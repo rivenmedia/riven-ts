@@ -33,6 +33,19 @@ importers:
       react-dom:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
+    devDependencies:
+      "@types/node":
+        specifier: 25.0.1
+        version: 25.0.1
+      "@types/react":
+        specifier: ^19.2.7
+        version: 19.2.7
+      "@types/react-dom":
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.7)
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
 
 packages:
   "@emnapi/runtime@1.7.1":
@@ -337,6 +350,26 @@ packages:
         integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==,
       }
 
+  "@types/node@25.0.1":
+    resolution:
+      {
+        integrity: sha512-czWPzKIAXucn9PtsttxmumiQ9N0ok9FrBwgRWrwmVLlp86BrMExzvXRLFYRJ+Ex3g6yqj+KuaxfX1JTgV2lpfg==,
+      }
+
+  "@types/react-dom@19.2.3":
+    resolution:
+      {
+        integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==,
+      }
+    peerDependencies:
+      "@types/react": ^19.2.0
+
+  "@types/react@19.2.7":
+    resolution:
+      {
+        integrity: sha512-MWtvHrGZLFttgeEj28VXHxpmwYbor/ATPYbBfSFZEIRK0ecCFLl2Qo55z52Hss+UV9CRN7trSeq1zbgx7YDWWg==,
+      }
+
   ansi-escapes@7.2.0:
     resolution:
       {
@@ -403,6 +436,12 @@ packages:
         integrity: sha512-TywoWNNRbhoD0BXs1P3ZEScW8W5iKrnbithIl0YH+uCmBd0QpPOA8yc82DS3BIE5Ma6FnBVUsJ7wVUDz4dvOWQ==,
       }
     engines: { node: ">=20" }
+
+  csstype@3.2.3:
+    resolution:
+      {
+        integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==,
+      }
 
   detect-libc@2.1.2:
     resolution:
@@ -766,6 +805,20 @@ packages:
       }
     hasBin: true
 
+  typescript@5.9.3:
+    resolution:
+      {
+        integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==,
+      }
+    engines: { node: ">=14.17" }
+    hasBin: true
+
+  undici-types@7.16.0:
+    resolution:
+      {
+        integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==,
+      }
+
   wrap-ansi@9.0.2:
     resolution:
       {
@@ -914,6 +967,18 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  "@types/node@25.0.1":
+    dependencies:
+      undici-types: 7.16.0
+
+  "@types/react-dom@19.2.3(@types/react@19.2.7)":
+    dependencies:
+      "@types/react": 19.2.7
+
+  "@types/react@19.2.7":
+    dependencies:
+      csstype: 3.2.3
+
   ansi-escapes@7.2.0:
     dependencies:
       environment: 1.1.0
@@ -942,6 +1007,8 @@ snapshots:
   colorette@2.0.20: {}
 
   commander@14.0.2: {}
+
+  csstype@3.2.3: {}
 
   detect-libc@2.1.2:
     optional: true
@@ -1159,6 +1226,10 @@ snapshots:
       turbo-linux-arm64: 2.6.3
       turbo-windows-64: 2.6.3
       turbo-windows-arm64: 2.6.3
+
+  typescript@5.9.3: {}
+
+  undici-types@7.16.0: {}
 
   wrap-ansi@9.0.2:
     dependencies:
