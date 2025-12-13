@@ -1,7 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "extends": ["//"],
-  "tags": ["group:{{package-group}}", "type:{{package-type}}"],
+  "tags": ["group:core", "type:util"],
   "tasks": {
     "test": {},
     "lint": {},

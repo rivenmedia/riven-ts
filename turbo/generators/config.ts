@@ -10,6 +10,11 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         message: "Package name (e.g., my-package):",
       },
       {
+        type: "",
+        name: "package-group",
+        message: "Package group (e.g., core):",
+      },
+      {
         type: "list",
         name: "package-type",
         message: "Select the package type:",
@@ -18,8 +23,17 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
       {
         type: "confirm",
         name: "confirm",
-        message: (data) =>
-          `This will create @repo/${data["package-type"]}-${data["package-name"]} in packages/${data["package-type"]}-${data["package-name"]}. Continue?`,
+        message: (data) => {
+          const {
+            "package-type": packageType,
+            "package-name": packageName,
+            "package-group": packageGroup,
+          } = data;
+
+          const packageIdentifier = `@repo/${packageGroup}-${packageType}-${packageName}`;
+          const packagePath = `packages/${packageGroup}/${packageType}-${packageName}`;
+          return `This will create ${packageIdentifier} in ${packagePath}. Continue?`;
+        },
         default: true,
       },
     ],
@@ -32,7 +46,8 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         },
         type: "addMany",
         base: "templates/package",
-        destination: "packages/{{package-type}}-{{dashCase package-name}}",
+        destination:
+          "packages/{{package-group}}/{{package-type}}-{{kebabCase package-name}}",
         templateFiles: "templates/package/**",
       },
     ],

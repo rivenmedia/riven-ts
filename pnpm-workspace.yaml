@@ -1,20 +1,29 @@
 packages:
   - apps/*
   - packages/*
+  - packages/core/*
+
+catalog:
+  zod: ^4.1.13
 
 catalogs:
   core:
-    reflect-metadata: ^0.2.2
     "@types/node": ^22
+    reflect-metadata: ^0.2.2
   database:
     class-validator: ^0.14.3
     pg: ^8.16.3
     typeorm: ^0.3.28
+  linting:
+    eslint: ^9
   next-16:
     next: ^16.0.10
   react-19:
     react: ^19.2.3
     react-dom: ^19.2.3
+  testing:
+    "@types/jest": ^30
+    jest: ^30
 
 configDependencies:
   "@pnpm/plugin-better-defaults": 0.2.1+sha512-3Fmur80S7+vmOKMmTdKS6JofiuvpUaBIdKEpgDyr9571FHo5Z4O2nrRUaSflxvwEakeYxIaFZ5MBaqAUnYHaeg==

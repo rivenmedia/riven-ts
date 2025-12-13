@@ -1,6 +1,7 @@
 {
-  "name": "@repo/database",
+  "name": "@repo/core-util-database",
   "version": "0.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
@@ -22,11 +23,15 @@
   },
   "dependencies": {
     "class-validator": "catalog:database",
-    "server-only": "^0.0.1",
     "reflect-metadata": "catalog:core",
-    "typeorm": "catalog:database"
+    "server-only": "^0.0.1",
+    "typeorm": "catalog:database",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "catalog:core"
+    "@repo/core-util-typescript-config": "workspace:^",
+    "@types/node": "catalog:core",
+    "eslint": "catalog:linting",
+    "jest": "catalog:testing"
   }
 }

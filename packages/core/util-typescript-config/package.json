@@ -1,0 +1,20 @@
+{
+  "name": "@repo/core-util-typescript-config",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "pnpm lint --fix"
+  },
+  "exports": {
+    "./base.json": "./lib/base.json"
+  },
+  "devDependencies": {
+    "@tsconfig/node-ts": "^23.6.2",
+    "@tsconfig/node22": "^22.0.5",
+    "@tsconfig/recommended": "^1.0.13",
+    "@tsconfig/strictest": "^2.0.8",
+    "eslint": "catalog:linting",
+    "jest": "catalog:testing"
+  }
+}

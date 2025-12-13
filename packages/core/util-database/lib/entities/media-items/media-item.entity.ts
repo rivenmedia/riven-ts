@@ -8,24 +8,27 @@ import {
   Index,
   type Relation,
 } from "typeorm";
-import { Stream } from "../streams/stream.entity";
-import type { FileSystemEntry } from "../filesystem/filesystem-entry.entity";
-import { SubtitleEntry } from "../filesystem/subtitle-entry.entity";
+import { Stream } from "../streams/stream.entity.ts";
+import type { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
+import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
+import z from "zod";
 
-export enum MediaItemState {
-  UNKNOWN = "Unknown",
-  UNRELEASED = "Unreleased",
-  ONGOING = "Ongoing",
-  REQUESTED = "Requested",
-  INDEXED = "Indexed",
-  SCRAPED = "Scraped",
-  DOWNLOADED = "Downloaded",
-  SYMLINKED = "Symlinked",
-  COMPLETED = "Completed",
-  PARTIALLY_COMPLETED = "PartiallyCompleted",
-  FAILED = "Failed",
-  PAUSED = "Paused",
-}
+export const mediaItemStateSchema = z.enum([
+  "Unknown",
+  "Unreleased",
+  "Ongoing",
+  "Requested",
+  "Indexed",
+  "Scraped",
+  "Downloaded",
+  "Symlinked",
+  "Completed",
+  "PartiallyCompleted",
+  "Failed",
+  "Paused",
+]);
+
+export type MediaItemState = z.infer<typeof mediaItemStateSchema>;
 
 @Entity()
 @TableInheritance({
@@ -37,11 +40,11 @@ export enum MediaItemState {
 @Index(["type", "airedAt"])
 export class MediaItem {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Index()
   @Column()
-  title: string;
+  title!: string;
 
   @Index()
   @Column({ nullable: true })
@@ -62,7 +65,7 @@ export class MediaItem {
   @Column({
     default: () => "CURRENT_TIMESTAMP",
   })
-  requestedAt: Date;
+  requestedAt!: Date;
 
   @Column({ nullable: true })
   requestedBy?: string;
@@ -77,22 +80,22 @@ export class MediaItem {
   scrapedAt?: Date;
 
   @Column({ default: 0 })
-  scrapedTimes: number;
+  scrapedTimes!: number;
 
   @ManyToOne(() => Stream, { nullable: true })
   activeStream?: Relation<Stream>;
 
   @ManyToMany(() => Stream)
-  streams: Relation<Stream>[];
+  streams!: Relation<Stream>[];
 
   @ManyToMany(() => Stream)
-  blacklistedStreams: Relation<Stream>[];
+  blacklistedStreams!: Relation<Stream>[];
 
   @Column("json", { nullable: true })
   aliases?: Record<string, string[]>;
 
   @Column({ default: false })
-  isAnime: boolean;
+  isAnime!: boolean;
 
   @Column({ nullable: true })
   network?: string;
@@ -119,7 +122,7 @@ export class MediaItem {
   contentRating?: string;
 
   @Column({ default: false })
-  updated: boolean;
+  updated!: boolean;
 
   @Column({ nullable: true })
   guid?: string;
@@ -127,15 +130,15 @@ export class MediaItem {
   @Column({ nullable: true })
   overseerrId?: number;
 
-  @Column("enum", { enum: MediaItemState })
-  lastState: MediaItemState;
+  @Column("enum", { enum: mediaItemStateSchema.options })
+  lastState!: MediaItemState;
 
   @ManyToMany("FileSystemEntry", (entry: FileSystemEntry) => entry.id)
-  filesystemEntries: Relation<FileSystemEntry>[];
+  filesystemEntries!: Relation<FileSystemEntry>[];
 
   @ManyToMany(() => SubtitleEntry)
-  subtitles: Relation<SubtitleEntry>[];
+  subtitles!: Relation<SubtitleEntry>[];
 
   @Column({ default: 0 })
-  failedAttempts: number;
+  failedAttempts!: number;
 }

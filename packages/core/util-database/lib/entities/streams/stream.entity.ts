@@ -5,31 +5,31 @@ import {
   PrimaryGeneratedColumn,
   type Relation,
 } from "typeorm";
-import { MediaItem } from "../media-items/media-item.entity";
+import { MediaItem } from "../media-items/media-item.entity.ts";
 
 @Entity()
 export class Stream {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  infoHash: string;
+  infoHash!: string;
 
   @Column()
-  rawTitle: string;
+  rawTitle!: string;
 
   @Column()
-  parsedTitle: string;
+  parsedTitle!: string;
 
   @Column()
-  rank: number;
+  rank!: number;
 
   @Column({ nullable: true })
   levRatio?: number;
 
   @ManyToMany(() => MediaItem)
-  parents: Relation<MediaItem>[];
+  parents!: Relation<MediaItem>[];
 
   @ManyToMany(() => MediaItem)
-  blacklistedParents: Relation<MediaItem>[];
+  blacklistedParents!: Relation<MediaItem>[];
 }

@@ -1,5 +1,5 @@
 import { ChildEntity, Column, Index } from "typeorm";
-import { FileSystemEntry } from "./filesystem-entry.entity";
+import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 
 class MediaMetadata {}
 
@@ -7,7 +7,7 @@ class MediaMetadata {}
 export class MediaEntry extends FileSystemEntry {
   @Index()
   @Column()
-  originalFilename: string;
+  originalFilename!: string;
 
   // ------------------------
   // Debrid service fields
@@ -35,5 +35,5 @@ export class MediaEntry extends FileSystemEntry {
   mediaMetadata?: MediaMetadata;
 
   @Column({ default: false })
-  isDirectory: boolean;
+  isDirectory!: boolean;
 }

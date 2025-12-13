@@ -6,19 +6,19 @@ import {
   type Relation,
 } from "typeorm";
 import { Min } from "class-validator";
-import { MediaItem } from "./media-item.entity";
-import { Show } from "./show.entity";
-import { Episode } from "./episode.entity";
+import { MediaItem } from "./media-item.entity.ts";
+import { Show } from "./show.entity.ts";
+import { Episode } from "./episode.entity.ts";
 
 @ChildEntity()
 export class Season extends MediaItem {
   @Column()
   @Min(1)
-  number: number;
+  number!: number;
 
   @ManyToOne(() => Show, (show) => show.seasons)
-  parent: Relation<Show>;
+  parent!: Relation<Show>;
 
   @OneToMany(() => Episode, (episode) => episode.season)
-  episodes: Relation<Episode>[];
+  episodes!: Relation<Episode>[];
 }

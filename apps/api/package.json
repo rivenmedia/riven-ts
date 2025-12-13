@@ -11,7 +11,7 @@
     "test": "echo 'Add test script here'"
   },
   "dependencies": {
-    "@repo/database": "workspace:^",
+    "@repo/core-util-database": "workspace:^",
     "next": "catalog:next-16",
     "pg": "catalog:database",
     "react": "catalog:react-19",

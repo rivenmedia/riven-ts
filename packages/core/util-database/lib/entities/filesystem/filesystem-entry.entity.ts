@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
   type Relation,
 } from "typeorm";
-import type { MediaItem } from "../media-items/media-item.entity";
+import type { MediaItem } from "../media-items/media-item.entity.ts";
 
 @Entity()
 @TableInheritance({
@@ -19,20 +19,20 @@ import type { MediaItem } from "../media-items/media-item.entity";
 })
 export class FileSystemEntry {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ default: 0 })
-  fileSize: number;
+  fileSize!: number;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @Column()
-  availableInVfs: boolean;
+  availableInVfs!: boolean;
 
   @ManyToOne("MediaItem", (item: MediaItem) => item.id)
-  mediaItem: Relation<MediaItem>;
+  mediaItem!: Relation<MediaItem>;
 }

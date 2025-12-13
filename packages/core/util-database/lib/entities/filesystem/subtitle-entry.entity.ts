@@ -1,23 +1,23 @@
 import { ChildEntity, Column, Index } from "typeorm";
-import { FileSystemEntry } from "./filesystem-entry.entity";
+import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 
 @ChildEntity()
 export class SubtitleEntry extends FileSystemEntry {
   @Index()
   @Column()
-  language: string;
+  language!: string;
 
   @Column({ nullable: true })
   parentOriginalFilename?: string;
 
   @Column()
-  content: string;
+  content!: string;
 
   @Column()
-  fileHash: string;
+  fileHash!: string;
 
   @Column()
-  videoFileSize: number;
+  videoFileSize!: number;
 
   @Column({ nullable: true })
   openSubtitlesId?: string; // TODO: Separate entity for external providers?
