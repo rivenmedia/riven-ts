@@ -6,12 +6,12 @@ class SeriesReleaseData {}
 
 @ChildEntity()
 export class Show extends MediaItem {
-  @Column()
+  @Column({ nullable: true })
   tvdbStatus?: string;
 
   @Column("json")
   releaseData: SeriesReleaseData;
 
-  @OneToMany(() => Season, (season) => season.parent)
-  seasons: Relation<Season>[];
+  @OneToMany(() => Season, (season) => season.parent, { nullable: true })
+  seasons?: Relation<Season>[];
 }

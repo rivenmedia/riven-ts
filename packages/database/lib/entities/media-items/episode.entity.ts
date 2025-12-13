@@ -9,7 +9,7 @@ export class Episode extends MediaItem {
   @Min(1)
   number: number;
 
-  @Column()
+  @Column({ nullable: true })
   absoluteNumber?: number;
 
   @ManyToOne(() => Season, (season) => season.episodes)

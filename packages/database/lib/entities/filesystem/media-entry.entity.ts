@@ -14,24 +14,24 @@ export class MediaEntry extends FileSystemEntry {
   // TODO: separate entity?
   // ------------------------
 
-  @Column()
+  @Column({ nullable: true })
   downloadUrl?: string;
 
-  @Column()
+  @Column({ nullable: true })
   unrestrictedUrl?: string;
 
-  @Column()
+  @Column({ nullable: true })
   provider?: string;
 
-  @Column()
+  @Column({ nullable: true })
   providerDownloadId?: string;
 
   // ------------------------
 
-  @Column("json")
+  @Column("json", { nullable: true })
   libraryProfiles?: string[];
 
-  @Column("json")
+  @Column("json", { nullable: true })
   mediaMetadata?: MediaMetadata;
 
   @Column({ default: false })

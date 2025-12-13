@@ -31,7 +31,7 @@ export class FileSystemEntry {
   updatedAt: Date;
 
   @Column()
-  availableInVFS: boolean;
+  availableInVfs: boolean;
 
   @ManyToOne("MediaItem", (item: MediaItem) => item.id)
   mediaItem: Relation<MediaItem>;

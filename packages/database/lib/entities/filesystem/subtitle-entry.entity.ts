@@ -7,7 +7,7 @@ export class SubtitleEntry extends FileSystemEntry {
   @Column()
   language: string;
 
-  @Column()
+  @Column({ nullable: true })
   parentOriginalFilename?: string;
 
   @Column()
@@ -19,6 +19,6 @@ export class SubtitleEntry extends FileSystemEntry {
   @Column()
   videoFileSize: number;
 
-  @Column()
+  @Column({ nullable: true })
   openSubtitlesId?: string; // TODO: Separate entity for external providers?
 }

@@ -24,12 +24,12 @@ export class Stream {
   @Column()
   rank: number;
 
-  @Column()
+  @Column({ nullable: true })
   levRatio?: number;
 
   @ManyToMany(() => MediaItem)
-  parents?: Relation<MediaItem>[];
+  parents: Relation<MediaItem>[];
 
   @ManyToMany(() => MediaItem)
-  blacklistedParents?: Relation<MediaItem>[];
+  blacklistedParents: Relation<MediaItem>[];
 }

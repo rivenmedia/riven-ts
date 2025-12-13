@@ -30,18 +30,18 @@ export class MediaItem {
   title: string;
 
   @Index()
-  @Column()
+  @Column({ nullable: true })
   imdbId?: string;
 
   @Index()
-  @Column()
+  @Column({ nullable: true })
   tvdbId?: string;
 
   @Index()
-  @Column()
+  @Column({ nullable: true })
   tmdbId?: string;
 
-  @Column()
+  @Column({ nullable: true })
   posterPath?: string;
 
   @Index()
@@ -50,23 +50,23 @@ export class MediaItem {
   })
   requestedAt: Date;
 
-  @Column()
+  @Column({ nullable: true })
   requestedBy?: string;
 
-  @Column()
+  @Column({ nullable: true })
   requestedId?: string;
 
-  @Column()
+  @Column({ nullable: true })
   indexedAt?: Date;
 
-  @Column()
+  @Column({ nullable: true })
   scrapedAt?: Date;
 
   @Column({ default: 0 })
   scrapedTimes: number;
 
-  @ManyToOne(() => Stream)
-  activeStream: Relation<Stream>;
+  @ManyToOne(() => Stream, { nullable: true })
+  activeStream?: Relation<Stream>;
 
   @ManyToMany(() => Stream)
   streams: Relation<Stream>[];
@@ -74,48 +74,46 @@ export class MediaItem {
   @ManyToMany(() => Stream)
   blacklistedStreams: Relation<Stream>[];
 
-  @Column("json")
+  @Column("json", { nullable: true })
   aliases?: Record<string, string[]>;
 
   @Column({ default: false })
   isAnime: boolean;
 
-  @Column()
+  @Column({ nullable: true })
   network?: string;
 
-  @Column()
+  @Column({ nullable: true })
   country?: string;
 
-  @Column()
+  @Column({ nullable: true })
   language?: string;
 
-  @Column()
+  @Column({ nullable: true })
   airedAt?: Date;
 
-  @Column()
+  @Column({ nullable: true })
   year?: number;
 
-  @Column("json", { array: true })
+  @Column("json", { array: true, nullable: true })
   genres?: string[];
 
-  @Column()
+  @Column({ nullable: true })
   rating?: number;
 
-  @Column()
+  @Column({ nullable: true })
   contentRating?: string;
 
   @Column({ default: false })
   updated: boolean;
 
-  @Column()
+  @Column({ nullable: true })
   guid?: string;
 
-  @Column()
+  @Column({ nullable: true })
   overseerrId?: number;
 
-  @Column("enum", {
-    enum: MediaItemState,
-  })
+  @Column("enum", { enum: MediaItemState })
   lastState: MediaItemState;
 
   @ManyToMany("FileSystemEntry", (entry: FileSystemEntry) => entry.id)
