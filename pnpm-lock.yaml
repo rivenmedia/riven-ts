@@ -26,10 +26,14 @@ catalogs:
     zod:
       specifier: ^4.1.13
       version: 4.1.13
-  linting:
+  eslint-9:
     eslint:
       specifier: ^9
       version: 9.0.0
+  jest-30:
+    jest:
+      specifier: ^30
+      version: 30.0.0
   next-16:
     next:
       specifier: ^16.0.10
@@ -41,10 +45,6 @@ catalogs:
     react-dom:
       specifier: ^19.2.3
       version: 19.2.3
-  testing:
-    jest:
-      specifier: ^30
-      version: 30.0.0
 
 pnpmfileChecksum: sha256-UtXZV825NqHOBG69jsYGuWZ97+do7mk2t42sK5gvG2I=
 
@@ -130,10 +130,10 @@ importers:
         specifier: catalog:core
         version: 22.0.0
       eslint:
-        specifier: catalog:linting
+        specifier: catalog:eslint-9
         version: 9.0.0
       jest:
-        specifier: catalog:testing
+        specifier: catalog:jest-30
         version: 30.0.0(@types/node@22.0.0)(ts-node@10.9.2(@types/node@22.0.0)(typescript@5.9.3))
 
   packages/core/util-typescript-config:
@@ -151,10 +151,10 @@ importers:
         specifier: ^2.0.8
         version: 2.0.8
       eslint:
-        specifier: catalog:linting
+        specifier: catalog:eslint-9
         version: 9.0.0
       jest:
-        specifier: catalog:testing
+        specifier: catalog:jest-30
         version: 30.0.0(@types/node@22.0.0)(ts-node@10.9.2(@types/node@22.0.0)(typescript@5.9.3))
 
 packages:
