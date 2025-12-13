@@ -7,7 +7,8 @@
     "lint:fix": "pnpm lint --fix"
   },
   "exports": {
-    "./base.json": "./lib/base.json"
+    "./base.json": "./lib/base.json",
+    "./jest.json": "./lib/jest.json"
   },
   "devDependencies": {
     "@tsconfig/node-ts": "^23.6.2",
