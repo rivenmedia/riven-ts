@@ -12,14 +12,12 @@ import { MediaItemState } from "./media-item-state.enum";
 import { Stream } from "../streams/stream.entity";
 import type { FileSystemEntry } from "../filesystem/filesystem-entry.entity";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity";
-import { MediaItemType } from "./media-item-type.enum";
 
 @Entity()
 @TableInheritance({
   column: {
     type: "varchar",
     name: "type",
-    enum: ["episode", "season", "show", "movie", "mediaitem"],
   },
 })
 @Index(["type", "airedAt"])
@@ -45,12 +43,6 @@ export class MediaItem {
 
   @Column()
   posterPath?: string;
-
-  @Index()
-  @Column("enum", {
-    enum: MediaItemType,
-  })
-  type: MediaItemType;
 
   @Index()
   @Column({

@@ -15,15 +15,11 @@ import type { MediaItem } from "../media-items/media-item.entity";
   column: {
     type: "varchar",
     name: "type",
-    enum: ["media", "subtitle"],
   },
 })
 export class FileSystemEntry {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column()
-  type: "media" | "subtitle";
 
   @Column({ default: 0 })
   fileSize: number;

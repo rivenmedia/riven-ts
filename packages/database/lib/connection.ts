@@ -12,6 +12,7 @@ import { Movie } from "./entities/media-items/movie.entity";
 import { Season } from "./entities/media-items/season.entity";
 import { Show } from "./entities/media-items/show.entity";
 import { Stream } from "./entities/streams/stream.entity";
+import { UndeterminedItem } from "./entities/media-items/undetermined-item.entity";
 
 const entities = [
   FileSystemEntry,
@@ -22,6 +23,7 @@ const entities = [
   Movie,
   Season,
   Show,
+  UndeterminedItem,
   Stream,
 ];
 
