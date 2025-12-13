@@ -1,5 +1,5 @@
 {
-  "name": "@repo/entities",
+  "name": "@repo/database",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -8,7 +8,16 @@
     "test": "echo 'Add test script here'",
     "lint": "echo 'Add lint script here'"
   },
+  "exports": {
+    "./connection": "./lib/connection.ts"
+  },
   "dependencies": {
+    "class-validator": "catalog:database",
+    "server-only": "^0.0.1",
+    "reflect-metadata": "catalog:core",
     "typeorm": "catalog:database"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:core"
   }
 }

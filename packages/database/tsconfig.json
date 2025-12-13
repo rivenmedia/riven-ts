@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "types": ["node"],
+    "moduleResolution": "bundler",
+    "module": "esnext",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
+  }
+}

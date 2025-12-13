@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "node .husky/install.mjs"
+    "format:check": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "postinstall": "husky || true"
   },
   "keywords": [],
   "author": "",

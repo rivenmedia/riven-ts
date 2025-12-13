@@ -1,0 +1,51 @@
+services:
+  riven:
+    container_name: riven-ts-dev
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: .
+          ignore:
+            - node_modules
+            - .next
+            - dist
+        - action: rebuild
+          path: package.json
+    tty: true
+    environment:
+      DATABASE_URL: postgres+psycopg2://postgres:${DATABASE_PASSWORD}@riven-ts-dev-db:5432/riven
+      NODE_ENV: development
+    ports:
+      - 3000:3000
+    depends_on:
+      riven-postgres:
+        condition: service_healthy
+
+  riven-postgres:
+    image: postgres:17-alpine
+    container_name: riven-ts-dev-db
+    restart: unless-stopped
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: riven
+    ports:
+      - 5432:5432
+    volumes:
+      - riven-ts-db:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U postgres
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  riven-ts-db:

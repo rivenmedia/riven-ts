@@ -11,6 +11,7 @@
     "test": "echo 'Add test script here'"
   },
   "dependencies": {
+    "@repo/database": "workspace:^",
     "next": "catalog:next-16",
     "pg": "catalog:database",
     "react": "catalog:react-19",
@@ -19,7 +20,7 @@
     "typeorm": "catalog:database"
   },
   "devDependencies": {
-    "@types/node": "25.0.1",
+    "@types/node": "catalog:core",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "typescript": "5.9.3"

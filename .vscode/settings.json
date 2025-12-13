@@ -1,0 +1,9 @@
+{
+  "python-envs.pythonProjects": [
+    {
+      "path": "",
+      "envManager": "",
+      "packageManager": "ms-python.python:pip"
+    }
+  ]
+}

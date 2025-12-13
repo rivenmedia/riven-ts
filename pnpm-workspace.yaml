@@ -3,7 +3,11 @@ packages:
   - packages/*
 
 catalogs:
+  core:
+    reflect-metadata: ^0.2.2
+    "@types/node": ^22
   database:
+    class-validator: ^0.14.3
     pg: ^8.16.3
     typeorm: ^0.3.28
   next-16:
