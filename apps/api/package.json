@@ -11,9 +11,12 @@
     "test": "echo 'Add test script here'"
   },
   "dependencies": {
-    "next": "^16.0.10",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "next": "catalog:next-16",
+    "pg": "catalog:database",
+    "react": "catalog:react-19",
+    "react-dom": "catalog:react-19",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "catalog:database"
   },
   "devDependencies": {
     "@types/node": "25.0.1",
