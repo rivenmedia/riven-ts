@@ -8,10 +8,24 @@ import {
   Index,
   type Relation,
 } from "typeorm";
-import { MediaItemState } from "./media-item-state.enum";
 import { Stream } from "../streams/stream.entity";
 import type { FileSystemEntry } from "../filesystem/filesystem-entry.entity";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity";
+
+export enum MediaItemState {
+  UNKNOWN = "Unknown",
+  UNRELEASED = "Unreleased",
+  ONGOING = "Ongoing",
+  REQUESTED = "Requested",
+  INDEXED = "Indexed",
+  SCRAPED = "Scraped",
+  DOWNLOADED = "Downloaded",
+  SYMLINKED = "Symlinked",
+  COMPLETED = "Completed",
+  PARTIALLY_COMPLETED = "PartiallyCompleted",
+  FAILED = "Failed",
+  PAUSED = "Paused",
+}
 
 @Entity()
 @TableInheritance({
