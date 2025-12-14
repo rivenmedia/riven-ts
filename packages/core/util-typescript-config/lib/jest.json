@@ -2,6 +2,6 @@
   "$schema": "https://www.schemastore.org/tsconfig",
   "extends": "./base.json",
   "compilerOptions": {
-    "types": ["jest"]
+    "types": ["node", "jest"]
   }
 }

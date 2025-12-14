@@ -14,5 +14,9 @@
     "@tsconfig/strictest": "^2.0.8",
     "eslint": "catalog:",
     "jest": "catalog:"
+  },
+  "peerDependencies": {
+    "@types/jest": "^30",
+    "@types/node": "^22"
   }
 }
