@@ -1,5 +1,5 @@
-import { ChildEntity, Column, Index } from "typeorm";
 import { FileSystemEntry } from "./filesystem-entry.entity.ts";
+import { ChildEntity, Column, Index } from "typeorm";
 
 @ChildEntity()
 export class SubtitleEntry extends FileSystemEntry {

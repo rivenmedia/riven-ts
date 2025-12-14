@@ -13,6 +13,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.25.0",
   "devDependencies": {
+    "@repo/core-util-typescript-config": "workspace:^",
     "@turbo/gen": "^2.6.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",

@@ -2,16 +2,17 @@
   "name": "@repo/{{package-group}}-{{package-type}}-{{kebabCase package-name}}",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
     "test": "jest",
     "lint": "eslint .",
     "lint:fix": "pnpm lint --fix"
   },
-  "exports": {},
-  "dependencies": {},
   "devDependencies": {
-    "jest": "catalog:jest-30",
-    "eslint": "catalog:eslint-9"
+    "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-typescript-config": "workspace:^",
+    "jest": "catalog:",
+    "eslint": "catalog:"
   }
 }

@@ -2,7 +2,6 @@
 
 import "reflect-metadata";
 import "server-only";
-import { DataSource } from "typeorm";
 import { FileSystemEntry } from "./entities/filesystem/filesystem-entry.entity.ts";
 import { MediaEntry } from "./entities/filesystem/media-entry.entity.ts";
 import { SubtitleEntry } from "./entities/filesystem/subtitle-entry.entity.ts";
@@ -13,7 +12,8 @@ import { Season } from "./entities/media-items/season.entity.ts";
 import { Show } from "./entities/media-items/show.entity.ts";
 import { Stream } from "./entities/streams/stream.entity.ts";
 import { UndeterminedItem } from "./entities/media-items/undetermined-item.entity.ts";
-import z from "zod";
+import { DataSource } from "typeorm";
+import { z } from "zod";
 
 const entities = [
   FileSystemEntry,

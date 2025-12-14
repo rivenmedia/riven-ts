@@ -1,3 +1,6 @@
+import { Stream } from "../streams/stream.entity.ts";
+import type { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
+import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -8,10 +11,7 @@ import {
   Index,
   type Relation,
 } from "typeorm";
-import { Stream } from "../streams/stream.entity.ts";
-import type { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
-import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
-import z from "zod";
+import { z } from "zod";
 
 export const mediaItemStateSchema = z.enum([
   "Unknown",

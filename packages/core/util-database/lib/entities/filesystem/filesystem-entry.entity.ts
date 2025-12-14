@@ -1,3 +1,4 @@
+import type { MediaItem } from "../media-items/media-item.entity.ts";
 import {
   Column,
   CreateDateColumn,
@@ -8,7 +9,6 @@ import {
   UpdateDateColumn,
   type Relation,
 } from "typeorm";
-import type { MediaItem } from "../media-items/media-item.entity.ts";
 
 @Entity()
 @TableInheritance({

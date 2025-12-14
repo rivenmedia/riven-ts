@@ -1,7 +1,5 @@
-import { ChildEntity, Column, Index } from "typeorm";
 import { FileSystemEntry } from "./filesystem-entry.entity.ts";
-
-class MediaMetadata {}
+import { ChildEntity, Column, Index } from "typeorm";
 
 @ChildEntity()
 export class MediaEntry extends FileSystemEntry {
@@ -32,7 +30,7 @@ export class MediaEntry extends FileSystemEntry {
   libraryProfiles?: string[];
 
   @Column("json", { nullable: true })
-  mediaMetadata?: MediaMetadata;
+  mediaMetadata?: object;
 
   @Column({ default: false })
   isDirectory!: boolean;

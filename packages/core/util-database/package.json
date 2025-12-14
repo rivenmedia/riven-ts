@@ -22,16 +22,18 @@
     "./entities/streams/stream.entity": "./lib/entities/streams/stream.entity.ts"
   },
   "dependencies": {
-    "class-validator": "catalog:database",
-    "reflect-metadata": "catalog:core",
+    "class-validator": "catalog:",
+    "reflect-metadata": "catalog:",
     "server-only": "^0.0.1",
-    "typeorm": "catalog:database",
+    "typeorm": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
-    "@types/node": "catalog:core",
-    "eslint": "catalog:eslint-9",
-    "jest": "catalog:jest-30"
+    "@types/node": "catalog:",
+    "@typescript-eslint/parser": "^8.49.0",
+    "eslint": "catalog:",
+    "jest": "catalog:"
   }
 }

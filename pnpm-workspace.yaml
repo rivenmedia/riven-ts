@@ -4,26 +4,22 @@ packages:
   - packages/core/*
 
 catalog:
+  "@types/jest": ^30
+  "@types/node": ^22
+  "@types/react": ^19.2.7
+  "@types/react-dom": ^19.2.3
+  class-validator: ^0.14.3
+  eslint: ^9.39.2
+  jest: ^30
+  jiti: 2.6.1
+  next: ^16.0.10
+  pg: ^8.16.3
+  react: ^19.2.3
+  react-dom: ^19.2.3
+  reflect-metadata: ^0.2.2
+  typeorm: ^0.3.28
+  typescript: ^5.9.3
   zod: ^4.1.13
-
-catalogs:
-  core:
-    "@types/node": ^22
-    reflect-metadata: ^0.2.2
-  database:
-    class-validator: ^0.14.3
-    pg: ^8.16.3
-    typeorm: ^0.3.28
-  eslint-9:
-    eslint: ^9
-  next-16:
-    next: ^16.0.10
-  react-19:
-    react: ^19.2.3
-    react-dom: ^19.2.3
-  jest-30:
-    "@types/jest": ^30
-    jest: ^30
 
 configDependencies:
   "@pnpm/plugin-better-defaults": 0.2.1+sha512-3Fmur80S7+vmOKMmTdKS6JofiuvpUaBIdKEpgDyr9571FHo5Z4O2nrRUaSflxvwEakeYxIaFZ5MBaqAUnYHaeg==

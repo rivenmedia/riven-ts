@@ -1,8 +1,6 @@
-import { ChildEntity, Column, OneToMany, type Relation } from "typeorm";
 import { MediaItem } from "./media-item.entity.ts";
 import { Season } from "./season.entity.ts";
-
-class SeriesReleaseData {}
+import { ChildEntity, Column, OneToMany, type Relation } from "typeorm";
 
 @ChildEntity()
 export class Show extends MediaItem {
@@ -10,7 +8,7 @@ export class Show extends MediaItem {
   tvdbStatus?: string;
 
   @Column("json")
-  releaseData!: SeriesReleaseData;
+  releaseData!: object;
 
   @OneToMany(() => Season, (season) => season.parent, { nullable: true })
   seasons?: Relation<Season>[];
