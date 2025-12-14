@@ -32,7 +32,7 @@
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@types/node": "catalog:",
-    "@typescript-eslint/parser": "^8.49.0",
+    "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
     "jest": "catalog:"
   }

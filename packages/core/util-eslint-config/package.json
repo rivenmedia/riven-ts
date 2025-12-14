@@ -17,7 +17,7 @@
     "@repo/core-util-typescript-config": "workspace:^",
     "@types/eslint": "^9.6.1",
     "@types/node": "catalog:",
-    "@typescript-eslint/parser": "^8.49.0",
+    "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
     "eslint-config-prettier": "^10.1.8",
     "eslint-config-turbo": "^2.6.3",
@@ -31,7 +31,7 @@
   },
   "peerDependencies": {
     "eslint": "catalog:",
-    "@typescript-eslint/parser": "^8.49.0",
+    "@typescript-eslint/parser": "catalog:",
     "jiti": "catalog:"
   }
 }
