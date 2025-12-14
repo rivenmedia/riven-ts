@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@repo/core-util-database": "workspace:^",
+    "@repo/core-util-logger": "workspace:^",
     "next": "catalog:",
     "pg": "catalog:",
     "react": "catalog:",

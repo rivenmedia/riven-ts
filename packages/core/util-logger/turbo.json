@@ -1,0 +1,10 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tags": ["group:core", "type:util"],
+  "tasks": {
+    "test": {},
+    "lint": {},
+    "check-types": {}
+  }
+}

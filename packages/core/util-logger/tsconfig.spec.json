@@ -1,0 +1,11 @@
+{
+  "$schema": "https://www.schemastore.org/tsconfig",
+  "extends": ["./tsconfig.json", "@repo/core-util-typescript-config/jest.json"],
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "."
+  },
+  "files": [],
+  "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],
+  "exclude": []
+}

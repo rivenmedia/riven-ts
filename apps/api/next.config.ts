@@ -4,6 +4,6 @@ import { resolve } from "node:path";
 
 export default {
   turbopack: {
-    root: resolve(__dirname, "../../.."),
+    root: resolve(__dirname, "../../../.."),
   },
 } satisfies NextConfig;

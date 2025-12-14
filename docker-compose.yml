@@ -4,22 +4,13 @@ services:
     restart: unless-stopped
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    develop:
-      watch:
-        - action: sync
-          path: .
-          target: .
-          ignore:
-            - node_modules
-            - .next
-            - dist
-        - action: rebuild
-          path: package.json
+      dockerfile: Dockerfile
     tty: true
     environment:
       DATABASE_URL: postgres+psycopg2://postgres:${DATABASE_PASSWORD}@riven-ts-dev-db:5432/riven
       NODE_ENV: development
+    volumes:
+      - ./data:/riven-ts/data
     ports:
       - 3000:3000
     depends_on:

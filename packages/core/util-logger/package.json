@@ -1,0 +1,27 @@
+{
+  "name": "@repo/core-util-logger",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
+    "test": "jest",
+    "lint": "eslint .",
+    "lint:fix": "pnpm lint --fix"
+  },
+  "exports": {
+    ".": "./lib/logger.ts"
+  },
+  "devDependencies": {
+    "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-typescript-config": "workspace:^",
+    "@types/jest": "catalog:",
+    "@types/node": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "eslint": "catalog:",
+    "jest": "catalog:"
+  },
+  "dependencies": {
+    "winston": "^3.19.0"
+  }
+}
