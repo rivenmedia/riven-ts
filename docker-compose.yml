@@ -13,14 +13,17 @@ services:
       - ./data:/riven-ts/data
     develop:
       watch:
-        - path: .
+        - path: apps
           action: sync
-          target: /riven-ts
-          ignore:
-            - node_modules/
-            - data/
-        - action: rebuild
-          path: pnpm-lock.yaml
+          target: /riven-ts/apps
+        - path: packages
+          action: sync
+          target: /riven-ts/packages
+        - path: pnpm-lock.yaml
+          action: sync+exec
+          target: /riven-ts/pnpm-lock.yaml
+          exec:
+            command: pnpm install
     ports:
       - 3000:3000
     depends_on:
