@@ -1,0 +1,13 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tags": ["group:listrr", "type:data-access"],
+  "tasks": {
+    "test": {},
+    "lint": {},
+    "check-types": {},
+    "generate-schemas": {
+      "outputs": ["lib/__generated__/**"]
+    }
+  }
+}

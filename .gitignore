@@ -4,3 +4,4 @@ node_modules
 *.tsbuildinfo
 *.log
 .pnpm-store
+__generated__

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tags": ["group:listrr", "type:service"],
+  "tasks": {
+    "test": {},
+    "lint": {},
+    "check-types": {}
+  }
+}

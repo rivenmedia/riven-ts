@@ -12,7 +12,9 @@
     },
     "dev": {
       "persistent": true,
-      "cache": false
-    }
+      "cache": false,
+      "dependsOn": ["^generate-schemas"]
+    },
+    "generate-schemas": {}
   }
 }

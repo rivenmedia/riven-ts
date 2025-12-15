@@ -8,6 +8,7 @@
   ],
   "compilerOptions": {
     "types": ["node"],
+    "lib": ["ESNext", "DOM"],
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true
   }
