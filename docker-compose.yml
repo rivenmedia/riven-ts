@@ -11,6 +11,16 @@ services:
       NODE_ENV: development
     volumes:
       - ./data:/riven-ts/data
+    develop:
+      watch:
+        - path: .
+          action: sync
+          target: /riven-ts
+          ignore:
+            - node_modules/
+            - data/
+        - action: rebuild
+          path: pnpm-lock.yaml
     ports:
       - 3000:3000
     depends_on:
