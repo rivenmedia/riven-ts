@@ -11,16 +11,16 @@ catalogs:
       specifier: ^6.4.1
       version: 6.4.1
     '@kubb/cli':
-      specifier: ^4.11.1
+      specifier: 4.11.1
       version: 4.11.1
     '@kubb/core':
-      specifier: ^4.11.1
+      specifier: 4.11.1
       version: 4.11.1
     '@kubb/plugin-oas':
-      specifier: ^4.11.1
+      specifier: 4.11.1
       version: 4.11.1
     '@kubb/plugin-zod':
-      specifier: ^4.11.1
+      specifier: 4.11.1
       version: 4.11.1
     '@types/jest':
       specifier: 30.0.0
@@ -357,6 +357,52 @@ importers:
         specifier: 'catalog:'
         version: 30.0.0(@types/node@22.0.0)(ts-node@10.9.2(@types/node@22.0.0)(typescript@5.9.3))
 
+  packages/mdblist/data-access-api:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 4.1.13
+    devDependencies:
+      '@kubb/cli':
+        specifier: 'catalog:'
+        version: 4.11.1(@kubb/react-fabric@0.5.4)(typescript@5.9.3)
+      '@kubb/core':
+        specifier: 'catalog:'
+        version: 4.11.1(@kubb/react-fabric@0.5.4)
+      '@kubb/plugin-oas':
+        specifier: 'catalog:'
+        version: 4.11.1(@kubb/react-fabric@0.5.4)(ajv@8.17.1)
+      '@kubb/plugin-zod':
+        specifier: 'catalog:'
+        version: 4.11.1(ajv@8.17.1)
+      '@repo/core-util-eslint-config':
+        specifier: workspace:^
+        version: link:../../core/util-eslint-config
+      '@repo/core-util-logger':
+        specifier: workspace:^
+        version: link:../../core/util-logger
+      '@repo/core-util-typescript-config':
+        specifier: workspace:^
+        version: link:../../core/util-typescript-config
+      '@types/jest':
+        specifier: 'catalog:'
+        version: 30.0.0
+      '@types/node':
+        specifier: 'catalog:'
+        version: 22.0.0
+      '@typescript-eslint/parser':
+        specifier: 'catalog:'
+        version: 8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      apib2openapi:
+        specifier: ^0.1.5
+        version: 0.1.5
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      jest:
+        specifier: 'catalog:'
+        version: 30.0.0(@types/node@22.0.0)(ts-node@10.9.2(@types/node@22.0.0)(typescript@5.9.3))
+
 packages:
 
   '@apidevtools/json-schema-ref-parser@14.2.1':
@@ -559,6 +605,9 @@ packages:
 
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
+
+  '@cloudflare/json-schema-walker@0.1.1':
+    resolution: {integrity: sha512-P3n0hEgk1m6uKWgL4Yb1owzXVG4pM70G4kRnDQxZXiVvfCRtaqiHu+ZRiRPzmwGBiLTO1LWc2yR1M8oz0YkXww==}
 
   '@colors/colors@1.6.0':
     resolution: {integrity: sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==}
@@ -1392,6 +1441,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  abbrev@1.1.1:
+    resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
+
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
     peerDependencies:
@@ -1475,6 +1527,18 @@ packages:
   anymatch@3.1.3:
     resolution: {integrity: sha512-KMReFUr0B4t+D+OBkjR3KYqvocp2XaSzO55UcB6mgQMd3KbcE+mWTyvVV7D/zsdEbNnV6acZUutkiHQXvTr1Rw==}
     engines: {node: '>= 8'}
+
+  apib-include-directive@0.1.0:
+    resolution: {integrity: sha512-7m5LKbmFGeJogORhkLOCQjcEuGrRcVLG32nHbTAAYjvZ3cSV1XaxU8LBXIvx0PyLYL4mE/gc0Nu0Y7odQmAU1Q==}
+
+  apib2openapi@0.1.5:
+    resolution: {integrity: sha512-q7GwzXIULo31ogfeGG+s8gxd+4T6k3Z0FMS4ft5C9YkNRRmXY6/H0/zs3s6xLUP+jDR1AfcT45q8cl9HSUNHcQ==}
+    engines: {node: '>=10.0.0'}
+    hasBin: true
+
+  apib2swagger@1.17.1:
+    resolution: {integrity: sha512-2ednp+ckytSEOvX3CaUcHYC01wmzzfy970T22EJiBzcl4rj5p5UvUxXxHh6gCSCmDTkqKdiIFCLhoIJGynN8CQ==}
+    hasBin: true
 
   app-root-path@3.1.0:
     resolution: {integrity: sha512-biN3PwB2gUtjaYy/isrU3aNWI5w+fAfvHkSvCKeQGxhmYpwKFUxudR3Yya+KqVRHBmEDYh+/lTozYCFbmzX4nA==}
@@ -1781,6 +1845,13 @@ packages:
     resolution: {integrity: sha512-TywoWNNRbhoD0BXs1P3ZEScW8W5iKrnbithIl0YH+uCmBd0QpPOA8yc82DS3BIE5Ma6FnBVUsJ7wVUDz4dvOWQ==}
     engines: {node: '>=20'}
 
+  commander@2.20.3:
+    resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
+
+  commander@6.2.1:
+    resolution: {integrity: sha512-U7VdrJFnJgo4xjrHpTzu0yrHPGImdsmD95ZlgYSEajAn2JKzDhDTPG9kBTefmObL2w/ngeZnilk+OV9CG3d7UA==}
+    engines: {node: '>= 6'}
+
   comment-parser@1.4.1:
     resolution: {integrity: sha512-buhp5kePrmda3vhc5B9t7pUQXAb2Tnd0qgpkIhPhkHXxJpiPJ11H0ZEU0oBpJ2QztSbzG/ZxMj/CHsYJqRHmyg==}
     engines: {node: '>= 12.0.0'}
@@ -1933,6 +2004,10 @@ packages:
   dotenv@16.6.1:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
     engines: {node: '>=12'}
+
+  drafter.js@2.6.7:
+    resolution: {integrity: sha512-B6/nqEr3B9N8B4eySiPVXnFvI9Fh62Xl6GBQVncoh1aDcnYxSME5S8nZEERd4LjSYLzZchqnEC0F4oaXhSRJtA==}
+    engines: {node: '>= 0.12'}
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -2288,6 +2363,10 @@ packages:
 
   functions-have-names@1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
+
+  generate-schema@2.6.0:
+    resolution: {integrity: sha512-EUBKfJNzT8f91xUk5X5gKtnbdejZeE065UAJ3BCzE8VEbvwKI9Pm5jaWmqVeK1MYc1g5weAVFDTSJzN7ymtTqA==}
+    hasBin: true
 
   generator-function@2.0.1:
     resolution: {integrity: sha512-SFdFmIJi+ybC0vjlHN0ZGVGHc3lgE0DxPAT0djjVg+kjOnSqclqmj0KQ7ykTOLP6YxoqOvuAODGdcHJn+43q3g==}
@@ -2897,6 +2976,10 @@ packages:
     resolution: {integrity: sha512-CTUKmIlPJbsWfzRRnOXz+0MjIqvnleIXwFTzz+t9T86HnYX/Rozria6ZVGLktAU9e+NygNljveP+yxqtQp/Q4w==}
     engines: {node: '>=12.0.0'}
 
+  json-schema-to-openapi-schema@0.4.0:
+    resolution: {integrity: sha512-/DY8s4l28M5ZIJBhmcUFWbZChJV5v7RCA7RMVxubyD1l5KwIceUq6+EUnqQ2q3wh/2D3Zn8bNSeAu1i2X+sMHQ==}
+    deprecated: This package is no longer maintained. Use @openapi-contrib/json-schema-to-openapi-schema instead.
+
   json-schema-to-ts@2.7.2:
     resolution: {integrity: sha512-R1JfqKqbBR4qE8UyBR56Ms30LL62/nlhoz+1UkfI/VE7p54Awu919FZ6ZUPG8zIa3XB65usPJgr1ONVncUGSaQ==}
     engines: {node: '>=16'}
@@ -2996,6 +3079,10 @@ packages:
   lodash.get@4.4.2:
     resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==}
     deprecated: This package is deprecated. Use the optional chaining (?.) operator instead.
+
+  lodash.isequal@4.5.0:
+    resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
+    deprecated: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
 
   lodash.isplainobject@4.0.6:
     resolution: {integrity: sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA==}
@@ -3203,6 +3290,10 @@ packages:
 
   node-releases@2.0.27:
     resolution: {integrity: sha512-nmh3lCkYZ3grZvqcCH+fjmQ7X+H0OeZgP40OierEaAptX4XofMh5kwNbWh7lBduUzCcV/8kZ+NDLCwm2iorIlA==}
+
+  nopt@3.0.6:
+    resolution: {integrity: sha512-4GUt3kSEYmk4ITxzB/b9vaIDfUVWN/Ml1Fwl11IlnIG2iaJ9O6WXZ9SrYM9NLI8OCBieN2Y8SWC2oJV0RQ7qYg==}
+    hasBin: true
 
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
@@ -4119,6 +4210,10 @@ packages:
     resolution: {integrity: sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA==}
     engines: {node: '>=16'}
 
+  type-of-is@3.5.1:
+    resolution: {integrity: sha512-SOnx8xygcAh8lvDU2exnK2bomASfNjzB3Qz71s2tw9QnX8fkAo7aC+D0H7FV0HjRKj94CKV2Hi71kVkkO6nOxg==}
+    engines: {node: '>=0.10.5'}
+
   type@2.7.3:
     resolution: {integrity: sha512-8j+1QmAbPvLZow5Qpi6NCaN8FB60p/6x8/vfNqOk/hC+HuvFZhL4+WfekuhQLiqFZXOgQdrs3B+XxEmCc6b3FQ==}
 
@@ -4252,6 +4347,9 @@ packages:
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
+
+  uritemplate@0.3.4:
+    resolution: {integrity: sha512-enADBvHfhjrwxFMTVWeIIYz51SZ91uC6o2MR/NQTVljJB6HTZ8eQL3Q7JBj3RxNISA14MOwJaU3vpf5R6dyxHA==}
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
@@ -4678,6 +4776,8 @@ snapshots:
       '@babel/helper-validator-identifier': 7.28.5
 
   '@bcoe/v8-coverage@0.2.3': {}
+
+  '@cloudflare/json-schema-walker@0.1.1': {}
 
   '@colors/colors@1.6.0': {}
 
@@ -5696,6 +5796,8 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
 
+  abbrev@1.1.1: {}
+
   acorn-jsx@5.3.2(acorn@8.15.0):
     dependencies:
       acorn: 8.15.0
@@ -5765,6 +5867,28 @@ snapshots:
     dependencies:
       normalize-path: 3.0.0
       picomatch: 2.3.1
+
+  apib-include-directive@0.1.0: {}
+
+  apib2openapi@0.1.5:
+    dependencies:
+      apib2swagger: 1.17.1
+      commander: 6.2.1
+      swagger2openapi: 7.0.8
+      yaml: 1.10.2
+    transitivePeerDependencies:
+      - encoding
+
+  apib2swagger@1.17.1:
+    dependencies:
+      apib-include-directive: 0.1.0
+      drafter.js: 2.6.7
+      generate-schema: 2.6.0
+      js-yaml: 4.1.1
+      json-schema-to-openapi-schema: 0.4.0
+      lodash.isequal: 4.5.0
+      nopt: 3.0.6
+      uritemplate: 0.3.4
 
   app-root-path@3.1.0: {}
 
@@ -6123,6 +6247,10 @@ snapshots:
 
   commander@14.0.2: {}
 
+  commander@2.20.3: {}
+
+  commander@6.2.1: {}
+
   comment-parser@1.4.1: {}
 
   compute-gcd@1.2.1:
@@ -6271,6 +6399,8 @@ snapshots:
   dotenv@16.0.3: {}
 
   dotenv@16.6.1: {}
+
+  drafter.js@2.6.7: {}
 
   dunder-proto@1.0.1:
     dependencies:
@@ -6764,6 +6894,11 @@ snapshots:
       is-callable: 1.2.7
 
   functions-have-names@1.2.3: {}
+
+  generate-schema@2.6.0:
+    dependencies:
+      commander: 2.20.3
+      type-of-is: 3.5.1
 
   generator-function@2.0.1: {}
 
@@ -7611,6 +7746,10 @@ snapshots:
       json-schema-compare: 0.2.2
       lodash: 4.17.21
 
+  json-schema-to-openapi-schema@0.4.0:
+    dependencies:
+      '@cloudflare/json-schema-walker': 0.1.1
+
   json-schema-to-ts@2.7.2:
     dependencies:
       '@babel/runtime': 7.28.4
@@ -7712,6 +7851,8 @@ snapshots:
   lodash.clonedeep@4.5.0: {}
 
   lodash.get@4.4.2: {}
+
+  lodash.isequal@4.5.0: {}
 
   lodash.isplainobject@4.0.6: {}
 
@@ -7905,6 +8046,10 @@ snapshots:
       es6-promise: 3.3.1
 
   node-releases@2.0.27: {}
+
+  nopt@3.0.6:
+    dependencies:
+      abbrev: 1.1.1
 
   normalize-path@3.0.0: {}
 
@@ -8945,6 +9090,8 @@ snapshots:
 
   type-fest@4.41.0: {}
 
+  type-of-is@3.5.1: {}
+
   type@2.7.3: {}
 
   typed-array-buffer@1.0.3:
@@ -9081,6 +9228,8 @@ snapshots:
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
+
+  uritemplate@0.3.4: {}
 
   util-deprecate@1.0.2: {}
 

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tags": ["group:mdblist", "type:data-access"],
+  "tasks": {
+    "test": {},
+    "lint": {},
+    "check-types": {}
+  }
+}
