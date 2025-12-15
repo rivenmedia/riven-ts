@@ -3,9 +3,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": "lib"
+    "rootDir": "lib",
+    "forceConsistentCasingInFileNames": false
   },
   "files": [],
-  "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],
-  "exclude": ["lib/**/*.spec.ts", "lib/__generated__/**/*.ts"]
+  "include": ["lib/__generated__/**/*.ts"],
+  "exclude": ["lib/!(__generated__)/**"]
 }

@@ -1,0 +1,2946 @@
+FORMAT: 1A
+HOST: https://api.mdblist.com
+
+# MDBList API
+
+API service allows you to access information about ratings, votes, streaming services and more
+
+## API Keys
+
+API key can be generated for free in mdblist.com preferences
+
+## Rate Limiting
+
+The API enforces daily rate limits to ensure fair usage across all users. Your rate limit depends on your supporter tier. Higher supporter tiers receive increased daily request limits.
+
+### Rate Limit Headers
+
+Every API response includes the following headers to help you track your usage:
+
+| Header | Description |
+| ------ | ----------- |
+| `X-RateLimit-Limit` | Maximum number of requests allowed per day |
+| `X-RateLimit-Remaining` | Number of requests remaining in the current period |
+| `X-RateLimit-Reset` | Unix timestamp when the rate limit resets (midnight UTC) |
+
+You can check your current rate limit by inspecting these headers in any API response, or by calling the `/user` endpoint.
+
+### Rate Limit Exceeded
+
+When you exceed your daily limit, the API returns a `429 Too Many Requests` status with additional headers:
+
+| Header | Description |
+| ------ | ----------- |
+| `Retry-After` | Number of seconds until the rate limit resets |
+
+Example response when rate limited:
+```json
+{
+    "error": "Daily API limit exceeded!"
+}
+```
+
+Response headers:
+```
+X-RateLimit-Limit: 10000
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1734393600
+Retry-After: 43200
+```
+
+## Pagination
+
+Some methods support pagination 📄
+Append a query string like ?limit=`limit`&offset=`offset` to the URL to influence the results.
+
+| Parameter | Type | Value |
+| --------- | ---- | ----- |
+| `limit` | integer  | Number of results to return |
+| `offset` | integer  | Number of results to skip from the beginning  |
+
+## Media IDs
+
+When a response includes an `ids` block for a movie or show we return the collection of provider identifiers plus the MDBList public ID (`mdblist`). Example:
+
+        "ids": {
+            "imdb": "tt0111161",
+            "tmdb": 278,
+            "trakt": 389,
+            "tvdb": 832,
+            "mal": 999,
+            "mdblist": "a0"
+        }
+
+
+## My Limits [/user{?apikey}]
+
+Show information about user limits
+
++ Parameters
+    + apikey: abc123 (string, required) - Your API key.
+
+### Get My Limits [GET]
+
++ Response 200 (application/json)
+
+            {
+                "api_requests": 100000,
+                "api_requests_count": 276,
+                "user_id": 3,
+                "patron_status": "active_patron",
+                "patreon_pledge": 300
+            }
+
+## My Lists [/lists/user{?apikey,sort}]
+Fetches users lists.
++ Parameters
+    + apikey: abc123 (string, required) - Your API key.
+    + sort: ranked (enum[string], optional) - Sort order for lists.
+        + Default: `ranked`
+        + Members
+            + `ranked` - Sort by manual rank order
+            + `name` - Sort alphabetically by name
+            + `created` - Sort by creation date
+
+### Get My Lists [GET]
++ Response 200 (application/json)
+    + Body
+
+            [
+                {
+                    "id": 13,
+                    "name": "Top Watched Movies of The Week for KiDS",
+                    "slug": "top-watched-movies-of-the-week-for-kids",
+                    "description": "",
+                    "mediatype": "movie",
+                    "items": 12,
+                    "likes": 50
+                },
+                {
+                    "id": 14,
+                    "name": "Top Watched Movies of The Week / >60",
+                    "slug": "top-watched-movies-of-the-week",
+                    "description": "",
+                    "mediatype": "movie",
+                    "items": 75,
+                    "likes": 247
+                },
+                {
+                    "id": 69,
+                    "name": "IMDb Moviemeter (Top 100)",
+                    "slug": "imdb-moviemeter-top-100",
+                    "description": "",
+                    "mediatype": "movie",
+                    "items": 100,
+                    "likes": 57
+                }
+            ]
+
+## User Lists by ID [/lists/user/{userid}{?apikey,sort}]
+Fetches users lists by `userid`.
++ Parameters
+    + userid: 3 (int, required) - User ID.
+    + apikey: abc123 (string, required) - Your API key.
+    + sort: ranked (enum[string], optional) - Sort order for lists.
+        + Default: `ranked`
+        + Members
+            + `ranked` - Sort by manual rank order
+            + `name` - Sort alphabetically by name
+            + `created` - Sort by creation date
+
+### Get User Lists [GET]
++ Response 200 (application/json)
+    + Body
+
+            [
+                {
+                    "id": 13,
+                    "name": "Top Watched Movies of The Week for KiDS",
+                    "slug": "top-watched-movies-of-the-week-for-kids",
+                    "description": "",
+                    "mediatype": "movie",
+                    "items": 12,
+                    "likes": 50
+                },
+                {
+                    "id": 14,
+                    "name": "Top Watched Movies of The Week / >60",
+                    "slug": "top-watched-movies-of-the-week",
+                    "description": "",
+                    "mediatype": "movie",
+                    "items": 75,
+                    "likes": 247
+                },
+                {
+                    "id": 69,
+                    "name": "IMDb Moviemeter (Top 100)",
+                    "slug": "imdb-moviemeter-top-100",
+                    "description": "",
+                    "mediatype": "movie",
+                    "items": 100,
+                    "likes": 57
+                }
+            ]
+
+## User Lists by Name [/lists/user/{username}{?apikey,sort}]
+Fetches users lists by username.
++ Parameters
+    + username: linaspurinis (string, required) - The username
+    + apikey: abc123 (string, required) - Your API key
+    + sort: ranked (enum[string], optional) - Sort order for lists.
+        + Default: `ranked`
+        + Members
+            + `ranked` - Sort by manual rank order
+            + `name` - Sort alphabetically by name
+            + `created` - Sort by creation date
+
+### Get User Lists [GET]
++ Response 200 (application/json)
+    + Body
+
+            [
+                {
+                    "id": 13,
+                    "name": "Top Watched Movies of The Week for KiDS",
+                    "slug": "top-watched-movies-of-the-week-for-kids",
+                    "description": "",
+                    "mediatype": "movie",
+                    "items": 12,
+                    "likes": 50
+                },
+                {
+                    "id": 14,
+                    "name": "Top Watched Movies of The Week / >60",
+                    "slug": "top-watched-movies-of-the-week",
+                    "description": "",
+                    "mediatype": "movie",
+                    "items": 75,
+                    "likes": 247
+                },
+                {
+                    "id": 69,
+                    "name": "IMDb Moviemeter (Top 100)",
+                    "slug": "imdb-moviemeter-top-100",
+                    "description": "",
+                    "mediatype": "movie",
+                    "items": 100,
+                    "likes": 57
+                }
+            ]
+
+## List by ID [/lists/{listid}{?apikey}]
+
+
++ Parameters
+    + listid: 1176 (number, required) - The ID of the list.
+    + apikey: abc123 (string, required) - Your API key.
+
+### Get List by ID [GET]
+
+Retrieves details of a list identified by `listid`.
+
++ Response 200 (application/json)
+    + Body
+
+            [
+                {
+                    "id": 1176,
+                    "user_id": 3,
+                    "user_name": "linaspurinis",
+                    "name": "Latest Certified Fresh Releases",
+                    "slug": "latest-certified-fresh-releases",
+                    "description": "Score >= 60\r\nLimit 30",
+                    "mediatype": "movie",
+                    "items": 30,
+                    "likes": 21,
+                    "dynamic": true,
+                    "private": false
+                }
+            ]
+
+### Update List Name by ID [PUT]
+
+Updates the name of a list specified by `listid`. Submit a JSON payload with the new `name`.
++ Request (application/json)
+    + Body
+
+            {
+                "name": "New List Title"
+            }
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "success": true,
+                "id": 89107,
+                "name": "New List Title"
+            }
+
+## List by Name [/lists/{username}/{listname}{?apikey}]
+
++ Parameters
+    + username: linaspurinis (string, required) - The username associated with the list.
+    + listname: `latest-certified-fresh-releases` (string, required) - The slug of the list.
+    + apikey: abc123 (string, required) - Your API key.
+
+### Get List by Name [GET]
+
+Retrieves details of list identified by `username` and `listname`. Multiple lists may be returned if separate filters exist for movies and shows.
++ Response 200 (application/json)
+    + Body
+
+            [
+                {
+                    "id": 1176,
+                    "user_id": 3,
+                    "user_name": "linaspurinis",
+                    "name": "Latest Certified Fresh Releases",
+                    "slug": "latest-certified-fresh-releases",
+                    "description": "Score >= 60\r\nLimit 30",
+                    "mediatype": "movie",
+                    "items": 30,
+                    "likes": 21,
+                    "dynamic": true,
+                    "private": false
+                },
+                {
+                    "id": 6365,
+                    "user_id": 3,
+                    "user_name": "linaspurinis",
+                    "name": "Latest Certified Fresh Releases",
+                    "slug": "latest-certified-fresh-releases",
+                    "description": "Score >= 60\r\nLimit 30",
+                    "mediatype": "show",
+                    "items": 30,
+                    "likes": 21,
+                    "dynamic": true,
+                    "private": false
+                }
+            ]
+
+### Update List Name by Name [PUT]
+
+Updates the name of a list identified by `username` and `listname`. Submit a JSON payload with the new `name`.
+
++ Request (application/json)
+    + Body
+
+            {
+                "name": "New List Title"
+            }
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "success": true,
+                "updated_ids": [
+                    1176,
+                    6365
+                ],
+                "name": "New List Title"
+            }
+
+## List items [/lists/{listid}/items{?apikey,limit,offset,append_to_response,filter_title,filter_genre,genre_operator,sort,order,unified,released_from,released_to,filter_score_min,filter_score_max}]
+
+#### 📄 Pagination
+
+Fetches items from a specified list. You can enhance the response by appending additional details like genres and posters using `append_to_response=genre,poster`.
+
+> **Note:** This endpoint returns up to 1,000 items max, regardless of the `limit` value. Use `limit` and `offset` to page through results.
+> The response also includes an `X-Has-More` header set to `true` if more items are available beyond the current page.
+
+To filter the results by genre(s), use the `filter_genre` parameter.
+
+> **Note:** When filtering by multiple genres, `genre_operator` controls the logic:
+> - **or** (default): matches items with *any* specified genres.
+> - **and**: matches items with *all* specified genres.
+
+#### ⭐ Supporter Feature: Rating Filters
+
+Supporters can filter items by rating thresholds using `_min` and `_max` parameters for any of these rating sources:
+- `filter_score_min` / `filter_score_max` - MDBList score (0-100)
+- `filter_imdbrating_min` / `filter_imdbrating_max` - IMDb rating (0-100)
+- `filter_tmdbrating_min` / `filter_tmdbrating_max` - TMDb rating (0-100)
+- `filter_metarating_min` / `filter_metarating_max` - Metacritic rating (0-100)
+- `filter_tomatorating_min` / `filter_tomatorating_max` - Rotten Tomatoes rating (0-100)
+- `filter_letterrating_min` / `filter_letterrating_max` - Letterboxd rating (0-100)
+- `filter_popcornrating_min` / `filter_popcornrating_max` - RT Audience (Popcorn) rating (0-100)
+- `filter_malrating_min` / `filter_malrating_max` - MyAnimeList rating (0-100)
+
+**How rating filters work:**
+All rating filters use a normalized 0–100 scale for consistency across different sources. This allows ratings from different platforms (IMDb, Letterboxd, Metacritic, etc.) to be compared, filtered, and sorted using a single unified scale.
+
+When filtering, always use values between 0 and 100, regardless of the original rating scale.
+
+Multiple rating filters can be combined. Example: `?filter_imdbrating_min=70&filter_tmdbrating_min=75`
+
+By default, items are sorted by rank ascending.
+
+
++ Parameters
+    + listid: 1176 (integer, required) - The ID of the list.
+    + limit: 100 (integer, optional)
+    + offset: 10 (integer, optional)
+    + append_to_response: `genre,poster` (string, optional) - Additional information to append.
+    + filter_title: Matrix (string, optional) - Filter by title.
+    + filter_genre: `fantasy` (string, optional) - Filter by genre.
+    + genre_operator: `or` (string, optional) - Logical operator used to combine multiple genre filters. Defaults to or.
+        + Members
+            + `or`
+            + `and`
+    + released_from: `2020-01-15` (string, optional) - Filter by minimum release date. Format: YYYY-MM-DD.
+    + released_to: `2023-12-31` (string, optional) - Filter by maximum release date. Format: YYYY-MM-DD.
+    + filter_score_min: 70 (integer, optional) - ⭐ Supporter only. Filter by minimum MDBList score (0-100).
+    + filter_score_max: 90 (integer, optional) - ⭐ Supporter only. Filter by maximum MDBList score (0-100).
+    + sort: `score` (string, optional)
+        + Members
+            + `rank`
+            + `score`
+            + `usort`
+            + `score_average`
+            + `released`
+            + `releasedigital`
+            + `imdbrating`
+            + `imdbvotes`
+            + `last_air_date`
+            + `imdbpopular`
+            + `tmdbpopular`
+            + `rogerebert`
+            + `rtomatoes`
+            + `rtaudience`
+            + `metacritic`
+            + `myanimelist`
+            + `letterrating`
+            + `lettervotes`
+            + `budget`
+            + `revenue`
+            + `runtime`
+            + `title`
+            + `added`
+            + `random`
+    + order: `asc` (string, optional)
+        + Members
+            + `asc`
+            + `desc`
+    + unified: `true` (boolean, optional) - Returns unified list of Movies and Shows
+    + apikey: abc123 (string, required) - Your API key.
+
+### Get List Items [GET]
+
++ Response 200 (application/json)
+
+    + Description
+
+        The `X-Total-Items` header shows total number of items in a list, without additional filtering
+        The `X-Has-More` header indicates whether more items exist beyond the current response, based on the limit parameter.
+        - `true`: More items are available on the next page(s).
+        - `false`: No more items available beyond this response.
+
+    + Headers
+
+            X-Total-Items: 7
+            X-Has-More: true
+
+    + Body
+
+            {
+              "movies": [
+                {
+                  "id": 917496,
+                  "rank": 1,
+                  "adult": 0,
+                  "title": "Beetlejuice Beetlejuice",
+                  "imdb_id": "tt2049403",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 646097,
+                  "rank": 2,
+                  "adult": 0,
+                  "title": "Rebel Ridge",
+                  "imdb_id": "tt11301886",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 1125073,
+                  "rank": 3,
+                  "adult": 0,
+                  "title": "Between the Temples",
+                  "imdb_id": "tt27722375",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 1029281,
+                  "rank": 4,
+                  "adult": 0,
+                  "title": "Strange Darling",
+                  "imdb_id": "tt22375054",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 840705,
+                  "rank": 5,
+                  "adult": 0,
+                  "title": "Blink Twice",
+                  "imdb_id": "tt14858658",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 945961,
+                  "rank": 6,
+                  "adult": 0,
+                  "title": "Alien: Romulus",
+                  "imdb_id": "tt18412256",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 1214521,
+                  "rank": 7,
+                  "adult": 0,
+                  "title": "Daughters",
+                  "imdb_id": "tt12336480",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 1158874,
+                  "rank": 8,
+                  "adult": 0,
+                  "title": "Sugarcane",
+                  "imdb_id": "tt30319854",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 1122618,
+                  "rank": 9,
+                  "adult": 0,
+                  "title": "Good One",
+                  "imdb_id": "tt30319516",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                }
+              ],
+              "shows": []
+            }
+
+
+## List items by List Name [/lists/{username}/{listname}/items/{?apikey,limit,offset,append_to_response,filter_title,filter_genre,genre_operator,sort,order,unified,released_from,released_to,filter_score_min,filter_score_max}]
+
+#### 📄 Pagination
+
+Fetches items from a specified list. You can enhance the response by appending additional details like genres and posters using `append_to_response=genre,poster`.
+
+> **Note:** This endpoint returns up to 1,000 items max, regardless of the `limit` value. Use `limit` and `offset` to page through results.
+> The response also includes an `X-Has-More` header set to `true` if more items are available beyond the current page.
+
+
+To filter the results by genre(s), use the `filter_genre` parameter.
+
+> **Note:** When filtering by multiple genres, `genre_operator` controls the logic:
+> - **or** (default): matches items with *any* specified genres.
+> - **and**: matches items with *all* specified genres.
+
+#### ⭐ Supporter Feature: Rating Filters
+
+Supporters can filter items by rating thresholds. See the complete list of available rating filters in the `/lists/{listid}/items` endpoint documentation above.
+
+By default, items are sorted by rank ascending.
+
+> You can filter results by `mediatype` by adding .../items/movie/ or .../items/show/
+
++ Parameters
+    + username: linaspurinis (string, required) - The username associated with the list.
+    + listname: `latest-certified-fresh-releases` (string, required) - The slug of the list.
+    + limit: 100 (integer, optional)
+    + offset: 10 (integer, optional)
+    + append_to_response: `genre,poster` (string, optional) - Additional information to append.
+    + filter_title: Matrix (string, optional) - Filter by title.
+    + filter_genre: `fantasy` (string, optional) - Filter by genre.
+    + genre_operator: `or` (string, optional) - Logical operator used to combine multiple genre filters. Defaults to or.
+        + Members
+            + `or`
+            + `and`
+    + released_from: `2020-01-15` (string, optional) - Filter by minimum release date. Format: YYYY-MM-DD.
+    + released_to: `2023-12-31` (string, optional) - Filter by maximum release date. Format: YYYY-MM-DD.
+    + filter_score_min: 70 (integer, optional) - ⭐ Supporter only. Filter by minimum MDBList score (0-100).
+    + filter_score_max: 90 (integer, optional) - ⭐ Supporter only. Filter by maximum MDBList score (0-100).
+    + sort: `score` (string, optional)
+        + Members
+            + `rank`
+            + `score`
+            + `usort`
+            + `score_average`
+            + `released`
+            + `releasedigital`
+            + `imdbrating`
+            + `imdbvotes`
+            + `last_air_date`
+            + `imdbpopular`
+            + `tmdbpopular`
+            + `rogerebert`
+            + `rtomatoes`
+            + `rtaudience`
+            + `metacritic`
+            + `myanimelist`
+            + `letterrating`
+            + `lettervotes`
+            + `budget`
+            + `revenue`
+            + `runtime`
+            + `title`
+            + `added`
+            + `random`
+    + order: `asc` (string, optional)
+        + Members
+            + `asc`
+            + `desc`
+    + unified: `true` (boolean, optional) - Returns unified list of Movies and Shows
+    + apikey: abc123 (string, required) - Your API key.
+
+### Get List Items by Name [GET]
+
++ Response 200 (application/json)
+
+    + Description
+
+        The `X-Has-More` header indicates whether more items exist beyond the current response, based on the limit parameter.
+        - `true`: More items are available on the next page(s).
+        - `false`: No more items available beyond this response.
+
+    + Headers
+
+            X-Has-More: true
+
+    + Body
+
+            {
+              "movies": [
+                {
+                  "id": 917496,
+                  "rank": 1,
+                  "adult": 0,
+                  "title": "Beetlejuice Beetlejuice",
+                  "imdb_id": "tt2049403",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 646097,
+                  "rank": 2,
+                  "adult": 0,
+                  "title": "Rebel Ridge",
+                  "imdb_id": "tt11301886",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 1125073,
+                  "rank": 3,
+                  "adult": 0,
+                  "title": "Between the Temples",
+                  "imdb_id": "tt27722375",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 1029281,
+                  "rank": 4,
+                  "adult": 0,
+                  "title": "Strange Darling",
+                  "imdb_id": "tt22375054",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 840705,
+                  "rank": 5,
+                  "adult": 0,
+                  "title": "Blink Twice",
+                  "imdb_id": "tt14858658",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                }
+              ],
+              "shows": [
+                {
+                  "id": 258902,
+                  "rank": 1,
+                  "adult": 0,
+                  "title": "English Teacher",
+                  "imdb_id": "tt20782190",
+                  "tvdb_id": 421968,
+                  "language": "en",
+                  "mediatype": "show",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 253254,
+                  "rank": 2,
+                  "adult": 0,
+                  "title": "Fantasmas",
+                  "imdb_id": "tt18182112",
+                  "tvdb_id": 450408,
+                  "language": "en",
+                  "mediatype": "show",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 241259,
+                  "rank": 3,
+                  "adult": 0,
+                  "title": "Baby Reindeer",
+                  "imdb_id": "tt13649112",
+                  "tvdb_id": 417223,
+                  "language": "en",
+                  "mediatype": "show",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 126308,
+                  "rank": 4,
+                  "adult": 0,
+                  "title": "Shōgun",
+                  "imdb_id": "tt2788316",
+                  "tvdb_id": 392573,
+                  "language": "en",
+                  "mediatype": "show",
+                  "release_year": 2024,
+                  "spoken_language": "ja"
+                },
+                {
+                  "id": 155292,
+                  "rank": 5,
+                  "adult": 0,
+                  "title": "Scott Pilgrim Takes Off",
+                  "imdb_id": "tt16969708",
+                  "tvdb_id": 433113,
+                  "language": "en",
+                  "mediatype": "show",
+                  "release_year": 2023,
+                  "spoken_language": "en"
+                }
+              ]
+            }
+
+
+## List Changes [/lists/{listid}/changes{?apikey}]
+
+Returns Trakt IDs for items changed after the last list update. Returned up to 200 items per action.
+
++ Parameters
+    + listid: 1176 (integer, required) - The ID of the list.
+    + apikey: abc123 (string, required) - Your API key.
+
+### Get List Changes [GET]
+
++ Response 200 (application/json)
+    + Body
+
+            {
+              "id": 1176,
+              "movie": {
+                "trakt_ids": {
+                  "added": [
+                    116006
+                  ],
+                  "removed": [
+                    125198,
+                    129400,
+                    132409,
+                    148315
+                  ]
+                }
+              },
+              "updated": "2024-09-19T09:01:39Z"
+            }
+
+
+## Media Info [/{media_provider}/{media_type}/{media_id}{?apikey,append_to_response}]
+
+Get informtion about Movie or Show
+
++ Parameters
+    + media_provider: `imdb` (enum[string], required) - Media provider
+        + Members
+            + `tmdb`
+            + `imdb`
+            + `trakt`
+            + `tmdb`
+            + `tvdb`
+            + `mal`
+    + media_type: movie (string, required)
+        + Members
+            + `movie`
+            + `show`
+            + `any`
+    + media_id: tt0073195 (string, required) - Media ID
+    + append_to_response: `keyword` (string, optional) - Additional information to append. Accepts a comma-separated list of the following values: `keyword`, `review`
+        + Members
+            + `keyword` - Append keyword information.
+            + `review` - Append review information.
+    + apikey: abc123 (string, required) - Your API key.
+
+### Get Media Info [GET]
+
++ Response 200 (application/json)
+
+            {
+              "title": "Jaws",
+              "year": 1975,
+              "released": "1975-06-20",
+              "released_digital": "1997-11-01",
+              "description": "When the seaside community of Amity finds itself under attack by a dangerous great white shark, the town's chief of police, a young marine biologist, and a grizzled hunter embark on a desperate quest to destroy the beast before it strikes again.",
+              "runtime": 124,
+              "score": 86,
+              "score_average": 86,
+              "ids": {
+                "imdb": "tt0073195",
+                "trakt": 457,
+                "tmdb": 578,
+                "tvdb": null,
+                "mal": null,
+                "mdblist": "om"
+              },
+              "type": "movie",
+              "ratings": [
+                {
+                  "source": "imdb",
+                  "value": 8.1,
+                  "score": 81,
+                  "votes": 673852,
+                  "url": 99
+                },
+                {
+                  "source": "metacritic",
+                  "value": 87,
+                  "score": 87,
+                  "votes": 21,
+                  "url": "/jaws"
+                },
+                {
+                  "source": "metacriticuser",
+                  "value": null,
+                  "score": null,
+                  "votes": null,
+                  "url": null
+                },
+                {
+                  "source": "trakt",
+                  "value": 78,
+                  "score": 78,
+                  "votes": 14033,
+                  "url": null
+                },
+                {
+                  "source": "tomatoes",
+                  "value": 97,
+                  "score": 97,
+                  "votes": 102,
+                  "url": "/m/jaws"
+                },
+                {
+                  "source": "tmdb",
+                  "value": 76,
+                  "score": 76,
+                  "votes": 10114,
+                  "url": null
+                },
+                {
+                  "source": "letterboxd",
+                  "value": 8,
+                  "score": 80,
+                  "votes": 876082,
+                  "url": "/film/jaws/"
+                },
+                {
+                  "source": "rogerebert",
+                  "value": 4,
+                  "score": null,
+                  "votes": null,
+                  "url": "great-movie-jaws-1975"
+                },
+                {
+                  "source": "myanimelist",
+                  "value": null,
+                  "score": null,
+                  "votes": null,
+                  "url": null
+                }
+              ],
+              "streams": [
+                {
+                  "id": 9,
+                  "name": "fuboTV"
+                },
+                {
+                  "id": 10,
+                  "name": "AMC"
+                }
+              ],
+              "watch_providers": [
+                {
+                  "id": 8,
+                  "name": "Netflix"
+                },
+                {
+                  "id": 1796,
+                  "name": "Netflix basic with Ads"
+                }
+              ],
+              "language": "en",
+              "spoken_language": "en",
+              "country": "us",
+              "certification": "PG",
+              "commonsense": true,
+              "age_rating": 13,
+              "status": "released",
+              "trailer": "https://youtube.com/watch?v=WKuZJjPSLXQ",
+              "poster": "https://image.tmdb.org/t/p/original/lxM6kqilAdpdhqUl2biYp5frUxE.jpg",
+              "backdrop": "https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/3nYlM34QhzdtAvWRV5bN4nLtnTc.jpg"
+            }
+
+
+## Media Info Batch [/{media_provider}/{media_type}{?apikey}]
+
+Request up to 200 media items. Add append_to_response in the request body.
+
++ Parameters
+    + media_provider: `trakt` (enum[string], required) - Media provider
+        + Members
+            + `tmdb`
+            + `imdb`
+            + `trakt`
+            + `tmdb`
+            + `tvdb`
+            + `mal`
+    + media_type: movie (string, required)
+        + Members
+            + `movie`
+            + `show`
+            + `any`
+    + apikey: abc123 (string, required) - Your API key.
+
+
+### Get Media Info Batch [POST]
+
++ Request (application/json)
+
+            {
+                "ids": ["116006", "125198"],
+                "append_to_response": ["review", "keyword"]
+            }
+
++ Response 200 (application/json)
+    + Body
+
+            [
+              {
+                "id": 128773,
+                "title": "The Phantom of the Convent",
+                "year": 1934,
+                "released": "1934-06-26",
+                "description": "Alfonso, Eduardo and Cristina get lost when visiting a forest. A strange monk finds them and takes them to an ancient convent. There, the three amigos suffer personality changes, specially Cristina who tries to seduce Alfonso in a strange coincidence to a story told by an old monk. After some efforts to escape, Alfonso is trapped inside a jail and more strange and macabre situations happen.",
+                "runtime": 85,
+                "score": 31,
+                "score_average": 64,
+                "ids": {
+                  "imdb": "tt0025100",
+                  "trakt": 116006,
+                  "tmdb": 184940,
+                  "tvdb": null,
+                  "mal": null,
+                  "mdblist": "2rd1"
+                },
+                "type": "movie",
+                "ratings": [],
+                "streams": [],
+                "watch_providers": [
+                  {
+                    "id": 258,
+                    "name": "Criterion Channel"
+                  }
+                ],
+                "language": "es",
+                "spoken_language": "es",
+                "country": "mx",
+                "certification": "NR",
+                "commonsense": null,
+                "age_rating": 11,
+                "status": "released",
+                "trailer": null,
+                "poster": "https://image.tmdb.org/t/p/original/gi5MqHPQEkekaqNZ5PqMFZ70cdf.jpg",
+                "backdrop": "https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/2peiLehxIXlk36KAtWfl2v53Soc.jpg",
+                "reviews": [
+                  {
+                    "updated_at": "2024-04-01",
+                    "author": "NealZ",
+                    "rating": 7,
+                    "provider_id": 1,
+                    "content": "This officially marks the oldest movie I've ever watched, and I must say, I'm pleasantly surprised by how much I enjoyed it. Initially seeming rather straightforward, it ended up delivering more surprises than I had imagined. I relished the overall atmosphere; it even boasted some impressive practical effects and had its moments of delightful silliness. Though it didn't quite muster the scares by today's standards, I found it to be a far more engaging experience than many contemporary releases. It leaves me hopeful for exploring other films from that era, or even earlier ones."
+                  }
+                ],
+                "keywords": [
+                  {
+                    "id": 96,
+                    "name": "monk"
+                  },
+                  {
+                    "id": 6325,
+                    "name": "convent-nunnery"
+                  },
+                  {
+                    "id": 51341,
+                    "name": "mexican-horror"
+                  },
+                  {
+                    "id": 80325,
+                    "name": "lost-in-woods"
+                  }
+                  }
+                ]
+              },
+              {
+                "id": 2401479,
+                "title": "One Mile From Heaven",
+                "year": 1937,
+                "released": "1937-08-18",
+                "description": "A female journalist travels to a new neighborhood after getting a (false) lead and is surprised by what she finds.",
+                "runtime": 67,
+                "score": 0,
+                "score_average": 70,
+                "ids": {
+                  "imdb": "tt0029349",
+                  "trakt": 125198,
+                  "tmdb": 200717,
+                  "tvdb": null,
+                  "mal": null,
+                  "mdblist": "1fgzr"
+                },
+                "type": "movie",
+                "ratings": [],
+                "streams": [],
+                "watch_providers": [],
+                "language": "en",
+                "spoken_language": "en",
+                "country": "us",
+                "certification": "NR",
+                "commonsense": null,
+                "age_rating": null,
+                "status": "released",
+                "trailer": null,
+                "poster": "https://image.tmdb.org/t/p/original/4zOeRUZqvqLSYdATrqg97qT5o0l.jpg",
+                "backdrop": "https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/qH2F24GxmUVsgwHvv39iVy3YSq1.jpg",
+                "reviews": [
+                  {
+                    "updated_at": "2021-02-02",
+                    "author": "Louis Lautier",
+                    "rating": 1,
+                    "provider_id": 3,
+                    "content": "Bill Robinson and Fredi Washington give performances deserving commendation."
+                  }
+                ],
+                "keywords": [
+                  {
+                    "id": 1305,
+                    "name": "mother"
+                  },
+                  {
+                    "id": 1594,
+                    "name": "wealth"
+                  },
+                  {
+                    "id": 12453,
+                    "name": "welfare"
+                  },
+                  {
+                    "id": 304495,
+                    "name": "welfare"
+                  }
+                ]
+              }
+            ]
+
+## Search for Media [/search/{media_type}{?apikey,query,limit_by_score,sort_by_score,year,limit}]
+
+Search for Movie or Show
+
++ Parameters
+    + media_type: movie (string, required)
+        + Members
+            + `movie`
+            + `show`
+            + `any`
+    + query: Jaws (string, required) - Search Query
+    + limit_by_score: 30 (int, optional) - Limit returned results by score
+    + sort_by_score: True (Boolean, optional) - Sort returned results by score
+    + year: 1976 (int, optional) - Limit returned results by year +-1
+    + limit: 10 (int, optional) - Limit returned results
+    + apikey: abc123 (string, required) - Your API Key
+
+### Get Search Results [GET]
+
++ Response 200 (application/json)
+
+            {
+              "search": [
+                {
+                  "title": "Jaws",
+                  "year": 1975,
+                  "score": 86,
+                  "score_average": 86,
+                  "type": "movie",
+                  "ids": {
+                    "imdbid": "tt0073195",
+                    "tmdbid": 578,
+                    "traktid": 457,
+                    "malid": null,
+                    "tvdbid": null
+                  }
+                },
+                {
+                  "title": "Jaws 2",
+                  "year": 1978,
+                  "score": 55,
+                  "score_average": 55,
+                  "type": "movie",
+                  "ids": {
+                    "imdbid": "tt0077766",
+                    "tmdbid": 579,
+                    "traktid": 458,
+                    "malid": null,
+                    "tvdbid": null
+                  }
+                },
+                {
+                  "title": "The Shark Is Still Working: The Impact & Legacy of \"Jaws\"",
+                  "year": 2009,
+                  "score": 46,
+                  "score_average": 80,
+                  "type": "movie",
+                  "ids": {
+                    "imdbid": "tt0469185",
+                    "tmdbid": 106262,
+                    "traktid": 75531,
+                    "malid": null,
+                    "tvdbid": null
+                  }
+                }
+              ],
+              "total": 3
+            }
+
+
+## Top Lists [/lists/top{?apikey}]
+Lists top lists sorted by Trakt likes
+
++ Parameters
+    + apikey: abc123 (string, required) - Your API key.
+
+### Get Top Lists [GET]
+
++ Response 200 (application/json)
+    + Body
+
+            [
+              {
+                "id": 2194,
+                "user_id": 1230,
+                "user_name": "garycrawfordgc",
+                "name": "Latest TV Shows",
+                "slug": "latest-tv-shows",
+                "description": "",
+                "mediatype": "show",
+                "items": 300,
+                "likes": 477
+              },
+              {
+                "id": 14,
+                "user_id": 3,
+                "user_name": "linaspurinis",
+                "name": "Top Watched Movies of The Week / >60",
+                "slug": "top-watched-movies-of-the-week",
+                "description": "",
+                "mediatype": "movie",
+                "items": 76,
+                "likes": 247
+              },
+              {
+                "id": 3082,
+                "user_id": 1230,
+                "user_name": "garycrawfordgc",
+                "name": "Netflix Shows",
+                "slug": "netflix-shows",
+                "description": "",
+                "mediatype": "show",
+                "items": 300,
+                "likes": 201
+              },
+              {
+                "id": 3093,
+                "user_id": 1230,
+                "user_name": "garycrawfordgc",
+                "name": "Netflix Movies",
+                "slug": "netflix-movies",
+                "description": "",
+                "mediatype": "movie",
+                "items": 200,
+                "likes": 192
+              },
+              {
+                "id": 3882,
+                "user_id": 894,
+                "user_name": "hdlists",
+                "name": "Latest TV Shows",
+                "slug": "latest-tv-shows",
+                "description": "Latest TV Shows List for English Language Series/Specials",
+                "mediatype": "show",
+                "items": 300,
+                "likes": 188
+              }
+            ]
+
+## List Search [/lists/search{?apikey,query}]
+Search public lists by title
+
++ Parameters
+    + query: Horror (string, required) - Search query
+    + apikey: abc123 (string, required) - Your API key.
+
+### Search Lists [GET]
+
++ Response 200 (application/json)
+    + Body
+
+            [
+              {
+                "id": 2410,
+                "user_id": 894,
+                "user_name": "hdlists",
+                "name": "Horror Movies (Top Rated From 1960 to Today)",
+                "slug": "latest-hd-horror-movies-top-rated-from-1980-to-today",
+                "description": "",
+                "mediatype": "movie",
+                "items": 920,
+                "likes": 139
+              },
+              {
+                "id": 3110,
+                "user_id": 1230,
+                "user_name": "garycrawfordgc",
+                "name": "Horror",
+                "slug": "horror",
+                "description": "",
+                "mediatype": "movie",
+                "items": 347,
+                "likes": 68
+              },
+              {
+                "id": 3124,
+                "user_id": 1230,
+                "user_name": "garycrawfordgc",
+                "name": "Horror Shows",
+                "slug": "horror-shows",
+                "description": "",
+                "mediatype": "show",
+                "items": 129,
+                "likes": 53
+              }
+            ]
+
+## Ratings [/rating/{media_type}/{return_rating}{?apikey,query}]
+Bulk rating request. Provide list of tmdb or imdb ids with media type and returns ratings of requested type.
+
++ Parameters
+    + media_type: movie (string, required)
+        + Members
+            + `movie`
+            + `show`
+    + return_rating: letterboxd (string, required) - Return rating type
+        + Members
+            + `trakt`
+            + `imdb`
+            + `tmdb`
+            + `letterboxd`
+            + `tomatoes`
+            + `audience`
+            + `metacritic`
+            + `rogerebert`
+            + `mal`
+            + `score`
+            + `score_average`
+    + apikey: abc123 (string, required) - Your API key.
+
+### Get Ratings [POST]
+
++ Request (application/json)
+
+            {
+                "ids":
+                    [923, 990, 545611],
+                "provider": "tmdb"
+            }
+
++ Response 200 (application/json)
+    + Body
+
+            {
+              "provider_id": "tmdb",
+              "provider_rating": "letterboxd",
+              "mediatype": "movie",
+              "ratings": [
+                {
+                  "id": 923,
+                  "rating": 4
+                },
+                {
+                  "id": 990,
+                  "rating": 4.1
+                },
+                {
+                  "id": 545611,
+                  "rating": 4.3
+                }
+              ]
+            }
+
+
+## Genres [/genres/{?apikey,anime}]
+Get a list of all genres, including names and slugs.
+
++ Parameters
+    + apikey: abc123 (string, required) - Your API key.
+    + anime: 1 (number, optional) - Display anime genres (0 for regular, 1 for anime)
+
+### Get Genres [GET]
+
++ Response 200 (application/json)
+
+    + Body
+
+            [
+                {
+                    "slug": "anime-parody",
+                    "title": "Anime: Parody"
+                },
+                {
+                    "slug": "anime-shounen",
+                    "title": "Anime: Shounen"
+                },
+                {
+                    "slug": "anime-slice-of-life",
+                    "title": "Anime: Slice of Life"
+                },
+                {
+                    "slug": "anime-isekai",
+                    "title": "Anime: Isekai"
+                },
+                {
+                    "slug": "anime-historical",
+                    "title": "Anime: Historical"
+                },
+                {
+                    "slug": "anime-military",
+                    "title": "Anime: Military"
+                },
+                {
+                    "slug": "anime-seinen",
+                    "title": "Anime: Seinen"
+                },
+                {
+                    "slug": "anime-supernatural",
+                    "title": "Anime: Supernatural"
+                },
+                {
+                    "slug": "anime-vampire",
+                    "title": "Anime: Vampire"
+                }
+            ]
+
+
+## Modify Static List [/lists/{listid}/items/{action}{?apikey}]
+
+You can modify static list by adding or removing items
+
++ Parameters
+    + listid: 49088 (number, required) - The ID of your static list
+    + action: add (string, required)
+        + Members
+            + `add`
+            + `remove`
+    + apikey: abc123 (string, required) - Your API key.
+
+### Modify List [POST]
+
++ Request (application/json)
+
+            {
+             "movies": [
+                {
+                 "tmdb": 630,
+                 "imdb": "tt0032138"
+                },
+                {
+                 "tmdb": 238
+                }
+             ],
+             "shows": [
+                {
+                 "imdb": "tt0417299"
+                },
+                {
+                 "tmdb": 1396
+                }
+               ]
+            }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+            "added": {
+                    "movies": 2,
+                    "shows": 2
+                },
+            "existing": {
+                    "movies": 0,
+                    "shows": 0
+                },
+            "not_found": {
+                    "movies": 0,
+                    "shows": 0
+                }
+            }
+
+
+# Group External Lists
+
+### Get Users External Lists [GET /external/lists/user{?apikey}]
+
+Retrieve all external lists owned by the authenticated user.
+
+External lists are lists imported from external sources (Trakt, IMDb, Letterboxd, etc.) and can be managed through the MDBList interface.
+
++ Parameters
+    + apikey: abc123 (string, required) - Your API key.
+
++ Response 200 (application/json)
+
+        [
+            {
+                "id": 123,
+                "user_id": 456,
+                "user_name": "johndoe",
+                "name": "My Trakt Watchlist",
+                "updated": "2025-01-15T10:30:00Z",
+                "items": 150,
+                "items_show": 25,
+                "url": "https://trakt.tv/users/johndoe/watchlist",
+                "source": "trakt"
+            },
+            {
+                "id": 124,
+                "user_id": 456,
+                "user_name": "johndoe",
+                "name": "IMDb Favorites",
+                "updated": "2025-01-10T08:15:00Z",
+                "items": 85,
+                "items_show": 12,
+                "url": "https://www.imdb.com/list/ls123456789/",
+                "source": "imdb"
+            }
+        ]
+
++ Response 401 (application/json)
+
+        {
+            "error": "Invalid API key"
+        }
+
++ Response 500 (application/json)
+
+        {
+            "error": "An error occurred"
+        }
+
+## List items [/external/lists/{listid}/items{?apikey,limit,offset,append_to_response,filter_genre,sort,order,unified,filter_score_min,filter_score_max}]
+
+#### 📄 Pagination
+
+Fetches list items. Use `append_to_response=genre,poster` to include genres and posters in the response. To filter results by a specific genre, use `filter_genre=fantasy` to retrieve only fantasy items.
+
+#### ⭐ Supporter Feature: Rating Filters
+
+Supporters can filter external list items by rating thresholds. See the complete list of available rating filters in the `/lists/{listid}/items` endpoint documentation.
+
+By default, items are sorted by rank.
+
++ Parameters
+    + listid: 47989 (integer, required) - The ID of the list.
+    + limit: 100 (integer, optional)
+    + offset: 10 (integer, optional)
+    + append_to_response: `genre,poster` (string, optional) - Additional information to append.
+    + filter_genre: `fantasy` (string, optional) - Filter by genre, works if genre is included.
+    + filter_score_min: 70 (integer, optional) - ⭐ Supporter only. Filter by minimum MDBList score (0-100).
+    + filter_score_max: 90 (integer, optional) - ⭐ Supporter only. Filter by maximum MDBList score (0-100).
+    + sort: `score` (string, optional)
+        + Members
+            + `rank`
+            + `score`
+            + `score_average`
+            + `released`
+            + `releasedigital`
+            + `imdbrating`
+            + `imdbvotes`
+            + `last_air_date`
+            + `imdbpopular`
+            + `tmdbpopular`
+            + `rogerebert`
+            + `rtomatoes`
+            + `rtaudience`
+            + `metacritic`
+            + `myanimelist`
+            + `letterrating`
+            + `lettervotes`
+            + `budget`
+            + `revenue`
+            + `runtime`
+            + `title`
+            + `random`
+    + order: `asc` (string, optional)
+        + Members
+            + `asc`
+            + `desc`
+    + unified: `true` (boolean, optional) - Returns unified list of Movies and Shows
+    + apikey: abc123 (string, required) - Your API key.
+
+### Get List Items [GET]
+
++ Response 200 (application/json)
+    + Body
+
+            {
+              "movies": [
+                {
+                  "id": 917496,
+                  "rank": 1,
+                  "adult": 0,
+                  "title": "Beetlejuice Beetlejuice",
+                  "imdb_id": "tt2049403",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 646097,
+                  "rank": 2,
+                  "adult": 0,
+                  "title": "Rebel Ridge",
+                  "imdb_id": "tt11301886",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 1125073,
+                  "rank": 3,
+                  "adult": 0,
+                  "title": "Between the Temples",
+                  "imdb_id": "tt27722375",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 1029281,
+                  "rank": 4,
+                  "adult": 0,
+                  "title": "Strange Darling",
+                  "imdb_id": "tt22375054",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 840705,
+                  "rank": 5,
+                  "adult": 0,
+                  "title": "Blink Twice",
+                  "imdb_id": "tt14858658",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 945961,
+                  "rank": 6,
+                  "adult": 0,
+                  "title": "Alien: Romulus",
+                  "imdb_id": "tt18412256",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 1214521,
+                  "rank": 7,
+                  "adult": 0,
+                  "title": "Daughters",
+                  "imdb_id": "tt12336480",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 1158874,
+                  "rank": 8,
+                  "adult": 0,
+                  "title": "Sugarcane",
+                  "imdb_id": "tt30319854",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                },
+                {
+                  "id": 1122618,
+                  "rank": 9,
+                  "adult": 0,
+                  "title": "Good One",
+                  "imdb_id": "tt30319516",
+                  "tvdb_id": null,
+                  "language": "en",
+                  "mediatype": "movie",
+                  "release_year": 2024,
+                  "spoken_language": "en"
+                }
+              ],
+              "shows": []
+            }
+
+
+
+
+# Group Sync
+
+## Last Activities [/sync/last_activities{?apikey}]
+
+> ⚠️ **Notice: Sync endpoints are currently in BETA.**
+
+Retrieve the latest user activity timestamps across multiple sync endpoints.
+Clients should call this first to check which categories have changed since the last sync.
+
++ Parameters
+    + apikey: `abc123` (string, required) — Your API key.
+
+### Retrieve Last Activities [GET]
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "watchlisted_at": "2025-10-22T06:48:10Z",
+                "watched_at": "2025-10-22T07:53:32Z",
+                "rated_at": "2025-10-22T07:53:44Z",
+                "collected_at": "2025-10-22T07:56:39Z"
+            }
+
+
+## Watched History [/sync/watched{?apikey,page,limit,since}]
+
+> ⚠️ **Notice: Sync endpoints are currently in BETA.**
+
+Get, add, or update watched history for movies and TV shows.
+This endpoint updates the user's `watched_at` activity timestamp.
+
+> **Supported IDs**: Movies support `imdb`, `tmdb`, `trakt`, and `kitsu` (for anime). Shows support `imdb`, `tmdb`, `trakt`, and `tvdb`.
+> **Note**: The `kitsu` ID is only returned when it exists in the database (primarily for anime titles). This ID is only available in sync and scrobble endpoints.
+
++ Parameters
+    + apikey: `abc123` (string, required) — Your API key.
+    + page: 1 (number, optional) — Page number for pagination (default: 1).
+    + limit: 1000 (number, optional) — Max results per page (default: 1000, max: 5000).
+    + since: `2025-10-01T00:00:00Z` (string, optional) — Return items updated after this timestamp.
+
+### Retrieve Watched History [GET]
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "movies": [
+                    {
+                        "last_watched_at": "2025-10-21T12:00:00Z",
+                        "movie": {
+                            "title": "Batman Begins",
+                            "year": 2005,
+                            "ids": {
+                                "trakt": 272,
+                                "imdb": "tt0372784",
+                                "tmdb": 272,
+                                "kitsu": 12345,
+                                "mdblist": "a388"
+                            }
+                        }
+                    }
+                ],
+                "seasons": [
+                    {
+                        "last_watched_at": "2025-10-15T20:00:00Z",
+                        "season": {
+                            "number": 1,
+                            "name": "Season 1",
+                            "ids": {
+                                "tmdb": 3572
+                            },
+                            "show": {
+                                "title": "Breaking Bad",
+                                "year": 2008,
+                                "ids": {
+                                    "tmdb": 1396,
+                                    "trakt": 1,
+                                    "imdb": "tt0903747",
+                                    "mdblist": "8plj"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "episodes": [
+                    {
+                        "last_watched_at": "2025-10-15T20:00:00Z",
+                        "episode": {
+                            "season": 1,
+                            "number": 1,
+                            "name": "Pilot",
+                            "ids": {
+                                "tmdb": 62085
+                            },
+                            "show": {
+                                "title": "Breaking Bad",
+                                "year": 2008,
+                                "ids": {
+                                    "tmdb": 1396,
+                                    "trakt": 1,
+                                    "imdb": "tt0903747",
+                                    "mdblist": "8plj"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "pagination": {
+                    "page": 1,
+                    "limit": 1000,
+                    "total_movies": 150,
+                    "total_seasons": 5,
+                    "total_episodes": 62,
+                    "has_more": true
+                }
+            }
+
+### Add or Update Watched History [POST]
+
+**Cascading Behavior:**
+- **Episode provided**: Marks only that specific episode
+- **Season provided (no episodes)**: Marks entire season + all episodes
+- **Show ID only (no seasons)**: Marks entire show + all seasons + all episodes
+- **Timestamps**: If `watched_at` is not provided, defaults to current time
+
++ Request (application/json)
+    + Body
+
+            {
+                "movies": [
+                    {
+                        "title": "Batman Begins",
+                        "year": 2005,
+                        "ids": {
+                            "imdb": "tt0372784",
+                            "tmdb": 272,
+                            "trakt": 272,
+                            "kitsu": 12345,
+                            "mdblist": "a388"
+                        },
+                        "watched_at": "2025-10-21T12:00:00Z"
+                    }
+                ],
+                "shows": [
+                    {
+                        "title": "Breaking Bad",
+                        "year": 2008,
+                        "ids": {
+                            "imdb": "tt0903747",
+                            "tmdb": 1396,
+                            "mdblist": "8plj"
+                        },
+                        "seasons": [
+                            {
+                                "number": 1,
+                                "watched_at": "2025-10-15T20:00:00Z"
+                            },
+                            {
+                                "number": 2,
+                                "episodes": [
+                                    {
+                                        "number": 1,
+                                        "watched_at": "2025-10-20T09:30:00Z"
+                                    },
+                                    {
+                                        "number": 2,
+                                        "watched_at": "2025-10-20T21:00:00Z"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "updated": {
+                    "movies": 1,
+                    "seasons": 1,
+                    "episodes": 2
+                }
+            }
+
+
+## Remove Watched History [/sync/watched/remove{?apikey}]
+
+> ⚠️ **Notice: Sync endpoints are currently in BETA.**
+
+Mark items as unwatched.
+The records remain in the database but their `watched_at` fields are set to `null`.
+
++ Parameters
+    + apikey: `abc123` (string, required) — Your API key.
+
+### Remove Watched History [POST]
+
++ Request (application/json)
+    + Body
+
+            {
+                "movies": [
+                    {
+                        "ids": {
+                            "imdb": "tt0372784",
+                            "mdblist": "a388"
+                        }
+                    }
+                ],
+                "shows": [
+                    {
+                        "ids": {
+                            "imdb": "tt0903747",
+                            "mdblist": "8plj"
+                        },
+                        "seasons": [
+                            {
+                                "number": 1
+                            },
+                            {
+                                "number": 2,
+                                "episodes": [
+                                    {
+                                        "number": 1
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "removed": {
+                    "movies": 1,
+                    "seasons": 1,
+                    "episodes": 1
+                }
+            }
+
+
+## Ratings Sync [/sync/ratings{?apikey,page,limit,since}]
+
+> ⚠️ **Notice: Sync endpoints are currently in BETA.**
+
+Get, add, or update user ratings for movies and TV shows.
+This endpoint updates the user's `rated_at` activity timestamp.
+
+> **Supported IDs**: Movies support `imdb`, `tmdb`, `trakt`, and `kitsu` (for anime). Shows support `imdb`, `tmdb`, `trakt`, and `tvdb`.
+> **Note**: The `kitsu` ID is only returned when it exists in the database (primarily for anime titles). This ID is only available in sync and scrobble endpoints.
+
++ Parameters
+    + apikey: `abc123` (string, required) — Your API key.
+    + page: 1 (number, optional) — Page number for pagination (default: 1).
+    + limit: 1000 (number, optional) — Max results per page (default: 1000, max: 5000).
+    + since: `2025-10-01T00:00:00Z` (string, optional) — Return items updated after this timestamp.
+
+### Retrieve Ratings [GET]
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "movies": [
+                    {
+                        "rated_at": "2025-10-21T14:00:00Z",
+                        "rating": 8,
+                        "movie": {
+                            "title": "The Avengers",
+                            "year": 2012,
+                            "ids": {
+                                "trakt": 24428,
+                                "imdb": "tt0848228",
+                                "tmdb": 24428,
+                                "kitsu": 67890
+                            }
+                        }
+                    }
+                ],
+                "seasons": [
+                    {
+                        "rated_at": "2025-10-15T20:00:00Z",
+                        "rating": 8,
+                        "season": {
+                            "number": 1,
+                            "name": "Season 1",
+                            "ids": {
+                                "tmdb": 3572
+                            },
+                            "show": {
+                                "title": "Breaking Bad",
+                                "year": 2008,
+                                "ids": {
+                                    "tmdb": 1396,
+                                    "trakt": 1,
+                                    "imdb": "tt0903747"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "episodes": [
+                    {
+                        "rated_at": "2025-10-15T21:00:00Z",
+                        "rating": 10,
+                        "episode": {
+                            "season": 1,
+                            "number": 1,
+                            "name": "Pilot",
+                            "ids": {
+                                "tmdb": 62085
+                            },
+                            "show": {
+                                "title": "Breaking Bad",
+                                "year": 2008,
+                                "ids": {
+                                    "tmdb": 1396,
+                                    "trakt": 1,
+                                    "imdb": "tt0903747"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "pagination": {
+                    "page": 1,
+                    "limit": 1000,
+                    "total_movies": 150,
+                    "total_seasons": 5,
+                    "total_episodes": 62,
+                    "has_more": false
+                }
+            }
+
+### Add or Update Ratings [POST]
+
++ Request (application/json)
+    + Body
+
+            {
+                "movies": [
+                    {
+                        "ids": {
+                            "tmdb": 24428,
+                            "imdb": "tt0848228",
+                            "trakt": 24428,
+                            "kitsu": 67890
+                        },
+                        "rating": 8,
+                        "rated_at": "2025-10-21T14:00:00Z"
+                    }
+                ],
+                "shows": [
+                    {
+                        "ids": {
+                            "imdb": "tt0903747"
+                        },
+                        "rating": 9,
+                        "rated_at": "2025-10-20T15:00:00Z",
+                        "seasons": [
+                            {
+                                "number": 1,
+                                "rating": 8,
+                                "rated_at": "2025-10-15T20:00:00Z",
+                                "episodes": [
+                                    {
+                                        "number": 1,
+                                        "rating": 10,
+                                        "rated_at": "2025-10-15T21:00:00Z"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "updated": {
+                    "movies": 1,
+                    "seasons": 1,
+                    "episodes": 1
+                }
+            }
+
+
+## Remove Ratings [/sync/ratings/remove{?apikey}]
+
+> ⚠️ **Notice: Sync endpoints are currently in BETA.**
+
+Remove user ratings for movies and TV shows.
+The records remain but rating fields are cleared and `rated_at` is set to `null`.
+
++ Parameters
+    + apikey: `abc123` (string, required) — Your API key.
+
+### Remove Ratings [POST]
+
++ Request (application/json)
+    + Body
+
+            {
+                "movies": [
+                    {
+                        "ids": {
+                            "tmdb": 24428
+                        }
+                    }
+                ],
+                "shows": [
+                    {
+                        "ids": {
+                            "imdb": "tt0903747"
+                        },
+                        "seasons": [
+                            {
+                                "number": 1,
+                                "episodes": [
+                                    {
+                                        "number": 1
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "removed": {
+                    "movies": 1,
+                    "seasons": 0,
+                    "episodes": 1
+                }
+            }
+
+
+## Collection Sync [/sync/collection{?apikey,page,limit,since}]
+
+> ⚠️ **Notice: Sync endpoints are currently in BETA.**
+
+Get, add, or update items in the user's collection.
+This endpoint updates the user's `collected_at` activity timestamp.
+
+> **Supported IDs**: Movies support `imdb`, `tmdb`, `trakt`, and `kitsu` (for anime). Shows support `imdb`, `tmdb`, `trakt`, and `tvdb`.
+> **Note**: The `kitsu` ID is only returned when it exists in the database (primarily for anime titles). This ID is only available in sync and scrobble endpoints.
+
++ Parameters
+    + apikey: `abc123` (string, required) — Your API key.
+    + page: 1 (number, optional) — Page number for pagination (default: 1).
+    + limit: 1000 (number, optional) — Max results per page (default: 1000, max: 5000).
+    + since: `2025-10-01T00:00:00Z` (string, optional) — Return items updated after this timestamp.
+
+### Retrieve Collection [GET]
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "movies": [
+                    {
+                        "collected_at": "2025-10-21T15:00:00Z",
+                        "movie": {
+                            "title": "The Dark Knight",
+                            "year": 2008,
+                            "ids": {
+                                "imdb": "tt0468569",
+                                "tmdb": 155,
+                                "trakt": 16,
+                                "kitsu": 11111
+                            }
+                        }
+                    }
+                ],
+                "shows": [
+                    {
+                        "collected_at": "2025-10-20T15:00:00Z",
+                        "show": {
+                            "title": "Breaking Bad",
+                            "year": 2008,
+                            "ids": {
+                                "imdb": "tt0903747",
+                                "tmdb": 1396
+                            }
+                        }
+                    }
+                ],
+                "pagination": {
+                    "page": 1,
+                    "limit": 1000,
+                    "total_movies": 150,
+                    "total_shows": 0,
+                    "has_more": false
+                }
+            }
+
+### Add or Update Collection [POST]
+
+**Cascading Behavior:**
+- **Episode provided**: Marks only that specific episode
+- **Season provided (no episodes)**: Marks entire season + all episodes
+- **Show ID only (no seasons)**: Marks entire show + all seasons + all episodes
+- **Timestamps**: If `collected_at` is not provided, defaults to current time
+
++ Request (application/json)
+    + Body
+
+            {
+                "movies": [
+                    {
+                        "ids": {
+                            "imdb": "tt0468569",
+                            "tmdb": 155,
+                            "trakt": 16,
+                            "kitsu": 11111
+                        },
+                        "collected_at": "2025-10-21T15:00:00Z"
+                    }
+                ],
+                "shows": [
+                    {
+                        "ids": {
+                            "imdb": "tt0903747"
+                        },
+                        "collected_at": "2025-10-20T15:00:00Z"
+                    }
+                ]
+            }
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "updated": {
+                    "movies": 1,
+                    "shows": 1
+                }
+            }
+
+
+## Remove Collection [/sync/collection/remove{?apikey}]
+
+> ⚠️ **Notice: Sync endpoints are currently in BETA.**
+
+Remove items from the user's collection.
+The records remain but collection fields are cleared and `collected_at` is set to `null`.
+
++ Parameters
+    + apikey: `abc123` (string, required) — Your API key.
+
+### Remove Collection [POST]
+
++ Request (application/json)
+    + Body
+
+            {
+                "movies": [
+                    {
+                        "ids": {
+                            "imdb": "tt0468569"
+                        }
+                    }
+                ],
+                "shows": [
+                    {
+                        "ids": {
+                            "imdb": "tt0903747"
+                        }
+                    }
+                ]
+            }
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "removed": {
+                    "movies": 1,
+                    "shows": 1
+                }
+            }
+
+
+
+
+
+# Group Scrobble
+
+> ⚠️ **Notice: Scrobble endpoints are currently in BETA.**
+
+Scrobble endpoints allow you to track real-time playback progress of movies and TV episodes. These endpoints are designed for media players and applications that want to track what users are currently watching and resume playback across multiple devices.
+
+## Quick Example
+
+**Starting a movie scrobble:**
+```json
+POST /scrobble/start?apikey=YOUR_API_KEY
+{
+  "movie": {"ids": {"imdb": "tt0111161", "mdblist": "a0"}},
+  "progress": 15.5
+}
+```
+
+**Starting an episode scrobble:**
+```json
+POST /scrobble/start?apikey=YOUR_API_KEY
+{
+  "show": {
+    "ids": {"imdb": "tt0108778", "mdblist": "8x1d"},
+    "season": {
+      "number": 1,
+      "episode": {
+        "number": 3
+      }
+    }
+  },
+  "progress": 42.75
+}
+```
+
+## How Scrobbling Works
+
+1. **Start**: Call `/scrobble/start` when playback begins
+2. **Pause**: Call `/scrobble/pause` when user pauses (saves progress for resume)
+3. **Stop**: Call `/scrobble/stop` when playback ends
+   - If progress ≥ 80%, the item is automatically marked as watched
+   - If progress < 80%, it's saved as a paused session for later resume
+
+## Key Features
+
+- **Single active session per item**: Starting a new session replaces any existing one for that movie/episode
+- **Cross-device resume**: Paused sessions can be retrieved via `/sync/playback` to resume on any device
+- **Auto-watched**: Items are automatically marked as watched when stopped at 80% or higher progress
+- **Auto-expiration**: Active sessions automatically expire after the remaining runtime + 10 minute buffer
+- **Seamless sync integration**: Watched items automatically appear in `/sync/watched` responses
+
+## Scrobble Start [/scrobble/start{?apikey}]
+
+Start or resume playback for a movie or episode. This creates a new scrobble session and replaces any existing session for the same item.
+
+> **Supported IDs**: Movies support `imdb`, `tmdb`, `trakt`, and `kitsu` (for anime). Shows support `imdb`, `tmdb`, `trakt`, and `tvdb`.
+> **Note**: The `kitsu` ID is only returned when it exists in the database (primarily for anime titles). This ID is only available in sync and scrobble endpoints.
+
+### Start Scrobble [POST]
+
+Start tracking playback progress. Call this when:
+- Video playback begins
+- User resumes from pause
+- Playback is un-paused
+
+The session will automatically expire after the remaining runtime has elapsed (based on progress).
+
++ Parameters
+    + apikey: `api_key_here` (string, required) - Your API key
+
++ Request Movie Scrobble (application/json)
+
+        {
+            "movie": {
+                "ids": {
+                    "imdb": "tt0111161",
+                    "tmdb": 278,
+                    "trakt": 389,
+                    "kitsu": 22222,
+                    "mdblist": "a0"
+                }
+            },
+            "progress": 15.5,
+            "app_version": "1.0.0",
+            "app_date": "2025-01-01"
+        }
+
++ Request Episode Scrobble (application/json)
+
+        {
+            "show": {
+                "ids": {
+                    "imdb": "tt0108778",
+                    "tmdb": 1668,
+                    "trakt": 1668,
+                    "mdblist": "8x1d"
+                },
+                "season": {
+                    "number": 1,
+                    "episode": {
+                        "number": 3
+                    }
+                }
+            },
+            "progress": 42.75,
+            "app_version": "1.0.0",
+            "app_date": "2025-01-01"
+        }
+
++ Response 201 (application/json)
+
+    Scrobble session created successfully. Returns movie details for movie scrobbles or show/episode details for episode scrobbles.
+
+    + Body
+
+            {
+                "id": 12345,
+                "action": "start",
+                "progress": 15.50,
+                "started_at": "2025-11-06T20:00:00Z",
+                "paused_at": null,
+                "expires_at": "2025-11-06T22:15:00Z",
+                "movie": {
+                    "title": "The Shawshank Redemption",
+                    "year": 1994,
+                    "ids": {
+                        "imdb": "tt0111161",
+                        "tmdb": 278,
+                        "trakt": 389,
+                        "kitsu": 22222,
+                        "mdblist": "a0"
+                    }
+                },
+                "episode": null,
+                "show": null
+            }
+
++ Response 400 (application/json)
+
+        {
+            "error": {
+                "progress": ["This field is required."],
+                "non_field_errors": ["Either 'movie' or 'show' must be provided"]
+            }
+        }
+
++ Response 404 (application/json)
+
+        {
+            "error": "Movie not found in database"
+        }
+
+## Scrobble Pause [/scrobble/pause{?apikey}]
+
+Pause playback and save the current progress. The saved progress can be retrieved via `/sync/playback` to resume on any device.
+
+### Pause Scrobble [POST]
+
+Save playback progress when the user pauses. The scrobble session is saved with the `paused_at` timestamp and can be resumed by calling `/scrobble/start` again with the same item.
+
++ Parameters
+    + apikey: `api_key_here` (string, required) - Your API key
+
++ Request Movie Pause (application/json)
+
+        {
+            "movie": {
+                "ids": {
+                    "imdb": "tt0111161"
+                }
+            },
+            "progress": 45.25,
+            "app_version": "1.0.0"
+        }
+
++ Request Episode Pause (application/json)
+
+        {
+            "show": {
+                "ids": {
+                    "imdb": "tt0108778"
+                },
+                "season": {
+                    "number": 1,
+                    "episode": {
+                        "number": 3
+                    }
+                }
+            },
+            "progress": 68.50,
+            "app_version": "1.0.0"
+        }
+
++ Response 200 (application/json)
+
+        {
+            "id": 12345,
+            "action": "pause",
+            "progress": 45.25,
+            "started_at": "2025-11-06T20:00:00Z",
+            "paused_at": "2025-11-06T20:45:15Z",
+            "expires_at": "2025-11-06T22:15:00Z",
+            "movie": {
+                "title": "The Shawshank Redemption",
+                "year": 1994,
+                "ids": {
+                    "imdbid": "tt0111161",
+                    "tmdbid": 278,
+                    "traktid": 389
+                }
+            },
+            "episode": null
+        }
+
++ Response 404 (application/json)
+
+        {
+            "error": "Movie not found in database"
+        }
+
+## Scrobble Stop [/scrobble/stop{?apikey}]
+
+Stop playback and finalize the scrobble. The behavior depends on the progress percentage:
+
+- **Progress ≥ 80%**: Item is marked as watched and synced with your watch history
+- **Progress < 80%**: Session is saved as paused (same as `/scrobble/pause`)
+
+### Stop Scrobble [POST]
+
+Stop tracking playback. Call this when:
+- Video playback completes
+- User stops the video
+- Playback is interrupted
+
+If the item is marked as watched (≥80%), it will appear in your `/sync/watched` results and the scrobble session is deleted.
+
++ Parameters
+    + apikey: `api_key_here` (string, required) - Your API key
+
++ Request (application/json)
+
+        {
+            "movie": {
+                "ids": {
+                    "imdb": "tt0111161"
+                }
+            },
+            "progress": 95.5
+        }
+
++ Response 200 (application/json)
+
+    Scrobble stopped successfully. If progress ≥ 80%, returns watched confirmation. If progress < 80%, returns paused session details.
+
+    + Body
+
+            {
+                "action": "scrobble",
+                "progress": 95.50,
+                "watched_at": "2025-11-06T22:00:00Z"
+            }
+
++ Response 404 (application/json)
+
+        {
+            "error": "Movie not found in database"
+        }
+
+## Sync Playback [/sync/playback{?apikey}]
+
+Retrieve all paused scrobble sessions for the authenticated user. Use this endpoint to show a "Continue Watching" section or to resume playback on a different device.
+
+### Get Playback Progress [GET]
+
+Returns all active paused sessions (items with saved progress that haven't been marked as watched yet). Expired sessions are automatically cleaned up.
+
++ Parameters
+    + apikey: `api_key_here` (string, required) - Your API key
+
++ Response 200 (application/json)
+
+        [
+            {
+                "id": 12345,
+                "progress": 45.25,
+                "paused_at": "2025-11-06T20:45:15Z",
+                "type": "movie",
+                "movie": {
+                    "title": "The Shawshank Redemption",
+                    "year": 1994,
+                    "ids": {
+                        "imdbid": "tt0111161",
+                        "tmdbid": 278,
+                        "traktid": 389
+                    }
+                },
+                "episode": null,
+                "show": null
+            },
+            {
+                "id": 12346,
+                "progress": 68.50,
+                "paused_at": "2025-11-06T19:30:00Z",
+                "type": "episode",
+                "movie": null,
+                "episode": {
+                    "season": 1,
+                    "number": 3,
+                    "title": "The One with the Thumb",
+                    "ids": {
+                        "imdbid": "tt0583459",
+                        "tmdbid": 63174,
+                        "traktid": 73640,
+                        "tvdbid": 349232
+                    }
+                },
+                "show": {
+                    "title": "Friends",
+                    "year": 1994,
+                    "ids": {
+                        "imdbid": "tt0108778",
+                        "tmdbid": 1668,
+                        "traktid": 1668,
+                        "tvdbid": 79168
+                    }
+                }
+            }
+        ]
+
++ Response 401 (application/json)
+
+        {
+            "error": "Invalid API key"
+        }
+
+
+
+
+# Group Watchlist
+
+## List Watchlist items [/watchlist/items{?apikey,limit,offset,append_to_response,filter_genre,sort,order,unified,filter_score_min,filter_score_max}]
+
+#### 📄 Pagination
+
+Fetches watchlist items. Use `append_to_response=genre,poster` to include genres and posters in the response. To filter results by a specific genre, use `filter_genre=fantasy` to retrieve only fantasy items.
+Returns a `pagination` block alongside the data, mirroring the sync collection response format.
+
+#### ⭐ Supporter Feature: Rating Filters
+
+Supporters can filter watchlist items by rating thresholds. See the complete list of available rating filters in the `/lists/{listid}/items` endpoint documentation.
+
+By default, items are sorted by date added.
+
++ Parameters
+    + limit: 100 (integer, optional)
+    + offset: 10 (integer, optional)
+    + append_to_response: `genre,poster` (string, optional) - Additional information to append.
+    + filter_genre: `fantasy` (string, optional) - Filter by genre, works if genre is included.
+    + filter_score_min: 70 (integer, optional) - ⭐ Supporter only. Filter by minimum MDBList score (0-100).
+    + filter_score_max: 90 (integer, optional) - ⭐ Supporter only. Filter by maximum MDBList score (0-100).
+    + sort: `score` (string, optional)
+        + Members
+            + `score`
+            + `score_average`
+            + `released`
+            + `releasedigital`
+            + `imdbrating`
+            + `imdbvotes`
+            + `last_air_date`
+            + `imdbpopular`
+            + `tmdbpopular`
+            + `rogerebert`
+            + `rtomatoes`
+            + `rtaudience`
+            + `metacritic`
+            + `myanimelist`
+            + `letterrating`
+            + `lettervotes`
+            + `budget`
+            + `revenue`
+            + `runtime`
+            + `title`
+            + `added`
+            + `random`
+    + order: `asc` (string, optional)
+        + Members
+            + `asc`
+            + `desc`
+    + unified: `true` (boolean, optional) - Returns unified list of Movies and Shows
+    + apikey: abc123 (string, required) - Your API key.
+
+### Get Watchlist Items [GET]
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "movies": [
+                    {
+                        "id": 661539,
+                        "adult": 0,
+                        "title": "A Complete Unknown",
+                        "imdb_id": "tt11563598",
+                        "tvdb_id": null,
+                        "language": "en",
+                        "mediatype": "movie",
+                        "release_year": 2024,
+                        "watchlist_at": "2025-02-02 17:28:22.000000",
+                        "spoken_language": "en",
+                        "rank": 0
+                    },
+                    {
+                        "id": 1013850,
+                        "adult": 0,
+                        "title": "A Real Pain",
+                        "imdb_id": "tt21823606",
+                        "tvdb_id": null,
+                        "language": "en",
+                        "mediatype": "movie",
+                        "release_year": 2024,
+                        "watchlist_at": "2025-02-21 08:43:31.000000",
+                        "spoken_language": "en",
+                        "rank": 3
+                    },
+                    {
+                        "id": 1064213,
+                        "adult": 0,
+                        "title": "Anora",
+                        "imdb_id": "tt28607951",
+                        "tvdb_id": null,
+                        "language": "en",
+                        "mediatype": "movie",
+                        "release_year": 2024,
+                        "watchlist_at": "2025-02-21 12:42:39.000000",
+                        "spoken_language": "en",
+                        "rank": 4
+                    },
+                    {
+                        "id": 728949,
+                        "adult": 0,
+                        "title": "Nightbitch",
+                        "imdb_id": "tt12810074",
+                        "tvdb_id": null,
+                        "language": "en",
+                        "mediatype": "movie",
+                        "release_year": 2024,
+                        "watchlist_at": "2025-02-21 12:42:47.000000",
+                        "spoken_language": "en",
+                        "rank": 6
+                    },
+                    {
+                        "id": 933260,
+                        "adult": 0,
+                        "title": "The Substance",
+                        "imdb_id": "tt17526714",
+                        "tvdb_id": null,
+                        "language": "en",
+                        "mediatype": "movie",
+                        "release_year": 2024,
+                        "watchlist_at": "2025-02-21 12:52:12.000000",
+                        "spoken_language": "en",
+                        "rank": 11
+                    },
+                    {
+                        "id": 1124620,
+                        "adult": 0,
+                        "title": "The Monkey",
+                        "imdb_id": "tt27714946",
+                        "tvdb_id": null,
+                        "language": "en",
+                        "mediatype": "movie",
+                        "release_year": 2025,
+                        "watchlist_at": "2025-02-21 12:52:12.000000",
+                        "spoken_language": "en",
+                        "rank": 12
+                    },
+                    {
+                        "id": 1084199,
+                        "adult": 0,
+                        "title": "Companion",
+                        "imdb_id": "tt26584495",
+                        "tvdb_id": null,
+                        "language": "en",
+                        "mediatype": "movie",
+                        "release_year": 2025,
+                        "watchlist_at": "2025-02-21 12:59:56.824522",
+                        "spoken_language": "en",
+                        "rank": 13
+                    }
+                ],
+                "shows": [
+                    {
+                        "id": 253905,
+                        "adult": 0,
+                        "title": "When the Phone Rings",
+                        "imdb_id": "tt33503491",
+                        "tvdb_id": 446494,
+                        "language": "ko",
+                        "mediatype": "show",
+                        "release_year": 2024,
+                        "watchlist_at": "2025-02-09 20:45:34.000000",
+                        "spoken_language": "ko",
+                        "rank": 1
+                    },
+                    {
+                        "id": 94951,
+                        "adult": 0,
+                        "title": "Mythic Quest",
+                        "imdb_id": "tt8879940",
+                        "tvdb_id": 362829,
+                        "language": "en",
+                        "mediatype": "show",
+                        "release_year": 2020,
+                        "watchlist_at": "2025-02-09 20:55:26.000000",
+                        "spoken_language": "en",
+                        "rank": 2
+                    },
+                    {
+                        "id": 194764,
+                        "adult": 0,
+                        "title": "The Penguin",
+                        "imdb_id": "tt15435876",
+                        "tvdb_id": 417648,
+                        "language": "en",
+                        "mediatype": "show",
+                        "release_year": 2024,
+                        "watchlist_at": "2025-02-21 12:42:41.000000",
+                        "spoken_language": "en",
+                        "rank": 5
+                    },
+                    {
+                        "id": 215866,
+                        "adult": 0,
+                        "title": "American Primeval",
+                        "imdb_id": "tt24069848",
+                        "tvdb_id": 428066,
+                        "language": "en",
+                        "mediatype": "show",
+                        "release_year": 2025,
+                        "watchlist_at": "2025-02-21 12:43:01.000000",
+                        "spoken_language": "en",
+                        "rank": 7
+                    },
+                    {
+                        "id": 95396,
+                        "adult": 0,
+                        "title": "Severance",
+                        "imdb_id": "tt11280740",
+                        "tvdb_id": 371980,
+                        "language": "en",
+                        "mediatype": "show",
+                        "release_year": 2022,
+                        "watchlist_at": "2025-02-21 12:52:12.000000",
+                        "spoken_language": "en",
+                        "rank": 8
+                    },
+                    {
+                        "id": 216082,
+                        "adult": 0,
+                        "title": "Zero Day",
+                        "imdb_id": "tt23872886",
+                        "tvdb_id": 431842,
+                        "language": "en",
+                        "mediatype": "show",
+                        "release_year": 2025,
+                        "watchlist_at": "2025-02-21 12:52:12.000000",
+                        "spoken_language": "en",
+                        "rank": 9
+                    },
+                    {
+                        "id": 250923,
+                        "adult": 0,
+                        "title": "Nobody Wants This",
+                        "imdb_id": "tt26933824",
+                        "tvdb_id": 450093,
+                        "language": "en",
+                        "mediatype": "show",
+                        "release_year": 2024,
+                        "watchlist_at": "2025-02-21 12:52:12.000000",
+                        "spoken_language": "en",
+                        "rank": 10
+                    },
+                    {
+                        "id": 222766,
+                        "adult": 0,
+                        "title": "The Day of the Jackal",
+                        "imdb_id": "tt24053860",
+                        "tvdb_id": 426866,
+                        "language": "en",
+                        "mediatype": "show",
+                        "release_year": 2024,
+                        "watchlist_at": "2025-02-21 13:00:05.108530",
+                        "spoken_language": "en",
+                        "rank": 14
+                    }
+                ],
+                "pagination": {
+                    "page": 1,
+                    "limit": 10,
+                    "total_movies": 1134,
+                    "total_shows": 26,
+                    "has_more": true
+                }
+            }
+
+## Modify Watchlist [/watchlist/items/{action}{?apikey}]
+
+You can modify watchlist by adding or removing items
+
++ Parameters
+    + action: add (string, required)
+        + Members
+            + `add`
+            + `remove`
+    + apikey: abc123 (string, required) - Your API key.
+
+### Modify Watchlist [POST]
+
++ Request (application/json)
+
+            {
+             "movies": [
+                {
+                 "tmdb": 630,
+                 "imdb": "tt0032138"
+                },
+                {
+                 "tmdb": 238
+                }
+             ],
+             "shows": [
+                {
+                 "imdb": "tt0417299"
+                },
+                {
+                 "tmdb": 1396
+                }
+               ]
+            }
+
++ Response 200 (application/json)
+    + Body
+
+            {
+              "added": {
+                "movies": 2,
+                "shows": 2
+              },
+              "existing": {
+                "movies": 0,
+                "shows": 0
+              },
+              "not_found": {
+                "movies": 0,
+                "shows": 0
+              }
+            }

@@ -1,14 +1,8 @@
 {
   "name": "@repo/core-util-database",
   "version": "0.0.0",
-  "type": "module",
   "private": true,
-  "scripts": {
-    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
-    "test": "jest",
-    "lint": "eslint .",
-    "lint:fix": "pnpm lint --fix"
-  },
+  "type": "module",
   "exports": {
     "./connection": "./lib/connection.ts",
     "./entities/filesystem/filesystem-entry.entity": "./lib/entities/filesystem/filesystem-entry.entity.ts",
@@ -21,6 +15,13 @@
     "./entities/media-items/movie.entity": "./lib/entities/media-items/movie.entity.ts",
     "./entities/streams/stream.entity": "./lib/entities/streams/stream.entity.ts"
   },
+  "scripts": {
+    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
+    "lint": "eslint .",
+    "lint:fix": "pnpm lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
   "dependencies": {
     "class-validator": "catalog:",
     "reflect-metadata": "catalog:",
@@ -32,10 +33,9 @@
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
-    "@types/jest": "catalog:",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
-    "jest": "catalog:"
+    "vitest": "catalog:"
   }
 }

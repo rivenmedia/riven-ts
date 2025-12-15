@@ -26,9 +26,8 @@ export const typescriptCore: tseslint.ConfigArray = [
       "import-x/resolver-next": [
         createTypeScriptImportResolver({
           alwaysTryTypes: true,
-          roots: [import.meta.dirname],
         }),
       ],
     },
   },
-];
+] as const;

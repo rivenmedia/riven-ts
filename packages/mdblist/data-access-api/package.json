@@ -4,11 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
-    "test": "jest",
+    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json && tsc --noEmit --project tsconfig.codegen.json",
+    "generate-schemas": "kubb generate",
     "lint": "eslint .",
     "lint:fix": "pnpm lint --fix",
-    "generate-schemas": "kubb generate"
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@kubb/cli": "catalog:",
@@ -18,14 +22,10 @@
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
-    "@types/jest": "catalog:",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "apib2openapi": "^0.1.5",
     "eslint": "catalog:",
-    "jest": "catalog:"
-  },
-  "dependencies": {
-    "zod": "catalog:"
+    "vitest": "catalog:"
   }
 }

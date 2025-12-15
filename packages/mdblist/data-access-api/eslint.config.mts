@@ -9,6 +9,7 @@ export default [
     languageOptions: {
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
+        allowDefaultProject: ["kubb.config.ts", "types/*.d.ts"],
       },
     },
   },

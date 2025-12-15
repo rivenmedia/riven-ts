@@ -5,10 +5,15 @@
   "type": "module",
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
-    "test": "jest",
+    "generate-schemas": "kubb generate",
     "lint": "eslint .",
     "lint:fix": "pnpm lint --fix",
-    "generate-schemas": "kubb generate"
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@apollo/datasource-rest": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@kubb/cli": "catalog:",
@@ -18,14 +23,9 @@
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
-    "@types/jest": "catalog:",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
-    "jest": "catalog:"
-  },
-  "dependencies": {
-    "@apollo/datasource-rest": "catalog:",
-    "zod": "catalog:"
+    "vitest": "catalog:"
   }
 }

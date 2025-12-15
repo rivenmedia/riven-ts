@@ -1,16 +1,15 @@
+import { readFile } from "node:fs/promises";
 import { defineConfig } from "@kubb/core";
 import { pluginZod } from "@kubb/plugin-zod";
 import { pluginOas } from "@kubb/plugin-oas";
 import apib2openapi from "apib2openapi";
 
 export default defineConfig(async () => {
-  const response = await fetch(
-    "https://raw.githubusercontent.com/linaspurinis/api.mdblist.com/refs/heads/main/apiary.apib",
-  );
-  const apibSpec = await response.text();
+  const apibSpec = await readFile("./lib/schema.apib", "utf-8");
   const openapiSpec = await apib2openapi.convert(apibSpec, {});
 
   return {
+    name: "MDBList",
     root: ".",
     input: {
       data: openapiSpec,

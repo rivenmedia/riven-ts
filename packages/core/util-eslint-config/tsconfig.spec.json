@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.schemastore.org/tsconfig",
-  "extends": ["./tsconfig.json", "@repo/core-util-typescript-config/jest.json"],
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
     "rootDir": "."

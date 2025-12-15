@@ -4,9 +4,10 @@ import { pluginOas } from "@kubb/plugin-oas";
 
 export default defineConfig(() => {
   return {
+    name: "Listrr",
     root: ".",
     input: {
-      path: "https://listrr.pro/swagger/v1/swagger.json",
+      path: "./lib/openapi-schema.json",
     },
     output: {
       path: "./lib/__generated__",

@@ -11,14 +11,12 @@ catalog:
   "@kubb/core": 4.11.1
   "@kubb/plugin-oas": 4.11.1
   "@kubb/plugin-zod": 4.11.1
-  "@types/jest": 30.0.0
-  "@types/node": ^22
+  "@types/node": ^24.0.0
   "@types/react": ^19.2.7
   "@types/react-dom": ^19.2.3
   "@typescript-eslint/parser": ^8.49.0
   class-validator: ^0.14.3
   eslint: ^9.39.2
-  jest: ^30
   jiti: 2.6.1
   next: ^16.0.10
   pg: ^8.16.3
@@ -27,6 +25,7 @@ catalog:
   reflect-metadata: ^0.2.2
   typeorm: ^0.3.28
   typescript: ^5.9.3
+  vitest: ^4.0.15
   zod: 4.1.13
 
 configDependencies:

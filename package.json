@@ -2,22 +2,22 @@
   "name": "riven-ts",
   "version": "1.0.0",
   "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
   "main": "index.js",
   "scripts": {
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
     "postinstall": "husky || true"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.25.0",
   "devDependencies": {
-    "@repo/core-util-typescript-config": "workspace:^",
     "@turbo/gen": "^2.6.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
+    "sort-package-json": "^3.6.0",
     "turbo": "^2.6.3"
-  }
+  },
+  "packageManager": "pnpm@10.25.0"
 }

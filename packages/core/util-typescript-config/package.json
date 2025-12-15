@@ -2,21 +2,21 @@
   "name": "@repo/core-util-typescript-config",
   "version": "0.0.0",
   "private": true,
-  "scripts": {},
   "exports": {
-    "./base.json": "./lib/base.json",
-    "./jest.json": "./lib/jest.json"
+    "./base.json": "./lib/base.json"
+  },
+  "scripts": {},
+  "dependencies": {
+    "@tsconfig/node-ts": "^23.6.2",
+    "@tsconfig/node24": "^24.0.3",
+    "@tsconfig/recommended": "^1.0.13",
+    "@tsconfig/strictest": "^2.0.8"
   },
   "devDependencies": {
-    "@tsconfig/node-ts": "^23.6.2",
-    "@tsconfig/node22": "^22.0.5",
-    "@tsconfig/recommended": "^1.0.13",
-    "@tsconfig/strictest": "^2.0.8",
     "eslint": "catalog:",
-    "jest": "catalog:"
+    "vitest": "catalog:"
   },
   "peerDependencies": {
-    "@types/jest": "^30",
-    "@types/node": "^22"
+    "@types/node": "^24.0.0"
   }
 }

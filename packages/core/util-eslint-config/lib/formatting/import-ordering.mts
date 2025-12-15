@@ -2,7 +2,7 @@ import { jsFiles, tsFiles } from "../internal/file-types.mts";
 import { flatConfigs as importX } from "eslint-plugin-import-x";
 import type { ConfigArray } from "typescript-eslint";
 
-export const importOrdering: ConfigArray = [
+export const importOrdering = [
   importX.recommended,
   {
     files: [jsFiles, tsFiles],
@@ -28,4 +28,4 @@ export const importOrdering: ConfigArray = [
       "import-x/internal-regex": "^@repo/",
     },
   },
-];
+] as const satisfies ConfigArray;

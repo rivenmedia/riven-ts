@@ -3,9 +3,10 @@
   "extends": "@repo/core-util-typescript-config/base.json",
   "references": [
     { "path": "./tsconfig.lib.json" },
-    { "path": "./tsconfig.spec.json" }
+    { "path": "./tsconfig.spec.json" },
+    { "path": "./tsconfig.codegen.json" }
   ],
-  "files": ["eslint.config.mts"],
+  "files": ["eslint.config.mts", "kubb.config.ts", "types/apib2openapi.d.ts"],
   "include": [],
   "exclude": []
 }

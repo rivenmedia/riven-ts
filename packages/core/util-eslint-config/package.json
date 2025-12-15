@@ -3,16 +3,17 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    ".": "./lib/base.mts"
+  },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
     "lint": "eslint .",
     "lint:fix": "pnpm lint --fix"
   },
-  "exports": {
-    ".": "./lib/base.mts"
-  },
   "dependencies": {
     "@eslint/js": "^9.39.2",
+    "@repo/core-util-typescript-config": "workspace:^",
     "@typescript-eslint/parser": "catalog:",
     "eslint-config-prettier": "^10.1.8",
     "eslint-config-turbo": "^2.6.3",
@@ -24,13 +25,13 @@
     "typescript-eslint": "^8.49.0"
   },
   "devDependencies": {
-    "@repo/core-util-typescript-config": "workspace:^",
+    "@eslint/json": "^0.14.0",
     "@types/eslint": "^9.6.1",
     "@types/node": "catalog:",
     "eslint": "catalog:"
   },
   "peerDependencies": {
-    "eslint": "^9",
-    "@typescript-eslint/parser": "^8"
+    "@typescript-eslint/parser": "^8",
+    "eslint": "^9"
   }
 }

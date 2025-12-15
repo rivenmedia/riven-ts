@@ -1,0 +1,36 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
+  "globalPassThroughEnv": ["DATABASE_URL"],
+  "tasks": {
+    "transit": {
+      "dependsOn": ["^transit"],
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"],
+    },
+    "check-types": {
+      "dependsOn": ["codegen", "transit"],
+    },
+    "dev": {
+      "persistent": true,
+      "cache": false,
+      "dependsOn": ["codegen"],
+    },
+    "generate-schemas": {
+      "outputs": ["lib/__generated__/**"],
+      "inputs": ["openapi-schema.json", "*.apib"],
+    },
+    "codegen": {
+      "dependsOn": ["generate-schemas", "^generate-schemas"],
+    },
+    "test": {
+      "dependsOn": ["codegen"],
+    },
+    "test:watch": {
+      "persistent": true,
+      "dependsOn": ["codegen"],
+    },
+  },
+}
