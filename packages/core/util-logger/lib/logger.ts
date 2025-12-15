@@ -19,4 +19,8 @@ export const logger = createLogger({
       format: format.combine(format.colorize(), format.simple()),
     }),
   ],
+  exceptionHandlers: [
+    new transports.File({ filename: `${logDir}/exceptions.log` }),
+  ],
+  exitOnError: false,
 });
