@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@types/jest": "catalog:",
     "@types/node": "catalog:",

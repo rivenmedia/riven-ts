@@ -160,6 +160,9 @@ importers:
       '@repo/core-util-eslint-config':
         specifier: workspace:^
         version: link:../util-eslint-config
+      '@repo/core-util-logger':
+        specifier: workspace:^
+        version: link:../util-logger
       '@repo/core-util-typescript-config':
         specifier: workspace:^
         version: link:../util-typescript-config
@@ -305,6 +308,9 @@ importers:
       '@repo/core-util-eslint-config':
         specifier: workspace:^
         version: link:../../core/util-eslint-config
+      '@repo/core-util-logger':
+        specifier: workspace:^
+        version: link:../../core/util-logger
       '@repo/core-util-typescript-config':
         specifier: workspace:^
         version: link:../../core/util-typescript-config
@@ -329,6 +335,9 @@ importers:
       '@repo/core-util-eslint-config':
         specifier: workspace:^
         version: link:../../core/util-eslint-config
+      '@repo/core-util-logger':
+        specifier: workspace:^
+        version: link:../../core/util-logger
       '@repo/core-util-typescript-config':
         specifier: workspace:^
         version: link:../../core/util-typescript-config

@@ -11,11 +11,12 @@
   },
   "devDependencies": {
     "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
-    "@types/node": "catalog:",
     "@types/jest": "catalog:",
+    "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
-    "jest": "catalog:",
-    "eslint": "catalog:"
+    "eslint": "catalog:",
+    "jest": "catalog:"
   }
 }
