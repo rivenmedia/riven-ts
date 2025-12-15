@@ -34,3 +34,7 @@ configDependencies:
 injectWorkspacePackages: true
 
 linkWorkspacePackages: true
+
+publicHoistPattern:
+  - "*vitest*"
+  - vite-node
