@@ -20,11 +20,13 @@
     "@repo/core-util-typescript-config": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
     "msw": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {
+    "@vitest/coverage-v8": "catalog:",
     "msw": "catalog:",
     "vitest": "catalog:"
   },

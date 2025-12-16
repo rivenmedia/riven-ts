@@ -1,8 +1,15 @@
 import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
 
 export const baseVitestConfig = mergeConfig(
-  configDefaults,
+  { test: configDefaults },
   defineConfig({
-    test: {},
+    test: {
+      coverage: {
+        exclude: ["**/__generated__/**"],
+      },
+      typecheck: {
+        enabled: false,
+      },
+    },
   }),
 );

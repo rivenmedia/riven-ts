@@ -5,3 +5,4 @@ node_modules
 *.log
 .pnpm-store
 __generated__
+coverage

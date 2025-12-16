@@ -69,8 +69,10 @@ it("paginates through all pages of the list", async ({ server }) => {
         getShowsResponse({
           pages: totalPages,
           count: totalPages * itemsPerPage,
-          items: Array.from({ length: itemsPerPage }).map(() =>
-            createListrrContractsModelsAPIShowDto(),
+          items: Array.from({ length: itemsPerPage }).map((_, i) =>
+            createListrrContractsModelsAPIShowDto({
+              id: `show-${page.toString()}-${i.toString()}`,
+            }),
           ),
         }),
       );

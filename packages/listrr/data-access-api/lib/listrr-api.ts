@@ -119,9 +119,9 @@ export class ListrrAPI extends RESTDataSource {
             });
           }
         }
-      }
 
-      page++;
+        page++;
+      }
     }
 
     return [...idsMap.values()];
