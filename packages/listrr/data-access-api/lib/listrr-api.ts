@@ -19,12 +19,13 @@ export class ListrrAPI extends RESTDataSource {
   override baseURL = "https://listrr.pro/api/";
 
   async validate() {
-    const response = await this.get<GetApiListMyPageQueryResponse>("List/My");
-
     try {
-      getApiListMyPageQueryResponseSchema.parse(response);
+      const response = await this.get<GetApiListMyPageQueryResponse>(
+        "List/My/1",
+        {},
+      );
 
-      return true;
+      return getApiListMyPageQueryResponseSchema.safeParse(response).success;
     } catch {
       return false;
     }

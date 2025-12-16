@@ -269,11 +269,6 @@
           "200": {
             "description": "List retrieved",
             "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/listrr.Contracts.Models.ListrrList"
-                }
-              },
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/listrr.Contracts.Models.ListrrList"
@@ -315,11 +310,6 @@
           "200": {
             "description": "Lists retrieved",
             "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.ListrrList]"
-                }
-              },
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.ListrrList]"
@@ -381,11 +371,6 @@
           "200": {
             "description": "List of movies retrieved",
             "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.MovieDto]"
-                }
-              },
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.MovieDto]"
@@ -453,11 +438,6 @@
           "200": {
             "description": "List of shows retrieved",
             "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.ShowDto]"
-                }
-              },
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.ShowDto]"
