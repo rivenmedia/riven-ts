@@ -1,30 +1,45 @@
-import { RESTDataSource } from "@apollo/datasource-rest";
 import {
   listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIShowDtoSchema as getShowsResponseSchema,
   listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIMovieDtoSchema as getMoviesResponseSchema,
+  getApiListMyPageQueryResponseSchema,
+  type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIShowDtoSchema as GetShowsResponse,
+  type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIMovieDtoSchema as GetMoviesResponse,
+  type GetApiListMyPageQueryResponse,
 } from "./__generated__/index.ts";
+import { RESTDataSource } from "@apollo/datasource-rest";
 
 export class ListrrAPIError extends Error {}
 
-export class ListrrAPI extends RESTDataSource {
-  override baseURL = "https://listrr.pro/api";
+interface ExternalIds {
+  imdbId: string | undefined;
+  tmdbId: string | undefined;
+}
 
-  validate() {
-    return this.get("/List/My");
+export class ListrrAPI extends RESTDataSource {
+  override baseURL = "https://listrr.pro/api/";
+
+  async validate() {
+    const response = await this.get<GetApiListMyPageQueryResponse>("List/My");
+
+    try {
+      getApiListMyPageQueryResponseSchema.parse(response);
+
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
    * Fetch unique show IDs from Listrr for a given list of content
    * @param contentLists
    */
-  async getShows(
-    contentLists: string[],
-  ): Promise<[string | undefined, string | undefined][]> {
-    if (!contentLists.length) {
+  async getShows(contentLists: Set<string>): Promise<ExternalIds[]> {
+    if (!contentLists.size) {
       return [];
     }
 
-    const idsMap = new Map<string, [string | undefined, string | undefined]>();
+    const idsMap = new Map<string, ExternalIds>();
 
     for (const listId of contentLists) {
       if (listId.length !== 24) {
@@ -35,8 +50,8 @@ export class ListrrAPI extends RESTDataSource {
       let totalPages = 1;
 
       while (page <= totalPages) {
-        const response = await this.get(
-          `/List/Movies/${listId}/ReleaseDate/Descending/${page}`,
+        const response = await this.get<GetShowsResponse>(
+          `List/Shows/${listId}/ReleaseDate/Descending/${page.toString()}`,
           {},
         );
 
@@ -50,10 +65,10 @@ export class ListrrAPI extends RESTDataSource {
               continue;
             }
 
-            idsMap.set(item.id, [
-              item.imDbId ?? undefined,
-              item.tmDbId?.toString(),
-            ]);
+            idsMap.set(item.id, {
+              imdbId: item.imDbId ?? undefined,
+              tmdbId: item.tmDbId?.toString(),
+            });
           }
         }
 
@@ -68,14 +83,12 @@ export class ListrrAPI extends RESTDataSource {
    * Fetch unique movie IDs from Listrr for a given list of content
    * @param contentLists
    */
-  async getMovies(
-    contentLists: string[],
-  ): Promise<[string | undefined, string | undefined][]> {
-    if (!contentLists.length) {
+  async getMovies(contentLists: Set<string>): Promise<ExternalIds[]> {
+    if (!contentLists.size) {
       return [];
     }
 
-    const idsMap = new Map<string, [string | undefined, string | undefined]>();
+    const idsMap = new Map<string, ExternalIds>();
 
     for (const listId of contentLists) {
       if (listId.length !== 24) {
@@ -86,8 +99,8 @@ export class ListrrAPI extends RESTDataSource {
       let totalPages = 1;
 
       while (page <= totalPages) {
-        const response = await this.get(
-          `/List/Movies/${listId}/ReleaseDate/Descending/${page}`,
+        const response = await this.get<GetMoviesResponse>(
+          `List/Movies/${listId}/ReleaseDate/Descending/${page.toString()}`,
         );
 
         const parsed = getMoviesResponseSchema.parse(response);
@@ -100,10 +113,10 @@ export class ListrrAPI extends RESTDataSource {
               continue;
             }
 
-            idsMap.set(item.id, [
-              item.imDbId ?? undefined,
-              item.tmDbId?.toString(),
-            ]);
+            idsMap.set(item.id, {
+              imdbId: item.imDbId ?? undefined,
+              tmdbId: item.tmDbId?.toString(),
+            });
           }
         }
       }

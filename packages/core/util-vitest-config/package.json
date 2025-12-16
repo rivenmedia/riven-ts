@@ -1,8 +1,12 @@
 {
-  "name": "@repo/{{package-group}}-{{package-type}}-{{kebabCase package-name}}",
+  "name": "@repo/core-util-vitest-config",
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    "./base": "./lib/base.ts",
+    "./test-context": "./lib/test-context.ts"
+  },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
     "lint": "eslint .",
@@ -17,6 +21,16 @@
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
+    "msw": "catalog:",
     "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "msw": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependenciesMeta": {
+    "msw": {
+      "optional": true
+    }
   }
 }

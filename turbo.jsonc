@@ -4,33 +4,34 @@
   "globalPassThroughEnv": ["DATABASE_URL"],
   "tasks": {
     "transit": {
-      "dependsOn": ["^transit"],
+      "dependsOn": ["^transit"]
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**"],
+      "outputs": [".next/**", "!.next/cache/**"]
     },
     "check-types": {
-      "dependsOn": ["codegen", "transit"],
+      "dependsOn": ["codegen", "transit"]
     },
     "dev": {
       "persistent": true,
       "cache": false,
-      "dependsOn": ["codegen"],
+      "dependsOn": ["codegen"]
     },
     "generate-schemas": {
       "outputs": ["lib/__generated__/**"],
-      "inputs": ["openapi-schema.json", "*.apib"],
+      "inputs": ["openapi-schema.json", "*.apib"]
     },
     "codegen": {
-      "dependsOn": ["generate-schemas", "^generate-schemas"],
+      "dependsOn": ["generate-schemas", "^generate-schemas"]
     },
     "test": {
-      "dependsOn": ["codegen"],
+      "dependsOn": ["codegen"]
     },
     "test:watch": {
       "persistent": true,
-      "dependsOn": ["codegen"],
+      "dependsOn": ["codegen"]
     },
-  },
+    "lint": {}
+  }
 }

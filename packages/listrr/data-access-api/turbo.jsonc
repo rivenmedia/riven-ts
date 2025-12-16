@@ -2,5 +2,5 @@
   "$schema": "https://turborepo.com/schema.json",
   "extends": ["//"],
   "tags": ["group:listrr", "type:data-access"],
-  "tasks": {},
+  "tasks": {}
 }

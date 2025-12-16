@@ -16,16 +16,22 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.1.0",
     "@kubb/cli": "catalog:",
     "@kubb/core": "catalog:",
+    "@kubb/plugin-faker": "^4.11.1",
+    "@kubb/plugin-msw": "^4.11.1",
     "@kubb/plugin-oas": "catalog:",
+    "@kubb/plugin-ts": "^4.11.1",
     "@kubb/plugin-zod": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
+    "@repo/core-util-vitest-config": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
+    "msw": "catalog:",
     "vitest": "catalog:"
   }
 }

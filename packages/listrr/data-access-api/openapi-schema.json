@@ -1,5 +1,240 @@
 {
-  "openapi": "3.0.1",
+  "components": {
+    "schemas": {
+      "listrr.Contracts.Enum.Controllers.ListController.ShowListSortEnum": {
+        "enum": ["Name", "ReleaseDate"],
+        "type": "string"
+      },
+      "listrr.Contracts.Enum.ListStateEnum": {
+        "enum": [
+          "Scheduled",
+          "Updating",
+          "None",
+          "SchduledForDeletion",
+          "Error"
+        ],
+        "type": "string"
+      },
+      "listrr.Contracts.Enum.ListTypeEnum": {
+        "enum": ["Movie", "Show"],
+        "type": "string"
+      },
+      "listrr.Contracts.Enum.SortByDirectionEnum": {
+        "enum": ["Ascending", "Descending"],
+        "type": "string"
+      },
+      "listrr.Contracts.Models.API.MovieDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "releaseDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "imDbId": {
+            "type": "string",
+            "nullable": true
+          },
+          "tmDbId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.MovieDto]": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/listrr.Contracts.Models.API.MovieDto"
+            },
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.ShowDto]": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/listrr.Contracts.Models.API.ShowDto"
+            },
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.ListrrList]": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/listrr.Contracts.Models.ListrrList"
+            },
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "listrr.Contracts.Models.API.ShowDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "firstAirDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "imDbId": {
+            "type": "string",
+            "nullable": true
+          },
+          "tmDbId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tvDbId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "required": [""]
+      },
+      "listrr.Contracts.Models.ListrrList": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "items": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "state": {
+            "$ref": "#/components/schemas/listrr.Contracts.Enum.ListStateEnum"
+          },
+          "type": {
+            "$ref": "#/components/schemas/listrr.Contracts.Enum.ListTypeEnum"
+          },
+          "lastProcessed": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "excludedItems": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "includeExternalLists": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "excludeExternalLists": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "isStatic": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "isBasicFilter": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "isExtensiveFilter": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "isPrivate": {
+            "type": "boolean"
+          },
+          "upvotes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifiedOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "InHeader": {
+        "type": "apiKey",
+        "description": "The API Key is delivered as header",
+        "name": "X-API-KEY",
+        "in": "header"
+      }
+    }
+  },
   "info": {
     "title": "listrr.pro V1",
     "description": "An extensive API for working with listrr.pro",
@@ -11,6 +246,7 @@
     },
     "version": "v1"
   },
+  "openapi": "3.0.1",
   "paths": {
     "/api/List/{id}": {
       "get": {
@@ -241,241 +477,6 @@
             "description": "The list could not be found"
           }
         }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "listrr.Contracts.Enum.Controllers.ListController.ShowListSortEnum": {
-        "enum": ["Name", "ReleaseDate"],
-        "type": "string"
-      },
-      "listrr.Contracts.Enum.ListStateEnum": {
-        "enum": [
-          "Scheduled",
-          "Updating",
-          "None",
-          "SchduledForDeletion",
-          "Error"
-        ],
-        "type": "string"
-      },
-      "listrr.Contracts.Enum.ListTypeEnum": {
-        "enum": ["Movie", "Show"],
-        "type": "string"
-      },
-      "listrr.Contracts.Enum.SortByDirectionEnum": {
-        "enum": ["Ascending", "Descending"],
-        "type": "string"
-      },
-      "listrr.Contracts.Models.API.MovieDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "nullable": true
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "releaseDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "imDbId": {
-            "type": "string",
-            "nullable": true
-          },
-          "tmDbId": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.MovieDto]": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/listrr.Contracts.Models.API.MovieDto"
-            },
-            "nullable": true
-          },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pages": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "additionalProperties": false
-      },
-      "listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.ShowDto]": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/listrr.Contracts.Models.API.ShowDto"
-            },
-            "nullable": true
-          },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pages": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "additionalProperties": false
-      },
-      "listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.ListrrList]": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/listrr.Contracts.Models.ListrrList"
-            },
-            "nullable": true
-          },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pages": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "additionalProperties": false
-      },
-      "listrr.Contracts.Models.API.ShowDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "nullable": true
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "firstAirDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "imDbId": {
-            "type": "string",
-            "nullable": true
-          },
-          "tmDbId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "tvDbId": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "listrr.Contracts.Models.ListrrList": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "items": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": true
-          },
-          "state": {
-            "$ref": "#/components/schemas/listrr.Contracts.Enum.ListStateEnum"
-          },
-          "type": {
-            "$ref": "#/components/schemas/listrr.Contracts.Enum.ListTypeEnum"
-          },
-          "lastProcessed": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "excludedItems": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "includeExternalLists": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
-          },
-          "excludeExternalLists": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
-          },
-          "isStatic": {
-            "type": "boolean",
-            "readOnly": true
-          },
-          "isBasicFilter": {
-            "type": "boolean",
-            "readOnly": true
-          },
-          "isExtensiveFilter": {
-            "type": "boolean",
-            "readOnly": true
-          },
-          "isPrivate": {
-            "type": "boolean"
-          },
-          "upvotes": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "createdOn": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "modifiedOn": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "id": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "securitySchemes": {
-      "InHeader": {
-        "type": "apiKey",
-        "description": "The API Key is delivered as header",
-        "name": "X-API-KEY",
-        "in": "header"
       }
     }
   },

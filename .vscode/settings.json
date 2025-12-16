@@ -6,5 +6,8 @@
       "packageManager": "ms-python.python:pip"
     }
   ],
-  "cSpell.words": ["kubb", "Listrr"]
+  "cSpell.words": ["kubb", "listrr"],
+  "typescript.preferences.autoImportSpecifierExcludeRegexes": [
+    "node:test" // Conflicts with Vitest imports
+  ]
 }
