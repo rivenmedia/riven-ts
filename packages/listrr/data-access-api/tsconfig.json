@@ -5,7 +5,7 @@
     { "path": "./tsconfig.lib.json" },
     { "path": "./tsconfig.spec.json" }
   ],
-  "files": ["eslint.config.mts", "kubb.config.ts", "vitest.config.ts"],
+  "files": ["eslint.config.ts", "kubb.config.ts", "vitest.config.ts"],
   "include": [],
   "exclude": []
 }

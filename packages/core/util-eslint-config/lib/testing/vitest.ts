@@ -1,4 +1,4 @@
-import { testFiles } from "../internal/file-types.mts";
+import { testFiles } from "../internal/file-types.ts";
 import type { ConfigArray } from "typescript-eslint";
 import vitest from "@vitest/eslint-plugin";
 

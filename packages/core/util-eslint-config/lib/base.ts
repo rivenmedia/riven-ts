@@ -1,8 +1,8 @@
-import { typescriptCore } from "./typescript/typescript-core.mts";
-import { prettier } from "./formatting/prettier.mts";
-import { importOrdering } from "./formatting/import-ordering.mts";
-import { jsonConfig } from "./json/json.mts";
-import { vitestConfig } from "./testing/vitest.mts";
+import { typescriptCore } from "./typescript/typescript-core.ts";
+import { prettier } from "./formatting/prettier.ts";
+import { importOrdering } from "./formatting/import-ordering.ts";
+import { jsonConfig } from "./json/json.ts";
+import { vitestConfig } from "./testing/vitest.ts";
 import turbo from "eslint-config-turbo/flat";
 import type { ConfigArray } from "typescript-eslint";
 

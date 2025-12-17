@@ -6,7 +6,7 @@
     { "path": "./tsconfig.spec.json" },
     { "path": "./tsconfig.codegen.json" }
   ],
-  "files": ["eslint.config.mts", "kubb.config.ts", "types/apib2openapi.d.ts"],
+  "files": ["eslint.config.ts", "kubb.config.ts", "types/apib2openapi.d.ts"],
   "include": [],
   "exclude": []
 }

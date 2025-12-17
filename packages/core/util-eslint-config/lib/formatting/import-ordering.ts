@@ -1,4 +1,4 @@
-import { jsFiles, tsFiles } from "../internal/file-types.mts";
+import { jsFiles, tsFiles } from "../internal/file-types.ts";
 import { flatConfigs as importX } from "eslint-plugin-import-x";
 import type { ConfigArray } from "typescript-eslint";
 
