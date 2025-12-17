@@ -1,4 +1,4 @@
-import { ListrrAPI } from "./listrr-api.ts";
+import { ListrrAPI } from "./listrr.datasource.ts";
 import { it } from "@repo/core-util-vitest-config/test-context";
 import { http, HttpResponse } from "msw";
 import { expect } from "vitest";

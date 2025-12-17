@@ -27,20 +27,19 @@ services:
     ports:
       - 3000:3000
     depends_on:
-      riven-postgres:
+      riven-ts-db:
         condition: service_healthy
 
-  riven-postgres:
+  riven-ts-db:
     image: postgres:17-alpine
     container_name: riven-ts-dev-db
     restart: unless-stopped
+    network_mode: host
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: riven
-    ports:
-      - 5432:5432
     volumes:
       - riven-ts-db:/var/lib/postgresql/data/pgdata
     healthcheck:

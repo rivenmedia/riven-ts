@@ -1,39 +1,31 @@
 {
-  "name": "@repo/api",
+  "name": "@repo/graphql-api",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "next build",
-    "dev": "next dev",
+    "dev": "node --watch --env-file=.env --import=@swc-node/register/esm-register --enable-source-maps lib/server.ts",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
-    "start": "next start",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@apollo/client": "^4.0.11",
     "@apollo/server": "^5.2.0",
     "@repo/core-util-database": "workspace:^",
-    "@repo/core-util-logger": "workspace:^",
-    "graphql": "^16.12.0",
-    "next": "catalog:",
-    "pg": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
+    "@repo/listrr-data-access-api": "workspace:^",
     "reflect-metadata": "^0.2.2",
-    "typeorm": "catalog:"
+    "type-graphql": "catalog:"
   },
   "devDependencies": {
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
+    "@repo/core-util-vitest-config": "workspace:^",
+    "@swc-node/register": "^1.11.1",
     "@types/node": "catalog:",
-    "@types/react": "catalog:",
-    "@types/react-dom": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
-    "typescript": "catalog:",
     "vitest": "catalog:"
   }
 }

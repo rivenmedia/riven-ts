@@ -6,11 +6,7 @@ import {
   type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIMovieDtoSchema as GetMoviesResponse,
   type GetApiListMyPageQueryResponse,
 } from "./__generated__/index.ts";
-import type {
-  DataSourceFetchResult,
-  DataSourceRequest,
-  ValueOrPromise,
-} from "@apollo/datasource-rest/dist/RESTDataSource.js";
+import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource.js";
 import { RESTDataSource, type AugmentedRequest } from "@apollo/datasource-rest";
 import { logger } from "@repo/core-util-logger";
 
@@ -30,23 +26,6 @@ export class ListrrAPI extends RESTDataSource {
     super();
 
     this.token = token;
-  }
-
-  override async throwIfResponseIsError() {}
-
-  override async fetch<TResult>(
-    path: string,
-    incomingRequest?: DataSourceRequest | undefined,
-  ): Promise<DataSourceFetchResult<TResult>> {
-    const result = await super.fetch<TResult>(path, incomingRequest);
-
-    if (result.response.status === 429) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      return this.fetch(path, incomingRequest);
-    }
-
-    return result;
   }
 
   protected override willSendRequest(

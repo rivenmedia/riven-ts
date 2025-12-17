@@ -5,7 +5,7 @@ import {
   type GetApiListShowsIdSortbySortbydirectionPageQueryResponse as GetShowsResponse,
   type ListrrContractsModelsAPIShowDto as ListrrShow,
 } from "./__generated__/index.ts";
-import { ListrrAPI } from "./listrr-api.ts";
+import { ListrrAPI } from "./listrr.datasource.ts";
 import { expect } from "vitest";
 import { it } from "@repo/core-util-vitest-config/test-context";
 import { http, HttpResponse } from "msw";

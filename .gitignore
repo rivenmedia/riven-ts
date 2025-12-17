@@ -3,6 +3,9 @@ node_modules
 .next
 *.tsbuildinfo
 *.log
+logs
 .pnpm-store
 __generated__
 coverage
+.env*
+!.env.example

@@ -1,7 +1,3 @@
-"use server";
-
-import "reflect-metadata";
-import "server-only";
 import { FileSystemEntry } from "./entities/filesystem/filesystem-entry.entity.ts";
 import { MediaEntry } from "./entities/filesystem/media-entry.entity.ts";
 import { SubtitleEntry } from "./entities/filesystem/subtitle-entry.entity.ts";
