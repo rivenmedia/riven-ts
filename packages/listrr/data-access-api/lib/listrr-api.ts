@@ -6,9 +6,16 @@ import {
   type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIMovieDtoSchema as GetMoviesResponse,
   type GetApiListMyPageQueryResponse,
 } from "./__generated__/index.ts";
-import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource.js";
+import type {
+  CacheOptions,
+  DataSourceFetchResult,
+  DataSourceRequest,
+  RequestOptions,
+  ValueOrPromise,
+} from "@apollo/datasource-rest/dist/RESTDataSource.js";
 import { RESTDataSource, type AugmentedRequest } from "@apollo/datasource-rest";
 import { logger } from "@repo/core-util-logger";
+import { request } from "undici";
 
 export class ListrrAPIError extends Error {}
 
@@ -20,19 +27,53 @@ interface ExternalIds {
 export class ListrrAPI extends RESTDataSource {
   override baseURL = "https://listrr.pro/api/";
 
+  // protected override httpCache: HTTPCache = {
+  //   fetch: async (url, requestOpts: RequestOptions) => {
+  //     const response = await betterFetch(url.toString(), {
+  //       ...requestOpts,
+  //       retry: {
+  //         attempts: 3,
+  //         type: "exponential",
+  //         baseDelay: 1000,
+  //         maxDelay: 10000,
+  //       },
+  //       baseURL: this.baseURL,
+  //       headers: {
+  //         "x-api-key": this.token,
+  //       },
+  //     });
+
+  //     return {
+  //       response,
+  //     };
+  //   },
+  // };
+
   private token: string;
 
   constructor(token: string) {
     super();
 
     this.token = token;
+    this.httpCache.fetch = async (url: URL, requestOpts: RequestOptions) => {
+      console.log(url);
+      const response = await request(url, {
+        blocking: false,
+      });
+
+      console.log(response);
+
+      return {
+        response,
+      };
+    };
   }
 
   protected override willSendRequest(
     _path: string,
     requestOpts: AugmentedRequest,
   ): ValueOrPromise<void> {
-    requestOpts.headers["x-api-key"] = `Bearer ${this.token}`;
+    requestOpts.headers["x-api-key"] = this.token;
   }
 
   async validate() {
