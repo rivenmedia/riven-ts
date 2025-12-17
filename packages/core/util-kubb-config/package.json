@@ -1,35 +1,35 @@
 {
-  "name": "@repo/listrr-data-access-api",
+  "name": "@repo/core-util-kubb-config",
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    ".": "./lib/index.ts"
+  },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
-    "generate-schemas": "kubb generate",
     "lint": "eslint .",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@apollo/datasource-rest": "catalog:",
-    "zod": "catalog:"
+    "@kubb/cli": "catalog:",
+    "@kubb/core": "catalog:",
+    "@kubb/plugin-faker": "catalog:",
+    "@kubb/plugin-msw": "catalog:",
+    "@kubb/plugin-oas": "catalog:",
+    "@kubb/plugin-ts": "catalog:",
+    "@kubb/plugin-zod": "catalog:"
   },
   "devDependencies": {
-    "@faker-js/faker": "^10.1.0",
-    "@kubb/cli": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
-    "@repo/core-util-kubb-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
-    "msw": "catalog:",
     "vitest": "catalog:"
-  },
-  "peerDependencies": {
-    "@kubb/cli": "*"
   }
 }
