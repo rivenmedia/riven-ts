@@ -7,15 +7,12 @@ import {
   type GetApiListMyPageQueryResponse,
 } from "./__generated__/index.ts";
 import type {
-  CacheOptions,
   DataSourceFetchResult,
   DataSourceRequest,
-  RequestOptions,
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
 import { RESTDataSource, type AugmentedRequest } from "@apollo/datasource-rest";
 import { logger } from "@repo/core-util-logger";
-import { request } from "undici";
 
 export class ListrrAPIError extends Error {}
 
@@ -27,46 +24,29 @@ interface ExternalIds {
 export class ListrrAPI extends RESTDataSource {
   override baseURL = "https://listrr.pro/api/";
 
-  // protected override httpCache: HTTPCache = {
-  //   fetch: async (url, requestOpts: RequestOptions) => {
-  //     const response = await betterFetch(url.toString(), {
-  //       ...requestOpts,
-  //       retry: {
-  //         attempts: 3,
-  //         type: "exponential",
-  //         baseDelay: 1000,
-  //         maxDelay: 10000,
-  //       },
-  //       baseURL: this.baseURL,
-  //       headers: {
-  //         "x-api-key": this.token,
-  //       },
-  //     });
-
-  //     return {
-  //       response,
-  //     };
-  //   },
-  // };
-
   private token: string;
 
   constructor(token: string) {
     super();
 
     this.token = token;
-    this.httpCache.fetch = async (url: URL, requestOpts: RequestOptions) => {
-      console.log(url);
-      const response = await request(url, {
-        blocking: false,
-      });
+  }
 
-      console.log(response);
+  override async throwIfResponseIsError() {}
 
-      return {
-        response,
-      };
-    };
+  override async fetch<TResult>(
+    path: string,
+    incomingRequest?: DataSourceRequest | undefined,
+  ): Promise<DataSourceFetchResult<TResult>> {
+    const result = await super.fetch<TResult>(path, incomingRequest);
+
+    if (result.response.status === 429) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      return this.fetch(path, incomingRequest);
+    }
+
+    return result;
   }
 
   protected override willSendRequest(
@@ -78,10 +58,8 @@ export class ListrrAPI extends RESTDataSource {
 
   async validate() {
     try {
-      const response = await this.get<GetApiListMyPageQueryResponse>(
-        "List/My/1",
-        {},
-      );
+      const response =
+        await this.get<GetApiListMyPageQueryResponse>("List/My/1");
 
       return getApiListMyPageQueryResponseSchema.safeParse(response).success;
     } catch {
@@ -113,7 +91,6 @@ export class ListrrAPI extends RESTDataSource {
       while (page <= totalPages) {
         const response = await this.get<GetShowsResponse>(
           `List/Shows/${listId}/ReleaseDate/Descending/${page.toString()}`,
-          {},
         );
 
         const parsed = getShowsResponseSchema.parse(response);

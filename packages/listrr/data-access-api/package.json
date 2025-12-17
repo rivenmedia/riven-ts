@@ -13,8 +13,6 @@
   },
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
-    "@better-fetch/fetch": "^1.1.21",
-    "undici": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -36,7 +36,11 @@ it("retrieves shows from each provided list", async ({ server }) => {
         getShowsResponse({
           pages: 1,
           count: 1,
-          items: [createListrrContractsModelsAPIShowDto()],
+          items: [
+            createListrrContractsModelsAPIShowDto({
+              id: info.params["id"].toString(),
+            }),
+          ],
         }),
       );
     }),

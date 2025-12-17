@@ -79,9 +79,6 @@ catalogs:
     typescript:
       specifier: ^5.9.3
       version: 5.9.3
-    undici:
-      specifier: ^7.16.0
-      version: 7.16.0
     vitest:
       specifier: 4.0.15
       version: 4.0.15
@@ -395,12 +392,6 @@ importers:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(graphql@16.12.0)
-      '@better-fetch/fetch':
-        specifier: ^1.1.21
-        version: 1.1.21
-      undici:
-        specifier: 'catalog:'
-        version: 7.16.0
       zod:
         specifier: 'catalog:'
         version: 4.1.13
@@ -574,9 +565,6 @@ packages:
   '@bcoe/v8-coverage@1.0.2':
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
-
-  '@better-fetch/fetch@1.1.21':
-    resolution: {integrity: sha512-/ImESw0sskqlVR94jB+5+Pxjf+xBwDZF/N5+y2/q4EqD7IARUTSpPfIo8uf39SYpCxyOCtbyYpUrZ3F/k0zT4A==}
 
   '@cloudflare/json-schema-walker@0.1.1':
     resolution: {integrity: sha512-P3n0hEgk1m6uKWgL4Yb1owzXVG4pM70G4kRnDQxZXiVvfCRtaqiHu+ZRiRPzmwGBiLTO1LWc2yR1M8oz0YkXww==}
@@ -4326,10 +4314,6 @@ packages:
   undici-types@7.8.0:
     resolution: {integrity: sha512-9UJ2xGDvQ43tYyVMpuHlsgApydB8ZKfVYTsLDhXkFL/6gfkp+U8xTGdh8pMJv1SpZna0zxG1DwsKZsreLbXBxw==}
 
-  undici@7.16.0:
-    resolution: {integrity: sha512-QEg3HPMll0o3t2ourKwOeUAZ159Kn9mx5pnzHRQO8+Wixmh88YdZRiIwat0iNzNNXn0yoEtXJqFpyW7eM8BV7g==}
-    engines: {node: '>=20.18.1'}
-
   unicorn-magic@0.1.0:
     resolution: {integrity: sha512-lRfVq8fE8gz6QMBuDM6a+LO3IAzTi05H6gCVaUpir2E1Rwpo4ZUog45KpNXKC/Mn3Yb9UDuHumeFTo9iV/D9FQ==}
     engines: {node: '>=18'}
@@ -4689,8 +4673,6 @@ snapshots:
       '@babel/helper-validator-identifier': 7.28.5
 
   '@bcoe/v8-coverage@1.0.2': {}
-
-  '@better-fetch/fetch@1.1.21': {}
 
   '@cloudflare/json-schema-walker@0.1.1': {}
 
@@ -8763,8 +8745,6 @@ snapshots:
   undici-types@7.16.0: {}
 
   undici-types@7.8.0: {}
-
-  undici@7.16.0: {}
 
   unicorn-magic@0.1.0: {}
 
