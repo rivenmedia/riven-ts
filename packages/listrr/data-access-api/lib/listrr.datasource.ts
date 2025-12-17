@@ -6,7 +6,13 @@ import {
   type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIMovieDtoSchema as GetMoviesResponse,
   type GetApiListMyPageQueryResponse,
 } from "./__generated__/index.ts";
-import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource.js";
+import type {
+  CacheOptions,
+  DataSourceFetchResult,
+  DataSourceRequest,
+  RequestOptions,
+  ValueOrPromise,
+} from "@apollo/datasource-rest/dist/RESTDataSource.js";
 import { RESTDataSource, type AugmentedRequest } from "@apollo/datasource-rest";
 import { logger } from "@repo/core-util-logger";
 
@@ -20,18 +26,43 @@ interface ExternalIds {
 export class ListrrAPI extends RESTDataSource {
   override baseURL = "https://listrr.pro/api/";
 
-  private token: string;
+  private token: string | undefined;
 
-  constructor(token: string) {
+  constructor(token?: string) {
     super();
 
     this.token = token;
+  }
+
+  override async fetch<TResult>(
+    path: string,
+    incomingRequest?: DataSourceRequest<CacheOptions> | undefined,
+  ): Promise<DataSourceFetchResult<TResult>> {
+    const result = await super.fetch<TResult>(path, incomingRequest);
+
+    logger.debug(`Listrr API Response for ${path}: ${result}`);
+
+    return result;
+  }
+
+  protected override didEncounterError(
+    error: Error,
+    _request: RequestOptions<CacheOptions>,
+    _url?: URL,
+  ): void {
+    logger.error(`Listrr API Error: ${error.message}`);
   }
 
   protected override willSendRequest(
     _path: string,
     requestOpts: AugmentedRequest,
   ): ValueOrPromise<void> {
+    if (!this.token) {
+      throw new ListrrAPIError(
+        "Listrr API token is not set. Please provide a valid API token.",
+      );
+    }
+
     requestOpts.headers["x-api-key"] = this.token;
   }
 
@@ -44,6 +75,18 @@ export class ListrrAPI extends RESTDataSource {
     } catch {
       return false;
     }
+  }
+
+  async getShowsListPage(listId: string, page: number) {
+    return this.get<GetShowsResponse>(
+      `List/Shows/${listId}/ReleaseDate/Descending/${page.toString()}`,
+    );
+  }
+
+  async getMoviesListPage(listId: string, page: number) {
+    return this.get<GetMoviesResponse>(
+      `List/Movies/${listId}/ReleaseDate/Descending/${page.toString()}`,
+    );
   }
 
   /**

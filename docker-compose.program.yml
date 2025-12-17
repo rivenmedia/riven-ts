@@ -29,26 +29,3 @@ services:
     depends_on:
       riven-ts-db:
         condition: service_healthy
-
-  riven-ts-db:
-    image: postgres:17-alpine
-    container_name: riven-ts-dev-db
-    restart: unless-stopped
-    network_mode: host
-    environment:
-      PGDATA: /var/lib/postgresql/data/pgdata
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: riven
-    volumes:
-      - riven-ts-db:/var/lib/postgresql/data/pgdata
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - pg_isready -U postgres
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  riven-ts-db:

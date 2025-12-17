@@ -47,7 +47,7 @@ catalogs:
       specifier: 4.0.15
       version: 4.0.15
     class-validator:
-      specifier: ^0.14.3
+      specifier: 0.14.3
       version: 0.14.3
     eslint:
       specifier: ^9.39.2
@@ -183,9 +183,15 @@ importers:
       '@apollo/server':
         specifier: ^5.2.0
         version: 5.2.0(graphql@16.12.0)
+      '@apollo/utils.keyvaluecache':
+        specifier: ^4.0.0
+        version: 4.0.0
       '@repo/core-util-database':
         specifier: workspace:^
         version: link:../../packages/core/util-database
+      '@repo/core-util-graphql-schema':
+        specifier: workspace:^
+        version: link:../../packages/core/util-graphql-schema
       '@repo/listrr-data-access-api':
         specifier: workspace:^
         version: link:../../packages/listrr/data-access-api
@@ -315,6 +321,43 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
+
+  packages/core/util-graphql-schema:
+    dependencies:
+      '@repo/listrr-data-access-api':
+        specifier: workspace:^
+        version: link:../../listrr/data-access-api
+      graphql:
+        specifier: ^16.12.0
+        version: 16.12.0
+      type-graphql:
+        specifier: 'catalog:'
+        version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
+    devDependencies:
+      '@repo/core-util-eslint-config':
+        specifier: workspace:^
+        version: link:../util-eslint-config
+      '@repo/core-util-logger':
+        specifier: workspace:^
+        version: link:../util-logger
+      '@repo/core-util-typescript-config':
+        specifier: workspace:^
+        version: link:../util-typescript-config
+      '@repo/core-util-vitest-config':
+        specifier: workspace:^
+        version: file:packages/core/util-vitest-config(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(vitest@4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.0.0
+      '@typescript-eslint/parser':
+        specifier: 'catalog:'
+        version: 8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      vitest:
+        specifier: 'catalog:'
+        version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
 
   packages/core/util-kubb-config:
     dependencies:
@@ -450,6 +493,9 @@ importers:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(graphql@16.12.0)
+      class-validator:
+        specifier: 'catalog:'
+        version: 0.14.3
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
@@ -466,6 +512,9 @@ importers:
       '@repo/core-util-eslint-config':
         specifier: workspace:^
         version: link:../../core/util-eslint-config
+      '@repo/core-util-graphql-schema':
+        specifier: workspace:^
+        version: link:../../core/util-graphql-schema
       '@repo/core-util-kubb-config':
         specifier: workspace:^
         version: file:packages/core/util-kubb-config(@kubb/react-fabric@0.5.4)(ajv@8.17.1)(typescript@5.9.3)

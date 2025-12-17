@@ -19,7 +19,7 @@ catalog:
   "@types/react-dom": ^19.2.3
   "@typescript-eslint/parser": ^8.49.0
   "@vitest/coverage-v8": 4.0.15
-  class-validator: ^0.14.3
+  class-validator: 0.14.3
   eslint: ^9.39.2
   jiti: 2.6.1
   msw: 2.12.4

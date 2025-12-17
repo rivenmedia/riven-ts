@@ -12,7 +12,9 @@
   },
   "dependencies": {
     "@apollo/server": "^5.2.0",
+    "@apollo/utils.keyvaluecache": "^4.0.0",
     "@repo/core-util-database": "workspace:^",
+    "@repo/core-util-graphql-schema": "workspace:^",
     "@repo/listrr-data-access-api": "workspace:^",
     "reflect-metadata": "^0.2.2",
     "type-graphql": "catalog:"
