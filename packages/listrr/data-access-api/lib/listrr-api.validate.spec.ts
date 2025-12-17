@@ -7,7 +7,7 @@ import { HttpResponse } from "msw";
 it("returns false if the request fails", async ({ server }) => {
   server.use(getApiListMyPageHandler(() => HttpResponse.error()));
 
-  const listrrApi = new ListrrAPI();
+  const listrrApi = new ListrrAPI("1234");
   const isValid = await listrrApi.validate();
 
   expect(isValid).toBe(false);
@@ -16,7 +16,7 @@ it("returns false if the request fails", async ({ server }) => {
 it("returns true if the request succeeds", async ({ server }) => {
   server.use(getApiListMyPageHandler());
 
-  const listrrApi = new ListrrAPI();
+  const listrrApi = new ListrrAPI("1234");
   const isValid = await listrrApi.validate();
 
   expect(isValid).toBe(true);

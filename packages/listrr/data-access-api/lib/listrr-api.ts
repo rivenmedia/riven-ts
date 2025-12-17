@@ -6,7 +6,9 @@ import {
   type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIMovieDtoSchema as GetMoviesResponse,
   type GetApiListMyPageQueryResponse,
 } from "./__generated__/index.ts";
-import { RESTDataSource } from "@apollo/datasource-rest";
+import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource.js";
+import { RESTDataSource, type AugmentedRequest } from "@apollo/datasource-rest";
+import { logger } from "@repo/core-util-logger";
 
 export class ListrrAPIError extends Error {}
 
@@ -17,6 +19,21 @@ interface ExternalIds {
 
 export class ListrrAPI extends RESTDataSource {
   override baseURL = "https://listrr.pro/api/";
+
+  private token: string;
+
+  constructor(token: string) {
+    super();
+
+    this.token = token;
+  }
+
+  protected override willSendRequest(
+    _path: string,
+    requestOpts: AugmentedRequest,
+  ): ValueOrPromise<void> {
+    requestOpts.headers["x-api-key"] = `Bearer ${this.token}`;
+  }
 
   async validate() {
     try {
@@ -44,6 +61,8 @@ export class ListrrAPI extends RESTDataSource {
 
     for (const listId of contentLists) {
       if (listId.length !== 24) {
+        logger.warn(`Skipping invalid list ID: ${listId}`);
+
         continue;
       }
 
@@ -62,14 +81,12 @@ export class ListrrAPI extends RESTDataSource {
 
         if (parsed.items) {
           for (const item of parsed.items) {
-            if (!item.id) {
-              continue;
+            if (item.id) {
+              idsMap.set(item.id, {
+                imdbId: item.imDbId ?? undefined,
+                tmdbId: item.tmDbId?.toString(),
+              });
             }
-
-            idsMap.set(item.id, {
-              imdbId: item.imDbId ?? undefined,
-              tmdbId: item.tmDbId?.toString(),
-            });
           }
         }
 
@@ -93,6 +110,8 @@ export class ListrrAPI extends RESTDataSource {
 
     for (const listId of contentLists) {
       if (listId.length !== 24) {
+        logger.warn(`Skipping invalid list ID: ${listId}`);
+
         continue;
       }
 

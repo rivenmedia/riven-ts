@@ -2,6 +2,8 @@ import { createLogger, format, transports } from "winston";
 
 const logDir = "/riven-ts/data/logs";
 
+const isTestEnvironment = process.env["NODE_ENV"] === "test";
+
 export const logger = createLogger({
   level: "info",
   format: format.combine(
@@ -13,14 +15,38 @@ export const logger = createLogger({
     format.json(),
   ),
   transports: [
-    new transports.File({ filename: `${logDir}/error.log`, level: "error" }),
-    new transports.File({ filename: `${logDir}/combined.log` }),
     new transports.Console({
       format: format.combine(format.colorize(), format.simple()),
+      silent: isTestEnvironment,
     }),
   ],
   exceptionHandlers: [
-    new transports.File({ filename: `${logDir}/exceptions.log` }),
+    ...(isTestEnvironment
+      ? []
+      : [
+          new transports.File({
+            filename: "exceptions.log",
+            dirname: logDir,
+            silent: isTestEnvironment,
+          }),
+        ]),
   ],
   exitOnError: false,
 });
+
+if (!isTestEnvironment) {
+  logger.add(
+    new transports.File({
+      filename: "error.log",
+      dirname: logDir,
+      level: "error",
+    }),
+  );
+
+  logger.add(
+    new transports.File({
+      filename: "combined.log",
+      dirname: logDir,
+    }),
+  );
+}

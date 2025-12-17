@@ -11,7 +11,7 @@ import { it } from "@repo/core-util-vitest-config/test-context";
 import { http, HttpResponse } from "msw";
 
 it("returns an empty array if no content lists are provided", async () => {
-  const listrrApi = new ListrrAPI();
+  const listrrApi = new ListrrAPI("1234");
   const movies = await listrrApi.getMovies(new Set());
 
   expect(movies).toEqual([]);
@@ -42,7 +42,7 @@ it("retrieves movies from each provided list", async ({ server }) => {
     }),
   );
 
-  const listrrApi = new ListrrAPI();
+  const listrrApi = new ListrrAPI("1234");
   const movies = await listrrApi.getMovies(contentLists);
 
   expect(movies.length).toBe(2);
@@ -79,7 +79,7 @@ it("paginates through all pages of the list", async ({ server }) => {
     }),
   );
 
-  const listrrApi = new ListrrAPI();
+  const listrrApi = new ListrrAPI("1234");
   const movies = await listrrApi.getMovies(contentLists);
 
   expect(movies.length).toBe(totalPages * itemsPerPage);
@@ -111,7 +111,7 @@ it("dedupes movies that appear in multiple lists", async ({ server }) => {
     ),
   );
 
-  const listrrApi = new ListrrAPI();
+  const listrrApi = new ListrrAPI("1234");
   const movies = await listrrApi.getMovies(new Set(Object.keys(items)));
 
   expect(movies).toHaveLength(8);
