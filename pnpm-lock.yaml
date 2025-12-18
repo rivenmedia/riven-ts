@@ -183,9 +183,18 @@ importers:
       '@apollo/server':
         specifier: ^5.2.0
         version: 5.2.0(graphql@16.12.0)
+      '@apollo/server-plugin-response-cache':
+        specifier: ^5.0.0
+        version: 5.0.0(@apollo/server@5.2.0(graphql@16.12.0))(graphql@16.12.0)
+      '@apollo/utils.keyvadapter':
+        specifier: ^4.0.1
+        version: 4.0.1
       '@apollo/utils.keyvaluecache':
         specifier: ^4.0.0
         version: 4.0.0
+      '@keyv/redis':
+        specifier: ^5.1.5
+        version: 5.1.5(keyv@5.5.5)
       '@repo/core-util-database':
         specifier: workspace:^
         version: link:../../packages/core/util-database
@@ -195,6 +204,9 @@ importers:
       '@repo/listrr-data-access-api':
         specifier: workspace:^
         version: link:../../packages/listrr/data-access-api
+      keyv:
+        specifier: ^5.5.5
+        version: 5.5.5
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -334,6 +346,9 @@ importers:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
     devDependencies:
+      '@apollo/cache-control-types':
+        specifier: ^1.0.3
+        version: 1.0.3(graphql@16.12.0)
       '@repo/core-util-eslint-config':
         specifier: workspace:^
         version: link:../util-eslint-config
@@ -355,6 +370,9 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
+      type-fest:
+        specifier: ^5.3.1
+        version: 5.3.1
       vitest:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
@@ -517,7 +535,7 @@ importers:
         version: link:../../core/util-graphql-schema
       '@repo/core-util-kubb-config':
         specifier: workspace:^
-        version: file:packages/core/util-kubb-config(@kubb/react-fabric@0.5.4)(ajv@8.17.1)(typescript@5.9.3)
+        version: link:../../core/util-kubb-config
       '@repo/core-util-logger':
         specifier: workspace:^
         version: link:../../core/util-logger
@@ -660,6 +678,13 @@ packages:
     peerDependencies:
       graphql: 14.x || 15.x || 16.x
 
+  '@apollo/server-plugin-response-cache@5.0.0':
+    resolution: {integrity: sha512-q78R0jUP642EjBvfzkAV5HtM0fcoA0/D2tBGQdXPShj6PvcV2UDhaw6Yw/N9rkXKJmFtXZiGyDyOssfWO1cTxw==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@apollo/server': ^5.0.0
+      graphql: ^16.11.0
+
   '@apollo/server@5.2.0':
     resolution: {integrity: sha512-OEAl5bwVitkvVkmZlgWksSnQ10FUr6q2qJMdkexs83lsvOGmd/y81X5LoETmKZux8UiQsy/A/xzP00b8hTHH/w==}
     engines: {node: '>=20'}
@@ -685,6 +710,10 @@ packages:
 
   '@apollo/utils.isnodelike@3.0.0':
     resolution: {integrity: sha512-xrjyjfkzunZ0DeF6xkHaK5IKR8F1FBq6qV+uZ+h9worIF/2YSzA0uoBxGv6tbTeo9QoIQnRW4PVFzGix5E7n/g==}
+    engines: {node: '>=16'}
+
+  '@apollo/utils.keyvadapter@4.0.1':
+    resolution: {integrity: sha512-nCsAM/uNi17sta6f98FOBiQc8qwx3As78LfUGmHWzaKnwpolzeV8Phz04W723CSaDGxeo/gxEkkQiK0oAdvGxw==}
     engines: {node: '>=16'}
 
   '@apollo/utils.keyvaluecache@3.1.0':
@@ -1259,6 +1288,15 @@ packages:
     peerDependencies:
       jsep: ^0.4.0||^1.0.0
 
+  '@keyv/redis@5.1.5':
+    resolution: {integrity: sha512-8tD98mQoZTHHHFG7bcI2T4gkvAL9YsBI7TqCW4sXbx33WmAaPQ+JofxdN+rCu5LKxiboapfS8swZWJ7Tl/XbQg==}
+    engines: {node: '>= 18'}
+    peerDependencies:
+      keyv: ^5.5.5
+
+  '@keyv/serialize@1.1.1':
+    resolution: {integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==}
+
   '@kubb/cli@4.11.1':
     resolution: {integrity: sha512-U/SD6agTDCzapba2hQwPVHFVS5WprJqmN/g/2DbUF0drJfWxTp+fMDCVaE7HtBR0ROaUmS6hdUVUIfDG0UjBCg==}
     engines: {node: '>=20'}
@@ -1557,6 +1595,10 @@ packages:
     resolution: {integrity: sha512-VvV2Hzjskz01m8doSn7Ypt6cSZzgjnypVqXy1ipThbyYD6SGiM74VSePXykOODj/43Y2m6zeYedPk/ZLts/HvQ==}
     engines: {node: '>=14'}
 
+  '@redis/client@5.10.0':
+    resolution: {integrity: sha512-JXmM4XCoso6C75Mr3lhKA3eNxSzkYi3nCzxDIKY+YOszYsJjuKbFgVtguVPbLMOttN4iu2fXoc2BGhdnYhIOxA==}
+    engines: {node: '>= 18'}
+
   '@redocly/ajv@8.17.1':
     resolution: {integrity: sha512-EDtsGZS964mf9zAUXAl9Ew16eYbeyAFWhsPr0fX6oaJxgd8rApYlPBf0joyhnUHz88WxrigyFtTaqqzXNzPgqw==}
 
@@ -1569,9 +1611,6 @@ packages:
 
   '@repeaterjs/repeater@3.0.6':
     resolution: {integrity: sha512-Javneu5lsuhwNCryN+pXH93VPQ8g0dBX7wItHFgYiwQmzE1sVdg5tWHiOgHywzL2W21XQopa7IwIEnNbmeUJYA==}
-
-  '@repo/core-util-kubb-config@file:packages/core/util-kubb-config':
-    resolution: {directory: packages/core/util-kubb-config, type: directory}
 
   '@repo/core-util-vitest-config@file:packages/core/util-vitest-config':
     resolution: {directory: packages/core/util-vitest-config, type: directory}
@@ -2464,6 +2503,10 @@ packages:
     resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
     engines: {node: '>=0.8'}
 
+  cluster-key-slot@1.1.2:
+    resolution: {integrity: sha512-RMr0FhtfXemyinomL4hrWcYJxmX6deFdCxpJzhDttxgO1+bcCnkk+9drydLVDmAMG7NE6aN/fl4F7ucU/90gAA==}
+    engines: {node: '>=0.10.0'}
+
   color-convert@1.9.3:
     resolution: {integrity: sha512-QfAUtd+vFdAtFQcC8CCyYt1fYWxSqAiK2cSD6zDB8N3cpsEBAvRxp9zOGg6G/SHHJYAT88/az/IuDGALsNVbGg==}
 
@@ -2598,6 +2641,9 @@ packages:
   data-view-byte-offset@1.0.1:
     resolution: {integrity: sha512-BS8PfmtDGnrgYdOonGZQdLZslWIeCGFP9tpan0hi1Co2Zr2NKADsvGYA8XxuG/4UWgJ6Cjtv+YJnB6MM69QGlQ==}
     engines: {node: '>= 0.4'}
+
+  dataloader@2.2.3:
+    resolution: {integrity: sha512-y2krtASINtPFS1rSDjacrFgn1dcUuoREVabwlOGOe4SdxenREqwjwjElAdwvbGM7kgZz9a3KVicWR7vcz8rnzA==}
 
   dayjs@1.11.19:
     resolution: {integrity: sha512-t5EcLVS6QPBNqM2z8fakk/NKel+Xzshgt8FFKAn+qwlD1pzZWxh0nVCrvFK7ZDb6XucZeF9z8C7CBWTRIVApAw==}
@@ -3205,6 +3251,9 @@ packages:
   headers-polyfill@4.0.3:
     resolution: {integrity: sha512-IScLbePpkvO846sIwOtOTDjutRMWdXdJmXdMvk6gCBHxFO8d+QKOQedyZSxFTTFYRSmlgSTDtXqqq4pcenBXLQ==}
 
+  hookified@1.14.0:
+    resolution: {integrity: sha512-pi1ynXIMFx/uIIwpWJ/5CEtOHLGtnUB0WhGeeYT+fKcQ+WCQbm3/rrkAXnpfph++PgepNqPdTC2WTj8A6k6zoQ==}
+
   hotscript@1.0.13:
     resolution: {integrity: sha512-C++tTF1GqkGYecL+2S1wJTfoH6APGAsbb7PAWQ3iVIwgG/EFseAfEVOKFgAFq4yK3+6j1EjUD4UQ9dRJHX/sSQ==}
 
@@ -3575,6 +3624,9 @@ packages:
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
+
+  keyv@5.5.5:
+    resolution: {integrity: sha512-FA5LmZVF1VziNc0bIdCSA1IoSVnDCqE8HJIZZv2/W8YmoAM50+tnUgJR/gQZwEeIMleuIOnRnHA/UaZRNeV4iQ==}
 
   kuler@2.0.0:
     resolution: {integrity: sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==}
@@ -5336,6 +5388,13 @@ snapshots:
       '@apollo/utils.logger': 3.0.0
       graphql: 16.12.0
 
+  '@apollo/server-plugin-response-cache@5.0.0(@apollo/server@5.2.0(graphql@16.12.0))(graphql@16.12.0)':
+    dependencies:
+      '@apollo/server': 5.2.0(graphql@16.12.0)
+      '@apollo/utils.createhash': 3.0.1
+      '@apollo/utils.keyvaluecache': 4.0.0
+      graphql: 16.12.0
+
   '@apollo/server@5.2.0(graphql@16.12.0)':
     dependencies:
       '@apollo/cache-control-types': 1.0.3(graphql@16.12.0)
@@ -5378,6 +5437,12 @@ snapshots:
   '@apollo/utils.fetcher@3.1.0': {}
 
   '@apollo/utils.isnodelike@3.0.0': {}
+
+  '@apollo/utils.keyvadapter@4.0.1':
+    dependencies:
+      '@apollo/utils.keyvaluecache': 4.0.0
+      dataloader: 2.2.3
+      keyv: 5.5.5
 
   '@apollo/utils.keyvaluecache@3.1.0':
     dependencies:
@@ -5827,6 +5892,15 @@ snapshots:
     dependencies:
       jsep: 1.4.0
 
+  '@keyv/redis@5.1.5(keyv@5.5.5)':
+    dependencies:
+      '@redis/client': 5.10.0
+      cluster-key-slot: 1.1.2
+      hookified: 1.14.0
+      keyv: 5.5.5
+
+  '@keyv/serialize@1.1.1': {}
+
   '@kubb/cli@4.11.1(@kubb/react-fabric@0.5.4)(typescript@5.9.3)':
     dependencies:
       '@kubb/core': 4.11.1(@kubb/react-fabric@0.5.4)
@@ -6181,6 +6255,10 @@ snapshots:
       marked: 4.3.0
       mustache: 4.2.0
 
+  '@redis/client@5.10.0':
+    dependencies:
+      cluster-key-slot: 1.1.2
+
   '@redocly/ajv@8.17.1':
     dependencies:
       fast-deep-equal: 3.1.3
@@ -6207,24 +6285,6 @@ snapshots:
       - ajv
 
   '@repeaterjs/repeater@3.0.6': {}
-
-  '@repo/core-util-kubb-config@file:packages/core/util-kubb-config(@kubb/react-fabric@0.5.4)(ajv@8.17.1)(typescript@5.9.3)':
-    dependencies:
-      '@kubb/cli': 4.11.1(@kubb/react-fabric@0.5.4)(typescript@5.9.3)
-      '@kubb/core': 4.11.1(@kubb/react-fabric@0.5.4)
-      '@kubb/plugin-faker': 4.11.1(ajv@8.17.1)
-      '@kubb/plugin-msw': 4.11.1(ajv@8.17.1)
-      '@kubb/plugin-oas': 4.11.1(@kubb/react-fabric@0.5.4)(ajv@8.17.1)
-      '@kubb/plugin-ts': 4.11.1(@kubb/react-fabric@0.5.4)(ajv@8.17.1)
-      '@kubb/plugin-zod': 4.11.1(ajv@8.17.1)
-    transitivePeerDependencies:
-      - '@kubb/react-fabric'
-      - ajv
-      - babel-plugin-macros
-      - bufferutil
-      - encoding
-      - typescript
-      - utf-8-validate
 
   '@repo/core-util-vitest-config@file:packages/core/util-vitest-config(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(vitest@4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
@@ -7134,6 +7194,8 @@ snapshots:
 
   clone@1.0.4: {}
 
+  cluster-key-slot@1.1.2: {}
+
   color-convert@1.9.3:
     dependencies:
       color-name: 1.1.3
@@ -7262,6 +7324,8 @@ snapshots:
       call-bound: 1.0.4
       es-errors: 1.3.0
       is-data-view: 1.0.2
+
+  dataloader@2.2.3: {}
 
   dayjs@1.11.19: {}
 
@@ -8033,6 +8097,8 @@ snapshots:
 
   headers-polyfill@4.0.3: {}
 
+  hookified@1.14.0: {}
+
   hotscript@1.0.13: {}
 
   html-escaper@2.0.2: {}
@@ -8414,6 +8480,10 @@ snapshots:
   keyv@4.5.4:
     dependencies:
       json-buffer: 3.0.1
+
+  keyv@5.5.5:
+    dependencies:
+      '@keyv/serialize': 1.1.1
 
   kuler@2.0.0: {}
 

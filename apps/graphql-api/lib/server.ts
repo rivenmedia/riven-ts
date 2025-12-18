@@ -6,7 +6,11 @@ import { logger } from "@repo/core-util-logger";
 import { schema } from "@repo/core-util-graphql-schema";
 import type { Context } from "@repo/core-util-graphql-schema/context";
 import { ListrrAPI } from "@repo/listrr-data-access-api/data-source";
-import { InMemoryLRUCache } from "@apollo/utils.keyvaluecache";
+import { KeyvAdapter } from "@apollo/utils.keyvadapter";
+import { Keyv } from "keyv";
+import KeyvRedis from "@keyv/redis";
+import { ApolloServerPluginCacheControl } from "@apollo/server/plugin/cacheControl";
+import responseCachePlugin from "@apollo/server-plugin-response-cache";
 
 try {
   await postgresDataSource.initialize();
@@ -23,9 +27,18 @@ const PORT = Number(process.env["PORT"]) || 3000;
 logger.info("Starting GraphQL server...");
 
 const server = new ApolloServer<Context>({
-  cache: new InMemoryLRUCache(),
+  cache: new KeyvAdapter(
+    new Keyv(new KeyvRedis(process.env["REDIS_URL"])) as any,
+  ),
   schema,
   introspection: true,
+  plugins: [
+    ApolloServerPluginCacheControl({
+      // Cache everything for 60 seconds by default.
+      defaultMaxAge: 60,
+    }),
+    responseCachePlugin(),
+  ],
   formatError(formattedError, error) {
     logger.error("GraphQL Error:", { error });
 

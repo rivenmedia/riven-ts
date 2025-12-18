@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./lib/index.ts",
-    "./context": "./lib/context.ts"
+    "./context": "./lib/context.ts",
+    "./cache-control-directive": "./lib/cache-control.directive.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
@@ -20,6 +21,7 @@
     "type-graphql": "catalog:"
   },
   "devDependencies": {
+    "@apollo/cache-control-types": "^1.0.3",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
@@ -27,6 +29,7 @@
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
+    "type-fest": "^5.3.1",
     "vitest": "catalog:"
   }
 }

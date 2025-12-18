@@ -2,9 +2,9 @@ import { Field, ObjectType } from "type-graphql";
 
 @ObjectType()
 export class ExternalIds {
-  @Field({ nullable: true })
-  imdbId?: string;
+  @Field((_type) => String, { nullable: true })
+  imdbId: string | undefined;
 
-  @Field({ nullable: true })
-  tmdbId?: number;
+  @Field((_type) => String, { nullable: true })
+  tmdbId: string | undefined;
 }
