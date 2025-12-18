@@ -6,6 +6,11 @@ import { ExternalIds } from "./external-ids.type.ts";
 
 @Resolver()
 export class ListrrResolver {
+  @Query((_returns) => Boolean)
+  async listrrIsValid(@Ctx() { dataSources }: Context): Promise<boolean> {
+    return dataSources.listrr.validate();
+  }
+
   @CacheControl({ maxAge: 300 })
   @Query((_returns) => [ExternalIds])
   async listrrMovies(
