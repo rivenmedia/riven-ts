@@ -6,25 +6,21 @@ import { ExternalIds } from "./external-ids.type.ts";
 
 @Resolver()
 export class ListrrResolver {
-  @CacheControl({
-    maxAge: 300,
-  })
+  @CacheControl({ maxAge: 300 })
   @Query((_returns) => [ExternalIds])
   async listrrMovies(
-    @Args() { listId }: ListIdsArguments,
+    @Args() { listIds }: ListIdsArguments,
     @Ctx() { dataSources }: Context,
   ): Promise<ExternalIds[]> {
-    return await dataSources.listrr.getMovies(new Set<string>([listId]));
+    return await dataSources.listrr.getMovies(new Set<string>(listIds));
   }
 
-  @CacheControl({
-    maxAge: 300,
-  })
+  @CacheControl({ maxAge: 300 })
   @Query((_returns) => [ExternalIds])
   async listrrShows(
-    @Args() { listId }: ListIdsArguments,
+    @Args() { listIds }: ListIdsArguments,
     @Ctx() { dataSources }: Context,
   ): Promise<ExternalIds[]> {
-    return await dataSources.listrr.getShows(new Set<string>([listId]));
+    return await dataSources.listrr.getShows(new Set<string>(listIds));
   }
 }
