@@ -1,4 +1,4 @@
-import { getApiListMyPageHandler } from "./__generated__/index.ts";
+import { getApiListMyPageHandler } from "../__generated__/index.ts";
 import { ListrrAPI } from "./listrr.datasource.ts";
 import { expect } from "vitest";
 import { it } from "@repo/core-util-vitest-config/test-context";

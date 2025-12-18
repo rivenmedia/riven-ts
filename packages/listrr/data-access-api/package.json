@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./data-source": "./lib/listrr.datasource.ts",
-    "./resolver": "./lib/listrr.resolver.ts"
+    "./data-source": "./lib/datasource/listrr.datasource.ts",
+    "./resolver": "./lib/schema/listrr.resolver.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",

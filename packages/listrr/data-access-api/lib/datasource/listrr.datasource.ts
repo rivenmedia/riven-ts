@@ -5,7 +5,7 @@ import {
   type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIShowDtoSchema as GetShowsResponse,
   type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIMovieDtoSchema as GetMoviesResponse,
   type GetApiListMyPageQueryResponse,
-} from "./__generated__/index.ts";
+} from "../__generated__/index.ts";
 import type {
   CacheOptions,
   DataSourceConfig,
@@ -16,7 +16,7 @@ import type {
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
 import { RESTDataSource, type AugmentedRequest } from "@apollo/datasource-rest";
 import { logger } from "@repo/core-util-logger";
-import type { ExternalIds } from "./external-ids.type.ts";
+import type { ExternalIds } from "../schema/external-ids.type.ts";
 
 export class ListrrAPIError extends Error {}
 
