@@ -4,8 +4,7 @@ import { startStandaloneServer } from "@apollo/server/standalone";
 import { postgresDataSource } from "@repo/core-util-database/connection";
 import { logger } from "@repo/core-util-logger";
 import { schema } from "@repo/core-util-graphql-schema";
-import type { Context } from "@repo/core-util-graphql-schema/context";
-import { ListrrAPI } from "@repo/listrr-data-access-api/data-source";
+import { type Context, buildContext } from "@repo/core-util-graphql-context";
 import { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import { Keyv } from "keyv";
 import KeyvRedis from "@keyv/redis";
@@ -47,22 +46,11 @@ const server = new ApolloServer<Context>({
 });
 
 try {
-  const { url } = await startStandaloneServer(server, {
+  const { url } = await startStandaloneServer<Context>(server, {
     listen: {
       port: PORT,
     },
-    async context() {
-      const { cache } = server;
-
-      return {
-        dataSources: {
-          listrr: new ListrrAPI({
-            cache,
-            token: process.env["LISTRR_API_KEY"],
-          }),
-        },
-      } satisfies Context;
-    },
+    context: buildContext(server),
   });
 
   logger.info(`🚀 GraphQL server ready at ${url}`);

@@ -1,11 +1,10 @@
 {
-  "name": "@repo/core-util-vitest-config",
+  "name": "@repo/core-util-graphql-context",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "exports": {
-    "./base": "./lib/base.ts",
-    "./test-context": "./lib/test-context.ts"
+    ".": "./lib/index.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
@@ -15,24 +14,18 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
+    "@apollo/server": "^5.2.0",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
+    "@repo/core-util-vitest-config": "workspace:^",
+    "@repo/listrr-data-access-api": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
-    "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
-    "msw": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "@vitest/coverage-v8": "^4.0.0",
-    "msw": "^2.0.0",
-    "vitest": "^4.0.0"
-  },
-  "peerDependenciesMeta": {
-    "msw": {
-      "optional": true
-    }
+    "@apollo/server": "^5.2.0"
   }
 }

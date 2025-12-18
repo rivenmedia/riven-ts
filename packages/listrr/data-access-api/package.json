@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
+    "@repo/core-util-graphql-helpers": "workspace:^",
     "class-validator": "catalog:",
     "type-graphql": "catalog:",
     "zod": "catalog:"
@@ -25,7 +26,6 @@
     "@faker-js/faker": "^10.1.0",
     "@kubb/cli": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
-    "@repo/core-util-graphql-schema": "workspace:^",
     "@repo/core-util-kubb-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",

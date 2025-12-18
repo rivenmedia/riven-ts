@@ -12,9 +12,9 @@ import type {
   DataSourceFetchResult,
   DataSourceRequest,
   RequestOptions,
-  ValueOrPromise,
-} from "@apollo/datasource-rest/dist/RESTDataSource.js";
-import { RESTDataSource, type AugmentedRequest } from "@apollo/datasource-rest";
+  AugmentedRequest,
+} from "@apollo/datasource-rest";
+import { RESTDataSource } from "@apollo/datasource-rest";
 import { logger } from "@repo/core-util-logger";
 import type { ExternalIds } from "../schema/external-ids.type.ts";
 
@@ -57,7 +57,7 @@ export class ListrrAPI extends RESTDataSource {
   protected override willSendRequest(
     _path: string,
     requestOpts: AugmentedRequest,
-  ): ValueOrPromise<void> {
+  ) {
     if (!this.token) {
       throw new ListrrAPIError(
         "Listrr API token is not set. Please provide a valid API token.",
@@ -185,4 +185,10 @@ export class ListrrAPI extends RESTDataSource {
 
     return [...idsMap.values()];
   }
+}
+
+export interface ListrrContextSlice {
+  dataSources: {
+    listrr: ListrrAPI;
+  };
 }

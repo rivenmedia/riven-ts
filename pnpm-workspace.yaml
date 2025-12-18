@@ -38,8 +38,6 @@ catalog:
 configDependencies:
   "@pnpm/plugin-better-defaults": 0.2.1+sha512-3Fmur80S7+vmOKMmTdKS6JofiuvpUaBIdKEpgDyr9571FHo5Z4O2nrRUaSflxvwEakeYxIaFZ5MBaqAUnYHaeg==
 
-injectWorkspacePackages: true
-
 linkWorkspacePackages: true
 
 publicHoistPattern:
