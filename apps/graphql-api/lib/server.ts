@@ -52,9 +52,14 @@ try {
       port: PORT,
     },
     async context() {
+      const { cache } = server;
+
       return {
         dataSources: {
-          listrr: new ListrrAPI(process.env["LISTRR_API_KEY"]),
+          listrr: new ListrrAPI({
+            cache,
+            token: process.env["LISTRR_API_KEY"],
+          }),
         },
       } satisfies Context;
     },

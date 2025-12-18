@@ -8,6 +8,7 @@ import {
 } from "./__generated__/index.ts";
 import type {
   CacheOptions,
+  DataSourceConfig,
   DataSourceFetchResult,
   DataSourceRequest,
   RequestOptions,
@@ -24,10 +25,14 @@ export class ListrrAPI extends RESTDataSource {
 
   private token: string | undefined;
 
-  constructor(token?: string) {
-    super();
+  constructor(
+    options: Required<Pick<DataSourceConfig, "cache">> & {
+      token: string | undefined;
+    },
+  ) {
+    super(options);
 
-    this.token = token;
+    this.token = options.token;
   }
 
   override async fetch<TResult>(
@@ -73,18 +78,6 @@ export class ListrrAPI extends RESTDataSource {
     }
   }
 
-  async getShowsListPage(listId: string, page: number) {
-    return this.get<GetShowsResponse>(
-      `List/Shows/${listId}/ReleaseDate/Descending/${page.toString()}`,
-    );
-  }
-
-  async getMoviesListPage(listId: string, page: number) {
-    return this.get<GetMoviesResponse>(
-      `List/Movies/${listId}/ReleaseDate/Descending/${page.toString()}`,
-    );
-  }
-
   /**
    * Fetch unique show IDs from Listrr for a given list of content
    * @param contentLists
@@ -109,6 +102,11 @@ export class ListrrAPI extends RESTDataSource {
       while (page <= totalPages) {
         const response = await this.get<GetShowsResponse>(
           `List/Shows/${listId}/ReleaseDate/Descending/${page.toString()}`,
+          {
+            cacheOptions: {
+              ttl: 60 * 2,
+            },
+          },
         );
 
         const parsed = getShowsResponseSchema.parse(response);
@@ -157,6 +155,11 @@ export class ListrrAPI extends RESTDataSource {
       while (page <= totalPages) {
         const response = await this.get<GetMoviesResponse>(
           `List/Movies/${listId}/ReleaseDate/Descending/${page.toString()}`,
+          {
+            cacheOptions: {
+              ttl: 60 * 2,
+            },
+          },
         );
 
         const parsed = getMoviesResponseSchema.parse(response);
