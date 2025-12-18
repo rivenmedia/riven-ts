@@ -6,12 +6,18 @@ import {
   type ListrrContractsModelsAPIMovieDto as ListrrMovie,
 } from "../__generated__/index.ts";
 import { ListrrAPI } from "./listrr.datasource.ts";
-import { expect } from "vitest";
+import { expect, vi } from "vitest";
 import { it } from "@repo/core-util-vitest-config/test-context";
 import { http, HttpResponse } from "msw";
 
+const cache = {
+  get: vi.fn(),
+  set: vi.fn(),
+  delete: vi.fn(),
+};
+
 it("returns an empty array if no content lists are provided", async () => {
-  const listrrApi = new ListrrAPI("1234");
+  const listrrApi = new ListrrAPI({ cache, token: "1234" });
   const movies = await listrrApi.getMovies(new Set());
 
   expect(movies).toEqual([]);
@@ -42,7 +48,7 @@ it("retrieves movies from each provided list", async ({ server }) => {
     }),
   );
 
-  const listrrApi = new ListrrAPI("1234");
+  const listrrApi = new ListrrAPI({ cache, token: "1234" });
   const movies = await listrrApi.getMovies(contentLists);
 
   expect(movies.length).toBe(2);
@@ -79,7 +85,7 @@ it("paginates through all pages of the list", async ({ server }) => {
     }),
   );
 
-  const listrrApi = new ListrrAPI("1234");
+  const listrrApi = new ListrrAPI({ cache, token: "1234" });
   const movies = await listrrApi.getMovies(contentLists);
 
   expect(movies.length).toBe(totalPages * itemsPerPage);
@@ -111,7 +117,7 @@ it("dedupes movies that appear in multiple lists", async ({ server }) => {
     ),
   );
 
-  const listrrApi = new ListrrAPI("1234");
+  const listrrApi = new ListrrAPI({ cache, token: "1234" });
   const movies = await listrrApi.getMovies(new Set(Object.keys(items)));
 
   expect(movies).toHaveLength(8);

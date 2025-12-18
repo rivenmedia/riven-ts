@@ -6,12 +6,18 @@ import {
   type ListrrContractsModelsAPIShowDto as ListrrShow,
 } from "../__generated__/index.ts";
 import { ListrrAPI } from "./listrr.datasource.ts";
-import { expect } from "vitest";
+import { expect, vi } from "vitest";
 import { it } from "@repo/core-util-vitest-config/test-context";
 import { http, HttpResponse } from "msw";
 
+const cache = {
+  get: vi.fn(),
+  set: vi.fn(),
+  delete: vi.fn(),
+};
+
 it("returns an empty array if no content lists are provided", async () => {
-  const listrrApi = new ListrrAPI("1234");
+  const listrrApi = new ListrrAPI({ cache, token: "1234" });
   const shows = await listrrApi.getShows(new Set());
 
   expect(shows).toEqual([]);
@@ -46,7 +52,7 @@ it("retrieves shows from each provided list", async ({ server }) => {
     }),
   );
 
-  const listrrApi = new ListrrAPI("1234");
+  const listrrApi = new ListrrAPI({ cache, token: "1234" });
   const shows = await listrrApi.getShows(contentLists);
 
   expect(shows.length).toBe(2);
@@ -83,7 +89,7 @@ it("paginates through all pages of the list", async ({ server }) => {
     }),
   );
 
-  const listrrApi = new ListrrAPI("1234");
+  const listrrApi = new ListrrAPI({ cache, token: "1234" });
   const shows = await listrrApi.getShows(contentLists);
 
   expect(shows.length).toBe(totalPages * itemsPerPage);
@@ -115,7 +121,7 @@ it("dedupes shows that appear in multiple lists", async ({ server }) => {
     ),
   );
 
-  const listrrApi = new ListrrAPI("1234");
+  const listrrApi = new ListrrAPI({ cache, token: "1234" });
   const shows = await listrrApi.getShows(new Set(Object.keys(items)));
 
   expect(shows).toHaveLength(8);
