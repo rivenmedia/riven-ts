@@ -1,9 +1,11 @@
+import "reflect-metadata";
+
 import { ApolloServer } from "@apollo/server";
+import { schema } from "@repo/core-util-graphql-schema";
+import type { Context } from "@repo/core-util-graphql-context";
 
-export async function buildMockServer() {
-  const { schema } = await import("@repo/core-util-graphql-schema");
+export const mockServer = new ApolloServer<Context>({
+  schema,
+});
 
-  return new ApolloServer({
-    schema,
-  });
-}
+await mockServer.start();

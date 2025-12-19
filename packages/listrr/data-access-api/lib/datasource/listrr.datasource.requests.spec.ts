@@ -1,16 +1,13 @@
 import { ListrrAPI } from "./listrr.datasource.ts";
 import { it } from "@repo/core-util-vitest-test-context";
 import { http, HttpResponse } from "msw";
-import { expect, vi } from "vitest";
+import { expect } from "vitest";
 
-const cache = {
-  get: vi.fn(),
-  set: vi.fn(),
-  delete: vi.fn(),
-};
-
-it('assigns the API to the "x-api-key" header', async ({ server }) => {
-  const listrrApi = new ListrrAPI({ cache, token: "test-token" });
+it('assigns the API to the "x-api-key" header', async ({
+  server,
+  httpCache,
+}) => {
+  const listrrApi = new ListrrAPI({ cache: httpCache, token: "test-token" });
 
   server.use(
     http.get("https://listrr.pro/api/test-endpoint", ({ request }) => {

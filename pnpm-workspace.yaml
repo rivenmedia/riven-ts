@@ -6,7 +6,7 @@ packages:
   - packages/mdblist/*
 
 catalog:
-  "@apollo/datasource-rest": ^6.4.1
+  "@apollo/datasource-rest": 6.4.1
   "@kubb/cli": 4.11.1
   "@kubb/core": 4.11.1
   "@kubb/plugin-faker": ^4.11.1

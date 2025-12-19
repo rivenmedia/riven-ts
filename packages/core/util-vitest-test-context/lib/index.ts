@@ -1,21 +1,20 @@
 import { setupServer } from "msw/node";
 import { test as testBase } from "vitest";
-import { buildMockServer } from "@repo/core-util-mock-graphql-server";
+import { mockServer } from "@repo/core-util-mock-graphql-server";
+import { InMemoryLRUCache } from "@apollo/utils.keyvaluecache";
 
 const server = setupServer();
 
 export const it = testBase.extend<{
+  httpCache: InMemoryLRUCache;
   server: typeof server;
-  gqlServer: Awaited<ReturnType<typeof buildMockServer>>;
+  gqlServer: typeof mockServer;
 }>({
+  async httpCache({}, use) {
+    await use(new InMemoryLRUCache());
+  },
   async gqlServer({}, use) {
-    const mockServer = await buildMockServer();
-
-    await mockServer.start();
-
     await use(mockServer);
-
-    await mockServer.stop();
   },
   server: [
     async ({}, use) => {

@@ -6,24 +6,23 @@ import {
   type ListrrContractsModelsAPIMovieDto as ListrrMovie,
 } from "../__generated__/index.ts";
 import { ListrrAPI } from "./listrr.datasource.ts";
-import { expect, vi } from "vitest";
+import { expect } from "vitest";
 import { it } from "@repo/core-util-vitest-test-context";
 import { http, HttpResponse } from "msw";
 
-const cache = {
-  get: vi.fn(),
-  set: vi.fn(),
-  delete: vi.fn(),
-};
-
-it("returns an empty array if no content lists are provided", async () => {
-  const listrrApi = new ListrrAPI({ cache, token: "1234" });
+it("returns an empty array if no content lists are provided", async ({
+  httpCache,
+}) => {
+  const listrrApi = new ListrrAPI({ cache: httpCache, token: "1234" });
   const movies = await listrrApi.getMovies(new Set());
 
   expect(movies).toEqual([]);
 });
 
-it.only("retrieves movies from each provided list", async ({ server }) => {
+it("retrieves movies from each provided list", async ({
+  server,
+  httpCache,
+}) => {
   const contentLists = new Set([
     "64b7f2f5e13e4b6f8c8e4d1a",
     "64b7f2f5e13e4b6f8c8e4d1b",
@@ -42,19 +41,23 @@ it.only("retrieves movies from each provided list", async ({ server }) => {
         getMoviesResponse({
           pages: 1,
           count: 1,
-          items: [createListrrContractsModelsAPIMovieDto()],
+          items: [
+            createListrrContractsModelsAPIMovieDto({
+              id: `movie-for-list-${info.params["id"].toString()}`,
+            }),
+          ],
         }),
       );
     }),
   );
 
-  const listrrApi = new ListrrAPI({ cache, token: "1234" });
+  const listrrApi = new ListrrAPI({ cache: httpCache, token: "1234" });
   const movies = await listrrApi.getMovies(contentLists);
 
   expect(movies.length).toBe(2);
 });
 
-it("paginates through all pages of the list", async ({ server }) => {
+it("paginates through all pages of the list", async ({ server, httpCache }) => {
   const contentLists = new Set(["64b7f2f5e13e4b6f8c8e4d1c"]);
   const totalPages = 3;
   const itemsPerPage = 2;
@@ -85,13 +88,16 @@ it("paginates through all pages of the list", async ({ server }) => {
     }),
   );
 
-  const listrrApi = new ListrrAPI({ cache, token: "1234" });
+  const listrrApi = new ListrrAPI({ cache: httpCache, token: "1234" });
   const movies = await listrrApi.getMovies(contentLists);
 
   expect(movies.length).toBe(totalPages * itemsPerPage);
 });
 
-it("dedupes movies that appear in multiple lists", async ({ server }) => {
+it("dedupes movies that appear in multiple lists", async ({
+  server,
+  httpCache,
+}) => {
   const buildMockMovie = (id: number) =>
     createListrrContractsModelsAPIMovieDto({
       id: `movie-${id.toString()}`,
@@ -117,7 +123,7 @@ it("dedupes movies that appear in multiple lists", async ({ server }) => {
     ),
   );
 
-  const listrrApi = new ListrrAPI({ cache, token: "1234" });
+  const listrrApi = new ListrrAPI({ cache: httpCache, token: "1234" });
   const movies = await listrrApi.getMovies(new Set(Object.keys(items)));
 
   expect(movies).toHaveLength(8);
