@@ -4,8 +4,8 @@ import {
   createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse as getMoviesResponse,
   type GetApiListMoviesIdSortbySortbydirectionPageQueryResponse as GetMoviesResponse,
   type ListrrContractsModelsAPIMovieDto as ListrrMovie,
-} from "../__generated__/index.ts";
-import { ListrrAPI } from "./listrr.datasource.ts";
+} from "../../__generated__/index.ts";
+import { ListrrAPI } from "../listrr.datasource.ts";
 import { expect } from "vitest";
 import { it } from "@repo/core-util-vitest-test-context";
 import { http, HttpResponse } from "msw";
