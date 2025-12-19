@@ -1,5 +1,5 @@
 import { ListrrAPI } from "./listrr.datasource.ts";
-import { it } from "@repo/core-util-vitest-config/test-context";
+import { it } from "@repo/core-util-vitest-test-context";
 import { http, HttpResponse } from "msw";
 import { expect, vi } from "vitest";
 

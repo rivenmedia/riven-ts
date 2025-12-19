@@ -24,7 +24,6 @@
   },
   "dependencies": {
     "class-validator": "catalog:",
-    "reflect-metadata": "catalog:",
     "server-only": "^0.0.1",
     "typeorm": "catalog:",
     "zod": "catalog:"

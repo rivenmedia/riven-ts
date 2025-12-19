@@ -1,7 +1,7 @@
 import { getApiListMyPageHandler } from "../__generated__/index.ts";
 import { ListrrAPI } from "./listrr.datasource.ts";
 import { expect, vi } from "vitest";
-import { it } from "@repo/core-util-vitest-config/test-context";
+import { it } from "@repo/core-util-vitest-test-context";
 import { HttpResponse } from "msw";
 
 const cache = {

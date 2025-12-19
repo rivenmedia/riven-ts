@@ -1,5 +1,5 @@
 import { Field, ObjectType } from "type-graphql";
-import type { ListrrContractsModelsAPIMovieDto } from "./__generated__/index.ts";
+import type { ListrrContractsModelsAPIMovieDto } from "../__generated__/index.ts";
 
 @ObjectType()
 export class ListrrItem implements Partial<ListrrContractsModelsAPIMovieDto> {
