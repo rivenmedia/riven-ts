@@ -1,0 +1,30 @@
+{
+  {{#if (equals packageType 'plugin')}}
+  "name": "@repo/{{packageType}}-{{kebabCase pluginName}}",
+  {{else}}
+  "name": "@repo/{{packageGroup}}-{{packageType}}-{{kebabCase packageName}}",
+  {{/if}}
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
+    "lint": "eslint",
+    "lint:fix": "pnpm lint --fix",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  {{!-- Output dependencies for the package based on the packageDependencies helper --}}
+  {{#each (array "dependencies" "devDependencies" "peerDependencies")}}
+  {{#with (packageDependencies ../packageType this) as |deps|}}
+  {{#if deps}}
+  "{{../this}}": {
+    {{#each deps}}
+    "{{@key}}": "{{this}}"{{#unless @last}},{{/unless}}
+    {{/each}}
+  },
+  {{/if}}
+  {{/with}}
+  {{/each}}
+  {{!-- Add a field at the end to avoid trailing comma issues --}}
+  "private": true
+}

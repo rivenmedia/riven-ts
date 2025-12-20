@@ -1,0 +1,19 @@
+import { BaseDataSource } from "@repo/core-util-datasource";
+
+export class {{pascalCase pluginName}}APIError extends Error {}
+
+export class {{pascalCase pluginName}}API extends BaseDataSource {
+  override baseURL = "Insert base URL here";
+  override serviceName = "{{pascalCase pluginName}}";
+
+  async validate() {
+    // Implement validation logic here
+    return Promise.resolve(true);
+  }
+}
+
+export interface {{pascalCase pluginName}}ContextSlice {
+  dataSources: {
+    {{camelCase pluginName}}: {{pascalCase pluginName}}API;
+  };
+}

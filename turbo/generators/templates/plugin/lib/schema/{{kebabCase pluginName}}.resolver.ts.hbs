@@ -1,0 +1,12 @@
+import type { {{pascalCase pluginName}}ContextSlice } from "../datasource/{{kebabCase pluginName}}.datasource.ts";
+import { Ctx, Query, Resolver } from "type-graphql";
+
+@Resolver()
+export class {{pascalCase pluginName}}Resolver {
+  @Query((_returns) => Boolean)
+  {{camelCase pluginName}}IsValid(
+    @Ctx() { dataSources }: {{pascalCase pluginName}}ContextSlice,
+  ): Promise<boolean> {
+    return dataSources.{{camelCase pluginName}}.validate();
+  }
+}

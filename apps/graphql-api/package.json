@@ -18,7 +18,7 @@
     "@keyv/redis": "^5.1.5",
     "@repo/core-util-database": "workspace:^",
     "@repo/core-util-graphql-schema": "workspace:^",
-    "@repo/listrr-data-access-api": "workspace:^",
+    "@repo/plugin-listrr": "workspace:^",
     "keyv": "^5.5.5",
     "reflect-metadata": "^0.2.2",
     "type-graphql": "catalog:"

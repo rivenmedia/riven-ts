@@ -16,7 +16,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@repo/listrr-data-access-api": "workspace:^",
+    "@repo/plugin-listrr": "workspace:^",
     "graphql": "catalog:",
     "type-graphql": "catalog:"
   },

@@ -1,0 +1,6 @@
+{{#if (equals packageType 'plugin')}}
+# @repo/{{packageType}}-{{kebabCase pluginName}}
+{{else}}
+# @repo/{{packageGroup}}-{{packageType}}-{{kebabCase packageName}}
+{{/if}}
+

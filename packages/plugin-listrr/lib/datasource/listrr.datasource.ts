@@ -8,7 +8,6 @@ import {
 } from "../__generated__/index.ts";
 import type { ExternalIds } from "../schema/external-ids.type.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
-import { logger } from "@repo/core-util-logger";
 import { BaseDataSource } from "@repo/core-util-datasource";
 
 export class ListrrAPIError extends Error {}
@@ -54,7 +53,7 @@ export class ListrrAPI extends BaseDataSource {
 
     for (const listId of contentLists) {
       if (listId.length !== 24) {
-        logger.warn(`Skipping invalid list ID: ${listId}`);
+        this.logger.warn(`Skipping invalid list ID: ${listId}`);
 
         continue;
       }
@@ -107,7 +106,7 @@ export class ListrrAPI extends BaseDataSource {
 
     for (const listId of contentLists) {
       if (listId.length !== 24) {
-        logger.warn(`Skipping invalid list ID: ${listId}`);
+        this.logger.warn(`Skipping invalid list ID: ${listId}`);
 
         continue;
       }

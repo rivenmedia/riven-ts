@@ -206,9 +206,9 @@ importers:
       '@repo/core-util-graphql-schema':
         specifier: workspace:^
         version: link:../../packages/core/util-graphql-schema
-      '@repo/listrr-data-access-api':
+      '@repo/plugin-listrr':
         specifier: workspace:^
-        version: link:../../packages/listrr/data-access-api
+        version: link:../../packages/plugin-listrr
       keyv:
         specifier: ^5.5.5
         version: 5.5.5
@@ -396,9 +396,9 @@ importers:
       '@repo/core-util-vitest-config':
         specifier: workspace:^
         version: link:../util-vitest-config
-      '@repo/listrr-data-access-api':
+      '@repo/plugin-listrr':
         specifier: workspace:^
-        version: link:../../listrr/data-access-api
+        version: link:../../plugin-listrr
       '@types/node':
         specifier: 'catalog:'
         version: 24.0.0
@@ -457,9 +457,9 @@ importers:
 
   packages/core/util-graphql-schema:
     dependencies:
-      '@repo/listrr-data-access-api':
+      '@repo/plugin-listrr':
         specifier: workspace:^
-        version: link:../../listrr/data-access-api
+        version: link:../../plugin-listrr
       graphql:
         specifier: 'catalog:'
         version: 16.12.0
@@ -741,17 +741,17 @@ importers:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
 
-  packages/listrr/data-access-api:
+  packages/plugin-listrr:
     dependencies:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(graphql@16.12.0)
       '@repo/core-util-datasource':
         specifier: workspace:^
-        version: link:../../core/util-datasource
+        version: link:../core/util-datasource
       '@repo/core-util-graphql-helpers':
         specifier: workspace:^
-        version: link:../../core/util-graphql-helpers
+        version: link:../core/util-graphql-helpers
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
@@ -763,26 +763,26 @@ importers:
         version: 4.1.13
     devDependencies:
       '@faker-js/faker':
-        specifier: ^10.1.0
+        specifier: 'catalog:'
         version: 10.1.0
       '@kubb/cli':
         specifier: 'catalog:'
         version: 4.11.1(@kubb/react-fabric@0.5.4)(typescript@5.9.3)
       '@repo/core-util-eslint-config':
         specifier: workspace:^
-        version: link:../../core/util-eslint-config
+        version: link:../core/util-eslint-config
       '@repo/core-util-kubb-config':
         specifier: workspace:^
-        version: link:../../core/util-kubb-config
+        version: link:../core/util-kubb-config
       '@repo/core-util-logger':
         specifier: workspace:^
-        version: link:../../core/util-logger
+        version: link:../core/util-logger
       '@repo/core-util-typescript-config':
         specifier: workspace:^
-        version: link:../../core/util-typescript-config
+        version: link:../core/util-typescript-config
       '@repo/core-util-vitest-config':
         specifier: workspace:^
-        version: link:../../core/util-vitest-config
+        version: link:../core/util-vitest-config
       '@types/node':
         specifier: 'catalog:'
         version: 24.0.0
@@ -792,9 +792,6 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
-      jiti:
-        specifier: 'catalog:'
-        version: 2.6.1
       msw:
         specifier: 'catalog:'
         version: 2.12.4(@types/node@24.0.0)(typescript@5.9.3)
@@ -805,38 +802,14 @@ importers:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
 
-  packages/listrr/service-content:
-    devDependencies:
-      '@repo/core-util-eslint-config':
-        specifier: workspace:^
-        version: link:../../core/util-eslint-config
-      '@repo/core-util-logger':
-        specifier: workspace:^
-        version: link:../../core/util-logger
-      '@repo/core-util-typescript-config':
-        specifier: workspace:^
-        version: link:../../core/util-typescript-config
-      '@types/node':
-        specifier: 'catalog:'
-        version: 24.0.0
-      '@typescript-eslint/parser':
-        specifier: 'catalog:'
-        version: 8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.2(jiti@2.6.1)
-      vitest:
-        specifier: 'catalog:'
-        version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
-
-  packages/mdblist/data-access-api:
+  packages/plugin-mdblist:
     dependencies:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(graphql@16.12.0)
       '@repo/core-util-datasource':
         specifier: workspace:^
-        version: link:../../core/util-datasource
+        version: link:../core/util-datasource
       zod:
         specifier: 'catalog:'
         version: 4.1.13
@@ -858,19 +831,19 @@ importers:
         version: 4.11.1(ajv@8.17.1)
       '@repo/core-util-eslint-config':
         specifier: workspace:^
-        version: link:../../core/util-eslint-config
+        version: link:../core/util-eslint-config
       '@repo/core-util-kubb-config':
         specifier: workspace:^
-        version: link:../../core/util-kubb-config
+        version: link:../core/util-kubb-config
       '@repo/core-util-logger':
         specifier: workspace:^
-        version: link:../../core/util-logger
+        version: link:../core/util-logger
       '@repo/core-util-typescript-config':
         specifier: workspace:^
-        version: link:../../core/util-typescript-config
+        version: link:../core/util-typescript-config
       '@repo/core-util-vitest-test-context':
         specifier: workspace:^
-        version: link:../../core/util-vitest-test-context
+        version: link:../core/util-vitest-test-context
       '@types/node':
         specifier: 'catalog:'
         version: 24.0.0

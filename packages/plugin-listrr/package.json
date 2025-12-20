@@ -1,10 +1,14 @@
 {
-  "name": "@repo/mdblist-data-access-api",
+  "name": "@repo/plugin-listrr",
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    "./data-source": "./lib/datasource/listrr.datasource.ts",
+    "./resolver": "./lib/schema/listrr.resolver.ts"
+  },
   "scripts": {
-    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json && tsc --noEmit --project tsconfig.codegen.json",
+    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
     "generate-schemas": "kubb generate",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
@@ -14,25 +18,27 @@
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@repo/core-util-datasource": "workspace:^",
+    "@repo/core-util-graphql-helpers": "workspace:^",
+    "class-validator": "catalog:",
+    "type-graphql": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@faker-js/faker": "catalog:",
     "@kubb/cli": "catalog:",
-    "@kubb/core": "catalog:",
-    "@kubb/plugin-oas": "catalog:",
-    "@kubb/plugin-zod": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-kubb-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
-    "@repo/core-util-vitest-test-context": "workspace:^",
+    "@repo/core-util-vitest-config": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
-    "apib2openapi": "^0.1.5",
     "eslint": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "@kubb/cli": "*"
   }
 }
