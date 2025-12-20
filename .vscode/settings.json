@@ -2,7 +2,7 @@
   "python-envs.pythonProjects": [
     {
       "path": "",
-      "envManager": "",
+      "envManager": "ms-python.python:venv",
       "packageManager": "ms-python.python:pip"
     }
   ],

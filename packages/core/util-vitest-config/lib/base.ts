@@ -13,9 +13,6 @@ export const baseVitestConfig = mergeConfig(
       coverage: {
         exclude: ["**/__generated__/**"],
       },
-      typecheck: {
-        enabled: false,
-      },
     },
     plugins: [swc.vite() as Plugin],
   }),

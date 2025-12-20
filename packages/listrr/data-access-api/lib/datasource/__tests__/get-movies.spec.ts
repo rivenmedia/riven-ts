@@ -13,7 +13,7 @@ import { http, HttpResponse } from "msw";
 it("returns an empty array if no content lists are provided", async ({
   httpCache,
 }) => {
-  const listrrApi = new ListrrAPI({ cache: httpCache, token: "1234" });
+  const listrrApi = new ListrrAPI({ cache: httpCache, token: "test-token" });
   const movies = await listrrApi.getMovies(new Set());
 
   expect(movies).toEqual([]);
@@ -51,7 +51,7 @@ it("retrieves movies from each provided list", async ({
     }),
   );
 
-  const listrrApi = new ListrrAPI({ cache: httpCache, token: "1234" });
+  const listrrApi = new ListrrAPI({ cache: httpCache, token: "test-token" });
   const movies = await listrrApi.getMovies(contentLists);
 
   expect(movies.length).toBe(2);
@@ -88,7 +88,7 @@ it("paginates through all pages of the list", async ({ server, httpCache }) => {
     }),
   );
 
-  const listrrApi = new ListrrAPI({ cache: httpCache, token: "1234" });
+  const listrrApi = new ListrrAPI({ cache: httpCache, token: "test-token" });
   const movies = await listrrApi.getMovies(contentLists);
 
   expect(movies.length).toBe(totalPages * itemsPerPage);
@@ -123,7 +123,7 @@ it("dedupes movies that appear in multiple lists", async ({
     ),
   );
 
-  const listrrApi = new ListrrAPI({ cache: httpCache, token: "1234" });
+  const listrrApi = new ListrrAPI({ cache: httpCache, token: "test-token" });
   const movies = await listrrApi.getMovies(new Set(Object.keys(items)));
 
   expect(movies).toHaveLength(8);

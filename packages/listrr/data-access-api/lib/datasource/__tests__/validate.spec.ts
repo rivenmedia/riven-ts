@@ -7,7 +7,7 @@ import { HttpResponse } from "msw";
 it("returns false if the request fails", async ({ server, httpCache }) => {
   server.use(getApiListMyPageHandler(() => HttpResponse.error()));
 
-  const listrrApi = new ListrrAPI({ cache: httpCache, token: "1234" });
+  const listrrApi = new ListrrAPI({ cache: httpCache, token: "test-token" });
   const isValid = await listrrApi.validate();
 
   expect(isValid).toBe(false);
@@ -16,7 +16,7 @@ it("returns false if the request fails", async ({ server, httpCache }) => {
 it("returns true if the request succeeds", async ({ server, httpCache }) => {
   server.use(getApiListMyPageHandler());
 
-  const listrrApi = new ListrrAPI({ cache: httpCache, token: "1234" });
+  const listrrApi = new ListrrAPI({ cache: httpCache, token: "test-token" });
   const isValid = await listrrApi.validate();
 
   expect(isValid).toBe(true);

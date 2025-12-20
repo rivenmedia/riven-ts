@@ -7,6 +7,7 @@ packages:
 
 catalog:
   "@apollo/datasource-rest": 6.4.1
+  "@faker-js/faker": 10.1.0
   "@kubb/cli": 4.11.1
   "@kubb/core": 4.11.1
   "@kubb/plugin-faker": ^4.11.1
