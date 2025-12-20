@@ -33,6 +33,7 @@
       "persistent": true,
       "dependsOn": ["codegen"]
     },
-    "lint": {}
+    "lint": {},
+    "lint:fix": {}
   }
 }
