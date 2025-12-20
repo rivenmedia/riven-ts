@@ -20,7 +20,7 @@ export type MergeContextSlices<T extends BaseContextSlice[]> = T extends [
   ...infer Rest extends BaseContextSlice[],
 ]
   ? First & MergeContextSlices<Rest>
-  : {};
+  : unknown;
 
 export interface FeatureContextSlice extends BaseContextSlice {
   dataSources: Record<string, unknown>;
@@ -31,6 +31,7 @@ export type Context = MergeContextSlices<[ListrrContextSlice]>;
 export function buildContext(server: ApolloServer<Context>) {
   const { cache } = server;
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   return async function context() {
     return {
       dataSources: {

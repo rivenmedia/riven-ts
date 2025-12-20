@@ -21,4 +21,4 @@ export const vitestConfig = [
       globals: vitest.environments.env.globals,
     },
   },
-] satisfies ConfigArray;
+] as const satisfies ConfigArray;

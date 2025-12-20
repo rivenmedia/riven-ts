@@ -9,7 +9,7 @@ export function CacheControl({ maxAge, scope }: RequireAtLeastOne<CacheHint>) {
 
   let sdl = "@cacheControl(";
   if (maxAge !== undefined) {
-    sdl += `maxAge: ${maxAge}`;
+    sdl += `maxAge: ${maxAge.toString()}`;
   }
   if (scope) {
     sdl += ` scope: ${scope}`;

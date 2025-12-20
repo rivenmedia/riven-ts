@@ -1,3 +1,5 @@
+/* eslint-disable no-empty-pattern */
+
 import { setupServer } from "msw/node";
 import { test as testBase } from "vitest";
 import { mockServer } from "@repo/core-util-mock-graphql-server";

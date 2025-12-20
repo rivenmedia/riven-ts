@@ -12,7 +12,4 @@ export default [
       },
     },
   },
-  {
-    ignores: ["coverage"],
-  },
 ] satisfies ConfigArray;

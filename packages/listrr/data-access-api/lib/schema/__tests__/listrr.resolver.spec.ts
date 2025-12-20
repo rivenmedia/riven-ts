@@ -1,8 +1,5 @@
-import { it } from "@repo/core-util-vitest-test-context";
 import assert from "node:assert";
-import { expect } from "vitest";
 import { ListrrAPI } from "../../datasource/listrr.datasource.ts";
-import { HttpResponse } from "msw";
 import {
   createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse,
   createGetApiListShowsIdSortbySortbydirectionPageQueryResponse,
@@ -14,6 +11,9 @@ import {
   type GetApiListMoviesIdSortbySortbydirectionPageQueryResponse,
   type GetApiListShowsIdSortbySortbydirectionPageQueryResponse,
 } from "../../__generated__/index.ts";
+import { it } from "@repo/core-util-vitest-test-context";
+import { expect } from "vitest";
+import { HttpResponse } from "msw";
 
 it("returns movies when calling listrrMovies query", async ({
   gqlServer,

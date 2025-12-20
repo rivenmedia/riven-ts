@@ -1,11 +1,11 @@
-import { jsFiles, tsFiles } from "../internal/file-types.ts";
+import { tsFiles } from "../internal/file-types.ts";
 import { flatConfigs as importX } from "eslint-plugin-import-x";
 import type { ConfigArray } from "typescript-eslint";
 
 export const importOrdering = [
   importX.recommended,
   {
-    files: [jsFiles, tsFiles],
+    files: [tsFiles],
     rules: {
       "import-x/order": [
         "error",

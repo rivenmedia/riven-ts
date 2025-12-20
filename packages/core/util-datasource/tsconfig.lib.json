@@ -3,9 +3,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": "."
+    "rootDir": "lib"
   },
   "files": [],
-  "include": ["app/**/*.ts", "app/**/*.tsx", "app/**/*.mts", "app/**/*.cts"],
-  "exclude": []
+  "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],
+  "exclude": ["lib/**/*.spec.ts"]
 }

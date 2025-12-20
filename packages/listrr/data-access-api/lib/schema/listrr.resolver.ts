@@ -1,8 +1,8 @@
-import { Args, Ctx, Query, Resolver } from "type-graphql";
-import { CacheControl } from "@repo/core-util-graphql-helpers/caching/cache-control.directive";
 import { ListIdsArguments } from "./list-ids.arguments.ts";
 import { ExternalIds } from "./external-ids.type.ts";
 import type { ListrrContextSlice } from "../datasource/listrr.datasource.ts";
+import { CacheControl } from "@repo/core-util-graphql-helpers/caching/cache-control.directive";
+import { Args, Ctx, Query, Resolver } from "type-graphql";
 
 @Resolver()
 export class ListrrResolver {

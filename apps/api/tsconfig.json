@@ -5,7 +5,7 @@
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.spec.json" }
   ],
-  "files": ["eslint.config.ts"],
+  "files": ["eslint.config.ts", "next.config.ts"],
   "include": [],
-  "exclude": []
+  "exclude": [".next"]
 }

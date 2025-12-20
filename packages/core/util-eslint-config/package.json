@@ -8,7 +8,7 @@
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
-    "lint": "eslint .",
+    "lint": "eslint",
     "lint:fix": "pnpm lint --fix"
   },
   "dependencies": {
@@ -29,7 +29,8 @@
     "@types/eslint": "^9.6.1",
     "@types/node": "catalog:",
     "@vitest/eslint-plugin": "^1.5.2",
-    "eslint": "catalog:"
+    "eslint": "catalog:",
+    "typescript": "catalog:"
   },
   "peerDependencies": {
     "@typescript-eslint/parser": "^8",

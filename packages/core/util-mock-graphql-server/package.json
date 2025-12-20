@@ -8,7 +8,7 @@
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
-    "lint": "eslint .",
+    "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
@@ -17,7 +17,7 @@
     "@apollo/server": "^5.2.0",
     "@repo/core-util-graphql-context": "workspace:^",
     "@repo/core-util-graphql-schema": "workspace:^",
-    "graphql": "^16.12.0",
+    "graphql": "catalog:",
     "reflect-metadata": "catalog:"
   },
   "devDependencies": {
@@ -28,6 +28,7 @@
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
+    "typescript": "catalog:",
     "vitest": "catalog:"
   }
 }

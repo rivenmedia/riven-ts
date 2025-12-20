@@ -27,7 +27,7 @@ logger.info("Starting GraphQL server...");
 
 const server = new ApolloServer<Context>({
   cache: new KeyvAdapter(
-    new Keyv(new KeyvRedis(process.env["REDIS_URL"])) as any,
+    new Keyv(new KeyvRedis(process.env["REDIS_URL"])) as never,
   ),
   schema,
   introspection: true,

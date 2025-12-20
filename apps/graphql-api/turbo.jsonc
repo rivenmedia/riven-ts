@@ -3,7 +3,7 @@
   "extends": ["//"],
   "tasks": {
     "dev": {
-      "passThroughEnv": ["PORT", "LISTRR_API_KEY"]
+      "passThroughEnv": ["PORT", "REDIS_URL"]
     }
   }
 }

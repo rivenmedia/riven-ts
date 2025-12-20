@@ -1,11 +1,10 @@
 {
-  "name": "@repo/core-util-vitest-config",
+  "name": "@repo/core-util-datasource",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "exports": {
-    "./base": "./lib/base.ts",
-    "./test-context": "./lib/test-context.ts"
+    ".": "./lib/index.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
@@ -15,29 +14,17 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@swc/core": "^1.15.7",
-    "unplugin-swc": "^1.5.9"
+    "@apollo/datasource-rest": "catalog:"
   },
   "devDependencies": {
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
+    "@repo/core-util-vitest-config": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
-    "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
-    "msw": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
-  },
-  "peerDependencies": {
-    "@vitest/coverage-v8": "^4.0.0",
-    "msw": "^2.0.0",
-    "vitest": "^4.0.0"
-  },
-  "peerDependenciesMeta": {
-    "msw": {
-      "optional": true
-    }
   }
 }

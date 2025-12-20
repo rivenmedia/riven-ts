@@ -1,4 +1,9 @@
-import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
+import {
+  configDefaults,
+  defineConfig,
+  mergeConfig,
+  type Plugin,
+} from "vitest/config";
 import swc from "unplugin-swc";
 
 export const baseVitestConfig = mergeConfig(
@@ -12,6 +17,6 @@ export const baseVitestConfig = mergeConfig(
         enabled: false,
       },
     },
-    plugins: [swc.vite()],
+    plugins: [swc.vite() as Plugin],
   }),
 );

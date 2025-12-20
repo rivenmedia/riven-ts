@@ -6,53 +6,16 @@ import {
   type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIMovieDtoSchema as GetMoviesResponse,
   type GetApiListMyPageQueryResponse,
 } from "../__generated__/index.ts";
-import type {
-  CacheOptions,
-  DataSourceConfig,
-  DataSourceFetchResult,
-  DataSourceRequest,
-  RequestOptions,
-  AugmentedRequest,
-} from "@apollo/datasource-rest";
-import { RESTDataSource } from "@apollo/datasource-rest";
-import { logger } from "@repo/core-util-logger";
 import type { ExternalIds } from "../schema/external-ids.type.ts";
+import type { AugmentedRequest } from "@apollo/datasource-rest";
+import { logger } from "@repo/core-util-logger";
+import { BaseDataSource } from "@repo/core-util-datasource";
 
 export class ListrrAPIError extends Error {}
 
-export class ListrrAPI extends RESTDataSource {
+export class ListrrAPI extends BaseDataSource {
   override baseURL = "https://listrr.pro/api/";
-
-  private token: string | undefined;
-
-  constructor(
-    options: Required<Pick<DataSourceConfig, "cache">> & {
-      token: string | undefined;
-    },
-  ) {
-    super(options);
-
-    this.token = options.token;
-  }
-
-  override async fetch<TResult>(
-    path: string,
-    incomingRequest?: DataSourceRequest<CacheOptions> | undefined,
-  ): Promise<DataSourceFetchResult<TResult>> {
-    const result = await super.fetch<TResult>(path, incomingRequest);
-
-    logger.debug(`Listrr API Response for ${path}: ${result}`);
-
-    return result;
-  }
-
-  protected override didEncounterError(
-    error: Error,
-    _request: RequestOptions<CacheOptions>,
-    _url?: URL,
-  ): void {
-    logger.error(`Listrr API Error: ${error.message}`);
-  }
+  override serviceName = "Listrr";
 
   protected override willSendRequest(
     _path: string,

@@ -51,6 +51,9 @@ catalogs:
     eslint:
       specifier: ^9.39.2
       version: 9.39.2
+    graphql:
+      specifier: ^16.12.0
+      version: 16.12.0
     jiti:
       specifier: 2.6.1
       version: 2.6.1
@@ -128,7 +131,7 @@ importers:
         specifier: workspace:^
         version: link:../../packages/core/util-logger
       graphql:
-        specifier: ^16.12.0
+        specifier: 'catalog:'
         version: 16.12.0
       next:
         specifier: 'catalog:'
@@ -277,6 +280,43 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
+
+  packages/core/util-datasource:
+    dependencies:
+      '@apollo/datasource-rest':
+        specifier: 'catalog:'
+        version: 6.4.1(graphql@16.12.0)
+    devDependencies:
+      '@repo/core-util-eslint-config':
+        specifier: workspace:^
+        version: link:../util-eslint-config
+      '@repo/core-util-logger':
+        specifier: workspace:^
+        version: link:../util-logger
+      '@repo/core-util-typescript-config':
+        specifier: workspace:^
+        version: link:../util-typescript-config
+      '@repo/core-util-vitest-config':
+        specifier: workspace:^
+        version: link:../util-vitest-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.0.0
+      '@typescript-eslint/parser':
+        specifier: 'catalog:'
+        version: 8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
       vitest:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
@@ -332,6 +372,9 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   packages/core/util-graphql-context:
     devDependencies:
@@ -362,6 +405,9 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
       vitest:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
@@ -399,6 +445,9 @@ importers:
       type-fest:
         specifier: ^5.3.1
         version: 5.3.1
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
       vitest:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
@@ -409,7 +458,7 @@ importers:
         specifier: workspace:^
         version: link:../../listrr/data-access-api
       graphql:
-        specifier: ^16.12.0
+        specifier: 'catalog:'
         version: 16.12.0
       type-graphql:
         specifier: 'catalog:'
@@ -442,6 +491,9 @@ importers:
       type-fest:
         specifier: ^5.3.1
         version: 5.3.1
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
       vitest:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
@@ -491,6 +543,9 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
       vitest:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
@@ -516,6 +571,9 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
       vitest:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
@@ -532,7 +590,7 @@ importers:
         specifier: workspace:^
         version: link:../util-graphql-schema
       graphql:
-        specifier: ^16.12.0
+        specifier: 'catalog:'
         version: 16.12.0
       reflect-metadata:
         specifier: 'catalog:'
@@ -559,6 +617,9 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
       vitest:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
@@ -621,6 +682,9 @@ importers:
       msw:
         specifier: 'catalog:'
         version: 2.12.4(@types/node@24.0.0)(typescript@5.9.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
       vitest:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
@@ -658,6 +722,9 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
       vitest:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
@@ -667,6 +734,9 @@ importers:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(graphql@16.12.0)
+      '@repo/core-util-datasource':
+        specifier: workspace:^
+        version: link:../../core/util-datasource
       '@repo/core-util-graphql-helpers':
         specifier: workspace:^
         version: link:../../core/util-graphql-helpers
@@ -710,9 +780,15 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
+      jiti:
+        specifier: 'catalog:'
+        version: 2.6.1
       msw:
         specifier: 'catalog:'
         version: 2.12.4(@types/node@24.0.0)(typescript@5.9.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
       vitest:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
@@ -743,6 +819,12 @@ importers:
 
   packages/mdblist/data-access-api:
     dependencies:
+      '@apollo/datasource-rest':
+        specifier: 'catalog:'
+        version: 6.4.1(graphql@16.12.0)
+      '@repo/core-util-datasource':
+        specifier: workspace:^
+        version: link:../../core/util-datasource
       zod:
         specifier: 'catalog:'
         version: 4.1.13
@@ -783,6 +865,9 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
       vitest:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
