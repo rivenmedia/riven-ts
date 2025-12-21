@@ -2,7 +2,7 @@
   {{#if (equals packageType 'plugin')}}
   "name": "@repo/{{packageType}}-{{kebabCase pluginName}}",
   {{else}}
-  "name": "@repo/{{packageGroup}}-{{packageType}}-{{kebabCase packageName}}",
+  "name": "@repo/{{packageType}}-{{kebabCase packageName}}",
   {{/if}}
   "version": "0.0.0",
   "type": "module",

@@ -5,7 +5,6 @@ import type { PlopTypes } from "@turbo/gen";
 
 interface PackageAnswers {
   packageName: string;
-  packageGroup: string;
   packageType: string;
   confirm: boolean;
 }
@@ -21,20 +20,6 @@ export const createPackageGenerator = (plop: PlopTypes.NodePlopAPI) =>
       },
       {
         type: "list",
-        name: "packageGroup",
-        message: "Package group (e.g., core):",
-        choices() {
-          return readdirSync("packages", { withFileTypes: true })
-            .filter(
-              (dirent) =>
-                dirent.isDirectory() &&
-                !existsSync(`packages/${dirent.name}/package.json`),
-            )
-            .map((dirent) => dirent.name);
-        },
-      },
-      {
-        type: "list",
         name: "packageType",
         message: "Select the package type:",
         choices: ["feature", "util"],
@@ -43,11 +28,10 @@ export const createPackageGenerator = (plop: PlopTypes.NodePlopAPI) =>
         type: "confirm",
         name: "confirm",
         message: (data) => {
-          const { packageType, packageName, packageGroup } =
-            data as PackageAnswers;
+          const { packageType, packageName } = data as PackageAnswers;
 
-          const packageIdentifier = `@repo/${packageGroup}-${packageType}-${packageName}`;
-          const packagePath = `packages/${packageGroup}/${packageType}-${packageName}`;
+          const packageIdentifier = `@repo/${packageType}-${packageName}`;
+          const packagePath = `packages/${packageType}-${packageName}`;
 
           return `This will create ${packageIdentifier} in ${packagePath}. Continue?`;
         },
@@ -63,8 +47,7 @@ export const createPackageGenerator = (plop: PlopTypes.NodePlopAPI) =>
         },
         type: "addMany",
         base: "templates/shared/boilerplate",
-        destination:
-          "packages/{{packageGroup}}/{{packageType}}-{{kebabCase packageName}}",
+        destination: "packages/{{packageType}}-{{kebabCase packageName}}",
         templateFiles: "templates/shared/boilerplate/**",
       },
       {
@@ -75,17 +58,15 @@ export const createPackageGenerator = (plop: PlopTypes.NodePlopAPI) =>
         },
         type: "addMany",
         base: "templates/package",
-        destination:
-          "packages/{{packageGroup}}/{{packageType}}-{{kebabCase packageName}}",
+        destination: "packages/{{packageType}}-{{kebabCase packageName}}",
         templateFiles: "templates/package/**",
       },
       installDependenciesAction,
       (answers) => {
-        const { packageGroup, packageType, packageName } =
-          answers as PackageAnswers;
+        const { packageType, packageName } = answers as PackageAnswers;
 
         return formatOutputCode([
-          `packages/${packageGroup}/${packageType}-${packageName}/**/*`,
+          `packages/${packageType}-${packageName}/**/*`,
         ]);
       },
     ],
