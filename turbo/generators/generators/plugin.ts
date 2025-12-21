@@ -82,7 +82,7 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
           },
         );
       },
-      async (answers) => {
+      (answers) => {
         const pluginName = plop.getHelper("kebabCase")(
           (answers as PluginAnswers).pluginName,
         );
