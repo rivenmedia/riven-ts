@@ -1,6 +1,7 @@
 import { installDependenciesAction } from "./actions/install-dependencies";
-import { formatOutputCodeAction } from "./actions/format-output";
+import { formatOutputCode } from "./actions/format-output";
 import type { PlopTypes } from "@turbo/gen";
+import { installDependenciesToPackage } from "./actions/install-dependencies-to-package";
 
 interface PluginAnswers {
   pluginName: string;
@@ -54,13 +55,39 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
         destination: "packages/plugin-{{kebabCase pluginName}}",
         templateFiles: "templates/plugin/**",
       },
+      {
+        path: require.resolve("../../../packages/core/util-graphql-schema/lib/index.ts"),
+        pattern: /(\/\/ {{resolver-imports}})/g,
+        template:
+          "import { {{pascalCase pluginName}}Resolver } from '@repo/plugin-{{kebabCase pluginName}}/resolver';\n$1",
+        type: "modify",
+      },
+      {
+        path: require.resolve("../../../packages/core/util-graphql-schema/lib/index.ts"),
+        pattern: /(\/\/ {{schema-resolvers}})/g,
+        template: "{{pascalCase pluginName}}Resolver,\n$1",
+        type: "modify",
+      },
       installDependenciesAction,
       (answers) => {
         const pluginName = plop.getHelper("kebabCase")(
           (answers as PluginAnswers).pluginName,
         );
 
-        return formatOutputCodeAction(`packages/plugin-${pluginName}`);
+        return installDependenciesToPackage(
+          "@repo/core-util-graphql-schema",
+          "dependencies",
+          {
+            [`@repo/plugin-${pluginName}`]: "workspace:^",
+          },
+        );
+      },
+      async (answers) => {
+        const pluginName = plop.getHelper("kebabCase")(
+          (answers as PluginAnswers).pluginName,
+        );
+
+        return formatOutputCode(`packages/plugin-${pluginName}`);
       },
     ],
   });

@@ -118,6 +118,9 @@ importers:
       turbo:
         specifier: ^2.6.3
         version: 2.6.3
+      type-fest:
+        specifier: ^5.3.1
+        version: 5.3.1
 
   apps/api:
     dependencies:
