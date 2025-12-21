@@ -2,7 +2,7 @@ import type { ApolloServer, BaseContext } from "@apollo/server";
 import {
   ListrrAPI,
   type ListrrContextSlice,
-} from "@repo/listrr-data-access-api/data-source";
+} from "@repo/plugin-listrr/datasource";
 
 /**
  * Base interface that all feature context slices must extend.

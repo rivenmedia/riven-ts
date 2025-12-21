@@ -1,6 +1,6 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "extends": ["//"],
-  "tags": ["group:mdblist", "type:data-access"],
+  "tags": ["group:mdblist", "type:plugin"],
   "tasks": {}
 }

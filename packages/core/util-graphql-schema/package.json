@@ -29,7 +29,6 @@
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
-    "type-fest": "^5.3.1",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

@@ -26,7 +26,6 @@
     "@repo/core-util-kubb-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
-    "@repo/core-util-vitest-test-context": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "apib2openapi": "^0.1.5",

@@ -491,9 +491,6 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
-      type-fest:
-        specifier: ^5.3.1
-        version: 5.3.1
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -841,9 +838,6 @@ importers:
       '@repo/core-util-typescript-config':
         specifier: workspace:^
         version: link:../core/util-typescript-config
-      '@repo/core-util-vitest-test-context':
-        specifier: workspace:^
-        version: link:../core/util-vitest-test-context
       '@types/node':
         specifier: 'catalog:'
         version: 24.0.0

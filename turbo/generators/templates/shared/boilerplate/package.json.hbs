@@ -7,15 +7,33 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    {{#with (packageJsonFields packageType 'scripts') as |scripts|}}
+    {{#if scripts}}
+    {{#each scripts}}
+    "{{@key}}": "{{this}}",
+    {{/each}}
+    {{/if}}
+    {{/with}}
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   },
-  {{!-- Output dependencies for the package based on the packageDependencies helper --}}
+  "exports": {
+    {{#with (packageJsonFields packageType 'exports') as |exports|}}
+    {{#if exports}}
+    {{#each exports}}
+    {{#if this}}
+    "{{@key}}": "{{this}}"{{#unless @last}},{{/unless}}
+    {{/if}}
+    {{/each}}
+    {{/if}}
+    {{/with}}
+  },
+  {{!-- Output dependencies for the package based on the packageJsonFields helper --}}
   {{#each (array "dependencies" "devDependencies" "peerDependencies")}}
-  {{#with (packageDependencies ../packageType this) as |deps|}}
+  {{#with (packageJsonFields ../packageType this) as |deps|}}
   {{#if deps}}
   "{{../this}}": {
     {{#each deps}}

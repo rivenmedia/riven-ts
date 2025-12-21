@@ -1,1 +1,1 @@
-# @repo/mdblist-data-access-api
+# @repo/plugin-mdblist

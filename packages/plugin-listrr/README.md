@@ -1,1 +1,1 @@
-# @repo/listrr-data-access-api
+# @repo/plugin-listrr

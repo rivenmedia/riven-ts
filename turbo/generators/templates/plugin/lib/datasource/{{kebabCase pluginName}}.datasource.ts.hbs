@@ -3,12 +3,18 @@ import { BaseDataSource } from "@repo/core-util-datasource";
 export class {{pascalCase pluginName}}APIError extends Error {}
 
 export class {{pascalCase pluginName}}API extends BaseDataSource {
-  override baseURL = "Insert base URL here";
+  override baseURL = "https://{{kebabCase pluginName}}.com/api/";
   override serviceName = "{{pascalCase pluginName}}";
 
   async validate() {
-    // Implement validation logic here
-    return Promise.resolve(true);
+    try {
+      // Implement your own validation logic here
+      await this.get('validate');
+
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 
