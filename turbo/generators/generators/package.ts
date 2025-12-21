@@ -1,6 +1,6 @@
 import { existsSync, readdirSync } from "node:fs";
 import { installDependenciesAction } from "./actions/install-dependencies";
-import { formatOutputCodeAction } from "./actions/format-output";
+import { formatOutputCode } from "./actions/format-output";
 import type { PlopTypes } from "@turbo/gen";
 
 interface PackageAnswers {
@@ -37,7 +37,7 @@ export const createPackageGenerator = (plop: PlopTypes.NodePlopAPI) =>
         type: "list",
         name: "packageType",
         message: "Select the package type:",
-        choices: ["util", "domain"],
+        choices: ["feature", "util"],
       },
       {
         type: "confirm",
@@ -84,9 +84,9 @@ export const createPackageGenerator = (plop: PlopTypes.NodePlopAPI) =>
         const { packageGroup, packageType, packageName } =
           answers as PackageAnswers;
 
-        return formatOutputCodeAction(
-          `packages/${packageGroup}/${packageType}-${packageName}`,
-        );
+        return formatOutputCode([
+          `packages/${packageGroup}/${packageType}-${packageName}/**/*`,
+        ]);
       },
     ],
   });
