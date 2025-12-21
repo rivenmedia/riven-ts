@@ -68,7 +68,6 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
         template: "{{pascalCase pluginName}}Resolver,\n$1",
         type: "modify",
       },
-      installDependenciesAction,
       (answers) => {
         const pluginName = plop.getHelper("kebabCase")(
           (answers as PluginAnswers).pluginName,
