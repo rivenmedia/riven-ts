@@ -1,8 +1,8 @@
 import { spawn } from "node:child_process";
 
-export const formatOutputCode = (path: string) => {
+export const formatOutputCode = (files: string[]) => {
   return new Promise<string>((resolve, reject) => {
-    const child = spawn("pnpm", ["prettier", "--write", `${path}/**/*`], {
+    const child = spawn("pnpm", ["prettier", "--write", ...files], {
       stdio: "inherit",
     });
 
