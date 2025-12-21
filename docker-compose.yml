@@ -54,6 +54,7 @@ services:
     container_name: riven-ts-dev-cache
     image: redis
     network_mode: host
+    restart: unless-stopped
 
 volumes:
   riven-ts-db:
