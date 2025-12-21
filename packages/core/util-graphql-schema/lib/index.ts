@@ -1,10 +1,10 @@
-import { ListrrResolver } from "@repo/plugin-listrr/resolver";
+import * as pluginListrr from "@repo/plugin-listrr";
 // {{resolver-imports}}
 import { buildSchema } from "type-graphql";
 
 export const schema = await buildSchema({
   resolvers: [
-    ListrrResolver,
+    ...pluginListrr.resolvers,
     // {{schema-resolvers}}
   ],
   validate: true,

@@ -1,0 +1,11 @@
+import {
+  {{pascalCase pluginName}}API,
+  type {{pascalCase pluginName}}ContextSlice,
+} from "./datasource/{{kebabCase pluginName}}.datasource.ts";
+import { {{pascalCase pluginName}}Resolver } from "./schema/{{kebabCase pluginName}}.resolver.ts";
+
+export const resolvers = [{{pascalCase pluginName}}Resolver] as const;
+
+export const datasource = {{pascalCase pluginName}}API;
+
+export type ContextSlice = {{pascalCase pluginName}}ContextSlice;

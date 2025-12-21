@@ -1,8 +1,6 @@
 import type { ApolloServer, BaseContext } from "@apollo/server";
-import {
-  ListrrAPI,
-  type ListrrContextSlice,
-} from "@repo/plugin-listrr/datasource";
+import * as pluginListrr from "@repo/plugin-listrr";
+// {{plugin-imports}}
 
 /**
  * Base interface that all feature context slices must extend.
@@ -26,7 +24,12 @@ export interface FeatureContextSlice extends BaseContextSlice {
   dataSources: Record<string, unknown>;
 }
 
-export type Context = MergeContextSlices<[ListrrContextSlice]>;
+export type Context = MergeContextSlices<
+  [
+    pluginListrr.ContextSlice,
+    // {{plugin-context-slices}}
+  ]
+>;
 
 export function buildContext(server: ApolloServer<Context>) {
   const { cache } = server;
@@ -35,10 +38,11 @@ export function buildContext(server: ApolloServer<Context>) {
   return async function context() {
     return {
       dataSources: {
-        listrr: new ListrrAPI({
+        listrr: new pluginListrr.datasource({
           cache,
           token: process.env["LISTRR_API_KEY"],
         }),
+        // {{plugin-datasources}}
       },
     } satisfies Context;
   };

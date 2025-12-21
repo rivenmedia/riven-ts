@@ -13,13 +13,15 @@
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   },
+  "dependencies": {
+    "@repo/plugin-listrr": "workspace:^"
+  },
   "devDependencies": {
     "@apollo/server": "^5.2.0",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
-    "@repo/plugin-listrr": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",

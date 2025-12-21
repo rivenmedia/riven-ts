@@ -1,8 +1,8 @@
 import { spawn } from "node:child_process";
 import type { PackageJson } from "type-fest";
 
-export const installDependenciesToPackage = (
-  targetPackage: string,
+export const installDependenciesToPackages = (
+  targetPackages: string[],
   dependencyType: keyof Pick<
     PackageJson.PackageJsonStandard,
     "dependencies" | "devDependencies" | "peerDependencies"
@@ -19,7 +19,7 @@ export const installDependenciesToPackage = (
     const child = spawn(
       "pnpm",
       [
-        `--filter=${targetPackage}`,
+        ...targetPackages.map((targetPackage) => `--filter=${targetPackage}`),
         "add",
         ...args[dependencyType],
         ...Object.entries(dependencies).map(

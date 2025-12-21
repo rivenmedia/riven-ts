@@ -6,7 +6,7 @@ import {
   type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIMovieDtoSchema as GetMoviesResponse,
   type GetApiListMyPageQueryResponse,
 } from "../__generated__/index.ts";
-import type { ExternalIds } from "../schema/external-ids.type.ts";
+import type { ExternalIds } from "../schema/types/external-ids.type.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import { BaseDataSource } from "@repo/core-util-datasource";
 

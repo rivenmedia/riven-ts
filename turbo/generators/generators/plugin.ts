@@ -1,7 +1,7 @@
-import { installDependenciesAction } from "./actions/install-dependencies";
+import dedent from "dedent";
 import { formatOutputCode } from "./actions/format-output";
 import type { PlopTypes } from "@turbo/gen";
-import { installDependenciesToPackage } from "./actions/install-dependencies-to-package";
+import { installDependenciesToPackages } from "./actions/install-dependencies-to-package";
 
 interface PluginAnswers {
   pluginName: string;
@@ -59,13 +59,38 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
         path: require.resolve("../../../packages/core/util-graphql-schema/lib/index.ts"),
         pattern: /(\/\/ {{resolver-imports}})/g,
         template:
-          "import { {{pascalCase pluginName}}Resolver } from '@repo/plugin-{{kebabCase pluginName}}/resolver';\n$1",
+          "import * as plugin{{pascalCase pluginName}} from '@repo/plugin-{{kebabCase pluginName}}';\n$1",
         type: "modify",
       },
       {
         path: require.resolve("../../../packages/core/util-graphql-schema/lib/index.ts"),
         pattern: /(\/\/ {{schema-resolvers}})/g,
-        template: "{{pascalCase pluginName}}Resolver,\n$1",
+        template: "...plugin{{pascalCase pluginName}}.resolvers,\n$1",
+        type: "modify",
+      },
+      {
+        path: require.resolve("../../../packages/core/util-graphql-context/lib/index.ts"),
+        pattern: /(\/\/ {{plugin-imports}})/g,
+        template:
+          "import * as plugin{{pascalCase pluginName}} from '@repo/plugin-{{kebabCase pluginName}}';\n$1",
+        type: "modify",
+      },
+      {
+        path: require.resolve("../../../packages/core/util-graphql-context/lib/index.ts"),
+        pattern: /(\/\/ {{plugin-context-slices}})/g,
+        template: "plugin{{pascalCase pluginName}}.ContextSlice,\n$1",
+        type: "modify",
+      },
+      {
+        path: require.resolve("../../../packages/core/util-graphql-context/lib/index.ts"),
+        pattern: /(\/\/ {{plugin-datasources}})/g,
+        template: dedent`
+          {{camelCase pluginName}}: new plugin{{pascalCase pluginName}}.datasource({
+            cache,
+            token: process.env["{{constantCase pluginName}}_API_KEY"],
+          }),
+          $1
+        `,
         type: "modify",
       },
       (answers) => {
@@ -73,8 +98,8 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
           (answers as PluginAnswers).pluginName,
         );
 
-        return installDependenciesToPackage(
-          "@repo/core-util-graphql-schema",
+        return installDependenciesToPackages(
+          ["@repo/core-util-graphql-schema", "@repo/core-util-graphql-context"],
           "dependencies",
           {
             [`@repo/plugin-${pluginName}`]: "workspace:^",
@@ -89,6 +114,7 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
         return formatOutputCode([
           `packages/plugin-${pluginName}/**/*`,
           require.resolve("../../../packages/core/util-graphql-schema/lib/index.ts"),
+          require.resolve("../../../packages/core/util-graphql-context/lib/index.ts"),
         ]);
       },
     ],

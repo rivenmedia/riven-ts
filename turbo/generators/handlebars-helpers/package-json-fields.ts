@@ -37,9 +37,7 @@ const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
       zod: "catalog:",
     },
     exports: {
-      ".": null,
       "./datasource": "./lib/datasource/{{kebabCase pluginName}}.datasource.ts",
-      "./resolver": "./lib/schema/{{kebabCase pluginName}}.resolver.ts",
     },
   },
 };

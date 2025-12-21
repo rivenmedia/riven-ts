@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "@turbo/gen": "^2.6.3",
+    "dedent": "^1.7.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",

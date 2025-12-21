@@ -1,5 +1,5 @@
-import { ListIdsArguments } from "./list-ids.arguments.ts";
-import { ExternalIds } from "./external-ids.type.ts";
+import { ListIdsArguments } from "./arguments/list-ids.arguments.ts";
+import { ExternalIds } from "./types/external-ids.type.ts";
 import type { ListrrContextSlice } from "../datasource/listrr.datasource.ts";
 import { CacheControl } from "@repo/core-util-graphql-helpers/caching/cache-control.directive";
 import { Args, Ctx, Query, Resolver } from "type-graphql";
