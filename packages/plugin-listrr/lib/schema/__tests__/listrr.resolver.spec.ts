@@ -11,6 +11,7 @@ import {
   type GetApiListMoviesIdSortbySortbydirectionPageQueryResponse,
   type GetApiListShowsIdSortbySortbydirectionPageQueryResponse,
 } from "../../__generated__/index.ts";
+import { pluginConfig } from "../../listrr-plugin.config.ts";
 import { it } from "@repo/core-util-vitest-test-context";
 import { expect } from "vitest";
 import { HttpResponse } from "msw";
@@ -66,8 +67,8 @@ it("returns movies when calling listrrMovies query", async ({
     },
     {
       contextValue: {
-        dataSources: {
-          listrr: new ListrrAPI({ cache: httpCache, token: "test-token" }),
+        [pluginConfig.name]: {
+          api: new ListrrAPI({ cache: httpCache, token: "test-token" }),
         },
       },
     },
@@ -130,8 +131,8 @@ it("returns shows when calling listrrShows query", async ({
     },
     {
       contextValue: {
-        dataSources: {
-          listrr: new ListrrAPI({ cache: httpCache, token: "test-token" }),
+        [pluginConfig.name]: {
+          api: new ListrrAPI({ cache: httpCache, token: "test-token" }),
         },
       },
     },
@@ -160,8 +161,8 @@ it('returns the user validation status when calling "listrrIsValid" query', asyn
     },
     {
       contextValue: {
-        dataSources: {
-          listrr: new ListrrAPI({ cache: httpCache, token: "test-token" }),
+        [pluginConfig.name]: {
+          api: new ListrrAPI({ cache: httpCache, token: "test-token" }),
         },
       },
     },

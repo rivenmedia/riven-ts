@@ -1,12 +1,12 @@
 {
-  "name": "@repo/core-util-graphql-schema",
+  "name": "@repo/feature-settings",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "exports": {
     ".": "./lib/index.ts",
-    "./context": "./lib/context.ts",
-    "./cache-control-directive": "./lib/cache-control.directive.ts"
+    "./resolver": "./lib/schema/settings.resolver.ts",
+    "./settings.type": "./lib/schema/types/settings.type.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
@@ -16,21 +16,17 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@repo/feature-settings": "workspace:^",
-    "@repo/plugin-listrr": "workspace:^",
-    "graphql": "catalog:",
     "type-graphql": "catalog:"
   },
   "devDependencies": {
-    "@apollo/cache-control-types": "^1.0.3",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
-    "@repo/util-plugin-sdk": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
+    "msw": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

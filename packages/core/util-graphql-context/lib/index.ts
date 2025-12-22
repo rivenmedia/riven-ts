@@ -1,49 +1,54 @@
+import packageJson from "../package.json" with { type: "json" };
 import type { ApolloServer, BaseContext } from "@apollo/server";
-import * as pluginListrr from "@repo/plugin-listrr";
-// {{plugin-imports}}
+import { parsePluginsFromDependencies } from "@repo/util-plugin-sdk";
 
-/**
- * Base interface that all feature context slices must extend.
- * Each feature package should define its own ContextSlice that extends this.
- */
-export interface BaseContextSlice extends BaseContext {
-  dataSources: Record<string, unknown>;
-}
+const plugins = await parsePluginsFromDependencies(
+  packageJson.dependencies,
+  import.meta.resolve.bind(null),
+);
 
 /**
  * Utility type to merge multiple context slices into a single context type.
  */
-export type MergeContextSlices<T extends BaseContextSlice[]> = T extends [
-  infer First extends BaseContextSlice,
-  ...infer Rest extends BaseContextSlice[],
+export type MergeContextSlices<T extends BaseContext[]> = T extends [
+  infer First extends BaseContext,
+  ...infer Rest extends BaseContext[],
 ]
   ? First & MergeContextSlices<Rest>
   : unknown;
 
-export interface FeatureContextSlice extends BaseContextSlice {
+export interface FeatureContextSlice extends BaseContext {
   dataSources: Record<string, unknown>;
 }
 
 export type Context = MergeContextSlices<
   [
-    pluginListrr.ContextSlice,
+    // pluginListrr.ContextSlice,
     // {{plugin-context-slices}}
   ]
 >;
 
-export function buildContext(server: ApolloServer<Context>) {
+export function buildContext(server: ApolloServer) {
   const { cache } = server;
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   return async function context() {
+    const pluginContexts = await Promise.all(
+      plugins.map<Promise<[symbol, unknown]>>(async (plugin) => [
+        plugin.name,
+        await plugin.context?.call(plugin, { cache }),
+      ]),
+    );
+
     return {
-      dataSources: {
-        listrr: new pluginListrr.datasource({
-          cache,
-          token: process.env["LISTRR_API_KEY"],
-        }),
-        // {{plugin-datasources}}
-      },
+      ...pluginContexts.reduce<Record<symbol, unknown>>(
+        (acc, [pluginName, pluginContext]) => {
+          return {
+            ...acc,
+            [pluginName]: pluginContext,
+          };
+        },
+        {},
+      ),
     } satisfies Context;
   };
 }

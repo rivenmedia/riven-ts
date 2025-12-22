@@ -2,10 +2,17 @@ import {
   ListrrAPI,
   type ListrrContextSlice,
 } from "./datasource/listrr.datasource.ts";
+import { pluginConfig } from "./listrr-plugin.config.ts";
+import { ListrrSettingsResolver } from "./schema/listrr-settings.resolver.ts";
 import { ListrrResolver } from "./schema/listrr.resolver.ts";
+import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export const resolvers = [ListrrResolver] as const;
-
-export const datasource = ListrrAPI;
-
-export type ContextSlice = ListrrContextSlice;
+export default {
+  name: pluginConfig.name,
+  resolvers: [ListrrResolver, ListrrSettingsResolver],
+  context: function (this, { cache }): ListrrContextSlice {
+    return {
+      api: new ListrrAPI({ cache, token: process.env["LISTRR_API_KEY"] }),
+    };
+  },
+} satisfies RivenPlugin;
