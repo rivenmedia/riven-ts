@@ -1,12 +1,13 @@
 import { registerEnumType } from "type-graphql";
 
 export const LogLevel = {
-  TRACE: "TRACE",
+  SILLY: "SILLY",
   DEBUG: "DEBUG",
+  VERBOSE: "VERBOSE",
+  HTTP: "HTTP",
   INFO: "INFO",
   WARN: "WARN",
   ERROR: "ERROR",
-  CRITICAL: "CRITICAL",
 } as const;
 
 registerEnumType(LogLevel, {

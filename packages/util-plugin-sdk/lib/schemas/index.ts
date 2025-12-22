@@ -11,6 +11,7 @@ export type RivenPluginConfig = z.infer<typeof RivenPluginConfig>;
 export const RivenPlugin = z.object({
   name: z.symbol(),
   resolvers: z.array(z.instanceof(Function)).min(1),
+  hooks: z.object({}).optional(),
   context: z
     .function({
       input: [

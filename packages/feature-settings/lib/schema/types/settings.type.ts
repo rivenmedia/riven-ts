@@ -12,5 +12,5 @@ export class RivenSettings {
   @Field((_type) => LogLevel, {
     description: "The logging level for the application",
   })
-  logLevel!: keyof typeof LogLevel;
+  logLevel: keyof typeof LogLevel = "SILLY";
 }

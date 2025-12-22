@@ -16,6 +16,6 @@ export const baseEslintConfig: ConfigArray = [
   ...importOrdering,
   ...vitestConfig,
   {
-    ignores: ["**/__generated__/**", "**/.next/**"],
+    ignores: ["**/__generated__/**", "**/*.generated.ts", "**/.next/**"],
   },
 ];

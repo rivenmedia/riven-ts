@@ -1,10 +1,10 @@
 import "reflect-metadata";
-import { ApolloServer } from "@apollo/server";
+import { ApolloServer, type BaseContext } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
 import { postgresDataSource } from "@repo/core-util-database/connection";
 import { logger } from "@repo/core-util-logger";
 import { schema } from "@repo/core-util-graphql-schema";
-import { type Context, buildContext } from "@repo/core-util-graphql-context";
+import { buildContext } from "@repo/core-util-graphql-context";
 import { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import { Keyv } from "keyv";
 import KeyvRedis from "@keyv/redis";
@@ -16,7 +16,7 @@ try {
 
   logger.info("Database connected successfully");
 } catch (error) {
-  logger.emerg("Error during database initialisation:", error);
+  logger.error("Error during database initialisation:", error);
 
   process.exit(1);
 }
@@ -25,7 +25,7 @@ const PORT = Number(process.env["PORT"]) || 3000;
 
 logger.info("Starting GraphQL server...");
 
-const server = new ApolloServer<Context>({
+const server = new ApolloServer<BaseContext>({
   cache: new KeyvAdapter(
     new Keyv(new KeyvRedis(process.env["REDIS_URL"])) as never,
   ),
@@ -46,7 +46,7 @@ const server = new ApolloServer<Context>({
 });
 
 try {
-  const { url } = await startStandaloneServer<Context>(server, {
+  const { url } = await startStandaloneServer<BaseContext>(server, {
     listen: {
       port: PORT,
     },
@@ -55,7 +55,7 @@ try {
 
   logger.info(`🚀 GraphQL server ready at ${url}`);
 } catch (error) {
-  logger.emerg("Error starting GraphQL server:", error);
+  logger.error("Error starting GraphQL server:", error);
 
   process.exit(1);
 }

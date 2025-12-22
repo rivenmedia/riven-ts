@@ -1,5 +1,10 @@
 import packageJson from "../package.json" with { type: "json" };
-import type { ApolloServer, BaseContext } from "@apollo/server";
+import type {
+  ApolloServer,
+  BaseContext,
+  ContextFunction,
+} from "@apollo/server";
+import type { StandaloneServerContextFunctionArgument } from "@apollo/server/standalone";
 import { parsePluginsFromDependencies } from "@repo/util-plugin-sdk";
 
 const plugins = await parsePluginsFromDependencies(
@@ -7,28 +12,9 @@ const plugins = await parsePluginsFromDependencies(
   import.meta.resolve.bind(null),
 );
 
-/**
- * Utility type to merge multiple context slices into a single context type.
- */
-export type MergeContextSlices<T extends BaseContext[]> = T extends [
-  infer First extends BaseContext,
-  ...infer Rest extends BaseContext[],
-]
-  ? First & MergeContextSlices<Rest>
-  : unknown;
-
-export interface FeatureContextSlice extends BaseContext {
-  dataSources: Record<string, unknown>;
-}
-
-export type Context = MergeContextSlices<
-  [
-    // pluginListrr.ContextSlice,
-    // {{plugin-context-slices}}
-  ]
->;
-
-export function buildContext(server: ApolloServer) {
+export function buildContext(
+  server: ApolloServer,
+): ContextFunction<[StandaloneServerContextFunctionArgument]> {
   const { cache } = server;
 
   return async function context() {
@@ -49,6 +35,6 @@ export function buildContext(server: ApolloServer) {
         },
         {},
       ),
-    } satisfies Context;
+    } satisfies BaseContext;
   };
 }
