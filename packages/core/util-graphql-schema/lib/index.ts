@@ -1,5 +1,8 @@
 import packageJson from "../package.json" with { type: "json" };
-import { SettingsResolver } from "@repo/feature-settings/resolver";
+import {
+  CoreSettingsResolver,
+  RivenSettingsResolver,
+} from "@repo/feature-settings/resolver";
 import { buildSchema } from "type-graphql";
 import { parsePluginsFromDependencies } from "@repo/util-plugin-sdk";
 
@@ -9,6 +12,10 @@ const plugins = await parsePluginsFromDependencies(
 );
 
 export const schema = await buildSchema({
-  resolvers: [SettingsResolver, ...plugins.flatMap((p) => p.resolvers)],
+  resolvers: [
+    CoreSettingsResolver,
+    RivenSettingsResolver,
+    ...plugins.flatMap((p) => p.resolvers),
+  ],
   validate: true,
 });

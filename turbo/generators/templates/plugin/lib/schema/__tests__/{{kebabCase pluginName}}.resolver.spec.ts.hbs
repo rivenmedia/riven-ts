@@ -1,5 +1,6 @@
 import assert from "node:assert";
 import { {{pascalCase pluginName}}API } from "../../datasource/{{kebabCase pluginName}}.datasource.ts";
+import { pluginConfig } from "../../{{kebabCase pluginName}}-plugin.config.ts";
 import { it } from "@repo/core-util-vitest-test-context";
 import { expect } from "vitest";
 import { http, HttpResponse } from "msw";
@@ -23,9 +24,9 @@ it('returns the validation status when calling "{{camelCase pluginName}}IsValid"
     },
     {
       contextValue: {
-        dataSources: {
-          {{camelCase pluginName}}: new {{pascalCase pluginName}}API({ cache: httpCache, token: "test-token" }),
-        },
+        [pluginConfig.name]: {
+          api: new {{pascalCase pluginName}}API({ cache: httpCache, token: "test-token" }),
+        }
       },
     },
   );

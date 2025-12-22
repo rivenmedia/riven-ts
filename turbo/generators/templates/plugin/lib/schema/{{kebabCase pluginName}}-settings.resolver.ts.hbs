@@ -1,0 +1,13 @@
+import { {{pascalCase pluginName}}Settings } from "./types/{{kebabCase pluginName}}-settings.type.ts";
+import { FieldResolver, Resolver } from "type-graphql";
+import { Settings } from "@repo/util-plugin-sdk";
+
+@Resolver((_of) => Settings)
+export class {{pascalCase pluginName}}SettingsResolver {
+  @FieldResolver((_returns) => {{pascalCase pluginName}}Settings)
+  {{camelCase pluginName}}(): {{pascalCase pluginName}}Settings {
+    return {
+      apiKey: "{{camelCase pluginName}}-api-key",
+    };
+  }
+}

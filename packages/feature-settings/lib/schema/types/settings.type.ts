@@ -2,7 +2,7 @@ import { LogLevel } from "../enums/log-level.enum.ts";
 import { Field, ObjectType } from "type-graphql";
 
 @ObjectType()
-export class Settings {
+export class RivenSettings {
   @Field({ description: "The current version of the application" })
   version!: string;
 

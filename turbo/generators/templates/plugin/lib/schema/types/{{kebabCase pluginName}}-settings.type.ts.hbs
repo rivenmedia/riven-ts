@@ -1,4 +1,7 @@
-import { ObjectType } from "type-graphql";
+import { ObjectType, Field } from "type-graphql";
 
 @ObjectType()
-export class {{pascalCase pluginName}}Settings {}
+export class {{pascalCase pluginName}}Settings {
+  @Field()
+  apiKey!: string;
+}

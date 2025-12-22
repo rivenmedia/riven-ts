@@ -36,8 +36,8 @@ const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
       "type-graphql": "catalog:",
       zod: "catalog:",
     },
-    exports: {
-      "./datasource": "./lib/datasource/{{kebabCase pluginName}}.datasource.ts",
+    devDependencies: {
+      "@repo/util-plugin-sdk": "workspace:^",
     },
   },
 };

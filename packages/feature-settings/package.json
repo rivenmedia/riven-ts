@@ -16,6 +16,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@repo/util-plugin-sdk": "workspace:^",
     "type-graphql": "catalog:"
   },
   "devDependencies": {

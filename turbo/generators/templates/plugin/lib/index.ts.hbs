@@ -2,10 +2,17 @@ import {
   {{pascalCase pluginName}}API,
   type {{pascalCase pluginName}}ContextSlice,
 } from "./datasource/{{kebabCase pluginName}}.datasource.ts";
+import { pluginConfig } from "./{{kebabCase pluginName}}-plugin.config.ts";
+import { {{pascalCase pluginName}}SettingsResolver } from "./schema/{{kebabCase pluginName}}-settings.resolver.ts";
 import { {{pascalCase pluginName}}Resolver } from "./schema/{{kebabCase pluginName}}.resolver.ts";
+import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export const resolvers = [{{pascalCase pluginName}}Resolver] as const;
-
-export const datasource = {{pascalCase pluginName}}API;
-
-export type ContextSlice = {{pascalCase pluginName}}ContextSlice;
+export default {
+  name: pluginConfig.name,
+  resolvers: [{{pascalCase pluginName}}Resolver, {{pascalCase pluginName}}SettingsResolver],
+  context: function (this, { cache }): {{pascalCase pluginName}}ContextSlice {
+    return {
+      api: new {{pascalCase pluginName}}API({ cache, token: process.env["{{constantCase pluginName}}_API_KEY"] }),
+    };
+  },
+} satisfies RivenPlugin;

@@ -55,44 +55,6 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
         destination: "packages/plugin-{{kebabCase pluginName}}",
         templateFiles: "templates/plugin/**",
       },
-      {
-        path: require.resolve("../../../packages/core/util-graphql-schema/lib/index.ts"),
-        pattern: /(\/\/ {{resolver-imports}})/g,
-        template:
-          "import * as plugin{{pascalCase pluginName}} from '@repo/plugin-{{kebabCase pluginName}}';\n$1",
-        type: "modify",
-      },
-      {
-        path: require.resolve("../../../packages/core/util-graphql-schema/lib/index.ts"),
-        pattern: /(\/\/ {{schema-resolvers}})/g,
-        template: "...plugin{{pascalCase pluginName}}.resolvers,\n$1",
-        type: "modify",
-      },
-      {
-        path: require.resolve("../../../packages/core/util-graphql-context/lib/index.ts"),
-        pattern: /(\/\/ {{plugin-imports}})/g,
-        template:
-          "import * as plugin{{pascalCase pluginName}} from '@repo/plugin-{{kebabCase pluginName}}';\n$1",
-        type: "modify",
-      },
-      {
-        path: require.resolve("../../../packages/core/util-graphql-context/lib/index.ts"),
-        pattern: /(\/\/ {{plugin-context-slices}})/g,
-        template: "plugin{{pascalCase pluginName}}.ContextSlice,\n$1",
-        type: "modify",
-      },
-      {
-        path: require.resolve("../../../packages/core/util-graphql-context/lib/index.ts"),
-        pattern: /(\/\/ {{plugin-datasources}})/g,
-        template: dedent`
-          {{camelCase pluginName}}: new plugin{{pascalCase pluginName}}.datasource({
-            cache,
-            token: process.env["{{constantCase pluginName}}_API_KEY"],
-          }),
-          $1
-        `,
-        type: "modify",
-      },
       (answers) => {
         const pluginName = plop.getHelper("kebabCase")(
           (answers as PluginAnswers).pluginName,

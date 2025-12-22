@@ -1,12 +1,14 @@
 import type { {{pascalCase pluginName}}ContextSlice } from "../datasource/{{kebabCase pluginName}}.datasource.ts";
-import { Ctx, Query, Resolver } from "type-graphql";
+import { pluginConfig } from "../{{kebabCase pluginName}}-plugin.config.ts";
+import { Query, Resolver } from "type-graphql";
+import { PluginContext } from "@repo/util-plugin-sdk";
 
 @Resolver()
 export class {{pascalCase pluginName}}Resolver {
   @Query((_returns) => Boolean)
-  {{camelCase pluginName}}IsValid(
-    @Ctx() { dataSources }: {{pascalCase pluginName}}ContextSlice,
+  async {{camelCase pluginName}}IsValid(
+    @PluginContext(pluginConfig.name) { api }: {{pascalCase pluginName}}ContextSlice,
   ): Promise<boolean> {
-    return dataSources.{{camelCase pluginName}}.validate();
+    return await api.validate();
   }
 }

@@ -1,6 +1,6 @@
 import { ListrrSettings } from "./types/listrr-settings.type.js";
 import { FieldResolver, Resolver } from "type-graphql";
-import { Settings } from "@repo/feature-settings/settings.type";
+import { Settings } from "@repo/util-plugin-sdk";
 
 @Resolver((_of) => Settings)
 export class ListrrSettingsResolver {

@@ -19,7 +19,5 @@ export class {{pascalCase pluginName}}API extends BaseDataSource {
 }
 
 export interface {{pascalCase pluginName}}ContextSlice {
-  dataSources: {
-    {{camelCase pluginName}}: {{pascalCase pluginName}}API;
-  };
+  api: {{pascalCase pluginName}}API;
 }
