@@ -33,11 +33,19 @@ export const buildKubbConfig = ({
       }),
       pluginFaker({
         unknownType: "unknown",
+        output: {
+          banner: "// @ts-nocheck",
+          path: "mocks",
+        },
       }),
       pluginTs(),
       pluginMsw({
         baseURL,
         parser: "faker",
+        output: {
+          banner: "// @ts-nocheck",
+          path: "handlers",
+        },
       }),
     ],
     hooks: {

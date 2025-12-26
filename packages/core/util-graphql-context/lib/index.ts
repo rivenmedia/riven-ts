@@ -5,6 +5,7 @@ import type {
   ContextFunction,
 } from "@apollo/server";
 import type { StandaloneServerContextFunctionArgument } from "@apollo/server/standalone";
+import { logger } from "@repo/core-util-logger";
 import { parsePluginsFromDependencies } from "@repo/util-plugin-sdk";
 
 const plugins = await parsePluginsFromDependencies(
@@ -17,7 +18,11 @@ export function buildContext(
 ): ContextFunction<[StandaloneServerContextFunctionArgument]> {
   const { cache } = server;
 
-  return async function context() {
+  return async function context({ req }) {
+    if (req.body.operationName) {
+      logger.http(`Received ${req.body.operationName} query`);
+    }
+
     const pluginContexts = await Promise.all(
       plugins.map<Promise<[symbol, unknown]>>(async (plugin) => [
         plugin.name,

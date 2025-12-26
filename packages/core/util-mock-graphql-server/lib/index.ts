@@ -6,5 +6,3 @@ import { schema } from "@repo/core-util-graphql-schema";
 export const mockServer = new ApolloServer({
   schema,
 });
-
-await mockServer.start();

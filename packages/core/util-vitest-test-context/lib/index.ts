@@ -1,42 +1,43 @@
 /* eslint-disable no-empty-pattern */
 
-import { setupServer } from "msw/node";
+import type { SetupServerApi } from "msw/node";
 import { test as testBase } from "vitest";
-import { mockServer } from "@repo/core-util-mock-graphql-server";
 import { InMemoryLRUCache } from "@apollo/utils.keyvaluecache";
-
-const server = setupServer();
+import { ApolloServer } from "@apollo/server";
 
 export const it = testBase.extend<{
   httpCache: InMemoryLRUCache;
-  server: typeof server;
-  gqlServer: typeof mockServer;
+  server: SetupServerApi;
+  gqlServer: ApolloServer;
 }>({
   async httpCache({}, use) {
     await use(new InMemoryLRUCache());
   },
   async gqlServer({}, use) {
+    const { mockServer } = await import("@repo/core-util-mock-graphql-server");
+
+    await mockServer.start();
+
     await use(mockServer);
   },
-  server: [
-    async ({}, use) => {
-      // Start the worker before the test.
-      server.listen({
-        onUnhandledRequest: "error",
-      });
+  server: async ({}, use) => {
+    const { setupServer } = await import("msw/node");
 
-      // Expose the worker object on the test's context.
-      await use(server);
+    const server = setupServer();
 
-      // Remove any request handlers added in individual test cases.
-      // This prevents them from affecting unrelated tests.
-      server.resetHandlers();
+    // Start the worker before the test.
+    server.listen({
+      onUnhandledRequest: "error",
+    });
 
-      // Stop the worker after the test.
-      server.close();
-    },
-    {
-      auto: true,
-    },
-  ],
+    // Expose the worker object on the test's context.
+    await use(server);
+
+    // Remove any request handlers added in individual test cases.
+    // This prevents them from affecting unrelated tests.
+    server.resetHandlers();
+
+    // Stop the worker after the test.
+    server.close();
+  },
 });

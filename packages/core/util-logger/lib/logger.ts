@@ -5,8 +5,12 @@ const logDir = path.resolve(process.cwd(), "logs");
 
 const isTestEnvironment = process.env["NODE_ENV"] === "test";
 
+const logFormat = format.printf(function (info) {
+  return `${String(info["timestamp"])} - ${info.level}: ${JSON.stringify(info.message, null, 2)}`;
+});
+
 export const logger = createLogger({
-  level: "info",
+  level: "silly",
   format: format.combine(
     format.timestamp({
       format: "YYYY-MM-DD HH:mm:ss",
@@ -17,7 +21,7 @@ export const logger = createLogger({
   ),
   transports: [
     new transports.Console({
-      format: format.combine(format.colorize(), format.simple()),
+      format: format.combine(format.colorize(), logFormat),
       silent: isTestEnvironment,
     }),
   ],

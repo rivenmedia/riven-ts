@@ -5,7 +5,7 @@
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.spec.json" }
   ],
-  "files": ["eslint.config.ts", "codegen.ts"],
+  "files": ["eslint.config.ts", "codegen.ts", "vitest.config.ts"],
   "include": [],
   "exclude": []
 }

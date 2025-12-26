@@ -9,3 +9,4 @@ __generated__
 coverage
 .env*
 !.env.example
+*.typegen.ts

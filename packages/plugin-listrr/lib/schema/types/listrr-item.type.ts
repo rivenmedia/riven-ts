@@ -1,4 +1,4 @@
-import type { ListrrContractsModelsAPIMovieDto } from "../__generated__/index.ts";
+import type { ListrrContractsModelsAPIMovieDto } from "../../__generated__/index.ts";
 import { Field, ObjectType } from "type-graphql";
 
 @ObjectType()

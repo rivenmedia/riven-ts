@@ -12,7 +12,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@apollo/client": "^4.0.11"
+    "@apollo/client": "^4.0.11",
+    "xstate": "^5.25.0"
   },
   "devDependencies": {
     "@apollo/client-devtools-vscode": "^4.23.2",
@@ -26,6 +27,7 @@
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
+    "@repo/core-util-vitest-test-context": "workspace:^",
     "@swc-node/register": "^1.11.1",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",

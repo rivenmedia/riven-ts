@@ -3,8 +3,7 @@
   "extends": "@repo/core-util-typescript-config/base.json",
   "references": [
     { "path": "./tsconfig.lib.json" },
-    { "path": "./tsconfig.spec.json" },
-    { "path": "./tsconfig.codegen.json" }
+    { "path": "./tsconfig.spec.json" }
   ],
   "files": [
     "eslint.config.ts",

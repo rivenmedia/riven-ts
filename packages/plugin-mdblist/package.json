@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json && tsc --noEmit --project tsconfig.codegen.json",
+    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
     "generate-schemas": "kubb generate",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
