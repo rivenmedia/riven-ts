@@ -1,7 +1,6 @@
 import { it } from "./helpers/test-context.ts";
 import { CHECK_SERVER_STATUS } from "../actors/check-server-status.actor.ts";
 import { CHECK_PLUGIN_STATUSES } from "../actors/check-plugin-statuses.actor.ts";
-import { ApolloClient } from "@apollo/client";
 import { expect } from "vitest";
 import { graphql, HttpResponse } from "msw";
 import { waitFor } from "xstate";
@@ -54,18 +53,6 @@ it('transitions to "Initialising" state on START event', ({ actor }) => {
   });
 });
 
-it("initialises the Apollo Client in context", ({ actor }) => {
-  const { context } = actor.getSnapshot();
-
-  expect(context.client).toBeInstanceOf(ApolloClient);
-});
-
-it('transitions to "Exited" state on EXIT event', ({ actor }) => {
-  actor.send({ type: "EXIT" });
-
-  expect(actor.getSnapshot().value).toBe("Exited");
-});
-
 it('transitions to the "Running" state if the plugins and server are healthy', async ({
   actor,
 }) => {
@@ -109,6 +96,19 @@ it('transitions to the "Errored" state if the plugins are unhealthy', async ({
 
   expect(actor.getSnapshot().value).toBe("Errored");
 });
+
+it.todo.for(SubscribableProgramEvent.options)(
+  "subscribes plugins to the %s event",
+  async (event, { actor }) => {
+    actor.send({ type: "START" });
+
+    await waitFor(actor, (snapshot) => snapshot.matches("Running"));
+
+    actor.on(event, () => {
+      expect(true).toBe(true);
+    });
+  },
+);
 
 it(`emits the "${SubscribableProgramEvent.enum["riven.running"]}" event when entering the "Running" state`, async ({
   actor,

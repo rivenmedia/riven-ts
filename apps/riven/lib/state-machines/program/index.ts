@@ -128,9 +128,12 @@ export const programStateMachine = setup({
     },
     Errored: {},
     Exited: {
-      entry() {
-        logger.info("Riven has shut down");
-      },
+      entry: [
+        emit({ type: SubscribableProgramEvent.enum["riven.exited"] }),
+        () => {
+          logger.info("Riven has shut down");
+        },
+      ],
       type: "final",
     },
   },
