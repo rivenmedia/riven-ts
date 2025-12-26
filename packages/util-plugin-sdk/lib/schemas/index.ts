@@ -8,10 +8,23 @@ export const RivenPluginConfig = z.readonly(
 
 export type RivenPluginConfig = z.infer<typeof RivenPluginConfig>;
 
+export const SubscribableProgramEvent = z.enum([
+  "riven.running",
+  "riven.exited",
+]);
+
+export type SubscribableProgramEvent = z.infer<typeof SubscribableProgramEvent>;
+
 export const RivenPlugin = z.object({
   name: z.symbol(),
   resolvers: z.array(z.instanceof(Function)).min(1),
-  hooks: z.object({}).optional(),
+  events: z.partialRecord(
+    SubscribableProgramEvent,
+    z.function({
+      input: [],
+      output: z.void(),
+    }),
+  ),
   context: z
     .function({
       input: [

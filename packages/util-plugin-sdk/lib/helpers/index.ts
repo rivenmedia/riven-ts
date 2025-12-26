@@ -24,6 +24,7 @@ export const parsePluginsFromDependencies = async (
           return {
             name: Symbol("InvalidPlugin"),
             resolvers: [],
+            events: {},
           } satisfies RivenPlugin;
         }
       }),

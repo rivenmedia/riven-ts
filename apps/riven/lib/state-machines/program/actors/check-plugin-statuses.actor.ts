@@ -13,6 +13,7 @@ export const CHECK_PLUGIN_STATUSES: TypedDocumentNode<
     settings {
       riven {
         version
+        apiKey
       }
     }
   }

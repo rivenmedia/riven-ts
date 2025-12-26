@@ -264,6 +264,15 @@ importers:
       '@apollo/client':
         specifier: ^4.0.11
         version: 4.0.11(graphql-ws@6.0.6(graphql@16.12.0)(ws@8.18.3))(graphql@16.12.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)
+      '@repo/plugin-listrr':
+        specifier: workspace:^
+        version: link:../../packages/plugin-listrr
+      '@repo/util-plugin-sdk':
+        specifier: workspace:^
+        version: link:../../packages/util-plugin-sdk
+      reflect-metadata:
+        specifier: 'catalog:'
+        version: 0.2.2
       xstate:
         specifier: ^5.25.0
         version: 5.25.0

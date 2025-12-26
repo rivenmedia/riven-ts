@@ -1,5 +1,6 @@
 import { checkServerStatus } from "./actors/check-server-status.actor.ts";
 import { checkPluginStatuses } from "./actors/check-plugin-statuses.actor.ts";
+import { registerPlugins } from "./actors/register-plugins.actor.ts";
 import {
   ApolloClient,
   ApolloLink,
@@ -7,8 +8,9 @@ import {
   InMemoryCache,
 } from "@apollo/client";
 import { RetryLink } from "@apollo/client/link/retry";
-import { raise, setup, type MachineContext } from "xstate";
+import { emit, raise, setup, type MachineContext } from "xstate";
 import { logger } from "@repo/core-util-logger";
+import { SubscribableProgramEvent } from "@repo/util-plugin-sdk";
 
 export interface ProgramStateMachineContext extends MachineContext {
   client: ApolloClient;
@@ -29,9 +31,10 @@ export const programStateMachine = setup({
   actors: {
     checkServerStatus,
     checkPluginStatuses,
+    registerPlugins,
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QAUBOB7KqCGBbABLAC7ZFj67YDGAFgJYB2YAxAMoAqAggErsDaABgC6iUAAd0sOkTroGokAA9EAFgBMAGhABPRADYBagHQB2AQGYBADisBWdQEY1AgJwBfN1rSYcBYqXJKWkYWAFEADQBJfmEFCSkZOQVlBHUtXQQ1FT1TFRcXE3MXC3MVFXMTDy8MLDxCEjIKanomZgAxTi4AGQB9UO5uAHluQREkEHjpWXlxlLSdRAcio3z8m3M9FVtbJyqQb1q-BsDmkKNIhinsABs6KQYoZgg5MCN-MiMD33qApuCmc6XGQ3O6MKCjOKSKZJWaIFxqFxGDYmBwmWwudEmPQOFzpfQCFRGZzmBwEqzONRWJZ7L51d4nf6vC5XW73KBGADCNDAVAA1oQwKgAG6Cn5EACusE53L5YKeLyMjCF6F5r1pR1+QRaTKBdBBbOlPP5sEFItQYslhtlDwQSvQVFI01GEPGk0SM1Acz0xgJenWAhMLisLiWeNSKNyaysemR5jsNJq33pf21gJZoIeVuNptF70tXKNcsFGFQRjE11IADN0KhcJ9E3TjimzszgaywVmBcLcw18zLeWDbQxlQ73c7Yq6oe7kqpvUZff7A8HQwsEDtEVl8oGsfDsg4Ez5G5rTgDW3r25mC3z8OXxVBGBapVeBw95QC7ar64eNY0tS3dfqHbPje1x3g+eZPv2g52qOTrCC64hTtMM7huYRgGC4Gx6JstgmI4JhhiYahoRiljbLhAbovunj7A2P4MqmZ6AZe-YgWBDCPlmRaoCWZYVkQ1a1l+hxigx-7pgawG3veHEQVxNowY6cjjmMiEJMhsKoehrhYTheFqKihERlsJKogiDjlCYlR7Aw6AQHACjqqJzZMJC6kwp6iAALR6GGPnzgIgVBcFQXWdU37OX+p4QNcYBudCHpKKomirlSRh5Ks+R6EG1g4geInJlFOoSWC8XTppDiokY5JUmo2HlKRAi+auCKEhlGKFLYdgovlSZNkVaZthm7LASa3bmhBZUaZ5CAOHotjVZSTj1UUtiWM1GRxg4KyrH6FQCJVei9Uev4nsVQ2SaxY1mpxz6lZO7mJSkBloTVy2bKt61hrYFhEnV9hWcGth1Wox30S553nsNnbXT2pCWm02B0KBqBxQ9CUoX6VhEuoaiUjYCJUio33LER81xoFLhlLYR00U5hVnYNUOXUaXY3XJrDilQVBwPA6PlTNWM43j+PkkGFlhtkiLtYGW3YdR4UFf1jNMReI2sdJ4G9nzakYxV82LbVK2NRt+ilESFikl18KWFiYORSrAFq52muydr8lQFNHlJZkSyG+9DVrU1hHbOlCJ+mtlUoiYVj2wzjJM8x6us67nGI8j4qo17T2ICi23InNAbOJiBGroG23wi4ehopHMY9XTdEOwnqvQ1JoEyZxnPc7z2coXnSLV4XRECCXhEGaYltzcUcbA7Tit9ceCfcOKDCXA8vcVQShKW8RQcFCG5jfYGE+WNGWx2PYKhx8rCehDxNaQBvM3ODkIYqE1H3mOiVjE6uh07Wsb0VhXA-2xNfReqZQiKGkI-fm00fZLGxnkAymEuoj1KMDMMIt0qrBjj-SkBg-QeA8EAA */
+  /** @xstate-layout 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-nuFcEAA */
   id: "Program state machine",
   initial: "Idle",
   context: () => ({
@@ -75,53 +78,55 @@ export const programStateMachine = setup({
                 src: "checkServerStatus",
                 onError: {
                   actions: raise({ type: "FATAL_ERROR" }),
-                  target: "Failure",
                 },
-                onDone: "Success",
+                onDone: "Healthy",
                 input: ({ context }) => ({
                   client: context.client,
                 }),
               },
             },
-            Failure: { type: "final" },
-            Success: { type: "final" },
+            Healthy: { type: "final" },
           },
         },
-        "Check plugin status": {
-          initial: "Checking",
+        "Register plugins": {
+          initial: "Registering",
           states: {
-            Checking: {
+            Registering: {
+              invoke: {
+                src: "registerPlugins",
+                input: {},
+                onDone: "Registered",
+              },
+            },
+            Registered: {
               invoke: {
                 src: "checkPluginStatuses",
                 onError: {
                   actions: raise({ type: "FATAL_ERROR" }),
-                  target: "Failure",
                 },
-                onDone: "Success",
+                onDone: "Validated",
                 input: ({ context }) => ({
                   client: context.client,
                 }),
               },
             },
-            Failure: { type: "final" },
-            Success: { type: "final" },
+            Validated: {
+              type: "final",
+            },
           },
         },
       },
       onDone: "Running",
     },
     Running: {
-      entry() {
-        logger.info("Riven is running!");
-      },
+      entry: [
+        emit({ type: SubscribableProgramEvent.enum["riven.running"] }),
+        () => {
+          logger.info("Riven is running!");
+        },
+      ],
     },
-    Errored: {
-      entry() {
-        logger.debug(
-          "Errored state entered due to unhealthy server or plugins.",
-        );
-      },
-    },
+    Errored: {},
     Exited: {
       entry() {
         logger.info("Riven has shut down");

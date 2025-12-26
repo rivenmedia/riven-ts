@@ -13,6 +13,9 @@
   },
   "dependencies": {
     "@apollo/client": "^4.0.11",
+    "@repo/plugin-listrr": "workspace:^",
+    "@repo/util-plugin-sdk": "workspace:^",
+    "reflect-metadata": "catalog:",
     "xstate": "^5.25.0"
   },
   "devDependencies": {
