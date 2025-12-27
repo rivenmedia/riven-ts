@@ -7,7 +7,7 @@ export const mediaProcessorMachine = setup({
     processorActor,
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5gF8A0IB2B7CdGgFtIBLAQwAUAnLAYzli0vxAActZiAXYrDZgD0QBaAGzoAnsICsAOgCcCxUqUBmZGhBEIZKrXqMZxDFzIAbAMqdSnMMzYduvAYgAsAJgmIAHAEYZLxV85KRE5FykpdXUgA */
+  /** @xstate-layout N4IgpgJg5mDOIC5gF8A0IB2B7CdGgFlIBLAQwAIAFAJywGM5Ytr8QAHLWYgF2Kw1YAPRAFoAbOgCeoscjQgiEMlVoNYTagDoA6qR7EMUVhy69+QxABYATFMQAOAIyaArHPSLlNeo2abvalyGxpz65kggwgj2AOyalpaOlgAMYtYudgiOsXJyQA */
   id: "Media Processor",
   initial: "Waiting",
   states: {

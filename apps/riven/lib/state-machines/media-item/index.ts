@@ -9,7 +9,7 @@ export const mediaItemMachine = setup({
     input: {} as MediaItemMachineInput,
   },
 }).createMachine({
-  id: "mediaItem",
+  id: "Media Item",
   initial: "Requested",
   states: {
     Requested: {},

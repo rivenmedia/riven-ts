@@ -15,8 +15,6 @@ import { SubscribableProgramEvent } from "@repo/util-plugin-sdk";
 
 export interface BootstrapMachineContext extends MachineContext {
   client: ApolloClient;
-  serverHealthy?: boolean;
-  pluginsHealthy?: boolean;
 }
 
 type BootstrapMachineEvent =
@@ -41,7 +39,7 @@ export const bootstrapMachine = setup({
     mediaProcessorMachine,
   },
 }).createMachine({
-  /** @xstate-layout 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-nuFcEAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7ABAIwHsCAXWYgJwEMAHascgYgGUAVAQWRYG0AGAXUShqBWKmKoCWQSAAeiACwAmADQgAnogBsAZgCMAOkU89AVgAcATk06Tu3QF97qtJlyESZKrXoMAogA0ASW5+aWFRcUlpOQQlVQ0ERUVtQxMeHjNNAHZNE20LRUdnDGx8IlIKGjpGADE2dgAZAH1fZGQAeWReASQQcLEJKV6YuPVEXXz9C2np-LSc5KKQF1L3Cq9q-UCsAcoAG1RRLCgGCEkwfTJKYguVt3LPKvotnfF9w9Rj7rCRAajh8baEzyQxmXRGCyZLI8RRmMzxLTaRT6aF6JS2RQWfKaJZ3MoeSrecgvXYHI5QfQAYQAFmAAMYAaxwsHomHIzOI1wArrAqbTGZ8TmcsBdPugCAzbiV7gSNs9tqSPsc+fSmSzyGyOdzeTTVYKEGKCHTroNut9ev1IkNQCNsvoePJNGZFEpNPIzBkTAiECYnfp5HldPJdDxctDMrjpfj1k9iQq3mTBSrGczWfQtcQecmGYKGPRyARidQ9tcAGaFgC2+jxa0eRJJCaVFN1KfVmqumZ1-JzxwNWHFxqtZtCFt+VuiiGSKXSWRy8khuUs8m98kd9vSPBMLu0WWdmMjrmjdc28dQ73J1bAUEON3Zxa516wvOQV5v9FzwtF-YlUsPtcJJ6vGeibKi+15kOm96Ps+r4QeQ+qGoOpr8OaQhjoME6xNomj6M6MLyNo6ROsYwLemYJhZPoFGwuRkKKNRB6rA8AHykB55JmBb53nsD6fDB4G3pApznPohqStWUb-nKcZsSBFKcXBOBQXxl4CfQkB9gOJqSMOPRoREGEAggliURRMKaKGzqrm6ZFZMiuSaEYAZWFu+5OMsknMdJDbAU2qlcUpPHQf5cFCfmhb6MWZaVhJf5ebGPnsaBsG3oFvFPiFgkQJpRraVguk-AZ-w2lothTE6WQBjoFgmBYujwmMCBZGkhjGHYtVOjodmOO5WAEBAcDSDW8VEoVfzWrIiAALSaN6M2MTKMb1oEEB7GAY3jkZowJGCVEbjwdlJHVQImAtR4sTJirkhthklQgdiUc6HrQpi7r5Noy6NYoWQGBuIY8AUG5ZNoZ1SQlp5Jc23aphq6YdjyN3FZN93QrhsIHTCFhvVin0JECZh7TO1i7nVtigyNgFXUmLZqmm7Lw12erHIjE0xIo9Vo89mPYx93rAikNV6DYs71bV5OyuDsl+TTMPtpynb6AAEmA+zENSCT6eNmGaFihhKN91X1Touh80oKJtZougmL6QIFOLS2U42F4KalylPizmG6LknMY69ZjvbjWiOebSJtTulUOO5w0S8tUvOylkFBSpLvvszo5Fazk4TD7L1Y-7ONkdo052RYGTzvIDpY-bx6sVTyVqdx6X8VxkAe0ZXUonCkIerokKESojVmO6+hW4530hh66Qg1Hnkx47vnxw3aXBQAau8EDXK36da0ZdhAvoSJgpubqWy6FhkWupeW45Vt1Y51cXdWXJYDsaea5td1Bn6WOBhYu5pNhWajVzDIiMELaEFdnRWAft5Xw5ACzkC3u-W6yMjA4TqsGSB4J-ZTm9EGHg-oZiOmavIZq2EYEJV8DIMQSC+joSRmzUMUwgz4LBLCJERc8HTHXOkWqRdMj0VOj1IAA */
   id: "Riven bootstrapper",
   initial: "Idle",
   context: () => ({
@@ -81,6 +79,9 @@ export const bootstrapMachine = setup({
           initial: "Checking",
           states: {
             Checking: {
+              entry() {
+                logger.info("Checking server status...");
+              },
               invoke: {
                 src: "checkServerStatus",
                 onError: {
@@ -94,7 +95,7 @@ export const bootstrapMachine = setup({
             },
             Healthy: {
               entry() {
-                logger.info("Server is healthy.");
+                logger.info("Server is healthy");
               },
               type: "final",
             },
@@ -104,6 +105,9 @@ export const bootstrapMachine = setup({
           initial: "Registering",
           states: {
             Registering: {
+              entry() {
+                logger.info("Registering plugins...");
+              },
               invoke: {
                 src: "registerPlugins",
                 input: {},
@@ -111,6 +115,9 @@ export const bootstrapMachine = setup({
               },
             },
             Registered: {
+              entry() {
+                logger.info("Plugins registered. Checking plugin health...");
+              },
               invoke: {
                 src: "checkPluginStatuses",
                 onError: {

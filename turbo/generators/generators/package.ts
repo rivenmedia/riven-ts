@@ -1,4 +1,3 @@
-import { existsSync, readdirSync } from "node:fs";
 import { installDependenciesAction } from "./actions/install-dependencies";
 import { formatOutputCode } from "./actions/format-output";
 import type { PlopTypes } from "@turbo/gen";
