@@ -6,7 +6,9 @@ export const parsePluginsFromDependencies = async (
   dependencies: PackageJson.Dependency,
   importResolver: ImportMeta["resolve"],
 ) => {
-  return await Promise.all(
+  const invalidPluginSymbol = Symbol("InvalidPlugin");
+
+  const plugins = await Promise.all(
     Object.keys(dependencies)
       .filter((pluginName) => pluginName.startsWith("@repo/plugin-"))
       .map(async (pluginName) => {
@@ -22,11 +24,12 @@ export const parsePluginsFromDependencies = async (
           logger.error(`Failed to load plugin ${pluginName}:`, error);
 
           return {
-            name: Symbol("InvalidPlugin"),
+            name: invalidPluginSymbol,
             resolvers: [],
-            events: {},
           } satisfies RivenPlugin;
         }
       }),
   );
+
+  return plugins.filter((plugin) => plugin.name !== invalidPluginSymbol);
 };

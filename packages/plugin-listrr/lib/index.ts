@@ -15,9 +15,4 @@ export default {
       api: new ListrrAPI({ cache, token: process.env["LISTRR_API_KEY"] }),
     };
   },
-  events: {
-    "riven.running": () => {
-      console.log("Server started with Listrr plugin");
-    },
-  },
 } satisfies RivenPlugin;

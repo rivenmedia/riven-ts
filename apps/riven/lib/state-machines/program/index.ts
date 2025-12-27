@@ -23,9 +23,14 @@ type ProgramStateMachineEvent =
   | { type: "FATAL_ERROR" }
   | { type: "EXIT" };
 
+interface ProgramStateMachineEmittedEvent {
+  type: SubscribableProgramEvent;
+}
+
 export const programStateMachine = setup({
   types: {
     context: {} as ProgramStateMachineContext,
+    emitted: {} as ProgramStateMachineEmittedEvent,
     events: {} as ProgramStateMachineEvent,
   },
   actors: {
@@ -120,7 +125,7 @@ export const programStateMachine = setup({
     },
     Running: {
       entry: [
-        emit({ type: SubscribableProgramEvent.enum["riven.running"] }),
+        emit({ type: "riven.running" }),
         () => {
           logger.info("Riven is running!");
         },

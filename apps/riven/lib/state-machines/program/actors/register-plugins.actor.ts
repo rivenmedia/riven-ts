@@ -15,8 +15,8 @@ export const registerPlugins = fromPromise(async ({ self }) => {
 
   for (const plugin of plugins) {
     for (const event of SubscribableProgramEvent.options) {
-      if (plugin.events[event]) {
-        self.on(event, plugin.events[event]);
+      if (plugin.events?.[event]) {
+        self._parent?.on(event, plugin.events[event]);
       }
     }
   }

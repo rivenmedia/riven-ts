@@ -1,9 +1,8 @@
 import { it } from "./helpers/test-context.ts";
 import { CHECK_SERVER_STATUS } from "../actors/check-server-status.actor.ts";
 import { CHECK_PLUGIN_STATUSES } from "../actors/check-plugin-statuses.actor.ts";
-import { expect } from "vitest";
+import { expect, vi } from "vitest";
 import { graphql, HttpResponse } from "msw";
-import { waitFor } from "xstate";
 import { SubscribableProgramEvent } from "@repo/util-plugin-sdk";
 
 it.beforeEach(({ server }) => {
@@ -58,7 +57,9 @@ it('transitions to the "Running" state if the plugins and server are healthy', a
 }) => {
   actor.send({ type: "START" });
 
-  await waitFor(actor, (snapshot) => snapshot.value === "Running");
+  await vi.waitFor(() => {
+    expect(actor.getSnapshot().value).toBe("Running");
+  });
 });
 
 it('transitions to the "Errored" state if the server is unhealthy', async ({
@@ -69,9 +70,9 @@ it('transitions to the "Errored" state if the server is unhealthy', async ({
 
   actor.send({ type: "START" });
 
-  await waitFor(actor, (snapshot) => snapshot.value === "Errored");
-
-  expect(actor.getSnapshot().value).toBe("Errored");
+  await vi.waitFor(() => {
+    expect(actor.getSnapshot().value).toBe("Errored");
+  });
 });
 
 it('transitions to the "Errored" state if the plugins are unhealthy', async ({
@@ -92,32 +93,22 @@ it('transitions to the "Errored" state if the plugins are unhealthy', async ({
 
   actor.send({ type: "START" });
 
-  await waitFor(actor, (snapshot) => snapshot.value === "Errored");
-
-  expect(actor.getSnapshot().value).toBe("Errored");
+  await vi.waitFor(() => {
+    expect(actor.getSnapshot().value).toBe("Errored");
+  });
 });
-
-it.todo.for(SubscribableProgramEvent.options)(
-  "subscribes plugins to the %s event",
-  async (event, { actor }) => {
-    actor.send({ type: "START" });
-
-    await waitFor(actor, (snapshot) => snapshot.matches("Running"));
-
-    actor.on(event, () => {
-      expect(true).toBe(true);
-    });
-  },
-);
 
 it(`emits the "${SubscribableProgramEvent.enum["riven.running"]}" event when entering the "Running" state`, async ({
   actor,
 }) => {
+  const pluginTest = await import("@repo/plugin-test");
+  const pluginHookSpy = vi.spyOn(pluginTest.default.events, "riven.running");
+
   actor.send({ type: "START" });
 
-  await waitFor(actor, (snapshot) => snapshot.matches("Running"));
-
-  actor.on(SubscribableProgramEvent.enum["riven.running"], () => {
-    expect(true).toBe(true);
+  await vi.waitFor(() => {
+    expect(actor.getSnapshot().value).toEqual("Running");
   });
+
+  expect(pluginHookSpy).toHaveBeenCalledOnce();
 });

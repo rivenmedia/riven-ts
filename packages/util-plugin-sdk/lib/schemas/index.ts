@@ -18,13 +18,15 @@ export type SubscribableProgramEvent = z.infer<typeof SubscribableProgramEvent>;
 export const RivenPlugin = z.object({
   name: z.symbol(),
   resolvers: z.array(z.instanceof(Function)).min(1),
-  events: z.partialRecord(
-    SubscribableProgramEvent,
-    z.function({
-      input: [],
-      output: z.void(),
-    }),
-  ),
+  events: z
+    .partialRecord(
+      SubscribableProgramEvent,
+      z.function({
+        input: [z.any()],
+        output: z.void(),
+      }),
+    )
+    .optional(),
   context: z
     .function({
       input: [
