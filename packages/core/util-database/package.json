@@ -13,6 +13,7 @@
     "./entities/media-items/season.entity": "./lib/entities/media-items/season.entity.ts",
     "./entities/media-items/show.entity": "./lib/entities/media-items/show.entity.ts",
     "./entities/media-items/movie.entity": "./lib/entities/media-items/movie.entity.ts",
+    "./entities/media-items/requested-item.entity": "./lib/entities/media-items/requested-item.entity.ts",
     "./entities/streams/stream.entity": "./lib/entities/streams/stream.entity.ts"
   },
   "scripts": {

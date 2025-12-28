@@ -38,9 +38,11 @@
     "eslint": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "xstate": "^5.25.0"
   },
   "peerDependencies": {
-    "@kubb/cli": "*"
+    "@kubb/cli": "*",
+    "xstate": "^5.25.0"
   }
 }

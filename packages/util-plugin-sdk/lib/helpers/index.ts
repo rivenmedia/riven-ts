@@ -25,11 +25,12 @@ export const parsePluginsFromDependencies = async (
 
           return {
             name: invalidPluginSymbol,
-            resolvers: [],
-          } satisfies RivenPlugin;
+          };
         }
       }),
   );
 
-  return plugins.filter((plugin) => plugin.name !== invalidPluginSymbol);
+  return plugins.filter(
+    (plugin): plugin is RivenPlugin => plugin.name !== invalidPluginSymbol,
+  );
 };

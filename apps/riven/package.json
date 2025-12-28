@@ -13,8 +13,11 @@
   },
   "dependencies": {
     "@apollo/client": "^4.0.11",
+    "@apollo/utils.keyvadapter": "^4.0.1",
+    "@keyv/redis": "^5.1.5",
     "@repo/plugin-listrr": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
+    "keyv": "^5.5.5",
     "reflect-metadata": "catalog:",
     "xstate": "^5.25.0"
   },
@@ -26,6 +29,7 @@
     "@graphql-codegen/typescript-operations": "^5.0.7",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@parcel/watcher": "^2.5.1",
+    "@repo/core-util-database": "workspace:^",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",

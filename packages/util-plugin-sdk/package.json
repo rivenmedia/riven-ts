@@ -28,6 +28,10 @@
     "msw": "catalog:",
     "type-graphql": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "xstate": "^5.25.0"
+  },
+  "peerDependencies": {
+    "xstate": "^5.25.0"
   }
 }

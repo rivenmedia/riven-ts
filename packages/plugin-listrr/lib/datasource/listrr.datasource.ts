@@ -7,7 +7,7 @@ import {
   type GetApiListMyPageQueryResponse,
 } from "../__generated__/index.ts";
 import type { ExternalIds } from "../schema/types/external-ids.type.ts";
-import type { BasePluginContext } from "@repo/util-plugin-sdk";
+import type { BasePluginContext, RequestedItem } from "@repo/util-plugin-sdk";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import { BaseDataSource } from "@repo/core-util-datasource";
 
@@ -45,7 +45,7 @@ export class ListrrAPI extends BaseDataSource {
    * Fetch unique show IDs from Listrr for a given list of content
    * @param contentLists
    */
-  async getShows(contentLists: Set<string>): Promise<ExternalIds[]> {
+  async getShows(contentLists: Set<string>): Promise<RequestedItem[]> {
     if (!contentLists.size) {
       return [];
     }
@@ -98,7 +98,7 @@ export class ListrrAPI extends BaseDataSource {
    * Fetch unique movie IDs from Listrr for a given list of content
    * @param contentLists
    */
-  async getMovies(contentLists: Set<string>): Promise<ExternalIds[]> {
+  async getMovies(contentLists: Set<string>): Promise<RequestedItem[]> {
     if (!contentLists.size) {
       return [];
     }

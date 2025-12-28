@@ -264,12 +264,21 @@ importers:
       '@apollo/client':
         specifier: ^4.0.11
         version: 4.0.11(graphql-ws@6.0.6(graphql@16.12.0)(ws@8.18.3))(graphql@16.12.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)
+      '@apollo/utils.keyvadapter':
+        specifier: ^4.0.1
+        version: 4.0.1
+      '@keyv/redis':
+        specifier: ^5.1.5
+        version: 5.1.5(keyv@5.5.5)
       '@repo/plugin-listrr':
         specifier: workspace:^
         version: link:../../packages/plugin-listrr
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../../packages/util-plugin-sdk
+      keyv:
+        specifier: ^5.5.5
+        version: 5.5.5
       reflect-metadata:
         specifier: 'catalog:'
         version: 0.2.2
@@ -298,6 +307,9 @@ importers:
       '@parcel/watcher':
         specifier: ^2.5.1
         version: 2.5.1
+      '@repo/core-util-database':
+        specifier: workspace:^
+        version: link:../../packages/core/util-database
       '@repo/core-util-eslint-config':
         specifier: workspace:^
         version: link:../../packages/core/util-eslint-config
@@ -951,6 +963,9 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
+      xstate:
+        specifier: ^5.25.0
+        version: 5.25.0
 
   packages/plugin-mdblist:
     dependencies:
@@ -1104,6 +1119,9 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.0.15(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
+      xstate:
+        specifier: ^5.25.0
+        version: 5.25.0
 
 packages:
 

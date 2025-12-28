@@ -7,7 +7,7 @@ import { Movie } from "./entities/media-items/movie.entity.ts";
 import { Season } from "./entities/media-items/season.entity.ts";
 import { Show } from "./entities/media-items/show.entity.ts";
 import { Stream } from "./entities/streams/stream.entity.ts";
-import { UndeterminedItem } from "./entities/media-items/undetermined-item.entity.ts";
+import { RequestedItem } from "./entities/media-items/requested-item.entity.ts";
 import { DataSource } from "typeorm";
 import { z } from "zod";
 
@@ -20,7 +20,7 @@ const entities = [
   Movie,
   Season,
   Show,
-  UndeterminedItem,
+  RequestedItem,
   Stream,
 ];
 

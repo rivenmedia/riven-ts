@@ -43,19 +43,19 @@ export class MediaItem {
   id!: number;
 
   @Index()
-  @Column()
-  title!: string;
-
-  @Index()
   @Column({ nullable: true })
+  title?: string;
+
+  @Index({ unique: true })
+  @Column({ nullable: true, unique: true })
   imdbId?: string;
 
-  @Index()
-  @Column({ nullable: true })
+  @Index({ unique: true })
+  @Column({ nullable: true, unique: true })
   tvdbId?: string;
 
-  @Index()
-  @Column({ nullable: true })
+  @Index({ unique: true })
+  @Column({ nullable: true, unique: true })
   tmdbId?: string;
 
   @Column({ nullable: true })
