@@ -15,8 +15,6 @@ export default {
     async ({ input: { dataSources }, helpers: { publishEvent } }) => {
       const api = dataSources.get(ListrrAPI);
 
-      console.log(api);
-
       for (const show of await api.getShows(
         new Set(["6941fe52770814e293788237"]),
       )) {
