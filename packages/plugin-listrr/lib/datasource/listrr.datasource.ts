@@ -7,9 +7,12 @@ import {
   type GetApiListMyPageQueryResponse,
 } from "../__generated__/index.ts";
 import type { ExternalIds } from "../schema/types/external-ids.type.ts";
-import type { BasePluginContext, RequestedItem } from "@repo/util-plugin-sdk";
+import {
+  BaseDataSource,
+  type BasePluginContext,
+  type RequestedItem,
+} from "@repo/util-plugin-sdk";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
-import { BaseDataSource } from "@repo/core-util-datasource";
 
 export class ListrrAPIError extends Error {}
 
@@ -30,7 +33,7 @@ export class ListrrAPI extends BaseDataSource {
     requestOpts.headers["x-api-key"] = this.token;
   }
 
-  async validate() {
+  override async validate() {
     try {
       const response =
         await this.get<GetApiListMyPageQueryResponse>("List/My/1");
@@ -147,6 +150,10 @@ export class ListrrAPI extends BaseDataSource {
     }
 
     return [...idsMap.values()];
+  }
+
+  override getApiToken() {
+    return "f7f5a6871a944fb692d144eab2fde171722b5a79c5af4ac1a3f4fd225f94c3ba";
   }
 }
 

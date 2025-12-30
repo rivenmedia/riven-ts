@@ -19,7 +19,7 @@
     "@repo/util-plugin-sdk": "workspace:^",
     "keyv": "^5.5.5",
     "reflect-metadata": "catalog:",
-    "xstate": "^5.25.0"
+    "xstate": "catalog:"
   },
   "devDependencies": {
     "@apollo/client-devtools-vscode": "^4.23.2",

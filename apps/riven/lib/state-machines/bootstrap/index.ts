@@ -1,7 +1,9 @@
 import { checkServerStatus } from "./actors/check-server-status.actor.ts";
 import { checkPluginStatuses } from "./actors/check-plugin-statuses.actor.ts";
-import { registerPlugins } from "./actors/register-plugins.actor.ts";
-import { processRequestedItems } from "./actors/process-requested-items.actor.ts";
+import {
+  registerPlugins,
+  type RegisteredPlugin,
+} from "./actors/register-plugins.actor.ts";
 import {
   ApolloClient,
   ApolloLink,
@@ -9,39 +11,24 @@ import {
   InMemoryCache,
 } from "@apollo/client";
 import { RetryLink } from "@apollo/client/link/retry";
-import {
-  assign,
-  emit,
-  raise,
-  setup,
-  spawnChild,
-  type ActorRef,
-  type AnyActorRef,
-  type Snapshot,
-} from "xstate";
+import { assign, emit, setup } from "xstate";
 import { logger } from "@repo/core-util-logger";
 import {
-  SubscribableProgramEvent,
-  type PublishableProgramEvent,
+  type PluginToProgramEvent,
+  type ProgramToPluginEvent,
 } from "@repo/util-plugin-sdk";
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
-
-interface RivenMachineEvent {
-  type: SubscribableProgramEvent;
-}
-
-type PluginRef = ActorRef<Snapshot<unknown>, RivenMachineEvent>;
 
 export const bootstrapMachine = setup({
   types: {
     context: {} as {
       cache: KeyvAdapter;
       client: ApolloClient;
-      plugins: Map<symbol, PluginRef>;
+      plugins: Map<symbol, RegisteredPlugin>;
     },
-    emitted: {} as RivenMachineEvent,
+    emitted: {} as ProgramToPluginEvent,
     events: {} as
-      | PublishableProgramEvent
+      | PluginToProgramEvent
       | { type: "START" }
       | { type: "FATAL_ERROR" }
       | { type: "EXIT" },
@@ -49,7 +36,6 @@ export const bootstrapMachine = setup({
       registerPlugins: "registerPlugins";
       checkServerStatus: "checkServerStatus";
       checkPluginStatuses: "checkPluginStatuses";
-      processRequestedItems: "processRequestedItems";
     },
     input: {} as {
       cache: KeyvAdapter;
@@ -59,10 +45,9 @@ export const bootstrapMachine = setup({
     checkServerStatus,
     checkPluginStatuses,
     registerPlugins,
-    processRequestedItems,
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7ABAIwHsCAXWYgJwEMAHascgYgGUAVAQWRYG0AGAXUShqBWKmKoCWQSAAeiACwAmADQgAnogBsAZgCMAOkU89AVgAcATk06Tu3QF97qtJlyESZKrXoMAogA0ASW5+aWFRcUlpOQQlVQ0ERUVtQxMeHjNNAHZNE20LRUdnDGx8IlIKGjpGADE2dgAZAH1fZGQAeWReASQQcLEJKV6YuPVEXXz9C2np-LSc5KKQF1L3Cq9q-UCsAcoAG1RRLCgGCEkwfTJKYguVt3LPKvotnfF9w9Rj7rCRAajh8baEzyQxmXRGCyZLI8RRmMzxLTaRT6aF6JS2RQWfKaJZ3MoeSrecgvXYHI5QfQAYQAFmAAMYAaxwsHomHIzOI1wArrAqbTGZ8TmcsBdPugCAzbiV7gSNs9tqSPsc+fSmSzyGyOdzeTTVYKEGKCHTroNut9ev1IkNQCNsvoePJNGZFEpNPIzBkTAiECYnfp5HldPJdDxctDMrjpfj1k9iQq3mTBSrGczWfQtcQecmGYKGPRyARidQ9tcAGaFgC2+jxa0eRJJCaVFN1KfVmqumZ1-JzxwNWHFxqtZtCFt+VuiiGSKXSWRy8khuUs8m98kd9vSPBMLu0WWdmMjrmjdc28dQ73J1bAUEON3Zxa516wvOQV5v9FzwtF-YlUsPtcJJ6vGeibKi+15kOm96Ps+r4QeQ+qGoOpr8OaQhjoME6xNomj6M6MLyNo6ROsYwLemYJhZPoFGwuRkKKNRB6rA8AHykB55JmBb53nsD6fDB4G3pApznPohqStWUb-nKcZsSBFKcXBOBQXxl4CfQkB9gOJqSMOPRoREGEAggliURRMKaKGzqrm6ZFZMiuSaEYAZWFu+5OMsknMdJDbAU2qlcUpPHQf5cFCfmhb6MWZaVhJf5ebGPnsaBsG3oFvFPiFgkQJpRraVguk-AZ-w2lothTE6WQBjoFgmBYujwmMCBZGkhjGHYtVOjodmOO5WAEBAcDSDW8VEoVfzWrIiAALSaN6M2MTKMb1oEEB7GAY3jkZowJGCVEbjwdlJHVQImAtR4sTJirkhthklQgdiUc6HrQpi7r5Noy6NYoWQGBuIY8AUG5ZNoZ1SQlp5Jc23aphq6YdjyN3FZN93QrhsIHTCFhvVin0JECZh7TO1i7nVtigyNgFXUmLZqmm7Lw12erHIjE0xIo9Vo89mPYx93rAikNV6DYs71bV5OyuDsl+TTMPtpynb6AAEmA+zENSCT6eNmGaFihhKN91X1Touh80oKJtZougmL6QIFOLS2U42F4KalylPizmG6LknMY69ZjvbjWiOebSJtTulUOO5w0S8tUvOylkFBSpLvvszo5Fazk4TD7L1Y-7ONkdo052RYGTzvIDpY-bx6sVTyVqdx6X8VxkAe0ZXUonCkIerokKESojVmO6+hW4530hh66Qg1Hnkx47vnxw3aXBQAau8EDXK36da0ZdhAvoSJgpubqWy6FhkWupeW45Vt1Y51cXdWXJYDsaea5td1Bn6WOBhYu5pNhWajVzDIiMELaEFdnRWAft5Xw5ACzkC3u-W6yMjA4TqsGSB4J-ZTm9EGHg-oZiOmavIZq2EYEJV8DIMQSC+joSRmzUMUwgz4LBLCJERc8HTHXOkWqRdMj0VOj1IAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7AxAZQBUBBZAgbQAYBdRUABwHtZUAXVBrWkAD0QBYATABoQAT36CAdHwCccgMwV5MioIBsfAOwBfbSLSZcAUQAaASXLUujZmw5deCQSPEIBA+ZIGyZADj5qHh6B8rr6GNg4AGJExAAyAPpGyMgA8siUNEggNqzsnNmOzmKIAIzKknJyvmq+AKylfOVqOnogBtiSZlh5AIYANqjMWFA4EBxgkrAsvSyTHVhdPWwDQ6gjmdZMefaFiDKaFJKa8nzyjS2+qnW+LhKeVSpq8h5+N2HtEYvdfYPDUJJkGAoEM5gAnAAEdH6AFcQVhYIDgaCwGD1qNxlhJut0AwANaTMHI6aogAKsPhsE22VydgKoEcdSaXh8MjqFDqTw8dycaiOmhOp05vhqijUujaWAYEDgXAWW1s+QciAAtGoeWqPgsuhB+mAFTt6Tx+MISghfKVpI9fIoBDdBFqvktfmsRga6cqEKVSppJL4BBbVP5lHwbabXAJDpUqt5TjI+LI6o7DM6Vn90UiQSTIdC4et4DTth69l61HU-QHSkGzvGwzz5DcrX4bWzZHyZMnOj8066AUCs+CoRT85mUWi3YXFbsGYgBOUK4HQzXQy8eQny48BBRW2ofTbO99lqhVv9R9mh3mEWfwZB3UqS5opHPfI-ShblKUZGu6r7HwoRW+dR1MorThCmyAwlgPQTvQRb3jOXoUPUkjKDaJyfiuBxrhQahNjIpQCAcAplgEB6SEYYJggwRIQHe07Gm4OGVI0FACCE3g1EBPIsXhNT1I0zSgZ8KZGNwrC3pOhqeluuH4XwrHsaGZZ1NxfjRlUWihgKbLihKQA */
   id: "Riven",
   initial: "Idle",
   context: ({ input }) => ({
@@ -88,53 +73,19 @@ export const bootstrapMachine = setup({
         enabled: true,
       },
     }),
-    plugins: new Map<symbol, PluginRef>(),
+    pluginEventHandlers: {},
+    plugins: new Map<symbol, RegisteredPlugin>(),
   }),
   on: {
     START: ".Initialising",
     EXIT: ".Exited",
     FATAL_ERROR: ".Errored",
-    "media:requested": {
-      actions: spawnChild("processRequestedItems", {
-        id: "processRequestedItems",
-        input: ({ event }) => ({
-          items: event.type === "media:requested" ? event.data : [],
-        }),
-      }),
-    },
   },
   states: {
     Idle: {},
     Initialising: {
       type: "parallel",
       states: {
-        "Check server status": {
-          initial: "Checking",
-          states: {
-            Checking: {
-              entry() {
-                logger.info("Checking server status...");
-              },
-              invoke: {
-                id: "checkServerStatus",
-                src: "checkServerStatus",
-                onError: {
-                  actions: raise({ type: "FATAL_ERROR" }),
-                },
-                onDone: "Healthy",
-                input: ({ context }) => ({
-                  client: context.client,
-                }),
-              },
-            },
-            Healthy: {
-              entry() {
-                logger.info("Server is healthy");
-              },
-              type: "final",
-            },
-          },
-        },
         "Register plugins": {
           initial: "Registering",
           states: {
@@ -145,21 +96,31 @@ export const bootstrapMachine = setup({
               invoke: {
                 id: "registerPlugins",
                 src: "registerPlugins",
-                input: {},
+                input: ({ context }) => ({
+                  cache: context.cache,
+                }),
                 onDone: {
                   actions: assign({
-                    plugins: ({ context, event, spawn, self }) => {
-                      const pluginMap = new Map<symbol, AnyActorRef>();
+                    plugins: ({ context, event, spawn }) => {
+                      const pluginMap = new Map<symbol, RegisteredPlugin>();
 
-                      for (const plugin of event.output) {
-                        const pluginActor = spawn(plugin.stateMachine, {
+                      for (const [
+                        pluginName,
+                        { machine, dataSources },
+                      ] of event.output.entries()) {
+                        const pluginRef = spawn(machine, {
                           input: {
-                            parentRef: self,
-                            cache: context.cache,
+                            client: context.client,
+                            dataSources,
+                            pluginName,
                           },
                         });
 
-                        pluginMap.set(plugin.name, pluginActor);
+                        pluginMap.set(pluginName, {
+                          dataSources,
+                          machine,
+                          ref: pluginRef,
+                        });
                       }
 
                       return pluginMap;
@@ -171,23 +132,7 @@ export const bootstrapMachine = setup({
             },
             Registered: {
               entry() {
-                logger.info("Plugins registered. Checking plugin health...");
-              },
-              invoke: {
-                id: "checkPluginStatuses",
-                src: "checkPluginStatuses",
-                onError: {
-                  actions: raise({ type: "FATAL_ERROR" }),
-                },
-                onDone: "Validated",
-                input: ({ context }) => ({
-                  client: context.client,
-                }),
-              },
-            },
-            Validated: {
-              entry() {
-                logger.info("Plugins are healthy.");
+                logger.info("Plugins registered.");
               },
               type: "final",
             },
@@ -198,10 +143,9 @@ export const bootstrapMachine = setup({
     },
     Running: {
       entry: [
-        emit({ type: "riven.running" }),
         ({ context }) => {
-          context.plugins.forEach((actor) => {
-            actor.send({ type: "riven.running" });
+          context.plugins.forEach(({ ref }) => {
+            ref?.send({ type: "riven.started" });
           });
         },
         () => {

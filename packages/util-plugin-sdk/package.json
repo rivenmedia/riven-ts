@@ -17,7 +17,10 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@apollo/client": "^4.0.11",
+    "@apollo/datasource-rest": "catalog:",
     "@apollo/server": "^5.2.0",
+    "@apollo/utils.keyvadapter": "^4.0.1",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
@@ -29,9 +32,12 @@
     "type-graphql": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
-    "xstate": "^5.25.0"
+    "xstate": "catalog:"
   },
   "peerDependencies": {
+    "@apollo/client": "^4.0.11",
+    "@apollo/datasource-rest": "catalog:",
+    "@apollo/utils.keyvadapter": "^4.0.1",
     "xstate": "^5.25.0"
   }
 }

@@ -9,7 +9,9 @@ export const it = baseIt.extend<{
 }>({
   actor: async ({}, use) => {
     const actor = createActor(bootstrapMachine, {
-      input: {},
+      input: {
+        cache: null as never,
+      },
     });
 
     actor.start();

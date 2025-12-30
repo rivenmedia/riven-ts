@@ -6,12 +6,13 @@ import {
   type RequestOptions,
 } from "@apollo/datasource-rest";
 import { logger } from "@repo/core-util-logger";
+import type { Promisable } from "type-fest";
 
 export interface BaseDataSourceConfig extends DataSourceConfig {
   token?: string | undefined;
 }
 
-export class BaseDataSource extends RESTDataSource {
+export abstract class BaseDataSource extends RESTDataSource {
   serviceName: string;
   token: string | undefined;
 
@@ -42,5 +43,13 @@ export class BaseDataSource extends RESTDataSource {
     _url?: URL,
   ): void {
     this.logger.error(`[${this.serviceName}] API Error: ${error.message}`);
+  }
+
+  validate(): Promisable<boolean> {
+    return true;
+  }
+
+  getApiToken(): Promisable<string | undefined> {
+    return undefined;
   }
 }

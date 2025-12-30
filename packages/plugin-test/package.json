@@ -30,6 +30,10 @@
     "eslint": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "xstate": "catalog:"
+  },
+  "peerDependencies": {
+    "xstate": "^5"
   }
 }

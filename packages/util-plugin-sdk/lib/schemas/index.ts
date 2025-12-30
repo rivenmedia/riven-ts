@@ -1,4 +1,9 @@
-import { StateMachine, type AnyStateMachine } from "xstate";
+import {
+  BaseDataSource,
+  type BaseDataSourceConfig,
+} from "../datasource/index.ts";
+import type { PluginActorLogic } from "../state-machine-helpers/create-plugin-runner.ts";
+import type { Constructor } from "type-fest";
 import { z } from "zod";
 
 export const RivenPluginConfig = z.readonly(
@@ -24,23 +29,64 @@ export const SubscribableProgramEvent = z.enum([
 
 export type SubscribableProgramEvent = z.infer<typeof SubscribableProgramEvent>;
 
-export type PublishableProgramEvent = {
+export interface PublishableProgramEvent {
   type: "media:requested";
-  data: RequestedItem[];
+  data: RequestedItem;
+}
+
+const pluginRunnerSchema = z.object({
+  config: z.function(),
+  start: z.function({
+    input: z.any(),
+  }),
+  transition: z.function({
+    input: z.any(),
+  }),
+  getInitialSnapshot: z.function({
+    input: z.any(),
+  }),
+  getPersistedSnapshot: z.function({
+    input: z.any(),
+    output: z.any(),
+  }),
+});
+
+const isPluginRunner = (value: unknown): value is PluginActorLogic => {
+  return pluginRunnerSchema.safeParse(value).success;
 };
+
+const instantiatableSchema = z.object({
+  constructor: z.any(),
+});
 
 export const RivenPlugin = z.object({
   name: z.symbol(),
+  dataSources: z
+    .array(
+      z.custom<Constructor<BaseDataSource, [BaseDataSourceConfig]>>((value) => {
+        if (typeof value !== "function") {
+          return false;
+        }
+
+        return instantiatableSchema.safeParse(value.prototype).success;
+      }),
+    )
+    .min(1)
+    .optional(),
   resolvers: z.array(z.instanceof(Function)).min(1),
-  stateMachine: z.custom<AnyStateMachine>(
-    (value) => value instanceof StateMachine,
-  ),
+  getApiToken: z
+    .function({
+      input: [z.never()],
+      output: z.promise(z.string().nullable()),
+    })
+    .optional(),
+  runner: z.custom<PluginActorLogic>((value) => isPluginRunner(value)),
   events: z
     .partialRecord(
       SubscribableProgramEvent,
       z.function({
         input: [z.any()],
-        output: z.void(),
+        output: z.promise(z.void()),
       }),
     )
     .optional(),

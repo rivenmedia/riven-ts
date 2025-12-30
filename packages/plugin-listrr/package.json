@@ -36,13 +36,13 @@
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
+    "graphql-tag": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "xstate": "^5.25.0"
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "@kubb/cli": "*",
-    "xstate": "^5.25.0"
+    "graphql-tag": "catalog:"
   }
 }

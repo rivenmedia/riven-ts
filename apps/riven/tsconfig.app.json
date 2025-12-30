@@ -3,7 +3,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": "lib"
+    "rootDir": "lib",
+    "outDir": "dist"
   },
   "files": [],
   "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],
