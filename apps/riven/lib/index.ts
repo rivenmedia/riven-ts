@@ -6,6 +6,8 @@ import { createActor, waitFor, type AnyEventObject } from "xstate";
 import KeyvRedis, { Keyv } from "@keyv/redis";
 import { LRUCache } from "lru-cache";
 
+const sessionId = crypto.randomUUID();
+
 await postgresDataSource.initialize();
 
 const cache = new KeyvAdapter(
@@ -17,22 +19,22 @@ const eventsCache = new LRUCache<string, AnyEventObject>({ max: 1000 });
 const actor = createActor(bootstrapMachine, {
   input: {
     cache,
+    sessionId,
   },
   inspect(inspectionEvent) {
     if (inspectionEvent.type === "@xstate.event") {
       eventsCache.set(inspectionEvent.event.type, inspectionEvent.event);
     }
-
-    if (inspectionEvent.type === "@xstate.action") {
-      eventsCache.set(inspectionEvent.action.type, inspectionEvent.action);
-    }
   },
 });
 
 async function persistEvents() {
-  await cache.set("riven:events-cache", JSON.stringify(eventsCache.dump()));
+  await cache.set(
+    `riven:events-cache:${sessionId}`,
+    JSON.stringify(eventsCache.dump()),
+  );
 
-  logger.info("Persisted Riven events cache");
+  logger.info(`Persisted Riven events cache for session ${sessionId}`);
 }
 
 const persistEventsIntervalId = setInterval(() => {

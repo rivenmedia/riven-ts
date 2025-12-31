@@ -1,14 +1,13 @@
 {
-  "python-envs.pythonProjects": [
-    {
-      "path": "",
-      "envManager": "ms-python.python:venv",
-      "packageManager": "ms-python.python:pip"
-    }
-  ],
   "cSpell.words": ["kubb", "listrr"],
   "typescript.preferences.autoImportSpecifierExcludeRegexes": [
     "node:test" // Conflicts with Vitest imports
   ],
-  "typescript.preferences.preferTypeOnlyAutoImports": true
+  "typescript.preferences.preferTypeOnlyAutoImports": true,
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/.hg/store/**": true,
+    "**/*.log": true // Exclude log files, this prevents VS Code from crashing when running the program
+  }
 }

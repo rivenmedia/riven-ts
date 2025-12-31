@@ -45,11 +45,9 @@ export abstract class BaseDataSource extends RESTDataSource {
     this.logger.error(`[${this.serviceName}] API Error: ${error.message}`);
   }
 
-  validate(): Promisable<boolean> {
-    return true;
-  }
+  abstract validate(): Promisable<boolean>;
 
-  getApiToken(): Promisable<string | undefined> {
+  static getApiToken(): Promisable<string | undefined> {
     return undefined;
   }
 }

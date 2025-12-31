@@ -2,7 +2,11 @@ import { ListrrAPI } from "./datasource/listrr.datasource.ts";
 import { pluginConfig } from "./listrr-plugin.config.ts";
 import { ListrrSettingsResolver } from "./schema/listrr-settings.resolver.ts";
 import { ListrrResolver } from "./schema/listrr.resolver.ts";
-import { createPluginRunner, type RivenPlugin } from "@repo/util-plugin-sdk";
+import {
+  createPluginRunner,
+  createPluginValidator,
+  type RivenPlugin,
+} from "@repo/util-plugin-sdk";
 
 export default {
   name: pluginConfig.name,
@@ -25,4 +29,5 @@ export default {
       };
     },
   ),
+  validator: createPluginValidator(() => true),
 } satisfies RivenPlugin;

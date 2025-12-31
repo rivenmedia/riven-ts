@@ -1,9 +1,11 @@
+import type { UUID } from "node:crypto";
 import { checkServerStatus } from "./actors/check-server-status.actor.ts";
 import { checkPluginStatuses } from "./actors/check-plugin-statuses.actor.ts";
 import {
   registerPlugins,
   type RegisteredPlugin,
 } from "./actors/register-plugins.actor.ts";
+import { waitForValidPlugins } from "./actors/wait-for-valid-plugins.actor.ts";
 import {
   ApolloClient,
   ApolloLink,
@@ -16,13 +18,16 @@ import { logger, type LogLevel } from "@repo/core-util-logger";
 import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk";
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 
+export interface BootstrapMachineContext {
+  cache: KeyvAdapter;
+  client: ApolloClient;
+  plugins: Map<symbol, RegisteredPlugin>;
+  sessionId: UUID;
+}
+
 export const bootstrapMachine = setup({
   types: {
-    context: {} as {
-      cache: KeyvAdapter;
-      client: ApolloClient;
-      plugins: Map<symbol, RegisteredPlugin>;
-    },
+    context: {} as BootstrapMachineContext,
     emitted: {} as ProgramToPluginEvent,
     events: {} as
       | { type: "START" }
@@ -32,15 +37,17 @@ export const bootstrapMachine = setup({
       registerPlugins: "registerPlugins";
       checkServerStatus: "checkServerStatus";
       checkPluginStatuses: "checkPluginStatuses";
+      waitForValidPlugins: "waitForValidPlugins";
     },
     input: {} as {
       cache: KeyvAdapter;
+      sessionId: UUID;
     },
   },
   actions: {
     broadcastToPlugins: ({ context }, event: ProgramToPluginEvent) => {
       for (const { ref } of context.plugins.values()) {
-        ref?.send(event);
+        ref.send(event);
       }
     },
     log: (
@@ -60,6 +67,18 @@ export const bootstrapMachine = setup({
     checkServerStatus,
     checkPluginStatuses,
     registerPlugins,
+    waitForValidPlugins,
+  },
+  guards: {
+    hasInvalidPlugins: ({ context }) => {
+      for (const { ref } of context.plugins.values()) {
+        if (ref.getSnapshot().matches("Errored")) {
+          return true;
+        }
+      }
+
+      return false;
+    },
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7AxAZQBUBBZAgbQAYBdRUABwHtZUAXVBrWkAD0QBYATABoQAT36CAdHwCccgMwV5MioIBsfAOwBfbSLSZcAUQAaASXLUujZmw5deCQSPEIBA+ZIGyZADj5qHh6B8rr6GNg4AGJExAAyAPpGyMgA8siUNEggNqzsnNmOzmKIAIzKknJyvmq+AKylfOVqOnogBtiSZlh5AIYANqjMWFA4EBxgkrAsvSyTHVhdPWwDQ6gjmdZMefaFiDKaFJKa8nzyjS2+qnW+LhKeVSpq8h5+N2HtEYvdfYPDUJJkGAoEM5gAnAAEdH6AFcQVhYIDgaCwGD1qNxlhJut0AwANaTMHI6aogAKsPhsE22VydgKoEcdSaXh8MjqFDqTw8dycaiOmhOp05vhqijUujaWAYEDgXAWW1s+QciAAtGoeWqPgsuhB+mAFTt6Tx+MISghfKVpI9fIoBDdBFqvktfmsRga6cqEKVSppJL4BBbVP5lHwbabXAJDpUqt5TjI+LI6o7DM6Vn90UiQSTIdC4et4DTth69l61HU-QHSkGzvGwzz5DcrX4bWzZHyZMnOj8066AUCs+CoRT85mUWi3YXFbsGYgBOUK4HQzXQy8eQny48BBRW2ofTbO99lqhVv9R9mh3mEWfwZB3UqS5opHPfI-ShblKUZGu6r7HwoRW+dR1MorThCmyAwlgPQTvQRb3jOXoUPUkjKDaJyfiuBxrhQahNjIpQCAcAplgEB6SEYYJggwRIQHe07Gm4OGVI0FACCE3g1EBPIsXhNT1I0zSgZ8KZGNwrC3pOhqeluuH4XwrHsaGZZ1NxfjRlUWihgKbLihKQA */
@@ -88,8 +107,8 @@ export const bootstrapMachine = setup({
         enabled: true,
       },
     }),
-    pluginEventHandlers: {},
     plugins: new Map<symbol, RegisteredPlugin>(),
+    sessionId: input.sessionId,
   }),
   on: {
     START: ".Initialising",
@@ -101,7 +120,7 @@ export const bootstrapMachine = setup({
     Initialising: {
       type: "parallel",
       states: {
-        "Register plugins": {
+        "Bootstrap plugins": {
           initial: "Registering",
           states: {
             Registering: {
@@ -123,18 +142,18 @@ export const bootstrapMachine = setup({
                       const pluginMap = new Map<symbol, RegisteredPlugin>();
 
                       for (const [
-                        pluginName,
+                        pluginSymbol,
                         { machine, dataSources },
                       ] of event.output.entries()) {
                         const pluginRef = spawn(machine, {
                           input: {
                             client: context.client,
                             dataSources,
-                            pluginName,
+                            pluginSymbol,
                           },
                         });
 
-                        pluginMap.set(pluginName, {
+                        pluginMap.set(pluginSymbol, {
                           dataSources,
                           machine,
                           ref: pluginRef,
@@ -144,17 +163,51 @@ export const bootstrapMachine = setup({
                       return pluginMap;
                     },
                   }),
-                  target: "Registered",
+                  target: "Validating",
                 },
               },
             },
-            Registered: {
+            Validating: {
               entry: {
                 type: "log",
                 params: {
-                  message: "Plugins registered successfully.",
+                  message: "Starting plugin validation...",
                 },
               },
+              invoke: {
+                id: "waitForValidPlugins",
+                src: "waitForValidPlugins",
+                input: ({ context }) => context.plugins,
+                onDone: [
+                  {
+                    target: "Complete",
+                    guard: "hasInvalidPlugins",
+                    actions: [
+                      {
+                        type: "log",
+                        params: {
+                          message:
+                            "One or more plugins failed to validate. Riven will start, but some functionality may be limited. Check the logs for more details.",
+                          level: "warn",
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    target: "Complete",
+                    actions: [
+                      {
+                        type: "log",
+                        params: {
+                          message: "Plugins registered successfully.",
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+            Complete: {
               type: "final",
             },
           },

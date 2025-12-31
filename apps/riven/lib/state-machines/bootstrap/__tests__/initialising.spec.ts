@@ -45,7 +45,7 @@ it('transitions to "Initialising" state on START event', ({ actor }) => {
 
   expect(actor.getSnapshot().value).toEqual({
     Initialising: {
-      "Register plugins": "Registering",
+      "Bootstrap plugins": "Registering",
     },
   });
 });

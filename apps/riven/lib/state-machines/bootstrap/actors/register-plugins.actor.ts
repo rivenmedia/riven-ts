@@ -2,26 +2,18 @@ import "reflect-metadata";
 
 import packageJson from "../../../../package.json" with { type: "json" };
 import { pluginMachine } from "../../plugin/index.ts";
-import { fromPromise, type ActorRef, type Snapshot } from "xstate";
+import { fromPromise, type ActorRefFromLogic } from "xstate";
 import {
   DataSourceMap,
   parsePluginsFromDependencies,
-  type PluginToProgramEvent,
-  type ProgramToPluginEvent,
 } from "@repo/util-plugin-sdk";
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import { logger } from "@repo/core-util-logger";
 
-export type PluginRef = ActorRef<
-  Snapshot<unknown>,
-  ProgramToPluginEvent,
-  PluginToProgramEvent
->;
-
 export interface RegisteredPlugin {
   dataSources: DataSourceMap;
   machine: typeof pluginMachine;
-  ref: PluginRef | null;
+  ref: ActorRefFromLogic<typeof pluginMachine>;
 }
 
 export interface RegisterPluginsInput {
@@ -29,7 +21,7 @@ export interface RegisterPluginsInput {
 }
 
 export const registerPlugins = fromPromise<
-  Map<symbol, RegisteredPlugin>,
+  Map<symbol, Omit<RegisteredPlugin, "ref">>,
   RegisterPluginsInput
 >(async ({ input: { cache } }) => {
   const plugins = await parsePluginsFromDependencies(
@@ -37,41 +29,40 @@ export const registerPlugins = fromPromise<
     import.meta.resolve.bind(null),
   );
 
-  const pluginMap = new Map<symbol, RegisteredPlugin>();
+  const pluginMap = new Map<symbol, Omit<RegisteredPlugin, "ref">>();
   const dataSourceMap = new DataSourceMap();
 
   for (const plugin of plugins) {
     if (plugin.dataSources) {
-      for (const DataSourceConstructor of plugin.dataSources) {
-        const instance = new DataSourceConstructor({
-          cache,
-        });
-
-        // TODO: Move validation to plugin machine
+      for (const DataSource of plugin.dataSources) {
         try {
-          instance.token = await instance.getApiToken();
+          const token = await DataSource.getApiToken();
+          const instance = new DataSource({
+            cache,
+            token,
+          });
+
+          dataSourceMap.set(DataSource, instance);
         } catch (error) {
           logger.error(
-            `Failed to get API token for data source ${instance.serviceName}: ${
+            `Failed to construct data source ${DataSource.name} for ${plugin.name.toString()}: ${
               (error as Error).message
             }`,
           );
         }
-
-        dataSourceMap.set(DataSourceConstructor, instance);
       }
     }
 
     const machine = pluginMachine.provide({
       actors: {
-        plugin: plugin.runner,
+        pluginRunner: plugin.runner,
+        validatePlugin: plugin.validator,
       },
     });
 
     pluginMap.set(plugin.name, {
       dataSources: dataSourceMap,
       machine,
-      ref: null,
     });
   }
 

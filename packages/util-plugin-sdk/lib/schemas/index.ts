@@ -2,10 +2,11 @@ import {
   BaseDataSource,
   type BaseDataSourceConfig,
 } from "../datasource/index.ts";
-import type { PluginActorLogic } from "../state-machine-helpers/create-plugin-runner.ts";
+import type { PluginRunnerLogic } from "../state-machine-helpers/create-plugin-runner.ts";
 import { DataSourceMap } from "../types/utilities.ts";
-import type { Constructor } from "type-fest";
+import type { PluginValidatorLogic } from "../state-machine-helpers/create-plugin-validator.ts";
 import { z } from "zod";
+import type { Promisable } from "type-fest";
 
 export const RivenPluginConfig = z.readonly(
   z.object({
@@ -23,7 +24,7 @@ export const requestedItemSchema = z.object({
 
 export type RequestedItem = z.infer<typeof requestedItemSchema>;
 
-const pluginRunnerSchema = z.object({
+const actorSchema = z.object({
   config: z.function(),
   start: z.function({
     input: z.any(),
@@ -40,8 +41,10 @@ const pluginRunnerSchema = z.object({
   }),
 });
 
-const isPluginRunner = (value: unknown): value is PluginActorLogic => {
-  return pluginRunnerSchema.safeParse(value).success;
+type Actor = z.infer<typeof actorSchema>;
+
+const isActor = (value: unknown): value is Actor => {
+  return actorSchema.safeParse(value).success;
 };
 
 const instantiatableSchema = z.object({
@@ -60,10 +63,24 @@ export const isBasePluginContext = (
   return basePluginContextSchema.safeParse(value).success;
 };
 
-const dataSourceSchema = z.custom<
-  Constructor<BaseDataSource, [BaseDataSourceConfig]>
->((value) => {
+/**
+ * Represents a constructor for a class that extends BaseDataSource.
+ * This type preserves both instance members and static members.
+ */
+export interface DataSourceConstructor {
+  /** Static method to get the API token */
+  getApiToken(): Promisable<string | undefined>;
+  /** Constructor signature */
+  new (options: BaseDataSourceConfig): BaseDataSource;
+}
+
+const dataSourceSchema = z.custom<DataSourceConstructor>((value) => {
   if (typeof value !== "function") {
+    return false;
+  }
+
+  // Check it has the static getApiToken method
+  if (typeof (value as DataSourceConstructor).getApiToken !== "function") {
     return false;
   }
 
@@ -74,7 +91,7 @@ export const RivenPlugin = z.object({
   name: z.symbol(),
   dataSources: z.tuple([dataSourceSchema]).rest(dataSourceSchema).optional(),
   resolvers: z.array(z.instanceof(Function)).min(1),
-  runner: z.custom<PluginActorLogic>((value) => isPluginRunner(value)),
+  runner: z.custom<PluginRunnerLogic>((value) => isActor(value)),
   context: z
     .function({
       input: [
@@ -85,6 +102,7 @@ export const RivenPlugin = z.object({
       output: z.promise(z.record(z.string(), z.unknown())),
     })
     .optional(),
+  validator: z.custom<PluginValidatorLogic>((value) => isActor(value)),
 });
 
 export type RivenPlugin = z.infer<typeof RivenPlugin>;

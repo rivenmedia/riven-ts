@@ -152,7 +152,7 @@ export class ListrrAPI extends BaseDataSource {
     return [...idsMap.values()];
   }
 
-  override getApiToken() {
+  static override getApiToken() {
     return "f7f5a6871a944fb692d144eab2fde171722b5a79c5af4ac1a3f4fd225f94c3ba";
   }
 }

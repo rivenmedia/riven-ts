@@ -16,13 +16,13 @@ export type ParentRef = ActorRef<
   ProgramToPluginEvent
 >;
 
-export interface PluginMachineContext extends MachineContext {
-  pluginName: symbol;
+export interface PluginRunnerContext extends MachineContext {
+  pluginSymbol: symbol;
 }
 
-export interface PluginMachineInput {
+export interface PluginRunnerInput {
   client: ApolloClient;
-  pluginName: symbol;
+  pluginSymbol: symbol;
   dataSources: DataSourceMap;
 }
 
@@ -44,24 +44,24 @@ type PluginRunner = (params: {
   receive: Parameters<
     CallbackLogicFunction<ProgramToPluginEvent>
   >[0]["receive"];
-  input: PluginMachineInput;
+  input: PluginRunnerInput;
   // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
 }) => Promise<void | (() => void)>;
 
 export const createPluginRunner = (callback: PluginRunner) =>
-  fromCallback<ProgramToPluginEvent, PluginMachineInput, PluginToProgramEvent>(
+  fromCallback<ProgramToPluginEvent, PluginRunnerInput, PluginToProgramEvent>(
     ({ input, sendBack, receive }) => {
-      const providePluginName = (
+      const providePluginSymbol = (
         event: Omit<PluginToProgramEvent, "plugin">,
       ): PluginToProgramEvent => ({
         ...event,
-        plugin: input.pluginName,
+        plugin: input.pluginSymbol,
       });
 
       const helpers = {
         publishEvent(event, params) {
           sendBack(
-            providePluginName({
+            providePluginSymbol({
               type: event,
               ...params,
             }),
@@ -69,7 +69,7 @@ export const createPluginRunner = (callback: PluginRunner) =>
         },
         sendMediaRequestedEvent(item: RequestedItem) {
           sendBack(
-            providePluginName({
+            providePluginSymbol({
               type: "media:requested",
               item,
             }),
@@ -85,4 +85,4 @@ export const createPluginRunner = (callback: PluginRunner) =>
     },
   );
 
-export type PluginActorLogic = ReturnType<typeof createPluginRunner>;
+export type PluginRunnerLogic = ReturnType<typeof createPluginRunner>;

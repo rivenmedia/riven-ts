@@ -62,10 +62,10 @@ export function buildContext(
 
     return {
       ...pluginContexts.reduce<Record<symbol, unknown>>(
-        (acc, [pluginName, pluginContext]) => {
+        (acc, [pluginSymbol, pluginContext]) => {
           return {
             ...acc,
-            [pluginName]: pluginContext,
+            [pluginSymbol]: pluginContext,
           };
         },
         {},

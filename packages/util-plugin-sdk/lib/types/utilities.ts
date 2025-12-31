@@ -1,28 +1,22 @@
-import type {
-  BaseDataSource,
-  BaseDataSourceConfig,
-} from "../datasource/index.ts";
-import type { Constructor } from "type-fest";
+import type { BaseDataSource } from "../datasource/index.ts";
+import type { DataSourceConstructor } from "../schemas/index.ts";
 
-export class DataSourceMap extends Map<
-  Constructor<BaseDataSource, [BaseDataSourceConfig]>,
-  BaseDataSource
-> {
-  override get<T extends BaseDataSource>(
-    ctor: Constructor<T, [BaseDataSourceConfig]>,
-  ) {
-    const value = super.get(ctor);
+export class DataSourceMap extends Map<DataSourceConstructor, BaseDataSource> {
+  override get<T extends DataSourceConstructor>(constructor: T) {
+    const value = super.get(constructor);
 
     if (!value) {
-      throw new Error(`DataSource for ${ctor.name} not found in DataSourceMap`);
-    }
-
-    if (!(value instanceof ctor)) {
       throw new Error(
-        `DataSource for ${ctor.name} is not an instance of the expected constructor`,
+        `DataSource for ${constructor.name} not found in DataSourceMap`,
       );
     }
 
-    return value;
+    if (!(value instanceof constructor)) {
+      throw new Error(
+        `DataSource for ${constructor.name} is not an instance of the expected constructor`,
+      );
+    }
+
+    return value as InstanceType<T>;
   }
 }
