@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
-    "@repo/core-util-datasource": "workspace:^",
     "type-graphql": "catalog:",
     "zod": "catalog:"
   },

@@ -1,4 +1,4 @@
-import { BaseDataSource } from "@repo/core-util-datasource";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 export class {{pascalCase pluginName}}APIError extends Error {}
 
@@ -6,7 +6,7 @@ export class {{pascalCase pluginName}}API extends BaseDataSource {
   override baseURL = "https://{{kebabCase pluginName}}.com/api/";
   override serviceName = "{{pascalCase pluginName}}";
 
-  async validate() {
+  override async validate() {
     try {
       // Implement your own validation logic here
       await this.get('validate');

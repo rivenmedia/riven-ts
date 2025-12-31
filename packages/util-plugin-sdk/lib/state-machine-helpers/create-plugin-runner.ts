@@ -45,7 +45,8 @@ type PluginRunner = (params: {
     CallbackLogicFunction<ProgramToPluginEvent>
   >[0]["receive"];
   input: PluginMachineInput;
-}) => Promise<() => void>;
+  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+}) => Promise<void | (() => void)>;
 
 export const createPluginRunner = (callback: PluginRunner) =>
   fromCallback<ProgramToPluginEvent, PluginMachineInput, PluginToProgramEvent>(

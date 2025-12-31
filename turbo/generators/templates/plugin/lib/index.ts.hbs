@@ -5,11 +5,23 @@ import {
 import { pluginConfig } from "./{{kebabCase pluginName}}-plugin.config.ts";
 import { {{pascalCase pluginName}}SettingsResolver } from "./schema/{{kebabCase pluginName}}-settings.resolver.ts";
 import { {{pascalCase pluginName}}Resolver } from "./schema/{{kebabCase pluginName}}.resolver.ts";
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import { createPluginRunner, type RivenPlugin } from "@repo/util-plugin-sdk";
 
 export default {
   name: pluginConfig.name,
   resolvers: [{{pascalCase pluginName}}Resolver, {{pascalCase pluginName}}SettingsResolver],
+  dataSources: [{{pascalCase pluginName}}API],
+  runner: createPluginRunner(
+    async ({ input: { dataSources }, helpers: { publishEvent } }) => {
+      const api = dataSources.get({{pascalCase pluginName}}API);
+
+      // Example runner logic
+
+      return () => {
+        console.log("{{pascalCase pluginName}} plugin runner stopped");
+      };
+    },
+  ),
   context: function (this, { cache }): {{pascalCase pluginName}}ContextSlice {
     return {
       api: new {{pascalCase pluginName}}API({ cache, token: process.env["{{constantCase pluginName}}_API_KEY"] }),

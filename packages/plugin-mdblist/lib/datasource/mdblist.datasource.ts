@@ -8,7 +8,7 @@ import type {
   RequestOptions,
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
-import { BaseDataSource } from "@repo/core-util-datasource";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 export class MDBListAPI extends BaseDataSource {
   override baseURL = "https://api.mdblist.com/";

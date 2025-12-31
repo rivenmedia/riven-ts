@@ -17,9 +17,9 @@
   },
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
-    "@repo/core-util-datasource": "workspace:^",
     "@repo/core-util-graphql-helpers": "workspace:^",
     "@repo/feature-settings": "workspace:^",
+    "@repo/util-plugin-sdk": "workspace:^",
     "class-validator": "catalog:",
     "type-graphql": "catalog:",
     "zod": "catalog:"
@@ -32,7 +32,6 @@
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
-    "@repo/util-plugin-sdk": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
