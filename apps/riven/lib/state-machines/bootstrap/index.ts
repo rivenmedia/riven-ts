@@ -12,11 +12,8 @@ import {
 } from "@apollo/client";
 import { RetryLink } from "@apollo/client/link/retry";
 import { assign, emit, setup } from "xstate";
-import { logger } from "@repo/core-util-logger";
-import {
-  type PluginToProgramEvent,
-  type ProgramToPluginEvent,
-} from "@repo/util-plugin-sdk";
+import { logger, type LogLevel } from "@repo/core-util-logger";
+import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk";
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 
 export const bootstrapMachine = setup({
@@ -28,7 +25,6 @@ export const bootstrapMachine = setup({
     },
     emitted: {} as ProgramToPluginEvent,
     events: {} as
-      | PluginToProgramEvent
       | { type: "START" }
       | { type: "FATAL_ERROR" }
       | { type: "EXIT" },
@@ -39,6 +35,26 @@ export const bootstrapMachine = setup({
     },
     input: {} as {
       cache: KeyvAdapter;
+    },
+  },
+  actions: {
+    broadcastToPlugins: ({ context }, event: ProgramToPluginEvent) => {
+      for (const { ref } of context.plugins.values()) {
+        ref?.send(event);
+      }
+    },
+    log: (
+      _,
+      {
+        message,
+        level = "info",
+      }: {
+        message: string;
+        level?: LogLevel;
+      },
+    ) => {
+      console.log(message);
+      logger[level](message);
     },
   },
   actors: {
@@ -90,8 +106,11 @@ export const bootstrapMachine = setup({
           initial: "Registering",
           states: {
             Registering: {
-              entry() {
-                logger.info("Registering plugins...");
+              entry: {
+                type: "log",
+                params: {
+                  message: "Starting plugin registration...",
+                },
               },
               invoke: {
                 id: "registerPlugins",
@@ -131,8 +150,11 @@ export const bootstrapMachine = setup({
               },
             },
             Registered: {
-              entry() {
-                logger.info("Plugins registered.");
+              entry: {
+                type: "log",
+                params: {
+                  message: "Plugins registered successfully.",
+                },
               },
               type: "final",
             },
@@ -143,19 +165,39 @@ export const bootstrapMachine = setup({
     },
     Running: {
       entry: [
-        ({ context }) => {
-          context.plugins.forEach(({ ref }) => {
-            ref?.send({ type: "riven.started" });
-          });
+        {
+          type: "broadcastToPlugins",
+          params: {
+            type: "riven.started",
+          },
         },
-        () => {
-          logger.info("Riven is running!");
+        {
+          type: "log",
+          params: {
+            message: "Riven has started successfully.",
+          },
         },
       ],
     },
-    Errored: {},
+    Errored: {
+      entry: {
+        type: "log",
+        params: {
+          message: "A fatal error occurred during bootstrap.",
+          level: "error",
+        },
+      },
+    },
     Exited: {
-      entry: emit({ type: "riven.exited" }),
+      entry: [
+        emit({ type: "riven.exited" }),
+        {
+          type: "log",
+          params: {
+            message: "Riven has exited.",
+          },
+        },
+      ],
       type: "final",
     },
   },

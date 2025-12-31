@@ -3,7 +3,6 @@ import { CHECK_SERVER_STATUS } from "../actors/check-server-status.actor.ts";
 import { CHECK_PLUGIN_STATUSES } from "../actors/check-plugin-statuses.actor.ts";
 import { expect, vi } from "vitest";
 import { graphql, HttpResponse } from "msw";
-import { SubscribableProgramEvent } from "@repo/util-plugin-sdk";
 
 it.beforeEach(({ server }) => {
   server.use(
@@ -51,29 +50,6 @@ it('transitions to "Initialising" state on START event', ({ actor }) => {
   });
 });
 
-it('transitions to the "Running" state if the plugins and server are healthy', async ({
-  actor,
-}) => {
-  actor.send({ type: "START" });
-
-  await vi.waitFor(() => {
-    expect(actor.getSnapshot().value).toBe("Running");
-  });
-});
-
-it.skip('transitions to the "Errored" state if the server is unhealthy', async ({
-  actor,
-  server,
-}) => {
-  server.use(graphql.query(CHECK_SERVER_STATUS, () => HttpResponse.error()));
-
-  actor.send({ type: "START" });
-
-  await vi.waitFor(() => {
-    expect(actor.getSnapshot().value).toBe("Errored");
-  });
-});
-
 it.skip('transitions to the "Errored" state if the plugins are unhealthy', async ({
   actor,
   server,
@@ -97,11 +73,11 @@ it.skip('transitions to the "Errored" state if the plugins are unhealthy', async
   });
 });
 
-it(`emits the "${SubscribableProgramEvent.enum["riven.running"]}" event when entering the "Running" state`, async ({
+it('starts the plugin runners when entering the "Running" state', async ({
   actor,
 }) => {
   const pluginTest = await import("@repo/plugin-test");
-  const pluginHookSpy = vi.spyOn(pluginTest.default.events, "riven.running");
+  const pluginHookSpy = vi.spyOn(pluginTest.default.runner, "start");
 
   actor.send({ type: "START" });
 

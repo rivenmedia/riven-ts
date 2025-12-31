@@ -9,6 +9,15 @@ const logFormat = format.printf(function (info) {
   return `${String(info["timestamp"])} - ${info.level}: ${JSON.stringify(info.message, null, 2)}`;
 });
 
+export type LogLevel =
+  | "error"
+  | "warn"
+  | "info"
+  | "http"
+  | "verbose"
+  | "debug"
+  | "silly";
+
 export const logger = createLogger({
   level: "silly",
   format: format.combine(
