@@ -53,7 +53,6 @@ export const bootstrapMachine = setup({
         level?: LogLevel;
       },
     ) => {
-      console.log(message);
       logger[level](message);
     },
   },
