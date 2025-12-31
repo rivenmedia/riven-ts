@@ -9,5 +9,3 @@ export * from "./state-machine-helpers/events.ts";
 export * from "./datasource/index.ts";
 
 export * from "./types/utilities.ts";
-
-export type { BaseContext as BasePluginContext } from "@apollo/server";

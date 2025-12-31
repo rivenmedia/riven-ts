@@ -157,6 +157,4 @@ export class ListrrAPI extends BaseDataSource {
   }
 }
 
-export interface ListrrContextSlice extends BasePluginContext {
-  api: ListrrAPI;
-}
+export type ListrrContextSlice = BasePluginContext;

@@ -4,8 +4,8 @@ import packageJson from "../../../../package.json" with { type: "json" };
 import { pluginMachine } from "../../plugin/index.ts";
 import { fromPromise, type ActorRef, type Snapshot } from "xstate";
 import {
+  DataSourceMap,
   parsePluginsFromDependencies,
-  type DataSourceMap,
   type PluginToProgramEvent,
   type ProgramToPluginEvent,
 } from "@repo/util-plugin-sdk";
@@ -38,7 +38,7 @@ export const registerPlugins = fromPromise<
   );
 
   const pluginMap = new Map<symbol, RegisteredPlugin>();
-  const dataSourceMap: DataSourceMap = new Map();
+  const dataSourceMap = new DataSourceMap();
 
   for (const plugin of plugins) {
     if (plugin.dataSources) {

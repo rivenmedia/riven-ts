@@ -34,7 +34,7 @@ export class MDBListAPI extends BaseDataSource {
     this.logger.error(`MDBListAPI request error: ${error.message}`);
   }
 
-  async validate(): Promise<boolean> {
+  override async validate(): Promise<boolean> {
     try {
       await this.get("user");
 

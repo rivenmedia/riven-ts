@@ -3,6 +3,7 @@ import {
   type BaseDataSourceConfig,
 } from "../datasource/index.ts";
 import type { PluginActorLogic } from "../state-machine-helpers/create-plugin-runner.ts";
+import { DataSourceMap } from "../types/utilities.ts";
 import type { Constructor } from "type-fest";
 import { z } from "zod";
 
@@ -47,30 +48,41 @@ const instantiatableSchema = z.object({
   constructor: z.any(),
 });
 
+export const basePluginContextSchema = z.object({
+  dataSources: z.instanceof(DataSourceMap),
+});
+
+export type BasePluginContext = z.infer<typeof basePluginContextSchema>;
+
+export const isBasePluginContext = (
+  value: unknown,
+): value is BasePluginContext => {
+  return basePluginContextSchema.safeParse(value).success;
+};
+
+const dataSourceSchema = z.custom<
+  Constructor<BaseDataSource, [BaseDataSourceConfig]>
+>((value) => {
+  if (typeof value !== "function") {
+    return false;
+  }
+
+  return instantiatableSchema.safeParse(value.prototype).success;
+});
+
 export const RivenPlugin = z.object({
   name: z.symbol(),
-  dataSources: z
-    .array(
-      z.custom<Constructor<BaseDataSource, [BaseDataSourceConfig]>>((value) => {
-        if (typeof value !== "function") {
-          return false;
-        }
-
-        return instantiatableSchema.safeParse(value.prototype).success;
-      }),
-    )
-    .min(1)
-    .optional(),
+  dataSources: z.tuple([dataSourceSchema]).rest(dataSourceSchema).optional(),
   resolvers: z.array(z.instanceof(Function)).min(1),
   runner: z.custom<PluginActorLogic>((value) => isPluginRunner(value)),
   context: z
     .function({
       input: [
         z.object({
-          // TODO: Replace z.any with a more specific type for KeyValueCache
-          cache: z.any(),
+          dataSources: z.instanceof(DataSourceMap),
         }),
       ],
+      output: z.promise(z.record(z.string(), z.unknown())),
     })
     .optional(),
 });

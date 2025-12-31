@@ -3,10 +3,20 @@ import type {
   ApolloServer,
   BaseContext,
   ContextFunction,
+  GraphQLRequest,
 } from "@apollo/server";
 import type { StandaloneServerContextFunctionArgument } from "@apollo/server/standalone";
 import { logger } from "@repo/core-util-logger";
-import { parsePluginsFromDependencies } from "@repo/util-plugin-sdk";
+import {
+  DataSourceMap,
+  parsePluginsFromDependencies,
+} from "@repo/util-plugin-sdk";
+
+declare module "node:http" {
+  interface IncomingMessage {
+    body: GraphQLRequest;
+  }
+}
 
 const plugins = await parsePluginsFromDependencies(
   packageJson.dependencies,
@@ -24,10 +34,30 @@ export function buildContext(
     }
 
     const pluginContexts = await Promise.all(
-      plugins.map<Promise<[symbol, unknown]>>(async (plugin) => [
-        plugin.name,
-        await plugin.context?.call(plugin, { cache }),
-      ]),
+      plugins.map<Promise<[symbol, unknown]>>(async (plugin) => {
+        const dataSources = new DataSourceMap();
+
+        if (plugin.dataSources) {
+          for (const DataSourceConstructor of plugin.dataSources) {
+            const instance = new DataSourceConstructor({
+              cache,
+            });
+
+            dataSources.set(DataSourceConstructor, instance);
+          }
+        }
+
+        const additionalContext = await plugin.context?.call(plugin, {
+          dataSources,
+        });
+
+        const pluginContext = {
+          ...additionalContext,
+          dataSources,
+        };
+
+        return [plugin.name, pluginContext];
+      }),
     );
 
     return {
