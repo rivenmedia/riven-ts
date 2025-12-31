@@ -1,4 +1,4 @@
-import { BaseDataSource } from "@repo/util-plugin-sdk";
+import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
 
 export class TestAPIError extends Error {}
 
@@ -18,6 +18,4 @@ export class TestAPI extends BaseDataSource {
   }
 }
 
-export interface TestContextSlice {
-  api: TestAPI;
-}
+export type TestContextSlice = BasePluginContext;
