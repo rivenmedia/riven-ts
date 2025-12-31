@@ -285,6 +285,9 @@ importers:
       keyv:
         specifier: ^5.5.5
         version: 5.5.5
+      lru-cache:
+        specifier: ^11.2.4
+        version: 11.2.4
       reflect-metadata:
         specifier: 'catalog:'
         version: 0.2.2
