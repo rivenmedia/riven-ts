@@ -18,7 +18,7 @@ import {
   assign,
 } from "xstate";
 
-interface PluginMachineContext extends MachineContext {
+export interface PluginMachineContext extends MachineContext {
   pluginSymbol: symbol;
   pluginPrettyName: string;
   client: ApolloClient;
@@ -27,6 +27,8 @@ interface PluginMachineContext extends MachineContext {
   isValidated: boolean;
 }
 
+export type PluginMachineInput = PluginRunnerInput;
+
 export const pluginMachine = setup({
   types: {
     context: {} as PluginMachineContext,
@@ -34,7 +36,7 @@ export const pluginMachine = setup({
       | ProgramToPluginEvent
       | PluginToProgramEvent
       | { type: "riven:validate-plugin" },
-    input: {} as PluginRunnerInput,
+    input: {} as PluginMachineInput,
     children: {} as {
       pluginRunner: "pluginRunner";
       processRequestedItem: "processRequestedItem";
@@ -140,16 +142,12 @@ export const pluginMachine = setup({
           logger.error(`Validation failed for ${context.pluginPrettyName}`);
         },
       ],
+      always: {
+        guard: "hasReachedMaxValidationFailures",
+        target: "Errored",
+      },
       after: {
-        5000: [
-          {
-            target: "Errored",
-            guard: "hasReachedMaxValidationFailures",
-          },
-          {
-            target: "Validating",
-          },
-        ],
+        5000: "Validating",
       },
     },
     Running: {

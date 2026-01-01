@@ -6,7 +6,9 @@ import { createActor, fromPromise, type Actor } from "xstate";
 
 export const it = baseIt.extend<{
   actor: Actor<typeof bootstrapMachine>;
+  machine: typeof bootstrapMachine;
 }>({
+  machine: bootstrapMachine,
   actor: async ({ apolloServerInstance }, use) => {
     const actor = createActor(
       bootstrapMachine.provide({

@@ -30,9 +30,10 @@ export const registerPlugins = fromPromise<
   );
 
   const pluginMap = new Map<symbol, Omit<RegisteredPlugin, "ref">>();
-  const dataSourceMap = new DataSourceMap();
 
   for (const plugin of plugins) {
+    const dataSourceMap = new DataSourceMap();
+
     if (plugin.dataSources) {
       for (const DataSource of plugin.dataSources) {
         try {
