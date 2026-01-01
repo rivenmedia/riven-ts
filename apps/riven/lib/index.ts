@@ -1,4 +1,3 @@
-import { postgresDataSource } from "@repo/core-util-database/connection";
 import { logger } from "@repo/core-util-logger";
 
 import { KeyvAdapter } from "@apollo/utils.keyvadapter";
@@ -9,8 +8,6 @@ import { type AnyEventObject, createActor, waitFor } from "xstate";
 import { bootstrapMachine } from "./state-machines/bootstrap/index.ts";
 
 const sessionId = crypto.randomUUID();
-
-await postgresDataSource.initialize();
 
 const cache = new KeyvAdapter(
   new Keyv(new KeyvRedis(process.env["REDIS_URL"])) as never,

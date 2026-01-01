@@ -14,8 +14,8 @@ export interface BaseDataSourceConfig extends DataSourceConfig {
 }
 
 export abstract class BaseDataSource extends RESTDataSource {
-  serviceName: string;
-  token: string | undefined;
+  readonly serviceName: string;
+  readonly token: string | undefined;
 
   constructor(options: BaseDataSourceConfig) {
     super(options);
@@ -31,8 +31,17 @@ export abstract class BaseDataSource extends RESTDataSource {
   ): Promise<DataSourceFetchResult<TResult>> {
     const result = await super.fetch<TResult>(path, incomingRequest);
 
+    if (result.response.status === 429) {
+      const hasRetryAfter = result.response.headers.has("Retry-After");
+
+      if (!hasRetryAfter) {
+        // TODO: Get from global rate limiter
+        result.response.headers.set("Retry-After", "1");
+      }
+    }
+
     this.logger.debug(
-      `[${this.serviceName}] API Response for ${path}: ${JSON.stringify(result, null, 2)}`,
+      `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${path}: ${JSON.stringify(result, null, 2)}`,
     );
 
     return result;

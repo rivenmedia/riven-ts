@@ -13,34 +13,34 @@ export const it = baseIt.extend<{
   actor: Actor<typeof bootstrapMachine>;
   input: BoostrapMachineInput;
   machine: typeof bootstrapMachine;
-  initialiseDatabaseConnectionActor: typeof initialiseDatabaseConnection;
-  startGqlServerActor: typeof startGqlServer;
-  stopGqlServerActor: typeof stopGqlServer;
+  initialiseDatabaseConnectionActorLogic: typeof initialiseDatabaseConnection;
+  startGqlServerActorLogic: typeof startGqlServer;
+  stopGqlServerActorLogic: typeof stopGqlServer;
 }>({
-  initialiseDatabaseConnectionActor: fromPromise(async () => {
+  initialiseDatabaseConnectionActorLogic: fromPromise(async () => {
     /* empty */
   }),
-  startGqlServerActor: fromPromise(async () => {
+  startGqlServerActorLogic: fromPromise(async () => {
     return {
       server: {} as ApolloServer,
       url: "http://localhost:4000/graphql",
     };
   }),
-  stopGqlServerActor: fromPromise(async () => undefined),
+  stopGqlServerActorLogic: fromPromise(async () => undefined),
   machine: (
     {
-      initialiseDatabaseConnectionActor,
-      startGqlServerActor,
-      stopGqlServerActor,
+      initialiseDatabaseConnectionActorLogic,
+      startGqlServerActorLogic,
+      stopGqlServerActorLogic,
     },
     use,
   ) =>
     use(
       bootstrapMachine.provide({
         actors: {
-          initialiseDatabaseConnection: initialiseDatabaseConnectionActor,
-          startGqlServer: startGqlServerActor,
-          stopGqlServer: stopGqlServerActor,
+          initialiseDatabaseConnection: initialiseDatabaseConnectionActorLogic,
+          startGqlServer: startGqlServerActorLogic,
+          stopGqlServer: stopGqlServerActorLogic,
         },
       }),
     ),

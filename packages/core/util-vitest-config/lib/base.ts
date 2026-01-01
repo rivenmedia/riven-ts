@@ -28,6 +28,9 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
         coverage: {
           exclude: ["**/__generated__/**", "**/__tests__/**"],
         },
+        setupFiles: [
+          path.resolve(import.meta.dirname, "./setup-files/use-real-timers.ts"),
+        ],
       },
       plugins: [swc.vite() as Plugin],
     }),

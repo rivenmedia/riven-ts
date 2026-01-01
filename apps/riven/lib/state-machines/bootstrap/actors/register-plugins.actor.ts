@@ -6,10 +6,17 @@ import {
 
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import "reflect-metadata";
-import { type ActorRefFromLogic, fromPromise } from "xstate";
+import {
+  type ActorRefFromLogic,
+  createActor,
+  fromPromise,
+  spawnChild,
+  toPromise,
+} from "xstate";
 
 import packageJson from "../../../../package.json" with { type: "json" };
 import { pluginMachine } from "../../plugin/index.ts";
+import { rateLimitedFetchMachine } from "../../rate-limited-fetch/index.ts";
 
 export interface RegisteredPlugin {
   dataSources: DataSourceMap;
@@ -24,7 +31,7 @@ export interface RegisterPluginsInput {
 export const registerPlugins = fromPromise<
   Map<symbol, Omit<RegisteredPlugin, "ref">>,
   RegisterPluginsInput
->(async ({ input: { cache } }) => {
+>(async ({ input: { cache }, signal }) => {
   const plugins = await parsePluginsFromDependencies(
     packageJson.dependencies,
     import.meta.resolve.bind(null),
@@ -38,10 +45,24 @@ export const registerPlugins = fromPromise<
     if (plugin.dataSources) {
       for (const DataSource of plugin.dataSources) {
         try {
-          const token = await DataSource.getApiToken();
+          const token = await DataSource.getApiToken({ signal });
           const instance = new DataSource({
             cache,
             token,
+            fetch: async (url, options) => {
+              const actor = createActor(rateLimitedFetchMachine, {
+                input: {
+                  url,
+                  fetchOpts: options,
+                },
+              });
+
+              actor.start();
+              actor.send({ type: "fetch" });
+
+              return toPromise(actor);
+            },
+            logger,
           });
 
           dataSourceMap.set(DataSource, instance);

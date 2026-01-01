@@ -142,16 +142,21 @@ export const bootstrapMachine = setup({
                   target: "#Riven.Errored",
                   actions: {
                     type: "log",
-                    params: {
-                      message:
-                        "Failed to initialise database connection during bootstrap.",
+                    params: ({ event }) => ({
+                      message: `Failed to initialise database connection during bootstrap. Error: ${(event.error as Error).message}`,
                       level: "error",
-                    },
+                    }),
                   },
                 },
               },
             },
             Complete: {
+              entry: {
+                type: "log",
+                params: {
+                  message: "Database connection bootstrap complete.",
+                },
+              },
               type: "final",
             },
           },
@@ -190,16 +195,21 @@ export const bootstrapMachine = setup({
                   target: "#Riven.Errored",
                   actions: {
                     type: "log",
-                    params: {
-                      message:
-                        "Failed to start GraphQL server during bootstrap.",
+                    params: ({ event }) => ({
+                      message: `Failed to start GraphQL server during bootstrap. Error: ${(event.error as Error).message}`,
                       level: "error",
-                    },
+                    }),
                   },
                 },
               },
             },
             Complete: {
+              entry: {
+                type: "log",
+                params: {
+                  message: "GraphQL bootstrap complete.",
+                },
+              },
               type: "final",
             },
           },
@@ -292,6 +302,12 @@ export const bootstrapMachine = setup({
               },
             },
             Complete: {
+              entry: {
+                type: "log",
+                params: {
+                  message: "Plugin bootstrap complete.",
+                },
+              },
               type: "final",
             },
           },

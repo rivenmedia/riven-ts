@@ -23,11 +23,14 @@
     "@repo/util-plugin-sdk": "workspace:^",
     "keyv": "^5.5.5",
     "lru-cache": "^11.2.4",
+    "luxon": "^3.7.2",
     "reflect-metadata": "catalog:",
-    "xstate": "catalog:"
+    "xstate": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@apollo/client-devtools-vscode": "^4.23.2",
+    "@apollo/utils.fetcher": "^3.1.0",
     "@graphql-codegen/cli": "^6.1.0",
     "@graphql-codegen/near-operation-file-preset": "^4.0.0",
     "@graphql-codegen/typescript": "^5.0.7",
@@ -42,6 +45,7 @@
     "@repo/core-util-vitest-test-context": "workspace:^",
     "@repo/plugin-test": "workspace:^",
     "@swc-node/register": "^1.11.1",
+    "@types/luxon": "^3.7.1",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",

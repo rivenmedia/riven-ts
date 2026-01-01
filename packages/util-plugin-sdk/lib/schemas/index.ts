@@ -70,7 +70,9 @@ export const isBasePluginContext = (
  */
 export interface DataSourceConstructor {
   /** Static method to get the API token */
-  getApiToken(): Promisable<string | undefined>;
+  getApiToken(
+    fetchOpts: Pick<RequestInit, "signal">,
+  ): Promisable<string | undefined>;
   /** Constructor signature */
   new (options: BaseDataSourceConfig): BaseDataSource;
 }
