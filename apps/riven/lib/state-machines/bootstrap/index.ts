@@ -1,11 +1,12 @@
 import type { UUID } from "node:crypto";
-import { checkServerStatus } from "./actors/check-server-status.actor.ts";
-import { checkPluginStatuses } from "./actors/check-plugin-statuses.actor.ts";
 import {
   registerPlugins,
   type RegisteredPlugin,
 } from "./actors/register-plugins.actor.ts";
 import { waitForValidPlugins } from "./actors/wait-for-valid-plugins.actor.ts";
+import { startGqlServer } from "./actors/start-gql-server.actor.ts";
+import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
+import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import {
   ApolloClient,
   ApolloLink,
@@ -17,12 +18,14 @@ import { assign, emit, setup } from "xstate";
 import { logger, type LogLevel } from "@repo/core-util-logger";
 import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk";
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
+import type { ApolloServer } from "@apollo/server";
 
 export interface BootstrapMachineContext {
   cache: KeyvAdapter;
   client: ApolloClient;
   plugins: Map<symbol, RegisteredPlugin>;
   sessionId: UUID;
+  server: ApolloServer | null;
 }
 
 export const bootstrapMachine = setup({
@@ -35,9 +38,10 @@ export const bootstrapMachine = setup({
       | { type: "EXIT" },
     children: {} as {
       registerPlugins: "registerPlugins";
-      checkServerStatus: "checkServerStatus";
-      checkPluginStatuses: "checkPluginStatuses";
       waitForValidPlugins: "waitForValidPlugins";
+      startGqlServer: "startGqlServer";
+      stopGqlServer: "stopGqlServer";
+      initialiseDatabaseConnection: "initialiseDatabaseConnection";
     },
     input: {} as {
       cache: KeyvAdapter;
@@ -64,10 +68,11 @@ export const bootstrapMachine = setup({
     },
   },
   actors: {
-    checkServerStatus,
-    checkPluginStatuses,
     registerPlugins,
     waitForValidPlugins,
+    startGqlServer,
+    stopGqlServer,
+    initialiseDatabaseConnection,
   },
   guards: {
     hasInvalidPlugins: ({ context }) => {
@@ -109,10 +114,11 @@ export const bootstrapMachine = setup({
     }),
     plugins: new Map<symbol, RegisteredPlugin>(),
     sessionId: input.sessionId,
+    server: null,
   }),
   on: {
     START: ".Initialising",
-    EXIT: ".Exited",
+    EXIT: ".Shutdown",
     FATAL_ERROR: ".Errored",
   },
   states: {
@@ -120,6 +126,80 @@ export const bootstrapMachine = setup({
     Initialising: {
       type: "parallel",
       states: {
+        "Bootstrap database connection": {
+          initial: "Starting",
+          states: {
+            Starting: {
+              invoke: {
+                id: "initialiseDatabaseConnection",
+                src: "initialiseDatabaseConnection",
+                onDone: "Complete",
+                onError: {
+                  target: "#Riven.Errored",
+                  actions: {
+                    type: "log",
+                    params: {
+                      message:
+                        "Failed to initialise database connection during bootstrap.",
+                      level: "error",
+                    },
+                  },
+                },
+              },
+            },
+            Complete: {
+              type: "final",
+            },
+          },
+        },
+        "Bootstrap GraphQL Server": {
+          initial: "Starting",
+          states: {
+            Starting: {
+              entry: {
+                type: "log",
+                params: {
+                  message: "Starting GraphQL server...",
+                },
+              },
+              invoke: {
+                id: "startGqlServer",
+                src: "startGqlServer",
+                input: ({ context }) => ({
+                  cache: context.cache,
+                }),
+                onDone: {
+                  target: "Complete",
+                  actions: [
+                    assign(({ event }) => ({
+                      server: event.output.server,
+                    })),
+                    {
+                      type: "log",
+                      params: ({ event }) => ({
+                        message: `GraphQL server ready at ${event.output.url}`,
+                      }),
+                    },
+                  ],
+                },
+                onError: {
+                  target: "#Riven.Errored",
+                  actions: {
+                    type: "log",
+                    params: {
+                      message:
+                        "Failed to start GraphQL server during bootstrap.",
+                      level: "error",
+                    },
+                  },
+                },
+              },
+            },
+            Complete: {
+              type: "final",
+            },
+          },
+        },
         "Bootstrap plugins": {
           initial: "Registering",
           states: {
@@ -239,6 +319,25 @@ export const bootstrapMachine = setup({
           level: "error",
         },
       },
+    },
+    Shutdown: {
+      entry: [
+        emit({ type: "riven.shutdown" }),
+        {
+          type: "log",
+          params: {
+            message: "Riven is shutting down.",
+          },
+        },
+      ],
+      invoke: [
+        {
+          id: "stopGqlServer",
+          src: "stopGqlServer",
+          input: ({ context }) => context.server,
+          onDone: "Exited",
+        },
+      ],
     },
     Exited: {
       entry: [

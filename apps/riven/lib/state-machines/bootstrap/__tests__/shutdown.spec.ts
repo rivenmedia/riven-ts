@@ -2,13 +2,13 @@ import { it } from "./helpers/test-context.ts";
 import { waitFor } from "xstate";
 import { expect } from "vitest";
 
-it('transitions to "Exited" state on EXIT event', ({ actor }) => {
+it('transitions to "Shutdown" state on EXIT event', ({ actor }) => {
   actor.send({ type: "EXIT" });
 
-  expect(actor.getSnapshot().value).toBe("Exited");
+  expect(actor.getSnapshot().value).toBe("Shutdown");
 });
 
-it(`emits the "riven.exited" event when entering the "Exited" state`, async ({
+it(`emits the "riven.shutdown" event when entering the "Shutdown" state`, async ({
   actor,
 }) => {
   actor.on("*", (event) => {

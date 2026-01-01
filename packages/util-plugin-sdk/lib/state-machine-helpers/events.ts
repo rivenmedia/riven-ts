@@ -26,6 +26,7 @@ type PluginEvent<
 
 export type ProgramToPluginEvent =
   | ProgramEvent<"riven.started">
+  | ProgramEvent<"riven.shutdown">
   | ProgramEvent<"riven.exited">;
 
 export type PluginToProgramEvent = PluginEvent<

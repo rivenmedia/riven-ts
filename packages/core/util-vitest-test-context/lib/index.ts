@@ -8,10 +8,16 @@ import { ApolloServer } from "@apollo/server";
 export const it = testBase.extend<{
   httpCache: InMemoryLRUCache;
   server: SetupServerApi;
+  apolloServerInstance: ApolloServer;
   gqlServer: ApolloServer;
 }>({
   async httpCache({}, use) {
     await use(new InMemoryLRUCache());
+  },
+  async apolloServerInstance({}, use) {
+    const { mockServer } = await import("@repo/core-util-mock-graphql-server");
+
+    await use(mockServer);
   },
   async gqlServer({}, use) {
     const { mockServer } = await import("@repo/core-util-mock-graphql-server");

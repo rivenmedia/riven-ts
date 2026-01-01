@@ -28,6 +28,6 @@ export const postgresDataSource = new DataSource({
   url: z.string().parse(process.env["DATABASE_URL"]),
   type: "postgres",
   synchronize: true,
-  logging: true,
+  logging: process.env["NODE_ENV"] !== "test",
   entities,
 });

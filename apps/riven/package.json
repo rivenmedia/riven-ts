@@ -13,8 +13,12 @@
   },
   "dependencies": {
     "@apollo/client": "^4.0.11",
+    "@apollo/server": "catalog:",
+    "@apollo/server-plugin-response-cache": "^5.0.0",
     "@apollo/utils.keyvadapter": "^4.0.1",
     "@keyv/redis": "^5.1.5",
+    "@repo/core-util-graphql-context": "workspace:^",
+    "@repo/core-util-graphql-schema": "workspace:^",
     "@repo/plugin-listrr": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "keyv": "^5.5.5",

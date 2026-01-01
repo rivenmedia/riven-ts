@@ -10,7 +10,7 @@ catalogs:
       specifier: 6.4.1
       version: 6.4.1
     '@apollo/server':
-      specifier: ^5.2.0
+      specifier: 5.2.0
       version: 5.2.0
     '@faker-js/faker':
       specifier: 10.1.0
@@ -270,12 +270,24 @@ importers:
       '@apollo/client':
         specifier: ^4.0.11
         version: 4.0.11(graphql-ws@6.0.6(graphql@16.12.0)(ws@8.18.3))(graphql@16.12.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)
+      '@apollo/server':
+        specifier: 'catalog:'
+        version: 5.2.0(graphql@16.12.0)
+      '@apollo/server-plugin-response-cache':
+        specifier: ^5.0.0
+        version: 5.0.0(@apollo/server@5.2.0(graphql@16.12.0))(graphql@16.12.0)
       '@apollo/utils.keyvadapter':
         specifier: ^4.0.1
         version: 4.0.1
       '@keyv/redis':
         specifier: ^5.1.5
         version: 5.1.5(keyv@5.5.5)
+      '@repo/core-util-graphql-context':
+        specifier: workspace:^
+        version: link:../../packages/core/util-graphql-context
+      '@repo/core-util-graphql-schema':
+        specifier: workspace:^
+        version: link:../../packages/core/util-graphql-schema
       '@repo/plugin-listrr':
         specifier: workspace:^
         version: link:../../packages/plugin-listrr
