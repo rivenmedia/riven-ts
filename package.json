@@ -12,6 +12,7 @@
     "postinstall": "husky || true"
   },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@turbo/gen": "^2.6.3",
     "dedent": "^1.7.1",
     "husky": "^9.1.7",

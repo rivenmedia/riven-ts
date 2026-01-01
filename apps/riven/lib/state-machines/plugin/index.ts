@@ -1,22 +1,24 @@
-import { processRequestedItem } from "./actors/process-requested-item.actor.ts";
-import type { ApolloClient } from "@apollo/client";
 import { logger } from "@repo/core-util-logger";
 import {
   type DataSourceMap,
-  type PluginRunnerLogic,
   type PluginRunnerInput,
+  type PluginRunnerLogic,
   type PluginToProgramEvent,
-  type ProgramToPluginEvent,
   type PluginValidatorLogic,
+  type ProgramToPluginEvent,
 } from "@repo/util-plugin-sdk";
+
+import type { ApolloClient } from "@apollo/client";
 import {
-  setup,
   type MachineContext,
-  spawnChild,
   assertEvent,
-  createEmptyActor,
   assign,
+  createEmptyActor,
+  setup,
+  spawnChild,
 } from "xstate";
+
+import { processRequestedItem } from "./actors/process-requested-item.actor.ts";
 
 export interface PluginMachineContext extends MachineContext {
   pluginSymbol: symbol;

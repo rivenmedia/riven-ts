@@ -1,7 +1,8 @@
+import { Min } from "class-validator";
+import { ChildEntity, Column, ManyToOne, type Relation } from "typeorm";
+
 import { MediaItem } from "./media-item.entity.ts";
 import { Season } from "./season.entity.ts";
-import { ChildEntity, Column, ManyToOne, type Relation } from "typeorm";
-import { Min } from "class-validator";
 
 @ChildEntity()
 export class Episode extends MediaItem {

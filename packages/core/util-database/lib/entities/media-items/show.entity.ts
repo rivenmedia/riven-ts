@@ -1,6 +1,7 @@
+import { ChildEntity, Column, OneToMany, type Relation } from "typeorm";
+
 import { MediaItem } from "./media-item.entity.ts";
 import { Season } from "./season.entity.ts";
-import { ChildEntity, Column, OneToMany, type Relation } from "typeorm";
 
 @ChildEntity()
 export class Show extends MediaItem {

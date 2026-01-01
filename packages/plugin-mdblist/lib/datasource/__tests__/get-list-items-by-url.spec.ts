@@ -1,8 +1,10 @@
-import { MDBListAPI } from "../mdblist.datasource.ts";
-import { createGetListItems200 } from "../../__generated__/index.ts";
-import { http, HttpResponse } from "msw";
 import { it } from "@repo/core-util-vitest-test-context";
+
+import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
+
+import { createGetListItems200 } from "../../__generated__/index.ts";
+import { MDBListAPI } from "../mdblist.datasource.ts";
 
 it("gets the items from the list with the given URL, appending /json to the path when not present", async ({
   server,

@@ -1,9 +1,8 @@
 /* eslint-disable no-empty-pattern */
-
+import { ApolloServer } from "@apollo/server";
+import { InMemoryLRUCache } from "@apollo/utils.keyvaluecache";
 import type { SetupServerApi } from "msw/node";
 import { test as testBase } from "vitest";
-import { InMemoryLRUCache } from "@apollo/utils.keyvaluecache";
-import { ApolloServer } from "@apollo/server";
 
 export const it = testBase.extend<{
   httpCache: InMemoryLRUCache;

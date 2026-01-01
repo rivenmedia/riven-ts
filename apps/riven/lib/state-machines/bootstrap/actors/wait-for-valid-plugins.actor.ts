@@ -1,5 +1,6 @@
-import type { RegisteredPlugin } from "./register-plugins.actor.ts";
 import { fromPromise, waitFor } from "xstate";
+
+import type { RegisteredPlugin } from "./register-plugins.actor.ts";
 
 export const waitForValidPlugins = fromPromise<
   undefined,

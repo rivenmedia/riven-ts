@@ -1,12 +1,6 @@
-import type { UUID } from "node:crypto";
-import {
-  registerPlugins,
-  type RegisteredPlugin,
-} from "./actors/register-plugins.actor.ts";
-import { waitForValidPlugins } from "./actors/wait-for-valid-plugins.actor.ts";
-import { startGqlServer } from "./actors/start-gql-server.actor.ts";
-import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
-import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
+import { type LogLevel, logger } from "@repo/core-util-logger";
+import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk";
+
 import {
   ApolloClient,
   ApolloLink,
@@ -14,11 +8,19 @@ import {
   InMemoryCache,
 } from "@apollo/client";
 import { RetryLink } from "@apollo/client/link/retry";
-import { assign, emit, setup } from "xstate";
-import { logger, type LogLevel } from "@repo/core-util-logger";
-import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk";
-import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import type { ApolloServer } from "@apollo/server";
+import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
+import type { UUID } from "node:crypto";
+import { assign, emit, setup } from "xstate";
+
+import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
+import {
+  type RegisteredPlugin,
+  registerPlugins,
+} from "./actors/register-plugins.actor.ts";
+import { startGqlServer } from "./actors/start-gql-server.actor.ts";
+import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
+import { waitForValidPlugins } from "./actors/wait-for-valid-plugins.actor.ts";
 
 export interface BootstrapMachineContext {
   cache: KeyvAdapter;
@@ -26,6 +28,11 @@ export interface BootstrapMachineContext {
   plugins: Map<symbol, RegisteredPlugin>;
   sessionId: UUID;
   server: ApolloServer | null;
+}
+
+export interface BoostrapMachineInput {
+  cache: KeyvAdapter;
+  sessionId: UUID;
 }
 
 export const bootstrapMachine = setup({
@@ -43,10 +50,7 @@ export const bootstrapMachine = setup({
       stopGqlServer: "stopGqlServer";
       initialiseDatabaseConnection: "initialiseDatabaseConnection";
     },
-    input: {} as {
-      cache: KeyvAdapter;
-      sessionId: UUID;
-    },
+    input: {} as BoostrapMachineInput,
   },
   actions: {
     broadcastToPlugins: ({ context }, event: ProgramToPluginEvent) => {

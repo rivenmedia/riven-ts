@@ -1,4 +1,9 @@
-import packageJson from "../package.json" with { type: "json" };
+import { logger } from "@repo/core-util-logger";
+import {
+  DataSourceMap,
+  parsePluginsFromDependencies,
+} from "@repo/util-plugin-sdk";
+
 import type {
   ApolloServer,
   BaseContext,
@@ -6,11 +11,8 @@ import type {
   GraphQLRequest,
 } from "@apollo/server";
 import type { StandaloneServerContextFunctionArgument } from "@apollo/server/standalone";
-import { logger } from "@repo/core-util-logger";
-import {
-  DataSourceMap,
-  parsePluginsFromDependencies,
-} from "@repo/util-plugin-sdk";
+
+import packageJson from "../package.json" with { type: "json" };
 
 declare module "node:http" {
   interface IncomingMessage {

@@ -1,12 +1,12 @@
-import { loadEnvFile } from "node:process";
 import path from "node:path";
+import { loadEnvFile } from "node:process";
+import swc from "unplugin-swc";
 import {
+  type Plugin,
   configDefaults,
   defineConfig,
   mergeConfig,
-  type Plugin,
 } from "vitest/config";
-import swc from "unplugin-swc";
 
 export const baseVitestConfig = defineConfig(({ mode }) => {
   try {
@@ -26,7 +26,7 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
     defineConfig({
       test: {
         coverage: {
-          exclude: ["**/__generated__/**"],
+          exclude: ["**/__generated__/**", "**/__tests__/**"],
         },
       },
       plugins: [swc.vite() as Plugin],

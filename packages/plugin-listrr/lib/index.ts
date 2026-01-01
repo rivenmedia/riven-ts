@@ -1,12 +1,13 @@
+import {
+  type RivenPlugin,
+  createPluginRunner,
+  createPluginValidator,
+} from "@repo/util-plugin-sdk";
+
 import { ListrrAPI } from "./datasource/listrr.datasource.ts";
 import { pluginConfig } from "./listrr-plugin.config.ts";
 import { ListrrSettingsResolver } from "./schema/listrr-settings.resolver.ts";
 import { ListrrResolver } from "./schema/listrr.resolver.ts";
-import {
-  createPluginRunner,
-  createPluginValidator,
-  type RivenPlugin,
-} from "@repo/util-plugin-sdk";
 
 export default {
   name: pluginConfig.name,

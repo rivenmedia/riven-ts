@@ -1,6 +1,7 @@
-import { it } from "./helpers/test-context.ts";
-import { createActor, fromCallback, fromPromise } from "xstate";
 import { expect, vi } from "vitest";
+import { createActor, fromCallback, fromPromise } from "xstate";
+
+import { it } from "./helpers/test-context.ts";
 
 it('starts in the "Idle" state', ({ actor }) => {
   expect(actor.getSnapshot().value).toBe("Idle");
@@ -8,7 +9,7 @@ it('starts in the "Idle" state', ({ actor }) => {
 
 it('validates the plugin on "riven:validate-plugin" event', async ({
   machine,
-  defaultInput,
+  input,
 }) => {
   const validatePluginSpy = vi.fn().mockResolvedValue(true);
 
@@ -18,7 +19,7 @@ it('validates the plugin on "riven:validate-plugin" event', async ({
         validatePlugin: fromPromise(validatePluginSpy),
       },
     }),
-    { input: defaultInput },
+    { input },
   );
 
   actor.start();
@@ -38,7 +39,7 @@ it('validates the plugin on "riven:validate-plugin" event', async ({
 
 it("retries validation up to 3 times on failure", async ({
   machine,
-  defaultInput,
+  input,
 }) => {
   vi.useFakeTimers();
 
@@ -52,7 +53,7 @@ it("retries validation up to 3 times on failure", async ({
         validatePlugin: fromPromise(validatePluginSpy),
       },
     }),
-    { input: defaultInput },
+    { input },
   );
 
   actor.start();
@@ -80,7 +81,7 @@ it("retries validation up to 3 times on failure", async ({
 
 it('starts the plugin runner on the "riven.started" event if the plugin is valid', async ({
   machine,
-  defaultInput,
+  input,
 }) => {
   const pluginRunnerSpy = vi.fn().mockResolvedValue(undefined);
 
@@ -91,7 +92,7 @@ it('starts the plugin runner on the "riven.started" event if the plugin is valid
         pluginRunner: fromCallback(pluginRunnerSpy),
       },
     }),
-    { input: defaultInput },
+    { input },
   );
 
   actor.start();

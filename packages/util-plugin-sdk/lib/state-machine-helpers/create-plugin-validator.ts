@@ -1,7 +1,8 @@
-import type { DataSourceMap } from "../types/utilities.ts";
 import type { ApolloClient } from "@apollo/client";
 import type { Promisable } from "type-fest";
 import { fromPromise } from "xstate";
+
+import type { DataSourceMap } from "../types/utilities.ts";
 
 export interface PluginValidatorInput {
   client: ApolloClient;

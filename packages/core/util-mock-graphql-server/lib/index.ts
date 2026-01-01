@@ -1,7 +1,7 @@
-import "reflect-metadata";
+import { schema } from "@repo/core-util-graphql-schema";
 
 import { ApolloServer } from "@apollo/server";
-import { schema } from "@repo/core-util-graphql-schema";
+import "reflect-metadata";
 
 export const mockServer = new ApolloServer({
   schema,

@@ -1,6 +1,7 @@
-import { it } from "./helpers/test-context.ts";
-import { waitFor } from "xstate";
 import { expect } from "vitest";
+import { waitFor } from "xstate";
+
+import { it } from "./helpers/test-context.ts";
 
 it('transitions to "Shutdown" then "Exited" when shutting down', async ({
   actor,

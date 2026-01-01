@@ -1,37 +1,55 @@
 /* eslint-disable @typescript-eslint/require-await */
-
-import { bootstrapMachine } from "../../index.ts";
 import { it as baseIt } from "@repo/core-util-vitest-test-context";
-import { createActor, fromPromise, type Actor } from "xstate";
+
+import { ApolloServer } from "@apollo/server";
+import { type Actor, createActor, fromPromise } from "xstate";
+
+import type { initialiseDatabaseConnection } from "../../actors/initialise-database-connection.actor.ts";
+import type { startGqlServer } from "../../actors/start-gql-server.actor.ts";
+import type { stopGqlServer } from "../../actors/stop-gql-server.actor.ts";
+import { type BoostrapMachineInput, bootstrapMachine } from "../../index.ts";
 
 export const it = baseIt.extend<{
   actor: Actor<typeof bootstrapMachine>;
+  input: BoostrapMachineInput;
   machine: typeof bootstrapMachine;
+  initialiseDatabaseConnectionActor: typeof initialiseDatabaseConnection;
+  startGqlServerActor: typeof startGqlServer;
+  stopGqlServerActor: typeof stopGqlServer;
 }>({
-  machine: bootstrapMachine,
-  actor: async ({ apolloServerInstance }, use) => {
-    const actor = createActor(
+  initialiseDatabaseConnectionActor: fromPromise(async () => {
+    /* empty */
+  }),
+  startGqlServerActor: fromPromise(async () => {
+    return {
+      server: {} as ApolloServer,
+      url: "http://localhost:4000/graphql",
+    };
+  }),
+  stopGqlServerActor: fromPromise(async () => undefined),
+  machine: (
+    {
+      initialiseDatabaseConnectionActor,
+      startGqlServerActor,
+      stopGqlServerActor,
+    },
+    use,
+  ) =>
+    use(
       bootstrapMachine.provide({
         actors: {
-          initialiseDatabaseConnection: fromPromise(async () => {
-            /* empty */
-          }),
-          startGqlServer: fromPromise(async () => {
-            return {
-              server: apolloServerInstance,
-              url: "http://localhost:4000/graphql",
-            };
-          }),
-          stopGqlServer: fromPromise(async () => undefined),
+          initialiseDatabaseConnection: initialiseDatabaseConnectionActor,
+          startGqlServer: startGqlServerActor,
+          stopGqlServer: stopGqlServerActor,
         },
       }),
-      {
-        input: {
-          cache: {} as never,
-          sessionId: crypto.randomUUID(),
-        },
-      },
-    );
+    ),
+  input: {
+    cache: {} as never,
+    sessionId: crypto.randomUUID(),
+  },
+  actor: async ({ input, machine }, use) => {
+    const actor = createActor(machine, { input });
 
     actor.start();
 

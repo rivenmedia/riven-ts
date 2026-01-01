@@ -1,17 +1,18 @@
-import { Stream } from "../streams/stream.entity.ts";
-import type { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
-import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
-  TableInheritance,
+  Entity,
+  Index,
   ManyToMany,
   ManyToOne,
-  Index,
+  PrimaryGeneratedColumn,
   type Relation,
+  TableInheritance,
 } from "typeorm";
 import { z } from "zod";
+
+import type { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
+import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
+import { Stream } from "../streams/stream.entity.ts";
 
 export const mediaItemStateSchema = z.enum([
   "Unknown",

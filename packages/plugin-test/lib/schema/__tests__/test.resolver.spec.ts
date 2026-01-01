@@ -1,9 +1,11 @@
+import { it } from "@repo/core-util-vitest-test-context";
+
+import { HttpResponse, http } from "msw";
 import assert from "node:assert";
+import { expect } from "vitest";
+
 import { TestAPI } from "../../datasource/test.datasource.ts";
 import { pluginConfig } from "../../test-plugin.config.ts";
-import { it } from "@repo/core-util-vitest-test-context";
-import { expect } from "vitest";
-import { http, HttpResponse } from "msw";
 
 it('returns the validation status when calling "testIsValid" query', async ({
   gqlServer,

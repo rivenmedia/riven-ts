@@ -1,5 +1,6 @@
-import { ApolloServer } from "@apollo/server";
 import { logger } from "@repo/core-util-logger";
+
+import { ApolloServer } from "@apollo/server";
 import { fromPromise } from "xstate";
 
 export const stopGqlServer = fromPromise<undefined, ApolloServer | null>(

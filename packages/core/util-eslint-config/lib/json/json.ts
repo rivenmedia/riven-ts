@@ -1,7 +1,8 @@
-import { jsonFiles } from "../internal/file-types.ts";
+import json from "@eslint/json";
 import type { ConfigArray } from "typescript-eslint";
 import * as tseslint from "typescript-eslint";
-import json from "@eslint/json";
+
+import { jsonFiles } from "../internal/file-types.ts";
 
 export const jsonConfig = [
   {

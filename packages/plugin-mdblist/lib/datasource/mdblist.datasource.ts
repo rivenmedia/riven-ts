@@ -1,14 +1,16 @@
-import type {
-  GetListItemsByNameQueryResponse,
-  GetMyLimitsQueryResponse,
-} from "../__generated__/index.ts";
-import type { CustomList } from "../schemas/lists.schema.ts";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
+
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type {
   RequestOptions,
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
-import { BaseDataSource } from "@repo/util-plugin-sdk";
+
+import type {
+  GetListItemsByNameQueryResponse,
+  GetMyLimitsQueryResponse,
+} from "../__generated__/index.ts";
+import type { CustomList } from "../schemas/lists.schema.ts";
 
 export class MDBListAPI extends BaseDataSource {
   override baseURL = "https://api.mdblist.com/";

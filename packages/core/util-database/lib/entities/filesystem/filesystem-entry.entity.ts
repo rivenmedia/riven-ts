@@ -1,14 +1,15 @@
-import type { MediaItem } from "../media-items/media-item.entity.ts";
 import {
   Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  type Relation,
   TableInheritance,
   UpdateDateColumn,
-  type Relation,
 } from "typeorm";
+
+import type { MediaItem } from "../media-items/media-item.entity.ts";
 
 @Entity()
 @TableInheritance({

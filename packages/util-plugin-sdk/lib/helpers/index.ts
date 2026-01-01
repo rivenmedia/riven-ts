@@ -1,6 +1,8 @@
-import { isRivenPluginPackage, RivenPlugin } from "../index.ts";
 import { logger } from "@repo/core-util-logger";
+
 import type { PackageJson } from "type-fest";
+
+import { RivenPlugin, isRivenPluginPackage } from "../index.ts";
 
 export const parsePluginsFromDependencies = async (
   dependencies: PackageJson.Dependency,

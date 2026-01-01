@@ -1,12 +1,12 @@
-import { noUnusedVariables } from "../best-practices/no-unused-variables.ts";
-import { jsFiles, tsFiles } from "../internal/file-types.ts";
-import * as tseslint from "typescript-eslint";
+import eslint from "@eslint/js";
+import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript";
 import { flatConfigs as importX } from "eslint-plugin-import-x";
 import { defineConfig } from "eslint/config";
-import eslint from "@eslint/js";
-
 import globals from "globals";
-import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript";
+import * as tseslint from "typescript-eslint";
+
+import { noUnusedVariables } from "../best-practices/no-unused-variables.ts";
+import { jsFiles, tsFiles } from "../internal/file-types.ts";
 
 export const typescriptCore = defineConfig(
   {

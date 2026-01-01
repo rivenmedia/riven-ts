@@ -1,7 +1,9 @@
-import { ListrrAPI } from "../listrr.datasource.ts";
 import { it } from "@repo/core-util-vitest-test-context";
-import { http, HttpResponse } from "msw";
+
+import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
+
+import { ListrrAPI } from "../listrr.datasource.ts";
 
 it('assigns the API to the "x-api-key" header', async ({
   server,

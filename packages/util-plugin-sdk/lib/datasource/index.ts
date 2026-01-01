@@ -1,11 +1,12 @@
+import { logger } from "@repo/core-util-logger";
+
 import {
-  RESTDataSource,
   type DataSourceConfig,
   type DataSourceFetchResult,
   type DataSourceRequest,
+  RESTDataSource,
   type RequestOptions,
 } from "@apollo/datasource-rest";
-import { logger } from "@repo/core-util-logger";
 import type { Promisable } from "type-fest";
 
 export interface BaseDataSourceConfig extends DataSourceConfig {

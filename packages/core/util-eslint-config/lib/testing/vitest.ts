@@ -1,6 +1,7 @@
-import { testFiles } from "../internal/file-types.ts";
-import type { ConfigArray } from "typescript-eslint";
 import vitest from "@vitest/eslint-plugin";
+import type { ConfigArray } from "typescript-eslint";
+
+import { testFiles } from "../internal/file-types.ts";
 
 export const vitestConfig = [
   {

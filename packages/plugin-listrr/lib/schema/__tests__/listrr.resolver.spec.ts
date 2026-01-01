@@ -1,6 +1,12 @@
+import { it } from "@repo/core-util-vitest-test-context";
+
+import { HttpResponse } from "msw";
 import assert from "node:assert";
-import { ListrrAPI } from "../../datasource/listrr.datasource.ts";
+import { expect } from "vitest";
+
 import {
+  type GetApiListMoviesIdSortbySortbydirectionPageQueryResponse,
+  type GetApiListShowsIdSortbySortbydirectionPageQueryResponse,
   createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse,
   createGetApiListShowsIdSortbySortbydirectionPageQueryResponse,
   createListrrContractsModelsAPIMovieDto,
@@ -8,13 +14,9 @@ import {
   getApiListMoviesIdSortbySortbydirectionPageHandler,
   getApiListMyPageHandler,
   getApiListShowsIdSortbySortbydirectionPageHandler,
-  type GetApiListMoviesIdSortbySortbydirectionPageQueryResponse,
-  type GetApiListShowsIdSortbySortbydirectionPageQueryResponse,
 } from "../../__generated__/index.ts";
+import { ListrrAPI } from "../../datasource/listrr.datasource.ts";
 import { pluginConfig } from "../../listrr-plugin.config.ts";
-import { it } from "@repo/core-util-vitest-test-context";
-import { expect } from "vitest";
-import { HttpResponse } from "msw";
 
 it("returns movies when calling listrrMovies query", async ({
   gqlServer,

@@ -1,14 +1,15 @@
-import type { PluginToProgramEvent, ProgramToPluginEvent } from "./events.ts";
-import type { RequestedItem } from "../schemas/index.ts";
-import type { DataSourceMap } from "../types/utilities.ts";
 import type { ApolloClient } from "@apollo/client";
 import {
-  fromCallback,
   type ActorRef,
   type CallbackLogicFunction,
   type MachineContext,
   type Snapshot,
+  fromCallback,
 } from "xstate";
+
+import type { RequestedItem } from "../schemas/index.ts";
+import type { DataSourceMap } from "../types/utilities.ts";
+import type { PluginToProgramEvent, ProgramToPluginEvent } from "./events.ts";
 
 export type ParentRef = ActorRef<
   Snapshot<unknown>,

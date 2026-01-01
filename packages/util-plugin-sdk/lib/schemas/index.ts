@@ -1,12 +1,13 @@
+import type { Promisable } from "type-fest";
+import { z } from "zod";
+
 import {
   BaseDataSource,
   type BaseDataSourceConfig,
 } from "../datasource/index.ts";
 import type { PluginRunnerLogic } from "../state-machine-helpers/create-plugin-runner.ts";
-import { DataSourceMap } from "../types/utilities.ts";
 import type { PluginValidatorLogic } from "../state-machine-helpers/create-plugin-validator.ts";
-import { z } from "zod";
-import type { Promisable } from "type-fest";
+import { DataSourceMap } from "../types/utilities.ts";
 
 export const RivenPluginConfig = z.readonly(
   z.object({

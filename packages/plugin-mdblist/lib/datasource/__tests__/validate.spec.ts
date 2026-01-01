@@ -1,8 +1,10 @@
+import { it } from "@repo/core-util-vitest-test-context";
+
+import { HttpResponse } from "msw";
+import { expect } from "vitest";
+
 import { getMyLimitsHandler } from "../../__generated__/index.ts";
 import { MDBListAPI } from "../mdblist.datasource.ts";
-import { HttpResponse } from "msw";
-import { it } from "@repo/core-util-vitest-test-context";
-import { expect } from "vitest";
 
 it("returns true if the current user is valid", async ({ server }) => {
   server.use(getMyLimitsHandler());

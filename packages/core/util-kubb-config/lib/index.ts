@@ -1,9 +1,9 @@
-import { defineConfig, type InputData, type InputPath } from "@kubb/core";
-import { pluginZod } from "@kubb/plugin-zod";
-import { pluginOas } from "@kubb/plugin-oas";
-import { pluginMsw } from "@kubb/plugin-msw";
+import { type InputData, type InputPath, defineConfig } from "@kubb/core";
 import { pluginFaker } from "@kubb/plugin-faker";
+import { pluginMsw } from "@kubb/plugin-msw";
+import { pluginOas } from "@kubb/plugin-oas";
 import { pluginTs } from "@kubb/plugin-ts";
+import { pluginZod } from "@kubb/plugin-zod";
 
 interface KubbConfigOptions {
   name: string;

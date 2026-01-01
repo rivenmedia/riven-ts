@@ -1,6 +1,6 @@
 import {
-  baseEslintConfig,
   type ConfigArray,
+  baseEslintConfig,
 } from "@repo/core-util-eslint-config";
 
 export default [

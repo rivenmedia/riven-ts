@@ -1,10 +1,12 @@
-import packageJson from "../package.json" with { type: "json" };
 import {
   CoreSettingsResolver,
   RivenSettingsResolver,
 } from "@repo/feature-settings/resolver";
-import { buildSchema } from "type-graphql";
 import { parsePluginsFromDependencies } from "@repo/util-plugin-sdk";
+
+import { buildSchema } from "type-graphql";
+
+import packageJson from "../package.json" with { type: "json" };
 
 const plugins = await parsePluginsFromDependencies(
   packageJson.dependencies,

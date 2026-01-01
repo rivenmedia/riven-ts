@@ -1,14 +1,16 @@
+import { it } from "@repo/core-util-vitest-test-context";
+
+import { HttpResponse, http } from "msw";
+import { expect } from "vitest";
+
 import {
+  type GetApiListShowsIdSortbySortbydirectionPageQueryResponse as GetShowsResponse,
+  type ListrrContractsModelsAPIShowDto as ListrrShow,
   createListrrContractsModelsAPIShowDto,
   getApiListShowsIdSortbySortbydirectionPageHandler as getShowsHandler,
   createGetApiListShowsIdSortbySortbydirectionPageQueryResponse as getShowsResponse,
-  type GetApiListShowsIdSortbySortbydirectionPageQueryResponse as GetShowsResponse,
-  type ListrrContractsModelsAPIShowDto as ListrrShow,
 } from "../../__generated__/index.ts";
 import { ListrrAPI } from "../listrr.datasource.ts";
-import { expect } from "vitest";
-import { it } from "@repo/core-util-vitest-test-context";
-import { http, HttpResponse } from "msw";
 
 it("returns an empty array if no content lists are provided", async ({
   httpCache,

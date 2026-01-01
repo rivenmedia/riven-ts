@@ -1,6 +1,7 @@
-import { registerPlugins } from "./register-plugins.actor.ts";
 import { expect, it, vi } from "vitest";
 import { createActor, fromPromise, toPromise } from "xstate";
+
+import { registerPlugins } from "./register-plugins.actor.ts";
 
 it("instantiates plugin datasources", async () => {
   const testPlugin = await import("@repo/plugin-test");

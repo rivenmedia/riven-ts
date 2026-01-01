@@ -1,6 +1,6 @@
+import type { CodegenConfig } from "@graphql-codegen/cli";
 import type { TypeScriptPluginConfig } from "@graphql-codegen/typescript";
 import type { TypeScriptDocumentsPluginConfig } from "@graphql-codegen/typescript-operations";
-import type { CodegenConfig } from "@graphql-codegen/cli";
 
 export default {
   schema: "http://localhost:3000",

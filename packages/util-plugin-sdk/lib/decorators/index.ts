@@ -1,7 +1,8 @@
-import type { BaseDataSource } from "../datasource/index.ts";
-import { isBasePluginContext } from "../schemas/index.ts";
 import type { Constructor } from "type-fest";
 import { createParameterDecorator } from "type-graphql";
+
+import type { BaseDataSource } from "../datasource/index.ts";
+import { isBasePluginContext } from "../schemas/index.ts";
 
 /**
  * Parameter decorator used to inject the plugin context for the current plugin.

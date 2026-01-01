@@ -1,10 +1,12 @@
-import { bootstrapMachine } from "./state-machines/bootstrap/index.ts";
-import { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import { postgresDataSource } from "@repo/core-util-database/connection";
 import { logger } from "@repo/core-util-logger";
-import { createActor, waitFor, type AnyEventObject } from "xstate";
+
+import { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import KeyvRedis, { Keyv } from "@keyv/redis";
 import { LRUCache } from "lru-cache";
+import { type AnyEventObject, createActor, waitFor } from "xstate";
+
+import { bootstrapMachine } from "./state-machines/bootstrap/index.ts";
 
 const sessionId = crypto.randomUUID();
 

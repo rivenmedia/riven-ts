@@ -1,10 +1,12 @@
-import { ListIdsArguments } from "./arguments/list-ids.arguments.ts";
-import { ExternalIds } from "./types/external-ids.type.ts";
+import { CacheControl } from "@repo/core-util-graphql-helpers/caching/cache-control.directive";
+import { PluginDataSource } from "@repo/util-plugin-sdk";
+
+import { Args, Query, Resolver } from "type-graphql";
+
 import { ListrrAPI } from "../datasource/listrr.datasource.ts";
 import { pluginConfig } from "../listrr-plugin.config.ts";
-import { CacheControl } from "@repo/core-util-graphql-helpers/caching/cache-control.directive";
-import { Args, Query, Resolver } from "type-graphql";
-import { PluginDataSource } from "@repo/util-plugin-sdk";
+import { ListIdsArguments } from "./arguments/list-ids.arguments.ts";
+import { ExternalIds } from "./types/external-ids.type.ts";
 
 @Resolver()
 export class ListrrResolver {

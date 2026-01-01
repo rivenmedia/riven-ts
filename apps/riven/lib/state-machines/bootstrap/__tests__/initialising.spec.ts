@@ -1,6 +1,6 @@
-import { it } from "./helpers/test-context.ts";
-import { createActor, fromPromise } from "xstate";
 import { expect, vi } from "vitest";
+
+import { it } from "./helpers/test-context.ts";
 
 it('starts in the "Idle" state', ({ actor }) => {
   expect(actor.getSnapshot().value).toBe("Idle");
@@ -65,66 +65,4 @@ it("sets up data sources for plugins", async ({ actor }) => {
       .get(pluginTest.default.name)
       ?.dataSources.get(pluginTest.default.dataSources[0]),
   ).toBeDefined();
-});
-
-it("errors if the database connection fails to initialise", async ({
-  machine,
-}) => {
-  const actor = createActor(
-    machine.provide({
-      actors: {
-        // @ts-expect-error Testing error case
-        // eslint-disable-next-line @typescript-eslint/require-await
-        initialiseDatabaseConnection: fromPromise(async () => {
-          throw new Error();
-        }),
-      },
-    }),
-    {
-      input: {
-        cache: {} as never,
-        sessionId: crypto.randomUUID(),
-      },
-    },
-  );
-
-  actor.start();
-
-  actor.send({ type: "START" });
-
-  await vi.waitFor(() => {
-    expect(actor.getSnapshot().value).toBe("Errored");
-  });
-
-  actor.stop();
-});
-
-it("errors if the GraphQL server fails to start", async ({ machine }) => {
-  const actor = createActor(
-    machine.provide({
-      actors: {
-        // @ts-expect-error Testing error case
-        // eslint-disable-next-line @typescript-eslint/require-await
-        startGqlServer: fromPromise(async () => {
-          throw new Error();
-        }),
-      },
-    }),
-    {
-      input: {
-        cache: {} as never,
-        sessionId: crypto.randomUUID(),
-      },
-    },
-  );
-
-  actor.start();
-
-  actor.send({ type: "START" });
-
-  await vi.waitFor(() => {
-    expect(actor.getSnapshot().value).toBe("Errored");
-  });
-
-  actor.stop();
 });

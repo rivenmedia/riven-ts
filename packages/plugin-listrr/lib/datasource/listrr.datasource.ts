@@ -1,18 +1,20 @@
 import {
-  listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIShowDtoSchema as getShowsResponseSchema,
-  listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIMovieDtoSchema as getMoviesResponseSchema,
-  getApiListMyPageQueryResponseSchema,
-  type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIShowDtoSchema as GetShowsResponse,
-  type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIMovieDtoSchema as GetMoviesResponse,
-  type GetApiListMyPageQueryResponse,
-} from "../__generated__/index.ts";
-import type { ExternalIds } from "../schema/types/external-ids.type.ts";
-import {
   BaseDataSource,
   type BasePluginContext,
   type RequestedItem,
 } from "@repo/util-plugin-sdk";
+
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+
+import {
+  type GetApiListMyPageQueryResponse,
+  type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIMovieDtoSchema as GetMoviesResponse,
+  type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIShowDtoSchema as GetShowsResponse,
+  getApiListMyPageQueryResponseSchema,
+  listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIMovieDtoSchema as getMoviesResponseSchema,
+  listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIShowDtoSchema as getShowsResponseSchema,
+} from "../__generated__/index.ts";
+import type { ExternalIds } from "../schema/types/external-ids.type.ts";
 
 export class ListrrAPIError extends Error {}
 

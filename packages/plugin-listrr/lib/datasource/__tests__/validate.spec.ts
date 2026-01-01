@@ -1,8 +1,10 @@
+import { it } from "@repo/core-util-vitest-test-context";
+
+import { HttpResponse } from "msw";
+import { expect } from "vitest";
+
 import { getApiListMyPageHandler } from "../../__generated__/index.ts";
 import { ListrrAPI } from "../listrr.datasource.ts";
-import { expect } from "vitest";
-import { it } from "@repo/core-util-vitest-test-context";
-import { HttpResponse } from "msw";
 
 it("returns false if the request fails", async ({ server, httpCache }) => {
   server.use(getApiListMyPageHandler(() => HttpResponse.error()));

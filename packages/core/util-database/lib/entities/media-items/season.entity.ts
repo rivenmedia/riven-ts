@@ -1,6 +1,3 @@
-import { MediaItem } from "./media-item.entity.ts";
-import { Show } from "./show.entity.ts";
-import { Episode } from "./episode.entity.ts";
 import { Min } from "class-validator";
 import {
   ChildEntity,
@@ -9,6 +6,10 @@ import {
   OneToMany,
   type Relation,
 } from "typeorm";
+
+import { Episode } from "./episode.entity.ts";
+import { MediaItem } from "./media-item.entity.ts";
+import { Show } from "./show.entity.ts";
 
 @ChildEntity()
 export class Season extends MediaItem {

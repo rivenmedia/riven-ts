@@ -1,4 +1,3 @@
-import { MediaItem } from "../media-items/media-item.entity.ts";
 import {
   Column,
   Entity,
@@ -6,6 +5,8 @@ import {
   PrimaryGeneratedColumn,
   type Relation,
 } from "typeorm";
+
+import { MediaItem } from "../media-items/media-item.entity.ts";
 
 @Entity()
 export class Stream {

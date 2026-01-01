@@ -1,6 +1,8 @@
-import { RivenSettings } from "./types/settings.type.ts";
 import { Settings } from "@repo/util-plugin-sdk";
+
 import { FieldResolver, Query, Resolver } from "type-graphql";
+
+import { RivenSettings } from "./types/settings.type.ts";
 
 @Resolver()
 export class CoreSettingsResolver {

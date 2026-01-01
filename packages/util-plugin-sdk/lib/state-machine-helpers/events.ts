@@ -1,5 +1,6 @@
-import type { RequestedItem } from "../schemas/index.ts";
 import type { Merge, NonEmptyString } from "type-fest";
+
+import type { RequestedItem } from "../schemas/index.ts";
 
 type ProgramEvent<
   Type extends string,

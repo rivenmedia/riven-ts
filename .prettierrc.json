@@ -9,5 +9,10 @@
         "trailingComma": "none"
       }
     }
-  ]
+  ],
+
+  "importOrder": ["^@repo/(.*)$", "<THIRD_PARTY_MODULES>", "^[./]"],
+  "importOrderParserPlugins": ["typescript", "jsx", "decorators-legacy"],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
 }

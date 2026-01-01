@@ -1,14 +1,15 @@
-import "reflect-metadata";
-
-import packageJson from "../../../../package.json" with { type: "json" };
-import { pluginMachine } from "../../plugin/index.ts";
-import { fromPromise, type ActorRefFromLogic } from "xstate";
+import { logger } from "@repo/core-util-logger";
 import {
   DataSourceMap,
   parsePluginsFromDependencies,
 } from "@repo/util-plugin-sdk";
+
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
-import { logger } from "@repo/core-util-logger";
+import "reflect-metadata";
+import { type ActorRefFromLogic, fromPromise } from "xstate";
+
+import packageJson from "../../../../package.json" with { type: "json" };
+import { pluginMachine } from "../../plugin/index.ts";
 
 export interface RegisteredPlugin {
   dataSources: DataSourceMap;

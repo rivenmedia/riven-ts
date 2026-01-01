@@ -1,7 +1,9 @@
-import { TestAPI } from "../test.datasource.ts";
-import { expect } from "vitest";
 import { it } from "@repo/core-util-vitest-test-context";
-import { http, HttpResponse } from "msw";
+
+import { HttpResponse, http } from "msw";
+import { expect } from "vitest";
+
+import { TestAPI } from "../test.datasource.ts";
 
 it("returns false if the request fails", async ({ server, httpCache }) => {
   server.use(
