@@ -18,7 +18,7 @@ export abstract class BaseDataSource extends RESTDataSource {
   readonly serviceName: string;
   readonly token: string | undefined;
 
-  static readonly rateLimitOptions: RateLimiterOpts | undefined;
+  static readonly rateLimiterOptions: RateLimiterOpts | undefined;
 
   constructor(options: BaseDataSourceConfig) {
     super(options);
@@ -43,9 +43,9 @@ export abstract class BaseDataSource extends RESTDataSource {
       }
     }
 
-    this.logger.debug(
-      `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${path}: ${JSON.stringify(result, null, 2)}`,
-    );
+    // this.logger.debug(
+    //   `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${path}: ${JSON.stringify(result, null, 2)}`,
+    // );
 
     return result;
   }
