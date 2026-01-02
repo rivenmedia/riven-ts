@@ -4,22 +4,36 @@ import type {
   FetcherResponse,
   FetcherRequestInit,
 } from "@apollo/utils.fetcher";
+import { RateLimiter } from "limiter";
 
 export interface FetchInput {
+  limiter: RateLimiter | null;
   fetchOpts: FetcherRequestInit | undefined;
   url: string;
 }
 
 export const fetchActorLogic = fromPromise<FetcherResponse, FetchInput>(
-  async ({ input: { url, fetchOpts }, signal }) => {
-    console.log(url, fetchOpts);
+  async ({ input: { url, fetchOpts, limiter }, signal }) => {
+    if (limiter) {
+      const tokensRequired = 1;
+      const canRequest = limiter.tryRemoveTokens(tokensRequired);
+
+      if (!canRequest) {
+        throw new RateLimitError(limiter, url, null);
+      }
+    }
+
     const response = await fetch(url, {
-      ...fetchOpts,
+      ...(fetchOpts as RequestInit),
       signal,
     });
 
     if (response.status === 429) {
-      throw new RateLimitError(url, response.headers.get("Retry-After"));
+      throw new RateLimitError(
+        limiter,
+        url,
+        response.headers.get("Retry-After"),
+      );
     }
 
     if (!response.ok) {

@@ -26,6 +26,7 @@ catalog:
   graphql: ^16.12.0
   graphql-tag: ^2.12.6
   jiti: 2.6.1
+  limiter: 3.0.0
   msw: 2.12.4
   next: ^16.0.10
   pg: ^8.16.3

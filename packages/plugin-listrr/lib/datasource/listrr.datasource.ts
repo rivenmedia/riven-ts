@@ -22,6 +22,11 @@ export class ListrrAPI extends BaseDataSource {
   override baseURL = "https://listrr.pro/api/";
   override serviceName = "Listrr";
 
+  override rateLimitOptions = {
+    tokensPerInterval: 1,
+    interval: "minute",
+  } as const;
+
   protected override willSendRequest(
     _path: string,
     requestOpts: AugmentedRequest,

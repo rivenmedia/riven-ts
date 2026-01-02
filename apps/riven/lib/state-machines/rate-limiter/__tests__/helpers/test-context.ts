@@ -1,21 +1,19 @@
-/* eslint-disable @typescript-eslint/require-await */
 import { it as baseIt } from "@repo/core-util-vitest-test-context";
-
-import { type Actor, createActor } from "xstate";
+import { type Actor, createActor, createEmptyActor } from "xstate";
 import {
-  createRateLimitedFetchMachine,
+  rateLimitedFetchMachine,
   type RateLimitedFetchMachineInput,
-} from "../../index.ts";
+} from "../../machines/fetch-machine.ts";
 import { z, type ZodType } from "zod";
 
 export const it = baseIt.extend<{
-  actor: Actor<ReturnType<typeof createRateLimitedFetchMachine>>;
+  actor: Actor<typeof rateLimitedFetchMachine>;
   schema: ZodType;
   validData: Record<string, unknown>;
   input: RateLimitedFetchMachineInput;
-  machine: ReturnType<typeof createRateLimitedFetchMachine>;
+  machine: typeof rateLimitedFetchMachine;
 }>({
-  machine: ({ schema }, use) => use(createRateLimitedFetchMachine(schema)),
+  machine: rateLimitedFetchMachine,
   schema: z.object({
     userId: z.number(),
     id: z.number(),
@@ -29,6 +27,10 @@ export const it = baseIt.extend<{
     completed: false,
   },
   input: {
+    requestId: crypto.randomUUID(),
+    fetchOpts: {},
+    limiter: null,
+    parentRef: createEmptyActor() as never,
     url: "https://placeholder.com",
   },
   actor: async ({ input, machine }, use) => {

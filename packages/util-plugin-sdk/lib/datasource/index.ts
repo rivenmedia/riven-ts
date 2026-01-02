@@ -8,6 +8,7 @@ import {
   type RequestOptions,
 } from "@apollo/datasource-rest";
 import type { Promisable } from "type-fest";
+import type { RateLimiterOpts } from "limiter";
 
 export interface BaseDataSourceConfig extends DataSourceConfig {
   token?: string | undefined;
@@ -16,6 +17,8 @@ export interface BaseDataSourceConfig extends DataSourceConfig {
 export abstract class BaseDataSource extends RESTDataSource {
   readonly serviceName: string;
   readonly token: string | undefined;
+
+  static readonly rateLimitOptions: RateLimiterOpts | undefined;
 
   constructor(options: BaseDataSourceConfig) {
     super(options);
@@ -57,7 +60,7 @@ export abstract class BaseDataSource extends RESTDataSource {
 
   abstract validate(): Promisable<boolean>;
 
-  static getApiToken(): Promisable<string | undefined> {
+  static getApiToken(): string | undefined {
     return undefined;
   }
 }

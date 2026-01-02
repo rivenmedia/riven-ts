@@ -1,31 +1,26 @@
-import { assign, log, setup } from "xstate";
+import { assign, sendTo, setup, type ActorRef, type Snapshot } from "xstate";
 import { z } from "zod";
-import { fetchActorLogic } from "./actors/fetch.actor.ts";
-import { RateLimitError } from "./errors/rate-limit-error.ts";
+import { fetchActorLogic } from "../actors/fetch.actor.ts";
+import { RateLimitError } from "../errors/rate-limit-error.ts";
 import type {
   FetcherRequestInit,
   FetcherResponse,
 } from "@apollo/utils.fetcher";
 import { logger } from "@repo/core-util-logger";
+import type { RateLimiter } from "limiter";
+import type { RateLimiterMachineEvent } from "../index.ts";
+import type { UUID } from "node:crypto";
 
 export interface RateLimitedFetchMachineInput {
+  limiter: RateLimiter | null;
   maxRetries?: number;
   fetchOpts: FetcherRequestInit | undefined;
   url: string;
+  parentRef: ActorRef<Snapshot<unknown>, RateLimiterMachineEvent>;
+  requestId: UUID;
 }
 
 export interface RateLimitedFetchMachineContext {
-  /**
-   * The fetched data validated against the provided schema.
-   * If the fetch fails, this will be `null`.
-   */
-  // data: z.infer<T> | null;
-
-  // /**
-  //  * The Zod schema used to validate the fetched data.
-  //  */
-  // schema: T;
-
   /**
    * The error encountered during the fetch operation, if any.
    */
@@ -60,6 +55,15 @@ export interface RateLimitedFetchMachineContext {
    * The options to use for the fetch operation.
    */
   fetchOpts: FetcherRequestInit | undefined;
+
+  /**
+   * The rate limiter to use for the fetch operation.
+   */
+  limiter: RateLimiter | null;
+
+  parentRef: ActorRef<Snapshot<unknown>, RateLimiterMachineEvent>;
+
+  requestId: UUID;
 }
 
 export interface RateLimitedFetchMachineEvent {
@@ -91,13 +95,9 @@ export const rateLimitedFetchMachine = setup({
       retryDelayMs: null,
     })),
     handleSuccess: assign((_, { response }: { response: FetcherResponse }) => ({
-      // data: context.schema.parse(data),
       response,
       error: null,
       retryDelayMs: null,
-    })),
-    setResponse: assign((_, { response }: { response: FetcherResponse }) => ({
-      response,
     })),
     log: (_, message: string) => logger.http(message),
   },
@@ -115,7 +115,7 @@ export const rateLimitedFetchMachine = setup({
         return 0;
       }
 
-      return context.retryDelayMs - Date.now();
+      return context.retryDelayMs;
     },
   },
 }).createMachine({
@@ -126,11 +126,21 @@ export const rateLimitedFetchMachine = setup({
     fetchOpts: input.fetchOpts,
     requestAttempts: 0,
     maxRetries: input.maxRetries ?? 3,
+    limiter: input.limiter,
+    parentRef: input.parentRef,
+    requestId: input.requestId,
     retryDelayMs: null,
     data: null,
     error: null,
     response: null,
   }),
+  exit: sendTo(
+    ({ context }) => context.parentRef,
+    ({ context }) => ({
+      type: "fetch-completed",
+      requestId: context.requestId,
+    }),
+  ),
   output: ({ context }) => {
     if (!context.response) {
       throw new Error(
@@ -163,6 +173,7 @@ export const rateLimitedFetchMachine = setup({
         input: ({ context }) => ({
           url: context.url,
           fetchOpts: context.fetchOpts,
+          limiter: context.limiter,
         }),
         onDone: {
           target: "Success",
@@ -192,7 +203,7 @@ export const rateLimitedFetchMachine = setup({
                 error: z.instanceof(Error).parse(event.error),
               }),
             },
-            target: "Failure",
+            target: "Failed",
           },
         ],
       },
@@ -200,21 +211,25 @@ export const rateLimitedFetchMachine = setup({
     "Rate limited": {
       always: {
         guard: "isMaxRetriesReached",
-        target: "Failure",
+        target: "Failed",
       },
       entry: {
         type: "log",
         params: ({ context }) =>
-          `Request was rate limited. Retrying in ${context.retryDelayMs?.toString() ?? "?"} ms.`,
+          `Request was rate limited. Retrying in ${context.retryDelayMs?.toString() ?? "Unknown"} ms.`,
       },
       after: {
         retryFetch: {
           target: "Fetching",
-          actions: log("Retrying fetch after rate limit"),
+          actions: {
+            type: "log",
+            params: ({ context: { requestAttempts, maxRetries, url } }) =>
+              `Retrying fetch for URL: ${url} (Attempt ${(requestAttempts + 1).toString()} of ${(maxRetries + 1).toString()})`,
+          },
         },
       },
     },
-    Failure: {
+    Failed: {
       type: "final",
       entry: ({ context }) => {
         if (context.error) {
@@ -222,7 +237,7 @@ export const rateLimitedFetchMachine = setup({
         }
 
         throw new Error(
-          "Reached Failure state without an error. This is likely a bug. Please report it.",
+          "Reached Failed state without an error. This is likely a bug. Please report it.",
         );
       },
     },

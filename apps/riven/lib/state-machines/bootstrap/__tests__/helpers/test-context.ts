@@ -7,11 +7,11 @@ import { type Actor, createActor, fromPromise } from "xstate";
 import type { initialiseDatabaseConnection } from "../../actors/initialise-database-connection.actor.ts";
 import type { startGqlServer } from "../../actors/start-gql-server.actor.ts";
 import type { stopGqlServer } from "../../actors/stop-gql-server.actor.ts";
-import { type BoostrapMachineInput, bootstrapMachine } from "../../index.ts";
+import { type BootstrapMachineInput, bootstrapMachine } from "../../index.ts";
 
 export const it = baseIt.extend<{
   actor: Actor<typeof bootstrapMachine>;
-  input: BoostrapMachineInput;
+  input: BootstrapMachineInput;
   machine: typeof bootstrapMachine;
   initialiseDatabaseConnectionActorLogic: typeof initialiseDatabaseConnection;
   startGqlServerActorLogic: typeof startGqlServer;

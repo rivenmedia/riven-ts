@@ -49,8 +49,12 @@ it("validates the plugins", async ({ actor }) => {
   expect(pluginValidateSpy).toHaveBeenCalledOnce();
 });
 
-it("sets up data sources for plugins", async ({ actor }) => {
-  const pluginTest = await import("@repo/plugin-test");
+it("instantiates plugin datasources", async ({ actor }) => {
+  const testPlugin = await import("@repo/plugin-test");
+
+  vi.spyOn(testPlugin.default.dataSources[0], "getApiToken").mockReturnValue(
+    "TEST_API_TOKEN",
+  );
 
   actor.send({ type: "START" });
 
@@ -58,11 +62,19 @@ it("sets up data sources for plugins", async ({ actor }) => {
     expect(actor.getSnapshot().value).toEqual("Running");
   });
 
-  const { plugins } = actor.getSnapshot().context;
+  const registeredPlugin = actor
+    .getSnapshot()
+    .context.plugins.get(Symbol.for("Plugin: Test"));
 
-  expect(
-    plugins
-      .get(pluginTest.default.name)
-      ?.dataSources.get(pluginTest.default.dataSources[0]),
-  ).toBeDefined();
+  expect(registeredPlugin).toBeDefined();
+
+  const dataSource = testPlugin.default.dataSources[0];
+
+  expect(registeredPlugin?.dataSources.get(dataSource)).toBeInstanceOf(
+    dataSource,
+  );
+
+  const dataSourceInstance = registeredPlugin?.dataSources.get(dataSource);
+
+  expect(dataSourceInstance?.token).toBe("TEST_API_TOKEN");
 });

@@ -6,6 +6,7 @@ import { LRUCache } from "lru-cache";
 import { type AnyEventObject, createActor, waitFor } from "xstate";
 
 import { bootstrapMachine } from "./state-machines/bootstrap/index.ts";
+import safeStringify from "safe-stringify";
 
 const sessionId = crypto.randomUUID();
 
@@ -28,10 +29,9 @@ const actor = createActor(bootstrapMachine, {
 });
 
 async function persistEvents() {
-  await cache.set(
-    `riven:events-cache:${sessionId}`,
-    JSON.stringify(eventsCache.dump()),
-  );
+  const value = eventsCache.dump();
+
+  await cache.set(`riven:events-cache:${sessionId}`, safeStringify(value));
 
   logger.info(`Persisted Riven events cache for session ${sessionId}`);
 }

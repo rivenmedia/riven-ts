@@ -1,4 +1,3 @@
-import type { Promisable } from "type-fest";
 import { z } from "zod";
 
 import {
@@ -8,6 +7,7 @@ import {
 import type { PluginRunnerLogic } from "../state-machine-helpers/create-plugin-runner.ts";
 import type { PluginValidatorLogic } from "../state-machine-helpers/create-plugin-validator.ts";
 import { DataSourceMap } from "../types/utilities.ts";
+import type { RateLimiterOpts } from "limiter";
 
 export const RivenPluginConfig = z.readonly(
   z.object({
@@ -69,10 +69,11 @@ export const isBasePluginContext = (
  * This type preserves both instance members and static members.
  */
 export interface DataSourceConstructor {
+  rateLimiterOptions?: RateLimiterOpts;
+
   /** Static method to get the API token */
-  getApiToken(
-    fetchOpts: Pick<RequestInit, "signal">,
-  ): Promisable<string | undefined>;
+  getApiToken(): string | undefined;
+
   /** Constructor signature */
   new (options: BaseDataSourceConfig): BaseDataSource;
 }

@@ -60,6 +60,9 @@ catalogs:
     jiti:
       specifier: 2.6.1
       version: 2.6.1
+    limiter:
+      specifier: 3.0.0
+      version: 3.0.0
     msw:
       specifier: 2.12.4
       version: 2.12.4
@@ -151,6 +154,9 @@ importers:
       keyv:
         specifier: ^5.5.5
         version: 5.5.5
+      limiter:
+        specifier: 'catalog:'
+        version: 3.0.0
       lru-cache:
         specifier: ^11.2.4
         version: 11.2.4
@@ -160,6 +166,9 @@ importers:
       reflect-metadata:
         specifier: 'catalog:'
         version: 0.2.2
+      safe-stringify:
+        specifier: ^1.2.0
+        version: 1.2.0
       xstate:
         specifier: 'catalog:'
         version: 5.25.0
@@ -966,6 +975,9 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
+      limiter:
+        specifier: 'catalog:'
+        version: 3.0.0
       msw:
         specifier: 'catalog:'
         version: 2.12.4(@types/node@24.0.0)(typescript@5.9.3)
@@ -4567,6 +4579,9 @@ packages:
   libphonenumber-js@1.12.31:
     resolution: {integrity: sha512-Z3IhgVgrqO1S5xPYM3K5XwbkDasU67/Vys4heW+lfSBALcUZjeIIzI8zCLifY+OCzSq+fpDdywMDa7z+4srJPQ==}
 
+  limiter@3.0.0:
+    resolution: {integrity: sha512-hev7DuXojsTFl2YwyzUJMDnZ/qBDd3yZQLSH3aD4tdL1cqfc3TMnoecEJtWFaQFdErZsKoFMBTxF/FBSkgDbEg==}
+
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
 
@@ -5444,6 +5459,10 @@ packages:
   safe-stable-stringify@2.5.0:
     resolution: {integrity: sha512-b3rppTKm9T+PsVCBEOUR46GWI7fdOs00VKZ1+9c1EWDaDMvjQc6tUwuFyIprgGgTcWoVHSKrU8H31ZHA2e0RHA==}
     engines: {node: '>=10'}
+
+  safe-stringify@1.2.0:
+    resolution: {integrity: sha512-C+LbapLbyGhP/WeMTrnYhIPjUoNTXZ/A3Znli8D5iF+IZXrDlgvfruykOq/bZ/5ncGy/K6RsavHlkirgWDFNdA==}
+    engines: {node: '>=16'}
 
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
@@ -10504,6 +10523,8 @@ snapshots:
 
   libphonenumber-js@1.12.31: {}
 
+  limiter@3.0.0: {}
+
   lines-and-columns@1.2.4: {}
 
   lint-staged@16.2.7:
@@ -11477,6 +11498,8 @@ snapshots:
       is-regex: 1.2.1
 
   safe-stable-stringify@2.5.0: {}
+
+  safe-stringify@1.2.0: {}
 
   safer-buffer@2.1.2: {}
 

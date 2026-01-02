@@ -28,6 +28,7 @@
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
+    "limiter": "catalog:",
     "msw": "catalog:",
     "type-graphql": "catalog:",
     "typescript": "catalog:",
@@ -38,6 +39,7 @@
     "@apollo/client": "^4.0.11",
     "@apollo/datasource-rest": "catalog:",
     "@apollo/utils.keyvadapter": "^4.0.1",
+    "limiter": "catalog:",
     "xstate": "^5.25.0"
   }
 }

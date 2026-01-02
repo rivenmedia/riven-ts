@@ -1,5 +1,9 @@
 import { type LogLevel, logger } from "@repo/core-util-logger";
-import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk";
+import {
+  DataSourceMap,
+  type BaseDataSource,
+  type ProgramToPluginEvent,
+} from "@repo/util-plugin-sdk";
 
 import {
   ApolloClient,
@@ -11,7 +15,14 @@ import { RetryLink } from "@apollo/client/link/retry";
 import type { ApolloServer } from "@apollo/server";
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import type { UUID } from "node:crypto";
-import { assign, emit, setup } from "xstate";
+import {
+  assign,
+  emit,
+  setup,
+  toPromise,
+  waitFor,
+  type ActorRefFromLogic,
+} from "xstate";
 
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import {
@@ -21,6 +32,8 @@ import {
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 import { waitForValidPlugins } from "./actors/wait-for-valid-plugins.actor.ts";
+import { rateLimiterMachine } from "../rate-limiter/index.js";
+import type { FetcherRequestInit } from "@apollo/utils.fetcher";
 
 export interface BootstrapMachineContext {
   cache: KeyvAdapter;
@@ -28,9 +41,13 @@ export interface BootstrapMachineContext {
   plugins: Map<symbol, RegisteredPlugin>;
   sessionId: UUID;
   server: ApolloServer | null;
+  rateLimiters: Map<
+    BaseDataSource,
+    ActorRefFromLogic<typeof rateLimiterMachine>
+  >;
 }
 
-export interface BoostrapMachineInput {
+export interface BootstrapMachineInput {
   cache: KeyvAdapter;
   sessionId: UUID;
 }
@@ -50,7 +67,7 @@ export const bootstrapMachine = setup({
       stopGqlServer: "stopGqlServer";
       initialiseDatabaseConnection: "initialiseDatabaseConnection";
     },
-    input: {} as BoostrapMachineInput,
+    input: {} as BootstrapMachineInput,
   },
   actions: {
     broadcastToPlugins: ({ context }, event: ProgramToPluginEvent) => {
@@ -119,6 +136,7 @@ export const bootstrapMachine = setup({
     plugins: new Map<symbol, RegisteredPlugin>(),
     sessionId: input.sessionId,
     server: null,
+    rateLimiters: new Map(),
   }),
   on: {
     START: ".Initialising",
@@ -218,12 +236,14 @@ export const bootstrapMachine = setup({
           initial: "Registering",
           states: {
             Registering: {
-              entry: {
-                type: "log",
-                params: {
-                  message: "Starting plugin registration...",
+              entry: [
+                {
+                  type: "log",
+                  params: {
+                    message: "Starting plugin registration...",
+                  },
                 },
-              },
+              ],
               invoke: {
                 id: "registerPlugins",
                 src: "registerPlugins",
@@ -231,32 +251,99 @@ export const bootstrapMachine = setup({
                   cache: context.cache,
                 }),
                 onDone: {
-                  actions: assign({
-                    plugins: ({ context, event, spawn }) => {
-                      const pluginMap = new Map<symbol, RegisteredPlugin>();
+                  actions: [
+                    assign({
+                      plugins: ({ context, event, spawn }) => {
+                        const pluginMap = new Map<symbol, RegisteredPlugin>();
 
-                      for (const [
-                        pluginSymbol,
-                        { machine, dataSources },
-                      ] of event.output.entries()) {
-                        const pluginRef = spawn(machine, {
-                          input: {
-                            client: context.client,
+                        for (const [
+                          pluginSymbol,
+                          { machine, config },
+                        ] of event.output.entries()) {
+                          const dataSources = new DataSourceMap();
+
+                          if (config.dataSources) {
+                            for (const DataSource of config.dataSources) {
+                              try {
+                                const rateLimiterRef = spawn(
+                                  rateLimiterMachine,
+                                  {
+                                    input: {
+                                      limiterOptions:
+                                        DataSource.rateLimiterOptions ?? null,
+                                    },
+                                  },
+                                );
+
+                                const token = DataSource.getApiToken();
+                                const instance = new DataSource({
+                                  cache: context.cache,
+                                  token,
+                                  fetch: async (
+                                    url: string,
+                                    options: FetcherRequestInit | undefined,
+                                  ) => {
+                                    const requestId = crypto.randomUUID();
+
+                                    rateLimiterRef.send({
+                                      type: "fetch-requested",
+                                      url,
+                                      fetchOpts: options,
+                                      requestId,
+                                    });
+
+                                    await waitFor(rateLimiterRef, (state) =>
+                                      state.context.requestQueue.has(requestId),
+                                    );
+
+                                    const actor = rateLimiterRef
+                                      .getSnapshot()
+                                      .context.requestQueue.get(requestId);
+
+                                    if (!actor) {
+                                      throw new Error(
+                                        `Failed to get fetch actor for request ID ${requestId}`,
+                                      );
+                                    }
+
+                                    actor.send({ type: "fetch" });
+
+                                    return toPromise(actor);
+                                  },
+                                  logger,
+                                });
+
+                                dataSources.set(DataSource, instance);
+                              } catch (error) {
+                                logger.error(
+                                  `Failed to construct data source ${DataSource.name} for ${config.name.toString()}: ${
+                                    (error as Error).message
+                                  }`,
+                                );
+                              }
+                            }
+                          }
+
+                          const pluginRef = spawn(machine, {
+                            input: {
+                              client: context.client,
+                              dataSources,
+                              pluginSymbol,
+                            },
+                          });
+
+                          pluginMap.set(pluginSymbol, {
+                            config,
                             dataSources,
-                            pluginSymbol,
-                          },
-                        });
+                            machine,
+                            ref: pluginRef,
+                          });
+                        }
 
-                        pluginMap.set(pluginSymbol, {
-                          dataSources,
-                          machine,
-                          ref: pluginRef,
-                        });
-                      }
-
-                      return pluginMap;
-                    },
-                  }),
+                        return pluginMap;
+                      },
+                    }),
+                  ],
                   target: "Validating",
                 },
               },

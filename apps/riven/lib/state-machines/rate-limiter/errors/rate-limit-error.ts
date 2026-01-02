@@ -1,3 +1,4 @@
+import type { RateLimiter } from "limiter";
 import { DateTime } from "luxon";
 
 /**
@@ -29,15 +30,31 @@ export class RateLimitError extends Error {
    *   - `null` if the header is not present
    *
    * @returns The delay in milliseconds before the next request should be attempted.
-   *   Returns 0 if the header is null (TODO: should be replaced with token bucket value).
+   *   Calculates an estimated value from the token bucket if the header is null.
    *
    * @throws {Error} If the Retry-After header value cannot be parsed as either a valid
    *   HTTP date or a numeric value (seconds).
    */
-  private parseRetryAfterHeader(retryAfterHeader: string | null): number {
+  private parseRetryAfterHeader(
+    limiter: RateLimiter | null,
+    retryAfterHeader: string | number | null,
+  ): number {
     if (retryAfterHeader === null) {
-      // TODO: Get from token bucket
-      return 0;
+      if (!limiter) {
+        throw new Error(
+          `No Retry-After header present and no limiter available to estimate delay for ${this.url}`,
+        );
+      }
+
+      return Math.ceil(
+        (1 - limiter.tokenBucket.content) *
+          (limiter.tokenBucket.interval /
+            limiter.tokenBucket.tokensPerInterval),
+      );
+    }
+
+    if (typeof retryAfterHeader === "number") {
+      return retryAfterHeader;
     }
 
     const httpDate = DateTime.fromHTTP(retryAfterHeader);
@@ -58,10 +75,14 @@ export class RateLimitError extends Error {
     return retryAfterSeconds * 1000;
   }
 
-  constructor(url: string, retryAfterHeader: string | null) {
+  constructor(
+    limiter: RateLimiter | null,
+    url: string,
+    retryAfterHeader: string | null,
+  ) {
     super();
 
     this.url = url;
-    this.retryAfter = this.parseRetryAfterHeader(retryAfterHeader);
+    this.retryAfter = this.parseRetryAfterHeader(limiter, retryAfterHeader);
   }
 }
