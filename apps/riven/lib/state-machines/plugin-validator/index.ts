@@ -1,54 +1,50 @@
 import { logger } from "@repo/core-util-logger";
-import {
-  type DataSourceMap,
-  type PluginRunnerInput,
-  type PluginToProgramEvent,
-  type ProgramToPluginEvent,
-  createPluginValidator,
-} from "@repo/util-plugin-sdk";
 
-import type { ApolloClient } from "@apollo/client";
 import {
-  type ActorRef,
+  type AnyActorRef,
   type MachineContext,
-  type Snapshot,
   assign,
+  enqueueActions,
   setup,
 } from "xstate";
 
-import { processRequestedItem } from "../bootstrap/actors/process-requested-item.actor.ts";
+import type {
+  InvalidPlugin,
+  RegisteredPlugin,
+  ValidPlugin,
+} from "../bootstrap/actors/register-plugins.actor.ts";
+import { validatePlugin } from "./actors/validate-plugin.actor.ts";
 
-export interface PluginMachineContext extends MachineContext {
-  pluginSymbol: symbol;
-  pluginPrettyName: string;
-  client: ApolloClient;
-  dataSources: DataSourceMap;
+export interface PluginValidatorMachineContext extends MachineContext {
   validationFailures: number;
-  isValidated: boolean;
-  parentRef: ActorRef<Snapshot<unknown>, ProgramToPluginEvent>;
+  runningValidators: Map<symbol, AnyActorRef>;
+  pendingPlugins: Map<symbol, RegisteredPlugin>;
+  invalidPlugins: Map<symbol, InvalidPlugin>;
+  validPlugins: Map<symbol, ValidPlugin>;
 }
 
-export interface PluginMachineInput extends PluginRunnerInput {
-  parentRef: ActorRef<Snapshot<unknown>, ProgramToPluginEvent>;
+export interface PluginValidatorMachineInput {
+  plugins: Map<symbol, RegisteredPlugin>;
 }
 
-export type PluginMachineEvent =
-  | ProgramToPluginEvent
-  | PluginToProgramEvent
-  | { type: "riven.validate-plugin" };
+export interface PluginValidatorMachineOutput {
+  validPlugins: Map<symbol, ValidPlugin>;
+  invalidPlugins: Map<symbol, InvalidPlugin>;
+}
 
-export const pluginMachine = setup({
+export type PluginValidatorMachineEvent =
+  | { type: "riven.plugin-valid"; plugin: ValidPlugin }
+  | { type: "riven.plugin-invalid"; plugin: InvalidPlugin };
+
+export const pluginValidatorMachine = setup({
   types: {
-    context: {} as PluginMachineContext,
-    events: {} as PluginMachineEvent,
-    input: {} as PluginMachineInput,
+    context: {} as PluginValidatorMachineContext,
+    events: {} as PluginValidatorMachineEvent,
+    input: {} as PluginValidatorMachineInput,
     children: {} as {
-      processRequestedItem: "processRequestedItem";
       validatePlugin: "validatePlugin";
     },
-    output: {} as {
-      plugin: symbol;
-    },
+    output: {} as PluginValidatorMachineOutput,
   },
   actions: {
     resetValidationFailures: assign({
@@ -57,93 +53,128 @@ export const pluginMachine = setup({
     incrementValidationFailures: assign(({ context }) => ({
       validationFailures: context.validationFailures + 1,
     })),
+    handleValidPlugin: assign(({ context }, validPlugin: ValidPlugin) => {
+      const existingPendingItem = context.pendingPlugins.get(
+        validPlugin.config.name,
+      );
+
+      if (!existingPendingItem) {
+        logger.error(
+          `Received valid plugin notification for unknown plugin: ${String(
+            validPlugin.config.name,
+          )}`,
+        );
+
+        return;
+      }
+
+      const newPendingPlugins = new Map(context.pendingPlugins);
+
+      newPendingPlugins.delete(validPlugin.config.name);
+
+      return {
+        pendingPlugins: newPendingPlugins,
+        validPlugins: context.validPlugins.set(
+          validPlugin.config.name,
+          validPlugin,
+        ),
+      };
+    }),
+    handleInvalidPlugin: assign(({ context }, invalidPlugin: InvalidPlugin) => {
+      const existingPendingItem = context.pendingPlugins.get(
+        invalidPlugin.config.name,
+      );
+
+      if (!existingPendingItem) {
+        logger.error(
+          `Received invalid plugin notification for unknown plugin: ${String(
+            invalidPlugin.config.name,
+          )}`,
+        );
+
+        return {};
+      }
+
+      const newPendingPlugins = new Map(context.pendingPlugins);
+
+      newPendingPlugins.delete(invalidPlugin.config.name);
+
+      return {
+        pendingPlugins: newPendingPlugins,
+        invalidPlugins: context.invalidPlugins.set(
+          invalidPlugin.config.name,
+          invalidPlugin,
+        ),
+      };
+    }),
+    spawnValidators: enqueueActions(({ context, enqueue }) => {
+      enqueue.assign({
+        runningValidators: ({ spawn }) => {
+          const validatorRefs = new Map(context.runningValidators);
+
+          for (const [pluginSymbol, plugin] of context.pendingPlugins) {
+            const validatorRef = spawn("validatePlugin", {
+              id: "validatePlugin",
+              input: { plugin },
+            });
+
+            validatorRefs.set(pluginSymbol, validatorRef);
+          }
+
+          return validatorRefs;
+        },
+      });
+    }),
   },
   actors: {
-    processRequestedItem,
-    validatePlugin: createPluginValidator(() => true),
+    validatePlugin,
   },
   guards: {
+    allPluginsValidated: ({ context }) => context.pendingPlugins.size === 0,
     isPluginValid: (_, isValid: boolean) => isValid,
     hasReachedMaxValidationFailures: ({ context }) =>
       context.validationFailures >= 3,
   },
 }).createMachine({
-  context: ({
-    input: { client, pluginSymbol: pluginSymbol, dataSources, parentRef },
-  }) => ({
-    client,
-    pluginSymbol,
-    pluginPrettyName: pluginSymbol.description ?? pluginSymbol.toString(),
-    dataSources,
+  context: ({ input: { plugins } }) => ({
+    invalidPlugins: new Map(),
+    pendingPlugins: new Map(plugins),
+    validPlugins: new Map(),
+    runningValidators: new Map(),
     validationFailures: 0,
-    isValidated: false,
-    parentRef,
   }),
   id: "Plugin validation runner",
-  initial: "Idle",
+  initial: "Validating",
   output: ({ context }) => ({
-    plugin: context.pluginSymbol,
+    validPlugins: context.validPlugins,
+    invalidPlugins: context.invalidPlugins,
   }),
   states: {
-    Idle: {
-      on: {
-        "riven.validate-plugin": "Validating",
-      },
-    },
     Validating: {
-      entry: ({ context }) => {
-        logger.info(`Validating ${context.pluginPrettyName}`);
+      entry: "spawnValidators",
+      always: {
+        guard: "allPluginsValidated",
+        target: "Validated",
       },
-      invoke: {
-        id: "validatePlugin",
-        src: "validatePlugin",
-        input: ({ context }) => ({
-          client: context.client,
-          pluginSymbol: context.pluginSymbol,
-          dataSources: context.dataSources,
-        }),
-        onDone: [
-          {
-            target: "Validated",
-            guard: {
-              type: "isPluginValid",
-              params: ({ event }) => event.output,
+      on: {
+        "riven.plugin-valid": {
+          actions: [
+            {
+              type: "handleValidPlugin",
+              params: ({ event }) => event.plugin,
             },
+          ],
+        },
+        "riven.plugin-invalid": {
+          actions: {
+            type: "handleInvalidPlugin",
+            params: ({ event }) => event.plugin,
           },
-          {
-            target: "Validation error",
-          },
-        ],
-        onError: "Validation error",
+        },
       },
     },
     Validated: {
       type: "final",
-    },
-    "Validation error": {
-      entry: [
-        {
-          type: "incrementValidationFailures",
-        },
-        ({ context }) => {
-          logger.error(`Validation failed for ${context.pluginPrettyName}`);
-        },
-      ],
-      always: {
-        guard: "hasReachedMaxValidationFailures",
-        target: "Errored",
-      },
-      after: {
-        5000: "Validating",
-      },
-    },
-    Errored: {
-      type: "final",
-      entry: ({ context }) => {
-        logger.error(
-          `${context.pluginPrettyName} has errored and will not be started`,
-        );
-      },
     },
   },
 });

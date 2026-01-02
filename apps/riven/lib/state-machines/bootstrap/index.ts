@@ -26,22 +26,28 @@ import {
   waitFor,
 } from "xstate";
 
-import { pluginMachine } from "../plugin-validator/index.ts";
+import {
+  type PluginValidatorMachineOutput,
+  pluginValidatorMachine,
+} from "../plugin-validator/index.ts";
 import { rateLimiterMachine } from "../rate-limiter/index.js";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { processRequestedItem } from "./actors/process-requested-item.actor.ts";
 import {
+  type InvalidPlugin,
   type RegisteredPlugin,
+  type ValidPlugin,
   registerPlugins,
 } from "./actors/register-plugins.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
-import { waitForValidPlugins } from "./actors/wait-for-valid-plugins.actor.ts";
 
 export interface BootstrapMachineContext {
   cache: KeyvAdapter;
   client: ApolloClient;
-  plugins: Map<symbol, RegisteredPlugin>;
+  validatingPlugins: Map<symbol, RegisteredPlugin>;
+  validPlugins: Map<symbol, ValidPlugin>;
+  invalidPlugins: Map<symbol, InvalidPlugin>;
   sessionId: UUID;
   server: ApolloServer | null;
 }
@@ -65,29 +71,34 @@ export const bootstrapMachine = setup({
     events: {} as BootstrapMachineEvent,
     children: {} as {
       registerPlugins: "registerPlugins";
-      waitForValidPlugins: "waitForValidPlugins";
       startGqlServer: "startGqlServer";
       stopGqlServer: "stopGqlServer";
       initialiseDatabaseConnection: "initialiseDatabaseConnection";
-      pluginMachine: "pluginMachine";
+      pluginValidatorMachine: "pluginValidatorMachine";
       processRequestedItem: "processRequestedItem";
     },
     input: {} as BootstrapMachineInput,
   },
   actions: {
     broadcastToPlugins: ({ context }, event: ProgramToPluginEvent) => {
-      for (const { runner } of context.plugins.values()) {
-        runner?.send(event);
+      for (const { runnerRef } of context.validPlugins.values()) {
+        runnerRef.send(event);
       }
     },
-    spawnPluginRunners: assign({
-      plugins: ({ context, spawn }, validPlugins: symbol[]) => {
-        const pluginMap = new Map<symbol, RegisteredPlugin>();
+    handlePluginValidationResponse: assign({
+      validatingPlugins: () => new Map(),
+      invalidPlugins: (_, { invalidPlugins }: PluginValidatorMachineOutput) =>
+        invalidPlugins,
+      validPlugins: (
+        { context, spawn },
+        { validPlugins }: PluginValidatorMachineOutput,
+      ) => {
+        const pluginMap = new Map<symbol, ValidPlugin>();
 
         for (const [
           pluginSymbol,
-          { machine, config, dataSources },
-        ] of context.plugins.entries()) {
+          { config, dataSources },
+        ] of validPlugins.entries()) {
           const pluginRef = spawn(config.runner, {
             input: {
               client: context.client,
@@ -97,12 +108,10 @@ export const bootstrapMachine = setup({
           });
 
           pluginMap.set(pluginSymbol, {
+            status: "valid",
             config,
             dataSources,
-            machine,
-            ref: null,
-            runner: pluginRef,
-            isInvalid: !validPlugins.includes(pluginSymbol),
+            runnerRef: pluginRef,
           });
         }
 
@@ -135,23 +144,14 @@ export const bootstrapMachine = setup({
   },
   actors: {
     registerPlugins,
-    waitForValidPlugins,
     startGqlServer,
     stopGqlServer,
     initialiseDatabaseConnection,
-    pluginMachine,
+    pluginValidatorMachine,
     processRequestedItem,
   },
   guards: {
-    hasInvalidPlugins: ({ context }) => {
-      for (const { ref } of context.plugins.values()) {
-        if (ref?.getSnapshot().matches("Errored")) {
-          return true;
-        }
-      }
-
-      return false;
-    },
+    hasInvalidPlugins: ({ context }) => context.invalidPlugins.size > 0,
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7AxAZQBUBBZAgbQAYBdRUABwHtZUAXVBrWkAD0QBYATABoQAT0QCAnAEYAdAL6TJfAKwU1kgMwAOFSoC++kWky4AogA0AkuWpdGzNhy68EgkeITTNFWYqUA7BQBmgF8fNrSfIbGGNg4AGJExAAyAPpmyMgA8siUNEggDqzsnIWu7mKI3poCsioAbAoB0tIUut4xICbYslZYJQCGADaozFhQOBAcYLKwLIMssz1YfQNsI2OoE-n2TCXO5dUhDbKaDUF8bRTSKjLSHoja4bIUTRHBAQ0qOl0ra0NRuMoLIAEIMBgseYAJ0GdAABBBFoMAEaDWBgeEAYw4WDAWKcqzwC2hbAmUxmsm26AYAGtZttAWMwAARZFojEAYVx+MJu0KxUJLkQDQoklk2gEkT4XxkfHUmkeXgoUle7zUigEAju2j+cVW-SZwLBEKhLFhCKRCw5mJxWDxBNKsmJg1J20mYGh0IY0NkdGGiwAZj6ALZU9aoTYYtnW9Fgbn23mlfn0fZCo5eE5nC4UK4UG53VpK1pqM6aFTaFp8TRRAQBAR60wAjZA90myEwuHwgDiFoAFgBFFLwvCezC+l1u8nTPHhmn0uYkljdgCOw1H0PHKaKadKwoQP208gE30C0jCkjFSoumj8by1lY1kgujd6hpbWwm7bNFp7-aHI5jp6zpLu6OCet6vr+kGoaLq6y5rhuW52AKu6HKArjnuc2aXNctz3Eq2gyPU6oNM8bxEZor4GhGUZtuCHbml2-oAK5QNssCyMgYDsfMnpgTODJYPOszQjxYxLNCAAKwxsRx26CnuGYqFc8hqCqYTVie6hKpoz71NomhGZoqgBNoFzREY3T6s2katl+DE-sxsnsVgnEAGqbFaAmUtSdKzAA7oMrAJD6nmjBAMlyW5CloWUGHVNIJ6vHp+bPA0DQ6N4Soyr4kg-A+TTBIZDZWf8752Z+IKOZ2CKsa5HleYsPmzn5C5BSFYVeVFDVkNIBSpo4SkJV4SWnBQqXtHwGVZYqVQIKEASyEoSgZVE55ig01HOn2LEsNMAW4IJc7+YuDB0Ku65AdCsVDehPD8HcfhRCqoRJRErR8MWNbLSt5lSutMoGF0WAMBAcBcCsex3fFD0IAAtA0SqI9tVgQMMYDQwcsMVMI83eFoaoKFqUoBGTz6o7R9lQFj6Yja0S2SpEDTKCZ5y5kj80CCqv1KDWrRaio0jKJTRr0aatWIuycbYjyjr3Yp92Yd8EoAyz1bVqK01KjIKgSu9ZHaO0DTeFtZU2RVdEORLTGWtLGKy4m8tEqBEy08NcMCN4qvM6zmsc8WNx1DKMjs+WUrqKLH7GjVttS7GDt2g6hKyNyIb+mASzu0rTySIzEeadqSiBxNZzvT45bqM0UeVTHNu-r2cKDsOSGetnOPVCrTPSOrbNa5zngVnrl5NBc3O6LoZuxE2lvU9+kuN3QzeAZuwGTmSNOoTD+5e7e3e9-72vzSzvjhCe2iVmTM2ldPb5U1V89x4vy+t76acZ1nW-Y-uIRLWRXwTWlF8AIKhryGVkKKLQ8pRQqE0pZW+NExbW0Yr+eqHF277h7nrfeft2ZH08FIU+K0Iij0kEbMmNcrbVXrs5aKnFuK8Uku6DBGZd4+x7rg-uulIgSjFDISsXswi6GBgg2yVDH6oJchxWQ4VUDeTdl-OmcMwh1C9pWW47MVIPHmllXhgRprKEaJleB1kZ73zrig2hDVU4MHThjT+g1v4ZluG0ZaqgkrEyuCZbQulLx+C+IWLQ3M9I31Mb0ZALF7TMMUR7TCUC-CSHHhWQyzxQHzSNqcRoCg1CRC0BlSQ20zBeh9JAFhI1uYCFvBNJKtQrieLmp4T6R4smCBMjISpoT-h4F2vtBgh0ylw28EeTU54giVnytIcyhE5DqRuCAqI9YL6dJsmYbgrBSkxJzggb4S1vB1nUFoEBXw8aeEJgoM85YQgykMIYIAA */
@@ -180,9 +180,11 @@ export const bootstrapMachine = setup({
         enabled: true,
       },
     }),
-    plugins: new Map<symbol, RegisteredPlugin>(),
     sessionId: input.sessionId,
     server: null,
+    validatingPlugins: new Map<symbol, RegisteredPlugin>(),
+    validPlugins: new Map<symbol, ValidPlugin>(),
+    invalidPlugins: new Map<symbol, InvalidPlugin>(),
   }),
   on: {
     START: ".Initialising",
@@ -299,17 +301,14 @@ export const bootstrapMachine = setup({
                 onDone: {
                   actions: [
                     assign({
-                      plugins: ({ context, event, spawn, self }) => {
+                      validatingPlugins: ({ context, event, spawn }) => {
                         const pluginMap = new Map<symbol, RegisteredPlugin>();
 
-                        for (const [
-                          pluginSymbol,
-                          { machine, config },
-                        ] of event.output.entries()) {
+                        for (const plugin of event.output) {
                           const dataSources = new DataSourceMap();
 
-                          if (config.dataSources) {
-                            for (const DataSource of config.dataSources) {
+                          if (plugin.dataSources) {
+                            for (const DataSource of plugin.dataSources) {
                               try {
                                 const rateLimiterRef = spawn(
                                   rateLimiterMachine,
@@ -362,7 +361,7 @@ export const bootstrapMachine = setup({
                                 dataSources.set(DataSource, instance);
                               } catch (error) {
                                 logger.error(
-                                  `Failed to construct data source ${DataSource.name} for ${config.name.toString()}: ${
+                                  `Failed to construct data source ${DataSource.name} for ${plugin.name.toString()}: ${
                                     (error as Error).message
                                   }`,
                                 );
@@ -370,21 +369,10 @@ export const bootstrapMachine = setup({
                             }
                           }
 
-                          const pluginRef = spawn(machine, {
-                            input: {
-                              client: context.client,
-                              dataSources,
-                              pluginSymbol,
-                              parentRef: self,
-                            },
-                          });
-
-                          pluginMap.set(pluginSymbol, {
-                            config,
+                          pluginMap.set(plugin.name, {
+                            status: "registered",
+                            config: plugin,
                             dataSources,
-                            machine,
-                            ref: pluginRef,
-                            runner: null,
                           });
                         }
 
@@ -404,9 +392,11 @@ export const bootstrapMachine = setup({
                 },
               },
               invoke: {
-                id: "waitForValidPlugins",
-                src: "waitForValidPlugins",
-                input: ({ context }) => context.plugins,
+                id: "pluginValidatorMachine",
+                src: "pluginValidatorMachine",
+                input: ({ context }) => ({
+                  plugins: context.validatingPlugins,
+                }),
                 onDone: [
                   {
                     target: "Complete",
@@ -421,7 +411,7 @@ export const bootstrapMachine = setup({
                         },
                       },
                       {
-                        type: "spawnPluginRunners",
+                        type: "handlePluginValidationResponse",
                         params: ({ event }) => event.output,
                       },
                     ],
@@ -436,7 +426,7 @@ export const bootstrapMachine = setup({
                         },
                       },
                       {
-                        type: "spawnPluginRunners",
+                        type: "handlePluginValidationResponse",
                         params: ({ event }) => event.output,
                       },
                     ],
@@ -473,6 +463,9 @@ export const bootstrapMachine = setup({
           params: {
             message: "Riven has started successfully.",
           },
+        },
+        ({ context }) => {
+          console.log(context);
         },
       ],
       on: {

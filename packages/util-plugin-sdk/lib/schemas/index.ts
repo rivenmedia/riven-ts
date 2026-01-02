@@ -6,7 +6,6 @@ import {
   type BaseDataSourceConfig,
 } from "../datasource/index.ts";
 import type { PluginRunnerLogic } from "../state-machine-helpers/create-plugin-runner.ts";
-import type { PluginValidatorLogic } from "../state-machine-helpers/create-plugin-validator.ts";
 import { DataSourceMap } from "../types/utilities.ts";
 
 export const RivenPluginConfig = z.readonly(
@@ -106,7 +105,9 @@ export const RivenPlugin = z.object({
       output: z.promise(z.record(z.string(), z.unknown())),
     })
     .optional(),
-  validator: z.custom<PluginValidatorLogic>((value) => isActor(value)),
+  validator: z.function({
+    output: z.union([z.promise(z.boolean()), z.boolean()]),
+  }),
 });
 
 export type RivenPlugin = z.infer<typeof RivenPlugin>;

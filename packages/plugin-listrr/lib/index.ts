@@ -1,8 +1,4 @@
-import {
-  type RivenPlugin,
-  createPluginRunner,
-  createPluginValidator,
-} from "@repo/util-plugin-sdk";
+import { type RivenPlugin, createPluginRunner } from "@repo/util-plugin-sdk";
 
 import { ListrrAPI } from "./datasource/listrr.datasource.ts";
 import { pluginConfig } from "./listrr-plugin.config.ts";
@@ -46,5 +42,5 @@ export default {
       };
     },
   ),
-  validator: createPluginValidator(() => true),
+  validator: () => true,
 } satisfies RivenPlugin;

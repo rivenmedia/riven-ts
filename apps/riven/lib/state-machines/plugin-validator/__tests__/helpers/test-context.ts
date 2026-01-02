@@ -3,19 +3,22 @@ import { DataSourceMap } from "@repo/util-plugin-sdk";
 
 import { type Actor, createActor } from "xstate";
 
-import { type PluginMachineInput, pluginMachine } from "../../index.ts";
+import {
+  type PluginValidatorMachineInput,
+  pluginValidatorMachine,
+} from "../../index.ts";
 
 export const it = baseIt.extend<{
-  input: PluginMachineInput;
-  actor: Actor<typeof pluginMachine>;
-  machine: typeof pluginMachine;
+  input: PluginValidatorMachineInput;
+  actor: Actor<typeof pluginValidatorMachine>;
+  machine: typeof pluginValidatorMachine;
 }>({
   input: {
     client: {} as never,
     dataSources: new DataSourceMap(),
     pluginSymbol: Symbol("test-plugin"),
   },
-  machine: pluginMachine,
+  machine: pluginValidatorMachine,
   actor: async ({ machine, input }, use) => {
     const actor = createActor(machine, { input });
 

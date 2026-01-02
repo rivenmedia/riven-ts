@@ -9,43 +9,61 @@ import "reflect-metadata";
 import { type ActorRefFromLogic, fromPromise } from "xstate";
 
 import packageJson from "../../../../package.json" with { type: "json" };
-import { pluginMachine } from "../../plugin-validator/index.ts";
 
-export interface RegisteredPlugin {
+export type RegisteredPlugin = {
+  status: string;
   config: RivenPlugin;
   dataSources: DataSourceMap;
-  machine: typeof pluginMachine;
-  ref: ActorRefFromLogic<typeof pluginMachine> | null;
-  runner: ActorRefFromLogic<ReturnType<typeof createPluginRunner>> | null;
-  isInvalid?: boolean;
-}
+} & (
+  | { status: "registered" }
+  | { status: "pending-runner-invocation" }
+  | {
+      status: "valid";
+      runnerRef: ActorRefFromLogic<ReturnType<typeof createPluginRunner>>;
+    }
+  | { status: "invalid" }
+);
 
-export const registerPlugins = fromPromise<
-  Map<symbol, Omit<RegisteredPlugin, "ref" | "runner" | "dataSources">>
->(async () => {
-  const plugins = await parsePluginsFromDependencies(
+export type ValidatingPlugin = Extract<
+  RegisteredPlugin,
+  { status: "validating" }
+>;
+
+export type ValidPlugin = Extract<RegisteredPlugin, { status: "valid" }>;
+
+export type PendingRunnerInvocationPlugin = Extract<
+  RegisteredPlugin,
+  { status: "pending-runner-invocation" }
+>;
+
+export type InvalidPlugin = Extract<RegisteredPlugin, { status: "invalid" }>;
+
+// export interface RegisteredPlugin {
+//   config: RivenPlugin;
+//   dataSources: DataSourceMap;
+//   isValidating: boolean;
+// }
+
+// export interface ValidatingPlugin extends RegisteredPlugin {
+//   isValidating: true;
+//   runnerRef?: never;
+// }
+
+// export interface ValidPlugin extends RegisteredPlugin {
+//   isInvalid: false;
+//   isValidating: false;
+//   runnerRef: ActorRefFromLogic<ReturnType<typeof createPluginRunner>>;
+// }
+
+// export interface InvalidPlugin extends RegisteredPlugin {
+//   isInvalid: true;
+//   isValidating: false;
+//   runnerRef?: never;
+// }
+
+export const registerPlugins = fromPromise<RivenPlugin[]>(async () => {
+  return await parsePluginsFromDependencies(
     packageJson.dependencies,
     import.meta.resolve.bind(null),
   );
-
-  const pluginMap = new Map<
-    symbol,
-    Omit<RegisteredPlugin, "ref" | "runner" | "dataSources">
-  >();
-
-  for (const plugin of plugins) {
-    const machine = pluginMachine.provide({
-      actors: {
-        pluginRunner: plugin.runner,
-        validatePlugin: plugin.validator,
-      },
-    });
-
-    pluginMap.set(plugin.name, {
-      config: plugin,
-      machine,
-    });
-  }
-
-  return pluginMap;
 });
