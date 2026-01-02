@@ -7,7 +7,7 @@ it('starts in the "Idle" state', ({ actor }) => {
   expect(actor.getSnapshot().value).toBe("Idle");
 });
 
-it('validates the plugin on "riven:validate-plugin" event', async ({
+it('validates the plugin on "riven.validate-plugin" event', async ({
   machine,
   input,
 }) => {
@@ -24,7 +24,7 @@ it('validates the plugin on "riven:validate-plugin" event', async ({
 
   actor.start();
 
-  actor.send({ type: "riven:validate-plugin" });
+  actor.send({ type: "riven.validate-plugin" });
 
   await vi.waitFor(() => {
     expect(actor.getSnapshot().value).toBe("Validating");
@@ -58,7 +58,7 @@ it("retries validation up to 3 times on failure", async ({
 
   actor.start();
 
-  actor.send({ type: "riven:validate-plugin" });
+  actor.send({ type: "riven.validate-plugin" });
 
   for (let i = 0; i < 2; i++) {
     await vi.waitFor(() => {
@@ -97,7 +97,7 @@ it('starts the plugin runner on the "riven.started" event if the plugin is valid
 
   actor.start();
 
-  actor.send({ type: "riven:validate-plugin" });
+  actor.send({ type: "riven.validate-plugin" });
 
   await vi.waitFor(() => {
     expect(actor.getSnapshot().value).toBe("Validated");

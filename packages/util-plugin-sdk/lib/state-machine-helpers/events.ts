@@ -28,7 +28,8 @@ type PluginEvent<
 export type ProgramToPluginEvent =
   | ProgramEvent<"riven.started">
   | ProgramEvent<"riven.shutdown">
-  | ProgramEvent<"riven.exited">;
+  | ProgramEvent<"riven.exited">
+  | ProgramEvent<"riven.media-item.created", { item: RequestedItem }>;
 
 export type PluginToProgramEvent = PluginEvent<
   "media:requested",

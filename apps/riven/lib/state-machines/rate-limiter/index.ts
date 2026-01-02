@@ -129,15 +129,6 @@ export const rateLimiterMachine = setup({
     },
   },
   states: {
-    Listening: {
-      always: {
-        actions: {
-          params: ({ context }) => ({
-            message: `RateLimiter is listening. Current queue size: ${context.requestQueue.size.toString()}`,
-          }),
-          type: "log",
-        },
-      },
-    },
+    Listening: {},
   },
 });

@@ -23,8 +23,8 @@ export class ListrrAPI extends BaseDataSource {
   override serviceName = "Listrr";
 
   static override readonly rateLimiterOptions = {
-    tokensPerInterval: 1,
-    interval: "minute",
+    tokensPerInterval: 50,
+    interval: "second",
   } as const;
 
   protected override willSendRequest(
@@ -72,7 +72,7 @@ export class ListrrAPI extends BaseDataSource {
       let page = 1;
       let totalPages = 1;
 
-      while (page <= totalPages) {
+      while (page <= 1) {
         const response = await this.get<GetShowsResponse>(
           `List/Shows/${listId}/ReleaseDate/Descending/${page.toString()}`,
           {
@@ -84,7 +84,7 @@ export class ListrrAPI extends BaseDataSource {
 
         const parsed = getShowsResponseSchema.parse(response);
 
-        totalPages = parsed.pages ?? 1;
+        // totalPages = parsed.pages ?? 1;
 
         if (parsed.items) {
           for (const item of parsed.items) {

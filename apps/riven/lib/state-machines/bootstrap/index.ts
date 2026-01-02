@@ -1,6 +1,5 @@
 import { type LogLevel, logger } from "@repo/core-util-logger";
 import {
-  type BaseDataSource,
   DataSourceMap,
   type ProgramToPluginEvent,
 } from "@repo/util-plugin-sdk";
@@ -16,14 +15,7 @@ import type { ApolloServer } from "@apollo/server";
 import type { FetcherRequestInit } from "@apollo/utils.fetcher";
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import type { UUID } from "node:crypto";
-import {
-  type ActorRefFromLogic,
-  assign,
-  emit,
-  setup,
-  toPromise,
-  waitFor,
-} from "xstate";
+import { assign, emit, setup, toPromise, waitFor } from "xstate";
 
 import { rateLimiterMachine } from "../rate-limiter/index.js";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
@@ -41,10 +33,6 @@ export interface BootstrapMachineContext {
   plugins: Map<symbol, RegisteredPlugin>;
   sessionId: UUID;
   server: ApolloServer | null;
-  rateLimiters: Map<
-    BaseDataSource,
-    ActorRefFromLogic<typeof rateLimiterMachine>
-  >;
 }
 
 export interface BootstrapMachineInput {
@@ -52,14 +40,17 @@ export interface BootstrapMachineInput {
   sessionId: UUID;
 }
 
+export type BootstrapMachineEvent =
+  | ProgramToPluginEvent
+  | { type: "START" }
+  | { type: "FATAL_ERROR" }
+  | { type: "EXIT" };
+
 export const bootstrapMachine = setup({
   types: {
     context: {} as BootstrapMachineContext,
     emitted: {} as ProgramToPluginEvent,
-    events: {} as
-      | { type: "START" }
-      | { type: "FATAL_ERROR" }
-      | { type: "EXIT" },
+    events: {} as BootstrapMachineEvent,
     children: {} as {
       registerPlugins: "registerPlugins";
       waitForValidPlugins: "waitForValidPlugins";
@@ -107,7 +98,7 @@ export const bootstrapMachine = setup({
     },
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7AxAZQBUBBZAgbQAYBdRUABwHtZUAXVBrWkAD0QBYATABoQAT36CAdHwCccgMwV5MioIBsfAOwBfbSLSZcAUQAaASXLUujZmw5deCQSPEIBA+ZIGyZADj5qHh6B8rr6GNg4AGJExAAyAPpGyMgA8siUNEggNqzsnNmOzmKIAIzKknJyvmq+AKylfOVqOnogBtiSZlh5AIYANqjMWFA4EBxgkrAsvSyTHVhdPWwDQ6gjmdZMefaFiDKaFJKa8nzyjS2+qnW+LhKeVSpq8h5+N2HtEYvdfYPDUJJkGAoEM5gAnAAEdH6AFcQVhYIDgaCwGD1qNxlhJut0AwANaTMHI6aogAKsPhsE22VydgKoEcdSaXh8MjqFDqTw8dycaiOmhOp05vhqijUujaWAYEDgXAWW1s+QciAAtGoeWqPgsuhB+mAFTt6Tx+MISghfKVpI9fIoBDdBFqvktfmsRga6cqEKVSppJL4BBbVP5lHwbabXAJDpUqt5TjI+LI6o7DM6Vn90UiQSTIdC4et4DTth69l61HU-QHSkGzvGwzz5DcrX4bWzZHyZMnOj8066AUCs+CoRT85mUWi3YXFbsGYgBOUK4HQzXQy8eQny48BBRW2ofTbO99lqhVv9R9mh3mEWfwZB3UqS5opHPfI-ShblKUZGu6r7HwoRW+dR1MorThCmyAwlgPQTvQRb3jOXoUPUkjKDaJyfiuBxrhQahNjIpQCAcAplgEB6SEYYJggwRIQHe07Gm4OGVI0FACCE3g1EBPIsXhNT1I0zSgZ8KZGNwrC3pOhqeluuH4XwrHsaGZZ1NxfjRlUWihgKbLihKQA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7AxAZQBUBBZAgbQAYBdRUABwHtZUAXVBrWkAD0QBYATABoQAT0QCAnAEYAdAL6TJfAKwU1kgMwAOFSoC++kWky4AogA0AkuWpdGzNhy68EgkeITTNFWYqUA7BQBmgF8fNrSfIbGGNg4AGJExAAyAPpmyMgA8siUNEggDqzsnIWu7mKI3poCsioAbAoB0tIUut4xICbYslZYJQCGADaozFhQOBAcYLKwLIMssz1YfQNsI2OoE-n2TCXO5dUhDbKaDUF8bRTSKjLSHoja4bIUTRHBAQ0qOl0ra0NRuMoLIAEIMBgseYAJ0GdAABBBFoMAEaDWBgeEAYw4WDAWKcqzwC2hbAmUxmsm26AYAGtZttAWMwAARZFojEAYVx+MJu0KxUJLkQDQoklk2gEkT4XxkfHUmkeXgoUle7zUigEAju2j+cVW-SZwLBEKhLFhCKRCw5mJxWDxBNKsmJg1J20mYGh0IY0NkdGGiwAZj6ALZU9aoTYYtnW9Fgbn23mlfn0fZCo5eE5nC4UK4UG53VpK1pqM6aFTaFp8TRRAQBAR60wAjZA90myEwuHwgDiFoAFgBFFLwvCezC+l1u8nTPHhmn0uYkljdgCOw1H0PHKaKadKwoQP208gE30C0jCkjFSoumj8by1lY1kgujd6hpbWwm7bNFp7-aHI5jp6zpLu6OCet6vr+kGoaLq6y5rhuW52AKu6HKArjnuc2aXNctz3Eq2gyPU6oNM8bxEZor4GhGUZtuCHbml2-oAK5QNssCyMgYDsfMnpgTODJYPOszQjxYxLNCAAKwxsRx26CnuGYqFc8hqCqYTVie6hKpoz71NomhGZoqgBNoFzREY3T6s2katl+DE-sxsnsVgnEAGqbFaAmUtSdKzAA7oMrAJD6nmjBAMlyW5CloWUGHVNIJ6vHp+bPA0DQ6N4Soyr4kg-A+TTBIZDZWf8752Z+IKOZ2CKsa5HleYsPmzn5C5BSFYVeVFDVkNIBSpo4SkJV4SWnBQqXtHwGVZYqVQIKEASyEoSgZVE55ig01HOn2LEsNMAW4IJc7+YuDB0Ku65AdCsVDehPD8HcfhRCqoRJRErR8MWNbLSt5lSutMoGF0WAMBAcBcCsex3fFD0IAAtA0SqI9tVgQMMYDQwcsMVMI83eFoaoKFqUoBGTz6o7R9lQFj6Yja0S2SpEDTKCZ5y5kj80CCqv1KDWrRaio0jKJTRr0aatWIuycbYjyjr3Yp92Yd8EoAyz1bVqK01KjIKgSu9ZHaO0DTeFtZU2RVdEORLTGWtLGKy4m8tEqBEy08NcMCN4qvM6zmsc8WNx1DKMjs+WUrqKLH7GjVttS7GDt2g6hKyNyIb+mASzu0rTySIzEeadqSiBxNZzvT45bqM0UeVTHNu-r2cKDsOSGetnOPVCrTPSOrbNa5zngVnrl5NBc3O6LoZuxE2lvU9+kuN3QzeAZuwGTmSNOoTD+5e7e3e9-72vzSzvjhCe2iVmTM2ldPb5U1V89x4vy+t76acZ1nW-Y-uIRLWRXwTWlF8AIKhryGVkKKLQ8pRQqE0pZW+NExbW0Yr+eqHF277h7nrfeft2ZH08FIU+K0Iij0kEbMmNcrbVXrs5aKnFuK8Uku6DBGZd4+x7rg-uulIgSjFDISsXswi6GBgg2yVDH6oJchxWQ4VUDeTdl-OmcMwh1C9pWW47MVIPHmllXhgRprKEaJleB1kZ73zrig2hDVU4MHThjT+g1v4ZluG0ZaqgkrEyuCZbQulLx+C+IWLQ3M9I31Mb0ZALF7TMMUR7TCUC-CSHHhWQyzxQHzSNqcRoCg1CRC0BlSQ20zBeh9JAFhI1uYCFvBNJKtQrieLmp4T6R4smCBMjISpoT-h4F2vtBgh0ylw28EeTU54giVnytIcyhE5DqRuCAqI9YL6dJsmYbgrBSkxJzggb4S1vB1nUFoEBXw8aeEJgoM85YQgykMIYIAA */
   id: "Riven",
   initial: "Idle",
   context: ({ input }) => ({
@@ -136,7 +127,6 @@ export const bootstrapMachine = setup({
     plugins: new Map<symbol, RegisteredPlugin>(),
     sessionId: input.sessionId,
     server: null,
-    rateLimiters: new Map(),
   }),
   on: {
     START: ".Initialising",
@@ -253,7 +243,7 @@ export const bootstrapMachine = setup({
                 onDone: {
                   actions: [
                     assign({
-                      plugins: ({ context, event, spawn }) => {
+                      plugins: ({ context, event, spawn, self }) => {
                         const pluginMap = new Map<symbol, RegisteredPlugin>();
 
                         for (const [
@@ -329,6 +319,7 @@ export const bootstrapMachine = setup({
                               client: context.client,
                               dataSources,
                               pluginSymbol,
+                              parentRef: self,
                             },
                           });
 
@@ -417,6 +408,16 @@ export const bootstrapMachine = setup({
           },
         },
       ],
+      on: {
+        "riven.media-item.*": {
+          actions: [
+            {
+              type: "broadcastToPlugins",
+              params: ({ event }) => event,
+            },
+          ],
+        },
+      },
     },
     Errored: {
       entry: {

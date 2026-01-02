@@ -8,7 +8,7 @@ export const waitForValidPlugins = fromPromise<
 >(async ({ input }) => {
   await Promise.allSettled(
     Array.from(input.values()).map(async ({ ref }) => {
-      ref.send({ type: "riven:validate-plugin" });
+      ref.send({ type: "riven.validate-plugin" });
 
       return waitFor(ref, (state) => state.matches("Validated"));
     }),

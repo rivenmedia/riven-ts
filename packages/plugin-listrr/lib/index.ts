@@ -14,7 +14,7 @@ export default {
   resolvers: [ListrrResolver, ListrrSettingsResolver],
   dataSources: [ListrrAPI],
   runner: createPluginRunner(
-    async ({ input: { dataSources }, helpers: { publishEvent } }) => {
+    async ({ input: { dataSources }, helpers: { publishEvent }, receive }) => {
       const api = dataSources.get(ListrrAPI);
 
       for (const show of await api.getShows(

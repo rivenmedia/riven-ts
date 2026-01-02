@@ -2,18 +2,20 @@ import { logger } from "@repo/core-util-logger";
 import {
   type DataSourceMap,
   type PluginRunnerInput,
-  type PluginRunnerLogic,
   type PluginToProgramEvent,
-  type PluginValidatorLogic,
   type ProgramToPluginEvent,
+  createPluginRunner,
+  createPluginValidator,
 } from "@repo/util-plugin-sdk";
 
 import type { ApolloClient } from "@apollo/client";
 import {
+  type ActorRef,
   type MachineContext,
+  type Snapshot,
   assertEvent,
   assign,
-  createEmptyActor,
+  sendTo,
   setup,
   spawnChild,
 } from "xstate";
@@ -27,17 +29,22 @@ export interface PluginMachineContext extends MachineContext {
   dataSources: DataSourceMap;
   validationFailures: number;
   isValidated: boolean;
+  parentRef: ActorRef<Snapshot<unknown>, ProgramToPluginEvent>;
 }
 
-export type PluginMachineInput = PluginRunnerInput;
+export interface PluginMachineInput extends PluginRunnerInput {
+  parentRef: ActorRef<Snapshot<unknown>, ProgramToPluginEvent>;
+}
+
+export type PluginMachineEvent =
+  | ProgramToPluginEvent
+  | PluginToProgramEvent
+  | { type: "riven.validate-plugin" };
 
 export const pluginMachine = setup({
   types: {
     context: {} as PluginMachineContext,
-    events: {} as
-      | ProgramToPluginEvent
-      | PluginToProgramEvent
-      | { type: "riven:validate-plugin" },
+    events: {} as PluginMachineEvent,
     input: {} as PluginMachineInput,
     children: {} as {
       pluginRunner: "pluginRunner";
@@ -54,28 +61,31 @@ export const pluginMachine = setup({
     })),
     processRequestedItem: spawnChild("processRequestedItem", {
       id: "processRequestedItem",
-      input: ({ event }) => {
+      input: ({ context, event }) => {
         assertEvent(event, "media:requested");
 
         return {
           item: event.item,
+          parentRef: context.parentRef,
         };
       },
     }),
   },
   actors: {
     processRequestedItem,
-    pluginRunner: createEmptyActor() as unknown as PluginRunnerLogic,
-    validatePlugin: createEmptyActor() as unknown as PluginValidatorLogic,
+    pluginRunner: createPluginRunner(async () => {
+      /* empty */
+    }),
+    validatePlugin: createPluginValidator(() => true),
   },
   guards: {
-    isPluginValid: (_, validationResult: boolean) => validationResult,
+    isPluginValid: (_, isValid: boolean) => isValid,
     hasReachedMaxValidationFailures: ({ context }) =>
       context.validationFailures >= 3,
   },
 }).createMachine({
   context: ({
-    input: { client, pluginSymbol: pluginSymbol, dataSources },
+    input: { client, pluginSymbol: pluginSymbol, dataSources, parentRef },
   }) => ({
     client,
     pluginSymbol,
@@ -83,6 +93,7 @@ export const pluginMachine = setup({
     dataSources,
     validationFailures: 0,
     isValidated: false,
+    parentRef,
   }),
   id: "Plugin runner",
   initial: "Idle",
@@ -92,7 +103,7 @@ export const pluginMachine = setup({
   states: {
     Idle: {
       on: {
-        "riven:validate-plugin": "Validating",
+        "riven.validate-plugin": "Validating",
       },
     },
     Validating: {
@@ -154,9 +165,16 @@ export const pluginMachine = setup({
     },
     Running: {
       on: {
+        "riven.media-item.*": {
+          actions: sendTo("pluginRunner", ({ event }) => event),
+        },
         "media:requested": {
           actions: {
             type: "processRequestedItem",
+            params: ({ event }) => ({
+              item: event.item,
+              plugin: event.plugin,
+            }),
           },
         },
       },
@@ -168,6 +186,16 @@ export const pluginMachine = setup({
           client: context.client,
           dataSources: context.dataSources,
         }),
+        onDone: {
+          actions: () => {
+            console.log("Plugin runner completed");
+          },
+        },
+        onError: {
+          actions: () => {
+            console.log("Plugin runner errored");
+          },
+        },
       },
     },
     Errored: {
