@@ -1,6 +1,7 @@
 import { type LogLevel, logger } from "@repo/core-util-logger";
 import {
   DataSourceMap,
+  type PluginToProgramEvent,
   type ProgramToPluginEvent,
 } from "@repo/util-plugin-sdk";
 
@@ -15,10 +16,20 @@ import type { ApolloServer } from "@apollo/server";
 import type { FetcherRequestInit } from "@apollo/utils.fetcher";
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import type { UUID } from "node:crypto";
-import { assign, emit, setup, toPromise, waitFor } from "xstate";
+import {
+  assertEvent,
+  assign,
+  emit,
+  setup,
+  spawnChild,
+  toPromise,
+  waitFor,
+} from "xstate";
 
+import { pluginMachine } from "../plugin-validator/index.ts";
 import { rateLimiterMachine } from "../rate-limiter/index.js";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
+import { processRequestedItem } from "./actors/process-requested-item.actor.ts";
 import {
   type RegisteredPlugin,
   registerPlugins,
@@ -42,6 +53,7 @@ export interface BootstrapMachineInput {
 
 export type BootstrapMachineEvent =
   | ProgramToPluginEvent
+  | PluginToProgramEvent
   | { type: "START" }
   | { type: "FATAL_ERROR" }
   | { type: "EXIT" };
@@ -57,15 +69,57 @@ export const bootstrapMachine = setup({
       startGqlServer: "startGqlServer";
       stopGqlServer: "stopGqlServer";
       initialiseDatabaseConnection: "initialiseDatabaseConnection";
+      pluginMachine: "pluginMachine";
+      processRequestedItem: "processRequestedItem";
     },
     input: {} as BootstrapMachineInput,
   },
   actions: {
     broadcastToPlugins: ({ context }, event: ProgramToPluginEvent) => {
-      for (const { ref } of context.plugins.values()) {
-        ref.send(event);
+      for (const { runner } of context.plugins.values()) {
+        runner?.send(event);
       }
     },
+    spawnPluginRunners: assign({
+      plugins: ({ context, spawn }, validPlugins: symbol[]) => {
+        const pluginMap = new Map<symbol, RegisteredPlugin>();
+
+        for (const [
+          pluginSymbol,
+          { machine, config, dataSources },
+        ] of context.plugins.entries()) {
+          const pluginRef = spawn(config.runner, {
+            input: {
+              client: context.client,
+              pluginSymbol,
+              dataSources,
+            },
+          });
+
+          pluginMap.set(pluginSymbol, {
+            config,
+            dataSources,
+            machine,
+            ref: null,
+            runner: pluginRef,
+            isInvalid: !validPlugins.includes(pluginSymbol),
+          });
+        }
+
+        return pluginMap;
+      },
+    }),
+    processRequestedItem: spawnChild("processRequestedItem", {
+      id: "processRequestedItem",
+      input: ({ event, self }) => {
+        assertEvent(event, "media-item.requested");
+
+        return {
+          item: event.item,
+          parentRef: self,
+        };
+      },
+    }),
     log: (
       _,
       {
@@ -85,11 +139,13 @@ export const bootstrapMachine = setup({
     startGqlServer,
     stopGqlServer,
     initialiseDatabaseConnection,
+    pluginMachine,
+    processRequestedItem,
   },
   guards: {
     hasInvalidPlugins: ({ context }) => {
       for (const { ref } of context.plugins.values()) {
-        if (ref.getSnapshot().matches("Errored")) {
+        if (ref?.getSnapshot().matches("Errored")) {
           return true;
         }
       }
@@ -328,6 +384,7 @@ export const bootstrapMachine = setup({
                             dataSources,
                             machine,
                             ref: pluginRef,
+                            runner: null,
                           });
                         }
 
@@ -363,6 +420,10 @@ export const bootstrapMachine = setup({
                           level: "warn",
                         },
                       },
+                      {
+                        type: "spawnPluginRunners",
+                        params: ({ event }) => event.output,
+                      },
                     ],
                   },
                   {
@@ -374,18 +435,24 @@ export const bootstrapMachine = setup({
                           message: "Plugins registered successfully.",
                         },
                       },
+                      {
+                        type: "spawnPluginRunners",
+                        params: ({ event }) => event.output,
+                      },
                     ],
                   },
                 ],
               },
             },
             Complete: {
-              entry: {
-                type: "log",
-                params: {
-                  message: "Plugin bootstrap complete.",
+              entry: [
+                {
+                  type: "log",
+                  params: {
+                    message: "Plugin bootstrap complete.",
+                  },
                 },
-              },
+              ],
               type: "final",
             },
           },
@@ -416,6 +483,15 @@ export const bootstrapMachine = setup({
               params: ({ event }) => event,
             },
           ],
+        },
+        "media-item.requested": {
+          actions: {
+            type: "processRequestedItem",
+            params: ({ event }) => ({
+              item: event.item,
+              plugin: event.plugin,
+            }),
+          },
         },
       },
     },

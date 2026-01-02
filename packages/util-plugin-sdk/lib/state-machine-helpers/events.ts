@@ -32,7 +32,7 @@ export type ProgramToPluginEvent =
   | ProgramEvent<"riven.media-item.created", { item: RequestedItem }>;
 
 export type PluginToProgramEvent = PluginEvent<
-  "media:requested",
+  "media-item.requested",
   { item: RequestedItem }
 >;
 

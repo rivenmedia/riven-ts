@@ -46,8 +46,7 @@ type PluginRunner = (params: {
     CallbackLogicFunction<ProgramToPluginEvent>
   >[0]["receive"];
   input: PluginRunnerInput;
-  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-}) => Promise<void | (() => void)>;
+}) => ReturnType<CallbackLogicFunction<ProgramToPluginEvent>>;
 
 export const createPluginRunner = (callback: PluginRunner) =>
   fromCallback<ProgramToPluginEvent, PluginRunnerInput, PluginToProgramEvent>(
@@ -71,7 +70,7 @@ export const createPluginRunner = (callback: PluginRunner) =>
         sendMediaRequestedEvent(item: RequestedItem) {
           sendBack(
             providePluginSymbol({
-              type: "media:requested",
+              type: "media-item.requested",
               item,
             }),
           );
@@ -82,7 +81,7 @@ export const createPluginRunner = (callback: PluginRunner) =>
         input,
         helpers,
         receive,
-      }) as unknown as Awaited<ReturnType<PluginRunner>>;
+      });
     },
   );
 

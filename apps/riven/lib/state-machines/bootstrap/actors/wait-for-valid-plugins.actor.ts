@@ -1,16 +1,28 @@
-import { fromPromise, waitFor } from "xstate";
+import { fromPromise, toPromise } from "xstate";
 
 import type { RegisteredPlugin } from "./register-plugins.actor.ts";
 
 export const waitForValidPlugins = fromPromise<
-  undefined,
+  symbol[],
   Map<symbol, RegisteredPlugin>
 >(async ({ input }) => {
-  await Promise.allSettled(
+  const plugins = await Promise.allSettled(
     Array.from(input.values()).map(async ({ ref }) => {
+      if (!ref) {
+        return;
+      }
+
       ref.send({ type: "riven.validate-plugin" });
 
-      return waitFor(ref, (state) => state.matches("Validated"));
+      return toPromise(ref);
     }),
   );
+
+  return plugins.reduce<symbol[]>((acc, result) => {
+    if (result.status === "fulfilled" && result.value) {
+      return acc.concat([result.value.plugin]);
+    }
+
+    return acc;
+  }, []);
 });

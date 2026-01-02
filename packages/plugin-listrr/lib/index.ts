@@ -14,16 +14,32 @@ export default {
   resolvers: [ListrrResolver, ListrrSettingsResolver],
   dataSources: [ListrrAPI],
   runner: createPluginRunner(
-    async ({ input: { dataSources }, helpers: { publishEvent }, receive }) => {
+    ({ input: { dataSources }, helpers: { publishEvent }, receive }) => {
       const api = dataSources.get(ListrrAPI);
 
-      for (const show of await api.getShows(
-        new Set(["6941fe52770814e293788237"]),
-      )) {
-        publishEvent("media:requested", {
-          item: show,
-        });
+      async function handleStarted() {
+        for (const show of await api.getShows(
+          new Set(["6941fe52770814e293788237"]),
+        )) {
+          publishEvent("media-item.requested", {
+            item: show,
+          });
+        }
       }
+
+      receive((event) => {
+        switch (event.type) {
+          case "riven.started":
+            void handleStarted();
+            break;
+          case "riven.media-item.created":
+            console.log(
+              "Listrr Plugin received created media item:",
+              event.item,
+            );
+            break;
+        }
+      });
 
       return () => {
         console.log("Listrr Plugin runner stopped");

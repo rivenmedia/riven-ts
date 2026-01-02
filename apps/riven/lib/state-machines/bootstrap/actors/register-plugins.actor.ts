@@ -1,6 +1,7 @@
 import {
   DataSourceMap,
   type RivenPlugin,
+  type createPluginRunner,
   parsePluginsFromDependencies,
 } from "@repo/util-plugin-sdk";
 
@@ -8,17 +9,19 @@ import "reflect-metadata";
 import { type ActorRefFromLogic, fromPromise } from "xstate";
 
 import packageJson from "../../../../package.json" with { type: "json" };
-import { pluginMachine } from "../../plugin/index.ts";
+import { pluginMachine } from "../../plugin-validator/index.ts";
 
 export interface RegisteredPlugin {
   config: RivenPlugin;
   dataSources: DataSourceMap;
   machine: typeof pluginMachine;
-  ref: ActorRefFromLogic<typeof pluginMachine>;
+  ref: ActorRefFromLogic<typeof pluginMachine> | null;
+  runner: ActorRefFromLogic<ReturnType<typeof createPluginRunner>> | null;
+  isInvalid?: boolean;
 }
 
 export const registerPlugins = fromPromise<
-  Map<symbol, Omit<RegisteredPlugin, "ref" | "dataSources">>
+  Map<symbol, Omit<RegisteredPlugin, "ref" | "runner" | "dataSources">>
 >(async () => {
   const plugins = await parsePluginsFromDependencies(
     packageJson.dependencies,
@@ -27,7 +30,7 @@ export const registerPlugins = fromPromise<
 
   const pluginMap = new Map<
     symbol,
-    Omit<RegisteredPlugin, "ref" | "dataSources">
+    Omit<RegisteredPlugin, "ref" | "runner" | "dataSources">
   >();
 
   for (const plugin of plugins) {

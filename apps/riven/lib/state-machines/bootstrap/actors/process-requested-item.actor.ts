@@ -32,13 +32,12 @@ export const processRequestedItem = fromPromise<
 
   itemEntity.lastState = "Requested";
 
+  parentRef.send({
+    type: "riven.media-item.created",
+    item: itemEntity,
+  });
   try {
     await postgresDataSource.manager.insert(MediaItem, itemEntity);
-
-    parentRef.send({
-      type: "riven.media-item.created",
-      item: itemEntity,
-    });
 
     logger.info(`Processed requested item: ${JSON.stringify(itemEntity)}`);
   } catch (error) {

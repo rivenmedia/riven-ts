@@ -4,7 +4,6 @@ import {
   type PluginRunnerInput,
   type PluginToProgramEvent,
   type ProgramToPluginEvent,
-  createPluginRunner,
   createPluginValidator,
 } from "@repo/util-plugin-sdk";
 
@@ -13,14 +12,11 @@ import {
   type ActorRef,
   type MachineContext,
   type Snapshot,
-  assertEvent,
   assign,
-  sendTo,
   setup,
-  spawnChild,
 } from "xstate";
 
-import { processRequestedItem } from "./actors/process-requested-item.actor.ts";
+import { processRequestedItem } from "../bootstrap/actors/process-requested-item.actor.ts";
 
 export interface PluginMachineContext extends MachineContext {
   pluginSymbol: symbol;
@@ -47,9 +43,11 @@ export const pluginMachine = setup({
     events: {} as PluginMachineEvent,
     input: {} as PluginMachineInput,
     children: {} as {
-      pluginRunner: "pluginRunner";
       processRequestedItem: "processRequestedItem";
       validatePlugin: "validatePlugin";
+    },
+    output: {} as {
+      plugin: symbol;
     },
   },
   actions: {
@@ -59,23 +57,9 @@ export const pluginMachine = setup({
     incrementValidationFailures: assign(({ context }) => ({
       validationFailures: context.validationFailures + 1,
     })),
-    processRequestedItem: spawnChild("processRequestedItem", {
-      id: "processRequestedItem",
-      input: ({ context, event }) => {
-        assertEvent(event, "media:requested");
-
-        return {
-          item: event.item,
-          parentRef: context.parentRef,
-        };
-      },
-    }),
   },
   actors: {
     processRequestedItem,
-    pluginRunner: createPluginRunner(async () => {
-      /* empty */
-    }),
     validatePlugin: createPluginValidator(() => true),
   },
   guards: {
@@ -95,11 +79,11 @@ export const pluginMachine = setup({
     isValidated: false,
     parentRef,
   }),
-  id: "Plugin runner",
+  id: "Plugin validation runner",
   initial: "Idle",
-  on: {
-    "riven.exited": ".Stopped",
-  },
+  output: ({ context }) => ({
+    plugin: context.pluginSymbol,
+  }),
   states: {
     Idle: {
       on: {
@@ -134,17 +118,7 @@ export const pluginMachine = setup({
       },
     },
     Validated: {
-      entry: [
-        {
-          type: "resetValidationFailures",
-        },
-        ({ context }) => {
-          logger.info(`Validated ${context.pluginPrettyName}`);
-        },
-      ],
-      on: {
-        "riven.started": "Running",
-      },
+      type: "final",
     },
     "Validation error": {
       entry: [
@@ -163,41 +137,6 @@ export const pluginMachine = setup({
         5000: "Validating",
       },
     },
-    Running: {
-      on: {
-        "riven.media-item.*": {
-          actions: sendTo("pluginRunner", ({ event }) => event),
-        },
-        "media:requested": {
-          actions: {
-            type: "processRequestedItem",
-            params: ({ event }) => ({
-              item: event.item,
-              plugin: event.plugin,
-            }),
-          },
-        },
-      },
-      invoke: {
-        id: "pluginRunner",
-        src: "pluginRunner",
-        input: ({ context }) => ({
-          pluginSymbol: context.pluginSymbol,
-          client: context.client,
-          dataSources: context.dataSources,
-        }),
-        onDone: {
-          actions: () => {
-            console.log("Plugin runner completed");
-          },
-        },
-        onError: {
-          actions: () => {
-            console.log("Plugin runner errored");
-          },
-        },
-      },
-    },
     Errored: {
       type: "final",
       entry: ({ context }) => {
@@ -205,9 +144,6 @@ export const pluginMachine = setup({
           `${context.pluginPrettyName} has errored and will not be started`,
         );
       },
-    },
-    Stopped: {
-      type: "final",
     },
   },
 });
