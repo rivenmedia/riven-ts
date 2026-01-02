@@ -7,8 +7,8 @@ import {
   RESTDataSource,
   type RequestOptions,
 } from "@apollo/datasource-rest";
-import type { Promisable } from "type-fest";
 import type { RateLimiterOpts } from "limiter";
+import type { Promisable } from "type-fest";
 
 export interface BaseDataSourceConfig extends DataSourceConfig {
   token?: string | undefined;

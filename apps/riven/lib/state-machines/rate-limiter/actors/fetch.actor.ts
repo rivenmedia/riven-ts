@@ -1,10 +1,11 @@
-import { fromPromise } from "xstate";
-import { RateLimitError } from "../errors/rate-limit-error.ts";
 import type {
-  FetcherResponse,
   FetcherRequestInit,
+  FetcherResponse,
 } from "@apollo/utils.fetcher";
 import { RateLimiter } from "limiter";
+import { fromPromise } from "xstate";
+
+import { RateLimitError } from "../errors/rate-limit-error.ts";
 
 export interface FetchInput {
   limiter: RateLimiter | null;

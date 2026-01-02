@@ -3,10 +3,10 @@ import { logger } from "@repo/core-util-logger";
 import { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import KeyvRedis, { Keyv } from "@keyv/redis";
 import { LRUCache } from "lru-cache";
+import safeStringify from "safe-stringify";
 import { type AnyEventObject, createActor, waitFor } from "xstate";
 
 import { bootstrapMachine } from "./state-machines/bootstrap/index.ts";
-import safeStringify from "safe-stringify";
 
 const sessionId = crypto.randomUUID();
 

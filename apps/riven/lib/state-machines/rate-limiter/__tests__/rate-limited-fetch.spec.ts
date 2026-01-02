@@ -1,8 +1,9 @@
-import { createActor, toPromise } from "xstate";
-import { it } from "./helpers/test-context.ts";
-import { expect, vi } from "vitest";
-import { http, HttpResponse } from "msw";
 import { DateTime } from "luxon";
+import { HttpResponse, http } from "msw";
+import { expect, vi } from "vitest";
+import { createActor, toPromise } from "xstate";
+
+import { it } from "./helpers/test-context.ts";
 
 it("defaults to 3 maxRetries when not provided", ({ actor }) => {
   expect(actor.getSnapshot().context.maxRetries).toBe(3);

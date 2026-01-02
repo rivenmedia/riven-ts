@@ -1,3 +1,4 @@
+import type { RateLimiterOpts } from "limiter";
 import { z } from "zod";
 
 import {
@@ -7,7 +8,6 @@ import {
 import type { PluginRunnerLogic } from "../state-machine-helpers/create-plugin-runner.ts";
 import type { PluginValidatorLogic } from "../state-machine-helpers/create-plugin-validator.ts";
 import { DataSourceMap } from "../types/utilities.ts";
-import type { RateLimiterOpts } from "limiter";
 
 export const RivenPluginConfig = z.readonly(
   z.object({

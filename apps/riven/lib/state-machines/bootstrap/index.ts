@@ -1,7 +1,7 @@
 import { type LogLevel, logger } from "@repo/core-util-logger";
 import {
-  DataSourceMap,
   type BaseDataSource,
+  DataSourceMap,
   type ProgramToPluginEvent,
 } from "@repo/util-plugin-sdk";
 
@@ -13,17 +13,19 @@ import {
 } from "@apollo/client";
 import { RetryLink } from "@apollo/client/link/retry";
 import type { ApolloServer } from "@apollo/server";
+import type { FetcherRequestInit } from "@apollo/utils.fetcher";
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import type { UUID } from "node:crypto";
 import {
+  type ActorRefFromLogic,
   assign,
   emit,
   setup,
   toPromise,
   waitFor,
-  type ActorRefFromLogic,
 } from "xstate";
 
+import { rateLimiterMachine } from "../rate-limiter/index.js";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import {
   type RegisteredPlugin,
@@ -32,8 +34,6 @@ import {
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 import { waitForValidPlugins } from "./actors/wait-for-valid-plugins.actor.ts";
-import { rateLimiterMachine } from "../rate-limiter/index.js";
-import type { FetcherRequestInit } from "@apollo/utils.fetcher";
 
 export interface BootstrapMachineContext {
   cache: KeyvAdapter;

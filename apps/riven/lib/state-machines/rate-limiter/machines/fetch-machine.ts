@@ -1,15 +1,17 @@
-import { assign, sendTo, setup, type ActorRef, type Snapshot } from "xstate";
-import { z } from "zod";
-import { fetchActorLogic } from "../actors/fetch.actor.ts";
-import { RateLimitError } from "../errors/rate-limit-error.ts";
+import { logger } from "@repo/core-util-logger";
+
 import type {
   FetcherRequestInit,
   FetcherResponse,
 } from "@apollo/utils.fetcher";
-import { logger } from "@repo/core-util-logger";
 import type { RateLimiter } from "limiter";
-import type { RateLimiterMachineEvent } from "../index.ts";
 import type { UUID } from "node:crypto";
+import { type ActorRef, type Snapshot, assign, sendTo, setup } from "xstate";
+import { z } from "zod";
+
+import { fetchActorLogic } from "../actors/fetch.actor.ts";
+import { RateLimitError } from "../errors/rate-limit-error.ts";
+import type { RateLimiterMachineEvent } from "../index.ts";
 
 export interface RateLimitedFetchMachineInput {
   limiter: RateLimiter | null;

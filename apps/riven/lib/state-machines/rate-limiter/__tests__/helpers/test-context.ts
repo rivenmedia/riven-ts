@@ -1,10 +1,12 @@
 import { it as baseIt } from "@repo/core-util-vitest-test-context";
+
 import { type Actor, createActor, createEmptyActor } from "xstate";
+import { type ZodType, z } from "zod";
+
 import {
-  rateLimitedFetchMachine,
   type RateLimitedFetchMachineInput,
+  rateLimitedFetchMachine,
 } from "../../machines/fetch-machine.ts";
-import { z, type ZodType } from "zod";
 
 export const it = baseIt.extend<{
   actor: Actor<typeof rateLimitedFetchMachine>;

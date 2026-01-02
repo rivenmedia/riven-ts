@@ -1,7 +1,7 @@
 import {
   DataSourceMap,
-  parsePluginsFromDependencies,
   type RivenPlugin,
+  parsePluginsFromDependencies,
 } from "@repo/util-plugin-sdk";
 
 import "reflect-metadata";

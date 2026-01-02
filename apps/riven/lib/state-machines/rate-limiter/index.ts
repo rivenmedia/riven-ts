@@ -1,9 +1,11 @@
+import { type LogLevel, logger } from "@repo/core-util-logger";
+
 import type { FetcherRequestInit } from "@apollo/utils.fetcher";
 import { RateLimiter, type RateLimiterOpts } from "limiter";
-import { assign, setup, stopChild, type ActorRefFromLogic } from "xstate";
-import { rateLimitedFetchMachine } from "./machines/fetch-machine.ts";
 import type { UUID } from "node:crypto";
-import { type LogLevel, logger } from "@repo/core-util-logger";
+import { type ActorRefFromLogic, assign, setup, stopChild } from "xstate";
+
+import { rateLimitedFetchMachine } from "./machines/fetch-machine.ts";
 
 export interface RateLimiterMachineInput {
   limiterOptions: RateLimiterOpts | null;
