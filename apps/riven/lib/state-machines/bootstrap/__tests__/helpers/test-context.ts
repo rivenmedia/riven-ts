@@ -2,11 +2,10 @@
 import { it as baseIt } from "@repo/core-util-vitest-test-context";
 
 import { ApolloServer } from "@apollo/server";
-import { type Actor, createActor, fromPromise } from "xstate";
+import { type Actor, createActor, createEmptyActor, fromPromise } from "xstate";
 
 import type { initialiseDatabaseConnection } from "../../actors/initialise-database-connection.actor.ts";
 import type { startGqlServer } from "../../actors/start-gql-server.actor.ts";
-import type { stopGqlServer } from "../../actors/stop-gql-server.actor.ts";
 import { type BootstrapMachineInput, bootstrapMachine } from "../../index.ts";
 
 export const it = baseIt.extend<{
@@ -15,7 +14,6 @@ export const it = baseIt.extend<{
   machine: typeof bootstrapMachine;
   initialiseDatabaseConnectionActorLogic: typeof initialiseDatabaseConnection;
   startGqlServerActorLogic: typeof startGqlServer;
-  stopGqlServerActorLogic: typeof stopGqlServer;
 }>({
   initialiseDatabaseConnectionActorLogic: fromPromise(async () => {
     /* empty */
@@ -26,13 +24,8 @@ export const it = baseIt.extend<{
       url: "http://localhost:4000/graphql",
     };
   }),
-  stopGqlServerActorLogic: fromPromise(async () => undefined),
   machine: (
-    {
-      initialiseDatabaseConnectionActorLogic,
-      startGqlServerActorLogic,
-      stopGqlServerActorLogic,
-    },
+    { initialiseDatabaseConnectionActorLogic, startGqlServerActorLogic },
     use,
   ) =>
     use(
@@ -40,18 +33,14 @@ export const it = baseIt.extend<{
         actors: {
           initialiseDatabaseConnection: initialiseDatabaseConnectionActorLogic,
           startGqlServer: startGqlServerActorLogic,
-          stopGqlServer: stopGqlServerActorLogic,
         },
       }),
     ),
   input: {
-    cache: {} as never,
-    sessionId: crypto.randomUUID(),
+    rootRef: createEmptyActor(),
   },
   actor: async ({ input, machine }, use) => {
     const actor = createActor(machine, { input });
-
-    actor.start();
 
     await use(actor);
 

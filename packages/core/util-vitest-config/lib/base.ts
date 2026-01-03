@@ -29,7 +29,10 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
           exclude: ["**/__generated__/**", "**/__tests__/**"],
         },
         setupFiles: [
-          path.resolve(import.meta.dirname, "./setup-files/use-real-timers.ts"),
+          path.resolve(
+            import.meta.dirname,
+            "./setup-files/restore-environment.ts",
+          ),
         ],
       },
       plugins: [swc.vite() as Plugin],

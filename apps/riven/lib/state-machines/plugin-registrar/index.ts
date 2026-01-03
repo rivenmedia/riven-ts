@@ -1,5 +1,9 @@
 import { logger } from "@repo/core-util-logger";
-import { DataSourceMap, type RivenPlugin } from "@repo/util-plugin-sdk";
+import {
+  DataSourceMap,
+  type ParsedPlugins,
+  type RivenPlugin,
+} from "@repo/util-plugin-sdk";
 
 import type { FetcherRequestInit } from "@apollo/utils.fetcher";
 import {
@@ -24,7 +28,7 @@ import { validatePlugin } from "./actors/validate-plugin.actor.ts";
 
 export interface PluginRegistrarMachineContext extends MachineContext {
   rootRef: AnyActorRef;
-  parsedPlugins?: RivenPlugin[];
+  parsedPlugins?: ParsedPlugins;
   runningValidators: Map<symbol, AnyActorRef>;
   pendingPlugins: Map<symbol, RegisteredPlugin>;
   invalidPlugins: Map<symbol, InvalidPlugin>;
@@ -58,10 +62,10 @@ export const pluginRegistrarMachine = setup({
   },
   actions: {
     registerPlugins: assign({
-      pendingPlugins: ({ context }, plugins: RivenPlugin[]) => {
+      pendingPlugins: ({ context }, { validPlugins }: ParsedPlugins) => {
         const pluginMap = new Map<symbol, RegisteredPlugin>();
 
-        for (const plugin of plugins) {
+        for (const plugin of validPlugins) {
           const dataSources = new DataSourceMap();
 
           if (plugin.dataSources) {

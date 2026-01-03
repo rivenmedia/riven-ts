@@ -1,16 +1,18 @@
 /* eslint-disable no-empty-pattern */
 import { ApolloServer } from "@apollo/server";
-import { InMemoryLRUCache } from "@apollo/utils.keyvaluecache";
+import { type KeyValueCache } from "@apollo/utils.keyvaluecache";
 import type { SetupServerApi } from "msw/node";
 import { test as testBase } from "vitest";
 
 export const it = testBase.extend<{
-  httpCache: InMemoryLRUCache;
+  httpCache: KeyValueCache;
   server: SetupServerApi;
   apolloServerInstance: ApolloServer;
   gqlServer: ApolloServer;
 }>({
   async httpCache({}, use) {
+    const { InMemoryLRUCache } = await import("@apollo/utils.keyvaluecache");
+
     await use(new InMemoryLRUCache());
   },
   async apolloServerInstance({}, use) {
@@ -46,3 +48,8 @@ export const it = testBase.extend<{
     server.close();
   },
 });
+
+export type {
+  KeyValueCache,
+  KeyValueCacheSetOptions,
+} from "@apollo/utils.keyvaluecache";

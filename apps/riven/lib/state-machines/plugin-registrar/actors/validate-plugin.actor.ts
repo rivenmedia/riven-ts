@@ -21,12 +21,13 @@ export const validatePlugin = fromCallback<
     });
   }
 
-  function sendInvalidPluginEvent() {
+  function sendInvalidPluginEvent(error: unknown) {
     sendBack({
       type: "riven.plugin-invalid",
       plugin: {
         ...plugin,
         status: "invalid",
+        error,
       },
     });
   }
@@ -40,17 +41,19 @@ export const validatePlugin = fromCallback<
 
         if (isValid) {
           sendValidPluginEvent();
+
+          return;
         }
-      } catch {
+      } catch (error) {
         if (attempt >= maxAttempts) {
-          sendInvalidPluginEvent();
+          sendInvalidPluginEvent(error);
+
+          return;
         }
 
         await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
       }
     }
-
-    sendInvalidPluginEvent();
   }
 
   void validate();

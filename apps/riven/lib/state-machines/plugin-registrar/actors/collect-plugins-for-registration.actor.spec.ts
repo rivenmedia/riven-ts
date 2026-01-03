@@ -1,42 +1,17 @@
-import { expect, it, vi } from "vitest";
-import { createActor, fromPromise, toPromise } from "xstate";
+import { expect, it } from "vitest";
+import { createActor, toPromise } from "xstate";
 
-import { registerPlugins } from "./register-plugins.actor.ts";
+import { collectPluginsForRegistration } from "./collect-plugins-for-registration.actor.ts";
 
-it("returns a plugin machine", async () => {
-  const mockRunner = fromPromise(vi.fn());
-  const mockValidator = fromPromise(vi.fn());
+it("returns the installed plugins from the package.json file", async () => {
+  const actor = createActor(collectPluginsForRegistration);
+  const testPlugin = await import("@repo/plugin-test");
 
-  vi.doMock("@repo/plugin-test", async (importOriginal) => {
-    const importOriginalModule =
-      await importOriginal<typeof import("@repo/plugin-test")>();
+  const plugins = await toPromise(actor.start());
 
-    return {
-      default: {
-        ...importOriginalModule.default,
-        runner: mockRunner,
-        validator: mockValidator,
-      },
-    };
+  expect(plugins).toEqual({
+    invalidPlugins: [],
+    unresolvablePlugins: [],
+    validPlugins: [testPlugin.default],
   });
-
-  const actor = createActor(registerPlugins, {
-    input: {
-      cache: {} as never,
-    },
-  });
-
-  actor.start();
-
-  const output = await toPromise(actor);
-
-  const registeredPlugin = output.get(Symbol.for("Plugin: Test"));
-
-  expect(registeredPlugin?.machine.implementations.actors["pluginRunner"]).toBe(
-    mockRunner,
-  );
-
-  expect(
-    registeredPlugin?.machine.implementations.actors["validatePlugin"],
-  ).toBe(mockValidator);
 });

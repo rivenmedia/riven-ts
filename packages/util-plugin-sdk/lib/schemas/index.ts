@@ -68,7 +68,7 @@ export const isBasePluginContext = (
  * This type preserves both instance members and static members.
  */
 export interface DataSourceConstructor {
-  rateLimiterOptions?: RateLimiterOpts;
+  rateLimiterOptions: RateLimiterOpts | undefined;
 
   /** Static method to get the API token */
   getApiToken(): string | undefined;

@@ -4,19 +4,20 @@ import type {
   MediaItemRequestedEvent,
   PluginToProgramEvent,
   ProgramToPluginEvent,
+  ShutdownEvent,
 } from "@repo/util-plugin-sdk/events";
 
 import type { ApolloServer } from "@apollo/server";
 import type { UUID } from "node:crypto";
 import { assign, enqueueActions, setup } from "xstate";
 
-import { processRequestedItem } from "../bootstrap/actors/process-requested-item.actor.ts";
-import { stopGqlServer } from "../bootstrap/actors/stop-gql-server.actor.ts";
 import { bootstrapMachine } from "../bootstrap/index.ts";
 import type {
   PendingRunnerInvocationPlugin,
   ValidPlugin,
 } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+import { processRequestedItem } from "./actors/process-requested-item.actor.ts";
+import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 
 export interface RivenMachineContext {
   plugins?: Map<symbol, ValidPlugin>;
@@ -30,8 +31,7 @@ export interface RivenMachineInput {
 export type RivenMachineEvent =
   | PluginToProgramEvent
   | ProgramToPluginEvent
-  | { type: "START" }
-  | { type: "EXIT" };
+  | ShutdownEvent;
 
 export const rivenMachine = setup({
   types: {
@@ -120,16 +120,11 @@ export const rivenMachine = setup({
   },
 }).createMachine({
   id: "Riven",
-  initial: "Idle",
+  initial: "Bootstrapping",
   on: {
-    EXIT: ".Shutdown",
+    "riven.shutdown": ".Shutdown",
   },
   states: {
-    Idle: {
-      on: {
-        START: "Bootstrapping",
-      },
-    },
     Bootstrapping: {
       invoke: {
         id: "bootstrap",

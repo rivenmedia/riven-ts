@@ -20,7 +20,7 @@ declare module "node:http" {
   }
 }
 
-const plugins = await parsePluginsFromDependencies(
+const { validPlugins } = await parsePluginsFromDependencies(
   packageJson.dependencies,
   import.meta.resolve.bind(null),
 );
@@ -36,7 +36,7 @@ export function buildContext(
     }
 
     const pluginContexts = await Promise.all(
-      plugins.map<Promise<[symbol, unknown]>>(async (plugin) => {
+      validPlugins.map<Promise<[symbol, unknown]>>(async (plugin) => {
         const dataSources = new DataSourceMap();
 
         if (plugin.dataSources) {

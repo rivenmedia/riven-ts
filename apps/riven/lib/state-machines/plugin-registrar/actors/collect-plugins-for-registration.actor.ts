@@ -1,5 +1,6 @@
 import {
   DataSourceMap,
+  type ParsedPlugins,
   type RivenPlugin,
   type createPluginRunner,
   parsePluginsFromDependencies,
@@ -21,7 +22,10 @@ export type RegisteredPlugin = {
       status: "valid";
       runnerRef: ActorRefFromLogic<ReturnType<typeof createPluginRunner>>;
     }
-  | { status: "invalid" }
+  | {
+      status: "invalid";
+      error: unknown;
+    }
 );
 
 export type ValidatingPlugin = Extract<
@@ -38,7 +42,7 @@ export type PendingRunnerInvocationPlugin = Extract<
 
 export type InvalidPlugin = Extract<RegisteredPlugin, { status: "invalid" }>;
 
-export const collectPluginsForRegistration = fromPromise<RivenPlugin[]>(
+export const collectPluginsForRegistration = fromPromise<ParsedPlugins>(
   async () => {
     return await parsePluginsFromDependencies(
       packageJson.dependencies,

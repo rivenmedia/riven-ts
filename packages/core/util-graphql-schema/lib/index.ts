@@ -8,7 +8,7 @@ import { buildSchema } from "type-graphql";
 
 import packageJson from "../package.json" with { type: "json" };
 
-const plugins = await parsePluginsFromDependencies(
+const { validPlugins } = await parsePluginsFromDependencies(
   packageJson.dependencies,
   import.meta.resolve.bind(null),
 );
@@ -17,7 +17,7 @@ export const schema = await buildSchema({
   resolvers: [
     CoreSettingsResolver,
     RivenSettingsResolver,
-    ...plugins.flatMap((p) => p.resolvers),
+    ...validPlugins.flatMap((p) => p.resolvers),
   ],
   validate: true,
 });

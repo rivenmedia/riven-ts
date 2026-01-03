@@ -20,6 +20,7 @@ import { initialiseDatabaseConnection } from "./actors/initialise-database-conne
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
 export interface BootstrapMachineContext {
+  error?: Error;
   rootRef: AnyActorRef;
   validatingPlugins: Map<symbol, RegisteredPlugin>;
   validPlugins: Map<symbol, PendingRunnerInvocationPlugin>;
@@ -27,12 +28,7 @@ export interface BootstrapMachineContext {
   server?: ApolloServer;
 }
 
-export type BootstrapMachineEvent =
-  | ProgramToPluginEvent
-  | PluginToProgramEvent
-  | { type: "START" }
-  | { type: "FATAL_ERROR" }
-  | { type: "EXIT" };
+export type BootstrapMachineEvent = ProgramToPluginEvent | PluginToProgramEvent;
 
 export interface BootstrapMachineInput {
   rootRef: AnyActorRef;
@@ -57,6 +53,12 @@ export const bootstrapMachine = setup({
     },
   },
   actions: {
+    assignGqlServer: assign((_, server: ApolloServer) => ({
+      server,
+    })),
+    raiseError: (_, error: Error) => {
+      throw error;
+    },
     handlePluginValidationResponse: assign({
       validatingPlugins: () => new Map(),
       invalidPlugins: (_, { invalidPlugins }: PluginRegistrarMachineOutput) =>
@@ -109,13 +111,6 @@ export const bootstrapMachine = setup({
     validPlugins: new Map<symbol, PendingRunnerInvocationPlugin>(),
     invalidPlugins: new Map<symbol, InvalidPlugin>(),
   }),
-  invoke: [
-    {
-      id: "initialiseDatabaseConnection",
-      src: "initialiseDatabaseConnection",
-      onError: {},
-    },
-  ],
   output: ({ context }) => {
     if (!context.server) {
       throw new Error(
@@ -136,19 +131,30 @@ export const bootstrapMachine = setup({
           initial: "Starting",
           states: {
             Starting: {
+              entry: {
+                type: "log",
+                params: {
+                  message: "Initialising database connection...",
+                },
+              },
               invoke: {
                 id: "initialiseDatabaseConnection",
                 src: "initialiseDatabaseConnection",
                 onDone: "Complete",
                 onError: {
-                  target: "#Bootstrap.Errored",
-                  actions: {
-                    type: "log",
-                    params: ({ event }) => ({
-                      message: `Failed to initialise database connection during bootstrap. Error: ${(event.error as Error).message}`,
-                      level: "error",
-                    }),
-                  },
+                  actions: [
+                    {
+                      type: "log",
+                      params: ({ event }) => ({
+                        message: `Failed to initialise database connection during bootstrap. Error: ${(event.error as Error).message}`,
+                        level: "error",
+                      }),
+                    },
+                    {
+                      type: "raiseError",
+                      params: ({ event }) => event.error as Error,
+                    },
+                  ],
                 },
               },
             },
@@ -179,9 +185,10 @@ export const bootstrapMachine = setup({
                 onDone: {
                   target: "Complete",
                   actions: [
-                    assign(({ event }) => ({
-                      server: event.output.server,
-                    })),
+                    {
+                      type: "assignGqlServer",
+                      params: ({ event }) => event.output.server,
+                    },
                     {
                       type: "log",
                       params: ({ event }) => ({
@@ -192,13 +199,19 @@ export const bootstrapMachine = setup({
                 },
                 onError: {
                   target: "#Bootstrap.Errored",
-                  actions: {
-                    type: "log",
-                    params: ({ event }) => ({
-                      message: `Failed to start GraphQL server during bootstrap. Error: ${(event.error as Error).message}`,
-                      level: "error",
-                    }),
-                  },
+                  actions: [
+                    {
+                      type: "log",
+                      params: ({ event }) => ({
+                        message: `Failed to start GraphQL server during bootstrap. Error: ${(event.error as Error).message}`,
+                        level: "error",
+                      }),
+                    },
+                    {
+                      type: "raiseError",
+                      params: ({ event }) => event.error as Error,
+                    },
+                  ],
                 },
               },
             },

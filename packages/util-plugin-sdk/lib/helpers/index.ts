@@ -4,35 +4,52 @@ import type { PackageJson } from "type-fest";
 
 import { RivenPlugin, isRivenPluginPackage } from "../index.ts";
 
+export interface ParsedPlugins {
+  validPlugins: RivenPlugin[];
+  invalidPlugins: string[];
+  unresolvablePlugins: string[];
+}
+
 export const parsePluginsFromDependencies = async (
   dependencies: PackageJson.Dependency,
   importResolver: ImportMeta["resolve"],
 ) => {
-  const invalidPluginSymbol = Symbol("InvalidPlugin");
-
-  const plugins = await Promise.all(
-    Object.keys(dependencies)
-      .filter((pluginName) => pluginName.startsWith("@repo/plugin-"))
-      .map(async (pluginName) => {
-        try {
-          const plugin = (await import(importResolver(pluginName))) as unknown;
-
-          if (!isRivenPluginPackage(plugin)) {
-            throw new Error(`Plugin ${pluginName} is not a valid RivenPlugin`);
-          }
-
-          return RivenPlugin.parse(plugin.default);
-        } catch (error) {
-          logger.error(`Failed to load plugin ${pluginName}:`, error);
-
-          return {
-            name: invalidPluginSymbol,
-          };
-        }
-      }),
+  const pluginNames = Object.keys(dependencies).filter((pluginName) =>
+    pluginName.startsWith("@repo/plugin-"),
   );
 
-  return plugins.filter(
-    (plugin): plugin is RivenPlugin => plugin.name !== invalidPluginSymbol,
+  return pluginNames.reduce<Promise<ParsedPlugins>>(
+    async (acc, pluginName) => {
+      const parsedPlugins = await acc;
+
+      try {
+        const plugin = (await import(importResolver(pluginName))) as unknown;
+
+        if (!isRivenPluginPackage(plugin)) {
+          return {
+            ...parsedPlugins,
+            invalidPlugins: parsedPlugins.invalidPlugins.concat(pluginName),
+          };
+        }
+
+        return {
+          ...parsedPlugins,
+          validPlugins: parsedPlugins.validPlugins.concat(plugin.default),
+        };
+      } catch (error) {
+        logger.error(`Unable to resolve plugin ${pluginName}:`, error);
+
+        return {
+          ...parsedPlugins,
+          unresolvablePlugins:
+            parsedPlugins.unresolvablePlugins.concat(pluginName),
+        };
+      }
+    },
+    Promise.resolve<ParsedPlugins>({
+      validPlugins: [],
+      invalidPlugins: [],
+      unresolvablePlugins: [],
+    }),
   );
 };

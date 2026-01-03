@@ -16,7 +16,7 @@ it("fetches data successfully", async ({ actor, input, server, validData }) => {
 
   const result = await toPromise(actor);
 
-  expect(result).toEqual(validData);
+  expect(await result.json()).toEqual(validData);
 });
 
 it("throws an error on an error status code that isn't 429", async ({

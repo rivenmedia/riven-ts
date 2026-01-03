@@ -9,10 +9,7 @@ import { redisCache } from "./utils/redis-cache.ts";
 
 const sessionId = crypto.randomUUID();
 
-const eventsCache = new LRUCache<string, AnyEventObject>({
-  maxSize: 5_000,
-  sizeCalculation: () => 1,
-});
+const eventsCache = new LRUCache<string, AnyEventObject>({ max: 1000 });
 
 const actor = createActor(rivenMachine, {
   input: {
@@ -20,6 +17,10 @@ const actor = createActor(rivenMachine, {
   },
   inspect(inspectionEvent) {
     if (inspectionEvent.type === "@xstate.event") {
+      if (inspectionEvent.actorRef !== actor) {
+        return;
+      }
+
       eventsCache.set(inspectionEvent.event.type, inspectionEvent.event);
     }
   },
@@ -38,10 +39,9 @@ const persistEventsIntervalId = setInterval(() => {
 }, 60_000);
 
 actor.start();
-actor.send({ type: "START" });
 
 process.on("SIGINT", () => {
-  actor.send({ type: "EXIT" });
+  actor.send({ type: "riven.shutdown" });
 });
 
 await waitFor(
