@@ -1,60 +1,30 @@
 import { type LogLevel, logger } from "@repo/core-util-logger";
-import {
-  DataSourceMap,
-  type PluginToProgramEvent,
-  type ProgramToPluginEvent,
-} from "@repo/util-plugin-sdk";
+import type {
+  PluginToProgramEvent,
+  ProgramToPluginEvent,
+} from "@repo/util-plugin-sdk/events";
 
-import {
-  ApolloClient,
-  ApolloLink,
-  HttpLink,
-  InMemoryCache,
-} from "@apollo/client";
-import { RetryLink } from "@apollo/client/link/retry";
 import type { ApolloServer } from "@apollo/server";
-import type { FetcherRequestInit } from "@apollo/utils.fetcher";
-import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
-import type { UUID } from "node:crypto";
-import {
-  assertEvent,
-  assign,
-  emit,
-  setup,
-  spawnChild,
-  toPromise,
-  waitFor,
-} from "xstate";
+import { type AnyActorRef, assign, setup } from "xstate";
 
-import {
-  type PluginValidatorMachineOutput,
-  pluginValidatorMachine,
-} from "../plugin-validator/index.ts";
-import { rateLimiterMachine } from "../rate-limiter/index.js";
-import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
-import { processRequestedItem } from "./actors/process-requested-item.actor.ts";
 import {
   type InvalidPlugin,
+  type PendingRunnerInvocationPlugin,
   type RegisteredPlugin,
-  type ValidPlugin,
-  registerPlugins,
-} from "./actors/register-plugins.actor.ts";
+} from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+import {
+  type PluginRegistrarMachineOutput,
+  pluginRegistrarMachine,
+} from "../plugin-registrar/index.ts";
+import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
-import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 
 export interface BootstrapMachineContext {
-  cache: KeyvAdapter;
-  client: ApolloClient;
+  rootRef: AnyActorRef;
   validatingPlugins: Map<symbol, RegisteredPlugin>;
-  validPlugins: Map<symbol, ValidPlugin>;
+  validPlugins: Map<symbol, PendingRunnerInvocationPlugin>;
   invalidPlugins: Map<symbol, InvalidPlugin>;
-  sessionId: UUID;
-  server: ApolloServer | null;
-}
-
-export interface BootstrapMachineInput {
-  cache: KeyvAdapter;
-  sessionId: UUID;
+  server?: ApolloServer;
 }
 
 export type BootstrapMachineEvent =
@@ -64,69 +34,48 @@ export type BootstrapMachineEvent =
   | { type: "FATAL_ERROR" }
   | { type: "EXIT" };
 
+export interface BootstrapMachineInput {
+  rootRef: AnyActorRef;
+}
+
+export interface BootstrapMachineOutput {
+  server: ApolloServer;
+  plugins: Map<symbol, PendingRunnerInvocationPlugin>;
+}
+
 export const bootstrapMachine = setup({
   types: {
     context: {} as BootstrapMachineContext,
     emitted: {} as ProgramToPluginEvent,
     events: {} as BootstrapMachineEvent,
-    children: {} as {
-      registerPlugins: "registerPlugins";
-      startGqlServer: "startGqlServer";
-      stopGqlServer: "stopGqlServer";
-      initialiseDatabaseConnection: "initialiseDatabaseConnection";
-      pluginValidatorMachine: "pluginValidatorMachine";
-      processRequestedItem: "processRequestedItem";
-    },
     input: {} as BootstrapMachineInput,
+    output: {} as BootstrapMachineOutput,
+    children: {} as {
+      startGqlServer: "startGqlServer";
+      initialiseDatabaseConnection: "initialiseDatabaseConnection";
+      pluginRegistrarMachine: "pluginRegistrarMachine";
+    },
   },
   actions: {
-    broadcastToPlugins: ({ context }, event: ProgramToPluginEvent) => {
-      for (const { runnerRef } of context.validPlugins.values()) {
-        runnerRef.send(event);
-      }
-    },
     handlePluginValidationResponse: assign({
       validatingPlugins: () => new Map(),
-      invalidPlugins: (_, { invalidPlugins }: PluginValidatorMachineOutput) =>
+      invalidPlugins: (_, { invalidPlugins }: PluginRegistrarMachineOutput) =>
         invalidPlugins,
-      validPlugins: (
-        { context, spawn },
-        { validPlugins }: PluginValidatorMachineOutput,
-      ) => {
-        const pluginMap = new Map<symbol, ValidPlugin>();
+      validPlugins: (_, { validPlugins }: PluginRegistrarMachineOutput) => {
+        const pluginMap = new Map<symbol, PendingRunnerInvocationPlugin>();
 
         for (const [
           pluginSymbol,
           { config, dataSources },
         ] of validPlugins.entries()) {
-          const pluginRef = spawn(config.runner, {
-            input: {
-              client: context.client,
-              pluginSymbol,
-              dataSources,
-            },
-          });
-
           pluginMap.set(pluginSymbol, {
-            status: "valid",
+            status: "pending-runner-invocation",
             config,
             dataSources,
-            runnerRef: pluginRef,
           });
         }
 
         return pluginMap;
-      },
-    }),
-    processRequestedItem: spawnChild("processRequestedItem", {
-      id: "processRequestedItem",
-      input: ({ event, self }) => {
-        assertEvent(event, "media-item.requested");
-
-        return {
-          item: event.item,
-          parentRef: self,
-        };
       },
     }),
     log: (
@@ -143,56 +92,43 @@ export const bootstrapMachine = setup({
     },
   },
   actors: {
-    registerPlugins,
     startGqlServer,
-    stopGqlServer,
     initialiseDatabaseConnection,
-    pluginValidatorMachine,
-    processRequestedItem,
+    pluginRegistrarMachine,
   },
   guards: {
     hasInvalidPlugins: ({ context }) => context.invalidPlugins.size > 0,
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7AxAZQBUBBZAgbQAYBdRUABwHtZUAXVBrWkAD0QBYATABoQAT0QCAnAEYAdAL6TJfAKwU1kgMwAOFSoC++kWky4AogA0AkuWpdGzNhy68EgkeITTNFWYqUA7BQBmgF8fNrSfIbGGNg4AGJExAAyAPpmyMgA8siUNEggDqzsnIWu7mKI3poCsioAbAoB0tIUut4xICbYslZYJQCGADaozFhQOBAcYLKwLIMssz1YfQNsI2OoE-n2TCXO5dUhDbKaDUF8bRTSKjLSHoja4bIUTRHBAQ0qOl0ra0NRuMoLIAEIMBgseYAJ0GdAABBBFoMAEaDWBgeEAYw4WDAWKcqzwC2hbAmUxmsm26AYAGtZttAWMwAARZFojEAYVx+MJu0KxUJLkQDQoklk2gEkT4XxkfHUmkeXgoUle7zUigEAju2j+cVW-SZwLBEKhLFhCKRCw5mJxWDxBNKsmJg1J20mYGh0IY0NkdGGiwAZj6ALZU9aoTYYtnW9Fgbn23mlfn0fZCo5eE5nC4UK4UG53VpK1pqM6aFTaFp8TRRAQBAR60wAjZA90myEwuHwgDiFoAFgBFFLwvCezC+l1u8nTPHhmn0uYkljdgCOw1H0PHKaKadKwoQP208gE30C0jCkjFSoumj8by1lY1kgujd6hpbWwm7bNFp7-aHI5jp6zpLu6OCet6vr+kGoaLq6y5rhuW52AKu6HKArjnuc2aXNctz3Eq2gyPU6oNM8bxEZor4GhGUZtuCHbml2-oAK5QNssCyMgYDsfMnpgTODJYPOszQjxYxLNCAAKwxsRx26CnuGYqFc8hqCqYTVie6hKpoz71NomhGZoqgBNoFzREY3T6s2katl+DE-sxsnsVgnEAGqbFaAmUtSdKzAA7oMrAJD6nmjBAMlyW5CloWUGHVNIJ6vHp+bPA0DQ6N4Soyr4kg-A+TTBIZDZWf8752Z+IKOZ2CKsa5HleYsPmzn5C5BSFYVeVFDVkNIBSpo4SkJV4SWnBQqXtHwGVZYqVQIKEASyEoSgZVE55ig01HOn2LEsNMAW4IJc7+YuDB0Ku65AdCsVDehPD8HcfhRCqoRJRErR8MWNbLSt5lSutMoGF0WAMBAcBcCsex3fFD0IAAtA0SqI9tVgQMMYDQwcsMVMI83eFoaoKFqUoBGTz6o7R9lQFj6Yja0S2SpEDTKCZ5y5kj80CCqv1KDWrRaio0jKJTRr0aatWIuycbYjyjr3Yp92Yd8EoAyz1bVqK01KjIKgSu9ZHaO0DTeFtZU2RVdEORLTGWtLGKy4m8tEqBEy08NcMCN4qvM6zmsc8WNx1DKMjs+WUrqKLH7GjVttS7GDt2g6hKyNyIb+mASzu0rTySIzEeadqSiBxNZzvT45bqM0UeVTHNu-r2cKDsOSGetnOPVCrTPSOrbNa5zngVnrl5NBc3O6LoZuxE2lvU9+kuN3QzeAZuwGTmSNOoTD+5e7e3e9-72vzSzvjhCe2iVmTM2ldPb5U1V89x4vy+t76acZ1nW-Y-uIRLWRXwTWlF8AIKhryGVkKKLQ8pRQqE0pZW+NExbW0Yr+eqHF277h7nrfeft2ZH08FIU+K0Iij0kEbMmNcrbVXrs5aKnFuK8Uku6DBGZd4+x7rg-uulIgSjFDISsXswi6GBgg2yVDH6oJchxWQ4VUDeTdl-OmcMwh1C9pWW47MVIPHmllXhgRprKEaJleB1kZ73zrig2hDVU4MHThjT+g1v4ZluG0ZaqgkrEyuCZbQulLx+C+IWLQ3M9I31Mb0ZALF7TMMUR7TCUC-CSHHhWQyzxQHzSNqcRoCg1CRC0BlSQ20zBeh9JAFhI1uYCFvBNJKtQrieLmp4T6R4smCBMjISpoT-h4F2vtBgh0ylw28EeTU54giVnytIcyhE5DqRuCAqI9YL6dJsmYbgrBSkxJzggb4S1vB1nUFoEBXw8aeEJgoM85YQgykMIYIAA */
-  id: "Riven",
-  initial: "Idle",
+  id: "Bootstrap",
+  initial: "Initialising",
   context: ({ input }) => ({
-    cache: input.cache,
-    client: new ApolloClient({
-      link: ApolloLink.from([
-        new RetryLink({
-          attempts: {
-            max: parseInt(process.env["REQUEST_RETRIES"] ?? "3", 10),
-          },
-          delay: {
-            initial: 1000,
-            max: 10000,
-          },
-        }),
-        new HttpLink({
-          uri: "http://localhost:3000/graphql",
-        }),
-      ]),
-      cache: new InMemoryCache(),
-      dataMasking: true,
-      devtools: {
-        enabled: true,
-      },
-    }),
-    sessionId: input.sessionId,
-    server: null,
+    rootRef: input.rootRef,
     validatingPlugins: new Map<symbol, RegisteredPlugin>(),
-    validPlugins: new Map<symbol, ValidPlugin>(),
+    validPlugins: new Map<symbol, PendingRunnerInvocationPlugin>(),
     invalidPlugins: new Map<symbol, InvalidPlugin>(),
   }),
-  on: {
-    START: ".Initialising",
-    EXIT: ".Shutdown",
-    FATAL_ERROR: ".Errored",
+  invoke: [
+    {
+      id: "initialiseDatabaseConnection",
+      src: "initialiseDatabaseConnection",
+      onError: {},
+    },
+  ],
+  output: ({ context }) => {
+    if (!context.server) {
+      throw new Error(
+        "Bootstrap machine completed without a GraphQL server instance",
+      );
+    }
+
+    return {
+      plugins: context.validPlugins,
+      server: context.server,
+    };
   },
   states: {
-    Idle: {},
     Initialising: {
       type: "parallel",
       states: {
@@ -205,7 +141,7 @@ export const bootstrapMachine = setup({
                 src: "initialiseDatabaseConnection",
                 onDone: "Complete",
                 onError: {
-                  target: "#Riven.Errored",
+                  target: "#Bootstrap.Errored",
                   actions: {
                     type: "log",
                     params: ({ event }) => ({
@@ -240,9 +176,6 @@ export const bootstrapMachine = setup({
               invoke: {
                 id: "startGqlServer",
                 src: "startGqlServer",
-                input: ({ context }) => ({
-                  cache: context.cache,
-                }),
                 onDone: {
                   target: "Complete",
                   actions: [
@@ -258,7 +191,7 @@ export const bootstrapMachine = setup({
                   ],
                 },
                 onError: {
-                  target: "#Riven.Errored",
+                  target: "#Bootstrap.Errored",
                   actions: {
                     type: "log",
                     params: ({ event }) => ({
@@ -293,109 +226,10 @@ export const bootstrapMachine = setup({
                 },
               ],
               invoke: {
-                id: "registerPlugins",
-                src: "registerPlugins",
+                id: "pluginRegistrarMachine",
+                src: "pluginRegistrarMachine",
                 input: ({ context }) => ({
-                  cache: context.cache,
-                }),
-                onDone: {
-                  actions: [
-                    assign({
-                      validatingPlugins: ({ context, event, spawn }) => {
-                        const pluginMap = new Map<symbol, RegisteredPlugin>();
-
-                        for (const plugin of event.output) {
-                          const dataSources = new DataSourceMap();
-
-                          if (plugin.dataSources) {
-                            for (const DataSource of plugin.dataSources) {
-                              try {
-                                const rateLimiterRef = spawn(
-                                  rateLimiterMachine,
-                                  {
-                                    input: {
-                                      limiterOptions:
-                                        DataSource.rateLimiterOptions ?? null,
-                                    },
-                                  },
-                                );
-
-                                const token = DataSource.getApiToken();
-                                const instance = new DataSource({
-                                  cache: context.cache,
-                                  token,
-                                  fetch: async (
-                                    url: string,
-                                    options: FetcherRequestInit | undefined,
-                                  ) => {
-                                    const requestId = crypto.randomUUID();
-
-                                    rateLimiterRef.send({
-                                      type: "fetch-requested",
-                                      url,
-                                      fetchOpts: options,
-                                      requestId,
-                                    });
-
-                                    await waitFor(rateLimiterRef, (state) =>
-                                      state.context.requestQueue.has(requestId),
-                                    );
-
-                                    const actor = rateLimiterRef
-                                      .getSnapshot()
-                                      .context.requestQueue.get(requestId);
-
-                                    if (!actor) {
-                                      throw new Error(
-                                        `Failed to get fetch actor for request ID ${requestId}`,
-                                      );
-                                    }
-
-                                    actor.send({ type: "fetch" });
-
-                                    return toPromise(actor);
-                                  },
-                                  logger,
-                                });
-
-                                dataSources.set(DataSource, instance);
-                              } catch (error) {
-                                logger.error(
-                                  `Failed to construct data source ${DataSource.name} for ${plugin.name.toString()}: ${
-                                    (error as Error).message
-                                  }`,
-                                );
-                              }
-                            }
-                          }
-
-                          pluginMap.set(plugin.name, {
-                            status: "registered",
-                            config: plugin,
-                            dataSources,
-                          });
-                        }
-
-                        return pluginMap;
-                      },
-                    }),
-                  ],
-                  target: "Validating",
-                },
-              },
-            },
-            Validating: {
-              entry: {
-                type: "log",
-                params: {
-                  message: "Starting plugin validation...",
-                },
-              },
-              invoke: {
-                id: "pluginValidatorMachine",
-                src: "pluginValidatorMachine",
-                input: ({ context }) => ({
-                  plugins: context.validatingPlugins,
+                  rootRef: context.rootRef,
                 }),
                 onDone: [
                   {
@@ -448,47 +282,13 @@ export const bootstrapMachine = setup({
           },
         },
       },
-      onDone: "Running",
+      onDone: "Success",
     },
-    Running: {
-      entry: [
-        {
-          type: "broadcastToPlugins",
-          params: {
-            type: "riven.started",
-          },
-        },
-        {
-          type: "log",
-          params: {
-            message: "Riven has started successfully.",
-          },
-        },
-        ({ context }) => {
-          console.log(context);
-        },
-      ],
-      on: {
-        "riven.media-item.*": {
-          actions: [
-            {
-              type: "broadcastToPlugins",
-              params: ({ event }) => event,
-            },
-          ],
-        },
-        "media-item.requested": {
-          actions: {
-            type: "processRequestedItem",
-            params: ({ event }) => ({
-              item: event.item,
-              plugin: event.plugin,
-            }),
-          },
-        },
-      },
+    Success: {
+      type: "final",
     },
     Errored: {
+      type: "final",
       entry: {
         type: "log",
         params: {
@@ -496,37 +296,6 @@ export const bootstrapMachine = setup({
           level: "error",
         },
       },
-    },
-    Shutdown: {
-      entry: [
-        emit({ type: "riven.shutdown" }),
-        {
-          type: "log",
-          params: {
-            message: "Riven is shutting down.",
-          },
-        },
-      ],
-      invoke: [
-        {
-          id: "stopGqlServer",
-          src: "stopGqlServer",
-          input: ({ context }) => context.server,
-          onDone: "Exited",
-        },
-      ],
-    },
-    Exited: {
-      entry: [
-        emit({ type: "riven.exited" }),
-        {
-          type: "log",
-          params: {
-            message: "Riven has exited.",
-          },
-        },
-      ],
-      type: "final",
     },
   },
 });

@@ -91,7 +91,7 @@ export const rateLimiterMachine = setup({
     fetch: rateLimitedFetchMachine,
   },
 }).createMachine({
-  id: "rateLimiter",
+  id: "Rate limiter",
   initial: "Listening",
   context: ({ input }) => ({
     limiter:
@@ -100,16 +100,36 @@ export const rateLimiterMachine = setup({
         : null,
     requestQueue: new Map(),
   }),
+  entry: {
+    type: "log",
+    params: {
+      message: "Starting rate limiter machine",
+    },
+  },
+  exit: {
+    type: "log",
+    params: {
+      message: "Shutting down rate limiter machine",
+    },
+  },
   on: {
     "fetch-requested": {
-      actions: {
-        type: "addToQueue",
-        params: ({ event }) => ({
-          url: event.url,
-          fetchOpts: event.fetchOpts,
-          requestId: event.requestId,
-        }),
-      },
+      actions: [
+        {
+          type: "log",
+          params: ({ event }) => ({
+            message: `Fetch requested for URL ${event.url} with request ID ${event.requestId}`,
+          }),
+        },
+        {
+          type: "addToQueue",
+          params: ({ event }) => ({
+            url: event.url,
+            fetchOpts: event.fetchOpts,
+            requestId: event.requestId,
+          }),
+        },
+      ],
     },
     "fetch-completed": {
       actions: [

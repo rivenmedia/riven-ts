@@ -17,7 +17,7 @@ export default {
         for (const show of await api.getShows(
           new Set(["6941fe52770814e293788237"]),
         )) {
-          publishEvent("media-item.requested", {
+          publishEvent("riven-plugin.media-item.requested", {
             item: show,
           });
         }

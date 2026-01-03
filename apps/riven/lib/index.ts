@@ -1,24 +1,21 @@
 import { logger } from "@repo/core-util-logger";
 
-import { KeyvAdapter } from "@apollo/utils.keyvadapter";
-import KeyvRedis, { Keyv } from "@keyv/redis";
 import { LRUCache } from "lru-cache";
 import safeStringify from "safe-stringify";
 import { type AnyEventObject, createActor, waitFor } from "xstate";
 
-import { bootstrapMachine } from "./state-machines/bootstrap/index.ts";
+import { rivenMachine } from "./state-machines/program/index.ts";
+import { redisCache } from "./utils/redis-cache.ts";
 
 const sessionId = crypto.randomUUID();
 
-const cache = new KeyvAdapter(
-  new Keyv(new KeyvRedis(process.env["REDIS_URL"])) as never,
-);
+const eventsCache = new LRUCache<string, AnyEventObject>({
+  maxSize: 5_000,
+  sizeCalculation: () => 1,
+});
 
-const eventsCache = new LRUCache<string, AnyEventObject>({ max: 1000 });
-
-const actor = createActor(bootstrapMachine, {
+const actor = createActor(rivenMachine, {
   input: {
-    cache,
     sessionId,
   },
   inspect(inspectionEvent) {
@@ -31,7 +28,7 @@ const actor = createActor(bootstrapMachine, {
 async function persistEvents() {
   const value = eventsCache.dump();
 
-  await cache.set(`riven:events-cache:${sessionId}`, safeStringify(value));
+  await redisCache.set(`riven:events-cache:${sessionId}`, safeStringify(value));
 
   logger.info(`Persisted Riven events cache for session ${sessionId}`);
 }

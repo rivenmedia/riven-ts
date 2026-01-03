@@ -6,26 +6,20 @@ import { ApolloServer, type BaseContext } from "@apollo/server";
 import responseCachePlugin from "@apollo/server-plugin-response-cache";
 import { ApolloServerPluginCacheControl } from "@apollo/server/plugin/cacheControl";
 import { startStandaloneServer } from "@apollo/server/standalone";
-import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import { fromPromise } from "xstate";
 
-export interface StartGQLServerInput {
-  cache: KeyvAdapter;
-}
+import { redisCache } from "../../../utils/redis-cache.ts";
 
 export interface StartGQLServerOutput {
   server: ApolloServer;
   url: string;
 }
 
-export const startGqlServer = fromPromise<
-  StartGQLServerOutput,
-  StartGQLServerInput
->(async ({ input }) => {
+export const startGqlServer = fromPromise<StartGQLServerOutput>(async () => {
   const PORT = Number(process.env["PORT"]) || 3000;
 
   const server = new ApolloServer<BaseContext>({
-    cache: input.cache,
+    cache: redisCache,
     schema,
     introspection: true,
     plugins: [

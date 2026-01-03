@@ -11,7 +11,7 @@ import { type ActorRef, type Snapshot, fromPromise } from "xstate";
 
 export interface ProcessRequestedItemInput {
   item: RequestedItemEventPayload;
-  parentRef: ActorRef<Snapshot<unknown>, ProgramToPluginEvent>;
+  // parentRef: ActorRef<Snapshot<unknown>, ProgramToPluginEvent>;
 }
 
 export const processRequestedItem = fromPromise<
@@ -32,12 +32,13 @@ export const processRequestedItem = fromPromise<
 
   itemEntity.lastState = "Requested";
 
-  parentRef.send({
-    type: "riven.media-item.created",
-    item: itemEntity,
-  });
   try {
     await postgresDataSource.manager.insert(MediaItem, itemEntity);
+
+    parentRef.send({
+      type: "riven.media-item.created",
+      item: itemEntity,
+    });
 
     logger.info(`Processed requested item: ${JSON.stringify(itemEntity)}`);
   } catch (error) {

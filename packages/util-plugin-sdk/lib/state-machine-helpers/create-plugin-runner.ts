@@ -1,4 +1,3 @@
-import type { ApolloClient } from "@apollo/client";
 import {
   type ActorRef,
   type CallbackLogicFunction,
@@ -7,9 +6,11 @@ import {
   fromCallback,
 } from "xstate";
 
+import type { PluginToProgramEvent } from "../events/plugin-to-program-event.ts";
+import type { ProgramToPluginEvent } from "../events/program-to-plugin-event.ts";
 import type { RequestedItem } from "../schemas/index.ts";
+import type { ParamsFor } from "../types/events.ts";
 import type { DataSourceMap } from "../types/utilities.ts";
-import type { PluginToProgramEvent, ProgramToPluginEvent } from "./events.ts";
 
 export type ParentRef = ActorRef<
   Snapshot<unknown>,
@@ -22,7 +23,6 @@ export interface PluginRunnerContext extends MachineContext {
 }
 
 export interface PluginRunnerInput {
-  client: ApolloClient;
   pluginSymbol: symbol;
   dataSources: DataSourceMap;
 }
@@ -36,7 +36,10 @@ interface PluginRunnerHelpers extends Record<
     // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
     this: void,
     event: T,
-    params: Omit<Extract<PluginToProgramEvent, { type: T }>, "type" | "plugin">,
+    params: Omit<
+      ParamsFor<Extract<PluginToProgramEvent, { type: T }>>,
+      "plugin"
+    >,
   ) => void;
 }
 
@@ -70,7 +73,7 @@ export const createPluginRunner = (callback: PluginRunner) =>
         sendMediaRequestedEvent(item: RequestedItem) {
           sendBack(
             providePluginSymbol({
-              type: "media-item.requested",
+              type: "riven-plugin.media-item.requested",
               item,
             }),
           );
@@ -86,3 +89,5 @@ export const createPluginRunner = (callback: PluginRunner) =>
   );
 
 export type PluginRunnerLogic = ReturnType<typeof createPluginRunner>;
+
+export type { ProgramToPluginEvent };

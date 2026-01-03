@@ -38,32 +38,11 @@ export type PendingRunnerInvocationPlugin = Extract<
 
 export type InvalidPlugin = Extract<RegisteredPlugin, { status: "invalid" }>;
 
-// export interface RegisteredPlugin {
-//   config: RivenPlugin;
-//   dataSources: DataSourceMap;
-//   isValidating: boolean;
-// }
-
-// export interface ValidatingPlugin extends RegisteredPlugin {
-//   isValidating: true;
-//   runnerRef?: never;
-// }
-
-// export interface ValidPlugin extends RegisteredPlugin {
-//   isInvalid: false;
-//   isValidating: false;
-//   runnerRef: ActorRefFromLogic<ReturnType<typeof createPluginRunner>>;
-// }
-
-// export interface InvalidPlugin extends RegisteredPlugin {
-//   isInvalid: true;
-//   isValidating: false;
-//   runnerRef?: never;
-// }
-
-export const registerPlugins = fromPromise<RivenPlugin[]>(async () => {
-  return await parsePluginsFromDependencies(
-    packageJson.dependencies,
-    import.meta.resolve.bind(null),
-  );
-});
+export const collectPluginsForRegistration = fromPromise<RivenPlugin[]>(
+  async () => {
+    return await parsePluginsFromDependencies(
+      packageJson.dependencies,
+      import.meta.resolve.bind(null),
+    );
+  },
+);

@@ -24,6 +24,8 @@ export class RateLimitError extends Error {
   /**
    * Parses the Retry-After header value and returns the delay in milliseconds.
    *
+   * @private
+   *
    * @param retryAfterHeader - The value of the Retry-After header, which can be either:
    *   - An HTTP date string (RFC 7231 format)
    *   - A number representing seconds to wait
@@ -35,7 +37,7 @@ export class RateLimitError extends Error {
    * @throws {Error} If the Retry-After header value cannot be parsed as either a valid
    *   HTTP date or a numeric value (seconds).
    */
-  private parseRetryAfterHeader(
+  #parseRetryAfterHeader(
     limiter: RateLimiter | null,
     retryAfterHeader: string | number | null,
   ): number {
@@ -83,6 +85,6 @@ export class RateLimitError extends Error {
     super();
 
     this.url = url;
-    this.retryAfter = this.parseRetryAfterHeader(limiter, retryAfterHeader);
+    this.retryAfter = this.#parseRetryAfterHeader(limiter, retryAfterHeader);
   }
 }

@@ -16,15 +16,13 @@ it('validates the plugin on "riven.validate-plugin" event', async ({
   const actor = createActor(
     machine.provide({
       actors: {
-        validatePlugin: fromPromise(validatePluginSpy),
+        validatePlugin: fromCallback(validatePluginSpy),
       },
     }),
     { input },
   );
 
   actor.start();
-
-  actor.send({ type: "riven.validate-plugin" });
 
   await vi.waitFor(() => {
     expect(actor.getSnapshot().value).toBe("Validating");
@@ -47,18 +45,12 @@ it("retries validation up to 3 times on failure", async ({
     .fn()
     .mockRejectedValue(new Error("Validation failed"));
 
-  const actor = createActor(
-    machine.provide({
-      actors: {
-        validatePlugin: fromPromise(validatePluginSpy),
-      },
-    }),
-    { input },
-  );
+  input.plugins.get(Symbol.for("Plugin: Test")).config.validator =
+    validatePluginSpy;
+
+  const actor = createActor(machine, { input });
 
   actor.start();
-
-  actor.send({ type: "riven.validate-plugin" });
 
   for (let i = 0; i < 2; i++) {
     await vi.waitFor(() => {
