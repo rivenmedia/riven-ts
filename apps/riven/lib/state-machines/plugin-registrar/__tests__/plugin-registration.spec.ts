@@ -1,19 +1,12 @@
-import { expect, vi } from "vitest";
+import { expect } from "vitest";
+import { toPromise } from "xstate";
 
 import { it } from "./helpers/test-context.ts";
 
 it("instantiates plugin datasources", async ({ actor }) => {
   const testPlugin = await import("@repo/plugin-test");
 
-  vi.spyOn(testPlugin.default.dataSources[0], "getApiToken").mockReturnValue(
-    "TEST_API_TOKEN",
-  );
-
-  actor.start();
-
-  await vi.waitFor(() => {
-    expect(actor.getSnapshot().value).toEqual("Validated");
-  });
+  await toPromise(actor.start());
 
   const registeredPlugin = actor
     .getSnapshot()

@@ -1,3 +1,5 @@
+import { BaseDataSource, createPluginRunner } from "@repo/util-plugin-sdk";
+
 import { vi } from "vitest";
 
 vi.mock<{ default: Record<string, unknown> }>(
@@ -22,3 +24,39 @@ vi.mock<typeof import("@apollo/server/standalone")>(
     }),
   }),
 );
+
+vi.mock<typeof import("@repo/plugin-test")>(import("@repo/plugin-test"), () => {
+  class TestAPI extends BaseDataSource {
+    override baseURL = "https://api.test.com";
+
+    // eslint-disable-next-line @typescript-eslint/require-await
+    override async validate(): Promise<boolean> {
+      return true;
+    }
+
+    static override getApiToken(): string | undefined {
+      return "TEST_API_TOKEN";
+    }
+  }
+
+  class TestResolver {
+    // eslint-disable-next-line @typescript-eslint/require-await
+    async testIsValid(): Promise<boolean> {
+      return true;
+    }
+  }
+
+  return {
+    default: {
+      name: Symbol.for("Plugin: Test"),
+      dataSources: [TestAPI],
+      resolvers: [TestResolver],
+      runner: createPluginRunner(() => {
+        /* empty */
+      }),
+      validator() {
+        return true;
+      },
+    },
+  };
+});

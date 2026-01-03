@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/require-await */
 import { it as baseIt } from "@repo/core-util-vitest-test-context";
 
-import { ApolloServer } from "@apollo/server";
 import { type Actor, createActor, createEmptyActor, fromPromise } from "xstate";
 
 import type { initialiseDatabaseConnection } from "../../actors/initialise-database-connection.actor.ts";
@@ -18,12 +17,16 @@ export const it = baseIt.extend<{
   initialiseDatabaseConnectionActorLogic: fromPromise(async () => {
     /* empty */
   }),
-  startGqlServerActorLogic: fromPromise(async () => {
-    return {
-      server: {} as ApolloServer,
-      url: "http://localhost:4000/graphql",
-    };
-  }),
+  async startGqlServerActorLogic({ apolloServerInstance }, use) {
+    await use(
+      fromPromise(async () => {
+        return {
+          server: apolloServerInstance,
+          url: "http://localhost:4000/graphql",
+        };
+      }),
+    );
+  },
   machine: (
     { initialiseDatabaseConnectionActorLogic, startGqlServerActorLogic },
     use,

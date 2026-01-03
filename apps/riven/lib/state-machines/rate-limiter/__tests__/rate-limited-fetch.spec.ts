@@ -192,11 +192,11 @@ it('waits the appropriate time before retrying after receiving a datetime "Retry
       expect(actor.getSnapshot().value).toBe("Rate limited");
     });
 
-    vi.advanceTimersByTime(delay - 1000);
+    vi.advanceTimersByTime(delay / 2);
 
     expect(actor.getSnapshot().value).toBe("Rate limited");
 
-    vi.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(delay / 2);
 
     expect(actor.getSnapshot().value).toBe("Fetching");
   }

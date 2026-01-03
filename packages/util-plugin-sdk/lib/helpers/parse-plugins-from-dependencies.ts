@@ -1,12 +1,18 @@
 import { logger } from "@repo/core-util-logger";
 
 import type { PackageJson } from "type-fest";
+import { z } from "zod";
+import type { $ZodErrorTree } from "zod/v4/core";
 
-import { RivenPlugin, isRivenPluginPackage } from "../index.ts";
+import {
+  RivenPlugin,
+  type RivenPluginPackage,
+  rivenPluginPackageSchema,
+} from "../index.ts";
 
 export interface ParsedPlugins {
   validPlugins: RivenPlugin[];
-  invalidPlugins: string[];
+  invalidPlugins: [string, $ZodErrorTree<RivenPluginPackage>][];
   unresolvablePlugins: string[];
 }
 
@@ -25,16 +31,24 @@ export const parsePluginsFromDependencies = async (
       try {
         const plugin = (await import(importResolver(pluginName))) as unknown;
 
-        if (!isRivenPluginPackage(plugin)) {
+        const validationResult =
+          await rivenPluginPackageSchema.safeParseAsync(plugin);
+
+        if (!validationResult.success) {
           return {
             ...parsedPlugins,
-            invalidPlugins: parsedPlugins.invalidPlugins.concat(pluginName),
+            invalidPlugins: parsedPlugins.invalidPlugins.concat([
+              pluginName,
+              z.treeifyError(validationResult.error),
+            ]),
           };
         }
 
         return {
           ...parsedPlugins,
-          validPlugins: parsedPlugins.validPlugins.concat(plugin.default),
+          validPlugins: parsedPlugins.validPlugins.concat(
+            validationResult.data.default,
+          ),
         };
       } catch (error) {
         logger.error(`Unable to resolve plugin ${pluginName}:`, error);

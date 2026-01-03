@@ -5,7 +5,13 @@ import { it } from "./helpers/test-context.ts";
 
 it.scoped({
   startGqlServerActorLogic: fromPromise(
-    vi.fn().mockRejectedValue("GraphQL server failed to start"),
+    vi.fn().mockImplementation(async () => {
+      // Simulate a delay to allow the other states to complete,
+      // otherwise XState outputs noisy warnings about unhandled transitions.
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      throw new Error("GraphQL server failed to start");
+    }),
   ),
 });
 

@@ -142,6 +142,7 @@ export const bootstrapMachine = setup({
                 src: "initialiseDatabaseConnection",
                 onDone: "Complete",
                 onError: {
+                  target: "#Bootstrap.Errored",
                   actions: [
                     {
                       type: "log",

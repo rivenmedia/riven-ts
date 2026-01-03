@@ -39,11 +39,13 @@ export const validatePlugin = fromCallback<
       try {
         const isValid = await plugin.config.validator();
 
-        if (isValid) {
-          sendValidPluginEvent();
-
-          return;
+        if (!isValid) {
+          throw new Error("Plugin validation returned false");
         }
+
+        sendValidPluginEvent();
+
+        return;
       } catch (error) {
         if (attempt >= maxAttempts) {
           sendInvalidPluginEvent(error);

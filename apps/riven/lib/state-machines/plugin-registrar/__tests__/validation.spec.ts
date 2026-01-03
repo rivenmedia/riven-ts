@@ -1,19 +1,11 @@
 import { expect, vi } from "vitest";
-import { createActor, toPromise } from "xstate";
+import { toPromise } from "xstate";
 
 import { it } from "./helpers/test-context.ts";
 
 it('validates the plugin on "riven.validate-plugin" event', async ({
-  machine,
-  input,
+  actor,
 }) => {
-  const actor = createActor(
-    machine.provide({
-      actors: {},
-    }),
-    { input },
-  );
-
   actor.start();
 
   await vi.waitFor(() => {
@@ -23,19 +15,14 @@ it('validates the plugin on "riven.validate-plugin" event', async ({
   expect(actor.getSnapshot().context.validPlugins.size).toBe(1);
 });
 
-it("retries validation up to 3 times on failure", async ({
-  machine,
-  input,
-}) => {
+it("retries validation up to 3 times on failure", async ({ actor }) => {
   vi.useFakeTimers();
 
   const testPlugin = await import("@repo/plugin-test");
 
   const validatePluginSpy = vi
     .spyOn(testPlugin.default, "validator")
-    .mockRejectedValue(new Error("Validation failed"));
-
-  const actor = createActor(machine, { input });
+    .mockReturnValue(false as never);
 
   actor.start();
 

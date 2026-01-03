@@ -36,7 +36,9 @@ export const it = baseIt.extend<{
     url: "https://placeholder.com",
   },
   actor: async ({ input, machine }, use) => {
-    const actor = createActor(machine, { input });
+    const actor = createActor(machine, {
+      input,
+    });
 
     actor.start();
 

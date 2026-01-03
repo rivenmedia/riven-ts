@@ -112,6 +112,12 @@ export const RivenPlugin = z.object({
 
 export type RivenPlugin = z.infer<typeof RivenPlugin>;
 
+export const rivenPluginPackageSchema = z.object({
+  default: RivenPlugin,
+});
+
+export type RivenPluginPackage = z.infer<typeof rivenPluginPackageSchema>;
+
 export const isRivenPluginPackage = (
   obj: unknown,
 ): obj is { default: RivenPlugin } => {
