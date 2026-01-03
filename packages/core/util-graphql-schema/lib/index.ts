@@ -3,6 +3,18 @@ import {
   RivenSettingsResolver,
 } from "@repo/feature-settings/resolver";
 import { parsePluginsFromDependencies } from "@repo/util-plugin-sdk";
+import {
+  Episode,
+  FileSystemEntry,
+  MediaEntry,
+  MediaItem,
+  Movie,
+  RequestedItem,
+  Season,
+  Show,
+  Stream,
+  SubtitleEntry,
+} from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { buildSchema } from "type-graphql";
 
@@ -14,6 +26,19 @@ const { validPlugins } = await parsePluginsFromDependencies(
 );
 
 export const schema = await buildSchema({
+  orphanedTypes: [
+    SubtitleEntry,
+    FileSystemEntry,
+    MediaEntry,
+    MediaItem,
+    Episode,
+    Movie,
+    Season,
+    Show,
+    RequestedItem,
+    Stream,
+  ],
+
   resolvers: [
     CoreSettingsResolver,
     RivenSettingsResolver,

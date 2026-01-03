@@ -1,3 +1,4 @@
+import { Field, ID, ObjectType } from "type-graphql";
 import {
   Column,
   CreateDateColumn,
@@ -9,8 +10,9 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 
-import type { MediaItem } from "../media-items/media-item.entity.ts";
+import { MediaItem } from "../media-items/media-item.entity.ts";
 
+@ObjectType()
 @Entity()
 @TableInheritance({
   column: {
@@ -19,21 +21,27 @@ import type { MediaItem } from "../media-items/media-item.entity.ts";
   },
 })
 export class FileSystemEntry {
+  @Field((_type) => ID)
   @PrimaryGeneratedColumn()
   id!: number;
 
+  @Field()
   @Column({ default: 0 })
   fileSize!: number;
 
+  @Field()
   @CreateDateColumn()
   createdAt!: Date;
 
+  @Field()
   @UpdateDateColumn()
   updatedAt!: Date;
 
+  @Field()
   @Column()
   availableInVfs!: boolean;
 
-  @ManyToOne("MediaItem", (item: MediaItem) => item.id)
+  @Field(() => MediaItem)
+  @ManyToOne(() => MediaItem, (item: MediaItem) => item.id)
   mediaItem!: Relation<MediaItem>;
 }

@@ -73,7 +73,7 @@ catalogs:
       specifier: 2.0.0-rc.2
       version: 2.0.0-rc.2
     typeorm:
-      specifier: ^0.3.28
+      specifier: 0.3.28
       version: 0.3.28
     typescript:
       specifier: ^5.9.3
@@ -248,6 +248,9 @@ importers:
 
   packages/core/util-database:
     dependencies:
+      '@repo/util-plugin-sdk':
+        specifier: workspace:^
+        version: link:../../util-plugin-sdk
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
@@ -972,6 +975,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      class-validator:
+        specifier: 'catalog:'
+        version: 0.14.3
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
@@ -984,6 +990,9 @@ importers:
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
+      typeorm:
+        specifier: 'catalog:'
+        version: 0.3.28(pg@8.16.3)(ts-node@10.9.2(@swc/core@1.15.7(@swc/helpers@0.5.17))(@types/node@24.0.0)(typescript@5.9.3))
       typescript:
         specifier: 'catalog:'
         version: 5.9.3

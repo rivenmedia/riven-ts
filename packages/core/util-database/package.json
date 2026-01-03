@@ -4,17 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./connection": "./lib/connection.ts",
-    "./entities/filesystem/filesystem-entry.entity": "./lib/entities/filesystem/filesystem-entry.entity.ts",
-    "./entities/filesystem/media-entry.entity": "./lib/entities/filesystem/media-entry.entity.ts",
-    "./entities/filesystem/subtitle-entry.entity": "./lib/entities/filesystem/subtitle-entry.entity.ts",
-    "./entities/media-items/media-item.entity": "./lib/entities/media-items/media-item.entity.ts",
-    "./entities/media-items/episode.entity": "./lib/entities/media-items/episode.entity.ts",
-    "./entities/media-items/season.entity": "./lib/entities/media-items/season.entity.ts",
-    "./entities/media-items/show.entity": "./lib/entities/media-items/show.entity.ts",
-    "./entities/media-items/movie.entity": "./lib/entities/media-items/movie.entity.ts",
-    "./entities/media-items/requested-item.entity": "./lib/entities/media-items/requested-item.entity.ts",
-    "./entities/streams/stream.entity": "./lib/entities/streams/stream.entity.ts"
+    "./connection": "./lib/connection.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
@@ -24,6 +14,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@repo/util-plugin-sdk": "workspace:^",
     "class-validator": "catalog:",
     "server-only": "^0.0.1",
     "typeorm": "catalog:",

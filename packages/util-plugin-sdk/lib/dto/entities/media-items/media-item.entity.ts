@@ -1,3 +1,4 @@
+import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
 import {
   Column,
   Entity,
@@ -10,7 +11,7 @@ import {
 } from "typeorm";
 import { z } from "zod";
 
-import type { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
+import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.js";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import { Stream } from "../streams/stream.entity.ts";
 
@@ -31,6 +32,12 @@ export const mediaItemStateSchema = z.enum([
 
 export type MediaItemState = z.infer<typeof mediaItemStateSchema>;
 
+registerEnumType(mediaItemStateSchema.enum, {
+  name: "MediaItemState",
+  description: "The state of a media item in the processing pipeline",
+});
+
+@ObjectType()
 @Entity()
 @TableInheritance({
   column: {
@@ -40,106 +47,137 @@ export type MediaItemState = z.infer<typeof mediaItemStateSchema>;
 })
 @Index(["type", "airedAt"])
 export class MediaItem {
+  @Field((_type) => ID)
   @PrimaryGeneratedColumn()
   id!: number;
 
+  @Field({ nullable: true })
   @Index()
   @Column({ nullable: true })
   title?: string;
 
+  @Field({ nullable: true })
   @Index({ unique: true })
   @Column({ nullable: true, unique: true })
   imdbId?: string;
 
+  @Field({ nullable: true })
   @Index({ unique: true })
   @Column({ nullable: true, unique: true })
   tvdbId?: string;
 
+  @Field({ nullable: true })
   @Index({ unique: true })
   @Column({ nullable: true, unique: true })
   tmdbId?: string;
 
+  @Field({ nullable: true })
   @Column({ nullable: true })
   posterPath?: string;
 
+  @Field()
   @Index()
   @Column({
     default: () => "CURRENT_TIMESTAMP",
   })
   requestedAt!: Date;
 
+  @Field({ nullable: true })
   @Column({ nullable: true })
   requestedBy?: string;
 
+  @Field({ nullable: true })
   @Column({ nullable: true })
   requestedId?: string;
 
+  @Field({ nullable: true })
   @Column({ nullable: true })
   indexedAt?: Date;
 
+  @Field({ nullable: true })
   @Column({ nullable: true })
   scrapedAt?: Date;
 
+  @Field()
   @Column({ default: 0 })
   scrapedTimes!: number;
 
+  @Field(() => Stream, { nullable: true })
   @ManyToOne(() => Stream, { nullable: true })
   activeStream?: Relation<Stream>;
 
+  @Field(() => [Stream])
   @ManyToMany(() => Stream)
   streams!: Relation<Stream>[];
 
+  @Field(() => [Stream])
   @ManyToMany(() => Stream)
   blacklistedStreams!: Relation<Stream>[];
 
+  @Field(() => String, { nullable: true })
   @Column("json", { nullable: true })
   aliases?: Record<string, string[]>;
 
+  @Field()
   @Column({ default: false })
   isAnime!: boolean;
 
+  @Field({ nullable: true })
   @Column({ nullable: true })
   network?: string;
 
+  @Field({ nullable: true })
   @Column({ nullable: true })
   country?: string;
 
+  @Field({ nullable: true })
   @Column({ nullable: true })
   language?: string;
 
+  @Field({ nullable: true })
   @Column({ nullable: true })
   airedAt?: Date;
 
+  @Field({ nullable: true })
   @Column({ nullable: true })
   year?: number;
 
+  @Field(() => [String], { nullable: true })
   @Column("json", { array: true, nullable: true })
   genres?: string[];
 
+  @Field({ nullable: true })
   @Column({ nullable: true })
   rating?: number;
 
+  @Field({ nullable: true })
   @Column({ nullable: true })
   contentRating?: string;
 
+  @Field()
   @Column({ default: false })
   updated!: boolean;
 
+  @Field({ nullable: true })
   @Column({ nullable: true })
   guid?: string;
 
   @Column({ nullable: true })
   overseerrId?: number;
 
+  @Field(() => mediaItemStateSchema.enum)
   @Column("enum", { enum: mediaItemStateSchema.options })
   lastState!: MediaItemState;
 
+  @Field(() => [FileSystemEntry])
   @ManyToMany("FileSystemEntry", (entry: FileSystemEntry) => entry.id)
   filesystemEntries!: Relation<FileSystemEntry>[];
 
+  @Field(() => [SubtitleEntry])
   @ManyToMany(() => SubtitleEntry)
   subtitles!: Relation<SubtitleEntry>[];
 
+  @Field()
   @Column({ default: 0 })
   failedAttempts!: number;
 }

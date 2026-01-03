@@ -1,11 +1,13 @@
 import { postgresDataSource } from "@repo/core-util-database/connection";
-import { MediaItem } from "@repo/core-util-database/entities/media-items/media-item.entity";
-import { RequestedItemEntity } from "@repo/core-util-database/entities/media-items/requested-item.entity";
 import { logger } from "@repo/core-util-logger";
 import type {
   ProgramToPluginEvent,
   RequestedItem as RequestedItemEventPayload,
 } from "@repo/util-plugin-sdk";
+import {
+  MediaItem,
+  RequestedItem,
+} from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { type ActorRef, type Snapshot, fromPromise } from "xstate";
 
@@ -20,7 +22,7 @@ export const processRequestedItem = fromPromise<
 >(async ({ input: { item, parentRef } }) => {
   logger.info("Processing requested item...", item);
 
-  const itemEntity = new RequestedItemEntity();
+  const itemEntity = new RequestedItem();
 
   if (item.imdbId) {
     itemEntity.imdbId = item.imdbId;

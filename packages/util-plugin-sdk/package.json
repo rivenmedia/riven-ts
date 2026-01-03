@@ -5,7 +5,9 @@
   "type": "module",
   "exports": {
     ".": "./lib/index.ts",
-    "./events": "./lib/events/index.ts"
+    "./events": "./lib/events/index.ts",
+    "./types/*": "./lib/types/*.ts",
+    "./dto/*": "./lib/dto/*.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
@@ -28,10 +30,12 @@
     "@repo/core-util-vitest-config": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
+    "class-validator": "catalog:",
     "eslint": "catalog:",
     "limiter": "catalog:",
     "msw": "catalog:",
     "type-graphql": "catalog:",
+    "typeorm": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "xstate": "catalog:"
@@ -40,7 +44,9 @@
     "@apollo/client": "^4.0.11",
     "@apollo/datasource-rest": "catalog:",
     "@apollo/utils.keyvadapter": "^4.0.1",
+    "class-validator": "catalog:",
     "limiter": "catalog:",
+    "typeorm": "catalog:",
     "xstate": "^5.25.0"
   }
 }
