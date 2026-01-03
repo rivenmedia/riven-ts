@@ -12,8 +12,9 @@ import {
   waitFor,
 } from "xstate";
 
-import { redisCache } from "../../utils/redis-cache.ts";
+import { redisCache } from "../../utilities/redis-cache.ts";
 import { rateLimiterMachine } from "../rate-limiter/index.ts";
+import { withLogAction } from "../utilities/with-log-action.ts";
 import {
   type InvalidPlugin,
   type PendingRunnerInvocationPlugin,
@@ -223,64 +224,66 @@ export const pluginRegistrarMachine = setup({
     allPluginsValidated: ({ context }) => context.pendingPlugins.size === 0,
     isPluginValid: (_, isValid: boolean) => isValid,
   },
-}).createMachine({
-  context: ({ input }) => ({
-    pendingPlugins: new Map(),
-    invalidPlugins: new Map(),
-    validPlugins: new Map(),
-    runningValidators: new Map(),
-    rootRef: input.rootRef,
-  }),
-  id: "Plugin registrar",
-  initial: "Registering plugins",
-  output: ({ context }) => ({
-    validPlugins: context.validPlugins,
-    invalidPlugins: context.invalidPlugins,
-  }),
-  states: {
-    "Registering plugins": {
-      invoke: {
-        id: "collectPluginsForRegistration",
-        src: "collectPluginsForRegistration",
-        onDone: {
-          target: "Validating",
-          actions: [
-            assign({
-              parsedPlugins: ({ event }) => event.output,
-            }),
-            {
-              type: "registerPlugins",
-              params: ({ event }) => event.output,
-            },
-          ],
-        },
-      },
-    },
-    Validating: {
-      entry: "spawnValidators",
-      always: {
-        guard: "allPluginsValidated",
-        target: "Validated",
-      },
-      on: {
-        "riven.plugin-valid": {
-          actions: [
-            {
-              type: "handleValidPlugin",
-              params: ({ event }) => event.plugin,
-            },
-          ],
-        },
-        "riven.plugin-invalid": {
-          actions: {
-            type: "handleInvalidPlugin",
-            params: ({ event }) => event.plugin,
+})
+  .extend(withLogAction)
+  .createMachine({
+    context: ({ input }) => ({
+      pendingPlugins: new Map(),
+      invalidPlugins: new Map(),
+      validPlugins: new Map(),
+      runningValidators: new Map(),
+      rootRef: input.rootRef,
+    }),
+    id: "Plugin registrar",
+    initial: "Registering plugins",
+    output: ({ context }) => ({
+      validPlugins: context.validPlugins,
+      invalidPlugins: context.invalidPlugins,
+    }),
+    states: {
+      "Registering plugins": {
+        invoke: {
+          id: "collectPluginsForRegistration",
+          src: "collectPluginsForRegistration",
+          onDone: {
+            target: "Validating",
+            actions: [
+              assign({
+                parsedPlugins: ({ event }) => event.output,
+              }),
+              {
+                type: "registerPlugins",
+                params: ({ event }) => event.output,
+              },
+            ],
           },
         },
       },
+      Validating: {
+        entry: "spawnValidators",
+        always: {
+          guard: "allPluginsValidated",
+          target: "Validated",
+        },
+        on: {
+          "riven.plugin-valid": {
+            actions: [
+              {
+                type: "handleValidPlugin",
+                params: ({ event }) => event.plugin,
+              },
+            ],
+          },
+          "riven.plugin-invalid": {
+            actions: {
+              type: "handleInvalidPlugin",
+              params: ({ event }) => event.plugin,
+            },
+          },
+        },
+      },
+      Validated: {
+        type: "final",
+      },
     },
-    Validated: {
-      type: "final",
-    },
-  },
-});
+  });

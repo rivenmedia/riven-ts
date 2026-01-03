@@ -5,11 +5,11 @@ import safeStringify from "safe-stringify";
 import { type AnyEventObject, createActor, waitFor } from "xstate";
 
 import { rivenMachine } from "./state-machines/program/index.ts";
-import { redisCache } from "./utils/redis-cache.ts";
+import { redisCache } from "./utilities/redis-cache.ts";
 
 const sessionId = crypto.randomUUID();
 
-const eventsCache = new LRUCache<string, AnyEventObject>({ max: 1000 });
+const eventsCache = new LRUCache<string, AnyEventObject>({ max: 100000 });
 
 const actor = createActor(rivenMachine, {
   input: {
@@ -21,7 +21,10 @@ const actor = createActor(rivenMachine, {
         return;
       }
 
-      eventsCache.set(inspectionEvent.event.type, inspectionEvent.event);
+      eventsCache.set(
+        safeStringify(inspectionEvent.event),
+        inspectionEvent.event,
+      );
     }
   },
 });
@@ -36,7 +39,7 @@ async function persistEvents() {
 
 const persistEventsIntervalId = setInterval(() => {
   void persistEvents();
-}, 60_000);
+}, 10_000);
 
 actor.start();
 

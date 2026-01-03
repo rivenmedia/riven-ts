@@ -1,5 +1,3 @@
-import { logger } from "@repo/core-util-logger";
-
 import type {
   FetcherRequestInit,
   FetcherResponse,
@@ -9,6 +7,7 @@ import type { UUID } from "node:crypto";
 import { type ActorRef, type Snapshot, assign, sendTo, setup } from "xstate";
 import { z } from "zod";
 
+import { withLogAction } from "../../utilities/with-log-action.ts";
 import { fetchActorLogic } from "../actors/fetch.actor.ts";
 import { RateLimitError } from "../errors/rate-limit-error.ts";
 import type { RateLimiterMachineEvent } from "../index.ts";
@@ -101,7 +100,6 @@ export const rateLimitedFetchMachine = setup({
       error: null,
       retryDelayMs: null,
     })),
-    log: (_, message: string) => logger.http(message),
   },
   actors: {
     fetch: fetchActorLogic,
@@ -120,131 +118,137 @@ export const rateLimitedFetchMachine = setup({
       return context.retryDelayMs;
     },
   },
-}).createMachine({
-  id: "Rate limited fetch",
-  initial: "Idle",
-  context: ({ input }) => ({
-    url: input.url,
-    fetchOpts: input.fetchOpts,
-    requestAttempts: 0,
-    maxRetries: input.maxRetries ?? 3,
-    limiter: input.limiter,
-    parentRef: input.parentRef,
-    requestId: input.requestId,
-    retryDelayMs: null,
-    data: null,
-    error: null,
-    response: null,
-  }),
-  exit: sendTo(
-    ({ context }) => context.parentRef,
-    ({ context }) => ({
-      type: "fetch-completed",
-      requestId: context.requestId,
+})
+  .extend(withLogAction)
+  .createMachine({
+    id: "Rate limited fetch",
+    initial: "Idle",
+    context: ({ input }) => ({
+      url: input.url,
+      fetchOpts: input.fetchOpts,
+      requestAttempts: 0,
+      maxRetries: input.maxRetries ?? 3,
+      limiter: input.limiter,
+      parentRef: input.parentRef,
+      requestId: input.requestId,
+      retryDelayMs: null,
+      data: null,
+      error: null,
+      response: null,
     }),
-  ),
-  output: ({ context }) => {
-    if (!context.response) {
-      throw new Error(
-        "Cannot get output from RateLimitedFetchMachine: no response available.",
-      );
-    }
+    exit: sendTo(
+      ({ context }) => context.parentRef,
+      ({ context }) => ({
+        type: "fetch-completed",
+        requestId: context.requestId,
+      }),
+    ),
+    output: ({ context }) => {
+      if (!context.response) {
+        throw new Error(
+          "Cannot get output from RateLimitedFetchMachine: no response available.",
+        );
+      }
 
-    return context.response;
-  },
-  states: {
-    Idle: {
-      on: {
-        fetch: "Fetching",
-      },
+      return context.response;
     },
-    Fetching: {
-      on: {
-        fetch: undefined, // ignore additional fetch events whilst fetching
+    states: {
+      Idle: {
+        on: {
+          fetch: "Fetching",
+        },
       },
-      entry: [
-        "incrementRequestAttempts",
-        {
-          type: "log",
-          params: ({ context }) => `Starting fetch for URL: ${context.url}`,
+      Fetching: {
+        on: {
+          fetch: undefined, // ignore additional fetch events whilst fetching
         },
-      ],
-      invoke: {
-        id: "fetch",
-        src: "fetch",
-        input: ({ context }) => ({
-          url: context.url,
-          fetchOpts: context.fetchOpts,
-          limiter: context.limiter,
-        }),
-        onDone: {
-          target: "Success",
-          actions: {
-            type: "handleSuccess",
-            params: ({ event }) => ({ response: event.output }),
-          },
-        },
-        onError: [
+        entry: [
+          "incrementRequestAttempts",
           {
-            actions: {
-              type: "handleRateLimitResponse",
-              params: ({ event }) => ({
-                error: z.instanceof(RateLimitError).parse(event.error),
-              }),
-            },
-            guard: {
-              type: "isRateLimitError",
-              params: ({ event }) => z.instanceof(Error).parse(event.error),
-            },
-            target: "Rate limited",
-          },
-          {
-            actions: {
-              type: "handleResponseError",
-              params: ({ event }) => ({
-                error: z.instanceof(Error).parse(event.error),
-              }),
-            },
-            target: "Failed",
+            type: "log",
+            params: ({ context }) => ({
+              message: `Starting fetch for URL: ${context.url}`,
+            }),
           },
         ],
+        invoke: {
+          id: "fetch",
+          src: "fetch",
+          input: ({ context }) => ({
+            url: context.url,
+            fetchOpts: context.fetchOpts,
+            limiter: context.limiter,
+          }),
+          onDone: {
+            target: "Success",
+            actions: {
+              type: "handleSuccess",
+              params: ({ event }) => ({ response: event.output }),
+            },
+          },
+          onError: [
+            {
+              actions: {
+                type: "handleRateLimitResponse",
+                params: ({ event }) => ({
+                  error: z.instanceof(RateLimitError).parse(event.error),
+                }),
+              },
+              guard: {
+                type: "isRateLimitError",
+                params: ({ event }) => z.instanceof(Error).parse(event.error),
+              },
+              target: "Rate limited",
+            },
+            {
+              actions: {
+                type: "handleResponseError",
+                params: ({ event }) => ({
+                  error: z.instanceof(Error).parse(event.error),
+                }),
+              },
+              target: "Failed",
+            },
+          ],
+        },
       },
-    },
-    "Rate limited": {
-      always: {
-        guard: "isMaxRetriesReached",
-        target: "Failed",
-      },
-      entry: {
-        type: "log",
-        params: ({ context }) =>
-          `Request was rate limited. Retrying in ${context.retryDelayMs?.toString() ?? "Unknown"} ms.`,
-      },
-      after: {
-        retryFetch: {
-          target: "Fetching",
-          actions: {
-            type: "log",
-            params: ({ context: { requestAttempts, maxRetries, url } }) =>
-              `Retrying fetch for URL: ${url} (Attempt ${(requestAttempts + 1).toString()} of ${(maxRetries + 1).toString()})`,
+      "Rate limited": {
+        always: {
+          guard: "isMaxRetriesReached",
+          target: "Failed",
+        },
+        entry: {
+          type: "log",
+          params: ({ context }) => ({
+            message: `Request was rate limited. Retrying in ${context.retryDelayMs?.toString() ?? "Unknown"} ms.`,
+          }),
+        },
+        after: {
+          retryFetch: {
+            target: "Fetching",
+            actions: {
+              type: "log",
+              params: ({ context: { requestAttempts, maxRetries, url } }) => ({
+                message: `Retrying fetch for URL: ${url} (Attempt ${(requestAttempts + 1).toString()} of ${(maxRetries + 1).toString()})`,
+              }),
+            },
           },
         },
       },
-    },
-    Failed: {
-      type: "final",
-      entry: ({ context }) => {
-        if (context.error) {
-          throw context.error;
-        }
+      Failed: {
+        type: "final",
+        entry: ({ context }) => {
+          if (context.error) {
+            throw context.error;
+          }
 
-        throw new Error(
-          "Reached Failed state without an error. This is likely a bug. Please report it.",
-        );
+          throw new Error(
+            "Reached Failed state without an error. This is likely a bug. Please report it.",
+          );
+        },
+      },
+      Success: {
+        type: "final",
       },
     },
-    Success: {
-      type: "final",
-    },
-  },
-});
+  });

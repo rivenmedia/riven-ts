@@ -1,4 +1,4 @@
-import { type LogLevel, logger } from "@repo/core-util-logger";
+import { logger } from "@repo/core-util-logger";
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type {
   MediaItemRequestedEvent,
@@ -16,6 +16,7 @@ import type {
   PendingRunnerInvocationPlugin,
   ValidPlugin,
 } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+import { withLogAction } from "../utilities/with-log-action.ts";
 import { processRequestedItem } from "./actors/process-requested-item.actor.ts";
 import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 
@@ -100,134 +101,124 @@ export const rivenMachine = setup({
         });
       },
     ),
-    log: (
-      _,
-      {
-        message,
-        level = "info",
-      }: {
-        message: string;
-        level?: LogLevel;
-      },
-    ) => {
-      logger[level](message);
-    },
   },
   actors: {
     bootstrapMachine,
     processRequestedItem,
     stopGqlServer,
   },
-}).createMachine({
-  id: "Riven",
-  initial: "Bootstrapping",
-  on: {
-    "riven.shutdown": ".Shutdown",
-  },
-  states: {
-    Bootstrapping: {
-      invoke: {
-        id: "bootstrap",
-        src: "bootstrapMachine",
-        input: ({ self }) => ({ rootRef: self }),
-        onDone: {
-          actions: [
-            {
-              type: "invokePluginRunners",
-              params: ({ event }) => event.output.plugins,
+})
+  .extend(withLogAction)
+  .createMachine({
+    id: "Riven",
+    initial: "Bootstrapping",
+    on: {
+      "riven.shutdown": ".Shutdown",
+    },
+    states: {
+      Bootstrapping: {
+        invoke: {
+          id: "bootstrap",
+          src: "bootstrapMachine",
+          input: ({ self }) => ({ rootRef: self }),
+          onDone: {
+            actions: [
+              {
+                type: "invokePluginRunners",
+                params: ({ event }) => event.output.plugins,
+              },
+              {
+                type: "storeGqlServerInstance",
+                params: ({ event }) => event.output.server,
+              },
+            ],
+            target: "Running",
+          },
+          onError: {
+            target: "Errored",
+            actions: {
+              type: "log",
+              params: ({ event }) => ({
+                message: `Error during bootstrap: ${(event.error as Error).message}`,
+                level: "error",
+              }),
             },
-            {
-              type: "storeGqlServerInstance",
-              params: ({ event }) => event.output.server,
-            },
-          ],
-          target: "Running",
+          },
         },
-        onError: {
-          target: "Errored",
-          actions: {
+      },
+      Running: {
+        entry: [
+          {
+            type: "broadcastToPlugins",
+            params: {
+              type: "riven.started",
+            },
+          },
+          {
             type: "log",
-            params: ({ event }) => ({
-              message: `Error during bootstrap: ${(event.error as Error).message}`,
-              level: "error",
-            }),
-          },
-        },
-      },
-    },
-    Running: {
-      entry: [
-        {
-          type: "broadcastToPlugins",
-          params: {
-            type: "riven.started",
-          },
-        },
-        {
-          type: "log",
-          params: {
-            message: "Riven has started successfully.",
-          },
-        },
-      ],
-      on: {
-        "riven.media-item.*": {
-          actions: [
-            {
-              type: "broadcastToPlugins",
-              params: ({ event }) => event,
+            params: {
+              message: "Riven has started successfully.",
             },
-          ],
-        },
-        "riven-plugin.media-item.requested": {
-          actions: {
-            type: "processRequestedItem",
-            params: ({ event }) => ({
-              item: event.item,
-              plugin: event.plugin,
-            }),
+          },
+        ],
+        on: {
+          "riven.media-item.*": {
+            actions: [
+              {
+                type: "broadcastToPlugins",
+                params: ({ event }) => event,
+              },
+            ],
+          },
+          "riven-plugin.media-item.requested": {
+            actions: {
+              type: "processRequestedItem",
+              params: ({ event }) => ({
+                item: event.item,
+                plugin: event.plugin,
+              }),
+            },
           },
         },
       },
-    },
-    Errored: {
-      type: "final",
-      entry: {
-        type: "log",
-        params: {
-          message: "A fatal error occurred.",
-          level: "error",
+      Errored: {
+        type: "final",
+        entry: {
+          type: "log",
+          params: {
+            message: "A fatal error occurred.",
+            level: "error",
+          },
         },
       },
-    },
-    Shutdown: {
-      entry: [
-        {
-          type: "log",
-          params: {
-            message: "Riven is shutting down.",
+      Shutdown: {
+        entry: [
+          {
+            type: "log",
+            params: {
+              message: "Riven is shutting down.",
+            },
           },
-        },
-      ],
-      invoke: [
-        {
-          id: "stopGqlServer",
-          src: "stopGqlServer",
-          input: ({ context }) => context.server,
-          onDone: "Exited",
-        },
-      ],
-    },
-    Exited: {
-      type: "final",
-      entry: [
-        {
-          type: "log",
-          params: {
-            message: "Riven has exited.",
+        ],
+        invoke: [
+          {
+            id: "stopGqlServer",
+            src: "stopGqlServer",
+            input: ({ context }) => context.server,
+            onDone: "Exited",
           },
-        },
-      ],
+        ],
+      },
+      Exited: {
+        type: "final",
+        entry: [
+          {
+            type: "log",
+            params: {
+              message: "Riven has exited.",
+            },
+          },
+        ],
+      },
     },
-  },
-});
+  });

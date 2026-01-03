@@ -1,10 +1,9 @@
-import { type LogLevel, logger } from "@repo/core-util-logger";
-
 import type { FetcherRequestInit } from "@apollo/utils.fetcher";
 import { RateLimiter, type RateLimiterOpts } from "limiter";
 import type { UUID } from "node:crypto";
 import { type ActorRefFromLogic, assign, setup, stopChild } from "xstate";
 
+import { withLogAction } from "../utilities/with-log-action.ts";
 import { rateLimitedFetchMachine } from "./machines/fetch-machine.ts";
 
 export interface RateLimiterMachineInput {
@@ -74,81 +73,71 @@ export const rateLimiterMachine = setup({
         }),
       ];
     },
-    log: (
-      _,
-      {
-        message,
-        level = "info",
-      }: {
-        message: string;
-        level?: LogLevel;
-      },
-    ) => {
-      logger[level](message);
-    },
   },
   actors: {
     fetch: rateLimitedFetchMachine,
   },
-}).createMachine({
-  id: "Rate limiter",
-  initial: "Listening",
-  context: ({ input }) => ({
-    limiter:
-      input.limiterOptions !== null
-        ? new RateLimiter(input.limiterOptions)
-        : null,
-    requestQueue: new Map(),
-  }),
-  entry: {
-    type: "log",
-    params: {
-      message: "Starting rate limiter machine",
+})
+  .extend(withLogAction)
+  .createMachine({
+    id: "Rate limiter",
+    initial: "Listening",
+    context: ({ input }) => ({
+      limiter:
+        input.limiterOptions !== null
+          ? new RateLimiter(input.limiterOptions)
+          : null,
+      requestQueue: new Map(),
+    }),
+    entry: {
+      type: "log",
+      params: {
+        message: "Starting rate limiter machine",
+      },
     },
-  },
-  exit: {
-    type: "log",
-    params: {
-      message: "Shutting down rate limiter machine",
+    exit: {
+      type: "log",
+      params: {
+        message: "Shutting down rate limiter machine",
+      },
     },
-  },
-  on: {
-    "fetch-requested": {
-      actions: [
-        {
-          type: "log",
-          params: ({ event }) => ({
-            message: `Fetch requested for URL ${event.url} with request ID ${event.requestId}`,
-          }),
-        },
-        {
-          type: "addToQueue",
-          params: ({ event }) => ({
-            url: event.url,
-            fetchOpts: event.fetchOpts,
-            requestId: event.requestId,
-          }),
-        },
-      ],
+    on: {
+      "fetch-requested": {
+        actions: [
+          {
+            type: "log",
+            params: ({ event }) => ({
+              message: `Fetch requested for URL ${event.url} with request ID ${event.requestId}`,
+            }),
+          },
+          {
+            type: "addToQueue",
+            params: ({ event }) => ({
+              url: event.url,
+              fetchOpts: event.fetchOpts,
+              requestId: event.requestId,
+            }),
+          },
+        ],
+      },
+      "fetch-completed": {
+        actions: [
+          {
+            type: "log",
+            params: ({ event }) => ({
+              message: `Fetch completed for request ID ${event.requestId}`,
+            }),
+          },
+          {
+            type: "removeFromQueue",
+            params: ({ event }) => ({
+              requestId: event.requestId,
+            }),
+          },
+        ],
+      },
     },
-    "fetch-completed": {
-      actions: [
-        {
-          type: "log",
-          params: ({ event }) => ({
-            message: `Fetch completed for request ID ${event.requestId}`,
-          }),
-        },
-        {
-          type: "removeFromQueue",
-          params: ({ event }) => ({
-            requestId: event.requestId,
-          }),
-        },
-      ],
+    states: {
+      Listening: {},
     },
-  },
-  states: {
-    Listening: {},
-  },
-});
+  });
