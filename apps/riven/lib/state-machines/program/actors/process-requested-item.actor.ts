@@ -11,7 +11,7 @@ import { type ActorRef, type Snapshot, fromPromise } from "xstate";
 
 export interface ProcessRequestedItemInput {
   item: RequestedItemEventPayload;
-  // parentRef: ActorRef<Snapshot<unknown>, ProgramToPluginEvent>;
+  parentRef: ActorRef<Snapshot<unknown>, ProgramToPluginEvent>;
 }
 
 export const processRequestedItem = fromPromise<

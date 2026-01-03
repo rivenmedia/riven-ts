@@ -1,9 +1,5 @@
 import { logger } from "@repo/core-util-logger";
-import {
-  DataSourceMap,
-  type ParsedPlugins,
-  type RivenPlugin,
-} from "@repo/util-plugin-sdk";
+import { DataSourceMap, type ParsedPlugins } from "@repo/util-plugin-sdk";
 
 import type { FetcherRequestInit } from "@apollo/utils.fetcher";
 import {
