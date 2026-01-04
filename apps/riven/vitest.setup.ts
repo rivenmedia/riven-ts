@@ -1,7 +1,7 @@
 import { BaseDataSource, createPluginRunner } from "@repo/util-plugin-sdk";
 
 import { DataSource } from "typeorm";
-import { beforeEach, vi } from "vitest";
+import { type Mock, beforeEach, expect, vi } from "vitest";
 
 vi.mock<{ default: Record<string, unknown> }>(
   import("./package.json"),
@@ -82,6 +82,26 @@ vi.mock<typeof import("@repo/core-util-database/connection")>(
     };
   },
 );
+
+expect.extend({
+  toHaveReceivedEvent(actorRef: { send: Mock }, expected: unknown) {
+    try {
+      expect(actorRef.send).toHaveBeenCalledWith(expected);
+
+      return {
+        pass: true,
+        message: () =>
+          `Expected event not to be:\n${this.utils.printExpected(expected)}`,
+      };
+    } catch {
+      return {
+        pass: false,
+        message: () =>
+          `Actor did not receive event:\n${this.utils.printExpected(expected)}`,
+      };
+    }
+  },
+});
 
 beforeEach(async () => {
   const { database } = await import("@repo/core-util-database/connection");

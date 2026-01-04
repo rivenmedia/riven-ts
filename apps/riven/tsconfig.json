@@ -8,6 +8,7 @@
   "files": [
     "eslint.config.ts",
     "codegen.ts",
+    "vitest.d.ts",
     "vitest.config.ts",
     "vitest.setup.ts"
   ],

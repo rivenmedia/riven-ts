@@ -5,7 +5,7 @@
     "composite": true,
     "rootDir": "."
   },
-  "files": [],
+  "files": ["vitest.d.ts"],
   "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],
   "exclude": []
 }
