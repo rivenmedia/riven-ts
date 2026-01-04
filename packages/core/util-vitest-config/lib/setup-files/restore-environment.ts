@@ -5,5 +5,5 @@ afterEach(() => {
   vi.useRealTimers();
 
   // Restore all mocks/spies after each test to avoid interference.
-  vi.resetAllMocks();
+  vi.clearAllMocks();
 });
