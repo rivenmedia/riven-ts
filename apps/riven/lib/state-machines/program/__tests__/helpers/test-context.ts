@@ -5,13 +5,13 @@ import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { vi } from "vitest";
 import { type Actor, createActor, fromPromise } from "xstate";
 
-import type { processRequestedItem } from "../../actors/process-requested-item.actor.ts";
-import type { stopGqlServer } from "../../actors/stop-gql-server.actor.ts";
+import type { PendingRunnerInvocationPlugin } from "../../..//plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import {
   type BootstrapMachineOutput,
   bootstrapMachine,
-} from "../../children/bootstrap/index.js";
-import type { PendingRunnerInvocationPlugin } from "../../children/plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+} from "../../../bootstrap/index.js";
+import type { processRequestedItem } from "../../actors/process-requested-item.actor.ts";
+import type { stopGqlServer } from "../../actors/stop-gql-server.actor.ts";
 import { type RivenMachineInput, rivenMachine } from "../../index.js";
 
 export const it = baseIt.extend<{

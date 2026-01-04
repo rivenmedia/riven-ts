@@ -12,9 +12,9 @@ import {
   waitFor,
 } from "xstate";
 
-import { redisCache } from "../../../../utilities/redis-cache.ts";
-import { rateLimiterMachine } from "../../../rate-limiter/index.ts";
-import { withLogAction } from "../../../utilities/with-log-action.ts";
+import { redisCache } from "../../utilities/redis-cache.ts";
+import { rateLimiterMachine } from "../rate-limiter/index.ts";
+import { withLogAction } from "../utilities/with-log-action.ts";
 import {
   type InvalidPlugin,
   type PendingRunnerInvocationPlugin,
