@@ -26,9 +26,9 @@ export const processRequestedItem = fromPromise<
 
   const existingItem = await database.manager.findOne(MediaItem, {
     where: [
-      { imdbId: item.imdbId ?? "" },
-      { tmdbId: item.tmdbId ?? "" },
-      { tvdbId: item.tvdbId ?? "" },
+      ...(item.imdbId ? [{ imdbId: item.imdbId }] : []),
+      ...(item.tmdbId ? [{ tmdbId: item.tmdbId }] : []),
+      ...(item.tvdbId ? [{ tvdbId: item.tvdbId }] : []),
     ],
   });
 
@@ -38,10 +38,11 @@ export const processRequestedItem = fromPromise<
       item: {
         ...item,
         id: existingItem.id,
+        ...(existingItem.title ? { title: existingItem.title } : {}),
       },
     });
 
-    return;
+    return undefined;
   }
 
   const itemEntity = new RequestedItem();

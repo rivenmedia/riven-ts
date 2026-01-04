@@ -16,11 +16,10 @@ const actor = createActor(rivenMachine, {
     sessionId,
   },
   inspect(inspectionEvent) {
-    if (inspectionEvent.type === "@xstate.event") {
-      if (inspectionEvent.actorRef !== actor) {
-        return;
-      }
-
+    if (
+      inspectionEvent.type === "@xstate.event" &&
+      inspectionEvent.event.type.startsWith("riven")
+    ) {
       eventsCache.set(
         safeStringify(inspectionEvent.event),
         inspectionEvent.event,
@@ -39,7 +38,7 @@ async function persistEvents() {
 
 const persistEventsIntervalId = setInterval(() => {
   void persistEvents();
-}, 10_000);
+}, 60_000);
 
 actor.start();
 
@@ -58,7 +57,7 @@ clearInterval(persistEventsIntervalId);
 
 if (value === "Errored") {
   logger.error(
-    "Riven encountered a fatal error. Persisting events to cache for debugging...",
+    `Riven encountered a fatal error. Persisting events to Redis [riven:events-cache:${sessionId}] for debugging...`,
   );
 
   await persistEvents();

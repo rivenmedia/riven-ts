@@ -1,3 +1,4 @@
+import type { MediaItem } from "../dto/entities/index.ts";
 import type { RequestedItem } from "../schemas/index.ts";
 import type { PluginEvent, ProgramEvent } from "../types/events.ts";
 
@@ -27,5 +28,5 @@ export type MediaItemCreationErrorEvent = ProgramEvent<
 
 export type MediaItemCreationAlreadyExistsEvent = ProgramEvent<
   "media-item.creation.already-exists",
-  { item: RequestedItem & { id: number } }
+  { item: RequestedItem & Pick<MediaItem, "id" | "title"> }
 >;
