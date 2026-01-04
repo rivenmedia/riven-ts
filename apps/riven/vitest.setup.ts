@@ -1,6 +1,7 @@
 import { BaseDataSource, createPluginRunner } from "@repo/util-plugin-sdk";
 
-import { vi } from "vitest";
+import { DataSource } from "typeorm";
+import { beforeEach, vi } from "vitest";
 
 vi.mock<{ default: Record<string, unknown> }>(
   import("./package.json"),
@@ -59,4 +60,31 @@ vi.mock<typeof import("@repo/plugin-test")>(import("@repo/plugin-test"), () => {
       },
     },
   };
+});
+
+vi.mock<typeof import("@repo/core-util-database/connection")>(
+  import("@repo/core-util-database/connection"),
+  async (importOriginal) => {
+    const { entities } = await importOriginal();
+
+    const database = new DataSource({
+      type: "sqlite",
+      database: ":memory:",
+      synchronize: true,
+      dropSchema: true,
+      entities,
+    });
+
+    await database.initialize();
+
+    return {
+      database,
+    };
+  },
+);
+
+beforeEach(async () => {
+  const { database } = await import("@repo/core-util-database/connection");
+
+  await database.synchronize(true);
 });

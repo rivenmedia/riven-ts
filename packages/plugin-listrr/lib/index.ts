@@ -28,7 +28,7 @@ export default {
           case "riven.started":
             void handleStarted();
             break;
-          case "riven.media-item.created":
+          case "riven.media-item.creation.success":
             console.log(
               "Listrr Plugin received created media item:",
               event.item,

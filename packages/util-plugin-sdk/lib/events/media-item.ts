@@ -12,7 +12,15 @@ export type MediaItemRequestedEvent = PluginEvent<
 /**
  * Event emitted when a new media item has been created from a requested item.
  */
-export type MediaItemCreatedEvent = ProgramEvent<
-  "media-item.created",
+export type MediaItemCreationSuccessEvent = ProgramEvent<
+  "media-item.creation.success",
   { item: RequestedItem }
+>;
+
+/**
+ * Event emitted when there was an error creating a media item from a requested item.
+ */
+export type MediaItemCreationErrorEvent = ProgramEvent<
+  "media-item.creation.error",
+  { item: RequestedItem; error: unknown }
 >;

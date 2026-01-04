@@ -11,14 +11,14 @@ import type { ApolloServer } from "@apollo/server";
 import type { UUID } from "node:crypto";
 import { assign, enqueueActions, setup } from "xstate";
 
-import { bootstrapMachine } from "../bootstrap/index.ts";
-import type {
-  PendingRunnerInvocationPlugin,
-  ValidPlugin,
-} from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { processRequestedItem } from "./actors/process-requested-item.actor.ts";
 import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
+import { bootstrapMachine } from "./children/bootstrap/index.ts";
+import type {
+  PendingRunnerInvocationPlugin,
+  ValidPlugin,
+} from "./children/plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 
 export interface RivenMachineContext {
   plugins?: Map<symbol, ValidPlugin>;
@@ -176,6 +176,15 @@ export const rivenMachine = setup({
               params: ({ event }) => ({
                 item: event.item,
                 plugin: event.plugin,
+              }),
+            },
+          },
+          "riven.media-item.creation.error": {
+            actions: {
+              type: "log",
+              params: ({ event }) => ({
+                message: `Error creating media item: ${JSON.stringify(event)}`,
+                level: "error",
               }),
             },
           },

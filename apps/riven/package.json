@@ -21,6 +21,7 @@
     "@repo/core-util-graphql-schema": "workspace:^",
     "@repo/plugin-listrr": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
+    "class-validator": "catalog:",
     "keyv": "^5.5.5",
     "limiter": "catalog:",
     "lru-cache": "^11.2.4",
@@ -52,6 +53,8 @@
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
     "msw": "catalog:",
+    "sqlite3": "^5.1.7",
+    "typeorm": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

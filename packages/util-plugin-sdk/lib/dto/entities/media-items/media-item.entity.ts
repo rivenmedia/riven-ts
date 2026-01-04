@@ -1,3 +1,4 @@
+import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
 import {
   Column,
@@ -59,16 +60,21 @@ export class MediaItem {
   @Field({ nullable: true })
   @Index({ unique: true })
   @Column({ nullable: true, unique: true })
+  @Matches(/^tt\d+$/)
   imdbId?: string;
 
   @Field({ nullable: true })
   @Index({ unique: true })
   @Column({ nullable: true, unique: true })
+  @IsNumberString()
+  @IsOptional()
   tvdbId?: string;
 
   @Field({ nullable: true })
   @Index({ unique: true })
   @Column({ nullable: true, unique: true })
+  @IsNumberString()
+  @IsOptional()
   tmdbId?: string;
 
   @Field({ nullable: true })
@@ -166,7 +172,7 @@ export class MediaItem {
   overseerrId?: number;
 
   @Field(() => mediaItemStateSchema.enum)
-  @Column("enum", { enum: mediaItemStateSchema.options })
+  @Column("simple-enum", { enum: mediaItemStateSchema.options })
   lastState!: MediaItemState;
 
   @Field(() => [FileSystemEntry])

@@ -1,14 +1,12 @@
-import { postgresDataSource } from "@repo/core-util-database/connection";
+import { database } from "@repo/core-util-database/connection";
 import { logger } from "@repo/core-util-logger";
 import type {
   ProgramToPluginEvent,
   RequestedItem as RequestedItemEventPayload,
 } from "@repo/util-plugin-sdk";
-import {
-  MediaItem,
-  RequestedItem,
-} from "@repo/util-plugin-sdk/dto/entities/index";
+import { RequestedItem } from "@repo/util-plugin-sdk/dto/entities/index";
 
+import { validateOrReject } from "class-validator";
 import { type ActorRef, type Snapshot, fromPromise } from "xstate";
 
 export interface ProcessRequestedItemInput {
@@ -35,15 +33,26 @@ export const processRequestedItem = fromPromise<
   itemEntity.lastState = "Requested";
 
   try {
-    await postgresDataSource.manager.insert(MediaItem, itemEntity);
+    await validateOrReject(itemEntity);
 
-    parentRef.send({
-      type: "riven.media-item.created",
-      item: itemEntity,
+    const result = await database.manager.insert(RequestedItem, itemEntity);
+    const item = await database.getRepository(RequestedItem).findOneByOrFail({
+      id: result.raw as number,
     });
 
-    logger.info(`Processed requested item: ${JSON.stringify(itemEntity)}`);
+    parentRef.send({
+      type: "riven.media-item.creation.success",
+      item,
+    });
+
+    logger.info(`Processed requested item: ${JSON.stringify(result)}`);
   } catch (error) {
+    console.log(error);
+    parentRef.send({
+      type: "riven.media-item.creation.error",
+      item,
+      error,
+    });
     logger.silly(
       `Error inserting requested item: ${JSON.stringify(item)}`,
       error,

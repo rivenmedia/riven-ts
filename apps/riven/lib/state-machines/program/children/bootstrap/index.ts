@@ -6,6 +6,7 @@ import type {
 import type { ApolloServer } from "@apollo/server";
 import { type AnyActorRef, assign, setup } from "xstate";
 
+import { withLogAction } from "../../../utilities/with-log-action.ts";
 import {
   type InvalidPlugin,
   type PendingRunnerInvocationPlugin,
@@ -15,7 +16,6 @@ import {
   type PluginRegistrarMachineOutput,
   pluginRegistrarMachine,
 } from "../plugin-registrar/index.ts";
-import { withLogAction } from "../utilities/with-log-action.ts";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 

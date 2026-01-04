@@ -14,7 +14,7 @@ import {
 import { DataSource } from "typeorm";
 import { z } from "zod";
 
-const entities = [
+export const entities = [
   SubtitleEntry,
   FileSystemEntry,
   MediaEntry,
@@ -27,7 +27,7 @@ const entities = [
   Stream,
 ];
 
-export const postgresDataSource = new DataSource({
+export const database = new DataSource({
   url: z.string().parse(process.env["DATABASE_URL"]),
   type: "postgres",
   synchronize: true,

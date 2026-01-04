@@ -46,6 +46,17 @@ configDependencies:
 
 linkWorkspacePackages: true
 
+onlyBuiltDependencies:
+  - "@apollo/protobufjs"
+  - "@parcel/watcher"
+  - "@swc/core"
+  - core-js-pure
+  - es5-ext
+  - esbuild
+  - msw
+  - sqlite3
+  - unrs-resolver
+
 publicHoistPattern:
   - "*vitest*"
   - vite-node

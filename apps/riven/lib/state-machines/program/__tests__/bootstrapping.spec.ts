@@ -1,7 +1,7 @@
 import { expect, vi } from "vitest";
 import type { ActorRefFrom } from "xstate";
 
-import type { BootstrapMachineOutput } from "../../bootstrap/index.ts";
+import type { BootstrapMachineOutput } from "../children/bootstrap/index.ts";
 import type { rivenMachine } from "../index.ts";
 import { it } from "./helpers/test-context.ts";
 
