@@ -8,7 +8,7 @@ import { ApolloServerPluginCacheControl } from "@apollo/server/plugin/cacheContr
 import { startStandaloneServer } from "@apollo/server/standalone";
 import { fromPromise } from "xstate";
 
-import { redisCache } from "../../../../../utilities/redis-cache.ts";
+import { redisCache } from "../../../utilities/redis-cache.ts";
 
 export interface StartGQLServerOutput {
   server: ApolloServer;

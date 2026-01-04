@@ -9,7 +9,7 @@ import {
 import "reflect-metadata";
 import { type ActorRefFromLogic, fromPromise } from "xstate";
 
-import packageJson from "../../../../../../package.json" with { type: "json" };
+import packageJson from "../../../../package.json" with { type: "json" };
 
 export type RegisteredPlugin = {
   status: string;
