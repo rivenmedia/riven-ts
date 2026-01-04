@@ -174,7 +174,7 @@ export class MediaItem {
 
   @Field(() => mediaItemStateSchema.enum)
   @Column("simple-enum", { enum: mediaItemStateSchema.options })
-  lastState!: MediaItemState;
+  state!: MediaItemState;
 
   @Field(() => [FileSystemEntry])
   @ManyToMany("FileSystemEntry", (entry: FileSystemEntry) => entry.id)

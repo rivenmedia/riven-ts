@@ -1,8 +1,8 @@
-/* eslint-disable no-empty-pattern */
 import { it as baseIt } from "@repo/core-util-vitest-test-context";
 import testPlugin from "@repo/plugin-test";
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
+import { vi } from "vitest";
 import { type Actor, createActor } from "xstate";
 
 import {
@@ -16,12 +16,7 @@ export const it = baseIt.extend<{
   input: MainRunnerMachineInput;
   machine: typeof mainRunnerMachine;
 }>({
-  machine: ({}, use) =>
-    use(
-      mainRunnerMachine.provide({
-        actors: {},
-      }),
-    ),
+  machine: mainRunnerMachine,
   input: {
     plugins: new Map<symbol, PendingRunnerInvocationPlugin>([
       [
@@ -35,7 +30,9 @@ export const it = baseIt.extend<{
     ]),
   },
   actor: async ({ input, machine }, use) => {
-    const actor = createActor(machine, { input });
+    const actor = createActor(machine, { id: "Main runner", input });
+
+    vi.spyOn(actor, "send");
 
     await use(actor);
 

@@ -55,7 +55,7 @@ export const processRequestedItem = fromPromise<
     itemEntity.tmdbId = item.tmdbId;
   }
 
-  itemEntity.lastState = "Requested";
+  itemEntity.state = "Requested";
 
   try {
     await validateOrReject(itemEntity);

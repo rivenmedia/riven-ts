@@ -10,8 +10,6 @@ it('processes the requested item when a "riven-plugin.media-item.requested" even
 }) => {
   const requestedId = "tt7654321";
 
-  vi.spyOn(actor, "send");
-
   actor.start();
 
   const pluginRunnerRef = actor
@@ -32,7 +30,7 @@ it('processes the requested item when a "riven-plugin.media-item.requested" even
     type: "riven.media-item.creation.success",
     item: expect.objectContaining<Partial<RequestedItem>>({
       imdbId: requestedId,
-      lastState: "Requested",
+      state: "Requested",
       id: 1,
     }) as never,
   } satisfies MediaItemCreationSuccessEvent;

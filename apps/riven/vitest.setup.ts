@@ -97,7 +97,7 @@ expect.extend({
       return {
         pass: false,
         message: () =>
-          `Actor "${actorRef.id}" did not receive event:\n${this.utils.printReceived(expected)}`,
+          `Actor "${actorRef.id}" did not receive event:\n${this.utils.printReceived(expected)}.\nReceived events:\n${this.utils.printExpected(actorRef.send.mock.calls.flatMap((x: unknown) => x))}`,
       };
     }
   },

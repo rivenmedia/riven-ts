@@ -30,7 +30,7 @@ it("sends a success event if the item is processed successfully", async () => {
       type: "riven.media-item.creation.success",
       item: expect.objectContaining<Partial<RequestedItem>>({
         imdbId: requestedId,
-        lastState: "Requested",
+        state: "Requested",
         id: 1,
       }) as never,
     });
