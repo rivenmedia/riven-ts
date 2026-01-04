@@ -4,7 +4,7 @@ import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type {
   RequestOptions,
   ValueOrPromise,
-} from "@apollo/datasource-rest/dist/RESTDataSource.js";
+} from "@apollo/datasource-rest/dist/RESTDataSource.ts";
 
 import type {
   GetListItemsByNameQueryResponse,

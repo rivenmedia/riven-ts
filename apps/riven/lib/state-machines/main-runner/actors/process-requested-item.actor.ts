@@ -4,10 +4,14 @@ import type {
   ProgramToPluginEvent,
   RequestedItem as RequestedItemEventPayload,
 } from "@repo/util-plugin-sdk";
-import { RequestedItem } from "@repo/util-plugin-sdk/dto/entities/index";
+import {
+  MediaItem,
+  RequestedItem,
+} from "@repo/util-plugin-sdk/dto/entities/index";
 
-import { validateOrReject } from "class-validator";
+import { ValidationError, validateOrReject } from "class-validator";
 import { type ActorRef, type Snapshot, fromPromise } from "xstate";
+import z from "zod";
 
 export interface ProcessRequestedItemInput {
   item: RequestedItemEventPayload;
@@ -19,6 +23,26 @@ export const processRequestedItem = fromPromise<
   ProcessRequestedItemInput
 >(async ({ input: { item, parentRef } }) => {
   logger.info("Processing requested item...", item);
+
+  const existingItem = await database.manager.findOne(MediaItem, {
+    where: [
+      { imdbId: item.imdbId ?? "" },
+      { tmdbId: item.tmdbId ?? "" },
+      { tvdbId: item.tvdbId ?? "" },
+    ],
+  });
+
+  if (existingItem) {
+    parentRef.send({
+      type: "riven.media-item.creation.already-exists",
+      item: {
+        ...item,
+        id: existingItem.id,
+      },
+    });
+
+    return;
+  }
 
   const itemEntity = new RequestedItem();
 
@@ -44,18 +68,21 @@ export const processRequestedItem = fromPromise<
       type: "riven.media-item.creation.success",
       item,
     });
-
-    logger.info(`Processed requested item: ${JSON.stringify(result)}`);
   } catch (error) {
-    console.log(error);
+    const parsedError = z
+      .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
+      .parse(error);
+
     parentRef.send({
       type: "riven.media-item.creation.error",
       item,
-      error,
+      error: Array.isArray(parsedError)
+        ? parsedError
+            .map((err) =>
+              err.constraints ? Object.values(err.constraints).join("; ") : "",
+            )
+            .join("; ")
+        : parsedError.message,
     });
-    logger.silly(
-      `Error inserting requested item: ${JSON.stringify(item)}`,
-      error,
-    );
   }
 });

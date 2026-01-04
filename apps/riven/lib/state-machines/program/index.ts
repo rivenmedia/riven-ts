@@ -1,27 +1,18 @@
-import { logger } from "@repo/core-util-logger";
-import type { ParamsFor } from "@repo/util-plugin-sdk";
-import type {
-  MediaItemRequestedEvent,
-  PluginToProgramEvent,
-  ProgramToPluginEvent,
-  ShutdownEvent,
-} from "@repo/util-plugin-sdk/events";
+import type { ShutdownEvent } from "@repo/util-plugin-sdk/events";
 
 import type { ApolloServer } from "@apollo/server";
 import type { UUID } from "node:crypto";
-import { assign, enqueueActions, setup } from "xstate";
+import { type AnyActorRef, assign, setup } from "xstate";
 
 import { bootstrapMachine } from "../bootstrap/index.ts";
-import type {
-  PendingRunnerInvocationPlugin,
-  ValidPlugin,
-} from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+import { mainRunnerMachine } from "../main-runner/index.ts";
+import type { PendingRunnerInvocationPlugin } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
-import { processRequestedItem } from "./actors/process-requested-item.actor.ts";
 import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 
 export interface RivenMachineContext {
-  plugins?: Map<symbol, ValidPlugin>;
+  mainRunnerRef?: AnyActorRef;
+  plugins?: Map<symbol, PendingRunnerInvocationPlugin>;
   server?: ApolloServer;
 }
 
@@ -29,10 +20,7 @@ export interface RivenMachineInput {
   sessionId: UUID;
 }
 
-export type RivenMachineEvent =
-  | PluginToProgramEvent
-  | ProgramToPluginEvent
-  | ShutdownEvent;
+export type RivenMachineEvent = ShutdownEvent;
 
 export const rivenMachine = setup({
   types: {
@@ -40,71 +28,19 @@ export const rivenMachine = setup({
     events: {} as RivenMachineEvent,
     input: {} as RivenMachineInput,
     children: {} as {
-      bootstrap: "bootstrapMachine";
-      processRequestedItem: "processRequestedItem";
+      bootstrapMachine: "bootstrapMachine";
       stopGqlServer: "stopGqlServer";
+      mainRunnerMachine: "mainRunnerMachine";
     },
   },
   actions: {
-    broadcastToPlugins: ({ context }, event: ProgramToPluginEvent) => {
-      if (!context.plugins) {
-        logger.warn(
-          `Attempted to broadcast ${event.type} with no plugins loaded. ` +
-            `Double-check that plugins have been installed.`,
-        );
-
-        return;
-      }
-
-      for (const { runnerRef } of context.plugins.values()) {
-        runnerRef.send(event);
-      }
-    },
-    invokePluginRunners: assign(
-      ({ spawn }, plugins: Map<symbol, PendingRunnerInvocationPlugin>) => {
-        const pluginMap = new Map<symbol, ValidPlugin>();
-
-        for (const [
-          pluginSymbol,
-          { config, dataSources },
-        ] of plugins.entries()) {
-          const pluginRef = spawn(config.runner, {
-            input: {
-              pluginSymbol,
-              dataSources,
-            },
-          });
-
-          pluginMap.set(pluginSymbol, {
-            status: "valid",
-            config,
-            dataSources,
-            runnerRef: pluginRef,
-          });
-        }
-
-        return {
-          plugins: pluginMap,
-        };
-      },
-    ),
     storeGqlServerInstance: assign({
       server: (_, server: ApolloServer) => server,
     }),
-    processRequestedItem: enqueueActions(
-      ({ enqueue, self }, params: ParamsFor<MediaItemRequestedEvent>) => {
-        enqueue.spawnChild(processRequestedItem, {
-          input: {
-            item: params.item,
-            parentRef: self,
-          },
-        });
-      },
-    ),
   },
   actors: {
     bootstrapMachine,
-    processRequestedItem,
+    mainRunnerMachine,
     stopGqlServer,
   },
 })
@@ -118,20 +54,18 @@ export const rivenMachine = setup({
     states: {
       Bootstrapping: {
         invoke: {
-          id: "bootstrap",
+          id: "bootstrapMachine",
           src: "bootstrapMachine",
           input: ({ self }) => ({ rootRef: self }),
           onDone: {
-            actions: [
-              {
-                type: "invokePluginRunners",
-                params: ({ event }) => event.output.plugins,
-              },
-              {
-                type: "storeGqlServerInstance",
-                params: ({ event }) => event.output.server,
-              },
-            ],
+            actions: assign(({ spawn, event }) => ({
+              server: event.output.server,
+              mainRunnerRef: spawn(mainRunnerMachine, {
+                input: {
+                  plugins: event.output.plugins,
+                },
+              }),
+            })),
             target: "Running",
           },
           onError: {
@@ -146,50 +80,7 @@ export const rivenMachine = setup({
           },
         },
       },
-      Running: {
-        entry: [
-          {
-            type: "broadcastToPlugins",
-            params: {
-              type: "riven.started",
-            },
-          },
-          {
-            type: "log",
-            params: {
-              message: "Riven has started successfully.",
-            },
-          },
-        ],
-        on: {
-          "riven.media-item.*": {
-            actions: [
-              {
-                type: "broadcastToPlugins",
-                params: ({ event }) => event,
-              },
-            ],
-          },
-          "riven-plugin.media-item.requested": {
-            actions: {
-              type: "processRequestedItem",
-              params: ({ event }) => ({
-                item: event.item,
-                plugin: event.plugin,
-              }),
-            },
-          },
-          "riven.media-item.creation.error": {
-            actions: {
-              type: "log",
-              params: ({ event }) => ({
-                message: `Error creating media item: ${JSON.stringify(event)}`,
-                level: "error",
-              }),
-            },
-          },
-        },
-      },
+      Running: {},
       Errored: {
         type: "final",
         entry: {

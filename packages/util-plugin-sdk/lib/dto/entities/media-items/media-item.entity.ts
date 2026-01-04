@@ -12,7 +12,7 @@ import {
 } from "typeorm";
 import { z } from "zod";
 
-import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.js";
+import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import { Stream } from "../streams/stream.entity.ts";
 
@@ -61,6 +61,7 @@ export class MediaItem {
   @Index({ unique: true })
   @Column({ nullable: true, unique: true })
   @Matches(/^tt\d+$/)
+  @IsOptional()
   imdbId?: string;
 
   @Field({ nullable: true })

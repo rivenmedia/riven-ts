@@ -24,3 +24,8 @@ export type MediaItemCreationErrorEvent = ProgramEvent<
   "media-item.creation.error",
   { item: RequestedItem; error: unknown }
 >;
+
+export type MediaItemCreationAlreadyExistsEvent = ProgramEvent<
+  "media-item.creation.already-exists",
+  { item: RequestedItem & { id: number } }
+>;

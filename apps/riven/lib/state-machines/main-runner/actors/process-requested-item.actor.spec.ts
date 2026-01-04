@@ -3,12 +3,14 @@ import { RequestedItem } from "@repo/util-plugin-sdk/dto/entities/index";
 import { expect, it, vi } from "vitest";
 import { type ActorRefFrom, createActor, createEmptyActor } from "xstate";
 
-import type { rivenMachine } from "../index.ts";
+import type { mainRunnerMachine } from "../index.ts";
 import { processRequestedItem } from "./process-requested-item.actor.ts";
 
 it("sends a success event if the item is processed successfully", async () => {
   const requestedId = "tt1234567";
-  const parentRef = createEmptyActor() as ActorRefFrom<typeof rivenMachine>;
+  const parentRef = createEmptyActor() as ActorRefFrom<
+    typeof mainRunnerMachine
+  >;
 
   vi.spyOn(parentRef, "send");
 
@@ -37,7 +39,9 @@ it("sends a success event if the item is processed successfully", async () => {
 
 it("sends an error event if the item processing fails", async () => {
   const requestedId = "1234";
-  const parentRef = createEmptyActor() as ActorRefFrom<typeof rivenMachine>;
+  const parentRef = createEmptyActor() as ActorRefFrom<
+    typeof mainRunnerMachine
+  >;
 
   vi.spyOn(parentRef, "send");
 
@@ -62,3 +66,7 @@ it("sends an error event if the item processing fails", async () => {
     });
   });
 });
+
+it.todo("sends an already-exists event if the item already exists");
+
+it.todo("does not save duplicate items");

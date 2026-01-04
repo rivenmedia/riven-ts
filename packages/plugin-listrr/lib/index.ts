@@ -28,6 +28,12 @@ export default {
           case "riven.started":
             void handleStarted();
             break;
+          case "riven.media-item.creation.error":
+            console.error(
+              "Listrr Plugin received media item creation error:",
+              event.error,
+            );
+            break;
           case "riven.media-item.creation.success":
             console.log(
               "Listrr Plugin received created media item:",

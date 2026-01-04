@@ -84,20 +84,20 @@ vi.mock<typeof import("@repo/core-util-database/connection")>(
 );
 
 expect.extend({
-  toHaveReceivedEvent(actorRef: { send: Mock }, expected: unknown) {
+  toHaveReceivedEvent(actorRef: { id: string; send: Mock }, expected: unknown) {
     try {
       expect(actorRef.send).toHaveBeenCalledWith(expected);
 
       return {
         pass: true,
         message: () =>
-          `Expected event not to be:\n${this.utils.printExpected(expected)}`,
+          `Actor "${actorRef.id}" received event:\n${this.utils.printExpected(expected)}`,
       };
     } catch {
       return {
         pass: false,
         message: () =>
-          `Actor did not receive event:\n${this.utils.printExpected(expected)}`,
+          `Actor "${actorRef.id}" did not receive event:\n${this.utils.printReceived(expected)}`,
       };
     }
   },

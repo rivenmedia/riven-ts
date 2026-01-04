@@ -26,11 +26,17 @@ export const logger = createLogger({
     }),
     format.errors({ stack: true }),
     format.splat(),
-    format.json(),
+    format.json({
+      space: 2,
+    }),
   ),
   transports: [
     new transports.Console({
-      format: format.combine(format.colorize(), logFormat),
+      format: format.combine(
+        format.json({ space: 2 }),
+        format.colorize(),
+        logFormat,
+      ),
       silent: isTestEnvironment,
     }),
   ],
@@ -46,6 +52,9 @@ export const logger = createLogger({
             filename: "exceptions.log",
             dirname: logDir,
             silent: isTestEnvironment,
+            tailable: true,
+            maxsize: 10 * 1024 * 1024, // 10MB
+            maxFiles: 5,
           }),
         ]),
   ],
@@ -58,6 +67,9 @@ if (!isTestEnvironment) {
       filename: "error.log",
       dirname: logDir,
       level: "error",
+      tailable: true,
+      maxsize: 10 * 1024 * 1024, // 10MB
+      maxFiles: 5,
     }),
   );
 
@@ -65,6 +77,9 @@ if (!isTestEnvironment) {
     new transports.File({
       filename: "combined.log",
       dirname: logDir,
+      tailable: true,
+      maxsize: 10 * 1024 * 1024, // 10MB
+      maxFiles: 5,
     }),
   );
 }

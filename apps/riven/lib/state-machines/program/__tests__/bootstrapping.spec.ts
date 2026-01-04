@@ -1,7 +1,7 @@
 import { expect, vi } from "vitest";
 import type { ActorRefFrom } from "xstate";
 
-import type { BootstrapMachineOutput } from "../children/bootstrap/index.ts";
+import type { BootstrapMachineOutput } from "../../bootstrap/index.ts";
 import type { rivenMachine } from "../index.ts";
 import { it } from "./helpers/test-context.ts";
 
@@ -11,7 +11,7 @@ function sendBootstrapDoneEvent(
 ) {
   actor.send({
     // @ts-expect-error Internal XState event
-    type: "xstate.done.actor.bootstrap",
+    type: "xstate.done.actor.bootstrapMachine",
     output,
   });
 }
@@ -29,16 +29,13 @@ it("assigns the Apollo Server instance to context when bootstrapping is complete
   );
 });
 
-it("starts the plugin runners when bootstrapping is complete", async ({
+it("starts the main runner when bootstrapping is complete", ({
   actor,
   bootstrapMachineOutput,
 }) => {
-  const testPlugin = await import("@repo/plugin-test");
-  const pluginHookSpy = vi.spyOn(testPlugin.default.runner, "start");
-
   actor.start();
 
   sendBootstrapDoneEvent(actor, bootstrapMachineOutput);
 
-  expect(pluginHookSpy).toHaveBeenCalledOnce();
+  expect(actor.getSnapshot().context.mainRunnerRef).toBeDefined();
 });

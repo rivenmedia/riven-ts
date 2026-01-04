@@ -1,5 +1,6 @@
 import {
   type ActorRef,
+  type CallbackActorLogic,
   type CallbackLogicFunction,
   type MachineContext,
   type Snapshot,
@@ -88,6 +89,10 @@ export const createPluginRunner = (callback: PluginRunner) =>
     },
   );
 
-export type PluginRunnerLogic = ReturnType<typeof createPluginRunner>;
+export type PluginRunnerLogic = CallbackActorLogic<
+  ProgramToPluginEvent,
+  PluginRunnerInput,
+  PluginToProgramEvent
+>;
 
 export type { ProgramToPluginEvent };
