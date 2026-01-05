@@ -1,3 +1,5 @@
+import { logger } from "@repo/core-util-logger";
+
 import { type EventObject, fromCallback } from "xstate";
 
 import type {
@@ -50,7 +52,7 @@ export const pluginActor = fromCallback<ProgramToPluginEvent, PluginActorInput>(
     });
 
     return () => {
-      console.log(
+      logger.silly(
         "Plugin actor shutdown for",
         String(input.pluginSymbol.description),
       );

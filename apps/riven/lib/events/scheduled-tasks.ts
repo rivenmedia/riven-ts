@@ -1,6 +1,6 @@
 /**
  * Event emitted to trigger a retry of the user's library.
  */
-export interface RetryLibraryEvent {
+export type RetryLibraryEvent = {
   type: "retry-library";
-}
+};

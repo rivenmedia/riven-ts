@@ -49,6 +49,7 @@ export const mainRunnerMachine = setup({
     ),
     retryLibrary: enqueueActions(({ enqueue, self }) => {
       enqueue.spawnChild(retryLibraryActor, {
+        id: "retry-library-actor" as never,
         input: {
           parentRef: self,
         },
@@ -146,7 +147,7 @@ export const mainRunnerMachine = setup({
           }),
         },
       },
-      "riven.retry-library": {
+      "retry-library": {
         description:
           "Retries processing of any media items that are in a pending state.",
         actions: {

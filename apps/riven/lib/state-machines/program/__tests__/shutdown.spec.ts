@@ -6,7 +6,7 @@ import { it } from "./helpers/test-context.ts";
 it('transitions to "Shutdown" then "Exited" when the "riven.shutdown" event is sent', async ({
   actor,
 }) => {
-  actor.start().send({ type: "riven.shutdown" });
+  actor.start().send({ type: "riven.core.shutdown" });
 
   expect(actor.getSnapshot().value).toBe("Shutdown");
 
@@ -32,7 +32,7 @@ it("stops the GraphQL server when shutting down", async ({
     },
   );
 
-  actor.start().send({ type: "riven.shutdown" });
+  actor.start().send({ type: "riven.core.shutdown" });
 
   await vi.waitFor(() => {
     expect(actor.getSnapshot().value).toBe("Exited");
