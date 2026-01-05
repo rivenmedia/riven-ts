@@ -1,8 +1,5 @@
-import {
-  BaseDataSource,
-  type BasePluginContext,
-  type RequestedItem,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
+import type { RequestedItem } from "@repo/util-plugin-sdk/schemas/media-item/requested-item";
 
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 

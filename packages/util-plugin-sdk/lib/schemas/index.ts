@@ -5,8 +5,13 @@ import {
   BaseDataSource,
   type BaseDataSourceConfig,
 } from "../datasource/index.ts";
-import type { PluginRunnerLogic } from "../state-machine-helpers/create-plugin-runner.ts";
 import { DataSourceMap } from "../types/utilities.ts";
+import { CoreStartedEventHandler } from "./program-to-plugin-events/core/started.ts";
+import { ProgramToPluginEvent } from "./program-to-plugin-events/index.ts";
+import { MediaItemCreationAlreadyExistsEventHandler } from "./program-to-plugin-events/media-item/creation/already-exists.ts";
+import { MediaItemCreationErrorEventHandler } from "./program-to-plugin-events/media-item/creation/error.ts";
+import { MediaItemCreationSuccessEventHandler } from "./program-to-plugin-events/media-item/creation/success.ts";
+import type { createEventHandlerSchema } from "./utilities/create-event-handler-schema.ts";
 
 export const RivenPluginConfig = z.readonly(
   z.object({
@@ -15,37 +20,6 @@ export const RivenPluginConfig = z.readonly(
 );
 
 export type RivenPluginConfig = z.infer<typeof RivenPluginConfig>;
-
-export const requestedItemSchema = z.object({
-  imdbId: z.string().optional(),
-  tmdbId: z.string().optional(),
-  tvdbId: z.string().optional(),
-});
-
-export type RequestedItem = z.infer<typeof requestedItemSchema>;
-
-const actorSchema = z.object({
-  config: z.function(),
-  start: z.function({
-    input: z.any(),
-  }),
-  transition: z.function({
-    input: z.any(),
-  }),
-  getInitialSnapshot: z.function({
-    input: z.any(),
-  }),
-  getPersistedSnapshot: z.function({
-    input: z.any(),
-    output: z.any(),
-  }),
-});
-
-type Actor = z.infer<typeof actorSchema>;
-
-const isActor = (value: unknown): value is Actor => {
-  return actorSchema.safeParse(value).success;
-};
 
 const instantiatableSchema = z.object({
   constructor: z.any(),
@@ -90,11 +64,19 @@ const dataSourceSchema = z.custom<DataSourceConstructor>((value) => {
   return instantiatableSchema.safeParse(value.prototype).success;
 });
 
+export const hooksMap = {
+  "riven.core.started": CoreStartedEventHandler,
+  "riven.media-item.creation.already-exists":
+    MediaItemCreationAlreadyExistsEventHandler,
+  "riven.media-item.creation.error": MediaItemCreationErrorEventHandler,
+  "riven.media-item.creation.success": MediaItemCreationSuccessEventHandler,
+} satisfies Record<ProgramToPluginEvent["type"], z.ZodFunction>;
+
 export const RivenPlugin = z.object({
   name: z.symbol(),
   dataSources: z.tuple([dataSourceSchema]).rest(dataSourceSchema).optional(),
   resolvers: z.array(z.instanceof(Function)).min(1),
-  runner: z.custom<PluginRunnerLogic>((value) => isActor(value)),
+  hooks: z.object(hooksMap).partial(),
   context: z
     .function({
       input: [
@@ -118,14 +100,4 @@ export const rivenPluginPackageSchema = z.object({
 
 export type RivenPluginPackage = z.infer<typeof rivenPluginPackageSchema>;
 
-export const isRivenPluginPackage = (
-  obj: unknown,
-): obj is { default: RivenPlugin } => {
-  if (typeof obj !== "object" || obj === null) {
-    return false;
-  }
-
-  const maybePlugin = (obj as { default?: unknown }).default;
-
-  return RivenPlugin.safeParse(maybePlugin).success;
-};
+export type EventHandler = z.infer<ReturnType<typeof createEventHandlerSchema>>;

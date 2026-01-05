@@ -1,4 +1,4 @@
-import { type RivenPlugin, createPluginRunner } from "@repo/util-plugin-sdk";
+import { type RivenPlugin } from "@repo/util-plugin-sdk";
 
 import { TestAPI } from "./datasource/test.datasource.ts";
 import { TestSettingsResolver } from "./schema/test-settings.resolver.ts";
@@ -9,9 +9,7 @@ export default {
   name: pluginConfig.name,
   dataSources: [TestAPI],
   resolvers: [TestResolver, TestSettingsResolver],
-  runner: createPluginRunner(() => {
-    /* empty */
-  }),
+  hooks: {},
   validator() {
     return true;
   },

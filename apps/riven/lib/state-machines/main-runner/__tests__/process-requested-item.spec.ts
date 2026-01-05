@@ -14,7 +14,7 @@ it('processes the requested item when a "riven-plugin.media-item.requested" even
 
   const pluginRunnerRef = actor
     .getSnapshot()
-    .context.plugins.get(Symbol.for("Plugin: Test"))?.runnerRef;
+    .context.pluginRefs.get(Symbol.for("Plugin: Test"));
 
   vi.spyOn(pluginRunnerRef!, "send");
 

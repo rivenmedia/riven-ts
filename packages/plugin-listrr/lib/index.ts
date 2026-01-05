@@ -1,4 +1,5 @@
-import { type RivenPlugin, createPluginRunner } from "@repo/util-plugin-sdk";
+import { type RivenPlugin } from "@repo/util-plugin-sdk";
+import { CoreStartedEventHandler } from "@repo/util-plugin-sdk/program-to-plugin-events/core/started";
 
 import { ListrrAPI } from "./datasource/listrr.datasource.ts";
 import { pluginConfig } from "./listrr-plugin.config.ts";
@@ -9,44 +10,39 @@ export default {
   name: pluginConfig.name,
   resolvers: [ListrrResolver, ListrrSettingsResolver],
   dataSources: [ListrrAPI],
-  runner: createPluginRunner(
-    ({ input: { dataSources }, helpers: { publishEvent }, receive }) => {
-      const api = dataSources.get(ListrrAPI);
+  hooks: {
+    "riven.core.started": CoreStartedEventHandler.implementAsync(
+      async ({ dataSources, publishEvent }) => {
+        const api = dataSources.get(ListrrAPI);
 
-      async function handleStarted() {
         for (const show of await api.getShows(
           new Set(["6941fe52770814e293788237"]),
         )) {
-          publishEvent("riven-plugin.media-item.requested", {
+          publishEvent({
+            type: "riven-plugin.media-item.requested",
             item: show,
           });
         }
-      }
-
-      receive((event) => {
-        switch (event.type) {
-          case "riven.started":
-            void handleStarted();
-            break;
-          case "riven.media-item.creation.error":
-            console.error(
-              "Listrr Plugin received media item creation error:",
-              event.error,
-            );
-            break;
-          case "riven.media-item.creation.success":
-            console.log(
-              "Listrr Plugin received created media item:",
-              event.item,
-            );
-            break;
-        }
-      });
-
-      return () => {
-        console.log("Listrr Plugin runner stopped");
-      };
+      },
+    ),
+    "riven.media-item.creation.already-exists": ({ event }) => {
+      console.log(
+        "Listrr Plugin noticed media item already exists:",
+        event.item,
+      );
     },
-  ),
+    "riven.media-item.creation.error": ({ event }) => {
+      console.error(
+        "Listrr Plugin noticed media item creation error:",
+        event.error,
+      );
+    },
+    "riven.media-item.creation.success": ({ event }) => {
+      console.log(
+        "Listrr Plugin noticed media item created successfully:",
+        event.item,
+      );
+    },
+  },
   validator: () => true,
 } satisfies RivenPlugin;

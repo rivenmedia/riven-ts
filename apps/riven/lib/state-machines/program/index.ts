@@ -1,4 +1,4 @@
-import type { ShutdownEvent } from "@repo/util-plugin-sdk/events";
+import type { ShutdownEvent } from "@repo/util-plugin-sdk/program-to-plugin-events/core/shutdown";
 
 import type { ApolloServer } from "@apollo/server";
 import type { UUID } from "node:crypto";
@@ -49,7 +49,7 @@ export const rivenMachine = setup({
     id: "Riven",
     initial: "Bootstrapping",
     on: {
-      "riven.shutdown": ".Shutdown",
+      "riven.core.shutdown": ".Shutdown",
     },
     states: {
       Bootstrapping: {

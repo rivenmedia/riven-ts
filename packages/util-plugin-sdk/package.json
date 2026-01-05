@@ -5,9 +5,13 @@
   "type": "module",
   "exports": {
     ".": "./lib/index.ts",
-    "./events": "./lib/events/index.ts",
     "./types/*": "./lib/types/*.ts",
-    "./dto/*": "./lib/dto/*.ts"
+    "./dto/*": "./lib/dto/*.ts",
+    "./plugin-to-program-events": "./lib/schemas/plugin-to-program-events/index.ts",
+    "./plugin-to-program-events/*": "./lib/schemas/plugin-to-program-events/*.ts",
+    "./program-to-plugin-events": "./lib/schemas/program-to-plugin-events/index.ts",
+    "./program-to-plugin-events/*": "./lib/schemas/program-to-plugin-events/*.ts",
+    "./schemas/media-item/*": "./lib/schemas/media-item/*.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",

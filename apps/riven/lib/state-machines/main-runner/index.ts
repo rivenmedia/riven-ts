@@ -1,23 +1,19 @@
 import type { ParamsFor } from "@repo/util-plugin-sdk";
-import type {
-  MediaItemRequestedEvent,
-  PluginToProgramEvent,
-  ProgramToPluginEvent,
-  RetryLibraryEvent,
-} from "@repo/util-plugin-sdk/events";
+import type { PluginToProgramEvent } from "@repo/util-plugin-sdk/plugin-to-program-events";
+import type { MediaItemRequestedEvent } from "@repo/util-plugin-sdk/plugin-to-program-events/media-item/requested";
+import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
 
-import { enqueueActions, raise, setup } from "xstate";
+import { type ActorRefFromLogic, enqueueActions, raise, setup } from "xstate";
 
-import type {
-  PendingRunnerInvocationPlugin,
-  ValidPlugin,
-} from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+import type { RetryLibraryEvent } from "../../events/scheduled-tasks.ts";
+import type { PendingRunnerInvocationPlugin } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
+import { pluginActor } from "./actors/plugin.actor.js";
 import { processRequestedItem } from "./actors/process-requested-item.actor.ts";
 import { retryLibraryActor } from "./actors/retry-library.actor.ts";
 
 export interface MainRunnerMachineContext {
-  plugins: Map<symbol, ValidPlugin>;
+  pluginRefs: Map<symbol, ActorRefFromLogic<typeof pluginActor>>;
 }
 
 export interface MainRunnerMachineInput {
@@ -37,8 +33,8 @@ export const mainRunnerMachine = setup({
   },
   actions: {
     broadcastToPlugins: ({ context }, event: ProgramToPluginEvent) => {
-      for (const { runnerRef } of context.plugins.values()) {
-        runnerRef.send(event);
+      for (const pluginRef of context.pluginRefs.values()) {
+        pluginRef.send(event);
       }
     },
     processRequestedItem: enqueueActions(
@@ -65,40 +61,39 @@ export const mainRunnerMachine = setup({
     /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7ABABwCcB7KAgQwFscKzVcCBXLLMAgYgI2wDoLJUyAWlQAXMBW4AqANoAGALqJQeIrFGoiWJSAAeiAIwAmADQgAnogCsATmvcAHEcsBfZ6bSZchEuSo06OIzMrBxcWIJ4ADYMUHS8-EKi4twEYACODHBiEHKKSCAqaiIaWvl6CEamFggALJaGDjYAzADsLm4gHtj4xKSU1LT0TCzsnJ7xEALCYhIAxqlkxZrcrMQEudqF6pra5ZXmiE2yltzWsgBshu3uYT0+-f5DwaNhE1NJcwtLWNxkkQsQMyCMA6VCwESwDb5LbfXYGEwHCqWeynSxNJyuG6eO59PyDQLDEJjHipEQEIGRVAAI3I5KhylU21KoD2COqRlcHSwRAgcG0XS8vV8AwCQRGm0ZsLKiDa3FkhhaTRqrUsVRlln03Ba50sl3ariAA */
     id: "Riven program main runner",
     context: ({ input, spawn }) => {
-      const pluginMap = new Map<symbol, ValidPlugin>();
+      const pluginRefMap = new Map<
+        symbol,
+        ActorRefFromLogic<typeof pluginActor>
+      >();
 
       for (const [
         pluginSymbol,
         { config, dataSources },
       ] of input.plugins.entries()) {
-        const pluginRef = spawn(config.runner, {
+        const pluginRef = spawn(pluginActor, {
           id: `plugin-runner-${String(pluginSymbol.description)}` as never,
           input: {
             pluginSymbol,
             dataSources,
+            hooks: config.hooks,
           },
         });
 
-        pluginMap.set(pluginSymbol, {
-          status: "valid",
-          config,
-          dataSources,
-          runnerRef: pluginRef,
-        });
+        pluginRefMap.set(pluginSymbol, pluginRef);
       }
 
       return {
-        plugins: pluginMap,
+        pluginRefs: pluginRefMap,
       };
     },
     entry: [
       {
         type: "broadcastToPlugins",
         params: {
-          type: "riven.started",
+          type: "riven.core.started",
         },
       },
-      raise({ type: "riven.retry-library" }),
+      raise({ type: "retry-library" }),
       {
         type: "log",
         params: {
@@ -107,6 +102,7 @@ export const mainRunnerMachine = setup({
       },
     ],
     on: {
+      // TODO: This is overwritten by other events
       "riven.media-item.*": {
         description:
           "Broadcasts any media item related events to all registered plugins.",

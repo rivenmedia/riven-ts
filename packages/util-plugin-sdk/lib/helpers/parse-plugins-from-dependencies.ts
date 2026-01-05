@@ -5,10 +5,10 @@ import { z } from "zod";
 import type { $ZodErrorTree } from "zod/v4/core";
 
 import {
-  RivenPlugin,
+  type RivenPlugin,
   type RivenPluginPackage,
   rivenPluginPackageSchema,
-} from "../index.ts";
+} from "../schemas/index.ts";
 
 export interface ParsedPlugins {
   validPlugins: RivenPlugin[];
