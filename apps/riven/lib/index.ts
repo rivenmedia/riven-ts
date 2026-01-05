@@ -43,7 +43,7 @@ const persistEventsIntervalId = setInterval(() => {
 actor.start();
 
 process.on("SIGINT", () => {
-  actor.send({ type: "riven.shutdown" });
+  actor.send({ type: "riven.core.shutdown" });
 });
 
 await waitFor(
