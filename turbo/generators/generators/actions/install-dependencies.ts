@@ -1,5 +1,6 @@
-import type { PlopTypes } from "@turbo/gen";
 import { spawn } from "node:child_process";
+
+import type { PlopTypes } from "@turbo/gen";
 
 export const installDependenciesAction: PlopTypes.CustomActionFunction =
   async () => {

@@ -1,7 +1,4 @@
 import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
-import type { RequestedItem } from "@repo/util-plugin-sdk/schemas/media-item/requested-item";
-
-import type { AugmentedRequest } from "@apollo/datasource-rest";
 
 import {
   type GetApiListMyPageQueryResponse,
@@ -11,7 +8,10 @@ import {
   listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIMovieDtoSchema as getMoviesResponseSchema,
   listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIShowDtoSchema as getShowsResponseSchema,
 } from "../__generated__/index.ts";
+
 import type { ExternalIds } from "../schema/types/external-ids.type.ts";
+import type { AugmentedRequest } from "@apollo/datasource-rest";
+import type { RequestedItem } from "@repo/util-plugin-sdk/schemas/media-item/requested-item";
 
 export class ListrrAPIError extends Error {}
 

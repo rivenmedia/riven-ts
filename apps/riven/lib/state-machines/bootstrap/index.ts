@@ -1,9 +1,3 @@
-import type {
-  PluginToProgramEvent,
-  ProgramToPluginEvent,
-} from "@repo/util-plugin-sdk/events";
-
-import type { ApolloServer } from "@apollo/server";
 import { type AnyActorRef, assign, setup } from "xstate";
 
 import {
@@ -18,6 +12,10 @@ import {
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
+
+import type { ApolloServer } from "@apollo/server";
+import type { PluginToProgramEvent } from "@repo/util-plugin-sdk/plugin-to-program-events";
+import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
 
 export interface BootstrapMachineContext {
   error?: Error;

@@ -1,8 +1,9 @@
-import type { PlopTypes } from "@turbo/gen";
 import dedent from "dedent";
 
 import { formatOutputCode } from "./actions/format-output";
 import { installDependenciesToPackages } from "./actions/install-dependencies-to-package";
+
+import type { PlopTypes } from "@turbo/gen";
 
 interface PluginAnswers {
   pluginName: string;

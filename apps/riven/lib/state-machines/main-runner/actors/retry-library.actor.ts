@@ -1,9 +1,10 @@
 import { database } from "@repo/core-util-database/connection";
-import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk";
 import { MediaItem } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { Not } from "typeorm";
 import { type ActorRef, type Snapshot, fromPromise } from "xstate";
+
+import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
 
 export interface RetryLibraryActorInput {
   parentRef: ActorRef<Snapshot<unknown>, ProgramToPluginEvent>;

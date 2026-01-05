@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+
 import type { PackageJson } from "type-fest";
 
 export const installDependenciesToPackages = (

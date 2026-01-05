@@ -1,12 +1,12 @@
-import {
-  type DataSourceMap,
-  type EventHandler,
-  type RivenPlugin,
+import { type EventObject, fromCallback } from "xstate";
+
+import type {
+  DataSourceMap,
+  EventHandler,
+  RivenPlugin,
 } from "@repo/util-plugin-sdk";
 import type { PluginToProgramEvent } from "@repo/util-plugin-sdk/plugin-to-program-events";
 import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
-
-import { type EventObject, fromCallback } from "xstate";
 
 export interface PluginActorInput {
   pluginSymbol: symbol;

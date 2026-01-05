@@ -1,7 +1,7 @@
-import type { PlopTypes } from "@turbo/gen";
-
 import { formatOutputCode } from "./actions/format-output";
 import { installDependenciesAction } from "./actions/install-dependencies";
+
+import type { PlopTypes } from "@turbo/gen";
 
 interface PackageAnswers {
   packageName: string;

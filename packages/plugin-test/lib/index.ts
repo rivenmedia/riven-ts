@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { type RivenPlugin } from "@repo/util-plugin-sdk";
 
 import { TestAPI } from "./datasource/test.datasource.ts";
@@ -9,7 +10,12 @@ export default {
   name: pluginConfig.name,
   dataSources: [TestAPI],
   resolvers: [TestResolver, TestSettingsResolver],
-  hooks: {},
+  hooks: {
+    "riven.core.started": () => {},
+    "riven.media-item.creation.already-exists": () => {},
+    "riven.media-item.creation.error": () => {},
+    "riven.media-item.creation.success": () => {},
+  },
   validator() {
     return true;
   },

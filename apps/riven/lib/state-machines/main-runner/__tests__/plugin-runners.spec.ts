@@ -6,7 +6,10 @@ it("starts the plugin runners when the main runner starts", async ({
   actor,
 }) => {
   const testPlugin = await import("@repo/plugin-test");
-  const pluginHookSpy = vi.spyOn(testPlugin.default.runner, "start");
+  const pluginHookSpy = vi.spyOn(
+    testPlugin.default.hooks,
+    "riven.core.started",
+  );
 
   actor.start();
 

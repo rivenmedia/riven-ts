@@ -10,9 +10,10 @@ import {
   bootstrapMachine,
 } from "../../../bootstrap/index.ts";
 import { mainRunnerMachine } from "../../../main-runner/index.ts";
+import { type RivenMachineInput, rivenMachine } from "../../index.ts";
+
 import type { PendingRunnerInvocationPlugin } from "../../../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import type { stopGqlServer } from "../../actors/stop-gql-server.actor.ts";
-import { type RivenMachineInput, rivenMachine } from "../../index.ts";
 
 export const it = baseIt.extend<{
   actor: Actor<typeof rivenMachine>;

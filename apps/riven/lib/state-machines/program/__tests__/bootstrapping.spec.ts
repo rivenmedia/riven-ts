@@ -1,9 +1,10 @@
-import { expect, vi } from "vitest";
-import type { ActorRefFrom } from "xstate";
+import { expect } from "vitest";
+
+import { it } from "./helpers/test-context.ts";
 
 import type { BootstrapMachineOutput } from "../../bootstrap/index.ts";
 import type { rivenMachine } from "../index.ts";
-import { it } from "./helpers/test-context.ts";
+import type { ActorRefFrom } from "xstate";
 
 function sendBootstrapDoneEvent(
   actor: ActorRefFrom<typeof rivenMachine>,

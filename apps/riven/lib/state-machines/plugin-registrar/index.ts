@@ -1,7 +1,6 @@
 import { logger } from "@repo/core-util-logger";
 import { DataSourceMap, type ParsedPlugins } from "@repo/util-plugin-sdk";
 
-import type { FetcherRequestInit } from "@apollo/utils.fetcher";
 import {
   type AnyActorRef,
   type MachineContext,
@@ -22,6 +21,8 @@ import {
   collectPluginsForRegistration,
 } from "./actors/collect-plugins-for-registration.actor.ts";
 import { validatePlugin } from "./actors/validate-plugin.actor.ts";
+
+import type { FetcherRequestInit } from "@apollo/utils.fetcher";
 
 export interface PluginRegistrarMachineContext extends MachineContext {
   rootRef: AnyActorRef;

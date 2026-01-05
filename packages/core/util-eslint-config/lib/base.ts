@@ -1,10 +1,11 @@
 import turboConfig from "eslint-config-turbo/flat";
-import type { ConfigArray } from "typescript-eslint";
 
 import { prettier } from "./formatting/prettier.ts";
 import { jsonConfig } from "./json/json.ts";
 import { vitestConfig } from "./testing/vitest.ts";
 import { typescriptCore } from "./typescript/typescript-core.ts";
+
+import type { ConfigArray } from "typescript-eslint";
 
 export type { ConfigArray } from "typescript-eslint";
 

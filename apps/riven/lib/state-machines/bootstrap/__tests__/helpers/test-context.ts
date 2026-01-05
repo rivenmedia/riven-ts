@@ -3,9 +3,10 @@ import { it as baseIt } from "@repo/core-util-vitest-test-context";
 
 import { type Actor, createActor, createEmptyActor, fromPromise } from "xstate";
 
+import { type BootstrapMachineInput, bootstrapMachine } from "../../index.ts";
+
 import type { initialiseDatabaseConnection } from "../../actors/initialise-database-connection.actor.ts";
 import type { startGqlServer } from "../../actors/start-gql-server.actor.ts";
-import { type BootstrapMachineInput, bootstrapMachine } from "../../index.ts";
 
 export const it = baseIt.extend<{
   actor: Actor<typeof bootstrapMachine>;

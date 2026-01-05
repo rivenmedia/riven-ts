@@ -1,9 +1,5 @@
 import { database } from "@repo/core-util-database/connection";
 import { logger } from "@repo/core-util-logger";
-import type {
-  ProgramToPluginEvent,
-  RequestedItem as RequestedItemEventPayload,
-} from "@repo/util-plugin-sdk";
 import {
   MediaItem,
   RequestedItem,
@@ -13,8 +9,12 @@ import { ValidationError, validateOrReject } from "class-validator";
 import { type ActorRef, type Snapshot, fromPromise } from "xstate";
 import z from "zod";
 
+import type { ParamsFor } from "@repo/util-plugin-sdk";
+import type { MediaItemRequestedEvent } from "@repo/util-plugin-sdk/plugin-to-program-events/media-item/requested";
+import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
+
 export interface ProcessRequestedItemInput {
-  item: RequestedItemEventPayload;
+  item: ParamsFor<MediaItemRequestedEvent>["item"];
   parentRef: ActorRef<Snapshot<unknown>, ProgramToPluginEvent>;
 }
 

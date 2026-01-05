@@ -1,4 +1,3 @@
-import type { RateLimiterOpts } from "limiter";
 import { z } from "zod";
 
 import {
@@ -11,7 +10,9 @@ import { ProgramToPluginEvent } from "./program-to-plugin-events/index.ts";
 import { MediaItemCreationAlreadyExistsEventHandler } from "./program-to-plugin-events/media-item/creation/already-exists.ts";
 import { MediaItemCreationErrorEventHandler } from "./program-to-plugin-events/media-item/creation/error.ts";
 import { MediaItemCreationSuccessEventHandler } from "./program-to-plugin-events/media-item/creation/success.ts";
+
 import type { createEventHandlerSchema } from "./utilities/create-event-handler-schema.ts";
+import type { RateLimiterOpts } from "limiter";
 
 export const RivenPluginConfig = z.readonly(
   z.object({

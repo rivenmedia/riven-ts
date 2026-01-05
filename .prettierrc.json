@@ -11,7 +11,12 @@
     }
   ],
   "plugins": ["@trivago/prettier-plugin-sort-imports"],
-  "importOrder": ["^@repo/(.*)$", "<THIRD_PARTY_MODULES>", "^[./]"],
+  "importOrder": [
+    "^@repo/(.*)$",
+    "<THIRD_PARTY_MODULES>",
+    "^[./]",
+    "<TS_TYPES>"
+  ],
   "importOrderParserPlugins": ["typescript", "jsx", "decorators-legacy"],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true

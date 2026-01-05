@@ -1,14 +1,15 @@
 import { logger } from "@repo/core-util-logger";
 
-import type { PackageJson } from "type-fest";
 import { z } from "zod";
-import type { $ZodErrorTree } from "zod/v4/core";
 
 import {
   type RivenPlugin,
   type RivenPluginPackage,
   rivenPluginPackageSchema,
 } from "../schemas/index.ts";
+
+import type { PackageJson } from "type-fest";
+import type { $ZodErrorTree } from "zod/v4/core";
 
 export interface ParsedPlugins {
   validPlugins: RivenPlugin[];

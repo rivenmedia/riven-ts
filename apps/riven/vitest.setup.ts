@@ -1,4 +1,4 @@
-import { BaseDataSource, createPluginRunner } from "@repo/util-plugin-sdk";
+import { BaseDataSource, type RivenPlugin } from "@repo/util-plugin-sdk";
 
 import { DataSource } from "typeorm";
 import { type Mock, beforeEach, expect, vi } from "vitest";
@@ -52,13 +52,13 @@ vi.mock<typeof import("@repo/plugin-test")>(import("@repo/plugin-test"), () => {
       name: Symbol.for("Plugin: Test"),
       dataSources: [TestAPI],
       resolvers: [TestResolver],
-      runner: createPluginRunner(() => {
-        /* empty */
-      }),
+      hooks: {
+        "riven.core.started": vi.fn(),
+      },
       validator() {
         return true;
       },
-    },
+    } satisfies RivenPlugin,
   };
 });
 

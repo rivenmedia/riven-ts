@@ -1,5 +1,6 @@
-import type { RateLimiter } from "limiter";
 import { DateTime } from "luxon";
+
+import type { RateLimiter } from "limiter";
 
 /**
  * Error thrown when a request is rate limited by the server.
