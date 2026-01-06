@@ -12,6 +12,7 @@ import {
 } from "typeorm";
 import { z } from "zod";
 
+import { BaseEntity } from "../entity.ts";
 import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import { Stream } from "../streams/stream.entity.ts";
@@ -47,29 +48,29 @@ registerEnumType(mediaItemStateSchema.enum, {
   },
 })
 @Index(["type", "airedAt"])
-export class MediaItem {
+export class MediaItem extends BaseEntity {
   @Field((_type) => ID)
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Index()
-  @Column({ nullable: true })
-  title?: string;
+  @Column("varchar", { nullable: true })
+  title?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Index({ unique: true })
-  @Column({ nullable: true, unique: true })
+  @Column("varchar", { nullable: true, unique: true })
   @Matches(/^tt\d+$/)
   @IsOptional()
-  imdbId?: string;
+  imdbId?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Index({ unique: true })
-  @Column({ nullable: true, unique: true })
+  @Column("varchar", { nullable: true, unique: true })
   @IsNumberString()
   @IsOptional()
-  tvdbId?: string;
+  tvdbId?: string | null;
 
   @Field({ nullable: true })
   @Index({ unique: true })

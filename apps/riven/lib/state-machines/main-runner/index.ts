@@ -1,3 +1,5 @@
+import { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
+
 import { type ActorRefFromLogic, enqueueActions, raise, setup } from "xstate";
 
 import { withLogAction } from "../utilities/with-log-action.ts";
@@ -10,7 +12,6 @@ import type { PendingRunnerInvocationPlugin } from "../plugin-registrar/actors/c
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type { PluginToProgramEvent } from "@repo/util-plugin-sdk/plugin-to-program-events";
 import type { MediaItemRequestedEvent } from "@repo/util-plugin-sdk/plugin-to-program-events/media-item/requested";
-import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
 
 export interface MainRunnerMachineContext {
   pluginRefs: Map<symbol, ActorRefFromLogic<typeof pluginActor>>;
@@ -55,6 +56,11 @@ export const mainRunnerMachine = setup({
         },
       });
     }),
+  },
+  guards: {
+    shouldForwardEventToPlugins: ({ event }) => {
+      return event.type.startsWith("riven.");
+    },
   },
 })
   .extend(withLogAction)
@@ -102,18 +108,14 @@ export const mainRunnerMachine = setup({
         },
       },
     ],
-    on: {
-      // TODO: This is overwritten by other events
-      "riven.media-item.*": {
-        description:
-          "Broadcasts any media item related events to all registered plugins.",
-        actions: [
-          {
-            type: "broadcastToPlugins",
-            params: ({ event }) => event,
-          },
-        ],
+    always: {
+      guard: "shouldForwardEventToPlugins",
+      actions: {
+        type: "broadcastToPlugins",
+        params: ({ event }) => ProgramToPluginEvent.parse(event),
       },
+    },
+    on: {
       "riven-plugin.media-item.requested": {
         description:
           "Indicates that a plugin has requested the creation of a media item in the library.",
@@ -128,24 +130,28 @@ export const mainRunnerMachine = setup({
       "riven.media-item.creation.error": {
         description:
           "Indicates that an error occurred while attempting to create a media item in the library.",
-        actions: {
-          type: "log",
-          params: ({ event }) => ({
-            message: `Error creating media item ${JSON.stringify(event.item)}: ${String(event.error)}`,
-            level: "error",
-          }),
-        },
+        actions: [
+          {
+            type: "log",
+            params: ({ event }) => ({
+              message: `Error creating media item ${JSON.stringify(event.item)}: ${String(event.error)}`,
+              level: "error",
+            }),
+          },
+        ],
       },
       "riven.media-item.creation.already-exists": {
         description:
           "Indicates that a media item creation was attempted, but the item already exists in the library.",
-        actions: {
-          type: "log",
-          params: ({ event }) => ({
-            message: `Media item already exists: ${JSON.stringify(event.item)}`,
-            level: "verbose",
-          }),
-        },
+        actions: [
+          {
+            type: "log",
+            params: ({ event }) => ({
+              message: `Media item already exists: ${JSON.stringify(event.item)}`,
+              level: "verbose",
+            }),
+          },
+        ],
       },
       "retry-library": {
         description:

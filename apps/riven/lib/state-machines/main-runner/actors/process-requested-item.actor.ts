@@ -38,7 +38,7 @@ export const processRequestedItem = fromPromise<
       item: {
         ...item,
         id: existingItem.id,
-        ...(existingItem.title ? { title: existingItem.title } : {}),
+        title: existingItem.title,
       },
     });
 

@@ -1,9 +1,9 @@
 import z from "zod";
 
 export const requestedItemSchema = z.object({
-  imdbId: z.string().optional(),
-  tmdbId: z.string().optional(),
-  tvdbId: z.string().optional(),
+  imdbId: z.string().nullish(),
+  tmdbId: z.string().nullish(),
+  tvdbId: z.string().nullish(),
 });
 
 export type RequestedItem = z.infer<typeof requestedItemSchema>;

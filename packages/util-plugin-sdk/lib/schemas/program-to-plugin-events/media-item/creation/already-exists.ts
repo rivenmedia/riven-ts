@@ -12,7 +12,7 @@ export const MediaItemCreationAlreadyExistsEvent = createProgramEventSchema(
   z.object({
     item: requestedItemSchema.extend({
       id: z.number(),
-      title: z.string().optional(),
+      title: z.string().nullish(),
     }),
   }),
 );

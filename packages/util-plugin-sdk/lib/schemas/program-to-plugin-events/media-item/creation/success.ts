@@ -1,5 +1,6 @@
 import z from "zod";
 
+import { mediaItemStateSchema } from "../../../../dto/entities/index.ts";
 import { requestedItemSchema } from "../../../media-item/requested-item.ts";
 import { createEventHandlerSchema } from "../../../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../../../utilities/create-program-event-schema.ts";
@@ -12,6 +13,7 @@ export const MediaItemCreationSuccessEvent = createProgramEventSchema(
   z.object({
     item: requestedItemSchema.extend({
       id: z.number(),
+      state: mediaItemStateSchema.extract(["Requested"]),
     }),
   }),
 );
