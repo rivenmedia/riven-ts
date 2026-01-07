@@ -65,3 +65,5 @@ export abstract class BaseDataSource extends RESTDataSource {
     return undefined;
   }
 }
+
+export type { RateLimiterOpts } from "limiter";

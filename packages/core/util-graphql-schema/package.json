@@ -18,6 +18,7 @@
   "dependencies": {
     "@repo/feature-settings": "workspace:^",
     "@repo/plugin-listrr": "workspace:^",
+    "@repo/plugin-tmdb": "workspace:^",
     "graphql": "catalog:",
     "type-graphql": "catalog:"
   },

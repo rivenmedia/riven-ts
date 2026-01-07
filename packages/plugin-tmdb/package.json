@@ -1,5 +1,5 @@
 {
-  "name": "@repo/core-util-graphql-context",
+  "name": "@repo/plugin-tmdb",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,24 +14,22 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@repo/plugin-listrr": "workspace:^",
-    "@repo/plugin-tmdb": "workspace:^"
+    "@apollo/datasource-rest": "catalog:",
+    "@repo/util-plugin-sdk": "workspace:^",
+    "type-graphql": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@apollo/server": "^5.2.0",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
-    "@repo/plugin-test": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
+    "msw": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
-  },
-  "peerDependencies": {
-    "@apollo/server": "^5.2.0"
   }
 }

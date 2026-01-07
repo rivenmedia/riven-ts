@@ -1,11 +1,10 @@
 import {
   {{pascalCase pluginName}}API,
-  type {{pascalCase pluginName}}ContextSlice,
 } from "./datasource/{{kebabCase pluginName}}.datasource.ts";
 import { pluginConfig } from "./{{kebabCase pluginName}}-plugin.config.ts";
 import { {{pascalCase pluginName}}SettingsResolver } from "./schema/{{kebabCase pluginName}}-settings.resolver.ts";
 import { {{pascalCase pluginName}}Resolver } from "./schema/{{kebabCase pluginName}}.resolver.ts";
-import { createPluginRunner, type RivenPlugin } from "@repo/util-plugin-sdk";
+import { type RivenPlugin } from "@repo/util-plugin-sdk";
 
 export default {
   name: pluginConfig.name,
