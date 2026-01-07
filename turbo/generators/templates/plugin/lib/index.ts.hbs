@@ -9,22 +9,13 @@ import { createPluginRunner, type RivenPlugin } from "@repo/util-plugin-sdk";
 
 export default {
   name: pluginConfig.name,
-  resolvers: [{{pascalCase pluginName}}Resolver, {{pascalCase pluginName}}SettingsResolver],
   dataSources: [{{pascalCase pluginName}}API],
-  runner: createPluginRunner(
-    async ({ input: { dataSources }, helpers: { publishEvent } }) => {
-      const api = dataSources.get({{pascalCase pluginName}}API);
-
-      // Example runner logic
-
-      return () => {
-        console.log("{{pascalCase pluginName}} plugin runner stopped");
-      };
-    },
-  ),
-  context: function (this, { cache }): {{pascalCase pluginName}}ContextSlice {
-    return {
-      api: new {{pascalCase pluginName}}API({ cache, token: process.env["{{constantCase pluginName}}_API_KEY"] }),
-    };
+  resolvers: [{{pascalCase pluginName}}Resolver, {{pascalCase pluginName}}SettingsResolver],
+  hooks: {
+    "riven.core.started": () => {},
+    // Add more hooks as needed
+  },
+  validator() {
+    return true;
   },
 } satisfies RivenPlugin;
