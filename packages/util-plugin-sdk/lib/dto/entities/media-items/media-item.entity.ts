@@ -110,18 +110,6 @@ export class MediaItem extends BaseEntity {
   @Column({ default: 0 })
   scrapedTimes!: number;
 
-  @Field(() => Stream, { nullable: true })
-  @ManyToOne(() => Stream, { nullable: true })
-  activeStream?: Relation<Stream>;
-
-  @Field(() => [Stream])
-  @ManyToMany(() => Stream)
-  streams!: Relation<Stream>[];
-
-  @Field(() => [Stream])
-  @ManyToMany(() => Stream)
-  blacklistedStreams!: Relation<Stream>[];
-
   @Field(() => String, { nullable: true })
   @Column("json", { nullable: true })
   aliases?: Record<string, string[]>;
@@ -177,6 +165,10 @@ export class MediaItem extends BaseEntity {
   @Column("simple-enum", { enum: mediaItemStateSchema.options })
   state!: MediaItemState;
 
+  @Field()
+  @Column({ default: 0 })
+  failedAttempts!: number;
+
   @Field(() => [FileSystemEntry])
   @ManyToMany("FileSystemEntry", (entry: FileSystemEntry) => entry.id)
   filesystemEntries!: Relation<FileSystemEntry>[];
@@ -185,7 +177,15 @@ export class MediaItem extends BaseEntity {
   @ManyToMany(() => SubtitleEntry)
   subtitles!: Relation<SubtitleEntry>[];
 
-  @Field()
-  @Column({ default: 0 })
-  failedAttempts!: number;
+  @Field(() => Stream, { nullable: true })
+  @ManyToOne(() => Stream, { nullable: true })
+  activeStream?: Relation<Stream>;
+
+  @Field(() => [Stream])
+  @ManyToMany(() => Stream)
+  streams!: Relation<Stream>[];
+
+  @Field(() => [Stream])
+  @ManyToMany(() => Stream)
+  blacklistedStreams!: Relation<Stream>[];
 }
