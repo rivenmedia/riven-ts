@@ -63,7 +63,11 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
         );
 
         return installDependenciesToPackages(
-          ["@repo/core-util-graphql-schema", "@repo/core-util-graphql-context"],
+          [
+            "@repo/core-util-graphql-schema",
+            "@repo/core-util-graphql-context",
+            "@repo/riven",
+          ],
           "dependencies",
           {
             [`@repo/plugin-${pluginName}`]: "workspace:^",
