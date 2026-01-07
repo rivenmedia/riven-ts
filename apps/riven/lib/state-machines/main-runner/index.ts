@@ -58,9 +58,7 @@ export const mainRunnerMachine = setup({
     }),
   },
   guards: {
-    shouldForwardEventToPlugins: ({ event }) => {
-      return event.type.startsWith("riven.");
-    },
+    shouldForwardEventToPlugins: ({ event }) => event.type.startsWith("riven."),
   },
 })
   .extend(withLogAction)
