@@ -63,6 +63,7 @@ export const rivenMachine = setup({
               mainRunnerRef: spawn(mainRunnerMachine, {
                 input: {
                   plugins: event.output.plugins,
+                  queues: event.output.queues,
                 },
               }),
             })),
@@ -92,6 +93,7 @@ export const rivenMachine = setup({
         },
       },
       Shutdown: {
+        type: "parallel",
         entry: [
           {
             type: "log",
@@ -100,14 +102,41 @@ export const rivenMachine = setup({
             },
           },
         ],
-        invoke: [
-          {
-            id: "stopGqlServer",
-            src: "stopGqlServer",
-            input: ({ context }) => context.server,
-            onDone: "Exited",
+        onDone: "Exited",
+        states: {
+          "Shutting down GQL server": {
+            initial: "Shutting down",
+            states: {
+              "Shutting down": {
+                invoke: {
+                  id: "stopGqlServer",
+                  src: "stopGqlServer",
+                  input: ({ context }) => context.server,
+                  onDone: "Stopped",
+                  onError: {
+                    target: "Stopped",
+                    actions: {
+                      type: "log",
+                      params: ({ event }) => ({
+                        message: `Error while shutting down GQL server: ${(event.error as Error).message}`,
+                        level: "error",
+                      }),
+                    },
+                  },
+                },
+              },
+              Stopped: {
+                type: "final",
+                entry: {
+                  type: "log",
+                  params: {
+                    message: "GQL server has been stopped.",
+                  },
+                },
+              },
+            },
           },
-        ],
+        },
       },
       Exited: {
         type: "final",

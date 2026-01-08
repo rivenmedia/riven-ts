@@ -1,34 +1,56 @@
 import {
   BaseDataSource,
   type BasePluginContext,
-  type RateLimiterOpts,
+  type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
 
+import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { Promisable } from "type-fest";
 
 export class TmdbAPIError extends Error {}
 
 export class TmdbAPI extends BaseDataSource {
-  override baseURL = "https://api.themoviedb.org/3";
+  override baseURL = "https://api.themoviedb.org/3/";
   override serviceName = "Tmdb";
 
-  static override rateLimiterOptions: RateLimiterOpts = {
-    tokensPerInterval: 40,
-    interval: "second",
+  protected override rateLimiterOptions?: RateLimiterOptions = {
+    max: 40,
+    duration: 1000,
   };
 
-  static override getApiToken(): string | undefined {
-    return "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJlNTkxMmVmOWFhM2IxNzg2Zjk3ZTE1NWY1YmQ3ZjY1MSIsInN1YiI6IjY1M2NjNWUyZTg5NGE2MDBmZjE2N2FmYyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.xrIXsMFJpI1o1j5g2QpQcFP1X3AfRjFA5FlBFO5Naw8";
+  protected override willSendRequest(
+    _path: string,
+    requestOpts: AugmentedRequest,
+  ) {
+    if (!this.token) {
+      throw new TmdbAPIError(
+        "Tmdb API token is not set. Please provide a valid API token.",
+      );
+    }
+
+    requestOpts.headers["Authorization"] = `Bearer ${this.token}`;
+  }
+
+  static override getApiToken() {
+    return "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJlZTMxMDdlNTI4NTYzYzE4Yjk0OWE1NGM3YjQwNGQwYSIsIm5iZiI6MTc2MDgwMDA1MS42MzY5OTk4LCJzdWIiOiI2OGYzYWQzMzJiOWY4NTQyZDc3OGRmZTMiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.5Q2n87kYQbiLI08arhWxr_DJRob6hv1EIncDmJKykBk";
   }
 
   override validate(): Promisable<boolean> {
     return true;
   }
 
-  getFromExternalId(externalId: string, externalSource: "imdb" | "tmdb") {
-    return this.get(`find/${externalId}`, {
+  async getFromExternalId(externalId: string, externalSource: "imdb" | "tmdb") {
+    return await this.get(`find/${externalId}`, {
       params: {
         external_source: externalSource,
+      },
+    });
+  }
+
+  getMovieDetailsWithExternalIdsAndReleaseDates(movieId: string) {
+    return this.get(`movie/${movieId}`, {
+      params: {
+        append_to_response: "external_ids,release_dates",
       },
     });
   }

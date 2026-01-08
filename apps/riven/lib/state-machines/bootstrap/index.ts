@@ -11,11 +11,14 @@ import {
 } from "../plugin-registrar/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
+import { initialiseQueues } from "./actors/initialise-queues.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
 import type { ApolloServer } from "@apollo/server";
+import type { RivenEvent } from "@repo/util-plugin-sdk";
 import type { PluginToProgramEvent } from "@repo/util-plugin-sdk/plugin-to-program-events";
 import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
+import type { Queue } from "bullmq";
 
 export interface BootstrapMachineContext {
   error?: Error;
@@ -24,6 +27,7 @@ export interface BootstrapMachineContext {
   validPlugins: Map<symbol, PendingRunnerInvocationPlugin>;
   invalidPlugins: Map<symbol, InvalidPlugin>;
   server?: ApolloServer;
+  queues: Map<RivenEvent["type"], Queue>;
 }
 
 export type BootstrapMachineEvent = ProgramToPluginEvent | PluginToProgramEvent;
@@ -35,6 +39,7 @@ export interface BootstrapMachineInput {
 export interface BootstrapMachineOutput {
   server: ApolloServer;
   plugins: Map<symbol, PendingRunnerInvocationPlugin>;
+  queues: Map<RivenEvent["type"], Queue>;
 }
 
 export const bootstrapMachine = setup({
@@ -48,11 +53,15 @@ export const bootstrapMachine = setup({
       startGqlServer: "startGqlServer";
       initialiseDatabaseConnection: "initialiseDatabaseConnection";
       pluginRegistrarMachine: "pluginRegistrarMachine";
+      initialiseQueues: "initialiseQueues";
     },
   },
   actions: {
     assignGqlServer: assign((_, server: ApolloServer) => ({
       server,
+    })),
+    assignQueues: assign((_, queues: Map<RivenEvent["type"], Queue>) => ({
+      queues,
     })),
     raiseError: (_, error: Error) => {
       throw error;
@@ -83,6 +92,7 @@ export const bootstrapMachine = setup({
     startGqlServer,
     initialiseDatabaseConnection,
     pluginRegistrarMachine,
+    initialiseQueues,
   },
   guards: {
     hasInvalidPlugins: ({ context }) => context.invalidPlugins.size > 0,
@@ -95,9 +105,10 @@ export const bootstrapMachine = setup({
     initial: "Initialising",
     context: ({ input }) => ({
       rootRef: input.rootRef,
-      validatingPlugins: new Map<symbol, RegisteredPlugin>(),
-      validPlugins: new Map<symbol, PendingRunnerInvocationPlugin>(),
-      invalidPlugins: new Map<symbol, InvalidPlugin>(),
+      validatingPlugins: new Map(),
+      validPlugins: new Map(),
+      invalidPlugins: new Map(),
+      queues: new Map(),
     }),
     output: ({ context }) => {
       if (!context.server) {
@@ -109,6 +120,7 @@ export const bootstrapMachine = setup({
       return {
         plugins: context.validPlugins,
         server: context.server,
+        queues: context.queues,
       };
     },
     states: {
@@ -257,9 +269,13 @@ export const bootstrapMachine = setup({
                       actions: [
                         {
                           type: "log",
-                          params: {
-                            message: "Plugins registered successfully.",
-                          },
+                          params: ({ event }) => ({
+                            message: `Plugins registered successfully. ${[
+                              ...event.output.validPlugins.keys(),
+                            ]
+                              .map((k) => k.description)
+                              .join(", ")}.`,
+                          }),
                         },
                         {
                           type: "handlePluginValidationResponse",
@@ -280,6 +296,39 @@ export const bootstrapMachine = setup({
                   },
                 ],
                 type: "final",
+              },
+            },
+          },
+          "Bootstrap queues": {
+            initial: "Initialising",
+            states: {
+              Initialising: {
+                entry: {
+                  type: "log",
+                  params: {
+                    message: "Starting queue initialisation...",
+                  },
+                },
+                invoke: {
+                  id: "initialiseQueues",
+                  src: "initialiseQueues",
+                  onDone: {
+                    target: "Complete",
+                    actions: {
+                      type: "assignQueues",
+                      params: ({ event }) => event.output,
+                    },
+                  },
+                },
+              },
+              Complete: {
+                type: "final",
+                entry: {
+                  type: "log",
+                  params: {
+                    message: "Queue initialisation complete.",
+                  },
+                },
               },
             },
           },

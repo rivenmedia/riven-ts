@@ -10,7 +10,7 @@ it("instantiates plugin datasources", async ({ actor }) => {
 
   const registeredPlugin = actor
     .getSnapshot()
-    .context.validPlugins.get(Symbol.for("Plugin: Test"));
+    .context.validPlugins.get(Symbol.for("Test"));
 
   expect(registeredPlugin).toBeDefined();
 

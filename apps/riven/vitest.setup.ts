@@ -49,7 +49,7 @@ vi.mock<typeof import("@repo/plugin-test")>(import("@repo/plugin-test"), () => {
 
   return {
     default: {
-      name: Symbol.for("Plugin: Test"),
+      name: Symbol.for("Test"),
       dataSources: [TestAPI],
       resolvers: [TestResolver],
       hooks: {

@@ -1,18 +1,10 @@
 import { logger } from "@repo/core-util-logger";
 import { DataSourceMap, type ParsedPlugins } from "@repo/util-plugin-sdk";
 
-import {
-  type AnyActorRef,
-  type MachineContext,
-  assign,
-  createActor,
-  setup,
-  toPromise,
-  waitFor,
-} from "xstate";
+import { type AnyActorRef, type MachineContext, assign, setup } from "xstate";
+import z from "zod";
 
 import { redisCache } from "../../utilities/redis-cache.ts";
-import { rateLimiterMachine } from "../rate-limiter/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import {
   type InvalidPlugin,
@@ -21,8 +13,6 @@ import {
   collectPluginsForRegistration,
 } from "./actors/collect-plugins-for-registration.actor.ts";
 import { validatePlugin } from "./actors/validate-plugin.actor.ts";
-
-import type { FetcherRequestInit } from "@apollo/utils.fetcher";
 
 export interface PluginRegistrarMachineContext extends MachineContext {
   rootRef: AnyActorRef;
@@ -52,7 +42,6 @@ export const pluginRegistrarMachine = setup({
     input: {} as PluginRegistrarMachineInput,
     events: {} as PluginRegistrarMachineEvent,
     children: {} as {
-      rateLimiterMachine: "rateLimiterMachine";
       collectPluginsForRegistration: "collectPluginsForRegistration";
       validatePlugin: "validatePlugin";
     },
@@ -60,7 +49,7 @@ export const pluginRegistrarMachine = setup({
   },
   actions: {
     registerPlugins: assign({
-      pendingPlugins: ({ context }, { validPlugins }: ParsedPlugins) => {
+      pendingPlugins: (_, { validPlugins }: ParsedPlugins) => {
         const pluginMap = new Map<symbol, RegisteredPlugin>();
 
         for (const plugin of validPlugins) {
@@ -69,59 +58,12 @@ export const pluginRegistrarMachine = setup({
           if (plugin.dataSources) {
             for (const DataSource of plugin.dataSources) {
               try {
-                const rateLimiterRef = createActor(rateLimiterMachine, {
-                  parent: context.rootRef,
-                  input: {
-                    limiterOptions: DataSource.rateLimiterOptions ?? null,
-                  },
-                }).start();
-
                 const token = DataSource.getApiToken();
                 const instance = new DataSource({
                   cache: redisCache,
                   token,
-                  fetch: async (
-                    url: string,
-                    options: FetcherRequestInit | undefined,
-                  ) => {
-                    const requestId = crypto.randomUUID();
-
-                    rateLimiterRef.send({
-                      type: "fetch-requested",
-                      url,
-                      fetchOpts: options,
-                      requestId,
-                    });
-
-                    try {
-                      await waitFor(
-                        rateLimiterRef,
-                        (state) => state.context.requestQueue.has(requestId),
-                        { timeout: 10000 },
-                      );
-                    } catch (error) {
-                      throw new Error(
-                        `Timeout waiting for rate limiter to register fetch request ${requestId} for data source ${DataSource.name} in plugin ${plugin.name.toString()}: ${
-                          (error as Error).message
-                        }`,
-                      );
-                    }
-
-                    const actor = rateLimiterRef
-                      .getSnapshot()
-                      .context.requestQueue.get(requestId);
-
-                    if (!actor) {
-                      throw new Error(
-                        `Failed to get fetch actor for request ID ${requestId}`,
-                      );
-                    }
-
-                    actor.send({ type: "fetch" });
-
-                    return toPromise(actor);
-                  },
                   logger,
+                  redisUrl: z.url().parse(process.env["REDIS_URL"]),
                 });
 
                 dataSources.set(DataSource, instance);
@@ -218,7 +160,6 @@ export const pluginRegistrarMachine = setup({
   },
   actors: {
     collectPluginsForRegistration,
-    rateLimiterMachine,
     validatePlugin,
   },
   guards: {

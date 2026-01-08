@@ -139,7 +139,7 @@ export class MediaItem extends BaseEntity {
   year?: number;
 
   @Field(() => [String], { nullable: true })
-  @Column("json", { array: true, nullable: true })
+  @Column("varchar", { array: true, nullable: true })
   genres?: string[];
 
   @Field({ nullable: true })

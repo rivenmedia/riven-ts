@@ -19,7 +19,7 @@ export const createEventHandlerSchema = <T extends ZodObject>(eventSchema: T) =>
               }),
             ),
           ],
-          output: z.void(),
+          output: z.promise(z.void()),
         }),
       }),
     ],

@@ -29,7 +29,7 @@ it("returns any invalid plugins from the package.json file along with their vali
   vi.doMock(import("@repo/plugin-test"), () => {
     return {
       default: {
-        name: "Plugin: Test",
+        name: "Test",
       } as never,
     };
   });

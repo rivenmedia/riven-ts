@@ -1,4 +1,8 @@
-import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
+import {
+  BaseDataSource,
+  type BasePluginContext,
+  type RateLimiterOptions,
+} from "@repo/util-plugin-sdk";
 
 import {
   type GetApiListMyPageQueryResponse,
@@ -19,10 +23,10 @@ export class ListrrAPI extends BaseDataSource {
   override baseURL = "https://listrr.pro/api/";
   override serviceName = "Listrr";
 
-  static override readonly rateLimiterOptions = {
-    tokensPerInterval: 50,
-    interval: "second",
-  } as const;
+  protected override readonly rateLimiterOptions: RateLimiterOptions = {
+    max: 50,
+    duration: 1000,
+  };
 
   protected override willSendRequest(
     _path: string,

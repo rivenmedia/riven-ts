@@ -5,7 +5,6 @@ import safeStringify from "safe-stringify";
 import { type AnyEventObject, createActor, waitFor } from "xstate";
 
 import { rivenMachine } from "./state-machines/program/index.ts";
-import { redisCache } from "./utilities/redis-cache.ts";
 
 const sessionId = crypto.randomUUID();
 
@@ -28,18 +27,6 @@ const actor = createActor(rivenMachine, {
   },
 });
 
-async function persistEvents() {
-  const value = eventsCache.dump();
-
-  await redisCache.set(`riven:events-cache:${sessionId}`, safeStringify(value));
-
-  logger.info(`Persisted Riven events cache for session ${sessionId}`);
-}
-
-const persistEventsIntervalId = setInterval(() => {
-  void persistEvents();
-}, 60_000);
-
 actor.start();
 
 process.on("SIGINT", () => {
@@ -53,14 +40,10 @@ await waitFor(
 
 const { value } = actor.getSnapshot();
 
-clearInterval(persistEventsIntervalId);
-
 if (value === "Errored") {
   logger.error(
     `Riven encountered a fatal error. Persisting events to Redis [riven:events-cache:${sessionId}] for debugging...`,
   );
-
-  await persistEvents();
 
   process.exit(1);
 }

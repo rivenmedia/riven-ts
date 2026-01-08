@@ -2,9 +2,8 @@ import { PluginDataSource } from "@repo/util-plugin-sdk";
 
 import { Query, Resolver } from "type-graphql";
 
+import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 import { pluginConfig } from "../tmdb-plugin.config.ts";
-
-import type { TmdbContextSlice } from "../datasource/tmdb.datasource.ts";
 
 @Resolver()
 export class TmdbResolver {

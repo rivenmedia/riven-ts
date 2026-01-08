@@ -56,5 +56,20 @@ services:
     network_mode: host
     restart: unless-stopped
 
+  jaeger:
+    container_name: BullMQ_with_opentelemetry_jaeger
+    image: jaegertracing/all-in-one:1.75.0
+    ports:
+      - 4318:4318
+      - 16686:16686
+
+  bullboard:
+    container_name: bullboard
+    network_mode: host
+    image: venatum/bull-board
+    restart: unless-stopped
+    environment:
+      PORT: 4000
+
 volumes:
   riven-ts-db:

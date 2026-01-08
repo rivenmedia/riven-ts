@@ -16,30 +16,34 @@ catalog:
   "@kubb/plugin-oas": 4.11.1
   "@kubb/plugin-ts": ^4.11.1
   "@kubb/plugin-zod": 4.11.1
+  "@opentelemetry/context-async-hooks": ^2.2.0
+  "@opentelemetry/exporter-metrics-otlp-proto": ^0.208.0
+  "@opentelemetry/exporter-trace-otlp-proto": ^0.208.0
+  "@opentelemetry/sdk-metrics": ^2.2.0
+  "@opentelemetry/sdk-node": ^0.208.0
+  "@types/luxon": ^3.7.1
   "@types/node": ^24.0.0
-  "@types/react": ^19.2.7
-  "@types/react-dom": ^19.2.3
   "@typescript-eslint/parser": ^8.49.0
   "@vitest/coverage-v8": 4.0.15
+  bullmq: 5.66.4
+  bullmq-otel: ^1.1.0
   class-validator: 0.14.3
   eslint: ^9.39.2
-  graphql: ^16.12.0
+  graphql: 16.12.0
   graphql-tag: ^2.12.6
   jiti: 2.6.1
   limiter: 3.0.0
+  luxon: ^3.7.2
   msw: 2.12.4
-  next: ^16.0.10
-  pg: ^8.16.3
-  react: ^19.2.3
-  react-dom: ^19.2.3
   reflect-metadata: 0.2.2
   type-graphql: 2.0.0-rc.2
   typeorm: 0.3.28
   typescript: ^5.9.3
-  undici: ^7.16.0
   vitest: 4.0.15
   xstate: ^5.25.0
   zod: 4.1.13
+
+cleanupUnusedCatalogs: true
 
 configDependencies:
   "@pnpm/plugin-better-defaults": 0.2.1+sha512-3Fmur80S7+vmOKMmTdKS6JofiuvpUaBIdKEpgDyr9571FHo5Z4O2nrRUaSflxvwEakeYxIaFZ5MBaqAUnYHaeg==
@@ -56,6 +60,14 @@ onlyBuiltDependencies:
   - msw
   - sqlite3
   - unrs-resolver
+
+packageExtensions:
+  "@opentelemetry/sdk-node":
+    dependencies:
+      "@opentelemetry/context-async-hooks": ^2.0.0
+  bullmq-otel:
+    dependencies:
+      tslib: ^2.0.0
 
 publicHoistPattern:
   - "*vitest*"

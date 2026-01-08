@@ -11,7 +11,8 @@
     "./plugin-to-program-events/*": "./lib/schemas/plugin-to-program-events/*.ts",
     "./program-to-plugin-events": "./lib/schemas/program-to-plugin-events/index.ts",
     "./program-to-plugin-events/*": "./lib/schemas/program-to-plugin-events/*.ts",
-    "./schemas/media-item/*": "./lib/schemas/media-item/*.ts"
+    "./schemas/media-item/*": "./lib/schemas/media-item/*.ts",
+    "./helpers/register-mq-listeners": "./lib/helpers/register-mq-listeners.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
@@ -21,6 +22,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "luxon": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -32,8 +34,10 @@
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
+    "@types/luxon": "catalog:",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
+    "bullmq": "catalog:",
     "class-validator": "catalog:",
     "eslint": "catalog:",
     "limiter": "catalog:",
@@ -48,6 +52,7 @@
     "@apollo/client": "^4.0.11",
     "@apollo/datasource-rest": "catalog:",
     "@apollo/utils.keyvadapter": "^4.0.1",
+    "bullmq": "catalog:",
     "class-validator": "catalog:",
     "limiter": "catalog:",
     "typeorm": "catalog:",

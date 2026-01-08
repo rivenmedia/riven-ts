@@ -3,6 +3,7 @@ import { createLogger, format, transports } from "winston";
 
 const logDir = path.resolve(process.cwd(), "logs");
 
+const isProductionEnvironment = process.env["NODE_ENV"] === "production";
 const isTestEnvironment = process.env["NODE_ENV"] === "test";
 
 const logFormat = format.printf(function (info) {
@@ -43,15 +44,15 @@ export const logger = createLogger({
   exceptionHandlers: [
     new transports.Console({
       format: format.combine(format.colorize(), format.simple()),
-      silent: isTestEnvironment,
+      silent: !isProductionEnvironment,
     }),
-    ...(isTestEnvironment
+    ...(!isProductionEnvironment
       ? []
       : [
           new transports.File({
             filename: "exceptions.log",
             dirname: logDir,
-            silent: isTestEnvironment,
+            silent: !isProductionEnvironment,
             tailable: true,
             maxsize: 10 * 1024 * 1024, // 10MB
             maxFiles: 5,
@@ -61,7 +62,7 @@ export const logger = createLogger({
   exitOnError: false,
 });
 
-if (!isTestEnvironment) {
+if (isProductionEnvironment) {
   logger.add(
     new transports.File({
       filename: "error.log",

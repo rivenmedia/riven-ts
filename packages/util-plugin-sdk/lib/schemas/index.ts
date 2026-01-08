@@ -5,6 +5,7 @@ import {
   type BaseDataSourceConfig,
 } from "../datasource/index.ts";
 import { DataSourceMap } from "../types/utilities.ts";
+import { PluginToProgramEvent } from "./plugin-to-program-events/index.ts";
 import { CoreStartedEventHandler } from "./program-to-plugin-events/core/started.ts";
 import { ProgramToPluginEvent } from "./program-to-plugin-events/index.ts";
 import { MediaItemCreationAlreadyExistsEventHandler } from "./program-to-plugin-events/media-item/creation/already-exists.ts";
@@ -12,7 +13,7 @@ import { MediaItemCreationErrorEventHandler } from "./program-to-plugin-events/m
 import { MediaItemCreationSuccessEventHandler } from "./program-to-plugin-events/media-item/creation/success.ts";
 
 import type { createEventHandlerSchema } from "./utilities/create-event-handler-schema.ts";
-import type { RateLimiterOpts } from "limiter";
+import type { RateLimiterOptions } from "bullmq";
 
 export const RivenPluginConfig = z.readonly(
   z.object({
@@ -43,7 +44,7 @@ export const isBasePluginContext = (
  * This type preserves both instance members and static members.
  */
 export interface DataSourceConstructor {
-  rateLimiterOptions: RateLimiterOpts | undefined;
+  rateLimiterOptions?: RateLimiterOptions | undefined;
 
   /** Static method to get the API token */
   getApiToken(): string | undefined;
@@ -102,3 +103,10 @@ export const rivenPluginPackageSchema = z.object({
 export type RivenPluginPackage = z.infer<typeof rivenPluginPackageSchema>;
 
 export type EventHandler = z.infer<ReturnType<typeof createEventHandlerSchema>>;
+
+export const RivenEvent = z.discriminatedUnion("type", [
+  ...PluginToProgramEvent.options,
+  ...ProgramToPluginEvent.options,
+]);
+
+export type RivenEvent = z.infer<typeof RivenEvent>;

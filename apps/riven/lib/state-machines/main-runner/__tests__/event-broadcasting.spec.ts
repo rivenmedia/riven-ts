@@ -45,7 +45,7 @@ it.for(Object.values(testCases))(
 
     const pluginRunnerRef = actor
       .getSnapshot()
-      .context.pluginRefs.get(Symbol.for("Plugin: Test"));
+      .context.pluginRefs.get(Symbol.for("Test"));
 
     vi.spyOn(pluginRunnerRef!, "send");
 
@@ -66,7 +66,7 @@ it.for(
 
   const pluginRunnerRef = actor
     .getSnapshot()
-    .context.pluginRefs.get(Symbol.for("Plugin: Test"));
+    .context.pluginRefs.get(Symbol.for("Test"));
 
   vi.spyOn(pluginRunnerRef!, "send");
 
