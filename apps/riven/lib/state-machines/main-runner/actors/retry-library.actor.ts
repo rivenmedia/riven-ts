@@ -1,4 +1,5 @@
 import { database } from "@repo/core-util-database/connection";
+import { logger } from "@repo/core-util-logger";
 import { MediaItem } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { Not } from "typeorm";
@@ -25,11 +26,16 @@ export const retryLibraryActor = fromPromise<undefined, RetryLibraryActorInput>(
           case "Requested":
             parentRef.send({
               type: "riven.media-item.creation.success",
-              item,
+              item: {
+                ...Object.assign({}, item),
+                state: "Requested",
+              },
             });
             break;
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      logger.error(error);
+    }
   },
 );

@@ -7,7 +7,7 @@ import {
   RESTDataSource,
   type RequestOptions,
 } from "@apollo/datasource-rest";
-import { Queue, type RateLimiterOptions, Worker } from "bullmq";
+import { Queue, QueueEvents, type RateLimiterOptions, Worker } from "bullmq";
 import { DateTime } from "luxon";
 
 import { registerMQListeners } from "../helpers/register-mq-listeners.ts";
@@ -20,6 +20,7 @@ interface FetchJobInput {
 }
 
 export interface BaseDataSourceConfig extends DataSourceConfig {
+  pluginSymbol: symbol;
   token?: string | undefined;
   redisUrl: string;
 }
@@ -31,17 +32,20 @@ export abstract class BaseDataSource extends RESTDataSource {
   protected readonly rateLimiterOptions?: RateLimiterOptions | undefined;
 
   #queue: Queue<FetchJobInput, DataSourceFetchResult<unknown>>;
+  #queueEvents: QueueEvents;
   #worker: Worker<FetchJobInput, DataSourceFetchResult<unknown>>;
   #queueId: string;
 
   constructor({
+    pluginSymbol,
     redisUrl,
     token,
     ...apolloDataSourceOptions
   }: BaseDataSourceConfig) {
     super(apolloDataSourceOptions);
 
-    this.#queueId = this.constructor.name;
+    this.serviceName = this.constructor.name;
+    this.#queueId = `${pluginSymbol.description ?? "unknown"}-${this.serviceName}-fetch-queue`;
     this.#queue = new Queue(this.#queueId, {
       connection: {
         url: redisUrl,
@@ -55,7 +59,15 @@ export abstract class BaseDataSource extends RESTDataSource {
       },
     });
 
-    registerMQListeners(this.#queue);
+    // Clear any previously queued fetch requests on startup.
+    // It's highly likely they'll be stale, and will be recreated as needed.
+    void this.#queue.obliterate({ force: true });
+
+    this.#queueEvents = new QueueEvents(this.#queueId, {
+      connection: {
+        url: redisUrl,
+      },
+    });
 
     this.#worker = new Worker(
       this.#queueId,
@@ -70,11 +82,11 @@ export abstract class BaseDataSource extends RESTDataSource {
       },
     );
 
+    registerMQListeners(this.#queue);
     registerMQListeners(this.#worker);
 
     this.token = token;
     this.logger = logger;
-    this.serviceName = this.constructor.name;
   }
 
   #parseRetryAfterHeader(retryAfterHeader: string | number): number | null {
@@ -102,26 +114,21 @@ export abstract class BaseDataSource extends RESTDataSource {
     path: string,
     incomingRequest?: DataSourceRequest,
   ): Promise<DataSourceFetchResult<TResult>> {
-    const job = await this.#queue.add("fetch", { path, incomingRequest });
-    const result = await new Promise<DataSourceFetchResult<TResult>>(
-      (resolve, reject) => {
-        const timeoutDuration = 30000; // 30 seconds timeout
-        const timeout = setTimeout(() => {
-          reject(new Error("Request timed out"));
-        }, timeoutDuration);
-
-        this.#worker
-          .on("completed", (completedJob, result) => {
-            if (completedJob.id === job.id) {
-              clearTimeout(timeout);
-              resolve(result as DataSourceFetchResult<TResult>);
-            }
-          })
-          .on("failed", (_job, error) => {
-            reject(error);
-          });
-      },
+    const jobId = this.cacheKeyFor(
+      new URL(path, this.baseURL),
+      (incomingRequest ?? {}) as never,
     );
+
+    // Redis keys use colons as a separator, so they need to be stripped out before insertion
+    const sanitisedJobId = jobId.replaceAll(":", "[COLON]");
+
+    const job = await this.#queue.add(
+      sanitisedJobId,
+      { path, incomingRequest },
+      { jobId: sanitisedJobId },
+    );
+
+    const result = await job.waitUntilFinished(this.#queueEvents, 10000);
 
     if (result.response.status === 429) {
       const waitMs = this.#parseRetryAfterHeader(
@@ -143,7 +150,7 @@ export abstract class BaseDataSource extends RESTDataSource {
       `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${path}: ${JSON.stringify(result, null, 2)}`,
     );
 
-    return result;
+    return result as DataSourceFetchResult<TResult>;
   }
 
   protected override didEncounterError(

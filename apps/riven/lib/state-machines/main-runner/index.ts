@@ -1,28 +1,27 @@
-import { logger } from "@repo/core-util-logger";
-import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
+import { type ParamsFor, RivenEvent } from "@repo/util-plugin-sdk";
 import { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
 
 import { Queue, Worker } from "bullmq";
-import { BullMQOtel } from "bullmq-otel";
-import os from "node:os";
-import { enqueueActions, raise, setup } from "xstate";
-import z from "zod";
+import { enqueueActions, raise, setup, toPromise } from "xstate";
 
+import { createWorker } from "../../message-queue/utilities/create-worker.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { persistMovieIndexerData } from "./actors/persist-movie-indexer-data.actor.ts";
 import { processRequestedItem } from "./actors/process-requested-item.actor.ts";
 import { retryLibraryActor } from "./actors/retry-library.actor.ts";
+import { createPluginHookWorkers } from "./utilities/create-plugin-hook-workers.ts";
 
 import type { RetryLibraryEvent } from "../../events/scheduled-tasks.ts";
 import type { PendingRunnerInvocationPlugin } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
-import type { ParamsFor, RivenEvent } from "@repo/util-plugin-sdk";
+import type { PluginToProgramEvent } from "@repo/util-plugin-sdk/plugin-to-program-events";
 import type { MediaItemPersistMovieIndexerDataEvent } from "@repo/util-plugin-sdk/plugin-to-program-events/media-item/persist-movie-indexer-data";
 import type { MediaItemRequestedEvent } from "@repo/util-plugin-sdk/plugin-to-program-events/media-item/requested";
 
 export interface MainRunnerMachineContext {
   plugins: Map<symbol, PendingRunnerInvocationPlugin>;
   queues: Map<RivenEvent["type"], Queue>;
-  workers: Map<RivenEvent["type"], Worker>;
+  processorWorkers: Map<PluginToProgramEvent["type"], Worker>;
+  pluginHookWorkers: Map<RivenEvent["type"], Worker>;
 }
 
 export interface MainRunnerMachineInput {
@@ -37,6 +36,10 @@ export const mainRunnerMachine = setup({
     context: {} as MainRunnerMachineContext,
     input: {} as MainRunnerMachineInput,
     events: {} as MainRunnerMachineEvent,
+    children: {} as {
+      persistMovieIndexerData: "persistMovieIndexerData";
+      processRequestedItem: "processRequestedItem";
+    },
   },
   actions: {
     addEventToQueue: ({ context }, event: ProgramToPluginEvent) => {
@@ -80,75 +83,61 @@ export const mainRunnerMachine = setup({
       });
     }),
   },
+  actors: {
+    persistMovieIndexerData,
+    processRequestedItem,
+  },
   guards: {
     shouldQueueEvent: ({ event }) => event.type.startsWith("riven."),
+    isRivenEvent: ({ event }) => RivenEvent.safeParse(event).success,
   },
 })
   .extend(withLogAction)
   .createMachine({
     /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7ABABwCcB7KAgQwFscKzVcCBXLLMAgYgI2wDoLJUyAWlQAXMBW4AqANoAGALqJQeIrFGoiWJSAAeiAIwAmADQgAnogCsATmvcAHEcsBfZ6bSZchEuSo06OIzMrBxcWIJ4ADYMUHS8-EKi4twEYACODHBiEHKKSCAqaiIaWvl6CEamFggALJaGDjYAzADsLm4gHtj4xKSU1LT0TCzsnJ7xEALCYhIAxqlkxZrcrMQEudqF6pra5ZXmiE2yltzWsgBshu3uYT0+-f5DwaNhE1NJcwtLWNxkkQsQMyCMA6VCwESwDb5LbfXYGEwHCqWeynSxNJyuG6eO59PyDQLDEJjHipEQEIGRVAAI3I5KhylU21KoD2COqRlcHSwRAgcG0XS8vV8AwCQRGm0ZsLKiDa3FkhhaTRqrUsVRlln03Ba50sl3ariAA */
     id: "Riven program main runner",
-    context: ({ input }) => {
-      const workerMap = new Map<ProgramToPluginEvent["type"], Worker>();
-
-      for (const [
-        pluginSymbol,
-        { config, dataSources },
-      ] of input.plugins.entries()) {
-        for (const [eventName, hook] of Object.entries(config.hooks)) {
-          if (hook) {
-            const worker = new Worker<{ event: ProgramToPluginEvent }>(
-              eventName,
-              async (job) => {
-                const result = await hook({
-                  event: job.data.event as never,
-                  dataSources,
-                  publishEvent: async ({ type, ...event }) => {
-                    const queueForEvent = input.queues.get(type);
-
-                    if (!queueForEvent) {
-                      throw new Error(`Event queue for ${type} not found`);
-                    }
-
-                    await queueForEvent.add(type, { event });
-                  },
-                });
-
-                return {
-                  plugin: pluginSymbol,
-                  result,
-                };
-              },
-              {
-                concurrency: os.availableParallelism(),
-                connection: {
-                  url: z.url().parse(process.env["REDIS_URL"]),
+    context: ({ input, self, spawn }) => ({
+      plugins: input.plugins,
+      queues: input.queues,
+      pluginHookWorkers: createPluginHookWorkers(input.plugins, input.queues),
+      processorWorkers: new Map<PluginToProgramEvent["type"], Worker>([
+        [
+          "riven-plugin.media-item.persist-movie-indexer-data",
+          createWorker(
+            "riven-plugin.media-item.persist-movie-indexer-data",
+            async (job) => {
+              const actor = spawn(persistMovieIndexerData, {
+                input: {
+                  item: job.data.item,
+                  parentRef: self,
+                  plugin: job.data.plugin,
                 },
-                telemetry: new BullMQOtel(
-                  `riven-plugin-${pluginSymbol.description ?? "unknown"}`,
-                ),
+              });
+
+              actor.start();
+
+              return toPromise(actor);
+            },
+          ),
+        ],
+        [
+          "riven-plugin.media-item.requested",
+          createWorker("riven-plugin.media-item.requested", async (job) => {
+            const actor = spawn(processRequestedItem, {
+              input: {
+                item: job.data.item,
+                parentRef: self,
+                plugin: job.data.plugin,
               },
-            );
+            });
 
-            registerMQListeners(worker);
+            actor.start();
 
-            logger.debug(
-              `Registered worker for event "${eventName}" for plugin ${String(
-                pluginSymbol.description,
-              )}`,
-            );
-
-            workerMap.set(eventName as ProgramToPluginEvent["type"], worker);
-          }
-        }
-      }
-
-      return {
-        plugins: input.plugins,
-        queues: input.queues,
-        workers: workerMap,
-      };
-    },
+            return toPromise(actor);
+          }),
+        ],
+      ]),
+    }),
     entry: [
       {
         type: "addEventToQueue",
@@ -164,13 +153,25 @@ export const mainRunnerMachine = setup({
         },
       },
     ],
-    always: {
-      guard: "shouldQueueEvent",
-      actions: {
-        type: "addEventToQueue",
-        params: ({ event }) => ProgramToPluginEvent.parse(event),
+    always: [
+      {
+        guard: "shouldQueueEvent",
+        actions: {
+          type: "addEventToQueue",
+          params: ({ event }) => ProgramToPluginEvent.parse(event),
+        },
       },
-    },
+      {
+        guard: "isRivenEvent",
+        actions: {
+          type: "log",
+          params: ({ event }) => ({
+            message: `Received event: ${event.type}`,
+            level: "verbose",
+          }),
+        },
+      },
+    ],
     on: {
       "riven-plugin.media-item.requested": {
         description:

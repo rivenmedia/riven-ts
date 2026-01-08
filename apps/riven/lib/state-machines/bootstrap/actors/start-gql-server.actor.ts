@@ -7,6 +7,7 @@ import responseCachePlugin from "@apollo/server-plugin-response-cache";
 import { ApolloServerPluginCacheControl } from "@apollo/server/plugin/cacheControl";
 import { startStandaloneServer } from "@apollo/server/standalone";
 import { fromPromise } from "xstate";
+import z from "zod";
 
 import { redisCache } from "../../../utilities/redis-cache.ts";
 
@@ -16,7 +17,7 @@ export interface StartGQLServerOutput {
 }
 
 export const startGqlServer = fromPromise<StartGQLServerOutput>(async () => {
-  const PORT = Number(process.env["PORT"]) || 3000;
+  const PORT = z.coerce.number().int().default(3000).parse(process.env["PORT"]);
 
   const server = new ApolloServer<BaseContext>({
     cache: redisCache,

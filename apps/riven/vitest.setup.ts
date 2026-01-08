@@ -49,11 +49,15 @@ vi.mock<typeof import("@repo/plugin-test")>(import("@repo/plugin-test"), () => {
 
   return {
     default: {
-      name: Symbol.for("Test"),
+      version: "1.0.0-mock",
+      name: Symbol.for("@repo/plugin-test"),
       dataSources: [TestAPI],
       resolvers: [TestResolver],
       hooks: {
         "riven.core.started": vi.fn(),
+        "riven.media-item.creation.already-exists": vi.fn(),
+        "riven.media-item.creation.error": vi.fn(),
+        "riven.media-item.creation.success": vi.fn(),
       },
       validator() {
         return true;

@@ -2,9 +2,12 @@ import { logger } from "@repo/core-util-logger";
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import { Queue, type QueueOptions } from "bullmq";
+import { BullMQOtel } from "bullmq-otel";
 import z from "zod";
 
-import { telemetry } from "../telemetry.ts";
+import packageJson from "../../../../../package.json" with { type: "json" };
+
+Queue.setMaxListeners(20);
 
 export async function createQueue(
   name: string,
@@ -15,7 +18,7 @@ export async function createQueue(
     connection: {
       url: z.url().parse(process.env["REDIS_URL"]),
     },
-    telemetry,
+    telemetry: new BullMQOtel(`riven-queue-${name}`, packageJson.version),
   });
 
   registerMQListeners(queue);

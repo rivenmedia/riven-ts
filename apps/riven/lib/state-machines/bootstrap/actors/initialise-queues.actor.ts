@@ -21,9 +21,10 @@ export const initialiseQueues = fromPromise<Map<RivenEvent["type"], Queue>>(
       // so we have to iterate over them.
       for (const discriminatorOption of event.shape.type.def.values) {
         if (!queueMap.has(discriminatorOption)) {
-          const queue = await createQueue(discriminatorOption);
-
-          queueMap.set(discriminatorOption, queue);
+          queueMap.set(
+            discriminatorOption,
+            await createQueue(discriminatorOption),
+          );
         }
       }
     }

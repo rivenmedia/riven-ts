@@ -60,6 +60,7 @@ export const pluginRegistrarMachine = setup({
               try {
                 const token = DataSource.getApiToken();
                 const instance = new DataSource({
+                  pluginSymbol: plugin.name,
                   cache: redisCache,
                   token,
                   logger,

@@ -1,13 +1,16 @@
+import packageJson from "../package.json" with { type: "json" };
 import {
   {{pascalCase pluginName}}API,
 } from "./datasource/{{kebabCase pluginName}}.datasource.ts";
 import { pluginConfig } from "./{{kebabCase pluginName}}-plugin.config.ts";
 import { {{pascalCase pluginName}}SettingsResolver } from "./schema/{{kebabCase pluginName}}-settings.resolver.ts";
 import { {{pascalCase pluginName}}Resolver } from "./schema/{{kebabCase pluginName}}.resolver.ts";
-import { type RivenPlugin } from "@repo/util-plugin-sdk";
+
+import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
 export default {
   name: pluginConfig.name,
+  version: packageJson.version,
   dataSources: [{{pascalCase pluginName}}API],
   resolvers: [{{pascalCase pluginName}}Resolver, {{pascalCase pluginName}}SettingsResolver],
   hooks: {

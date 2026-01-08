@@ -18,7 +18,7 @@ it('processes the requested item when a "riven-plugin.media-item.requested" even
 
   const pluginRunnerRef = actor
     .getSnapshot()
-    .context.pluginRefs.get(Symbol.for("Test"));
+    .context.pluginRefs.get(Symbol.for("@repo/plugin-test"));
 
   vi.spyOn(pluginRunnerRef!, "send");
 
@@ -27,7 +27,7 @@ it('processes the requested item when a "riven-plugin.media-item.requested" even
     item: {
       imdbId: requestedId,
     },
-    plugin: Symbol.for("Test"),
+    plugin: Symbol.for("@repo/plugin-test"),
   });
 
   const expectedEvent = {
@@ -59,7 +59,7 @@ it('sends an already-exists event when a "riven-plugin.media-item.requested" eve
 
   const pluginRunnerRef = actor
     .getSnapshot()
-    .context.pluginRefs.get(Symbol.for("Test"));
+    .context.pluginRefs.get(Symbol.for("@repo/plugin-test"));
 
   vi.spyOn(pluginRunnerRef!, "send");
 
@@ -68,7 +68,7 @@ it('sends an already-exists event when a "riven-plugin.media-item.requested" eve
     item: {
       imdbId: requestedId,
     },
-    plugin: Symbol.for("Test"),
+    plugin: Symbol.for("@repo/plugin-test"),
   });
 
   const expectedEvent = {

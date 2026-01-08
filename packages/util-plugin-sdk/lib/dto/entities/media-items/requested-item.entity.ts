@@ -1,8 +1,10 @@
 import { ObjectType } from "type-graphql";
 import { ChildEntity } from "typeorm";
 
-import { MediaItem } from "./media-item.entity.ts";
+import { MediaItem, type MediaItemState } from "./media-item.entity.ts";
 
 @ObjectType()
 @ChildEntity()
-export class RequestedItem extends MediaItem {}
+export class RequestedItem extends MediaItem {
+  declare state: Extract<MediaItemState, "Requested">;
+}

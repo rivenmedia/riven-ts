@@ -23,7 +23,7 @@ export type PluginEvent<
 > = Merge<
   {
     type: `riven-plugin.${Type}`;
-    plugin: symbol;
+    plugin: string;
   },
   Payload extends never ? {} : Payload
 >;

@@ -13,8 +13,7 @@ import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type { MediaItemRequestedEvent } from "@repo/util-plugin-sdk/plugin-to-program-events/media-item/requested";
 import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
 
-export interface ProcessRequestedItemInput {
-  item: ParamsFor<MediaItemRequestedEvent>["item"];
+export interface ProcessRequestedItemInput extends ParamsFor<MediaItemRequestedEvent> {
   parentRef: ActorRef<Snapshot<unknown>, ProgramToPluginEvent>;
 }
 

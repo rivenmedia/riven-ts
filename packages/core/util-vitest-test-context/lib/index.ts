@@ -1,8 +1,8 @@
 /* eslint-disable no-empty-pattern */
 import { ApolloServer } from "@apollo/server";
-import { type KeyValueCache } from "@apollo/utils.keyvaluecache";
 import { test as testBase } from "vitest";
 
+import type { KeyValueCache } from "@apollo/utils.keyvaluecache";
 import type { SetupServerApi } from "msw/node";
 
 export const it = testBase.extend<{

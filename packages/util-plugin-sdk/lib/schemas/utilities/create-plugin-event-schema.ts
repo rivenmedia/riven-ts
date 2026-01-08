@@ -10,6 +10,6 @@ export const createPluginEventSchema = <
 ) =>
   z.object({
     ...payloadSchema.shape,
-    plugin: z.symbol(),
+    plugin: z.string(),
     type: z.literal(`riven-plugin.${type}`),
   });

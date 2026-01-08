@@ -1,6 +1,6 @@
-import { type Queue, Worker } from "bullmq";
+import { type Queue, type QueueEvents, Worker } from "bullmq";
 
-async function shutdownHandler(resource: Queue | Worker) {
+async function shutdownHandler(resource: Queue | Worker | QueueEvents) {
   await resource.close();
   await resource.disconnect();
 }
@@ -12,7 +12,7 @@ async function shutdownHandler(resource: Queue | Worker) {
  *
  * @param resource - The BullMQ Queue or Worker to shut down on process termination signals.
  */
-export function registerMQListeners(resource: Queue | Worker) {
+export function registerMQListeners(resource: Queue | Worker | QueueEvents) {
   const signals = ["SIGINT", "SIGTERM"] satisfies NodeJS.Signals[];
   const events = ["beforeExit"] as const;
 
