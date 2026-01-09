@@ -21,7 +21,15 @@ export const processRequestedItem = fromPromise<
   undefined,
   ProcessRequestedItemInput
 >(async ({ input: { item, parentRef } }) => {
-  logger.silly("Processing requested item...", item);
+  const externalIds = [
+    item.imdbId ? `IMDB: ${item.imdbId}` : null,
+    item.tmdbId ? `TMDB: ${item.tmdbId}` : null,
+    item.tvdbId ? `TVDB: ${item.tvdbId}` : null,
+  ];
+
+  logger.silly(
+    `Processing requested item: ${externalIds.filter(Boolean).join(", ")}`,
+  );
 
   const existingItem = await database.manager.findOne(MediaItem, {
     where: [

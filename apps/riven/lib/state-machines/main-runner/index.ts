@@ -181,7 +181,7 @@ export const mainRunnerMachine = setup({
           type: "log",
           params: ({ event }) => ({
             message: `Received event: ${event.type}`,
-            level: "verbose",
+            level: "silly",
           }),
         },
       },

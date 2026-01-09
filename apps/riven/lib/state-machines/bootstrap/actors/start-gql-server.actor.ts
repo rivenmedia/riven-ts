@@ -37,7 +37,7 @@ export const startGqlServer = fromPromise<StartGQLServerOutput>(async () => {
     },
   });
 
-  const { url } = await startStandaloneServer<BaseContext>(server, {
+  const { url } = await startStandaloneServer(server, {
     listen: {
       port: PORT,
     },

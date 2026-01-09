@@ -217,13 +217,13 @@ export const bootstrapMachine = setup({
                 },
               },
               Complete: {
+                type: "final",
                 entry: {
                   type: "log",
                   params: {
                     message: "GraphQL bootstrap complete.",
                   },
                 },
-                type: "final",
               },
             },
           },

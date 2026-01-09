@@ -131,7 +131,7 @@ export class MediaItem extends BaseEntity {
   language?: string;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Column("date", { nullable: true })
   airedAt?: Date;
 
   @Field({ nullable: true })
