@@ -68,10 +68,13 @@ export const processRequestedItem = fromPromise<
     await validateOrReject(itemEntity);
 
     const result = await database.manager.insert(RequestedItem, itemEntity);
+    const item = await database.manager.findOneByOrFail(RequestedItem, {
+      id: result.identifiers[0]?.["id"] as number,
+    });
 
     parentRef.send({
       type: "riven.media-item.creation.success",
-      item: result.raw as RequestedItem,
+      item,
     });
   } catch (error) {
     const parsedError = z
