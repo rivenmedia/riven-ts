@@ -41,6 +41,7 @@ export const persistMovieIndexerData = fromPromise<
 
   const itemEntity = new MediaItem();
 
+  itemEntity.id = item.id;
   itemEntity.title = item.title;
 
   if (item.posterUrl) {
@@ -86,7 +87,9 @@ export const persistMovieIndexerData = fromPromise<
 
     const updatedItem = await database.manager.save(MediaItem, itemEntity);
 
-    logger.info(`Indexed media item: ${item.title} (${item.id.toString()})`);
+    logger.info(
+      `Indexed media item: ${item.title} (ID: ${item.id.toString()})`,
+    );
 
     parentRef.send({
       type: "riven.media-item.index.success",

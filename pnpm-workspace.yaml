@@ -40,6 +40,7 @@ catalog:
   typeorm: 0.3.28
   typescript: ^5.9.3
   vitest: 4.0.15
+  winston: ^3.19.0
   xstate: ^5.25.0
   zod: 4.1.13
 

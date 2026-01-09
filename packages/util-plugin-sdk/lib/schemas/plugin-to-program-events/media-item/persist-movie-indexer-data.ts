@@ -17,7 +17,7 @@ export const MediaItemPersistMovieIndexerDataEvent = createPluginEventSchema(
       contentRating: z.string().nullish(),
       aliases: z.record(z.string(), z.array(z.string())).nullish(),
       posterUrl: z.url().nullish(),
-      releaseDate: z.iso.date().nullish(),
+      releaseDate: z.union([z.iso.date().nullish(), z.literal("")]),
       language: z.string().nullish(),
     }),
   }),

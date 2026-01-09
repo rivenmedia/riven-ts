@@ -1,5 +1,3 @@
-import { logger } from "@repo/core-util-logger";
-
 import {
   type AugmentedRequest,
   type DataSourceConfig,
@@ -10,6 +8,7 @@ import {
 } from "@apollo/datasource-rest";
 import { Queue, QueueEvents, type RateLimiterOptions, Worker } from "bullmq";
 import { DateTime } from "luxon";
+import { Logger } from "winston";
 
 import { registerMQListeners } from "../helpers/register-mq-listeners.ts";
 
@@ -33,15 +32,17 @@ type FetchResponse<T = unknown> = Pick<
   };
 };
 
-export interface BaseDataSourceConfig extends DataSourceConfig {
+export interface BaseDataSourceConfig extends Omit<DataSourceConfig, "logger"> {
   pluginSymbol: symbol;
   token?: string | undefined;
   redisUrl: string;
+  logger: Logger;
 }
 
 export abstract class BaseDataSource extends RESTDataSource {
   readonly serviceName: string;
   readonly token: string | undefined;
+  override readonly logger: Logger;
 
   protected readonly rateLimiterOptions?: RateLimiterOptions | undefined;
 
@@ -77,10 +78,6 @@ export abstract class BaseDataSource extends RESTDataSource {
         },
       },
     });
-
-    // Clear any previously queued fetch requests on startup.
-    // It's highly likely they'll be stale, and will be recreated as needed.
-    void this.#queue.obliterate({ force: true });
 
     this.#queueEvents = new QueueEvents(this.#queueId, {
       connection: {
@@ -120,7 +117,7 @@ export abstract class BaseDataSource extends RESTDataSource {
     registerMQListeners(this.#worker);
 
     this.token = token;
-    this.logger = logger;
+    this.logger = apolloDataSourceOptions.logger;
   }
 
   #parseRetryAfterHeader(retryAfterHeader: string | number): number | null {
@@ -227,7 +224,7 @@ export abstract class BaseDataSource extends RESTDataSource {
       );
 
       if (!waitMs) {
-        logger.warn(
+        this.logger.warn(
           `[${this.serviceName}] Received 429 response without valid Retry-After header for ${path}. Using default wait time of 1000ms.`,
         );
       }
@@ -237,8 +234,8 @@ export abstract class BaseDataSource extends RESTDataSource {
       throw Worker.RateLimitError();
     }
 
-    this.logger.debug(
-      `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${path}: ${JSON.stringify(result, null, 2)}`,
+    this.logger.http(
+      `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${path}`,
     );
 
     return {

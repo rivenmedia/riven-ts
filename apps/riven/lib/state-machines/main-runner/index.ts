@@ -22,6 +22,7 @@ export interface MainRunnerMachineContext {
   queues: Map<RivenEvent["type"], Queue>;
   processorWorkers: Map<PluginToProgramEvent["type"], Worker>;
   pluginHookWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
+  publishableEvents: Set<RivenEvent["type"]>;
 }
 
 export interface MainRunnerMachineInput {
@@ -91,7 +92,9 @@ export const mainRunnerMachine = setup({
     processRequestedItem,
   },
   guards: {
-    shouldQueueEvent: ({ event }) => event.type.startsWith("riven."),
+    shouldQueueEvent: ({ event, context }) =>
+      event.type.startsWith("riven.") &&
+      context.publishableEvents.has(event.type as never),
     isRivenEvent: ({ event }) => RivenEvent.safeParse(event).success,
   },
 })
@@ -99,17 +102,41 @@ export const mainRunnerMachine = setup({
   .createMachine({
     /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7ABABwCcB7KAgQwFscKzVcCBXLLMAgYgI2wDoLJUyAWlQAXMBW4AqANoAGALqJQeIrFGoiWJSAAeiAIwAmADQgAnogCsATmvcAHEcsBfZ6bSZchEuSo06OIzMrBxcWIJ4ADYMUHS8-EKi4twEYACODHBiEHKKSCAqaiIaWvl6CEamFggALJaGDjYAzADsLm4gHtj4xKSU1LT0TCzsnJ7xEALCYhIAxqlkxZrcrMQEudqF6pra5ZXmiE2yltzWsgBshu3uYT0+-f5DwaNhE1NJcwtLWNxkkQsQMyCMA6VCwESwDb5LbfXYGEwHCqWeynSxNJyuG6eO59PyDQLDEJjHipEQEIGRVAAI3I5KhylU21KoD2COqRlcHSwRAgcG0XS8vV8AwCQRGm0ZsLKiDa3FkhhaTRqrUsVRlln03Ba50sl3ariAA */
     id: "Riven program main runner",
-    context: ({ input, self, spawn }) => ({
-      plugins: input.plugins,
-      queues: input.queues,
-      pluginHookWorkers: createPluginHookWorkers(input.plugins, input.queues),
-      processorWorkers: new Map<PluginToProgramEvent["type"], Worker>([
-        [
-          "riven-plugin.media-item.persist-movie-indexer-data",
-          createWorker(
+    context: ({ input, self, spawn }) => {
+      const { pluginWorkers, publishableEvents } = createPluginHookWorkers(
+        input.plugins,
+        input.queues,
+      );
+
+      return {
+        plugins: input.plugins,
+        queues: input.queues,
+        pluginHookWorkers: pluginWorkers,
+        publishableEvents,
+        processorWorkers: new Map<PluginToProgramEvent["type"], Worker>([
+          [
             "riven-plugin.media-item.persist-movie-indexer-data",
-            async (job) => {
-              const actor = spawn(persistMovieIndexerData, {
+            createWorker(
+              "riven-plugin.media-item.persist-movie-indexer-data",
+              async (job) => {
+                const actor = spawn(persistMovieIndexerData, {
+                  input: {
+                    item: job.data.item,
+                    parentRef: self,
+                    plugin: job.data.plugin,
+                  },
+                });
+
+                actor.start();
+
+                return toPromise(actor);
+              },
+            ),
+          ],
+          [
+            "riven-plugin.media-item.requested",
+            createWorker("riven-plugin.media-item.requested", async (job) => {
+              const actor = spawn(processRequestedItem, {
                 input: {
                   item: job.data.item,
                   parentRef: self,
@@ -120,27 +147,11 @@ export const mainRunnerMachine = setup({
               actor.start();
 
               return toPromise(actor);
-            },
-          ),
-        ],
-        [
-          "riven-plugin.media-item.requested",
-          createWorker("riven-plugin.media-item.requested", async (job) => {
-            const actor = spawn(processRequestedItem, {
-              input: {
-                item: job.data.item,
-                parentRef: self,
-                plugin: job.data.plugin,
-              },
-            });
-
-            actor.start();
-
-            return toPromise(actor);
-          }),
-        ],
-      ]),
-    }),
+            }),
+          ],
+        ]),
+      };
+    },
     entry: [
       {
         type: "addEventToQueue",

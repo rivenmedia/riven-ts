@@ -17,6 +17,7 @@ export function createPluginHookWorkers(
     symbol,
     Map<ProgramToPluginEvent["type"], Worker>
   >();
+  const publishableEvents = new Set<RivenEvent["type"]>();
 
   for (const [pluginSymbol, { config, dataSources }] of plugins.entries()) {
     const workerMap = new Map<ProgramToPluginEvent["type"], Worker>();
@@ -68,6 +69,7 @@ export function createPluginHookWorkers(
           )}`,
         );
 
+        publishableEvents.add(eventName as RivenEvent["type"]);
         workerMap.set(eventName as ProgramToPluginEvent["type"], worker);
       }
     }
@@ -75,5 +77,8 @@ export function createPluginHookWorkers(
     pluginWorkerMap.set(pluginSymbol, workerMap);
   }
 
-  return pluginWorkerMap;
+  return {
+    pluginWorkers: pluginWorkerMap,
+    publishableEvents,
+  };
 }

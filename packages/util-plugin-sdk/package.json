@@ -46,6 +46,7 @@
     "typeorm": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
+    "winston": "catalog:",
     "xstate": "catalog:"
   },
   "peerDependencies": {

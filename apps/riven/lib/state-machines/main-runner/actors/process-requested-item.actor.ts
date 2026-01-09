@@ -21,7 +21,7 @@ export const processRequestedItem = fromPromise<
   undefined,
   ProcessRequestedItemInput
 >(async ({ input: { item, parentRef } }) => {
-  logger.info("Processing requested item...", item);
+  logger.silly("Processing requested item...", item);
 
   const existingItem = await database.manager.findOne(MediaItem, {
     where: [
@@ -60,13 +60,10 @@ export const processRequestedItem = fromPromise<
     await validateOrReject(itemEntity);
 
     const result = await database.manager.insert(RequestedItem, itemEntity);
-    const item = await database.getRepository(RequestedItem).findOneByOrFail({
-      id: result.raw as number,
-    });
 
     parentRef.send({
       type: "riven.media-item.creation.success",
-      item,
+      item: result.raw as RequestedItem,
     });
   } catch (error) {
     const parsedError = z
