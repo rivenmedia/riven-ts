@@ -51,7 +51,9 @@ export function createPluginHookWorkers(
               result,
             };
           },
-          { concurrency: os.availableParallelism() },
+          {
+            concurrency: os.availableParallelism(),
+          },
           {
             telemetry: {
               tracerName: `riven-plugin-${pluginSymbol.description ?? "unknown"}`,

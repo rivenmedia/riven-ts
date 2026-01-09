@@ -2,9 +2,10 @@ import { database } from "@repo/core-util-database/connection";
 import { logger } from "@repo/core-util-logger";
 import { MediaItem } from "@repo/util-plugin-sdk/dto/entities/index";
 
-import { validateOrReject } from "class-validator";
+import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
 import { type ActorRef, type Snapshot, fromPromise } from "xstate";
+import z from "zod";
 
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type { MediaItemPersistMovieIndexerDataEvent } from "@repo/util-plugin-sdk/plugin-to-program-events/media-item/persist-movie-indexer-data";
@@ -18,8 +19,6 @@ export const persistMovieIndexerData = fromPromise<
   undefined,
   PersistMovieIndexerDataInput
 >(async ({ input: { item, parentRef } }) => {
-  logger.info("Persisting indexer data...", item);
-
   const existingItem = await database.manager.findOne(MediaItem, {
     where: {
       state: "Indexed",
@@ -85,30 +84,29 @@ export const persistMovieIndexerData = fromPromise<
   try {
     await validateOrReject(itemEntity);
 
-    const result = await database.manager.save(MediaItem, itemEntity);
+    const updatedItem = await database.manager.save(MediaItem, itemEntity);
 
-    console.log("Item indexed successfully", result.id);
+    logger.info(`Indexed media item: ${item.title} (${item.id.toString()})`);
 
-    // parentRef.send({
-    //   type: "riven.media-item.creation.success",
-    //   item,
-    // });
+    parentRef.send({
+      type: "riven.media-item.index.success",
+      item: updatedItem,
+    });
   } catch (error) {
-    console.error("Error processing requested item", error);
-    // const parsedError = z
-    //   .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-    //   .parse(error);
+    const parsedError = z
+      .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
+      .parse(error);
 
-    // parentRef.send({
-    //   type: "riven.media-item.creation.error",
-    //   item,
-    //   error: Array.isArray(parsedError)
-    //     ? parsedError
-    //         .map((err) =>
-    //           err.constraints ? Object.values(err.constraints).join("; ") : "",
-    //         )
-    //         .join("; ")
-    //     : parsedError.message,
-    // });
+    parentRef.send({
+      type: "riven.media-item.index.error",
+      item,
+      error: Array.isArray(parsedError)
+        ? parsedError
+            .map((err) =>
+              err.constraints ? Object.values(err.constraints).join("; ") : "",
+            )
+            .join("; ")
+        : parsedError.message,
+    });
   }
 });
