@@ -23,12 +23,14 @@ export default {
         return;
       }
 
-      const { imdbId, tmdbId } = event.item;
       const api = dataSources.get(TmdbAPI);
+      const { imdbId, tmdbId } = event.item;
 
       if (imdbId && !tmdbId) {
         try {
-          const results = await api.getFromExternalId(imdbId, "imdb");
+          const results = await api.findById(imdbId, {
+            external_source: "imdb_id",
+          });
 
           console.log({ results });
         } catch (error) {
@@ -43,15 +45,20 @@ export default {
         return;
       }
 
-      const result =
-        await api.getMovieDetailsWithExternalIdsAndReleaseDates(tmdbId);
+      const result = await api.getMovieDetails(tmdbId);
 
       await publishEvent({
         type: "riven-plugin.media-item.persist-movie-indexer-data",
         item: {
           id: event.item.id,
-          genres: result.genres.map((genre) => genre.name),
-          title: result.title,
+          genres: (result.genres ?? []).reduce<string[]>((acc, genre) => {
+            if (!genre.name) {
+              return acc;
+            }
+
+            return [...acc, genre.name];
+          }, []),
+          title: result.title ?? "Unknown title",
           aliases: {},
           country: result.production_countries?.[0]?.iso_3166_1,
           rating: 0,

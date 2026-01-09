@@ -1025,9 +1025,15 @@ importers:
         specifier: 'catalog:'
         version: 4.1.13
     devDependencies:
+      '@kubb/cli':
+        specifier: 'catalog:'
+        version: 4.11.1(@kubb/react-fabric@0.5.4)(typescript@5.9.3)
       '@repo/core-util-eslint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
+      '@repo/core-util-kubb-config':
+        specifier: workspace:^
+        version: link:../core/util-kubb-config
       '@repo/core-util-logger':
         specifier: workspace:^
         version: link:../core/util-logger

@@ -4,6 +4,11 @@ import {
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
 
+import type {
+  FindById200,
+  FindByIdQueryParams,
+  MovieDetails200,
+} from "../__generated__/index.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { Promisable } from "type-fest";
 
@@ -39,16 +44,14 @@ export class TmdbAPI extends BaseDataSource {
     return true;
   }
 
-  async getFromExternalId(externalId: string, externalSource: "imdb" | "tmdb") {
-    return await this.get(`find/${externalId}`, {
-      params: {
-        external_source: externalSource,
-      },
+  async findById(externalId: string, params: FindByIdQueryParams) {
+    return await this.get<FindById200>(`find/${externalId}`, {
+      params,
     });
   }
 
-  getMovieDetailsWithExternalIdsAndReleaseDates(movieId: string) {
-    return this.get(`movie/${movieId}`, {
+  async getMovieDetails(movieId: string) {
+    return await this.get<MovieDetails200>(`movie/${movieId}`, {
       params: {
         append_to_response: "external_ids,release_dates",
       },
