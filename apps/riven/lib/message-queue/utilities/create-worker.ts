@@ -36,7 +36,9 @@ export function createWorker<T extends RivenEvent["type"]>(
 
   registerMQListeners(worker);
 
-  worker.on("error", logger.error);
+  worker.on("error", logger.error).on("failed", (_job, err) => {
+    logger.error(`[${name}] Error: ${err.message}`);
+  });
 
   return worker;
 }

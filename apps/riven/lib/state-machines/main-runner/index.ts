@@ -21,7 +21,7 @@ export interface MainRunnerMachineContext {
   plugins: Map<symbol, PendingRunnerInvocationPlugin>;
   queues: Map<RivenEvent["type"], Queue>;
   processorWorkers: Map<PluginToProgramEvent["type"], Worker>;
-  pluginHookWorkers: Map<RivenEvent["type"], Worker>;
+  pluginHookWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
 }
 
 export interface MainRunnerMachineInput {
@@ -42,14 +42,17 @@ export const mainRunnerMachine = setup({
     },
   },
   actions: {
-    addEventToQueue: ({ context }, event: ProgramToPluginEvent) => {
-      const queue = context.queues.get(event.type);
+    addEventToQueue: (
+      { context },
+      { type, ...event }: ProgramToPluginEvent,
+    ) => {
+      const queue = context.queues.get(type);
 
       if (!queue) {
         throw new Error("Task queue not found");
       }
 
-      void queue.add(event.type, { event });
+      void queue.add(type, event);
     },
     processRequestedItem: enqueueActions(
       ({ enqueue, self }, params: ParamsFor<MediaItemRequestedEvent>) => {

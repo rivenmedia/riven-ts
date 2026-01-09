@@ -1,6 +1,7 @@
 import { logger } from "@repo/core-util-logger";
 
 import {
+  type AugmentedRequest,
   type DataSourceConfig,
   type DataSourceFetchResult,
   type DataSourceRequest,
@@ -12,12 +13,25 @@ import { DateTime } from "luxon";
 
 import { registerMQListeners } from "../helpers/register-mq-listeners.ts";
 
+import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import type { Promisable } from "type-fest";
 
 interface FetchJobInput {
   path: string;
   incomingRequest: DataSourceRequest | undefined;
 }
+
+type FetchResponse<T = unknown> = Pick<
+  DataSourceFetchResult<T>,
+  "parsedBody"
+> & {
+  response: {
+    ok: boolean;
+    status: number;
+    statusText: string;
+    headers: Record<string, string>;
+  };
+};
 
 export interface BaseDataSourceConfig extends DataSourceConfig {
   pluginSymbol: symbol;
@@ -31,10 +45,13 @@ export abstract class BaseDataSource extends RESTDataSource {
 
   protected readonly rateLimiterOptions?: RateLimiterOptions | undefined;
 
-  #queue: Queue<FetchJobInput, DataSourceFetchResult<unknown>>;
+  #queue: Queue<FetchJobInput, FetchResponse>;
   #queueEvents: QueueEvents;
-  #worker: Worker<FetchJobInput, DataSourceFetchResult<unknown>>;
+  #worker: Worker<FetchJobInput, FetchResponse>;
   #queueId: string;
+
+  #keyv: KeyvAdapter;
+  #keyvPrefix = "httpcache:";
 
   constructor({
     pluginSymbol,
@@ -43,6 +60,8 @@ export abstract class BaseDataSource extends RESTDataSource {
     ...apolloDataSourceOptions
   }: BaseDataSourceConfig) {
     super(apolloDataSourceOptions);
+
+    this.#keyv = apolloDataSourceOptions.cache as KeyvAdapter;
 
     this.serviceName = this.constructor.name;
     this.#queueId = `${pluginSymbol.description ?? "unknown"}-${this.serviceName}-fetch-queue`;
@@ -71,7 +90,22 @@ export abstract class BaseDataSource extends RESTDataSource {
 
     this.#worker = new Worker(
       this.#queueId,
-      (job) => super.fetch(job.data.path, job.data.incomingRequest),
+      async (job) => {
+        const { response, parsedBody } = await super.fetch(
+          job.data.path,
+          job.data.incomingRequest,
+        );
+
+        return {
+          parsedBody,
+          response: {
+            ok: response.ok,
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers),
+          },
+        };
+      },
       {
         connection: {
           url: redisUrl,
@@ -110,20 +144,77 @@ export abstract class BaseDataSource extends RESTDataSource {
     return retryAfterSeconds * 1000;
   }
 
+  #urlSearchParamsFromRecord(
+    params: Record<string, string | undefined> | undefined,
+  ): URLSearchParams {
+    const usp = new URLSearchParams();
+
+    if (params) {
+      for (const [name, value] of Object.entries(params)) {
+        if (value !== undefined) {
+          usp.set(name, value);
+        }
+      }
+    }
+
+    return usp;
+  }
+
+  // Generate a cache key for the request, after applying any request modifications
+  // This is mostly copied from RESTDataSource, as there was no native way to determine
+  // whether a request is cached without actually performing subsequent fetch.
+  async #getCacheKey(
+    path: string,
+    incomingRequest?: DataSourceRequest,
+  ): Promise<string> {
+    const downcasedHeaders: Record<string, string> = {};
+    const augmentedRequest: AugmentedRequest = {
+      ...incomingRequest,
+      params:
+        incomingRequest?.params instanceof URLSearchParams
+          ? incomingRequest.params
+          : this.#urlSearchParamsFromRecord(incomingRequest?.params),
+      headers: downcasedHeaders,
+    };
+
+    await this.willSendRequest?.(path, augmentedRequest);
+
+    const url = await this.resolveURL(path, augmentedRequest);
+
+    // Append params to existing params in the path
+    for (const [name, value] of augmentedRequest.params) {
+      url.searchParams.append(name, value);
+    }
+
+    if (this.shouldJSONSerializeBody(augmentedRequest.body)) {
+      augmentedRequest.body = JSON.stringify(augmentedRequest.body);
+
+      // If Content-Type header has not been previously set, set to application/json
+      augmentedRequest.headers["content-type"] ??= "application/json";
+    }
+
+    return this.cacheKeyFor(url, augmentedRequest as never);
+  }
+
   override async fetch<TResult>(
     path: string,
     incomingRequest?: DataSourceRequest,
   ): Promise<DataSourceFetchResult<TResult>> {
-    const jobId = this.cacheKeyFor(
-      new URL(path, this.baseURL),
-      (incomingRequest ?? {}) as never,
+    const cacheKey = await this.#getCacheKey(path, incomingRequest);
+    const isCached = Boolean(
+      await this.#keyv.get(`${this.#keyvPrefix}${cacheKey}`),
     );
 
+    if (isCached) {
+      // If we have a cached response, bypass the message queue and fetch directly
+      return await super.fetch(path, incomingRequest);
+    }
+
     // Redis keys use colons as a separator, so they need to be stripped out before insertion
-    const sanitisedJobId = jobId.replaceAll(":", "[COLON]");
+    const sanitisedJobId = cacheKey.replaceAll(":", "[COLON]");
 
     const job = await this.#queue.add(
-      sanitisedJobId,
+      cacheKey,
       { path, incomingRequest },
       { jobId: sanitisedJobId },
     );
@@ -132,7 +223,7 @@ export abstract class BaseDataSource extends RESTDataSource {
 
     if (result.response.status === 429) {
       const waitMs = this.#parseRetryAfterHeader(
-        result.response.headers.get("Retry-After") ?? "",
+        result.response.headers["retry-after"] ?? "",
       );
 
       if (!waitMs) {
@@ -150,7 +241,18 @@ export abstract class BaseDataSource extends RESTDataSource {
       `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${path}: ${JSON.stringify(result, null, 2)}`,
     );
 
-    return result as DataSourceFetchResult<TResult>;
+    return {
+      parsedBody: result.parsedBody as TResult,
+      response: result.response as never,
+
+      // The following fields aren't used by the application,
+      // but must be included to satisfy the return type.
+      responseFromCache: false,
+      requestDeduplication: undefined as never,
+      httpCache: {
+        cacheWritePromise: Promise.resolve(),
+      },
+    };
   }
 
   protected override didEncounterError(

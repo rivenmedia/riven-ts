@@ -13,16 +13,24 @@ export function createPluginHookWorkers(
   plugins: Map<symbol, PendingRunnerInvocationPlugin>,
   queues: Map<RivenEvent["type"], Queue>,
 ) {
-  const workerMap = new Map<ProgramToPluginEvent["type"], Worker>();
+  const pluginWorkerMap = new Map<
+    symbol,
+    Map<ProgramToPluginEvent["type"], Worker>
+  >();
 
   for (const [pluginSymbol, { config, dataSources }] of plugins.entries()) {
+    const workerMap = new Map<ProgramToPluginEvent["type"], Worker>();
+
     for (const [eventName, hook] of Object.entries(config.hooks)) {
       if (hook) {
         const worker = createWorker(
           eventName as ProgramToPluginEvent["type"],
           async (job) => {
             const result = await hook({
-              event: job.data as never,
+              event: {
+                type: job.name,
+                ...job.data,
+              } as never,
               dataSources,
               async publishEvent({ type, ...event }) {
                 const queueForEvent = queues.get(type);
@@ -61,7 +69,9 @@ export function createPluginHookWorkers(
         workerMap.set(eventName as ProgramToPluginEvent["type"], worker);
       }
     }
+
+    pluginWorkerMap.set(pluginSymbol, workerMap);
   }
 
-  return workerMap;
+  return pluginWorkerMap;
 }
