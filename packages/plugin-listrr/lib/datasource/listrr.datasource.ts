@@ -15,7 +15,6 @@ import {
 
 import type { ExternalIds } from "../schema/types/external-ids.type.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
-import type { RequestedItem } from "@repo/util-plugin-sdk/schemas/media-item/requested-item";
 
 export class ListrrAPIError extends Error {}
 
@@ -56,7 +55,7 @@ export class ListrrAPI extends BaseDataSource {
    * Fetch unique show IDs from Listrr for a given list of content
    * @param contentLists
    */
-  async getShows(contentLists: Set<string>): Promise<RequestedItem[]> {
+  async getShows(contentLists: Set<string>): Promise<ExternalIds[]> {
     if (!contentLists.size) {
       return [];
     }
@@ -109,7 +108,7 @@ export class ListrrAPI extends BaseDataSource {
    * Fetch unique movie IDs from Listrr for a given list of content
    * @param contentLists
    */
-  async getMovies(contentLists: Set<string>): Promise<RequestedItem[]> {
+  async getMovies(contentLists: Set<string>): Promise<ExternalIds[]> {
     if (!contentLists.size) {
       return [];
     }

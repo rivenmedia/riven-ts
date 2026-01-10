@@ -1,3 +1,4 @@
+import { logger } from "@repo/core-util-logger";
 import { it } from "@repo/core-util-vitest-test-context";
 
 import { HttpResponse, http } from "msw";
@@ -9,7 +10,13 @@ it('assigns the API to the "x-api-key" header', async ({
   server,
   httpCache,
 }) => {
-  const listrrApi = new ListrrAPI({ cache: httpCache, token: "test-token" });
+  const listrrApi = new ListrrAPI({
+    cache: httpCache,
+    token: "test-token",
+    logger,
+    pluginSymbol: Symbol("@repo/plugin-listrr"),
+    redisUrl: "redis-url",
+  });
 
   server.use(
     http.get("https://listrr.pro/api/test-endpoint", ({ request }) => {

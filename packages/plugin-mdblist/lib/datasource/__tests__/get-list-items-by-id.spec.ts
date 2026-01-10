@@ -1,3 +1,4 @@
+import { logger } from "@repo/core-util-logger";
 import { it } from "@repo/core-util-vitest-test-context";
 
 import { HttpResponse } from "msw";
@@ -9,7 +10,10 @@ import {
 } from "../../__generated__/index.ts";
 import { MDBListAPI } from "../mdblist.datasource.ts";
 
-it("gets the items from the list with the given ID", async ({ server }) => {
+it("gets the items from the list with the given ID", async ({
+  server,
+  httpCache,
+}) => {
   const mockListItemsResponse = createGetListItemsByNameQueryResponse();
 
   server.use(
@@ -25,7 +29,13 @@ it("gets the items from the list with the given ID", async ({ server }) => {
     }),
   );
 
-  const mdbListApi = new MDBListAPI({ token: "test-token" });
+  const mdbListApi = new MDBListAPI({
+    cache: httpCache,
+    token: "test-token",
+    redisUrl: "redis-url",
+    logger,
+    pluginSymbol: Symbol("@repo/plugin-mdblist"),
+  });
   const items = await mdbListApi.getListItemsById(123);
 
   expect(items).toEqual(mockListItemsResponse);

@@ -1,3 +1,4 @@
+import { logger } from "@repo/core-util-logger";
 import { it } from "@repo/core-util-vitest-test-context";
 
 import { HttpResponse, http } from "msw";
@@ -12,7 +13,13 @@ it("returns false if the request fails", async ({ server, httpCache }) => {
     ),
   );
 
-  const tmdbApi = new TmdbAPI({ cache: httpCache, token: "test-token" });
+  const tmdbApi = new TmdbAPI({
+    cache: httpCache,
+    token: "test-token",
+    redisUrl: "redis-url",
+    logger,
+    pluginSymbol: Symbol("@repo/plugin-tmdb"),
+  });
   const isValid = await tmdbApi.validate();
 
   expect(isValid).toBe(false);
@@ -23,7 +30,13 @@ it("returns true if the request succeeds", async ({ server, httpCache }) => {
     http.get("**/validate", () => HttpResponse.json({ success: true })),
   );
 
-  const tmdbApi = new TmdbAPI({ cache: httpCache, token: "test-token" });
+  const tmdbApi = new TmdbAPI({
+    cache: httpCache,
+    token: "test-token",
+    redisUrl: "redis-url",
+    logger,
+    pluginSymbol: Symbol("@repo/plugin-tmdb"),
+  });
   const isValid = await tmdbApi.validate();
 
   expect(isValid).toBe(true);

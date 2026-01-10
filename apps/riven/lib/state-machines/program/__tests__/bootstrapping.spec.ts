@@ -11,7 +11,6 @@ function sendBootstrapDoneEvent(
   output?: BootstrapMachineOutput,
 ) {
   actor.send({
-    // @ts-expect-error Internal XState event
     type: "xstate.done.actor.bootstrapMachine",
     output,
   });

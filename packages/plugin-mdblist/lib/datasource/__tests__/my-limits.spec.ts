@@ -1,3 +1,4 @@
+import { logger } from "@repo/core-util-logger";
 import { it } from "@repo/core-util-vitest-test-context";
 
 import { expect } from "vitest";
@@ -8,12 +9,18 @@ import {
 } from "../../__generated__/index.ts";
 import { MDBListAPI } from "../mdblist.datasource.ts";
 
-it("returns the user's API limits", async ({ server }) => {
+it("returns the user's API limits", async ({ server, httpCache }) => {
   const mockLimits = createGetMyLimitsQueryResponse();
 
   server.use(getMyLimitsHandler(mockLimits));
 
-  const mdbListApi = new MDBListAPI({ token: "test-token" });
+  const mdbListApi = new MDBListAPI({
+    cache: httpCache,
+    token: "test-token",
+    redisUrl: "redis-url",
+    logger,
+    pluginSymbol: Symbol("@repo/plugin-mdblist"),
+  });
   const limits = await mdbListApi.myLimits();
 
   expect(limits).toEqual(mockLimits);

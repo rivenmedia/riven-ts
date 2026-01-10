@@ -13,10 +13,10 @@ export default {
   dataSources: [TestAPI],
   resolvers: [TestResolver, TestSettingsResolver],
   hooks: {
-    "riven.core.started": () => {},
-    "riven.media-item.creation.already-exists": () => {},
-    "riven.media-item.creation.error": () => {},
-    "riven.media-item.creation.success": () => {},
+    "riven.core.started": async () => {},
+    "riven.media-item.creation.already-exists": async () => {},
+    "riven.media-item.creation.error": async () => {},
+    "riven.media-item.creation.success": async () => {},
   },
   validator() {
     return true;

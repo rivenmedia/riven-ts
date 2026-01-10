@@ -6,25 +6,24 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { ValidationError, validateOrReject } from "class-validator";
-import { type ActorRef, type Snapshot, fromPromise } from "xstate";
 import z from "zod";
 
-import type { ParamsFor } from "@repo/util-plugin-sdk";
-import type { MediaItemRequestedEvent } from "@repo/util-plugin-sdk/plugin-to-program-events/media-item/requested";
-import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
+import type { MainRunnerMachineIntake } from "../index.ts";
+import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item/content-service-requested";
 
-export interface ProcessRequestedItemInput extends ParamsFor<MediaItemRequestedEvent> {
-  parentRef: ActorRef<Snapshot<unknown>, ProgramToPluginEvent>;
+export interface ProcessRequestedItemInput {
+  sendEvent: MainRunnerMachineIntake;
+  item: ContentServiceRequestedResponse[number];
 }
 
 export interface ProcessRequestedItemOutput {
   isNewItem: boolean;
 }
 
-export const processRequestedItem = fromPromise<
-  ProcessRequestedItemOutput,
-  ProcessRequestedItemInput
->(async ({ input: { item, parentRef } }) => {
+export async function processRequestedItem({
+  item,
+  sendEvent,
+}: ProcessRequestedItemInput): Promise<ProcessRequestedItemOutput> {
   const externalIds = [
     item.imdbId ? `IMDB: ${item.imdbId}` : null,
     item.tmdbId ? `TMDB: ${item.tmdbId}` : null,
@@ -44,7 +43,7 @@ export const processRequestedItem = fromPromise<
   });
 
   if (existingItem) {
-    parentRef.send({
+    sendEvent({
       type: "riven.media-item.creation.already-exists",
       item: {
         ...item,
@@ -78,7 +77,7 @@ export const processRequestedItem = fromPromise<
       id: result.identifiers[0]?.["id"] as number,
     });
 
-    parentRef.send({
+    sendEvent({
       type: "riven.media-item.creation.success",
       item,
     });
@@ -91,7 +90,7 @@ export const processRequestedItem = fromPromise<
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
       .parse(error);
 
-    parentRef.send({
+    sendEvent({
       type: "riven.media-item.creation.error",
       item,
       error: Array.isArray(parsedError)
@@ -107,4 +106,4 @@ export const processRequestedItem = fromPromise<
       isNewItem: false,
     };
   }
-});
+}

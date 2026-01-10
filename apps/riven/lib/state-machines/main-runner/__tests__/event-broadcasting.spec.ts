@@ -1,9 +1,8 @@
-import { PluginToProgramEvent } from "@repo/util-plugin-sdk/plugin-to-program-events";
-import { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
-
 import { expect, vi } from "vitest";
 
 import { it } from "./helpers/test-context.ts";
+
+import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 const testCases = {
   "riven.core.started": {
@@ -32,10 +31,7 @@ const testCases = {
     type: "riven.media-item.creation.success",
   },
 } satisfies {
-  [Event in ProgramToPluginEvent["type"]]: Extract<
-    ProgramToPluginEvent,
-    { type: Event }
-  >;
+  [Event in RivenEvent["type"]]: Extract<RivenEvent, { type: Event }>;
 };
 
 it.for(Object.values(testCases))(

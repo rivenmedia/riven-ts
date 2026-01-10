@@ -1,3 +1,4 @@
+import { logger } from "@repo/core-util-logger";
 import { it } from "@repo/core-util-vitest-test-context";
 
 import { HttpResponse, http } from "msw";
@@ -15,7 +16,13 @@ import { ListrrAPI } from "../listrr.datasource.ts";
 it("returns an empty array if no content lists are provided", async ({
   httpCache,
 }) => {
-  const listrrApi = new ListrrAPI({ cache: httpCache, token: "test-token" });
+  const listrrApi = new ListrrAPI({
+    cache: httpCache,
+    token: "test-token",
+    logger,
+    pluginSymbol: Symbol("@repo/plugin-listrr"),
+    redisUrl: "redis-url",
+  });
   const shows = await listrrApi.getShows(new Set());
 
   expect(shows).toEqual([]);
@@ -50,7 +57,13 @@ it("retrieves shows from each provided list", async ({ server, httpCache }) => {
     }),
   );
 
-  const listrrApi = new ListrrAPI({ cache: httpCache, token: "test-token" });
+  const listrrApi = new ListrrAPI({
+    cache: httpCache,
+    token: "test-token",
+    logger,
+    pluginSymbol: Symbol("@repo/plugin-listrr"),
+    redisUrl: "redis-url",
+  });
   const shows = await listrrApi.getShows(contentLists);
 
   expect(shows.length).toBe(2);
@@ -87,7 +100,13 @@ it("paginates through all pages of the list", async ({ server, httpCache }) => {
     }),
   );
 
-  const listrrApi = new ListrrAPI({ cache: httpCache, token: "test-token" });
+  const listrrApi = new ListrrAPI({
+    cache: httpCache,
+    token: "test-token",
+    logger,
+    pluginSymbol: Symbol("@repo/plugin-listrr"),
+    redisUrl: "redis-url",
+  });
   const shows = await listrrApi.getShows(contentLists);
 
   expect(shows.length).toBe(totalPages * itemsPerPage);
@@ -122,7 +141,13 @@ it("dedupes shows that appear in multiple lists", async ({
     ),
   );
 
-  const listrrApi = new ListrrAPI({ cache: httpCache, token: "test-token" });
+  const listrrApi = new ListrrAPI({
+    cache: httpCache,
+    token: "test-token",
+    logger,
+    pluginSymbol: Symbol("@repo/plugin-listrr"),
+    redisUrl: "redis-url",
+  });
   const shows = await listrrApi.getShows(new Set(Object.keys(items)));
 
   expect(shows).toHaveLength(8);

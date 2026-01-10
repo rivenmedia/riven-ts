@@ -1,4 +1,4 @@
-import { RivenEvent } from "@repo/util-plugin-sdk";
+import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 import { Queue } from "bullmq";
 import { fromPromise } from "xstate";

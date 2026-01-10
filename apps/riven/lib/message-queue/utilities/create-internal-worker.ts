@@ -5,8 +5,9 @@ import { type Processor, Worker, type WorkerOptions } from "bullmq";
 import { BullMQOtel } from "bullmq-otel";
 import z from "zod";
 
-import type { ParamsFor, RivenEvent } from "@repo/util-plugin-sdk";
-import type { PluginToProgramEvent } from "@repo/util-plugin-sdk/plugin-to-program-events";
+import type { Flow } from "../flows/index.ts";
+import type { ParamsFor } from "@repo/util-plugin-sdk";
+import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 Worker.setMaxListeners(20);
 
@@ -17,9 +18,9 @@ interface CreateInternalWorkerOptions {
   };
 }
 
-export function createInternalWorker<T extends RivenEvent["type"]>(
+export function createInternalWorker<T extends RivenEvent["type"] | Flow>(
   name: T,
-  processor: Processor<ParamsFor<Extract<PluginToProgramEvent, { type: T }>>>,
+  processor: Processor<ParamsFor<Extract<RivenEvent, { type: T }>>>,
   workerOptions?: Omit<WorkerOptions, "connection" | "telemetry">,
   createInternalWorkerOptions?: CreateInternalWorkerOptions,
 ) {

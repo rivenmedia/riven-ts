@@ -4,21 +4,19 @@ import { MediaItem } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
-import { type ActorRef, type Snapshot, fromPromise } from "xstate";
 import z from "zod";
 
+import type { MainRunnerMachineIntake } from "../index.ts";
 import type { ParamsFor } from "@repo/util-plugin-sdk";
-import type { MediaItemPersistMovieIndexerDataEvent } from "@repo/util-plugin-sdk/plugin-to-program-events/media-item/persist-movie-indexer-data";
-import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
 
 export interface PersistMovieIndexerDataInput extends ParamsFor<MediaItemPersistMovieIndexerDataEvent> {
-  parentRef: ActorRef<Snapshot<unknown>, ProgramToPluginEvent>;
+  sendEvent: MainRunnerMachineIntake;
 }
 
-export const persistMovieIndexerData = fromPromise<
-  undefined,
-  PersistMovieIndexerDataInput
->(async ({ input: { item, parentRef } }) => {
+export async function persistMovieIndexerData({
+  item,
+  sendEvent,
+}: PersistMovieIndexerDataInput) {
   const existingItem = await database.manager.findOne(MediaItem, {
     where: {
       state: "Indexed",
@@ -27,14 +25,16 @@ export const persistMovieIndexerData = fromPromise<
   });
 
   if (existingItem) {
-    parentRef.send({
-      type: "riven.media-item.creation.already-exists",
-      item: {
-        ...item,
-        id: existingItem.id,
-        title: existingItem.title,
-      },
-    });
+    // sendEvent({
+    //   type: "riven.media-item.creation.already-exists",
+    //   item: {
+    //     ...item,
+    //     id: existingItem.id,
+    //     title: existingItem.title,
+    //   },
+    // });
+
+    return;
   }
 
   const itemEntity = new MediaItem();
@@ -89,7 +89,9 @@ export const persistMovieIndexerData = fromPromise<
       `Indexed media item: ${item.title} (ID: ${item.id.toString()})`,
     );
 
-    parentRef.send({
+    return updatedItem;
+
+    sendEvent({
       type: "riven.media-item.index.success",
       item: updatedItem,
     });
@@ -98,16 +100,18 @@ export const persistMovieIndexerData = fromPromise<
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
       .parse(error);
 
-    parentRef.send({
-      type: "riven.media-item.index.error",
-      item,
-      error: Array.isArray(parsedError)
-        ? parsedError
-            .map((err) =>
-              err.constraints ? Object.values(err.constraints).join("; ") : "",
-            )
-            .join("; ")
-        : parsedError.message,
-    });
+    // sendEvent({
+    //   type: "riven.media-item.index.error",
+    //   item,
+    //   error: Array.isArray(parsedError)
+    //     ? parsedError
+    //         .map((err) =>
+    //           err.constraints ? Object.values(err.constraints).join("; ") : "",
+    //         )
+    //         .join("; ")
+    //     : parsedError.message,
+    // });
+
+    throw error;
   }
-});
+}

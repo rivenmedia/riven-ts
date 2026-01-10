@@ -15,9 +15,7 @@ import { initialiseQueues } from "./actors/initialise-queues.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
 import type { ApolloServer } from "@apollo/server";
-import type { RivenEvent } from "@repo/util-plugin-sdk";
-import type { PluginToProgramEvent } from "@repo/util-plugin-sdk/plugin-to-program-events";
-import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
+import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { Queue } from "bullmq";
 
 export interface BootstrapMachineContext {
@@ -29,8 +27,6 @@ export interface BootstrapMachineContext {
   server?: ApolloServer;
   queues: Map<RivenEvent["type"], Queue>;
 }
-
-export type BootstrapMachineEvent = ProgramToPluginEvent | PluginToProgramEvent;
 
 export interface BootstrapMachineInput {
   rootRef: AnyActorRef;
@@ -45,8 +41,6 @@ export interface BootstrapMachineOutput {
 export const bootstrapMachine = setup({
   types: {
     context: {} as BootstrapMachineContext,
-    emitted: {} as ProgramToPluginEvent,
-    events: {} as BootstrapMachineEvent,
     input: {} as BootstrapMachineInput,
     output: {} as BootstrapMachineOutput,
     children: {} as {

@@ -7,11 +7,9 @@
     ".": "./lib/index.ts",
     "./types/*": "./lib/types/*.ts",
     "./dto/*": "./lib/dto/*.ts",
-    "./plugin-to-program-events": "./lib/schemas/plugin-to-program-events/index.ts",
-    "./plugin-to-program-events/*": "./lib/schemas/plugin-to-program-events/*.ts",
-    "./program-to-plugin-events": "./lib/schemas/program-to-plugin-events/index.ts",
-    "./program-to-plugin-events/*": "./lib/schemas/program-to-plugin-events/*.ts",
-    "./schemas/media-item/*": "./lib/schemas/media-item/*.ts",
+    "./events": "./lib/schemas/events/index.ts",
+    "./events/*": "./lib/schemas/plugin-to-program-events/*.ts",
+    "./schemas/*": "./lib/schemas/*.ts",
     "./helpers/register-mq-listeners": "./lib/helpers/register-mq-listeners.ts"
   },
   "scripts": {

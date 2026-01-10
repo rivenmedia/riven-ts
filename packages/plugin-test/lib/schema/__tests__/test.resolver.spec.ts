@@ -1,3 +1,4 @@
+import { logger } from "@repo/core-util-logger";
 import { it } from "@repo/core-util-vitest-test-context";
 
 import { HttpResponse, http } from "msw";
@@ -27,7 +28,13 @@ it('returns the validation status when calling "testIsValid" query', async ({
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new TestAPI({ cache: httpCache, token: "test-token" }),
+          api: new TestAPI({
+            cache: httpCache,
+            token: "test-token",
+            pluginSymbol: Symbol("@repo/plugin-test"),
+            logger,
+            redisUrl: "redis-url",
+          }),
         },
       },
     },

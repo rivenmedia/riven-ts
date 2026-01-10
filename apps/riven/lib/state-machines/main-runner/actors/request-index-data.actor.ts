@@ -1,6 +1,6 @@
 import { type ActorRef, type Snapshot, fromPromise } from "xstate";
 
-import { createRequestIndexDataFlowJob } from "../../../message-queue/flows/indexing.ts";
+import { createRequestIndexDataFlowJob } from "../../../message-queue/flows/indexing/indexing.ts";
 
 import type { ParamsFor, RivenPlugin } from "@repo/util-plugin-sdk";
 import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";

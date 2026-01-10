@@ -6,8 +6,8 @@ import { expect, vi } from "vitest";
 import { it } from "./helpers/test-context.ts";
 
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities/index";
-import type { MediaItemCreationAlreadyExistsEvent } from "@repo/util-plugin-sdk/program-to-plugin-events/media-item/creation/already-exists";
-import type { MediaItemCreationSuccessEvent } from "@repo/util-plugin-sdk/program-to-plugin-events/media-item/creation/success";
+import type { MediaItemCreationAlreadyExistsEvent } from "@repo/util-plugin-sdk/schemas/events/media-item/creation/already-exists";
+import type { MediaItemCreationSuccessEvent } from "@repo/util-plugin-sdk/schemas/events/media-item/creation/success";
 
 it('processes the requested item when a "riven-plugin.media-item.requested" event is received', async ({
   actor,

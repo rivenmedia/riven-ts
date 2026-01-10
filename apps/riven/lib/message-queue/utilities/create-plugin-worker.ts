@@ -1,12 +1,15 @@
 import { logger } from "@repo/core-util-logger";
+import {
+  type RivenEvent,
+  RivenEventHandler,
+} from "@repo/util-plugin-sdk/events";
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import { type Processor, Worker, type WorkerOptions } from "bullmq";
 import { BullMQOtel } from "bullmq-otel";
 import z from "zod";
 
-import type { ParamsFor, RivenEvent } from "@repo/util-plugin-sdk";
-import type { PluginToProgramEvent } from "@repo/util-plugin-sdk/plugin-to-program-events";
+import type { ParamsFor } from "@repo/util-plugin-sdk";
 
 Worker.setMaxListeners(20);
 
@@ -17,13 +20,22 @@ interface CreatePluginWorkerOptions {
   };
 }
 
-export function createPluginWorker<T extends RivenEvent["type"]>(
-  name: `${T}.plugin-${string}`,
-  processor: Processor<ParamsFor<Extract<PluginToProgramEvent, { type: T }>>>,
+export function createPluginWorker<
+  T extends RivenEvent["type"],
+  R extends (typeof RivenEventHandler)[T],
+>(
+  name: T,
+  pluginName: string,
+  processor: Processor<
+    ParamsFor<Extract<RivenEvent, { type: T }>>,
+    Awaited<ReturnType<z.infer<R>>>
+  >,
   workerOptions?: Omit<WorkerOptions, "connection" | "telemetry">,
   createPluginWorkerOptions?: CreatePluginWorkerOptions,
 ) {
-  const worker = new Worker(name, processor, {
+  const queueName = `${name}.plugin-${pluginName}`;
+
+  const worker = new Worker(queueName, processor, {
     ...workerOptions,
     telemetry: new BullMQOtel(
       createPluginWorkerOptions?.telemetry?.tracerName ??

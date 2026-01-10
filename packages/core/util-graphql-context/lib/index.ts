@@ -43,6 +43,9 @@ export function buildContext(
           for (const DataSourceConstructor of plugin.dataSources) {
             const instance = new DataSourceConstructor({
               cache,
+              logger,
+              pluginSymbol: plugin.name,
+              redisUrl: process.env["REDIS_URL"],
             });
 
             dataSources.set(DataSourceConstructor, instance);

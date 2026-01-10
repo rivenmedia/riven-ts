@@ -1,6 +1,6 @@
 import { fromPromise } from "xstate";
 
-import { requestContentServices } from "../../../message-queue/flows/request-content-services.ts";
+import { requestContentServices } from "../../../message-queue/flows/request-content-services/request-content-services.ts";
 
 import type { ParamsFor, RivenPlugin } from "@repo/util-plugin-sdk";
 import type { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/program-to-plugin-events/media-item/index-requested";

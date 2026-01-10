@@ -2,14 +2,14 @@ import z, { type ZodArray, type ZodLiteral, type ZodObject } from "zod";
 
 import { DataSourceMap } from "../../types/utilities.ts";
 
-import type { RivenEvent } from "../index.ts";
+import type { RivenEvent } from "../events/index.ts";
 
 export const createEventHandlerSchema = <
   I extends { type: ZodLiteral<RivenEvent["type"]> },
   O extends ZodObject | ZodArray<ZodObject>,
 >(
   inputSchema: ZodObject<I>,
-  outputSchema: O,
+  outputSchema?: O,
 ) =>
   z.function({
     input: [
@@ -18,5 +18,5 @@ export const createEventHandlerSchema = <
         dataSources: z.instanceof(DataSourceMap),
       }),
     ],
-    output: z.promise(outputSchema),
+    output: z.promise(outputSchema ?? z.void()),
   });
