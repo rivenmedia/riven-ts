@@ -17,8 +17,12 @@ export interface ProcessRequestedItemInput extends ParamsFor<MediaItemRequestedE
   parentRef: ActorRef<Snapshot<unknown>, ProgramToPluginEvent>;
 }
 
+export interface ProcessRequestedItemOutput {
+  isNewItem: boolean;
+}
+
 export const processRequestedItem = fromPromise<
-  undefined,
+  ProcessRequestedItemOutput,
   ProcessRequestedItemInput
 >(async ({ input: { item, parentRef } }) => {
   const externalIds = [
@@ -49,7 +53,9 @@ export const processRequestedItem = fromPromise<
       },
     });
 
-    return undefined;
+    return {
+      isNewItem: false,
+    };
   }
 
   const itemEntity = new RequestedItem();
@@ -76,6 +82,10 @@ export const processRequestedItem = fromPromise<
       type: "riven.media-item.creation.success",
       item,
     });
+
+    return {
+      isNewItem: true,
+    };
   } catch (error) {
     const parsedError = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
@@ -92,5 +102,9 @@ export const processRequestedItem = fromPromise<
             .join("; ")
         : parsedError.message,
     });
+
+    return {
+      isNewItem: false,
+    };
   }
 });

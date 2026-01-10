@@ -23,15 +23,14 @@ export const retryLibraryActor = fromPromise<undefined, RetryLibraryActorInput>(
 
       for (const item of pendingItems) {
         switch (item.state) {
-          case "Requested":
+          case "Requested": {
             parentRef.send({
               type: "riven.media-item.creation.success",
-              item: {
-                ...Object.assign({}, item),
-                state: "Requested",
-              },
+              item,
             });
+
             break;
+          }
         }
       }
     } catch (error) {

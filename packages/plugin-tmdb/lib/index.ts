@@ -14,13 +14,9 @@ export default {
   dataSources: [TmdbAPI],
   resolvers: [TmdbResolver, TmdbSettingsResolver],
   hooks: {
-    "riven.media-item.creation.success": async ({
-      dataSources,
-      event,
-      publishEvent,
-    }) => {
+    "riven.media-item.index.requested": async ({ dataSources, event }) => {
       if (!event.item.tmdbId && !event.item.imdbId) {
-        return;
+        throw new Error("Media item must have either a TMDB ID or an IMDB ID");
       }
 
       const api = dataSources.get(TmdbAPI);
@@ -42,13 +38,13 @@ export default {
         logger.error(
           `No TMDB ID found for media item ${event.item.id.toString()}`,
         );
-        return;
+
+        throw new Error("No TMDB ID found for media item");
       }
 
       const result = await api.getMovieDetails(tmdbId);
 
-      await publishEvent({
-        type: "riven-plugin.media-item.persist-movie-indexer-data",
+      return {
         item: {
           id: event.item.id,
           genres: (result.genres ?? []).reduce<string[]>((acc, genre) => {
@@ -69,9 +65,7 @@ export default {
           releaseDate: result.release_date,
           language: result.original_language,
         },
-      });
-
-      // console.log(results);
+      };
     },
   },
   validator() {

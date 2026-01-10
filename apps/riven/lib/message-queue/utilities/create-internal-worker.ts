@@ -10,24 +10,25 @@ import type { PluginToProgramEvent } from "@repo/util-plugin-sdk/plugin-to-progr
 
 Worker.setMaxListeners(20);
 
-interface CreateWorkerOptions {
+interface CreateInternalWorkerOptions {
   telemetry?: {
     tracerName: string;
     version?: string;
   };
 }
 
-export function createWorker<T extends RivenEvent["type"]>(
+export function createInternalWorker<T extends RivenEvent["type"]>(
   name: T,
   processor: Processor<ParamsFor<Extract<PluginToProgramEvent, { type: T }>>>,
   workerOptions?: Omit<WorkerOptions, "connection" | "telemetry">,
-  createWorkerOptions?: CreateWorkerOptions,
+  createInternalWorkerOptions?: CreateInternalWorkerOptions,
 ) {
   const worker = new Worker(name, processor, {
     ...workerOptions,
     telemetry: new BullMQOtel(
-      createWorkerOptions?.telemetry?.tracerName ?? `riven-worker-${name}`,
-      createWorkerOptions?.telemetry?.version,
+      createInternalWorkerOptions?.telemetry?.tracerName ??
+        `riven-worker-${name}`,
+      createInternalWorkerOptions?.telemetry?.version,
     ),
     connection: {
       url: z.url().parse(process.env["REDIS_URL"]),

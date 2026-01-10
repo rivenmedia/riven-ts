@@ -35,8 +35,6 @@ export const persistMovieIndexerData = fromPromise<
         title: existingItem.title,
       },
     });
-
-    return undefined;
   }
 
   const itemEntity = new MediaItem();

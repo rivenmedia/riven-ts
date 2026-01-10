@@ -6,6 +6,8 @@ import { type AnyEventObject, createActor, waitFor } from "xstate";
 
 import { rivenMachine } from "./state-machines/program/index.ts";
 
+process.on("uncaughtException", (error) => logger.error(error));
+
 const sessionId = crypto.randomUUID();
 
 const eventsCache = new LRUCache<string, AnyEventObject>({ max: 100000 });

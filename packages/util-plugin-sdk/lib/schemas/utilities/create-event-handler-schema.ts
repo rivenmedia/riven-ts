@@ -1,26 +1,22 @@
-import z, { type ZodObject } from "zod";
+import z, { type ZodArray, type ZodLiteral, type ZodObject } from "zod";
 
 import { DataSourceMap } from "../../types/utilities.ts";
-import { PluginToProgramEvent } from "../plugin-to-program-events/index.js";
 
-export const createEventHandlerSchema = <T extends ZodObject>(eventSchema: T) =>
+import type { RivenEvent } from "../index.ts";
+
+export const createEventHandlerSchema = <
+  I extends { type: ZodLiteral<RivenEvent["type"]> },
+  O extends ZodObject | ZodArray<ZodObject>,
+>(
+  inputSchema: ZodObject<I>,
+  outputSchema: O,
+) =>
   z.function({
     input: [
       z.object({
-        event: eventSchema,
+        event: inputSchema.omit({ type: true }),
         dataSources: z.instanceof(DataSourceMap),
-        publishEvent: z.function({
-          input: [
-            z.union(
-              PluginToProgramEvent.options.map((option) => {
-                const { plugin, ...shape } = option.shape;
-
-                return z.object(shape);
-              }),
-            ),
-          ],
-          output: z.promise(z.void()),
-        }),
       }),
     ],
+    output: z.promise(outputSchema),
   });

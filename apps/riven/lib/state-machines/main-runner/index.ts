@@ -1,13 +1,16 @@
 import { type ParamsFor, RivenEvent } from "@repo/util-plugin-sdk";
 import { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
 
-import { Queue, Worker } from "bullmq";
+import { FlowProducer, Queue, Worker } from "bullmq";
 import { enqueueActions, raise, setup, toPromise } from "xstate";
+import z from "zod";
 
-import { createWorker } from "../../message-queue/utilities/create-worker.ts";
+import { createInternalWorker } from "../../message-queue/utilities/create-internal-worker.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { persistMovieIndexerData } from "./actors/persist-movie-indexer-data.actor.ts";
 import { processRequestedItem } from "./actors/process-requested-item.actor.ts";
+import { requestContentServicesActor } from "./actors/request-content-services.actor.ts";
+import { requestIndexData } from "./actors/request-index-data.actor.ts";
 import { retryLibraryActor } from "./actors/retry-library.actor.ts";
 import { createPluginHookWorkers } from "./utilities/create-plugin-hook-workers.ts";
 
@@ -16,10 +19,16 @@ import type { PendingRunnerInvocationPlugin } from "../plugin-registrar/actors/c
 import type { PluginToProgramEvent } from "@repo/util-plugin-sdk/plugin-to-program-events";
 import type { MediaItemPersistMovieIndexerDataEvent } from "@repo/util-plugin-sdk/plugin-to-program-events/media-item/persist-movie-indexer-data";
 import type { MediaItemRequestedEvent } from "@repo/util-plugin-sdk/plugin-to-program-events/media-item/requested";
+import type {
+  MediaItemIndexRequestedEvent,
+  MediaItemIndexRequestedResponse,
+} from "@repo/util-plugin-sdk/program-to-plugin-events/media-item/index-requested";
+import type { RequestedItem } from "@repo/util-plugin-sdk/schemas/media-item/requested-item";
 
 export interface MainRunnerMachineContext {
   plugins: Map<symbol, PendingRunnerInvocationPlugin>;
   queues: Map<RivenEvent["type"], Queue>;
+  flowProducer: FlowProducer;
   processorWorkers: Map<PluginToProgramEvent["type"], Worker>;
   pluginHookWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
   publishableEvents: Set<RivenEvent["type"]>;
@@ -40,6 +49,7 @@ export const mainRunnerMachine = setup({
     children: {} as {
       persistMovieIndexerData: "persistMovieIndexerData";
       processRequestedItem: "processRequestedItem";
+      requestContentServices: "requestContentServices";
     },
   },
   actions: {
@@ -61,6 +71,38 @@ export const mainRunnerMachine = setup({
           input: {
             item: params.item,
             parentRef: self,
+          },
+        });
+      },
+    ),
+    requestContentServices: enqueueActions(({ enqueue, context }) => {
+      enqueue.spawnChild(requestContentServicesActor, {
+        input: {
+          subscribers: Array.from(
+            context.plugins
+              .values()
+              .map((plugin) => plugin.config)
+              .filter(({ hooks }) => hooks["riven.content-service.requested"]),
+          ),
+        },
+      });
+    }),
+    requestIndexData: enqueueActions(
+      (
+        { enqueue, context },
+        params: ParamsFor<MediaItemIndexRequestedEvent>,
+      ) => {
+        enqueue.spawnChild(requestIndexData, {
+          input: {
+            item: params.item,
+            subscribers: Array.from(
+              context.plugins
+                .values()
+                .map((plugin) => plugin.config)
+                .filter(
+                  ({ hooks }) => hooks["riven.media-item.index.requested"],
+                ),
+            ),
           },
         });
       },
@@ -90,6 +132,7 @@ export const mainRunnerMachine = setup({
   actors: {
     persistMovieIndexerData,
     processRequestedItem,
+    requestContentServices: requestContentServicesActor,
   },
   guards: {
     shouldQueueEvent: ({ event, context }) =>
@@ -105,40 +148,42 @@ export const mainRunnerMachine = setup({
     context: ({ input, self, spawn }) => {
       const { pluginWorkers, publishableEvents } = createPluginHookWorkers(
         input.plugins,
-        input.queues,
       );
 
       return {
         plugins: input.plugins,
         queues: input.queues,
+        flowProducer: new FlowProducer({
+          connection: {
+            url: z.url().parse(process.env["REDIS_URL"]),
+          },
+        }),
         pluginHookWorkers: pluginWorkers,
         publishableEvents,
         processorWorkers: new Map<PluginToProgramEvent["type"], Worker>([
           [
-            "riven-plugin.media-item.persist-movie-indexer-data",
-            createWorker(
-              "riven-plugin.media-item.persist-movie-indexer-data",
-              async (job) => {
-                const actor = spawn(persistMovieIndexerData, {
-                  input: {
-                    item: job.data.item,
-                    parentRef: self,
-                    plugin: job.data.plugin,
-                  },
-                });
+            "indexing",
+            createInternalWorker("indexing", async (job) => {
+              const data =
+                await job.getChildrenValues<MediaItemIndexRequestedResponse>();
 
-                actor.start();
+              if (!Object.keys(data).length) {
+                throw new Error("No data returned from indexers");
+              }
 
-                return toPromise(actor);
-              },
-            ),
-          ],
-          [
-            "riven-plugin.media-item.requested",
-            createWorker("riven-plugin.media-item.requested", async (job) => {
-              const actor = spawn(processRequestedItem, {
+              const item = Object.values(data).reduce<
+                MediaItemIndexRequestedResponse["item"]
+              >(
+                (acc, { item }) => ({
+                  ...acc,
+                  ...item,
+                }),
+                {} as MediaItemIndexRequestedResponse["item"],
+              );
+
+              const actor = spawn(persistMovieIndexerData, {
                 input: {
-                  item: job.data.item,
+                  item,
                   parentRef: self,
                   plugin: job.data.plugin,
                 },
@@ -146,7 +191,47 @@ export const mainRunnerMachine = setup({
 
               actor.start();
 
-              return toPromise(actor);
+              await toPromise(actor);
+
+              return {
+                success: true,
+              };
+            }),
+          ],
+          [
+            "request-content-services",
+            createInternalWorker("request-content-services", async (job) => {
+              const data = await job.getChildrenValues<RequestedItem[]>();
+
+              const items = Object.values(data).reduce<RequestedItem[]>(
+                (acc, childData) => [...acc, ...childData],
+                [],
+              );
+
+              const results = await Promise.allSettled(
+                items.map(async (item) => {
+                  const actor = spawn(processRequestedItem, {
+                    input: {
+                      item,
+                      parentRef: self,
+                      plugin: job.data.plugin,
+                    },
+                  });
+
+                  actor.start();
+
+                  return toPromise(actor);
+                }),
+              );
+
+              return {
+                success: true,
+                count: items.length,
+                newItems: results.filter(
+                  (result) =>
+                    result.status === "fulfilled" && result.value.isNewItem,
+                ).length,
+              };
             }),
           ],
         ]),
@@ -158,6 +243,9 @@ export const mainRunnerMachine = setup({
         params: {
           type: "riven.core.started",
         },
+      },
+      {
+        type: "requestContentServices",
       },
       raise({ type: "retry-library" }),
       {
@@ -208,6 +296,25 @@ export const mainRunnerMachine = setup({
             plugin: event.plugin,
           }),
         },
+      },
+      "riven.media-item.creation.success": {
+        description:
+          "Indicates that a media item has been successfully created in the library.",
+        actions: [
+          {
+            type: "log",
+            params: ({ event }) => ({
+              message: `Successfully created media item: ${JSON.stringify(event.item)}`,
+              level: "info",
+            }),
+          },
+          {
+            type: "requestIndexData",
+            params: ({ event }) => ({
+              item: event.item,
+            }),
+          },
+        ],
       },
       "riven.media-item.creation.error": {
         description:
