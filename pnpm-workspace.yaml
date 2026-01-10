@@ -2,8 +2,6 @@ packages:
   - apps/*
   - packages/*
   - packages/core/*
-  - packages/listrr/*
-  - packages/mdblist/*
 
 catalog:
   "@apollo/datasource-rest": 6.4.1

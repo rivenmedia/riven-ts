@@ -560,10 +560,10 @@ importers:
         version: 4.11.1(@kubb/react-fabric@0.5.4)
       '@kubb/plugin-faker':
         specifier: 'catalog:'
-        version: 4.11.1(ajv@8.17.1)
+        version: 4.11.1(ajv@8.17.1)(encoding@0.1.13)
       '@kubb/plugin-msw':
         specifier: 'catalog:'
-        version: 4.11.1(ajv@8.17.1)
+        version: 4.11.1(ajv@8.17.1)(encoding@0.1.13)
       '@kubb/plugin-oas':
         specifier: 'catalog:'
         version: 4.11.1(@kubb/react-fabric@0.5.4)(ajv@8.17.1)(encoding@0.1.13)
@@ -890,67 +890,6 @@ importers:
       graphql-tag:
         specifier: 'catalog:'
         version: 2.12.6(graphql@16.12.0)
-      msw:
-        specifier: 'catalog:'
-        version: 2.12.4(@types/node@24.0.0)(typescript@5.9.3)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      vitest:
-        specifier: 'catalog:'
-        version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
-
-  packages/plugin-mdblist:
-    dependencies:
-      '@apollo/datasource-rest':
-        specifier: 'catalog:'
-        version: 6.4.1(encoding@0.1.13)(graphql@16.12.0)
-      '@repo/util-plugin-sdk':
-        specifier: workspace:^
-        version: link:../util-plugin-sdk
-      zod:
-        specifier: 'catalog:'
-        version: 4.1.13
-    devDependencies:
-      '@faker-js/faker':
-        specifier: 'catalog:'
-        version: 10.1.0
-      '@kubb/cli':
-        specifier: 'catalog:'
-        version: 4.11.1(@kubb/react-fabric@0.5.4)(typescript@5.9.3)
-      '@kubb/core':
-        specifier: 'catalog:'
-        version: 4.11.1(@kubb/react-fabric@0.5.4)
-      '@kubb/plugin-oas':
-        specifier: 'catalog:'
-        version: 4.11.1(@kubb/react-fabric@0.5.4)(ajv@8.17.1)(encoding@0.1.13)
-      '@kubb/plugin-zod':
-        specifier: 'catalog:'
-        version: 4.11.1(ajv@8.17.1)(encoding@0.1.13)
-      '@repo/core-util-eslint-config':
-        specifier: workspace:^
-        version: link:../core/util-eslint-config
-      '@repo/core-util-kubb-config':
-        specifier: workspace:^
-        version: link:../core/util-kubb-config
-      '@repo/core-util-logger':
-        specifier: workspace:^
-        version: link:../core/util-logger
-      '@repo/core-util-typescript-config':
-        specifier: workspace:^
-        version: link:../core/util-typescript-config
-      '@types/node':
-        specifier: 'catalog:'
-        version: 24.0.0
-      '@typescript-eslint/parser':
-        specifier: 'catalog:'
-        version: 8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      apib2openapi:
-        specifier: ^0.1.5
-        version: 0.1.5(encoding@0.1.13)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.2(jiti@2.6.1)
       msw:
         specifier: 'catalog:'
         version: 2.12.4(@types/node@24.0.0)(typescript@5.9.3)
@@ -1370,9 +1309,6 @@ packages:
   '@bcoe/v8-coverage@1.0.2':
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
-
-  '@cloudflare/json-schema-walker@0.1.1':
-    resolution: {integrity: sha512-P3n0hEgk1m6uKWgL4Yb1owzXVG4pM70G4kRnDQxZXiVvfCRtaqiHu+ZRiRPzmwGBiLTO1LWc2yR1M8oz0YkXww==}
 
   '@colors/colors@1.6.0':
     resolution: {integrity: sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==}
@@ -3386,18 +3322,6 @@ packages:
     resolution: {integrity: sha512-HqZ5rWlFjGiV0tDm3UxxgNRqsOTniqoKZu0pIAfh7TZQMGuZK+hH0drySty0si0QXj1ieop4+SkSfPZBPPkHig==}
     engines: {node: '>=14'}
 
-  apib-include-directive@0.1.0:
-    resolution: {integrity: sha512-7m5LKbmFGeJogORhkLOCQjcEuGrRcVLG32nHbTAAYjvZ3cSV1XaxU8LBXIvx0PyLYL4mE/gc0Nu0Y7odQmAU1Q==}
-
-  apib2openapi@0.1.5:
-    resolution: {integrity: sha512-q7GwzXIULo31ogfeGG+s8gxd+4T6k3Z0FMS4ft5C9YkNRRmXY6/H0/zs3s6xLUP+jDR1AfcT45q8cl9HSUNHcQ==}
-    engines: {node: '>=10.0.0'}
-    hasBin: true
-
-  apib2swagger@1.17.1:
-    resolution: {integrity: sha512-2ednp+ckytSEOvX3CaUcHYC01wmzzfy970T22EJiBzcl4rj5p5UvUxXxHh6gCSCmDTkqKdiIFCLhoIJGynN8CQ==}
-    hasBin: true
-
   app-root-path@3.1.0:
     resolution: {integrity: sha512-biN3PwB2gUtjaYy/isrU3aNWI5w+fAfvHkSvCKeQGxhmYpwKFUxudR3Yya+KqVRHBmEDYh+/lTozYCFbmzX4nA==}
     engines: {node: '>= 6.0.0'}
@@ -3730,13 +3654,6 @@ packages:
     resolution: {integrity: sha512-TywoWNNRbhoD0BXs1P3ZEScW8W5iKrnbithIl0YH+uCmBd0QpPOA8yc82DS3BIE5Ma6FnBVUsJ7wVUDz4dvOWQ==}
     engines: {node: '>=20'}
 
-  commander@2.20.3:
-    resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
-
-  commander@6.2.1:
-    resolution: {integrity: sha512-U7VdrJFnJgo4xjrHpTzu0yrHPGImdsmD95ZlgYSEajAn2JKzDhDTPG9kBTefmObL2w/ngeZnilk+OV9CG3d7UA==}
-    engines: {node: '>= 6'}
-
   comment-parser@1.4.1:
     resolution: {integrity: sha512-buhp5kePrmda3vhc5B9t7pUQXAb2Tnd0qgpkIhPhkHXxJpiPJ11H0ZEU0oBpJ2QztSbzG/ZxMj/CHsYJqRHmyg==}
     engines: {node: '>= 12.0.0'}
@@ -3970,10 +3887,6 @@ packages:
   dotenv@16.6.1:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
     engines: {node: '>=12'}
-
-  drafter.js@2.6.7:
-    resolution: {integrity: sha512-B6/nqEr3B9N8B4eySiPVXnFvI9Fh62Xl6GBQVncoh1aDcnYxSME5S8nZEERd4LjSYLzZchqnEC0F4oaXhSRJtA==}
-    engines: {node: '>= 0.12'}
 
   dset@3.1.4:
     resolution: {integrity: sha512-2QF/g9/zTaPDc3BjNcVTGoBbXBgYfMTTceLaYcFJ/W9kggFUkhxD/hMEeuLKbugyef9SqAx8cpgwlIP/jinUTA==}
@@ -4387,10 +4300,6 @@ packages:
     resolution: {integrity: sha512-f9m+BEN5jkg6a0fZjleidjN51VE1X+mPFQ2DJ0uv1V39oCLCbsGe6yjbBnp7eK7z/+GAon99a3nHuqbuuthyPg==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
     deprecated: This package is no longer supported.
-
-  generate-schema@2.6.0:
-    resolution: {integrity: sha512-EUBKfJNzT8f91xUk5X5gKtnbdejZeE065UAJ3BCzE8VEbvwKI9Pm5jaWmqVeK1MYc1g5weAVFDTSJzN7ymtTqA==}
-    hasBin: true
 
   generator-function@2.0.1:
     resolution: {integrity: sha512-SFdFmIJi+ybC0vjlHN0ZGVGHc3lgE0DxPAT0djjVg+kjOnSqclqmj0KQ7ykTOLP6YxoqOvuAODGdcHJn+43q3g==}
@@ -5007,10 +4916,6 @@ packages:
     resolution: {integrity: sha512-CTUKmIlPJbsWfzRRnOXz+0MjIqvnleIXwFTzz+t9T86HnYX/Rozria6ZVGLktAU9e+NygNljveP+yxqtQp/Q4w==}
     engines: {node: '>=12.0.0'}
 
-  json-schema-to-openapi-schema@0.4.0:
-    resolution: {integrity: sha512-/DY8s4l28M5ZIJBhmcUFWbZChJV5v7RCA7RMVxubyD1l5KwIceUq6+EUnqQ2q3wh/2D3Zn8bNSeAu1i2X+sMHQ==}
-    deprecated: This package is no longer maintained. Use @openapi-contrib/json-schema-to-openapi-schema instead.
-
   json-schema-to-ts@2.7.2:
     resolution: {integrity: sha512-R1JfqKqbBR4qE8UyBR56Ms30LL62/nlhoz+1UkfI/VE7p54Awu919FZ6ZUPG8zIa3XB65usPJgr1ONVncUGSaQ==}
     engines: {node: '>=16'}
@@ -5129,10 +5034,6 @@ packages:
 
   lodash.isarguments@3.1.0:
     resolution: {integrity: sha512-chi4NHZlZqZD18a0imDHnZPrDeBbTtVN7GXMwuGdRH9qotxAjYs3aVLKc7zNOG9eddR5Ksd8rvFEBc9SsggPpg==}
-
-  lodash.isequal@4.5.0:
-    resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
-    deprecated: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
 
   lodash.isplainobject@4.0.6:
     resolution: {integrity: sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA==}
@@ -5492,10 +5393,6 @@ packages:
 
   node-releases@2.0.27:
     resolution: {integrity: sha512-nmh3lCkYZ3grZvqcCH+fjmQ7X+H0OeZgP40OierEaAptX4XofMh5kwNbWh7lBduUzCcV/8kZ+NDLCwm2iorIlA==}
-
-  nopt@3.0.6:
-    resolution: {integrity: sha512-4GUt3kSEYmk4ITxzB/b9vaIDfUVWN/Ml1Fwl11IlnIG2iaJ9O6WXZ9SrYM9NLI8OCBieN2Y8SWC2oJV0RQ7qYg==}
-    hasBin: true
 
   nopt@5.0.0:
     resolution: {integrity: sha512-Tbj67rffqceeLpcRXrT7vKAN8CwfPeIBgM7E6iBkmKLV7bEMwpGgYLGv0jACUsECaa/vuxP0IjEont6umdMgtQ==}
@@ -6636,10 +6533,6 @@ packages:
     resolution: {integrity: sha512-OZs6gsjF4vMp32qrCbiVSkrFmXtG/AZhY3t0iAMrMBiAZyV9oALtXO8hsrHbMXF9x6L3grlFuwW2oAz7cav+Gw==}
     engines: {node: '>= 0.6'}
 
-  type-of-is@3.5.1:
-    resolution: {integrity: sha512-SOnx8xygcAh8lvDU2exnK2bomASfNjzB3Qz71s2tw9QnX8fkAo7aC+D0H7FV0HjRKj94CKV2Hi71kVkkO6nOxg==}
-    engines: {node: '>=0.10.5'}
-
   type@2.7.3:
     resolution: {integrity: sha512-8j+1QmAbPvLZow5Qpi6NCaN8FB60p/6x8/vfNqOk/hC+HuvFZhL4+WfekuhQLiqFZXOgQdrs3B+XxEmCc6b3FQ==}
 
@@ -6813,9 +6706,6 @@ packages:
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
-
-  uritemplate@0.3.4:
-    resolution: {integrity: sha512-enADBvHfhjrwxFMTVWeIIYz51SZ91uC6o2MR/NQTVljJB6HTZ8eQL3Q7JBj3RxNISA14MOwJaU3vpf5R6dyxHA==}
 
   urlpattern-polyfill@10.1.0:
     resolution: {integrity: sha512-IGjKp/o0NL3Bso1PymYURCJxMPNAf/ILOpendP9f5B6e1rTJgdgiOvgfoT8VxCAdY+Wisb9uhGaJJf3yZ2V9nw==}
@@ -7413,8 +7303,6 @@ snapshots:
       '@babel/helper-validator-identifier': 7.28.5
 
   '@bcoe/v8-coverage@1.0.2': {}
-
-  '@cloudflare/json-schema-walker@0.1.1': {}
 
   '@colors/colors@1.6.0': {}
 
@@ -8421,7 +8309,7 @@ snapshots:
       - ajv
       - encoding
 
-  '@kubb/plugin-faker@4.11.1(ajv@8.17.1)':
+  '@kubb/plugin-faker@4.11.1(ajv@8.17.1)(encoding@0.1.13)':
     dependencies:
       '@kubb/core': 4.11.1(@kubb/react-fabric@0.5.4)
       '@kubb/oas': 4.11.1(ajv@8.17.1)(encoding@0.1.13)
@@ -8435,11 +8323,11 @@ snapshots:
       - encoding
       - utf-8-validate
 
-  '@kubb/plugin-msw@4.11.1(ajv@8.17.1)':
+  '@kubb/plugin-msw@4.11.1(ajv@8.17.1)(encoding@0.1.13)':
     dependencies:
       '@kubb/core': 4.11.1(@kubb/react-fabric@0.5.4)
       '@kubb/oas': 4.11.1(ajv@8.17.1)(encoding@0.1.13)
-      '@kubb/plugin-faker': 4.11.1(ajv@8.17.1)
+      '@kubb/plugin-faker': 4.11.1(ajv@8.17.1)(encoding@0.1.13)
       '@kubb/plugin-oas': 4.11.1(@kubb/react-fabric@0.5.4)(ajv@8.17.1)(encoding@0.1.13)
       '@kubb/plugin-ts': 4.11.1(@kubb/react-fabric@0.5.4)(ajv@8.17.1)(encoding@0.1.13)
       '@kubb/react-fabric': 0.5.4
@@ -9626,7 +9514,8 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  abbrev@1.1.1: {}
+  abbrev@1.1.1:
+    optional: true
 
   acorn-import-attributes@1.9.5(acorn@8.15.0):
     dependencies:
@@ -9706,28 +9595,6 @@ snapshots:
   ansi-styles@6.2.3: {}
 
   ansis@4.2.0: {}
-
-  apib-include-directive@0.1.0: {}
-
-  apib2openapi@0.1.5(encoding@0.1.13):
-    dependencies:
-      apib2swagger: 1.17.1
-      commander: 6.2.1
-      swagger2openapi: 7.0.8(encoding@0.1.13)
-      yaml: 1.10.2
-    transitivePeerDependencies:
-      - encoding
-
-  apib2swagger@1.17.1:
-    dependencies:
-      apib-include-directive: 0.1.0
-      drafter.js: 2.6.7
-      generate-schema: 2.6.0
-      js-yaml: 4.1.1
-      json-schema-to-openapi-schema: 0.4.0
-      lodash.isequal: 4.5.0
-      nopt: 3.0.6
-      uritemplate: 0.3.4
 
   app-root-path@3.1.0: {}
 
@@ -10155,10 +10022,6 @@ snapshots:
 
   commander@14.0.2: {}
 
-  commander@2.20.3: {}
-
-  commander@6.2.1: {}
-
   comment-parser@1.4.1: {}
 
   common-tags@1.8.2: {}
@@ -10375,8 +10238,6 @@ snapshots:
   dotenv@16.0.3: {}
 
   dotenv@16.6.1: {}
-
-  drafter.js@2.6.7: {}
 
   dset@3.1.4: {}
 
@@ -10965,11 +10826,6 @@ snapshots:
       strip-ansi: 6.0.1
       wide-align: 1.1.5
     optional: true
-
-  generate-schema@2.6.0:
-    dependencies:
-      commander: 2.20.3
-      type-of-is: 3.5.1
 
   generator-function@2.0.1: {}
 
@@ -11640,10 +11496,6 @@ snapshots:
       json-schema-compare: 0.2.2
       lodash: 4.17.21
 
-  json-schema-to-openapi-schema@0.4.0:
-    dependencies:
-      '@cloudflare/json-schema-walker': 0.1.1
-
   json-schema-to-ts@2.7.2:
     dependencies:
       '@babel/runtime': 7.28.4
@@ -11760,8 +11612,6 @@ snapshots:
   lodash.get@4.4.2: {}
 
   lodash.isarguments@3.1.0: {}
-
-  lodash.isequal@4.5.0: {}
 
   lodash.isplainobject@4.0.6: {}
 
@@ -12143,10 +11993,6 @@ snapshots:
       es6-promise: 3.3.1
 
   node-releases@2.0.27: {}
-
-  nopt@3.0.6:
-    dependencies:
-      abbrev: 1.1.1
 
   nopt@5.0.0:
     dependencies:
@@ -13515,8 +13361,6 @@ snapshots:
       media-typer: 1.1.0
       mime-types: 3.0.2
 
-  type-of-is@3.5.1: {}
-
   type@2.7.3: {}
 
   typed-array-buffer@1.0.3:
@@ -13701,8 +13545,6 @@ snapshots:
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
-
-  uritemplate@0.3.4: {}
 
   urlpattern-polyfill@10.1.0: {}
 
