@@ -2,6 +2,7 @@ export * from "./datasource/index.ts";
 
 export * from "./decorators/index.ts";
 
+export * from "./helpers/get-stremio-scrape-config.ts";
 export * from "./helpers/parse-plugins-from-dependencies.ts";
 
 export * from "./schemas/index.ts";

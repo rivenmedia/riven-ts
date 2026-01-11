@@ -17,5 +17,5 @@ export type RequestContentServicesFlow = z.infer<
   typeof RequestContentServicesFlow
 >;
 
-export const requestContentServicesHandlerSchema =
+export const requestContentServicesProcessorSchema =
   RequestContentServicesFlow.shape.processor;

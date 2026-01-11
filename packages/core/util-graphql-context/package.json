@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "@repo/plugin-listrr": "workspace:^",
-    "@repo/plugin-tmdb": "workspace:^"
+    "@repo/plugin-tmdb": "workspace:^",
+    "@repo/plugin-torrentio": "workspace:^"
   },
   "devDependencies": {
     "@apollo/server": "^5.2.0",

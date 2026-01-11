@@ -14,5 +14,15 @@ export async function requestContentServices(
       name: `${plugin.name.description ?? "unknown"} - Request content service`,
       queueName: `riven.content-service.requested.plugin-${plugin.name.description ?? "unknown"}`,
     })),
+    opts: {
+      removeOnComplete: {
+        age: 60 * 60,
+        count: 1000,
+      },
+      removeOnFail: {
+        age: 24 * 60 * 60,
+        count: 5000,
+      },
+    },
   });
 }

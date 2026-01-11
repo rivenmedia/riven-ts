@@ -1,4 +1,4 @@
-import z, { type ZodType } from "zod";
+import z, { type ZodNever, type ZodOptional, type ZodType } from "zod";
 
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
 import type { Job } from "bullmq";
@@ -6,14 +6,13 @@ import type { Job } from "bullmq";
 export const createFlowSchema = <
   Type extends string,
   Children extends ZodType,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  Output extends Record<string, ZodType> = {},
+  Output extends ZodType = ZodOptional<ZodNever>,
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   Payload extends Record<string, ZodType> = {},
 >(
   type: Type,
   childrenSchema: Children,
-  outputSchema: z.ZodObject<Output> = z.object<Output>(),
+  outputSchema: Output = z.never().optional() as never,
   _inputSchema: z.ZodObject<Payload> = z.object<Payload>(),
 ) => {
   const wrappedOutputSchema = z.union([
@@ -34,7 +33,6 @@ export const createFlowSchema = <
     children: childrenValuesSchema,
     processor: z.function({
       input: [
-        z.custom<MainRunnerMachineIntake>(),
         z.custom<
           Omit<
             Job<
@@ -48,8 +46,7 @@ export const createFlowSchema = <
             >;
           }
         >(),
-        z.string().optional(),
-        z.custom<AbortSignal>().optional(),
+        z.custom<MainRunnerMachineIntake>(),
       ],
       output: z.promise(wrappedOutputSchema),
     }),

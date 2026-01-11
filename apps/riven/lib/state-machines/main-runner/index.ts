@@ -1,27 +1,30 @@
+import { logger } from "@repo/core-util-logger";
 import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 import { Queue, Worker } from "bullmq";
 import { enqueueActions, raise, setup } from "xstate";
 
-import { indexerProcessor } from "../../message-queue/flows/indexing/indexing.processor.ts";
-import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
+import { type Flow, FlowHandlers } from "../../message-queue/flows/index.ts";
 import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { requestContentServicesActor } from "./actors/request-content-services.actor.ts";
 import { requestIndexData } from "./actors/request-index-data.actor.ts";
+import { requestScrape } from "./actors/request-scrape.actor.ts";
 import { retryLibraryActor } from "./actors/retry-library.actor.ts";
 import { createPluginHookWorkers } from "./utilities/create-plugin-hook-workers.ts";
+import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscribers.ts";
 
 import type { RetryLibraryEvent } from "../../message-queue/events/retry-library.event.ts";
-import type { Flow } from "../../message-queue/flows/index.ts";
 import type { PendingRunnerInvocationPlugin } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item/index-requested";
+import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item/scrape-requested";
 
 export interface MainRunnerMachineContext {
   plugins: Map<symbol, PendingRunnerInvocationPlugin>;
-  queues: Map<RivenEvent["type"], Queue>;
-  flowWorkers: Map<Flow["name"], Worker>;
+  flows: Map<Flow["name"], Worker>;
+  pluginQueues: Map<symbol, Map<RivenEvent["type"], Queue>>;
+  pluginWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
   publishableEvents: Set<RivenEvent["type"]>;
 }
 
@@ -42,23 +45,29 @@ export const mainRunnerMachine = setup({
     },
   },
   actions: {
-    addEventToQueue: ({ context }, { type, ...event }: RivenEvent) => {
-      const queue = context.queues.get(type);
+    broadcastEventToPlugins: ({ context }, { type, ...event }: RivenEvent) => {
+      for (const plugin of context.plugins.values()) {
+        const queue = context.pluginQueues.get(plugin.config.name)?.get(type);
 
-      if (!queue) {
-        throw new Error("Task queue not found");
+        if (!queue) {
+          continue;
+        }
+
+        logger.silly(
+          `Broadcasting event "${type}" to plugin "${
+            plugin.config.name.description ?? "unknown"
+          }"`,
+        );
+
+        void queue.add(type, event);
       }
-
-      void queue.add(type, event);
     },
     requestContentServices: enqueueActions(({ enqueue, context }) => {
       enqueue.spawnChild(requestContentServicesActor, {
         input: {
-          subscribers: Array.from(
-            context.plugins
-              .values()
-              .map((plugin) => plugin.config)
-              .filter(({ hooks }) => hooks["riven.content-service.requested"]),
+          subscribers: getPluginEventSubscribers(
+            "riven.content-service.requested",
+            context.plugins,
           ),
         },
       });
@@ -71,13 +80,25 @@ export const mainRunnerMachine = setup({
         enqueue.spawnChild(requestIndexData, {
           input: {
             item: params.item,
-            subscribers: Array.from(
-              context.plugins
-                .values()
-                .map((plugin) => plugin.config)
-                .filter(
-                  ({ hooks }) => hooks["riven.media-item.index.requested"],
-                ),
+            subscribers: getPluginEventSubscribers(
+              "riven.media-item.index.requested",
+              context.plugins,
+            ),
+          },
+        });
+      },
+    ),
+    requestScrape: enqueueActions(
+      (
+        { enqueue, context },
+        params: ParamsFor<MediaItemScrapeRequestedEvent>,
+      ) => {
+        enqueue.spawnChild(requestScrape, {
+          input: {
+            item: params.item,
+            subscribers: getPluginEventSubscribers(
+              "riven.media-item.scrape.requested",
+              context.plugins,
             ),
           },
         });
@@ -85,7 +106,6 @@ export const mainRunnerMachine = setup({
     ),
     retryLibrary: enqueueActions(({ enqueue, self }) => {
       enqueue.spawnChild(retryLibraryActor, {
-        id: "retry-library-actor" as never,
         input: {
           parentRef: self,
         },
@@ -96,6 +116,12 @@ export const mainRunnerMachine = setup({
     requestContentServices: requestContentServicesActor,
   },
   guards: {
+    /**
+     * Not all events should be broadcast to plugins - only those that have registered hooks.
+     * Otherwise, events build up in the queue and may be unintentionally processed later, when a hook is registered.
+     *
+     * @returns boolean
+     */
     shouldQueueEvent: ({ event, context }) => {
       const parsedEvent = RivenEvent.safeParse(event);
 
@@ -113,36 +139,30 @@ export const mainRunnerMachine = setup({
     /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7ABABwCcB7KAgQwFscKzVcCBXLLMAgYgI2wDoLJUyAWlQAXMBW4AqANoAGALqJQeIrFGoiWJSAAeiAIwAmADQgAnogCsATmvcAHEcsBfZ6bSZchEuSo06OIzMrBxcWIJ4ADYMUHS8-EKi4twEYACODHBiEHKKSCAqaiIaWvl6CEamFggALJaGDjYAzADsLm4gHtj4xKSU1LT0TCzsnJ7xEALCYhIAxqlkxZrcrMQEudqF6pra5ZXmiE2yltzWsgBshu3uYT0+-f5DwaNhE1NJcwtLWNxkkQsQMyCMA6VCwESwDb5LbfXYGEwHCqWeynSxNJyuG6eO59PyDQLDEJjHipEQEIGRVAAI3I5KhylU21KoD2COqRlcHSwRAgcG0XS8vV8AwCQRGm0ZsLKiDa3FkhhaTRqrUsVRlln03Ba50sl3ariAA */
     id: "Riven program main runner",
     context: ({ input, self }) => {
-      const { publishableEvents } = createPluginHookWorkers(input.plugins);
+      const { publishableEvents, pluginQueues, pluginWorkers } =
+        createPluginHookWorkers(input.plugins);
 
       return {
         plugins: input.plugins,
-        queues: input.queues,
         publishableEvents,
-        flowWorkers: new Map<Flow["name"], Worker>([
-          [
-            "indexing",
-            createFlowWorker("indexing", indexerProcessor, self.send),
-          ],
-          [
-            "request-content-services",
-            createFlowWorker(
-              "request-content-services",
-              requestContentServicesProcessor,
-              self.send,
-            ),
-          ],
-        ]),
+        pluginQueues,
+        pluginWorkers,
+        flows: new Map<Flow["name"], Worker>(
+          Object.entries(FlowHandlers).map(([name, handler]) => [
+            name as Flow["name"],
+            createFlowWorker(name as Flow["name"], handler as never, self.send),
+          ]),
+        ),
       };
     },
     entry: [
       {
-        type: "addEventToQueue",
+        type: "broadcastEventToPlugins",
         params: {
           type: "riven.core.started",
         },
       },
-      { type: "requestContentServices" },
+      // { type: "requestContentServices" },
       raise({ type: "riven-internal.retry-library" }),
       {
         type: "log",
@@ -155,7 +175,7 @@ export const mainRunnerMachine = setup({
       {
         guard: "shouldQueueEvent",
         actions: {
-          type: "addEventToQueue",
+          type: "broadcastEventToPlugins",
           params: ({ event }) => RivenEvent.parse(event),
         },
       },
@@ -190,6 +210,22 @@ export const mainRunnerMachine = setup({
           },
         ],
       },
+      "riven.media-item.index.requested": {
+        actions: {
+          type: "requestIndexData",
+          params: ({ event }) => ({
+            item: event.item,
+          }),
+        },
+      },
+      "riven.media-item.scrape.requested": {
+        actions: {
+          type: "requestScrape",
+          params: ({ event }) => ({
+            item: event.item,
+          }),
+        },
+      },
       "riven.media-item.creation.error": {
         description:
           "Indicates that an error occurred while attempting to create a media item in the library.",
@@ -211,6 +247,19 @@ export const mainRunnerMachine = setup({
             type: "log",
             params: ({ event }) => ({
               message: `Media item already exists: ${JSON.stringify(event.item)}`,
+              level: "verbose",
+            }),
+          },
+        ],
+      },
+      "riven.media-item.index.already-exists": {
+        description:
+          "Indicates that a media item index was attempted, but the item was already indexed in the library.",
+        actions: [
+          {
+            type: "log",
+            params: ({ event }) => ({
+              message: `Media item has already been indexed: ${JSON.stringify(event.item)}`,
               level: "verbose",
             }),
           },

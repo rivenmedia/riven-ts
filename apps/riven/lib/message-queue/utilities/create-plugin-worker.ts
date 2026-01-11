@@ -9,9 +9,11 @@ import { type Processor, Worker, type WorkerOptions } from "bullmq";
 import { BullMQOtel } from "bullmq-otel";
 import z from "zod";
 
+import { createQueue } from "./create-queue.ts";
+
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 
-Worker.setMaxListeners(20);
+Worker.setMaxListeners(200);
 
 interface CreatePluginWorkerOptions {
   telemetry?: {
@@ -35,6 +37,8 @@ export function createPluginWorker<
 ) {
   const queueName = `${name}.plugin-${pluginName}`;
 
+  const queue = createQueue(queueName);
+
   const worker = new Worker(queueName, processor, {
     ...workerOptions,
     telemetry: new BullMQOtel(
@@ -53,5 +57,8 @@ export function createPluginWorker<
     logger.error(`[${name}] Error: ${err.message}`);
   });
 
-  return worker;
+  return {
+    queue,
+    worker,
+  };
 }

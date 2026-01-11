@@ -6,9 +6,9 @@ import { BullMQOtel } from "bullmq-otel";
 import z from "zod";
 
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
-import type { Flow } from "../flows/index.ts";
+import type { Flow, FlowHandlers } from "../flows/index.ts";
 
-Worker.setMaxListeners(20);
+Worker.setMaxListeners(200);
 
 interface CreateFlowWorkerOptions {
   telemetry?: {
@@ -19,7 +19,7 @@ interface CreateFlowWorkerOptions {
 
 export function createFlowWorker<T extends Flow["name"]>(
   name: T,
-  processor: Extract<Flow, { name: T }>["processor"],
+  processor: z.infer<(typeof FlowHandlers)[T]>,
   sendEvent: MainRunnerMachineIntake,
   workerOptions?: Omit<WorkerOptions, "connection" | "telemetry">,
   createFlowWorkerOptions?: CreateFlowWorkerOptions,
@@ -27,7 +27,7 @@ export function createFlowWorker<T extends Flow["name"]>(
   const worker = new Worker(
     name,
     async (job) => {
-      return await processor(sendEvent, job);
+      return await processor(job, sendEvent);
     },
     {
       ...workerOptions,

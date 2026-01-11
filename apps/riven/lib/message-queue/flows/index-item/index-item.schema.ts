@@ -11,5 +11,5 @@ export const RequestIndexDataFlow = createFlowSchema(
 
 export type RequestIndexDataFlow = z.infer<typeof RequestIndexDataFlow>;
 
-export const requestIndexDataHandlerSchema =
+export const requestIndexDataProcessorSchema =
   RequestIndexDataFlow.shape.processor;

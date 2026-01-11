@@ -6,7 +6,7 @@ import { createEventHandlerSchema } from "../../utilities/create-event-handler-s
 import { createProgramEventSchema } from "../../utilities/create-program-event-schema.ts";
 
 /**
- * Event emitted when a new media item has been created from a requested item.
+ * Event emitted when an index has been requested for a newly created media item.
  */
 export const MediaItemIndexRequestedEvent = createProgramEventSchema(
   "media-item.index.requested",

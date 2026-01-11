@@ -1,11 +1,31 @@
-import { RequestIndexDataFlow } from "./indexing/indexing.schema.ts";
-import { RequestContentServicesFlow } from "./request-content-services/request-content-services.schema.ts";
+import {
+  RequestIndexDataFlow,
+  requestIndexDataProcessorSchema,
+} from "./index-item/index-item.schema.ts";
+import {
+  RequestContentServicesFlow,
+  requestContentServicesProcessorSchema,
+} from "./request-content-services/request-content-services.schema.ts";
+import {
+  ScrapeItemFlow,
+  scrapeItemProcessorSchema,
+} from "./scrape-item/scrape-item.schema.js";
+import {
+  type SortScrapeResultsFlow,
+  sortScrapeResultsProcessorSchema,
+} from "./scrape-item/steps/sort-scrape-results.schema.ts";
 
 import type z from "zod";
 
-export type Flow = RequestIndexDataFlow | RequestContentServicesFlow;
+export type Flow =
+  | RequestIndexDataFlow
+  | RequestContentServicesFlow
+  | ScrapeItemFlow
+  | SortScrapeResultsFlow;
 
 export const FlowHandlers = {
-  indexing: RequestIndexDataFlow.shape.processor,
-  "request-content-services": RequestContentServicesFlow.shape.processor,
+  indexing: requestIndexDataProcessorSchema,
+  "request-content-services": requestContentServicesProcessorSchema,
+  "scrape-item": scrapeItemProcessorSchema,
+  "sort-scrape-results": sortScrapeResultsProcessorSchema,
 } satisfies Record<Flow["name"], z.ZodFunction>;

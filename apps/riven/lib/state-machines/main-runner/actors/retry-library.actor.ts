@@ -5,10 +5,10 @@ import { MediaItem } from "@repo/util-plugin-sdk/dto/entities/index";
 import { Not } from "typeorm";
 import { type ActorRef, type Snapshot, fromPromise } from "xstate";
 
-import type { ProgramToPluginEvent } from "@repo/util-plugin-sdk/program-to-plugin-events";
+import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 export interface RetryLibraryActorInput {
-  parentRef: ActorRef<Snapshot<unknown>, ProgramToPluginEvent>;
+  parentRef: ActorRef<Snapshot<unknown>, RivenEvent>;
 }
 
 export const retryLibraryActor = fromPromise<undefined, RetryLibraryActorInput>(
@@ -24,8 +24,25 @@ export const retryLibraryActor = fromPromise<undefined, RetryLibraryActorInput>(
       for (const item of pendingItems) {
         switch (item.state) {
           case "Requested": {
+            const { id, state, tmdbId, imdbId, tvdbId } = item;
+
             parentRef.send({
-              type: "riven.media-item.creation.success",
+              type: "riven.media-item.index.requested",
+              item: {
+                id: id,
+                state: state,
+                tmdbId: tmdbId,
+                imdbId: imdbId,
+                tvdbId: tvdbId,
+              },
+            });
+
+            break;
+          }
+          case "Indexed": {
+            console.log({ item });
+            parentRef.send({
+              type: "riven.media-item.scrape.requested",
               item,
             });
 

@@ -1,15 +1,15 @@
 import { database } from "@repo/core-util-database/connection";
 import { logger } from "@repo/core-util-logger";
-import { MediaItem } from "@repo/util-plugin-sdk/dto/entities/index";
+import { MediaItem, Movie } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
 import z from "zod";
 
 import type { MainRunnerMachineIntake } from "../index.ts";
-import type { ParamsFor } from "@repo/util-plugin-sdk";
+import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item/index-requested";
 
-export interface PersistMovieIndexerDataInput extends ParamsFor<MediaItemPersistMovieIndexerDataEvent> {
+export interface PersistMovieIndexerDataInput extends MediaItemIndexRequestedResponse {
   sendEvent: MainRunnerMachineIntake;
 }
 
@@ -17,27 +17,24 @@ export async function persistMovieIndexerData({
   item,
   sendEvent,
 }: PersistMovieIndexerDataInput) {
-  const existingItem = await database.manager.findOne(MediaItem, {
-    where: {
-      state: "Indexed",
-      id: item.id,
-    },
+  const existingItem = await database.manager.findOneByOrFail(MediaItem, {
+    id: item.id,
   });
 
-  if (existingItem) {
-    // sendEvent({
-    //   type: "riven.media-item.creation.already-exists",
-    //   item: {
-    //     ...item,
-    //     id: existingItem.id,
-    //     title: existingItem.title,
-    //   },
-    // });
+  if (existingItem.state !== "Requested") {
+    sendEvent({
+      type: "riven.media-item.index.already-exists",
+      item: {
+        ...item,
+        id: existingItem.id,
+        title: existingItem.title,
+      },
+    });
 
     return;
   }
 
-  const itemEntity = new MediaItem();
+  const itemEntity = new Movie();
 
   itemEntity.id = item.id;
   itemEntity.title = item.title;
@@ -83,7 +80,7 @@ export async function persistMovieIndexerData({
   try {
     await validateOrReject(itemEntity);
 
-    const updatedItem = await database.manager.save(MediaItem, itemEntity);
+    const updatedItem = await database.manager.save(Movie, itemEntity);
 
     logger.info(
       `Indexed media item: ${item.title} (ID: ${item.id.toString()})`,
@@ -100,17 +97,17 @@ export async function persistMovieIndexerData({
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
       .parse(error);
 
-    // sendEvent({
-    //   type: "riven.media-item.index.error",
-    //   item,
-    //   error: Array.isArray(parsedError)
-    //     ? parsedError
-    //         .map((err) =>
-    //           err.constraints ? Object.values(err.constraints).join("; ") : "",
-    //         )
-    //         .join("; ")
-    //     : parsedError.message,
-    // });
+    sendEvent({
+      type: "riven.media-item.index.error",
+      item,
+      error: Array.isArray(parsedError)
+        ? parsedError
+            .map((err) =>
+              err.constraints ? Object.values(err.constraints).join("; ") : "",
+            )
+            .join("; ")
+        : parsedError.message,
+    });
 
     throw error;
   }

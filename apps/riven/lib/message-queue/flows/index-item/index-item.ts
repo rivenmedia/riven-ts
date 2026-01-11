@@ -3,7 +3,7 @@ import { type FlowJob, FlowProducer } from "bullmq";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item/index-requested";
 
-export async function createRequestIndexDataFlowJob(
+export async function indexItem(
   item: MediaItemIndexRequestedEvent["item"],
   indexerPlugins: RivenPlugin[],
 ) {
@@ -22,7 +22,7 @@ export async function createRequestIndexDataFlowJob(
 
   const rootNode = {
     name: `Indexing item #${item.id.toString()}`,
-    queueName: "indexing",
+    queueName: "index-item",
     children: childNodes,
   } as const satisfies FlowJob;
 

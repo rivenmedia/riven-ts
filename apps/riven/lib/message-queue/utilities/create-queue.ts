@@ -7,9 +7,9 @@ import z from "zod";
 
 import packageJson from "../../../../../package.json" with { type: "json" };
 
-Queue.setMaxListeners(20);
+Queue.setMaxListeners(200);
 
-export async function createQueue(
+export function createQueue(
   name: string,
   options?: Omit<QueueOptions, "connection" | "telemetry">,
 ) {
@@ -19,17 +19,21 @@ export async function createQueue(
       url: z.url().parse(process.env["REDIS_URL"]),
     },
     telemetry: new BullMQOtel(`riven-queue-${name}`, packageJson.version),
+    defaultJobOptions: {
+      removeOnComplete: {
+        age: 60 * 60,
+        count: 1000,
+      },
+      removeOnFail: {
+        age: 24 * 60 * 60,
+        count: 5000,
+      },
+    },
   });
 
   registerMQListeners(queue);
 
   queue.on("error", logger.error);
-
-  if (z.stringbool().parse(process.env["CLEAR_QUEUES"])) {
-    await queue.obliterate({
-      force: true,
-    });
-  }
 
   return queue;
 }

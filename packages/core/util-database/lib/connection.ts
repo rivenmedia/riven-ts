@@ -31,6 +31,7 @@ export const database = new DataSource({
   url: z.string().parse(process.env["DATABASE_URL"]),
   type: "postgres",
   synchronize: true,
+  dropSchema: true,
   // logging: process.env["NODE_ENV"] !== "test",
   entities,
 });

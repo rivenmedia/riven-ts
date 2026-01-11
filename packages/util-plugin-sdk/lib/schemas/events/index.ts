@@ -34,6 +34,10 @@ import {
   MediaItemIndexSuccessEvent,
   MediaItemIndexSuccessEventHandler,
 } from "./media-item/index/success.ts";
+import {
+  MediaItemScrapeRequestedEvent,
+  MediaItemScrapeRequestedEventHandler,
+} from "./media-item/scrape-requested.ts";
 
 export const RivenEvent = z.discriminatedUnion("type", [
   CoreStartedEvent,
@@ -46,6 +50,7 @@ export const RivenEvent = z.discriminatedUnion("type", [
   MediaItemIndexErrorEvent,
   ContentServiceRequestedEvent,
   ShutdownEvent,
+  MediaItemScrapeRequestedEvent,
 ]);
 
 export type RivenEvent = z.infer<typeof RivenEvent>;
@@ -63,4 +68,5 @@ export const RivenEventHandler = {
     MediaItemIndexAlreadyExistsEventHandler,
   "riven.media-item.index.error": MediaItemIndexErrorEventHandler,
   "riven.media-item.index.success": MediaItemIndexSuccessEventHandler,
+  "riven.media-item.scrape.requested": MediaItemScrapeRequestedEventHandler,
 } as const satisfies Record<RivenEvent["type"], z.ZodFunction>;
