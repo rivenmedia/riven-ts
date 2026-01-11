@@ -30,6 +30,7 @@
     "@repo/util-plugin-sdk": "workspace:^",
     "bullmq": "catalog:",
     "bullmq-otel": "catalog:",
+    "class-transformer": "catalog:",
     "class-validator": "catalog:",
     "keyv": "^5.5.5",
     "limiter": "catalog:",

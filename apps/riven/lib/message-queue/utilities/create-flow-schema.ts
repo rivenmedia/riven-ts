@@ -31,6 +31,7 @@ export const createFlowSchema = <
   return z.object({
     name: z.literal(type),
     children: childrenValuesSchema,
+    output: wrappedOutputSchema,
     processor: z.function({
       input: [
         z.custom<

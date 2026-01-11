@@ -12,6 +12,7 @@ import { createQueue } from "../../../message-queue/utilities/create-queue.ts";
  * where each hook provided by a plugin registers a new worker associated with the event it subscribes to.
  */
 export const initialiseQueues = fromPromise<Map<RivenEvent["type"], Queue>>(
+  // eslint-disable-next-line @typescript-eslint/require-await
   async () => {
     const queueMap = new Map<RivenEvent["type"], Queue>();
 
@@ -21,10 +22,7 @@ export const initialiseQueues = fromPromise<Map<RivenEvent["type"], Queue>>(
       // so we have to iterate over them.
       for (const discriminatorOption of event.shape.type.def.values) {
         if (!queueMap.has(discriminatorOption)) {
-          queueMap.set(
-            discriminatorOption,
-            await createQueue(discriminatorOption),
-          );
+          queueMap.set(discriminatorOption, createQueue(discriminatorOption));
         }
       }
     }

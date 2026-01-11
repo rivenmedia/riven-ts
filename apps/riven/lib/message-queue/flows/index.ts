@@ -1,3 +1,5 @@
+import z from "zod";
+
 import {
   RequestIndexDataFlow,
   requestIndexDataProcessorSchema,
@@ -11,20 +13,21 @@ import {
   scrapeItemProcessorSchema,
 } from "./scrape-item/scrape-item.schema.js";
 import {
-  type SortScrapeResultsFlow,
+  SortScrapeResultsFlow,
   sortScrapeResultsProcessorSchema,
 } from "./scrape-item/steps/sort-scrape-results.schema.ts";
 
-import type z from "zod";
+export const Flow = z.discriminatedUnion("name", [
+  RequestIndexDataFlow,
+  RequestContentServicesFlow,
+  ScrapeItemFlow,
+  SortScrapeResultsFlow,
+]);
 
-export type Flow =
-  | RequestIndexDataFlow
-  | RequestContentServicesFlow
-  | ScrapeItemFlow
-  | SortScrapeResultsFlow;
+export type Flow = z.infer<typeof Flow>;
 
 export const FlowHandlers = {
-  indexing: requestIndexDataProcessorSchema,
+  "index-item": requestIndexDataProcessorSchema,
   "request-content-services": requestContentServicesProcessorSchema,
   "scrape-item": scrapeItemProcessorSchema,
   "sort-scrape-results": sortScrapeResultsProcessorSchema,

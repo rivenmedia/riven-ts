@@ -1,5 +1,7 @@
 import { type FlowJob, FlowProducer } from "bullmq";
 
+import { queueNameFor } from "../../utilities/queue-name-for.ts";
+
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item/scrape-requested";
 
@@ -11,7 +13,10 @@ export async function scrapeItem(
 
   const childNodes = scraperPlugins.map((plugin) => ({
     name: `${plugin.name.description ?? "unknown"} - Scrape item #${item.id.toString()}`,
-    queueName: `riven.media-item.scrape.requested.plugin-${plugin.name.description ?? "unknown"}`,
+    queueName: queueNameFor(
+      "riven.media-item.scrape.requested",
+      plugin.name.description ?? "unknown",
+    ),
     data: {
       item,
     },
@@ -22,11 +27,17 @@ export async function scrapeItem(
 
   const rootNode = {
     name: `Scraping item #${item.id.toString()}`,
-    queueName: "scrape-item",
+    queueName: queueNameFor("scrape-item"),
+    data: {
+      id: item.id,
+    },
     children: [
       {
         name: "Sort scrape results",
-        queueName: "sort-scrape-results",
+        queueName: queueNameFor("sort-scrape-results"),
+        data: {
+          id: item.id,
+        },
         children: childNodes,
       },
     ],

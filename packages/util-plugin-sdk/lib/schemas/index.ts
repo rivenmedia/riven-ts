@@ -7,7 +7,6 @@ import {
 import { DataSourceMap } from "../types/utilities.ts";
 import { RivenEventHandler } from "./events/index.ts";
 
-import type { createEventHandlerSchema } from "./utilities/create-event-handler-schema.ts";
 import type { RateLimiterOptions } from "bullmq";
 
 export const RivenPluginConfig = z.readonly(
@@ -61,8 +60,6 @@ const dataSourceSchema = z.custom<DataSourceConstructor>((value) => {
   return instantiatableSchema.safeParse(value.prototype).success;
 });
 
-export type EventHandler = z.infer<ReturnType<typeof createEventHandlerSchema>>;
-
 export const RivenPlugin = z.object({
   version: z.string().regex(
     // https://regex101.com/r/vkijKf/1/
@@ -88,7 +85,7 @@ export const RivenPlugin = z.object({
   }),
 });
 
-export type RivenPlugin = z.infer<typeof RivenPlugin>;
+export type RivenPlugin = z.input<typeof RivenPlugin>;
 
 export const rivenPluginPackageSchema = z.object({
   default: RivenPlugin,

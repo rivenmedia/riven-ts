@@ -4,6 +4,7 @@ import {
   Column,
   Entity,
   Index,
+  JoinTable,
   ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -17,7 +18,7 @@ import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import { Stream } from "../streams/stream.entity.ts";
 
-export const mediaItemStateSchema = z.enum([
+export const MediaItemState = z.enum([
   "Unknown",
   "Unreleased",
   "Ongoing",
@@ -32,20 +33,32 @@ export const mediaItemStateSchema = z.enum([
   "Paused",
 ]);
 
-export type MediaItemState = z.infer<typeof mediaItemStateSchema>;
+export type MediaItemState = z.infer<typeof MediaItemState>;
 
-registerEnumType(mediaItemStateSchema.enum, {
+registerEnumType(MediaItemState.enum, {
   name: "MediaItemState",
   description: "The state of a media item in the processing pipeline",
+});
+
+export const MediaItemType = z.enum([
+  "Movie",
+  "Show",
+  "Season",
+  "Episode",
+  "RequestedItem",
+]);
+
+export type MediaItemType = z.infer<typeof MediaItemType>;
+
+registerEnumType(MediaItemType.enum, {
+  name: "MediaItemType",
+  description: "The type of a media item",
 });
 
 @ObjectType()
 @Entity()
 @TableInheritance({
-  column: {
-    type: "varchar",
-    name: "type",
-  },
+  column: "type",
 })
 @Index(["type", "airedAt"])
 export class MediaItem extends BaseEntity {
@@ -161,8 +174,8 @@ export class MediaItem extends BaseEntity {
   @Column({ nullable: true })
   overseerrId?: number;
 
-  @Field(() => mediaItemStateSchema.enum)
-  @Column("simple-enum", { enum: mediaItemStateSchema.options })
+  @Field(() => MediaItemState.enum)
+  @Column("simple-enum", { enum: MediaItemState.options })
   state!: MediaItemState;
 
   @Field()
@@ -171,10 +184,12 @@ export class MediaItem extends BaseEntity {
 
   @Field(() => [FileSystemEntry])
   @ManyToMany("FileSystemEntry", (entry: FileSystemEntry) => entry.id)
+  @JoinTable()
   filesystemEntries!: Relation<FileSystemEntry>[];
 
   @Field(() => [SubtitleEntry])
   @ManyToMany(() => SubtitleEntry)
+  @JoinTable()
   subtitles!: Relation<SubtitleEntry>[];
 
   @Field(() => Stream, { nullable: true })
@@ -183,9 +198,15 @@ export class MediaItem extends BaseEntity {
 
   @Field(() => [Stream])
   @ManyToMany(() => Stream)
+  @JoinTable()
   streams!: Relation<Stream>[];
 
   @Field(() => [Stream])
   @ManyToMany(() => Stream)
+  @JoinTable()
   blacklistedStreams!: Relation<Stream>[];
+
+  @Field(() => String)
+  @Column("simple-enum", { enum: MediaItemType.options })
+  type!: MediaItemType;
 }

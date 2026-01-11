@@ -40,7 +40,6 @@ export const retryLibraryActor = fromPromise<undefined, RetryLibraryActorInput>(
             break;
           }
           case "Indexed": {
-            console.log({ item });
             parentRef.send({
               type: "riven.media-item.scrape.requested",
               item,

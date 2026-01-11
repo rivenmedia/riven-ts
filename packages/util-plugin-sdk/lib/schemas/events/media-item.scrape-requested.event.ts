@@ -1,8 +1,8 @@
 import z from "zod";
 
-import { MediaItem } from "../../../dto/entities/index.ts";
-import { createEventHandlerSchema } from "../../utilities/create-event-handler-schema.ts";
-import { createProgramEventSchema } from "../../utilities/create-program-event-schema.ts";
+import { SerialisedMediaItem } from "../media-item/serialised-media-item.ts";
+import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
+import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
 /**
  * Event emitted when a scrape has been requested for an indexed media item.
@@ -10,7 +10,7 @@ import { createProgramEventSchema } from "../../utilities/create-program-event-s
 export const MediaItemScrapeRequestedEvent = createProgramEventSchema(
   "media-item.scrape.requested",
   z.object({
-    item: z.instanceof(MediaItem),
+    item: SerialisedMediaItem,
   }),
 );
 

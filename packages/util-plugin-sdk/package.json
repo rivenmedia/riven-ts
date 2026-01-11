@@ -21,6 +21,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "class-transformer": "catalog:",
     "luxon": "catalog:",
     "zod": "catalog:"
   },

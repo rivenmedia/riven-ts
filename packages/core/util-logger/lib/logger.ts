@@ -20,7 +20,7 @@ export type LogLevel =
   | "silly";
 
 export const logger = createLogger({
-  level: "silly",
+  level: "debug",
   format: format.combine(
     format.timestamp({
       format: "YYYY-MM-DD HH:mm:ss",
@@ -62,7 +62,7 @@ export const logger = createLogger({
   exitOnError: false,
 });
 
-if (isProductionEnvironment) {
+if (!isTestEnvironment) {
   logger.add(
     new transports.File({
       filename: "error.log",

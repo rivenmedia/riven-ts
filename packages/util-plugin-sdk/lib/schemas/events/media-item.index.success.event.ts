@@ -1,8 +1,8 @@
 import z from "zod";
 
-import { requestedItemSchema } from "../../../media-item/requested-item.ts";
-import { createEventHandlerSchema } from "../../../utilities/create-event-handler-schema.ts";
-import { createProgramEventSchema } from "../../../utilities/create-program-event-schema.ts";
+import { SerialisedMediaItem } from "../media-item/serialised-media-item.ts";
+import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
+import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
 /**
  * Event emitted when a media item's state has been updated.
@@ -10,10 +10,7 @@ import { createProgramEventSchema } from "../../../utilities/create-program-even
 export const MediaItemIndexSuccessEvent = createProgramEventSchema(
   "media-item.index.success",
   z.object({
-    item: requestedItemSchema.extend({
-      id: z.number(),
-      title: z.string().nullish(),
-    }),
+    item: SerialisedMediaItem,
   }),
 );
 

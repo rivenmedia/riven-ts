@@ -1,6 +1,9 @@
 import { database } from "@repo/core-util-database/connection";
 import { logger } from "@repo/core-util-logger";
-import { MediaItem, Movie } from "@repo/util-plugin-sdk/dto/entities/index";
+import {
+  MediaItem,
+  RequestedItem,
+} from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
@@ -24,74 +27,72 @@ export async function persistMovieIndexerData({
   if (existingItem.state !== "Requested") {
     sendEvent({
       type: "riven.media-item.index.already-exists",
-      item: {
-        ...item,
-        id: existingItem.id,
-        title: existingItem.title,
-      },
+      item: existingItem,
     });
 
     return;
   }
 
-  const itemEntity = new Movie();
-
-  itemEntity.id = item.id;
-  itemEntity.title = item.title;
+  existingItem.id = item.id;
+  existingItem.title = item.title;
 
   if (item.posterUrl) {
-    itemEntity.posterPath = item.posterUrl;
+    existingItem.posterPath = item.posterUrl;
   }
 
   if (item.releaseDate) {
-    itemEntity.airedAt = DateTime.fromISO(item.releaseDate).toJSDate();
-    itemEntity.year = DateTime.fromISO(item.releaseDate).year;
+    existingItem.airedAt = DateTime.fromISO(item.releaseDate).toJSDate();
+    existingItem.year = DateTime.fromISO(item.releaseDate).year;
   }
 
   if (item.country) {
-    itemEntity.country = item.country;
+    existingItem.country = item.country;
   }
 
   if (item.language) {
-    itemEntity.language = item.language;
+    existingItem.language = item.language;
   }
 
   if (item.aliases) {
-    itemEntity.aliases = item.aliases;
+    existingItem.aliases = item.aliases;
   }
 
   if (item.contentRating) {
-    itemEntity.contentRating = item.contentRating;
+    existingItem.contentRating = item.contentRating;
   }
 
   if (item.rating) {
-    itemEntity.rating = item.rating;
+    existingItem.rating = item.rating;
   }
 
-  itemEntity.isAnime =
+  existingItem.isAnime =
     item.language !== "en" &&
     ["animation", "anime"].every((genre) =>
       item.genres.map((g) => g.toLowerCase()).includes(genre),
     );
 
-  itemEntity.genres = item.genres;
-  itemEntity.state = "Indexed";
+  existingItem.genres = item.genres;
+  existingItem.state = "Indexed";
+  existingItem.type = "Movie";
 
   try {
-    await validateOrReject(itemEntity);
+    await validateOrReject(existingItem);
 
-    const updatedItem = await database.manager.save(Movie, itemEntity);
+    const updatedItem = await database.manager.save(
+      RequestedItem,
+      existingItem,
+    );
 
     logger.info(
       `Indexed media item: ${item.title} (ID: ${item.id.toString()})`,
     );
 
-    return updatedItem;
-
     sendEvent({
       type: "riven.media-item.index.success",
       item: updatedItem,
     });
+
+    return updatedItem;
   } catch (error) {
     const parsedError = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
@@ -99,7 +100,7 @@ export async function persistMovieIndexerData({
 
     sendEvent({
       type: "riven.media-item.index.error",
-      item,
+      item: existingItem,
       error: Array.isArray(parsedError)
         ? parsedError
             .map((err) =>

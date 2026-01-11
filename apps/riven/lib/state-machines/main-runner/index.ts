@@ -21,8 +21,8 @@ import type { RetryLibraryEvent } from "../../message-queue/events/retry-library
 import type { Flow } from "../../message-queue/flows/index.ts";
 import type { PendingRunnerInvocationPlugin } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import type { ParamsFor } from "@repo/util-plugin-sdk";
-import type { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item/index-requested";
-import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item/scrape-requested";
+import type { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 export interface MainRunnerMachineContext {
   plugins: Map<symbol, PendingRunnerInvocationPlugin>;
@@ -118,6 +118,8 @@ export const mainRunnerMachine = setup({
   },
   actors: {
     requestContentServices: requestContentServicesActor,
+    requestIndexData,
+    requestScrape,
   },
   guards: {
     /**
@@ -153,8 +155,8 @@ export const mainRunnerMachine = setup({
         pluginWorkers,
         flows: new Map<Flow["name"], Worker>([
           [
-            "indexing",
-            createFlowWorker("indexing", indexItemProcessor, self.send),
+            "index-item",
+            createFlowWorker("index-item", indexItemProcessor, self.send),
           ],
           [
             "request-content-services",
@@ -186,7 +188,7 @@ export const mainRunnerMachine = setup({
           type: "riven.core.started",
         },
       },
-      // { type: "requestContentServices" },
+      { type: "requestContentServices" },
       raise({ type: "riven-internal.retry-library" }),
       {
         type: "log",
@@ -223,7 +225,7 @@ export const mainRunnerMachine = setup({
             type: "log",
             params: ({ event }) => ({
               message: `Successfully created media item: ${JSON.stringify(event.item)}`,
-              level: "info",
+              level: "silly",
             }),
           },
           {
@@ -241,6 +243,23 @@ export const mainRunnerMachine = setup({
             item: event.item,
           }),
         },
+      },
+      "riven.media-item.index.success": {
+        actions: [
+          {
+            type: "log",
+            params: ({ event }) => ({
+              message: `Successfully indexed media item: ${JSON.stringify(event.item)}`,
+              level: "info",
+            }),
+          },
+          {
+            type: "requestScrape",
+            params: ({ event }) => ({
+              item: event.item,
+            }),
+          },
+        ],
       },
       "riven.media-item.scrape.requested": {
         actions: {
@@ -263,7 +282,7 @@ export const mainRunnerMachine = setup({
           },
         ],
       },
-      "riven.media-item.creation.already-exists": {
+      "riven.media-item.creation.error.conflict": {
         description:
           "Indicates that a media item creation was attempted, but the item already exists in the library.",
         actions: [
@@ -276,7 +295,7 @@ export const mainRunnerMachine = setup({
           },
         ],
       },
-      "riven.media-item.index.already-exists": {
+      "riven.media-item.index.error.incorrect-state": {
         description:
           "Indicates that a media item index was attempted, but the item was already indexed in the library.",
         actions: [

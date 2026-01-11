@@ -1,5 +1,7 @@
 import { FlowProducer } from "bullmq";
 
+import { queueNameFor } from "../../utilities/queue-name-for.ts";
+
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
 export async function requestContentServices(
@@ -9,10 +11,13 @@ export async function requestContentServices(
 
   return producer.add({
     name: "Request content services",
-    queueName: "request-content-services",
+    queueName: queueNameFor("request-content-services"),
     children: contentServicePlugins.map((plugin) => ({
       name: `${plugin.name.description ?? "unknown"} - Request content service`,
-      queueName: `riven.content-service.requested.plugin-${plugin.name.description ?? "unknown"}`,
+      queueName: queueNameFor(
+        "riven.content-service.requested",
+        plugin.name.description ?? "unknown",
+      ),
     })),
     opts: {
       removeOnComplete: {

@@ -1,72 +1,106 @@
 import z from "zod";
 
-import { ShutdownEvent, ShutdownEventHandler } from "./core/shutdown.ts";
-import { CoreStartedEvent, CoreStartedEventHandler } from "./core/started.ts";
 import {
   ContentServiceRequestedEvent,
   ContentServiceRequestedEventHandler,
-} from "./media-item/content-service-requested.ts";
+} from "./content-service-requested.event.ts";
 import {
-  MediaItemCreationAlreadyExistsEvent,
-  MediaItemCreationAlreadyExistsEventHandler,
-} from "./media-item/creation/already-exists.ts";
+  CoreShutdownEvent,
+  CoreShutdownEventHandler,
+} from "./core.shutdown.event.ts";
+import {
+  CoreStartedEvent,
+  CoreStartedEventHandler,
+} from "./core.started.event.ts";
+import {
+  MediaItemCreationErrorConflictEvent,
+  MediaItemCreationErrorConflictEventHandler,
+} from "./media-item.creation.error.conflict.event.ts";
 import {
   MediaItemCreationErrorEvent,
   MediaItemCreationErrorEventHandler,
-} from "./media-item/creation/error.ts";
+} from "./media-item.creation.error.event.ts";
 import {
   MediaItemCreationSuccessEvent,
   MediaItemCreationSuccessEventHandler,
-} from "./media-item/creation/success.ts";
-import {
-  MediaItemIndexRequestedEvent,
-  MediaItemIndexRequestedEventHandler,
-} from "./media-item/index-requested.ts";
-import {
-  MediaItemIndexAlreadyExistsEvent,
-  MediaItemIndexAlreadyExistsEventHandler,
-} from "./media-item/index/already-exists.ts";
+} from "./media-item.creation.success.event.ts";
 import {
   MediaItemIndexErrorEvent,
   MediaItemIndexErrorEventHandler,
-} from "./media-item/index/error.ts";
+} from "./media-item.index.error.event.ts";
+import {
+  MediaItemIndexErrorIncorrectStateEvent,
+  MediaItemIndexErrorIncorrectStateEventHandler,
+} from "./media-item.index.incorrect-state.event.ts";
+import {
+  MediaItemIndexRequestedEvent,
+  MediaItemIndexRequestedEventHandler,
+} from "./media-item.index.requested.event.ts";
 import {
   MediaItemIndexSuccessEvent,
   MediaItemIndexSuccessEventHandler,
-} from "./media-item/index/success.ts";
+} from "./media-item.index.success.event.ts";
 import {
   MediaItemScrapeRequestedEvent,
   MediaItemScrapeRequestedEventHandler,
-} from "./media-item/scrape-requested.ts";
+} from "./media-item.scrape-requested.event.ts";
+import {
+  MediaItemScrapeErrorEvent,
+  MediaItemScrapeErrorEventHandler,
+} from "./media-item.scrape.error.event.ts";
+import {
+  MediaItemScrapeErrorIncorrectStateEvent,
+  MediaItemScrapeErrorIncorrectStateEventHandler,
+} from "./media-item.scrape.error.incorrect-state.event.ts";
+import {
+  MediaItemScrapeSuccessEvent,
+  MediaItemScrapeSuccessEventHandler,
+} from "./media-item.scrape.success.event.ts";
 
 export const RivenEvent = z.discriminatedUnion("type", [
   CoreStartedEvent,
   MediaItemCreationSuccessEvent,
-  MediaItemCreationAlreadyExistsEvent,
+  MediaItemCreationErrorConflictEvent,
   MediaItemCreationErrorEvent,
   MediaItemIndexRequestedEvent,
   MediaItemIndexSuccessEvent,
-  MediaItemIndexAlreadyExistsEvent,
+  MediaItemIndexErrorIncorrectStateEvent,
   MediaItemIndexErrorEvent,
   ContentServiceRequestedEvent,
-  ShutdownEvent,
+  CoreShutdownEvent,
   MediaItemScrapeRequestedEvent,
+  MediaItemScrapeSuccessEvent,
+  MediaItemScrapeErrorIncorrectStateEvent,
+  MediaItemScrapeErrorEvent,
 ]);
 
 export type RivenEvent = z.infer<typeof RivenEvent>;
 
 export const RivenEventHandler = {
+  // Program lifecycle
   "riven.core.started": CoreStartedEventHandler,
-  "riven.media-item.creation.already-exists":
-    MediaItemCreationAlreadyExistsEventHandler,
+  "riven.core.shutdown": CoreShutdownEventHandler,
+
+  // Content services
+  "riven.content-service.requested": ContentServiceRequestedEventHandler,
+
+  // Item creation
+  "riven.media-item.creation.error.conflict":
+    MediaItemCreationErrorConflictEventHandler,
   "riven.media-item.creation.error": MediaItemCreationErrorEventHandler,
   "riven.media-item.creation.success": MediaItemCreationSuccessEventHandler,
+
+  // Item indexing
   "riven.media-item.index.requested": MediaItemIndexRequestedEventHandler,
-  "riven.content-service.requested": ContentServiceRequestedEventHandler,
-  "riven.core.shutdown": ShutdownEventHandler,
-  "riven.media-item.index.already-exists":
-    MediaItemIndexAlreadyExistsEventHandler,
   "riven.media-item.index.error": MediaItemIndexErrorEventHandler,
+  "riven.media-item.index.error.incorrect-state":
+    MediaItemIndexErrorIncorrectStateEventHandler,
   "riven.media-item.index.success": MediaItemIndexSuccessEventHandler,
+
+  // Item scraping
   "riven.media-item.scrape.requested": MediaItemScrapeRequestedEventHandler,
+  "riven.media-item.scrape.error": MediaItemScrapeErrorEventHandler,
+  "riven.media-item.scrape.error.incorrect-state":
+    MediaItemScrapeErrorIncorrectStateEventHandler,
+  "riven.media-item.scrape.success": MediaItemScrapeSuccessEventHandler,
 } as const satisfies Record<RivenEvent["type"], z.ZodFunction>;

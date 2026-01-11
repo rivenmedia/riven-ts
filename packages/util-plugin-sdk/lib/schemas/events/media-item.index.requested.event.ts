@@ -1,9 +1,8 @@
 import z from "zod";
 
-import { mediaItemStateSchema } from "../../../dto/entities/index.ts";
-import { requestedItemSchema } from "../../media-item/requested-item.ts";
-import { createEventHandlerSchema } from "../../utilities/create-event-handler-schema.ts";
-import { createProgramEventSchema } from "../../utilities/create-program-event-schema.ts";
+import { SerialisedMediaItem } from "../media-item/serialised-media-item.ts";
+import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
+import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
 /**
  * Event emitted when an index has been requested for a newly created media item.
@@ -11,10 +10,7 @@ import { createProgramEventSchema } from "../../utilities/create-program-event-s
 export const MediaItemIndexRequestedEvent = createProgramEventSchema(
   "media-item.index.requested",
   z.object({
-    item: requestedItemSchema.extend({
-      id: z.number(),
-      state: mediaItemStateSchema.extract(["Requested"]),
-    }),
+    item: SerialisedMediaItem,
   }),
 );
 

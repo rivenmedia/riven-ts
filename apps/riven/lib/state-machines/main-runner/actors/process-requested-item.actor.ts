@@ -45,11 +45,7 @@ export async function processRequestedItem({
   if (existingItem) {
     sendEvent({
       type: "riven.media-item.creation.already-exists",
-      item: {
-        ...item,
-        id: existingItem.id,
-        title: existingItem.title,
-      },
+      item: existingItem,
     });
 
     return {
@@ -65,6 +61,10 @@ export async function processRequestedItem({
 
   if (item.tmdbId) {
     itemEntity.tmdbId = item.tmdbId;
+  }
+
+  if (item.tvdbId) {
+    itemEntity.tvdbId = item.tvdbId;
   }
 
   itemEntity.state = "Requested";

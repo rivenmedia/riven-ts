@@ -69,6 +69,9 @@ catalogs:
     bullmq-otel:
       specifier: ^1.1.0
       version: 1.1.0
+    class-transformer:
+      specifier: ^0.5.1
+      version: 0.5.1
     class-validator:
       specifier: 0.14.3
       version: 0.14.3
@@ -210,6 +213,9 @@ importers:
       bullmq-otel:
         specifier: 'catalog:'
         version: 1.1.0
+      class-transformer:
+        specifier: 'catalog:'
+        version: 0.5.1
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
@@ -1061,6 +1067,9 @@ importers:
 
   packages/util-plugin-sdk:
     dependencies:
+      class-transformer:
+        specifier: 'catalog:'
+        version: 0.5.1
       luxon:
         specifier: 'catalog:'
         version: 3.7.2
@@ -3617,6 +3626,9 @@ packages:
 
   cjs-module-lexer@1.4.3:
     resolution: {integrity: sha512-9z8TZaGM1pfswYeXrUpzPrkx8UnWYdhJclsiYMm6x/w5+nN+8Tf/LnAgfLGQCm59qAOxU8WwHEq2vNwF6i4j+Q==}
+
+  class-transformer@0.5.1:
+    resolution: {integrity: sha512-SQa1Ws6hUbfC98vKGxZH3KFY0Y1lm5Zm0SY8XX9zbK7FJCyVEac3ATW0RIpwzW+oOfmHE5PMPufDG9hCfoEOMw==}
 
   class-validator@0.14.3:
     resolution: {integrity: sha512-rXXekcjofVN1LTOSw+u4u9WXVEUvNBVjORW154q/IdmYWy1nMbOU9aNtZB0t8m+FJQ9q91jlr2f9CwwUFdFMRA==}
@@ -10004,6 +10016,8 @@ snapshots:
       consola: 3.4.2
 
   cjs-module-lexer@1.4.3: {}
+
+  class-transformer@0.5.1: {}
 
   class-validator@0.14.3:
     dependencies:

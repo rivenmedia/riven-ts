@@ -71,6 +71,7 @@ export abstract class BaseDataSource extends RESTDataSource {
         url: redisUrl,
       },
       defaultJobOptions: {
+        attempts: 3,
         backoff: {
           type: "exponential",
           delay: 1000,
@@ -224,23 +225,7 @@ export abstract class BaseDataSource extends RESTDataSource {
       { jobId: sanitisedJobId },
     );
 
-    const result = await job.waitUntilFinished(this.#queueEvents, 10000);
-
-    if (result.response.status === 429) {
-      const waitMs = this.#parseRetryAfterHeader(
-        result.response.headers["retry-after"] ?? "",
-      );
-
-      if (!waitMs) {
-        this.logger.warn(
-          `[${this.serviceName}] Received 429 response without valid Retry-After header for ${path}. Using default wait time of 1000ms.`,
-        );
-      }
-
-      await this.#queue.rateLimit(waitMs ?? 1000);
-
-      throw Worker.RateLimitError();
-    }
+    const result = await job.waitUntilFinished(this.#queueEvents, 60000);
 
     this.logger.http(
       `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${path}`,
@@ -250,7 +235,7 @@ export abstract class BaseDataSource extends RESTDataSource {
       parsedBody: result.parsedBody as TResult,
       response: result.response as never,
 
-      // The following fields aren't used by the application,
+      // The following fields aren't used by our application,
       // but must be included to satisfy the return type.
       responseFromCache: false,
       requestDeduplication: undefined as never,
@@ -258,6 +243,36 @@ export abstract class BaseDataSource extends RESTDataSource {
         cacheWritePromise: Promise.resolve(),
       },
     };
+  }
+
+  override async throwIfResponseIsError({
+    response,
+    url,
+  }: {
+    url: URL;
+    request: RequestOptions;
+    response: DataSourceFetchResult<unknown>["response"];
+    parsedBody: unknown;
+  }) {
+    if (response.ok) {
+      return;
+    }
+
+    if (response.status === 429) {
+      const waitMs = this.#parseRetryAfterHeader(
+        response.headers.get("Retry-After") ?? "",
+      );
+
+      this.logger.warn(
+        waitMs
+          ? `[${this.serviceName}] Received 429 Too Many Requests response for ${url}; retrying after ${Math.round(waitMs / 1000).toFixed(0)} seconds`
+          : `[${this.serviceName}] Received 429 response without valid Retry-After header for ${url}. Using default wait time of 5 seconds.`,
+      );
+
+      await this.#queue.rateLimit(waitMs ?? 5000);
+
+      throw Worker.RateLimitError();
+    }
   }
 
   protected override didEncounterError(

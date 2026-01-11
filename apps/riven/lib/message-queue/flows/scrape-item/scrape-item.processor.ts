@@ -1,21 +1,36 @@
+import { logger } from "@repo/core-util-logger";
+
 import { persistScrapeResults } from "../../../state-machines/main-runner/actors/persist-scrape-results.actor.ts";
 import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
+
+import type { DefaultParserResult } from "parse-torrent-title";
 
 export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
   async function (job, sendEvent) {
     const children = await job.getChildrenValues();
 
-    const aggregatedResults = Object.values(children).reduce(
-      (acc, scrapeResult) => ({
+    const sortedResults = Object.values(children).reduce<
+      Record<string, DefaultParserResult>
+    >((acc, scrapeResult) => {
+      if (!scrapeResult.success) {
+        return acc;
+      }
+
+      return {
         ...acc,
-        ...scrapeResult,
-      }),
-      {},
-    );
+        ...scrapeResult.result.results,
+      };
+    }, {});
+
+    logger.info({ sortedResults, children });
+
+    if (!Object.keys(sortedResults).length) {
+      throw new Error(`No streams found for item ${job.data.id.toString()}`);
+    }
 
     await persistScrapeResults({
       id: job.data.id,
-      results: aggregatedResults,
+      results: sortedResults,
       sendEvent,
     });
 
