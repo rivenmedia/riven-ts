@@ -9,12 +9,20 @@ import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
 
 import type { MainRunnerMachineIntake } from "../index.ts";
-import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item/content-service-requested";
+import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
-export interface ProcessRequestedItemInput {
+export type ProcessRequestedItemInput = {
   sendEvent: MainRunnerMachineIntake;
-  item: ContentServiceRequestedResponse[number];
-}
+} & (
+  | {
+      type: "show";
+      item: ContentServiceRequestedResponse["shows"][number];
+    }
+  | {
+      type: "movie";
+      item: ContentServiceRequestedResponse["movies"][number];
+    }
+);
 
 export interface ProcessRequestedItemOutput {
   isNewItem: boolean;
@@ -22,29 +30,28 @@ export interface ProcessRequestedItemOutput {
 
 export async function processRequestedItem({
   item,
+  type,
   sendEvent,
 }: ProcessRequestedItemInput): Promise<ProcessRequestedItemOutput> {
   const externalIds = [
     item.imdbId ? `IMDB: ${item.imdbId}` : null,
-    item.tmdbId ? `TMDB: ${item.tmdbId}` : null,
-    item.tvdbId ? `TVDB: ${item.tvdbId}` : null,
-  ];
+    type === "movie" && item.tmdbId ? `TMDB: ${item.tmdbId}` : null,
+    type === "show" && item.tvdbId ? `TVDB: ${item.tvdbId}` : null,
+  ].filter(Boolean);
 
-  logger.silly(
-    `Processing requested item: ${externalIds.filter(Boolean).join(", ")}`,
-  );
+  logger.silly(`Processing requested item: ${externalIds.join(", ")}`);
 
   const existingItem = await database.manager.findOne(MediaItem, {
     where: [
       ...(item.imdbId ? [{ imdbId: item.imdbId }] : []),
-      ...(item.tmdbId ? [{ tmdbId: item.tmdbId }] : []),
-      ...(item.tvdbId ? [{ tvdbId: item.tvdbId }] : []),
+      ...(type === "movie" && item.tmdbId ? [{ tmdbId: item.tmdbId }] : []),
+      ...(type === "show" && item.tvdbId ? [{ tvdbId: item.tvdbId }] : []),
     ],
   });
 
   if (existingItem) {
     sendEvent({
-      type: "riven.media-item.creation.already-exists",
+      type: "riven.media-item.creation.error.conflict",
       item: existingItem,
     });
 
@@ -59,11 +66,11 @@ export async function processRequestedItem({
     itemEntity.imdbId = item.imdbId;
   }
 
-  if (item.tmdbId) {
+  if (type === "movie" && item.tmdbId) {
     itemEntity.tmdbId = item.tmdbId;
   }
 
-  if (item.tvdbId) {
+  if (type === "show" && item.tvdbId) {
     itemEntity.tvdbId = item.tvdbId;
   }
 

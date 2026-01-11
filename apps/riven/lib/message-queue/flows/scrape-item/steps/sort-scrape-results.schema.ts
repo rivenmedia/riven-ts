@@ -1,4 +1,4 @@
-import { MediaItemScrapeRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item/scrape-requested";
+import { MediaItemScrapeRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 import z from "zod";
 
@@ -15,6 +15,7 @@ export const SortScrapeResultsFlow = createFlowSchema(
   }),
   z.object({
     id: z.int(),
+    title: z.string(),
   }),
 );
 

@@ -12,10 +12,13 @@ export default {
   resolvers: [ListrrResolver, ListrrSettingsResolver],
   dataSources: [ListrrAPI],
   hooks: {
-    "riven.content-service.requested": async function ({ dataSources }) {
+    "riven.content-service.requested": async ({ dataSources }) => {
       const api = dataSources.get(ListrrAPI);
 
-      return await api.getShows(new Set(["6941fe52770814e293788237"]));
+      return {
+        movies: await api.getMovies(new Set(["6844e31b19709aa9ed18e776"])),
+        shows: [],
+      };
     },
   },
   validator: () => true,

@@ -10,7 +10,7 @@ import { DateTime } from "luxon";
 import z from "zod";
 
 import type { MainRunnerMachineIntake } from "../index.ts";
-import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item/index-requested";
+import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
 export interface PersistMovieIndexerDataInput extends MediaItemIndexRequestedResponse {
   sendEvent: MainRunnerMachineIntake;
@@ -26,7 +26,7 @@ export async function persistMovieIndexerData({
 
   if (existingItem.state !== "Requested") {
     sendEvent({
-      type: "riven.media-item.index.already-exists",
+      type: "riven.media-item.index.error.incorrect-state",
       item: existingItem,
     });
 

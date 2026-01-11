@@ -14,7 +14,7 @@ export default {
   resolvers: [TestResolver, TestSettingsResolver],
   hooks: {
     "riven.core.started": async () => {},
-    "riven.media-item.creation.already-exists": async () => {},
+    "riven.media-item.creation.error.conflict": async () => {},
     "riven.media-item.creation.error": async () => {},
     "riven.media-item.creation.success": async () => {},
   },

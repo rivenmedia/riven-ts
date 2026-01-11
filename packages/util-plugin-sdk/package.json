@@ -7,6 +7,7 @@
     ".": "./lib/index.ts",
     "./types/*": "./lib/types/*.ts",
     "./dto/*": "./lib/dto/*.ts",
+    "./errors/*": "./lib/errors/*.ts",
     "./events": "./lib/schemas/events/index.ts",
     "./events/*": "./lib/schemas/plugin-to-program-events/*.ts",
     "./schemas/*": "./lib/schemas/*.ts",
@@ -17,7 +18,7 @@
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {

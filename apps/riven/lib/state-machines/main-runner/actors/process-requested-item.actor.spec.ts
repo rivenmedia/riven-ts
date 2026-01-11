@@ -9,25 +9,17 @@ import type { mainRunnerMachine } from "../index.ts";
 
 it("sends a success event if the item is processed successfully", async () => {
   const requestedId = "tt1234567";
-  const parentRef = createEmptyActor() as ActorRefFrom<
-    typeof mainRunnerMachine
-  >;
+  const sendEventSpy = vi.fn();
 
-  vi.spyOn(parentRef, "send");
-
-  const actor = createActor(processRequestedItem, {
-    input: {
-      item: {
-        imdbId: requestedId,
-      },
-      parentRef,
+  await processRequestedItem({
+    item: {
+      imdbId: requestedId,
     },
+    sendEvent: sendEventSpy,
   });
 
-  actor.start();
-
   await vi.waitFor(() => {
-    expect(parentRef).toHaveReceivedEvent({
+    expect(sendEventSpy).toHaveBeenCalledWith({
       type: "riven.media-item.creation.success",
       item: expect.objectContaining<Partial<RequestedItem>>({
         imdbId: requestedId,
@@ -40,30 +32,22 @@ it("sends a success event if the item is processed successfully", async () => {
 
 it("sends an error event if the item processing fails", async () => {
   const requestedId = "1234";
-  const parentRef = createEmptyActor() as ActorRefFrom<
-    typeof mainRunnerMachine
-  >;
+  const sendEventSpy = vi.fn();
 
-  vi.spyOn(parentRef, "send");
-
-  const actor = createActor(processRequestedItem, {
-    input: {
-      item: {
-        imdbId: requestedId,
-      },
-      parentRef,
+  await processRequestedItem({
+    item: {
+      imdbId: requestedId,
     },
+    sendEvent: sendEventSpy,
   });
 
-  actor.start();
-
   await vi.waitFor(() => {
-    expect(parentRef).toHaveReceivedEvent({
+    expect(sendEventSpy).toHaveBeenCalledWith({
       type: "riven.media-item.creation.error",
       item: expect.objectContaining<Partial<RequestedItem>>({
         imdbId: requestedId,
       }) as never,
-      error: expect.anything(),
+      error: expect.stringContaining("imdbId must match"),
     });
   });
 });

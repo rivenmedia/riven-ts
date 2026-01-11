@@ -1,5 +1,3 @@
-import { logger } from "@repo/core-util-logger";
-
 import { UnrecoverableError } from "bullmq";
 import { type DefaultParserResult, parse } from "parse-torrent-title";
 
@@ -20,9 +18,7 @@ export const sortScrapeResultsProcessor =
     );
 
     if (!Object.keys(aggregatedResults).length) {
-      throw new UnrecoverableError(
-        `No streams found for item ${job.data.id.toString()}`,
-      );
+      throw new UnrecoverableError(`No streams found for ${job.data.title}`);
     }
 
     const parsedResults = Object.entries(aggregatedResults).reduce<
@@ -34,8 +30,6 @@ export const sortScrapeResultsProcessor =
 
       return acc;
     }, {});
-
-    logger.info({ parsedResults });
 
     return {
       success: true,

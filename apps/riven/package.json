@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "check-types": "tsc --noEmit --project tsconfig.app.json && tsc --noEmit --project tsconfig.spec.json",
     "dev": "node --watch --env-file=.env --import=./lib/opentelemetry.ts --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
     "graphql-codegen": "graphql-codegen",
     "lint": "eslint",

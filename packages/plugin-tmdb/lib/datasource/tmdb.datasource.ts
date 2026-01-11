@@ -44,6 +44,28 @@ export class TmdbAPI extends BaseDataSource {
     return true;
   }
 
+  async getTmdbIdFromImdbId(imdbId: string) {
+    try {
+      const { movie_results: movieResults } = await this.findById(imdbId, {
+        external_source: "imdb_id",
+      });
+
+      if (!movieResults?.[0]) {
+        throw new Error(`IMDB ID ${imdbId} is not a movie`);
+      }
+
+      return movieResults[0].id;
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.debug(
+          `Failed to get TMDB ID from IMDB ID ${imdbId}: ${error}`,
+        );
+      }
+
+      return null;
+    }
+  }
+
   async findById(externalId: string, params: FindByIdQueryParams) {
     return await this.get<FindById200>(`find/${externalId}`, {
       params,

@@ -7,7 +7,7 @@ import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 
 import type { PendingRunnerInvocationPlugin } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import type { ApolloServer } from "@apollo/server";
-import type { ShutdownEvent } from "@repo/util-plugin-sdk/program-to-plugin-events/core/shutdown";
+import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";
 import type { UUID } from "node:crypto";
 
 export interface RivenMachineContext {
@@ -20,7 +20,7 @@ export interface RivenMachineInput {
   sessionId: UUID;
 }
 
-export type RivenMachineEvent = ShutdownEvent;
+export type RivenMachineEvent = CoreShutdownEvent;
 
 export const rivenMachine = setup({
   types: {

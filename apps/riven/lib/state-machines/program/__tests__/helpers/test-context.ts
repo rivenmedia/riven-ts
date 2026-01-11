@@ -39,6 +39,7 @@ export const it = baseIt.extend<{
           },
         ],
       ]),
+      queues: new Map(),
     });
   },
   stopGqlServerActorLogic: fromPromise(vi.fn()),

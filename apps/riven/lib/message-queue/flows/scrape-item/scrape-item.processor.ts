@@ -1,5 +1,3 @@
-import { logger } from "@repo/core-util-logger";
-
 import { persistScrapeResults } from "../../../state-machines/main-runner/actors/persist-scrape-results.actor.ts";
 import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
 
@@ -21,12 +19,6 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
         ...scrapeResult.result.results,
       };
     }, {});
-
-    logger.info({ sortedResults, children });
-
-    if (!Object.keys(sortedResults).length) {
-      throw new Error(`No streams found for item ${job.data.id.toString()}`);
-    }
 
     await persistScrapeResults({
       id: job.data.id,

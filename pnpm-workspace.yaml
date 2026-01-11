@@ -57,7 +57,9 @@ onlyBuiltDependencies:
   - core-js-pure
   - es5-ext
   - esbuild
+  - msgpackr-extract
   - msw
+  - protobufjs
   - sqlite3
   - unrs-resolver
 

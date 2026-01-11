@@ -1,5 +1,13 @@
 {
-  "cSpell.words": ["bullmq", "kubb", "listrr", "Promisable"],
+  "cSpell.words": [
+    "bullmq",
+    "imdb",
+    "kubb",
+    "listrr",
+    "Promisable",
+    "TMDB",
+    "torrentio"
+  ],
   "typescript.preferences.autoImportSpecifierExcludeRegexes": [
     "node:test" // Conflicts with Vitest imports
   ],

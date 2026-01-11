@@ -48,7 +48,7 @@ export const parsePluginsFromDependencies = async (
         return {
           ...parsedPlugins,
           validPlugins: parsedPlugins.validPlugins.concat(
-            validationResult.data.default,
+            validationResult.data.default as RivenPlugin,
           ),
         };
       } catch (error) {

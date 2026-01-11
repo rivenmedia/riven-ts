@@ -33,11 +33,9 @@ export async function persistScrapeResults({
     throw new Error(`Media item with ID ${id.toString()} not found`);
   }
 
-  logger.warn({ existingItem, results, id });
-
   if (existingItem.state !== "Indexed") {
     sendEvent({
-      type: "riven.media-item.scrape.already-exists",
+      type: "riven.media-item.scrape.error.incorrect-state",
       item: existingItem,
     });
 
@@ -101,17 +99,17 @@ export async function persistScrapeResults({
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
       .parse(error);
 
-    // sendEvent({
-    //   type: "riven.media-item.scrape.error",
-    //   item,
-    //   error: Array.isArray(parsedError)
-    //     ? parsedError
-    //         .map((err) =>
-    //           err.constraints ? Object.values(err.constraints).join("; ") : "",
-    //         )
-    //         .join("; ")
-    //     : parsedError.message,
-    // });
+    sendEvent({
+      type: "riven.media-item.scrape.error",
+      item: existingItem,
+      error: Array.isArray(parsedError)
+        ? parsedError
+            .map((err) =>
+              err.constraints ? Object.values(err.constraints).join("; ") : "",
+            )
+            .join("; ")
+        : parsedError.message,
+    });
 
     throw error;
   }

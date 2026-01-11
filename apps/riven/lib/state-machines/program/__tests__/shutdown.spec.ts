@@ -8,7 +8,11 @@ it('transitions to "Shutdown" then "Exited" when the "riven.shutdown" event is s
 }) => {
   actor.start().send({ type: "riven.core.shutdown" });
 
-  expect(actor.getSnapshot().value).toBe("Shutdown");
+  expect(actor.getSnapshot().value).toStrictEqual({
+    Shutdown: {
+      "Shutting down GQL server": "Shutting down",
+    },
+  });
 
   await vi.waitFor(() => {
     expect(actor.getSnapshot().value).toBe("Exited");

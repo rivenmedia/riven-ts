@@ -3,7 +3,7 @@ import { type FlowJob, FlowProducer } from "bullmq";
 import { queueNameFor } from "../../utilities/queue-name-for.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
-import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item/scrape-requested";
+import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 export async function scrapeItem(
   item: MediaItemScrapeRequestedEvent["item"],
@@ -30,6 +30,7 @@ export async function scrapeItem(
     queueName: queueNameFor("scrape-item"),
     data: {
       id: item.id,
+      title: item.title,
     },
     children: [
       {
@@ -37,6 +38,7 @@ export async function scrapeItem(
         queueName: queueNameFor("sort-scrape-results"),
         data: {
           id: item.id,
+          title: item.title,
         },
         children: childNodes,
       },

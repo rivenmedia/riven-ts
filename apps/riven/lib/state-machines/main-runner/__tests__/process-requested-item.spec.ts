@@ -6,15 +6,13 @@ import { expect, vi } from "vitest";
 import { it } from "./helpers/test-context.ts";
 
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities/index";
-import type { MediaItemCreationAlreadyExistsEvent } from "@repo/util-plugin-sdk/schemas/events/media-item/creation/already-exists";
-import type { MediaItemCreationSuccessEvent } from "@repo/util-plugin-sdk/schemas/events/media-item/creation/success";
+import type { MediaItemCreationErrorConflictEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.creation.error.conflict.event";
+import type { MediaItemCreationSuccessEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.creation.success.event";
 
 it('processes the requested item when a "riven-plugin.media-item.requested" event is received', async ({
   actor,
 }) => {
   const requestedId = "tt7654321";
-
-  actor.start();
 
   const pluginRunnerRef = actor
     .getSnapshot()
@@ -45,7 +43,7 @@ it('processes the requested item when a "riven-plugin.media-item.requested" even
   });
 });
 
-it('sends an already-exists event when a "riven-plugin.media-item.requested" event is received for an item that already exists', async ({
+it('sends an conflict event when a "riven-plugin.media-item.requested" event is received for an item that already exists', async ({
   actor,
 }) => {
   const requestedId = "tt1234567";
@@ -72,12 +70,12 @@ it('sends an already-exists event when a "riven-plugin.media-item.requested" eve
   });
 
   const expectedEvent = {
-    type: "riven.media-item.creation.already-exists",
+    type: "riven.media-item.creation.error.conflict",
     item: expect.objectContaining<Partial<MediaItem>>({
       imdbId: requestedId,
       id: 1,
     }) as never,
-  } satisfies MediaItemCreationAlreadyExistsEvent;
+  } satisfies MediaItemCreationErrorConflictEvent;
 
   await vi.waitFor(() => {
     expect(actor).toHaveReceivedEvent(expectedEvent);

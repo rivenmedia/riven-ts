@@ -4,7 +4,7 @@ import { scrapeItem } from "../../../message-queue/flows/scrape-item/scrape-item
 
 import type { ParamsFor, RivenPlugin } from "@repo/util-plugin-sdk";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
-import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item/scrape-requested";
+import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 import type { FlowProducer } from "bullmq";
 
 export interface RequestScrapeInput extends ParamsFor<MediaItemScrapeRequestedEvent> {

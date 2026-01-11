@@ -24,17 +24,9 @@ export const retryLibraryActor = fromPromise<undefined, RetryLibraryActorInput>(
       for (const item of pendingItems) {
         switch (item.state) {
           case "Requested": {
-            const { id, state, tmdbId, imdbId, tvdbId } = item;
-
             parentRef.send({
               type: "riven.media-item.index.requested",
-              item: {
-                id: id,
-                state: state,
-                tmdbId: tmdbId,
-                imdbId: imdbId,
-                tvdbId: tvdbId,
-              },
+              item,
             });
 
             break;
