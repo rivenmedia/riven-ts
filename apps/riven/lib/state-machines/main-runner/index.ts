@@ -4,7 +4,10 @@ import { RivenEvent } from "@repo/util-plugin-sdk/events";
 import { Queue, Worker } from "bullmq";
 import { enqueueActions, raise, setup } from "xstate";
 
-import { type Flow, FlowHandlers } from "../../message-queue/flows/index.ts";
+import { indexItemProcessor } from "../../message-queue/flows/index-item/index-item.processor.ts";
+import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
+import { scrapeItemProcessor } from "../../message-queue/flows/scrape-item/scrape-item.processor.ts";
+import { sortScrapeResultsProcessor } from "../../message-queue/flows/scrape-item/steps/sort-scrape-results.processor.ts";
 import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { requestContentServicesActor } from "./actors/request-content-services.actor.ts";
@@ -15,6 +18,7 @@ import { createPluginHookWorkers } from "./utilities/create-plugin-hook-workers.
 import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscribers.ts";
 
 import type { RetryLibraryEvent } from "../../message-queue/events/retry-library.event.ts";
+import type { Flow } from "../../message-queue/flows/index.ts";
 import type { PendingRunnerInvocationPlugin } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item/index-requested";
@@ -147,12 +151,32 @@ export const mainRunnerMachine = setup({
         publishableEvents,
         pluginQueues,
         pluginWorkers,
-        flows: new Map<Flow["name"], Worker>(
-          Object.entries(FlowHandlers).map(([name, handler]) => [
-            name as Flow["name"],
-            createFlowWorker(name as Flow["name"], handler as never, self.send),
-          ]),
-        ),
+        flows: new Map<Flow["name"], Worker>([
+          [
+            "indexing",
+            createFlowWorker("indexing", indexItemProcessor, self.send),
+          ],
+          [
+            "request-content-services",
+            createFlowWorker(
+              "request-content-services",
+              requestContentServicesProcessor,
+              self.send,
+            ),
+          ],
+          [
+            "scrape-item",
+            createFlowWorker("scrape-item", scrapeItemProcessor, self.send),
+          ],
+          [
+            "sort-scrape-results",
+            createFlowWorker(
+              "sort-scrape-results",
+              sortScrapeResultsProcessor,
+              self.send,
+            ),
+          ],
+        ]),
       };
     },
     entry: [
