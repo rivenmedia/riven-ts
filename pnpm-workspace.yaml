@@ -28,13 +28,16 @@ catalog:
   class-transformer: ^0.5.1
   class-validator: 0.14.3
   eslint: ^9.39.2
+  fastest-levenshtein: ^1.0.16
   graphql: 16.12.0
   graphql-tag: ^2.12.6
   jiti: 2.6.1
   limiter: 3.0.0
   luxon: ^3.7.2
   msw: 2.12.4
+  parse-torrent-title: ^2.1.0
   reflect-metadata: 0.2.2
+  type-fest: ^5.3.1
   type-graphql: 2.0.0-rc.2
   typeorm: 0.3.28
   typescript: ^5.9.3

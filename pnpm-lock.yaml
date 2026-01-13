@@ -78,6 +78,9 @@ catalogs:
     eslint:
       specifier: ^9.39.2
       version: 9.39.2
+    fastest-levenshtein:
+      specifier: ^1.0.16
+      version: 1.0.16
     graphql:
       specifier: 16.12.0
       version: 16.12.0
@@ -96,9 +99,15 @@ catalogs:
     msw:
       specifier: 2.12.4
       version: 2.12.4
+    parse-torrent-title:
+      specifier: ^2.1.0
+      version: 2.1.0
     reflect-metadata:
       specifier: 0.2.2
       version: 0.2.2
+    type-fest:
+      specifier: ^5.3.1
+      version: 5.3.1
     type-graphql:
       specifier: 2.0.0-rc.2
       version: 2.0.0-rc.2
@@ -1198,6 +1207,52 @@ importers:
       xstate:
         specifier: 'catalog:'
         version: 5.25.0
+
+  packages/util-rank-torrent-name:
+    dependencies:
+      fastest-levenshtein:
+        specifier: 'catalog:'
+        version: 1.0.16
+      parse-torrent-title:
+        specifier: 'catalog:'
+        version: 2.1.0
+      zod:
+        specifier: 'catalog:'
+        version: 4.1.13
+    devDependencies:
+      '@repo/core-util-eslint-config':
+        specifier: workspace:^
+        version: link:../core/util-eslint-config
+      '@repo/core-util-logger':
+        specifier: workspace:^
+        version: link:../core/util-logger
+      '@repo/core-util-typescript-config':
+        specifier: workspace:^
+        version: link:../core/util-typescript-config
+      '@repo/core-util-vitest-config':
+        specifier: workspace:^
+        version: link:../core/util-vitest-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.0.0
+      '@typescript-eslint/parser':
+        specifier: 'catalog:'
+        version: 8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      msw:
+        specifier: 'catalog:'
+        version: 2.12.4(@types/node@24.0.0)(typescript@5.9.3)
+      type-fest:
+        specifier: 'catalog:'
+        version: 5.3.1
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
 
 packages:
 
@@ -4306,6 +4361,10 @@ packages:
 
   fast-uri@3.1.0:
     resolution: {integrity: sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==}
+
+  fastest-levenshtein@1.0.16:
+    resolution: {integrity: sha512-eRnCtTTtGZFpQCwhJiUOuxPQWRXVKYDn0b2PeHfXL6/Zi53SLAzAHfVhVWK2AryC/WH05kGfxhFIPvTF0SXQzg==}
+    engines: {node: '>= 4.9.1'}
 
   fastq@1.19.1:
     resolution: {integrity: sha512-GwLTyxkCXjXbxqIhTsMI2Nui8huMPtnxg7krajPJAjnEG/iiOS7i+zCtWGZR9G0NBKbXKh6X9m9UIsYX/N6vvQ==}
@@ -10814,6 +10873,8 @@ snapshots:
   fast-safe-stringify@2.1.1: {}
 
   fast-uri@3.1.0: {}
+
+  fastest-levenshtein@1.0.16: {}
 
   fastq@1.19.1:
     dependencies:
