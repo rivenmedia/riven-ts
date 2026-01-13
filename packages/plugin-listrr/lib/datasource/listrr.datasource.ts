@@ -160,7 +160,7 @@ export class ListrrAPI extends BaseDataSource {
   }
 
   static override getApiToken() {
-    return "f7f5a6871a944fb692d144eab2fde171722b5a79c5af4ac1a3f4fd225f94c3ba";
+    return process.env["LISTRR_API_KEY"];
   }
 }
 

@@ -30,9 +30,8 @@ vi.mock<typeof import("@repo/plugin-test")>(import("@repo/plugin-test"), () => {
   class TestAPI extends BaseDataSource {
     override baseURL = "https://api.test.com";
 
-    // eslint-disable-next-line @typescript-eslint/require-await
-    override async validate(): Promise<boolean> {
-      return true;
+    override validate(): Promise<boolean> {
+      return Promise.resolve(true);
     }
 
     static override getApiToken(): string | undefined {
@@ -55,7 +54,7 @@ vi.mock<typeof import("@repo/plugin-test")>(import("@repo/plugin-test"), () => {
       resolvers: [TestResolver],
       hooks: {
         "riven.core.started": vi.fn(),
-        "riven.media-item.creation.already-exists": vi.fn(),
+        "riven.media-item.creation.error.conflict": vi.fn(),
         "riven.media-item.creation.error": vi.fn(),
         "riven.media-item.creation.success": vi.fn(),
       },

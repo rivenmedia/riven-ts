@@ -1,6 +1,6 @@
 import { type ActorRef, type Snapshot, fromPromise } from "xstate";
 
-import { scrapeItem } from "../../../message-queue/flows/scrape-item/scrape-item.ts";
+import { downloadItem } from "../../../message-queue/flows/download-item/download-item.ts";
 
 import type { ParamsFor, RivenPlugin } from "@repo/util-plugin-sdk";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
@@ -11,8 +11,8 @@ export interface RequestScrapeInput extends ParamsFor<MediaItemScrapeRequestedEv
   parentRef: ActorRef<Snapshot<unknown>, RivenEvent>;
 }
 
-export const requestScrape = fromPromise<undefined, RequestScrapeInput>(
+export const requestDownload = fromPromise<undefined, RequestScrapeInput>(
   async ({ input: { item, subscribers } }) => {
-    await scrapeItem(item, subscribers);
+    await downloadItem(item, subscribers);
   },
 );

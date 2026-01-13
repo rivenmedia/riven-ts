@@ -1,5 +1,4 @@
 import { database } from "@repo/core-util-database/connection";
-import { logger } from "@repo/core-util-logger";
 import {
   MediaItem,
   RequestedItem,
@@ -78,21 +77,18 @@ export async function persistMovieIndexerData({
   try {
     await validateOrReject(existingItem);
 
-    const updatedItem = await database.manager.save(
+    await database.manager.update(
       RequestedItem,
+      { id: existingItem.id },
       existingItem,
-    );
-
-    logger.info(
-      `Indexed media item: ${item.title} (ID: ${item.id.toString()})`,
     );
 
     sendEvent({
       type: "riven.media-item.index.success",
-      item: updatedItem,
+      item: existingItem,
     });
 
-    return updatedItem;
+    return existingItem;
   } catch (error) {
     const parsedError = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

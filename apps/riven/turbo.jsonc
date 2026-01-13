@@ -3,7 +3,7 @@
   "extends": ["//"],
   "tasks": {
     "dev": {
-      "passThroughEnv": ["REDIS_URL", "PORT", "CLEAR_QUEUES"]
+      "passThroughEnv": ["REDIS_URL", "PORT"]
     }
   }
 }

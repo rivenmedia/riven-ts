@@ -4,6 +4,7 @@ import { RivenEvent } from "@repo/util-plugin-sdk/events";
 import { Queue, Worker } from "bullmq";
 import { enqueueActions, raise, setup } from "xstate";
 
+import { downloadItemProcessor } from "../../message-queue/flows/download-item/download-item.processor.ts";
 import { indexItemProcessor } from "../../message-queue/flows/index-item/index-item.processor.ts";
 import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
 import { scrapeItemProcessor } from "../../message-queue/flows/scrape-item/scrape-item.processor.ts";
@@ -11,6 +12,7 @@ import { sortScrapeResultsProcessor } from "../../message-queue/flows/scrape-ite
 import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { requestContentServicesActor } from "./actors/request-content-services.actor.ts";
+import { requestDownload } from "./actors/request-download.actor.ts";
 import { requestIndexData } from "./actors/request-index-data.actor.ts";
 import { requestScrape } from "./actors/request-scrape.actor.ts";
 import { retryLibraryActor } from "./actors/retry-library.actor.ts";
@@ -108,6 +110,22 @@ export const mainRunnerMachine = setup({
         });
       },
     ),
+    requestDownload: enqueueActions(
+      (
+        { enqueue, context },
+        params: ParamsFor<MediaItemScrapeRequestedEvent>,
+      ) => {
+        enqueue.spawnChild(requestDownload, {
+          input: {
+            item: params.item,
+            subscribers: getPluginEventSubscribers(
+              "riven.media-item.download.requested",
+              context.plugins,
+            ),
+          },
+        });
+      },
+    ),
     retryLibrary: enqueueActions(({ enqueue, self }) => {
       enqueue.spawnChild(retryLibraryActor, {
         input: {
@@ -177,6 +195,10 @@ export const mainRunnerMachine = setup({
               sortScrapeResultsProcessor,
               self.send,
             ),
+          ],
+          [
+            "download-item",
+            createFlowWorker("download-item", downloadItemProcessor, self.send),
           ],
         ]),
       };
@@ -268,6 +290,52 @@ export const mainRunnerMachine = setup({
             item: event.item,
           }),
         },
+      },
+      "riven.media-item.scrape.success": {
+        actions: [
+          {
+            type: "log",
+            params: ({ event }) => ({
+              message: `Successfully scraped media item: ${JSON.stringify(event.item)}`,
+              level: "info",
+            }),
+          },
+          {
+            type: "requestDownload",
+            params: ({ event }) => ({
+              item: event.item,
+            }),
+          },
+        ],
+      },
+      "riven.media-item.download.requested": {
+        actions: {
+          type: "requestDownload",
+          params: ({ event }) => ({
+            item: event.item,
+          }),
+        },
+      },
+      "riven.media-item.download.success": {
+        actions: [
+          {
+            type: "log",
+            params: ({ event }) => ({
+              message: `Successfully downloaded ${event.item.title ?? "Unknown"} in ${event.durationFromRequestToDownload.toString()} seconds.`,
+            }),
+          },
+        ],
+      },
+      "riven.media-item.download.error": {
+        actions: [
+          {
+            type: "log",
+            params: ({ event }) => ({
+              message: `Error downloading media item ${JSON.stringify(event.item)}: ${String(event.error)}`,
+              level: "error",
+            }),
+          },
+        ],
       },
       "riven.media-item.creation.error": {
         description:

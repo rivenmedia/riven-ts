@@ -26,6 +26,7 @@
     "@repo/core-util-graphql-context": "workspace:^",
     "@repo/core-util-graphql-schema": "workspace:^",
     "@repo/plugin-listrr": "workspace:^",
+    "@repo/plugin-realdebrid": "workspace:^",
     "@repo/plugin-tmdb": "workspace:^",
     "@repo/plugin-torrentio": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",

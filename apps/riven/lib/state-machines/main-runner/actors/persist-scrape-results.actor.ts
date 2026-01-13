@@ -87,13 +87,7 @@ export async function persistScrapeResults({
   try {
     await validateOrReject(existingItem);
 
-    const updatedItem = await database.manager.save(MediaItem, existingItem);
-
-    logger.info(
-      `Scraped media item: ${existingItem.title ?? "Unknown"} (ID: ${id.toString()})`,
-    );
-
-    return updatedItem;
+    return await database.manager.save(MediaItem, existingItem);
   } catch (error) {
     const parsedError = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

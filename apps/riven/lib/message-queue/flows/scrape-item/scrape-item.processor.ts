@@ -20,11 +20,18 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
       };
     }, {});
 
-    await persistScrapeResults({
+    const item = await persistScrapeResults({
       id: job.data.id,
       results: sortedResults,
       sendEvent,
     });
+
+    if (item) {
+      sendEvent({
+        type: "riven.media-item.scrape.success",
+        item,
+      });
+    }
 
     return {
       success: true,

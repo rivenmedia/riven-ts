@@ -6,11 +6,20 @@ import {
   RESTDataSource,
   type RequestOptions,
 } from "@apollo/datasource-rest";
-import { Queue, QueueEvents, type RateLimiterOptions, Worker } from "bullmq";
+import {
+  type Job,
+  Queue,
+  QueueEvents,
+  type RateLimiterOptions,
+  Worker,
+} from "bullmq";
 import { DateTime } from "luxon";
 import { Logger } from "winston";
+import z from "zod";
 
 import { registerMQListeners } from "../helpers/register-mq-listeners.ts";
+import { jsonCodec } from "../validation/json-parser.ts";
+import { urlSearchParamsCodec } from "../validation/url-search-params-parser.ts";
 
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import type { Promisable } from "type-fest";
@@ -18,6 +27,10 @@ import type { Promisable } from "type-fest";
 interface FetchJobInput {
   path: string;
   incomingRequest: DataSourceRequest | undefined;
+  /**
+   * Used to determine how to decode the request body.
+   */
+  bodyType: "json" | "url-search-params" | undefined;
 }
 
 type FetchResponse<T = unknown> = Pick<
@@ -97,6 +110,8 @@ export abstract class BaseDataSource extends RESTDataSource {
     this.#worker = new Worker(
       this.#queueId,
       async (job) => {
+        this.#decodeRequestBody(job);
+
         const { response, parsedBody } = await super.fetch(
           job.data.path,
           job.data.incomingRequest,
@@ -127,6 +142,30 @@ export abstract class BaseDataSource extends RESTDataSource {
 
     this.token = token;
     this.logger = apolloDataSourceOptions.logger;
+  }
+
+  #decodeRequestBody(job: Job<FetchJobInput, FetchResponse>) {
+    const { bodyType } = job.data;
+
+    if (!bodyType || !job.data.incomingRequest?.body) {
+      return;
+    }
+
+    if (typeof job.data.incomingRequest.body !== "string") {
+      throw new Error("Unable to decode non-string request body.");
+    }
+
+    if (bodyType === "url-search-params") {
+      job.data.incomingRequest.body = urlSearchParamsCodec.decode(
+        job.data.incomingRequest.body,
+      );
+
+      return;
+    }
+
+    job.data.incomingRequest.body = jsonCodec(
+      z.record(z.string(), z.unknown()),
+    ).decode(job.data.incomingRequest.body);
   }
 
   #parseRetryAfterHeader(retryAfterHeader: string | number): number | null {
@@ -166,24 +205,32 @@ export abstract class BaseDataSource extends RESTDataSource {
     return usp;
   }
 
-  // Generate a cache key for the request, after applying any request modifications
+  // Generate an outgoing request, after applying any request modifications.
   // This is mostly copied from RESTDataSource, as there was no native way to determine
   // whether a request is cached without actually performing subsequent fetch.
-  async #getCacheKey(
+  async #createAugmentedRequest(
     path: string,
     incomingRequest?: DataSourceRequest,
-  ): Promise<string> {
-    const downcasedHeaders: Record<string, string> = {};
+  ): Promise<AugmentedRequest> {
     const augmentedRequest: AugmentedRequest = {
       ...incomingRequest,
       params:
         incomingRequest?.params instanceof URLSearchParams
           ? incomingRequest.params
           : this.#urlSearchParamsFromRecord(incomingRequest?.params),
-      headers: downcasedHeaders,
+      headers: incomingRequest?.headers ?? {},
     };
 
     await this.willSendRequest?.(path, augmentedRequest);
+
+    const downcasedHeaders: Record<string, string> = {};
+
+    // map incoming headers to lower-case headers
+    for (const [key, value] of Object.entries(augmentedRequest.headers)) {
+      downcasedHeaders[key.toLowerCase()] = value;
+    }
+
+    augmentedRequest.headers = downcasedHeaders;
 
     const url = await this.resolveURL(path, augmentedRequest);
 
@@ -199,36 +246,72 @@ export abstract class BaseDataSource extends RESTDataSource {
       augmentedRequest.headers["content-type"] ??= "application/json";
     }
 
-    return this.cacheKeyFor(url, augmentedRequest as never);
+    return augmentedRequest;
+  }
+
+  #determineRequestBodyType(body: unknown) {
+    if (!body) {
+      return;
+    }
+
+    if (body instanceof URLSearchParams) {
+      return "url-search-params";
+    }
+
+    if (typeof body === "object") {
+      return "json";
+    }
+
+    throw new Error("Unable to determine the request body type.");
   }
 
   override async fetch<TResult>(
     path: string,
     incomingRequest?: DataSourceRequest,
   ): Promise<DataSourceFetchResult<TResult>> {
-    const cacheKey = await this.#getCacheKey(path, incomingRequest);
+    const augmentedRequest = await this.#createAugmentedRequest(
+      path,
+      incomingRequest,
+    );
+
+    const url = await this.resolveURL(path, augmentedRequest);
+
+    const cacheKey = this.cacheKeyFor(url, augmentedRequest as never);
+
     const isCached = Boolean(
       await this.#keyv.get(`${this.#keyvPrefix}${cacheKey}`),
     );
 
     if (isCached) {
       // If we have a cached response, bypass the message queue and fetch directly
-      return await super.fetch(path, incomingRequest);
+      return await super.fetch(path, augmentedRequest);
     }
 
     // Redis keys use colons as a separator, so they need to be stripped out before insertion
-    const sanitisedJobId = cacheKey.replaceAll(":", "[COLON]");
+    // const sanitisedJobId = cacheKey.replaceAll(":", "[COLON]");
+
+    const bodyType = this.#determineRequestBodyType(augmentedRequest.body);
+
+    if (bodyType === "url-search-params") {
+      augmentedRequest.body = urlSearchParamsCodec.encode(
+        augmentedRequest.body as URLSearchParams,
+      );
+    }
 
     const job = await this.#queue.add(
       cacheKey,
-      { path, incomingRequest },
-      { jobId: sanitisedJobId },
+      {
+        path,
+        incomingRequest: augmentedRequest,
+        bodyType,
+      },
+      // { jobId: sanitisedJobId },
     );
 
     const result = await job.waitUntilFinished(this.#queueEvents, 60000);
 
     this.logger.http(
-      `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${path}`,
+      `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url}`,
     );
 
     return {
@@ -245,18 +328,17 @@ export abstract class BaseDataSource extends RESTDataSource {
     };
   }
 
-  override async throwIfResponseIsError({
-    response,
-    url,
-  }: {
+  override async throwIfResponseIsError(options: {
     url: URL;
     request: RequestOptions;
     response: DataSourceFetchResult<unknown>["response"];
     parsedBody: unknown;
   }) {
-    if (response.ok) {
+    if (options.response.ok) {
       return;
     }
+
+    const { response, url } = options;
 
     if (response.status === 429) {
       const waitMs = this.#parseRetryAfterHeader(

@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@repo/plugin-listrr": "workspace:^",
+    "@repo/plugin-realdebrid": "workspace:^",
     "@repo/plugin-tmdb": "workspace:^",
     "@repo/plugin-torrentio": "workspace:^"
   },

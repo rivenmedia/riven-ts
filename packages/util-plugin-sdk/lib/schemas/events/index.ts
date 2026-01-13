@@ -25,6 +25,22 @@ import {
   MediaItemCreationSuccessEventHandler,
 } from "./media-item.creation.success.event.ts";
 import {
+  MediaItemDownloadRequestedEvent,
+  MediaItemDownloadRequestedEventHandler,
+} from "./media-item.download-requested.event.ts";
+import {
+  MediaItemDownloadErrorEvent,
+  MediaItemDownloadErrorEventHandler,
+} from "./media-item.download.error.event.ts";
+import {
+  MediaItemDownloadErrorIncorrectStateEvent,
+  MediaItemDownloadErrorIncorrectStateEventHandler,
+} from "./media-item.download.incorrect-state.event.ts";
+import {
+  MediaItemDownloadSuccessEvent,
+  MediaItemDownloadSuccessEventHandler,
+} from "./media-item.download.success.event.ts";
+import {
   MediaItemIndexErrorEvent,
   MediaItemIndexErrorEventHandler,
 } from "./media-item.index.error.event.ts";
@@ -72,6 +88,10 @@ export const RivenEvent = z.discriminatedUnion("type", [
   MediaItemScrapeSuccessEvent,
   MediaItemScrapeErrorIncorrectStateEvent,
   MediaItemScrapeErrorEvent,
+  MediaItemDownloadRequestedEvent,
+  MediaItemDownloadErrorIncorrectStateEvent,
+  MediaItemDownloadErrorEvent,
+  MediaItemDownloadSuccessEvent,
 ]);
 
 export type RivenEvent = z.infer<typeof RivenEvent>;
@@ -103,4 +123,11 @@ export const RivenEventHandler = {
   "riven.media-item.scrape.error.incorrect-state":
     MediaItemScrapeErrorIncorrectStateEventHandler,
   "riven.media-item.scrape.success": MediaItemScrapeSuccessEventHandler,
+
+  // Item downloading
+  "riven.media-item.download.requested": MediaItemDownloadRequestedEventHandler,
+  "riven.media-item.download.error": MediaItemDownloadErrorEventHandler,
+  "riven.media-item.download.error.incorrect-state":
+    MediaItemDownloadErrorIncorrectStateEventHandler,
+  "riven.media-item.download.success": MediaItemDownloadSuccessEventHandler,
 } as const satisfies Record<RivenEvent["type"], z.ZodFunction>;
