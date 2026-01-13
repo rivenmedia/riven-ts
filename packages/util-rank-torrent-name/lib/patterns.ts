@@ -97,24 +97,25 @@ const translationTable: Record<string, string | null> = {
   "?": null,
   ",": null,
   ".": " ",
-  ":": null,
+  ":": " ",
   ";": null,
   "'": null,
   "&": "and",
   _: " ",
+  "%": " ",
 };
 
 /**
  * Normalize the title to remove special characters and accents.
+ * Preserves non-Latin characters (Cyrillic, Chinese, Japanese, etc.)
  */
 export function normalizeTitle(rawTitle: string, lower = true): string {
-  let result = lower ? rawTitle.toLowerCase() : rawTitle;
-
   // Normalize unicode characters to their closest ASCII equivalent
-  result = result.normalize("NFKC");
+  const result = (lower ? rawTitle.toLowerCase() : rawTitle).normalize("NFKC");
 
-  // Apply specific translations
+  // Apply specific translations for Latin characters
   let translated = "";
+
   for (const char of result) {
     if (char in translationTable) {
       const replacement = translationTable[char];
@@ -127,8 +128,9 @@ export function normalizeTitle(rawTitle: string, lower = true): string {
     }
   }
 
-  // Remove punctuation - keep only alphanumeric and spaces
-  const cleaned = translated.replace(/[^a-zA-Z0-9\s]/g, "");
+  // Remove punctuation but keep alphanumeric, spaces, and non-Latin characters
+  // This regex keeps: letters (including non-Latin), numbers, and spaces
+  const cleaned = translated.replace(/[^\p{L}\p{N}\s]/gu, "");
 
   // Collapse multiple spaces into one
   return cleaned.replace(/\s+/g, " ").trim();

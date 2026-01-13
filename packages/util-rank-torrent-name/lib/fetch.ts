@@ -84,47 +84,80 @@ export function checkFetch(
   if (speedMode) {
     // Fail as soon as possible
     if (trashHandler(data, settings, failedKeys)) {
-      return { fetch: false, failedKeys: Array.from(failedKeys) };
+      return {
+        fetch: false,
+        failedKeys: Array.from(failedKeys),
+      };
     }
 
     if (adultHandler(data, settings, failedKeys)) {
-      return { fetch: false, failedKeys: Array.from(failedKeys) };
+      return {
+        fetch: false,
+        failedKeys: Array.from(failedKeys),
+      };
     }
 
     if (checkRequired(data, settings)) {
-      return { fetch: true, failedKeys: Array.from(failedKeys) };
+      return {
+        fetch: true,
+        failedKeys: Array.from(failedKeys),
+      };
     }
 
     if (checkExclude(data, settings, failedKeys)) {
-      return { fetch: false, failedKeys: Array.from(failedKeys) };
+      return {
+        fetch: false,
+        failedKeys: Array.from(failedKeys),
+      };
     }
 
     if (languageHandler(data, settings, failedKeys)) {
-      return { fetch: false, failedKeys: Array.from(failedKeys) };
+      return {
+        fetch: false,
+        failedKeys: Array.from(failedKeys),
+      };
     }
 
     if (fetchResolution(data, settings, failedKeys)) {
-      return { fetch: false, failedKeys: Array.from(failedKeys) };
+      return {
+        fetch: false,
+        failedKeys: Array.from(failedKeys),
+      };
     }
 
     if (fetchQuality(data, settings, failedKeys)) {
-      return { fetch: false, failedKeys: Array.from(failedKeys) };
+      return {
+        fetch: false,
+        failedKeys: Array.from(failedKeys),
+      };
     }
 
     if (fetchAudio(data, settings, failedKeys)) {
-      return { fetch: false, failedKeys: Array.from(failedKeys) };
+      return {
+        fetch: false,
+        failedKeys: Array.from(failedKeys),
+      };
     }
 
     if (fetchHdr(data, settings, failedKeys)) {
-      return { fetch: false, failedKeys: Array.from(failedKeys) };
+      return {
+        fetch: false,
+        failedKeys: Array.from(failedKeys),
+      };
     }
 
     if (fetchCodec(data, settings, failedKeys)) {
-      return { fetch: false, failedKeys: Array.from(failedKeys) };
+      return {
+        fetch: false,
+        failedKeys: Array.from(failedKeys),
+      };
     }
 
     if (fetchOther(data, settings, failedKeys)) {
-      return { fetch: false, failedKeys: Array.from(failedKeys) };
+      return {
+        fetch: false,
+        failedKeys: Array.from(failedKeys),
+      };
     }
   } else {
     // Gather all failed keys for more information
@@ -142,16 +175,22 @@ export function checkFetch(
   }
 
   if (failedKeys.size > 0) {
-    return { fetch: false, failedKeys: Array.from(failedKeys) };
+    return {
+      fetch: false,
+      failedKeys: Array.from(failedKeys),
+    };
   }
 
-  return { fetch: true, failedKeys: [] };
+  return {
+    fetch: true,
+    failedKeys: [],
+  };
 }
 
 /**
  * Check if the title is trash based on user settings.
  */
-function trashHandler(
+export function trashHandler(
   data: ParsedData,
   settings: SettingsModel,
   failedKeys: Set<string>,
@@ -184,7 +223,7 @@ function trashHandler(
 /**
  * Check if the title is adult based on user settings.
  */
-function adultHandler(
+export function adultHandler(
   data: ParsedData,
   settings: SettingsModel,
   failedKeys: Set<string>,
@@ -201,7 +240,7 @@ function adultHandler(
 /**
  * Check if the languages are excluded based on user settings.
  */
-function languageHandler(
+export function languageHandler(
   data: ParsedData,
   settings: SettingsModel,
   failedKeys: Set<string>,
@@ -250,7 +289,7 @@ function languageHandler(
 /**
  * Populate the languages based on user settings.
  */
-function populateLangs(settings: SettingsModel): void {
+export function populateLangs(settings: SettingsModel): void {
   const excludeLangs = new Set(settings.languages.exclude);
   const requiredLangs = new Set(settings.languages.required);
 
@@ -278,24 +317,23 @@ function populateLangs(settings: SettingsModel): void {
 /**
  * Check if the title meets the required patterns.
  */
-function checkRequired(data: ParsedData, settings: SettingsModel): boolean {
-  if (settings.require.length > 0) {
-    return settings.require.some((pattern) => {
-      if (pattern instanceof RegExp) {
-        return pattern.test(data.rawTitle);
-      }
+export function checkRequired(
+  data: ParsedData,
+  settings: SettingsModel,
+): boolean {
+  return settings.require.some((pattern) => {
+    if (pattern instanceof RegExp) {
+      return pattern.test(data.rawTitle);
+    }
 
-      return new RegExp(pattern, "i").test(data.rawTitle);
-    });
-  }
-
-  return false;
+    return new RegExp(pattern, "i").test(data.rawTitle);
+  });
 }
 
 /**
  * Check if the title contains excluded patterns.
  */
-function checkExclude(
+export function checkExclude(
   data: ParsedData,
   settings: SettingsModel,
   failedKeys: Set<string>,
@@ -319,7 +357,7 @@ function checkExclude(
 /**
  * Check if the quality is fetchable based on user settings.
  */
-function fetchQuality(
+export function fetchQuality(
   data: ParsedData,
   settings: SettingsModel,
   failedKeys: Set<string>,
@@ -380,7 +418,7 @@ function fetchQuality(
 /**
  * Check if the resolution is fetchable based on user settings.
  */
-function fetchResolution(
+export function fetchResolution(
   data: ParsedData,
   settings: SettingsModel,
   failedKeys: Set<string>,
@@ -388,6 +426,7 @@ function fetchResolution(
   if (!data.resolution || data.resolution === "unknown") {
     if (!settings.resolutions.unknown) {
       failedKeys.add("resolution_unknown");
+
       return true;
     }
 
@@ -420,7 +459,7 @@ function fetchResolution(
 /**
  * Check if the codec is fetchable based on user settings.
  */
-function fetchCodec(
+export function fetchCodec(
   data: ParsedData,
   settings: SettingsModel,
   failedKeys: Set<string>,
@@ -445,25 +484,19 @@ function fetchCodec(
 
   const mappedCodec = codecMap[codec];
 
-  if (
-    mappedCodec &&
-    Object.keys(settings.customRanks.quality[mappedCodec]).length > 0
-  ) {
-    const codecRank = settings.customRanks.quality[mappedCodec];
+  if (mappedCodec && !settings.customRanks.quality[mappedCodec].fetch) {
+    failedKeys.add(`codec_${mappedCodec}`);
 
-    if (!codecRank.fetch) {
-      failedKeys.add(`codec_${mappedCodec}`);
-
-      return true;
-    }
+    return true;
   }
+
   return false;
 }
 
 /**
  * Check if the audio is fetchable based on user settings.
  */
-function fetchAudio(
+export function fetchAudio(
   data: ParsedData,
   settings: SettingsModel,
   failedKeys: Set<string>,
@@ -505,13 +538,14 @@ function fetchAudio(
       return true;
     }
   }
+
   return false;
 }
 
 /**
  * Check if the HDR is fetchable based on user settings.
  */
-function fetchHdr(
+export function fetchHdr(
   data: ParsedData,
   settings: SettingsModel,
   failedKeys: Set<string>,
@@ -532,16 +566,18 @@ function fetchHdr(
 
     if (key && !settings.customRanks.hdr[key].fetch) {
       failedKeys.add(`hdr_${key}`);
+
       return true;
     }
   }
+
   return false;
 }
 
 /**
  * Check if the other data is fetchable based on user settings.
  */
-function fetchOther(
+export function fetchOther(
   data: ParsedData,
   settings: SettingsModel,
   failedKeys: Set<string>,

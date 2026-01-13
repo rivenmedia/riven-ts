@@ -81,106 +81,106 @@ export function calculateQualityRank(
   const quality = data.quality;
   const customRanks = settings.customRanks;
 
-  switch (quality.toLowerCase()) {
+  switch (quality) {
     // Quality
-    case "web":
+    case "WEB":
       return customRanks.quality.web.useCustomRank
         ? customRanks.quality.web.rank
         : rankModel.web;
-    case "web-dl":
+    case "WEB-DL":
       return customRanks.quality.webdl.useCustomRank
         ? customRanks.quality.webdl.rank
         : rankModel.webdl;
-    case "bluray":
+    case "BluRay":
       return customRanks.quality.bluray.useCustomRank
         ? customRanks.quality.bluray.rank
         : rankModel.bluray;
-    case "hdtv":
+    case "HDTV":
       return customRanks.quality.hdtv.useCustomRank
         ? customRanks.quality.hdtv.rank
         : rankModel.hdtv;
-    case "vhs":
+    case "VHS":
       return customRanks.quality.vhs.useCustomRank
         ? customRanks.quality.vhs.rank
         : rankModel.vhs;
-    case "webmux":
+    case "WEBMux":
       return customRanks.quality.webmux.useCustomRank
         ? customRanks.quality.webmux.rank
         : rankModel.webmux;
-    case "bluray remux":
-    case "remux":
+    case "BluRay REMUX":
+    case "REMUX":
       return customRanks.quality.remux.useCustomRank
         ? customRanks.quality.remux.rank
         : rankModel.remux;
 
     // Rips
-    case "webrip":
+    case "WEBRip":
       return customRanks.rips.webrip.useCustomRank
         ? customRanks.rips.webrip.rank
         : rankModel.webrip;
-    case "web-dlrip":
+    case "WEB-DLRip":
       return customRanks.rips.webdlrip.useCustomRank
         ? customRanks.rips.webdlrip.rank
         : rankModel.webdlrip;
-    case "uhdrip":
+    case "UHDRip":
       return customRanks.rips.uhdrip.useCustomRank
         ? customRanks.rips.uhdrip.rank
         : rankModel.uhdrip;
-    case "hdrip":
+    case "HDRip":
       return customRanks.rips.hdrip.useCustomRank
         ? customRanks.rips.hdrip.rank
         : rankModel.hdrip;
-    case "dvdrip":
+    case "DVDRip":
       return customRanks.rips.dvdrip.useCustomRank
         ? customRanks.rips.dvdrip.rank
         : rankModel.dvdrip;
-    case "bdrip":
+    case "BDRip":
       return customRanks.rips.bdrip.useCustomRank
         ? customRanks.rips.bdrip.rank
         : rankModel.bdrip;
-    case "brrip":
+    case "BRRip":
       return customRanks.rips.brrip.useCustomRank
         ? customRanks.rips.brrip.rank
         : rankModel.brrip;
-    case "vhsrip":
+    case "VHSRip":
       return customRanks.rips.vhsrip.useCustomRank
         ? customRanks.rips.vhsrip.rank
         : rankModel.vhsrip;
-    case "ppvrip":
+    case "PPVRip":
       return customRanks.rips.ppvrip.useCustomRank
         ? customRanks.rips.ppvrip.rank
         : rankModel.ppvrip;
-    case "satrip":
+    case "SATRip":
       return customRanks.rips.satrip.useCustomRank
         ? customRanks.rips.satrip.rank
         : rankModel.satrip;
-    case "tvrip":
+    case "TVRip":
       return customRanks.rips.tvrip.useCustomRank
         ? customRanks.rips.tvrip.rank
         : rankModel.tvrip;
 
     // Trash
-    case "telecine":
+    case "TeleCine":
       return customRanks.trash.telecine.useCustomRank
         ? customRanks.trash.telecine.rank
         : rankModel.telecine;
-    case "telesync":
+    case "TeleSync":
       return customRanks.trash.telesync.useCustomRank
         ? customRanks.trash.telesync.rank
         : rankModel.telesync;
-    case "scr":
+    case "SCR":
       return customRanks.trash.screener.useCustomRank
         ? customRanks.trash.screener.rank
         : rankModel.screener;
-    case "r5":
+    case "R5":
       return customRanks.trash.r5.useCustomRank
         ? customRanks.trash.r5.rank
         : rankModel.r5;
-    case "cam":
+    case "CAM":
       return customRanks.trash.cam.useCustomRank
         ? customRanks.trash.cam.rank
         : rankModel.cam;
-    case "pdtv":
+    case "PDTV":
       return customRanks.trash.pdtv.useCustomRank
         ? customRanks.trash.pdtv.rank
         : rankModel.pdtv;
@@ -252,23 +252,23 @@ export function calculateHdrRank(
   const customRanks = settings.customRanks;
 
   for (const hdr of data.hdr) {
-    switch (hdr.toLowerCase()) {
-      case "dv":
+    switch (hdr) {
+      case "DV":
         totalRank += customRanks.hdr.dolbyVision.useCustomRank
           ? customRanks.hdr.dolbyVision.rank
           : rankModel.dolbyVision;
         break;
-      case "hdr":
+      case "HDR":
         totalRank += customRanks.hdr.hdr.useCustomRank
           ? customRanks.hdr.hdr.rank
           : rankModel.hdr;
         break;
-      case "hdr10+":
+      case "HDR10+":
         totalRank += customRanks.hdr.hdr10plus.useCustomRank
           ? customRanks.hdr.hdr10plus.rank
           : rankModel.hdr10plus;
         break;
-      case "sdr":
+      case "SDR":
         totalRank += customRanks.hdr.sdr.useCustomRank
           ? customRanks.hdr.sdr.rank
           : rankModel.sdr;
@@ -302,53 +302,53 @@ export function calculateAudioRank(
   const customRanks = settings.customRanks;
 
   for (const audioFormat of data.audio) {
-    switch (audioFormat.toLowerCase()) {
-      case "aac":
+    switch (audioFormat) {
+      case "AAC":
         totalRank += customRanks.audio.aac.useCustomRank
           ? customRanks.audio.aac.rank
           : rankModel.aac;
         break;
-      case "atmos":
+      case "Atmos":
         totalRank += customRanks.audio.atmos.useCustomRank
           ? customRanks.audio.atmos.rank
           : rankModel.atmos;
         break;
-      case "dolby digital":
+      case "Dolby Digital":
         totalRank += customRanks.audio.dolbyDigital.useCustomRank
           ? customRanks.audio.dolbyDigital.rank
           : rankModel.dolbyDigital;
         break;
-      case "dolby digital plus":
+      case "Dolby Digital Plus":
         totalRank += customRanks.audio.dolbyDigitalPlus.useCustomRank
           ? customRanks.audio.dolbyDigitalPlus.rank
           : rankModel.dolbyDigitalPlus;
         break;
-      case "dts lossy":
+      case "DTS Lossy":
         totalRank += customRanks.audio.dtsLossy.useCustomRank
           ? customRanks.audio.dtsLossy.rank
           : rankModel.dtsLossy;
         break;
-      case "dts lossless":
+      case "DTS Lossless":
         totalRank += customRanks.audio.dtsLossless.useCustomRank
           ? customRanks.audio.dtsLossless.rank
           : rankModel.dtsLossless;
         break;
-      case "flac":
+      case "FLAC":
         totalRank += customRanks.audio.flac.useCustomRank
           ? customRanks.audio.flac.rank
           : rankModel.flac;
         break;
-      case "mp3":
+      case "MP3":
         totalRank += customRanks.audio.mp3.useCustomRank
           ? customRanks.audio.mp3.rank
           : rankModel.mp3;
         break;
-      case "truehd":
+      case "TrueHD":
         totalRank += customRanks.audio.truehd.useCustomRank
           ? customRanks.audio.truehd.rank
           : rankModel.truehd;
         break;
-      case "hq clean audio":
+      case "HQ Clean Audio":
         totalRank += customRanks.trash.cleanAudio.useCustomRank
           ? customRanks.trash.cleanAudio.rank
           : rankModel.cleanAudio;
@@ -407,6 +407,9 @@ export function calculateExtraRanks(
   settings: SettingsModel,
   rankModel: BaseRankingModel,
 ): number {
+  // Early return check - matches Python behavior
+  // Note: This means extras like site, dubbed, etc. are only calculated if
+  // at least one of bitDepth, hdr, seasons, or episodes is present
   if (
     !data.bitDepth &&
     data.hdr.length === 0 &&
@@ -417,7 +420,6 @@ export function calculateExtraRanks(
   }
 
   let totalRank = 0;
-
   const customRanks = settings.customRanks;
 
   if (data.is3d) {
@@ -425,91 +427,76 @@ export function calculateExtraRanks(
       ? customRanks.extras.three_d.rank
       : rankModel.three_d;
   }
-
   if (data.converted) {
     totalRank += customRanks.extras.converted.useCustomRank
       ? customRanks.extras.converted.rank
       : rankModel.converted;
   }
-
   if (data.documentary) {
     totalRank += customRanks.extras.documentary.useCustomRank
       ? customRanks.extras.documentary.rank
       : rankModel.documentary;
   }
-
   if (data.dubbed) {
     totalRank += customRanks.extras.dubbed.useCustomRank
       ? customRanks.extras.dubbed.rank
       : rankModel.dubbed;
   }
-
   if (data.edition) {
     totalRank += customRanks.extras.edition.useCustomRank
       ? customRanks.extras.edition.rank
       : rankModel.edition;
   }
-
   if (data.hardcoded) {
     totalRank += customRanks.extras.hardcoded.useCustomRank
       ? customRanks.extras.hardcoded.rank
       : rankModel.hardcoded;
   }
-
   if (data.network) {
     totalRank += customRanks.extras.network.useCustomRank
       ? customRanks.extras.network.rank
       : rankModel.network;
   }
-
   if (data.proper) {
     totalRank += customRanks.extras.proper.useCustomRank
       ? customRanks.extras.proper.rank
       : rankModel.proper;
   }
-
   if (data.repack) {
     totalRank += customRanks.extras.repack.useCustomRank
       ? customRanks.extras.repack.rank
       : rankModel.repack;
   }
-
   if (data.retail) {
     totalRank += customRanks.extras.retail.useCustomRank
       ? customRanks.extras.retail.rank
       : rankModel.retail;
   }
-
   if (data.subbed) {
     totalRank += customRanks.extras.subbed.useCustomRank
       ? customRanks.extras.subbed.rank
       : rankModel.subbed;
   }
-
   if (data.upscaled) {
     totalRank += customRanks.extras.upscaled.useCustomRank
       ? customRanks.extras.upscaled.rank
       : rankModel.upscaled;
   }
-
   if (data.site) {
     totalRank += customRanks.extras.site.useCustomRank
       ? customRanks.extras.site.rank
       : rankModel.site;
   }
-
   if (data.size) {
     totalRank += customRanks.trash.size.useCustomRank
       ? customRanks.trash.size.rank
       : rankModel.size;
   }
-
   if (data.scene) {
     totalRank += customRanks.extras.scene.useCustomRank
       ? customRanks.extras.scene.rank
       : rankModel.scene;
   }
-
   if (data.uncensored) {
     totalRank += customRanks.extras.uncensored.useCustomRank
       ? customRanks.extras.uncensored.rank

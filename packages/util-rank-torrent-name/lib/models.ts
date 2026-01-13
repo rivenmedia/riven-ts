@@ -72,7 +72,6 @@ export function getParsedDataType(data: ParsedData): "movie" | "show" {
   if (data.seasons.length === 0 && data.episodes.length === 0) {
     return "movie";
   }
-
   return "show";
 }
 
@@ -463,12 +462,10 @@ export function compileSettingsPatterns(
     if (pattern instanceof RegExp) {
       return pattern;
     }
-
     // Case-sensitive if enclosed in /
     if (pattern.startsWith("/") && pattern.endsWith("/")) {
       return new RegExp(pattern.slice(1, -1));
     }
-
     // Case-insensitive by default
     return new RegExp(pattern, "i");
   };
@@ -510,7 +507,7 @@ export const TorrentSchema = z.object({
   data: ParsedDataSchema,
   fetch: z.boolean().default(false),
   rank: z.int().default(0),
-  levRatio: z.number().default(0.0),
+  levRatio: z.number().min(0).max(1).default(0),
 });
 
 export type Torrent = z.infer<typeof TorrentSchema>;
@@ -518,17 +515,6 @@ export type Torrent = z.infer<typeof TorrentSchema>;
 /**
  * Create a Torrent instance.
  */
-export function createTorrent(input: {
-  infohash: string;
-  rawTitle: string;
-  data: ParsedData;
-  fetch?: boolean;
-  rank?: number;
-  levRatio?: number;
-  torrent?: string | null;
-  seeders?: number;
-  leechers?: number;
-  trackers?: string[];
-}): Torrent {
+export function createTorrent(input: z.input<typeof TorrentSchema>): Torrent {
   return TorrentSchema.parse(input);
 }

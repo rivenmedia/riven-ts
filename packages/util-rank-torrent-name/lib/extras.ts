@@ -142,6 +142,10 @@ export function getLevRatio(
     return [...acc, ratio];
   }, []);
 
+  if (ratios.length === 0) {
+    return 0;
+  }
+
   return Math.max(...ratios);
 }
 
@@ -160,21 +164,19 @@ export function sortTorrents(
 ): Map<string, Torrent> {
   // Filter by resolutions if specified
   const filtered =
-    resolutions.length > 0
-      ? Array.from(torrents).filter((t) =>
+    resolutions.length === 0
+      ? Array.from(torrents)
+      : Array.from(torrents).filter((t) =>
           resolutions.includes(getResolution(t)),
-        )
-      : Array.from(torrents);
+        );
 
   // Sort by resolution (descending) then by rank (descending)
   const sorted = filtered.sort((a, b) => {
     const resA = getResolution(a);
     const resB = getResolution(b);
-
     if (resA !== resB) {
       return resB - resA; // Higher resolution first
     }
-
     return b.rank - a.rank; // Higher rank first
   });
 
@@ -240,9 +242,108 @@ export function extractEpisodes(rawTitle: string): number[] {
     throw new TypeError("The input title must be a non-empty string.");
   }
 
-  const parsed = ptt.parse(rawTitle);
+  const episodes: number[] = [];
 
-  return parsed.episode !== undefined ? [parsed.episode] : [];
+  let match;
+
+  // Multiple episodes: E01E02E03 (check first)
+  const multiPattern =
+    /\bE(\d{1,3})E(\d{1,3})(?:E(\d{1,3}))?(?:E(\d{1,3}))?\b/gi;
+
+  while ((match = multiPattern.exec(rawTitle)) !== null) {
+    for (let i = 1; i < match.length; i++) {
+      const matchedEpisode = match[i];
+
+      if (matchedEpisode) {
+        const ep = parseInt(matchedEpisode, 10);
+
+        if (ep > 0 && ep <= 9999 && !episodes.includes(ep)) {
+          episodes.push(ep);
+        }
+      }
+    }
+  }
+
+  // Range pattern with explicit E: E01-E05
+  const explicitRangePattern = /\bE(\d{1,3})\s*[-–—]\s*E(\d{1,3})\b/gi;
+
+  while ((match = explicitRangePattern.exec(rawTitle)) !== null) {
+    const start = parseInt(match[1] ?? "", 10);
+    const end = parseInt(match[2] ?? "", 10);
+
+    if (start > 0 && end >= start && end <= 9999) {
+      for (let i = start; i <= end; i++) {
+        if (!episodes.includes(i)) {
+          episodes.push(i);
+        }
+      }
+    }
+  }
+
+  // Range pattern without E: E01-05 (only if reasonable range)
+  const implicitRangePattern = /\bE(\d{1,3})\s*[-–—]\s*(\d{1,3})\b/gi;
+  while ((match = implicitRangePattern.exec(rawTitle)) !== null) {
+    if (/\bE\d{1,3}\s*[-–—]\s*E\d{1,3}\b/i.test(match[0])) {
+      continue;
+    }
+
+    const start = parseInt(match[1] ?? "", 10);
+    const end = parseInt(match[2] ?? "", 10);
+
+    if (start > 0 && end >= start && end - start <= 50 && end <= 9999) {
+      for (let i = start; i <= end; i++) {
+        if (!episodes.includes(i)) {
+          episodes.push(i);
+        }
+      }
+    }
+  }
+
+  // Standard episode patterns: E01
+  const ePattern = /\bE(\d{1,3})(?![E\d])\b/gi;
+
+  while ((match = ePattern.exec(rawTitle)) !== null) {
+    const ep = parseInt(match[1] ?? "", 10);
+
+    if (ep > 0 && ep <= 9999 && !episodes.includes(ep)) {
+      episodes.push(ep);
+    }
+  }
+
+  // 6x05 style (season x episode)
+  const altPattern = /\b\d{1,2}x(\d{1,3})\b/gi;
+
+  while ((match = altPattern.exec(rawTitle)) !== null) {
+    const ep = parseInt(match[1] ?? "", 10);
+
+    if (ep > 0 && ep <= 9999 && !episodes.includes(ep)) {
+      episodes.push(ep);
+    }
+  }
+
+  // Anime-style: - 087 - (episode number between dashes)
+  const animePattern = /\s-\s(\d{2,4})\s-\s/g;
+
+  while ((match = animePattern.exec(rawTitle)) !== null) {
+    const ep = parseInt(match[1] ?? "", 10);
+
+    if (ep > 0 && ep <= 9999 && !episodes.includes(ep)) {
+      episodes.push(ep);
+    }
+  }
+
+  // Mini-series style: 2Of4
+  const miniPattern = /\b(\d{1,2})Of\d{1,2}\b/gi;
+
+  while ((match = miniPattern.exec(rawTitle)) !== null) {
+    const ep = parseInt(match[1] ?? "", 10);
+
+    if (ep > 0 && ep <= 999 && !episodes.includes(ep)) {
+      episodes.push(ep);
+    }
+  }
+
+  return episodes.sort((a, b) => a - b);
 }
 
 /**
@@ -275,5 +376,6 @@ export function episodesFromSeason(
   if (seasons.includes(seasonNum)) {
     return episodes;
   }
+
   return [];
 }
