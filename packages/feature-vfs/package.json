@@ -1,0 +1,39 @@
+{
+  "name": "@repo/feature-vfs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./lib/index.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
+    "lint": "eslint",
+    "lint:fix": "pnpm lint --fix",
+    "proto:generate": "buf generate --clean",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "^2.10.2",
+    "@grpc/grpc-js": "^1.10.9",
+    "@grpc/proto-loader": "^0.7.13",
+    "long": "^5.3.2",
+    "nice-grpc-common": "^2.0.2",
+    "protobufjs": "^8.0.0"
+  },
+  "devDependencies": {
+    "@bufbuild/buf": "^1.63.0",
+    "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-logger": "workspace:^",
+    "@repo/core-util-typescript-config": "workspace:^",
+    "@repo/core-util-vitest-config": "workspace:^",
+    "@types/node": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "eslint": "catalog:",
+    "grpc-tools": "^1.12.4",
+    "msw": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

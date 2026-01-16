@@ -18,5 +18,9 @@
     "**/.hg/store/**": true,
     "**/*.log": true // Exclude log files, this prevents VS Code from crashing when running the program
   },
-  "wallaby.compactStatus": true
+  "wallaby.compactStatus": true,
+  "rust-analyzer.linkedProjects": [
+    "apps/vfs-daemon/Cargo.toml",
+    "packages/feature-vfs/Cargo.toml"
+  ]
 }

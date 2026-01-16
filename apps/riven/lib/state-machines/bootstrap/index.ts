@@ -12,6 +12,7 @@ import {
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { initialiseQueues } from "./actors/initialise-queues.actor.ts";
+import { initialiseVFS } from "./actors/initialise-vfs.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
 import type { ApolloServer } from "@apollo/server";
@@ -46,6 +47,7 @@ export const bootstrapMachine = setup({
     children: {} as {
       startGqlServer: "startGqlServer";
       initialiseDatabaseConnection: "initialiseDatabaseConnection";
+      initialiseVFS: "initialiseVFS";
       pluginRegistrarMachine: "pluginRegistrarMachine";
       initialiseQueues: "initialiseQueues";
     },
@@ -85,6 +87,7 @@ export const bootstrapMachine = setup({
   actors: {
     startGqlServer,
     initialiseDatabaseConnection,
+    initialiseVFS,
     pluginRegistrarMachine,
     initialiseQueues,
   },
@@ -158,6 +161,49 @@ export const bootstrapMachine = setup({
                   type: "log",
                   params: {
                     message: "Database connection bootstrap complete.",
+                  },
+                },
+                type: "final",
+              },
+            },
+          },
+          "Bootstrap VFS": {
+            initial: "Starting",
+            states: {
+              Starting: {
+                entry: {
+                  type: "log",
+                  params: {
+                    message: "Initialising VFS...",
+                  },
+                },
+                invoke: {
+                  id: "initialiseVFS",
+                  src: "initialiseVFS",
+                  onDone: "Complete",
+                  onError: {
+                    target: "#Bootstrap.Errored",
+                    actions: [
+                      {
+                        type: "log",
+                        params: ({ event }) => ({
+                          message: `Failed to initialise VFS during bootstrap. Error: ${(event.error as Error).message}`,
+                          level: "error",
+                        }),
+                      },
+                      {
+                        type: "raiseError",
+                        params: ({ event }) => event.error as Error,
+                      },
+                    ],
+                  },
+                },
+              },
+              Complete: {
+                entry: {
+                  type: "log",
+                  params: {
+                    message: "VFS bootstrap complete.",
                   },
                 },
                 type: "final",

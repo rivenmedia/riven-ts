@@ -1,0 +1,16 @@
+[package]
+name = "riven_vfs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+prost = "0.13"
+tonic = "0.13"
+tokio = { version = "1", features = ["full"] }
+
+[build-dependencies]
+prost-build = "0.13"
+tonic-build = "0.13"
+
+[lib]
+path = "lib/lib.rs"

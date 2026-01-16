@@ -3,7 +3,10 @@
   "extends": ["//"],
   "tasks": {
     "dev": {
-      "passThroughEnv": ["REDIS_URL", "PORT", "GRPC_VFS_*"]
+      "cache": false
+    },
+    "build": {
+      "outputs": ["target"]
     }
   }
 }

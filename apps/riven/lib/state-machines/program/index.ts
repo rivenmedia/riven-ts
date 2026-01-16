@@ -3,6 +3,7 @@ import { type AnyActorRef, assign, setup } from "xstate";
 import { bootstrapMachine } from "../bootstrap/index.ts";
 import { mainRunnerMachine } from "../main-runner/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
+import { shutdownVFS } from "./actors/shutdown-vfs.actor.ts";
 import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 
 import type { PendingRunnerInvocationPlugin } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
@@ -30,6 +31,7 @@ export const rivenMachine = setup({
     children: {} as {
       bootstrapMachine: "bootstrapMachine";
       stopGqlServer: "stopGqlServer";
+      shutdownVFS: "shutdownVFS";
       mainRunnerMachine: "mainRunnerMachine";
     },
   },
@@ -42,6 +44,7 @@ export const rivenMachine = setup({
     bootstrapMachine,
     mainRunnerMachine,
     stopGqlServer,
+    shutdownVFS,
   },
 })
   .extend(withLogAction)
@@ -131,6 +134,37 @@ export const rivenMachine = setup({
                   type: "log",
                   params: {
                     message: "GQL server has been stopped.",
+                  },
+                },
+              },
+            },
+          },
+          "Shutting down VFS": {
+            initial: "Shutting down",
+            states: {
+              "Shutting down": {
+                invoke: {
+                  id: "shutdownVFS",
+                  src: "shutdownVFS",
+                  onDone: "Stopped",
+                  onError: {
+                    target: "Stopped",
+                    actions: {
+                      type: "log",
+                      params: ({ event }) => ({
+                        message: `Error while shutting down VFS: ${(event.error as Error).message}`,
+                        level: "error",
+                      }),
+                    },
+                  },
+                },
+              },
+              Stopped: {
+                type: "final",
+                entry: {
+                  type: "log",
+                  params: {
+                    message: "VFS has been stopped.",
                   },
                 },
               },

@@ -1,0 +1,12 @@
+[
+  {
+    "name": "test.txt",
+    "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    "size": 13264
+  },
+  {
+    "name": "sample.bin",
+    "url": "https://proof.ovh.net/files/1Mb.dat",
+    "size": 1048576
+  }
+]

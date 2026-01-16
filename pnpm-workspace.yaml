@@ -57,6 +57,7 @@ onlyBuiltDependencies:
   - core-js-pure
   - es5-ext
   - esbuild
+  - grpc-tools
   - msgpackr-extract
   - msw
   - protobufjs

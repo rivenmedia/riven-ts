@@ -1,0 +1,7 @@
+{
+  "name": "@repo/vfs-daemon",
+  "scripts": {
+    "build": "cargo build --release",
+    "dev": "cargo run"
+  }
+}

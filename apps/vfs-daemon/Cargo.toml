@@ -1,0 +1,21 @@
+[package]
+name = "vfs-daemon"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fuser = "0.16"
+clap = { version = "4", features = ["derive"] }
+libc = "0.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+log = "0.4"
+env_logger = "0.11"
+reqwest = { version = "0.11", features = ["stream", "json"] }
+riven_vfs = { path = "../../packages/feature-vfs" }
+prost = "0.13"
+tonic = "0.13"
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+bytes = "1"
+async-gen = "0.2.3"

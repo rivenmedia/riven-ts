@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package riven.vfs.v1;
+
+/**
+ * gRPC service for VFS media streaming with server-side streaming support
+ * Shared between Rust daemon and Node.js backend
+ */
+service RivenVFSService {
+  // Stream file data with configurable chunk size
+  // Supports header/footer retrieval and continuous streaming
+  rpc StreamFile(StreamFileRequest) returns (stream StreamFileResponse);
+
+  // Sync files from the database into the VFS
+  rpc SyncFiles(SyncFilesRequest) returns (stream SyncFilesResponse);
+}
+
+/**
+ * Request to stream file data
+ * Can be used for:
+ * - Entire file: offset=0, length=0 (means read to EOF)
+ * - Header: offset=0, length=header_size (e.g., first 1MB)
+ * - Footer: offset=file_size-footer_size, length=footer_size
+ * - Range: offset=X, length=Y (standard Range request)
+ */
+message StreamFileRequest {
+  // URL of the file to stream
+  string url = 1;
+
+  // Byte offset to start reading from
+  uint64 offset = 2;
+
+  // Number of bytes to read (0 = read to EOF)
+  uint64 length = 3;
+
+  // Size of each chunk to send in stream (default: 1MB)
+  // Useful for tuning memory vs network tradeoff
+  uint32 chunk_size = 4;
+
+  // Optional: timeout for the entire stream (seconds)
+  uint32 timeout_seconds = 5;
+}
+
+/**
+ * File data chunk - sent as part of stream
+ * Multiple chunks make up the complete file data
+ */
+message StreamFileResponse {
+  // The actual file bytes for this chunk
+  bytes data = 1;
+
+  // Which chunk number this is (0-indexed)
+  uint32 chunk_number = 2;
+
+  // Total size of the requested range (for progress tracking)
+  uint64 total_size = 3;
+
+  // Whether this is the final chunk
+  bool is_final = 4;
+
+  // Optional: byte offset of this chunk in the file
+  uint64 chunk_offset = 5;
+}
+
+/**
+ * File info for syncing into VFS
+ */
+message SyncFilesFile {
+  uint64 item_id = 1;
+
+  string file_url = 2;
+
+  uint64 file_size = 3;
+
+  string file_name = 4;
+}
+
+/**
+ * Request to sync multiple files into the VFS
+ */
+message SyncFilesRequest {}
+
+/**
+ * Response after syncing files
+ */
+message SyncFilesResponse {
+  // List of file URLs to sync
+  repeated SyncFilesFile files = 1;
+}
+
+/**
+ * Error details - sent if streaming fails
+ * gRPC will automatically convert this to appropriate status codes
+ */
+message ErrorDetail {
+  // Error code (HTTP-like)
+  int32 code = 1;
+
+  // Human-readable error message
+  string message = 2;
+}

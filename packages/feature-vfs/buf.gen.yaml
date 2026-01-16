@@ -1,0 +1,15 @@
+version: v2
+plugins:
+  - remote: buf.build/community/stephenh-ts-proto
+    out: ./lib/__generated__
+    opt:
+      - esModuleInterop=true
+      - importSuffix=.js
+      # - env=node
+      - outputServices=generic-definitions
+      - outputServices=nice-grpc
+      - useExactTypes=false
+      - outputClientImpl=false
+      - exportCommonSymbols=false
+inputs:
+  - directory: proto

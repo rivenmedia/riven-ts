@@ -18,7 +18,7 @@ it('processes the requested item when a "riven-plugin.media-item.requested" even
     .getSnapshot()
     .context.pluginRefs.get(Symbol.for("@repo/plugin-test"));
 
-  vi.spyOn(pluginRunnerRef!, "send");
+  vi.spyOn(pluginRunnerRef, "send");
 
   actor.send({
     type: "riven-plugin.media-item.requested",
@@ -59,7 +59,7 @@ it('sends an conflict event when a "riven-plugin.media-item.requested" event is 
     .getSnapshot()
     .context.pluginRefs.get(Symbol.for("@repo/plugin-test"));
 
-  vi.spyOn(pluginRunnerRef!, "send");
+  vi.spyOn(pluginRunnerRef, "send");
 
   actor.send({
     type: "riven-plugin.media-item.requested",

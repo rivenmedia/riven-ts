@@ -3,11 +3,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": "lib",
-    "outDir": "dist",
-    "exactOptionalPropertyTypes": false
+    "rootDir": "."
   },
   "files": [],
   "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],
-  "exclude": ["lib/**/*.spec.ts"]
+  "exclude": []
 }
