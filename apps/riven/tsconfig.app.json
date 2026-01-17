@@ -4,8 +4,7 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "lib",
-    "outDir": "dist",
-    "exactOptionalPropertyTypes": false
+    "outDir": "dist"
   },
   "files": [],
   "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],

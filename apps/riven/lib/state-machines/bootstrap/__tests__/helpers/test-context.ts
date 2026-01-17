@@ -5,7 +5,7 @@ import { type Actor, createActor, createEmptyActor, fromPromise } from "xstate";
 
 import { type BootstrapMachineInput, bootstrapMachine } from "../../index.ts";
 
-import type { initialiseDatabaseConnection } from "../../actors/initialise-vfs.actor.ts";
+import type { initialiseDatabaseConnection } from "../../actors/initialise-database-connection.actor.ts";
 import type { startGqlServer } from "../../actors/start-gql-server.actor.ts";
 
 export const it = baseIt.extend<{
