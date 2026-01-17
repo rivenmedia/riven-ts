@@ -34,6 +34,7 @@
     "bullmq-otel": "catalog:",
     "class-transformer": "catalog:",
     "class-validator": "catalog:",
+    "fuse-native": "^2.2.6",
     "keyv": "^5.5.5",
     "limiter": "catalog:",
     "lru-cache": "^11.2.4",

@@ -1,5 +1,8 @@
 import { database } from "@repo/core-util-database/connection";
-import { MediaItem } from "@repo/util-plugin-sdk/dto/entities/index";
+import {
+  MediaEntry,
+  MediaItem,
+} from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
@@ -25,6 +28,7 @@ export async function persistDownloadResults({
     },
     relations: {
       streams: true,
+      filesystemEntries: true,
     },
   });
 
@@ -48,10 +52,34 @@ export async function persistDownloadResults({
   existingItem.activeStream = existingItem.streams[0];
   existingItem.state = "Downloaded";
 
+  const mediaEntry = new MediaEntry();
+
+  mediaEntry.fileSize = BigInt(container.files[0]?.fileSize ?? 0);
+  mediaEntry.originalFilename = container.files[0]?.fileName ?? "";
+  mediaEntry.mediaItem = existingItem;
+
   try {
     await validateOrReject(existingItem);
 
-    return await database.manager.save(MediaItem, existingItem);
+    return await database.manager.transaction(
+      async (transactionalEntityManager) => {
+        const savedMediaEntry = await transactionalEntityManager.insert(
+          MediaEntry,
+          mediaEntry,
+        );
+
+        existingItem.filesystemEntries = existingItem.filesystemEntries.concat([
+          savedMediaEntry.generatedMaps[0] as MediaEntry,
+        ]);
+
+        const savedItem = await transactionalEntityManager.save(
+          MediaItem,
+          existingItem,
+        );
+
+        return savedItem;
+      },
+    );
   } catch (error) {
     const parsedError = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

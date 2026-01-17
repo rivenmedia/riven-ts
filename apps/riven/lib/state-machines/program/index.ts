@@ -8,12 +8,14 @@ import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 import type { PendingRunnerInvocationPlugin } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";
+import type Fuse from "fuse-native";
 import type { UUID } from "node:crypto";
 
 export interface RivenMachineContext {
   mainRunnerRef?: AnyActorRef;
   plugins?: Map<symbol, PendingRunnerInvocationPlugin>;
   server?: ApolloServer;
+  vfs?: Fuse;
 }
 
 export interface RivenMachineInput {
@@ -32,11 +34,6 @@ export const rivenMachine = setup({
       stopGqlServer: "stopGqlServer";
       mainRunnerMachine: "mainRunnerMachine";
     },
-  },
-  actions: {
-    storeGqlServerInstance: assign({
-      server: (_, server: ApolloServer) => server,
-    }),
   },
   actors: {
     bootstrapMachine,
@@ -60,6 +57,7 @@ export const rivenMachine = setup({
           onDone: {
             actions: assign(({ spawn, event }) => ({
               server: event.output.server,
+              vfs: event.output.vfs,
               mainRunnerRef: spawn(mainRunnerMachine, {
                 input: {
                   plugins: event.output.plugins,

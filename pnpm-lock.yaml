@@ -222,6 +222,9 @@ importers:
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
+      fuse-native:
+        specifier: ^2.2.6
+        version: 2.2.6
       keyv:
         specifier: ^5.5.5
         version: 5.5.5
@@ -4421,6 +4424,22 @@ packages:
   functions-have-names@1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
 
+  fuse-native@2.2.6:
+    resolution: {integrity: sha512-Y5wXd7vUsWWWIIHbjluv7jKZgPZaSVA5YWaW3I5fXIJfcGWL6IRUgoBUveQAq+D8cG9cCiGNahv9CeToccCXrw==}
+    hasBin: true
+
+  fuse-shared-library-darwin@1.1.3:
+    resolution: {integrity: sha512-4Q8gMxyMl1+gwHGpiYUoKKpi7xq8WcPo0TvJvjZzHMuCiszouu2GgEs6SJAqPB3LjfmEkl6kPV+2Oluczr0Nig==}
+
+  fuse-shared-library-linux-arm@1.0.0:
+    resolution: {integrity: sha512-Dj4ssxo1/MKGvOsVWRblSRu+o5F5OJTrVPDkjSyGDU2yKvVnIzQSwy1deiWA0qCcS/Q8iJMlZaCpCcZWSwvoug==}
+
+  fuse-shared-library-linux@1.0.1:
+    resolution: {integrity: sha512-07MQRSobrBKwW4D7oKm0gM2TwgvZWb+gC08JdiYDG4KBTncxk9ssqEDiDMKll8hpseZufsY2w1yc/feOu2DPmQ==}
+
+  fuse-shared-library@1.1.1:
+    resolution: {integrity: sha512-EfgTo/eS1euZFUe7x8KqyA40hV4DwP7kqp1VNZApu2nlPnJv8SanraBE3VXyX7ff41sxw7M0oWY7re3G3wnZVA==}
+
   gauge@4.0.4:
     resolution: {integrity: sha512-f9m+BEN5jkg6a0fZjleidjN51VE1X+mPFQ2DJ0uv1V39oCLCbsGe6yjbBnp7eK7z/+GAon99a3nHuqbuuthyPg==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
@@ -5426,8 +5445,14 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  nanoresource@1.3.0:
+    resolution: {integrity: sha512-OI5dswqipmlYfyL3k/YMm7mbERlh4Bd1KuKdMHpeoVD1iVxqxaTMKleB4qaA2mbQZ6/zMNSxCXv9M9P/YbqTuQ==}
+
   napi-build-utils@2.0.0:
     resolution: {integrity: sha512-GEbrYkbfF7MoNaoh2iGG84Mnf/WZfB0GdGEsM8wz7Expx/LlWf5U8t9nvJKXSp3qr5IsEbK04cBGhol/KwOsWA==}
+
+  napi-macros@2.2.2:
+    resolution: {integrity: sha512-hmEVtAGYzVQpCKdbQea4skABsdXW4RUh5t5mJ2zzqowJS2OyXZTU1KhDVFhx+NlWZ4ap9mqR9TcDO3LTTttd+g==}
 
   napi-postinstall@0.3.4:
     resolution: {integrity: sha512-PHI5f1O0EP5xJ9gQmFGMS6IZcrVvTjpXjz7Na41gTE7eE2hK11lg04CECCYEEjdc17EV4DO+fkGEtt7TpTaTiQ==}
@@ -5499,6 +5524,10 @@ packages:
 
   node-gyp-build-optional-packages@5.2.2:
     resolution: {integrity: sha512-s+w+rBWnpTMwSFbaE0UXsRlg7hU4FjekKU4eyAih5T8nJuNZT1nNsskXpxmeqSK9UzkBl6UgRlnKc8hz8IEqOw==}
+    hasBin: true
+
+  node-gyp-build@4.8.4:
+    resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}
     hasBin: true
 
   node-gyp@8.4.1:
@@ -10946,6 +10975,25 @@ snapshots:
 
   functions-have-names@1.2.3: {}
 
+  fuse-native@2.2.6:
+    dependencies:
+      fuse-shared-library: 1.1.1
+      nanoresource: 1.3.0
+      napi-macros: 2.2.2
+      node-gyp-build: 4.8.4
+
+  fuse-shared-library-darwin@1.1.3: {}
+
+  fuse-shared-library-linux-arm@1.0.0: {}
+
+  fuse-shared-library-linux@1.0.1: {}
+
+  fuse-shared-library@1.1.1:
+    dependencies:
+      fuse-shared-library-darwin: 1.1.3
+      fuse-shared-library-linux: 1.0.1
+      fuse-shared-library-linux-arm: 1.0.0
+
   gauge@4.0.4:
     dependencies:
       aproba: 2.1.0
@@ -12027,7 +12075,13 @@ snapshots:
 
   nanoid@3.3.11: {}
 
+  nanoresource@1.3.0:
+    dependencies:
+      inherits: 2.0.4
+
   napi-build-utils@2.0.0: {}
+
+  napi-macros@2.2.2: {}
 
   napi-postinstall@0.3.4: {}
 
@@ -12085,6 +12139,8 @@ snapshots:
     dependencies:
       detect-libc: 2.1.2
     optional: true
+
+  node-gyp-build@4.8.4: {}
 
   node-gyp@8.4.1:
     dependencies:

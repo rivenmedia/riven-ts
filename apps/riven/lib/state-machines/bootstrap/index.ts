@@ -12,11 +12,13 @@ import {
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { initialiseQueues } from "./actors/initialise-queues.actor.ts";
+import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
 import type { ApolloServer } from "@apollo/server";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { Queue } from "bullmq";
+import type Fuse from "fuse-native";
 
 export interface BootstrapMachineContext {
   error?: Error;
@@ -26,6 +28,7 @@ export interface BootstrapMachineContext {
   invalidPlugins: Map<symbol, InvalidPlugin>;
   server?: ApolloServer;
   queues: Map<RivenEvent["type"], Queue>;
+  vfs?: Fuse;
 }
 
 export interface BootstrapMachineInput {
@@ -36,6 +39,7 @@ export interface BootstrapMachineOutput {
   server: ApolloServer;
   plugins: Map<symbol, PendingRunnerInvocationPlugin>;
   queues: Map<RivenEvent["type"], Queue>;
+  vfs: Fuse;
 }
 
 export const bootstrapMachine = setup({
@@ -48,11 +52,15 @@ export const bootstrapMachine = setup({
       initialiseDatabaseConnection: "initialiseDatabaseConnection";
       pluginRegistrarMachine: "pluginRegistrarMachine";
       initialiseQueues: "initialiseQueues";
+      initialiseVfs: "initialiseVfs";
     },
   },
   actions: {
     assignGqlServer: assign((_, server: ApolloServer) => ({
       server,
+    })),
+    assignVfs: assign((_, vfs: Fuse) => ({
+      vfs,
     })),
     assignQueues: assign((_, queues: Map<RivenEvent["type"], Queue>) => ({
       queues,
@@ -87,6 +95,7 @@ export const bootstrapMachine = setup({
     initialiseDatabaseConnection,
     pluginRegistrarMachine,
     initialiseQueues,
+    initialiseVfs,
   },
   guards: {
     hasInvalidPlugins: ({ context }) => context.invalidPlugins.size > 0,
@@ -111,10 +120,15 @@ export const bootstrapMachine = setup({
         );
       }
 
+      if (!context.vfs) {
+        throw new Error("Bootstrap machine completed without a VFS instance");
+      }
+
       return {
         plugins: context.validPlugins,
         server: context.server,
         queues: context.queues,
+        vfs: context.vfs,
       };
     },
     states: {
@@ -158,6 +172,58 @@ export const bootstrapMachine = setup({
                   type: "log",
                   params: {
                     message: "Database connection bootstrap complete.",
+                  },
+                },
+                type: "final",
+              },
+            },
+          },
+          "Bootstrap VFS": {
+            initial: "Starting",
+            states: {
+              Starting: {
+                entry: {
+                  type: "log",
+                  params: {
+                    message: "Initialising VFS...",
+                  },
+                },
+                invoke: {
+                  id: "initialiseVfs",
+                  src: "initialiseVfs",
+                  input: {
+                    mountPath: "/mnt/media",
+                  },
+                  onDone: {
+                    target: "Complete",
+                    actions: {
+                      type: "assignVfs",
+                      params: ({ event }) => event.output.vfs,
+                    },
+                  },
+                  onError: {
+                    target: "#Bootstrap.Errored",
+                    actions: [
+                      {
+                        type: "log",
+                        params: ({ event }) => ({
+                          message: `Failed to initialise VFS during bootstrap. Error: ${(event.error as Error).message}`,
+                          level: "error",
+                        }),
+                      },
+                      {
+                        type: "raiseError",
+                        params: ({ event }) => event.error as Error,
+                      },
+                    ],
+                  },
+                },
+              },
+              Complete: {
+                entry: {
+                  type: "log",
+                  params: {
+                    message: "VFS bootstrap complete.",
                   },
                 },
                 type: "final",

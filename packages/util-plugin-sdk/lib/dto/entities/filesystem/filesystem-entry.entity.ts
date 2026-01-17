@@ -25,9 +25,9 @@ export class FileSystemEntry {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Field()
-  @Column({ default: 0 })
-  fileSize!: number;
+  @Field(() => Number)
+  @Column("bigint", { default: 0 })
+  fileSize!: bigint;
 
   @Field()
   @CreateDateColumn()
@@ -36,10 +36,6 @@ export class FileSystemEntry {
   @Field()
   @UpdateDateColumn()
   updatedAt!: Date;
-
-  @Field()
-  @Column()
-  availableInVfs!: boolean;
 
   @Field(() => MediaItem)
   @ManyToOne(() => MediaItem, (item: MediaItem) => item.id)
