@@ -4,12 +4,8 @@ import { FileSystemEntry } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import Fuse from "fuse-native";
 
-import {
-  HIDDEN_PATH,
-  TRASH_PATH,
-  childQueryType,
-  pathSchema,
-} from "../config.ts";
+import { HIDDEN_PATH, TRASH_PATH, childQueryType } from "../config.ts";
+import { pathSchema } from "../schemas/path.ts";
 
 type StatMode = "dir" | "file" | "link" | number;
 

@@ -4,21 +4,20 @@ import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import Fuse from "fuse-native";
 
-import {
-  ROOT_PATH,
-  childQueryType,
-  pathSchema,
-  persistentDirs,
-} from "../config.ts";
+import { ROOT_PATH, childQueryType } from "../config.ts";
+import { pathSchema } from "../schemas/path.ts";
+import { persistentDirectorySchema } from "../schemas/persistent-directory.ts";
 
 export const readDirSync = function (path, callback) {
   async function readdir() {
     if (path === ROOT_PATH) {
-      return persistentDirs.options;
+      return persistentDirectorySchema.options;
     }
 
     const pathInfo = pathSchema.parse(path);
-    const validatePersistentDir = persistentDirs.safeParse(pathInfo.name);
+    const validatePersistentDir = persistentDirectorySchema.safeParse(
+      pathInfo.name,
+    );
 
     if (validatePersistentDir.success) {
       const entries = await database.manager.find(MediaEntry, {
