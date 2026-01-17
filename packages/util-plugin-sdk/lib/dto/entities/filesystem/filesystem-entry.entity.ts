@@ -10,6 +10,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 
+import { BaseEntity } from "../entity.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
 
 @ObjectType()
@@ -20,7 +21,7 @@ import { MediaItem } from "../media-items/media-item.entity.ts";
     name: "type",
   },
 })
-export class FileSystemEntry {
+export class FileSystemEntry extends BaseEntity {
   @Field((_type) => ID)
   @PrimaryGeneratedColumn()
   id!: number;

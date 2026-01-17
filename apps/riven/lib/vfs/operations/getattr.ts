@@ -60,9 +60,9 @@ async function getattr(path: string) {
     case "/movies":
     case "/shows": {
       return stat({
-        mtime: new Date(),
-        atime: new Date(),
-        ctime: new Date(),
+        mtime: new Date().getTime(),
+        atime: new Date().getTime(),
+        ctime: new Date().getTime(),
         mode: "dir",
       });
     }
