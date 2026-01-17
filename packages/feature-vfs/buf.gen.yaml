@@ -5,11 +5,13 @@ plugins:
     opt:
       - esModuleInterop=true
       - importSuffix=.js
-      # - env=node
+      - env=node
       - outputServices=generic-definitions
       - outputServices=nice-grpc
       - useExactTypes=false
       - outputClientImpl=false
       - exportCommonSymbols=false
+      - enumsAsLiterals=true
+      - oneof=unions
 inputs:
   - directory: proto

@@ -11,8 +11,10 @@ service RivenVFSService {
   // Supports header/footer retrieval and continuous streaming
   rpc StreamFile(StreamFileRequest) returns (stream StreamFileResponse);
 
-  // Sync files from the database into the VFS
-  rpc SyncFiles(SyncFilesRequest) returns (stream SyncFilesResponse);
+  // Bidirectional stream for catalog updates
+  // Daemon subscribes to receive hot file updates from server
+  // Server broadcasts file additions/removals/updates in real-time
+  rpc WatchCatalog(stream WatchCatalogRequest) returns (stream WatchCatalogResponse);
 }
 
 /**
@@ -34,7 +36,7 @@ message StreamFileRequest {
   uint64 length = 3;
 
   // Size of each chunk to send in stream (default: 1MB)
-  // Useful for tuning memory vs network tradeoff
+  // Useful for tuning memory vs network trade-off
   uint32 chunk_size = 4;
 
   // Optional: timeout for the entire stream (seconds)
@@ -98,4 +100,85 @@ message ErrorDetail {
 
   // Human-readable error message
   string message = 2;
+}
+
+/**
+ * Catalog management command from daemon to server
+ * Daemon uses this to subscribe/acknowledge catalog updates
+ */
+message WatchCatalogRequest {
+  oneof command {
+    // Subscribe to catalog updates - send on connection
+    // Server responds with all future catalog changes
+    SubscribeCommand subscribe = 1;
+
+    // Acknowledge receipt of a catalog update
+    // Helps server track which updates have been processed
+    AckCommand ack = 2;
+  }
+}
+
+/**
+ * Subscribe command - sent by daemon to initiate catalog watching
+ */
+message SubscribeCommand {
+  // Daemon instance ID (for tracking multiple connections)
+  string daemon_id = 1;
+
+  // Current catalog version (0 = send all files)
+  // Server sends only updates newer than this version
+  uint64 version = 2;
+}
+
+/**
+ * Acknowledgment command - confirms daemon received an update
+ */
+message AckCommand {
+  // The update_id being acknowledged
+  uint64 update_id = 1;
+}
+
+/**
+ * File entry in catalog
+ */
+message FileEntry {
+  // Unique file ID
+  uint64 id = 1;
+
+  // File name as it appears in VFS
+  string name = 2;
+
+  // HTTP URL to stream from
+  string url = 3;
+
+  // File size in bytes
+  uint64 size = 4;
+
+  // MIME type (optional, can be inferred from file extension)
+  string mime_type = 5;
+
+  // Last modified timestamp (Unix seconds)
+  int64 modified_time = 6;
+}
+
+/**
+ * Catalog update - server pushes new/changed/removed files to daemon
+ * Enables hot-loading of files without daemon restart
+ */
+message WatchCatalogResponse {
+  // Unique update ID (for acknowledgment tracking)
+  uint64 update_id = 1;
+
+  // Update type
+  UpdateType type = 2;
+
+  // File being added/updated/removed
+  repeated FileEntry files = 3;
+
+  enum UpdateType {
+    UPDATE_TYPE_UNSPECIFIED = 0;
+    UPDATE_TYPE_ADD = 1;      // New file added to catalog
+    UPDATE_TYPE_REMOVE = 2;   // File removed from catalog
+    UPDATE_TYPE_UPDATE = 3;   // File metadata changed (size, URL, etc)
+  }
 }

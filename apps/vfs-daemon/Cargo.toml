@@ -16,6 +16,8 @@ riven_vfs = { path = "../../packages/feature-vfs" }
 prost = "0.13"
 tonic = "0.13"
 tokio = { version = "1", features = ["full"] }
+tokio-stream = "0.1"
 futures = "0.3"
 bytes = "1"
 async-gen = "0.2.3"
+async-stream = "0.3.6"

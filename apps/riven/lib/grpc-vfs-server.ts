@@ -1,11 +1,23 @@
 import {
+  type FileEntry,
   RivenVFSServiceDefinition,
   type RivenVFSServiceImplementation,
   StreamFileResponse,
-  type SyncFilesResponse,
+  type WatchCatalogRequest,
+  type WatchCatalogResponse,
+  WatchCatalogResponse_UpdateType,
 } from "@repo/feature-vfs";
 
 import { createServer } from "nice-grpc";
+
+// Track connected catalog watchers
+const catalogWatchers = new Map<
+  string,
+  {
+    daemonId: string;
+    response: AsyncIterable<WatchCatalogRequest>;
+  }
+>();
 
 const vfsImpl = {
   async *streamFile(request, context): AsyncIterable<StreamFileResponse> {
@@ -21,29 +33,109 @@ const vfsImpl = {
       totalSize: 43,
     };
   },
-  async *syncFiles(request, context): AsyncIterable<SyncFilesResponse> {
-    console.log("SyncFiles request received:", request, context);
 
-    while (true) {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+  async *watchCatalog(
+    request: AsyncIterable<WatchCatalogRequest>,
+    _context,
+  ): AsyncIterable<WatchCatalogResponse> {
+    const daemonId = "unknown";
 
-      yield {
-        files: [
-          {
-            itemId: 1,
-            fileSize: 1234,
-            fileName: "example1.txt",
-            fileUrl: "http://example.com/example1.txt",
-          },
-          {
-            itemId: 2,
-            fileSize: 1234,
-            fileName: "example2.txt",
-            fileUrl: "http://example.com/example2.txt",
-          },
-        ],
-      };
+    let updateId = 0;
+    let updaterInterval: NodeJS.Timeout | undefined;
+
+    const newItems: FileEntry[] = [];
+    const itemsToDelete: FileEntry[] = [];
+
+    async function listen() {
+      for await (const command of request) {
+        console.log(command);
+
+        switch (command.command?.$case) {
+          case "ack": {
+            console.log(
+              `Daemon ${daemonId} acknowledged update ${command.command.ack.updateId.toString()}`,
+            );
+
+            break;
+          }
+          case "subscribe": {
+            const { daemonId, version } = command.command.subscribe;
+
+            console.log(
+              `Daemon ${daemonId} subscribed to catalog (version ${version.toString()})`,
+            );
+
+            updaterInterval ??= setInterval(() => {
+              const newItemCount = Math.floor(Math.random() * 3);
+
+              newItems.push(
+                ...Array.from({ length: newItemCount }).map(() => {
+                  const fileId = Math.floor(Math.random() * 10000);
+
+                  return {
+                    id: fileId,
+                    mimeType: "application/octet-stream",
+                    name: `file_${fileId.toString()}.txt`,
+                    size: 1024,
+                    url: `http://example.com/file_${fileId.toString()}.txt`,
+                    modifiedTime: Date.now(),
+                  };
+                }),
+              );
+
+              itemsToDelete.push(...newItems);
+
+              console.log(
+                `Added ${newItemCount.toString()} new items to catalog`,
+              );
+            }, 5000);
+
+            // Register this watcher
+            catalogWatchers.set(daemonId, { daemonId, response: request });
+
+            break;
+          }
+        }
+      }
     }
+
+    void listen();
+
+    // Process incoming commands from daemon
+    while (true) {
+      console.log("New items:", newItems);
+      if (!newItems.length && !itemsToDelete.length) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        continue;
+      }
+
+      updateId += 1;
+
+      const rand = Math.random();
+      console.log(rand, itemsToDelete);
+
+      if (rand < 0.4 && itemsToDelete.length) {
+        const files = itemsToDelete.splice(0, itemsToDelete.length);
+
+        yield {
+          files,
+          type: WatchCatalogResponse_UpdateType.UPDATE_TYPE_REMOVE,
+          updateId,
+        };
+      } else {
+        const files = newItems.splice(0, newItems.length);
+
+        yield {
+          files,
+          type: WatchCatalogResponse_UpdateType.UPDATE_TYPE_ADD,
+          updateId,
+        };
+      }
+    }
+
+    console.log(`Daemon ${daemonId} disconnected from catalog watch`);
+
+    catalogWatchers.delete(daemonId);
   },
 } satisfies RivenVFSServiceImplementation;
 
