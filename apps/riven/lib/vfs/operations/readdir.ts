@@ -12,13 +12,11 @@ import {
 } from "../config.ts";
 
 export const readDirSync = function (path, callback) {
-  if (path === ROOT_PATH) {
-    callback(0, persistentDirs.options);
-
-    return;
-  }
-
   async function readdir() {
+    if (path === ROOT_PATH) {
+      return persistentDirs.options;
+    }
+
     const pathInfo = pathSchema.parse(path);
     const validatePersistentDir = persistentDirs.safeParse(pathInfo.name);
 
@@ -42,25 +40,18 @@ export const readDirSync = function (path, callback) {
       });
 
       if (entries.length) {
-        callback(
-          0,
-          entries.reduce<string[]>((acc, entry) => {
-            if (!entry.mediaItem.title) {
-              return acc;
-            }
+        return entries.reduce<string[]>((acc, entry) => {
+          if (!entry.mediaItem.title) {
+            return acc;
+          }
 
-            return [...acc, entry.mediaItem.path];
-          }, []),
-        );
-
-        return;
+          return [...acc, entry.mediaItem.path];
+        }, []);
       }
     }
 
     if (!pathInfo.tmdbId) {
-      callback(0, []);
-
-      return;
+      return [];
     }
 
     const entries = await database.manager.find(MediaEntry, {
@@ -84,18 +75,19 @@ export const readDirSync = function (path, callback) {
     });
 
     if (entries.length) {
-      callback(
-        0,
-        entries.map((entry) => entry.path),
-      );
-
-      return;
+      return entries.map((entry) => entry.path);
     }
 
-    callback(Fuse.ENOENT);
+    throw new Error("No entries found");
   }
 
-  readdir().catch((error: unknown) => {
-    logger.error(`VFS readdir error: ${(error as Error).message}`);
-  });
+  readdir()
+    .then((data) => {
+      callback(0, data);
+    })
+    .catch((error: unknown) => {
+      logger.error(`VFS readdir error: ${(error as Error).message}`);
+
+      callback(Fuse.ENOENT);
+    });
 } satisfies Fuse.Operations["readdir"];

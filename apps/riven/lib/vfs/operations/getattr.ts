@@ -43,72 +43,57 @@ const stat = (st: Omit<Fuse.Stats, "mode"> & { mode: StatMode }) => {
 };
 
 export const getattrSync = function (path, callback) {
-  if (path.toLowerCase().startsWith(TRASH_PATH) || path.endsWith(HIDDEN_PATH)) {
-    callback(0);
+  async function getattr() {
+    if (
+      path.toLowerCase().startsWith(TRASH_PATH) ||
+      path.endsWith(HIDDEN_PATH)
+    ) {
+      return;
+    }
 
-    return;
-  }
-
-  switch (path) {
-    case "/":
-    case "/movies":
-    case "/shows": {
-      callback(
-        0,
-        stat({
+    switch (path) {
+      case "/":
+      case "/movies":
+      case "/shows": {
+        return stat({
           mtime: new Date(),
           atime: new Date(),
           ctime: new Date(),
           size: 0,
           mode: "dir",
-        }),
-      );
-
-      return;
+        });
+      }
     }
+
+    const pathInfo = pathSchema.parse(path);
+    const entityType = childQueryType[pathInfo.type];
+
+    const entry = await database.manager.findOneBy(FileSystemEntry, {
+      mediaItem: {
+        type: entityType,
+      },
+    });
+
+    if (!entry) {
+      throw new Error("Entry not found");
+    }
+
+    return stat({
+      ctime: entry.createdAt.getTime(),
+      atime: entry.updatedAt.getTime(),
+      mtime: entry.updatedAt.getTime(),
+      size: pathInfo.isFile ? Number(entry.fileSize) : 0,
+      mode: pathInfo.isFile ? "file" : "dir",
+    });
   }
 
-  async function getattr() {
-    try {
-      const pathInfo = pathSchema.parse(path);
-      const entityType = childQueryType[pathInfo.type];
-
-      const entry = await database.manager.findOneBy(FileSystemEntry, {
-        mediaItem: {
-          type: entityType,
-        },
-      });
-
-      if (!entry) {
-        callback(Fuse.ENOENT);
-
-        return;
-      }
-
-      callback(
-        0,
-        stat({
-          ctime: entry.createdAt.getTime(),
-          atime: entry.updatedAt.getTime(),
-          mtime: entry.updatedAt.getTime(),
-          size: pathInfo.isFile ? Number(entry.fileSize) : 0,
-          mode: pathInfo.isFile ? "file" : "dir",
-        }),
-      );
-    } catch (error) {
-      logger.error(error);
+  getattr()
+    .then((data) => {
+      callback(0, data);
+    })
+    .catch((error: unknown) => {
+      logger.error(`VFS getattr error: ${(error as Error).message}`);
 
       callback(Fuse.ENOENT);
-
-      return;
-    }
-  }
-
-  getattr().catch((error: unknown) => {
-    logger.error(`VFS getattr error: ${(error as Error).message}`);
-
-    callback(Fuse.ENOENT);
-  });
-
-  return;
+    });
 } satisfies Fuse.Operations["getattr"];
