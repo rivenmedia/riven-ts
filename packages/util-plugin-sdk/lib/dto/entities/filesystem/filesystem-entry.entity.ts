@@ -10,6 +10,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 
+import { BaseEntity } from "../entity.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
 
 @ObjectType()
@@ -20,14 +21,14 @@ import { MediaItem } from "../media-items/media-item.entity.ts";
     name: "type",
   },
 })
-export class FileSystemEntry {
+export class FileSystemEntry extends BaseEntity {
   @Field((_type) => ID)
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Field()
-  @Column({ default: 0 })
-  fileSize!: number;
+  @Field(() => Number)
+  @Column("bigint", { default: 0 })
+  fileSize!: bigint;
 
   @Field()
   @CreateDateColumn()
@@ -36,10 +37,6 @@ export class FileSystemEntry {
   @Field()
   @UpdateDateColumn()
   updatedAt!: Date;
-
-  @Field()
-  @Column()
-  availableInVfs!: boolean;
 
   @Field(() => MediaItem)
   @ManyToOne(() => MediaItem, (item: MediaItem) => item.id)
