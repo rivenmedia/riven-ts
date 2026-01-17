@@ -50,21 +50,7 @@ export const getattrSync = function (path, callback) {
   }
 
   switch (path) {
-    case "/": {
-      callback(
-        0,
-        stat({
-          mtime: new Date(),
-          atime: new Date(),
-          ctime: new Date(),
-          size: 0,
-          mode: "dir",
-          ino: 0,
-        }),
-      );
-
-      return;
-    }
+    case "/":
     case "/movies":
     case "/shows": {
       callback(
@@ -106,7 +92,6 @@ export const getattrSync = function (path, callback) {
           atime: entry.updatedAt.getTime(),
           mtime: entry.updatedAt.getTime(),
           size: pathInfo.isFile ? Number(entry.fileSize) : 0,
-          ino: entry.id,
           mode: pathInfo.isFile ? "file" : "dir",
         }),
       );

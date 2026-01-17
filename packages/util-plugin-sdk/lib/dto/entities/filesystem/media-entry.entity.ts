@@ -1,3 +1,4 @@
+import path from "node:path";
 import { Field, ObjectType } from "type-graphql";
 import { ChildEntity, Column, Index } from "typeorm";
 
@@ -45,4 +46,14 @@ export class MediaEntry extends FileSystemEntry {
   @Field()
   @Column({ default: false })
   isDirectory!: boolean;
+
+  get path() {
+    if (!this.mediaItem.path) {
+      throw new TypeError("MediaEntry is missing associated MediaItem");
+    }
+
+    const extension = path.extname(this.originalFilename);
+
+    return `${this.mediaItem.path}${extension}`;
+  }
 }

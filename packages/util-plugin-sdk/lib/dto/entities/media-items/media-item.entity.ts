@@ -209,4 +209,12 @@ export class MediaItem extends BaseEntity {
   @Field(() => String)
   @Column("simple-enum", { enum: MediaItemType.options })
   type!: MediaItemType;
+
+  get path() {
+    if (!this.title || !this.year || !this.tmdbId) {
+      throw new TypeError("MediaItem is missing title, year, or tmdbId");
+    }
+
+    return `${this.title} (${this.year.toString()}) {tmdb-${this.tmdbId}}`;
+  }
 }

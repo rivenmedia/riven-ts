@@ -26,6 +26,8 @@ export const readDirSync = function (path, callback) {
       const entries = await database.manager.find(MediaEntry, {
         select: {
           mediaItem: {
+            tmdbId: true,
+            year: true,
             title: true,
           },
         },
@@ -47,7 +49,7 @@ export const readDirSync = function (path, callback) {
               return acc;
             }
 
-            return [...acc, entry.mediaItem.title];
+            return [...acc, entry.mediaItem.path];
           }, []),
         );
 
@@ -55,7 +57,7 @@ export const readDirSync = function (path, callback) {
       }
     }
 
-    if (!pathInfo.title) {
+    if (!pathInfo.tmdbId) {
       callback(0, []);
 
       return;
@@ -64,11 +66,16 @@ export const readDirSync = function (path, callback) {
     const entries = await database.manager.find(MediaEntry, {
       select: {
         originalFilename: true,
+        mediaItem: {
+          tmdbId: true,
+          year: true,
+          title: true,
+        },
       },
       where: {
         mediaItem: {
           type: childQueryType[pathInfo.type],
-          title: pathInfo.title,
+          tmdbId: pathInfo.tmdbId,
         },
       },
       relations: {
@@ -79,7 +86,7 @@ export const readDirSync = function (path, callback) {
     if (entries.length) {
       callback(
         0,
-        entries.map((entry) => entry.originalFilename),
+        entries.map((entry) => entry.path),
       );
 
       return;
