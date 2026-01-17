@@ -1,4 +1,5 @@
 import { fromPromise } from "xstate";
+import z from "zod";
 
 import { Fuse, ops } from "../../../vfs/index.ts";
 
@@ -15,7 +16,7 @@ export const initialiseVfs = fromPromise<
   InitialiseVfsInput
 >(async ({ input: { mountPath } }) => {
   const vfs = new Fuse(mountPath, ops, {
-    debug: true,
+    debug: z.stringbool().parse(process.env["VFS_DEBUG_LOGGING"]),
     autoUnmount: true,
     allowOther: true,
     force: true,

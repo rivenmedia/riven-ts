@@ -3,7 +3,7 @@
   "extends": ["//"],
   "tasks": {
     "dev": {
-      "passThroughEnv": ["REDIS_URL", "PORT"]
+      "passThroughEnv": ["REDIS_URL", "PORT", "VFS_DEBUG_LOGGING"]
     }
   }
 }
