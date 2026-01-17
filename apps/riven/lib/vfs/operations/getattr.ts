@@ -35,14 +35,11 @@ const stat = (st: Omit<Fuse.Stats, "mode"> & { mode: StatMode }) => {
   const uid = st.uid ?? process.getuid?.();
 
   return {
-    mtime: st.mtime,
-    atime: st.atime,
-    ctime: st.ctime,
-    size: st.size,
+    ...st,
     mode: parseMode(st.mode),
     ...(gid !== undefined ? { gid } : {}),
     ...(uid !== undefined ? { uid } : {}),
-  };
+  } satisfies Fuse.Stats;
 };
 
 export const getattrSync = function (path, callback) {
@@ -52,32 +49,37 @@ export const getattrSync = function (path, callback) {
     return;
   }
 
-  if (path === "/") {
-    callback(0, {
-      mtime: new Date(),
-      atime: new Date(),
-      ctime: new Date(),
-      size: 100,
-      mode: 16877,
-      gid: process.getgid?.() ?? 0,
-      uid: process.getuid?.() ?? 0,
-    });
+  switch (path) {
+    case "/": {
+      callback(
+        0,
+        stat({
+          mtime: new Date(),
+          atime: new Date(),
+          ctime: new Date(),
+          size: 0,
+          mode: "dir",
+          ino: 0,
+        }),
+      );
 
-    return;
-  }
+      return;
+    }
+    case "/movies":
+    case "/shows": {
+      callback(
+        0,
+        stat({
+          mtime: new Date(),
+          atime: new Date(),
+          ctime: new Date(),
+          size: 0,
+          mode: "dir",
+        }),
+      );
 
-  if (path === "/movies" || path === "/shows") {
-    callback(0, {
-      mtime: new Date(),
-      atime: new Date(),
-      ctime: new Date(),
-      size: 100,
-      mode: 16877,
-      gid: process.getgid?.() ?? 0,
-      uid: process.getuid?.() ?? 0,
-    });
-
-    return;
+      return;
+    }
   }
 
   async function getattr() {
@@ -103,7 +105,7 @@ export const getattrSync = function (path, callback) {
           ctime: entry.createdAt.getTime(),
           atime: entry.updatedAt.getTime(),
           mtime: entry.updatedAt.getTime(),
-          size: Number(entry.fileSize),
+          size: pathInfo.isFile ? Number(entry.fileSize) : 0,
           ino: entry.id,
           mode: pathInfo.isFile ? "file" : "dir",
         }),
