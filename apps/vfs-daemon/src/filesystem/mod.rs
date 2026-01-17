@@ -10,6 +10,7 @@ use fuser::{
     FileType, Filesystem, ReplyAttr, ReplyData, ReplyDirectory, ReplyEmpty, ReplyEntry, ReplyOpen,
     Request,
 };
+use libc::{EBADF, EIO, ENOENT};
 use log::{debug, error};
 use tonic::async_trait;
 
@@ -17,11 +18,12 @@ use crate::filesystem::streaming_fs::StreamingFS;
 
 #[async_trait]
 impl Filesystem for StreamingFS {
+    /// Look up a directory entry by name and get its attributes
     fn lookup(&mut self, _req: &Request, parent: u64, name: &OsStr, reply: ReplyEntry) {
         debug!("lookup: parent={}, name={:?}", parent, name);
 
         if parent != ROOT_INO {
-            reply.error(libc::ENOENT);
+            reply.error(ENOENT);
             return;
         }
 
@@ -37,9 +39,10 @@ impl Filesystem for StreamingFS {
             }
         }
 
-        reply.error(libc::ENOENT);
+        reply.error(ENOENT);
     }
 
+    /// Get file attributes by inode number
     fn getattr(&mut self, _req: &Request, ino: u64, _fh: Option<u64>, reply: ReplyAttr) {
         debug!("getattr: ino={}", ino);
 
@@ -48,13 +51,14 @@ impl Filesystem for StreamingFS {
                 let attr = self.file_attr(ino, &entry);
                 reply.attr(&std::time::Duration::from_secs(1), &attr);
             } else {
-                reply.error(libc::ENOENT);
+                reply.error(ENOENT);
             }
         } else {
-            reply.error(libc::EIO);
+            reply.error(EIO);
         }
     }
 
+    /// Read a directory's entries
     fn readdir(
         &mut self,
         _req: &Request,
@@ -66,13 +70,14 @@ impl Filesystem for StreamingFS {
         debug!("readdir: ino={}, offset={}", ino, offset);
 
         if ino != ROOT_INO {
-            reply.error(libc::ENOENT);
+            reply.error(ENOENT);
 
             return;
         }
 
         let mut entry_idx = 0;
 
+        // TODO: Enable directories other than root
         let dot_entries = vec![
             (ROOT_INO, FileType::Directory, "."),
             (ROOT_INO, FileType::Directory, ".."),
@@ -113,6 +118,7 @@ impl Filesystem for StreamingFS {
         reply.ok();
     }
 
+    /// Open a file and get a file handle
     fn open(&mut self, _req: &Request, ino: u64, _flags: i32, reply: ReplyOpen) {
         debug!("open: ino={}", ino);
 
@@ -123,7 +129,7 @@ impl Filesystem for StreamingFS {
         };
 
         if !exists {
-            reply.error(libc::ENOENT);
+            reply.error(ENOENT);
             return;
         }
 
@@ -132,6 +138,7 @@ impl Filesystem for StreamingFS {
         reply.opened(fh, 0);
     }
 
+    /// Read data from a file
     fn read(
         &mut self,
         _req: &Request,
@@ -148,7 +155,7 @@ impl Filesystem for StreamingFS {
         let handle_info = match self.handles.get(fh) {
             Some(info) => info,
             None => {
-                reply.error(libc::EBADF);
+                reply.error(EBADF);
                 return;
             }
         };
@@ -158,12 +165,12 @@ impl Filesystem for StreamingFS {
                 match cat.get(handle_info.ino) {
                     Some(e) => e,
                     None => {
-                        reply.error(libc::ENOENT);
+                        reply.error(ENOENT);
                         return;
                     }
                 }
             } else {
-                reply.error(libc::EIO);
+                reply.error(EIO);
                 return;
             }
         };
@@ -199,11 +206,12 @@ impl Filesystem for StreamingFS {
             Err(e) => {
                 error!("Failed to stream file data: {}", e);
 
-                reply.error(libc::EIO);
+                reply.error(EIO);
             }
         }
     }
 
+    /// Release a file handle
     fn release(
         &mut self,
         _req: &Request,

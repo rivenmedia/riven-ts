@@ -65,7 +65,7 @@ async fn main() {
                     while let Some(response) = inbound.message().await.unwrap_or_else(|e| {
                         panic!("Failed to receive message from catalog watch stream: {}", e)
                     }) {
-                        println!("Received response = {:?}", response);
+                        info!("Received response = {:?}", response);
 
                         match response.r#type {
                             1 => {

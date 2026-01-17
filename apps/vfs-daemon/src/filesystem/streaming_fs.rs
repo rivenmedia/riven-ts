@@ -4,6 +4,7 @@ use std::{
 };
 
 use fuser::{FileAttr, FileType};
+use libc::{getgid, getuid};
 use riven_vfs::FileEntry;
 use tokio::runtime::Runtime;
 
@@ -33,6 +34,7 @@ impl StreamingFS {
         }
     }
 
+    /// Generate file attributes for a given inode and file entry
     pub fn file_attr(&self, ino: u64, entry: &FileEntry) -> FileAttr {
         let is_dir = ino == ROOT_INO;
         let mode = if is_dir { 0o755 } else { 0o444 };
@@ -56,8 +58,8 @@ impl StreamingFS {
             kind,
             perm: mode,
             nlink: if is_dir { 2 } else { 1 },
-            uid: unsafe { libc::getuid() },
-            gid: unsafe { libc::getgid() },
+            uid: unsafe { getuid() },
+            gid: unsafe { getgid() },
             rdev: 0,
             flags: 0,
             blksize: 4096,

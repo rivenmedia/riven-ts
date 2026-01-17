@@ -68,23 +68,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a23eb6b1614318a8071c9b2521f36b424b2c83db5eb3a0fead4a6c0809af6e61"
 
 [[package]]
-name = "async-gen"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f872d9d498f6cc7a18aff10f2658f17fc5d729928625d68169aaa29febdf813"
-dependencies = [
- "async-gen-macros",
- "futures-core",
- "pin-project-lite",
-]
-
-[[package]]
-name = "async-gen-macros"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "017a711dbce72e9467fea4f6e55afc8cf8e4306a53c80593bad684e8eccef122"
-
-[[package]]
 name = "async-stream"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1818,7 +1801,6 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 name = "vfs-daemon"
 version = "0.1.0"
 dependencies = [
- "async-gen",
  "async-stream",
  "bytes",
  "clap",

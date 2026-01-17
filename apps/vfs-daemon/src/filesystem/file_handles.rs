@@ -21,6 +21,7 @@ impl FileHandles {
         }
     }
 
+    /// Open a new file handle for the given inode
     pub fn open(&self, ino: u64) -> u64 {
         let mut counter = self
             .handle_counter
@@ -39,6 +40,7 @@ impl FileHandles {
         handle
     }
 
+    /// Get file handle info by handle ID
     pub fn get(&self, handle: u64) -> Option<FileHandleInfo> {
         self.handles
             .lock()
@@ -47,6 +49,7 @@ impl FileHandles {
             .cloned()
     }
 
+    /// Close a file handle by its handle ID
     pub fn close(&self, handle: u64) {
         self.handles
             .lock()

@@ -21,7 +21,7 @@ impl VfsGrpcClient {
         }
     }
 
-    pub async fn connect(&mut self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    async fn connect(&mut self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         debug!("Connecting to gRPC server at {}", self.server_addr);
 
         let channel = Channel::from_shared(self.server_addr.clone())?
@@ -35,6 +35,16 @@ impl VfsGrpcClient {
         Ok(())
     }
 
+    async fn get_channel(&mut self) -> Result<&Channel, Box<dyn std::error::Error + Send + Sync>> {
+        if self.channel.is_none() {
+            self.connect()
+                .await
+                .map_err(|e| format!("Connect error: {}", e))?;
+        }
+
+        Ok(self.channel.as_ref().ok_or("No channel available")?)
+    }
+
     pub async fn stream_file(
         &mut self,
         url: String,
@@ -42,11 +52,7 @@ impl VfsGrpcClient {
         length: u64,
         chunk_size: u32,
     ) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
-        if self.channel.is_none() {
-            self.connect().await?;
-        }
-
-        let channel = self.channel.as_ref().ok_or("No channel available")?.clone();
+        let channel = self.get_channel().await.cloned()?;
 
         let mut client = RivenVfsServiceClient::new(channel);
 
@@ -116,19 +122,9 @@ impl VfsGrpcClient {
         ),
         Box<dyn std::error::Error + Send + Sync>,
     > {
-        if self.channel.is_none() {
-            self.connect()
-                .await
-                .map_err(|e| format!("Connect error: {}", e))?;
-        }
+        let channel = self.get_channel().await.cloned()?;
 
         info!("Starting catalog watch for daemon_id={}", daemon_id);
-
-        let channel = self
-            .channel
-            .as_ref()
-            .ok_or("No channel available".to_string())?
-            .clone();
 
         let mut client = RivenVfsServiceClient::new(channel);
 
@@ -136,9 +132,11 @@ impl VfsGrpcClient {
         let (tx, mut rx) = mpsc::unbounded_channel();
 
         let subscribe_daemon_id = daemon_id.clone();
-        let outbound = async_stream::stream! {
+
+        let outbound_stream = async_stream::stream! {
             info!("Sending catalog subscribe request for daemon_id={}", subscribe_daemon_id);
 
+            // Subscribe to receive catalog updates
             yield WatchCatalogRequest {
                 command: Some(riven_vfs::watch_catalog_request::Command::Subscribe(
                     SubscribeCommand {
@@ -151,6 +149,7 @@ impl VfsGrpcClient {
             // Forward ack commands from the channel
             while let Some(update_id) = rx.recv().await {
                 info!("Sending ack for update_id={}", update_id);
+
                 yield WatchCatalogRequest {
                     command: Some(riven_vfs::watch_catalog_request::Command::Ack(
                         AckCommand {
@@ -161,11 +160,10 @@ impl VfsGrpcClient {
             }
         };
 
-        let request = Request::new(outbound).into_streaming_request();
+        let request = Request::new(outbound_stream).into_streaming_request();
 
-        let response = client.watch_catalog(request).await?;
-        let inbound = response.into_inner();
+        let inbound_stream = client.watch_catalog(request).await?.into_inner();
 
-        Ok((inbound, tx))
+        Ok((inbound_stream, tx))
     }
 }
