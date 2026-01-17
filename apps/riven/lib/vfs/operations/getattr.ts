@@ -5,7 +5,7 @@ import { FileSystemEntry } from "@repo/util-plugin-sdk/dto/entities/index";
 import Fuse from "fuse-native";
 
 import { HIDDEN_PATH, TRASH_PATH, childQueryType } from "../config.ts";
-import { pathSchema } from "../schemas/path.ts";
+import { PathInfo } from "../schemas/path-info.ts";
 
 type StatMode = "dir" | "file" | "link" | number;
 
@@ -50,57 +50,59 @@ const stat = (st: StatInput) => {
   } satisfies Fuse.Stats;
 };
 
-export const getattrSync = function (path, callback) {
-  async function getattr() {
-    if (
-      path.toLowerCase().startsWith(TRASH_PATH) ||
-      path.endsWith(HIDDEN_PATH)
-    ) {
-      return;
-    }
-
-    switch (path) {
-      case "/":
-      case "/movies":
-      case "/shows": {
-        return stat({
-          mtime: new Date(),
-          atime: new Date(),
-          ctime: new Date(),
-          mode: "dir",
-        });
-      }
-    }
-
-    const pathInfo = pathSchema.parse(path);
-    const entityType = childQueryType[pathInfo.type];
-
-    const entry = await database.manager.findOneBy(FileSystemEntry, {
-      mediaItem: {
-        type: entityType,
-      },
-    });
-
-    if (!entry) {
-      throw new Error("Entry not found");
-    }
-
-    return stat({
-      ctime: entry.createdAt.getTime(),
-      atime: entry.updatedAt.getTime(),
-      mtime: entry.updatedAt.getTime(),
-      ...(pathInfo.isFile
-        ? {
-            size: Number(entry.fileSize),
-            mode: "file",
-          }
-        : {
-            mode: "dir",
-          }),
-    });
+async function getattr(path: string) {
+  if (path.toLowerCase().startsWith(TRASH_PATH) || path.endsWith(HIDDEN_PATH)) {
+    return;
   }
 
-  getattr()
+  switch (path) {
+    case "/":
+    case "/movies":
+    case "/shows": {
+      return stat({
+        mtime: new Date(),
+        atime: new Date(),
+        ctime: new Date(),
+        mode: "dir",
+      });
+    }
+  }
+
+  const pathInfo = PathInfo.parse(path);
+  const entityType = childQueryType[pathInfo.type];
+
+  if (!pathInfo.tmdbId) {
+    throw new Error(`Invalid path: ${path}`);
+  }
+
+  const entry = await database.manager.findOneBy(FileSystemEntry, {
+    mediaItem: {
+      tmdbId: pathInfo.tmdbId,
+      type: entityType,
+    },
+  });
+
+  if (!entry) {
+    throw new Error("Entry not found");
+  }
+
+  return stat({
+    ctime: entry.createdAt.getTime(),
+    atime: entry.updatedAt.getTime(),
+    mtime: entry.updatedAt.getTime(),
+    ...(pathInfo.isFile
+      ? {
+          size: Number(entry.fileSize),
+          mode: "file",
+        }
+      : {
+          mode: "dir",
+        }),
+  });
+}
+
+export const getattrSync = function (path, callback) {
+  getattr(path)
     .then((data) => {
       callback(0, data);
     })

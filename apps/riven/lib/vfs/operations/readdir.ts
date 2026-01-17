@@ -1,86 +1,34 @@
-import { database } from "@repo/core-util-database/connection";
 import { logger } from "@repo/core-util-logger";
-import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import Fuse from "fuse-native";
 
-import { ROOT_PATH, childQueryType } from "../config.ts";
-import { pathSchema } from "../schemas/path.ts";
-import { persistentDirectorySchema } from "../schemas/persistent-directory.ts";
+import { ROOT_PATH } from "../config.ts";
+import { PathInfo } from "../schemas/path-info.ts";
+import { PersistentDirectory } from "../schemas/persistent-directory.ts";
+import { getItemDirectoryEntries } from "../utilities/get-item-directory-entries.ts";
+import { getPersistentDirectoryEntries } from "../utilities/get-persistent-directory-entries.ts";
 
-export const readDirSync = function (path, callback) {
-  async function readdir() {
-    if (path === ROOT_PATH) {
-      return persistentDirectorySchema.options;
-    }
-
-    const pathInfo = pathSchema.parse(path);
-    const validatePersistentDir = persistentDirectorySchema.safeParse(
-      pathInfo.name,
-    );
-
-    if (validatePersistentDir.success) {
-      const entries = await database.manager.find(MediaEntry, {
-        select: {
-          mediaItem: {
-            tmdbId: true,
-            year: true,
-            title: true,
-          },
-        },
-        where: {
-          mediaItem: {
-            type: childQueryType[validatePersistentDir.data],
-          },
-        },
-        relations: {
-          mediaItem: true,
-        },
-      });
-
-      if (entries.length) {
-        return entries.reduce<string[]>((acc, entry) => {
-          if (!entry.mediaItem.title) {
-            return acc;
-          }
-
-          return [...acc, entry.mediaItem.path];
-        }, []);
-      }
-    }
-
-    if (!pathInfo.tmdbId) {
-      return [];
-    }
-
-    const entries = await database.manager.find(MediaEntry, {
-      select: {
-        originalFilename: true,
-        mediaItem: {
-          tmdbId: true,
-          year: true,
-          title: true,
-        },
-      },
-      where: {
-        mediaItem: {
-          type: childQueryType[pathInfo.type],
-          tmdbId: pathInfo.tmdbId,
-        },
-      },
-      relations: {
-        mediaItem: true,
-      },
-    });
-
-    if (entries.length) {
-      return entries.map((entry) => entry.path);
-    }
-
-    throw new Error("No entries found");
+async function readdir(path: string) {
+  if (path === ROOT_PATH) {
+    return PersistentDirectory.options;
   }
 
-  readdir()
+  const pathInfo = PathInfo.parse(path);
+  const validatePersistentDir = PersistentDirectory.safeParse(pathInfo.name);
+
+  if (validatePersistentDir.success) {
+    return getPersistentDirectoryEntries(validatePersistentDir.data);
+  }
+
+  if (!pathInfo.tmdbId) {
+    return [];
+  }
+
+  return getItemDirectoryEntries(pathInfo.type, pathInfo.tmdbId);
+}
+
+export const readDirSync = function (path, callback) {
+  readdir(path)
     .then((data) => {
       callback(0, data);
     })
