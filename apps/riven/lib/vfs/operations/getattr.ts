@@ -26,13 +26,25 @@ function parseMode(mode: StatMode): number {
   }
 }
 
-const stat = (st: Omit<Fuse.Stats, "mode"> & { mode: StatMode }) => {
+type StatInput = Omit<Fuse.Stats, "mode" | "size"> & { mode: StatMode } & (
+    | {
+        mode: Extract<StatMode, "dir">;
+        size?: never;
+      }
+    | {
+        mode: Exclude<StatMode, "dir">;
+        size: number;
+      }
+  );
+
+const stat = (st: StatInput) => {
   const gid = st.gid ?? process.getgid?.();
   const uid = st.uid ?? process.getuid?.();
 
   return {
     ...st,
     mode: parseMode(st.mode),
+    size: st.mode === "dir" ? 0 : st.size,
     ...(gid !== undefined ? { gid } : {}),
     ...(uid !== undefined ? { uid } : {}),
   } satisfies Fuse.Stats;
@@ -55,7 +67,6 @@ export const getattrSync = function (path, callback) {
           mtime: new Date(),
           atime: new Date(),
           ctime: new Date(),
-          size: 0,
           mode: "dir",
         });
       }
@@ -78,8 +89,14 @@ export const getattrSync = function (path, callback) {
       ctime: entry.createdAt.getTime(),
       atime: entry.updatedAt.getTime(),
       mtime: entry.updatedAt.getTime(),
-      size: pathInfo.isFile ? Number(entry.fileSize) : 0,
-      mode: pathInfo.isFile ? "file" : "dir",
+      ...(pathInfo.isFile
+        ? {
+            size: Number(entry.fileSize),
+            mode: "file",
+          }
+        : {
+            mode: "dir",
+          }),
     });
   }
 
