@@ -134,8 +134,9 @@ export const bootstrapMachine = setup({
     states: {
       Initialising: {
         type: "parallel",
+        onDone: "Bootstrapping VFS",
         states: {
-          "Bootstrap database connection": {
+          "Bootstrapping database connection": {
             initial: "Starting",
             states: {
               Starting: {
@@ -178,59 +179,7 @@ export const bootstrapMachine = setup({
               },
             },
           },
-          "Bootstrap VFS": {
-            initial: "Starting",
-            states: {
-              Starting: {
-                entry: {
-                  type: "log",
-                  params: {
-                    message: "Initialising VFS...",
-                  },
-                },
-                invoke: {
-                  id: "initialiseVfs",
-                  src: "initialiseVfs",
-                  input: {
-                    mountPath: "/mnt/media",
-                  },
-                  onDone: {
-                    target: "Complete",
-                    actions: {
-                      type: "assignVfs",
-                      params: ({ event }) => event.output.vfs,
-                    },
-                  },
-                  onError: {
-                    target: "#Bootstrap.Errored",
-                    actions: [
-                      {
-                        type: "log",
-                        params: ({ event }) => ({
-                          message: `Failed to initialise VFS during bootstrap. Error: ${(event.error as Error).message}`,
-                          level: "error",
-                        }),
-                      },
-                      {
-                        type: "raiseError",
-                        params: ({ event }) => event.error as Error,
-                      },
-                    ],
-                  },
-                },
-              },
-              Complete: {
-                entry: {
-                  type: "log",
-                  params: {
-                    message: "VFS bootstrap complete.",
-                  },
-                },
-                type: "final",
-              },
-            },
-          },
-          "Bootstrap GraphQL Server": {
+          "Bootstrapping GraphQL Server": {
             initial: "Starting",
             states: {
               Starting: {
@@ -287,7 +236,7 @@ export const bootstrapMachine = setup({
               },
             },
           },
-          "Bootstrap plugins": {
+          "Bootstrapping plugins": {
             initial: "Registering",
             states: {
               Registering: {
@@ -359,7 +308,7 @@ export const bootstrapMachine = setup({
               },
             },
           },
-          "Bootstrap queues": {
+          "Bootstrapping queues": {
             initial: "Initialising",
             states: {
               Initialising: {
@@ -393,7 +342,59 @@ export const bootstrapMachine = setup({
             },
           },
         },
+      },
+      "Bootstrapping VFS": {
+        initial: "Starting",
         onDone: "Success",
+        states: {
+          Starting: {
+            entry: {
+              type: "log",
+              params: {
+                message: "Initialising VFS...",
+              },
+            },
+            invoke: {
+              id: "initialiseVfs",
+              src: "initialiseVfs",
+              input: {
+                mountPath: "/mnt/media",
+              },
+              onDone: {
+                target: "Complete",
+                actions: {
+                  type: "assignVfs",
+                  params: ({ event }) => event.output.vfs,
+                },
+              },
+              onError: {
+                target: "#Bootstrap.Errored",
+                actions: [
+                  {
+                    type: "log",
+                    params: ({ event }) => ({
+                      message: `Failed to initialise VFS during bootstrap. Error: ${(event.error as Error).message}`,
+                      level: "error",
+                    }),
+                  },
+                  {
+                    type: "raiseError",
+                    params: ({ event }) => event.error as Error,
+                  },
+                ],
+              },
+            },
+          },
+          Complete: {
+            entry: {
+              type: "log",
+              params: {
+                message: "VFS bootstrap complete.",
+              },
+            },
+            type: "final",
+          },
+        },
       },
       Success: {
         type: "final",

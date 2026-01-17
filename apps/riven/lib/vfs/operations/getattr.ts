@@ -4,6 +4,13 @@ import { FileSystemEntry } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import Fuse from "fuse-native";
 
+import {
+  HIDDEN_PATH,
+  TRASH_PATH,
+  childQueryType,
+  pathSchema,
+} from "../config.ts";
+
 type StatMode = "dir" | "file" | "link" | number;
 
 function parseMode(mode: StatMode): number {
@@ -39,6 +46,12 @@ const stat = (st: Omit<Fuse.Stats, "mode"> & { mode: StatMode }) => {
 };
 
 export const getattrSync = function (path, callback) {
+  if (path.toLowerCase().startsWith(TRASH_PATH) || path.endsWith(HIDDEN_PATH)) {
+    callback(0);
+
+    return;
+  }
+
   if (path === "/") {
     callback(0, {
       mtime: new Date(),
@@ -68,27 +81,40 @@ export const getattrSync = function (path, callback) {
   }
 
   async function getattr() {
-    const entry = await database.manager.findOneBy(FileSystemEntry, {
-      id: 1,
-    });
+    try {
+      const pathInfo = pathSchema.parse(path);
+      const entityType = childQueryType[pathInfo.type];
 
-    if (!entry) {
+      const entry = await database.manager.findOneBy(FileSystemEntry, {
+        mediaItem: {
+          type: entityType,
+        },
+      });
+
+      if (!entry) {
+        callback(Fuse.ENOENT);
+
+        return;
+      }
+
+      callback(
+        0,
+        stat({
+          ctime: entry.createdAt.getTime(),
+          atime: entry.updatedAt.getTime(),
+          mtime: entry.updatedAt.getTime(),
+          size: Number(entry.fileSize),
+          ino: entry.id,
+          mode: pathInfo.isFile ? "file" : "dir",
+        }),
+      );
+    } catch (error) {
+      logger.error(error);
+
       callback(Fuse.ENOENT);
 
       return;
     }
-
-    callback(
-      0,
-      stat({
-        ctime: entry.createdAt.getMilliseconds(),
-        atime: entry.updatedAt.getMilliseconds(),
-        mtime: entry.updatedAt.getMilliseconds(),
-        size: Number(entry.fileSize),
-        ino: entry.id,
-        mode: "file",
-      }),
-    );
   }
 
   getattr().catch((error: unknown) => {
