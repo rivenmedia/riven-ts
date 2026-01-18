@@ -40,7 +40,6 @@ it("returns all shows for the /shows path", async () => {
   const show = em.create(
     Show,
     Show.create({
-      id: 1,
       tmdbId: "1",
       title: "Example Show 1",
       state: "Ongoing",
@@ -53,7 +52,6 @@ it("returns all shows for the /shows path", async () => {
   const season = em.create(
     Season,
     Season.create({
-      id: 2,
       state: "Completed",
       number: 1,
       parent: ref(show),
@@ -66,7 +64,6 @@ it("returns all shows for the /shows path", async () => {
     em.create(
       Episode,
       Episode.create({
-        id: 3,
         number: 1,
         season: ref(season),
         tmdbId: "1",
@@ -112,14 +109,12 @@ it("returns all movies for the /movies path", async () => {
 
   const expectedMediaEntries: MediaEntry[] = [
     MediaEntry.create({
-      id: 1,
       originalFilename: "Example Movie 1.mkv",
     }),
   ];
 
   const expectedMovies: Movie[] = [
     Movie.create({
-      id: 1,
       tmdbId: "1",
       year: 2020,
       title: "Example Movie 1",
@@ -162,14 +157,12 @@ it("returns media entries for a known media item path", async () => {
 
   const expectedMediaEntries: MediaEntry[] = [
     MediaEntry.create({
-      id: 1,
       originalFilename: "Example Movie 1.mkv",
     }),
   ];
 
   const expectedMovies: Movie[] = [
     Movie.create({
-      id: 1,
       tmdbId: "1",
       year: 2020,
       title: "Example Movie 1",

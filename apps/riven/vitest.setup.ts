@@ -75,9 +75,11 @@ vi.mock<typeof import("@repo/core-util-database/database")>(
       ...databaseConfig,
       driver: SqliteDriver as never,
       dbName: ":memory:",
+      connect: false,
+      debug: false,
     });
 
-    await database.orm.connect();
+    await database.orm.schema.createSchema();
 
     return {
       database,
@@ -108,7 +110,5 @@ expect.extend({
 beforeEach(async () => {
   const { database } = await import("@repo/core-util-database/database");
 
-  await database.orm.schema.refreshDatabase({
-    dropDb: true,
-  });
+  await database.orm.schema.refreshDatabase();
 });
