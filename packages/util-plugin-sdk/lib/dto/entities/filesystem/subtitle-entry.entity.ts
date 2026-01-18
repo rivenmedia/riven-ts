@@ -1,33 +1,35 @@
+import { Entity, Index, Property } from "@mikro-orm/core";
 import { Field, ObjectType } from "type-graphql";
-import { ChildEntity, Column, Index } from "typeorm";
 
 import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 
 @ObjectType()
-@ChildEntity()
+@Entity({
+  discriminatorValue: "SubtitleEntry",
+})
 export class SubtitleEntry extends FileSystemEntry {
   @Field()
   @Index()
-  @Column()
+  @Property()
   language!: string;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   parentOriginalFilename?: string;
 
   @Field()
-  @Column()
+  @Property()
   content!: string;
 
   @Field()
-  @Column()
+  @Property()
   fileHash!: string;
 
   @Field()
-  @Column()
+  @Property()
   videoFileSize!: number;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   openSubtitlesId?: string; // TODO: Separate entity for external providers?
 }

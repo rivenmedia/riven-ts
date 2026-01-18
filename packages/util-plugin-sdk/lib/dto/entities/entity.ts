@@ -7,7 +7,17 @@ export abstract class BaseEntity {
     this: Constructor<T>,
     data: Partial<T>,
   ): T {
-    return Object.assign(new this(), data);
+    const instance = new this();
+
+    for (const [key, value] of Object.entries(data)) {
+      try {
+        (instance as Record<string, unknown>)[key] = value;
+      } catch {
+        /* empty */
+      }
+    }
+
+    return instance;
   }
 
   async validate(): Promise<ValidationError[]> {

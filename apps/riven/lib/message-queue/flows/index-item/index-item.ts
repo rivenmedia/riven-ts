@@ -3,7 +3,7 @@ import { type FlowChildJob, type FlowJob, FlowProducer } from "bullmq";
 import { queueNameFor } from "../../utilities/queue-name-for.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
-import type { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item/index-requested";
+import type { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
 export async function indexItem(
   item: MediaItemIndexRequestedEvent["item"],

@@ -1,4 +1,4 @@
-import { database } from "@repo/core-util-database/connection";
+import { database } from "@repo/core-util-database/database";
 import { RequestedItem } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { expect, vi } from "vitest";
@@ -23,7 +23,7 @@ it('sends a "riven.media-item.index.requested" event for each pending RequestedI
     }),
   ];
 
-  await database.manager.insert(RequestedItem, items);
+  await database.mediaItem.insertMany(items);
 
   actor.start();
 

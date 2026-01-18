@@ -1,4 +1,4 @@
-import { database } from "@repo/core-util-database/connection";
+import { database } from "@repo/core-util-database/database";
 import { RequestedItem } from "@repo/util-plugin-sdk/dto/entities/media-items/requested-item.entity";
 
 import { expect, vi } from "vitest";
@@ -48,10 +48,12 @@ it('sends an conflict event when a "riven-plugin.media-item.requested" event is 
 }) => {
   const requestedId = "tt1234567";
 
-  await database.manager.insert(RequestedItem, {
-    imdbId: requestedId,
-    state: "Requested",
-  });
+  const requestedItem = new RequestedItem();
+
+  requestedItem.imdbId = requestedId;
+  requestedItem.state = "Requested";
+
+  await database.mediaItem.insert(requestedItem);
 
   actor.start();
 

@@ -1,6 +1,7 @@
-import { database } from "@repo/core-util-database/connection";
+import { database } from "@repo/core-util-database/database";
 import { MediaEntry, Movie } from "@repo/util-plugin-sdk/dto/entities/index";
 
+import { ref } from "@mikro-orm/core";
 import Fuse from "fuse-native";
 import { expect, it, vi } from "vitest";
 
@@ -60,17 +61,27 @@ it("returns ENOENT for unknown paths", async () => {
 it("returns file stats for known files", async () => {
   const callback = vi.fn();
 
-  const mediaItem = await database.manager.save(Movie, {
-    title: "Inception",
-    year: 2010,
-    state: "Downloaded",
-    tmdbId: "27205",
-  });
+  const em = database.em.fork();
 
-  await database.manager.insert(MediaEntry, {
-    mediaItem,
-    fileSize: 2147483648 as never,
-  });
+  const mediaEntry = new MediaEntry();
+
+  mediaEntry.fileSize = 2147483648n;
+  mediaEntry.originalFilename = "Inception (2010) {tmdb-27205}.mkv";
+
+  const mediaItem = new Movie();
+
+  mediaItem.title = "Inception";
+  mediaItem.year = 2010;
+  mediaItem.state = "Downloaded";
+  mediaItem.tmdbId = "27205";
+  mediaItem.filesystemEntries.add(mediaEntry);
+
+  mediaEntry.mediaItem = ref(mediaItem);
+
+  em.persist(mediaEntry);
+  em.persist(mediaItem);
+
+  await em.flush();
 
   getattrSync(
     "/movies/Inception (2010) {tmdb-27205}/Inception (2010) {tmdb-27205}.mkv",

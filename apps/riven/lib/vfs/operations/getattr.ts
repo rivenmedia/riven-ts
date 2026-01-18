@@ -1,11 +1,11 @@
-import { database } from "@repo/core-util-database/connection";
+import { database } from "@repo/core-util-database/database";
 import { logger } from "@repo/core-util-logger";
-import { FileSystemEntry } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import Fuse from "fuse-native";
 
-import { HIDDEN_PATH, TRASH_PATH, childQueryType } from "../config.ts";
+import { childQueryType } from "../config.ts";
 import { PathInfo } from "../schemas/path-info.ts";
+import { isHiddenPath } from "../utilities/is-hidden-path.ts";
 
 type StatMode = "dir" | "file" | "link" | number;
 
@@ -51,7 +51,9 @@ const stat = (st: StatInput) => {
 };
 
 async function getattr(path: string) {
-  if (path.toLowerCase().startsWith(TRASH_PATH) || path.endsWith(HIDDEN_PATH)) {
+  if (isHiddenPath(path)) {
+    logger.silly(`VFS getattr: Skipping hidden path ${path}`);
+
     return;
   }
 
@@ -75,21 +77,17 @@ async function getattr(path: string) {
     throw new Error(`Invalid path: ${path}`);
   }
 
-  const entry = await database.manager.findOneBy(FileSystemEntry, {
+  const entry = await database.filesystemEntry.findOneOrFail({
     mediaItem: {
       tmdbId: pathInfo.tmdbId,
       type: entityType,
     },
   });
 
-  if (!entry) {
-    throw new Error("Entry not found");
-  }
-
   return stat({
     ctime: entry.createdAt.getTime(),
-    atime: entry.updatedAt.getTime(),
-    mtime: entry.updatedAt.getTime(),
+    atime: entry.updatedAt?.getTime() ?? 0,
+    mtime: entry.updatedAt?.getTime() ?? 0,
     ...(pathInfo.isFile
       ? {
           size: Number(entry.fileSize),

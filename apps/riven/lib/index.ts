@@ -21,10 +21,10 @@ const actor = createActor(rivenMachine, {
       inspectionEvent.type === "@xstate.event" &&
       inspectionEvent.event.type.startsWith("riven")
     ) {
-      eventsCache.set(
-        safeStringify(inspectionEvent.event),
-        inspectionEvent.event,
-      );
+      // eventsCache.set(
+      //   safeStringify(inspectionEvent.event),
+      //   inspectionEvent.event,
+      // );
     }
   },
 });

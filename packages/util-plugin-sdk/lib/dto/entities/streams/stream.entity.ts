@@ -1,11 +1,11 @@
-import { Field, ID, ObjectType } from "type-graphql";
 import {
-  Column,
+  Collection,
   Entity,
   ManyToMany,
-  PrimaryGeneratedColumn,
-  type Relation,
-} from "typeorm";
+  PrimaryKey,
+  Property,
+} from "@mikro-orm/core";
+import { Field, ID, ObjectType } from "type-graphql";
 
 import { MediaItem } from "../media-items/media-item.entity.ts";
 
@@ -13,34 +13,34 @@ import { MediaItem } from "../media-items/media-item.entity.ts";
 @Entity()
 export class Stream {
   @Field(() => ID)
-  @PrimaryGeneratedColumn()
+  @PrimaryKey()
   id!: number;
 
   @Field()
-  @Column()
+  @Property()
   infoHash!: string;
 
   @Field()
-  @Column()
+  @Property()
   rawTitle!: string;
 
   @Field()
-  @Column()
+  @Property()
   parsedTitle!: string;
 
   @Field()
-  @Column()
+  @Property()
   rank!: number;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   levRatio?: number;
 
   @Field(() => [MediaItem])
-  @ManyToMany(() => MediaItem)
-  parents!: Relation<MediaItem>[];
+  @ManyToMany()
+  parents = new Collection<MediaItem>(this);
 
   @Field(() => [MediaItem])
-  @ManyToMany(() => MediaItem)
-  blacklistedParents!: Relation<MediaItem>[];
+  @ManyToMany()
+  blacklistedParents = new Collection<MediaItem>(this);
 }

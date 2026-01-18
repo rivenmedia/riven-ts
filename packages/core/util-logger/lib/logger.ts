@@ -7,7 +7,7 @@ const isProductionEnvironment = process.env["NODE_ENV"] === "production";
 const isTestEnvironment = process.env["NODE_ENV"] === "test";
 
 const logFormat = format.printf(function (info) {
-  return `${String(info["timestamp"])} - ${info.level}: ${JSON.stringify(info.message, null, 2)}`;
+  return `${String(info["timestamp"])} - ${info.level}: ${JSON.stringify(info["stack"] ?? info.message, null, 2)}`;
 });
 
 export type LogLevel =

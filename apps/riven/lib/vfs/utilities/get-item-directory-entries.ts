@@ -1,5 +1,4 @@
-import { database } from "@repo/core-util-database/connection";
-import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities/index";
+import { database } from "@repo/core-util-database/database";
 
 import { childQueryType } from "../config.ts";
 
@@ -9,25 +8,18 @@ export const getItemDirectoryEntries = async (
   directoryType: PersistentDirectory,
   tmdbId: string,
 ): Promise<string[]> => {
-  const entries = await database.manager.find(MediaEntry, {
-    select: {
-      originalFilename: true,
-      mediaItem: {
-        tmdbId: true,
-        year: true,
-        title: true,
-      },
-    },
-    where: {
+  const entries = await database.mediaEntry.find(
+    {
       mediaItem: {
         type: childQueryType[directoryType],
         tmdbId,
       },
     },
-    relations: {
-      mediaItem: true,
+    {
+      populate: ["$infer"],
+      fields: ["originalFilename", "mediaItem", "path"],
     },
-  });
+  );
 
   return entries.map((entry) => entry.path);
 };

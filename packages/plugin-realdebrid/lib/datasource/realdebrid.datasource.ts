@@ -313,7 +313,7 @@ export class RealDebridAPI extends BaseDataSource {
   async getInstantAvailability(item: MediaItem): Promise<TorrentContainer> {
     if (!item.streams[0]?.infoHash) {
       throw new RealDebridAPIError(
-        "Media item does not have an active stream with an info hash.",
+        "Media item does not have any streams with an info hash.",
       );
     }
 

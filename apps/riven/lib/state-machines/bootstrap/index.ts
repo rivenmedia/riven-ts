@@ -1,4 +1,5 @@
 import { type AnyActorRef, assign, setup } from "xstate";
+import z from "zod";
 
 import {
   type InvalidPlugin,
@@ -358,7 +359,9 @@ export const bootstrapMachine = setup({
               id: "initialiseVfs",
               src: "initialiseVfs",
               input: {
-                mountPath: "/mnt/media",
+                mountPath: z
+                  .string()
+                  .parse(process.env["RIVEN_VFS_MOUNT_PATH"]),
               },
               onDone: {
                 target: "Complete",
