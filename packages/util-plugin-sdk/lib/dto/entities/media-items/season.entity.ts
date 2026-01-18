@@ -1,30 +1,31 @@
-import { Min } from "class-validator";
-import { Field, ObjectType } from "type-graphql";
 import {
-  ChildEntity,
-  Column,
+  Collection,
+  Entity,
   ManyToOne,
   OneToMany,
-  type Relation,
-} from "typeorm";
+  Property,
+  type Ref,
+} from "@mikro-orm/core";
+import { Min } from "class-validator";
+import { Field, ObjectType } from "type-graphql";
 
 import { Episode } from "./episode.entity.ts";
 import { MediaItem } from "./media-item.entity.ts";
 import { Show } from "./show.entity.ts";
 
 @ObjectType()
-@ChildEntity()
+@Entity()
 export class Season extends MediaItem {
   @Field()
-  @Column()
+  @Property()
   @Min(1)
   number!: number;
 
   @Field(() => Show)
-  @ManyToOne(() => Show, (show) => show.seasons)
-  parent!: Relation<Show>;
+  @ManyToOne()
+  parent!: Ref<Show>;
 
   @Field(() => [Episode])
   @OneToMany(() => Episode, (episode) => episode.season)
-  episodes!: Relation<Episode>[];
+  episodes = new Collection<Episode>(this);
 }

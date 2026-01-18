@@ -1,9 +1,7 @@
-import { database } from "@repo/core-util-database/connection";
-import {
-  MediaEntry,
-  MediaItem,
-} from "@repo/util-plugin-sdk/dto/entities/index";
+import { database } from "@repo/core-util-database/database";
+import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities/index";
 
+import { ref } from "@mikro-orm/core";
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
 
@@ -21,16 +19,16 @@ export async function persistDownloadResults({
   container,
   sendEvent,
 }: PersistDownloadResultsInput) {
-  const existingItem = await database.manager.findOne(MediaItem, {
-    where: {
-      streams: [{ infoHash: container.infoHash }],
+  const existingItem = await database.mediaItem.findOne(
+    {
+      streams: { infoHash: container.infoHash },
       id,
     },
-    relations: {
-      streams: true,
-      filesystemEntries: true,
+    {
+      populate: ["streams:ref", "filesystemEntries:ref"],
+      populateWhere: "infer",
     },
-  });
+  );
 
   if (!existingItem) {
     throw new Error(`Media item with ID ${id.toString()} not found`);
@@ -49,37 +47,31 @@ export async function persistDownloadResults({
     return;
   }
 
-  existingItem.activeStream = existingItem.streams[0];
+  const em = database.em.fork();
+
+  existingItem.activeStream = ref(existingItem.streams[0]);
   existingItem.state = "Downloaded";
 
   const mediaEntry = new MediaEntry();
 
   mediaEntry.fileSize = BigInt(container.files[0]?.fileSize ?? 0);
   mediaEntry.originalFilename = container.files[0]?.fileName ?? "";
-  mediaEntry.mediaItem = existingItem;
+  mediaEntry.mediaItem = ref(existingItem);
+
+  existingItem.filesystemEntries.add(mediaEntry);
 
   try {
-    await validateOrReject(existingItem);
+    await Promise.all([
+      validateOrReject(existingItem),
+      validateOrReject(mediaEntry),
+    ]);
 
-    return await database.manager.transaction(
-      async (transactionalEntityManager) => {
-        const savedMediaEntry = await transactionalEntityManager.insert(
-          MediaEntry,
-          mediaEntry,
-        );
+    em.persist(mediaEntry);
+    em.persist(existingItem);
 
-        existingItem.filesystemEntries = existingItem.filesystemEntries.concat([
-          savedMediaEntry.generatedMaps[0] as MediaEntry,
-        ]);
+    await em.flush();
 
-        const savedItem = await transactionalEntityManager.save(
-          MediaItem,
-          existingItem,
-        );
-
-        return savedItem;
-      },
-    );
+    return await em.refreshOrFail(existingItem);
   } catch (error) {
     const parsedError = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

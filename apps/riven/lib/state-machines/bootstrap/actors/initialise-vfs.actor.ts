@@ -21,6 +21,7 @@ export const initialiseVfs = fromPromise<
     allowOther: true,
     force: true,
     mkdir: true,
+    fsname: "riven_vfs",
   });
 
   return new Promise((resolve, reject) => {

@@ -1,4 +1,4 @@
-import { instanceToPlain, plainToInstance } from "class-transformer";
+import { wrap } from "@mikro-orm/core";
 import z from "zod";
 
 import {
@@ -24,23 +24,20 @@ export const SerialisedMediaItem = z.codec(
   {
     decode: (data) => {
       switch (data.type) {
-        case "Movie":
-          return plainToInstance(Movie, data);
-        case "Show":
-          return plainToInstance(Show, data);
-        case "Season":
-          return plainToInstance(Season, data);
-        case "Episode":
-          return plainToInstance(Episode, data);
-        case "RequestedItem":
-          return plainToInstance(RequestedItem, data);
+        case "movie":
+          return Movie.create(data);
+        case "show":
+          return Show.create(data);
+        case "season":
+          return Season.create(data);
+        case "episode":
+          return Episode.create(data);
+        case "requested_item":
+          return RequestedItem.create(data);
         default:
           throw new Error(`Unknown media item type: ${data.type as string}`);
       }
     },
-    encode: (data) =>
-      instanceToPlain(data, {
-        excludeExtraneousValues: true,
-      }) as { type: MediaItemType },
+    encode: (data) => wrap(data).toJSON(),
   },
 );

@@ -11,3 +11,4 @@ coverage
 !.env.example
 *.typegen.ts
 dist
+temp

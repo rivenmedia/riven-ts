@@ -1,21 +1,21 @@
+import { Collection, Entity, OneToMany, Property } from "@mikro-orm/core";
 import { Field, ObjectType } from "type-graphql";
-import { ChildEntity, Column, OneToMany, type Relation } from "typeorm";
 
 import { MediaItem } from "./media-item.entity.ts";
 import { Season } from "./season.entity.ts";
 
 @ObjectType()
-@ChildEntity()
+@Entity()
 export class Show extends MediaItem {
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   tvdbStatus?: string;
 
   @Field(() => String)
-  @Column("json")
+  @Property({ type: "json" })
   releaseData!: object;
 
   @Field(() => [Season], { nullable: true })
-  @OneToMany(() => Season, (season) => season.parent, { nullable: true })
-  seasons?: Relation<Season>[];
+  @OneToMany(() => Season, (season) => season.parent)
+  seasons = new Collection<Season>(this);
 }

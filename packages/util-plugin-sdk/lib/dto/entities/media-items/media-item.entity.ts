@@ -1,16 +1,16 @@
-import { IsNumberString, IsOptional, Matches } from "class-validator";
-import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
 import {
-  Column,
+  Collection,
   Entity,
+  Enum,
   Index,
-  JoinTable,
   ManyToMany,
   ManyToOne,
-  PrimaryGeneratedColumn,
-  type Relation,
-  TableInheritance,
-} from "typeorm";
+  PrimaryKey,
+  Property,
+  type Ref,
+} from "@mikro-orm/core";
+import { IsNumberString, IsOptional, Matches } from "class-validator";
+import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
 import { z } from "zod";
 
 import { BaseEntity } from "../entity.ts";
@@ -41,11 +41,11 @@ registerEnumType(MediaItemState.enum, {
 });
 
 export const MediaItemType = z.enum([
-  "Movie",
-  "Show",
-  "Season",
-  "Episode",
-  "RequestedItem",
+  "movie",
+  "show",
+  "season",
+  "episode",
+  "requested_item",
 ]);
 
 export type MediaItemType = z.infer<typeof MediaItemType>;
@@ -56,163 +56,162 @@ registerEnumType(MediaItemType.enum, {
 });
 
 @ObjectType()
-@Entity()
-@TableInheritance({
-  column: "type",
+@Entity({
+  abstract: true,
+  discriminatorColumn: "type",
+  discriminatorMap: {
+    movie: "Movie",
+    show: "Show",
+    season: "Season",
+    episode: "Episode",
+    requested_item: "RequestedItem",
+  },
 })
-@Index(["type", "airedAt"])
-export class MediaItem extends BaseEntity {
+@Index({ properties: ["type", "airedAt"] })
+export abstract class MediaItem extends BaseEntity {
   @Field((_type) => ID)
-  @PrimaryGeneratedColumn()
+  @PrimaryKey()
   id!: number;
 
   @Field(() => String, { nullable: true })
   @Index()
-  @Column("varchar", { nullable: true })
+  @Property()
   title?: string | null;
 
   @Field(() => String, { nullable: true })
-  @Index({ unique: true })
-  @Column("varchar", { nullable: true, unique: true })
+  @Property()
   @Matches(/^tt\d+$/)
   @IsOptional()
   imdbId?: string | null;
 
   @Field(() => String, { nullable: true })
-  @Index({ unique: true })
-  @Column("varchar", { nullable: true, unique: true })
+  @Property()
   @IsNumberString()
   @IsOptional()
   tvdbId?: string | null;
 
   @Field({ nullable: true })
-  @Index({ unique: true })
-  @Column({ nullable: true, unique: true })
+  @Property()
   @IsNumberString()
   @IsOptional()
   tmdbId?: string;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   posterPath?: string;
 
   @Field()
   @Index()
-  @Column({
-    default: () => "CURRENT_TIMESTAMP",
-  })
-  requestedAt!: Date;
+  @Property()
+  requestedAt: Date = new Date();
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   requestedBy?: string;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   requestedId?: string;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   indexedAt?: Date;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   scrapedAt?: Date;
 
   @Field()
-  @Column({ default: 0 })
+  @Property({ default: 0 })
   scrapedTimes!: number;
 
   @Field(() => String, { nullable: true })
-  @Column("json", { nullable: true })
+  @Property({ nullable: true, type: "json" })
   aliases?: Record<string, string[]>;
 
   @Field()
-  @Column({ default: false })
+  @Property({ default: false })
   isAnime!: boolean;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   network?: string;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   country?: string;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   language?: string;
 
   @Field({ nullable: true })
-  @Column("date", { nullable: true })
+  @Property()
   airedAt?: Date;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   year?: number;
 
   @Field(() => [String], { nullable: true })
-  @Column("varchar", { array: true, nullable: true })
+  @Property()
   genres?: string[];
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   rating?: number;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   contentRating?: string;
 
   @Field()
-  @Column({ default: false })
+  @Property({ default: false })
   updated!: boolean;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Property()
   guid?: string;
 
-  @Column({ nullable: true })
+  @Property()
   overseerrId?: number;
 
   @Field(() => MediaItemState.enum)
-  @Column("simple-enum", { enum: MediaItemState.options })
+  @Enum(() => MediaItemState.enum)
   state!: MediaItemState;
 
   @Field()
-  @Column({ default: 0 })
+  @Property({ default: 0 })
   failedAttempts!: number;
 
   @Field(() => [FileSystemEntry])
-  @ManyToMany("FileSystemEntry", (entry: FileSystemEntry) => entry.id)
-  @JoinTable()
-  filesystemEntries!: Relation<FileSystemEntry>[];
+  @ManyToMany()
+  filesystemEntries = new Collection<FileSystemEntry>(this);
 
   @Field(() => [SubtitleEntry])
-  @ManyToMany(() => SubtitleEntry)
-  @JoinTable()
-  subtitles!: Relation<SubtitleEntry>[];
+  @ManyToMany()
+  subtitles = new Collection<SubtitleEntry>(this);
 
   @Field(() => Stream, { nullable: true })
-  @ManyToOne(() => Stream, { nullable: true })
-  activeStream?: Relation<Stream>;
+  @ManyToOne()
+  activeStream?: Ref<Stream>;
 
   @Field(() => [Stream])
-  @ManyToMany(() => Stream)
-  @JoinTable()
-  streams!: Relation<Stream>[];
+  @ManyToMany({ owner: true })
+  streams = new Collection<Stream>(this);
 
   @Field(() => [Stream])
-  @ManyToMany(() => Stream)
-  @JoinTable()
-  blacklistedStreams!: Relation<Stream>[];
+  @ManyToMany()
+  blacklistedStreams = new Collection<Stream>(this);
 
   @Field(() => String)
-  @Column("simple-enum", { enum: MediaItemType.options })
+  @Enum()
   type!: MediaItemType;
 
+  @Property({ persist: false })
   get path() {
     if (!this.title || !this.year || !this.tmdbId) {
-      throw new TypeError("MediaItem is missing title, year, or tmdbId");
+      return;
     }
 
     return `${this.title} (${this.year.toString()}) {tmdb-${this.tmdbId}}`;

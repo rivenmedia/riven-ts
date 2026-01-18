@@ -22,7 +22,6 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "class-transformer": "catalog:",
     "luxon": "catalog:",
     "zod": "catalog:"
   },
@@ -31,6 +30,9 @@
     "@apollo/datasource-rest": "catalog:",
     "@apollo/server": "^5.2.0",
     "@apollo/utils.keyvadapter": "^4.0.1",
+    "@mikro-orm/core": "catalog:",
+    "@mikro-orm/postgresql": "catalog:",
+    "@mikro-orm/reflection": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
@@ -44,7 +46,6 @@
     "limiter": "catalog:",
     "msw": "catalog:",
     "type-graphql": "catalog:",
-    "typeorm": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "winston": "catalog:",
@@ -54,10 +55,12 @@
     "@apollo/client": "^4.0.11",
     "@apollo/datasource-rest": "catalog:",
     "@apollo/utils.keyvadapter": "^4.0.1",
+    "@mikro-orm/core": "catalog:",
+    "@mikro-orm/postgresql": "catalog:",
+    "@mikro-orm/reflection": "catalog:",
     "bullmq": "catalog:",
     "class-validator": "catalog:",
     "limiter": "catalog:",
-    "typeorm": "catalog:",
     "xstate": "^5.25.0"
   }
 }

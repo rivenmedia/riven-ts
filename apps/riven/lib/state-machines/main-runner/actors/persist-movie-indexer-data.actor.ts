@@ -1,8 +1,5 @@
-import { database } from "@repo/core-util-database/connection";
-import {
-  MediaItem,
-  RequestedItem,
-} from "@repo/util-plugin-sdk/dto/entities/index";
+import { database } from "@repo/core-util-database/database";
+import { Movie } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
@@ -19,7 +16,7 @@ export async function persistMovieIndexerData({
   item,
   sendEvent,
 }: PersistMovieIndexerDataInput) {
-  const existingItem = await database.manager.findOneByOrFail(MediaItem, {
+  const existingItem = await database.requestedItem.findOneOrFail({
     id: item.id,
   });
 
@@ -31,6 +28,8 @@ export async function persistMovieIndexerData({
 
     return;
   }
+
+  const em = database.em.fork();
 
   existingItem.id = item.id;
   existingItem.title = item.title;
@@ -72,23 +71,23 @@ export async function persistMovieIndexerData({
 
   existingItem.genres = item.genres;
   existingItem.state = "Indexed";
-  existingItem.type = "Movie";
+  existingItem.type = "movie";
+
+  em.persist(existingItem);
 
   try {
     await validateOrReject(existingItem);
 
-    await database.manager.update(
-      RequestedItem,
-      { id: existingItem.id },
-      existingItem,
-    );
+    await em.flush();
+
+    const item = await em.findOneOrFail(Movie, existingItem);
 
     sendEvent({
       type: "riven.media-item.index.success",
-      item: existingItem,
+      item: item,
     });
 
-    return existingItem;
+    return item;
   } catch (error) {
     const parsedError = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

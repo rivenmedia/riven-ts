@@ -1,6 +1,5 @@
 import { BaseDataSource, type RivenPlugin } from "@repo/util-plugin-sdk";
 
-import { DataSource } from "typeorm";
 import { type Mock, beforeEach, expect, vi } from "vitest";
 
 vi.mock<{ default: Record<string, unknown> }>(
@@ -65,20 +64,22 @@ vi.mock<typeof import("@repo/plugin-test")>(import("@repo/plugin-test"), () => {
   };
 });
 
-vi.mock<typeof import("@repo/core-util-database/connection")>(
-  import("@repo/core-util-database/connection"),
+vi.mock<typeof import("@repo/core-util-database/database")>(
+  import("@repo/core-util-database/database"),
   async (importOriginal) => {
-    const { entities } = await importOriginal();
+    const { initORM } = await importOriginal();
+    const { databaseConfig } = await import("@repo/core-util-database/config");
+    const { SqliteDriver } = await import("@mikro-orm/sqlite");
 
-    const database = new DataSource({
-      type: "sqlite",
-      database: ":memory:",
-      synchronize: true,
-      dropSchema: true,
-      entities,
+    const database = await initORM({
+      ...databaseConfig,
+      driver: SqliteDriver as never,
+      dbName: ":memory:",
+      connect: false,
+      debug: false,
     });
 
-    await database.initialize();
+    await database.orm.schema.createSchema();
 
     return {
       database,
@@ -107,7 +108,7 @@ expect.extend({
 });
 
 beforeEach(async () => {
-  const { database } = await import("@repo/core-util-database/connection");
+  const { database } = await import("@repo/core-util-database/database");
 
-  await database.synchronize(true);
+  await database.orm.schema.refreshDatabase();
 });

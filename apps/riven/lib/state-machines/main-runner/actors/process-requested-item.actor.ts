@@ -1,9 +1,6 @@
-import { database } from "@repo/core-util-database/connection";
+import { database } from "@repo/core-util-database/database";
 import { logger } from "@repo/core-util-logger";
-import {
-  MediaItem,
-  RequestedItem,
-} from "@repo/util-plugin-sdk/dto/entities/index";
+import { RequestedItem } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
@@ -41,8 +38,8 @@ export async function processRequestedItem({
 
   logger.silly(`Processing requested item: ${externalIds.join(", ")}`);
 
-  const existingItem = await database.manager.findOne(MediaItem, {
-    where: [
+  const existingItem = await database.requestedItem.findOne({
+    $or: [
       ...(item.imdbId ? [{ imdbId: item.imdbId }] : []),
       ...(type === "movie" && item.tmdbId ? [{ tmdbId: item.tmdbId }] : []),
       ...(type === "show" && item.tvdbId ? [{ tvdbId: item.tvdbId }] : []),
@@ -60,29 +57,32 @@ export async function processRequestedItem({
     };
   }
 
-  const itemEntity = new RequestedItem();
+  const em = database.em.fork();
+
+  const requestedItem = new RequestedItem();
 
   if (item.imdbId) {
-    itemEntity.imdbId = item.imdbId;
+    requestedItem.imdbId = item.imdbId;
   }
 
   if (type === "movie" && item.tmdbId) {
-    itemEntity.tmdbId = item.tmdbId;
+    requestedItem.tmdbId = item.tmdbId;
   }
 
   if (type === "show" && item.tvdbId) {
-    itemEntity.tvdbId = item.tvdbId;
+    requestedItem.tvdbId = item.tvdbId;
   }
 
-  itemEntity.state = "Requested";
+  requestedItem.state = "Requested";
+
+  em.persist(requestedItem);
 
   try {
-    await validateOrReject(itemEntity);
+    await validateOrReject(requestedItem);
 
-    const result = await database.manager.insert(RequestedItem, itemEntity);
-    const item = await database.manager.findOneByOrFail(RequestedItem, {
-      id: result.identifiers[0]?.["id"] as number,
-    });
+    await em.flush();
+
+    const item = await em.refreshOrFail(requestedItem);
 
     sendEvent({
       type: "riven.media-item.creation.success",

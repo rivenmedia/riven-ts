@@ -1,44 +1,37 @@
-import { Field, ID, ObjectType } from "type-graphql";
 import {
-  Column,
-  CreateDateColumn,
   Entity,
   ManyToOne,
-  PrimaryGeneratedColumn,
-  type Relation,
-  TableInheritance,
-  UpdateDateColumn,
-} from "typeorm";
+  PrimaryKey,
+  Property,
+  type Ref,
+} from "@mikro-orm/core";
+import { Field, ID, ObjectType } from "type-graphql";
 
 import { BaseEntity } from "../entity.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
 
 @ObjectType()
-@Entity()
-@TableInheritance({
-  column: {
-    type: "varchar",
-    name: "type",
-  },
+@Entity({
+  discriminatorColumn: "type",
 })
 export class FileSystemEntry extends BaseEntity {
   @Field((_type) => ID)
-  @PrimaryGeneratedColumn()
+  @PrimaryKey()
   id!: number;
 
   @Field(() => Number)
-  @Column("bigint", { default: 0 })
+  @Property({ type: "bigint", default: 0 })
   fileSize!: bigint;
 
   @Field()
-  @CreateDateColumn()
-  createdAt!: Date;
+  @Property()
+  createdAt: Date = new Date();
 
   @Field()
-  @UpdateDateColumn()
-  updatedAt!: Date;
+  @Property({ onUpdate: () => new Date() })
+  updatedAt?: Date;
 
   @Field(() => MediaItem)
-  @ManyToOne(() => MediaItem, (item: MediaItem) => item.id)
-  mediaItem!: Relation<MediaItem>;
+  @ManyToOne()
+  mediaItem!: Ref<MediaItem>;
 }

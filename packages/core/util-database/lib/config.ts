@@ -11,7 +11,8 @@ import {
   SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities/index";
 
-import { DataSource } from "typeorm";
+import { type Options, PostgreSqlDriver } from "@mikro-orm/postgresql";
+import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 import { z } from "zod";
 
 export const entities = [
@@ -27,11 +28,10 @@ export const entities = [
   Stream,
 ];
 
-export const database = new DataSource({
-  url: z.string().parse(process.env["DATABASE_URL"]),
-  type: "postgres",
-  synchronize: true,
-  dropSchema: true,
-  // logging: process.env["NODE_ENV"] !== "test",
+export const databaseConfig = {
+  driver: PostgreSqlDriver,
+  metadataProvider: TsMorphMetadataProvider,
   entities,
-});
+  forceUtcTimezone: true,
+  clientUrl: z.string().parse(process.env["DATABASE_URL"]),
+} satisfies Options;
