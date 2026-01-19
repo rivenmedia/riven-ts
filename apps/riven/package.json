@@ -6,6 +6,8 @@
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.app.json && tsc --noEmit --project tsconfig.spec.json",
     "dev": "node --watch --env-file=.env --import=./lib/opentelemetry.ts --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
+    "fuse:check": "fuse-native is-configured",
+    "fuse:configure": "fuse-native configure",
     "graphql-codegen": "graphql-codegen",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
