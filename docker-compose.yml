@@ -1,40 +1,46 @@
 services:
-  # riven:
-  #   container_name: riven-ts-dev
-  #   restart: unless-stopped
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   tty: true
-  #   environment:
-  #     DATABASE_URL: postgres+psycopg2://postgres:${DATABASE_PASSWORD}@riven-ts-dev-db:5432/riven
-  #     NODE_ENV: development
-  #   volumes:
-  #     - ./data:/riven-ts/data
-  #   develop:
-  #     watch:
-  #       - path: apps
-  #         action: sync
-  #         target: /riven-ts/apps
-  #       - path: packages
-  #         action: sync
-  #         target: /riven-ts/packages
-  #       - path: pnpm-lock.yaml
-  #         action: sync+exec
-  #         target: /riven-ts/pnpm-lock.yaml
-  #         exec:
-  #           command: pnpm install
-  #   ports:
-  #     - 3000:3000
-  #   depends_on:
-  #     riven-ts-db:
-  #       condition: service_healthy
+  riven:
+    container_name: riven-ts-dev
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    tty: true
+    environment:
+      DATABASE_URL: postgres+psycopg2://postgres:${DATABASE_PASSWORD}@riven-ts-dev-db:5432/riven
+      NODE_ENV: development
+    volumes:
+      - ./data:/riven-ts/data
+    develop:
+      watch:
+        - path: apps
+          action: sync
+          target: /riven-ts/apps
+        - path: packages
+          action: sync
+          target: /riven-ts/packages
+        - path: pnpm-lock.yaml
+          action: sync+exec
+          target: /riven-ts/pnpm-lock.yaml
+          exec:
+            command: pnpm install
+    ports:
+      - 8080:8080
+    depends_on:
+      riven-ts-db:
+        condition: service_healthy
+    profiles:
+      - all
 
   riven-ts-db:
     image: postgres:17-alpine
     container_name: riven-ts-dev-db
     restart: unless-stopped
-    network_mode: host
+    profiles:
+      - all
+      - services
+    ports:
+      - 5432:5432
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
       POSTGRES_USER: postgres
@@ -53,8 +59,12 @@ services:
   riven-ts-cache:
     container_name: riven-ts-dev-cache
     image: redis
-    network_mode: host
     restart: unless-stopped
+    ports:
+      - 6379:6379
+    profiles:
+      - all
+      - services
 
   jaeger:
     container_name: BullMQ_with_opentelemetry_jaeger
@@ -62,6 +72,9 @@ services:
     ports:
       - 4318:4318
       - 16686:16686
+    profiles:
+      - all
+      - analytics
 
   bullboard:
     container_name: bullboard
@@ -70,6 +83,9 @@ services:
     restart: unless-stopped
     environment:
       PORT: 4000
+    profiles:
+      - all
+      - analytics
 
 volumes:
   riven-ts-db:
