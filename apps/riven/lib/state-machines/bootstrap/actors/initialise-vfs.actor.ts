@@ -1,4 +1,4 @@
-import Fuse from "fuse-native";
+import Fuse from "@zkochan/fuse-native";
 import { fromPromise } from "xstate";
 import z from "zod";
 
@@ -20,7 +20,6 @@ export const initialiseVfs = fromPromise<
     (resolve, reject) => {
       Fuse.isConfigured((err, val) => {
         if (err) {
-          console.error(err);
           reject(err);
         }
 
@@ -31,14 +30,16 @@ export const initialiseVfs = fromPromise<
 
   if (!isConfigured) {
     throw new Error(
-      "FUSE is not configured on this system. Please run `cd apps/riven && sudo env PATH=$PATH npm run fuse:configure`.",
+      "FUSE is not configured on this system. Please run `sudo env PATH=$PATH npm run --prefix apps/riven fuse:configure`.",
     );
   }
 
   const vfs = new Fuse(mountPath, fuseOperations, {
     debug: z.stringbool().parse(process.env["VFS_DEBUG_LOGGING"]),
     autoUnmount: true,
-    // allowOther: true,
+    allowOther: true,
+    autoCache: true,
+    maxRead: 131072,
     force: true,
     mkdir: true,
     fsname: "riven_vfs",

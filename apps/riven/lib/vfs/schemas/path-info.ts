@@ -26,6 +26,7 @@ export const PathInfo = z
         ...pathGroups,
         ...pathInfo,
         isFile: pathInfo.ext !== "",
+        isFolderIcon: pathInfo.base.toLowerCase() === "folder.jpg",
         tmdbId,
       };
     }),

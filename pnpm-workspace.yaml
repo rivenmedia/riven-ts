@@ -55,6 +55,7 @@ onlyBuiltDependencies:
   - "@apollo/protobufjs"
   - "@parcel/watcher"
   - "@swc/core"
+  - "@zkochan/fuse-native"
   - core-js-pure
   - es5-ext
   - esbuild
@@ -72,6 +73,9 @@ packageExtensions:
   bullmq-otel:
     dependencies:
       tslib: ^2.0.0
+  "@zkochan/fuse-native@*":
+    dependencies:
+      "node-gyp": "^12.0.0"
 
 publicHoistPattern:
   - "*vitest*"

@@ -8,6 +8,7 @@ import {
   PrimaryKey,
   Property,
   type Ref,
+  Unique,
 } from "@mikro-orm/core";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
@@ -82,18 +83,21 @@ export abstract class MediaItem extends BaseEntity {
   @Property()
   @Matches(/^tt\d+$/)
   @IsOptional()
+  @Unique()
   imdbId?: string | null;
 
   @Field(() => String, { nullable: true })
   @Property()
   @IsNumberString()
   @IsOptional()
+  @Unique()
   tvdbId?: string | null;
 
   @Field({ nullable: true })
   @Property()
   @IsNumberString()
   @IsOptional()
+  @Unique()
   tmdbId?: string;
 
   @Field({ nullable: true })

@@ -1,6 +1,6 @@
 import { logger } from "@repo/core-util-logger";
 
-import Fuse from "fuse-native";
+import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 
 import { ROOT_PATH } from "../config.ts";
 import { PathInfo } from "../schemas/path-info.ts";
@@ -37,4 +37,4 @@ export const readDirSync = function (path, callback) {
 
       callback(Fuse.ENOENT);
     });
-} satisfies Fuse.Operations["readdir"];
+} satisfies OPERATIONS["readdir"];

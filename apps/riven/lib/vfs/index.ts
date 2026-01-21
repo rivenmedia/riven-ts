@@ -1,9 +1,15 @@
-import Fuse from "fuse-native";
-
 import { getattrSync } from "./operations/getattr.ts";
+import { openSync } from "./operations/open.ts";
+import { readSync } from "./operations/read.ts";
 import { readDirSync } from "./operations/readdir.ts";
+import { releaseSync } from "./operations/release.ts";
 
-export const fuseOperations: Fuse.Operations = {
-  readdir: readDirSync,
+import type { OPERATIONS } from "@zkochan/fuse-native";
+
+export const fuseOperations: OPERATIONS = {
   getattr: getattrSync,
+  open: openSync,
+  read: readSync,
+  readdir: readDirSync,
+  release: releaseSync,
 };

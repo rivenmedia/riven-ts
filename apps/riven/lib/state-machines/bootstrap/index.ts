@@ -18,8 +18,8 @@ import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
 import type { ApolloServer } from "@apollo/server";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type Fuse from "@zkochan/fuse-native";
 import type { Queue } from "bullmq";
-import type Fuse from "fuse-native";
 
 export interface BootstrapMachineContext {
   error?: Error;

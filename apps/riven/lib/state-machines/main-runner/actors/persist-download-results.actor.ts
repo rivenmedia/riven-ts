@@ -54,8 +54,10 @@ export async function persistDownloadResults({
 
   const mediaEntry = new MediaEntry();
 
-  mediaEntry.fileSize = BigInt(container.files[0]?.fileSize ?? 0);
+  mediaEntry.fileSize = container.files[0]?.fileSize ?? 0;
   mediaEntry.originalFilename = container.files[0]?.fileName ?? "";
+  mediaEntry.unrestrictedUrl =
+    "https://131-4.download.real-debrid.com/d/XJREY5X73GFQS/Zootopia.2.2025.1440p.DCP.WEBRIP.AC3.SDR.H264.mkv";
   mediaEntry.mediaItem = ref(existingItem);
 
   existingItem.filesystemEntries.add(mediaEntry);

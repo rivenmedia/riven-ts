@@ -1,4 +1,5 @@
 import path from "path";
+import safeStringify from "safe-stringify";
 import { createLogger, format, transports } from "winston";
 
 const logDir = path.resolve(process.cwd(), "logs");
@@ -7,7 +8,12 @@ const isProductionEnvironment = process.env["NODE_ENV"] === "production";
 const isTestEnvironment = process.env["NODE_ENV"] === "test";
 
 const logFormat = format.printf(function (info) {
-  return `${String(info["timestamp"])} - ${info.level}: ${JSON.stringify(info["stack"] ?? info.message, null, 2)}`;
+  return `${String(info["timestamp"])} - ${info.level}: ${safeStringify(
+    info["stack"] ?? info.message,
+    {
+      indentation: 2,
+    },
+  )}`;
 });
 
 export type LogLevel =

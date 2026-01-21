@@ -8,7 +8,7 @@ import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 import type { PendingRunnerInvocationPlugin } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";
-import type Fuse from "fuse-native";
+import type Fuse from "@zkochan/fuse-native";
 import type { UUID } from "node:crypto";
 
 export interface RivenMachineContext {
