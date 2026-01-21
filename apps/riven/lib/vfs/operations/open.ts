@@ -1,8 +1,10 @@
 import { database } from "@repo/core-util-database/database";
 import { logger } from "@repo/core-util-logger";
 
+import Fuse from "@zkochan/fuse-native";
 import { Client, interceptors } from "undici";
 
+import { FuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.ts";
 import { fdToFileHandleMeta } from "../utilities/file-handle-map.ts";
 
@@ -14,7 +16,7 @@ async function open(path: string, _flags: number) {
   const { tmdbId } = PathInfo.parse(path);
 
   if (!tmdbId) {
-    throw new Error(`Invalid path for open: ${path}`);
+    throw new FuseError(Fuse.ENOENT, `Invalid path for open: ${path}`);
   }
 
   const item = await database.mediaEntry.findOneOrFail({
@@ -24,7 +26,8 @@ async function open(path: string, _flags: number) {
   });
 
   if (!item.unrestrictedUrl) {
-    throw new Error(
+    throw new FuseError(
+      Fuse.ENOENT,
       `Media entry ${item.id.toString()} has no unrestricted URL`,
     );
   }
@@ -51,6 +54,8 @@ export const openSync = function (path, flags, callback) {
   open(path, flags)
     .then(callback.bind(null, 0))
     .catch((error: unknown) => {
-      console.error("Error during open:", error);
+      logger.error(`VFS open error: ${(error as Error).message}`);
+
+      callback(Fuse.EIO);
     });
 } satisfies OPERATIONS["open"];

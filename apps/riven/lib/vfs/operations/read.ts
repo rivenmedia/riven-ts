@@ -3,6 +3,7 @@ import { logger } from "@repo/core-util-logger";
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 import { Writable } from "node:stream";
 
+import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { fdToFileHandleMeta } from "../utilities/file-handle-map.ts";
 
 // import { pathToFileHandleMeta } from "../utilities/file-handle-map.ts";
@@ -19,7 +20,10 @@ async function read({ fd, length, position, buffer }: ReadInput) {
   const fileHandle = fdToFileHandleMeta.get(fd);
 
   if (!fileHandle) {
-    throw new Error(`Invalid file handle for read: ${fd.toString()}`);
+    throw new FuseError(
+      Fuse.ENOENT,
+      `Invalid file handle for read: ${fd.toString()}`,
+    );
   }
 
   const chunks: Buffer[] = [];
@@ -58,18 +62,6 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     },
   );
 
-  // console.log("read", {
-  //   // opaque,
-  //   // trailers,
-  //   path,
-  //   fd,
-  //   length,
-  //   position,
-  // });
-
-  // console.log("request size", length);
-  // console.log("opaque length", opaque.length);
-
   return opaque.length;
 }
 
@@ -90,14 +82,12 @@ export const readSync = function (
   })
     .then(callback)
     .catch((error: unknown) => {
-      if (error instanceof Error) {
-        logger.error(`VFS read error: ${error.message}`);
+      if (isFuseError(error)) {
+        logger.error(`VFS read FuseError: ${error.message}`);
 
-        if (error.cause === Fuse.ENOENT) {
-          callback(Fuse.ENOENT);
+        callback(error.errorCode);
 
-          return;
-        }
+        return;
       }
 
       logger.error(`VFS read unknown error: ${String(error)}`);

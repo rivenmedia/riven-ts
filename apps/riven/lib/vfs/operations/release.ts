@@ -1,3 +1,8 @@
+import { logger } from "@repo/core-util-logger";
+
+import Fuse from "@zkochan/fuse-native";
+
+import { isFuseError } from "../errors/fuse-error.ts";
 import { fdToFileHandleMeta } from "../utilities/file-handle-map.ts";
 
 import type { OPERATIONS } from "@zkochan/fuse-native";
@@ -16,6 +21,16 @@ export const releaseSync = function (_path, fd, callback) {
   release()
     .then(callback.bind(null, 0))
     .catch((error: unknown) => {
-      console.error("Error during release:", error);
+      if (isFuseError(error)) {
+        logger.error(`VFS release FuseError: ${error.message}`);
+
+        callback(error.errorCode);
+
+        return;
+      }
+
+      logger.error(`VFS release unknown error: ${String(error)}`);
+
+      callback(Fuse.EIO);
     });
 } satisfies OPERATIONS["release"];

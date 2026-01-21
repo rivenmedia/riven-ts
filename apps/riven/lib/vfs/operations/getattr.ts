@@ -5,6 +5,7 @@ import Fuse, { type OPERATIONS, type Stats } from "@zkochan/fuse-native";
 import z from "zod";
 
 import { childQueryType } from "../config.ts";
+import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.ts";
 import { isHiddenPath } from "../utilities/is-hidden-path.ts";
 import { isIgnoredPath } from "../utilities/is-ignored-path.ts";
@@ -100,7 +101,7 @@ async function getattr(path: string) {
   const entityType = childQueryType[pathInfo.type];
 
   if (!pathInfo.tmdbId) {
-    throw new Error(`Invalid path: ${path}`);
+    throw new FuseError(Fuse.ENOENT, `Invalid path: ${path}`);
   }
 
   const entry = await database.filesystemEntry.findOneOrFail({
@@ -127,7 +128,15 @@ export const getattrSync = function (path, callback) {
   getattr(path)
     .then(callback.bind(null, 0))
     .catch((error: unknown) => {
-      logger.error(`VFS getattr error: ${(error as Error).message}`);
+      if (isFuseError(error)) {
+        logger.error(`VFS getattr FuseError: ${error.message}`);
+
+        callback(error.errorCode);
+
+        return;
+      }
+
+      logger.error(`VFS getattr unknown error: ${String(error)}`);
 
       callback(Fuse.ENOENT);
     });

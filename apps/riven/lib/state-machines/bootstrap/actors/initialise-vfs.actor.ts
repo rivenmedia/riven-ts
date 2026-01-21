@@ -39,7 +39,6 @@ export const initialiseVfs = fromPromise<
     autoUnmount: true,
     allowOther: true,
     autoCache: true,
-    maxRead: 131072,
     force: true,
     mkdir: true,
     fsname: "riven_vfs",
