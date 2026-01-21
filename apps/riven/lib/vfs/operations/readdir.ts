@@ -4,8 +4,8 @@ import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 
 import { ROOT_PATH } from "../config.ts";
 import { isFuseError } from "../errors/fuse-error.ts";
-import { PathInfo } from "../schemas/path-info.ts";
-import { PersistentDirectory } from "../schemas/persistent-directory.ts";
+import { PathInfo } from "../schemas/path-info.schema.ts";
+import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 import { getItemDirectoryEntries } from "../utilities/get-item-directory-entries.ts";
 import { getPersistentDirectoryEntries } from "../utilities/get-persistent-directory-entries.ts";
 

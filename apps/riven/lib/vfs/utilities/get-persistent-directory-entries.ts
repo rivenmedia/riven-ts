@@ -2,7 +2,7 @@ import { database } from "@repo/core-util-database/database";
 
 import { childQueryType } from "../config.ts";
 
-import type { PersistentDirectory } from "../schemas/persistent-directory.ts";
+import type { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 
 export const getPersistentDirectoryEntries = async (
   directoryType: PersistentDirectory,

@@ -4,6 +4,7 @@ import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 import { Writable } from "node:stream";
 
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
+import { calculateChunkRange } from "../utilities/chunks/calculate-chunk-range.ts";
 import { fdToFileHandleMeta } from "../utilities/file-handle-map.ts";
 
 // import { pathToFileHandleMeta } from "../utilities/file-handle-map.ts";
@@ -26,12 +27,31 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     );
   }
 
-  const chunks: Buffer[] = [];
+  const {
+    cacheKey,
+    chunkRange: [chunkStart],
+  } = calculateChunkRange({
+    chunkSize: 1024 * 1024,
+    fileSize: Number(fileHandle.fileSize),
+    requestRange: [position, position + length - 1],
+  });
 
-  const [requestStart, requestEnd] = [
-    position,
-    Math.min(position + length - 1, fileHandle.fileSize - 1),
-  ];
+  const maybeCachedChunk = fileHandle.cache.get(cacheKey);
+
+  if (maybeCachedChunk) {
+    logger.verbose(`Cache hit for chunk [${cacheKey}] for fd ${fd.toString()}`);
+
+    Buffer.concat(maybeCachedChunk).copy(
+      buffer,
+      0,
+      position - chunkStart,
+      position - chunkStart + length,
+    );
+
+    return length;
+  }
+
+  const parts: Buffer[] = [];
 
   const { opaque } = await fileHandle.client.stream(
     {
@@ -43,18 +63,29 @@ async function read({ fd, length, position, buffer }: ReadInput) {
       headers: {
         "accept-encoding": "identity",
         connection: "keep-alive",
-        range: `bytes=${requestStart.toString()}-${requestEnd.toString()}`,
+        range: `bytes=${cacheKey}`,
       },
     },
     ({ opaque }) => {
       return new Writable({
-        write(chunk: Buffer, _encoding, callback) {
-          chunks.push(chunk);
+        write(part: Buffer, _encoding, callback) {
+          parts.push(part);
 
           callback();
         },
         final(callback) {
-          Buffer.concat(chunks).copy(opaque);
+          const chunk = Buffer.concat(parts);
+
+          logger.verbose(`Fetched chunk [${cacheKey}] for fd ${fd.toString()}`);
+
+          fileHandle.cache.set(cacheKey, parts);
+
+          chunk.copy(
+            opaque,
+            0,
+            position - chunkStart,
+            position - chunkStart + length,
+          );
 
           callback();
         },

@@ -6,7 +6,7 @@ import z from "zod";
 
 import { childQueryType } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
-import { PathInfo } from "../schemas/path-info.ts";
+import { PathInfo } from "../schemas/path-info.schema.ts";
 import { isHiddenPath } from "../utilities/is-hidden-path.ts";
 import { isIgnoredPath } from "../utilities/is-ignored-path.ts";
 
