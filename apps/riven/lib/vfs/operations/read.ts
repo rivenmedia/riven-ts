@@ -2,12 +2,12 @@ import { logger } from "@repo/core-util-logger";
 
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 import { Writable } from "node:stream";
+import shm from "shm-typed-array";
 
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
+import { Chunk } from "../schemas/chunk.schema.ts";
 import { calculateChunkRange } from "../utilities/chunks/calculate-chunk-range.ts";
 import { fdToFileHandleMeta } from "../utilities/file-handle-map.ts";
-
-// import { pathToFileHandleMeta } from "../utilities/file-handle-map.ts";
 
 interface ReadInput {
   buffer: Buffer;
@@ -27,21 +27,41 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     );
   }
 
+  const chunkSize = 1024 * 1024;
   const {
-    cacheKey,
-    chunkRange: [chunkStart],
+    chunks,
+    chunkRange: [chunkStart, chunkEnd],
+    chunksRequired,
+    firstChunk,
+    lastChunk,
+    // bytesRequired,
   } = calculateChunkRange({
-    chunkSize: 1024 * 1024,
+    fileId: fileHandle.fileId,
+    chunkSize,
     fileSize: Number(fileHandle.fileSize),
     requestRange: [position, position + length - 1],
   });
 
-  const maybeCachedChunk = fileHandle.cache.get(cacheKey);
+  const parts: Buffer[] = [];
 
-  if (maybeCachedChunk) {
-    logger.verbose(`Cache hit for chunk [${cacheKey}] for fd ${fd.toString()}`);
+  for (const chunk of chunks) {
+    const maybeCachedChunk = shm.get(chunk.cacheKey, "Buffer");
 
-    Buffer.concat(maybeCachedChunk).copy(
+    if (maybeCachedChunk) {
+      parts.push(maybeCachedChunk);
+    } else {
+      break;
+    }
+  }
+
+  if (parts.length === chunksRequired) {
+    logger.verbose(
+      `Cache hit for chunk [${firstChunk.range[0].toString()}-${lastChunk.range[1].toString()}] for fd ${fd.toString()}`,
+    );
+
+    const chunk = Buffer.concat(parts);
+
+    chunk.copy(
       buffer,
       0,
       position - chunkStart,
@@ -51,19 +71,30 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     return length;
   }
 
-  const parts: Buffer[] = [];
+  const missingChunks = chunks.slice(parts.length);
+  const bytesRequired = missingChunks.length * chunkSize;
 
+  logger.verbose(
+    `Cache miss for chunk [${missingChunks[0]?.cacheKey ?? "Unknown"}] for fd ${fd.toString()}`,
+  );
+
+  console.log(
+    `Fetching bytes=${(chunkStart + parts.reduce((acc, part) => acc + part.byteLength, 0)).toString()}-${chunkEnd.toString()}`,
+  );
+
+  const { pathname, origin } = new URL(fileHandle.url);
   const { opaque } = await fileHandle.client.stream(
     {
       method: "GET",
-      path: fileHandle.pathname,
-      highWaterMark: length,
+      origin,
+      path: pathname,
       opaque: buffer,
-      // reset: true,
+      highWaterMark: bytesRequired,
+      blocking: false,
       headers: {
         "accept-encoding": "identity",
         connection: "keep-alive",
-        range: `bytes=${cacheKey}`,
+        range: `bytes=${(chunkStart + parts.reduce((acc, part) => acc + part.byteLength, 0)).toString()}-${chunkEnd.toString()}`,
       },
     },
     ({ opaque }) => {
@@ -76,9 +107,24 @@ async function read({ fd, length, position, buffer }: ReadInput) {
         final(callback) {
           const chunk = Buffer.concat(parts);
 
-          logger.verbose(`Fetched chunk [${cacheKey}] for fd ${fd.toString()}`);
+          for (let start = 0; start < bytesRequired; start += chunkSize) {
+            const cacheChunk = chunk.subarray(start, start + chunkSize);
+            const chunkMeta = Chunk.parse({
+              fileId: fileHandle.fileId,
+              start: chunkStart + start,
+              end: Math.min(chunkStart + start + chunkSize - 1, chunkEnd),
+            });
 
-          fileHandle.cache.set(cacheKey, parts);
+            logger.silly(`Caching chunk ${chunkMeta.cacheKey}`);
+
+            shm
+              .create(cacheChunk.length, "Buffer", chunkMeta.cacheKey)
+              ?.set(cacheChunk);
+          }
+
+          logger.verbose(
+            `Fetched chunk [${chunks[0].cacheKey}] for fd ${fd.toString()}`,
+          );
 
           chunk.copy(
             opaque,
@@ -121,7 +167,7 @@ export const readSync = function (
         return;
       }
 
-      logger.error(`VFS read unknown error: ${String(error)}`);
+      logger.error(`VFS read unknown error: ${(error as Error).stack}`);
 
       callback(Fuse.EIO);
     });

@@ -11,6 +11,7 @@ services:
       NODE_ENV: development
     volumes:
       - ./data:/riven-ts/data
+      - /mnt/riven:/mount:rshared,z
     develop:
       watch:
         - path: apps
@@ -86,6 +87,36 @@ services:
     profiles:
       - all
       - analytics
+
+  plex:
+    container_name: plex
+    image: plexinc/pms-docker
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities:
+                - gpu
+    runtime: nvidia
+    gpus: all
+    network_mode: host
+    environment:
+      TZ: Europe/London
+      PLEX_CLAIM: claim-hqAzC6-eB8pZqc2MveVL
+    volumes:
+      - ./plex/config:/config
+      - ./plex/transcode:/transcode
+      - /mnt/riven:/mount:rslave,z
+    healthcheck:
+      test: curl --connect-timeout 15 --silent --show-error --fail http://0.0.0.0:32400/identity
+      interval: 1m00s
+      timeout: 15s
+      retries: 3
+      start_period: 1m00s
+    profiles:
+      - all
+      - services
 
 volumes:
   riven-ts-db:

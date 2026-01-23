@@ -3,7 +3,7 @@ import { logger } from "@repo/core-util-logger";
 
 import Fuse from "@zkochan/fuse-native";
 import { LRUCache } from "lru-cache";
-import { Client, interceptors } from "undici";
+import { Agent, interceptors } from "undici";
 
 import { FuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
@@ -12,6 +12,30 @@ import { fdToFileHandleMeta } from "../utilities/file-handle-map.ts";
 import type { OPERATIONS } from "@zkochan/fuse-native";
 
 let fd = 0;
+
+const lru = new LRUCache<string, interceptors.DNSInterceptorOriginRecords>({
+  max: 1000,
+});
+
+const lruAdapter = {
+  get size() {
+    return lru.size;
+  },
+  get(origin) {
+    return lru.get(origin) ?? null;
+  },
+  set(origin, records) {
+    lru.set(origin, records ?? undefined);
+  },
+  delete(origin) {
+    lru.delete(origin);
+  },
+  full() {
+    // For LRU cache, we can always store new records,
+    // old records will be evicted automatically
+    return false;
+  },
+} satisfies interceptors.DNSStorage;
 
 async function open(path: string, _flags: number) {
   const { tmdbId } = PathInfo.parse(path);
@@ -34,22 +58,20 @@ async function open(path: string, _flags: number) {
   }
 
   const nextFd = fd++;
-  const { pathname, origin } = new URL(item.unrestrictedUrl);
 
-  const client = new Client(origin).compose(interceptors.deduplicate());
+  const client = new Agent().compose(
+    interceptors.dns({
+      storage: lruAdapter,
+    }),
+    interceptors.deduplicate(),
+  );
 
   fdToFileHandleMeta.set(nextFd, {
+    fileId: item.id,
     fileSize: item.fileSize,
     filePath: path,
     url: item.unrestrictedUrl,
     client,
-    pathname,
-    cache: new LRUCache<`${string}-${string}`, Buffer[]>({
-      maxSize: Math.pow(1024, 3) * 2,
-      sizeCalculation: (value, _key) => {
-        return value.reduce((acc, buf) => acc + buf.byteLength, 0);
-      },
-    }),
   });
 
   logger.debug(`Opened file at path ${path} with fd ${nextFd.toString()}`);

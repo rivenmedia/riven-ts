@@ -12,3 +12,4 @@ coverage
 *.typegen.ts
 dist
 temp
+plex
