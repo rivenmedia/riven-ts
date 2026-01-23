@@ -183,7 +183,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
         break;
       }
 
-      await setTimeout(100);
+      await setTimeout(50);
     }
 
     return bytesFetched;
