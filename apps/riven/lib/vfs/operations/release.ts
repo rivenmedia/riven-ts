@@ -3,18 +3,17 @@ import { logger } from "@repo/core-util-logger";
 import Fuse from "@zkochan/fuse-native";
 
 import { isFuseError } from "../errors/fuse-error.ts";
-import { fdToFileHandleMeta } from "../utilities/file-handle-map.ts";
+import {
+  fdToFileHandleMeta,
+  fdToResponseMap,
+} from "../utilities/file-handle-map.ts";
 
 import type { OPERATIONS } from "@zkochan/fuse-native";
 
 export const releaseSync = function (_path, fd, callback) {
+  // eslint-disable-next-line @typescript-eslint/require-await
   async function release() {
-    const fileHandle = fdToFileHandleMeta.get(fd);
-
-    if (fileHandle) {
-      await fileHandle.client.close();
-    }
-
+    fdToResponseMap.get(fd)?.body.destroy();
     fdToFileHandleMeta.delete(fd);
   }
 

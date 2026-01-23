@@ -25,7 +25,7 @@ export const transformRequestRangeToBounds = z.transform(
     const chunksRequired = Math.ceil(
       (chunkAlignedEnd + 1 - chunkAlignedStart) / chunkSize,
     );
-    const chunks: [Chunk, ...Chunk[]] = [];
+    const chunks: [Chunk, ...Chunk[]] = [] as unknown as [Chunk, ...Chunk[]];
 
     for (let i = 0; i < chunksRequired; i++) {
       const chunkStartPos = chunkAlignedStart + i * chunkSize;

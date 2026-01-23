@@ -6,3 +6,5 @@ export const childQueryType = {
 } satisfies Record<string, MediaItemType>;
 
 export const ROOT_PATH = "/";
+
+export const CHUNK_SIZE = 1024 * 1024;

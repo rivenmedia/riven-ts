@@ -5,7 +5,8 @@ export interface FileHandleMetadata {
   fileSize: number;
   filePath: string;
   url: string;
-  client: Dispatcher;
 }
 
 export const fdToFileHandleMeta = new Map<number, FileHandleMetadata>();
+
+export const fdToResponseMap = new Map<number, Dispatcher.ResponseData>();

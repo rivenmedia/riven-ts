@@ -10,6 +10,7 @@ export const Chunk = z
     cacheKey:
       `${fileId.toString()}-${start.toString()}-${end.toString()}` as const,
     range: [start, end] as const,
+    size: end - start + 1,
   }));
 
 export type Chunk = z.infer<typeof Chunk>;
