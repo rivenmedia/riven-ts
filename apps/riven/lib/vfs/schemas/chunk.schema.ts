@@ -1,16 +1,19 @@
 import z from "zod";
 
-export const Chunk = z
+import { createChunkCacheKey } from "../utilities/chunks/create-chunk-cache-key.ts";
+import { createChunkRangeLabel } from "../utilities/chunks/create-chunk-range-label.ts";
+
+export const ChunkMetadata = z
   .object({
     fileId: z.number().nonnegative(),
     start: z.number().nonnegative(),
     end: z.number().nonnegative(),
   })
   .transform(({ fileId, start, end }) => ({
-    cacheKey:
-      `${fileId.toString()}-${start.toString()}-${end.toString()}` as const,
+    cacheKey: createChunkCacheKey(fileId, start, end),
+    rangeLabel: createChunkRangeLabel([start, end]),
     range: [start, end] as const,
     size: end - start + 1,
   }));
 
-export type Chunk = z.infer<typeof Chunk>;
+export type ChunkMetadata = z.infer<typeof ChunkMetadata>;

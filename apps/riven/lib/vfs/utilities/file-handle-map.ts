@@ -1,12 +1,28 @@
+import type { FileChunkCalculations } from "../schemas/file-chunk-calculations.schema.ts";
 import type { Dispatcher } from "undici";
 
 export interface FileHandleMetadata {
   fileId: number;
-  fileSize: number;
+  fileSize: string;
   filePath: string;
+  fileName: string;
   url: string;
 }
 
+/**
+ * Maps file descriptor (fd) to the corresponding `FileHandleMetadata`.
+ */
 export const fdToFileHandleMeta = new Map<number, FileHandleMetadata>();
 
+/**
+ * Maps file descriptor (fd) to the corresponding response data from Undici dispatcher.
+ */
 export const fdToResponseMap = new Map<number, Dispatcher.ResponseData>();
+
+/**
+ * Maps file name to its corresponding `FileChunkCalculations`.
+ */
+export const fileNameToFileChunkCalculationsMap = new Map<
+  string,
+  FileChunkCalculations
+>();

@@ -2,7 +2,7 @@ import { logger } from "@repo/core-util-logger";
 
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 
-import { ROOT_PATH } from "../config.ts";
+import { config } from "../config.ts";
 import { isFuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
@@ -10,7 +10,7 @@ import { getItemDirectoryEntries } from "../utilities/get-item-directory-entries
 import { getPersistentDirectoryEntries } from "../utilities/get-persistent-directory-entries.ts";
 
 async function readdir(path: string) {
-  if (path === ROOT_PATH) {
+  if (path === config.rootPath) {
     return PersistentDirectory.options;
   }
 

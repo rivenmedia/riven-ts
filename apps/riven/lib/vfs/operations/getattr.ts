@@ -4,7 +4,7 @@ import { logger } from "@repo/core-util-logger";
 import Fuse, { type OPERATIONS, type Stats } from "@zkochan/fuse-native";
 import z from "zod";
 
-import { childQueryType } from "../config.ts";
+import { config } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { isHiddenPath } from "../utilities/is-hidden-path.ts";
@@ -98,7 +98,7 @@ async function getattr(path: string) {
   }
 
   const pathInfo = PathInfo.parse(path);
-  const entityType = childQueryType[pathInfo.type];
+  const entityType = config.childQueryType[pathInfo.type];
 
   if (!pathInfo.tmdbId) {
     throw new FuseError(Fuse.ENOENT, `Invalid path: ${path}`);

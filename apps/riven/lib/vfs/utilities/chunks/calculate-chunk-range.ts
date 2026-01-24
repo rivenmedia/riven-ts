@@ -8,6 +8,7 @@ interface CalculateChunkRangeInput {
   requestRange: [start: number, end: number];
   fileSize: number;
   chunkSize: number;
+  fileName: string;
 }
 
 export const calculateChunkRange = ({
@@ -15,6 +16,7 @@ export const calculateChunkRange = ({
   requestRange: [start, end],
   fileId,
   fileSize,
+  fileName,
 }: CalculateChunkRangeInput) =>
   RequestRange.pipe(transformRequestRangeToBounds).parse({
     fileId,
@@ -22,4 +24,5 @@ export const calculateChunkRange = ({
     end,
     fileSize,
     chunkSize,
+    fileName,
   });

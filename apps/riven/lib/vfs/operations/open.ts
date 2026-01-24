@@ -5,7 +5,11 @@ import Fuse from "@zkochan/fuse-native";
 
 import { FuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
-import { fdToFileHandleMeta } from "../utilities/file-handle-map.ts";
+import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
+import {
+  fdToFileHandleMeta,
+  fileNameToFileChunkCalculationsMap,
+} from "../utilities/file-handle-map.ts";
 
 import type { OPERATIONS } from "@zkochan/fuse-native";
 
@@ -33,10 +37,16 @@ async function open(path: string, _flags: number) {
 
   const nextFd = fd++;
 
+  fileNameToFileChunkCalculationsMap.set(
+    item.originalFilename,
+    calculateFileChunks(item.id, Number(item.fileSize)),
+  );
+
   fdToFileHandleMeta.set(nextFd, {
     fileId: item.id,
-    fileSize: item.fileSize,
+    fileSize: item.fileSize.toString(),
     filePath: path,
+    fileName: item.originalFilename,
     url: item.unrestrictedUrl,
   });
 
