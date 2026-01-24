@@ -1,3 +1,5 @@
+import { logger } from "@repo/core-util-logger";
+
 import Fuse from "@zkochan/fuse-native";
 import { setTimeout as sleep } from "node:timers/promises";
 
@@ -20,6 +22,10 @@ export const waitForChunk = async (
   while ((chunk = reader.read(targetChunk.size) as Buffer | null) === null) {
     await sleep(50);
   }
+
+  logger.silly(
+    `Fetched chunk ${targetChunk.rangeLabel} (${chunk.byteLength.toString()} bytes)`,
+  );
 
   clearTimeout(timeout);
 

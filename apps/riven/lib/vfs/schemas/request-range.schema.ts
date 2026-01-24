@@ -19,7 +19,6 @@ const calculateRequiredChunks = (
   start: number,
   end: number,
   chunkSize: number,
-  fileSize: number,
   fileId: number,
   { headerChunk, footerChunk }: FileChunkCalculations,
 ) => {
@@ -34,8 +33,11 @@ const calculateRequiredChunks = (
   const chunksRequired = Math.ceil((end + 1 - start) / chunkSize);
 
   return Array.from<ChunkMetadata>({ length: chunksRequired }).map((_, i) => {
-    const chunkStartPos = start + i * chunkSize;
-    const chunkEndPos = Math.min(chunkStartPos + chunkSize - 1, fileSize - 1);
+    const chunkStartPos = Math.max(headerChunk.size, start + i * chunkSize);
+    const chunkEndPos = Math.min(
+      chunkStartPos + chunkSize - 1,
+      footerChunk.range[0] - 1,
+    );
 
     return ChunkMetadata.parse({
       fileId,
@@ -46,7 +48,7 @@ const calculateRequiredChunks = (
 };
 
 export const transformRequestRangeToBounds = z.transform(
-  ({ start, end, fileSize, chunkSize, fileId, fileName }: RequestRange) => {
+  ({ start, end, chunkSize, fileId, fileName }: RequestRange) => {
     const preCalculatedChunks =
       fileNameToFileChunkCalculationsMap.get(fileName);
 
@@ -56,33 +58,29 @@ export const transformRequestRangeToBounds = z.transform(
       );
     }
 
-    const effectiveEnd = Math.min(end, fileSize - 1);
-
-    const chunkAlignedStart = Math.floor(start / chunkSize) * chunkSize;
-    const chunkAlignedEnd = Math.min(
-      Math.ceil((effectiveEnd + 1) / chunkSize) * chunkSize - 1,
-      fileSize - 1,
-    );
-
     const chunks = calculateRequiredChunks(
-      chunkAlignedStart,
-      chunkAlignedEnd,
+      start,
+      end,
       chunkSize,
-      fileSize,
       fileId,
       preCalculatedChunks,
     );
 
+    const [firstChunk] = chunks;
+    const lastChunk = chunks.length > 1 ? chunks[chunks.length - 1] : undefined;
+
     return {
-      chunkRange: [chunkAlignedStart, chunkAlignedEnd] as const,
-      requestRange: [start, effectiveEnd] as const,
-      bytesRequired: effectiveEnd - start + 1,
-      size: chunkAlignedEnd - chunkAlignedStart + 1,
+      requestRange: [start, end] as const,
+      bytesRequired: end - start + 1,
+      size: end - start + 1,
       chunksRequired: chunks.length,
       chunks,
-      firstChunk: chunks[0],
-      lastChunk: chunks.length > 1 ? chunks[chunks.length - 1] : undefined,
-      rangeLabel: createChunkRangeLabel([start, effectiveEnd]),
+      firstChunk,
+      lastChunk,
+      rangeLabel: createChunkRangeLabel([
+        firstChunk.range[0],
+        lastChunk?.range[1] ?? firstChunk.range[1],
+      ]),
     };
   },
 );

@@ -47,7 +47,7 @@
     "reflect-metadata": "catalog:",
     "safe-stringify": "^1.2.0",
     "shm-typed-array": "^0.1.1",
-    "undici": "^7.18.2",
+    "undici": "catalog:",
     "xstate": "catalog:",
     "zod": "catalog:"
   },

@@ -16,7 +16,8 @@
   "dependencies": {
     "@apollo/utils.keyvaluecache": "^4.0.0",
     "@repo/core-util-mock-graphql-server": "workspace:^",
-    "msw": "catalog:"
+    "msw": "catalog:",
+    "undici": "catalog:"
   },
   "devDependencies": {
     "@apollo/server": "catalog:",

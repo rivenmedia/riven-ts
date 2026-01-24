@@ -1,5 +1,5 @@
 import { LRUCache } from "lru-cache";
-import { Agent, interceptors } from "undici";
+import { Agent, interceptors, setGlobalDispatcher } from "undici";
 
 import { config } from "../../config.ts";
 
@@ -40,3 +40,5 @@ export const requestAgent = new Agent({
   interceptors.deduplicate(),
   interceptors.retry(),
 );
+
+setGlobalDispatcher(requestAgent);

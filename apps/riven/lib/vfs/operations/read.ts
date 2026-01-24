@@ -7,7 +7,7 @@ import shm from "shm-typed-array";
 import { config } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { calculateChunkRange } from "../utilities/chunks/calculate-chunk-range.ts";
-import { fetchDiscreteByteRange } from "../utilities/chunks/fetch-discrete-byte-range.ts";
+import { scanChunk } from "../utilities/chunks/scan-chunk.ts";
 import { waitForChunk } from "../utilities/chunks/wait-for-chunk.ts";
 import {
   fdToFileHandleMeta,
@@ -47,7 +47,9 @@ async function read({ fd, length, position, buffer }: ReadInput) {
 
   const {
     chunks,
-    chunkRange: [chunkStart],
+    firstChunk: {
+      range: [chunkStart],
+    },
     chunksRequired,
     rangeLabel,
   } = calculateChunkRange({
@@ -71,7 +73,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
   }
 
   if (cachedChunks.length === chunksRequired) {
-    logger.verbose(`Cache hit for ${rangeLabel} for fd ${fd.toString()}`);
+    logger.silly(`Cache hit for ${rangeLabel} for fd ${fd.toString()}`);
 
     const chunk = Buffer.concat(cachedChunks);
 
@@ -93,6 +95,8 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     ));
 
   if (!fdToResponseMap.has(fd)) {
+    logger.silly(`Storing stream reader for fd ${fd.toString()}`);
+
     fdToResponseMap.set(fd, streamReader);
   }
 
@@ -105,46 +109,43 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     );
   }
 
-  logger.verbose(
-    `Cache miss for chunk ${missingChunks[0].rangeLabel} for fd ${fd.toString()}`,
+  logger.silly(
+    `Cache miss for chunk ${missingChunks.map((chunk) => chunk.rangeLabel).join(", ")} for fd ${fd.toString()}`,
   );
 
-  // If the requested chunk is within the last 10MB of the file, do a discrete fetch.
-  // Streams can't skip forwards, so this allows the main stream to remain open for other reads.
+  if (missingChunks[0].range[0] === 0) {
+    logger.verbose(
+      `Header read detected for fd ${fd.toString()}, using discrete fetch`,
+    );
+
+    const headerChunk = await scanChunk(
+      fileHandle,
+      fileChunkCalculations.headerChunk,
+      position,
+      length,
+    );
+
+    headerChunk.copy(buffer);
+
+    return length;
+  }
+
+  // Fetch footer chunk via discrete request to avoid disrupting main stream.
   if (
-    missingChunks[0].range[0] >=
-    Number(fileHandle.fileSize) - config.chunkSize * 10
+    missingChunks[0].cacheKey === fileChunkCalculations.footerChunk.cacheKey
   ) {
     logger.verbose(
       `Footer read detected for fd ${fd.toString()}, using discrete fetch`,
     );
 
-    const [discreteRequestStart, discreteRequestEnd] = [
-      missingChunks[0].range[0],
-      missingChunks[missingChunks.length - 1]?.range[1],
-    ];
-
-    if (!discreteRequestEnd) {
-      throw new FuseError(
-        Fuse.EIO,
-        `Invalid chunk end for discrete fetch on fd ${fd.toString()}`,
-      );
-    }
-
-    const chunk = await fetchDiscreteByteRange(
+    const footerChunk = await scanChunk(
       fileHandle,
-      discreteRequestStart,
-      discreteRequestEnd,
+      fileChunkCalculations.footerChunk,
+      position,
+      length,
     );
 
-    const bufferChunk = Buffer.from(chunk);
-
-    bufferChunk.copy(
-      buffer,
-      0,
-      position - chunkStart,
-      position - chunkStart + length,
-    );
+    footerChunk.copy(buffer);
 
     return length;
   }
@@ -164,7 +165,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
       fetchedChunks.push(readChunk);
 
       shm
-        .create(readChunk.length, "Buffer", targetChunk.cacheKey)
+        .create(readChunk.byteLength, "Buffer", targetChunk.cacheKey)
         ?.set(readChunk);
     }
 
