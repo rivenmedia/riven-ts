@@ -26,7 +26,7 @@ export type LogLevel =
   | "silly";
 
 export const logger = createLogger({
-  level: "info",
+  level: "verbose",
   format: format.combine(
     format.timestamp({
       format: "YYYY-MM-DD HH:mm:ss",

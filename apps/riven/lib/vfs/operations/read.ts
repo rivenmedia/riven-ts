@@ -7,9 +7,11 @@ import shm from "shm-typed-array";
 import { config } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { calculateChunkRange } from "../utilities/chunks/calculate-chunk-range.ts";
+import { fetchDiscreteByteRange } from "../utilities/chunks/fetch-discrete-byte-range.ts";
 import { scanChunk } from "../utilities/chunks/scan-chunk.ts";
 import { waitForChunk } from "../utilities/chunks/wait-for-chunk.ts";
 import {
+  fdToCurrentStreamPositionMap,
   fdToFileHandleMeta,
   fdToPreviousReadPositionMap,
   fdToResponseMap,
@@ -96,19 +98,6 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     return length;
   }
 
-  const streamReader =
-    fdToResponseMap.get(fd) ??
-    (await createStreamRequest(
-      fileHandle,
-      chunkStart + cachedChunks.reduce((acc, part) => acc + part.byteLength, 0),
-    ));
-
-  if (!fdToResponseMap.has(fd)) {
-    logger.silly(`Storing stream reader for fd ${fd.toString()}`);
-
-    fdToResponseMap.set(fd, streamReader);
-  }
-
   const missingChunks = chunks.slice(cachedChunks.length);
 
   if (!missingChunks[0]) {
@@ -157,6 +146,57 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     return length;
   }
 
+  if (
+    (previousReadPosition !== undefined &&
+      Math.abs(previousReadPosition - position) > config.scanToleranceBytes) ||
+    (position > fileChunkCalculations.headerChunk.size &&
+      previousReadPosition === undefined)
+  ) {
+    logger.verbose(
+      `Scan read detected for fd ${fd.toString()}, using discrete fetch`,
+    );
+
+    const scannedChunk = await fetchDiscreteByteRange(
+      fileHandle,
+      position,
+      position + length - 1,
+      false,
+    );
+
+    scannedChunk.copy(buffer);
+
+    return length;
+  }
+
+  const streamReader =
+    fdToResponseMap.get(fd) ??
+    (await createStreamRequest(
+      fileHandle,
+      chunkStart + cachedChunks.reduce((acc, part) => acc + part.byteLength, 0),
+    ));
+
+  if (!fdToResponseMap.has(fd)) {
+    logger.silly(`Storing stream reader for fd ${fd.toString()}`);
+
+    fdToResponseMap.set(fd, streamReader);
+  }
+
+  if (!fdToCurrentStreamPositionMap.has(fd)) {
+    fdToCurrentStreamPositionMap.set(
+      fd,
+      chunkStart + cachedChunks.reduce((acc, part) => acc + part.byteLength, 0),
+    );
+  }
+
+  const currentStreamPosition = fdToCurrentStreamPositionMap.get(fd);
+
+  if (currentStreamPosition === undefined) {
+    throw new FuseError(
+      Fuse.EIO,
+      `Missing current stream position for fd ${fd.toString()}`,
+    );
+  }
+
   const {
     timeTaken,
     result: { bytesFetched, fetchedChunks },
@@ -168,6 +208,11 @@ async function read({ fd, length, position, buffer }: ReadInput) {
       const readChunk = await waitForChunk(streamReader.body, targetChunk);
 
       bytesFetched += readChunk.byteLength;
+
+      fdToCurrentStreamPositionMap.set(
+        fd,
+        currentStreamPosition + readChunk.byteLength,
+      );
 
       fetchedChunks.push(readChunk);
 

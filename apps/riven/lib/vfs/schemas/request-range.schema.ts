@@ -71,6 +71,11 @@ const calculateRequiredChunks = (
     );
   }
 
+  // If the request spans into the footer, include the footer chunk.
+  if (end >= footerChunk.range[0]) {
+    chunks.push(footerChunk);
+  }
+
   return chunks;
 };
 

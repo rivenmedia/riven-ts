@@ -31,3 +31,8 @@ export const fileNameToFileChunkCalculationsMap = new Map<
  * Maps file descriptor (fd) to the previous read position.
  */
 export const fdToPreviousReadPositionMap = new Map<number, number>();
+
+/**
+ * Maps file descriptor (fd) to the current stream position.
+ */
+export const fdToCurrentStreamPositionMap = new Map<number, number>();

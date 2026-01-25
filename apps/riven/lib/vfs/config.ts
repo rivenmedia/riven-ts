@@ -63,4 +63,11 @@ export const config = {
    * Tolerance for detecting scan reads. Any read that jumps more than this value is considered a scan.
    */
   scanToleranceBlocks: 25,
+
+  /**
+   * Scan tolerance in bytes.
+   */
+  get scanToleranceBytes() {
+    return this.scanToleranceBlocks * this.blockSize;
+  },
 } as const;
