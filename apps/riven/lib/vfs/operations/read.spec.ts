@@ -13,9 +13,44 @@ import {
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
 
+import type { MockAgent } from "undici";
+
 vi.mock("shm-typed-array");
 
 const fileName = "movie.mkv";
+
+function setupRangeInterceptor(
+  agent: MockAgent,
+  range: readonly [number, number | undefined],
+) {
+  const mockPool = agent.get("http://example.com");
+
+  const size = range[1] !== undefined ? range[1] - range[0] + 1 : undefined;
+  const responseBuffer = Buffer.alloc(size ?? config.chunkSize);
+
+  responseBuffer.set(randomBytes(responseBuffer.byteLength));
+
+  mockPool
+    .intercept({ path: `/files/${fileName}` })
+    .reply(({ headers }) => {
+      const rangeHeader = (headers as Record<string, string>)["range"];
+
+      if (rangeHeader === `bytes=${range.join("-")}`) {
+        return {
+          statusCode: 206,
+          data: responseBuffer,
+        };
+      }
+
+      return {
+        statusCode: 416,
+        data: "",
+      };
+    })
+    .times(2);
+
+  return responseBuffer;
+}
 
 it.beforeEach(() => {
   fdToFileHandleMeta.clear();
@@ -37,6 +72,8 @@ it.beforeEach(() => {
     fileName,
     calculateFileChunks(1, fileSize),
   );
+
+  vi.resetAllMocks();
 });
 
 it("fetches the header chunk if the requested range is entirely within the header chunk", async ({
@@ -49,33 +86,10 @@ it("fetches the header chunk if the requested range is entirely within the heade
   const fileChunkCalculations =
     fileNameToFileChunkCalculationsMap.get(fileName)!;
 
-  const responseBuffer = Buffer.alloc(fileChunkCalculations.headerChunk.size);
-
-  responseBuffer.set(randomBytes(fileChunkCalculations.headerChunk.size));
-
-  const mockPool = mockAgent.get("http://example.com");
-
-  mockPool
-    .intercept({ path: `/files/${fileName}` })
-    .reply(({ headers }) => {
-      const rangeHeader = (headers as Record<string, string>)["range"];
-
-      if (
-        rangeHeader ===
-        `bytes=${fileChunkCalculations.headerChunk.range.join("-")}`
-      ) {
-        return {
-          statusCode: 206,
-          data: responseBuffer,
-        };
-      }
-
-      return {
-        statusCode: 416,
-        data: "",
-      };
-    })
-    .times(2);
+  const responseBuffer = setupRangeInterceptor(
+    mockAgent,
+    fileChunkCalculations.headerChunk.range,
+  );
 
   const length = 64;
   const buffer = Buffer.alloc(length);
@@ -105,35 +119,12 @@ it("fetches the footer chunk if the requested range is entirely within the foote
   const fileChunkCalculations =
     fileNameToFileChunkCalculationsMap.get(fileName)!;
 
-  const responseBuffer = Buffer.alloc(fileChunkCalculations.footerChunk.size);
-
-  responseBuffer.set(randomBytes(fileChunkCalculations.footerChunk.size));
-
-  const mockPool = mockAgent.get("http://example.com");
+  const responseBuffer = setupRangeInterceptor(
+    mockAgent,
+    fileChunkCalculations.footerChunk.range,
+  );
 
   const length = 64;
-
-  mockPool
-    .intercept({ path: `/files/${fileName}` })
-    .reply(({ headers }) => {
-      const rangeHeader = (headers as Record<string, string>)["range"];
-
-      if (
-        rangeHeader ===
-        `bytes=${fileChunkCalculations.footerChunk.range.join("-")}`
-      ) {
-        return {
-          statusCode: 206,
-          data: responseBuffer,
-        };
-      }
-
-      return {
-        statusCode: 416,
-        data: "",
-      };
-    })
-    .persist();
 
   const buffer = Buffer.alloc(length);
   const callback = vi.fn();
@@ -167,36 +158,13 @@ it("correctly calculates offsets when copying chunk data into the buffer", async
   const fileChunkCalculations =
     fileNameToFileChunkCalculationsMap.get(fileName)!;
 
-  const responseBuffer = Buffer.alloc(fileChunkCalculations.footerChunk.size);
-
-  responseBuffer.set(randomBytes(fileChunkCalculations.footerChunk.size));
-
-  const mockPool = mockAgent.get("http://example.com");
-
   const length = 64;
   const offset = 1024;
 
-  mockPool
-    .intercept({ path: `/files/${fileName}` })
-    .reply(({ headers }) => {
-      const rangeHeader = (headers as Record<string, string>)["range"];
-
-      if (
-        rangeHeader ===
-        `bytes=${fileChunkCalculations.footerChunk.range.join("-")}`
-      ) {
-        return {
-          statusCode: 206,
-          data: responseBuffer,
-        };
-      }
-
-      return {
-        statusCode: 416,
-        data: "",
-      };
-    })
-    .times(2);
+  const responseBuffer = setupRangeInterceptor(
+    mockAgent,
+    fileChunkCalculations.footerChunk.range,
+  );
 
   const buffer = Buffer.alloc(length);
   const callback = vi.fn();
@@ -217,12 +185,9 @@ it("correctly calculates offsets when copying chunk data into the buffer", async
   expect(buffer).toStrictEqual(
     responseBuffer.subarray(offset, offset + length),
   );
-
-  mockPool.cleanMocks();
-  await mockPool.close();
 });
 
-it("offsets the first chunk by the size of the header chunks", async ({
+it("offsets the first chunk by the size of the header chunk", async ({
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
@@ -230,35 +195,12 @@ it("offsets the first chunk by the size of the header chunks", async ({
   const fileChunkCalculations =
     fileNameToFileChunkCalculationsMap.get(fileName)!;
 
-  const responseBuffer = Buffer.alloc(config.chunkSize);
-
-  responseBuffer.set(randomBytes(config.chunkSize));
-
-  const mockPool = mockAgent.get("http://example.com");
-
   const length = 64;
 
-  mockPool
-    .intercept({ path: `/files/${fileName}` })
-    .reply(({ headers }) => {
-      const rangeHeader = (headers as Record<string, string>)["range"];
-
-      if (
-        rangeHeader ===
-        `bytes=${fileChunkCalculations.headerChunk.size.toString()}-`
-      ) {
-        return {
-          statusCode: 206,
-          data: responseBuffer,
-        };
-      }
-
-      return {
-        statusCode: 416,
-        data: "",
-      };
-    })
-    .times(2);
+  const responseBuffer = setupRangeInterceptor(mockAgent, [
+    fileChunkCalculations.headerChunk.size,
+    undefined,
+  ]);
 
   const buffer = Buffer.alloc(length);
   const callback = vi.fn();
@@ -300,32 +242,9 @@ it("reads data across multiple chunks, utilising the shared memory cache where p
     return null;
   });
 
-  const responseBuffer = Buffer.alloc(config.chunkSize);
-
-  responseBuffer.set(randomBytes(config.chunkSize));
-
-  const mockPool = mockAgent.get("http://example.com");
+  const responseBuffer = setupRangeInterceptor(mockAgent, [262144, undefined]);
 
   const length = 131072; // 128 KB
-
-  mockPool
-    .intercept({ path: `/files/${fileName}` })
-    .reply(({ headers }) => {
-      const rangeHeader = (headers as Record<string, string>)["range"];
-
-      if (rangeHeader === `bytes=262144-`) {
-        return {
-          statusCode: 206,
-          data: responseBuffer,
-        };
-      }
-
-      return {
-        statusCode: 416,
-        data: "",
-      };
-    })
-    .times(2);
 
   const position = 196608;
   const buffer = Buffer.alloc(length);
@@ -349,4 +268,34 @@ it("reads data across multiple chunks, utilising the shared memory cache where p
     "Buffer",
     createChunkCacheKey(1, 262144, 262144 + config.chunkSize - 1),
   );
+});
+
+it("performs a one-off scan when receiving a read outside the scan tolerance limit during playback", async ({
+  mockAgent,
+}) => {
+  const { readSync } = await import("./read.ts");
+  const shm = vi.mocked(await import("shm-typed-array"));
+
+  fdToPreviousReadPositionMap.set(0, 10485760); // 10MB
+
+  const length = 32768; // 32 KB
+  const position = 104857600; // 100MB
+
+  const responseBuffer = setupRangeInterceptor(mockAgent, [
+    position,
+    position + length - 1,
+  ]);
+
+  const buffer = Buffer.alloc(length);
+  const callback = vi.fn();
+
+  readSync(fileName, 0, buffer, length, position, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(length);
+  });
+
+  expect(buffer).toStrictEqual(responseBuffer);
+
+  expect(shm.create).not.toHaveBeenCalled();
 });
