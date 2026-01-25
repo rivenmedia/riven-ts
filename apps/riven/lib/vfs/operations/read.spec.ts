@@ -5,8 +5,10 @@ import { expect, vi } from "vitest";
 
 import { config } from "../config.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
+import { createChunkCacheKey } from "../utilities/chunks/create-chunk-cache-key.ts";
 import {
   fdToFileHandleMeta,
+  fdToPreviousReadPositionMap,
   fdToResponseMap,
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
@@ -19,6 +21,7 @@ it.beforeEach(() => {
   fdToFileHandleMeta.clear();
   fdToResponseMap.clear();
   fileNameToFileChunkCalculationsMap.clear();
+  fdToPreviousReadPositionMap.clear();
 
   const fileSize = 1024 * 1024 * 1024 * 10; // 10 GB
 
@@ -40,6 +43,8 @@ it("fetches the header chunk if the requested range is entirely within the heade
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
+
+  const shm = vi.mocked(await import("shm-typed-array"));
 
   const fileChunkCalculations =
     fileNameToFileChunkCalculationsMap.get(fileName)!;
@@ -83,12 +88,19 @@ it("fetches the header chunk if the requested range is entirely within the heade
   });
 
   expect(buffer).toStrictEqual(responseBuffer.subarray(0, length));
+  expect(shm.create).toHaveBeenCalledWith(
+    fileChunkCalculations.headerChunk.size,
+    "Buffer",
+    fileChunkCalculations.headerChunk.cacheKey,
+  );
 });
 
 it("fetches the footer chunk if the requested range is entirely within the footer chunk", async ({
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
+
+  const shm = vi.mocked(await import("shm-typed-array"));
 
   const fileChunkCalculations =
     fileNameToFileChunkCalculationsMap.get(fileName)!;
@@ -140,6 +152,11 @@ it("fetches the footer chunk if the requested range is entirely within the foote
   });
 
   expect(buffer).toStrictEqual(responseBuffer.subarray(0, length));
+  expect(shm.create).toHaveBeenCalledWith(
+    fileChunkCalculations.footerChunk.size,
+    "Buffer",
+    fileChunkCalculations.footerChunk.cacheKey,
+  );
 });
 
 it("correctly calculates offsets when copying chunk data into the buffer", async ({
@@ -260,4 +277,76 @@ it("offsets the first chunk by the size of the header chunks", async ({
   });
 
   expect(buffer).toStrictEqual(responseBuffer.subarray(0, length));
+});
+
+it("reads data across multiple chunks, utilising the shared memory cache where possible", async ({
+  mockAgent,
+}) => {
+  const { readSync } = await import("./read.ts");
+  const shm = vi.mocked(await import("shm-typed-array"));
+
+  const fileChunkCalculations =
+    fileNameToFileChunkCalculationsMap.get(fileName)!;
+
+  const cachedChunk = Buffer.alloc(fileChunkCalculations.headerChunk.size).fill(
+    randomBytes(fileChunkCalculations.headerChunk.size),
+  );
+
+  shm.get.mockImplementation((key) => {
+    if (key === fileChunkCalculations.headerChunk.cacheKey) {
+      return cachedChunk;
+    }
+
+    return null;
+  });
+
+  const responseBuffer = Buffer.alloc(config.chunkSize);
+
+  responseBuffer.set(randomBytes(config.chunkSize));
+
+  const mockPool = mockAgent.get("http://example.com");
+
+  const length = 131072; // 128 KB
+
+  mockPool
+    .intercept({ path: `/files/${fileName}` })
+    .reply(({ headers }) => {
+      const rangeHeader = (headers as Record<string, string>)["range"];
+
+      if (rangeHeader === `bytes=262144-`) {
+        return {
+          statusCode: 206,
+          data: responseBuffer,
+        };
+      }
+
+      return {
+        statusCode: 416,
+        data: "",
+      };
+    })
+    .times(2);
+
+  const position = 196608;
+  const buffer = Buffer.alloc(length);
+  const callback = vi.fn();
+
+  readSync(fileName, 0, buffer, length, position, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(length);
+  });
+
+  expect(buffer).toStrictEqual(
+    Buffer.concat([cachedChunk, responseBuffer]).subarray(
+      position,
+      position + length,
+    ),
+  );
+
+  expect(shm.create).toHaveBeenCalledWith(
+    config.chunkSize,
+    "Buffer",
+    createChunkCacheKey(1, 262144, 262144 + config.chunkSize - 1),
+  );
 });

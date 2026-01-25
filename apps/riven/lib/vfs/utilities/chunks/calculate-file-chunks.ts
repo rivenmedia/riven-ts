@@ -36,6 +36,7 @@ export const calculateFileChunks = (fileId: number, fileSize: number) => {
 
   return {
     headerChunk: {
+      index: 0,
       cacheKey: createChunkCacheKey(
         fileId,
         headerChunkRange[0],
@@ -46,6 +47,7 @@ export const calculateFileChunks = (fileId: number, fileSize: number) => {
       size: Math.min(config.headerSize, fileSize),
     },
     footerChunk: {
+      index: totalChunksExcludingHeaderAndFooter + 1,
       cacheKey: createChunkCacheKey(
         fileId,
         footerChunkRange[0],

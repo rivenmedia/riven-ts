@@ -26,3 +26,8 @@ export const fileNameToFileChunkCalculationsMap = new Map<
   string,
   FileChunkCalculations
 >();
+
+/**
+ * Maps file descriptor (fd) to the previous read position.
+ */
+export const fdToPreviousReadPositionMap = new Map<number, number>();

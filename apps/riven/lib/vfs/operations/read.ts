@@ -11,6 +11,7 @@ import { scanChunk } from "../utilities/chunks/scan-chunk.ts";
 import { waitForChunk } from "../utilities/chunks/wait-for-chunk.ts";
 import {
   fdToFileHandleMeta,
+  fdToPreviousReadPositionMap,
   fdToResponseMap,
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
@@ -25,6 +26,14 @@ export interface ReadInput {
 }
 
 async function read({ fd, length, position, buffer }: ReadInput) {
+  const previousReadPosition = fdToPreviousReadPositionMap.get(fd);
+
+  fdToPreviousReadPositionMap.set(fd, position);
+
+  logger.silly(
+    `[${fd.toString()}] Read request: range=${position.toString()}-${(position + length).toString()} length=${length.toString()} position=${position.toString()} previous=${previousReadPosition?.toString() ?? "N/A"} diff=${previousReadPosition !== undefined ? (position - previousReadPosition).toString() : "N/A"}`,
+  );
+
   const fileHandle = fdToFileHandleMeta.get(fd);
 
   if (!fileHandle) {
@@ -113,7 +122,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     `Cache miss for chunk ${missingChunks.map((chunk) => chunk.rangeLabel).join(", ")} for fd ${fd.toString()}`,
   );
 
-  if (missingChunks[0].range[0] === 0) {
+  if (missingChunks[0].index === fileChunkCalculations.headerChunk.index) {
     logger.verbose(
       `Header read detected for fd ${fd.toString()}, using discrete fetch`,
     );
@@ -131,9 +140,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
   }
 
   // Fetch footer chunk via discrete request to avoid disrupting main stream.
-  if (
-    missingChunks[0].cacheKey === fileChunkCalculations.footerChunk.cacheKey
-  ) {
+  if (missingChunks[0].index === fileChunkCalculations.footerChunk.index) {
     logger.verbose(
       `Footer read detected for fd ${fd.toString()}, using discrete fetch`,
     );

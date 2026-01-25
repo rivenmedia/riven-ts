@@ -20,9 +20,9 @@ const calculateRequiredChunks = (
   end: number,
   chunkSize: number,
   fileId: number,
-  { headerChunk, footerChunk }: FileChunkCalculations,
+  { headerChunk, footerChunk, totalChunks }: FileChunkCalculations,
 ) => {
-  if (end < headerChunk.range[1]) {
+  if (end <= headerChunk.range[1]) {
     return [headerChunk] as const;
   }
 
@@ -30,21 +30,48 @@ const calculateRequiredChunks = (
     return [footerChunk] as const;
   }
 
-  const chunksRequired = Math.ceil((end + 1 - start) / chunkSize);
+  const chunkAlignedStart = Math.max(0, start - headerChunk.size);
+  const chunkAlignedEnd = Math.min(
+    Math.max(0, end - headerChunk.size),
+    footerChunk.range[0] - 1,
+  );
 
-  return Array.from<ChunkMetadata>({ length: chunksRequired }).map((_, i) => {
-    const chunkStartPos = Math.max(headerChunk.size, start + i * chunkSize);
-    const chunkEndPos = Math.min(
-      chunkStartPos + chunkSize - 1,
+  const lowerChunkIndex = Math.min(
+    Math.floor(chunkAlignedStart / chunkSize),
+    totalChunks + 1,
+  );
+
+  const upperChunkIndex = Math.min(
+    Math.floor(chunkAlignedEnd / chunkSize),
+    totalChunks + 1,
+  );
+
+  const chunks: ChunkMetadata[] = [];
+
+  // If the current request is within the header boundaries, include the header chunk.
+  // This is sized differently to normal chunks, so handle it separately.
+  if (start < headerChunk.size) {
+    chunks.push(headerChunk);
+  }
+
+  for (let i = lowerChunkIndex; i <= upperChunkIndex; i++) {
+    const chunkStart = headerChunk.size + i * chunkSize;
+    const chunkEnd = Math.min(
+      chunkStart + chunkSize - 1,
       footerChunk.range[0] - 1,
     );
 
-    return ChunkMetadata.parse({
-      fileId,
-      start: chunkStartPos,
-      end: chunkEndPos,
-    });
-  }) as [ChunkMetadata, ...ChunkMetadata[]];
+    chunks.push(
+      ChunkMetadata.parse({
+        index: i + 1,
+        fileId,
+        start: chunkStart,
+        end: chunkEnd,
+      }),
+    );
+  }
+
+  return chunks;
 };
 
 export const transformRequestRangeToBounds = z.transform(
