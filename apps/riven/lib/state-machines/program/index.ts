@@ -5,7 +5,7 @@ import { mainRunnerMachine } from "../main-runner/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 
-import type { PendingRunnerInvocationPlugin } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+import type { ValidPlugin } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";
 import type Fuse from "@zkochan/fuse-native";
@@ -13,7 +13,7 @@ import type { UUID } from "node:crypto";
 
 export interface RivenMachineContext {
   mainRunnerRef?: AnyActorRef;
-  plugins?: Map<symbol, PendingRunnerInvocationPlugin>;
+  plugins?: Map<symbol, ValidPlugin>;
   server?: ApolloServer;
   vfs?: Fuse;
 }

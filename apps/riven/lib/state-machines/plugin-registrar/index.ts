@@ -8,8 +8,8 @@ import { redisCache } from "../../utilities/redis-cache.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import {
   type InvalidPlugin,
-  type PendingRunnerInvocationPlugin,
   type RegisteredPlugin,
+  type ValidPlugin,
   collectPluginsForRegistration,
 } from "./actors/collect-plugins-for-registration.actor.ts";
 import { validatePlugin } from "./actors/validate-plugin.actor.ts";
@@ -20,7 +20,7 @@ export interface PluginRegistrarMachineContext extends MachineContext {
   runningValidators: Map<symbol, AnyActorRef>;
   pendingPlugins: Map<symbol, RegisteredPlugin>;
   invalidPlugins: Map<symbol, InvalidPlugin>;
-  validPlugins: Map<symbol, PendingRunnerInvocationPlugin>;
+  validPlugins: Map<symbol, ValidPlugin>;
 }
 
 export interface PluginRegistrarMachineInput {
@@ -28,12 +28,12 @@ export interface PluginRegistrarMachineInput {
 }
 
 export interface PluginRegistrarMachineOutput {
-  validPlugins: Map<symbol, PendingRunnerInvocationPlugin>;
+  validPlugins: Map<symbol, ValidPlugin>;
   invalidPlugins: Map<symbol, InvalidPlugin>;
 }
 
 export type PluginRegistrarMachineEvent =
-  | { type: "riven.plugin-valid"; plugin: PendingRunnerInvocationPlugin }
+  | { type: "riven.plugin-valid"; plugin: ValidPlugin }
   | { type: "riven.plugin-invalid"; plugin: InvalidPlugin };
 
 export const pluginRegistrarMachine = setup({
@@ -88,33 +88,31 @@ export const pluginRegistrarMachine = setup({
         return pluginMap;
       },
     }),
-    handleValidPlugin: assign(
-      ({ context }, validPlugin: PendingRunnerInvocationPlugin) => {
-        const existingPendingItem = context.pendingPlugins.get(
-          validPlugin.config.name,
+    handleValidPlugin: assign(({ context }, validPlugin: ValidPlugin) => {
+      const existingPendingItem = context.pendingPlugins.get(
+        validPlugin.config.name,
+      );
+
+      if (!existingPendingItem) {
+        logger.error(
+          `Received valid plugin notification for unknown plugin: ${validPlugin.config.name.toString()}`,
         );
 
-        if (!existingPendingItem) {
-          logger.error(
-            `Received valid plugin notification for unknown plugin: ${validPlugin.config.name.toString()}`,
-          );
+        return;
+      }
 
-          return;
-        }
+      const newPendingPlugins = new Map(context.pendingPlugins);
 
-        const newPendingPlugins = new Map(context.pendingPlugins);
+      newPendingPlugins.delete(validPlugin.config.name);
 
-        newPendingPlugins.delete(validPlugin.config.name);
-
-        return {
-          pendingPlugins: newPendingPlugins,
-          validPlugins: context.validPlugins.set(
-            validPlugin.config.name,
-            validPlugin,
-          ),
-        };
-      },
-    ),
+      return {
+        pendingPlugins: newPendingPlugins,
+        validPlugins: context.validPlugins.set(
+          validPlugin.config.name,
+          validPlugin,
+        ),
+      };
+    }),
     handleInvalidPlugin: assign(({ context }, invalidPlugin: InvalidPlugin) => {
       const existingPendingItem = context.pendingPlugins.get(
         invalidPlugin.config.name,

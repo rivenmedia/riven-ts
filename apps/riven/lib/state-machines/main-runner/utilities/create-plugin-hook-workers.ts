@@ -5,12 +5,10 @@ import os from "node:os";
 
 import { createPluginWorker } from "../../../message-queue/utilities/create-plugin-worker.ts";
 
-import type { PendingRunnerInvocationPlugin } from "../../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+import type { ValidPlugin } from "../../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 
-export function createPluginHookWorkers(
-  plugins: Map<symbol, PendingRunnerInvocationPlugin>,
-) {
+export function createPluginHookWorkers(plugins: Map<symbol, ValidPlugin>) {
   const pluginQueueMap = new Map<symbol, Map<RivenEvent["type"], Queue>>();
   const pluginWorkerMap = new Map<symbol, Map<RivenEvent["type"], Worker>>();
   const publishableEvents = new Set<RivenEvent["type"]>();
@@ -28,7 +26,7 @@ export function createPluginHookWorkers(
             hook({
               event: job.data as never,
               dataSources,
-            }),
+            }) as Promise<never>,
           { concurrency: os.availableParallelism() },
           {
             telemetry: {

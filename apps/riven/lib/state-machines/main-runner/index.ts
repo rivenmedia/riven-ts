@@ -21,13 +21,13 @@ import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscrib
 
 import type { RetryLibraryEvent } from "../../message-queue/events/retry-library.event.ts";
 import type { Flow } from "../../message-queue/flows/index.ts";
-import type { PendingRunnerInvocationPlugin } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+import type { ValidPlugin } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 export interface MainRunnerMachineContext {
-  plugins: Map<symbol, PendingRunnerInvocationPlugin>;
+  plugins: Map<symbol, ValidPlugin>;
   flows: Map<Flow["name"], Worker>;
   pluginQueues: Map<symbol, Map<RivenEvent["type"], Queue>>;
   pluginWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
@@ -35,7 +35,7 @@ export interface MainRunnerMachineContext {
 }
 
 export interface MainRunnerMachineInput {
-  plugins: Map<symbol, PendingRunnerInvocationPlugin>;
+  plugins: Map<symbol, ValidPlugin>;
   queues: Map<RivenEvent["type"], Queue>;
 }
 

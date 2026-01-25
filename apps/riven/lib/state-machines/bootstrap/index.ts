@@ -2,11 +2,6 @@ import { type AnyActorRef, assign, setup } from "xstate";
 import z from "zod";
 
 import {
-  type InvalidPlugin,
-  type PendingRunnerInvocationPlugin,
-  type RegisteredPlugin,
-} from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
-import {
   type PluginRegistrarMachineOutput,
   pluginRegistrarMachine,
 } from "../plugin-registrar/index.ts";
@@ -16,6 +11,11 @@ import { initialiseQueues } from "./actors/initialise-queues.actor.ts";
 import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
+import type {
+  InvalidPlugin,
+  RegisteredPlugin,
+  ValidPlugin,
+} from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type Fuse from "@zkochan/fuse-native";
@@ -25,7 +25,7 @@ export interface BootstrapMachineContext {
   error?: Error;
   rootRef: AnyActorRef;
   validatingPlugins: Map<symbol, RegisteredPlugin>;
-  validPlugins: Map<symbol, PendingRunnerInvocationPlugin>;
+  validPlugins: Map<symbol, ValidPlugin>;
   invalidPlugins: Map<symbol, InvalidPlugin>;
   server?: ApolloServer;
   queues: Map<RivenEvent["type"], Queue>;
@@ -38,7 +38,7 @@ export interface BootstrapMachineInput {
 
 export interface BootstrapMachineOutput {
   server: ApolloServer;
-  plugins: Map<symbol, PendingRunnerInvocationPlugin>;
+  plugins: Map<symbol, ValidPlugin>;
   queues: Map<RivenEvent["type"], Queue>;
   vfs: Fuse;
 }
@@ -74,14 +74,14 @@ export const bootstrapMachine = setup({
       invalidPlugins: (_, { invalidPlugins }: PluginRegistrarMachineOutput) =>
         invalidPlugins,
       validPlugins: (_, { validPlugins }: PluginRegistrarMachineOutput) => {
-        const pluginMap = new Map<symbol, PendingRunnerInvocationPlugin>();
+        const pluginMap = new Map<symbol, ValidPlugin>();
 
         for (const [
           pluginSymbol,
           { config, dataSources },
         ] of validPlugins.entries()) {
           pluginMap.set(pluginSymbol, {
-            status: "pending-runner-invocation",
+            status: "valid",
             config,
             dataSources,
           });
