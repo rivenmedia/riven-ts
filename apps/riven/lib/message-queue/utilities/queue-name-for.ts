@@ -7,7 +7,7 @@ export function queueNameFor<T extends Flow["name"]>(eventName: T): T;
 export function queueNameFor<T extends RivenEvent["type"], P extends string>(
   eventName: T,
   pluginName: P,
-): `${T}.plugin-${P}`;
+): `${T}.plugin[${P}]`;
 
 export function queueNameFor(
   eventName: RivenEvent["type"] | Flow["name"],
@@ -17,5 +17,5 @@ export function queueNameFor(
     return eventName;
   }
 
-  return `${eventName}.plugin-${pluginName}`;
+  return `${eventName}.plugin[${pluginName}]`;
 }

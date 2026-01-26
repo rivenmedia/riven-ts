@@ -10,7 +10,7 @@ import {
   mainRunnerMachine,
 } from "../../../main-runner/index.ts";
 
-import type { ValidPlugin } from "../../../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+import type { ValidPlugin } from "../../../../types/plugins.ts";
 
 export const it = baseIt.extend<{
   actor: Actor<typeof mainRunnerMachine>;
@@ -29,7 +29,9 @@ export const it = baseIt.extend<{
         },
       ],
     ]),
-    queues: new Map(),
+    publishableEvents: new Set(),
+    pluginQueues: new Map(),
+    pluginWorkers: new Map(),
   },
   actor: async ({ input, machine }, use) => {
     const actor = createActor(machine, { id: "Main runner", input });

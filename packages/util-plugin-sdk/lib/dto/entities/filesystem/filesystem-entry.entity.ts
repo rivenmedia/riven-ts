@@ -20,7 +20,7 @@ export class FileSystemEntry extends BaseEntity {
   id!: number;
 
   @Field(() => Number)
-  @Property({ default: 0 })
+  @Property({ type: "bigint" })
   fileSize!: number;
 
   @Field()

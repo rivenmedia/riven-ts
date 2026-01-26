@@ -6,31 +6,35 @@ import z from "zod";
 
 import { redisCache } from "../../utilities/redis-cache.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
-import {
-  type InvalidPlugin,
-  type RegisteredPlugin,
-  type ValidPlugin,
-  collectPluginsForRegistration,
-} from "./actors/collect-plugins-for-registration.actor.ts";
+import { collectPluginsForRegistration } from "./actors/collect-plugins-for-registration.actor.ts";
 import {
   type RegisterPluginHookWorkersOutput,
   registerPluginHookWorkers,
 } from "./actors/register-plugin-hook-workers.actor.ts";
 import { validatePlugin } from "./actors/validate-plugin.actor.ts";
 
-import type { RivenEvent } from "@repo/util-plugin-sdk/events";
-import type { Queue, Worker } from "bullmq";
+import type {
+  InvalidPlugin,
+  InvalidPluginMap,
+  PendingPlugin,
+  PendingPluginMap,
+  PluginQueueMap,
+  PluginWorkerMap,
+  PublishableEventSet,
+  ValidPlugin,
+  ValidPluginMap,
+} from "../../types/plugins.ts";
 
 export interface PluginRegistrarMachineContext extends MachineContext {
   rootRef: AnyActorRef;
   parsedPlugins?: ParsedPlugins;
   runningValidators: Map<symbol, AnyActorRef>;
-  pendingPlugins: Map<symbol, RegisteredPlugin>;
-  invalidPlugins: Map<symbol, InvalidPlugin>;
-  validPlugins: Map<symbol, ValidPlugin>;
-  pluginQueues: Map<symbol, Map<RivenEvent["type"], Queue>>;
-  pluginWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
-  publishableEvents: Set<RivenEvent["type"]>;
+  pendingPlugins: PendingPluginMap;
+  invalidPlugins: InvalidPluginMap;
+  validPlugins: ValidPluginMap;
+  pluginQueues: PluginQueueMap;
+  pluginWorkers: PluginWorkerMap;
+  publishableEvents: PublishableEventSet;
 }
 
 export interface PluginRegistrarMachineInput {
@@ -38,11 +42,11 @@ export interface PluginRegistrarMachineInput {
 }
 
 export interface PluginRegistrarMachineOutput {
-  validPlugins: Map<symbol, ValidPlugin>;
-  invalidPlugins: Map<symbol, InvalidPlugin>;
-  pluginQueues: Map<symbol, Map<RivenEvent["type"], Queue>>;
-  pluginWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
-  publishableEvents: Set<RivenEvent["type"]>;
+  validPlugins: ValidPluginMap;
+  invalidPlugins: InvalidPluginMap;
+  pluginQueues: PluginQueueMap;
+  pluginWorkers: PluginWorkerMap;
+  publishableEvents: PublishableEventSet;
 }
 
 export type PluginRegistrarMachineEvent =
@@ -64,7 +68,7 @@ export const pluginRegistrarMachine = setup({
   actions: {
     registerPlugins: assign({
       pendingPlugins: (_, { validPlugins }: ParsedPlugins) => {
-        const pluginMap = new Map<symbol, RegisteredPlugin>();
+        const pluginMap = new Map<symbol, PendingPlugin>();
 
         for (const plugin of validPlugins) {
           const dataSources = new DataSourceMap();

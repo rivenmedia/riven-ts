@@ -11,25 +11,27 @@ import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
 import type {
-  InvalidPlugin,
-  RegisteredPlugin,
+  InvalidPluginMap,
+  PluginQueueMap,
+  PluginWorkerMap,
+  RegisteredPluginMap,
   ValidPlugin,
-} from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+  ValidPluginMap,
+} from "../../types/plugins.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type Fuse from "@zkochan/fuse-native";
-import type { Queue, Worker } from "bullmq";
 
 export interface BootstrapMachineContext {
   error?: Error;
   rootRef: AnyActorRef;
-  validatingPlugins: Map<symbol, RegisteredPlugin>;
-  validPlugins: Map<symbol, ValidPlugin>;
-  invalidPlugins: Map<symbol, InvalidPlugin>;
+  validatingPlugins: RegisteredPluginMap;
+  validPlugins: ValidPluginMap;
+  invalidPlugins: InvalidPluginMap;
   server?: ApolloServer;
   vfs?: Fuse;
-  pluginQueues: Map<symbol, Map<RivenEvent["type"], Queue>>;
-  pluginWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
+  pluginQueues: PluginQueueMap;
+  pluginWorkers: PluginWorkerMap;
   publishableEvents: Set<RivenEvent["type"]>;
 }
 
@@ -39,9 +41,9 @@ export interface BootstrapMachineInput {
 
 export interface BootstrapMachineOutput {
   server: ApolloServer;
-  plugins: Map<symbol, ValidPlugin>;
-  pluginQueues: Map<symbol, Map<RivenEvent["type"], Queue>>;
-  pluginWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
+  plugins: ValidPluginMap;
+  pluginQueues: PluginQueueMap;
+  pluginWorkers: PluginWorkerMap;
   publishableEvents: Set<RivenEvent["type"]>;
   vfs: Fuse;
 }

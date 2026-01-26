@@ -35,7 +35,7 @@ export async function createPluginWorker<
   workerOptions?: Omit<WorkerOptions, "connection" | "telemetry">,
   createPluginWorkerOptions?: CreatePluginWorkerOptions,
 ) {
-  const queueName = `${name}.plugin-${pluginName}`;
+  const queueName = `${name}.plugin[${pluginName}]`;
 
   const queue = createQueue(queueName);
 

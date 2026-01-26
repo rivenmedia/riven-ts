@@ -1,11 +1,17 @@
+import {
+  type MediaItemStreamLinkRequestedEvent,
+  MediaItemStreamLinkRequestedResponse,
+} from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
+
 import Fuse from "@zkochan/fuse-native";
-import { Queue } from "bullmq";
 import { fromPromise } from "xstate";
 import z from "zod";
 
 import { fuseOperations } from "../../../vfs/index.ts";
 
-import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { PluginQueueMap } from "../../../types/plugins.ts";
+import type { ParamsFor } from "@repo/util-plugin-sdk";
+import type { Queue } from "bullmq";
 
 export interface InitialiseVfsOutput {
   vfs: Fuse;
@@ -13,7 +19,7 @@ export interface InitialiseVfsOutput {
 
 export interface InitialiseVfsInput {
   mountPath: string;
-  pluginQueues: Map<symbol, Map<RivenEvent["type"], Queue>>;
+  pluginQueues: PluginQueueMap;
 }
 
 export const initialiseVfs = fromPromise<
@@ -38,7 +44,28 @@ export const initialiseVfs = fromPromise<
     );
   }
 
-  const vfs = new Fuse(mountPath, fuseOperations(pluginQueues), {
+  const linkRequestQueues = new Map<
+    string,
+    Queue<
+      ParamsFor<MediaItemStreamLinkRequestedEvent>,
+      MediaItemStreamLinkRequestedResponse
+    >
+  >();
+
+  for (const [pluginSymbol, queueMap] of pluginQueues.entries()) {
+    for (const [event, queue] of queueMap.entries()) {
+      if (
+        event !== "riven.media-item.stream-link.requested" ||
+        !pluginSymbol.description
+      ) {
+        continue;
+      }
+
+      linkRequestQueues.set(pluginSymbol.description, queue as never);
+    }
+  }
+
+  const vfs = new Fuse(mountPath, fuseOperations({ linkRequestQueues }), {
     debug: z.stringbool().parse(process.env["VFS_DEBUG_LOGGING"]),
     autoUnmount: true,
     allowOther: true,

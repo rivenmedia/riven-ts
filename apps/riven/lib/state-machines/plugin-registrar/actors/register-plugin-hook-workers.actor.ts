@@ -6,26 +6,41 @@ import { fromPromise } from "xstate";
 
 import { createPluginWorker } from "../../../message-queue/utilities/create-plugin-worker.ts";
 
-import type { ValidPlugin } from "./collect-plugins-for-registration.actor.ts";
+import type {
+  PluginQueueMap,
+  PluginWorkerMap,
+  PublishableEventSet,
+  ValidPluginMap,
+} from "../../../types/plugins.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 export interface RegisterPluginHookWorkersInput {
-  plugins: Map<symbol, ValidPlugin>;
+  plugins: ValidPluginMap;
 }
 
 export interface RegisterPluginHookWorkersOutput {
-  pluginQueues: Map<symbol, Map<RivenEvent["type"], Queue>>;
-  pluginWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
-  publishableEvents: Set<RivenEvent["type"]>;
+  pluginQueues: PluginQueueMap;
+  pluginWorkers: PluginWorkerMap;
+  publishableEvents: PublishableEventSet;
 }
 
 export const registerPluginHookWorkers = fromPromise<
   RegisterPluginHookWorkersOutput,
   RegisterPluginHookWorkersInput
 >(async ({ input: { plugins } }) => {
-  const pluginQueueMap = new Map<symbol, Map<RivenEvent["type"], Queue>>();
-  const pluginWorkerMap = new Map<symbol, Map<RivenEvent["type"], Worker>>();
-  const publishableEvents = new Set<RivenEvent["type"]>();
+  const pluginQueueMap = new Map<
+    symbol,
+    Map<RivenEvent["type"], Queue>
+  >() satisfies PluginQueueMap;
+
+  const pluginWorkerMap = new Map<
+    symbol,
+    Map<RivenEvent["type"], Worker>
+  >() satisfies PluginWorkerMap;
+
+  const publishableEvents = new Set<
+    RivenEvent["type"]
+  >() satisfies PublishableEventSet;
 
   for (const [pluginSymbol, { config, dataSources }] of plugins.entries()) {
     const queueMap = new Map<RivenEvent["type"], Queue>();
@@ -36,7 +51,7 @@ export const registerPluginHookWorkers = fromPromise<
         const { queue, worker } = await createPluginWorker(
           eventName as RivenEvent["type"],
           pluginSymbol.description ?? "unknown",
-          async (job) =>
+          (job) =>
             hook({
               event: job.data as never,
               dataSources,
@@ -60,6 +75,12 @@ export const registerPluginHookWorkers = fromPromise<
 
         queueMap.set(eventName as RivenEvent["type"], queue);
         workerMap.set(eventName as RivenEvent["type"], worker);
+      } else {
+        logger.silly(
+          `No hook defined for event "${eventName}" for plugin ${String(
+            pluginSymbol.description,
+          )}, skipping worker registration.`,
+        );
       }
     }
 

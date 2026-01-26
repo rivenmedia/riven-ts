@@ -12,7 +12,7 @@ import {
 import { mainRunnerMachine } from "../../../main-runner/index.ts";
 import { type RivenMachineInput, rivenMachine } from "../../index.ts";
 
-import type { ValidPlugin } from "../../../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+import type { ValidPlugin } from "../../../../types/plugins.ts";
 import type { stopGqlServer } from "../../actors/stop-gql-server.actor.ts";
 
 export const it = baseIt.extend<{
@@ -39,7 +39,9 @@ export const it = baseIt.extend<{
           },
         ],
       ]),
-      queues: new Map(),
+      pluginQueues: new Map(),
+      pluginWorkers: new Map(),
+      publishableEvents: new Set(),
       vfs: {} as never,
     });
   },
