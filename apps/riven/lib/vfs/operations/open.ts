@@ -11,11 +11,16 @@ import {
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
 
-import type { OPERATIONS } from "@zkochan/fuse-native";
+import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { Queue } from "bullmq";
 
 let fd = 0;
 
-async function open(path: string, _flags: number) {
+async function open(
+  path: string,
+  _flags: number,
+  queues: Map<symbol, Map<RivenEvent["type"], Queue>>,
+) {
   const { tmdbId } = PathInfo.parse(path);
 
   if (!tmdbId) {
@@ -27,6 +32,8 @@ async function open(path: string, _flags: number) {
       tmdbId,
     },
   });
+
+  console.log({ queues });
 
   if (!item.unrestrictedUrl) {
     throw new FuseError(
@@ -55,12 +62,17 @@ async function open(path: string, _flags: number) {
   return nextFd;
 }
 
-export const openSync = function (path, flags, callback) {
-  open(path, flags)
+export const openSync = function (
+  path: string,
+  flags: number,
+  pluginQueues: Map<symbol, Map<RivenEvent["type"], Queue>>,
+  callback: (err: number, fd?: number) => void,
+) {
+  open(path, flags, pluginQueues)
     .then(callback.bind(null, 0))
     .catch((error: unknown) => {
       logger.error(`VFS open error: ${(error as Error).message}`);
 
       callback(Fuse.EIO);
     });
-} satisfies OPERATIONS["open"];
+};

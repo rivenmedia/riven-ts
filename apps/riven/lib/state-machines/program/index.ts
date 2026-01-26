@@ -55,16 +55,32 @@ export const rivenMachine = setup({
           src: "bootstrapMachine",
           input: ({ self }) => ({ rootRef: self }),
           onDone: {
-            actions: assign(({ spawn, event }) => ({
-              server: event.output.server,
-              vfs: event.output.vfs,
-              mainRunnerRef: spawn(mainRunnerMachine, {
-                input: {
-                  plugins: event.output.plugins,
-                  queues: event.output.queues,
+            actions: assign(
+              ({
+                spawn,
+                event: {
+                  output: {
+                    server,
+                    vfs,
+                    plugins,
+                    publishableEvents,
+                    pluginQueues,
+                    pluginWorkers,
+                  },
                 },
+              }) => ({
+                server,
+                vfs,
+                mainRunnerRef: spawn(mainRunnerMachine, {
+                  input: {
+                    plugins,
+                    publishableEvents,
+                    pluginQueues,
+                    pluginWorkers,
+                  },
+                }),
               }),
-            })),
+            ),
             target: "Running",
           },
           onError: {
@@ -109,7 +125,7 @@ export const rivenMachine = setup({
                 invoke: {
                   id: "stopGqlServer",
                   src: "stopGqlServer",
-                  input: ({ context }) => context.server,
+                  input: ({ context: { server } }) => server,
                   onDone: "Stopped",
                   onError: {
                     target: "Stopped",

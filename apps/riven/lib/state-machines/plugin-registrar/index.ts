@@ -12,7 +12,14 @@ import {
   type ValidPlugin,
   collectPluginsForRegistration,
 } from "./actors/collect-plugins-for-registration.actor.ts";
+import {
+  type RegisterPluginHookWorkersOutput,
+  registerPluginHookWorkers,
+} from "./actors/register-plugin-hook-workers.actor.ts";
 import { validatePlugin } from "./actors/validate-plugin.actor.ts";
+
+import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { Queue, Worker } from "bullmq";
 
 export interface PluginRegistrarMachineContext extends MachineContext {
   rootRef: AnyActorRef;
@@ -21,6 +28,9 @@ export interface PluginRegistrarMachineContext extends MachineContext {
   pendingPlugins: Map<symbol, RegisteredPlugin>;
   invalidPlugins: Map<symbol, InvalidPlugin>;
   validPlugins: Map<symbol, ValidPlugin>;
+  pluginQueues: Map<symbol, Map<RivenEvent["type"], Queue>>;
+  pluginWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
+  publishableEvents: Set<RivenEvent["type"]>;
 }
 
 export interface PluginRegistrarMachineInput {
@@ -30,6 +40,9 @@ export interface PluginRegistrarMachineInput {
 export interface PluginRegistrarMachineOutput {
   validPlugins: Map<symbol, ValidPlugin>;
   invalidPlugins: Map<symbol, InvalidPlugin>;
+  pluginQueues: Map<symbol, Map<RivenEvent["type"], Queue>>;
+  pluginWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
+  publishableEvents: Set<RivenEvent["type"]>;
 }
 
 export type PluginRegistrarMachineEvent =
@@ -43,6 +56,7 @@ export const pluginRegistrarMachine = setup({
     events: {} as PluginRegistrarMachineEvent,
     children: {} as {
       collectPluginsForRegistration: "collectPluginsForRegistration";
+      registerPluginHookWorkers: "registerPluginHookWorkers";
       validatePlugin: "validatePlugin";
     },
     output: {} as PluginRegistrarMachineOutput,
@@ -88,58 +102,63 @@ export const pluginRegistrarMachine = setup({
         return pluginMap;
       },
     }),
-    handleValidPlugin: assign(({ context }, validPlugin: ValidPlugin) => {
-      const existingPendingItem = context.pendingPlugins.get(
-        validPlugin.config.name,
-      );
+    handleValidPlugin: assign(
+      (
+        { context: { pendingPlugins, validPlugins } },
+        validPlugin: ValidPlugin,
+      ) => {
+        const existingPendingItem = pendingPlugins.get(validPlugin.config.name);
 
-      if (!existingPendingItem) {
-        logger.error(
-          `Received valid plugin notification for unknown plugin: ${validPlugin.config.name.toString()}`,
-        );
+        if (!existingPendingItem) {
+          logger.error(
+            `Received valid plugin notification for unknown plugin: ${validPlugin.config.name.toString()}`,
+          );
 
-        return;
-      }
+          return;
+        }
 
-      const newPendingPlugins = new Map(context.pendingPlugins);
+        const newPendingPlugins = new Map(pendingPlugins);
 
-      newPendingPlugins.delete(validPlugin.config.name);
+        newPendingPlugins.delete(validPlugin.config.name);
 
-      return {
-        pendingPlugins: newPendingPlugins,
-        validPlugins: context.validPlugins.set(
-          validPlugin.config.name,
-          validPlugin,
-        ),
-      };
-    }),
-    handleInvalidPlugin: assign(({ context }, invalidPlugin: InvalidPlugin) => {
-      const existingPendingItem = context.pendingPlugins.get(
-        invalidPlugin.config.name,
-      );
-
-      if (!existingPendingItem) {
-        logger.error(
-          `Received invalid plugin notification for unknown plugin: ${String(
-            invalidPlugin.config.name,
-          )}`,
-        );
-
-        return {};
-      }
-
-      const newPendingPlugins = new Map(context.pendingPlugins);
-
-      newPendingPlugins.delete(invalidPlugin.config.name);
-
-      return {
-        pendingPlugins: newPendingPlugins,
-        invalidPlugins: context.invalidPlugins.set(
+        return {
+          pendingPlugins: newPendingPlugins,
+          validPlugins: validPlugins.set(validPlugin.config.name, validPlugin),
+        };
+      },
+    ),
+    handleInvalidPlugin: assign(
+      (
+        { context: { pendingPlugins, invalidPlugins } },
+        invalidPlugin: InvalidPlugin,
+      ) => {
+        const existingPendingItem = pendingPlugins.get(
           invalidPlugin.config.name,
-          invalidPlugin,
-        ),
-      };
-    }),
+        );
+
+        if (!existingPendingItem) {
+          logger.error(
+            `Received invalid plugin notification for unknown plugin: ${String(
+              invalidPlugin.config.name,
+            )}`,
+          );
+
+          return {};
+        }
+
+        const newPendingPlugins = new Map(pendingPlugins);
+
+        newPendingPlugins.delete(invalidPlugin.config.name);
+
+        return {
+          pendingPlugins: newPendingPlugins,
+          invalidPlugins: invalidPlugins.set(
+            invalidPlugin.config.name,
+            invalidPlugin,
+          ),
+        };
+      },
+    ),
     spawnValidators: assign(({ spawn, context: { pendingPlugins } }) => {
       const validatorRefs = new Map<symbol, AnyActorRef>();
 
@@ -156,13 +175,31 @@ export const pluginRegistrarMachine = setup({
         runningValidators: validatorRefs,
       };
     }),
+    assignPluginHooks: assign(
+      (
+        _,
+        {
+          pluginQueues,
+          pluginWorkers,
+          publishableEvents,
+        }: RegisterPluginHookWorkersOutput,
+      ) => {
+        return {
+          pluginQueues,
+          pluginWorkers,
+          publishableEvents,
+        };
+      },
+    ),
   },
   actors: {
     collectPluginsForRegistration,
     validatePlugin,
+    registerPluginHookWorkers,
   },
   guards: {
-    allPluginsValidated: ({ context }) => context.pendingPlugins.size === 0,
+    allPluginsValidated: ({ context: { pendingPlugins } }) =>
+      pendingPlugins.size === 0,
     isPluginValid: (_, isValid: boolean) => isValid,
   },
 })
@@ -174,12 +211,26 @@ export const pluginRegistrarMachine = setup({
       validPlugins: new Map(),
       runningValidators: new Map(),
       rootRef: input.rootRef,
+      pluginQueues: new Map(),
+      pluginWorkers: new Map(),
+      publishableEvents: new Set(),
     }),
     id: "Plugin registrar",
     initial: "Registering plugins",
-    output: ({ context }) => ({
-      validPlugins: context.validPlugins,
-      invalidPlugins: context.invalidPlugins,
+    output: ({
+      context: {
+        validPlugins,
+        invalidPlugins,
+        pluginQueues,
+        pluginWorkers,
+        publishableEvents,
+      },
+    }) => ({
+      validPlugins,
+      invalidPlugins,
+      pluginQueues,
+      pluginWorkers,
+      publishableEvents,
     }),
     states: {
       "Registering plugins": {
@@ -190,11 +241,12 @@ export const pluginRegistrarMachine = setup({
             target: "Validating",
             actions: [
               assign({
-                parsedPlugins: ({ event }) => event.output,
+                parsedPlugins: ({ event: { output: parsedPlugins } }) =>
+                  parsedPlugins,
               }),
               {
                 type: "registerPlugins",
-                params: ({ event }) => event.output,
+                params: ({ event: { output: parsedPlugins } }) => parsedPlugins,
               },
             ],
           },
@@ -204,22 +256,44 @@ export const pluginRegistrarMachine = setup({
         entry: "spawnValidators",
         always: {
           guard: "allPluginsValidated",
-          target: "Validated",
+          target: "Registering plugin hook workers",
+          actions: {
+            type: "log",
+            params: {
+              message: "Plugin validation complete.",
+            },
+          },
         },
         on: {
           "riven.plugin-valid": {
             actions: [
               {
                 type: "handleValidPlugin",
-                params: ({ event }) => event.plugin,
+                params: ({ event: { plugin } }) => plugin,
               },
             ],
           },
           "riven.plugin-invalid": {
             actions: {
               type: "handleInvalidPlugin",
-              params: ({ event }) => event.plugin,
+              params: ({ event: { plugin } }) => plugin,
             },
+          },
+        },
+      },
+      "Registering plugin hook workers": {
+        invoke: {
+          id: "registerPluginHookWorkers",
+          src: "registerPluginHookWorkers",
+          input: ({ context: { validPlugins } }) => ({
+            plugins: validPlugins,
+          }),
+          onDone: {
+            actions: {
+              type: "assignPluginHooks",
+              params: ({ event: { output } }) => output,
+            },
+            target: "Validated",
           },
         },
       },

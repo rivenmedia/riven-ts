@@ -16,7 +16,6 @@ import { requestDownload } from "./actors/request-download.actor.ts";
 import { requestIndexData } from "./actors/request-index-data.actor.ts";
 import { requestScrape } from "./actors/request-scrape.actor.ts";
 import { retryLibraryActor } from "./actors/retry-library.actor.ts";
-import { createPluginHookWorkers } from "./utilities/create-plugin-hook-workers.ts";
 import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscribers.ts";
 
 import type { RetryLibraryEvent } from "../../message-queue/events/retry-library.event.ts";
@@ -36,7 +35,9 @@ export interface MainRunnerMachineContext {
 
 export interface MainRunnerMachineInput {
   plugins: Map<symbol, ValidPlugin>;
-  queues: Map<RivenEvent["type"], Queue>;
+  publishableEvents: Set<RivenEvent["type"]>;
+  pluginQueues: Map<symbol, Map<RivenEvent["type"], Queue>>;
+  pluginWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
 }
 
 export type MainRunnerMachineEvent = RetryLibraryEvent | RivenEvent;
@@ -51,9 +52,12 @@ export const mainRunnerMachine = setup({
     },
   },
   actions: {
-    broadcastEventToPlugins: ({ context }, { type, ...event }: RivenEvent) => {
-      for (const plugin of context.plugins.values()) {
-        const queue = context.pluginQueues.get(plugin.config.name)?.get(type);
+    broadcastEventToPlugins: (
+      { context: { plugins, pluginQueues } },
+      { type, ...event }: RivenEvent,
+    ) => {
+      for (const plugin of plugins.values()) {
+        const queue = pluginQueues.get(plugin.config.name)?.get(type);
 
         if (!queue) {
           continue;
@@ -68,19 +72,21 @@ export const mainRunnerMachine = setup({
         void queue.add(type, event);
       }
     },
-    requestContentServices: enqueueActions(({ enqueue, context }) => {
-      enqueue.spawnChild(requestContentServicesActor, {
-        input: {
-          subscribers: getPluginEventSubscribers(
-            "riven.content-service.requested",
-            context.plugins,
-          ),
-        },
-      });
-    }),
+    requestContentServices: enqueueActions(
+      ({ enqueue, context: { plugins } }) => {
+        enqueue.spawnChild(requestContentServicesActor, {
+          input: {
+            subscribers: getPluginEventSubscribers(
+              "riven.content-service.requested",
+              plugins,
+            ),
+          },
+        });
+      },
+    ),
     requestIndexData: enqueueActions(
       (
-        { enqueue, context },
+        { enqueue, context: { plugins } },
         params: ParamsFor<MediaItemIndexRequestedEvent>,
       ) => {
         enqueue.spawnChild(requestIndexData, {
@@ -88,7 +94,7 @@ export const mainRunnerMachine = setup({
             item: params.item,
             subscribers: getPluginEventSubscribers(
               "riven.media-item.index.requested",
-              context.plugins,
+              plugins,
             ),
           },
         });
@@ -96,7 +102,7 @@ export const mainRunnerMachine = setup({
     ),
     requestScrape: enqueueActions(
       (
-        { enqueue, context },
+        { enqueue, context: { plugins } },
         params: ParamsFor<MediaItemScrapeRequestedEvent>,
       ) => {
         enqueue.spawnChild(requestScrape, {
@@ -104,7 +110,7 @@ export const mainRunnerMachine = setup({
             item: params.item,
             subscribers: getPluginEventSubscribers(
               "riven.media-item.scrape.requested",
-              context.plugins,
+              plugins,
             ),
           },
         });
@@ -112,7 +118,7 @@ export const mainRunnerMachine = setup({
     ),
     requestDownload: enqueueActions(
       (
-        { enqueue, context },
+        { enqueue, context: { plugins } },
         params: ParamsFor<MediaItemScrapeRequestedEvent>,
       ) => {
         enqueue.spawnChild(requestDownload, {
@@ -120,7 +126,7 @@ export const mainRunnerMachine = setup({
             item: params.item,
             subscribers: getPluginEventSubscribers(
               "riven.media-item.download.requested",
-              context.plugins,
+              plugins,
             ),
           },
         });
@@ -146,14 +152,22 @@ export const mainRunnerMachine = setup({
      *
      * @returns boolean
      */
-    shouldQueueEvent: ({ event, context }) => {
+    shouldQueueEvent: ({ event, context: { publishableEvents } }) => {
       const parsedEvent = RivenEvent.safeParse(event);
 
       if (!parsedEvent.success) {
         return false;
       }
 
-      return context.publishableEvents.has(parsedEvent.data.type);
+      const isPublishableEvent = publishableEvents.has(parsedEvent.data.type);
+
+      if (!isPublishableEvent) {
+        logger.silly(
+          `Event "${parsedEvent.data.type}" will not be queued, as no plugins have registered hooks for it.`,
+        );
+      }
+
+      return isPublishableEvent;
     },
     isRivenEvent: ({ event }) => RivenEvent.safeParse(event).success,
   },
@@ -163,14 +177,11 @@ export const mainRunnerMachine = setup({
     /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7ABABwCcB7KAgQwFscKzVcCBXLLMAgYgI2wDoLJUyAWlQAXMBW4AqANoAGALqJQeIrFGoiWJSAAeiAIwAmADQgAnogCsATmvcAHEcsBfZ6bSZchEuSo06OIzMrBxcWIJ4ADYMUHS8-EKi4twEYACODHBiEHKKSCAqaiIaWvl6CEamFggALJaGDjYAzADsLm4gHtj4xKSU1LT0TCzsnJ7xEALCYhIAxqlkxZrcrMQEudqF6pra5ZXmiE2yltzWsgBshu3uYT0+-f5DwaNhE1NJcwtLWNxkkQsQMyCMA6VCwESwDb5LbfXYGEwHCqWeynSxNJyuG6eO59PyDQLDEJjHipEQEIGRVAAI3I5KhylU21KoD2COqRlcHSwRAgcG0XS8vV8AwCQRGm0ZsLKiDa3FkhhaTRqrUsVRlln03Ba50sl3ariAA */
     id: "Riven program main runner",
     context: ({ input, self }) => {
-      const { publishableEvents, pluginQueues, pluginWorkers } =
-        createPluginHookWorkers(input.plugins);
-
       return {
         plugins: input.plugins,
-        publishableEvents,
-        pluginQueues,
-        pluginWorkers,
+        publishableEvents: input.publishableEvents,
+        pluginQueues: input.pluginQueues,
+        pluginWorkers: input.pluginWorkers,
         flows: new Map<Flow["name"], Worker>([
           [
             "index-item",
@@ -245,15 +256,15 @@ export const mainRunnerMachine = setup({
         actions: [
           {
             type: "log",
-            params: ({ event }) => ({
-              message: `Successfully created media item: ${JSON.stringify(event.item)}`,
+            params: ({ event: { item } }) => ({
+              message: `Successfully created media item: ${JSON.stringify(item)}`,
               level: "silly",
             }),
           },
           {
             type: "requestIndexData",
-            params: ({ event }) => ({
-              item: event.item,
+            params: ({ event: { item } }) => ({
+              item,
             }),
           },
         ],
@@ -261,8 +272,8 @@ export const mainRunnerMachine = setup({
       "riven.media-item.index.requested": {
         actions: {
           type: "requestIndexData",
-          params: ({ event }) => ({
-            item: event.item,
+          params: ({ event: { item } }) => ({
+            item,
           }),
         },
       },
@@ -270,15 +281,15 @@ export const mainRunnerMachine = setup({
         actions: [
           {
             type: "log",
-            params: ({ event }) => ({
-              message: `Successfully indexed media item: ${JSON.stringify(event.item)}`,
+            params: ({ event: { item } }) => ({
+              message: `Successfully indexed media item: ${JSON.stringify(item)}`,
               level: "info",
             }),
           },
           {
             type: "requestScrape",
-            params: ({ event }) => ({
-              item: event.item,
+            params: ({ event: { item } }) => ({
+              item,
             }),
           },
         ],
@@ -286,8 +297,8 @@ export const mainRunnerMachine = setup({
       "riven.media-item.scrape.requested": {
         actions: {
           type: "requestScrape",
-          params: ({ event }) => ({
-            item: event.item,
+          params: ({ event: { item } }) => ({
+            item,
           }),
         },
       },
@@ -295,15 +306,15 @@ export const mainRunnerMachine = setup({
         actions: [
           {
             type: "log",
-            params: ({ event }) => ({
-              message: `Successfully scraped media item: ${JSON.stringify(event.item)}`,
+            params: ({ event: { item } }) => ({
+              message: `Successfully scraped media item: ${JSON.stringify(item)}`,
               level: "info",
             }),
           },
           {
             type: "requestDownload",
-            params: ({ event }) => ({
-              item: event.item,
+            params: ({ event: { item } }) => ({
+              item,
             }),
           },
         ],
@@ -311,8 +322,8 @@ export const mainRunnerMachine = setup({
       "riven.media-item.download.requested": {
         actions: {
           type: "requestDownload",
-          params: ({ event }) => ({
-            item: event.item,
+          params: ({ event: { item } }) => ({
+            item,
           }),
         },
       },
@@ -320,8 +331,13 @@ export const mainRunnerMachine = setup({
         actions: [
           {
             type: "log",
-            params: ({ event }) => ({
-              message: `Successfully downloaded ${event.item.title ?? "Unknown"} in ${event.durationFromRequestToDownload.toString()} seconds.`,
+            params: ({
+              event: {
+                item: { title },
+                durationFromRequestToDownload,
+              },
+            }) => ({
+              message: `Successfully downloaded ${title ?? "Unknown"} in ${durationFromRequestToDownload.toString()} seconds.`,
             }),
           },
         ],
@@ -330,8 +346,8 @@ export const mainRunnerMachine = setup({
         actions: [
           {
             type: "log",
-            params: ({ event }) => ({
-              message: `Error downloading media item ${JSON.stringify(event.item)}: ${String(event.error)}`,
+            params: ({ event: { item, error } }) => ({
+              message: `Error downloading media item ${JSON.stringify(item)}: ${String(error)}`,
               level: "error",
             }),
           },
@@ -343,8 +359,8 @@ export const mainRunnerMachine = setup({
         actions: [
           {
             type: "log",
-            params: ({ event }) => ({
-              message: `Error creating media item ${JSON.stringify(event.item)}: ${String(event.error)}`,
+            params: ({ event: { item, error } }) => ({
+              message: `Error creating media item ${JSON.stringify(item)}: ${String(error)}`,
               level: "error",
             }),
           },
@@ -356,8 +372,8 @@ export const mainRunnerMachine = setup({
         actions: [
           {
             type: "log",
-            params: ({ event }) => ({
-              message: `Media item already exists: ${JSON.stringify(event.item)}`,
+            params: ({ event: { item } }) => ({
+              message: `Media item already exists: ${JSON.stringify(item)}`,
               level: "verbose",
             }),
           },
@@ -369,8 +385,8 @@ export const mainRunnerMachine = setup({
         actions: [
           {
             type: "log",
-            params: ({ event }) => ({
-              message: `Media item has already been indexed: ${JSON.stringify(event.item)}`,
+            params: ({ event: { item } }) => ({
+              message: `Media item has already been indexed: ${JSON.stringify(item)}`,
               level: "verbose",
             }),
           },

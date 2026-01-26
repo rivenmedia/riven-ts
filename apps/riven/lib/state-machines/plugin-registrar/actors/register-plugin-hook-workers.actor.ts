@@ -2,13 +2,27 @@ import { logger } from "@repo/core-util-logger";
 
 import { type Queue, Worker } from "bullmq";
 import os from "node:os";
+import { fromPromise } from "xstate";
 
 import { createPluginWorker } from "../../../message-queue/utilities/create-plugin-worker.ts";
 
-import type { ValidPlugin } from "../../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+import type { ValidPlugin } from "./collect-plugins-for-registration.actor.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 
-export function createPluginHookWorkers(plugins: Map<symbol, ValidPlugin>) {
+export interface RegisterPluginHookWorkersInput {
+  plugins: Map<symbol, ValidPlugin>;
+}
+
+export interface RegisterPluginHookWorkersOutput {
+  pluginQueues: Map<symbol, Map<RivenEvent["type"], Queue>>;
+  pluginWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
+  publishableEvents: Set<RivenEvent["type"]>;
+}
+
+export const registerPluginHookWorkers = fromPromise<
+  RegisterPluginHookWorkersOutput,
+  RegisterPluginHookWorkersInput
+>(async ({ input: { plugins } }) => {
   const pluginQueueMap = new Map<symbol, Map<RivenEvent["type"], Queue>>();
   const pluginWorkerMap = new Map<symbol, Map<RivenEvent["type"], Worker>>();
   const publishableEvents = new Set<RivenEvent["type"]>();
@@ -19,7 +33,7 @@ export function createPluginHookWorkers(plugins: Map<symbol, ValidPlugin>) {
 
     for (const [eventName, hook] of Object.entries(config.hooks)) {
       if (hook) {
-        const { queue, worker } = createPluginWorker(
+        const { queue, worker } = await createPluginWorker(
           eventName as RivenEvent["type"],
           pluginSymbol.description ?? "unknown",
           async (job) =>
@@ -58,4 +72,4 @@ export function createPluginHookWorkers(plugins: Map<symbol, ValidPlugin>) {
     pluginWorkers: pluginWorkerMap,
     publishableEvents,
   };
-}
+});

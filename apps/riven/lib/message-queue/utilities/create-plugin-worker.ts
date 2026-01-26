@@ -22,7 +22,7 @@ interface CreatePluginWorkerOptions {
   };
 }
 
-export function createPluginWorker<
+export async function createPluginWorker<
   T extends RivenEvent["type"],
   R extends (typeof RivenEventHandler)[T],
 >(
@@ -56,6 +56,12 @@ export function createPluginWorker<
   worker.on("error", logger.error).on("failed", (_job, err) => {
     logger.error(`[${name}] Error: ${err.message}`);
   });
+
+  if (z.stringbool().parse(process.env["UNSAFE_CLEAR_QUEUES_ON_STARTUP"])) {
+    await queue.obliterate({
+      force: true,
+    });
+  }
 
   return {
     queue,

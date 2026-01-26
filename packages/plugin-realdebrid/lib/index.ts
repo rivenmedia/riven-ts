@@ -25,6 +25,14 @@ export default {
         );
       }
     },
+    "riven.media-item.stream-link.requested": async ({
+      dataSources,
+      event,
+    }) => {
+      return {
+        url: "https://real-debrid.example.com/stream-link",
+      };
+    },
   },
   validator() {
     return true;

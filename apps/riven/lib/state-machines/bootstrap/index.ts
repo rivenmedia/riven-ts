@@ -7,7 +7,6 @@ import {
 } from "../plugin-registrar/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
-import { initialiseQueues } from "./actors/initialise-queues.actor.ts";
 import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
@@ -19,7 +18,7 @@ import type {
 import type { ApolloServer } from "@apollo/server";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type Fuse from "@zkochan/fuse-native";
-import type { Queue } from "bullmq";
+import type { Queue, Worker } from "bullmq";
 
 export interface BootstrapMachineContext {
   error?: Error;
@@ -28,8 +27,10 @@ export interface BootstrapMachineContext {
   validPlugins: Map<symbol, ValidPlugin>;
   invalidPlugins: Map<symbol, InvalidPlugin>;
   server?: ApolloServer;
-  queues: Map<RivenEvent["type"], Queue>;
   vfs?: Fuse;
+  pluginQueues: Map<symbol, Map<RivenEvent["type"], Queue>>;
+  pluginWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
+  publishableEvents: Set<RivenEvent["type"]>;
 }
 
 export interface BootstrapMachineInput {
@@ -39,7 +40,9 @@ export interface BootstrapMachineInput {
 export interface BootstrapMachineOutput {
   server: ApolloServer;
   plugins: Map<symbol, ValidPlugin>;
-  queues: Map<RivenEvent["type"], Queue>;
+  pluginQueues: Map<symbol, Map<RivenEvent["type"], Queue>>;
+  pluginWorkers: Map<symbol, Map<RivenEvent["type"], Worker>>;
+  publishableEvents: Set<RivenEvent["type"]>;
   vfs: Fuse;
 }
 
@@ -52,7 +55,6 @@ export const bootstrapMachine = setup({
       startGqlServer: "startGqlServer";
       initialiseDatabaseConnection: "initialiseDatabaseConnection";
       pluginRegistrarMachine: "pluginRegistrarMachine";
-      initialiseQueues: "initialiseQueues";
       initialiseVfs: "initialiseVfs";
     },
   },
@@ -63,9 +65,6 @@ export const bootstrapMachine = setup({
     assignVfs: assign((_, vfs: Fuse) => ({
       vfs,
     })),
-    assignQueues: assign((_, queues: Map<RivenEvent["type"], Queue>) => ({
-      queues,
-    })),
     raiseError: (_, error: Error) => {
       throw error;
     },
@@ -73,7 +72,7 @@ export const bootstrapMachine = setup({
       validatingPlugins: () => new Map(),
       invalidPlugins: (_, { invalidPlugins }: PluginRegistrarMachineOutput) =>
         invalidPlugins,
-      validPlugins: (_, { validPlugins }: PluginRegistrarMachineOutput) => {
+      validPlugins: (_, { validPlugins }) => {
         const pluginMap = new Map<symbol, ValidPlugin>();
 
         for (const [
@@ -89,17 +88,20 @@ export const bootstrapMachine = setup({
 
         return pluginMap;
       },
+      pluginQueues: (_, { pluginQueues }) => pluginQueues,
+      pluginWorkers: (_, { pluginWorkers }) => pluginWorkers,
+      publishableEvents: (_, { publishableEvents }) => publishableEvents,
     }),
   },
   actors: {
     startGqlServer,
     initialiseDatabaseConnection,
     pluginRegistrarMachine,
-    initialiseQueues,
     initialiseVfs,
   },
   guards: {
-    hasInvalidPlugins: ({ context }) => context.invalidPlugins.size > 0,
+    hasInvalidPlugins: ({ context: { invalidPlugins } }) =>
+      invalidPlugins.size > 0,
   },
 })
   .extend(withLogAction)
@@ -112,24 +114,37 @@ export const bootstrapMachine = setup({
       validatingPlugins: new Map(),
       validPlugins: new Map(),
       invalidPlugins: new Map(),
-      queues: new Map(),
+      pluginQueues: new Map(),
+      pluginWorkers: new Map(),
+      publishableEvents: new Set(),
     }),
-    output: ({ context }) => {
-      if (!context.server) {
+    output: ({
+      context: {
+        server,
+        vfs,
+        validPlugins,
+        pluginQueues,
+        pluginWorkers,
+        publishableEvents,
+      },
+    }) => {
+      if (!server) {
         throw new Error(
           "Bootstrap machine completed without a GraphQL server instance",
         );
       }
 
-      if (!context.vfs) {
+      if (!vfs) {
         throw new Error("Bootstrap machine completed without a VFS instance");
       }
 
       return {
-        plugins: context.validPlugins,
-        server: context.server,
-        queues: context.queues,
-        vfs: context.vfs,
+        plugins: validPlugins,
+        server,
+        vfs,
+        pluginQueues,
+        pluginWorkers,
+        publishableEvents,
       };
     },
     states: {
@@ -198,12 +213,20 @@ export const bootstrapMachine = setup({
                     actions: [
                       {
                         type: "assignGqlServer",
-                        params: ({ event }) => event.output.server,
+                        params: ({
+                          event: {
+                            output: { server },
+                          },
+                        }) => server,
                       },
                       {
                         type: "log",
-                        params: ({ event }) => ({
-                          message: `GraphQL server ready at ${event.output.url}`,
+                        params: ({
+                          event: {
+                            output: { url },
+                          },
+                        }) => ({
+                          message: `GraphQL server ready at ${url}`,
                         }),
                       },
                     ],
@@ -252,8 +275,8 @@ export const bootstrapMachine = setup({
                 invoke: {
                   id: "pluginRegistrarMachine",
                   src: "pluginRegistrarMachine",
-                  input: ({ context }) => ({
-                    rootRef: context.rootRef,
+                  input: ({ context: { rootRef } }) => ({
+                    rootRef,
                   }),
                   onDone: [
                     {
@@ -270,7 +293,7 @@ export const bootstrapMachine = setup({
                         },
                         {
                           type: "handlePluginValidationResponse",
-                          params: ({ event }) => event.output,
+                          params: ({ event: { output } }) => output,
                         },
                       ],
                     },
@@ -279,9 +302,13 @@ export const bootstrapMachine = setup({
                       actions: [
                         {
                           type: "log",
-                          params: ({ event }) => ({
+                          params: ({
+                            event: {
+                              output: { validPlugins },
+                            },
+                          }) => ({
                             message: `Plugins registered successfully. ${[
-                              ...event.output.validPlugins.keys(),
+                              ...validPlugins.keys(),
                             ]
                               .map((k) => k.description)
                               .join(", ")}.`,
@@ -309,39 +336,6 @@ export const bootstrapMachine = setup({
               },
             },
           },
-          "Bootstrapping queues": {
-            initial: "Initialising",
-            states: {
-              Initialising: {
-                entry: {
-                  type: "log",
-                  params: {
-                    message: "Starting queue initialisation...",
-                  },
-                },
-                invoke: {
-                  id: "initialiseQueues",
-                  src: "initialiseQueues",
-                  onDone: {
-                    target: "Complete",
-                    actions: {
-                      type: "assignQueues",
-                      params: ({ event }) => event.output,
-                    },
-                  },
-                },
-              },
-              Complete: {
-                type: "final",
-                entry: {
-                  type: "log",
-                  params: {
-                    message: "Queue initialisation complete.",
-                  },
-                },
-              },
-            },
-          },
         },
       },
       "Bootstrapping VFS": {
@@ -358,16 +352,21 @@ export const bootstrapMachine = setup({
             invoke: {
               id: "initialiseVfs",
               src: "initialiseVfs",
-              input: {
+              input: ({ context: { pluginQueues } }) => ({
                 mountPath: z
                   .string()
                   .parse(process.env["RIVEN_VFS_MOUNT_PATH"]),
-              },
+                pluginQueues,
+              }),
               onDone: {
                 target: "Complete",
                 actions: {
                   type: "assignVfs",
-                  params: ({ event }) => event.output.vfs,
+                  params: ({
+                    event: {
+                      output: { vfs },
+                    },
+                  }) => vfs,
                 },
               },
               onError: {
