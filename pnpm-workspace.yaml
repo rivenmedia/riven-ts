@@ -64,7 +64,6 @@ onlyBuiltDependencies:
   - msgpackr-extract
   - msw
   - protobufjs
-  - shm-typed-array
   - sqlite3
   - unrs-resolver
 

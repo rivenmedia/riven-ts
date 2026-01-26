@@ -79,9 +79,10 @@ services:
 
   bullboard:
     container_name: bullboard
-    network_mode: host
     image: venatum/bull-board
     restart: unless-stopped
+    ports:
+      - 4000:4000
     environment:
       PORT: 4000
     profiles:
@@ -100,7 +101,8 @@ services:
                 - gpu
     runtime: nvidia
     gpus: all
-    network_mode: host
+    ports:
+      - 32400:32400
     environment:
       TZ: Europe/London
       PLEX_CLAIM: claim-hqAzC6-eB8pZqc2MveVL

@@ -1,7 +1,6 @@
 import { logger } from "@repo/core-util-logger";
 
-import shm from "shm-typed-array";
-
+import { chunkCache } from "../chunk-cache.ts";
 import { createStreamRequest } from "../requests/create-stream-request.ts";
 import { createChunkCacheKey } from "./create-chunk-cache-key.ts";
 
@@ -22,13 +21,7 @@ export const fetchDiscreteByteRange = async (
       `Caching discrete byte range ${start.toString()}-${end.toString()} (${buffer.byteLength.toString()} bytes) for file ${fileHandle.fileName}`,
     );
 
-    shm
-      .create(
-        buffer.byteLength,
-        "Buffer",
-        createChunkCacheKey(fileHandle.fileId, start, end),
-      )
-      ?.set(buffer);
+    chunkCache.set(createChunkCacheKey(fileHandle.fileId, start, end), buffer);
   }
 
   return buffer;

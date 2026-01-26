@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 import { expect, vi } from "vitest";
 
 import { config } from "../config.ts";
+import { chunkCache } from "../utilities/chunk-cache.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
 import { createChunkCacheKey } from "../utilities/chunks/create-chunk-cache-key.ts";
 import {
@@ -14,8 +15,6 @@ import {
 } from "../utilities/file-handle-map.ts";
 
 import type { MockAgent } from "undici";
-
-vi.mock("shm-typed-array");
 
 const fileName = "movie.mkv";
 
@@ -73,15 +72,13 @@ it.beforeEach(() => {
     calculateFileChunks(1, fileSize),
   );
 
-  vi.resetAllMocks();
+  chunkCache.clear();
 });
 
 it("fetches the header chunk if the requested range is entirely within the header chunk", async ({
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
-
-  const shm = vi.mocked(await import("shm-typed-array"));
 
   const fileChunkCalculations =
     fileNameToFileChunkCalculationsMap.get(fileName)!;
@@ -102,19 +99,14 @@ it("fetches the header chunk if the requested range is entirely within the heade
   });
 
   expect(buffer).toStrictEqual(responseBuffer.subarray(0, length));
-  expect(shm.create).toHaveBeenCalledWith(
-    fileChunkCalculations.headerChunk.size,
-    "Buffer",
-    fileChunkCalculations.headerChunk.cacheKey,
-  );
+
+  expect(chunkCache.has(fileChunkCalculations.headerChunk.cacheKey)).toBe(true);
 });
 
 it("fetches the footer chunk if the requested range is entirely within the footer chunk", async ({
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
-
-  const shm = vi.mocked(await import("shm-typed-array"));
 
   const fileChunkCalculations =
     fileNameToFileChunkCalculationsMap.get(fileName)!;
@@ -143,11 +135,7 @@ it("fetches the footer chunk if the requested range is entirely within the foote
   });
 
   expect(buffer).toStrictEqual(responseBuffer.subarray(0, length));
-  expect(shm.create).toHaveBeenCalledWith(
-    fileChunkCalculations.footerChunk.size,
-    "Buffer",
-    fileChunkCalculations.footerChunk.cacheKey,
-  );
+  expect(chunkCache.has(fileChunkCalculations.footerChunk.cacheKey)).toBe(true);
 });
 
 it("correctly calculates offsets when copying chunk data into the buffer", async ({
@@ -225,22 +213,12 @@ it("reads data across multiple chunks, utilising the shared memory cache where p
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
-  const shm = vi.mocked(await import("shm-typed-array"));
 
-  const fileChunkCalculations =
-    fileNameToFileChunkCalculationsMap.get(fileName)!;
-
-  const cachedChunk = Buffer.alloc(fileChunkCalculations.headerChunk.size).fill(
-    randomBytes(fileChunkCalculations.headerChunk.size),
+  const cachedChunk = Buffer.alloc(config.headerSize).fill(
+    randomBytes(config.headerSize),
   );
 
-  shm.get.mockImplementation((key) => {
-    if (key === fileChunkCalculations.headerChunk.cacheKey) {
-      return cachedChunk;
-    }
-
-    return null;
-  });
+  chunkCache.set(createChunkCacheKey(1, 0, config.headerSize - 1), cachedChunk);
 
   const responseBuffer = setupRangeInterceptor(mockAgent, [262144, undefined]);
 
@@ -263,18 +241,17 @@ it("reads data across multiple chunks, utilising the shared memory cache where p
     ),
   );
 
-  expect(shm.create).toHaveBeenCalledWith(
-    config.chunkSize,
-    "Buffer",
-    createChunkCacheKey(1, 262144, 262144 + config.chunkSize - 1),
-  );
+  expect(
+    chunkCache.has(
+      createChunkCacheKey(1, 262144, 262144 + config.chunkSize - 1),
+    ),
+  ).toBe(true);
 });
 
 it("performs a one-off scan when receiving a read outside the scan tolerance limit during playback", async ({
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
-  const shm = vi.mocked(await import("shm-typed-array"));
 
   fdToPreviousReadPositionMap.set(0, 10485760); // 10MB
 
@@ -297,5 +274,5 @@ it("performs a one-off scan when receiving a read outside the scan tolerance lim
 
   expect(buffer).toStrictEqual(responseBuffer);
 
-  expect(shm.create).not.toHaveBeenCalled();
+  expect(chunkCache.size).toBe(0);
 });

@@ -258,9 +258,6 @@ importers:
       safe-stringify:
         specifier: ^1.2.0
         version: 1.2.0
-      shm-typed-array:
-        specifier: ^0.1.1
-        version: 0.1.1
       undici:
         specifier: 'catalog:'
         version: 7.18.2
@@ -5595,9 +5592,6 @@ packages:
     resolution: {integrity: sha512-WWdIxpyjEn+FhQJQQv9aQAYlHoNVdzIzUySNV1gHUPDSdZJ3yZn7pAAbQcV7B56Mvu881q9FZV+0Vx2xC44VWA==}
     engines: {node: ^18.17.0 || >=20.5.0}
 
-  nan@2.24.0:
-    resolution: {integrity: sha512-Vpf9qnVW1RaDkoNKFUvfxqAbtI8ncb8OJlqZ9wwpXzWPEsvsB1nvdUi6oYrHIkQ1Y/tMDnr1h4nczS0VB9Xykg==}
-
   nano-spawn@2.0.0:
     resolution: {integrity: sha512-tacvGzUY5o2D8CBh2rrwxyNojUsZNU2zjNTzKQrkgGJQTbGAfArVWXSKMBokBeeg6C7OLRGUEyoFlYbfeWQIqw==}
     engines: {node: '>=20.17'}
@@ -6443,11 +6437,6 @@ packages:
   shell-quote@1.8.3:
     resolution: {integrity: sha512-ObmnIF4hXNg1BqhnHmgbDETF8dLPCggZWBjkQfhZpbszZnYur5DUljTcCHii5LC3J5E0yeO/1LIMyH+UvHQgyw==}
     engines: {node: '>= 0.4'}
-
-  shm-typed-array@0.1.1:
-    resolution: {integrity: sha512-xreJ/uIcmkszP98puw7aE2ZmaE8QaY9f4lc7CWA63dVB8w95QH29iuuYZdiDhCHzvMKhDPZKLmHHdA3s0lqjZg==}
-    engines: {node: '>=4.0.0'}
-    os: ['!win32']
 
   should-equal@2.0.0:
     resolution: {integrity: sha512-ZP36TMrK9euEuWQYBig9W55WPC7uo37qzAEmbjHz4gfyuXrEUgF8cUvQVO+w+d3OMfPvSRQJ22lSm8MQJ43LTA==}
@@ -12404,8 +12393,6 @@ snapshots:
 
   mute-stream@2.0.0: {}
 
-  nan@2.24.0: {}
-
   nano-spawn@2.0.0: {}
 
   nanoid@3.3.11: {}
@@ -13375,10 +13362,6 @@ snapshots:
   shebang-regex@3.0.0: {}
 
   shell-quote@1.8.3: {}
-
-  shm-typed-array@0.1.1:
-    dependencies:
-      nan: 2.24.0
 
   should-equal@2.0.0:
     dependencies:

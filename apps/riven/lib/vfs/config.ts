@@ -65,9 +65,24 @@ export const config = {
   scanToleranceBlocks: 25,
 
   /**
+   * Reads don't always come in exactly sequentially;
+   * they may be interleaved with other reads (e.g. 1 -> 3 -> 2 -> 4).
+   *
+   * This allows for some tolerance during the calculations.
+   */
+  sequentialReadToleranceBlocks: 10,
+
+  /**
    * Scan tolerance in bytes.
    */
   get scanToleranceBytes() {
     return this.scanToleranceBlocks * this.blockSize;
+  },
+
+  /**
+   * Tolerance for sequential reads to account for interleaved reads.
+   */
+  get sequentialReadTolerance() {
+    return this.blockSize * this.sequentialReadToleranceBlocks;
   },
 } as const;

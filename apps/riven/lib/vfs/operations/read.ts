@@ -2,15 +2,16 @@ import { logger } from "@repo/core-util-logger";
 import { benchmark } from "@repo/util-plugin-sdk/helpers/benchmark";
 
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
-import shm from "shm-typed-array";
 
 import { config } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
+import { chunkCache } from "../utilities/chunk-cache.ts";
 import { calculateChunkRange } from "../utilities/chunks/calculate-chunk-range.ts";
 import { fetchDiscreteByteRange } from "../utilities/chunks/fetch-discrete-byte-range.ts";
-import { scanChunk } from "../utilities/chunks/scan-chunk.ts";
 import { waitForChunk } from "../utilities/chunks/wait-for-chunk.ts";
+import { detectReadType } from "../utilities/detect-read-type.ts";
 import {
+  type FileHandleMetadata,
   fdToCurrentStreamPositionMap,
   fdToFileHandleMeta,
   fdToPreviousReadPositionMap,
@@ -18,6 +19,118 @@ import {
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
 import { createStreamRequest } from "../utilities/requests/create-stream-request.ts";
+
+import type { ChunkMetadata } from "../schemas/chunk.schema.ts";
+
+function performCacheHit(fd: number, chunks: readonly ChunkMetadata[]) {
+  const cachedChunks: Buffer[] = [];
+
+  for (const chunk of chunks) {
+    const maybeCachedChunk = chunkCache.get(chunk.cacheKey);
+
+    if (!maybeCachedChunk) {
+      throw new FuseError(
+        Fuse.EIO,
+        `Expected chunk to be cached for cache-hit read type for fd ${fd.toString()}`,
+      );
+    }
+
+    cachedChunks.push(maybeCachedChunk);
+  }
+
+  return Buffer.concat(cachedChunks);
+}
+
+async function performBodyRead(
+  fd: number,
+  chunks: readonly ChunkMetadata[],
+  fileHandle: FileHandleMetadata,
+) {
+  const cachedChunksMetadata = chunks.filter((chunk) => chunk.isCached);
+  const missingChunksMetadata = chunks.filter((chunk) => !chunk.isCached);
+
+  if (!missingChunksMetadata[0]) {
+    throw new FuseError(
+      Fuse.EIO,
+      `No missing chunks calculated for fd ${fd.toString()}`,
+    );
+  }
+
+  logger.silly(
+    `Cache miss for chunk ${missingChunksMetadata.map((chunk) => chunk.rangeLabel).join(", ")} for fd ${fd.toString()}`,
+  );
+
+  const streamReader =
+    fdToResponseMap.get(fd) ??
+    (await createStreamRequest(fileHandle, missingChunksMetadata[0].range[0]));
+
+  if (!fdToResponseMap.has(fd)) {
+    logger.silly(`Storing stream reader for fd ${fd.toString()}`);
+
+    fdToResponseMap.set(fd, streamReader);
+  }
+
+  if (!fdToCurrentStreamPositionMap.has(fd)) {
+    fdToCurrentStreamPositionMap.set(fd, missingChunksMetadata[0].range[0]);
+  }
+
+  const currentStreamPosition = fdToCurrentStreamPositionMap.get(fd);
+
+  if (currentStreamPosition === undefined) {
+    throw new FuseError(
+      Fuse.EIO,
+      `Missing current stream position for fd ${fd.toString()}`,
+    );
+  }
+
+  const {
+    timeTaken,
+    result: { bytesFetched, fetchedChunks },
+  } = await benchmark(async () => {
+    const fetchedChunks: Buffer[] = [];
+    let bytesFetched = 0;
+
+    for (const targetChunk of missingChunksMetadata) {
+      const readChunk = await waitForChunk(fd, streamReader.body, targetChunk);
+
+      logger.silly(
+        `Fetched chunk ${targetChunk.rangeLabel} for fd ${fd.toString()}`,
+      );
+
+      bytesFetched += readChunk.byteLength;
+
+      fetchedChunks.push(readChunk);
+
+      chunkCache.set(targetChunk.cacheKey, readChunk);
+    }
+
+    return {
+      bytesFetched,
+      fetchedChunks,
+    };
+  });
+
+  logger.verbose(
+    `Fetched ${bytesFetched.toString()} bytes in ${timeTaken.toFixed(2)}ms for fd ${fd.toString()}`,
+  );
+
+  const cachedChunks: Buffer[] = [];
+
+  for (const chunk of cachedChunksMetadata) {
+    const maybeCachedChunk = chunkCache.get(chunk.cacheKey);
+
+    if (!maybeCachedChunk) {
+      throw new FuseError(
+        Fuse.EIO,
+        `Expected chunk to be cached after fetch for fd ${fd.toString()}`,
+      );
+    }
+
+    cachedChunks.push(maybeCachedChunk);
+  }
+
+  return Buffer.concat([...cachedChunks, ...fetchedChunks]);
+}
 
 export interface ReadInput {
   buffer: Buffer;
@@ -31,10 +144,6 @@ async function read({ fd, length, position, buffer }: ReadInput) {
   const previousReadPosition = fdToPreviousReadPositionMap.get(fd);
 
   fdToPreviousReadPositionMap.set(fd, position);
-
-  logger.silly(
-    `[${fd.toString()}] Read request: range=${position.toString()}-${(position + length).toString()} length=${length.toString()} position=${position.toString()} previous=${previousReadPosition?.toString() ?? "N/A"} diff=${previousReadPosition !== undefined ? (position - previousReadPosition).toString() : "N/A"}`,
-  );
 
   const fileHandle = fdToFileHandleMeta.get(fd);
 
@@ -61,8 +170,6 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     firstChunk: {
       range: [chunkStart],
     },
-    chunksRequired,
-    rangeLabel,
   } = calculateChunkRange({
     fileId: fileHandle.fileId,
     chunkSize: config.chunkSize,
@@ -71,172 +178,109 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     fileName: fileHandle.fileName,
   });
 
-  const cachedChunks: Buffer[] = [];
-
-  for (const chunk of chunks) {
-    const maybeCachedChunk = shm.get(chunk.cacheKey, "Buffer");
-
-    if (maybeCachedChunk) {
-      cachedChunks.push(maybeCachedChunk);
-    } else {
-      break;
-    }
-  }
-
-  if (cachedChunks.length === chunksRequired) {
-    logger.silly(`Cache hit for ${rangeLabel} for fd ${fd.toString()}`);
-
-    const chunk = Buffer.concat(cachedChunks);
-
-    chunk.copy(
-      buffer,
-      0,
-      position - chunkStart,
-      position - chunkStart + length,
-    );
-
-    return length;
-  }
-
-  const missingChunks = chunks.slice(cachedChunks.length);
-
-  if (!missingChunks[0]) {
-    throw new FuseError(
-      Fuse.EIO,
-      `No missing chunks calculated for fd ${fd.toString()}`,
-    );
-  }
-
-  logger.silly(
-    `Cache miss for chunk ${missingChunks.map((chunk) => chunk.rangeLabel).join(", ")} for fd ${fd.toString()}`,
+  const readType = detectReadType(
+    fileHandle,
+    previousReadPosition,
+    chunks,
+    length,
+    fileChunkCalculations,
   );
-
-  if (missingChunks[0].index === fileChunkCalculations.headerChunk.index) {
-    logger.verbose(
-      `Header read detected for fd ${fd.toString()}, using discrete fetch`,
-    );
-
-    const headerChunk = await scanChunk(
-      fileHandle,
-      fileChunkCalculations.headerChunk,
-      position,
-      length,
-    );
-
-    headerChunk.copy(buffer);
-
-    return length;
-  }
-
-  // Fetch footer chunk via discrete request to avoid disrupting main stream.
-  if (missingChunks[0].index === fileChunkCalculations.footerChunk.index) {
-    logger.verbose(
-      `Footer read detected for fd ${fd.toString()}, using discrete fetch`,
-    );
-
-    const footerChunk = await scanChunk(
-      fileHandle,
-      fileChunkCalculations.footerChunk,
-      position,
-      length,
-    );
-
-    footerChunk.copy(buffer);
-
-    return length;
-  }
-
-  if (
-    (previousReadPosition !== undefined &&
-      Math.abs(previousReadPosition - position) > config.scanToleranceBytes) ||
-    (position > fileChunkCalculations.headerChunk.size &&
-      previousReadPosition === undefined)
-  ) {
-    logger.verbose(
-      `Scan read detected for fd ${fd.toString()}, using discrete fetch`,
-    );
-
-    const scannedChunk = await fetchDiscreteByteRange(
-      fileHandle,
-      position,
-      position + length - 1,
-      false,
-    );
-
-    scannedChunk.copy(buffer);
-
-    return length;
-  }
-
-  const streamReader =
-    fdToResponseMap.get(fd) ??
-    (await createStreamRequest(
-      fileHandle,
-      chunkStart + cachedChunks.reduce((acc, part) => acc + part.byteLength, 0),
-    ));
-
-  if (!fdToResponseMap.has(fd)) {
-    logger.silly(`Storing stream reader for fd ${fd.toString()}`);
-
-    fdToResponseMap.set(fd, streamReader);
-  }
-
-  if (!fdToCurrentStreamPositionMap.has(fd)) {
-    fdToCurrentStreamPositionMap.set(
-      fd,
-      chunkStart + cachedChunks.reduce((acc, part) => acc + part.byteLength, 0),
-    );
-  }
 
   const currentStreamPosition = fdToCurrentStreamPositionMap.get(fd);
 
-  if (currentStreamPosition === undefined) {
-    throw new FuseError(
-      Fuse.EIO,
-      `Missing current stream position for fd ${fd.toString()}`,
-    );
-  }
+  logger.silly(
+    [
+      `[${fd.toString()}] ${readType}:`,
+      `range=${position.toString()}-${(position + length).toString()}`,
+      `length=${length.toString()}`,
+      `position=${position.toString()}`,
+      `previous=${previousReadPosition?.toString() ?? "N/A"}`,
+      `diff=${previousReadPosition !== undefined ? (position - previousReadPosition).toString() : "N/A"}`,
+      `currentStreamPosition=${currentStreamPosition?.toString() ?? "N/A"}`,
+    ].join(" | "),
+  );
 
-  const {
-    timeTaken,
-    result: { bytesFetched, fetchedChunks },
-  } = await benchmark(async () => {
-    const fetchedChunks: Buffer[] = [];
-    let bytesFetched = 0;
-
-    for (const targetChunk of missingChunks) {
-      const readChunk = await waitForChunk(streamReader.body, targetChunk);
-
-      bytesFetched += readChunk.byteLength;
-
-      fdToCurrentStreamPositionMap.set(
-        fd,
-        currentStreamPosition + readChunk.byteLength,
+  switch (readType) {
+    case "header-scan": {
+      const data = await fetchDiscreteByteRange(
+        fileHandle,
+        fileChunkCalculations.headerChunk.range[0],
+        fileChunkCalculations.headerChunk.range[1],
       );
 
-      fetchedChunks.push(readChunk);
+      data.copy(
+        buffer,
+        0,
+        position - fileChunkCalculations.headerChunk.range[0],
+        position - fileChunkCalculations.headerChunk.range[0] + length,
+      );
 
-      shm
-        .create(readChunk.byteLength, "Buffer", targetChunk.cacheKey)
-        ?.set(readChunk);
+      break;
     }
 
-    return {
-      bytesFetched,
-      fetchedChunks,
-    };
-  });
+    // Note: if the read type is footer_read, the footer cache chunk
+    // has likely expired and the player is nearing EOF.
+    // In this case, we will re-download the entire footer and serve the rest from cache.
+    //
+    // This can happen if the user's cache size is small,
+    // or during heavy scans with lots of competing streams.
+    case "footer-read":
+    case "footer-scan": {
+      const data = await fetchDiscreteByteRange(
+        fileHandle,
+        fileChunkCalculations.footerChunk.range[0],
+        fileChunkCalculations.footerChunk.range[1],
+      );
 
-  logger.verbose(
-    `Fetched ${bytesFetched.toString()} bytes in ${timeTaken.toFixed(2)}ms for fd ${fd.toString()}`,
-  );
+      data.copy(
+        buffer,
+        0,
+        position - fileChunkCalculations.footerChunk.range[0],
+        position - fileChunkCalculations.footerChunk.range[0] + length,
+      );
 
-  Buffer.concat([...cachedChunks, ...fetchedChunks]).copy(
-    buffer,
-    0,
-    position - chunkStart,
-    position - chunkStart + length,
-  );
+      break;
+    }
+
+    case "general-scan": {
+      const scannedChunk = await fetchDiscreteByteRange(
+        fileHandle,
+        position,
+        position + length - 1,
+        false,
+      );
+
+      scannedChunk.copy(buffer);
+
+      break;
+    }
+
+    case "body-read": {
+      const data = await performBodyRead(fd, chunks, fileHandle);
+
+      data.copy(
+        buffer,
+        0,
+        position - chunkStart,
+        position - chunkStart + length,
+      );
+
+      break;
+    }
+
+    case "cache-hit": {
+      const data = performCacheHit(fd, chunks);
+
+      data.copy(
+        buffer,
+        0,
+        position - chunkStart,
+        position - chunkStart + length,
+      );
+
+      break;
+    }
+  }
 
   return length;
 }

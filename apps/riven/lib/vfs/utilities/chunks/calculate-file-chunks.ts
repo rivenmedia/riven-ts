@@ -1,4 +1,5 @@
 import { config } from "../../config.ts";
+import { chunkCache } from "../chunk-cache.ts";
 import { createChunkCacheKey } from "./create-chunk-cache-key.ts";
 import { createChunkRangeLabel } from "./create-chunk-range-label.ts";
 
@@ -42,6 +43,9 @@ export const calculateFileChunks = (fileId: number, fileSize: number) => {
         headerChunkRange[0],
         headerChunkRange[1],
       ),
+      get isCached() {
+        return chunkCache.has(this.cacheKey);
+      },
       rangeLabel: createChunkRangeLabel(headerChunkRange),
       range: headerChunkRange,
       size: Math.min(config.headerSize, fileSize),
@@ -53,6 +57,9 @@ export const calculateFileChunks = (fileId: number, fileSize: number) => {
         footerChunkRange[0],
         footerChunkRange[1],
       ),
+      get isCached() {
+        return chunkCache.has(this.cacheKey);
+      },
       rangeLabel: createChunkRangeLabel(footerChunkRange),
       range: footerChunkRange,
       size: footerSize,
