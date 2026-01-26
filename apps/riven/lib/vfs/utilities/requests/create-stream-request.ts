@@ -13,7 +13,7 @@ export async function createStreamRequest(
     headers: {
       "accept-encoding": "identity",
       connection: "keep-alive",
-      range: [requestStart, requestEnd].join("-"),
+      range: `bytes=${[requestStart, requestEnd].join("-")}`,
     },
   });
 }
