@@ -4,6 +4,7 @@ import Fuse from "@zkochan/fuse-native";
 
 import { isFuseError } from "../errors/fuse-error.ts";
 import {
+  fdToCurrentStreamPositionMap,
   fdToFileHandleMeta,
   fdToPreviousReadPositionMap,
   fdToResponseMap,
@@ -19,11 +20,14 @@ export const releaseSync = function (_path, fd, callback) {
     // Clean up all mappings related to this file descriptor.
     // The chunk calculations map is intentionally left alone, as it can be reused by other
     // file descriptors opening the same file.
-    [fdToFileHandleMeta, fdToPreviousReadPositionMap, fdToResponseMap].forEach(
-      (map) => {
-        map.delete(fd);
-      },
-    );
+    [
+      fdToFileHandleMeta,
+      fdToResponseMap,
+      fdToPreviousReadPositionMap,
+      fdToCurrentStreamPositionMap,
+    ].forEach((map) => {
+      map.delete(fd);
+    });
   }
 
   release()
