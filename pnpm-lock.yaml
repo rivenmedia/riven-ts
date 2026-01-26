@@ -661,9 +661,6 @@ importers:
 
   packages/core/util-logger:
     dependencies:
-      safe-stringify:
-        specifier: ^1.2.0
-        version: 1.2.0
       winston:
         specifier: ^3.19.0
         version: 3.19.0
