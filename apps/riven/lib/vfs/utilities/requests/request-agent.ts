@@ -27,7 +27,7 @@ const lruAdapter = {
   },
 } satisfies interceptors.DNSStorage;
 
-export const requestAgent = new Agent({
+const requestAgent = new Agent({
   allowH2: true,
   keepAliveMaxTimeout: config.activityTimeoutSeconds * 1000,
   connect: {

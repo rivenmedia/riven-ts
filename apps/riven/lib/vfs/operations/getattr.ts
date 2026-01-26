@@ -2,6 +2,7 @@ import { database } from "@repo/core-util-database/database";
 import { logger } from "@repo/core-util-logger";
 
 import Fuse, { type OPERATIONS, type Stats } from "@zkochan/fuse-native";
+import fs from "node:fs";
 import z from "zod";
 
 import { config } from "../config.ts";
@@ -21,11 +22,11 @@ function parseMode(mode: StatMode): number {
 
   switch (mode) {
     case "dir":
-      return 0o40_000;
+      return fs.constants.S_IFDIR;
     case "file":
-      return 0o100_000;
+      return fs.constants.S_IFREG;
     case "link":
-      return 0o120_000;
+      return fs.constants.S_IFLNK;
     default:
       return 0;
   }
@@ -62,12 +63,12 @@ const stat = (st: StatInput) => {
     uid,
     mode: parseMode(st.mode),
     size: st.mode === "dir" ? 0 : st.size,
-    blksize: 0,
+    blksize: config.blockSize,
     dev: 0,
     nlink: 1,
     rdev: 0,
     ino: 0,
-    blocks: Math.ceil((st.size ?? 0) / 131072),
+    blocks: Math.ceil((st.size ?? 0) / config.blockSize),
   } satisfies Stats;
 };
 

@@ -25,6 +25,7 @@ export const calculateFileChunks = (fileId: number, fileSize: number) => {
     0,
     Math.floor((fileSize - footerSize - config.headerSize) / config.chunkSize),
   );
+
   const footerChunkRange = [
     Math.min(footerStart, Math.max(0, fileSize - 1)),
     Math.max(0, fileSize - 1),

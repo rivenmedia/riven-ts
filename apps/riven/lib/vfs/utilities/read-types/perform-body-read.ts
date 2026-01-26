@@ -46,7 +46,10 @@ export async function performBodyRead(
 
   const streamReader =
     fdToResponseMap.get(fd) ??
-    (await createStreamRequest(fileHandle, missingChunksMetadata[0].range[0]));
+    (await createStreamRequest(fileHandle, [
+      missingChunksMetadata[0].range[0],
+      undefined,
+    ]));
 
   if (!fdToResponseMap.has(fd)) {
     logger.silly(`Storing stream reader for fd ${fd.toString()}`);

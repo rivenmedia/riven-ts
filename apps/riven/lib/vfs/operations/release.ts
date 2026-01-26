@@ -13,8 +13,7 @@ import {
 import type { OPERATIONS } from "@zkochan/fuse-native";
 
 export const releaseSync = function (_path, fd, callback) {
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async function release() {
+  try {
     fdToResponseMap.get(fd)?.body.destroy();
 
     // Clean up all mappings related to this file descriptor.
@@ -28,21 +27,19 @@ export const releaseSync = function (_path, fd, callback) {
     ].forEach((map) => {
       map.delete(fd);
     });
+
+    callback(0);
+  } catch (error: unknown) {
+    if (isFuseError(error)) {
+      logger.error(`VFS release FuseError: ${error.message}`);
+
+      callback(error.errorCode);
+
+      return;
+    }
+
+    logger.error(`VFS release unknown error: ${String(error)}`);
+
+    callback(Fuse.EIO);
   }
-
-  release()
-    .then(callback.bind(null, 0))
-    .catch((error: unknown) => {
-      if (isFuseError(error)) {
-        logger.error(`VFS release FuseError: ${error.message}`);
-
-        callback(error.errorCode);
-
-        return;
-      }
-
-      logger.error(`VFS release unknown error: ${String(error)}`);
-
-      callback(Fuse.EIO);
-    });
 } satisfies OPERATIONS["release"];

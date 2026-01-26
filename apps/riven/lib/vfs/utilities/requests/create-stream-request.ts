@@ -6,17 +6,14 @@ import type { FileHandleMetadata } from "../file-handle-map.ts";
 
 export async function createStreamRequest(
   fileHandle: FileHandleMetadata,
-  requestStart: number,
-  requestEnd?: number,
+  [requestStart, requestEnd]: readonly [number, number | undefined],
 ) {
-  const range = `bytes=${requestStart.toString()}-${requestEnd?.toString() ?? ""}`;
-
   return request(fileHandle.url, {
     highWaterMark: config.chunkSize,
     headers: {
       "accept-encoding": "identity",
       connection: "keep-alive",
-      range,
+      range: [requestStart, requestEnd].join("-"),
     },
   });
 }

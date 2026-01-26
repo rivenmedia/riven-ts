@@ -105,7 +105,7 @@ services:
       - 32400:32400
     environment:
       TZ: Europe/London
-      PLEX_CLAIM: claim-hqAzC6-eB8pZqc2MveVL
+      PLEX_CLAIM: ${PLEX_CLAIM}
     volumes:
       - ./plex/config:/config
       - ./plex/transcode:/transcode
