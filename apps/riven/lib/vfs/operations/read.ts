@@ -1,136 +1,20 @@
 import { logger } from "@repo/core-util-logger";
-import { benchmark } from "@repo/util-plugin-sdk/helpers/benchmark";
 
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 
 import { config } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
-import { chunkCache } from "../utilities/chunk-cache.ts";
 import { calculateChunkRange } from "../utilities/chunks/calculate-chunk-range.ts";
 import { fetchDiscreteByteRange } from "../utilities/chunks/fetch-discrete-byte-range.ts";
-import { waitForChunk } from "../utilities/chunks/wait-for-chunk.ts";
 import { detectReadType } from "../utilities/detect-read-type.ts";
 import {
-  type FileHandleMetadata,
   fdToCurrentStreamPositionMap,
   fdToFileHandleMeta,
   fdToPreviousReadPositionMap,
-  fdToResponseMap,
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
-import { createStreamRequest } from "../utilities/requests/create-stream-request.ts";
-
-import type { ChunkMetadata } from "../schemas/chunk.schema.ts";
-
-function performCacheHit(fd: number, chunks: readonly ChunkMetadata[]) {
-  const cachedChunks: Buffer[] = [];
-
-  for (const chunk of chunks) {
-    const maybeCachedChunk = chunkCache.get(chunk.cacheKey);
-
-    if (!maybeCachedChunk) {
-      throw new FuseError(
-        Fuse.EIO,
-        `Expected chunk to be cached for cache-hit read type for fd ${fd.toString()}`,
-      );
-    }
-
-    cachedChunks.push(maybeCachedChunk);
-  }
-
-  return Buffer.concat(cachedChunks);
-}
-
-async function performBodyRead(
-  fd: number,
-  chunks: readonly ChunkMetadata[],
-  fileHandle: FileHandleMetadata,
-) {
-  const cachedChunksMetadata = chunks.filter((chunk) => chunk.isCached);
-  const missingChunksMetadata = chunks.filter((chunk) => !chunk.isCached);
-
-  if (!missingChunksMetadata[0]) {
-    throw new FuseError(
-      Fuse.EIO,
-      `No missing chunks calculated for fd ${fd.toString()}`,
-    );
-  }
-
-  logger.silly(
-    `Cache miss for chunk ${missingChunksMetadata.map((chunk) => chunk.rangeLabel).join(", ")} for fd ${fd.toString()}`,
-  );
-
-  const streamReader =
-    fdToResponseMap.get(fd) ??
-    (await createStreamRequest(fileHandle, missingChunksMetadata[0].range[0]));
-
-  if (!fdToResponseMap.has(fd)) {
-    logger.silly(`Storing stream reader for fd ${fd.toString()}`);
-
-    fdToResponseMap.set(fd, streamReader);
-  }
-
-  if (!fdToCurrentStreamPositionMap.has(fd)) {
-    fdToCurrentStreamPositionMap.set(fd, missingChunksMetadata[0].range[0]);
-  }
-
-  const currentStreamPosition = fdToCurrentStreamPositionMap.get(fd);
-
-  if (currentStreamPosition === undefined) {
-    throw new FuseError(
-      Fuse.EIO,
-      `Missing current stream position for fd ${fd.toString()}`,
-    );
-  }
-
-  const {
-    timeTaken,
-    result: { bytesFetched, fetchedChunks },
-  } = await benchmark(async () => {
-    const fetchedChunks: Buffer[] = [];
-    let bytesFetched = 0;
-
-    for (const targetChunk of missingChunksMetadata) {
-      const readChunk = await waitForChunk(fd, streamReader.body, targetChunk);
-
-      logger.silly(
-        `Fetched chunk ${targetChunk.rangeLabel} for fd ${fd.toString()}`,
-      );
-
-      bytesFetched += readChunk.byteLength;
-
-      fetchedChunks.push(readChunk);
-
-      chunkCache.set(targetChunk.cacheKey, readChunk);
-    }
-
-    return {
-      bytesFetched,
-      fetchedChunks,
-    };
-  });
-
-  logger.verbose(
-    `Fetched ${bytesFetched.toString()} bytes in ${timeTaken.toFixed(2)}ms for fd ${fd.toString()}`,
-  );
-
-  const cachedChunks: Buffer[] = [];
-
-  for (const chunk of cachedChunksMetadata) {
-    const maybeCachedChunk = chunkCache.get(chunk.cacheKey);
-
-    if (!maybeCachedChunk) {
-      throw new FuseError(
-        Fuse.EIO,
-        `Expected chunk to be cached after fetch for fd ${fd.toString()}`,
-      );
-    }
-
-    cachedChunks.push(maybeCachedChunk);
-  }
-
-  return Buffer.concat([...cachedChunks, ...fetchedChunks]);
-}
+import { performBodyRead } from "../utilities/read-types/perform-body-read.ts";
+import { performCacheHit } from "../utilities/read-types/perform-cache-hit.ts";
 
 export interface ReadInput {
   buffer: Buffer;
