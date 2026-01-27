@@ -6,13 +6,13 @@ import { createChunkRangeLabel } from "../utilities/chunks/create-chunk-range-la
 
 export const ChunkMetadata = z
   .object({
-    fileId: z.number().nonnegative(),
+    fileName: z.string().nonempty(),
     index: z.number().nonnegative(),
     start: z.number().nonnegative(),
     end: z.number().nonnegative(),
   })
-  .transform(({ fileId, start, end, index }) => {
-    const cacheKey = createChunkCacheKey(fileId, start, end);
+  .transform(({ fileName, start, end, index }) => {
+    const cacheKey = createChunkCacheKey(fileName, start, end);
 
     return {
       index,

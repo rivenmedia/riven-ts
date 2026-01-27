@@ -18,7 +18,7 @@ function calculateFooterSize(fileSize: number) {
   return Math.abs(alignedFooterSize);
 }
 
-export const calculateFileChunks = (fileId: number, fileSize: number) => {
+export const calculateFileChunks = (fileName: string, fileSize: number) => {
   const footerSize = calculateFooterSize(fileSize);
   const footerStart = Math.max(0, fileSize - footerSize);
   const totalChunksExcludingHeaderAndFooter = Math.max(
@@ -40,7 +40,7 @@ export const calculateFileChunks = (fileId: number, fileSize: number) => {
     headerChunk: {
       index: 0,
       cacheKey: createChunkCacheKey(
-        fileId,
+        fileName,
         headerChunkRange[0],
         headerChunkRange[1],
       ),
@@ -54,7 +54,7 @@ export const calculateFileChunks = (fileId: number, fileSize: number) => {
     footerChunk: {
       index: totalChunksExcludingHeaderAndFooter + 1,
       cacheKey: createChunkCacheKey(
-        fileId,
+        fileName,
         footerChunkRange[0],
         footerChunkRange[1],
       ),

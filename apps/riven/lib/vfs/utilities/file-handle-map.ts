@@ -2,7 +2,6 @@ import type { FileChunkCalculations } from "../schemas/file-chunk-calculations.s
 import type { Dispatcher } from "undici";
 
 export interface FileHandleMetadata {
-  fileId: number;
   fileSize: number;
   filePath: string;
   fileName: string;

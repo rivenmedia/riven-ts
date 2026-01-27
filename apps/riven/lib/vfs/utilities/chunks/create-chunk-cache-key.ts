@@ -1,7 +1,7 @@
 export const createChunkCacheKey = (
-  fileId: number,
+  fileName: string,
   start: number,
   end: number,
 ) => {
-  return [fileId, start, end].join("-") as `${string}-${string}-${string}`;
+  return [fileName, start, end].join("-") as `${string}-${string}-${string}`;
 };

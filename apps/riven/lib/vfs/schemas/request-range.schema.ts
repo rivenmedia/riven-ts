@@ -19,7 +19,7 @@ const calculateRequiredChunks = (
   start: number,
   end: number,
   chunkSize: number,
-  fileId: number,
+  fileName: string,
   { headerChunk, footerChunk, totalChunks }: FileChunkCalculations,
 ) => {
   if (end <= headerChunk.range[1]) {
@@ -64,7 +64,7 @@ const calculateRequiredChunks = (
     chunks.push(
       ChunkMetadata.parse({
         index: i + 1,
-        fileId,
+        fileName,
         start: chunkStart,
         end: chunkEnd,
       }),
@@ -80,7 +80,7 @@ const calculateRequiredChunks = (
 };
 
 export const transformRequestRangeToBounds = z.transform(
-  ({ start, end, chunkSize, fileId, fileName }: RequestRange) => {
+  ({ start, end, chunkSize, fileName }: RequestRange) => {
     const preCalculatedChunks =
       fileNameToFileChunkCalculationsMap.get(fileName);
 
@@ -94,7 +94,7 @@ export const transformRequestRangeToBounds = z.transform(
       start,
       end,
       chunkSize,
-      fileId,
+      fileName,
       preCalculatedChunks,
     );
 
@@ -120,7 +120,6 @@ export const transformRequestRangeToBounds = z.transform(
 export const RequestRange = z
   .object({
     fileName: z.string(),
-    fileId: z.number().nonnegative(),
     start: z.int().nonnegative(),
     end: z.int().nonnegative(),
     fileSize: z.int().nonnegative(),

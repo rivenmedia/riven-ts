@@ -20,7 +20,10 @@ export const fetchDiscreteByteRange = async (
       `Caching discrete byte range ${start.toString()}-${end.toString()} (${buffer.byteLength.toString()} bytes) for file ${fileHandle.fileName}`,
     );
 
-    chunkCache.set(createChunkCacheKey(fileHandle.fileId, start, end), buffer);
+    chunkCache.set(
+      createChunkCacheKey(fileHandle.fileName, start, end),
+      buffer,
+    );
   }
 
   return buffer;

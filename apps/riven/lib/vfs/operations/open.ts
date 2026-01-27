@@ -98,11 +98,10 @@ async function open(
 
   fileNameToFileChunkCalculationsMap.set(
     item.originalFilename,
-    calculateFileChunks(item.id, item.fileSize),
+    calculateFileChunks(item.originalFilename, item.fileSize),
   );
 
   fdToFileHandleMeta.set(nextFd, {
-    fileId: item.id,
     fileSize: item.fileSize,
     filePath: path,
     fileName: item.originalFilename,

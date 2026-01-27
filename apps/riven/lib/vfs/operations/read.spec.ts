@@ -60,7 +60,6 @@ it.beforeEach(() => {
   const fileSize = 1024 * 1024 * 1024 * 10; // 10 GB
 
   fdToFileHandleMeta.set(0, {
-    fileId: 1,
     fileSize,
     filePath: `/files/${fileName}`,
     fileName,
@@ -69,7 +68,7 @@ it.beforeEach(() => {
 
   fileNameToFileChunkCalculationsMap.set(
     fileName,
-    calculateFileChunks(1, fileSize),
+    calculateFileChunks(fileName, fileSize),
   );
 
   chunkCache.clear();
@@ -218,7 +217,10 @@ it("reads data across multiple chunks, utilising the shared memory cache where p
     randomBytes(config.headerSize),
   );
 
-  chunkCache.set(createChunkCacheKey(1, 0, config.headerSize - 1), cachedChunk);
+  chunkCache.set(
+    createChunkCacheKey(fileName, 0, config.headerSize - 1),
+    cachedChunk,
+  );
 
   const responseBuffer = setupRangeInterceptor(mockAgent, [262144, undefined]);
 
@@ -243,7 +245,7 @@ it("reads data across multiple chunks, utilising the shared memory cache where p
 
   expect(
     chunkCache.has(
-      createChunkCacheKey(1, 262144, 262144 + config.chunkSize - 1),
+      createChunkCacheKey(fileName, 262144, 262144 + config.chunkSize - 1),
     ),
   ).toBe(true);
 });
