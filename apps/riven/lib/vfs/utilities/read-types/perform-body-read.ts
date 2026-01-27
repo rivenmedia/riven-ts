@@ -41,7 +41,10 @@ export async function performBodyRead(
   }
 
   logger.silly(
-    `Cache miss for chunk ${missingChunksMetadata.map((chunk) => chunk.rangeLabel).join(", ")} for fd ${fd.toString()}`,
+    [
+      `Cached chunks: ${cachedChunksMetadata.map((chunk) => chunk.rangeLabel).join(", ") || "none"}`,
+      `Missing chunks: ${missingChunksMetadata.map((chunk) => chunk.rangeLabel).join(", ")}`,
+    ].join(" | "),
   );
 
   const streamReader =

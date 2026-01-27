@@ -27,8 +27,6 @@ export interface ReadInput {
 async function read({ fd, length, position, buffer }: ReadInput) {
   const previousReadPosition = fdToPreviousReadPositionMap.get(fd);
 
-  fdToPreviousReadPositionMap.set(fd, position);
-
   const fileHandle = fdToFileHandleMeta.get(fd);
 
   if (!fileHandle) {
@@ -161,6 +159,8 @@ async function read({ fd, length, position, buffer }: ReadInput) {
       break;
     }
   }
+
+  fdToPreviousReadPositionMap.set(fd, position);
 
   return length;
 }
