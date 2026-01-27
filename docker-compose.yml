@@ -93,6 +93,7 @@ services:
     container_name: plex
     image: plexinc/pms-docker
     restart: unless-stopped
+    network_mode: host
     deploy:
       resources:
         reservations:
@@ -101,8 +102,6 @@ services:
                 - gpu
     runtime: nvidia
     gpus: all
-    ports:
-      - 32400:32400
     environment:
       TZ: Europe/London
       PLEX_CLAIM: ${PLEX_CLAIM}

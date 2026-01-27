@@ -14,6 +14,7 @@ import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 import { TorrentContainer } from "@repo/util-plugin-sdk/schemas/torrents/torrent-container";
 import { TorrentFile } from "@repo/util-plugin-sdk/schemas/torrents/torrent-file";
 import { TorrentInfo } from "@repo/util-plugin-sdk/schemas/torrents/torrent-info";
+import { UnrestrictedLink } from "@repo/util-plugin-sdk/schemas/torrents/unrestricted-link";
 
 import { AddMagnetResponse } from "../schemas/add-magnet-response.schema.ts";
 import { RealDebridError } from "../schemas/realdebrid-error.schema.ts";
@@ -273,7 +274,9 @@ export class RealDebridAPI extends BaseDataSource {
             }
 
             files.push(debridFile);
-          } catch (error) {}
+          } catch (error) {
+            console.error(error);
+          }
         }
 
         if (!files.length) {
@@ -359,6 +362,18 @@ export class RealDebridAPI extends BaseDataSource {
         }`,
       );
     }
+  }
+
+  async unrestrictLink(link: string) {
+    const body = new URLSearchParams({
+      link,
+    });
+
+    const response = await this.post<UnrestrictedLink>("unrestrict/link", {
+      body,
+    });
+
+    return UnrestrictedLink.parse(response);
   }
 
   static override getApiToken() {

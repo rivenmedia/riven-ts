@@ -3,7 +3,7 @@ import type { Dispatcher } from "undici";
 
 export interface FileHandleMetadata {
   fileId: number;
-  fileSize: string;
+  fileSize: number;
   filePath: string;
   fileName: string;
   url: string;

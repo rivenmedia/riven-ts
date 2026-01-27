@@ -29,9 +29,25 @@ export default {
       dataSources,
       event,
     }) => {
-      return {
-        url: "https://real-debrid.example.com/stream-link",
-      };
+      const api = dataSources.get(RealDebridAPI);
+
+      if (!event.item.downloadUrl) {
+        throw new Error("No download URL available for this media item.");
+      }
+
+      try {
+        const { download: url } = await api.unrestrictLink(
+          event.item.downloadUrl,
+        );
+
+        return { url };
+      } catch (error) {
+        throw new Error(
+          `Failed to unrestrict link from RealDebrid: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
     },
   },
   validator() {

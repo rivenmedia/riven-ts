@@ -5,3 +5,5 @@ export const UnrestrictedLink = z.object({
   filename: z.string(),
   filesize: z.number().int().nonnegative(),
 });
+
+export type UnrestrictedLink = z.infer<typeof UnrestrictedLink>;

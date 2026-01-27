@@ -42,8 +42,8 @@ export const detectReadType = (
   if (
     (previousReadPosition ?? 0) <
       start - config.sequentialReadToleranceBlocks &&
-    Number(fileSize) - fileChunkCalculations.footerChunk.size <= start &&
-    start <= Number(fileSize)
+    fileSize - fileChunkCalculations.footerChunk.size <= start &&
+    start <= fileSize
   ) {
     return "footer-scan";
   }
@@ -59,7 +59,7 @@ export const detectReadType = (
     return "general-scan";
   }
 
-  if (start < Number(fileSize) - fileChunkCalculations.footerChunk.size) {
+  if (start < fileSize - fileChunkCalculations.footerChunk.size) {
     return "body-read";
   }
 

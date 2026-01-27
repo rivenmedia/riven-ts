@@ -4,7 +4,7 @@ import { config } from "../../config.ts";
 
 import type { FileHandleMetadata } from "../file-handle-map.ts";
 
-export async function createStreamRequest(
+export function createStreamRequest(
   fileHandle: FileHandleMetadata,
   [requestStart, requestEnd]: readonly [number, number | undefined],
 ) {

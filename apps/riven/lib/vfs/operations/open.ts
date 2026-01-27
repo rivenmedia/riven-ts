@@ -38,11 +38,14 @@ async function open(
     throw new FuseError(Fuse.ENOENT, `Invalid path for open: ${path}`);
   }
 
-  const item = await database.mediaEntry.findOneOrFail({
-    mediaItem: {
-      tmdbId,
+  const item = await database.mediaEntry.findOneOrFail(
+    {
+      mediaItem: {
+        tmdbId,
+      },
     },
-  });
+    { populate: ["mediaItem"] },
+  );
 
   if (!item.unrestrictedUrl) {
     const requestQueue = linkRequestQueues.get(item.provider);
@@ -58,13 +61,11 @@ async function open(
       );
     }
 
-    const mediaItem = await item.mediaItem.loadOrFail();
-
     try {
       const { url: unrestrictedUrl } = await runSingleJob(
         requestQueue,
         item.id.toString(),
-        { item: mediaItem },
+        { item },
       );
 
       const em = database.em.fork();
@@ -80,7 +81,7 @@ async function open(
       if (error instanceof Error) {
         throw new FuseError(
           Fuse.ENOENT,
-          `Unable to get unrestricted url for ${mediaItem.title ?? "Unknown"}: ${error.message}`,
+          `Unable to get unrestricted url for ${item.originalFilename}: ${error.message}`,
         );
       }
     }
@@ -97,12 +98,12 @@ async function open(
 
   fileNameToFileChunkCalculationsMap.set(
     item.originalFilename,
-    calculateFileChunks(item.id, Number(item.fileSize)),
+    calculateFileChunks(item.id, item.fileSize),
   );
 
   fdToFileHandleMeta.set(nextFd, {
     fileId: item.id,
-    fileSize: item.fileSize.toString(),
+    fileSize: item.fileSize,
     filePath: path,
     fileName: item.originalFilename,
     url: item.unrestrictedUrl,

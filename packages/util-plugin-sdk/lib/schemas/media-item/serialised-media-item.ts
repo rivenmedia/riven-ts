@@ -41,3 +41,5 @@ export const SerialisedMediaItem = z.codec(
     encode: (data) => wrap(data).toJSON(),
   },
 );
+
+export type SerialisedMediaItem = z.infer<typeof SerialisedMediaItem>;

@@ -57,7 +57,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
   } = calculateChunkRange({
     fileId: fileHandle.fileId,
     chunkSize: config.chunkSize,
-    fileSize: Number(fileHandle.fileSize),
+    fileSize: fileHandle.fileSize,
     requestRange: [position, position + length - 1],
     fileName: fileHandle.fileName,
   });

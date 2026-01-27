@@ -5,6 +5,7 @@ import {
   Property,
   type Ref,
 } from "@mikro-orm/core";
+import { IsPositive } from "class-validator";
 import { Field, ID, ObjectType } from "type-graphql";
 
 import { BaseEntity } from "../entity.ts";
@@ -21,6 +22,7 @@ export class FileSystemEntry extends BaseEntity {
 
   @Field(() => Number)
   @Property({ type: "bigint" })
+  @IsPositive()
   fileSize!: number;
 
   @Field()
