@@ -62,7 +62,6 @@ async function read({ fd, length, position, buffer }: ReadInput) {
   });
 
   const readType = detectReadType(
-    fileHandle,
     previousReadPosition,
     chunks,
     length,

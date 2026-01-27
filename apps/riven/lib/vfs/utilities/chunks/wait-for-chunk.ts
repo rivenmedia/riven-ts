@@ -23,7 +23,7 @@ export const waitForChunk = async (
   let fetchedFromCache = false;
 
   const timeout = setTimeout(() => {
-    throw new FuseError(Fuse.ETIMEDOUT, `Timeout waiting for chunk`);
+    throw new FuseError(Fuse.ETIMEDOUT, "Timeout waiting for chunk");
   }, config.chunkTimeoutSeconds * 1000);
 
   while ((chunk = reader.read(targetChunk.size) as Buffer | null) === null) {

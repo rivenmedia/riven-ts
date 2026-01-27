@@ -3,7 +3,6 @@ import { chunkCache } from "./chunk-cache.ts";
 
 import type { ChunkMetadata } from "../schemas/chunk.schema.ts";
 import type { FileChunkCalculations } from "../schemas/file-chunk-calculations.schema.ts";
-import type { FileHandleMetadata } from "./file-handle-map.ts";
 
 export type ReadType =
   | "header-scan"
@@ -14,7 +13,6 @@ export type ReadType =
   | "cache-hit";
 
 export const detectReadType = (
-  { fileSize }: FileHandleMetadata,
   previousReadPosition: number | undefined,
   chunks: readonly ChunkMetadata[],
   size: number,
@@ -42,8 +40,8 @@ export const detectReadType = (
   if (
     (previousReadPosition ?? 0) <
       start - config.sequentialReadToleranceBlocks &&
-    fileSize - fileChunkCalculations.footerChunk.size <= start &&
-    start <= fileSize
+    fileChunkCalculations.footerChunk.range[0] <= start &&
+    start <= fileChunkCalculations.footerChunk.range[1]
   ) {
     return "footer-scan";
   }
@@ -59,7 +57,7 @@ export const detectReadType = (
     return "general-scan";
   }
 
-  if (start < fileSize - fileChunkCalculations.footerChunk.size) {
+  if (start < fileChunkCalculations.footerChunk.range[0]) {
     return "body-read";
   }
 
