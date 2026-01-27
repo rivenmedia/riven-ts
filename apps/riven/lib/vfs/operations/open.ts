@@ -2,6 +2,7 @@ import { database } from "@repo/core-util-database/database";
 import { logger } from "@repo/core-util-logger";
 
 import Fuse from "@zkochan/fuse-native";
+import { setTimeout } from "node:timers/promises";
 
 import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
 import { FuseError } from "../errors/fuse-error.ts";
@@ -9,6 +10,7 @@ import { PathInfo } from "../schemas/path-info.schema.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
 import {
   fdToFileHandleMeta,
+  fileNameIsFetchingLinkMap,
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
 
@@ -47,7 +49,42 @@ async function open(
     { populate: ["mediaItem"] },
   );
 
-  if (!item.unrestrictedUrl) {
+  if (
+    !item.unrestrictedUrl &&
+    fileNameIsFetchingLinkMap.get(item.originalFilename)
+  ) {
+    logger.silly(
+      `Waiting for unrestricted URL for media entry ${item.id.toString()}...`,
+    );
+
+    // Wait until the unrestricted URL is fetched
+    while (fileNameIsFetchingLinkMap.get(item.originalFilename)) {
+      await setTimeout(100);
+    }
+
+    const em = database.em.fork();
+
+    // Refresh the item to get the updated unrestricted URL
+    await em.refreshOrFail(item, {
+      populate: ["mediaItem"],
+    });
+
+    if (!item.unrestrictedUrl) {
+      throw new FuseError(
+        Fuse.ENOENT,
+        `Media entry ${item.id.toString()} has no unrestricted URL after waiting`,
+      );
+    }
+  }
+
+  if (
+    !item.unrestrictedUrl &&
+    !fileNameIsFetchingLinkMap.get(item.originalFilename)
+  ) {
+    logger.silly(
+      `No unrestricted URL for media entry ${item.id.toString()}, requesting via RealDebrid...`,
+    );
+
     const requestQueue = linkRequestQueues.get(item.provider);
 
     if (!requestQueue) {
@@ -62,6 +99,8 @@ async function open(
     }
 
     try {
+      fileNameIsFetchingLinkMap.set(item.originalFilename, true);
+
       const { url: unrestrictedUrl } = await runSingleJob(
         requestQueue,
         item.id.toString(),
@@ -84,6 +123,8 @@ async function open(
           `Unable to get unrestricted url for ${item.originalFilename}: ${error.message}`,
         );
       }
+    } finally {
+      fileNameIsFetchingLinkMap.set(item.originalFilename, false);
     }
   }
 

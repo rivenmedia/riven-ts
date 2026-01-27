@@ -52,7 +52,9 @@ export async function performBodyRead(
     ]));
 
   if (!fdToResponseMap.has(fd)) {
-    logger.silly(`Storing stream reader for fd ${fd.toString()}`);
+    logger.silly(
+      `Storing stream reader for fd ${fd.toString()} from position: ${missingChunksMetadata[0].range[0].toString()}`,
+    );
 
     fdToResponseMap.set(fd, streamReader);
   }
@@ -78,17 +80,21 @@ export async function performBodyRead(
     let bytesFetched = 0;
 
     for (const targetChunk of missingChunksMetadata) {
-      const readChunk = await waitForChunk(fd, streamReader.body, targetChunk);
-
-      logger.silly(
-        `Fetched chunk ${targetChunk.rangeLabel} for fd ${fd.toString()}`,
+      const { chunk, fetchedFromCache } = await waitForChunk(
+        fd,
+        streamReader.body,
+        targetChunk,
       );
 
-      bytesFetched += readChunk.byteLength;
+      logger.silly(
+        `Fetched chunk ${targetChunk.rangeLabel} ${fetchedFromCache ? "from cache" : "from stream"} for fd ${fd.toString()}`,
+      );
 
-      fetchedChunks.push(readChunk);
+      bytesFetched += chunk.byteLength;
 
-      chunkCache.set(targetChunk.cacheKey, readChunk);
+      fetchedChunks.push(chunk);
+
+      chunkCache.set(targetChunk.cacheKey, chunk);
     }
 
     return {

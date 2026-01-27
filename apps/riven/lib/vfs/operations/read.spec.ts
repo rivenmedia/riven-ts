@@ -208,7 +208,7 @@ it("offsets the first chunk by the size of the header chunk", async ({
   expect(buffer).toStrictEqual(responseBuffer.subarray(0, length));
 });
 
-it("reads data across multiple chunks, utilising the shared memory cache where possible", async ({
+it("reads data across multiple chunks, utilising the chunk cache where possible", async ({
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
@@ -245,7 +245,11 @@ it("reads data across multiple chunks, utilising the shared memory cache where p
 
   expect(
     chunkCache.has(
-      createChunkCacheKey(fileName, 262144, 262144 + config.chunkSize - 1),
+      createChunkCacheKey(
+        fileName,
+        config.headerSize,
+        config.headerSize + config.chunkSize - 1,
+      ),
     ),
   ).toBe(true);
 });
@@ -255,10 +259,10 @@ it("performs a one-off scan when receiving a read outside the scan tolerance lim
 }) => {
   const { readSync } = await import("./read.ts");
 
-  fdToPreviousReadPositionMap.set(0, 10485760); // 10MB
+  fdToPreviousReadPositionMap.set(0, config.chunkSize * 10); // 10MB
 
   const length = 32768; // 32 KB
-  const position = 104857600; // 100MB
+  const position = config.chunkSize * 100; // 100MB
 
   const responseBuffer = setupRangeInterceptor(mockAgent, [
     position,

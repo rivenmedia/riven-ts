@@ -1,7 +1,10 @@
 import path from "path";
 import { createLogger, format, transports } from "winston";
 
-const logDir = path.resolve(process.cwd(), "logs");
+const logDir = path.resolve(
+  process.cwd(),
+  process.env["LOG_DIRECTORY"] ?? "logs",
+);
 
 const isProductionEnvironment = process.env["NODE_ENV"] === "production";
 const isTestEnvironment = process.env["NODE_ENV"] === "test";

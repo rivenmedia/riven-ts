@@ -75,7 +75,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     [
       `fd=${fd.toString()}`,
       `read-type=${readType}`,
-      `range=${position.toString()}-${(position + length).toString()}`,
+      `range=${position.toString()}-${(position + length - 1).toString()}`,
       `length=${length.toString()}`,
       `position=${position.toString()}`,
       `previous=${previousReadPosition?.toString() ?? "N/A"}`,

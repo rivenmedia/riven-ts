@@ -28,6 +28,8 @@ export const releaseSync = function (_path, fd, callback) {
       map.delete(fd);
     });
 
+    logger.silly(`Released file descriptor ${fd.toString()} successfully.`);
+
     callback(0);
   } catch (error: unknown) {
     if (isFuseError(error)) {

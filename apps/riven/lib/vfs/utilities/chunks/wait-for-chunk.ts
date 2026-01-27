@@ -9,11 +9,16 @@ import { fdToCurrentStreamPositionMap } from "../file-handle-map.ts";
 import type { ChunkMetadata } from "../../schemas/chunk.schema.ts";
 import type BodyReadable from "undici/types/readable.js";
 
+interface WaitForChunkResponse {
+  chunk: Buffer;
+  fetchedFromCache: boolean;
+}
+
 export const waitForChunk = async (
   fd: number,
   reader: BodyReadable.default,
   targetChunk: ChunkMetadata,
-): Promise<Buffer> => {
+): Promise<WaitForChunkResponse> => {
   let chunk: Buffer | null = null;
   let fetchedFromCache = false;
 
@@ -45,5 +50,8 @@ export const waitForChunk = async (
 
   clearTimeout(timeout);
 
-  return chunk;
+  return {
+    chunk,
+    fetchedFromCache,
+  };
 };

@@ -35,3 +35,9 @@ export const fdToPreviousReadPositionMap = new Map<number, number>();
  * Maps file descriptor (fd) to the current stream position.
  */
 export const fdToCurrentStreamPositionMap = new Map<number, number>();
+
+/**
+ * Maps file name to a boolean indicating if the file is currently fetching its link.
+ * This prevents duplicate fetches and potential race conditions.
+ */
+export const fileNameIsFetchingLinkMap = new Map<string, boolean>();
