@@ -3,5 +3,9 @@ export const createChunkCacheKey = (
   start: number,
   end: number,
 ) => {
-  return [fileName, start, end].join("-") as `${string}-${string}-${string}`;
+  const rawKey = [fileName, start, end].join(
+    "-",
+  ) as `${string}-${string}-${string}`;
+
+  return Buffer.from(rawKey).toString("base64");
 };
