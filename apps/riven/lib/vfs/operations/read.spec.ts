@@ -61,7 +61,7 @@ it.beforeEach(() => {
 
   fdToFileHandleMeta.set(0, {
     fileId: 1,
-    fileSize: fileSize.toString(),
+    fileSize,
     filePath: `/files/${fileName}`,
     fileName,
     url: `http://example.com/files/${fileName}`,

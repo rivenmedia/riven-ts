@@ -74,13 +74,14 @@ async function read({ fd, length, position, buffer }: ReadInput) {
 
   logger.silly(
     [
-      `[${fd.toString()}] ${readType}:`,
+      `fd=${fd.toString()}`,
+      `read-type=${readType}`,
       `range=${position.toString()}-${(position + length).toString()}`,
       `length=${length.toString()}`,
       `position=${position.toString()}`,
       `previous=${previousReadPosition?.toString() ?? "N/A"}`,
       `diff=${previousReadPosition !== undefined ? (position - previousReadPosition).toString() : "N/A"}`,
-      `currentStreamPosition=${currentStreamPosition?.toString() ?? "N/A"}`,
+      `current-stream-position=${currentStreamPosition?.toString() ?? "N/A"}`,
     ].join(" | "),
   );
 
