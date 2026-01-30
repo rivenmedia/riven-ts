@@ -1,6 +1,7 @@
 import { logger } from "@repo/core-util-logger";
 
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
+import { Buffer } from "node:buffer";
 
 import { config } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
@@ -180,12 +181,14 @@ export const readSync = function (
     length,
     position,
   })
-    .then(callback)
+    .then((bytesRead) => {
+      process.nextTick(callback, bytesRead);
+    })
     .catch((error: unknown) => {
       if (isFuseError(error)) {
         logger.error(`VFS read FuseError: ${error.message}`);
 
-        callback(error.errorCode);
+        process.nextTick(callback, error.errorCode);
 
         return;
       }
@@ -196,6 +199,6 @@ export const readSync = function (
         logger.error(`VFS read unknown error: ${String(error)}`);
       }
 
-      callback(Fuse.EIO);
+      process.nextTick(callback, Fuse.EIO);
     });
 } satisfies OPERATIONS["read"];

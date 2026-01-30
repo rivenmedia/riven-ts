@@ -1,9 +1,9 @@
 import z from "zod";
 
-const ANIME_SPECIALS_PATTERN = new RegExp(
-  "\\b(OVA|NCED|NCOP|NC|OVA|ED(\\d?v?\\d?)|OPv?(\\d+)?|SP\\d+)\\b",
-  "i",
-);
+// const ANIME_SPECIALS_PATTERN = new RegExp(
+//   "\\b(OVA|NCED|NCOP|NC|OVA|ED(\\d?v?\\d?)|OPv?(\\d+)?|SP\\d+)\\b",
+//   "i",
+// );
 
 export const DebridFile = z.object({
   fileId: z.int().optional(),

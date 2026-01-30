@@ -2,6 +2,7 @@ import { logger } from "@repo/core-util-logger";
 import { benchmark } from "@repo/util-plugin-sdk/helpers/benchmark";
 
 import Fuse from "@zkochan/fuse-native";
+import { Buffer } from "node:buffer";
 
 import { FuseError } from "../../errors/fuse-error.ts";
 import { chunkCache } from "../chunk-cache.ts";
@@ -49,7 +50,7 @@ export async function performBodyRead(
 
   const streamReader =
     fdToResponseMap.get(fd) ??
-    (await createStreamRequest(fileHandle, [
+    (await createStreamRequest(fileHandle.url, [
       missingChunksMetadata[0].range[0],
       undefined,
     ]));

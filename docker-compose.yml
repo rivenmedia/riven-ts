@@ -1,41 +1,57 @@
 services:
   riven:
-    container_name: riven-ts-dev
-    restart: unless-stopped
+    container_name: riven
     build:
       context: .
       dockerfile: Dockerfile
+    restart: unless-stopped
+    profiles:
+      - all
     tty: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    devices:
+      - /dev/fuse
     environment:
-      DATABASE_URL: postgres+psycopg2://postgres:${DATABASE_PASSWORD}@riven-ts-dev-db:5432/riven
+      DATABASE_URL: postgres+psycopg2://postgres:${DATABASE_PASSWORD}@riven-db:5432/riven
       NODE_ENV: development
+      REDIS_URL: redis://riven-cache:6379
+      RIVEN_VFS_MOUNT_PATH: /mount
+      LOG_DIRECTORY: /riven/data/logs
+      VFS_DEBUG_LOGGING: true
+      REAL_DEBRID_API_KEY: XCA2CWCDYX3B4KDDOD2M7677WB54S4QKEIG4YT43YU4TMFLWLTSA
+      LISTRR_API_KEY: f7f5a6871a944fb692d144eab2fde171722b5a79c5af4ac1a3f4fd225f94c3ba
+      UNSAFE_CLEAR_QUEUES_ON_STARTUP: true
+      UNSAFE_REFRESH_DATABASE_ON_STARTUP: false
+      LOG_LEVEL: silly
+      JAEGER_URL: http://jaeger:4318
     volumes:
-      - ./data:/riven-ts/data
-      - /mnt/riven:/mount:rshared,z
+      - ./data:/riven/data
+      - /mnt/riven:/mount:rshared
     develop:
       watch:
         - path: apps
           action: sync
-          target: /riven-ts/apps
+          target: /riven/apps
         - path: packages
           action: sync
-          target: /riven-ts/packages
+          target: /riven/packages
         - path: pnpm-lock.yaml
           action: sync+exec
-          target: /riven-ts/pnpm-lock.yaml
+          target: /riven/pnpm-lock.yaml
           exec:
             command: pnpm install
     ports:
       - 8080:8080
     depends_on:
-      riven-ts-db:
+      riven-db:
         condition: service_healthy
-    profiles:
-      - all
 
-  riven-ts-db:
+  riven-db:
     image: postgres:17-alpine
-    container_name: riven-ts-dev-db
+    container_name: riven-db
     restart: unless-stopped
     profiles:
       - all
@@ -48,7 +64,7 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: riven
     volumes:
-      - riven-ts-db:/var/lib/postgresql/data/pgdata
+      - riven-db:/var/lib/postgresql/data/pgdata
     healthcheck:
       test:
         - CMD-SHELL
@@ -57,8 +73,8 @@ services:
       timeout: 5s
       retries: 5
 
-  riven-ts-cache:
-    container_name: riven-ts-dev-cache
+  riven-cache:
+    container_name: riven-cache
     image: redis
     restart: unless-stopped
     ports:
@@ -68,7 +84,7 @@ services:
       - services
 
   jaeger:
-    container_name: BullMQ_with_opentelemetry_jaeger
+    container_name: jaeger
     image: jaegertracing/all-in-one:1.75.0
     ports:
       - 4318:4318
@@ -93,7 +109,6 @@ services:
     container_name: plex
     image: plexinc/pms-docker
     restart: unless-stopped
-    network_mode: host
     deploy:
       resources:
         reservations:
@@ -105,10 +120,12 @@ services:
     environment:
       TZ: Europe/London
       PLEX_CLAIM: ${PLEX_CLAIM}
+    ports:
+      - 32400:32400
     volumes:
       - ./plex/config:/config
       - ./plex/transcode:/transcode
-      - /mnt/riven:/mount:rslave,z
+      - /mnt/riven:/mount:rslave
     healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://0.0.0.0:32400/identity
       interval: 1m00s
@@ -118,6 +135,9 @@ services:
     profiles:
       - all
       - services
+    depends_on:
+      - riven
 
 volumes:
-  riven-ts-db:
+  riven-db:
+  media-mount:

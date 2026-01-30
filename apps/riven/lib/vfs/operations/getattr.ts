@@ -15,18 +15,18 @@ import type { SetOptional } from "type-fest";
 
 type StatMode = "dir" | "file" | "link" | number;
 
-function parseMode(mode: StatMode): number {
+export function parseMode(mode: StatMode): number {
   if (typeof mode === "number") {
     return mode;
   }
 
   switch (mode) {
     case "dir":
-      return fs.constants.S_IFDIR;
+      return fs.constants.S_IFDIR | 0o755;
     case "file":
-      return fs.constants.S_IFREG;
+      return fs.constants.S_IFREG | 0o644;
     case "link":
-      return fs.constants.S_IFLNK;
+      return fs.constants.S_IFLNK | 0o755;
     default:
       return 0;
   }
@@ -57,6 +57,8 @@ const stat = (st: StatInput) => {
   const uid =
     st.uid ?? process.getuid?.() ?? z.int().parse(process.env["PUID"]);
 
+  // `ino` is omitted as the FUSE library will auto-generate it.
+  // If we set it ourselves, it conflicts and files do not stream.
   return {
     ...st,
     gid,
@@ -64,12 +66,9 @@ const stat = (st: StatInput) => {
     mode: parseMode(st.mode),
     size: st.mode === "dir" ? 0 : st.size,
     blksize: config.blockSize,
-    dev: 0,
-    nlink: 1,
-    rdev: 0,
-    ino: 0,
-    blocks: Math.ceil((st.size ?? 0) / config.blockSize),
-  } satisfies Stats;
+    blocks: 1,
+    nlink: st.mode === "dir" ? 2 : 1,
+  } satisfies Partial<Omit<Stats, "ino">>;
 };
 
 async function getattr(path: string) {
@@ -127,18 +126,20 @@ async function getattr(path: string) {
 
 export const getattrSync = function (path, callback) {
   getattr(path)
-    .then(callback.bind(null, 0))
+    .then((stats) => {
+      process.nextTick(callback, null, stats);
+    })
     .catch((error: unknown) => {
       if (isFuseError(error)) {
         logger.error(`VFS getattr FuseError: ${error.message}`);
 
-        callback(error.errorCode);
+        process.nextTick(callback, error.errorCode);
 
         return;
       }
 
       logger.error(`VFS getattr unknown error: ${String(error)}`);
 
-      callback(Fuse.ENOENT);
+      process.nextTick(callback, Fuse.ENOENT);
     });
 } satisfies OPERATIONS["getattr"];

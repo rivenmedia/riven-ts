@@ -1,6 +1,9 @@
 .git
-**/node_modules
-**/.turbo
-**/.next
-**/*.tsbuildinfo
-**/*.log
+.gitignore
+*.md
+dist
+node_modules
+.turbo
+.next
+*.tsbuildinfo
+*.log

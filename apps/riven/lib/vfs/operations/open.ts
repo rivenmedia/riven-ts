@@ -167,10 +167,12 @@ export const openSync = function (
   callback: (err: number, fd?: number) => void,
 ) {
   open(path, flags, linkRequestQueues)
-    .then(callback.bind(null, 0))
+    .then((fd) => {
+      process.nextTick(callback, 0, fd);
+    })
     .catch((error: unknown) => {
       logger.error(`VFS open error: ${(error as Error).message}`);
 
-      callback(Fuse.EIO);
+      process.nextTick(callback, Fuse.EIO);
     });
 };

@@ -26,21 +26,21 @@ export const initialiseVfs = fromPromise<
   InitialiseVfsOutput,
   InitialiseVfsInput
 >(async ({ input: { mountPath, pluginQueues } }) => {
-  const isConfigured = await new Promise<boolean | undefined>(
-    (resolve, reject) => {
-      Fuse.isConfigured((err, val) => {
-        if (err) {
-          reject(err);
+  try {
+    await new Promise((resolve, reject) => {
+      Fuse.configure((error) => {
+        if (error) {
+          reject(error);
         }
 
-        resolve(val);
+        resolve(undefined);
       });
-    },
-  );
-
-  if (!isConfigured) {
+    });
+  } catch (error: unknown) {
     throw new Error(
-      "FUSE is not configured on this system. Please run `sudo env PATH=$PATH npm run --prefix apps/riven fuse:configure`.",
+      `FUSE configuration failed on this system: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     );
   }
 
@@ -67,7 +67,6 @@ export const initialiseVfs = fromPromise<
 
   const vfs = new Fuse(mountPath, fuseOperations({ linkRequestQueues }), {
     debug: z.stringbool().parse(process.env["VFS_DEBUG_LOGGING"]),
-    autoUnmount: true,
     allowOther: true,
     autoCache: true,
     force: true,

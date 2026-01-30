@@ -5,7 +5,7 @@ import { ref } from "@mikro-orm/core";
 import Fuse from "@zkochan/fuse-native";
 import { expect, it, vi } from "vitest";
 
-import { getattrSync } from "./getattr.ts";
+import { getattrSync, parseMode } from "./getattr.ts";
 
 it.for(["/", "/movies", "/shows"])(
   'returns a container directory for "%s"',
@@ -15,14 +15,17 @@ it.for(["/", "/movies", "/shows"])(
     getattrSync(path, callback);
 
     await vi.waitFor(() => {
-      expect(callback).toHaveBeenCalledWith<[number, Fuse.Stats]>(0, {
-        atime: expect.any(Number) as never,
-        ctime: expect.any(Number) as never,
-        mtime: expect.any(Number) as never,
-        mode: 16877, // dir
+      expect(callback).toHaveBeenCalledWith(null, {
+        atime: expect.any(Date) as never,
+        ctime: expect.any(Date) as never,
+        mtime: expect.any(Date) as never,
+        mode: parseMode("dir"),
         gid: 1000,
         uid: 1000,
         size: 0,
+        blksize: 131072,
+        blocks: 1,
+        nlink: 2,
       });
     });
   },
@@ -34,7 +37,7 @@ it("skips hidden paths", async () => {
   getattrSync("/.Trash", callback);
 
   await vi.waitFor(() => {
-    expect(callback).toHaveBeenCalledWith(0, undefined);
+    expect(callback).toHaveBeenCalledWith(null, undefined);
   });
 });
 
@@ -44,7 +47,7 @@ it("skips trash paths", async () => {
   getattrSync("/somefolder/.hidden", callback);
 
   await vi.waitFor(() => {
-    expect(callback).toHaveBeenCalledWith(0, undefined);
+    expect(callback).toHaveBeenCalledWith(null, undefined);
   });
 });
 
@@ -65,8 +68,9 @@ it("returns file stats for known files", async () => {
 
   const mediaEntry = new MediaEntry();
 
-  mediaEntry.fileSize = 2147483648n;
+  mediaEntry.fileSize = 2147483648;
   mediaEntry.originalFilename = "Inception (2010) {tmdb-27205}.mkv";
+  mediaEntry.provider = "@repo/plugin-test";
 
   const mediaItem = new Movie();
 
@@ -89,14 +93,17 @@ it("returns file stats for known files", async () => {
   );
 
   await vi.waitFor(() => {
-    expect(callback).toHaveBeenCalledWith<[number, Fuse.Stats]>(0, {
-      atime: expect.any(Number) as never,
-      ctime: expect.any(Number) as never,
-      mtime: expect.any(Number) as never,
-      mode: 33188, // file
+    expect(callback).toHaveBeenCalledWith(null, {
+      atime: expect.any(Date) as never,
+      ctime: expect.any(Date) as never,
+      mtime: expect.any(Date) as never,
+      mode: parseMode("file"),
       gid: 1000,
       uid: 1000,
       size: 2147483648,
+      blksize: 131072,
+      blocks: 1,
+      nlink: 1,
     });
   });
 });

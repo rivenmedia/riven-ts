@@ -1,7 +1,7 @@
 import { fromCallback } from "xstate";
 
+import type { RegisteredPlugin } from "../../../types/plugins.ts";
 import type { PluginRegistrarMachineEvent } from "../index.ts";
-import type { RegisteredPlugin } from "./collect-plugins-for-registration.actor.ts";
 
 export interface ValidatePluginInput {
   plugin: RegisteredPlugin;

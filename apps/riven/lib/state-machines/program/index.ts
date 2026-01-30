@@ -4,6 +4,7 @@ import { bootstrapMachine } from "../bootstrap/index.ts";
 import { mainRunnerMachine } from "../main-runner/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
+import { unmountVfs } from "./actors/unmount-vfs.actor.ts";
 
 import type { ValidPluginMap } from "../../types/plugins.ts";
 import type { ApolloServer } from "@apollo/server";
@@ -33,12 +34,14 @@ export const rivenMachine = setup({
       bootstrapMachine: "bootstrapMachine";
       stopGqlServer: "stopGqlServer";
       mainRunnerMachine: "mainRunnerMachine";
+      unmountVfs: "unmountVfs";
     },
   },
   actors: {
     bootstrapMachine,
     mainRunnerMachine,
     stopGqlServer,
+    unmountVfs,
   },
 })
   .extend(withLogAction)
@@ -147,6 +150,40 @@ export const rivenMachine = setup({
                     message: "GQL server has been stopped.",
                   },
                 },
+              },
+            },
+          },
+          "Unmounting VFS": {
+            initial: "Unmounting",
+            states: {
+              Unmounting: {
+                invoke: {
+                  id: "unmountVfs",
+                  src: "unmountVfs",
+                  input: ({ context: { vfs } }) => vfs,
+                  onDone: {
+                    target: "Unmounted",
+                    actions: {
+                      type: "log",
+                      params: {
+                        message: "VFS has been unmounted successfully.",
+                      },
+                    },
+                  },
+                  onError: {
+                    target: "Unmounted",
+                    actions: {
+                      type: "log",
+                      params: ({ event }) => ({
+                        message: `Error while unmounting VFS: ${(event.error as Error).message}`,
+                        level: "error",
+                      }),
+                    },
+                  },
+                },
+              },
+              Unmounted: {
+                type: "final",
               },
             },
           },

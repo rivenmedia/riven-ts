@@ -1,4 +1,5 @@
 import Fuse from "@zkochan/fuse-native";
+import { Buffer } from "node:buffer";
 import { setTimeout as sleep } from "node:timers/promises";
 
 import { config } from "../../config.ts";

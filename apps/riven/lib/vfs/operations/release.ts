@@ -30,18 +30,18 @@ export const releaseSync = function (_path, fd, callback) {
 
     logger.silly(`Released file descriptor ${fd.toString()} successfully.`);
 
-    callback(0);
+    process.nextTick(callback, 0);
   } catch (error: unknown) {
     if (isFuseError(error)) {
       logger.error(`VFS release FuseError: ${error.message}`);
 
-      callback(error.errorCode);
+      process.nextTick(callback, error.errorCode);
 
       return;
     }
 
     logger.error(`VFS release unknown error: ${String(error)}`);
 
-    callback(Fuse.EIO);
+    process.nextTick(callback, Fuse.EIO);
   }
 } satisfies OPERATIONS["release"];

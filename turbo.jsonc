@@ -6,7 +6,9 @@
     "DATABASE_URL",
     "*_API_KEY",
     "LOG_LEVEL",
-    "LOG_DIRECTORY"
+    "LOG_DIRECTORY",
+    "REDIS_URL",
+    "JAEGER_URL"
   ],
   "tasks": {
     "transit": {

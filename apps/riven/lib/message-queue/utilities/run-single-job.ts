@@ -1,4 +1,6 @@
-import { type Queue, QueueEvents } from "bullmq";
+import { createQueueEvents } from "./create-queue-events.ts";
+
+import type { Queue } from "bullmq";
 
 export const runSingleJob = async <
   DataType,
@@ -11,7 +13,7 @@ export const runSingleJob = async <
 ) => {
   await using disposer = new AsyncDisposableStack();
 
-  const queueEvents = disposer.adopt(new QueueEvents(queue.name), (qe) =>
+  const queueEvents = disposer.adopt(createQueueEvents(queue.name), (qe) =>
     qe.close(),
   );
 

@@ -1,4 +1,5 @@
 import Fuse from "@zkochan/fuse-native";
+import { Buffer } from "node:buffer";
 
 import { FuseError } from "../../errors/fuse-error.ts";
 import { chunkCache } from "../chunk-cache.ts";
