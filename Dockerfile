@@ -20,15 +20,15 @@ RUN chown -R ${PUID}:${PGID} ${HOME}
 # Install core dependencies
 RUN apt-get update && apt-get install -y wget fuse3 libfuse3-dev libfuse-dev
 
-# Install pnpm and Node.js
-RUN wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -
-RUN pnpm env use --global 24
-
 # Configure FUSE
 RUN sed -i 's/^#\s*user_allow_other/user_allow_other/' /etc/fuse.conf || \
     echo 'user_allow_other' >> /etc/fuse.conf
 
-#--------------------------
+# Install pnpm and Node.js
+RUN wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -
+RUN pnpm env use --global 24
+
+#---------------------------
 
 FROM base AS dependencies
 
@@ -38,12 +38,13 @@ ENV HUSKY=0
 # Install build dependencies
 RUN apt-get update && apt-get install -y make gcc python3 build-essential
 
-# Copy project files
-COPY . ${HOME}/riven-ts
 WORKDIR ${HOME}/riven-ts
 
-# Set ownership of home directory
-RUN chown -R ${PUID}:${PGID} ${HOME}
+# Copy dependency files
+COPY .husky/install.mjs .husky/install.mjs
+COPY pnpm-workspace.yaml .
+COPY pnpm-lock.yaml .
+COPY --parents **/package.json ./
 
 # Install project dependencies
 RUN pnpm install --frozen-lockfile
@@ -53,10 +54,8 @@ RUN pnpm install --frozen-lockfile
 FROM dependencies AS riven
 
 # Copy built project to final image
-COPY --from=dependencies --chown=${PUID}:${PGID} ${HOME} ${HOME}
-
-# Switch to non-root user
-# USER ${PUID}:${PGID}
+COPY --parents --from=dependencies ${HOME}/riven-ts/**/node_modules ./node_modules/
+COPY . .
 
 EXPOSE 8080
 
