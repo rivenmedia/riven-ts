@@ -12,7 +12,7 @@ import {
 import { mainRunnerMachine } from "../../../main-runner/index.ts";
 import { type RivenMachineInput, rivenMachine } from "../../index.ts";
 
-import type { PendingRunnerInvocationPlugin } from "../../../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+import type { ValidPlugin } from "../../../../types/plugins.ts";
 import type { stopGqlServer } from "../../actors/stop-gql-server.actor.ts";
 
 export const it = baseIt.extend<{
@@ -29,17 +29,20 @@ export const it = baseIt.extend<{
 
     return use({
       server: {} as never,
-      plugins: new Map<symbol, PendingRunnerInvocationPlugin>([
+      plugins: new Map<symbol, ValidPlugin>([
         [
           testPlugin.default.name,
           {
             config: testPlugin.default,
             dataSources: new DataSourceMap(),
-            status: "pending-runner-invocation",
+            status: "valid",
           },
         ],
       ]),
-      queues: new Map(),
+      pluginQueues: new Map(),
+      pluginWorkers: new Map(),
+      publishableEvents: new Set(),
+      vfs: {} as never,
     });
   },
   stopGqlServerActorLogic: fromPromise(vi.fn()),

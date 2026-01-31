@@ -2,14 +2,14 @@ import { UnrecoverableError } from "bullmq";
 import { DateTime } from "luxon";
 
 import { persistDownloadResults } from "../../../state-machines/main-runner/actors/persist-download-results.actor.ts";
+import { zipFlowChildrenResults } from "../../utilities/zip-children-results.ts";
 import { downloadItemProcessorSchema } from "./download-item.schema.ts";
 
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
   async function (job, sendEvent) {
-    const children = await job.getChildrenValues();
-    const [container] = Object.values(children);
+    const [finalResult] = zipFlowChildrenResults(await job.getChildrenValues());
 
-    if (!container) {
+    if (!finalResult) {
       throw new UnrecoverableError(
         "No torrent container returned from downloaders",
       );
@@ -17,7 +17,8 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
 
     const updatedItem = await persistDownloadResults({
       id: job.data.id,
-      container,
+      container: finalResult.result,
+      processedBy: finalResult.plugin,
       sendEvent,
     });
 

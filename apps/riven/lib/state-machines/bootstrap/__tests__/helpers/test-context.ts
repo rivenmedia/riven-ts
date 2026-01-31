@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/require-await */
 import { it as baseIt } from "@repo/core-util-vitest-test-context";
 
-import Fuse from "fuse-native";
+import Fuse from "@zkochan/fuse-native";
 import { type Actor, createActor, createEmptyActor, fromPromise } from "xstate";
 
 import { type BootstrapMachineInput, bootstrapMachine } from "../../index.ts";

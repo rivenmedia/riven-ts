@@ -11,7 +11,7 @@
     "./events": "./lib/schemas/events/index.ts",
     "./events/*": "./lib/schemas/plugin-to-program-events/*.ts",
     "./schemas/*": "./lib/schemas/*.ts",
-    "./helpers/register-mq-listeners": "./lib/helpers/register-mq-listeners.ts",
+    "./helpers/*": "./lib/helpers/*.ts",
     "./validation": "./lib/validation/index.ts"
   },
   "scripts": {

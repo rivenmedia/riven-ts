@@ -1,15 +1,16 @@
 import { logger } from "@repo/core-util-logger";
 
-import Fuse from "fuse-native";
+import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 
-import { ROOT_PATH } from "../config.ts";
-import { PathInfo } from "../schemas/path-info.ts";
-import { PersistentDirectory } from "../schemas/persistent-directory.ts";
+import { config } from "../config.ts";
+import { isFuseError } from "../errors/fuse-error.ts";
+import { PathInfo } from "../schemas/path-info.schema.ts";
+import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 import { getItemDirectoryEntries } from "../utilities/get-item-directory-entries.ts";
 import { getPersistentDirectoryEntries } from "../utilities/get-persistent-directory-entries.ts";
 
 async function readdir(path: string) {
-  if (path === ROOT_PATH) {
+  if (path === config.rootPath) {
     return PersistentDirectory.options;
   }
 
@@ -30,11 +31,19 @@ async function readdir(path: string) {
 export const readDirSync = function (path, callback) {
   readdir(path)
     .then((data) => {
-      callback(0, data);
+      process.nextTick(callback, 0, data);
     })
     .catch((error: unknown) => {
-      logger.error(`VFS readdir error: ${(error as Error).message}`);
+      if (isFuseError(error)) {
+        logger.error(`VFS readdir FuseError: ${error.message}`);
 
-      callback(Fuse.ENOENT);
+        process.nextTick(callback, error.errorCode);
+
+        return;
+      }
+
+      logger.error(`VFS readdir unknown error: ${String(error)}`);
+
+      process.nextTick(callback, Fuse.ENOENT);
     });
-} satisfies Fuse.Operations["readdir"];
+} satisfies OPERATIONS["readdir"];

@@ -28,11 +28,13 @@ export class MediaEntry extends FileSystemEntry {
 
   @Field({ nullable: true })
   @Property()
+  @IsUrl()
+  @IsOptional()
   unrestrictedUrl?: string;
 
-  @Field({ nullable: true })
+  @Field()
   @Property()
-  provider?: string;
+  provider!: string;
 
   @Field({ nullable: true })
   @Property()

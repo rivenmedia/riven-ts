@@ -262,6 +262,18 @@ export abstract class BaseDataSource extends RESTDataSource {
       return "json";
     }
 
+    if (typeof body === "string") {
+      try {
+        JSON.parse(body);
+      } catch {
+        throw new Error(
+          "Unable to determine the request body type: invalid JSON string.",
+        );
+      }
+
+      return "json";
+    }
+
     throw new Error("Unable to determine the request body type.");
   }
 

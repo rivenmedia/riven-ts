@@ -3,6 +3,7 @@ import {
   DataSourceMap,
   parsePluginsFromDependencies,
 } from "@repo/util-plugin-sdk";
+import { z } from "@repo/util-plugin-sdk/validation";
 
 import packageJson from "../package.json" with { type: "json" };
 
@@ -45,7 +46,7 @@ export function buildContext(
               cache,
               logger,
               pluginSymbol: plugin.name,
-              redisUrl: process.env["REDIS_URL"],
+              redisUrl: z.url().parse(process.env["REDIS_URL"]),
             });
 
             dataSources.set(DataSourceConstructor, instance);

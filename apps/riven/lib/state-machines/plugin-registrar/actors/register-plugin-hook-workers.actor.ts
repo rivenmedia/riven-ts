@@ -2,18 +2,45 @@ import { logger } from "@repo/core-util-logger";
 
 import { type Queue, Worker } from "bullmq";
 import os from "node:os";
+import { fromPromise } from "xstate";
 
 import { createPluginWorker } from "../../../message-queue/utilities/create-plugin-worker.ts";
 
-import type { PendingRunnerInvocationPlugin } from "../../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+import type {
+  PluginQueueMap,
+  PluginWorkerMap,
+  PublishableEventSet,
+  ValidPluginMap,
+} from "../../../types/plugins.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 
-export function createPluginHookWorkers(
-  plugins: Map<symbol, PendingRunnerInvocationPlugin>,
-) {
-  const pluginQueueMap = new Map<symbol, Map<RivenEvent["type"], Queue>>();
-  const pluginWorkerMap = new Map<symbol, Map<RivenEvent["type"], Worker>>();
-  const publishableEvents = new Set<RivenEvent["type"]>();
+export interface RegisterPluginHookWorkersInput {
+  plugins: ValidPluginMap;
+}
+
+export interface RegisterPluginHookWorkersOutput {
+  pluginQueues: PluginQueueMap;
+  pluginWorkers: PluginWorkerMap;
+  publishableEvents: PublishableEventSet;
+}
+
+export const registerPluginHookWorkers = fromPromise<
+  RegisterPluginHookWorkersOutput,
+  RegisterPluginHookWorkersInput
+>(async ({ input: { plugins } }) => {
+  const pluginQueueMap = new Map<
+    symbol,
+    Map<RivenEvent["type"], Queue>
+  >() satisfies PluginQueueMap;
+
+  const pluginWorkerMap = new Map<
+    symbol,
+    Map<RivenEvent["type"], Worker>
+  >() satisfies PluginWorkerMap;
+
+  const publishableEvents = new Set<
+    RivenEvent["type"]
+  >() satisfies PublishableEventSet;
 
   for (const [pluginSymbol, { config, dataSources }] of plugins.entries()) {
     const queueMap = new Map<RivenEvent["type"], Queue>();
@@ -21,14 +48,14 @@ export function createPluginHookWorkers(
 
     for (const [eventName, hook] of Object.entries(config.hooks)) {
       if (hook) {
-        const { queue, worker } = createPluginWorker(
+        const { queue, worker } = await createPluginWorker(
           eventName as RivenEvent["type"],
           pluginSymbol.description ?? "unknown",
-          async (job) =>
+          (job) =>
             hook({
               event: job.data as never,
               dataSources,
-            }),
+            }) as Promise<never>,
           { concurrency: os.availableParallelism() },
           {
             telemetry: {
@@ -48,6 +75,12 @@ export function createPluginHookWorkers(
 
         queueMap.set(eventName as RivenEvent["type"], queue);
         workerMap.set(eventName as RivenEvent["type"], worker);
+      } else {
+        logger.silly(
+          `No hook defined for event "${eventName}" for plugin ${String(
+            pluginSymbol.description,
+          )}, skipping worker registration.`,
+        );
       }
     }
 
@@ -60,4 +93,4 @@ export function createPluginHookWorkers(
     pluginWorkers: pluginWorkerMap,
     publishableEvents,
   };
-}
+});

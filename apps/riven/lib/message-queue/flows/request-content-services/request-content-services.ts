@@ -1,5 +1,4 @@
-import { FlowProducer } from "bullmq";
-
+import { createFlowProducer } from "../../utilities/create-flow-producer.ts";
 import { queueNameFor } from "../../utilities/queue-name-for.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
@@ -7,7 +6,7 @@ import type { RivenPlugin } from "@repo/util-plugin-sdk";
 export async function requestContentServices(
   contentServicePlugins: RivenPlugin[],
 ) {
-  const producer = new FlowProducer();
+  const producer = createFlowProducer("request-content-services");
 
   return producer.add({
     name: "Request content services",

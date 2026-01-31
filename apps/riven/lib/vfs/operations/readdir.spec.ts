@@ -34,6 +34,8 @@ it("returns all shows for the /shows path", async () => {
     MediaEntry.create({
       id: 1,
       originalFilename: "Example Show 1.mkv",
+      fileSize: 123456789,
+      provider: "@repo/plugin-test",
     }),
   ];
 
@@ -110,6 +112,8 @@ it("returns all movies for the /movies path", async () => {
   const expectedMediaEntries: MediaEntry[] = [
     MediaEntry.create({
       originalFilename: "Example Movie 1.mkv",
+      fileSize: 987654321,
+      provider: "@repo/plugin-test",
     }),
   ];
 
@@ -158,6 +162,8 @@ it("returns media entries for a known media item path", async () => {
   const expectedMediaEntries: MediaEntry[] = [
     MediaEntry.create({
       originalFilename: "Example Movie 1.mkv",
+      fileSize: 987654321,
+      provider: "@repo/plugin-test",
     }),
   ];
 

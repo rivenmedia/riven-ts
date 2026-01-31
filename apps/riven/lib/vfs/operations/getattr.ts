@@ -1,32 +1,52 @@
 import { database } from "@repo/core-util-database/database";
 import { logger } from "@repo/core-util-logger";
 
-import Fuse from "fuse-native";
+import Fuse, { type OPERATIONS, type Stats } from "@zkochan/fuse-native";
+import { LRUCache } from "lru-cache";
+import fs, { type PathLike } from "node:fs";
+import z from "zod";
 
-import { childQueryType } from "../config.ts";
-import { PathInfo } from "../schemas/path-info.ts";
+import { config } from "../config.ts";
+import { FuseError, isFuseError } from "../errors/fuse-error.ts";
+import { PathInfo } from "../schemas/path-info.schema.ts";
 import { isHiddenPath } from "../utilities/is-hidden-path.ts";
+import { isIgnoredPath } from "../utilities/is-ignored-path.ts";
+
+import type { SetOptional } from "type-fest";
+
+const attrCache = new LRUCache<PathLike, Partial<Stats>>({
+  ttl: 5000,
+  ttlAutopurge: false,
+});
 
 type StatMode = "dir" | "file" | "link" | number;
 
-function parseMode(mode: StatMode): number {
+export function parseMode(mode: StatMode): number {
   if (typeof mode === "number") {
     return mode;
   }
 
   switch (mode) {
     case "dir":
-      return 16877;
+      return fs.constants.S_IFDIR | 0o755;
     case "file":
-      return 33188;
+      return fs.constants.S_IFREG | 0o644;
     case "link":
-      return 41453;
+      return fs.constants.S_IFLNK | 0o755;
     default:
       return 0;
   }
 }
 
-type StatInput = Omit<Fuse.Stats, "mode" | "size"> & { mode: StatMode } & (
+type StatInput = SetOptional<
+  Omit<
+    Stats,
+    "mode" | "size" | "blksize" | "dev" | "nlink" | "rdev" | "ino" | "blocks"
+  >,
+  "gid" | "uid"
+> & {
+  mode: StatMode;
+} & (
     | {
         mode: Extract<StatMode, "dir">;
         size?: never;
@@ -38,23 +58,30 @@ type StatInput = Omit<Fuse.Stats, "mode" | "size"> & { mode: StatMode } & (
   );
 
 const stat = (st: StatInput) => {
-  const gid = st.gid ?? process.getgid?.();
-  const uid = st.uid ?? process.getuid?.();
+  const gid =
+    st.gid ?? process.getgid?.() ?? z.int().parse(process.env["PGID"]);
+  const uid =
+    st.uid ?? process.getuid?.() ?? z.int().parse(process.env["PUID"]);
 
   return {
     ...st,
+    gid,
+    uid,
     mode: parseMode(st.mode),
     size: st.mode === "dir" ? 0 : st.size,
-    ...(gid !== undefined ? { gid } : {}),
-    ...(uid !== undefined ? { uid } : {}),
-  } satisfies Fuse.Stats;
+    blksize: config.blockSize,
+    blocks: 1,
+    nlink: st.mode === "dir" ? 2 : 1,
+  } satisfies Partial<Stats>;
 };
 
 async function getattr(path: string) {
-  if (isHiddenPath(path)) {
-    logger.silly(`VFS getattr: Skipping hidden path ${path}`);
+  const maybeCachedAttr = attrCache.get(path);
 
-    return;
+  if (maybeCachedAttr) {
+    logger.silly(`VFS getattr: Cache hit for path ${path}`);
+
+    return maybeCachedAttr;
   }
 
   switch (path) {
@@ -62,19 +89,19 @@ async function getattr(path: string) {
     case "/movies":
     case "/shows": {
       return stat({
-        mtime: new Date().getTime(),
-        atime: new Date().getTime(),
-        ctime: new Date().getTime(),
+        mtime: new Date(),
+        atime: new Date(),
+        ctime: new Date(),
         mode: "dir",
       });
     }
   }
 
   const pathInfo = PathInfo.parse(path);
-  const entityType = childQueryType[pathInfo.type];
+  const entityType = config.childQueryType[pathInfo.type];
 
   if (!pathInfo.tmdbId) {
-    throw new Error(`Invalid path: ${path}`);
+    throw new FuseError(Fuse.ENOENT, `Invalid path: ${path}`);
   }
 
   const entry = await database.filesystemEntry.findOneOrFail({
@@ -84,29 +111,49 @@ async function getattr(path: string) {
     },
   });
 
-  return stat({
-    ctime: entry.createdAt.getTime(),
-    atime: entry.updatedAt?.getTime() ?? 0,
-    mtime: entry.updatedAt?.getTime() ?? 0,
+  const attrs = stat({
+    ctime: entry.createdAt,
+    atime: entry.updatedAt ?? entry.createdAt,
+    mtime: entry.updatedAt ?? entry.createdAt,
     ...(pathInfo.isFile
       ? {
-          size: Number(entry.fileSize),
+          size: entry.fileSize,
           mode: "file",
         }
-      : {
-          mode: "dir",
-        }),
+      : { mode: "dir" }),
   });
+
+  attrCache.set(path, attrs);
+
+  logger.silly(`VFS getattr: Cache miss for path ${path}`);
+
+  return attrs;
 }
 
 export const getattrSync = function (path, callback) {
+  if (isHiddenPath(path) || isIgnoredPath(path)) {
+    logger.silly(`VFS getattr: Skipping hidden/ignored path ${path}`);
+
+    process.nextTick(callback, Fuse.EBADF);
+
+    return;
+  }
+
   getattr(path)
-    .then((data) => {
-      callback(0, data);
+    .then((stats) => {
+      process.nextTick(callback, null, stats);
     })
     .catch((error: unknown) => {
-      logger.error(`VFS getattr error: ${(error as Error).message}`);
+      if (isFuseError(error)) {
+        logger.error(`VFS getattr FuseError: ${error.message}`);
 
-      callback(Fuse.ENOENT);
+        process.nextTick(callback, error.errorCode);
+
+        return;
+      }
+
+      logger.error(`VFS getattr unknown error: ${String(error)}`);
+
+      process.nextTick(callback, Fuse.ENOENT);
     });
-} satisfies Fuse.Operations["getattr"];
+} satisfies OPERATIONS["getattr"];

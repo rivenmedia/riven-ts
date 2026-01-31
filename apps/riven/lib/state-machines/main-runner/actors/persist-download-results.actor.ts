@@ -11,12 +11,14 @@ import type { TorrentContainer } from "@repo/util-plugin-sdk/schemas/torrents/to
 export interface PersistDownloadResultsInput {
   id: number;
   container: TorrentContainer;
+  processedBy: string;
   sendEvent: MainRunnerMachineIntake;
 }
 
 export async function persistDownloadResults({
   id,
   container,
+  processedBy,
   sendEvent,
 }: PersistDownloadResultsInput) {
   const existingItem = await database.mediaItem.findOne(
@@ -54,9 +56,17 @@ export async function persistDownloadResults({
 
   const mediaEntry = new MediaEntry();
 
-  mediaEntry.fileSize = BigInt(container.files[0]?.fileSize ?? 0);
+  mediaEntry.fileSize = container.files[0]?.fileSize ?? 0;
   mediaEntry.originalFilename = container.files[0]?.fileName ?? "";
   mediaEntry.mediaItem = ref(existingItem);
+  mediaEntry.provider = processedBy;
+  mediaEntry.providerDownloadId = container.torrentId.toString();
+
+  const downloadUrl = container.files[0]?.downloadUrl;
+
+  if (downloadUrl) {
+    mediaEntry.downloadUrl = downloadUrl;
+  }
 
   existingItem.filesystemEntries.add(mediaEntry);
 

@@ -1,15 +1,15 @@
-import { type FlowJob, FlowProducer } from "bullmq";
-
+import { createFlowProducer } from "../../utilities/create-flow-producer.ts";
 import { queueNameFor } from "../../utilities/queue-name-for.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
+import type { FlowJob } from "bullmq";
 
 export async function scrapeItem(
   item: MediaItemScrapeRequestedEvent["item"],
   scraperPlugins: RivenPlugin[],
 ) {
-  const producer = new FlowProducer();
+  const producer = createFlowProducer("scrape-item");
 
   const childNodes = scraperPlugins.map((plugin) => ({
     name: `${plugin.name.description ?? "unknown"} - Scrape item #${item.id.toString()}`,

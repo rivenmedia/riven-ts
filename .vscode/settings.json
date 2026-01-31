@@ -5,8 +5,10 @@
     "kubb",
     "listrr",
     "Promisable",
+    "stringbool",
     "TMDB",
-    "torrentio"
+    "torrentio",
+    "zkochan"
   ],
   "typescript.preferences.autoImportSpecifierExcludeRegexes": [
     "node:test" // Conflicts with Vitest imports

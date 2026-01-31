@@ -4,16 +4,17 @@ import { bootstrapMachine } from "../bootstrap/index.ts";
 import { mainRunnerMachine } from "../main-runner/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
+import { unmountVfs } from "./actors/unmount-vfs.actor.ts";
 
-import type { PendingRunnerInvocationPlugin } from "../plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
+import type { ValidPluginMap } from "../../types/plugins.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";
-import type Fuse from "fuse-native";
+import type Fuse from "@zkochan/fuse-native";
 import type { UUID } from "node:crypto";
 
 export interface RivenMachineContext {
   mainRunnerRef?: AnyActorRef;
-  plugins?: Map<symbol, PendingRunnerInvocationPlugin>;
+  plugins?: ValidPluginMap;
   server?: ApolloServer;
   vfs?: Fuse;
 }
@@ -33,12 +34,14 @@ export const rivenMachine = setup({
       bootstrapMachine: "bootstrapMachine";
       stopGqlServer: "stopGqlServer";
       mainRunnerMachine: "mainRunnerMachine";
+      unmountVfs: "unmountVfs";
     },
   },
   actors: {
     bootstrapMachine,
     mainRunnerMachine,
     stopGqlServer,
+    unmountVfs,
   },
 })
   .extend(withLogAction)
@@ -55,16 +58,32 @@ export const rivenMachine = setup({
           src: "bootstrapMachine",
           input: ({ self }) => ({ rootRef: self }),
           onDone: {
-            actions: assign(({ spawn, event }) => ({
-              server: event.output.server,
-              vfs: event.output.vfs,
-              mainRunnerRef: spawn(mainRunnerMachine, {
-                input: {
-                  plugins: event.output.plugins,
-                  queues: event.output.queues,
+            actions: assign(
+              ({
+                spawn,
+                event: {
+                  output: {
+                    server,
+                    vfs,
+                    plugins,
+                    publishableEvents,
+                    pluginQueues,
+                    pluginWorkers,
+                  },
                 },
+              }) => ({
+                server,
+                vfs,
+                mainRunnerRef: spawn(mainRunnerMachine, {
+                  input: {
+                    plugins,
+                    publishableEvents,
+                    pluginQueues,
+                    pluginWorkers,
+                  },
+                }),
               }),
-            })),
+            ),
             target: "Running",
           },
           onError: {
@@ -109,7 +128,7 @@ export const rivenMachine = setup({
                 invoke: {
                   id: "stopGqlServer",
                   src: "stopGqlServer",
-                  input: ({ context }) => context.server,
+                  input: ({ context: { server } }) => server,
                   onDone: "Stopped",
                   onError: {
                     target: "Stopped",
@@ -131,6 +150,40 @@ export const rivenMachine = setup({
                     message: "GQL server has been stopped.",
                   },
                 },
+              },
+            },
+          },
+          "Unmounting VFS": {
+            initial: "Unmounting",
+            states: {
+              Unmounting: {
+                invoke: {
+                  id: "unmountVfs",
+                  src: "unmountVfs",
+                  input: ({ context: { vfs } }) => vfs,
+                  onDone: {
+                    target: "Unmounted",
+                    actions: {
+                      type: "log",
+                      params: {
+                        message: "VFS has been unmounted successfully.",
+                      },
+                    },
+                  },
+                  onError: {
+                    target: "Unmounted",
+                    actions: {
+                      type: "log",
+                      params: ({ event }) => ({
+                        message: `Error while unmounting VFS: ${(event.error as Error).message}`,
+                        level: "error",
+                      }),
+                    },
+                  },
+                },
+              },
+              Unmounted: {
+                type: "final",
               },
             },
           },

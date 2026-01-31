@@ -1,13 +1,20 @@
 import path from "path";
 import { createLogger, format, transports } from "winston";
 
-const logDir = path.resolve(process.cwd(), "logs");
+const logDir = path.resolve(
+  process.cwd(),
+  process.env["LOG_DIRECTORY"] ?? "logs",
+);
 
 const isProductionEnvironment = process.env["NODE_ENV"] === "production";
 const isTestEnvironment = process.env["NODE_ENV"] === "test";
 
 const logFormat = format.printf(function (info) {
-  return `${String(info["timestamp"])} - ${info.level}: ${JSON.stringify(info["stack"] ?? info.message, null, 2)}`;
+  return `${String(info["timestamp"])} - ${info.level}: ${JSON.stringify(
+    info["stack"] ?? info.message,
+    null,
+    2,
+  )}`;
 });
 
 export type LogLevel =
@@ -20,7 +27,7 @@ export type LogLevel =
   | "silly";
 
 export const logger = createLogger({
-  level: "debug",
+  level: process.env["LOG_LEVEL"] ?? "info",
   format: format.combine(
     format.timestamp({
       format: "YYYY-MM-DD HH:mm:ss",

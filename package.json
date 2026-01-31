@@ -9,7 +9,7 @@
   "scripts": {
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
-    "postinstall": "husky || true"
+    "postinstall": "node .husky/install.mjs || true"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
@@ -22,5 +22,5 @@
     "turbo": "^2.6.3",
     "type-fest": "^5.3.1"
   },
-  "packageManager": "pnpm@10.27.0"
+  "packageManager": "pnpm@10.28.1"
 }

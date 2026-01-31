@@ -1,5 +1,6 @@
 /* eslint-disable no-empty-pattern */
 import { ApolloServer } from "@apollo/server";
+import { MockAgent, setGlobalDispatcher } from "undici";
 import { test as testBase } from "vitest";
 
 import type { KeyValueCache } from "@apollo/utils.keyvaluecache";
@@ -10,6 +11,7 @@ export const it = testBase.extend<{
   server: SetupServerApi;
   apolloServerInstance: ApolloServer;
   gqlServer: ApolloServer;
+  mockAgent: MockAgent;
 }>({
   async httpCache({}, use) {
     const { InMemoryLRUCache } = await import("@apollo/utils.keyvaluecache");
@@ -47,6 +49,17 @@ export const it = testBase.extend<{
 
     // Stop the worker after the test.
     server.close();
+  },
+  mockAgent: async ({}, use) => {
+    const mockAgent = new MockAgent();
+
+    mockAgent.disableNetConnect();
+
+    setGlobalDispatcher(mockAgent);
+
+    await use(mockAgent);
+
+    await mockAgent.close();
   },
 });
 
