@@ -135,8 +135,8 @@ services:
     profiles:
       - all
       - services
-    depends_on:
-      - riven
+    # depends_on:
+    #   - riven
 
 volumes:
   riven-db:

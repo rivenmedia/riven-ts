@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.app.json && tsc --noEmit --project tsconfig.spec.json",
-    "dev": "pnpm start --watch --env-file=.env",
+    "dev": "node --watch --env-file=.env --import=./lib/opentelemetry.ts --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
     "fuse:check": "fuse-native is-configured",
     "fuse:configure": "fuse-native configure",
     "graphql-codegen": "graphql-codegen",
@@ -34,6 +34,7 @@
     "@repo/core-util-graphql-schema": "workspace:^",
     "@repo/core-util-logger": "workspace:^",
     "@repo/plugin-listrr": "workspace:^",
+    "@repo/plugin-plex": "workspace:^",
     "@repo/plugin-realdebrid": "workspace:^",
     "@repo/plugin-tmdb": "workspace:^",
     "@repo/plugin-torrentio": "workspace:^",

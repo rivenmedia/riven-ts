@@ -17,6 +17,7 @@ import type { SetOptional } from "type-fest";
 const attrCache = new LRUCache<PathLike, Partial<Stats>>({
   ttl: 5000,
   ttlAutopurge: false,
+  max: 1000,
 });
 
 type StatMode = "dir" | "file" | "link" | number;

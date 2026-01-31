@@ -1,0 +1,6 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tags": ["group:plex", "type:plugin"],
+  "tasks": {}
+}
