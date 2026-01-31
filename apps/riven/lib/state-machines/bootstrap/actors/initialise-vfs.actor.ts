@@ -68,10 +68,11 @@ export const initialiseVfs = fromPromise<
   const vfs = new Fuse(mountPath, fuseOperations({ linkRequestQueues }), {
     debug: z.stringbool().parse(process.env["VFS_DEBUG_LOGGING"]),
     allowOther: true,
-    autoCache: true,
+    defaultPermissions: true as never,
+    entryTimeout: 0,
+    attrTimeout: 0,
+    acAttrTimeout: 0,
     force: true,
-    mkdir: true,
-    fsname: "riven_vfs",
   });
 
   return new Promise((resolve, reject) => {

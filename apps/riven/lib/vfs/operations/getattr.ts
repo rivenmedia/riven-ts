@@ -2,7 +2,8 @@ import { database } from "@repo/core-util-database/database";
 import { logger } from "@repo/core-util-logger";
 
 import Fuse, { type OPERATIONS, type Stats } from "@zkochan/fuse-native";
-import fs from "node:fs";
+import { LRUCache } from "lru-cache";
+import fs, { type PathLike } from "node:fs";
 import z from "zod";
 
 import { config } from "../config.ts";
@@ -12,6 +13,11 @@ import { isHiddenPath } from "../utilities/is-hidden-path.ts";
 import { isIgnoredPath } from "../utilities/is-ignored-path.ts";
 
 import type { SetOptional } from "type-fest";
+
+const attrCache = new LRUCache<PathLike, Partial<Stats>>({
+  ttl: 5000,
+  ttlAutopurge: false,
+});
 
 type StatMode = "dir" | "file" | "link" | number;
 
@@ -57,8 +63,6 @@ const stat = (st: StatInput) => {
   const uid =
     st.uid ?? process.getuid?.() ?? z.int().parse(process.env["PUID"]);
 
-  // `ino` is omitted as the FUSE library will auto-generate it.
-  // If we set it ourselves, it conflicts and files do not stream.
   return {
     ...st,
     gid,
@@ -68,20 +72,16 @@ const stat = (st: StatInput) => {
     blksize: config.blockSize,
     blocks: 1,
     nlink: st.mode === "dir" ? 2 : 1,
-  } satisfies Partial<Omit<Stats, "ino">>;
+  } satisfies Partial<Stats>;
 };
 
 async function getattr(path: string) {
-  if (isHiddenPath(path)) {
-    logger.silly(`VFS getattr: Skipping hidden path ${path}`);
+  const maybeCachedAttr = attrCache.get(path);
 
-    return;
-  }
+  if (maybeCachedAttr) {
+    logger.silly(`VFS getattr: Cache hit for path ${path}`);
 
-  if (isIgnoredPath(path)) {
-    logger.silly(`VFS getattr: Skipping ignored path ${path}`);
-
-    return;
+    return maybeCachedAttr;
   }
 
   switch (path) {
@@ -111,7 +111,7 @@ async function getattr(path: string) {
     },
   });
 
-  return stat({
+  const attrs = stat({
     ctime: entry.createdAt,
     atime: entry.updatedAt ?? entry.createdAt,
     mtime: entry.updatedAt ?? entry.createdAt,
@@ -122,9 +122,23 @@ async function getattr(path: string) {
         }
       : { mode: "dir" }),
   });
+
+  attrCache.set(path, attrs);
+
+  logger.silly(`VFS getattr: Cache miss for path ${path}`);
+
+  return attrs;
 }
 
 export const getattrSync = function (path, callback) {
+  if (isHiddenPath(path) || isIgnoredPath(path)) {
+    logger.silly(`VFS getattr: Skipping hidden/ignored path ${path}`);
+
+    process.nextTick(callback, Fuse.EBADF);
+
+    return;
+  }
+
   getattr(path)
     .then((stats) => {
       process.nextTick(callback, null, stats);
