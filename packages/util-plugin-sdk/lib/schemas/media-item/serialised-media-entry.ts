@@ -1,7 +1,9 @@
+import { database } from "@repo/core-util-database/database";
+
 import { wrap } from "@mikro-orm/core";
 import z from "zod";
 
-import { MediaEntry } from "../../dto/entities/index.ts";
+import { MediaEntry } from "../../dto/entities/filesystem/media-entry.entity.ts";
 
 export const SerialisedMediaEntry = z.codec(
   // Just validate the input has a matching media item type here
@@ -9,8 +11,12 @@ export const SerialisedMediaEntry = z.codec(
   z.looseObject({ provider: z.string() }),
   z.instanceof(MediaEntry),
   {
-    decode: (data) => MediaEntry.create(data),
-    encode: (data) => wrap(data).toJSON(),
+    decode: (data) =>
+      database.mediaEntry.create(data, {
+        persist: false,
+        partial: true,
+      }),
+    encode: (data) => wrap(data).toPOJO(),
   },
 );
 

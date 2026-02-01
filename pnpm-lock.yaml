@@ -1207,6 +1207,9 @@ importers:
 
   packages/util-plugin-sdk:
     dependencies:
+      '@repo/core-util-database':
+        specifier: workspace:^
+        version: link:../core/util-database
       luxon:
         specifier: 'catalog:'
         version: 3.7.2

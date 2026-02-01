@@ -1,6 +1,4 @@
-import { wrap } from "@mikro-orm/core";
-import z from "zod";
-
+import { database } from "@repo/core-util-database/database";
 import {
   Episode,
   MediaItemType,
@@ -8,7 +6,10 @@ import {
   RequestedItem,
   Season,
   Show,
-} from "../../dto/entities/index.ts";
+} from "@repo/util-plugin-sdk/dto/entities/index";
+
+import { wrap } from "@mikro-orm/core";
+import z from "zod";
 
 export const SerialisedMediaItem = z.codec(
   // Just validate the input has a matching media item type here
@@ -25,20 +26,35 @@ export const SerialisedMediaItem = z.codec(
     decode: (data) => {
       switch (data.type) {
         case "movie":
-          return Movie.create(data);
+          return database.movie.create(data, {
+            persist: false,
+            partial: true,
+          });
         case "show":
-          return Show.create(data);
+          return database.show.create(data, {
+            persist: false,
+            partial: true,
+          });
         case "season":
-          return Season.create(data);
+          return database.season.create(data, {
+            persist: false,
+            partial: true,
+          });
         case "episode":
-          return Episode.create(data);
+          return database.episode.create(data, {
+            persist: false,
+            partial: true,
+          });
         case "requested_item":
-          return RequestedItem.create(data);
+          return database.requestedItem.create(data, {
+            persist: false,
+            partial: true,
+          });
         default:
           throw new Error(`Unknown media item type: ${data.type as string}`);
       }
     },
-    encode: (data) => wrap(data).toJSON(),
+    encode: (data) => wrap(data).toPOJO(),
   },
 );
 
