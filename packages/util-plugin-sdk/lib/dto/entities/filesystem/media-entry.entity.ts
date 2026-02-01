@@ -7,9 +7,15 @@ import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 
 @ObjectType()
 @Entity({
-  discriminatorValue: "MediaEntry",
+  discriminatorValue: "media",
 })
 export class MediaEntry extends FileSystemEntry {
+  constructor() {
+    super();
+
+    this.type = "media";
+  }
+
   @Field()
   @Index()
   @Property()

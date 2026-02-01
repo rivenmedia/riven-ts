@@ -1,3 +1,5 @@
+import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities/index";
+
 import packageJson from "../package.json" with { type: "json" };
 import { PlexAPI } from "./datasource/plex.datasource.ts";
 import { pluginConfig } from "./plex-plugin.config.ts";
@@ -12,12 +14,21 @@ export default {
   dataSources: [PlexAPI],
   resolvers: [PlexResolver, PlexSettingsResolver],
   hooks: {
-    "riven.core.started": async ({ dataSources }) => {
+    "riven.media-item.download.success": async ({ dataSources, event }) => {
       const plexAPI = dataSources.get(PlexAPI);
 
-      await plexAPI.updateSection("/library/sections");
+      const mediaEntry = event.item.filesystemEntries.find(
+        (entry) => entry.type === "media",
+      ) as MediaEntry | undefined;
+
+      if (!mediaEntry) {
+        throw new Error(
+          `No media filesystem entry found for media item ID ${event.item.id.toString()}`,
+        );
+      }
+
+      await plexAPI.updateSection(mediaEntry.path);
     },
-    // Add more hooks as needed
   },
   validator() {
     return true;

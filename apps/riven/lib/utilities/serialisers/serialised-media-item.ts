@@ -25,12 +25,13 @@ export const SerialisedMediaItem = z.codec(
   {
     decode: (data) => {
       switch (data.type) {
-        case "movie":
+        case "movie": {
           return database.movie.create(data, {
             persist: false,
             partial: true,
             managed: true,
           });
+        }
         case "show":
           return database.show.create(data, {
             persist: false,
@@ -57,7 +58,10 @@ export const SerialisedMediaItem = z.codec(
           });
       }
     },
-    encode: (data) => wrap(data).serialize(),
+    encode: (data) =>
+      wrap(data).serialize({
+        populate: ["*"],
+      }),
   },
 );
 

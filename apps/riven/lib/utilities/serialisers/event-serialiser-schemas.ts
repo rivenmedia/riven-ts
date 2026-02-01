@@ -6,12 +6,12 @@ import { RivenEvent, RivenEventSchemaMap } from "@repo/util-plugin-sdk/events";
 
 import { ZodCodec, ZodCustom, ZodObject, type ZodType, z } from "zod";
 
-import { SerialisedMediaEntry } from "./serialised-media-entry.ts";
+import { SerialisedFileSystemEntry } from "./serialised-filesystem-entry.ts";
 import { SerialisedMediaItem } from "./serialised-media-item.ts";
 
 const serialiserMap = new Map<ZodType, ZodCodec>([
   [z.instanceof(MediaItem), SerialisedMediaItem],
-  [z.instanceof(MediaEntry), SerialisedMediaEntry],
+  [z.instanceof(MediaEntry), SerialisedFileSystemEntry],
 ]);
 
 const shouldSerialise = (a: ZodType, b: ZodType) => {
@@ -22,7 +22,7 @@ const shouldSerialise = (a: ZodType, b: ZodType) => {
   return false;
 };
 
-function buildDeserialiserSchema(schema: ZodType): ZodObject {
+function buildSerialiserSchema(schema: ZodType): ZodObject {
   if (!(schema instanceof ZodObject)) {
     throw new Error("Expected a ZodObject schema");
   }
@@ -43,12 +43,9 @@ function buildDeserialiserSchema(schema: ZodType): ZodObject {
   return schema;
 }
 
-export const eventDeserialiserSchemaMap = new Map<
-  RivenEvent["type"],
-  ZodObject
->(
+export const eventSerialiserSchemaMap = new Map<RivenEvent["type"], ZodObject>(
   RivenEventSchemaMap.entries().map(([eventType, schema]) => [
     eventType,
-    buildDeserialiserSchema(schema),
+    buildSerialiserSchema(schema),
   ]),
 );

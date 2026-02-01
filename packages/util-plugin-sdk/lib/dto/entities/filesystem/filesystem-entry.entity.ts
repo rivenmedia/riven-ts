@@ -1,5 +1,6 @@
 import {
   Entity,
+  Enum,
   ManyToOne,
   PrimaryKey,
   Property,
@@ -7,14 +8,24 @@ import {
 } from "@mikro-orm/core";
 import { IsPositive } from "class-validator";
 import { Field, ID, ObjectType } from "type-graphql";
+import z from "zod";
 
 import { MediaItem } from "../media-items/media-item.entity.ts";
 
+export const FileSystemEntryType = z.enum(["media", "subtitle"]);
+
+export type FileSystemEntryType = z.infer<typeof FileSystemEntryType>;
+
 @ObjectType()
 @Entity({
+  abstract: true,
   discriminatorColumn: "type",
+  discriminatorMap: {
+    media: "MediaEntry",
+    subtitle: "SubtitleEntry",
+  },
 })
-export class FileSystemEntry {
+export abstract class FileSystemEntry {
   @Field((_type) => ID)
   @PrimaryKey()
   id!: number;
@@ -35,4 +46,8 @@ export class FileSystemEntry {
   @Field(() => MediaItem)
   @ManyToOne()
   mediaItem!: Ref<MediaItem>;
+
+  @Field(() => String)
+  @Enum(() => FileSystemEntryType.enum)
+  type!: FileSystemEntryType;
 }

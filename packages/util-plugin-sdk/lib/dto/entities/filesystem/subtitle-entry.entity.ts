@@ -5,9 +5,15 @@ import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 
 @ObjectType()
 @Entity({
-  discriminatorValue: "SubtitleEntry",
+  discriminatorValue: "subtitle",
 })
 export class SubtitleEntry extends FileSystemEntry {
+  constructor() {
+    super();
+
+    this.type = "subtitle";
+  }
+
   @Field()
   @Index()
   @Property()

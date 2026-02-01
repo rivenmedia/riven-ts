@@ -5,7 +5,7 @@ import os from "node:os";
 import { fromPromise } from "xstate";
 
 import { createPluginWorker } from "../../../message-queue/utilities/create-plugin-worker.ts";
-import { eventDeserialiserSchemaMap } from "../../../utilities/serialisers/event-deserialiser-schemas.ts";
+import { eventSerialiserSchemaMap } from "../../../utilities/serialisers/event-serialiser-schemas.ts";
 
 import type {
   PluginQueueMap,
@@ -56,7 +56,7 @@ export const registerPluginHookWorkers = fromPromise<
           pluginSymbol.description ?? "unknown",
           (job) => {
             const eventSchemaWithDeserialiser =
-              eventDeserialiserSchemaMap.get(typedEventName);
+              eventSerialiserSchemaMap.get(typedEventName);
 
             if (!eventSchemaWithDeserialiser) {
               throw new Error(
