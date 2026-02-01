@@ -101,6 +101,7 @@ services:
       - 4000:4000
     environment:
       PORT: 4000
+      REDIS_HOST: riven-cache
     profiles:
       - all
       - analytics
