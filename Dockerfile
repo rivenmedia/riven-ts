@@ -51,10 +51,21 @@ RUN pnpm install --frozen-lockfile
 
 #---------------------------
 
+FROM dependencies AS schema-generator
+
+COPY --parents --from=dependencies ${HOME}/riven-ts/**/node_modules ./node_modules/
+COPY --parents **/kubb.config.ts ./
+COPY ./packages/core/util-kubb-config ./packages/core/util-kubb-config
+
+RUN pnpm -r generate-schemas
+
+# ---------------------------
+
 FROM dependencies AS riven
 
 # Copy built project to final image
 COPY --parents --from=dependencies ${HOME}/riven-ts/**/node_modules ./node_modules/
+COPY --parents --from=schema-generator ${HOME}/riven-ts/**/__generated__ ./__generated__
 COPY . .
 
 EXPOSE 8080
