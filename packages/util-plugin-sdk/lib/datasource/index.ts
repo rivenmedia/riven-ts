@@ -326,9 +326,11 @@ export abstract class BaseDataSource extends RESTDataSource {
       `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url}`,
     );
 
+    const { ok, ...responseInit } = result.response;
+
     return {
       parsedBody: result.parsedBody as TResult,
-      response: result.response as never,
+      response: new Response(null, responseInit),
 
       // The following fields aren't used by our application,
       // but must be included to satisfy the return type.
