@@ -1,3 +1,5 @@
+import { SerialisedMediaItem } from "@repo/util-plugin-sdk/schemas/media-item/serialised-media-item";
+
 import { createFlowProducer } from "../../utilities/create-flow-producer.ts";
 import { queueNameFor } from "../../utilities/queue-name-for.ts";
 
@@ -18,7 +20,7 @@ export async function downloadItem(
       plugin.name.description ?? "unknown",
     ),
     data: {
-      item,
+      item: SerialisedMediaItem.encode(item),
     },
     opts: {
       ignoreDependencyOnFailure: true,

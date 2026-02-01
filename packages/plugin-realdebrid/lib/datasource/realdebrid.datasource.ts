@@ -314,9 +314,12 @@ export class RealDebridAPI extends BaseDataSource {
   }
 
   async getInstantAvailability(item: MediaItem): Promise<TorrentContainer> {
-    if (!item.streams[0]?.infoHash) {
+    const loadedStreams = await item.streams.loadItems();
+    const infoHash = loadedStreams[0]?.infoHash;
+
+    if (!infoHash) {
       throw new RealDebridAPIError(
-        "Media item does not have any streams with an info hash.",
+        `${item.title ?? "Unknown media item"} does not have any streams with an info hash.`,
       );
     }
 
@@ -333,10 +336,10 @@ export class RealDebridAPI extends BaseDataSource {
       );
     }
 
-    const torrentId = await this.#addTorrent(item.streams[0].infoHash);
+    const torrentId = await this.#addTorrent(infoHash);
 
     try {
-      return await this.#processTorrent(torrentId, item.streams[0].infoHash);
+      return await this.#processTorrent(torrentId, infoHash);
     } catch (error) {
       if (error instanceof Error) {
         this.logger.warn(

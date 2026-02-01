@@ -57,7 +57,7 @@ export const SerialisedMediaItem = z.codec(
           });
       }
     },
-    encode: (data) => wrap(data).toPOJO(),
+    encode: (data) => wrap(data).serialize(),
   },
 );
 

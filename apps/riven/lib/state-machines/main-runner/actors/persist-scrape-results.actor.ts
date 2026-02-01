@@ -84,10 +84,7 @@ export async function persistScrapeResults({
 
     await em.flush();
 
-    return await database.mediaItem.findOneOrFail(
-      { id },
-      { populate: ["streams:ref"] },
-    );
+    return await database.mediaItem.findOneOrFail({ id });
   } catch (error) {
     const parsedError = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
