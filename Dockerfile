@@ -61,11 +61,8 @@ RUN pnpm -r generate-schemas
 
 # ---------------------------
 
-FROM dependencies AS riven
+FROM schema-generator AS riven
 
-# Copy built project to final image
-COPY --parents --from=dependencies ${HOME}/riven-ts/**/node_modules ./node_modules/
-COPY --parents --from=schema-generator ${HOME}/riven-ts/**/__generated__ ./__generated__
 COPY . .
 
 EXPOSE 8080

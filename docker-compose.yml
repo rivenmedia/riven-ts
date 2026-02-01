@@ -105,6 +105,8 @@ services:
     profiles:
       - all
       - analytics
+    depends_on:
+      - riven-cache
 
   plex:
     container_name: plex
