@@ -22,7 +22,6 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@repo/core-util-database": "workspace:^",
     "luxon": "catalog:",
     "zod": "catalog:"
   },

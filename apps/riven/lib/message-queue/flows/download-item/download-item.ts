@@ -1,5 +1,4 @@
-import { SerialisedMediaItem } from "@repo/util-plugin-sdk/schemas/media-item/serialised-media-item";
-
+import { SerialisedMediaItem } from "../../../utilities/serialisers/serialised-media-item.ts";
 import { createFlowProducer } from "../../utilities/create-flow-producer.ts";
 import { queueNameFor } from "../../utilities/queue-name-for.ts";
 

@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { SerialisedMediaItem } from "../media-item/serialised-media-item.ts";
+import { MediaItem } from "../../dto/entities/index.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
@@ -10,7 +10,7 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 export const MediaItemIndexErrorIncorrectStateEvent = createProgramEventSchema(
   "media-item.index.error.incorrect-state",
   z.object({
-    item: SerialisedMediaItem,
+    item: z.instanceof(MediaItem),
   }),
 );
 

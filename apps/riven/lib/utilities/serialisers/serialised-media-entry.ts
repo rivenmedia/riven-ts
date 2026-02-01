@@ -1,9 +1,8 @@
 import { database } from "@repo/core-util-database/database";
+import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities/filesystem/media-entry.entity";
 
 import { wrap } from "@mikro-orm/core";
 import z from "zod";
-
-import { MediaEntry } from "../../dto/entities/filesystem/media-entry.entity.ts";
 
 export const SerialisedMediaEntry = z.codec(
   // Just validate the input has a matching media item type here

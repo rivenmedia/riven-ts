@@ -1,6 +1,5 @@
 import { logger } from "@repo/core-util-logger";
 import { RivenEvent } from "@repo/util-plugin-sdk/events";
-import { SerialisedMediaItem } from "@repo/util-plugin-sdk/schemas/media-item/serialised-media-item";
 
 import { Worker } from "bullmq";
 import { enqueueActions, raise, setup } from "xstate";
@@ -11,6 +10,7 @@ import { requestContentServicesProcessor } from "../../message-queue/flows/reque
 import { scrapeItemProcessor } from "../../message-queue/flows/scrape-item/scrape-item.processor.ts";
 import { sortScrapeResultsProcessor } from "../../message-queue/flows/scrape-item/steps/sort-scrape-results.processor.ts";
 import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
+import { SerialisedMediaItem } from "../../utilities/serialisers/serialised-media-item.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { requestContentServicesActor } from "./actors/request-content-services.actor.ts";
 import { requestDownload } from "./actors/request-download.actor.ts";
