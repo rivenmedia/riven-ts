@@ -14,7 +14,6 @@ import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
 import { z } from "zod";
 
-import { BaseEntity } from "../entity.ts";
 import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import { Stream } from "../streams/stream.entity.ts";
@@ -69,7 +68,7 @@ registerEnumType(MediaItemType.enum, {
   },
 })
 @Index({ properties: ["type", "airedAt"] })
-export abstract class MediaItem extends BaseEntity {
+export abstract class MediaItem {
   @Field((_type) => ID)
   @PrimaryKey()
   id!: number;

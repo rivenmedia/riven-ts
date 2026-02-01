@@ -8,14 +8,13 @@ import {
 import { IsPositive } from "class-validator";
 import { Field, ID, ObjectType } from "type-graphql";
 
-import { BaseEntity } from "../entity.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
 
 @ObjectType()
 @Entity({
   discriminatorColumn: "type",
 })
-export class FileSystemEntry extends BaseEntity {
+export class FileSystemEntry {
   @Field((_type) => ID)
   @PrimaryKey()
   id!: number;
