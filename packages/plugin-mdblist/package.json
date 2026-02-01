@@ -1,0 +1,42 @@
+{
+  "name": "@repo/plugin-mdblist",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./lib/index.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
+    "download-schema": "wget -q https://raw.githubusercontent.com/linaspurinis/api.mdblist.com/refs/heads/main/apiary.apib -O mdblist.apib && npx -y apib2openapi -i mdblist.apib -o mdblist_openapi.json && rm mdblist.apib",
+    "generate-schemas": "pnpm download-schema && kubb generate",
+    "lint": "eslint",
+    "lint:fix": "pnpm lint --fix",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@apollo/datasource-rest": "catalog:",
+    "@repo/util-plugin-sdk": "workspace:^",
+    "type-graphql": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "catalog:",
+    "@kubb/cli": "catalog:",
+    "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-graphql-helpers": "workspace:^",
+    "@repo/core-util-kubb-config": "workspace:^",
+    "@repo/core-util-logger": "workspace:^",
+    "@repo/core-util-typescript-config": "workspace:^",
+    "@repo/core-util-vitest-config": "workspace:^",
+    "@repo/util-plugin-sdk": "workspace:^",
+    "@types/node": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "class-validator": "catalog:",
+    "eslint": "catalog:",
+    "msw": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -23,6 +23,7 @@ services:
       VFS_DEBUG_LOGGING: true
       REAL_DEBRID_API_KEY: XCA2CWCDYX3B4KDDOD2M7677WB54S4QKEIG4YT43YU4TMFLWLTSA
       LISTRR_API_KEY: f7f5a6871a944fb692d144eab2fde171722b5a79c5af4ac1a3f4fd225f94c3ba
+      MDBLIST_API_KEY: 2bm58gabgbe203tifgytdlijn
       UNSAFE_CLEAR_QUEUES_ON_STARTUP: true
       UNSAFE_REFRESH_DATABASE_ON_STARTUP: false
       LOG_LEVEL: silly
@@ -53,13 +54,13 @@ services:
 
   riven-db:
     image: postgres:17-alpine
-    container_name: riven-db
+    container_name: riven-db2
     restart: unless-stopped
     profiles:
       - all
       - services
     ports:
-      - 5432:5432
+      - 5442:5432
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
       POSTGRES_USER: postgres
@@ -102,22 +103,22 @@ services:
       - riven-cache
 
   plex:
-    container_name: plex
+    container_name: plex2
     image: plexinc/pms-docker
     restart: unless-stopped
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities:
-                - gpu
-    runtime: nvidia
-    gpus: all
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - capabilities:
+    #             - gpu
+    # runtime: nvidia
+    # gpus: all
     environment:
       TZ: Europe/London
       PLEX_CLAIM: ${PLEX_CLAIM}
     ports:
-      - 32400:32400
+      - 32440:32400
     volumes:
       - ./plex/config:/config
       - ./plex/transcode:/transcode
