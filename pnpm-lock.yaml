@@ -300,7 +300,7 @@ importers:
         version: 3.2.0(graphql@16.12.0)
       '@mikro-orm/sqlite':
         specifier: ^6.6.4
-        version: 6.6.4(@mikro-orm/core@6.6.4)(pg@8.16.3)
+        version: 6.6.4(@mikro-orm/core@6.6.4)
       '@parcel/watcher':
         specifier: ^2.5.1
         version: 2.5.1
@@ -8866,11 +8866,26 @@ snapshots:
       mikro-orm: 6.6.4
       reflect-metadata: 0.2.2
 
-  '@mikro-orm/knex@6.6.4(@mikro-orm/core@6.6.4)(pg@8.16.3)(sqlite3@5.1.7)':
+  '@mikro-orm/knex@6.6.4(@mikro-orm/core@6.6.4)(pg@8.16.3)':
     dependencies:
       '@mikro-orm/core': 6.6.4
       fs-extra: 11.3.3
-      knex: 3.1.0(pg@8.16.3)(sqlite3@5.1.7)
+      knex: 3.1.0(pg@8.16.3)
+      sqlstring: 2.3.3
+    transitivePeerDependencies:
+      - mysql
+      - mysql2
+      - pg
+      - pg-native
+      - sqlite3
+      - supports-color
+      - tedious
+
+  '@mikro-orm/knex@6.6.4(@mikro-orm/core@6.6.4)(sqlite3@5.1.7)':
+    dependencies:
+      '@mikro-orm/core': 6.6.4
+      fs-extra: 11.3.3
+      knex: 3.1.0(sqlite3@5.1.7)
       sqlstring: 2.3.3
     transitivePeerDependencies:
       - mysql
@@ -8884,7 +8899,7 @@ snapshots:
   '@mikro-orm/postgresql@6.6.4(@mikro-orm/core@6.6.4)':
     dependencies:
       '@mikro-orm/core': 6.6.4
-      '@mikro-orm/knex': 6.6.4(@mikro-orm/core@6.6.4)(pg@8.16.3)(sqlite3@5.1.7)
+      '@mikro-orm/knex': 6.6.4(@mikro-orm/core@6.6.4)(pg@8.16.3)
       pg: 8.16.3
       postgres-array: 3.0.4
       postgres-date: 2.1.0
@@ -8906,10 +8921,10 @@ snapshots:
       globby: 11.1.0
       ts-morph: 27.0.2
 
-  '@mikro-orm/sqlite@6.6.4(@mikro-orm/core@6.6.4)(pg@8.16.3)':
+  '@mikro-orm/sqlite@6.6.4(@mikro-orm/core@6.6.4)':
     dependencies:
       '@mikro-orm/core': 6.6.4
-      '@mikro-orm/knex': 6.6.4(@mikro-orm/core@6.6.4)(pg@8.16.3)(sqlite3@5.1.7)
+      '@mikro-orm/knex': 6.6.4(@mikro-orm/core@6.6.4)(sqlite3@5.1.7)
       fs-extra: 11.3.3
       sqlite3: 5.1.7
       sqlstring-sqlite: 0.1.1
@@ -12124,7 +12139,7 @@ snapshots:
     dependencies:
       '@keyv/serialize': 1.1.1
 
-  knex@3.1.0(pg@8.16.3)(sqlite3@5.1.7):
+  knex@3.1.0(pg@8.16.3):
     dependencies:
       colorette: 2.0.19
       commander: 10.0.1
@@ -12142,6 +12157,26 @@ snapshots:
       tildify: 2.0.0
     optionalDependencies:
       pg: 8.16.3
+    transitivePeerDependencies:
+      - supports-color
+
+  knex@3.1.0(sqlite3@5.1.7):
+    dependencies:
+      colorette: 2.0.19
+      commander: 10.0.1
+      debug: 4.3.4
+      escalade: 3.2.0
+      esm: 3.2.25
+      get-package-type: 0.1.0
+      getopts: 2.3.0
+      interpret: 2.2.0
+      lodash: 4.17.21
+      pg-connection-string: 2.6.2
+      rechoir: 0.8.0
+      resolve-from: 5.0.0
+      tarn: 3.0.2
+      tildify: 2.0.0
+    optionalDependencies:
       sqlite3: 5.1.7
     transitivePeerDependencies:
       - supports-color

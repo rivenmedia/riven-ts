@@ -55,8 +55,6 @@ export const SerialisedMediaItem = z.codec(
             partial: true,
             managed: true,
           });
-        default:
-          throw new Error(`Unknown media item type: ${data.type as string}`);
       }
     },
     encode: (data) => wrap(data).toPOJO(),
