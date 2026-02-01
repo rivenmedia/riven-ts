@@ -84,7 +84,7 @@ export async function persistScrapeResults({
 
     await em.flush();
 
-    return await database.mediaItem.findOneOrFail({ id });
+    return await em.refreshOrFail(existingItem);
   } catch (error) {
     const parsedError = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
