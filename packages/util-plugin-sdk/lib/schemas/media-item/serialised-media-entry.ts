@@ -15,6 +15,7 @@ export const SerialisedMediaEntry = z.codec(
       database.mediaEntry.create(data, {
         persist: false,
         partial: true,
+        managed: true,
       }),
     encode: (data) => wrap(data).toPOJO(),
   },

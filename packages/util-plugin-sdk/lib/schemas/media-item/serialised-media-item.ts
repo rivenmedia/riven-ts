@@ -29,26 +29,31 @@ export const SerialisedMediaItem = z.codec(
           return database.movie.create(data, {
             persist: false,
             partial: true,
+            managed: true,
           });
         case "show":
           return database.show.create(data, {
             persist: false,
             partial: true,
+            managed: true,
           });
         case "season":
           return database.season.create(data, {
             persist: false,
             partial: true,
+            managed: true,
           });
         case "episode":
           return database.episode.create(data, {
             persist: false,
             partial: true,
+            managed: true,
           });
         case "requested_item":
           return database.requestedItem.create(data, {
             persist: false,
             partial: true,
+            managed: true,
           });
         default:
           throw new Error(`Unknown media item type: ${data.type as string}`);
