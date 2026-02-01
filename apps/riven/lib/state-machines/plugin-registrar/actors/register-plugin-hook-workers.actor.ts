@@ -5,6 +5,7 @@ import os from "node:os";
 import { fromPromise } from "xstate";
 
 import { createPluginWorker } from "../../../message-queue/utilities/create-plugin-worker.ts";
+import { eventDeserialiserSchemaMap } from "../../../utilities/serialisers/event-deserialiser-schemas.ts";
 
 import type {
   PluginQueueMap,
@@ -48,14 +49,28 @@ export const registerPluginHookWorkers = fromPromise<
 
     for (const [eventName, hook] of Object.entries(config.hooks)) {
       if (hook) {
+        const typedEventName = eventName as RivenEvent["type"];
+
         const { queue, worker } = await createPluginWorker(
-          eventName as RivenEvent["type"],
+          typedEventName,
           pluginSymbol.description ?? "unknown",
-          (job) =>
-            hook({
-              event: job.data as never,
+          (job) => {
+            const eventSchemaWithDeserialiser =
+              eventDeserialiserSchemaMap.get(typedEventName);
+
+            if (!eventSchemaWithDeserialiser) {
+              throw new Error(
+                `No deserialiser schema found for event type "${typedEventName}"`,
+              );
+            }
+
+            return hook({
+              event: eventSchemaWithDeserialiser
+                .omit({ type: true })
+                .decode(job.data) as never,
               dataSources,
-            }) as Promise<never>,
+            }) as Promise<never>;
+          },
           { concurrency: os.availableParallelism() },
           {
             telemetry: {
