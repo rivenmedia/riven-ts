@@ -51,7 +51,9 @@ export class PlexAPI extends BaseDataSource {
     return false;
   }
 
-  override async validate() {}
+  override validate() {
+    return true;
+  }
 }
 
 export type PlexContextSlice = BasePluginContext;
