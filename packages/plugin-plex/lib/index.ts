@@ -1,5 +1,3 @@
-import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities/index";
-
 import path from "node:path";
 
 import packageJson from "../package.json" with { type: "json" };
@@ -19,24 +17,13 @@ export default {
     "riven.media-item.download.success": async ({ dataSources, event }) => {
       const plexAPI = dataSources.get(PlexAPI);
 
-      const mediaEntry = event.item.filesystemEntries.find(
-        (entry) => entry.type === "media",
-      ) as MediaEntry | undefined;
-
-      if (!mediaEntry) {
+      if (!event.item.mediaEntry) {
         throw new Error(
           `No media filesystem entry found for media item ID ${event.item.id.toString()}`,
         );
       }
 
-      await plexAPI.updateSection(
-        path.dirname(
-          path.join(
-            mediaEntry.mediaItem.getProperty("baseDirectory") ?? "",
-            mediaEntry.path,
-          ),
-        ),
-      );
+      await plexAPI.updateSection(path.dirname(event.item.mediaEntry.path));
     },
   },
   validator() {

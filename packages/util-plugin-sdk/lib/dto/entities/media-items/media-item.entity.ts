@@ -18,6 +18,8 @@ import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import { Stream } from "../streams/stream.entity.ts";
 
+import type { MediaEntry } from "../index.ts";
+
 export const MediaItemState = z.enum([
   "Unknown",
   "Unreleased",
@@ -211,26 +213,23 @@ export abstract class MediaItem {
   @Enum()
   type!: MediaItemType;
 
+  /**
+   * A pretty name for the media item to be used in VFS paths.
+   *
+   * @example "Inception (2010) {tmdb-27205}"
+   */
   @Property({ persist: false })
-  get baseDirectory() {
-    switch (this.type) {
-      case "episode":
-      case "season":
-      case "show":
-        return "shows";
-      case "movie":
-        return "movies";
-      case "requested_item":
-        return null;
-    }
-  }
-
-  @Property({ persist: false })
-  get vfsIdentifier() {
+  get prettyName() {
     if (!this.title || !this.year || !this.tmdbId) {
       return;
     }
 
     return `${this.title} (${this.year.toString()}) {tmdb-${this.tmdbId}}`;
+  }
+
+  get mediaEntry() {
+    return this.filesystemEntries
+      .getItems()
+      .find((entry) => entry.type === "media") as MediaEntry | undefined;
   }
 }

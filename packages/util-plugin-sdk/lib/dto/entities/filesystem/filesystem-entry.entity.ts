@@ -7,6 +7,7 @@ import {
   type Ref,
 } from "@mikro-orm/core";
 import { IsPositive } from "class-validator";
+import path from "node:path";
 import { Field, ID, ObjectType } from "type-graphql";
 import z from "zod";
 
@@ -50,4 +51,44 @@ export abstract class FileSystemEntry {
   @Field(() => String)
   @Enum(() => FileSystemEntryType.enum)
   type!: FileSystemEntryType;
+
+  /**
+   * The base directory for this media item, e.g. "movies" or "shows"
+   */
+  @Property({ persist: false })
+  get baseDirectory() {
+    switch (this.mediaItem.getProperty("type")) {
+      case "episode":
+      case "season":
+      case "show":
+        return "shows";
+      case "movie":
+        return "movies";
+      case "requested_item":
+        throw new Error("Requested items do not have a filesystem entry");
+    }
+  }
+
+  /**
+   * The VFS file name for this entry
+   *
+   * @example "movie.mkv", "episode.srt"
+   */
+  abstract get vfsFileName(): string;
+
+  /**
+   * The full path to this filesystem entry in the VFS
+   *
+   * @example "/mount/riven/movies/Inception (2010) {tmdb-27205}/Inception (2010) {tmdb-27205}.mkv"
+   */
+  @Property({ persist: false })
+  get path() {
+    const prettyName = this.mediaItem.getProperty("prettyName");
+
+    if (!prettyName) {
+      throw new ReferenceError("Unable to determine path - missing prettyName");
+    }
+
+    return path.join(this.baseDirectory, prettyName, this.vfsFileName);
+  }
 }
