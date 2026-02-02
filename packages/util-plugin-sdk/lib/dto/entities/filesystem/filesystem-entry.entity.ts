@@ -55,7 +55,7 @@ export abstract class FileSystemEntry {
   /**
    * The base directory for this media item, e.g. "movies" or "shows"
    */
-  @Property({ persist: false })
+  @Property({ persist: false, hidden: true })
   get baseDirectory() {
     switch (this.mediaItem.getProperty("type")) {
       case "episode":
@@ -81,7 +81,7 @@ export abstract class FileSystemEntry {
    *
    * @example "/mount/riven/movies/Inception (2010) {tmdb-27205}/Inception (2010) {tmdb-27205}.mkv"
    */
-  @Property({ persist: false })
+  @Property({ persist: false, hidden: true })
   get path() {
     const prettyName = this.mediaItem.getProperty("prettyName");
 

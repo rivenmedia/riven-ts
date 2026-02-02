@@ -2,6 +2,7 @@ import {
   Collection,
   Entity,
   Enum,
+  type Hidden,
   Index,
   ManyToMany,
   ManyToOne,
@@ -218,7 +219,7 @@ export abstract class MediaItem {
    *
    * @example "Inception (2010) {tmdb-27205}"
    */
-  @Property({ persist: false })
+  @Property({ persist: false, hidden: true })
   get prettyName() {
     if (!this.title || !this.year || !this.tmdbId) {
       return;
@@ -227,7 +228,17 @@ export abstract class MediaItem {
     return `${this.title} (${this.year.toString()}) {tmdb-${this.tmdbId}}`;
   }
 
-  get mediaEntry() {
+  /**
+   * The media entry associated with this media item, if any.
+   *
+   * This is determined by picking the first MediaEntry from the filesystem entries.
+   *
+   * _Usually_ there should only be one media entry per media item.
+   *
+   * @see {@link MediaEntry}
+   * @returns The associated MediaEntry or undefined if none exists.
+   */
+  get mediaEntry(): Hidden<MediaEntry> | undefined {
     return this.filesystemEntries
       .getItems()
       .find((entry) => entry.type === "media") as MediaEntry | undefined;

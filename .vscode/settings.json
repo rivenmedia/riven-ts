@@ -8,6 +8,7 @@
     "listrr",
     "Promisable",
     "serialiser",
+    "serialisers",
     "stringbool",
     "TMDB",
     "torrentio",

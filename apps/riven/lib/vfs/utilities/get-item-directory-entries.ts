@@ -16,7 +16,7 @@ export const getItemDirectoryEntries = async (
       },
     },
     {
-      populate: ["mediaItem"],
+      populate: ["$infer"],
       fields: ["originalFilename", "mediaItem", "vfsFileName"],
     },
   );

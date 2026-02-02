@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { requestedItemSchema } from "../media-item/requested-item.ts";
+import { requestedItemSchema } from "../media/requested-item.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 

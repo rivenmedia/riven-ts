@@ -44,11 +44,8 @@ export class PlexAPI extends BaseDataSource {
             );
           }
 
-          await this.get(
+          await this.post(
             `library/sections/${directory.key}/refresh?path=${encodeURIComponent(fullPath)}`,
-            {
-              skipCache: true,
-            },
           );
 
           return true;

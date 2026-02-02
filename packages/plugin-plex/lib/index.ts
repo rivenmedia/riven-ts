@@ -1,3 +1,5 @@
+import { logger } from "@repo/core-util-logger";
+
 import path from "node:path";
 
 import packageJson from "../package.json" with { type: "json" };
@@ -23,7 +25,17 @@ export default {
         );
       }
 
-      await plexAPI.updateSection(path.dirname(event.item.mediaEntry.path));
+      const success = await plexAPI.updateSection(
+        path.dirname(event.item.mediaEntry.path),
+      );
+
+      if (!success) {
+        throw new Error(
+          `Failed to find matching Plex library section for media item ID ${event.item.id.toString()}`,
+        );
+      }
+
+      logger.info(`Plex updated for path "${event.item.mediaEntry.path}"`);
     },
   },
   validator() {

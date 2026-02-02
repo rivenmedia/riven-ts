@@ -1,48 +1,43 @@
-import {
-  MediaEntry,
-  MediaItem,
-} from "@repo/util-plugin-sdk/dto/entities/index";
 import { RivenEvent, RivenEventSchemaMap } from "@repo/util-plugin-sdk/events";
+import { MediaEntry } from "@repo/util-plugin-sdk/schemas/media/media-entry";
+import { MediaItem } from "@repo/util-plugin-sdk/schemas/media/media-item";
 
-import { ZodCodec, ZodCustom, ZodObject, type ZodType, z } from "zod";
+import { type ZodCodec, type ZodObject, type ZodType, z } from "zod";
 
 import { SerialisedFileSystemEntry } from "./serialised-filesystem-entry.ts";
 import { SerialisedMediaItem } from "./serialised-media-item.ts";
 
+/**
+ * A map of schemas to their corresponding serialiser schemas.
+ */
 const serialiserMap = new Map<ZodType, ZodCodec>([
-  [z.instanceof(MediaItem), SerialisedMediaItem],
-  [z.instanceof(MediaEntry), SerialisedFileSystemEntry],
+  [MediaItem, SerialisedMediaItem],
+  [MediaEntry, SerialisedFileSystemEntry],
 ]);
 
-const shouldSerialise = (a: ZodType, b: ZodType) => {
-  if (a instanceof ZodCustom && b instanceof ZodCustom) {
-    return a._zod.bag.Class === b._zod.bag.Class;
-  }
-
-  return false;
-};
-
-function buildSerialiserSchema(schema: ZodType): ZodObject {
-  if (!(schema instanceof ZodObject)) {
-    throw new Error("Expected a ZodObject schema");
-  }
-
-  const entries = Object.entries(schema.shape) as [
+/**
+ * Augments a {@link RivenEvent} schema with any required serialisers from the {@link serialiserMap serialiser map}.
+ *
+ * @param schema The base schema, typically a {@link RivenEvent} schema
+ *
+ * @returns The augmented base schema with any required serialisers attached
+ */
+function buildSerialiserSchema(schema: ZodObject): ZodObject {
+  const schemaShapeEntries = Object.entries(schema.shape) as [
     keyof z.infer<typeof schema>,
     ZodType,
   ][];
 
-  for (const [key, value] of entries) {
-    for (const [type, serialiser] of serialiserMap.entries()) {
-      if (shouldSerialise(value, type)) {
-        schema.shape[key as never] = serialiser;
-      }
-    }
+  for (const [key, value] of schemaShapeEntries) {
+    schema.shape[key as never] = serialiserMap.get(value) ?? value;
   }
 
   return schema;
 }
 
+/**
+ * A map of {@link RivenEvent} types to their serialiser schemas.
+ */
 export const eventSerialiserSchemaMap = new Map<RivenEvent["type"], ZodObject>(
   RivenEventSchemaMap.entries().map(([eventType, schema]) => [
     eventType,

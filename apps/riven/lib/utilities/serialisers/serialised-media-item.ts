@@ -11,6 +11,9 @@ import {
 import { wrap } from "@mikro-orm/core";
 import z from "zod";
 
+/**
+ * A schema that converts to/from a serialised MediaItem.
+ */
 export const SerialisedMediaItem = z.codec(
   // Just validate the input has a matching media item type here
   // to prevent non-media items from being passed through
@@ -58,10 +61,7 @@ export const SerialisedMediaItem = z.codec(
           });
       }
     },
-    encode: (data) =>
-      wrap(data).serialize({
-        populate: ["*"],
-      }),
+    encode: (data) => wrap(data).serialize(),
   },
 );
 

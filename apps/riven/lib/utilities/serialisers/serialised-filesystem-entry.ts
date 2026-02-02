@@ -7,6 +7,9 @@ import {
 import { wrap } from "@mikro-orm/core";
 import z from "zod";
 
+/**
+ * A schema that converts to/from a serialised FileSystemEntry.
+ */
 export const SerialisedFileSystemEntry = z.codec(
   // Just validate the input has a matching media item type here
   // to prevent non-media items from being passed through

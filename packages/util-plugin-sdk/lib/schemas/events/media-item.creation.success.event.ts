@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { MediaItem } from "../../dto/entities/index.ts";
+import { MediaItem } from "../media/media-item.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
@@ -10,7 +10,7 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 export const MediaItemCreationSuccessEvent = createProgramEventSchema(
   "media-item.creation.success",
   z.object({
-    item: z.instanceof(MediaItem),
+    item: MediaItem,
   }),
 );
 
