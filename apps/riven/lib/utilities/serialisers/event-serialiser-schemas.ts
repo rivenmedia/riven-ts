@@ -2,10 +2,10 @@ import { RivenEvent, RivenEventSchemaMap } from "@repo/util-plugin-sdk/events";
 import { MediaEntry } from "@repo/util-plugin-sdk/schemas/media/media-entry";
 import { MediaItem } from "@repo/util-plugin-sdk/schemas/media/media-item";
 
-import { type ZodCodec, type ZodObject, type ZodType, z } from "zod";
-
 import { SerialisedFileSystemEntry } from "./serialised-filesystem-entry.ts";
 import { SerialisedMediaItem } from "./serialised-media-item.ts";
+
+import type { ZodCodec, ZodObject, ZodType } from "zod";
 
 /**
  * A map of schemas to their corresponding serialiser codec.
@@ -23,12 +23,7 @@ const serialiserMap = new Map<ZodType, ZodCodec>([
  * @returns The augmented base schema with any required serialisers attached
  */
 function buildSerialiserSchema(schema: ZodObject): ZodObject {
-  const schemaShapeEntries = Object.entries(schema.shape) as [
-    keyof z.infer<typeof schema>,
-    ZodType,
-  ][];
-
-  for (const [key, value] of schemaShapeEntries) {
+  for (const [key, value] of Object.entries<ZodType>(schema.shape)) {
     schema.shape[key as never] = serialiserMap.get(value) ?? value;
   }
 
