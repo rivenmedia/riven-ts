@@ -10,12 +10,6 @@ import { FileSystemEntry } from "./filesystem-entry.entity.ts";
   discriminatorValue: "media",
 })
 export class MediaEntry extends FileSystemEntry {
-  constructor() {
-    super();
-
-    this.type = "media";
-  }
-
   @Field()
   @Index()
   @Property()
@@ -71,4 +65,6 @@ export class MediaEntry extends FileSystemEntry {
       ext: path.extname(this.originalFilename),
     });
   }
+
+  override type = "media" as const;
 }

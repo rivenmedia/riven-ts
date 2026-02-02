@@ -12,24 +12,36 @@ import z from "zod";
  */
 export const SerialisedFileSystemEntry = z.codec(
   // Just validate the input has a matching media item type here
-  // to prevent non-media items from being passed through
+  // to prevent non-filesystem entries from being passed through
   z.looseObject({ type: FileSystemEntryType }),
   z.instanceof(FileSystemEntry),
   {
     decode: (data) => {
       switch (data.type) {
         case "media":
-          return database.mediaEntry.create(data, {
-            persist: false,
-            partial: true,
-            managed: true,
-          });
+          return database.mediaEntry.create(
+            {
+              ...data,
+              type: "media",
+            },
+            {
+              persist: false,
+              partial: true,
+              managed: true,
+            },
+          );
         case "subtitle":
-          return database.subtitleEntry.create(data, {
-            persist: false,
-            partial: true,
-            managed: true,
-          });
+          return database.subtitleEntry.create(
+            {
+              ...data,
+              type: "subtitle",
+            },
+            {
+              persist: false,
+              partial: true,
+              managed: true,
+            },
+          );
       }
     },
     encode: (data) => wrap(data).serialize(),

@@ -43,4 +43,6 @@ export class SubtitleEntry extends FileSystemEntry {
   get vfsFileName(): never {
     throw new Error("SubtitleEntry vfsFileName not implemented yet");
   }
+
+  override type = "subtitle" as const;
 }

@@ -29,36 +29,66 @@ export const SerialisedMediaItem = z.codec(
     decode: (data) => {
       switch (data.type) {
         case "movie": {
-          return database.movie.create(data, {
-            persist: false,
-            partial: true,
-            managed: true,
-          });
+          return database.movie.create(
+            {
+              ...data,
+              type: "movie",
+            },
+            {
+              persist: false,
+              partial: true,
+              managed: true,
+            },
+          );
         }
         case "show":
-          return database.show.create(data, {
-            persist: false,
-            partial: true,
-            managed: true,
-          });
+          return database.show.create(
+            {
+              ...data,
+              type: "show",
+            },
+            {
+              persist: false,
+              partial: true,
+              managed: true,
+            },
+          );
         case "season":
-          return database.season.create(data, {
-            persist: false,
-            partial: true,
-            managed: true,
-          });
+          return database.season.create(
+            {
+              ...data,
+              type: "season",
+            },
+            {
+              persist: false,
+              partial: true,
+              managed: true,
+            },
+          );
         case "episode":
-          return database.episode.create(data, {
-            persist: false,
-            partial: true,
-            managed: true,
-          });
+          return database.episode.create(
+            {
+              ...data,
+              type: "episode",
+            },
+            {
+              persist: false,
+              partial: true,
+              managed: true,
+            },
+          );
         case "requested_item":
-          return database.requestedItem.create(data, {
-            persist: false,
-            partial: true,
-            managed: true,
-          });
+          return database.requestedItem.create(
+            {
+              ...data,
+              type: "requested_item",
+            },
+            {
+              persist: false,
+              partial: true,
+              managed: true,
+            },
+          );
       }
     },
     encode: (data) => wrap(data).serialize(),
