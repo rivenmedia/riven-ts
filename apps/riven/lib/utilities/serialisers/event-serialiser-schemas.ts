@@ -8,7 +8,7 @@ import { SerialisedFileSystemEntry } from "./serialised-filesystem-entry.ts";
 import { SerialisedMediaItem } from "./serialised-media-item.ts";
 
 /**
- * A map of schemas to their corresponding serialiser schemas.
+ * A map of schemas to their corresponding serialiser codec.
  */
 const serialiserMap = new Map<ZodType, ZodCodec>([
   [MediaItem, SerialisedMediaItem],
