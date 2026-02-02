@@ -1,6 +1,7 @@
 import {
   Entity,
   Enum,
+  type Hidden,
   ManyToOne,
   PrimaryKey,
   Property,
@@ -56,7 +57,7 @@ export abstract class FileSystemEntry {
    * The base directory for this media item, e.g. "movies" or "shows"
    */
   @Property({ persist: false, hidden: true })
-  get baseDirectory() {
+  get baseDirectory(): Hidden<"movies" | "shows"> {
     switch (this.mediaItem.getProperty("type")) {
       case "episode":
       case "season":
@@ -74,7 +75,7 @@ export abstract class FileSystemEntry {
    *
    * @example "movie.mkv", "episode.srt"
    */
-  abstract get vfsFileName(): string;
+  abstract get vfsFileName(): Hidden<string>;
 
   /**
    * The full path to this filesystem entry in the VFS
@@ -82,7 +83,7 @@ export abstract class FileSystemEntry {
    * @example "/mount/riven/movies/Inception (2010) {tmdb-27205}/Inception (2010) {tmdb-27205}.mkv"
    */
   @Property({ persist: false, hidden: true })
-  get path() {
+  get path(): Hidden<string> {
     const prettyName = this.mediaItem.getProperty("prettyName");
 
     if (!prettyName) {

@@ -11,7 +11,7 @@ import z from "zod";
  * A schema that converts to/from a serialised FileSystemEntry.
  */
 export const SerialisedFileSystemEntry = z.codec(
-  // Just validate the input has a matching media item type here
+  // Just validate the input has a matching filesystem entry type here
   // to prevent non-filesystem entries from being passed through
   z.looseObject({ type: FileSystemEntryType }),
   z.instanceof(FileSystemEntry),
