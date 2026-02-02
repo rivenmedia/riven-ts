@@ -16,7 +16,7 @@ export class PlexAPI extends BaseDataSource {
   override baseURL = z.url().parse(process.env["PLEX_SERVER_URL"]);
   override serviceName = "Plex";
 
-  #mountDirectory = z.string().parse(process.env["PLEX_MOUNT_DIRECTORY"]);
+  #libraryPath = z.string().parse(process.env["PLEX_LIBRARY_PATH"]);
 
   protected override willSendRequest(
     _path: string,
@@ -35,7 +35,7 @@ export class PlexAPI extends BaseDataSource {
 
     for (const directory of sections.MediaContainer?.Directory ?? []) {
       for (const location of directory.Location ?? []) {
-        const fullPath = join(this.#mountDirectory, path);
+        const fullPath = join(this.#libraryPath, path);
 
         if (fullPath.startsWith(location.path as string)) {
           if (!directory.key) {

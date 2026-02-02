@@ -11,7 +11,7 @@
     "JAEGER_URL",
     "PLEX_SERVER_URL",
     "PLEX_TOKEN",
-    "PLEX_MOUNT_DIRECTORY"
+    "PLEX_LIBRARY_PATH"
   ],
   "tasks": {
     "transit": {
