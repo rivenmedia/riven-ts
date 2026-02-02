@@ -12,6 +12,7 @@
     "./events/*": "./lib/schemas/plugin-to-program-events/*.ts",
     "./schemas/*": "./lib/schemas/*.ts",
     "./helpers/*": "./lib/helpers/*.ts",
+    "./utilities/*": "./lib/utilities/*.ts",
     "./validation": "./lib/validation/index.ts"
   },
   "scripts": {

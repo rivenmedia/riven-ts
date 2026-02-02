@@ -1,5 +1,6 @@
 import { logger } from "@repo/core-util-logger";
 import { DataSourceMap, type ParsedPlugins } from "@repo/util-plugin-sdk";
+import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import { type AnyActorRef, type MachineContext, assign, setup } from "xstate";
 import z from "zod";
@@ -35,6 +36,7 @@ export interface PluginRegistrarMachineContext extends MachineContext {
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: PublishableEventSet;
+  settings: PluginSettings;
 }
 
 export interface PluginRegistrarMachineInput {
@@ -47,6 +49,7 @@ export interface PluginRegistrarMachineOutput {
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: PublishableEventSet;
+  settings: PluginSettings;
 }
 
 export type PluginRegistrarMachineEvent =
@@ -163,22 +166,27 @@ export const pluginRegistrarMachine = setup({
         };
       },
     ),
-    spawnValidators: assign(({ spawn, context: { pendingPlugins } }) => {
-      const validatorRefs = new Map<symbol, AnyActorRef>();
+    spawnValidators: assign(
+      ({ spawn, context: { pendingPlugins, settings } }) => {
+        const validatorRefs = new Map<symbol, AnyActorRef>();
 
-      for (const [pluginSymbol, plugin] of pendingPlugins) {
-        const validatorRef = spawn("validatePlugin", {
-          id: "validatePlugin",
-          input: { plugin },
-        });
+        for (const [pluginSymbol, plugin] of pendingPlugins) {
+          const validatorRef = spawn("validatePlugin", {
+            id: "validatePlugin",
+            input: {
+              plugin,
+              settings,
+            },
+          });
 
-        validatorRefs.set(pluginSymbol, validatorRef);
-      }
+          validatorRefs.set(pluginSymbol, validatorRef);
+        }
 
-      return {
-        runningValidators: validatorRefs,
-      };
-    }),
+        return {
+          runningValidators: validatorRefs,
+        };
+      },
+    ),
     assignPluginHooks: assign(
       (
         _,
@@ -218,6 +226,7 @@ export const pluginRegistrarMachine = setup({
       pluginQueues: new Map(),
       pluginWorkers: new Map(),
       publishableEvents: new Set(),
+      settings: new PluginSettings(),
     }),
     id: "Plugin registrar",
     initial: "Registering plugins",
@@ -228,6 +237,7 @@ export const pluginRegistrarMachine = setup({
         pluginQueues,
         pluginWorkers,
         publishableEvents,
+        settings,
       },
     }) => ({
       validPlugins,
@@ -235,6 +245,7 @@ export const pluginRegistrarMachine = setup({
       pluginQueues,
       pluginWorkers,
       publishableEvents,
+      settings,
     }),
     states: {
       "Registering plugins": {
@@ -244,6 +255,17 @@ export const pluginRegistrarMachine = setup({
           onDone: {
             target: "Validating",
             actions: [
+              {
+                type: "log",
+                params: ({ event: { output: parsedPlugins } }) => ({
+                  message: [
+                    `Collected ${parsedPlugins.validPlugins.length.toString()} plugins for validation:`,
+                    parsedPlugins.validPlugins
+                      .map((p) => p.name.description?.toString())
+                      .join(", "),
+                  ].join(" "),
+                }),
+              },
               assign({
                 parsedPlugins: ({ event: { output: parsedPlugins } }) =>
                   parsedPlugins,
@@ -289,8 +311,9 @@ export const pluginRegistrarMachine = setup({
         invoke: {
           id: "registerPluginHookWorkers",
           src: "registerPluginHookWorkers",
-          input: ({ context: { validPlugins } }) => ({
+          input: ({ context: { validPlugins, settings } }) => ({
             plugins: validPlugins,
+            settings,
           }),
           onDone: {
             actions: {

@@ -9,11 +9,9 @@ import { fromPromise } from "xstate";
 
 import packageJson from "../../../../package.json" with { type: "json" };
 
-export const collectPluginsForRegistration = fromPromise<ParsedPlugins>(
-  async () => {
-    return await parsePluginsFromDependencies(
-      packageJson.dependencies,
-      import.meta.resolve.bind(null),
-    );
-  },
+export const collectPluginsForRegistration = fromPromise<ParsedPlugins>(() =>
+  parsePluginsFromDependencies(
+    packageJson.dependencies,
+    import.meta.resolve.bind(null),
+  ),
 );

@@ -5,7 +5,8 @@ import z, {
   type ZodVoid,
 } from "zod";
 
-import { DataSourceMap } from "../../types/utilities.ts";
+import { DataSourceMap } from "../../utilities/datasource-map.ts";
+import { PluginSettings } from "../../utilities/plugin-settings.ts";
 
 import type { RivenEvent } from "../events/index.ts";
 
@@ -21,6 +22,7 @@ export const createEventHandlerSchema = <
       z.object({
         event: inputSchema.omit({ type: true }),
         dataSources: z.instanceof(DataSourceMap),
+        settings: z.instanceof(PluginSettings),
       }),
     ],
     output: z.promise(outputSchema),

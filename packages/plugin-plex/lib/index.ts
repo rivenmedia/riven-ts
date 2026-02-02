@@ -5,6 +5,7 @@ import path from "node:path";
 import packageJson from "../package.json" with { type: "json" };
 import { PlexAPI } from "./datasource/plex.datasource.ts";
 import { pluginConfig } from "./plex-plugin.config.ts";
+import { plexSettingsSchema } from "./plex-settings.schema.ts";
 import { PlexSettingsResolver } from "./schema/plex-settings.resolver.ts";
 import { PlexResolver } from "./schema/plex.resolver.ts";
 
@@ -38,7 +39,10 @@ export default {
       logger.info(`Plex updated for path "${event.item.mediaEntry.path}"`);
     },
   },
-  validator() {
+  settingsSchema: plexSettingsSchema,
+  validator({ settings }) {
+    const plexSettings = settings.get(plexSettingsSchema);
+
     return true;
   },
 } satisfies RivenPlugin;

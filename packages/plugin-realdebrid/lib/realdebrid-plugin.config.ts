@@ -1,5 +1,7 @@
+import packageJson from "../package.json" with { type: "json" };
+
 import type { RivenPluginConfig } from "@repo/util-plugin-sdk";
 
 export const pluginConfig = {
-  name: Symbol("@repo/plugin-realdebrid"),
+  name: Symbol(packageJson.name),
 } satisfies RivenPluginConfig;

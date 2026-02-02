@@ -51,7 +51,7 @@ export class MediaEntry extends FileSystemEntry {
   mediaMetadata?: object;
 
   @Property({ persist: false, hidden: true })
-  get vfsFileName() {
+  get vfsFileName(): string {
     const prettyName = this.mediaItem.getProperty("prettyName");
 
     if (!prettyName) {
