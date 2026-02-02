@@ -24,9 +24,12 @@ services:
       REAL_DEBRID_API_KEY: XCA2CWCDYX3B4KDDOD2M7677WB54S4QKEIG4YT43YU4TMFLWLTSA
       LISTRR_API_KEY: f7f5a6871a944fb692d144eab2fde171722b5a79c5af4ac1a3f4fd225f94c3ba
       UNSAFE_CLEAR_QUEUES_ON_STARTUP: true
-      UNSAFE_REFRESH_DATABASE_ON_STARTUP: false
+      UNSAFE_REFRESH_DATABASE_ON_STARTUP: true
       LOG_LEVEL: silly
       JAEGER_URL: http://jaeger:4318
+      PLEX_TOKEN: ${PLEX_TOKEN}
+      PLEX_SERVER_URL: http://plex:32400
+      PLEX_MOUNT_DIRECTORY: /mount
     volumes:
       - ./data:/riven/data
       - /mnt/riven:/mount:rshared

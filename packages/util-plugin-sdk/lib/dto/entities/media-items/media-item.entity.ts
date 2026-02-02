@@ -226,7 +226,7 @@ export abstract class MediaItem {
   }
 
   @Property({ persist: false })
-  get path() {
+  get vfsIdentifier() {
     if (!this.title || !this.year || !this.tmdbId) {
       return;
     }

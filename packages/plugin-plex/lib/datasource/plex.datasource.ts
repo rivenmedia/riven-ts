@@ -1,5 +1,6 @@
 import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
 
+import { join } from "node:path";
 import z from "zod";
 
 import type {
@@ -34,17 +35,20 @@ export class PlexAPI extends BaseDataSource {
 
     for (const directory of sections.MediaContainer?.Directory ?? []) {
       for (const location of directory.Location ?? []) {
-        if (
-          `${this.#mountDirectory}/${path}`.startsWith(location.path as string)
-        ) {
+        const fullPath = join(this.#mountDirectory, path);
+
+        if (fullPath.startsWith(location.path as string)) {
           if (!directory.key) {
             throw new PlexAPIError(
-              `Directory key is missing for path: ${path}`,
+              `Directory key is missing for path: ${fullPath}`,
             );
           }
 
           await this.get(
-            `library/sections/${directory.key}/refresh?path=${encodeURIComponent(path)}`,
+            `library/sections/${directory.key}/refresh?path=${encodeURIComponent(fullPath)}`,
+            {
+              skipCache: true,
+            },
           );
 
           return true;

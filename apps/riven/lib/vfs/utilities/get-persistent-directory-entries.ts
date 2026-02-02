@@ -20,10 +20,10 @@ export const getPersistentDirectoryEntries = async (
   );
 
   return entries.reduce<string[]>((acc, entry) => {
-    if (!entry.mediaItem.$.path) {
+    if (!entry.mediaItem.$.vfsIdentifier) {
       return acc;
     }
 
-    return [...acc, entry.mediaItem.$.path];
+    return [...acc, entry.mediaItem.$.vfsIdentifier];
   }, []);
 };

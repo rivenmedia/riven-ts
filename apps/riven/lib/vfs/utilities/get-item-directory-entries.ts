@@ -16,10 +16,10 @@ export const getItemDirectoryEntries = async (
       },
     },
     {
-      populate: ["$infer"],
-      fields: ["originalFilename", "mediaItem", "path"],
+      populate: ["mediaItem"],
+      fields: ["originalFilename", "mediaItem", "vfsFileName"],
     },
   );
 
-  return entries.map((entry) => entry.path);
+  return entries.map((entry) => entry.vfsFileName);
 };
