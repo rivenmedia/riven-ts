@@ -64,8 +64,14 @@ export class MediaEntry extends FileSystemEntry {
       throw new TypeError("MediaEntry is missing associated MediaItem");
     }
 
+    const baseDirectory = this.mediaItem.getProperty("baseDirectory");
+
+    if (!baseDirectory) {
+      throw new TypeError("MediaEntry has no base directory");
+    }
+
     const extension = path.extname(this.originalFilename);
 
-    return `${basePath}${extension}`;
+    return `${baseDirectory}/${basePath}/${basePath}${extension}`;
   }
 }

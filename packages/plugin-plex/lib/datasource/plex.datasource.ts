@@ -15,6 +15,8 @@ export class PlexAPI extends BaseDataSource {
   override baseURL = z.url().parse(process.env["PLEX_SERVER_URL"]);
   override serviceName = "Plex";
 
+  #mountDirectory = z.string().parse(process.env["PLEX_MOUNT_DIRECTORY"]);
+
   protected override willSendRequest(
     _path: string,
     requestOpts: AugmentedRequest,
@@ -32,7 +34,9 @@ export class PlexAPI extends BaseDataSource {
 
     for (const directory of sections.MediaContainer?.Directory ?? []) {
       for (const location of directory.Location ?? []) {
-        if (path.startsWith(location.path as string)) {
+        if (
+          `${this.#mountDirectory}/${path}`.startsWith(location.path as string)
+        ) {
           if (!directory.key) {
             throw new PlexAPIError(
               `Directory key is missing for path: ${path}`,

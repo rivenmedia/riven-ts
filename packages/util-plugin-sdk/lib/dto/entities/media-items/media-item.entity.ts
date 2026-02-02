@@ -212,6 +212,20 @@ export abstract class MediaItem {
   type!: MediaItemType;
 
   @Property({ persist: false })
+  get baseDirectory() {
+    switch (this.type) {
+      case "episode":
+      case "season":
+      case "show":
+        return "shows";
+      case "movie":
+        return "movies";
+      case "requested_item":
+        return null;
+    }
+  }
+
+  @Property({ persist: false })
   get path() {
     if (!this.title || !this.year || !this.tmdbId) {
       return;

@@ -10,7 +10,8 @@
     "REDIS_URL",
     "JAEGER_URL",
     "PLEX_SERVER_URL",
-    "PLEX_TOKEN"
+    "PLEX_TOKEN",
+    "PLEX_MOUNT_DIRECTORY"
   ],
   "tasks": {
     "transit": {
