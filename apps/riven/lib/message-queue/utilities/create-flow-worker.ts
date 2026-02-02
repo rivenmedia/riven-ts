@@ -24,23 +24,16 @@ export function createFlowWorker<T extends Flow["name"]>(
   workerOptions?: Omit<WorkerOptions, "connection" | "telemetry">,
   createFlowWorkerOptions?: CreateFlowWorkerOptions,
 ) {
-  const worker = new Worker(
-    name,
-    async (job) => {
-      return await processor(job, sendEvent);
+  const worker = new Worker(name, (job) => processor(job, sendEvent), {
+    ...workerOptions,
+    telemetry: new BullMQOtel(
+      createFlowWorkerOptions?.telemetry?.tracerName ?? `riven-worker-${name}`,
+      createFlowWorkerOptions?.telemetry?.version,
+    ),
+    connection: {
+      url: z.url().parse(process.env["REDIS_URL"]),
     },
-    {
-      ...workerOptions,
-      telemetry: new BullMQOtel(
-        createFlowWorkerOptions?.telemetry?.tracerName ??
-          `riven-worker-${name}`,
-        createFlowWorkerOptions?.telemetry?.version,
-      ),
-      connection: {
-        url: z.url().parse(process.env["REDIS_URL"]),
-      },
-    },
-  );
+  });
 
   registerMQListeners(worker);
 

@@ -1,4 +1,4 @@
-import z from "zod";
+import z, { type ZodObject } from "zod";
 
 import {
   ContentServiceRequestedEvent,
@@ -100,6 +100,13 @@ export const RivenEvent = z.discriminatedUnion("type", [
 ]);
 
 export type RivenEvent = z.infer<typeof RivenEvent>;
+
+export const RivenEventSchemaMap = new Map<RivenEvent["type"], ZodObject>(
+  RivenEvent.options.map((option) => [
+    option.shape.type.value,
+    z.object(option.shape),
+  ]),
+);
 
 export const RivenEventHandler = {
   // Program lifecycle

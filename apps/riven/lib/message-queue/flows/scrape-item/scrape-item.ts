@@ -1,3 +1,4 @@
+import { SerialisedMediaItem } from "../../../utilities/serialisers/serialised-media-item.ts";
 import { createFlowProducer } from "../../utilities/create-flow-producer.ts";
 import { queueNameFor } from "../../utilities/queue-name-for.ts";
 
@@ -18,7 +19,7 @@ export async function scrapeItem(
       plugin.name.description ?? "unknown",
     ),
     data: {
-      item,
+      item: SerialisedMediaItem.encode(item),
     },
     opts: {
       ignoreDependencyOnFailure: true,

@@ -5,4 +5,6 @@ import { MediaItem } from "./media-item.entity.ts";
 
 @ObjectType()
 @Entity()
-export class RequestedItem extends MediaItem {}
+export class RequestedItem extends MediaItem {
+  override type = "requested_item" as const;
+}

@@ -17,9 +17,9 @@ export const getItemDirectoryEntries = async (
     },
     {
       populate: ["$infer"],
-      fields: ["originalFilename", "mediaItem", "path"],
+      fields: ["originalFilename", "mediaItem", "vfsFileName"],
     },
   );
 
-  return entries.map((entry) => entry.path);
+  return entries.map((entry) => entry.vfsFileName);
 };

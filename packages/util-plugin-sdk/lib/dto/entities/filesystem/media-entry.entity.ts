@@ -7,7 +7,7 @@ import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 
 @ObjectType()
 @Entity({
-  discriminatorValue: "MediaEntry",
+  discriminatorValue: "media",
 })
 export class MediaEntry extends FileSystemEntry {
   @Field()
@@ -50,16 +50,21 @@ export class MediaEntry extends FileSystemEntry {
   @Property({ type: "json" })
   mediaMetadata?: object;
 
-  @Property({ persist: false })
-  get path() {
-    const basePath = this.mediaItem.getProperty("path");
+  @Property({ persist: false, hidden: true })
+  get vfsFileName() {
+    const prettyName = this.mediaItem.getProperty("prettyName");
 
-    if (!basePath) {
-      throw new TypeError("MediaEntry is missing associated MediaItem");
+    if (!prettyName) {
+      throw new TypeError(
+        "Unable to determine VFS file name without associated MediaItem",
+      );
     }
 
-    const extension = path.extname(this.originalFilename);
-
-    return `${basePath}${extension}`;
+    return path.format({
+      name: prettyName,
+      ext: path.extname(this.originalFilename),
+    });
   }
+
+  override type = "media" as const;
 }

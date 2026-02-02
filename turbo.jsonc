@@ -8,7 +8,10 @@
     "LOG_LEVEL",
     "LOG_DIRECTORY",
     "REDIS_URL",
-    "JAEGER_URL"
+    "JAEGER_URL",
+    "PLEX_SERVER_URL",
+    "PLEX_TOKEN",
+    "PLEX_LIBRARY_PATH"
   ],
   "tasks": {
     "transit": {

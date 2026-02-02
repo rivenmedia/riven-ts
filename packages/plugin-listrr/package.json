@@ -41,7 +41,6 @@
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "@kubb/cli": "*",
     "graphql-tag": "catalog:"
   }
 }

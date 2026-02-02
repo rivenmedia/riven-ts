@@ -20,4 +20,6 @@ export class Episode extends MediaItem {
   @Field(() => Season)
   @ManyToOne()
   season!: Ref<Season>;
+
+  override type = "episode" as const;
 }

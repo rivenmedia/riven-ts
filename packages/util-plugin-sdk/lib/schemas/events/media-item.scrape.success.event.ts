@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { SerialisedMediaItem } from "../media-item/serialised-media-item.ts";
+import { MediaItem } from "../media/media-item.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
@@ -10,7 +10,7 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 export const MediaItemScrapeSuccessEvent = createProgramEventSchema(
   "media-item.scrape.success",
   z.object({
-    item: SerialisedMediaItem,
+    item: MediaItem,
   }),
 );
 

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://www.schemastore.org/tsconfig",
+  "extends": "@repo/core-util-typescript-config/base.json",
+  "references": [
+    { "path": "./tsconfig.lib.json" },
+    { "path": "./tsconfig.spec.json" }
+  ],
+  "files": ["eslint.config.ts", "vitest.config.ts", "kubb.config.ts"],
+  "include": [],
+  "exclude": []
+}

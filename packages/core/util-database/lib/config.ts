@@ -1,3 +1,4 @@
+import { logger } from "@repo/core-util-logger";
 import {
   Episode,
   FileSystemEntry,
@@ -34,4 +35,7 @@ export const databaseConfig = {
   entities,
   forceUtcTimezone: true,
   clientUrl: z.string().parse(process.env["DATABASE_URL"]),
+  logger: (message) => {
+    logger.verbose(message);
+  },
 } satisfies Options;

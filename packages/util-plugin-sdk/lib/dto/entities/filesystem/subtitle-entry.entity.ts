@@ -5,9 +5,15 @@ import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 
 @ObjectType()
 @Entity({
-  discriminatorValue: "SubtitleEntry",
+  discriminatorValue: "subtitle",
 })
 export class SubtitleEntry extends FileSystemEntry {
+  constructor() {
+    super();
+
+    this.type = "subtitle";
+  }
+
   @Field()
   @Index()
   @Property()
@@ -32,4 +38,11 @@ export class SubtitleEntry extends FileSystemEntry {
   @Field({ nullable: true })
   @Property()
   openSubtitlesId?: string; // TODO: Separate entity for external providers?
+
+  @Property({ persist: false, hidden: true })
+  get vfsFileName(): never {
+    throw new Error("SubtitleEntry vfsFileName not implemented yet");
+  }
+
+  override type = "subtitle" as const;
 }

@@ -8,6 +8,7 @@ import {
   Season,
   Show,
   Stream,
+  SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import {
@@ -28,6 +29,7 @@ export interface Services {
   show: EntityRepository<Show>;
   season: EntityRepository<Season>;
   mediaEntry: EntityRepository<MediaEntry>;
+  subtitleEntry: EntityRepository<SubtitleEntry>;
   stream: EntityRepository<Stream>;
 }
 
@@ -53,6 +55,7 @@ export async function initORM(options?: Options): Promise<Services> {
     show: orm.em.fork().getRepository(Show),
     season: orm.em.fork().getRepository(Season),
     mediaEntry: orm.em.fork().getRepository(MediaEntry),
+    subtitleEntry: orm.em.fork().getRepository(SubtitleEntry),
     stream: orm.em.fork().getRepository(Stream),
   });
 }

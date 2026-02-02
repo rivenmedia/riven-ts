@@ -10,6 +10,7 @@ import { requestContentServicesProcessor } from "../../message-queue/flows/reque
 import { scrapeItemProcessor } from "../../message-queue/flows/scrape-item/scrape-item.processor.ts";
 import { sortScrapeResultsProcessor } from "../../message-queue/flows/scrape-item/steps/sort-scrape-results.processor.ts";
 import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
+import { SerialisedMediaItem } from "../../utilities/serialisers/serialised-media-item.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { requestContentServicesActor } from "./actors/request-content-services.actor.ts";
 import { requestDownload } from "./actors/request-download.actor.ts";
@@ -29,6 +30,7 @@ import type {
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
+import type z from "zod";
 
 export interface MainRunnerMachineContext {
   plugins: ValidPluginMap;
@@ -59,7 +61,7 @@ export const mainRunnerMachine = setup({
   actions: {
     broadcastEventToPlugins: (
       { context: { plugins, pluginQueues } },
-      { type, ...event }: RivenEvent,
+      { type, ...event }: z.input<typeof RivenEvent>,
     ) => {
       for (const plugin of plugins.values()) {
         const queue = pluginQueues.get(plugin.config.name)?.get(type);
@@ -240,7 +242,7 @@ export const mainRunnerMachine = setup({
         guard: "shouldQueueEvent",
         actions: {
           type: "broadcastEventToPlugins",
-          params: ({ event }) => RivenEvent.parse(event),
+          params: ({ event }) => RivenEvent.encode(event as never),
         },
       },
       {
@@ -312,7 +314,7 @@ export const mainRunnerMachine = setup({
           {
             type: "log",
             params: ({ event: { item } }) => ({
-              message: `Successfully scraped media item: ${JSON.stringify(item)}`,
+              message: `Successfully scraped media item: ${JSON.stringify(SerialisedMediaItem.encode(item))}`,
               level: "info",
             }),
           },

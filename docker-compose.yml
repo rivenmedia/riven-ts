@@ -27,6 +27,9 @@ services:
       UNSAFE_REFRESH_DATABASE_ON_STARTUP: false
       LOG_LEVEL: silly
       JAEGER_URL: http://jaeger:4318
+      PLEX_TOKEN: ${PLEX_TOKEN}
+      PLEX_SERVER_URL: http://plex:32400
+      PLEX_LIBRARY_PATH: /mount
     volumes:
       - ./data:/riven/data
       - /mnt/riven:/mount:rshared
@@ -138,8 +141,8 @@ services:
     profiles:
       - all
       - services
-    depends_on:
-      - riven
+    # depends_on:
+    #   - riven
 
 volumes:
   riven-db:

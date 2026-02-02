@@ -7,13 +7,13 @@ catalog:
   "@apollo/datasource-rest": 6.4.1
   "@apollo/server": 5.2.0
   "@faker-js/faker": 10.1.0
-  "@kubb/cli": 4.11.1
-  "@kubb/core": 4.11.1
-  "@kubb/plugin-faker": ^4.11.1
-  "@kubb/plugin-msw": ^4.11.1
-  "@kubb/plugin-oas": 4.11.1
-  "@kubb/plugin-ts": ^4.11.1
-  "@kubb/plugin-zod": 4.11.1
+  "@kubb/cli": 4.20.1
+  "@kubb/core": 4.20.1
+  "@kubb/plugin-faker": 4.20.1
+  "@kubb/plugin-msw": 4.20.1
+  "@kubb/plugin-oas": 4.20.1
+  "@kubb/plugin-ts": 4.20.1
+  "@kubb/plugin-zod": 4.20.1
   "@mikro-orm/core": ^6.6.4
   "@mikro-orm/postgresql": ^6.6.4
   "@mikro-orm/reflection": ^6.6.4

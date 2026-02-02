@@ -2,6 +2,7 @@ import {
   Collection,
   Entity,
   Enum,
+  type Hidden,
   Index,
   ManyToMany,
   ManyToOne,
@@ -14,10 +15,11 @@ import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
 import { z } from "zod";
 
-import { BaseEntity } from "../entity.ts";
 import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import { Stream } from "../streams/stream.entity.ts";
+
+import type { MediaEntry } from "../index.ts";
 
 export const MediaItemState = z.enum([
   "Unknown",
@@ -69,7 +71,7 @@ registerEnumType(MediaItemType.enum, {
   },
 })
 @Index({ properties: ["type", "airedAt"] })
-export abstract class MediaItem extends BaseEntity {
+export abstract class MediaItem {
   @Field((_type) => ID)
   @PrimaryKey()
   id!: number;
@@ -212,12 +214,33 @@ export abstract class MediaItem extends BaseEntity {
   @Enum()
   type!: MediaItemType;
 
-  @Property({ persist: false })
-  get path() {
+  /**
+   * A pretty name for the media item to be used in VFS paths.
+   *
+   * @example "Inception (2010) {tmdb-27205}"
+   */
+  @Property({ persist: false, hidden: true })
+  get prettyName(): Hidden<string> | undefined {
     if (!this.title || !this.year || !this.tmdbId) {
       return;
     }
 
     return `${this.title} (${this.year.toString()}) {tmdb-${this.tmdbId}}`;
+  }
+
+  /**
+   * The media entry associated with this media item, if any.
+   *
+   * This is determined by picking the first MediaEntry from the filesystem entries.
+   *
+   * _Usually_ there should only be one media entry per media item.
+   *
+   * @see {@link MediaEntry}
+   * @returns The associated MediaEntry or undefined if none exists.
+   */
+  get mediaEntry(): Hidden<MediaEntry> | undefined {
+    return this.filesystemEntries
+      .getItems()
+      .find((entry) => entry.type === "media") as MediaEntry | undefined;
   }
 }
