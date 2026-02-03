@@ -8,7 +8,7 @@ it("returns false if the request fails", async ({ server, httpCache }) => {
     http.get("**/validate", () => HttpResponse.json({ success: false }, { status: 401 })),
   )
 
-  const {{camelCase pluginName}}Api = new {{pascalCase pluginName}}API({ cache: httpCache, token: "test-token" });
+  const {{camelCase pluginName}}Api = new {{pascalCase pluginName}}API({ cache: httpCache });
   const isValid = await {{camelCase pluginName}}Api.validate();
 
   expect(isValid).toBe(false);
@@ -19,7 +19,7 @@ it("returns true if the request succeeds", async ({ server, httpCache }) => {
     http.get("**/validate", () => HttpResponse.json({ success: true })),
   )
 
-  const {{camelCase pluginName}}Api = new {{pascalCase pluginName}}API({ cache: httpCache, token: "test-token" });
+  const {{camelCase pluginName}}Api = new {{pascalCase pluginName}}API({ cache: httpCache });
   const isValid = await {{camelCase pluginName}}Api.validate();
 
   expect(isValid).toBe(true);

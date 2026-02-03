@@ -13,12 +13,13 @@ import {
   listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIShowDtoSchema as getShowsResponseSchema,
 } from "../__generated__/index.ts";
 
+import type { ListrrSettings } from "../listrr-settings.schema.ts";
 import type { ExternalIds } from "../schema/types/external-ids.type.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 
 export class ListrrAPIError extends Error {}
 
-export class ListrrAPI extends BaseDataSource {
+export class ListrrAPI extends BaseDataSource<ListrrSettings> {
   override baseURL = "https://listrr.pro/api/";
   override serviceName = "Listrr";
 
@@ -31,13 +32,7 @@ export class ListrrAPI extends BaseDataSource {
     _path: string,
     requestOpts: AugmentedRequest,
   ) {
-    if (!this.token) {
-      throw new ListrrAPIError(
-        "Listrr API token is not set. Please provide a valid API token.",
-      );
-    }
-
-    requestOpts.headers["x-api-key"] = this.token;
+    requestOpts.headers["x-api-key"] = this.settings.apiKey;
   }
 
   override async validate() {
@@ -157,10 +152,6 @@ export class ListrrAPI extends BaseDataSource {
     }
 
     return [...idsMap.values()];
-  }
-
-  static override getApiToken() {
-    return process.env["LISTRR_API_KEY"];
   }
 }
 

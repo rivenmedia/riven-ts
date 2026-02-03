@@ -12,7 +12,6 @@ it("returns false if the request fails", async ({ server, httpCache }) => {
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    token: "test-token",
     redisUrl: "redis-url",
     logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
@@ -27,7 +26,6 @@ it("returns true if the request succeeds", async ({ server, httpCache }) => {
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    token: "test-token",
     redisUrl: "redis-url",
     logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),

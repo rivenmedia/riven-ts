@@ -15,7 +15,6 @@ it("returns false if the request fails", async ({ server, httpCache }) => {
 
   const tmdbApi = new TmdbAPI({
     cache: httpCache,
-    token: "test-token",
     redisUrl: "redis-url",
     logger,
     pluginSymbol: Symbol("@repo/plugin-tmdb"),
@@ -32,7 +31,6 @@ it("returns true if the request succeeds", async ({ server, httpCache }) => {
 
   const tmdbApi = new TmdbAPI({
     cache: httpCache,
-    token: "test-token",
     redisUrl: "redis-url",
     logger,
     pluginSymbol: Symbol("@repo/plugin-tmdb"),

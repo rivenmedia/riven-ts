@@ -4,6 +4,7 @@ import { TestAPI } from "./datasource/test.datasource.ts";
 import { TestSettingsResolver } from "./schema/test-settings.resolver.ts";
 import { TestResolver } from "./schema/test.resolver.ts";
 import { pluginConfig } from "./test-plugin.config.ts";
+import { TestSettings } from "./test-settings.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
@@ -18,6 +19,7 @@ export default {
     "riven.media-item.creation.error": async () => {},
     "riven.media-item.creation.success": async () => {},
   },
+  settingsSchema: TestSettings,
   validator() {
     return true;
   },

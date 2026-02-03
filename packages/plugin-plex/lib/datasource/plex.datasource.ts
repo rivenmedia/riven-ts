@@ -1,7 +1,8 @@
 import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
 
 import { join } from "node:path";
-import z from "zod";
+
+import { PlexSettings } from "../plex-settings.schema.ts";
 
 import type {
   LibrarySection,
@@ -12,19 +13,18 @@ import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource
 
 export class PlexAPIError extends Error {}
 
-export class PlexAPI extends BaseDataSource {
-  override baseURL = z.url().parse(process.env["PLEX_SERVER_URL"]);
-  override serviceName = "Plex";
+export class PlexAPI extends BaseDataSource<PlexSettings> {
+  get baseURL() {
+    return this.settings.plexServerUrl;
+  }
 
-  #libraryPath = z.string().parse(process.env["PLEX_LIBRARY_PATH"]);
+  override serviceName = "Plex";
 
   protected override willSendRequest(
     _path: string,
     requestOpts: AugmentedRequest,
   ): ValueOrPromise<void> {
-    const token = z.string().parse(process.env["PLEX_TOKEN"]);
-
-    requestOpts.headers["X-Plex-Token"] = token;
+    requestOpts.headers["X-Plex-Token"] = this.settings.plexToken;
     requestOpts.headers["Accept"] = "application/json";
   }
 
@@ -35,7 +35,7 @@ export class PlexAPI extends BaseDataSource {
 
     for (const directory of sections.MediaContainer?.Directory ?? []) {
       for (const location of directory.Location ?? []) {
-        const fullPath = join(this.#libraryPath, path);
+        const fullPath = join(this.settings.plexLibraryPath, path);
 
         if (fullPath.startsWith(location.path as string)) {
           if (!directory.key) {

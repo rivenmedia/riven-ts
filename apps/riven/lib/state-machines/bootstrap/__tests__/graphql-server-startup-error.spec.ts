@@ -1,3 +1,4 @@
+import { setTimeout } from "node:timers/promises";
 import { expect, vi } from "vitest";
 import { fromPromise, toPromise } from "xstate";
 
@@ -8,7 +9,7 @@ it.scoped({
     vi.fn().mockImplementation(async () => {
       // Simulate a delay to allow the other states to complete,
       // otherwise XState outputs noisy warnings about unhandled transitions.
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await setTimeout(10);
 
       throw new Error("GraphQL server failed to start");
     }),

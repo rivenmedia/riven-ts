@@ -5,7 +5,7 @@ import z from "zod";
  *
  * @param schema The Zod schema to validate the JSON object against.
  */
-export const jsonCodec = <T extends z.core.$ZodType>(schema: T) =>
+export const json = <T extends z.core.$ZodType>(schema: T) =>
   z.codec(z.string(), schema, {
     decode: (jsonString, ctx) => {
       try {

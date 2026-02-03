@@ -12,7 +12,6 @@ it('assigns the API to the "x-api-key" header', async ({
 }) => {
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    token: "test-token",
     logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     redisUrl: "redis-url",

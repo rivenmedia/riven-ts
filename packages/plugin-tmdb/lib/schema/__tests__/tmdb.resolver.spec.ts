@@ -27,7 +27,7 @@ it('returns the validation status when calling "tmdbIsValid" query', async ({
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new TmdbAPI({ cache: httpCache, token: "test-token" }),
+          api: new TmdbAPI({ cache: httpCache }),
         },
       },
     },

@@ -4,14 +4,10 @@
   "globalEnv": ["NODE_ENV"],
   "globalPassThroughEnv": [
     "DATABASE_URL",
-    "*_API_KEY",
     "LOG_LEVEL",
     "LOG_DIRECTORY",
     "REDIS_URL",
-    "JAEGER_URL",
-    "PLEX_SERVER_URL",
-    "PLEX_TOKEN",
-    "PLEX_LIBRARY_PATH"
+    "JAEGER_URL"
   ],
   "tasks": {
     "transit": {
@@ -32,6 +28,10 @@
     "generate-schemas": {
       "outputs": ["lib/__generated__/**"],
       "inputs": ["openapi-schema.json", "*.apib"]
+    },
+    "generate-config-docs": {
+      "inputs": ["**/*-settings.schema.ts", "zod2md.config.ts"],
+      "outputs": ["docs/*.md"]
     },
     "codegen": {
       "dependsOn": ["generate-schemas", "^generate-schemas"]

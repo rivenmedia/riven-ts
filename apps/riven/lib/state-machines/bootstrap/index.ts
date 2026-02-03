@@ -20,6 +20,7 @@ import type {
 } from "../../types/plugins.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";
 
 export interface BootstrapMachineContext {
@@ -33,6 +34,7 @@ export interface BootstrapMachineContext {
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: Set<RivenEvent["type"]>;
+  pluginSettings: PluginSettings | null;
 }
 
 export interface BootstrapMachineInput {
@@ -93,6 +95,7 @@ export const bootstrapMachine = setup({
       pluginQueues: (_, { pluginQueues }) => pluginQueues,
       pluginWorkers: (_, { pluginWorkers }) => pluginWorkers,
       publishableEvents: (_, { publishableEvents }) => publishableEvents,
+      pluginSettings: (_, { settings }) => settings,
     }),
   },
   actors: {
@@ -108,9 +111,9 @@ export const bootstrapMachine = setup({
 })
   .extend(withLogAction)
   .createMachine({
-    /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7AxAZQBUBBZAgbQAYBdRUABwHtZUAXVBrWkAD0QBYATABoQAT0QCAnAEYAdAL6TJfAKwU1kgMwAOFSoC++kWky4AogA0AkuWpdGzNhy68EgkeITTNFWYqUA7BQBmgF8fNrSfIbGGNg4AGJExAAyAPpmyMgA8siUNEggDqzsnIWu7mKI3poCsioAbAoB0tIUut4xICbYslZYJQCGADaozFhQOBAcYLKwLIMssz1YfQNsI2OoE-n2TCXO5dUhDbKaDUF8bRTSKjLSHoja4bIUTRHBAQ0qOl0ra0NRuMoLIAEIMBgseYAJ0GdAABBBFoMAEaDWBgeEAYw4WDAWKcqzwC2hbAmUxmsm26AYAGtZttAWMwAARZFojEAYVx+MJu0KxUJLkQDQoklk2gEkT4XxkfHUmkeXgoUle7zUigEAju2j+cVW-SZwLBEKhLFhCKRCw5mJxWDxBNKsmJg1J20mYGh0IY0NkdGGiwAZj6ALZU9aoTYYtnW9Fgbn23mlfn0fZCo5eE5nC4UK4UG53VpK1pqM6aFTaFp8TRRAQBAR60wAjZA90myEwuHwgDiFoAFgBFFLwvCezC+l1u8nTPHhmn0uYkljdgCOw1H0PHKaKadKwoQP208gE30C0jCkjFSoumj8by1lY1kgujd6hpbWwm7bNFp7-aHI5jp6zpLu6OCet6vr+kGoaLq6y5rhuW52AKu6HKArjnuc2aXNctz3Eq2gyPU6oNM8bxEZor4GhGUZtuCHbml2-oAK5QNssCyMgYDsfMnpgTODJYPOszQjxYxLNCAAKwxsRx26CnuGYqFc8hqCqYTVie6hKpoz71NomhGZoqgBNoFzREY3T6s2katl+DE-sxsnsVgnEAGqbFaAmUtSdKzAA7oMrAJD6nmjBAMlyW5CloWUGHVNIJ6vHp+bPA0DQ6N4Soyr4kg-A+TTBIZDZWf8752Z+IKOZ2CKsa5HleYsPmzn5C5BSFYVeVFDVkNIBSpo4SkJV4SWnBQqXtHwGVZYqVQIKEASyEoSgZVE55ig01HOn2LEsNMAW4IJc7+YuDB0Ku65AdCsVDehPD8HcfhRCqoRJRErR8MWNbLSt5lSutMoGF0WAMBAcBcCsex3fFD0IAAtA0SqI9tVgQMMYDQwcsMVMI83eFoaoKFqUoBGTz6o7R9lQFj6Yja0S2SpEDTKCZ5y5kj80CCqv1KDWrRaio0jKJTRr0aatWIuycbYjyjr3Yp92Yd8EoAyz1bVqK01KjIKgSu9ZHaO0DTeFtZU2RVdEORLTGWtLGKy4m8tEqBEy08NcMCN4qvM6zmsc8WNx1DKMjs+WUrqKLH7GjVttS7GDt2g6hKyNyIb+mASzu0rTySIzEeadqSiBxNZzvT45bqM0UeVTHNu-r2cKDsOSGetnOPVCrTPSOrbNa5zngVnrl5NBc3O6LoZuxE2lvU9+kuN3QzeAZuwGTmSNOoTD+5e7e3e9-72vzSzvjhCe2iVmTM2ldPb5U1V89x4vy+t76acZ1nW-Y-uIRLWRXwTWlF8AIKhryGVkKKLQ8pRQqE0pZW+NExbW0Yr+eqHF277h7nrfeft2ZH08FIU+K0Iij0kEbMmNcrbVXrs5aKnFuK8Uku6DBGZd4+x7rg-uulIgSjFDISsXswi6GBgg2yVDH6oJchxWQ4VUDeTdl-OmcMwh1C9pWW47MVIPHmllXhgRprKEaJleB1kZ73zrig2hDVU4MHThjT+g1v4ZluG0ZaqgkrEyuCZbQulLx+C+IWLQ3M9I31Mb0ZALF7TMMUR7TCUC-CSHHhWQyzxQHzSNqcRoCg1CRC0BlSQ20zBeh9JAFhI1uYCFvBNJKtQrieLmp4T6R4smCBMjISpoT-h4F2vtBgh0ylw28EeTU54giVnytIcyhE5DqRuCAqI9YL6dJsmYbgrBSkxJzggb4S1vB1nUFoEBXw8aeEJgoM85YQgykMIYIAA */
+    /** @xstate-layout N4IgpgJg5mDOIC5QCED2qAusMCcCGADgHRqbb4EECWAdlAAQEA2ArlLbEQEpjvZg5aUAMQRUNMEVoA3VAGtJzNrR59ceHAFk8AYwAWtMAG0ADAF1EoAqlhUMVcZZAAPRAFYAjAHYiATgBsJgBMJr4hYb4ALP4ANCAAnohB-j7Rbv6RHgDM6ZG+Jh4AvoVxpFjqxGXkhNR0jKzsNJyqVPyCdKLikjLyig0qvK3qWroGEkYeFkgg1rb2jtOuCJ4+AcGh4UFRsQmIHm4mRFlBAByBWVkmJv5BQW7FpejlFEQAkjR2VHhMrUL0sAJpFQdHBOhIiNg8BhJFUKm8PvZvr86gCcECQbBTFMrDZPgtQEsPB4CkQDl4vPs3PkMrc4okEClDidiSZ0mFIhSskUSiBYS93p8kbYUYDgXASE9qpQ-hAoXgAEZ4AH0HTiCQ6eY0IgAZQwGnsHTE4J6CikCK+PwBABE5YqAQBhNVgDUOGhYpyzPE0JxLNwnSJELyRaJZclZaIUoJ0xC+Dz+IiRA5BSInIJeE6hrIPXmSuECxGWv6o9Hivk1GW2pVgFVOl3iHV6nAGkQCHCoHBEZhQgBm7YAtmbBZawDa9XawI6aOrNe7pp7NT6Y15owgPCdfFlA-tImmPKdgl5-Nmy8R8xbkQxi2LOCfagwAOIUPQARQAMvRtYCBA39UIwd0aFkU1ISbe8AEcmE-NEBFnHE5ldRcGS8TcPA3LYLjyTx-RXdIgj8LkLn8KIOX9blHjIPNzSFItRQxCUKIoO96EfQgX3fKDpG-XVfw6Vt207Jge37CFGwwcDIK-HBYJmXEF0WPZiQ8UkTHJSlqR3KNdgQCl418PSTgzEwDP8VCTmPXMXlvP4ADUADFtX-ESoRhCzCHo55yzqOztWk+cEPk1dFOU1S3Cpa4NJXfYsl8I4DM8LlfDcQ9-CzHkT3cqUmO8n8mz-I0AKAgCh1aMBrO7TFzA9WT-IJRAbjwzw0giDkvGTSLEwDDMCJCdcgxU8yGLcqyvPsnLm2EPiOy7DBexwAdaGKgEyoq7EZPg-EXAUkkyQpUL1NpLT9hONxSXTLJ1xUoI42KHkaFQCA4CcE8qvW70AuSFcAFogk3PS-v+-6koGjzKlc6U6iURp4DnaqNqWIMVxSog40iS44wOLk938I80rBjKKiYyGOG4QY2iEF6vUQvdNPpH7Ny8XwKXTK5IgKfwTi8YGpXxxi-iJpoiEdPtmDAaEKbk2qEDCeNkgCRL0muM4ThXZI8KiKkViMvc3CCLnKMWmi0WvcWas2qW8PTYNTh1txQ2xldzpOIhAjTQjgzja7ccG08qMLEUjbo4aGFlMcqxrKdnQltbKYCjxWcDf0d2Ou47Z2ekThMTdFZ3MJjkTdI9f5X2L3+WjSzBpiQ4VMPVQjustW43K6BNuG9gMhOreT23kpXC7neS5lolItxIkLtyz2o-2SxvCuK1D5Va+nV1BdQYWmFFsAW7eyWOaUkJkKuYlHdjXv8iIH7XaM1Nkt8MefYNqfrx5zyHyfN8P0krfELRohM5MgoCiZDOCuDkJ1DxeEzjrYirUzh33hA-S8ZcZ7eyYixAgbEP7QQ7I3ZsX8Arhhin-RSgC1xp3cOmPwgRjqsm1hmHG5EQbwILCXK8gdZ51DQRgji34hYizFjDV6iFd7nxUpcABx8PA4VasjDmO5yQj2ZEROBQd6DeTwZLLYeEQwpFuNFVCgQyGriyEjY6h5MihUzjA5R7CGDZRweTARMdJbhkONo1qP1YxrEMXHJKgZErRUuEGHIqUGHcxUdlXh69+FwScWbBmMVQEhl8P6LYRJ2qeF-ldKIxwrjs1Hl7Rh2oWA6AxNDGJUdCSXCdmuDq7NjgZHTJFW28Y8gH2ZKEHI+w4EAFEcBthwJAdRZtshGRkbUjMyQSKRQ5jFZkttkxxnONjG6hQgA */
     id: "Bootstrap",
-    initial: "Initialising",
+    initial: "Bootstrapping plugins",
     context: ({ input }) => ({
       rootRef: input.rootRef,
       validatingPlugins: new Map(),
@@ -119,6 +122,7 @@ export const bootstrapMachine = setup({
       pluginQueues: new Map(),
       pluginWorkers: new Map(),
       publishableEvents: new Set(),
+      pluginSettings: null,
     }),
     output: ({
       context: {
@@ -150,7 +154,65 @@ export const bootstrapMachine = setup({
       };
     },
     states: {
-      Initialising: {
+      "Bootstrapping plugins": {
+        entry: [
+          {
+            type: "log",
+            params: {
+              message: "Starting plugin registration...",
+            },
+          },
+        ],
+        invoke: {
+          id: "pluginRegistrarMachine",
+          src: "pluginRegistrarMachine",
+          input: ({ context: { rootRef } }) => ({ rootRef }),
+          onDone: [
+            {
+              target: "Initialising services",
+              guard: "hasInvalidPlugins",
+              actions: [
+                {
+                  type: "log",
+                  params: {
+                    message:
+                      "One or more plugins failed to validate. Riven will start, but some functionality may be limited. Check the logs for more details.",
+                    level: "warn",
+                  },
+                },
+                {
+                  type: "handlePluginValidationResponse",
+                  params: ({ event: { output } }) => output,
+                },
+              ],
+            },
+            {
+              target: "Initialising services",
+              actions: [
+                {
+                  type: "log",
+                  params: ({
+                    event: {
+                      output: { validPlugins },
+                    },
+                  }) => ({
+                    message: `Plugins registered successfully. ${[
+                      ...validPlugins.keys(),
+                    ]
+                      .map((k) => k.description)
+                      .join(", ")}.`,
+                  }),
+                },
+                {
+                  type: "handlePluginValidationResponse",
+                  params: ({ event }) => event.output,
+                },
+              ],
+            },
+          ],
+        },
+      },
+      "Initialising services": {
         type: "parallel",
         onDone: "Bootstrapping VFS",
         states: {
@@ -210,6 +272,18 @@ export const bootstrapMachine = setup({
                 invoke: {
                   id: "startGqlServer",
                   src: "startGqlServer",
+                  input: ({ context: { validPlugins, pluginSettings } }) => {
+                    if (!pluginSettings) {
+                      throw new Error(
+                        "Plugin settings not available when starting GraphQL server. Ensure the plugin registrar has been run first.",
+                      );
+                    }
+
+                    return {
+                      validPlugins,
+                      pluginSettings,
+                    };
+                  },
                   onDone: {
                     target: "Complete",
                     actions: [
@@ -259,82 +333,6 @@ export const bootstrapMachine = setup({
                     message: "GraphQL bootstrap complete.",
                   },
                 },
-              },
-            },
-          },
-          "Bootstrapping plugins": {
-            initial: "Registering",
-            states: {
-              Registering: {
-                entry: [
-                  {
-                    type: "log",
-                    params: {
-                      message: "Starting plugin registration...",
-                    },
-                  },
-                ],
-                invoke: {
-                  id: "pluginRegistrarMachine",
-                  src: "pluginRegistrarMachine",
-                  input: ({ context: { rootRef } }) => ({
-                    rootRef,
-                  }),
-                  onDone: [
-                    {
-                      target: "Complete",
-                      guard: "hasInvalidPlugins",
-                      actions: [
-                        {
-                          type: "log",
-                          params: {
-                            message:
-                              "One or more plugins failed to validate. Riven will start, but some functionality may be limited. Check the logs for more details.",
-                            level: "warn",
-                          },
-                        },
-                        {
-                          type: "handlePluginValidationResponse",
-                          params: ({ event: { output } }) => output,
-                        },
-                      ],
-                    },
-                    {
-                      target: "Complete",
-                      actions: [
-                        {
-                          type: "log",
-                          params: ({
-                            event: {
-                              output: { validPlugins },
-                            },
-                          }) => ({
-                            message: `Plugins registered successfully. ${[
-                              ...validPlugins.keys(),
-                            ]
-                              .map((k) => k.description)
-                              .join(", ")}.`,
-                          }),
-                        },
-                        {
-                          type: "handlePluginValidationResponse",
-                          params: ({ event }) => event.output,
-                        },
-                      ],
-                    },
-                  ],
-                },
-              },
-              Complete: {
-                entry: [
-                  {
-                    type: "log",
-                    params: {
-                      message: "Plugin bootstrap complete.",
-                    },
-                  },
-                ],
-                type: "final",
               },
             },
           },

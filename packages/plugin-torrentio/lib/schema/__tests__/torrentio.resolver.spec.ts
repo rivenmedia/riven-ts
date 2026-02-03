@@ -27,7 +27,7 @@ it('returns the validation status when calling "torrentioIsValid" query', async 
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new TorrentioAPI({ cache: httpCache, token: "test-token" }),
+          api: new TorrentioAPI({ cache: httpCache }),
         },
       },
     },

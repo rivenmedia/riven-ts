@@ -18,7 +18,6 @@ it("returns an empty array if no content lists are provided", async ({
 }) => {
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    token: "test-token",
     logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     redisUrl: "redis-url",
@@ -62,7 +61,6 @@ it("retrieves movies from each provided list", async ({
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    token: "test-token",
     logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     redisUrl: "redis-url",
@@ -105,7 +103,6 @@ it("paginates through all pages of the list", async ({ server, httpCache }) => {
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    token: "test-token",
     logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     redisUrl: "redis-url",
@@ -146,7 +143,6 @@ it("dedupes movies that appear in multiple lists", async ({
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    token: "test-token",
     logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     redisUrl: "redis-url",

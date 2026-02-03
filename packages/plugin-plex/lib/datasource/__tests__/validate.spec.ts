@@ -12,7 +12,7 @@ it("returns false if the request fails", async ({ server, httpCache }) => {
     ),
   );
 
-  const plexApi = new PlexAPI({ cache: httpCache, token: "test-token" });
+  const plexApi = new PlexAPI({ cache: httpCache });
   const isValid = await plexApi.validate();
 
   expect(isValid).toBe(false);
@@ -23,7 +23,7 @@ it("returns true if the request succeeds", async ({ server, httpCache }) => {
     http.get("**/validate", () => HttpResponse.json({ success: true })),
   );
 
-  const plexApi = new PlexAPI({ cache: httpCache, token: "test-token" });
+  const plexApi = new PlexAPI({ cache: httpCache });
   const isValid = await plexApi.validate();
 
   expect(isValid).toBe(true);

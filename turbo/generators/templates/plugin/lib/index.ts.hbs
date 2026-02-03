@@ -5,6 +5,7 @@ import {
 import { pluginConfig } from "./{{kebabCase pluginName}}-plugin.config.ts";
 import { {{pascalCase pluginName}}SettingsResolver } from "./schema/{{kebabCase pluginName}}-settings.resolver.ts";
 import { {{pascalCase pluginName}}Resolver } from "./schema/{{kebabCase pluginName}}.resolver.ts";
+import { {{camelCase pluginName}}SettingsSchema } from "./{{kebabCase pluginName}}-settings.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
@@ -17,6 +18,7 @@ export default {
     "riven.core.started": async () => {},
     // Add more hooks as needed
   },
+  settingsSchema: {{camelCase pluginName}}SettingsSchema,
   validator() {
     return true;
   },

@@ -18,7 +18,6 @@ it("returns an empty array if no content lists are provided", async ({
 }) => {
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    token: "test-token",
     logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     redisUrl: "redis-url",
@@ -59,7 +58,6 @@ it("retrieves shows from each provided list", async ({ server, httpCache }) => {
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    token: "test-token",
     logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     redisUrl: "redis-url",
@@ -102,7 +100,6 @@ it("paginates through all pages of the list", async ({ server, httpCache }) => {
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    token: "test-token",
     logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     redisUrl: "redis-url",
@@ -143,7 +140,6 @@ it("dedupes shows that appear in multiple lists", async ({
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    token: "test-token",
     logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     redisUrl: "redis-url",

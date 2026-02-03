@@ -18,7 +18,7 @@ import { Logger } from "winston";
 import z from "zod";
 
 import { registerMQListeners } from "../helpers/register-mq-listeners.ts";
-import { jsonCodec } from "../validation/json-parser.ts";
+import { json } from "../validation/json.ts";
 import { urlSearchParamsCodec } from "../validation/url-search-params-parser.ts";
 
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
@@ -45,16 +45,23 @@ type FetchResponse<T = unknown> = Pick<
   };
 };
 
-export interface BaseDataSourceConfig extends Omit<DataSourceConfig, "logger"> {
+export interface BaseDataSourceConfig<
+  T extends Record<string, unknown>,
+> extends Omit<DataSourceConfig, "logger"> {
+  settings: T;
   pluginSymbol: symbol;
-  token?: string | undefined;
   redisUrl: string;
   logger: Logger;
 }
 
-export abstract class BaseDataSource extends RESTDataSource {
+export abstract class BaseDataSource<
+  T extends Record<string, unknown>,
+> extends RESTDataSource {
+  abstract override readonly baseURL: string;
+
   readonly serviceName: string;
-  readonly token: string | undefined;
+  readonly settings: T;
+
   override readonly logger: Logger;
 
   protected readonly rateLimiterOptions?: RateLimiterOptions | undefined;
@@ -70,9 +77,9 @@ export abstract class BaseDataSource extends RESTDataSource {
   constructor({
     pluginSymbol,
     redisUrl,
-    token,
+    settings,
     ...apolloDataSourceOptions
-  }: BaseDataSourceConfig) {
+  }: BaseDataSourceConfig<T>) {
     super(apolloDataSourceOptions);
 
     this.#keyv = apolloDataSourceOptions.cache as KeyvAdapter;
@@ -140,8 +147,8 @@ export abstract class BaseDataSource extends RESTDataSource {
     registerMQListeners(this.#queue);
     registerMQListeners(this.#worker);
 
-    this.token = token;
     this.logger = apolloDataSourceOptions.logger;
+    this.settings = settings;
   }
 
   #decodeRequestBody(job: Job<FetchJobInput, FetchResponse>) {
@@ -163,7 +170,7 @@ export abstract class BaseDataSource extends RESTDataSource {
       return;
     }
 
-    job.data.incomingRequest.body = jsonCodec(
+    job.data.incomingRequest.body = json(
       z.record(z.string(), z.unknown()),
     ).decode(job.data.incomingRequest.body);
   }
@@ -382,10 +389,6 @@ export abstract class BaseDataSource extends RESTDataSource {
   }
 
   abstract validate(): Promisable<boolean>;
-
-  static getApiToken(): string | undefined {
-    return undefined;
-  }
 }
 
 export type { RateLimiterOptions } from "bullmq";

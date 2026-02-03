@@ -1,12 +1,16 @@
 import { logger } from "@repo/core-util-logger";
-import { DataSourceMap, type ParsedPlugins } from "@repo/util-plugin-sdk";
+import { DataSourceMap } from "@repo/util-plugin-sdk";
+import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import { type AnyActorRef, type MachineContext, assign, setup } from "xstate";
-import z from "zod";
+import z, { ZodError } from "zod";
 
 import { redisCache } from "../../utilities/redis-cache.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
-import { collectPluginsForRegistration } from "./actors/collect-plugins-for-registration.actor.ts";
+import {
+  type ParsedPlugins,
+  collectPluginsForRegistration,
+} from "./actors/collect-plugins-for-registration.actor.ts";
 import {
   type RegisterPluginHookWorkersOutput,
   registerPluginHookWorkers,
@@ -27,7 +31,7 @@ import type {
 
 export interface PluginRegistrarMachineContext extends MachineContext {
   rootRef: AnyActorRef;
-  parsedPlugins?: ParsedPlugins;
+  parsedPlugins: ParsedPlugins | null;
   runningValidators: Map<symbol, AnyActorRef>;
   pendingPlugins: PendingPluginMap;
   invalidPlugins: InvalidPluginMap;
@@ -35,6 +39,7 @@ export interface PluginRegistrarMachineContext extends MachineContext {
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: PublishableEventSet;
+  settings: PluginSettings | null;
 }
 
 export interface PluginRegistrarMachineInput {
@@ -47,6 +52,7 @@ export interface PluginRegistrarMachineOutput {
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: PublishableEventSet;
+  settings: PluginSettings;
 }
 
 export type PluginRegistrarMachineEvent =
@@ -67,22 +73,50 @@ export const pluginRegistrarMachine = setup({
   },
   actions: {
     registerPlugins: assign({
-      pendingPlugins: (_, { validPlugins }: ParsedPlugins) => {
+      pendingPlugins: (
+        _,
+        { validPlugins, pluginConfigPrefixMap, pluginSettings }: ParsedPlugins,
+      ) => {
         const pluginMap = new Map<symbol, PendingPlugin>();
 
         for (const plugin of validPlugins) {
           const dataSources = new DataSourceMap();
 
+          try {
+            const pluginConfigPrefix = pluginConfigPrefixMap.get(plugin.name);
+
+            if (!pluginConfigPrefix) {
+              throw new Error(
+                `No config prefix found for plugin "${String(plugin.name)}"`,
+              );
+            }
+
+            pluginSettings._set(pluginConfigPrefix, plugin.settingsSchema);
+          } catch (error) {
+            if (error instanceof ZodError) {
+              logger.error(
+                `Invalid settings provided for plugin '${String(plugin.name.description)}: ${z.prettifyError(error)}'`,
+              );
+            } else {
+              logger.error(
+                `Failed to set settings for plugin '${String(
+                  plugin.name.description,
+                )}': ${String(error)}`,
+              );
+            }
+
+            continue;
+          }
+
           if (plugin.dataSources) {
             for (const DataSource of plugin.dataSources) {
               try {
-                const token = DataSource.getApiToken();
                 const instance = new DataSource({
                   pluginSymbol: plugin.name,
                   cache: redisCache,
-                  token,
                   logger,
                   redisUrl: z.url().parse(process.env["REDIS_URL"]),
+                  settings: pluginSettings.get(plugin.settingsSchema),
                 });
 
                 dataSources.set(DataSource, instance);
@@ -103,8 +137,11 @@ export const pluginRegistrarMachine = setup({
           });
         }
 
+        pluginSettings._lock();
+
         return pluginMap;
       },
+      settings: (_, { pluginSettings }) => pluginSettings,
     }),
     handleValidPlugin: assign(
       (
@@ -163,22 +200,33 @@ export const pluginRegistrarMachine = setup({
         };
       },
     ),
-    spawnValidators: assign(({ spawn, context: { pendingPlugins } }) => {
-      const validatorRefs = new Map<symbol, AnyActorRef>();
+    spawnValidators: assign(
+      ({ spawn, context: { pendingPlugins, settings } }) => {
+        const validatorRefs = new Map<symbol, AnyActorRef>();
 
-      for (const [pluginSymbol, plugin] of pendingPlugins) {
-        const validatorRef = spawn("validatePlugin", {
-          id: "validatePlugin",
-          input: { plugin },
-        });
+        if (!settings) {
+          throw new Error(
+            "PluginSettings is not initialised. Have the plugins been registered?",
+          );
+        }
 
-        validatorRefs.set(pluginSymbol, validatorRef);
-      }
+        for (const [pluginSymbol, plugin] of pendingPlugins) {
+          const validatorRef = spawn("validatePlugin", {
+            id: "validatePlugin",
+            input: {
+              plugin,
+              settings,
+            },
+          });
 
-      return {
-        runningValidators: validatorRefs,
-      };
-    }),
+          validatorRefs.set(pluginSymbol, validatorRef);
+        }
+
+        return {
+          runningValidators: validatorRefs,
+        };
+      },
+    ),
     assignPluginHooks: assign(
       (
         _,
@@ -218,6 +266,8 @@ export const pluginRegistrarMachine = setup({
       pluginQueues: new Map(),
       pluginWorkers: new Map(),
       publishableEvents: new Set(),
+      settings: null,
+      parsedPlugins: null,
     }),
     id: "Plugin registrar",
     initial: "Registering plugins",
@@ -228,14 +278,24 @@ export const pluginRegistrarMachine = setup({
         pluginQueues,
         pluginWorkers,
         publishableEvents,
+        settings,
       },
-    }) => ({
-      validPlugins,
-      invalidPlugins,
-      pluginQueues,
-      pluginWorkers,
-      publishableEvents,
-    }),
+    }) => {
+      if (!settings) {
+        throw new Error(
+          "PluginSettings is not available in the output context.",
+        );
+      }
+
+      return {
+        validPlugins,
+        invalidPlugins,
+        pluginQueues,
+        pluginWorkers,
+        publishableEvents,
+        settings,
+      };
+    },
     states: {
       "Registering plugins": {
         invoke: {
@@ -244,6 +304,18 @@ export const pluginRegistrarMachine = setup({
           onDone: {
             target: "Validating",
             actions: [
+              {
+                type: "log",
+                params: ({ event: { output: parsedPlugins } }) => ({
+                  message: [
+                    `Collected ${parsedPlugins.validPlugins.length.toString()} plugins for validation:`,
+                    parsedPlugins.validPlugins
+                      .map((p) => p.name.description?.toString())
+                      .join(", "),
+                  ].join(" "),
+                  level: "verbose",
+                }),
+              },
               assign({
                 parsedPlugins: ({ event: { output: parsedPlugins } }) =>
                   parsedPlugins,
@@ -289,9 +361,18 @@ export const pluginRegistrarMachine = setup({
         invoke: {
           id: "registerPluginHookWorkers",
           src: "registerPluginHookWorkers",
-          input: ({ context: { validPlugins } }) => ({
-            plugins: validPlugins,
-          }),
+          input: ({ context: { validPlugins, settings } }) => {
+            if (!settings) {
+              throw new Error(
+                "PluginSettings is not initialised. Have the plugins been registered?",
+              );
+            }
+
+            return {
+              plugins: validPlugins,
+              settings,
+            };
+          },
           onDone: {
             actions: {
               type: "assignPluginHooks",

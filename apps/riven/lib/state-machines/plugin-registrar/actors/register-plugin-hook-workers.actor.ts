@@ -14,9 +14,11 @@ import type {
   ValidPluginMap,
 } from "../../../types/plugins.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 export interface RegisterPluginHookWorkersInput {
   plugins: ValidPluginMap;
+  settings: PluginSettings;
 }
 
 export interface RegisterPluginHookWorkersOutput {
@@ -28,7 +30,7 @@ export interface RegisterPluginHookWorkersOutput {
 export const registerPluginHookWorkers = fromPromise<
   RegisterPluginHookWorkersOutput,
   RegisterPluginHookWorkersInput
->(async ({ input: { plugins } }) => {
+>(async ({ input: { plugins, settings } }) => {
   const pluginQueueMap = new Map<
     symbol,
     Map<RivenEvent["type"], Queue>
@@ -69,6 +71,7 @@ export const registerPluginHookWorkers = fromPromise<
                 .omit({ type: true })
                 .decode(job.data) as never,
               dataSources,
+              settings,
             }) as Promise<never>;
           },
           { concurrency: os.availableParallelism() },

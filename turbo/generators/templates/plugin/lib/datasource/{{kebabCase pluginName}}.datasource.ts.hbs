@@ -1,8 +1,10 @@
 import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
 
+import { {{pascalCase pluginName}}Settings } from "../{{kebabCase pluginName}}-settings.schema.ts";
+
 export class {{pascalCase pluginName}}APIError extends Error {}
 
-export class {{pascalCase pluginName}}API extends BaseDataSource {
+export class {{pascalCase pluginName}}API extends BaseDataSource<{{pascalCase pluginName}}Settings> {
   override baseURL = "https://{{kebabCase pluginName}}.com/api/";
   override serviceName = "{{pascalCase pluginName}}";
 

@@ -20,6 +20,7 @@ import { AddMagnetResponse } from "../schemas/add-magnet-response.schema.ts";
 import { RealDebridError } from "../schemas/realdebrid-error.schema.ts";
 import { RealDebridTorrentInfo } from "../schemas/torrent-info.schema.ts";
 
+import type { RealDebridSettings } from "../realdebrid-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type {
   DataSourceFetchResult,
@@ -29,7 +30,7 @@ import type {
 
 export class RealDebridAPIError extends Error {}
 
-export class RealDebridAPI extends BaseDataSource {
+export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
   override baseURL = "https://api.real-debrid.com/rest/1.0/";
   override serviceName = "RealDebrid";
 
@@ -42,14 +43,7 @@ export class RealDebridAPI extends BaseDataSource {
     _path: string,
     requestOpts: AugmentedRequest,
   ): ValueOrPromise<void> {
-    if (!this.token) {
-      throw new RealDebridAPIError(
-        "RealDebrid API token is not set. Please provide a valid API token.",
-      );
-    }
-
-    requestOpts.headers["authorization"] = `Bearer ${this.token}`;
-    // requestOpts.headers["content-type"] = "text/plain";
+    requestOpts.headers["authorization"] = `Bearer ${this.settings.apiKey}`;
   }
 
   override async throwIfResponseIsError(options: {
@@ -208,7 +202,7 @@ export class RealDebridAPI extends BaseDataSource {
       throw new Error("No files found in the torrent.");
     }
 
-    const torrentFiles = Array.from(Object.values(info.files));
+    const torrentFiles = [...Object.values(info.files)];
     const { data: status } = RealDebridTorrentInfo.shape.status.safeParse(
       info.status,
     );
@@ -377,10 +371,6 @@ export class RealDebridAPI extends BaseDataSource {
     });
 
     return UnrestrictedLink.parse(response);
-  }
-
-  static override getApiToken() {
-    return process.env["REAL_DEBRID_API_KEY"];
   }
 }
 
