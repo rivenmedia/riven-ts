@@ -30,6 +30,7 @@
       "inputs": ["openapi-schema.json", "*.apib"]
     },
     "generate-config-docs": {
+      "inputs": ["**/*-settings.schema.ts", "zod2md.config.ts"],
       "outputs": ["docs/*.md"]
     },
     "codegen": {

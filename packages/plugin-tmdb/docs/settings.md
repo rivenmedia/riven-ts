@@ -4,8 +4,8 @@
 
 _Object containing the following properties:_
 
-| Property          | Type                       |
-| :---------------- | :------------------------- |
-| **`apiKey`** (\*) | `string` (_min length: 1_) |
+| Property          | Description       | Type                       |
+| :---------------- | :---------------- | :------------------------- |
+| **`apiKey`** (\*) | Your TMDB API Key | `string` (_min length: 1_) |
 
 _(\*) Required._
