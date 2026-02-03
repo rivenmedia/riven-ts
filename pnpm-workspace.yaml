@@ -45,6 +45,7 @@ catalog:
   winston: ^3.19.0
   xstate: ^5.25.0
   zod: 4.1.13
+  zod2md: ^0.2.5
 
 cleanupUnusedCatalogs: true
 

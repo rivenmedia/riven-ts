@@ -29,6 +29,9 @@
       "outputs": ["lib/__generated__/**"],
       "inputs": ["openapi-schema.json", "*.apib"]
     },
+    "generate-config-docs": {
+      "outputs": ["docs/*.md"]
+    },
     "codegen": {
       "dependsOn": ["generate-schemas", "^generate-schemas"]
     },

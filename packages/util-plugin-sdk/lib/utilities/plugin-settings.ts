@@ -1,4 +1,3 @@
-import { camelCase, constantCase } from "es-toolkit";
 import { type ZodObject, z } from "zod";
 
 import type { Logger } from "winston";
@@ -40,7 +39,7 @@ export class PluginSettings {
     );
 
     const settingPattern = new RegExp(
-      `^RIVEN_PLUGIN_SETTING_(?<prefix>${pluginConfigPrefixes.join("|")})_(?<settingName>.+)$`,
+      `^RIVEN_PLUGIN_SETTING__(?<prefix>${pluginConfigPrefixes.join("|")})__(?<settingName>.+)$`,
     );
 
     for (const [key, value] of Object.entries(process.env)) {
@@ -70,7 +69,7 @@ export class PluginSettings {
         continue;
       }
 
-      settingGroup.set(camelCase(settingName), value);
+      settingGroup.set(settingName, value);
 
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete process.env[key];
@@ -94,7 +93,7 @@ export class PluginSettings {
     for (const [prefix, settings] of this.#environmentSettingGroups) {
       if (settings.size > 0) {
         const unusedSettings = Array.from(settings.keys()).map(
-          (key) => `${prefix}_${constantCase(key)}`,
+          (key) => `${prefix}_${key}`,
         );
 
         this.#logger.warn(

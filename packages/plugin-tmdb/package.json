@@ -8,6 +8,7 @@
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
+    "generate-config-docs": "zod2md",
     "generate-schemas": "kubb generate",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
@@ -33,6 +34,7 @@
     "eslint": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "zod2md": "catalog:"
   }
 }
