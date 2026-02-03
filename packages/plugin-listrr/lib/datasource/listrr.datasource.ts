@@ -13,13 +13,13 @@ import {
   listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIShowDtoSchema as getShowsResponseSchema,
 } from "../__generated__/index.ts";
 
-import type { listrrSettingsSchema } from "../listrr-settings.schema.ts";
+import type { ListrrSettings } from "../listrr-settings.schema.ts";
 import type { ExternalIds } from "../schema/types/external-ids.type.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 
 export class ListrrAPIError extends Error {}
 
-export class ListrrAPI extends BaseDataSource<typeof listrrSettingsSchema> {
+export class ListrrAPI extends BaseDataSource<ListrrSettings> {
   override baseURL = "https://listrr.pro/api/";
   override serviceName = "Listrr";
 

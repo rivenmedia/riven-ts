@@ -2,7 +2,7 @@ import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
 
 import { join } from "node:path";
 
-import { plexSettingsSchema } from "../plex-settings.schema.ts";
+import { PlexSettings } from "../plex-settings.schema.ts";
 
 import type {
   LibrarySection,
@@ -13,7 +13,7 @@ import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource
 
 export class PlexAPIError extends Error {}
 
-export class PlexAPI extends BaseDataSource<typeof plexSettingsSchema> {
+export class PlexAPI extends BaseDataSource<PlexSettings> {
   get baseURL() {
     return this.settings.plexServerUrl;
   }

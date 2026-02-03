@@ -4,6 +4,7 @@ import { indexTMDBMediaItemHandler } from "./handlers/index-media-item.ts";
 import { TmdbSettingsResolver } from "./schema/tmdb-settings.resolver.ts";
 import { TmdbResolver } from "./schema/tmdb.resolver.ts";
 import { pluginConfig } from "./tmdb-plugin.config.ts";
+import { TmdbSettings } from "./tmdb-settings.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
@@ -15,6 +16,7 @@ export default {
   hooks: {
     "riven.media-item.index.requested": indexTMDBMediaItemHandler,
   },
+  settingsSchema: TmdbSettings,
   validator() {
     return true;
   },

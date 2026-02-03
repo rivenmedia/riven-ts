@@ -7,6 +7,7 @@ import {
 } from "@repo/util-plugin-sdk";
 import { z } from "@repo/util-plugin-sdk/validation";
 
+import type { TorrentioSettings } from "../torrentio-settings.schema.ts";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 const TorrentioScrapeResponse = z.object({
@@ -20,11 +21,13 @@ const TorrentioScrapeResponse = z.object({
 
 export class TorrentioAPIError extends Error {}
 
-export class TorrentioAPI extends BaseDataSource {
+export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
   override baseURL = "http://torrentio.strem.fun/";
   override serviceName = "Torrent.io";
 
-  #filter = "sort=qualitysize%7Cqualityfilter=threed,480p,scr,cam";
+  get #filter() {
+    return this.settings.filter;
+  }
 
   protected override rateLimiterOptions: RateLimiterOptions = {
     max: 150,

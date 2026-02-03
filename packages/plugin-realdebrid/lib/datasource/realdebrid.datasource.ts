@@ -20,7 +20,7 @@ import { AddMagnetResponse } from "../schemas/add-magnet-response.schema.ts";
 import { RealDebridError } from "../schemas/realdebrid-error.schema.ts";
 import { RealDebridTorrentInfo } from "../schemas/torrent-info.schema.ts";
 
-import type { realDebridSettingsSchema } from "../real-debrid-settings.schema.ts";
+import type { RealDebridSettings } from "../real-debrid-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type {
   DataSourceFetchResult,
@@ -30,9 +30,7 @@ import type {
 
 export class RealDebridAPIError extends Error {}
 
-export class RealDebridAPI extends BaseDataSource<
-  typeof realDebridSettingsSchema
-> {
+export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
   override baseURL = "https://api.real-debrid.com/rest/1.0/";
   override serviceName = "RealDebrid";
 
