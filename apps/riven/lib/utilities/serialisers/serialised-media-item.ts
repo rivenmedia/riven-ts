@@ -1,12 +1,6 @@
 import { database } from "@repo/core-util-database/database";
-import {
-  Episode,
-  MediaItemType,
-  Movie,
-  RequestedItem,
-  Season,
-  Show,
-} from "@repo/util-plugin-sdk/dto/entities/index";
+import { MediaItemType } from "@repo/util-plugin-sdk/dto/entities/index";
+import { MediaItem } from "@repo/util-plugin-sdk/schemas/media/media-item";
 
 import { wrap } from "@mikro-orm/core";
 import z from "zod";
@@ -18,13 +12,7 @@ export const SerialisedMediaItem = z.codec(
   // Just validate the input has a matching media item type here
   // to prevent non-media items from being passed through
   z.looseObject({ type: MediaItemType }),
-  z.union([
-    z.instanceof(Movie),
-    z.instanceof(Show),
-    z.instanceof(Season),
-    z.instanceof(Episode),
-    z.instanceof(RequestedItem),
-  ]),
+  MediaItem,
   {
     decode: (data) => {
       switch (data.type) {
