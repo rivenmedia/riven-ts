@@ -6,4 +6,4 @@ export const PlexSettings = z.object({
   plexLibraryPath: z.string().min(1, "Plex Library Path is required"),
 });
 
-export type PlexSettings = typeof PlexSettings;
+export type PlexSettings = z.infer<typeof PlexSettings>;

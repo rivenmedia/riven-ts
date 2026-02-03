@@ -15,7 +15,7 @@ import {
 } from "bullmq";
 import { DateTime } from "luxon";
 import { Logger } from "winston";
-import z, { type ZodObject, type ZodUnknown } from "zod";
+import z from "zod";
 
 import { registerMQListeners } from "../helpers/register-mq-listeners.ts";
 import { json } from "../validation/json.ts";
@@ -46,21 +46,21 @@ type FetchResponse<T = unknown> = Pick<
 };
 
 export interface BaseDataSourceConfig<
-  T extends ZodObject | ZodUnknown = ZodObject | ZodUnknown,
+  T extends Record<string, unknown>,
 > extends Omit<DataSourceConfig, "logger"> {
-  settings: z.infer<T>;
+  settings: T;
   pluginSymbol: symbol;
   redisUrl: string;
   logger: Logger;
 }
 
 export abstract class BaseDataSource<
-  T extends ZodObject | ZodUnknown = ZodObject | ZodUnknown,
+  T extends Record<string, unknown>,
 > extends RESTDataSource {
   abstract override readonly baseURL: string;
 
   readonly serviceName: string;
-  readonly settings: z.infer<T>;
+  readonly settings: T;
 
   override readonly logger: Logger;
 

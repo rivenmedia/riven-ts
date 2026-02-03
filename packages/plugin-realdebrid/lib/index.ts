@@ -1,7 +1,7 @@
 import packageJson from "../package.json" with { type: "json" };
 import { RealDebridAPI } from "./datasource/realdebrid.datasource.ts";
-import { RealDebridSettings } from "./real-debrid-settings.schema.ts";
 import { pluginConfig } from "./realdebrid-plugin.config.ts";
+import { RealDebridSettings } from "./realdebrid-settings.schema.ts";
 import { RealDebridSettingsResolver } from "./schema/realdebrid-settings.resolver.ts";
 import { RealDebridResolver } from "./schema/realdebrid.resolver.ts";
 

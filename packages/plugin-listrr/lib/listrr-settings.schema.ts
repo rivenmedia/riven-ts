@@ -7,4 +7,4 @@ export const ListrrSettings = z.object({
   movieLists: json(z.array(z.string().min(1))),
 });
 
-export type ListrrSettings = typeof ListrrSettings;
+export type ListrrSettings = z.infer<typeof ListrrSettings>;

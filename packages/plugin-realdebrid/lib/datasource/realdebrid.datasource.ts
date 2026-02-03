@@ -20,7 +20,7 @@ import { AddMagnetResponse } from "../schemas/add-magnet-response.schema.ts";
 import { RealDebridError } from "../schemas/realdebrid-error.schema.ts";
 import { RealDebridTorrentInfo } from "../schemas/torrent-info.schema.ts";
 
-import type { RealDebridSettings } from "../real-debrid-settings.schema.ts";
+import type { RealDebridSettings } from "../realdebrid-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type {
   DataSourceFetchResult,
