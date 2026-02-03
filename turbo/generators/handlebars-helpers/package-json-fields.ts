@@ -30,6 +30,9 @@ const commonFields: PackageJsonDefinition = {
 
 const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
   plugin: {
+    scripts: {
+      "generate-config-docs": "zod2md",
+    },
     dependencies: {
       "@apollo/datasource-rest": "catalog:",
       "@repo/util-plugin-sdk": "workspace:^",
@@ -38,6 +41,7 @@ const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
     },
     devDependencies: {
       "@repo/util-plugin-sdk": "workspace:^",
+      zod2md: "catalog:",
     },
   },
 };
