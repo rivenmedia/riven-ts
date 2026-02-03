@@ -78,6 +78,6 @@
     "msw": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
-    "zod2md": "^0.2.5"
+    "zod2md": "catalog:"
   }
 }
