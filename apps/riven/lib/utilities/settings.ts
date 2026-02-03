@@ -18,6 +18,9 @@ class Settings {
       }
 
       rawSettings[match.groups["setting"]] = value;
+
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete process.env[key];
     }
 
     this.settings = RivenSettings.parse(rawSettings);
