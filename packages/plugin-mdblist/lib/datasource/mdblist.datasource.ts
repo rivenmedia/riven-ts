@@ -10,7 +10,7 @@ import {
 } from "../__generated__/index.ts";
 
 import type { MdbListExternalIds } from "../schema/types/external-ids.type.ts";
-import type { AugmentedRequest, GetRequest } from "@apollo/datasource-rest";
+import type { AugmentedRequest } from "@apollo/datasource-rest";
 
 export type MdblistName = `${string}/${string}`;
 function isMdblistName(name: unknown): name is MdblistName {
@@ -79,8 +79,8 @@ export class MdblistAPI extends BaseDataSource {
         const response = await this.fetch<GetListItemsByNameQueryResponse>(
           `lists/${listName}/items`,
           {
-            cacheOptions: {
-              ttl: 60 * 2,
+            params: {
+              offset: (movieIdsMap.size + showIdsMap.size).toString(),
             },
           },
         );
