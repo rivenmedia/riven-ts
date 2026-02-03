@@ -54,13 +54,13 @@ services:
 
   riven-db:
     image: postgres:17-alpine
-    container_name: riven-db2
+    container_name: riven-db
     restart: unless-stopped
     profiles:
       - all
       - services
     ports:
-      - 5442:5432
+      - 5432:5432
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
       POSTGRES_USER: postgres
@@ -103,22 +103,22 @@ services:
       - riven-cache
 
   plex:
-    container_name: plex2
+    container_name: plex
     image: plexinc/pms-docker
     restart: unless-stopped
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - capabilities:
-    #             - gpu
-    # runtime: nvidia
-    # gpus: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities:
+                - gpu
+    runtime: nvidia
+    gpus: all
     environment:
       TZ: Europe/London
       PLEX_CLAIM: ${PLEX_CLAIM}
     ports:
-      - 32440:32400
+      - 32400:32400
     volumes:
       - ./plex/config:/config
       - ./plex/transcode:/transcode
