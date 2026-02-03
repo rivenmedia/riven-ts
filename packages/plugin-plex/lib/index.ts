@@ -40,9 +40,7 @@ export default {
     },
   },
   settingsSchema: plexSettingsSchema,
-  validator({ settings }) {
-    const plexSettings = settings.get(plexSettingsSchema);
-
+  validator() {
     return true;
   },
 } satisfies RivenPlugin;

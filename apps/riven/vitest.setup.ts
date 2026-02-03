@@ -1,6 +1,7 @@
 import { BaseDataSource, type RivenPlugin } from "@repo/util-plugin-sdk";
 
 import { type Mock, beforeEach, expect, vi } from "vitest";
+import z from "zod";
 
 vi.mock<{ default: Record<string, unknown> }>(
   import("./package.json"),
@@ -32,10 +33,6 @@ vi.mock<typeof import("@repo/plugin-test")>(import("@repo/plugin-test"), () => {
     override validate(): Promise<boolean> {
       return Promise.resolve(true);
     }
-
-    static override getApiToken(): string | undefined {
-      return "TEST_API_TOKEN";
-    }
   }
 
   class TestResolver {
@@ -57,6 +54,7 @@ vi.mock<typeof import("@repo/plugin-test")>(import("@repo/plugin-test"), () => {
         "riven.media-item.creation.error": vi.fn(),
         "riven.media-item.creation.success": vi.fn(),
       },
+      settingsSchema: z.object({}),
       validator() {
         return true;
       },

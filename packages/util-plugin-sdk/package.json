@@ -23,6 +23,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "es-toolkit": "catalog:",
     "luxon": "catalog:",
     "zod": "catalog:"
   },

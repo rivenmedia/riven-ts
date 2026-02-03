@@ -9,6 +9,7 @@ import { PluginSettings } from "../utilities/plugin-settings.ts";
 import { RivenEventHandler } from "./events/index.ts";
 
 import type { RateLimiterOptions } from "bullmq";
+import type { Constructor } from "type-fest";
 
 export const RivenPluginConfig = z.readonly(
   z.object({
@@ -36,25 +37,16 @@ export const isBasePluginContext = (
 
 /**
  * Represents a constructor for a class that extends BaseDataSource.
- * This type preserves both instance members and static members.
  */
 export interface DataSourceConstructor {
   rateLimiterOptions?: RateLimiterOptions | undefined;
-
-  /** Static method to get the API token */
-  getApiToken(): string | undefined;
 
   /** Constructor signature */
   new (options: BaseDataSourceConfig): BaseDataSource;
 }
 
-const dataSourceSchema = z.custom<DataSourceConstructor>((value) => {
+const dataSourceSchema = z.custom<Constructor<BaseDataSource>>((value) => {
   if (typeof value !== "function") {
-    return false;
-  }
-
-  // Check it has the static getApiToken method
-  if (typeof (value as DataSourceConstructor).getApiToken !== "function") {
     return false;
   }
 
@@ -82,7 +74,7 @@ export const RivenPlugin = z.object({
       output: z.promise(z.record(z.string(), z.unknown())),
     })
     .optional(),
-  settingsSchema: z.instanceof(z.ZodObject).optional(),
+  settingsSchema: z.instanceof(z.ZodObject),
   validator: z.function({
     input: [
       z.object({

@@ -1,11 +1,6 @@
 import { logger } from "@repo/core-util-logger";
-import {
-  DataSourceMap,
-  parsePluginsFromDependencies,
-} from "@repo/util-plugin-sdk";
+import { DataSourceMap, type RivenPlugin } from "@repo/util-plugin-sdk";
 import { z } from "@repo/util-plugin-sdk/validation";
-
-import packageJson from "../package.json" with { type: "json" };
 
 import type {
   ApolloServer,
@@ -14,6 +9,7 @@ import type {
   GraphQLRequest,
 } from "@apollo/server";
 import type { StandaloneServerContextFunctionArgument } from "@apollo/server/standalone";
+import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 declare module "node:http" {
   interface IncomingMessage {
@@ -21,13 +17,10 @@ declare module "node:http" {
   }
 }
 
-const { validPlugins } = await parsePluginsFromDependencies(
-  packageJson.dependencies,
-  import.meta.resolve.bind(null),
-);
-
 export function buildContext(
   server: ApolloServer,
+  settings: PluginSettings,
+  validPlugins: RivenPlugin[],
 ): ContextFunction<[StandaloneServerContextFunctionArgument]> {
   const { cache } = server;
 
@@ -47,6 +40,7 @@ export function buildContext(
               logger,
               pluginSymbol: plugin.name,
               redisUrl: z.url().parse(process.env["REDIS_URL"]),
+              settings: settings.get(plugin.settingsSchema),
             });
 
             dataSources.set(DataSourceConstructor, instance);
@@ -55,6 +49,7 @@ export function buildContext(
 
         const additionalContext = await plugin.context?.call(plugin, {
           dataSources,
+          settings,
         });
 
         const pluginContext = {

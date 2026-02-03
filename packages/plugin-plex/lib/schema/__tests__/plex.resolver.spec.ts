@@ -27,7 +27,7 @@ it('returns the validation status when calling "plexIsValid" query', async ({
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new PlexAPI({ cache: httpCache, token: "test-token" }),
+          api: new PlexAPI({ cache: httpCache }),
         },
       },
     },

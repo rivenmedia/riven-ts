@@ -14,7 +14,6 @@ it("returns false if the request fails", async ({ server, httpCache }) => {
 
   const torrentioApi = new TorrentioAPI({
     cache: httpCache,
-    token: "test-token",
   });
   const isValid = await torrentioApi.validate();
 
@@ -28,7 +27,6 @@ it("returns true if the request succeeds", async ({ server, httpCache }) => {
 
   const torrentioApi = new TorrentioAPI({
     cache: httpCache,
-    token: "test-token",
   });
   const isValid = await torrentioApi.validate();
 

@@ -73,7 +73,6 @@ it("returns movies when calling listrrMovies query", async ({
         [pluginConfig.name]: {
           api: new ListrrAPI({
             cache: httpCache,
-            token: "test-token",
             logger,
             pluginSymbol: pluginConfig.name,
             redisUrl: "redis-url",
@@ -143,7 +142,6 @@ it("returns shows when calling listrrShows query", async ({
         [pluginConfig.name]: {
           api: new ListrrAPI({
             cache: httpCache,
-            token: "test-token",
             logger,
             pluginSymbol: pluginConfig.name,
             redisUrl: "redis-url",
@@ -179,7 +177,6 @@ it('returns the user validation status when calling "listrrIsValid" query', asyn
         [pluginConfig.name]: {
           api: new ListrrAPI({
             cache: httpCache,
-            token: "test-token",
             logger,
             pluginSymbol: pluginConfig.name,
             redisUrl: "redis-url",

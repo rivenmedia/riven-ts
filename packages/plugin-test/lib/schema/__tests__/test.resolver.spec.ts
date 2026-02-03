@@ -30,7 +30,6 @@ it('returns the validation status when calling "testIsValid" query', async ({
         [pluginConfig.name]: {
           api: new TestAPI({
             cache: httpCache,
-            token: "test-token",
             pluginSymbol: Symbol("@repo/plugin-test"),
             logger,
             redisUrl: "redis-url",

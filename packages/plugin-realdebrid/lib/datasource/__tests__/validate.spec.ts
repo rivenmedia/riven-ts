@@ -14,7 +14,6 @@ it("returns false if the request fails", async ({ server, httpCache }) => {
 
   const realdebridApi = new RealDebridAPI({
     cache: httpCache,
-    token: "test-token",
   });
   const isValid = await realdebridApi.validate();
 
@@ -28,7 +27,6 @@ it("returns true if the request succeeds", async ({ server, httpCache }) => {
 
   const realdebridApi = new RealDebridAPI({
     cache: httpCache,
-    token: "test-token",
   });
   const isValid = await realdebridApi.validate();
 

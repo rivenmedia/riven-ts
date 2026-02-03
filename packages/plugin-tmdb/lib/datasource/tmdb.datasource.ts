@@ -36,10 +36,6 @@ export class TmdbAPI extends BaseDataSource {
     requestOpts.headers["Authorization"] = `Bearer ${this.token}`;
   }
 
-  static override getApiToken() {
-    return "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJlZTMxMDdlNTI4NTYzYzE4Yjk0OWE1NGM3YjQwNGQwYSIsIm5iZiI6MTc2MDgwMDA1MS42MzY5OTk4LCJzdWIiOiI2OGYzYWQzMzJiOWY4NTQyZDc3OGRmZTMiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.5Q2n87kYQbiLI08arhWxr_DJRob6hv1EIncDmJKykBk";
-  }
-
   override validate(): Promisable<boolean> {
     return true;
   }

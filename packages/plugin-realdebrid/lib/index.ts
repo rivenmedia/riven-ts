@@ -1,5 +1,6 @@
 import packageJson from "../package.json" with { type: "json" };
 import { RealDebridAPI } from "./datasource/realdebrid.datasource.ts";
+import { realDebridSettingsSchema } from "./real-debrid-settings.schema.ts";
 import { pluginConfig } from "./realdebrid-plugin.config.ts";
 import { RealDebridSettingsResolver } from "./schema/realdebrid-settings.resolver.ts";
 import { RealDebridResolver } from "./schema/realdebrid.resolver.ts";
@@ -50,6 +51,7 @@ export default {
       }
     },
   },
+  settingsSchema: realDebridSettingsSchema,
   validator() {
     return true;
   },

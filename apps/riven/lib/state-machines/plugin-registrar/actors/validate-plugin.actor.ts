@@ -1,5 +1,3 @@
-import { logger } from "@repo/core-util-logger";
-
 import { setTimeout } from "node:timers/promises";
 import { fromCallback } from "xstate";
 
@@ -37,26 +35,6 @@ export const validatePlugin = fromCallback<
     });
   }
 
-  function parseSettings() {
-    const { settingsSchema } = plugin.config;
-
-    if (!settingsSchema) {
-      return;
-    }
-
-    try {
-      settings.set(settingsSchema, settingsSchema.parse(process.env));
-    } catch (error) {
-      logger.error(
-        `Failed to parse settings for plugin "${String(
-          plugin.config.name,
-        )}": ${(error as Error).message}`,
-      );
-
-      sendInvalidPluginEvent(error);
-    }
-  }
-
   async function validate() {
     const maxAttempts = 3;
 
@@ -82,9 +60,6 @@ export const validatePlugin = fromCallback<
       }
     }
   }
-
-  // Parse the settings from environment variables and store them in the Settings instance
-  parseSettings();
 
   // Run the plugin validator
   void validate();

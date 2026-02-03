@@ -25,7 +25,7 @@ it('returns the validation status when calling "{{camelCase pluginName}}IsValid"
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new {{pascalCase pluginName}}API({ cache: httpCache, token: "test-token" }),
+          api: new {{pascalCase pluginName}}API({ cache: httpCache }),
         }
       },
     },

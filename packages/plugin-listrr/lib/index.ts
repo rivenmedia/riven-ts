@@ -1,6 +1,7 @@
 import packageJson from "../package.json" with { type: "json" };
 import { ListrrAPI } from "./datasource/listrr.datasource.ts";
 import { pluginConfig } from "./listrr-plugin.config.ts";
+import { listrrSettingsSchema } from "./listrr-settings.schema.ts";
 import { ListrrSettingsResolver } from "./schema/listrr-settings.resolver.ts";
 import { ListrrResolver } from "./schema/listrr.resolver.ts";
 
@@ -21,5 +22,6 @@ export default {
       };
     },
   },
+  settingsSchema: listrrSettingsSchema,
   validator: () => true,
 } satisfies RivenPlugin;

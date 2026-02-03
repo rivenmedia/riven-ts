@@ -3,8 +3,9 @@
   "ui": "tui",
   "globalEnv": ["NODE_ENV"],
   "globalPassThroughEnv": [
-    "DATABASE_URL",
+    "RIVEN_PLUGIN_SETTING_*",
     "*_API_KEY",
+    "DATABASE_URL",
     "LOG_LEVEL",
     "LOG_DIRECTORY",
     "REDIS_URL",
