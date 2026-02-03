@@ -3,16 +3,11 @@
   "ui": "tui",
   "globalEnv": ["NODE_ENV"],
   "globalPassThroughEnv": [
-    "RIVEN_PLUGIN_SETTING_*",
-    "*_API_KEY",
     "DATABASE_URL",
     "LOG_LEVEL",
     "LOG_DIRECTORY",
     "REDIS_URL",
-    "JAEGER_URL",
-    "PLEX_SERVER_URL",
-    "PLEX_TOKEN",
-    "PLEX_LIBRARY_PATH"
+    "JAEGER_URL"
   ],
   "tasks": {
     "transit": {
