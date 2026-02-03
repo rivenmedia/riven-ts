@@ -10,7 +10,8 @@
     "codegen.ts",
     "vitest.d.ts",
     "vitest.config.ts",
-    "vitest.setup.ts"
+    "vitest.setup.ts",
+    "zod2md.config.ts"
   ],
   "include": [],
   "exclude": []

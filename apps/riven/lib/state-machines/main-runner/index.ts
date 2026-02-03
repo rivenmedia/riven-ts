@@ -1,4 +1,3 @@
-import { logger } from "@repo/core-util-logger";
 import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 import { Worker } from "bullmq";
@@ -10,6 +9,7 @@ import { requestContentServicesProcessor } from "../../message-queue/flows/reque
 import { scrapeItemProcessor } from "../../message-queue/flows/scrape-item/scrape-item.processor.ts";
 import { sortScrapeResultsProcessor } from "../../message-queue/flows/scrape-item/steps/sort-scrape-results.processor.ts";
 import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
+import { logger } from "../../utilities/logger/logger.ts";
 import { SerialisedMediaItem } from "../../utilities/serialisers/serialised-media-item.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { requestContentServicesActor } from "./actors/request-content-services.actor.ts";

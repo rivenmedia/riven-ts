@@ -27,7 +27,7 @@ vi.mock<typeof import("@apollo/server/standalone")>(
 );
 
 vi.mock<typeof import("@repo/plugin-test")>(import("@repo/plugin-test"), () => {
-  class TestAPI extends BaseDataSource {
+  class TestAPI extends BaseDataSource<Record<string, unknown>> {
     override baseURL = "https://api.test.com";
 
     override validate(): Promise<boolean> {
@@ -62,11 +62,11 @@ vi.mock<typeof import("@repo/plugin-test")>(import("@repo/plugin-test"), () => {
   };
 });
 
-vi.mock<typeof import("@repo/core-util-database/database")>(
-  import("@repo/core-util-database/database"),
+vi.mock<typeof import("./lib/database/database.ts")>(
+  import("./lib/database/database.ts"),
   async (importOriginal) => {
     const { initORM } = await importOriginal();
-    const { databaseConfig } = await import("@repo/core-util-database/config");
+    const { databaseConfig } = await import("./lib/database/config.ts");
     const { SqliteDriver } = await import("@mikro-orm/sqlite");
 
     const database = await initORM({
@@ -106,7 +106,7 @@ expect.extend({
 });
 
 beforeEach(async () => {
-  const { database } = await import("@repo/core-util-database/database");
+  const { database } = await import("./lib/database/database.ts");
 
   await database.orm.schema.refreshDatabase();
 });

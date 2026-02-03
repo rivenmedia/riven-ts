@@ -1,8 +1,7 @@
-import { logger } from "@repo/core-util-logger";
-
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 import { Buffer } from "node:buffer";
 
+import { logger } from "../../utilities/logger/logger.ts";
 import { config } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { calculateChunkRange } from "../utilities/chunks/calculate-chunk-range.ts";

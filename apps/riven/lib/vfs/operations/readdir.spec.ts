@@ -1,4 +1,3 @@
-import { database } from "@repo/core-util-database/database";
 import {
   Episode,
   MediaEntry,
@@ -10,6 +9,7 @@ import {
 import { ref } from "@mikro-orm/core";
 import { expect, it, vi } from "vitest";
 
+import { database } from "../../database/database.ts";
 import { readDirSync } from "./readdir.ts";
 
 it("returns persistent directory entries for the root path", async () => {

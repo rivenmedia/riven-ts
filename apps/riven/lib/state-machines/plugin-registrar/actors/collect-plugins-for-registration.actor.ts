@@ -1,6 +1,5 @@
 import "reflect-metadata";
 
-import { logger } from "@repo/core-util-logger";
 import {
   type RivenPlugin,
   type RivenPluginPackage,
@@ -13,6 +12,7 @@ import { fromPromise } from "xstate";
 import z from "zod";
 
 import packageJson from "../../../../package.json" with { type: "json" };
+import { logger } from "../../../utilities/logger/logger.ts";
 
 import type { $ZodErrorTree } from "zod/v4/core";
 

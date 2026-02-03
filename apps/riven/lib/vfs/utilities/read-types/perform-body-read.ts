@@ -1,9 +1,9 @@
-import { logger } from "@repo/core-util-logger";
 import { benchmark } from "@repo/util-plugin-sdk/helpers/benchmark";
 
 import Fuse from "@zkochan/fuse-native";
 import { Buffer } from "node:buffer";
 
+import { logger } from "../../../utilities/logger/logger.ts";
 import { FuseError } from "../../errors/fuse-error.ts";
 import { chunkCache } from "../chunk-cache.ts";
 import { waitForChunk } from "../chunks/wait-for-chunk.ts";

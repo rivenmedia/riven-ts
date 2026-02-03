@@ -38,14 +38,16 @@ export const isBasePluginContext = (
 /**
  * Represents a constructor for a class that extends BaseDataSource.
  */
-export interface DataSourceConstructor {
+export interface DataSourceConstructor<T extends Record<string, unknown>> {
   rateLimiterOptions?: RateLimiterOptions | undefined;
 
   /** Constructor signature */
-  new (options: BaseDataSourceConfig): BaseDataSource;
+  new (options: BaseDataSourceConfig<T>): BaseDataSource<T>;
 }
 
-const dataSourceSchema = z.custom<Constructor<BaseDataSource>>((value) => {
+const dataSourceSchema = z.custom<
+  Constructor<BaseDataSource<Record<string, unknown>>>
+>((value) => {
   if (typeof value !== "function") {
     return false;
   }

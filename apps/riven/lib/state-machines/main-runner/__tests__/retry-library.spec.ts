@@ -1,8 +1,8 @@
-import { database } from "@repo/core-util-database/database";
 import { RequestedItem } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { expect, vi } from "vitest";
 
+import { database } from "../../../database/database.ts";
 import { it } from "./helpers/test-context.ts";
 
 it('sends a "riven.media-item.index.requested" event for each pending RequestedItem in the database with state "Requested"', async ({

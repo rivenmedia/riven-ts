@@ -1,9 +1,10 @@
-import { database } from "@repo/core-util-database/database";
-import { logger } from "@repo/core-util-logger";
 import { RequestedItem } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
+
+import { database } from "../../../database/database.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
 
 import type { MainRunnerMachineIntake } from "../index.ts";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";

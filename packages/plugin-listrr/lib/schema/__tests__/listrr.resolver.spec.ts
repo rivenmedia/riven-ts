@@ -1,4 +1,3 @@
-import { logger } from "@repo/core-util-logger";
 import { it } from "@repo/core-util-vitest-test-context";
 
 import { HttpResponse } from "msw";

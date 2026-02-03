@@ -1,4 +1,3 @@
-import { logger } from "@repo/core-util-logger";
 import {
   Episode,
   FileSystemEntry,
@@ -14,7 +13,9 @@ import {
 
 import { type Options, PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
-import { z } from "zod";
+
+import { logger } from "../utilities/logger/logger.ts";
+import { settings } from "../utilities/settings.ts";
 
 export const entities = [
   SubtitleEntry,
@@ -34,7 +35,7 @@ export const databaseConfig = {
   metadataProvider: TsMorphMetadataProvider,
   entities,
   forceUtcTimezone: true,
-  clientUrl: z.string().parse(process.env["DATABASE_URL"]),
+  clientUrl: settings.databaseUrl,
   logger: (message) => {
     logger.verbose(message);
   },

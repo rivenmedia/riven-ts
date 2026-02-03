@@ -1,7 +1,6 @@
-import { logger } from "@repo/core-util-logger";
-
 import Fuse from "@zkochan/fuse-native";
 
+import { logger } from "../../utilities/logger/logger.ts";
 import { isFuseError } from "../errors/fuse-error.ts";
 import {
   fdToCurrentStreamPositionMap,

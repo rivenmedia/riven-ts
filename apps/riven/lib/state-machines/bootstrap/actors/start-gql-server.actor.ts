@@ -1,15 +1,15 @@
-import { buildContext } from "@repo/core-util-graphql-context";
 import { buildSchema } from "@repo/core-util-graphql-schema";
-import { logger } from "@repo/core-util-logger";
 
 import { ApolloServer, type BaseContext } from "@apollo/server";
 import responseCachePlugin from "@apollo/server-plugin-response-cache";
 import { ApolloServerPluginCacheControl } from "@apollo/server/plugin/cacheControl";
 import { startStandaloneServer } from "@apollo/server/standalone";
 import { fromPromise } from "xstate";
-import z from "zod";
 
+import { buildContext } from "../../../graphql/build-context.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
 import { redisCache } from "../../../utilities/redis-cache.ts";
+import { settings } from "../../../utilities/settings.ts";
 
 import type { ValidPluginMap } from "../../../types/plugins.ts";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
@@ -28,8 +28,6 @@ export const startGqlServer = fromPromise<
   StartGQLServerOutput,
   StartGQLServerInput
 >(async ({ input: { validPlugins, pluginSettings } }) => {
-  const PORT = z.coerce.number().int().default(3000).parse(process.env["PORT"]);
-
   const pluginResolvers = [...validPlugins.values()].flatMap(
     (p) => p.config.resolvers,
   );
@@ -54,7 +52,7 @@ export const startGqlServer = fromPromise<
 
   const { url } = await startStandaloneServer(server, {
     listen: {
-      port: PORT,
+      port: settings.gqlPort,
     },
     context: buildContext(
       server,

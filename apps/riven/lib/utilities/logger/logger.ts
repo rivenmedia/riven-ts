@@ -1,10 +1,9 @@
 import path from "path";
 import { createLogger, format, transports } from "winston";
 
-const logDir = path.resolve(
-  process.cwd(),
-  process.env["LOG_DIRECTORY"] ?? "logs",
-);
+import { settings } from "../settings.ts";
+
+const logDir = path.resolve(process.cwd(), settings.logDirectory);
 
 const isProductionEnvironment = process.env["NODE_ENV"] === "production";
 const isTestEnvironment = process.env["NODE_ENV"] === "test";
@@ -17,17 +16,8 @@ const logFormat = format.printf(function (info) {
   )}`;
 });
 
-export type LogLevel =
-  | "error"
-  | "warn"
-  | "info"
-  | "http"
-  | "verbose"
-  | "debug"
-  | "silly";
-
 export const logger = createLogger({
-  level: process.env["LOG_LEVEL"] ?? "info",
+  level: settings.logLevel,
   format: format.combine(
     format.timestamp({
       format: "YYYY-MM-DD HH:mm:ss",

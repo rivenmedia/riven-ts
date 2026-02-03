@@ -1,7 +1,7 @@
-import { logger } from "@repo/core-util-logger";
-
 import Fuse from "@zkochan/fuse-native";
 import { fromPromise } from "xstate";
+
+import { logger } from "../../../utilities/logger/logger.ts";
 
 export const unmountVfs = fromPromise<undefined, Fuse | undefined>(
   async ({ input: vfs }) => {

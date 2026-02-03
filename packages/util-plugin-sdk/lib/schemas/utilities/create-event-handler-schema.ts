@@ -1,3 +1,4 @@
+import { Logger } from "winston";
 import z, {
   type ZodLiteral,
   type ZodObject,
@@ -23,6 +24,7 @@ export const createEventHandlerSchema = <
         event: inputSchema.omit({ type: true }),
         dataSources: z.instanceof(DataSourceMap),
         settings: z.instanceof(PluginSettings),
+        logger: z.instanceof(Logger),
       }),
     ],
     output: z.promise(outputSchema),

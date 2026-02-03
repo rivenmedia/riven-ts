@@ -1,9 +1,10 @@
-import { database } from "@repo/core-util-database/database";
 import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { ref } from "@mikro-orm/core";
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
+
+import { database } from "../../../database/database.ts";
 
 import type { MainRunnerMachineIntake } from "../index.ts";
 import type { TorrentContainer } from "@repo/util-plugin-sdk/schemas/torrents/torrent-container";

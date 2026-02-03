@@ -1,6 +1,7 @@
 import { type AnyActorRef, assign, setup } from "xstate";
 import z from "zod";
 
+import { settings } from "../../utilities/settings.ts";
 import {
   type PluginRegistrarMachineOutput,
   pluginRegistrarMachine,
@@ -353,9 +354,7 @@ export const bootstrapMachine = setup({
               id: "initialiseVfs",
               src: "initialiseVfs",
               input: ({ context: { pluginQueues } }) => ({
-                mountPath: z
-                  .string()
-                  .parse(process.env["RIVEN_VFS_MOUNT_PATH"]),
+                mountPath: settings.vfsMountPath,
                 pluginQueues,
               }),
               onDone: {

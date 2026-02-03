@@ -1,11 +1,12 @@
-import { logger } from "@repo/core-util-logger";
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import { type AnyActorRef, type MachineContext, assign, setup } from "xstate";
 import z, { ZodError } from "zod";
 
+import { logger } from "../../utilities/logger/logger.ts";
 import { redisCache } from "../../utilities/redis-cache.ts";
+import { settings } from "../../utilities/settings.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import {
   type ParsedPlugins,
@@ -115,7 +116,7 @@ export const pluginRegistrarMachine = setup({
                   pluginSymbol: plugin.name,
                   cache: redisCache,
                   logger,
-                  redisUrl: z.url().parse(process.env["REDIS_URL"]),
+                  redisUrl: settings.redisUrl,
                   settings: pluginSettings.get(plugin.settingsSchema),
                 });
 

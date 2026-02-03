@@ -1,7 +1,7 @@
-import { database } from "@repo/core-util-database/database";
-import { logger } from "@repo/core-util-logger";
-
 import { type ActorRef, type Snapshot, fromPromise } from "xstate";
+
+import { database } from "../../../database/database.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
 
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 

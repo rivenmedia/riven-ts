@@ -1,10 +1,9 @@
-import { logger } from "@repo/core-util-logger";
-
 import { type Queue, Worker } from "bullmq";
 import os from "node:os";
 import { fromPromise } from "xstate";
 
 import { createPluginWorker } from "../../../message-queue/utilities/create-plugin-worker.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
 import { eventSerialiserSchemaMap } from "../../../utilities/serialisers/event-serialiser-schemas.ts";
 
 import type {
@@ -72,6 +71,7 @@ export const registerPluginHookWorkers = fromPromise<
                 .decode(job.data) as never,
               dataSources,
               settings,
+              logger,
             }) as Promise<never>;
           },
           { concurrency: os.availableParallelism() },

@@ -1,4 +1,4 @@
-import { type LogLevel, logger } from "@repo/core-util-logger";
+import { type LogLevel, logger } from "../../utilities/logger/logger.ts";
 
 export const withLogAction = {
   actions: {

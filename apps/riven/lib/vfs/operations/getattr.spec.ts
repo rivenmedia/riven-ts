@@ -1,10 +1,10 @@
-import { database } from "@repo/core-util-database/database";
 import { MediaEntry, Movie } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { ref } from "@mikro-orm/core";
 import Fuse from "@zkochan/fuse-native";
 import { expect, it, vi } from "vitest";
 
+import { database } from "../../database/database.ts";
 import { getattrSync, parseMode } from "./getattr.ts";
 
 it.for(["/", "/movies", "/shows"])(
