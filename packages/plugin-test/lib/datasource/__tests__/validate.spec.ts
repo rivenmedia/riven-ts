@@ -15,7 +15,8 @@ it("returns false if the request fails", async ({ server, httpCache }) => {
   const testApi = new TestAPI({
     cache: httpCache,
     redisUrl: "redis-url",
-    logger,
+    logger: {} as never,
+    settings: {},
     pluginSymbol: Symbol("@repo/plugin-test"),
   });
   const isValid = await testApi.validate();
@@ -31,7 +32,8 @@ it("returns true if the request succeeds", async ({ server, httpCache }) => {
   const testApi = new TestAPI({
     cache: httpCache,
     redisUrl: "redis-url",
-    logger,
+    logger: {} as never,
+    settings: {},
     pluginSymbol: Symbol("@repo/plugin-test"),
   });
   const isValid = await testApi.validate();

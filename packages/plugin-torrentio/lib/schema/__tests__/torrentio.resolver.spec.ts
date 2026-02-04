@@ -27,7 +27,15 @@ it('returns the validation status when calling "torrentioIsValid" query', async 
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new TorrentioAPI({ cache: httpCache }),
+          api: new TorrentioAPI({
+            cache: httpCache,
+            logger: {} as never,
+            pluginSymbol: Symbol("@repo/plugin-torrentio"),
+            redisUrl: "redis-url",
+            settings: {
+              filter: "",
+            },
+          }),
         },
       },
     },

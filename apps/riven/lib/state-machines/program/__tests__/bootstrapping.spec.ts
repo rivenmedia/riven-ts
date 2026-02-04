@@ -13,7 +13,7 @@ function sendBootstrapDoneEvent(
   actor.send({
     type: "xstate.done.actor.bootstrapMachine",
     output,
-  });
+  } as never);
 }
 
 it("assigns the Apollo Server instance to context when bootstrapping is complete", ({

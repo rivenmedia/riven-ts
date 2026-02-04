@@ -1,11 +1,8 @@
 import { RequestedItem } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { expect, it, vi } from "vitest";
-import { type ActorRefFrom, createActor, createEmptyActor } from "xstate";
 
 import { processRequestedItem } from "./process-requested-item.actor.ts";
-
-import type { mainRunnerMachine } from "../index.ts";
 
 it("sends a success event if the item is processed successfully", async () => {
   const requestedId = "tt1234567";
@@ -15,6 +12,7 @@ it("sends a success event if the item is processed successfully", async () => {
     item: {
       imdbId: requestedId,
     },
+    type: "movie",
     sendEvent: sendEventSpy,
   });
 
@@ -38,6 +36,7 @@ it("sends an error event if the item processing fails", async () => {
     item: {
       imdbId: requestedId,
     },
+    type: "movie",
     sendEvent: sendEventSpy,
   });
 
@@ -47,7 +46,7 @@ it("sends an error event if the item processing fails", async () => {
       item: expect.objectContaining<Partial<RequestedItem>>({
         imdbId: requestedId,
       }) as never,
-      error: expect.stringContaining("imdbId must match"),
+      error: expect.stringContaining("imdbId must match") as never,
     });
   });
 });

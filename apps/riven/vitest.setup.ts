@@ -58,7 +58,7 @@ vi.mock<typeof import("@repo/plugin-test")>(import("@repo/plugin-test"), () => {
       validator() {
         return true;
       },
-    } satisfies RivenPlugin,
+    } satisfies RivenPlugin as RivenPlugin,
   };
 });
 

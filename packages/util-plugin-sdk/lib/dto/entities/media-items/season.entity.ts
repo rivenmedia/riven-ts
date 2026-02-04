@@ -28,6 +28,4 @@ export class Season extends MediaItem {
   @Field(() => [Episode])
   @OneToMany(() => Episode, (episode) => episode.season)
   episodes = new Collection<Episode>(this);
-
-  override type = "season" as const;
 }

@@ -1,7 +1,10 @@
 import type { BaseDataSource } from "../datasource/index.ts";
 import type { DataSourceConstructor } from "../schemas/index.ts";
 
-export class DataSourceMap extends Map<DataSourceConstructor, BaseDataSource> {
+export class DataSourceMap extends Map<
+  DataSourceConstructor,
+  BaseDataSource<Record<string, unknown>>
+> {
   override get<T extends DataSourceConstructor>(constructor: T) {
     const value = super.get(constructor);
 

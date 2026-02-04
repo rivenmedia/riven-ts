@@ -15,8 +15,11 @@ it("returns false if the request fails", async ({ server, httpCache }) => {
   const tmdbApi = new TmdbAPI({
     cache: httpCache,
     redisUrl: "redis-url",
-    logger,
+    logger: {} as never,
     pluginSymbol: Symbol("@repo/plugin-tmdb"),
+    settings: {
+      apiKey: "",
+    },
   });
   const isValid = await tmdbApi.validate();
 
@@ -31,8 +34,11 @@ it("returns true if the request succeeds", async ({ server, httpCache }) => {
   const tmdbApi = new TmdbAPI({
     cache: httpCache,
     redisUrl: "redis-url",
-    logger,
+    logger: {} as never,
     pluginSymbol: Symbol("@repo/plugin-tmdb"),
+    settings: {
+      apiKey: "",
+    },
   });
   const isValid = await tmdbApi.validate();
 

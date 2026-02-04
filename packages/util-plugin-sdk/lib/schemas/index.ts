@@ -38,7 +38,10 @@ export const isBasePluginContext = (
 /**
  * Represents a constructor for a class that extends BaseDataSource.
  */
-export interface DataSourceConstructor<T extends Record<string, unknown>> {
+export interface DataSourceConstructor<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends Record<string, any> = any,
+> {
   rateLimiterOptions?: RateLimiterOptions | undefined;
 
   /** Constructor signature */
@@ -46,7 +49,8 @@ export interface DataSourceConstructor<T extends Record<string, unknown>> {
 }
 
 const dataSourceSchema = z.custom<
-  Constructor<BaseDataSource<Record<string, unknown>>>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Constructor<BaseDataSource<Record<string, any>>>
 >((value) => {
   if (typeof value !== "function") {
     return false;

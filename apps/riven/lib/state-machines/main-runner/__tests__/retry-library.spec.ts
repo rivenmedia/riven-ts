@@ -1,5 +1,3 @@
-import { RequestedItem } from "@repo/util-plugin-sdk/dto/entities/index";
-
 import { expect, vi } from "vitest";
 
 import { database } from "../../../database/database.ts";
@@ -9,18 +7,27 @@ it('sends a "riven.media-item.index.requested" event for each pending RequestedI
   actor,
 }) => {
   const items = [
-    RequestedItem.create({
-      imdbId: "tt1234567",
-      state: "Requested",
-    }),
-    RequestedItem.create({
-      imdbId: "tt2345678",
-      state: "Requested",
-    }),
-    RequestedItem.create({
-      imdbId: "tt3456789",
-      state: "Requested",
-    }),
+    database.requestedItem.create(
+      {
+        imdbId: "tt1234567",
+        state: "Requested",
+      },
+      { partial: true },
+    ),
+    database.requestedItem.create(
+      {
+        imdbId: "tt2345678",
+        state: "Requested",
+      },
+      { partial: true },
+    ),
+    database.requestedItem.create(
+      {
+        imdbId: "tt3456789",
+        state: "Requested",
+      },
+      { partial: true },
+    ),
   ];
 
   await database.mediaItem.insertMany(items);

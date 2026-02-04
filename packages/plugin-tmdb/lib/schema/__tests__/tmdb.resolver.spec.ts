@@ -27,7 +27,15 @@ it('returns the validation status when calling "tmdbIsValid" query', async ({
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new TmdbAPI({ cache: httpCache }),
+          api: new TmdbAPI({
+            cache: httpCache,
+            logger: {} as never,
+            pluginSymbol: Symbol("@repo/plugin-tmdb"),
+            redisUrl: "redis-url",
+            settings: {
+              apiKey: "",
+            },
+          }),
         },
       },
     },

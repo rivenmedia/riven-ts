@@ -27,7 +27,17 @@ it('returns the validation status when calling "plexIsValid" query', async ({
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new PlexAPI({ cache: httpCache }),
+          api: new PlexAPI({
+            cache: httpCache,
+            logger: {} as never,
+            pluginSymbol: Symbol("@repo/plugin-plex"),
+            redisUrl: "redis-url",
+            settings: {
+              plexLibraryPath: "",
+              plexServerUrl: "",
+              plexToken: "",
+            },
+          }),
         },
       },
     },
