@@ -1,42 +1,36 @@
 {
-  "name": "@repo/core-util-graphql-schema",
+  "name": "@repo/plugin-tvdb",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./lib/index.ts",
-    "./context": "./lib/context.ts",
-    "./cache-control-directive": "./lib/cache-control.directive.ts"
+    ".": "./lib/index.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
+    "generate-config-docs": "zod2md",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@repo/feature-settings": "workspace:^",
-    "@repo/plugin-listrr": "workspace:^",
-    "@repo/plugin-plex": "workspace:^",
-    "@repo/plugin-realdebrid": "workspace:^",
-    "@repo/plugin-tmdb": "workspace:^",
-    "@repo/plugin-torrentio": "workspace:^",
-    "@repo/plugin-tvdb": "workspace:^",
-    "graphql": "catalog:",
-    "type-graphql": "catalog:"
+    "@apollo/datasource-rest": "catalog:",
+    "@repo/util-plugin-sdk": "workspace:^",
+    "type-graphql": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@apollo/cache-control-types": "^1.0.3",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
-    "@repo/plugin-test": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
+    "msw": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "zod2md": "catalog:"
   }
 }

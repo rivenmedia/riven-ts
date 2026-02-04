@@ -36,6 +36,7 @@
     "@repo/plugin-realdebrid": "workspace:^",
     "@repo/plugin-tmdb": "workspace:^",
     "@repo/plugin-torrentio": "workspace:^",
+    "@repo/plugin-tvdb": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "@zkochan/fuse-native": "^0.1.0",
     "bullmq": "catalog:",

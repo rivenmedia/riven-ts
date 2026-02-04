@@ -228,6 +228,9 @@ importers:
       '@repo/plugin-torrentio':
         specifier: workspace:^
         version: link:../../packages/plugin-torrentio
+      '@repo/plugin-tvdb':
+        specifier: workspace:^
+        version: link:../../packages/plugin-tvdb
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../../packages/util-plugin-sdk
@@ -462,6 +465,9 @@ importers:
       '@repo/plugin-torrentio':
         specifier: workspace:^
         version: link:../../plugin-torrentio
+      '@repo/plugin-tvdb':
+        specifier: workspace:^
+        version: link:../../plugin-tvdb
       graphql:
         specifier: 'catalog:'
         version: 16.12.0
@@ -1010,6 +1016,52 @@ importers:
         version: 0.2.5(zod@4.1.13)
 
   packages/plugin-torrentio:
+    dependencies:
+      '@apollo/datasource-rest':
+        specifier: 'catalog:'
+        version: 6.4.1(encoding@0.1.13)(graphql@16.12.0)
+      '@repo/util-plugin-sdk':
+        specifier: workspace:^
+        version: link:../util-plugin-sdk
+      type-graphql:
+        specifier: 'catalog:'
+        version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
+      zod:
+        specifier: 'catalog:'
+        version: 4.1.13
+    devDependencies:
+      '@repo/core-util-eslint-config':
+        specifier: workspace:^
+        version: link:../core/util-eslint-config
+      '@repo/core-util-typescript-config':
+        specifier: workspace:^
+        version: link:../core/util-typescript-config
+      '@repo/core-util-vitest-config':
+        specifier: workspace:^
+        version: link:../core/util-vitest-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.0.0
+      '@typescript-eslint/parser':
+        specifier: 'catalog:'
+        version: 8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      msw:
+        specifier: 'catalog:'
+        version: 2.12.4(@types/node@24.0.0)(typescript@5.9.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
+      zod2md:
+        specifier: 'catalog:'
+        version: 0.2.5(zod@4.1.13)
+
+  packages/plugin-tvdb:
     dependencies:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
@@ -9890,7 +9942,7 @@ snapshots:
 
   '@types/minimatch@6.0.0':
     dependencies:
-      minimatch: 9.0.5
+      minimatch: 10.1.1
 
   '@types/node@24.0.0':
     dependencies:
