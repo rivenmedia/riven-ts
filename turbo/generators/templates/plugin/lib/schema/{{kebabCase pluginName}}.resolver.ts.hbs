@@ -1,10 +1,9 @@
-import type {
-  {{pascalCase pluginName}}API,
-  {{pascalCase pluginName}}ContextSlice,
-} from "../datasource/{{kebabCase pluginName}}.datasource.ts";
-import { pluginConfig } from "../{{kebabCase pluginName}}-plugin.config.ts";
-import { Query, Resolver } from "type-graphql";
 import { PluginDataSource } from "@repo/util-plugin-sdk";
+
+import { Query, Resolver } from "type-graphql";
+
+import { {{pascalCase pluginName}}API } from "../datasource/{{kebabCase pluginName}}.datasource.ts";
+import { pluginConfig } from "../{{kebabCase pluginName}}-plugin.config.ts";
 
 @Resolver()
 export class {{pascalCase pluginName}}Resolver {
