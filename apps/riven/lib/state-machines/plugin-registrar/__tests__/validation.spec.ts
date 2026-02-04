@@ -29,18 +29,13 @@ it("retries validation up to 3 times on failure", async ({ actor }) => {
     .spyOn(testPlugin.default, "validator")
     .mockResolvedValue(false);
 
-  // Use vi.waitFor without fake timers to allow real timeouts to execute
-  // This approach works better with node:timers/promises
-  await vi.waitFor(
-    () => {
-      expect(validatePluginSpy).toHaveBeenCalledTimes(3);
-    },
-    { timeout: 10000 },
-  );
+  await vi.waitFor(() => {
+    expect(validatePluginSpy).toHaveBeenCalledTimes(3);
+  });
 
   expect(actor.getSnapshot().value).toBe("Validated");
   expect(actor.getSnapshot().context.invalidPlugins.size).toBe(1);
-}, 10000);
+});
 
 it("returns the validated plugins", async ({ actor }) => {
   const result = await toPromise(actor);

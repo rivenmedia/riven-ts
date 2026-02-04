@@ -8,7 +8,7 @@ import { settings } from "./utilities/settings.ts";
 
 if (!settings.jaegerUrl) {
   logger.info(
-    "Jaeger URL not configured. Skipping OpenTelemetry initialization.",
+    "Jaeger URL not configured. Skipping OpenTelemetry initialisation.",
   );
 } else {
   const sdk = new NodeSDK({
