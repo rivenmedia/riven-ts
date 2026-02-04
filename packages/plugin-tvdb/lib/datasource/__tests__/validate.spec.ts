@@ -3,6 +3,7 @@ import { it } from "@repo/core-util-vitest-test-context";
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
+import { pluginConfig } from "../../tvdb-plugin.config.ts";
 import { TvdbAPI } from "../tvdb.datasource.ts";
 
 it("returns false if the request fails", async ({ server, httpCache }) => {
@@ -12,7 +13,13 @@ it("returns false if the request fails", async ({ server, httpCache }) => {
     ),
   );
 
-  const tvdbApi = new TvdbAPI({ cache: httpCache });
+  const tvdbApi = new TvdbAPI({
+    cache: httpCache,
+    logger: {} as never,
+    pluginSymbol: pluginConfig.name,
+    redisUrl: "",
+    settings: {},
+  });
   const isValid = await tvdbApi.validate();
 
   expect(isValid).toBe(false);
@@ -23,7 +30,13 @@ it("returns true if the request succeeds", async ({ server, httpCache }) => {
     http.get("**/validate", () => HttpResponse.json({ success: true })),
   );
 
-  const tvdbApi = new TvdbAPI({ cache: httpCache });
+  const tvdbApi = new TvdbAPI({
+    cache: httpCache,
+    logger: {} as never,
+    pluginSymbol: pluginConfig.name,
+    redisUrl: "",
+    settings: {},
+  });
   const isValid = await tvdbApi.validate();
 
   expect(isValid).toBe(true);

@@ -3,7 +3,7 @@ import { TvdbAPI } from "./datasource/tvdb.datasource.ts";
 import { TvdbSettingsResolver } from "./schema/tvdb-settings.resolver.ts";
 import { TvdbResolver } from "./schema/tvdb.resolver.ts";
 import { pluginConfig } from "./tvdb-plugin.config.ts";
-import { tvdbSettingsSchema } from "./tvdb-settings.schema.ts";
+import { TvdbSettings } from "./tvdb-settings.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
@@ -16,7 +16,7 @@ export default {
     "riven.core.started": async () => {},
     // Add more hooks as needed
   },
-  settingsSchema: tvdbSettingsSchema,
+  settingsSchema: TvdbSettings,
   validator() {
     return true;
   },

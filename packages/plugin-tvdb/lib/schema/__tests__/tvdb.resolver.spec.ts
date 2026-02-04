@@ -27,7 +27,13 @@ it('returns the validation status when calling "tvdbIsValid" query', async ({
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new TvdbAPI({ cache: httpCache }),
+          api: new TvdbAPI({
+            cache: httpCache,
+            logger: {} as never,
+            pluginSymbol: pluginConfig.name,
+            redisUrl: "",
+            settings: {},
+          }),
         },
       },
     },
