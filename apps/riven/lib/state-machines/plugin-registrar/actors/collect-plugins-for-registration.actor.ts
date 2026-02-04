@@ -30,6 +30,7 @@ export const collectPluginsForRegistration = fromPromise(() => {
   // Initialise PluginSettings BEFORE importing plugins, to ensure `process.env` has been parsed.
   // Otherwise, plugins will be able to read the whole environment, including other plugins' settings.
   const pluginSettings = new PluginSettings(
+    process.env,
     pluginNames.map(constantCase),
     logger,
   );

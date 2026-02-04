@@ -40,12 +40,6 @@ if (settings.loggingEnabled) {
         ),
       }),
     );
-
-    logger.add(
-      new transports.Console({
-        format: format.combine(format.colorize(), format.simple()),
-      }),
-    );
   }
 
   if (settings.enabledLogTransports.includes("file")) {

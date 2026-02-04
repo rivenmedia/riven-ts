@@ -52,6 +52,6 @@ it("returns any invalid plugins from the package.json file along with their vali
     unresolvablePlugins: [],
     validPlugins: [],
     pluginConfigPrefixMap: new Map(),
-    pluginSettings: new PluginSettings(["REPO_PLUGIN_TEST"], logger),
+    pluginSettings: new PluginSettings({}, ["REPO_PLUGIN_TEST"], logger),
   });
 });
