@@ -1,7 +1,6 @@
-import { logger } from "@repo/core-util-logger";
-
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 
+import { logger } from "../../utilities/logger/logger.ts";
 import { config } from "../config.ts";
 import { isFuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";

@@ -1,9 +1,10 @@
-import { database } from "@repo/core-util-database/database";
 import { FileSystemEntryType } from "@repo/util-plugin-sdk/dto/entities/index";
 import { FileSystemEntry } from "@repo/util-plugin-sdk/schemas/media/filesystem-entry";
 
 import { wrap } from "@mikro-orm/core";
 import z from "zod";
+
+import { database } from "../../database/database.ts";
 
 /**
  * A schema that converts to/from a serialised FileSystemEntry.

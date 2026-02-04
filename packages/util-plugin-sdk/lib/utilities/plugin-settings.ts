@@ -1,6 +1,15 @@
 import { type ZodObject, z } from "zod";
 
+import type { Jsonifiable, ReadonlyDeep } from "type-fest";
 import type { Logger } from "winston";
+
+function deepFreeze<T>(obj: T) {
+  Object.values(obj as Record<string, Jsonifiable>).forEach(
+    (value) => Object.isFrozen(value) || deepFreeze(value),
+  );
+
+  return Object.freeze(obj) as ReadonlyDeep<T>;
+}
 
 /**
  * A class to manage and retrieve plugin settings based on provided Zod schemas.
@@ -14,7 +23,7 @@ export class PluginSettings {
   /**
    * A map to hold parsed settings for each schema.
    */
-  #settingsMap = new Map<ZodObject, unknown>();
+  #settingsMap = new Map<ZodObject, Record<string, unknown>>();
 
   /**
    * A flag to indicate if the settings are locked. The settings are locked once all plugins have been registered.
@@ -31,7 +40,11 @@ export class PluginSettings {
   /**
    * Initialises the PluginSettings instance and builds a map of plugin-related environment variables
    */
-  constructor(pluginConfigPrefixes: string[], logger: Logger) {
+  constructor(
+    environment: NodeJS.ProcessEnv,
+    pluginConfigPrefixes: string[],
+    logger: Logger,
+  ) {
     this.#logger = logger;
 
     this.#environmentSettingGroups = new Map(
@@ -42,7 +55,7 @@ export class PluginSettings {
       `^RIVEN_PLUGIN_SETTING__(?<prefix>${pluginConfigPrefixes.join("|")})__(?<settingName>.+)$`,
     );
 
-    for (const [key, value] of Object.entries(process.env)) {
+    for (const [key, value] of Object.entries(environment)) {
       const match = settingPattern.exec(key);
 
       if (!match?.groups || !value) {
@@ -72,7 +85,7 @@ export class PluginSettings {
       settingGroup.set(settingName, value);
 
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-      delete process.env[key];
+      delete environment[key];
     }
   }
 
@@ -83,12 +96,19 @@ export class PluginSettings {
    */
   _lock() {
     if (this.#isLocked) {
-      this.#logger.warn("PluginSettings._lock() called multiple times.");
+      this.#logger.warn(
+        "PluginSettings._lock() called multiple times. This is a no-op.",
+      );
 
       return;
     }
 
     this.#isLocked = true;
+
+    for (const [key, value] of this.#settingsMap.entries()) {
+      // Freeze each settings object to prevent further modifications.
+      this.#settingsMap.set(key, deepFreeze(value));
+    }
 
     for (const [prefix, settings] of this.#environmentSettingGroups) {
       if (settings.size > 0) {

@@ -1,6 +1,3 @@
-import "reflect-metadata";
-
-import { logger } from "@repo/core-util-logger";
 import {
   type RivenPlugin,
   type RivenPluginPackage,
@@ -13,6 +10,7 @@ import { fromPromise } from "xstate";
 import z from "zod";
 
 import packageJson from "../../../../package.json" with { type: "json" };
+import { logger } from "../../../utilities/logger/logger.ts";
 
 import type { $ZodErrorTree } from "zod/v4/core";
 
@@ -32,6 +30,7 @@ export const collectPluginsForRegistration = fromPromise(() => {
   // Initialise PluginSettings BEFORE importing plugins, to ensure `process.env` has been parsed.
   // Otherwise, plugins will be able to read the whole environment, including other plugins' settings.
   const pluginSettings = new PluginSettings(
+    process.env,
     pluginNames.map(constantCase),
     logger,
   );
@@ -50,8 +49,7 @@ export const collectPluginsForRegistration = fromPromise(() => {
           return {
             ...parsedPlugins,
             invalidPlugins: parsedPlugins.invalidPlugins.concat([
-              pluginName,
-              z.treeifyError(validationResult.error),
+              [pluginName, z.treeifyError(validationResult.error)],
             ]),
           };
         }

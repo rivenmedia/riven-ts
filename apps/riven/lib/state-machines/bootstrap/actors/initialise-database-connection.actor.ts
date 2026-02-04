@@ -1,17 +1,15 @@
-import { databaseConfig } from "@repo/core-util-database/config";
-import { initORM } from "@repo/core-util-database/database";
-
 import { fromPromise } from "xstate";
-import z from "zod";
+
+import { databaseConfig } from "../../../database/config.ts";
+import { initORM } from "../../../database/database.ts";
+import { settings } from "../../../utilities/settings.ts";
 
 export const initialiseDatabaseConnection = fromPromise(async () => {
   const { orm } = await initORM(databaseConfig);
 
   // await orm.schema.createSchema();
 
-  if (
-    !z.stringbool().parse(process.env["UNSAFE_REFRESH_DATABASE_ON_STARTUP"])
-  ) {
+  if (!settings.unsafeRefreshDatabaseOnStartup) {
     return;
   }
 

@@ -5,8 +5,8 @@ import {
 
 import Fuse from "@zkochan/fuse-native";
 import { fromPromise } from "xstate";
-import z from "zod";
 
+import { settings } from "../../../utilities/settings.ts";
 import { fuseOperations } from "../../../vfs/index.ts";
 
 import type { PluginQueueMap } from "../../../types/plugins.ts";
@@ -66,7 +66,7 @@ export const initialiseVfs = fromPromise<
   }
 
   const vfs = new Fuse(mountPath, fuseOperations({ linkRequestQueues }), {
-    debug: z.stringbool().parse(process.env["VFS_DEBUG_LOGGING"]),
+    debug: settings.vfsDebugLogging,
     allowOther: true,
     defaultPermissions: true as never,
     entryTimeout: 0,

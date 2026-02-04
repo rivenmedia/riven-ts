@@ -63,11 +63,7 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
         );
 
         return installDependenciesToPackages(
-          [
-            "@repo/core-util-graphql-schema",
-            "@repo/core-util-graphql-context",
-            "@repo/riven",
-          ],
+          ["@repo/core-util-graphql-schema", "@repo/riven"],
           "dependencies",
           {
             [`@repo/plugin-${pluginName}`]: "workspace:^",
@@ -82,7 +78,6 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
         return formatOutputCode([
           `packages/plugin-${pluginName}/**/*`,
           require.resolve("../../../packages/core/util-graphql-schema/lib/index.ts"),
-          require.resolve("../../../packages/core/util-graphql-context/lib/index.ts"),
         ]);
       },
     ],

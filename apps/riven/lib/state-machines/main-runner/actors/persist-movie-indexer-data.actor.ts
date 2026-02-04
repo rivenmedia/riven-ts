@@ -1,9 +1,10 @@
-import { database } from "@repo/core-util-database/database";
 import { Movie } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
 import z from "zod";
+
+import { database } from "../../../database/database.ts";
 
 import type { MainRunnerMachineIntake } from "../index.ts";
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";

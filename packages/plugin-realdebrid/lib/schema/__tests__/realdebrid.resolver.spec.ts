@@ -27,7 +27,15 @@ it('returns the validation status when calling "realdebridIsValid" query', async
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new RealDebridAPI({ cache: httpCache }),
+          api: new RealDebridAPI({
+            cache: httpCache,
+            logger: {} as never,
+            pluginSymbol: Symbol("@repo/plugin-realdebrid"),
+            redisUrl: "redis-url",
+            settings: {
+              apiKey: "",
+            },
+          }),
         },
       },
     },

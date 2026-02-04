@@ -1,11 +1,9 @@
-import { database } from "@repo/core-util-database/database";
-import { logger } from "@repo/core-util-logger";
-
 import Fuse, { type OPERATIONS, type Stats } from "@zkochan/fuse-native";
 import { LRUCache } from "lru-cache";
 import fs, { type PathLike } from "node:fs";
-import z from "zod";
 
+import { database } from "../../database/database.ts";
+import { logger } from "../../utilities/logger/logger.ts";
 import { config } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
@@ -59,10 +57,8 @@ type StatInput = SetOptional<
   );
 
 const stat = (st: StatInput) => {
-  const gid =
-    st.gid ?? process.getgid?.() ?? z.int().parse(process.env["PGID"]);
-  const uid =
-    st.uid ?? process.getuid?.() ?? z.int().parse(process.env["PUID"]);
+  const gid = st.gid ?? process.getgid?.() ?? 0;
+  const uid = st.uid ?? process.getuid?.() ?? 0;
 
   return {
     ...st,

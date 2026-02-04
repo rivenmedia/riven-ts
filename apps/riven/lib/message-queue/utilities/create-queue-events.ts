@@ -1,8 +1,9 @@
-import { logger } from "@repo/core-util-logger";
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import { QueueEvents, type QueueOptions } from "bullmq";
-import z from "zod";
+
+import { logger } from "../../utilities/logger/logger.ts";
+import { settings } from "../../utilities/settings.ts";
 
 QueueEvents.setMaxListeners(200);
 
@@ -13,7 +14,7 @@ export function createQueueEvents(
   const queueEvents = new QueueEvents(name, {
     ...options,
     connection: {
-      url: z.url().parse(process.env["REDIS_URL"]),
+      url: settings.redisUrl,
     },
   });
 

@@ -38,14 +38,20 @@ export const isBasePluginContext = (
 /**
  * Represents a constructor for a class that extends BaseDataSource.
  */
-export interface DataSourceConstructor {
+export interface DataSourceConstructor<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends Record<string, any> = any,
+> {
   rateLimiterOptions?: RateLimiterOptions | undefined;
 
   /** Constructor signature */
-  new (options: BaseDataSourceConfig): BaseDataSource;
+  new (options: BaseDataSourceConfig<T>): BaseDataSource<T>;
 }
 
-const dataSourceSchema = z.custom<Constructor<BaseDataSource>>((value) => {
+const dataSourceSchema = z.custom<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Constructor<BaseDataSource<Record<string, any>>>
+>((value) => {
   if (typeof value !== "function") {
     return false;
   }
@@ -81,7 +87,7 @@ export const RivenPlugin = z.object({
         settings: z.instanceof(PluginSettings),
       }),
     ],
-    output: z.union([z.promise(z.boolean()), z.boolean()]),
+    output: z.promise(z.boolean()),
   }),
 });
 

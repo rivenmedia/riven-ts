@@ -1,4 +1,3 @@
-import { logger } from "@repo/core-util-logger";
 import {
   type RivenEvent,
   RivenEventHandler,
@@ -9,6 +8,8 @@ import { type Processor, Worker, type WorkerOptions } from "bullmq";
 import { BullMQOtel } from "bullmq-otel";
 import z from "zod";
 
+import { logger } from "../../utilities/logger/logger.ts";
+import { settings } from "../../utilities/settings.ts";
 import { createQueue } from "./create-queue.ts";
 
 import type { ParamsFor } from "@repo/util-plugin-sdk";
@@ -47,7 +48,7 @@ export async function createPluginWorker<
       createPluginWorkerOptions?.telemetry?.version,
     ),
     connection: {
-      url: z.url().parse(process.env["REDIS_URL"]),
+      url: settings.redisUrl,
     },
   });
 
@@ -57,7 +58,7 @@ export async function createPluginWorker<
     logger.error(`[${name}] Error: ${err.message}`);
   });
 
-  if (z.stringbool().parse(process.env["UNSAFE_CLEAR_QUEUES_ON_STARTUP"])) {
+  if (settings.unsafeClearQueuesOnStartup) {
     await queue.obliterate({
       force: true,
     });

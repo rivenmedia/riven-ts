@@ -56,7 +56,7 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
     return false;
   }
 
-  override validate() {
+  override async validate() {
     return true;
   }
 }

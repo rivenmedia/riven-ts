@@ -1,4 +1,3 @@
-import { logger } from "@repo/core-util-logger";
 import { it } from "@repo/core-util-vitest-test-context";
 
 import { HttpResponse, http } from "msw";
@@ -18,9 +17,14 @@ it("returns an empty array if no content lists are provided", async ({
 }) => {
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    logger,
+    logger: {} as never,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     redisUrl: "redis-url",
+    settings: {
+      apiKey: "",
+      movieLists: [],
+      showLists: [],
+    },
   });
   const movies = await listrrApi.getMovies(new Set());
 
@@ -61,9 +65,14 @@ it("retrieves movies from each provided list", async ({
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    logger,
+    logger: {} as never,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     redisUrl: "redis-url",
+    settings: {
+      apiKey: "",
+      movieLists: [],
+      showLists: [],
+    },
   });
   const movies = await listrrApi.getMovies(contentLists);
 
@@ -103,9 +112,14 @@ it("paginates through all pages of the list", async ({ server, httpCache }) => {
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    logger,
+    logger: {} as never,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     redisUrl: "redis-url",
+    settings: {
+      apiKey: "",
+      movieLists: [],
+      showLists: [],
+    },
   });
   const movies = await listrrApi.getMovies(contentLists);
 
@@ -143,9 +157,14 @@ it("dedupes movies that appear in multiple lists", async ({
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    logger,
+    logger: {} as never,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     redisUrl: "redis-url",
+    settings: {
+      apiKey: "",
+      movieLists: [],
+      showLists: [],
+    },
   });
   const movies = await listrrApi.getMovies(new Set(Object.keys(items)));
 

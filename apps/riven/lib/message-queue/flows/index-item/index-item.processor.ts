@@ -1,8 +1,7 @@
-import { logger } from "@repo/core-util-logger";
-
 import { UnrecoverableError } from "bullmq";
 
 import { persistMovieIndexerData } from "../../../state-machines/main-runner/actors/persist-movie-indexer-data.actor.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
 import { requestIndexDataProcessorSchema } from "./index-item.schema.ts";
 
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";

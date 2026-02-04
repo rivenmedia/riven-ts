@@ -26,7 +26,8 @@ export function PluginContext(pluginSymbol: symbol) {
  */
 export function PluginDataSource(
   pluginSymbol: symbol,
-  dataSource: DataSourceConstructor,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dataSource: DataSourceConstructor<any>,
 ) {
   return createParameterDecorator<Record<symbol, unknown>>(({ context }) => {
     const pluginContext = context[pluginSymbol];

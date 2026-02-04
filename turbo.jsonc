@@ -27,7 +27,7 @@
     },
     "generate-schemas": {
       "outputs": ["lib/__generated__/**"],
-      "inputs": ["openapi-schema.json", "*.apib"]
+      "inputs": ["openapi-schema.json", "openapi-schema.yaml", "*.apib"]
     },
     "generate-config-docs": {
       "inputs": ["**/*-settings.schema.ts", "zod2md.config.ts"],

@@ -1,10 +1,10 @@
-import { logger } from "@repo/core-util-logger";
-
 import { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import KeyvRedis, { Keyv } from "@keyv/redis";
-import z from "zod";
 
-const instance = new KeyvRedis(z.url().parse(process.env["REDIS_URL"]));
+import { logger } from "./logger/logger.ts";
+import { settings } from "./settings.ts";
+
+const instance = new KeyvRedis(settings.redisUrl);
 
 async function killInstance() {
   try {

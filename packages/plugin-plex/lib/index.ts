@@ -1,5 +1,3 @@
-import { logger } from "@repo/core-util-logger";
-
 import path from "node:path";
 
 import packageJson from "../package.json" with { type: "json" };
@@ -17,7 +15,11 @@ export default {
   dataSources: [PlexAPI],
   resolvers: [PlexResolver, PlexSettingsResolver],
   hooks: {
-    "riven.media-item.download.success": async ({ dataSources, event }) => {
+    "riven.media-item.download.success": async ({
+      dataSources,
+      event,
+      logger,
+    }) => {
       const plexAPI = dataSources.get(PlexAPI);
 
       if (!event.item.mediaEntry) {
@@ -43,4 +45,4 @@ export default {
   validator() {
     return true;
   },
-} satisfies RivenPlugin;
+} satisfies RivenPlugin as RivenPlugin;

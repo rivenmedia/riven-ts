@@ -15,14 +15,12 @@
   },
   "dependencies": {
     "@apollo/server": "^5.2.0",
-    "@repo/core-util-graphql-context": "workspace:^",
     "@repo/core-util-graphql-schema": "workspace:^",
     "graphql": "catalog:",
     "reflect-metadata": "catalog:"
   },
   "devDependencies": {
     "@repo/core-util-eslint-config": "workspace:^",
-    "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@types/node": "catalog:",

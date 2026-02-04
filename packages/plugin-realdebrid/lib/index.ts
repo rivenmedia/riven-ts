@@ -55,4 +55,4 @@ export default {
   validator() {
     return true;
   },
-} satisfies RivenPlugin;
+} satisfies RivenPlugin as RivenPlugin;

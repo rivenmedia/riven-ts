@@ -16,7 +16,6 @@ const commonFields: PackageJsonDefinition = {
   },
   devDependencies: {
     "@repo/core-util-eslint-config": "workspace:^",
-    "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@types/node": "catalog:",

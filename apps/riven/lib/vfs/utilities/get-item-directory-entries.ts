@@ -1,5 +1,4 @@
-import { database } from "@repo/core-util-database/database";
-
+import { database } from "../../database/database.ts";
 import { config } from "../config.ts";
 
 import type { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";

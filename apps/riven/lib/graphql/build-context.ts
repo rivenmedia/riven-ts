@@ -1,6 +1,7 @@
-import { logger } from "@repo/core-util-logger";
 import { DataSourceMap, type RivenPlugin } from "@repo/util-plugin-sdk";
-import { z } from "@repo/util-plugin-sdk/validation";
+
+import { logger } from "../utilities/logger/logger.ts";
+import { settings } from "../utilities/settings.ts";
 
 import type {
   ApolloServer,
@@ -19,7 +20,7 @@ declare module "node:http" {
 
 export function buildContext(
   server: ApolloServer,
-  settings: PluginSettings,
+  pluginSettings: PluginSettings,
   validPlugins: RivenPlugin[],
 ): ContextFunction<[StandaloneServerContextFunctionArgument]> {
   const { cache } = server;
@@ -39,8 +40,8 @@ export function buildContext(
               cache,
               logger,
               pluginSymbol: plugin.name,
-              redisUrl: z.url().parse(process.env["REDIS_URL"]),
-              settings: settings.get(plugin.settingsSchema),
+              redisUrl: settings.redisUrl,
+              settings: pluginSettings.get(plugin.settingsSchema),
             });
 
             dataSources.set(DataSourceConstructor, instance);
@@ -49,7 +50,7 @@ export function buildContext(
 
         const additionalContext = await plugin.context?.call(plugin, {
           dataSources,
-          settings,
+          settings: pluginSettings,
         });
 
         const pluginContext = {

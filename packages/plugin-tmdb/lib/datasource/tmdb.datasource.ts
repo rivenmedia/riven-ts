@@ -9,12 +9,13 @@ import type {
   FindByIdQueryParams,
   MovieDetails200,
 } from "../__generated__/index.ts";
+import type { TmdbSettings } from "../tmdb-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { Promisable } from "type-fest";
 
 export class TmdbAPIError extends Error {}
 
-export class TmdbAPI extends BaseDataSource {
+export class TmdbAPI extends BaseDataSource<TmdbSettings> {
   override baseURL = "https://api.themoviedb.org/3/";
   override serviceName = "Tmdb";
 
@@ -27,13 +28,7 @@ export class TmdbAPI extends BaseDataSource {
     _path: string,
     requestOpts: AugmentedRequest,
   ) {
-    if (!this.token) {
-      throw new TmdbAPIError(
-        "Tmdb API token is not set. Please provide a valid API token.",
-      );
-    }
-
-    requestOpts.headers["Authorization"] = `Bearer ${this.token}`;
+    requestOpts.headers["Authorization"] = `Bearer ${this.settings.apiKey}`;
   }
 
   override validate(): Promisable<boolean> {

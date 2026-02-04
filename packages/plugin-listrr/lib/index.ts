@@ -25,4 +25,4 @@ export default {
   },
   settingsSchema: ListrrSettings,
   validator: () => true,
-} satisfies RivenPlugin;
+} satisfies RivenPlugin as RivenPlugin;

@@ -1,4 +1,3 @@
-import { logger } from "@repo/core-util-logger";
 import { it } from "@repo/core-util-vitest-test-context";
 
 import { HttpResponse } from "msw";
@@ -73,9 +72,14 @@ it("returns movies when calling listrrMovies query", async ({
         [pluginConfig.name]: {
           api: new ListrrAPI({
             cache: httpCache,
-            logger,
+            logger: {} as never,
             pluginSymbol: pluginConfig.name,
             redisUrl: "redis-url",
+            settings: {
+              apiKey: "",
+              movieLists: [],
+              showLists: [],
+            },
           }),
         },
       },
@@ -142,9 +146,14 @@ it("returns shows when calling listrrShows query", async ({
         [pluginConfig.name]: {
           api: new ListrrAPI({
             cache: httpCache,
-            logger,
+            logger: {} as never,
             pluginSymbol: pluginConfig.name,
             redisUrl: "redis-url",
+            settings: {
+              apiKey: "",
+              movieLists: [],
+              showLists: [],
+            },
           }),
         },
       },
@@ -177,9 +186,14 @@ it('returns the user validation status when calling "listrrIsValid" query', asyn
         [pluginConfig.name]: {
           api: new ListrrAPI({
             cache: httpCache,
-            logger,
+            logger: {} as never,
             pluginSymbol: pluginConfig.name,
             redisUrl: "redis-url",
+            settings: {
+              apiKey: "",
+              movieLists: [],
+              showLists: [],
+            },
           }),
         },
       },

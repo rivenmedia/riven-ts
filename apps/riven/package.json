@@ -8,11 +8,12 @@
     "dev": "node --watch --env-file=.env --import=./lib/opentelemetry.ts --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
     "fuse:check": "fuse-native is-configured",
     "fuse:configure": "fuse-native configure",
+    "generate-config-docs": "zod2md",
     "graphql-codegen": "graphql-codegen",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "start": "node --import=./lib/opentelemetry.ts --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
@@ -29,10 +30,7 @@
     "@opentelemetry/exporter-trace-otlp-proto": "catalog:",
     "@opentelemetry/sdk-metrics": "catalog:",
     "@opentelemetry/sdk-node": "catalog:",
-    "@repo/core-util-database": "workspace:^",
-    "@repo/core-util-graphql-context": "workspace:^",
     "@repo/core-util-graphql-schema": "workspace:^",
-    "@repo/core-util-logger": "workspace:^",
     "@repo/plugin-listrr": "workspace:^",
     "@repo/plugin-plex": "workspace:^",
     "@repo/plugin-realdebrid": "workspace:^",
@@ -52,6 +50,7 @@
     "reflect-metadata": "catalog:",
     "safe-stringify": "^1.2.0",
     "undici": "catalog:",
+    "winston": "catalog:",
     "xstate": "catalog:",
     "zod": "catalog:"
   },

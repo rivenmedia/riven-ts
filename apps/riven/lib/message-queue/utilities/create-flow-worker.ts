@@ -1,9 +1,11 @@
-import { logger } from "@repo/core-util-logger";
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import { Worker, type WorkerOptions } from "bullmq";
 import { BullMQOtel } from "bullmq-otel";
 import z from "zod";
+
+import { logger } from "../../utilities/logger/logger.ts";
+import { settings } from "../../utilities/settings.ts";
 
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
 import type { Flow, FlowHandlers } from "../flows/index.ts";
@@ -31,7 +33,7 @@ export function createFlowWorker<T extends Flow["name"]>(
       createFlowWorkerOptions?.telemetry?.version,
     ),
     connection: {
-      url: z.url().parse(process.env["REDIS_URL"]),
+      url: settings.redisUrl,
     },
   });
 
