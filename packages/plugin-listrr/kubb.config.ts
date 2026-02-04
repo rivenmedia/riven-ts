@@ -2,7 +2,7 @@ import { buildKubbConfig } from "@repo/core-util-kubb-config";
 
 export default buildKubbConfig({
   input: {
-    path: "https://listrr.pro/swagger/v1/swagger.json",
+    path: "./openapi-schema.json",
   },
   name: "Listrr",
   baseURL: "https://listrr.pro",

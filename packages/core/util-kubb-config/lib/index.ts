@@ -30,6 +30,11 @@ export const buildKubbConfig = ({
       }),
       pluginZod({
         inferred: true,
+        version: "4",
+        output: {
+          banner: "// @ts-nocheck",
+          path: "zod",
+        },
       }),
       pluginFaker({
         unknownType: "unknown",
@@ -48,7 +53,4 @@ export const buildKubbConfig = ({
         },
       }),
     ],
-    hooks: {
-      done: ['pnpm prettier --write "lib/__generated__"'],
-    },
   }));

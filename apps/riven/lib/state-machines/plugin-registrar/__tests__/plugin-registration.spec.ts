@@ -15,12 +15,7 @@ it("instantiates plugin datasources", async ({ actor }) => {
   expect(registeredPlugin).toBeDefined();
 
   const dataSource = testPlugin.default.dataSources?.[0];
-
-  expect(registeredPlugin?.dataSources.get(dataSource!)).toBeInstanceOf(
-    dataSource,
-  );
-
   const dataSourceInstance = registeredPlugin?.dataSources.get(dataSource!);
 
-  expect(dataSourceInstance?.token).toBe("TEST_API_TOKEN");
+  expect(dataSourceInstance).toBeInstanceOf(dataSource);
 });

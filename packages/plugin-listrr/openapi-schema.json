@@ -1,4 +1,249 @@
 {
+  "openapi": "3.0.1",
+  "info": {
+    "title": "listrr.pro V1",
+    "description": "An extensive API for working with listrr.pro",
+    "contact": {
+      "name": "listrr.pro",
+      "url": "https://discord.gg/djBkazjf4F",
+      "email": "developers@listrr.pro",
+      "discord": "https://discord.gg/djBkazjf4F"
+    },
+    "version": "v1"
+  },
+  "paths": {
+    "/api/List/{id}": {
+      "get": {
+        "tags": ["List"],
+        "summary": "Get a list by it´s id",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The Id of a list",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "634ffe820765c4a9e73c42ce"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List retrieved",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/listrr.Contracts.Models.ListrrList"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/listrr.Contracts.Models.ListrrList"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/listrr.Contracts.Models.ListrrList"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "A list with the given id could not be found"
+          }
+        }
+      }
+    },
+    "/api/List/My/{page}": {
+      "get": {
+        "tags": ["List"],
+        "summary": "Gets a paginated list of lists a user has created",
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "path",
+            "description": "The page you want to get your results from",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lists retrieved",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.ListrrList]"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.ListrrList]"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.ListrrList]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/List/Movies/{id}/{sortBy}/{sortByDirection}/{page}": {
+      "get": {
+        "tags": ["List"],
+        "summary": "Gets a paginated list of movies the list with the given id contains",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/listrr.Contracts.Enum.Controllers.ListController.ShowListSortEnum"
+            }
+          },
+          {
+            "name": "sortByDirection",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/listrr.Contracts.Enum.SortByDirectionEnum"
+            }
+          },
+          {
+            "name": "page",
+            "in": "path",
+            "description": "The page you want to get your results from",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of movies retrieved",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.MovieDto]"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.MovieDto]"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.MovieDto]"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The list could not be found"
+          },
+          "400": {
+            "description": "The list you requested is a list for shows"
+          }
+        }
+      }
+    },
+    "/api/List/Shows/{id}/{sortBy}/{sortByDirection}/{page}": {
+      "get": {
+        "tags": ["List"],
+        "summary": "Gets a paginated list of shows the list with the given id contains",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/listrr.Contracts.Enum.Controllers.ListController.ShowListSortEnum"
+            }
+          },
+          {
+            "name": "sortByDirection",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/listrr.Contracts.Enum.SortByDirectionEnum"
+            }
+          },
+          {
+            "name": "page",
+            "in": "path",
+            "description": "The page you want to get your results from",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of shows retrieved",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.ShowDto]"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.ShowDto]"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.ShowDto]"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The list could not be found"
+          },
+          "400": {
+            "description": "The list you requested is a list for movies"
+          }
+        }
+      }
+    }
+  },
   "components": {
     "schemas": {
       "listrr.Contracts.Enum.Controllers.ListController.ShowListSortEnum": {
@@ -140,8 +385,7 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "required": [""]
+        "additionalProperties": false
       },
       "listrr.Contracts.Models.ListrrList": {
         "type": "object",
@@ -232,231 +476,6 @@
         "description": "The API Key is delivered as header",
         "name": "X-API-KEY",
         "in": "header"
-      }
-    }
-  },
-  "info": {
-    "title": "listrr.pro V1",
-    "description": "An extensive API for working with listrr.pro",
-    "contact": {
-      "name": "listrr.pro",
-      "url": "https://discord.gg/djBkazjf4F",
-      "email": "developers@listrr.pro",
-      "discord": "https://discord.gg/djBkazjf4F"
-    },
-    "version": "v1"
-  },
-  "openapi": "3.0.1",
-  "paths": {
-    "/api/List/{id}": {
-      "get": {
-        "tags": ["List"],
-        "summary": "Get a list by it´s id",
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "The Id of a list",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "634ffe820765c4a9e73c42ce"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List retrieved",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/listrr.Contracts.Models.ListrrList"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/listrr.Contracts.Models.ListrrList"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "A list with the given id could not be found"
-          }
-        }
-      }
-    },
-    "/api/List/My/{page}": {
-      "get": {
-        "tags": ["List"],
-        "summary": "Gets a paginated list of lists a user has created",
-        "description": "",
-        "parameters": [
-          {
-            "name": "page",
-            "in": "path",
-            "description": "The page you want to get your results from",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 1
-            },
-            "example": 1
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Lists retrieved",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.ListrrList]"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.ListrrList]"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/List/Movies/{id}/{sortBy}/{sortByDirection}/{page}": {
-      "get": {
-        "tags": ["List"],
-        "summary": "Gets a paginated list of movies the list with the given id contains",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sortBy",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/listrr.Contracts.Enum.Controllers.ListController.ShowListSortEnum"
-            }
-          },
-          {
-            "name": "sortByDirection",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/listrr.Contracts.Enum.SortByDirectionEnum"
-            }
-          },
-          {
-            "name": "page",
-            "in": "path",
-            "description": "The page you want to get your results from",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 1
-            },
-            "example": 1
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of movies retrieved",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.MovieDto]"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.MovieDto]"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "The list you requested is a list for shows"
-          },
-          "404": {
-            "description": "The list could not be found"
-          }
-        }
-      }
-    },
-    "/api/List/Shows/{id}/{sortBy}/{sortByDirection}/{page}": {
-      "get": {
-        "tags": ["List"],
-        "summary": "Gets a paginated list of shows the list with the given id contains",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sortBy",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/listrr.Contracts.Enum.Controllers.ListController.ShowListSortEnum"
-            }
-          },
-          {
-            "name": "sortByDirection",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/listrr.Contracts.Enum.SortByDirectionEnum"
-            }
-          },
-          {
-            "name": "page",
-            "in": "path",
-            "description": "The page you want to get your results from",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 1
-            },
-            "example": 1
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of shows retrieved",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.ShowDto]"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/listrr.Contracts.Models.API.PagedResponse`1[listrr.Contracts.Models.API.ShowDto]"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "The list you requested is a list for movies"
-          },
-          "404": {
-            "description": "The list could not be found"
-          }
-        }
       }
     }
   },
