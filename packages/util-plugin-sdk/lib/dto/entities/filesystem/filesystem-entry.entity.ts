@@ -32,7 +32,7 @@ export abstract class FileSystemEntry {
   @PrimaryKey()
   id!: number;
 
-  @Field(() => Number)
+  @Field()
   @Property({ type: "bigint" })
   @IsPositive()
   fileSize!: number;

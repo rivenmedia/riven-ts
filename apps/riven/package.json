@@ -13,7 +13,7 @@
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "start": "node --import=./lib/opentelemetry.ts --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {

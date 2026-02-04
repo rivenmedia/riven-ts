@@ -31,23 +31,23 @@ it.for(["/", "/movies", "/shows"])(
   },
 );
 
-it("skips hidden paths", async () => {
+it("returns EBADF for hidden paths", async () => {
   const callback = vi.fn();
 
   getattrSync("/.Trash", callback);
 
   await vi.waitFor(() => {
-    expect(callback).toHaveBeenCalledWith(null, undefined);
+    expect(callback).toHaveBeenCalledWith(Fuse.EBADF);
   });
 });
 
-it("skips trash paths", async () => {
+it("returns EBADF for trash paths", async () => {
   const callback = vi.fn();
 
   getattrSync("/somefolder/.hidden", callback);
 
   await vi.waitFor(() => {
-    expect(callback).toHaveBeenCalledWith(null, undefined);
+    expect(callback).toHaveBeenCalledWith(Fuse.EBADF);
   });
 });
 

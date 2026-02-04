@@ -87,7 +87,7 @@ export const RivenPlugin = z.object({
         settings: z.instanceof(PluginSettings),
       }),
     ],
-    output: z.union([z.promise(z.boolean()), z.boolean()]),
+    output: z.promise(z.boolean()),
   }),
 });
 

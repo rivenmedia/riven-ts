@@ -1,5 +1,3 @@
-import "reflect-metadata";
-
 import {
   type RivenPlugin,
   type RivenPluginPackage,
@@ -50,8 +48,7 @@ export const collectPluginsForRegistration = fromPromise(() => {
           return {
             ...parsedPlugins,
             invalidPlugins: parsedPlugins.invalidPlugins.concat([
-              pluginName,
-              z.treeifyError(validationResult.error),
+              [pluginName, z.treeifyError(validationResult.error)],
             ]),
           };
         }

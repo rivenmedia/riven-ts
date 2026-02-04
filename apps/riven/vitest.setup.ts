@@ -26,7 +26,7 @@ vi.mock<typeof import("@apollo/server/standalone")>(
   }),
 );
 
-vi.mock<typeof import("@repo/plugin-test")>(import("@repo/plugin-test"), () => {
+vi.mock(import("@repo/plugin-test"), () => {
   class TestAPI extends BaseDataSource<Record<string, unknown>> {
     override baseURL = "https://api.test.com";
 
@@ -62,28 +62,25 @@ vi.mock<typeof import("@repo/plugin-test")>(import("@repo/plugin-test"), () => {
   };
 });
 
-vi.mock<typeof import("./lib/database/database.ts")>(
-  import("./lib/database/database.ts"),
-  async (importOriginal) => {
-    const { initORM } = await importOriginal();
-    const { databaseConfig } = await import("./lib/database/config.ts");
-    const { SqliteDriver } = await import("@mikro-orm/sqlite");
+vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
+  const { initORM } = await importOriginal();
+  const { databaseConfig } = await import("./lib/database/config.ts");
+  const { SqliteDriver } = await import("@mikro-orm/sqlite");
 
-    const database = await initORM({
-      ...databaseConfig,
-      driver: SqliteDriver as never,
-      dbName: ":memory:",
-      connect: false,
-      debug: false,
-    });
+  const database = await initORM({
+    ...databaseConfig,
+    driver: SqliteDriver as never,
+    dbName: ":memory:",
+    connect: false,
+    debug: false,
+  });
 
-    await database.orm.schema.createSchema();
+  await database.orm.schema.createSchema();
 
-    return {
-      database,
-    };
-  },
-);
+  return {
+    database,
+  };
+});
 
 expect.extend({
   toHaveReceivedEvent(actorRef: { id: string; send: Mock }, expected: unknown) {

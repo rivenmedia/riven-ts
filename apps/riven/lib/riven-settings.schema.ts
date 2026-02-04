@@ -1,3 +1,5 @@
+import { json } from "@repo/util-plugin-sdk/validation";
+
 import z from "zod";
 
 import { LogLevel } from "./utilities/logger/log-levels.ts";
@@ -24,6 +26,13 @@ export const RivenSettings = z.object({
     .describe(
       "**UNSAFE**.\n \nIf true, the database will be wiped on application startup.",
     ),
+  enabledLogTransports: json(z.array(z.enum(["console", "file"])))
+    .default(["console", "file"])
+    .describe("The enabled logging transports."),
+  loggingEnabled: z
+    .stringbool()
+    .default(true)
+    .describe("Enable or disable logging for the application."),
   logLevel: LogLevel.default("info").describe(
     "The logging level for the application.",
   ),

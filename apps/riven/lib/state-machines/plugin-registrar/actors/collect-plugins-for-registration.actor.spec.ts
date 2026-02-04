@@ -1,10 +1,15 @@
 import { rivenPluginPackageSchema } from "@repo/util-plugin-sdk";
+import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import { expect, it, vi } from "vitest";
 import { createActor, toPromise } from "xstate";
 import z from "zod";
 
-import { collectPluginsForRegistration } from "./collect-plugins-for-registration.actor.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
+import {
+  type ParsedPlugins,
+  collectPluginsForRegistration,
+} from "./collect-plugins-for-registration.actor.ts";
 
 it("returns the installed plugins from the package.json file", async () => {
   const actor = createActor(collectPluginsForRegistration);
@@ -40,12 +45,13 @@ it("returns any invalid plugins from the package.json file along with their vali
 
   const plugins = await toPromise(actor.start());
 
-  expect(plugins).toEqual({
+  expect(plugins).toEqual<ParsedPlugins>({
     invalidPlugins: [
-      "@repo/plugin-test",
-      z.treeifyError(validationResult.error as never),
-    ],
+      ["@repo/plugin-test", z.treeifyError(validationResult.error as never)],
+    ] as const,
     unresolvablePlugins: [],
     validPlugins: [],
+    pluginConfigPrefixMap: new Map(),
+    pluginSettings: new PluginSettings(["REPO_PLUGIN_TEST"], logger),
   });
 });
