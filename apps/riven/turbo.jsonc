@@ -2,18 +2,7 @@
   "$schema": "https://turborepo.com/schema.json",
   "extends": ["//"],
   "tasks": {
-    "dev": {
-      "passThroughEnv": [
-        "REDIS_URL",
-        "PORT",
-        "VFS_DEBUG_LOGGING",
-        "RIVEN_VFS_MOUNT_PATH",
-        "UNSAFE_CLEAR_QUEUES_ON_STARTUP",
-        "UNSAFE_REFRESH_DATABASE_ON_STARTUP",
-        "PGID",
-        "PUID"
-      ]
-    },
+    "dev": {},
     "start": {}
   }
 }

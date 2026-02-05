@@ -28,7 +28,7 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     _path: string,
     requestOpts: AugmentedRequest,
   ) {
-    requestOpts.headers["Authorization"] = `Bearer ${this.settings.apiKey}`;
+    requestOpts.headers["authorization"] = `Bearer ${this.settings.apiKey}`;
   }
 
   override validate(): Promisable<boolean> {

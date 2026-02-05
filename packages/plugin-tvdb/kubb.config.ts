@@ -4,6 +4,6 @@ export default buildKubbConfig({
   input: {
     path: "./openapi-schema.yaml",
   },
-  name: "Plex",
-  baseURL: "https://plex.com/api",
+  name: "TVDB",
+  baseURL: "https://api4.thetvdb.com/v4",
 });

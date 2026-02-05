@@ -1,4 +1,4 @@
-import { it } from "@repo/core-util-vitest-test-context";
+import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { HttpResponse } from "msw";
 import assert from "node:assert";
@@ -22,6 +22,7 @@ it("returns movies when calling listrrMovies query", async ({
   gqlServer,
   httpCache,
   server,
+  redisUrl,
 }) => {
   const contentLists = new Set([
     "64b7f2f5e13e4b6f8c8e4d1a",
@@ -74,7 +75,9 @@ it("returns movies when calling listrrMovies query", async ({
             cache: httpCache,
             logger: {} as never,
             pluginSymbol: pluginConfig.name,
-            redisUrl: "redis-url",
+            connection: {
+              url: redisUrl,
+            },
             settings: {
               apiKey: "",
               movieLists: [],
@@ -96,6 +99,7 @@ it("returns shows when calling listrrShows query", async ({
   gqlServer,
   httpCache,
   server,
+  redisUrl,
 }) => {
   const contentLists = new Set([
     "64b7f2f5e13e4b6f8c8e4d1a",
@@ -148,7 +152,9 @@ it("returns shows when calling listrrShows query", async ({
             cache: httpCache,
             logger: {} as never,
             pluginSymbol: pluginConfig.name,
-            redisUrl: "redis-url",
+            connection: {
+              url: redisUrl,
+            },
             settings: {
               apiKey: "",
               movieLists: [],
@@ -170,6 +176,7 @@ it('returns the user validation status when calling "listrrIsValid" query', asyn
   gqlServer,
   httpCache,
   server,
+  redisUrl,
 }) => {
   server.use(getApiListMyPageHandler());
 
@@ -188,7 +195,9 @@ it('returns the user validation status when calling "listrrIsValid" query', asyn
             cache: httpCache,
             logger: {} as never,
             pluginSymbol: pluginConfig.name,
-            redisUrl: "redis-url",
+            connection: {
+              url: redisUrl,
+            },
             settings: {
               apiKey: "",
               movieLists: [],

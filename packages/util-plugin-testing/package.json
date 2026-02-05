@@ -1,10 +1,12 @@
 {
-  "name": "@repo/core-util-vitest-test-context",
+  "name": "@repo/util-plugin-testing",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./lib/index.ts"
+    "./create-mock-logger": "./lib/create-mock-logger.ts",
+    "./create-mock-plugin-settings": "./lib/create-mock-plugin-settings.ts",
+    "./plugin-test-context": "./lib/plugin-test-context.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
@@ -14,20 +16,23 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@apollo/utils.keyvaluecache": "^4.0.0",
-    "@repo/core-util-mock-graphql-server": "workspace:^",
-    "msw": "catalog:",
-    "undici": "catalog:"
+    "@apollo/utils.keyvaluecache": "catalog:",
+    "@repo/util-plugin-sdk": "workspace:^",
+    "redis-memory-server": "^0.16.0",
+    "winston": "catalog:"
   },
   "devDependencies": {
     "@apollo/server": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-mock-graphql-server": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
+    "msw": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "zod": "catalog:"
   }
 }

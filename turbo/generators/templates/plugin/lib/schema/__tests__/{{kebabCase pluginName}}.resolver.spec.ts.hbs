@@ -11,6 +11,7 @@ it('returns the validation status when calling "{{camelCase pluginName}}IsValid"
   gqlServer,
   httpCache,
   server,
+  redisUrl,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -31,7 +32,9 @@ it('returns the validation status when calling "{{camelCase pluginName}}IsValid"
             cache: httpCache,
             logger: {} as never,
             pluginSymbol: pluginConfig.name,
-            redisUrl: "",
+            connection: {
+              url: redisUrl,
+            },
             settings: {},
           }),
         }

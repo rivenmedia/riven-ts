@@ -1,4 +1,4 @@
-import { it } from "@repo/core-util-vitest-test-context";
+import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { HttpResponse, http } from "msw";
 import assert from "node:assert";
@@ -11,6 +11,7 @@ it('returns the validation status when calling "torrentioIsValid" query', async 
   gqlServer,
   httpCache,
   server,
+  redisUrl,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -31,7 +32,9 @@ it('returns the validation status when calling "torrentioIsValid" query', async 
             cache: httpCache,
             logger: {} as never,
             pluginSymbol: Symbol("@repo/plugin-torrentio"),
-            redisUrl: "redis-url",
+            connection: {
+              url: redisUrl,
+            },
             settings: {
               filter: "",
             },

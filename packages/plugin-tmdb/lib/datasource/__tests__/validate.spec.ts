@@ -1,11 +1,15 @@
-import { it } from "@repo/core-util-vitest-test-context";
+import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
 import { TmdbAPI } from "../tmdb.datasource.ts";
 
-it("returns false if the request fails", async ({ server, httpCache }) => {
+it("returns false if the request fails", async ({
+  server,
+  httpCache,
+  redisUrl,
+}) => {
   server.use(
     http.get("**/validate", () =>
       HttpResponse.json({ success: false }, { status: 401 }),
@@ -14,7 +18,9 @@ it("returns false if the request fails", async ({ server, httpCache }) => {
 
   const tmdbApi = new TmdbAPI({
     cache: httpCache,
-    redisUrl: "redis-url",
+    connection: {
+      url: redisUrl,
+    },
     logger: {} as never,
     pluginSymbol: Symbol("@repo/plugin-tmdb"),
     settings: {
@@ -26,14 +32,20 @@ it("returns false if the request fails", async ({ server, httpCache }) => {
   expect(isValid).toBe(false);
 });
 
-it("returns true if the request succeeds", async ({ server, httpCache }) => {
+it("returns true if the request succeeds", async ({
+  server,
+  httpCache,
+  redisUrl,
+}) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
   );
 
   const tmdbApi = new TmdbAPI({
     cache: httpCache,
-    redisUrl: "redis-url",
+    connection: {
+      url: redisUrl,
+    },
     logger: {} as never,
     pluginSymbol: Symbol("@repo/plugin-tmdb"),
     settings: {

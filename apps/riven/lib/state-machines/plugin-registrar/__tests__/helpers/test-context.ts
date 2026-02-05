@@ -1,13 +1,12 @@
-import { it as baseIt } from "@repo/core-util-vitest-test-context";
-
 import { type Actor, createActor, createEmptyActor } from "xstate";
 
+import { rivenTestContext } from "../../../../__tests__/test-context.ts";
 import {
   type PluginRegistrarMachineInput,
   pluginRegistrarMachine,
 } from "../../index.ts";
 
-export const it = baseIt.extend<{
+export const it = rivenTestContext.extend<{
   input: PluginRegistrarMachineInput;
   actor: Actor<typeof pluginRegistrarMachine>;
   machine: typeof pluginRegistrarMachine;

@@ -3,21 +3,14 @@ import { ApolloServer } from "@apollo/server";
 import { MockAgent, setGlobalDispatcher } from "undici";
 import { test as testBase } from "vitest";
 
-import type { KeyValueCache } from "@apollo/utils.keyvaluecache";
 import type { SetupServerApi } from "msw/node";
 
-export const it = testBase.extend<{
-  httpCache: KeyValueCache;
+export const rivenTestContext = testBase.extend<{
   server: SetupServerApi;
   apolloServerInstance: ApolloServer;
   gqlServer: ApolloServer;
   mockAgent: MockAgent;
 }>({
-  async httpCache({}, use) {
-    const { InMemoryLRUCache } = await import("@apollo/utils.keyvaluecache");
-
-    await use(new InMemoryLRUCache());
-  },
   async apolloServerInstance({}, use) {
     const { mockServer } = await import("@repo/core-util-mock-graphql-server");
 
@@ -34,6 +27,18 @@ export const it = testBase.extend<{
     const { setupServer } = await import("msw/node");
 
     const server = setupServer();
+
+    if (/(\*|msw)/.test(process.env["DEBUG"] ?? "")) {
+      server.events.on("response:mocked", ({ request, response }) => {
+        console.log(
+          "%s %s received %s %s",
+          request.method,
+          request.url,
+          response.status,
+          response.statusText,
+        );
+      });
+    }
 
     // Start the worker before the test.
     server.listen({
@@ -62,8 +67,3 @@ export const it = testBase.extend<{
     await mockAgent.close();
   },
 });
-
-export type {
-  KeyValueCache,
-  KeyValueCacheSetOptions,
-} from "@apollo/utils.keyvaluecache";

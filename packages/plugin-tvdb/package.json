@@ -9,6 +9,7 @@
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
     "generate-config-docs": "zod2md",
+    "generate-schemas": "kubb generate",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run --passWithNoTests",
@@ -17,16 +18,22 @@
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@repo/util-plugin-sdk": "workspace:^",
+    "luxon": "catalog:",
     "type-graphql": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@faker-js/faker": "catalog:",
+    "@kubb/cli": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-kubb-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
-    "@repo/util-plugin-sdk": "workspace:^",
+    "@repo/util-plugin-testing": "workspace:^",
+    "@types/luxon": "catalog:",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
+    "es-toolkit": "catalog:",
     "eslint": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",

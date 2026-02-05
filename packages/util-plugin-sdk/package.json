@@ -12,6 +12,7 @@
     "./events/*": "./lib/schemas/plugin-to-program-events/*.ts",
     "./schemas/*": "./lib/schemas/*.ts",
     "./helpers/*": "./lib/helpers/*.ts",
+    "./testing/*": "./lib/testing/*.ts",
     "./utilities/*": "./lib/utilities/*.ts",
     "./validation": "./lib/validation/index.ts"
   },
@@ -24,13 +25,14 @@
   },
   "dependencies": {
     "luxon": "catalog:",
+    "redis-memory-server": "^0.16.0",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@apollo/client": "^4.0.11",
     "@apollo/datasource-rest": "catalog:",
     "@apollo/server": "^5.2.0",
-    "@apollo/utils.keyvadapter": "^4.0.1",
+    "@apollo/utils.keyvadapter": "catalog:",
     "@mikro-orm/core": "catalog:",
     "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",
@@ -54,7 +56,7 @@
   "peerDependencies": {
     "@apollo/client": "^4.0.11",
     "@apollo/datasource-rest": "catalog:",
-    "@apollo/utils.keyvadapter": "^4.0.1",
+    "@apollo/utils.keyvadapter": "catalog:",
     "@mikro-orm/core": "catalog:",
     "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",

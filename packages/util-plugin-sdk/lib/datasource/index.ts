@@ -7,6 +7,7 @@ import {
   type RequestOptions,
 } from "@apollo/datasource-rest";
 import {
+  type ConnectionOptions,
   type Job,
   Queue,
   QueueEvents,
@@ -50,8 +51,9 @@ export interface BaseDataSourceConfig<
 > extends Omit<DataSourceConfig, "logger"> {
   settings: T;
   pluginSymbol: symbol;
-  redisUrl: string;
+  requestAttempts?: number;
   logger: Logger;
+  connection: ConnectionOptions;
 }
 
 export abstract class BaseDataSource<
@@ -76,8 +78,9 @@ export abstract class BaseDataSource<
 
   constructor({
     pluginSymbol,
-    redisUrl,
     settings,
+    requestAttempts = 3,
+    connection,
     ...apolloDataSourceOptions
   }: BaseDataSourceConfig<T>) {
     super(apolloDataSourceOptions);
@@ -87,11 +90,9 @@ export abstract class BaseDataSource<
     this.serviceName = this.constructor.name;
     this.#queueId = `${pluginSymbol.description ?? "unknown"}-${this.serviceName}-fetch-queue`;
     this.#queue = new Queue(this.#queueId, {
-      connection: {
-        url: redisUrl,
-      },
+      connection,
       defaultJobOptions: {
-        attempts: 3,
+        attempts: requestAttempts,
         backoff: {
           type: "exponential",
           delay: 1000,
@@ -108,11 +109,7 @@ export abstract class BaseDataSource<
       },
     });
 
-    this.#queueEvents = new QueueEvents(this.#queueId, {
-      connection: {
-        url: redisUrl,
-      },
-    });
+    this.#queueEvents = new QueueEvents(this.#queueId, { connection });
 
     this.#worker = new Worker(
       this.#queueId,
@@ -135,9 +132,7 @@ export abstract class BaseDataSource<
         };
       },
       {
-        connection: {
-          url: redisUrl,
-        },
+        connection,
         ...(this.rateLimiterOptions
           ? { limiter: this.rateLimiterOptions }
           : {}),
@@ -306,9 +301,6 @@ export abstract class BaseDataSource<
       return await super.fetch(path, augmentedRequest);
     }
 
-    // Redis keys use colons as a separator, so they need to be stripped out before insertion
-    // const sanitisedJobId = cacheKey.replaceAll(":", "[COLON]");
-
     const bodyType = this.#determineRequestBodyType(augmentedRequest.body);
 
     if (bodyType === "url-search-params") {
@@ -317,15 +309,11 @@ export abstract class BaseDataSource<
       );
     }
 
-    const job = await this.#queue.add(
-      cacheKey,
-      {
-        path,
-        incomingRequest: augmentedRequest,
-        bodyType,
-      },
-      // { jobId: sanitisedJobId },
-    );
+    const job = await this.#queue.add(cacheKey, {
+      path,
+      incomingRequest: augmentedRequest,
+      bodyType,
+    });
 
     const result = await job.waitUntilFinished(this.#queueEvents, 60000);
 

@@ -1,4 +1,4 @@
-import { it } from "@repo/core-util-vitest-test-context";
+import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
@@ -8,12 +8,15 @@ import { ListrrAPI } from "../listrr.datasource.ts";
 it('assigns the API to the "x-api-key" header', async ({
   server,
   httpCache,
+  redisUrl,
 }) => {
   const listrrApi = new ListrrAPI({
     cache: httpCache,
     logger: {} as never,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
-    redisUrl: "redis-url",
+    connection: {
+      url: redisUrl,
+    },
     settings: {
       apiKey: "test-token",
       movieLists: [],

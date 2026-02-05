@@ -1,9 +1,8 @@
-import { it } from "@repo/core-util-vitest-test-context";
-
 import { Buffer } from "node:buffer";
 import { randomBytes } from "node:crypto";
 import { expect, vi } from "vitest";
 
+import { rivenTestContext as it } from "../../__tests__/test-context.ts";
 import { config } from "../config.ts";
 import { chunkCache } from "../utilities/chunk-cache.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";

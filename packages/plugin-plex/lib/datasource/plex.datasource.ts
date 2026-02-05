@@ -24,8 +24,8 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
     _path: string,
     requestOpts: AugmentedRequest,
   ): ValueOrPromise<void> {
-    requestOpts.headers["X-Plex-Token"] = this.settings.plexToken;
-    requestOpts.headers["Accept"] = "application/json";
+    requestOpts.headers["x-plex-token"] = this.settings.plexToken;
+    requestOpts.headers["accept"] = "application/json";
   }
 
   async updateSection(path: string) {

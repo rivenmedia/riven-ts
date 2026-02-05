@@ -1,17 +1,107 @@
-import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
+import {
+  BaseDataSource,
+  type BasePluginContext,
+  type RateLimiterOptions,
+} from "@repo/util-plugin-sdk";
 
+import { DateTime } from "luxon";
+
+import {
+  getSeriesExtended200Schema,
+  postLogin200Schema,
+} from "../__generated__/index.ts";
 import { TvdbSettings } from "../tvdb-settings.schema.ts";
+
+import type { AugmentedRequest } from "@apollo/datasource-rest";
 
 export class TvdbAPIError extends Error {}
 
+interface TvdbToken {
+  value: string;
+  expiresAt: DateTime;
+}
+
 export class TvdbAPI extends BaseDataSource<TvdbSettings> {
-  override baseURL = "https://tvdb.com/api/";
+  override baseURL = "https://api4.thetvdb.com/v4/";
   override serviceName = "Tvdb";
+
+  #token: TvdbToken | null = null;
+
+  protected override rateLimiterOptions: RateLimiterOptions = {
+    duration: 1000,
+    max: 25,
+  };
+
+  protected override async willSendRequest(
+    path: string,
+    requestOpts: AugmentedRequest,
+  ) {
+    if (path === "login") {
+      return;
+    }
+
+    const { value } = await this.#getAuthToken();
+
+    requestOpts.headers["authorization"] = `Bearer ${value}`;
+    requestOpts.headers["content-type"] = "application/json";
+    requestOpts.headers["accept"] = "application/json";
+  }
+
+  /**
+   * Retrieve a TVDB series by its id
+   *
+   * @see {@link https://thetvdb.github.io/v4-api/#/Series/getSeriesExtended}
+   *
+   * @param id The TVDB id of the series to retrieve
+   */
+  async getSeries(id: string) {
+    const response = await this.get<unknown>(`series/${id}/extended`);
+    const { data } = getSeriesExtended200Schema.parse(response);
+
+    if (!data) {
+      throw new TvdbAPIError(
+        `Failed to retrieve series with id ${id}: No data in response`,
+      );
+    }
+
+    return data;
+  }
+
+  /**
+   * Retrieve and cache the TVDB authentication token
+   *
+   * @see {@link https://thetvdb.github.io/v4-api/#/Login/post_login}
+   *
+   * @returns The {@link TvdbToken} from the `/login` response
+   */
+  async #getAuthToken() {
+    const now = DateTime.now();
+
+    // Return cached token if valid
+    if (this.#token && this.#token.expiresAt > now) {
+      return this.#token;
+    }
+
+    const response = await this.post<unknown>("login");
+    const { data } = postLogin200Schema.parse(response);
+
+    if (!data?.token) {
+      throw new TvdbAPIError(
+        "Failed to retrieve TVDB API token: No token in response",
+      );
+    }
+
+    this.#token = {
+      value: data.token,
+      expiresAt: now.plus({ days: 25 }),
+    };
+
+    return this.#token;
+  }
 
   override async validate() {
     try {
-      // Implement your own validation logic here
-      await this.get("validate");
+      await this.#getAuthToken();
 
       return true;
     } catch {
