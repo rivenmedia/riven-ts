@@ -9,7 +9,7 @@ import { database } from "../../../database/database.ts";
 import type { MainRunnerMachineIntake } from "../index.ts";
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-export interface PersistMovieIndexerDataInput extends MediaItemIndexRequestedResponse {
+export interface PersistMovieIndexerDataInput extends NonNullable<MediaItemIndexRequestedResponse> {
   sendEvent: MainRunnerMachineIntake;
 }
 

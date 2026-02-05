@@ -16,11 +16,17 @@ export const indexItemProcessor =
       }
 
       const item = Object.values(data).reduce(
-        (acc, { item }) => ({
-          ...acc,
-          ...item,
-        }),
-        {} as MediaItemIndexRequestedResponse["item"],
+        (acc, value) => {
+          if (!value?.item) {
+            return acc;
+          }
+
+          return {
+            ...acc,
+            ...value.item,
+          };
+        },
+        {} as NonNullable<MediaItemIndexRequestedResponse>["item"],
       );
 
       try {

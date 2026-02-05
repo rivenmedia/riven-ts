@@ -66,6 +66,7 @@
     "@mikro-orm/sqlite": "^6.6.4",
     "@parcel/watcher": "^2.5.1",
     "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-mock-graphql-server": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/plugin-test": "workspace:^",

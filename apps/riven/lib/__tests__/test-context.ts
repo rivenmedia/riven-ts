@@ -16,12 +16,12 @@ export const rivenTestContext = testBase.extend<{
 
     await use(mockServer);
   },
-  async gqlServer({}, use) {
-    const { mockServer } = await import("@repo/core-util-mock-graphql-server");
+  async gqlServer({ apolloServerInstance }, use) {
+    await apolloServerInstance.start();
 
-    await mockServer.start();
+    await use(apolloServerInstance);
 
-    await use(mockServer);
+    await apolloServerInstance.stop();
   },
   server: async ({}, use) => {
     const { setupServer } = await import("msw/node");

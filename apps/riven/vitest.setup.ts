@@ -17,14 +17,11 @@ vi.mock<{ default: Record<string, unknown> }>(
     }) as const,
 );
 
-vi.mock<typeof import("@apollo/server/standalone")>(
-  import("@apollo/server/standalone"),
-  () => ({
-    startStandaloneServer: vi.fn().mockResolvedValue({
-      url: "http://localhost:4000/mocked-server",
-    }),
+vi.mock(import("@apollo/server/standalone"), () => ({
+  startStandaloneServer: vi.fn().mockResolvedValue({
+    url: "http://localhost:4000/mocked-server",
   }),
-);
+}));
 
 vi.mock(import("@repo/plugin-test"), () => {
   class TestAPI extends BaseDataSource<Record<string, unknown>> {
