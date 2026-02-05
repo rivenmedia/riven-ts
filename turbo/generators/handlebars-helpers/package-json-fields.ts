@@ -39,7 +39,7 @@ const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
       zod: "catalog:",
     },
     devDependencies: {
-      "@repo/util-plugin-sdk": "workspace:^",
+      "@repo/util-plugin-testing": "workspace:^",
       zod2md: "catalog:",
     },
   },
