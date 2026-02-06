@@ -40,7 +40,11 @@ export const MediaItemIndexRequestedResponse = z
     item: z.discriminatedUnion("type", [
       IndexedItem.extend({
         type: z.literal("show"),
-        contentRating: z.string().default("Unknown").pipe(ShowContentRating),
+        contentRating: z
+          .string()
+          .toLowerCase()
+          .default("unknown")
+          .pipe(ShowContentRating),
         firstAired: z.iso.date(),
         network: z.string().min(1).nullable(),
         status: ShowStatus,
@@ -51,7 +55,8 @@ export const MediaItemIndexRequestedResponse = z
               z.object({
                 contentRating: z
                   .string()
-                  .default("Unknown")
+                  .toLowerCase()
+                  .default("unknown")
                   .pipe(ShowContentRating)
                   .nullable(),
                 number: z.number(),
@@ -67,7 +72,11 @@ export const MediaItemIndexRequestedResponse = z
       IndexedItem.extend({
         type: z.literal("movie"),
         releaseDate: z.iso.date().nullish(),
-        contentRating: z.string().default("Unknown").pipe(MovieContentRating),
+        contentRating: z
+          .string()
+          .toLowerCase()
+          .default("unknown")
+          .pipe(MovieContentRating),
       }),
     ]),
   })

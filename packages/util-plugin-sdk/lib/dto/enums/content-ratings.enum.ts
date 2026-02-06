@@ -3,18 +3,18 @@ import { registerEnumType } from "type-graphql";
 import z from "zod";
 
 export const MediaItemContentRating = z.enum([
-  "G",
-  "PG",
-  "PG-13",
-  "R",
-  "NC-17",
-  "TV-Y",
-  "TV-Y7",
-  "TV-G",
-  "TV-PG",
-  "TV-14",
-  "TV-MA",
-  "Unknown",
+  "g",
+  "pg",
+  "pg-13",
+  "r",
+  "nc-17",
+  "tv-y",
+  "tv-y7",
+  "tv-g",
+  "tv-pg",
+  "tv-14",
+  "tv-ma",
+  "unknown",
 ]);
 
 export type MediaItemContentRating = z.infer<typeof MediaItemContentRating>;
@@ -36,12 +36,12 @@ registerEnumType(MediaItemContentRatingEnum, {
  * See https://en.wikipedia.org/wiki/MPAA_film_rating_system for more details.
  */
 export const MovieContentRating = MediaItemContentRating.extract([
-  "G",
-  "PG",
-  "PG-13",
-  "R",
-  "NC-17",
-  "Unknown",
+  "g",
+  "pg",
+  "pg-13",
+  "r",
+  "nc-17",
+  "unknown",
 ]);
 
 export type MovieContentRating = z.infer<typeof MovieContentRating>;
@@ -63,13 +63,13 @@ registerEnumType(MovieContentRatingEnum, {
  * See https://en.wikipedia.org/wiki/TV_Parental_Guidelines for more details.
  */
 export const ShowContentRating = MediaItemContentRating.extract([
-  "TV-Y",
-  "TV-Y7",
-  "TV-G",
-  "TV-PG",
-  "TV-14",
-  "TV-MA",
-  "Unknown",
+  "tv-y",
+  "tv-y7",
+  "tv-g",
+  "tv-pg",
+  "tv-14",
+  "tv-ma",
+  "unknown",
 ]);
 
 export type ShowContentRating = z.infer<typeof ShowContentRating>;

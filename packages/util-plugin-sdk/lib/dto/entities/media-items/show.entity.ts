@@ -16,8 +16,6 @@ export class Show extends MediaItem {
     super();
 
     this.type = "show";
-    this.contentRating = "Unknown";
-    this.status = "unknown";
   }
 
   @Field(() => ShowStatus.enum, { nullable: true })
