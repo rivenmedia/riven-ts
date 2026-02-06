@@ -28,7 +28,7 @@ export const rivenTestContext = testBase.extend<{
 
     const server = setupServer();
 
-    if (/(\*|msw)/.test(process.env["DEBUG"] ?? "")) {
+    if (/^(\*|msw)/.test(process.env["DEBUG"] ?? "")) {
       server.events.on("response:mocked", ({ request, response }) => {
         console.log(
           "%s %s received %s %s",

@@ -2790,6 +2790,7 @@ components:
           items:
             type: string
           type: array
+          nullable: true
           x-go-name: NameTranslations
         overviewTranslations:
           items:
@@ -2951,6 +2952,7 @@ components:
           type: integer
         aired:
           type: string
+          nullable: true
         airsAfterSeason:
           type: integer
         airsBeforeEpisode:
@@ -2960,12 +2962,14 @@ components:
         finaleType:
           description: season, midseason, or series
           type: string
+          nullable: true
         id:
           format: int64
           type: integer
           x-go-name: ID
         image:
           type: string
+          nullable: true
         imageType:
           type: integer
           nullable: true
@@ -3003,6 +3007,7 @@ components:
           items:
             $ref: "#/components/schemas/SeasonBaseRecord"
           type: array
+          nullable: true
           x-go-name: Seasons
         seriesId:
           format: int64
@@ -3019,6 +3024,7 @@ components:
       properties:
         aired:
           type: string
+          nullable: true
         airsAfterSeason:
           type: integer
         airsBeforeEpisode:
@@ -3053,6 +3059,7 @@ components:
           x-go-name: ID
         image:
           type: string
+          nullable: true
         imageType:
           type: integer
           nullable: true

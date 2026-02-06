@@ -7,9 +7,9 @@ import {
 import { DateTime } from "luxon";
 
 import {
-  getEpisodeExtended200Schema,
-  getSeasonExtended200Schema,
-  getSeriesExtended200Schema,
+  getEpisodeExtendedQueryResponseSchema,
+  getSeasonExtendedQueryResponseSchema,
+  getSeriesExtendedQueryResponseSchema,
   postLogin200Schema,
 } from "../__generated__/index.ts";
 import { TvdbSettings } from "../tvdb-settings.schema.ts";
@@ -58,7 +58,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
    */
   async getSeries(id: string) {
     const response = await this.get<unknown>(`series/${id}/extended`);
-    const { data } = getSeriesExtended200Schema.parse(response);
+    const { data } = getSeriesExtendedQueryResponseSchema.parse(response);
 
     if (!data) {
       throw new TvdbAPIError(
@@ -77,12 +77,14 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
    * @param id The TVDB id of the season to retrieve
    */
   async getSeason(id: number) {
-    const response = await this.get<unknown>(`seasons/${id}/extended`);
-    const { data } = getSeasonExtended200Schema.parse(response);
+    const response = await this.get<unknown>(
+      `seasons/${id.toString()}/extended`,
+    );
+    const { data } = getSeasonExtendedQueryResponseSchema.parse(response);
 
     if (!data) {
       throw new TvdbAPIError(
-        `Failed to retrieve season with id ${id}: No data in response`,
+        `Failed to retrieve season with id ${id.toString()}: No data in response`,
       );
     }
 
@@ -98,7 +100,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
    */
   async getEpisode(id: string) {
     const response = await this.get<unknown>(`episodes/${id}/extended`);
-    const { data } = getEpisodeExtended200Schema.parse(response);
+    const { data } = getEpisodeExtendedQueryResponseSchema.parse(response);
 
     if (!data) {
       throw new TvdbAPIError(

@@ -1,21 +1,29 @@
-import { DateTime } from "luxon";
+import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 
-import type { SeriesExtendedRecordSchema } from "../__generated__/index.ts";
+import assert from "node:assert";
+
+import type {
+  SeasonExtendedRecordSchema,
+  SeriesExtendedRecordSchema,
+} from "../__generated__/index.ts";
 import type {
   MediaItemIndexRequestedEvent,
-  MediaItemIndexRequestedResponse,
+  MediaItemIndexRequestedPluginResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+
+type Episode = Extract<
+  NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
+  { type: "show" }
+>["seasons"][number]["episodes"][number];
 
 export const transformSeries = (
   eventItem: MediaItemIndexRequestedEvent["item"],
   series: SeriesExtendedRecordSchema,
+  seasons: SeasonExtendedRecordSchema[],
   imdbId = series.remoteIds?.find(
     (id) => id.sourceName?.toLowerCase() === "imdb",
   )?.id,
-): Extract<
-  NonNullable<MediaItemIndexRequestedResponse>["item"],
-  { type: "show" }
-> => {
+) => {
   const {
     slug = "",
     name: title,
@@ -27,9 +35,11 @@ export const transformSeries = (
     throw new Error("Series must have a name");
   }
 
-  const airedAt = series.firstAired
+  const firstAired = series.firstAired
     ? DateTime.fromISO(series.firstAired)
     : null;
+
+  assert(firstAired);
 
   const network =
     series.latestNetwork?.name ?? series.originalNetwork?.name ?? null;
@@ -71,16 +81,42 @@ export const transformSeries = (
     ),
     contentRating,
     posterUrl: posterPath,
-    airedAt: airedAt
-      ? airedAt.toISO({
-          precision: "day",
-          includeOffset: false,
-        })
-      : null,
-    year: airedAt ? airedAt.year : null,
-    seasons: series.seasons?.map((season) => ({
-      number: season.number,
-      year: season.firstAired ? DateTime.fromISO(season.firstAired).year : null,
-    })),
-  };
+    status: tvdbStatus === "Continuing" ? "continuing" : "ended",
+    firstAired: firstAired.toISO({
+      precision: "day",
+      includeOffset: false,
+    }),
+    seasons: seasons.map((season) => {
+      assert(season.number !== undefined, "Season must have a number");
+
+      return {
+        number: season.number,
+        episodes:
+          season.episodes?.reduce<Episode[]>((acc, episode) => {
+            assert(episode.name);
+            assert(episode.number !== undefined, "Episode must have a number");
+
+            return [
+              ...acc,
+              {
+                contentRating: contentRating ?? null, // TODO: Get episode-specific content rating
+                number: episode.number,
+                title: episode.name,
+                posterPath: episode.image,
+                airedAt: episode.aired
+                  ? DateTime.fromISO(episode.aired).toISO({
+                      precision: "day",
+                      includeOffset: false,
+                    })
+                  : null,
+                runtime: episode.runtime ?? null,
+              } satisfies Episode,
+            ];
+          }, [] as Episode[]) ?? [],
+      };
+    }),
+  } satisfies Extract<
+    NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
+    { type: "show" }
+  >;
 };

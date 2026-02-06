@@ -1,6 +1,10 @@
 import z from "zod";
 
-import { MediaItemContentRating } from "../../dto/enums/content-ratings.enum.ts";
+import {
+  MovieContentRating,
+  ShowContentRating,
+} from "../../dto/enums/content-ratings.enum.ts";
+import { ShowStatus } from "../../dto/enums/show-status.enum.ts";
 import { MediaItem } from "../media/media-item.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
@@ -25,11 +29,9 @@ const IndexedItem = z.object({
   genres: z.array(z.string()),
   country: z.string().nullish(),
   rating: z.number().nullish(),
-  contentRating: MediaItemContentRating.nullish(),
   aliases: z.record(z.string(), z.array(z.string())).nullish(),
   posterUrl: z.url().nullish(),
   language: z.string().nullish(),
-  year: z.number().nullish(),
 });
 
 export const MediaItemIndexRequestedResponse = z
@@ -37,19 +39,25 @@ export const MediaItemIndexRequestedResponse = z
     item: z.discriminatedUnion("type", [
       IndexedItem.extend({
         type: z.literal("show"),
-        airedAt: z.iso.date().nullish(),
+        contentRating: z.string().default("Unknown").pipe(ShowContentRating),
+        firstAired: z.iso.date(),
         network: z.string().min(1).nullable(),
+        status: ShowStatus,
         seasons: z.array(
           z.object({
             number: z.number(),
-            year: z.number(),
             episodes: z.array(
               z.object({
+                contentRating: z
+                  .string()
+                  .default("Unknown")
+                  .pipe(ShowContentRating)
+                  .nullable(),
                 number: z.number(),
-                year: z.number(),
                 title: z.string(),
                 posterPath: z.url().nullish(),
                 airedAt: z.iso.date().nullish(),
+                runtime: z.int().positive().nullable(),
               }),
             ),
           }),
@@ -58,6 +66,7 @@ export const MediaItemIndexRequestedResponse = z
       IndexedItem.extend({
         type: z.literal("movie"),
         releaseDate: z.iso.date().nullish(),
+        contentRating: z.string().default("Unknown").pipe(MovieContentRating),
       }),
     ]),
   })
@@ -65,6 +74,10 @@ export const MediaItemIndexRequestedResponse = z
   .describe(
     "The indexed media item data, or null if no indexing was performed",
   );
+
+export type MediaItemIndexRequestedPluginResponse = z.input<
+  typeof MediaItemIndexRequestedResponse
+>;
 
 export type MediaItemIndexRequestedResponse = z.infer<
   typeof MediaItemIndexRequestedResponse
