@@ -23,7 +23,7 @@ export const indexTVDBMediaItem: z.input<
     );
 
     return {
-      item: transformSeries(event.item, series, seasons),
+      item: transformSeries(event.item, series, seasons, event.item.imdbId),
     };
   } else if (event.item.imdbId) {
     return null;

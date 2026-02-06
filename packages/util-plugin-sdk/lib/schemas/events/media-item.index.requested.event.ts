@@ -32,6 +32,7 @@ const IndexedItem = z.object({
   aliases: z.record(z.string(), z.array(z.string())).nullish(),
   posterUrl: z.url().nullish(),
   language: z.string().nullish(),
+  imdbId: z.string().nullable(),
 });
 
 export const MediaItemIndexRequestedResponse = z

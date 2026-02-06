@@ -137,6 +137,7 @@ it("returns the series if the item has a tvdbId", async ({
 
   expect(result.item).toStrictEqual({
     id: 1,
+    imdbId: "tt0903747",
     type: "show",
     title: "Breaking Bad",
     genres: ["Drama", "Crime", "Thriller", "Western"],

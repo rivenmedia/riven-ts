@@ -20,9 +20,9 @@ export const transformSeries = (
   eventItem: MediaItemIndexRequestedEvent["item"],
   series: SeriesExtendedRecordSchema,
   seasons: SeasonExtendedRecordSchema[],
-  imdbId = series.remoteIds?.find(
+  imdbId: string | null = series.remoteIds?.find(
     (id) => id.sourceName?.toLowerCase() === "imdb",
-  )?.id,
+  )?.id ?? null,
 ) => {
   const {
     slug = "",
@@ -69,6 +69,7 @@ export const transformSeries = (
   return {
     id: eventItem.id,
     type: "show",
+    imdbId: imdbId ?? null,
     title: sanitisedTitle,
     genres,
     network,
