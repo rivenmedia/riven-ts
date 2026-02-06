@@ -21,10 +21,9 @@ export const indexTVDBMediaItem: z.input<
         )
         .map((season) => api.getSeason(season.id)) ?? [],
     );
-    const transformedSeries = transformSeries(event.item, series, seasons);
 
     return {
-      item: transformedSeries,
+      item: transformSeries(event.item, series, seasons),
     };
   } else if (event.item.imdbId) {
     return null;
