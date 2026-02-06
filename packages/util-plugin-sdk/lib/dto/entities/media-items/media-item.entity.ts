@@ -6,6 +6,7 @@ import {
   Index,
   ManyToMany,
   ManyToOne,
+  type Opt,
   PrimaryKey,
   Property,
   type Ref,
@@ -15,6 +16,7 @@ import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
 import { z } from "zod";
 
+import { MediaItemContentRating } from "../../enums/content-ratings.enum.js";
 import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import { Stream } from "../streams/stream.entity.ts";
@@ -74,7 +76,7 @@ registerEnumType(MediaItemType.enum, {
 export abstract class MediaItem {
   @Field((_type) => ID)
   @PrimaryKey()
-  id!: number;
+  id!: number & Opt;
 
   @Field(() => String, { nullable: true })
   @Index()
@@ -106,10 +108,10 @@ export abstract class MediaItem {
   @Property()
   posterPath?: string;
 
-  @Field()
+  @Field(() => Date)
   @Index()
   @Property()
-  requestedAt: Date = new Date();
+  requestedAt: Date & Opt = new Date();
 
   @Field({ nullable: true })
   @Property()
@@ -167,13 +169,13 @@ export abstract class MediaItem {
   @Property()
   rating?: number;
 
-  @Field({ nullable: true })
+  @Field(() => MediaItemContentRating.enum, { nullable: true })
   @Property()
-  contentRating?: string;
+  contentRating?: MediaItemContentRating;
 
-  @Field()
+  @Field(() => Boolean)
   @Property({ default: false })
-  updated!: boolean;
+  updated!: boolean & Opt;
 
   @Field({ nullable: true })
   @Property()
@@ -186,17 +188,20 @@ export abstract class MediaItem {
   @Enum(() => MediaItemState.enum)
   state!: MediaItemState;
 
-  @Field()
-  @Property({ default: 0 })
-  failedAttempts!: number;
+  @Field(() => Number)
+  @Property()
+  failedAttempts: number & Opt = 0;
 
   @Field(() => [FileSystemEntry])
   @ManyToMany()
-  filesystemEntries = new Collection<FileSystemEntry>(this);
+  filesystemEntries: Collection<FileSystemEntry> & Opt =
+    new Collection<FileSystemEntry>(this);
 
   @Field(() => [SubtitleEntry])
   @ManyToMany()
-  subtitles = new Collection<SubtitleEntry>(this);
+  subtitles: Collection<SubtitleEntry> & Opt = new Collection<SubtitleEntry>(
+    this,
+  );
 
   @Field(() => Stream, { nullable: true })
   @ManyToOne()
@@ -204,15 +209,15 @@ export abstract class MediaItem {
 
   @Field(() => [Stream])
   @ManyToMany({ owner: true })
-  streams = new Collection<Stream>(this);
+  streams: Collection<Stream> & Opt = new Collection<Stream>(this);
 
   @Field(() => [Stream])
   @ManyToMany()
-  blacklistedStreams = new Collection<Stream>(this);
+  blacklistedStreams: Collection<Stream> & Opt = new Collection<Stream>(this);
 
   @Field(() => String)
   @Enum()
-  type!: MediaItemType;
+  type!: MediaItemType & Opt;
 
   /**
    * A pretty name for the media item to be used in VFS paths.

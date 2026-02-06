@@ -7,6 +7,8 @@ import {
 import { DateTime } from "luxon";
 
 import {
+  getEpisodeExtended200Schema,
+  getSeasonExtended200Schema,
   getSeriesExtended200Schema,
   postLogin200Schema,
 } from "../__generated__/index.ts";
@@ -61,6 +63,46 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
     if (!data) {
       throw new TvdbAPIError(
         `Failed to retrieve series with id ${id}: No data in response`,
+      );
+    }
+
+    return data;
+  }
+
+  /**
+   * Retrieve a TVDB season by its id
+   *
+   * @see {@link https://thetvdb.github.io/v4-api/#/Seasons/getSeasonExtended}
+   *
+   * @param id The TVDB id of the season to retrieve
+   */
+  async getSeason(id: number) {
+    const response = await this.get<unknown>(`seasons/${id}/extended`);
+    const { data } = getSeasonExtended200Schema.parse(response);
+
+    if (!data) {
+      throw new TvdbAPIError(
+        `Failed to retrieve season with id ${id}: No data in response`,
+      );
+    }
+
+    return data;
+  }
+
+  /**
+   * Retrieve a TVDB episode by its id
+   *
+   * @see {@link https://thetvdb.github.io/v4-api/#/Episodes/getEpisodeExtended}
+   *
+   * @param id The TVDB id of the episode to retrieve
+   */
+  async getEpisode(id: string) {
+    const response = await this.get<unknown>(`episodes/${id}/extended`);
+    const { data } = getEpisodeExtended200Schema.parse(response);
+
+    if (!data) {
+      throw new TvdbAPIError(
+        `Failed to retrieve episode with id ${id}: No data in response`,
       );
     }
 

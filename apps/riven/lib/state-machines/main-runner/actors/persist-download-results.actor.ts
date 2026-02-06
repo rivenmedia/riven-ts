@@ -1,4 +1,4 @@
-import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities/index";
+import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import { ref } from "@mikro-orm/core";
 import { ValidationError, validateOrReject } from "class-validator";

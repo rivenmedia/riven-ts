@@ -1,6 +1,6 @@
 import packageJson from "../package.json" with { type: "json" };
 import { TvdbAPI } from "./datasource/tvdb.datasource.ts";
-import { indexRequestedHook } from "./hooks/index-requested.hook.ts";
+import { indexTVDBMediaItem } from "./hooks/index-tvdb-media-item.ts";
 import { TvdbSettingsResolver } from "./schema/tvdb-settings.resolver.ts";
 import { TvdbResolver } from "./schema/tvdb.resolver.ts";
 import { pluginConfig } from "./tvdb-plugin.config.ts";
@@ -14,7 +14,7 @@ export default {
   dataSources: [TvdbAPI],
   resolvers: [TvdbResolver, TvdbSettingsResolver],
   hooks: {
-    "riven.media-item.index.requested": indexRequestedHook,
+    "riven.media-item.index.requested": indexTVDBMediaItem,
   },
   settingsSchema: TvdbSettings,
   validator() {

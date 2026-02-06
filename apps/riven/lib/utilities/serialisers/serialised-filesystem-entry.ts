@@ -1,4 +1,4 @@
-import { FileSystemEntryType } from "@repo/util-plugin-sdk/dto/entities/index";
+import { FileSystemEntryType } from "@repo/util-plugin-sdk/dto/entities";
 import { FileSystemEntry } from "@repo/util-plugin-sdk/schemas/media/filesystem-entry";
 
 import { wrap } from "@mikro-orm/core";

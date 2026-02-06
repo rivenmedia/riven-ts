@@ -1,4 +1,4 @@
-import { MediaItemType } from "@repo/util-plugin-sdk/dto/entities/index";
+import { MediaItemType } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItem } from "@repo/util-plugin-sdk/schemas/media/media-item";
 
 import { wrap } from "@mikro-orm/core";

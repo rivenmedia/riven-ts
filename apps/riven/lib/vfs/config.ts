@@ -1,4 +1,4 @@
-import { MediaItemType } from "@repo/util-plugin-sdk/dto/entities/index";
+import { MediaItemType } from "@repo/util-plugin-sdk/dto/entities";
 
 export const config = {
   /**

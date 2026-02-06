@@ -16,6 +16,12 @@ import { Show } from "./show.entity.ts";
 @ObjectType()
 @Entity()
 export class Season extends MediaItem {
+  constructor() {
+    super();
+
+    this.type = "season";
+  }
+
   @Field()
   @Property()
   @Min(1)

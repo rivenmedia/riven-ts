@@ -9,7 +9,7 @@ import {
   Movie,
   Season,
   Show,
-} from "@repo/util-plugin-sdk/dto/entities/index";
+} from "@repo/util-plugin-sdk/dto/entities";
 import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 import { TorrentContainer } from "@repo/util-plugin-sdk/schemas/torrents/torrent-container";
 import { TorrentFile } from "@repo/util-plugin-sdk/schemas/torrents/torrent-file";

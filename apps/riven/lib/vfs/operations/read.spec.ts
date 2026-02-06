@@ -81,7 +81,9 @@ it("fetches the header chunk if the requested range is entirely within the heade
   const { readSync } = await import("./read.ts");
 
   const fileChunkCalculations =
-    fileNameToFileChunkCalculationsMap.get(fileName)!;
+    fileNameToFileChunkCalculationsMap.get(fileName);
+
+  expect.assert(fileChunkCalculations);
 
   const responseBuffer = setupRangeInterceptor(
     mockAgent,
@@ -109,7 +111,9 @@ it("fetches the footer chunk if the requested range is entirely within the foote
   const { readSync } = await import("./read.ts");
 
   const fileChunkCalculations =
-    fileNameToFileChunkCalculationsMap.get(fileName)!;
+    fileNameToFileChunkCalculationsMap.get(fileName);
+
+  expect.assert(fileChunkCalculations);
 
   const responseBuffer = setupRangeInterceptor(
     mockAgent,
@@ -145,7 +149,9 @@ it("correctly calculates offsets when copying chunk data into the buffer", async
   const { readSync } = await import("./read.ts");
 
   const fileChunkCalculations =
-    fileNameToFileChunkCalculationsMap.get(fileName)!;
+    fileNameToFileChunkCalculationsMap.get(fileName);
+
+  expect.assert(fileChunkCalculations);
 
   const length = 64;
   const offset = 1024;
@@ -182,7 +188,9 @@ it("offsets the first chunk by the size of the header chunk", async ({
   const { readSync } = await import("./read.ts");
 
   const fileChunkCalculations =
-    fileNameToFileChunkCalculationsMap.get(fileName)!;
+    fileNameToFileChunkCalculationsMap.get(fileName);
+
+  expect.assert(fileChunkCalculations);
 
   const length = 64;
 
@@ -332,12 +340,13 @@ it("saves a copy of each chunk to the cache when reading during playback within 
     104071168 + config.chunkSize - 1,
   ] as const;
 
+  const fileHandle = fdToFileHandleMeta.get(0);
+
+  expect.assert(fileHandle);
+
   fdToResponseMap.set(
     0,
-    await createStreamRequest(fdToFileHandleMeta.get(0)!.url, [
-      firstChunkRange[0],
-      undefined,
-    ]),
+    await createStreamRequest(fileHandle.url, [firstChunkRange[0], undefined]),
   );
 
   const callback = vi.fn();
@@ -370,11 +379,11 @@ it("saves a copy of each chunk to the cache when reading during playback within 
     createChunkCacheKey(fileName, secondChunkRange[0], secondChunkRange[1]),
   );
 
-  expect(firstCachedChunk).toBeDefined();
-  expect(secondCachedChunk).toBeDefined();
+  expect.assert(firstCachedChunk);
+  expect.assert(secondCachedChunk);
 
-  expect(firstCachedChunk!.equals(firstChunkResponseBuffer)).toBe(true);
-  expect(secondCachedChunk!.equals(secondChunkResponseBuffer)).toBe(true);
+  expect(firstCachedChunk.equals(firstChunkResponseBuffer)).toBe(true);
+  expect(secondCachedChunk.equals(secondChunkResponseBuffer)).toBe(true);
 
-  expect(firstCachedChunk!.equals(secondCachedChunk!)).toBe(false);
+  expect(firstCachedChunk.equals(secondCachedChunk)).toBe(false);
 });

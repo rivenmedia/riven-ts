@@ -13,7 +13,7 @@ import {
   Show,
   Stream,
   SubtitleEntry,
-} from "@repo/util-plugin-sdk/dto/entities/index";
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import { buildSchema as baseBuildSchema } from "type-graphql";
 

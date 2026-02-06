@@ -1,4 +1,4 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities/index";
+import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
@@ -17,6 +17,16 @@ export async function persistMovieIndexerData({
   item,
   sendEvent,
 }: PersistMovieIndexerDataInput) {
+  if (item.type !== "movie") {
+    sendEvent({
+      type: "riven.media-item.index.error",
+      item,
+      error: "Item is not a movie",
+    });
+
+    return;
+  }
+
   const existingItem = await database.requestedItem.findOneOrFail({
     id: item.id,
   });

@@ -7,6 +7,7 @@
     ".": "./lib/index.ts",
     "./types/*": "./lib/types/*.ts",
     "./dto/*": "./lib/dto/*.ts",
+    "./dto/entities": "./lib/dto/entities/index.ts",
     "./errors/*": "./lib/errors/*.ts",
     "./events": "./lib/schemas/events/index.ts",
     "./events/*": "./lib/schemas/plugin-to-program-events/*.ts",
@@ -26,7 +27,8 @@
   "dependencies": {
     "luxon": "catalog:",
     "redis-memory-server": "^0.16.0",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zod-validation-error": "^5.0.0"
   },
   "devDependencies": {
     "@apollo/client": "^4.0.11",

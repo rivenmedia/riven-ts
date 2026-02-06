@@ -1,4 +1,4 @@
-import { MediaEntry, Movie } from "@repo/util-plugin-sdk/dto/entities/index";
+import { MediaEntry, Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import { ref } from "@mikro-orm/core";
 import Fuse from "@zkochan/fuse-native";

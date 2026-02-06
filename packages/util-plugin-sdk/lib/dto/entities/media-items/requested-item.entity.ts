@@ -5,4 +5,10 @@ import { MediaItem } from "./media-item.entity.ts";
 
 @ObjectType()
 @Entity()
-export class RequestedItem extends MediaItem {}
+export class RequestedItem extends MediaItem {
+  constructor() {
+    super();
+
+    this.type = "requested_item";
+  }
+}
