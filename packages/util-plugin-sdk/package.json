@@ -25,6 +25,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "es-toolkit": "catalog:",
     "luxon": "catalog:",
     "redis-memory-server": "^0.16.0",
     "zod": "catalog:",

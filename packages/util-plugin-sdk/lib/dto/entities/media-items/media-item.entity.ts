@@ -16,7 +16,10 @@ import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
 import { z } from "zod";
 
-import { MediaItemContentRating } from "../../enums/content-ratings.enum.js";
+import {
+  MediaItemContentRating,
+  MediaItemContentRatingEnum,
+} from "../../enums/content-ratings.enum.js";
 import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import { Stream } from "../streams/stream.entity.ts";
@@ -169,7 +172,7 @@ export abstract class MediaItem {
   @Property()
   rating?: number;
 
-  @Field(() => MediaItemContentRating.enum, { nullable: true })
+  @Field(() => MediaItemContentRatingEnum, { nullable: true })
   @Property()
   contentRating?: MediaItemContentRating;
 

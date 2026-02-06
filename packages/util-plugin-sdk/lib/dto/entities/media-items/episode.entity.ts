@@ -2,7 +2,10 @@ import { Entity, Enum, ManyToOne, Property, type Ref } from "@mikro-orm/core";
 import { Min } from "class-validator";
 import { Field, ObjectType } from "type-graphql";
 
-import { ShowContentRating } from "../../enums/content-ratings.enum.ts";
+import {
+  ShowContentRating,
+  ShowContentRatingEnum,
+} from "../../enums/content-ratings.enum.ts";
 import { MediaItem } from "./media-item.entity.ts";
 import { Season } from "./season.entity.ts";
 
@@ -28,7 +31,7 @@ export class Episode extends MediaItem {
   @ManyToOne()
   season!: Ref<Season>;
 
-  @Field(() => ShowContentRating)
+  @Field(() => ShowContentRatingEnum)
   @Enum({ items: ShowContentRating.options })
   declare contentRating: ShowContentRating;
 }

@@ -26,24 +26,6 @@ export const initialiseVfs = fromPromise<
   InitialiseVfsOutput,
   InitialiseVfsInput
 >(async ({ input: { mountPath, pluginQueues } }) => {
-  try {
-    await new Promise((resolve, reject) => {
-      Fuse.configure((error) => {
-        if (error) {
-          reject(error);
-        }
-
-        resolve(undefined);
-      });
-    });
-  } catch (error: unknown) {
-    throw new Error(
-      `FUSE configuration failed on this system: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
-  }
-
   const linkRequestQueues = new Map<
     string,
     Queue<

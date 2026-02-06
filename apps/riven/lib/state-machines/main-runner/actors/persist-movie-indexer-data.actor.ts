@@ -66,9 +66,7 @@ export async function persistMovieIndexerData({
     existingItem.aliases = item.aliases;
   }
 
-  if (item.contentRating) {
-    existingItem.contentRating = item.contentRating;
-  }
+  existingItem.contentRating = item.contentRating;
 
   if (item.rating) {
     existingItem.rating = item.rating;
@@ -95,7 +93,7 @@ export async function persistMovieIndexerData({
 
     sendEvent({
       type: "riven.media-item.index.success",
-      item: item,
+      item,
     });
 
     return item;

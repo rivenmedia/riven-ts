@@ -50,7 +50,7 @@ export interface DataSourceConstructor<
 
 const dataSourceSchema = z.custom<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Constructor<BaseDataSource<Record<string, any>>>
+  Constructor<BaseDataSource<Record<string, any>>, [BaseDataSourceConfig<any>]>
 >((value) => {
   if (typeof value !== "function") {
     return false;

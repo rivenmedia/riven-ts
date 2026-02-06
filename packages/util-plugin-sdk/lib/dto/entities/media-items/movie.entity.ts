@@ -2,6 +2,7 @@ import { Entity, Enum } from "@mikro-orm/core";
 import { Field, ObjectType } from "type-graphql";
 import z from "zod";
 
+import { MovieContentRatingEnum } from "../../enums/content-ratings.enum.ts";
 import { MediaItem } from "./media-item.entity.ts";
 
 export const MovieContentRating = z.enum([
@@ -24,7 +25,7 @@ export class Movie extends MediaItem {
     this.type = "movie";
   }
 
-  @Field(() => MovieContentRating.enum)
+  @Field(() => MovieContentRatingEnum)
   @Enum()
   declare contentRating: MovieContentRating;
 }

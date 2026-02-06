@@ -116,7 +116,9 @@ export const pluginRegistrarMachine = setup({
                   pluginSymbol: plugin.name,
                   cache: redisCache,
                   logger,
-                  redisUrl: settings.redisUrl,
+                  connection: {
+                    url: settings.redisUrl,
+                  },
                   settings: pluginSettings.get(plugin.settingsSchema),
                 });
 

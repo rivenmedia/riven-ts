@@ -1090,6 +1090,9 @@ importers:
 
   packages/util-plugin-sdk:
     dependencies:
+      es-toolkit:
+        specifier: 'catalog:'
+        version: 1.44.0
       luxon:
         specifier: 'catalog:'
         version: 3.7.2

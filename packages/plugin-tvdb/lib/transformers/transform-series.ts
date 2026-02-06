@@ -20,7 +20,7 @@ export const transformSeries = (
   eventItem: MediaItemIndexRequestedEvent["item"],
   series: SeriesExtendedRecordSchema,
   seasons: SeasonExtendedRecordSchema[],
-  imdbId: string | null = series.remoteIds?.find(
+  imdbId = series.remoteIds?.find(
     (id) => id.sourceName?.toLowerCase() === "imdb",
   )?.id ?? null,
 ) => {
