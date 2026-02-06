@@ -1,6 +1,7 @@
 import { UnrecoverableError } from "bullmq";
 
 import { persistMovieIndexerData } from "../../../state-machines/main-runner/actors/persist-movie-indexer-data.actor.ts";
+import { persistShowIndexerData } from "../../../state-machines/main-runner/actors/persist-show-indexer-data.actor.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { requestIndexDataProcessorSchema } from "./index-item.schema.ts";
 
@@ -11,7 +12,7 @@ export const indexItemProcessor =
     async function (job, sendEvent) {
       const data = await job.getChildrenValues();
 
-      if (!Object.keys(data).length) {
+      if (!Object.values(data).filter(Boolean).length) {
         throw new UnrecoverableError("No data returned from indexers");
       }
 
@@ -30,10 +31,16 @@ export const indexItemProcessor =
       );
 
       try {
-        const updatedItem = await persistMovieIndexerData({
-          item,
-          sendEvent,
-        });
+        const updatedItem =
+          item.type === "movie"
+            ? await persistMovieIndexerData({
+                item,
+                sendEvent,
+              })
+            : await persistShowIndexerData({
+                item,
+                sendEvent,
+              });
 
         if (updatedItem) {
           sendEvent({

@@ -1,5 +1,6 @@
+import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
+
 import { ValidationError, validateOrReject } from "class-validator";
-import { DateTime } from "luxon";
 import z from "zod";
 
 import { database } from "../../../database/database.ts";
@@ -7,25 +8,25 @@ import { database } from "../../../database/database.ts";
 import type { MainRunnerMachineIntake } from "../index.ts";
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-export interface PersistMovieIndexerDataInput extends NonNullable<MediaItemIndexRequestedResponse> {
+export interface PersistShowIndexerDataInput extends NonNullable<MediaItemIndexRequestedResponse> {
   sendEvent: MainRunnerMachineIntake;
 }
 
-export async function persistMovieIndexerData({
+export async function persistShowIndexerData({
   item,
   sendEvent,
-}: PersistMovieIndexerDataInput) {
-  if (item.type !== "movie") {
+}: PersistShowIndexerDataInput) {
+  if (item.type !== "show") {
     sendEvent({
       type: "riven.media-item.index.error",
       item,
-      error: "Item is not a movie",
+      error: "Item is not a show",
     });
 
     return;
   }
 
-  const existingItem = await database.mediaItem.findOneOrFail({
+  const existingItem = await database.show.findOneOrFail({
     id: item.id,
   });
 
@@ -47,10 +48,8 @@ export async function persistMovieIndexerData({
     existingItem.posterPath = item.posterUrl;
   }
 
-  if (item.releaseDate) {
-    existingItem.airedAt = DateTime.fromISO(item.releaseDate).toJSDate();
-    existingItem.year = DateTime.fromISO(item.releaseDate).year;
-  }
+  existingItem.airedAt = DateTime.fromISO(item.firstAired).toJSDate();
+  existingItem.year = DateTime.fromISO(item.firstAired).year;
 
   if (item.country) {
     existingItem.country = item.country;
@@ -76,9 +75,9 @@ export async function persistMovieIndexerData({
       item.genres.map((g) => g.toLowerCase()).includes(genre),
     );
 
-  existingItem.genres = item.genres;
+  existingItem.genres = item.genres.map((genre) => genre.toLowerCase());
   existingItem.state = "Indexed";
-  existingItem.type = "movie";
+  existingItem.type = "show";
 
   em.persist(existingItem);
 
@@ -87,14 +86,14 @@ export async function persistMovieIndexerData({
 
     await em.flush();
 
-    const updatedItem = await em.refreshOrFail(existingItem);
+    const item = await em.refreshOrFail(existingItem);
 
     sendEvent({
       type: "riven.media-item.index.success",
-      item: updatedItem,
+      item,
     });
 
-    return updatedItem;
+    return item;
   } catch (error) {
     const parsedError = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

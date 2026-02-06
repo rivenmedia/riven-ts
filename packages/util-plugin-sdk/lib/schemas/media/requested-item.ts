@@ -1,9 +1,13 @@
 import z from "zod";
 
-export const requestedItemSchema = z.object({
+import { RequestType } from "../../dto/entities/index.ts";
+
+export const ItemRequest = z.object({
+  id: z.int(),
   imdbId: z.string().nullish(),
   tmdbId: z.string().nullish(),
   tvdbId: z.string().nullish(),
+  type: RequestType,
 });
 
-export type RequestedItem = z.infer<typeof requestedItemSchema>;
+export type ItemRequest = z.infer<typeof ItemRequest>;

@@ -66,18 +66,6 @@ export const SerialisedMediaItem = z.codec(
               managed: true,
             },
           );
-        case "requested_item":
-          return database.requestedItem.create(
-            {
-              ...data,
-              type: "requested_item",
-            },
-            {
-              persist: false,
-              partial: true,
-              managed: true,
-            },
-          );
       }
     },
     encode: (data) => wrap(data).serialize(),

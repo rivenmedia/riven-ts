@@ -8,6 +8,7 @@ import type z from "zod";
 export const indexTVDBMediaItem: z.input<
   typeof MediaItemIndexRequestedEventHandler
 > = async ({ dataSources, event }) => {
+  console.log(event);
   if (event.item.tvdbId) {
     const api = dataSources.get(TvdbAPI);
     const series = await api.getSeries(event.item.tvdbId);

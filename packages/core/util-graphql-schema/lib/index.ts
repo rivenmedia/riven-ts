@@ -8,7 +8,6 @@ import {
   MediaEntry,
   MediaItem,
   Movie,
-  RequestedItem,
   Season,
   Show,
   Stream,
@@ -29,7 +28,6 @@ export const buildSchema = async (pluginResolvers: Function[]) =>
       Movie,
       Season,
       Show,
-      RequestedItem,
       Stream,
     ],
     resolvers: [

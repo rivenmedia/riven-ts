@@ -5,7 +5,7 @@ import {
   ShowContentRating,
 } from "../../dto/enums/content-ratings.enum.ts";
 import { ShowStatus } from "../../dto/enums/show-status.enum.ts";
-import { MediaItem } from "../media/media-item.ts";
+import { ItemRequest } from "../media/requested-item.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
@@ -15,7 +15,7 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 export const MediaItemIndexRequestedEvent = createProgramEventSchema(
   "media-item.index.requested",
   z.object({
-    item: MediaItem,
+    item: ItemRequest,
   }),
 );
 

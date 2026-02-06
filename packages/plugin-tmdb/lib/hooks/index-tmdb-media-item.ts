@@ -8,6 +8,12 @@ import type z from "zod";
 export const indexTMDBMediaItem: z.input<
   typeof MediaItemIndexRequestedEventHandler
 > = async ({ dataSources, event }) => {
+  if (event.item.type !== "movie") {
+    throw new UnrecoverableError(
+      `TMDB plugin can only index movies. Received item of type ${event.item.type}`,
+    );
+  }
+
   if (!event.item.tmdbId && !event.item.imdbId) {
     throw new UnrecoverableError(
       "Media item must have either a TMDB ID or an IMDB ID",
@@ -31,6 +37,8 @@ export const indexTMDBMediaItem: z.input<
   return {
     item: {
       id: event.item.id,
+      type: "movie",
+      imdbId: imdbId ?? result.imdb_id ?? null,
       genres: (result.genres ?? []).reduce<string[]>((acc, genre) => {
         if (!genre.name) {
           return acc;

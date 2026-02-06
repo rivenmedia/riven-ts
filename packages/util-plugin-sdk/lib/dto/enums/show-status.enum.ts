@@ -1,7 +1,7 @@
 import { registerEnumType } from "type-graphql";
 import z from "zod";
 
-export const ShowStatus = z.enum(["continuing", "ended"]);
+export const ShowStatus = z.enum(["continuing", "ended", "unknown"]);
 
 export type ShowStatus = z.infer<typeof ShowStatus>;
 

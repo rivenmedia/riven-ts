@@ -32,6 +32,6 @@ export class Episode extends MediaItem {
   season!: Ref<Season>;
 
   @Field(() => ShowContentRatingEnum)
-  @Enum({ items: ShowContentRating.options })
+  @Enum()
   declare contentRating: ShowContentRating;
 }

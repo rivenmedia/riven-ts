@@ -48,13 +48,7 @@ registerEnumType(MediaItemState.enum, {
   description: "The state of a media item in the processing pipeline",
 });
 
-export const MediaItemType = z.enum([
-  "movie",
-  "show",
-  "season",
-  "episode",
-  "requested_item",
-]);
+export const MediaItemType = z.enum(["movie", "show", "season", "episode"]);
 
 export type MediaItemType = z.infer<typeof MediaItemType>;
 
@@ -72,7 +66,6 @@ registerEnumType(MediaItemType.enum, {
     show: "Show",
     season: "Season",
     episode: "Episode",
-    requested_item: "RequestedItem",
   },
 })
 @Index({ properties: ["type", "airedAt"] })
@@ -220,7 +213,7 @@ export abstract class MediaItem {
 
   @Field(() => String)
   @Enum()
-  type!: MediaItemType & Opt;
+  type!: MediaItemType;
 
   /**
    * A pretty name for the media item to be used in VFS paths.

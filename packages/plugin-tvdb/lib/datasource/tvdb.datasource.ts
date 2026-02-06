@@ -126,7 +126,11 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
       return this.#token;
     }
 
-    const response = await this.post<unknown>("login");
+    const response = await this.post<unknown>("login", {
+      body: {
+        apikey: this.settings.apiKey,
+      },
+    });
     const { data } = postLogin200Schema.parse(response);
 
     if (!data?.token) {

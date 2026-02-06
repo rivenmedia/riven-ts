@@ -1,4 +1,4 @@
-import { RequestedItem } from "@repo/util-plugin-sdk/dto/entities";
+import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
@@ -39,7 +39,7 @@ export async function processRequestedItem({
 
   logger.silly(`Processing requested item: ${externalIds.join(", ")}`);
 
-  const existingItem = await database.requestedItem.findOne({
+  const existingItem = await database.mediaItem.findOne({
     $or: [
       ...(item.imdbId ? [{ imdbId: item.imdbId }] : []),
       ...(type === "movie" && item.tmdbId ? [{ tmdbId: item.tmdbId }] : []),
@@ -60,30 +60,30 @@ export async function processRequestedItem({
 
   const em = database.em.fork();
 
-  const requestedItem = new RequestedItem();
+  const mediaItem = type === "movie" ? new Movie() : new Show();
 
   if (item.imdbId) {
-    requestedItem.imdbId = item.imdbId;
+    mediaItem.imdbId = item.imdbId;
   }
 
   if (type === "movie" && item.tmdbId) {
-    requestedItem.tmdbId = item.tmdbId;
+    mediaItem.tmdbId = item.tmdbId;
   }
 
   if (type === "show" && item.tvdbId) {
-    requestedItem.tvdbId = item.tvdbId;
+    mediaItem.tvdbId = item.tvdbId;
   }
 
-  requestedItem.state = "Requested";
+  mediaItem.state = "Requested";
 
-  em.persist(requestedItem);
+  em.persist(mediaItem);
 
   try {
-    await validateOrReject(requestedItem);
+    await validateOrReject(mediaItem);
 
     await em.flush();
 
-    const item = await em.refreshOrFail(requestedItem);
+    const item = await em.refreshOrFail(mediaItem);
 
     sendEvent({
       type: "riven.media-item.creation.success",
@@ -100,7 +100,10 @@ export async function processRequestedItem({
 
     sendEvent({
       type: "riven.media-item.creation.error",
-      item,
+      item: {
+        ...item,
+        type,
+      },
       error: Array.isArray(parsedError)
         ? parsedError
             .map((err) =>

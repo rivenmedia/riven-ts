@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { requestedItemSchema } from "../media/requested-item.ts";
+import { ItemRequest } from "../media/requested-item.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
@@ -10,7 +10,7 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 export const MediaItemCreationErrorEvent = createProgramEventSchema(
   "media-item.creation.error",
   z.object({
-    item: requestedItemSchema,
+    item: ItemRequest.omit({ id: true }),
     error: z.unknown(),
   }),
 );

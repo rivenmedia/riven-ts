@@ -1,10 +1,10 @@
 import {
   Episode,
   FileSystemEntry,
+  ItemRequest,
   MediaEntry,
   MediaItem,
   Movie,
-  RequestedItem,
   Season,
   Show,
   Stream,
@@ -26,7 +26,7 @@ export const entities = [
   Movie,
   Season,
   Show,
-  RequestedItem,
+  ItemRequest,
   Stream,
 ];
 

@@ -1,4 +1,4 @@
-import { SerialisedMediaItem } from "../../../utilities/serialisers/serialised-media-item.ts";
+import { SerialisedItemRequest } from "../../../utilities/serialisers/serialised-item-request.ts";
 import { createFlowProducer } from "../../utilities/create-flow-producer.ts";
 import { queueNameFor } from "../../utilities/queue-name-for.ts";
 
@@ -13,13 +13,13 @@ export async function indexItem(
   const producer = createFlowProducer("index-item");
 
   const childNodes = indexerPlugins.map<FlowChildJob>((plugin) => ({
-    name: `${plugin.name.description ?? "unknown"} - Index item #${item.id.toString()}`,
+    name: `${plugin.name.description ?? "unknown"} - Index item request #${item.id.toString()}`,
     queueName: queueNameFor(
       "riven.media-item.index.requested",
       plugin.name.description ?? "unknown",
     ),
     data: {
-      item: SerialisedMediaItem.encode(item),
+      item: SerialisedItemRequest.encode(item),
     },
     opts: {
       ignoreDependencyOnFailure: true,

@@ -65,8 +65,6 @@ export abstract class FileSystemEntry {
         return "shows";
       case "movie":
         return "movies";
-      case "requested_item":
-        throw new Error("Requested items do not have a filesystem entry");
     }
   }
 

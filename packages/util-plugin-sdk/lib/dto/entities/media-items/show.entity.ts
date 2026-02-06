@@ -16,21 +16,23 @@ export class Show extends MediaItem {
     super();
 
     this.type = "show";
+    this.contentRating = "Unknown";
+    this.status = "unknown";
   }
 
   @Field(() => ShowStatus.enum, { nullable: true })
-  @Enum()
+  @Enum(() => ShowStatus.enum)
   status!: ShowStatus;
 
   @Field(() => String)
   @Property({ type: "json" })
-  releaseData!: object;
+  releaseData: object = {};
 
   @Field(() => [Season], { nullable: true })
   @OneToMany(() => Season, (season) => season.parent)
   seasons = new Collection<Season>(this);
 
   @Field(() => ShowContentRatingEnum)
-  @Enum()
+  @Enum(() => ShowContentRating.enum)
   declare contentRating: ShowContentRating;
 }

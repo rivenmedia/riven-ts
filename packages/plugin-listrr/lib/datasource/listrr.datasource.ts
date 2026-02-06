@@ -86,7 +86,7 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
             if (item.id) {
               idsMap.set(item.id, {
                 imdbId: item.imDbId ?? undefined,
-                tmdbId: item.tmDbId?.toString(),
+                tvdbId: item.tvDbId?.toString(),
               });
             }
           }
