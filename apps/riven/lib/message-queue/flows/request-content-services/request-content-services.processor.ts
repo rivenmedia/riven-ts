@@ -29,10 +29,7 @@ export const requestContentServicesProcessor =
         ),
         ...items.shows.map((item) =>
           processRequestedItem({
-            item: {
-              imdbId: item.imdbId,
-              tvdbId: item.tvdbId,
-            },
+            item,
             sendEvent,
             type: "show",
           }),

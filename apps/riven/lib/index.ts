@@ -5,7 +5,6 @@ import { logger } from "./utilities/logger/logger.ts";
 
 process.on("uncaughtException", (error) => {
   logger.error(error);
-  console.trace();
 });
 
 const sessionId = crypto.randomUUID();
