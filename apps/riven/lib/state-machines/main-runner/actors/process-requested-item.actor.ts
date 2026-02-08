@@ -63,9 +63,10 @@ export async function processRequestedItem({
   const mediaItem = type === "movie" ? new Movie() : new Show();
 
   if (mediaItem instanceof Show) {
-    mediaItem.contentRating = "unknown";
     mediaItem.status = "unknown";
   }
+
+  mediaItem.contentRating = "unknown";
 
   if (item.imdbId) {
     mediaItem.imdbId = item.imdbId;

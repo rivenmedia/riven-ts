@@ -101,7 +101,11 @@ export abstract class MediaItem {
   @Field(() => Date)
   @Index()
   @Property()
-  requestedAt: Opt<Date> = new Date();
+  createdAt: Opt<Date> = new Date();
+
+  @Field(() => Date, { nullable: true })
+  @Property({ onUpdate: () => new Date() })
+  updatedAt?: Opt<Date>;
 
   @Field({ nullable: true })
   @Property()
@@ -190,12 +194,12 @@ export abstract class MediaItem {
   failedAttempts: Opt<number> = 0;
 
   @Field(() => [FileSystemEntry])
-  @ManyToMany()
+  @ManyToMany({ owner: true })
   filesystemEntries: Collection<FileSystemEntry> =
     new Collection<FileSystemEntry>(this);
 
   @Field(() => [SubtitleEntry])
-  @ManyToMany()
+  @ManyToMany({ owner: true })
   subtitles: Collection<SubtitleEntry> = new Collection<SubtitleEntry>(this);
 
   @Field(() => Stream, { nullable: true })
@@ -207,7 +211,7 @@ export abstract class MediaItem {
   streams: Collection<Stream> = new Collection<Stream>(this);
 
   @Field(() => [Stream])
-  @ManyToMany()
+  @ManyToMany({ owner: true })
   blacklistedStreams: Collection<Stream> = new Collection<Stream>(this);
 
   @Field(() => String)
@@ -221,11 +225,20 @@ export abstract class MediaItem {
    */
   @Property({ persist: false, hidden: true })
   get prettyName(): Hidden<string> | undefined {
-    if (!this.title || !this.year || !this.tmdbId) {
+    if (
+      !this.title ||
+      !this.year ||
+      (this.type === "movie" ? !this.tmdbId : !this.tvdbId)
+    ) {
       return;
     }
 
-    return `${this.title} (${this.year.toString()}) {tmdb-${this.tmdbId}}`;
+    const externalIdentifier =
+      this.type === "movie"
+        ? `tmdb-${String(this.tmdbId)}`
+        : `tvdb-${String(this.tvdbId)}`;
+
+    return `${this.title} (${this.year.toString()}) {${externalIdentifier}}`;
   }
 
   /**

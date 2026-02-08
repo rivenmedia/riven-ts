@@ -72,6 +72,39 @@ const stat = (st: StatInput) => {
   } satisfies Partial<Stats>;
 };
 
+function getEntry(pathInfo: PathInfo) {
+  switch (pathInfo.pathType) {
+    case "single-movie":
+      return database.movie.findOneOrFail({
+        tmdbId: String(pathInfo.tmdbId),
+      });
+    case "single-episode":
+      return database.episode.findOneOrFail({
+        season: {
+          number: Number(pathInfo.season),
+          parent: {
+            tvdbId: String(pathInfo.tvdbId),
+          },
+        },
+        number: Number(pathInfo.episode),
+      });
+    case "show-seasons":
+      return database.show.findOneOrFail({
+        tvdbId: String(pathInfo.tvdbId),
+      });
+    case "season-episodes":
+      return database.season.findOneOrFail({
+        parent: {
+          tvdbId: String(pathInfo.tvdbId),
+        },
+        number: Number(pathInfo.season),
+      });
+    case "all-movies":
+    case "all-shows":
+      return null;
+  }
+}
+
 async function getattr(path: string) {
   const maybeCachedAttr = attrCache.get(path);
 
@@ -95,18 +128,11 @@ async function getattr(path: string) {
   }
 
   const pathInfo = PathInfo.parse(path);
-  const entityType = config.childQueryType[pathInfo.type];
+  const entry = await getEntry(pathInfo);
 
-  if (!pathInfo.tmdbId) {
-    throw new FuseError(Fuse.ENOENT, `Invalid path: ${path}`);
+  if (!entry) {
+    throw new FuseError(Fuse.ENOENT, "Entry not found");
   }
-
-  const entry = await database.filesystemEntry.findOneOrFail({
-    mediaItem: {
-      tmdbId: pathInfo.tmdbId,
-      type: entityType,
-    },
-  });
 
   const attrs = stat({
     ctime: entry.createdAt,
@@ -114,7 +140,7 @@ async function getattr(path: string) {
     mtime: entry.updatedAt ?? entry.createdAt,
     ...(pathInfo.isFile
       ? {
-          size: entry.fileSize,
+          size: entry.mediaEntry?.fileSize ?? 0,
           mode: "file",
         }
       : { mode: "dir" }),

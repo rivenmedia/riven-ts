@@ -30,5 +30,9 @@ export class Season extends MediaItem {
   @OneToMany(() => Episode, (episode) => episode.season)
   episodes = new Collection<Episode>(this);
 
+  override get prettyName() {
+    return `Season ${this.number.toString().padStart(2, "0")}`;
+  }
+
   override type: Opt<"season"> = "season" as const;
 }

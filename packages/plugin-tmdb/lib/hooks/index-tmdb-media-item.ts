@@ -50,7 +50,7 @@ export const indexTMDBMediaItem: z.input<
       aliases: {},
       country: result.production_countries?.[0]?.iso_3166_1,
       rating: 0,
-      contentRating: "-",
+      contentRating: "unknown",
       posterUrl: result.poster_path
         ? `https://image.tmdb.org/t/p/w500${result.poster_path}`
         : null,

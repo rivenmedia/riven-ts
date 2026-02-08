@@ -7,6 +7,7 @@ import {
   type Ref,
 } from "@mikro-orm/core";
 import { Min } from "class-validator";
+import { extname } from "node:path";
 import { Field, ObjectType } from "type-graphql";
 
 import {
@@ -35,6 +36,18 @@ export class Episode extends MediaItem {
   @Field(() => ShowContentRatingEnum)
   @Enum()
   declare contentRating: ShowContentRating;
+
+  override get prettyName() {
+    const baseName = this.season
+      .getProperty("parent")
+      .getProperty("prettyName");
+
+    if (!baseName) {
+      return undefined;
+    }
+
+    return `${baseName} - s${this.season.getProperty("number").toString().padStart(2, "0")}e${this.number.toString().padStart(2, "0")} - ${this.title}${extname(this.mediaEntry?.originalFilename)}`;
+  }
 
   override type: Opt<"episode"> = "episode" as const;
 }

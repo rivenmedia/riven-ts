@@ -1,14 +1,4 @@
-import { MediaItemType } from "@repo/util-plugin-sdk/dto/entities";
-
 export const config = {
-  /**
-   * Mapping of child query types based on parent media item type.
-   */
-  childQueryType: {
-    movies: MediaItemType.enum.movie,
-    shows: MediaItemType.enum.episode,
-  } satisfies Record<string, MediaItemType>,
-
   /**
    * Root path for the virtual file system.
    */

@@ -52,7 +52,7 @@ export async function persistDownloadResults({
 
   const em = database.em.fork();
 
-  console.log({ existingItem, container });
+  em.persist(existingItem);
 
   existingItem.activeStream = ref(existingItem.streams[0]);
   existingItem.state = "Downloaded";
@@ -67,14 +67,16 @@ export async function persistDownloadResults({
         );
       }
 
-      em.create(MediaEntry, {
-        fileSize: file.fileSize,
-        originalFilename: file.fileName,
-        mediaItem: ref(existingItem),
-        provider: processedBy,
-        providerDownloadId: container.torrentId.toString(),
-        downloadUrl: file.downloadUrl ?? null,
-      });
+      existingItem.filesystemEntries.add(
+        em.create(MediaEntry, {
+          fileSize: file.fileSize,
+          originalFilename: file.fileName,
+          mediaItem: ref(existingItem),
+          provider: processedBy,
+          providerDownloadId: container.torrentId.toString(),
+          downloadUrl: file.downloadUrl ?? null,
+        }),
+      );
 
       break;
     }
@@ -86,14 +88,16 @@ export async function persistDownloadResults({
           absoluteNumber: ++iteratedEpisodes,
         });
 
-        em.create(MediaEntry, {
-          fileSize: file.fileSize,
-          originalFilename: file.fileName,
-          mediaItem: ref(associatedMediaItem),
-          provider: processedBy,
-          providerDownloadId: container.torrentId.toString(),
-          downloadUrl: file.downloadUrl ?? null,
-        });
+        associatedMediaItem.filesystemEntries.add(
+          em.create(MediaEntry, {
+            fileSize: file.fileSize,
+            originalFilename: file.fileName,
+            mediaItem: associatedMediaItem,
+            provider: processedBy,
+            providerDownloadId: container.torrentId.toString(),
+            downloadUrl: file.downloadUrl ?? null,
+          }),
+        );
       }
 
       break;
@@ -101,13 +105,7 @@ export async function persistDownloadResults({
   }
 
   try {
-    await Promise.all([
-      validateOrReject(existingItem),
-      // validateOrReject(mediaEntry),
-    ]);
-
-    // em.persist(mediaEntry);
-    em.persist(existingItem);
+    await validateOrReject(existingItem);
 
     await em.flush();
 
