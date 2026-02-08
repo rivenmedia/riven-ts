@@ -1,4 +1,11 @@
-import { Entity, Enum, ManyToOne, Property, type Ref } from "@mikro-orm/core";
+import {
+  Entity,
+  Enum,
+  ManyToOne,
+  type Opt,
+  Property,
+  type Ref,
+} from "@mikro-orm/core";
 import { Min } from "class-validator";
 import { Field, ObjectType } from "type-graphql";
 
@@ -29,7 +36,7 @@ export class Episode extends MediaItem {
 
   @Field(() => Season)
   @ManyToOne()
-  season!: Ref<Season>;
+  season!: Ref<Season> & Opt;
 
   @Field(() => ShowContentRatingEnum)
   @Enum()

@@ -70,12 +70,6 @@ export async function persistMovieIndexerData({
     existingItem.rating = item.rating;
   }
 
-  existingItem.isAnime =
-    item.language !== "en" &&
-    ["animation", "anime"].every((genre) =>
-      item.genres.map((g) => g.toLowerCase()).includes(genre),
-    );
-
   existingItem.genres = item.genres;
   existingItem.state = "Indexed";
   existingItem.type = "movie";

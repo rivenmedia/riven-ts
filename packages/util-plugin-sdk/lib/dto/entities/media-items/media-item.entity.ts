@@ -61,12 +61,6 @@ registerEnumType(MediaItemType.enum, {
 @Entity({
   abstract: true,
   discriminatorColumn: "type",
-  discriminatorMap: {
-    movie: "Movie",
-    show: "Show",
-    season: "Season",
-    episode: "Episode",
-  },
 })
 @Index({ properties: ["type", "airedAt"] })
 export abstract class MediaItem {
@@ -125,17 +119,24 @@ export abstract class MediaItem {
   @Property()
   scrapedAt?: Date;
 
-  @Field()
+  @Field(() => Number)
   @Property({ default: 0 })
-  scrapedTimes!: number;
+  scrapedTimes!: Opt<number>;
 
   @Field(() => String, { nullable: true })
   @Property({ nullable: true, type: "json" })
   aliases?: Record<string, string[]>;
 
-  @Field()
-  @Property({ default: false })
-  isAnime!: boolean;
+  @Field(() => Boolean)
+  @Property({ persist: false, hidden: true })
+  get isAnime(): Opt<Hidden<boolean>> {
+    return (
+      this.language !== "en" &&
+      ["animation", "anime"].every((genre) =>
+        this.genres?.map((g) => g.toLowerCase()).includes(genre),
+      )
+    );
+  }
 
   @Field({ nullable: true })
   @Property()
@@ -212,8 +213,8 @@ export abstract class MediaItem {
   blacklistedStreams: Collection<Stream> & Opt = new Collection<Stream>(this);
 
   @Field(() => String)
-  @Enum()
-  type!: MediaItemType;
+  @Enum(() => MediaItemType.enum)
+  type!: MediaItemType & Opt;
 
   /**
    * A pretty name for the media item to be used in VFS paths.

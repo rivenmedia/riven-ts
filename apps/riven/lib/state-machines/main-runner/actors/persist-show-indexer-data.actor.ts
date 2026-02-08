@@ -1,5 +1,7 @@
+import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities/index";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 
+import { ref } from "@mikro-orm/core";
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
 
@@ -39,61 +41,77 @@ export async function persistShowIndexerData({
     return;
   }
 
-  const em = database.em.fork();
-
-  existingItem.id = item.id;
-  existingItem.title = item.title;
-
-  if (item.posterUrl) {
-    existingItem.posterPath = item.posterUrl;
-  }
-
-  existingItem.airedAt = DateTime.fromISO(item.firstAired).toJSDate();
-  existingItem.year = DateTime.fromISO(item.firstAired).year;
-
-  if (item.country) {
-    existingItem.country = item.country;
-  }
-
-  if (item.language) {
-    existingItem.language = item.language;
-  }
-
-  if (item.aliases) {
-    existingItem.aliases = item.aliases;
-  }
-
-  existingItem.contentRating = item.contentRating;
-
-  if (item.rating) {
-    existingItem.rating = item.rating;
-  }
-
-  existingItem.isAnime =
-    item.language !== "en" &&
-    ["animation", "anime"].every((genre) =>
-      item.genres.map((g) => g.toLowerCase()).includes(genre),
-    );
-
-  existingItem.genres = item.genres.map((genre) => genre.toLowerCase());
-  existingItem.state = "Indexed";
-  existingItem.type = "show";
-
-  em.persist(existingItem);
-
   try {
-    await validateOrReject(existingItem);
+    const em = database.em.fork();
 
-    await em.flush();
+    await em.transactional(async (transaction) => {
+      existingItem.id = item.id;
+      existingItem.title = item.title;
 
-    const item = await em.refreshOrFail(existingItem);
+      if (item.posterUrl) {
+        existingItem.posterPath = item.posterUrl;
+      }
+
+      existingItem.airedAt = DateTime.fromISO(item.firstAired).toJSDate();
+      existingItem.year = DateTime.fromISO(item.firstAired).year;
+
+      if (item.country) {
+        existingItem.country = item.country;
+      }
+
+      if (item.language) {
+        existingItem.language = item.language;
+      }
+
+      if (item.aliases) {
+        existingItem.aliases = item.aliases;
+      }
+
+      existingItem.contentRating = item.contentRating;
+
+      if (item.rating) {
+        existingItem.rating = item.rating;
+      }
+
+      for (const season of item.seasons) {
+        const seasonEntry = transaction.create(Season, {
+          title: `${existingItem.title} - Season ${season.number.toString()}`,
+          number: season.number,
+          parent: ref(existingItem),
+          state: "Indexed",
+        });
+
+        await transaction.flush();
+
+        for (const episode of season.episodes) {
+          transaction.create(Episode, {
+            contentRating: episode.contentRating,
+            number: episode.number,
+            title: episode.title,
+            state: "Indexed",
+            season: ref(seasonEntry),
+          });
+        }
+      }
+
+      existingItem.genres = item.genres.map((genre) => genre.toLowerCase());
+      existingItem.state = "Indexed";
+      existingItem.type = "show";
+      existingItem.status = item.status;
+
+      await validateOrReject(existingItem);
+
+      await transaction.flush();
+    });
+
+    const updatedItem = await em.refreshOrFail(existingItem);
 
     sendEvent({
       type: "riven.media-item.index.success",
-      item,
+      item: updatedItem,
     });
 
-    return item;
+    return updatedItem;
   } catch (error) {
     const parsedError = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

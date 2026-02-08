@@ -56,9 +56,9 @@ export const MediaItemIndexRequestedResponse = z
                 contentRating: z
                   .string()
                   .toLowerCase()
+                  .nullable()
                   .default("unknown")
-                  .pipe(ShowContentRating)
-                  .nullable(),
+                  .pipe(ShowContentRating),
                 number: z.number(),
                 title: z.string(),
                 posterPath: z.url().nullish(),
