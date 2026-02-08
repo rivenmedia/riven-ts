@@ -52,32 +52,61 @@ export async function persistDownloadResults({
 
   const em = database.em.fork();
 
+  console.log({ existingItem, container });
+
   existingItem.activeStream = ref(existingItem.streams[0]);
   existingItem.state = "Downloaded";
 
-  const mediaEntry = new MediaEntry();
+  switch (existingItem.type) {
+    case "movie": {
+      const [file] = container.files;
 
-  mediaEntry.fileSize = container.files[0]?.fileSize ?? 0;
-  mediaEntry.originalFilename = container.files[0]?.fileName ?? "";
-  mediaEntry.mediaItem = ref(existingItem);
-  mediaEntry.provider = processedBy;
-  mediaEntry.providerDownloadId = container.torrentId.toString();
+      if (!file) {
+        throw new Error(
+          `No files found in torrent container ${container.infoHash}`,
+        );
+      }
 
-  const downloadUrl = container.files[0]?.downloadUrl;
+      em.create(MediaEntry, {
+        fileSize: file.fileSize,
+        originalFilename: file.fileName,
+        mediaItem: ref(existingItem),
+        provider: processedBy,
+        providerDownloadId: container.torrentId.toString(),
+        downloadUrl: file.downloadUrl ?? null,
+      });
 
-  if (downloadUrl) {
-    mediaEntry.downloadUrl = downloadUrl;
+      break;
+    }
+    case "show": {
+      let iteratedEpisodes = 0;
+
+      for (const file of container.files) {
+        const associatedMediaItem = await database.episode.findOneOrFail({
+          absoluteNumber: ++iteratedEpisodes,
+        });
+
+        em.create(MediaEntry, {
+          fileSize: file.fileSize,
+          originalFilename: file.fileName,
+          mediaItem: ref(associatedMediaItem),
+          provider: processedBy,
+          providerDownloadId: container.torrentId.toString(),
+          downloadUrl: file.downloadUrl ?? null,
+        });
+      }
+
+      break;
+    }
   }
-
-  existingItem.filesystemEntries.add(mediaEntry);
 
   try {
     await Promise.all([
       validateOrReject(existingItem),
-      validateOrReject(mediaEntry),
+      // validateOrReject(mediaEntry),
     ]);
 
-    em.persist(mediaEntry);
+    // em.persist(mediaEntry);
     em.persist(existingItem);
 
     await em.flush();

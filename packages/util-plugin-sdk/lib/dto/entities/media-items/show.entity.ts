@@ -1,4 +1,11 @@
-import { Collection, Entity, Enum, OneToMany, Property } from "@mikro-orm/core";
+import {
+  Collection,
+  Entity,
+  Enum,
+  OneToMany,
+  type Opt,
+  Property,
+} from "@mikro-orm/core";
 import { Field, ObjectType } from "type-graphql";
 
 import {
@@ -12,12 +19,6 @@ import { Season } from "./season.entity.ts";
 @ObjectType()
 @Entity()
 export class Show extends MediaItem {
-  constructor() {
-    super();
-
-    this.type = "show";
-  }
-
   @Field(() => ShowStatus.enum, { nullable: true })
   @Enum(() => ShowStatus.enum)
   status!: ShowStatus;
@@ -33,4 +34,6 @@ export class Show extends MediaItem {
   @Field(() => ShowContentRatingEnum)
   @Enum(() => ShowContentRating.enum)
   declare contentRating: ShowContentRating;
+
+  override type: Opt<"show"> = "show" as const;
 }

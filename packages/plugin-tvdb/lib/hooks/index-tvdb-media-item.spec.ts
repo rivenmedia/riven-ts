@@ -1,5 +1,5 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
-import { RequestedItem } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import { mockLogger } from "@repo/util-plugin-testing/create-mock-logger";
 import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
@@ -24,7 +24,7 @@ import type { PostLogin200 } from "../__generated__/index.ts";
 const it = baseIt.extend<{
   settings: PluginSettings;
   dataSourceMap: DataSourceMap;
-  item: RequestedItem;
+  item: ItemRequest;
 }>({
   async settings({}, use) {
     const settings = createMockPluginSettings(TvdbSettings, {});
@@ -51,7 +51,7 @@ const it = baseIt.extend<{
     await use(dataSourceMap);
   },
   async item({}, use) {
-    const item = new RequestedItem();
+    const item = new ItemRequest();
 
     item.id = 1;
 

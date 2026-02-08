@@ -3,6 +3,7 @@ import {
   Entity,
   ManyToOne,
   OneToMany,
+  type Opt,
   Property,
   type Ref,
 } from "@mikro-orm/core";
@@ -16,12 +17,6 @@ import { Show } from "./show.entity.ts";
 @ObjectType()
 @Entity()
 export class Season extends MediaItem {
-  constructor() {
-    super();
-
-    this.type = "season";
-  }
-
   @Field()
   @Property()
   @Min(1)
@@ -34,4 +29,6 @@ export class Season extends MediaItem {
   @Field(() => [Episode])
   @OneToMany(() => Episode, (episode) => episode.season)
   episodes = new Collection<Episode>(this);
+
+  override type: Opt<"season"> = "season" as const;
 }

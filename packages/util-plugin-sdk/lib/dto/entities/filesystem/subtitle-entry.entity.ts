@@ -1,4 +1,4 @@
-import { Entity, Index, Property } from "@mikro-orm/core";
+import { Entity, Index, type Opt, Property } from "@mikro-orm/core";
 import { Field, ObjectType } from "type-graphql";
 
 import { FileSystemEntry } from "./filesystem-entry.entity.ts";
@@ -40,9 +40,9 @@ export class SubtitleEntry extends FileSystemEntry {
   openSubtitlesId?: string; // TODO: Separate entity for external providers?
 
   @Property({ persist: false, hidden: true })
-  get vfsFileName(): string {
+  get vfsFileName(): Opt<string> {
     throw new Error("SubtitleEntry vfsFileName not implemented yet");
   }
 
-  override type = "subtitle" as const;
+  override type: Opt<"subtitle"> = "subtitle" as const;
 }

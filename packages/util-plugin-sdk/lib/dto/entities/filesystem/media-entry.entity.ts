@@ -1,4 +1,4 @@
-import { Entity, Index, Property } from "@mikro-orm/core";
+import { Entity, Index, type Opt, Property } from "@mikro-orm/core";
 import { IsOptional, IsUrl } from "class-validator";
 import path from "node:path";
 import { Field, ObjectType } from "type-graphql";
@@ -51,7 +51,7 @@ export class MediaEntry extends FileSystemEntry {
   mediaMetadata?: object;
 
   @Property({ persist: false, hidden: true })
-  get vfsFileName(): string {
+  get vfsFileName(): Opt<string> {
     const prettyName = this.mediaItem.getProperty("prettyName");
 
     if (!prettyName) {
@@ -66,5 +66,5 @@ export class MediaEntry extends FileSystemEntry {
     });
   }
 
-  override type = "media" as const;
+  override type: Opt<"media"> = "media" as const;
 }

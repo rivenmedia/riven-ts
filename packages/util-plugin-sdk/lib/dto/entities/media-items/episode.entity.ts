@@ -19,12 +19,6 @@ import { Season } from "./season.entity.ts";
 @ObjectType()
 @Entity()
 export class Episode extends MediaItem {
-  constructor() {
-    super();
-
-    this.type = "episode";
-  }
-
   @Field()
   @Property()
   @Min(1)
@@ -41,4 +35,6 @@ export class Episode extends MediaItem {
   @Field(() => ShowContentRatingEnum)
   @Enum()
   declare contentRating: ShowContentRating;
+
+  override type: Opt<"episode"> = "episode" as const;
 }

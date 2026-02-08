@@ -3,6 +3,7 @@ import {
   Enum,
   type Hidden,
   ManyToOne,
+  type Opt,
   PrimaryKey,
   Property,
   type Ref,
@@ -37,13 +38,13 @@ export abstract class FileSystemEntry {
   @IsPositive()
   fileSize!: number;
 
-  @Field()
+  @Field(() => Date)
   @Property()
-  createdAt: Date = new Date();
+  createdAt: Opt<Date> = new Date();
 
-  @Field()
+  @Field(() => Date, { nullable: true })
   @Property({ onUpdate: () => new Date() })
-  updatedAt?: Date;
+  updatedAt?: Opt<Date>;
 
   @Field(() => MediaItem)
   @ManyToOne()
@@ -57,7 +58,7 @@ export abstract class FileSystemEntry {
    * The base directory for this media item, e.g. "movies" or "shows"
    */
   @Property({ persist: false, hidden: true })
-  get baseDirectory(): Hidden<"movies" | "shows"> {
+  get baseDirectory(): Opt<Hidden<"movies" | "shows">> {
     switch (this.mediaItem.getProperty("type")) {
       case "episode":
       case "season":
@@ -65,6 +66,12 @@ export abstract class FileSystemEntry {
         return "shows";
       case "movie":
         return "movies";
+      default:
+        throw new ReferenceError(
+          `Unable to determine base directory for media item of type ${this.mediaItem.getProperty(
+            "type",
+          )}`,
+        );
     }
   }
 
@@ -73,7 +80,7 @@ export abstract class FileSystemEntry {
    *
    * @example "movie.mkv", "episode.srt"
    */
-  abstract get vfsFileName(): Hidden<string>;
+  abstract get vfsFileName(): Opt<Hidden<string>>;
 
   /**
    * The full path to this filesystem entry in the VFS
@@ -81,7 +88,7 @@ export abstract class FileSystemEntry {
    * @example "/mount/riven/movies/Inception (2010) {tmdb-27205}/Inception (2010) {tmdb-27205}.mkv"
    */
   @Property({ persist: false, hidden: true })
-  get path(): Hidden<string> {
+  get path(): Opt<Hidden<string>> {
     const prettyName = this.mediaItem.getProperty("prettyName");
 
     if (!prettyName) {

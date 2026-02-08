@@ -73,6 +73,8 @@ export async function persistShowIndexerData({
         existingItem.rating = item.rating;
       }
 
+      let totalEpisodes = 0;
+
       for (const season of item.seasons) {
         const seasonEntry = transaction.create(Season, {
           title: `${existingItem.title} - Season ${season.number.toString()}`,
@@ -85,6 +87,7 @@ export async function persistShowIndexerData({
 
         for (const episode of season.episodes) {
           transaction.create(Episode, {
+            absoluteNumber: ++totalEpisodes,
             contentRating: episode.contentRating,
             number: episode.number,
             title: episode.title,

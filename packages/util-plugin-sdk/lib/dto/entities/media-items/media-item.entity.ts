@@ -66,7 +66,7 @@ registerEnumType(MediaItemType.enum, {
 export abstract class MediaItem {
   @Field((_type) => ID)
   @PrimaryKey()
-  id!: number & Opt;
+  id!: Opt<number>;
 
   @Field(() => String, { nullable: true })
   @Index()
@@ -101,7 +101,7 @@ export abstract class MediaItem {
   @Field(() => Date)
   @Index()
   @Property()
-  requestedAt: Date & Opt = new Date();
+  requestedAt: Opt<Date> = new Date();
 
   @Field({ nullable: true })
   @Property()
@@ -172,7 +172,7 @@ export abstract class MediaItem {
 
   @Field(() => Boolean)
   @Property({ default: false })
-  updated!: boolean & Opt;
+  updated!: Opt<boolean>;
 
   @Field({ nullable: true })
   @Property()
@@ -187,18 +187,16 @@ export abstract class MediaItem {
 
   @Field(() => Number)
   @Property()
-  failedAttempts: number & Opt = 0;
+  failedAttempts: Opt<number> = 0;
 
   @Field(() => [FileSystemEntry])
   @ManyToMany()
-  filesystemEntries: Collection<FileSystemEntry> & Opt =
+  filesystemEntries: Collection<FileSystemEntry> =
     new Collection<FileSystemEntry>(this);
 
   @Field(() => [SubtitleEntry])
   @ManyToMany()
-  subtitles: Collection<SubtitleEntry> & Opt = new Collection<SubtitleEntry>(
-    this,
-  );
+  subtitles: Collection<SubtitleEntry> = new Collection<SubtitleEntry>(this);
 
   @Field(() => Stream, { nullable: true })
   @ManyToOne()
@@ -206,15 +204,15 @@ export abstract class MediaItem {
 
   @Field(() => [Stream])
   @ManyToMany({ owner: true })
-  streams: Collection<Stream> & Opt = new Collection<Stream>(this);
+  streams: Collection<Stream> = new Collection<Stream>(this);
 
   @Field(() => [Stream])
   @ManyToMany()
-  blacklistedStreams: Collection<Stream> & Opt = new Collection<Stream>(this);
+  blacklistedStreams: Collection<Stream> = new Collection<Stream>(this);
 
   @Field(() => String)
   @Enum(() => MediaItemType.enum)
-  type!: MediaItemType & Opt;
+  type!: MediaItemType;
 
   /**
    * A pretty name for the media item to be used in VFS paths.
