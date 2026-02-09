@@ -10,6 +10,8 @@ import { FileSystemEntry } from "./filesystem-entry.entity.ts";
   discriminatorValue: "media",
 })
 export class MediaEntry extends FileSystemEntry {
+  override type: Opt<"media"> = "media" as const;
+
   @Field()
   @Index()
   @Property()
@@ -52,7 +54,7 @@ export class MediaEntry extends FileSystemEntry {
 
   @Property({ persist: false, hidden: true })
   get vfsFileName(): Opt<string> {
-    const prettyName = this.mediaItem.getProperty("prettyName");
+    const { prettyName } = this.mediaItem.getEntity();
 
     if (!prettyName) {
       throw new TypeError(
@@ -65,6 +67,4 @@ export class MediaEntry extends FileSystemEntry {
       ext: path.extname(this.originalFilename),
     });
   }
-
-  override type: Opt<"media"> = "media" as const;
 }

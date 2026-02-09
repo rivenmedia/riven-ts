@@ -7,7 +7,6 @@ import {
   type Ref,
 } from "@mikro-orm/core";
 import { Min } from "class-validator";
-import { extname } from "node:path";
 import { Field, ObjectType } from "type-graphql";
 
 import {
@@ -43,10 +42,18 @@ export class Episode extends MediaItem {
       .getProperty("prettyName");
 
     if (!baseName) {
-      return undefined;
+      throw new TypeError(
+        "Unable to determine pretty name - missing show prettyName",
+      );
     }
 
-    return `${baseName} - s${this.season.getProperty("number").toString().padStart(2, "0")}e${this.number.toString().padStart(2, "0")} - ${this.title}${extname(this.mediaEntry?.originalFilename)}`;
+    const seasonNumber = this.season
+      .getProperty("number")
+      .toString()
+      .padStart(2, "0");
+    const episodeNumber = this.number.toString().padStart(2, "0");
+
+    return `${baseName} - s${seasonNumber}e${episodeNumber}`;
   }
 
   override type: Opt<"episode"> = "episode" as const;

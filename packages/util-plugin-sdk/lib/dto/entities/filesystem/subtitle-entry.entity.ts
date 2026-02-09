@@ -8,11 +8,7 @@ import { FileSystemEntry } from "./filesystem-entry.entity.ts";
   discriminatorValue: "subtitle",
 })
 export class SubtitleEntry extends FileSystemEntry {
-  constructor() {
-    super();
-
-    this.type = "subtitle";
-  }
+  override type: Opt<"subtitle"> = "subtitle" as const;
 
   @Field()
   @Index()
@@ -43,6 +39,4 @@ export class SubtitleEntry extends FileSystemEntry {
   get vfsFileName(): Opt<string> {
     throw new Error("SubtitleEntry vfsFileName not implemented yet");
   }
-
-  override type: Opt<"subtitle"> = "subtitle" as const;
 }

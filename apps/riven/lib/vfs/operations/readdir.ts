@@ -6,10 +6,7 @@ import { isFuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 import { getMoviesDirectoryEntries } from "../utilities/get-movies-directory-entries.ts";
-import { getSeasonEpisodeEntries } from "../utilities/get-season-episode-entries.ts";
-import { getShowSeasonEntries } from "../utilities/get-show-season-entries.ts";
 import { getShowsDirectoryEntries } from "../utilities/get-shows-directory-entries.ts";
-import { getSingleMovieDirectoryEntries } from "../utilities/get-single-movie-directory-entries.ts";
 
 async function readdir(path: string) {
   if (path === config.rootPath) {
@@ -20,15 +17,12 @@ async function readdir(path: string) {
 
   switch (pathInfo.pathType) {
     case "all-movies":
-      return getMoviesDirectoryEntries();
-    case "all-shows":
-      return getShowsDirectoryEntries();
-    case "show-seasons":
-      return getShowSeasonEntries(pathInfo);
-    case "season-episodes":
-      return getSeasonEpisodeEntries(pathInfo);
     case "single-movie":
-      return getSingleMovieDirectoryEntries(pathInfo);
+      return getMoviesDirectoryEntries(pathInfo.tmdbId);
+    case "all-shows":
+    case "show-seasons":
+    case "season-episodes":
+      return getShowsDirectoryEntries(pathInfo.tvdbId, pathInfo.season);
     case "single-episode":
       return [pathInfo.base];
   }

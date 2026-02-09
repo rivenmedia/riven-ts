@@ -13,11 +13,43 @@ import path from "node:path";
 import { Field, ID, ObjectType } from "type-graphql";
 import z from "zod";
 
+import { Episode } from "../media-items/episode.entity.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
+import { Movie } from "../media-items/movie.entity.ts";
 
 export const FileSystemEntryType = z.enum(["media", "subtitle"]);
 
 export type FileSystemEntryType = z.infer<typeof FileSystemEntryType>;
+
+/**
+ * Builds the path parts for a given media item, used for generating the VFS path for filesystem entries.
+ *
+ * @param mediaItem The media item associated with the filesystem entry.
+ * @returns An array of strings to build the path.
+ *
+ * @throws {ReferenceError} if required properties are missing for path generation.
+ * @throws {TypeError} if the media item type is unsupported. Only `Movie` and `Episode` have associated filesystem entries.
+ */
+function getMediaItemPathParts(mediaItem: MediaItem) {
+  if (mediaItem instanceof Movie) {
+    return [mediaItem.prettyName];
+  }
+
+  if (mediaItem instanceof Episode) {
+    const seasonLabel = mediaItem.season.getProperty("prettyName");
+    const showLabel = mediaItem.season
+      .getProperty("parent")
+      .getProperty("prettyName");
+
+    if (!seasonLabel || !showLabel) {
+      throw new ReferenceError("Unable to determine path - missing prettyName");
+    }
+
+    return [showLabel, seasonLabel];
+  }
+
+  throw new TypeError("Unsupported media item type for path generation");
+}
 
 @ObjectType()
 @Entity({
@@ -47,8 +79,8 @@ export abstract class FileSystemEntry {
   updatedAt?: Opt<Date>;
 
   @Field(() => MediaItem)
-  @ManyToOne()
-  mediaItem!: Ref<MediaItem>;
+  @ManyToOne(() => MediaItem)
+  mediaItem!: Ref<Movie | Episode>;
 
   @Field(() => String)
   @Enum(() => FileSystemEntryType.enum)
@@ -59,20 +91,13 @@ export abstract class FileSystemEntry {
    */
   @Property({ persist: false, hidden: true })
   get baseDirectory(): Opt<Hidden<"movies" | "shows">> {
-    switch (this.mediaItem.getProperty("type")) {
-      case "episode":
-      case "season":
-      case "show":
-        return "shows";
-      case "movie":
-        return "movies";
-      default:
-        throw new ReferenceError(
-          `Unable to determine base directory for media item of type ${this.mediaItem.getProperty(
-            "type",
-          )}`,
-        );
+    const mediaItemType = this.mediaItem.getEntity().type;
+
+    if (mediaItemType === "movie") {
+      return "movies";
     }
+
+    return "shows";
   }
 
   /**
@@ -85,16 +110,14 @@ export abstract class FileSystemEntry {
   /**
    * The full path to this filesystem entry in the VFS
    *
-   * @example "/mount/riven/movies/Inception (2010) {tmdb-27205}/Inception (2010) {tmdb-27205}.mkv"
+   * @example "movies/Inception (2010) {tmdb-27205}/Inception (2010) {tmdb-27205}.mkv"
    */
   @Property({ persist: false, hidden: true })
   get path(): Opt<Hidden<string>> {
-    const prettyName = this.mediaItem.getProperty("prettyName");
-
-    if (!prettyName) {
-      throw new ReferenceError("Unable to determine path - missing prettyName");
-    }
-
-    return path.join(this.baseDirectory, prettyName, this.vfsFileName);
+    return path.join(
+      this.baseDirectory,
+      ...getMediaItemPathParts(this.mediaItem.unwrap()).map(String),
+      this.vfsFileName,
+    );
   }
 }

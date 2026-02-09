@@ -79,26 +79,36 @@ function getEntry(pathInfo: PathInfo) {
         tmdbId: String(pathInfo.tmdbId),
       });
     case "single-episode":
-      return database.episode.findOneOrFail({
-        season: {
-          number: Number(pathInfo.season),
-          parent: {
-            tvdbId: String(pathInfo.tvdbId),
+      return database.episode.findOneOrFail(
+        {
+          season: {
+            number: Number(pathInfo.season),
+            parent: {
+              tvdbId: String(pathInfo.tvdbId),
+            },
           },
+          number: Number(pathInfo.episode),
         },
-        number: Number(pathInfo.episode),
-      });
+        {
+          populate: ["*"],
+        },
+      );
     case "show-seasons":
       return database.show.findOneOrFail({
         tvdbId: String(pathInfo.tvdbId),
       });
     case "season-episodes":
-      return database.season.findOneOrFail({
-        parent: {
-          tvdbId: String(pathInfo.tvdbId),
+      return database.season.findOneOrFail(
+        {
+          parent: {
+            tvdbId: String(pathInfo.tvdbId),
+          },
+          number: Number(pathInfo.season),
         },
-        number: Number(pathInfo.season),
-      });
+        {
+          populate: ["*"],
+        },
+      );
     case "all-movies":
     case "all-shows":
       return null;
