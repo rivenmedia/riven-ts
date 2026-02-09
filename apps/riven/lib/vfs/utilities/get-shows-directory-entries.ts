@@ -20,7 +20,10 @@ export const getShowsDirectoryEntries = async (
         }),
       },
     },
-    { populate: ["*"] },
+    {
+      // @ts-expect-error - MikroORM doesn't like `mediaItem.season.parent` in the type definition, but it does work
+      populate: ["mediaItem", "mediaItem.season", "mediaItem.season.parent"],
+    },
   );
 
   return entries.reduce<string[]>((acc, entry) => {

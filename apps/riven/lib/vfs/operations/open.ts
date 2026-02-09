@@ -22,6 +22,32 @@ import type { Queue } from "bullmq";
 
 let fd = 0;
 
+async function getItemEntry(path: string) {
+  const pathInfo = PathInfo.parse(path);
+
+  if (pathInfo.tmdbId) {
+    return database.mediaEntry.findOneOrFail({
+      mediaItem: {
+        tmdbId: pathInfo.tmdbId,
+      },
+    });
+  }
+
+  if (pathInfo.tvdbId && pathInfo.season && pathInfo.episode) {
+    return database.mediaEntry.findOneOrFail({
+      mediaItem: {
+        type: "episode",
+        number: pathInfo.episode,
+        season: {
+          number: pathInfo.season,
+        },
+      },
+    });
+  }
+
+  throw new FuseError(Fuse.ENOENT, `Invalid path for open: ${path}`);
+}
+
 async function open(
   path: string,
   _flags: number,
@@ -33,119 +59,102 @@ async function open(
     >
   >,
 ) {
-  const { tmdbId } = PathInfo.parse(path);
-
-  if (!tmdbId) {
-    throw new FuseError(Fuse.ENOENT, `Invalid path for open: ${path}`);
-  }
-
-  const item = await database.mediaEntry.findOneOrFail(
-    {
-      mediaItem: {
-        tmdbId,
-      },
-    },
-    { populate: ["mediaItem"] },
-  );
+  const entry = await getItemEntry(path);
 
   if (
-    !item.unrestrictedUrl &&
-    fileNameIsFetchingLinkMap.get(item.originalFilename)
+    !entry.unrestrictedUrl &&
+    fileNameIsFetchingLinkMap.get(entry.originalFilename)
   ) {
     logger.silly(
-      `Waiting for unrestricted URL for media entry ${item.id.toString()}...`,
+      `Waiting for unrestricted URL for media entry ${entry.id.toString()}...`,
     );
 
     // Wait until the unrestricted URL is fetched
-    while (fileNameIsFetchingLinkMap.get(item.originalFilename)) {
+    while (fileNameIsFetchingLinkMap.get(entry.originalFilename)) {
       await setTimeout(100);
     }
 
     const em = database.em.fork();
 
     // Refresh the item to get the updated unrestricted URL
-    await em.refreshOrFail(item, {
-      populate: ["mediaItem"],
-    });
+    await em.refreshOrFail(entry);
 
-    if (!item.unrestrictedUrl) {
+    if (!entry.unrestrictedUrl) {
       throw new FuseError(
         Fuse.ENOENT,
-        `Media entry ${item.id.toString()} has no unrestricted URL after waiting`,
+        `Media entry ${entry.id.toString()} has no unrestricted URL after waiting`,
       );
     }
   }
 
   if (
-    !item.unrestrictedUrl &&
-    !fileNameIsFetchingLinkMap.get(item.originalFilename)
+    !entry.unrestrictedUrl &&
+    !fileNameIsFetchingLinkMap.get(entry.originalFilename)
   ) {
     logger.silly(
-      `No unrestricted URL for media entry ${item.id.toString()}, requesting via RealDebrid...`,
+      `No unrestricted URL for media entry ${entry.id.toString()}, requesting from ${entry.provider}...`,
     );
 
-    const requestQueue = linkRequestQueues.get(item.provider);
+    const requestQueue = linkRequestQueues.get(entry.provider);
 
     if (!requestQueue) {
       logger.error(
-        `No link request queue found for RealDebrid when opening file at path ${path}`,
+        `No link request queue found for ${entry.provider} when opening file at path ${path}`,
       );
 
       throw new FuseError(
         Fuse.ENOENT,
-        `Media entry ${item.id.toString()} has no unrestricted URL and no link request queue is available`,
+        `Media entry ${entry.id.toString()} has no unrestricted URL and no link request queue is available`,
       );
     }
 
     try {
-      fileNameIsFetchingLinkMap.set(item.originalFilename, true);
+      fileNameIsFetchingLinkMap.set(entry.originalFilename, true);
 
       const { url: unrestrictedUrl } = await runSingleJob(
         requestQueue,
-        item.id.toString(),
-        { item },
+        entry.id.toString(),
+        { item: entry },
       );
 
       const em = database.em.fork();
 
-      em.assign(item, { unrestrictedUrl });
-      em.persist(item);
+      em.assign(entry, { unrestrictedUrl });
+      em.persist(entry);
 
       await em.flush();
-      await em.refreshOrFail(item, {
-        populate: ["mediaItem"],
-      });
+      await em.refreshOrFail(entry);
     } catch (error: unknown) {
       if (error instanceof Error) {
         throw new FuseError(
           Fuse.ENOENT,
-          `Unable to get unrestricted url for ${item.originalFilename}: ${error.message}`,
+          `Unable to get unrestricted url for ${entry.originalFilename}: ${error.message}`,
         );
       }
     } finally {
-      fileNameIsFetchingLinkMap.set(item.originalFilename, false);
+      fileNameIsFetchingLinkMap.set(entry.originalFilename, false);
     }
   }
 
-  if (!item.unrestrictedUrl) {
+  if (!entry.unrestrictedUrl) {
     throw new FuseError(
       Fuse.ENOENT,
-      `Media entry ${item.id.toString()} has no unrestricted URL`,
+      `Media entry ${entry.id.toString()} has no unrestricted URL`,
     );
   }
 
   const nextFd = fd++;
 
   fileNameToFileChunkCalculationsMap.set(
-    item.originalFilename,
-    calculateFileChunks(item.originalFilename, item.fileSize),
+    entry.originalFilename,
+    calculateFileChunks(entry.originalFilename, entry.fileSize),
   );
 
   fdToFileHandleMeta.set(nextFd, {
-    fileSize: item.fileSize,
+    fileSize: entry.fileSize,
     filePath: path,
-    fileName: item.originalFilename,
-    url: item.unrestrictedUrl,
+    fileName: entry.originalFilename,
+    url: entry.unrestrictedUrl,
   });
 
   logger.debug(`Opened file at path ${path} with fd ${nextFd.toString()}`);

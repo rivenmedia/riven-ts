@@ -10,7 +10,7 @@ export const getMoviesDirectoryEntries = async (
         ...(tmdbId && { tmdbId }),
       },
     },
-    { populate: ["*"] },
+    { populate: ["$infer"] },
   );
 
   return entries.reduce<string[]>((acc, entry) => {
@@ -18,7 +18,7 @@ export const getMoviesDirectoryEntries = async (
       return [...acc, entry.vfsFileName];
     }
 
-    const prettyName = entry.mediaItem.getProperty("prettyName");
+    const { prettyName } = entry.mediaItem.getEntity();
 
     if (!prettyName) {
       return acc;

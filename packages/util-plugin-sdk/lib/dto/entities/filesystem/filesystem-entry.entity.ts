@@ -63,7 +63,7 @@ function getMediaItemPathParts(mediaItem: MediaItem) {
 export abstract class FileSystemEntry {
   @Field((_type) => ID)
   @PrimaryKey()
-  id!: number;
+  id!: Opt<number>;
 
   @Field()
   @Property({ type: "bigint" })
