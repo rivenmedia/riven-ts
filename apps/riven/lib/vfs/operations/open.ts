@@ -77,7 +77,9 @@ async function open(
     const em = database.em.fork();
 
     // Refresh the item to get the updated unrestricted URL
-    await em.refreshOrFail(entry);
+    await em.refreshOrFail(entry, {
+      populate: ["*"],
+    });
 
     if (!entry.unrestrictedUrl) {
       throw new FuseError(
@@ -123,7 +125,6 @@ async function open(
       em.persist(entry);
 
       await em.flush();
-      await em.refreshOrFail(entry);
     } catch (error: unknown) {
       if (error instanceof Error) {
         throw new FuseError(
