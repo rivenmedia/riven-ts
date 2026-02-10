@@ -26,19 +26,21 @@ export const getShowsDirectoryEntries = async (
     },
   );
 
-  return entries.reduce<string[]>((acc, entry) => {
-    if (!entry.path) {
-      return acc;
-    }
+  return Array.from(
+    entries.reduce<Set<string>>((acc, entry) => {
+      if (!entry.path) {
+        return acc;
+      }
 
-    const { dir, base } = path.parse(entry.path);
-    const [, showName, seasonName] = dir.split(path.sep);
-    const part = tvdbId ? (season ? base : seasonName) : showName;
+      const { dir, base } = path.parse(entry.path);
+      const [, showName, seasonName] = dir.split(path.sep);
+      const part = tvdbId ? (season ? base : seasonName) : showName;
 
-    if (!part) {
-      return acc;
-    }
+      if (!part) {
+        return acc;
+      }
 
-    return [...acc, part];
-  }, []);
+      return new Set([...acc, part]);
+    }, new Set<string>()),
+  );
 };

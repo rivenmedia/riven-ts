@@ -13,17 +13,19 @@ export const getMoviesDirectoryEntries = async (
     { populate: ["$infer"] },
   );
 
-  return entries.reduce<string[]>((acc, entry) => {
-    if (tmdbId) {
-      return [...acc, entry.vfsFileName];
-    }
+  return Array.from(
+    entries.reduce<Set<string>>((acc, entry) => {
+      if (tmdbId) {
+        return new Set([...acc, entry.vfsFileName]);
+      }
 
-    const { prettyName } = entry.mediaItem.getEntity();
+      const { prettyName } = entry.mediaItem.getEntity();
 
-    if (!prettyName) {
-      return acc;
-    }
+      if (!prettyName) {
+        return acc;
+      }
 
-    return [...acc, prettyName];
-  }, []);
+      return new Set([...acc, prettyName]);
+    }, new Set<string>()),
+  );
 };

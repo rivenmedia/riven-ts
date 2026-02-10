@@ -4,16 +4,16 @@ import fs, { type PathLike } from "node:fs";
 
 import { database } from "../../database/database.ts";
 import { logger } from "../../utilities/logger/logger.ts";
-import { config } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
+import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 import { isHiddenPath } from "../utilities/is-hidden-path.ts";
 import { isIgnoredPath } from "../utilities/is-ignored-path.ts";
 
 import type { SetOptional } from "type-fest";
 
 const attrCache = new LRUCache<PathLike, Partial<Stats>>({
-  ttl: 5000,
+  ttl: 300_000,
   ttlAutopurge: false,
   max: 1000,
 });
@@ -56,7 +56,7 @@ type StatInput = SetOptional<
       }
   );
 
-const stat = (st: StatInput, subDirectoryCount: number) => {
+const stat = (st: StatInput, subDirectoryCount = 0) => {
   const gid = st.gid ?? process.getgid?.() ?? 0;
   const uid = st.uid ?? process.getuid?.() ?? 0;
   const nlink = st.mode === "dir" ? 2 + subDirectoryCount : 1;
@@ -67,8 +67,6 @@ const stat = (st: StatInput, subDirectoryCount: number) => {
     uid,
     mode: parseMode(st.mode),
     size: st.mode === "dir" ? 0 : st.size,
-    blksize: config.blockSize,
-    blocks: 1,
     nlink,
   } satisfies Partial<Stats>;
 };
@@ -138,16 +136,44 @@ function getEntry(pathInfo: PathInfo) {
 }
 
 async function getattr(path: string) {
-  const maybeCachedAttr = attrCache.get(path);
-
-  if (maybeCachedAttr) {
-    logger.silly(`VFS getattr: Cache hit for path ${path}`);
-
-    return maybeCachedAttr;
-  }
-
   switch (path) {
-    case "/":
+    case "/": {
+      const oldestEntry = await database.mediaEntry.findOne(
+        { type: "media" },
+        {
+          orderBy: {
+            createdAt: "asc nulls last",
+          },
+          fields: ["createdAt"],
+        },
+      );
+
+      const mostRecentlyUpdatedEntry = await database.mediaEntry.findOne(
+        { type: "media" },
+        {
+          orderBy: {
+            updatedAt: "desc nulls last",
+          },
+          fields: ["updatedAt"],
+        },
+      );
+
+      return stat(
+        {
+          mtime:
+            mostRecentlyUpdatedEntry?.updatedAt ??
+            oldestEntry?.createdAt ??
+            new Date(),
+          atime:
+            mostRecentlyUpdatedEntry?.updatedAt ??
+            oldestEntry?.createdAt ??
+            new Date(),
+          ctime: oldestEntry?.createdAt ?? new Date(),
+          mode: "dir",
+        },
+        PersistentDirectory.options.length,
+      );
+    }
     case "/shows": {
       const totalShows = await database.show.count({
         seasons: {
@@ -161,11 +187,43 @@ async function getattr(path: string) {
         },
       });
 
+      const oldestShow = await database.mediaEntry.findOne(
+        {
+          type: "media",
+          mediaItem: {
+            type: "episode",
+          },
+        },
+        {
+          orderBy: {
+            createdAt: "asc nulls last",
+          },
+          fields: ["createdAt"],
+        },
+      );
+
+      const lastUpdatedShow = await database.mediaEntry.findOne(
+        {
+          type: "media",
+          mediaItem: {
+            type: "episode",
+          },
+        },
+        {
+          orderBy: {
+            updatedAt: "desc nulls last",
+          },
+          fields: ["updatedAt"],
+        },
+      );
+
       return stat(
         {
-          mtime: new Date(),
-          atime: new Date(),
-          ctime: new Date(),
+          mtime:
+            lastUpdatedShow?.updatedAt ?? oldestShow?.createdAt ?? new Date(),
+          atime:
+            lastUpdatedShow?.updatedAt ?? oldestShow?.createdAt ?? new Date(),
+          ctime: oldestShow?.createdAt ?? new Date(),
           mode: "dir",
         },
         totalShows,
@@ -180,11 +238,43 @@ async function getattr(path: string) {
         },
       });
 
+      const lastUpdatedMovie = await database.mediaEntry.findOne(
+        {
+          type: "media",
+          mediaItem: {
+            type: "movie",
+          },
+        },
+        {
+          orderBy: {
+            updatedAt: "desc nulls last",
+          },
+          fields: ["updatedAt"],
+        },
+      );
+
+      const oldestMovie = await database.mediaEntry.findOne(
+        {
+          type: "media",
+          mediaItem: {
+            type: "movie",
+          },
+        },
+        {
+          orderBy: {
+            createdAt: "asc nulls last",
+          },
+          fields: ["createdAt"],
+        },
+      );
+
       return stat(
         {
-          mtime: new Date(),
-          atime: new Date(),
-          ctime: new Date(),
+          mtime:
+            lastUpdatedMovie?.updatedAt ?? oldestMovie?.createdAt ?? new Date(),
+          atime:
+            lastUpdatedMovie?.updatedAt ?? oldestMovie?.createdAt ?? new Date(),
+          ctime: oldestMovie?.createdAt ?? new Date(),
           mode: "dir",
         },
         totalMovies,
@@ -202,6 +292,9 @@ async function getattr(path: string) {
   const subDirectoryCount =
     pathInfo.pathType === "show-seasons"
       ? await database.season.count({
+          parent: {
+            tvdbId: String(pathInfo.tvdbId),
+          },
           episodes: {
             filesystemEntries: {
               $some: {
@@ -227,14 +320,20 @@ async function getattr(path: string) {
     subDirectoryCount,
   );
 
-  attrCache.set(path, attrs);
-
-  logger.silly(`VFS getattr: Cache miss for path ${path}`);
-
   return attrs;
 }
 
 export const getattrSync = function (path, callback) {
+  const cachedAttr = attrCache.get(path);
+
+  if (cachedAttr) {
+    logger.silly(`VFS getattr: Cache hit for path ${path}`);
+
+    process.nextTick(callback, null, cachedAttr);
+
+    return;
+  }
+
   if (isHiddenPath(path) || isIgnoredPath(path)) {
     logger.silly(`VFS getattr: Skipping hidden/ignored path ${path}`);
 
@@ -244,8 +343,12 @@ export const getattrSync = function (path, callback) {
   }
 
   getattr(path)
-    .then((stats) => {
-      process.nextTick(callback, null, stats);
+    .then((attrs) => {
+      attrCache.set(path, attrs);
+
+      logger.silly(`VFS getattr: Cache miss for path ${path}`);
+
+      process.nextTick(callback, null, attrs);
     })
     .catch((error: unknown) => {
       if (isFuseError(error)) {
