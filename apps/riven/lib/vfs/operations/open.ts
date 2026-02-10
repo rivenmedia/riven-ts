@@ -6,6 +6,7 @@ import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { FuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
+import { attrCache } from "../utilities/attr-cache.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
 import {
   fdToFileHandleMeta,
@@ -87,6 +88,8 @@ async function open(
         `Media entry ${entry.id.toString()} has no unrestricted URL after waiting`,
       );
     }
+
+    attrCache.delete(path);
   }
 
   if (
@@ -125,6 +128,8 @@ async function open(
       em.persist(entry);
 
       await em.flush();
+
+      attrCache.delete(path);
     } catch (error: unknown) {
       if (error instanceof Error) {
         throw new FuseError(

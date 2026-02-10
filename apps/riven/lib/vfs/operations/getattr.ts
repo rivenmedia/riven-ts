@@ -1,22 +1,16 @@
 import Fuse, { type OPERATIONS, type Stats } from "@zkochan/fuse-native";
-import { LRUCache } from "lru-cache";
-import fs, { type PathLike } from "node:fs";
+import fs from "node:fs";
 
 import { database } from "../../database/database.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
+import { attrCache } from "../utilities/attr-cache.ts";
 import { isHiddenPath } from "../utilities/is-hidden-path.ts";
 import { isIgnoredPath } from "../utilities/is-ignored-path.ts";
 
 import type { SetOptional } from "type-fest";
-
-const attrCache = new LRUCache<PathLike, Partial<Stats>>({
-  ttl: 300_000,
-  ttlAutopurge: false,
-  max: 1000,
-});
 
 type StatMode = "dir" | "file" | "link" | number;
 
