@@ -34,8 +34,6 @@ export const readDirSync = function (path, callback) {
       process.nextTick(callback, 0, data);
     })
     .catch((error: unknown) => {
-      console.error(error);
-
       if (isFuseError(error)) {
         logger.error(`VFS readdir FuseError: ${error.message}`);
 
