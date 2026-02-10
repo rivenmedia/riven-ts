@@ -12,6 +12,7 @@ it('returns the validation status when calling "tvdbIsValid" query', async ({
   httpCache,
   server,
   redisUrl,
+  logger,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -30,12 +31,14 @@ it('returns the validation status when calling "tvdbIsValid" query', async ({
         [pluginConfig.name]: {
           api: new TvdbAPI({
             cache: httpCache,
-            logger: {} as never,
+            logger,
             pluginSymbol: pluginConfig.name,
             connection: {
               url: redisUrl,
             },
-            settings: {},
+            settings: {
+              apiKey: "",
+            },
           }),
         },
       },

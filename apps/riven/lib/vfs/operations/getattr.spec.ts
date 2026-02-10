@@ -1,6 +1,3 @@
-import { MediaEntry, Movie } from "@repo/util-plugin-sdk/dto/entities";
-
-import { ref } from "@mikro-orm/core";
 import Fuse from "@zkochan/fuse-native";
 import { expect, it, vi } from "vitest";
 
@@ -66,21 +63,21 @@ it("returns file stats for known files", async () => {
 
   const em = database.em.fork();
 
-  const mediaEntry = new MediaEntry();
+  const mediaEntry = database.mediaEntry.create({
+    fileSize: 2147483648,
+    originalFilename: "Inception (2010) {tmdb-27205}.mkv",
+    provider: "@repo/plugin-test",
+  });
 
-  mediaEntry.fileSize = 2147483648;
-  mediaEntry.originalFilename = "Inception (2010) {tmdb-27205}.mkv";
-  mediaEntry.provider = "@repo/plugin-test";
+  const mediaItem = database.movie.create({
+    title: "Inception",
+    year: 2010,
+    state: "Downloaded",
+    tmdbId: "27205",
+    contentRating: "pg-13",
+  });
 
-  const mediaItem = new Movie();
-
-  mediaItem.title = "Inception";
-  mediaItem.year = 2010;
-  mediaItem.state = "Downloaded";
-  mediaItem.tmdbId = "27205";
   mediaItem.filesystemEntries.add(mediaEntry);
-
-  mediaEntry.mediaItem = ref(mediaItem);
 
   em.persist(mediaEntry);
   em.persist(mediaItem);

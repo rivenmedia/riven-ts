@@ -5,14 +5,15 @@ import { expect } from "vitest";
 
 import { ListrrAPI } from "../listrr.datasource.ts";
 
-it('assigns the API to the "x-api-key" header', async ({
+it('assigns the API key to the "x-api-key" header', async ({
   server,
   httpCache,
   redisUrl,
+  logger,
 }) => {
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    logger: {} as never,
+    logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     connection: {
       url: redisUrl,

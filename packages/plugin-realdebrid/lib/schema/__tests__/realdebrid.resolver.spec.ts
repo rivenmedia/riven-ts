@@ -12,6 +12,7 @@ it('returns the validation status when calling "realdebridIsValid" query', async
   httpCache,
   server,
   redisUrl,
+  logger,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -30,7 +31,7 @@ it('returns the validation status when calling "realdebridIsValid" query', async
         [pluginConfig.name]: {
           api: new RealDebridAPI({
             cache: httpCache,
-            logger: {} as never,
+            logger,
             pluginSymbol: Symbol("@repo/plugin-realdebrid"),
             connection: {
               url: redisUrl,

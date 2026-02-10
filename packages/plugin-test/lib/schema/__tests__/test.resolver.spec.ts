@@ -12,6 +12,7 @@ it('returns the validation status when calling "testIsValid" query', async ({
   httpCache,
   server,
   redisUrl,
+  logger,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -31,7 +32,7 @@ it('returns the validation status when calling "testIsValid" query', async ({
           api: new TestAPI({
             cache: httpCache,
             pluginSymbol: Symbol("@repo/plugin-test"),
-            logger: {} as never,
+            logger,
             connection: {
               url: redisUrl,
             },

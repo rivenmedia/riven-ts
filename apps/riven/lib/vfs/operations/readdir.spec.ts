@@ -39,49 +39,40 @@ it.skip("returns all shows for the /shows path", async () => {
         fileSize: 123456789,
         provider: "@repo/plugin-test",
       },
-      { partial: true, persist: false },
+      { persist: false },
     ),
   ];
 
-  const show = em.create(
-    Show,
-    {
-      tmdbId: "1",
-      title: "Example Show 1",
-      state: "Ongoing",
-      releaseData: {},
-    },
-    { partial: true },
-  );
+  const show = em.create(Show, {
+    tmdbId: "1",
+    title: "Example Show 1",
+    state: "Ongoing",
+    releaseData: {},
+    status: "continuing",
+    contentRating: "tv-14",
+  });
 
   await em.flush();
 
-  const season = em.create(
-    Season,
-    {
-      state: "Completed",
-      number: 1,
-      parent: ref(show),
-    },
-    { partial: true },
-  );
+  const season = em.create(Season, {
+    state: "Completed",
+    number: 1,
+    parent: ref(show),
+  });
 
   await em.flush();
 
   const expectedEpisodes: Episode[] = [
-    em.create(
-      Episode,
-      {
-        number: 1,
-        season: ref(season),
-        tmdbId: "1",
-        year: 2020,
-        title: "Example Episode 1",
-        state: "Downloaded",
-        type: "episode",
-      },
-      { partial: true },
-    ),
+    em.create(Episode, {
+      number: 1,
+      season: ref(season),
+      tmdbId: "1",
+      year: 2020,
+      title: "Example Episode 1",
+      state: "Downloaded",
+      type: "episode",
+      contentRating: "tv-14",
+    }),
   ];
 
   await database.em.transactional(async (em) => {
@@ -117,29 +108,22 @@ it("returns all movies for the /movies path", async () => {
   const em = database.em.fork();
 
   const expectedMediaEntries = [
-    em.create(
-      MediaEntry,
-      {
-        originalFilename: "Example Movie 1.mkv",
-        fileSize: 987654321,
-        provider: "@repo/plugin-test",
-      },
-      { partial: true },
-    ),
+    em.create(MediaEntry, {
+      originalFilename: "Example Movie 1.mkv",
+      fileSize: 987654321,
+      provider: "@repo/plugin-test",
+    }),
   ];
 
   const expectedMovies = [
-    em.create(
-      Movie,
-      {
-        tmdbId: "1",
-        year: 2020,
-        title: "Example Movie 1",
-        state: "Downloaded",
-        type: "movie",
-      },
-      { partial: true },
-    ),
+    em.create(Movie, {
+      tmdbId: "1",
+      year: 2020,
+      title: "Example Movie 1",
+      state: "Downloaded",
+      type: "movie",
+      contentRating: "g",
+    }),
   ];
 
   for (const entry of expectedMediaEntries) {
@@ -175,27 +159,22 @@ it("returns the media entry's filename when viewing a single movie's directory",
   const em = database.em.fork();
 
   const expectedMediaEntries: MediaEntry[] = [
-    database.mediaEntry.create(
-      {
-        originalFilename: "Example Movie 1.mkv",
-        fileSize: 987654321,
-        provider: "@repo/plugin-test",
-      },
-      { partial: true },
-    ),
+    database.mediaEntry.create({
+      originalFilename: "Example Movie 1.mkv",
+      fileSize: 987654321,
+      provider: "@repo/plugin-test",
+    }),
   ];
 
   const expectedMovies: Movie[] = [
-    database.movie.create(
-      {
-        tmdbId: "1",
-        year: 2020,
-        title: "Example Movie 1",
-        state: "Downloaded",
-        type: "movie",
-      },
-      { partial: true },
-    ),
+    database.movie.create({
+      tmdbId: "1",
+      year: 2020,
+      title: "Example Movie 1",
+      state: "Downloaded",
+      type: "movie",
+      contentRating: "g",
+    }),
   ];
 
   for (const entry of expectedMediaEntries) {

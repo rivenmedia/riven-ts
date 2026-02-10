@@ -224,7 +224,7 @@ export abstract class MediaItem {
    * @example "Inception (2010) {tmdb-27205}"
    */
   @Property({ persist: false, hidden: true })
-  get prettyName(): Hidden<string> | undefined {
+  get prettyName(): Opt<Hidden<string>> | undefined {
     if (
       !this.title ||
       !this.year ||

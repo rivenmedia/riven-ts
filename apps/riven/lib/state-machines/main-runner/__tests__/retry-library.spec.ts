@@ -7,30 +7,21 @@ it('sends a "riven.media-item.index.requested" event for each pending RequestedI
   actor,
 }) => {
   const items = [
-    database.requestedItem.create(
-      {
-        imdbId: "tt1234567",
-        state: "Requested",
-      },
-      { partial: true },
-    ),
-    database.requestedItem.create(
-      {
-        imdbId: "tt2345678",
-        state: "Requested",
-      },
-      { partial: true },
-    ),
-    database.requestedItem.create(
-      {
-        imdbId: "tt3456789",
-        state: "Requested",
-      },
-      { partial: true },
-    ),
+    database.itemRequest.create({
+      imdbId: "tt1234567",
+      type: "movie",
+    }),
+    database.itemRequest.create({
+      imdbId: "tt2345678",
+      type: "show",
+    }),
+    database.itemRequest.create({
+      imdbId: "tt3456789",
+      type: "show",
+    }),
   ];
 
-  await database.mediaItem.insertMany(items);
+  await database.itemRequest.insertMany(items);
 
   actor.start();
 

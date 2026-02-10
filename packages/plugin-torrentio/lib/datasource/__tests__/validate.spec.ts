@@ -10,6 +10,7 @@ it("returns false if the request fails", async ({
   server,
   httpCache,
   redisUrl,
+  logger,
 }) => {
   server.use(
     http.get("**/validate", () =>
@@ -19,7 +20,7 @@ it("returns false if the request fails", async ({
 
   const torrentioApi = new TorrentioAPI({
     cache: httpCache,
-    logger: {} as never,
+    logger,
     pluginSymbol: pluginConfig.name,
     connection: {
       url: redisUrl,
@@ -37,6 +38,7 @@ it("returns true if the request succeeds", async ({
   server,
   httpCache,
   redisUrl,
+  logger,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -44,7 +46,7 @@ it("returns true if the request succeeds", async ({
 
   const torrentioApi = new TorrentioAPI({
     cache: httpCache,
-    logger: {} as never,
+    logger,
     pluginSymbol: pluginConfig.name,
     connection: {
       url: redisUrl,

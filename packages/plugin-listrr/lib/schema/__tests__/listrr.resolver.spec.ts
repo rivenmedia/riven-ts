@@ -23,6 +23,7 @@ it("returns movies when calling listrrMovies query", async ({
   httpCache,
   server,
   redisUrl,
+  logger,
 }) => {
   const contentLists = new Set([
     "64b7f2f5e13e4b6f8c8e4d1a",
@@ -73,7 +74,7 @@ it("returns movies when calling listrrMovies query", async ({
         [pluginConfig.name]: {
           api: new ListrrAPI({
             cache: httpCache,
-            logger: {} as never,
+            logger,
             pluginSymbol: pluginConfig.name,
             connection: {
               url: redisUrl,
@@ -100,6 +101,7 @@ it("returns shows when calling listrrShows query", async ({
   httpCache,
   server,
   redisUrl,
+  logger,
 }) => {
   const contentLists = new Set([
     "64b7f2f5e13e4b6f8c8e4d1a",
@@ -150,7 +152,7 @@ it("returns shows when calling listrrShows query", async ({
         [pluginConfig.name]: {
           api: new ListrrAPI({
             cache: httpCache,
-            logger: {} as never,
+            logger,
             pluginSymbol: pluginConfig.name,
             connection: {
               url: redisUrl,
@@ -177,6 +179,7 @@ it('returns the user validation status when calling "listrrIsValid" query', asyn
   httpCache,
   server,
   redisUrl,
+  logger,
 }) => {
   server.use(getApiListMyPageHandler());
 
@@ -193,7 +196,7 @@ it('returns the user validation status when calling "listrrIsValid" query', asyn
         [pluginConfig.name]: {
           api: new ListrrAPI({
             cache: httpCache,
-            logger: {} as never,
+            logger,
             pluginSymbol: pluginConfig.name,
             connection: {
               url: redisUrl,

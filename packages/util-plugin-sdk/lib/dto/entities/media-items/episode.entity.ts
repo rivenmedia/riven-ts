@@ -36,7 +36,7 @@ export class Episode extends MediaItem {
   @Enum()
   declare contentRating: ShowContentRating;
 
-  override get prettyName() {
+  override get prettyName(): Opt<string> {
     const baseName = this.season
       .getProperty("parent")
       .getProperty("prettyName");

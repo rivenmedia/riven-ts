@@ -3,15 +3,19 @@ import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { expect, test as testBase } from "vitest";
 
+import { mockLogger } from "./create-mock-logger.ts";
+
 import type { ApolloServer } from "@apollo/server";
 import type { KeyValueCache } from "@apollo/utils.keyvaluecache";
 import type { SetupServerApi } from "msw/node";
+import type { Logger } from "winston";
 
 export const it = testBase.extend<{
   gqlServer: ApolloServer;
   redisUrl: string;
   httpCache: KeyValueCache;
   server: SetupServerApi;
+  logger: Logger;
 }>({
   redisUrl: [
     async ({}, use) => {
@@ -41,11 +45,15 @@ export const it = testBase.extend<{
     { scope: "worker" },
   ],
   async gqlServer({}, use) {
-    const { mockServer } = await import("@repo/core-util-mock-graphql-server");
+    const { buildMockServer } =
+      await import("@repo/core-util-mock-graphql-server");
+    const mockServer = await buildMockServer();
 
     await mockServer.start();
 
     await use(mockServer);
+
+    await mockServer.stop();
   },
   async httpCache({}, use) {
     const { InMemoryLRUCache } = await import("@apollo/utils.keyvaluecache");
@@ -84,6 +92,7 @@ export const it = testBase.extend<{
     // Stop the worker after the test.
     server.close();
   },
+  logger: mockLogger,
 });
 
 export type {

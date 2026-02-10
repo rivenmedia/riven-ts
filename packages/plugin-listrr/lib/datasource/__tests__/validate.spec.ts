@@ -10,6 +10,7 @@ it("returns false if the request fails", async ({
   server,
   httpCache,
   redisUrl,
+  logger,
 }) => {
   server.use(getApiListMyPageHandler(() => HttpResponse.error()));
 
@@ -18,7 +19,7 @@ it("returns false if the request fails", async ({
     connection: {
       url: redisUrl,
     },
-    logger: {} as never,
+    logger,
     settings: {
       apiKey: "",
       movieLists: [],
@@ -35,6 +36,7 @@ it("returns true if the request succeeds", async ({
   server,
   httpCache,
   redisUrl,
+  logger,
 }) => {
   server.use(getApiListMyPageHandler());
 
@@ -43,7 +45,7 @@ it("returns true if the request succeeds", async ({
     connection: {
       url: redisUrl,
     },
-    logger: {} as never,
+    logger,
     settings: {
       apiKey: "",
       movieLists: [],

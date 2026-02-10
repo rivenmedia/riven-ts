@@ -15,10 +15,11 @@ import { ListrrAPI } from "../listrr.datasource.ts";
 it("returns an empty array if no content lists are provided", async ({
   httpCache,
   redisUrl,
+  logger,
 }) => {
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    logger: {} as never,
+    logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     connection: {
       url: redisUrl,
@@ -38,6 +39,7 @@ it("retrieves movies from each provided list", async ({
   server,
   httpCache,
   redisUrl,
+  logger,
 }) => {
   const contentLists = new Set([
     "64b7f2f5e13e4b6f8c8e4d1a",
@@ -69,7 +71,7 @@ it("retrieves movies from each provided list", async ({
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    logger: {} as never,
+    logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     connection: {
       url: redisUrl,
@@ -89,6 +91,7 @@ it("paginates through all pages of the list", async ({
   server,
   httpCache,
   redisUrl,
+  logger,
 }) => {
   const contentLists = new Set(["64b7f2f5e13e4b6f8c8e4d1c"]);
   const totalPages = 3;
@@ -122,7 +125,7 @@ it("paginates through all pages of the list", async ({
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    logger: {} as never,
+    logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     connection: {
       url: redisUrl,
@@ -142,6 +145,7 @@ it("dedupes movies that appear in multiple lists", async ({
   server,
   httpCache,
   redisUrl,
+  logger,
 }) => {
   const buildMockMovie = (id: number) =>
     createListrrContractsModelsAPIMovieDto({
@@ -170,7 +174,7 @@ it("dedupes movies that appear in multiple lists", async ({
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    logger: {} as never,
+    logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
     connection: {
       url: redisUrl,

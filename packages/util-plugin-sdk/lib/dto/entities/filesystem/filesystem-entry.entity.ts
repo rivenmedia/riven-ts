@@ -80,7 +80,7 @@ export abstract class FileSystemEntry {
 
   @Field(() => MediaItem)
   @ManyToOne(() => MediaItem)
-  mediaItem!: Ref<Movie | Episode>;
+  mediaItem!: Opt<Ref<Movie | Episode>>;
 
   @Field(() => String)
   @Enum(() => FileSystemEntryType.enum)

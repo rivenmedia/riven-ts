@@ -4,6 +4,7 @@ import { ApolloServer } from "@apollo/server";
 
 import "reflect-metadata";
 
-export const mockServer = new ApolloServer({
-  schema: await buildSchema([]),
-});
+export const buildMockServer = async () =>
+  new ApolloServer({
+    schema: await buildSchema([]),
+  });
