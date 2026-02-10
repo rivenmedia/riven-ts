@@ -10,8 +10,6 @@ import { database } from "../../database/database.ts";
  * A schema that converts to/from a serialised MediaItem.
  */
 export const SerialisedMediaItem = z.codec(
-  // Just validate the input has a matching media item type here
-  // to prevent non-media items from being passed through
   z.looseObject({ type: MediaItemType }),
   MediaItem,
   {

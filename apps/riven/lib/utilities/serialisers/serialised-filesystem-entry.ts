@@ -10,8 +10,6 @@ import { database } from "../../database/database.ts";
  * A schema that converts to/from a serialised FileSystemEntry.
  */
 export const SerialisedFileSystemEntry = z.codec(
-  // Just validate the input has a matching filesystem entry type here
-  // to prevent non-filesystem entries from being passed through
   z.looseObject({ type: FileSystemEntryType }),
   FileSystemEntry,
   {
