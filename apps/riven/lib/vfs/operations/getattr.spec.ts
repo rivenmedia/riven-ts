@@ -12,29 +12,24 @@ import { expect, it, vi } from "vitest";
 import { database } from "../../database/database.ts";
 import { getattrSync, parseMode } from "./getattr.ts";
 
-it.for(["/", "/movies"])(
-  'returns a container directory for "%s"',
-  async (path) => {
-    const callback = vi.fn();
+it("returns directory stats for the root directory", async () => {
+  const callback = vi.fn();
 
-    getattrSync(path, callback);
+  getattrSync("/", callback);
 
-    await vi.waitFor(() => {
-      expect(callback).toHaveBeenCalledWith(null, {
-        atime: expect.any(Date) as never,
-        ctime: expect.any(Date) as never,
-        mtime: expect.any(Date) as never,
-        mode: parseMode("dir"),
-        gid: 1000,
-        uid: 1000,
-        size: 0,
-        blksize: 131072,
-        blocks: 1,
-        nlink: 2,
-      });
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(null, {
+      atime: expect.any(Date) as never,
+      ctime: expect.any(Date) as never,
+      mtime: expect.any(Date) as never,
+      mode: parseMode("dir"),
+      gid: 1000,
+      uid: 1000,
+      size: 0,
+      nlink: 4,
     });
-  },
-);
+  });
+});
 
 it("returns EBADF for hidden paths", async () => {
   const callback = vi.fn();
@@ -66,7 +61,7 @@ it("returns ENOENT for unknown paths", async () => {
   });
 });
 
-it("returns file stats for movies", async () => {
+it("returns file stats for movie files", async () => {
   const callback = vi.fn();
 
   const em = database.em.fork();
@@ -106,14 +101,53 @@ it("returns file stats for movies", async () => {
       gid: 1000,
       uid: 1000,
       size: 2147483648,
-      blksize: 131072,
-      blocks: 1,
       nlink: 1,
     });
   });
 });
 
-it("returns directory stats for all shows", async () => {
+it("returns directory stats for /movies", async () => {
+  const callback = vi.fn();
+
+  const em = database.em.fork();
+
+  for (let i = 1; i <= 3; i++) {
+    const movie = em.create(Movie, {
+      contentRating: "g",
+      state: "Downloaded",
+    });
+
+    await em.flush();
+
+    const mediaEntry = em.create(MediaEntry, {
+      fileSize: 1234567890,
+      originalFilename: "Example Show.mkv",
+      provider: "@repo/plugin-test",
+      mediaItem: movie,
+    });
+
+    movie.filesystemEntries.add(mediaEntry);
+  }
+
+  await em.flush();
+
+  getattrSync("/movies", callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(null, {
+      atime: expect.any(Date) as never,
+      ctime: expect.any(Date) as never,
+      mtime: expect.any(Date) as never,
+      mode: parseMode("dir"),
+      gid: 1000,
+      uid: 1000,
+      size: 0,
+      nlink: 5,
+    });
+  });
+});
+
+it("returns directory stats for /shows", async () => {
   const callback = vi.fn();
 
   const em = database.em.fork();
@@ -170,8 +204,6 @@ it("returns directory stats for all shows", async () => {
       gid: 1000,
       uid: 1000,
       size: 0,
-      blksize: 131072,
-      blocks: 1,
       nlink: 5,
     });
   });
@@ -234,8 +266,6 @@ it("returns directory stats for single shows", async () => {
       gid: 1000,
       uid: 1000,
       size: 0,
-      blksize: 131072,
-      blocks: 1,
       nlink: 12,
     });
   });
@@ -298,8 +328,6 @@ it("returns directory stats for single seasons", async () => {
       gid: 1000,
       uid: 1000,
       size: 0,
-      blksize: 131072,
-      blocks: 1,
       nlink: 2,
     });
   });
@@ -363,8 +391,6 @@ it("returns file stats for episodes", async () => {
       gid: 1000,
       uid: 1000,
       size: 1234567890,
-      blksize: 131072,
-      blocks: 1,
       nlink: 1,
     });
   });
