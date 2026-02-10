@@ -24,7 +24,7 @@ export class Season extends MediaItem {
 
   @Field(() => Show)
   @ManyToOne()
-  parent!: Ref<Show>;
+  parent!: Opt<Ref<Show>>;
 
   @Field(() => [Episode])
   @OneToMany(() => Episode, (episode) => episode.season)

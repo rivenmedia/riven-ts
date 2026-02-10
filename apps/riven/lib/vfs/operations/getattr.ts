@@ -56,9 +56,10 @@ type StatInput = SetOptional<
       }
   );
 
-const stat = (st: StatInput) => {
+const stat = (st: StatInput, subDirectoryCount: number) => {
   const gid = st.gid ?? process.getgid?.() ?? 0;
   const uid = st.uid ?? process.getuid?.() ?? 0;
+  const nlink = st.mode === "dir" ? 2 + subDirectoryCount : 1;
 
   return {
     ...st,
@@ -68,49 +69,70 @@ const stat = (st: StatInput) => {
     size: st.mode === "dir" ? 0 : st.size,
     blksize: config.blockSize,
     blocks: 1,
-    nlink: st.mode === "dir" ? 2 : 1,
+    nlink,
   } satisfies Partial<Stats>;
 };
 
 function getEntry(pathInfo: PathInfo) {
   switch (pathInfo.pathType) {
-    case "single-movie":
-      return database.movie.findOneOrFail({
-        tmdbId: String(pathInfo.tmdbId),
-      });
-    case "single-episode":
+    case "single-movie": {
+      if (!pathInfo.tmdbId) {
+        throw new TypeError("Missing tmdbId for movie path");
+      }
+
+      return database.movie.findOneOrFail(
+        { tmdbId: pathInfo.tmdbId },
+        { fields: ["createdAt", "updatedAt", "filesystemEntries.fileSize"] },
+      );
+    }
+    case "single-episode": {
+      if (!pathInfo.tvdbId || !pathInfo.season || !pathInfo.episode) {
+        throw new TypeError(
+          "Missing tvdbId, season, or episode for episode path",
+        );
+      }
+
       return database.episode.findOneOrFail(
         {
           season: {
-            number: Number(pathInfo.season),
+            number: pathInfo.season,
             parent: {
-              tvdbId: String(pathInfo.tvdbId),
+              tvdbId: pathInfo.tvdbId,
             },
           },
-          number: Number(pathInfo.episode),
+          number: pathInfo.episode,
         },
-        {
-          populate: ["*"],
-        },
+        { fields: ["createdAt", "updatedAt", "filesystemEntries.fileSize"] },
       );
-    case "show-seasons":
+    }
+    case "show-seasons": {
+      if (!pathInfo.tvdbId) {
+        throw new TypeError("Missing tvdbId for show seasons path");
+      }
+
       return database.show.findOneOrFail({
-        tvdbId: String(pathInfo.tvdbId),
+        tvdbId: pathInfo.tvdbId,
       });
-    case "season-episodes":
+    }
+    case "season-episodes": {
+      if (!pathInfo.tvdbId || !pathInfo.season) {
+        throw new TypeError(
+          "Missing tvdbId or season for season episodes path",
+        );
+      }
+
       return database.season.findOneOrFail(
         {
           parent: {
-            tvdbId: String(pathInfo.tvdbId),
+            tvdbId: pathInfo.tvdbId,
           },
-          number: Number(pathInfo.season),
+          number: pathInfo.season,
         },
-        {
-          populate: ["*"],
-        },
+        { populate: ["*"] },
       );
-    case "all-movies":
+    }
     case "all-shows":
+    case "all-movies":
       return null;
   }
 }
@@ -126,14 +148,47 @@ async function getattr(path: string) {
 
   switch (path) {
     case "/":
-    case "/movies":
     case "/shows": {
-      return stat({
-        mtime: new Date(),
-        atime: new Date(),
-        ctime: new Date(),
-        mode: "dir",
+      const totalShows = await database.show.count({
+        seasons: {
+          episodes: {
+            filesystemEntries: {
+              $some: {
+                type: "media",
+              },
+            },
+          },
+        },
       });
+
+      return stat(
+        {
+          mtime: new Date(),
+          atime: new Date(),
+          ctime: new Date(),
+          mode: "dir",
+        },
+        totalShows,
+      );
+    }
+    case "/movies": {
+      const totalMovies = await database.movie.count({
+        filesystemEntries: {
+          $some: {
+            type: "media",
+          },
+        },
+      });
+
+      return stat(
+        {
+          mtime: new Date(),
+          atime: new Date(),
+          ctime: new Date(),
+          mode: "dir",
+        },
+        totalMovies,
+      );
     }
   }
 
@@ -144,17 +199,33 @@ async function getattr(path: string) {
     throw new FuseError(Fuse.ENOENT, "Entry not found");
   }
 
-  const attrs = stat({
-    ctime: entry.createdAt,
-    atime: entry.updatedAt ?? entry.createdAt,
-    mtime: entry.updatedAt ?? entry.createdAt,
-    ...(pathInfo.isFile
-      ? {
-          size: entry.mediaEntry?.fileSize ?? 0,
-          mode: "file",
-        }
-      : { mode: "dir" }),
-  });
+  const subDirectoryCount =
+    pathInfo.pathType === "show-seasons"
+      ? await database.season.count({
+          episodes: {
+            filesystemEntries: {
+              $some: {
+                type: "media",
+              },
+            },
+          },
+        })
+      : 0;
+
+  const attrs = stat(
+    {
+      ctime: entry.createdAt,
+      atime: entry.updatedAt ?? entry.createdAt,
+      mtime: entry.updatedAt ?? entry.createdAt,
+      ...(pathInfo.isFile
+        ? {
+            size: entry.filesystemEntries[0]?.fileSize ?? 0,
+            mode: "file",
+          }
+        : { mode: "dir" }),
+    },
+    subDirectoryCount,
+  );
 
   attrCache.set(path, attrs);
 

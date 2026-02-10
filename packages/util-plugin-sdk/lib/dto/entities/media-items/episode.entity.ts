@@ -29,7 +29,7 @@ export class Episode extends MediaItem {
 
   @Field(() => Season)
   @ManyToOne()
-  season!: Ref<Season> & Opt;
+  season!: Opt<Ref<Season>>;
 
   @Field(() => ShowContentRatingEnum)
   declare contentRating: ShowContentRating;

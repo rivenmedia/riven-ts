@@ -81,7 +81,7 @@ export abstract class FileSystemEntry {
   updatedAt?: Opt<Date>;
 
   @Field(() => MediaItem)
-  @ManyToOne(() => MediaItem)
+  @ManyToOne()
   mediaItem!: Opt<Ref<Movie | Episode>>;
 
   @Field(() => String)
