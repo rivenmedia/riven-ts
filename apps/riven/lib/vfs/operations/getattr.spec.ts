@@ -79,9 +79,6 @@ it("returns file stats for known files", async () => {
 
   mediaItem.filesystemEntries.add(mediaEntry);
 
-  em.persist(mediaEntry);
-  em.persist(mediaItem);
-
   await em.flush();
 
   getattrSync(

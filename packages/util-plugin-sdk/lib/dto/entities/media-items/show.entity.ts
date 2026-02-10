@@ -32,7 +32,6 @@ export class Show extends MediaItem {
   seasons = new Collection<Season>(this);
 
   @Field(() => ShowContentRatingEnum)
-  @Enum(() => ShowContentRating.enum)
   declare contentRating: ShowContentRating;
 
   override type: Opt<"show"> = "show" as const;

@@ -8,7 +8,7 @@ import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 import { getMoviesDirectoryEntries } from "../utilities/get-movies-directory-entries.ts";
 import { getShowsDirectoryEntries } from "../utilities/get-shows-directory-entries.ts";
 
-async function readdir(path: string) {
+async function readdir(path: string): Promise<string[]> {
   if (path === config.rootPath) {
     return PersistentDirectory.options;
   }
@@ -34,6 +34,8 @@ export const readDirSync = function (path, callback) {
       process.nextTick(callback, 0, data);
     })
     .catch((error: unknown) => {
+      console.error(error);
+
       if (isFuseError(error)) {
         logger.error(`VFS readdir FuseError: ${error.message}`);
 

@@ -61,6 +61,12 @@ registerEnumType(MediaItemType.enum, {
 @Entity({
   abstract: true,
   discriminatorColumn: "type",
+  discriminatorMap: {
+    movie: "Movie",
+    show: "Show",
+    season: "Season",
+    episode: "Episode",
+  },
 })
 @Index({ properties: ["type", "airedAt"] })
 export abstract class MediaItem {
@@ -171,7 +177,7 @@ export abstract class MediaItem {
   rating?: number;
 
   @Field(() => MediaItemContentRatingEnum, { nullable: true })
-  @Property()
+  @Enum(() => MediaItemContentRating.enum)
   contentRating?: MediaItemContentRating;
 
   @Field(() => Boolean)

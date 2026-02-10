@@ -27,13 +27,14 @@ export const MediaItemContentRatingEnum = Object.fromEntries(
 
 registerEnumType(MediaItemContentRatingEnum, {
   name: "MediaItemContentRating",
-  description: "The content rating of a media item",
+  description:
+    "The content rating of a media item. See MovieContentRating and ShowContentRating for more specific ratings.",
 });
 
 /**
  * The content rating of a movie, based on the MPAA rating system.
  *
- * See https://en.wikipedia.org/wiki/MPAA_film_rating_system for more details.
+ * @see {@link https://en.wikipedia.org/wiki/MPAA_film_rating_system MPAA film rating system} for more details.
  */
 export const MovieContentRating = MediaItemContentRating.extract([
   "g",
@@ -54,13 +55,14 @@ export const MovieContentRatingEnum = Object.fromEntries(
 
 registerEnumType(MovieContentRatingEnum, {
   name: "MovieContentRating",
-  description: "The content rating of a movie",
+  description:
+    "The content rating of a movie. See https://en.wikipedia.org/wiki/MPAA_film_rating_system for more details.",
 });
 
 /**
  * The content rating of a TV show, based on the TV Parental Guidelines.
  *
- * See https://en.wikipedia.org/wiki/TV_Parental_Guidelines for more details.
+ * @see {@link https://en.wikipedia.org/wiki/TV_Parental_Guidelines TV Parental Guidelines} for more details.
  */
 export const ShowContentRating = MediaItemContentRating.extract([
   "tv-y",

@@ -4,7 +4,8 @@ import {
   Movie,
   Season,
   Show,
-} from "@repo/util-plugin-sdk/dto/entities";
+} from "@repo/util-plugin-sdk/dto/entities/index";
+import { MovieContentRating } from "@repo/util-plugin-sdk/dto/enums/content-ratings.enum";
 
 import { ref } from "@mikro-orm/core";
 import { expect, it, vi } from "vitest";
@@ -25,27 +26,15 @@ it("returns persistent directory entries for the root path", async () => {
   });
 });
 
-it.skip("returns all shows for the /shows path", async () => {
+it("returns all shows for the /shows path", async () => {
   const callback = vi.fn();
 
   const em = database.em.fork();
 
-  const expectedMediaEntries: MediaEntry[] = [
-    em.create(
-      MediaEntry,
-      {
-        id: 1,
-        originalFilename: "Example Show 1.mkv",
-        fileSize: 123456789,
-        provider: "@repo/plugin-test",
-      },
-      { persist: false },
-    ),
-  ];
-
   const show = em.create(Show, {
-    tmdbId: "1",
+    tvdbId: "1",
     title: "Example Show 1",
+    year: 2020,
     state: "Ongoing",
     releaseData: {},
     status: "continuing",
@@ -62,42 +51,30 @@ it.skip("returns all shows for the /shows path", async () => {
 
   await em.flush();
 
-  const expectedEpisodes: Episode[] = [
-    em.create(Episode, {
-      number: 1,
-      season: ref(season),
-      tmdbId: "1",
-      year: 2020,
-      title: "Example Episode 1",
-      state: "Downloaded",
-      type: "episode",
-      contentRating: "tv-14",
-    }),
-  ];
-
-  await database.em.transactional(async (em) => {
-    expectedMediaEntries.forEach((entry, i) => {
-      if (expectedEpisodes[i]) {
-        entry.mediaItem = ref(expectedEpisodes[i]);
-      }
-
-      em.persist(entry);
-    });
-
-    for (const episode of expectedEpisodes) {
-      episode.filesystemEntries.add(expectedMediaEntries);
-
-      em.persist(episode);
-    }
-
-    await em.flush();
+  const episode = em.create(Episode, {
+    number: 1,
+    season: ref(season),
+    year: 2020,
+    title: "Example Episode 1",
+    state: "Downloaded",
+    type: "episode",
+    contentRating: "tv-14",
   });
+
+  em.create(MediaEntry, {
+    originalFilename: "Example Episode 1.mkv",
+    fileSize: 123456789,
+    provider: "@repo/plugin-test",
+    mediaItem: ref(episode),
+  });
+
+  await em.flush();
 
   readDirSync("/shows", callback);
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
-      "Example Episode 1 (2020) {tmdb-1}",
+      "Example Show 1 (2020) {tvdb-1}",
     ]);
   });
 });
@@ -107,38 +84,22 @@ it("returns all movies for the /movies path", async () => {
 
   const em = database.em.fork();
 
-  const expectedMediaEntries = [
-    em.create(MediaEntry, {
-      originalFilename: "Example Movie 1.mkv",
-      fileSize: 987654321,
-      provider: "@repo/plugin-test",
-    }),
-  ];
+  const movie = em.create(Movie, {
+    tmdbId: "1",
+    year: 2020,
+    title: "Example Movie 1",
+    state: "Downloaded",
+    contentRating: "unknown",
+  });
 
-  const expectedMovies = [
-    em.create(Movie, {
-      tmdbId: "1",
-      year: 2020,
-      title: "Example Movie 1",
-      state: "Downloaded",
-      type: "movie",
-      contentRating: "g",
-    }),
-  ];
+  const mediaEntry = em.create(MediaEntry, {
+    originalFilename: "Example Movie 1.mkv",
+    fileSize: 987654321,
+    provider: "@repo/plugin-test",
+    mediaItem: ref(movie),
+  });
 
-  for (const entry of expectedMediaEntries) {
-    if (expectedMovies[0]) {
-      entry.mediaItem = ref(expectedMovies[0]);
-    }
-  }
-
-  em.persist(expectedMediaEntries);
-
-  for (const movie of expectedMovies) {
-    movie.filesystemEntries.add(expectedMediaEntries);
-  }
-
-  em.persist(expectedMovies);
+  movie.filesystemEntries.add(mediaEntry);
 
   await em.flush();
 
@@ -151,53 +112,150 @@ it("returns all movies for the /movies path", async () => {
   });
 });
 
-it.todo("returns episodes for a show season path");
+it("returns all seasons for a show path", async () => {
+  const callback = vi.fn();
+
+  const em = database.em.fork();
+
+  const show = em.create(Show, {
+    tvdbId: "1",
+    title: "Example Show 1",
+    year: 2020,
+    state: "Ongoing",
+    releaseData: {},
+    status: "continuing",
+    contentRating: "tv-14",
+  });
+
+  await em.flush();
+
+  for (let i = 1; i <= 3; i++) {
+    const season = em.create(Season, {
+      state: "Completed",
+      number: i,
+      parent: ref(show),
+    });
+
+    await em.flush();
+
+    const episode = em.create(Episode, {
+      number: 1,
+      season: ref(season),
+      year: 2020,
+      title: "Example Episode 1",
+      state: "Downloaded",
+      type: "episode",
+      contentRating: "tv-14",
+    });
+
+    em.create(MediaEntry, {
+      originalFilename: "Example Episode 1.mkv",
+      fileSize: 123456789,
+      provider: "@repo/plugin-test",
+      mediaItem: ref(episode),
+    });
+  }
+
+  await em.flush();
+
+  readDirSync("/shows/Example Show 1 (2020) {tvdb-1}", callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
+      "Season 01",
+      "Season 02",
+      "Season 03",
+    ]);
+  });
+});
+
+it("returns all episodes for a show season path", async () => {
+  const callback = vi.fn();
+
+  const em = database.em.fork();
+
+  const show = em.create(Show, {
+    tvdbId: "1",
+    title: "Example Show 1",
+    year: 2020,
+    state: "Ongoing",
+    releaseData: {},
+    status: "continuing",
+    contentRating: "tv-14",
+  });
+
+  await em.flush();
+
+  const season = em.create(Season, {
+    state: "Completed",
+    number: 1,
+    parent: ref(show),
+  });
+
+  await em.flush();
+
+  for (let i = 1; i <= 3; i++) {
+    const episode = em.create(Episode, {
+      number: i,
+      season: ref(season),
+      year: 2020,
+      title: `Example Episode ${i.toString().padStart(2, "0")}`,
+      state: "Downloaded",
+      type: "episode",
+      contentRating: "tv-14",
+    });
+
+    const mediaEntry = em.create(MediaEntry, {
+      originalFilename: `Example Episode ${i.toString().padStart(2, "0")}.mkv`,
+      fileSize: 123456789,
+      provider: "@repo/plugin-test",
+      mediaItem: ref(episode),
+    });
+
+    episode.filesystemEntries.add(mediaEntry);
+  }
+
+  await em.flush();
+
+  readDirSync("/shows/Example Show 1 (2020) {tvdb-1}/Season 01", callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
+      "Example Show 1 (2020) {tvdb-1} - s01e01.mkv",
+      "Example Show 1 (2020) {tvdb-1} - s01e02.mkv",
+      "Example Show 1 (2020) {tvdb-1} - s01e03.mkv",
+    ]);
+  });
+});
 
 it("returns the media entry's filename when viewing a single movie's directory", async () => {
   const callback = vi.fn();
 
   const em = database.em.fork();
 
-  const expectedMediaEntries: MediaEntry[] = [
-    database.mediaEntry.create({
-      originalFilename: "Example Movie 1.mkv",
-      fileSize: 987654321,
-      provider: "@repo/plugin-test",
-    }),
-  ];
+  const movie = em.create(Movie, {
+    tmdbId: "1",
+    year: 2020,
+    title: "Example Movie 1",
+    state: "Downloaded",
+    type: "movie",
+    contentRating: MovieContentRating.enum.g,
+  });
 
-  const expectedMovies: Movie[] = [
-    database.movie.create({
-      tmdbId: "1",
-      year: 2020,
-      title: "Example Movie 1",
-      state: "Downloaded",
-      type: "movie",
-      contentRating: "g",
-    }),
-  ];
-
-  for (const entry of expectedMediaEntries) {
-    if (expectedMovies[0]) {
-      entry.mediaItem = ref(expectedMovies[0]);
-    }
-  }
-
-  for (const movie of expectedMovies) {
-    movie.filesystemEntries.add(expectedMediaEntries);
-  }
-
-  em.persist(expectedMediaEntries);
-  em.persist(expectedMovies);
+  const mediaEntry = em.create(MediaEntry, {
+    originalFilename: "Example Movie 1.mkv",
+    fileSize: 987654321,
+    provider: "@repo/plugin-test",
+    mediaItem: ref(movie),
+  });
 
   await em.flush();
 
   readDirSync("/movies/Example Movie 1 (2020) {tmdb-1}", callback);
 
   await vi.waitFor(() => {
-    expect(callback).toHaveBeenCalledWith<[number, string[]]>(
-      0,
-      expectedMediaEntries.map((entry) => entry.vfsFileName),
-    );
+    expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
+      mediaEntry.vfsFileName,
+    ]);
   });
 });

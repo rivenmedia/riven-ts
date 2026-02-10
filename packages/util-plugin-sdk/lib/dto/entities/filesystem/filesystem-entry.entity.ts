@@ -42,7 +42,9 @@ function getMediaItemPathParts(mediaItem: MediaItem) {
       .getProperty("prettyName");
 
     if (!seasonLabel || !showLabel) {
-      throw new ReferenceError("Unable to determine path - missing prettyName");
+      throw new ReferenceError(
+        "Unable to determine path - missing seasonLabel or showLabel",
+      );
     }
 
     return [showLabel, seasonLabel];

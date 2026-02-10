@@ -1,8 +1,8 @@
-import { Entity, Enum, type Opt } from "@mikro-orm/core";
+import { Entity, type Opt } from "@mikro-orm/core";
 import { Field, ObjectType } from "type-graphql";
 
 import {
-  type MovieContentRating,
+  MovieContentRating,
   MovieContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
 import { MediaItem } from "./media-item.entity.ts";
@@ -11,7 +11,6 @@ import { MediaItem } from "./media-item.entity.ts";
 @Entity()
 export class Movie extends MediaItem {
   @Field(() => MovieContentRatingEnum)
-  @Enum()
   declare contentRating: MovieContentRating;
 
   override type: Opt<"movie"> = "movie" as const;

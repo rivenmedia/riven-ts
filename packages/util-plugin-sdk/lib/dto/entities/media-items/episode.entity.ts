@@ -1,6 +1,5 @@
 import {
   Entity,
-  Enum,
   ManyToOne,
   type Opt,
   Property,
@@ -33,7 +32,6 @@ export class Episode extends MediaItem {
   season!: Ref<Season> & Opt;
 
   @Field(() => ShowContentRatingEnum)
-  @Enum()
   declare contentRating: ShowContentRating;
 
   override get prettyName(): Opt<string> {

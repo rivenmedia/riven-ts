@@ -69,7 +69,7 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
     driver: SqliteDriver as never,
     dbName: ":memory:",
     connect: false,
-    debug: false,
+    debug: true,
   });
 
   await database.orm.schema.createSchema();
@@ -102,5 +102,5 @@ expect.extend({
 beforeEach(async () => {
   const { database } = await import("./lib/database/database.ts");
 
-  await database.orm.schema.refreshDatabase();
+  await database.orm.schema.clearDatabase();
 });
