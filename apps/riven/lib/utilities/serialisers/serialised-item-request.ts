@@ -1,6 +1,7 @@
 import { RequestType } from "@repo/util-plugin-sdk/dto/entities";
 import { ItemRequest } from "@repo/util-plugin-sdk/schemas/media/requested-item";
 
+import { wrap } from "@mikro-orm/core";
 import z from "zod";
 
 import { database } from "../../database/database.ts";
@@ -18,7 +19,7 @@ export const SerialisedItemRequest = z.codec(
         partial: true,
         managed: true,
       }),
-    encode: (data) => data,
+    encode: (data) => wrap(data).serialize(),
   },
 );
 
