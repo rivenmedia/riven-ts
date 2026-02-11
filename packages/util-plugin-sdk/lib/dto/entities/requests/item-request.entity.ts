@@ -2,6 +2,8 @@ import { Entity, Enum, type Opt, PrimaryKey, Property } from "@mikro-orm/core";
 import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
 import z from "zod";
 
+import { DateTime } from "../../../helpers/dates.ts";
+
 export const RequestType = z.enum(["movie", "show"]);
 
 export type RequestType = z.infer<typeof RequestType>;
@@ -40,7 +42,7 @@ export class ItemRequest {
 
   @Field(() => Date)
   @Property()
-  createdAt: Opt<Date> = new Date();
+  createdAt: Opt<Date> = DateTime.now().toJSDate();
 
   @Field(() => Date, { nullable: true })
   @Property()

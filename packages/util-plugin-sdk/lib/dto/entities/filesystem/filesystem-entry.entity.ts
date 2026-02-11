@@ -9,6 +9,7 @@ import {
   type Ref,
 } from "@mikro-orm/core";
 import { IsPositive } from "class-validator";
+import { DateTime } from "luxon";
 import path from "node:path";
 import { Field, ID, ObjectType } from "type-graphql";
 import z from "zod";
@@ -74,10 +75,10 @@ export abstract class FileSystemEntry {
 
   @Field(() => Date)
   @Property()
-  createdAt: Opt<Date> = new Date();
+  createdAt: Opt<Date> = DateTime.now().toJSDate();
 
   @Field(() => Date, { nullable: true })
-  @Property({ onUpdate: () => new Date() })
+  @Property({ onUpdate: () => DateTime.now().toJSDate() })
   updatedAt?: Opt<Date>;
 
   @Field(() => MediaItem)

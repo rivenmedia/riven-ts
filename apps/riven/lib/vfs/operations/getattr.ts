@@ -1,4 +1,5 @@
 import Fuse, { type OPERATIONS, type Stats } from "@zkochan/fuse-native";
+import { DateTime } from "luxon";
 import fs from "node:fs";
 
 import { database } from "../../database/database.ts";
@@ -157,12 +158,12 @@ async function getattr(path: string) {
           mtime:
             mostRecentlyUpdatedEntry?.updatedAt ??
             oldestEntry?.createdAt ??
-            new Date(),
+            DateTime.now().toJSDate(),
           atime:
             mostRecentlyUpdatedEntry?.updatedAt ??
             oldestEntry?.createdAt ??
-            new Date(),
-          ctime: oldestEntry?.createdAt ?? new Date(),
+            DateTime.now().toJSDate(),
+          ctime: oldestEntry?.createdAt ?? DateTime.now().toJSDate(),
           mode: "dir",
         },
         PersistentDirectory.options.length,
@@ -214,10 +215,14 @@ async function getattr(path: string) {
       return stat(
         {
           mtime:
-            lastUpdatedShow?.updatedAt ?? oldestShow?.createdAt ?? new Date(),
+            lastUpdatedShow?.updatedAt ??
+            oldestShow?.createdAt ??
+            DateTime.now().toJSDate(),
           atime:
-            lastUpdatedShow?.updatedAt ?? oldestShow?.createdAt ?? new Date(),
-          ctime: oldestShow?.createdAt ?? new Date(),
+            lastUpdatedShow?.updatedAt ??
+            oldestShow?.createdAt ??
+            DateTime.now().toJSDate(),
+          ctime: oldestShow?.createdAt ?? DateTime.now().toJSDate(),
           mode: "dir",
         },
         totalShows,
@@ -265,10 +270,14 @@ async function getattr(path: string) {
       return stat(
         {
           mtime:
-            lastUpdatedMovie?.updatedAt ?? oldestMovie?.createdAt ?? new Date(),
+            lastUpdatedMovie?.updatedAt ??
+            oldestMovie?.createdAt ??
+            DateTime.now().toJSDate(),
           atime:
-            lastUpdatedMovie?.updatedAt ?? oldestMovie?.createdAt ?? new Date(),
-          ctime: oldestMovie?.createdAt ?? new Date(),
+            lastUpdatedMovie?.updatedAt ??
+            oldestMovie?.createdAt ??
+            DateTime.now().toJSDate(),
+          ctime: oldestMovie?.createdAt ?? DateTime.now().toJSDate(),
           mode: "dir",
         },
         totalMovies,

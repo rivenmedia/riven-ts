@@ -13,6 +13,7 @@ import {
   Unique,
 } from "@mikro-orm/core";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
+import { DateTime } from "luxon";
 import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
 import { z } from "zod";
 
@@ -74,10 +75,10 @@ export abstract class MediaItem {
   @PrimaryKey()
   id!: Opt<number>;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   @Index()
   @Property()
-  title?: string | null;
+  title!: string;
 
   @Field(() => String, { nullable: true })
   @Property()
@@ -107,10 +108,10 @@ export abstract class MediaItem {
   @Field(() => Date)
   @Index()
   @Property()
-  createdAt: Opt<Date> = new Date();
+  createdAt: Opt<Date> = DateTime.now().toJSDate();
 
   @Field(() => Date, { nullable: true })
-  @Property({ onUpdate: () => new Date() })
+  @Property({ onUpdate: () => DateTime.now().toMillis() })
   updatedAt?: Opt<Date>;
 
   @Field({ nullable: true })
@@ -164,9 +165,9 @@ export abstract class MediaItem {
   @Property()
   airedAt?: Date;
 
-  @Field({ nullable: true })
+  @Field()
   @Property()
-  year?: number;
+  year!: number;
 
   @Field(() => [String], { nullable: true })
   @Property()
@@ -231,11 +232,7 @@ export abstract class MediaItem {
    */
   @Property({ persist: false, hidden: true })
   get prettyName(): Opt<Hidden<string>> | undefined {
-    if (
-      !this.title ||
-      !this.year ||
-      (this.type === "movie" ? !this.tmdbId : !this.tvdbId)
-    ) {
+    if (this.type === "movie" ? !this.tmdbId : !this.tvdbId) {
       return;
     }
 

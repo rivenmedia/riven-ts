@@ -24,12 +24,13 @@ export async function persistDownloadResults({
 }: PersistDownloadResultsInput) {
   const existingItem = await database.mediaItem.findOne(
     {
-      streams: { infoHash: container.infoHash },
+      streams: {
+        infoHash: container.infoHash,
+      },
       id,
     },
     {
       populate: ["streams:ref", "filesystemEntries:ref"],
-      populateWhere: "infer",
     },
   );
 
@@ -51,8 +52,6 @@ export async function persistDownloadResults({
   }
 
   const em = database.em.fork();
-
-  em.persist(existingItem);
 
   existingItem.activeStream = ref(existingItem.streams[0]);
   existingItem.state = "Downloaded";
@@ -109,7 +108,9 @@ export async function persistDownloadResults({
 
     await em.flush();
 
-    return await database.mediaItem.findOneOrFail({ id }, { populate: ["*"] });
+    return await em.refreshOrFail(existingItem, {
+      populate: ["*"],
+    });
   } catch (error) {
     const parsedError = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

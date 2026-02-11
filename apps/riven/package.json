@@ -68,6 +68,7 @@
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/plugin-test": "workspace:^",
+    "@repo/util-plugin-testing": "workspace:^",
     "@swc-node/register": "^1.11.1",
     "@types/luxon": "^3.7.1",
     "@types/node": "catalog:",
