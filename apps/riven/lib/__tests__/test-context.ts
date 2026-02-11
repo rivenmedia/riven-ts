@@ -12,7 +12,10 @@ export const rivenTestContext = testBase.extend<{
   mockAgent: MockAgent;
 }>({
   async apolloServerInstance({}, use) {
-    const { mockServer } = await import("@repo/core-util-mock-graphql-server");
+    const { buildMockServer } =
+      await import("@repo/core-util-mock-graphql-server");
+
+    const mockServer = await buildMockServer();
 
     await use(mockServer);
   },
