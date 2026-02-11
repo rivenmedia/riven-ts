@@ -1,4 +1,4 @@
-import { RequestedItem } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities/requests/item-request.entity";
 
 import { expect, it, vi } from "vitest";
 import { type ActorRefFrom, createEmptyActor } from "xstate";
@@ -26,9 +26,8 @@ it("sends a success event if the item is processed successfully", async () => {
   await vi.waitFor(() => {
     expect(parentRef).toHaveReceivedEvent({
       type: "riven.media-item.creation.success",
-      item: expect.objectContaining<Partial<RequestedItem>>({
+      item: expect.objectContaining<Partial<ItemRequest>>({
         imdbId: requestedId,
-        state: "Requested",
         id: 1,
       }) as never,
     });
@@ -54,7 +53,7 @@ it("sends an error event if the item processing fails", async () => {
   await vi.waitFor(() => {
     expect(parentRef).toHaveReceivedEvent({
       type: "riven.media-item.creation.error",
-      item: expect.objectContaining<Partial<RequestedItem>>({
+      item: expect.objectContaining<Partial<ItemRequest>>({
         imdbId: requestedId,
       }) as never,
       error: expect.anything(),

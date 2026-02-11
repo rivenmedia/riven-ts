@@ -1,5 +1,5 @@
 import { RequestType } from "@repo/util-plugin-sdk/dto/entities";
-import { ItemRequest } from "@repo/util-plugin-sdk/schemas/media/requested-item";
+import { ItemRequest } from "@repo/util-plugin-sdk/schemas/media/item-request";
 
 import { wrap } from "@mikro-orm/core";
 import z from "zod";
