@@ -5,7 +5,7 @@ import {
   ShowContentRating,
 } from "../../dto/enums/content-ratings.enum.ts";
 import { ShowStatus } from "../../dto/enums/show-status.enum.ts";
-import { ItemRequest } from "../media/requested-item.ts";
+import { ItemRequest } from "../media/item-request.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 

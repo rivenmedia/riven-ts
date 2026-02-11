@@ -1,5 +1,5 @@
-import { Entity, Enum, PrimaryKey, Property } from "@mikro-orm/core";
-import { Field, ObjectType, registerEnumType } from "type-graphql";
+import { Entity, Enum, type Opt, PrimaryKey, Property } from "@mikro-orm/core";
+import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
 import z from "zod";
 
 export const RequestType = z.enum(["movie", "show"]);
@@ -14,9 +14,9 @@ registerEnumType(RequestType.enum, {
 @ObjectType()
 @Entity()
 export class ItemRequest {
-  @Field()
+  @Field(() => ID)
   @PrimaryKey()
-  id!: number;
+  id!: Opt<number>;
 
   @Field()
   @Property()

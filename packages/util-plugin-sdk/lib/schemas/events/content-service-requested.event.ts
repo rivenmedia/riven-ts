@@ -1,7 +1,7 @@
 import z from "zod";
 
 import { atLeastOnePropertyRequired } from "../../validation/at-least-one-property-required.ts";
-import { ItemRequest } from "../media/requested-item.ts";
+import { ItemRequest } from "../media/item-request.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
