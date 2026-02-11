@@ -313,7 +313,7 @@ export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
 
     if (!infoHash) {
       throw new RealDebridAPIError(
-        `${item.title ?? "Unknown media item"} does not have any streams with an info hash.`,
+        `${item.title} does not have any streams with an info hash.`,
       );
     }
 
