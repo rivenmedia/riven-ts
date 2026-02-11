@@ -18,7 +18,7 @@ it("sends a success event if the item is processed successfully", async () => {
 
   await vi.waitFor(() => {
     expect(sendEventSpy).toHaveBeenCalledWith({
-      type: "riven.media-item.creation.success",
+      type: "riven.item-request.creation.success",
       item: expect.objectContaining<Partial<ItemRequest>>({
         imdbId: requestedId,
         id: 1,

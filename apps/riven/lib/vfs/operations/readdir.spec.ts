@@ -35,7 +35,7 @@ it("returns all shows for the /shows path", async () => {
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "Ongoing",
+    state: "ongoing",
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
@@ -44,7 +44,9 @@ it("returns all shows for the /shows path", async () => {
   await em.flush();
 
   const season = em.create(Season, {
-    state: "Completed",
+    title: "Season 01",
+    year: 2020,
+    state: "completed",
     number: 1,
     parent: ref(show),
   });
@@ -56,7 +58,7 @@ it("returns all shows for the /shows path", async () => {
     season: ref(season),
     year: 2020,
     title: "Example Episode 1",
-    state: "Downloaded",
+    state: "downloaded",
     type: "episode",
     contentRating: "tv-14",
   });
@@ -88,7 +90,7 @@ it('does not return entries for the "all shows" path for shows that do not have 
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "Ongoing",
+    state: "ongoing",
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
@@ -97,7 +99,9 @@ it('does not return entries for the "all shows" path for shows that do not have 
   await em.flush();
 
   const season = em.create(Season, {
-    state: "Completed",
+    title: "Season 01",
+    year: 2020,
+    state: "completed",
     number: 1,
     parent: ref(show),
   });
@@ -109,7 +113,7 @@ it('does not return entries for the "all shows" path for shows that do not have 
     season: ref(season),
     year: 2020,
     title: "Example Episode 1",
-    state: "Downloaded",
+    state: "downloaded",
     type: "episode",
     contentRating: "tv-14",
   });
@@ -133,7 +137,7 @@ it("returns all movies for the /movies path", async () => {
       tmdbId: i.toString(),
       year: 2020,
       title: `Example Movie ${i.toString().padStart(2, "0")}`,
-      state: "Downloaded",
+      state: "downloaded",
       contentRating: "unknown",
     });
 
@@ -169,7 +173,7 @@ it("returns all seasons for a single show path", async () => {
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "Ongoing",
+    state: "ongoing",
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
@@ -179,7 +183,9 @@ it("returns all seasons for a single show path", async () => {
 
   for (let i = 1; i <= 3; i++) {
     const season = em.create(Season, {
-      state: "Completed",
+      title: `Season ${i.toString().padStart(2, "0")}`,
+      year: 2020,
+      state: "completed",
       number: i,
       parent: ref(show),
     });
@@ -191,7 +197,7 @@ it("returns all seasons for a single show path", async () => {
       season: ref(season),
       year: 2020,
       title: "Example Episode 1",
-      state: "Downloaded",
+      state: "downloaded",
       type: "episode",
       contentRating: "tv-14",
     });
@@ -226,7 +232,7 @@ it("does not return entries for a season that does not have any episodes with a 
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "Ongoing",
+    state: "ongoing",
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
@@ -236,7 +242,9 @@ it("does not return entries for a season that does not have any episodes with a 
 
   for (let i = 1; i <= 3; i++) {
     const season = em.create(Season, {
-      state: "Completed",
+      title: `Season ${i.toString().padStart(2, "0")}`,
+      year: 2020,
+      state: "completed",
       number: i,
       parent: ref(show),
     });
@@ -248,7 +256,7 @@ it("does not return entries for a season that does not have any episodes with a 
       season: ref(season),
       year: 2020,
       title: "Example Episode 1",
-      state: "Downloaded",
+      state: "downloaded",
       type: "episode",
       contentRating: "tv-14",
     });
@@ -281,7 +289,7 @@ it("returns all episodes for a single season path", async () => {
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "Ongoing",
+    state: "ongoing",
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
@@ -290,7 +298,9 @@ it("returns all episodes for a single season path", async () => {
   await em.flush();
 
   const season = em.create(Season, {
-    state: "Completed",
+    title: "Season 01",
+    year: 2020,
+    state: "completed",
     number: 1,
     parent: ref(show),
   });
@@ -303,7 +313,7 @@ it("returns all episodes for a single season path", async () => {
       season: ref(season),
       year: 2020,
       title: `Example Episode ${i.toString().padStart(2, "0")}`,
-      state: "Downloaded",
+      state: "downloaded",
       type: "episode",
       contentRating: "tv-14",
     });
@@ -340,7 +350,7 @@ it("does not return entries for episodes that does not have a media entry when v
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "Ongoing",
+    state: "ongoing",
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
@@ -349,7 +359,9 @@ it("does not return entries for episodes that does not have a media entry when v
   await em.flush();
 
   const season = em.create(Season, {
-    state: "Completed",
+    title: "Season 01",
+    year: 2020,
+    state: "completed",
     number: 1,
     parent: ref(show),
   });
@@ -362,7 +374,7 @@ it("does not return entries for episodes that does not have a media entry when v
       season: ref(season),
       year: 2020,
       title: `Example Episode ${i.toString().padStart(2, "0")}`,
-      state: "Downloaded",
+      state: "downloaded",
       type: "episode",
       contentRating: "tv-14",
     });
@@ -397,7 +409,7 @@ it("returns the media entry's filename when viewing a single movie's directory",
     tmdbId: "1",
     year: 2020,
     title: "Example Movie 01",
-    state: "Downloaded",
+    state: "downloaded",
     type: "movie",
     contentRating: MovieContentRating.enum.g,
   });
@@ -430,7 +442,7 @@ it('does not return entries for the "all movies" path when a movie does not have
       tmdbId: i.toString(),
       year: 2020,
       title: `Example Movie ${i.toString().padStart(2, "0")}`,
-      state: "Downloaded",
+      state: "downloaded",
       contentRating: "unknown",
     });
 

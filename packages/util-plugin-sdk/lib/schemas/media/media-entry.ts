@@ -1,5 +1,5 @@
 import z from "zod";
 
-import { MediaEntry as MediaEntryEntity } from "../../dto/entities/filesystem/media-entry.entity.ts";
+import { MediaEntry } from "../../dto/entities/filesystem/media-entry.entity.ts";
 
-export const MediaEntry = z.instanceof(MediaEntryEntity);
+export const MediaEntryInstance = z.instanceof(MediaEntry);

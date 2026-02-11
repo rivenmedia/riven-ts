@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { MediaItem } from "../media/media-item.ts";
+import { MediaItemInstance } from "../media/media-item.ts";
 import { TorrentContainer } from "../torrents/torrent-container.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
@@ -11,7 +11,7 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 export const MediaItemDownloadRequestedEvent = createProgramEventSchema(
   "media-item.download.requested",
   z.object({
-    item: MediaItem,
+    item: MediaItemInstance,
   }),
 );
 

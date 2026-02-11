@@ -58,7 +58,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     id: 1,
     tmdbId: "123",
     contentRating: "g",
-    state: "Scraped",
+    state: "scraped",
     title: "Test Movie",
     year: 2024,
     createdAt: DateTime.now().minus({ milliseconds: 30 }).toJSDate(),

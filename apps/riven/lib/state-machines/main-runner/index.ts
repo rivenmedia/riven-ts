@@ -257,7 +257,7 @@ export const mainRunnerMachine = setup({
       },
     ],
     on: {
-      "riven.media-item.creation.success": {
+      "riven.item-request.creation.success": {
         description:
           "Indicates that a media item has been successfully created in the library.",
         actions: [
@@ -344,7 +344,7 @@ export const mainRunnerMachine = setup({
                 durationFromRequestToDownload,
               },
             }) => ({
-              message: `Successfully downloaded ${title ?? "Unknown"} in ${durationFromRequestToDownload.toString()} seconds.`,
+              message: `Successfully downloaded ${title} in ${durationFromRequestToDownload.toString()} seconds.`,
             }),
           },
         ],

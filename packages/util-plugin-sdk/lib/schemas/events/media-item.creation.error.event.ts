@@ -10,7 +10,9 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 export const MediaItemCreationErrorEvent = createProgramEventSchema(
   "media-item.creation.error",
   z.object({
-    item: ItemRequest.omit({ id: true }),
+    item: ItemRequest.transform(({ id, ...data }) => ({ ...data })).pipe(
+      ItemRequest.omit({ id: true }),
+    ),
     error: z.unknown(),
   }),
 );

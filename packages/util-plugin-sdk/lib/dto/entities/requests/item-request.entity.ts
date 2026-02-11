@@ -1,4 +1,12 @@
-import { Entity, Enum, type Opt, PrimaryKey, Property } from "@mikro-orm/core";
+import {
+  Entity,
+  Enum,
+  type Opt,
+  PrimaryKey,
+  Property,
+  Unique,
+} from "@mikro-orm/core";
+import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
 import z from "zod";
 
@@ -7,6 +15,10 @@ import { DateTime } from "../../../helpers/dates.ts";
 export const RequestType = z.enum(["movie", "show"]);
 
 export type RequestType = z.infer<typeof RequestType>;
+
+export const ItemRequestState = z.enum(["requested", "completed", "failed"]);
+
+export type ItemRequestState = z.infer<typeof ItemRequestState>;
 
 registerEnumType(RequestType.enum, {
   name: "RequestType",
@@ -20,17 +32,26 @@ export class ItemRequest {
   @PrimaryKey()
   id!: Opt<number>;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
-  imdbId?: string;
+  @Matches(/^tt\d+$/)
+  @IsOptional()
+  @Unique()
+  imdbId?: string | null;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
-  tmdbId?: string;
+  @IsNumberString()
+  @IsOptional()
+  @Unique()
+  tmdbId?: string | null;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
-  tvdbId?: string;
+  @IsNumberString()
+  @IsOptional()
+  @Unique()
+  tvdbId?: string | null;
 
   @Field()
   @Enum(() => RequestType.enum)
@@ -38,7 +59,7 @@ export class ItemRequest {
 
   @Field()
   @Property()
-  source!: string;
+  requestedBy!: string;
 
   @Field(() => Date)
   @Property()
@@ -46,9 +67,9 @@ export class ItemRequest {
 
   @Field(() => Date, { nullable: true })
   @Property()
-  completedAt?: Opt<Date>;
+  completedAt?: Opt<Date> | null;
 
   @Field()
-  @Enum()
-  state!: "requested" | "completed" | "failed";
+  @Enum(() => ItemRequestState.enum)
+  state!: ItemRequestState;
 }

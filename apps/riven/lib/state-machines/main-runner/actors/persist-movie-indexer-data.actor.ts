@@ -1,3 +1,5 @@
+import { Movie } from "@repo/util-plugin-sdk/dto/entities/index";
+
 import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
 import z from "zod";
@@ -25,70 +27,52 @@ export async function persistMovieIndexerData({
     return;
   }
 
-  const existingItem = await database.mediaItem.findOneOrFail({
+  const itemRequest = await database.itemRequest.findOneOrFail({
     id: item.id,
   });
 
-  if (existingItem.state !== "Requested") {
+  if (itemRequest.state !== "requested") {
     sendEvent({
       type: "riven.media-item.index.error.incorrect-state",
-      item: existingItem,
+      item: itemRequest,
     });
 
     return;
   }
 
-  const em = database.em.fork();
-
-  existingItem.id = item.id;
-  existingItem.title = item.title;
-
-  if (item.posterUrl) {
-    existingItem.posterPath = item.posterUrl;
-  }
-
-  if (item.releaseDate) {
-    existingItem.airedAt = DateTime.fromISO(item.releaseDate).toJSDate();
-    existingItem.year = DateTime.fromISO(item.releaseDate).year;
-  }
-
-  if (item.country) {
-    existingItem.country = item.country;
-  }
-
-  if (item.language) {
-    existingItem.language = item.language;
-  }
-
-  if (item.aliases) {
-    existingItem.aliases = item.aliases;
-  }
-
-  existingItem.contentRating = item.contentRating;
-
-  if (item.rating) {
-    existingItem.rating = item.rating;
-  }
-
-  existingItem.genres = item.genres;
-  existingItem.state = "Indexed";
-  existingItem.type = "movie";
-
-  em.persist(existingItem);
-
   try {
-    await validateOrReject(existingItem);
+    const em = database.em.fork();
+
+    const mediaItem = em.create(Movie, {
+      title: item.title,
+      imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
+      tmdbId: itemRequest.tmdbId ?? null,
+      contentRating: item.contentRating,
+      rating: item.rating ?? null,
+      posterPath: item.posterUrl ?? null,
+      airedAt: item.releaseDate
+        ? DateTime.fromISO(item.releaseDate).toJSDate()
+        : null,
+      year: item.releaseDate ? DateTime.fromISO(item.releaseDate).year : null,
+      country: item.country ?? null,
+      language: item.language ?? null,
+      aliases: item.aliases ?? null,
+      genres: item.genres,
+      state: "indexed",
+    });
+
+    await validateOrReject(mediaItem);
 
     await em.flush();
 
-    const updatedItem = await em.refreshOrFail(existingItem);
+    await em.refreshOrFail(mediaItem);
 
     sendEvent({
       type: "riven.media-item.index.success",
-      item: updatedItem,
+      item: mediaItem,
     });
 
-    return updatedItem;
+    return mediaItem;
   } catch (error) {
     const parsedError = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
@@ -96,7 +80,7 @@ export async function persistMovieIndexerData({
 
     sendEvent({
       type: "riven.media-item.index.error",
-      item: existingItem,
+      item: itemRequest,
       error: Array.isArray(parsedError)
         ? parsedError
             .map((err) =>

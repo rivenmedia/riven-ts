@@ -1,6 +1,9 @@
 import z from "zod";
 
-import { RequestType } from "../../dto/entities/index.ts";
+import {
+  ItemRequest as ItemRequestEntity,
+  RequestType,
+} from "../../dto/entities/index.ts";
 
 export const ItemRequest = z.object({
   id: z.int(),
@@ -10,4 +13,6 @@ export const ItemRequest = z.object({
   type: RequestType,
 });
 
-export type ItemRequest = z.infer<typeof ItemRequest>;
+export const ItemRequestInstance = z.instanceof(ItemRequestEntity);
+
+export type ItemRequestInstance = z.infer<typeof ItemRequestInstance>;

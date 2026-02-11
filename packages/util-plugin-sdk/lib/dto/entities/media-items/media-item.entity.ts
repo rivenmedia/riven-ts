@@ -10,7 +10,6 @@ import {
   PrimaryKey,
   Property,
   type Ref,
-  Unique,
 } from "@mikro-orm/core";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { DateTime } from "luxon";
@@ -28,18 +27,18 @@ import { Stream } from "../streams/stream.entity.ts";
 import type { MediaEntry } from "../index.ts";
 
 export const MediaItemState = z.enum([
-  "Unknown",
-  "Unreleased",
-  "Ongoing",
-  "Requested",
-  "Indexed",
-  "Scraped",
-  "Downloaded",
-  "Symlinked",
-  "Completed",
-  "PartiallyCompleted",
-  "Failed",
-  "Paused",
+  "unknown",
+  "unreleased",
+  "ongoing",
+  "requested",
+  "indexed",
+  "scraped",
+  "downloaded",
+  "symlinked",
+  "completed",
+  "partially_completed",
+  "failed",
+  "paused",
 ]);
 
 export type MediaItemState = z.infer<typeof MediaItemState>;
@@ -84,26 +83,23 @@ export abstract class MediaItem {
   @Property()
   @Matches(/^tt\d+$/)
   @IsOptional()
-  @Unique()
   imdbId?: string | null;
 
   @Field(() => String, { nullable: true })
   @Property()
   @IsNumberString()
   @IsOptional()
-  @Unique()
   tvdbId?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
   @IsNumberString()
   @IsOptional()
-  @Unique()
-  tmdbId?: string;
+  tmdbId?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
-  posterPath?: string;
+  posterPath?: string | null;
 
   @Field(() => Date)
   @Index()
@@ -111,24 +107,16 @@ export abstract class MediaItem {
   createdAt: Opt<Date> = DateTime.now().toJSDate();
 
   @Field(() => Date, { nullable: true })
-  @Property({ onUpdate: () => DateTime.now().toMillis() })
-  updatedAt?: Opt<Date>;
+  @Property({ onUpdate: () => DateTime.now().toJSDate() })
+  updatedAt?: Opt<Date> | null;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   @Property()
-  requestedBy?: string;
+  indexedAt?: Date | null;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   @Property()
-  requestedId?: string;
-
-  @Field({ nullable: true })
-  @Property()
-  indexedAt?: Date;
-
-  @Field({ nullable: true })
-  @Property()
-  scrapedAt?: Date;
+  scrapedAt?: Date | null;
 
   @Field(() => Number)
   @Property({ default: 0 })
@@ -136,7 +124,7 @@ export abstract class MediaItem {
 
   @Field(() => String, { nullable: true })
   @Property({ nullable: true, type: "json" })
-  aliases?: Record<string, string[]>;
+  aliases?: Record<string, string[]> | null;
 
   @Field(() => Boolean)
   @Property({ persist: false, hidden: true })
@@ -149,48 +137,49 @@ export abstract class MediaItem {
     );
   }
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
-  network?: string;
+  network?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
-  country?: string;
+  country?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
-  language?: string;
+  language?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   @Property()
-  airedAt?: Date;
+  airedAt?: Date | null;
 
-  @Field()
+  @Field(() => Number, { nullable: true })
   @Property()
-  year!: number;
+  year?: number | null;
 
   @Field(() => [String], { nullable: true })
   @Property()
-  genres?: string[];
+  genres?: string[] | null;
 
-  @Field({ nullable: true })
+  @Field(() => Number, { nullable: true })
   @Property()
-  rating?: number;
+  rating?: number | null;
 
   @Field(() => MediaItemContentRatingEnum, { nullable: true })
   @Enum(() => MediaItemContentRating.enum)
-  contentRating?: MediaItemContentRating;
+  contentRating?: MediaItemContentRating | null;
 
   @Field(() => Boolean)
   @Property({ default: false })
   updated!: Opt<boolean>;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
-  guid?: string;
+  guid?: string | null;
 
+  @Field(() => String, { nullable: true })
   @Property()
-  overseerrId?: number;
+  overseerrId?: number | null;
 
   @Field(() => MediaItemState.enum)
   @Enum(() => MediaItemState.enum)
@@ -211,7 +200,7 @@ export abstract class MediaItem {
 
   @Field(() => Stream, { nullable: true })
   @ManyToOne()
-  activeStream?: Ref<Stream>;
+  activeStream?: Ref<Stream> | null;
 
   @Field(() => [Stream])
   @ManyToMany({ owner: true })
@@ -241,7 +230,7 @@ export abstract class MediaItem {
         ? `tmdb-${String(this.tmdbId)}`
         : `tvdb-${String(this.tvdbId)}`;
 
-    return `${this.title} (${this.year.toString()}) {${externalIdentifier}}`;
+    return `${this.title} (${this.year?.toString() ?? "Unknown"}) {${externalIdentifier}}`;
   }
 
   /**

@@ -1,7 +1,7 @@
 import { RivenEvent, RivenEventSchemaMap } from "@repo/util-plugin-sdk/events";
-import { ItemRequest } from "@repo/util-plugin-sdk/schemas/media/item-request";
-import { MediaEntry } from "@repo/util-plugin-sdk/schemas/media/media-entry";
-import { MediaItem } from "@repo/util-plugin-sdk/schemas/media/media-item";
+import { ItemRequestInstance } from "@repo/util-plugin-sdk/schemas/media/item-request";
+import { MediaEntryInstance } from "@repo/util-plugin-sdk/schemas/media/media-entry";
+import { MediaItemInstance } from "@repo/util-plugin-sdk/schemas/media/media-item";
 
 import { SerialisedFileSystemEntry } from "./serialised-filesystem-entry.ts";
 import { SerialisedItemRequest } from "./serialised-item-request.ts";
@@ -13,9 +13,9 @@ import type { ZodCodec, ZodObject, ZodType } from "zod";
  * A map of schemas to their corresponding serialiser codec.
  */
 const serialiserMap = new Map<ZodType, ZodCodec>([
-  [MediaItem, SerialisedMediaItem],
-  [MediaEntry, SerialisedFileSystemEntry],
-  [ItemRequest, SerialisedItemRequest],
+  [MediaItemInstance, SerialisedMediaItem],
+  [MediaEntryInstance, SerialisedFileSystemEntry],
+  [ItemRequestInstance, SerialisedItemRequest],
 ]);
 
 /**

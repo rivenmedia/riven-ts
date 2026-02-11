@@ -26,7 +26,7 @@ export async function persistScrapeResults({
     { populate: ["streams.infoHash", "blacklistedStreams:ref"] },
   );
 
-  if (existingItem.state !== "Indexed") {
+  if (existingItem.state !== "indexed") {
     sendEvent({
       type: "riven.media-item.scrape.error.incorrect-state",
       item: existingItem,
@@ -74,7 +74,7 @@ export async function persistScrapeResults({
     existingItem.failedAttempts++;
   }
 
-  existingItem.state = "Scraped";
+  existingItem.state = "scraped";
   existingItem.scrapedAt = DateTime.now().toJSDate();
   existingItem.scrapedTimes++;
   existingItem.streams.add(newStreams);

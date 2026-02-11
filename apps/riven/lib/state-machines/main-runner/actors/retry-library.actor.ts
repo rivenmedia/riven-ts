@@ -15,7 +15,7 @@ export const retryLibraryActor = fromPromise<undefined, RetryLibraryActorInput>(
       const pendingItems = await database.mediaItem.find(
         {
           state: {
-            $ne: "Completed",
+            $ne: "completed",
           },
         },
         {
@@ -38,7 +38,7 @@ export const retryLibraryActor = fromPromise<undefined, RetryLibraryActorInput>(
 
       for (const item of pendingItems) {
         switch (item.state) {
-          case "Indexed": {
+          case "indexed": {
             parentRef.send({
               type: "riven.media-item.scrape.requested",
               item,
@@ -46,7 +46,7 @@ export const retryLibraryActor = fromPromise<undefined, RetryLibraryActorInput>(
 
             break;
           }
-          case "Scraped": {
+          case "scraped": {
             parentRef.send({
               type: "riven.media-item.download.requested",
               item,

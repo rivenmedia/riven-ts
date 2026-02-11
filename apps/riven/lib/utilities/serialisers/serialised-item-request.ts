@@ -1,5 +1,5 @@
 import { RequestType } from "@repo/util-plugin-sdk/dto/entities";
-import { ItemRequest } from "@repo/util-plugin-sdk/schemas/media/item-request";
+import { ItemRequestInstance } from "@repo/util-plugin-sdk/schemas/media/item-request";
 
 import { wrap } from "@mikro-orm/core";
 import z from "zod";
@@ -11,7 +11,7 @@ import { database } from "../../database/database.ts";
  */
 export const SerialisedItemRequest = z.codec(
   z.looseObject({ type: RequestType }),
-  ItemRequest,
+  ItemRequestInstance,
   {
     decode: (data) =>
       database.itemRequest.create(data, {

@@ -23,9 +23,9 @@ export class Episode extends MediaItem {
   @Min(1)
   number!: number;
 
-  @Field({ nullable: true })
+  @Field(() => Number, { nullable: true })
   @Property()
-  absoluteNumber?: number;
+  absoluteNumber?: number | null;
 
   @Field(() => Season)
   @ManyToOne()

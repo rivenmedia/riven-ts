@@ -10,19 +10,19 @@ it('sends a "riven.media-item.index.requested" event for each incomplete item re
     database.itemRequest.create({
       imdbId: "tt1234567",
       type: "movie",
-      source: "@repo/plugin-test",
+      requestedBy: "@repo/plugin-test",
       state: "requested",
     }),
     database.itemRequest.create({
       imdbId: "tt2345678",
       type: "show",
-      source: "@repo/plugin-test",
+      requestedBy: "@repo/plugin-test",
       state: "requested",
     }),
     database.itemRequest.create({
       imdbId: "tt3456789",
       type: "show",
-      source: "@repo/plugin-test",
+      requestedBy: "@repo/plugin-test",
       state: "failed",
     }),
   ];
@@ -38,12 +38,16 @@ it('sends a "riven.media-item.index.requested" event for each incomplete item re
         item: expect.objectContaining({
           id: item.id,
           imdbId: item.imdbId,
-          source: item.source,
+          requestedBy: item.requestedBy,
         }) as never,
       });
     });
   }
 });
+
+it.todo(
+  'does not send a "riven.media-item.index.requested" event for completed item requests',
+);
 
 it.todo('requests a scrape for each media item in the "Indexed" state');
 

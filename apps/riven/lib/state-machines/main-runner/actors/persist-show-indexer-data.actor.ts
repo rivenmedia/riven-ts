@@ -1,4 +1,8 @@
-import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities/index";
+import {
+  Episode,
+  Season,
+  Show,
+} from "@repo/util-plugin-sdk/dto/entities/index";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 
 import { ref } from "@mikro-orm/core";
@@ -28,14 +32,14 @@ export async function persistShowIndexerData({
     return;
   }
 
-  const existingItem = await database.show.findOneOrFail({
+  const itemRequest = await database.itemRequest.findOneOrFail({
     id: item.id,
   });
 
-  if (existingItem.state !== "Requested") {
+  if (itemRequest.state !== "requested") {
     sendEvent({
       type: "riven.media-item.index.error.incorrect-state",
-      item: existingItem,
+      item: itemRequest,
     });
 
     return;
@@ -44,77 +48,79 @@ export async function persistShowIndexerData({
   try {
     const em = database.em.fork();
 
-    await em.transactional(async (transaction) => {
-      existingItem.id = item.id;
-      existingItem.title = item.title;
+    const show = await em.transactional(async (transaction) => {
+      const firstAired = item.firstAired
+        ? DateTime.fromISO(item.firstAired)
+        : null;
 
-      if (item.posterUrl) {
-        existingItem.posterPath = item.posterUrl;
-      }
+      const show = transaction.create(Show, {
+        title: item.title,
+        contentRating: item.contentRating,
+        state: "indexed",
+        imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
+        tvdbId: itemRequest.tvdbId ?? null,
+        status: item.status,
+        posterPath: item.posterUrl ?? null,
+        airedAt: firstAired?.toJSDate() ?? null,
+        year: firstAired?.year ?? null,
+        country: item.country ?? null,
+        language: item.language ?? null,
+        aliases: item.aliases ?? null,
+        rating: item.rating ?? null,
+        genres: item.genres.map((genre) => genre.toLowerCase()),
+      });
 
-      existingItem.airedAt = DateTime.fromISO(item.firstAired).toJSDate();
-      existingItem.year = DateTime.fromISO(item.firstAired).year;
-
-      if (item.country) {
-        existingItem.country = item.country;
-      }
-
-      if (item.language) {
-        existingItem.language = item.language;
-      }
-
-      if (item.aliases) {
-        existingItem.aliases = item.aliases;
-      }
-
-      existingItem.contentRating = item.contentRating;
-
-      if (item.rating) {
-        existingItem.rating = item.rating;
-      }
+      await transaction.flush();
 
       let totalEpisodes = 0;
 
       for (const season of item.seasons) {
+        const seasonYear = season.episodes[0]?.airedAt
+          ? DateTime.fromISO(season.episodes[0].airedAt).year
+          : null;
+
         const seasonEntry = transaction.create(Season, {
-          title: `${existingItem.title} - Season ${season.number.toString()}`,
+          title: `${show.title} - Season ${season.number.toString().padStart(2, "0")}`,
+          year: seasonYear,
           number: season.number,
-          parent: ref(existingItem),
-          state: "Indexed",
+          parent: ref(show),
+          state: "indexed",
         });
 
         await transaction.flush();
 
         for (const episode of season.episodes) {
+          const episodeYear = episode.airedAt
+            ? DateTime.fromISO(episode.airedAt).year
+            : seasonYear;
+
           transaction.create(Episode, {
             absoluteNumber: ++totalEpisodes,
             contentRating: episode.contentRating,
             number: episode.number,
             title: episode.title,
-            state: "Indexed",
+            state: "indexed",
             season: ref(seasonEntry),
+            year: episodeYear,
           });
         }
       }
 
-      existingItem.genres = item.genres.map((genre) => genre.toLowerCase());
-      existingItem.state = "Indexed";
-      existingItem.type = "show";
-      existingItem.status = item.status;
-
-      await validateOrReject(existingItem);
+      await validateOrReject(show);
 
       await transaction.flush();
+
+      return show;
     });
 
-    const updatedItem = await em.refreshOrFail(existingItem);
+    await em.refreshOrFail(show);
 
     sendEvent({
       type: "riven.media-item.index.success",
-      item: updatedItem,
+      item: show,
     });
 
-    return updatedItem;
+    return show;
   } catch (error) {
     const parsedError = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
@@ -122,7 +128,7 @@ export async function persistShowIndexerData({
 
     sendEvent({
       type: "riven.media-item.index.error",
-      item: existingItem,
+      item: itemRequest,
       error: Array.isArray(parsedError)
         ? parsedError
             .map((err) =>

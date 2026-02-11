@@ -42,7 +42,7 @@ export async function persistDownloadResults({
     throw new Error(`Media item with ID ${id.toString()} has no streams`);
   }
 
-  if (existingItem.state !== "Scraped") {
+  if (existingItem.state !== "scraped") {
     sendEvent({
       type: "riven.media-item.download.error.incorrect-state",
       item: existingItem,
@@ -54,7 +54,7 @@ export async function persistDownloadResults({
   const em = database.em.fork();
 
   existingItem.activeStream = ref(existingItem.streams[0]);
-  existingItem.state = "Downloaded";
+  existingItem.state = "downloaded";
 
   switch (existingItem.type) {
     case "movie": {

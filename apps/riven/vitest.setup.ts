@@ -49,7 +49,7 @@ vi.mock(import("@repo/plugin-test"), () => {
         "riven.core.started": vi.fn(),
         "riven.media-item.creation.error.conflict": vi.fn(),
         "riven.media-item.creation.error": vi.fn(),
-        "riven.media-item.creation.success": vi.fn(),
+        "riven.item-request.creation.success": vi.fn(),
       },
       settingsSchema: z.object({}),
       validator() {

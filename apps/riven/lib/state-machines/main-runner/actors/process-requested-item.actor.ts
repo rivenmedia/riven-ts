@@ -1,4 +1,4 @@
-import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities/index";
+import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
@@ -39,7 +39,7 @@ export async function processRequestedItem({
 
   logger.silly(`Processing requested item: ${externalIds.join(", ")}`);
 
-  const existingItem = await database.mediaItem.findOne({
+  const existingItem = await database.itemRequest.findOne({
     $or: [
       ...(item.imdbId ? [{ imdbId: item.imdbId }] : []),
       ...(type === "movie" && item.tmdbId ? [{ tmdbId: item.tmdbId }] : []),
@@ -60,40 +60,25 @@ export async function processRequestedItem({
 
   const em = database.em.fork();
 
-  const mediaItem = type === "movie" ? new Movie() : new Show();
-
-  if (mediaItem instanceof Show) {
-    mediaItem.status = "unknown";
-  }
-
-  mediaItem.contentRating = "unknown";
-
-  if (item.imdbId) {
-    mediaItem.imdbId = item.imdbId;
-  }
-
-  if (type === "movie" && item.tmdbId) {
-    mediaItem.tmdbId = item.tmdbId;
-  }
-
-  if (type === "show" && item.tvdbId) {
-    mediaItem.tvdbId = item.tvdbId;
-  }
-
-  mediaItem.state = "Requested";
-
-  em.persist(mediaItem);
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "unknown",
+    state: "requested",
+    type,
+    imdbId: item.imdbId ?? null,
+    tmdbId: (type === "movie" ? item.tmdbId : null) ?? null,
+    tvdbId: (type === "show" ? item.tvdbId : null) ?? null,
+  });
 
   try {
-    await validateOrReject(mediaItem);
+    await validateOrReject(itemRequest);
 
     await em.flush();
 
-    const item = await em.refreshOrFail(mediaItem);
+    await em.refreshOrFail(itemRequest);
 
     sendEvent({
-      type: "riven.media-item.creation.success",
-      item,
+      type: "riven.item-request.creation.success",
+      item: itemRequest,
     });
 
     return {
@@ -106,10 +91,7 @@ export async function processRequestedItem({
 
     sendEvent({
       type: "riven.media-item.creation.error",
-      item: {
-        ...item,
-        type,
-      },
+      item: itemRequest,
       error: Array.isArray(parsedError)
         ? parsedError
             .map((err) =>

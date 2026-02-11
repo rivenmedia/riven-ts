@@ -1,5 +1,5 @@
 import { MediaItemType } from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItem } from "@repo/util-plugin-sdk/schemas/media/media-item";
+import { MediaItemInstance } from "@repo/util-plugin-sdk/schemas/media/media-item";
 
 import { wrap } from "@mikro-orm/core";
 import z from "zod";
@@ -11,7 +11,7 @@ import { database } from "../../database/database.ts";
  */
 export const SerialisedMediaItem = z.codec(
   z.looseObject({ type: MediaItemType }),
-  MediaItem,
+  MediaItemInstance,
   {
     decode: (data) => {
       switch (data.type) {

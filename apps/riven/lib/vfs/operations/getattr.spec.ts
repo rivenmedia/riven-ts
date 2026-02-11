@@ -69,7 +69,7 @@ it("returns file stats for movie files", async () => {
   const mediaItem = em.create(Movie, {
     title: "Inception",
     year: 2010,
-    state: "Downloaded",
+    state: "downloaded",
     tmdbId: "27205",
     contentRating: "pg-13",
   });
@@ -113,8 +113,10 @@ it("returns directory stats for /movies", async () => {
 
   for (let i = 1; i <= 3; i++) {
     const movie = em.create(Movie, {
+      title: `Example Movie ${i.toString()}`,
+      year: 2020,
       contentRating: "g",
-      state: "Downloaded",
+      state: "downloaded",
     });
 
     await em.flush();
@@ -158,15 +160,17 @@ it("returns directory stats for /shows", async () => {
       tvdbId: i.toString(),
       contentRating: "tv-14",
       year: 2026,
-      state: "Downloaded",
+      state: "downloaded",
       status: "continuing",
     });
 
     await em.flush();
 
     const season = em.create(Season, {
+      title: `Season ${i.toString().padStart(2, "0")}`,
+      year: 2020,
       number: i,
-      state: "Downloaded",
+      state: "downloaded",
     });
 
     show.seasons.add(season);
@@ -174,9 +178,11 @@ it("returns directory stats for /shows", async () => {
     await em.flush();
 
     const episode = em.create(Episode, {
+      title: `Episode 01`,
+      year: 2020,
       contentRating: "tv-14",
       number: 1,
-      state: "Downloaded",
+      state: "downloaded",
     });
 
     season.episodes.add(episode);
@@ -219,7 +225,7 @@ it("returns directory stats for single shows", async () => {
     tvdbId: "1",
     contentRating: "tv-14",
     year: 2026,
-    state: "Downloaded",
+    state: "downloaded",
     status: "continuing",
   });
 
@@ -227,8 +233,10 @@ it("returns directory stats for single shows", async () => {
 
   for (let i = 1; i <= 10; i++) {
     const season = em.create(Season, {
+      title: `Season ${i.toString().padStart(2, "0")}`,
+      year: 2020,
       number: i,
-      state: "Downloaded",
+      state: "downloaded",
     });
 
     show.seasons.add(season);
@@ -236,9 +244,11 @@ it("returns directory stats for single shows", async () => {
     await em.flush();
 
     const episode = em.create(Episode, {
+      title: `Episode 01`,
+      year: 2020,
       contentRating: "tv-14",
       number: 1,
-      state: "Downloaded",
+      state: "downloaded",
     });
 
     season.episodes.add(episode);
@@ -281,15 +291,17 @@ it("returns directory stats for single seasons", async () => {
     tvdbId: "1",
     contentRating: "tv-14",
     year: 2026,
-    state: "Downloaded",
+    state: "downloaded",
     status: "continuing",
   });
 
   await em.flush();
 
   const season = em.create(Season, {
+    title: `Season 01`,
+    year: 2020,
     number: 1,
-    state: "Downloaded",
+    state: "downloaded",
   });
 
   show.seasons.add(season);
@@ -298,9 +310,11 @@ it("returns directory stats for single seasons", async () => {
 
   for (let i = 1; i <= 10; i++) {
     const episode = em.create(Episode, {
+      title: `Episode 01`,
+      year: 2020,
       contentRating: "tv-14",
       number: 1,
-      state: "Downloaded",
+      state: "downloaded",
     });
 
     season.episodes.add(episode);
@@ -343,15 +357,17 @@ it("returns file stats for episodes", async () => {
     tvdbId: "1",
     contentRating: "tv-14",
     year: 2026,
-    state: "Downloaded",
+    state: "downloaded",
     status: "continuing",
   });
 
   await em.flush();
 
   const season = em.create(Season, {
+    title: `Season 01`,
+    year: 2020,
     number: 1,
-    state: "Downloaded",
+    state: "downloaded",
   });
 
   show.seasons.add(season);
@@ -359,9 +375,11 @@ it("returns file stats for episodes", async () => {
   await em.flush();
 
   const episode = em.create(Episode, {
+    title: `Episode 01`,
+    year: 2020,
     contentRating: "tv-14",
     number: 1,
-    state: "Downloaded",
+    state: "downloaded",
   });
 
   season.episodes.add(episode);
