@@ -170,15 +170,25 @@ export abstract class BaseDataSource<
     ).decode(job.data.incomingRequest.body);
   }
 
+  #parseHTTPDate(dateString: string): number | null {
+    try {
+      const httpDate = DateTime.fromHTTP(dateString);
+
+      return httpDate.diffNow().milliseconds;
+    } catch {
+      return null;
+    }
+  }
+
   #parseRetryAfterHeader(retryAfterHeader: string | number): number | null {
     if (typeof retryAfterHeader === "number") {
       return retryAfterHeader;
     }
 
-    const httpDate = DateTime.fromHTTP(retryAfterHeader);
+    const httpDate = this.#parseHTTPDate(retryAfterHeader);
 
-    if (httpDate.isValid) {
-      return httpDate.diffNow().milliseconds;
+    if (httpDate !== null) {
+      return httpDate;
     }
 
     const retryAfterSeconds = parseInt(retryAfterHeader, 10);
