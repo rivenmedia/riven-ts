@@ -23,16 +23,21 @@ export const retryLibraryActor = fromPromise<undefined, RetryLibraryActorInput>(
         },
       );
 
+      const pendingRequests = await database.itemRequest.find({
+        state: {
+          $ne: "completed",
+        },
+      });
+
+      for (const request of pendingRequests) {
+        parentRef.send({
+          type: "riven.media-item.index.requested",
+          item: request,
+        });
+      }
+
       for (const item of pendingItems) {
         switch (item.state) {
-          // case "Requested": {
-          //   parentRef.send({
-          //     type: "riven.media-item.index.requested",
-          //     item,
-          //   });
-
-          //   break;
-          // }
           case "Indexed": {
             parentRef.send({
               type: "riven.media-item.scrape.requested",

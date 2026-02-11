@@ -33,4 +33,20 @@ export class ItemRequest {
   @Field()
   @Enum(() => RequestType.enum)
   type!: RequestType;
+
+  @Field()
+  @Property()
+  source!: string;
+
+  @Field(() => Date)
+  @Property()
+  createdAt: Opt<Date> = new Date();
+
+  @Field(() => Date, { nullable: true })
+  @Property()
+  completedAt?: Opt<Date>;
+
+  @Field()
+  @Enum()
+  state!: "requested" | "completed" | "failed";
 }
