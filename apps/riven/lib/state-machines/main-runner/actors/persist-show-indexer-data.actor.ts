@@ -81,6 +81,8 @@ export async function persistShowIndexerData({
 
         const seasonEntry = transaction.create(Season, {
           title: `${show.title} - Season ${season.number.toString().padStart(2, "0")}`,
+          imdbId: show.imdbId ?? null,
+          tvdbId: itemRequest.tvdbId ?? null,
           year: seasonYear,
           number: season.number,
           parent: ref(show),
@@ -95,6 +97,8 @@ export async function persistShowIndexerData({
             : seasonYear;
 
           transaction.create(Episode, {
+            imdbId: seasonEntry.imdbId ?? null,
+            tvdbId: seasonEntry.tvdbId ?? null,
             absoluteNumber: ++totalEpisodes,
             contentRating: episode.contentRating,
             number: episode.number,

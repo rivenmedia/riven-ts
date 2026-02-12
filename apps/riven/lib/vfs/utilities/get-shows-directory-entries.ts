@@ -10,12 +10,10 @@ export const getShowsDirectoryEntries = async (
     {
       mediaItem: {
         type: "episode",
-        ...(tvdbId && {
+        ...(tvdbId && { tvdbId }),
+        ...(season && {
           season: {
-            ...(season && { number: season }),
-            parent: {
-              tvdbId,
-            },
+            number: season,
           },
         }),
       },
