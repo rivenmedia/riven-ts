@@ -3,7 +3,7 @@ import z from "zod";
 import { createChunkRangeLabel } from "../utilities/chunks/create-chunk-range-label.ts";
 import { fileNameToFileChunkCalculationsMap } from "../utilities/file-handle-map.ts";
 import { ChunkMetadata } from "./chunk.schema.ts";
-import { FileChunkCalculations } from "./file-chunk-calculations.schema.js";
+import { FileChunkCalculations } from "./file-chunk-calculations.schema.ts";
 
 const isValidRange = ({ end, fileSize, start }: RequestRange) => {
   if (start >= fileSize) {

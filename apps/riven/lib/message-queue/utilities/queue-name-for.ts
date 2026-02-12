@@ -1,4 +1,4 @@
-import { Flow } from "../flows/index.js";
+import { Flow } from "../flows/index.ts";
 
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 

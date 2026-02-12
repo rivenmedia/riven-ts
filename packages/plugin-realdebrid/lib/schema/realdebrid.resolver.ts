@@ -2,7 +2,7 @@ import { PluginDataSource } from "@repo/util-plugin-sdk";
 
 import { Query, Resolver } from "type-graphql";
 
-import { RealDebridAPI } from "../datasource/realdebrid.datasource.js";
+import { RealDebridAPI } from "../datasource/realdebrid.datasource.ts";
 import { pluginConfig } from "../realdebrid-plugin.config.ts";
 
 @Resolver()

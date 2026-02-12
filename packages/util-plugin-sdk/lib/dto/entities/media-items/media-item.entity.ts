@@ -19,7 +19,7 @@ import { z } from "zod";
 import {
   MediaItemContentRating,
   MediaItemContentRatingEnum,
-} from "../../enums/content-ratings.enum.js";
+} from "../../enums/content-ratings.enum.ts";
 import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import { Stream } from "../streams/stream.entity.ts";

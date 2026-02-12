@@ -312,7 +312,7 @@ importers:
         version: 3.2.0(graphql@16.12.0)
       '@mikro-orm/sqlite':
         specifier: ^6.6.4
-        version: 6.6.4(@mikro-orm/core@6.6.4)(pg@8.16.3)
+        version: 6.6.4(@mikro-orm/core@6.6.4)
       '@parcel/watcher':
         specifier: ^2.5.1
         version: 2.5.1
@@ -1230,6 +1230,46 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 4.1.13
+
+  packages/util-rank-torrent-name:
+    dependencies:
+      '@viren070/parse-torrent-title':
+        specifier: ^0.6.5
+        version: 0.6.5
+      fastest-levenshtein:
+        specifier: ^1.0.16
+        version: 1.0.16
+      zod:
+        specifier: 'catalog:'
+        version: 4.1.13
+    devDependencies:
+      '@repo/core-util-eslint-config':
+        specifier: workspace:^
+        version: link:../core/util-eslint-config
+      '@repo/core-util-typescript-config':
+        specifier: workspace:^
+        version: link:../core/util-typescript-config
+      '@repo/core-util-vitest-config':
+        specifier: workspace:^
+        version: link:../core/util-vitest-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.0.0
+      '@typescript-eslint/parser':
+        specifier: 'catalog:'
+        version: 8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      msw:
+        specifier: 'catalog:'
+        version: 2.12.4(@types/node@24.0.0)(typescript@5.9.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
 
 packages:
 
@@ -3744,6 +3784,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@viren070/parse-torrent-title@0.6.5':
+    resolution: {integrity: sha512-qjMC0jLyK0h4lZ2JT67huTvHJCxIPYPmPWDxuFjIqCZxTFEWYn/xptsiceNfn0PiOmyjDkvH0UBEmRzi1FpOuQ==}
+
   '@vitest/coverage-v8@4.0.15':
     resolution: {integrity: sha512-FUJ+1RkpTFW7rQITdgTi93qOCWJobWhBirEPCeXh2SW2wsTlFxy51apDz5gzG+ZEYt/THvWeNmhdAoS9DTwpCw==}
     peerDependencies:
@@ -4846,6 +4889,10 @@ packages:
 
   fast-uri@3.1.0:
     resolution: {integrity: sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==}
+
+  fastest-levenshtein@1.0.16:
+    resolution: {integrity: sha512-eRnCtTTtGZFpQCwhJiUOuxPQWRXVKYDn0b2PeHfXL6/Zi53SLAzAHfVhVWK2AryC/WH05kGfxhFIPvTF0SXQzg==}
+    engines: {node: '>= 4.9.1'}
 
   fastq@1.19.1:
     resolution: {integrity: sha512-GwLTyxkCXjXbxqIhTsMI2Nui8huMPtnxg7krajPJAjnEG/iiOS7i+zCtWGZR9G0NBKbXKh6X9m9UIsYX/N6vvQ==}
@@ -9545,11 +9592,26 @@ snapshots:
       mikro-orm: 6.6.4
       reflect-metadata: 0.2.2
 
-  '@mikro-orm/knex@6.6.4(@mikro-orm/core@6.6.4)(pg@8.16.3)(sqlite3@5.1.7)':
+  '@mikro-orm/knex@6.6.4(@mikro-orm/core@6.6.4)(pg@8.16.3)':
     dependencies:
       '@mikro-orm/core': 6.6.4
       fs-extra: 11.3.3
-      knex: 3.1.0(pg@8.16.3)(sqlite3@5.1.7)
+      knex: 3.1.0(pg@8.16.3)
+      sqlstring: 2.3.3
+    transitivePeerDependencies:
+      - mysql
+      - mysql2
+      - pg
+      - pg-native
+      - sqlite3
+      - supports-color
+      - tedious
+
+  '@mikro-orm/knex@6.6.4(@mikro-orm/core@6.6.4)(sqlite3@5.1.7)':
+    dependencies:
+      '@mikro-orm/core': 6.6.4
+      fs-extra: 11.3.3
+      knex: 3.1.0(sqlite3@5.1.7)
       sqlstring: 2.3.3
     transitivePeerDependencies:
       - mysql
@@ -9563,7 +9625,7 @@ snapshots:
   '@mikro-orm/postgresql@6.6.4(@mikro-orm/core@6.6.4)':
     dependencies:
       '@mikro-orm/core': 6.6.4
-      '@mikro-orm/knex': 6.6.4(@mikro-orm/core@6.6.4)(pg@8.16.3)(sqlite3@5.1.7)
+      '@mikro-orm/knex': 6.6.4(@mikro-orm/core@6.6.4)(pg@8.16.3)
       pg: 8.16.3
       postgres-array: 3.0.4
       postgres-date: 2.1.0
@@ -9585,10 +9647,10 @@ snapshots:
       globby: 11.1.0
       ts-morph: 27.0.2
 
-  '@mikro-orm/sqlite@6.6.4(@mikro-orm/core@6.6.4)(pg@8.16.3)':
+  '@mikro-orm/sqlite@6.6.4(@mikro-orm/core@6.6.4)':
     dependencies:
       '@mikro-orm/core': 6.6.4
-      '@mikro-orm/knex': 6.6.4(@mikro-orm/core@6.6.4)(pg@8.16.3)(sqlite3@5.1.7)
+      '@mikro-orm/knex': 6.6.4(@mikro-orm/core@6.6.4)(sqlite3@5.1.7)
       fs-extra: 11.3.3
       sqlite3: 5.1.7
       sqlstring-sqlite: 0.1.1
@@ -10670,6 +10732,8 @@ snapshots:
 
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
+
+  '@viren070/parse-torrent-title@0.6.5': {}
 
   '@vitest/coverage-v8@4.0.15(vitest@4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
@@ -11915,7 +11979,7 @@ snapshots:
 
   eslint@9.39.2(jiti@2.6.1):
     dependencies:
-      '@eslint-community/eslint-utils': 4.9.0(eslint@9.39.2(jiti@2.6.1))
+      '@eslint-community/eslint-utils': 4.9.1(eslint@9.39.2(jiti@2.6.1))
       '@eslint-community/regexpp': 4.12.2
       '@eslint/config-array': 0.21.1
       '@eslint/config-helpers': 0.4.2
@@ -12066,6 +12130,8 @@ snapshots:
   fast-safe-stringify@2.1.1: {}
 
   fast-uri@3.1.0: {}
+
+  fastest-levenshtein@1.0.16: {}
 
   fastq@1.19.1:
     dependencies:
@@ -12969,7 +13035,7 @@ snapshots:
     dependencies:
       '@keyv/serialize': 1.1.1
 
-  knex@3.1.0(pg@8.16.3)(sqlite3@5.1.7):
+  knex@3.1.0(pg@8.16.3):
     dependencies:
       colorette: 2.0.19
       commander: 10.0.1
@@ -12987,6 +13053,26 @@ snapshots:
       tildify: 2.0.0
     optionalDependencies:
       pg: 8.16.3
+    transitivePeerDependencies:
+      - supports-color
+
+  knex@3.1.0(sqlite3@5.1.7):
+    dependencies:
+      colorette: 2.0.19
+      commander: 10.0.1
+      debug: 4.3.4
+      escalade: 3.2.0
+      esm: 3.2.25
+      get-package-type: 0.1.0
+      getopts: 2.3.0
+      interpret: 2.2.0
+      lodash: 4.17.21
+      pg-connection-string: 2.6.2
+      rechoir: 0.8.0
+      resolve-from: 5.0.0
+      tarn: 3.0.2
+      tildify: 2.0.0
+    optionalDependencies:
       sqlite3: 5.1.7
     transitivePeerDependencies:
       - supports-color

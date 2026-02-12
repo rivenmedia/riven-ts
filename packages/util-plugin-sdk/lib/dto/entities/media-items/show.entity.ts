@@ -12,7 +12,7 @@ import {
   ShowContentRating,
   ShowContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
-import { ShowStatus } from "../../enums/show-status.enum.js";
+import { ShowStatus } from "../../enums/show-status.enum.ts";
 import { MediaItem } from "./media-item.entity.ts";
 import { Season } from "./season.entity.ts";
 

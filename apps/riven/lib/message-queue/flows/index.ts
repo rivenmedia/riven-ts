@@ -15,7 +15,7 @@ import {
 import {
   ScrapeItemFlow,
   scrapeItemProcessorSchema,
-} from "./scrape-item/scrape-item.schema.js";
+} from "./scrape-item/scrape-item.schema.ts";
 import {
   SortScrapeResultsFlow,
   sortScrapeResultsProcessorSchema,
