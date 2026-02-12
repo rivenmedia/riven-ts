@@ -23,12 +23,13 @@ it("throws an unrecoverable error if the item cannot be scraped", async () => {
   const sendEvent = vi.fn();
 
   const mockQueue = createQueue("mock-queue");
-  const job = await Job.create<
-    ScrapeItemFlow["input"],
-    ScrapeItemFlow["output"]
-  >(mockQueue, "mock-scrape-item", {
-    id: 1,
-  });
+  const job: Parameters<ScrapeItemFlow["processor"]>[0] = await Job.create(
+    mockQueue,
+    "mock-scrape-item",
+    {
+      id: 1,
+    },
+  );
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 

@@ -23,12 +23,13 @@ it("throws an unrecoverable error if the item cannot be downloaded", async () =>
   const sendEvent = vi.fn();
 
   const mockQueue = createQueue("mock-queue");
-  const job = await Job.create<
-    DownloadItemFlow["input"],
-    DownloadItemFlow["output"]
-  >(mockQueue, "mock-download-item", {
-    id: 1,
-  });
+  const job: Parameters<DownloadItemFlow["processor"]>[0] = await Job.create(
+    mockQueue,
+    "mock-download-item",
+    {
+      id: 1,
+    },
+  );
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
@@ -105,7 +106,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.success",
-    item: expect.any(Movie) as never,
+    item: expect.any(Movie) as Movie,
     durationFromRequestToDownload: expectedDuration,
   });
 });
