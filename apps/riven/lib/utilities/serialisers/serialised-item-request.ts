@@ -1,4 +1,4 @@
-import { RequestType } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequestType } from "@repo/util-plugin-sdk/dto/enums/item-request-type.enum";
 import { ItemRequestInstance } from "@repo/util-plugin-sdk/schemas/media/item-request";
 
 import { wrap } from "@mikro-orm/core";
@@ -10,7 +10,7 @@ import { database } from "../../database/database.ts";
  * A schema that converts to/from a serialised item request.
  */
 export const SerialisedItemRequest = z.codec(
-  z.looseObject({ type: RequestType }),
+  z.looseObject({ type: ItemRequestType }),
   ItemRequestInstance,
   {
     decode: (data) =>

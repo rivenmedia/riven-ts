@@ -7,23 +7,11 @@ import {
   Unique,
 } from "@mikro-orm/core";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
-import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
-import z from "zod";
+import { Field, ID, ObjectType } from "type-graphql";
 
 import { DateTime } from "../../../helpers/dates.ts";
-
-export const RequestType = z.enum(["movie", "show"]);
-
-export type RequestType = z.infer<typeof RequestType>;
-
-export const ItemRequestState = z.enum(["requested", "completed", "failed"]);
-
-export type ItemRequestState = z.infer<typeof ItemRequestState>;
-
-registerEnumType(RequestType.enum, {
-  name: "RequestType",
-  description: "The type of a media item request, either 'movie' or 'show'.",
-});
+import { ItemRequestState } from "../../enums/item-request-state.enum.ts";
+import { ItemRequestType } from "../../enums/item-request-type.enum.ts";
 
 @ObjectType()
 @Entity()
@@ -54,8 +42,8 @@ export class ItemRequest {
   tvdbId?: string | null;
 
   @Field()
-  @Enum(() => RequestType.enum)
-  type!: RequestType;
+  @Enum(() => ItemRequestType.enum)
+  type!: ItemRequestType;
 
   @Field()
   @Property()
