@@ -3,34 +3,31 @@ import { expect, vi } from "vitest";
 import { database } from "../../../database/database.ts";
 import { it } from "./helpers/test-context.ts";
 
-it('sends a "riven.media-item.index.requested" event for each pending RequestedItem in the database with state "Requested"', async ({
+it('sends a "riven.media-item.index.requested" event for each incomplete item request in the database', async ({
   actor,
 }) => {
   const items = [
-    database.requestedItem.create(
-      {
-        imdbId: "tt1234567",
-        state: "Requested",
-      },
-      { partial: true },
-    ),
-    database.requestedItem.create(
-      {
-        imdbId: "tt2345678",
-        state: "Requested",
-      },
-      { partial: true },
-    ),
-    database.requestedItem.create(
-      {
-        imdbId: "tt3456789",
-        state: "Requested",
-      },
-      { partial: true },
-    ),
+    database.itemRequest.create({
+      imdbId: "tt1234567",
+      type: "movie",
+      requestedBy: "@repo/plugin-test",
+      state: "requested",
+    }),
+    database.itemRequest.create({
+      imdbId: "tt2345678",
+      type: "show",
+      requestedBy: "@repo/plugin-test",
+      state: "requested",
+    }),
+    database.itemRequest.create({
+      imdbId: "tt3456789",
+      type: "show",
+      requestedBy: "@repo/plugin-test",
+      state: "failed",
+    }),
   ];
 
-  await database.mediaItem.insertMany(items);
+  await database.itemRequest.insertMany(items);
 
   actor.start();
 
@@ -41,8 +38,19 @@ it('sends a "riven.media-item.index.requested" event for each pending RequestedI
         item: expect.objectContaining({
           id: item.id,
           imdbId: item.imdbId,
+          requestedBy: item.requestedBy,
         }) as never,
       });
     });
   }
 });
+
+it.todo(
+  'does not send a "riven.media-item.index.requested" event for completed item requests',
+);
+
+it.todo('requests a scrape for each media item in the "Indexed" state');
+
+it.todo('requests a download for each media item in the "Scraped" state');
+
+it.todo("does not send events for media items in other states");

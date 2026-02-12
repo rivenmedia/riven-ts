@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { MediaItem } from "../media/media-item.ts";
+import { ItemRequest } from "../media/item-request.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
@@ -10,7 +10,7 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 export const MediaItemIndexErrorIncorrectStateEvent = createProgramEventSchema(
   "media-item.index.error.incorrect-state",
   z.object({
-    item: MediaItem,
+    item: ItemRequest,
   }),
 );
 

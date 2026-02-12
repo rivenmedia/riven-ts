@@ -6,5 +6,5 @@ export * from "./media-items/episode.entity.ts";
 export * from "./media-items/season.entity.ts";
 export * from "./media-items/show.entity.ts";
 export * from "./media-items/movie.entity.ts";
-export * from "./media-items/requested-item.entity.ts";
+export * from "./requests/item-request.entity.ts";
 export * from "./streams/stream.entity.ts";

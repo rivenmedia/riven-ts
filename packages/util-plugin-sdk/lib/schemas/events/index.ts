@@ -13,6 +13,10 @@ import {
   CoreStartedEventHandler,
 } from "./core.started.event.ts";
 import {
+  ItemRequestCreationSuccessEvent,
+  ItemRequestCreationSuccessEventHandler,
+} from "./item-request.creation.success.event.ts";
+import {
   MediaItemCreationErrorConflictEvent,
   MediaItemCreationErrorConflictEventHandler,
 } from "./media-item.creation.error.conflict.event.ts";
@@ -20,10 +24,6 @@ import {
   MediaItemCreationErrorEvent,
   MediaItemCreationErrorEventHandler,
 } from "./media-item.creation.error.event.ts";
-import {
-  MediaItemCreationSuccessEvent,
-  MediaItemCreationSuccessEventHandler,
-} from "./media-item.creation.success.event.ts";
 import {
   MediaItemDownloadRequestedEvent,
   MediaItemDownloadRequestedEventHandler,
@@ -79,7 +79,7 @@ import {
 
 export const RivenEvent = z.discriminatedUnion("type", [
   CoreStartedEvent,
-  MediaItemCreationSuccessEvent,
+  ItemRequestCreationSuccessEvent,
   MediaItemCreationErrorConflictEvent,
   MediaItemCreationErrorEvent,
   MediaItemIndexRequestedEvent,
@@ -120,7 +120,7 @@ export const RivenEventHandler = {
   "riven.media-item.creation.error.conflict":
     MediaItemCreationErrorConflictEventHandler,
   "riven.media-item.creation.error": MediaItemCreationErrorEventHandler,
-  "riven.media-item.creation.success": MediaItemCreationSuccessEventHandler,
+  "riven.item-request.creation.success": ItemRequestCreationSuccessEventHandler,
 
   // Item indexing
   "riven.media-item.index.requested": MediaItemIndexRequestedEventHandler,

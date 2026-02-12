@@ -22,20 +22,14 @@ export const requestContentServicesProcessor =
       const results = await Promise.allSettled([
         ...items.movies.map((item) =>
           processRequestedItem({
-            item: {
-              imdbId: item.imdbId,
-              tmdbId: item.tmdbId,
-            },
+            item,
             sendEvent,
             type: "movie",
           }),
         ),
         ...items.shows.map((item) =>
           processRequestedItem({
-            item: {
-              imdbId: item.imdbId,
-              tvdbId: item.tvdbId,
-            },
+            item,
             sendEvent,
             type: "show",
           }),

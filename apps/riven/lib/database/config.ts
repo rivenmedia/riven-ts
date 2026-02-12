@@ -1,15 +1,15 @@
 import {
   Episode,
   FileSystemEntry,
+  ItemRequest,
   MediaEntry,
   MediaItem,
   Movie,
-  RequestedItem,
   Season,
   Show,
   Stream,
   SubtitleEntry,
-} from "@repo/util-plugin-sdk/dto/entities/index";
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import { type Options, PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
@@ -26,7 +26,7 @@ export const entities = [
   Movie,
   Season,
   Show,
-  RequestedItem,
+  ItemRequest,
   Stream,
 ];
 

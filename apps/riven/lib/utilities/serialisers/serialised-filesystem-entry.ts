@@ -1,4 +1,4 @@
-import { FileSystemEntryType } from "@repo/util-plugin-sdk/dto/entities/index";
+import { FileSystemEntryType } from "@repo/util-plugin-sdk/dto/entities";
 import { FileSystemEntry } from "@repo/util-plugin-sdk/schemas/media/filesystem-entry";
 
 import { wrap } from "@mikro-orm/core";
@@ -7,11 +7,9 @@ import z from "zod";
 import { database } from "../../database/database.ts";
 
 /**
- * A schema that converts to/from a serialised FileSystemEntry.
+ * A schema that converts to/from a serialised filesystem entry.
  */
 export const SerialisedFileSystemEntry = z.codec(
-  // Just validate the input has a matching filesystem entry type here
-  // to prevent non-filesystem entries from being passed through
   z.looseObject({ type: FileSystemEntryType }),
   FileSystemEntry,
   {

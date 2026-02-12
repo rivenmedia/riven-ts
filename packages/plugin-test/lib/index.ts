@@ -17,7 +17,7 @@ export default {
     "riven.core.started": async () => {},
     "riven.media-item.creation.error.conflict": async () => {},
     "riven.media-item.creation.error": async () => {},
-    "riven.media-item.creation.success": async () => {},
+    "riven.item-request.creation.success": async () => {},
   },
   settingsSchema: TestSettings,
   validator() {

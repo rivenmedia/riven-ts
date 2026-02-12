@@ -1,7 +1,7 @@
 import z from "zod";
 
 import { atLeastOnePropertyRequired } from "../../validation/at-least-one-property-required.ts";
-import { requestedItemSchema } from "../media/requested-item.ts";
+import { ItemRequest } from "../media/item-request.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
@@ -18,20 +18,16 @@ export type ContentServiceRequestedEvent = z.infer<
 
 export const ContentServiceRequestedResponse = z.object({
   movies: z.array(
-    requestedItemSchema
-      .omit({ tvdbId: true })
-      .refine(
-        atLeastOnePropertyRequired,
-        "At least one identifier is required",
-      ),
+    ItemRequest.pick({ imdbId: true, tmdbId: true }).refine(
+      atLeastOnePropertyRequired,
+      "At least one identifier is required",
+    ),
   ),
   shows: z.array(
-    requestedItemSchema
-      .omit({ tmdbId: true })
-      .refine(
-        atLeastOnePropertyRequired,
-        "At least one identifier is required",
-      ),
+    ItemRequest.pick({ imdbId: true, tvdbId: true }).refine(
+      atLeastOnePropertyRequired,
+      "At least one identifier is required",
+    ),
   ),
 });
 

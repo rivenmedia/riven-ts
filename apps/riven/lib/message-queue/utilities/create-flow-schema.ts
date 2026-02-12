@@ -13,7 +13,7 @@ export const createFlowSchema = <
   type: Type,
   childrenSchema: Children,
   outputSchema: Output = z.never().optional() as never,
-  _inputSchema: z.ZodObject<Payload> = z.object<Payload>(),
+  inputSchema: z.ZodObject<Payload> = z.object<Payload>(),
 ) => {
   const wrappedOutputSchema = z.union([
     z.object({
@@ -30,6 +30,7 @@ export const createFlowSchema = <
 
   return z.object({
     name: z.literal(type),
+    input: inputSchema,
     children: childrenValuesSchema,
     output: wrappedOutputSchema,
     processor: z.function({
@@ -37,7 +38,7 @@ export const createFlowSchema = <
         z.custom<
           Omit<
             Job<
-              z.infer<typeof _inputSchema>,
+              z.infer<typeof inputSchema>,
               z.infer<typeof wrappedOutputSchema>
             >,
             "getChildrenValues"

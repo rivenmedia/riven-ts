@@ -5,5 +5,5 @@ export default buildKubbConfig({
     path: "./openapi-schema.yaml",
   },
   name: "Plex",
-  baseURL: "https://plex.com/api/",
+  baseURL: "https://plex.com/api",
 });

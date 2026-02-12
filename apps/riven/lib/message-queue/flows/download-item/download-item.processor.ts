@@ -27,7 +27,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
         type: "riven.media-item.download.success",
         item: updatedItem,
         durationFromRequestToDownload: DateTime.utc()
-          .diff(DateTime.fromJSDate(updatedItem.requestedAt))
+          .diff(DateTime.fromJSDate(updatedItem.createdAt))
           .as("seconds"),
       });
     }

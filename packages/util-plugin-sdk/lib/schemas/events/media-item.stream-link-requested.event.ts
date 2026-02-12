@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { MediaEntry } from "../media/media-entry.ts";
+import { MediaEntryInstance } from "../media/media-entry.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
@@ -10,7 +10,7 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 export const MediaItemStreamLinkRequestedEvent = createProgramEventSchema(
   "media-item.stream-link.requested",
   z.object({
-    item: MediaEntry,
+    item: MediaEntryInstance,
   }),
 );
 

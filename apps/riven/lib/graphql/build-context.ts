@@ -40,7 +40,9 @@ export function buildContext(
               cache,
               logger,
               pluginSymbol: plugin.name,
-              redisUrl: settings.redisUrl,
+              connection: {
+                url: settings.redisUrl,
+              },
               settings: pluginSettings.get(plugin.settingsSchema),
             });
 

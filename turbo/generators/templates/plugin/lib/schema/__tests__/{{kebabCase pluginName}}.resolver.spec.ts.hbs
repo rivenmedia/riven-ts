@@ -1,14 +1,18 @@
+import { it } from "@repo/core-util-vitest-test-context";
+
+import { http, HttpResponse } from "msw";
 import assert from "node:assert";
+import { expect } from "vitest";
+
 import { {{pascalCase pluginName}}API } from "../../datasource/{{kebabCase pluginName}}.datasource.ts";
 import { pluginConfig } from "../../{{kebabCase pluginName}}-plugin.config.ts";
-import { it } from "@repo/core-util-vitest-test-context";
-import { expect } from "vitest";
-import { http, HttpResponse } from "msw";
 
 it('returns the validation status when calling "{{camelCase pluginName}}IsValid" query', async ({
   gqlServer,
   httpCache,
   server,
+  redisUrl,
+  logger,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -25,7 +29,15 @@ it('returns the validation status when calling "{{camelCase pluginName}}IsValid"
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new {{pascalCase pluginName}}API({ cache: httpCache }),
+          api: new {{pascalCase pluginName}}API({
+            cache: httpCache,
+            logger,
+            pluginSymbol: pluginConfig.name,
+            connection: {
+              url: redisUrl,
+            },
+            settings: {},
+          }),
         }
       },
     },

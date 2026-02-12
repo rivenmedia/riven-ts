@@ -7,11 +7,13 @@
     ".": "./lib/index.ts",
     "./types/*": "./lib/types/*.ts",
     "./dto/*": "./lib/dto/*.ts",
+    "./dto/entities": "./lib/dto/entities/index.ts",
     "./errors/*": "./lib/errors/*.ts",
     "./events": "./lib/schemas/events/index.ts",
     "./events/*": "./lib/schemas/plugin-to-program-events/*.ts",
     "./schemas/*": "./lib/schemas/*.ts",
     "./helpers/*": "./lib/helpers/*.ts",
+    "./testing/*": "./lib/testing/*.ts",
     "./utilities/*": "./lib/utilities/*.ts",
     "./validation": "./lib/validation/index.ts"
   },
@@ -23,14 +25,17 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "es-toolkit": "catalog:",
     "luxon": "catalog:",
-    "zod": "catalog:"
+    "redis-memory-server": "^0.16.0",
+    "zod": "catalog:",
+    "zod-validation-error": "^5.0.0"
   },
   "devDependencies": {
     "@apollo/client": "^4.0.11",
     "@apollo/datasource-rest": "catalog:",
     "@apollo/server": "^5.2.0",
-    "@apollo/utils.keyvadapter": "^4.0.1",
+    "@apollo/utils.keyvadapter": "catalog:",
     "@mikro-orm/core": "catalog:",
     "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",
@@ -54,7 +59,7 @@
   "peerDependencies": {
     "@apollo/client": "^4.0.11",
     "@apollo/datasource-rest": "catalog:",
-    "@apollo/utils.keyvadapter": "^4.0.1",
+    "@apollo/utils.keyvadapter": "catalog:",
     "@mikro-orm/core": "catalog:",
     "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",

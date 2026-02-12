@@ -41,7 +41,7 @@ export function getStremioScrapeConfig(item: MediaItem): StremioScrapeConfig {
 
   if (item instanceof Episode) {
     return {
-      identifier: `:${item.season.getEntity().number.toString()}:${item.number.toString()}`,
+      identifier: `:${item.season.getProperty("number").toString()}:${item.number.toString()}`,
       imdbId: item.imdbId,
       scrapeType: "series",
     };

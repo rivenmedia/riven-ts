@@ -1,10 +1,10 @@
-import { it as baseIt } from "@repo/core-util-vitest-test-context";
 import testPlugin from "@repo/plugin-test";
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
 import { vi } from "vitest";
 import { type Actor, createActor } from "xstate";
 
+import { rivenTestContext } from "../../../../__tests__/test-context.ts";
 import {
   type MainRunnerMachineInput,
   mainRunnerMachine,
@@ -12,7 +12,7 @@ import {
 
 import type { ValidPlugin } from "../../../../types/plugins.ts";
 
-export const it = baseIt.extend<{
+export const it = rivenTestContext.extend<{
   actor: Actor<typeof mainRunnerMachine>;
   input: MainRunnerMachineInput;
   machine: typeof mainRunnerMachine;

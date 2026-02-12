@@ -3,7 +3,9 @@ import { createActor, waitFor } from "xstate";
 import { rivenMachine } from "./state-machines/program/index.ts";
 import { logger } from "./utilities/logger/logger.ts";
 
-process.on("uncaughtException", (error) => logger.error(error));
+process.on("uncaughtException", (error) => {
+  logger.error(error);
+});
 
 const sessionId = crypto.randomUUID();
 

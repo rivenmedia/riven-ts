@@ -14,8 +14,13 @@ it("instantiates plugin datasources", async ({ actor }) => {
 
   expect(registeredPlugin).toBeDefined();
 
-  const dataSource = testPlugin.default.dataSources?.[0];
-  const dataSourceInstance = registeredPlugin?.dataSources.get(dataSource!);
+  const DataSourceConstructor = testPlugin.default.dataSources?.[0];
 
-  expect(dataSourceInstance).toBeInstanceOf(dataSource);
+  expect.assert(DataSourceConstructor);
+
+  const dataSourceInstance = registeredPlugin?.dataSources.get(
+    DataSourceConstructor,
+  );
+
+  expect(dataSourceInstance).toBeInstanceOf(DataSourceConstructor);
 });

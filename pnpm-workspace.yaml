@@ -6,6 +6,8 @@ packages:
 catalog:
   "@apollo/datasource-rest": 6.4.1
   "@apollo/server": 5.2.0
+  "@apollo/utils.keyvadapter": ^4.0.1
+  "@apollo/utils.keyvaluecache": ^4.0.0
   "@faker-js/faker": 10.1.0
   "@kubb/cli": 4.20.1
   "@kubb/core": 4.20.1
@@ -52,6 +54,9 @@ cleanupUnusedCatalogs: true
 configDependencies:
   "@pnpm/plugin-better-defaults": 0.2.1+sha512-3Fmur80S7+vmOKMmTdKS6JofiuvpUaBIdKEpgDyr9571FHo5Z4O2nrRUaSflxvwEakeYxIaFZ5MBaqAUnYHaeg==
 
+ignoredBuiltDependencies:
+  - redis-memory-server
+
 linkWorkspacePackages: true
 
 onlyBuiltDependencies:
@@ -60,13 +65,14 @@ onlyBuiltDependencies:
   - "@swc/core"
   - "@zkochan/fuse-native"
   - core-js-pure
+  - cpu-features
   - es5-ext
   - esbuild
-  - fuse-native
   - msgpackr-extract
   - msw
   - protobufjs
   - sqlite3
+  - ssh2
   - unrs-resolver
 
 packageExtensions:

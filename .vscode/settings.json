@@ -12,6 +12,7 @@
     "stringbool",
     "TMDB",
     "torrentio",
+    "tvdb",
     "zkochan"
   ],
   "typescript.preferences.autoImportSpecifierExcludeRegexes": [

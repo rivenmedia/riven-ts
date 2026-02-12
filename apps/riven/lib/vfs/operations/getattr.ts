@@ -1,22 +1,17 @@
 import Fuse, { type OPERATIONS, type Stats } from "@zkochan/fuse-native";
-import { LRUCache } from "lru-cache";
-import fs, { type PathLike } from "node:fs";
+import { DateTime } from "luxon";
+import fs from "node:fs";
 
 import { database } from "../../database/database.ts";
 import { logger } from "../../utilities/logger/logger.ts";
-import { config } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
+import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
+import { attrCache } from "../utilities/attr-cache.ts";
 import { isHiddenPath } from "../utilities/is-hidden-path.ts";
 import { isIgnoredPath } from "../utilities/is-ignored-path.ts";
 
 import type { SetOptional } from "type-fest";
-
-const attrCache = new LRUCache<PathLike, Partial<Stats>>({
-  ttl: 5000,
-  ttlAutopurge: false,
-  max: 1000,
-});
 
 type StatMode = "dir" | "file" | "link" | number;
 
@@ -56,9 +51,10 @@ type StatInput = SetOptional<
       }
   );
 
-const stat = (st: StatInput) => {
+const stat = (st: StatInput, subDirectoryCount = 0) => {
   const gid = st.gid ?? process.getgid?.() ?? 0;
   const uid = st.uid ?? process.getuid?.() ?? 0;
+  const nlink = st.mode === "dir" ? 2 + subDirectoryCount : 1;
 
   return {
     ...st,
@@ -66,68 +62,281 @@ const stat = (st: StatInput) => {
     uid,
     mode: parseMode(st.mode),
     size: st.mode === "dir" ? 0 : st.size,
-    blksize: config.blockSize,
-    blocks: 1,
-    nlink: st.mode === "dir" ? 2 : 1,
+    nlink,
   } satisfies Partial<Stats>;
 };
 
-async function getattr(path: string) {
-  const maybeCachedAttr = attrCache.get(path);
+function getEntry(pathInfo: PathInfo) {
+  switch (pathInfo.pathType) {
+    case "single-movie": {
+      if (!pathInfo.tmdbId) {
+        throw new TypeError("Missing tmdbId for movie path");
+      }
 
-  if (maybeCachedAttr) {
-    logger.silly(`VFS getattr: Cache hit for path ${path}`);
+      return database.movie.findOneOrFail(
+        { tmdbId: pathInfo.tmdbId },
+        { fields: ["createdAt", "updatedAt", "filesystemEntries.fileSize"] },
+      );
+    }
+    case "single-episode": {
+      if (!pathInfo.tvdbId || !pathInfo.season || !pathInfo.episode) {
+        throw new TypeError(
+          "Missing tvdbId, season, or episode for episode path",
+        );
+      }
 
-    return maybeCachedAttr;
-  }
+      return database.episode.findOneOrFail(
+        {
+          season: {
+            number: pathInfo.season,
+            parent: {
+              tvdbId: pathInfo.tvdbId,
+            },
+          },
+          number: pathInfo.episode,
+        },
+        { fields: ["createdAt", "updatedAt", "filesystemEntries.fileSize"] },
+      );
+    }
+    case "show-seasons": {
+      if (!pathInfo.tvdbId) {
+        throw new TypeError("Missing tvdbId for show seasons path");
+      }
 
-  switch (path) {
-    case "/":
-    case "/movies":
-    case "/shows": {
-      return stat({
-        mtime: new Date(),
-        atime: new Date(),
-        ctime: new Date(),
-        mode: "dir",
+      return database.show.findOneOrFail({
+        tvdbId: pathInfo.tvdbId,
       });
+    }
+    case "season-episodes": {
+      if (!pathInfo.tvdbId || !pathInfo.season) {
+        throw new TypeError(
+          "Missing tvdbId or season for season episodes path",
+        );
+      }
+
+      return database.season.findOneOrFail(
+        {
+          parent: {
+            tvdbId: pathInfo.tvdbId,
+          },
+          number: pathInfo.season,
+        },
+        { populate: ["*"] },
+      );
+    }
+    case "all-shows":
+    case "all-movies":
+      return null;
+  }
+}
+
+async function getattr(path: string) {
+  switch (path) {
+    case "/": {
+      const oldestEntry = await database.mediaEntry.findOne(
+        { type: "media" },
+        {
+          orderBy: {
+            createdAt: "asc nulls last",
+          },
+          fields: ["createdAt"],
+        },
+      );
+
+      const mostRecentlyUpdatedEntry = await database.mediaEntry.findOne(
+        { type: "media" },
+        {
+          orderBy: {
+            updatedAt: "desc nulls last",
+          },
+          fields: ["updatedAt"],
+        },
+      );
+
+      return stat(
+        {
+          mtime:
+            mostRecentlyUpdatedEntry?.updatedAt ??
+            oldestEntry?.createdAt ??
+            DateTime.now().toJSDate(),
+          atime:
+            mostRecentlyUpdatedEntry?.updatedAt ??
+            oldestEntry?.createdAt ??
+            DateTime.now().toJSDate(),
+          ctime: oldestEntry?.createdAt ?? DateTime.now().toJSDate(),
+          mode: "dir",
+        },
+        PersistentDirectory.options.length,
+      );
+    }
+    case "/shows": {
+      const totalShows = await database.show.count({
+        seasons: {
+          episodes: {
+            filesystemEntries: {
+              $some: {
+                type: "media",
+              },
+            },
+          },
+        },
+      });
+
+      const oldestShow = await database.mediaEntry.findOne(
+        {
+          type: "media",
+          mediaItem: {
+            type: "episode",
+          },
+        },
+        {
+          orderBy: {
+            createdAt: "asc nulls last",
+          },
+          fields: ["createdAt"],
+        },
+      );
+
+      const lastUpdatedShow = await database.mediaEntry.findOne(
+        {
+          type: "media",
+          mediaItem: {
+            type: "episode",
+          },
+        },
+        {
+          orderBy: {
+            updatedAt: "desc nulls last",
+          },
+          fields: ["updatedAt"],
+        },
+      );
+
+      return stat(
+        {
+          mtime:
+            lastUpdatedShow?.updatedAt ??
+            oldestShow?.createdAt ??
+            DateTime.now().toJSDate(),
+          atime:
+            lastUpdatedShow?.updatedAt ??
+            oldestShow?.createdAt ??
+            DateTime.now().toJSDate(),
+          ctime: oldestShow?.createdAt ?? DateTime.now().toJSDate(),
+          mode: "dir",
+        },
+        totalShows,
+      );
+    }
+    case "/movies": {
+      const totalMovies = await database.movie.count({
+        filesystemEntries: {
+          $some: {
+            type: "media",
+          },
+        },
+      });
+
+      const lastUpdatedMovie = await database.mediaEntry.findOne(
+        {
+          type: "media",
+          mediaItem: {
+            type: "movie",
+          },
+        },
+        {
+          orderBy: {
+            updatedAt: "desc nulls last",
+          },
+          fields: ["updatedAt"],
+        },
+      );
+
+      const oldestMovie = await database.mediaEntry.findOne(
+        {
+          type: "media",
+          mediaItem: {
+            type: "movie",
+          },
+        },
+        {
+          orderBy: {
+            createdAt: "asc nulls last",
+          },
+          fields: ["createdAt"],
+        },
+      );
+
+      return stat(
+        {
+          mtime:
+            lastUpdatedMovie?.updatedAt ??
+            oldestMovie?.createdAt ??
+            DateTime.now().toJSDate(),
+          atime:
+            lastUpdatedMovie?.updatedAt ??
+            oldestMovie?.createdAt ??
+            DateTime.now().toJSDate(),
+          ctime: oldestMovie?.createdAt ?? DateTime.now().toJSDate(),
+          mode: "dir",
+        },
+        totalMovies,
+      );
     }
   }
 
   const pathInfo = PathInfo.parse(path);
-  const entityType = config.childQueryType[pathInfo.type];
+  const entry = await getEntry(pathInfo);
 
-  if (!pathInfo.tmdbId) {
-    throw new FuseError(Fuse.ENOENT, `Invalid path: ${path}`);
+  if (!entry) {
+    throw new FuseError(Fuse.ENOENT, "Entry not found");
   }
 
-  const entry = await database.filesystemEntry.findOneOrFail({
-    mediaItem: {
-      tmdbId: pathInfo.tmdbId,
-      type: entityType,
+  const subDirectoryCount =
+    pathInfo.pathType === "show-seasons"
+      ? await database.season.count({
+          parent: {
+            tvdbId: String(pathInfo.tvdbId),
+          },
+          episodes: {
+            filesystemEntries: {
+              $some: {
+                type: "media",
+              },
+            },
+          },
+        })
+      : 0;
+
+  const attrs = stat(
+    {
+      ctime: entry.createdAt,
+      atime: entry.updatedAt ?? entry.createdAt,
+      mtime: entry.updatedAt ?? entry.createdAt,
+      ...(pathInfo.isFile
+        ? {
+            size: entry.filesystemEntries[0]?.fileSize ?? 0,
+            mode: "file",
+          }
+        : { mode: "dir" }),
     },
-  });
-
-  const attrs = stat({
-    ctime: entry.createdAt,
-    atime: entry.updatedAt ?? entry.createdAt,
-    mtime: entry.updatedAt ?? entry.createdAt,
-    ...(pathInfo.isFile
-      ? {
-          size: entry.fileSize,
-          mode: "file",
-        }
-      : { mode: "dir" }),
-  });
-
-  attrCache.set(path, attrs);
-
-  logger.silly(`VFS getattr: Cache miss for path ${path}`);
+    subDirectoryCount,
+  );
 
   return attrs;
 }
 
 export const getattrSync = function (path, callback) {
+  const cachedAttr = attrCache.get(path);
+
+  if (cachedAttr) {
+    logger.silly(`VFS getattr: Cache hit for path ${path}`);
+
+    process.nextTick(callback, null, cachedAttr);
+
+    return;
+  }
+
   if (isHiddenPath(path) || isIgnoredPath(path)) {
     logger.silly(`VFS getattr: Skipping hidden/ignored path ${path}`);
 
@@ -137,8 +346,12 @@ export const getattrSync = function (path, callback) {
   }
 
   getattr(path)
-    .then((stats) => {
-      process.nextTick(callback, null, stats);
+    .then((attrs) => {
+      attrCache.set(path, attrs);
+
+      logger.silly(`VFS getattr: Cache miss for path ${path}`);
+
+      process.nextTick(callback, null, attrs);
     })
     .catch((error: unknown) => {
       if (isFuseError(error)) {

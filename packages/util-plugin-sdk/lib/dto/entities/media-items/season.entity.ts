@@ -3,6 +3,7 @@ import {
   Entity,
   ManyToOne,
   OneToMany,
+  type Opt,
   Property,
   type Ref,
 } from "@mikro-orm/core";
@@ -23,9 +24,15 @@ export class Season extends MediaItem {
 
   @Field(() => Show)
   @ManyToOne()
-  parent!: Ref<Show>;
+  parent!: Opt<Ref<Show>>;
 
   @Field(() => [Episode])
   @OneToMany(() => Episode, (episode) => episode.season)
   episodes = new Collection<Episode>(this);
+
+  override get prettyName(): Opt<string> {
+    return `Season ${this.number.toString().padStart(2, "0")}`;
+  }
+
+  override type: Opt<"season"> = "season" as const;
 }

@@ -1,15 +1,15 @@
 import {
   Episode,
   FileSystemEntry,
+  ItemRequest,
   MediaEntry,
   MediaItem,
   Movie,
-  RequestedItem,
   Season,
   Show,
   Stream,
   SubtitleEntry,
-} from "@repo/util-plugin-sdk/dto/entities/index";
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   EntityManager,
@@ -23,7 +23,7 @@ export interface Services {
   em: EntityManager;
   filesystemEntry: EntityRepository<FileSystemEntry>;
   mediaItem: EntityRepository<MediaItem>;
-  requestedItem: EntityRepository<RequestedItem>;
+  itemRequest: EntityRepository<ItemRequest>;
   movie: EntityRepository<Movie>;
   episode: EntityRepository<Episode>;
   show: EntityRepository<Show>;
@@ -49,7 +49,7 @@ export async function initORM(options?: Options): Promise<Services> {
     em: orm.em,
     filesystemEntry: orm.em.fork().getRepository(FileSystemEntry),
     mediaItem: orm.em.fork().getRepository(MediaItem),
-    requestedItem: orm.em.fork().getRepository(RequestedItem),
+    itemRequest: orm.em.fork().getRepository(ItemRequest),
     movie: orm.em.fork().getRepository(Movie),
     episode: orm.em.fork().getRepository(Episode),
     show: orm.em.fork().getRepository(Show),

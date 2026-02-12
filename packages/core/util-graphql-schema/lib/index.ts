@@ -8,12 +8,11 @@ import {
   MediaEntry,
   MediaItem,
   Movie,
-  RequestedItem,
   Season,
   Show,
   Stream,
   SubtitleEntry,
-} from "@repo/util-plugin-sdk/dto/entities/index";
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import { buildSchema as baseBuildSchema } from "type-graphql";
 
@@ -29,7 +28,6 @@ export const buildSchema = async (pluginResolvers: Function[]) =>
       Movie,
       Season,
       Show,
-      RequestedItem,
       Stream,
     ],
     resolvers: [

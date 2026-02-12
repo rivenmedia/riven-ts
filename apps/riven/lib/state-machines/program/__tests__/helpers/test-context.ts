@@ -1,10 +1,10 @@
 /* eslint-disable no-empty-pattern */
-import { it as baseIt } from "@repo/core-util-vitest-test-context";
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
 import { vi } from "vitest";
 import { type Actor, createActor, fromPromise } from "xstate";
 
+import { rivenTestContext } from "../../../../__tests__/test-context.ts";
 import {
   type BootstrapMachineOutput,
   bootstrapMachine,
@@ -15,7 +15,7 @@ import { type RivenMachineInput, rivenMachine } from "../../index.ts";
 import type { ValidPlugin } from "../../../../types/plugins.ts";
 import type { stopGqlServer } from "../../actors/stop-gql-server.actor.ts";
 
-export const it = baseIt.extend<{
+export const it = rivenTestContext.extend<{
   actor: Actor<typeof rivenMachine>;
   input: RivenMachineInput;
   machine: typeof rivenMachine;

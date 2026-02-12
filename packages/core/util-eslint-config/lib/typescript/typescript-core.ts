@@ -5,6 +5,7 @@ import { defineConfig } from "eslint/config";
 import globals from "globals";
 import * as tseslint from "typescript-eslint";
 
+import { banDateConstructor } from "../best-practices/ban-date-constructor.ts";
 import { noUnusedVariables } from "../best-practices/no-unused-variables.ts";
 import { jsFiles, tsFiles } from "../internal/file-types.ts";
 
@@ -19,6 +20,7 @@ export const typescriptCore = defineConfig(
       tseslint.configs.strictTypeChecked,
       tseslint.configs.stylisticTypeChecked,
       noUnusedVariables,
+      banDateConstructor,
       importX.typescript as never,
     ],
     languageOptions: {

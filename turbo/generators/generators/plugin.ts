@@ -62,13 +62,9 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
           (answers as PluginAnswers).pluginName,
         );
 
-        return installDependenciesToPackages(
-          ["@repo/core-util-graphql-schema", "@repo/riven"],
-          "dependencies",
-          {
-            [`@repo/plugin-${pluginName}`]: "workspace:^",
-          },
-        );
+        return installDependenciesToPackages(["@repo/riven"], "dependencies", {
+          [`@repo/plugin-${pluginName}`]: "workspace:^",
+        });
       },
       (answers) => {
         const pluginName = plop.getHelper("kebabCase")(

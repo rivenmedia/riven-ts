@@ -7,4 +7,7 @@ export class ExternalIds {
 
   @Field((_type) => String, { nullable: true })
   tmdbId?: string | undefined;
+
+  @Field((_type) => String, { nullable: true })
+  tvdbId?: string | undefined;
 }

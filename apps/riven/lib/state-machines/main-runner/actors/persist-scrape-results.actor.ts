@@ -1,6 +1,7 @@
-import { Stream } from "@repo/util-plugin-sdk/dto/entities/index";
+import { Stream } from "@repo/util-plugin-sdk/dto/entities";
 
 import { ValidationError, validateOrReject } from "class-validator";
+import { DateTime } from "luxon";
 import z from "zod";
 
 import { database } from "../../../database/database.ts";
@@ -25,7 +26,7 @@ export async function persistScrapeResults({
     { populate: ["streams.infoHash", "blacklistedStreams:ref"] },
   );
 
-  if (existingItem.state !== "Indexed") {
+  if (existingItem.state !== "indexed") {
     sendEvent({
       type: "riven.media-item.scrape.error.incorrect-state",
       item: existingItem,
@@ -63,18 +64,18 @@ export async function persistScrapeResults({
 
   if (newStreams.length > 0) {
     logger.info(
-      `Added ${newStreams.length.toString()} new streams to ${existingItem.title ?? "Unknown"}: ${id.toString()}`,
+      `Added ${newStreams.length.toString()} new streams to ${existingItem.title}: #${id.toString()}`,
     );
   } else {
     logger.info(
-      `No new streams found for ${existingItem.title ?? "Unknown"}: #${id.toString()}`,
+      `No new streams found for ${existingItem.title}: #${id.toString()}`,
     );
 
     existingItem.failedAttempts++;
   }
 
-  existingItem.state = "Scraped";
-  existingItem.scrapedAt = new Date();
+  existingItem.state = "scraped";
+  existingItem.scrapedAt = DateTime.now().toJSDate();
   existingItem.scrapedTimes++;
   existingItem.streams.add(newStreams);
 

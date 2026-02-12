@@ -1,4 +1,4 @@
-import { it } from "@repo/core-util-vitest-test-context";
+import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
@@ -14,12 +14,16 @@ import { ListrrAPI } from "../listrr.datasource.ts";
 
 it("returns an empty array if no content lists are provided", async ({
   httpCache,
+  redisUrl,
+  logger,
 }) => {
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    logger: {} as never,
+    logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
-    redisUrl: "redis-url",
+    connection: {
+      url: redisUrl,
+    },
     settings: {
       apiKey: "",
       movieLists: [],
@@ -34,6 +38,8 @@ it("returns an empty array if no content lists are provided", async ({
 it("retrieves movies from each provided list", async ({
   server,
   httpCache,
+  redisUrl,
+  logger,
 }) => {
   const contentLists = new Set([
     "64b7f2f5e13e4b6f8c8e4d1a",
@@ -65,9 +71,11 @@ it("retrieves movies from each provided list", async ({
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    logger: {} as never,
+    logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
-    redisUrl: "redis-url",
+    connection: {
+      url: redisUrl,
+    },
     settings: {
       apiKey: "",
       movieLists: [],
@@ -79,7 +87,12 @@ it("retrieves movies from each provided list", async ({
   expect(movies.length).toBe(2);
 });
 
-it("paginates through all pages of the list", async ({ server, httpCache }) => {
+it("paginates through all pages of the list", async ({
+  server,
+  httpCache,
+  redisUrl,
+  logger,
+}) => {
   const contentLists = new Set(["64b7f2f5e13e4b6f8c8e4d1c"]);
   const totalPages = 3;
   const itemsPerPage = 2;
@@ -112,9 +125,11 @@ it("paginates through all pages of the list", async ({ server, httpCache }) => {
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    logger: {} as never,
+    logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
-    redisUrl: "redis-url",
+    connection: {
+      url: redisUrl,
+    },
     settings: {
       apiKey: "",
       movieLists: [],
@@ -129,6 +144,8 @@ it("paginates through all pages of the list", async ({ server, httpCache }) => {
 it("dedupes movies that appear in multiple lists", async ({
   server,
   httpCache,
+  redisUrl,
+  logger,
 }) => {
   const buildMockMovie = (id: number) =>
     createListrrContractsModelsAPIMovieDto({
@@ -157,9 +174,11 @@ it("dedupes movies that appear in multiple lists", async ({
 
   const listrrApi = new ListrrAPI({
     cache: httpCache,
-    logger: {} as never,
+    logger,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
-    redisUrl: "redis-url",
+    connection: {
+      url: redisUrl,
+    },
     settings: {
       apiKey: "",
       movieLists: [],

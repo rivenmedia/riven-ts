@@ -28,7 +28,7 @@
     "@eslint/json": "^0.14.0",
     "@types/eslint": "^9.6.1",
     "@types/node": "catalog:",
-    "@vitest/eslint-plugin": "^1.5.2",
+    "@vitest/eslint-plugin": "^1.6.6",
     "eslint": "catalog:",
     "typescript": "catalog:"
   },

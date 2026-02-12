@@ -1,4 +1,4 @@
-import { it } from "@repo/core-util-vitest-test-context";
+import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { HttpResponse, http } from "msw";
 import assert from "node:assert";
@@ -11,6 +11,8 @@ it('returns the validation status when calling "tmdbIsValid" query', async ({
   gqlServer,
   httpCache,
   server,
+  redisUrl,
+  logger,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -29,9 +31,11 @@ it('returns the validation status when calling "tmdbIsValid" query', async ({
         [pluginConfig.name]: {
           api: new TmdbAPI({
             cache: httpCache,
-            logger: {} as never,
+            logger,
             pluginSymbol: Symbol("@repo/plugin-tmdb"),
-            redisUrl: "redis-url",
+            connection: {
+              url: redisUrl,
+            },
             settings: {
               apiKey: "",
             },

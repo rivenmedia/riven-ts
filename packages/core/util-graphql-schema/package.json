@@ -17,11 +17,6 @@
   },
   "dependencies": {
     "@repo/feature-settings": "workspace:^",
-    "@repo/plugin-listrr": "workspace:^",
-    "@repo/plugin-plex": "workspace:^",
-    "@repo/plugin-realdebrid": "workspace:^",
-    "@repo/plugin-tmdb": "workspace:^",
-    "@repo/plugin-torrentio": "workspace:^",
     "graphql": "catalog:",
     "type-graphql": "catalog:"
   },
@@ -30,7 +25,6 @@
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
-    "@repo/plugin-test": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",

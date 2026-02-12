@@ -17,14 +17,11 @@ vi.mock<{ default: Record<string, unknown> }>(
     }) as const,
 );
 
-vi.mock<typeof import("@apollo/server/standalone")>(
-  import("@apollo/server/standalone"),
-  () => ({
-    startStandaloneServer: vi.fn().mockResolvedValue({
-      url: "http://localhost:4000/mocked-server",
-    }),
+vi.mock(import("@apollo/server/standalone"), () => ({
+  startStandaloneServer: vi.fn().mockResolvedValue({
+    url: "http://localhost:4000/mocked-server",
   }),
-);
+}));
 
 vi.mock(import("@repo/plugin-test"), () => {
   class TestAPI extends BaseDataSource<Record<string, unknown>> {
@@ -52,7 +49,7 @@ vi.mock(import("@repo/plugin-test"), () => {
         "riven.core.started": vi.fn(),
         "riven.media-item.creation.error.conflict": vi.fn(),
         "riven.media-item.creation.error": vi.fn(),
-        "riven.media-item.creation.success": vi.fn(),
+        "riven.item-request.creation.success": vi.fn(),
       },
       settingsSchema: z.object({}),
       validator() {
@@ -105,5 +102,5 @@ expect.extend({
 beforeEach(async () => {
   const { database } = await import("./lib/database/database.ts");
 
-  await database.orm.schema.refreshDatabase();
+  await database.orm.schema.clearDatabase();
 });

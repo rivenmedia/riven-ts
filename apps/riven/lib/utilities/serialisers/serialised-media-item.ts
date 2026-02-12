@@ -1,5 +1,5 @@
-import { MediaItemType } from "@repo/util-plugin-sdk/dto/entities/index";
-import { MediaItem } from "@repo/util-plugin-sdk/schemas/media/media-item";
+import { MediaItemType } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemInstance } from "@repo/util-plugin-sdk/schemas/media/media-item";
 
 import { wrap } from "@mikro-orm/core";
 import z from "zod";
@@ -7,13 +7,11 @@ import z from "zod";
 import { database } from "../../database/database.ts";
 
 /**
- * A schema that converts to/from a serialised MediaItem.
+ * A schema that converts to/from a serialised media item.
  */
 export const SerialisedMediaItem = z.codec(
-  // Just validate the input has a matching media item type here
-  // to prevent non-media items from being passed through
   z.looseObject({ type: MediaItemType }),
-  MediaItem,
+  MediaItemInstance,
   {
     decode: (data) => {
       switch (data.type) {
@@ -59,18 +57,6 @@ export const SerialisedMediaItem = z.codec(
             {
               ...data,
               type: "episode",
-            },
-            {
-              persist: false,
-              partial: true,
-              managed: true,
-            },
-          );
-        case "requested_item":
-          return database.requestedItem.create(
-            {
-              ...data,
-              type: "requested_item",
             },
             {
               persist: false,

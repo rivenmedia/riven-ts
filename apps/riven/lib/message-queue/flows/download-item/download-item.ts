@@ -27,7 +27,7 @@ export async function downloadItem(
   }));
 
   const rootNode = {
-    name: `Downloading ${item.title ?? "Unknown title"} (ID: ${item.id.toString()})`,
+    name: `Downloading ${item.title} (ID: ${item.id.toString()})`,
     queueName: queueNameFor("download-item"),
     data: {
       id: item.id,

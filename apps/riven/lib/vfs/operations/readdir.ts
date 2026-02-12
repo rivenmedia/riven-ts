@@ -5,26 +5,27 @@ import { config } from "../config.ts";
 import { isFuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
-import { getItemDirectoryEntries } from "../utilities/get-item-directory-entries.ts";
-import { getPersistentDirectoryEntries } from "../utilities/get-persistent-directory-entries.ts";
+import { getMoviesDirectoryEntries } from "../utilities/get-movies-directory-entries.ts";
+import { getShowsDirectoryEntries } from "../utilities/get-shows-directory-entries.ts";
 
-async function readdir(path: string) {
+async function readdir(path: string): Promise<string[]> {
   if (path === config.rootPath) {
     return PersistentDirectory.options;
   }
 
   const pathInfo = PathInfo.parse(path);
-  const validatePersistentDir = PersistentDirectory.safeParse(pathInfo.name);
 
-  if (validatePersistentDir.success) {
-    return getPersistentDirectoryEntries(validatePersistentDir.data);
+  switch (pathInfo.pathType) {
+    case "all-movies":
+    case "single-movie":
+      return getMoviesDirectoryEntries(pathInfo.tmdbId);
+    case "all-shows":
+    case "show-seasons":
+    case "season-episodes":
+      return getShowsDirectoryEntries(pathInfo.tvdbId, pathInfo.season);
+    case "single-episode":
+      return [pathInfo.base];
   }
-
-  if (!pathInfo.tmdbId) {
-    return [];
-  }
-
-  return getItemDirectoryEntries(pathInfo.type, pathInfo.tmdbId);
 }
 
 export const readDirSync = function (path, callback) {

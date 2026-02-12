@@ -2,13 +2,7 @@
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
   "globalEnv": ["NODE_ENV"],
-  "globalPassThroughEnv": [
-    "DATABASE_URL",
-    "LOG_LEVEL",
-    "LOG_DIRECTORY",
-    "REDIS_URL",
-    "JAEGER_URL"
-  ],
+  "globalPassThroughEnv": ["DEBUG"],
   "tasks": {
     "transit": {
       "dependsOn": ["^transit"]

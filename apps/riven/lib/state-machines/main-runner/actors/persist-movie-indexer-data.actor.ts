@@ -9,7 +9,7 @@ import { database } from "../../../database/database.ts";
 import type { MainRunnerMachineIntake } from "../index.ts";
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-export interface PersistMovieIndexerDataInput extends MediaItemIndexRequestedResponse {
+export interface PersistMovieIndexerDataInput extends NonNullable<MediaItemIndexRequestedResponse> {
   sendEvent: MainRunnerMachineIntake;
 }
 
@@ -17,78 +17,62 @@ export async function persistMovieIndexerData({
   item,
   sendEvent,
 }: PersistMovieIndexerDataInput) {
-  const existingItem = await database.requestedItem.findOneOrFail({
-    id: item.id,
-  });
-
-  if (existingItem.state !== "Requested") {
+  if (item.type !== "movie") {
     sendEvent({
-      type: "riven.media-item.index.error.incorrect-state",
-      item: existingItem,
+      type: "riven.media-item.index.error",
+      item,
+      error: "Item is not a movie",
     });
 
     return;
   }
 
-  const em = database.em.fork();
+  const itemRequest = await database.itemRequest.findOneOrFail({
+    id: item.id,
+  });
 
-  existingItem.id = item.id;
-  existingItem.title = item.title;
+  if (itemRequest.state !== "requested") {
+    sendEvent({
+      type: "riven.media-item.index.error.incorrect-state",
+      item: itemRequest,
+    });
 
-  if (item.posterUrl) {
-    existingItem.posterPath = item.posterUrl;
+    return;
   }
-
-  if (item.releaseDate) {
-    existingItem.airedAt = DateTime.fromISO(item.releaseDate).toJSDate();
-    existingItem.year = DateTime.fromISO(item.releaseDate).year;
-  }
-
-  if (item.country) {
-    existingItem.country = item.country;
-  }
-
-  if (item.language) {
-    existingItem.language = item.language;
-  }
-
-  if (item.aliases) {
-    existingItem.aliases = item.aliases;
-  }
-
-  if (item.contentRating) {
-    existingItem.contentRating = item.contentRating;
-  }
-
-  if (item.rating) {
-    existingItem.rating = item.rating;
-  }
-
-  existingItem.isAnime =
-    item.language !== "en" &&
-    ["animation", "anime"].every((genre) =>
-      item.genres.map((g) => g.toLowerCase()).includes(genre),
-    );
-
-  existingItem.genres = item.genres;
-  existingItem.state = "Indexed";
-  existingItem.type = "movie";
-
-  em.persist(existingItem);
 
   try {
-    await validateOrReject(existingItem);
+    const em = database.em.fork();
+
+    const mediaItem = em.create(Movie, {
+      title: item.title,
+      imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
+      tmdbId: itemRequest.tmdbId ?? null,
+      contentRating: item.contentRating,
+      rating: item.rating ?? null,
+      posterPath: item.posterUrl ?? null,
+      airedAt: item.releaseDate
+        ? DateTime.fromISO(item.releaseDate).toJSDate()
+        : null,
+      year: item.releaseDate ? DateTime.fromISO(item.releaseDate).year : null,
+      country: item.country ?? null,
+      language: item.language ?? null,
+      aliases: item.aliases ?? null,
+      genres: item.genres,
+      state: "indexed",
+    });
+
+    await validateOrReject(mediaItem);
 
     await em.flush();
 
-    const item = await em.findOneOrFail(Movie, existingItem);
+    await em.refreshOrFail(mediaItem);
 
     sendEvent({
       type: "riven.media-item.index.success",
-      item: item,
+      item: mediaItem,
     });
 
-    return item;
+    return mediaItem;
   } catch (error) {
     const parsedError = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
@@ -96,7 +80,7 @@ export async function persistMovieIndexerData({
 
     sendEvent({
       type: "riven.media-item.index.error",
-      item: existingItem,
+      item: itemRequest,
       error: Array.isArray(parsedError)
         ? parsedError
             .map((err) =>

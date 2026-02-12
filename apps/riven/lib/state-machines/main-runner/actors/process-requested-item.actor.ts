@@ -1,4 +1,4 @@
-import { RequestedItem } from "@repo/util-plugin-sdk/dto/entities/index";
+import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities/index";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
@@ -39,7 +39,7 @@ export async function processRequestedItem({
 
   logger.silly(`Processing requested item: ${externalIds.join(", ")}`);
 
-  const existingItem = await database.requestedItem.findOne({
+  const existingItem = await database.itemRequest.findOne({
     $or: [
       ...(item.imdbId ? [{ imdbId: item.imdbId }] : []),
       ...(type === "movie" && item.tmdbId ? [{ tmdbId: item.tmdbId }] : []),
@@ -60,34 +60,25 @@ export async function processRequestedItem({
 
   const em = database.em.fork();
 
-  const requestedItem = new RequestedItem();
-
-  if (item.imdbId) {
-    requestedItem.imdbId = item.imdbId;
-  }
-
-  if (type === "movie" && item.tmdbId) {
-    requestedItem.tmdbId = item.tmdbId;
-  }
-
-  if (type === "show" && item.tvdbId) {
-    requestedItem.tvdbId = item.tvdbId;
-  }
-
-  requestedItem.state = "Requested";
-
-  em.persist(requestedItem);
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "unknown",
+    state: "requested",
+    type,
+    imdbId: item.imdbId ?? null,
+    tmdbId: (type === "movie" ? item.tmdbId : null) ?? null,
+    tvdbId: (type === "show" ? item.tvdbId : null) ?? null,
+  });
 
   try {
-    await validateOrReject(requestedItem);
+    await validateOrReject(itemRequest);
 
     await em.flush();
 
-    const item = await em.refreshOrFail(requestedItem);
+    await em.refreshOrFail(itemRequest);
 
     sendEvent({
-      type: "riven.media-item.creation.success",
-      item,
+      type: "riven.item-request.creation.success",
+      item: itemRequest,
     });
 
     return {
@@ -100,7 +91,7 @@ export async function processRequestedItem({
 
     sendEvent({
       type: "riven.media-item.creation.error",
-      item,
+      item: itemRequest,
       error: Array.isArray(parsedError)
         ? parsedError
             .map((err) =>

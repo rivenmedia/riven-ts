@@ -6,15 +6,20 @@ import {
   Index,
   ManyToMany,
   ManyToOne,
+  type Opt,
   PrimaryKey,
   Property,
   type Ref,
-  Unique,
 } from "@mikro-orm/core";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
+import { DateTime } from "luxon";
 import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
 import { z } from "zod";
 
+import {
+  MediaItemContentRating,
+  MediaItemContentRatingEnum,
+} from "../../enums/content-ratings.enum.js";
 import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import { Stream } from "../streams/stream.entity.ts";
@@ -22,18 +27,18 @@ import { Stream } from "../streams/stream.entity.ts";
 import type { MediaEntry } from "../index.ts";
 
 export const MediaItemState = z.enum([
-  "Unknown",
-  "Unreleased",
-  "Ongoing",
-  "Requested",
-  "Indexed",
-  "Scraped",
-  "Downloaded",
-  "Symlinked",
-  "Completed",
-  "PartiallyCompleted",
-  "Failed",
-  "Paused",
+  "unknown",
+  "unreleased",
+  "ongoing",
+  "requested",
+  "indexed",
+  "scraped",
+  "downloaded",
+  "symlinked",
+  "completed",
+  "partially_completed",
+  "failed",
+  "paused",
 ]);
 
 export type MediaItemState = z.infer<typeof MediaItemState>;
@@ -43,13 +48,7 @@ registerEnumType(MediaItemState.enum, {
   description: "The state of a media item in the processing pipeline",
 });
 
-export const MediaItemType = z.enum([
-  "movie",
-  "show",
-  "season",
-  "episode",
-  "requested_item",
-]);
+export const MediaItemType = z.enum(["movie", "show", "season", "episode"]);
 
 export type MediaItemType = z.infer<typeof MediaItemType>;
 
@@ -67,151 +66,152 @@ registerEnumType(MediaItemType.enum, {
     show: "Show",
     season: "Season",
     episode: "Episode",
-    requested_item: "RequestedItem",
   },
 })
 @Index({ properties: ["type", "airedAt"] })
 export abstract class MediaItem {
   @Field((_type) => ID)
   @PrimaryKey()
-  id!: number;
+  id!: Opt<number>;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   @Index()
   @Property()
-  title?: string | null;
+  title!: string;
 
   @Field(() => String, { nullable: true })
   @Property()
   @Matches(/^tt\d+$/)
   @IsOptional()
-  @Unique()
   imdbId?: string | null;
 
   @Field(() => String, { nullable: true })
   @Property()
   @IsNumberString()
   @IsOptional()
-  @Unique()
   tvdbId?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
   @IsNumberString()
   @IsOptional()
-  @Unique()
-  tmdbId?: string;
+  tmdbId?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
-  posterPath?: string;
+  posterPath?: string | null;
 
-  @Field()
+  @Field(() => Date)
   @Index()
   @Property()
-  requestedAt: Date = new Date();
+  createdAt: Opt<Date> = DateTime.now().toJSDate();
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
+  @Property({ onUpdate: () => DateTime.now().toJSDate() })
+  updatedAt?: Opt<Date> | null;
+
+  @Field(() => Date, { nullable: true })
   @Property()
-  requestedBy?: string;
+  indexedAt?: Date | null;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   @Property()
-  requestedId?: string;
+  scrapedAt?: Date | null;
 
-  @Field({ nullable: true })
-  @Property()
-  indexedAt?: Date;
-
-  @Field({ nullable: true })
-  @Property()
-  scrapedAt?: Date;
-
-  @Field()
+  @Field(() => Number)
   @Property({ default: 0 })
-  scrapedTimes!: number;
+  scrapedTimes!: Opt<number>;
 
   @Field(() => String, { nullable: true })
   @Property({ nullable: true, type: "json" })
-  aliases?: Record<string, string[]>;
+  aliases?: Record<string, string[]> | null;
 
-  @Field()
-  @Property({ default: false })
-  isAnime!: boolean;
+  @Field(() => Boolean)
+  @Property({ persist: false, hidden: true })
+  get isAnime(): Opt<Hidden<boolean>> {
+    return (
+      this.language !== "en" &&
+      ["animation", "anime"].every((genre) =>
+        this.genres?.map((g) => g.toLowerCase()).includes(genre),
+      )
+    );
+  }
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
-  network?: string;
+  network?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
-  country?: string;
+  country?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
-  language?: string;
+  language?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   @Property()
-  airedAt?: Date;
+  airedAt?: Date | null;
 
-  @Field({ nullable: true })
+  @Field(() => Number, { nullable: true })
   @Property()
-  year?: number;
+  year?: number | null;
 
   @Field(() => [String], { nullable: true })
   @Property()
-  genres?: string[];
+  genres?: string[] | null;
 
-  @Field({ nullable: true })
+  @Field(() => Number, { nullable: true })
   @Property()
-  rating?: number;
+  rating?: number | null;
 
-  @Field({ nullable: true })
-  @Property()
-  contentRating?: string;
+  @Field(() => MediaItemContentRatingEnum, { nullable: true })
+  @Enum(() => MediaItemContentRating.enum)
+  contentRating?: MediaItemContentRating | null;
 
-  @Field()
+  @Field(() => Boolean)
   @Property({ default: false })
-  updated!: boolean;
+  updated!: Opt<boolean>;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
-  guid?: string;
+  guid?: string | null;
 
+  @Field(() => String, { nullable: true })
   @Property()
-  overseerrId?: number;
+  overseerrId?: number | null;
 
   @Field(() => MediaItemState.enum)
   @Enum(() => MediaItemState.enum)
   state!: MediaItemState;
 
-  @Field()
-  @Property({ default: 0 })
-  failedAttempts!: number;
+  @Field(() => Number)
+  @Property()
+  failedAttempts: Opt<number> = 0;
 
   @Field(() => [FileSystemEntry])
-  @ManyToMany()
-  filesystemEntries = new Collection<FileSystemEntry>(this);
+  @ManyToMany({ owner: true })
+  filesystemEntries: Collection<FileSystemEntry> =
+    new Collection<FileSystemEntry>(this);
 
   @Field(() => [SubtitleEntry])
-  @ManyToMany()
-  subtitles = new Collection<SubtitleEntry>(this);
+  @ManyToMany({ owner: true })
+  subtitles: Collection<SubtitleEntry> = new Collection<SubtitleEntry>(this);
 
   @Field(() => Stream, { nullable: true })
   @ManyToOne()
-  activeStream?: Ref<Stream>;
+  activeStream?: Ref<Stream> | null;
 
   @Field(() => [Stream])
   @ManyToMany({ owner: true })
-  streams = new Collection<Stream>(this);
+  streams: Collection<Stream> = new Collection<Stream>(this);
 
   @Field(() => [Stream])
-  @ManyToMany()
-  blacklistedStreams = new Collection<Stream>(this);
+  @ManyToMany({ owner: true })
+  blacklistedStreams: Collection<Stream> = new Collection<Stream>(this);
 
   @Field(() => String)
-  @Enum()
+  @Enum(() => MediaItemType.enum)
   type!: MediaItemType;
 
   /**
@@ -220,12 +220,17 @@ export abstract class MediaItem {
    * @example "Inception (2010) {tmdb-27205}"
    */
   @Property({ persist: false, hidden: true })
-  get prettyName(): Hidden<string> | undefined {
-    if (!this.title || !this.year || !this.tmdbId) {
+  get prettyName(): Opt<Hidden<string>> | undefined {
+    if (this.type === "movie" ? !this.tmdbId : !this.tvdbId) {
       return;
     }
 
-    return `${this.title} (${this.year.toString()}) {tmdb-${this.tmdbId}}`;
+    const externalIdentifier =
+      this.type === "movie"
+        ? `tmdb-${String(this.tmdbId)}`
+        : `tvdb-${String(this.tvdbId)}`;
+
+    return `${this.title} (${this.year?.toString() ?? "Unknown"}) {${externalIdentifier}}`;
   }
 
   /**
