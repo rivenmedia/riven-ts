@@ -88,8 +88,6 @@ async function open(
         `Media entry ${entry.id.toString()} has no unrestricted URL after waiting`,
       );
     }
-
-    attrCache.delete(path);
   }
 
   if (
@@ -125,7 +123,6 @@ async function open(
       const em = database.em.fork();
 
       em.assign(entry, { unrestrictedUrl });
-      em.persist(entry);
 
       await em.flush();
 
