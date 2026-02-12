@@ -69,7 +69,7 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
     driver: SqliteDriver as never,
     dbName: ":memory:",
     connect: false,
-    debug: true,
+    debug: false,
   });
 
   await database.orm.schema.createSchema();
