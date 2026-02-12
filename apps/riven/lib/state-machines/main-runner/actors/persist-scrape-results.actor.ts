@@ -8,11 +8,11 @@ import { database } from "../../../database/database.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 
 import type { MainRunnerMachineIntake } from "../index.ts";
-import type { DefaultParserResult } from "parse-torrent-title";
+import type { RankedResult } from "@repo/util-rank-torrent-name";
 
 export interface PersistScrapeResultsInput {
   id: number;
-  results: Record<string, DefaultParserResult>;
+  results: Record<string, RankedResult>;
   sendEvent: MainRunnerMachineIntake;
 }
 
@@ -35,8 +35,6 @@ export async function persistScrapeResults({
     return;
   }
 
-  let rank = 1;
-
   const em = database.em.fork();
   const newStreams: Stream[] = [];
 
@@ -52,9 +50,9 @@ export async function persistScrapeResults({
     const stream = new Stream();
 
     stream.infoHash = infoHash;
-    stream.rawTitle = parseResult.title;
-    stream.parsedTitle = parseResult.title;
-    stream.rank = rank++;
+    stream.rawTitle = parseResult.data.rawTitle;
+    stream.parsedTitle = parseResult.data.title;
+    stream.rank = parseResult.rank;
     stream.parents.add(existingItem);
 
     newStreams.push(stream);

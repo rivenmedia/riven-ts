@@ -26,7 +26,7 @@ function trashHandler(
     return true;
   }
 
-  if (data.audio.includes("HQ Clean Audio")) {
+  if (data.audio?.includes("HQ Clean Audio")) {
     failed.push("trash_audio");
     return true;
   }
@@ -261,11 +261,11 @@ export function checkFetch(
       return { fetch: false, failedChecks: failed };
     }
 
-    if (checkFetchList(data.audio, AUDIO_MAP, settings, failed)) {
+    if (checkFetchList(data.audio ?? [], AUDIO_MAP, settings, failed)) {
       return { fetch: false, failedChecks: failed };
     }
 
-    if (checkFetchList(data.hdr, HDR_MAP, settings, failed)) {
+    if (checkFetchList(data.hdr ?? [], HDR_MAP, settings, failed)) {
       return { fetch: false, failedChecks: failed };
     }
 
@@ -286,8 +286,8 @@ export function checkFetch(
     languageHandler(data, settings, failed);
     fetchResolution(data, settings, failed);
     checkFetchMap(data.quality, QUALITY_MAP, settings, failed);
-    checkFetchList(data.audio, AUDIO_MAP, settings, failed);
-    checkFetchList(data.hdr, HDR_MAP, settings, failed);
+    checkFetchList(data.audio ?? [], AUDIO_MAP, settings, failed);
+    checkFetchList(data.hdr ?? [], HDR_MAP, settings, failed);
     checkFetchMap(data.codec?.toLowerCase(), CODEC_MAP, settings, failed);
     checkFetchFlags(data, FLAG_MAP, settings, failed);
   }

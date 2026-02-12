@@ -1,8 +1,4 @@
-import {
-  type RivenPlugin,
-  type RivenPluginPackage,
-  rivenPluginPackageSchema,
-} from "@repo/util-plugin-sdk";
+import { type RivenPlugin, RivenPluginPackage } from "@repo/util-plugin-sdk";
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import { constantCase } from "es-toolkit";
@@ -16,7 +12,7 @@ import type { $ZodErrorTree } from "zod/v4/core";
 
 export interface ParsedPlugins {
   validPlugins: RivenPlugin[];
-  invalidPlugins: [string, $ZodErrorTree<RivenPluginPackage>][];
+  invalidPlugins: [string, $ZodErrorTree<typeof RivenPluginPackage>][];
   unresolvablePlugins: string[];
   pluginConfigPrefixMap: Map<symbol, string>;
   pluginSettings: PluginSettings;
@@ -43,7 +39,7 @@ export const collectPluginsForRegistration = fromPromise(() => {
         const plugin = (await import(pluginName)) as unknown;
 
         const validationResult =
-          await rivenPluginPackageSchema.safeParseAsync(plugin);
+          await RivenPluginPackage.safeParseAsync(plugin);
 
         if (!validationResult.success) {
           return {

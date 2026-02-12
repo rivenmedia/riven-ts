@@ -52,7 +52,7 @@ vi.mock(import("@repo/plugin-test"), () => {
         "riven.item-request.creation.success": vi.fn(),
       },
       settingsSchema: z.object({}),
-      validator() {
+      async validator() {
         return true;
       },
     } satisfies RivenPlugin as RivenPlugin,

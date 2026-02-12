@@ -1,7 +1,18 @@
+import {
+  type RankedResult,
+  createSettings,
+  rankTorrent,
+} from "@repo/util-rank-torrent-name";
+
 import { UnrecoverableError } from "bullmq";
-import { type DefaultParserResult, parse } from "parse-torrent-title";
 
 import { sortScrapeResultsProcessorSchema } from "./sort-scrape-results.schema.ts";
+
+const rankingSettings = createSettings({
+  languages: {
+    required: ["en"],
+  },
+});
 
 export const sortScrapeResultsProcessor =
   sortScrapeResultsProcessorSchema.implementAsync(async function (job) {
@@ -22,11 +33,17 @@ export const sortScrapeResultsProcessor =
     }
 
     const parsedResults = Object.entries(aggregatedResults).reduce<
-      Record<string, DefaultParserResult>
+      Record<string, RankedResult>
     >((acc, [infoHash, title]) => {
-      const parseResult = parse(title || "");
+      const rank = rankTorrent(title, rankingSettings);
 
-      acc[infoHash] = parseResult;
+      if (!rank.fetch) {
+        return acc;
+      }
+
+      console.log(rank);
+
+      acc[infoHash] = rank;
 
       return acc;
     }, {});

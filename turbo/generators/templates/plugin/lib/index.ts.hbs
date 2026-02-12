@@ -19,7 +19,7 @@ export default {
     // Add more hooks as needed
   },
   settingsSchema: {{pascalCase pluginName}}Settings,
-  validator() {
+  async validator() {
     return true;
   },
 } satisfies RivenPlugin as RivenPlugin;

@@ -5,56 +5,56 @@ export interface ParsedData {
   normalizedTitle: string;
 
   // Metadata
-  year: number | undefined;
+  year?: number;
   resolution: string;
-  quality: string | undefined;
-  codec: string | undefined;
-  bitDepth: string | undefined;
+  quality?: string;
+  codec?: string;
+  bitDepth?: string;
 
   // Episodes
   seasons: number[];
   episodes: number[];
   complete: boolean;
-  volumes: number[];
+  volumes?: number[];
 
   // Audio/Video
-  audio: string[];
-  channels: string[];
-  hdr: string[];
+  audio?: string[];
+  channels?: string[];
+  hdr?: string[];
 
   // Languages
   languages: string[];
 
   // Boolean flags
-  dubbed: boolean;
-  subbed: boolean;
-  hardcoded: boolean;
-  proper: boolean;
-  repack: boolean;
-  remux: boolean;
-  retail: boolean;
-  upscaled: boolean;
-  remastered: boolean;
-  extended: boolean;
-  converted: boolean;
-  unrated: boolean;
-  uncensored: boolean;
-  documentary: boolean;
-  commentary: boolean;
-  threeD: boolean;
-  ppv: boolean;
+  dubbed?: boolean;
+  subbed?: boolean;
+  hardcoded?: boolean;
+  proper?: boolean;
+  repack?: boolean;
+  remux?: boolean;
+  retail?: boolean;
+  upscaled?: boolean;
+  remastered?: boolean;
+  extended?: boolean;
+  converted?: boolean;
+  unrated?: boolean;
+  uncensored?: boolean;
+  documentary?: boolean;
+  commentary?: boolean;
+  threeD?: boolean;
+  ppv?: boolean;
 
   // Optional metadata
-  date: string | undefined;
-  group: string | undefined;
-  edition: string | undefined;
-  network: string | undefined;
-  region: string | undefined;
-  site: string | undefined;
-  size: string | undefined;
-  container: string | undefined;
-  extension: string | undefined;
-  episodeCode: string | undefined;
+  date?: string;
+  group?: string;
+  edition?: string;
+  network?: string;
+  region?: string;
+  site?: string;
+  size?: string;
+  container?: string;
+  extension?: string;
+  episodeCode?: string;
 
   // Computed
   type: "movie" | "show";

@@ -5,7 +5,7 @@ import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 
 import type z from "zod";
 
-export const indexTMDBMediaItem: z.input<
+export const indexTMDBMediaItem: z.infer<
   typeof MediaItemIndexRequestedEventHandler
 > = async ({ dataSources, event }) => {
   if (event.item.type !== "movie") {

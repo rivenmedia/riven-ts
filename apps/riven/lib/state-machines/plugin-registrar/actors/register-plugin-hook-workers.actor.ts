@@ -72,7 +72,7 @@ export const registerPluginHookWorkers = fromPromise<
               dataSources,
               settings,
               logger,
-            }) as Promise<never>;
+            });
           },
           { concurrency: os.availableParallelism() },
           {

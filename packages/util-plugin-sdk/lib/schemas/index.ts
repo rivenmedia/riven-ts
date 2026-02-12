@@ -91,10 +91,12 @@ export const RivenPlugin = z.object({
   }),
 });
 
-export type RivenPlugin = z.input<typeof RivenPlugin>;
+export type RivenPlugin = z.infer<typeof RivenPlugin>;
 
-export const rivenPluginPackageSchema = z.object({
+// type T = RivenPlugin["hooks"]['riven.content-service.requested'];
+
+export const RivenPluginPackage = z.object({
   default: RivenPlugin,
 });
 
-export type RivenPluginPackage = z.infer<typeof rivenPluginPackageSchema>;
+export type RivenPluginPackage = z.infer<typeof RivenPluginPackage>;

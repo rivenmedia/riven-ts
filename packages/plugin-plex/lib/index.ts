@@ -42,7 +42,7 @@ export default {
     },
   },
   settingsSchema: PlexSettings,
-  validator() {
+  async validator() {
     return true;
   },
 } satisfies RivenPlugin as RivenPlugin;

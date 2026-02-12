@@ -4,14 +4,14 @@ import z from "zod";
 
 import { createFlowSchema } from "../../../utilities/create-flow-schema.ts";
 
-import type { DefaultParserResult } from "parse-torrent-title";
+import type { RankedResult } from "@repo/util-rank-torrent-name";
 
 export const SortScrapeResultsFlow = createFlowSchema(
   "sort-scrape-results",
   MediaItemScrapeRequestedResponse,
   z.object({
     id: z.int(),
-    results: z.record(z.string(), z.custom<DefaultParserResult>()),
+    results: z.record(z.string(), z.custom<RankedResult>()),
   }),
   z.object({
     id: z.int(),

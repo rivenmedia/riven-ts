@@ -123,7 +123,7 @@ export function rank(
   );
 
   // HDR
-  score += rankFromList(data.hdr, HDR_MAP, settings, rankingModel);
+  score += rankFromList(data.hdr ?? [], HDR_MAP, settings, rankingModel);
 
   // Bit depth
   if (data.bitDepth) {
@@ -131,10 +131,15 @@ export function rank(
   }
 
   // Audio
-  score += rankFromList(data.audio, AUDIO_MAP, settings, rankingModel);
+  score += rankFromList(data.audio ?? [], AUDIO_MAP, settings, rankingModel);
 
   // Channels
-  score += rankFromList(data.channels, CHANNEL_MAP, settings, rankingModel);
+  score += rankFromList(
+    data.channels ?? [],
+    CHANNEL_MAP,
+    settings,
+    rankingModel,
+  );
 
   // Boolean flags (extras, trash.size, etc.)
   score += rankFromFlags(data, FLAG_MAP, settings, rankingModel);

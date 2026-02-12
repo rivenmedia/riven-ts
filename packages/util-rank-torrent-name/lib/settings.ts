@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { PartialDeep } from "type-fest";
+
 // --- CustomRank ---
 
 const CustomRankSchema = z.object({
@@ -142,10 +144,10 @@ const OptionsConfigSchema = z.object({
 // --- Languages Config ---
 
 const LanguagesConfigSchema = z.object({
-  required: z.array(z.string()).default([]),
-  allowed: z.array(z.string()).default([]),
-  exclude: z.array(z.string()).default([]),
-  preferred: z.array(z.string()).default([]),
+  required: z.array(z.string()).prefault([]),
+  allowed: z.array(z.string()).prefault([]),
+  exclude: z.array(z.string()).prefault([]),
+  preferred: z.array(z.string()).prefault([]),
 });
 
 // --- Pattern handling ---
@@ -190,7 +192,7 @@ export interface Settings {
   customRanks: z.infer<typeof CustomRanksConfigSchema>;
 }
 
-export function createSettings(input: unknown = {}): Settings {
+export function createSettings(input: PartialDeep<Settings> = {}): Settings {
   const raw = SettingsRawSchema.parse(input);
   return {
     ...raw,
