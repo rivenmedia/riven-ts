@@ -42,7 +42,6 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
 
   vi.spyOn(Settings, "now").mockReturnValue(10000);
 
-  const expectedDuration = 30;
   const mockQueue = createQueue("mock-queue");
   const job: Parameters<DownloadItemFlow["processor"]>[0] = await Job.create(
     mockQueue,
@@ -51,6 +50,8 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
       id: 1,
     },
   );
+
+  const expectedDuration = 1;
 
   const em = database.orm.em.fork();
 
@@ -61,7 +62,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     state: "scraped",
     title: "Test Movie",
     year: 2024,
-    createdAt: DateTime.now().minus({ milliseconds: 30 }).toJSDate(),
+    createdAt: DateTime.now().minus({ seconds: expectedDuration }).toJSDate(),
   });
 
   const streamInfoHash = "test-info-hash";
@@ -105,7 +106,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.success",
     item: expect.any(Movie) as never,
-    durationFromRequestToDownload: expectedDuration / 1000,
+    durationFromRequestToDownload: expectedDuration,
   });
 });
 
