@@ -108,3 +108,9 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     durationFromRequestToDownload: expectedDuration / 1000,
   });
 });
+
+it.todo("requests individual seasons if no results were found for a show");
+
+it.todo(
+  "requests individual episodes if no results were found for a season of a show",
+);

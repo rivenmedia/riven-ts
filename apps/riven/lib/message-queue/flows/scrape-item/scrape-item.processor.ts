@@ -1,3 +1,5 @@
+import { UnrecoverableError } from "bullmq";
+
 import { persistScrapeResults } from "../../../state-machines/main-runner/actors/persist-scrape-results.actor.ts";
 import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
 
@@ -20,21 +22,27 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
       };
     }, {});
 
-    const item = await persistScrapeResults({
-      id: job.data.id,
-      results: sortedResults,
-      sendEvent,
-    });
-
-    if (item) {
-      sendEvent({
-        type: "riven.media-item.scrape.success",
-        item,
+    try {
+      const item = await persistScrapeResults({
+        id: job.data.id,
+        results: sortedResults,
+        sendEvent,
       });
-    }
 
-    return {
-      success: true,
-    };
+      if (item) {
+        sendEvent({
+          type: "riven.media-item.scrape.success",
+          item,
+        });
+      }
+
+      return {
+        success: true,
+      };
+    } catch (error) {
+      throw new UnrecoverableError(
+        `Failed to persist scrape results: ${String(error)}`,
+      );
+    }
   },
 );
