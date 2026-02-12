@@ -7,7 +7,7 @@ import z from "zod";
 import { database } from "../../database/database.ts";
 
 /**
- * A schema that converts to/from a serialised FileSystemEntry.
+ * A schema that converts to/from a serialised filesystem entry.
  */
 export const SerialisedFileSystemEntry = z.codec(
   z.looseObject({ type: FileSystemEntryType }),

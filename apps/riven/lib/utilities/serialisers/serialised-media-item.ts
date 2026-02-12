@@ -7,7 +7,7 @@ import z from "zod";
 import { database } from "../../database/database.ts";
 
 /**
- * A schema that converts to/from a serialised MediaItem.
+ * A schema that converts to/from a serialised media item.
  */
 export const SerialisedMediaItem = z.codec(
   z.looseObject({ type: MediaItemType }),
