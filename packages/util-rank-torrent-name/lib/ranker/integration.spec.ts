@@ -9,7 +9,7 @@ import {
 } from "../index.ts";
 
 describe("rankTorrent (integration)", () => {
-  it("should parse, rank, and check fetch in one call", () => {
+  it("parses, ranks, and checks fetch in one call", () => {
     const settings = createSettings();
     const result = rankTorrent(
       "Movie.2024.1080p.BluRay.x264-GROUP",
@@ -25,7 +25,7 @@ describe("rankTorrent (integration)", () => {
     expect(result.failedChecks).toHaveLength(0);
   });
 
-  it("should detect show type", () => {
+  it("detects show type", () => {
     const settings = createSettings();
     const result = rankTorrent(
       "Breaking.Bad.S01E01.720p.BluRay.x264-GROUP",
@@ -38,7 +38,7 @@ describe("rankTorrent (integration)", () => {
     expect(result.data.episodes).toEqual([1]);
   });
 
-  it("should work with custom settings", () => {
+  it("works with custom settings", () => {
     const settings = createSettings({
       require: ["1080p"],
       exclude: ["CAM"],
@@ -66,7 +66,7 @@ describe("rankTorrent (integration)", () => {
     expect(result.rank).toBeGreaterThan(10000); // preferred bonus
   });
 
-  it("should reject excluded content", () => {
+  it("rejects excluded content", () => {
     const settings = createSettings({
       exclude: ["CAM"],
     });
@@ -82,7 +82,7 @@ describe("rankTorrent (integration)", () => {
 });
 
 describe("public API exports", () => {
-  it("should export all expected functions", () => {
+  it("exports all expected functions", () => {
     expect(typeof parse).toBe("function");
     expect(typeof rank).toBe("function");
     expect(typeof checkFetch).toBe("function");

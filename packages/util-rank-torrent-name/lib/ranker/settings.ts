@@ -170,7 +170,7 @@ function compilePatterns(patterns: string[]): RegExp[] {
 
 // --- Settings Schema ---
 
-const SettingsSchema = z
+export const SettingsSchema = z
   .object({
     require: z.array(z.string()).default([]),
     exclude: z.array(z.string()).default([]),

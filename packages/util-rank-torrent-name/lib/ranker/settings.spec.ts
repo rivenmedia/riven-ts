@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_RANKING, createSettings } from "./settings.ts";
 
 describe("createSettings", () => {
-  it("should create default settings from empty input", () => {
+  it("creates default settings from empty input", () => {
     const s = createSettings();
 
     expect(s.require).toEqual([]);
@@ -14,7 +14,7 @@ describe("createSettings", () => {
     expect(s.compiledPreferred).toEqual([]);
   });
 
-  it("should create settings from partial input", () => {
+  it("creates settings from partial input", () => {
     const s = createSettings({
       require: ["1080p"],
       resolutions: { r2160p: true },
@@ -29,21 +29,21 @@ describe("createSettings", () => {
     expect(s.resolutions.r720p).toBe(true);
   });
 
-  it("should compile case-insensitive patterns by default", () => {
+  it("compiles case-insensitive patterns by default", () => {
     const s = createSettings({ require: ["BluRay"] });
 
     expect(s.compiledRequire[0]?.test("bluray")).toBe(true);
     expect(s.compiledRequire[0]?.test("BLURAY")).toBe(true);
   });
 
-  it("should compile case-sensitive patterns with slashes", () => {
+  it("compiles case-sensitive patterns with slashes", () => {
     const s = createSettings({ require: ["/BluRay/"] });
 
     expect(s.compiledRequire[0]?.test("BluRay")).toBe(true);
     expect(s.compiledRequire[0]?.test("bluray")).toBe(false);
   });
 
-  it("should have correct default options", () => {
+  it("has correct default options", () => {
     const s = createSettings();
 
     expect(s.options.removeAllTrash).toBe(true);
@@ -53,7 +53,7 @@ describe("createSettings", () => {
     expect(s.options.removeAdultContent).toBe(true);
   });
 
-  it("should have correct default resolution config", () => {
+  it("hasq correct default resolution config", () => {
     const s = createSettings();
 
     expect(s.resolutions.r2160p).toBe(false);
@@ -64,7 +64,7 @@ describe("createSettings", () => {
     expect(s.resolutions.unknown).toBe(true);
   });
 
-  it("should have correct default custom ranks", () => {
+  it("has correct default custom ranks", () => {
     const s = createSettings();
 
     // Quality
@@ -94,7 +94,7 @@ describe("createSettings", () => {
     expect(s.customRanks.trash.telesync.fetch).toBe(false);
   });
 
-  it("should allow custom rank overrides", () => {
+  it("allows custom rank overrides", () => {
     const s = createSettings({
       customRanks: {
         quality: { remux: { fetch: true, rank: 5000 } },
@@ -108,12 +108,12 @@ describe("createSettings", () => {
     expect(s.customRanks.quality.bluray.fetch).toBe(true);
   });
 
-  it("should throw on invalid input types", () => {
+  it("throws on invalid input types", () => {
     // @ts-expect-error - invalid type for resolutions
     expect(() => createSettings({ resolutions: { r1080p: "yes" } })).toThrow();
   });
 
-  it("should accept empty language config", () => {
+  it("accepts empty language config", () => {
     const s = createSettings();
 
     expect(s.languages.required).toEqual([]);
@@ -124,20 +124,20 @@ describe("createSettings", () => {
 });
 
 describe("DEFAULT_RANKING", () => {
-  it("should have expected quality values", () => {
+  it("has expected quality values", () => {
     expect(DEFAULT_RANKING.remux).toBe(10000);
     expect(DEFAULT_RANKING.bluray).toBe(100);
     expect(DEFAULT_RANKING.webdl).toBe(200);
     expect(DEFAULT_RANKING.cam).toBe(-10000);
   });
 
-  it("should have expected HDR values", () => {
+  it("has expected HDR values", () => {
     expect(DEFAULT_RANKING.dolbyVision).toBe(3000);
     expect(DEFAULT_RANKING.hdr).toBe(2000);
     expect(DEFAULT_RANKING.hdr10plus).toBe(2100);
   });
 
-  it("should have expected audio values", () => {
+  it("has expected audio values", () => {
     expect(DEFAULT_RANKING.truehd).toBe(2000);
     expect(DEFAULT_RANKING.atmos).toBe(1000);
     expect(DEFAULT_RANKING.mp3).toBe(-1000);

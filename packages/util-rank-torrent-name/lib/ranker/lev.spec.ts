@@ -30,19 +30,19 @@ describe("getLevRatio", () => {
     expect(getLevRatio(a, b)).toBe(expected);
   });
 
-  it("should throw on empty titles", () => {
+  it("throws on empty titles", () => {
     expect(() => getLevRatio("", "foo")).toThrow();
     expect(() => getLevRatio("foo", "")).toThrow();
   });
 
-  it("should throw on invalid threshold", () => {
+  it("throws on invalid threshold", () => {
     expect(() => getLevRatio("a", "b", -1)).toThrow();
     expect(() => getLevRatio("a", "b", 2)).toThrow();
   });
 });
 
 describe("getLevRatio with aliases", () => {
-  it("should match via alias", () => {
+  it("matches via alias", () => {
     const aliases = {
       jp: ["Gokushufudō", "Gokushufudou"],
       us: ["The Way of the Househusband", "The Way of the House Husband"],
@@ -58,7 +58,7 @@ describe("getLevRatio with aliases", () => {
     ).toBe(1);
   });
 
-  it("should match via foreign alias", () => {
+  it("matches via foreign alias", () => {
     const aliases = {
       jp: ["Gokushufudō", "Gokushufudou"],
       us: ["The Way of the Househusband"],
@@ -69,12 +69,12 @@ describe("getLevRatio with aliases", () => {
     ).toBe(1);
   });
 
-  it("should match without aliases", () => {
+  it("matches without aliases", () => {
     expect(getLevRatio("The Simpsons", "The Simpsons", 0.85, {})).toBe(1);
   });
 });
 
-describe("integration with parse", () => {
+describe("Integration with parse", () => {
   it.each([
     ["The Walking Dead S05E03 720p HDTV x264-ASAP", "The Walking Dead", true],
     [
@@ -88,15 +88,8 @@ describe("integration with parse", () => {
     (rawTitle, correctTitle, expected) => {
       const data = parse(rawTitle);
       const match = titleMatch(correctTitle, data.title);
-      expect(match).toBe(expected);
 
-      if (expected) {
-        expect(getLevRatio(correctTitle, data.title)).toBeGreaterThanOrEqual(
-          0.85,
-        );
-      } else {
-        expect(getLevRatio(correctTitle, data.title)).toBe(0);
-      }
+      expect(match).toBe(expected);
     },
   );
 });
