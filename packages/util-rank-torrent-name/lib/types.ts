@@ -75,7 +75,18 @@ export interface FetchResult {
 
 export interface RankedResult {
   data: ParsedData;
+  hash: string;
   rank: number;
   fetch: boolean;
   failedChecks: string[];
 }
+
+export const Resolution = {
+  "2160p": "2160p",
+  "1080p": "1080p",
+  "1440p": "1080p",
+  "720p": "720p",
+  "480p": "480p",
+  "360p": "360p",
+  unknown: "unknown",
+} as const;

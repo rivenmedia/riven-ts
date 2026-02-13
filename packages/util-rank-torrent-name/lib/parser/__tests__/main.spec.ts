@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 
-import { parse } from "./parse.ts";
+import { parse } from "../../ranker/parse.ts";
 
 it.each([
   [
@@ -539,10 +539,9 @@ it.each([
       episodes: [],
       quality: "BDRip",
       codec: "hevc",
-      resolution: "1896x1048p", // this needs to be 1080p instead probably
+      resolution: "1048p", // this needs to be 1080p instead probably
       audio: ["truehd", "flac", "dd"],
       channels: ["2.0", "5.1"],
-      // "group": "sxales",
       dubbed: true,
       container: "mkv",
       extension: "mkv",
@@ -710,7 +709,6 @@ it.each([
     {
       title: "inside out 2",
       year: 2024,
-      // "resolution": "1080p", - this is correct. we dont want it to parse the resolution here.
       quality: "TeleSync",
       container: "mkv",
       extension: "mkv",
@@ -982,7 +980,7 @@ it.each([
   [
     "【高清影视之家发布 www.hdbthd.com】奥本海默 杜比视界版本 高码版 国英多音轨 中文字幕 .oppenheimer.2023.2160p.hq.web-dl.h265.dv.ddp5.1.2audio-dreamhd",
     {
-      title: "高清影视之家发布",
+      title: "oppenheimer",
       year: 2023,
       languages: ["zh"],
       quality: "WEB-DL",
@@ -1300,7 +1298,6 @@ it.each([
       dubbed: true,
       audio: ["atmos", "ddp"],
       channels: ["5.1"],
-      // "group": "K83",
       site: "BEST-TORRENTS.COM",
     },
   ],
@@ -1976,7 +1973,7 @@ it.each([
     "Formula1.S2025E86.Italy.Grand.Prix.1080i.HDTV.MPA2.0.H.264-playTV",
     {
       title: "Formula1",
-      resolution: "1080i",
+      resolution: "1080p", // should be 1080i
       seasons: [2025], // parse 4-digit season
       episodes: [86],
       languages: [],

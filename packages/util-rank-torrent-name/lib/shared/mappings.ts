@@ -1,5 +1,7 @@
 // Maps parsed values to [settingsCategory, settingsKey]
 // Used by both rank() and checkFetch()
+import type { Resolution } from "../types.ts";
+import type { ValueOf } from "type-fest";
 
 export const QUALITY_MAP = new Map<string, [string, string]>([
   // Quality
@@ -109,7 +111,7 @@ export const TRASH_QUALITIES = new Set([
 ]);
 
 // Resolution normalization map
-export const RESOLUTION_MAP = new Map<string, string>([
+export const RESOLUTION_MAP = new Map<string, ValueOf<typeof Resolution>>([
   ["2160p", "2160p"],
   ["4k", "2160p"],
   ["1080p", "1080p"],

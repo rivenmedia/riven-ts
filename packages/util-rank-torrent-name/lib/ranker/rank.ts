@@ -1,4 +1,3 @@
-import { checkFetch } from "./fetch.ts";
 import {
   AUDIO_MAP,
   CHANNEL_MAP,
@@ -6,12 +5,13 @@ import {
   FLAG_MAP,
   HDR_MAP,
   QUALITY_MAP,
-} from "./mappings.ts";
+} from "../shared/mappings.ts";
+import { checkFetch } from "./fetch.ts";
 import { parse } from "./parse.ts";
 import { DEFAULT_RANKING, getCustomRank } from "./settings.ts";
 
+import type { ParsedData, RankedResult } from "../types.ts";
 import type { RankingModel, Settings } from "./settings.ts";
-import type { ParsedData, RankedResult } from "./types.ts";
 
 function resolveRank(
   category: string,
@@ -162,6 +162,7 @@ export function rank(
 
 export function rankTorrent(
   rawTitle: string,
+  hash: string,
   settings: Settings,
   rankingModel: RankingModel = DEFAULT_RANKING,
 ): RankedResult {
@@ -171,6 +172,7 @@ export function rankTorrent(
 
   return {
     data,
+    hash,
     rank: score,
     fetch: fetchResult.fetch,
     failedChecks: fetchResult.failedChecks,

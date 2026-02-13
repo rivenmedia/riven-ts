@@ -8,11 +8,11 @@ import {
   RESOLUTION_MAP,
   RESOLUTION_SETTINGS_MAP,
   TRASH_QUALITIES,
-} from "./mappings.ts";
+} from "../shared/mappings.ts";
 import { getCustomRank } from "./settings.ts";
 
+import type { FetchResult, ParsedData } from "../types.ts";
 import type { Settings } from "./settings.ts";
-import type { FetchResult, ParsedData } from "./types.ts";
 
 function trashHandler(
   data: ParsedData,

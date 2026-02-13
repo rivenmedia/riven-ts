@@ -6,12 +6,16 @@ import {
   parse,
   rank,
   rankTorrent,
-} from "./index.ts";
+} from "../index.ts";
 
 describe("rankTorrent (integration)", () => {
   it("should parse, rank, and check fetch in one call", () => {
     const settings = createSettings();
-    const result = rankTorrent("Movie.2024.1080p.BluRay.x264-GROUP", settings);
+    const result = rankTorrent(
+      "Movie.2024.1080p.BluRay.x264-GROUP",
+      "1234567890123456789012345678901234567893",
+      settings,
+    );
 
     expect(result.data.title).toBe("Movie");
     expect(result.data.resolution).toBe("1080p");
@@ -25,6 +29,7 @@ describe("rankTorrent (integration)", () => {
     const settings = createSettings();
     const result = rankTorrent(
       "Breaking.Bad.S01E01.720p.BluRay.x264-GROUP",
+      "1234567890123456789012345678901234567893",
       settings,
     );
 
@@ -53,6 +58,7 @@ describe("rankTorrent (integration)", () => {
     // This should match require and get preferred bonus
     const result = rankTorrent(
       "Movie.2024.1080p.BluRay.REMUX.AVC-GROUP",
+      "1234567890123456789012345678901234567893",
       settings,
     );
 
@@ -64,7 +70,11 @@ describe("rankTorrent (integration)", () => {
     const settings = createSettings({
       exclude: ["CAM"],
     });
-    const result = rankTorrent("Movie.2024.CAM-GROUP", settings);
+    const result = rankTorrent(
+      "Movie.2024.CAM-GROUP",
+      "1234567890123456789012345678901234567893",
+      settings,
+    );
 
     // CAM is both trash and excluded
     expect(result.fetch).toBe(false);

@@ -1,6 +1,6 @@
 import { distance } from "fastest-levenshtein";
 
-import { normalizeTitle } from "./normalize.ts";
+import { normaliseTitle } from "../shared/normalise.ts";
 
 export type Aliases = Record<string, string[]>;
 
@@ -42,13 +42,13 @@ export function getLevRatio(
     throw new Error("The threshold must be a number between 0 and 1.");
   }
 
-  const normalizedParsed = normalizeTitle(parsedTitle);
+  const normalizedParsed = normaliseTitle(parsedTitle);
 
-  const candidates = new Set<string>([normalizeTitle(correctTitle)]);
+  const candidates = new Set<string>([normaliseTitle(correctTitle)]);
 
   for (const aliasList of Object.values(aliases)) {
     for (const alias of aliasList) {
-      candidates.add(normalizeTitle(alias));
+      candidates.add(normaliseTitle(alias));
     }
   }
 

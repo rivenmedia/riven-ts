@@ -24,9 +24,8 @@ describe("checkFetch", () => {
   it("should reject TeleSync quality", () => {
     const data = parse("Movie.2024.TS-GROUP");
     const result = checkFetch(data, defaultSettings);
-    if (data.quality === "TeleSync") {
-      expect(result.fetch).toBe(false);
-    }
+
+    expect(result.fetch).toBe(false);
   });
 
   it("should accept CAM when removeAllTrash is false", () => {
@@ -142,10 +141,9 @@ describe("checkFetch", () => {
       });
       const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
       const result = checkFetch(data, settings);
-      if (data.languages.length === 0) {
-        expect(result.fetch).toBe(false);
-        expect(result.failedChecks).toContain("unknown_language");
-      }
+
+      expect(result.fetch).toBe(false);
+      expect(result.failedChecks).toContain("unknown_language");
     });
 
     it("should not reject unknown languages by default", () => {
@@ -160,10 +158,9 @@ describe("checkFetch", () => {
       });
       const data = parse("Movie.2024.FRENCH.1080p.BluRay.x264-GROUP");
       const result = checkFetch(data, settings);
-      if (data.languages.includes("fr")) {
-        expect(result.fetch).toBe(false);
-        expect(result.failedChecks).toContain("lang_fr");
-      }
+
+      expect(result.fetch).toBe(false);
+      expect(result.failedChecks).toContain("lang_fr");
     });
 
     it("should accept allowed language even if also excluded", () => {
@@ -172,9 +169,8 @@ describe("checkFetch", () => {
       });
       const data = parse("Movie.2024.FRENCH.1080p.BluRay.x264-GROUP");
       const result = checkFetch(data, settings);
-      if (data.languages.includes("fr")) {
-        expect(result.fetch).toBe(true);
-      }
+
+      expect(result.fetch).toBe(true);
     });
 
     it("should require language when required is set", () => {
@@ -183,11 +179,9 @@ describe("checkFetch", () => {
       });
       const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
       const result = checkFetch(data, settings);
-      // If no languages detected, it should fail
-      if (data.languages.length === 0) {
-        expect(result.fetch).toBe(false);
-        expect(result.failedChecks).toContain("missing_required_language");
-      }
+
+      expect(result.fetch).toBe(false);
+      expect(result.failedChecks).toContain("missing_required_language");
     });
   });
 
@@ -195,10 +189,9 @@ describe("checkFetch", () => {
     it("should reject REMUX by default (fetch: false)", () => {
       const data = parse("Movie.2024.1080p.BluRay.REMUX.AVC-GROUP");
       const result = checkFetch(data, defaultSettings);
-      if (data.quality === "BluRay REMUX" || data.quality === "REMUX") {
-        expect(result.fetch).toBe(false);
-        expect(result.failedChecks).toContain("quality_remux");
-      }
+
+      expect(result.fetch).toBe(false);
+      expect(result.failedChecks).toContain("quality_remux");
     });
 
     it("should accept REMUX when custom rank allows fetch", () => {
@@ -216,10 +209,9 @@ describe("checkFetch", () => {
     it("should reject AV1 by default", () => {
       const data = parse("Movie.2024.1080p.WEB-DL.AV1-GROUP");
       const result = checkFetch(data, defaultSettings);
-      if (data.codec?.toLowerCase() === "av1") {
-        expect(result.fetch).toBe(false);
-        expect(result.failedChecks).toContain("quality_av1");
-      }
+
+      expect(result.fetch).toBe(false);
+      expect(result.failedChecks).toContain("quality_av1");
     });
   });
 
@@ -235,10 +227,9 @@ describe("checkFetch", () => {
       // A title with both resolution and codec issues
       const data = parse("Movie.2024.2160p.WEB-DL.AV1-GROUP");
       const result = checkFetch(data, settings, false);
-      if (data.resolution === "2160p" && data.codec?.toLowerCase() === "av1") {
-        expect(result.fetch).toBe(false);
-        expect(result.failedChecks.length).toBeGreaterThan(1);
-      }
+
+      expect(result.fetch).toBe(false);
+      expect(result.failedChecks.length).toBeGreaterThan(1);
     });
   });
 });

@@ -99,7 +99,7 @@ const translationTable: Record<string, string | null> = {
   _: " ",
 };
 
-export function normalizeTitle(rawTitle: string, lower = true): string {
+export function normaliseTitle(rawTitle: string, lower = true): string {
   let text = lower ? rawTitle.toLowerCase() : rawTitle;
 
   // Normalize unicode characters (NFKC)

@@ -1,13 +1,13 @@
 import { Parser, transforms } from "@viren070/parse-torrent-title";
 
-import { bitDepthHandlers } from "./handlers/bit-depth.handlers.ts";
-import { sceneHandlers } from "./handlers/scene.handlers.ts";
-import { siteHandlers } from "./handlers/site.handlers.ts";
-import { trashHandlers } from "./handlers/trash.handlers.ts";
-import { AUDIO_MAP, CODEC_MAP, RESOLUTION_MAP } from "./mappings.ts";
-import { normalizeTitle } from "./normalize.ts";
+import { bitDepthHandlers } from "../parser/handlers/bit-depth.handlers.ts";
+import { sceneHandlers } from "../parser/handlers/scene.handlers.ts";
+import { siteHandlers } from "../parser/handlers/site.handlers.ts";
+import { trashHandlers } from "../parser/handlers/trash.handlers.ts";
+import { AUDIO_MAP, CODEC_MAP, RESOLUTION_MAP } from "../shared/mappings.ts";
+import { normaliseTitle } from "../shared/normalise.ts";
 
-import type { CustomFields, ParsedData } from "./types.ts";
+import type { CustomFields, ParsedData } from "../types.ts";
 
 const parser = new Parser()
   .addHandlers(siteHandlers)
@@ -21,6 +21,17 @@ const parser = new Parser()
       transform: transforms.toValueSet("2.0"),
       remove: true,
       keepMatching: true,
+    },
+  ])
+  .addHandlers([
+    {
+      field: "complete",
+      pattern: new RegExp(
+        "(?:\\bthe\\W)?(?:\\bcomplete\\b|\\bfull\\b|\\ball\\b)\\b.*\\b(?:series|seasons|collection|episodes|set|pack|movies)\\b",
+        "i",
+      ),
+      transform: transforms.toBoolean(),
+      remove: true,
     },
   ])
   .addDefaultHandlers()
@@ -85,6 +96,14 @@ const parser = new Parser()
       transform: transforms.toTrimmed(),
       remove: true,
     },
+  ])
+  .addHandlers([
+    {
+      field: "title",
+      pattern: new RegExp("\\bHigh.?Quality\\b", "i"),
+      remove: true,
+      skipFromTitle: true,
+    },
   ]);
 
 export function parse(rawTitle: string): ParsedData {
@@ -117,7 +136,7 @@ export function parse(rawTitle: string): ParsedData {
   return {
     rawTitle,
     title,
-    normalizedTitle: normalizeTitle(title),
+    normalizedTitle: normaliseTitle(title),
     seasons,
     episodes,
     scene: parseResult.scene ?? false,
@@ -143,7 +162,6 @@ export function parse(rawTitle: string): ParsedData {
       : {}),
     ...(parseResult.dubbed ? { dubbed: parseResult.dubbed } : {}),
     ...(parseResult.subbed ? { subbed: parseResult.subbed } : {}),
-    ...(parseResult.extras ? { extras: parseResult.extras } : {}),
     ...(parseResult.hardcoded ? { hardcoded: parseResult.hardcoded } : {}),
     ...(parseResult.proper ? { proper: parseResult.proper } : {}),
     ...(parseResult.repack ? { repack: parseResult.repack } : {}),
