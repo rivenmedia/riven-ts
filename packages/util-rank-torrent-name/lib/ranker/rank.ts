@@ -21,7 +21,7 @@ function resolveRank(
 ): number {
   const custom = getCustomRank(settings, category, key);
 
-  if (custom?.rank !== undefined) {
+  if (custom.rank !== undefined) {
     return custom.rank;
   }
 

@@ -1,4 +1,8 @@
-import type { CustomRanksConfig, RankingModel } from "../ranker/settings.ts";
+import type {
+  CustomRanksConfig,
+  RankingModel,
+  ResolutionConfig,
+} from "../ranker/settings.ts";
 import type { Resolution } from "../types.ts";
 import type { ValueOf } from "type-fest";
 
@@ -133,11 +137,11 @@ export const TRASH_QUALITIES = new Set([
 export const RESOLUTION_MAP = new Map<string, ValueOf<typeof Resolution>>([
   ["2160p", "2160p"],
   ["4k", "2160p"],
+  ["1440p", "1080p"],
   ["1080p", "1080p"],
-  ["1440p", "1440p"],
   ["720p", "720p"],
-  ["480p", "480p"],
   ["576p", "480p"],
+  ["480p", "480p"],
   ["360p", "360p"],
   ["240p", "360p"],
 ]);
@@ -145,7 +149,7 @@ export const RESOLUTION_MAP = new Map<string, ValueOf<typeof Resolution>>([
 // Resolution key to settings field name
 export const RESOLUTION_SETTINGS_MAP = new Map<
   ValueOf<typeof Resolution>,
-  `r${Exclude<ValueOf<typeof Resolution>, "unknown">}` | "unknown"
+  keyof ResolutionConfig
 >([
   ["2160p", "r2160p"],
   ["1080p", "r1080p"],

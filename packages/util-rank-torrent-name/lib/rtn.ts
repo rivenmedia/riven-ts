@@ -1,6 +1,4 @@
-import { parse } from "./parser/parse.ts";
-import { checkFetch } from "./ranker/fetch.ts";
-import { rank } from "./ranker/rank.ts";
+import { rankTorrent } from "./ranker/rank.ts";
 import {
   DEFAULT_RANKING,
   type RankingModel,
@@ -8,12 +6,12 @@ import {
 } from "./ranker/settings.ts";
 import { sortTorrents } from "./ranker/sort.ts";
 
-import type { RankedResult } from "./types.ts";
+import type { Resolution } from "./types.ts";
 
 export class RTN {
   #settings: Settings;
   #rankingModel: RankingModel;
-  #enabledResolutions: Set<string>;
+  #enabledResolutions: Set<keyof typeof Resolution>;
 
   constructor(
     settings: Settings,
@@ -24,28 +22,19 @@ export class RTN {
     this.#enabledResolutions = new Set(
       Object.entries(settings.resolutions)
         .filter(([_, enabled]) => enabled)
-        .map(([res]) => res.replace(/^r/, "")),
+        .map(([res]) => res.replace(/^r/, "") as keyof typeof Resolution),
     );
   }
 
-  rankTorrent(rawTitle: string, hash: string): RankedResult {
-    const data = parse(rawTitle);
-    const score = rank(data, this.#settings, this.#rankingModel);
-    const fetchResult = checkFetch(data, this.#settings);
-
-    return {
-      data,
-      hash,
-      rank: score,
-      fetch: fetchResult.fetch,
-      failedChecks: fetchResult.failedChecks,
-    };
+  rankTorrent(rawTitle: string, hash: string) {
+    return rankTorrent(rawTitle, hash, this.#settings, this.#rankingModel);
   }
 
   rankTorrents(
     torrents: Record<string, string>,
     bucketLimit = Infinity,
-  ): Map<string, RankedResult> {
+    resolutions = this.#enabledResolutions,
+  ) {
     const rawMap = new Map(
       Object.entries(torrents).map(([hash, title]) => [
         hash,
@@ -53,6 +42,6 @@ export class RTN {
       ]),
     );
 
-    return sortTorrents(rawMap, bucketLimit, this.#enabledResolutions);
+    return sortTorrents(rawMap, bucketLimit, resolutions);
   }
 }

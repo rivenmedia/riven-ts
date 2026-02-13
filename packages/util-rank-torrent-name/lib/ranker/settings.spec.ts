@@ -125,21 +125,21 @@ describe("createSettings", () => {
 
 describe("DEFAULT_RANKING", () => {
   it("should have expected quality values", () => {
-    expect(DEFAULT_RANKING["remux"]).toBe(10000);
-    expect(DEFAULT_RANKING["bluray"]).toBe(100);
-    expect(DEFAULT_RANKING["webdl"]).toBe(200);
-    expect(DEFAULT_RANKING["cam"]).toBe(-10000);
+    expect(DEFAULT_RANKING.remux).toBe(10000);
+    expect(DEFAULT_RANKING.bluray).toBe(100);
+    expect(DEFAULT_RANKING.webdl).toBe(200);
+    expect(DEFAULT_RANKING.cam).toBe(-10000);
   });
 
   it("should have expected HDR values", () => {
-    expect(DEFAULT_RANKING["dolbyVision"]).toBe(3000);
-    expect(DEFAULT_RANKING["hdr"]).toBe(2000);
-    expect(DEFAULT_RANKING["hdr10plus"]).toBe(2100);
+    expect(DEFAULT_RANKING.dolbyVision).toBe(3000);
+    expect(DEFAULT_RANKING.hdr).toBe(2000);
+    expect(DEFAULT_RANKING.hdr10plus).toBe(2100);
   });
 
   it("should have expected audio values", () => {
-    expect(DEFAULT_RANKING["truehd"]).toBe(2000);
-    expect(DEFAULT_RANKING["atmos"]).toBe(1000);
-    expect(DEFAULT_RANKING["mp3"]).toBe(-1000);
+    expect(DEFAULT_RANKING.truehd).toBe(2000);
+    expect(DEFAULT_RANKING.atmos).toBe(1000);
+    expect(DEFAULT_RANKING.mp3).toBe(-1000);
   });
 });

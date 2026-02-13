@@ -124,13 +124,14 @@ export type CustomRanksConfig = z.infer<typeof CustomRanksConfigSchema>;
 
 const ResolutionConfigSchema = z.object({
   r2160p: z.boolean().default(false),
-  r1440p: z.boolean().default(true),
   r1080p: z.boolean().default(true),
   r720p: z.boolean().default(true),
   r480p: z.boolean().default(false),
   r360p: z.boolean().default(false),
   unknown: z.boolean().default(true),
 });
+
+export type ResolutionConfig = z.infer<typeof ResolutionConfigSchema>;
 
 // --- Options Config ---
 
@@ -197,13 +198,12 @@ export function createSettings(input: SettingsInput = {}): Settings {
 // Helper to look up custom rank from nested settings
 export function getCustomRank(
   settings: Settings,
-  category: string,
-  key: string,
-): CustomRank | undefined {
-  const cat = (
-    settings.customRanks as Record<string, Record<string, CustomRank>>
-  )[category];
-  return cat?.[key];
+  category: keyof CustomRanksConfig,
+  key: keyof RankingModel,
+): CustomRank {
+  const cat = settings.customRanks[category];
+
+  return cat[key as keyof typeof cat];
 }
 
 // --- Ranking Model ---

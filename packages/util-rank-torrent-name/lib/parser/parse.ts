@@ -4,7 +4,6 @@ import { bitDepthHandlers } from "../parser/handlers/bit-depth.handlers.ts";
 import { sceneHandlers } from "../parser/handlers/scene.handlers.ts";
 import { siteHandlers } from "../parser/handlers/site.handlers.ts";
 import { trashHandlers } from "../parser/handlers/trash.handlers.ts";
-import { AUDIO_MAP, CODEC_MAP, RESOLUTION_MAP } from "../shared/mappings.ts";
 import { normaliseTitle } from "../shared/normalise.ts";
 import { adultHandlers } from "./handlers/adult.handlers.ts";
 
@@ -128,13 +127,6 @@ export function parse(rawTitle: string): ParsedData {
   // ptt-viren year is string, parse to number
   const year = parseResult.year ? parseInt(parseResult.year, 10) : undefined;
 
-  const [, mappedCodec] =
-    CODEC_MAP.get(parseResult.codec?.toLowerCase() ?? "") ?? [];
-
-  const mappedResolution = RESOLUTION_MAP.get(
-    parseResult.resolution?.toLowerCase() ?? "",
-  );
-
   return {
     rawTitle,
     title,
@@ -142,12 +134,12 @@ export function parse(rawTitle: string): ParsedData {
     seasons,
     episodes,
     scene: parseResult.scene ?? false,
-    resolution: mappedResolution ?? parseResult.resolution ?? "unknown",
+    resolution: parseResult.resolution ?? "unknown",
     languages: parseResult.languages ?? [],
     type: seasons.length > 0 || episodes.length > 0 ? "show" : "movie",
     ...(year && !isNaN(year) ? { year } : {}),
     ...(quality ? { quality } : {}),
-    ...(mappedCodec ? { codec: mappedCodec } : {}),
+    ...(parseResult.codec ? { codec: parseResult.codec } : {}),
     ...(parseResult.adult ? { adult: parseResult.adult } : {}),
     ...(parseResult.bitDepth ? { bitDepth: parseResult.bitDepth } : {}),
     ...(parseResult.bitrate ? { bitrate: parseResult.bitrate } : {}),

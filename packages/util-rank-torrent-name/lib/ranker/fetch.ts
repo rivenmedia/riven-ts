@@ -12,14 +12,16 @@ import {
 import { getCustomRank } from "./settings.ts";
 
 import type { FetchResult, ParsedData } from "../types.ts";
-import type { Settings } from "./settings.ts";
+import type { CustomRanksConfig, RankingModel, Settings } from "./settings.ts";
 
 export function trashHandler(
   data: ParsedData,
   settings: Settings,
   failed: Set<string>,
 ): boolean {
-  if (!settings.options.removeAllTrash) return false;
+  if (!settings.options.removeAllTrash) {
+    return false;
+  }
 
   if (data.quality && TRASH_QUALITIES.has(data.quality)) {
     failed.add("trash_quality");
@@ -28,6 +30,11 @@ export function trashHandler(
 
   if (data.audio?.includes("HQ Clean Audio")) {
     failed.add("trash_audio");
+    return true;
+  }
+
+  if (data.trash) {
+    failed.add("trash_flag");
     return true;
   }
 
@@ -45,10 +52,10 @@ function checkRequired(data: ParsedData, settings: Settings): boolean {
 export function adultHandler(
   data: ParsedData,
   settings: Settings,
-  failed_keys: Set<string>,
+  failed: Set<string>,
 ): boolean {
   if (data.adult && settings.options.removeAdultContent) {
-    failed_keys.add("trash_adult");
+    failed.add("trash_adult");
     return true;
   }
 
@@ -148,27 +155,25 @@ function fetchResolution(
       failed.add("resolution_unknown");
       return true;
     }
+
     return false;
   }
 
   const normalizedRes = RESOLUTION_MAP.get(data.resolution) ?? "unknown";
-
   const settingsKey = RESOLUTION_SETTINGS_MAP.get(normalizedRes) ?? "unknown";
-
-  const enabled = (settings.resolutions as Record<string, boolean>)[
-    settingsKey
-  ];
+  const enabled = settings.resolutions[settingsKey];
 
   if (!enabled) {
     failed.add("resolution");
     return true;
   }
+
   return false;
 }
 
 function checkFetchMap(
   value: string | undefined,
-  map: Map<string, [string, string]>,
+  map: Map<string, [keyof CustomRanksConfig, keyof RankingModel]>,
   settings: Settings,
   failed: Set<string>,
 ): boolean {
@@ -185,7 +190,7 @@ function checkFetchMap(
   const [category, key] = entry;
   const custom = getCustomRank(settings, category, key);
 
-  if (custom && !custom.fetch) {
+  if (!custom.fetch) {
     failed.add(`${category}_${key}`);
     return true;
   }
@@ -195,7 +200,7 @@ function checkFetchMap(
 
 function checkFetchList(
   values: string[],
-  map: Map<string, [string, string]>,
+  map: Map<string, [keyof CustomRanksConfig, keyof RankingModel]>,
   settings: Settings,
   failed: Set<string>,
 ): boolean {
@@ -209,7 +214,7 @@ function checkFetchList(
     const [category, key] = entry;
     const custom = getCustomRank(settings, category, key);
 
-    if (custom && !custom.fetch) {
+    if (!custom.fetch) {
       failed.add(`${category}_${key}`);
       return true;
     }
@@ -220,7 +225,7 @@ function checkFetchList(
 
 function checkFetchFlags(
   data: ParsedData,
-  flagMap: Map<string, [string, string]>,
+  flagMap: Map<string, [keyof CustomRanksConfig, keyof RankingModel]>,
   settings: Settings,
   failed: Set<string>,
 ): boolean {
@@ -233,7 +238,7 @@ function checkFetchFlags(
 
     const custom = getCustomRank(settings, category, key);
 
-    if (custom && !custom.fetch) {
+    if (!custom.fetch) {
       failed.add(`${category}_${key}`);
       return true;
     }
