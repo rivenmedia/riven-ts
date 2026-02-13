@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 
-import { parse } from "../../ranker/parse.ts";
+import { parse } from "../parse.ts";
 
 it.each([
   [
@@ -814,7 +814,7 @@ it.each([
       episodes: [],
       resolution: "1080p",
       quality: "BluRay",
-      "3d": true,
+      threeD: true,
       site: "YTS.MX",
     },
   ],
@@ -831,7 +831,7 @@ it.each([
       quality: "BluRay",
       codec: "avc",
       group: "SURCODE",
-      "3d": true,
+      threeD: true,
       site: "rarbg",
     },
   ],

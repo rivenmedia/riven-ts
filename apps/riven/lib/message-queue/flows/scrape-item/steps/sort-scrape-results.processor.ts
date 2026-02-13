@@ -41,8 +41,6 @@ export const sortScrapeResultsProcessor =
         return acc;
       }
 
-      console.log(rank);
-
       acc[infoHash] = rank;
 
       return acc;

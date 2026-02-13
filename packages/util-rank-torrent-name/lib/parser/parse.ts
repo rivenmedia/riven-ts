@@ -6,10 +6,12 @@ import { siteHandlers } from "../parser/handlers/site.handlers.ts";
 import { trashHandlers } from "../parser/handlers/trash.handlers.ts";
 import { AUDIO_MAP, CODEC_MAP, RESOLUTION_MAP } from "../shared/mappings.ts";
 import { normaliseTitle } from "../shared/normalise.ts";
+import { adultHandlers } from "./handlers/adult.handlers.ts";
 
 import type { CustomFields, ParsedData } from "../types.ts";
 
 const parser = new Parser()
+  .addHandlers(adultHandlers)
   .addHandlers(siteHandlers)
   .addHandlers(sceneHandlers)
   .addHandlers(trashHandlers)
@@ -146,6 +148,7 @@ export function parse(rawTitle: string): ParsedData {
     ...(year && !isNaN(year) ? { year } : {}),
     ...(quality ? { quality } : {}),
     ...(mappedCodec ? { codec: mappedCodec } : {}),
+    ...(parseResult.adult ? { adult: parseResult.adult } : {}),
     ...(parseResult.bitDepth ? { bitDepth: parseResult.bitDepth } : {}),
     ...(parseResult.bitrate ? { bitrate: parseResult.bitrate } : {}),
     ...(parseResult.date ? { date: parseResult.date } : {}),
@@ -195,7 +198,7 @@ export function parse(rawTitle: string): ParsedData {
       : {}),
     ...(parseResult.channels?.length ? { channels: parseResult.channels } : {}),
     ...(parseResult.hdr?.length ? { hdr: parseResult.hdr } : {}),
-    ...(parseResult.threeD ? { "3d": !!parseResult.threeD } : {}),
+    ...(parseResult.threeD ? { threeD: !!parseResult.threeD } : {}),
     ...(remux ? { remux } : {}),
     ...(parseResult.convert ? { converted: parseResult.convert } : {}),
   };

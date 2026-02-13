@@ -1,5 +1,5 @@
 // Functions
-export { parse } from "./ranker/parse.ts";
+export { parse } from "./parser/parse.ts";
 export { rank, rankTorrent } from "./ranker/rank.ts";
 export { checkFetch } from "./ranker/fetch.ts";
 export { createSettings } from "./ranker/settings.ts";

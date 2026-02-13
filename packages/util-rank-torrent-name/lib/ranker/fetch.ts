@@ -14,20 +14,20 @@ import { getCustomRank } from "./settings.ts";
 import type { FetchResult, ParsedData } from "../types.ts";
 import type { Settings } from "./settings.ts";
 
-function trashHandler(
+export function trashHandler(
   data: ParsedData,
   settings: Settings,
-  failed: string[],
+  failed: Set<string>,
 ): boolean {
   if (!settings.options.removeAllTrash) return false;
 
   if (data.quality && TRASH_QUALITIES.has(data.quality)) {
-    failed.push("trash_quality");
+    failed.add("trash_quality");
     return true;
   }
 
   if (data.audio?.includes("HQ Clean Audio")) {
-    failed.push("trash_audio");
+    failed.add("trash_audio");
     return true;
   }
 
@@ -42,16 +42,29 @@ function checkRequired(data: ParsedData, settings: Settings): boolean {
   return settings.compiledRequire.some((p) => p.test(data.rawTitle));
 }
 
+export function adultHandler(
+  data: ParsedData,
+  settings: Settings,
+  failed_keys: Set<string>,
+): boolean {
+  if (data.adult && settings.options.removeAdultContent) {
+    failed_keys.add("trash_adult");
+    return true;
+  }
+
+  return false;
+}
+
 function checkExclude(
   data: ParsedData,
   settings: Settings,
-  failed: string[],
+  failed: Set<string>,
 ): boolean {
   for (let i = 0; i < settings.compiledExclude.length; i++) {
     const pattern = settings.compiledExclude[i];
 
     if (pattern?.test(data.rawTitle)) {
-      failed.push(`exclude_regex '${settings.exclude[i] ?? ""}'`);
+      failed.add(`exclude_regex '${settings.exclude[i] ?? ""}'`);
       return true;
     }
   }
@@ -73,10 +86,10 @@ function populateLangs(langs: string[]): Set<string> {
   return expanded;
 }
 
-function languageHandler(
+export function languageHandler(
   data: ParsedData,
   settings: Settings,
-  failed: string[],
+  failed: Set<string>,
 ): boolean {
   const required = populateLangs(settings.languages.required);
   const allowed = populateLangs(settings.languages.allowed);
@@ -84,12 +97,12 @@ function languageHandler(
 
   if (data.languages.length === 0) {
     if (settings.options.removeUnknownLanguages) {
-      failed.push("unknown_language");
+      failed.add("unknown_language");
       return true;
     }
 
     if (required.size > 0) {
-      failed.push("missing_required_language");
+      failed.add("missing_required_language");
       return true;
     }
 
@@ -97,7 +110,7 @@ function languageHandler(
   }
 
   if (required.size > 0 && !data.languages.some((lang) => required.has(lang))) {
-    failed.push("missing_required_language");
+    failed.add("missing_required_language");
     return true;
   }
 
@@ -116,7 +129,7 @@ function languageHandler(
 
   if (excluded.length > 0) {
     for (const lang of excluded) {
-      failed.push(`lang_${lang}`);
+      failed.add(`lang_${lang}`);
     }
 
     return true;
@@ -128,11 +141,11 @@ function languageHandler(
 function fetchResolution(
   data: ParsedData,
   settings: Settings,
-  failed: string[],
+  failed: Set<string>,
 ): boolean {
   if (!data.resolution || data.resolution === "unknown") {
     if (!settings.resolutions.unknown) {
-      failed.push("resolution_unknown");
+      failed.add("resolution_unknown");
       return true;
     }
     return false;
@@ -147,7 +160,7 @@ function fetchResolution(
   ];
 
   if (!enabled) {
-    failed.push("resolution");
+    failed.add("resolution");
     return true;
   }
   return false;
@@ -157,7 +170,7 @@ function checkFetchMap(
   value: string | undefined,
   map: Map<string, [string, string]>,
   settings: Settings,
-  failed: string[],
+  failed: Set<string>,
 ): boolean {
   if (!value) {
     return false;
@@ -173,7 +186,7 @@ function checkFetchMap(
   const custom = getCustomRank(settings, category, key);
 
   if (custom && !custom.fetch) {
-    failed.push(`${category}_${key}`);
+    failed.add(`${category}_${key}`);
     return true;
   }
 
@@ -184,7 +197,7 @@ function checkFetchList(
   values: string[],
   map: Map<string, [string, string]>,
   settings: Settings,
-  failed: string[],
+  failed: Set<string>,
 ): boolean {
   for (const v of values) {
     const entry = map.get(v);
@@ -197,7 +210,7 @@ function checkFetchList(
     const custom = getCustomRank(settings, category, key);
 
     if (custom && !custom.fetch) {
-      failed.push(`${category}_${key}`);
+      failed.add(`${category}_${key}`);
       return true;
     }
   }
@@ -209,7 +222,7 @@ function checkFetchFlags(
   data: ParsedData,
   flagMap: Map<string, [string, string]>,
   settings: Settings,
-  failed: string[],
+  failed: Set<string>,
 ): boolean {
   for (const [field, [category, key]] of flagMap.entries()) {
     const value = (data as unknown as Record<string, unknown>)[field];
@@ -221,7 +234,7 @@ function checkFetchFlags(
     const custom = getCustomRank(settings, category, key);
 
     if (custom && !custom.fetch) {
-      failed.push(`${category}_${key}`);
+      failed.add(`${category}_${key}`);
       return true;
     }
   }
@@ -234,15 +247,19 @@ export function checkFetch(
   settings: Settings,
   speedMode = true,
 ): FetchResult {
-  const failed: string[] = [];
+  const failed = new Set<string>();
 
   if (speedMode) {
     if (trashHandler(data, settings, failed)) {
       return { fetch: false, failedChecks: failed };
     }
 
+    if (adultHandler(data, settings, failed)) {
+      return { fetch: false, failedChecks: failed };
+    }
+
     if (checkRequired(data, settings)) {
-      return { fetch: true, failedChecks: [] };
+      return { fetch: true, failedChecks: failed };
     }
 
     if (checkExclude(data, settings, failed)) {
@@ -293,7 +310,7 @@ export function checkFetch(
   }
 
   return {
-    fetch: failed.length === 0,
+    fetch: failed.size === 0,
     failedChecks: failed,
   };
 }

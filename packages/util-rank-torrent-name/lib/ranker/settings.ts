@@ -124,6 +124,7 @@ const CustomRanksConfigSchema = z.object({
 
 const ResolutionConfigSchema = z.object({
   r2160p: z.boolean().default(false),
+  r1440p: z.boolean().default(true),
   r1080p: z.boolean().default(true),
   r720p: z.boolean().default(true),
   r480p: z.boolean().default(false),
@@ -194,6 +195,7 @@ export interface Settings {
 
 export function createSettings(input: PartialDeep<Settings> = {}): Settings {
   const raw = SettingsRawSchema.parse(input);
+
   return {
     ...raw,
     compiledRequire: compilePatterns(raw.require),

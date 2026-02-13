@@ -115,7 +115,7 @@ export const RESOLUTION_MAP = new Map<string, ValueOf<typeof Resolution>>([
   ["2160p", "2160p"],
   ["4k", "2160p"],
   ["1080p", "1080p"],
-  ["1440p", "1080p"],
+  ["1440p", "1440p"],
   ["720p", "720p"],
   ["480p", "480p"],
   ["576p", "480p"],

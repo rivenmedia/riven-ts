@@ -1,13 +1,11 @@
 import { expect, it } from "vitest";
 
-import { RESOLUTION_MAP } from "../../shared/mappings.ts";
+import { parse } from "../../parser/parse.ts";
+import { RTN } from "../../rtn.ts";
 import { normaliseTitle } from "../../shared/normalise.ts";
-import { Resolution } from "../../types.ts";
+import { adultHandler, languageHandler, trashHandler } from "../fetch.ts";
 import { getLevRatio, titleMatch } from "../lev.ts";
-import { parse } from "../parse.ts";
-import { rankTorrent } from "../rank.ts";
 import { createSettings } from "../settings.ts";
-import { sortTorrents } from "../sort.ts";
 
 it.each([
   ["The Walking Dead", "The Running Dead", true, 0.875],
@@ -45,32 +43,20 @@ it.each([
 });
 
 it("sorts torrents correctly", () => {
-  const torrents = [
-    [
+  const torrents = {
+    "1234567890123456789012345678901234567890":
       "Sprint.2024.S01.COMPLETE.1080p.WEBDL.h264-EDITH[TGx]",
-      "1234567890123456789012345678901234567890",
-    ],
-    [
-      "Madame Web 2024 1080p WEBRip DD 5.1 x264-GalaxyRG[TGx]",
-      "1234567890123456789012345678901234567891",
-    ],
-    [
-      "Guardians of the Galaxy Vol. 2 (2017) 720p x264 MKVTV",
-      "1234567890123456789012345678901234567892",
-    ],
-    [
+    "1234567890123456789012345678901234567891":
+      "Madame Web 2024 1080p WEBRip 1400MB DD 5.1 x264-GalaxyRG[TGx]",
+    "1234567890123456789012345678901234567892":
+      "Guardians of the Galaxy Vol. 2 (2017) 720p HDTC x264 MKVTV",
+    "1234567890123456789012345678901234567893":
       "Wonder Woman 1984 (2020) [1440p DoVi P8 DTSHD AC3 En-AC3",
-      "1234567890123456789012345678901234567893",
-    ],
-    [
+    "1234567890123456789012345678901234567894":
       "8 Bit Christmas (2021) - x264 - Telugu (Fan Dub)",
-      "1234567890123456789012345678901234567894",
-    ],
-    [
+    "1234567890123456789012345678901234567895":
       "[SubsPlease] Fairy Tail - 100 Years Quest - 05 (1080p) [1107F3A9].mkv",
-      "1234567890123456789012345678901234567895",
-    ],
-  ] as const;
+  };
 
   const expectedOrder = [
     "1234567890123456789012345678901234567893", // Wonder Woman 1984 (2020) [UHDRemux 2160p DoVi P8 Es-DTSHD AC3 En-AC3
@@ -82,68 +68,44 @@ it("sorts torrents correctly", () => {
   ];
 
   const settings = createSettings();
+  const rtnInstance = new RTN(settings);
+  const rankedTorrents = rtnInstance.rankTorrents(torrents).keys().toArray();
 
-  const rankedTorrents = new Map(
-    torrents.map(([title, hash]) => [hash, rankTorrent(title, hash, settings)]),
-  );
-
-  const sortedTorrents = sortTorrents(rankedTorrents).keys().toArray();
-
-  expect(sortedTorrents).toEqual(expectedOrder);
+  expect(rankedTorrents).toEqual(expectedOrder);
 });
 
-it.only("sorts torrents with a resolution filter correctly", () => {
-  const torrents = [
-    [
+it("sorts torrents with a resolution filter correctly", () => {
+  const torrents = {
+    "1234567890123456789012345678901234567890":
       "Sprint.2024.S01.COMPLETE.1080p.WEBDL.h264-EDITH[TGx]",
-      "1234567890123456789012345678901234567890",
-    ],
-    [
+    "1234567890123456789012345678901234567891":
       "Madame Web 2024 1080p WEBRip DD 5.1 x264-GalaxyRG[TGx]",
-      "1234567890123456789012345678901234567891",
-    ],
-    [
+    "1234567890123456789012345678901234567892":
       "Guardians of the Galaxy Vol. 2 (2017) 720p x264 MKVTV",
-      "1234567890123456789012345678901234567892",
-    ],
-    [
+    "1234567890123456789012345678901234567893":
       "Wonder Woman 1984 (2020) [1440p DoVi P8 DTSHD AC3 En-AC3",
-      "1234567890123456789012345678901234567893",
-    ],
-    [
+    "1234567890123456789012345678901234567894":
       "8 Bit Christmas (2021) - x264 - Telugu (Fan Dub)",
-      "1234567890123456789012345678901234567894",
-    ],
-    [
+    "1234567890123456789012345678901234567895":
       "[SubsPlease] Fairy Tail - 100 Years Quest - 05 (1080p) [1107F3A9].mkv",
-      "1234567890123456789012345678901234567895",
-    ],
-  ] as const;
+  } as const;
 
   const settings = createSettings({
-    resolutions: { r2160p: true },
+    resolutions: {
+      r1440p: true,
+      r1080p: false,
+      r720p: false,
+      unknown: false,
+    },
   });
-
-  const rankedTorrents = new Map(
-    torrents.map(([title, hash]) => [hash, rankTorrent(title, hash, settings)]),
-  );
-
-  const sortedTorrents = sortTorrents(
-    rankedTorrents,
-    10000,
-    new Set([Resolution["1440p"]]),
-  )
-    .keys()
-    .toArray();
-
-  // torrent_objs = {rtn.rank(torrent, hash) for torrent, hash in torrents}
-  // sorted_torrents = sort_torrents(torrent_objs, resolutions=[Resolution.UHD_1440P])
+  const rtnInstance = new RTN(settings);
+  const rankedTorrents = rtnInstance.rankTorrents(torrents).keys().toArray();
 
   const expectedOrder = [
     "1234567890123456789012345678901234567893", // Wonder Woman 1984 (2020) [1440p DoVi P8 DTSHD AC3 En-AC3
   ];
 
-  expect(sortedTorrents).toEqual(expectedOrder);
+  expect(rankedTorrents).toEqual(expectedOrder);
 });
 
 it.each([
@@ -153,11 +115,18 @@ it.each([
 ])(
   "handles languages exclusions correctly for %s",
   (rawTitle, expectedExclude) => {
-    const settings = {};
+    const settings = createSettings({
+      options: {
+        allowEnglishInLanguages: false,
+      },
+      languages: {
+        exclude: ["es"],
+      },
+    });
     const data = parse(rawTitle);
-    const failedKeys = new Set();
-    // const excludeLanguagesResult = languageHandler(data, settings, failedKeys);
-    // expect(excludeLanguagesResult).toBe(expectedExclude);
+    const excludeLanguagesResult = languageHandler(data, settings, new Set());
+
+    expect(excludeLanguagesResult).toBe(expectedExclude);
   },
 );
 
@@ -176,9 +145,9 @@ it.each([
   ["The Walking Dead S05E03 720p x264-ASAP", false],
 ])("handles trash detection for %s", (rawTitle, expectedTrash) => {
   const data = parse(rawTitle);
-  const failedKeys = new Set();
-  // const trashResult = trashHandlers.some(handler => handler.transform(data, {}, failedKeys));
-  // expect(trashResult).toBe(expectedTrash);
+  const trashResult = trashHandler(data, createSettings(), new Set());
+
+  expect(trashResult).toBe(expectedTrash);
 });
 
 it.each([
@@ -211,53 +180,68 @@ it.each([
   ["The Walking Dead S05E03 720p x264-ASAP vrporn", true],
   ["The Walking Dead S05E03 720p x264-ASAP", false],
 ])("handles adult content detection for %s", (rawTitle, expectedAdult) => {
+  const settings = createSettings({
+    options: {
+      removeAdultContent: true,
+    },
+  });
   const data = parse(rawTitle);
-  const failedKeys = new Set();
-  // const adultResult = adult_handler(data, {}, failedKeys);
-  // expect(adultResult).toBe(expectedAdult);
+  const adultResult = adultHandler(data, settings, new Set());
+
+  expect(adultResult).toBe(expectedAdult);
 });
 
 it("handles bucket limits correctly", () => {
-  const torrents = [
-    // Unknown resolution torrents
-    ["Movie.2024.1.WEB-DL.mkv", "efe476b52c7f5504042a036bd32adf2af9327e91"],
-    ["Movie.2024.2.WEB-DL.mkv", "a44e8e42dd21212c2da7a7ff5592cb365b10ee5a"],
-    ["Movie.2024.3.WEB-DL.mkv", "ecb8bd9f5c3682bb08b62264cc53a8fe095946f0"],
+  // Unknown resolution torrents
+  const unknownResTorrents = {
+    efe476b52c7f5504042a036bd32adf2af9327e91: "Movie.2024.1.WEB-DL.mkv",
+    a44e8e42dd21212c2da7a7ff5592cb365b10ee5a: "Movie.2024.2.WEB-DL.mkv",
+    ecb8bd9f5c3682bb08b62264cc53a8fe095946f0: "Movie.2024.3.WEB-DL.mkv",
+  };
 
-    // 1080p torrents
-    [
-      "Movie.2024.4.1080p.WEB-DL.mkv",
-      "bc10e7a6895ef41633cf4966e880fd7da14bff28",
-    ],
-    [
-      "Movie.2024.5.1080p.BluRay.mkv",
-      "d0eb09414bb94152b4ffbe81023894a568118dd7",
-    ],
-    [
-      "Movie.2024.6.1080p.WEBDL.mkv",
-      "611df0d2d1fd026896d013ecedeef1c1a4fc16a9",
-    ],
+  // 1080p torrents
+  const hdTorrents = {
+    bc10e7a6895ef41633cf4966e880fd7da14bff28: "Movie.2024.4.1080p.WEB-DL.mkv",
+    d0eb09414bb94152b4ffbe81023894a568118dd7: "Movie.2024.5.1080p.BluRay.mkv",
+    "611df0d2d1fd026896d013ecedeef1c1a4fc16a9": "Movie.2024.6.1080p.WEBDL.mkv",
+  };
 
-    // 720p torrents
-    ["Movie.2024.720p.WEB-DL.mkv", "e71e1f9d57e17fce640af4410a49e28bba18dd1a"],
-    ["Movie.2024.720p.BluRay.mkv", "d61e9402608769c6a1d02a1705a059f148b439bf"],
-    ["Movie.2024.720p.WEBDL.mkv", "38b640c9b942b95565fb69eb17470b1b8d0e23bc"],
-  ];
+  // 720p torrents
+  const sdTorrents = {
+    e71e1f9d57e17fce640af4410a49e28bba18dd1a: "Movie.2024.720p.WEB-DL.mkv",
+    d61e9402608769c6a1d02a1705a059f148b439bf: "Movie.2024.720p.BluRay.mkv",
+    "38b640c9b942b95565fb69eb17470b1b8d0e23bc": "Movie.2024.720p.WEBDL.mkv",
+  };
 
-  // torrent_objs = {rtn.rank(torrent, hash) for torrent, hash in torrents}
-  // sorted_torrents = sort_torrents(torrent_objs, bucket_limit=2)
+  const rtnInstance = new RTN(createSettings());
+  const rankedTorrents = rtnInstance.rankTorrents(
+    {
+      ...unknownResTorrents,
+      ...hdTorrents,
+      ...sdTorrents,
+    },
+    2,
+  );
 
-  // Group results by resolution for easier testing
-  // const unknown_results = [hash for hash, torrent in sorted_torrents.items() if "1080p" not in torrent.raw_title and "720p" not in torrent.raw_title]
-  // const fhd_results = [hash for hash, torrent in sorted_torrents.items() if "1080p" in torrent.raw_title]
-  // const hd_results = [hash for hash, torrent in sorted_torrents.items() if "720p" in torrent.raw_title]
+  console.log(rankedTorrents);
 
   // Verify we get at most 2 torrents per resolution bucket
-  // assert len(unknown_results) == 2, f"Expected max 2 unknown torrents, got {len(unknown_results)}"
-  // assert len(fhd_results) == 2, f"Expected max 2 1080p torrents, got {len(fhd_results)}"
-  // assert len(hd_results) == 2, f"Expected max 2 720p torrents, got {len(hd_results)}"
 
-  // Verify total number of results
-  const expected_total = 6; // 2 from each resolution bucket
-  // assert len(sorted_torrents) == expected_total, f"Expected {expected_total} total torrents, got {len(sorted_torrents)}"
+  const unknownResults = [...rankedTorrents.values()].filter(
+    (result) => result.data.resolution === "unknown",
+  );
+  const hdResults = [...rankedTorrents.values()].filter(
+    (result) => result.data.resolution === "1080p",
+  );
+  const sdResults = [...rankedTorrents.values()].filter(
+    (result) => result.data.resolution === "720p",
+  );
+
+  expect(unknownResults.length).toBeLessThanOrEqual(2);
+  expect(hdResults.length).toBeLessThanOrEqual(2);
+  expect(sdResults.length).toBeLessThanOrEqual(2);
+
+  const expectedTotal = 6; // 2 from each resolution bucket
+
+  expect(rankedTorrents.size).toBe(expectedTotal);
 });

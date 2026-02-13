@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { parse } from "../parser/parse.ts";
 import { checkFetch } from "./fetch.ts";
-import { parse } from "./parse.ts";
 import { createSettings } from "./settings.ts";
 
 describe("checkFetch", () => {
@@ -229,7 +229,7 @@ describe("checkFetch", () => {
       const result = checkFetch(data, settings, false);
 
       expect(result.fetch).toBe(false);
-      expect(result.failedChecks.length).toBeGreaterThan(1);
+      expect(result.failedChecks.size).toBeGreaterThan(1);
     });
   });
 });

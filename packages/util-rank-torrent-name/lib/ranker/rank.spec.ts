@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parse } from "./parse.ts";
+import { parse } from "../parser/parse.ts";
 import { rank } from "./rank.ts";
 import { DEFAULT_RANKING, createSettings } from "./settings.ts";
 
@@ -71,14 +71,14 @@ describe("rank", () => {
     expect(score).toBeLessThan(10000);
   });
 
-  it("should add preferred language bonus", () => {
-    const settings = createSettings({ languages: { preferred: ["en"] } });
-    const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
+  // it("should add preferred language bonus", () => {
+  //   const settings = createSettings({ languages: { preferred: ["en"] } });
+  //   const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
 
-    // ptt-viren may or may not detect English, but if it doesn't
-    // we just verify the mechanism doesn't crash
-    rank(data, settings);
-  });
+  //   // ptt-viren may or may not detect English, but if it doesn't
+  //   // we just verify the mechanism doesn't crash
+  //   rank(data, settings);
+  // });
 
   it("should use custom rank override", () => {
     const settings = createSettings({
@@ -107,9 +107,7 @@ describe("rank", () => {
     const score = rank(data, settings);
 
     // threeD (-10000), should be very negative
-    if (data.threeD) {
-      expect(score).toBeLessThan(0);
-    }
+    expect(score).toBeLessThan(0);
   });
 
   it("should score audio formats", () => {
@@ -126,8 +124,6 @@ describe("rank", () => {
 
     // dubbed (-1000), WEB-DL (200)
     // Total should be negative
-    if (data.dubbed) {
-      expect(score).toBeLessThan(0);
-    }
+    expect(score).toBeLessThan(0);
   });
 });

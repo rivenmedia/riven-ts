@@ -1,3 +1,4 @@
+import { parse } from "../parser/parse.ts";
 import {
   AUDIO_MAP,
   CHANNEL_MAP,
@@ -7,7 +8,6 @@ import {
   QUALITY_MAP,
 } from "../shared/mappings.ts";
 import { checkFetch } from "./fetch.ts";
-import { parse } from "./parse.ts";
 import { DEFAULT_RANKING, getCustomRank } from "./settings.ts";
 
 import type { ParsedData, RankedResult } from "../types.ts";

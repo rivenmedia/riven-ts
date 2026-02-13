@@ -1,7 +1,7 @@
 export interface CustomFields {
+  adult?: boolean;
   scene?: boolean;
   trash?: boolean;
-  "3d"?: boolean;
   country?: string;
   bitrate?: string;
 }
@@ -70,7 +70,7 @@ export interface ParsedData extends CustomFields {
 
 export interface FetchResult {
   fetch: boolean;
-  failedChecks: string[];
+  failedChecks: Set<string>;
 }
 
 export interface RankedResult {
@@ -78,13 +78,13 @@ export interface RankedResult {
   hash: string;
   rank: number;
   fetch: boolean;
-  failedChecks: string[];
+  failedChecks: Set<string>;
 }
 
 export const Resolution = {
   "2160p": "2160p",
   "1080p": "1080p",
-  "1440p": "1080p",
+  "1440p": "1440p",
   "720p": "720p",
   "480p": "480p",
   "360p": "360p",
