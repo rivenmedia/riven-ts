@@ -2,6 +2,8 @@ export interface CustomFields {
   scene?: boolean;
   trash?: boolean;
   "3d"?: boolean;
+  country?: string;
+  bitrate?: string;
 }
 
 export interface ParsedData extends CustomFields {

@@ -1,4 +1,4 @@
-import { Parser } from "@viren070/parse-torrent-title";
+import { Parser, transforms } from "@viren070/parse-torrent-title";
 
 import { bitDepthHandlers } from "./handlers/bit-depth.handlers.ts";
 import { sceneHandlers } from "./handlers/scene.handlers.ts";
@@ -14,49 +14,56 @@ const parser = new Parser()
   .addHandlers(sceneHandlers)
   .addHandlers(trashHandlers)
   .addHandlers(bitDepthHandlers)
-  .addDefaultHandlers(
-    "audio",
-    "bitDepth",
-    "channels",
-    "codec",
-    "commentary",
-    "complete",
-    "container",
-    "convert",
-    "date",
-    "documentary",
-    "ppv",
-    "dubbed",
-    "edition",
-    "episodeCode",
-    "episodes",
-    "extended",
-    "extension",
-    "group",
-    "hdr",
-    "hardcoded",
-    "languages",
-    "network",
-    "proper",
-    "quality",
-    "region",
-    "releaseTypes",
-    "remastered",
-    "repack",
-    "resolution",
-    "retail",
-    "seasons",
-    "site",
-    "size",
-    "subbed",
-    "threeD",
-    "title",
-    "uncensored",
-    "unrated",
-    "upscaled",
-    "volumes",
-    "year",
-  )
+  .addHandlers([
+    {
+      field: "channels",
+      pattern: new RegExp("\\+?2[\\.\\s]0(?:x[2-4])?\\b", "i"),
+      transform: transforms.toValueSet("2.0"),
+      remove: true,
+      keepMatching: true,
+    },
+  ])
+  .addDefaultHandlers()
+  .addHandlers([
+    {
+      field: "episodes",
+      process: (title, m, result) => {
+        const animePattern = new RegExp("One.*?Piece|Bleach|Naruto");
+
+        if (animePattern.test(title)) {
+          if (result.has("episodes")) {
+            return m;
+          }
+
+          const episodePattern = new RegExp("\\b\\d{1,4}\\b");
+          const matches = episodePattern.exec(title);
+
+          if (matches) {
+            m.value = [parseInt(matches[0], 10)];
+            m.mIndex = matches.index;
+            m.remove = true;
+          }
+        }
+
+        return m;
+      },
+    },
+  ])
+  .addHandlers([
+    {
+      field: "bitrate",
+      pattern: new RegExp("\\b\\d+[kmg]bps\\b", "i"),
+      matchGroup: 1,
+      remove: true,
+      transform: transforms.toLowercase(),
+    },
+  ])
+  .addHandlers([
+    {
+      field: "country",
+      pattern: new RegExp("\\b(US|UK|AU|NZ|CA)\\b"),
+    },
+  ])
   .addHandlers([
     {
       field: "site",
@@ -75,6 +82,7 @@ const parser = new Parser()
     {
       field: "site",
       pattern: new RegExp("\\[([^\\]]+\\.[^\\]]+)\\](?=\\.\\w{2,4}$|\\s)", "i"),
+      transform: transforms.toTrimmed(),
       remove: true,
     },
   ]);
@@ -84,12 +92,12 @@ export function parse(rawTitle: string): ParsedData {
     throw new TypeError("The input title must be a non-empty string.");
   }
 
-  const ptt = parser.parse<CustomFields>(rawTitle);
+  const parseResult = parser.parse<CustomFields>(rawTitle);
 
-  const title = ptt.title ?? "";
-  const seasons = ptt.seasons ?? [];
-  const episodes = ptt.episodes ?? [];
-  const quality = ptt.quality;
+  const title = parseResult.title ?? "";
+  const seasons = parseResult.seasons ?? [];
+  const episodes = parseResult.episodes ?? [];
+  const quality = parseResult.quality;
 
   // Derive remux from quality
   const remux = ["bluray remux", "remux"].includes(
@@ -97,12 +105,13 @@ export function parse(rawTitle: string): ParsedData {
   );
 
   // ptt-viren year is string, parse to number
-  const year = ptt.year ? parseInt(ptt.year, 10) : undefined;
+  const year = parseResult.year ? parseInt(parseResult.year, 10) : undefined;
 
-  const [, mappedCodec] = CODEC_MAP.get(ptt.codec?.toLowerCase() ?? "") ?? [];
+  const [, mappedCodec] =
+    CODEC_MAP.get(parseResult.codec?.toLowerCase() ?? "") ?? [];
 
   const mappedResolution = RESOLUTION_MAP.get(
-    ptt.resolution?.toLowerCase() ?? "",
+    parseResult.resolution?.toLowerCase() ?? "",
   );
 
   return {
@@ -111,55 +120,65 @@ export function parse(rawTitle: string): ParsedData {
     normalizedTitle: normalizeTitle(title),
     seasons,
     episodes,
-    scene: ptt.scene ?? false,
-    resolution: mappedResolution ?? ptt.resolution ?? "unknown",
-    languages: ptt.languages ?? [],
+    scene: parseResult.scene ?? false,
+    resolution: mappedResolution ?? parseResult.resolution ?? "unknown",
+    languages: parseResult.languages ?? [],
     type: seasons.length > 0 || episodes.length > 0 ? "show" : "movie",
     ...(year && !isNaN(year) ? { year } : {}),
     ...(quality ? { quality } : {}),
     ...(mappedCodec ? { codec: mappedCodec } : {}),
-    ...(ptt.bitDepth ? { bitDepth: ptt.bitDepth } : {}),
-    ...(ptt.date ? { date: ptt.date } : {}),
-    ...(ptt.group ? { group: ptt.group } : {}),
-    ...(ptt.edition ? { edition: ptt.edition } : {}),
-    ...(ptt.network ? { network: ptt.network } : {}),
-    ...(ptt.region ? { region: ptt.region } : {}),
-    ...(ptt.site ? { site: ptt.site } : {}),
-    ...(ptt.size ? { size: ptt.size } : {}),
-    ...(ptt.container ? { container: ptt.container } : {}),
-    ...(ptt.extension ? { extension: ptt.extension } : {}),
-    ...(ptt.episodeCode ? { episodeCode: ptt.episodeCode } : {}),
-    ...(ptt.dubbed ? { dubbed: ptt.dubbed } : {}),
-    ...(ptt.subbed ? { subbed: ptt.subbed } : {}),
-    ...(ptt.hardcoded ? { hardcoded: ptt.hardcoded } : {}),
-    ...(ptt.proper ? { proper: ptt.proper } : {}),
-    ...(ptt.repack ? { repack: ptt.repack } : {}),
-    ...(ptt.retail ? { retail: ptt.retail } : {}),
-    ...(ptt.upscaled ? { upscaled: ptt.upscaled } : {}),
-    ...(ptt.remastered ? { remastered: ptt.remastered } : {}),
-    ...(ptt.extended ? { extended: ptt.extended } : {}),
-    ...(ptt.unrated ? { unrated: ptt.unrated } : {}),
-    ...(ptt.uncensored ? { uncensored: ptt.uncensored } : {}),
-    ...(ptt.documentary ? { documentary: ptt.documentary } : {}),
-    ...(ptt.commentary ? { commentary: ptt.commentary } : {}),
-    ...(ptt.complete ? { complete: ptt.complete } : {}),
-    ...(ptt.ppv ? { ppv: ptt.ppv } : {}),
-    ...(ptt.trash ? { trash: ptt.trash } : {}),
-    ...(ptt.site ? { site: ptt.site } : {}),
-    ...(ptt.volumes?.length ? { volumes: ptt.volumes } : {}),
-    ...(ptt.audio?.length
+    ...(parseResult.bitDepth ? { bitDepth: parseResult.bitDepth } : {}),
+    ...(parseResult.bitrate ? { bitrate: parseResult.bitrate } : {}),
+    ...(parseResult.date ? { date: parseResult.date } : {}),
+    ...(parseResult.group ? { group: parseResult.group } : {}),
+    ...(parseResult.edition ? { edition: parseResult.edition } : {}),
+    ...(parseResult.network ? { network: parseResult.network } : {}),
+    ...(parseResult.region ? { region: parseResult.region } : {}),
+    ...(parseResult.site ? { site: parseResult.site } : {}),
+    ...(parseResult.size ? { size: parseResult.size } : {}),
+    ...(parseResult.container ? { container: parseResult.container } : {}),
+    ...(parseResult.extension ? { extension: parseResult.extension } : {}),
+    ...(parseResult.episodeCode
+      ? { episodeCode: parseResult.episodeCode }
+      : {}),
+    ...(parseResult.dubbed ? { dubbed: parseResult.dubbed } : {}),
+    ...(parseResult.subbed ? { subbed: parseResult.subbed } : {}),
+    ...(parseResult.extras ? { extras: parseResult.extras } : {}),
+    ...(parseResult.hardcoded ? { hardcoded: parseResult.hardcoded } : {}),
+    ...(parseResult.proper ? { proper: parseResult.proper } : {}),
+    ...(parseResult.repack ? { repack: parseResult.repack } : {}),
+    ...(parseResult.retail ? { retail: parseResult.retail } : {}),
+    ...(parseResult.upscaled ? { upscaled: parseResult.upscaled } : {}),
+    ...(parseResult.remastered ? { remastered: parseResult.remastered } : {}),
+    ...(parseResult.extended ? { extended: parseResult.extended } : {}),
+    ...(parseResult.unrated ? { unrated: parseResult.unrated } : {}),
+    ...(parseResult.uncensored ? { uncensored: parseResult.uncensored } : {}),
+    ...(parseResult.documentary
+      ? { documentary: parseResult.documentary }
+      : {}),
+    ...(parseResult.commentary ? { commentary: parseResult.commentary } : {}),
+    ...(parseResult.complete ? { complete: parseResult.complete } : {}),
+    ...(parseResult.ppv ? { ppv: parseResult.ppv } : {}),
+    ...(parseResult.trash ? { trash: parseResult.trash } : {}),
+    ...(parseResult.country ? { country: parseResult.country } : {}),
+    ...(parseResult.site ? { site: parseResult.site } : {}),
+    ...(parseResult.volumes?.length ? { volumes: parseResult.volumes } : {}),
+    ...(parseResult.releaseTypes?.length
+      ? { releaseTypes: parseResult.releaseTypes }
+      : {}),
+    ...(parseResult.audio?.length
       ? {
-          audio: ptt.audio.map((a) => {
+          audio: parseResult.audio.map((a) => {
             const normalisedAudio = a.toLowerCase();
 
             return AUDIO_MAP.get(normalisedAudio)?.[1] ?? normalisedAudio;
           }),
         }
       : {}),
-    ...(ptt.channels?.length ? { channels: ptt.channels } : {}),
-    ...(ptt.hdr?.length ? { hdr: ptt.hdr } : {}),
-    ...(ptt.threeD ? { "3d": !!ptt.threeD } : {}),
+    ...(parseResult.channels?.length ? { channels: parseResult.channels } : {}),
+    ...(parseResult.hdr?.length ? { hdr: parseResult.hdr } : {}),
+    ...(parseResult.threeD ? { "3d": !!parseResult.threeD } : {}),
     ...(remux ? { remux } : {}),
-    ...(ptt.convert ? { converted: ptt.convert } : {}),
+    ...(parseResult.convert ? { converted: parseResult.convert } : {}),
   };
 }
