@@ -20,7 +20,11 @@ function resolveRank(
   rankingModel: RankingModel,
 ): number {
   const custom = getCustomRank(settings, category, key);
-  if (custom?.rank !== undefined) return custom.rank;
+
+  if (custom?.rank !== undefined) {
+    return custom.rank;
+  }
+
   return rankingModel[key] ?? 0;
 }
 

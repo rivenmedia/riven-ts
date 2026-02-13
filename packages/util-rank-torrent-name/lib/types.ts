@@ -1,4 +1,10 @@
-export interface ParsedData {
+export interface CustomFields {
+  scene?: boolean;
+  trash?: boolean;
+  "3d"?: boolean;
+}
+
+export interface ParsedData extends CustomFields {
   // Identity
   rawTitle: string;
   title: string;
@@ -14,7 +20,7 @@ export interface ParsedData {
   // Episodes
   seasons: number[];
   episodes: number[];
-  complete: boolean;
+  complete?: boolean;
   volumes?: number[];
 
   // Audio/Video

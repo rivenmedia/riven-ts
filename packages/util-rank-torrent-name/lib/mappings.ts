@@ -55,16 +55,18 @@ export const HDR_MAP = new Map<string, [string, string]>([
 ]);
 
 export const AUDIO_MAP = new Map<string, [string, string]>([
-  ["AAC", ["audio", "aac"]],
-  ["Atmos", ["audio", "atmos"]],
-  ["Dolby Digital", ["audio", "dolbyDigital"]],
-  ["Dolby Digital Plus", ["audio", "dolbyDigitalPlus"]],
-  ["DTS Lossy", ["audio", "dtsLossy"]],
-  ["DTS Lossless", ["audio", "dtsLossless"]],
-  ["FLAC", ["audio", "flac"]],
-  ["MP3", ["audio", "mp3"]],
-  ["TrueHD", ["audio", "truehd"]],
-  ["HQ Clean Audio", ["trash", "cleanAudio"]],
+  ["aac", ["audio", "aac"]],
+  ["atmos", ["audio", "atmos"]],
+  ["dolby digital", ["audio", "dd"]],
+  ["dolby digital plus", ["audio", "ddp"]],
+  ["ac3", ["audio", "dd"]],
+  ["eac3", ["audio", "ddp"]],
+  ["dts lossy", ["audio", "dtsLossy"]],
+  ["dts lossless", ["audio", "dtsLossless"]],
+  ["flac", ["audio", "flac"]],
+  ["mp3", ["audio", "mp3"]],
+  ["truehd", ["audio", "truehd"]],
+  ["hq clean audio", ["trash", "cleanAudio"]],
 ]);
 
 export const CHANNEL_MAP = new Map<string, [string, string]>([
