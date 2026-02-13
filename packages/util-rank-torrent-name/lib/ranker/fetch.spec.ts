@@ -93,6 +93,7 @@ describe("checkFetch", () => {
       const settings = createSettings({ require: ["2160p"] });
       const data = parse("Movie.2024.2160p.WEB-DL.HEVC-GROUP");
       const result = checkFetch(data, settings);
+
       expect(result.fetch).toBe(true);
     });
 
@@ -212,24 +213,6 @@ describe("checkFetch", () => {
 
       expect(result.fetch).toBe(false);
       expect(result.failedChecks).toContain("quality_av1");
-    });
-  });
-
-  describe("speed mode vs full mode", () => {
-    it("should collect all failures in non-speed mode", () => {
-      const settings = createSettings({
-        resolutions: { r2160p: false },
-        options: { removeAllTrash: false },
-        customRanks: {
-          quality: { av1: { fetch: false } },
-        },
-      });
-      // A title with both resolution and codec issues
-      const data = parse("Movie.2024.2160p.WEB-DL.AV1-GROUP");
-      const result = checkFetch(data, settings, false);
-
-      expect(result.fetch).toBe(false);
-      expect(result.failedChecks.size).toBeGreaterThan(1);
     });
   });
 });

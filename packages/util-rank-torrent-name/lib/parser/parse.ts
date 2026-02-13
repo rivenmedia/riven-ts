@@ -187,15 +187,7 @@ export function parse(rawTitle: string): ParsedData {
     ...(parseResult.releaseTypes?.length
       ? { releaseTypes: parseResult.releaseTypes }
       : {}),
-    ...(parseResult.audio?.length
-      ? {
-          audio: parseResult.audio.map((a) => {
-            const normalisedAudio = a.toLowerCase();
-
-            return AUDIO_MAP.get(normalisedAudio)?.[1] ?? normalisedAudio;
-          }),
-        }
-      : {}),
+    ...(parseResult.audio?.length ? { audio: parseResult.audio } : {}),
     ...(parseResult.channels?.length ? { channels: parseResult.channels } : {}),
     ...(parseResult.hdr?.length ? { hdr: parseResult.hdr } : {}),
     ...(parseResult.threeD ? { threeD: !!parseResult.threeD } : {}),

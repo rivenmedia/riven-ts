@@ -11,11 +11,11 @@ import { checkFetch } from "./fetch.ts";
 import { DEFAULT_RANKING, getCustomRank } from "./settings.ts";
 
 import type { ParsedData, RankedResult } from "../types.ts";
-import type { RankingModel, Settings } from "./settings.ts";
+import type { CustomRanksConfig, RankingModel, Settings } from "./settings.ts";
 
 function resolveRank(
-  category: string,
-  key: string,
+  category: keyof CustomRanksConfig,
+  key: keyof RankingModel,
   settings: Settings,
   rankingModel: RankingModel,
 ): number {
@@ -25,12 +25,12 @@ function resolveRank(
     return custom.rank;
   }
 
-  return rankingModel[key] ?? 0;
+  return rankingModel[key];
 }
 
 function rankFromMap(
   value: string | undefined,
-  map: Map<string, [string, string]>,
+  map: Map<string, [keyof CustomRanksConfig, keyof RankingModel]>,
   settings: Settings,
   rankingModel: RankingModel,
 ): number {
@@ -49,7 +49,7 @@ function rankFromMap(
 
 function rankFromList(
   values: string[],
-  map: Map<string, [string, string]>,
+  map: Map<string, [keyof CustomRanksConfig, keyof RankingModel]>,
   settings: Settings,
   rankingModel: RankingModel,
 ): number {
@@ -68,7 +68,7 @@ function rankFromList(
 
 function rankFromFlags(
   data: ParsedData,
-  flagMap: Map<string, [string, string]>,
+  flagMap: Map<string, [keyof CustomRanksConfig, keyof RankingModel]>,
   settings: Settings,
   rankingModel: RankingModel,
 ): number {

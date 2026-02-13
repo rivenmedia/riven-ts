@@ -242,75 +242,24 @@ function checkFetchFlags(
   return false;
 }
 
-export function checkFetch(
-  data: ParsedData,
-  settings: Settings,
-  speedMode = true,
-): FetchResult {
+export function checkFetch(data: ParsedData, settings: Settings): FetchResult {
   const failed = new Set<string>();
 
-  if (speedMode) {
-    if (trashHandler(data, settings, failed)) {
-      return { fetch: false, failedChecks: failed };
-    }
+  trashHandler(data, settings, failed);
+  adultHandler(data, settings, failed);
 
-    if (adultHandler(data, settings, failed)) {
-      return { fetch: false, failedChecks: failed };
-    }
+  checkExclude(data, settings, failed);
 
-    if (checkRequired(data, settings)) {
-      return { fetch: true, failedChecks: failed };
-    }
-
-    if (checkExclude(data, settings, failed)) {
-      return { fetch: false, failedChecks: failed };
-    }
-
-    if (languageHandler(data, settings, failed)) {
-      return { fetch: false, failedChecks: failed };
-    }
-
-    if (fetchResolution(data, settings, failed)) {
-      return { fetch: false, failedChecks: failed };
-    }
-
-    if (checkFetchMap(data.quality, QUALITY_MAP, settings, failed)) {
-      return { fetch: false, failedChecks: failed };
-    }
-
-    if (checkFetchList(data.audio ?? [], AUDIO_MAP, settings, failed)) {
-      return { fetch: false, failedChecks: failed };
-    }
-
-    if (checkFetchList(data.hdr ?? [], HDR_MAP, settings, failed)) {
-      return { fetch: false, failedChecks: failed };
-    }
-
-    if (checkFetchMap(data.codec?.toLowerCase(), CODEC_MAP, settings, failed)) {
-      return { fetch: false, failedChecks: failed };
-    }
-
-    if (checkFetchFlags(data, FLAG_MAP, settings, failed)) {
-      return { fetch: false, failedChecks: failed };
-    }
-  } else {
-    trashHandler(data, settings, failed);
-
-    if (!checkRequired(data, settings)) {
-      checkExclude(data, settings, failed);
-    }
-
-    languageHandler(data, settings, failed);
-    fetchResolution(data, settings, failed);
-    checkFetchMap(data.quality, QUALITY_MAP, settings, failed);
-    checkFetchList(data.audio ?? [], AUDIO_MAP, settings, failed);
-    checkFetchList(data.hdr ?? [], HDR_MAP, settings, failed);
-    checkFetchMap(data.codec?.toLowerCase(), CODEC_MAP, settings, failed);
-    checkFetchFlags(data, FLAG_MAP, settings, failed);
-  }
+  languageHandler(data, settings, failed);
+  fetchResolution(data, settings, failed);
+  checkFetchMap(data.quality, QUALITY_MAP, settings, failed);
+  checkFetchList(data.audio ?? [], AUDIO_MAP, settings, failed);
+  checkFetchList(data.hdr ?? [], HDR_MAP, settings, failed);
+  checkFetchMap(data.codec?.toLowerCase(), CODEC_MAP, settings, failed);
+  checkFetchFlags(data, FLAG_MAP, settings, failed);
 
   return {
-    fetch: failed.size === 0,
+    fetch: failed.size === 0 || checkRequired(data, settings),
     failedChecks: failed,
   };
 }

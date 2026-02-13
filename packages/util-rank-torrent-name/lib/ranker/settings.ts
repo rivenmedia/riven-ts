@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import type { PartialDeep } from "type-fest";
-
 // --- CustomRank ---
 
 const CustomRankSchema = z.object({
@@ -120,6 +118,8 @@ const CustomRanksConfigSchema = z.object({
   trash: TrashRanksSchema.prefault({}),
 });
 
+export type CustomRanksConfig = z.infer<typeof CustomRanksConfigSchema>;
+
 // --- Resolution Config ---
 
 const ResolutionConfigSchema = z.object({
@@ -158,6 +158,7 @@ function compilePattern(pattern: string): RegExp {
     // Case-sensitive
     return new RegExp(pattern.slice(1, -1));
   }
+
   // Case-insensitive
   return new RegExp(pattern, "i");
 }
@@ -168,40 +169,29 @@ function compilePatterns(patterns: string[]): RegExp[] {
 
 // --- Settings Schema ---
 
-const SettingsRawSchema = z.object({
-  require: z.array(z.string()).default([]),
-  exclude: z.array(z.string()).default([]),
-  preferred: z.array(z.string()).default([]),
-  resolutions: ResolutionConfigSchema.prefault({}),
-  options: OptionsConfigSchema.prefault({}),
-  languages: LanguagesConfigSchema.prefault({}),
-  customRanks: CustomRanksConfigSchema.prefault({}),
-});
-
-export type SettingsInput = z.input<typeof SettingsRawSchema>;
-
-export interface Settings {
-  require: string[];
-  exclude: string[];
-  preferred: string[];
-  compiledRequire: RegExp[];
-  compiledExclude: RegExp[];
-  compiledPreferred: RegExp[];
-  resolutions: z.infer<typeof ResolutionConfigSchema>;
-  options: z.infer<typeof OptionsConfigSchema>;
-  languages: z.infer<typeof LanguagesConfigSchema>;
-  customRanks: z.infer<typeof CustomRanksConfigSchema>;
-}
-
-export function createSettings(input: PartialDeep<Settings> = {}): Settings {
-  const raw = SettingsRawSchema.parse(input);
-
-  return {
+const SettingsSchema = z
+  .object({
+    require: z.array(z.string()).default([]),
+    exclude: z.array(z.string()).default([]),
+    preferred: z.array(z.string()).default([]),
+    resolutions: ResolutionConfigSchema.prefault({}),
+    options: OptionsConfigSchema.prefault({}),
+    languages: LanguagesConfigSchema.prefault({}),
+    customRanks: CustomRanksConfigSchema.prefault({}),
+  })
+  .transform((raw) => ({
     ...raw,
     compiledRequire: compilePatterns(raw.require),
     compiledExclude: compilePatterns(raw.exclude),
     compiledPreferred: compilePatterns(raw.preferred),
-  };
+  }));
+
+export type SettingsInput = z.input<typeof SettingsSchema>;
+
+export type Settings = z.infer<typeof SettingsSchema>;
+
+export function createSettings(input: SettingsInput = {}): Settings {
+  return SettingsSchema.parse(input);
 }
 
 // Helper to look up custom rank from nested settings
@@ -218,10 +208,88 @@ export function getCustomRank(
 
 // --- Ranking Model ---
 
-export type RankingModel = Record<string, number>;
+export const RankingModelSchema = z.object({
+  av1: z.int().default(0),
+  avc: z.int().default(0),
+  bluray: z.int().default(0),
+  dvd: z.int().default(0),
+  hdtv: z.int().default(0),
+  hevc: z.int().default(0),
+  mpeg: z.int().default(0),
+  remux: z.int().default(0),
+  vhs: z.int().default(0),
+  web: z.int().default(0),
+  webdl: z.int().default(0),
+  webmux: z.int().default(0),
+  xvid: z.int().default(0),
 
-export const DEFAULT_RANKING: RankingModel = {
-  // Quality
+  // rips
+  bdrip: z.int().default(0),
+  brrip: z.int().default(0),
+  dvdrip: z.int().default(0),
+  hdrip: z.int().default(0),
+  ppvrip: z.int().default(0),
+  tvrip: z.int().default(0),
+  uhdrip: z.int().default(0),
+  vhsrip: z.int().default(0),
+  webdlrip: z.int().default(0),
+  webrip: z.int().default(0),
+
+  // hdr
+  bit10: z.int().default(0),
+  dolbyVision: z.int().default(0),
+  hdr: z.int().default(0),
+  hdr10plus: z.int().default(0),
+  sdr: z.int().default(0),
+
+  // audio
+  aac: z.int().default(0),
+  atmos: z.int().default(0),
+  dolbyDigital: z.int().default(0),
+  dolbyDigitalPlus: z.int().default(0),
+  dtsLossy: z.int().default(0),
+  dtsLossless: z.int().default(0),
+  flac: z.int().default(0),
+  mono: z.int().default(0),
+  mp3: z.int().default(0),
+  stereo: z.int().default(0),
+  surround: z.int().default(0),
+  truehd: z.int().default(0),
+
+  // extras
+  threeD: z.int().default(0),
+  converted: z.int().default(0),
+  documentary: z.int().default(0),
+  commentary: z.int().default(0),
+  uncensored: z.int().default(0),
+  dubbed: z.int().default(0),
+  edition: z.int().default(0),
+  hardcoded: z.int().default(0),
+  network: z.int().default(0),
+  proper: z.int().default(0),
+  repack: z.int().default(0),
+  retail: z.int().default(0),
+  subbed: z.int().default(0),
+  upscaled: z.int().default(0),
+  scene: z.int().default(0),
+
+  // trash
+  cam: z.int().default(0),
+  cleanAudio: z.int().default(0),
+  r5: z.int().default(0),
+  pdtv: z.int().default(0),
+  satrip: z.int().default(0),
+  screener: z.int().default(0),
+  site: z.int().default(0),
+  size: z.int().default(0),
+  telecine: z.int().default(0),
+  telesync: z.int().default(0),
+});
+
+export type RankingModel = z.infer<typeof RankingModelSchema>;
+
+export const DEFAULT_RANKING = RankingModelSchema.decode({
+  // quality
   av1: 500,
   avc: 500,
   bluray: 100,
@@ -235,8 +303,9 @@ export const DEFAULT_RANKING: RankingModel = {
   webdl: 200,
   webmux: -10000,
   xvid: -10000,
-  // Rips
-  webrip: -1000,
+  pdtv: -10000,
+
+  // rips
   bdrip: -5000,
   brrip: -10000,
   dvdrip: -5000,
@@ -246,14 +315,15 @@ export const DEFAULT_RANKING: RankingModel = {
   uhdrip: -5000,
   vhsrip: -10000,
   webdlrip: -10000,
-  satrip: -10000,
-  // HDR
+  webrip: -1000,
+
+  // hdr
+  bit10: 100,
   dolbyVision: 3000,
   hdr: 2000,
   hdr10plus: 2100,
-  bit10: 100,
-  sdr: 0,
-  // Audio
+
+  // audio
   aac: 100,
   atmos: 1000,
   dolbyDigital: 50,
@@ -262,36 +332,25 @@ export const DEFAULT_RANKING: RankingModel = {
   dtsLossless: 2000,
   mp3: -1000,
   truehd: 2000,
-  flac: 0,
-  // Channels
-  surround: 0,
-  stereo: 0,
-  mono: 0,
-  // Extras
+
+  // extras
   threeD: -10000,
   converted: -1000,
   documentary: -250,
   dubbed: -1000,
   edition: 100,
-  hardcoded: 0,
-  network: 0,
   proper: 20,
   repack: 20,
-  retail: 0,
-  subbed: 0,
   site: -10000,
   upscaled: -10000,
-  scene: 0,
-  uncensored: 0,
-  // Trash
+
+  // trash
   cam: -10000,
   cleanAudio: -10000,
   r5: -10000,
-  pdtv: -10000,
+  satrip: -10000,
   screener: -10000,
   size: -10000,
   telecine: -10000,
   telesync: -10000,
-};
-
-export { SettingsRawSchema as SettingsSchema };
+});

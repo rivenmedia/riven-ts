@@ -1,9 +1,11 @@
-// Maps parsed values to [settingsCategory, settingsKey]
-// Used by both rank() and checkFetch()
+import type { CustomRanksConfig, RankingModel } from "../ranker/settings.ts";
 import type { Resolution } from "../types.ts";
 import type { ValueOf } from "type-fest";
 
-export const QUALITY_MAP = new Map<string, [string, string]>([
+export const QUALITY_MAP = new Map<
+  string,
+  [keyof CustomRanksConfig, keyof RankingModel]
+>([
   // Quality
   ["WEB", ["quality", "web"]],
   ["WEB-DL", ["quality", "webdl"]],
@@ -37,7 +39,10 @@ export const QUALITY_MAP = new Map<string, [string, string]>([
   ["PDTV", ["trash", "pdtv"]],
 ]);
 
-export const CODEC_MAP = new Map<string, [string, string]>([
+export const CODEC_MAP = new Map<
+  string,
+  [keyof CustomRanksConfig, keyof RankingModel]
+>([
   ["avc", ["quality", "avc"]],
   ["h264", ["quality", "avc"]],
   ["x264", ["quality", "avc"]],
@@ -49,20 +54,28 @@ export const CODEC_MAP = new Map<string, [string, string]>([
   ["mpeg", ["quality", "mpeg"]],
 ]);
 
-export const HDR_MAP = new Map<string, [string, string]>([
+export const HDR_MAP = new Map<
+  string,
+  [keyof CustomRanksConfig, keyof RankingModel]
+>([
   ["DV", ["hdr", "dolbyVision"]],
   ["HDR", ["hdr", "hdr"]],
   ["HDR10+", ["hdr", "hdr10plus"]],
   ["SDR", ["hdr", "sdr"]],
 ]);
 
-export const AUDIO_MAP = new Map<string, [string, string]>([
+export const AUDIO_MAP = new Map<
+  string,
+  [keyof CustomRanksConfig, keyof RankingModel]
+>([
   ["aac", ["audio", "aac"]],
   ["atmos", ["audio", "atmos"]],
-  ["dolby digital", ["audio", "dd"]],
-  ["dolby digital plus", ["audio", "ddp"]],
-  ["ac3", ["audio", "dd"]],
-  ["eac3", ["audio", "ddp"]],
+  ["dd", ["audio", "dolbyDigital"]],
+  ["dolby digital", ["audio", "dolbyDigital"]],
+  ["ddp", ["audio", "dolbyDigitalPlus"]],
+  ["dolby digital plus", ["audio", "dolbyDigitalPlus"]],
+  ["ac3", ["audio", "dolbyDigital"]],
+  ["eac3", ["audio", "dolbyDigitalPlus"]],
   ["dts lossy", ["audio", "dtsLossy"]],
   ["dts lossless", ["audio", "dtsLossless"]],
   ["flac", ["audio", "flac"]],
@@ -71,7 +84,10 @@ export const AUDIO_MAP = new Map<string, [string, string]>([
   ["hq clean audio", ["trash", "cleanAudio"]],
 ]);
 
-export const CHANNEL_MAP = new Map<string, [string, string]>([
+export const CHANNEL_MAP = new Map<
+  string,
+  [keyof CustomRanksConfig, keyof RankingModel]
+>([
   ["5.1", ["audio", "surround"]],
   ["7.1", ["audio", "surround"]],
   ["stereo", ["audio", "stereo"]],
@@ -80,7 +96,10 @@ export const CHANNEL_MAP = new Map<string, [string, string]>([
 ]);
 
 // Boolean flags on ParsedData -> [settingsCategory, settingsKey]
-export const FLAG_MAP = new Map<string, [string, string]>([
+export const FLAG_MAP = new Map<
+  string,
+  [keyof CustomRanksConfig, keyof RankingModel]
+>([
   ["threeD", ["extras", "threeD"]],
   ["converted", ["extras", "converted"]],
   ["documentary", ["extras", "documentary"]],
@@ -124,7 +143,10 @@ export const RESOLUTION_MAP = new Map<string, ValueOf<typeof Resolution>>([
 ]);
 
 // Resolution key to settings field name
-export const RESOLUTION_SETTINGS_MAP = new Map<string, string>([
+export const RESOLUTION_SETTINGS_MAP = new Map<
+  ValueOf<typeof Resolution>,
+  `r${Exclude<ValueOf<typeof Resolution>, "unknown">}` | "unknown"
+>([
   ["2160p", "r2160p"],
   ["1080p", "r1080p"],
   ["720p", "r720p"],
@@ -136,7 +158,7 @@ export const RESOLUTION_SETTINGS_MAP = new Map<string, string>([
 // Language groups
 export const LANG_GROUPS = {
   anime: new Set(["ja", "zh", "ko"]),
-  non_anime: new Set([
+  nonAnime: new Set([
     "de",
     "es",
     "hi",
@@ -195,6 +217,6 @@ export const LANG_GROUPS = {
   all: new Set<string>(),
 } as const satisfies Record<string, Set<string>>;
 
-for (const group of [...LANG_GROUPS.anime, ...LANG_GROUPS.non_anime]) {
+for (const group of [...LANG_GROUPS.anime, ...LANG_GROUPS.nonAnime]) {
   LANG_GROUPS.all.add(group);
 }
