@@ -18,5 +18,6 @@ _Object containing the following properties:_
 | `logDirectory`                   | The directory where log files will be stored.                                       | `string`                                                                   | `'./logs'`           |
 | `jaegerUrl`                      | The Jaeger tracing server URL.                                                      | `string` (_url_)                                                           |                      |
 | `gqlPort`                        | The GraphQL server port.                                                            | `number` (_int_)                                                           | `3000`               |
+| `dubbedAnimeOnly`                | Only scrape dubbed anime.                                                           | `boolean`                                                                  | `false`              |
 
 _(\*) Required._
