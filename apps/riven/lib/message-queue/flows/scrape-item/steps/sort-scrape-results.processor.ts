@@ -24,42 +24,22 @@ const rtnInstance = new RTN(
     },
     customRanks: {
       quality: {
-        av1: {
-          fetch: true,
-        },
-        remux: {
-          fetch: true,
-        },
+        av1: { fetch: true },
+        remux: { fetch: true },
       },
       rips: {
-        bdrip: {
-          fetch: true,
-        },
-        dvdrip: {
-          fetch: true,
-        },
-        tvrip: {
-          fetch: true,
-        },
-        uhdrip: {
-          fetch: true,
-        },
-        webdlrip: {
-          fetch: true,
-        },
+        bdrip: { fetch: true },
+        dvdrip: { fetch: true },
+        tvrip: { fetch: true },
+        uhdrip: { fetch: true },
+        webdlrip: { fetch: true },
       },
       hdr: {
-        dolbyVision: {
-          fetch: true,
-        },
+        dolbyVision: { fetch: true },
       },
       extras: {
-        documentary: {
-          fetch: true,
-        },
-        site: {
-          fetch: true,
-        },
+        documentary: { fetch: true },
+        site: { fetch: true },
       },
     },
   },
