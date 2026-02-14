@@ -1,113 +1,351 @@
 import { z } from "zod";
 
-// --- CustomRank ---
-
 const CustomRankSchema = z.object({
   fetch: z.boolean().default(true),
+
+  /**
+   * @see {@link defaultRankingModel}
+   */
   rank: z.number().optional(),
 });
 
 export type CustomRank = z.infer<typeof CustomRankSchema>;
 
-function cr(fetch = true): CustomRank {
+function customRank(fetch: boolean): CustomRank {
   return { fetch };
 }
 
-// --- Quality Ranks ---
-
 const QualityRanksSchema = z.object({
-  av1: CustomRankSchema.default(cr(false)),
-  avc: CustomRankSchema.default(cr(true)),
-  bluray: CustomRankSchema.default(cr(true)),
-  dvd: CustomRankSchema.default(cr(false)),
-  hdtv: CustomRankSchema.default(cr(true)),
-  hevc: CustomRankSchema.default(cr(true)),
-  mpeg: CustomRankSchema.default(cr(false)),
-  remux: CustomRankSchema.default(cr(false)),
-  vhs: CustomRankSchema.default(cr(false)),
-  web: CustomRankSchema.default(cr(true)),
-  webdl: CustomRankSchema.default(cr(true)),
-  webmux: CustomRankSchema.default(cr(false)),
-  xvid: CustomRankSchema.default(cr(false)),
-});
+  /**
+   * @default { fetch: false }
+   */
+  av1: CustomRankSchema.default(customRank(false)),
 
-// --- Rips Ranks ---
+  /**
+   * @default { fetch: true }
+   */
+  avc: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  bluray: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: false }
+   */
+  dvd: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: true }
+   */
+  hdtv: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  hevc: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: false }
+   */
+  mpeg: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  remux: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  vhs: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: true }
+   */
+  web: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  webdl: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: false }
+   */
+  webmux: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  xvid: CustomRankSchema.default(customRank(false)),
+});
 
 const RipsRanksSchema = z.object({
-  bdrip: CustomRankSchema.default(cr(false)),
-  brrip: CustomRankSchema.default(cr(true)),
-  dvdrip: CustomRankSchema.default(cr(false)),
-  hdrip: CustomRankSchema.default(cr(true)),
-  ppvrip: CustomRankSchema.default(cr(false)),
-  satrip: CustomRankSchema.default(cr(false)),
-  tvrip: CustomRankSchema.default(cr(false)),
-  uhdrip: CustomRankSchema.default(cr(false)),
-  vhsrip: CustomRankSchema.default(cr(false)),
-  webdlrip: CustomRankSchema.default(cr(false)),
-  webrip: CustomRankSchema.default(cr(true)),
-});
+  /**
+   * @default { fetch: false }
+   */
+  bdrip: CustomRankSchema.default(customRank(false)),
 
-// --- HDR Ranks ---
+  /**
+   * @default { fetch: true }
+   */
+  brrip: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: false }
+   */
+  dvdrip: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: true }
+   */
+  hdrip: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: false }
+   */
+  ppvrip: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  satrip: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  tvrip: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  uhdrip: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  vhsrip: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  webdlrip: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: true }
+   */
+  webrip: CustomRankSchema.default(customRank(true)),
+});
 
 const HdrRanksSchema = z.object({
-  bit10: CustomRankSchema.default(cr(true)),
-  dolbyVision: CustomRankSchema.default(cr(false)),
-  hdr: CustomRankSchema.default(cr(true)),
-  hdr10plus: CustomRankSchema.default(cr(true)),
-  sdr: CustomRankSchema.default(cr(true)),
-});
+  /**
+   * @default { fetch: true }
+   */
+  bit10: CustomRankSchema.default(customRank(true)),
 
-// --- Audio Ranks ---
+  /**
+   * @default { fetch: false }
+   */
+  dolbyVision: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: true }
+   */
+  hdr: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  hdr10plus: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  sdr: CustomRankSchema.default(customRank(true)),
+});
 
 const AudioRanksSchema = z.object({
-  aac: CustomRankSchema.default(cr(true)),
-  atmos: CustomRankSchema.default(cr(true)),
-  dolbyDigital: CustomRankSchema.default(cr(true)),
-  dolbyDigitalPlus: CustomRankSchema.default(cr(true)),
-  dtsLossy: CustomRankSchema.default(cr(true)),
-  dtsLossless: CustomRankSchema.default(cr(true)),
-  flac: CustomRankSchema.default(cr(true)),
-  mono: CustomRankSchema.default(cr(false)),
-  mp3: CustomRankSchema.default(cr(false)),
-  stereo: CustomRankSchema.default(cr(true)),
-  surround: CustomRankSchema.default(cr(true)),
-  truehd: CustomRankSchema.default(cr(true)),
-});
+  /**
+   * @default { fetch: true }
+   */
+  aac: CustomRankSchema.default(customRank(true)),
 
-// --- Extras Ranks ---
+  /**
+   * @default { fetch: true }
+   */
+  atmos: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  dolbyDigital: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  dolbyDigitalPlus: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  dtsLossy: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  dtsLossless: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  flac: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: false }
+   */
+  mono: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  mp3: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: true }
+   */
+  stereo: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  surround: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  truehd: CustomRankSchema.default(customRank(true)),
+});
 
 const ExtrasRanksSchema = z.object({
-  threeD: CustomRankSchema.default(cr(false)),
-  converted: CustomRankSchema.default(cr(false)),
-  documentary: CustomRankSchema.default(cr(false)),
-  dubbed: CustomRankSchema.default(cr(true)),
-  edition: CustomRankSchema.default(cr(true)),
-  hardcoded: CustomRankSchema.default(cr(true)),
-  network: CustomRankSchema.default(cr(true)),
-  proper: CustomRankSchema.default(cr(true)),
-  repack: CustomRankSchema.default(cr(true)),
-  retail: CustomRankSchema.default(cr(true)),
-  site: CustomRankSchema.default(cr(false)),
-  subbed: CustomRankSchema.default(cr(true)),
-  upscaled: CustomRankSchema.default(cr(false)),
-  scene: CustomRankSchema.default(cr(true)),
-  uncensored: CustomRankSchema.default(cr(true)),
-});
+  /**
+   * @default { fetch: false }
+   */
+  threeD: CustomRankSchema.default(customRank(false)),
 
-// --- Trash Ranks ---
+  /**
+   * @default { fetch: false }
+   */
+  converted: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  documentary: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: true }
+   */
+  dubbed: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  edition: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  hardcoded: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  network: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  proper: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  repack: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  retail: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: false }
+   */
+  site: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: true }
+   */
+  subbed: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: false }
+   */
+  upscaled: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: true }
+   */
+  scene: CustomRankSchema.default(customRank(true)),
+
+  /**
+   * @default { fetch: true }
+   */
+  uncensored: CustomRankSchema.default(customRank(true)),
+});
 
 const TrashRanksSchema = z.object({
-  cam: CustomRankSchema.default(cr(false)),
-  cleanAudio: CustomRankSchema.default(cr(false)),
-  pdtv: CustomRankSchema.default(cr(false)),
-  r5: CustomRankSchema.default(cr(false)),
-  screener: CustomRankSchema.default(cr(false)),
-  size: CustomRankSchema.default(cr(false)),
-  telecine: CustomRankSchema.default(cr(false)),
-  telesync: CustomRankSchema.default(cr(false)),
-});
+  /**
+   * @default { fetch: false }
+   */
+  cam: CustomRankSchema.default(customRank(false)),
 
-// --- Custom Ranks Config ---
+  /**
+   * @default { fetch: false }
+   */
+  cleanAudio: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  pdtv: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  r5: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  screener: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  size: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  telecine: CustomRankSchema.default(customRank(false)),
+
+  /**
+   * @default { fetch: false }
+   */
+  telesync: CustomRankSchema.default(customRank(false)),
+});
 
 const CustomRanksConfigSchema = z.object({
   quality: QualityRanksSchema.prefault({}),
@@ -120,43 +358,97 @@ const CustomRanksConfigSchema = z.object({
 
 export type CustomRanksConfig = z.infer<typeof CustomRanksConfigSchema>;
 
-// --- Resolution Config ---
-
 const ResolutionConfigSchema = z.object({
+  /**
+   * @default false
+   */
   r2160p: z.boolean().default(false),
+
+  /**
+   * @default true
+   */
   r1080p: z.boolean().default(true),
+
+  /**
+   * @default true
+   */
   r720p: z.boolean().default(true),
+
+  /**
+   * @default false
+   */
   r480p: z.boolean().default(false),
+
+  /**
+   * @default false
+   */
   r360p: z.boolean().default(false),
+
+  /**
+   * @default true
+   */
   unknown: z.boolean().default(true),
 });
 
 export type ResolutionConfig = z.infer<typeof ResolutionConfigSchema>;
 
-// --- Options Config ---
-
 const OptionsConfigSchema = z.object({
+  /**
+   * @default true
+   */
   removeAllTrash: z.boolean().default(true),
+
+  /**
+   * @default -10000
+   */
   removeRanksUnder: z.number().default(-10000),
+
+  /**
+   * @default false
+   */
   removeUnknownLanguages: z.boolean().default(false),
+
+  /**
+   * @default true
+   */
   allowEnglishInLanguages: z.boolean().default(true),
+
+  /**
+   * @default true
+   */
   removeAdultContent: z.boolean().default(true),
+
+  /**
+   * @default 0.85
+   */
+  titleSimilarity: z.number().min(0).max(1).default(0.85),
 });
 
-// --- Languages Config ---
-
 const LanguagesConfigSchema = z.object({
+  /**
+   * @default []
+   */
   required: z.array(z.string()).prefault([]),
+
+  /**
+   * @default []
+   */
   allowed: z.array(z.string()).prefault([]),
+
+  /**
+   * @default []
+   */
   exclude: z.array(z.string()).prefault([]),
+
+  /**
+   * @default []
+   */
   preferred: z.array(z.string()).prefault([]),
 });
 
-// --- Pattern handling ---
-
 function compilePattern(pattern: string): RegExp {
+  // Case-sensitive
   if (pattern.startsWith("/") && pattern.endsWith("/") && pattern.length > 2) {
-    // Case-sensitive
     return new RegExp(pattern.slice(1, -1));
   }
 
@@ -167,8 +459,6 @@ function compilePattern(pattern: string): RegExp {
 function compilePatterns(patterns: string[]): RegExp[] {
   return patterns.map(compilePattern);
 }
-
-// --- Settings Schema ---
 
 export const SettingsSchema = z
   .object({
@@ -206,9 +496,8 @@ export function getCustomRank(
   return cat[key as keyof typeof cat];
 }
 
-// --- Ranking Model ---
-
 export const RankingModelSchema = z.object({
+  // Quality
   av1: z.int().default(0),
   avc: z.int().default(0),
   bluray: z.int().default(0),
@@ -223,7 +512,7 @@ export const RankingModelSchema = z.object({
   webmux: z.int().default(0),
   xvid: z.int().default(0),
 
-  // rips
+  // Rips
   bdrip: z.int().default(0),
   brrip: z.int().default(0),
   dvdrip: z.int().default(0),
@@ -235,14 +524,14 @@ export const RankingModelSchema = z.object({
   webdlrip: z.int().default(0),
   webrip: z.int().default(0),
 
-  // hdr
+  // HDR
   bit10: z.int().default(0),
   dolbyVision: z.int().default(0),
   hdr: z.int().default(0),
   hdr10plus: z.int().default(0),
   sdr: z.int().default(0),
 
-  // audio
+  // Audio
   aac: z.int().default(0),
   atmos: z.int().default(0),
   dolbyDigital: z.int().default(0),
@@ -256,7 +545,7 @@ export const RankingModelSchema = z.object({
   surround: z.int().default(0),
   truehd: z.int().default(0),
 
-  // extras
+  // Extras
   threeD: z.int().default(0),
   converted: z.int().default(0),
   documentary: z.int().default(0),
@@ -273,7 +562,7 @@ export const RankingModelSchema = z.object({
   upscaled: z.int().default(0),
   scene: z.int().default(0),
 
-  // trash
+  // Trash
   cam: z.int().default(0),
   cleanAudio: z.int().default(0),
   r5: z.int().default(0),
@@ -288,8 +577,11 @@ export const RankingModelSchema = z.object({
 
 export type RankingModel = z.infer<typeof RankingModelSchema>;
 
-export const DEFAULT_RANKING = RankingModelSchema.decode({
-  // quality
+export const createRankingModel = (input: z.input<typeof RankingModelSchema>) =>
+  RankingModelSchema.decode(input);
+
+export const defaultRankingModel = createRankingModel({
+  // Quality
   av1: 500,
   avc: 500,
   bluray: 100,
@@ -305,7 +597,7 @@ export const DEFAULT_RANKING = RankingModelSchema.decode({
   xvid: -10000,
   pdtv: -10000,
 
-  // rips
+  // Rips
   bdrip: -5000,
   brrip: -10000,
   dvdrip: -5000,
@@ -317,13 +609,13 @@ export const DEFAULT_RANKING = RankingModelSchema.decode({
   webdlrip: -10000,
   webrip: -1000,
 
-  // hdr
+  // HDR
   bit10: 100,
   dolbyVision: 3000,
   hdr: 2000,
   hdr10plus: 2100,
 
-  // audio
+  // Audio
   aac: 100,
   atmos: 1000,
   dolbyDigital: 50,
@@ -333,7 +625,7 @@ export const DEFAULT_RANKING = RankingModelSchema.decode({
   mp3: -1000,
   truehd: 2000,
 
-  // extras
+  // Extras
   threeD: -10000,
   converted: -1000,
   documentary: -250,
@@ -344,7 +636,7 @@ export const DEFAULT_RANKING = RankingModelSchema.decode({
   site: -10000,
   upscaled: -10000,
 
-  // trash
+  // Trash
   cam: -10000,
   cleanAudio: -10000,
   r5: -10000,

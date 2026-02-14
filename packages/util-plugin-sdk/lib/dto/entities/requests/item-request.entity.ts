@@ -60,4 +60,15 @@ export class ItemRequest {
   @Field()
   @Enum(() => ItemRequestState.enum)
   state!: ItemRequestState;
+
+  @Property({ persist: false, hidden: true })
+  get externalIdsLabel(): Opt<string[]> {
+    const externalIds = [
+      this.imdbId ? `IMDB: ${this.imdbId}` : null,
+      this.type === "movie" && this.tmdbId ? `TMDB: ${this.tmdbId}` : null,
+      this.type === "show" && this.tvdbId ? `TVDB: ${this.tvdbId}` : null,
+    ].filter((str) => str != null);
+
+    return externalIds;
+  }
 }

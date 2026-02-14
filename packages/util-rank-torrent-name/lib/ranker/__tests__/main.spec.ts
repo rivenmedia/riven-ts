@@ -22,8 +22,8 @@ it.each([
   "calculates the correct levenshtein ratio for %s",
   (rawTitle, correctTitle, expectedMatch, expectedRatio) => {
     const data = parse(rawTitle);
-    const match = titleMatch(correctTitle, data.title);
-    const ratio = getLevRatio(correctTitle, data.title);
+    const match = titleMatch(correctTitle, data.title, 0.85);
+    const ratio = getLevRatio(correctTitle, data.title, 0.85);
 
     expect(match).toBe(expectedMatch);
     expect(ratio).toBe(expectedRatio);

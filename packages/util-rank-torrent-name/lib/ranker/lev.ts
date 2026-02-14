@@ -31,7 +31,7 @@ function levRatio(a: string, b: string): number {
 export function getLevRatio(
   correctTitle: string,
   parsedTitle: string,
-  threshold = 0.85,
+  threshold: number,
   aliases: Aliases = {},
 ): number {
   if (!correctTitle || !parsedTitle) {
@@ -71,7 +71,7 @@ export function getLevRatio(
 export function titleMatch(
   correctTitle: string,
   parsedTitle: string,
-  threshold = 0.85,
+  threshold: number,
   aliases: Aliases = {},
 ): boolean {
   return (

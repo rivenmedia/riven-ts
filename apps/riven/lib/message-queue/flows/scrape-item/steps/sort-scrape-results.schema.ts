@@ -11,7 +11,7 @@ export const SortScrapeResultsFlow = createFlowSchema(
   MediaItemScrapeRequestedResponse,
   z.object({
     id: z.int(),
-    results: z.record(z.string(), z.custom<RankedResult>()),
+    results: z.array(z.custom<RankedResult>()),
   }),
   z.object({
     id: z.int(),

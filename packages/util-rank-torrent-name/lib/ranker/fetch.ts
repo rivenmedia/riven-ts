@@ -11,7 +11,8 @@ import {
 } from "../shared/mappings.ts";
 import { getCustomRank } from "./settings.ts";
 
-import type { FetchResult, ParsedData } from "../types.ts";
+import type { ParsedData } from "../schemas.ts";
+import type { FetchResult } from "../types.ts";
 import type { CustomRanksConfig, RankingModel, Settings } from "./settings.ts";
 
 export function trashHandler(
@@ -247,7 +248,7 @@ function checkFetchFlags(
   return false;
 }
 
-export function checkFetch(data: ParsedData, settings: Settings): FetchResult {
+export function checkFetch(data: ParsedData, settings: Settings) {
   const failed = new Set<string>();
 
   trashHandler(data, settings, failed);
@@ -266,5 +267,5 @@ export function checkFetch(data: ParsedData, settings: Settings): FetchResult {
   return {
     fetch: failed.size === 0 || checkRequired(data, settings),
     failedChecks: failed,
-  };
+  } satisfies FetchResult;
 }

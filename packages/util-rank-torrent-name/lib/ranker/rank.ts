@@ -1,3 +1,5 @@
+import z from "zod";
+
 import { parse } from "../parser/parse.ts";
 import {
   AUDIO_MAP,
@@ -7,10 +9,13 @@ import {
   HDR_MAP,
   QUALITY_MAP,
 } from "../shared/mappings.ts";
+import { InvalidHashError, TitleSimilarityError } from "./exceptions.ts";
 import { checkFetch } from "./fetch.ts";
-import { DEFAULT_RANKING, getCustomRank } from "./settings.ts";
+import { getLevRatio } from "./lev.ts";
+import { defaultRankingModel, getCustomRank } from "./settings.ts";
 
-import type { ParsedData, RankedResult } from "../types.ts";
+import type { ParsedData } from "../schemas.ts";
+import type { RankResult, RankedResult } from "../types.ts";
 import type { CustomRanksConfig, RankingModel, Settings } from "./settings.ts";
 
 function resolveRank(
@@ -107,19 +112,24 @@ function calculatePreferredLangs(
 export function rank(
   data: ParsedData,
   settings: Settings,
-  rankingModel: RankingModel = DEFAULT_RANKING,
-): number {
+  rankingModel: RankingModel,
+) {
   if (!data.rawTitle) {
     throw new Error("Parsed data cannot have an empty rawTitle.");
   }
 
-  let score = 0;
+  const scoreParts: Record<string, number> = {};
 
   // Quality (includes rips and trash quality)
-  score += rankFromMap(data.quality, QUALITY_MAP, settings, rankingModel);
+  scoreParts["quality"] = rankFromMap(
+    data.quality,
+    QUALITY_MAP,
+    settings,
+    rankingModel,
+  );
 
   // Codec
-  score += rankFromMap(
+  scoreParts["codec"] = rankFromMap(
     data.codec?.toLowerCase(),
     CODEC_MAP,
     settings,
@@ -127,18 +137,33 @@ export function rank(
   );
 
   // HDR
-  score += rankFromList(data.hdr ?? [], HDR_MAP, settings, rankingModel);
+  scoreParts["hdr"] = rankFromList(
+    data.hdr ?? [],
+    HDR_MAP,
+    settings,
+    rankingModel,
+  );
 
   // Bit depth
   if (data.bitDepth) {
-    score += resolveRank("hdr", "bit10", settings, rankingModel);
+    scoreParts["bitDepth"] = resolveRank(
+      "hdr",
+      "bit10",
+      settings,
+      rankingModel,
+    );
   }
 
   // Audio
-  score += rankFromList(data.audio ?? [], AUDIO_MAP, settings, rankingModel);
+  scoreParts["audio"] = rankFromList(
+    data.audio ?? [],
+    AUDIO_MAP,
+    settings,
+    rankingModel,
+  );
 
   // Channels
-  score += rankFromList(
+  scoreParts["channels"] = rankFromList(
     data.channels ?? [],
     CHANNEL_MAP,
     settings,
@@ -146,35 +171,70 @@ export function rank(
   );
 
   // Boolean flags (extras, trash.size, etc.)
-  score += rankFromFlags(data, FLAG_MAP, settings, rankingModel);
+  scoreParts["flags"] = rankFromFlags(data, FLAG_MAP, settings, rankingModel);
 
   // Preferred patterns (+10000)
-  score += calculatePreferred(data.rawTitle, settings.compiledPreferred);
+  scoreParts["preferredPatterns"] = calculatePreferred(
+    data.rawTitle,
+    settings.compiledPreferred,
+  );
 
   // Preferred languages (+10000)
-  score += calculatePreferredLangs(
+  scoreParts["preferredLanguages"] = calculatePreferredLangs(
     data.languages,
     settings.languages.preferred,
   );
 
-  return score;
+  return {
+    totalScore: Object.values(scoreParts).reduce((a, b) => a + b, 0),
+    scoreParts,
+  } as const satisfies RankResult;
 }
+
+const hashSchema = z.hash("sha1");
 
 export function rankTorrent(
   rawTitle: string,
   hash: string,
+  correctTitle: string,
   settings: Settings,
-  rankingModel: RankingModel = DEFAULT_RANKING,
-): RankedResult {
+  rankingModel: RankingModel = defaultRankingModel,
+) {
+  const hashValidation = hashSchema.safeParse(hash);
+
+  if (!hashValidation.success) {
+    throw new InvalidHashError(rawTitle, hashValidation.error);
+  }
+
+  const { titleSimilarity, removeAllTrash } = settings.options;
   const data = parse(rawTitle);
-  const score = rank(data, settings, rankingModel);
+
+  const levRatio = getLevRatio(correctTitle, data.title, titleSimilarity);
+
+  if (removeAllTrash) {
+    const levRatioValidation = z
+      .number()
+      .min(
+        titleSimilarity,
+        `Title similarity ${levRatio.toString()} is below threshold of ${titleSimilarity.toString()}`,
+      )
+      .safeParse(levRatio);
+
+    if (!levRatioValidation.success) {
+      throw new TitleSimilarityError(rawTitle, levRatioValidation.error);
+    }
+  }
+
+  const { totalScore, scoreParts } = rank(data, settings, rankingModel);
   const fetchResult = checkFetch(data, settings);
 
   return {
     data,
-    hash,
-    rank: score,
+    hash: hashValidation.data,
+    scoreParts,
+    levRatio,
+    rank: totalScore,
     fetch: fetchResult.fetch,
     failedChecks: fetchResult.failedChecks,
-  };
+  } as const satisfies RankedResult;
 }

@@ -1,10 +1,15 @@
+import {
+  animeLanguages,
+  commonLanguages,
+  nonAnimeLanguages,
+} from "./languages.ts";
+
 import type {
   CustomRanksConfig,
   RankingModel,
   ResolutionConfig,
 } from "../ranker/settings.ts";
-import type { Resolution } from "../types.ts";
-import type { ValueOf } from "type-fest";
+import type { Resolution } from "../schemas.ts";
 
 export const QUALITY_MAP = new Map<
   string,
@@ -99,7 +104,6 @@ export const CHANNEL_MAP = new Map<
   ["mono", ["audio", "mono"]],
 ]);
 
-// Boolean flags on ParsedData -> [settingsCategory, settingsKey]
 export const FLAG_MAP = new Map<
   string,
   [keyof CustomRanksConfig, keyof RankingModel]
@@ -133,8 +137,7 @@ export const TRASH_QUALITIES = new Set([
   "TeleSync",
 ]);
 
-// Resolution normalization map
-export const RESOLUTION_MAP = new Map<string, ValueOf<typeof Resolution>>([
+export const RESOLUTION_MAP = new Map<string, Resolution>([
   ["2160p", "2160p"],
   ["4k", "2160p"],
   ["1440p", "1080p"],
@@ -146,9 +149,8 @@ export const RESOLUTION_MAP = new Map<string, ValueOf<typeof Resolution>>([
   ["240p", "360p"],
 ]);
 
-// Resolution key to settings field name
 export const RESOLUTION_SETTINGS_MAP = new Map<
-  ValueOf<typeof Resolution>,
+  Resolution,
   keyof ResolutionConfig
 >([
   ["2160p", "r2160p"],
@@ -159,68 +161,13 @@ export const RESOLUTION_SETTINGS_MAP = new Map<
   ["unknown", "unknown"],
 ]);
 
-// Language groups
 export const LANG_GROUPS = {
-  anime: new Set(["ja", "zh", "ko"]),
-  nonAnime: new Set([
-    "de",
-    "es",
-    "hi",
-    "ta",
-    "ru",
-    "ua",
-    "th",
-    "it",
-    "ar",
-    "pt",
-    "fr",
-    "pa",
-    "mr",
-    "gu",
-    "te",
-    "kn",
-    "ml",
-    "vi",
-    "id",
-    "tr",
-    "he",
-    "fa",
-    "el",
-    "lt",
-    "lv",
-    "et",
-    "pl",
-    "cs",
-    "sk",
-    "hu",
-    "ro",
-    "bg",
-    "sr",
-    "hr",
-    "sl",
-    "nl",
-    "da",
-    "fi",
-    "sv",
-    "no",
-    "ms",
+  anime: animeLanguages,
+  nonAnime: nonAnimeLanguages,
+  common: commonLanguages,
+  all: new Set<string>([
+    ...animeLanguages,
+    ...nonAnimeLanguages,
+    ...commonLanguages,
   ]),
-  common: new Set([
-    "de",
-    "es",
-    "hi",
-    "ta",
-    "ru",
-    "ua",
-    "th",
-    "it",
-    "zh",
-    "ar",
-    "fr",
-  ]),
-  all: new Set<string>(),
 } as const satisfies Record<string, Set<string>>;
-
-for (const group of [...LANG_GROUPS.anime, ...LANG_GROUPS.nonAnime]) {
-  LANG_GROUPS.all.add(group);
-}

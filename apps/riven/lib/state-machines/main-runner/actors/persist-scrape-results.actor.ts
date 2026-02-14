@@ -54,6 +54,7 @@ export async function persistScrapeResults({
     stream.parsedTitle = parseResult.data.title;
     stream.rank = parseResult.rank;
     stream.parents.add(existingItem);
+    stream.levRatio = parseResult.levRatio;
 
     newStreams.push(stream);
 
