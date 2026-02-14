@@ -2,7 +2,7 @@ import { MediaItemScrapeRequestedResponse } from "@repo/util-plugin-sdk/schemas/
 
 import z from "zod";
 
-import { createFlowSchema } from "../../../utilities/create-flow-schema.ts";
+import { createFlowSchema } from "../../../../utilities/create-flow-schema.ts";
 
 import type { RankedResult } from "@repo/util-rank-torrent-name";
 

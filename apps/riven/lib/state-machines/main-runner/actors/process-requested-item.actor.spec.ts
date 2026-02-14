@@ -22,7 +22,7 @@ it("sends a success event if the item is processed successfully", async () => {
       item: expect.objectContaining<Partial<ItemRequest>>({
         imdbId: requestedId,
         id: 1,
-      }) as never,
+      }),
     });
   });
 });
@@ -44,8 +44,8 @@ it("sends an error event if the item processing fails", async () => {
       type: "riven.media-item.creation.error",
       item: expect.objectContaining<Partial<ItemRequest>>({
         imdbId: requestedId,
-      }) as never,
-      error: expect.stringContaining("imdbId must match") as never,
+      }),
+      error: expect.stringContaining("imdbId must match"),
     });
   });
 });

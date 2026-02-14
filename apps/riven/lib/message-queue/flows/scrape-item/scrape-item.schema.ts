@@ -1,7 +1,7 @@
 import z from "zod";
 
 import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
-import { SortScrapeResultsFlow } from "./steps/sort-scrape-results.schema.ts";
+import { SortScrapeResultsFlow } from "./steps/sort-scrape-results/sort-scrape-results.schema.ts";
 
 export const ScrapeItemFlow = createFlowSchema(
   "scrape-item",

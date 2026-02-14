@@ -3,7 +3,6 @@ import { expect, it } from "vitest";
 import { parse } from "../../parser/parse.ts";
 import { RTN } from "../../rtn.ts";
 import { normaliseTitle } from "../../shared/normalise.ts";
-import { Resolution } from "../../types.ts";
 import { adultHandler, languageHandler, trashHandler } from "../fetch.ts";
 import { getLevRatio, titleMatch } from "../lev.ts";
 import { createSettings } from "../settings.ts";
@@ -70,9 +69,12 @@ it("sorts torrents correctly", () => {
 
   const settings = createSettings();
   const rtnInstance = new RTN(settings);
-  const rankedTorrents = rtnInstance.rankTorrents(torrents).keys().toArray();
+  const rankedTorrents = Object.entries(torrents).map(([hash, title]) =>
+    rtnInstance.rankTorrent(title, hash, "Test Movie"),
+  );
+  const sortedTorrents = rtnInstance.sortTorrents(rankedTorrents);
 
-  expect(rankedTorrents).toEqual(expectedOrder);
+  expect(sortedTorrents.map(({ hash }) => hash)).toEqual(expectedOrder);
 });
 
 it("sorts torrents with a resolution filter correctly", () => {
@@ -93,16 +95,16 @@ it("sorts torrents with a resolution filter correctly", () => {
 
   const settings = createSettings();
   const rtnInstance = new RTN(settings);
-  const rankedTorrents = rtnInstance
-    .rankTorrents(torrents, Infinity, new Set([Resolution["2160p"]]))
-    .keys()
-    .toArray();
+  const rankedTorrents = Object.entries(torrents).map(([hash, title]) =>
+    rtnInstance.rankTorrent(title, hash, "Test Movie"),
+  );
+  const sortedTorrents = rtnInstance.sortTorrents(rankedTorrents);
 
   const expectedOrder = [
     "1234567890123456789012345678901234567890", // Sprint.2024.S01.COMPLETE.4k.WEBDL.h264-EDITH[TGx]
   ];
 
-  expect(rankedTorrents).toEqual(expectedOrder);
+  expect(sortedTorrents.map(({ hash }) => hash)).toEqual(expectedOrder);
 });
 
 it.each([
@@ -211,23 +213,22 @@ it("handles bucket limits correctly", () => {
   };
 
   const rtnInstance = new RTN(createSettings());
-  const rankedTorrents = rtnInstance.rankTorrents(
-    {
-      ...unknownResTorrents,
-      ...hdTorrents,
-      ...sdTorrents,
-    },
-    2,
-  );
+  const rankedTorrents = Object.entries({
+    ...unknownResTorrents,
+    ...hdTorrents,
+    ...sdTorrents,
+  }).map(([hash, title]) => rtnInstance.rankTorrent(title, hash, "Movie 2024"));
+
+  const sortedTorrents = rtnInstance.sortTorrents(rankedTorrents);
 
   // Verify we get at most 2 torrents per resolution bucket
-  const unknownResults = [...rankedTorrents.values()].filter(
+  const unknownResults = sortedTorrents.filter(
     (result) => result.data.resolution === "unknown",
   );
-  const hdResults = [...rankedTorrents.values()].filter(
+  const hdResults = sortedTorrents.filter(
     (result) => result.data.resolution === "1080p",
   );
-  const sdResults = [...rankedTorrents.values()].filter(
+  const sdResults = sortedTorrents.filter(
     (result) => result.data.resolution === "720p",
   );
 
@@ -237,5 +238,5 @@ it("handles bucket limits correctly", () => {
 
   const expectedTotal = 6; // 2 from each resolution bucket
 
-  expect(rankedTorrents.size).toBe(expectedTotal);
+  expect(sortedTorrents.length).toBe(expectedTotal);
 });

@@ -1,5 +1,6 @@
 import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
+import { createSettings, rankTorrent } from "@repo/util-rank-torrent-name";
 
 import { Job, UnrecoverableError } from "bullmq";
 import { Settings } from "luxon";
@@ -65,18 +66,21 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
 
   await em.flush();
 
-  const streamInfoHash = "test-info-hash";
+  const streamInfoHash = "1234567890123456789012345678901234567890";
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
       success: true,
       result: {
         id: 1,
-        results: {
-          [streamInfoHash]: {
-            title: "Test Movie 2024 1080p",
-          },
-        },
+        results: [
+          rankTorrent(
+            "Test Movie 2024 1080p WEB-DL",
+            streamInfoHash,
+            "Test Movie",
+            createSettings(),
+          ),
+        ],
       },
     },
   });
@@ -89,7 +93,7 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
   });
 });
 
-it.todo("scraped individual seasons if no results were found for a show");
+it.todo("scrapes individual seasons if no results were found for a show");
 
 it.todo(
   "scrapes individual episodes if no results were found for a season of a show",

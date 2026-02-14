@@ -6,9 +6,10 @@ export { normaliseTitle } from "./shared/normalise.ts";
 export { getLevRatio, titleMatch } from "./ranker/lev.ts";
 export { sortTorrents } from "./ranker/sort.ts";
 export { GarbageTorrentError } from "./ranker/exceptions.ts";
+export { Resolution } from "./schemas.ts";
 
 export type { FetchResult, RankedResult } from "./types.ts";
-export type { ParsedData, Resolution } from "./schemas.ts";
+export type { ParsedData } from "./schemas.ts";
 export type {
   Settings,
   RankingModel,

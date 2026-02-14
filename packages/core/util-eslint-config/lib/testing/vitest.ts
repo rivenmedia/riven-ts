@@ -14,6 +14,9 @@ export const vitestConfig = [
       ...vitest.configs.recommended.rules,
       "vitest/no-standalone-expect": "off", // https://github.com/vitest-dev/eslint-plugin-vitest/issues/686
       "no-empty-pattern": "off", // Allow empty destructuring in test files for vitest context extension
+      "no-restricted-globals": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
     },
     settings: {
       vitest: {

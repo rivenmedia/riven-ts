@@ -7,7 +7,7 @@ import { downloadItemProcessor } from "../../message-queue/flows/download-item/d
 import { indexItemProcessor } from "../../message-queue/flows/index-item/index-item.processor.ts";
 import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
 import { scrapeItemProcessor } from "../../message-queue/flows/scrape-item/scrape-item.processor.ts";
-import { sortScrapeResultsProcessor } from "../../message-queue/flows/scrape-item/steps/sort-scrape-results.processor.ts";
+import { sortScrapeResultsProcessor } from "../../message-queue/flows/scrape-item/steps/sort-scrape-results/sort-scrape-results.processor.ts";
 import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { SerialisedItemRequest } from "../../utilities/serialisers/serialised-item-request.ts";

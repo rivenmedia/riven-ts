@@ -1,4 +1,4 @@
-import { rivenPluginPackageSchema } from "@repo/util-plugin-sdk";
+import { RivenPluginPackage } from "@repo/util-plugin-sdk";
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import { expect, it, vi } from "vitest";
@@ -15,7 +15,7 @@ it("returns the installed plugins from the package.json file", async () => {
   const actor = createActor(collectPluginsForRegistration);
   const testPlugin = await import("@repo/plugin-test");
 
-  const validatedPlugin = await rivenPluginPackageSchema.parseAsync(testPlugin);
+  const validatedPlugin = RivenPluginPackage.parse(testPlugin);
 
   const plugins = await toPromise(actor.start());
 
@@ -35,19 +35,21 @@ it("returns any invalid plugins from the package.json file along with their vali
     return {
       default: {
         name: "Test",
-      } as never,
-    };
+      },
+    } as never;
   });
 
-  const validationResult = rivenPluginPackageSchema.safeParse(
+  const validationResult = RivenPluginPackage.safeParse(
     await import("@repo/plugin-test"),
   );
 
   const plugins = await toPromise(actor.start());
 
+  expect.assert(validationResult.error);
+
   expect(plugins).toEqual<ParsedPlugins>({
     invalidPlugins: [
-      ["@repo/plugin-test", z.treeifyError(validationResult.error as never)],
+      ["@repo/plugin-test", z.treeifyError(validationResult.error)],
     ] as const,
     unresolvablePlugins: [],
     validPlugins: [],
