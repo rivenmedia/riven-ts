@@ -227,7 +227,7 @@ export function rankTorrent(
       .safeParse(levRatio);
 
     if (!levRatioValidation.success) {
-      throw new TitleSimilarityError(rawTitle, levRatioValidation.error);
+      throw new TitleSimilarityError(rawTitle, data.title, correctTitle);
     }
   }
 

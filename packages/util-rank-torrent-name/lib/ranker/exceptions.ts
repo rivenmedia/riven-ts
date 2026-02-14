@@ -9,8 +9,11 @@ export class GarbageTorrentError extends Error {
 }
 
 export class TitleSimilarityError extends GarbageTorrentError {
-  constructor(title: string, error: ZodError) {
-    super(title, prettifyError(error));
+  constructor(title: string, parsedTitle: string, expectedTitle: string) {
+    super(
+      title,
+      `${parsedTitle} does not match the correct title: ${expectedTitle}`,
+    );
 
     this.name = "TitleSimilarityError";
   }
