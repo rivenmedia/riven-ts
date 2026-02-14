@@ -12,7 +12,7 @@ import type { RankedResult } from "@repo/util-rank-torrent-name";
 
 export interface PersistScrapeResultsInput {
   id: number;
-  results: Record<string, RankedResult>;
+  results: RankedResult[];
   sendEvent: MainRunnerMachineIntake;
 }
 
@@ -38,10 +38,10 @@ export async function persistScrapeResults({
   const em = database.em.fork();
   const newStreams: Stream[] = [];
 
-  for (const [infoHash, parseResult] of Object.entries(results)) {
+  for (const { data, hash, levRatio, rank } of results) {
     if (
       [...existingItem.streams, ...existingItem.blacklistedStreams].some(
-        (s) => s.infoHash === infoHash,
+        (s) => s.infoHash === hash,
       )
     ) {
       continue;
@@ -49,12 +49,13 @@ export async function persistScrapeResults({
 
     const stream = new Stream();
 
-    stream.infoHash = infoHash;
-    stream.rawTitle = parseResult.data.rawTitle;
-    stream.parsedTitle = parseResult.data.title;
-    stream.rank = parseResult.rank;
+    stream.infoHash = hash;
+    stream.rawTitle = data.rawTitle;
+    stream.parsedTitle = data.title;
+    stream.rank = rank;
+    stream.levRatio = levRatio;
+
     stream.parents.add(existingItem);
-    stream.levRatio = parseResult.levRatio;
 
     newStreams.push(stream);
 

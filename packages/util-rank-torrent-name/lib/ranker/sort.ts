@@ -1,11 +1,12 @@
 import { RESOLUTION_MAP } from "../shared/mappings.ts";
 
-import type { RankedResult, Resolution } from "../types.ts";
+import type { Resolution } from "../schemas.ts";
+import type { RankedResult } from "../types.ts";
 
 export function sortTorrents(
   torrents: RankedResult[],
   bucketLimit = Infinity,
-  resolutions = new Set<keyof typeof Resolution>(),
+  resolutions = new Set<Resolution>(),
 ) {
   const filteredTorrents =
     resolutions.size > 0

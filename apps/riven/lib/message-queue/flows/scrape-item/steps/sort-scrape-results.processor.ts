@@ -130,23 +130,11 @@ export const sortScrapeResultsProcessor =
       }
     }, []);
 
-    const filteredResults = parsedResults.filter((rankedResult) => {
-      if (!rankedResult.fetch) {
-        logger.silly(
-          `Excluding ${rankedResult.data.rawTitle} due to ${rankedResult.failedChecks.values().toArray().join(", ")}`,
-        );
-
-        return false;
-      }
-
-      return true;
-    });
-
     return {
       success: true,
       result: {
         id: job.data.id,
-        results: rtnInstance.sortTorrents(filteredResults),
+        results: rtnInstance.sortTorrents(parsedResults),
       },
     };
   });

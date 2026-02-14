@@ -23,3 +23,11 @@ export class InvalidHashError extends GarbageTorrentError {
     this.name = "InvalidHashError";
   }
 }
+
+export class FetchChecksFailedError extends GarbageTorrentError {
+  constructor(title: string, reasons: Set<string>) {
+    super(title, `Failed fetch checks: ${[...reasons].join(", ")}`);
+
+    this.name = "FetchChecksFailedError";
+  }
+}

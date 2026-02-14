@@ -9,7 +9,11 @@ import {
   HDR_MAP,
   QUALITY_MAP,
 } from "../shared/mappings.ts";
-import { InvalidHashError, TitleSimilarityError } from "./exceptions.ts";
+import {
+  FetchChecksFailedError,
+  InvalidHashError,
+  TitleSimilarityError,
+} from "./exceptions.ts";
 import { checkFetch } from "./fetch.ts";
 import { getLevRatio } from "./lev.ts";
 import { defaultRankingModel, getCustomRank } from "./settings.ts";
@@ -227,6 +231,10 @@ export function rankTorrent(
 
   const { totalScore, scoreParts } = rank(data, settings, rankingModel);
   const fetchResult = checkFetch(data, settings);
+
+  if (removeAllTrash && !fetchResult.fetch) {
+    throw new FetchChecksFailedError(rawTitle, fetchResult.failedChecks);
+  }
 
   return {
     data,
