@@ -46,4 +46,8 @@ export const RivenSettings = z.object({
     .int()
     .default(3000)
     .describe("The GraphQL server port."),
+  dubbedAnimeOnly: z
+    .stringbool()
+    .default(false)
+    .describe("Only scrape dubbed anime."),
 });

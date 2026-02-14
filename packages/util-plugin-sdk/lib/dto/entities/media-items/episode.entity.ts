@@ -35,7 +35,12 @@ export class Episode extends MediaItem {
   declare contentRating: ShowContentRating;
 
   async getShowTitle() {
-    return (await this.season.loadProperty("parent")).getProperty("title");
+    const season = await this.season.loadOrFail({
+      populate: ["parent"],
+    });
+    const show = await season.parent.loadOrFail();
+
+    return show.title;
   }
 
   override get prettyName(): Opt<string> {

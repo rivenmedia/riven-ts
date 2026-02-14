@@ -9,6 +9,7 @@ import { Job, UnrecoverableError } from "bullmq";
 import { it as baseIt, expect, vi } from "vitest";
 
 import { database } from "../../../../../database/database.ts";
+import * as settingsModule from "../../../../../utilities/settings.ts";
 import { createQueue } from "../../../../utilities/create-queue.ts";
 import { sortScrapeResultsProcessor } from "./sort-scrape-results.processor.ts";
 
@@ -741,6 +742,263 @@ it("filters out torrents with no episodes for episode items", async ({
         }),
       }),
     ]),
+  );
+});
+
+it("filters out torrents that do not match the media item's country", async ({
+  episode,
+  job,
+}) => {
+  const rawTitle = "Test Show 2024 S01E01 [US]";
+
+  const em = database.em.fork();
+
+  em.persist(episode);
+  em.assign(episode, { country: "UK" });
+
+  await em.flush();
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+    "plugin[@repo/plugin-test]": {
+      id: job.data.id,
+      results: {
+        "1434567890123456789012345678901234567890": rawTitle,
+      },
+    },
+  });
+
+  await job.updateData({
+    id: episode.id,
+    title: await episode.getShowTitle(),
+  });
+
+  const result = await sortScrapeResultsProcessor(job, vi.fn());
+
+  expect.assert(result.success);
+
+  expect(result.result.results).toHaveLength(0);
+  expect(result.result.results).not.toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        data: expect.objectContaining({
+          rawTitle,
+        }),
+      }),
+    ]),
+  );
+});
+
+it("does not filter out torrents that do not match the media item's country if the media item is anime", async ({
+  episode,
+  job,
+}) => {
+  const rawTitle = "Test Show 2024 S01E01 [US]";
+
+  const em = database.em.fork();
+
+  em.persist(episode);
+  em.assign(episode, {
+    country: "UK",
+    language: "jp",
+    genres: ["animation", "anime"],
+  });
+
+  await em.flush();
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+    "plugin[@repo/plugin-test]": {
+      id: job.data.id,
+      results: {
+        "1434567890123456789012345678901234567890": rawTitle,
+      },
+    },
+  });
+
+  await job.updateData({
+    id: episode.id,
+    title: await episode.getShowTitle(),
+  });
+
+  const result = await sortScrapeResultsProcessor(job, vi.fn());
+
+  expect.assert(result.success);
+
+  expect(result.result.results).toHaveLength(1);
+  expect(result.result.results).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        data: expect.objectContaining({
+          rawTitle,
+        }),
+      }),
+    ]),
+  );
+});
+
+it("filters out torrents that do not match the media item's year ± 1 year", async ({
+  movie,
+  job,
+}) => {
+  const rawTitles = [
+    "Test Movie 2018 1080p",
+    "Test Movie 2019 1080p",
+    "Test Movie 2020 1080p",
+    "Test Movie 2021 1080p",
+    "Test Movie 2022 1080p",
+  ] as const;
+
+  const em = database.em.fork();
+
+  em.persist(movie);
+  em.assign(movie, {
+    year: 2020,
+  });
+
+  await em.flush();
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+    "plugin[@repo/plugin-test]": {
+      id: job.data.id,
+      results: {
+        "1434567890123456789012345678901234567890": rawTitles[0],
+        "1434567890123456789012345678901234567891": rawTitles[1],
+        "1434567890123456789012345678901234567892": rawTitles[2],
+        "1434567890123456789012345678901234567893": rawTitles[3],
+        "1434567890123456789012345678901234567894": rawTitles[4],
+      },
+    },
+  });
+
+  await job.updateData({
+    id: movie.id,
+    title: movie.title,
+  });
+
+  const result = await sortScrapeResultsProcessor(job, vi.fn());
+
+  expect.assert(result.success);
+
+  expect(result.result.results).toHaveLength(3);
+  expect(result.result.results).toEqual(
+    expect.arrayContaining(
+      rawTitles.slice(1, 4).map((rawTitle) =>
+        expect.objectContaining({
+          data: expect.objectContaining({
+            rawTitle,
+          }),
+        }),
+      ),
+    ),
+  );
+});
+
+it('filters out torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is enabled', async ({
+  movie,
+  job,
+}) => {
+  const rawTitles = [
+    "Test Movie 2018 1080p [Dubbed]",
+    "Test Movie 2022 1080p",
+  ] as const;
+
+  const em = database.em.fork();
+
+  em.persist(movie);
+  em.assign(movie, {
+    language: "jp",
+    genres: ["animation", "anime"],
+  });
+
+  await em.flush();
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+    "plugin[@repo/plugin-test]": {
+      id: job.data.id,
+      results: {
+        "1434567890123456789012345678901234567890": rawTitles[0],
+        "1434567890123456789012345678901234567891": rawTitles[1],
+      },
+    },
+  });
+
+  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
+    ...settingsModule.settings,
+    dubbedAnimeOnly: true,
+  });
+
+  await job.updateData({
+    id: movie.id,
+    title: movie.title,
+  });
+
+  const result = await sortScrapeResultsProcessor(job, vi.fn());
+
+  expect.assert(result.success);
+
+  expect(result.result.results).toHaveLength(1);
+  expect(result.result.results).toEqual([
+    expect.objectContaining({
+      data: expect.objectContaining({
+        rawTitle: rawTitles[0],
+      }),
+    }),
+  ]);
+});
+
+it('does not filter out torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is disabled', async ({
+  movie,
+  job,
+}) => {
+  const rawTitles = [
+    "Test Movie 2018 1080p [Dubbed]",
+    "Test Movie 2022 1080p",
+  ] as const;
+
+  const em = database.em.fork();
+
+  em.persist(movie);
+  em.assign(movie, {
+    language: "jp",
+    genres: ["animation", "anime"],
+  });
+
+  await em.flush();
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+    "plugin[@repo/plugin-test]": {
+      id: job.data.id,
+      results: {
+        "1434567890123456789012345678901234567890": rawTitles[0],
+        "1434567890123456789012345678901234567891": rawTitles[1],
+      },
+    },
+  });
+
+  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
+    ...settingsModule.settings,
+    dubbedAnimeOnly: false,
+  });
+
+  await job.updateData({
+    id: movie.id,
+    title: movie.title,
+  });
+
+  const result = await sortScrapeResultsProcessor(job, vi.fn());
+
+  expect.assert(result.success);
+
+  expect(result.result.results).toHaveLength(2);
+  expect(result.result.results).toEqual(
+    expect.arrayContaining(
+      rawTitles.map((rawTitle) =>
+        expect.objectContaining({
+          data: expect.objectContaining({
+            rawTitle,
+          }),
+        }),
+      ),
+    ),
   );
 });
 

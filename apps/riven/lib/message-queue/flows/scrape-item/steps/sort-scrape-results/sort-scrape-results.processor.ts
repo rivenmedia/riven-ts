@@ -16,6 +16,7 @@ import { UnrecoverableError } from "bullmq";
 
 import { database } from "../../../../../database/database.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
+import { settings } from "../../../../../utilities/settings.ts";
 import { sortScrapeResultsProcessorSchema } from "./sort-scrape-results.schema.ts";
 
 const rtnInstance = new RTN(
@@ -292,6 +293,42 @@ export const sortScrapeResultsProcessor =
               hash,
             );
           }
+        }
+
+        if (
+          torrent.data.country &&
+          item.country &&
+          torrent.data.country !== item.country &&
+          !item.isAnime
+        ) {
+          throw new SkippedTorrentError(
+            "Skipping torrent with incorrect country",
+            job.data.title,
+            rawTitle,
+            hash,
+          );
+        }
+
+        if (
+          torrent.data.year &&
+          item.year &&
+          ![item.year - 1, item.year, item.year + 1].includes(torrent.data.year)
+        ) {
+          throw new SkippedTorrentError(
+            "Skipping torrent with incorrect year",
+            job.data.title,
+            rawTitle,
+            hash,
+          );
+        }
+
+        if (item.isAnime && settings.dubbedAnimeOnly && !torrent.data.dubbed) {
+          throw new SkippedTorrentError(
+            "Skipping non-dubbed anime torrent",
+            job.data.title,
+            rawTitle,
+            hash,
+          );
         }
 
         return [...results, torrent];
