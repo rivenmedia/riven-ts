@@ -31,3 +31,14 @@ export class FetchChecksFailedError extends GarbageTorrentError {
     this.name = "FetchChecksFailedError";
   }
 }
+
+export class RankUnderThresholdError extends GarbageTorrentError {
+  constructor(title: string, rank: number, threshold: number) {
+    super(
+      title,
+      `Rank ${rank.toString()} is below the threshold of ${threshold.toString()}`,
+    );
+
+    this.name = "RankUnderThresholdError";
+  }
+}

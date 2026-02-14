@@ -12,6 +12,7 @@ import {
 import {
   FetchChecksFailedError,
   InvalidHashError,
+  RankUnderThresholdError,
   TitleSimilarityError,
 } from "./exceptions.ts";
 import { checkFetch } from "./fetch.ts";
@@ -210,7 +211,8 @@ export function rankTorrent(
     throw new InvalidHashError(rawTitle, hashValidation.error);
   }
 
-  const { titleSimilarity, removeAllTrash } = settings.options;
+  const { titleSimilarity, removeAllTrash, removeRanksUnder } =
+    settings.options;
   const data = parse(rawTitle);
 
   const levRatio = getLevRatio(correctTitle, data.title, titleSimilarity);
@@ -234,6 +236,10 @@ export function rankTorrent(
 
   if (removeAllTrash && !fetchResult.fetch) {
     throw new FetchChecksFailedError(rawTitle, fetchResult.failedChecks);
+  }
+
+  if (removeAllTrash && totalScore < removeRanksUnder) {
+    throw new RankUnderThresholdError(rawTitle, totalScore, removeRanksUnder);
   }
 
   return {
