@@ -1,8 +1,6 @@
 import { Parser, transforms } from "@viren070/parse-torrent-title";
 
-import { bitDepthHandlers } from "../parser/handlers/bit-depth.handlers.ts";
 import { sceneHandlers } from "../parser/handlers/scene.handlers.ts";
-import { siteHandlers } from "../parser/handlers/site.handlers.ts";
 import { trashHandlers } from "../parser/handlers/trash.handlers.ts";
 import { normaliseTitle } from "../shared/normalise.ts";
 import { adultHandlers } from "./handlers/adult.handlers.ts";
@@ -11,10 +9,8 @@ import type { CustomFields, ParsedData } from "../types.ts";
 
 const parser = new Parser()
   .addHandlers(adultHandlers)
-  .addHandlers(siteHandlers)
   .addHandlers(sceneHandlers)
   .addHandlers(trashHandlers)
-  .addHandlers(bitDepthHandlers)
   .addHandlers([
     {
       field: "channels",
@@ -69,41 +65,14 @@ const parser = new Parser()
       remove: true,
       transform: transforms.toLowercase(),
     },
-  ])
-  .addHandlers([
     {
       field: "country",
       pattern: new RegExp("\\b(US|UK|AU|NZ|CA)\\b"),
-    },
-  ])
-  .addHandlers([
-    {
-      field: "site",
-      pattern: new RegExp(
-        "\\b(?:www?.?)?(?:\\w+\\-)?\\w+[\\.\\s](?:com|org|net|ms|tv|mx|co|party|vip|nu|pics)\\b",
-        "i",
-      ),
-      matchGroup: 1,
-      remove: true,
     },
     {
       field: "site",
       pattern: new RegExp("rarbg|torrentleech|(?:the)?piratebay", "i"),
       remove: true,
-    },
-    {
-      field: "site",
-      pattern: new RegExp("\\[([^\\]]+\\.[^\\]]+)\\](?=\\.\\w{2,4}$|\\s)", "i"),
-      transform: transforms.toTrimmed(),
-      remove: true,
-    },
-  ])
-  .addHandlers([
-    {
-      field: "title",
-      pattern: new RegExp("\\bHigh.?Quality\\b", "i"),
-      remove: true,
-      skipFromTitle: true,
     },
   ]);
 
