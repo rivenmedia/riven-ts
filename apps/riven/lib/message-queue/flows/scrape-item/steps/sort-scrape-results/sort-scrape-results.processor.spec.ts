@@ -29,6 +29,7 @@ const it = baseIt.extend<{
       title: "Test Movie",
       contentRating: "g",
       state: "indexed",
+      tmdbId: "1",
     });
 
     await em.flush();
@@ -41,6 +42,7 @@ const it = baseIt.extend<{
       contentRating: "tv-14",
       state: "indexed",
       status: "ended",
+      tvdbId: "1",
     });
 
     await em.flush();
