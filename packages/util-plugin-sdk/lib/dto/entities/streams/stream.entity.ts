@@ -16,23 +16,23 @@ export class Stream {
   @PrimaryKey()
   id!: number;
 
-  @Field()
+  @Field(() => String)
   @Property()
   infoHash!: string;
 
-  @Field()
+  @Field(() => String)
   @Property()
   rawTitle!: string;
 
-  @Field()
+  @Field(() => String)
   @Property()
   parsedTitle!: string;
 
-  @Field()
+  @Field(() => String)
   @Property()
   rank!: number;
 
-  @Field({ nullable: true })
+  @Field(() => Number, { nullable: true })
   @Property()
   levRatio?: number;
 

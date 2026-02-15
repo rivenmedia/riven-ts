@@ -55,13 +55,16 @@ describe("rankTorrent (integration)", () => {
           },
         },
       },
+      options: {
+        removeAllTrash: false,
+      },
     });
 
     // This should match require and get preferred bonus
     const result = rankTorrent(
       "Movie.2024.1080p.BluRay.REMUX.AVC-GROUP",
       "1234567890123456789012345678901234567893",
-      "Breaking Bad",
+      "Movie",
       settings,
     );
 
@@ -72,11 +75,14 @@ describe("rankTorrent (integration)", () => {
   it("rejects excluded content", () => {
     const settings = createSettings({
       exclude: ["CAM"],
+      options: {
+        removeAllTrash: false,
+      },
     });
     const result = rankTorrent(
       "Movie.2024.CAM-GROUP",
       "1234567890123456789012345678901234567893",
-      "Breaking Bad",
+      "Movie",
       settings,
     );
 

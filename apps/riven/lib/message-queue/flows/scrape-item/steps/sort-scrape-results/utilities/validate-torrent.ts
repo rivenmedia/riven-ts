@@ -27,13 +27,14 @@ export class SkippedTorrentError extends Error {
 
 export const validateTorrent = async (
   item: MediaItem,
+  itemTitle: string,
   torrent: RankedResult,
 ) => {
   if (item instanceof Movie) {
     if (torrent.data.seasons.length || torrent.data.episodes.length) {
       throw new SkippedTorrentError(
         `Skipping show torrent for movie`,
-        item.title,
+        itemTitle,
         torrent.data.rawTitle,
         torrent.hash,
       );
@@ -44,7 +45,7 @@ export const validateTorrent = async (
     if (torrent.data.episodes.length && torrent.data.episodes.length <= 2) {
       throw new SkippedTorrentError(
         "Skipping torrent with 2 or fewer episodes for show",
-        item.title,
+        itemTitle,
         torrent.data.rawTitle,
         torrent.hash,
       );
@@ -59,7 +60,7 @@ export const validateTorrent = async (
     if (seasonsIntersection.size !== item.seasons.length) {
       throw new SkippedTorrentError(
         "Skipping torrent with incorrect number of seasons",
-        item.title,
+        itemTitle,
         torrent.data.rawTitle,
         torrent.hash,
       );
@@ -78,13 +79,10 @@ export const validateTorrent = async (
         new Set(episodes.map((episode) => episode.absoluteNumber)),
       );
 
-      if (
-        torrent.data.episodes.length &&
-        episodesIntersection.size !== episodes.length
-      ) {
+      if (episodesIntersection.size !== episodes.length) {
         throw new SkippedTorrentError(
           "Skipping torrent with incorrect number of episodes for single-season show",
-          item.title,
+          itemTitle,
           torrent.data.rawTitle,
           torrent.hash,
         );
@@ -96,7 +94,7 @@ export const validateTorrent = async (
     if (!torrent.data.seasons.length) {
       throw new SkippedTorrentError(
         "Skipping torrent with no seasons for season item",
-        item.title,
+        itemTitle,
         torrent.data.rawTitle,
         torrent.hash,
       );
@@ -105,22 +103,22 @@ export const validateTorrent = async (
     if (!torrent.data.seasons.includes(item.number)) {
       throw new SkippedTorrentError(
         "Skipping torrent with incorrect season number for season item",
-        item.title,
-        torrent.data.rawTitle,
-        torrent.hash,
-      );
-    }
-
-    if (torrent.data.episodes.length && torrent.data.episodes.length <= 2) {
-      throw new SkippedTorrentError(
-        "Skipping torrent with 2 or fewer episodes for season item",
-        item.title,
+        itemTitle,
         torrent.data.rawTitle,
         torrent.hash,
       );
     }
 
     if (torrent.data.episodes.length) {
+      if (torrent.data.episodes.length <= 2) {
+        throw new SkippedTorrentError(
+          "Skipping torrent with 2 or fewer episodes for season item",
+          itemTitle,
+          torrent.data.rawTitle,
+          torrent.hash,
+        );
+      }
+
       await wrap(item).populate(["episodes"]);
 
       const episodesIntersection = new Set(torrent.data.episodes).intersection(
@@ -134,7 +132,7 @@ export const validateTorrent = async (
       if (episodesIntersection.size !== item.episodes.length) {
         throw new SkippedTorrentError(
           "Skipping torrent with incorrect episodes for season item",
-          item.title,
+          itemTitle,
           torrent.data.rawTitle,
           torrent.hash,
         );
@@ -155,7 +153,7 @@ export const validateTorrent = async (
     if (hasEpisodes && episodesIntersection.size === 0) {
       throw new SkippedTorrentError(
         "Skipping torrent with incorrect episode number for episode item",
-        item.title,
+        itemTitle,
         torrent.data.rawTitle,
         torrent.hash,
       );
@@ -167,7 +165,7 @@ export const validateTorrent = async (
     ) {
       throw new SkippedTorrentError(
         "Skipping torrent with incorrect season number for episode item",
-        item.title,
+        itemTitle,
         torrent.data.rawTitle,
         torrent.hash,
       );
@@ -176,7 +174,7 @@ export const validateTorrent = async (
     if (!hasEpisodes && !hasSeasons) {
       throw new SkippedTorrentError(
         "Skipping torrent with no seasons or episodes for episode item",
-        item.title,
+        itemTitle,
         torrent.data.rawTitle,
         torrent.hash,
       );
@@ -191,7 +189,7 @@ export const validateTorrent = async (
   ) {
     throw new SkippedTorrentError(
       "Skipping torrent with incorrect country",
-      item.title,
+      itemTitle,
       torrent.data.rawTitle,
       torrent.hash,
     );
@@ -204,7 +202,7 @@ export const validateTorrent = async (
   ) {
     throw new SkippedTorrentError(
       "Skipping torrent with incorrect year",
-      item.title,
+      itemTitle,
       torrent.data.rawTitle,
       torrent.hash,
     );
@@ -213,7 +211,7 @@ export const validateTorrent = async (
   if (item.isAnime && settings.dubbedAnimeOnly && !torrent.data.dubbed) {
     throw new SkippedTorrentError(
       "Skipping non-dubbed anime torrent",
-      item.title,
+      itemTitle,
       torrent.data.rawTitle,
       torrent.hash,
     );

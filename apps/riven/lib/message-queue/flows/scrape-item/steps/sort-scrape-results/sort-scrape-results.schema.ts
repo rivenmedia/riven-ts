@@ -15,7 +15,6 @@ export const SortScrapeResultsFlow = createFlowSchema(
   }),
   z.object({
     id: z.int(),
-    title: z.string(),
   }),
 );
 

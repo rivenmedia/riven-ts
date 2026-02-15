@@ -1,3 +1,4 @@
+import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
 import {
   GarbageTorrentError,
   RTN,
@@ -109,11 +110,15 @@ export const sortScrapeResultsProcessor =
       {},
     );
 
-    if (!Object.keys(aggregatedResults).length) {
-      throw new UnrecoverableError(`No streams found for ${job.data.title}`);
-    }
-
     const item = await database.mediaItem.findOneOrFail(job.data.id);
+    const itemTitle =
+      item instanceof Episode || item instanceof Season
+        ? await item.getShowTitle()
+        : item.title;
+
+    if (!Object.keys(aggregatedResults).length) {
+      throw new UnrecoverableError(`No streams found for ${itemTitle}`);
+    }
 
     const parsedResults = await Object.entries(aggregatedResults).reduce<
       Promise<RankedResult[]>
@@ -121,9 +126,9 @@ export const sortScrapeResultsProcessor =
       const results = await acc;
 
       try {
-        const torrent = rtnInstance.rankTorrent(rawTitle, hash, job.data.title);
+        const torrent = rtnInstance.rankTorrent(rawTitle, hash, itemTitle);
 
-        await validateTorrent(item, torrent);
+        await validateTorrent(item, itemTitle, torrent);
 
         return [...results, torrent];
       } catch (error) {
@@ -134,7 +139,7 @@ export const sortScrapeResultsProcessor =
           logger.silly(error.message);
         } else {
           logger.error(
-            `Failed to rank torrent ${rawTitle} (${hash}) for ${job.data.title}: ${
+            `Failed to rank torrent ${rawTitle} (${hash}) for ${itemTitle}: ${
               (error as Error).message
             }`,
           );
@@ -148,6 +153,7 @@ export const sortScrapeResultsProcessor =
       success: true,
       result: {
         id: job.data.id,
+        title: itemTitle,
         results: rtnInstance.sortTorrents(parsedResults),
       },
     };

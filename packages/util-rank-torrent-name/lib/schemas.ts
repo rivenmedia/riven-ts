@@ -5,27 +5,6 @@ import { normaliseTitle } from "./shared/normalise.ts";
 const nonEmptyString = z.string().min(1);
 const positiveIntSchema = z.int().positive();
 
-const torrentTypeEnum = z.enum(["movie", "show", "season", "episode"]);
-
-function determineType(
-  seasons: number[],
-  episodes: number[],
-): z.infer<typeof torrentTypeEnum> {
-  if (episodes.length === 1) {
-    return torrentTypeEnum.enum.episode;
-  }
-
-  if (seasons.length === 1) {
-    return torrentTypeEnum.enum.season;
-  }
-
-  if (seasons.length > 0 || episodes.length > 0) {
-    return torrentTypeEnum.enum.show;
-  }
-
-  return torrentTypeEnum.enum.movie;
-}
-
 const bitDepthEnum = z.enum(["8bit", "10bit", "12bit"]);
 
 export type BitDepth = z.infer<typeof bitDepthEnum>;
@@ -60,12 +39,12 @@ export const ParsedDataSchema = z
     upscaled: z.boolean().optional(),
     remastered: z.boolean().optional(),
     extended: z.boolean().optional(),
-    converted: z.boolean().optional(),
+    convert: z.boolean().optional(),
     unrated: z.boolean().optional(),
     uncensored: z.boolean().optional(),
     documentary: z.boolean().optional(),
     commentary: z.boolean().optional(),
-    threeD: z.boolean().optional(),
+    threeD: z.coerce.boolean().optional(),
     ppv: z.boolean().optional(),
     date: nonEmptyString.optional(),
     group: nonEmptyString.optional(),
@@ -77,6 +56,7 @@ export const ParsedDataSchema = z
     container: nonEmptyString.optional(),
     extension: nonEmptyString.optional(),
     episodeCode: nonEmptyString.optional(),
+    releaseTypes: z.array(nonEmptyString).optional(),
 
     // Custom fields
     adult: z.boolean().optional(),
@@ -87,8 +67,12 @@ export const ParsedDataSchema = z
   })
   .transform((data) => ({
     ...data,
-    type: determineType(data.seasons, data.episodes),
+    type: data.seasons.length || data.episodes.length ? "show" : "movie",
     normalisedTitle: normaliseTitle(data.title),
+    converted: data.convert ?? false,
+    remux:
+      data.remux ??
+      ["remux", "bluray remux"].includes(data.quality?.toLowerCase() ?? ""),
   }));
 
 export type ParsedData = z.infer<typeof ParsedDataSchema>;

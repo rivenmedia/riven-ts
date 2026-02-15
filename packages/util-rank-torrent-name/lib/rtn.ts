@@ -56,7 +56,11 @@ export class RTN {
     );
   }
 
-  sortTorrents(torrents: RankedResult[], bucketLimit = Infinity) {
-    return sortTorrents(torrents, bucketLimit, this.#enabledResolutions);
+  sortTorrents(
+    torrents: RankedResult[],
+    bucketLimit = Infinity,
+    resolutions = this.#enabledResolutions,
+  ) {
+    return sortTorrents(torrents, bucketLimit, resolutions);
   }
 }

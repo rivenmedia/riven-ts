@@ -44,19 +44,31 @@ it.each([
 
 it("sorts torrents correctly", () => {
   const torrents = {
-    "1234567890123456789012345678901234567890":
+    "1234567890123456789012345678901234567890": [
+      "Sprint",
       "Sprint.2024.S01.COMPLETE.1080p.WEBDL.h264-EDITH[TGx]",
-    "1234567890123456789012345678901234567891":
+    ],
+    "1234567890123456789012345678901234567891": [
+      "Madame Web",
       "Madame Web 2024 1080p WEBRip DD 5.1 x264-GalaxyRG[TGx]",
-    "1234567890123456789012345678901234567892":
+    ],
+    "1234567890123456789012345678901234567892": [
+      "Guardians of the Galaxy",
       "Guardians of the Galaxy Vol. 2 (2017) 720p x264 MKVTV",
-    "1234567890123456789012345678901234567893":
-      "Wonder Woman 1984 (2020) [1440p DoVi P8 DTSHD AC3 En-AC3",
-    "1234567890123456789012345678901234567894":
+    ],
+    "1234567890123456789012345678901234567893": [
+      "Wonder Woman 1984",
+      "Wonder Woman 1984 (2020) [1440p DoVi P8 DTSHD AC3 En-AC3]",
+    ],
+    "1234567890123456789012345678901234567894": [
+      "8 Bit Christmas",
       "8 Bit Christmas (2021) - x264 - Telugu (Fan Dub)",
-    "1234567890123456789012345678901234567895":
+    ],
+    "1234567890123456789012345678901234567895": [
+      "Fairy Tail - 100 Years Quest",
       "[SubsPlease] Fairy Tail - 100 Years Quest - 05 (1080p) [1107F3A9].mkv",
-  };
+    ],
+  } as const;
 
   const expectedOrder = [
     "1234567890123456789012345678901234567893", // Wonder Woman 1984 (2020) [UHDRemux 2160p DoVi P8 Es-DTSHD AC3 En-AC3
@@ -67,10 +79,19 @@ it("sorts torrents correctly", () => {
     "1234567890123456789012345678901234567894", // ww.Tamilblasters.sbs - 8 Bit Christmas (2021) HQ HDRip - x264 - Telugu (Fan Dub) - 400MB
   ];
 
-  const settings = createSettings();
+  const settings = createSettings({
+    customRanks: {
+      hdr: {
+        dolbyVision: {
+          fetch: true,
+        },
+      },
+    },
+  });
   const rtnInstance = new RTN(settings);
-  const rankedTorrents = Object.entries(torrents).map(([hash, title]) =>
-    rtnInstance.rankTorrent(title, hash, "Test Movie"),
+  const rankedTorrents = Object.entries(torrents).map(
+    ([hash, [correctTitle, rawTitle]]) =>
+      rtnInstance.rankTorrent(rawTitle, hash, correctTitle),
   );
   const sortedTorrents = rtnInstance.sortTorrents(rankedTorrents);
 
@@ -79,26 +100,54 @@ it("sorts torrents correctly", () => {
 
 it("sorts torrents with a resolution filter correctly", () => {
   const torrents = {
-    "1234567890123456789012345678901234567890":
+    "1234567890123456789012345678901234567890": [
+      "Sprint",
       "Sprint.2024.S01.COMPLETE.4k.WEBDL.h264-EDITH[TGx]",
-    "1234567890123456789012345678901234567891":
+    ],
+    "1234567890123456789012345678901234567891": [
+      "Madame Web",
       "Madame Web 2024 1080p WEBRip DD 5.1 x264-GalaxyRG[TGx]",
-    "1234567890123456789012345678901234567892":
+    ],
+    "1234567890123456789012345678901234567892": [
+      "Guardians of the Galaxy",
       "Guardians of the Galaxy Vol. 2 (2017) 720p x264 MKVTV",
-    "1234567890123456789012345678901234567893":
+    ],
+    "1234567890123456789012345678901234567893": [
+      "Wonder Woman 1984",
       "Wonder Woman 1984 (2020) [1440p DoVi P8 DTSHD AC3 En-AC3]",
-    "1234567890123456789012345678901234567894":
+    ],
+    "1234567890123456789012345678901234567894": [
+      "8 Bit Christmas",
       "8 Bit Christmas (2021) - x264 - Telugu (Fan Dub)",
-    "1234567890123456789012345678901234567895":
+    ],
+    "1234567890123456789012345678901234567895": [
+      "Fairy Tail - 100 Years Quest",
       "[SubsPlease] Fairy Tail - 100 Years Quest - 05 (1080p) [1107F3A9].mkv",
+    ],
   } as const;
 
-  const settings = createSettings();
+  const settings = createSettings({
+    resolutions: {
+      r2160p: true,
+    },
+    customRanks: {
+      hdr: {
+        dolbyVision: {
+          fetch: true,
+        },
+      },
+    },
+  });
   const rtnInstance = new RTN(settings);
-  const rankedTorrents = Object.entries(torrents).map(([hash, title]) =>
-    rtnInstance.rankTorrent(title, hash, "Test Movie"),
+  const rankedTorrents = Object.entries(torrents).map(
+    ([hash, [correctTitle, rawTitle]]) =>
+      rtnInstance.rankTorrent(rawTitle, hash, correctTitle),
   );
-  const sortedTorrents = rtnInstance.sortTorrents(rankedTorrents);
+  const sortedTorrents = rtnInstance.sortTorrents(
+    rankedTorrents,
+    Infinity,
+    new Set(["2160p"]),
+  );
 
   const expectedOrder = [
     "1234567890123456789012345678901234567890", // Sprint.2024.S01.COMPLETE.4k.WEBDL.h264-EDITH[TGx]
@@ -217,9 +266,9 @@ it("handles bucket limits correctly", () => {
     ...unknownResTorrents,
     ...hdTorrents,
     ...sdTorrents,
-  }).map(([hash, title]) => rtnInstance.rankTorrent(title, hash, "Movie 2024"));
+  }).map(([hash, title]) => rtnInstance.rankTorrent(title, hash, "Movie"));
 
-  const sortedTorrents = rtnInstance.sortTorrents(rankedTorrents);
+  const sortedTorrents = rtnInstance.sortTorrents(rankedTorrents, 2);
 
   // Verify we get at most 2 torrents per resolution bucket
   const unknownResults = sortedTorrents.filter(
