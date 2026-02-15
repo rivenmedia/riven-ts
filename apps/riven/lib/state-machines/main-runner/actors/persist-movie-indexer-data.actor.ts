@@ -1,4 +1,4 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities/index";
+import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import { UnrecoverableError } from "bullmq";
 import { ValidationError, validateOrReject } from "class-validator";

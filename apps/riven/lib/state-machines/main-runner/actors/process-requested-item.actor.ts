@@ -1,4 +1,4 @@
-import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities/index";
+import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";

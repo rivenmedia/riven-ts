@@ -4,7 +4,7 @@ import {
   Movie,
   Season,
   Show,
-} from "@repo/util-plugin-sdk/dto/entities/index";
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import Fuse from "@zkochan/fuse-native";
 import { expect, it, vi } from "vitest";

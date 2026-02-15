@@ -1,8 +1,4 @@
-import {
-  Episode,
-  Season,
-  Show,
-} from "@repo/util-plugin-sdk/dto/entities/index";
+import { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 
 import { UnrecoverableError } from "bullmq";

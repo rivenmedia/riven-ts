@@ -6,8 +6,9 @@
   "exports": {
     ".": "./lib/index.ts",
     "./types/*": "./lib/types/*.ts",
-    "./dto/*": "./lib/dto/*.ts",
     "./dto/entities": "./lib/dto/entities/index.ts",
+    "./dto/enums/*": "./lib/dto/enums/*.ts",
+    "./dto/unions/*": "./lib/dto/unions/*.ts",
     "./errors/*": "./lib/errors/*.ts",
     "./events": "./lib/schemas/events/index.ts",
     "./events/*": "./lib/schemas/plugin-to-program-events/*.ts",

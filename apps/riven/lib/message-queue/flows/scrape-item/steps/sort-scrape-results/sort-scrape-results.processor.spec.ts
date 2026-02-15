@@ -3,7 +3,7 @@ import {
   Movie,
   Season,
   Show,
-} from "@repo/util-plugin-sdk/dto/entities/index";
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import { Job, UnrecoverableError } from "bullmq";
 import { it as baseIt, expect, vi } from "vitest";
