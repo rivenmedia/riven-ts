@@ -202,32 +202,22 @@ it("throws for show torrents if the item is a movie", async ({ movie }) => {
   );
 });
 
-it("throws for torrents with 2 or fewer episodes for shows", async ({
+it("throws for torrents with an incorrect number of seasons for ended shows", async ({
   show,
+  annotate,
 }) => {
-  const rawTitle = "Test Show: S01E01";
-
-  const torrent = rankTorrent(
-    rawTitle,
-    "1234567890123456789012345678901234567890",
-    show.title,
-    createSettings(),
+  await annotate(
+    "Torrents must contain all seasons for ended shows, as there will be no new seasons to download in the future.",
   );
 
-  await expect(validateTorrent(show, show.title, torrent)).rejects.toThrow(
-    new SkippedTorrentError(
-      `Skipping torrent with 2 or fewer episodes for show`,
-      show.title,
-      torrent.data.rawTitle,
-      torrent.hash,
-    ),
-  );
-});
+  const rawTitle = "Test Show: S01-03";
 
-it("throws for torrents with an incorrect number of seasons for shows", async ({
-  show,
-}) => {
-  const rawTitle = "Test Show: S01-03 E01-30";
+  const em = database.em.fork();
+
+  em.persist(show);
+  em.assign(show, { status: "ended" });
+
+  await em.flush();
 
   const torrent = rankTorrent(
     rawTitle,
@@ -244,6 +234,105 @@ it("throws for torrents with an incorrect number of seasons for shows", async ({
       torrent.hash,
     ),
   );
+});
+
+it("throws for torrents with an incorrect number of seasons for continuing shows", async ({
+  show,
+  annotate,
+}) => {
+  await annotate(
+    "Torrents may be missing the most recent season for continuing shows, but they must not be missing more than that.",
+  );
+
+  const rawTitle = "Test Show: S01-03";
+
+  const em = database.em.fork();
+
+  em.persist(show);
+  em.assign(show, { status: "continuing" });
+
+  await em.flush();
+
+  const torrent = rankTorrent(
+    rawTitle,
+    "1234567890123456789012345678901234567890",
+    show.title,
+    createSettings(),
+  );
+
+  await expect(validateTorrent(show, show.title, torrent)).rejects.toThrow(
+    new SkippedTorrentError(
+      `Skipping torrent with incorrect number of seasons`,
+      show.title,
+      torrent.data.rawTitle,
+      torrent.hash,
+    ),
+  );
+});
+
+it("does not throw for torrents that do not contain the most recent season for continuing shows", async ({
+  show,
+}) => {
+  const rawTitle = "Test Show: S01-05";
+
+  const em = database.em.fork();
+
+  em.persist(show);
+  em.assign(show, { status: "continuing" });
+
+  await em.flush();
+
+  const torrent = rankTorrent(
+    rawTitle,
+    "1234567890123456789012345678901234567890",
+    show.title,
+    createSettings(),
+  );
+
+  await expect(
+    validateTorrent(show, show.title, torrent),
+  ).resolves.not.toThrow();
+});
+
+it("does not throw for torrents that contain all seasons for ended shows", async ({
+  show,
+}) => {
+  const rawTitle = "Test Show: S01-06";
+
+  const em = database.em.fork();
+
+  em.persist(show);
+  em.assign(show, { status: "ended" });
+
+  await em.flush();
+
+  const torrent = rankTorrent(
+    rawTitle,
+    "1234567890123456789012345678901234567890",
+    show.title,
+    createSettings(),
+  );
+
+  await expect(
+    validateTorrent(show, show.title, torrent),
+  ).resolves.not.toThrow();
+});
+
+it("does not throw for torrents with an unknown number of seasons / episodes for shows", async ({
+  show,
+}) => {
+  const rawTitle = "Test Show";
+
+  const torrent = rankTorrent(
+    rawTitle,
+    "1234567890123456789012345678901234567890",
+    show.title,
+    createSettings(),
+  );
+
+  await expect(
+    validateTorrent(show, show.title, torrent),
+  ).resolves.not.toThrow();
 });
 
 it("throws for torrents with incorrect number of episodes for single-season shows", async ({
