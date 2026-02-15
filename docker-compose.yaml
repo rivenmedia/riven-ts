@@ -145,6 +145,16 @@ services:
     # depends_on:
     #   - riven
 
+  spotlight:
+    container_name: spotlight
+    image: ghcr.io/getsentry/spotlight:latest
+    restart: unless-stopped
+    ports:
+      - 8969:8969
+    profiles:
+      - all
+      - analytics
+
 volumes:
   riven-db:
   media-mount:

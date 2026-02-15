@@ -2,7 +2,9 @@
   "$schema": "https://turborepo.com/schema.json",
   "extends": ["//"],
   "tasks": {
-    "dev": {},
+    "dev": {
+      "passThroughEnv": ["SENTRY_SPOTLIGHT"]
+    },
     "start": {}
   }
 }
