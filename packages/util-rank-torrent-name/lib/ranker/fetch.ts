@@ -160,8 +160,8 @@ function fetchResolution(
     return false;
   }
 
-  const normalizedRes = RESOLUTION_MAP.get(data.resolution) ?? "unknown";
-  const settingsKey = RESOLUTION_SETTINGS_MAP.get(normalizedRes) ?? "unknown";
+  const normalisedRes = RESOLUTION_MAP.get(data.resolution) ?? "unknown";
+  const settingsKey = RESOLUTION_SETTINGS_MAP.get(normalisedRes) ?? "unknown";
   const enabled = settings.resolutions[settingsKey];
 
   if (!enabled) {

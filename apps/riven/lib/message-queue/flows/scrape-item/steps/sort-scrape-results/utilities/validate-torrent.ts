@@ -30,6 +30,42 @@ export const validateTorrent = async (
   itemTitle: string,
   torrent: RankedResult,
 ) => {
+  if (
+    torrent.data.country &&
+    item.country &&
+    torrent.data.country !== item.country &&
+    !item.isAnime
+  ) {
+    throw new SkippedTorrentError(
+      "Skipping torrent with incorrect country",
+      itemTitle,
+      torrent.data.rawTitle,
+      torrent.hash,
+    );
+  }
+
+  if (
+    torrent.data.year &&
+    item.year &&
+    ![item.year - 1, item.year, item.year + 1].includes(torrent.data.year)
+  ) {
+    throw new SkippedTorrentError(
+      "Skipping torrent with incorrect year",
+      itemTitle,
+      torrent.data.rawTitle,
+      torrent.hash,
+    );
+  }
+
+  if (item.isAnime && settings.dubbedAnimeOnly && !torrent.data.dubbed) {
+    throw new SkippedTorrentError(
+      "Skipping non-dubbed anime torrent",
+      itemTitle,
+      torrent.data.rawTitle,
+      torrent.hash,
+    );
+  }
+
   if (item instanceof Movie) {
     if (torrent.data.seasons.length || torrent.data.episodes.length) {
       throw new SkippedTorrentError(
@@ -53,26 +89,28 @@ export const validateTorrent = async (
 
     await wrap(item).populate(["seasons"]);
 
-    const seasonsIntersection = new Set(torrent.data.seasons).intersection(
-      new Set(item.seasons.map((season) => season.number)),
-    );
-
-    if (seasonsIntersection.size !== item.seasons.length) {
-      throw new SkippedTorrentError(
-        "Skipping torrent with incorrect number of seasons",
-        itemTitle,
-        torrent.data.rawTitle,
-        torrent.hash,
+    if (torrent.data.seasons.length) {
+      const seasonsIntersection = new Set(torrent.data.seasons).intersection(
+        new Set(item.seasons.map((season) => season.number)),
       );
-    }
 
-    await wrap(item).populate(["seasons.episodes"]);
+      if (seasonsIntersection.size !== item.seasons.length) {
+        throw new SkippedTorrentError(
+          "Skipping torrent with incorrect number of seasons",
+          itemTitle,
+          torrent.data.rawTitle,
+          torrent.hash,
+        );
+      }
+    }
 
     if (
       torrent.data.episodes.length &&
       item.seasons.length === 1 &&
-      item.seasons[0]?.episodes
+      item.seasons[0]?.episodes.count()
     ) {
+      await wrap(item).populate(["seasons.episodes"]);
+
       const { episodes } = item.seasons[0];
 
       const episodesIntersection = new Set(torrent.data.episodes).intersection(
@@ -179,41 +217,5 @@ export const validateTorrent = async (
         torrent.hash,
       );
     }
-  }
-
-  if (
-    torrent.data.country &&
-    item.country &&
-    torrent.data.country !== item.country &&
-    !item.isAnime
-  ) {
-    throw new SkippedTorrentError(
-      "Skipping torrent with incorrect country",
-      itemTitle,
-      torrent.data.rawTitle,
-      torrent.hash,
-    );
-  }
-
-  if (
-    torrent.data.year &&
-    item.year &&
-    ![item.year - 1, item.year, item.year + 1].includes(torrent.data.year)
-  ) {
-    throw new SkippedTorrentError(
-      "Skipping torrent with incorrect year",
-      itemTitle,
-      torrent.data.rawTitle,
-      torrent.hash,
-    );
-  }
-
-  if (item.isAnime && settings.dubbedAnimeOnly && !torrent.data.dubbed) {
-    throw new SkippedTorrentError(
-      "Skipping non-dubbed anime torrent",
-      itemTitle,
-      torrent.data.rawTitle,
-      torrent.hash,
-    );
   }
 };

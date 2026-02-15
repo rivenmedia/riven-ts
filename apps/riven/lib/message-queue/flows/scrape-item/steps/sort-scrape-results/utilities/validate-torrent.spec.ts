@@ -246,6 +246,23 @@ it("throws for torrents with an incorrect number of seasons for shows", async ({
   );
 });
 
+it("does not throw for torrents with an unknown number of seasons for shows", async ({
+  show,
+}) => {
+  const rawTitle = "Test Show";
+
+  const torrent = rankTorrent(
+    rawTitle,
+    "1234567890123456789012345678901234567890",
+    show.title,
+    createSettings(),
+  );
+
+  await expect(
+    validateTorrent(show, show.title, torrent),
+  ).resolves.not.toThrow();
+});
+
 it("throws for torrents with incorrect number of episodes for single-season shows", async ({
   show,
 }) => {
