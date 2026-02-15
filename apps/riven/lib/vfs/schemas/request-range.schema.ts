@@ -3,17 +3,7 @@ import z from "zod";
 import { createChunkRangeLabel } from "../utilities/chunks/create-chunk-range-label.ts";
 import { fileNameToFileChunkCalculationsMap } from "../utilities/file-handle-map.ts";
 import { ChunkMetadata } from "./chunk.schema.ts";
-import { FileChunkCalculations } from "./file-chunk-calculations.schema.js";
-
-const isValidRange = ({ end, fileSize, start }: RequestRange) => {
-  if (start >= fileSize) {
-    return false;
-  }
-
-  const effectiveEnd = Math.min(end, fileSize - 1);
-
-  return effectiveEnd >= start;
-};
+import { FileChunkCalculations } from "./file-chunk-calculations.schema.ts";
 
 const calculateRequiredChunks = (
   start: number,
@@ -125,6 +115,14 @@ export const RequestRange = z
     fileSize: z.int().nonnegative(),
     chunkSize: z.int().positive(),
   })
-  .refine(isValidRange, "Invalid request range");
+  .refine(({ end, fileSize, start }) => {
+    if (start >= fileSize) {
+      return false;
+    }
+
+    const effectiveEnd = Math.min(end, fileSize - 1);
+
+    return effectiveEnd >= start;
+  }, "Invalid request range");
 
 export type RequestRange = z.infer<typeof RequestRange>;

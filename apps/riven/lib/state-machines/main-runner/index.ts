@@ -7,10 +7,10 @@ import { downloadItemProcessor } from "../../message-queue/flows/download-item/d
 import { indexItemProcessor } from "../../message-queue/flows/index-item/index-item.processor.ts";
 import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
 import { scrapeItemProcessor } from "../../message-queue/flows/scrape-item/scrape-item.processor.ts";
-import { sortScrapeResultsProcessor } from "../../message-queue/flows/scrape-item/steps/sort-scrape-results.processor.ts";
+import { sortScrapeResultsProcessor } from "../../message-queue/flows/scrape-item/steps/sort-scrape-results/sort-scrape-results.processor.ts";
 import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
 import { logger } from "../../utilities/logger/logger.ts";
-import { SerialisedMediaItem } from "../../utilities/serialisers/serialised-media-item.ts";
+import { SerialisedItemRequest } from "../../utilities/serialisers/serialised-item-request.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { requestContentServicesActor } from "./actors/request-content-services.actor.ts";
 import { requestDownload } from "./actors/request-download.actor.ts";
@@ -264,7 +264,7 @@ export const mainRunnerMachine = setup({
           {
             type: "log",
             params: ({ event: { item } }) => ({
-              message: `Successfully created media item: ${JSON.stringify(item)}`,
+              message: `Successfully created item request: [${item.externalIdsLabel.join(" | ")}]`,
               level: "silly",
             }),
           },
@@ -289,7 +289,7 @@ export const mainRunnerMachine = setup({
           {
             type: "log",
             params: ({ event: { item } }) => ({
-              message: `Successfully indexed media item: ${JSON.stringify(item)}`,
+              message: `Successfully indexed ${item.type}: ${item.title}`,
               level: "info",
             }),
           },
@@ -314,7 +314,7 @@ export const mainRunnerMachine = setup({
           {
             type: "log",
             params: ({ event: { item } }) => ({
-              message: `Successfully scraped media item: ${JSON.stringify(SerialisedMediaItem.encode(item))}`,
+              message: `Successfully scraped ${item.type}: ${item.title}`,
               level: "info",
             }),
           },
@@ -354,7 +354,7 @@ export const mainRunnerMachine = setup({
           {
             type: "log",
             params: ({ event: { item, error } }) => ({
-              message: `Error downloading media item ${JSON.stringify(item)}: ${String(error)}`,
+              message: `Error downloading ${item.title}: ${String(error)}`,
               level: "error",
             }),
           },
@@ -367,7 +367,7 @@ export const mainRunnerMachine = setup({
           {
             type: "log",
             params: ({ event: { item, error } }) => ({
-              message: `Error creating media item ${JSON.stringify(item)}: ${String(error)}`,
+              message: `Error creating media item ${JSON.stringify(SerialisedItemRequest.decode(item))}: ${String(error)}`,
               level: "error",
             }),
           },
@@ -380,7 +380,7 @@ export const mainRunnerMachine = setup({
           {
             type: "log",
             params: ({ event: { item } }) => ({
-              message: `Media item already exists: ${JSON.stringify(item)}`,
+              message: `Media item already exists: ${JSON.stringify(SerialisedItemRequest.decode(item))}`,
               level: "verbose",
             }),
           },
@@ -393,7 +393,7 @@ export const mainRunnerMachine = setup({
           {
             type: "log",
             params: ({ event: { item } }) => ({
-              message: `Media item has already been indexed: ${JSON.stringify(item)}`,
+              message: `Media item has already been indexed: ${JSON.stringify(SerialisedItemRequest.decode(item))}`,
               level: "verbose",
             }),
           },

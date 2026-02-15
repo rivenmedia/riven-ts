@@ -24,7 +24,7 @@ export default {
     },
   },
   settingsSchema: TorrentioSettings,
-  validator() {
+  async validator() {
     return true;
   },
 } satisfies RivenPlugin as RivenPlugin;

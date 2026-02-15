@@ -52,7 +52,7 @@ export default {
     },
   },
   settingsSchema: RealDebridSettings,
-  validator() {
+  async validator() {
     return true;
   },
 } satisfies RivenPlugin as RivenPlugin;

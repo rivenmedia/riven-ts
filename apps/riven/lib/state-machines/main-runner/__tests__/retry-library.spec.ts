@@ -39,7 +39,7 @@ it('sends a "riven.media-item.index.requested" event for each incomplete item re
           id: item.id,
           imdbId: item.imdbId,
           requestedBy: item.requestedBy,
-        }) as never,
+        }),
       });
     });
   }

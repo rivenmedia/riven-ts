@@ -15,11 +15,11 @@ import {
 import {
   ScrapeItemFlow,
   scrapeItemProcessorSchema,
-} from "./scrape-item/scrape-item.schema.js";
+} from "./scrape-item/scrape-item.schema.ts";
 import {
   SortScrapeResultsFlow,
   sortScrapeResultsProcessorSchema,
-} from "./scrape-item/steps/sort-scrape-results.schema.ts";
+} from "./scrape-item/steps/sort-scrape-results/sort-scrape-results.schema.ts";
 
 export const Flow = z.discriminatedUnion("name", [
   RequestIndexDataFlow,

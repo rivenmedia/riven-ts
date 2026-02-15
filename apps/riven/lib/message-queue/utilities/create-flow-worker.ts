@@ -2,7 +2,6 @@ import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-l
 
 import { Worker, type WorkerOptions } from "bullmq";
 import { BullMQOtel } from "bullmq-otel";
-import z from "zod";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
@@ -21,7 +20,7 @@ interface CreateFlowWorkerOptions {
 
 export function createFlowWorker<T extends Flow["name"]>(
   name: T,
-  processor: z.infer<(typeof FlowHandlers)[T]>,
+  processor: ReturnType<(typeof FlowHandlers)[T]["implementAsync"]>,
   sendEvent: MainRunnerMachineIntake,
   workerOptions?: Omit<WorkerOptions, "connection" | "telemetry">,
   createFlowWorkerOptions?: CreateFlowWorkerOptions,

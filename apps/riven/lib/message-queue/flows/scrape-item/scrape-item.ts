@@ -31,7 +31,6 @@ export async function scrapeItem(
     queueName: queueNameFor("scrape-item"),
     data: {
       id: item.id,
-      title: item.title,
     },
     children: [
       {

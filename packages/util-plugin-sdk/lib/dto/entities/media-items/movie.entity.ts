@@ -14,4 +14,7 @@ export class Movie extends MediaItem {
   declare contentRating: MovieContentRating;
 
   override type: Opt<"movie"> = "movie" as const;
+
+  declare tmdbId: string;
+  declare tvdbId: never;
 }

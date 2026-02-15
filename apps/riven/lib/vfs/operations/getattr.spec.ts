@@ -4,7 +4,7 @@ import {
   Movie,
   Season,
   Show,
-} from "@repo/util-plugin-sdk/dto/entities/index";
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import Fuse from "@zkochan/fuse-native";
 import { expect, it, vi } from "vitest";
@@ -19,9 +19,9 @@ it("returns directory stats for the root directory", async () => {
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith(null, {
-      atime: expect.any(Date) as never,
-      ctime: expect.any(Date) as never,
-      mtime: expect.any(Date) as never,
+      atime: expect.any(Date),
+      ctime: expect.any(Date),
+      mtime: expect.any(Date),
       mode: parseMode("dir"),
       gid: 1000,
       uid: 1000,
@@ -94,9 +94,9 @@ it("returns file stats for movie files", async () => {
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith(null, {
-      atime: expect.any(Date) as never,
-      ctime: expect.any(Date) as never,
-      mtime: expect.any(Date) as never,
+      atime: expect.any(Date),
+      ctime: expect.any(Date),
+      mtime: expect.any(Date),
       mode: parseMode("file"),
       gid: 1000,
       uid: 1000,
@@ -137,9 +137,9 @@ it("returns directory stats for /movies", async () => {
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith(null, {
-      atime: expect.any(Date) as never,
-      ctime: expect.any(Date) as never,
-      mtime: expect.any(Date) as never,
+      atime: expect.any(Date),
+      ctime: expect.any(Date),
+      mtime: expect.any(Date),
       mode: parseMode("dir"),
       gid: 1000,
       uid: 1000,
@@ -203,9 +203,9 @@ it("returns directory stats for /shows", async () => {
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith(null, {
-      atime: expect.any(Date) as never,
-      ctime: expect.any(Date) as never,
-      mtime: expect.any(Date) as never,
+      atime: expect.any(Date),
+      ctime: expect.any(Date),
+      mtime: expect.any(Date),
       mode: parseMode("dir"),
       gid: 1000,
       uid: 1000,
@@ -269,9 +269,9 @@ it("returns directory stats for single shows", async () => {
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith(null, {
-      atime: expect.any(Date) as never,
-      ctime: expect.any(Date) as never,
-      mtime: expect.any(Date) as never,
+      atime: expect.any(Date),
+      ctime: expect.any(Date),
+      mtime: expect.any(Date),
       mode: parseMode("dir"),
       gid: 1000,
       uid: 1000,
@@ -335,9 +335,9 @@ it("returns directory stats for single seasons", async () => {
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith(null, {
-      atime: expect.any(Date) as never,
-      ctime: expect.any(Date) as never,
-      mtime: expect.any(Date) as never,
+      atime: expect.any(Date),
+      ctime: expect.any(Date),
+      mtime: expect.any(Date),
       mode: parseMode("dir"),
       gid: 1000,
       uid: 1000,
@@ -402,9 +402,9 @@ it("returns file stats for episodes", async () => {
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith(null, {
-      atime: expect.any(Date) as never,
-      ctime: expect.any(Date) as never,
-      mtime: expect.any(Date) as never,
+      atime: expect.any(Date),
+      ctime: expect.any(Date),
+      mtime: expect.any(Date),
       mode: parseMode("file"),
       gid: 1000,
       uid: 1000,

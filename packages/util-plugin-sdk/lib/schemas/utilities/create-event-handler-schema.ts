@@ -15,7 +15,7 @@ export const createEventHandlerSchema = <
   I extends { type: ZodLiteral<RivenEvent["type"]> },
   O extends ZodType = ZodVoid,
 >(
-  inputSchema: ZodObject<I>,
+  inputSchema: ZodObject<I & { type: ZodLiteral<RivenEvent["type"]> }>,
   outputSchema: O = z.void() as never,
 ) =>
   z.function({

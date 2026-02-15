@@ -1,5 +1,5 @@
-import { MediaItemType } from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemInstance } from "@repo/util-plugin-sdk/schemas/media/media-item";
+import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
+import { MediaItemInstance } from "@repo/util-plugin-sdk/schemas/media/media-item-instance";
 
 import { wrap } from "@mikro-orm/core";
 import z from "zod";

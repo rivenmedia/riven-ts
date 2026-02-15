@@ -39,7 +39,7 @@ function getMediaItemPathParts(mediaItem: MediaItem) {
   if (mediaItem instanceof Episode) {
     const seasonLabel = mediaItem.season.getProperty("prettyName");
     const showLabel = mediaItem.season
-      .getProperty("parent")
+      .getProperty("show")
       .getProperty("prettyName");
 
     if (!seasonLabel || !showLabel) {
@@ -58,10 +58,6 @@ function getMediaItemPathParts(mediaItem: MediaItem) {
 @Entity({
   abstract: true,
   discriminatorColumn: "type",
-  discriminatorMap: {
-    media: "MediaEntry",
-    subtitle: "SubtitleEntry",
-  },
 })
 export abstract class FileSystemEntry {
   @Field((_type) => ID)

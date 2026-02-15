@@ -1,6 +1,8 @@
+import { ShowContentRating } from "@repo/util-plugin-sdk/dto/enums/content-ratings.enum";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 
 import assert from "node:assert";
+import z from "zod";
 
 import type {
   SeasonExtendedRecordSchema,
@@ -65,9 +67,14 @@ export const transformSeries = (
 
   const sanitisedTitle = title.replaceAll(/\s*\(.*\)\s*$/g, "");
 
-  const contentRating = series.contentRatings?.find(
-    ({ country }) => country === "usa",
-  )?.name;
+  const contentRating = z
+    .string()
+    .toLowerCase()
+    .pipe(ShowContentRating)
+    .default("unknown")
+    .parse(
+      series.contentRatings?.find(({ country }) => country === "usa")?.name,
+    );
 
   return {
     id: eventItem.id,
@@ -103,7 +110,7 @@ export const transformSeries = (
             return [
               ...acc,
               {
-                contentRating: contentRating ?? null, // TODO: Get episode-specific content rating
+                contentRating, // TODO: Get episode-specific content rating
                 number: episode.number,
                 title: episode.name,
                 posterPath: episode.image,

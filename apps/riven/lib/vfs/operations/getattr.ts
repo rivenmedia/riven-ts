@@ -89,7 +89,7 @@ function getEntry(pathInfo: PathInfo) {
         {
           season: {
             number: pathInfo.season,
-            parent: {
+            show: {
               tvdbId: pathInfo.tvdbId,
             },
           },
@@ -116,7 +116,7 @@ function getEntry(pathInfo: PathInfo) {
 
       return database.season.findOneOrFail(
         {
-          parent: {
+          show: {
             tvdbId: pathInfo.tvdbId,
           },
           number: pathInfo.season,
@@ -295,7 +295,7 @@ async function getattr(path: string) {
   const subDirectoryCount =
     pathInfo.pathType === "show-seasons"
       ? await database.season.count({
-          parent: {
+          show: {
             tvdbId: String(pathInfo.tvdbId),
           },
           episodes: {

@@ -133,8 +133,8 @@ catalogs:
       specifier: ^5.25.0
       version: 5.25.0
     zod:
-      specifier: 4.1.13
-      version: 4.1.13
+      specifier: ^4.3.6
+      version: 4.3.6
     zod2md:
       specifier: ^0.2.5
       version: 0.2.5
@@ -240,6 +240,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../../packages/util-plugin-sdk
+      '@repo/util-rank-torrent-name':
+        specifier: workspace:^
+        version: link:../../packages/util-rank-torrent-name
       '@zkochan/fuse-native':
         specifier: ^0.1.0
         version: 0.1.0
@@ -287,7 +290,7 @@ importers:
         version: 5.25.0
       zod:
         specifier: 'catalog:'
-        version: 4.1.13
+        version: 4.3.6
     devDependencies:
       '@apollo/client-devtools-vscode':
         specifier: ^4.23.2
@@ -360,7 +363,7 @@ importers:
         version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
       zod2md:
         specifier: 'catalog:'
-        version: 0.2.5(zod@4.1.13)
+        version: 0.2.5(zod@4.3.6)
 
   packages/core/util-eslint-config:
     dependencies:
@@ -553,7 +556,7 @@ importers:
         version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
       zod:
         specifier: 'catalog:'
-        version: 4.1.13
+        version: 4.3.6
 
   packages/core/util-mock-graphql-server:
     dependencies:
@@ -716,7 +719,7 @@ importers:
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
       zod:
         specifier: 'catalog:'
-        version: 4.1.13
+        version: 4.3.6
     devDependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -762,7 +765,7 @@ importers:
         version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
       zod2md:
         specifier: 'catalog:'
-        version: 0.2.5(zod@4.1.13)
+        version: 0.2.5(zod@4.3.6)
 
   packages/plugin-plex:
     dependencies:
@@ -777,7 +780,7 @@ importers:
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
       zod:
         specifier: 'catalog:'
-        version: 4.1.13
+        version: 4.3.6
     devDependencies:
       '@kubb/cli':
         specifier: 'catalog:'
@@ -817,7 +820,7 @@ importers:
         version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
       zod2md:
         specifier: 'catalog:'
-        version: 0.2.5(zod@4.1.13)
+        version: 0.2.5(zod@4.3.6)
 
   packages/plugin-realdebrid:
     dependencies:
@@ -832,7 +835,7 @@ importers:
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
       zod:
         specifier: 'catalog:'
-        version: 4.1.13
+        version: 4.3.6
     devDependencies:
       '@repo/core-util-eslint-config':
         specifier: workspace:^
@@ -866,7 +869,7 @@ importers:
         version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
       zod2md:
         specifier: 'catalog:'
-        version: 0.2.5(zod@4.1.13)
+        version: 0.2.5(zod@4.3.6)
 
   packages/plugin-test:
     dependencies:
@@ -881,7 +884,7 @@ importers:
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
       zod:
         specifier: 'catalog:'
-        version: 4.1.13
+        version: 4.3.6
     devDependencies:
       '@repo/core-util-eslint-config':
         specifier: workspace:^
@@ -918,7 +921,7 @@ importers:
         version: 5.25.0
       zod2md:
         specifier: 'catalog:'
-        version: 0.2.5(zod@4.1.13)
+        version: 0.2.5(zod@4.3.6)
 
   packages/plugin-tmdb:
     dependencies:
@@ -933,7 +936,7 @@ importers:
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
       zod:
         specifier: 'catalog:'
-        version: 4.1.13
+        version: 4.3.6
     devDependencies:
       '@kubb/cli':
         specifier: 'catalog:'
@@ -973,7 +976,7 @@ importers:
         version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
       zod2md:
         specifier: 'catalog:'
-        version: 0.2.5(zod@4.1.13)
+        version: 0.2.5(zod@4.3.6)
 
   packages/plugin-torrentio:
     dependencies:
@@ -988,7 +991,7 @@ importers:
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
       zod:
         specifier: 'catalog:'
-        version: 4.1.13
+        version: 4.3.6
     devDependencies:
       '@repo/core-util-eslint-config':
         specifier: workspace:^
@@ -1022,7 +1025,7 @@ importers:
         version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
       zod2md:
         specifier: 'catalog:'
-        version: 0.2.5(zod@4.1.13)
+        version: 0.2.5(zod@4.3.6)
 
   packages/plugin-tvdb:
     dependencies:
@@ -1040,7 +1043,7 @@ importers:
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
       zod:
         specifier: 'catalog:'
-        version: 4.1.13
+        version: 4.3.6
     devDependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -1089,7 +1092,7 @@ importers:
         version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
       zod2md:
         specifier: 'catalog:'
-        version: 0.2.5(zod@4.1.13)
+        version: 0.2.5(zod@4.3.6)
 
   packages/util-plugin-sdk:
     dependencies:
@@ -1104,10 +1107,10 @@ importers:
         version: 0.16.0
       zod:
         specifier: 'catalog:'
-        version: 4.1.13
+        version: 4.3.6
       zod-validation-error:
         specifier: ^5.0.0
-        version: 5.0.0(zod@4.1.13)
+        version: 5.0.0(zod@4.3.6)
     devDependencies:
       '@apollo/client':
         specifier: ^4.0.11
@@ -1229,7 +1232,50 @@ importers:
         version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
       zod:
         specifier: 'catalog:'
-        version: 4.1.13
+        version: 4.3.6
+
+  packages/util-rank-torrent-name:
+    dependencies:
+      '@viren070/parse-torrent-title':
+        specifier: ^0.6.5
+        version: 0.6.5
+      fastest-levenshtein:
+        specifier: ^1.0.16
+        version: 1.0.16
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.6
+    devDependencies:
+      '@repo/core-util-eslint-config':
+        specifier: workspace:^
+        version: link:../core/util-eslint-config
+      '@repo/core-util-typescript-config':
+        specifier: workspace:^
+        version: link:../core/util-typescript-config
+      '@repo/core-util-vitest-config':
+        specifier: workspace:^
+        version: link:../core/util-vitest-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.0.0
+      '@typescript-eslint/parser':
+        specifier: 'catalog:'
+        version: 8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      msw:
+        specifier: 'catalog:'
+        version: 2.12.4(@types/node@24.0.0)(typescript@5.9.3)
+      type-fest:
+        specifier: ^5.3.1
+        version: 5.3.1
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
 
 packages:
 
@@ -3744,6 +3790,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@viren070/parse-torrent-title@0.6.5':
+    resolution: {integrity: sha512-qjMC0jLyK0h4lZ2JT67huTvHJCxIPYPmPWDxuFjIqCZxTFEWYn/xptsiceNfn0PiOmyjDkvH0UBEmRzi1FpOuQ==}
+
   '@vitest/coverage-v8@4.0.15':
     resolution: {integrity: sha512-FUJ+1RkpTFW7rQITdgTi93qOCWJobWhBirEPCeXh2SW2wsTlFxy51apDz5gzG+ZEYt/THvWeNmhdAoS9DTwpCw==}
     peerDependencies:
@@ -4846,6 +4895,10 @@ packages:
 
   fast-uri@3.1.0:
     resolution: {integrity: sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==}
+
+  fastest-levenshtein@1.0.16:
+    resolution: {integrity: sha512-eRnCtTTtGZFpQCwhJiUOuxPQWRXVKYDn0b2PeHfXL6/Zi53SLAzAHfVhVWK2AryC/WH05kGfxhFIPvTF0SXQzg==}
+    engines: {node: '>= 4.9.1'}
 
   fastq@1.19.1:
     resolution: {integrity: sha512-GwLTyxkCXjXbxqIhTsMI2Nui8huMPtnxg7krajPJAjnEG/iiOS7i+zCtWGZR9G0NBKbXKh6X9m9UIsYX/N6vvQ==}
@@ -7953,8 +8006,8 @@ packages:
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
 
-  zod@4.1.13:
-    resolution: {integrity: sha512-AvvthqfqrAhNH9dnfmrfKzX5upOdjUVJYFqNSlkmGf64gRaTzlPwz99IHYnVs28qYAybvAlBV+H7pn0saFY4Ig==}
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
 snapshots:
 
@@ -10671,6 +10724,8 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
 
+  '@viren070/parse-torrent-title@0.6.5': {}
+
   '@vitest/coverage-v8@4.0.15(vitest@4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@bcoe/v8-coverage': 1.0.2
@@ -11915,7 +11970,7 @@ snapshots:
 
   eslint@9.39.2(jiti@2.6.1):
     dependencies:
-      '@eslint-community/eslint-utils': 4.9.0(eslint@9.39.2(jiti@2.6.1))
+      '@eslint-community/eslint-utils': 4.9.1(eslint@9.39.2(jiti@2.6.1))
       '@eslint-community/regexpp': 4.12.2
       '@eslint/config-array': 0.21.1
       '@eslint/config-helpers': 0.4.2
@@ -12066,6 +12121,8 @@ snapshots:
   fast-safe-stringify@2.1.1: {}
 
   fast-uri@3.1.0: {}
+
+  fastest-levenshtein@1.0.16: {}
 
   fastq@1.19.1:
     dependencies:
@@ -15410,16 +15467,16 @@ snapshots:
 
   yoctocolors@2.1.2: {}
 
-  zod-validation-error@5.0.0(zod@4.1.13):
+  zod-validation-error@5.0.0(zod@4.3.6):
     dependencies:
-      zod: 4.1.13
+      zod: 4.3.6
 
-  zod2md@0.2.5(zod@4.1.13):
+  zod2md@0.2.5(zod@4.3.6):
     dependencies:
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
       bundle-require: 5.1.0(esbuild@0.25.12)
       commander: 12.1.0
       esbuild: 0.25.12
-      zod: 4.1.13
+      zod: 4.3.6
 
-  zod@4.1.13: {}
+  zod@4.3.6: {}

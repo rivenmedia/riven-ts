@@ -5,7 +5,7 @@ import { transformSeries } from "../transformers/transform-series.ts";
 
 import type z from "zod";
 
-export const indexTVDBMediaItem: z.input<
+export const indexTVDBMediaItem: z.infer<
   typeof MediaItemIndexRequestedEventHandler
 > = async ({ dataSources, event }) => {
   if (event.item.tvdbId) {

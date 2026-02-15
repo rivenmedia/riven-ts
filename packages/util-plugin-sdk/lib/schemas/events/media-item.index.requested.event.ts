@@ -5,7 +5,7 @@ import {
   ShowContentRating,
 } from "../../dto/enums/content-ratings.enum.ts";
 import { ShowStatus } from "../../dto/enums/show-status.enum.ts";
-import { ItemRequest } from "../media/item-request.ts";
+import { ItemRequestInstance } from "../media/item-request.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
@@ -15,7 +15,7 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 export const MediaItemIndexRequestedEvent = createProgramEventSchema(
   "media-item.index.requested",
   z.object({
-    item: ItemRequest,
+    item: ItemRequestInstance,
   }),
 );
 
@@ -40,11 +40,7 @@ export const MediaItemIndexRequestedResponse = z
     item: z.discriminatedUnion("type", [
       IndexedItem.extend({
         type: z.literal("show"),
-        contentRating: z
-          .string()
-          .toLowerCase()
-          .default("unknown")
-          .pipe(ShowContentRating),
+        contentRating: ShowContentRating,
         firstAired: z.iso.date(),
         network: z.string().min(1).nullable(),
         status: ShowStatus,
@@ -53,12 +49,7 @@ export const MediaItemIndexRequestedResponse = z
             number: z.number(),
             episodes: z.array(
               z.object({
-                contentRating: z
-                  .string()
-                  .toLowerCase()
-                  .nullable()
-                  .default("unknown")
-                  .pipe(ShowContentRating),
+                contentRating: ShowContentRating,
                 number: z.number(),
                 title: z.string(),
                 posterPath: z.url().nullish(),
@@ -72,11 +63,7 @@ export const MediaItemIndexRequestedResponse = z
       IndexedItem.extend({
         type: z.literal("movie"),
         releaseDate: z.iso.date().nullish(),
-        contentRating: z
-          .string()
-          .toLowerCase()
-          .default("unknown")
-          .pipe(MovieContentRating),
+        contentRating: MovieContentRating,
       }),
     ]),
   })

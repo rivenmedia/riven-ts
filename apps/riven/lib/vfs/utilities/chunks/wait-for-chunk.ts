@@ -8,7 +8,7 @@ import { chunkCache } from "../chunk-cache.ts";
 import { fdToCurrentStreamPositionMap } from "../file-handle-map.ts";
 
 import type { ChunkMetadata } from "../../schemas/chunk.schema.ts";
-import type BodyReadable from "undici/types/readable.js";
+import type BodyReadable from "undici/types/readable.ts";
 
 interface WaitForChunkResponse {
   chunk: Buffer;

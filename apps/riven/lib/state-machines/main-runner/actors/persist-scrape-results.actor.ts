@@ -8,11 +8,11 @@ import { database } from "../../../database/database.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 
 import type { MainRunnerMachineIntake } from "../index.ts";
-import type { DefaultParserResult } from "parse-torrent-title";
+import type { RankedResult } from "@repo/util-rank-torrent-name";
 
 export interface PersistScrapeResultsInput {
   id: number;
-  results: Record<string, DefaultParserResult>;
+  results: RankedResult[];
   sendEvent: MainRunnerMachineIntake;
 }
 
@@ -35,31 +35,29 @@ export async function persistScrapeResults({
     return;
   }
 
-  let rank = 1;
-
   const em = database.em.fork();
   const newStreams: Stream[] = [];
 
-  for (const [infoHash, parseResult] of Object.entries(results)) {
+  for (const { data, hash, levRatio, rank } of results) {
     if (
       [...existingItem.streams, ...existingItem.blacklistedStreams].some(
-        (s) => s.infoHash === infoHash,
+        (s) => s.infoHash === hash,
       )
     ) {
       continue;
     }
 
-    const stream = new Stream();
+    const stream = em.create(Stream, {
+      infoHash: hash,
+      rawTitle: data.rawTitle,
+      parsedTitle: data.title,
+      rank,
+      levRatio,
+    });
 
-    stream.infoHash = infoHash;
-    stream.rawTitle = parseResult.title;
-    stream.parsedTitle = parseResult.title;
-    stream.rank = rank++;
     stream.parents.add(existingItem);
 
     newStreams.push(stream);
-
-    em.persist(stream);
   }
 
   if (newStreams.length > 0) {
@@ -78,8 +76,6 @@ export async function persistScrapeResults({
   existingItem.scrapedAt = DateTime.now().toJSDate();
   existingItem.scrapedTimes++;
   existingItem.streams.add(newStreams);
-
-  em.persist(existingItem);
 
   try {
     await validateOrReject(existingItem);
