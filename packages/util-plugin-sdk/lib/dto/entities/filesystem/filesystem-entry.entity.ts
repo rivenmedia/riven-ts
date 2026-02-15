@@ -58,10 +58,6 @@ function getMediaItemPathParts(mediaItem: MediaItem) {
 @Entity({
   abstract: true,
   discriminatorColumn: "type",
-  discriminatorMap: {
-    media: "MediaEntry",
-    subtitle: "SubtitleEntry",
-  },
 })
 export abstract class FileSystemEntry {
   @Field((_type) => ID)
