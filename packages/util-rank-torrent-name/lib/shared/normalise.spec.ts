@@ -34,7 +34,7 @@ describe("normaliseTitle", () => {
   });
 
   it("normalises unicode (NFKC)", () => {
-    // fullwidth characters should be normalized
+    // fullwidth characters should be normalised
     expect(normaliseTitle("Ｈｅｌｌｏ")).toBe("hello");
   });
 

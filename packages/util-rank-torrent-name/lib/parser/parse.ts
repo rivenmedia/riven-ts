@@ -18,8 +18,6 @@ const parser = new Parser()
       remove: true,
       keepMatching: true,
     },
-  ])
-  .addHandlers([
     {
       field: "complete",
       pattern: new RegExp(
@@ -34,25 +32,25 @@ const parser = new Parser()
   .addHandlers([
     {
       field: "episodes",
-      process: (title, m, result) => {
+      process: (title, meta, result) => {
         const animePattern = new RegExp("One.*?Piece|Bleach|Naruto");
 
         if (animePattern.test(title)) {
           if (result.has("episodes")) {
-            return m;
+            return meta;
           }
 
           const episodePattern = new RegExp("\\b\\d{1,4}\\b");
           const matches = episodePattern.exec(title);
 
           if (matches) {
-            m.value = [parseInt(matches[0], 10)];
-            m.mIndex = matches.index;
-            m.remove = true;
+            meta.value = [parseInt(matches[0], 10)];
+            meta.mIndex = matches.index;
+            meta.remove = true;
           }
         }
 
-        return m;
+        return meta;
       },
     },
   ])
@@ -63,10 +61,6 @@ const parser = new Parser()
       matchGroup: 1,
       remove: true,
       transform: transforms.toLowercase(),
-    },
-    {
-      field: "country",
-      pattern: new RegExp("\\b(US|UK|AU|NZ|CA)\\b"),
     },
     {
       field: "site",
@@ -80,14 +74,16 @@ export function parse(rawTitle: string) {
     throw new TypeError("The input title must be a non-empty string.");
   }
 
-  const p = ParsedDataSchema.safeParse({
+  const parsedData = ParsedDataSchema.safeParse({
     ...parser.parse(rawTitle),
     rawTitle,
   });
 
-  if (!p.success) {
-    throw new Error(`Failed to parse ${rawTitle}: ${prettifyError(p.error)}`);
+  if (!parsedData.success) {
+    throw new Error(
+      `Failed to parse ${rawTitle}: ${prettifyError(parsedData.error)}`,
+    );
   }
 
-  return p.data;
+  return parsedData.data;
 }

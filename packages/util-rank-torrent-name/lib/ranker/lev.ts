@@ -21,7 +21,7 @@ function levRatio(a: string, b: string): number {
 
 /**
  * Compare a parsed title against a correct title (and optional aliases)
- * using the Levenshtein ratio on normalized titles.
+ * using the Levenshtein ratio on normalised titles.
  *
  * Ratios below the threshold are returned as 0, matching
  * python-Levenshtein's score_cutoff behavior.
@@ -42,7 +42,7 @@ export function getLevRatio(
     throw new Error("The threshold must be a number between 0 and 1.");
   }
 
-  const normalizedParsed = normaliseTitle(parsedTitle);
+  const normalisedParsed = normaliseTitle(parsedTitle);
 
   const candidates = new Set<string>([normaliseTitle(correctTitle)]);
 
@@ -55,7 +55,7 @@ export function getLevRatio(
   let best = 0;
 
   for (const candidate of candidates) {
-    const r = levRatio(candidate, normalizedParsed);
+    const r = levRatio(candidate, normalisedParsed);
 
     if (r > best) {
       best = r;

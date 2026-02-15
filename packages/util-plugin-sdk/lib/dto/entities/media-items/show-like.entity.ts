@@ -1,7 +1,7 @@
 import { Entity } from "@mikro-orm/core";
 
-import { ShowContentRating } from "../../../enums/content-ratings.enum.ts";
-import { MediaItem } from "../media-item.entity.ts";
+import { ShowContentRating } from "../../enums/content-ratings.enum.ts";
+import { MediaItem } from "./media-item.entity.ts";
 
 @Entity({
   abstract: true,

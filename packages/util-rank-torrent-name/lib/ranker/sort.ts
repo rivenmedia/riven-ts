@@ -10,11 +10,11 @@ export function sortTorrents(
 ) {
   const filteredTorrents =
     resolutions.size > 0
-      ? torrents.filter((rank) => {
-          return resolutions.has(
+      ? torrents.filter((rank) =>
+          resolutions.has(
             RESOLUTION_MAP.get(rank.data.resolution) ?? "unknown",
-          );
-        })
+          ),
+        )
       : torrents;
 
   const sortedTorrents = filteredTorrents.sort((a, b) => b.rank - a.rank);

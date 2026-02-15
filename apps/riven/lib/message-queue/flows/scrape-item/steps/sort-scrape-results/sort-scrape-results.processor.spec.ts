@@ -125,8 +125,15 @@ const it = baseIt.extend<{
   },
 });
 
-it("throws an UnrecoverableError if no results are found", async ({ job }) => {
+it("throws an UnrecoverableError if no results are found", async ({
+  movie,
+  job,
+}) => {
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
+
+  await job.updateData({
+    id: movie.id,
+  });
 
   await expect(() => sortScrapeResultsProcessor(job, vi.fn())).rejects.toThrow(
     UnrecoverableError,
@@ -156,7 +163,6 @@ it("returns valid movie torrents if the item is a movie", async ({
 
   await job.updateData({
     id: movie.id,
-    title: movie.title,
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -198,7 +204,6 @@ it("returns valid show torrents if the item is a show", async ({
 
   await job.updateData({
     id: show.id,
-    title: show.title,
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -242,7 +247,6 @@ it("returns valid season torrents if the item is a season", async ({
 
   await job.updateData({
     id: season.id,
-    title: await season.getShowTitle(),
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -286,7 +290,6 @@ it("returns valid episode torrents if the item is an episode", async ({
 
   await job.updateData({
     id: episode.id,
-    title: await episode.getShowTitle(),
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -321,7 +324,6 @@ it("filters show torrents if the item is a movie", async ({ movie, job }) => {
 
   await job.updateData({
     id: movie.id,
-    title: movie.title,
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -357,7 +359,6 @@ it("filters out torrents with 2 or fewer episodes for shows", async ({
 
   await job.updateData({
     id: show.id,
-    title: show.title,
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -393,7 +394,6 @@ it("filters out torrents with an incorrect number of seasons for shows", async (
 
   await job.updateData({
     id: show.id,
-    title: show.title,
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -437,7 +437,6 @@ it("filters out torrents with incorrect number of episodes for single-season sho
 
   await job.updateData({
     id: show.id,
-    title: show.title,
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -479,7 +478,6 @@ it("filters out duplicate torrents from different plugins", async ({
 
   await job.updateData({
     id: movie.id,
-    title: movie.title,
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -513,7 +511,6 @@ it("filters out torrents with no seasons for season items", async ({
 
   await job.updateData({
     id: season.id,
-    title: await season.getShowTitle(),
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -549,7 +546,6 @@ it("filters out torrents with the incorrect season number for season items", asy
 
   await job.updateData({
     id: season.id,
-    title: await season.getShowTitle(),
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -585,7 +581,6 @@ it("filters out torrents with 2 or fewer episodes for season items", async ({
 
   await job.updateData({
     id: season.id,
-    title: await season.getShowTitle(),
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -621,7 +616,6 @@ it("filters out torrents with incorrect episodes for season items", async ({
 
   await job.updateData({
     id: season.id,
-    title: await season.getShowTitle(),
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -657,7 +651,6 @@ it("filters out torrents with incorrect episode numbers for episode items", asyn
 
   await job.updateData({
     id: episode.id,
-    title: await episode.getShowTitle(),
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -693,7 +686,6 @@ it("filters out torrents with the incorrect season number for episode items", as
 
   await job.updateData({
     id: episode.id,
-    title: await episode.getShowTitle(),
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -729,7 +721,6 @@ it("filters out torrents with no episodes for episode items", async ({
 
   await job.updateData({
     id: episode.id,
-    title: await episode.getShowTitle(),
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -771,7 +762,6 @@ it("filters out torrents that do not match the media item's country", async ({
 
   await job.updateData({
     id: episode.id,
-    title: await episode.getShowTitle(),
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -818,7 +808,6 @@ it("does not filter out torrents that do not match the media item's country if t
 
   await job.updateData({
     id: episode.id,
-    title: await episode.getShowTitle(),
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -873,7 +862,6 @@ it("filters out torrents that do not match the media item's year ± 1 year", asy
 
   await job.updateData({
     id: movie.id,
-    title: movie.title,
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -930,7 +918,6 @@ it('filters out torrents that are not dubbed if the media item is anime and the 
 
   await job.updateData({
     id: movie.id,
-    title: movie.title,
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -983,7 +970,6 @@ it('does not filter out torrents that are not dubbed if the media item is anime 
 
   await job.updateData({
     id: movie.id,
-    title: movie.title,
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());
@@ -1024,7 +1010,6 @@ it("returns sorted results", async ({ movie, job }) => {
 
   await job.updateData({
     id: movie.id,
-    title: movie.title,
   });
 
   const result = await sortScrapeResultsProcessor(job, vi.fn());

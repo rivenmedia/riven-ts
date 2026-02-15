@@ -12,7 +12,7 @@ import { Min } from "class-validator";
 import { Field, ObjectType } from "type-graphql";
 
 import { Episode } from "./episode.entity.ts";
-import { ShowLikeMediaItem } from "./interfaces/show-like.interface.ts";
+import { ShowLikeMediaItem } from "./show-like.entity.ts";
 import { Show } from "./show.entity.ts";
 
 @ObjectType()

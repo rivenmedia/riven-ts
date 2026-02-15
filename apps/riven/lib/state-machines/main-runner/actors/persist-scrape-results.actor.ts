@@ -47,19 +47,17 @@ export async function persistScrapeResults({
       continue;
     }
 
-    const stream = new Stream();
-
-    stream.infoHash = hash;
-    stream.rawTitle = data.rawTitle;
-    stream.parsedTitle = data.title;
-    stream.rank = rank;
-    stream.levRatio = levRatio;
+    const stream = em.create(Stream, {
+      infoHash: hash,
+      rawTitle: data.rawTitle,
+      parsedTitle: data.title,
+      rank,
+      levRatio,
+    });
 
     stream.parents.add(existingItem);
 
     newStreams.push(stream);
-
-    em.persist(stream);
   }
 
   if (newStreams.length > 0) {
@@ -78,8 +76,6 @@ export async function persistScrapeResults({
   existingItem.scrapedAt = DateTime.now().toJSDate();
   existingItem.scrapedTimes++;
   existingItem.streams.add(newStreams);
-
-  em.persist(existingItem);
 
   try {
     await validateOrReject(existingItem);

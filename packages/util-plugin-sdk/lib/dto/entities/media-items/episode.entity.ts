@@ -13,8 +13,8 @@ import {
   ShowContentRating,
   ShowContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
-import { ShowLikeMediaItem } from "./interfaces/show-like.interface.ts";
 import { Season } from "./season.entity.ts";
+import { ShowLikeMediaItem } from "./show-like.entity.ts";
 
 @ObjectType()
 @Entity()
