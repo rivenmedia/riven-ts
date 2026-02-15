@@ -16,7 +16,7 @@ describe("parse", () => {
     expect(data.quality).toBe("BluRay");
     expect(data.type).toBe("movie");
     expect(data.rawTitle).toBe("The Matrix 1999 1080p BluRay x264-GROUP");
-    expect(data.normalizedTitle).toBe("the matrix");
+    expect(data.normalisedTitle).toBe("the matrix");
   });
 
   it("should parse a TV show with season and episode", () => {

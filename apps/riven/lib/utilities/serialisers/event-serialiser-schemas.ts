@@ -1,7 +1,7 @@
 import { RivenEvent, RivenEventSchemaMap } from "@repo/util-plugin-sdk/events";
 import { ItemRequestInstance } from "@repo/util-plugin-sdk/schemas/media/item-request";
-import { MediaEntryInstance } from "@repo/util-plugin-sdk/schemas/media/media-entry";
-import { MediaItemInstance } from "@repo/util-plugin-sdk/schemas/media/media-item";
+import { MediaEntryInstance } from "@repo/util-plugin-sdk/schemas/media/media-entry-instance";
+import { MediaItemInstance } from "@repo/util-plugin-sdk/schemas/media/media-item-instance";
 
 import { SerialisedFileSystemEntry } from "./serialised-filesystem-entry.ts";
 import { SerialisedItemRequest } from "./serialised-item-request.ts";

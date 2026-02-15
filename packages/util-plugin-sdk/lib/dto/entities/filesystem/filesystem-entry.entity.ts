@@ -39,7 +39,7 @@ function getMediaItemPathParts(mediaItem: MediaItem) {
   if (mediaItem instanceof Episode) {
     const seasonLabel = mediaItem.season.getProperty("prettyName");
     const showLabel = mediaItem.season
-      .getProperty("parent")
+      .getProperty("show")
       .getProperty("prettyName");
 
     if (!seasonLabel || !showLabel) {

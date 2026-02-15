@@ -19,8 +19,9 @@ export const getShowsDirectoryEntries = async (
       },
     },
     {
-      // @ts-expect-error - MikroORM doesn't like `mediaItem.season.parent` in the type definition, but it does work
-      populate: ["mediaItem.season.parent"],
+      // TODO: Is there a better way to do this?
+      // @ts-expect-error - MikroORM doesn't like `mediaItem.season.show` in the type definition
+      populate: ["mediaItem.season.show"],
     },
   );
 

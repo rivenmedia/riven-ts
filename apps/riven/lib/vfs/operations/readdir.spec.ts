@@ -7,7 +7,6 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities/index";
 import { MovieContentRating } from "@repo/util-plugin-sdk/dto/enums/content-ratings.enum";
 
-import { ref } from "@mikro-orm/core";
 import { expect, it, vi } from "vitest";
 
 import { database } from "../../database/database.ts";
@@ -48,14 +47,14 @@ it("returns all shows for the /shows path", async () => {
     year: 2020,
     state: "completed",
     number: 1,
-    parent: ref(show),
   });
+
+  show.seasons.add(season);
 
   await em.flush();
 
   const episode = em.create(Episode, {
     number: 1,
-    season: ref(season),
     year: 2020,
     title: "Example Episode 1",
     state: "downloaded",
@@ -63,11 +62,15 @@ it("returns all shows for the /shows path", async () => {
     contentRating: "tv-14",
   });
 
+  season.episodes.add(episode);
+
+  await em.flush();
+
   em.create(MediaEntry, {
     originalFilename: "Example Episode 1.mkv",
     fileSize: 123456789,
     provider: "@repo/plugin-test",
-    mediaItem: ref(episode),
+    mediaItem: episode,
   });
 
   await em.flush();
@@ -103,20 +106,22 @@ it('does not return entries for the "all shows" path for shows that do not have 
     year: 2020,
     state: "completed",
     number: 1,
-    parent: ref(show),
   });
+
+  show.seasons.add(season);
 
   await em.flush();
 
-  em.create(Episode, {
+  const episode = em.create(Episode, {
     number: 1,
-    season: ref(season),
     year: 2020,
     title: "Example Episode 1",
     state: "downloaded",
     type: "episode",
     contentRating: "tv-14",
   });
+
+  season.episodes.add(episode);
 
   await em.flush();
 
@@ -141,14 +146,12 @@ it("returns all movies for the /movies path", async () => {
       contentRating: "unknown",
     });
 
-    const mediaEntry = em.create(MediaEntry, {
+    em.create(MediaEntry, {
       originalFilename: `Example Movie ${i.toString().padStart(2, "0")}.mkv`,
       fileSize: 987654321,
       provider: "@repo/plugin-test",
-      mediaItem: ref(movie),
+      mediaItem: movie,
     });
-
-    movie.filesystemEntries.add(mediaEntry);
   }
 
   await em.flush();
@@ -187,14 +190,14 @@ it("returns all seasons for a single show path", async () => {
       year: 2020,
       state: "completed",
       number: i,
-      parent: ref(show),
     });
+
+    show.seasons.add(season);
 
     await em.flush();
 
     const episode = em.create(Episode, {
       number: 1,
-      season: ref(season),
       year: 2020,
       title: "Example Episode 1",
       state: "downloaded",
@@ -202,11 +205,15 @@ it("returns all seasons for a single show path", async () => {
       contentRating: "tv-14",
     });
 
+    season.episodes.add(episode);
+
+    await em.flush();
+
     em.create(MediaEntry, {
       originalFilename: "Example Episode 1.mkv",
       fileSize: 123456789,
       provider: "@repo/plugin-test",
-      mediaItem: ref(episode),
+      mediaItem: episode,
     });
   }
 
@@ -246,14 +253,14 @@ it("does not return entries for a season that does not have any episodes with a 
       year: 2020,
       state: "completed",
       number: i,
-      parent: ref(show),
     });
+
+    show.seasons.add(season);
 
     await em.flush();
 
     const episode = em.create(Episode, {
       number: 1,
-      season: ref(season),
       year: 2020,
       title: "Example Episode 1",
       state: "downloaded",
@@ -261,12 +268,16 @@ it("does not return entries for a season that does not have any episodes with a 
       contentRating: "tv-14",
     });
 
+    season.episodes.add(episode);
+
+    await em.flush();
+
     if (i === 1) {
       em.create(MediaEntry, {
         originalFilename: "Example Episode 1.mkv",
         fileSize: 123456789,
         provider: "@repo/plugin-test",
-        mediaItem: ref(episode),
+        mediaItem: episode,
       });
     }
   }
@@ -302,15 +313,15 @@ it("returns all episodes for a single season path", async () => {
     year: 2020,
     state: "completed",
     number: 1,
-    parent: ref(show),
   });
+
+  show.seasons.add(season);
 
   await em.flush();
 
   for (let i = 1; i <= 3; i++) {
     const episode = em.create(Episode, {
       number: i,
-      season: ref(season),
       year: 2020,
       title: `Example Episode ${i.toString().padStart(2, "0")}`,
       state: "downloaded",
@@ -318,14 +329,16 @@ it("returns all episodes for a single season path", async () => {
       contentRating: "tv-14",
     });
 
-    const mediaEntry = em.create(MediaEntry, {
+    season.episodes.add(episode);
+
+    await em.flush();
+
+    em.create(MediaEntry, {
       originalFilename: `Example Episode ${i.toString().padStart(2, "0")}.mkv`,
       fileSize: 123456789,
       provider: "@repo/plugin-test",
-      mediaItem: ref(episode),
+      mediaItem: episode,
     });
-
-    episode.filesystemEntries.add(mediaEntry);
   }
 
   await em.flush();
@@ -363,15 +376,15 @@ it("does not return entries for episodes that does not have a media entry when v
     year: 2020,
     state: "completed",
     number: 1,
-    parent: ref(show),
   });
+
+  show.seasons.add(season);
 
   await em.flush();
 
   for (let i = 1; i <= 3; i++) {
     const episode = em.create(Episode, {
       number: i,
-      season: ref(season),
       year: 2020,
       title: `Example Episode ${i.toString().padStart(2, "0")}`,
       state: "downloaded",
@@ -379,12 +392,16 @@ it("does not return entries for episodes that does not have a media entry when v
       contentRating: "tv-14",
     });
 
+    season.episodes.add(episode);
+
+    await em.flush();
+
     if (i === 1) {
       em.create(MediaEntry, {
         originalFilename: `Example Episode ${i.toString().padStart(2, "0")}.mkv`,
         fileSize: 123456789,
         provider: "@repo/plugin-test",
-        mediaItem: ref(episode),
+        mediaItem: episode,
       });
     }
   }
@@ -418,7 +435,7 @@ it("returns the media entry's filename when viewing a single movie's directory",
     originalFilename: "Example Movie 01.mkv",
     fileSize: 987654321,
     provider: "@repo/plugin-test",
-    mediaItem: ref(movie),
+    mediaItem: movie,
   });
 
   await em.flush();
@@ -447,14 +464,12 @@ it('does not return entries for the "all movies" path when a movie does not have
     });
 
     if (i === 1) {
-      const mediaEntry = em.create(MediaEntry, {
+      em.create(MediaEntry, {
         originalFilename: `Example Movie ${i.toString().padStart(2, "0")}.mkv`,
         fileSize: 987654321,
         provider: "@repo/plugin-test",
-        mediaItem: ref(movie),
+        mediaItem: movie,
       });
-
-      movie.filesystemEntries.add(mediaEntry);
     }
   }
 

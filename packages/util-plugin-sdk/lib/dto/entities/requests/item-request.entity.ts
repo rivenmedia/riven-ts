@@ -49,6 +49,10 @@ export class ItemRequest {
   @Property()
   requestedBy!: string;
 
+  @Field()
+  @Property()
+  externalRequestId?: string;
+
   @Field(() => Date)
   @Property()
   createdAt: Opt<Date> = DateTime.now().toJSDate();

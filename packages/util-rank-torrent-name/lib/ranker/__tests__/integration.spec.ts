@@ -6,7 +6,7 @@ import {
   parse,
   rank,
   rankTorrent,
-} from "../index.ts";
+} from "../../index.ts";
 
 describe("rankTorrent (integration)", () => {
   it("parses, ranks, and checks fetch in one call", () => {
@@ -14,6 +14,7 @@ describe("rankTorrent (integration)", () => {
     const result = rankTorrent(
       "Movie.2024.1080p.BluRay.x264-GROUP",
       "1234567890123456789012345678901234567893",
+      "Movie",
       settings,
     );
 
@@ -30,6 +31,7 @@ describe("rankTorrent (integration)", () => {
     const result = rankTorrent(
       "Breaking.Bad.S01E01.720p.BluRay.x264-GROUP",
       "1234567890123456789012345678901234567893",
+      "Breaking Bad",
       settings,
     );
 
@@ -59,6 +61,7 @@ describe("rankTorrent (integration)", () => {
     const result = rankTorrent(
       "Movie.2024.1080p.BluRay.REMUX.AVC-GROUP",
       "1234567890123456789012345678901234567893",
+      "Breaking Bad",
       settings,
     );
 
@@ -73,6 +76,7 @@ describe("rankTorrent (integration)", () => {
     const result = rankTorrent(
       "Movie.2024.CAM-GROUP",
       "1234567890123456789012345678901234567893",
+      "Breaking Bad",
       settings,
     );
 

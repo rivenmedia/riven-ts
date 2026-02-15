@@ -1,4 +1,5 @@
 import {
+  BeforeCreate,
   Entity,
   ManyToOne,
   type Opt,
@@ -12,12 +13,12 @@ import {
   ShowContentRating,
   ShowContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
-import { MediaItem } from "./media-item.entity.ts";
+import { ShowLikeMediaItem } from "./interfaces/show-like.interface.ts";
 import { Season } from "./season.entity.ts";
 
 @ObjectType()
 @Entity()
-export class Episode extends MediaItem {
+export class Episode extends ShowLikeMediaItem {
   @Field()
   @Property()
   @Min(1)
@@ -36,17 +37,15 @@ export class Episode extends MediaItem {
 
   async getShowTitle() {
     const season = await this.season.loadOrFail({
-      populate: ["parent"],
+      populate: ["show"],
     });
-    const show = await season.parent.loadOrFail();
+    const show = await season.show.loadOrFail();
 
     return show.title;
   }
 
   override get prettyName(): Opt<string> {
-    const baseName = this.season
-      .getProperty("parent")
-      .getProperty("prettyName");
+    const baseName = this.season.getProperty("show").getProperty("prettyName");
 
     if (!baseName) {
       throw new TypeError(
@@ -64,4 +63,13 @@ export class Episode extends MediaItem {
   }
 
   override type: Opt<"episode"> = "episode" as const;
+
+  declare tvdbId: Opt<string>;
+  declare tmdbId?: never;
+
+  @BeforeCreate()
+  setTvdbId() {
+    this.tvdbId ||= this.season.getProperty("tvdbId");
+    this.imdbId ??= this.season.getProperty("imdbId") ?? null;
+  }
 }

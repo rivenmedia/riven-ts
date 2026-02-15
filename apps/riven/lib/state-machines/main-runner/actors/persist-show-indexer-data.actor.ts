@@ -5,7 +5,7 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities/index";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 
-import { ref } from "@mikro-orm/core";
+import { UnrecoverableError } from "bullmq";
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
 
@@ -45,6 +45,12 @@ export async function persistShowIndexerData({
     return;
   }
 
+  const { tvdbId } = itemRequest;
+
+  if (!tvdbId) {
+    throw new UnrecoverableError("Item request is missing tvdbId");
+  }
+
   try {
     const em = database.em.fork();
 
@@ -58,7 +64,7 @@ export async function persistShowIndexerData({
         contentRating: item.contentRating,
         state: "indexed",
         imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
-        tvdbId: itemRequest.tvdbId ?? null,
+        tvdbId,
         status: item.status,
         posterPath: item.posterUrl ?? null,
         airedAt: firstAired?.toJSDate() ?? null,
@@ -82,12 +88,12 @@ export async function persistShowIndexerData({
         const seasonEntry = transaction.create(Season, {
           title: `${show.title} - Season ${season.number.toString().padStart(2, "0")}`,
           imdbId: show.imdbId ?? null,
-          tvdbId: itemRequest.tvdbId ?? null,
           year: seasonYear,
           number: season.number,
-          parent: ref(show),
           state: "indexed",
         });
+
+        show.seasons.add(seasonEntry);
 
         await transaction.flush();
 
@@ -96,17 +102,17 @@ export async function persistShowIndexerData({
             ? DateTime.fromISO(episode.airedAt).year
             : seasonYear;
 
-          transaction.create(Episode, {
+          const episodeEntry = transaction.create(Episode, {
             imdbId: seasonEntry.imdbId ?? null,
-            tvdbId: seasonEntry.tvdbId ?? null,
             absoluteNumber: ++totalEpisodes,
             contentRating: episode.contentRating,
             number: episode.number,
             title: episode.title,
             state: "indexed",
-            season: ref(seasonEntry),
             year: episodeYear,
           });
+
+          seasonEntry.episodes.add(episodeEntry);
         }
       }
 

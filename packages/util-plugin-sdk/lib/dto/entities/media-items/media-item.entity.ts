@@ -13,60 +13,24 @@ import {
 } from "@mikro-orm/core";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { DateTime } from "luxon";
-import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
-import { z } from "zod";
+import { Field, ID, ObjectType } from "type-graphql";
 
 import {
   MediaItemContentRating,
   MediaItemContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
+import { MediaItemState } from "../../enums/media-item-state.enum.ts";
+import { MediaItemType } from "../../enums/media-item-type.enum.ts";
 import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import { Stream } from "../streams/stream.entity.ts";
 
 import type { MediaEntry } from "../index.ts";
 
-export const MediaItemState = z.enum([
-  "unknown",
-  "unreleased",
-  "ongoing",
-  "requested",
-  "indexed",
-  "scraped",
-  "downloaded",
-  "symlinked",
-  "completed",
-  "partially_completed",
-  "failed",
-  "paused",
-]);
-
-export type MediaItemState = z.infer<typeof MediaItemState>;
-
-registerEnumType(MediaItemState.enum, {
-  name: "MediaItemState",
-  description: "The state of a media item in the processing pipeline",
-});
-
-export const MediaItemType = z.enum(["movie", "show", "season", "episode"]);
-
-export type MediaItemType = z.infer<typeof MediaItemType>;
-
-registerEnumType(MediaItemType.enum, {
-  name: "MediaItemType",
-  description: "The type of a media item",
-});
-
 @ObjectType()
 @Entity({
   abstract: true,
   discriminatorColumn: "type",
-  discriminatorMap: {
-    movie: "Movie",
-    show: "Show",
-    season: "Season",
-    episode: "Episode",
-  },
 })
 @Index({ properties: ["type", "airedAt"] })
 export abstract class MediaItem {
@@ -176,10 +140,6 @@ export abstract class MediaItem {
   @Field(() => String, { nullable: true })
   @Property()
   guid?: string | null;
-
-  @Field(() => String, { nullable: true })
-  @Property()
-  overseerrId?: number | null;
 
   @Field(() => MediaItemState.enum)
   @Enum(() => MediaItemState.enum)

@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { MediaEntryInstance } from "../media/media-entry.ts";
+import { MediaEntryInstance } from "../media/media-entry-instance.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 

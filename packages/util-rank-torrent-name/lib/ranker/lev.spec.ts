@@ -13,7 +13,7 @@ describe("titleMatch", () => {
     ["American Horror Story", "American Story Horror", false],
     ["S W A T", "S.W.A.T.", true],
   ] as const)("titleMatch(%s, %s) => %s", (a, b, expected) => {
-    expect(titleMatch(a, b)).toBe(expected);
+    expect(titleMatch(a, b, 0.85)).toBe(expected);
   });
 });
 
@@ -27,12 +27,12 @@ describe("getLevRatio", () => {
     ["American Horror Story", "American Story Horror", 0],
     ["S W A T", "S.W.A.T.", 1],
   ] as const)("getLevRatio(%s, %s) => %s", (a, b, expected) => {
-    expect(getLevRatio(a, b)).toBe(expected);
+    expect(getLevRatio(a, b, 0.85)).toBe(expected);
   });
 
   it("throws on empty titles", () => {
-    expect(() => getLevRatio("", "foo")).toThrow();
-    expect(() => getLevRatio("foo", "")).toThrow();
+    expect(() => getLevRatio("", "foo", 0.85)).toThrow();
+    expect(() => getLevRatio("foo", "", 0.85)).toThrow();
   });
 
   it("throws on invalid threshold", () => {
@@ -87,7 +87,7 @@ describe("Integration with parse", () => {
     "parse(%s) matches %s => %s",
     (rawTitle, correctTitle, expected) => {
       const data = parse(rawTitle);
-      const match = titleMatch(correctTitle, data.title);
+      const match = titleMatch(correctTitle, data.title, 0.85);
 
       expect(match).toBe(expected);
     },

@@ -1,5 +1,5 @@
 import { FileSystemEntryType } from "@repo/util-plugin-sdk/dto/entities";
-import { FileSystemEntry } from "@repo/util-plugin-sdk/schemas/media/filesystem-entry";
+import { FileSystemEntryInstance } from "@repo/util-plugin-sdk/schemas/media/filesystem-entry-instance";
 
 import { wrap } from "@mikro-orm/core";
 import z from "zod";
@@ -11,7 +11,7 @@ import { database } from "../../database/database.ts";
  */
 export const SerialisedFileSystemEntry = z.codec(
   z.looseObject({ type: FileSystemEntryType }),
-  FileSystemEntry,
+  FileSystemEntryInstance,
   {
     decode: (data) => {
       switch (data.type) {

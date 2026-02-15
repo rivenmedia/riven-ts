@@ -1,5 +1,6 @@
 import { Movie } from "@repo/util-plugin-sdk/dto/entities/index";
 
+import { UnrecoverableError } from "bullmq";
 import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
 import z from "zod";
@@ -40,13 +41,21 @@ export async function persistMovieIndexerData({
     return;
   }
 
+  const { tmdbId } = itemRequest;
+
+  if (!tmdbId) {
+    throw new UnrecoverableError(
+      "Item request is missing tmdbId, cannot persist movie indexer data",
+    );
+  }
+
   try {
     const em = database.em.fork();
 
     const mediaItem = em.create(Movie, {
       title: item.title,
       imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
-      tmdbId: itemRequest.tmdbId ?? null,
+      tmdbId,
       contentRating: item.contentRating,
       rating: item.rating ?? null,
       posterPath: item.posterUrl ?? null,
