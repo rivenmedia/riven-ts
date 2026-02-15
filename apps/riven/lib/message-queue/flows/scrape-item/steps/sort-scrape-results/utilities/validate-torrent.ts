@@ -78,15 +78,6 @@ export const validateTorrent = async (
   }
 
   if (item instanceof Show) {
-    if (torrent.data.episodes.length && torrent.data.episodes.length <= 2) {
-      throw new SkippedTorrentError(
-        "Skipping torrent with 2 or fewer episodes for show",
-        itemTitle,
-        torrent.data.rawTitle,
-        torrent.hash,
-      );
-    }
-
     await wrap(item).populate(["seasons"]);
 
     if (torrent.data.seasons.length) {
@@ -94,7 +85,10 @@ export const validateTorrent = async (
         new Set(item.seasons.map((season) => season.number)),
       );
 
-      if (seasonsIntersection.size !== item.seasons.length) {
+      const expectedSeasonCount =
+        item.status === "ended" ? item.seasons.length : item.seasons.length - 1;
+
+      if (seasonsIntersection.size < expectedSeasonCount) {
         throw new SkippedTorrentError(
           "Skipping torrent with incorrect number of seasons",
           itemTitle,
