@@ -178,33 +178,26 @@ export const sortScrapeResultsProcessor =
 
           await wrap(item).populate(["seasons.episodes"]);
 
-          const episodesIntersection = new Set(
-            torrent.data.episodes,
-          ).intersection(
-            new Set(
-              item.seasons
-                .getItems()
-                .flatMap((season) =>
-                  season.episodes.map((episode) => episode.absoluteNumber),
-                ),
-            ),
-          );
+          if (item.seasons.length === 1 && item.seasons[0]?.episodes.length) {
+            const { episodes } = item.seasons[0];
 
-          const totalEpisodes = item.seasons.reduce(
-            (acc, season) => acc + season.episodes.length,
-            0,
-          );
-
-          if (
-            torrent.data.episodes.length &&
-            episodesIntersection.size !== totalEpisodes
-          ) {
-            throw new SkippedTorrentError(
-              "Skipping torrent with incorrect number of episodes for show",
-              job.data.title,
-              rawTitle,
-              hash,
+            const episodesIntersection = new Set(
+              torrent.data.episodes,
+            ).intersection(
+              new Set(episodes.map((episode) => episode.absoluteNumber)),
             );
+
+            if (
+              torrent.data.episodes.length &&
+              episodesIntersection.size !== episodes.length
+            ) {
+              throw new SkippedTorrentError(
+                "Skipping torrent with incorrect number of episodes for single-season show",
+                job.data.title,
+                rawTitle,
+                hash,
+              );
+            }
           }
         }
 
@@ -287,7 +280,7 @@ export const sortScrapeResultsProcessor =
 
           if (!hasEpisodes && !hasSeasons) {
             throw new SkippedTorrentError(
-              "Skipping torrent with no season or episode data for episode item",
+              "Skipping torrent with no seasons or episodes for episode item",
               job.data.title,
               rawTitle,
               hash,
