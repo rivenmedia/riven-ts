@@ -3,11 +3,6 @@ import { createActor, waitFor } from "xstate";
 import { rivenMachine } from "./state-machines/program/index.ts";
 import { logger } from "./utilities/logger/logger.ts";
 
-// Add this temporary code to trigger a test error
-setTimeout(() => {
-  throw new Error("Test error for Spotlight!");
-}, 1000);
-
 process.on("uncaughtException", (error) => {
   logger.error(error);
 });

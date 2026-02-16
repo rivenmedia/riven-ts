@@ -29,7 +29,7 @@ catalog:
   "@typescript-eslint/parser": ^8.49.0
   "@vitest/coverage-v8": 4.0.15
   bullmq: 5.66.4
-  bullmq-otel: ^1.1.0
+  bullmq-otel: ^1.2.0
   class-validator: 0.14.3
   es-toolkit: ^1.44.0
   eslint: ^9.39.2

@@ -1,6 +1,5 @@
 import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
-import { Worker } from "bullmq";
 import { enqueueActions, raise, setup } from "xstate";
 
 import { downloadItemProcessor } from "../../message-queue/flows/download-item/download-item.processor.ts";
@@ -30,6 +29,7 @@ import type {
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
+import type { Worker } from "bullmq";
 import type z from "zod";
 
 export interface MainRunnerMachineContext {

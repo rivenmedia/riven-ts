@@ -10,21 +10,24 @@ export async function indexItem(
   item: MediaItemIndexRequestedEvent["item"],
   indexerPlugins: RivenPlugin[],
 ) {
-  const producer = createFlowProducer("index-item");
+  const producer = createFlowProducer();
 
-  const childNodes = indexerPlugins.map<FlowChildJob>((plugin) => ({
-    name: `${plugin.name.description ?? "unknown"} - Index item request #${item.id.toString()}`,
-    queueName: queueNameFor(
-      "riven.media-item.index.requested",
-      plugin.name.description ?? "unknown",
-    ),
-    data: {
-      item: SerialisedItemRequest.encode(item),
-    },
-    opts: {
-      ignoreDependencyOnFailure: true,
-    },
-  }));
+  const childNodes = indexerPlugins.map(
+    (plugin) =>
+      ({
+        name: `${plugin.name.description ?? "unknown"} - Index item request #${item.id.toString()}`,
+        queueName: queueNameFor(
+          "riven.media-item.index.requested",
+          plugin.name.description ?? "unknown",
+        ),
+        data: {
+          item: SerialisedItemRequest.encode(item),
+        },
+        opts: {
+          ignoreDependencyOnFailure: true,
+        },
+      }) as const satisfies FlowChildJob,
+  );
 
   const rootNode = {
     name: `Indexing item #${item.id.toString()}`,

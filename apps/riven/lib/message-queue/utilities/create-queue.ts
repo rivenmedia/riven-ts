@@ -1,11 +1,10 @@
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import { Queue, type QueueOptions } from "bullmq";
-import { BullMQOtel } from "bullmq-otel";
 
-import packageJson from "../../../../../package.json" with { type: "json" };
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
+import { telemetry } from "../../utilities/telemetry.ts";
 
 Queue.setMaxListeners(200);
 
@@ -18,7 +17,6 @@ export function createQueue(
     connection: {
       url: settings.redisUrl,
     },
-    telemetry: new BullMQOtel(`riven-queue-${name}`, packageJson.version),
     defaultJobOptions: {
       removeOnComplete: {
         age: 60 * 60,
@@ -29,11 +27,10 @@ export function createQueue(
         count: 5000,
       },
     },
+    telemetry,
   });
 
-  registerMQListeners(queue);
-
-  queue.on("error", logger.error);
+  registerMQListeners(queue, logger);
 
   return queue;
 }

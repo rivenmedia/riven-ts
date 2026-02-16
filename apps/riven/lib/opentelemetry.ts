@@ -11,17 +11,16 @@ if (!settings.jaegerUrl) {
     "Jaeger URL not configured. Skipping OpenTelemetry initialisation.",
   );
 } else {
-  const sdk = new NodeSDK({
-    serviceName: "consumer",
-    traceExporter: new OTLPTraceExporter({
-      url: `${settings.jaegerUrl}/v1/traces`,
-    }),
-    metricReader: new PeriodicExportingMetricReader({
-      exporter: new OTLPMetricExporter({
-        url: `${settings.jaegerUrl}/v1/metrics`,
-      }),
-    }),
-  });
-
-  sdk.start();
+  // const sdk = new NodeSDK({
+  //   serviceName: "consumer",
+  //   traceExporter: new OTLPTraceExporter({
+  //     url: `${settings.jaegerUrl}/v1/traces`,
+  //   }),
+  //   metricReader: new PeriodicExportingMetricReader({
+  //     exporter: new OTLPMetricExporter({
+  //       url: `${settings.jaegerUrl}/v1/metrics`,
+  //     }),
+  //   }),
+  // });
+  // sdk.start();
 }

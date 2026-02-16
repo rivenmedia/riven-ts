@@ -6,7 +6,7 @@ import type { RivenPlugin } from "@repo/util-plugin-sdk";
 export async function requestContentServices(
   contentServicePlugins: RivenPlugin[],
 ) {
-  const producer = createFlowProducer("request-content-services");
+  const producer = createFlowProducer();
 
   return producer.add({
     name: "Request content services",
