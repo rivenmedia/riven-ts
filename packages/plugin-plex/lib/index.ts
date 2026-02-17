@@ -49,15 +49,15 @@ export default {
         )
         .map((result) => result.reason as unknown);
 
-      console.log(errors);
-
       if (!success) {
         throw new Error(
           `Failed to find matching Plex library section for media item ID ${event.item.id.toString()}`,
         );
       }
 
-      logger.info(`Plex updated for paths: ${sections.join(", ")}`);
+      logger.info(
+        `Plex updated ${(results.length - errors.length).toString()} paths for ${event.item.title}`,
+      );
     },
   },
   settingsSchema: PlexSettings,
