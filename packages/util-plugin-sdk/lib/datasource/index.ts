@@ -12,6 +12,7 @@ import {
   Queue,
   QueueEvents,
   type RateLimiterOptions,
+  type Telemetry,
   Worker,
 } from "bullmq";
 import { DateTime } from "luxon";
@@ -54,6 +55,7 @@ export interface BaseDataSourceConfig<
   requestAttempts?: number;
   logger: Logger;
   connection: ConnectionOptions;
+  telemetry: Telemetry;
 }
 
 export abstract class BaseDataSource<
@@ -81,6 +83,7 @@ export abstract class BaseDataSource<
     settings,
     requestAttempts = 3,
     connection,
+    telemetry,
     ...apolloDataSourceOptions
   }: BaseDataSourceConfig<T>) {
     super(apolloDataSourceOptions);
@@ -107,6 +110,7 @@ export abstract class BaseDataSource<
           count: 5000,
         },
       },
+      telemetry,
     });
 
     this.#queueEvents = new QueueEvents(this.#queueId, { connection });
@@ -136,13 +140,16 @@ export abstract class BaseDataSource<
         ...(this.rateLimiterOptions
           ? { limiter: this.rateLimiterOptions }
           : {}),
+        telemetry,
       },
     );
 
-    registerMQListeners(this.#queue);
-    registerMQListeners(this.#worker);
-
     this.logger = apolloDataSourceOptions.logger;
+
+    [this.#queue, this.#queueEvents, this.#worker].forEach((resource) => {
+      registerMQListeners(resource, this.logger);
+    });
+
     this.settings = settings;
   }
 

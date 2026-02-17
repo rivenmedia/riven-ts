@@ -2,6 +2,7 @@ import { DataSourceMap, type RivenPlugin } from "@repo/util-plugin-sdk";
 
 import { logger } from "../utilities/logger/logger.ts";
 import { settings } from "../utilities/settings.ts";
+import { telemetry } from "../utilities/telemetry.ts";
 
 import type {
   ApolloServer,
@@ -44,6 +45,7 @@ export function buildContext(
                 url: settings.redisUrl,
               },
               settings: pluginSettings.get(plugin.settingsSchema),
+              telemetry,
             });
 
             dataSources.set(DataSourceConstructor, instance);

@@ -7,6 +7,7 @@ import z, { ZodError } from "zod";
 import { logger } from "../../utilities/logger/logger.ts";
 import { redisCache } from "../../utilities/redis-cache.ts";
 import { settings } from "../../utilities/settings.ts";
+import { telemetry } from "../../utilities/telemetry.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import {
   type ParsedPlugins,
@@ -120,6 +121,7 @@ export const pluginRegistrarMachine = setup({
                     url: settings.redisUrl,
                   },
                   settings: pluginSettings.get(plugin.settingsSchema),
+                  telemetry,
                 });
 
                 dataSources.set(DataSource, instance);

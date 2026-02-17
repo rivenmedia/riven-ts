@@ -4,27 +4,30 @@ import { queueNameFor } from "../../utilities/queue-name-for.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
-import type { FlowJob } from "bullmq";
+import type { FlowChildJob, FlowJob } from "bullmq";
 
 export async function scrapeItem(
   item: MediaItemScrapeRequestedEvent["item"],
   scraperPlugins: RivenPlugin[],
 ) {
-  const producer = createFlowProducer("scrape-item");
+  const producer = createFlowProducer();
 
-  const childNodes = scraperPlugins.map((plugin) => ({
-    name: `${plugin.name.description ?? "unknown"} - Scrape item #${item.id.toString()}`,
-    queueName: queueNameFor(
-      "riven.media-item.scrape.requested",
-      plugin.name.description ?? "unknown",
-    ),
-    data: {
-      item: SerialisedMediaItem.encode(item),
-    },
-    opts: {
-      ignoreDependencyOnFailure: true,
-    },
-  }));
+  const childNodes = scraperPlugins.map(
+    (plugin) =>
+      ({
+        name: `${plugin.name.description ?? "unknown"} - Scrape item #${item.id.toString()}`,
+        queueName: queueNameFor(
+          "riven.media-item.scrape.requested",
+          plugin.name.description ?? "unknown",
+        ),
+        data: {
+          item: SerialisedMediaItem.encode(item),
+        },
+        opts: {
+          ignoreDependencyOnFailure: true,
+        },
+      }) as const satisfies FlowChildJob,
+  );
 
   const rootNode = {
     name: `Scraping item #${item.id.toString()}`,

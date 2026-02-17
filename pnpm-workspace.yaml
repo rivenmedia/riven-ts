@@ -19,17 +19,12 @@ catalog:
   "@mikro-orm/core": ^6.6.4
   "@mikro-orm/postgresql": ^6.6.4
   "@mikro-orm/reflection": ^6.6.4
-  "@opentelemetry/context-async-hooks": ^2.2.0
-  "@opentelemetry/exporter-metrics-otlp-proto": ^0.208.0
-  "@opentelemetry/exporter-trace-otlp-proto": ^0.208.0
-  "@opentelemetry/sdk-metrics": ^2.2.0
-  "@opentelemetry/sdk-node": ^0.208.0
   "@types/luxon": ^3.7.1
   "@types/node": ^24.0.0
   "@typescript-eslint/parser": ^8.49.0
   "@vitest/coverage-v8": 4.0.15
   bullmq: 5.66.4
-  bullmq-otel: ^1.1.0
+  bullmq-otel: ^1.2.0
   class-validator: 0.14.3
   es-toolkit: ^1.44.0
   eslint: ^9.39.2

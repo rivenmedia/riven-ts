@@ -16,7 +16,6 @@ _Object containing the following properties:_
 | `loggingEnabled`                 | Enable or disable logging for the application.                                      | `boolean`                                                                  | `true`               |
 | `logLevel`                       | The logging level for the application.                                              | `'error' \| 'warn' \| 'info' \| 'http' \| 'verbose' \| 'debug' \| 'silly'` | `'info'`             |
 | `logDirectory`                   | The directory where log files will be stored.                                       | `string`                                                                   | `'./logs'`           |
-| `jaegerUrl`                      | The Jaeger tracing server URL.                                                      | `string` (_url_)                                                           |                      |
 | `gqlPort`                        | The GraphQL server port.                                                            | `number` (_int_)                                                           | `3000`               |
 | `dubbedAnimeOnly`                | Only scrape dubbed anime.                                                           | `boolean`                                                                  | `false`              |
 

@@ -18,9 +18,11 @@ export function createQueueEvents(
     },
   });
 
-  registerMQListeners(queueEvents);
+  registerMQListeners(queueEvents, logger);
 
-  queueEvents.on("error", logger.error);
+  queueEvents.on("failed", ({ failedReason, jobId }) => {
+    logger.error(`[${name}] Job ${jobId} failed: ${failedReason}`);
+  });
 
   return queueEvents;
 }

@@ -4,24 +4,18 @@ import {
 } from "@repo/util-plugin-sdk/events";
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
+import * as Sentry from "@sentry/node";
 import { type Processor, Worker, type WorkerOptions } from "bullmq";
-import { BullMQOtel } from "bullmq-otel";
 import z from "zod";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
+import { telemetry } from "../../utilities/telemetry.ts";
 import { createQueue } from "./create-queue.ts";
 
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 
 Worker.setMaxListeners(200);
-
-interface CreatePluginWorkerOptions {
-  telemetry?: {
-    tracerName: string;
-    version?: string;
-  };
-}
 
 export async function createPluginWorker<
   T extends RivenEvent["type"],
@@ -34,28 +28,35 @@ export async function createPluginWorker<
     Awaited<ReturnType<z.infer<R>>>
   >,
   workerOptions?: Omit<WorkerOptions, "connection" | "telemetry">,
-  createPluginWorkerOptions?: CreatePluginWorkerOptions,
 ) {
   const queueName = `${name}.plugin[${pluginName}]`;
 
   const queue = createQueue(queueName);
 
-  const worker = new Worker(queueName, processor, {
-    ...workerOptions,
-    telemetry: new BullMQOtel(
-      createPluginWorkerOptions?.telemetry?.tracerName ??
-        `riven-plugin-worker-${name}`,
-      createPluginWorkerOptions?.telemetry?.version,
-    ),
-    connection: {
-      url: settings.redisUrl,
+  const worker = new Worker(
+    queueName,
+    async (job, token, signal) => {
+      try {
+        return await processor(job as never, token, signal);
+      } catch (error) {
+        Sentry.captureException(error);
+
+        throw error;
+      }
     },
-  });
+    {
+      ...workerOptions,
+      connection: {
+        url: settings.redisUrl,
+      },
+      telemetry,
+    },
+  );
 
-  registerMQListeners(worker);
+  registerMQListeners(worker, logger);
 
-  worker.on("error", logger.error).on("failed", (_job, err) => {
-    logger.error(`[${name}] Error: ${err.message}`);
+  worker.on("failed", (_job, error) => {
+    logger.error(`[${name}] Error: ${error.message}`);
   });
 
   if (settings.unsafeClearQueuesOnStartup) {

@@ -75,12 +75,6 @@ export const registerPluginHookWorkers = fromPromise<
             });
           },
           { concurrency: os.availableParallelism() },
-          {
-            telemetry: {
-              tracerName: `riven-plugin-${pluginSymbol.description ?? "unknown"}`,
-              version: config.version,
-            },
-          },
         );
 
         logger.debug(

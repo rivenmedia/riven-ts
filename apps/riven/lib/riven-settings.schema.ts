@@ -40,7 +40,6 @@ export const RivenSettings = z.object({
     .string()
     .default("./logs")
     .describe("The directory where log files will be stored."),
-  jaegerUrl: z.url().optional().describe("The Jaeger tracing server URL."),
   gqlPort: z.coerce
     .number()
     .int()
