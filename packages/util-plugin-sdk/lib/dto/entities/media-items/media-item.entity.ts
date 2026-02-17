@@ -23,8 +23,9 @@ import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { MediaItemType } from "../../enums/media-item-type.enum.ts";
 import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
-import { Episode, type MediaEntry, Movie } from "../index.ts";
 import { Stream } from "../streams/stream.entity.ts";
+
+import type { MediaEntry } from "../index.ts";
 
 @ObjectType()
 @Entity({
@@ -179,26 +180,6 @@ export abstract class MediaItem {
    * @example "Inception (2010) {tmdb-27205}"
    */
   abstract get prettyName(): Opt<Hidden<string>>;
-
-  /**
-   * The media entry associated with this media item, if any.
-   *
-   * This is determined by picking the first MediaEntry from the filesystem entries.
-   *
-   * _Usually_ there should only be one media entry per media item.
-   *
-   * @see {@link MediaEntry}
-   * @returns The associated MediaEntry or undefined if none exists.
-   */
-  get mediaEntry(): Hidden<MediaEntry> | undefined {
-    if (!(this instanceof Movie) && !(this instanceof Episode)) {
-      return;
-    }
-
-    return this.filesystemEntries
-      .getItems()
-      .find((entry) => entry.type === "media") as MediaEntry | undefined;
-  }
 
   /**
    * Gets all media entries associated with this media item.
