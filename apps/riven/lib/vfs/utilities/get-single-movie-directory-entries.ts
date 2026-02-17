@@ -20,12 +20,14 @@ export const getSingleMovieDirectoryEntries = async (
     { populate: ["filesystemEntries"] },
   );
 
-  if (!entry.mediaEntry) {
+  const [mediaEntry] = await entry.getMediaEntries();
+
+  if (!mediaEntry) {
     throw new FuseError(
       Fuse.ENOENT,
       `No filesystem entries found for movie with TMDB ID ${pathInfo.tmdbId}`,
     );
   }
 
-  return [entry.mediaEntry.vfsFileName];
+  return [mediaEntry.vfsFileName];
 };

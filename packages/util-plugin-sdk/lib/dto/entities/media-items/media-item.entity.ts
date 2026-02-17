@@ -23,9 +23,8 @@ import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { MediaItemType } from "../../enums/media-item-type.enum.ts";
 import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
+import { Episode, type MediaEntry, Movie } from "../index.ts";
 import { Stream } from "../streams/stream.entity.ts";
-
-import type { MediaEntry } from "../index.ts";
 
 @ObjectType()
 @Entity({
@@ -179,19 +178,7 @@ export abstract class MediaItem {
    *
    * @example "Inception (2010) {tmdb-27205}"
    */
-  @Property({ persist: false, hidden: true })
-  get prettyName(): Opt<Hidden<string>> | undefined {
-    if (this.type === "movie" ? !this.tmdbId : !this.tvdbId) {
-      return;
-    }
-
-    const externalIdentifier =
-      this.type === "movie"
-        ? `tmdb-${String(this.tmdbId)}`
-        : `tvdb-${String(this.tvdbId)}`;
-
-    return `${this.title} (${this.year?.toString() ?? "Unknown"}) {${externalIdentifier}}`;
-  }
+  abstract get prettyName(): Opt<Hidden<string>>;
 
   /**
    * The media entry associated with this media item, if any.
@@ -204,8 +191,14 @@ export abstract class MediaItem {
    * @returns The associated MediaEntry or undefined if none exists.
    */
   get mediaEntry(): Hidden<MediaEntry> | undefined {
+    if (!(this instanceof Movie) && !(this instanceof Episode)) {
+      return;
+    }
+
     return this.filesystemEntries
       .getItems()
       .find((entry) => entry.type === "media") as MediaEntry | undefined;
   }
+
+  abstract getMediaEntries(): Promise<MediaEntry[]>;
 }

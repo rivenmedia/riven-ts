@@ -21,16 +21,35 @@ export default {
       logger,
     }) => {
       const plexAPI = dataSources.get(PlexAPI);
+      const mediaEntries = await event.item.getMediaEntries();
 
-      if (!event.item.mediaEntry) {
+      if (mediaEntries.length === 0) {
         throw new Error(
           `No media filesystem entry found for media item ID ${event.item.id.toString()}`,
         );
       }
 
-      const success = await plexAPI.updateSection(
-        path.dirname(event.item.mediaEntry.path),
+      const sections = mediaEntries
+        .reduce<Set<string>>(
+          (acc, entry) => new Set([...acc, path.dirname(entry.path)]),
+          new Set<string>(),
+        )
+        .values()
+        .toArray();
+
+      const results = await Promise.allSettled(
+        sections.map((section) => plexAPI.updateSection(section)),
       );
+
+      const success = results.every((result) => result.status === "fulfilled");
+      const errors = results
+        .filter(
+          (result): result is PromiseRejectedResult =>
+            result.status === "rejected",
+        )
+        .map((result) => result.reason as unknown);
+
+      console.log(errors);
 
       if (!success) {
         throw new Error(
@@ -38,7 +57,7 @@ export default {
         );
       }
 
-      logger.info(`Plex updated for path "${event.item.mediaEntry.path}"`);
+      logger.info(`Plex updated for paths: ${sections.join(", ")}`);
     },
   },
   settingsSchema: PlexSettings,
