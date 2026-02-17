@@ -59,4 +59,8 @@ if (spotlightEnabled) {
       Sentry.logger.trace(message, rest);
     }
   });
+} else {
+  logger.warn(
+    "Sentry Spotlight integration is disabled. Set SENTRY_SPOTLIGHT=1 to enable it.",
+  );
 }

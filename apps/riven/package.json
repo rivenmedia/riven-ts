@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.app.json && tsc --noEmit --project tsconfig.spec.json",
-    "dev": "SENTRY_SPOTLIGHT=1 node --watch --env-file=.env --import=./lib/sentry.ts --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
+    "dev": "node --watch --env-file=.env --import=./lib/sentry.ts --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
     "generate-config-docs": "zod2md",
     "graphql-codegen": "graphql-codegen",
     "lint": "eslint",
