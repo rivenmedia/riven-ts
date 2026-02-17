@@ -1,4 +1,4 @@
-FROM ubuntu:25.10 AS base
+FROM node:24-alpine AS base
 
 ARG PUID
 ARG PGID
@@ -11,22 +11,25 @@ ENV HOME=/home/${USERNAME}
 ENV PNPM_HOME=${HOME}/.local/share/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 
-# Create user and group
-RUN usermod --login riven ubuntu
-RUN groupmod -n ${USERGROUP} ubuntu
-RUN mv /home/ubuntu ${HOME}
-RUN chown -R ${PUID}:${PGID} ${HOME}
+# Install core dependencies and FUSE
+RUN apk add --no-cache \
+    wget \
+    bash \
+    fuse3 \
+    fuse3-dev \
+    shadow
 
-# Install core dependencies
-RUN apt-get update && apt-get install -y wget fuse3 libfuse3-dev libfuse-dev
+# Modify existing node user to match desired UID/GID
+RUN deluser --remove-home node && \
+    addgroup -g ${PGID} ${USERGROUP} && \
+    adduser -D -u ${PUID} -G ${USERGROUP} -h ${HOME} ${USERNAME}
 
 # Configure FUSE
 RUN sed -i 's/^#\s*user_allow_other/user_allow_other/' /etc/fuse.conf || \
     echo 'user_allow_other' >> /etc/fuse.conf
 
-# Install pnpm and Node.js
-RUN wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -
-RUN pnpm env use --global 24
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 #---------------------------
 
@@ -36,7 +39,12 @@ FROM base AS dependencies
 ENV HUSKY=0
 
 # Install build dependencies
-RUN apt-get update && apt-get install -y make gcc python3 build-essential
+RUN apk add --no-cache \
+    make \
+    gcc \
+    g++ \
+    python3 \
+    linux-headers
 
 WORKDIR ${HOME}/riven-ts
 
@@ -55,6 +63,8 @@ FROM dependencies AS schema-generator
 
 COPY --parents --from=dependencies ${HOME}/riven-ts/**/node_modules ./node_modules/
 COPY --parents **/kubb.config.ts ./
+COPY --parents **/openapi-schema.json ./
+COPY --parents **/openapi-schema.yaml ./
 COPY ./packages/core/util-kubb-config ./packages/core/util-kubb-config
 
 RUN pnpm -r generate-schemas
