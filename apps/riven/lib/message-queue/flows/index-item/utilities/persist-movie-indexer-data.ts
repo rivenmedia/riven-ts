@@ -5,9 +5,9 @@ import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
 import z from "zod";
 
-import { database } from "../../../database/database.ts";
+import { database } from "../../../../database/database.ts";
 
-import type { MainRunnerMachineIntake } from "../index.ts";
+import type { MainRunnerMachineIntake } from "../../../../state-machines/main-runner/index.ts";
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
 export interface PersistMovieIndexerDataInput extends NonNullable<MediaItemIndexRequestedResponse> {

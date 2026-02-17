@@ -1,7 +1,7 @@
 import { UnrecoverableError } from "bullmq";
 
-import { persistScrapeResults } from "../../../state-machines/main-runner/actors/persist-scrape-results.actor.ts";
 import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
+import { persistScrapeResults } from "./utilities/persist-scrape-results.actor.ts";
 
 import type { RankedResult } from "@repo/util-rank-torrent-name";
 
