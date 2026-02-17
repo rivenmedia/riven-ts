@@ -74,6 +74,7 @@ export class Episode extends ShowLikeMediaItem {
       where: {
         type: "media",
       },
+      refresh: true,
     });
   }
 

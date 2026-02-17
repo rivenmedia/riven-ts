@@ -24,6 +24,7 @@ export class Movie extends MediaItem {
       where: {
         type: "media",
       },
+      refresh: true,
     });
   }
 
