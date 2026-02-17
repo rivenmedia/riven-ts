@@ -41,13 +41,14 @@ export default {
         sections.map((section) => plexAPI.updateSection(section)),
       );
 
-      const success = results.every((result) => result.status === "fulfilled");
       const errors = results
         .filter(
           (result): result is PromiseRejectedResult =>
             result.status === "rejected",
         )
         .map((result) => result.reason as unknown);
+
+      const success = errors.length === 0;
 
       if (!success) {
         throw new Error(
