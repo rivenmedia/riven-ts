@@ -1,23 +1,30 @@
-import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities/requests/item-request.entity";
+import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 
 import { expect, it, vi } from "vitest";
+import { type ActorRefFrom, createEmptyActor } from "xstate";
 
-import { processRequestedItem } from "./process-requested-item.actor.ts";
+import { processRequestedItem } from "../../request-content-services/utilities/process-requested-item.ts";
+
+import type { mainRunnerMachine } from "../../../../state-machines/main-runner/index.ts";
 
 it("sends a success event if the item is processed successfully", async () => {
   const requestedId = "tt1234567";
-  const sendEventSpy = vi.fn();
+  const parentRef = createEmptyActor() as ActorRefFrom<
+    typeof mainRunnerMachine
+  >;
+
+  vi.spyOn(parentRef, "send");
 
   await processRequestedItem({
     item: {
       imdbId: requestedId,
     },
     type: "movie",
-    sendEvent: sendEventSpy,
+    sendEvent: parentRef.send,
   });
 
   await vi.waitFor(() => {
-    expect(sendEventSpy).toHaveBeenCalledWith({
+    expect(parentRef).toHaveReceivedEvent({
       type: "riven.item-request.creation.success",
       item: expect.objectContaining<Partial<ItemRequest>>({
         imdbId: requestedId,
@@ -29,23 +36,27 @@ it("sends a success event if the item is processed successfully", async () => {
 
 it("sends an error event if the item processing fails", async () => {
   const requestedId = "1234";
-  const sendEventSpy = vi.fn();
+  const parentRef = createEmptyActor() as ActorRefFrom<
+    typeof mainRunnerMachine
+  >;
+
+  vi.spyOn(parentRef, "send");
 
   await processRequestedItem({
     item: {
       imdbId: requestedId,
     },
     type: "movie",
-    sendEvent: sendEventSpy,
+    sendEvent: parentRef.send,
   });
 
   await vi.waitFor(() => {
-    expect(sendEventSpy).toHaveBeenCalledWith({
+    expect(parentRef).toHaveReceivedEvent({
       type: "riven.media-item.creation.error",
       item: expect.objectContaining<Partial<ItemRequest>>({
         imdbId: requestedId,
       }),
-      error: expect.stringContaining("imdbId must match"),
+      error: expect.anything(),
     });
   });
 });

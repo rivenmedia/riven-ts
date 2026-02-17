@@ -1,30 +1,23 @@
-import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities/requests/item-request.entity";
+import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 
 import { expect, it, vi } from "vitest";
-import { type ActorRefFrom, createEmptyActor } from "xstate";
 
-import { processRequestedItem } from "./process-requested-item.actor.ts";
-
-import type { mainRunnerMachine } from "../index.ts";
+import { processRequestedItem } from "./process-requested-item.ts";
 
 it("sends a success event if the item is processed successfully", async () => {
   const requestedId = "tt1234567";
-  const parentRef = createEmptyActor() as ActorRefFrom<
-    typeof mainRunnerMachine
-  >;
-
-  vi.spyOn(parentRef, "send");
+  const sendEventSpy = vi.fn();
 
   await processRequestedItem({
     item: {
       imdbId: requestedId,
     },
     type: "movie",
-    sendEvent: parentRef.send,
+    sendEvent: sendEventSpy,
   });
 
   await vi.waitFor(() => {
-    expect(parentRef).toHaveReceivedEvent({
+    expect(sendEventSpy).toHaveBeenCalledWith({
       type: "riven.item-request.creation.success",
       item: expect.objectContaining<Partial<ItemRequest>>({
         imdbId: requestedId,
@@ -36,27 +29,23 @@ it("sends a success event if the item is processed successfully", async () => {
 
 it("sends an error event if the item processing fails", async () => {
   const requestedId = "1234";
-  const parentRef = createEmptyActor() as ActorRefFrom<
-    typeof mainRunnerMachine
-  >;
-
-  vi.spyOn(parentRef, "send");
+  const sendEventSpy = vi.fn();
 
   await processRequestedItem({
     item: {
       imdbId: requestedId,
     },
     type: "movie",
-    sendEvent: parentRef.send,
+    sendEvent: sendEventSpy,
   });
 
   await vi.waitFor(() => {
-    expect(parentRef).toHaveReceivedEvent({
+    expect(sendEventSpy).toHaveBeenCalledWith({
       type: "riven.media-item.creation.error",
       item: expect.objectContaining<Partial<ItemRequest>>({
         imdbId: requestedId,
       }),
-      error: expect.anything(),
+      error: expect.stringContaining("imdbId must match"),
     });
   });
 });

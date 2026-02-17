@@ -1,9 +1,9 @@
 import { UnrecoverableError } from "bullmq";
 
-import { persistMovieIndexerData } from "../../../state-machines/main-runner/actors/persist-movie-indexer-data.actor.ts";
-import { persistShowIndexerData } from "../../../state-machines/main-runner/actors/persist-show-indexer-data.actor.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { requestIndexDataProcessorSchema } from "./index-item.schema.ts";
+import { persistMovieIndexerData } from "./utilities/persist-movie-indexer-data.ts";
+import { persistShowIndexerData } from "./utilities/persist-show-indexer-data.ts";
 
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 

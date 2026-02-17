@@ -4,10 +4,10 @@ import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
 import z from "zod";
 
-import { database } from "../../../database/database.ts";
-import { logger } from "../../../utilities/logger/logger.ts";
+import { database } from "../../../../database/database.ts";
+import { logger } from "../../../../utilities/logger/logger.ts";
 
-import type { MainRunnerMachineIntake } from "../index.ts";
+import type { MainRunnerMachineIntake } from "../../../../state-machines/main-runner/index.ts";
 import type { RankedResult } from "@repo/util-rank-torrent-name";
 
 export interface PersistScrapeResultsInput {

@@ -1,5 +1,5 @@
-import { processRequestedItem } from "../../../state-machines/main-runner/actors/process-requested-item.actor.ts";
 import { requestContentServicesProcessorSchema } from "./request-content-services.schema.ts";
+import { processRequestedItem } from "./utilities/process-requested-item.ts";
 
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 

@@ -4,9 +4,9 @@ import { ref } from "@mikro-orm/core";
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
 
-import { database } from "../../../database/database.ts";
+import { database } from "../../../../database/database.ts";
 
-import type { MainRunnerMachineIntake } from "../index.ts";
+import type { MainRunnerMachineIntake } from "../../../../state-machines/main-runner/index.ts";
 import type { TorrentContainer } from "@repo/util-plugin-sdk/schemas/torrents/torrent-container";
 
 export interface PersistDownloadResultsInput {

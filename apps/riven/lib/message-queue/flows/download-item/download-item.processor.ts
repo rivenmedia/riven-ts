@@ -1,9 +1,9 @@
 import { UnrecoverableError } from "bullmq";
 import { DateTime } from "luxon";
 
-import { persistDownloadResults } from "../../../state-machines/main-runner/actors/persist-download-results.actor.ts";
 import { zipFlowChildrenResults } from "../../utilities/zip-children-results.ts";
 import { downloadItemProcessorSchema } from "./download-item.schema.ts";
+import { persistDownloadResults } from "./utilities/persist-download-results.ts";
 
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
   async function (job, sendEvent) {
