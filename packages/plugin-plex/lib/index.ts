@@ -51,12 +51,13 @@ export default {
 
       if (!success) {
         throw new Error(
-          `Failed to find matching Plex library section for media item ID ${event.item.id.toString()}`,
+          `Failed to update Plex library sections for media item ID ${event.item.id.toString()}`,
+          { cause: errors },
         );
       }
 
       logger.info(
-        `Plex updated ${(results.length - errors.length).toString()} paths for ${event.item.title}`,
+        `Plex updated ${results.length.toString()} paths for ${event.item.title}`,
       );
     },
   },
