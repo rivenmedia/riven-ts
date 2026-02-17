@@ -200,5 +200,17 @@ export abstract class MediaItem {
       .find((entry) => entry.type === "media") as MediaEntry | undefined;
   }
 
+  /**
+   * Gets all media entries associated with this media item.
+   *
+   * This is determined by picking all MediaEntries from the filesystem entries.
+   *
+   * The amount of entries returned varies based on the media item type.
+   * For movies and episodes, this will return a maximum of 1 entry,
+   * but for shows and seasons, it will return all media entries from all descendant episodes.
+   *
+   * @see {@link MediaEntry}
+   * @returns An array of associated MediaEntries, which may be empty if none exist.
+   */
   abstract getMediaEntries(): Promise<MediaEntry[]>;
 }
