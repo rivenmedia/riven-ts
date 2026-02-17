@@ -1,11 +1,11 @@
 import path from "node:path";
-import { type Logger, createLogger, format, transports } from "winston";
+import { createLogger, format, transports } from "winston";
 
 import { settings } from "../settings.ts";
 
 const logDir = path.resolve(process.cwd(), settings.logDirectory);
 
-export const logFormat: Logger["format"] = format.printf(function (info) {
+const logFormat = format.printf(function (info) {
   return `${String(info["timestamp"])} - ${info.level}: ${JSON.stringify(
     info["stack"] ?? info.message,
     null,

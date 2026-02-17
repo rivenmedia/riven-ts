@@ -26,7 +26,6 @@ services:
       UNSAFE_CLEAR_QUEUES_ON_STARTUP: true
       UNSAFE_REFRESH_DATABASE_ON_STARTUP: false
       LOG_LEVEL: silly
-      JAEGER_URL: http://jaeger:4318
       PLEX_TOKEN: ${PLEX_TOKEN}
       PLEX_SERVER_URL: http://plex:32400
       PLEX_LIBRARY_PATH: /mount
@@ -85,16 +84,6 @@ services:
     profiles:
       - all
       - services
-      - analytics
-
-  jaeger:
-    container_name: jaeger
-    image: jaegertracing/all-in-one:1.75.0
-    ports:
-      - 4318:4318
-      - 16686:16686
-    profiles:
-      - all
       - analytics
 
   bullboard:
