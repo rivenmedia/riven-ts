@@ -18,19 +18,30 @@ export function createFlowWorker<T extends Flow["name"]>(
   sendEvent: MainRunnerMachineIntake,
   workerOptions?: Omit<WorkerOptions, "connection" | "telemetry">,
 ) {
-  const worker = new Worker(name, (job) => processor(job, sendEvent), {
-    ...workerOptions,
-    connection: {
-      url: settings.redisUrl,
+  const worker = new Worker(
+    name,
+    async (job) => {
+      try {
+        return await processor(job, sendEvent);
+      } catch (error) {
+        Sentry.captureException(error);
+
+        throw error;
+      }
     },
-    telemetry,
-  });
+    {
+      ...workerOptions,
+      connection: {
+        url: settings.redisUrl,
+      },
+      telemetry,
+    },
+  );
 
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
     logger.error(`[${name}] Error: ${error.message}`);
-    Sentry.captureException(error);
   });
 
   return worker;

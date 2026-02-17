@@ -1,5 +1,9 @@
 import z from "zod";
 
+import { logger } from "./utilities/logger/logger.ts";
+
+import type { LogEntry } from "winston";
+
 const { data: spotlightEnabled } = z
   .stringbool()
   .safeParse(process.env["SENTRY_SPOTLIGHT"] ?? "0");
@@ -9,6 +13,7 @@ if (spotlightEnabled) {
 
   Sentry.init({
     dsn: "https://spotlight@local/0",
+    enableLogs: true,
     sampleRate: 1,
     tracesSampleRate: 1,
     beforeSendTransaction(event) {
@@ -21,14 +26,6 @@ if (spotlightEnabled) {
       }
 
       for (const span of event.spans ?? []) {
-        if (span.data["sentry.parent_span_already_sent"]) {
-          console.log(
-            "Not sending transaction because parent span was already sent",
-          );
-          console.log(event);
-          return null;
-        }
-
         if (span.data["bullmq.queue.operation"] === "fail") {
           span.status = "error";
 
@@ -42,5 +39,24 @@ if (spotlightEnabled) {
 
       return event;
     },
+  });
+
+  const sentryLogLevelEnum = z.enum([
+    "trace",
+    "debug",
+    "info",
+    "warn",
+    "error",
+    "fatal",
+  ]);
+
+  logger.on("data", ({ message, level, ...rest }: LogEntry) => {
+    const parsedLogLevel = sentryLogLevelEnum.safeParse(level);
+
+    if (parsedLogLevel.success) {
+      Sentry.logger[parsedLogLevel.data](message, rest);
+    } else {
+      Sentry.logger.trace(message, rest);
+    }
   });
 }

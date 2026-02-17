@@ -33,19 +33,30 @@ export async function createPluginWorker<
 
   const queue = createQueue(queueName);
 
-  const worker = new Worker(queueName, processor, {
-    ...workerOptions,
-    connection: {
-      url: settings.redisUrl,
+  const worker = new Worker(
+    queueName,
+    async (job, token, signal) => {
+      try {
+        return await processor(job as never, token, signal);
+      } catch (error) {
+        Sentry.captureException(error);
+
+        throw error;
+      }
     },
-    telemetry,
-  });
+    {
+      ...workerOptions,
+      connection: {
+        url: settings.redisUrl,
+      },
+      telemetry,
+    },
+  );
 
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
     logger.error(`[${name}] Error: ${error.message}`);
-    Sentry.captureException(error);
   });
 
   if (settings.unsafeClearQueuesOnStartup) {

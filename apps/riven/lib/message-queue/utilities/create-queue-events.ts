@@ -1,6 +1,5 @@
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
-import * as Sentry from "@sentry/node";
 import { QueueEvents, type QueueOptions } from "bullmq";
 
 import { logger } from "../../utilities/logger/logger.ts";
@@ -21,10 +20,8 @@ export function createQueueEvents(
 
   registerMQListeners(queueEvents, logger);
 
-  queueEvents.on("failed", ({ failedReason, jobId }, error) => {
+  queueEvents.on("failed", ({ failedReason, jobId }) => {
     logger.error(`[${name}] Job ${jobId} failed: ${failedReason}`);
-
-    Sentry.captureException(error);
   });
 
   return queueEvents;

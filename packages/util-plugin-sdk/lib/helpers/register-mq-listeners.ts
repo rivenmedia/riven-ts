@@ -31,5 +31,5 @@ export function registerMQListeners(
     });
   }
 
-  (resource as EventEmitter).on("error", logger.error);
+  (resource as EventEmitter).on("error", (error) => logger.error(error));
 }
