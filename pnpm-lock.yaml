@@ -1106,6 +1106,9 @@ importers:
       '@mikro-orm/reflection':
         specifier: 'catalog:'
         version: 6.6.4(@mikro-orm/core@6.6.4)
+      '@mikro-orm/sqlite':
+        specifier: ^6.6.4
+        version: 6.6.4(@mikro-orm/core@6.6.4)(pg@8.16.3)
       '@repo/core-util-eslint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config

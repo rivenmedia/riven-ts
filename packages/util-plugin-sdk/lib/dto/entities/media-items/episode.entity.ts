@@ -1,6 +1,7 @@
 import {
   BeforeCreate,
   Entity,
+  type Hidden,
   ManyToOne,
   type Opt,
   Property,
@@ -13,6 +14,7 @@ import {
   ShowContentRating,
   ShowContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
+import { MediaEntry } from "../filesystem/media-entry.entity.ts";
 import { Season } from "./season.entity.ts";
 import { ShowLikeMediaItem } from "./show-like.entity.ts";
 
@@ -44,7 +46,7 @@ export class Episode extends ShowLikeMediaItem {
     return show.title;
   }
 
-  override get prettyName(): Opt<string> {
+  get prettyName(): Opt<Hidden<string>> {
     const baseName = this.season.getProperty("show").getProperty("prettyName");
 
     if (!baseName) {
@@ -66,6 +68,15 @@ export class Episode extends ShowLikeMediaItem {
 
   declare tvdbId: Opt<string>;
   declare tmdbId?: never;
+
+  getMediaEntries() {
+    return this.filesystemEntries.loadItems<MediaEntry>({
+      where: {
+        type: "media",
+      },
+      refresh: true,
+    });
+  }
 
   @BeforeCreate()
   setTvdbId() {

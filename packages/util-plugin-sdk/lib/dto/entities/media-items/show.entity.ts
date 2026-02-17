@@ -2,6 +2,7 @@ import {
   Collection,
   Entity,
   Enum,
+  type Hidden,
   OneToMany,
   type Opt,
   Property,
@@ -13,6 +14,7 @@ import {
   ShowContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
 import { ShowStatus } from "../../enums/show-status.enum.ts";
+import { MediaEntry } from "../filesystem/media-entry.entity.js";
 import { Season } from "./season.entity.ts";
 import { ShowLikeMediaItem } from "./show-like.entity.ts";
 
@@ -38,4 +40,34 @@ export class Show extends ShowLikeMediaItem {
 
   declare tvdbId: string;
   declare tmdbId?: never;
+
+  async getMediaEntries() {
+    const seasons = await this.seasons.loadItems({
+      where: {
+        episodes: {
+          filesystemEntries: {
+            $some: {
+              type: "media",
+            },
+          },
+        },
+      },
+      fields: ["episodes"],
+      populate: ["episodes.filesystemEntries"],
+      refresh: true,
+    });
+
+    const episodes = seasons.flatMap((season) => season.episodes.getItems());
+
+    return episodes.flatMap(
+      (episode) =>
+        episode.filesystemEntries.filter(
+          (entry) => entry.type === "media",
+        ) as MediaEntry[],
+    );
+  }
+
+  get prettyName(): Opt<Hidden<string>> {
+    return `${this.title} (${this.year?.toString() ?? "Unknown"}) {tvdb-${this.tvdbId}}`;
+  }
 }

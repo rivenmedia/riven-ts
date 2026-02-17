@@ -179,33 +179,19 @@ export abstract class MediaItem {
    *
    * @example "Inception (2010) {tmdb-27205}"
    */
-  @Property({ persist: false, hidden: true })
-  get prettyName(): Opt<Hidden<string>> | undefined {
-    if (this.type === "movie" ? !this.tmdbId : !this.tvdbId) {
-      return;
-    }
-
-    const externalIdentifier =
-      this.type === "movie"
-        ? `tmdb-${String(this.tmdbId)}`
-        : `tvdb-${String(this.tvdbId)}`;
-
-    return `${this.title} (${this.year?.toString() ?? "Unknown"}) {${externalIdentifier}}`;
-  }
+  abstract get prettyName(): Opt<Hidden<string>>;
 
   /**
-   * The media entry associated with this media item, if any.
+   * Gets all media entries associated with this media item.
    *
-   * This is determined by picking the first MediaEntry from the filesystem entries.
+   * This is determined by picking all MediaEntries from the filesystem entries.
    *
-   * _Usually_ there should only be one media entry per media item.
+   * The amount of entries returned varies based on the media item type.
+   * For movies and episodes, this will return a maximum of 1 entry,
+   * but for shows and seasons, it will return all media entries from all descendant episodes.
    *
    * @see {@link MediaEntry}
-   * @returns The associated MediaEntry or undefined if none exists.
+   * @returns An array of associated MediaEntries, which may be empty if none exist.
    */
-  get mediaEntry(): Hidden<MediaEntry> | undefined {
-    return this.filesystemEntries
-      .getItems()
-      .find((entry) => entry.type === "media") as MediaEntry | undefined;
-  }
+  abstract getMediaEntries(): Promise<MediaEntry[]>;
 }
