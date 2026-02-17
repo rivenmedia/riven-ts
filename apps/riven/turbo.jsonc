@@ -3,7 +3,10 @@
   "extends": ["//"],
   "tasks": {
     "dev": {
-      "passThroughEnv": ["SENTRY_SPOTLIGHT"]
+      "passThroughEnv": [
+        "SENTRY_SPOTLIGHT",
+        "SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"
+      ]
     },
     "start": {}
   }

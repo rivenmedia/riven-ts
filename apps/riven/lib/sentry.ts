@@ -11,6 +11,15 @@ const { data: spotlightEnabled } = z
 if (spotlightEnabled) {
   const Sentry = await import("@sentry/node");
 
+  const { data: spotlightClearOnStartup } = z
+    .stringbool()
+    .safeParse(process.env["SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"] ?? "0");
+
+  // Clear any existing Sentry events from the local server before starting the application.
+  if (spotlightClearOnStartup) {
+    await fetch("http://localhost:8969/clear", { method: "DELETE" });
+  }
+
   Sentry.init({
     dsn: "https://spotlight@local/0",
     enableLogs: true,
