@@ -140,7 +140,7 @@ it("returns the series if the item has a tvdbId", async ({
     network: "AMC",
     country: "usa",
     aliases: { us: ["breaking-bad"] },
-    contentRating: "TV-MA",
+    contentRating: "tv-ma",
     posterUrl: "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
     firstAired: "2008-01-20",
     status: "ended",
@@ -149,7 +149,7 @@ it("returns the series if the item has a tvdbId", async ({
         episodes: [
           {
             airedAt: "2008-01-20",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 1,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/6421d9584f9dd.jpg",
@@ -158,7 +158,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2008-01-27",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 2,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/642203f37c277.jpg",
@@ -167,7 +167,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2008-02-10",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 3,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ea716c6a773d.jpg",
@@ -176,7 +176,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2008-02-17",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 4,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/64232be19ffa2.jpg",
@@ -185,7 +185,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2008-02-24",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 5,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ea71ca4d8cf8.jpg",
@@ -194,7 +194,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2008-03-09",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 7,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ea8700bb5d18.jpg",
@@ -203,7 +203,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2008-03-02",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 6,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ea72a5bd991e.jpg",
@@ -217,7 +217,7 @@ it("returns the series if the item has a tvdbId", async ({
         episodes: [
           {
             airedAt: "2009-03-08",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 1,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ea87588d39fc.jpg",
@@ -226,7 +226,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2009-03-15",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 2,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ea89ad421a42.jpg",
@@ -235,7 +235,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2009-03-22",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 3,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ea89d1b129f3.jpg",
@@ -244,7 +244,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2009-03-29",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 4,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ebdbf1815106.jpg",
@@ -253,7 +253,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2009-04-05",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 5,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ebdc501c14f5.jpg",
@@ -262,7 +262,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2009-04-12",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 6,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ebdc8791a975.jpg",
@@ -271,7 +271,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2009-04-19",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 7,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ebdcdc7e746f.jpg",
@@ -280,7 +280,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2009-04-26",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 8,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ebdd48aca19a.jpg",
@@ -289,7 +289,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2009-05-03",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 9,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ebede40ebf91.jpg",
@@ -298,7 +298,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2009-05-10",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 10,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ebedf6e80794.jpg",
@@ -307,7 +307,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2009-05-17",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 11,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ebee9d56e81e.jpg",
@@ -316,7 +316,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2009-05-24",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 12,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ebeed67dcacb.jpg",
@@ -325,7 +325,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2009-05-31",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 13,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ebeeecf13014.jpg",
@@ -339,7 +339,7 @@ it("returns the series if the item has a tvdbId", async ({
         episodes: [
           {
             airedAt: "2010-03-21",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 1,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/642c8e983cc69.jpg",
@@ -348,7 +348,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2010-03-28",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 2,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/642cae4b49286.jpg",
@@ -357,7 +357,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2010-04-04",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 3,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/642d74fc96d80.jpg",
@@ -366,7 +366,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2010-04-11",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 4,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/642da9038a4b1.jpg",
@@ -375,7 +375,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2010-04-18",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 5,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/642dc2db9f454.jpg",
@@ -384,7 +384,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2010-04-25",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 6,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ebf1d3fb3ff4.jpg",
@@ -393,7 +393,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2010-05-02",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 7,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ebf237fb10b1.jpg",
@@ -402,7 +402,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2010-05-09",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 8,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ebf24da09ad0.jpg",
@@ -411,7 +411,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2010-05-16",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 9,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/642f365806330.jpg",
@@ -420,7 +420,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2010-05-23",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 10,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/642f367d1808f.jpg",
@@ -429,7 +429,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2010-05-30",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 11,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ec2ea711fdc5.jpg",
@@ -438,7 +438,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2010-06-06",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 12,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ec2f2a8a7a3b.jpg",
@@ -447,7 +447,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2010-06-13",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 13,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/6430a1fd84f79.jpg",
@@ -461,7 +461,7 @@ it("returns the series if the item has a tvdbId", async ({
         episodes: [
           {
             airedAt: "2011-07-17",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 1,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/6431eb24c04af.jpg",
@@ -470,7 +470,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2011-07-24",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 2,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/6432fb7d85d01.jpg",
@@ -479,7 +479,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2011-07-31",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 3,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/64330d3336d8a.jpg",
@@ -488,7 +488,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2011-08-07",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 4,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ec3219910251.jpg",
@@ -497,7 +497,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2011-08-14",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 5,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/643595909286e.jpg",
@@ -506,7 +506,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2011-08-21",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 6,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/6435a700ddb2c.jpg",
@@ -515,7 +515,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2011-08-28",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 7,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/6435bcc005073.jpg",
@@ -524,7 +524,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2011-09-04",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 8,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/6437cc3d70968.jpg",
@@ -533,7 +533,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2011-09-11",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 9,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ec4384965fb5.jpg",
@@ -542,7 +542,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2011-09-18",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 10,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ec43964e72b8.jpg",
@@ -551,7 +551,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2011-09-25",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 11,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/6439730668d56.jpg",
@@ -560,7 +560,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2011-10-02",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 12,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ec43f0bd0393.jpg",
@@ -569,7 +569,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2011-10-09",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 13,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/6439a250a06ca.jpg",
@@ -583,7 +583,7 @@ it("returns the series if the item has a tvdbId", async ({
         episodes: [
           {
             airedAt: "2012-07-15",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 1,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ec44a5282bb8.jpg",
@@ -592,7 +592,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2012-07-22",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 2,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/643a5dff8b925.jpg",
@@ -601,7 +601,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2012-07-29",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 3,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/643b0b02f2427.jpg",
@@ -610,7 +610,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2012-08-05",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 4,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/643c054d8f33a.jpg",
@@ -619,7 +619,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2012-08-12",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 5,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/643c450d914f6.jpg",
@@ -628,7 +628,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2012-08-19",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 6,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ec45d0ab85aa.jpg",
@@ -637,7 +637,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2012-08-26",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 7,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/643d713000300.jpg",
@@ -646,7 +646,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2012-09-02",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 8,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ec4628385493.jpg",
@@ -655,7 +655,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2013-08-11",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 9,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/643d9bb73189e.jpg",
@@ -664,7 +664,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2013-08-18",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 10,
             posterPath:
               "https://artworks.thetvdb.com/banners/series/81189/episodes/5ec4787fbd5b3.jpg",
@@ -673,7 +673,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2013-08-25",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 11,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/643dc3212e518.jpg",
@@ -682,7 +682,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2013-09-01",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 12,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/643eed7cc5a34.jpg",
@@ -691,7 +691,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2013-09-08",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 13,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/643f05b447467.jpg",
@@ -700,7 +700,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2013-09-15",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 14,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/643f13cf31542.jpg",
@@ -709,7 +709,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2013-09-22",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 15,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/643f2821d00fc.jpg",
@@ -718,7 +718,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             airedAt: "2013-09-29",
-            contentRating: "TV-MA",
+            contentRating: "tv-ma",
             number: 16,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/643f38bb24163.jpg",
