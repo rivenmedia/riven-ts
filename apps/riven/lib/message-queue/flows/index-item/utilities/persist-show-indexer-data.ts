@@ -2,6 +2,7 @@ import { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 import { ItemRequestCreationError } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.event";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
+import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
@@ -27,9 +28,8 @@ export async function persistShowIndexerData({
 
   assert(
     itemRequest.state === "requested",
-    new MediaItemIndexError({
+    new MediaItemIndexErrorIncorrectState({
       item: itemRequest,
-      error: `Item request is in invalid state ${itemRequest.state}, expected "requested"`,
     }),
   );
 

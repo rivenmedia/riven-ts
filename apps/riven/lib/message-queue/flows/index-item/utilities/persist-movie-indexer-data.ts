@@ -1,6 +1,7 @@
 import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { ItemRequestCreationError } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.event";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
+import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
@@ -27,16 +28,15 @@ export async function persistMovieIndexerData({
 
   assert(
     itemRequest.state === "requested",
-    new MediaItemIndexError({
+    new MediaItemIndexErrorIncorrectState({
       item: itemRequest,
-      error: `Item request is in invalid state ${itemRequest.state}, expected "requested"`,
     }),
   );
 
   const { tmdbId } = itemRequest;
 
   if (!tmdbId) {
-    throw new ItemRequestCreationError({
+    throw new MediaItemIndexError({
       item: itemRequest,
       error:
         "Item request is missing tmdbId, cannot persist movie indexer data",
