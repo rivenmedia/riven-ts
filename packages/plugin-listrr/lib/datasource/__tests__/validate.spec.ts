@@ -8,24 +8,18 @@ import { ListrrAPI } from "../listrr.datasource.ts";
 
 it("returns false if the request fails", async ({
   server,
-  httpCache,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(getApiListMyPageHandler(() => HttpResponse.error()));
 
   const listrrApi = new ListrrAPI({
-    cache: httpCache,
-    connection: {
-      url: redisUrl,
-    },
-    logger,
+    ...dataSourceConfig,
+    pluginSymbol: Symbol("@repo/plugin-listrr"),
     settings: {
       apiKey: "",
       movieLists: [],
       showLists: [],
     },
-    pluginSymbol: Symbol("@repo/plugin-listrr"),
   });
   const isValid = await listrrApi.validate();
 
@@ -34,24 +28,18 @@ it("returns false if the request fails", async ({
 
 it("returns true if the request succeeds", async ({
   server,
-  httpCache,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(getApiListMyPageHandler());
 
   const listrrApi = new ListrrAPI({
-    cache: httpCache,
-    connection: {
-      url: redisUrl,
-    },
-    logger,
+    ...dataSourceConfig,
+    pluginSymbol: Symbol("@repo/plugin-listrr"),
     settings: {
       apiKey: "",
       movieLists: [],
       showLists: [],
     },
-    pluginSymbol: Symbol("@repo/plugin-listrr"),
   });
   const isValid = await listrrApi.validate();
 

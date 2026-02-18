@@ -18,13 +18,21 @@ export type ContentServiceRequestedEvent = z.infer<
 
 export const ContentServiceRequestedResponse = z.object({
   movies: z.array(
-    ItemRequest.pick({ imdbId: true, tmdbId: true }).refine(
+    ItemRequest.pick({
+      imdbId: true,
+      tmdbId: true,
+      externalRequestId: true,
+    }).refine(
       atLeastOnePropertyRequired,
       "At least one identifier is required",
     ),
   ),
   shows: z.array(
-    ItemRequest.pick({ imdbId: true, tvdbId: true }).refine(
+    ItemRequest.pick({
+      imdbId: true,
+      tvdbId: true,
+      externalRequestId: true,
+    }).refine(
       atLeastOnePropertyRequired,
       "At least one identifier is required",
     ),

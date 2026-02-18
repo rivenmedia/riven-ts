@@ -9,10 +9,8 @@ import { pluginConfig } from "../../realdebrid-plugin.config.ts";
 
 it('returns the validation status when calling "realdebridIsValid" query', async ({
   gqlServer,
-  httpCache,
   server,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -30,12 +28,8 @@ it('returns the validation status when calling "realdebridIsValid" query', async
       contextValue: {
         [pluginConfig.name]: {
           api: new RealDebridAPI({
-            cache: httpCache,
-            logger,
+            ...dataSourceConfig,
             pluginSymbol: Symbol("@repo/plugin-realdebrid"),
-            connection: {
-              url: redisUrl,
-            },
             settings: {
               apiKey: "",
             },

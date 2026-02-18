@@ -56,7 +56,7 @@ export async function createPluginWorker<
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
-    logger.error(`[${name}] Error: ${error.message}`);
+    logger.error(`[${name}] ${error.message}`);
   });
 
   if (settings.unsafeClearQueuesOnStartup) {

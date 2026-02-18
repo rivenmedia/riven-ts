@@ -1,3 +1,6 @@
+import { ItemRequestCreationErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.conflict.event";
+import { ItemRequestCreationError } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.event";
+
 import { requestContentServicesProcessorSchema } from "./request-content-services.schema.ts";
 import { processRequestedItem } from "./utilities/process-requested-item.ts";
 
@@ -23,18 +26,32 @@ export const requestContentServicesProcessor =
         ...items.movies.map((item) =>
           processRequestedItem({
             item,
-            sendEvent,
             type: "movie",
           }),
         ),
         ...items.shows.map((item) =>
           processRequestedItem({
             item,
-            sendEvent,
             type: "show",
           }),
         ),
       ]);
+
+      for (const result of results) {
+        if (result.status === "rejected") {
+          if (
+            result.reason instanceof ItemRequestCreationError ||
+            result.reason instanceof ItemRequestCreationErrorConflict
+          ) {
+            sendEvent(result.reason.payload);
+          }
+        } else {
+          sendEvent({
+            type: "riven.item-request.creation.success",
+            item: result.value.item,
+          });
+        }
+      }
 
       return {
         success: true,

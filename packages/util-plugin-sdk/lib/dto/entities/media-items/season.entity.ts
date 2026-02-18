@@ -37,6 +37,7 @@ export class Season extends ShowLikeMediaItem {
     return this.show.loadProperty("title");
   }
 
+  @Property({ persist: false, hidden: true, getter: true })
   get prettyName(): Opt<Hidden<string>> {
     return `Season ${this.number.toString().padStart(2, "0")}`;
   }

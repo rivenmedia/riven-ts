@@ -2,6 +2,7 @@ import z from "zod";
 
 import { ItemRequestInstance } from "../media/item-request.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
+import { createProgramEventError } from "../utilities/create-program-event-error.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
 /**
@@ -20,3 +21,7 @@ export type MediaItemIndexErrorEvent = z.infer<typeof MediaItemIndexErrorEvent>;
 export const MediaItemIndexErrorEventHandler = createEventHandlerSchema(
   MediaItemIndexErrorEvent,
 );
+
+export class MediaItemIndexError extends createProgramEventError(
+  MediaItemIndexErrorEvent,
+) {}

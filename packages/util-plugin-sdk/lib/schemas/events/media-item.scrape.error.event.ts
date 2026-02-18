@@ -1,6 +1,7 @@
 import z from "zod";
 
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
+import { createProgramEventError } from "../utilities/create-program-event-error.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 import { MediaItemScrapeRequestedEvent } from "./media-item.scrape-requested.event.ts";
 
@@ -22,3 +23,7 @@ export type MediaItemScrapeErrorEvent = z.infer<
 export const MediaItemScrapeErrorEventHandler = createEventHandlerSchema(
   MediaItemScrapeErrorEvent,
 );
+
+export class MediaItemScrapeError extends createProgramEventError(
+  MediaItemScrapeErrorEvent,
+) {}

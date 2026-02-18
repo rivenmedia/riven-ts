@@ -28,7 +28,7 @@ export class Movie extends MediaItem {
     });
   }
 
-  @Property({ getter: true })
+  @Property({ persist: false, hidden: true, getter: true })
   get prettyName(): Opt<Hidden<string>> {
     return `${this.title} (${this.year?.toString() ?? "Unknown"}) {tmdb-${this.tmdbId}}`;
   }

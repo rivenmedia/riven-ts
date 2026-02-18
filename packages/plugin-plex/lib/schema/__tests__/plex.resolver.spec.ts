@@ -9,10 +9,8 @@ import { pluginConfig } from "../../plex-plugin.config.ts";
 
 it('returns the validation status when calling "plexIsValid" query', async ({
   gqlServer,
-  httpCache,
+  dataSourceConfig,
   server,
-  redisUrl,
-  logger,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -30,12 +28,8 @@ it('returns the validation status when calling "plexIsValid" query', async ({
       contextValue: {
         [pluginConfig.name]: {
           api: new PlexAPI({
-            cache: httpCache,
-            logger,
+            ...dataSourceConfig,
             pluginSymbol: Symbol("@repo/plugin-plex"),
-            connection: {
-              url: redisUrl,
-            },
             settings: {
               plexLibraryPath: "",
               plexServerUrl: "",

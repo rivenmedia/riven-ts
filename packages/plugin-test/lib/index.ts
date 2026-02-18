@@ -15,8 +15,8 @@ export default {
   resolvers: [TestResolver, TestSettingsResolver],
   hooks: {
     "riven.core.started": async () => {},
-    "riven.media-item.creation.error.conflict": async () => {},
-    "riven.media-item.creation.error": async () => {},
+    "riven.item-request.creation.error.conflict": async () => {},
+    "riven.item-request.creation.error": async () => {},
     "riven.item-request.creation.success": async () => {},
   },
   settingsSchema: TestSettings,

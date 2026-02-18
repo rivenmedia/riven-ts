@@ -7,6 +7,8 @@ import { mockLogger } from "./create-mock-logger.ts";
 
 import type { ApolloServer } from "@apollo/server";
 import type { KeyValueCache } from "@apollo/utils.keyvaluecache";
+import type { BaseDataSourceConfig } from "@repo/util-plugin-sdk";
+import type { Telemetry } from "bullmq";
 import type { SetupServerApi } from "msw/node";
 import type { Logger } from "winston";
 
@@ -16,6 +18,8 @@ export const it = testBase.extend<{
   httpCache: KeyValueCache;
   server: SetupServerApi;
   logger: Logger;
+  telemetry: Telemetry;
+  dataSourceConfig: Omit<BaseDataSourceConfig<never>, "settings">;
 }>({
   redisUrl: [
     async ({}, use) => {
@@ -93,6 +97,19 @@ export const it = testBase.extend<{
     server.close();
   },
   logger: mockLogger,
+  telemetry: undefined as unknown as Telemetry,
+  dataSourceConfig: async ({ httpCache, redisUrl, logger, telemetry }, use) => {
+    await use({
+      cache: httpCache,
+      connection: {
+        url: redisUrl,
+      },
+      logger,
+      pluginSymbol: Symbol.for(""),
+      telemetry,
+      requestAttempts: 1,
+    });
+  },
 });
 
 export type {

@@ -4,7 +4,7 @@ import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-
 import { expect, it } from "vitest";
 
 import { database } from "../../../../database/database.ts";
-import { persistMovieIndexerData } from "./persist-movie-indexer-data.ts";
+import { persistShowIndexerData } from "./persist-show-indexer-data.ts";
 
 it("returns the media item if processed successfully", async ({}) => {
   const requestedId = "tt1234567";
@@ -13,21 +13,25 @@ it("returns the media item if processed successfully", async ({}) => {
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "test-user",
     imdbId: requestedId,
-    tmdbId: "1234",
-    type: "movie",
+    tvdbId: "1234",
+    type: "show",
     state: "requested",
   });
 
   await em.flush();
 
-  const result = await persistMovieIndexerData({
+  const result = await persistShowIndexerData({
     item: {
       id: itemRequest.id,
-      title: "Test Movie",
+      title: "Test Show",
       imdbId: requestedId,
-      contentRating: "g",
+      contentRating: "tv-14",
       genres: [],
-      type: "movie",
+      type: "show",
+      firstAired: new Date("2020-01-01").toISOString(),
+      network: "Test Network",
+      seasons: [],
+      status: "ended",
     },
   });
 
@@ -35,8 +39,8 @@ it("returns the media item if processed successfully", async ({}) => {
   expect(result).toEqual(
     expect.objectContaining({
       id: 1,
-      title: "Test Movie",
-      type: "movie",
+      title: "Test Show",
+      type: "show",
     }),
   );
 });
@@ -45,14 +49,18 @@ it("throws an error if the item processing fails", async () => {
   const requestedId = "1234";
 
   await expect(
-    persistMovieIndexerData({
+    persistShowIndexerData({
       item: {
         id: 1,
-        title: "Test Movie",
+        title: "Test Show",
         imdbId: requestedId,
-        contentRating: "g",
+        contentRating: "tv-14",
         genres: [],
-        type: "movie",
+        type: "show",
+        firstAired: new Date("2020-01-01").toISOString(),
+        network: "Test Network",
+        seasons: [],
+        status: "ended",
       },
     }),
   ).rejects.toThrow(MediaItemIndexError);

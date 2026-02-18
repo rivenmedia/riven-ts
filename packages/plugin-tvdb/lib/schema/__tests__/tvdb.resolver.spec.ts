@@ -9,10 +9,8 @@ import { pluginConfig } from "../../tvdb-plugin.config.ts";
 
 it('returns the validation status when calling "tvdbIsValid" query', async ({
   gqlServer,
-  httpCache,
   server,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -30,12 +28,8 @@ it('returns the validation status when calling "tvdbIsValid" query', async ({
       contextValue: {
         [pluginConfig.name]: {
           api: new TvdbAPI({
-            cache: httpCache,
-            logger,
+            ...dataSourceConfig,
             pluginSymbol: pluginConfig.name,
-            connection: {
-              url: redisUrl,
-            },
             settings: {
               apiKey: "",
             },

@@ -1,3 +1,6 @@
+import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
+import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
+
 import { UnrecoverableError } from "bullmq";
 import { DateTime } from "luxon";
 
@@ -15,14 +18,13 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
       );
     }
 
-    const updatedItem = await persistDownloadResults({
-      id: job.data.id,
-      container: finalResult.result,
-      processedBy: finalResult.plugin,
-      sendEvent,
-    });
+    try {
+      const updatedItem = await persistDownloadResults({
+        id: job.data.id,
+        container: finalResult.result,
+        processedBy: finalResult.plugin,
+      });
 
-    if (updatedItem) {
       sendEvent({
         type: "riven.media-item.download.success",
         item: updatedItem,
@@ -30,10 +32,25 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
           .diff(DateTime.fromJSDate(updatedItem.createdAt))
           .as("seconds"),
       });
-    }
 
-    return {
-      success: true,
-    };
+      return {
+        success: true,
+      };
+    } catch (error) {
+      if (
+        error instanceof MediaItemDownloadError ||
+        error instanceof MediaItemDownloadErrorIncorrectState
+      ) {
+        sendEvent(error.payload);
+
+        throw new UnrecoverableError(
+          `Failed to persist download results: ${String(error)}`,
+        );
+      }
+
+      throw new UnrecoverableError(
+        `Unexpected error while processing download item: ${String(error)}`,
+      );
+    }
   },
 );

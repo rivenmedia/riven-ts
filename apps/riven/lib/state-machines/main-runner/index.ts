@@ -360,27 +360,27 @@ export const mainRunnerMachine = setup({
           },
         ],
       },
-      "riven.media-item.creation.error": {
+      "riven.item-request.creation.error": {
         description:
-          "Indicates that an error occurred while attempting to create a media item in the library.",
+          "Indicates that an error occurred while attempting to create an item request.",
         actions: [
           {
             type: "log",
             params: ({ event: { item, error } }) => ({
-              message: `Error creating media item ${JSON.stringify(SerialisedItemRequest.decode(item))}: ${String(error)}`,
+              message: `Error creating item request ${JSON.stringify(SerialisedItemRequest.decode(item))}: ${String(error)}`,
               level: "error",
             }),
           },
         ],
       },
-      "riven.media-item.creation.error.conflict": {
+      "riven.item-request.creation.error.conflict": {
         description:
-          "Indicates that a media item creation was attempted, but the item already exists in the library.",
+          "Indicates that an item request creation was attempted, but the item already exists in the library.",
         actions: [
           {
             type: "log",
             params: ({ event: { item } }) => ({
-              message: `Media item already exists: ${JSON.stringify(SerialisedItemRequest.decode(item))}`,
+              message: `Item request already exists: ${JSON.stringify(SerialisedItemRequest.decode(item))}`,
               level: "verbose",
             }),
           },

@@ -2,6 +2,7 @@ import z from "zod";
 
 import { MediaItemInstance } from "../media/media-item-instance.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
+import { createProgramEventError } from "../utilities/create-program-event-error.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
 /**
@@ -20,3 +21,7 @@ export type MediaItemScrapeErrorIncorrectStateEvent = z.infer<
 
 export const MediaItemScrapeErrorIncorrectStateEventHandler =
   createEventHandlerSchema(MediaItemScrapeErrorIncorrectStateEvent);
+
+export class MediaItemScrapeErrorIncorrectState extends createProgramEventError(
+  MediaItemScrapeErrorIncorrectStateEvent,
+) {}

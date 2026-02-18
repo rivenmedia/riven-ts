@@ -1,7 +1,10 @@
+import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
+import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
+
 import { UnrecoverableError } from "bullmq";
 
 import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
-import { persistScrapeResults } from "./utilities/persist-scrape-results.actor.ts";
+import { persistScrapeResults } from "./utilities/persist-scrape-results.ts";
 
 import type { RankedResult } from "@repo/util-rank-torrent-name";
 
@@ -24,23 +27,27 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
       const item = await persistScrapeResults({
         id: job.data.id,
         results: sortedResults,
-        sendEvent,
       });
 
-      if (item) {
-        sendEvent({
-          type: "riven.media-item.scrape.success",
-          item,
-        });
-      }
+      sendEvent({
+        type: "riven.media-item.scrape.success",
+        item,
+      });
 
       return {
         success: true,
       };
     } catch (error) {
-      throw new UnrecoverableError(
-        `Failed to persist scrape results: ${String(error)}`,
-      );
+      if (
+        error instanceof MediaItemScrapeErrorIncorrectState ||
+        error instanceof MediaItemScrapeError
+      ) {
+        sendEvent(error.payload);
+
+        throw new UnrecoverableError(error.message);
+      }
+
+      throw error;
     }
   },
 );

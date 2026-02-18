@@ -7,9 +7,7 @@ import { TmdbAPI } from "../tmdb.datasource.ts";
 
 it("returns false if the request fails", async ({
   server,
-  httpCache,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () =>
@@ -18,11 +16,7 @@ it("returns false if the request fails", async ({
   );
 
   const tmdbApi = new TmdbAPI({
-    cache: httpCache,
-    connection: {
-      url: redisUrl,
-    },
-    logger,
+    ...dataSourceConfig,
     pluginSymbol: Symbol("@repo/plugin-tmdb"),
     settings: {
       apiKey: "",
@@ -35,20 +29,14 @@ it("returns false if the request fails", async ({
 
 it("returns true if the request succeeds", async ({
   server,
-  httpCache,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
   );
 
   const tmdbApi = new TmdbAPI({
-    cache: httpCache,
-    connection: {
-      url: redisUrl,
-    },
-    logger,
+    ...dataSourceConfig,
     pluginSymbol: Symbol("@repo/plugin-tmdb"),
     settings: {
       apiKey: "",
