@@ -1,4 +1,6 @@
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequestCreationErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.conflict.event";
+import { ItemRequestCreationError } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
@@ -6,12 +8,9 @@ import z from "zod";
 import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
 
-import type { MainRunnerMachineIntake } from "../../../../state-machines/main-runner/index.ts";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
-export type ProcessRequestedItemInput = {
-  sendEvent: MainRunnerMachineIntake;
-} & (
+export type ProcessRequestedItemInput =
   | {
       type: "show";
       item: ContentServiceRequestedResponse["shows"][number];
@@ -19,17 +18,16 @@ export type ProcessRequestedItemInput = {
   | {
       type: "movie";
       item: ContentServiceRequestedResponse["movies"][number];
-    }
-);
+    };
 
 export interface ProcessRequestedItemOutput {
   isNewItem: boolean;
+  item: ItemRequest;
 }
 
 export async function processRequestedItem({
   item,
   type,
-  sendEvent,
 }: ProcessRequestedItemInput): Promise<ProcessRequestedItemOutput> {
   const externalIds = [
     item.imdbId ? `IMDB: ${item.imdbId}` : null,
@@ -37,7 +35,7 @@ export async function processRequestedItem({
     type === "show" && item.tvdbId ? `TVDB: ${item.tvdbId}` : null,
   ].filter(Boolean);
 
-  logger.silly(`Processing requested item: ${externalIds.join(", ")}`);
+  logger.silly(`Processing requested ${type}: ${externalIds.join(", ")}`);
 
   const existingItem = await database.itemRequest.findOne({
     $or: [
@@ -48,14 +46,9 @@ export async function processRequestedItem({
   });
 
   if (existingItem) {
-    sendEvent({
-      type: "riven.media-item.creation.error.conflict",
+    throw new ItemRequestCreationErrorConflict({
       item: existingItem,
     });
-
-    return {
-      isNewItem: false,
-    };
   }
 
   const em = database.em.fork();
@@ -67,6 +60,7 @@ export async function processRequestedItem({
     imdbId: item.imdbId ?? null,
     tmdbId: (type === "movie" ? item.tmdbId : null) ?? null,
     tvdbId: (type === "show" ? item.tvdbId : null) ?? null,
+    externalRequestId: item.externalRequestId ?? null,
   });
 
   try {
@@ -76,33 +70,29 @@ export async function processRequestedItem({
 
     await em.refreshOrFail(itemRequest);
 
-    sendEvent({
-      type: "riven.item-request.creation.success",
-      item: itemRequest,
-    });
-
     return {
       isNewItem: true,
+      item: itemRequest,
     };
   } catch (error) {
-    const parsedError = z
+    const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .parse(error);
-
-    sendEvent({
-      type: "riven.media-item.creation.error",
-      item: itemRequest,
-      error: Array.isArray(parsedError)
-        ? parsedError
+      .transform((error) => {
+        if (Array.isArray(error)) {
+          return error
             .map((err) =>
               err.constraints ? Object.values(err.constraints).join("; ") : "",
             )
-            .join("; ")
-        : parsedError.message,
-    });
+            .join("; ");
+        }
 
-    return {
-      isNewItem: false,
-    };
+        return error.message;
+      })
+      .parse(error);
+
+    throw new ItemRequestCreationError({
+      item: itemRequest,
+      error: errorMessage,
+    });
   }
 }

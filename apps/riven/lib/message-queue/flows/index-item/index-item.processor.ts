@@ -1,6 +1,8 @@
+import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
+import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
+
 import { UnrecoverableError } from "bullmq";
 
-import { logger } from "../../../utilities/logger/logger.ts";
 import { requestIndexDataProcessorSchema } from "./index-item.schema.ts";
 import { persistMovieIndexerData } from "./utilities/persist-movie-indexer-data.ts";
 import { persistShowIndexerData } from "./utilities/persist-show-indexer-data.ts";
@@ -33,32 +35,30 @@ export const indexItemProcessor =
       try {
         const updatedItem =
           item.type === "movie"
-            ? await persistMovieIndexerData({
-                item,
-                sendEvent,
-              })
-            : await persistShowIndexerData({
-                item,
-                sendEvent,
-              });
+            ? await persistMovieIndexerData({ item })
+            : await persistShowIndexerData({ item });
 
-        if (updatedItem) {
-          sendEvent({
-            type: "riven.media-item.index.success",
-            item: updatedItem,
-          });
-        }
+        sendEvent({
+          type: "riven.media-item.index.success",
+          item: updatedItem,
+        });
 
         return {
           success: true,
         };
-      } catch (error: unknown) {
-        logger.error(error);
+      } catch (error) {
+        if (
+          error instanceof MediaItemIndexError ||
+          error instanceof MediaItemIndexErrorIncorrectState
+        ) {
+          sendEvent(error.payload);
 
-        return {
-          success: false,
-          error,
-        };
+          throw new UnrecoverableError(
+            `Failed to persist indexer data: ${String(error)}`,
+          );
+        }
+
+        throw error;
       }
     },
   );

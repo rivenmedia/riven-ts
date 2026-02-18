@@ -9,6 +9,7 @@ export const ItemRequest = z.object({
   tmdbId: z.string().nullish(),
   tvdbId: z.string().nullish(),
   type: ItemRequestType,
+  externalRequestId: z.string().optional(),
 });
 
 export const ItemRequestInstance = z.instanceof(ItemRequestEntity);

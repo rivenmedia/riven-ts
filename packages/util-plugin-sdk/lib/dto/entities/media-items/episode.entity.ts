@@ -46,6 +46,7 @@ export class Episode extends ShowLikeMediaItem {
     return show.title;
   }
 
+  @Property({ persist: false, hidden: true, getter: true })
   get prettyName(): Opt<Hidden<string>> {
     const baseName = this.season.getProperty("show").getProperty("prettyName");
 

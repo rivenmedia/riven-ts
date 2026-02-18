@@ -42,13 +42,15 @@ it("sends an error event if the item processing fails", async () => {
 
   vi.spyOn(parentRef, "send");
 
-  await processRequestedItem({
-    item: {
-      imdbId: requestedId,
-    },
-    type: "movie",
-    sendEvent: parentRef.send,
-  });
+  await expect(
+    processRequestedItem({
+      item: {
+        imdbId: requestedId,
+      },
+      type: "movie",
+      sendEvent: parentRef.send,
+    }),
+  ).rejects.toThrow();
 
   await vi.waitFor(() => {
     expect(parentRef).toHaveReceivedEvent({

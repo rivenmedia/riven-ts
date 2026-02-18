@@ -67,7 +67,12 @@ export class Show extends ShowLikeMediaItem {
     );
   }
 
+  @Property({ persist: false, hidden: true, getter: true })
   get prettyName(): Opt<Hidden<string>> {
     return `${this.title} (${this.year?.toString() ?? "Unknown"}) {tvdb-${this.tvdbId}}`;
+  }
+
+  getShowTitle() {
+    return this.title;
   }
 }

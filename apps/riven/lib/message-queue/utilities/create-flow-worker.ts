@@ -1,7 +1,7 @@
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import * as Sentry from "@sentry/node";
-import { Worker, type WorkerOptions } from "bullmq";
+import { UnrecoverableError, Worker, type WorkerOptions } from "bullmq";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
@@ -26,7 +26,7 @@ export function createFlowWorker<T extends Flow["name"]>(
       } catch (error) {
         Sentry.captureException(error);
 
-        throw error;
+        throw new UnrecoverableError(String(error));
       }
     },
     {
@@ -41,7 +41,7 @@ export function createFlowWorker<T extends Flow["name"]>(
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
-    logger.error(`[${name}] Error: ${error.message}`);
+    logger.error(`[${name}] ${error.message}`);
   });
 
   return worker;

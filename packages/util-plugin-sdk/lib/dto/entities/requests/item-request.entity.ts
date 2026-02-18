@@ -1,6 +1,7 @@
 import {
   Entity,
   Enum,
+  type Hidden,
   type Opt,
   PrimaryKey,
   Property,
@@ -65,8 +66,8 @@ export class ItemRequest {
   @Enum(() => ItemRequestState.enum)
   state!: ItemRequestState;
 
-  @Property({ persist: false, hidden: true })
-  get externalIdsLabel(): Opt<string[]> {
+  @Property({ persist: false, hidden: true, getter: true })
+  get externalIdsLabel(): Hidden<Opt<string[]>> {
     const externalIds = [
       this.imdbId ? `IMDB: ${this.imdbId}` : null,
       this.type === "movie" && this.tmdbId ? `TMDB: ${this.tmdbId}` : null,

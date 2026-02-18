@@ -1,56 +1,49 @@
 import { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
+import { ItemRequestCreationError } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.event";
+import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 
-import { UnrecoverableError } from "bullmq";
 import { ValidationError, validateOrReject } from "class-validator";
+import assert from "node:assert";
 import z from "zod";
 
 import { database } from "../../../../database/database.ts";
 
-import type { MainRunnerMachineIntake } from "../../../../state-machines/main-runner/index.ts";
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-export interface PersistShowIndexerDataInput extends NonNullable<MediaItemIndexRequestedResponse> {
-  sendEvent: MainRunnerMachineIntake;
+export interface PersistShowIndexerDataInput {
+  item: Extract<
+    NonNullable<MediaItemIndexRequestedResponse>["item"],
+    { type: "show" }
+  >;
 }
 
 export async function persistShowIndexerData({
   item,
-  sendEvent,
 }: PersistShowIndexerDataInput) {
-  if (item.type !== "show") {
-    sendEvent({
-      type: "riven.media-item.index.error",
-      item,
-      error: "Item is not a show",
-    });
-
-    return;
-  }
-
   const itemRequest = await database.itemRequest.findOneOrFail({
     id: item.id,
   });
 
-  if (itemRequest.state !== "requested") {
-    sendEvent({
-      type: "riven.media-item.index.error.incorrect-state",
+  assert(
+    itemRequest.state === "requested",
+    new MediaItemIndexError({
       item: itemRequest,
-    });
-
-    return;
-  }
+      error: `Item request is in invalid state ${itemRequest.state}, expected "requested"`,
+    }),
+  );
 
   const { tvdbId } = itemRequest;
 
   if (!tvdbId) {
-    throw new UnrecoverableError("Item request is missing tvdbId");
+    throw new MediaItemIndexError({
+      item: itemRequest,
+      error: "Item request is missing tvdbId",
+    });
   }
 
   try {
-    const em = database.em.fork();
-
-    const show = await em.transactional(async (transaction) => {
+    return await database.em.fork().transactional(async (transaction) => {
       const firstAired = item.firstAired
         ? DateTime.fromISO(item.firstAired)
         : null;
@@ -74,7 +67,7 @@ export async function persistShowIndexerData({
 
       await transaction.flush();
 
-      let totalEpisodes = 0;
+      let totalEpisodes = 1;
 
       for (const season of item.seasons) {
         const seasonYear = season.episodes[0]?.airedAt
@@ -83,7 +76,6 @@ export async function persistShowIndexerData({
 
         const seasonEntry = transaction.create(Season, {
           title: `${show.title} - Season ${season.number.toString().padStart(2, "0")}`,
-          imdbId: show.imdbId ?? null,
           year: seasonYear,
           number: season.number,
           state: "indexed",
@@ -99,8 +91,7 @@ export async function persistShowIndexerData({
             : seasonYear;
 
           const episodeEntry = transaction.create(Episode, {
-            imdbId: seasonEntry.imdbId ?? null,
-            absoluteNumber: ++totalEpisodes,
+            absoluteNumber: totalEpisodes++,
             contentRating: episode.contentRating,
             number: episode.number,
             title: episode.title,
@@ -116,34 +107,27 @@ export async function persistShowIndexerData({
 
       await transaction.flush();
 
-      return show;
+      return transaction.refreshOrFail(show);
     });
-
-    await em.refreshOrFail(show);
-
-    sendEvent({
-      type: "riven.media-item.index.success",
-      item: show,
-    });
-
-    return show;
   } catch (error) {
-    const parsedError = z
+    const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .parse(error);
-
-    sendEvent({
-      type: "riven.media-item.index.error",
-      item: itemRequest,
-      error: Array.isArray(parsedError)
-        ? parsedError
+      .transform((error) => {
+        if (Array.isArray(error)) {
+          return error
             .map((err) =>
               err.constraints ? Object.values(err.constraints).join("; ") : "",
             )
-            .join("; ")
-        : parsedError.message,
-    });
+            .join("; ");
+        }
 
-    throw error;
+        return error.message;
+      })
+      .parse(error);
+
+    throw new ItemRequestCreationError({
+      item: itemRequest,
+      error: errorMessage,
+    });
   }
 }

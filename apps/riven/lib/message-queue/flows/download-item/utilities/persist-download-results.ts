@@ -1,28 +1,28 @@
 import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
+import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
 import { ref } from "@mikro-orm/core";
 import { ValidationError, validateOrReject } from "class-validator";
+import assert from "node:assert";
 import z from "zod";
 
 import { database } from "../../../../database/database.ts";
 
-import type { MainRunnerMachineIntake } from "../../../../state-machines/main-runner/index.ts";
 import type { TorrentContainer } from "@repo/util-plugin-sdk/schemas/torrents/torrent-container";
 
 export interface PersistDownloadResultsInput {
   id: number;
   container: TorrentContainer;
   processedBy: string;
-  sendEvent: MainRunnerMachineIntake;
 }
 
 export async function persistDownloadResults({
   id,
   container,
   processedBy,
-  sendEvent,
 }: PersistDownloadResultsInput) {
-  const existingItem = await database.mediaItem.findOne(
+  const existingItem = await database.mediaItem.findOneOrFail(
     {
       streams: {
         infoHash: container.infoHash,
@@ -34,22 +34,16 @@ export async function persistDownloadResults({
     },
   );
 
-  if (!existingItem) {
-    throw new Error(`Media item with ID ${id.toString()} not found`);
-  }
-
   if (!existingItem.streams[0]) {
     throw new Error(`Media item with ID ${id.toString()} has no streams`);
   }
 
-  if (existingItem.state !== "scraped") {
-    sendEvent({
-      type: "riven.media-item.download.error.incorrect-state",
+  assert(
+    existingItem.state === "scraped",
+    new MediaItemDownloadErrorIncorrectState({
       item: existingItem,
-    });
-
-    return;
-  }
+    }),
+  );
 
   const em = database.em.fork();
 
@@ -112,22 +106,24 @@ export async function persistDownloadResults({
       populate: ["*"],
     });
   } catch (error) {
-    const parsedError = z
+    const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .parse(error);
-
-    sendEvent({
-      type: "riven.media-item.download.error",
-      item: existingItem,
-      error: Array.isArray(parsedError)
-        ? parsedError
+      .transform((error) => {
+        if (Array.isArray(error)) {
+          return error
             .map((err) =>
               err.constraints ? Object.values(err.constraints).join("; ") : "",
             )
-            .join("; ")
-        : parsedError.message,
-    });
+            .join("; ");
+        }
 
-    throw error;
+        return error.message;
+      })
+      .parse(error);
+
+    throw new MediaItemDownloadError({
+      item: existingItem,
+      error: errorMessage,
+    });
   }
 }

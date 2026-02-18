@@ -7,8 +7,7 @@ export const createFlowSchema = <
   Type extends string,
   Children extends ZodType,
   Output extends ZodType = ZodOptional<ZodNever>,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  Payload extends Record<string, ZodType> = {},
+  Payload extends Record<string, ZodType> = Record<string, ZodNever>,
 >(
   type: Type,
   childrenSchema: Children,

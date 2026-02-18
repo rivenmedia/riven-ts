@@ -1,52 +1,46 @@
 import { Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequestCreationError } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.event";
+import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 
-import { UnrecoverableError } from "bullmq";
 import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
+import assert from "node:assert";
 import z from "zod";
 
 import { database } from "../../../../database/database.ts";
 
-import type { MainRunnerMachineIntake } from "../../../../state-machines/main-runner/index.ts";
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-export interface PersistMovieIndexerDataInput extends NonNullable<MediaItemIndexRequestedResponse> {
-  sendEvent: MainRunnerMachineIntake;
+export interface PersistMovieIndexerDataInput {
+  item: Extract<
+    NonNullable<MediaItemIndexRequestedResponse>["item"],
+    { type: "movie" }
+  >;
 }
 
 export async function persistMovieIndexerData({
   item,
-  sendEvent,
 }: PersistMovieIndexerDataInput) {
-  if (item.type !== "movie") {
-    sendEvent({
-      type: "riven.media-item.index.error",
-      item,
-      error: "Item is not a movie",
-    });
-
-    return;
-  }
-
   const itemRequest = await database.itemRequest.findOneOrFail({
     id: item.id,
   });
 
-  if (itemRequest.state !== "requested") {
-    sendEvent({
-      type: "riven.media-item.index.error.incorrect-state",
+  assert(
+    itemRequest.state === "requested",
+    new MediaItemIndexError({
       item: itemRequest,
-    });
-
-    return;
-  }
+      error: `Item request is in invalid state ${itemRequest.state}, expected "requested"`,
+    }),
+  );
 
   const { tmdbId } = itemRequest;
 
   if (!tmdbId) {
-    throw new UnrecoverableError(
-      "Item request is missing tmdbId, cannot persist movie indexer data",
-    );
+    throw new ItemRequestCreationError({
+      item: itemRequest,
+      error:
+        "Item request is missing tmdbId, cannot persist movie indexer data",
+    });
   }
 
   try {
@@ -74,31 +68,26 @@ export async function persistMovieIndexerData({
 
     await em.flush();
 
-    await em.refreshOrFail(mediaItem);
-
-    sendEvent({
-      type: "riven.media-item.index.success",
-      item: mediaItem,
-    });
-
-    return mediaItem;
+    return await em.refreshOrFail(mediaItem);
   } catch (error) {
-    const parsedError = z
+    const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .parse(error);
-
-    sendEvent({
-      type: "riven.media-item.index.error",
-      item: itemRequest,
-      error: Array.isArray(parsedError)
-        ? parsedError
+      .transform((error) => {
+        if (Array.isArray(error)) {
+          return error
             .map((err) =>
               err.constraints ? Object.values(err.constraints).join("; ") : "",
             )
-            .join("; ")
-        : parsedError.message,
-    });
+            .join("; ");
+        }
 
-    throw error;
+        return error.message;
+      })
+      .parse(error);
+
+    throw new ItemRequestCreationError({
+      item: itemRequest,
+      error: errorMessage,
+    });
   }
 }
