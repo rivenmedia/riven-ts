@@ -9,10 +9,8 @@ import { pluginConfig } from "../../{{kebabCase pluginName}}-plugin.config.ts";
 
 it('returns the validation status when calling "{{camelCase pluginName}}IsValid" query', async ({
   gqlServer,
-  httpCache,
   server,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -30,12 +28,8 @@ it('returns the validation status when calling "{{camelCase pluginName}}IsValid"
       contextValue: {
         [pluginConfig.name]: {
           api: new {{pascalCase pluginName}}API({
-            cache: httpCache,
-            logger,
+            ...dataSourceConfig,
             pluginSymbol: pluginConfig.name,
-            connection: {
-              url: redisUrl,
-            },
             settings: {},
           }),
         }

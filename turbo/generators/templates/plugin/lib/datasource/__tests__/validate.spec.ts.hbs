@@ -8,21 +8,15 @@ import { {{pascalCase pluginName}}API } from "../{{kebabCase pluginName}}.dataso
 
 it("returns false if the request fails", async ({
   server,
-  httpCache,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: false }, { status: 401 })),
   )
 
   const {{camelCase pluginName}}Api = new {{pascalCase pluginName}}API({
-    cache: httpCache,
-    logger,
+    ...dataSourceConfig,
     pluginSymbol: pluginConfig.name,
-    connection: {
-      url: redisUrl,
-    },
     settings: {},
   });
   const isValid = await {{camelCase pluginName}}Api.validate();
@@ -32,21 +26,15 @@ it("returns false if the request fails", async ({
 
 it("returns true if the request succeeds", async ({
   server,
-  httpCache,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
   )
 
   const {{camelCase pluginName}}Api = new {{pascalCase pluginName}}API({
-    cache: httpCache,
-    logger,
+    ...dataSourceConfig,
     pluginSymbol: pluginConfig.name,
-    connection: {
-      url: redisUrl,
-    },
     settings: {},
   });
   const isValid = await {{camelCase pluginName}}Api.validate();
