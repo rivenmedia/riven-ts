@@ -1,35 +1,31 @@
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequestCreationErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.conflict.event";
+import { ItemRequestCreationError } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.event";
 
-import { expect, it, vi } from "vitest";
+import { expect, it } from "vitest";
 
 import { processRequestedItem } from "./process-requested-item.ts";
 
-it("sends a success event if the item is processed successfully", async () => {
+it("returns the item request if processed successfully", async () => {
   const requestedId = "tt1234567";
-  const sendEventSpy = vi.fn();
 
-  await processRequestedItem({
+  const result = await processRequestedItem({
     item: {
       imdbId: requestedId,
     },
     type: "movie",
-    sendEvent: sendEventSpy,
   });
 
-  await vi.waitFor(() => {
-    expect(sendEventSpy).toHaveBeenCalledWith({
-      type: "riven.item-request.creation.success",
-      item: expect.objectContaining<Partial<ItemRequest>>({
-        imdbId: requestedId,
-        id: 1,
-      }),
-    });
-  });
+  expect(result.item).toEqual(
+    expect.objectContaining({
+      id: 1,
+      imdbId: requestedId,
+    }),
+  );
 });
 
 it("sends an error event if the item processing fails", async () => {
   const requestedId = "1234";
-  const sendEventSpy = vi.fn();
 
   await expect(
     processRequestedItem({
@@ -37,25 +33,13 @@ it("sends an error event if the item processing fails", async () => {
         imdbId: requestedId,
       },
       type: "movie",
-      sendEvent: sendEventSpy,
     }),
-  ).rejects.toThrow();
-
-  await vi.waitFor(() => {
-    expect(sendEventSpy).toHaveBeenCalledWith({
-      type: "riven.media-item.creation.error",
-      item: expect.objectContaining<Partial<ItemRequest>>({
-        imdbId: requestedId,
-      }),
-      error: expect.stringContaining("imdbId must match"),
-    });
-  });
+  ).rejects.toThrow(ItemRequestCreationError);
 });
 
 it("saves the external request ID if provided", async () => {
   const requestedId = "tt1234568";
   const externalRequestId = "external-req-123";
-  const sendEventSpy = vi.fn();
 
   const result = await processRequestedItem({
     item: {
@@ -63,7 +47,6 @@ it("saves the external request ID if provided", async () => {
       externalRequestId,
     },
     type: "movie",
-    sendEvent: sendEventSpy,
   });
 
   expect(result.item).toEqual(
@@ -73,6 +56,25 @@ it("saves the external request ID if provided", async () => {
   );
 });
 
-it.todo("sends an already-exists event if the item already exists");
+it("throws an ItemRequestCreationErrorConflict error if the item request already exists", async () => {
+  const requestedId = "tt1234568";
+  const externalRequestId = "external-req-123";
 
-it.todo("does not save duplicate items");
+  await processRequestedItem({
+    item: {
+      imdbId: requestedId,
+      externalRequestId,
+    },
+    type: "movie",
+  });
+
+  await expect(
+    processRequestedItem({
+      item: {
+        imdbId: requestedId,
+        externalRequestId,
+      },
+      type: "movie",
+    }),
+  ).rejects.toThrow(ItemRequestCreationErrorConflict);
+});

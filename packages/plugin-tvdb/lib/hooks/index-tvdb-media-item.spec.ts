@@ -31,19 +31,15 @@ const it = baseIt.extend<{
 
     await use(settings);
   },
-  async dataSourceMap({ httpCache, settings, redisUrl }, use) {
+  async dataSourceMap({ dataSourceConfig, settings }, use) {
     const dataSourceMap = new DataSourceMap([
       [
         TvdbAPI,
         new TvdbAPI({
+          ...dataSourceConfig,
           requestAttempts: 1,
-          cache: httpCache,
-          logger: mockLogger,
-          settings: settings.get(TvdbSettings),
           pluginSymbol: pluginConfig.name,
-          connection: {
-            url: redisUrl,
-          },
+          settings: settings.get(TvdbSettings),
         }),
       ],
     ]);

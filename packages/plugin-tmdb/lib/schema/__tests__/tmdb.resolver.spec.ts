@@ -9,10 +9,8 @@ import { pluginConfig } from "../../tmdb-plugin.config.ts";
 
 it('returns the validation status when calling "tmdbIsValid" query', async ({
   gqlServer,
-  httpCache,
   server,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -30,12 +28,8 @@ it('returns the validation status when calling "tmdbIsValid" query', async ({
       contextValue: {
         [pluginConfig.name]: {
           api: new TmdbAPI({
-            cache: httpCache,
-            logger,
+            ...dataSourceConfig,
             pluginSymbol: Symbol("@repo/plugin-tmdb"),
-            connection: {
-              url: redisUrl,
-            },
             settings: {
               apiKey: "",
             },

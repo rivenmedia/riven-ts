@@ -1,68 +1,59 @@
-import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 
-import { expect, it, vi } from "vitest";
-import { type ActorRefFrom, createEmptyActor } from "xstate";
+import { expect, it } from "vitest";
 
-import { processRequestedItem } from "../../request-content-services/utilities/process-requested-item.ts";
+import { database } from "../../../../database/database.ts";
+import { persistMovieIndexerData } from "./persist-movie-indexer-data.ts";
 
-import type { mainRunnerMachine } from "../../../../state-machines/main-runner/index.ts";
-
-it("sends a success event if the item is processed successfully", async () => {
+it("returns the media item if processed successfully", async ({}) => {
   const requestedId = "tt1234567";
-  const parentRef = createEmptyActor() as ActorRefFrom<
-    typeof mainRunnerMachine
-  >;
 
-  vi.spyOn(parentRef, "send");
-
-  await processRequestedItem({
-    item: {
-      imdbId: requestedId,
-    },
+  const em = database.orm.em.fork();
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "test-user",
+    imdbId: requestedId,
+    tmdbId: "1234",
     type: "movie",
-    sendEvent: parentRef.send,
+    state: "requested",
   });
 
-  await vi.waitFor(() => {
-    expect(parentRef).toHaveReceivedEvent({
-      type: "riven.item-request.creation.success",
-      item: expect.objectContaining<Partial<ItemRequest>>({
-        imdbId: requestedId,
-        id: 1,
-      }),
-    });
+  await em.flush();
+
+  const result = await persistMovieIndexerData({
+    item: {
+      id: itemRequest.id,
+      title: "Test Movie",
+      imdbId: requestedId,
+      contentRating: "g",
+      genres: [],
+      type: "movie",
+    },
   });
+
+  expect(result).instanceOf(Movie);
+  expect(result).toEqual(
+    expect.objectContaining({
+      id: 1,
+      title: "Test Movie",
+      type: "movie",
+    }),
+  );
 });
 
-it("sends an error event if the item processing fails", async () => {
+it("throws an error if the item processing fails", async () => {
   const requestedId = "1234";
-  const parentRef = createEmptyActor() as ActorRefFrom<
-    typeof mainRunnerMachine
-  >;
-
-  vi.spyOn(parentRef, "send");
 
   await expect(
-    processRequestedItem({
+    persistMovieIndexerData({
       item: {
+        id: 1,
+        title: "Test Movie",
         imdbId: requestedId,
+        contentRating: "g",
+        genres: [],
+        type: "movie",
       },
-      type: "movie",
-      sendEvent: parentRef.send,
     }),
-  ).rejects.toThrow();
-
-  await vi.waitFor(() => {
-    expect(parentRef).toHaveReceivedEvent({
-      type: "riven.media-item.creation.error",
-      item: expect.objectContaining<Partial<ItemRequest>>({
-        imdbId: requestedId,
-      }),
-      error: expect.anything(),
-    });
-  });
+  ).rejects.toThrow(MediaItemIndexError);
 });
-
-it.todo("sends an already-exists event if the item already exists");
-
-it.todo("does not save duplicate items");

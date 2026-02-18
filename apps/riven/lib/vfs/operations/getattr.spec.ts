@@ -117,6 +117,7 @@ it("returns directory stats for /movies", async () => {
       year: 2020,
       contentRating: "g",
       state: "downloaded",
+      tmdbId: i.toString(),
     });
 
     await em.flush();

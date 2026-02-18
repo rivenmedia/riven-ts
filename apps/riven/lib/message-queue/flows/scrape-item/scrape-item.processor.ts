@@ -4,7 +4,7 @@ import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schema
 import { UnrecoverableError } from "bullmq";
 
 import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
-import { persistScrapeResults } from "./utilities/persist-scrape-results.actor.ts";
+import { persistScrapeResults } from "./utilities/persist-scrape-results.ts";
 
 import type { RankedResult } from "@repo/util-rank-torrent-name";
 

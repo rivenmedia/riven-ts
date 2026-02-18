@@ -1,5 +1,4 @@
 import { Movie } from "@repo/util-plugin-sdk/dto/entities";
-import { ItemRequestCreationError } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.event";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
@@ -85,7 +84,7 @@ export async function persistMovieIndexerData({
       })
       .parse(error);
 
-    throw new ItemRequestCreationError({
+    throw new MediaItemIndexError({
       item: itemRequest,
       error: errorMessage,
     });

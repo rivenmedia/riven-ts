@@ -20,10 +20,8 @@ import { pluginConfig } from "../../listrr-plugin.config.ts";
 
 it("returns movies when calling listrrMovies query", async ({
   gqlServer,
-  httpCache,
   server,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   const contentLists = new Set([
     "64b7f2f5e13e4b6f8c8e4d1a",
@@ -73,12 +71,8 @@ it("returns movies when calling listrrMovies query", async ({
       contextValue: {
         [pluginConfig.name]: {
           api: new ListrrAPI({
-            cache: httpCache,
-            logger,
+            ...dataSourceConfig,
             pluginSymbol: pluginConfig.name,
-            connection: {
-              url: redisUrl,
-            },
             settings: {
               apiKey: "",
               movieLists: [],
@@ -98,10 +92,8 @@ it("returns movies when calling listrrMovies query", async ({
 
 it("returns shows when calling listrrShows query", async ({
   gqlServer,
-  httpCache,
+  dataSourceConfig,
   server,
-  redisUrl,
-  logger,
 }) => {
   const contentLists = new Set([
     "64b7f2f5e13e4b6f8c8e4d1a",
@@ -151,12 +143,8 @@ it("returns shows when calling listrrShows query", async ({
       contextValue: {
         [pluginConfig.name]: {
           api: new ListrrAPI({
-            cache: httpCache,
-            logger,
+            ...dataSourceConfig,
             pluginSymbol: pluginConfig.name,
-            connection: {
-              url: redisUrl,
-            },
             settings: {
               apiKey: "",
               movieLists: [],
@@ -176,10 +164,8 @@ it("returns shows when calling listrrShows query", async ({
 
 it('returns the user validation status when calling "listrrIsValid" query', async ({
   gqlServer,
-  httpCache,
+  dataSourceConfig,
   server,
-  redisUrl,
-  logger,
 }) => {
   server.use(getApiListMyPageHandler());
 
@@ -195,12 +181,8 @@ it('returns the user validation status when calling "listrrIsValid" query', asyn
       contextValue: {
         [pluginConfig.name]: {
           api: new ListrrAPI({
-            cache: httpCache,
-            logger,
+            ...dataSourceConfig,
             pluginSymbol: pluginConfig.name,
-            connection: {
-              url: redisUrl,
-            },
             settings: {
               apiKey: "",
               movieLists: [],

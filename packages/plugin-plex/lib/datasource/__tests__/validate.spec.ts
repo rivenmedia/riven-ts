@@ -7,9 +7,7 @@ import { PlexAPI } from "../plex.datasource.ts";
 
 it("returns false if the request fails", async ({
   server,
-  httpCache,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () =>
@@ -18,16 +16,12 @@ it("returns false if the request fails", async ({
   );
 
   const plexApi = new PlexAPI({
-    cache: httpCache,
+    ...dataSourceConfig,
+    pluginSymbol: Symbol.for("@repo/plugin-plex"),
     settings: {
       plexLibraryPath: "",
       plexServerUrl: "",
       plexToken: "",
-    },
-    logger,
-    pluginSymbol: Symbol.for(""),
-    connection: {
-      url: redisUrl,
     },
   });
 
@@ -38,25 +32,19 @@ it("returns false if the request fails", async ({
 
 it("returns true if the request succeeds", async ({
   server,
-  httpCache,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
   );
 
   const plexApi = new PlexAPI({
-    cache: httpCache,
+    ...dataSourceConfig,
+    pluginSymbol: Symbol.for("@repo/plugin-plex"),
     settings: {
       plexLibraryPath: "",
       plexServerUrl: "",
       plexToken: "",
-    },
-    logger,
-    pluginSymbol: Symbol.for(""),
-    connection: {
-      url: redisUrl,
     },
   });
   const isValid = await plexApi.validate();

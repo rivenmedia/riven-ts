@@ -9,10 +9,8 @@ import { pluginConfig } from "../../test-plugin.config.ts";
 
 it('returns the validation status when calling "testIsValid" query', async ({
   gqlServer,
-  httpCache,
   server,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -30,12 +28,8 @@ it('returns the validation status when calling "testIsValid" query', async ({
       contextValue: {
         [pluginConfig.name]: {
           api: new TestAPI({
-            cache: httpCache,
+            ...dataSourceConfig,
             pluginSymbol: Symbol("@repo/plugin-test"),
-            logger,
-            connection: {
-              url: redisUrl,
-            },
             settings: {
               apiKey: "",
             },

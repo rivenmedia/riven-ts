@@ -8,9 +8,7 @@ import { TorrentioAPI } from "../torrentio.datasource.ts";
 
 it("returns false if the request fails", async ({
   server,
-  httpCache,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () =>
@@ -19,12 +17,8 @@ it("returns false if the request fails", async ({
   );
 
   const torrentioApi = new TorrentioAPI({
-    cache: httpCache,
-    logger,
+    ...dataSourceConfig,
     pluginSymbol: pluginConfig.name,
-    connection: {
-      url: redisUrl,
-    },
     settings: {
       filter: "",
     },
@@ -36,21 +30,15 @@ it("returns false if the request fails", async ({
 
 it("returns true if the request succeeds", async ({
   server,
-  httpCache,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
   );
 
   const torrentioApi = new TorrentioAPI({
-    cache: httpCache,
-    logger,
+    ...dataSourceConfig,
     pluginSymbol: pluginConfig.name,
-    connection: {
-      url: redisUrl,
-    },
     settings: {
       filter: "",
     },

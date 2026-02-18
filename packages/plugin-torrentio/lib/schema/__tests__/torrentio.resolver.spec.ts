@@ -9,10 +9,8 @@ import { pluginConfig } from "../../torrentio-plugin.config.ts";
 
 it('returns the validation status when calling "torrentioIsValid" query', async ({
   gqlServer,
-  httpCache,
   server,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -30,12 +28,8 @@ it('returns the validation status when calling "torrentioIsValid" query', async 
       contextValue: {
         [pluginConfig.name]: {
           api: new TorrentioAPI({
-            cache: httpCache,
-            logger,
+            ...dataSourceConfig,
             pluginSymbol: Symbol("@repo/plugin-torrentio"),
-            connection: {
-              url: redisUrl,
-            },
             settings: {
               filter: "",
             },

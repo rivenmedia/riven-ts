@@ -7,17 +7,11 @@ import { ListrrAPI } from "../listrr.datasource.ts";
 
 it('assigns the API key to the "x-api-key" header', async ({
   server,
-  httpCache,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   const listrrApi = new ListrrAPI({
-    cache: httpCache,
-    logger,
+    ...dataSourceConfig,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
-    connection: {
-      url: redisUrl,
-    },
     settings: {
       apiKey: "test-token",
       movieLists: [],

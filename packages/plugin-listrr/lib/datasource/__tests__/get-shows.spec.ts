@@ -13,17 +13,11 @@ import {
 import { ListrrAPI } from "../listrr.datasource.ts";
 
 it("returns an empty array if no content lists are provided", async ({
-  httpCache,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   const listrrApi = new ListrrAPI({
-    cache: httpCache,
-    logger,
+    ...dataSourceConfig,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
-    connection: {
-      url: redisUrl,
-    },
     settings: {
       apiKey: "",
       movieLists: [],
@@ -37,9 +31,7 @@ it("returns an empty array if no content lists are provided", async ({
 
 it("retrieves shows from each provided list", async ({
   server,
-  httpCache,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   const contentLists = new Set([
     "64b7f2f5e13e4b6f8c8e4d1a",
@@ -70,12 +62,8 @@ it("retrieves shows from each provided list", async ({
   );
 
   const listrrApi = new ListrrAPI({
-    cache: httpCache,
-    logger,
+    ...dataSourceConfig,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
-    connection: {
-      url: redisUrl,
-    },
     settings: {
       apiKey: "",
       movieLists: [],
@@ -89,9 +77,7 @@ it("retrieves shows from each provided list", async ({
 
 it("paginates through all pages of the list", async ({
   server,
-  httpCache,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   const contentLists = new Set(["64b7f2f5e13e4b6f8c8e4d1c"]);
   const totalPages = 3;
@@ -124,12 +110,8 @@ it("paginates through all pages of the list", async ({
   );
 
   const listrrApi = new ListrrAPI({
-    cache: httpCache,
-    logger,
+    ...dataSourceConfig,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
-    connection: {
-      url: redisUrl,
-    },
     settings: {
       apiKey: "",
       movieLists: [],
@@ -143,9 +125,7 @@ it("paginates through all pages of the list", async ({
 
 it("dedupes shows that appear in multiple lists", async ({
   server,
-  httpCache,
-  redisUrl,
-  logger,
+  dataSourceConfig,
 }) => {
   const buildMockShow = (id: number) =>
     createListrrContractsModelsAPIShowDto({
@@ -173,12 +153,8 @@ it("dedupes shows that appear in multiple lists", async ({
   );
 
   const listrrApi = new ListrrAPI({
-    cache: httpCache,
-    logger,
+    ...dataSourceConfig,
     pluginSymbol: Symbol("@repo/plugin-listrr"),
-    connection: {
-      url: redisUrl,
-    },
     settings: {
       apiKey: "",
       movieLists: [],
