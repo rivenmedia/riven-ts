@@ -1,43 +1,30 @@
-import { SerialisedMediaItem } from "../../../utilities/serialisers/serialised-media-item.ts";
-import { createFlowProducer } from "../../utilities/create-flow-producer.ts";
-import { queueNameFor } from "../../utilities/queue-name-for.ts";
+import { flow } from "../producer.ts";
+import { createDownloadItemJob } from "./download-item.schema.ts";
+import { createFindValidTorrentContainerJob } from "./steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { MediaItemDownloadRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
-import type { FlowChildJob, FlowJob } from "bullmq";
 
 export async function downloadItem(
   item: MediaItemDownloadRequestedEvent["item"],
   downloaderPlugins: RivenPlugin[],
 ) {
-  const producer = createFlowProducer();
-
-  const childNodes = downloaderPlugins.map(
-    (plugin) =>
-      ({
-        name: `${plugin.name.description ?? "unknown"} - Download item #${item.id.toString()}`,
-        queueName: queueNameFor(
-          "riven.media-item.download.requested",
-          plugin.name.description ?? "unknown",
-        ),
-        data: {
-          item: SerialisedMediaItem.encode(item),
-        },
-        opts: {
-          ignoreDependencyOnFailure: true,
-        },
-      }) as const satisfies FlowChildJob,
+  const findValidTorrentContainerNode = createFindValidTorrentContainerJob(
+    `Finding valid torrent container for ${item.title}`,
+    {
+      id: item.id,
+      availableDownloaders: downloaderPlugins.map(
+        (plugin) => plugin.name.description ?? "unknown",
+      ),
+      infoHashes: item.streams.map((stream) => stream.infoHash),
+    },
   );
 
-  const rootNode = {
-    name: `Downloading ${item.title} (ID: ${item.id.toString()})`,
-    queueName: queueNameFor("download-item"),
-    data: {
-      id: item.id,
-      title: item.title,
-    },
-    children: childNodes,
-  } as const satisfies FlowJob;
+  const rootNode = createDownloadItemJob(
+    `Downloading ${item.title}`,
+    { id: item.id },
+    { children: [findValidTorrentContainerNode] },
+  );
 
-  return producer.add(rootNode);
+  return flow.add(rootNode);
 }

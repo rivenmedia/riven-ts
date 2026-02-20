@@ -1,4 +1,9 @@
-import z, { type ZodNever, type ZodOptional, type ZodType } from "zod";
+import z, {
+  type ZodNever,
+  type ZodObject,
+  type ZodOptional,
+  type ZodType,
+} from "zod";
 
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
 import type { Job } from "bullmq";
@@ -10,9 +15,15 @@ export const createFlowSchema = <
   Payload extends Record<string, ZodType> = Record<string, ZodNever>,
 >(
   type: Type,
-  childrenSchema: Children,
-  outputSchema: Output = z.never().optional() as never,
-  inputSchema: z.ZodObject<Payload> = z.object<Payload>(),
+  {
+    children: childrenSchema,
+    input: inputSchema = z.never().optional() as never,
+    output: outputSchema = z.never().optional() as never,
+  }: {
+    children: Children;
+    input?: ZodObject<Payload>;
+    output?: Output;
+  },
 ) => {
   const wrappedOutputSchema = z.union([
     z.object({

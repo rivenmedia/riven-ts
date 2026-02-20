@@ -4,13 +4,14 @@ import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/sche
 import { UnrecoverableError } from "bullmq";
 import { DateTime } from "luxon";
 
-import { zipFlowChildrenResults } from "../../utilities/zip-children-results.ts";
 import { downloadItemProcessorSchema } from "./download-item.schema.ts";
 import { persistDownloadResults } from "./utilities/persist-download-results.ts";
 
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
   async function (job, sendEvent) {
-    const [finalResult] = zipFlowChildrenResults(await job.getChildrenValues());
+    const [finalResult] = Object.values(await job.getChildrenValues());
+
+    console.log("Final result from downloaders:", finalResult);
 
     if (!finalResult) {
       throw new UnrecoverableError(
@@ -48,9 +49,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
         );
       }
 
-      throw new UnrecoverableError(
-        `Unexpected error while processing download item: ${String(error)}`,
-      );
+      throw error;
     }
   },
 );

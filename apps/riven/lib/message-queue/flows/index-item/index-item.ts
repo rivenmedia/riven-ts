@@ -1,39 +1,29 @@
-import { SerialisedItemRequest } from "../../../utilities/serialisers/serialised-item-request.ts";
-import { createFlowProducer } from "../../utilities/create-flow-producer.ts";
-import { queueNameFor } from "../../utilities/queue-name-for.ts";
+import { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+
+import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
+import { flow } from "../producer.ts";
+import { createRequestIndexDataJob } from "./index-item.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
-import type { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
-import type { FlowChildJob, FlowJob } from "bullmq";
 
 export async function indexItem(
   item: MediaItemIndexRequestedEvent["item"],
   indexerPlugins: RivenPlugin[],
 ) {
-  const producer = createFlowProducer();
-
-  const childNodes = indexerPlugins.map(
-    (plugin) =>
-      ({
-        name: `${plugin.name.description ?? "unknown"} - Index item request #${item.id.toString()}`,
-        queueName: queueNameFor(
-          "riven.media-item.index.requested",
-          plugin.name.description ?? "unknown",
-        ),
-        data: {
-          item: SerialisedItemRequest.encode(item),
-        },
-        opts: {
-          ignoreDependencyOnFailure: true,
-        },
-      }) as const satisfies FlowChildJob,
+  const childNodes = indexerPlugins.map((plugin) =>
+    createPluginFlowJob(
+      MediaItemIndexRequestedEvent,
+      `Index ${item.externalIdsLabel.join(" | ")}`,
+      plugin.name.description ?? "unknown",
+      { item },
+      { ignoreDependencyOnFailure: true },
+    ),
   );
 
-  const rootNode = {
-    name: `Indexing item #${item.id.toString()}`,
-    queueName: queueNameFor("index-item"),
-    children: childNodes,
-  } as const satisfies FlowJob;
+  const rootNode = createRequestIndexDataJob(
+    `Indexing [${item.externalIdsLabel.join(" | ")}]`,
+    { children: childNodes },
+  );
 
-  return producer.add(rootNode);
+  return flow.add(rootNode);
 }

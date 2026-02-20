@@ -1,3 +1,4 @@
+import assert from "node:assert";
 import z, { type ZodLiteral, type ZodObject, type ZodUnknown } from "zod";
 
 import type { ParamsFor } from "../../types/events.ts";
@@ -33,9 +34,7 @@ export const createProgramEventError = <
     constructor(data: Data) {
       const [type] = payloadSchema.shape.type.def.values;
 
-      if (!type) {
-        throw new Error("Invalid event type");
-      }
+      assert(type, "Invalid event type");
 
       super(type, data);
     }

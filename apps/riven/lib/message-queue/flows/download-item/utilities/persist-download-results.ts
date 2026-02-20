@@ -3,6 +3,7 @@ import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/med
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
 import { ref } from "@mikro-orm/core";
+import { UnrecoverableError } from "bullmq";
 import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
 import z from "zod";
@@ -22,7 +23,7 @@ export async function persistDownloadResults({
   container,
   processedBy,
 }: PersistDownloadResultsInput) {
-  const existingItem = await database.mediaItem.findOneOrFail(
+  const existingItem = await database.mediaItem.findOne(
     {
       streams: {
         infoHash: container.infoHash,
@@ -34,8 +35,15 @@ export async function persistDownloadResults({
     },
   );
 
+  assert(
+    existingItem,
+    new UnrecoverableError(`Media item with ID ${id.toString()} not found`),
+  );
+
   if (!existingItem.streams[0]) {
-    throw new Error(`Media item with ID ${id.toString()} has no streams`);
+    throw new UnrecoverableError(
+      `Media item with ID ${id.toString()} has no streams`,
+    );
   }
 
   assert(
@@ -55,7 +63,7 @@ export async function persistDownloadResults({
       const [file] = container.files;
 
       if (!file) {
-        throw new Error(
+        throw new UnrecoverableError(
           `No files found in torrent container ${container.infoHash}`,
         );
       }

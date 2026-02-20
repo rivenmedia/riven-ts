@@ -3,10 +3,17 @@ import { RivenEvent } from "@repo/util-plugin-sdk/events";
 import { enqueueActions, raise, setup } from "xstate";
 
 import { downloadItemProcessor } from "../../message-queue/flows/download-item/download-item.processor.ts";
+import { DownloadItemFlow } from "../../message-queue/flows/download-item/download-item.schema.ts";
+import { findValidTorrentContainerProcessor } from "../../message-queue/flows/download-item/steps/find-valid-torrent-container/find-valid-torrent-container.processor.ts";
+import { FindValidTorrentContainerFlow } from "../../message-queue/flows/download-item/steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
 import { indexItemProcessor } from "../../message-queue/flows/index-item/index-item.processor.ts";
+import { RequestIndexDataFlow } from "../../message-queue/flows/index-item/index-item.schema.ts";
 import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
+import { RequestContentServicesFlow } from "../../message-queue/flows/request-content-services/request-content-services.schema.ts";
 import { scrapeItemProcessor } from "../../message-queue/flows/scrape-item/scrape-item.processor.ts";
+import { ScrapeItemFlow } from "../../message-queue/flows/scrape-item/scrape-item.schema.ts";
 import { sortScrapeResultsProcessor } from "../../message-queue/flows/scrape-item/steps/sort-scrape-results/sort-scrape-results.processor.ts";
+import { SortScrapeResultsFlow } from "../../message-queue/flows/scrape-item/steps/sort-scrape-results/sort-scrape-results.schema.ts";
 import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { SerialisedItemRequest } from "../../utilities/serialisers/serialised-item-request.ts";
@@ -34,7 +41,12 @@ import type z from "zod";
 
 export interface MainRunnerMachineContext {
   plugins: ValidPluginMap;
-  flows: Map<Flow["name"], Worker>;
+  flows: {
+    [K in Flow["name"]]: Worker<
+      Extract<Flow, { name: K }>["input"],
+      Extract<Flow, { name: K }>["output"]
+    >;
+  };
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: PublishableEventSet;
@@ -189,36 +201,38 @@ export const mainRunnerMachine = setup({
         publishableEvents: input.publishableEvents,
         pluginQueues: input.pluginQueues,
         pluginWorkers: input.pluginWorkers,
-        flows: new Map<Flow["name"], Worker>([
-          [
-            "index-item",
-            createFlowWorker("index-item", indexItemProcessor, self.send),
-          ],
-          [
-            "request-content-services",
-            createFlowWorker(
-              "request-content-services",
-              requestContentServicesProcessor,
-              self.send,
-            ),
-          ],
-          [
-            "scrape-item",
-            createFlowWorker("scrape-item", scrapeItemProcessor, self.send),
-          ],
-          [
-            "sort-scrape-results",
-            createFlowWorker(
-              "sort-scrape-results",
-              sortScrapeResultsProcessor,
-              self.send,
-            ),
-          ],
-          [
-            "download-item",
-            createFlowWorker("download-item", downloadItemProcessor, self.send),
-          ],
-        ]),
+        flows: {
+          "index-item": createFlowWorker(
+            RequestIndexDataFlow,
+            indexItemProcessor,
+            self.send,
+          ),
+          "request-content-services": createFlowWorker(
+            RequestContentServicesFlow,
+            requestContentServicesProcessor,
+            self.send,
+          ),
+          "scrape-item": createFlowWorker(
+            ScrapeItemFlow,
+            scrapeItemProcessor,
+            self.send,
+          ),
+          "scrape-item.sort-scrape-results": createFlowWorker(
+            SortScrapeResultsFlow,
+            sortScrapeResultsProcessor,
+            self.send,
+          ),
+          "download-item": createFlowWorker(
+            DownloadItemFlow,
+            downloadItemProcessor,
+            self.send,
+          ),
+          "download-item.find-valid-torrent-container": createFlowWorker(
+            FindValidTorrentContainerFlow,
+            findValidTorrentContainerProcessor,
+            self.send,
+          ),
+        },
       };
     },
     entry: [
