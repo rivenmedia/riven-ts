@@ -20,8 +20,8 @@ export function createQueueEvents(
 
   registerMQListeners(queueEvents, logger);
 
-  queueEvents.on("failed", ({ failedReason, jobId }) => {
-    logger.error(`[${name}] Job ${jobId} failed: ${failedReason}`);
+  queueEvents.on("failed", ({ failedReason }) => {
+    logger.error(`[${name}] ${failedReason}`);
   });
 
   return queueEvents;

@@ -45,8 +45,9 @@ export const findValidTorrentContainerProcessor =
           MediaItemDownloadRequestedResponse,
           `Download ${mediaItem.title}`,
           plugin,
-          { item: mediaItem },
+          { infoHash },
           {
+            ignoreDependencyOnFailure: true,
             parent: {
               id: jobId,
               queue: job.queueQualifiedName,
@@ -56,28 +57,31 @@ export const findValidTorrentContainerProcessor =
 
         try {
           const result = await runSingleJob(node.job);
-          const isContainerValid = validateTorrentContainer(mediaItem, result);
 
           return {
             success: true,
             result: {
               plugin,
-              result,
+              result: await validateTorrentContainer(mediaItem, result),
             },
           };
         } catch (error) {
           logger.warn(
-            `Invalid info hash: ${infoHash} from plugin ${plugin} for media item ${mediaItem.title} (${mediaItem.id.toString()}) - ${String(error)}`,
+            `${mediaItem.type} ${mediaItem.title} (${mediaItem.id.toString()}) - ${String(error)}`,
           );
-
-          await job.updateData({
-            ...job.data,
-            failedInfoHashes: [...failedInfoHashes, infoHash],
-          });
 
           continue;
         }
       }
+
+      logger.warn(
+        `Info hash ${infoHash} failed validation for all plugins for ${mediaItem.type} ${mediaItem.title} (${mediaItem.id.toString()})`,
+      );
+
+      await job.updateData({
+        ...job.data,
+        failedInfoHashes: [...failedInfoHashes, infoHash],
+      });
     }
 
     throw new UnrecoverableError(

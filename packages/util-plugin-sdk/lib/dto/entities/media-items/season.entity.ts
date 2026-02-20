@@ -33,8 +33,8 @@ export class Season extends ShowLikeMediaItem {
   @OneToMany(() => Episode, (episode) => episode.season)
   episodes = new Collection<Episode>(this);
 
-  getShowTitle() {
-    return this.show.loadProperty("title");
+  getShow() {
+    return this.show.loadOrFail();
   }
 
   @Property({ persist: false, hidden: true, getter: true })

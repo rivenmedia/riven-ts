@@ -150,17 +150,17 @@ it("does not throw for season torrents if the item is a season", async ({
   season,
 }) => {
   const rawTitle = "Test Show 2024 1080p WEB-DL S01 E01-10";
-  const showTitle = await season.getShowTitle();
+  const show = await season.getShow();
 
   const torrent = rankTorrent(
     rawTitle,
     "1234567890123456789012345678901234567890",
-    showTitle,
+    show.title,
     createSettings(),
   );
 
   await expect(
-    validateTorrent(season, showTitle, torrent),
+    validateTorrent(season, show.title, torrent),
   ).resolves.not.toThrow();
 });
 
@@ -168,17 +168,17 @@ it("does not throw for episode torrents if the item is an episode", async ({
   episode,
 }) => {
   const rawTitle = "Test Show 2024 1080p WEB-DL S01E01";
-  const showTitle = await episode.getShowTitle();
+  const show = await episode.getShow();
 
   const torrent = rankTorrent(
     rawTitle,
     "1234567890123456789012345678901234567890",
-    showTitle,
+    show.title,
     createSettings(),
   );
 
   await expect(
-    validateTorrent(episode, showTitle, torrent),
+    validateTorrent(episode, show.title, torrent),
   ).resolves.not.toThrow();
 });
 
@@ -394,19 +394,19 @@ it("throws for torrents with no seasons for season items", async ({
   season,
 }) => {
   const rawTitle = "Test Show 2024 E01-10";
-  const showTitle = await season.getShowTitle();
+  const show = await season.getShow();
 
   const torrent = rankTorrent(
     rawTitle,
     "1234567890123456789012345678901234567890",
-    showTitle,
+    show.title,
     createSettings(),
   );
 
-  await expect(validateTorrent(season, showTitle, torrent)).rejects.toThrow(
+  await expect(validateTorrent(season, show.title, torrent)).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with no seasons for season item`,
-      showTitle,
+      show.title,
       torrent.data.rawTitle,
       torrent.hash,
     ),
@@ -417,21 +417,21 @@ it("throws for torrents with incorrect season number for season items", async ({
   season,
 }) => {
   const rawTitle = "Test Show 2024 S02 E01-10";
-  const showTitle = await season.getShowTitle();
+  const show = await season.getShow();
 
   const torrent = rankTorrent(
     rawTitle,
     "1234567890123456789012345678901234567890",
-    showTitle,
+    show.title,
     createSettings(),
   );
 
   await expect(() =>
-    validateTorrent(season, showTitle, torrent),
+    validateTorrent(season, show.title, torrent),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect season number for season item`,
-      showTitle,
+      show.title,
       torrent.data.rawTitle,
       torrent.hash,
     ),
@@ -442,17 +442,17 @@ it("does not throw for torrents with an unknown number of episodes for season it
   season,
 }) => {
   const rawTitle = "Test Show: S01";
-  const showTitle = await season.getShowTitle();
+  const show = await season.getShow();
 
   const torrent = rankTorrent(
     rawTitle,
     "1234567890123456789012345678901234567890",
-    showTitle,
+    show.title,
     createSettings(),
   );
 
   await expect(
-    validateTorrent(season, showTitle, torrent),
+    validateTorrent(season, show.title, torrent),
   ).resolves.not.toThrow();
 });
 
@@ -460,21 +460,21 @@ it("throws for torrents with 2 or fewer episodes for season items", async ({
   season,
 }) => {
   const rawTitle = "Test Show 2024 S01E01";
-  const showTitle = await season.getShowTitle();
+  const show = await season.getShow();
 
   const torrent = rankTorrent(
     rawTitle,
     "1234567890123456789012345678901234567890",
-    showTitle,
+    show.title,
     createSettings(),
   );
 
   await expect(() =>
-    validateTorrent(season, showTitle, torrent),
+    validateTorrent(season, show.title, torrent),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with 2 or fewer episodes for season item`,
-      showTitle,
+      show.title,
       torrent.data.rawTitle,
       torrent.hash,
     ),
@@ -485,19 +485,19 @@ it("throws for torrents with incorrect episodes for season items", async ({
   season,
 }) => {
   const rawTitle = "Test Show 2024 S01 E30-50";
-  const showTitle = await season.getShowTitle();
+  const show = await season.getShow();
 
   const torrent = rankTorrent(
     rawTitle,
     "1234567890123456789012345678901234567890",
-    showTitle,
+    show.title,
     createSettings(),
   );
 
-  await expect(validateTorrent(season, showTitle, torrent)).rejects.toThrow(
+  await expect(validateTorrent(season, show.title, torrent)).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect episodes for season item`,
-      showTitle,
+      show.title,
       torrent.data.rawTitle,
       torrent.hash,
     ),
@@ -508,19 +508,19 @@ it("throws for torrents with incorrect episode number for episode items", async 
   episode,
 }) => {
   const rawTitle = "Test Show 2024 S01 E30-50";
-  const showTitle = await episode.getShowTitle();
+  const show = await episode.getShow();
 
   const torrent = rankTorrent(
     rawTitle,
     "1234567890123456789012345678901234567890",
-    showTitle,
+    show.title,
     createSettings(),
   );
 
-  await expect(validateTorrent(episode, showTitle, torrent)).rejects.toThrow(
+  await expect(validateTorrent(episode, show.title, torrent)).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect episode number for episode item`,
-      showTitle,
+      show.title,
       torrent.data.rawTitle,
       torrent.hash,
     ),
@@ -531,19 +531,19 @@ it("throws for torrents with incorrect season number for episode items", async (
   episode,
 }) => {
   const rawTitle = "Test Show 2024 S02E01";
-  const showTitle = await episode.getShowTitle();
+  const show = await episode.getShow();
 
   const torrent = rankTorrent(
     rawTitle,
     "1234567890123456789012345678901234567890",
-    showTitle,
+    show.title,
     createSettings(),
   );
 
-  await expect(validateTorrent(episode, showTitle, torrent)).rejects.toThrow(
+  await expect(validateTorrent(episode, show.title, torrent)).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect season number for episode item`,
-      showTitle,
+      show.title,
       torrent.data.rawTitle,
       torrent.hash,
     ),
@@ -554,19 +554,19 @@ it("throws for torrents with no episodes for episode items", async ({
   episode,
 }) => {
   const rawTitle = "Test Show 2024";
-  const showTitle = await episode.getShowTitle();
+  const show = await episode.getShow();
 
   const torrent = rankTorrent(
     rawTitle,
     "1234567890123456789012345678901234567890",
-    showTitle,
+    show.title,
     createSettings(),
   );
 
-  await expect(validateTorrent(episode, showTitle, torrent)).rejects.toThrow(
+  await expect(validateTorrent(episode, show.title, torrent)).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with no seasons or episodes for episode item`,
-      showTitle,
+      show.title,
       torrent.data.rawTitle,
       torrent.hash,
     ),

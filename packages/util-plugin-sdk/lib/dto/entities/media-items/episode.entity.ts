@@ -37,13 +37,12 @@ export class Episode extends ShowLikeMediaItem {
   @Field(() => ShowContentRatingEnum)
   declare contentRating: ShowContentRating;
 
-  async getShowTitle() {
+  async getShow() {
     const season = await this.season.loadOrFail({
       populate: ["show"],
     });
-    const show = await season.show.loadOrFail();
 
-    return show.title;
+    return season.show.loadOrFail();
   }
 
   @Property({ persist: false, hidden: true, getter: true })

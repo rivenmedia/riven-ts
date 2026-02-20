@@ -113,7 +113,7 @@ export const sortScrapeResultsProcessor =
     const item = await database.mediaItem.findOneOrFail(job.data.id);
     const itemTitle =
       item instanceof Episode || item instanceof Season
-        ? await item.getShowTitle()
+        ? (await item.getShow()).title
         : item.title;
 
     if (!Object.keys(aggregatedResults).length) {

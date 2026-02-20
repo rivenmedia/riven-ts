@@ -3,10 +3,10 @@ import { createDownloadItemJob } from "./download-item.schema.ts";
 import { createFindValidTorrentContainerJob } from "./steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
-import type { MediaItemDownloadRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
+import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 export async function downloadItem(
-  item: MediaItemDownloadRequestedEvent["item"],
+  item: MediaItem,
   downloaderPlugins: RivenPlugin[],
 ) {
   const findValidTorrentContainerNode = createFindValidTorrentContainerJob(

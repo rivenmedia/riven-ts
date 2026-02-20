@@ -3,6 +3,7 @@ import { Entity } from "@mikro-orm/core";
 import { ShowContentRating } from "../../enums/content-ratings.enum.ts";
 import { MediaItem } from "./media-item.entity.ts";
 
+import type { Show } from "./show.entity.ts";
 import type { Promisable } from "type-fest";
 
 @Entity({
@@ -10,10 +11,9 @@ import type { Promisable } from "type-fest";
   discriminatorColumn: "type",
 })
 export abstract class ShowLikeMediaItem extends MediaItem {
-  declare imdbId?: string | null;
   declare tvdbId: string;
   declare tmdbId?: never;
   declare contentRating: ShowContentRating;
 
-  abstract getShowTitle(): Promisable<string>;
+  abstract getShow(): Promisable<Show>;
 }

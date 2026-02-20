@@ -41,6 +41,14 @@ export class Show extends ShowLikeMediaItem {
   declare tvdbId: string;
   declare tmdbId?: never;
 
+  async getEpisodes() {
+    const seasons = await this.seasons.loadItems({
+      populate: ["episodes"],
+    });
+
+    return seasons.flatMap((season) => season.episodes.getItems());
+  }
+
   async getMediaEntries() {
     const seasons = await this.seasons.loadItems({
       where: {
@@ -72,7 +80,7 @@ export class Show extends ShowLikeMediaItem {
     return `${this.title} (${this.year?.toString() ?? "Unknown"}) {tvdb-${this.tvdbId}}`;
   }
 
-  getShowTitle() {
-    return this.title;
+  getShow() {
+    return this;
   }
 }
