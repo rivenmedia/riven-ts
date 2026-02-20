@@ -1,13 +1,11 @@
-import { TorrentContainer } from "@repo/util-plugin-sdk/schemas/torrents/torrent-container";
-
 import z from "zod";
 
 import { createFlowJobBuilder } from "../../utilities/create-flow-job-schema.ts";
-import { createPluginResultSchema } from "../../utilities/create-flow-plugin-result-schema.ts";
 import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
+import { FindValidTorrentContainerFlow } from "./steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
 
 export const DownloadItemFlow = createFlowSchema("download-item", {
-  children: createPluginResultSchema(TorrentContainer),
+  children: FindValidTorrentContainerFlow.shape.output,
   input: z.object({
     id: z.int(),
   }),

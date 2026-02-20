@@ -96,7 +96,7 @@ const rtnInstance = new RTN(
 );
 
 export const sortScrapeResultsProcessor =
-  sortScrapeResultsProcessorSchema.implementAsync(async function (job) {
+  sortScrapeResultsProcessorSchema.implementAsync(async function ({ job }) {
     const children = await job.getChildrenValues();
 
     const childResults = Object.values(children);

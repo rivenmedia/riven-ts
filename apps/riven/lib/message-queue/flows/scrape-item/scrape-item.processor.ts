@@ -9,7 +9,7 @@ import { persistScrapeResults } from "./utilities/persist-scrape-results.ts";
 import type { RankedResult } from "@repo/util-rank-torrent-name";
 
 export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
-  async function (job, sendEvent) {
+  async function ({ job }, sendEvent) {
     const children = await job.getChildrenValues();
 
     const sortedResults = Object.values(children).reduce<RankedResult[]>(

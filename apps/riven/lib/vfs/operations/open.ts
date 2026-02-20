@@ -114,11 +114,9 @@ async function open(
     try {
       fileNameIsFetchingLinkMap.set(entry.originalFilename, true);
 
-      const { url: unrestrictedUrl } = await runSingleJob(
-        requestQueue,
-        entry.id.toString(),
-        { item: entry },
-      );
+      const job = await requestQueue.add(entry.id.toString(), { item: entry });
+
+      const { url: unrestrictedUrl } = await runSingleJob(job);
 
       const em = database.em.fork();
 

@@ -1,22 +1,30 @@
-import { MediaItemDownloadRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
+import {
+  MediaItemDownloadRequestedEvent,
+  MediaItemDownloadRequestedResponse,
+} from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
 
 import { UnrecoverableError } from "bullmq";
 import assert from "node:assert";
 
 import { database } from "../../../../../database/database.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
-import { SerialisedMediaItem } from "../../../../../utilities/serialisers/serialised-media-item.ts";
-import { createPluginFlowJob } from "../../../../utilities/create-flow-plugin-job.ts";
-import { zipFlowChildrenResults } from "../../../../utilities/zip-children-results.ts";
+import { runSingleJob } from "../../../../utilities/run-single-job.ts";
 import { flow } from "../../../producer.ts";
 import { findValidTorrentContainerProcessorSchema } from "./find-valid-torrent-container.schema.ts";
 import { validateTorrentContainer } from "./utilities/validate-torrent-container.ts";
 
 export const findValidTorrentContainerProcessor =
-  findValidTorrentContainerProcessorSchema.implementAsync(async function (job) {
+  findValidTorrentContainerProcessorSchema.implementAsync(async function ({
+    job,
+  }) {
     const {
       id: jobId,
-      data: { availableDownloaders, id: mediaItemId },
+      data: {
+        availableDownloaders,
+        id: mediaItemId,
+        infoHashes,
+        failedInfoHashes,
+      },
     } = job;
 
     assert(jobId);
@@ -25,44 +33,50 @@ export const findValidTorrentContainerProcessor =
       populate: ["streams"],
     });
 
-    for (const { infoHash } of mediaItem.streams) {
+    const uncheckedInfoHashes = new Set(infoHashes)
+      .difference(new Set(failedInfoHashes))
+      .values()
+      .toArray();
+
+    for (const infoHash of uncheckedInfoHashes) {
       for (const plugin of availableDownloaders) {
-        await flow.add(
-          createPluginFlowJob(
-            MediaItemDownloadRequestedEvent,
-            `Download ${mediaItem.title} from ${plugin}`,
-            plugin,
-            { item: mediaItem },
-            {
-              parent: {
-                id: jobId,
-                queue: job.queueQualifiedName,
-              },
+        const node = await flow.addPluginJob(
+          MediaItemDownloadRequestedEvent,
+          MediaItemDownloadRequestedResponse,
+          `Download ${mediaItem.title}`,
+          plugin,
+          { item: mediaItem },
+          {
+            parent: {
+              id: jobId,
+              queue: job.queueQualifiedName,
             },
-          ),
+          },
         );
 
-        const [finalResult] = zipFlowChildrenResults(
-          await job.getChildrenValues(),
-        );
+        try {
+          const result = await runSingleJob(node.job);
+          const isContainerValid = validateTorrentContainer(mediaItem, result);
 
-        if (!finalResult) {
+          return {
+            success: true,
+            result: {
+              plugin,
+              result,
+            },
+          };
+        } catch (error) {
           logger.warn(
-            `No result returned from downloader plugin ${plugin} for ${mediaItem.type} "${mediaItem.title}"`,
+            `Invalid info hash: ${infoHash} from plugin ${plugin} for media item ${mediaItem.title} (${mediaItem.id.toString()}) - ${String(error)}`,
           );
+
+          await job.updateData({
+            ...job.data,
+            failedInfoHashes: [...failedInfoHashes, infoHash],
+          });
 
           continue;
         }
-
-        const isContainerValid = validateTorrentContainer(
-          mediaItem,
-          finalResult.result,
-        );
-
-        return {
-          success: true,
-          result: finalResult,
-        };
       }
     }
 

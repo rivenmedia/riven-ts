@@ -14,6 +14,7 @@ export const FindValidTorrentContainerFlow = createFlowSchema(
       id: z.int(),
       availableDownloaders: z.array(z.string()).min(1),
       infoHashes: z.array(z.hash("sha1")).min(1),
+      failedInfoHashes: z.array(z.hash("sha1")),
     }),
     output: createPluginResultSchema(TorrentContainer),
   },

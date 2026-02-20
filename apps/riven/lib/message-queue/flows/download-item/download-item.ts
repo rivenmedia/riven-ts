@@ -17,6 +17,7 @@ export async function downloadItem(
         (plugin) => plugin.name.description ?? "unknown",
       ),
       infoHashes: item.streams.map((stream) => stream.infoHash),
+      failedInfoHashes: [],
     },
   );
 

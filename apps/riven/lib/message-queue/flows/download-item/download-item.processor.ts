@@ -8,10 +8,8 @@ import { downloadItemProcessorSchema } from "./download-item.schema.ts";
 import { persistDownloadResults } from "./utilities/persist-download-results.ts";
 
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
-  async function (job, sendEvent) {
+  async function ({ job }, sendEvent) {
     const [finalResult] = Object.values(await job.getChildrenValues());
-
-    console.log("Final result from downloaders:", finalResult);
 
     if (!finalResult) {
       throw new UnrecoverableError(
@@ -19,11 +17,17 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
       );
     }
 
+    if (!finalResult.success) {
+      throw new UnrecoverableError(
+        "Downloader plugins did not return a valid torrent container",
+      );
+    }
+
     try {
       const updatedItem = await persistDownloadResults({
         id: job.data.id,
-        container: finalResult.result,
-        processedBy: finalResult.plugin,
+        container: finalResult.result.result,
+        processedBy: finalResult.result.plugin,
       });
 
       sendEvent({

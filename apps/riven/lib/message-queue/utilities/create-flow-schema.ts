@@ -45,19 +45,22 @@ export const createFlowSchema = <
     output: wrappedOutputSchema,
     processor: z.function({
       input: [
-        z.custom<
-          Omit<
-            Job<
-              z.infer<typeof inputSchema>,
-              z.infer<typeof wrappedOutputSchema>
-            >,
-            "getChildrenValues"
-          > & {
-            getChildrenValues: () => Promise<
-              z.infer<typeof childrenValuesSchema>
-            >;
-          }
-        >(),
+        z.object({
+          job: z.custom<
+            Omit<
+              Job<
+                z.infer<typeof inputSchema>,
+                z.infer<typeof wrappedOutputSchema>
+              >,
+              "getChildrenValues"
+            > & {
+              getChildrenValues: () => Promise<
+                z.infer<typeof childrenValuesSchema>
+              >;
+            }
+          >(),
+          token: z.string().optional(),
+        }),
         z.custom<MainRunnerMachineIntake>(),
       ],
       output: z.promise(wrappedOutputSchema),

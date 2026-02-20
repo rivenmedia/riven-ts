@@ -37,9 +37,9 @@ export function createFlowWorker<
 
   const worker = new Worker(
     flowName,
-    async (job) => {
+    async (job, token) => {
       try {
-        return await processor(job, sendEvent);
+        return await processor({ job, token }, sendEvent);
       } catch (error) {
         Sentry.captureException(error);
 
