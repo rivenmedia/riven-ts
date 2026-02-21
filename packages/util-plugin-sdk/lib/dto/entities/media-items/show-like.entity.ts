@@ -15,5 +15,11 @@ export abstract class ShowLikeMediaItem extends MediaItem {
   declare tmdbId?: never;
   declare contentRating: ShowContentRating;
 
+  /**
+   * Helper method to get the parent show of this media item. For shows, this will return the show itself.
+   * For seasons or episodes, it will return the parent show.
+   *
+   * @returns The parent {@link Show} of this media item.
+   */
   abstract getShow(): Promisable<Show>;
 }

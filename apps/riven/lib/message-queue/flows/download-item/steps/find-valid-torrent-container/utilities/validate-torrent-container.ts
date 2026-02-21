@@ -5,6 +5,7 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities";
 import { parse } from "@repo/util-rank-torrent-name";
 
+import { reduceAsync } from "es-toolkit";
 import assert from "node:assert";
 
 import type { TorrentContainer } from "@repo/util-plugin-sdk/schemas/torrents/torrent-container";
@@ -27,9 +28,11 @@ export const validateTorrentContainer = async (
     const expectedSeasons =
       show.status === "continuing" ? seasons.length - 1 : seasons.length;
 
-    const expectedEpisodes = seasons
-      .slice(0, Math.max(1, expectedSeasons))
-      .reduce((acc, season) => acc + season.episodes.count(), 0);
+    const expectedEpisodes = await reduceAsync(
+      seasons.slice(0, Math.max(1, expectedSeasons)),
+      async (acc, season) => acc + (await season.episodes.loadCount()),
+      0,
+    );
 
     assert(
       container.files.length === expectedEpisodes,

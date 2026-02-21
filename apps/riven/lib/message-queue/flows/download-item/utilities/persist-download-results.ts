@@ -1,4 +1,10 @@
-import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  Episode,
+  MediaEntry,
+  Movie,
+  Season,
+  Show,
+} from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
@@ -40,11 +46,12 @@ export async function persistDownloadResults({
     new UnrecoverableError(`Media item with ID ${id.toString()} not found`),
   );
 
-  if (!existingItem.streams[0]) {
-    throw new UnrecoverableError(
+  assert(
+    existingItem.streams[0],
+    new UnrecoverableError(
       `Media item with ID ${id.toString()} has no streams`,
-    );
-  }
+    ),
+  );
 
   assert(
     existingItem.state === "scraped",
@@ -58,61 +65,59 @@ export async function persistDownloadResults({
   existingItem.activeStream = ref(existingItem.streams[0]);
   existingItem.state = "downloaded";
 
-  switch (existingItem.type) {
-    case "movie": {
-      const [file] = container.files;
+  if (existingItem instanceof Movie || existingItem instanceof Episode) {
+    const [file] = container.files;
 
-      if (!file) {
-        throw new UnrecoverableError(
-          `No files found in torrent container ${container.infoHash}`,
-        );
-      }
+    existingItem.filesystemEntries.add(
+      em.create(MediaEntry, {
+        fileSize: file.fileSize,
+        originalFilename: file.fileName,
+        mediaItem: ref(existingItem),
+        provider: processedBy,
+        providerDownloadId: container.torrentId.toString(),
+        downloadUrl: file.downloadUrl ?? null,
+      }),
+    );
+  }
 
-      existingItem.filesystemEntries.add(
+  if (existingItem instanceof Show || existingItem instanceof Season) {
+    const episodes =
+      existingItem instanceof Show
+        ? await existingItem.getEpisodes()
+        : await existingItem.episodes.loadItems();
+
+    assert(episodes[0]);
+
+    let episodeNumber = episodes[0].absoluteNumber;
+
+    for (const file of container.files) {
+      const episode = await database.episode.findOneOrFail({
+        absoluteNumber: episodeNumber++,
+      });
+
+      episode.filesystemEntries.add(
         em.create(MediaEntry, {
           fileSize: file.fileSize,
           originalFilename: file.fileName,
-          mediaItem: ref(existingItem),
+          mediaItem: episode,
           provider: processedBy,
           providerDownloadId: container.torrentId.toString(),
           downloadUrl: file.downloadUrl ?? null,
         }),
       );
-
-      break;
-    }
-    case "show": {
-      let iteratedEpisodes = 0;
-
-      for (const file of container.files) {
-        const associatedMediaItem = await database.episode.findOneOrFail({
-          absoluteNumber: ++iteratedEpisodes,
-        });
-
-        associatedMediaItem.filesystemEntries.add(
-          em.create(MediaEntry, {
-            fileSize: file.fileSize,
-            originalFilename: file.fileName,
-            mediaItem: associatedMediaItem,
-            provider: processedBy,
-            providerDownloadId: container.torrentId.toString(),
-            downloadUrl: file.downloadUrl ?? null,
-          }),
-        );
-      }
-
-      break;
     }
   }
 
   try {
     await validateOrReject(existingItem);
 
-    await em.flush();
+    await em.persist(existingItem).flush();
 
-    return await em.refreshOrFail(existingItem, {
+    await em.refreshOrFail(existingItem, {
       populate: ["*"],
     });
+
+    return existingItem;
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

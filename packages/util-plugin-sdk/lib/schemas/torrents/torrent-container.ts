@@ -5,9 +5,7 @@ import { TorrentInfo } from "./torrent-info.ts";
 
 export const TorrentContainer = z.object({
   infoHash: z.string(),
-  files: z
-    .array(DebridFile)
-    .min(1, "Torrent container must have at least 1 file"),
+  files: z.tuple([DebridFile], DebridFile),
   torrentId: z.union([z.string(), z.number()]),
   torrentInfo: TorrentInfo,
 });

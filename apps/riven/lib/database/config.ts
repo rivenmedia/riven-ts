@@ -16,6 +16,7 @@ import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 
 import { logger } from "../utilities/logger/logger.ts";
 import { settings } from "../utilities/settings.ts";
+import { MediaItemStatePropagationSubscriber } from "./subscribers/media-item-state-propagation.subscriber.ts";
 
 export const entities = [
   SubtitleEntry,
@@ -34,6 +35,7 @@ export const databaseConfig = {
   driver: PostgreSqlDriver,
   metadataProvider: TsMorphMetadataProvider,
   entities,
+  subscribers: [new MediaItemStatePropagationSubscriber()],
   forceUtcTimezone: true,
   clientUrl: settings.databaseUrl,
   logger: (message) => {

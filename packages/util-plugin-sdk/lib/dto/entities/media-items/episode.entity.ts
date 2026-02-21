@@ -26,9 +26,9 @@ export class Episode extends ShowLikeMediaItem {
   @Min(1)
   number!: number;
 
-  @Field(() => Number, { nullable: true })
+  @Field(() => Number)
   @Property()
-  absoluteNumber?: number | null;
+  absoluteNumber!: number;
 
   @Field(() => Season)
   @ManyToOne()
@@ -79,7 +79,7 @@ export class Episode extends ShowLikeMediaItem {
   }
 
   @BeforeCreate()
-  setTvdbId() {
+  fallbackToSeasonExternalIds() {
     this.tvdbId ||= this.season.getProperty("tvdbId");
     this.imdbId ??= this.season.getProperty("imdbId") ?? null;
   }
