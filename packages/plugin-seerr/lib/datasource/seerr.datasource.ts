@@ -93,9 +93,9 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     const allResults: MediaRequestWithType[] = [];
     const take = 20;
     let skip = 0;
+    let totalResults = 0;
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    while (true) {
+    do {
       const response = await this.get<GetRequestResponseWithType>("request", {
         params: {
           take: take.toString(),
@@ -112,14 +112,9 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
         allResults.push(...response.results);
       }
 
-      const totalResults = response.pageInfo?.results ?? 0;
-
-      if (skip + take >= totalResults) {
-        break;
-      }
-
+      totalResults = response.pageInfo?.results ?? 0;
       skip += take;
-    }
+    } while (skip < totalResults);
 
     return allResults;
   }
