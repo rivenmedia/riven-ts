@@ -53,7 +53,7 @@ export async function persistScrapeResults({
       levRatio,
     });
 
-    existingItem.streams.add(stream);
+    stream.parents.add(existingItem);
 
     newStreams.push(stream);
   }
