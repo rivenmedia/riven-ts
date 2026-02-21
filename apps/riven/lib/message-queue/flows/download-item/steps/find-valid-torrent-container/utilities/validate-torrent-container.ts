@@ -34,10 +34,54 @@ export const validateTorrentContainer = async (
       0,
     );
 
+    // some release packs contain extra videos
+    const normalisedFiles = container.files
+      .map((file) => ({
+        file,
+        parsed: parse(file.fileName),
+      }))
+      .filter(
+        ({ parsed }) =>
+          parsed.episodes.length > 0 &&
+          !parsed.episodes.includes(0) &&
+          !parsed.seasons.includes(0),
+      )
+      .map(({ file, parsed }) => ({
+        file,
+        season: parsed.seasons.find((season) => season > 0) ?? 0,
+        episode: parsed.episodes.find((episode) => episode > 0) ?? 0,
+      }))
+      .toSorted((a, b) => {
+        const bySeason = a.season - b.season;
+
+        if (bySeason !== 0) {
+          return bySeason;
+        }
+
+        const byEpisode = a.episode - b.episode;
+
+        if (byEpisode !== 0) {
+          return byEpisode;
+        }
+
+        return a.file.fileName.localeCompare(b.file.fileName);
+      })
+      .map(({ file }) => file);
+
     assert(
-      container.files.length === expectedEpisodes,
-      `Show torrent container must have exactly ${expectedEpisodes.toString()} files, but has ${container.files.length.toString()}`,
+      normalisedFiles.length >= expectedEpisodes,
+      `Show torrent container must have at least ${expectedEpisodes.toString()} episode files, but has ${normalisedFiles.length.toString()}`,
     );
+
+    const selectedFiles = normalisedFiles.slice(0, expectedEpisodes);
+
+    assert(selectedFiles.length > 0, "Show torrent container has no files");
+
+    const [firstFile, ...restFiles] = selectedFiles;
+
+    assert(firstFile, "Show torrent container has no files");
+
+    container.files = [firstFile, ...restFiles];
   }
 
   for (const file of container.files) {

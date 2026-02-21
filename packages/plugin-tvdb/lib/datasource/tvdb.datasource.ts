@@ -18,6 +18,25 @@ import type { AugmentedRequest } from "@apollo/datasource-rest";
 
 export class TvdbAPIError extends Error {}
 
+function normaliseNullableOverview(input: unknown): unknown {
+  if (Array.isArray(input)) {
+    return input.map(normaliseNullableOverview);
+  }
+
+  if (input && typeof input === "object") {
+    return Object.fromEntries(
+      Object.entries(input).map(([key, value]) => [
+        key,
+        key === "overview" && value === null
+          ? ""
+          : normaliseNullableOverview(value),
+      ]),
+    );
+  }
+
+  return input;
+}
+
 interface TvdbToken {
   value: string;
   expiresAt: DateTime;
@@ -58,7 +77,9 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
    */
   async getSeries(id: string) {
     const response = await this.get<unknown>(`series/${id}/extended`);
-    const { data } = getSeriesExtendedQueryResponseSchema.parse(response);
+    const { data } = getSeriesExtendedQueryResponseSchema.parse(
+      normaliseNullableOverview(response),
+    );
 
     if (!data) {
       throw new TvdbAPIError(
@@ -80,7 +101,9 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
     const response = await this.get<unknown>(
       `seasons/${id.toString()}/extended`,
     );
-    const { data } = getSeasonExtendedQueryResponseSchema.parse(response);
+    const { data } = getSeasonExtendedQueryResponseSchema.parse(
+      normaliseNullableOverview(response),
+    );
 
     if (!data) {
       throw new TvdbAPIError(
@@ -100,7 +123,9 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
    */
   async getEpisode(id: string) {
     const response = await this.get<unknown>(`episodes/${id}/extended`);
-    const { data } = getEpisodeExtendedQueryResponseSchema.parse(response);
+    const { data } = getEpisodeExtendedQueryResponseSchema.parse(
+      normaliseNullableOverview(response),
+    );
 
     if (!data) {
       throw new TvdbAPIError(

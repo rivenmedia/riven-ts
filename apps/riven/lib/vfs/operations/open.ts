@@ -4,7 +4,7 @@ import { setTimeout } from "node:timers/promises";
 import { database } from "../../database/database.ts";
 import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
 import { logger } from "../../utilities/logger/logger.ts";
-import { FuseError } from "../errors/fuse-error.ts";
+import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { attrCache } from "../utilities/attr-cache.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
@@ -180,7 +180,23 @@ export const openSync = function (
       process.nextTick(callback, 0, fd);
     })
     .catch((error: unknown) => {
-      logger.error(`VFS open error: ${(error as Error).message}`);
+      if (isFuseError(error)) {
+        if (error.errorCode === Fuse.ENOENT) {
+          logger.silly(`VFS open miss: ${error.message}`);
+        } else {
+          logger.error(`VFS open FuseError: ${error.message}`);
+        }
+
+        process.nextTick(callback, error.errorCode);
+
+        return;
+      }
+
+      if (error instanceof Error) {
+        logger.error(`VFS open Error: ${error.stack ?? error.message}`);
+      } else {
+        logger.error(`VFS open unknown error: ${String(error)}`);
+      }
 
       process.nextTick(callback, Fuse.EIO);
     });

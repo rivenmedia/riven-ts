@@ -15,6 +15,7 @@ ENV PATH=$PNPM_HOME:$PATH
 RUN apk add --no-cache \
     wget \
     bash \
+    fuse \
     fuse3 \
     fuse3-dev \
     shadow
@@ -48,11 +49,8 @@ RUN apk add --no-cache \
 
 WORKDIR ${HOME}/riven-ts
 
-# Copy dependency files
-COPY .husky/install.mjs .husky/install.mjs
-COPY pnpm-workspace.yaml .
-COPY pnpm-lock.yaml .
-COPY --parents **/package.json ./
+# Copy workspace sources
+COPY . .
 
 # Install project dependencies
 RUN pnpm install --frozen-lockfile
@@ -60,12 +58,6 @@ RUN pnpm install --frozen-lockfile
 #---------------------------
 
 FROM dependencies AS schema-generator
-
-COPY --parents --from=dependencies ${HOME}/riven-ts/**/node_modules ./node_modules/
-COPY --parents **/kubb.config.ts ./
-COPY --parents **/openapi-schema.json ./
-COPY --parents **/openapi-schema.yaml ./
-COPY ./packages/core/util-kubb-config ./packages/core/util-kubb-config
 
 RUN pnpm -r generate-schemas
 

@@ -8,6 +8,7 @@
     "dev": "node --watch --env-file=.env --import=./lib/sentry.ts --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
     "generate-config-docs": "zod2md",
     "graphql-codegen": "graphql-codegen",
+    "ingest:magnet": "node --import=@swc-node/register/esm-register --enable-source-maps lib/scripts/ingest-magnet.ts",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "start": "node --import=./lib/sentry.ts --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
