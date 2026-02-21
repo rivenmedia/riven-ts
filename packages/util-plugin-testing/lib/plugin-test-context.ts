@@ -8,6 +8,12 @@ import { mockLogger } from "./create-mock-logger.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { KeyValueCache } from "@apollo/utils.keyvaluecache";
 import type { BaseDataSourceConfig } from "@repo/util-plugin-sdk";
+import type {
+  Episode,
+  Movie,
+  Season,
+  Show,
+} from "@repo/util-plugin-sdk/dto/entities";
 import type { Telemetry } from "bullmq";
 import type { SetupServerApi } from "msw/node";
 import type { Logger } from "winston";

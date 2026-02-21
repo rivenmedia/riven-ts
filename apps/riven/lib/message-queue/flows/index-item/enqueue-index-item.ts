@@ -5,12 +5,18 @@ import { flow } from "../producer.ts";
 import { createRequestIndexDataJob } from "./index-item.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 
-export async function indexItem(
-  item: MediaItemIndexRequestedEvent["item"],
-  indexerPlugins: RivenPlugin[],
-) {
-  const childNodes = indexerPlugins.map((plugin) =>
+export interface EnqueueIndexItemInput {
+  item: ItemRequest;
+  subscribers: RivenPlugin[];
+}
+
+export async function enqueueIndexItem({
+  item,
+  subscribers,
+}: EnqueueIndexItemInput) {
+  const childNodes = subscribers.map((plugin) =>
     createPluginFlowJob(
       MediaItemIndexRequestedEvent,
       `Index ${item.externalIdsLabel.join(" | ")}`,

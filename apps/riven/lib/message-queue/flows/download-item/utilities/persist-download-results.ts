@@ -5,6 +5,7 @@ import {
   Season,
   Show,
 } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
@@ -15,6 +16,7 @@ import assert from "node:assert";
 import z from "zod";
 
 import { database } from "../../../../database/database.ts";
+import { logger } from "../../../../utilities/logger/logger.ts";
 
 import type { TorrentContainer } from "@repo/util-plugin-sdk/schemas/torrents/torrent-container";
 
@@ -91,9 +93,33 @@ export async function persistDownloadResults({
     let episodeNumber = episodes[0].absoluteNumber;
 
     for (const file of container.files) {
-      const episode = await database.episode.findOneOrFail({
+      const episode = await database.episode.findOne({
         absoluteNumber: episodeNumber++,
       });
+
+      if (!episode) {
+        logger.debug(
+          `File ${file.fileName} does not correspond to a valid episode, skipping...`,
+        );
+
+        continue;
+      }
+
+      const ignoredStates = MediaItemState.exclude(["completed", "downloaded"]);
+
+      if (!ignoredStates.safeParse(episode.state).success) {
+        continue;
+      }
+
+      const existingMediaEntries = await episode.getMediaEntries();
+
+      if (existingMediaEntries.length) {
+        logger.debug(
+          `Episode ${episode.id.toString()} already has media entries, skipping...`,
+        );
+
+        continue;
+      }
 
       episode.filesystemEntries.add(
         em.create(MediaEntry, {

@@ -7,11 +7,16 @@ import { createSortScrapeResultsJob } from "./steps/sort-scrape-results/sort-scr
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export async function scrapeItem(
-  item: MediaItemScrapeRequestedEvent["item"],
-  scraperPlugins: RivenPlugin[],
-) {
-  const childNodes = scraperPlugins.map((plugin) =>
+export interface EnqueueScrapeItemInput {
+  item: MediaItemScrapeRequestedEvent["item"];
+  subscribers: RivenPlugin[];
+}
+
+export async function enqueueScrapeItem({
+  item,
+  subscribers,
+}: EnqueueScrapeItemInput) {
+  const childNodes = subscribers.map((plugin) =>
     createPluginFlowJob(
       MediaItemScrapeRequestedEvent,
       `Scrape ${item.title}`,

@@ -1,4 +1,5 @@
 import { BaseDataSource, type RivenPlugin } from "@repo/util-plugin-sdk";
+import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
 
 import { type Mock, beforeEach, expect, vi } from "vitest";
 import z from "zod";
@@ -45,12 +46,11 @@ vi.mock(import("@repo/plugin-test"), () => {
       name: Symbol.for("@repo/plugin-test"),
       dataSources: [TestAPI],
       resolvers: [TestResolver],
-      hooks: {
-        "riven.core.started": vi.fn(),
-        "riven.item-request.creation.error.conflict": vi.fn(),
-        "riven.item-request.creation.error": vi.fn(),
-        "riven.item-request.creation.success": vi.fn(),
-      },
+      // Listen to all events with a mock function, as plugin subscribers are filtered based
+      // on the presence of a handler for the event type.
+      hooks: Object.fromEntries(
+        Object.keys(RivenEventHandler).map((key) => [key, vi.fn()]),
+      ),
       settingsSchema: z.object({}),
       async validator() {
         return true;
