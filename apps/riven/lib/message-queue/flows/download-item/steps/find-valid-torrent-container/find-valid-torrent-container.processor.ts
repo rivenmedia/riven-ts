@@ -29,9 +29,7 @@ export const findValidTorrentContainerProcessor =
 
     assert(jobId);
 
-    const mediaItem = await database.mediaItem.findOneOrFail(mediaItemId, {
-      populate: ["streams"],
-    });
+    const mediaItem = await database.mediaItem.findOneOrFail(mediaItemId);
 
     const uncheckedInfoHashes = new Set(infoHashes)
       .difference(new Set(failedInfoHashes))
