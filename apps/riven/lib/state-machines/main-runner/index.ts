@@ -140,6 +140,10 @@ export const mainRunnerMachine = setup({
         { enqueue, context: { plugins } },
         params: ParamsFor<MediaItemScrapeRequestedEvent>,
       ) => {
+        if (params.item.streams.length === 0) {
+          return;
+        }
+
         enqueue.spawnChild(requestDownload, {
           input: {
             item: params.item,
@@ -340,14 +344,14 @@ export const mainRunnerMachine = setup({
           },
         ],
       },
-      "riven.media-item.download.requested": {
-        actions: {
-          type: "requestDownload",
-          params: ({ event: { item } }) => ({
-            item,
-          }),
-        },
-      },
+      // "riven.media-item.download.requested": {
+      //   actions: {
+      //     type: "requestDownload",
+      //     params: ({ event: { item } }) => ({
+      //       item,
+      //     }),
+      //   },
+      // },
       "riven.media-item.download.success": {
         actions: [
           {
