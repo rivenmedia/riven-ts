@@ -47,8 +47,8 @@ vi.mock(import("@repo/plugin-test"), () => {
       resolvers: [TestResolver],
       hooks: {
         "riven.core.started": vi.fn(),
-        "riven.media-item.creation.error.conflict": vi.fn(),
-        "riven.media-item.creation.error": vi.fn(),
+        "riven.item-request.creation.error.conflict": vi.fn(),
+        "riven.item-request.creation.error": vi.fn(),
         "riven.item-request.creation.success": vi.fn(),
       },
       settingsSchema: z.object({}),

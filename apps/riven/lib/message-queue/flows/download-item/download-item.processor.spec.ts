@@ -1,6 +1,7 @@
 import { Movie, Stream } from "@repo/util-plugin-sdk/dto/entities";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
+import { NotFoundError } from "@mikro-orm/core";
 import { Job, UnrecoverableError } from "bullmq";
 import { DateTime, Settings } from "luxon";
 import { expect, vi } from "vitest";
@@ -19,22 +20,19 @@ it.beforeEach(({ redisUrl }) => {
   });
 });
 
-it("throws an unrecoverable error if the item cannot be downloaded", async () => {
+it("throws an error if the item cannot be found", async () => {
   const sendEvent = vi.fn();
 
   const mockQueue = createQueue("mock-queue");
-  const job: Parameters<DownloadItemFlow["processor"]>[0] = await Job.create(
-    mockQueue,
-    "mock-download-item",
-    {
+  const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
+    await Job.create(mockQueue, "mock-download-item", {
       id: 1,
-    },
-  );
+    });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
-  await expect(() => downloadItemProcessor(job, sendEvent)).rejects.toThrow(
-    UnrecoverableError,
+  await expect(() => downloadItemProcessor({ job }, sendEvent)).rejects.toThrow(
+    NotFoundError,
   );
 });
 
@@ -44,13 +42,10 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   vi.spyOn(Settings, "now").mockReturnValue(10000);
 
   const mockQueue = createQueue("mock-queue");
-  const job: Parameters<DownloadItemFlow["processor"]>[0] = await Job.create(
-    mockQueue,
-    "mock-download-item",
-    {
+  const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
+    await Job.create(mockQueue, "mock-download-item", {
       id: 1,
-    },
-  );
+    });
 
   const expectedDuration = 1;
 
@@ -80,29 +75,32 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   await em.flush();
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
-      files: [
-        {
-          fileName: "Test Movie 2024 1080p.mkv",
-          fileSize: 1024,
+    "find-valid-torrent-container": {
+      result: {
+        files: [
+          {
+            fileName: "Test Movie 2024 1080p.mkv",
+            fileSize: 1024,
+          },
+        ],
+        infoHash: streamInfoHash,
+        torrentId: "",
+        torrentInfo: {
+          files: {},
+          infoHash: "",
+          name: "",
+          id: "",
+          isCached: true,
+          links: [],
+          sizeMB: 0,
+          alternativeFilename: "",
         },
-      ],
-      infoHash: streamInfoHash,
-      torrentId: "",
-      torrentInfo: {
-        files: {},
-        infoHash: "",
-        name: "",
-        id: "",
-        isCached: true,
-        links: [],
-        sizeMB: 0,
-        alternativeFilename: "",
       },
+      plugin: "@repo/plugin-test",
     },
   });
 
-  await downloadItemProcessor(job, sendEvent);
+  await downloadItemProcessor({ job }, sendEvent);
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.success",

@@ -183,6 +183,7 @@ it("returns directory stats for /shows", async () => {
       year: 2020,
       contentRating: "tv-14",
       number: 1,
+      absoluteNumber: 1,
       state: "downloaded",
     });
 
@@ -249,6 +250,7 @@ it("returns directory stats for single shows", async () => {
       year: 2020,
       contentRating: "tv-14",
       number: 1,
+      absoluteNumber: 1,
       state: "downloaded",
     });
 
@@ -315,6 +317,7 @@ it("returns directory stats for single seasons", async () => {
       year: 2020,
       contentRating: "tv-14",
       number: 1,
+      absoluteNumber: 1,
       state: "downloaded",
     });
 
@@ -380,6 +383,7 @@ it("returns file stats for episodes", async () => {
     year: 2020,
     contentRating: "tv-14",
     number: 1,
+    absoluteNumber: 1,
     state: "downloaded",
   });
 

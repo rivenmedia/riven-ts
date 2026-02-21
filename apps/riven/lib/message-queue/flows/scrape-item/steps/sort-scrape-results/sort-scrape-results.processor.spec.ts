@@ -20,7 +20,7 @@ const it = baseIt.extend<{
   show: Show;
   season: Season;
   episode: Episode;
-  job: Parameters<SortScrapeResultsFlow["processor"]>[0];
+  job: Parameters<SortScrapeResultsFlow["processor"]>[0]["job"];
   scrapeResults: Record<string, string>;
 }>({
   movie: async ({}, use) => {
@@ -135,9 +135,9 @@ it("throws an UnrecoverableError if no results are found", async ({
     id: movie.id,
   });
 
-  await expect(() => sortScrapeResultsProcessor(job, vi.fn())).rejects.toThrow(
-    UnrecoverableError,
-  );
+  await expect(() =>
+    sortScrapeResultsProcessor({ job }, vi.fn()),
+  ).rejects.toThrow(UnrecoverableError);
 });
 
 it("returns valid movie torrents if the item is a movie", async ({
@@ -165,12 +165,10 @@ it("returns valid movie torrents if the item is a movie", async ({
     id: movie.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(3);
-  expect(result.result.results).toEqual(
+  expect(results).toHaveLength(3);
+  expect(results).toEqual(
     expect.arrayContaining(
       rawTitles.map((title) =>
         expect.objectContaining({
@@ -206,12 +204,10 @@ it("returns valid show torrents if the item is a show", async ({
     id: show.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(2);
-  expect(result.result.results).toEqual(
+  expect(results).toHaveLength(2);
+  expect(results).toEqual(
     expect.arrayContaining(
       rawTitles.map((title) =>
         expect.objectContaining({
@@ -249,12 +245,10 @@ it("returns valid season torrents if the item is a season", async ({
     id: season.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(3);
-  expect(result.result.results).toEqual(
+  expect(results).toHaveLength(3);
+  expect(results).toEqual(
     expect.arrayContaining(
       rawTitles.map((title) =>
         expect.objectContaining({
@@ -292,12 +286,10 @@ it("returns valid episode torrents if the item is an episode", async ({
     id: episode.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(3);
-  expect(result.result.results).toEqual(
+  expect(results).toHaveLength(3);
+  expect(results).toEqual(
     expect.arrayContaining(
       rawTitles.map((title) =>
         expect.objectContaining({
@@ -326,12 +318,10 @@ it("filters show torrents if the item is a movie", async ({ movie, job }) => {
     id: movie.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(0);
-  expect(result.result.results).not.toEqual(
+  expect(results).toHaveLength(0);
+  expect(results).not.toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -361,12 +351,10 @@ it("filters out torrents with 2 or fewer episodes for shows", async ({
     id: show.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(0);
-  expect(result.result.results).not.toEqual(
+  expect(results).toHaveLength(0);
+  expect(results).not.toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -396,12 +384,10 @@ it("filters out torrents with an incorrect number of seasons for shows", async (
     id: show.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(0);
-  expect(result.result.results).not.toEqual(
+  expect(results).toHaveLength(0);
+  expect(results).not.toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -439,12 +425,10 @@ it("filters out torrents with incorrect number of episodes for single-season sho
     id: show.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(0);
-  expect(result.result.results).not.toEqual(
+  expect(results).toHaveLength(0);
+  expect(results).not.toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -480,12 +464,10 @@ it("filters out duplicate torrents from different plugins", async ({
     id: movie.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(1);
-  expect(result.result.results).toEqual([
+  expect(results).toHaveLength(1);
+  expect(results).toEqual([
     expect.objectContaining({
       data: expect.objectContaining({
         rawTitle,
@@ -513,12 +495,10 @@ it("filters out torrents with no seasons for season items", async ({
     id: season.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(0);
-  expect(result.result.results).not.toEqual(
+  expect(results).toHaveLength(0);
+  expect(results).not.toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -548,12 +528,10 @@ it("filters out torrents with the incorrect season number for season items", asy
     id: season.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(0);
-  expect(result.result.results).not.toEqual(
+  expect(results).toHaveLength(0);
+  expect(results).not.toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -583,12 +561,10 @@ it("filters out torrents with 2 or fewer episodes for season items", async ({
     id: season.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(0);
-  expect(result.result.results).not.toEqual(
+  expect(results).toHaveLength(0);
+  expect(results).not.toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -618,12 +594,10 @@ it("filters out torrents with incorrect episodes for season items", async ({
     id: season.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(0);
-  expect(result.result.results).not.toEqual(
+  expect(results).toHaveLength(0);
+  expect(results).not.toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -653,12 +627,10 @@ it("filters out torrents with incorrect episode numbers for episode items", asyn
     id: episode.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(0);
-  expect(result.result.results).not.toEqual(
+  expect(results).toHaveLength(0);
+  expect(results).not.toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -688,12 +660,10 @@ it("filters out torrents with the incorrect season number for episode items", as
     id: episode.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(0);
-  expect(result.result.results).not.toEqual(
+  expect(results).toHaveLength(0);
+  expect(results).not.toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -723,11 +693,9 @@ it("filters out torrents with no episodes for episode items", async ({
     id: episode.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).not.toEqual(
+  expect(results).not.toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -764,12 +732,10 @@ it("filters out torrents that do not match the media item's country", async ({
     id: episode.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(0);
-  expect(result.result.results).not.toEqual(
+  expect(results).toHaveLength(0);
+  expect(results).not.toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -810,12 +776,10 @@ it("does not filter out torrents that do not match the media item's country if t
     id: episode.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(1);
-  expect(result.result.results).toEqual(
+  expect(results).toHaveLength(1);
+  expect(results).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -864,12 +828,10 @@ it("filters out torrents that do not match the media item's year ± 1 year", asy
     id: movie.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(3);
-  expect(result.result.results).toEqual(
+  expect(results).toHaveLength(3);
+  expect(results).toEqual(
     expect.arrayContaining(
       rawTitles.slice(1, 4).map((rawTitle) =>
         expect.objectContaining({
@@ -920,12 +882,10 @@ it('filters out torrents that are not dubbed if the media item is anime and the 
     id: movie.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(1);
-  expect(result.result.results).toEqual([
+  expect(results).toHaveLength(1);
+  expect(results).toEqual([
     expect.objectContaining({
       data: expect.objectContaining({
         rawTitle: rawTitles[0],
@@ -972,12 +932,10 @@ it('does not filter out torrents that are not dubbed if the media item is anime 
     id: movie.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
-  expect.assert(result.success);
-
-  expect(result.result.results).toHaveLength(2);
-  expect(result.result.results).toEqual(
+  expect(results).toHaveLength(2);
+  expect(results).toEqual(
     expect.arrayContaining(
       rawTitles.map((rawTitle) =>
         expect.objectContaining({
@@ -1012,14 +970,12 @@ it("returns sorted results", async ({ movie, job }) => {
     id: movie.id,
   });
 
-  const result = await sortScrapeResultsProcessor(job, vi.fn());
-
-  expect.assert(result.success);
+  const { results } = await sortScrapeResultsProcessor({ job }, vi.fn());
 
   const expectedOrder = [rawTitles[2], rawTitles[0], rawTitles[1]] as const;
 
-  expect(result.result.results).toHaveLength(3);
-  expect(result.result.results).toEqual(
+  expect(results).toHaveLength(3);
+  expect(results).toEqual(
     expectedOrder.map((rawTitle) =>
       expect.objectContaining({
         data: expect.objectContaining({

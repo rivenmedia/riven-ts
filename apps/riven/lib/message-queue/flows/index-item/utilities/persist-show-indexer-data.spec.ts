@@ -1,4 +1,4 @@
-import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequest, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 
 import { expect, it } from "vitest";
@@ -35,7 +35,7 @@ it("returns the media item if processed successfully", async ({}) => {
     },
   });
 
-  expect(result).instanceOf(Movie);
+  expect(result).instanceOf(Show);
   expect(result).toEqual(
     expect.objectContaining({
       id: 1,
