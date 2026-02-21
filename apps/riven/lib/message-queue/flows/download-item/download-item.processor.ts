@@ -4,6 +4,7 @@ import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/sche
 import { UnrecoverableError } from "bullmq";
 import { DateTime } from "luxon";
 
+import { database } from "../../../database/database.ts";
 import { downloadItemProcessorSchema } from "./download-item.schema.ts";
 import { persistDownloadResults } from "./utilities/persist-download-results.ts";
 
@@ -12,6 +13,14 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
     const [finalResult] = Object.values(await job.getChildrenValues());
 
     if (!finalResult) {
+      const item = await database.mediaItem.findOneOrFail(job.data.id);
+
+      sendEvent({
+        type: "riven.media-item.download.error",
+        item,
+        error: "No valid torrent container found",
+      });
+
       throw new UnrecoverableError(
         "No torrent container returned from downloaders",
       );
