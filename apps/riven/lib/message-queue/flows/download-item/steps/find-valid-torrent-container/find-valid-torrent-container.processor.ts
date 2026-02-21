@@ -59,11 +59,8 @@ export const findValidTorrentContainerProcessor =
           const result = await runSingleJob(node.job);
 
           return {
-            success: true,
-            result: {
-              plugin,
-              result: await validateTorrentContainer(mediaItem, result),
-            },
+            plugin,
+            result: await validateTorrentContainer(mediaItem, result),
           };
         } catch (error) {
           logger.warn(

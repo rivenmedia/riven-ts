@@ -13,13 +13,7 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
     const children = await job.getChildrenValues();
 
     const sortedResults = Object.values(children).reduce<RankedResult[]>(
-      (acc, scrapeResult) => {
-        if (!scrapeResult.success) {
-          return acc;
-        }
-
-        return [...acc, ...scrapeResult.result.results];
-      },
+      (acc, scrapeResult) => [...acc, ...scrapeResult.results],
       [],
     );
 
@@ -33,10 +27,6 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
         type: "riven.media-item.scrape.success",
         item,
       });
-
-      return {
-        success: true,
-      };
     } catch (error) {
       if (
         error instanceof MediaItemScrapeErrorIncorrectState ||

@@ -24,15 +24,12 @@ it("throws an unrecoverable error if the item cannot be scraped", async () => {
   const sendEvent = vi.fn();
 
   const mockQueue = createQueue("mock-queue");
-  const job: Parameters<ScrapeItemFlow["processor"]>[0] = await Job.create(
-    mockQueue,
-    "mock-scrape-item",
-    { id: 1 },
-  );
+  const job: Parameters<ScrapeItemFlow["processor"]>[0]["job"] =
+    await Job.create(mockQueue, "mock-scrape-item", { id: 1 });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
-  await expect(() => scrapeItemProcessor(job, sendEvent)).rejects.toThrow();
+  await expect(() => scrapeItemProcessor({ job }, sendEvent)).rejects.toThrow();
 });
 
 it.todo("throws an unrecoverable if no new streams were found");
@@ -43,11 +40,8 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
   vi.spyOn(Settings, "now").mockReturnValue(10000);
 
   const mockQueue = createQueue("mock-queue");
-  const job: Parameters<ScrapeItemFlow["processor"]>[0] = await Job.create(
-    mockQueue,
-    "mock-scrape-item",
-    { id: 1 },
-  );
+  const job: Parameters<ScrapeItemFlow["processor"]>[0]["job"] =
+    await Job.create(mockQueue, "mock-scrape-item", { id: 1 });
 
   const em = database.orm.em.fork();
 
@@ -66,22 +60,19 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
-      success: true,
-      result: {
-        id: 1,
-        results: [
-          rankTorrent(
-            "Test Movie 2024 1080p WEB-DL",
-            streamInfoHash,
-            "Test Movie",
-            createSettings(),
-          ),
-        ],
-      },
+      id: 1,
+      results: [
+        rankTorrent(
+          "Test Movie 2024 1080p WEB-DL",
+          streamInfoHash,
+          "Test Movie",
+          createSettings(),
+        ),
+      ],
     },
   });
 
-  await scrapeItemProcessor(job, sendEvent);
+  await scrapeItemProcessor({ job }, sendEvent);
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.scrape.success",

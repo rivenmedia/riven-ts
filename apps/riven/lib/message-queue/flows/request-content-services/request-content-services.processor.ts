@@ -54,13 +54,10 @@ export const requestContentServicesProcessor =
       }
 
       return {
-        success: true,
-        result: {
-          count: items.movies.length + items.shows.length,
-          newItems: results.filter(
-            (result) => result.status === "fulfilled" && result.value.isNewItem,
-          ).length,
-        },
+        count: items.movies.length + items.shows.length,
+        newItems: results.filter(
+          (result) => result.status === "fulfilled" && result.value.isNewItem,
+        ).length,
       };
     },
   );

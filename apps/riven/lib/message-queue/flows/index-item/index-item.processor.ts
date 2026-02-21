@@ -44,10 +44,6 @@ export const indexItemProcessor =
         type: "riven.media-item.index.success",
         item: updatedItem,
       });
-
-      return {
-        success: true,
-      };
     } catch (error) {
       if (
         error instanceof MediaItemIndexError ||

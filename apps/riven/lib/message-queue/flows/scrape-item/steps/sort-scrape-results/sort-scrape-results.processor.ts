@@ -150,11 +150,8 @@ export const sortScrapeResultsProcessor =
     }, Promise.resolve([]));
 
     return {
-      success: true,
-      result: {
-        id: job.data.id,
-        title: itemTitle,
-        results: rtnInstance.sortTorrents(parsedResults),
-      },
+      id: job.data.id,
+      title: itemTitle,
+      results: rtnInstance.sortTorrents(parsedResults),
     };
   });

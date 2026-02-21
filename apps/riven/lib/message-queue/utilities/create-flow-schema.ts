@@ -25,33 +25,19 @@ export const createFlowSchema = <
     output?: Output;
   },
 ) => {
-  const wrappedOutputSchema = z.union([
-    z.object({
-      success: z.literal(true),
-      result: outputSchema,
-    }),
-    z.object({
-      success: z.literal(false),
-      error: z.unknown(),
-    }),
-  ]);
-
   const childrenValuesSchema = z.record(z.string(), childrenSchema);
 
   return z.object({
     name: z.literal(type),
     input: inputSchema,
     children: childrenValuesSchema,
-    output: wrappedOutputSchema,
+    output: outputSchema,
     processor: z.function({
       input: [
         z.object({
           job: z.custom<
             Omit<
-              Job<
-                z.infer<typeof inputSchema>,
-                z.infer<typeof wrappedOutputSchema>
-              >,
+              Job<z.infer<typeof inputSchema>, z.infer<typeof outputSchema>>,
               "getChildrenValues"
             > & {
               getChildrenValues: () => Promise<
@@ -63,7 +49,7 @@ export const createFlowSchema = <
         }),
         z.custom<MainRunnerMachineIntake>(),
       ],
-      output: z.promise(wrappedOutputSchema),
+      output: z.promise(outputSchema),
     }),
   });
 };

@@ -17,17 +17,11 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
       );
     }
 
-    if (!finalResult.success) {
-      throw new UnrecoverableError(
-        "Downloader plugins did not return a valid torrent container",
-      );
-    }
-
     try {
       const updatedItem = await persistDownloadResults({
         id: job.data.id,
-        container: finalResult.result.result,
-        processedBy: finalResult.result.plugin,
+        container: finalResult.result,
+        processedBy: finalResult.plugin,
       });
 
       sendEvent({
@@ -37,10 +31,6 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
           .diff(DateTime.fromJSDate(updatedItem.createdAt))
           .as("seconds"),
       });
-
-      return {
-        success: true,
-      };
     } catch (error) {
       if (
         error instanceof MediaItemDownloadError ||
