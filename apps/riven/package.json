@@ -27,6 +27,7 @@
     "@repo/plugin-listrr": "workspace:^",
     "@repo/plugin-plex": "workspace:^",
     "@repo/plugin-realdebrid": "workspace:^",
+    "@repo/plugin-seerr": "workspace:^",
     "@repo/plugin-tmdb": "workspace:^",
     "@repo/plugin-torrentio": "workspace:^",
     "@repo/plugin-tvdb": "workspace:^",
