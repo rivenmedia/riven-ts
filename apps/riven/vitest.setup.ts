@@ -1,7 +1,8 @@
 import { BaseDataSource, type RivenPlugin } from "@repo/util-plugin-sdk";
 import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
 
-import { type Mock, beforeEach, expect, vi } from "vitest";
+import { EntityRepository } from "@mikro-orm/core";
+import { type Mock, afterEach, expect, vi } from "vitest";
 import z from "zod";
 
 vi.mock<{ default: Record<string, unknown> }>(
@@ -99,8 +100,15 @@ expect.extend({
   },
 });
 
-beforeEach(async () => {
+afterEach(async () => {
   const { database } = await import("./lib/database/database.ts");
 
   await database.orm.schema.clearDatabase();
+
+  // Clear all repositories to prevent caching issues between tests.
+  Object.values(database).forEach((repo) => {
+    if (repo instanceof EntityRepository) {
+      repo.getEntityManager().clear();
+    }
+  });
 });
