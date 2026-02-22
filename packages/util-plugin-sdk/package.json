@@ -26,6 +26,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@repo/util-rank-torrent-name": "workspace:^",
     "es-toolkit": "catalog:",
     "luxon": "catalog:",
     "redis-memory-server": "^0.16.0",

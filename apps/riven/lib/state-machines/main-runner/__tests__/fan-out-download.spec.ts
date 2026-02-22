@@ -1,6 +1,7 @@
 import { getEventTypeFromSchema } from "@repo/util-plugin-sdk";
 import { Season, Show, Stream } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemDownloadErrorEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
+import { parse } from "@repo/util-rank-torrent-name";
 
 import assert from "node:assert";
 import { expect, vi } from "vitest";
@@ -42,9 +43,8 @@ it(`enqueues a scrape for each individual season when a "${eventType}" event is 
 
   const stream = em.create(Stream, {
     infoHash: "1234567890123456789012345678901234567890",
-    parsedTitle: "Test Show S01 1080p",
     rank: 0,
-    rawTitle: "Test Show S01 1080p",
+    parsedData: parse("Test Show S01 1080p"),
   });
 
   show.streams.add(stream);
@@ -104,9 +104,8 @@ it(`enqueues a scrape for each individual season's episode when a "${eventType}"
 
   const stream = em.create(Stream, {
     infoHash: "1234567890123456789012345678901234567890",
-    parsedTitle: "Test Show S01 1080p",
     rank: 0,
-    rawTitle: "Test Show S01 1080p",
+    parsedData: parse("Test Show S01 1080p"),
   });
 
   show.streams.add(stream);

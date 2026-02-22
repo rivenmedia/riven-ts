@@ -7,7 +7,7 @@ import z, {
   type ZodType,
 } from "zod";
 
-import type { FlowJob } from "bullmq";
+import type { FlowChildJob, FlowJob, ParentOptions } from "bullmq";
 
 type PartialJobOptions = Partial<Omit<FlowJob, "name" | "queueName" | "data">>;
 
@@ -32,12 +32,12 @@ export const createFlowJobBuilder = <
 
   assert(queueName, `No event type found for flow: ${schema.shape.name.value}`);
 
-  return (
+  return <O extends PartialJobOptions["opts"]>(
     name: string,
     ...args: z.infer<T>["input"] extends Record<string, never>
-      ? [jobOptions?: PartialJobOptions]
-      : [data: z.infer<T>["input"], jobOptions?: PartialJobOptions]
-  ): FlowJob => {
+      ? [jobOptions?: PartialJobOptions & O]
+      : [data: z.infer<T>["input"], jobOptions?: PartialJobOptions & O]
+  ): O extends { parent: ParentOptions } ? FlowChildJob : FlowJob => {
     const baseJob = jobSchema.parse({
       queueName,
       ...(inputIsNever ? {} : { data: args[0] }),

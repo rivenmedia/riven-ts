@@ -10,11 +10,11 @@ import z from "zod";
 import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
 
-import type { RankedResult } from "@repo/util-rank-torrent-name";
+import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export interface PersistScrapeResultsInput {
   id: number;
-  results: RankedResult[];
+  results: Record<string, ParsedData>;
 }
 
 export async function persistScrapeResults({
@@ -36,21 +36,18 @@ export async function persistScrapeResults({
   const em = database.em.fork();
   const newStreams: Stream[] = [];
 
-  for (const { data, hash, levRatio, rank } of results) {
+  for (const [infoHash, parsedData] of Object.entries(results)) {
     if (
       [...existingItem.streams, ...existingItem.blacklistedStreams].some(
-        (s) => s.infoHash === hash,
+        (s) => s.infoHash === infoHash,
       )
     ) {
       continue;
     }
 
     const stream = em.create(Stream, {
-      infoHash: hash,
-      rawTitle: data.rawTitle,
-      parsedTitle: data.title,
-      rank,
-      levRatio,
+      infoHash,
+      parsedData,
     });
 
     stream.parents.add(existingItem);

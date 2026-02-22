@@ -1,5 +1,6 @@
 import { Movie, Stream } from "@repo/util-plugin-sdk/dto/entities";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
+import { parse } from "@repo/util-rank-torrent-name";
 
 import { Job, UnrecoverableError } from "bullmq";
 import { DateTime, Settings } from "luxon";
@@ -77,9 +78,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
 
   const stream = em.create(Stream, {
     infoHash: streamInfoHash,
-    parsedTitle: "Test Movie 2024 1080p",
-    rank: 1,
-    rawTitle: "Test Movie 2024 1080p",
+    parsedData: parse("Test Movie 2024 1080p"),
   });
 
   movie.streams.add(stream);

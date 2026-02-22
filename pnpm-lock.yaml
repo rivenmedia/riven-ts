@@ -1069,6 +1069,9 @@ importers:
 
   packages/util-plugin-sdk:
     dependencies:
+      '@repo/util-rank-torrent-name':
+        specifier: workspace:^
+        version: link:../util-rank-torrent-name
       es-toolkit:
         specifier: 'catalog:'
         version: 1.44.0

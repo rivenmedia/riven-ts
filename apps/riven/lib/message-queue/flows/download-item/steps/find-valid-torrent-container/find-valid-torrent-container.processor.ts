@@ -17,20 +17,22 @@ export const findValidTorrentContainerProcessor =
   findValidTorrentContainerProcessorSchema.implementAsync(async function ({
     job,
   }) {
+    const [rankedStreams] = Object.values(await job.getChildrenValues());
+
+    if (!rankedStreams?.length) {
+      throw new UnrecoverableError("No ranked streams returned from ranker");
+    }
+
     const {
       id: jobId,
-      data: {
-        availableDownloaders,
-        id: mediaItemId,
-        infoHashes,
-        failedInfoHashes,
-      },
+      data: { availableDownloaders, id: mediaItemId, failedInfoHashes },
     } = job;
 
     assert(jobId);
 
     const mediaItem = await database.mediaItem.findOneOrFail(mediaItemId);
 
+    const infoHashes = rankedStreams.map((stream) => stream.hash);
     const uncheckedInfoHashes = new Set(infoHashes)
       .difference(new Set(failedInfoHashes))
       .values()

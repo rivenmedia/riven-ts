@@ -3,7 +3,7 @@ import { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/eve
 import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
 import { flow } from "../producer.ts";
 import { createScrapeItemJob } from "./scrape-item.schema.ts";
-import { createSortScrapeResultsJob } from "./steps/sort-scrape-results/sort-scrape-results.schema.ts";
+import { createParseScrapeResultsJob } from "./steps/parse-scrape-results/parse-scrape-results.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
@@ -31,7 +31,7 @@ export async function enqueueScrapeItem({
     { id: item.id },
     {
       children: [
-        createSortScrapeResultsJob(
+        createParseScrapeResultsJob(
           "Sort scrape results",
           { id: item.id },
           { children: childNodes },

@@ -2,10 +2,10 @@ import z from "zod";
 
 import { createFlowJobBuilder } from "../../utilities/create-flow-job-schema.ts";
 import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
-import { SortScrapeResultsFlow } from "./steps/sort-scrape-results/sort-scrape-results.schema.ts";
+import { ParseScrapeResultsFlow } from "./steps/parse-scrape-results/parse-scrape-results.schema.ts";
 
 export const ScrapeItemFlow = createFlowSchema("scrape-item", {
-  children: SortScrapeResultsFlow.shape.output,
+  children: ParseScrapeResultsFlow.shape.output,
   input: z.object({
     id: z.int(),
   }),

@@ -6,21 +6,26 @@ import { UnrecoverableError } from "bullmq";
 import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
 import { persistScrapeResults } from "./utilities/persist-scrape-results.ts";
 
-import type { RankedResult } from "@repo/util-rank-torrent-name";
+import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
   async function ({ job }, sendEvent) {
     const children = await job.getChildrenValues();
 
-    const sortedResults = Object.values(children).reduce<RankedResult[]>(
-      (acc, scrapeResult) => [...acc, ...scrapeResult.results],
-      [],
+    const parsedResults = Object.values(children).reduce<
+      Record<string, ParsedData>
+    >(
+      (acc, scrapeResult) => ({
+        ...acc,
+        ...scrapeResult.results,
+      }),
+      {},
     );
 
     try {
       const item = await persistScrapeResults({
         id: job.data.id,
-        results: sortedResults,
+        results: parsedResults,
       });
 
       sendEvent({
