@@ -20,6 +20,8 @@ import { Show } from "./show.entity.ts";
 @ObjectType()
 @Entity()
 export class Season extends ShowLikeMediaItem {
+  declare filesystemEntries: never;
+
   @Field()
   @Property()
   @Min(1)

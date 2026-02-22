@@ -169,11 +169,11 @@ export const mainRunnerMachine = setup({
 
         if (item instanceof Show) {
           for (const season of item.seasons) {
-            enqueue.spawnChild(requestDownload, {
+            enqueue.spawnChild(requestScrape, {
               input: {
                 item: season,
                 subscribers: getPluginEventSubscribers(
-                  "riven.media-item.download.requested",
+                  "riven.media-item.scrape.requested",
                   plugins,
                 ),
               },
@@ -183,11 +183,11 @@ export const mainRunnerMachine = setup({
 
         if (item instanceof Season) {
           for (const episode of item.episodes) {
-            enqueue.spawnChild(requestDownload, {
+            enqueue.spawnChild(requestScrape, {
               input: {
                 item: episode,
                 subscribers: getPluginEventSubscribers(
-                  "riven.media-item.download.requested",
+                  "riven.media-item.scrape.requested",
                   plugins,
                 ),
               },

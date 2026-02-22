@@ -21,6 +21,8 @@ import { ShowLikeMediaItem } from "./show-like.entity.ts";
 @ObjectType()
 @Entity()
 export class Show extends ShowLikeMediaItem {
+  declare filesystemEntries: never;
+
   @Field(() => ShowStatus.enum, { nullable: true })
   @Enum(() => ShowStatus.enum)
   status!: ShowStatus;

@@ -11,7 +11,7 @@ import { it } from "./helpers/test-context.ts";
 
 const eventType = getEventTypeFromSchema(MediaItemDownloadErrorEvent);
 
-it(`enqueues a download for each individual season when a "${eventType}" event is received for a show`, async ({
+it(`enqueues a scrape for each individual season when a "${eventType}" event is received for a show`, async ({
   actor,
 }) => {
   const em = database.em.fork();
@@ -63,7 +63,7 @@ it(`enqueues a download for each individual season when a "${eventType}" event i
     for (const season of show.seasons) {
       expect(flowAddSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          queueName: "download-item",
+          queueName: "scrape-item",
           data: expect.objectContaining({
             id: season.id,
           }),
@@ -73,7 +73,7 @@ it(`enqueues a download for each individual season when a "${eventType}" event i
   });
 });
 
-it(`enqueues a download for each individual season's episode when a "${eventType}" event is received for a season`, async ({
+it(`enqueues a scrape for each individual season's episode when a "${eventType}" event is received for a season`, async ({
   actor,
 }) => {
   const em = database.em.fork();
@@ -129,7 +129,7 @@ it(`enqueues a download for each individual season's episode when a "${eventType
     for (const episode of failedSeason.episodes) {
       expect(flowAddSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          queueName: "download-item",
+          queueName: "scrape-item",
           data: expect.objectContaining({
             id: episode.id,
           }),

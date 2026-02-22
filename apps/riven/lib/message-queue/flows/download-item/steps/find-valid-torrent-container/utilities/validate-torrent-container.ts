@@ -14,13 +14,6 @@ export const validateTorrentContainer = async (
   item: MediaItem,
   container: TorrentContainer,
 ) => {
-  if (item instanceof Movie) {
-    assert(
-      container.files.length === 1,
-      "Movie torrent container must have exactly 1 file",
-    );
-  }
-
   if (item instanceof ShowLikeMediaItem) {
     const show = await item.getShow();
     const seasons = await show.seasons.loadItems();
@@ -35,8 +28,8 @@ export const validateTorrentContainer = async (
     );
 
     assert(
-      container.files.length === expectedEpisodes,
-      `Show torrent container must have exactly ${expectedEpisodes.toString()} files, but has ${container.files.length.toString()}`,
+      container.files.length >= expectedEpisodes,
+      `Show torrent container must have at least ${expectedEpisodes.toString()} files, but has ${container.files.length.toString()}`,
     );
   }
 
