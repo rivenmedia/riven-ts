@@ -44,7 +44,7 @@ export abstract class MediaItem {
   @Property()
   title!: string;
 
-  @Field()
+  @Field(() => String)
   @Property()
   fullTitle!: Opt<string>;
 

@@ -106,7 +106,7 @@ export async function enqueueDownloadItem({
   const streams = await topLevelItem.streams.loadItems();
 
   const rankStreamsNode = createRankStreamsJob(
-    `Ranking streams for ${item.title}`,
+    `Ranking streams for ${item.fullTitle}`,
     {
       id: item.id,
       streams: Object.fromEntries(
@@ -118,7 +118,7 @@ export async function enqueueDownloadItem({
   );
 
   const findValidTorrentContainerNode = createFindValidTorrentContainerJob(
-    `Finding valid torrent container for ${item.title}`,
+    `Finding valid torrent container for ${item.fullTitle}`,
     {
       id: item.id,
       availableDownloaders: subscribers.map(
@@ -135,7 +135,7 @@ export async function enqueueDownloadItem({
   );
 
   const rootNode = createDownloadItemJob(
-    `Downloading ${item.title}`,
+    `Downloading ${item.fullTitle}`,
     { id: item.id },
     { children: [findValidTorrentContainerNode] },
   );

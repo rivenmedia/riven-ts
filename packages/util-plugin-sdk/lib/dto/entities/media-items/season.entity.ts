@@ -81,6 +81,6 @@ export class Season extends ShowLikeMediaItem {
 
   @BeforeCreate()
   _persistFullTitle({ entity }: EventArgs<this>) {
-    this.fullTitle = `${entity.show.getProperty("fullTitle")} - ${this.prettyName}`;
+    this.fullTitle = `${entity.show.getProperty("fullTitle")} - S${entity.number.toString().padStart(2, "0")}`;
   }
 }

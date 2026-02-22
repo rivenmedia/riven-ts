@@ -87,6 +87,13 @@ export class Episode extends ShowLikeMediaItem {
 
   @BeforeCreate()
   _persistFullTitle({ entity }: EventArgs<this>) {
-    this.fullTitle = `${entity.season.getProperty("fullTitle")} - ${this.title}`;
+    const showTitle = entity.season.getProperty("show").getProperty("title");
+    const seasonNumber = entity.season
+      .getProperty("number")
+      .toString()
+      .padStart(2, "0");
+    const episodeNumber = entity.number.toString().padStart(2, "0");
+
+    this.fullTitle = `${showTitle} - S${seasonNumber}E${episodeNumber} - ${this.title}`;
   }
 }
