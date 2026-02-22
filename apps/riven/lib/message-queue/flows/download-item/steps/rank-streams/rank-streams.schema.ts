@@ -1,4 +1,5 @@
 import { TorrentContainer } from "@repo/util-plugin-sdk/schemas/torrents/torrent-container";
+import { atLeastOnePropertyRequired } from "@repo/util-plugin-sdk/validation";
 import {
   type RankedResult,
   RankingModelSchema,
@@ -14,7 +15,11 @@ export const RankStreamsFlow = createFlowSchema("download-item.rank-streams", {
   children: TorrentContainer,
   input: z.object({
     id: z.int(),
-    streams: z.record(z.hash("sha1"), z.string()),
+    streams: z
+      .record(z.hash("sha1"), z.string())
+      .refine(atLeastOnePropertyRequired, {
+        message: "At least one stream must be provided",
+      }),
     rtnSettings: SettingsSchema,
     rtnRankingModel: RankingModelSchema,
   }),
