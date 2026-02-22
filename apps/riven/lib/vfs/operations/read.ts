@@ -1,5 +1,6 @@
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 import { Buffer } from "node:buffer";
+import Undici from "undici";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { config } from "../config.ts";
@@ -184,6 +185,15 @@ export const readSync = function (
       process.nextTick(callback, bytesRead);
     })
     .catch((error: unknown) => {
+      // This is triggered when a file handle is released
+      if (error instanceof Undici.errors.RequestAbortedError) {
+        logger.silly(`Read operation aborted for fd ${fd.toString()}`);
+
+        process.nextTick(callback, 0);
+
+        return;
+      }
+
       if (isFuseError(error)) {
         logger.error(`VFS read FuseError: ${error.message}`);
 
