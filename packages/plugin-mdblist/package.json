@@ -8,7 +8,7 @@
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
-    "download-schema": "wget -q https://raw.githubusercontent.com/linaspurinis/api.mdblist.com/refs/heads/main/apiary.apib -O mdblist.apib && npx -y apib2openapi -i mdblist.apib -o mdblist_openapi.json && rm mdblist.apib",
+    "download-schema": "wget -q https://raw.githubusercontent.com/linaspurinis/api.mdblist.com/refs/heads/main/apiary.apib -O mdblist.apib && npx -y apib2openapi -i mdblist.apib -o openapi-schema.json && rm mdblist.apib",
     "generate-schemas": "pnpm download-schema && kubb generate",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
@@ -27,7 +27,6 @@
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-graphql-helpers": "workspace:^",
     "@repo/core-util-kubb-config": "workspace:^",
-    "@repo/core-util-logger": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
