@@ -31,7 +31,6 @@ export class MediaItemStatePropagationSubscriber implements EventSubscriber {
       const propagableStates = MediaItemState.extract([
         "downloaded",
         "indexed",
-        "scraped",
       ]);
 
       if (!propagableStates.safeParse(nextState).success) {

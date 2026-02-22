@@ -20,7 +20,9 @@ export const findValidTorrentContainerProcessor =
     const [rankedStreams] = Object.values(await job.getChildrenValues());
 
     if (!rankedStreams?.length) {
-      throw new UnrecoverableError("No ranked streams returned from ranker");
+      throw new UnrecoverableError(
+        "No streams found that match the ranking criteria",
+      );
     }
 
     const {

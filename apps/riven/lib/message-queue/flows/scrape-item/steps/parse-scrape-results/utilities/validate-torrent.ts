@@ -8,7 +8,7 @@ import {
 
 import { wrap } from "@mikro-orm/core";
 
-import { settings } from "../../../../../../utilities/settings.ts";
+// import { settings } from "../../../../../../utilities/settings.ts";
 
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 

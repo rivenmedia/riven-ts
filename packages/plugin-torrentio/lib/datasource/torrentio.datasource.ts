@@ -55,7 +55,8 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
         throw new Error("IMDB ID is required for Torrentio scraping");
       }
 
-      const { identifier, imdbId, scrapeType } = getStremioScrapeConfig(item);
+      const { identifier, imdbId, scrapeType } =
+        await getStremioScrapeConfig(item);
 
       const response = await this.get<unknown>(
         `${this.#filter}/stream/${scrapeType}/${imdbId}${identifier ?? ""}.json`,

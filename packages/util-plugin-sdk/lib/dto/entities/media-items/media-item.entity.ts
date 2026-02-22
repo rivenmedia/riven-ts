@@ -150,12 +150,12 @@ export abstract class MediaItem {
   failedAttempts: Opt<number> = 0;
 
   @Field(() => [FileSystemEntry])
-  @ManyToMany({ owner: true })
+  @ManyToMany()
   filesystemEntries: Collection<FileSystemEntry> =
     new Collection<FileSystemEntry>(this);
 
   @Field(() => [SubtitleEntry])
-  @ManyToMany({ owner: true })
+  @ManyToMany()
   subtitles: Collection<SubtitleEntry> = new Collection<SubtitleEntry>(this);
 
   @Field(() => Stream, { nullable: true })
@@ -163,11 +163,11 @@ export abstract class MediaItem {
   activeStream?: Ref<Stream> | null;
 
   @Field(() => [Stream])
-  @ManyToMany({ owner: true })
+  @ManyToMany()
   streams: Collection<Stream> = new Collection<Stream>(this);
 
   @Field(() => [Stream])
-  @ManyToMany({ owner: true })
+  @ManyToMany()
   blacklistedStreams: Collection<Stream> = new Collection<Stream>(this);
 
   @Field(() => String)

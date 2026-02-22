@@ -4,6 +4,7 @@ import {
   ManyToMany,
   PrimaryKey,
   Property,
+  Unique,
 } from "@mikro-orm/core";
 import { Field, ID, ObjectType } from "type-graphql";
 
@@ -20,16 +21,17 @@ export class Stream {
 
   @Field(() => String)
   @Property()
+  @Unique()
   infoHash!: string;
 
   @Property({ type: "json" })
   parsedData!: ParsedData;
 
   @Field(() => [MediaItem])
-  @ManyToMany()
+  @ManyToMany(() => MediaItem, (mediaItem) => mediaItem.streams)
   parents = new Collection<MediaItem>(this);
 
   @Field(() => [MediaItem])
-  @ManyToMany()
+  @ManyToMany(() => MediaItem, (mediaItem) => mediaItem.blacklistedStreams)
   blacklistedParents = new Collection<MediaItem>(this);
 }

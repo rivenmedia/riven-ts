@@ -104,6 +104,8 @@ export async function persistShowIndexerData({
 
       await validateOrReject(show);
 
+      transaction.assign(itemRequest, { state: "completed" });
+
       await transaction.flush();
 
       return transaction.refreshOrFail(show);

@@ -126,7 +126,12 @@ export async function enqueueDownloadItem({
       ),
       failedInfoHashes: [],
     },
-    { children: [rankStreamsNode] },
+    {
+      opts: {
+        continueParentOnFailure: true,
+      },
+      children: [rankStreamsNode],
+    },
   );
 
   const rootNode = createDownloadItemJob(

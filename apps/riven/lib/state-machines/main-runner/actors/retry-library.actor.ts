@@ -20,14 +20,18 @@ export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
         },
         {
           populate: ["activeStream", "streams"],
+          refresh: true,
         },
       );
 
-      const pendingRequests = await database.itemRequest.find({
-        state: {
-          $ne: "completed",
+      const pendingRequests = await database.itemRequest.find(
+        {
+          state: {
+            $ne: "completed",
+          },
         },
-      });
+        { refresh: true },
+      );
 
       for (const request of pendingRequests) {
         parentRef.send({

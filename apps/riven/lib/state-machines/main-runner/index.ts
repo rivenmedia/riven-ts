@@ -1,4 +1,3 @@
-import { Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 import { enqueueActions, raise, setup } from "xstate";
@@ -11,6 +10,7 @@ import { rankStreamsProcessor } from "../../message-queue/flows/download-item/st
 import { RankStreamsFlow } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.schema.ts";
 import { indexItemProcessor } from "../../message-queue/flows/index-item/index-item.processor.ts";
 import { RequestIndexDataFlow } from "../../message-queue/flows/index-item/index-item.schema.ts";
+import { flow } from "../../message-queue/flows/producer.ts";
 import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
 import { RequestContentServicesFlow } from "../../message-queue/flows/request-content-services/request-content-services.schema.ts";
 import { scrapeItemProcessor } from "../../message-queue/flows/scrape-item/scrape-item.processor.ts";
@@ -18,9 +18,11 @@ import { ScrapeItemFlow } from "../../message-queue/flows/scrape-item/scrape-ite
 import { parseScrapeResultsProcessor } from "../../message-queue/flows/scrape-item/steps/parse-scrape-results/parse-scrape-results.processor.ts";
 import { ParseScrapeResultsFlow } from "../../message-queue/flows/scrape-item/steps/parse-scrape-results/parse-scrape-results.schema.ts";
 import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
+import { extractPluginNameFromJobId } from "../../message-queue/utilities/extract-plugin-name-from-job-id.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { SerialisedItemRequest } from "../../utilities/serialisers/serialised-item-request.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
+import { fanOutDownload } from "./actors/fan-out-download.actor.ts";
 import { requestContentServices } from "./actors/request-content-services.actor.ts";
 import { requestDownload } from "./actors/request-download.actor.ts";
 import { requestIndexData } from "./actors/request-index-data.actor.ts";
@@ -39,7 +41,7 @@ import type {
   PublishableEventSet,
   ValidPluginMap,
 } from "../../types/plugins.ts";
-import type { Worker } from "bullmq";
+import type { FlowJob, Worker } from "bullmq";
 import type z from "zod";
 
 export interface MainRunnerMachineContext {
@@ -71,6 +73,9 @@ export const mainRunnerMachine = setup({
     events: {} as MainRunnerMachineEvent,
     children: {} as {
       requestContentServices: "requestContentServices";
+      requestIndexData: "requestIndexData";
+      requestScrape: "requestScrape";
+      fanOutDownload: "fanOutDownload";
     },
   },
   actions: {
@@ -78,21 +83,40 @@ export const mainRunnerMachine = setup({
       { context: { plugins, pluginQueues } },
       { type, ...event }: z.input<typeof RivenEvent>,
     ) => {
-      for (const plugin of plugins.values()) {
+      const jobs = plugins.values().reduce<FlowJob[]>((acc, plugin) => {
         const queue = pluginQueues.get(plugin.config.name)?.get(type);
 
         if (!queue) {
-          continue;
+          logger.silly(
+            `No queue found for event "${type}" and plugin "${plugin.config.name.description ?? "unknown"}". Event will not be broadcast to this plugin.`,
+          );
+
+          return acc;
         }
 
+        return [
+          ...acc,
+          {
+            name: type,
+            queueName: queue.name,
+            data: event,
+          },
+        ];
+      }, [] as FlowJob[]);
+
+      if (jobs.length === 0) {
         logger.silly(
-          `Broadcasting event "${type}" to plugin "${
-            plugin.config.name.description ?? "unknown"
-          }"`,
+          `No plugins have registered hooks for event "${type}". Event will not be broadcast to any plugins.`,
         );
 
-        void queue.add(type, event);
+        return;
       }
+
+      logger.debug(
+        `Enqueuing event "${type}" for ${jobs.map((job) => extractPluginNameFromJobId(job.queueName)).join(", ")} plugin(s).`,
+      );
+
+      void flow.addBulk(jobs);
     },
     requestContentServices: enqueueActions(
       ({ enqueue, context: { plugins } }) => {
@@ -163,39 +187,15 @@ export const mainRunnerMachine = setup({
         { enqueue, context: { plugins } },
         params: Omit<EnqueueDownloadItemInput, "subscribers">,
       ) => {
-        if (params.item.streams.length === 0) {
-          return;
-        }
-
-        const { item } = params;
-
-        if (item instanceof Show) {
-          for (const season of item.seasons) {
-            enqueue.spawnChild(requestScrape, {
-              input: {
-                item: season,
-                subscribers: getPluginEventSubscribers(
-                  "riven.media-item.scrape.requested",
-                  plugins,
-                ),
-              },
-            });
-          }
-        }
-
-        if (item instanceof Season) {
-          for (const episode of item.episodes) {
-            enqueue.spawnChild(requestScrape, {
-              input: {
-                item: episode,
-                subscribers: getPluginEventSubscribers(
-                  "riven.media-item.scrape.requested",
-                  plugins,
-                ),
-              },
-            });
-          }
-        }
+        enqueue.spawnChild(fanOutDownload, {
+          input: {
+            item: params.item,
+            subscribers: getPluginEventSubscribers(
+              "riven.media-item.scrape.requested",
+              plugins,
+            ),
+          },
+        });
       },
     ),
     retryLibrary: enqueueActions(({ enqueue, self }) => {
@@ -210,6 +210,9 @@ export const mainRunnerMachine = setup({
     requestContentServices,
     requestIndexData,
     requestScrape,
+    requestDownload,
+    fanOutDownload,
+    retryLibrary,
   },
   guards: {
     /**
@@ -299,6 +302,11 @@ export const mainRunnerMachine = setup({
         params: { message: "Riven has started successfully." },
       },
     ],
+    after: {
+      20000: {
+        actions: raise({ type: "riven-internal.retry-library" }),
+      },
+    },
     always: [
       {
         guard: "shouldQueueEvent",
