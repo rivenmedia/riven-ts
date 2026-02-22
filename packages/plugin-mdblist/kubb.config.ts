@@ -2,8 +2,8 @@ import { buildKubbConfig } from "@repo/core-util-kubb-config";
 
 export default buildKubbConfig({
   input: {
-    path: "./mdblist_openapi.json",
+    path: "./openapi-schema.json",
   },
   name: "MDBList",
-  baseURL: "https://mdblist.com",
+  baseURL: "https://api.mdblist.com",
 });
