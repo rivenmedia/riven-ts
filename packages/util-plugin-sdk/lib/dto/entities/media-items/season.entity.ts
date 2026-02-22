@@ -2,6 +2,7 @@ import {
   BeforeCreate,
   Collection,
   Entity,
+  type EventArgs,
   type Hidden,
   ManyToOne,
   OneToMany,
@@ -73,8 +74,13 @@ export class Season extends ShowLikeMediaItem {
   }
 
   @BeforeCreate()
-  fallbackToShowExternalIds() {
+  _fallbackToShowExternalIds() {
     this.tvdbId ||= this.show.getProperty("tvdbId");
     this.imdbId ??= this.show.getProperty("imdbId") ?? null;
+  }
+
+  @BeforeCreate()
+  _persistFullTitle({ entity }: EventArgs<this>) {
+    this.fullTitle = `${entity.show.getProperty("fullTitle")} - ${this.prettyName}`;
   }
 }

@@ -1,4 +1,4 @@
-import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
+import { ShowLikeMediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import {
   GarbageTorrentError,
   RTN,
@@ -12,10 +12,8 @@ import { rankStreamsProcessorSchema } from "./rank-streams.schema.ts";
 export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
   async function ({ job }) {
     const item = await database.mediaItem.findOneOrFail(job.data.id);
-    const itemTitle =
-      item instanceof Episode || item instanceof Season
-        ? (await item.getShow()).title
-        : item.title;
+    const { title: itemTitle } =
+      item instanceof ShowLikeMediaItem ? await item.getShow() : item;
 
     const rtnInstance = new RTN(job.data.rtnSettings, job.data.rtnRankingModel);
 

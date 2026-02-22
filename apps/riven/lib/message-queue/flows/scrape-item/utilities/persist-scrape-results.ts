@@ -70,13 +70,12 @@ export async function persistScrapeResults({
 
     logger.info(
       newStreamsCount > 0
-        ? `Added ${newStreamsCount.toString()} new streams to ${existingItem.title}`
-        : `No new streams found for ${existingItem.title}`,
+        ? `Added ${newStreamsCount.toString()} new streams to ${existingItem.fullTitle}`
+        : `No new streams found for ${existingItem.fullTitle}`,
     );
 
     return existingItem;
   } catch (error) {
-    console.error("Error validating or saving scraped results:", error);
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
       .transform((error) => {

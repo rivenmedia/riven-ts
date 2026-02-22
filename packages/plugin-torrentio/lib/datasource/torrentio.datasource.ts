@@ -66,7 +66,7 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
 
       if (!parsed.streams.length) {
         this.logger.info(
-          `No streams found for item ${item.title} (IMDB: ${item.imdbId})`,
+          `No streams found for item ${item.fullTitle} (IMDB: ${item.imdbId})`,
         );
 
         return {};
@@ -93,11 +93,11 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
 
       if (torrentsCount >= 0) {
         this.logger.info(
-          `Found ${torrentsCount.toString()} torrents for ${item.title} (IMDB: ${item.imdbId})`,
+          `Found ${torrentsCount.toString()} torrents for ${item.fullTitle} (IMDB: ${item.imdbId})`,
         );
       } else {
         this.logger.info(
-          `No torrents found for ${item.title} (IMDB: ${item.imdbId})`,
+          `No torrents found for ${item.fullTitle} (IMDB: ${item.imdbId})`,
         );
       }
 

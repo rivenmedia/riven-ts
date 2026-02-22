@@ -2,6 +2,7 @@ import {
   Collection,
   Entity,
   Enum,
+  type EventArgs,
   type Hidden,
   Index,
   ManyToMany,
@@ -42,6 +43,10 @@ export abstract class MediaItem {
   @Index()
   @Property()
   title!: string;
+
+  @Field()
+  @Property()
+  fullTitle!: Opt<string>;
 
   @Field(() => String, { nullable: true })
   @Property()
@@ -194,4 +199,6 @@ export abstract class MediaItem {
    * @returns An array of associated MediaEntries, which may be empty if none exist.
    */
   abstract getMediaEntries(): Promise<MediaEntry[]>;
+
+  abstract _persistFullTitle(args: EventArgs<this>): void;
 }

@@ -1,7 +1,9 @@
 import {
+  BeforeCreate,
   Collection,
   Entity,
   Enum,
+  type EventArgs,
   type Hidden,
   OneToMany,
   type Opt,
@@ -84,5 +86,10 @@ export class Show extends ShowLikeMediaItem {
 
   getShow() {
     return this;
+  }
+
+  @BeforeCreate()
+  _persistFullTitle({ entity }: EventArgs<this>) {
+    this.fullTitle = entity.title;
   }
 }

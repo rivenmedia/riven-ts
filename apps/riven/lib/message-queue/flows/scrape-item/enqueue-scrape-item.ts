@@ -19,7 +19,7 @@ export async function enqueueScrapeItem({
   const childNodes = subscribers.map((plugin) =>
     createPluginFlowJob(
       MediaItemScrapeRequestedEvent,
-      `Scrape ${item.title}`,
+      `Scrape ${item.fullTitle}`,
       plugin.name.description ?? "unknown",
       { item },
       { ignoreDependencyOnFailure: true },
@@ -27,7 +27,7 @@ export async function enqueueScrapeItem({
   );
 
   const rootNode = createScrapeItemJob(
-    `Scraping ${item.title}`,
+    `Scraping ${item.fullTitle}`,
     { id: item.id },
     {
       children: [

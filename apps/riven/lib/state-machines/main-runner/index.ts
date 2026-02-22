@@ -397,7 +397,7 @@ export const mainRunnerMachine = setup({
           {
             type: "log",
             params: ({ event: { item } }) => ({
-              message: `Successfully indexed ${item.type}: ${item.title}`,
+              message: `Successfully indexed ${item.type}: ${item.fullTitle}`,
               level: "info",
             }),
           },
@@ -442,7 +442,7 @@ export const mainRunnerMachine = setup({
           {
             type: "log",
             params: ({ event: { item } }) => ({
-              message: `Successfully scraped ${item.type}: ${item.title}`,
+              message: `Successfully scraped ${item.type}: ${item.fullTitle}`,
               level: "info",
             }),
           },
@@ -482,7 +482,7 @@ export const mainRunnerMachine = setup({
           {
             type: "log",
             params: ({ event: { item, error } }) => ({
-              message: `Error downloading ${item.title}: ${String(error)}`,
+              message: `Error downloading ${item.fullTitle}: ${String(error)}`,
               level: "error",
             }),
           },

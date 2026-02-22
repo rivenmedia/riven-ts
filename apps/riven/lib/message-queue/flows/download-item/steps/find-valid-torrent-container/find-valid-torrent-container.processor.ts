@@ -45,7 +45,7 @@ export const findValidTorrentContainerProcessor =
         const node = await flow.addPluginJob(
           MediaItemDownloadRequestedEvent,
           MediaItemDownloadRequestedResponse,
-          `Download ${mediaItem.title}`,
+          `Download ${mediaItem.fullTitle}`,
           plugin,
           { infoHash },
           {
@@ -66,7 +66,7 @@ export const findValidTorrentContainerProcessor =
           };
         } catch (error) {
           logger.warn(
-            `${mediaItem.type} ${mediaItem.title} (${mediaItem.id.toString()}) - ${String(error)}`,
+            `${mediaItem.type} ${mediaItem.fullTitle} (${mediaItem.id.toString()}) - ${String(error)}`,
           );
 
           continue;
@@ -74,7 +74,7 @@ export const findValidTorrentContainerProcessor =
       }
 
       logger.warn(
-        `Info hash ${infoHash} failed validation for all plugins for ${mediaItem.type} ${mediaItem.title} (${mediaItem.id.toString()})`,
+        `Info hash ${infoHash} failed validation for all plugins for ${mediaItem.type} ${mediaItem.fullTitle} (${mediaItem.id.toString()})`,
       );
 
       await job.updateData({
@@ -84,6 +84,6 @@ export const findValidTorrentContainerProcessor =
     }
 
     throw new UnrecoverableError(
-      `No valid torrent container found for ${mediaItem.title} after trying ${availableDownloaders.length.toString()} plugins`,
+      `No valid torrent container found for ${mediaItem.fullTitle} after trying ${availableDownloaders.length.toString()} plugins`,
     );
   });

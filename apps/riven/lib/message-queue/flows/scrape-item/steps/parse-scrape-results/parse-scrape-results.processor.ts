@@ -31,10 +31,8 @@ export const parseScrapeResultsProcessor =
     );
 
     const item = await database.mediaItem.findOneOrFail(job.data.id);
-    const itemTitle =
-      item instanceof ShowLikeMediaItem
-        ? (await item.getShow()).title
-        : item.title;
+    const { title: itemTitle } =
+      item instanceof ShowLikeMediaItem ? await item.getShow() : item;
 
     if (!Object.keys(aggregatedResults).length) {
       throw new UnrecoverableError(`No streams found for ${itemTitle}`);
