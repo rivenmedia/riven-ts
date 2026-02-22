@@ -1,5 +1,6 @@
 import { ContentServiceRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
+import { logger } from "../../../utilities/logger/logger.ts";
 import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
 import { flow } from "../producer.ts";
 import { createRequestContentServicesJob } from "./request-content-services.schema.ts";
@@ -26,6 +27,10 @@ export async function enqueueRequestContentServices({
   const rootNode = createRequestContentServicesJob("Request content services", {
     children: childNodes,
   });
+
+  logger.silly(
+    `Requesting content from ${subscribers.map((plugin) => plugin.name.description ?? "unknown").join(", ")}.`,
+  );
 
   return flow.add(rootNode);
 }
