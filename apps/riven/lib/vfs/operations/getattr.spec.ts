@@ -51,7 +51,7 @@ it("returns ENOENT for trash paths", async () => {
   });
 });
 
-it.skip("returns ENOENT for unknown paths", async () => {
+it("returns ENOENT for unknown paths", async () => {
   const callback = vi.fn();
 
   getattrSync("/unknownpath", callback);

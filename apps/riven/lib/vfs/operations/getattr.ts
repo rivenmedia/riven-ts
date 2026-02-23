@@ -1,6 +1,7 @@
 import Fuse, { type OPERATIONS, type Stats } from "@zkochan/fuse-native";
 import { DateTime } from "luxon";
 import fs from "node:fs";
+import { isZodErrorLike } from "zod-validation-error";
 
 import { database } from "../../database/database.ts";
 import { logger } from "../../utilities/logger/logger.ts";
@@ -362,7 +363,13 @@ export const getattrSync = function (path, callback) {
         return;
       }
 
-      console.log(error);
+      if (isZodErrorLike(error)) {
+        logger.error(`VFS getattr validation error: ${error.message}`);
+
+        process.nextTick(callback, Fuse.ENOENT);
+
+        return;
+      }
 
       logger.error(`VFS getattr unknown error: ${String(error)}`);
 

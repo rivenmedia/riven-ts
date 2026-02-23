@@ -47,7 +47,8 @@
     "undici": "catalog:",
     "winston": "catalog:",
     "xstate": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zod-validation-error": "catalog:"
   },
   "devDependencies": {
     "@apollo/client-devtools-vscode": "^4.23.2",
