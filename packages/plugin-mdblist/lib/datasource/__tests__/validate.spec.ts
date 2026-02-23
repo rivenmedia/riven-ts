@@ -1,4 +1,4 @@
-import { it } from "@repo/util-plugin-testing";
+import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
