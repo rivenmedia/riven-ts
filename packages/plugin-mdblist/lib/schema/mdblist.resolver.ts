@@ -6,7 +6,8 @@ import { Args, Query, Resolver } from "type-graphql";
 import { MdblistAPI } from "../datasource/mdblist.datasource.ts";
 import { pluginConfig } from "../mdblist-plugin.config.ts";
 import { ListNamesArguments } from "./arguments/list-names.arguments.ts";
-import { MdbListExternalIds } from "./types/external-ids.type.ts";
+
+import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
 @Resolver()
 export class MdblistResolver {
@@ -18,11 +19,11 @@ export class MdblistResolver {
   }
 
   @CacheControl({ maxAge: 300 })
-  @Query((_returns) => [MdbListExternalIds])
+  @Query((_returns) => ContentServiceRequestedResponse)
   async mdbListItems(
     @Args() { listNames }: ListNamesArguments,
     @PluginDataSource(pluginConfig.name, MdblistAPI) api: MdblistAPI,
-  ): Promise<{ movies: MdbListExternalIds[]; shows: MdbListExternalIds[] }> {
+  ): Promise<ContentServiceRequestedResponse> {
     return await api.getListItems(new Set<string>(listNames));
   }
 }

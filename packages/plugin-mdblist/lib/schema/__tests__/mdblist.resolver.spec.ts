@@ -1,4 +1,4 @@
-import { it } from "@repo/core-util-vitest-test-context";
+import { it } from "@repo/util-plugin-testing";
 
 import { HttpResponse, http } from "msw";
 import assert from "node:assert";
@@ -12,9 +12,7 @@ it('returns the validation status when calling "mdblistIsValid" query', async ({
   httpCache,
   server,
 }) => {
-  server.use(
-    http.get("**/validate", () => HttpResponse.json({ success: true })),
-  );
+  server.use(http.get("**/user", () => HttpResponse.json({ success: true })));
 
   const { body } = await gqlServer.executeOperation(
     {

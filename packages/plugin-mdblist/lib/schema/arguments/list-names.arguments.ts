@@ -1,11 +1,12 @@
-import { ArrayUnique, Contains } from "class-validator";
+import { ArrayUnique, Matches } from "class-validator";
 import { ArgsType, Field } from "type-graphql";
 
 @ArgsType()
 export class ListNamesArguments {
   @Field((_type) => [String])
-  @Contains("/", {
+  @Matches(/^[^/]+\/[^/]+$/, {
     each: true,
+    message: "Each list name must be in the format {username}/{listname}",
   })
   @ArrayUnique()
   listNames!: string[];
