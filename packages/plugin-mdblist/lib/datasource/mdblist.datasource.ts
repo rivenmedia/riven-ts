@@ -11,10 +11,11 @@ import {
 
 import type { MdbListExternalIds } from "../schema/types/external-ids.type.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
 export type MdblistName = `${string}/${string}`;
 function isMdblistName(name: unknown): name is MdblistName {
-  return String(name).includes("/");
+  return /^[^/]+\/[^/]+$/.test(String(name));
 }
 
 export class MdblistAPIError extends Error {}
@@ -53,7 +54,7 @@ export class MdblistAPI extends BaseDataSource {
 
   async getListItems(
     contentLists: Set<string>,
-  ): Promise<{ movies: MdbListExternalIds[]; shows: MdbListExternalIds[] }> {
+  ): Promise<ContentServiceRequestedResponse> {
     if (!contentLists.size) {
       return {
         movies: [],
@@ -74,18 +75,21 @@ export class MdblistAPI extends BaseDataSource {
 
     for (const listName of contentLists) {
       let hasMoreItems = true;
+      let offset = 0;
 
       while (hasMoreItems) {
         const response = await this.fetch<GetListItemsByNameQueryResponse>(
           `lists/${listName}/items`,
           {
             params: {
-              offset: (movieIdsMap.size + showIdsMap.size).toString(),
+              offset: offset.toString(),
             },
           },
         );
 
         const parsed = getListItemsResponseSchema.parse(response.parsedBody);
+
+        let pageItemCount = 0;
 
         if (parsed.movies) {
           for (const item of parsed.movies) {
@@ -96,6 +100,7 @@ export class MdblistAPI extends BaseDataSource {
                 mdblistId: item.ids.mdblist,
                 tvdbId: item.ids.tvdb ? String(item.ids.tvdb) : undefined,
               });
+              pageItemCount++;
             }
           }
         }
@@ -107,10 +112,12 @@ export class MdblistAPI extends BaseDataSource {
                 imdbId: item.imdb_id,
                 tvdbId: item.tvdb_id.toString(),
               });
+              pageItemCount++;
             }
           }
         }
 
+        offset += pageItemCount;
         hasMoreItems = response.response.headers.get("X-Has-More") == "true";
       }
     }
