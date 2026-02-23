@@ -30,6 +30,9 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
     duration: 1000,
   };
 
+  readonly #seenMovieIds = new Set<number>();
+  readonly #seenShowIds = new Set<number>();
+
   protected override willSendRequest(
     _path: string,
     requestOpts: AugmentedRequest,
@@ -95,13 +98,15 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
         if (parsed.movies) {
           for (const item of parsed.movies) {
             if (item.id) {
-              movieIdsMap.set(item.id, {
-                imdbId: item.ids.imdb,
-                tmdbId: item.ids.tmdb?.toString(),
-                mdblistId: item.ids.mdblist,
-                tvdbId: item.ids.tvdb ? String(item.ids.tvdb) : undefined,
-              });
               pageItemCount++;
+              if (!this.#seenMovieIds.has(item.id)) {
+                movieIdsMap.set(item.id, {
+                  imdbId: item.ids.imdb,
+                  tmdbId: item.ids.tmdb?.toString(),
+                  mdblistId: item.ids.mdblist,
+                  tvdbId: item.ids.tvdb ? String(item.ids.tvdb) : undefined,
+                });
+              }
             }
           }
         }
@@ -109,11 +114,13 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
         if (parsed.shows) {
           for (const item of parsed.shows) {
             if (item.id) {
-              showIdsMap.set(item.id, {
-                imdbId: item.imdb_id,
-                tvdbId: item.tvdb_id.toString(),
-              });
               pageItemCount++;
+              if (!this.#seenShowIds.has(item.id)) {
+                showIdsMap.set(item.id, {
+                  imdbId: item.imdb_id,
+                  tvdbId: item.tvdb_id.toString(),
+                });
+              }
             }
           }
         }
@@ -121,6 +128,13 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
         offset += pageItemCount;
         hasMoreItems = response.response.headers.get("X-Has-More") == "true";
       }
+    }
+
+    for (const id of movieIdsMap.keys()) {
+      this.#seenMovieIds.add(id);
+    }
+    for (const id of showIdsMap.keys()) {
+      this.#seenShowIds.add(id);
     }
 
     return {
