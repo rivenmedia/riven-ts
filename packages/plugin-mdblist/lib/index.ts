@@ -1,6 +1,7 @@
 import packageJson from "../package.json" with { type: "json" };
 import { MdblistAPI } from "./datasource/mdblist.datasource.ts";
 import { pluginConfig } from "./mdblist-plugin.config.ts";
+import { MdbListSettings } from "./mdblist-settings.schema.ts";
 import { MdblistSettingsResolver } from "./schema/mdblist-settings.resolver.ts";
 import { MdblistResolver } from "./schema/mdblist.resolver.ts";
 
@@ -12,15 +13,15 @@ export default {
   dataSources: [MdblistAPI],
   resolvers: [MdblistResolver, MdblistSettingsResolver],
   hooks: {
-    "riven.content-service.requested": async ({ dataSources }) => {
+    "riven.content-service.requested": async ({ dataSources, settings }) => {
+      const { lists } = settings.get(MdbListSettings);
       const api = dataSources.get(MdblistAPI);
 
-      return await api.getListItems(
-        new Set(["garycrawfordgc/top-movies-of-the-week"]),
-      );
+      return await api.getListItems(new Set(lists));
     },
   },
-  validator() {
+  settingsSchema: MdbListSettings,
+  async validator() {
     return true;
   },
-} satisfies RivenPlugin;
+} satisfies RivenPlugin as RivenPlugin;
