@@ -58,7 +58,7 @@ export default {
       }
 
       logger.info(
-        `Plex updated ${results.length.toString()} paths for ${event.item.title}`,
+        `Plex updated ${results.length.toString()} paths for ${event.item.fullTitle}`,
       );
     },
   },

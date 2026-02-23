@@ -8,21 +8,22 @@ import { createChunkCacheKey } from "./create-chunk-cache-key.ts";
 import type { FileHandleMetadata } from "../file-handle-map.ts";
 
 export const fetchDiscreteByteRange = async (
+  fd: number,
   fileHandle: FileHandleMetadata,
   [start, end]: readonly [number, number],
   shouldCache = true,
 ) => {
-  const response = await createStreamRequest(fileHandle.url, [start, end]);
+  const response = await createStreamRequest(fd, fileHandle.url, [start, end]);
   const data = await response.body.arrayBuffer();
   const buffer = Buffer.from(data);
 
   if (shouldCache) {
     logger.silly(
-      `Caching discrete byte range ${start.toString()}-${end.toString()} (${buffer.byteLength.toString()} bytes) for file ${fileHandle.fileName}`,
+      `Caching discrete byte range ${start.toString()}-${end.toString()} (${buffer.byteLength.toString()} bytes) for file ${fileHandle.filePath}`,
     );
 
     chunkCache.set(
-      createChunkCacheKey(fileHandle.fileName, start, end),
+      createChunkCacheKey(fileHandle.originalFileName, start, end),
       buffer,
     );
   }

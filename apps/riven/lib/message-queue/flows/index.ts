@@ -5,6 +5,14 @@ import {
   downloadItemProcessorSchema,
 } from "./download-item/download-item.schema.ts";
 import {
+  FindValidTorrentContainerFlow,
+  findValidTorrentContainerProcessorSchema,
+} from "./download-item/steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
+import {
+  RankStreamsFlow,
+  rankStreamsProcessorSchema,
+} from "./download-item/steps/rank-streams/rank-streams.schema.ts";
+import {
   RequestIndexDataFlow,
   requestIndexDataProcessorSchema,
 } from "./index-item/index-item.schema.ts";
@@ -17,16 +25,18 @@ import {
   scrapeItemProcessorSchema,
 } from "./scrape-item/scrape-item.schema.ts";
 import {
-  SortScrapeResultsFlow,
-  sortScrapeResultsProcessorSchema,
-} from "./scrape-item/steps/sort-scrape-results/sort-scrape-results.schema.ts";
+  ParseScrapeResultsFlow,
+  parseScrapeResultsProcessorSchema,
+} from "./scrape-item/steps/parse-scrape-results/parse-scrape-results.schema.ts";
 
 export const Flow = z.discriminatedUnion("name", [
   RequestIndexDataFlow,
   RequestContentServicesFlow,
   ScrapeItemFlow,
-  SortScrapeResultsFlow,
+  ParseScrapeResultsFlow,
   DownloadItemFlow,
+  FindValidTorrentContainerFlow,
+  RankStreamsFlow,
 ]);
 
 export type Flow = z.infer<typeof Flow>;
@@ -35,6 +45,9 @@ export const FlowHandlers = {
   "index-item": requestIndexDataProcessorSchema,
   "request-content-services": requestContentServicesProcessorSchema,
   "scrape-item": scrapeItemProcessorSchema,
-  "sort-scrape-results": sortScrapeResultsProcessorSchema,
+  "scrape-item.parse-scrape-results": parseScrapeResultsProcessorSchema,
   "download-item": downloadItemProcessorSchema,
+  "download-item.find-valid-torrent-container":
+    findValidTorrentContainerProcessorSchema,
+  "download-item.rank-streams": rankStreamsProcessorSchema,
 } satisfies Record<Flow["name"], z.ZodFunction>;

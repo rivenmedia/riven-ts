@@ -10,11 +10,11 @@ import z from "zod";
 import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
 
-import type { RankedResult } from "@repo/util-rank-torrent-name";
+import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export interface PersistScrapeResultsInput {
   id: number;
-  results: RankedResult[];
+  results: Record<string, ParsedData>;
 }
 
 export async function persistScrapeResults({
@@ -23,7 +23,7 @@ export async function persistScrapeResults({
 }: PersistScrapeResultsInput) {
   const existingItem = await database.mediaItem.findOneOrFail(
     { id },
-    { populate: ["streams.infoHash", "blacklistedStreams:ref"] },
+    { populate: ["streams.infoHash"] },
   );
 
   assert(
@@ -34,51 +34,47 @@ export async function persistScrapeResults({
   );
 
   const em = database.em.fork();
-  const newStreams: Stream[] = [];
+  const streamsCount = existingItem.streams.count();
 
-  for (const { data, hash, levRatio, rank } of results) {
-    if (
-      [...existingItem.streams, ...existingItem.blacklistedStreams].some(
-        (s) => s.infoHash === hash,
-      )
-    ) {
-      continue;
-    }
+  const infoHashes = Object.keys(results);
+  const preScrapedStreams = await database.stream.find({
+    infoHash: { $in: infoHashes },
+  });
 
-    const stream = em.create(Stream, {
-      infoHash: hash,
-      rawTitle: data.rawTitle,
-      parsedTitle: data.title,
-      rank,
-      levRatio,
-    });
+  const preScrapedStreamsMap = preScrapedStreams.reduce<Record<string, Stream>>(
+    (acc, stream) => ({ ...acc, [stream.infoHash]: stream }),
+    {},
+  );
 
-    stream.parents.add(existingItem);
+  for (const [infoHash, parsedData] of Object.entries(results)) {
+    const existingEntry = preScrapedStreamsMap[infoHash];
+    const stream = existingEntry ?? em.create(Stream, { infoHash, parsedData });
 
-    newStreams.push(stream);
+    existingItem.streams.add(stream);
   }
 
-  if (newStreams.length > 0) {
-    logger.info(
-      `Added ${newStreams.length.toString()} new streams to ${existingItem.title}`,
-    );
-  } else {
-    logger.info(`No new streams found for ${existingItem.title}`);
+  const newStreamsCount = existingItem.streams.count() - streamsCount;
 
+  if (newStreamsCount === 0) {
     existingItem.failedAttempts++;
   }
 
   existingItem.state = "scraped";
   existingItem.scrapedAt = DateTime.now().toJSDate();
   existingItem.scrapedTimes++;
-  existingItem.streams.add(newStreams);
 
   try {
     await validateOrReject(existingItem);
 
     await em.flush();
 
-    return await em.refreshOrFail(existingItem);
+    logger.info(
+      newStreamsCount > 0
+        ? `Added ${newStreamsCount.toString()} new streams to ${existingItem.fullTitle}`
+        : `No new streams found for ${existingItem.fullTitle}`,
+    );
+
+    return existingItem;
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

@@ -10,7 +10,7 @@ import { createChunkCacheKey } from "../utilities/chunks/create-chunk-cache-key.
 import {
   fdToFileHandleMeta,
   fdToPreviousReadPositionMap,
-  fdToResponseMap,
+  fdToResponsePromiseMap,
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
 import { createStreamRequest } from "../utilities/requests/create-stream-request.ts";
@@ -54,7 +54,7 @@ function setupRangeInterceptor(
 
 it.beforeEach(() => {
   fdToFileHandleMeta.clear();
-  fdToResponseMap.clear();
+  fdToResponsePromiseMap.clear();
   fileNameToFileChunkCalculationsMap.clear();
   fdToPreviousReadPositionMap.clear();
 
@@ -63,7 +63,8 @@ it.beforeEach(() => {
   fdToFileHandleMeta.set(0, {
     fileSize,
     filePath: `/files/${fileName}`,
-    fileName,
+    fileBaseName: fileName,
+    originalFileName: fileName,
     url: `http://example.com/files/${fileName}`,
   });
 
@@ -344,9 +345,9 @@ it("saves a copy of each chunk to the cache when reading during playback within 
 
   expect.assert(fileHandle);
 
-  fdToResponseMap.set(
+  fdToResponsePromiseMap.set(
     0,
-    await createStreamRequest(fileHandle.url, [firstChunkRange[0], undefined]),
+    createStreamRequest(0, fileHandle.url, [firstChunkRange[0], undefined]),
   );
 
   const callback = vi.fn();

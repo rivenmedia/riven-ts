@@ -1,4 +1,5 @@
 import Fuse from "@zkochan/fuse-native";
+import { basename } from "node:path";
 import { setTimeout } from "node:timers/promises";
 
 import { database } from "../../database/database.ts";
@@ -11,6 +12,7 @@ import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.t
 import {
   fdToFileHandleMeta,
   fileNameIsFetchingLinkMap,
+  fileNameToFdCountMap,
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
 
@@ -80,6 +82,7 @@ async function open(
     // Refresh the item to get the updated unrestricted URL
     await em.refreshOrFail(entry, {
       populate: ["*"],
+      refresh: true,
     });
 
     if (!entry.unrestrictedUrl) {
@@ -114,11 +117,9 @@ async function open(
     try {
       fileNameIsFetchingLinkMap.set(entry.originalFilename, true);
 
-      const { url: unrestrictedUrl } = await runSingleJob(
-        requestQueue,
-        entry.id.toString(),
-        { item: entry },
-      );
+      const job = await requestQueue.add(entry.id.toString(), { item: entry });
+
+      const { url: unrestrictedUrl } = await runSingleJob(job);
 
       const em = database.em.fork();
 
@@ -135,7 +136,7 @@ async function open(
         );
       }
     } finally {
-      fileNameIsFetchingLinkMap.set(entry.originalFilename, false);
+      fileNameIsFetchingLinkMap.delete(entry.originalFilename);
     }
   }
 
@@ -156,9 +157,15 @@ async function open(
   fdToFileHandleMeta.set(nextFd, {
     fileSize: entry.fileSize,
     filePath: path,
-    fileName: entry.originalFilename,
+    fileBaseName: basename(path),
+    originalFileName: entry.originalFilename,
     url: entry.unrestrictedUrl,
   });
+
+  fileNameToFdCountMap.set(
+    entry.originalFilename,
+    (fileNameToFdCountMap.get(entry.originalFilename) ?? 0) + 1,
+  );
 
   logger.debug(`Opened file at path ${path} with fd ${nextFd.toString()}`);
 

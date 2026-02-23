@@ -13,11 +13,14 @@ export default {
   dataSources: [RealDebridAPI],
   resolvers: [RealDebridResolver, RealDebridSettingsResolver],
   hooks: {
-    "riven.media-item.download.requested": async ({ dataSources, event }) => {
+    "riven.media-item.download.requested": async ({
+      dataSources,
+      event: { infoHash },
+    }) => {
       const api = dataSources.get(RealDebridAPI);
 
       try {
-        return await api.getInstantAvailability(event.item);
+        return await api.getInstantAvailability(infoHash);
       } catch (error) {
         throw new Error(
           `Failed to get instant availability from RealDebrid: ${

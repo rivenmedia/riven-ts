@@ -1,6 +1,7 @@
 import {
   BeforeCreate,
   Entity,
+  type EventArgs,
   type Hidden,
   ManyToOne,
   type Opt,
@@ -26,9 +27,9 @@ export class Episode extends ShowLikeMediaItem {
   @Min(1)
   number!: number;
 
-  @Field(() => Number, { nullable: true })
+  @Field(() => Number)
   @Property()
-  absoluteNumber?: number | null;
+  absoluteNumber!: number;
 
   @Field(() => Season)
   @ManyToOne()
@@ -37,13 +38,12 @@ export class Episode extends ShowLikeMediaItem {
   @Field(() => ShowContentRatingEnum)
   declare contentRating: ShowContentRating;
 
-  async getShowTitle() {
+  async getShow() {
     const season = await this.season.loadOrFail({
       populate: ["show"],
     });
-    const show = await season.show.loadOrFail();
 
-    return show.title;
+    return season.show.loadOrFail();
   }
 
   @Property({ persist: false, hidden: true, getter: true })
@@ -80,8 +80,20 @@ export class Episode extends ShowLikeMediaItem {
   }
 
   @BeforeCreate()
-  setTvdbId() {
+  _fallbackToSeasonExternalIds() {
     this.tvdbId ||= this.season.getProperty("tvdbId");
     this.imdbId ??= this.season.getProperty("imdbId") ?? null;
+  }
+
+  @BeforeCreate()
+  _persistFullTitle({ entity }: EventArgs<this>) {
+    const showTitle = entity.season.getProperty("show").getProperty("title");
+    const seasonNumber = entity.season
+      .getProperty("number")
+      .toString()
+      .padStart(2, "0");
+    const episodeNumber = entity.number.toString().padStart(2, "0");
+
+    this.fullTitle = `${showTitle} - S${seasonNumber}E${episodeNumber} - ${this.title}`;
   }
 }

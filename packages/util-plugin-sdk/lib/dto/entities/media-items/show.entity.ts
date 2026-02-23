@@ -1,7 +1,9 @@
 import {
+  BeforeCreate,
   Collection,
   Entity,
   Enum,
+  type EventArgs,
   type Hidden,
   OneToMany,
   type Opt,
@@ -21,6 +23,8 @@ import { ShowLikeMediaItem } from "./show-like.entity.ts";
 @ObjectType()
 @Entity()
 export class Show extends ShowLikeMediaItem {
+  declare filesystemEntries: never;
+
   @Field(() => ShowStatus.enum, { nullable: true })
   @Enum(() => ShowStatus.enum)
   status!: ShowStatus;
@@ -40,6 +44,14 @@ export class Show extends ShowLikeMediaItem {
 
   declare tvdbId: string;
   declare tmdbId?: never;
+
+  async getEpisodes() {
+    const seasons = await this.seasons.loadItems({
+      populate: ["episodes"],
+    });
+
+    return seasons.flatMap((season) => season.episodes.getItems());
+  }
 
   async getMediaEntries() {
     const seasons = await this.seasons.loadItems({
@@ -72,7 +84,12 @@ export class Show extends ShowLikeMediaItem {
     return `${this.title} (${this.year?.toString() ?? "Unknown"}) {tvdb-${this.tvdbId}}`;
   }
 
-  getShowTitle() {
-    return this.title;
+  getShow() {
+    return this;
+  }
+
+  @BeforeCreate()
+  _persistFullTitle({ entity }: EventArgs<this>) {
+    this.fullTitle = entity.title;
   }
 }

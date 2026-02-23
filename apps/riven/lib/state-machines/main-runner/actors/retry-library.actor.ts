@@ -3,13 +3,13 @@ import { type ActorRef, type Snapshot, fromPromise } from "xstate";
 import { database } from "../../../database/database.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 
-import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { MainRunnerMachineEvent } from "../index.ts";
 
 export interface RetryLibraryActorInput {
-  parentRef: ActorRef<Snapshot<unknown>, RivenEvent>;
+  parentRef: ActorRef<Snapshot<unknown>, MainRunnerMachineEvent>;
 }
 
-export const retryLibraryActor = fromPromise<undefined, RetryLibraryActorInput>(
+export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
   async ({ input: { parentRef } }) => {
     try {
       const pendingItems = await database.mediaItem.find(
@@ -20,14 +20,18 @@ export const retryLibraryActor = fromPromise<undefined, RetryLibraryActorInput>(
         },
         {
           populate: ["activeStream", "streams"],
+          refresh: true,
         },
       );
 
-      const pendingRequests = await database.itemRequest.find({
-        state: {
-          $ne: "completed",
+      const pendingRequests = await database.itemRequest.find(
+        {
+          state: {
+            $ne: "completed",
+          },
         },
-      });
+        { refresh: true },
+      );
 
       for (const request of pendingRequests) {
         parentRef.send({
@@ -48,7 +52,7 @@ export const retryLibraryActor = fromPromise<undefined, RetryLibraryActorInput>(
           }
           case "scraped": {
             parentRef.send({
-              type: "riven.media-item.download.requested",
+              type: "riven-internal.retry-item-download",
               item,
             });
 

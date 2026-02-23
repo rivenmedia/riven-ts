@@ -37,7 +37,6 @@ const requestAgent = new Agent({
   interceptors.dns({
     storage: lruAdapter,
   }),
-  interceptors.deduplicate(),
   interceptors.retry(),
 );
 
