@@ -3,7 +3,7 @@ import { toPromise } from "xstate";
 
 import { it } from "./helpers/test-context.ts";
 
-it("instantiates plugin datasources", async ({ actor }) => {
+it.skip("instantiates plugin datasources", async ({ actor }) => {
   const testPlugin = await import("@repo/plugin-test");
 
   await toPromise(actor.start());

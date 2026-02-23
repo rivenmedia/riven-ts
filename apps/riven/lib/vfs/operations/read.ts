@@ -1,5 +1,6 @@
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 import { Buffer } from "node:buffer";
+import Undici from "undici";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { config } from "../config.ts";
@@ -37,7 +38,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
   }
 
   const fileChunkCalculations = fileNameToFileChunkCalculationsMap.get(
-    fileHandle.fileName,
+    fileHandle.originalFileName,
   );
 
   if (!fileChunkCalculations) {
@@ -56,7 +57,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     chunkSize: config.chunkSize,
     fileSize: fileHandle.fileSize,
     requestRange: [position, position + length - 1],
-    fileName: fileHandle.fileName,
+    fileName: fileHandle.originalFileName,
   });
 
   const readType = detectReadType(
@@ -84,6 +85,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
   switch (readType) {
     case "header-scan": {
       const data = await fetchDiscreteByteRange(
+        fd,
         fileHandle,
         fileChunkCalculations.headerChunk.range,
       );
@@ -107,6 +109,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     case "footer-read":
     case "footer-scan": {
       const data = await fetchDiscreteByteRange(
+        fd,
         fileHandle,
         fileChunkCalculations.footerChunk.range,
       );
@@ -123,6 +126,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
 
     case "general-scan": {
       const scannedChunk = await fetchDiscreteByteRange(
+        fd,
         fileHandle,
         [position, position + length - 1],
         false,
@@ -184,6 +188,15 @@ export const readSync = function (
       process.nextTick(callback, bytesRead);
     })
     .catch((error: unknown) => {
+      // This is triggered when a file handle is released
+      if (error instanceof Undici.errors.RequestAbortedError) {
+        logger.silly(`Read operation aborted for fd ${fd.toString()}`);
+
+        process.nextTick(callback, 0);
+
+        return;
+      }
+
       if (isFuseError(error)) {
         logger.error(`VFS read FuseError: ${error.message}`);
 

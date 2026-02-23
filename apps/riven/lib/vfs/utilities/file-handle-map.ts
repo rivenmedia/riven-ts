@@ -4,7 +4,8 @@ import type { Dispatcher } from "undici";
 export interface FileHandleMetadata {
   fileSize: number;
   filePath: string;
-  fileName: string;
+  fileBaseName: string;
+  originalFileName: string;
   url: string;
 }
 
@@ -14,16 +15,11 @@ export interface FileHandleMetadata {
 export const fdToFileHandleMeta = new Map<number, FileHandleMetadata>();
 
 /**
- * Maps file descriptor (fd) to the corresponding response data from Undici dispatcher.
+ * Maps file descriptor (fd) to the promise of the response data, used to cache the initial stream request for each fd.
  */
-export const fdToResponseMap = new Map<number, Dispatcher.ResponseData>();
-
-/**
- * Maps file name to its corresponding `FileChunkCalculations`.
- */
-export const fileNameToFileChunkCalculationsMap = new Map<
-  string,
-  FileChunkCalculations
+export const fdToResponsePromiseMap = new Map<
+  number,
+  Promise<Dispatcher.ResponseData>
 >();
 
 /**
@@ -35,6 +31,22 @@ export const fdToPreviousReadPositionMap = new Map<number, number>();
  * Maps file descriptor (fd) to the current stream position.
  */
 export const fdToCurrentStreamPositionMap = new Map<number, number>();
+
+/**
+ * Maps file name to its corresponding `FileChunkCalculations`.
+ */
+export const fileNameToFileChunkCalculationsMap = new Map<
+  string,
+  FileChunkCalculations
+>();
+
+/**
+ * Maps file name to its corresponding file descriptor (fd) count.
+ *
+ * This helps track how many active file descriptors are associated with each file,
+ * which is useful for resource management and cleanup when files are closed.
+ */
+export const fileNameToFdCountMap = new Map<string, number>();
 
 /**
  * Maps file name to a boolean indicating if the file is currently fetching its link.

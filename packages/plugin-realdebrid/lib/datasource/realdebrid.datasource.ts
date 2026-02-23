@@ -3,13 +3,6 @@ import {
   type BasePluginContext,
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
-import {
-  Episode,
-  type MediaItem,
-  Movie,
-  Season,
-  Show,
-} from "@repo/util-plugin-sdk/dto/entities";
 import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 import { TorrentContainer } from "@repo/util-plugin-sdk/schemas/torrents/torrent-container";
 import { TorrentFile } from "@repo/util-plugin-sdk/schemas/torrents/torrent-file";
@@ -248,15 +241,19 @@ export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
           }
 
           try {
-            const debridFile = DebridFile.parse({
+            const debridFile = DebridFile.safeParse({
               fileId: file.id,
               fileName: file.fileName,
               fileSize: file.bytes,
               downloadUrl: file.downloadUrl,
             });
 
+            if (!debridFile.success) {
+              continue;
+            }
+
             if (file.downloadUrl) {
-              debridFile.downloadUrl = file.downloadUrl;
+              debridFile.data.downloadUrl = file.downloadUrl;
 
               this.logger.debug(
                 `Using correlated download URL for file ${file.fileName}`,
@@ -267,7 +264,7 @@ export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
               );
             }
 
-            files.push(debridFile);
+            files.push(debridFile.data);
           } catch (error) {
             console.error(error);
           }
@@ -307,29 +304,7 @@ export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
     return this.delete<undefined>(`torrents/delete/${torrentId}`);
   }
 
-  async getInstantAvailability(item: MediaItem): Promise<TorrentContainer> {
-    const loadedStreams = await item.streams.loadItems();
-    const infoHash = loadedStreams[0]?.infoHash;
-
-    if (!infoHash) {
-      throw new RealDebridAPIError(
-        `${item.title} does not have any streams with an info hash.`,
-      );
-    }
-
-    const itemType =
-      (item instanceof Movie ? "movie" : null) ??
-      (item instanceof Show ? "show" : null) ??
-      (item instanceof Episode ? "episode" : null) ??
-      (item instanceof Season ? "season" : null) ??
-      null;
-
-    if (!itemType) {
-      throw new RealDebridAPIError(
-        "Media item type is not supported for RealDebrid processing.",
-      );
-    }
-
+  async getInstantAvailability(infoHash: string): Promise<TorrentContainer> {
     const torrentId = await this.#addTorrent(infoHash);
 
     try {

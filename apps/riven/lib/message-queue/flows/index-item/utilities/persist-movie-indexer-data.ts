@@ -43,31 +43,33 @@ export async function persistMovieIndexerData({
   }
 
   try {
-    const em = database.em.fork();
+    return await database.em.fork().transactional(async (transaction) => {
+      const mediaItem = transaction.create(Movie, {
+        title: item.title,
+        imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
+        tmdbId,
+        contentRating: item.contentRating,
+        rating: item.rating ?? null,
+        posterPath: item.posterUrl ?? null,
+        airedAt: item.releaseDate
+          ? DateTime.fromISO(item.releaseDate).toJSDate()
+          : null,
+        year: item.releaseDate ? DateTime.fromISO(item.releaseDate).year : null,
+        country: item.country ?? null,
+        language: item.language ?? null,
+        aliases: item.aliases ?? null,
+        genres: item.genres,
+        state: "indexed",
+      });
 
-    const mediaItem = em.create(Movie, {
-      title: item.title,
-      imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
-      tmdbId,
-      contentRating: item.contentRating,
-      rating: item.rating ?? null,
-      posterPath: item.posterUrl ?? null,
-      airedAt: item.releaseDate
-        ? DateTime.fromISO(item.releaseDate).toJSDate()
-        : null,
-      year: item.releaseDate ? DateTime.fromISO(item.releaseDate).year : null,
-      country: item.country ?? null,
-      language: item.language ?? null,
-      aliases: item.aliases ?? null,
-      genres: item.genres,
-      state: "indexed",
+      await validateOrReject(mediaItem);
+
+      transaction.assign(itemRequest, { state: "completed" });
+
+      await transaction.flush();
+
+      return await transaction.refreshOrFail(mediaItem);
     });
-
-    await validateOrReject(mediaItem);
-
-    await em.flush();
-
-    return await em.refreshOrFail(mediaItem);
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

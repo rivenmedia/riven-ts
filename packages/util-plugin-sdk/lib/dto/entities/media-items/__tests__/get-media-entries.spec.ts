@@ -58,6 +58,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
   const episode1 = em.create(Episode, {
     title: "Episode 1",
     number: 1,
+    absoluteNumber: 1,
     contentRating: "tv-14",
     state: "completed",
   });
@@ -65,6 +66,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
   const episode2 = em.create(Episode, {
     title: "Episode 2",
     number: 2,
+    absoluteNumber: 2,
     contentRating: "tv-14",
     state: "completed",
   });
@@ -127,6 +129,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
   const season1Episode1 = em.create(Episode, {
     title: "Episode 1",
     number: 1,
+    absoluteNumber: 1,
     contentRating: "tv-14",
     state: "completed",
   });
@@ -134,6 +137,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
   const season2Episode1 = em.create(Episode, {
     title: "Episode 1",
     number: 1,
+    absoluteNumber: 2,
     contentRating: "tv-14",
     state: "completed",
   });
@@ -192,6 +196,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
   const episode = em.create(Episode, {
     title: "Episode 1",
     number: 1,
+    absoluteNumber: 1,
     contentRating: "tv-14",
     state: "completed",
   });

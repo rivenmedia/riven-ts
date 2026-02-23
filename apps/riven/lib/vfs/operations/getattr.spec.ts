@@ -31,23 +31,23 @@ it("returns directory stats for the root directory", async () => {
   });
 });
 
-it("returns EBADF for hidden paths", async () => {
+it("returns ENOENT for ignored paths", async () => {
   const callback = vi.fn();
 
   getattrSync("/.Trash", callback);
 
   await vi.waitFor(() => {
-    expect(callback).toHaveBeenCalledWith(Fuse.EBADF);
+    expect(callback).toHaveBeenCalledWith(Fuse.ENOENT);
   });
 });
 
-it("returns EBADF for trash paths", async () => {
+it("returns ENOENT for hidden paths", async () => {
   const callback = vi.fn();
 
   getattrSync("/somefolder/.hidden", callback);
 
   await vi.waitFor(() => {
-    expect(callback).toHaveBeenCalledWith(Fuse.EBADF);
+    expect(callback).toHaveBeenCalledWith(Fuse.ENOENT);
   });
 });
 
@@ -183,6 +183,7 @@ it("returns directory stats for /shows", async () => {
       year: 2020,
       contentRating: "tv-14",
       number: 1,
+      absoluteNumber: 1,
       state: "downloaded",
     });
 
@@ -249,6 +250,7 @@ it("returns directory stats for single shows", async () => {
       year: 2020,
       contentRating: "tv-14",
       number: 1,
+      absoluteNumber: 1,
       state: "downloaded",
     });
 
@@ -315,6 +317,7 @@ it("returns directory stats for single seasons", async () => {
       year: 2020,
       contentRating: "tv-14",
       number: 1,
+      absoluteNumber: 1,
       state: "downloaded",
     });
 
@@ -380,6 +383,7 @@ it("returns file stats for episodes", async () => {
     year: 2020,
     contentRating: "tv-14",
     number: 1,
+    absoluteNumber: 1,
     state: "downloaded",
   });
 

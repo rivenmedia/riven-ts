@@ -2,6 +2,7 @@ import {
   BeforeCreate,
   Collection,
   Entity,
+  type EventArgs,
   type Hidden,
   ManyToOne,
   OneToMany,
@@ -20,6 +21,8 @@ import { Show } from "./show.entity.ts";
 @ObjectType()
 @Entity()
 export class Season extends ShowLikeMediaItem {
+  declare filesystemEntries: never;
+
   @Field()
   @Property()
   @Min(1)
@@ -33,8 +36,8 @@ export class Season extends ShowLikeMediaItem {
   @OneToMany(() => Episode, (episode) => episode.season)
   episodes = new Collection<Episode>(this);
 
-  getShowTitle() {
-    return this.show.loadProperty("title");
+  getShow() {
+    return this.show.loadOrFail();
   }
 
   @Property({ persist: false, hidden: true, getter: true })
@@ -71,8 +74,13 @@ export class Season extends ShowLikeMediaItem {
   }
 
   @BeforeCreate()
-  setTvdbId() {
+  _fallbackToShowExternalIds() {
     this.tvdbId ||= this.show.getProperty("tvdbId");
     this.imdbId ??= this.show.getProperty("imdbId") ?? null;
+  }
+
+  @BeforeCreate()
+  _persistFullTitle({ entity }: EventArgs<this>) {
+    this.fullTitle = `${entity.show.getProperty("fullTitle")} - S${entity.number.toString().padStart(2, "0")}`;
   }
 }

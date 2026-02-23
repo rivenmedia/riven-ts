@@ -65,10 +65,12 @@ export const registerPluginHookWorkers = fromPromise<
               );
             }
 
+            const event = eventSchemaWithDeserialiser
+              .omit({ type: true })
+              .decode(job.data) as never;
+
             return hook({
-              event: eventSchemaWithDeserialiser
-                .omit({ type: true })
-                .decode(job.data) as never,
+              event,
               dataSources,
               settings,
               logger,

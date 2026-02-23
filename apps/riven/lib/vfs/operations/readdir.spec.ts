@@ -55,6 +55,7 @@ it("returns all shows for the /shows path", async () => {
 
   const episode = em.create(Episode, {
     number: 1,
+    absoluteNumber: 1,
     year: 2020,
     title: "Example Episode 1",
     state: "downloaded",
@@ -114,6 +115,7 @@ it('does not return entries for the "all shows" path for shows that do not have 
 
   const episode = em.create(Episode, {
     number: 1,
+    absoluteNumber: 1,
     year: 2020,
     title: "Example Episode 1",
     state: "downloaded",
@@ -198,6 +200,7 @@ it("returns all seasons for a single show path", async () => {
 
     const episode = em.create(Episode, {
       number: 1,
+      absoluteNumber: 1,
       year: 2020,
       title: "Example Episode 1",
       state: "downloaded",
@@ -261,6 +264,7 @@ it("does not return entries for a season that does not have any episodes with a 
 
     const episode = em.create(Episode, {
       number: 1,
+      absoluteNumber: 1,
       year: 2020,
       title: "Example Episode 1",
       state: "downloaded",
@@ -322,6 +326,7 @@ it("returns all episodes for a single season path", async () => {
   for (let i = 1; i <= 3; i++) {
     const episode = em.create(Episode, {
       number: i,
+      absoluteNumber: i,
       year: 2020,
       title: `Example Episode ${i.toString().padStart(2, "0")}`,
       state: "downloaded",
@@ -385,6 +390,7 @@ it("does not return entries for episodes that does not have a media entry when v
   for (let i = 1; i <= 3; i++) {
     const episode = em.create(Episode, {
       number: i,
+      absoluteNumber: i,
       year: 2020,
       title: `Example Episode ${i.toString().padStart(2, "0")}`,
       state: "downloaded",
