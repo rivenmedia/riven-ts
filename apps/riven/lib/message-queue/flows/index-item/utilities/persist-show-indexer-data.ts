@@ -74,7 +74,7 @@ export async function persistShowIndexerData({
           : null;
 
         const seasonEntry = transaction.create(Season, {
-          title: `${show.title} - Season ${season.number.toString().padStart(2, "0")}`,
+          title: `Season ${season.number.toString().padStart(2, "0")}`,
           year: seasonYear,
           number: season.number,
           state: "indexed",
@@ -103,6 +103,8 @@ export async function persistShowIndexerData({
       }
 
       await validateOrReject(show);
+
+      transaction.assign(itemRequest, { state: "completed" });
 
       await transaction.flush();
 

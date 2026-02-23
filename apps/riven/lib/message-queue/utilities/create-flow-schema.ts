@@ -1,4 +1,9 @@
-import z, { type ZodNever, type ZodOptional, type ZodType } from "zod";
+import z, {
+  type ZodNever,
+  type ZodObject,
+  type ZodOptional,
+  type ZodType,
+} from "zod";
 
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
 import type { Job } from "bullmq";
@@ -10,46 +15,41 @@ export const createFlowSchema = <
   Payload extends Record<string, ZodType> = Record<string, ZodNever>,
 >(
   type: Type,
-  childrenSchema: Children,
-  outputSchema: Output = z.never().optional() as never,
-  inputSchema: z.ZodObject<Payload> = z.object<Payload>(),
+  {
+    children: childrenSchema,
+    input: inputSchema = z.never().optional() as never,
+    output: outputSchema = z.never().optional() as never,
+  }: {
+    children: Children;
+    input?: ZodObject<Payload>;
+    output?: Output;
+  },
 ) => {
-  const wrappedOutputSchema = z.union([
-    z.object({
-      success: z.literal(true),
-      result: outputSchema,
-    }),
-    z.object({
-      success: z.literal(false),
-      error: z.unknown(),
-    }),
-  ]);
-
   const childrenValuesSchema = z.record(z.string(), childrenSchema);
 
   return z.object({
     name: z.literal(type),
     input: inputSchema,
     children: childrenValuesSchema,
-    output: wrappedOutputSchema,
+    output: outputSchema,
     processor: z.function({
       input: [
-        z.custom<
-          Omit<
-            Job<
-              z.infer<typeof inputSchema>,
-              z.infer<typeof wrappedOutputSchema>
-            >,
-            "getChildrenValues"
-          > & {
-            getChildrenValues: () => Promise<
-              z.infer<typeof childrenValuesSchema>
-            >;
-          }
-        >(),
+        z.object({
+          job: z.custom<
+            Omit<
+              Job<z.infer<typeof inputSchema>, z.infer<typeof outputSchema>>,
+              "getChildrenValues"
+            > & {
+              getChildrenValues: () => Promise<
+                z.infer<typeof childrenValuesSchema>
+              >;
+            }
+          >(),
+          token: z.string().optional(),
+        }),
         z.custom<MainRunnerMachineIntake>(),
       ],
-      output: z.promise(wrappedOutputSchema),
+      output: z.promise(outputSchema),
     }),
   });
 };

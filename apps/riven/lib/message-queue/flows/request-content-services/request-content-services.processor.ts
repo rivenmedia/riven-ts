@@ -8,7 +8,7 @@ import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/sche
 
 export const requestContentServicesProcessor =
   requestContentServicesProcessorSchema.implementAsync(
-    async (job, sendEvent) => {
+    async ({ job }, sendEvent) => {
       const data = await job.getChildrenValues();
 
       const items = Object.values(data).reduce<ContentServiceRequestedResponse>(
@@ -54,13 +54,10 @@ export const requestContentServicesProcessor =
       }
 
       return {
-        success: true,
-        result: {
-          count: items.movies.length + items.shows.length,
-          newItems: results.filter(
-            (result) => result.status === "fulfilled" && result.value.isNewItem,
-          ).length,
-        },
+        count: items.movies.length + items.shows.length,
+        newItems: results.filter(
+          (result) => result.status === "fulfilled" && result.value.isNewItem,
+        ).length,
       };
     },
   );

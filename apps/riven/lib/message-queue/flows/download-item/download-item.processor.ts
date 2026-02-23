@@ -4,15 +4,23 @@ import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/sche
 import { UnrecoverableError } from "bullmq";
 import { DateTime } from "luxon";
 
-import { zipFlowChildrenResults } from "../../utilities/zip-children-results.ts";
+import { database } from "../../../database/database.ts";
 import { downloadItemProcessorSchema } from "./download-item.schema.ts";
 import { persistDownloadResults } from "./utilities/persist-download-results.ts";
 
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
-  async function (job, sendEvent) {
-    const [finalResult] = zipFlowChildrenResults(await job.getChildrenValues());
+  async function ({ job }, sendEvent) {
+    const [finalResult] = Object.values(await job.getChildrenValues());
 
     if (!finalResult) {
+      const item = await database.mediaItem.findOneOrFail(job.data.id);
+
+      sendEvent({
+        type: "riven.media-item.download.error",
+        item,
+        error: "No valid torrent container found",
+      });
+
       throw new UnrecoverableError(
         "No torrent container returned from downloaders",
       );
@@ -32,10 +40,6 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
           .diff(DateTime.fromJSDate(updatedItem.createdAt))
           .as("seconds"),
       });
-
-      return {
-        success: true,
-      };
     } catch (error) {
       if (
         error instanceof MediaItemDownloadError ||
@@ -48,9 +52,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
         );
       }
 
-      throw new UnrecoverableError(
-        `Unexpected error while processing download item: ${String(error)}`,
-      );
+      throw error;
     }
   },
 );

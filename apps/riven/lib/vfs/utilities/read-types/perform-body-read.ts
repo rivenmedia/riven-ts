@@ -10,7 +10,7 @@ import { waitForChunk } from "../chunks/wait-for-chunk.ts";
 import {
   type FileHandleMetadata,
   fdToCurrentStreamPositionMap,
-  fdToResponseMap,
+  fdToResponsePromiseMap,
 } from "../file-handle-map.ts";
 import { createStreamRequest } from "../requests/create-stream-request.ts";
 
@@ -49,19 +49,11 @@ export async function performBodyRead(
   );
 
   const streamReader =
-    fdToResponseMap.get(fd) ??
-    (await createStreamRequest(fileHandle.url, [
+    (await fdToResponsePromiseMap.get(fd)) ??
+    (await createStreamRequest(fd, fileHandle.url, [
       missingChunksMetadata[0].range[0],
       undefined,
     ]));
-
-  if (!fdToResponseMap.has(fd)) {
-    logger.silly(
-      `Storing stream reader for fd ${fd.toString()} from position: ${missingChunksMetadata[0].range[0].toString()}`,
-    );
-
-    fdToResponseMap.set(fd, streamReader);
-  }
 
   if (!fdToCurrentStreamPositionMap.has(fd)) {
     fdToCurrentStreamPositionMap.set(fd, missingChunksMetadata[0].range[0]);
@@ -78,9 +70,11 @@ export async function performBodyRead(
 
   const {
     timeTaken,
-    result: { bytesFetched, fetchedChunks },
+    result: { bytesFetched, fetchedChunks, fetchedChunksMetadata },
   } = await benchmark(async () => {
     const fetchedChunks: Buffer[] = [];
+    const fetchedChunksMetadata: ChunkMetadata[] = [];
+
     let bytesFetched = 0;
 
     for (const targetChunk of missingChunksMetadata) {
@@ -90,11 +84,15 @@ export async function performBodyRead(
         targetChunk,
       );
 
-      logger.silly(
-        `Fetched chunk ${targetChunk.rangeLabel} ${fetchedFromCache ? "from cache" : "from stream"} for fd ${fd.toString()}`,
-      );
+      if (!fetchedFromCache) {
+        logger.silly(
+          `Fetched chunk ${targetChunk.rangeLabel} for fd ${fd.toString()}`,
+        );
 
-      bytesFetched += chunk.byteLength;
+        bytesFetched += chunk.byteLength;
+
+        fetchedChunksMetadata.push(targetChunk);
+      }
 
       fetchedChunks.push(chunk);
 
@@ -104,12 +102,25 @@ export async function performBodyRead(
     return {
       bytesFetched,
       fetchedChunks,
+      fetchedChunksMetadata,
     };
   });
 
-  logger.verbose(
-    `Fetched ${bytesFetched.toString()} bytes in ${timeTaken.toFixed(2)}ms for fd ${fd.toString()}`,
-  );
+  if (fetchedChunksMetadata.length) {
+    const chunkLabels = fetchedChunksMetadata
+      .map((chunk) => chunk.rangeLabel)
+      .join(", ");
+
+    logger.verbose(
+      `Fetched ${bytesFetched.toString()} bytes from stream[fd=${fd.toString()}] for chunks ${chunkLabels} in ${timeTaken.toFixed(2)}ms.`,
+    );
+  } else {
+    const chunkLabels = chunks.map((chunk) => chunk.rangeLabel).join(", ");
+
+    logger.silly(
+      `Response was read from cache for fd ${fd.toString()} | chunks: ${chunkLabels} in ${timeTaken.toFixed(2)}ms.`,
+    );
+  }
 
   const cachedChunks: Buffer[] = [];
 

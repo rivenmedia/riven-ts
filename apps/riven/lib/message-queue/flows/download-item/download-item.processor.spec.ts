@@ -1,5 +1,6 @@
 import { Movie, Stream } from "@repo/util-plugin-sdk/dto/entities";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
+import { parse } from "@repo/util-rank-torrent-name";
 
 import { Job, UnrecoverableError } from "bullmq";
 import { DateTime, Settings } from "luxon";
@@ -19,21 +20,31 @@ it.beforeEach(({ redisUrl }) => {
   });
 });
 
-it("throws an unrecoverable error if the item cannot be downloaded", async () => {
+it("throws an unrecoverable error if no valid torrent container is found", async () => {
   const sendEvent = vi.fn();
 
+  const em = database.em.fork();
+
+  em.create(Movie, {
+    id: 1,
+    contentRating: "g",
+    tmdbId: "1234",
+    state: "scraped",
+    title: "Test Movie",
+    year: 2024,
+  });
+
+  await em.flush();
+
   const mockQueue = createQueue("mock-queue");
-  const job: Parameters<DownloadItemFlow["processor"]>[0] = await Job.create(
-    mockQueue,
-    "mock-download-item",
-    {
+  const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
+    await Job.create(mockQueue, "mock-download-item", {
       id: 1,
-    },
-  );
+    });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
-  await expect(() => downloadItemProcessor(job, sendEvent)).rejects.toThrow(
+  await expect(() => downloadItemProcessor({ job }, sendEvent)).rejects.toThrow(
     UnrecoverableError,
   );
 });
@@ -44,13 +55,10 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   vi.spyOn(Settings, "now").mockReturnValue(10000);
 
   const mockQueue = createQueue("mock-queue");
-  const job: Parameters<DownloadItemFlow["processor"]>[0] = await Job.create(
-    mockQueue,
-    "mock-download-item",
-    {
+  const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
+    await Job.create(mockQueue, "mock-download-item", {
       id: 1,
-    },
-  );
+    });
 
   const expectedDuration = 1;
 
@@ -70,9 +78,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
 
   const stream = em.create(Stream, {
     infoHash: streamInfoHash,
-    parsedTitle: "Test Movie 2024 1080p",
-    rank: 1,
-    rawTitle: "Test Movie 2024 1080p",
+    parsedData: parse("Test Movie 2024 1080p"),
   });
 
   movie.streams.add(stream);
@@ -80,29 +86,32 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   await em.flush();
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
-      files: [
-        {
-          fileName: "Test Movie 2024 1080p.mkv",
-          fileSize: 1024,
+    "find-valid-torrent-container": {
+      result: {
+        files: [
+          {
+            fileName: "Test Movie 2024 1080p.mkv",
+            fileSize: 1024,
+          },
+        ],
+        infoHash: streamInfoHash,
+        torrentId: "",
+        torrentInfo: {
+          files: {},
+          infoHash: "",
+          name: "",
+          id: "",
+          isCached: true,
+          links: [],
+          sizeMB: 0,
+          alternativeFilename: "",
         },
-      ],
-      infoHash: streamInfoHash,
-      torrentId: "",
-      torrentInfo: {
-        files: {},
-        infoHash: "",
-        name: "",
-        id: "",
-        isCached: true,
-        links: [],
-        sizeMB: 0,
-        alternativeFilename: "",
       },
+      plugin: "@repo/plugin-test",
     },
   });
 
-  await downloadItemProcessor(job, sendEvent);
+  await downloadItemProcessor({ job }, sendEvent);
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.success",
@@ -111,8 +120,37 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   });
 });
 
-it.todo("requests individual seasons if no results were found for a show");
+it('sends a "riven.media-item.download.error" event if no valid torrent container is found', async () => {
+  const sendEvent = vi.fn();
 
-it.todo(
-  "requests individual episodes if no results were found for a season of a show",
-);
+  const em = database.em.fork();
+
+  em.create(Movie, {
+    id: 1,
+    contentRating: "g",
+    tmdbId: "1234",
+    state: "scraped",
+    title: "Test Movie",
+    year: 2024,
+  });
+
+  await em.flush();
+
+  const mockQueue = createQueue("mock-queue");
+  const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
+    await Job.create(mockQueue, "mock-download-item", {
+      id: 1,
+    });
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
+
+  await downloadItemProcessor({ job }, sendEvent).catch(() => {
+    /* empty */
+  });
+
+  expect(sendEvent).toHaveBeenCalledWith({
+    type: "riven.media-item.download.error",
+    item: expect.any(Movie) as Movie,
+    error: "No valid torrent container found",
+  });
+});

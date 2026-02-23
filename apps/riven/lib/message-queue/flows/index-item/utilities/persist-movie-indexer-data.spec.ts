@@ -1,5 +1,5 @@
 import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
+import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { expect, it } from "vitest";
 
@@ -41,13 +41,24 @@ it("returns the media item if processed successfully", async ({}) => {
   );
 });
 
-it("throws an error if the item processing fails", async () => {
+it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorrect state", async () => {
   const requestedId = "1234";
+
+  const em = database.orm.em.fork();
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "test-user",
+    imdbId: requestedId,
+    tmdbId: "1234",
+    type: "movie",
+    state: "completed",
+  });
+
+  await em.flush();
 
   await expect(
     persistMovieIndexerData({
       item: {
-        id: 1,
+        id: itemRequest.id,
         title: "Test Movie",
         imdbId: requestedId,
         contentRating: "g",
@@ -55,5 +66,5 @@ it("throws an error if the item processing fails", async () => {
         type: "movie",
       },
     }),
-  ).rejects.toThrow(MediaItemIndexError);
+  ).rejects.toThrow(MediaItemIndexErrorIncorrectState);
 });

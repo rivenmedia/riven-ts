@@ -2,6 +2,7 @@ import {
   Collection,
   Entity,
   Enum,
+  type EventArgs,
   type Hidden,
   Index,
   ManyToMany,
@@ -42,6 +43,10 @@ export abstract class MediaItem {
   @Index()
   @Property()
   title!: string;
+
+  @Field(() => String)
+  @Property()
+  fullTitle!: Opt<string>;
 
   @Field(() => String, { nullable: true })
   @Property()
@@ -150,12 +155,12 @@ export abstract class MediaItem {
   failedAttempts: Opt<number> = 0;
 
   @Field(() => [FileSystemEntry])
-  @ManyToMany({ owner: true })
+  @ManyToMany()
   filesystemEntries: Collection<FileSystemEntry> =
     new Collection<FileSystemEntry>(this);
 
   @Field(() => [SubtitleEntry])
-  @ManyToMany({ owner: true })
+  @ManyToMany()
   subtitles: Collection<SubtitleEntry> = new Collection<SubtitleEntry>(this);
 
   @Field(() => Stream, { nullable: true })
@@ -163,11 +168,11 @@ export abstract class MediaItem {
   activeStream?: Ref<Stream> | null;
 
   @Field(() => [Stream])
-  @ManyToMany({ owner: true })
+  @ManyToMany()
   streams: Collection<Stream> = new Collection<Stream>(this);
 
   @Field(() => [Stream])
-  @ManyToMany({ owner: true })
+  @ManyToMany()
   blacklistedStreams: Collection<Stream> = new Collection<Stream>(this);
 
   @Field(() => String)
@@ -194,4 +199,6 @@ export abstract class MediaItem {
    * @returns An array of associated MediaEntries, which may be empty if none exist.
    */
   abstract getMediaEntries(): Promise<MediaEntry[]>;
+
+  abstract _persistFullTitle(args: EventArgs<any>): void;
 }

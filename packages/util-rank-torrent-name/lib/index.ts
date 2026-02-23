@@ -18,6 +18,10 @@ export type {
 } from "./ranker/settings.ts";
 export type { Aliases } from "./ranker/lev.ts";
 
-export { defaultRankingModel, SettingsSchema } from "./ranker/settings.ts";
+export {
+  defaultRankingModel,
+  SettingsSchema,
+  RankingModelSchema,
+} from "./ranker/settings.ts";
 
 export { RTN } from "./rtn.ts";
