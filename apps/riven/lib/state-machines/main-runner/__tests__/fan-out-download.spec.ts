@@ -43,7 +43,6 @@ it(`enqueues a scrape for each individual season when a "${eventType}" event is 
 
   const stream = em.create(Stream, {
     infoHash: "1234567890123456789012345678901234567890",
-    rank: 0,
     parsedData: parse("Test Show S01 1080p"),
   });
 
@@ -104,7 +103,6 @@ it(`enqueues a scrape for each individual season's episode when a "${eventType}"
 
   const stream = em.create(Stream, {
     infoHash: "1234567890123456789012345678901234567890",
-    rank: 0,
     parsedData: parse("Test Show S01 1080p"),
   });
 

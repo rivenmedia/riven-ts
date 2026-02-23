@@ -1,6 +1,6 @@
 import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
-import { createSettings, rankTorrent } from "@repo/util-rank-torrent-name";
+import { parse } from "@repo/util-rank-torrent-name";
 
 import { Job } from "bullmq";
 import { Settings } from "luxon";
@@ -61,14 +61,9 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
       id: 1,
-      results: [
-        rankTorrent(
-          "Test Movie 2024 1080p WEB-DL",
-          streamInfoHash,
-          "Test Movie",
-          createSettings(),
-        ),
-      ],
+      results: {
+        [streamInfoHash]: parse("Test Movie 2024 1080p WEB-DL"),
+      },
     },
   });
 
