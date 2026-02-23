@@ -4,33 +4,28 @@ import {
   Show,
 } from "@repo/util-plugin-sdk/dto/entities";
 
-import { type ActorRef, type Snapshot, createActor, fromPromise } from "xstate";
+import { fromPromise } from "xstate";
 
 import { database } from "../../../database/database.ts";
-import { requestScrape } from "./request-scrape.actor.ts";
+import { enqueueScrapeItem } from "../../../message-queue/flows/scrape-item/enqueue-scrape-item.ts";
 
-import type { MainRunnerMachineEvent } from "../index.ts";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
 export interface FanOutDownloadInput {
   item: MediaItem;
   subscribers: RivenPlugin[];
-  parentRef: ActorRef<Snapshot<unknown>, MainRunnerMachineEvent>;
 }
 
 export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
-  async ({ input: { item, subscribers, parentRef } }) => {
+  async ({ input: { item, subscribers } }) => {
     if (item instanceof Show) {
       await database.em.fork().populate(item, ["seasons"]);
 
       for (const season of item.seasons) {
-        createActor(requestScrape, {
-          input: {
-            item: season,
-            subscribers,
-          },
-          parent: parentRef,
-        }).start();
+        await enqueueScrapeItem({
+          item: season,
+          subscribers,
+        });
       }
     }
 
@@ -38,13 +33,10 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
       await database.em.fork().populate(item, ["episodes"]);
 
       for (const episode of item.episodes) {
-        createActor(requestScrape, {
-          input: {
-            item: episode,
-            subscribers,
-          },
-          parent: parentRef,
-        }).start();
+        await enqueueScrapeItem({
+          item: episode,
+          subscribers,
+        });
       }
     }
   },

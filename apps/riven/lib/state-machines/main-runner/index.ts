@@ -185,7 +185,7 @@ export const mainRunnerMachine = setup({
     fanOutDownload: enqueueActions(
       (
         { enqueue, context: { plugins } },
-        params: Omit<EnqueueDownloadItemInput, "subscribers">,
+        params: Omit<EnqueueScrapeItemInput, "subscribers">,
       ) => {
         enqueue.spawnChild(fanOutDownload, {
           input: {

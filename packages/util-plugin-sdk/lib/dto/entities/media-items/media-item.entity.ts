@@ -200,5 +200,5 @@ export abstract class MediaItem {
    */
   abstract getMediaEntries(): Promise<MediaEntry[]>;
 
-  abstract _persistFullTitle(args: EventArgs<this>): void;
+  abstract _persistFullTitle(args: EventArgs<any>): void;
 }
