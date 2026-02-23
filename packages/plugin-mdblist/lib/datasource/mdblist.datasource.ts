@@ -9,6 +9,7 @@ import {
   getListItemsByName200Schema as getListItemsResponseSchema,
 } from "../__generated__/index.ts";
 
+import type { MdbListSettings } from "../mdblist-settings.schema.ts";
 import type { MdbListExternalIds } from "../schema/types/external-ids.type.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
@@ -20,7 +21,7 @@ function isMdblistName(name: unknown): name is MdblistName {
 
 export class MdblistAPIError extends Error {}
 
-export class MdblistAPI extends BaseDataSource {
+export class MdblistAPI extends BaseDataSource<MdbListSettings> {
   override baseURL = "https://api.mdblist.com/";
   override serviceName = "MDBList";
 
@@ -33,13 +34,13 @@ export class MdblistAPI extends BaseDataSource {
     _path: string,
     requestOpts: AugmentedRequest,
   ) {
-    if (!this.token) {
+    if (!this.settings.apiKey) {
       throw new MdblistAPIError(
         "MDBList API token is not set. Please provide a valid API token.",
       );
     }
 
-    requestOpts.params.append("apikey", this.token);
+    requestOpts.params.append("apikey", this.settings.apiKey);
   }
 
   override async validate() {
@@ -126,10 +127,6 @@ export class MdblistAPI extends BaseDataSource {
       movies: Array.from(movieIdsMap.values()),
       shows: Array.from(showIdsMap.values()),
     };
-  }
-
-  static override getApiToken() {
-    return process.env["MDBLIST_API_KEY"];
   }
 }
 
