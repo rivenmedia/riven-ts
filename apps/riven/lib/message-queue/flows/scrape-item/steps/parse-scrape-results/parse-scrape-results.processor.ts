@@ -47,7 +47,7 @@ export const parseScrapeResultsProcessor =
             logger.silly(error.message);
           } else {
             logger.error(
-              `Failed to rank torrent ${rawTitle} (${hash}) for ${itemTitle}: ${
+              `Failed to parse torrent ${rawTitle} (${hash}) for ${itemTitle}: ${
                 (error as Error).message
               }`,
             );
