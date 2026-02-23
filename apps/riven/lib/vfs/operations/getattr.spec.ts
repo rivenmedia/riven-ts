@@ -31,7 +31,7 @@ it("returns directory stats for the root directory", async () => {
   });
 });
 
-it("returns ENOENT for hidden paths", async () => {
+it("returns ENOENT for ignored paths", async () => {
   const callback = vi.fn();
 
   getattrSync("/.Trash", callback);
@@ -41,7 +41,7 @@ it("returns ENOENT for hidden paths", async () => {
   });
 });
 
-it("returns ENOENT for trash paths", async () => {
+it("returns ENOENT for hidden paths", async () => {
   const callback = vi.fn();
 
   getattrSync("/somefolder/.hidden", callback);
