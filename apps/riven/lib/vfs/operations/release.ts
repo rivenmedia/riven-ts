@@ -7,6 +7,9 @@ import {
   fdToFileHandleMeta,
   fdToPreviousReadPositionMap,
   fdToResponsePromiseMap,
+  fileNameIsFetchingLinkMap,
+  fileNameToFdCountMap,
+  fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
 
 import type { OPERATIONS } from "@zkochan/fuse-native";
@@ -20,8 +23,8 @@ async function release(_path: string, fd: number) {
 
   const fileHandleMeta = fdToFileHandleMeta.get(fd);
 
-  // Clean up all mappings related to this file descriptor.
-  // The chunk calculations map is intentionally left alone, as it can be reused by other
+  // Clean up all fd-related mappings related to this file descriptor.
+  // The chunk calculations map is intentionally omitted, as it can be reused by other
   // file descriptors opening the same file.
   [
     fdToFileHandleMeta,
@@ -38,6 +41,23 @@ async function release(_path: string, fd: number) {
     );
 
     return;
+  }
+
+  const nextFdCount =
+    (fileNameToFdCountMap.get(fileHandleMeta.originalFileName) ?? 1) - 1;
+
+  if (nextFdCount > 0) {
+    fileNameToFdCountMap.set(fileHandleMeta.originalFileName, nextFdCount);
+  } else {
+    fileNameToFdCountMap.delete(fileHandleMeta.originalFileName);
+
+    // If there are no more file descriptors referencing this file,
+    // we can clean up the file-name based mappings as well to free up memory.
+    [fileNameToFileChunkCalculationsMap, fileNameIsFetchingLinkMap].forEach(
+      (map) => {
+        map.delete(fileHandleMeta.originalFileName);
+      },
+    );
   }
 
   logger.verbose(

@@ -12,6 +12,7 @@ import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.t
 import {
   fdToFileHandleMeta,
   fileNameIsFetchingLinkMap,
+  fileNameToFdCountMap,
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
 
@@ -160,6 +161,11 @@ async function open(
     originalFileName: entry.originalFilename,
     url: entry.unrestrictedUrl,
   });
+
+  fileNameToFdCountMap.set(
+    entry.originalFilename,
+    (fileNameToFdCountMap.get(entry.originalFilename) ?? 0) + 1,
+  );
 
   logger.debug(`Opened file at path ${path} with fd ${nextFd.toString()}`);
 
