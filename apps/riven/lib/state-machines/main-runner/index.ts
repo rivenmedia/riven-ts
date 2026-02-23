@@ -302,11 +302,6 @@ export const mainRunnerMachine = setup({
         params: { message: "Riven has started successfully." },
       },
     ],
-    after: {
-      20000: {
-        actions: raise({ type: "riven-internal.retry-library" }),
-      },
-    },
     always: [
       {
         guard: "shouldQueueEvent",

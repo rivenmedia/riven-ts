@@ -80,6 +80,7 @@ async function open(
     // Refresh the item to get the updated unrestricted URL
     await em.refreshOrFail(entry, {
       populate: ["*"],
+      refresh: true,
     });
 
     if (!entry.unrestrictedUrl) {
@@ -133,7 +134,7 @@ async function open(
         );
       }
     } finally {
-      fileNameIsFetchingLinkMap.set(entry.originalFilename, false);
+      fileNameIsFetchingLinkMap.delete(entry.originalFilename);
     }
   }
 

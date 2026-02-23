@@ -340,7 +340,7 @@ export const getattrSync = function (path, callback) {
   if (isHiddenPath(path) || isIgnoredPath(path)) {
     logger.silly(`VFS getattr: Skipping hidden/ignored path ${path}`);
 
-    process.nextTick(callback, Fuse.EBADF);
+    process.nextTick(callback, Fuse.ENOENT);
 
     return;
   }
@@ -364,6 +364,6 @@ export const getattrSync = function (path, callback) {
 
       logger.error(`VFS getattr unknown error: ${String(error)}`);
 
-      process.nextTick(callback, Fuse.ENOENT);
+      process.nextTick(callback, Fuse.EIO);
     });
 } satisfies OPERATIONS["getattr"];

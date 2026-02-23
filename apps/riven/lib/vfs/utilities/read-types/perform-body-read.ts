@@ -10,7 +10,7 @@ import { waitForChunk } from "../chunks/wait-for-chunk.ts";
 import {
   type FileHandleMetadata,
   fdToCurrentStreamPositionMap,
-  fdToResponseMap,
+  fdToResponsePromiseMap,
 } from "../file-handle-map.ts";
 import { createStreamRequest } from "../requests/create-stream-request.ts";
 
@@ -49,19 +49,11 @@ export async function performBodyRead(
   );
 
   const streamReader =
-    fdToResponseMap.get(fd) ??
-    (await createStreamRequest(fileHandle.url, [
+    (await fdToResponsePromiseMap.get(fd)) ??
+    (await createStreamRequest(fd, fileHandle.url, [
       missingChunksMetadata[0].range[0],
       undefined,
     ]));
-
-  if (!fdToResponseMap.has(fd)) {
-    logger.silly(
-      `Storing stream reader for fd ${fd.toString()} from position: ${missingChunksMetadata[0].range[0].toString()}`,
-    );
-
-    fdToResponseMap.set(fd, streamReader);
-  }
 
   if (!fdToCurrentStreamPositionMap.has(fd)) {
     fdToCurrentStreamPositionMap.set(fd, missingChunksMetadata[0].range[0]);
@@ -81,6 +73,7 @@ export async function performBodyRead(
     result: { bytesFetched, fetchedChunks },
   } = await benchmark(async () => {
     const fetchedChunks: Buffer[] = [];
+
     let bytesFetched = 0;
 
     for (const targetChunk of missingChunksMetadata) {
@@ -90,11 +83,13 @@ export async function performBodyRead(
         targetChunk,
       );
 
-      logger.silly(
-        `Fetched chunk ${targetChunk.rangeLabel} ${fetchedFromCache ? "from cache" : "from stream"} for fd ${fd.toString()}`,
-      );
+      if (!fetchedFromCache) {
+        logger.silly(
+          `Fetched chunk ${targetChunk.rangeLabel} for fd ${fd.toString()}`,
+        );
 
-      bytesFetched += chunk.byteLength;
+        bytesFetched += chunk.byteLength;
+      }
 
       fetchedChunks.push(chunk);
 
@@ -107,9 +102,15 @@ export async function performBodyRead(
     };
   });
 
-  logger.verbose(
-    `Fetched ${bytesFetched.toString()} bytes in ${timeTaken.toFixed(2)}ms for fd ${fd.toString()}`,
-  );
+  if (bytesFetched === 0) {
+    logger.silly(
+      `All chunks were fetched from cache for ${chunks.map((chunk) => chunk.rangeLabel).join(", ")} fd ${fd.toString()}`,
+    );
+  } else {
+    logger.verbose(
+      `Fetched ${bytesFetched.toString()} bytes for ${chunks.map((chunk) => chunk.rangeLabel).join(", ")} in ${timeTaken.toFixed(2)}ms from stream for fd ${fd.toString()}`,
+    );
+  }
 
   const cachedChunks: Buffer[] = [];
 

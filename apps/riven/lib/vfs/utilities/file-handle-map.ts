@@ -14,9 +14,12 @@ export interface FileHandleMetadata {
 export const fdToFileHandleMeta = new Map<number, FileHandleMetadata>();
 
 /**
- * Maps file descriptor (fd) to the corresponding response data from Undici dispatcher.
+ * Maps file descriptor (fd) to the promise of the response data, used to cache the initial stream request for each fd.
  */
-export const fdToResponseMap = new Map<number, Dispatcher.ResponseData>();
+export const fdToResponsePromiseMap = new Map<
+  number,
+  Promise<Dispatcher.ResponseData>
+>();
 
 /**
  * Maps file name to its corresponding `FileChunkCalculations`.

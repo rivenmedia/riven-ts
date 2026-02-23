@@ -85,6 +85,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
   switch (readType) {
     case "header-scan": {
       const data = await fetchDiscreteByteRange(
+        fd,
         fileHandle,
         fileChunkCalculations.headerChunk.range,
       );
@@ -108,6 +109,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     case "footer-read":
     case "footer-scan": {
       const data = await fetchDiscreteByteRange(
+        fd,
         fileHandle,
         fileChunkCalculations.footerChunk.range,
       );
@@ -124,6 +126,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
 
     case "general-scan": {
       const scannedChunk = await fetchDiscreteByteRange(
+        fd,
         fileHandle,
         [position, position + length - 1],
         false,
