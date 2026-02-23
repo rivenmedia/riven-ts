@@ -8,8 +8,6 @@ import {
 
 import { wrap } from "@mikro-orm/core";
 
-// import { settings } from "../../../../../../utilities/settings.ts";
-
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export class SkippedTorrentError extends Error {
@@ -57,15 +55,6 @@ export const validateTorrent = async (
       infoHash,
     );
   }
-
-  // if (item.isAnime && settings.dubbedAnimeOnly && !parsedData.dubbed) {
-  //   throw new SkippedTorrentError(
-  //     "Skipping non-dubbed anime torrent",
-  //     itemTitle,
-  //     parsedData.rawTitle,
-  //     infoHash,
-  //   );
-  // }
 
   if (item instanceof Movie) {
     if (parsedData.seasons.length || parsedData.episodes.length) {

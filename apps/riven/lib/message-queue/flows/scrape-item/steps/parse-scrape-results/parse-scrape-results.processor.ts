@@ -1,9 +1,5 @@
 import { ShowLikeMediaItem } from "@repo/util-plugin-sdk/dto/entities";
-import {
-  GarbageTorrentError,
-  type ParsedData,
-  parse,
-} from "@repo/util-rank-torrent-name";
+import { type ParsedData, parse } from "@repo/util-rank-torrent-name";
 
 import { UnrecoverableError } from "bullmq";
 
@@ -47,10 +43,7 @@ export const parseScrapeResultsProcessor =
 
           return [hash, parsedData] as const;
         } catch (error) {
-          if (
-            error instanceof GarbageTorrentError ||
-            error instanceof SkippedTorrentError
-          ) {
+          if (error instanceof SkippedTorrentError) {
             logger.silly(error.message);
           } else {
             logger.error(

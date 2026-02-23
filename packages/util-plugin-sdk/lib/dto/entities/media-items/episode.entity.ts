@@ -80,7 +80,7 @@ export class Episode extends ShowLikeMediaItem {
   }
 
   @BeforeCreate()
-  fallbackToSeasonExternalIds() {
+  _fallbackToSeasonExternalIds() {
     this.tvdbId ||= this.season.getProperty("tvdbId");
     this.imdbId ??= this.season.getProperty("imdbId") ?? null;
   }
