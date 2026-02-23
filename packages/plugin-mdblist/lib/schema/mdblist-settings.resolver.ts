@@ -10,6 +10,7 @@ export class MdblistSettingsResolver {
   mdblist(): MdblistSettings {
     return {
       apiKey: "mdblist-api-key",
+      lists: ["list1", "list2", "list3"],
     };
   }
 }

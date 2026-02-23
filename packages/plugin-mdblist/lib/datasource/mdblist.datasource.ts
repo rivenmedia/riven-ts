@@ -10,7 +10,7 @@ import {
 } from "../__generated__/index.ts";
 
 import type { MdbListSettings } from "../mdblist-settings.schema.ts";
-import type { MdbListExternalIds } from "../schema/types/external-ids.type.ts";
+import type { MdbListExternalIds } from "../schema/types/mdblist-external-ids.type.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
