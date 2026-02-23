@@ -70,9 +70,10 @@ export async function performBodyRead(
 
   const {
     timeTaken,
-    result: { bytesFetched, fetchedChunks },
+    result: { bytesFetched, fetchedChunks, fetchedChunksMetadata },
   } = await benchmark(async () => {
     const fetchedChunks: Buffer[] = [];
+    const fetchedChunksMetadata: ChunkMetadata[] = [];
 
     let bytesFetched = 0;
 
@@ -89,6 +90,8 @@ export async function performBodyRead(
         );
 
         bytesFetched += chunk.byteLength;
+
+        fetchedChunksMetadata.push(targetChunk);
       }
 
       fetchedChunks.push(chunk);
@@ -99,16 +102,23 @@ export async function performBodyRead(
     return {
       bytesFetched,
       fetchedChunks,
+      fetchedChunksMetadata,
     };
   });
 
-  if (bytesFetched === 0) {
-    logger.silly(
-      `All chunks were fetched from cache for ${chunks.map((chunk) => chunk.rangeLabel).join(", ")} fd ${fd.toString()}`,
+  if (fetchedChunksMetadata.length) {
+    const chunkLabels = fetchedChunksMetadata
+      .map((chunk) => chunk.rangeLabel)
+      .join(", ");
+
+    logger.verbose(
+      `Fetched ${bytesFetched.toString()} bytes from stream[fd=${fd.toString()}] for chunks ${chunkLabels} in ${timeTaken.toFixed(2)}ms.`,
     );
   } else {
-    logger.verbose(
-      `Fetched ${bytesFetched.toString()} bytes for ${chunks.map((chunk) => chunk.rangeLabel).join(", ")} in ${timeTaken.toFixed(2)}ms from stream for fd ${fd.toString()}`,
+    const chunkLabels = chunks.map((chunk) => chunk.rangeLabel).join(", ");
+
+    logger.silly(
+      `Response was read from cache for fd ${fd.toString()} | chunks: ${chunkLabels} in ${timeTaken.toFixed(2)}ms.`,
     );
   }
 

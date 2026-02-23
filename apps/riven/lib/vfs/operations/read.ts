@@ -38,7 +38,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
   }
 
   const fileChunkCalculations = fileNameToFileChunkCalculationsMap.get(
-    fileHandle.fileName,
+    fileHandle.originalFileName,
   );
 
   if (!fileChunkCalculations) {
@@ -57,7 +57,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     chunkSize: config.chunkSize,
     fileSize: fileHandle.fileSize,
     requestRange: [position, position + length - 1],
-    fileName: fileHandle.fileName,
+    fileName: fileHandle.originalFileName,
   });
 
   const readType = detectReadType(

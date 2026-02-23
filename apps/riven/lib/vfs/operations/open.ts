@@ -1,4 +1,5 @@
 import Fuse from "@zkochan/fuse-native";
+import { basename } from "node:path";
 import { setTimeout } from "node:timers/promises";
 
 import { database } from "../../database/database.ts";
@@ -155,7 +156,8 @@ async function open(
   fdToFileHandleMeta.set(nextFd, {
     fileSize: entry.fileSize,
     filePath: path,
-    fileName: entry.originalFilename,
+    fileBaseName: basename(path),
+    originalFileName: entry.originalFilename,
     url: entry.unrestrictedUrl,
   });
 

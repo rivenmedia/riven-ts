@@ -23,7 +23,7 @@ export const fetchDiscreteByteRange = async (
     );
 
     chunkCache.set(
-      createChunkCacheKey(fileHandle.fileName, start, end),
+      createChunkCacheKey(fileHandle.originalFileName, start, end),
       buffer,
     );
   }

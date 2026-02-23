@@ -4,7 +4,8 @@ import type { Dispatcher } from "undici";
 export interface FileHandleMetadata {
   fileSize: number;
   filePath: string;
-  fileName: string;
+  fileBaseName: string;
+  originalFileName: string;
   url: string;
 }
 

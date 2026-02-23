@@ -18,19 +18,31 @@ async function release(_path: string, fd: number) {
     response.body.destroy();
   }
 
+  const fileHandleMeta = fdToFileHandleMeta.get(fd);
+
   // Clean up all mappings related to this file descriptor.
   // The chunk calculations map is intentionally left alone, as it can be reused by other
   // file descriptors opening the same file.
   [
     fdToFileHandleMeta,
-    fdToPreviousReadPositionMap,
-    fdToCurrentStreamPositionMap,
     fdToResponsePromiseMap,
+    fdToCurrentStreamPositionMap,
+    fdToPreviousReadPositionMap,
   ].forEach((map) => {
     map.delete(fd);
   });
 
-  logger.silly(`Released file descriptor ${fd.toString()} successfully.`);
+  if (!fileHandleMeta) {
+    logger.warn(
+      `Released unknown file for fd ${fd.toString()}. It may have been already released or never opened successfully.`,
+    );
+
+    return;
+  }
+
+  logger.verbose(
+    `Released "${fileHandleMeta.fileBaseName}" [fd=${fd.toString()}] successfully.`,
+  );
 }
 
 export const releaseSync = function (_path, fd, callback) {
