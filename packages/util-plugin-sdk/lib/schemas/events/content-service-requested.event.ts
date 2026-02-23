@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { atLeastOnePropertyRequired } from "../../validation/refinements/at-least-one-property-required.ts";
+import { atLeastOnePropertyRequired } from "../../validation/at-least-one-property-required.ts";
 import { ItemRequest } from "../media/item-request.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
@@ -16,33 +16,27 @@ export type ContentServiceRequestedEvent = z.infer<
   typeof ContentServiceRequestedEvent
 >;
 
-export const ContentServiceRequestedMoviesResponse = z.array(
-  ItemRequest.pick({
-    imdbId: true,
-    tmdbId: true,
-    externalRequestId: true,
-  }).refine(atLeastOnePropertyRequired, "At least one identifier is required"),
-);
-
-export type ContentServiceRequestedMoviesResponse = z.infer<
-  typeof ContentServiceRequestedMoviesResponse
->;
-
-export const ContentServiceRequestedShowsResponse = z.array(
-  ItemRequest.pick({
-    imdbId: true,
-    tvdbId: true,
-    externalRequestId: true,
-  }).refine(atLeastOnePropertyRequired, "At least one identifier is required"),
-);
-
-export type ContentServiceRequestedShowsResponse = z.infer<
-  typeof ContentServiceRequestedShowsResponse
->;
-
 export const ContentServiceRequestedResponse = z.object({
-  movies: ContentServiceRequestedMoviesResponse,
-  shows: ContentServiceRequestedShowsResponse,
+  movies: z.array(
+    ItemRequest.pick({
+      imdbId: true,
+      tmdbId: true,
+      externalRequestId: true,
+    }).refine(
+      atLeastOnePropertyRequired,
+      "At least one identifier is required",
+    ),
+  ),
+  shows: z.array(
+    ItemRequest.pick({
+      imdbId: true,
+      tvdbId: true,
+      externalRequestId: true,
+    }).refine(
+      atLeastOnePropertyRequired,
+      "At least one identifier is required",
+    ),
+  ),
 });
 
 export type ContentServiceRequestedResponse = z.infer<

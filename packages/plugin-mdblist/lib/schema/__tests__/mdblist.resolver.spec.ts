@@ -9,7 +9,7 @@ import { pluginConfig } from "../../mdblist-plugin.config.ts";
 
 it('returns the validation status when calling "mdblistIsValid" query', async ({
   gqlServer,
-  httpCache,
+  dataSourceConfig,
   server,
 }) => {
   server.use(http.get("**/user", () => HttpResponse.json({ success: true })));
@@ -25,7 +25,11 @@ it('returns the validation status when calling "mdblistIsValid" query', async ({
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new MdblistAPI({ cache: httpCache, token: "test-token" }),
+          api: new MdblistAPI({
+            ...dataSourceConfig,
+            pluginSymbol: pluginConfig.name,
+            settings: { apiKey: "test-api-key", lists: [] },
+          }),
         },
       },
     },
