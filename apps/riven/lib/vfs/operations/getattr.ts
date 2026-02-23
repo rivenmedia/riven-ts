@@ -362,6 +362,8 @@ export const getattrSync = function (path, callback) {
         return;
       }
 
+      console.log(error);
+
       logger.error(`VFS getattr unknown error: ${String(error)}`);
 
       process.nextTick(callback, Fuse.EIO);
