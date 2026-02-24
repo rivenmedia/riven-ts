@@ -1,6 +1,7 @@
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import { QueueEvents, type QueueOptions } from "bullmq";
+import chalk from "chalk";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
@@ -21,7 +22,7 @@ export function createQueueEvents(
   registerMQListeners(queueEvents, logger);
 
   queueEvents.on("failed", ({ failedReason }) => {
-    logger.error(`[${name}] ${failedReason}`);
+    logger.error(`${chalk.dim(`[${name}]`)} ${failedReason}`);
   });
 
   return queueEvents;
