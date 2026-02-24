@@ -103,7 +103,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
                 movieIdsMap.set(item.id, {
                   imdbId: item.ids.imdb,
                   tmdbId: item.ids.tmdb?.toString(),
-                  mdblistId: item.ids.mdblist,
+                  externalRequestId: item.ids.mdblist,
                   tvdbId: item.ids.tvdb ? String(item.ids.tvdb) : undefined,
                 });
               }
