@@ -12,5 +12,5 @@ export class MdbListExternalIds {
   tvdbId?: string | undefined;
 
   @Field((_type) => String, { nullable: true })
-  mdblistId?: string | undefined;
+  externalRequestId?: string | undefined;
 }
