@@ -1,4 +1,11 @@
-import { Field, ObjectType } from "type-graphql";
+import { Field, ObjectType, registerEnumType } from "type-graphql";
+
+import { getRequestQueryParamsFilterEnum } from "../../__generated__/index.ts";
+
+registerEnumType(getRequestQueryParamsFilterEnum, {
+  name: "SeerrRequestFilter",
+  description: "Request status filter for Seerr settings",
+});
 
 @ObjectType()
 export class SeerrSettings {
@@ -8,6 +15,6 @@ export class SeerrSettings {
   @Field()
   url!: string;
 
-  @Field()
+  @Field(() => getRequestQueryParamsFilterEnum)
   filter!: string;
 }

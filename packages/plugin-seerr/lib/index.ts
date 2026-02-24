@@ -17,10 +17,7 @@ export default {
       const { filter } = settings.get(SeerrSettings);
       const api = dataSources.get(SeerrAPI);
 
-      return {
-        movies: await api.getMovies(filter),
-        shows: await api.getShows(filter),
-      };
+      return await api.getContent(filter);
     },
   },
   settingsSchema: SeerrSettings,

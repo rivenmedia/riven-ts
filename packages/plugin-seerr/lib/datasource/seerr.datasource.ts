@@ -58,35 +58,31 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     }
   }
 
-  async getMovies(filter: string): Promise<ExternalIds[]> {
+  async getContent(
+    filter: string,
+  ): Promise<{ movies: ExternalIds[]; shows: ExternalIds[] }> {
     const requests = await this.#getAllRequests(filter);
-    const idsMap = new Map<number, ExternalIds>();
+    const movieMap = new Map<number, ExternalIds>();
+    const showMap = new Map<number, ExternalIds>();
 
     for (const request of requests) {
-      if (request.type === "movie" && request.media?.tmdbId) {
-        idsMap.set(request.media.tmdbId, {
+      if (!request.media?.tmdbId) continue;
+      if (request.type === "movie") {
+        movieMap.set(request.media.tmdbId, {
           tmdbId: request.media.tmdbId.toString(),
+          externalId: request.media.id?.toString(),
         });
-      }
-    }
-
-    return [...idsMap.values()];
-  }
-
-  async getShows(filter: string): Promise<ExternalIds[]> {
-    const requests = await this.#getAllRequests(filter);
-    const idsMap = new Map<number, ExternalIds>();
-
-    for (const request of requests) {
-      if (request.type === "tv" && request.media?.tmdbId) {
-        idsMap.set(request.media.tmdbId, {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      } else if (request.type === "tv") {
+        showMap.set(request.media.tmdbId, {
           tmdbId: request.media.tmdbId.toString(),
           tvdbId: request.media.tvdbId?.toString(),
+          externalId: request.media.id?.toString(),
         });
       }
     }
 
-    return [...idsMap.values()];
+    return { movies: [...movieMap.values()], shows: [...showMap.values()] };
   }
 
   async #getAllRequests(filter: string): Promise<MediaRequestWithType[]> {

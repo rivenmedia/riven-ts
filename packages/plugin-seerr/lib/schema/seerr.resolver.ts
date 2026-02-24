@@ -23,7 +23,7 @@ export class SeerrResolver {
     @Args() { filter }: FilterArguments,
     @PluginDataSource(pluginConfig.name, SeerrAPI) api: SeerrAPI,
   ): Promise<ExternalIds[]> {
-    return await api.getMovies(filter);
+    return (await api.getContent(filter)).movies;
   }
 
   @CacheControl({ maxAge: 300 })
@@ -32,6 +32,6 @@ export class SeerrResolver {
     @Args() { filter }: FilterArguments,
     @PluginDataSource(pluginConfig.name, SeerrAPI) api: SeerrAPI,
   ): Promise<ExternalIds[]> {
-    return await api.getShows(filter);
+    return (await api.getContent(filter)).shows;
   }
 }
