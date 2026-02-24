@@ -25,6 +25,7 @@
     "@mikro-orm/reflection": "catalog:",
     "@repo/core-util-graphql-schema": "workspace:^",
     "@repo/plugin-listrr": "workspace:^",
+    "@repo/plugin-mdblist": "workspace:^",
     "@repo/plugin-plex": "workspace:^",
     "@repo/plugin-realdebrid": "workspace:^",
     "@repo/plugin-seerr": "workspace:^",

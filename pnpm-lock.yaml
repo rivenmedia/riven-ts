@@ -195,6 +195,9 @@ importers:
       '@repo/plugin-listrr':
         specifier: workspace:^
         version: link:../../packages/plugin-listrr
+      '@repo/plugin-mdblist':
+        specifier: workspace:^
+        version: link:../../packages/plugin-mdblist
       '@repo/plugin-plex':
         specifier: workspace:^
         version: link:../../packages/plugin-plex
@@ -748,6 +751,67 @@ importers:
       zod2md:
         specifier: 'catalog:'
         version: 0.2.5(zod@4.3.6)
+
+  packages/plugin-mdblist:
+    dependencies:
+      '@apollo/datasource-rest':
+        specifier: 'catalog:'
+        version: 6.4.1(encoding@0.1.13)(graphql@16.12.0)
+      '@repo/util-plugin-sdk':
+        specifier: workspace:^
+        version: link:../util-plugin-sdk
+      type-graphql:
+        specifier: 'catalog:'
+        version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.6
+    devDependencies:
+      '@faker-js/faker':
+        specifier: 'catalog:'
+        version: 10.1.0
+      '@kubb/cli':
+        specifier: 'catalog:'
+        version: 4.20.1(@kubb/react-fabric@0.12.7)(typescript@5.9.3)
+      '@repo/core-util-eslint-config':
+        specifier: workspace:^
+        version: link:../core/util-eslint-config
+      '@repo/core-util-graphql-helpers':
+        specifier: workspace:^
+        version: link:../core/util-graphql-helpers
+      '@repo/core-util-kubb-config':
+        specifier: workspace:^
+        version: link:../core/util-kubb-config
+      '@repo/core-util-typescript-config':
+        specifier: workspace:^
+        version: link:../core/util-typescript-config
+      '@repo/core-util-vitest-config':
+        specifier: workspace:^
+        version: link:../core/util-vitest-config
+      '@repo/util-plugin-testing':
+        specifier: workspace:^
+        version: link:../util-plugin-testing
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.0.0
+      '@typescript-eslint/parser':
+        specifier: 'catalog:'
+        version: 8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      class-validator:
+        specifier: 'catalog:'
+        version: 0.14.3
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      msw:
+        specifier: 'catalog:'
+        version: 2.12.4(@types/node@24.0.0)(typescript@5.9.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
 
   packages/plugin-plex:
     dependencies:
@@ -9596,7 +9660,7 @@ snapshots:
       latest-version: 9.0.0
       picocolors: 1.1.1
       seedrandom: 3.0.5
-      semver: 7.7.3
+      semver: 7.7.4
       string-argv: 0.3.2
     transitivePeerDependencies:
       - '@kubb/react-fabric'
