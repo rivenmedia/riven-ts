@@ -88,13 +88,13 @@ export const validateTorrent = async (
       }
     }
 
+    await wrap(item).populate(["seasons.episodes"]);
+
     if (
       parsedData.episodes.length &&
       item.seasons.length === 1 &&
       item.seasons[0]?.episodes.count()
     ) {
-      await wrap(item).populate(["seasons.episodes"]);
-
       const { episodes } = item.seasons[0];
 
       const episodesIntersection = new Set(parsedData.episodes).intersection(
