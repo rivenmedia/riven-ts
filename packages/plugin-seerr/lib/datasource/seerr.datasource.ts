@@ -66,14 +66,16 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     const showMap = new Map<number, ExternalIds>();
 
     for (const request of requests) {
-      if (!request.media?.tmdbId) continue;
+      if (!request.media?.tmdbId) {
+        continue;
+      }
+
       if (request.type === "movie") {
         movieMap.set(request.media.tmdbId, {
           tmdbId: request.media.tmdbId.toString(),
           externalId: request.media.id?.toString(),
         });
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      } else if (request.type === "tv") {
+      } else {
         showMap.set(request.media.tmdbId, {
           tmdbId: request.media.tmdbId.toString(),
           tvdbId: request.media.tvdbId?.toString(),
