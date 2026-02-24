@@ -1,6 +1,7 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
+import chalk from "chalk";
 import { type AnyActorRef, type MachineContext, assign, setup } from "xstate";
 import z, { ZodError } from "zod";
 
@@ -313,9 +314,9 @@ export const pluginRegistrarMachine = setup({
                 type: "log",
                 params: ({ event: { output: parsedPlugins } }) => ({
                   message: [
-                    `Collected ${parsedPlugins.validPlugins.length.toString()} plugins for validation:`,
+                    `Collected ${chalk.bold(parsedPlugins.validPlugins.length.toString())} plugins for validation:`,
                     parsedPlugins.validPlugins
-                      .map((p) => p.name.description?.toString())
+                      .map((p) => chalk.bold(p.name.description?.toString()))
                       .join(", "),
                   ].join(" "),
                   level: "verbose",

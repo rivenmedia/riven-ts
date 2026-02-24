@@ -4,6 +4,7 @@ import {
 } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
 
 import { UnrecoverableError } from "bullmq";
+import chalk from "chalk";
 import assert from "node:assert";
 
 import { database } from "../../../../../database/database.ts";
@@ -66,7 +67,7 @@ export const findValidTorrentContainerProcessor =
           };
         } catch (error) {
           logger.warn(
-            `${mediaItem.type} ${mediaItem.fullTitle} (${mediaItem.id.toString()}) - ${String(error)}`,
+            `${mediaItem.type} ${chalk.bold(mediaItem.fullTitle)} (${chalk.bold(mediaItem.id.toString())}) - ${String(error)}`,
           );
 
           continue;
@@ -74,7 +75,7 @@ export const findValidTorrentContainerProcessor =
       }
 
       logger.warn(
-        `Info hash ${infoHash} failed validation for all plugins for ${mediaItem.type} ${mediaItem.fullTitle} (${mediaItem.id.toString()})`,
+        `Info hash ${chalk.bold(infoHash)} failed validation for all plugins for ${mediaItem.type} ${chalk.bold(mediaItem.fullTitle)} (${chalk.bold(mediaItem.id.toString())})`,
       );
 
       await job.updateData({
@@ -84,6 +85,6 @@ export const findValidTorrentContainerProcessor =
     }
 
     throw new UnrecoverableError(
-      `No valid torrent container found for ${mediaItem.fullTitle} after trying ${availableDownloaders.length.toString()} plugins`,
+      `No valid torrent container found for ${chalk.bold(mediaItem.fullTitle)} after trying ${chalk.bold(availableDownloaders.length.toString())} plugins`,
     );
   });

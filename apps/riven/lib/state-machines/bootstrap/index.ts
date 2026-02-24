@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import { type AnyActorRef, assign, setup } from "xstate";
 
 import { settings } from "../../utilities/settings.ts";
@@ -199,7 +200,7 @@ export const bootstrapMachine = setup({
                     message: `Plugins registered successfully. ${[
                       ...validPlugins.keys(),
                     ]
-                      .map((k) => k.description)
+                      .map((k) => chalk.bold(k.description))
                       .join(", ")}.`,
                   }),
                 },
