@@ -1,8 +1,4 @@
 import {
-  type MediaItem,
-  ShowLikeMediaItem,
-} from "@repo/util-plugin-sdk/dto/entities";
-import {
   createRankingModel,
   createSettings,
 } from "@repo/util-rank-torrent-name";
@@ -13,6 +9,7 @@ import { createFindValidTorrentContainerJob } from "./steps/find-valid-torrent-c
 import { createRankStreamsJob } from "./steps/rank-streams/rank-streams.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 const rtnSettings = createSettings({
   exclude: ["\\bmatte\\b"],
@@ -101,9 +98,7 @@ export async function enqueueDownloadItem({
   item,
   subscribers,
 }: EnqueueDownloadItemInput) {
-  const topLevelItem =
-    item instanceof ShowLikeMediaItem ? await item.getShow() : item;
-  const streams = await topLevelItem.streams.loadItems();
+  const streams = await item.streams.loadItems();
 
   const rankStreamsNode = createRankStreamsJob(
     `Ranking streams for ${item.fullTitle}`,
