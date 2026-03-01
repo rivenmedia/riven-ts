@@ -334,9 +334,13 @@ export abstract class BaseDataSource<
 
     const result = await job.waitUntilFinished(this.#queueEvents, 60000);
 
-    this.logger.http(
-      `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url}`,
-    );
+    const logMessage = `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url}`;
+
+    if (!result.response.ok) {
+      throw new Error(logMessage);
+    }
+
+    this.logger.http(logMessage);
 
     const { ok, ...responseInit } = result.response;
 
