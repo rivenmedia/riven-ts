@@ -115,7 +115,7 @@ export async function persistDownloadResults({
 
       if (existingMediaEntries.length) {
         logger.debug(
-          `Episode ${episode.id.toString()} already has media entries, skipping...`,
+          `${episode.fullTitle} already has media entries, skipping...`,
         );
 
         continue;

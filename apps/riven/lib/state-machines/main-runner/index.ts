@@ -460,11 +460,11 @@ export const mainRunnerMachine = setup({
             type: "log",
             params: ({
               event: {
-                item: { title },
+                item: { fullTitle },
                 durationFromRequestToDownload,
               },
             }) => ({
-              message: `Successfully downloaded ${title} in ${durationFromRequestToDownload.toString()} seconds.`,
+              message: `Successfully downloaded ${fullTitle} in ${durationFromRequestToDownload.toString()} seconds.`,
             }),
           },
         ],
