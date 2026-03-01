@@ -62,6 +62,7 @@ export async function persistShowIndexerData({
         aliases: item.aliases ?? null,
         rating: item.rating ?? null,
         genres: item.genres.map((genre) => genre.toLowerCase()),
+        itemRequest,
       });
 
       await transaction.flush();

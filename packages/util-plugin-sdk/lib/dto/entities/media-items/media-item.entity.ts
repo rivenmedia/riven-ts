@@ -24,9 +24,8 @@ import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { MediaItemType } from "../../enums/media-item-type.enum.ts";
 import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
+import { ItemRequest, type MediaEntry } from "../index.ts";
 import { Stream } from "../streams/stream.entity.ts";
-
-import type { MediaEntry } from "../index.ts";
 
 @ObjectType()
 @Entity({
@@ -178,6 +177,9 @@ export abstract class MediaItem {
   @Field(() => String)
   @Enum(() => MediaItemType.enum)
   type!: MediaItemType;
+
+  @ManyToOne(() => ItemRequest)
+  itemRequest!: Opt<Ref<ItemRequest>>;
 
   /**
    * A pretty name for the media item to be used in VFS paths.

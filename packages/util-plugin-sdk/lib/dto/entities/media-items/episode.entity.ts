@@ -86,6 +86,11 @@ export class Episode extends ShowLikeMediaItem {
   }
 
   @BeforeCreate()
+  _copyItemRequest() {
+    this.itemRequest = this.season.getProperty("itemRequest");
+  }
+
+  @BeforeCreate()
   _persistFullTitle({ entity }: EventArgs<this>) {
     const showTitle = entity.season.getProperty("show").getProperty("title");
     const seasonNumber = entity.season
