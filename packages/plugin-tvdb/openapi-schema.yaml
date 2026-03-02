@@ -2992,6 +2992,7 @@ components:
           type: integer
         overview:
           type: string
+          nullable: true
         overviewTranslations:
           items:
             type: string

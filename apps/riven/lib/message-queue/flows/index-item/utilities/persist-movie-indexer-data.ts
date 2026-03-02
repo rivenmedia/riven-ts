@@ -60,6 +60,7 @@ export async function persistMovieIndexerData({
         aliases: item.aliases ?? null,
         genres: item.genres,
         state: "indexed",
+        itemRequest,
       });
 
       await validateOrReject(mediaItem);

@@ -1,4 +1,4 @@
-import { Movie, Stream } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequest, Movie, Stream } from "@repo/util-plugin-sdk/dto/entities";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 import { parse } from "@repo/util-rank-torrent-name";
 
@@ -25,6 +25,12 @@ it("throws an unrecoverable error if no valid torrent container is found", async
 
   const em = database.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "movie",
+  });
+
   em.create(Movie, {
     id: 1,
     contentRating: "g",
@@ -32,6 +38,7 @@ it("throws an unrecoverable error if no valid torrent container is found", async
     state: "scraped",
     title: "Test Movie",
     year: 2024,
+    itemRequest,
   });
 
   await em.flush();
@@ -64,6 +71,12 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
 
   const em = database.orm.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "movie",
+  });
+
   const movie = em.create(Movie, {
     id: 1,
     tmdbId: "123",
@@ -72,6 +85,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     title: "Test Movie",
     year: 2024,
     createdAt: DateTime.now().minus({ seconds: expectedDuration }).toJSDate(),
+    itemRequest,
   });
 
   const streamInfoHash = "test-info-hash";
@@ -92,6 +106,9 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
           {
             fileName: "Test Movie 2024 1080p.mkv",
             fileSize: 1024,
+            downloadUrl: "http://example.com/download",
+            type: "movie",
+            matchedMediaItemId: movie.id,
           },
         ],
         infoHash: streamInfoHash,
@@ -125,6 +142,12 @@ it('sends a "riven.media-item.download.error" event if no valid torrent containe
 
   const em = database.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "movie",
+  });
+
   em.create(Movie, {
     id: 1,
     contentRating: "g",
@@ -132,6 +155,7 @@ it('sends a "riven.media-item.download.error" event if no valid torrent containe
     state: "scraped",
     title: "Test Movie",
     year: 2024,
+    itemRequest,
   });
 
   await em.flush();

@@ -18,11 +18,11 @@ import z from "zod";
 import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
 
-import type { TorrentContainer } from "@repo/util-plugin-sdk/schemas/torrents/torrent-container";
+import type { ValidTorrentContainer } from "../steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
 
 export interface PersistDownloadResultsInput {
   id: number;
-  container: TorrentContainer;
+  container: ValidTorrentContainer;
   processedBy: string;
 }
 
@@ -77,7 +77,7 @@ export async function persistDownloadResults({
         mediaItem: ref(existingItem),
         provider: processedBy,
         providerDownloadId: container.torrentId.toString(),
-        downloadUrl: file.downloadUrl ?? null,
+        downloadUrl: file.downloadUrl,
       }),
     );
   }
@@ -90,20 +90,22 @@ export async function persistDownloadResults({
 
     assert(episodes[0]);
 
-    let episodeNumber = episodes[0].absoluteNumber;
-
     for (const file of container.files) {
-      const episode = await database.episode.findOne({
-        absoluteNumber: episodeNumber++,
-      });
-
-      if (!episode) {
-        logger.debug(
-          `File ${file.fileName} does not correspond to a valid episode, skipping...`,
-        );
-
+      if (file.type !== "show") {
         continue;
       }
+
+      const episode = await database.episode.findOneOrFail(
+        {
+          ...(existingItem instanceof Episode ? { id: existingItem.id } : {}),
+          season: {
+            ...(existingItem instanceof Season ? { id: existingItem.id } : {}),
+            number: file.season,
+          },
+          number: file.episode,
+        },
+        { populate: ["$infer"] },
+      );
 
       const ignoredStates = MediaItemState.exclude(["completed", "downloaded"]);
 
@@ -115,7 +117,7 @@ export async function persistDownloadResults({
 
       if (existingMediaEntries.length) {
         logger.debug(
-          `Episode ${episode.id.toString()} already has media entries, skipping...`,
+          `${episode.fullTitle} already has media entries, skipping...`,
         );
 
         continue;
@@ -128,7 +130,7 @@ export async function persistDownloadResults({
           mediaItem: episode,
           provider: processedBy,
           providerDownloadId: container.torrentId.toString(),
-          downloadUrl: file.downloadUrl ?? null,
+          downloadUrl: file.downloadUrl,
         }),
       );
     }

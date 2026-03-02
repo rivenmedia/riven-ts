@@ -1,5 +1,6 @@
 import {
   Episode,
+  ItemRequest,
   MediaEntry,
   Movie,
   Season,
@@ -66,12 +67,19 @@ it("returns file stats for movie files", async () => {
 
   const em = database.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "movie",
+  });
+
   const mediaItem = em.create(Movie, {
     title: "Inception",
     year: 2010,
     state: "downloaded",
     tmdbId: "27205",
     contentRating: "pg-13",
+    itemRequest,
   });
 
   await em.flush();
@@ -112,12 +120,19 @@ it("returns directory stats for /movies", async () => {
   const em = database.em.fork();
 
   for (let i = 1; i <= 3; i++) {
+    const itemRequest = em.create(ItemRequest, {
+      requestedBy: "@repo/plugin-test",
+      state: "completed",
+      type: "movie",
+    });
+
     const movie = em.create(Movie, {
       title: `Example Movie ${i.toString()}`,
       year: 2020,
       contentRating: "g",
       state: "downloaded",
       tmdbId: i.toString(),
+      itemRequest,
     });
 
     await em.flush();
@@ -156,6 +171,12 @@ it("returns directory stats for /shows", async () => {
   const em = database.em.fork();
 
   for (let i = 1; i <= 3; i++) {
+    const itemRequest = em.create(ItemRequest, {
+      requestedBy: "@repo/plugin-test",
+      state: "completed",
+      type: "show",
+    });
+
     const show = em.create(Show, {
       title: "Example Show",
       tvdbId: i.toString(),
@@ -163,6 +184,7 @@ it("returns directory stats for /shows", async () => {
       year: 2026,
       state: "downloaded",
       status: "continuing",
+      itemRequest,
     });
 
     await em.flush();
@@ -222,6 +244,12 @@ it("returns directory stats for single shows", async () => {
 
   const em = database.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
+
   const show = em.create(Show, {
     title: "Example Show",
     tvdbId: "1",
@@ -229,6 +257,7 @@ it("returns directory stats for single shows", async () => {
     year: 2026,
     state: "downloaded",
     status: "continuing",
+    itemRequest,
   });
 
   await em.flush();
@@ -289,6 +318,12 @@ it("returns directory stats for single seasons", async () => {
 
   const em = database.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
+
   const show = em.create(Show, {
     title: "Example Show",
     tvdbId: "1",
@@ -296,6 +331,7 @@ it("returns directory stats for single seasons", async () => {
     year: 2026,
     state: "downloaded",
     status: "continuing",
+    itemRequest,
   });
 
   await em.flush();
@@ -356,6 +392,12 @@ it("returns file stats for episodes", async () => {
 
   const em = database.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
+
   const show = em.create(Show, {
     title: "Example Show",
     tvdbId: "1",
@@ -363,6 +405,7 @@ it("returns file stats for episodes", async () => {
     year: 2026,
     state: "downloaded",
     status: "continuing",
+    itemRequest,
   });
 
   await em.flush();

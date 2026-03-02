@@ -8,6 +8,7 @@ import {
   OneToMany,
   type Opt,
   Property,
+  type Ref,
 } from "@mikro-orm/core";
 import { Field, ObjectType } from "type-graphql";
 
@@ -20,9 +21,19 @@ import { MediaEntry } from "../filesystem/media-entry.entity.js";
 import { Season } from "./season.entity.ts";
 import { ShowLikeMediaItem } from "./show-like.entity.ts";
 
+import type { ItemRequest } from "../requests/item-request.entity.ts";
+
 @ObjectType()
 @Entity()
 export class Show extends ShowLikeMediaItem {
+  @Field(() => ShowContentRatingEnum)
+  declare contentRating: ShowContentRating;
+
+  override type: Opt<"show"> = "show" as const;
+
+  declare tvdbId: string;
+  declare tmdbId?: never;
+  declare itemRequest: Ref<ItemRequest>;
   declare filesystemEntries: never;
 
   @Field(() => ShowStatus.enum, { nullable: true })
@@ -36,14 +47,6 @@ export class Show extends ShowLikeMediaItem {
   @Field(() => [Season], { nullable: true })
   @OneToMany(() => Season, (season) => season.show)
   seasons = new Collection<Season>(this);
-
-  @Field(() => ShowContentRatingEnum)
-  declare contentRating: ShowContentRating;
-
-  override type: Opt<"show"> = "show" as const;
-
-  declare tvdbId: string;
-  declare tmdbId?: never;
 
   async getEpisodes() {
     const seasons = await this.seasons.loadItems({

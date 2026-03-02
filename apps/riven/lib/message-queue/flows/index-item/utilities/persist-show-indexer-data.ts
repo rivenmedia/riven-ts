@@ -62,13 +62,16 @@ export async function persistShowIndexerData({
         aliases: item.aliases ?? null,
         rating: item.rating ?? null,
         genres: item.genres.map((genre) => genre.toLowerCase()),
+        itemRequest,
       });
 
       await transaction.flush();
 
       let totalEpisodes = 1;
 
-      for (const season of item.seasons) {
+      const sortedSeasons = item.seasons.sort((a, b) => a.number - b.number);
+
+      for (const season of sortedSeasons) {
         const seasonYear = season.episodes[0]?.airedAt
           ? DateTime.fromISO(season.episodes[0].airedAt).year
           : null;
@@ -84,7 +87,11 @@ export async function persistShowIndexerData({
 
         await transaction.flush();
 
-        for (const episode of season.episodes) {
+        const sortedEpisodes = season.episodes.sort(
+          (a, b) => a.number - b.number,
+        );
+
+        for (const episode of sortedEpisodes) {
           const episodeYear = episode.airedAt
             ? DateTime.fromISO(episode.airedAt).year
             : seasonYear;

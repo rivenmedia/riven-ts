@@ -5,6 +5,7 @@ import {
   type Hidden,
   type Opt,
   Property,
+  type Ref,
 } from "@mikro-orm/core";
 import { Field, ObjectType } from "type-graphql";
 
@@ -14,6 +15,8 @@ import {
 } from "../../enums/content-ratings.enum.ts";
 import { MediaEntry } from "../filesystem/media-entry.entity.ts";
 import { MediaItem } from "./media-item.entity.ts";
+
+import type { ItemRequest } from "../requests/item-request.entity.ts";
 
 @ObjectType()
 @Entity()
@@ -25,6 +28,7 @@ export class Movie extends MediaItem {
 
   declare tmdbId: string;
   declare tvdbId: never;
+  declare itemRequest: Ref<ItemRequest>;
 
   getMediaEntries() {
     return this.filesystemEntries.loadItems<MediaEntry>({

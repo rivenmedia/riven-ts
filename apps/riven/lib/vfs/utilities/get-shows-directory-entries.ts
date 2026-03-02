@@ -32,7 +32,7 @@ export const getShowsDirectoryEntries = async (
       }
 
       const { dir, base } = path.parse(entry.path);
-      const [, showName, seasonName] = dir.split(path.sep);
+      const [showName, seasonName] = dir.split(path.sep);
       const part = tvdbId ? (season ? base : seasonName) : showName;
 
       if (!part) {

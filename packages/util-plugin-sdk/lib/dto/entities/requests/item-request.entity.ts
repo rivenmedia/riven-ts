@@ -1,7 +1,9 @@
 import {
+  Collection,
   Entity,
   Enum,
   type Hidden,
+  OneToMany,
   type Opt,
   PrimaryKey,
   Property,
@@ -13,6 +15,7 @@ import { Field, ID, ObjectType } from "type-graphql";
 import { DateTime } from "../../../helpers/dates.ts";
 import { ItemRequestState } from "../../enums/item-request-state.enum.ts";
 import { ItemRequestType } from "../../enums/item-request-type.enum.ts";
+import { MediaItem } from "../media-items/media-item.entity.ts";
 
 @ObjectType()
 @Entity()
@@ -76,4 +79,7 @@ export class ItemRequest {
 
     return externalIds;
   }
+
+  @OneToMany(() => MediaItem, (mediaItem) => mediaItem.itemRequest)
+  mediaItems = new Collection<MediaItem>(this);
 }

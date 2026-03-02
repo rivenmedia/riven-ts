@@ -1,5 +1,6 @@
 import {
   Episode,
+  ItemRequest,
   Movie,
   Season,
   Show,
@@ -25,11 +26,19 @@ const it = baseIt.extend<{
 }>({
   movie: async ({}, use) => {
     const em = database.em.fork();
+
+    const itemRequest = em.create(ItemRequest, {
+      requestedBy: "@repo/plugin-test",
+      state: "completed",
+      type: "movie",
+    });
+
     const movie = em.create(Movie, {
       title: "Test Movie",
       contentRating: "g",
       state: "indexed",
       tmdbId: "1",
+      itemRequest,
     });
 
     await em.flush();
@@ -37,12 +46,20 @@ const it = baseIt.extend<{
   },
   show: async ({}, use) => {
     const em = database.em.fork();
+
+    const itemRequest = em.create(ItemRequest, {
+      requestedBy: "@repo/plugin-test",
+      state: "completed",
+      type: "show",
+    });
+
     const show = em.create(Show, {
       title: "Test Show",
       contentRating: "tv-14",
       state: "indexed",
       status: "ended",
       tvdbId: "1",
+      itemRequest,
     });
 
     await em.flush();

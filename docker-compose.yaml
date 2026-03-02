@@ -144,6 +144,14 @@ services:
       - all
       - analytics
 
+  seerr:
+    extends:
+      file: ./packages/plugin-seerr/docker-compose.yaml
+      service: seerr
+    profiles:
+      - all
+      - services
+
 volumes:
   riven-db:
   media-mount:
