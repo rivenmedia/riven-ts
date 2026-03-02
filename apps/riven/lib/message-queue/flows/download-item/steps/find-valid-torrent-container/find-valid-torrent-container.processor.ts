@@ -45,10 +45,11 @@ export const findValidTorrentContainerProcessor =
         const node = await flow.addPluginJob(
           MediaItemDownloadRequestedEvent,
           MediaItemDownloadRequestedResponse,
-          `Download ${mediaItem.fullTitle}`,
+          `Download ${infoHash}`,
           plugin,
           { infoHash },
           {
+            jobId: infoHash, // Use info hash as job ID to prevent duplicate processing of the same torrent container
             ignoreDependencyOnFailure: true,
             parent: {
               id: jobId,
@@ -59,10 +60,17 @@ export const findValidTorrentContainerProcessor =
 
         try {
           const result = await runSingleJob(node.job);
+          const validatedFiles = await validateTorrentContainer(
+            mediaItem,
+            result,
+          );
 
           return {
             plugin,
-            result: await validateTorrentContainer(mediaItem, result),
+            result: {
+              ...result,
+              files: validatedFiles,
+            },
           };
         } catch (error) {
           logger.warn(

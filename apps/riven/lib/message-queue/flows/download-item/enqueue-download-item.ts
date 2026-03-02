@@ -124,6 +124,7 @@ export async function enqueueDownloadItem({
     {
       opts: {
         continueParentOnFailure: true,
+        removeOnFail: true,
       },
       children: [rankStreamsNode],
     },

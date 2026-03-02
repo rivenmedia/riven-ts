@@ -67,7 +67,10 @@ export const ParsedDataSchema = z
   })
   .transform((data) => ({
     ...data,
-    type: data.seasons.length || data.episodes.length ? "show" : "movie",
+    type:
+      data.seasons.length || data.episodes.length
+        ? ("show" as const)
+        : ("movie" as const),
     normalisedTitle: normaliseTitle(data.title),
     converted: data.convert ?? false,
     remux:

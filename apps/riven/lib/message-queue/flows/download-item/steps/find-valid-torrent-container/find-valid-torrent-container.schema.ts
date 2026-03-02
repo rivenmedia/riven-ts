@@ -8,6 +8,38 @@ import { createFlowSchema } from "../../../../utilities/create-flow-schema.ts";
 
 import type { RankedResult } from "@repo/util-rank-torrent-name";
 
+const BaseMatchedFile = z.object({
+  fileName: z.string(),
+  fileSize: z.number(),
+  downloadUrl: z.url(),
+  matchedMediaItemId: z.int().positive(),
+});
+
+const MovieMatchedFile = BaseMatchedFile.extend({
+  type: z.literal("movie"),
+});
+
+const ShowMatchedFile = BaseMatchedFile.extend({
+  type: z.literal("show"),
+  season: z.int().positive(),
+  episode: z.int().positive(),
+});
+
+const MatchedFile = z.union([MovieMatchedFile, ShowMatchedFile]);
+
+export type MatchedFile = z.infer<typeof MatchedFile>;
+
+export const ValidTorrentContainer = TorrentContainer.extend(
+  z.object({
+    files: z
+      .array(MatchedFile)
+      .min(1)
+      .pipe(z.tuple([MatchedFile], MatchedFile)),
+  }).shape,
+);
+
+export type ValidTorrentContainer = z.infer<typeof ValidTorrentContainer>;
+
 export const FindValidTorrentContainerFlow = createFlowSchema(
   "download-item.find-valid-torrent-container",
   {
@@ -17,7 +49,7 @@ export const FindValidTorrentContainerFlow = createFlowSchema(
       availableDownloaders: z.array(z.string()).min(1),
       failedInfoHashes: z.array(z.hash("sha1")),
     }),
-    output: createPluginResultSchema(TorrentContainer),
+    output: createPluginResultSchema(ValidTorrentContainer),
   },
 );
 
