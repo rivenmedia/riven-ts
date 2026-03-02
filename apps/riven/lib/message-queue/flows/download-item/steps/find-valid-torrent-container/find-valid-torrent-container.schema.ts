@@ -25,7 +25,10 @@ const ShowMatchedFile = BaseMatchedFile.extend({
   episode: z.int().positive(),
 });
 
-const MatchedFile = z.union([MovieMatchedFile, ShowMatchedFile]);
+const MatchedFile = z.discriminatedUnion("type", [
+  MovieMatchedFile,
+  ShowMatchedFile,
+]);
 
 export type MatchedFile = z.infer<typeof MatchedFile>;
 
