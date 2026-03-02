@@ -124,7 +124,7 @@ export const validateTorrentContainer = async (
         });
       }
     } catch (error) {
-      logger.warn(
+      logger.debug(
         `File ${file.fileName} failed validation: ${
           error instanceof Error ? error.message : String(error)
         }`,
