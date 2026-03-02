@@ -1,5 +1,6 @@
 import {
   Episode,
+  ItemRequest,
   MediaEntry,
   Movie,
   Season,
@@ -30,6 +31,12 @@ it("returns all shows for the /shows path", async () => {
 
   const em = database.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
+
   const show = em.create(Show, {
     tvdbId: "1",
     title: "Example Show 1",
@@ -38,6 +45,7 @@ it("returns all shows for the /shows path", async () => {
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
+    itemRequest,
   });
 
   await em.flush();
@@ -90,6 +98,12 @@ it('does not return entries for the "all shows" path for shows that do not have 
 
   const em = database.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
+
   const show = em.create(Show, {
     tvdbId: "1",
     title: "Example Show 1",
@@ -98,6 +112,7 @@ it('does not return entries for the "all shows" path for shows that do not have 
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
+    itemRequest,
   });
 
   await em.flush();
@@ -140,12 +155,19 @@ it("returns all movies for the /movies path", async () => {
   const em = database.em.fork();
 
   for (let i = 1; i <= 3; i++) {
+    const itemRequest = em.create(ItemRequest, {
+      requestedBy: "@repo/plugin-test",
+      state: "completed",
+      type: "movie",
+    });
+
     const movie = em.create(Movie, {
       tmdbId: i.toString(),
       year: 2020,
       title: `Example Movie ${i.toString().padStart(2, "0")}`,
       state: "downloaded",
       contentRating: "unknown",
+      itemRequest,
     });
 
     em.create(MediaEntry, {
@@ -174,6 +196,12 @@ it("returns all seasons for a single show path", async () => {
 
   const em = database.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
+
   const show = em.create(Show, {
     tvdbId: "1",
     title: "Example Show 1",
@@ -182,6 +210,7 @@ it("returns all seasons for a single show path", async () => {
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
+    itemRequest,
   });
 
   await em.flush();
@@ -238,6 +267,12 @@ it("does not return entries for a season that does not have any episodes with a 
 
   const em = database.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
+
   const show = em.create(Show, {
     tvdbId: "1",
     title: "Example Show 1",
@@ -246,6 +281,7 @@ it("does not return entries for a season that does not have any episodes with a 
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
+    itemRequest,
   });
 
   await em.flush();
@@ -300,6 +336,12 @@ it("returns all episodes for a single season path", async () => {
 
   const em = database.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
+
   const show = em.create(Show, {
     tvdbId: "1",
     title: "Example Show 1",
@@ -308,6 +350,7 @@ it("returns all episodes for a single season path", async () => {
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
+    itemRequest,
   });
 
   await em.flush();
@@ -364,6 +407,12 @@ it("does not return entries for episodes that does not have a media entry when v
 
   const em = database.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
+
   const show = em.create(Show, {
     tvdbId: "1",
     title: "Example Show 1",
@@ -372,6 +421,7 @@ it("does not return entries for episodes that does not have a media entry when v
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
+    itemRequest,
   });
 
   await em.flush();
@@ -428,6 +478,12 @@ it("returns the media entry's filename when viewing a single movie's directory",
 
   const em = database.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "movie",
+  });
+
   const movie = em.create(Movie, {
     tmdbId: "1",
     year: 2020,
@@ -435,6 +491,7 @@ it("returns the media entry's filename when viewing a single movie's directory",
     state: "downloaded",
     type: "movie",
     contentRating: MovieContentRating.enum.g,
+    itemRequest,
   });
 
   em.create(MediaEntry, {
@@ -461,12 +518,19 @@ it('does not return entries for the "all movies" path when a movie does not have
   const em = database.em.fork();
 
   for (let i = 1; i <= 3; i++) {
+    const itemRequest = em.create(ItemRequest, {
+      requestedBy: "@repo/plugin-test",
+      state: "completed",
+      type: "movie",
+    });
+
     const movie = em.create(Movie, {
       tmdbId: i.toString(),
       year: 2020,
       title: `Example Movie ${i.toString().padStart(2, "0")}`,
       state: "downloaded",
       contentRating: "unknown",
+      itemRequest,
     });
 
     if (i === 1) {

@@ -1,4 +1,4 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 import { parse } from "@repo/util-rank-torrent-name";
 
@@ -45,6 +45,12 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
 
   const em = database.orm.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "movie",
+  });
+
   em.create(Movie, {
     id: 1,
     tmdbId: "123",
@@ -52,6 +58,7 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
     state: "indexed",
     title: "Test Movie",
     year: 2024,
+    itemRequest,
   });
 
   await em.flush();

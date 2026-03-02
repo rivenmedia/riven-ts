@@ -1,5 +1,10 @@
 import { getEventTypeFromSchema } from "@repo/util-plugin-sdk";
-import { Season, Show, Stream } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  ItemRequest,
+  Season,
+  Show,
+  Stream,
+} from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemDownloadErrorEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { parse } from "@repo/util-rank-torrent-name";
 
@@ -19,6 +24,12 @@ it(`enqueues a scrape for each individual season when a "${eventType}" event is 
 
   const flowAddSpy = vi.spyOn(flow, "add");
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
+
   const show = em.create(Show, {
     contentRating: "tv-14",
     state: "scraped",
@@ -26,6 +37,7 @@ it(`enqueues a scrape for each individual season when a "${eventType}" event is 
     tvdbId: "1",
     id: 1,
     status: "ended",
+    itemRequest,
   });
 
   await em.flush();
@@ -75,9 +87,15 @@ it(`enqueues a scrape for each individual season when a "${eventType}" event is 
 it(`enqueues a scrape for each individual season's episode when a "${eventType}" event is received for a season`, async ({
   actor,
 }) => {
+  const flowAddSpy = vi.spyOn(flow, "add");
+
   const em = database.em.fork();
 
-  const flowAddSpy = vi.spyOn(flow, "add");
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
 
   const show = em.create(Show, {
     contentRating: "tv-14",
@@ -86,6 +104,7 @@ it(`enqueues a scrape for each individual season's episode when a "${eventType}"
     tvdbId: "1",
     id: 1,
     status: "ended",
+    itemRequest,
   });
 
   await em.flush();
