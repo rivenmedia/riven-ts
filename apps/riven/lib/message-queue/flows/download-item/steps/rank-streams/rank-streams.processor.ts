@@ -79,7 +79,7 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
         b.data.resolution,
       );
 
-      return ResolutionRank[resA] - ResolutionRank[resB];
+      return ResolutionRank[resB] - ResolutionRank[resA];
     });
 
     return sortedTorrentsByResolution;
