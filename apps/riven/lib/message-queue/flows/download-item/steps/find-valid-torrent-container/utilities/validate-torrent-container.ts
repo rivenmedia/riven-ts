@@ -74,7 +74,7 @@ export const validateTorrentContainer = async (
       }
 
       if (item instanceof ShowLikeMediaItem) {
-        assert(fileData.type === "show", "File must be part of a show");
+        assert(fileData.type === "show", "File is a movie, but item is a show");
 
         assert(
           fileData.episodes[0],
