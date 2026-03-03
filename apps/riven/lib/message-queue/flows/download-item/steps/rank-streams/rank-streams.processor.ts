@@ -6,6 +6,7 @@ import {
 } from "@repo/util-rank-torrent-name";
 
 import { NotFoundError } from "@mikro-orm/core";
+import chalk from "chalk";
 
 import { database } from "../../../../../database/database.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
@@ -34,7 +35,10 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
         const stream = streams.find((s) => s.infoHash === hash);
 
         if (!stream) {
-          throw new NotFoundError(`No stream found for hash ${hash}`, Stream);
+          throw new NotFoundError(
+            `No stream found for hash ${chalk.bold(hash)}`,
+            Stream,
+          );
         }
 
         const { parsedData } = stream;

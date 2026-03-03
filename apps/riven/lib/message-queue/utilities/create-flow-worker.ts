@@ -2,6 +2,7 @@ import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-l
 
 import * as Sentry from "@sentry/node";
 import { UnrecoverableError, Worker, type WorkerOptions } from "bullmq";
+import chalk from "chalk";
 import assert from "node:assert";
 
 import { logger } from "../../utilities/logger/logger.ts";
@@ -58,7 +59,7 @@ export function createFlowWorker<
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
-    logger.error(`[${flowName}] ${error.message}`);
+    logger.error(`${chalk.dim(`[${flowName}]`)} ${error.message}`);
   });
 
   return worker;

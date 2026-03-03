@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import path from "node:path";
 import { createLogger, format, transports } from "winston";
 
@@ -5,13 +6,22 @@ import { settings } from "../settings.ts";
 
 const logDir = path.resolve(process.cwd(), settings.logDirectory);
 
-const logFormat = format.printf(function (info) {
-  return `${String(info["timestamp"])} - ${info.level}: ${JSON.stringify(
-    info["stack"] ?? info.message,
-    null,
-    2,
-  )}`;
-});
+const fileFormat = format.combine(
+  format.json({ space: 2 }),
+  format.printf(function (info) {
+    return chalk.reset(
+      `${String(info["timestamp"])} - ${info.level}: ${String(
+        info["stack"] ?? info.message,
+      )}`,
+    );
+  }),
+  format.uncolorize(),
+);
+
+const consoleFormat = format.printf(
+  ({ level, message, ...meta }) =>
+    `${chalk.dim.black(meta["timestamp"])} - ${level}: ${String(message)}`,
+);
 
 export const logger = createLogger({
   level: settings.logLevel,
@@ -35,8 +45,11 @@ if (settings.loggingEnabled) {
       new transports.Console({
         format: format.combine(
           format.json({ space: 2 }),
-          format.colorize(),
-          logFormat,
+          format.colorize({
+            level: process.stdout.isTTY,
+          }),
+          consoleFormat,
+          // logFormat,
         ),
       }),
     );
@@ -51,7 +64,7 @@ if (settings.loggingEnabled) {
         tailable: true,
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
-        zippedArchive: true,
+        format: fileFormat,
       }),
     );
 
@@ -62,6 +75,7 @@ if (settings.loggingEnabled) {
         tailable: true,
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
+        format: fileFormat,
       }),
     );
 
@@ -72,6 +86,7 @@ if (settings.loggingEnabled) {
         tailable: true,
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
+        format: fileFormat,
       }),
     );
   }

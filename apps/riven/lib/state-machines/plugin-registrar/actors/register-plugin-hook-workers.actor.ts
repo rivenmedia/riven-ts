@@ -1,4 +1,5 @@
 import { type Queue, Worker } from "bullmq";
+import chalk from "chalk";
 import os from "node:os";
 import { fromPromise } from "xstate";
 
@@ -80,8 +81,8 @@ export const registerPluginHookWorkers = fromPromise<
         );
 
         logger.debug(
-          `Registered worker for event "${eventName}" for plugin ${String(
-            pluginSymbol.description,
+          `Registered worker for event ${chalk.blue(eventName)} for ${chalk.bold(
+            String(pluginSymbol.description),
           )}`,
         );
 
