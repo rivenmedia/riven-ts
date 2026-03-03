@@ -135,7 +135,7 @@ export function rank(
 
   // Codec
   scoreParts["codec"] = data.codec
-    ? rankFromMap(data.codec.toLowerCase(), CODEC_MAP, settings, rankingModel)
+    ? rankFromMap(data.codec, CODEC_MAP, settings, rankingModel)
     : 0;
 
   // HDR
