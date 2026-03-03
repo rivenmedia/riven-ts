@@ -29,7 +29,7 @@ export function trashHandler(
     return true;
   }
 
-  if (data.audio?.some((a) => a.toLowerCase().includes("hq clean audio"))) {
+  if (data.audio?.some((a) => /hq clean audio/i.exec(a))) {
     failed.add("trash_audio");
     return true;
   }
@@ -206,8 +206,8 @@ function checkFetchList(
   settings: Settings,
   failed: Set<string>,
 ): boolean {
-  for (const v of values) {
-    const entry = map.get(v);
+  for (const value of values) {
+    const entry = map.get(value.toLowerCase());
 
     if (!entry) {
       continue;
@@ -262,7 +262,7 @@ export function checkFetch(data: ParsedData, settings: Settings) {
   checkFetchMap(data.quality, QUALITY_MAP, settings, failed);
   checkFetchList(data.audio ?? [], AUDIO_MAP, settings, failed);
   checkFetchList(data.hdr ?? [], HDR_MAP, settings, failed);
-  checkFetchMap(data.codec?.toLowerCase(), CODEC_MAP, settings, failed);
+  checkFetchMap(data.codec, CODEC_MAP, settings, failed);
   checkFetchFlags(data, FLAG_MAP, settings, failed);
 
   return {

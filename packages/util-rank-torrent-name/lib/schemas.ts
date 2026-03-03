@@ -75,7 +75,9 @@ export const ParsedDataSchema = z
     converted: data.convert ?? false,
     remux:
       data.remux ??
-      ["remux", "bluray remux"].includes(data.quality?.toLowerCase() ?? ""),
+      (data.quality
+        ? ["remux", "bluray remux"].includes(data.quality.toLowerCase())
+        : false),
   }));
 
 export type ParsedData = z.infer<typeof ParsedDataSchema>;
