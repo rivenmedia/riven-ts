@@ -3,8 +3,6 @@ import {
   GarbageTorrentError,
   RTN,
   type RankedResult,
-  Resolution,
-  ResolutionRank,
 } from "@repo/util-rank-torrent-name";
 
 import { NotFoundError } from "@mikro-orm/core";
@@ -14,6 +12,7 @@ import { logger } from "../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../utilities/settings.ts";
 import { SkippedTorrentError } from "../../../scrape-item/steps/parse-scrape-results/utilities/validate-torrent.ts";
 import { rankStreamsProcessorSchema } from "./rank-streams.schema.ts";
+import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution.ts";
 
 export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
   async function ({ job }) {
@@ -70,17 +69,9 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
     }, []);
 
     const bucketedTorrents = rtnInstance.sortTorrents(rankedResults);
-    const sortedTorrentsByResolution = bucketedTorrents.sort((a, b) => {
-      const { data: resA = "unknown" } = Resolution.safeParse(
-        a.data.resolution,
-      );
-
-      const { data: resB = "unknown" } = Resolution.safeParse(
-        b.data.resolution,
-      );
-
-      return ResolutionRank[resB] - ResolutionRank[resA];
-    });
+    const sortedTorrentsByResolution = bucketedTorrents.sort(
+      sortByRankAndResolution,
+    );
 
     return sortedTorrentsByResolution;
   },

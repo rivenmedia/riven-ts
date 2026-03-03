@@ -39,20 +39,12 @@ const it = baseIt.extend<{
       tmdbId: "12345",
     });
 
-    em.create(Stream, {
-      infoHash: "1234567890123456789012345678901234567890",
-      parsedData: {} as never,
-    });
-
-    em.create(Stream, {
-      infoHash: "2234567890123456789012345678901234567890",
-      parsedData: {} as never,
-    });
-
-    em.create(Stream, {
-      infoHash: "3234567890123456789012345678901234567890",
-      parsedData: {} as never,
-    });
+    for (let i = 1; i <= 6; i++) {
+      em.create(Stream, {
+        infoHash: `${i.toString()}234567890123456789012345678901234567890`,
+        parsedData: {} as never,
+      });
+    }
 
     await em.flush();
 
@@ -60,10 +52,7 @@ const it = baseIt.extend<{
   },
 });
 
-it("does not include streams that throw GarbageTorrentError", async ({
-  item,
-  mockQueue,
-}) => {
+it("does not include trashed streams", async ({ item, mockQueue }) => {
   const job = await Job.create(mockQueue, "mock-rank-streams", {
     id: item.id,
     streams: {
@@ -88,24 +77,33 @@ it("does not include streams that throw GarbageTorrentError", async ({
   );
 });
 
-it("sorts ranked results using RTN", async ({ item, mockQueue }) => {
+it("sorts torrents by resolution and rank within the same resolution", async ({
+  item,
+  mockQueue,
+}) => {
   const job = await Job.create(mockQueue, "mock-rank-streams", {
     id: item.id,
     streams: {
-      "1234567890123456789012345678901234567890": "Test Movie 720p aac",
+      "1234567890123456789012345678901234567890": "Test Movie 720p",
       "2234567890123456789012345678901234567890": "Test Movie 720p DDP",
-      "3234567890123456789012345678901234567890": "Test Movie 720p atmos",
+      "3234567890123456789012345678901234567890": "Test Movie 1080p",
+      "4234567890123456789012345678901234567890": "Test Movie 1080p atmos",
+      "5234567890123456789012345678901234567890": "Test Movie",
+      "6234567890123456789012345678901234567890": "Test Movie mp3",
     },
     rtnSettings: createSettings({
       customRanks: {
         audio: {
-          aac: {
+          mp3: {
+            fetch: true,
             rank: 10000,
           },
           atmos: {
+            fetch: true,
             rank: 20000,
           },
           dolbyDigitalPlus: {
+            fetch: true,
             rank: 100000,
           },
         },
@@ -124,66 +122,14 @@ it("sorts ranked results using RTN", async ({ item, mockQueue }) => {
     }),
     expect.objectContaining({
       data: expect.objectContaining({
-        rawTitle: "Test Movie 720p atmos",
+        rawTitle: "Test Movie 1080p atmos",
       }),
     }),
     expect.objectContaining({
       data: expect.objectContaining({
-        rawTitle: "Test Movie 720p aac",
+        rawTitle: "Test Movie mp3",
       }),
     }),
-  ]);
-});
-
-it("uses the provided RTN settings and ranking model for ranking torrents", async ({
-  item,
-  mockQueue,
-}) => {
-  const job = await Job.create(mockQueue, "mock-rank-streams", {
-    id: item.id,
-    streams: {
-      "1234567890123456789012345678901234567890": "Test Movie 720p",
-      "2234567890123456789012345678901234567890": "Test Movie 1080p",
-      "3234567890123456789012345678901234567890": "Test Movie",
-    },
-    rtnSettings: createSettings({
-      resolutions: {
-        r1080p: false,
-        r720p: false,
-      },
-    }),
-    rtnRankingModel: defaultRankingModel,
-  });
-
-  const result = await rankStreamsProcessor({ job }, vi.fn());
-
-  expect(result).toEqual([
-    expect.objectContaining({
-      data: expect.objectContaining({
-        rawTitle: "Test Movie",
-      }),
-    }),
-  ]);
-});
-
-it("sorts torrents by resolution, with higher quality resolutions ranked higher", async ({
-  item,
-  mockQueue,
-}) => {
-  const job = await Job.create(mockQueue, "mock-rank-streams", {
-    id: item.id,
-    streams: {
-      "1234567890123456789012345678901234567890": "Test Movie 720p",
-      "2234567890123456789012345678901234567890": "Test Movie 1080p",
-      "3234567890123456789012345678901234567890": "Test Movie",
-    },
-    rtnSettings: createSettings(),
-    rtnRankingModel: defaultRankingModel,
-  });
-
-  const result = await rankStreamsProcessor({ job }, vi.fn());
-
-  expect(result).toEqual([
     expect.objectContaining({
       data: expect.objectContaining({
         rawTitle: "Test Movie 1080p",
