@@ -3,6 +3,8 @@ import {
   GarbageTorrentError,
   RTN,
   type RankedResult,
+  Resolution,
+  ResolutionRank,
 } from "@repo/util-rank-torrent-name";
 
 import { NotFoundError } from "@mikro-orm/core";
@@ -67,6 +69,19 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
       }
     }, []);
 
-    return rtnInstance.sortTorrents(rankedResults);
+    const bucketedTorrents = rtnInstance.sortTorrents(rankedResults);
+    const sortedTorrentsByResolution = bucketedTorrents.sort((a, b) => {
+      const { data: resA = "unknown" } = Resolution.safeParse(
+        a.data.resolution,
+      );
+
+      const { data: resB = "unknown" } = Resolution.safeParse(
+        b.data.resolution,
+      );
+
+      return ResolutionRank[resA] - ResolutionRank[resB];
+    });
+
+    return sortedTorrentsByResolution;
   },
 );

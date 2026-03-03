@@ -73,7 +73,7 @@ export const findValidTorrentContainerProcessor =
             },
           };
         } catch (error) {
-          logger.warn(
+          logger.debug(
             `${mediaItem.type} ${mediaItem.fullTitle} (${mediaItem.id.toString()}) - ${String(error)}`,
           );
 
@@ -81,8 +81,8 @@ export const findValidTorrentContainerProcessor =
         }
       }
 
-      logger.warn(
-        `Info hash ${infoHash} failed validation for all plugins for ${mediaItem.type} ${mediaItem.fullTitle} (${mediaItem.id.toString()})`,
+      logger.debug(
+        `Info hash ${infoHash} failed validation for all plugins for ${mediaItem.type} ${mediaItem.fullTitle}`,
       );
 
       await job.updateData({

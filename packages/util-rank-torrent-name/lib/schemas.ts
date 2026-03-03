@@ -91,3 +91,13 @@ export const Resolution = z.enum([
 ]);
 
 export type Resolution = z.infer<typeof Resolution>;
+
+export const ResolutionRank = Resolution.options.reduce<
+  Record<Resolution, number>
+>(
+  (acc, res, index) => ({
+    ...acc,
+    [res]: Resolution.options.length - index,
+  }),
+  {} as Record<Resolution, number>,
+);

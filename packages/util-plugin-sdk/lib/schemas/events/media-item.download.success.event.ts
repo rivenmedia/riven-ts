@@ -11,6 +11,7 @@ export const MediaItemDownloadSuccessEvent = createProgramEventSchema(
   "media-item.download.success",
   z.object({
     item: MediaItemInstance,
+    downloader: z.string(),
     durationFromRequestToDownload: z.number(),
   }),
 );
