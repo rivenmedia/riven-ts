@@ -75,15 +75,17 @@ export const ParsedDataSchema = z
     converted: data.convert ?? false,
     remux:
       data.remux ??
-      ["remux", "bluray remux"].includes(data.quality?.toLowerCase() ?? ""),
+      (data.quality
+        ? ["remux", "bluray remux"].includes(data.quality.toLowerCase())
+        : false),
   }));
 
 export type ParsedData = z.infer<typeof ParsedDataSchema>;
 
 export const Resolution = z.enum([
   "2160p",
-  "1080p",
   "1440p",
+  "1080p",
   "720p",
   "480p",
   "360p",
@@ -91,3 +93,13 @@ export const Resolution = z.enum([
 ]);
 
 export type Resolution = z.infer<typeof Resolution>;
+
+export const ResolutionRank = Resolution.options.reduce<
+  Record<Resolution, number>
+>(
+  (acc, res, index) => ({
+    ...acc,
+    [res]: Resolution.options.length - index,
+  }),
+  {} as Record<Resolution, number>,
+);

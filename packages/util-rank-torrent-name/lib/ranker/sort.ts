@@ -12,7 +12,7 @@ export function sortTorrents(
     resolutions.size > 0
       ? torrents.filter((rank) =>
           resolutions.has(
-            RESOLUTION_MAP.get(rank.data.resolution) ?? "unknown",
+            RESOLUTION_MAP.get(rank.data.resolution.toLowerCase()) ?? "unknown",
           ),
         )
       : torrents;

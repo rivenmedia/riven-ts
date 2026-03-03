@@ -12,6 +12,7 @@ import { logger } from "../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../utilities/settings.ts";
 import { SkippedTorrentError } from "../../../scrape-item/steps/parse-scrape-results/utilities/validate-torrent.ts";
 import { rankStreamsProcessorSchema } from "./rank-streams.schema.ts";
+import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution.ts";
 
 export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
   async function ({ job }) {
@@ -67,6 +68,11 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
       }
     }, []);
 
-    return rtnInstance.sortTorrents(rankedResults);
+    const bucketedTorrents = rtnInstance.sortTorrents(rankedResults);
+    const sortedTorrentsByResolution = bucketedTorrents.sort(
+      sortByRankAndResolution,
+    );
+
+    return sortedTorrentsByResolution;
   },
 );

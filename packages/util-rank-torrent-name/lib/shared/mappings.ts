@@ -16,36 +16,36 @@ export const QUALITY_MAP = new Map<
   [keyof CustomRanksConfig, keyof RankingModel]
 >([
   // Quality
-  ["WEB", ["quality", "web"]],
-  ["WEB-DL", ["quality", "webdl"]],
-  ["BluRay", ["quality", "bluray"]],
-  ["HDTV", ["quality", "hdtv"]],
-  ["VHS", ["quality", "vhs"]],
-  ["WEBMux", ["quality", "webmux"]],
-  ["BluRay REMUX", ["quality", "remux"]],
-  ["REMUX", ["quality", "remux"]],
-  ["DVD", ["quality", "dvd"]],
+  ["web", ["quality", "web"]],
+  ["web-dl", ["quality", "webdl"]],
+  ["bluray", ["quality", "bluray"]],
+  ["hdtv", ["quality", "hdtv"]],
+  ["vhs", ["quality", "vhs"]],
+  ["webmux", ["quality", "webmux"]],
+  ["bluray remux", ["quality", "remux"]],
+  ["remux", ["quality", "remux"]],
+  ["dvd", ["quality", "dvd"]],
 
   // Rips
-  ["WEBRip", ["rips", "webrip"]],
-  ["WEB-DLRip", ["rips", "webdlrip"]],
-  ["UHDRip", ["rips", "uhdrip"]],
-  ["HDRip", ["rips", "hdrip"]],
-  ["DVDRip", ["rips", "dvdrip"]],
-  ["BDRip", ["rips", "bdrip"]],
-  ["BRRip", ["rips", "brrip"]],
-  ["VHSRip", ["rips", "vhsrip"]],
-  ["PPVRip", ["rips", "ppvrip"]],
-  ["SATRip", ["rips", "satrip"]],
-  ["TVRip", ["rips", "tvrip"]],
+  ["webrip", ["rips", "webrip"]],
+  ["web-dlrip", ["rips", "webdlrip"]],
+  ["uhdrip", ["rips", "uhdrip"]],
+  ["hdrip", ["rips", "hdrip"]],
+  ["dvdrip", ["rips", "dvdrip"]],
+  ["bdrip", ["rips", "bdrip"]],
+  ["brrip", ["rips", "brrip"]],
+  ["vhsrip", ["rips", "vhsrip"]],
+  ["ppvrip", ["rips", "ppvrip"]],
+  ["satrip", ["rips", "satrip"]],
+  ["tvrip", ["rips", "tvrip"]],
 
   // Trash
-  ["TeleCine", ["trash", "telecine"]],
-  ["TeleSync", ["trash", "telesync"]],
-  ["SCR", ["trash", "screener"]],
-  ["R5", ["trash", "r5"]],
-  ["CAM", ["trash", "cam"]],
-  ["PDTV", ["trash", "pdtv"]],
+  ["telecine", ["trash", "telecine"]],
+  ["telesync", ["trash", "telesync"]],
+  ["screener", ["trash", "screener"]],
+  ["r5", ["trash", "r5"]],
+  ["cam", ["trash", "cam"]],
+  ["pdtv", ["trash", "pdtv"]],
 ]);
 
 export const CODEC_MAP = new Map<
@@ -67,10 +67,10 @@ export const HDR_MAP = new Map<
   string,
   [keyof CustomRanksConfig, keyof RankingModel]
 >([
-  ["DV", ["hdr", "dolbyVision"]],
-  ["HDR", ["hdr", "hdr"]],
-  ["HDR10+", ["hdr", "hdr10plus"]],
-  ["SDR", ["hdr", "sdr"]],
+  ["dv", ["hdr", "dolbyVision"]],
+  ["hdr", ["hdr", "hdr"]],
+  ["hdr10+", ["hdr", "hdr10plus"]],
+  ["sdr", ["hdr", "sdr"]],
 ]);
 
 export const AUDIO_MAP = new Map<
@@ -129,12 +129,12 @@ export const FLAG_MAP = new Map<
 
 // Trash quality values for quick lookup
 export const TRASH_QUALITIES = new Set([
-  "CAM",
-  "PDTV",
-  "R5",
-  "SCR",
-  "TeleCine",
-  "TeleSync",
+  "cam",
+  "pdtv",
+  "r5",
+  "screener",
+  "telecine",
+  "telesync",
 ]);
 
 export const RESOLUTION_MAP = new Map<string, Resolution>([

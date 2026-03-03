@@ -1,4 +1,3 @@
-import { ShowLikeMediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import { type ParsedData, parse } from "@repo/util-rank-torrent-name";
 
 import { UnrecoverableError } from "bullmq";
@@ -27,8 +26,7 @@ export const parseScrapeResultsProcessor =
     );
 
     const item = await database.mediaItem.findOneOrFail(job.data.id);
-    const { title: itemTitle } =
-      item instanceof ShowLikeMediaItem ? await item.getShow() : item;
+    const { fullTitle: itemTitle } = item;
 
     if (!Object.keys(aggregatedResults).length) {
       throw new UnrecoverableError(`No streams found for ${itemTitle}`);

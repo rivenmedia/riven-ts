@@ -17,6 +17,27 @@ import { logger } from "../../../../../../utilities/logger/logger.ts";
 import type { MatchedFile } from "../find-valid-torrent-container.schema.ts";
 import type { TorrentContainer } from "@repo/util-plugin-sdk/schemas/torrents/torrent-container";
 
+async function getExpectedFileCount(item: MediaItem) {
+  if (item instanceof Show) {
+    const seasons = await item.seasons.loadItems();
+
+    const expectedSeasons =
+      item.status === "continuing" ? seasons.length - 1 : seasons.length;
+
+    return reduceAsync(
+      seasons.slice(0, Math.max(1, expectedSeasons)),
+      async (acc, season) => acc + (await season.episodes.loadCount()),
+      0,
+    );
+  }
+
+  if (item instanceof Season) {
+    return item.episodes.loadCount();
+  }
+
+  return 1;
+}
+
 export const validateTorrentContainer = async (
   item: MediaItem,
   container: TorrentContainer,
@@ -25,32 +46,12 @@ export const validateTorrentContainer = async (
     `Validating torrent container for item ${item.fullTitle}: ${container.infoHash}`,
   );
 
-  if (item instanceof Show) {
-    const seasons = await item.seasons.loadItems();
+  const expectedFileCount = await getExpectedFileCount(item);
 
-    const expectedSeasons =
-      item.status === "continuing" ? seasons.length - 1 : seasons.length;
-
-    const expectedEpisodes = await reduceAsync(
-      seasons.slice(0, Math.max(1, expectedSeasons)),
-      async (acc, season) => acc + (await season.episodes.loadCount()),
-      0,
-    );
-
-    assert(
-      container.files.length >= expectedEpisodes,
-      `Show torrent container must have at least ${expectedEpisodes.toString()} files, but has ${container.files.length.toString()}`,
-    );
-  }
-
-  if (item instanceof Season) {
-    const expectedEpisodes = await item.episodes.loadCount();
-
-    assert(
-      container.files.length >= expectedEpisodes,
-      `Season torrent container must have at least ${expectedEpisodes.toString()} files, but has ${container.files.length.toString()}`,
-    );
-  }
+  assert(
+    container.files.length >= expectedFileCount,
+    `${item.type.substring(0, 1).toUpperCase() + item.type.substring(1)} torrent container must have at least ${expectedFileCount.toString()} files, but has ${container.files.length.toString()}`,
+  );
 
   const validFiles: MatchedFile[] = [];
 
@@ -133,8 +134,8 @@ export const validateTorrentContainer = async (
   }
 
   assert(
-    validFiles.length > 0,
-    `No valid files found in torrent container ${container.infoHash}`,
+    expectedFileCount === validFiles.length,
+    `Expected ${expectedFileCount.toString()} valid files, but found ${validFiles.length.toString()}`,
   );
 
   return validFiles;

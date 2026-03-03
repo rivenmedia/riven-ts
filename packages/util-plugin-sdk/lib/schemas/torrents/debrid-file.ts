@@ -8,7 +8,7 @@ export const DebridFile = z.object({
   fileName: z
     .string()
     .refine(
-      (name) => !name.toLowerCase().includes("sample"),
+      (name) => !/sample/i.test(name),
       "File name should not contain the word 'sample'",
     )
     .refine(

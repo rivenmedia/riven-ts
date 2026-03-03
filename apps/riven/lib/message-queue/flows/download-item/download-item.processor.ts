@@ -36,6 +36,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
       sendEvent({
         type: "riven.media-item.download.success",
         item: updatedItem,
+        downloader: finalResult.plugin,
         durationFromRequestToDownload: DateTime.utc()
           .diff(DateTime.fromJSDate(updatedItem.createdAt))
           .as("seconds"),
