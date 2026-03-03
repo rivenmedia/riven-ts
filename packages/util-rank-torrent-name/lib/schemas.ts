@@ -82,8 +82,8 @@ export type ParsedData = z.infer<typeof ParsedDataSchema>;
 
 export const Resolution = z.enum([
   "2160p",
-  "1080p",
   "1440p",
+  "1080p",
   "720p",
   "480p",
   "360p",
