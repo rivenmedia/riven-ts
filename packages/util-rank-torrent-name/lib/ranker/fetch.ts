@@ -24,12 +24,12 @@ export function trashHandler(
     return false;
   }
 
-  if (data.quality && TRASH_QUALITIES.has(data.quality)) {
+  if (data.quality && TRASH_QUALITIES.has(data.quality.toLowerCase())) {
     failed.add("trash_quality");
     return true;
   }
 
-  if (data.audio?.includes("HQ Clean Audio")) {
+  if (data.audio?.some((a) => a.toLowerCase().includes("hq clean audio"))) {
     failed.add("trash_audio");
     return true;
   }
@@ -160,7 +160,8 @@ function fetchResolution(
     return false;
   }
 
-  const normalisedRes = RESOLUTION_MAP.get(data.resolution) ?? "unknown";
+  const normalisedRes =
+    RESOLUTION_MAP.get(data.resolution.toLowerCase()) ?? "unknown";
   const settingsKey = RESOLUTION_SETTINGS_MAP.get(normalisedRes) ?? "unknown";
   const enabled = settings.resolutions[settingsKey];
 
@@ -182,7 +183,7 @@ function checkFetchMap(
     return false;
   }
 
-  const entry = map.get(value);
+  const entry = map.get(value.toLowerCase());
 
   if (!entry) {
     return false;

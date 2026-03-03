@@ -14,7 +14,7 @@ const TorrentioScrapeResponse = z.object({
   streams: z.array(
     z.object({
       title: z.string(),
-      infoHash: z.string(),
+      infoHash: z.hash("sha1"),
     }),
   ),
 });
