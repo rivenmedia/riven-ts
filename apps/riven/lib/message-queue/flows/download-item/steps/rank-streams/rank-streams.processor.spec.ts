@@ -20,7 +20,13 @@ const it = baseIt.extend<{
   item: MediaItem;
   mockQueue: Queue;
 }>({
-  mockQueue: createQueue("mock-queue"),
+  mockQueue: async ({}, use) => {
+    const queue = createQueue("mock-queue");
+
+    await use(queue);
+
+    await queue.close();
+  },
   item: async ({}, use) => {
     const em = database.em.fork();
 
