@@ -1,5 +1,4 @@
 import {
-  Episode,
   type MediaItem,
   Movie,
   Season,
@@ -82,11 +81,6 @@ export const validateTorrentContainer = async (
         );
 
         assert(
-          fileData.seasons[0],
-          "File must have at least one season number",
-        );
-
-        assert(
           !fileData.episodes.includes(0),
           "File must not have unknown episode numbers",
         );
@@ -96,17 +90,10 @@ export const validateTorrentContainer = async (
           "File must not have unknown season numbers",
         );
 
-        const episode = await database.episode.findOne(
-          {
-            ...(item instanceof Episode ? { id: item.id } : {}),
-            season: {
-              ...(item instanceof Season ? { id: item.id } : {}),
-              number: fileData.seasons[0],
-              ...(item instanceof Show ? { show: { id: item.id } } : {}),
-            },
-            number: fileData.episodes[0],
-          },
-          { populate: ["$infer"] },
+        const episode = await database.episode.findAbsoluteEpisode(
+          item.tvdbId,
+          fileData.episodes[0],
+          fileData.seasons[0],
         );
 
         assert(
@@ -120,7 +107,7 @@ export const validateTorrentContainer = async (
           downloadUrl: file.downloadUrl,
           matchedMediaItemId: item.id,
           type: "show",
-          season: fileData.seasons[0],
+          season: fileData.seasons[0] ?? null,
           episode: fileData.episodes[0],
         });
       }

@@ -18,6 +18,8 @@ import {
   type Options,
 } from "@mikro-orm/postgresql";
 
+import type { EpisodeRepository } from "@repo/util-plugin-sdk/dto/repositories/episode.repository";
+
 export interface Services {
   orm: MikroORM;
   em: EntityManager;
@@ -25,7 +27,7 @@ export interface Services {
   mediaItem: EntityRepository<MediaItem>;
   itemRequest: EntityRepository<ItemRequest>;
   movie: EntityRepository<Movie>;
-  episode: EntityRepository<Episode>;
+  episode: EpisodeRepository;
   show: EntityRepository<Show>;
   season: EntityRepository<Season>;
   mediaEntry: EntityRepository<MediaEntry>;

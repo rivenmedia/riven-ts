@@ -95,16 +95,15 @@ export async function persistDownloadResults({
         continue;
       }
 
-      const episode = await database.episode.findOneOrFail(
-        {
-          ...(existingItem instanceof Episode ? { id: existingItem.id } : {}),
-          season: {
-            ...(existingItem instanceof Season ? { id: existingItem.id } : {}),
-            number: file.season,
-          },
-          number: file.episode,
-        },
-        { populate: ["$infer"] },
+      const episode = await database.episode.findAbsoluteEpisode(
+        existingItem.tvdbId,
+        file.episode,
+        file.season ?? undefined,
+      );
+
+      assert(
+        episode,
+        `File ${file.fileName} does not correspond to a valid episode`,
       );
 
       const ignoredStates = MediaItemState.exclude(["completed", "downloaded"]);

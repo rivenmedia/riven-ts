@@ -1,6 +1,7 @@
 import {
   BeforeCreate,
   Entity,
+  EntityRepositoryType,
   type EventArgs,
   type Hidden,
   ManyToOne,
@@ -15,13 +16,16 @@ import {
   ShowContentRating,
   ShowContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
+import { EpisodeRepository } from "../../repositories/episode.repository.ts";
 import { MediaEntry } from "../filesystem/media-entry.entity.ts";
 import { Season } from "./season.entity.ts";
 import { ShowLikeMediaItem } from "./show-like.entity.ts";
 
 @ObjectType()
-@Entity()
+@Entity({ repository: () => EpisodeRepository })
 export class Episode extends ShowLikeMediaItem {
+  [EntityRepositoryType]?: EpisodeRepository;
+
   @Field()
   @Property()
   @Min(1)
