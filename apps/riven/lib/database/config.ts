@@ -11,6 +11,7 @@ import {
   SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
 
+// eslint-disable-next-line no-restricted-imports
 import { type Options, PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 

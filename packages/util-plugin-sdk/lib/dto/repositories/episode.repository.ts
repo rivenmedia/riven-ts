@@ -1,4 +1,4 @@
-import { EntityRepository, type FilterQuery } from "@mikro-orm/sqlite";
+import { EntityRepository, type FilterQuery } from "@mikro-orm/core";
 
 import { Episode } from "../entities/index.ts";
 
