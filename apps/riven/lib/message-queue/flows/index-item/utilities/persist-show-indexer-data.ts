@@ -50,7 +50,6 @@ export async function persistShowIndexerData({
       const show = transaction.create(Show, {
         title: item.title,
         contentRating: item.contentRating,
-        state: "indexed",
         imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
         tvdbId,
         status: item.status,
@@ -72,15 +71,17 @@ export async function persistShowIndexerData({
       const sortedSeasons = item.seasons.sort((a, b) => a.number - b.number);
 
       for (const season of sortedSeasons) {
-        const seasonYear = season.episodes[0]?.airedAt
-          ? DateTime.fromISO(season.episodes[0].airedAt).year
+        const seasonFirstAired = season.episodes[0]?.airedAt ?? null;
+
+        const seasonYear = seasonFirstAired
+          ? DateTime.fromISO(seasonFirstAired).year
           : null;
 
         const seasonEntry = transaction.create(Season, {
           title: `Season ${season.number.toString().padStart(2, "0")}`,
           year: seasonYear,
           number: season.number,
-          state: "indexed",
+          airedAt: seasonFirstAired,
         });
 
         show.seasons.add(seasonEntry);
@@ -101,8 +102,8 @@ export async function persistShowIndexerData({
             contentRating: episode.contentRating,
             number: episode.number,
             title: episode.title,
-            state: "indexed",
             year: episodeYear,
+            airedAt: episode.airedAt ?? null,
           });
 
           seasonEntry.episodes.add(episodeEntry);

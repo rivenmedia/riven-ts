@@ -21,7 +21,7 @@ export class EpisodeRepository extends EntityRepository<Episode> {
           }
     ) satisfies FilterQuery<Episode>;
 
-    return this.em.findOne(Episode, query, {
+    return this.findOne(query, {
       populate: ["$infer"],
     });
   }

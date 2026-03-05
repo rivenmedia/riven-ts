@@ -24,7 +24,7 @@ import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { MediaItemType } from "../../enums/media-item-type.enum.ts";
 import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
 import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
-import { ItemRequest, type MediaEntry } from "../index.ts";
+import { ItemRequest, MediaEntry } from "../index.ts";
 import { Stream } from "../streams/stream.entity.ts";
 
 @ObjectType()
@@ -146,8 +146,16 @@ export abstract class MediaItem {
   guid?: string | null;
 
   @Field(() => MediaItemState.enum)
-  @Enum(() => MediaItemState.enum)
-  state!: MediaItemState;
+  @Enum({
+    items: () => MediaItemState.enum,
+    onCreate(entity: Partial<MediaItem>) {
+      const isUnreleased =
+        entity.airedAt && DateTime.fromJSDate(entity.airedAt) > DateTime.now();
+
+      return isUnreleased ? "unreleased" : "indexed";
+    },
+  })
+  state!: Opt<MediaItemState>;
 
   @Field(() => Number)
   @Property()

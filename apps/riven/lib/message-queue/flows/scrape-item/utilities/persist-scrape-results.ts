@@ -59,7 +59,6 @@ export async function persistScrapeResults({
     existingItem.failedAttempts++;
   }
 
-  existingItem.state = "scraped";
   existingItem.scrapedAt = DateTime.now().toJSDate();
   existingItem.scrapedTimes++;
 
