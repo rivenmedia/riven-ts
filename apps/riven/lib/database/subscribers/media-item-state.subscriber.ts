@@ -10,7 +10,7 @@ import type {
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
 export class MediaItemStateSubscriber implements EventSubscriber {
-  onFlush({ uow }: FlushEventArgs): void {
+  async onFlush({ uow }: FlushEventArgs): Promise<void> {
     const trackedItems = new Map<
       MediaItem,
       ChangeSet<Partial<MediaItem>> | null
@@ -29,7 +29,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     }
 
     for (const [item, changeSet] of trackedItems) {
-      const nextState = this.#computeState(item);
+      const nextState = await this.#computeState(item);
 
       if (nextState === item.state) {
         continue;
@@ -45,23 +45,27 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     }
   }
 
-  #computeState(item: MediaItem): MediaItemState {
+  async #computeState(item: MediaItem): Promise<MediaItemState> {
     if (item.state === "paused" || item.state === "failed") {
       return item.state;
     }
 
     if (item instanceof Episode || item instanceof Movie) {
-      const hasMediaEntry = item.filesystemEntries
-        .getItems(false)
-        .some((entry) => entry.type === "media");
+      const filesystemEntries = await item.filesystemEntries.loadItems();
+      const hasMediaEntry = filesystemEntries.some(
+        (entry) => entry.type === "media",
+      );
 
       if (hasMediaEntry) {
         return "downloaded";
       }
     }
 
-    const blacklistedStreams = new Set(item.blacklistedStreams.getItems(false));
-    const streams = item.streams.getItems(false);
+    const blacklistedStreams = new Set(
+      await item.blacklistedStreams.loadItems(),
+    );
+    const streams = await item.streams.loadItems();
+
     const hasAvailableStreams = streams.some(
       (stream) => !blacklistedStreams.has(stream),
     );
