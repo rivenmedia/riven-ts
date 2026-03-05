@@ -1,4 +1,5 @@
 import {
+  Episode,
   type MediaItem,
   Movie,
   Season,
@@ -104,14 +105,33 @@ export const validateTorrentContainer = async (
           `File must correspond to a valid episode in ${item.fullTitle}`,
         );
 
+        const episodeSeasonNumber = episode.season.getProperty("number");
+
+        if (item instanceof Season) {
+          assert(
+            episodeSeasonNumber === item.number,
+            `File must correspond to a valid episode in ${item.fullTitle}`,
+          );
+        }
+
+        if (item instanceof Episode) {
+          const itemSeasonNumber = item.season.getProperty("number");
+
+          assert(
+            episode.number === item.number &&
+              episodeSeasonNumber === itemSeasonNumber,
+            `Incorrect episode for ${item.fullTitle}`,
+          );
+        }
+
         validFiles.push({
           fileName: file.fileName,
           fileSize: file.fileSize,
           downloadUrl: file.downloadUrl,
           matchedMediaItemId: item.id,
           type: "show",
-          season: fileData.seasons[0] ?? null,
-          episode: fileData.episodes[0],
+          season: episodeSeasonNumber,
+          episode: episode.number,
         });
       }
     } catch (error) {

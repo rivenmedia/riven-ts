@@ -21,7 +21,7 @@ const MovieMatchedFile = BaseMatchedFile.extend({
 
 const ShowMatchedFile = BaseMatchedFile.extend({
   type: z.literal("show"),
-  season: z.int().positive().nullable(),
+  season: z.int().positive(),
   episode: z.int().positive(),
 });
 

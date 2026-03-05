@@ -98,7 +98,7 @@ export async function persistDownloadResults({
           const episode = await database.episode.findAbsoluteEpisode(
             existingItem.tvdbId,
             file.episode,
-            file.season ?? undefined,
+            file.season,
           );
 
           assert(
@@ -135,16 +135,12 @@ export async function persistDownloadResults({
               downloadUrl: file.downloadUrl,
             }),
           );
-
-          transaction.persist(episode);
         }
       }
 
       await validateOrReject(existingItem);
 
-      await transaction.flush();
-
-      return transaction.refreshOrFail(existingItem);
+      return existingItem;
     });
   } catch (error) {
     const errorMessage = z

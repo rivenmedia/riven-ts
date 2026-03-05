@@ -61,9 +61,10 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     }
 
     const blacklistedStreams = new Set(item.blacklistedStreams.getItems(false));
-    const hasAvailableStreams = item.streams
-      .getItems(false)
-      .some((stream) => !blacklistedStreams.has(stream));
+    const streams = item.streams.getItems(false);
+    const hasAvailableStreams = streams.some(
+      (stream) => !blacklistedStreams.has(stream),
+    );
 
     if (hasAvailableStreams) {
       return "scraped";
