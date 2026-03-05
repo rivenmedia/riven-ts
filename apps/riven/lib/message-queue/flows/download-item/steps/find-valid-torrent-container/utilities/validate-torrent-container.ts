@@ -105,7 +105,7 @@ export const validateTorrentContainer = async (
           `File must correspond to a valid episode in ${item.fullTitle}`,
         );
 
-        const episodeSeasonNumber = episode.season.getProperty("number");
+        const episodeSeasonNumber = await episode.season.loadProperty("number");
 
         if (item instanceof Season) {
           assert(
@@ -115,7 +115,7 @@ export const validateTorrentContainer = async (
         }
 
         if (item instanceof Episode) {
-          const itemSeasonNumber = item.season.getProperty("number");
+          const itemSeasonNumber = await item.season.loadProperty("number");
 
           assert(
             episode.number === item.number &&
