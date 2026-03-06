@@ -87,7 +87,9 @@ export async function persistDownloadResults({
         for (const file of container.files) {
           assert(
             file.type === "show",
-            `Expected file type "show", got "${file.type}"`,
+            new UnrecoverableError(
+              `Expected file type "show", got "${file.type}"`,
+            ),
           );
 
           const episode = await database.episode.findAbsoluteEpisode(
