@@ -134,6 +134,8 @@ export async function persistDownloadResults({
               downloadUrl: file.downloadUrl,
             }),
           );
+
+          transaction.persist(episode);
         }
       }
 

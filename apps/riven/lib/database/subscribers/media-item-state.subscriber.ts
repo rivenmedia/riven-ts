@@ -233,7 +233,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       );
 
       if (hasMediaEntry) {
-        return "completed";
+        return "downloaded";
       }
     }
 
