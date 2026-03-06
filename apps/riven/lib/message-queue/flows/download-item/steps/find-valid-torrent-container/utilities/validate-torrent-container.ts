@@ -69,7 +69,6 @@ export const validateTorrentContainer = async (
           fileSize: file.fileSize,
           downloadUrl: file.downloadUrl,
           matchedMediaItemId: item.id,
-          type: "movie",
         });
       }
 
@@ -128,10 +127,7 @@ export const validateTorrentContainer = async (
           fileName: file.fileName,
           fileSize: file.fileSize,
           downloadUrl: file.downloadUrl,
-          matchedMediaItemId: item.id,
-          type: "show",
-          season: episodeSeasonNumber,
-          episode: episode.number,
+          matchedMediaItemId: episode.id,
         });
       }
     } catch (error) {

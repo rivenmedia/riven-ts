@@ -58,6 +58,23 @@ export async function persistDownloadResults({
   );
 
   try {
+    const episodes = await database.episode.find({
+      id: {
+        $in: container.files.map((file) => file.matchedMediaItemId),
+      },
+    });
+
+    assert(
+      episodes.length === container.files.length,
+      new UnrecoverableError(
+        "Unable to find all matched media items from the torrent container",
+      ),
+    );
+
+    const episodeMap = new Map<number, Episode>(
+      episodes.map((episode) => [episode.id, episode]),
+    );
+
     return await database.em.fork().transactional(async (transaction) => {
       assert(
         existingItem.streams[0],
@@ -85,18 +102,7 @@ export async function persistDownloadResults({
 
       if (existingItem instanceof Show || existingItem instanceof Season) {
         for (const file of container.files) {
-          assert(
-            file.type === "show",
-            new UnrecoverableError(
-              `Expected file type "show", got "${file.type}"`,
-            ),
-          );
-
-          const episode = await database.episode.findAbsoluteEpisode(
-            existingItem.tvdbId,
-            file.episode,
-            file.season,
-          );
+          const episode = episodeMap.get(file.matchedMediaItemId);
 
           assert(
             episode,
