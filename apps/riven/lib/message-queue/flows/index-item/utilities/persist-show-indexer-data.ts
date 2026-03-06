@@ -54,7 +54,7 @@ export async function persistShowIndexerData({
         tvdbId,
         status: item.status,
         posterPath: item.posterUrl ?? null,
-        airedAt: firstAired?.toJSDate() ?? null,
+        airedAt: firstAired?.toISODate() ?? null,
         year: firstAired?.year ?? null,
         country: item.country ?? null,
         language: item.language ?? null,
