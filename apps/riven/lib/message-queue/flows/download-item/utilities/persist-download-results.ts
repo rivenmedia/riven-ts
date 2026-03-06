@@ -48,8 +48,10 @@ export async function persistDownloadResults({
     new UnrecoverableError(`Media item with ID ${id.toString()} not found`),
   );
 
+  const allowedStates: MediaItemState[] = ["scraped", "ongoing"];
+
   assert(
-    existingItem.state === "scraped",
+    allowedStates.includes(existingItem.state),
     new MediaItemDownloadErrorIncorrectState({
       item: existingItem,
     }),

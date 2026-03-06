@@ -4,6 +4,7 @@ import {
   Movie,
   Season,
   Show,
+  type ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
 
 import { DateTime } from "luxon";
@@ -15,6 +16,8 @@ import type {
   UnitOfWork,
 } from "@mikro-orm/core";
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
+
+type NextStatesMap = Map<MediaItem, MediaItemState>;
 
 export class MediaItemStateSubscriber implements EventSubscriber {
   async onFlush({ uow }: FlushEventArgs): Promise<void> {
@@ -37,13 +40,22 @@ export class MediaItemStateSubscriber implements EventSubscriber {
 
     const seasonsAwaitingUpdate = new Set<Season>();
     const showsAwaitingUpdate = new Set<Show>();
-    const nextStatesMap = new Map<MediaItem, MediaItemState>();
+    const nextStatesMap: NextStatesMap = new Map();
 
     // Process direct updates from the unit of work
     for (const [item, changeSet] of trackedItems) {
-      await this.#updateState(item, changeSet, uow, nextStatesMap);
+      const stateChanged = await this.#maybeUpdateState(
+        item,
+        changeSet,
+        uow,
+        nextStatesMap,
+      );
 
-      if (item instanceof Season || item instanceof Episode) {
+      if (!stateChanged) {
+        continue;
+      }
+
+      if (item instanceof Season) {
         showsAwaitingUpdate.add(await item.getShow());
       }
 
@@ -54,40 +66,136 @@ export class MediaItemStateSubscriber implements EventSubscriber {
 
     // Handle season state propagation
     for (const season of seasonsAwaitingUpdate) {
-      await this.#updateState(season, null, uow, nextStatesMap);
+      const stateChanged = await this.#maybeUpdateState(
+        season,
+        null,
+        uow,
+        nextStatesMap,
+      );
+
+      if (stateChanged) {
+        showsAwaitingUpdate.add(await season.getShow());
+      }
     }
 
     // Handle show state propagation
     for (const show of showsAwaitingUpdate) {
-      await this.#updateState(show, null, uow, nextStatesMap);
+      await this.#maybeUpdateState(show, null, uow, nextStatesMap);
     }
   }
 
-  #computeNextState(
+  async #computeNextState(
     entity: MediaItem,
-    nextStatesMap: Map<MediaItem, MediaItemState>,
+    nextStatesMap: NextStatesMap,
   ): Promise<MediaItemState> {
     if (entity instanceof Season) {
-      return this.#computeSeasonState(entity, nextStatesMap);
+      return this.#computeStateWithChildren(
+        entity,
+        await entity.episodes.loadItems(),
+        nextStatesMap,
+      );
     }
 
     if (entity instanceof Show) {
-      return this.#computeShowState(entity, nextStatesMap);
+      return this.#computeStateWithChildren(
+        entity,
+        await entity.seasons.loadItems(),
+        nextStatesMap,
+      );
     }
 
     return this.#computeState(entity);
   }
 
-  async #updateState(
+  #buildChildrenStateCountMap(
+    children: MediaItem[],
+    nextStatesMap: NextStatesMap,
+  ) {
+    return children.reduce<Partial<Record<MediaItemState, number>>>(
+      (acc, child) => {
+        const childState = nextStatesMap.get(child) ?? child.state;
+
+        return {
+          ...acc,
+          [childState]: (acc[childState] ?? 0) + 1,
+        };
+      },
+      {},
+    );
+  }
+
+  #determineFixedState(item: MediaItem) {
+    if (item.state === "paused" || item.state === "failed") {
+      return item.state;
+    }
+
+    return null;
+  }
+
+  #determineParentStateFromChildren(
+    parent: ShowLikeMediaItem,
+    children: MediaItem[],
+    nextStatesMap: NextStatesMap,
+  ): MediaItemState | null {
+    if (children.length === 0) {
+      return null;
+    }
+
+    const childrenStateCountMap = this.#buildChildrenStateCountMap(
+      children,
+      nextStatesMap,
+    );
+
+    const propagableStates = ["paused", "failed"] satisfies MediaItemState[];
+
+    for (const propagableState of propagableStates) {
+      if (parent.state === propagableState) {
+        continue;
+      }
+
+      const childrenStateCount = childrenStateCountMap[propagableState] ?? 0;
+
+      if (childrenStateCount === children.length) {
+        return propagableState;
+      }
+    }
+
+    if (childrenStateCountMap.completed === children.length) {
+      if (parent instanceof Show) {
+        return parent.status === "continuing" ? "ongoing" : "completed";
+      }
+
+      return "completed";
+    }
+
+    if (childrenStateCountMap.ongoing || childrenStateCountMap.unreleased) {
+      return "ongoing";
+    }
+
+    if (
+      childrenStateCountMap.completed ||
+      childrenStateCountMap.partially_completed
+    ) {
+      return "partially_completed";
+    }
+
+    if (childrenStateCountMap.downloaded) {
+      return "downloaded";
+    }
+
+    return null;
+  }
+
+  async #maybeUpdateState(
     entity: MediaItem,
     changeSet: ChangeSet<Partial<MediaItem>> | null,
     uow: UnitOfWork,
-    nextStatesMap: Map<MediaItem, MediaItemState>,
-  ) {
+    nextStatesMap: NextStatesMap,
+  ): Promise<boolean> {
     const nextState = await this.#computeNextState(entity, nextStatesMap);
 
     if (nextState === entity.state) {
-      return;
+      return false;
     }
 
     entity.state = nextState;
@@ -99,89 +207,24 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     } else {
       uow.computeChangeSet(entity);
     }
+
+    return true;
   }
 
-  async #computeShowState(
-    show: Show,
-    nextStatesMap: Map<MediaItem, MediaItemState>,
-  ): Promise<MediaItemState> {
-    if (show.state === "paused" || show.state === "failed") {
-      return show.state;
-    }
-
-    const seasons = await show.seasons.loadItems();
-    const seasonStateCountMap = seasons.reduce<
-      Partial<Record<MediaItemState, number>>
-    >((acc, season) => {
-      const seasonState = nextStatesMap.get(season) ?? season.state;
-
-      return {
-        ...acc,
-        [seasonState]: (acc[seasonState] ?? 0) + 1,
-      };
-    }, {});
-
-    if (seasonStateCountMap.downloaded === seasons.length) {
-      return "downloaded";
-    }
-
-    if (seasonStateCountMap.completed === seasons.length) {
-      return "completed";
-    }
-
-    if (
-      seasonStateCountMap.completed &&
-      seasonStateCountMap.completed > 0 &&
-      seasonStateCountMap.completed < seasons.length
-    ) {
-      return "partially_completed";
-    }
-
-    return this.#computeState(show);
-  }
-
-  async #computeSeasonState(
-    season: Season,
-    nextStatesMap: Map<MediaItem, MediaItemState>,
-  ): Promise<MediaItemState> {
-    if (season.state === "paused" || season.state === "failed") {
-      return season.state;
-    }
-
-    const episodes = await season.episodes.loadItems();
-    const episodeStateCountMap = episodes.reduce<
-      Partial<Record<MediaItemState, number>>
-    >((acc, episode) => {
-      const episodeState = nextStatesMap.get(episode) ?? episode.state;
-
-      return {
-        ...acc,
-        [episodeState]: (acc[episodeState] ?? 0) + 1,
-      };
-    }, {});
-
-    // If all episodes are downloaded, season is downloaded
-    if (episodeStateCountMap.downloaded === episodes.length) {
-      return "downloaded";
-    }
-
-    if (episodeStateCountMap.completed === episodes.length) {
-      return "completed";
-    }
-
-    if (
-      episodeStateCountMap.completed &&
-      episodeStateCountMap.completed > 0 &&
-      episodeStateCountMap.completed < episodes.length
-    ) {
-      return "partially_completed";
-    }
-
-    return this.#computeState(season);
+  async #computeStateWithChildren(
+    item: Show | Season,
+    children: (Season | Episode)[],
+    nextStatesMap: NextStatesMap,
+  ) {
+    return (
+      this.#determineFixedState(item) ??
+      this.#determineParentStateFromChildren(item, children, nextStatesMap) ??
+      this.#computeState(item)
+    );
   }
 
   async #computeState(item: MediaItem): Promise<MediaItemState> {
-    if (item.state === "paused" || item.state === "failed") {
+    if (this.#determineFixedState(item)) {
       return item.state;
     }
 
@@ -192,13 +235,14 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       );
 
       if (hasMediaEntry) {
-        return "downloaded";
+        return "completed";
       }
     }
 
     const blacklistedStreams = new Set(
       await item.blacklistedStreams.loadItems(),
     );
+
     const streams = await item.streams.loadItems();
 
     const hasAvailableStreams = streams.some(
