@@ -141,6 +141,10 @@ export async function persistDownloadResults({
 
       await validateOrReject(existingItem);
 
+      transaction.persist(existingItem);
+
+      await transaction.flush();
+
       return existingItem;
     });
   } catch (error) {
