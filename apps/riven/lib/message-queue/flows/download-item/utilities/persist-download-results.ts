@@ -84,13 +84,6 @@ export async function persistDownloadResults({
       }
 
       if (existingItem instanceof Show || existingItem instanceof Season) {
-        const episodes =
-          existingItem instanceof Show
-            ? await existingItem.getEpisodes()
-            : await existingItem.episodes.loadItems();
-
-        assert(episodes[0]);
-
         for (const file of container.files) {
           assert(
             file.type === "show",
