@@ -33,7 +33,10 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     }
 
     for (const collection of uow.getCollectionUpdates()) {
-      if (collection.owner instanceof MediaItem) {
+      if (
+        collection.owner instanceof MediaItem &&
+        !trackedItems.has(collection.owner)
+      ) {
         trackedItems.set(collection.owner, null);
       }
     }
