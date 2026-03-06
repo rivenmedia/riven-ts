@@ -98,7 +98,9 @@ export async function persistDownloadResults({
 
           assert(
             episode,
-            `File ${file.fileName} does not correspond to a valid episode`,
+            new UnrecoverableError(
+              `File ${file.fileName} does not correspond to a valid episode`,
+            ),
           );
 
           const ignoredStates = MediaItemState.exclude([
