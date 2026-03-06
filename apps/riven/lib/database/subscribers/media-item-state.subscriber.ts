@@ -161,11 +161,9 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     }
 
     if (childrenStateCountMap.completed === children.length) {
-      if (parent instanceof Show) {
-        return parent.status === "continuing" ? "ongoing" : "completed";
-      }
-
-      return "completed";
+      return parent instanceof Show && parent.status === "continuing"
+        ? "ongoing"
+        : "completed";
     }
 
     if (childrenStateCountMap.ongoing || childrenStateCountMap.unreleased) {
