@@ -105,12 +105,12 @@ export async function persistDownloadResults({
             ),
           );
 
-          const ignoredStates = MediaItemState.exclude([
+          const processableStates = MediaItemState.exclude([
             "completed",
             "downloaded",
           ]);
 
-          if (!ignoredStates.safeParse(episode.state).success) {
+          if (!processableStates.safeParse(episode.state).success) {
             continue;
           }
 
