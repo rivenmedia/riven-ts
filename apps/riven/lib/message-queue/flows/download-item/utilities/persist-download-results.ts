@@ -39,7 +39,7 @@ export async function persistDownloadResults({
       id,
     },
     {
-      populate: ["streams:ref", "filesystemEntries:ref"],
+      populate: ["streams.infoHash", "filesystemEntries:ref"],
     },
   );
 
@@ -59,13 +59,6 @@ export async function persistDownloadResults({
 
   try {
     return await database.em.fork().transactional(async (transaction) => {
-      assert(
-        existingItem.streams[0],
-        new UnrecoverableError(
-          `Media item with ID ${id.toString()} has no streams`,
-        ),
-      );
-
       const matchedStream = existingItem.streams.find(
         ({ infoHash }) => infoHash === container.infoHash,
       );
@@ -103,7 +96,7 @@ export async function persistDownloadResults({
       }
 
       if (existingItem instanceof Show || existingItem instanceof Season) {
-        const episodes = await database.episode.find({
+        const episodes = await transaction.getRepository(Episode).find({
           id: {
             $in: container.files.map((file) => file.matchedMediaItemId),
           },
