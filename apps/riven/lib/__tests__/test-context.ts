@@ -16,6 +16,7 @@ import { expect, test as testBase } from "vitest";
 
 import { type Services, database } from "../database/database.ts";
 
+import type { EntityManager } from "@mikro-orm/core";
 import type { SetupServerApi } from "msw/node";
 
 export const rivenTestContext = testBase.extend<{
@@ -23,6 +24,7 @@ export const rivenTestContext = testBase.extend<{
   apolloServerInstance: ApolloServer;
   gqlServer: ApolloServer;
   mockAgent: MockAgent;
+  em: EntityManager;
   movie: Movie;
   show: Show;
   season: Season;
@@ -89,9 +91,12 @@ export const rivenTestContext = testBase.extend<{
 
     await mockAgent.close();
   },
-  movie: async ({}, use) => {
+  em: async ({}, use) => {
     const em = database.em.fork();
 
+    await use(em);
+  },
+  movie: async ({ em }, use) => {
     const itemRequest = em.create(ItemRequest, {
       requestedBy: "@repo/plugin-test",
       state: "completed",
@@ -110,9 +115,7 @@ export const rivenTestContext = testBase.extend<{
 
     await use(movie);
   },
-  show: async ({}, use) => {
-    const em = database.em.fork();
-
+  show: async ({ em }, use) => {
     const itemRequest = em.create(ItemRequest, {
       requestedBy: "@repo/plugin-test",
       state: "completed",
@@ -172,8 +175,7 @@ export const rivenTestContext = testBase.extend<{
 
     await use(season.episodes[0]);
   },
-  stream: async ({}, use) => {
-    const em = database.em.fork();
+  stream: async ({ em }, use) => {
     const stream = em.create(Stream, {
       infoHash: "1234567890abcdef1234567890abcdef12345678",
       parsedData: parse("Example.Movie.2024.1080p.BluRay.x264-GROUP"),
@@ -183,8 +185,8 @@ export const rivenTestContext = testBase.extend<{
 
     await use(stream);
   },
-  mediaEntry: async ({ database }, use) => {
-    const mediaEntry = database.em.fork().create(MediaEntry, {
+  mediaEntry: async ({ em }, use) => {
+    const mediaEntry = em.create(MediaEntry, {
       fileSize: 1024,
       downloadUrl: "http://example.com/file.mp4",
       originalFilename: "file.mp4",
