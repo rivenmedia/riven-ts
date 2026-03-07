@@ -8,9 +8,9 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities";
 import { MovieContentRating } from "@repo/util-plugin-sdk/dto/enums/content-ratings.enum";
 
-import { expect, it, vi } from "vitest";
+import { expect, vi } from "vitest";
 
-import { database } from "../../database/database.ts";
+import { rivenTestContext as it } from "../../__tests__/test-context.ts";
 import { readDirSync } from "./readdir.ts";
 
 it("returns persistent directory entries for the root path", async () => {
@@ -26,10 +26,8 @@ it("returns persistent directory entries for the root path", async () => {
   });
 });
 
-it("returns all shows for the /shows path", async () => {
+it("returns all shows for the /shows path", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
@@ -93,10 +91,10 @@ it("returns all shows for the /shows path", async () => {
   });
 });
 
-it('does not return entries for the "all shows" path for shows that do not have any episodes with a media entry', async () => {
+it('does not return entries for the "all shows" path for shows that do not have any episodes with a media entry', async ({
+  em,
+}) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
@@ -149,10 +147,8 @@ it('does not return entries for the "all shows" path for shows that do not have 
   });
 });
 
-it("returns all movies for the /movies path", async () => {
+it("returns all movies for the /movies path", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   for (let i = 1; i <= 3; i++) {
     const itemRequest = em.create(ItemRequest, {
@@ -191,10 +187,8 @@ it("returns all movies for the /movies path", async () => {
   });
 });
 
-it("returns all seasons for a single show path", async () => {
+it("returns all seasons for a single show path", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
@@ -262,10 +256,10 @@ it("returns all seasons for a single show path", async () => {
   });
 });
 
-it("does not return entries for a season that does not have any episodes with a media entry", async () => {
+it("does not return entries for a season that does not have any episodes with a media entry", async ({
+  em,
+}) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
@@ -331,10 +325,8 @@ it("does not return entries for a season that does not have any episodes with a 
   });
 });
 
-it("returns all episodes for a single season path", async () => {
+it("returns all episodes for a single season path", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
@@ -402,10 +394,10 @@ it("returns all episodes for a single season path", async () => {
   });
 });
 
-it("does not return entries for episodes that does not have a media entry when viewing a season path", async () => {
+it("does not return entries for episodes that does not have a media entry when viewing a season path", async ({
+  em,
+}) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
@@ -473,10 +465,10 @@ it("does not return entries for episodes that does not have a media entry when v
   });
 });
 
-it("returns the media entry's filename when viewing a single movie's directory", async () => {
+it("returns the media entry's filename when viewing a single movie's directory", async ({
+  em,
+}) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
@@ -512,10 +504,10 @@ it("returns the media entry's filename when viewing a single movie's directory",
   });
 });
 
-it('does not return entries for the "all movies" path when a movie does not have a media entry', async () => {
+it('does not return entries for the "all movies" path when a movie does not have a media entry', async ({
+  em,
+}) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   for (let i = 1; i <= 3; i++) {
     const itemRequest = em.create(ItemRequest, {

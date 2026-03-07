@@ -8,9 +8,9 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities";
 
 import Fuse from "@zkochan/fuse-native";
-import { expect, it, vi } from "vitest";
+import { expect, vi } from "vitest";
 
-import { database } from "../../database/database.ts";
+import { rivenTestContext as it } from "../../__tests__/test-context.ts";
 import { getattrSync, parseMode } from "./getattr.ts";
 
 it("returns directory stats for the root directory", async () => {
@@ -62,10 +62,8 @@ it("returns ENOENT for unknown paths", async () => {
   });
 });
 
-it("returns file stats for movie files", async () => {
+it("returns file stats for movie files", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
@@ -114,10 +112,8 @@ it("returns file stats for movie files", async () => {
   });
 });
 
-it("returns directory stats for /movies", async () => {
+it("returns directory stats for /movies", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   for (let i = 1; i <= 3; i++) {
     const itemRequest = em.create(ItemRequest, {
@@ -165,10 +161,8 @@ it("returns directory stats for /movies", async () => {
   });
 });
 
-it("returns directory stats for /shows", async () => {
+it("returns directory stats for /shows", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   for (let i = 1; i <= 3; i++) {
     const itemRequest = em.create(ItemRequest, {
@@ -239,10 +233,8 @@ it("returns directory stats for /shows", async () => {
   });
 });
 
-it("returns directory stats for single shows", async () => {
+it("returns directory stats for single shows", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
@@ -313,10 +305,8 @@ it("returns directory stats for single shows", async () => {
   });
 });
 
-it("returns directory stats for single seasons", async () => {
+it("returns directory stats for single seasons", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
@@ -387,10 +377,8 @@ it("returns directory stats for single seasons", async () => {
   });
 });
 
-it("returns file stats for episodes", async () => {
+it("returns file stats for episodes", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
