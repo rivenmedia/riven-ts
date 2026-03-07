@@ -16,6 +16,7 @@ import type {
   UnitOfWork,
 } from "@mikro-orm/core";
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
+import type { Promisable } from "type-fest";
 
 type NextStatesMap = Map<MediaItem, MediaItemState>;
 
@@ -217,11 +218,11 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     return true;
   }
 
-  async #computeStateWithChildren(
+  #computeStateWithChildren(
     item: Show | Season,
     children: (Season | Episode)[],
     nextStatesMap: NextStatesMap,
-  ) {
+  ): Promisable<MediaItemState> {
     return (
       this.#determineFixedState(item) ??
       this.#determineParentStateFromChildren(item, children, nextStatesMap) ??
