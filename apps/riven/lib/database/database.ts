@@ -16,7 +16,7 @@ import {
   EntityRepository,
   MikroORM,
   type Options,
-} from "@mikro-orm/postgresql";
+} from "@mikro-orm/core";
 
 import type { EpisodeRepository } from "@repo/util-plugin-sdk/dto/repositories/episode.repository";
 

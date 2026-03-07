@@ -155,14 +155,22 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       nextStatesMap,
     );
 
-    const propagableStates = ["paused", "failed"] satisfies MediaItemState[];
+    const propagableStates = [
+      "paused",
+      "failed",
+      "downloaded",
+    ] satisfies MediaItemState[];
 
     for (const propagableState of propagableStates) {
       if (parent.state === propagableState) {
         continue;
       }
 
-      const childrenStateCount = childrenStateCountMap[propagableState] ?? 0;
+      const childrenStateCount = childrenStateCountMap[propagableState];
+
+      if (!childrenStateCount) {
+        continue;
+      }
 
       if (childrenStateCount === children.length) {
         return propagableState;
@@ -184,10 +192,6 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       childrenStateCountMap.partially_completed
     ) {
       return "partially_completed";
-    }
-
-    if (childrenStateCountMap.downloaded) {
-      return "downloaded";
     }
 
     return null;

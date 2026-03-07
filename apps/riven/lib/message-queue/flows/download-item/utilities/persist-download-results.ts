@@ -75,14 +75,6 @@ export async function persistDownloadResults({
 
       if (existingItem instanceof Movie || existingItem instanceof Episode) {
         const [file] = container.files;
-        const existingMediaEntries = await existingItem.getMediaEntries();
-
-        assert(
-          existingMediaEntries.length === 0,
-          new UnrecoverableError(
-            `Media item with ID ${id.toString()} already has media entries`,
-          ),
-        );
 
         existingItem.filesystemEntries.add(
           transaction.create(MediaEntry, {
@@ -130,14 +122,8 @@ export async function persistDownloadResults({
           );
 
           if (!processableStates.safeParse(episode.state).success) {
-            continue;
-          }
-
-          const existingMediaEntries = await episode.getMediaEntries();
-
-          if (existingMediaEntries.length) {
             logger.debug(
-              `${episode.fullTitle} already has media entries, skipping...`,
+              `Skipping media entry creation for ${episode.fullTitle} due to "${episode.state}" state`,
             );
 
             continue;
@@ -160,9 +146,7 @@ export async function persistDownloadResults({
 
       await validateOrReject(existingItem);
 
-      transaction.persist(existingItem);
-
-      await transaction.flush();
+      await transaction.persist(existingItem).flush();
 
       return existingItem;
     } catch (error) {
