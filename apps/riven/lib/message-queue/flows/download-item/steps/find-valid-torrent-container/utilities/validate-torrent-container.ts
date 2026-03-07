@@ -83,16 +83,6 @@ export const validateTorrentContainer = async (
           "File must have at least one episode number",
         );
 
-        assert(
-          !fileData.episodes.includes(0),
-          "File must not have unknown episode numbers",
-        );
-
-        assert(
-          !fileData.seasons.includes(0),
-          "File must not have unknown season numbers",
-        );
-
         const episode = await database.episode.findAbsoluteEpisode(
           item.tvdbId,
           fileData.episodes[0],
