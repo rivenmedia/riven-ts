@@ -59,7 +59,6 @@ export async function persistMovieIndexerData({
         language: item.language ?? null,
         aliases: item.aliases ?? null,
         genres: item.genres,
-        state: "indexed",
         itemRequest,
       });
 

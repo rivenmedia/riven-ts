@@ -74,7 +74,6 @@ it("returns file stats for movie files", async ({ em }) => {
   const mediaItem = em.create(Movie, {
     title: "Inception",
     year: 2010,
-    state: "downloaded",
     tmdbId: "27205",
     contentRating: "pg-13",
     itemRequest,
@@ -126,7 +125,6 @@ it("returns directory stats for /movies", async ({ em }) => {
       title: `Example Movie ${i.toString()}`,
       year: 2020,
       contentRating: "g",
-      state: "downloaded",
       tmdbId: i.toString(),
       itemRequest,
     });
@@ -176,7 +174,6 @@ it("returns directory stats for /shows", async ({ em }) => {
       tvdbId: i.toString(),
       contentRating: "tv-14",
       year: 2026,
-      state: "downloaded",
       status: "continuing",
       itemRequest,
     });
@@ -187,7 +184,6 @@ it("returns directory stats for /shows", async ({ em }) => {
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
-      state: "downloaded",
     });
 
     show.seasons.add(season);
@@ -200,7 +196,6 @@ it("returns directory stats for /shows", async ({ em }) => {
       contentRating: "tv-14",
       number: 1,
       absoluteNumber: 1,
-      state: "downloaded",
     });
 
     season.episodes.add(episode);
@@ -247,7 +242,6 @@ it("returns directory stats for single shows", async ({ em }) => {
     tvdbId: "1",
     contentRating: "tv-14",
     year: 2026,
-    state: "downloaded",
     status: "continuing",
     itemRequest,
   });
@@ -259,7 +253,6 @@ it("returns directory stats for single shows", async ({ em }) => {
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
-      state: "downloaded",
     });
 
     show.seasons.add(season);
@@ -272,7 +265,6 @@ it("returns directory stats for single shows", async ({ em }) => {
       contentRating: "tv-14",
       number: 1,
       absoluteNumber: 1,
-      state: "downloaded",
     });
 
     season.episodes.add(episode);
@@ -319,7 +311,6 @@ it("returns directory stats for single seasons", async ({ em }) => {
     tvdbId: "1",
     contentRating: "tv-14",
     year: 2026,
-    state: "downloaded",
     status: "continuing",
     itemRequest,
   });
@@ -330,7 +321,6 @@ it("returns directory stats for single seasons", async ({ em }) => {
     title: `Season 01`,
     year: 2020,
     number: 1,
-    state: "downloaded",
   });
 
   show.seasons.add(season);
@@ -344,7 +334,6 @@ it("returns directory stats for single seasons", async ({ em }) => {
       contentRating: "tv-14",
       number: 1,
       absoluteNumber: 1,
-      state: "downloaded",
     });
 
     season.episodes.add(episode);
@@ -391,7 +380,6 @@ it("returns file stats for episodes", async ({ em }) => {
     tvdbId: "1",
     contentRating: "tv-14",
     year: 2026,
-    state: "downloaded",
     status: "continuing",
     itemRequest,
   });
@@ -402,7 +390,6 @@ it("returns file stats for episodes", async ({ em }) => {
     title: `Season 01`,
     year: 2020,
     number: 1,
-    state: "downloaded",
   });
 
   show.seasons.add(season);
@@ -415,7 +402,6 @@ it("returns file stats for episodes", async ({ em }) => {
     contentRating: "tv-14",
     number: 1,
     absoluteNumber: 1,
-    state: "downloaded",
   });
 
   season.episodes.add(episode);

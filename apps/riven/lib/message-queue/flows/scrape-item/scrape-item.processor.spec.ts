@@ -55,7 +55,6 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
     id: 1,
     tmdbId: "123",
     contentRating: "g",
-    state: "indexed",
     title: "Test Movie",
     year: 2024,
     itemRequest,

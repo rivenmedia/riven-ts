@@ -32,7 +32,6 @@ it(`enqueues a scrape for each individual season when a "${eventType}" event is 
 
   const show = em.create(Show, {
     contentRating: "tv-14",
-    state: "scraped",
     title: "Test Show",
     tvdbId: "1",
     id: 1,
@@ -45,7 +44,6 @@ it(`enqueues a scrape for each individual season when a "${eventType}" event is 
   for (let i = 1; i <= 3; i++) {
     const season = em.create(Season, {
       number: i,
-      state: "scraped",
       title: `Season ${i.toString().padStart(2, "0")}`,
       tvdbId: i.toString(),
     });
@@ -99,7 +97,6 @@ it(`enqueues a scrape for each individual season's episode when a "${eventType}"
 
   const show = em.create(Show, {
     contentRating: "tv-14",
-    state: "scraped",
     title: "Test Show",
     tvdbId: "1",
     id: 1,
@@ -112,7 +109,6 @@ it(`enqueues a scrape for each individual season's episode when a "${eventType}"
   for (let i = 1; i <= 3; i++) {
     const season = em.create(Season, {
       number: i,
-      state: "scraped",
       title: `Season ${i.toString().padStart(2, "0")}`,
       tvdbId: i.toString(),
     });

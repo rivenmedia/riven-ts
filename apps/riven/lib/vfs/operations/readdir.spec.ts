@@ -39,7 +39,6 @@ it("returns all shows for the /shows path", async ({ em }) => {
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "ongoing",
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
@@ -51,7 +50,6 @@ it("returns all shows for the /shows path", async ({ em }) => {
   const season = em.create(Season, {
     title: "Season 01",
     year: 2020,
-    state: "completed",
     number: 1,
   });
 
@@ -64,7 +62,6 @@ it("returns all shows for the /shows path", async ({ em }) => {
     absoluteNumber: 1,
     year: 2020,
     title: "Example Episode 1",
-    state: "downloaded",
     type: "episode",
     contentRating: "tv-14",
   });
@@ -106,7 +103,6 @@ it('does not return entries for the "all shows" path for shows that do not have 
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "ongoing",
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
@@ -118,7 +114,6 @@ it('does not return entries for the "all shows" path for shows that do not have 
   const season = em.create(Season, {
     title: "Season 01",
     year: 2020,
-    state: "completed",
     number: 1,
   });
 
@@ -131,7 +126,6 @@ it('does not return entries for the "all shows" path for shows that do not have 
     absoluteNumber: 1,
     year: 2020,
     title: "Example Episode 1",
-    state: "downloaded",
     type: "episode",
     contentRating: "tv-14",
   });
@@ -161,7 +155,6 @@ it("returns all movies for the /movies path", async ({ em }) => {
       tmdbId: i.toString(),
       year: 2020,
       title: `Example Movie ${i.toString().padStart(2, "0")}`,
-      state: "downloaded",
       contentRating: "unknown",
       itemRequest,
     });
@@ -200,7 +193,6 @@ it("returns all seasons for a single show path", async ({ em }) => {
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "ongoing",
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
@@ -213,7 +205,6 @@ it("returns all seasons for a single show path", async ({ em }) => {
     const season = em.create(Season, {
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
-      state: "completed",
       number: i,
     });
 
@@ -226,7 +217,6 @@ it("returns all seasons for a single show path", async ({ em }) => {
       absoluteNumber: 1,
       year: 2020,
       title: "Example Episode 1",
-      state: "downloaded",
       type: "episode",
       contentRating: "tv-14",
     });
@@ -271,7 +261,6 @@ it("does not return entries for a season that does not have any episodes with a 
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "ongoing",
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
@@ -284,7 +273,6 @@ it("does not return entries for a season that does not have any episodes with a 
     const season = em.create(Season, {
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
-      state: "completed",
       number: i,
     });
 
@@ -297,7 +285,6 @@ it("does not return entries for a season that does not have any episodes with a 
       absoluteNumber: 1,
       year: 2020,
       title: "Example Episode 1",
-      state: "downloaded",
       type: "episode",
       contentRating: "tv-14",
     });
@@ -338,7 +325,6 @@ it("returns all episodes for a single season path", async ({ em }) => {
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "ongoing",
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
@@ -350,7 +336,6 @@ it("returns all episodes for a single season path", async ({ em }) => {
   const season = em.create(Season, {
     title: "Season 01",
     year: 2020,
-    state: "completed",
     number: 1,
   });
 
@@ -364,7 +349,6 @@ it("returns all episodes for a single season path", async ({ em }) => {
       absoluteNumber: i,
       year: 2020,
       title: `Example Episode ${i.toString().padStart(2, "0")}`,
-      state: "downloaded",
       type: "episode",
       contentRating: "tv-14",
     });
@@ -409,7 +393,6 @@ it("does not return entries for episodes that does not have a media entry when v
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "ongoing",
     releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
@@ -421,7 +404,6 @@ it("does not return entries for episodes that does not have a media entry when v
   const season = em.create(Season, {
     title: "Season 01",
     year: 2020,
-    state: "completed",
     number: 1,
   });
 
@@ -435,7 +417,6 @@ it("does not return entries for episodes that does not have a media entry when v
       absoluteNumber: i,
       year: 2020,
       title: `Example Episode ${i.toString().padStart(2, "0")}`,
-      state: "downloaded",
       type: "episode",
       contentRating: "tv-14",
     });
@@ -480,7 +461,6 @@ it("returns the media entry's filename when viewing a single movie's directory",
     tmdbId: "1",
     year: 2020,
     title: "Example Movie 01",
-    state: "downloaded",
     type: "movie",
     contentRating: MovieContentRating.enum.g,
     itemRequest,
@@ -520,7 +500,6 @@ it('does not return entries for the "all movies" path when a movie does not have
       tmdbId: i.toString(),
       year: 2020,
       title: `Example Movie ${i.toString().padStart(2, "0")}`,
-      state: "downloaded",
       contentRating: "unknown",
       itemRequest,
     });

@@ -41,7 +41,6 @@ const it = baseIt.extend<{
       title: "Test Movie",
       contentRating: "g",
       itemRequest,
-      state: "scraped",
       tmdbId: "12345",
     });
 
@@ -169,7 +168,6 @@ it("handles foreign language titles with aliases correctly", async ({
     title: "Foreign Movie",
     contentRating: "g",
     itemRequest,
-    state: "scraped",
     tmdbId: "67890",
     aliases: {
       imdb: ["Película Extranjera", "Film Étranger"],

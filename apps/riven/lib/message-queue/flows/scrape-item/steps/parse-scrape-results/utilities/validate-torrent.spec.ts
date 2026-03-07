@@ -33,7 +33,6 @@ const it = baseIt.extend<{
     const movie = em.create(Movie, {
       title: "Test Movie",
       contentRating: "g",
-      state: "indexed",
       tmdbId: "1",
       itemRequest,
     });
@@ -53,7 +52,6 @@ const it = baseIt.extend<{
     const show = em.create(Show, {
       title: "Test Show",
       contentRating: "tv-14",
-      state: "indexed",
       status: "ended",
       tvdbId: "1",
       itemRequest,
@@ -67,7 +65,6 @@ const it = baseIt.extend<{
       const season = em.create(Season, {
         title: `Season ${i.toString()}`,
         number: i,
-        state: "indexed",
       });
 
       show.seasons.add(season);
@@ -80,7 +77,6 @@ const it = baseIt.extend<{
           contentRating: "tv-14",
           number: i,
           absoluteNumber: ++episodeNumber,
-          state: "indexed",
         });
 
         season.episodes.add(episode);
