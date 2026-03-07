@@ -69,44 +69,24 @@ export const validateTorrentContainer = async (
           fileSize: file.fileSize,
           downloadUrl: file.downloadUrl,
           matchedMediaItemId: item.id,
-          type: "movie",
         });
       }
 
       if (item instanceof ShowLikeMediaItem) {
-        assert(fileData.type === "show", "File must be part of a show");
+        assert(
+          fileData.type === "show",
+          "Expected an episode, but found a movie",
+        );
 
         assert(
           fileData.episodes[0],
           "File must have at least one episode number",
         );
 
-        assert(
+        const episode = await database.episode.findAbsoluteEpisode(
+          item.tvdbId,
+          fileData.episodes[0],
           fileData.seasons[0],
-          "File must have at least one season number",
-        );
-
-        assert(
-          !fileData.episodes.includes(0),
-          "File must not have unknown episode numbers",
-        );
-
-        assert(
-          !fileData.seasons.includes(0),
-          "File must not have unknown season numbers",
-        );
-
-        const episode = await database.episode.findOne(
-          {
-            ...(item instanceof Episode ? { id: item.id } : {}),
-            season: {
-              ...(item instanceof Season ? { id: item.id } : {}),
-              number: fileData.seasons[0],
-              ...(item instanceof Show ? { show: { id: item.id } } : {}),
-            },
-            number: fileData.episodes[0],
-          },
-          { populate: ["$infer"] },
         );
 
         assert(
@@ -114,14 +94,30 @@ export const validateTorrentContainer = async (
           `File must correspond to a valid episode in ${item.fullTitle}`,
         );
 
+        const episodeSeasonNumber = await episode.season.loadProperty("number");
+
+        if (item instanceof Season) {
+          assert(
+            episodeSeasonNumber === item.number,
+            `File must correspond to a valid episode in ${item.fullTitle}`,
+          );
+        }
+
+        if (item instanceof Episode) {
+          const itemSeasonNumber = await item.season.loadProperty("number");
+
+          assert(
+            episode.number === item.number &&
+              episodeSeasonNumber === itemSeasonNumber,
+            `Incorrect episode for ${item.fullTitle}`,
+          );
+        }
+
         validFiles.push({
           fileName: file.fileName,
           fileSize: file.fileSize,
           downloadUrl: file.downloadUrl,
-          matchedMediaItemId: item.id,
-          type: "show",
-          season: fileData.seasons[0],
-          episode: fileData.episodes[0],
+          matchedMediaItemId: episode.id,
         });
       }
     } catch (error) {

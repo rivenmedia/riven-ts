@@ -23,7 +23,7 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
       },
     });
 
-    const { title: itemTitle } =
+    const { title: itemTitle, aliases } =
       item instanceof ShowLikeMediaItem ? await item.getShow() : item;
 
     const rtnInstance = new RTN(job.data.rtnSettings, job.data.rtnRankingModel);
@@ -49,7 +49,10 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
           );
         }
 
-        return [...acc, rtnInstance.rankTorrent(rawTitle, hash, itemTitle)];
+        return [
+          ...acc,
+          rtnInstance.rankTorrent(rawTitle, hash, itemTitle, aliases ?? {}),
+        ];
       } catch (error) {
         if (
           error instanceof GarbageTorrentError ||

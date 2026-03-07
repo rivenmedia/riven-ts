@@ -7,6 +7,7 @@ import * as tseslint from "typescript-eslint";
 
 import { banDateConstructor } from "../best-practices/ban-date-constructor.ts";
 import { noUnusedVariables } from "../best-practices/no-unused-variables.ts";
+import { preferMikroOrmCore } from "../best-practices/prefer-mikro-orm-core.ts";
 import { jsFiles, tsFiles } from "../internal/file-types.ts";
 
 export const typescriptCore = defineConfig(
@@ -21,6 +22,7 @@ export const typescriptCore = defineConfig(
       tseslint.configs.stylisticTypeChecked,
       noUnusedVariables,
       banDateConstructor,
+      preferMikroOrmCore,
       importX.typescript as never,
     ],
     languageOptions: {

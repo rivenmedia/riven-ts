@@ -8,27 +8,12 @@ import { createFlowSchema } from "../../../../utilities/create-flow-schema.ts";
 
 import type { RankedResult } from "@repo/util-rank-torrent-name";
 
-const BaseMatchedFile = z.object({
+const MatchedFile = z.object({
   fileName: z.string(),
   fileSize: z.number(),
   downloadUrl: z.url(),
   matchedMediaItemId: z.int().positive(),
 });
-
-const MovieMatchedFile = BaseMatchedFile.extend({
-  type: z.literal("movie"),
-});
-
-const ShowMatchedFile = BaseMatchedFile.extend({
-  type: z.literal("show"),
-  season: z.int().positive(),
-  episode: z.int().positive(),
-});
-
-const MatchedFile = z.discriminatedUnion("type", [
-  MovieMatchedFile,
-  ShowMatchedFile,
-]);
 
 export type MatchedFile = z.infer<typeof MatchedFile>;
 

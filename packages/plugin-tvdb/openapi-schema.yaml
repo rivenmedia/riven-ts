@@ -2439,6 +2439,7 @@ components:
           type: boolean
         language:
           type: string
+          nullable: true
         score:
           type: number
         thumbnail:
@@ -2707,6 +2708,7 @@ components:
           x-go-name: ID
         image:
           type: string
+          nullable: true
         isFeatured:
           type: boolean
           x-go-name: IsFeatured
@@ -2718,6 +2720,7 @@ components:
           nullable: true
         name:
           type: string
+          nullable: true
         nameTranslations:
           items:
             type: string
@@ -2734,6 +2737,7 @@ components:
           type: integer
         personImgURL:
           type: string
+          nullable: true
         peopleType:
           type: string
         seriesId:
@@ -2777,6 +2781,7 @@ components:
           x-go-name: Aliases
         country:
           type: string
+          nullable: true
         id:
           format: int64
           type: integer

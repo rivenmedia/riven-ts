@@ -1,8 +1,22 @@
 /* eslint-disable no-empty-pattern */
+import {
+  Episode,
+  ItemRequest,
+  MediaEntry,
+  Movie,
+  Season,
+  Show,
+  Stream,
+} from "@repo/util-plugin-sdk/dto/entities";
+import { parse } from "@repo/util-rank-torrent-name";
+
 import { ApolloServer } from "@apollo/server";
 import { MockAgent, setGlobalDispatcher } from "undici";
-import { test as testBase } from "vitest";
+import { expect, test as testBase } from "vitest";
 
+import { database } from "../database/database.ts";
+
+import type { EntityManager } from "@mikro-orm/core";
 import type { SetupServerApi } from "msw/node";
 
 export const rivenTestContext = testBase.extend<{
@@ -10,6 +24,13 @@ export const rivenTestContext = testBase.extend<{
   apolloServerInstance: ApolloServer;
   gqlServer: ApolloServer;
   mockAgent: MockAgent;
+  em: EntityManager;
+  movie: Movie;
+  show: Show;
+  season: Season;
+  episode: Episode;
+  stream: Stream;
+  mediaEntry: MediaEntry;
 }>({
   async apolloServerInstance({}, use) {
     const { buildMockServer } =
@@ -68,5 +89,105 @@ export const rivenTestContext = testBase.extend<{
     await use(mockAgent);
 
     await mockAgent.close();
+  },
+  em: async ({}, use) => {
+    const em = database.em.fork();
+
+    await use(em);
+  },
+  movie: async ({ em }, use) => {
+    const itemRequest = em.create(ItemRequest, {
+      requestedBy: "@repo/plugin-test",
+      state: "completed",
+      type: "movie",
+    });
+
+    const movie = em.create(Movie, {
+      title: "Test Movie",
+      contentRating: "g",
+      tmdbId: "1",
+      itemRequest,
+    });
+
+    await em.flush();
+
+    await use(movie);
+  },
+  show: async ({ em }, use) => {
+    const itemRequest = em.create(ItemRequest, {
+      requestedBy: "@repo/plugin-test",
+      state: "completed",
+      type: "show",
+    });
+
+    const show = em.create(Show, {
+      title: "Test Show",
+      contentRating: "tv-14",
+      status: "ended",
+      tvdbId: "1",
+      itemRequest,
+    });
+
+    await em.flush();
+
+    let absoluteEpisodeNumber = 1;
+
+    for (let seasonNumber = 1; seasonNumber <= 6; seasonNumber++) {
+      const season = em.create(Season, {
+        title: `Season ${seasonNumber.toString()}`,
+        number: seasonNumber,
+      });
+
+      show.seasons.add(season);
+
+      await em.flush();
+
+      for (let episodeNumber = 1; episodeNumber <= 10; episodeNumber++) {
+        const episode = em.create(Episode, {
+          title: `Episode ${episodeNumber.toString().padStart(2, "0")}`,
+          contentRating: "tv-14",
+          number: episodeNumber,
+          absoluteNumber: absoluteEpisodeNumber++,
+        });
+
+        season.episodes.add(episode);
+      }
+
+      show.seasons.add(season);
+    }
+
+    await em.flush();
+
+    await use(show);
+  },
+  season: async ({ show }, use) => {
+    expect.assert(show.seasons[0]);
+
+    await use(show.seasons[0]);
+  },
+  episode: async ({ season }, use) => {
+    expect.assert(season.episodes[0]);
+
+    await use(season.episodes[0]);
+  },
+  stream: async ({ em }, use) => {
+    const stream = em.create(Stream, {
+      infoHash: "1234567890abcdef1234567890abcdef12345678",
+      parsedData: parse("Example.Movie.2024.1080p.BluRay.x264-GROUP"),
+    });
+
+    await em.flush();
+
+    await use(stream);
+  },
+  mediaEntry: async ({ em }, use) => {
+    const mediaEntry = em.create(MediaEntry, {
+      fileSize: 1024,
+      downloadUrl: "http://example.com/file.mp4",
+      originalFilename: "file.mp4",
+      provider: "@repo/plugin-test",
+    });
+
+    await use(mediaEntry);
   },
 });

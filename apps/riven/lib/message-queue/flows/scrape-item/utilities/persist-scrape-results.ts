@@ -10,6 +10,7 @@ import z from "zod";
 import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
 
+import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export interface PersistScrapeResultsInput {
@@ -26,8 +27,10 @@ export async function persistScrapeResults({
     { populate: ["streams.infoHash"] },
   );
 
+  const allowedStates: MediaItemState[] = ["indexed", "ongoing"];
+
   assert(
-    existingItem.state === "indexed",
+    allowedStates.includes(existingItem.state),
     new MediaItemScrapeErrorIncorrectState({
       item: existingItem,
     }),
@@ -59,7 +62,6 @@ export async function persistScrapeResults({
     existingItem.failedAttempts++;
   }
 
-  existingItem.state = "scraped";
   existingItem.scrapedAt = DateTime.now().toJSDate();
   existingItem.scrapedTimes++;
 

@@ -16,7 +16,7 @@ import {
   TitleSimilarityError,
 } from "./exceptions.ts";
 import { checkFetch } from "./fetch.ts";
-import { getLevRatio } from "./lev.ts";
+import { type Aliases, getLevRatio } from "./lev.ts";
 import { defaultRankingModel, getCustomRank } from "./settings.ts";
 
 import type { ParsedData } from "../schemas.ts";
@@ -190,6 +190,7 @@ export function rankTorrent(
   rawTitle: string,
   hash: string,
   correctTitle: string,
+  aliases: Aliases,
   settings: Settings,
   rankingModel: RankingModel = defaultRankingModel,
 ) {
@@ -203,7 +204,12 @@ export function rankTorrent(
     settings.options;
   const data = parse(rawTitle);
 
-  const levRatio = getLevRatio(correctTitle, data.title, titleSimilarity);
+  const levRatio = getLevRatio(
+    correctTitle,
+    data.title,
+    titleSimilarity,
+    aliases,
+  );
 
   if (removeAllTrash) {
     const levRatioValidation = z

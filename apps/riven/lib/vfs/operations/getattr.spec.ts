@@ -8,9 +8,9 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities";
 
 import Fuse from "@zkochan/fuse-native";
-import { expect, it, vi } from "vitest";
+import { expect, vi } from "vitest";
 
-import { database } from "../../database/database.ts";
+import { rivenTestContext as it } from "../../__tests__/test-context.ts";
 import { getattrSync, parseMode } from "./getattr.ts";
 
 it("returns directory stats for the root directory", async () => {
@@ -62,10 +62,8 @@ it("returns ENOENT for unknown paths", async () => {
   });
 });
 
-it("returns file stats for movie files", async () => {
+it("returns file stats for movie files", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
@@ -76,7 +74,6 @@ it("returns file stats for movie files", async () => {
   const mediaItem = em.create(Movie, {
     title: "Inception",
     year: 2010,
-    state: "downloaded",
     tmdbId: "27205",
     contentRating: "pg-13",
     itemRequest,
@@ -114,10 +111,8 @@ it("returns file stats for movie files", async () => {
   });
 });
 
-it("returns directory stats for /movies", async () => {
+it("returns directory stats for /movies", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   for (let i = 1; i <= 3; i++) {
     const itemRequest = em.create(ItemRequest, {
@@ -130,7 +125,6 @@ it("returns directory stats for /movies", async () => {
       title: `Example Movie ${i.toString()}`,
       year: 2020,
       contentRating: "g",
-      state: "downloaded",
       tmdbId: i.toString(),
       itemRequest,
     });
@@ -165,10 +159,8 @@ it("returns directory stats for /movies", async () => {
   });
 });
 
-it("returns directory stats for /shows", async () => {
+it("returns directory stats for /shows", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   for (let i = 1; i <= 3; i++) {
     const itemRequest = em.create(ItemRequest, {
@@ -182,7 +174,6 @@ it("returns directory stats for /shows", async () => {
       tvdbId: i.toString(),
       contentRating: "tv-14",
       year: 2026,
-      state: "downloaded",
       status: "continuing",
       itemRequest,
     });
@@ -193,7 +184,6 @@ it("returns directory stats for /shows", async () => {
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
-      state: "downloaded",
     });
 
     show.seasons.add(season);
@@ -206,7 +196,6 @@ it("returns directory stats for /shows", async () => {
       contentRating: "tv-14",
       number: 1,
       absoluteNumber: 1,
-      state: "downloaded",
     });
 
     season.episodes.add(episode);
@@ -239,10 +228,8 @@ it("returns directory stats for /shows", async () => {
   });
 });
 
-it("returns directory stats for single shows", async () => {
+it("returns directory stats for single shows", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
@@ -255,7 +242,6 @@ it("returns directory stats for single shows", async () => {
     tvdbId: "1",
     contentRating: "tv-14",
     year: 2026,
-    state: "downloaded",
     status: "continuing",
     itemRequest,
   });
@@ -267,7 +253,6 @@ it("returns directory stats for single shows", async () => {
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
-      state: "downloaded",
     });
 
     show.seasons.add(season);
@@ -280,7 +265,6 @@ it("returns directory stats for single shows", async () => {
       contentRating: "tv-14",
       number: 1,
       absoluteNumber: 1,
-      state: "downloaded",
     });
 
     season.episodes.add(episode);
@@ -313,10 +297,8 @@ it("returns directory stats for single shows", async () => {
   });
 });
 
-it("returns directory stats for single seasons", async () => {
+it("returns directory stats for single seasons", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
@@ -329,7 +311,6 @@ it("returns directory stats for single seasons", async () => {
     tvdbId: "1",
     contentRating: "tv-14",
     year: 2026,
-    state: "downloaded",
     status: "continuing",
     itemRequest,
   });
@@ -340,7 +321,6 @@ it("returns directory stats for single seasons", async () => {
     title: `Season 01`,
     year: 2020,
     number: 1,
-    state: "downloaded",
   });
 
   show.seasons.add(season);
@@ -354,7 +334,6 @@ it("returns directory stats for single seasons", async () => {
       contentRating: "tv-14",
       number: 1,
       absoluteNumber: 1,
-      state: "downloaded",
     });
 
     season.episodes.add(episode);
@@ -387,10 +366,8 @@ it("returns directory stats for single seasons", async () => {
   });
 });
 
-it("returns file stats for episodes", async () => {
+it("returns file stats for episodes", async ({ em }) => {
   const callback = vi.fn();
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
@@ -403,7 +380,6 @@ it("returns file stats for episodes", async () => {
     tvdbId: "1",
     contentRating: "tv-14",
     year: 2026,
-    state: "downloaded",
     status: "continuing",
     itemRequest,
   });
@@ -414,7 +390,6 @@ it("returns file stats for episodes", async () => {
     title: `Season 01`,
     year: 2020,
     number: 1,
-    state: "downloaded",
   });
 
   show.seasons.add(season);
@@ -427,7 +402,6 @@ it("returns file stats for episodes", async () => {
     contentRating: "tv-14",
     number: 1,
     absoluteNumber: 1,
-    state: "downloaded",
   });
 
   season.episodes.add(episode);

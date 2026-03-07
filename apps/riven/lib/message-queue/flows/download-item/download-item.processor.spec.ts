@@ -35,7 +35,6 @@ it("throws an unrecoverable error if no valid torrent container is found", async
     id: 1,
     contentRating: "g",
     tmdbId: "1234",
-    state: "scraped",
     title: "Test Movie",
     year: 2024,
     itemRequest,
@@ -81,7 +80,6 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     id: 1,
     tmdbId: "123",
     contentRating: "g",
-    state: "scraped",
     title: "Test Movie",
     year: 2024,
     createdAt: DateTime.now().minus({ seconds: expectedDuration }).toJSDate(),
@@ -107,7 +105,6 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
             fileName: "Test Movie 2024 1080p.mkv",
             fileSize: 1024,
             downloadUrl: "http://example.com/download",
-            type: "movie",
             matchedMediaItemId: movie.id,
           },
         ],
@@ -134,6 +131,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     type: "riven.media-item.download.success",
     item: expect.any(Movie) as Movie,
     durationFromRequestToDownload: expectedDuration,
+    downloader: "@repo/plugin-test",
   });
 });
 
@@ -152,7 +150,6 @@ it('sends a "riven.media-item.download.error" event if no valid torrent containe
     id: 1,
     contentRating: "g",
     tmdbId: "1234",
-    state: "scraped",
     title: "Test Movie",
     year: 2024,
     itemRequest,

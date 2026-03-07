@@ -1,6 +1,7 @@
 import {
   Episode,
   MediaEntry,
+  MediaItem,
   Movie,
   Season,
   Show,
@@ -31,140 +32,145 @@ export async function persistDownloadResults({
   container,
   processedBy,
 }: PersistDownloadResultsInput) {
-  const existingItem = await database.mediaItem.findOne(
-    {
-      streams: {
-        infoHash: container.infoHash,
+  return await database.em.fork().transactional(async (transaction) => {
+    const existingItem = await transaction.getRepository(MediaItem).findOne(
+      {
+        streams: {
+          infoHash: container.infoHash,
+        },
+        id,
       },
-      id,
-    },
-    {
-      populate: ["streams:ref", "filesystemEntries:ref"],
-    },
-  );
+      {
+        populate: ["streams.infoHash", "filesystemEntries:ref"],
+      },
+    );
 
-  assert(
-    existingItem,
-    new UnrecoverableError(`Media item with ID ${id.toString()} not found`),
-  );
+    assert(
+      existingItem,
+      new UnrecoverableError(`Media item with ID ${id.toString()} not found`),
+    );
 
-  assert(
-    existingItem.streams[0],
-    new UnrecoverableError(
-      `Media item with ID ${id.toString()} has no streams`,
-    ),
-  );
+    const allowedStates: MediaItemState[] = ["scraped", "ongoing"];
 
-  assert(
-    existingItem.state === "scraped",
-    new MediaItemDownloadErrorIncorrectState({
-      item: existingItem,
-    }),
-  );
-
-  const em = database.em.fork();
-
-  existingItem.activeStream = ref(existingItem.streams[0]);
-  existingItem.state = "downloaded";
-
-  if (existingItem instanceof Movie || existingItem instanceof Episode) {
-    const [file] = container.files;
-
-    existingItem.filesystemEntries.add(
-      em.create(MediaEntry, {
-        fileSize: file.fileSize,
-        originalFilename: file.fileName,
-        mediaItem: ref(existingItem),
-        provider: processedBy,
-        providerDownloadId: container.torrentId.toString(),
-        downloadUrl: file.downloadUrl,
+    assert(
+      allowedStates.includes(existingItem.state),
+      new MediaItemDownloadErrorIncorrectState({
+        item: existingItem,
       }),
     );
-  }
 
-  if (existingItem instanceof Show || existingItem instanceof Season) {
-    const episodes =
-      existingItem instanceof Show
-        ? await existingItem.getEpisodes()
-        : await existingItem.episodes.loadItems();
-
-    assert(episodes[0]);
-
-    for (const file of container.files) {
-      if (file.type !== "show") {
-        continue;
-      }
-
-      const episode = await database.episode.findOneOrFail(
-        {
-          ...(existingItem instanceof Episode ? { id: existingItem.id } : {}),
-          season: {
-            ...(existingItem instanceof Season ? { id: existingItem.id } : {}),
-            number: file.season,
-          },
-          number: file.episode,
-        },
-        { populate: ["$infer"] },
+    try {
+      const matchedStream = existingItem.streams.find(
+        ({ infoHash }) => infoHash === container.infoHash,
       );
 
-      const ignoredStates = MediaItemState.exclude(["completed", "downloaded"]);
+      assert(
+        matchedStream,
+        new UnrecoverableError(
+          `Media item with ID ${id.toString()} does not have a stream matching the torrent container's info hash`,
+        ),
+      );
 
-      if (!ignoredStates.safeParse(episode.state).success) {
-        continue;
+      existingItem.activeStream = ref(matchedStream);
+
+      if (existingItem instanceof Movie || existingItem instanceof Episode) {
+        const [file] = container.files;
+
+        existingItem.filesystemEntries.add(
+          transaction.create(MediaEntry, {
+            fileSize: file.fileSize,
+            originalFilename: file.fileName,
+            mediaItem: ref(existingItem),
+            provider: processedBy,
+            providerDownloadId: container.torrentId.toString(),
+            downloadUrl: file.downloadUrl,
+          }),
+        );
       }
 
-      const existingMediaEntries = await episode.getMediaEntries();
+      if (existingItem instanceof Show || existingItem instanceof Season) {
+        const episodes = await transaction.getRepository(Episode).find({
+          id: {
+            $in: container.files.map((file) => file.matchedMediaItemId),
+          },
+        });
 
-      if (existingMediaEntries.length) {
-        logger.debug(
-          `${episode.fullTitle} already has media entries, skipping...`,
+        assert(
+          episodes.length === container.files.length,
+          new UnrecoverableError(
+            "Unable to find all matched media items from the torrent container",
+          ),
         );
 
-        continue;
+        const episodeMap = new Map<number, Episode>(
+          episodes.map((episode) => [episode.id, episode]),
+        );
+
+        const processableStates = MediaItemState.exclude([
+          "completed",
+          "downloaded",
+        ]);
+
+        for (const file of container.files) {
+          const episode = episodeMap.get(file.matchedMediaItemId);
+
+          assert(
+            episode,
+            new UnrecoverableError(
+              `File ${file.fileName} does not correspond to a valid episode`,
+            ),
+          );
+
+          if (!processableStates.safeParse(episode.state).success) {
+            logger.debug(
+              `Skipping media entry creation for ${episode.fullTitle} due to "${episode.state}" state`,
+            );
+
+            continue;
+          }
+
+          episode.filesystemEntries.add(
+            transaction.create(MediaEntry, {
+              fileSize: file.fileSize,
+              originalFilename: file.fileName,
+              mediaItem: ref(episode),
+              provider: processedBy,
+              providerDownloadId: container.torrentId.toString(),
+              downloadUrl: file.downloadUrl,
+            }),
+          );
+
+          transaction.persist(episode);
+        }
       }
 
-      episode.filesystemEntries.add(
-        em.create(MediaEntry, {
-          fileSize: file.fileSize,
-          originalFilename: file.fileName,
-          mediaItem: episode,
-          provider: processedBy,
-          providerDownloadId: container.torrentId.toString(),
-          downloadUrl: file.downloadUrl,
-        }),
-      );
+      await validateOrReject(existingItem);
+
+      await transaction.persist(existingItem).flush();
+
+      return existingItem;
+    } catch (error) {
+      const errorMessage = z
+        .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
+        .transform((error) => {
+          if (Array.isArray(error)) {
+            return error
+              .map((err) =>
+                err.constraints
+                  ? Object.values(err.constraints).join("; ")
+                  : "",
+              )
+              .join("; ");
+          }
+
+          return error.message;
+        })
+        .parse(error);
+
+      throw new MediaItemDownloadError({
+        item: existingItem,
+        error: errorMessage,
+      });
     }
-  }
-
-  try {
-    await validateOrReject(existingItem);
-
-    await em.persist(existingItem).flush();
-
-    await em.refreshOrFail(existingItem, {
-      populate: ["*"],
-    });
-
-    return existingItem;
-  } catch (error) {
-    const errorMessage = z
-      .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((error) => {
-        if (Array.isArray(error)) {
-          return error
-            .map((err) =>
-              err.constraints ? Object.values(err.constraints).join("; ") : "",
-            )
-            .join("; ");
-        }
-
-        return error.message;
-      })
-      .parse(error);
-
-    throw new MediaItemDownloadError({
-      item: existingItem,
-      error: errorMessage,
-    });
-  }
+  });
 }
