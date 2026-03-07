@@ -114,6 +114,11 @@ export async function persistDownloadResults({
           episodes.map((episode) => [episode.id, episode]),
         );
 
+        const processableStates = MediaItemState.exclude([
+          "completed",
+          "downloaded",
+        ]);
+
         for (const file of container.files) {
           const episode = episodeMap.get(file.matchedMediaItemId);
 
@@ -123,11 +128,6 @@ export async function persistDownloadResults({
               `File ${file.fileName} does not correspond to a valid episode`,
             ),
           );
-
-          const processableStates = MediaItemState.exclude([
-            "completed",
-            "downloaded",
-          ]);
 
           if (!processableStates.safeParse(episode.state).success) {
             continue;
