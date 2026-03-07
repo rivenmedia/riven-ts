@@ -9,6 +9,8 @@ import { expect, vi } from "vitest";
 import { rivenTestContext as it } from "../../../../__tests__/test-context.ts";
 import { persistDownloadResults } from "./persist-download-results.ts";
 
+import type { MatchedFile } from "../steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
+
 it("throws an error if the media item has no streams", async ({ movie }) => {
   await expect(
     persistDownloadResults({
@@ -192,7 +194,7 @@ it("adds one media entry per episode for shows", async ({
         downloadUrl: `http://example.com/${episode.title}.mp4`,
         fileName: `${episode.title}.mp4`,
         matchedMediaItemId: episode.id,
-      })) as never,
+      })) as [MatchedFile, ...MatchedFile[]],
       torrentId: 1,
       torrentInfo: {
         files: {},
