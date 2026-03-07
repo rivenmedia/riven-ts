@@ -70,6 +70,14 @@ export async function persistDownloadResults({
 
       if (existingItem instanceof Movie || existingItem instanceof Episode) {
         const [file] = container.files;
+        const existingMediaEntries = await existingItem.getMediaEntries();
+
+        assert(
+          existingMediaEntries.length === 0,
+          new UnrecoverableError(
+            `Media item with ID ${id.toString()} already has media entries`,
+          ),
+        );
 
         existingItem.filesystemEntries.add(
           transaction.create(MediaEntry, {
