@@ -12,7 +12,7 @@ test("getMediaEntries() returns the associated media entry for a Movie media ite
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
     state: "completed",
-    type: "show",
+    type: "movie",
   });
 
   const movie = em.create(Movie, {
