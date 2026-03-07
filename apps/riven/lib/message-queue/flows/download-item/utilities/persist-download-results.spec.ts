@@ -45,10 +45,8 @@ it("throws an error if the media item has no streams", async ({ movie }) => {
 it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in the scraped or ongoing state", async ({
   movie,
   stream,
-  database,
+  em,
 }) => {
-  const em = database.em.fork();
-
   movie.streams.add(stream);
   movie.filesystemEntries.add(
     em.create(MediaEntry, {
@@ -95,11 +93,11 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
 it("sets the active stream and updates the state to downloaded if successful", async ({
   movie,
   stream,
-  database,
+  em,
 }) => {
   movie.streams.add(stream);
 
-  await database.em.fork().persist(movie).flush();
+  await em.persist(movie).flush();
 
   const updatedItem = await persistDownloadResults({
     id: movie.id,
@@ -132,14 +130,10 @@ it("sets the active stream and updates the state to downloaded if successful", a
   expect(updatedItem.state).toBe("downloaded");
 });
 
-it("adds a single media entry for movies", async ({
-  movie,
-  database,
-  stream,
-}) => {
+it("adds a single media entry for movies", async ({ movie, em, stream }) => {
   movie.streams.add(stream);
 
-  await database.em.fork().persist(movie).flush();
+  await em.persist(movie).flush();
 
   await persistDownloadResults({
     id: movie.id,
@@ -175,12 +169,12 @@ it("adds a single media entry for movies", async ({
 
 it("adds one media entry per episode for shows", async ({
   show,
-  database,
+  em,
   stream,
 }) => {
   show.streams.add(stream);
 
-  await database.em.fork().persist(show).flush();
+  await em.persist(show).flush();
 
   const episodes = await show.getEpisodes();
 
@@ -221,7 +215,7 @@ it("adds one media entry per episode for shows", async ({
 it("does not create duplicate media entries for episodes with existing entries", async ({
   show,
   season,
-  database,
+  em,
   stream,
   mediaEntry,
 }) => {
@@ -235,7 +229,7 @@ it("does not create duplicate media entries for episodes with existing entries",
 
   episode.filesystemEntries.add(mediaEntry);
 
-  await database.em.fork().persist(show).flush();
+  await em.persist(show).flush();
 
   await persistDownloadResults({
     id: show.id,
@@ -271,11 +265,9 @@ it("does not create duplicate media entries for episodes with existing entries",
 
 it("throws a MediaItemDownloadError if a validation error occurs during persistence", async ({
   movie,
-  database,
+  em,
   stream,
 }) => {
-  const em = database.em.fork();
-
   movie.streams.add(stream);
 
   await em.persist(movie).flush();

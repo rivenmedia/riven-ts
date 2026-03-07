@@ -14,7 +14,7 @@ import { ApolloServer } from "@apollo/server";
 import { MockAgent, setGlobalDispatcher } from "undici";
 import { expect, test as testBase } from "vitest";
 
-import { type Services, database } from "../database/database.ts";
+import { database } from "../database/database.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { SetupServerApi } from "msw/node";
@@ -30,7 +30,6 @@ export const rivenTestContext = testBase.extend<{
   season: Season;
   episode: Episode;
   stream: Stream;
-  database: Services;
   mediaEntry: MediaEntry;
 }>({
   async apolloServerInstance({}, use) {
@@ -194,8 +193,5 @@ export const rivenTestContext = testBase.extend<{
     });
 
     await use(mediaEntry);
-  },
-  database: async ({}, use) => {
-    await use(database);
   },
 });
