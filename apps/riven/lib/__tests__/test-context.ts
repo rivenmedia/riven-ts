@@ -130,24 +130,24 @@ export const rivenTestContext = testBase.extend<{
 
     await em.flush();
 
-    let episodeNumber = 0;
+    let absoluteEpisodeNumber = 1;
 
-    for (let i = 1; i <= 6; i++) {
+    for (let seasonNumber = 1; seasonNumber <= 6; seasonNumber++) {
       const season = em.create(Season, {
-        title: `Season ${i.toString()}`,
-        number: i,
+        title: `Season ${seasonNumber.toString()}`,
+        number: seasonNumber,
       });
 
       show.seasons.add(season);
 
       await em.flush();
 
-      for (let i = 1; i <= 10; i++) {
+      for (let episodeNumber = 1; episodeNumber <= 10; episodeNumber++) {
         const episode = em.create(Episode, {
-          title: `Episode ${i.toString().padStart(2, "0")}`,
+          title: `Episode ${episodeNumber.toString().padStart(2, "0")}`,
           contentRating: "tv-14",
-          number: i,
-          absoluteNumber: ++episodeNumber,
+          number: episodeNumber,
+          absoluteNumber: absoluteEpisodeNumber++,
         });
 
         season.episodes.add(episode);
