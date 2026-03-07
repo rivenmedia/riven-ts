@@ -1,6 +1,7 @@
 import {
   Episode,
   MediaEntry,
+  MediaItem,
   Movie,
   Season,
   Show,
@@ -31,34 +32,34 @@ export async function persistDownloadResults({
   container,
   processedBy,
 }: PersistDownloadResultsInput) {
-  const existingItem = await database.mediaItem.findOne(
-    {
-      streams: {
-        infoHash: container.infoHash,
+  return await database.em.fork().transactional(async (transaction) => {
+    const existingItem = await transaction.getRepository(MediaItem).findOne(
+      {
+        streams: {
+          infoHash: container.infoHash,
+        },
+        id,
       },
-      id,
-    },
-    {
-      populate: ["streams.infoHash", "filesystemEntries:ref"],
-    },
-  );
+      {
+        populate: ["streams.infoHash", "filesystemEntries:ref"],
+      },
+    );
 
-  assert(
-    existingItem,
-    new UnrecoverableError(`Media item with ID ${id.toString()} not found`),
-  );
+    assert(
+      existingItem,
+      new UnrecoverableError(`Media item with ID ${id.toString()} not found`),
+    );
 
-  const allowedStates: MediaItemState[] = ["scraped", "ongoing"];
+    const allowedStates: MediaItemState[] = ["scraped", "ongoing"];
 
-  assert(
-    allowedStates.includes(existingItem.state),
-    new MediaItemDownloadErrorIncorrectState({
-      item: existingItem,
-    }),
-  );
+    assert(
+      allowedStates.includes(existingItem.state),
+      new MediaItemDownloadErrorIncorrectState({
+        item: existingItem,
+      }),
+    );
 
-  try {
-    return await database.em.fork().transactional(async (transaction) => {
+    try {
       const matchedStream = existingItem.streams.find(
         ({ infoHash }) => infoHash === container.infoHash,
       );
@@ -164,26 +165,28 @@ export async function persistDownloadResults({
       await transaction.flush();
 
       return existingItem;
-    });
-  } catch (error) {
-    const errorMessage = z
-      .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((error) => {
-        if (Array.isArray(error)) {
-          return error
-            .map((err) =>
-              err.constraints ? Object.values(err.constraints).join("; ") : "",
-            )
-            .join("; ");
-        }
+    } catch (error) {
+      const errorMessage = z
+        .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
+        .transform((error) => {
+          if (Array.isArray(error)) {
+            return error
+              .map((err) =>
+                err.constraints
+                  ? Object.values(err.constraints).join("; ")
+                  : "",
+              )
+              .join("; ");
+          }
 
-        return error.message;
-      })
-      .parse(error);
+          return error.message;
+        })
+        .parse(error);
 
-    throw new MediaItemDownloadError({
-      item: existingItem,
-      error: errorMessage,
-    });
-  }
+      throw new MediaItemDownloadError({
+        item: existingItem,
+        error: errorMessage,
+      });
+    }
+  });
 }
