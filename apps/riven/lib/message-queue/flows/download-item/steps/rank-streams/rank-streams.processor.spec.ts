@@ -154,4 +154,67 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
   ]);
 });
 
-it.todo("handles foreign language titles with aliases correctly");
+it("handles foreign language titles with aliases correctly", async ({
+  mockQueue,
+}) => {
+  const em = database.em.fork();
+
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "movie",
+  });
+
+  const itemWithAliases = em.create(Movie, {
+    title: "Foreign Movie",
+    contentRating: "g",
+    itemRequest,
+    state: "scraped",
+    tmdbId: "67890",
+    aliases: {
+      imdb: ["Película Extranjera", "Film Étranger"],
+      tmdb: ["外国映画"],
+    },
+  });
+
+  for (let i = 1; i <= 3; i++) {
+    em.create(Stream, {
+      infoHash: `a${i.toString()}34567890123456789012345678901234567890`,
+      parsedData: {} as never,
+    });
+  }
+
+  await em.flush();
+
+  const job = await Job.create(mockQueue, "mock-rank-streams", {
+    id: itemWithAliases.id,
+    streams: {
+      a134567890123456789012345678901234567890:
+        "Película Extranjera 1080p BluRay",
+      a234567890123456789012345678901234567890: "Film Étranger 720p",
+      a334567890123456789012345678901234567890: "Foreign Movie 1080p",
+    },
+    rtnSettings: createSettings(),
+    rtnRankingModel: defaultRankingModel,
+  });
+
+  const result = await rankStreamsProcessor({ job }, vi.fn());
+
+  expect(result).toEqual([
+    expect.objectContaining({
+      data: expect.objectContaining({
+        rawTitle: "Película Extranjera 1080p BluRay",
+      }),
+    }),
+    expect.objectContaining({
+      data: expect.objectContaining({
+        rawTitle: "Foreign Movie 1080p",
+      }),
+    }),
+    expect.objectContaining({
+      data: expect.objectContaining({
+        rawTitle: "Film Étranger 720p",
+      }),
+    }),
+  ]);
+});
