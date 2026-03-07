@@ -66,7 +66,18 @@ export async function persistDownloadResults({
         ),
       );
 
-      existingItem.activeStream = ref(existingItem.streams[0]);
+      const matchedStream = existingItem.streams.find(
+        ({ infoHash }) => infoHash === container.infoHash,
+      );
+
+      assert(
+        matchedStream,
+        new UnrecoverableError(
+          `Media item with ID ${id.toString()} does not have a stream matching the torrent container's info hash`,
+        ),
+      );
+
+      existingItem.activeStream = ref(matchedStream);
 
       if (existingItem instanceof Movie || existingItem instanceof Episode) {
         const [file] = container.files;
@@ -142,7 +153,7 @@ export async function persistDownloadResults({
             transaction.create(MediaEntry, {
               fileSize: file.fileSize,
               originalFilename: file.fileName,
-              mediaItem: episode,
+              mediaItem: ref(episode),
               provider: processedBy,
               providerDownloadId: container.torrentId.toString(),
               downloadUrl: file.downloadUrl,
