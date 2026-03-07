@@ -107,7 +107,6 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
             fileName: "Test Movie 2024 1080p.mkv",
             fileSize: 1024,
             downloadUrl: "http://example.com/download",
-            type: "movie",
             matchedMediaItemId: movie.id,
           },
         ],
@@ -134,6 +133,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     type: "riven.media-item.download.success",
     item: expect.any(Movie) as Movie,
     durationFromRequestToDownload: expectedDuration,
+    downloader: "@repo/plugin-test",
   });
 });
 
