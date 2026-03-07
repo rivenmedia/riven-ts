@@ -362,8 +362,10 @@ it("returns valid matched files for a show", async ({ show }) => {
   expect(result).toHaveLength(episodes.length);
 
   expect.assert(result[0]);
+  expect.assert(episodes[0]);
 
   expect(result[0].fileName).toBe("Test.Show.E1.1080p.WEB-DL.mkv");
+  expect(result[0].matchedMediaItemId).toBe(episodes[0].id);
 });
 
 it("throws an error if season file episode does not belong to expected season", async ({
