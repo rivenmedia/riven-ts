@@ -71,7 +71,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     for (const season of seasonsAwaitingUpdate) {
       const stateChanged = await this.#maybeUpdateState(
         season,
-        null,
+        trackedItems.get(season) ?? null,
         uow,
         nextStatesMap,
       );
@@ -83,7 +83,12 @@ export class MediaItemStateSubscriber implements EventSubscriber {
 
     // Handle show state propagation
     for (const show of showsAwaitingUpdate) {
-      await this.#maybeUpdateState(show, null, uow, nextStatesMap);
+      await this.#maybeUpdateState(
+        show,
+        trackedItems.get(show) ?? null,
+        uow,
+        nextStatesMap,
+      );
     }
   }
 
