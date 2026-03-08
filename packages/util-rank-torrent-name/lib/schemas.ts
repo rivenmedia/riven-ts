@@ -4,6 +4,7 @@ import { normaliseTitle } from "./shared/normalise.ts";
 
 const nonEmptyString = z.string().min(1);
 const positiveIntSchema = z.int().positive();
+const nonnegativeIntSchema = z.int().nonnegative();
 
 const bitDepthEnum = z.enum(["8bit", "10bit", "12bit"]);
 
@@ -21,8 +22,8 @@ export const ParsedDataSchema = z
     quality: nonEmptyString.optional(),
     codec: nonEmptyString.optional(),
     bitDepth: bitDepthEnum.optional(),
-    seasons: z.array(positiveIntSchema).default([]),
-    episodes: z.array(positiveIntSchema).default([]),
+    seasons: z.array(nonnegativeIntSchema).default([]),
+    episodes: z.array(nonnegativeIntSchema).default([]),
     complete: z.boolean().optional(),
     volumes: z.array(positiveIntSchema).optional(),
     audio: z.array(nonEmptyString).optional(),
