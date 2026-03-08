@@ -17,7 +17,7 @@ import { it } from "./helpers/test-context.ts";
 
 const eventType = getEventTypeFromSchema(MediaItemDownloadErrorEvent);
 
-it(`enqueues a scrape for each individual season when a "${eventType}" event is received for a show`, async ({
+it(`enqueues a scrape for each incomplete season when a "${eventType}" event is received for a show`, async ({
   actor,
 }) => {
   const em = database.em.fork();
@@ -82,7 +82,7 @@ it(`enqueues a scrape for each individual season when a "${eventType}" event is 
   });
 });
 
-it(`enqueues a scrape for each individual season's episode when a "${eventType}" event is received for a season`, async ({
+it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is received for a season`, async ({
   actor,
 }) => {
   const flowAddSpy = vi.spyOn(flow, "add");

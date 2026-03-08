@@ -1,3 +1,5 @@
+import { Season, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
@@ -32,6 +34,34 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
         container: finalResult.result,
         processedBy: finalResult.plugin,
       });
+
+      const incompleteChildStates = MediaItemState.extract([
+        "ongoing",
+        "indexed",
+        "scraped",
+      ]);
+
+      if (
+        (updatedItem instanceof Show || updatedItem instanceof Season) &&
+        updatedItem.state === "ongoing"
+      ) {
+        const show = await updatedItem.getShow();
+        const episodes = await show.getEpisodes();
+
+        const hasIncompleteItems = episodes.some(
+          ({ state }) => incompleteChildStates.safeParse(state).success,
+        );
+
+        if (hasIncompleteItems) {
+          sendEvent({
+            type: "riven.media-item.download.partial-success",
+            item: updatedItem,
+            downloader: finalResult.plugin,
+          });
+
+          return;
+        }
+      }
 
       sendEvent({
         type: "riven.media-item.download.success",
