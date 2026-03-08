@@ -4042,6 +4042,7 @@ components:
           $ref: "#/components/schemas/SeriesAirsDays"
         airsTime:
           type: string
+          nullable: true
         aliases:
           items:
             $ref: "#/components/schemas/Alias"
