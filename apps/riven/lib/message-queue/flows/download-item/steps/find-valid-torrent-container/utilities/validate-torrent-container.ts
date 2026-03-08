@@ -6,6 +6,7 @@ import {
   Show,
   ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
+import { parse } from "@repo/util-rank-torrent-name";
 
 import { reduceAsync } from "es-toolkit";
 import assert from "node:assert";
@@ -13,7 +14,7 @@ import assert from "node:assert";
 import { database } from "../../../../../../database/database.ts";
 import { logger } from "../../../../../../utilities/logger/logger.ts";
 
-import type { ParseDownloadResultsFlow } from "../../parse-download-results/parse-download-results.schema.ts";
+import type { MapItemsToFilesFlow } from "../../map-items-to-files/map-items-to-files.schema.ts";
 import type { MatchedFile } from "../find-valid-torrent-container.schema.ts";
 
 async function getExpectedFileCount(item: MediaItem) {
@@ -37,32 +38,74 @@ async function getExpectedFileCount(item: MediaItem) {
   return 1;
 }
 
+function getEpisodeLookupKeys(episode: Episode) {
+  return [
+    `abs:${episode.absoluteNumber.toString()}`,
+    `${episode.season.unwrap().number.toString()}:${episode.number.toString()}`,
+  ];
+}
+
+async function getItemLookupKeys(item: MediaItem) {
+  if (item instanceof Show || item instanceof Season) {
+    const episodes =
+      item instanceof Show
+        ? await item.getEpisodes()
+        : item.episodes.getItems();
+
+    return episodes.reduce<string[]>(
+      (acc, episode) => [...acc, ...getEpisodeLookupKeys(episode)],
+      [],
+    );
+  }
+
+  if (item instanceof Episode) {
+    return getEpisodeLookupKeys(item);
+  }
+
+  return ["1"];
+}
+
 export const validateTorrentContainer = async (
   item: MediaItem,
   infoHash: string,
-  parsedContainer: ParseDownloadResultsFlow["output"],
+  mappedContainerItems: MapItemsToFilesFlow["output"],
 ): Promise<MatchedFile[]> => {
   logger.verbose(
     `Validating torrent container for item ${item.fullTitle}: ${infoHash}`,
   );
 
   const expectedFileCount = await getExpectedFileCount(item);
+
   const group =
     item instanceof ShowLikeMediaItem
-      ? parsedContainer.episodes
-      : parsedContainer.movies;
+      ? mappedContainerItems.files.episodes
+      : mappedContainerItems.files.movies;
+
   const groupMap = new Map(Object.entries(group));
 
   assert(
     groupMap.size >= expectedFileCount,
-    `${item.type.substring(0, 1).toUpperCase() + item.type.substring(1)} torrent container must have at least ${expectedFileCount.toString()} files, but has ${groupMap.size.toString()}`,
+    `${item.type.substring(0, 1).toUpperCase() + item.type.substring(1)} torrent container must have at least ${expectedFileCount.toString()} ${item instanceof ShowLikeMediaItem ? "episodes" : "movies"}, but has ${groupMap.size.toString()}`,
   );
 
   const validFiles: MatchedFile[] = [];
+  const lookupKeys = await getItemLookupKeys(item);
 
-  for (const { file, parseData } of groupMap.values()) {
+  for (const lookupKey of lookupKeys) {
+    const file = groupMap.get(lookupKey);
+
+    if (!file) {
+      continue;
+    }
+
+    logger.debug(
+      `Found match: ${file.fileName} for item ${item.fullTitle} using lookup key '${lookupKey}'`,
+    );
+
     try {
       assert(file.downloadUrl, `File ${file.fileName} has no download URL`);
+
+      const parseData = parse(file.fileName);
 
       if (item instanceof Movie) {
         assert(parseData.type === "movie", "File must be a movie");

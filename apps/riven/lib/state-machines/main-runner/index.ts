@@ -6,8 +6,8 @@ import { downloadItemProcessor } from "../../message-queue/flows/download-item/d
 import { DownloadItemFlow } from "../../message-queue/flows/download-item/download-item.schema.ts";
 import { findValidTorrentContainerProcessor } from "../../message-queue/flows/download-item/steps/find-valid-torrent-container/find-valid-torrent-container.processor.ts";
 import { FindValidTorrentContainerFlow } from "../../message-queue/flows/download-item/steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
-import { parseDownloadResultsProcessor } from "../../message-queue/flows/download-item/steps/parse-download-results/parse-download-results.processor.ts";
-import { ParseDownloadResultsFlow } from "../../message-queue/flows/download-item/steps/parse-download-results/parse-download-results.schema.ts";
+import { mapItemsToFilesProcessor } from "../../message-queue/flows/download-item/steps/map-items-to-files/map-items-to-files.processor.ts";
+import { MapItemsToFilesFlow } from "../../message-queue/flows/download-item/steps/map-items-to-files/map-items-to-files.schema.ts";
 import { rankStreamsProcessor } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.processor.ts";
 import { RankStreamsFlow } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.schema.ts";
 import { indexItemProcessor } from "../../message-queue/flows/index-item/index-item.processor.ts";
@@ -279,9 +279,9 @@ export const mainRunnerMachine = setup({
             downloadItemProcessor,
             self.send,
           ),
-          "download-item.parse-download-results": createFlowWorker(
-            ParseDownloadResultsFlow,
-            parseDownloadResultsProcessor,
+          "download-item.map-items-to-files": createFlowWorker(
+            MapItemsToFilesFlow,
+            mapItemsToFilesProcessor,
             self.send,
           ),
           "download-item.find-valid-torrent-container": createFlowWorker(

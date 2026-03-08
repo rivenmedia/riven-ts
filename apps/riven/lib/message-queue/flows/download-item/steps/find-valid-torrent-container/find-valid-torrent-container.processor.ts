@@ -1,19 +1,10 @@
-import {
-  MediaItemDownloadRequestedEvent,
-  MediaItemDownloadRequestedResponse,
-} from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
-
-import { type PluginJobNode, UnrecoverableError } from "bullmq";
+import { UnrecoverableError } from "bullmq";
 import assert from "node:assert";
 
 import { database } from "../../../../../database/database.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
 import { runSingleJob } from "../../../../utilities/run-single-job.ts";
-import { flow } from "../../../producer.ts";
-import {
-  type ParseDownloadResultsFlow,
-  createParseDownloadResultsJob,
-} from "../parse-download-results/parse-download-results.schema.ts";
+import { enqueueMapItemsToFiles } from "../../enqueue-map-items-to-files.ts";
 import { findValidTorrentContainerProcessorSchema } from "./find-valid-torrent-container.schema.ts";
 import { validateTorrentContainer } from "./utilities/validate-torrent-container.ts";
 
@@ -47,57 +38,26 @@ export const findValidTorrentContainerProcessor =
     for (const infoHash of uncheckedInfoHashes) {
       for (const plugin of availableDownloaders) {
         try {
-          const pluginDownloadNode = await flow.addPluginJob(
-            MediaItemDownloadRequestedEvent,
-            MediaItemDownloadRequestedResponse,
-            `Download ${infoHash}`,
+          const mapItemsToFilesJobNode = await enqueueMapItemsToFiles({
+            parent: { id: jobId, queue: job.queueQualifiedName },
+            infoHash,
             plugin,
-            { infoHash },
-            {
-              jobId: infoHash, // Use info hash as job ID to prevent duplicate processing of the same torrent container
-              ignoreDependencyOnFailure: true,
-              parent: {
-                id: jobId,
-                queue: job.queueQualifiedName,
-              },
-            },
-          );
+          });
 
-          const torrentContainer = await runSingleJob(pluginDownloadNode.job);
-
-          const parsedTorrentContainerNode: PluginJobNode<
-            ParseDownloadResultsFlow["input"],
-            ParseDownloadResultsFlow["output"]
-          > = await flow.add(
-            createParseDownloadResultsJob(
-              `Parse download results for ${infoHash}`,
-              { results: torrentContainer },
-              {
-                opts: {
-                  parent: {
-                    id: jobId,
-                    queue: job.queueQualifiedName,
-                  },
-                  removeOnFail: true,
-                },
-              },
-            ),
-          );
-
-          const parsedTorrentContainer = await runSingleJob(
-            parsedTorrentContainerNode.job,
+          const mappedTorrentContainer = await runSingleJob(
+            mapItemsToFilesJobNode.job,
           );
 
           const validatedFiles = await validateTorrentContainer(
             mediaItem,
             infoHash,
-            parsedTorrentContainer,
+            mappedTorrentContainer,
           );
 
           return {
             plugin,
             result: {
-              ...torrentContainer,
+              ...mappedTorrentContainer,
               files: validatedFiles,
             },
           };
