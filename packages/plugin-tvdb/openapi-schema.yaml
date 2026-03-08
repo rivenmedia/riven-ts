@@ -2988,6 +2988,7 @@ components:
           type: integer
         name:
           type: string
+          nullable: true
         nameTranslations:
           items:
             type: string
