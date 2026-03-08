@@ -17,5 +17,5 @@ export const runSingleJob = async <
 
   await queueEvents.waitUntilReady();
 
-  return await job.waitUntilFinished(queueEvents, 10_000);
+  return await job.waitUntilFinished(queueEvents, 600_000);
 };

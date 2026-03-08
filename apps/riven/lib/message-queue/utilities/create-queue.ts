@@ -13,18 +13,18 @@ export function createQueue(
   options?: Omit<QueueOptions, "connection" | "telemetry">,
 ) {
   const queue = new Queue(name, {
-    ...options,
-    connection: {
-      url: settings.redisUrl,
+    streams: {
+      events: {
+        maxLen: 100,
+      },
     },
     defaultJobOptions: {
       removeOnComplete: 50,
       removeOnFail: 100,
     },
-    streams: {
-      events: {
-        maxLen: 100,
-      },
+    ...options,
+    connection: {
+      url: settings.redisUrl,
     },
     telemetry,
   });

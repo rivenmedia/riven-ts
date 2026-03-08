@@ -76,7 +76,15 @@ export const registerPluginHookWorkers = fromPromise<
               logger,
             });
           },
-          { concurrency: os.availableParallelism() },
+          {
+            concurrency: os.availableParallelism(),
+            removeOnComplete: {
+              count: 50,
+            },
+            removeOnFail: {
+              count: 100,
+            },
+          },
         );
 
         logger.debug(

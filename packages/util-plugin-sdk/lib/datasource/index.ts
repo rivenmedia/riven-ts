@@ -98,7 +98,7 @@ export abstract class BaseDataSource<
         attempts: requestAttempts,
         backoff: {
           type: "exponential",
-          delay: 1000,
+          delay: 5000,
           jitter: 0.5,
         },
         removeOnComplete: true,
@@ -140,6 +140,7 @@ export abstract class BaseDataSource<
           ? { limiter: this.rateLimiterOptions }
           : {}),
         telemetry,
+        concurrency: 1,
       },
     );
 

@@ -1,7 +1,12 @@
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import * as Sentry from "@sentry/node";
-import { UnrecoverableError, Worker, type WorkerOptions } from "bullmq";
+import {
+  type QueueOptions,
+  UnrecoverableError,
+  Worker,
+  type WorkerOptions,
+} from "bullmq";
 import assert from "node:assert";
 import os from "node:os";
 
@@ -28,6 +33,7 @@ export function createFlowWorker<
     (typeof FlowHandlers)[T["shape"]["name"]["value"]]["implementAsync"]
   >,
   sendEvent: MainRunnerMachineIntake,
+  queueOptions?: Omit<QueueOptions, "connection" | "telemetry">,
   workerOptions?: Omit<WorkerOptions, "connection" | "telemetry">,
 ) {
   const [flowName] = flowSchema.shape.name.def.values;
@@ -37,7 +43,7 @@ export function createFlowWorker<
     `No queue name found for flow: ${flowSchema.shape.name.value}`,
   );
 
-  const queue = createQueue(flowName);
+  const queue = createQueue(flowName, queueOptions);
 
   const worker = new Worker(
     flowName,

@@ -261,16 +261,22 @@ export const mainRunnerMachine = setup({
             RequestIndexDataFlow,
             indexItemProcessor,
             self.send,
+            {},
+            { concurrency: 1 },
           ),
           "request-content-services": createFlowWorker(
             RequestContentServicesFlow,
             requestContentServicesProcessor,
             self.send,
+            {},
+            { concurrency: 1 },
           ),
           "scrape-item": createFlowWorker(
             ScrapeItemFlow,
             scrapeItemProcessor,
             self.send,
+            {},
+            { concurrency: 1 },
           ),
           "scrape-item.parse-scrape-results": createFlowWorker(
             ParseScrapeResultsFlow,
@@ -281,6 +287,8 @@ export const mainRunnerMachine = setup({
             DownloadItemFlow,
             downloadItemProcessor,
             self.send,
+            {},
+            { concurrency: 1 },
           ),
           "download-item.map-items-to-files": createFlowWorker(
             MapItemsToFilesFlow,
@@ -291,6 +299,13 @@ export const mainRunnerMachine = setup({
             FindValidTorrentContainerFlow,
             findValidTorrentContainerProcessor,
             self.send,
+            {
+              streams: {
+                events: {
+                  maxLen: 500,
+                },
+              },
+            },
           ),
           "download-item.rank-streams": createFlowWorker(
             RankStreamsFlow,
