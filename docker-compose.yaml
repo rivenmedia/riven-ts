@@ -79,12 +79,15 @@ services:
     container_name: riven-cache
     image: redis
     restart: unless-stopped
+    command: redis-server --maxmemory-policy noeviction --appendonly yes
     ports:
       - 6379:6379
     profiles:
       - all
       - services
       - analytics
+    volumes:
+      - /tmp/local-redis/data:/data
 
   bullboard:
     container_name: bullboard

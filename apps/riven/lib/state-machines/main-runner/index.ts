@@ -43,16 +43,19 @@ import type {
   PublishableEventSet,
   ValidPluginMap,
 } from "../../types/plugins.ts";
-import type { FlowJob, Worker } from "bullmq";
+import type { FlowJob, Queue, Worker } from "bullmq";
 import type z from "zod";
 
 export interface MainRunnerMachineContext {
   plugins: ValidPluginMap;
   flows: {
-    [K in Flow["name"]]: Worker<
-      Extract<Flow, { name: K }>["input"],
-      Extract<Flow, { name: K }>["output"]
-    >;
+    [K in Flow["name"]]: {
+      queue: Queue;
+      worker: Worker<
+        Extract<Flow, { name: K }>["input"],
+        Extract<Flow, { name: K }>["output"]
+      >;
+    };
   };
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;

@@ -7,7 +7,7 @@ import {
   type JobNode,
   type JobsOptions,
   type PluginJobNode,
-  type QueueOptions,
+  type QueueBaseOptions,
 } from "bullmq";
 
 import { logger } from "../../utilities/logger/logger.ts";
@@ -60,7 +60,7 @@ export class ExtendedFlowProducer extends FlowProducer {
 }
 
 export function createFlowProducer(
-  options?: Omit<QueueOptions, "connection" | "telemetry">,
+  options?: Omit<QueueBaseOptions, "connection" | "telemetry">,
 ) {
   const flowProducer = new ExtendedFlowProducer({
     ...options,

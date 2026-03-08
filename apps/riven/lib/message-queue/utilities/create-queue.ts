@@ -18,13 +18,12 @@ export function createQueue(
       url: settings.redisUrl,
     },
     defaultJobOptions: {
-      removeOnComplete: {
-        age: 60 * 60,
-        count: 1000,
-      },
-      removeOnFail: {
-        age: 24 * 60 * 60,
-        count: 5000,
+      removeOnComplete: 50,
+      removeOnFail: 100,
+    },
+    streams: {
+      events: {
+        maxLen: 100,
       },
     },
     telemetry,

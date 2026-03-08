@@ -54,6 +54,6 @@ export const FlowHandlers = {
   "download-item": downloadItemProcessorSchema,
   "download-item.find-valid-torrent-container":
     findValidTorrentContainerProcessorSchema,
-  "download-item.parse-download-results": mapItemsToFilesProcessorSchema,
+  "download-item.map-items-to-files": mapItemsToFilesProcessorSchema,
   "download-item.rank-streams": rankStreamsProcessorSchema,
 } satisfies Record<Flow["name"], z.ZodFunction>;

@@ -47,6 +47,7 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
         ({ state }) => processableStates.safeParse(state).success,
       );
 
+      // TODO: Implement pagination for shows with a large number of episodes to avoid enqueueing thousands of scrape jobs at once
       for (const episode of incompleteEpisodes) {
         await enqueueScrapeItem({
           item: episode,

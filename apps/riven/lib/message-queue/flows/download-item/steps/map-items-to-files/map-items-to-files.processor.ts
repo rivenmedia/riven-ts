@@ -14,7 +14,7 @@ export const mapItemsToFilesProcessor =
 
     if (!torrentContainer) {
       throw new UnrecoverableError(
-        "No valid torrent container found to map items to files",
+        "Unable to map items to files without a valid torrent container.",
       );
     }
 
