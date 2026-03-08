@@ -1,4 +1,11 @@
-import { ItemRequest, Movie, Stream } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  Episode,
+  ItemRequest,
+  Movie,
+  Season,
+  Show,
+  Stream,
+} from "@repo/util-plugin-sdk/dto/entities";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 import { parse } from "@repo/util-rank-torrent-name";
 
@@ -131,6 +138,116 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     type: "riven.media-item.download.success",
     item: expect.any(Movie) as Movie,
     durationFromRequestToDownload: expectedDuration,
+    downloader: "@repo/plugin-test",
+  });
+});
+
+it('sends a "riven.media-item.download.partial-success" event with the updated item if the download result is valid but does not contain all episodes', async () => {
+  const sendEvent = vi.fn();
+
+  const em = database.orm.em.fork();
+
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
+
+  const show = em.create(Show, {
+    tvdbId: "123",
+    contentRating: "tv-14",
+    title: "Test Show",
+    year: 2024,
+    itemRequest,
+    status: "continuing",
+  });
+
+  await em.flush();
+
+  for (let i = 1; i <= 2; i++) {
+    const season = em.create(Season, {
+      number: i,
+      title: `Season ${i.toString()}`,
+    });
+
+    show.seasons.add(season);
+
+    await em.flush();
+
+    for (let j = 1; j <= 2; j++) {
+      const episode = em.create(Episode, {
+        title: `Test Show S01E0${j.toString()}`,
+        contentRating: "tv-14",
+        year: 2024,
+        number: j,
+        absoluteNumber: j,
+      });
+
+      season.episodes.add(episode);
+    }
+  }
+
+  const streamInfoHash = "test-info-hash";
+
+  const stream = em.create(Stream, {
+    infoHash: streamInfoHash,
+    parsedData: parse("Test Show 2024 1080p"),
+  });
+
+  show.streams.add(stream);
+
+  await em.flush();
+
+  const episodes = await show.getEpisodes();
+
+  expect.assert(episodes[0]);
+  expect.assert(episodes[1]);
+
+  const mockQueue = createQueue("mock-queue");
+  const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
+    await Job.create(mockQueue, "mock-download-item", {
+      id: show.id,
+    });
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+    "find-valid-torrent-container": {
+      result: {
+        files: [
+          {
+            fileName: "Test Show S01E01 2024 1080p.mkv",
+            fileSize: 1024,
+            downloadUrl: "http://example.com/download",
+            matchedMediaItemId: episodes[0].id,
+          },
+          {
+            fileName: "Test Show S01E02 2024 1080p.mkv",
+            fileSize: 1024,
+            downloadUrl: "http://example.com/download",
+            matchedMediaItemId: episodes[1].id,
+          },
+        ],
+        infoHash: streamInfoHash,
+        torrentId: "",
+        torrentInfo: {
+          files: {},
+          infoHash: "",
+          name: "",
+          id: "",
+          isCached: true,
+          links: [],
+          sizeMB: 0,
+          alternativeFilename: "",
+        },
+      },
+      plugin: "@repo/plugin-test",
+    },
+  });
+
+  await downloadItemProcessor({ job }, sendEvent);
+
+  expect(sendEvent).toHaveBeenCalledWith({
+    type: "riven.media-item.download.partial-success",
+    item: expect.any(Show) as Show,
     downloader: "@repo/plugin-test",
   });
 });

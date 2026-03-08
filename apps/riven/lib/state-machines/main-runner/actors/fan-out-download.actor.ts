@@ -3,6 +3,7 @@ import {
   Season,
   Show,
 } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
 import { fromPromise } from "xstate";
 
@@ -18,10 +19,20 @@ export interface FanOutDownloadInput {
 
 export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
   async ({ input: { item, subscribers } }) => {
+    const processableStates = MediaItemState.extract([
+      "ongoing",
+      "indexed",
+      "scraped",
+    ]);
+
     if (item instanceof Show) {
       await database.em.fork().populate(item, ["seasons"]);
 
-      for (const season of item.seasons) {
+      const incompleteSeasons = item.seasons.filter(
+        ({ state }) => processableStates.safeParse(state).success,
+      );
+
+      for (const season of incompleteSeasons) {
         await enqueueScrapeItem({
           item: season,
           subscribers,
@@ -32,7 +43,11 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
     if (item instanceof Season) {
       await database.em.fork().populate(item, ["episodes"]);
 
-      for (const episode of item.episodes) {
+      const incompleteEpisodes = item.episodes.filter(
+        ({ state }) => processableStates.safeParse(state).success,
+      );
+
+      for (const episode of incompleteEpisodes) {
         await enqueueScrapeItem({
           item: episode,
           subscribers,

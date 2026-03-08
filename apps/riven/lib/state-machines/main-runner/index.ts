@@ -471,6 +471,28 @@ export const mainRunnerMachine = setup({
         ],
       },
 
+      "riven.media-item.download.partial-success": {
+        description:
+          "Indicates that a show or season has been partially downloaded.",
+        actions: [
+          {
+            type: "log",
+            params: ({
+              event: {
+                downloader,
+                item: { fullTitle },
+              },
+            }) => ({
+              message: `Partially downloaded ${fullTitle} using ${downloader}. Attempting to download the remaining items separately.`,
+            }),
+          },
+          {
+            type: "fanOutDownload",
+            params: ({ event: { item } }) => ({ item }),
+          },
+        ],
+      },
+
       "riven.media-item.download.error": {
         description:
           "Indicates that an error occurred during the download process for a media item.",

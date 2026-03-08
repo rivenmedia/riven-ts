@@ -37,6 +37,10 @@ import {
   MediaItemDownloadErrorIncorrectStateEventHandler,
 } from "./media-item.download.incorrect-state.event.ts";
 import {
+  MediaItemDownloadPartialSuccessEvent,
+  MediaItemDownloadPartialSuccessEventHandler,
+} from "./media-item.download.partial-success.event.ts";
+import {
   MediaItemDownloadSuccessEvent,
   MediaItemDownloadSuccessEventHandler,
 } from "./media-item.download.success.event.ts";
@@ -95,6 +99,7 @@ export const RivenEvent = z.discriminatedUnion("type", [
   MediaItemDownloadRequestedEvent,
   MediaItemDownloadErrorIncorrectStateEvent,
   MediaItemDownloadErrorEvent,
+  MediaItemDownloadPartialSuccessEvent,
   MediaItemDownloadSuccessEvent,
   MediaItemStreamLinkRequestedEvent,
 ]);
@@ -141,6 +146,8 @@ export const RivenEventHandler = {
   "riven.media-item.download.error": MediaItemDownloadErrorEventHandler,
   "riven.media-item.download.error.incorrect-state":
     MediaItemDownloadErrorIncorrectStateEventHandler,
+  "riven.media-item.download.partial-success":
+    MediaItemDownloadPartialSuccessEventHandler,
   "riven.media-item.download.success": MediaItemDownloadSuccessEventHandler,
 
   // Item streaming
