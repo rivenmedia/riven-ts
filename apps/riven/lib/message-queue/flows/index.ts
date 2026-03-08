@@ -9,6 +9,10 @@ import {
   findValidTorrentContainerProcessorSchema,
 } from "./download-item/steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
 import {
+  ParseDownloadResultsFlow,
+  parseDownloadResultsProcessorSchema,
+} from "./download-item/steps/parse-download-results/parse-download-results.schema.ts";
+import {
   RankStreamsFlow,
   rankStreamsProcessorSchema,
 } from "./download-item/steps/rank-streams/rank-streams.schema.ts";
@@ -36,6 +40,7 @@ export const Flow = z.discriminatedUnion("name", [
   ParseScrapeResultsFlow,
   DownloadItemFlow,
   FindValidTorrentContainerFlow,
+  ParseDownloadResultsFlow,
   RankStreamsFlow,
 ]);
 
@@ -49,5 +54,6 @@ export const FlowHandlers = {
   "download-item": downloadItemProcessorSchema,
   "download-item.find-valid-torrent-container":
     findValidTorrentContainerProcessorSchema,
+  "download-item.parse-download-results": parseDownloadResultsProcessorSchema,
   "download-item.rank-streams": rankStreamsProcessorSchema,
 } satisfies Record<Flow["name"], z.ZodFunction>;

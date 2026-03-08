@@ -1,6 +1,7 @@
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import {
+  type FlowChildJob,
   FlowProducer,
   type Job,
   type JobNode,
@@ -43,6 +44,7 @@ export class ExtendedFlowProducer extends FlowProducer {
     pluginName: string,
     data: ParamsFor<z.input<I>>,
     opts: Partial<Omit<JobsOptions, "name" | "queueName" | "data">>,
+    children?: FlowChildJob[],
   ): Promise<PluginJobNode<ParamsFor<z.input<I>>, z.infer<O>>> {
     const job = createPluginFlowJob(
       inputSchema,
@@ -50,6 +52,7 @@ export class ExtendedFlowProducer extends FlowProducer {
       pluginName,
       data,
       opts,
+      children,
     );
 
     return this.add(job);
