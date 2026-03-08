@@ -125,7 +125,7 @@ export const validateTorrentContainer = async (
         );
 
         assert(
-          parseData.episodes[0],
+          parseData.episodes[0] != null,
           "File must have at least one episode number",
         );
 

@@ -204,7 +204,7 @@ export abstract class BaseDataSource<
       return null;
     }
 
-    // If the Retry-After header is a number, it's the number of **seconds** to wait
+    // If the Retry-After header is a string, it's the number of **seconds** to wait
     return retryAfterSeconds * 1000;
   }
 
