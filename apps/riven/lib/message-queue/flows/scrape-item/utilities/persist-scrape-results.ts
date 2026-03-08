@@ -58,9 +58,8 @@ export async function persistScrapeResults({
 
   const newStreamsCount = existingItem.streams.count() - streamsCount;
 
-  if (newStreamsCount === 0) {
-    existingItem.failedAttempts++;
-  }
+  existingItem.failedAttempts =
+    newStreamsCount === 0 ? existingItem.failedAttempts + 1 : 0;
 
   existingItem.scrapedAt = DateTime.now().toJSDate();
   existingItem.scrapedTimes++;
