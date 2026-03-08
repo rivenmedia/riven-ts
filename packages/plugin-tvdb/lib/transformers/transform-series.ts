@@ -36,9 +36,7 @@ export const transformSeries = (
     status: { name: tvdbStatus } = {},
   } = series;
 
-  if (!title) {
-    throw new Error("Series must have a name");
-  }
+  assert(title, "Series must have a name");
 
   const firstAired = series.firstAired
     ? DateTime.fromISO(series.firstAired)
@@ -56,14 +54,15 @@ export const transformSeries = (
 
   // TODO: Get translations
 
-  const genres =
-    series.genres?.reduce<string[]>((acc, genre) => {
-      if (!genre.name) {
-        return acc;
-      }
+  const genres = series.genres
+    ? series.genres.reduce<string[]>((acc, genre) => {
+        if (!genre.name) {
+          return acc;
+        }
 
-      return [...acc, genre.name];
-    }, []) ?? [];
+        return [...acc, genre.name];
+      }, [])
+    : [];
 
   const sanitisedTitle = title.replaceAll(/\s*\(.*\)\s*$/g, "");
 
@@ -104,7 +103,6 @@ export const transformSeries = (
         number: season.number,
         episodes:
           season.episodes?.reduce<Episode[]>((acc, episode) => {
-            assert(episode.name);
             assert(episode.number !== undefined, "Episode must have a number");
 
             return [
@@ -112,7 +110,7 @@ export const transformSeries = (
               {
                 contentRating, // TODO: Get episode-specific content rating
                 number: episode.number,
-                title: episode.name,
+                title: episode.name ?? "Unknown title",
                 posterPath: episode.image,
                 airedAt: episode.aired
                   ? DateTime.fromISO(episode.aired).toISO({
