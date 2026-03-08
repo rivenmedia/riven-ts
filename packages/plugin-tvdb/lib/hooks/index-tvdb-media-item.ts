@@ -11,19 +11,17 @@ export const indexTVDBMediaItem: z.infer<
   if (event.item.tvdbId) {
     const api = dataSources.get(TvdbAPI);
     const series = await api.getSeries(event.item.tvdbId);
-    const seasons = await Promise.all(
-      series.seasons
-        ?.filter(
-          (season): season is { id: number } =>
-            season.type?.type === "official" &&
-            season.number !== 0 &&
-            season.id !== undefined,
-        )
-        .map((season) => api.getSeason(season.id)) ?? [],
+    const allEpisodes = await api.getAllEpisodesInOfficialOrder(
+      event.item.tvdbId,
     );
 
+    const seriesTranslation =
+      series.originalLanguage !== "eng"
+        ? await api.getSeriesTranslations(event.item.tvdbId)
+        : null;
+
     return {
-      item: transformSeries(event.item, series, seasons),
+      item: transformSeries(event.item, series, allEpisodes, seriesTranslation),
     };
   } else if (event.item.imdbId) {
     // TODO: Implement IMDb-only indexing logic

@@ -44,13 +44,16 @@ export const MediaItemIndexRequestedResponse = z
         firstAired: z.iso.date(),
         network: z.string().min(1).nullable(),
         status: ShowStatus,
-        seasons: z.array(
+        seasons: z.record(
+          z.int(),
           z.object({
             number: z.number(),
+            title: z.string().nullable(),
             episodes: z.array(
               z.object({
                 contentRating: ShowContentRating,
-                number: z.number(),
+                absoluteNumber: z.int().nonnegative(),
+                number: z.int().nonnegative(),
                 title: z.string(),
                 posterPath: z.url().nullish(),
                 airedAt: z.iso.date().nullish(),

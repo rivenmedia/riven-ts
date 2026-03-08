@@ -5,23 +5,20 @@ import assert from "node:assert";
 import z from "zod";
 
 import type {
-  SeasonExtendedRecordSchema,
+  EpisodeBaseRecordSchema,
   SeriesExtendedRecordSchema,
+  TranslationSchema,
 } from "../__generated__/index.ts";
 import type {
   MediaItemIndexRequestedEvent,
   MediaItemIndexRequestedPluginResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-type Episode = Extract<
-  NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
-  { type: "show" }
->["seasons"][number]["episodes"][number];
-
 export const transformSeries = (
   eventItem: MediaItemIndexRequestedEvent["item"],
   series: SeriesExtendedRecordSchema,
-  seasons: SeasonExtendedRecordSchema[],
+  allEpisodes: EpisodeBaseRecordSchema[],
+  translation: TranslationSchema | null,
 ) => {
   const imdbId =
     eventItem.imdbId ??
@@ -31,10 +28,11 @@ export const transformSeries = (
 
   const {
     slug = "",
-    name: title,
     image: posterPath,
     status: { name: tvdbStatus } = {},
   } = series;
+
+  const title = translation?.name ?? series.name;
 
   assert(title, "Series must have a name");
 
@@ -47,12 +45,9 @@ export const transformSeries = (
   const network =
     series.latestNetwork?.name ?? series.originalNetwork?.name ?? null;
 
-  // TODO: Fetch from Trakt
-  const aliases = new Map<string, Set<string>>();
-
-  aliases.set("us", new Set([slug]));
-
-  // TODO: Get translations
+  const aliases = new Map<string, Set<string>>([
+    ["us", new Set([slug, ...(translation?.aliases ?? [])])],
+  ]);
 
   const genres = series.genres
     ? series.genres.reduce<string[]>((acc, genre) => {
@@ -75,6 +70,54 @@ export const transformSeries = (
       series.contentRatings?.find(({ country }) => country === "usa")?.name,
     );
 
+  const seasons = allEpisodes.reduce<
+    Extract<
+      NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
+      { type: "show" }
+    >["seasons"]
+  >((acc, episode) => {
+    const { seasonNumber, number } = episode;
+
+    if (seasonNumber === undefined || number === undefined) {
+      return acc;
+    }
+
+    const season = acc[seasonNumber] ?? {
+      number: seasonNumber,
+      title: episode.seasonName ?? null,
+      episodes: [],
+    };
+
+    return {
+      ...acc,
+      [seasonNumber]: {
+        ...season,
+        episodes: [
+          ...season.episodes,
+          {
+            contentRating, // TODO: Get episode-specific content rating
+            number,
+            absoluteNumber: episode.absoluteNumber ?? 0,
+            title: episode.name ?? "Unknown",
+            posterPath: episode.image
+              ? new URL(
+                  episode.image,
+                  "https://artworks.thetvdb.com",
+                ).toString()
+              : posterPath,
+            airedAt: episode.aired
+              ? DateTime.fromISO(episode.aired).toISO({
+                  precision: "day",
+                  includeOffset: false,
+                })
+              : null,
+            runtime: episode.runtime ?? null,
+          },
+        ],
+      },
+    };
+  }, {});
+
   return {
     id: eventItem.id,
     type: "show",
@@ -96,34 +139,7 @@ export const transformSeries = (
       precision: "day",
       includeOffset: false,
     }),
-    seasons: seasons.map((season) => {
-      assert(season.number !== undefined, "Season must have a number");
-
-      return {
-        number: season.number,
-        episodes:
-          season.episodes?.reduce<Episode[]>((acc, episode) => {
-            assert(episode.number !== undefined, "Episode must have a number");
-
-            return [
-              ...acc,
-              {
-                contentRating, // TODO: Get episode-specific content rating
-                number: episode.number,
-                title: episode.name ?? "Unknown title",
-                posterPath: episode.image,
-                airedAt: episode.aired
-                  ? DateTime.fromISO(episode.aired).toISO({
-                      precision: "day",
-                      includeOffset: false,
-                    })
-                  : null,
-                runtime: episode.runtime ?? null,
-              } satisfies Episode,
-            ];
-          }, [] as Episode[]) ?? [],
-      };
-    }),
+    seasons,
   } satisfies Extract<
     NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
     { type: "show" }

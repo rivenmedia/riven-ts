@@ -66,19 +66,22 @@ export async function persistShowIndexerData({
 
       await transaction.flush();
 
-      let totalEpisodes = 1;
-
-      const sortedSeasons = item.seasons.sort((a, b) => a.number - b.number);
-
-      for (const season of sortedSeasons) {
+      for (const season of Object.values(item.seasons)) {
         const seasonFirstAired = season.episodes[0]?.airedAt ?? null;
 
         const seasonYear = seasonFirstAired
           ? DateTime.fromISO(seasonFirstAired).year
           : null;
 
+        const seasonTitle = [
+          `Season ${season.number.toString().padStart(2, "0")}`,
+          season.title,
+        ]
+          .filter(Boolean)
+          .join(" - ");
+
         const seasonEntry = transaction.create(Season, {
-          title: `Season ${season.number.toString().padStart(2, "0")}`,
+          title: seasonTitle,
           year: seasonYear,
           number: season.number,
           airedAt: seasonFirstAired,
@@ -88,17 +91,13 @@ export async function persistShowIndexerData({
 
         await transaction.flush();
 
-        const sortedEpisodes = season.episodes.sort(
-          (a, b) => a.number - b.number,
-        );
-
-        for (const episode of sortedEpisodes) {
+        for (const episode of season.episodes) {
           const episodeYear = episode.airedAt
             ? DateTime.fromISO(episode.airedAt).year
             : seasonYear;
 
           const episodeEntry = transaction.create(Episode, {
-            absoluteNumber: totalEpisodes++,
+            absoluteNumber: episode.absoluteNumber,
             contentRating: episode.contentRating,
             number: episode.number,
             title: episode.title,
