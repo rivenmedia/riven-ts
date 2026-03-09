@@ -455,6 +455,24 @@ export const mainRunnerMachine = setup({
         },
       },
 
+      "riven.media-item.scrape.error.no-new-streams": {
+        description:
+          "Indicates that a media item scrape completed successfully, but no new streams were found.",
+        actions: [
+          {
+            type: "log",
+            params: ({ event: { item } }) => ({
+              message: `No new streams found for ${item.fullTitle}.`,
+              level: "verbose",
+            }),
+          },
+          {
+            type: "fanOutDownload",
+            params: ({ event: { item } }) => ({ item }),
+          },
+        ],
+      },
+
       "riven.media-item.scrape.success": {
         description:
           "Indicates that a media item has been successfully scraped.",

@@ -1,6 +1,7 @@
 import { Stream } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
+import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 
 import { ref } from "@mikro-orm/core";
 import { ValidationError, validateOrReject } from "class-validator";
@@ -69,13 +70,11 @@ export async function persistScrapeResults({
 
     await em.persist(existingItem).flush();
 
-    logger.info(
-      newStreamsCount > 0
-        ? `Added ${newStreamsCount.toString()} new streams to ${existingItem.fullTitle}`
-        : `No new streams found for ${existingItem.fullTitle}`,
-    );
-
-    return existingItem;
+    if (newStreamsCount > 0) {
+      logger.info(
+        `Added ${newStreamsCount.toString()} new streams to ${existingItem.fullTitle}`,
+      );
+    }
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
@@ -97,4 +96,12 @@ export async function persistScrapeResults({
       error: errorMessage,
     });
   }
+
+  if (newStreamsCount === 0) {
+    throw new MediaItemScrapeErrorNoNewStreams({
+      item: existingItem,
+    });
+  }
+
+  return existingItem;
 }
