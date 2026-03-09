@@ -123,7 +123,7 @@ it("returns the series if the item has a tvdbId", async ({
     aliases: {
       ara: ["اختلال ضال"],
       ces: ["Perníkový táta"],
-      eng: ["breaking-bad", "Breaking Bad: Original Minisodes"],
+      eng: ["breaking-bad"],
       est: ["Halvale teele"],
       heb: ["שובר שורות"],
       hrv: ["Na putu prema dolje"],
