@@ -23,6 +23,10 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
       },
     });
 
+    if (!streams.length) {
+      return [];
+    }
+
     const { title: itemTitle, aliases } =
       item instanceof ShowLikeMediaItem ? await item.getShow() : item;
 

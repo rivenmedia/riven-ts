@@ -31,7 +31,7 @@ export async function enqueueMapItemsToFiles({
     { infoHash },
     {
       jobId,
-      ignoreDependencyOnFailure: true,
+      removeDependencyOnFailure: true,
     },
   );
 
@@ -41,7 +41,7 @@ export async function enqueueMapItemsToFiles({
       opts: {
         jobId,
         parent,
-        ignoreDependencyOnFailure: true,
+        removeDependencyOnFailure: true,
       },
       children: [pluginDownloadNode],
     },
