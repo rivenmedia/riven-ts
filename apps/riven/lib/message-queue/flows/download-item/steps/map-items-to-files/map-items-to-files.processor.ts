@@ -1,12 +1,7 @@
-import { parse } from "@repo/util-rank-torrent-name";
-
 import { UnrecoverableError } from "bullmq";
-import assert from "node:assert";
 
-import {
-  type MapItemsToFilesFlow,
-  mapItemsToFilesProcessorSchema,
-} from "./map-items-to-files.schema.ts";
+import { mapItemsToFilesProcessorSchema } from "./map-items-to-files.schema.ts";
+import { mapItemsToFiles } from "./utilities/map-items-to-files.ts";
 
 export const mapItemsToFilesProcessor =
   mapItemsToFilesProcessorSchema.implementAsync(async function ({ job }) {
@@ -18,49 +13,8 @@ export const mapItemsToFilesProcessor =
       );
     }
 
-    const parsedFiles = torrentContainer.files.reduce<
-      MapItemsToFilesFlow["output"]["files"]
-    >(
-      (acc, file) => {
-        try {
-          const parseData = parse(file.fileName);
-
-          if (parseData.type === "movie") {
-            return {
-              ...acc,
-              movies: {
-                ...acc.movies,
-                [Object.keys(acc.movies).length.toString()]: file,
-              },
-            };
-          }
-
-          const seasonNumber = parseData.seasons[0] ?? "abs";
-          const episodeNumber = parseData.episodes[0];
-
-          assert(episodeNumber, "Episode number is required for show files");
-
-          const key = `${seasonNumber.toString()}:${episodeNumber.toString()}`;
-
-          return {
-            ...acc,
-            episodes: {
-              ...acc.episodes,
-              [key]: file,
-            },
-          };
-        } catch {
-          return acc;
-        }
-      },
-      {
-        episodes: {},
-        movies: {},
-      },
-    );
-
     return {
       ...torrentContainer,
-      files: parsedFiles,
+      files: mapItemsToFiles(torrentContainer.files),
     };
   });

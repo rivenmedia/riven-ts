@@ -60,14 +60,14 @@ it("considers torrent containers for continuing shows as valid if missing a maxi
 
       return {
         ...acc,
-        [`abs:${episode.absoluteNumber}`]: {
+        [`abs:${episode.absoluteNumber.toString()}`]: {
           fileName: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
           fileSize: 5000000000,
           downloadUrl: "http://example.com/file.mkv",
         },
       };
     },
-    {} as MappedTorrentContainer["files"]["episodes"],
+    {},
   );
 
   const container: MappedTorrentContainer = {
@@ -107,14 +107,14 @@ it("considers torrent containers for completed shows as invalid if missing any s
 
       return {
         ...acc,
-        [`abs:${episode.absoluteNumber}`]: {
+        [`abs:${episode.absoluteNumber.toString()}`]: {
           fileName: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
           fileSize: 5000000000,
           downloadUrl: "http://example.com/file.mkv",
         },
       };
     },
-    {} as MappedTorrentContainer["files"]["episodes"],
+    {},
   );
 
   const container: MappedTorrentContainer = {
@@ -212,7 +212,7 @@ it("throws an error if show file has unknown episode number", async ({
 
   const { "abs:1": _, ...files } = Object.fromEntries(
     episodes.map((episode) => [
-      `abs:${episode.absoluteNumber}`,
+      `abs:${episode.absoluteNumber.toString()}`,
       {
         fileName: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
         fileSize: 5000000000,
@@ -295,7 +295,7 @@ it("returns valid matched files for a show", async ({ show }) => {
 
   const files = Object.fromEntries(
     episodes.map((episode) => [
-      `abs:${episode.absoluteNumber}`,
+      `abs:${episode.absoluteNumber.toString()}`,
       {
         fileName: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
         fileSize: 5000000000,
@@ -337,7 +337,7 @@ it("returns valid matched files for a show", async ({ show }) => {
 it("does not match episodes from a different season", async ({ season }) => {
   const files = Object.fromEntries(
     season.episodes.map((episode) => [
-      `${episode.season.unwrap().number + 1}:${episode.number}`,
+      `${(episode.season.unwrap().number + 1).toString()}:${episode.number.toString()}`,
       {
         fileName: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
         fileSize: 5000000000,
@@ -404,7 +404,3 @@ it("throws an error if episode file does not match the episode", async ({
     validateTorrentContainer(episode, "test", container),
   ).rejects.toThrow("Expected 1 valid files, but found 0");
 });
-
-it.todo("matches absolutely numbered episode files");
-
-it.todo("matches season and episode numbered files");
