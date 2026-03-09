@@ -10,6 +10,7 @@
     "types": ["node"],
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "disableReferencedProjectLoad": true
   }
 }

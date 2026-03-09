@@ -15,16 +15,29 @@
     "tvdb",
     "zkochan"
   ],
-  "typescript.preferences.autoImportSpecifierExcludeRegexes": [
-    "node:test" // Conflicts with Vitest imports
-  ],
-  "typescript.preferences.preferTypeOnlyAutoImports": true,
+  "js/ts.preferences.autoImportSpecifierExcludeRegexes": ["node:test"],
+  "js/ts.preferences.preferTypeOnlyAutoImports": true,
+  "js/ts.tsserver.useSyntaxServer": "auto",
+  "js/ts.tsserver.watchOptions": {
+    "excludeDirectories": [
+      "**/node_modules",
+      "**/.git",
+      "**/dist",
+      "**/coverage",
+      "**/.turbo",
+      "**/logs",
+      "**/temp",
+      "**/docs",
+      "**/__generated__"
+    ]
+  },
   "files.watcherExclude": {
     "**/.git/objects/**": true,
     "**/.git/subtree-cache/**": true,
     "**/.hg/store/**": true,
+    "**/node_modules/**": true,
     "**/__generated__/**": true,
-    "**/*.log": true // Exclude log files, this prevents VS Code from crashing when running the program
+    "**/*.log": true
   },
   "wallaby.compactStatus": true
 }
