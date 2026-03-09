@@ -113,16 +113,10 @@ export const validateTorrent = async (
   }
 
   if (item instanceof Season) {
-    if (!parsedData.seasons.length) {
-      throw new SkippedTorrentError(
-        "Skipping torrent with no seasons for season item",
-        itemTitle,
-        parsedData.rawTitle,
-        infoHash,
-      );
-    }
-
-    if (!parsedData.seasons.includes(item.number)) {
+    if (
+      parsedData.seasons.length &&
+      !parsedData.seasons.includes(item.number)
+    ) {
       throw new SkippedTorrentError(
         "Skipping torrent with incorrect season number for season item",
         itemTitle,

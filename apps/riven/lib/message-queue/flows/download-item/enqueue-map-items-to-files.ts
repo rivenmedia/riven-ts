@@ -41,6 +41,7 @@ export async function enqueueMapItemsToFiles({
       opts: {
         jobId,
         parent,
+        ignoreDependencyOnFailure: true,
       },
       children: [pluginDownloadNode],
     },

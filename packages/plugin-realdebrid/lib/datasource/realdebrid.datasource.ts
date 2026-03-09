@@ -188,6 +188,7 @@ export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
   async #processTorrent(
     torrentId: string,
     infoHash: string,
+    didSelectFiles = false, // Provided after selecting files to prevent infinite loops
   ): Promise<TorrentContainer> {
     const info = await this.#getTorrentInfo(torrentId);
 
@@ -202,6 +203,10 @@ export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
 
     switch (status) {
       case "waiting_files_selection": {
+        if (didSelectFiles) {
+          throw new RealDebridAPIError("Expected files to have been selected");
+        }
+
         const videoExtensions = [
           // TODO: Move to settings
           ".mp4",
@@ -228,7 +233,7 @@ export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
         await this.#selectFiles(torrentId, videoIds);
 
         // Re-fetch torrent info after file selection
-        return await this.#processTorrent(torrentId, infoHash);
+        return await this.#processTorrent(torrentId, infoHash, true);
       }
       case "downloaded": {
         const files: DebridFile[] = [];
