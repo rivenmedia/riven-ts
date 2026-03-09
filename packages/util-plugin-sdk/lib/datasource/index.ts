@@ -28,11 +28,14 @@ import type { Promisable } from "type-fest";
 
 interface FetchJobInput {
   path: string;
-  incomingRequest: DataSourceRequest | undefined;
+  incomingRequest:
+    | (DataSourceRequest & { params: string | URLSearchParams })
+    | undefined;
   /**
    * Used to determine how to decode the request body.
    */
   bodyType: "json" | "url-search-params" | undefined;
+  params: string;
 }
 
 type FetchResponse<T = unknown> = Pick<
@@ -118,6 +121,12 @@ export abstract class BaseDataSource<
       this.#queueId,
       async (job) => {
         this.#decodeRequestBody(job);
+
+        if (job.data.incomingRequest) {
+          job.data.incomingRequest.params = urlSearchParamsCodec.decode(
+            job.data.params,
+          );
+        }
 
         const { response, parsedBody } = await super.fetch(
           job.data.path,
@@ -330,6 +339,7 @@ export abstract class BaseDataSource<
       path,
       incomingRequest: augmentedRequest,
       bodyType,
+      params: urlSearchParamsCodec.encode(augmentedRequest.params),
     });
 
     const result = await job.waitUntilFinished(this.#queueEvents, 60000);
