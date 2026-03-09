@@ -7,12 +7,6 @@ import { getAuthMeHandler } from "../../__generated__/index.ts";
 import { pluginConfig } from "../../seerr-plugin.config.ts";
 import { SeerrAPI } from "../seerr.datasource.ts";
 
-const testSettings = {
-  apiKey: "test-api-key",
-  url: "http://localhost:5055",
-  filter: "approved",
-};
-
 it("returns false if the request fails", async ({
   server,
   dataSourceConfig,
@@ -22,7 +16,11 @@ it("returns false if the request fails", async ({
   const seerrApi = new SeerrAPI({
     ...dataSourceConfig,
     pluginSymbol: pluginConfig.name,
-    settings: testSettings,
+    settings: {
+      apiKey: "test-api-key",
+      url: "http://localhost:5055",
+      filter: "approved",
+    },
   });
   const isValid = await seerrApi.validate();
 
@@ -38,7 +36,11 @@ it("returns true if the request succeeds", async ({
   const seerrApi = new SeerrAPI({
     ...dataSourceConfig,
     pluginSymbol: pluginConfig.name,
-    settings: testSettings,
+    settings: {
+      apiKey: "test-api-key",
+      url: "http://localhost:5055",
+      filter: "approved",
+    },
   });
   const isValid = await seerrApi.validate();
 

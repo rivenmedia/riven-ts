@@ -27,17 +27,17 @@ describe("getLevRatio", () => {
     ["American Horror Story", "American Story Horror", 0],
     ["S W A T", "S.W.A.T.", 1],
   ] as const)("getLevRatio(%s, %s) => %s", (a, b, expected) => {
-    expect(getLevRatio(a, b, 0.85)).toBe(expected);
+    expect(getLevRatio(a, b, 0.85, {})).toBe(expected);
   });
 
   it("throws on empty titles", () => {
-    expect(() => getLevRatio("", "foo", 0.85)).toThrow();
-    expect(() => getLevRatio("foo", "", 0.85)).toThrow();
+    expect(() => getLevRatio("", "foo", 0.85, {})).toThrow();
+    expect(() => getLevRatio("foo", "", 0.85, {})).toThrow();
   });
 
   it("throws on invalid threshold", () => {
-    expect(() => getLevRatio("a", "b", -1)).toThrow();
-    expect(() => getLevRatio("a", "b", 2)).toThrow();
+    expect(() => getLevRatio("a", "b", -1, {})).toThrow();
+    expect(() => getLevRatio("a", "b", 2, {})).toThrow();
   });
 });
 
