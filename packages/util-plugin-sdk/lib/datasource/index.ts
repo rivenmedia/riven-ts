@@ -28,9 +28,7 @@ import type { Promisable } from "type-fest";
 
 interface FetchJobInput {
   path: string;
-  incomingRequest:
-    | (DataSourceRequest & { params: string | URLSearchParams })
-    | undefined;
+  incomingRequest: DataSourceRequest | undefined;
   /**
    * Used to determine how to decode the request body.
    */
