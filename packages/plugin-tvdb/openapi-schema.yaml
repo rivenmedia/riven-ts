@@ -4072,6 +4072,7 @@ components:
           items:
             $ref: "#/components/schemas/ArtworkExtendedRecord"
           type: array
+          nullable: true
           x-go-name: Artworks
         averageRuntime:
           type: integer
@@ -4080,6 +4081,7 @@ components:
           items:
             $ref: "#/components/schemas/Character"
           type: array
+          nullable: true
           x-go-name: Characters
         contentRatings:
           items:

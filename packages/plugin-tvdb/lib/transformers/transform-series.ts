@@ -7,18 +7,28 @@ import z from "zod";
 import type {
   EpisodeBaseRecordSchema,
   SeriesExtendedRecordSchema,
-  TranslationSchema,
 } from "../__generated__/index.ts";
 import type {
   MediaItemIndexRequestedEvent,
   MediaItemIndexRequestedPluginResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
+function findEnglishShowTitle(series: SeriesExtendedRecordSchema) {
+  if (series.originalLanguage === "eng") {
+    return series.name ?? null;
+  }
+
+  const translation = series.translations?.nameTranslations?.find(
+    ({ language, isAlias }) => language === "eng" && !isAlias,
+  );
+
+  return translation?.name ?? null;
+}
+
 export const transformSeries = (
   eventItem: MediaItemIndexRequestedEvent["item"],
   series: SeriesExtendedRecordSchema,
   allEpisodes: EpisodeBaseRecordSchema[],
-  translation: TranslationSchema | null,
 ) => {
   const imdbId =
     eventItem.imdbId ??
@@ -32,7 +42,7 @@ export const transformSeries = (
     status: { name: tvdbStatus } = {},
   } = series;
 
-  const title = translation?.name ?? series.name;
+  const title = findEnglishShowTitle(series);
 
   assert(title, "Series must have a name");
 
@@ -45,9 +55,31 @@ export const transformSeries = (
   const network =
     series.latestNetwork?.name ?? series.originalNetwork?.name ?? null;
 
-  const aliases = new Map<string, Set<string>>([
-    ["us", new Set([slug, ...(translation?.aliases ?? [])])],
-  ]);
+  const aliases = (series.translations?.nameTranslations ?? []).reduce<
+    Map<string, Set<string>>
+  >(
+    (acc, { language, name }) => {
+      if (!name || !language) {
+        return acc;
+      }
+
+      // Ignore english translations, we already have the English show title
+      if (language === "eng") {
+        return acc;
+      }
+
+      // Ignore translations that are identical to the main show title;
+      // these add no value to the list.
+      if (name === title) {
+        return acc;
+      }
+
+      const existing = acc.get(language) ?? new Set<string>();
+
+      return acc.set(language, existing.add(name));
+    },
+    new Map<string, Set<string>>([["eng", new Set([slug])]]),
+  );
 
   const genres = series.genres
     ? series.genres.reduce<string[]>((acc, genre) => {

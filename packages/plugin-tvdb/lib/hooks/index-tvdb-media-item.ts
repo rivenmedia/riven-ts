@@ -10,18 +10,12 @@ export const indexTVDBMediaItem: z.infer<
 > = async ({ dataSources, event }) => {
   if (event.item.tvdbId) {
     const api = dataSources.get(TvdbAPI);
-    const series = await api.getSeries(event.item.tvdbId);
-    const allEpisodes = await api.getAllEpisodesInOfficialOrder(
-      event.item.tvdbId,
-    );
 
-    const seriesTranslation =
-      series.originalLanguage !== "eng"
-        ? await api.getSeriesTranslations(event.item.tvdbId)
-        : null;
+    const series = await api.getSeries(event.item.tvdbId);
+    const episodes = await api.getAllEpisodesInOfficialOrder(event.item.tvdbId);
 
     return {
-      item: transformSeries(event.item, series, allEpisodes, seriesTranslation),
+      item: transformSeries(event.item, series, episodes),
     };
   } else if (event.item.imdbId) {
     // TODO: Implement IMDb-only indexing logic

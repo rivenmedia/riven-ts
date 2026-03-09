@@ -100,6 +100,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
     const response = await this.get<unknown>(`series/${id}/extended`, {
       params: {
         short: "true",
+        meta: "translations",
       },
     });
     const { data } = getSeriesExtendedQueryResponseSchema.parse(response);
