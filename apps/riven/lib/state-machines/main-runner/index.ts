@@ -6,6 +6,8 @@ import { downloadItemProcessor } from "../../message-queue/flows/download-item/d
 import { DownloadItemFlow } from "../../message-queue/flows/download-item/download-item.schema.ts";
 import { findValidTorrentContainerProcessor } from "../../message-queue/flows/download-item/steps/find-valid-torrent-container/find-valid-torrent-container.processor.ts";
 import { FindValidTorrentContainerFlow } from "../../message-queue/flows/download-item/steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
+import { mapItemsToFilesProcessor } from "../../message-queue/flows/download-item/steps/map-items-to-files/map-items-to-files.processor.ts";
+import { MapItemsToFilesFlow } from "../../message-queue/flows/download-item/steps/map-items-to-files/map-items-to-files.schema.ts";
 import { rankStreamsProcessor } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.processor.ts";
 import { RankStreamsFlow } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.schema.ts";
 import { indexItemProcessor } from "../../message-queue/flows/index-item/index-item.processor.ts";
@@ -41,16 +43,19 @@ import type {
   PublishableEventSet,
   ValidPluginMap,
 } from "../../types/plugins.ts";
-import type { FlowJob, Worker } from "bullmq";
+import type { FlowJob, Queue, Worker } from "bullmq";
 import type z from "zod";
 
 export interface MainRunnerMachineContext {
   plugins: ValidPluginMap;
   flows: {
-    [K in Flow["name"]]: Worker<
-      Extract<Flow, { name: K }>["input"],
-      Extract<Flow, { name: K }>["output"]
-    >;
+    [K in Flow["name"]]: {
+      queue: Queue;
+      worker: Worker<
+        Extract<Flow, { name: K }>["input"],
+        Extract<Flow, { name: K }>["output"]
+      >;
+    };
   };
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
@@ -256,16 +261,22 @@ export const mainRunnerMachine = setup({
             RequestIndexDataFlow,
             indexItemProcessor,
             self.send,
+            {},
+            { concurrency: 1 },
           ),
           "request-content-services": createFlowWorker(
             RequestContentServicesFlow,
             requestContentServicesProcessor,
             self.send,
+            {},
+            { concurrency: 1 },
           ),
           "scrape-item": createFlowWorker(
             ScrapeItemFlow,
             scrapeItemProcessor,
             self.send,
+            {},
+            { concurrency: 1 },
           ),
           "scrape-item.parse-scrape-results": createFlowWorker(
             ParseScrapeResultsFlow,
@@ -276,11 +287,25 @@ export const mainRunnerMachine = setup({
             DownloadItemFlow,
             downloadItemProcessor,
             self.send,
+            {},
+            { concurrency: 1 },
+          ),
+          "download-item.map-items-to-files": createFlowWorker(
+            MapItemsToFilesFlow,
+            mapItemsToFilesProcessor,
+            self.send,
           ),
           "download-item.find-valid-torrent-container": createFlowWorker(
             FindValidTorrentContainerFlow,
             findValidTorrentContainerProcessor,
             self.send,
+            {
+              streams: {
+                events: {
+                  maxLen: 500,
+                },
+              },
+            },
           ),
           "download-item.rank-streams": createFlowWorker(
             RankStreamsFlow,
@@ -428,6 +453,24 @@ export const mainRunnerMachine = setup({
           type: "requestScrape",
           params: ({ event: { item } }) => ({ item }),
         },
+      },
+
+      "riven.media-item.scrape.error.no-new-streams": {
+        description:
+          "Indicates that a media item scrape completed successfully, but no new streams were found.",
+        actions: [
+          {
+            type: "log",
+            params: ({ event: { item } }) => ({
+              message: `No new streams found for ${item.fullTitle}.`,
+              level: "verbose",
+            }),
+          },
+          {
+            type: "fanOutDownload",
+            params: ({ event: { item } }) => ({ item }),
+          },
+        ],
       },
 
       "riven.media-item.scrape.success": {

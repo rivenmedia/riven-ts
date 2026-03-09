@@ -9,7 +9,7 @@ export class EpisodeRepository extends EntityRepository<Episode> {
     seasonNumber: number | undefined,
   ) {
     const query = (
-      seasonNumber
+      seasonNumber !== undefined
         ? {
             tvdbId,
             season: { number: seasonNumber },

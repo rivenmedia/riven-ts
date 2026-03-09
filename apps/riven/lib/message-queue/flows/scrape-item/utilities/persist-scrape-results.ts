@@ -1,7 +1,9 @@
 import { Stream } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
+import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 
+import { ref } from "@mikro-orm/core";
 import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
 import assert from "node:assert";
@@ -44,23 +46,21 @@ export async function persistScrapeResults({
     infoHash: { $in: infoHashes },
   });
 
-  const preScrapedStreamsMap = preScrapedStreams.reduce<Record<string, Stream>>(
-    (acc, stream) => ({ ...acc, [stream.infoHash]: stream }),
-    {},
+  const preScrapedStreamsMap = new Map(
+    preScrapedStreams.map((stream) => [stream.infoHash, stream]),
   );
 
   for (const [infoHash, parsedData] of Object.entries(results)) {
-    const existingEntry = preScrapedStreamsMap[infoHash];
+    const existingEntry = preScrapedStreamsMap.get(infoHash);
     const stream = existingEntry ?? em.create(Stream, { infoHash, parsedData });
 
-    existingItem.streams.add(stream);
+    existingItem.streams.add(ref(stream));
   }
 
   const newStreamsCount = existingItem.streams.count() - streamsCount;
 
-  if (newStreamsCount === 0) {
-    existingItem.failedAttempts++;
-  }
+  existingItem.failedAttempts =
+    newStreamsCount === 0 ? existingItem.failedAttempts + 1 : 0;
 
   existingItem.scrapedAt = DateTime.now().toJSDate();
   existingItem.scrapedTimes++;
@@ -68,15 +68,13 @@ export async function persistScrapeResults({
   try {
     await validateOrReject(existingItem);
 
-    await em.flush();
+    await em.persist(existingItem).flush();
 
-    logger.info(
-      newStreamsCount > 0
-        ? `Added ${newStreamsCount.toString()} new streams to ${existingItem.fullTitle}`
-        : `No new streams found for ${existingItem.fullTitle}`,
-    );
-
-    return existingItem;
+    if (newStreamsCount > 0) {
+      logger.info(
+        `Added ${newStreamsCount.toString()} new streams to ${existingItem.fullTitle}`,
+      );
+    }
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
@@ -98,4 +96,12 @@ export async function persistScrapeResults({
       error: errorMessage,
     });
   }
+
+  if (newStreamsCount === 0) {
+    throw new MediaItemScrapeErrorNoNewStreams({
+      item: existingItem,
+    });
+  }
+
+  return existingItem;
 }

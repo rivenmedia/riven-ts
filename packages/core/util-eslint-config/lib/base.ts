@@ -16,6 +16,11 @@ export const baseEslintConfig: ConfigArray = [
   ...jsonConfig,
   ...vitestConfig,
   {
-    ignores: ["**/__generated__/**", "**/*.typegen.ts", "**/.next/**"],
+    ignores: [
+      "**/__generated__/**",
+      "**/*.typegen.ts",
+      "**/.next/**",
+      "**/logs/**",
+    ],
   },
 ];

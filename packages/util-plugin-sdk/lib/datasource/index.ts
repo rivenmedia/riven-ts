@@ -33,6 +33,7 @@ interface FetchJobInput {
    * Used to determine how to decode the request body.
    */
   bodyType: "json" | "url-search-params" | undefined;
+  params: string;
 }
 
 type FetchResponse<T = unknown> = Pick<
@@ -98,16 +99,15 @@ export abstract class BaseDataSource<
         attempts: requestAttempts,
         backoff: {
           type: "exponential",
-          delay: 1000,
+          delay: 5000,
           jitter: 0.5,
         },
-        removeOnComplete: {
-          age: 60 * 60,
-          count: 1000,
-        },
-        removeOnFail: {
-          age: 24 * 60 * 60,
-          count: 5000,
+        removeOnComplete: true,
+        removeOnFail: true,
+      },
+      streams: {
+        events: {
+          maxLen: 100,
         },
       },
       telemetry,
@@ -119,6 +119,12 @@ export abstract class BaseDataSource<
       this.#queueId,
       async (job) => {
         this.#decodeRequestBody(job);
+
+        if (job.data.incomingRequest) {
+          job.data.incomingRequest.params = urlSearchParamsCodec.decode(
+            job.data.params,
+          );
+        }
 
         const { response, parsedBody } = await super.fetch(
           job.data.path,
@@ -141,6 +147,7 @@ export abstract class BaseDataSource<
           ? { limiter: this.rateLimiterOptions }
           : {}),
         telemetry,
+        concurrency: 1,
       },
     );
 
@@ -204,7 +211,7 @@ export abstract class BaseDataSource<
       return null;
     }
 
-    // If the Retry-After header is a number, it's the number of **seconds** to wait
+    // If the Retry-After header is a string, it's the number of **seconds** to wait
     return retryAfterSeconds * 1000;
   }
 
@@ -330,6 +337,7 @@ export abstract class BaseDataSource<
       path,
       incomingRequest: augmentedRequest,
       bodyType,
+      params: urlSearchParamsCodec.encode(augmentedRequest.params),
     });
 
     const result = await job.waitUntilFinished(this.#queueEvents, 60000);

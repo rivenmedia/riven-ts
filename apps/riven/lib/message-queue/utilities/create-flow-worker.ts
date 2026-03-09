@@ -1,12 +1,19 @@
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import * as Sentry from "@sentry/node";
-import { UnrecoverableError, Worker, type WorkerOptions } from "bullmq";
+import {
+  type QueueOptions,
+  UnrecoverableError,
+  Worker,
+  type WorkerOptions,
+} from "bullmq";
 import assert from "node:assert";
+import os from "node:os";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
+import { createQueue } from "./create-queue.ts";
 
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
 import type { Flow, FlowHandlers } from "../flows/index.ts";
@@ -26,6 +33,7 @@ export function createFlowWorker<
     (typeof FlowHandlers)[T["shape"]["name"]["value"]]["implementAsync"]
   >,
   sendEvent: MainRunnerMachineIntake,
+  queueOptions?: Omit<QueueOptions, "connection" | "telemetry">,
   workerOptions?: Omit<WorkerOptions, "connection" | "telemetry">,
 ) {
   const [flowName] = flowSchema.shape.name.def.values;
@@ -35,6 +43,8 @@ export function createFlowWorker<
     `No queue name found for flow: ${flowSchema.shape.name.value}`,
   );
 
+  const queue = createQueue(flowName, queueOptions);
+
   const worker = new Worker(
     flowName,
     async (job, token) => {
@@ -43,10 +53,17 @@ export function createFlowWorker<
       } catch (error) {
         Sentry.captureException(error);
 
+        if (error instanceof Error) {
+          throw error;
+        }
+
         throw new UnrecoverableError(String(error));
       }
     },
     {
+      concurrency: os.availableParallelism(),
+      removeOnComplete: { count: 50 },
+      removeOnFail: { count: 100 },
       ...workerOptions,
       connection: {
         url: settings.redisUrl,
@@ -61,5 +78,5 @@ export function createFlowWorker<
     logger.error(`[${flowName}] ${error.message}`);
   });
 
-  return worker;
+  return { worker, queue };
 }

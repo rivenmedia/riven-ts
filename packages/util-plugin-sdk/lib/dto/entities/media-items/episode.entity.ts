@@ -29,7 +29,7 @@ export class Episode extends ShowLikeMediaItem {
 
   @Field()
   @Property()
-  @Min(1)
+  @Min(0)
   number!: number;
 
   @Field(() => Number)

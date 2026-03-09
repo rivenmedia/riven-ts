@@ -1,5 +1,6 @@
 import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
+import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 
 import { UnrecoverableError } from "bullmq";
 
@@ -34,6 +35,7 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
       });
     } catch (error) {
       if (
+        error instanceof MediaItemScrapeErrorNoNewStreams ||
         error instanceof MediaItemScrapeErrorIncorrectState ||
         error instanceof MediaItemScrapeError
       ) {

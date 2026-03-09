@@ -25,7 +25,7 @@ export class Season extends ShowLikeMediaItem {
 
   @Field()
   @Property()
-  @Min(1)
+  @Min(0)
   number!: number;
 
   @Field(() => Show)

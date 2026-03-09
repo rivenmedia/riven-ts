@@ -8,12 +8,8 @@ import { it as baseIt } from "@repo/util-plugin-testing/plugin-test-context";
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import breakingBadExtendedSeason1Fixture from "../__fixtures__/breaking-bad/extended-season-1.json" with { type: "json" };
-import breakingBadExtendedSeason2Fixture from "../__fixtures__/breaking-bad/extended-season-2.json" with { type: "json" };
-import breakingBadExtendedSeason3Fixture from "../__fixtures__/breaking-bad/extended-season-3.json" with { type: "json" };
-import breakingBadExtendedSeason4Fixture from "../__fixtures__/breaking-bad/extended-season-4.json" with { type: "json" };
-import breakingBadExtendedSeason5Fixture from "../__fixtures__/breaking-bad/extended-season-5.json" with { type: "json" };
 import breakingBadExtendedSeriesFixture from "../__fixtures__/breaking-bad/extended-series.json" with { type: "json" };
+import breakingBadOfficialOrderFixture from "../__fixtures__/breaking-bad/official-order.json" with { type: "json" };
 import { TvdbAPI } from "../datasource/tvdb.datasource.ts";
 import { pluginConfig } from "../tvdb-plugin.config.ts";
 import { TvdbSettings } from "../tvdb-settings.schema.ts";
@@ -92,31 +88,16 @@ it("returns the series if the item has a tvdbId", async ({
   settings,
   server,
 }) => {
-  item.tvdbId = breakingBadExtendedSeriesFixture.data.id.toString();
+  item.tvdbId = breakingBadOfficialOrderFixture.data.id.toString();
 
   server.use(
     http.get(
-      `https://api4.thetvdb.com/v4/series/${breakingBadExtendedSeriesFixture.data.id.toString()}/extended`,
-      () => HttpResponse.json(breakingBadExtendedSeriesFixture),
+      `https://api4.thetvdb.com/v4/series/${breakingBadOfficialOrderFixture.data.id.toString()}/episodes/official/eng`,
+      () => HttpResponse.json(breakingBadOfficialOrderFixture),
     ),
-    http.get<{ id: string }>(
-      `https://api4.thetvdb.com/v4/seasons/:id/extended`,
-      ({ params: { id } }) => {
-        switch (id) {
-          case "30272":
-            return HttpResponse.json(breakingBadExtendedSeason1Fixture);
-          case "40719":
-            return HttpResponse.json(breakingBadExtendedSeason2Fixture);
-          case "171641":
-            return HttpResponse.json(breakingBadExtendedSeason3Fixture);
-          case "297361":
-            return HttpResponse.json(breakingBadExtendedSeason4Fixture);
-          case "490110":
-            return HttpResponse.json(breakingBadExtendedSeason5Fixture);
-          default:
-            return HttpResponse.error();
-        }
-      },
+    http.get(
+      `https://api4.thetvdb.com/v4/series/${breakingBadOfficialOrderFixture.data.id.toString()}/extended`,
+      () => HttpResponse.json(breakingBadExtendedSeriesFixture),
     ),
   );
 
@@ -139,15 +120,217 @@ it("returns the series if the item has a tvdbId", async ({
     genres: ["Drama", "Crime", "Thriller", "Western"],
     network: "AMC",
     country: "usa",
-    aliases: { us: ["breaking-bad"] },
+    aliases: {
+      ara: ["اختلال ضال"],
+      ces: ["Perníkový táta"],
+      eng: ["breaking-bad"],
+      est: ["Halvale teele"],
+      heb: ["שובר שורות"],
+      hrv: ["Na putu prema dolje"],
+      hun: ["Totál szívás"],
+      ita: ["Breaking Bad - Reazioni collaterali"],
+      kor: ["브레이킹 배드"],
+      por: ["Breaking Bad: Ruptura Total", "Ruptura Total"],
+      rus: ["Во все тяжкие"],
+      srp: ["Чиста хемија"],
+      ukr: ["Пуститися берега"],
+      zho: ["绝命毒师", "絕命毒師"],
+    },
     contentRating: "tv-ma",
     posterUrl: "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
     firstAired: "2008-01-20",
     status: "ended",
-    seasons: [
-      {
+    seasons: {
+      0: {
         episodes: [
           {
+            absoluteNumber: 0,
+            title: "Good Cop / Bad Cop",
+            airedAt: "2009-02-17",
+            contentRating: "tv-ma",
+            runtime: 3,
+            number: 1,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/episodes/81189/3859781.jpg",
+          },
+          {
+            contentRating: "tv-ma",
+            title: "Wedding Day",
+            airedAt: "2009-02-17",
+            runtime: 5,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/episodes/81189/3859791.jpg",
+            number: 2,
+            absoluteNumber: 0,
+          },
+          {
+            title: "TwaüghtHammër",
+            airedAt: "2009-02-17",
+            contentRating: "tv-ma",
+            runtime: 4,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/episodes/81189/3859801.jpg",
+            number: 3,
+            absoluteNumber: 0,
+          },
+          {
+            title: "Marie's Confession",
+            airedAt: "2009-02-17",
+            contentRating: "tv-ma",
+            runtime: 3,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/episodes/81189/3859811.jpg",
+            number: 4,
+            absoluteNumber: 0,
+          },
+          {
+            title: "The Break-In",
+            airedAt: "2009-02-17",
+            contentRating: "tv-ma",
+            runtime: 5,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/episodes/81189/3859821.jpg",
+            number: 5,
+            absoluteNumber: 0,
+          },
+          {
+            title: "Live Saul Cam",
+            airedAt: null,
+            contentRating: "tv-ma",
+            runtime: 5,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
+            number: 20,
+            absoluteNumber: 0,
+          },
+          {
+            title: "Fernando",
+            airedAt: null,
+            contentRating: "tv-ma",
+            runtime: 1,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
+            number: 21,
+            absoluteNumber: 0,
+          },
+          {
+            title: "Carl",
+            airedAt: null,
+            contentRating: "tv-ma",
+            runtime: 1,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
+            number: 22,
+            absoluteNumber: 0,
+          },
+          {
+            title: "Wendy",
+            airedAt: null,
+            contentRating: "tv-ma",
+            runtime: 1,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
+            number: 23,
+            absoluteNumber: 0,
+          },
+          {
+            title: "Badger",
+            airedAt: null,
+            contentRating: "tv-ma",
+            runtime: 2,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
+            number: 24,
+            absoluteNumber: 0,
+          },
+          {
+            title: "Wayfarer 515",
+            airedAt: null,
+            contentRating: "tv-ma",
+            runtime: 2,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
+            number: 25,
+            absoluteNumber: 0,
+          },
+          {
+            title: "Letters to Saul",
+            airedAt: null,
+            contentRating: "tv-ma",
+            runtime: 2,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
+            number: 26,
+            absoluteNumber: 0,
+          },
+          {
+            title: "Tiger Trouble? Better Call Saul!",
+            airedAt: null,
+            contentRating: "tv-ma",
+            runtime: 2,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
+            number: 27,
+            absoluteNumber: 0,
+          },
+          {
+            title: 'Saul Says: "Sue \'Em Now"',
+            airedAt: null,
+            contentRating: "tv-ma",
+            runtime: 2,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
+            number: 28,
+            absoluteNumber: 0,
+          },
+          {
+            title: "Team S.C.I.E.N.C.E.",
+            airedAt: null,
+            contentRating: "tv-ma",
+            runtime: 4,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
+            number: 29,
+            absoluteNumber: 0,
+          },
+          {
+            title: "Fatty Fat Fat",
+            airedAt: null,
+            contentRating: "tv-ma",
+            runtime: 1,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
+            number: 30,
+            absoluteNumber: 0,
+          },
+          {
+            title: "Fighting for You",
+            airedAt: null,
+            contentRating: "tv-ma",
+            runtime: 1,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
+            number: 31,
+            absoluteNumber: 0,
+          },
+          {
+            title: "Snow Globe: A Breaking Bad Short",
+            airedAt: "2020-02-17",
+            contentRating: "tv-ma",
+            runtime: 3,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
+            number: 32,
+            absoluteNumber: 0,
+          },
+        ],
+        number: 0,
+        title: null,
+      },
+      1: {
+        episodes: [
+          {
+            absoluteNumber: 1,
             airedAt: "2008-01-20",
             contentRating: "tv-ma",
             number: 1,
@@ -157,6 +340,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Pilot",
           },
           {
+            absoluteNumber: 2,
             airedAt: "2008-01-27",
             contentRating: "tv-ma",
             number: 2,
@@ -166,6 +350,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Cat's in the Bag...",
           },
           {
+            absoluteNumber: 3,
             airedAt: "2008-02-10",
             contentRating: "tv-ma",
             number: 3,
@@ -175,6 +360,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "...And the Bag's in the River",
           },
           {
+            absoluteNumber: 4,
             airedAt: "2008-02-17",
             contentRating: "tv-ma",
             number: 4,
@@ -184,6 +370,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Cancer Man",
           },
           {
+            absoluteNumber: 5,
             airedAt: "2008-02-24",
             contentRating: "tv-ma",
             number: 5,
@@ -193,15 +380,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Gray Matter",
           },
           {
-            airedAt: "2008-03-09",
-            contentRating: "tv-ma",
-            number: 7,
-            posterPath:
-              "https://artworks.thetvdb.com/banners/series/81189/episodes/5ea8700bb5d18.jpg",
-            runtime: 48,
-            title: "A No-Rough-Stuff-Type Deal",
-          },
-          {
+            absoluteNumber: 6,
             airedAt: "2008-03-02",
             contentRating: "tv-ma",
             number: 6,
@@ -210,12 +389,24 @@ it("returns the series if the item has a tvdbId", async ({
             runtime: 48,
             title: "Crazy Handful of Nothin'",
           },
+          {
+            absoluteNumber: 7,
+            airedAt: "2008-03-09",
+            contentRating: "tv-ma",
+            number: 7,
+            posterPath:
+              "https://artworks.thetvdb.com/banners/series/81189/episodes/5ea8700bb5d18.jpg",
+            runtime: 48,
+            title: "A No-Rough-Stuff-Type Deal",
+          },
         ],
         number: 1,
+        title: null,
       },
-      {
+      2: {
         episodes: [
           {
+            absoluteNumber: 8,
             airedAt: "2009-03-08",
             contentRating: "tv-ma",
             number: 1,
@@ -225,6 +416,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Seven Thirty-Seven",
           },
           {
+            absoluteNumber: 9,
             airedAt: "2009-03-15",
             contentRating: "tv-ma",
             number: 2,
@@ -234,6 +426,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Grilled",
           },
           {
+            absoluteNumber: 10,
             airedAt: "2009-03-22",
             contentRating: "tv-ma",
             number: 3,
@@ -243,6 +436,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Bit by a Dead Bee",
           },
           {
+            absoluteNumber: 11,
             airedAt: "2009-03-29",
             contentRating: "tv-ma",
             number: 4,
@@ -252,6 +446,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Down",
           },
           {
+            absoluteNumber: 12,
             airedAt: "2009-04-05",
             contentRating: "tv-ma",
             number: 5,
@@ -261,6 +456,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Breakage",
           },
           {
+            absoluteNumber: 13,
             airedAt: "2009-04-12",
             contentRating: "tv-ma",
             number: 6,
@@ -270,6 +466,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Peekaboo",
           },
           {
+            absoluteNumber: 14,
             airedAt: "2009-04-19",
             contentRating: "tv-ma",
             number: 7,
@@ -279,6 +476,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Negro y Azul",
           },
           {
+            absoluteNumber: 15,
             airedAt: "2009-04-26",
             contentRating: "tv-ma",
             number: 8,
@@ -288,6 +486,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Better Call Saul",
           },
           {
+            absoluteNumber: 16,
             airedAt: "2009-05-03",
             contentRating: "tv-ma",
             number: 9,
@@ -297,6 +496,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "4 Days Out",
           },
           {
+            absoluteNumber: 17,
             airedAt: "2009-05-10",
             contentRating: "tv-ma",
             number: 10,
@@ -306,6 +506,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Over",
           },
           {
+            absoluteNumber: 18,
             airedAt: "2009-05-17",
             contentRating: "tv-ma",
             number: 11,
@@ -315,6 +516,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Mandala",
           },
           {
+            absoluteNumber: 19,
             airedAt: "2009-05-24",
             contentRating: "tv-ma",
             number: 12,
@@ -324,6 +526,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Phoenix",
           },
           {
+            absoluteNumber: 20,
             airedAt: "2009-05-31",
             contentRating: "tv-ma",
             number: 13,
@@ -334,10 +537,12 @@ it("returns the series if the item has a tvdbId", async ({
           },
         ],
         number: 2,
+        title: null,
       },
-      {
+      3: {
         episodes: [
           {
+            absoluteNumber: 21,
             airedAt: "2010-03-21",
             contentRating: "tv-ma",
             number: 1,
@@ -347,6 +552,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "No Más",
           },
           {
+            absoluteNumber: 22,
             airedAt: "2010-03-28",
             contentRating: "tv-ma",
             number: 2,
@@ -356,6 +562,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Caballo sin Nombre",
           },
           {
+            absoluteNumber: 23,
             airedAt: "2010-04-04",
             contentRating: "tv-ma",
             number: 3,
@@ -365,6 +572,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "I.F.T.",
           },
           {
+            absoluteNumber: 24,
             airedAt: "2010-04-11",
             contentRating: "tv-ma",
             number: 4,
@@ -374,6 +582,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Green Light",
           },
           {
+            absoluteNumber: 25,
             airedAt: "2010-04-18",
             contentRating: "tv-ma",
             number: 5,
@@ -383,6 +592,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Más",
           },
           {
+            absoluteNumber: 26,
             airedAt: "2010-04-25",
             contentRating: "tv-ma",
             number: 6,
@@ -392,6 +602,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Sunset",
           },
           {
+            absoluteNumber: 27,
             airedAt: "2010-05-02",
             contentRating: "tv-ma",
             number: 7,
@@ -401,6 +612,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "One Minute",
           },
           {
+            absoluteNumber: 28,
             airedAt: "2010-05-09",
             contentRating: "tv-ma",
             number: 8,
@@ -410,6 +622,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "I See You",
           },
           {
+            absoluteNumber: 29,
             airedAt: "2010-05-16",
             contentRating: "tv-ma",
             number: 9,
@@ -419,6 +632,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Kafkaesque",
           },
           {
+            absoluteNumber: 30,
             airedAt: "2010-05-23",
             contentRating: "tv-ma",
             number: 10,
@@ -428,6 +642,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Fly",
           },
           {
+            absoluteNumber: 31,
             airedAt: "2010-05-30",
             contentRating: "tv-ma",
             number: 11,
@@ -437,6 +652,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Abiquiu",
           },
           {
+            absoluteNumber: 32,
             airedAt: "2010-06-06",
             contentRating: "tv-ma",
             number: 12,
@@ -446,6 +662,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Half Measures",
           },
           {
+            absoluteNumber: 33,
             airedAt: "2010-06-13",
             contentRating: "tv-ma",
             number: 13,
@@ -456,10 +673,12 @@ it("returns the series if the item has a tvdbId", async ({
           },
         ],
         number: 3,
+        title: null,
       },
-      {
+      4: {
         episodes: [
           {
+            absoluteNumber: 34,
             airedAt: "2011-07-17",
             contentRating: "tv-ma",
             number: 1,
@@ -469,6 +688,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Box Cutter",
           },
           {
+            absoluteNumber: 35,
             airedAt: "2011-07-24",
             contentRating: "tv-ma",
             number: 2,
@@ -478,6 +698,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Thirty-Eight Snub",
           },
           {
+            absoluteNumber: 36,
             airedAt: "2011-07-31",
             contentRating: "tv-ma",
             number: 3,
@@ -487,6 +708,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Open House",
           },
           {
+            absoluteNumber: 37,
             airedAt: "2011-08-07",
             contentRating: "tv-ma",
             number: 4,
@@ -496,6 +718,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Bullet Points",
           },
           {
+            absoluteNumber: 38,
             airedAt: "2011-08-14",
             contentRating: "tv-ma",
             number: 5,
@@ -505,6 +728,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Shotgun",
           },
           {
+            absoluteNumber: 39,
             airedAt: "2011-08-21",
             contentRating: "tv-ma",
             number: 6,
@@ -514,6 +738,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Cornered",
           },
           {
+            absoluteNumber: 40,
             airedAt: "2011-08-28",
             contentRating: "tv-ma",
             number: 7,
@@ -523,6 +748,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Problem Dog",
           },
           {
+            absoluteNumber: 41,
             airedAt: "2011-09-04",
             contentRating: "tv-ma",
             number: 8,
@@ -532,6 +758,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Hermanos",
           },
           {
+            absoluteNumber: 42,
             airedAt: "2011-09-11",
             contentRating: "tv-ma",
             number: 9,
@@ -541,6 +768,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Bug",
           },
           {
+            absoluteNumber: 43,
             airedAt: "2011-09-18",
             contentRating: "tv-ma",
             number: 10,
@@ -550,6 +778,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Salud",
           },
           {
+            absoluteNumber: 44,
             airedAt: "2011-09-25",
             contentRating: "tv-ma",
             number: 11,
@@ -559,6 +788,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Crawl Space",
           },
           {
+            absoluteNumber: 45,
             airedAt: "2011-10-02",
             contentRating: "tv-ma",
             number: 12,
@@ -568,6 +798,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "End Times",
           },
           {
+            absoluteNumber: 46,
             airedAt: "2011-10-09",
             contentRating: "tv-ma",
             number: 13,
@@ -578,10 +809,12 @@ it("returns the series if the item has a tvdbId", async ({
           },
         ],
         number: 4,
+        title: null,
       },
-      {
+      5: {
         episodes: [
           {
+            absoluteNumber: 47,
             airedAt: "2012-07-15",
             contentRating: "tv-ma",
             number: 1,
@@ -591,6 +824,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Live Free or Die",
           },
           {
+            absoluteNumber: 48,
             airedAt: "2012-07-22",
             contentRating: "tv-ma",
             number: 2,
@@ -600,6 +834,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Madrigal",
           },
           {
+            absoluteNumber: 49,
             airedAt: "2012-07-29",
             contentRating: "tv-ma",
             number: 3,
@@ -609,6 +844,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Hazard Pay",
           },
           {
+            absoluteNumber: 50,
             airedAt: "2012-08-05",
             contentRating: "tv-ma",
             number: 4,
@@ -618,6 +854,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Fifty-One",
           },
           {
+            absoluteNumber: 51,
             airedAt: "2012-08-12",
             contentRating: "tv-ma",
             number: 5,
@@ -627,6 +864,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Dead Freight",
           },
           {
+            absoluteNumber: 52,
             airedAt: "2012-08-19",
             contentRating: "tv-ma",
             number: 6,
@@ -636,6 +874,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Buyout",
           },
           {
+            absoluteNumber: 53,
             airedAt: "2012-08-26",
             contentRating: "tv-ma",
             number: 7,
@@ -645,6 +884,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Say My Name",
           },
           {
+            absoluteNumber: 54,
             airedAt: "2012-09-02",
             contentRating: "tv-ma",
             number: 8,
@@ -654,6 +894,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Gliding Over All",
           },
           {
+            absoluteNumber: 55,
             airedAt: "2013-08-11",
             contentRating: "tv-ma",
             number: 9,
@@ -663,6 +904,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Blood Money",
           },
           {
+            absoluteNumber: 56,
             airedAt: "2013-08-18",
             contentRating: "tv-ma",
             number: 10,
@@ -672,6 +914,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Buried",
           },
           {
+            absoluteNumber: 57,
             airedAt: "2013-08-25",
             contentRating: "tv-ma",
             number: 11,
@@ -681,6 +924,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Confessions",
           },
           {
+            absoluteNumber: 58,
             airedAt: "2013-09-01",
             contentRating: "tv-ma",
             number: 12,
@@ -690,6 +934,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Rabid Dog",
           },
           {
+            absoluteNumber: 59,
             airedAt: "2013-09-08",
             contentRating: "tv-ma",
             number: 13,
@@ -699,6 +944,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "To'hajiilee",
           },
           {
+            absoluteNumber: 60,
             airedAt: "2013-09-15",
             contentRating: "tv-ma",
             number: 14,
@@ -708,6 +954,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Ozymandias",
           },
           {
+            absoluteNumber: 61,
             airedAt: "2013-09-22",
             contentRating: "tv-ma",
             number: 15,
@@ -717,6 +964,7 @@ it("returns the series if the item has a tvdbId", async ({
             title: "Granite State",
           },
           {
+            absoluteNumber: 62,
             airedAt: "2013-09-29",
             contentRating: "tv-ma",
             number: 16,
@@ -727,7 +975,8 @@ it("returns the series if the item has a tvdbId", async ({
           },
         ],
         number: 5,
+        title: null,
       },
-    ],
+    },
   });
 });
