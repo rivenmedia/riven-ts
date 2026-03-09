@@ -113,6 +113,22 @@ export const validateTorrent = async (
   }
 
   if (item instanceof Season) {
+    if (parsedData.seasons.length === 0) {
+      const episodes = item.episodes.getItems();
+      const absoluteEpisodeNumbers = new Set(parsedData.episodes).intersection(
+        new Set(episodes.map((episode) => episode.absoluteNumber)),
+      );
+
+      if (absoluteEpisodeNumbers.size !== episodes.length) {
+        throw new SkippedTorrentError(
+          "Skipping torrent with incorrect absolute episode range for season item",
+          itemTitle,
+          parsedData.rawTitle,
+          infoHash,
+        );
+      }
+    }
+
     if (
       parsedData.seasons.length &&
       !parsedData.seasons.includes(item.number)
