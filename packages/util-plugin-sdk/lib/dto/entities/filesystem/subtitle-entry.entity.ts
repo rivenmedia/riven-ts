@@ -37,7 +37,16 @@ export class SubtitleEntry extends FileSystemEntry {
   @Property()
   openSubtitlesId?: string; // TODO: Separate entity for external providers?
 
-  getVfsFileName(): string {
-    throw new Error("SubtitleEntry vfsFileName not implemented yet");
+  @Property({ persist: false, hidden: true })
+  async getVfsFileName(): Promise<string> {
+    const prettyName = await this.mediaItem.getEntity().getPrettyName();
+
+    if (!prettyName) {
+      throw new TypeError(
+        "Unable to determine VFS file name without associated MediaItem",
+      );
+    }
+
+    return `${prettyName}.${this.language}.srt`;
   }
 }
