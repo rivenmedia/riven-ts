@@ -37,6 +37,14 @@ export class SubtitleEntry extends FileSystemEntry {
 
   @Property({ persist: false, hidden: true })
   get vfsFileName(): Opt<string> {
-    throw new Error("SubtitleEntry vfsFileName not implemented yet");
+    const { prettyName } = this.mediaItem.getEntity();
+
+    if (!prettyName) {
+      throw new TypeError(
+        "Unable to determine VFS file name without associated MediaItem",
+      );
+    }
+
+    return `${prettyName}.${this.language}.srt`;
   }
 }

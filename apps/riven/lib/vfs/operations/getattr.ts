@@ -309,6 +309,20 @@ async function getattr(path: string) {
         })
       : 0;
 
+  let fileSize = entry.filesystemEntries[0]?.fileSize ?? 0;
+
+  // For subtitle files, look up the SubtitleEntry to get the correct file size
+  if (pathInfo.isFile && pathInfo.ext === ".srt") {
+    const subtitleEntry = await database.subtitleEntry.findOne({
+      mediaItem: { id: entry.id },
+      path: { $like: `%${pathInfo.base}` },
+    });
+
+    if (subtitleEntry) {
+      fileSize = Buffer.byteLength(subtitleEntry.content, "utf8");
+    }
+  }
+
   const attrs = stat(
     {
       ctime: entry.createdAt,
@@ -316,7 +330,7 @@ async function getattr(path: string) {
       mtime: entry.updatedAt ?? entry.createdAt,
       ...(pathInfo.isFile
         ? {
-            size: entry.filesystemEntries[0]?.fileSize ?? 0,
+            size: fileSize,
             mode: "file",
           }
         : { mode: "dir" }),
