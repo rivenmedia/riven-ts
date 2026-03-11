@@ -31,12 +31,12 @@ export default {
     },
     "riven.media-item.download.cache-check-requested": async ({
       dataSources,
-      event: { infoHash },
+      event: { infoHashes },
     }) => {
       const api = dataSources.get(RealDebridAPI);
 
       try {
-        return await api.getCachedTorrent(infoHash);
+        return await api.getCachedTorrents(infoHashes);
       } catch (error) {
         throw new Error(
           `Failed to get cache torrent status from RealDebrid: ${

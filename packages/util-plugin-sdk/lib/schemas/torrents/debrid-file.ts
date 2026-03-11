@@ -2,9 +2,9 @@ import z from "zod";
 
 export const DebridFile = z.object({
   link: z.string().min(1).optional(),
-  name: z.string().min(1),
-  path: z.string().min(1),
-  size: z.int().positive(),
+  name: z.string(),
+  path: z.string(),
+  size: z.int(),
   video_hash: z.string().optional(),
 });
 

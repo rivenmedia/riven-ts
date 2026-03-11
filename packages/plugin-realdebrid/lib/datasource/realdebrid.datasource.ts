@@ -3,7 +3,6 @@ import {
   type BasePluginContext,
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
-import { CachedTorrent } from "@repo/util-plugin-sdk/schemas/torrents/cached-torrent";
 import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 import { TorrentFile } from "@repo/util-plugin-sdk/schemas/torrents/torrent-file";
 import { TorrentInfo } from "@repo/util-plugin-sdk/schemas/torrents/torrent-info";
@@ -318,16 +317,14 @@ export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
     return this.delete<undefined>(`torrents/delete/${torrentId}`);
   }
 
-  async getCachedTorrent(infoHash: string): Promise<CachedTorrent> {
+  async getCachedTorrents(infoHashes: string[]) {
     const {
-      data: {
-        items: [item],
-      },
+      data: { items },
     } = await this.stremThruClient.store.torz.check({
-      hash: [infoHash],
+      hash: infoHashes,
     });
 
-    return CachedTorrent.parse(item);
+    return items;
   }
 
   async getInstantAvailability(

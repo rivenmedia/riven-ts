@@ -11,7 +11,7 @@ export const MediaItemDownloadCacheCheckRequestedEvent =
   createProgramEventSchema(
     "media-item.download.cache-check-requested",
     z.object({
-      infoHash: z.hash("sha1"),
+      infoHashes: z.array(z.hash("sha1")).min(1),
     }),
   );
 
@@ -20,7 +20,7 @@ export type MediaItemDownloadCacheCheckRequestedEvent = z.infer<
 >;
 
 export const MediaItemDownloadCacheCheckRequestedResponse =
-  CachedTorrent.nullable();
+  z.array(CachedTorrent);
 
 export type MediaItemDownloadCacheCheckRequestedResponse = z.infer<
   typeof MediaItemDownloadCacheCheckRequestedResponse
