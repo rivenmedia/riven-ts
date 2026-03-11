@@ -62,13 +62,13 @@ async function getItemLookupKeys(item: MediaItem) {
     return getEpisodeLookupKeys(item);
   }
 
-  return ["1"];
+  return ["0"];
 }
 
-export const validateTorrentContainer = async (
+export const validateTorrentFiles = async (
   item: MediaItem,
   infoHash: string,
-  mappedContainerItems: MapItemsToFilesFlow["output"],
+  { episodes, movies }: MapItemsToFilesFlow["output"],
 ): Promise<MatchedFile[]> => {
   logger.verbose(
     `Validating torrent container for item ${item.fullTitle}: ${infoHash}`,
@@ -76,10 +76,7 @@ export const validateTorrentContainer = async (
 
   const expectedFileCount = await getExpectedFileCount(item);
 
-  const group =
-    item instanceof ShowLikeMediaItem
-      ? mappedContainerItems.files.episodes
-      : mappedContainerItems.files.movies;
+  const group = item instanceof ShowLikeMediaItem ? episodes : movies;
 
   const groupMap = new Map(Object.entries(group));
 
@@ -99,21 +96,20 @@ export const validateTorrentContainer = async (
     }
 
     logger.debug(
-      `Found match: ${file.fileName} for item ${item.fullTitle} using lookup key '${lookupKey}'`,
+      `Found match: ${file.name} for item ${item.fullTitle} using lookup key '${lookupKey}'`,
     );
 
     try {
-      assert(file.downloadUrl, `File ${file.fileName} has no download URL`);
+      assert(file.link, `File ${file.name} has no download URL`);
 
-      const parseData = parse(file.fileName);
+      const parseData = parse(file.name);
 
       if (item instanceof Movie) {
         assert(parseData.type === "movie", "File must be a movie");
 
         validFiles.push({
-          fileName: file.fileName,
-          fileSize: file.fileSize,
-          downloadUrl: file.downloadUrl,
+          ...file,
+          link: file.link,
           matchedMediaItemId: item.id,
         });
       }
@@ -160,15 +156,14 @@ export const validateTorrentContainer = async (
         }
 
         validFiles.push({
-          fileName: file.fileName,
-          fileSize: file.fileSize,
-          downloadUrl: file.downloadUrl,
+          ...file,
+          link: file.link,
           matchedMediaItemId: episode.id,
         });
       }
     } catch (error) {
       logger.debug(
-        `File ${file.fileName} failed validation: ${
+        `File ${file.name} failed validation: ${
           error instanceof Error ? error.message : String(error)
         }`,
       );

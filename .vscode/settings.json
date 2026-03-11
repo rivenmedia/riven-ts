@@ -28,7 +28,8 @@
       "**/logs",
       "**/temp",
       "**/docs",
-      "**/__generated__"
+      "**/__generated__",
+      "**/plex"
     ]
   },
   "files.watcherExclude": {
@@ -39,5 +40,8 @@
     "**/__generated__/**": true,
     "**/*.log": true
   },
-  "wallaby.compactStatus": true
+  "wallaby.compactStatus": true,
+  "cSpell.enabledFileTypes": {
+    "typescript": false
+  }
 }

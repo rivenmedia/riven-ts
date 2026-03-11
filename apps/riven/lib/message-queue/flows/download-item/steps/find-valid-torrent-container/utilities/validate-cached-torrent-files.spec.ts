@@ -1,7 +1,7 @@
 import { expect } from "vitest";
 
 import { rivenTestContext as it } from "../../../../../../__tests__/test-context.ts";
-import { validateTorrentContainer } from "./validate-torrent-container.ts";
+import { validateTorrentFiles } from "./validate-torrent-files.ts";
 
 import type { MapItemsToFilesFlow } from "../../map-items-to-files/map-items-to-files.schema.ts";
 
@@ -36,7 +36,7 @@ it("throws an error if season-like torrent has fewer files than expected", async
   };
 
   await expect(
-    validateTorrentContainer(season, "test", mappedTorrentContainer),
+    validateTorrentFiles(season, "test", mappedTorrentContainer),
   ).rejects.toThrow(
     `Season torrent container must have at least ${season.episodes.length.toString()} episodes, but has 0`,
   );
@@ -90,7 +90,7 @@ it("considers torrent containers for continuing shows as valid if missing a maxi
   };
 
   await expect(
-    validateTorrentContainer(show, "test", container),
+    validateTorrentFiles(show, "test", container),
   ).resolves.toHaveLength(episodes.length - 10);
 });
 
@@ -136,9 +136,7 @@ it("considers torrent containers for completed shows as invalid if missing any s
     },
   };
 
-  await expect(
-    validateTorrentContainer(show, "test", container),
-  ).rejects.toThrow(
+  await expect(validateTorrentFiles(show, "test", container)).rejects.toThrow(
     `Show torrent container must have at least 60 episodes, but has 50`,
   );
 });
@@ -169,9 +167,9 @@ it("throws an error if file has no download URL", async ({ movie }) => {
     },
   };
 
-  await expect(
-    validateTorrentContainer(movie, "test", container),
-  ).rejects.toThrow("Expected 1 valid files, but found 0");
+  await expect(validateTorrentFiles(movie, "test", container)).rejects.toThrow(
+    "Expected 1 valid files, but found 0",
+  );
 });
 
 it("throws an error if movie file is parsed as a show", async ({ movie }) => {
@@ -200,9 +198,9 @@ it("throws an error if movie file is parsed as a show", async ({ movie }) => {
     },
   };
 
-  await expect(
-    validateTorrentContainer(movie, "test", container),
-  ).rejects.toThrow("Expected 1 valid files, but found 0");
+  await expect(validateTorrentFiles(movie, "test", container)).rejects.toThrow(
+    "Expected 1 valid files, but found 0",
+  );
 });
 
 it("throws an error if show file has unknown episode number", async ({
@@ -247,9 +245,7 @@ it("throws an error if show file has unknown episode number", async ({
     },
   };
 
-  await expect(
-    validateTorrentContainer(show, "test", container),
-  ).rejects.toThrow(
+  await expect(validateTorrentFiles(show, "test", container)).rejects.toThrow(
     `Expected ${episodes.length.toString()} valid files, but found ${Object.keys(files).length.toString()}`,
   );
 });
@@ -280,7 +276,7 @@ it("returns valid matched files for a movie", async ({ movie }) => {
     },
   };
 
-  const result = await validateTorrentContainer(movie, "test", container);
+  const result = await validateTorrentFiles(movie, "test", container);
 
   expect(result).toHaveLength(1);
 
@@ -323,7 +319,7 @@ it("returns valid matched files for a show", async ({ show }) => {
     },
   };
 
-  const result = await validateTorrentContainer(show, "test", container);
+  const result = await validateTorrentFiles(show, "test", container);
 
   expect(result).toHaveLength(episodes.length);
 
@@ -365,9 +361,7 @@ it("does not match episodes from a different season", async ({ season }) => {
     },
   };
 
-  await expect(
-    validateTorrentContainer(season, "test", container),
-  ).rejects.toThrow(
+  await expect(validateTorrentFiles(season, "test", container)).rejects.toThrow(
     `Expected ${season.episodes.length.toString()} valid files, but found 0`,
   );
 });
@@ -401,6 +395,6 @@ it("throws an error if episode file does not match the episode", async ({
   };
 
   await expect(
-    validateTorrentContainer(episode, "test", container),
+    validateTorrentFiles(episode, "test", container),
   ).rejects.toThrow("Expected 1 valid files, but found 0");
 });

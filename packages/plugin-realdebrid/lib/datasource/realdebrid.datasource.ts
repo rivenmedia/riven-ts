@@ -3,11 +3,13 @@ import {
   type BasePluginContext,
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
+import { CachedTorrent } from "@repo/util-plugin-sdk/schemas/torrents/cached-torrent";
 import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
-import { TorrentContainer } from "@repo/util-plugin-sdk/schemas/torrents/torrent-container";
 import { TorrentFile } from "@repo/util-plugin-sdk/schemas/torrents/torrent-file";
 import { TorrentInfo } from "@repo/util-plugin-sdk/schemas/torrents/torrent-info";
 import { UnrestrictedLink } from "@repo/util-plugin-sdk/schemas/torrents/unrestricted-link";
+
+import { StremThru } from "stremthru";
 
 import { AddMagnetResponse } from "../schemas/add-magnet-response.schema.ts";
 import { RealDebridError } from "../schemas/realdebrid-error.schema.ts";
@@ -20,6 +22,7 @@ import type {
   RequestOptions,
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
+import type { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
 
 export class RealDebridAPIError extends Error {}
 
@@ -31,6 +34,14 @@ export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
     max: 250 / 60,
     duration: 1000,
   };
+
+  protected stremThruClient = new StremThru({
+    baseUrl: "https://stremthru.13377001.xyz/",
+    auth: {
+      store: "realdebrid",
+      token: this.settings.apiKey,
+    },
+  });
 
   protected override willSendRequest(
     _path: string,
@@ -189,7 +200,7 @@ export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
     torrentId: string,
     infoHash: string,
     didSelectFiles = false, // Provided after selecting files to prevent infinite loops
-  ): Promise<TorrentContainer> {
+  ): Promise<MediaItemDownloadRequestedResponse> {
     const info = await this.#getTorrentInfo(torrentId);
 
     if (Object.keys(info.files).length === 0) {
@@ -247,10 +258,10 @@ export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
 
           try {
             const debridFile = DebridFile.safeParse({
-              fileId: file.id,
-              fileName: file.fileName,
-              fileSize: file.bytes,
-              downloadUrl: file.downloadUrl,
+              name: file.fileName,
+              size: file.bytes,
+              link: file.downloadUrl,
+              path: file.path,
             });
 
             if (!debridFile.success) {
@@ -258,7 +269,7 @@ export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
             }
 
             if (file.downloadUrl) {
-              debridFile.data.downloadUrl = file.downloadUrl;
+              debridFile.data.link = file.downloadUrl;
 
               this.logger.debug(
                 `Using correlated download URL for file ${file.fileName}`,
@@ -280,15 +291,13 @@ export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
             throw new Error("File size above set limit");
           }
 
-          throw new Error("No valid files found in the torrent.");
+          throw new Error("No valid files found in the torrent");
         }
 
-        return TorrentContainer.parse({
-          infoHash,
+        return {
+          torrentId: info.id.toString(),
           files,
-          torrentId,
-          torrentInfo: info,
-        });
+        };
       }
       case "magnet_error":
       case "error":
@@ -309,7 +318,21 @@ export class RealDebridAPI extends BaseDataSource<RealDebridSettings> {
     return this.delete<undefined>(`torrents/delete/${torrentId}`);
   }
 
-  async getInstantAvailability(infoHash: string): Promise<TorrentContainer> {
+  async getCachedTorrent(infoHash: string): Promise<CachedTorrent> {
+    const {
+      data: {
+        items: [item],
+      },
+    } = await this.stremThruClient.store.torz.check({
+      hash: [infoHash],
+    });
+
+    return CachedTorrent.parse(item);
+  }
+
+  async getInstantAvailability(
+    infoHash: string,
+  ): Promise<MediaItemDownloadRequestedResponse> {
     const torrentId = await this.#addTorrent(infoHash);
 
     try {

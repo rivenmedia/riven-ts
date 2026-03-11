@@ -12,6 +12,7 @@
     "lint:fix": "pnpm lint --fix"
   },
   "dependencies": {
+    "@eslint/compat": "^2.0.3",
     "@eslint/js": "^9.39.2",
     "@repo/core-util-typescript-config": "workspace:^",
     "@typescript-eslint/parser": "catalog:",

@@ -1,12 +1,23 @@
-import { UnrecoverableError } from "bullmq";
+import {
+  MediaItemDownloadRequestedEvent,
+  MediaItemDownloadRequestedResponse,
+} from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
+import {
+  MediaItemDownloadCacheCheckRequestedEvent,
+  MediaItemDownloadCacheCheckRequestedResponse,
+} from "@repo/util-plugin-sdk/schemas/events/media-item.download.cache-check-requested.event";
+
+import { type ParentOptions, UnrecoverableError } from "bullmq";
 import assert from "node:assert";
 
 import { database } from "../../../../../database/database.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
 import { runSingleJob } from "../../../../utilities/run-single-job.ts";
+import { flow } from "../../../producer.ts";
 import { enqueueMapItemsToFiles } from "../../enqueue-map-items-to-files.ts";
 import { findValidTorrentContainerProcessorSchema } from "./find-valid-torrent-container.schema.ts";
-import { validateTorrentContainer } from "./utilities/validate-torrent-container.ts";
+import { validateCachedTorrentFiles } from "./utilities/validate-cached-torrent-files.ts";
+import { validateTorrentFiles } from "./utilities/validate-torrent-files.ts";
 
 export const findValidTorrentContainerProcessor =
   findValidTorrentContainerProcessorSchema.implementAsync(async function ({
@@ -35,29 +46,89 @@ export const findValidTorrentContainerProcessor =
       .values()
       .toArray();
 
+    const jobParentOptions: ParentOptions = {
+      id: jobId,
+      queue: job.queueQualifiedName,
+    };
+
     for (const infoHash of uncheckedInfoHashes) {
       for (const plugin of availableDownloaders) {
         try {
+          if (plugin.hasCacheCheckHook) {
+            const jobId = `${infoHash}-cache`;
+
+            const pluginCacheCheckNode = await flow.addPluginJob(
+              MediaItemDownloadCacheCheckRequestedEvent,
+              MediaItemDownloadCacheCheckRequestedResponse,
+              `Check cache for ${infoHash}`,
+              plugin.pluginName,
+              { infoHash },
+              {
+                jobId,
+                removeDependencyOnFailure: true,
+              },
+            );
+
+            logger.verbose(
+              `Checking cached torrent status for ${infoHash} on ${plugin.pluginName}`,
+            );
+
+            const pluginCacheCheckResult = await runSingleJob(
+              pluginCacheCheckNode.job,
+            );
+
+            assert(pluginCacheCheckResult);
+
+            const mapCacheItemsNode = await enqueueMapItemsToFiles({
+              parent: jobParentOptions,
+              infoHash,
+              files: pluginCacheCheckResult.files,
+              jobId,
+            });
+
+            const mappedCachedFiles = await runSingleJob(mapCacheItemsNode.job);
+
+            await validateCachedTorrentFiles(mediaItem, mappedCachedFiles);
+          }
+
+          const pluginDownloadNode = await flow.addPluginJob(
+            MediaItemDownloadRequestedEvent,
+            MediaItemDownloadRequestedResponse,
+            `Download ${infoHash}`,
+            plugin.pluginName,
+            { infoHash },
+            {
+              jobId,
+              removeDependencyOnFailure: true,
+            },
+          );
+
+          const pluginDownloadResult = await runSingleJob(
+            pluginDownloadNode.job,
+          );
+
           const mapItemsToFilesJobNode = await enqueueMapItemsToFiles({
-            parent: { id: jobId, queue: job.queueQualifiedName },
+            parent: jobParentOptions,
             infoHash,
-            plugin,
+            files: pluginDownloadResult.files,
+            jobId: `${infoHash}-download`,
           });
 
-          const mappedTorrentContainer = await runSingleJob(
+          const mappedTorrentFiles = await runSingleJob(
             mapItemsToFilesJobNode.job,
           );
 
-          const validatedFiles = await validateTorrentContainer(
+          const validatedFiles = await validateTorrentFiles(
             mediaItem,
             infoHash,
-            mappedTorrentContainer,
+            mappedTorrentFiles,
           );
 
           return {
-            plugin,
+            plugin: plugin.pluginName,
             result: {
-              ...mappedTorrentContainer,
+              torrentId: pluginDownloadResult.torrentId,
+              infoHash,
               files: validatedFiles,
             },
           };

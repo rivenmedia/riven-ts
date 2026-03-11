@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { TorrentContainer } from "../torrents/torrent-container.ts";
+import { DebridFile } from "../torrents/debrid-file.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
@@ -18,7 +18,10 @@ export type MediaItemDownloadRequestedEvent = z.infer<
   typeof MediaItemDownloadRequestedEvent
 >;
 
-export const MediaItemDownloadRequestedResponse = TorrentContainer;
+export const MediaItemDownloadRequestedResponse = z.object({
+  torrentId: z.string().min(1),
+  files: z.array(DebridFile).min(1),
+});
 
 export type MediaItemDownloadRequestedResponse = z.infer<
   typeof MediaItemDownloadRequestedResponse

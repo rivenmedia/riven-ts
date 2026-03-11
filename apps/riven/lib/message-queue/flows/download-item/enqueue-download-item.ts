@@ -116,9 +116,12 @@ export async function enqueueDownloadItem({
     `Finding valid torrent container for ${item.fullTitle}`,
     {
       id: item.id,
-      availableDownloaders: subscribers.map(
-        (plugin) => plugin.name.description ?? "unknown",
-      ),
+      availableDownloaders: subscribers.map((plugin) => ({
+        pluginName: plugin.name.description ?? "unknown",
+        hasCacheCheckHook: Boolean(
+          plugin.hooks["riven.media-item.download.cache-check-requested"],
+        ),
+      })),
       failedInfoHashes: [],
     },
     {

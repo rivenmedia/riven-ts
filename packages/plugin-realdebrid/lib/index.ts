@@ -29,6 +29,22 @@ export default {
         );
       }
     },
+    "riven.media-item.download.cache-check-requested": async ({
+      dataSources,
+      event: { infoHash },
+    }) => {
+      const api = dataSources.get(RealDebridAPI);
+
+      try {
+        return await api.getCachedTorrent(infoHash);
+      } catch (error) {
+        throw new Error(
+          `Failed to get cache torrent status from RealDebrid: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+    },
     "riven.media-item.stream-link.requested": async ({
       dataSources,
       event,

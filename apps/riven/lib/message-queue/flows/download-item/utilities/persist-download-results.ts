@@ -78,12 +78,12 @@ export async function persistDownloadResults({
 
         existingItem.filesystemEntries.add(
           transaction.create(MediaEntry, {
-            fileSize: file.fileSize,
-            originalFilename: file.fileName,
+            fileSize: file.size,
+            originalFilename: file.name,
             mediaItem: ref(existingItem),
             provider: processedBy,
-            providerDownloadId: container.torrentId.toString(),
-            downloadUrl: file.downloadUrl,
+            providerDownloadId: container.torrentId,
+            downloadUrl: file.link,
           }),
         );
       }
@@ -117,7 +117,7 @@ export async function persistDownloadResults({
           assert(
             episode,
             new UnrecoverableError(
-              `File ${file.fileName} does not correspond to a valid episode`,
+              `File ${file.name} does not correspond to a valid episode`,
             ),
           );
 
@@ -131,12 +131,12 @@ export async function persistDownloadResults({
 
           episode.filesystemEntries.add(
             transaction.create(MediaEntry, {
-              fileSize: file.fileSize,
-              originalFilename: file.fileName,
+              fileSize: file.size,
+              originalFilename: file.name,
               mediaItem: ref(episode),
               provider: processedBy,
-              providerDownloadId: container.torrentId.toString(),
-              downloadUrl: file.downloadUrl,
+              providerDownloadId: container.torrentId,
+              downloadUrl: file.link,
             }),
           );
 

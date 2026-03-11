@@ -17,6 +17,7 @@
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@repo/util-plugin-sdk": "workspace:^",
+    "stremthru": "^0.12.0",
     "type-graphql": "catalog:",
     "zod": "catalog:"
   },
