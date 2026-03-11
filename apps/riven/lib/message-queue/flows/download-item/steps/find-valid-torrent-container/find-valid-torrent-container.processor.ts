@@ -147,14 +147,14 @@ export const findValidTorrentContainerProcessor =
         }
       }
 
-      // logger.debug(
-      //   `Info hash ${infoHash} failed validation for all plugins for ${mediaItem.type} ${mediaItem.fullTitle}`,
-      // );
+      logger.debug(
+        `Info hash ${infoHash} failed validation for all plugins for ${mediaItem.type} ${mediaItem.fullTitle}`,
+      );
 
-      // await job.updateData({
-      //   ...job.data,
-      //   failedInfoHashes: [...failedInfoHashes, infoHash],
-      // });
+      await job.updateData({
+        ...job.data,
+        failedInfoHashes: [...failedInfoHashes, infoHash],
+      });
     }
 
     throw new UnrecoverableError(
