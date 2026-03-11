@@ -20,7 +20,7 @@ export default {
       const api = dataSources.get(RealDebridAPI);
 
       try {
-        return await api.getInstantAvailability(infoHash);
+        return await api.addTorrent(infoHash);
       } catch (error) {
         throw new Error(
           `Failed to get instant availability from RealDebrid: ${

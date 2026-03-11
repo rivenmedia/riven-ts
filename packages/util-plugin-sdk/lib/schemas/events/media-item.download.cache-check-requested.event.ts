@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { CachedTorrent } from "../torrents/cached-torrent.ts";
+import { DebridFile } from "../torrents/debrid-file.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
@@ -19,8 +19,10 @@ export type MediaItemDownloadCacheCheckRequestedEvent = z.infer<
   typeof MediaItemDownloadCacheCheckRequestedEvent
 >;
 
-export const MediaItemDownloadCacheCheckRequestedResponse =
-  z.array(CachedTorrent);
+export const MediaItemDownloadCacheCheckRequestedResponse = z.record(
+  z.hash("sha1"),
+  z.array(DebridFile),
+);
 
 export type MediaItemDownloadCacheCheckRequestedResponse = z.infer<
   typeof MediaItemDownloadCacheCheckRequestedResponse
