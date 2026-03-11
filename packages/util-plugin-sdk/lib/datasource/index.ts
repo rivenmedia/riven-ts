@@ -19,6 +19,7 @@ import { DateTime } from "luxon";
 import { Logger } from "winston";
 import z from "zod";
 
+import { benchmark } from "../helpers/benchmark.ts";
 import { registerMQListeners } from "../helpers/register-mq-listeners.ts";
 import { json } from "../validation/json.ts";
 import { urlSearchParamsCodec } from "../validation/url-search-params-parser.ts";
@@ -340,9 +341,13 @@ export abstract class BaseDataSource<
       params: urlSearchParamsCodec.encode(augmentedRequest.params),
     });
 
-    const result = await job.waitUntilFinished(this.#queueEvents, 60000);
+    const { result, timeTaken } = await benchmark(async () => {
+      return job.waitUntilFinished(this.#queueEvents, 60000);
+    });
 
-    const logMessage = `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url}`;
+    url.search = augmentedRequest.params.toString();
+
+    const logMessage = `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url} in ${(timeTaken / 1000).toFixed(2)} seconds`;
 
     if (!result.response.ok) {
       throw new Error(logMessage);
