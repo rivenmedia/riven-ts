@@ -1,6 +1,6 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "extends": ["//"],
-  "tags": ["group:realdebrid", "type:plugin"],
+  "tags": ["group:stremthru", "type:plugin"],
   "tasks": {}
 }

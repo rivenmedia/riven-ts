@@ -3,7 +3,7 @@ import { it } from "@repo/util-plugin-testing/plugin-test-context";
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { RealDebridAPI } from "../realdebrid.datasource.ts";
+import { StremThruAPI } from "../stremthru.datasource.ts";
 
 it("returns false if the request fails", async ({
   server,
@@ -15,14 +15,14 @@ it("returns false if the request fails", async ({
     ),
   );
 
-  const realdebridApi = new RealDebridAPI({
+  const stremThruApi = new StremThruAPI({
     ...dataSourceConfig,
-    pluginSymbol: Symbol("@repo/plugin-realdebrid"),
+    pluginSymbol: Symbol("@repo/plugin-stremthru"),
     settings: {
-      apiKey: "",
+      store: {},
     },
   });
-  const isValid = await realdebridApi.validate();
+  const isValid = await stremThruApi.validate();
 
   expect(isValid).toBe(false);
 });
@@ -35,14 +35,14 @@ it("returns true if the request succeeds", async ({
     http.get("**/validate", () => HttpResponse.json({ success: true })),
   );
 
-  const realdebridApi = new RealDebridAPI({
+  const stremThruApi = new StremThruAPI({
     ...dataSourceConfig,
-    pluginSymbol: Symbol("@repo/plugin-realdebrid"),
+    pluginSymbol: Symbol("@repo/plugin-stremthru"),
     settings: {
-      apiKey: "",
+      store: {},
     },
   });
-  const isValid = await realdebridApi.validate();
+  const isValid = await stremThruApi.validate();
 
   expect(isValid).toBe(true);
 });

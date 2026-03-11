@@ -4,10 +4,10 @@ import { HttpResponse, http } from "msw";
 import assert from "node:assert";
 import { expect } from "vitest";
 
-import { RealDebridAPI } from "../../datasource/realdebrid.datasource.ts";
-import { pluginConfig } from "../../realdebrid-plugin.config.ts";
+import { StremThruAPI } from "../../datasource/stremthru.datasource.ts";
+import { pluginConfig } from "../../stremthru-plugin.config.ts";
 
-it('returns the validation status when calling "realdebridIsValid" query', async ({
+it('returns the validation status when calling "stremthruIsValid" query', async ({
   gqlServer,
   server,
   dataSourceConfig,
@@ -19,19 +19,19 @@ it('returns the validation status when calling "realdebridIsValid" query', async
   const { body } = await gqlServer.executeOperation(
     {
       query: `
-        query RealDebridIsValid {
-          realdebridIsValid
+        query StremThruIsValid {
+          stremThruIsValid
         }
       `,
     },
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new RealDebridAPI({
+          api: new StremThruAPI({
             ...dataSourceConfig,
-            pluginSymbol: Symbol("@repo/plugin-realdebrid"),
+            pluginSymbol: Symbol("@repo/plugin-stremthru"),
             settings: {
-              apiKey: "",
+              store: {},
             },
           }),
         },
@@ -42,5 +42,5 @@ it('returns the validation status when calling "realdebridIsValid" query', async
   assert(body.kind === "single");
 
   expect(body.singleResult.errors).toBeUndefined();
-  expect(body.singleResult.data?.["realdebridIsValid"]).toBe(true);
+  expect(body.singleResult.data?.["stremThruIsValid"]).toBe(true);
 });

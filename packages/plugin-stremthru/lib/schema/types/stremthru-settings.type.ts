@@ -1,7 +1,7 @@
 import { Field, ObjectType } from "type-graphql";
 
 @ObjectType()
-export class RealDebridSettings {
+export class StremThruSettings {
   @Field()
   apiKey!: string;
 }

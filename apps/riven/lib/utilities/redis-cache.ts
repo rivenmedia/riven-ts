@@ -4,7 +4,9 @@ import KeyvRedis, { Keyv } from "@keyv/redis";
 import { logger } from "./logger/logger.ts";
 import { settings } from "./settings.ts";
 
-const instance = new KeyvRedis(settings.redisUrl);
+const instance = new KeyvRedis(settings.redisUrl, {
+  namespace: "hi",
+});
 
 async function killInstance() {
   try {

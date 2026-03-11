@@ -66,7 +66,7 @@ export const findValidTorrentContainerProcessor =
               plugin.pluginName,
               { infoHashes: uncheckedInfoHashes },
               {
-                jobId: `${uncheckedInfoHashes.join(",")}-cache-check`,
+                jobId: `${uncheckedInfoHashes.join(",")}-${plugin.pluginName}-cache-check`,
                 removeDependencyOnFailure: true,
               },
             );
