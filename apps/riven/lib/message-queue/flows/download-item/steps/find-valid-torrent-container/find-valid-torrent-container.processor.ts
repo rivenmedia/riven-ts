@@ -83,7 +83,13 @@ export const findValidTorrentContainerProcessor =
         };
       }, {});
 
-      for (const [infoHash, cacheResult] of Object.entries(validCacheResults)) {
+      const validCacheResultsEntries = Object.entries(validCacheResults);
+
+      logger.debug(
+        `Found ${validCacheResultsEntries.length.toString()} cached results for ${mediaItem.fullTitle} using ${plugin.pluginName}`,
+      );
+
+      for (const [infoHash, cacheResult] of validCacheResultsEntries) {
         try {
           const mapCacheItemsNode = await enqueueMapItemsToFiles({
             parent: jobParentOptions,
@@ -103,7 +109,7 @@ export const findValidTorrentContainerProcessor =
             plugin.pluginName,
             { infoHash },
             {
-              jobId,
+              jobId: infoHash,
               removeDependencyOnFailure: true,
             },
           );
