@@ -88,6 +88,9 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
       params: {
         hash: infoHashes.join(","),
       },
+      cacheOptions: {
+        ttl: 60 * 60 * 24,
+      },
     });
 
     return items.reduce<Record<string, DebridFile[]>>((acc, item) => {

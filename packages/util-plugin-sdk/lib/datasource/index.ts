@@ -47,6 +47,8 @@ type FetchResponse<T = unknown> = Pick<
     statusText: string;
     headers: Record<string, string>;
   };
+  responseTime: number;
+  responseFromCache: boolean | undefined;
 };
 
 export interface BaseDataSourceConfig<
@@ -119,18 +121,20 @@ export abstract class BaseDataSource<
     this.#worker = new Worker(
       this.#queueId,
       async (job) => {
-        this.#decodeRequestBody(job);
+        const {
+          timeTaken,
+          result: { parsedBody, response, responseFromCache },
+        } = await benchmark(async () => {
+          this.#decodeRequestBody(job);
 
-        if (job.data.incomingRequest) {
-          job.data.incomingRequest.params = urlSearchParamsCodec.decode(
-            job.data.params,
-          );
-        }
+          if (job.data.incomingRequest) {
+            job.data.incomingRequest.params = urlSearchParamsCodec.decode(
+              job.data.params,
+            );
+          }
 
-        const { response, parsedBody } = await super.fetch(
-          job.data.path,
-          job.data.incomingRequest,
-        );
+          return super.fetch(job.data.path, job.data.incomingRequest);
+        });
 
         return {
           parsedBody,
@@ -140,6 +144,8 @@ export abstract class BaseDataSource<
             statusText: response.statusText,
             headers: Object.fromEntries(response.headers),
           },
+          responseTime: timeTaken,
+          responseFromCache,
         };
       },
       {
@@ -341,13 +347,13 @@ export abstract class BaseDataSource<
       params: urlSearchParamsCodec.encode(augmentedRequest.params),
     });
 
-    const { result, timeTaken } = await benchmark(async () => {
-      return job.waitUntilFinished(this.#queueEvents, 60000);
-    });
+    const result = await job.waitUntilFinished(this.#queueEvents, 60000);
 
     url.search = augmentedRequest.params.toString();
 
-    const logMessage = `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url} in ${(timeTaken / 1000).toFixed(2)} seconds`;
+    const logMessage = result.responseFromCache
+      ? `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url} from cache`
+      : `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url} in ${(result.responseTime / 1000).toFixed(2)} seconds`;
 
     if (!result.response.ok) {
       throw new Error(logMessage);
