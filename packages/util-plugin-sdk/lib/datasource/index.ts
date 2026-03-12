@@ -125,6 +125,13 @@ export abstract class BaseDataSource<
           timeTaken,
           result: { parsedBody, response, responseFromCache },
         } = await benchmark(async () => {
+          this.logger.debug(
+            [
+              `[${this.serviceName}] Initiating request to ${this.baseURL}${job.data.path}`,
+              ...(job.data.params ? [`?${job.data.params}`] : []),
+            ].join(""),
+          );
+
           this.#decodeRequestBody(job);
 
           if (job.data.incomingRequest) {
@@ -244,7 +251,10 @@ export abstract class BaseDataSource<
   async #createAugmentedRequest(
     path: string,
     incomingRequest?: DataSourceRequest,
-  ): Promise<AugmentedRequest> {
+  ): Promise<{
+    augmentedRequest: AugmentedRequest;
+    url: URL;
+  }> {
     const augmentedRequest: AugmentedRequest = {
       ...incomingRequest,
       params:
@@ -279,7 +289,10 @@ export abstract class BaseDataSource<
       augmentedRequest.headers["content-type"] ??= "application/json";
     }
 
-    return augmentedRequest;
+    return {
+      augmentedRequest,
+      url,
+    };
   }
 
   #determineRequestBodyType(body: unknown) {
@@ -314,12 +327,10 @@ export abstract class BaseDataSource<
     path: string,
     incomingRequest?: DataSourceRequest,
   ): Promise<DataSourceFetchResult<TResult>> {
-    const augmentedRequest = await this.#createAugmentedRequest(
+    const { augmentedRequest, url } = await this.#createAugmentedRequest(
       path,
       incomingRequest,
     );
-
-    const url = await this.resolveURL(path, augmentedRequest);
 
     const cacheKey = this.cacheKeyFor(url, augmentedRequest as never);
 
@@ -350,13 +361,13 @@ export abstract class BaseDataSource<
       },
       {
         // Use a stable job ID to enable deduplication of idempotent GET requests
-        ...(augmentedRequest.method === "GET" && { jobId: cacheKey }),
+        ...(augmentedRequest.method === "GET" && {
+          jobId: cacheKey.replaceAll(":", "_"),
+        }),
       },
     );
 
     const result = await job.waitUntilFinished(this.#queueEvents, 60000);
-
-    url.search = augmentedRequest.params.toString();
 
     const logMessage = result.responseFromCache
       ? `[${this.serviceName}] Returned cached response for ${augmentedRequest.method ?? "GET"} ${url}`
