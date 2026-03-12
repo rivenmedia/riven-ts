@@ -78,5 +78,11 @@ export function createFlowWorker<
     logger.error(`[${flowName}] ${error.message}`);
   });
 
+  if (settings.unsafeClearQueuesOnStartup) {
+    void queue.obliterate({
+      force: true,
+    });
+  }
+
   return { worker, queue };
 }

@@ -340,19 +340,26 @@ export abstract class BaseDataSource<
       );
     }
 
-    const job = await this.#queue.add(cacheKey, {
-      path,
-      incomingRequest: augmentedRequest,
-      bodyType,
-      params: urlSearchParamsCodec.encode(augmentedRequest.params),
-    });
+    const job = await this.#queue.add(
+      cacheKey,
+      {
+        path,
+        incomingRequest: augmentedRequest,
+        bodyType,
+        params: urlSearchParamsCodec.encode(augmentedRequest.params),
+      },
+      {
+        // Use a stable job ID to enable deduplication of idempotent GET requests
+        ...(augmentedRequest.method === "GET" && { jobId: cacheKey }),
+      },
+    );
 
     const result = await job.waitUntilFinished(this.#queueEvents, 60000);
 
     url.search = augmentedRequest.params.toString();
 
     const logMessage = result.responseFromCache
-      ? `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url} from cache`
+      ? `[${this.serviceName}] Returned cached response for ${augmentedRequest.method ?? "GET"} ${url}`
       : `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url} in ${(result.responseTime / 1000).toFixed(2)} seconds`;
 
     if (!result.response.ok) {
