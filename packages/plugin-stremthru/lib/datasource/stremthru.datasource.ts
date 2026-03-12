@@ -60,6 +60,10 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
       }),
     });
 
+    if (!data) {
+      throw new StremThruAPIError(`No data returned from ${store}`);
+    }
+
     return {
       torrentId: data.id,
       files: data.files,

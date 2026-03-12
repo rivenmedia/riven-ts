@@ -95,7 +95,7 @@ export const findValidTorrentContainerProcessor =
               parent: jobParentOptions,
               infoHash,
               files: cachedFiles,
-              jobId,
+              jobId: `${infoHash}-map-items-to-files`,
             });
 
             const mappedCachedFiles = await runSingleJob(mapCacheItemsNode.job);

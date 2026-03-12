@@ -18,12 +18,17 @@ import type { MapItemsToFilesFlow } from "../../map-items-to-files/map-items-to-
 async function getExpectedFileCount(item: MediaItem) {
   if (item instanceof Show) {
     const seasons = await item.seasons.loadItems();
+    const seasonsExcludingSpecials = seasons.filter(
+      ({ number }) => number !== 0,
+    );
 
     const expectedSeasons =
-      item.status === "continuing" ? seasons.length - 1 : seasons.length;
+      item.status === "continuing"
+        ? seasonsExcludingSpecials.length - 1
+        : seasonsExcludingSpecials.length;
 
     return reduceAsync(
-      seasons.slice(0, Math.max(1, expectedSeasons)),
+      seasonsExcludingSpecials.slice(0, Math.max(1, expectedSeasons)),
       async (acc, season) => acc + (await season.episodes.loadCount()),
       0,
     );
