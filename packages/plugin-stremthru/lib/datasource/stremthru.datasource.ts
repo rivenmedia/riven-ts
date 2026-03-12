@@ -6,7 +6,7 @@ import {
 import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 import { UnrestrictedLink } from "@repo/util-plugin-sdk/schemas/torrents/unrestricted-link";
 
-import { Store } from "../schemas/store.schema.js";
+import { Store } from "../schemas/store.schema.ts";
 
 import type { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
 import type { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
@@ -67,10 +67,6 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
         link: `magnet:?xt=urn:btih:${infoHash}`.toLowerCase(),
       }),
     });
-
-    if (!data.id) {
-      throw new StremThruAPIError(`Failed to add torrent to ${store}.`);
-    }
 
     return {
       torrentId: data.id,

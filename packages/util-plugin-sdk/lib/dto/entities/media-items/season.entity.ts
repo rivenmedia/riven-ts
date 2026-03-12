@@ -13,7 +13,7 @@ import {
 import { Min } from "class-validator";
 import { Field, ObjectType } from "type-graphql";
 
-import { MediaEntry } from "../filesystem/media-entry.entity.js";
+import { MediaEntry } from "../filesystem/media-entry.entity.ts";
 import { Episode } from "./episode.entity.ts";
 import { ShowLikeMediaItem } from "./show-like.entity.ts";
 import { Show } from "./show.entity.ts";

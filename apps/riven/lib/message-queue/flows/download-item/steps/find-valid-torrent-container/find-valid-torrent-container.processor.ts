@@ -79,11 +79,15 @@ export const findValidTorrentContainerProcessor =
 
             if (!cachedFiles) {
               logger.verbose(
-                `${infoHash} is not cached on ${plugin.pluginName}; skipping...`,
+                `${infoHash} is not cached on ${plugin.pluginName} for ${mediaItem.fullTitle}; skipping...`,
               );
 
               continue;
             }
+
+            logger.verbose(
+              `Found ${infoHash} in ${plugin.pluginName} cache for ${mediaItem.fullTitle}`,
+            );
 
             const mapCacheItemsNode = await enqueueMapItemsToFiles({
               parent: jobParentOptions,

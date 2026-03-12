@@ -17,7 +17,7 @@ import {
   ShowContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
 import { ShowStatus } from "../../enums/show-status.enum.ts";
-import { MediaEntry } from "../filesystem/media-entry.entity.js";
+import { MediaEntry } from "../filesystem/media-entry.entity.ts";
 import { Season } from "./season.entity.ts";
 import { ShowLikeMediaItem } from "./show-like.entity.ts";
 
