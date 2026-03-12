@@ -1,0 +1,53 @@
+services:
+  riven:
+    container_name: riven
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    tty: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    devices:
+      - /dev/fuse
+    env_file: .env.riven
+    volumes:
+      - ./docker-data/riven:/riven/data
+      - /mnt/riven:/mount:rshared
+    ports:
+      - 8080:8080
+    depends_on:
+      riven-db:
+        condition: service_healthy
+
+  riven-db:
+    image: postgres:17-alpine
+    container_name: riven-db
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    env_file: .env.riven-db
+    volumes:
+      - riven-db:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U postgres
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  riven-cache:
+    container_name: riven-cache
+    image: redis
+    restart: unless-stopped
+    command: redis-server --maxmemory-policy noeviction --appendonly yes
+    ports:
+      - 6379:6379
+    volumes:
+      - ./docker-data/riven-cache:/data
+
+volumes:
+  riven-db:

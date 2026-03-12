@@ -1,0 +1,16 @@
+services:
+  stremthru:
+    container_name: stremthru
+    image: muniftanjim/stremthru
+    ports:
+      - 9000:9000
+    env_file: .env.stremthru
+    volumes:
+      - ./docker-data/stremthru:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: wget --tries=1 http://localhost:9000/v0/health -qO - | jq '.data.status == "ok"' &>/dev/null || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      retries: 3

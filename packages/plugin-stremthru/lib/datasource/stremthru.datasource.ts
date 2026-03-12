@@ -6,6 +6,7 @@ import {
 import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 import { UnrestrictedLink } from "@repo/util-plugin-sdk/schemas/torrents/unrestricted-link";
 
+import { ItemStatus } from "../schemas/item-status.schema.js";
 import { Store } from "../schemas/store.schema.ts";
 
 import type { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
@@ -18,11 +19,11 @@ import type { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/s
 export class StremThruAPIError extends Error {}
 
 export class StremThruAPI extends BaseDataSource<StremThruSettings> {
-  override baseURL = "https://stremthru.13377001.xyz/";
+  override baseURL = this.settings.stremThruUrl;
   override serviceName = "StremThru";
 
   protected override rateLimiterOptions?: RateLimiterOptions | undefined = {
-    max: 1,
+    max: 5,
     duration: 1000,
   };
 
@@ -89,8 +90,10 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
       },
     });
 
+    const allowedStatuses = ItemStatus.extract(["cached"]);
+
     return items.reduce<Record<string, DebridFile[]>>((acc, item) => {
-      if (item.status !== "cached") {
+      if (!allowedStatuses.safeParse(item.status).success) {
         return acc;
       }
 

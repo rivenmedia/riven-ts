@@ -4,8 +4,9 @@
 
 _Object containing the following properties:_
 
-| Property                    | Type     |
-| :-------------------------- | :------- |
-| **`realdebridApiKey`** (\*) | `string` |
+| Property                    | Description                                  | Type             | Default                             |
+| :-------------------------- | :------------------------------------------- | :--------------- | :---------------------------------- |
+| `stremThruUrl`              | The URL of the StremThru instance to request | `string` (_url_) | `'https://stremthru.13377001.xyz/'` |
+| **`realdebridApiKey`** (\*) |                                              | `string`         |                                     |
 
 _(\*) Required._

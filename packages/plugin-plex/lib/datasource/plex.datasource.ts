@@ -14,9 +14,7 @@ import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource
 export class PlexAPIError extends Error {}
 
 export class PlexAPI extends BaseDataSource<PlexSettings> {
-  get baseURL() {
-    return this.settings.plexServerUrl;
-  }
+  override baseURL = this.settings.plexServerUrl;
 
   override serviceName = "Plex";
 

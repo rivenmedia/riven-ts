@@ -64,9 +64,9 @@ export const findValidTorrentContainerProcessor =
               MediaItemDownloadCacheCheckRequestedResponse,
               `Find cached torrents for ${plugin.pluginName}`,
               plugin.pluginName,
-              { infoHashes: uncheckedInfoHashes },
+              { infoHashes: [infoHash] },
               {
-                jobId: `${uncheckedInfoHashes.join(",")}-${plugin.pluginName}-cache-check`,
+                jobId: `${jobId}-${infoHash}-cache-check-${plugin.pluginName}`,
                 removeDependencyOnFailure: true,
               },
             );
@@ -79,7 +79,7 @@ export const findValidTorrentContainerProcessor =
 
             if (!cachedFiles) {
               logger.verbose(
-                `${infoHash} is not cached on ${plugin.pluginName} for ${mediaItem.fullTitle}; skipping...`,
+                `${infoHash} is not immediately available on ${plugin.pluginName} for ${mediaItem.fullTitle}; skipping...`,
               );
 
               continue;
