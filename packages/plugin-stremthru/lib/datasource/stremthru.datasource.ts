@@ -1,8 +1,4 @@
-import {
-  BaseDataSource,
-  type BasePluginContext,
-  type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
 import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 import { UnrestrictedLink } from "@repo/util-plugin-sdk/schemas/torrents/unrestricted-link";
 
@@ -21,11 +17,6 @@ export class StremThruAPIError extends Error {}
 export class StremThruAPI extends BaseDataSource<StremThruSettings> {
   override baseURL = this.settings.stremThruUrl;
   override serviceName = "StremThru";
-
-  protected override rateLimiterOptions?: RateLimiterOptions | undefined = {
-    max: 5,
-    duration: 1000,
-  };
 
   protected override willSendRequest(
     _path: string,
