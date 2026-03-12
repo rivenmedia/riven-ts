@@ -8,6 +8,7 @@ export const runSingleJob = async <
   JobName extends string = string,
 >(
   job: Job<DataType, ResultType, JobName>,
+  timeout = 600_000,
 ) => {
   await using disposer = new AsyncDisposableStack();
 
@@ -17,5 +18,5 @@ export const runSingleJob = async <
 
   await queueEvents.waitUntilReady();
 
-  return await job.waitUntilFinished(queueEvents, 600_000);
+  return await job.waitUntilFinished(queueEvents, timeout);
 };

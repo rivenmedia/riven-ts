@@ -302,7 +302,7 @@ export const mainRunnerMachine = setup({
             {
               streams: {
                 events: {
-                  maxLen: 500,
+                  maxLen: 10000,
                 },
               },
             },

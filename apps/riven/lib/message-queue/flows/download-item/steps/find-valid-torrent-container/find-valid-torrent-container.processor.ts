@@ -66,13 +66,15 @@ export const findValidTorrentContainerProcessor =
               plugin.pluginName,
               { infoHashes: [infoHash] },
               {
-                jobId: `${jobId}-${infoHash}-cache-check-${plugin.pluginName}`,
+                jobId: `${infoHash}-cache-check-${plugin.pluginName}`,
                 removeDependencyOnFailure: true,
+                parent: jobParentOptions,
               },
             );
 
             const pluginCacheCheckResult = await runSingleJob(
               pluginCacheCheckNode.job,
+              60_000,
             );
 
             const cachedFiles = pluginCacheCheckResult[infoHash];
@@ -110,6 +112,7 @@ export const findValidTorrentContainerProcessor =
             {
               jobId: infoHash,
               removeDependencyOnFailure: true,
+              parent: jobParentOptions,
             },
           );
 
