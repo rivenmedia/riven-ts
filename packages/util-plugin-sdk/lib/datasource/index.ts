@@ -125,7 +125,7 @@ export abstract class BaseDataSource<
           timeTaken,
           result: { parsedBody, response, responseFromCache },
         } = await benchmark(async () => {
-          this.logger.debug(
+          this.logger.silly(
             [
               `[${this.serviceName}] Initiating request to ${this.baseURL}${job.data.path}`,
               ...(job.data.params ? [`?${job.data.params}`] : []),
