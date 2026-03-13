@@ -176,8 +176,8 @@ export const validateTorrentFiles = async (
   }
 
   assert(
-    expectedFileCount === validFiles.length,
-    `Expected ${expectedFileCount.toString()} valid files, but found ${validFiles.length.toString()}`,
+    expectedFileCount <= validFiles.length,
+    `Expected at least ${expectedFileCount.toString()} valid files, but found ${validFiles.length.toString()}`,
   );
 
   return validFiles;

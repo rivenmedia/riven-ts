@@ -74,9 +74,9 @@ export const validateCachedTorrentFiles = async (
 ): Promise<void> => {
   const expectedFileCount = await getExpectedFileCount(item);
 
-  const group = item instanceof ShowLikeMediaItem ? episodes : movies;
-
-  const groupMap = new Map(Object.entries(group));
+  const groupMap = new Map(
+    Object.entries(item instanceof ShowLikeMediaItem ? episodes : movies),
+  );
 
   assert(
     groupMap.size >= expectedFileCount,
@@ -151,7 +151,7 @@ export const validateCachedTorrentFiles = async (
   }
 
   assert(
-    expectedFileCount === validFileCount,
-    `Expected ${expectedFileCount.toString()} valid files, but found ${validFileCount.toString()}`,
+    expectedFileCount <= validFileCount,
+    `Expected at least ${expectedFileCount.toString()} valid files, but found ${validFileCount.toString()}`,
   );
 };
