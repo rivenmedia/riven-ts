@@ -27,9 +27,9 @@ export class SubtitleEntry extends FileSystemEntry {
   @Property()
   sourceProvider!: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property({ nullable: true })
-  sourceId?: string;
+  sourceId?: string | null;
 
   @Property({ persist: false, hidden: true })
   get vfsFileName(): Opt<string> {
