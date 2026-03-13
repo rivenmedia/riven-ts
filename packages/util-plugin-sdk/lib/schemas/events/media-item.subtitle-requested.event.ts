@@ -19,11 +19,11 @@ export type MediaItemSubtitleRequestedEvent = z.infer<
 >;
 
 export const SubtitleData = z.object({
-  language: z.string(),
-  content: z.string(),
-  fileHash: z.string(),
-  fileSize: z.number(),
-  sourceProvider: z.string(),
+  language: z.string().min(1),
+  content: z.string().min(1),
+  fileHash: z.string().min(1),
+  fileSize: z.number().int().nonnegative(),
+  sourceProvider: z.string().min(1),
   sourceId: z.string().optional(),
 });
 
