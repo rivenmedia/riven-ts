@@ -99,7 +99,7 @@ export const validateTorrentFiles = async (
     }
 
     logger.debug(
-      `Found match: ${file.name} for item ${item.fullTitle} using lookup key '${lookupKey}'`,
+      `Found match in ${isCacheCheck ? "cached files" : "container files"}: ${file.name} for item ${item.fullTitle} using lookup key '${lookupKey}'`,
     );
 
     try {
