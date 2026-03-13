@@ -287,8 +287,6 @@ export const mainRunnerMachine = setup({
             DownloadItemFlow,
             downloadItemProcessor,
             self.send,
-            {},
-            { concurrency: 1 },
           ),
           "download-item.map-items-to-files": createFlowWorker(
             MapItemsToFilesFlow,

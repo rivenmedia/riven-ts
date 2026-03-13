@@ -76,6 +76,8 @@ export async function persistDownloadResults({
       if (existingItem instanceof Movie || existingItem instanceof Episode) {
         const [file] = container.files;
 
+        assert(file.link, "Download URL is missing for the matched file");
+
         existingItem.filesystemEntries.add(
           transaction.create(MediaEntry, {
             fileSize: file.size,
@@ -112,6 +114,8 @@ export async function persistDownloadResults({
         ]);
 
         for (const file of container.files) {
+          assert(file.link, "Download URL is missing for the matched file");
+
           const episode = episodeMap.get(file.matchedMediaItemId);
 
           assert(

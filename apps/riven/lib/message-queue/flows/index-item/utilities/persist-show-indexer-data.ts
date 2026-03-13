@@ -85,6 +85,7 @@ export async function persistShowIndexerData({
           year: seasonYear,
           number: season.number,
           airedAt: seasonFirstAired,
+          isSpecial: season.number === 0,
         });
 
         show.seasons.add(seasonEntry);
@@ -103,6 +104,7 @@ export async function persistShowIndexerData({
             title: episode.title,
             year: episodeYear,
             airedAt: episode.airedAt ?? null,
+            isSpecial: season.number === 0,
           });
 
           seasonEntry.episodes.add(episodeEntry);

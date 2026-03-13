@@ -8,9 +8,13 @@ import { createFlowSchema } from "../../../../utilities/create-flow-schema.ts";
 
 import type { RankedResult } from "@repo/util-rank-torrent-name";
 
-const MatchedFile = DebridFile.required({ link: true }).extend({
+export const MatchedFile = DebridFile.extend({
   matchedMediaItemId: z.int().positive(),
-});
+  isCachedFile: z.boolean(),
+}).refine(
+  (file) => file.isCachedFile || file.link !== undefined,
+  "File must have a download URL",
+);
 
 export type MatchedFile = z.infer<typeof MatchedFile>;
 
@@ -31,6 +35,7 @@ export const FindValidTorrentContainerFlow = createFlowSchema(
     children: z.array(z.custom<RankedResult>()),
     input: z.object({
       id: z.int(),
+      itemTitle: z.string().min(1),
       availableDownloaders: z
         .array(
           z.object({

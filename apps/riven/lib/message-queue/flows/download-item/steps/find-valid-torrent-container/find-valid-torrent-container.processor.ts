@@ -16,7 +16,6 @@ import { runSingleJob } from "../../../../utilities/run-single-job.ts";
 import { flow } from "../../../producer.ts";
 import { enqueueMapItemsToFiles } from "../../enqueue-map-items-to-files.ts";
 import { findValidTorrentContainerProcessorSchema } from "./find-valid-torrent-container.schema.ts";
-import { validateCachedTorrentFiles } from "./utilities/validate-cached-torrent-files.ts";
 import { validateTorrentFiles } from "./utilities/validate-torrent-files.ts";
 
 export const findValidTorrentContainerProcessor =
@@ -27,7 +26,7 @@ export const findValidTorrentContainerProcessor =
 
     if (!rankedStreams?.length) {
       throw new UnrecoverableError(
-        "No streams found that match the ranking criteria",
+        `No streams found that match the ranking criteria for ${job.data.itemTitle}`,
       );
     }
 
@@ -100,7 +99,12 @@ export const findValidTorrentContainerProcessor =
 
             const mappedCachedFiles = await runSingleJob(mapCacheItemsNode.job);
 
-            await validateCachedTorrentFiles(mediaItem, mappedCachedFiles);
+            await validateTorrentFiles(
+              mediaItem,
+              infoHash,
+              mappedCachedFiles,
+              true,
+            );
           }
 
           const pluginDownloadNode = await flow.addPluginJob(
@@ -135,6 +139,7 @@ export const findValidTorrentContainerProcessor =
             mediaItem,
             infoHash,
             mappedTorrentFiles,
+            false,
           );
 
           return {

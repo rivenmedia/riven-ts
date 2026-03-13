@@ -63,7 +63,7 @@ export function createFlowWorker<
     {
       concurrency: os.availableParallelism(),
       removeOnComplete: { count: 50 },
-      removeOnFail: { count: 100 },
+      removeOnFail: { age: 60 * 60 * 24 },
       ...workerOptions,
       connection: {
         url: settings.redisUrl,

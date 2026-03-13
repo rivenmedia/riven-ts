@@ -116,6 +116,7 @@ export async function enqueueDownloadItem({
     `Finding valid torrent container for ${item.fullTitle}`,
     {
       id: item.id,
+      itemTitle: item.fullTitle,
       availableDownloaders: subscribers.map((plugin) => ({
         pluginName: plugin.name.description ?? "unknown",
         hasCacheCheckHook: Boolean(

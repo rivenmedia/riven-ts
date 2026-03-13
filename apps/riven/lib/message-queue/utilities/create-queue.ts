@@ -20,7 +20,7 @@ export function createQueue(
     },
     defaultJobOptions: {
       removeOnComplete: 50,
-      removeOnFail: 100,
+      removeOnFail: { age: 60 * 60 * 24 },
     },
     ...options,
     connection: {

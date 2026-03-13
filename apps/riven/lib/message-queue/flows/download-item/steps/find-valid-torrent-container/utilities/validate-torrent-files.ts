@@ -6,6 +6,7 @@ import {
   Show,
   ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { parse } from "@repo/util-rank-torrent-name";
 
 import { reduceAsync } from "es-toolkit";
@@ -13,21 +14,17 @@ import assert from "node:assert";
 
 import { database } from "../../../../../../database/database.ts";
 import { logger } from "../../../../../../utilities/logger/logger.ts";
+import { MatchedFile } from "../find-valid-torrent-container.schema.ts";
 
 import type { MapItemsToFilesFlow } from "../../map-items-to-files/map-items-to-files.schema.ts";
-import type { MatchedFile } from "../find-valid-torrent-container.schema.ts";
 
 async function getExpectedFileCount(item: MediaItem) {
   if (item instanceof Show) {
-    const seasons = await item.seasons.loadItems();
-    const seasonsExcludingSpecials = seasons.filter(
-      ({ number }) => number !== 0,
-    );
+    const processableStates = MediaItemState.exclude(["unreleased", "ongoing"]);
 
+    const seasons = await item.getStandardSeasons(processableStates.options);
     const expectedSeasons =
-      item.status === "continuing"
-        ? seasonsExcludingSpecials.length - 1
-        : seasonsExcludingSpecials.length;
+      item.status === "continuing" ? seasons.length - 1 : seasons.length;
 
     return reduceAsync(
       seasons.slice(0, Math.max(1, expectedSeasons)),
@@ -74,6 +71,7 @@ export const validateTorrentFiles = async (
   item: MediaItem,
   infoHash: string,
   { episodes, movies }: MapItemsToFilesFlow["output"],
+  isCacheCheck: boolean,
 ): Promise<MatchedFile[]> => {
   logger.verbose(
     `Validating torrent container for item ${item.fullTitle}: ${infoHash}`,
@@ -105,18 +103,18 @@ export const validateTorrentFiles = async (
     );
 
     try {
-      assert(file.link, `File ${file.name} has no download URL`);
-
       const parseData = parse(file.name);
 
       if (item instanceof Movie) {
         assert(parseData.type === "movie", "File must be a movie");
 
-        validFiles.push({
-          ...file,
-          link: file.link,
-          matchedMediaItemId: item.id,
-        });
+        validFiles.push(
+          MatchedFile.encode({
+            ...file,
+            matchedMediaItemId: item.id,
+            isCachedFile: isCacheCheck,
+          }),
+        );
       }
 
       if (item instanceof ShowLikeMediaItem) {
@@ -160,11 +158,13 @@ export const validateTorrentFiles = async (
           );
         }
 
-        validFiles.push({
-          ...file,
-          link: file.link,
-          matchedMediaItemId: episode.id,
-        });
+        validFiles.push(
+          MatchedFile.encode({
+            ...file,
+            matchedMediaItemId: episode.id,
+            isCachedFile: isCacheCheck,
+          }),
+        );
       }
     } catch (error) {
       logger.debug(

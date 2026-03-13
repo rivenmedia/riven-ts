@@ -4,6 +4,7 @@ import {
   EntityRepositoryType,
   type EventArgs,
   type Hidden,
+  HiddenProps,
   ManyToOne,
   type Opt,
   Property,
@@ -27,6 +28,8 @@ import type { MediaEntry } from "../filesystem/media-entry.entity.ts";
 export class Episode extends ShowLikeMediaItem {
   [EntityRepositoryType]?: EpisodeRepository;
 
+  [HiddenProps]?: "prettyName";
+
   @Field()
   @Property()
   @Min(0)
@@ -39,6 +42,9 @@ export class Episode extends ShowLikeMediaItem {
   @Field(() => Season)
   @ManyToOne()
   season!: Opt<Ref<Season>>;
+
+  @Property()
+  isSpecial!: boolean;
 
   @Field(() => ShowContentRatingEnum)
   declare contentRating: ShowContentRating;
@@ -76,7 +82,7 @@ export class Episode extends ShowLikeMediaItem {
   declare tmdbId?: never;
 
   getMediaEntries() {
-    return this.filesystemEntries.loadItems<MediaEntry>({
+    return this.filesystemEntries.matching<MediaEntry>({
       where: {
         type: "media",
       },
