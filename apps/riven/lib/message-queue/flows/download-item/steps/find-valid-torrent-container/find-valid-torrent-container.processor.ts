@@ -2,10 +2,6 @@ import {
   MediaItemDownloadRequestedEvent,
   MediaItemDownloadRequestedResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
-import {
-  MediaItemDownloadCacheCheckRequestedEvent,
-  MediaItemDownloadCacheCheckRequestedResponse,
-} from "@repo/util-plugin-sdk/schemas/events/media-item.download.cache-check-requested.event";
 
 import { type ParentOptions, UnrecoverableError } from "bullmq";
 import assert from "node:assert";
@@ -16,6 +12,7 @@ import { runSingleJob } from "../../../../utilities/run-single-job.ts";
 import { flow } from "../../../producer.ts";
 import { enqueueMapItemsToFiles } from "../../enqueue-map-items-to-files.ts";
 import { findValidTorrentContainerProcessorSchema } from "./find-valid-torrent-container.schema.ts";
+import { getCachedTorrentFiles } from "./utilities/get-cached-torrent-files.ts";
 import { getPluginProviderList } from "./utilities/get-plugin-provider-list.ts";
 import { validateTorrentFiles } from "./utilities/validate-torrent-files.ts";
 
@@ -66,29 +63,16 @@ export const findValidTorrentContainerProcessor =
                 `Checking for ${infoHash} in ${plugin.pluginName} cache${provider ? ` for ${provider}` : ""}...`,
               );
 
-              const pluginCacheCheckNode = await flow.addPluginJob(
-                MediaItemDownloadCacheCheckRequestedEvent,
-                MediaItemDownloadCacheCheckRequestedResponse,
-                `Find cached torrents for ${plugin.pluginName}${provider ? ` on ${provider}` : ""}`,
+              const cachedFiles = await getCachedTorrentFiles(
                 plugin.pluginName,
-                { infoHashes: [infoHash], provider },
-                {
-                  jobId: `${infoHash}-cache-check-${plugin.pluginName}-${provider ?? ""}`,
-                  removeDependencyOnFailure: true,
-                  parent: jobParentOptions,
-                },
+                infoHash,
+                jobParentOptions,
+                provider,
               );
-
-              const pluginCacheCheckResult = await runSingleJob(
-                pluginCacheCheckNode.job,
-                60_000,
-              );
-
-              const cachedFiles = pluginCacheCheckResult[infoHash];
 
               if (!cachedFiles) {
                 logger.verbose(
-                  `${infoHash} is not immediately available on ${plugin.pluginName}${provider ? `on ${provider}` : ""} for ${mediaItem.fullTitle}; skipping...`,
+                  `${infoHash} is not immediately available on ${plugin.pluginName}${provider ? ` via ${provider}` : ""} for ${mediaItem.fullTitle}; skipping...`,
                 );
 
                 continue;

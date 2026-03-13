@@ -68,7 +68,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
         item: updatedItem,
         downloader: finalResult.plugin,
         durationFromRequestToDownload: DateTime.utc()
-          .diff(DateTime.fromJSDate(updatedItem.createdAt))
+          .diff(DateTime.fromMillis(job.timestamp))
           .as("seconds"),
         provider: finalResult.result.provider,
       });

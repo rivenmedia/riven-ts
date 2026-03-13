@@ -5,13 +5,13 @@ import { CacheCheckResponse } from "../schemas/cache-check-response.schema.js";
 import { GenerateLinkResponse } from "../schemas/generate-link-response.schema.js";
 import { ItemStatus } from "../schemas/item-status.schema.js";
 import { Store } from "../schemas/store.schema.ts";
-import {
-  StoreKeys,
-  type StremThruSettings,
-} from "../stremthru-settings.schema.ts";
 
+import type { StremThruSettings } from "../stremthru-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
-import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource.js";
+import type {
+  RequestOptions,
+  ValueOrPromise,
+} from "@apollo/datasource-rest/dist/RESTDataSource.js";
 import type { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 
@@ -20,25 +20,6 @@ export class StremThruAPIError extends Error {}
 export class StremThruAPI extends BaseDataSource<StremThruSettings> {
   override baseURL = this.settings.stremThruUrl;
   override serviceName = "StremThru";
-
-  #enabledStores: Store[] | null = null;
-
-  get enabledStores() {
-    this.#enabledStores ??= Object.keys(StoreKeys.shape).reduce<Store[]>(
-      (acc, val) => {
-        const apiKey = this.settings[val as keyof StoreKeys];
-
-        if (!apiKey) {
-          return acc;
-        }
-
-        return [...acc, Store.parse(val.replace("ApiKey", ""))];
-      },
-      [],
-    );
-
-    return this.#enabledStores;
-  }
 
   protected override willSendRequest(
     _path: string,
@@ -60,6 +41,17 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
     }
 
     requestOpts.headers["x-stremthru-store-authorization"] = `Bearer ${apiKey}`;
+  }
+
+  protected override cacheKeyFor(url: URL, request: RequestOptions): string {
+    const baseKey = super.cacheKeyFor(url, request);
+    const store = request.headers?.["x-stremthru-store-name"];
+
+    if (!store) {
+      throw new Error("Missing store for StremThruAPI cache key");
+    }
+
+    return `${baseKey} - ${store}`;
   }
 
   override async validate() {
