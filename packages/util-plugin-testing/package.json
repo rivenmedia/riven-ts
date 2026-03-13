@@ -18,7 +18,7 @@
   "dependencies": {
     "@apollo/utils.keyvaluecache": "catalog:",
     "@repo/util-plugin-sdk": "workspace:^",
-    "redis-memory-server": "^0.16.0",
+    "redis-memory-server": "catalog:",
     "winston": "catalog:"
   },
   "devDependencies": {

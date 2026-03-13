@@ -46,6 +46,7 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
       number: i,
       title: `Season ${i.toString().padStart(2, "0")}`,
       tvdbId: i.toString(),
+      isSpecial: false,
     });
 
     show.seasons.add(season);
@@ -111,6 +112,7 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
       number: i,
       title: `Season ${i.toString().padStart(2, "0")}`,
       tvdbId: i.toString(),
+      isSpecial: false,
     });
 
     show.seasons.add(season);

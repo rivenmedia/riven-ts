@@ -4,6 +4,7 @@ import {
   Movie,
   Season,
   Show,
+  ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
 
 import { wrap } from "@mikro-orm/core";
@@ -59,7 +60,18 @@ export const validateTorrent = async (
   if (item instanceof Movie) {
     if (parsedData.seasons.length || parsedData.episodes.length) {
       throw new SkippedTorrentError(
-        `Skipping show torrent for movie`,
+        "Skipping show torrent for movie",
+        itemTitle,
+        parsedData.rawTitle,
+        infoHash,
+      );
+    }
+  }
+
+  if (item instanceof ShowLikeMediaItem) {
+    if (parsedData.seasons.length === 0 && parsedData.episodes.length === 0) {
+      throw new SkippedTorrentError(
+        `Skipping torrent with no seasons or episodes for ${item.type} item`,
         itemTitle,
         parsedData.rawTitle,
         infoHash,
@@ -113,7 +125,7 @@ export const validateTorrent = async (
   }
 
   if (item instanceof Season) {
-    if (parsedData.episodes.length <= 2) {
+    if (parsedData.episodes.length && parsedData.episodes.length <= 2) {
       throw new SkippedTorrentError(
         "Skipping torrent with 2 or fewer episodes for season item",
         itemTitle,
@@ -125,23 +137,25 @@ export const validateTorrent = async (
     await wrap(item).populate(["episodes"]);
 
     if (parsedData.seasons.length === 0) {
-      // If we don't have seasons, check that each *absolute* number is found in the list.
-      // Some items name torrents using absolute episodes only (e.g. One Piece 0001-1000)
+      if (parsedData.episodes.length) {
+        // If we don't have seasons, check that each *absolute* number is found in the list.
+        // Some items name torrents using absolute episodes only (e.g. One Piece 0001-1000)
 
-      const episodes = item.episodes.getItems();
-      const absoluteEpisodesIntersection = new Set(
-        parsedData.episodes,
-      ).intersection(
-        new Set(episodes.map((episode) => episode.absoluteNumber)),
-      );
-
-      if (absoluteEpisodesIntersection.size !== episodes.length) {
-        throw new SkippedTorrentError(
-          "Skipping torrent with incorrect absolute episode range for season item",
-          itemTitle,
-          parsedData.rawTitle,
-          infoHash,
+        const episodes = item.episodes.getItems();
+        const absoluteEpisodesIntersection = new Set(
+          parsedData.episodes,
+        ).intersection(
+          new Set(episodes.map((episode) => episode.absoluteNumber)),
         );
+
+        if (absoluteEpisodesIntersection.size !== episodes.length) {
+          throw new SkippedTorrentError(
+            "Skipping torrent with incorrect absolute episode range for season item",
+            itemTitle,
+            parsedData.rawTitle,
+            infoHash,
+          );
+        }
       }
     } else {
       if (!parsedData.seasons.includes(item.number)) {
@@ -153,18 +167,20 @@ export const validateTorrent = async (
         );
       }
 
-      // If we have seasons, check that each *relative* number is found in the list
-      const relativeEpisodesIntersection = new Set(
-        parsedData.episodes,
-      ).intersection(new Set(item.episodes.map((episode) => episode.number)));
+      if (parsedData.episodes.length) {
+        // If we have seasons and episodes, check that each *relative* number is found in the list
+        const relativeEpisodesIntersection = new Set(
+          parsedData.episodes,
+        ).intersection(new Set(item.episodes.map((episode) => episode.number)));
 
-      if (relativeEpisodesIntersection.size !== item.episodes.length) {
-        throw new SkippedTorrentError(
-          "Skipping torrent with incorrect episodes for season item",
-          itemTitle,
-          parsedData.rawTitle,
-          infoHash,
-        );
+        if (relativeEpisodesIntersection.size !== item.episodes.length) {
+          throw new SkippedTorrentError(
+            "Skipping torrent with incorrect episodes for season item",
+            itemTitle,
+            parsedData.rawTitle,
+            infoHash,
+          );
+        }
       }
     }
   }

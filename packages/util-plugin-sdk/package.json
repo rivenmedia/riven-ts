@@ -30,7 +30,7 @@
     "@repo/util-rank-torrent-name": "workspace:^",
     "es-toolkit": "catalog:",
     "luxon": "catalog:",
-    "redis-memory-server": "^0.16.0",
+    "redis-memory-server": "catalog:",
     "zod": "catalog:",
     "zod-validation-error": "catalog:"
   },

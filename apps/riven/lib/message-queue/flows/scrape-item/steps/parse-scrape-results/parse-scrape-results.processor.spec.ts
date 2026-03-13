@@ -68,6 +68,7 @@ const it = baseIt.extend<{
       const season = em.create(Season, {
         title: `Season ${i.toString()}`,
         number: i,
+        isSpecial: false,
       });
 
       show.seasons.add(season);
@@ -80,6 +81,7 @@ const it = baseIt.extend<{
           contentRating: "tv-14",
           number: i,
           absoluteNumber: ++episodeNumber,
+          isSpecial: false,
         });
 
         season.episodes.add(episode);
@@ -475,39 +477,6 @@ it("filters out duplicate torrents from different plugins", async ({
       rawTitle,
     }),
   ]);
-});
-
-it("filters out torrents with no seasons for season items", async ({
-  season,
-  job,
-}) => {
-  const rawTitle = "Test Show 2024 E01-10";
-
-  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
-      id: job.data.id,
-      results: {
-        "1434567890123456789012345678901234567890": rawTitle,
-      },
-    },
-  });
-
-  await job.updateData({
-    id: season.id,
-  });
-
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
-
-  expect(Object.keys(results)).toHaveLength(0);
-  expect(results).not.toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        data: expect.objectContaining({
-          rawTitle,
-        }),
-      }),
-    ]),
-  );
 });
 
 it("filters out torrents with the incorrect season number for season items", async ({

@@ -184,6 +184,7 @@ it("returns directory stats for /shows", async ({ em }) => {
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
+      isSpecial: false,
     });
 
     show.seasons.add(season);
@@ -191,11 +192,12 @@ it("returns directory stats for /shows", async ({ em }) => {
     await em.flush();
 
     const episode = em.create(Episode, {
-      title: `Episode 01`,
+      title: "Episode 01",
       year: 2020,
       contentRating: "tv-14",
       number: 1,
       absoluteNumber: 1,
+      isSpecial: false,
     });
 
     season.episodes.add(episode);
@@ -253,6 +255,7 @@ it("returns directory stats for single shows", async ({ em }) => {
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
+      isSpecial: false,
     });
 
     show.seasons.add(season);
@@ -260,11 +263,12 @@ it("returns directory stats for single shows", async ({ em }) => {
     await em.flush();
 
     const episode = em.create(Episode, {
-      title: `Episode 01`,
+      title: "Episode 01",
       year: 2020,
       contentRating: "tv-14",
       number: 1,
       absoluteNumber: 1,
+      isSpecial: false,
     });
 
     season.episodes.add(episode);
@@ -318,9 +322,10 @@ it("returns directory stats for single seasons", async ({ em }) => {
   await em.flush();
 
   const season = em.create(Season, {
-    title: `Season 01`,
+    title: "Season 01",
     year: 2020,
     number: 1,
+    isSpecial: false,
   });
 
   show.seasons.add(season);
@@ -329,11 +334,12 @@ it("returns directory stats for single seasons", async ({ em }) => {
 
   for (let i = 1; i <= 10; i++) {
     const episode = em.create(Episode, {
-      title: `Episode 01`,
+      title: "Episode 01",
       year: 2020,
       contentRating: "tv-14",
       number: 1,
       absoluteNumber: 1,
+      isSpecial: false,
     });
 
     season.episodes.add(episode);
@@ -387,9 +393,10 @@ it("returns file stats for episodes", async ({ em }) => {
   await em.flush();
 
   const season = em.create(Season, {
-    title: `Season 01`,
+    title: "Season 01",
     year: 2020,
     number: 1,
+    isSpecial: false,
   });
 
   show.seasons.add(season);
@@ -397,11 +404,12 @@ it("returns file stats for episodes", async ({ em }) => {
   await em.flush();
 
   const episode = em.create(Episode, {
-    title: `Episode 01`,
+    title: "Episode 01",
     year: 2020,
     contentRating: "tv-14",
     number: 1,
     absoluteNumber: 1,
+    isSpecial: false,
   });
 
   season.episodes.add(episode);

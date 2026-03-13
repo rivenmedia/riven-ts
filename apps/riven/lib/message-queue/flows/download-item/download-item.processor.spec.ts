@@ -14,18 +14,10 @@ import { DateTime, Settings } from "luxon";
 import { expect, vi } from "vitest";
 
 import { database } from "../../../database/database.ts";
-import * as settingsModule from "../../../utilities/settings.ts";
 import { createQueue } from "../../utilities/create-queue.ts";
 import { downloadItemProcessor } from "./download-item.processor.ts";
 
 import type { DownloadItemFlow } from "./download-item.schema.ts";
-
-it.beforeEach(({ redisUrl }) => {
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
-    redisUrl,
-  });
-});
 
 it("throws an unrecoverable error if no valid torrent container is found", async () => {
   const sendEvent = vi.fn();
@@ -107,26 +99,18 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "find-valid-torrent-container": {
       result: {
+        torrentId: "1234",
+        infoHash: streamInfoHash,
         files: [
           {
-            fileName: "Test Movie 2024 1080p.mkv",
-            fileSize: 1024,
-            downloadUrl: "http://example.com/download",
+            name: "Test Movie 2024 1080p.mkv",
+            path: "/Test Movie 2024 1080p.mkv",
+            size: 1024,
+            link: "http://example.com/download",
             matchedMediaItemId: movie.id,
+            isCachedFile: false,
           },
         ],
-        infoHash: streamInfoHash,
-        torrentId: "",
-        torrentInfo: {
-          files: {},
-          infoHash: "",
-          name: "",
-          id: "",
-          isCached: true,
-          links: [],
-          sizeMB: 0,
-          alternativeFilename: "",
-        },
       },
       plugin: "@repo/plugin-test",
     },
@@ -168,6 +152,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
     const season = em.create(Season, {
       number: i,
       title: `Season ${i.toString()}`,
+      isSpecial: false,
     });
 
     show.seasons.add(season);
@@ -181,6 +166,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
         year: 2024,
         number: j,
         absoluteNumber: j,
+        isSpecial: season.isSpecial,
       });
 
       season.episodes.add(episode);
@@ -212,32 +198,26 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "find-valid-torrent-container": {
       result: {
+        torrentId: "1234",
+        infoHash: streamInfoHash,
         files: [
           {
-            fileName: "Test Show S01E01 2024 1080p.mkv",
-            fileSize: 1024,
-            downloadUrl: "http://example.com/download",
+            name: "Test Show S01E01 2024 1080p.mkv",
+            path: "/Test Show S01E01 2024 1080p.mkv",
+            size: 1024,
+            link: "http://example.com/download",
             matchedMediaItemId: episodes[0].id,
+            isCachedFile: false,
           },
           {
-            fileName: "Test Show S01E02 2024 1080p.mkv",
-            fileSize: 1024,
-            downloadUrl: "http://example.com/download",
+            name: "Test Show S01E02 2024 1080p.mkv",
+            path: "/Test Show S01E02 2024 1080p.mkv",
+            size: 1024,
+            link: "http://example.com/download",
             matchedMediaItemId: episodes[1].id,
+            isCachedFile: false,
           },
         ],
-        infoHash: streamInfoHash,
-        torrentId: "",
-        torrentInfo: {
-          files: {},
-          infoHash: "",
-          name: "",
-          id: "",
-          isCached: true,
-          links: [],
-          sizeMB: 0,
-          alternativeFilename: "",
-        },
       },
       plugin: "@repo/plugin-test",
     },

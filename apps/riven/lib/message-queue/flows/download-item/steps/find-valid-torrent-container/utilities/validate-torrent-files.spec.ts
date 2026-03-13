@@ -5,38 +5,25 @@ import { validateTorrentFiles } from "./validate-torrent-files.ts";
 
 import type { MapItemsToFilesFlow } from "../../map-items-to-files/map-items-to-files.schema.ts";
 
-type MappedTorrentContainer = MapItemsToFilesFlow["output"];
+type MappedFiles = MapItemsToFilesFlow["output"];
 
 it("throws an error if season-like torrent has fewer files than expected", async ({
   season,
 }) => {
-  const mappedTorrentContainer: MappedTorrentContainer = {
-    infoHash: "test",
-    files: {
-      episodes: {},
-      movies: {
-        "1": {
-          fileName: "Test.Show.S01E01.1080p.WEB-DL.mkv",
-          fileSize: 5000000000,
-          downloadUrl: "http://example.com/file.mkv",
-        },
+  const mappedFiles: MappedFiles = {
+    episodes: {},
+    movies: {
+      "1": {
+        name: "Test.Show.S01E01.1080p.WEB-DL.mkv",
+        path: "/Test.Show.S01E01.1080p.WEB-DL.mkv",
+        size: 5000000000,
+        link: "http://example.com/file.mkv",
       },
-    },
-    torrentId: 1,
-    torrentInfo: {
-      files: {},
-      infoHash: "test",
-      name: "test",
-      id: "test",
-      isCached: true,
-      links: [],
-      sizeMB: 100,
-      alternativeFilename: "",
     },
   };
 
   await expect(
-    validateTorrentFiles(season, "test", mappedTorrentContainer),
+    validateTorrentFiles(season, "test", mappedFiles, false),
   ).rejects.toThrow(
     `Season torrent container must have at least ${season.episodes.length.toString()} episodes, but has 0`,
   );
@@ -52,45 +39,29 @@ it("considers torrent containers for continuing shows as valid if missing a maxi
 
   const episodes = await show.getEpisodes();
 
-  const files = episodes.reduce<MappedTorrentContainer["files"]["episodes"]>(
-    (acc, episode) => {
-      if (episode.season.getProperty("number") === show.seasons.length) {
-        return acc;
-      }
+  const files = episodes.reduce<MappedFiles["episodes"]>((acc, episode) => {
+    if (episode.season.getProperty("number") === show.seasons.length) {
+      return acc;
+    }
 
-      return {
-        ...acc,
-        [`abs:${episode.absoluteNumber.toString()}`]: {
-          fileName: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-          fileSize: 5000000000,
-          downloadUrl: "http://example.com/file.mkv",
-        },
-      };
-    },
-    {},
-  );
+    return {
+      ...acc,
+      [`abs:${episode.absoluteNumber.toString()}`]: {
+        name: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        path: `/Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        size: 5000000000,
+        link: "http://example.com/file.mkv",
+      },
+    };
+  }, {});
 
-  const container: MappedTorrentContainer = {
-    infoHash: "test",
-    files: {
-      movies: {},
-      episodes: files,
-    },
-    torrentId: 1,
-    torrentInfo: {
-      files: {},
-      infoHash: "test",
-      name: "test",
-      id: "test",
-      isCached: true,
-      links: [],
-      sizeMB: 100,
-      alternativeFilename: "",
-    },
+  const container: MappedFiles = {
+    movies: {},
+    episodes: files,
   };
 
   await expect(
-    validateTorrentFiles(show, "test", container),
+    validateTorrentFiles(show, "test", container, false),
   ).resolves.toHaveLength(episodes.length - 10);
 });
 
@@ -99,108 +70,68 @@ it("considers torrent containers for completed shows as invalid if missing any s
 }) => {
   const episodes = await show.getEpisodes();
 
-  const files = episodes.reduce<MappedTorrentContainer["files"]["episodes"]>(
-    (acc, episode) => {
-      if (episode.season.getProperty("number") === show.seasons.length) {
-        return acc;
-      }
+  const files = episodes.reduce<MappedFiles["episodes"]>((acc, episode) => {
+    if (episode.season.getProperty("number") === show.seasons.length) {
+      return acc;
+    }
 
-      return {
-        ...acc,
-        [`abs:${episode.absoluteNumber.toString()}`]: {
-          fileName: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-          fileSize: 5000000000,
-          downloadUrl: "http://example.com/file.mkv",
-        },
-      };
-    },
-    {},
-  );
+    return {
+      ...acc,
+      [`abs:${episode.absoluteNumber.toString()}`]: {
+        name: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        path: `/Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        size: 5000000000,
+        link: "http://example.com/file.mkv",
+      },
+    };
+  }, {});
 
-  const container: MappedTorrentContainer = {
-    infoHash: "test",
-    files: {
-      movies: {},
-      episodes: files,
-    },
-    torrentId: 1,
-    torrentInfo: {
-      files: {},
-      infoHash: "test",
-      name: "test",
-      id: "test",
-      isCached: true,
-      links: [],
-      sizeMB: 100,
-      alternativeFilename: "",
-    },
+  const container: MappedFiles = {
+    movies: {},
+    episodes: files,
   };
 
-  await expect(validateTorrentFiles(show, "test", container)).rejects.toThrow(
+  await expect(
+    validateTorrentFiles(show, "test", container, false),
+  ).rejects.toThrow(
     `Show torrent container must have at least 60 episodes, but has 50`,
   );
 });
 
 it("throws an error if file has no download URL", async ({ movie }) => {
-  const container: MappedTorrentContainer = {
-    infoHash: "test",
-    files: {
-      movies: {
-        1: {
-          fileName: "Test.Movie.2024.1080p.WEB-DL.mkv",
-          fileSize: 5000000000,
-          downloadUrl: "",
-        },
+  const container: MappedFiles = {
+    movies: {
+      1: {
+        name: "Test.Movie.2024.1080p.WEB-DL.mkv",
+        path: "/Test.Movie.2024.1080p.WEB-DL.mkv",
+        size: 5000000000,
+        link: "",
       },
-      episodes: {},
     },
-    torrentId: 1,
-    torrentInfo: {
-      files: {},
-      infoHash: "test",
-      name: "test",
-      id: "test",
-      isCached: true,
-      links: [],
-      sizeMB: 100,
-      alternativeFilename: "",
-    },
+    episodes: {},
   };
 
-  await expect(validateTorrentFiles(movie, "test", container)).rejects.toThrow(
-    "Expected 1 valid files, but found 0",
-  );
+  await expect(
+    validateTorrentFiles(movie, "test", container, false),
+  ).rejects.toThrow("Expected at least 1 valid files, but found 0");
 });
 
 it("throws an error if movie file is parsed as a show", async ({ movie }) => {
-  const container: MappedTorrentContainer = {
-    infoHash: "test",
-    files: {
-      movies: {
-        1: {
-          fileName: "Test.Show.S01E01.1080p.WEB-DL.mkv",
-          fileSize: 5000000000,
-          downloadUrl: "http://example.com/file.mkv",
-        },
+  const container: MappedFiles = {
+    movies: {
+      1: {
+        name: "Test.Show.S01E01.1080p.WEB-DL.mkv",
+        path: "/Test.Show.S01E01.1080p.WEB-DL.mkv",
+        size: 5000000000,
+        link: "http://example.com/file.mkv",
       },
-      episodes: {},
     },
-    torrentId: 1,
-    torrentInfo: {
-      files: {},
-      infoHash: "test",
-      name: "test",
-      id: "test",
-      isCached: true,
-      links: [],
-      sizeMB: 100,
-      alternativeFilename: "",
-    },
+    episodes: {},
   };
 
-  await expect(validateTorrentFiles(movie, "test", container)).rejects.toThrow(
-    "Expected 1 valid files, but found 0",
-  );
+  await expect(
+    validateTorrentFiles(movie, "test", container, false),
+  ).rejects.toThrow("Expected at least 1 valid files, but found 0");
 });
 
 it("throws an error if show file has unknown episode number", async ({
@@ -212,78 +143,55 @@ it("throws an error if show file has unknown episode number", async ({
     episodes.map((episode) => [
       `abs:${episode.absoluteNumber.toString()}`,
       {
-        fileName: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        fileSize: 5000000000,
-        downloadUrl: "http://example.com/file.mkv",
+        name: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        path: `/Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        size: 5000000000,
+        link: "http://example.com/file.mkv",
       },
     ]),
-  ) as MappedTorrentContainer["files"]["episodes"];
+  );
 
-  const container: MappedTorrentContainer = {
-    infoHash: "test",
-    files: {
-      episodes: {
-        ...files,
-        "abs:1": {
-          fileName: "Test.Show.S01E00.1080p.WEB-DL.mkv",
-          fileSize: 5000000000,
-          downloadUrl: "http://example.com/file.mkv",
-        },
+  const container: MappedFiles = {
+    episodes: {
+      ...files,
+      "abs:1": {
+        name: "Test.Show.S01E00.1080p.WEB-DL.mkv",
+        path: "Test.Show.S01E00.1080p.WEB-DL.mkv",
+        size: 5000000000,
+        link: "http://example.com/file.mkv",
       },
-      movies: {},
     },
-    torrentId: 1,
-    torrentInfo: {
-      files: {},
-      infoHash: "test",
-      name: "test",
-      id: "test",
-      isCached: true,
-      links: [],
-      sizeMB: 100,
-      alternativeFilename: "",
-    },
+    movies: {},
   };
 
-  await expect(validateTorrentFiles(show, "test", container)).rejects.toThrow(
-    `Expected ${episodes.length.toString()} valid files, but found ${Object.keys(files).length.toString()}`,
+  await expect(
+    validateTorrentFiles(show, "test", container, false),
+  ).rejects.toThrow(
+    `Expected at least ${episodes.length.toString()} valid files, but found ${Object.keys(files).length.toString()}`,
   );
 });
 
 it("returns valid matched files for a movie", async ({ movie }) => {
-  const container: MappedTorrentContainer = {
-    infoHash: "test",
-    files: {
-      movies: {
-        1: {
-          fileName: "Test.Movie.2024.1080p.WEB-DL.mkv",
-          fileSize: 5000000000,
-          downloadUrl: "http://example.com/file.mkv",
-        },
+  const container: MappedFiles = {
+    movies: {
+      0: {
+        name: "Test.Movie.2024.1080p.WEB-DL.mkv",
+        path: "/Test.Movie.2024.1080p.WEB-DL.mkv",
+        size: 5000000000,
+        link: "http://example.com/file.mkv",
       },
-      episodes: {},
     },
-    torrentId: 1,
-    torrentInfo: {
-      files: {},
-      infoHash: "test",
-      name: "test",
-      id: "test",
-      isCached: true,
-      links: [],
-      sizeMB: 100,
-      alternativeFilename: "",
-    },
+    episodes: {},
   };
 
-  const result = await validateTorrentFiles(movie, "test", container);
+  const result = await validateTorrentFiles(movie, "test", container, false);
 
   expect(result).toHaveLength(1);
 
   expect.assert(result[0]);
 
   expect(result[0].matchedMediaItemId).toBe(movie.id);
-  expect(result[0].fileName).toBe("Test.Movie.2024.1080p.WEB-DL.mkv");
+  expect(result[0].name).toBe("Test.Movie.2024.1080p.WEB-DL.mkv");
 });
 
 it("returns valid matched files for a show", async ({ show }) => {
@@ -293,40 +201,27 @@ it("returns valid matched files for a show", async ({ show }) => {
     episodes.map((episode) => [
       `abs:${episode.absoluteNumber.toString()}`,
       {
-        fileName: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        fileSize: 5000000000,
-        downloadUrl: "http://example.com/file.mkv",
+        name: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        path: `/Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        size: 5000000000,
+        link: "http://example.com/file.mkv",
       },
     ]),
-  ) as MappedTorrentContainer["files"]["episodes"];
+  );
 
-  const container: MappedTorrentContainer = {
-    infoHash: "test",
-    files: {
-      episodes: files,
-      movies: {},
-    },
-    torrentId: 1,
-    torrentInfo: {
-      files: {},
-      infoHash: "test",
-      name: "test",
-      id: "test",
-      isCached: true,
-      links: [],
-      sizeMB: 100,
-      alternativeFilename: "",
-    },
+  const container: MappedFiles = {
+    episodes: files,
+    movies: {},
   };
 
-  const result = await validateTorrentFiles(show, "test", container);
+  const result = await validateTorrentFiles(show, "test", container, false);
 
   expect(result).toHaveLength(episodes.length);
 
   expect.assert(result[0]);
   expect.assert(episodes[0]);
 
-  expect(result[0].fileName).toBe("Test.Show.E1.1080p.WEB-DL.mkv");
+  expect(result[0].name).toBe("Test.Show.E1.1080p.WEB-DL.mkv");
   expect(result[0].matchedMediaItemId).toBe(episodes[0].id);
 });
 
@@ -335,66 +230,42 @@ it("does not match episodes from a different season", async ({ season }) => {
     season.episodes.map((episode) => [
       `${(episode.season.unwrap().number + 1).toString()}:${episode.number.toString()}`,
       {
-        fileName: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        fileSize: 5000000000,
-        downloadUrl: "http://example.com/file.mkv",
+        name: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        path: `/Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        size: 5000000000,
+        link: "http://example.com/file.mkv",
       },
     ]),
-  ) as MappedTorrentContainer["files"]["episodes"];
+  ) as MappedFiles["episodes"];
 
-  const container: MappedTorrentContainer = {
-    infoHash: "test",
-    files: {
-      movies: {},
-      episodes: files,
-    },
-    torrentId: 1,
-    torrentInfo: {
-      files: {},
-      infoHash: "test",
-      name: "test",
-      id: "test",
-      isCached: true,
-      links: [],
-      sizeMB: 100,
-      alternativeFilename: "",
-    },
+  const container: MappedFiles = {
+    movies: {},
+    episodes: files,
   };
 
-  await expect(validateTorrentFiles(season, "test", container)).rejects.toThrow(
-    `Expected ${season.episodes.length.toString()} valid files, but found 0`,
+  await expect(
+    validateTorrentFiles(season, "test", container, false),
+  ).rejects.toThrow(
+    `Expected at least ${season.episodes.length.toString()} valid files, but found 0`,
   );
 });
 
 it("throws an error if episode file does not match the episode", async ({
   episode,
 }) => {
-  const container: MappedTorrentContainer = {
-    infoHash: "test",
-    files: {
-      movies: {},
-      episodes: {
-        1: {
-          fileName: "Test.Show.S02E01.1080p.WEB-DL.mkv",
-          fileSize: 5000000000,
-          downloadUrl: "http://example.com/file.mkv",
-        },
+  const container: MappedFiles = {
+    movies: {},
+    episodes: {
+      1: {
+        name: "Test.Show.S02E01.1080p.WEB-DL.mkv",
+        path: "/Test.Show.S02E01.1080p.WEB-DL.mkv",
+        size: 5000000000,
+        link: "http://example.com/file.mkv",
       },
-    },
-    torrentId: 1,
-    torrentInfo: {
-      files: {},
-      infoHash: "test",
-      name: "test",
-      id: "test",
-      isCached: true,
-      links: [],
-      sizeMB: 100,
-      alternativeFilename: "",
     },
   };
 
   await expect(
-    validateTorrentFiles(episode, "test", container),
-  ).rejects.toThrow("Expected 1 valid files, but found 0");
+    validateTorrentFiles(episode, "test", container, false),
+  ).rejects.toThrow("Expected at least 1 valid files, but found 0");
 });

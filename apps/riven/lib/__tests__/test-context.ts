@@ -136,6 +136,7 @@ export const rivenTestContext = testBase.extend<{
       const season = em.create(Season, {
         title: `Season ${seasonNumber.toString()}`,
         number: seasonNumber,
+        isSpecial: false,
       });
 
       show.seasons.add(season);
@@ -148,6 +149,7 @@ export const rivenTestContext = testBase.extend<{
           contentRating: "tv-14",
           number: episodeNumber,
           absoluteNumber: absoluteEpisodeNumber++,
+          isSpecial: false,
         });
 
         season.episodes.add(episode);
