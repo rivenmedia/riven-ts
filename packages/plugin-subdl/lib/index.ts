@@ -1,10 +1,5 @@
-import {
-  Episode,
-  Movie,
-  SubtitleEntry,
-} from "@repo/util-plugin-sdk/dto/entities";
+import { Episode, Movie } from "@repo/util-plugin-sdk/dto/entities";
 
-import { ref } from "@mikro-orm/core";
 import { createHash } from "node:crypto";
 
 import packageJson from "../package.json" with { type: "json" };
@@ -15,6 +10,7 @@ import { pluginConfig } from "./subdl-plugin.config.ts";
 import { SubdlSettings } from "./subdl-settings.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { SubtitleData } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";
 
 export default {
   name: pluginConfig.name,
@@ -22,7 +18,7 @@ export default {
   dataSources: [SubdlAPI],
   resolvers: [SubdlResolver, SubdlSettingsResolver],
   hooks: {
-    "riven.media-item.download.success": async ({
+    "riven.media-item.subtitle.requested": async ({
       dataSources,
       event,
       settings,
@@ -31,19 +27,6 @@ export default {
       const api = dataSources.get(SubdlAPI);
       const { languages } = settings.get(SubdlSettings);
       const item = event.item;
-
-      const mediaEntries = await item.getMediaEntries();
-      if (mediaEntries.length === 0) {
-        logger.warn(
-          `No media entries found for ${item.fullTitle}, skipping subtitle download`,
-        );
-        return;
-      }
-
-      const firstMediaEntry = mediaEntries[0];
-      if (!firstMediaEntry) {
-        return;
-      }
 
       let tmdbId: string | undefined;
       let imdbId: string | undefined;
@@ -61,14 +44,14 @@ export default {
         seasonNumber = item.season.getProperty("number");
         episodeNumber = item.number;
       } else {
-        return;
+        return { subtitles: [] };
       }
 
       if (!tmdbId && !imdbId) {
         logger.warn(
           `No TMDB/IMDB ID found for ${item.fullTitle}, skipping subtitle download`,
         );
-        return;
+        return { subtitles: [] };
       }
 
       const results = await api.searchSubtitles({
@@ -82,18 +65,19 @@ export default {
 
       if (results.length === 0) {
         logger.debug(`No subtitles found for ${item.fullTitle}`);
-        return;
+        return { subtitles: [] };
       }
 
       // Pick the best subtitle per language (first result per language)
       const bestPerLanguage = new Map<string, (typeof results)[0]>();
       for (const sub of results) {
-        if (!bestPerLanguage.has(sub.lang)) {
-          bestPerLanguage.set(sub.lang, sub);
+        const subLangLower = sub.lang.toLowerCase();
+        if (!bestPerLanguage.has(subLangLower)) {
+          bestPerLanguage.set(subLangLower, sub);
         }
       }
 
-      let downloadedCount = 0;
+      const subtitles: SubtitleData[] = [];
 
       for (const [language, sub] of bestPerLanguage) {
         try {
@@ -105,20 +89,14 @@ export default {
             continue;
           }
 
-          const subtitleEntry = new SubtitleEntry();
-          subtitleEntry.language = language;
-          subtitleEntry.content = content;
-          subtitleEntry.fileSize = Buffer.byteLength(content, "utf8");
-          subtitleEntry.fileHash = createHash("md5")
-            .update(content)
-            .digest("hex");
-          subtitleEntry.videoFileSize = firstMediaEntry.fileSize;
-          subtitleEntry.parentOriginalFilename =
-            firstMediaEntry.originalFilename;
-          subtitleEntry.mediaItem = ref(item);
-
-          item.filesystemEntries.add(subtitleEntry);
-          downloadedCount++;
+          subtitles.push({
+            language,
+            content,
+            fileSize: Buffer.byteLength(content, "utf8"),
+            fileHash: createHash("md5").update(content).digest("hex"),
+            sourceProvider: "subdl",
+            sourceId: sub.url,
+          });
         } catch (error) {
           logger.warn(
             `Failed to download subtitle for ${item.fullTitle} (${language}): ${error instanceof Error ? error.message : String(error)}`,
@@ -126,11 +104,13 @@ export default {
         }
       }
 
-      if (downloadedCount > 0) {
+      if (subtitles.length > 0) {
         logger.info(
-          `Downloaded ${downloadedCount.toString()} subtitle(s) for ${item.fullTitle}`,
+          `Downloaded ${subtitles.length.toString()} subtitle(s) for ${item.fullTitle}`,
         );
       }
+
+      return { subtitles };
     },
   },
   settingsSchema: SubdlSettings,

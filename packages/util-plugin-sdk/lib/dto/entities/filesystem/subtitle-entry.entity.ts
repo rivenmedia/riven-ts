@@ -15,12 +15,8 @@ export class SubtitleEntry extends FileSystemEntry {
   @Property()
   language!: string;
 
-  @Field({ nullable: true })
-  @Property()
-  parentOriginalFilename?: string;
-
   @Field()
-  @Property()
+  @Property({ type: "text" })
   content!: string;
 
   @Field()
@@ -29,11 +25,11 @@ export class SubtitleEntry extends FileSystemEntry {
 
   @Field()
   @Property()
-  videoFileSize!: number;
+  sourceProvider!: string;
 
   @Field({ nullable: true })
-  @Property()
-  openSubtitlesId?: string; // TODO: Separate entity for external providers?
+  @Property({ nullable: true })
+  sourceId?: string;
 
   @Property({ persist: false, hidden: true })
   get vfsFileName(): Opt<string> {

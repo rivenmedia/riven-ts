@@ -15,9 +15,6 @@ export const getMoviesDirectoryEntries = async (
     database.subtitleEntry.find(filter, { populate: ["$infer"] }),
   ]);
 
-  console.log(mediaEntries);
-  console.log(subtitleEntries);
-
   const names = new Set<string>();
 
   for (const entry of mediaEntries) {

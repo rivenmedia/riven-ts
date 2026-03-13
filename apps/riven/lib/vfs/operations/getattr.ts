@@ -378,7 +378,7 @@ export const getattrSync = function (path, callback) {
       }
 
       if (isZodErrorLike(error)) {
-        logger.error(`VFS getattr validation error: ${error.message}`);
+        logger.debug(`VFS getattr validation error: ${error.message}`);
 
         process.nextTick(callback, Fuse.ENOENT);
 
