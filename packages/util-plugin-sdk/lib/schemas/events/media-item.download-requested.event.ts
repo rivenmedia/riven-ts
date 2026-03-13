@@ -11,6 +11,7 @@ export const MediaItemDownloadRequestedEvent = createProgramEventSchema(
   "media-item.download.requested",
   z.object({
     infoHash: z.hash("sha1"),
+    provider: z.string().nullable(),
   }),
 );
 

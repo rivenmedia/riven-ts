@@ -70,6 +70,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
         durationFromRequestToDownload: DateTime.utc()
           .diff(DateTime.fromJSDate(updatedItem.createdAt))
           .as("seconds"),
+        provider: finalResult.result.provider,
       });
     } catch (error) {
       if (

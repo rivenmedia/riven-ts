@@ -12,6 +12,7 @@ export const MediaItemDownloadCacheCheckRequestedEvent =
     "media-item.download.cache-check-requested",
     z.object({
       infoHashes: z.array(z.hash("sha1")).min(1),
+      provider: z.string().nullable(),
     }),
   );
 

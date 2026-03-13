@@ -122,6 +122,9 @@ export async function enqueueDownloadItem({
         hasCacheCheckHook: Boolean(
           plugin.hooks["riven.media-item.download.cache-check-requested"],
         ),
+        hasProviderListHook: Boolean(
+          plugin.hooks["riven.media-item.download.provider-list-requested"],
+        ),
       })),
       failedInfoHashes: [],
     },

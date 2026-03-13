@@ -16,6 +16,7 @@ import { runSingleJob } from "../../../../utilities/run-single-job.ts";
 import { flow } from "../../../producer.ts";
 import { enqueueMapItemsToFiles } from "../../enqueue-map-items-to-files.ts";
 import { findValidTorrentContainerProcessorSchema } from "./find-valid-torrent-container.schema.ts";
+import { getPluginProviderList } from "./utilities/get-plugin-provider-list.ts";
 import { validateTorrentFiles } from "./utilities/validate-torrent-files.ts";
 
 export const findValidTorrentContainerProcessor =
@@ -52,111 +53,122 @@ export const findValidTorrentContainerProcessor =
 
     for (const infoHash of uncheckedInfoHashes) {
       for (const plugin of availableDownloaders) {
-        try {
-          if (plugin.hasCacheCheckHook) {
-            logger.debug(
-              `Checking for ${infoHash} in ${plugin.pluginName} cache...`,
-            );
+        const providers = plugin.hasProviderListHook
+          ? await getPluginProviderList(plugin.pluginName, jobParentOptions)
+          : [];
 
-            const pluginCacheCheckNode = await flow.addPluginJob(
-              MediaItemDownloadCacheCheckRequestedEvent,
-              MediaItemDownloadCacheCheckRequestedResponse,
-              `Find cached torrents for ${plugin.pluginName}`,
+        do {
+          const provider = providers.shift() ?? null;
+
+          try {
+            if (plugin.hasCacheCheckHook) {
+              logger.debug(
+                `Checking for ${infoHash} in ${plugin.pluginName} cache${provider ? ` for ${provider}` : ""}...`,
+              );
+
+              const pluginCacheCheckNode = await flow.addPluginJob(
+                MediaItemDownloadCacheCheckRequestedEvent,
+                MediaItemDownloadCacheCheckRequestedResponse,
+                `Find cached torrents for ${plugin.pluginName}${provider ? ` on ${provider}` : ""}`,
+                plugin.pluginName,
+                { infoHashes: [infoHash], provider },
+                {
+                  jobId: `${infoHash}-cache-check-${plugin.pluginName}-${provider ?? ""}`,
+                  removeDependencyOnFailure: true,
+                  parent: jobParentOptions,
+                },
+              );
+
+              const pluginCacheCheckResult = await runSingleJob(
+                pluginCacheCheckNode.job,
+                60_000,
+              );
+
+              const cachedFiles = pluginCacheCheckResult[infoHash];
+
+              if (!cachedFiles) {
+                logger.verbose(
+                  `${infoHash} is not immediately available on ${plugin.pluginName}${provider ? `on ${provider}` : ""} for ${mediaItem.fullTitle}; skipping...`,
+                );
+
+                continue;
+              }
+
+              logger.verbose(
+                `Found ${infoHash} in ${plugin.pluginName} cache for ${mediaItem.fullTitle}${provider ? ` on ${provider}` : ""}`,
+              );
+
+              const mapCacheItemsNode = await enqueueMapItemsToFiles({
+                parent: jobParentOptions,
+                infoHash,
+                files: cachedFiles,
+                jobId: `${infoHash}-map-items-to-files`,
+              });
+
+              const mappedCachedFiles = await runSingleJob(
+                mapCacheItemsNode.job,
+              );
+
+              await validateTorrentFiles(
+                mediaItem,
+                infoHash,
+                mappedCachedFiles,
+                true,
+              );
+            }
+
+            const pluginDownloadNode = await flow.addPluginJob(
+              MediaItemDownloadRequestedEvent,
+              MediaItemDownloadRequestedResponse,
+              `Download ${infoHash}`,
               plugin.pluginName,
-              { infoHashes: [infoHash] },
+              { infoHash, provider },
               {
-                jobId: `${infoHash}-cache-check-${plugin.pluginName}`,
+                jobId: [infoHash, plugin.pluginName, provider].join("-"),
                 removeDependencyOnFailure: true,
                 parent: jobParentOptions,
               },
             );
 
-            const pluginCacheCheckResult = await runSingleJob(
-              pluginCacheCheckNode.job,
-              60_000,
+            const pluginDownloadResult = await runSingleJob(
+              pluginDownloadNode.job,
             );
 
-            const cachedFiles = pluginCacheCheckResult[infoHash];
-
-            if (!cachedFiles) {
-              logger.verbose(
-                `${infoHash} is not immediately available on ${plugin.pluginName} for ${mediaItem.fullTitle}; skipping...`,
-              );
-
-              continue;
-            }
-
-            logger.verbose(
-              `Found ${infoHash} in ${plugin.pluginName} cache for ${mediaItem.fullTitle}`,
-            );
-
-            const mapCacheItemsNode = await enqueueMapItemsToFiles({
+            const mapItemsToFilesJobNode = await enqueueMapItemsToFiles({
               parent: jobParentOptions,
               infoHash,
-              files: cachedFiles,
-              jobId: `${infoHash}-map-items-to-files`,
+              files: pluginDownloadResult.files,
+              jobId: `${infoHash}-download`,
             });
 
-            const mappedCachedFiles = await runSingleJob(mapCacheItemsNode.job);
+            const mappedTorrentFiles = await runSingleJob(
+              mapItemsToFilesJobNode.job,
+            );
 
-            await validateTorrentFiles(
+            const validatedFiles = await validateTorrentFiles(
               mediaItem,
               infoHash,
-              mappedCachedFiles,
-              true,
+              mappedTorrentFiles,
+              false,
             );
+
+            return {
+              plugin: plugin.pluginName,
+              result: {
+                torrentId: pluginDownloadResult.torrentId,
+                infoHash,
+                files: validatedFiles,
+                provider,
+              },
+            };
+          } catch (error) {
+            logger.debug(
+              `${mediaItem.type} ${mediaItem.fullTitle} (${mediaItem.id.toString()}) - ${String(error)}`,
+            );
+
+            continue;
           }
-
-          const pluginDownloadNode = await flow.addPluginJob(
-            MediaItemDownloadRequestedEvent,
-            MediaItemDownloadRequestedResponse,
-            `Download ${infoHash}`,
-            plugin.pluginName,
-            { infoHash },
-            {
-              jobId: infoHash,
-              removeDependencyOnFailure: true,
-              parent: jobParentOptions,
-            },
-          );
-
-          const pluginDownloadResult = await runSingleJob(
-            pluginDownloadNode.job,
-          );
-
-          const mapItemsToFilesJobNode = await enqueueMapItemsToFiles({
-            parent: jobParentOptions,
-            infoHash,
-            files: pluginDownloadResult.files,
-            jobId: `${infoHash}-download`,
-          });
-
-          const mappedTorrentFiles = await runSingleJob(
-            mapItemsToFilesJobNode.job,
-          );
-
-          const validatedFiles = await validateTorrentFiles(
-            mediaItem,
-            infoHash,
-            mappedTorrentFiles,
-            false,
-          );
-
-          return {
-            plugin: plugin.pluginName,
-            result: {
-              torrentId: pluginDownloadResult.torrentId,
-              infoHash,
-              files: validatedFiles,
-            },
-          };
-        } catch (error) {
-          logger.debug(
-            `${mediaItem.type} ${mediaItem.fullTitle} (${mediaItem.id.toString()}) - ${String(error)}`,
-          );
-
-          continue;
-        }
+        } while (providers.length);
       }
 
       logger.debug(

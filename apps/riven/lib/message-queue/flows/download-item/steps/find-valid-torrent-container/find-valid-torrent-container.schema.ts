@@ -21,6 +21,7 @@ export type MatchedFile = z.infer<typeof MatchedFile>;
 export const ValidTorrentContainer = z.object({
   torrentId: z.string().min(1),
   infoHash: z.hash("sha1"),
+  provider: z.string().nullable(),
   files: z
     .array(MatchedFile)
     .min(1)
@@ -41,6 +42,7 @@ export const FindValidTorrentContainerFlow = createFlowSchema(
           z.object({
             pluginName: z.string(),
             hasCacheCheckHook: z.boolean(),
+            hasProviderListHook: z.boolean(),
           }),
         )
         .min(1),

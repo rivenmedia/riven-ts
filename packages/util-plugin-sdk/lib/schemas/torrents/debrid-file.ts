@@ -5,7 +5,6 @@ export const DebridFile = z.object({
   name: z.string(),
   path: z.string(),
   size: z.int(),
-  video_hash: z.string().optional(),
 });
 
 export type DebridFile = z.infer<typeof DebridFile>;

@@ -504,9 +504,18 @@ export const mainRunnerMachine = setup({
                 downloader,
                 item: { fullTitle },
                 durationFromRequestToDownload,
+                provider,
               },
             }) => ({
-              message: `Successfully downloaded ${fullTitle} in ${durationFromRequestToDownload.toString()} seconds using ${downloader}`,
+              get message() {
+                const baseMessage = `Successfully downloaded ${fullTitle} in ${durationFromRequestToDownload.toString()} seconds using ${downloader}`;
+
+                if (provider) {
+                  return `${baseMessage} via ${provider}`;
+                }
+
+                return baseMessage;
+              },
             }),
           },
         ],
