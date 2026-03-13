@@ -32,7 +32,7 @@ export class MediaEntry extends FileSystemEntry {
   @Property()
   @IsUrl()
   @IsOptional()
-  unrestrictedUrl?: string;
+  streamUrl?: string;
 
   @Field()
   @Property()

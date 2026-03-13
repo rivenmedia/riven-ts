@@ -60,12 +60,7 @@ export default {
       }
 
       try {
-        const { download: url } = await api.generateLink(
-          event.item.downloadUrl,
-          store,
-        );
-
-        return { url };
+        return await api.generateLink(event.item.downloadUrl, store);
       } catch (error) {
         throw new Error(
           `Failed to generate link from ${store}: ${

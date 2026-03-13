@@ -65,7 +65,7 @@ async function open(
   const entry = await getItemEntry(path);
 
   if (
-    !entry.unrestrictedUrl &&
+    !entry.streamUrl &&
     fileNameIsFetchingLinkMap.get(entry.originalFilename)
   ) {
     logger.silly(
@@ -85,7 +85,7 @@ async function open(
       refresh: true,
     });
 
-    if (!entry.unrestrictedUrl) {
+    if (!entry.streamUrl) {
       throw new FuseError(
         Fuse.ENOENT,
         `Media entry ${entry.id.toString()} has no unrestricted URL after waiting`,
@@ -94,7 +94,7 @@ async function open(
   }
 
   if (
-    !entry.unrestrictedUrl &&
+    !entry.streamUrl &&
     !fileNameIsFetchingLinkMap.get(entry.originalFilename)
   ) {
     logger.silly(
@@ -119,11 +119,11 @@ async function open(
 
       const job = await requestQueue.add(entry.id.toString(), { item: entry });
 
-      const { url: unrestrictedUrl } = await runSingleJob(job);
+      const { link: streamUrl } = await runSingleJob(job);
 
       const em = database.em.fork();
 
-      em.assign(entry, { unrestrictedUrl });
+      em.assign(entry, { streamUrl });
 
       await em.flush();
 
@@ -140,7 +140,7 @@ async function open(
     }
   }
 
-  if (!entry.unrestrictedUrl) {
+  if (!entry.streamUrl) {
     throw new FuseError(
       Fuse.ENOENT,
       `Media entry ${entry.id.toString()} has no unrestricted URL`,
@@ -159,7 +159,7 @@ async function open(
     filePath: path,
     fileBaseName: basename(path),
     originalFileName: entry.originalFilename,
-    url: entry.unrestrictedUrl,
+    url: entry.streamUrl,
   });
 
   fileNameToFdCountMap.set(

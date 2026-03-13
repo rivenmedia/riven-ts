@@ -1,12 +1,12 @@
 import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
 import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
-import { UnrestrictedLink } from "@repo/util-plugin-sdk/schemas/torrents/unrestricted-link";
 
+import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.js";
+import { CacheCheckResponse } from "../schemas/cache-check-response.schema.js";
+import { GenerateLinkResponse } from "../schemas/generate-link-response.schema.js";
 import { ItemStatus } from "../schemas/item-status.schema.js";
 import { Store } from "../schemas/store.schema.ts";
 
-import type { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
-import type { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
 import type { StremThruSettings } from "../stremthru-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource.js";
@@ -51,7 +51,7 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
     infoHash: string,
     store: Store,
   ): Promise<MediaItemDownloadRequestedResponse> {
-    const { data } = await this.post<AddTorrentResponse>("v0/store/torz", {
+    const response = await this.post<unknown>("v0/store/torz", {
       headers: {
         "x-stremthru-store-name": store,
       },
@@ -59,6 +59,8 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
         link: `magnet:?xt=urn:btih:${infoHash}`.toLowerCase(),
       }),
     });
+
+    const { data } = AddTorrentResponse.parse(response);
 
     if (!data) {
       throw new StremThruAPIError(`No data returned from ${store}`);
@@ -71,9 +73,7 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
   }
 
   async getCachedTorrents(infoHashes: string[], store: Store) {
-    const {
-      data: { items },
-    } = await this.get<CacheCheckResponse>("v0/store/torz/check", {
+    const response = await this.get<unknown>("v0/store/torz/check", {
       headers: {
         "x-stremthru-store-name": store,
       },
@@ -84,6 +84,10 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
         ttl: 60 * 60 * 24,
       },
     });
+
+    const {
+      data: { items },
+    } = CacheCheckResponse.parse(response);
 
     const allowedStatuses = ItemStatus.extract(["cached"]);
 
@@ -100,17 +104,16 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
   }
 
   async generateLink(link: string, store: Store) {
-    const response = await this.post<UnrestrictedLink>(
-      "v0/store/torz/link/generate",
-      {
-        body: JSON.stringify({ link }),
-        headers: {
-          "x-stremthru-store-name": store,
-        },
+    const response = await this.post<unknown>("v0/store/torz/link/generate", {
+      body: JSON.stringify({ link }),
+      headers: {
+        "x-stremthru-store-name": store,
       },
-    );
+    });
 
-    return UnrestrictedLink.parse(response);
+    const { data } = GenerateLinkResponse.parse(response);
+
+    return data;
   }
 }
 
