@@ -63,8 +63,14 @@ it("returns subtitles for a movie search", async ({
   dataSourceConfig,
 }) => {
   server.use(
-    http.get("https://api.subdl.com/api/v1/subtitles", () =>
-      HttpResponse.json({
+    http.get("https://api.subdl.com/api/v1/subtitles", ({ request }) => {
+      const url = new URL(request.url);
+      expect(url.search).toContain("27205");
+      expect(url.search).toContain("movie");
+      expect(url.search).toContain("en");
+      expect(url.search).toContain("de");
+
+      return HttpResponse.json({
         status: true,
         results: [{ sd_id: 1, name: "Inception" }],
         subtitles: [
@@ -83,8 +89,8 @@ it("returns subtitles for a movie search", async ({
             url: "/subtitle/124.zip",
           },
         ],
-      }),
-    ),
+      });
+    }),
   );
 
   const api = new SubdlAPI({
