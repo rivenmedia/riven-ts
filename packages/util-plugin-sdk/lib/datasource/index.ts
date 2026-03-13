@@ -11,6 +11,7 @@ import {
   type Job,
   Queue,
   QueueEvents,
+  RateLimitError,
   type RateLimiterOptions,
   type Telemetry,
   Worker,
@@ -429,6 +430,10 @@ export abstract class BaseDataSource<
     _request: RequestOptions,
     url: URL,
   ): void {
+    if (error instanceof RateLimitError) {
+      return;
+    }
+
     this.logger.error(
       `[${this.serviceName}] API Error for ${url}: ${error.message}`,
     );
