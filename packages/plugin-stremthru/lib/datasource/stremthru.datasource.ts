@@ -51,7 +51,7 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
       throw new Error("Missing store for StremThruAPI cache key");
     }
 
-    return `${baseKey} - ${store}`;
+    return `${baseKey}:${store}`;
   }
 
   override async validate() {
