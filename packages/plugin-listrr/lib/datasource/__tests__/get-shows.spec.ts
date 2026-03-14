@@ -123,7 +123,7 @@ it("paginates through all pages of the list", async ({
   expect(shows.length).toBe(totalPages * itemsPerPage);
 });
 
-it("dedupes shows that appear in multiple lists", async ({
+it("deduplicates shows that appear in multiple lists", async ({
   server,
   dataSourceConfig,
 }) => {

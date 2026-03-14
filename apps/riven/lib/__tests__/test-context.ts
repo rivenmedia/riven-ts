@@ -136,6 +136,7 @@ export const rivenTestContext = testBase.extend<{
       const season = em.create(Season, {
         title: `Season ${seasonNumber.toString()}`,
         number: seasonNumber,
+        isSpecial: false,
       });
 
       show.seasons.add(season);
@@ -148,6 +149,7 @@ export const rivenTestContext = testBase.extend<{
           contentRating: "tv-14",
           number: episodeNumber,
           absoluteNumber: absoluteEpisodeNumber++,
+          isSpecial: false,
         });
 
         season.episodes.add(episode);
@@ -185,7 +187,7 @@ export const rivenTestContext = testBase.extend<{
       fileSize: 1024,
       downloadUrl: "http://example.com/file.mp4",
       originalFilename: "file.mp4",
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
     });
 
     await use(mediaEntry);

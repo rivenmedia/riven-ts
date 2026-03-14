@@ -7,36 +7,28 @@ import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
 import { rivenTestContext as it } from "../../../../__tests__/test-context.ts";
+import { MatchedFile } from "../steps/find-valid-torrent/find-valid-torrent.schema.js";
 import { persistDownloadResults } from "./persist-download-results.ts";
-
-import type { MatchedFile } from "../steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
 
 it("throws an error if the media item has no streams", async ({ movie }) => {
   await expect(
     persistDownloadResults({
       id: movie.id,
       processedBy: "@repo/plugin-test",
-      container: {
+      torrent: {
         infoHash: "1234567890123456789012345678901234567890",
+        provider: null,
         files: [
           {
-            fileSize: 1024,
-            downloadUrl: "http://example.com/file.mp4",
-            fileName: "file.mp4",
+            size: 1024,
+            link: "http://example.com/file.mp4",
+            name: "file.mp4",
+            path: "/file.mp4",
             matchedMediaItemId: movie.id,
+            isCachedFile: false,
           },
         ],
-        torrentId: 1,
-        torrentInfo: {
-          files: {},
-          infoHash: "",
-          name: "",
-          id: "",
-          isCached: true,
-          links: [],
-          sizeMB: 0,
-          alternativeFilename: "",
-        },
+        torrentId: "1",
       },
     }),
   ).rejects.toThrow(UnrecoverableError);
@@ -53,7 +45,7 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
       fileSize: 1024,
       downloadUrl: "http://example.com/file.mp4",
       originalFilename: "file.mp4",
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: movie,
     }),
   );
@@ -64,27 +56,20 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
     persistDownloadResults({
       id: movie.id,
       processedBy: "@repo/plugin-test",
-      container: {
+      torrent: {
+        torrentId: "1",
         infoHash: stream.infoHash,
+        provider: null,
         files: [
           {
-            fileSize: 1024,
-            downloadUrl: "http://example.com/file.mp4",
-            fileName: "file.mp4",
+            size: 1024,
+            link: "http://example.com/file.mp4",
+            name: "file.mp4",
+            path: "/file.mp4",
             matchedMediaItemId: movie.id,
+            isCachedFile: false,
           },
         ],
-        torrentId: 1,
-        torrentInfo: {
-          files: {},
-          infoHash: stream.infoHash,
-          name: "",
-          id: "",
-          isCached: true,
-          links: [],
-          sizeMB: 0,
-          alternativeFilename: "",
-        },
       },
     }),
   ).rejects.toThrow(MediaItemDownloadErrorIncorrectState);
@@ -102,27 +87,20 @@ it("sets the active stream and updates the state to downloaded if successful", a
   const updatedItem = await persistDownloadResults({
     id: movie.id,
     processedBy: "@repo/plugin-test",
-    container: {
+    torrent: {
+      torrentId: "1",
       infoHash: stream.infoHash,
+      provider: null,
       files: [
         {
-          fileSize: 1024,
-          downloadUrl: "http://example.com/file.mp4",
-          fileName: "file.mp4",
+          size: 1024,
+          link: "http://example.com/file.mp4",
+          name: "file.mp4",
+          path: "/file.mp4",
           matchedMediaItemId: movie.id,
+          isCachedFile: false,
         },
       ],
-      torrentId: 1,
-      torrentInfo: {
-        files: {},
-        infoHash: stream.infoHash,
-        name: "",
-        id: "",
-        isCached: true,
-        links: [],
-        sizeMB: 0,
-        alternativeFilename: "",
-      },
     },
   });
 
@@ -138,27 +116,20 @@ it("adds a single media entry for movies", async ({ movie, em, stream }) => {
   await persistDownloadResults({
     id: movie.id,
     processedBy: "@repo/plugin-test",
-    container: {
+    torrent: {
+      torrentId: "1",
       infoHash: stream.infoHash,
+      provider: null,
       files: [
         {
-          fileSize: 1024,
-          downloadUrl: "http://example.com/file.mp4",
-          fileName: "file.mp4",
+          size: 1024,
+          link: "http://example.com/file.mp4",
+          name: "file.mp4",
+          path: "/file.mp4",
           matchedMediaItemId: movie.id,
+          isCachedFile: false,
         },
       ],
-      torrentId: 1,
-      torrentInfo: {
-        files: {},
-        infoHash: stream.infoHash,
-        name: "",
-        id: "",
-        isCached: true,
-        links: [],
-        sizeMB: 0,
-        alternativeFilename: "",
-      },
     },
   });
 
@@ -181,25 +152,18 @@ it("adds one media entry per episode for shows", async ({
   await persistDownloadResults({
     id: show.id,
     processedBy: "@repo/plugin-test",
-    container: {
+    torrent: {
+      torrentId: "1",
       infoHash: stream.infoHash,
-      files: episodes.map((episode) => ({
-        fileSize: 1024,
-        downloadUrl: `http://example.com/${episode.title}.mp4`,
-        fileName: `${episode.title}.mp4`,
+      provider: null,
+      files: episodes.map<MatchedFile>((episode) => ({
+        size: 1024,
+        link: `http://example.com/${episode.title}.mp4`,
+        path: `/${episode.title}.mp4`,
+        name: `${episode.title}.mp4`,
         matchedMediaItemId: episode.id,
+        isCachedFile: false,
       })) as [MatchedFile, ...MatchedFile[]],
-      torrentId: 1,
-      torrentInfo: {
-        files: {},
-        infoHash: stream.infoHash,
-        name: "",
-        id: "",
-        isCached: true,
-        links: [],
-        sizeMB: 0,
-        alternativeFilename: "",
-      },
     },
   });
 
@@ -234,27 +198,20 @@ it("does not create duplicate media entries for episodes with existing entries",
   await persistDownloadResults({
     id: show.id,
     processedBy: "@repo/plugin-test",
-    container: {
+    torrent: {
+      torrentId: "1",
       infoHash: stream.infoHash,
+      provider: null,
       files: [
         {
-          fileSize: 1024,
-          downloadUrl: "http://example.com/file.mp4",
-          fileName: "file.mp4",
+          size: 1024,
+          link: "http://example.com/file.mp4",
+          name: "file.mp4",
+          path: "/file.mp4",
           matchedMediaItemId: episode.id,
+          isCachedFile: false,
         },
       ],
-      torrentId: 1,
-      torrentInfo: {
-        files: {},
-        infoHash: stream.infoHash,
-        name: "",
-        id: "",
-        isCached: true,
-        links: [],
-        sizeMB: 0,
-        alternativeFilename: "",
-      },
     },
   });
 
@@ -281,27 +238,20 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
     persistDownloadResults({
       id: movie.id,
       processedBy: "@repo/plugin-test",
-      container: {
+      torrent: {
+        torrentId: "1",
         infoHash: stream.infoHash,
+        provider: null,
         files: [
           {
-            fileSize: 1024,
-            downloadUrl: "http://example.com/file.mp4",
-            fileName: "file.mp4",
+            size: 1024,
+            link: "http://example.com/file.mp4",
+            name: "file.mp4",
+            path: "/file.mp4",
             matchedMediaItemId: movie.id,
+            isCachedFile: false,
           },
         ],
-        torrentId: 1,
-        torrentInfo: {
-          files: {},
-          infoHash: stream.infoHash,
-          name: "",
-          id: "",
-          isCached: true,
-          links: [],
-          sizeMB: 0,
-          alternativeFilename: "",
-        },
       },
     }),
   ).rejects.toThrow(MediaItemDownloadError);

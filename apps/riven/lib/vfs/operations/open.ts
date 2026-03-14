@@ -65,52 +65,52 @@ async function open(
   const entry = await getItemEntry(path);
 
   if (
-    !entry.unrestrictedUrl &&
+    !entry.streamUrl &&
     fileNameIsFetchingLinkMap.get(entry.originalFilename)
   ) {
     logger.silly(
-      `Waiting for unrestricted URL for media entry ${entry.id.toString()}...`,
+      `Waiting for stream URL for media entry ${entry.id.toString()}...`,
     );
 
-    // Wait until the unrestricted URL is fetched
+    // Wait until the stream URL is fetched
     while (fileNameIsFetchingLinkMap.get(entry.originalFilename)) {
       await setTimeout(100);
     }
 
     const em = database.em.fork();
 
-    // Refresh the item to get the updated unrestricted URL
+    // Refresh the item to get the updated stream URL
     await em.refreshOrFail(entry, {
       populate: ["*"],
       refresh: true,
     });
 
-    if (!entry.unrestrictedUrl) {
+    if (!entry.streamUrl) {
       throw new FuseError(
         Fuse.ENOENT,
-        `Media entry ${entry.id.toString()} has no unrestricted URL after waiting`,
+        `Media entry ${entry.id.toString()} has no stream URL after waiting`,
       );
     }
   }
 
   if (
-    !entry.unrestrictedUrl &&
+    !entry.streamUrl &&
     !fileNameIsFetchingLinkMap.get(entry.originalFilename)
   ) {
     logger.silly(
-      `No unrestricted URL for media entry ${entry.id.toString()}, requesting from ${entry.provider}...`,
+      `No stream URL for media entry ${entry.id.toString()}, requesting from ${entry.plugin}...`,
     );
 
-    const requestQueue = linkRequestQueues.get(entry.provider);
+    const requestQueue = linkRequestQueues.get(entry.plugin);
 
     if (!requestQueue) {
       logger.error(
-        `No link request queue found for ${entry.provider} when opening file at path ${path}`,
+        `No link request queue found for ${entry.plugin} when opening file at path ${path}`,
       );
 
       throw new FuseError(
         Fuse.ENOENT,
-        `Media entry ${entry.id.toString()} has no unrestricted URL and no link request queue is available`,
+        `Media entry ${entry.id.toString()} has no stream URL and no link request queue is available`,
       );
     }
 
@@ -119,31 +119,29 @@ async function open(
 
       const job = await requestQueue.add(entry.id.toString(), { item: entry });
 
-      const { url: unrestrictedUrl } = await runSingleJob(job);
+      const { link: streamUrl } = await runSingleJob(job);
 
       const em = database.em.fork();
 
-      em.assign(entry, { unrestrictedUrl });
+      em.assign(entry, { streamUrl });
 
-      await em.flush();
+      await em.persist(entry).flush();
 
       attrCache.delete(path);
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new FuseError(
-          Fuse.ENOENT,
-          `Unable to get unrestricted url for ${entry.originalFilename}: ${error.message}`,
-        );
-      }
+      throw new FuseError(
+        Fuse.ENOENT,
+        `Unable to get stream url for ${entry.originalFilename}: ${String(error)}`,
+      );
     } finally {
       fileNameIsFetchingLinkMap.delete(entry.originalFilename);
     }
   }
 
-  if (!entry.unrestrictedUrl) {
+  if (!entry.streamUrl) {
     throw new FuseError(
       Fuse.ENOENT,
-      `Media entry ${entry.id.toString()} has no unrestricted URL`,
+      `Media entry ${entry.id.toString()} has no stream URL`,
     );
   }
 
@@ -159,7 +157,7 @@ async function open(
     filePath: path,
     fileBaseName: basename(path),
     originalFileName: entry.originalFilename,
-    url: entry.unrestrictedUrl,
+    url: entry.streamUrl,
   });
 
   fileNameToFdCountMap.set(

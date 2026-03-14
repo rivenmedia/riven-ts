@@ -4,8 +4,8 @@ import { enqueueActions, raise, setup } from "xstate";
 
 import { downloadItemProcessor } from "../../message-queue/flows/download-item/download-item.processor.ts";
 import { DownloadItemFlow } from "../../message-queue/flows/download-item/download-item.schema.ts";
-import { findValidTorrentContainerProcessor } from "../../message-queue/flows/download-item/steps/find-valid-torrent-container/find-valid-torrent-container.processor.ts";
-import { FindValidTorrentContainerFlow } from "../../message-queue/flows/download-item/steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
+import { findValidTorrentProcessor } from "../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.processor.ts";
+import { FindValidTorrentFlow } from "../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { mapItemsToFilesProcessor } from "../../message-queue/flows/download-item/steps/map-items-to-files/map-items-to-files.processor.ts";
 import { MapItemsToFilesFlow } from "../../message-queue/flows/download-item/steps/map-items-to-files/map-items-to-files.schema.ts";
 import { rankStreamsProcessor } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.processor.ts";
@@ -287,22 +287,20 @@ export const mainRunnerMachine = setup({
             DownloadItemFlow,
             downloadItemProcessor,
             self.send,
-            {},
-            { concurrency: 1 },
           ),
           "download-item.map-items-to-files": createFlowWorker(
             MapItemsToFilesFlow,
             mapItemsToFilesProcessor,
             self.send,
           ),
-          "download-item.find-valid-torrent-container": createFlowWorker(
-            FindValidTorrentContainerFlow,
-            findValidTorrentContainerProcessor,
+          "download-item.find-valid-torrent": createFlowWorker(
+            FindValidTorrentFlow,
+            findValidTorrentProcessor,
             self.send,
             {
               streams: {
                 events: {
-                  maxLen: 500,
+                  maxLen: 10000,
                 },
               },
             },
@@ -506,9 +504,18 @@ export const mainRunnerMachine = setup({
                 downloader,
                 item: { fullTitle },
                 durationFromRequestToDownload,
+                provider,
               },
             }) => ({
-              message: `Successfully downloaded ${fullTitle} in ${durationFromRequestToDownload.toString()} seconds using ${downloader}`,
+              get message() {
+                const baseMessage = `Successfully downloaded ${fullTitle} in ${durationFromRequestToDownload.toString()} seconds using ${downloader}`;
+
+                if (provider) {
+                  return `${baseMessage} via ${provider}`;
+                }
+
+                return baseMessage;
+              },
             }),
           },
         ],

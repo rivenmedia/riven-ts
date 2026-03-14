@@ -7,7 +7,7 @@ import {
   defaultRankingModel,
 } from "./ranker/settings.ts";
 import { sortTorrents } from "./ranker/sort.ts";
-import { Resolution } from "./schemas.js";
+import { Resolution } from "./schemas.ts";
 
 import type { Aliases } from "./ranker/lev.ts";
 import type { RankedResult } from "./types.ts";

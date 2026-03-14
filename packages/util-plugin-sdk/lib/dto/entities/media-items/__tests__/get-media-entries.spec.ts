@@ -25,7 +25,7 @@ test("getMediaEntries() returns the associated media entry for a Movie media ite
   const mediaEntry = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-movie.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: movie,
   });
 
@@ -60,6 +60,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
   const season = em.create(Season, {
     title: "Season 1",
     number: 1,
+    isSpecial: false,
   });
 
   show.seasons.add(season);
@@ -71,6 +72,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     number: 1,
     absoluteNumber: 1,
     contentRating: "tv-14",
+    isSpecial: false,
   });
 
   const episode2 = em.create(Episode, {
@@ -78,19 +80,20 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     number: 2,
     absoluteNumber: 2,
     contentRating: "tv-14",
+    isSpecial: false,
   });
 
   const mediaEntry1 = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-show-s01e01.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: episode1,
   });
 
   const mediaEntry2 = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-show-s01e01.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: episode2,
   });
 
@@ -128,11 +131,13 @@ test("getMediaEntries() returns the associated media entries for a Season media 
   const season1 = em.create(Season, {
     title: "Season 1",
     number: 1,
+    isSpecial: false,
   });
 
   const season2 = em.create(Season, {
     title: "Season 2",
     number: 1,
+    isSpecial: false,
   });
 
   show.seasons.add(season1, season2);
@@ -144,6 +149,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     number: 1,
     absoluteNumber: 1,
     contentRating: "tv-14",
+    isSpecial: false,
   });
 
   const season2Episode1 = em.create(Episode, {
@@ -151,19 +157,20 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     number: 1,
     absoluteNumber: 2,
     contentRating: "tv-14",
+    isSpecial: false,
   });
 
   const season1Episode1MediaEntry = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-show-s01e01.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: season1Episode1,
   });
 
   const season2Episode1MediaEntry = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-show-s02e01.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: season2Episode1,
   });
 
@@ -203,6 +210,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
   const season = em.create(Season, {
     title: "Season 1",
     number: 1,
+    isSpecial: false,
   });
 
   show.seasons.add(season);
@@ -214,12 +222,13 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     number: 1,
     absoluteNumber: 1,
     contentRating: "tv-14",
+    isSpecial: false,
   });
 
   const mediaEntry = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-show-s01e01.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: episode,
   });
 

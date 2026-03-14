@@ -17,10 +17,11 @@ import {
   ShowContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
 import { ShowStatus } from "../../enums/show-status.enum.ts";
-import { MediaEntry } from "../filesystem/media-entry.entity.js";
+import { MediaEntry } from "../filesystem/media-entry.entity.ts";
 import { Season } from "./season.entity.ts";
 import { ShowLikeMediaItem } from "./show-like.entity.ts";
 
+import type { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import type { ItemRequest } from "../requests/item-request.entity.ts";
 
 @ObjectType()
@@ -40,24 +41,52 @@ export class Show extends ShowLikeMediaItem {
   @Enum(() => ShowStatus.enum)
   status!: ShowStatus;
 
-  @Field(() => String)
-  @Property({ type: "json" })
-  releaseData: object = {};
-
   @Field(() => [Season], { nullable: true })
   @OneToMany(() => Season, (season) => season.show)
   seasons = new Collection<Season>(this);
 
-  async getEpisodes() {
-    const seasons = await this.seasons.loadItems({
+  @Property({ persist: false, hidden: true, getter: true })
+  get prettyName(): Opt<Hidden<string>> {
+    return `${this.title} (${this.year?.toString() ?? "Unknown"}) {tvdb-${this.tvdbId}}`;
+  }
+
+  getShow() {
+    return this;
+  }
+
+  async getEpisodes(includeSpecials = false) {
+    const seasons = await this.seasons.matching({
+      orderBy: { number: "asc" },
       populate: ["episodes"],
+      where: {
+        ...(!includeSpecials ? { isSpecial: false } : {}),
+      },
     });
 
     return seasons.flatMap((season) => season.episodes.getItems());
   }
 
+  async getStandardSeasons(stateFilter?: MediaItemState[]) {
+    return await this.seasons.matching({
+      orderBy: { number: "asc" },
+      where: {
+        ...(stateFilter ? { state: { $in: stateFilter } } : {}),
+        isSpecial: false,
+      },
+    });
+  }
+
+  async getSpecialSeason() {
+    const [season] = await this.seasons.matching({
+      limit: 1,
+      where: { isSpecial: true },
+    });
+
+    return season;
+  }
+
   async getMediaEntries() {
-    const seasons = await this.seasons.loadItems({
+    const seasons = await this.seasons.matching({
       where: {
         episodes: {
           filesystemEntries: {
@@ -67,7 +96,6 @@ export class Show extends ShowLikeMediaItem {
           },
         },
       },
-      fields: ["episodes"],
       populate: ["episodes.filesystemEntries"],
       refresh: true,
     });
@@ -80,15 +108,6 @@ export class Show extends ShowLikeMediaItem {
           (entry) => entry.type === "media",
         ) as MediaEntry[],
     );
-  }
-
-  @Property({ persist: false, hidden: true, getter: true })
-  get prettyName(): Opt<Hidden<string>> {
-    return `${this.title} (${this.year?.toString() ?? "Unknown"}) {tvdb-${this.tvdbId}}`;
-  }
-
-  getShow() {
-    return this;
   }
 
   @BeforeCreate()

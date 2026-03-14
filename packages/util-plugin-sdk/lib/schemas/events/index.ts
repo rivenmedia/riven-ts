@@ -29,6 +29,10 @@ import {
   MediaItemDownloadRequestedEventHandler,
 } from "./media-item.download-requested.event.ts";
 import {
+  MediaItemDownloadCacheCheckRequestedEvent,
+  MediaItemDownloadCacheCheckRequestedEventHandler,
+} from "./media-item.download.cache-check-requested.event.ts";
+import {
   MediaItemDownloadErrorEvent,
   MediaItemDownloadErrorEventHandler,
 } from "./media-item.download.error.event.ts";
@@ -40,6 +44,10 @@ import {
   MediaItemDownloadPartialSuccessEvent,
   MediaItemDownloadPartialSuccessEventHandler,
 } from "./media-item.download.partial-success.event.ts";
+import {
+  MediaItemDownloadProviderListRequestedEvent,
+  MediaItemDownloadProviderListRequestedEventHandler,
+} from "./media-item.download.provider-list-requested.event.ts";
 import {
   MediaItemDownloadSuccessEvent,
   MediaItemDownloadSuccessEventHandler,
@@ -102,9 +110,11 @@ export const RivenEvent = z.discriminatedUnion("type", [
   MediaItemScrapeErrorIncorrectStateEvent,
   MediaItemScrapeErrorEvent,
   MediaItemDownloadRequestedEvent,
+  MediaItemDownloadCacheCheckRequestedEvent,
   MediaItemDownloadErrorIncorrectStateEvent,
   MediaItemDownloadErrorEvent,
   MediaItemDownloadPartialSuccessEvent,
+  MediaItemDownloadProviderListRequestedEvent,
   MediaItemDownloadSuccessEvent,
   MediaItemStreamLinkRequestedEvent,
 ]);
@@ -150,11 +160,15 @@ export const RivenEventHandler = {
 
   // Item downloading
   "riven.media-item.download.requested": MediaItemDownloadRequestedEventHandler,
+  "riven.media-item.download.cache-check-requested":
+    MediaItemDownloadCacheCheckRequestedEventHandler,
   "riven.media-item.download.error": MediaItemDownloadErrorEventHandler,
   "riven.media-item.download.error.incorrect-state":
     MediaItemDownloadErrorIncorrectStateEventHandler,
   "riven.media-item.download.partial-success":
     MediaItemDownloadPartialSuccessEventHandler,
+  "riven.media-item.download.provider-list-requested":
+    MediaItemDownloadProviderListRequestedEventHandler,
   "riven.media-item.download.success": MediaItemDownloadSuccessEventHandler,
 
   // Item streaming

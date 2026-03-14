@@ -10,24 +10,16 @@ import { it } from "@repo/util-plugin-testing/plugin-test-context";
 import { parse } from "@repo/util-rank-torrent-name";
 
 import { Job, UnrecoverableError } from "bullmq";
-import { DateTime, Settings } from "luxon";
+import { Settings } from "luxon";
 import { expect, vi } from "vitest";
 
 import { database } from "../../../database/database.ts";
-import * as settingsModule from "../../../utilities/settings.ts";
 import { createQueue } from "../../utilities/create-queue.ts";
 import { downloadItemProcessor } from "./download-item.processor.ts";
 
 import type { DownloadItemFlow } from "./download-item.schema.ts";
 
-it.beforeEach(({ redisUrl }) => {
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
-    redisUrl,
-  });
-});
-
-it("throws an unrecoverable error if no valid torrent container is found", async () => {
+it("throws an unrecoverable error if no valid torrent is found", async () => {
   const sendEvent = vi.fn();
 
   const em = database.em.fork();
@@ -69,11 +61,12 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
 
   const mockQueue = createQueue("mock-queue");
   const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
-    await Job.create(mockQueue, "mock-download-item", {
-      id: 1,
-    });
-
-  const expectedDuration = 1;
+    await Job.create(
+      mockQueue,
+      "mock-download-item",
+      { id: 1 },
+      { timestamp: 1000 },
+    );
 
   const em = database.orm.em.fork();
 
@@ -89,7 +82,6 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     contentRating: "g",
     title: "Test Movie",
     year: 2024,
-    createdAt: DateTime.now().minus({ seconds: expectedDuration }).toJSDate(),
     itemRequest,
   });
 
@@ -105,28 +97,21 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   await em.flush();
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "find-valid-torrent-container": {
+    "find-valid-torrent": {
       result: {
+        torrentId: "1234",
+        infoHash: streamInfoHash,
+        provider: null,
         files: [
           {
-            fileName: "Test Movie 2024 1080p.mkv",
-            fileSize: 1024,
-            downloadUrl: "http://example.com/download",
+            name: "Test Movie 2024 1080p.mkv",
+            path: "/Test Movie 2024 1080p.mkv",
+            size: 1024,
+            link: "http://example.com/download",
             matchedMediaItemId: movie.id,
+            isCachedFile: false,
           },
         ],
-        infoHash: streamInfoHash,
-        torrentId: "",
-        torrentInfo: {
-          files: {},
-          infoHash: "",
-          name: "",
-          id: "",
-          isCached: true,
-          links: [],
-          sizeMB: 0,
-          alternativeFilename: "",
-        },
       },
       plugin: "@repo/plugin-test",
     },
@@ -137,8 +122,9 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.success",
     item: expect.any(Movie) as Movie,
-    durationFromRequestToDownload: expectedDuration,
+    durationFromRequestToDownload: 9,
     downloader: "@repo/plugin-test",
+    provider: null,
   });
 });
 
@@ -168,6 +154,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
     const season = em.create(Season, {
       number: i,
       title: `Season ${i.toString()}`,
+      isSpecial: false,
     });
 
     show.seasons.add(season);
@@ -181,6 +168,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
         year: 2024,
         number: j,
         absoluteNumber: j,
+        isSpecial: season.isSpecial,
       });
 
       season.episodes.add(episode);
@@ -210,34 +198,29 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
     });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "find-valid-torrent-container": {
+    "find-valid-torrent": {
       result: {
+        torrentId: "1234",
+        infoHash: streamInfoHash,
+        provider: null,
         files: [
           {
-            fileName: "Test Show S01E01 2024 1080p.mkv",
-            fileSize: 1024,
-            downloadUrl: "http://example.com/download",
+            name: "Test Show S01E01 2024 1080p.mkv",
+            path: "/Test Show S01E01 2024 1080p.mkv",
+            size: 1024,
+            link: "http://example.com/download",
             matchedMediaItemId: episodes[0].id,
+            isCachedFile: false,
           },
           {
-            fileName: "Test Show S01E02 2024 1080p.mkv",
-            fileSize: 1024,
-            downloadUrl: "http://example.com/download",
+            name: "Test Show S01E02 2024 1080p.mkv",
+            path: "/Test Show S01E02 2024 1080p.mkv",
+            size: 1024,
+            link: "http://example.com/download",
             matchedMediaItemId: episodes[1].id,
+            isCachedFile: false,
           },
         ],
-        infoHash: streamInfoHash,
-        torrentId: "",
-        torrentInfo: {
-          files: {},
-          infoHash: "",
-          name: "",
-          id: "",
-          isCached: true,
-          links: [],
-          sizeMB: 0,
-          alternativeFilename: "",
-        },
       },
       plugin: "@repo/plugin-test",
     },
@@ -252,7 +235,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
   });
 });
 
-it('sends a "riven.media-item.download.error" event if no valid torrent container is found', async () => {
+it('sends a "riven.media-item.download.error" event if no valid torrent is found', async () => {
   const sendEvent = vi.fn();
 
   const em = database.em.fork();
@@ -289,6 +272,6 @@ it('sends a "riven.media-item.download.error" event if no valid torrent containe
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.error",
     item: expect.any(Movie) as Movie,
-    error: "No valid torrent container found",
+    error: "No valid torrent found",
   });
 });

@@ -28,11 +28,17 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
     if (item instanceof Show) {
       await database.em.fork().populate(item, ["seasons"]);
 
-      const incompleteSeasons = item.seasons.filter(
-        ({ state }) => processableStates.safeParse(state).success,
-      );
+      /**
+       * Ignore specials when fanning out.
+       *
+       * These are unable to be downloaded in most instances,
+       * and end up burdening the queue with jobs.
+       *
+       * They should be handled after the main attempt has resolved.
+       */
+      const seasons = await item.getStandardSeasons(processableStates.options);
 
-      for (const season of incompleteSeasons) {
+      for (const season of seasons) {
         await enqueueScrapeItem({
           item: season,
           subscribers,
@@ -43,9 +49,10 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
     if (item instanceof Season) {
       await database.em.fork().populate(item, ["episodes"]);
 
-      const incompleteEpisodes = item.episodes.filter(
-        ({ state }) => processableStates.safeParse(state).success,
-      );
+      const incompleteEpisodes = await item.episodes.matching({
+        orderBy: { number: "asc" },
+        where: { state: { $in: processableStates.options } },
+      });
 
       // TODO: Implement pagination for shows with a large number of episodes to avoid enqueueing thousands of scrape jobs at once
       for (const episode of incompleteEpisodes) {

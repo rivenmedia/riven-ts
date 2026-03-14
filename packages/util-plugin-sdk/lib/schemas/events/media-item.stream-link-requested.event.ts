@@ -19,7 +19,7 @@ export type MediaItemStreamLinkRequestedEvent = z.infer<
 >;
 
 export const MediaItemStreamLinkRequestedResponse = z.object({
-  url: z.url(),
+  link: z.url(),
 });
 
 export type MediaItemStreamLinkRequestedResponse = z.infer<

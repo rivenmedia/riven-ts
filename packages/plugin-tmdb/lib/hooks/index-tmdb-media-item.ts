@@ -55,6 +55,8 @@ export const indexTMDBMediaItem: z.infer<
         ? `https://image.tmdb.org/t/p/w500${result.poster_path}`
         : null,
       releaseDate: result.release_date,
+      runtime: result.runtime ?? null,
+      language: result.original_language ?? null,
     },
   };
 };

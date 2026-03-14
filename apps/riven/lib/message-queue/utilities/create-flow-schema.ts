@@ -16,11 +16,11 @@ export const createFlowSchema = <
 >(
   type: Type,
   {
-    children: childrenSchema,
+    children: childrenSchema = z.never().optional() as never,
     input: inputSchema = z.never().optional() as never,
     output: outputSchema = z.never().optional() as never,
   }: {
-    children: Children;
+    children?: Children;
     input?: ZodObject<Payload>;
     output?: Output;
   },

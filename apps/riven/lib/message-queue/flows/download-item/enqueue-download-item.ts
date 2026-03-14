@@ -5,7 +5,7 @@ import {
 
 import { flow } from "../producer.ts";
 import { createDownloadItemJob } from "./download-item.schema.ts";
-import { createFindValidTorrentContainerJob } from "./steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
+import { createFindValidTorrentJob } from "./steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { createRankStreamsJob } from "./steps/rank-streams/rank-streams.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
@@ -112,13 +112,20 @@ export async function enqueueDownloadItem({
     },
   );
 
-  const findValidTorrentContainerNode = createFindValidTorrentContainerJob(
-    `Finding valid torrent container for ${item.fullTitle}`,
+  const findValidTorrentNode = createFindValidTorrentJob(
+    `Finding valid torrent for ${item.fullTitle}`,
     {
       id: item.id,
-      availableDownloaders: subscribers.map(
-        (plugin) => plugin.name.description ?? "unknown",
-      ),
+      itemTitle: item.fullTitle,
+      availableDownloaders: subscribers.map((plugin) => ({
+        pluginName: plugin.name.description ?? "unknown",
+        hasCacheCheckHook: Boolean(
+          plugin.hooks["riven.media-item.download.cache-check-requested"],
+        ),
+        hasProviderListHook: Boolean(
+          plugin.hooks["riven.media-item.download.provider-list-requested"],
+        ),
+      })),
       failedInfoHashes: [],
     },
     {
@@ -132,7 +139,7 @@ export async function enqueueDownloadItem({
   const rootNode = createDownloadItemJob(
     `Downloading ${item.fullTitle}`,
     { id: item.id },
-    { children: [findValidTorrentContainerNode] },
+    { children: [findValidTorrentNode] },
   );
 
   return flow.add(rootNode);

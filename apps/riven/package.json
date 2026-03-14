@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.app.json && tsc --noEmit --project tsconfig.spec.json",
-    "dev": "node --watch --env-file=.env --import=./lib/sentry.ts --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
+    "dev": "node --watch --env-file=.env.riven --import=./lib/sentry.ts --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
     "generate-config-docs": "zod2md",
     "graphql-codegen": "graphql-codegen",
     "lint": "eslint",
@@ -26,8 +26,8 @@
     "@repo/core-util-graphql-schema": "workspace:^",
     "@repo/plugin-listrr": "workspace:^",
     "@repo/plugin-plex": "workspace:^",
-    "@repo/plugin-realdebrid": "workspace:^",
     "@repo/plugin-seerr": "workspace:^",
+    "@repo/plugin-stremthru": "workspace:^",
     "@repo/plugin-tmdb": "workspace:^",
     "@repo/plugin-torrentio": "workspace:^",
     "@repo/plugin-tvdb": "workspace:^",
@@ -74,6 +74,7 @@
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
     "msw": "catalog:",
+    "redis-memory-server": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "zod2md": "catalog:"

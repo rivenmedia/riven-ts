@@ -46,6 +46,7 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
       number: i,
       title: `Season ${i.toString().padStart(2, "0")}`,
       tvdbId: i.toString(),
+      isSpecial: false,
     });
 
     show.seasons.add(season);
@@ -65,7 +66,7 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
   actor.send({
     type: "riven.media-item.download.error",
     item: show,
-    error: "No valid torrent containers found",
+    error: "No valid torrents found",
   });
 
   await vi.waitFor(() => {
@@ -111,6 +112,7 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
       number: i,
       title: `Season ${i.toString().padStart(2, "0")}`,
       tvdbId: i.toString(),
+      isSpecial: false,
     });
 
     show.seasons.add(season);
@@ -134,7 +136,7 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
   actor.send({
     type: "riven.media-item.download.error",
     item: failedSeason,
-    error: "No valid torrent containers found",
+    error: "No valid torrents found",
   });
 
   await vi.waitFor(() => {

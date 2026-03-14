@@ -39,7 +39,6 @@ it("returns all shows for the /shows path", async ({ em }) => {
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
     itemRequest,
@@ -51,6 +50,7 @@ it("returns all shows for the /shows path", async ({ em }) => {
     title: "Season 01",
     year: 2020,
     number: 1,
+    isSpecial: false,
   });
 
   show.seasons.add(season);
@@ -64,6 +64,7 @@ it("returns all shows for the /shows path", async ({ em }) => {
     title: "Example Episode 1",
     type: "episode",
     contentRating: "tv-14",
+    isSpecial: false,
   });
 
   season.episodes.add(episode);
@@ -73,7 +74,7 @@ it("returns all shows for the /shows path", async ({ em }) => {
   em.create(MediaEntry, {
     originalFilename: "Example Episode 1.mkv",
     fileSize: 123456789,
-    provider: "@repo/plugin-test",
+    plugin: "@repo/plugin-test",
     mediaItem: episode,
   });
 
@@ -103,7 +104,6 @@ it('does not return entries for the "all shows" path for shows that do not have 
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
     itemRequest,
@@ -115,6 +115,7 @@ it('does not return entries for the "all shows" path for shows that do not have 
     title: "Season 01",
     year: 2020,
     number: 1,
+    isSpecial: false,
   });
 
   show.seasons.add(season);
@@ -128,6 +129,7 @@ it('does not return entries for the "all shows" path for shows that do not have 
     title: "Example Episode 1",
     type: "episode",
     contentRating: "tv-14",
+    isSpecial: false,
   });
 
   season.episodes.add(episode);
@@ -162,7 +164,7 @@ it("returns all movies for the /movies path", async ({ em }) => {
     em.create(MediaEntry, {
       originalFilename: `Example Movie ${i.toString().padStart(2, "0")}.mkv`,
       fileSize: 987654321,
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: movie,
     });
   }
@@ -193,7 +195,6 @@ it("returns all seasons for a single show path", async ({ em }) => {
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
     itemRequest,
@@ -206,6 +207,7 @@ it("returns all seasons for a single show path", async ({ em }) => {
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
+      isSpecial: false,
     });
 
     show.seasons.add(season);
@@ -219,6 +221,7 @@ it("returns all seasons for a single show path", async ({ em }) => {
       title: "Example Episode 1",
       type: "episode",
       contentRating: "tv-14",
+      isSpecial: false,
     });
 
     season.episodes.add(episode);
@@ -228,7 +231,7 @@ it("returns all seasons for a single show path", async ({ em }) => {
     em.create(MediaEntry, {
       originalFilename: "Example Episode 1.mkv",
       fileSize: 123456789,
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: episode,
     });
   }
@@ -261,7 +264,6 @@ it("does not return entries for a season that does not have any episodes with a 
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
     itemRequest,
@@ -274,6 +276,7 @@ it("does not return entries for a season that does not have any episodes with a 
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
+      isSpecial: false,
     });
 
     show.seasons.add(season);
@@ -287,6 +290,7 @@ it("does not return entries for a season that does not have any episodes with a 
       title: "Example Episode 1",
       type: "episode",
       contentRating: "tv-14",
+      isSpecial: false,
     });
 
     season.episodes.add(episode);
@@ -297,7 +301,7 @@ it("does not return entries for a season that does not have any episodes with a 
       em.create(MediaEntry, {
         originalFilename: "Example Episode 1.mkv",
         fileSize: 123456789,
-        provider: "@repo/plugin-test",
+        plugin: "@repo/plugin-test",
         mediaItem: episode,
       });
     }
@@ -325,7 +329,6 @@ it("returns all episodes for a single season path", async ({ em }) => {
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
     itemRequest,
@@ -337,6 +340,7 @@ it("returns all episodes for a single season path", async ({ em }) => {
     title: "Season 01",
     year: 2020,
     number: 1,
+    isSpecial: false,
   });
 
   show.seasons.add(season);
@@ -351,6 +355,7 @@ it("returns all episodes for a single season path", async ({ em }) => {
       title: `Example Episode ${i.toString().padStart(2, "0")}`,
       type: "episode",
       contentRating: "tv-14",
+      isSpecial: false,
     });
 
     season.episodes.add(episode);
@@ -360,7 +365,7 @@ it("returns all episodes for a single season path", async ({ em }) => {
     em.create(MediaEntry, {
       originalFilename: `Example Episode ${i.toString().padStart(2, "0")}.mkv`,
       fileSize: 123456789,
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: episode,
     });
   }
@@ -393,7 +398,6 @@ it("does not return entries for episodes that does not have a media entry when v
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
     itemRequest,
@@ -405,6 +409,7 @@ it("does not return entries for episodes that does not have a media entry when v
     title: "Season 01",
     year: 2020,
     number: 1,
+    isSpecial: false,
   });
 
   show.seasons.add(season);
@@ -419,6 +424,7 @@ it("does not return entries for episodes that does not have a media entry when v
       title: `Example Episode ${i.toString().padStart(2, "0")}`,
       type: "episode",
       contentRating: "tv-14",
+      isSpecial: false,
     });
 
     season.episodes.add(episode);
@@ -429,7 +435,7 @@ it("does not return entries for episodes that does not have a media entry when v
       em.create(MediaEntry, {
         originalFilename: `Example Episode ${i.toString().padStart(2, "0")}.mkv`,
         fileSize: 123456789,
-        provider: "@repo/plugin-test",
+        plugin: "@repo/plugin-test",
         mediaItem: episode,
       });
     }
@@ -469,7 +475,7 @@ it("returns the media entry's filename when viewing a single movie's directory",
   em.create(MediaEntry, {
     originalFilename: "Example Movie 01.mkv",
     fileSize: 987654321,
-    provider: "@repo/plugin-test",
+    plugin: "@repo/plugin-test",
     mediaItem: movie,
   });
 
@@ -508,7 +514,7 @@ it('does not return entries for the "all movies" path when a movie does not have
       em.create(MediaEntry, {
         originalFilename: `Example Movie ${i.toString().padStart(2, "0")}.mkv`,
         fileSize: 987654321,
-        provider: "@repo/plugin-test",
+        plugin: "@repo/plugin-test",
         mediaItem: movie,
       });
     }

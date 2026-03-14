@@ -21,6 +21,7 @@
   "js/ts.tsserver.watchOptions": {
     "excludeDirectories": [
       "**/node_modules",
+      "**/docker-data",
       "**/.git",
       "**/dist",
       "**/coverage",
@@ -28,7 +29,8 @@
       "**/logs",
       "**/temp",
       "**/docs",
-      "**/__generated__"
+      "**/__generated__",
+      "**/plex"
     ]
   },
   "files.watcherExclude": {
@@ -37,7 +39,7 @@
     "**/.hg/store/**": true,
     "**/node_modules/**": true,
     "**/__generated__/**": true,
-    "**/*.log": true
-  },
-  "wallaby.compactStatus": true
+    "**/*.log": true,
+    "**/docker-data/**": true
+  }
 }

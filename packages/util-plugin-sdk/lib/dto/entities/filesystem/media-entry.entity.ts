@@ -32,11 +32,15 @@ export class MediaEntry extends FileSystemEntry {
   @Property()
   @IsUrl()
   @IsOptional()
-  unrestrictedUrl?: string;
+  streamUrl?: string;
 
   @Field()
   @Property()
-  provider!: string;
+  plugin!: string;
+
+  @Field(() => String, { nullable: true })
+  @Property()
+  provider!: string | null;
 
   @Field({ nullable: true })
   @Property()

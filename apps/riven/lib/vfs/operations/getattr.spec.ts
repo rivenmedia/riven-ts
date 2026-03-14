@@ -84,7 +84,7 @@ it("returns file stats for movie files", async ({ em }) => {
   const mediaEntry = em.create(MediaEntry, {
     fileSize: 2147483648,
     originalFilename: "Inception (2010) {tmdb-27205}.mkv",
-    provider: "@repo/plugin-test",
+    plugin: "@repo/plugin-test",
     mediaItem,
   });
 
@@ -134,7 +134,7 @@ it("returns directory stats for /movies", async ({ em }) => {
     const mediaEntry = em.create(MediaEntry, {
       fileSize: 1234567890,
       originalFilename: "Example Show.mkv",
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: movie,
     });
 
@@ -184,6 +184,7 @@ it("returns directory stats for /shows", async ({ em }) => {
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
+      isSpecial: false,
     });
 
     show.seasons.add(season);
@@ -191,11 +192,12 @@ it("returns directory stats for /shows", async ({ em }) => {
     await em.flush();
 
     const episode = em.create(Episode, {
-      title: `Episode 01`,
+      title: "Episode 01",
       year: 2020,
       contentRating: "tv-14",
       number: 1,
       absoluteNumber: 1,
+      isSpecial: false,
     });
 
     season.episodes.add(episode);
@@ -203,7 +205,7 @@ it("returns directory stats for /shows", async ({ em }) => {
     const mediaEntry = em.create(MediaEntry, {
       fileSize: 1234567890,
       originalFilename: "Example Show.mkv",
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: episode,
     });
 
@@ -253,6 +255,7 @@ it("returns directory stats for single shows", async ({ em }) => {
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
+      isSpecial: false,
     });
 
     show.seasons.add(season);
@@ -260,11 +263,12 @@ it("returns directory stats for single shows", async ({ em }) => {
     await em.flush();
 
     const episode = em.create(Episode, {
-      title: `Episode 01`,
+      title: "Episode 01",
       year: 2020,
       contentRating: "tv-14",
       number: 1,
       absoluteNumber: 1,
+      isSpecial: false,
     });
 
     season.episodes.add(episode);
@@ -272,7 +276,7 @@ it("returns directory stats for single shows", async ({ em }) => {
     const mediaEntry = em.create(MediaEntry, {
       fileSize: 1234567890,
       originalFilename: "Example Show.mkv",
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: episode,
     });
 
@@ -318,9 +322,10 @@ it("returns directory stats for single seasons", async ({ em }) => {
   await em.flush();
 
   const season = em.create(Season, {
-    title: `Season 01`,
+    title: "Season 01",
     year: 2020,
     number: 1,
+    isSpecial: false,
   });
 
   show.seasons.add(season);
@@ -329,11 +334,12 @@ it("returns directory stats for single seasons", async ({ em }) => {
 
   for (let i = 1; i <= 10; i++) {
     const episode = em.create(Episode, {
-      title: `Episode 01`,
+      title: "Episode 01",
       year: 2020,
       contentRating: "tv-14",
       number: 1,
       absoluteNumber: 1,
+      isSpecial: false,
     });
 
     season.episodes.add(episode);
@@ -341,7 +347,7 @@ it("returns directory stats for single seasons", async ({ em }) => {
     const mediaEntry = em.create(MediaEntry, {
       fileSize: 1234567890,
       originalFilename: "Example Show.mkv",
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: episode,
     });
 
@@ -387,9 +393,10 @@ it("returns file stats for episodes", async ({ em }) => {
   await em.flush();
 
   const season = em.create(Season, {
-    title: `Season 01`,
+    title: "Season 01",
     year: 2020,
     number: 1,
+    isSpecial: false,
   });
 
   show.seasons.add(season);
@@ -397,11 +404,12 @@ it("returns file stats for episodes", async ({ em }) => {
   await em.flush();
 
   const episode = em.create(Episode, {
-    title: `Episode 01`,
+    title: "Episode 01",
     year: 2020,
     contentRating: "tv-14",
     number: 1,
     absoluteNumber: 1,
+    isSpecial: false,
   });
 
   season.episodes.add(episode);
@@ -409,7 +417,7 @@ it("returns file stats for episodes", async ({ em }) => {
   const mediaEntry = em.create(MediaEntry, {
     fileSize: 1234567890,
     originalFilename: "Example Show.mkv",
-    provider: "@repo/plugin-test",
+    plugin: "@repo/plugin-test",
     mediaItem: episode,
   });
 

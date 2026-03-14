@@ -65,6 +65,7 @@ const it = baseIt.extend<{
       const season = em.create(Season, {
         title: `Season ${i.toString()}`,
         number: i,
+        isSpecial: false,
       });
 
       show.seasons.add(season);
@@ -77,6 +78,7 @@ const it = baseIt.extend<{
           contentRating: "tv-14",
           number: i,
           absoluteNumber: ++episodeNumber,
+          isSpecial: false,
         });
 
         season.episodes.add(episode);
@@ -301,7 +303,7 @@ it("does not throw for torrents that contain all seasons for ended shows", async
   ).resolves.not.toThrow();
 });
 
-it("does not throw for torrents with an unknown number of seasons / episodes for shows", async ({
+it("throws for torrents with no seasons and episodes for show-like items", async ({
   show,
   infoHash,
 }) => {
@@ -311,7 +313,14 @@ it("does not throw for torrents with an unknown number of seasons / episodes for
 
   await expect(
     validateTorrent(show, show.title, parsedData, infoHash),
-  ).resolves.not.toThrow();
+  ).rejects.toThrow(
+    new SkippedTorrentError(
+      `Skipping torrent with no seasons or episodes for show item`,
+      show.title,
+      parsedData.rawTitle,
+      infoHash,
+    ),
+  );
 });
 
 it("throws for torrents with incorrect number of episodes for single-season shows", async ({
@@ -437,27 +446,6 @@ it("does not throw for torrents with an unknown number of episodes for season it
   await expect(
     validateTorrent(season, show.title, parsedData, infoHash),
   ).resolves.not.toThrow();
-});
-
-it("throws for torrents with 2 or fewer episodes for season items", async ({
-  season,
-  infoHash,
-}) => {
-  const rawTitle = "Test Show 2024 S01E01";
-  const show = await season.getShow();
-
-  const parsedData = parse(rawTitle);
-
-  await expect(() =>
-    validateTorrent(season, show.title, parsedData, infoHash),
-  ).rejects.toThrow(
-    new SkippedTorrentError(
-      `Skipping torrent with 2 or fewer episodes for season item`,
-      show.title,
-      parsedData.rawTitle,
-      infoHash,
-    ),
-  );
 });
 
 it("throws for torrents with incorrect episodes for season items", async ({

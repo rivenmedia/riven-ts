@@ -7,18 +7,10 @@ import { Settings } from "luxon";
 import { expect, vi } from "vitest";
 
 import { database } from "../../../database/database.ts";
-import * as settingsModule from "../../../utilities/settings.ts";
 import { createQueue } from "../../utilities/create-queue.ts";
 import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 
 import type { ScrapeItemFlow } from "./scrape-item.schema.ts";
-
-it.beforeEach(({ redisUrl }) => {
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
-    redisUrl,
-  });
-});
 
 it("throws an unrecoverable error if the item cannot be scraped", async () => {
   const sendEvent = vi.fn();

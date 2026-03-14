@@ -11,6 +11,7 @@ import {
   type Job,
   Queue,
   QueueEvents,
+  RateLimitError,
   type RateLimiterOptions,
   type Telemetry,
   Worker,
@@ -19,6 +20,7 @@ import { DateTime } from "luxon";
 import { Logger } from "winston";
 import z from "zod";
 
+import { benchmark } from "../helpers/benchmark.ts";
 import { registerMQListeners } from "../helpers/register-mq-listeners.ts";
 import { json } from "../validation/json.ts";
 import { urlSearchParamsCodec } from "../validation/url-search-params-parser.ts";
@@ -46,6 +48,8 @@ type FetchResponse<T = unknown> = Pick<
     statusText: string;
     headers: Record<string, string>;
   };
+  responseTime: number;
+  responseFromCache: boolean | undefined;
 };
 
 export interface BaseDataSourceConfig<
@@ -118,18 +122,27 @@ export abstract class BaseDataSource<
     this.#worker = new Worker(
       this.#queueId,
       async (job) => {
-        this.#decodeRequestBody(job);
-
-        if (job.data.incomingRequest) {
-          job.data.incomingRequest.params = urlSearchParamsCodec.decode(
-            job.data.params,
+        const {
+          timeTaken,
+          result: { parsedBody, response, responseFromCache },
+        } = await benchmark(async () => {
+          this.logger.silly(
+            [
+              `[${this.serviceName}] Initiating request to ${this.baseURL}${job.data.path}`,
+              ...(job.data.params ? [`?${job.data.params}`] : []),
+            ].join(""),
           );
-        }
 
-        const { response, parsedBody } = await super.fetch(
-          job.data.path,
-          job.data.incomingRequest,
-        );
+          this.#decodeRequestBody(job);
+
+          if (job.data.incomingRequest) {
+            job.data.incomingRequest.params = urlSearchParamsCodec.decode(
+              job.data.params,
+            );
+          }
+
+          return super.fetch(job.data.path, job.data.incomingRequest);
+        });
 
         return {
           parsedBody,
@@ -139,6 +152,8 @@ export abstract class BaseDataSource<
             statusText: response.statusText,
             headers: Object.fromEntries(response.headers),
           },
+          responseTime: timeTaken,
+          responseFromCache,
         };
       },
       {
@@ -237,7 +252,10 @@ export abstract class BaseDataSource<
   async #createAugmentedRequest(
     path: string,
     incomingRequest?: DataSourceRequest,
-  ): Promise<AugmentedRequest> {
+  ): Promise<{
+    augmentedRequest: AugmentedRequest;
+    url: URL;
+  }> {
     const augmentedRequest: AugmentedRequest = {
       ...incomingRequest,
       params:
@@ -272,7 +290,10 @@ export abstract class BaseDataSource<
       augmentedRequest.headers["content-type"] ??= "application/json";
     }
 
-    return augmentedRequest;
+    return {
+      augmentedRequest,
+      url,
+    };
   }
 
   #determineRequestBodyType(body: unknown) {
@@ -307,12 +328,10 @@ export abstract class BaseDataSource<
     path: string,
     incomingRequest?: DataSourceRequest,
   ): Promise<DataSourceFetchResult<TResult>> {
-    const augmentedRequest = await this.#createAugmentedRequest(
+    const { augmentedRequest, url } = await this.#createAugmentedRequest(
       path,
       incomingRequest,
     );
-
-    const url = await this.resolveURL(path, augmentedRequest);
 
     const cacheKey = this.cacheKeyFor(url, augmentedRequest as never);
 
@@ -333,16 +352,27 @@ export abstract class BaseDataSource<
       );
     }
 
-    const job = await this.#queue.add(cacheKey, {
-      path,
-      incomingRequest: augmentedRequest,
-      bodyType,
-      params: urlSearchParamsCodec.encode(augmentedRequest.params),
-    });
+    const job = await this.#queue.add(
+      cacheKey,
+      {
+        path,
+        incomingRequest: augmentedRequest,
+        bodyType,
+        params: urlSearchParamsCodec.encode(augmentedRequest.params),
+      },
+      {
+        // Use a stable job ID to enable deduplication of idempotent GET requests
+        ...(augmentedRequest.method === "GET" && {
+          jobId: cacheKey.replaceAll(":", "_"),
+        }),
+      },
+    );
 
     const result = await job.waitUntilFinished(this.#queueEvents, 60000);
 
-    const logMessage = `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url}`;
+    const logMessage = result.responseFromCache
+      ? `[${this.serviceName}] Returned cached response for ${augmentedRequest.method ?? "GET"} ${url}`
+      : `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url} in ${(result.responseTime / 1000).toFixed(2)} seconds`;
 
     if (!result.response.ok) {
       throw new Error(logMessage);
@@ -400,6 +430,10 @@ export abstract class BaseDataSource<
     _request: RequestOptions,
     url: URL,
   ): void {
+    if (error instanceof RateLimitError) {
+      return;
+    }
+
     this.logger.error(
       `[${this.serviceName}] API Error for ${url}: ${error.message}`,
     );

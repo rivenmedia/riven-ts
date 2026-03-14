@@ -63,7 +63,10 @@ export function createFlowWorker<
     {
       concurrency: os.availableParallelism(),
       removeOnComplete: { count: 50 },
-      removeOnFail: { count: 100 },
+      removeOnFail: {
+        age: 60 * 60 * 24,
+        count: 5000,
+      },
       ...workerOptions,
       connection: {
         url: settings.redisUrl,
@@ -77,6 +80,12 @@ export function createFlowWorker<
   worker.on("failed", (_job, error) => {
     logger.error(`[${flowName}] ${error.message}`);
   });
+
+  if (settings.unsafeClearQueuesOnStartup) {
+    void queue.obliterate({
+      force: true,
+    });
+  }
 
   return { worker, queue };
 }

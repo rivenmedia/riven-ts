@@ -1,4 +1,4 @@
-import { TorrentContainer } from "@repo/util-plugin-sdk/schemas/torrents/torrent-container";
+import { Torrent } from "@repo/util-plugin-sdk/schemas/torrents/torrent";
 import { atLeastOnePropertyRequired } from "@repo/util-plugin-sdk/validation";
 import {
   type RankedResult,
@@ -12,7 +12,7 @@ import { createFlowJobBuilder } from "../../../../utilities/create-flow-job-sche
 import { createFlowSchema } from "../../../../utilities/create-flow-schema.ts";
 
 export const RankStreamsFlow = createFlowSchema("download-item.rank-streams", {
-  children: TorrentContainer,
+  children: Torrent,
   input: z.object({
     id: z.int(),
     streams: z

@@ -13,7 +13,7 @@ import {
 import { Min } from "class-validator";
 import { Field, ObjectType } from "type-graphql";
 
-import { MediaEntry } from "../filesystem/media-entry.entity.js";
+import { MediaEntry } from "../filesystem/media-entry.entity.ts";
 import { Episode } from "./episode.entity.ts";
 import { ShowLikeMediaItem } from "./show-like.entity.ts";
 import { Show } from "./show.entity.ts";
@@ -36,14 +36,13 @@ export class Season extends ShowLikeMediaItem {
   @OneToMany(() => Episode, (episode) => episode.season)
   episodes = new Collection<Episode>(this);
 
-  getShow() {
-    return this.show.loadOrFail();
-  }
-
   @Property({ persist: false, hidden: true, getter: true })
   get prettyName(): Opt<Hidden<string>> {
     return `Season ${this.number.toString().padStart(2, "0")}`;
   }
+
+  @Property()
+  isSpecial!: boolean;
 
   override type: Opt<"season"> = "season" as const;
 
@@ -51,8 +50,12 @@ export class Season extends ShowLikeMediaItem {
   declare tmdbId?: never;
   declare contentRating: Opt<never>;
 
+  getShow() {
+    return this.show.loadOrFail();
+  }
+
   async getMediaEntries() {
-    const episodes = await this.episodes.loadItems({
+    const episodes = await this.episodes.matching({
       where: {
         filesystemEntries: {
           $some: {
@@ -60,7 +63,6 @@ export class Season extends ShowLikeMediaItem {
           },
         },
       },
-      fields: ["filesystemEntries"],
       populate: ["filesystemEntries"],
       refresh: true,
     });

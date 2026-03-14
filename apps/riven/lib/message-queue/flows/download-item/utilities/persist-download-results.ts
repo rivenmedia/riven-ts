@@ -19,24 +19,24 @@ import z from "zod";
 import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
 
-import type { ValidTorrentContainer } from "../steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
+import type { ValidTorrent } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
 
 export interface PersistDownloadResultsInput {
   id: number;
-  container: ValidTorrentContainer;
+  torrent: ValidTorrent;
   processedBy: string;
 }
 
 export async function persistDownloadResults({
   id,
-  container,
+  torrent,
   processedBy,
 }: PersistDownloadResultsInput) {
   return await database.em.fork().transactional(async (transaction) => {
     const existingItem = await transaction.getRepository(MediaItem).findOne(
       {
         streams: {
-          infoHash: container.infoHash,
+          infoHash: torrent.infoHash,
         },
         id,
       },
@@ -61,29 +61,32 @@ export async function persistDownloadResults({
 
     try {
       const matchedStream = existingItem.streams.find(
-        ({ infoHash }) => infoHash === container.infoHash,
+        ({ infoHash }) => infoHash === torrent.infoHash,
       );
 
       assert(
         matchedStream,
         new UnrecoverableError(
-          `Media item with ID ${id.toString()} does not have a stream matching the torrent container's info hash`,
+          `Media item with ID ${id.toString()} does not have a stream matching the torrent's info hash`,
         ),
       );
 
       existingItem.activeStream = ref(matchedStream);
 
       if (existingItem instanceof Movie || existingItem instanceof Episode) {
-        const [file] = container.files;
+        const [file] = torrent.files;
+
+        assert(file.link, "Download URL is missing for the matched file");
 
         existingItem.filesystemEntries.add(
           transaction.create(MediaEntry, {
-            fileSize: file.fileSize,
-            originalFilename: file.fileName,
+            fileSize: file.size,
+            originalFilename: file.name,
             mediaItem: ref(existingItem),
-            provider: processedBy,
-            providerDownloadId: container.torrentId.toString(),
-            downloadUrl: file.downloadUrl,
+            provider: torrent.provider,
+            providerDownloadId: torrent.torrentId,
+            downloadUrl: file.link,
+            plugin: processedBy,
           }),
         );
       }
@@ -91,14 +94,14 @@ export async function persistDownloadResults({
       if (existingItem instanceof Show || existingItem instanceof Season) {
         const episodes = await transaction.getRepository(Episode).find({
           id: {
-            $in: container.files.map((file) => file.matchedMediaItemId),
+            $in: torrent.files.map((file) => file.matchedMediaItemId),
           },
         });
 
         assert(
-          episodes.length === container.files.length,
+          episodes.length === torrent.files.length,
           new UnrecoverableError(
-            "Unable to find all matched media items from the torrent container",
+            "Unable to find all matched media items from the torrent",
           ),
         );
 
@@ -111,13 +114,15 @@ export async function persistDownloadResults({
           "downloaded",
         ]);
 
-        for (const file of container.files) {
+        for (const file of torrent.files) {
+          assert(file.link, "Download URL is missing for the matched file");
+
           const episode = episodeMap.get(file.matchedMediaItemId);
 
           assert(
             episode,
             new UnrecoverableError(
-              `File ${file.fileName} does not correspond to a valid episode`,
+              `File ${file.name} does not correspond to a valid episode`,
             ),
           );
 
@@ -131,12 +136,13 @@ export async function persistDownloadResults({
 
           episode.filesystemEntries.add(
             transaction.create(MediaEntry, {
-              fileSize: file.fileSize,
-              originalFilename: file.fileName,
+              fileSize: file.size,
+              originalFilename: file.name,
               mediaItem: ref(episode),
-              provider: processedBy,
-              providerDownloadId: container.torrentId.toString(),
-              downloadUrl: file.downloadUrl,
+              provider: torrent.provider,
+              providerDownloadId: torrent.torrentId,
+              downloadUrl: file.link,
+              plugin: processedBy,
             }),
           );
 

@@ -28,6 +28,7 @@ it("returns the media item if processed successfully", async ({}) => {
       contentRating: "g",
       genres: [],
       type: "movie",
+      runtime: 40,
     },
   });
 
@@ -37,6 +38,7 @@ it("returns the media item if processed successfully", async ({}) => {
       id: 1,
       title: "Test Movie",
       type: "movie",
+      runtime: 40,
     }),
   );
 });
@@ -64,6 +66,7 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorr
         contentRating: "g",
         genres: [],
         type: "movie",
+        runtime: 40,
       },
     }),
   ).rejects.toThrow(MediaItemIndexErrorIncorrectState);

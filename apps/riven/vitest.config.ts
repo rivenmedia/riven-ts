@@ -7,6 +7,7 @@ export default defineConfig((env) =>
     baseVitestConfig(env),
     defineConfig({
       test: {
+        globalSetup: ["vitest.global-setup.ts"],
         setupFiles: ["vitest.setup.ts"],
       },
     }),

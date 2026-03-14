@@ -34,6 +34,7 @@ catalog:
   limiter: 3.0.0
   luxon: ^3.7.2
   msw: 2.12.4
+  redis-memory-server: ^0.16.0
   reflect-metadata: 0.2.2
   type-graphql: 2.0.0-rc.2
   typescript: ^5.9.3

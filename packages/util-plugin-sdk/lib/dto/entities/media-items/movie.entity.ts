@@ -21,6 +21,9 @@ import type { ItemRequest } from "../requests/item-request.entity.ts";
 @ObjectType()
 @Entity()
 export class Movie extends MediaItem {
+  @Property()
+  runtime!: number | null;
+
   @Field(() => MovieContentRatingEnum)
   declare contentRating: MovieContentRating;
 
@@ -31,11 +34,10 @@ export class Movie extends MediaItem {
   declare itemRequest: Ref<ItemRequest>;
 
   getMediaEntries() {
-    return this.filesystemEntries.loadItems<MediaEntry>({
+    return this.filesystemEntries.matching<MediaEntry>({
       where: {
         type: "media",
       },
-      refresh: true,
     });
   }
 
