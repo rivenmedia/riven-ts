@@ -10,13 +10,15 @@ import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state
 import { parse } from "@repo/util-rank-torrent-name";
 
 import { reduceAsync } from "es-toolkit";
-import assert from "node:assert";
+import assert, { AssertionError } from "node:assert";
 
 import { database } from "../../../../../../database/database.ts";
 import { logger } from "../../../../../../utilities/logger/logger.ts";
 import { MatchedFile } from "../find-valid-torrent-container.schema.ts";
 
 import type { MapItemsToFilesFlow } from "../../map-items-to-files/map-items-to-files.schema.ts";
+
+export class InvalidTorrentError extends Error {}
 
 async function getExpectedFileCount(item: MediaItem) {
   if (item instanceof Show) {
@@ -73,112 +75,121 @@ export const validateTorrentFiles = async (
   { episodes, movies }: MapItemsToFilesFlow["output"],
   isCacheCheck: boolean,
 ): Promise<MatchedFile[]> => {
-  logger.verbose(
-    `Validating torrent container for item ${item.fullTitle}: ${infoHash}`,
-  );
-
-  const expectedFileCount = await getExpectedFileCount(item);
-
-  const groupMap = new Map(
-    Object.entries(item instanceof ShowLikeMediaItem ? episodes : movies),
-  );
-
-  assert(
-    groupMap.size >= expectedFileCount,
-    `${item.type.substring(0, 1).toUpperCase() + item.type.substring(1)} torrent container must have at least ${expectedFileCount.toString()} ${item instanceof ShowLikeMediaItem ? "episodes" : "movies"}, but has ${groupMap.size.toString()}`,
-  );
-
-  const validFiles: MatchedFile[] = [];
-  const lookupKeys = await getItemLookupKeys(item);
-
-  for (const lookupKey of lookupKeys) {
-    const file = groupMap.get(lookupKey);
-
-    if (!file) {
-      continue;
-    }
-
-    logger.debug(
-      `Found match in ${isCacheCheck ? "cached files" : "container files"}: ${file.name} for item ${item.fullTitle} using lookup key '${lookupKey}'`,
+  try {
+    logger.verbose(
+      `Validating torrent container for item ${item.fullTitle}: ${infoHash}`,
     );
 
-    try {
-      const parseData = parse(file.name);
+    const expectedFileCount = await getExpectedFileCount(item);
 
-      if (item instanceof Movie) {
-        assert(parseData.type === "movie", "File must be a movie");
+    const groupMap = new Map(
+      Object.entries(item instanceof ShowLikeMediaItem ? episodes : movies),
+    );
 
-        validFiles.push(
-          MatchedFile.encode({
-            ...file,
-            matchedMediaItemId: item.id,
-            isCachedFile: isCacheCheck,
-          }),
-        );
+    assert(
+      groupMap.size >= expectedFileCount,
+      `${item.type.substring(0, 1).toUpperCase() + item.type.substring(1)} torrent container must have at least ${expectedFileCount.toString()} ${item instanceof ShowLikeMediaItem ? "episodes" : "movies"}, but has ${groupMap.size.toString()}`,
+    );
+
+    const validFiles: MatchedFile[] = [];
+    const lookupKeys = await getItemLookupKeys(item);
+
+    for (const lookupKey of lookupKeys) {
+      const file = groupMap.get(lookupKey);
+
+      if (!file) {
+        continue;
       }
 
-      if (item instanceof ShowLikeMediaItem) {
-        assert(
-          parseData.type === "show",
-          "Expected an episode, but found a movie",
-        );
+      logger.debug(
+        `Found match in ${isCacheCheck ? "cached files" : "container files"}: ${file.name} for item ${item.fullTitle} using lookup key '${lookupKey}'`,
+      );
 
-        assert(
-          parseData.episodes[0] != null,
-          "File must have at least one episode number",
-        );
+      try {
+        const parseData = parse(file.name);
 
-        const episode = await database.episode.findAbsoluteEpisode(
-          item.tvdbId,
-          parseData.episodes[0],
-          parseData.seasons[0],
-        );
+        if (item instanceof Movie) {
+          assert(parseData.type === "movie", "File must be a movie");
 
-        assert(
-          episode,
-          `File must correspond to a valid episode in ${item.fullTitle}`,
-        );
+          validFiles.push(
+            MatchedFile.encode({
+              ...file,
+              matchedMediaItemId: item.id,
+              isCachedFile: isCacheCheck,
+            }),
+          );
+        }
 
-        const episodeSeasonNumber = await episode.season.loadProperty("number");
-
-        if (item instanceof Season) {
+        if (item instanceof ShowLikeMediaItem) {
           assert(
-            episodeSeasonNumber === item.number,
+            parseData.type === "show",
+            "Expected an episode, but found a movie",
+          );
+
+          assert(
+            parseData.episodes[0] != null,
+            "File must have at least one episode number",
+          );
+
+          const episode = await database.episode.findAbsoluteEpisode(
+            item.tvdbId,
+            parseData.episodes[0],
+            parseData.seasons[0],
+          );
+
+          assert(
+            episode,
             `File must correspond to a valid episode in ${item.fullTitle}`,
           );
-        }
 
-        if (item instanceof Episode) {
-          const itemSeasonNumber = await item.season.loadProperty("number");
+          const episodeSeasonNumber =
+            await episode.season.loadProperty("number");
 
-          assert(
-            episode.number === item.number &&
-              episodeSeasonNumber === itemSeasonNumber,
-            `Incorrect episode for ${item.fullTitle}`,
+          if (item instanceof Season) {
+            assert(
+              episodeSeasonNumber === item.number,
+              `File must correspond to a valid episode in ${item.fullTitle}`,
+            );
+          }
+
+          if (item instanceof Episode) {
+            const itemSeasonNumber = await item.season.loadProperty("number");
+
+            assert(
+              episode.number === item.number &&
+                episodeSeasonNumber === itemSeasonNumber,
+              `Incorrect episode for ${item.fullTitle}`,
+            );
+          }
+
+          validFiles.push(
+            MatchedFile.encode({
+              ...file,
+              matchedMediaItemId: episode.id,
+              isCachedFile: isCacheCheck,
+            }),
           );
         }
-
-        validFiles.push(
-          MatchedFile.encode({
-            ...file,
-            matchedMediaItemId: episode.id,
-            isCachedFile: isCacheCheck,
-          }),
+      } catch (error) {
+        logger.debug(
+          `File ${file.name} failed validation: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
         );
       }
-    } catch (error) {
-      logger.debug(
-        `File ${file.name} failed validation: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
     }
+
+    assert(
+      expectedFileCount <= validFiles.length,
+      `Expected at least ${expectedFileCount.toString()} valid files, but found ${validFiles.length.toString()}`,
+    );
+
+    return validFiles;
+  } catch (error) {
+    if (error instanceof AssertionError) {
+      throw new InvalidTorrentError(error.message);
+    }
+
+    throw error;
   }
-
-  assert(
-    expectedFileCount <= validFiles.length,
-    `Expected at least ${expectedFileCount.toString()} valid files, but found ${validFiles.length.toString()}`,
-  );
-
-  return validFiles;
 };

@@ -14,7 +14,10 @@ import { enqueueMapItemsToFiles } from "../../enqueue-map-items-to-files.ts";
 import { findValidTorrentContainerProcessorSchema } from "./find-valid-torrent-container.schema.ts";
 import { getCachedTorrentFiles } from "./utilities/get-cached-torrent-files.ts";
 import { getPluginProviderList } from "./utilities/get-plugin-provider-list.ts";
-import { validateTorrentFiles } from "./utilities/validate-torrent-files.ts";
+import {
+  InvalidTorrentError,
+  validateTorrentFiles,
+} from "./utilities/validate-torrent-files.ts";
 
 export const findValidTorrentContainerProcessor =
   findValidTorrentContainerProcessorSchema.implementAsync(async function ({
@@ -53,6 +56,8 @@ export const findValidTorrentContainerProcessor =
         const providers = plugin.hasProviderListHook
           ? await getPluginProviderList(plugin.pluginName, jobParentOptions)
           : [];
+
+        let torrentIsInvalid = false;
 
         do {
           const provider = providers.shift() ?? null;
@@ -146,6 +151,12 @@ export const findValidTorrentContainerProcessor =
               },
             };
           } catch (error) {
+            if (error instanceof InvalidTorrentError) {
+              torrentIsInvalid = true;
+
+              break;
+            }
+
             logger.debug(
               `${mediaItem.type} ${mediaItem.fullTitle} (${mediaItem.id.toString()}) - ${String(error)}`,
             );
@@ -153,6 +164,16 @@ export const findValidTorrentContainerProcessor =
             continue;
           }
         } while (providers.length);
+
+        if (torrentIsInvalid) {
+          // If we receive a torrent validation error, it means we've actually checked its contents.
+          // We can skip all processing of other providers & plugins, because the contents won't change.
+          logger.info(
+            `Skipping all further processing of ${infoHash} due to invalid contents for ${mediaItem.fullTitle}`,
+          );
+
+          break;
+        }
       }
 
       logger.debug(
