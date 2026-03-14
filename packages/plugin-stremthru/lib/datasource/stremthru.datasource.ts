@@ -2,6 +2,7 @@ import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
 
 import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.js";
 import { CacheCheckResponse } from "../schemas/cache-check-response.schema.js";
+import { DeleteTorrentResponse } from "../schemas/delete-torrent-response.schema.ts";
 import { GenerateLinkResponse } from "../schemas/generate-link-response.schema.js";
 import { ItemStatus } from "../schemas/item-status.schema.js";
 import { Store } from "../schemas/store.schema.ts";
@@ -15,18 +16,26 @@ import type {
 import type { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 
+const storeNameHeader = "x-stremthru-store-name";
+
 export class StremThruAPIError extends Error {}
 
 export class StremThruAPI extends BaseDataSource<StremThruSettings> {
   override baseURL = this.settings.stremThruUrl;
   override serviceName = "StremThru";
 
+  #buildCommonHeaders(store: Store) {
+    return {
+      [storeNameHeader]: store,
+    };
+  }
+
   protected override willSendRequest(
     _path: string,
     requestOpts: AugmentedRequest,
   ): ValueOrPromise<void> {
     const { data: store } = Store.safeParse(
-      requestOpts.headers["x-stremthru-store-name"],
+      requestOpts.headers[storeNameHeader],
     );
 
     if (!store) {
@@ -45,7 +54,7 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
 
   protected override cacheKeyFor(url: URL, request: RequestOptions): string {
     const baseKey = super.cacheKeyFor(url, request);
-    const store = request.headers?.["x-stremthru-store-name"];
+    const store = request.headers?.[storeNameHeader];
 
     if (!store) {
       throw new Error("Missing store for StremThruAPI cache key");
@@ -70,9 +79,7 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
     store: Store,
   ): Promise<MediaItemDownloadRequestedResponse> {
     const response = await this.post<unknown>("v0/store/torz", {
-      headers: {
-        "x-stremthru-store-name": store,
-      },
+      headers: this.#buildCommonHeaders(store),
       body: JSON.stringify({
         link: `magnet:?xt=urn:btih:${infoHash}`.toLowerCase(),
       }),
@@ -84,17 +91,31 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
       throw new StremThruAPIError(`No data returned from ${store}`);
     }
 
+    if (data.status !== "downloaded") {
+      await this.removeTorrent(data.id, store);
+
+      throw new StremThruAPIError(
+        `${infoHash} was in the ${data.status} state on ${store}; the torrent will not be downloaded.`,
+      );
+    }
+
     return {
       torrentId: data.id,
       files: data.files,
     };
   }
 
+  async removeTorrent(id: string, store: Store) {
+    const response = await this.delete<unknown>(`v0/store/torz/${id}`, {
+      headers: this.#buildCommonHeaders(store),
+    });
+
+    return DeleteTorrentResponse.parse(response).data;
+  }
+
   async getCachedTorrents(infoHashes: string[], store: Store) {
     const response = await this.get<unknown>("v0/store/torz/check", {
-      headers: {
-        "x-stremthru-store-name": store,
-      },
+      headers: this.#buildCommonHeaders(store),
       params: {
         hash: infoHashes.join(","),
       },
@@ -124,9 +145,7 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
   async generateLink(link: string, store: Store) {
     const response = await this.post<unknown>("v0/store/torz/link/generate", {
       body: JSON.stringify({ link }),
-      headers: {
-        "x-stremthru-store-name": store,
-      },
+      headers: this.#buildCommonHeaders(store),
     });
 
     const { data } = GenerateLinkResponse.parse(response);
