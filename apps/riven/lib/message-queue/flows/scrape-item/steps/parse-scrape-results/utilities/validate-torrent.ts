@@ -125,15 +125,6 @@ export const validateTorrent = async (
   }
 
   if (item instanceof Season) {
-    if (parsedData.episodes.length && parsedData.episodes.length <= 2) {
-      throw new SkippedTorrentError(
-        "Skipping torrent with 2 or fewer episodes for season item",
-        itemTitle,
-        parsedData.rawTitle,
-        infoHash,
-      );
-    }
-
     await wrap(item).populate(["episodes"]);
 
     if (parsedData.seasons.length === 0) {

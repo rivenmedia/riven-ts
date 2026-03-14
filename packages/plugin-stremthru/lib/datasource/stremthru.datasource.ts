@@ -107,6 +107,14 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
     }
 
     if (data.status !== "downloaded") {
+      try {
+        await this.removeTorrent(data.id, store);
+      } catch (removeError) {
+        this.logger.warn(
+          `Failed to remove torrent ${data.id}: ${String(removeError)}`,
+        );
+      }
+
       await this.removeTorrent(data.id, store);
 
       throw new StremThruAPIError(

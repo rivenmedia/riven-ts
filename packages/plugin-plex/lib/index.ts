@@ -57,10 +57,8 @@ export default {
         );
       }
 
-      const successfulUpdatesCount = results.length - errors.length;
-
       logger.info(
-        `Plex updated ${successfulUpdatesCount.toString()} paths for ${event.item.fullTitle}`,
+        `Plex updated ${results.length.toString()} paths for ${event.item.fullTitle}`,
       );
     },
   },

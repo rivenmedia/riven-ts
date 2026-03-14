@@ -3,7 +3,7 @@ import z from "zod";
 import { DebridFile } from "./debrid-file.ts";
 
 export const Torrent = z.object({
-  infoHash: z.string(),
+  infoHash: z.hash("sha1"),
   files: z.tuple(
     [DebridFile.required({ link: true })],
     DebridFile.required({ link: true }),

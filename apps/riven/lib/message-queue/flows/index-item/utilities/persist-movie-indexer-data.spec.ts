@@ -38,6 +38,7 @@ it("returns the media item if processed successfully", async ({}) => {
       id: 1,
       title: "Test Movie",
       type: "movie",
+      runtime: 40,
     }),
   );
 });

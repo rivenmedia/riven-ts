@@ -79,7 +79,10 @@ export const registerPluginHookWorkers = fromPromise<
           {
             concurrency: os.availableParallelism(),
             removeOnComplete: { count: 50 },
-            removeOnFail: { age: 60 * 60 * 24 },
+            removeOnFail: {
+              age: 60 * 60 * 24,
+              count: 5000,
+            },
           },
         );
 

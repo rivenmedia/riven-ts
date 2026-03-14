@@ -23,7 +23,7 @@ export async function getPluginDownloadResult(
     pluginName,
     { infoHash, provider },
     {
-      jobId: [infoHash, pluginName, provider].join("-"),
+      jobId: [infoHash, pluginName, provider].filter(Boolean).join("-"),
       removeDependencyOnFailure: true,
       parent,
     },

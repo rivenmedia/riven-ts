@@ -7,9 +7,8 @@ import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
 import { rivenTestContext as it } from "../../../../__tests__/test-context.ts";
+import { MatchedFile } from "../steps/find-valid-torrent/find-valid-torrent.schema.js";
 import { persistDownloadResults } from "./persist-download-results.ts";
-
-import type { MatchedFile } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
 
 it("throws an error if the media item has no streams", async ({ movie }) => {
   await expect(
@@ -157,11 +156,13 @@ it("adds one media entry per episode for shows", async ({
       torrentId: "1",
       infoHash: stream.infoHash,
       provider: null,
-      files: episodes.map((episode) => ({
+      files: episodes.map<MatchedFile>((episode) => ({
         size: 1024,
         link: `http://example.com/${episode.title}.mp4`,
+        path: `/${episode.title}.mp4`,
         name: `${episode.title}.mp4`,
         matchedMediaItemId: episode.id,
+        isCachedFile: false,
       })) as [MatchedFile, ...MatchedFile[]],
     },
   });

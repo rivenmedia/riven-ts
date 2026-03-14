@@ -47,9 +47,17 @@ export const findValidTorrentProcessor =
             ? await getPluginProviderList(plugin.pluginName, jobParentOptions)
             : [];
 
-          do {
-            const provider = providers.shift() ?? null;
+          if (plugin.hasProviderListHook && !providers.length) {
+            logger.debug(
+              `Skipping ${plugin.pluginName} for ${infoHash}; no providers are configured.`,
+            );
 
+            continue;
+          }
+
+          for (const provider of plugin.hasProviderListHook
+            ? providers
+            : [null]) {
             try {
               if (plugin.hasCacheCheckHook) {
                 logger.debug(
@@ -119,7 +127,7 @@ export const findValidTorrentProcessor =
 
               continue;
             }
-          } while (providers.length);
+          }
         } catch (error) {
           if (error instanceof InvalidTorrentError) {
             // If we receive a torrent validation error, it means we've actually checked its contents.
