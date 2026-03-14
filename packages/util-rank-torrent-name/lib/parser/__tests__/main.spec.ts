@@ -1161,7 +1161,6 @@ it.each([
       languages: ["zh"],
       resolution: "1080p",
       quality: "TeleCine",
-      trash: true,
     },
   ],
   [
