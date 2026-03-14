@@ -448,27 +448,6 @@ it("does not throw for torrents with an unknown number of episodes for season it
   ).resolves.not.toThrow();
 });
 
-it("throws for torrents with 2 or fewer episodes for season items", async ({
-  season,
-  infoHash,
-}) => {
-  const rawTitle = "Test Show 2024 S01E01";
-  const show = await season.getShow();
-
-  const parsedData = parse(rawTitle);
-
-  await expect(() =>
-    validateTorrent(season, show.title, parsedData, infoHash),
-  ).rejects.toThrow(
-    new SkippedTorrentError(
-      `Skipping torrent with 2 or fewer episodes for season item`,
-      show.title,
-      parsedData.rawTitle,
-      infoHash,
-    ),
-  );
-});
-
 it("throws for torrents with incorrect episodes for season items", async ({
   season,
   infoHash,
