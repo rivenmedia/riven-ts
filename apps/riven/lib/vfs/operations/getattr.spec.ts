@@ -84,7 +84,7 @@ it("returns file stats for movie files", async ({ em }) => {
   const mediaEntry = em.create(MediaEntry, {
     fileSize: 2147483648,
     originalFilename: "Inception (2010) {tmdb-27205}.mkv",
-    provider: "@repo/plugin-test",
+    plugin: "@repo/plugin-test",
     mediaItem,
   });
 
@@ -134,7 +134,7 @@ it("returns directory stats for /movies", async ({ em }) => {
     const mediaEntry = em.create(MediaEntry, {
       fileSize: 1234567890,
       originalFilename: "Example Show.mkv",
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: movie,
     });
 
@@ -205,7 +205,7 @@ it("returns directory stats for /shows", async ({ em }) => {
     const mediaEntry = em.create(MediaEntry, {
       fileSize: 1234567890,
       originalFilename: "Example Show.mkv",
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: episode,
     });
 
@@ -276,7 +276,7 @@ it("returns directory stats for single shows", async ({ em }) => {
     const mediaEntry = em.create(MediaEntry, {
       fileSize: 1234567890,
       originalFilename: "Example Show.mkv",
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: episode,
     });
 
@@ -347,7 +347,7 @@ it("returns directory stats for single seasons", async ({ em }) => {
     const mediaEntry = em.create(MediaEntry, {
       fileSize: 1234567890,
       originalFilename: "Example Show.mkv",
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: episode,
     });
 
@@ -417,7 +417,7 @@ it("returns file stats for episodes", async ({ em }) => {
   const mediaEntry = em.create(MediaEntry, {
     fileSize: 1234567890,
     originalFilename: "Example Show.mkv",
-    provider: "@repo/plugin-test",
+    plugin: "@repo/plugin-test",
     mediaItem: episode,
   });
 

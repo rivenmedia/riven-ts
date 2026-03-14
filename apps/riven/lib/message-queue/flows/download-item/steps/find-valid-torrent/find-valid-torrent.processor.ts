@@ -1,23 +1,14 @@
-import {
-  MediaItemDownloadRequestedEvent,
-  MediaItemDownloadRequestedResponse,
-} from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
-
 import { type ParentOptions, UnrecoverableError } from "bullmq";
 import assert from "node:assert";
 
 import { database } from "../../../../../database/database.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
-import { runSingleJob } from "../../../../utilities/run-single-job.ts";
-import { flow } from "../../../producer.ts";
-import { enqueueMapItemsToFiles } from "../../enqueue-map-items-to-files.ts";
 import { findValidTorrentProcessorSchema } from "./find-valid-torrent.schema.ts";
 import { getCachedTorrentFiles } from "./utilities/get-cached-torrent-files.ts";
+import { getPluginDownloadResult } from "./utilities/get-plugin-download-result.ts";
 import { getPluginProviderList } from "./utilities/get-plugin-provider-list.ts";
-import {
-  InvalidTorrentError,
-  validateTorrentFiles,
-} from "./utilities/validate-torrent-files.ts";
+import { getValidTorrentFiles } from "./utilities/get-valid-torrent-files.ts";
+import { InvalidTorrentError } from "./utilities/validate-torrent-files.ts";
 
 export const findValidTorrentProcessor =
   findValidTorrentProcessorSchema.implementAsync(async function ({ job }) {
@@ -84,58 +75,28 @@ export const findValidTorrentProcessor =
                   `Found ${infoHash} in ${plugin.pluginName} cache for ${mediaItem.fullTitle}${provider ? ` on ${provider}` : ""}`,
                 );
 
-                const mapCacheItemsNode = await enqueueMapItemsToFiles({
-                  parent: jobParentOptions,
-                  infoHash,
-                  files: cachedFiles,
-                  jobId: `${infoHash}-map-items-to-files`,
-                });
-
-                const mappedCachedFiles = await runSingleJob(
-                  mapCacheItemsNode.job,
-                );
-
-                await validateTorrentFiles(
+                await getValidTorrentFiles(
                   mediaItem,
                   infoHash,
-                  mappedCachedFiles,
+                  cachedFiles,
                   true,
+                  jobParentOptions,
                 );
               }
 
-              const pluginDownloadNode = await flow.addPluginJob(
-                MediaItemDownloadRequestedEvent,
-                MediaItemDownloadRequestedResponse,
-                `Download ${infoHash}`,
-                plugin.pluginName,
-                { infoHash, provider },
-                {
-                  jobId: [infoHash, plugin.pluginName, provider].join("-"),
-                  removeDependencyOnFailure: true,
-                  parent: jobParentOptions,
-                },
-              );
-
-              const pluginDownloadResult = await runSingleJob(
-                pluginDownloadNode.job,
-              );
-
-              const mapItemsToFilesJobNode = await enqueueMapItemsToFiles({
-                parent: jobParentOptions,
+              const pluginDownloadResult = await getPluginDownloadResult(
                 infoHash,
-                files: pluginDownloadResult.files,
-                jobId: `${infoHash}-download`,
-              });
-
-              const mappedTorrentFiles = await runSingleJob(
-                mapItemsToFilesJobNode.job,
+                plugin.pluginName,
+                provider,
+                jobParentOptions,
               );
 
-              const validatedFiles = await validateTorrentFiles(
+              const validatedFiles = await getValidTorrentFiles(
                 mediaItem,
                 infoHash,
-                mappedTorrentFiles,
+                pluginDownloadResult.files,
                 false,
+                jobParentOptions,
               );
 
               return {

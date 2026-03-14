@@ -25,7 +25,7 @@ test("getMediaEntries() returns the associated media entry for a Movie media ite
   const mediaEntry = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-movie.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: movie,
   });
 
@@ -86,14 +86,14 @@ test("getMediaEntries() returns the associated media entries for a Show media it
   const mediaEntry1 = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-show-s01e01.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: episode1,
   });
 
   const mediaEntry2 = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-show-s01e01.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: episode2,
   });
 
@@ -163,14 +163,14 @@ test("getMediaEntries() returns the associated media entries for a Season media 
   const season1Episode1MediaEntry = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-show-s01e01.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: season1Episode1,
   });
 
   const season2Episode1MediaEntry = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-show-s02e01.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: season2Episode1,
   });
 
@@ -228,7 +228,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
   const mediaEntry = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-show-s01e01.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: episode,
   });
 

@@ -85,11 +85,17 @@ export default {
       event,
     }) => {
       const api = dataSources.get(StremThruAPI);
-      const store = "realdebrid" satisfies Store;
+      const parsedStore = Store.safeParse(event.item.provider);
 
       if (!event.item.downloadUrl) {
         throw new Error("No download URL available for this media item.");
       }
+
+      if (!parsedStore.success) {
+        throw new Error(parsedStore.error.message);
+      }
+
+      const { data: store } = parsedStore;
 
       try {
         return await api.generateLink(event.item.downloadUrl, store);

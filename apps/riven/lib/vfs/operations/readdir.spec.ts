@@ -74,7 +74,7 @@ it("returns all shows for the /shows path", async ({ em }) => {
   em.create(MediaEntry, {
     originalFilename: "Example Episode 1.mkv",
     fileSize: 123456789,
-    provider: "@repo/plugin-test",
+    plugin: "@repo/plugin-test",
     mediaItem: episode,
   });
 
@@ -164,7 +164,7 @@ it("returns all movies for the /movies path", async ({ em }) => {
     em.create(MediaEntry, {
       originalFilename: `Example Movie ${i.toString().padStart(2, "0")}.mkv`,
       fileSize: 987654321,
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: movie,
     });
   }
@@ -231,7 +231,7 @@ it("returns all seasons for a single show path", async ({ em }) => {
     em.create(MediaEntry, {
       originalFilename: "Example Episode 1.mkv",
       fileSize: 123456789,
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: episode,
     });
   }
@@ -301,7 +301,7 @@ it("does not return entries for a season that does not have any episodes with a 
       em.create(MediaEntry, {
         originalFilename: "Example Episode 1.mkv",
         fileSize: 123456789,
-        provider: "@repo/plugin-test",
+        plugin: "@repo/plugin-test",
         mediaItem: episode,
       });
     }
@@ -365,7 +365,7 @@ it("returns all episodes for a single season path", async ({ em }) => {
     em.create(MediaEntry, {
       originalFilename: `Example Episode ${i.toString().padStart(2, "0")}.mkv`,
       fileSize: 123456789,
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: episode,
     });
   }
@@ -435,7 +435,7 @@ it("does not return entries for episodes that does not have a media entry when v
       em.create(MediaEntry, {
         originalFilename: `Example Episode ${i.toString().padStart(2, "0")}.mkv`,
         fileSize: 123456789,
-        provider: "@repo/plugin-test",
+        plugin: "@repo/plugin-test",
         mediaItem: episode,
       });
     }
@@ -475,7 +475,7 @@ it("returns the media entry's filename when viewing a single movie's directory",
   em.create(MediaEntry, {
     originalFilename: "Example Movie 01.mkv",
     fileSize: 987654321,
-    provider: "@repo/plugin-test",
+    plugin: "@repo/plugin-test",
     mediaItem: movie,
   });
 
@@ -514,7 +514,7 @@ it('does not return entries for the "all movies" path when a movie does not have
       em.create(MediaEntry, {
         originalFilename: `Example Movie ${i.toString().padStart(2, "0")}.mkv`,
         fileSize: 987654321,
-        provider: "@repo/plugin-test",
+        plugin: "@repo/plugin-test",
         mediaItem: movie,
       });
     }

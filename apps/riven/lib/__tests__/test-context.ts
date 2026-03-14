@@ -187,7 +187,7 @@ export const rivenTestContext = testBase.extend<{
       fileSize: 1024,
       downloadUrl: "http://example.com/file.mp4",
       originalFilename: "file.mp4",
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
     });
 
     await use(mediaEntry);

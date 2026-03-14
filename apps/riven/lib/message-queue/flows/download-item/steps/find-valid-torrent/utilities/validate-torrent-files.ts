@@ -113,6 +113,8 @@ export const validateTorrentFiles = async (
           if (item.runtime && settings.minimumAverageBitrateMovies) {
             const bitrate = calculateAverageBitrate(file.size, item.runtime);
 
+            // TODO: If this assertion fails, we can probably skip checking all other files.
+            // Average bitrate is proportional to the file size, and the files are ordered by size.
             assert(
               bitrate >= settings.minimumAverageBitrateMovies,
               `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateMovies.toString()} for movies`,

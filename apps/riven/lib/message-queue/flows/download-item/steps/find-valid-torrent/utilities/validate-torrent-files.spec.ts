@@ -10,7 +10,7 @@ type MappedFiles = MapItemsToFilesFlow["output"];
 it("throws an error if season-like torrent has fewer files than expected", async ({
   season,
 }) => {
-  const mappedFiles: MappedFiles = {
+  const mappedFiles = {
     episodes: {},
     movies: {
       "1": {
@@ -20,7 +20,7 @@ it("throws an error if season-like torrent has fewer files than expected", async
         link: "http://example.com/file.mkv",
       },
     },
-  };
+  } satisfies MappedFiles;
 
   await expect(
     validateTorrentFiles(season, "test", mappedFiles, false),
@@ -55,10 +55,10 @@ it("considers torrents for continuing shows as valid if missing a maximum of one
     };
   }, {});
 
-  const mappedFiles: MappedFiles = {
+  const mappedFiles = {
     movies: {},
     episodes: files,
-  };
+  } satisfies MappedFiles;
 
   await expect(
     validateTorrentFiles(show, "test", mappedFiles, false),

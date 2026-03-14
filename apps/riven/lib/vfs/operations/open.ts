@@ -98,14 +98,14 @@ async function open(
     !fileNameIsFetchingLinkMap.get(entry.originalFilename)
   ) {
     logger.silly(
-      `No stream URL for media entry ${entry.id.toString()}, requesting from ${entry.provider}...`,
+      `No stream URL for media entry ${entry.id.toString()}, requesting from ${entry.plugin}...`,
     );
 
-    const requestQueue = linkRequestQueues.get(entry.provider);
+    const requestQueue = linkRequestQueues.get(entry.plugin);
 
     if (!requestQueue) {
       logger.error(
-        `No link request queue found for ${entry.provider} when opening file at path ${path}`,
+        `No link request queue found for ${entry.plugin} when opening file at path ${path}`,
       );
 
       throw new FuseError(

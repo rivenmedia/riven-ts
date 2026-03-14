@@ -83,9 +83,10 @@ export async function persistDownloadResults({
             fileSize: file.size,
             originalFilename: file.name,
             mediaItem: ref(existingItem),
-            provider: processedBy,
+            provider: torrent.provider,
             providerDownloadId: torrent.torrentId,
             downloadUrl: file.link,
+            plugin: processedBy,
           }),
         );
       }
@@ -138,9 +139,10 @@ export async function persistDownloadResults({
               fileSize: file.size,
               originalFilename: file.name,
               mediaItem: ref(episode),
-              provider: processedBy,
+              provider: torrent.provider,
               providerDownloadId: torrent.torrentId,
               downloadUrl: file.link,
+              plugin: processedBy,
             }),
           );
 

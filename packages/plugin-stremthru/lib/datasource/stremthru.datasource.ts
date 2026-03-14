@@ -3,7 +3,11 @@ import {
   type BasePluginContext,
   type ParamsFor,
 } from "@repo/util-plugin-sdk";
-import { Episode, Movie, Season } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  Episode,
+  Season,
+  ShowLikeMediaItem,
+} from "@repo/util-plugin-sdk/dto/entities";
 import { z } from "@repo/util-plugin-sdk/validation";
 
 import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.js";
@@ -188,25 +192,33 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
     Record<string, string>
   > {
     try {
-      const params: Record<string, string> = {
-        ...(item.imdbId ? { imdbid: item.imdbId } : { q: item.title }),
+      const params = new URLSearchParams({
         o: "json",
-      };
+      });
 
-      if (item instanceof Movie) {
-        params["t"] = "movie";
-        params["cat"] = "2000";
+      if (item.imdbId) {
+        params.set("imdbid", item.imdbId);
       } else {
-        params["t"] = "tvsearch";
-        params["cat"] = "5000";
+        params.set("q", item.title);
+      }
 
-        if (item instanceof Season) {
-          params["season"] = item.number.toString();
-        } else if (item instanceof Episode) {
-          const seasonNumber = await item.season.loadProperty("number");
-          params["season"] = seasonNumber.toString();
-          params["ep"] = item.number.toString();
-        }
+      if (item instanceof ShowLikeMediaItem) {
+        params.set("t", "tvsearch");
+        params.set("cat", "5000");
+      } else {
+        params.set("t", "movie");
+        params.set("cat", "2000");
+      }
+
+      if (item instanceof Season) {
+        params.set("season", item.number.toString());
+      }
+
+      if (item instanceof Episode) {
+        const seasonNumber = await item.season.loadProperty("number");
+
+        params.set("season", seasonNumber.toString());
+        params.set("ep", item.number.toString());
       }
 
       const response = await this.get<unknown>("v0/torznab/api", { params });
@@ -217,6 +229,7 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
         this.logger.warn(
           `Invalid torznab response for ${item.fullTitle} (IMDB: ${item.imdbId ?? "N/A"})`,
         );
+
         return {};
       }
 
@@ -243,6 +256,7 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
       return torrents;
     } catch (error: unknown) {
       this.logger.error(error);
+
       return {};
     }
   }

@@ -36,7 +36,11 @@ export class MediaEntry extends FileSystemEntry {
 
   @Field()
   @Property()
-  provider!: string;
+  plugin!: string;
+
+  @Field()
+  @Property()
+  provider!: string | null;
 
   @Field({ nullable: true })
   @Property()
