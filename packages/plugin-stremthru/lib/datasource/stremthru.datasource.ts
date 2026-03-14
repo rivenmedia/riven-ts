@@ -115,8 +115,6 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
         );
       }
 
-      await this.removeTorrent(data.id, store);
-
       throw new StremThruAPIError(
         `${infoHash} was in the ${data.status} state on ${store}; the torrent will not be downloaded.`,
       );
