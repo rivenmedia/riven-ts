@@ -1,25 +1,27 @@
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { pluginConfig } from "../../{{kebabCase pluginName}}-plugin.config.ts";
-import { {{pascalCase pluginName}}API } from "../{{kebabCase pluginName}}.datasource.ts";
+import { pluginConfig } from "../../comet-plugin.config.ts";
+import { CometAPI } from "../comet.datasource.ts";
 
 it("returns false if the request fails", async ({
   server,
   dataSourceConfig,
 }) => {
   server.use(
-    http.get("**/validate", () => HttpResponse.json({ success: false }, { status: 401 })),
-  )
+    http.get("**/validate", () =>
+      HttpResponse.json({ success: false }, { status: 401 }),
+    ),
+  );
 
-  const {{camelCase pluginName}}Api = new {{pascalCase pluginName}}API({
+  const cometApi = new CometAPI({
     ...dataSourceConfig,
     pluginSymbol: pluginConfig.name,
     settings: {},
   });
-  const isValid = await {{camelCase pluginName}}Api.validate();
+  const isValid = await cometApi.validate();
 
   expect(isValid).toBe(false);
 });
@@ -30,14 +32,14 @@ it("returns true if the request succeeds", async ({
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
-  )
+  );
 
-  const {{camelCase pluginName}}Api = new {{pascalCase pluginName}}API({
+  const cometApi = new CometAPI({
     ...dataSourceConfig,
     pluginSymbol: pluginConfig.name,
     settings: {},
   });
-  const isValid = await {{camelCase pluginName}}Api.validate();
+  const isValid = await cometApi.validate();
 
   expect(isValid).toBe(true);
 });
