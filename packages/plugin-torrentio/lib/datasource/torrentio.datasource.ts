@@ -93,7 +93,7 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
 
       if (torrentsCount >= 0) {
         this.logger.info(
-          `Found ${torrentsCount.toString()} torrents for ${item.fullTitle} (IMDB: ${item.imdbId})`,
+          `Found ${torrentsCount.toString()} torrents from ${this.serviceName} for ${item.fullTitle} (IMDB: ${item.imdbId})`,
         );
       } else {
         this.logger.info(

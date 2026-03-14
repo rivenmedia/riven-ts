@@ -232,7 +232,7 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
       }
 
       this.logger.info(
-        `Found ${Object.keys(torrents).length.toString()} torrents for ${item.fullTitle} (IMDB: ${item.imdbId ?? "N/A"})`,
+        `Found ${Object.keys(torrents).length.toString()} torrents from ${this.serviceName} for ${item.fullTitle} (IMDB: ${item.imdbId ?? "N/A"})`,
       );
 
       return torrents;
