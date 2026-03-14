@@ -71,6 +71,15 @@ export default {
         providers: enabledProviders,
       };
     },
+    "riven.media-item.scrape.requested": async ({ dataSources, event }) => {
+      const api = dataSources.get(StremThruAPI);
+      const results = await api.scrape(event);
+
+      return {
+        id: event.item.id,
+        results,
+      };
+    },
     "riven.media-item.stream-link.requested": async ({
       dataSources,
       event,

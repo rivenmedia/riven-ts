@@ -1,4 +1,10 @@
-import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
+import {
+  BaseDataSource,
+  type BasePluginContext,
+  type ParamsFor,
+} from "@repo/util-plugin-sdk";
+import { Episode, Movie, Season } from "@repo/util-plugin-sdk/dto/entities";
+import { z } from "@repo/util-plugin-sdk/validation";
 
 import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.js";
 import { CacheCheckResponse } from "../schemas/cache-check-response.schema.js";
@@ -14,7 +20,26 @@ import type {
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
 import type { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
+import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+
+const TorznabItem = z.object({
+  title: z.string(),
+  attr: z.array(
+    z.object({
+      "@attributes": z.object({
+        name: z.string(),
+        value: z.string(),
+      }),
+    }),
+  ),
+});
+
+const TorznabResponse = z.object({
+  channel: z.object({
+    items: z.array(TorznabItem).default([]),
+  }),
+});
 
 const storeNameHeader = "x-stremthru-store-name";
 
@@ -31,9 +56,13 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
   }
 
   protected override willSendRequest(
-    _path: string,
+    path: string,
     requestOpts: AugmentedRequest,
   ): ValueOrPromise<void> {
+    if (path.startsWith("v0/torznab")) {
+      return;
+    }
+
     const { data: store } = Store.safeParse(
       requestOpts.headers[storeNameHeader],
     );
@@ -57,7 +86,7 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
     const store = request.headers?.[storeNameHeader];
 
     if (!store) {
-      throw new Error("Missing store for StremThruAPI cache key");
+      return baseKey;
     }
 
     return `${baseKey}:${store}`;
@@ -151,6 +180,71 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
     const { data } = GenerateLinkResponse.parse(response);
 
     return data;
+  }
+
+  async scrape({
+    item,
+  }: ParamsFor<MediaItemScrapeRequestedEvent>): Promise<
+    Record<string, string>
+  > {
+    try {
+      const params: Record<string, string> = {
+        ...(item.imdbId ? { imdbid: item.imdbId } : { q: item.title }),
+        o: "json",
+      };
+
+      if (item instanceof Movie) {
+        params["t"] = "movie";
+        params["cat"] = "2000";
+      } else {
+        params["t"] = "tvsearch";
+        params["cat"] = "5000";
+
+        if (item instanceof Season) {
+          params["season"] = item.number.toString();
+        } else if (item instanceof Episode) {
+          const seasonNumber = await item.season.loadProperty("number");
+          params["season"] = seasonNumber.toString();
+          params["ep"] = item.number.toString();
+        }
+      }
+
+      const response = await this.get<unknown>("v0/torznab/api", { params });
+
+      const parsed = TorznabResponse.safeParse(response);
+
+      if (!parsed.success) {
+        this.logger.warn(
+          `Invalid torznab response for ${item.fullTitle} (IMDB: ${item.imdbId ?? "N/A"})`,
+        );
+        return {};
+      }
+
+      const torrents: Record<string, string> = {};
+
+      for (const torznabItem of parsed.data.channel.items) {
+        const infoHashAttr = torznabItem.attr.find(
+          (a) => a["@attributes"].name === "infohash",
+        );
+
+        const infoHash = infoHashAttr?.["@attributes"].value;
+
+        if (!infoHash || !torznabItem.title) {
+          continue;
+        }
+
+        torrents[infoHash] = torznabItem.title;
+      }
+
+      this.logger.info(
+        `Found ${Object.keys(torrents).length.toString()} torrents for ${item.fullTitle} (IMDB: ${item.imdbId ?? "N/A"})`,
+      );
+
+      return torrents;
+    } catch (error: unknown) {
+      this.logger.error(error);
+      return {};
+    }
   }
 }
 
