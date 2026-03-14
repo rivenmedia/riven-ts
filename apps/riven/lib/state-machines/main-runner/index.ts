@@ -15,6 +15,8 @@ import { RequestIndexDataFlow } from "../../message-queue/flows/index-item/index
 import { flow } from "../../message-queue/flows/producer.ts";
 import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
 import { RequestContentServicesFlow } from "../../message-queue/flows/request-content-services/request-content-services.schema.ts";
+import { requestSubtitlesProcessor } from "../../message-queue/flows/request-subtitles/request-subtitles.processor.ts";
+import { RequestSubtitlesFlow } from "../../message-queue/flows/request-subtitles/request-subtitles.schema.ts";
 import { scrapeItemProcessor } from "../../message-queue/flows/scrape-item/scrape-item.processor.ts";
 import { ScrapeItemFlow } from "../../message-queue/flows/scrape-item/scrape-item.schema.ts";
 import { parseScrapeResultsProcessor } from "../../message-queue/flows/scrape-item/steps/parse-scrape-results/parse-scrape-results.processor.ts";
@@ -29,6 +31,7 @@ import { requestContentServices } from "./actors/request-content-services.actor.
 import { requestDownload } from "./actors/request-download.actor.ts";
 import { requestIndexData } from "./actors/request-index-data.actor.ts";
 import { requestScrape } from "./actors/request-scrape.actor.ts";
+import { requestSubtitles } from "./actors/request-subtitles.actor.ts";
 import { retryLibrary } from "./actors/retry-library.actor.ts";
 import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscribers.ts";
 
@@ -36,6 +39,7 @@ import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
 import type { EnqueueDownloadItemInput } from "../../message-queue/flows/download-item/enqueue-download-item.ts";
 import type { EnqueueIndexItemInput } from "../../message-queue/flows/index-item/enqueue-index-item.ts";
 import type { Flow } from "../../message-queue/flows/index.ts";
+import type { EnqueueRequestSubtitlesInput } from "../../message-queue/flows/request-subtitles/enqueue-request-subtitles.ts";
 import type { EnqueueScrapeItemInput } from "../../message-queue/flows/scrape-item/enqueue-scrape-item.ts";
 import type {
   PluginQueueMap,
@@ -80,6 +84,7 @@ export const mainRunnerMachine = setup({
       requestContentServices: "requestContentServices";
       requestIndexData: "requestIndexData";
       requestScrape: "requestScrape";
+      requestSubtitles: "requestSubtitles";
       fanOutDownload: "fanOutDownload";
     },
   },
@@ -203,6 +208,22 @@ export const mainRunnerMachine = setup({
         });
       },
     ),
+    requestSubtitles: enqueueActions(
+      (
+        { enqueue, context: { plugins } },
+        params: Omit<EnqueueRequestSubtitlesInput, "subscribers">,
+      ) => {
+        enqueue.spawnChild(requestSubtitles, {
+          input: {
+            item: params.item,
+            subscribers: getPluginEventSubscribers(
+              "riven.media-item.subtitle.requested",
+              plugins,
+            ),
+          },
+        });
+      },
+    ),
     retryLibrary: enqueueActions(({ enqueue, self }) => {
       enqueue.spawnChild(retryLibrary, {
         input: {
@@ -216,6 +237,7 @@ export const mainRunnerMachine = setup({
     requestIndexData,
     requestScrape,
     requestDownload,
+    requestSubtitles,
     fanOutDownload,
     retryLibrary,
   },
@@ -311,6 +333,13 @@ export const mainRunnerMachine = setup({
             RankStreamsFlow,
             rankStreamsProcessor,
             self.send,
+          ),
+          "request-subtitles": createFlowWorker(
+            RequestSubtitlesFlow,
+            requestSubtitlesProcessor,
+            self.send,
+            {},
+            { concurrency: 1 },
           ),
         },
       };
@@ -510,6 +539,10 @@ export const mainRunnerMachine = setup({
             }) => ({
               message: `Successfully downloaded ${fullTitle} in ${durationFromRequestToDownload.toString()} seconds using ${downloader}`,
             }),
+          },
+          {
+            type: "requestSubtitles",
+            params: ({ event: { item } }) => ({ item }),
           },
         ],
       },

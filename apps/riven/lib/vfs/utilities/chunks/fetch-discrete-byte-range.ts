@@ -5,11 +5,11 @@ import { chunkCache } from "../chunk-cache.ts";
 import { createStreamRequest } from "../requests/create-stream-request.ts";
 import { createChunkCacheKey } from "./create-chunk-cache-key.ts";
 
-import type { FileHandleMetadata } from "../file-handle-map.ts";
+import type { MediaFileHandleMetadata } from "../file-handle-map.ts";
 
 export const fetchDiscreteByteRange = async (
   fd: number,
-  fileHandle: FileHandleMetadata,
+  fileHandle: MediaFileHandleMetadata,
   [start, end]: readonly [number, number],
   shouldCache = true,
 ) => {

@@ -1,5 +1,5 @@
 import Fuse from "@zkochan/fuse-native";
-import { basename } from "node:path";
+import { basename, extname } from "node:path";
 import { setTimeout } from "node:timers/promises";
 
 import { database } from "../../database/database.ts";
@@ -24,6 +24,31 @@ import type {
 import type { Queue } from "bullmq";
 
 let fd = 0;
+
+async function getSubtitleEntry(path: string) {
+  const pathInfo = PathInfo.parse(path);
+  const fileName = pathInfo.base;
+
+  if (pathInfo.tmdbId) {
+    return database.subtitleEntry.findOne({
+      mediaItem: { tmdbId: pathInfo.tmdbId },
+      path: { $like: `%${fileName}` },
+    });
+  }
+
+  if (pathInfo.tvdbId && pathInfo.season && pathInfo.episode) {
+    return database.subtitleEntry.findOne({
+      mediaItem: {
+        type: "episode",
+        number: pathInfo.episode,
+        season: { number: pathInfo.season },
+      },
+      path: { $like: `%${fileName}` },
+    });
+  }
+
+  return null;
+}
 
 async function getItemEntry(path: string) {
   const pathInfo = PathInfo.parse(path);
@@ -62,6 +87,32 @@ async function open(
     >
   >,
 ) {
+  // Handle subtitle files (.srt) — serve directly from DB content
+  if (extname(path) === ".srt") {
+    const subtitleEntry = await getSubtitleEntry(path);
+
+    if (!subtitleEntry) {
+      throw new FuseError(Fuse.ENOENT, `Subtitle not found for path: ${path}`);
+    }
+
+    const contentBuffer = Buffer.from(subtitleEntry.content, "utf8");
+    const nextFd = fd++;
+
+    fdToFileHandleMeta.set(nextFd, {
+      type: "subtitle",
+      fileSize: contentBuffer.length,
+      filePath: path,
+      fileBaseName: basename(path),
+      contentBuffer,
+    });
+
+    logger.debug(
+      `Opened subtitle file at path ${path} with fd ${nextFd.toString()}`,
+    );
+
+    return nextFd;
+  }
+
   const entry = await getItemEntry(path);
 
   if (
@@ -155,6 +206,7 @@ async function open(
   );
 
   fdToFileHandleMeta.set(nextFd, {
+    type: "media",
     fileSize: entry.fileSize,
     filePath: path,
     fileBaseName: basename(path),
