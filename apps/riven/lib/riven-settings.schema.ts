@@ -49,4 +49,14 @@ export const RivenSettings = z.object({
     .stringbool()
     .default(false)
     .describe("Only scrape dubbed anime."),
+  minimumAverageBitrateMovies: z
+    .int()
+    .positive()
+    .optional()
+    .describe("The minimum average bitrate for movies."),
+  minimumAverageBitrateEpisodes: z
+    .int()
+    .positive()
+    .optional()
+    .describe("The minimum average bitrate for episodes."),
 });

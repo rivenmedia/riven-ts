@@ -46,6 +46,9 @@ export class Episode extends ShowLikeMediaItem {
   @Property()
   isSpecial!: boolean;
 
+  @Property()
+  runtime!: number | null;
+
   @Field(() => ShowContentRatingEnum)
   declare contentRating: ShowContentRating;
 

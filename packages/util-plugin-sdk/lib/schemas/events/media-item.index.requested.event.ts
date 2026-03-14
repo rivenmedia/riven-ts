@@ -67,6 +67,7 @@ export const MediaItemIndexRequestedResponse = z
         type: z.literal("movie"),
         releaseDate: z.iso.date().nullish(),
         contentRating: MovieContentRating,
+        runtime: z.int().positive().nullable(),
       }),
     ]),
   })

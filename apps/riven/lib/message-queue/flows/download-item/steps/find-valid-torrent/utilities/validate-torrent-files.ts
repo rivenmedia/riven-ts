@@ -14,6 +14,7 @@ import assert, { AssertionError } from "node:assert";
 
 import { database } from "../../../../../../database/database.ts";
 import { logger } from "../../../../../../utilities/logger/logger.ts";
+import { settings } from "../../../../../../utilities/settings.ts";
 import { MatchedFile } from "../find-valid-torrent.schema.ts";
 
 import type { MapItemsToFilesFlow } from "../../map-items-to-files/map-items-to-files.schema.ts";
@@ -49,7 +50,7 @@ function getEpisodeLookupKeys(episode: Episode) {
   ];
 }
 
-async function getItemLookupKeys(item: MediaItem) {
+async function getItemLookupKeys(item: ShowLikeMediaItem) {
   if (item instanceof Show || item instanceof Season) {
     const episodes =
       item instanceof Show
@@ -66,7 +67,11 @@ async function getItemLookupKeys(item: MediaItem) {
     return getEpisodeLookupKeys(item);
   }
 
-  return ["0"];
+  throw new Error("Movies do not have lookup keys");
+}
+
+function calculateAverageBitrate(fileSize: number, runtime: number) {
+  return fileSize / runtime / (1024 * 1024);
 }
 
 export const validateTorrentFiles = async (
@@ -92,24 +97,27 @@ export const validateTorrentFiles = async (
     );
 
     const validFiles: MatchedFile[] = [];
-    const lookupKeys = await getItemLookupKeys(item);
 
-    for (const lookupKey of lookupKeys) {
-      const file = groupMap.get(lookupKey);
+    if (item instanceof Movie) {
+      const files = groupMap
+        .values()
+        .toArray()
+        .sort((a, b) => b.size - a.size);
 
-      if (!file) {
-        continue;
-      }
+      for (const file of files) {
+        try {
+          const parseData = parse(file.name);
 
-      logger.debug(
-        `Found match in ${isCacheCheck ? "cached files" : "torrent files"}: ${file.name} for item ${item.fullTitle} using lookup key '${lookupKey}'`,
-      );
-
-      try {
-        const parseData = parse(file.name);
-
-        if (item instanceof Movie) {
           assert(parseData.type === "movie", "File must be a movie");
+
+          if (item.runtime && settings.minimumAverageBitrateMovies) {
+            const bitrate = calculateAverageBitrate(file.size, item.runtime);
+
+            assert(
+              bitrate >= settings.minimumAverageBitrateMovies,
+              `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateMovies.toString()} for movies`,
+            );
+          }
 
           validFiles.push(
             MatchedFile.encode({
@@ -118,9 +126,35 @@ export const validateTorrentFiles = async (
               isCachedFile: isCacheCheck,
             }),
           );
+
+          break;
+        } catch (error) {
+          logger.debug(
+            `File ${file.name} failed validation: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          );
+        }
+      }
+    }
+
+    if (item instanceof ShowLikeMediaItem) {
+      const lookupKeys = await getItemLookupKeys(item);
+
+      for (const lookupKey of lookupKeys) {
+        const file = groupMap.get(lookupKey);
+
+        if (!file) {
+          continue;
         }
 
-        if (item instanceof ShowLikeMediaItem) {
+        logger.debug(
+          `Found match in ${isCacheCheck ? "cached files" : "torrent files"}: ${file.name} for item ${item.fullTitle} using lookup key '${lookupKey}'`,
+        );
+
+        try {
+          const parseData = parse(file.name);
+
           assert(
             parseData.type === "show",
             "Expected an episode, but found a movie",
@@ -160,6 +194,15 @@ export const validateTorrentFiles = async (
                 episodeSeasonNumber === itemSeasonNumber,
               `Incorrect episode for ${item.fullTitle}`,
             );
+
+            if (item.runtime && settings.minimumAverageBitrateEpisodes) {
+              const bitrate = calculateAverageBitrate(file.size, item.runtime);
+
+              assert(
+                bitrate >= settings.minimumAverageBitrateEpisodes,
+                `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateEpisodes.toString()} for episodes`,
+              );
+            }
           }
 
           validFiles.push(
@@ -169,13 +212,13 @@ export const validateTorrentFiles = async (
               isCachedFile: isCacheCheck,
             }),
           );
+        } catch (error) {
+          logger.debug(
+            `File ${file.name} failed validation: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          );
         }
-      } catch (error) {
-        logger.debug(
-          `File ${file.name} failed validation: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
       }
     }
 

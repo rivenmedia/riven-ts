@@ -21,6 +21,9 @@ import type { ItemRequest } from "../requests/item-request.entity.ts";
 @ObjectType()
 @Entity()
 export class Movie extends MediaItem {
+  @Property()
+  runtime!: number | null;
+
   @Field(() => MovieContentRatingEnum)
   declare contentRating: MovieContentRating;
 

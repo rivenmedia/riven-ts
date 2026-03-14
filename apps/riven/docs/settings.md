@@ -18,5 +18,7 @@ _Object containing the following properties:_
 | `logDirectory`                   | The directory where log files will be stored.                                       | `string`                                                                   | `'./logs'`           |
 | `gqlPort`                        | The GraphQL server port.                                                            | `number` (_int_)                                                           | `3000`               |
 | `dubbedAnimeOnly`                | Only scrape dubbed anime.                                                           | `boolean`                                                                  | `false`              |
+| `minimumAverageBitrateMovies`    | The minimum average bitrate for movies.                                             | `number` (_>0_)                                                            |                      |
+| `minimumAverageBitrateEpisodes`  | The minimum average bitrate for episodes.                                           | `number` (_>0_)                                                            |                      |
 
 _(\*) Required._
