@@ -1,38 +1,38 @@
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import assert from "node:assert";
 import { expect } from "vitest";
 
-import { {{pascalCase pluginName}}API } from "../../datasource/{{kebabCase pluginName}}.datasource.ts";
-import { pluginConfig } from "../../{{kebabCase pluginName}}-plugin.config.ts";
+import { pluginConfig } from "../../comet-plugin.config.ts";
+import { CometAPI } from "../../datasource/comet.datasource.ts";
 
-it('returns the validation status when calling "{{camelCase pluginName}}IsValid" query', async ({
+it('returns the validation status when calling "cometIsValid" query', async ({
   gqlServer,
   server,
   dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
-  )
+  );
 
   const { body } = await gqlServer.executeOperation(
     {
       query: `
-        query {{pascalCase pluginName}}IsValid {
-          {{camelCase pluginName}}IsValid
+        query CometIsValid {
+          cometIsValid
         }
       `,
     },
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new {{pascalCase pluginName}}API({
+          api: new CometAPI({
             ...dataSourceConfig,
             pluginSymbol: pluginConfig.name,
             settings: {},
           }),
-        }
+        },
       },
     },
   );
@@ -40,5 +40,5 @@ it('returns the validation status when calling "{{camelCase pluginName}}IsValid"
   assert(body.kind === "single");
 
   expect(body.singleResult.errors).toBeUndefined();
-  expect(body.singleResult.data?.["{{camelCase pluginName}}IsValid"]).toBe(true);
+  expect(body.singleResult.data?.["cometIsValid"]).toBe(true);
 });
