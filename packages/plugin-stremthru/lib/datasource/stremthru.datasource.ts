@@ -8,7 +8,6 @@ import {
   Season,
   ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
-import { z } from "@repo/util-plugin-sdk/validation";
 
 import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.js";
 import { CacheCheckResponse } from "../schemas/cache-check-response.schema.js";
@@ -16,6 +15,7 @@ import { DeleteTorrentResponse } from "../schemas/delete-torrent-response.schema
 import { GenerateLinkResponse } from "../schemas/generate-link-response.schema.js";
 import { ItemStatus } from "../schemas/item-status.schema.js";
 import { Store } from "../schemas/store.schema.ts";
+import { TorznabResponse } from "../schemas/torznab-response.schema.ts";
 
 import type { StremThruSettings } from "../stremthru-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
@@ -26,24 +26,6 @@ import type {
 import type { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
-
-const TorznabItem = z.object({
-  title: z.string(),
-  attr: z.array(
-    z.object({
-      "@attributes": z.object({
-        name: z.string(),
-        value: z.string(),
-      }),
-    }),
-  ),
-});
-
-const TorznabResponse = z.object({
-  channel: z.object({
-    items: z.array(TorznabItem).default([]),
-  }),
-});
 
 const storeNameHeader = "x-stremthru-store-name";
 
