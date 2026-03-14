@@ -10,7 +10,7 @@ import { it } from "@repo/util-plugin-testing/plugin-test-context";
 import { parse } from "@repo/util-rank-torrent-name";
 
 import { Job, UnrecoverableError } from "bullmq";
-import { DateTime, Settings } from "luxon";
+import { Settings } from "luxon";
 import { expect, vi } from "vitest";
 
 import { database } from "../../../database/database.ts";
@@ -61,11 +61,12 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
 
   const mockQueue = createQueue("mock-queue");
   const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
-    await Job.create(mockQueue, "mock-download-item", {
-      id: 1,
-    });
-
-  const expectedDuration = 1;
+    await Job.create(
+      mockQueue,
+      "mock-download-item",
+      { id: 1 },
+      { timestamp: 1000 },
+    );
 
   const em = database.orm.em.fork();
 
@@ -81,7 +82,6 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     contentRating: "g",
     title: "Test Movie",
     year: 2024,
-    createdAt: DateTime.now().minus({ seconds: expectedDuration }).toJSDate(),
     itemRequest,
   });
 
@@ -101,6 +101,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
       result: {
         torrentId: "1234",
         infoHash: streamInfoHash,
+        provider: null,
         files: [
           {
             name: "Test Movie 2024 1080p.mkv",
@@ -121,8 +122,9 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.success",
     item: expect.any(Movie) as Movie,
-    durationFromRequestToDownload: expectedDuration,
+    durationFromRequestToDownload: 9,
     downloader: "@repo/plugin-test",
+    provider: null,
   });
 });
 
@@ -200,6 +202,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
       result: {
         torrentId: "1234",
         infoHash: streamInfoHash,
+        provider: null,
         files: [
           {
             name: "Test Show S01E01 2024 1080p.mkv",
