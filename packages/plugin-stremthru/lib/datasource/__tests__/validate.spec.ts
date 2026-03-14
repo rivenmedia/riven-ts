@@ -19,7 +19,7 @@ it("returns false if the request fails", async ({
     ...dataSourceConfig,
     pluginSymbol: Symbol("@repo/plugin-stremthru"),
     settings: {
-      store: {},
+      stremThruUrl: "https://stremthru.13377001.xyz/",
     },
   });
   const isValid = await stremThruApi.validate();
@@ -39,7 +39,7 @@ it("returns true if the request succeeds", async ({
     ...dataSourceConfig,
     pluginSymbol: Symbol("@repo/plugin-stremthru"),
     settings: {
-      store: {},
+      stremThruUrl: "https://stremthru.13377001.xyz/",
     },
   });
   const isValid = await stremThruApi.validate();

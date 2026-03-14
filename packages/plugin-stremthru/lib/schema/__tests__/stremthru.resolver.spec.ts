@@ -31,7 +31,7 @@ it('returns the validation status when calling "stremthruIsValid" query', async 
             ...dataSourceConfig,
             pluginSymbol: Symbol("@repo/plugin-stremthru"),
             settings: {
-              store: {},
+              stremThruUrl: "https://stremthru.13377001.xyz/",
             },
           }),
         },

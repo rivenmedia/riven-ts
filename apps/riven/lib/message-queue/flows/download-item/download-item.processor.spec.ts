@@ -19,7 +19,7 @@ import { downloadItemProcessor } from "./download-item.processor.ts";
 
 import type { DownloadItemFlow } from "./download-item.schema.ts";
 
-it("throws an unrecoverable error if no valid torrent container is found", async () => {
+it("throws an unrecoverable error if no valid torrent is found", async () => {
   const sendEvent = vi.fn();
 
   const em = database.em.fork();
@@ -97,7 +97,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   await em.flush();
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "find-valid-torrent-container": {
+    "find-valid-torrent": {
       result: {
         torrentId: "1234",
         infoHash: streamInfoHash,
@@ -198,7 +198,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
     });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "find-valid-torrent-container": {
+    "find-valid-torrent": {
       result: {
         torrentId: "1234",
         infoHash: streamInfoHash,
@@ -235,7 +235,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
   });
 });
 
-it('sends a "riven.media-item.download.error" event if no valid torrent container is found', async () => {
+it('sends a "riven.media-item.download.error" event if no valid torrent is found', async () => {
   const sendEvent = vi.fn();
 
   const em = database.em.fork();
@@ -272,6 +272,6 @@ it('sends a "riven.media-item.download.error" event if no valid torrent containe
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.error",
     item: expect.any(Movie) as Movie,
-    error: "No valid torrent container found",
+    error: "No valid torrent found",
   });
 });

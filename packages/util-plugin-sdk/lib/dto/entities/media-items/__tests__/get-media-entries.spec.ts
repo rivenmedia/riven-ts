@@ -60,6 +60,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
   const season = em.create(Season, {
     title: "Season 1",
     number: 1,
+    isSpecial: false,
   });
 
   show.seasons.add(season);
@@ -71,6 +72,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     number: 1,
     absoluteNumber: 1,
     contentRating: "tv-14",
+    isSpecial: false,
   });
 
   const episode2 = em.create(Episode, {
@@ -78,6 +80,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     number: 2,
     absoluteNumber: 2,
     contentRating: "tv-14",
+    isSpecial: false,
   });
 
   const mediaEntry1 = em.create(MediaEntry, {
@@ -128,11 +131,13 @@ test("getMediaEntries() returns the associated media entries for a Season media 
   const season1 = em.create(Season, {
     title: "Season 1",
     number: 1,
+    isSpecial: false,
   });
 
   const season2 = em.create(Season, {
     title: "Season 2",
     number: 1,
+    isSpecial: false,
   });
 
   show.seasons.add(season1, season2);
@@ -144,6 +149,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     number: 1,
     absoluteNumber: 1,
     contentRating: "tv-14",
+    isSpecial: false,
   });
 
   const season2Episode1 = em.create(Episode, {
@@ -151,6 +157,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     number: 1,
     absoluteNumber: 2,
     contentRating: "tv-14",
+    isSpecial: false,
   });
 
   const season1Episode1MediaEntry = em.create(MediaEntry, {
@@ -203,6 +210,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
   const season = em.create(Season, {
     title: "Season 1",
     number: 1,
+    isSpecial: false,
   });
 
   show.seasons.add(season);
@@ -214,6 +222,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     number: 1,
     absoluteNumber: 1,
     contentRating: "tv-14",
+    isSpecial: false,
   });
 
   const mediaEntry = em.create(MediaEntry, {

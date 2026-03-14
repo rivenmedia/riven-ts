@@ -11,9 +11,9 @@ it.todo(
 it.todo("returns the plugin and validated result on successful validation");
 
 it.todo(
-  "updates job data with the failed info hash when an invalid torrent container is returned",
+  "updates job data with the failed info hash when an invalid torrent is returned",
 );
 
 it.todo(
-  "throws UnrecoverableError if no valid torrent container found after trying all plugins",
+  "throws UnrecoverableError if no valid torrent found after trying all plugins",
 );

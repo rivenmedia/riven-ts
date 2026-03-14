@@ -20,18 +20,18 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
       sendEvent({
         type: "riven.media-item.download.error",
         item,
-        error: "No valid torrent container found",
+        error: "No valid torrent found",
       });
 
       throw new UnrecoverableError(
-        "No torrent container returned from downloaders",
+        "No valid torrent found after trying all downloaders",
       );
     }
 
     try {
       const updatedItem = await persistDownloadResults({
         id: job.data.id,
-        container: finalResult.result,
+        torrent: finalResult.result,
         processedBy: finalResult.plugin,
       });
 

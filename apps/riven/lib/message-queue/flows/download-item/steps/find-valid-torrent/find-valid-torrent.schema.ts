@@ -18,7 +18,7 @@ export const MatchedFile = DebridFile.extend({
 
 export type MatchedFile = z.infer<typeof MatchedFile>;
 
-export const ValidTorrentContainer = z.object({
+export const ValidTorrent = z.object({
   torrentId: z.string().min(1),
   infoHash: z.hash("sha1"),
   provider: z.string().nullable(),
@@ -28,10 +28,10 @@ export const ValidTorrentContainer = z.object({
     .pipe(z.tuple([MatchedFile], MatchedFile)),
 });
 
-export type ValidTorrentContainer = z.infer<typeof ValidTorrentContainer>;
+export type ValidTorrent = z.infer<typeof ValidTorrent>;
 
-export const FindValidTorrentContainerFlow = createFlowSchema(
-  "download-item.find-valid-torrent-container",
+export const FindValidTorrentFlow = createFlowSchema(
+  "download-item.find-valid-torrent",
   {
     children: z.array(z.custom<RankedResult>()),
     input: z.object({
@@ -48,17 +48,14 @@ export const FindValidTorrentContainerFlow = createFlowSchema(
         .min(1),
       failedInfoHashes: z.array(z.hash("sha1")),
     }),
-    output: createPluginResultSchema(ValidTorrentContainer),
+    output: createPluginResultSchema(ValidTorrent),
   },
 );
 
-export type FindValidTorrentContainerFlow = z.infer<
-  typeof FindValidTorrentContainerFlow
->;
+export type FindValidTorrentFlow = z.infer<typeof FindValidTorrentFlow>;
 
-export const findValidTorrentContainerProcessorSchema =
-  FindValidTorrentContainerFlow.shape.processor;
+export const findValidTorrentProcessorSchema =
+  FindValidTorrentFlow.shape.processor;
 
-export const createFindValidTorrentContainerJob = createFlowJobBuilder(
-  FindValidTorrentContainerFlow,
-);
+export const createFindValidTorrentJob =
+  createFlowJobBuilder(FindValidTorrentFlow);

@@ -2,10 +2,10 @@ import z from "zod";
 
 import { createFlowJobBuilder } from "../../utilities/create-flow-job-schema.ts";
 import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
-import { FindValidTorrentContainerFlow } from "./steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
+import { FindValidTorrentFlow } from "./steps/find-valid-torrent/find-valid-torrent.schema.ts";
 
 export const DownloadItemFlow = createFlowSchema("download-item", {
-  children: FindValidTorrentContainerFlow.shape.output,
+  children: FindValidTorrentFlow.shape.output,
   input: z.object({
     id: z.int(),
   }),

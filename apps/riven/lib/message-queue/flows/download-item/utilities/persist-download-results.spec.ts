@@ -9,15 +9,16 @@ import { expect, vi } from "vitest";
 import { rivenTestContext as it } from "../../../../__tests__/test-context.ts";
 import { persistDownloadResults } from "./persist-download-results.ts";
 
-import type { MatchedFile } from "../steps/find-valid-torrent-container/find-valid-torrent-container.schema.ts";
+import type { MatchedFile } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
 
 it("throws an error if the media item has no streams", async ({ movie }) => {
   await expect(
     persistDownloadResults({
       id: movie.id,
       processedBy: "@repo/plugin-test",
-      container: {
+      torrent: {
         infoHash: "1234567890123456789012345678901234567890",
+        provider: null,
         files: [
           {
             size: 1024,
@@ -56,9 +57,10 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
     persistDownloadResults({
       id: movie.id,
       processedBy: "@repo/plugin-test",
-      container: {
+      torrent: {
         torrentId: "1",
         infoHash: stream.infoHash,
+        provider: null,
         files: [
           {
             size: 1024,
@@ -86,9 +88,10 @@ it("sets the active stream and updates the state to downloaded if successful", a
   const updatedItem = await persistDownloadResults({
     id: movie.id,
     processedBy: "@repo/plugin-test",
-    container: {
+    torrent: {
       torrentId: "1",
       infoHash: stream.infoHash,
+      provider: null,
       files: [
         {
           size: 1024,
@@ -114,9 +117,10 @@ it("adds a single media entry for movies", async ({ movie, em, stream }) => {
   await persistDownloadResults({
     id: movie.id,
     processedBy: "@repo/plugin-test",
-    container: {
+    torrent: {
       torrentId: "1",
       infoHash: stream.infoHash,
+      provider: null,
       files: [
         {
           size: 1024,
@@ -149,9 +153,10 @@ it("adds one media entry per episode for shows", async ({
   await persistDownloadResults({
     id: show.id,
     processedBy: "@repo/plugin-test",
-    container: {
+    torrent: {
       torrentId: "1",
       infoHash: stream.infoHash,
+      provider: null,
       files: episodes.map((episode) => ({
         size: 1024,
         link: `http://example.com/${episode.title}.mp4`,
@@ -192,9 +197,10 @@ it("does not create duplicate media entries for episodes with existing entries",
   await persistDownloadResults({
     id: show.id,
     processedBy: "@repo/plugin-test",
-    container: {
+    torrent: {
       torrentId: "1",
       infoHash: stream.infoHash,
+      provider: null,
       files: [
         {
           size: 1024,
@@ -231,9 +237,10 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
     persistDownloadResults({
       id: movie.id,
       processedBy: "@repo/plugin-test",
-      container: {
+      torrent: {
         torrentId: "1",
         infoHash: stream.infoHash,
+        provider: null,
         files: [
           {
             size: 1024,

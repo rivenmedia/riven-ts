@@ -14,7 +14,7 @@ import assert, { AssertionError } from "node:assert";
 
 import { database } from "../../../../../../database/database.ts";
 import { logger } from "../../../../../../utilities/logger/logger.ts";
-import { MatchedFile } from "../find-valid-torrent-container.schema.ts";
+import { MatchedFile } from "../find-valid-torrent.schema.ts";
 
 import type { MapItemsToFilesFlow } from "../../map-items-to-files/map-items-to-files.schema.ts";
 
@@ -77,7 +77,7 @@ export const validateTorrentFiles = async (
 ): Promise<MatchedFile[]> => {
   try {
     logger.verbose(
-      `Validating torrent container for item ${item.fullTitle}: ${infoHash}`,
+      `Validating torrent files for item ${item.fullTitle}: ${infoHash}`,
     );
 
     const expectedFileCount = await getExpectedFileCount(item);
@@ -88,7 +88,7 @@ export const validateTorrentFiles = async (
 
     assert(
       groupMap.size >= expectedFileCount,
-      `${item.type.substring(0, 1).toUpperCase() + item.type.substring(1)} torrent container must have at least ${expectedFileCount.toString()} ${item instanceof ShowLikeMediaItem ? "episodes" : "movies"}, but has ${groupMap.size.toString()}`,
+      `${item.type.substring(0, 1).toUpperCase() + item.type.substring(1)} torrent must have at least ${expectedFileCount.toString()} ${item instanceof ShowLikeMediaItem ? "episodes" : "movies"}, but has ${groupMap.size.toString()}`,
     );
 
     const validFiles: MatchedFile[] = [];
@@ -102,7 +102,7 @@ export const validateTorrentFiles = async (
       }
 
       logger.debug(
-        `Found match in ${isCacheCheck ? "cached files" : "container files"}: ${file.name} for item ${item.fullTitle} using lookup key '${lookupKey}'`,
+        `Found match in ${isCacheCheck ? "cached files" : "torrent files"}: ${file.name} for item ${item.fullTitle} using lookup key '${lookupKey}'`,
       );
 
       try {
