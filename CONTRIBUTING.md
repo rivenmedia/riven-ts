@@ -111,8 +111,9 @@ pnpm --filter @repo/riven dev
 
 If everything works, you should see a bunch of logs, else you can check for errors on http://localhost:8969.
 
-Also for dev, it's recommened to enable these env in `.env.riven` ``
+Also for dev, it's recommened to enable these env in `.env.riven`
 
+```
 ## Clear queues on startup
 
 RIVEN_SETTING\_\_unsafeClearQueuesOnStartup=true
@@ -120,7 +121,5 @@ RIVEN_SETTING\_\_unsafeClearQueuesOnStartup=true
 ## Refresh database on startup
 
 RIVEN_SETTING\_\_unsafeRefreshDatabaseOnStartup=true
-
-```
 
 ```
