@@ -17,11 +17,5 @@ export async function sendNotification(
       return discordDispatcher.send(service, payload, api);
     case "json":
       return jsonWebhookDispatcher.send(service, payload, api);
-    default: {
-      const _exhaustive: never = service;
-      throw new Error(
-        `Unhandled notification service type: ${(_exhaustive as { type: string }).type}`,
-      );
-    }
   }
 }

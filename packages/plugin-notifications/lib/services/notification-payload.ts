@@ -1,22 +1,25 @@
 import { DateTime } from "luxon";
+import z from "zod";
 
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
-export interface NotificationPayload {
-  event: string;
-  title: string;
-  fullTitle: string;
-  type: "movie" | "show" | "season" | "episode";
-  year: number | null;
-  imdbId: string | null;
-  tmdbId: string | null;
-  tvdbId: string | null;
-  posterPath: string | null;
-  downloader: string;
-  provider: string | null;
-  durationSeconds: number;
-  timestamp: string;
-}
+export const NotificationPayload = z.object({
+  event: z.string(),
+  title: z.string(),
+  fullTitle: z.string(),
+  type: z.enum(["movie", "show", "season", "episode"]),
+  year: z.number().nullable(),
+  imdbId: z.string().nullable(),
+  tmdbId: z.string().nullable(),
+  tvdbId: z.string().nullable(),
+  posterPath: z.string().nullable(),
+  downloader: z.string(),
+  provider: z.string().nullable(),
+  durationSeconds: z.number(),
+  timestamp: z.string(),
+});
+
+export type NotificationPayload = z.infer<typeof NotificationPayload>;
 
 export function buildNotificationPayload(
   event: {
@@ -29,7 +32,7 @@ export function buildNotificationPayload(
 ): NotificationPayload {
   const { item } = event;
 
-  return {
+  return NotificationPayload.parse({
     event: eventName,
     title: item.title,
     fullTitle: item.fullTitle,
@@ -43,5 +46,5 @@ export function buildNotificationPayload(
     provider: event.provider,
     durationSeconds: Math.round(event.durationFromRequestToDownload),
     timestamp: DateTime.utc().toISO(),
-  };
+  });
 }

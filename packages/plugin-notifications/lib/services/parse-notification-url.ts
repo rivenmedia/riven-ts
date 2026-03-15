@@ -1,3 +1,5 @@
+import { SUPPORTED_SCHEMES } from "../notifications-settings.schema.ts";
+
 export interface DiscordService {
   type: "discord";
   webhookId: string;
@@ -16,7 +18,7 @@ export type NotificationService = DiscordService | JsonWebhookService;
  *
  * Supported schemes:
  * - `discord://webhookId/webhookToken`
- * - `json://host/path` (HTTPS) or `jsons://host/path` (explicit HTTPS)
+ * - `json://host/path` (HTTP) or `jsons://host/path` (HTTPS)
  */
 export function parseNotificationUrl(raw: string): NotificationService {
   const url = new URL(raw);
@@ -24,9 +26,8 @@ export function parseNotificationUrl(raw: string): NotificationService {
 
   switch (scheme) {
     case "discord": {
-      const parts = url.pathname.replace(/^\//, "").split("/");
+      const [webhookToken] = url.pathname.replace(/^\//, "").split("/");
       const webhookId = url.hostname;
-      const webhookToken = parts[0];
 
       if (!webhookId || !webhookToken) {
         throw new Error(
@@ -39,15 +40,15 @@ export function parseNotificationUrl(raw: string): NotificationService {
 
     case "json":
     case "jsons": {
-      const port = url.port ? `:${url.port}` : "";
-      const targetUrl = `https://${url.hostname}${port}${url.pathname}${url.search}`;
+      const httpScheme = scheme === "jsons" ? "https" : "http";
+      const targetUrl = new URL(raw.replace(/^jsons?:/, httpScheme + ":"));
 
-      return { type: "json", url: targetUrl };
+      return { type: "json", url: targetUrl.toString() };
     }
 
     default:
       throw new Error(
-        `Unsupported notification scheme "${scheme}". Supported: discord, json, jsons`,
+        `Unsupported notification scheme "${scheme}". Supported: ${SUPPORTED_SCHEMES.join(", ")}`,
       );
   }
 }

@@ -1,26 +1,25 @@
+import { Duration } from "luxon";
+
 import type { NotificationPayload } from "../notification-payload.ts";
 import type { DiscordService } from "../parse-notification-url.ts";
 import type { NotificationDispatcher } from "./notification-dispatcher.ts";
+import type {
+  APIEmbed,
+  RESTPostAPIWebhookWithTokenJSONBody,
+} from "discord-api-types/v10";
 
 const DISCORD_WEBHOOK_BASE = "https://discord.com/api/webhooks";
 const EMBED_COLOR_SUCCESS = 0x2ecc71; // Green
 
-function formatDuration(seconds: number): string {
-  if (seconds < 60) return String(seconds) + "s";
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return secs > 0
-    ? String(mins) + "m " + String(secs) + "s"
-    : String(mins) + "m";
-}
-
-function buildEmbed(payload: NotificationPayload) {
-  const fields = [
+function buildEmbed(payload: NotificationPayload): APIEmbed {
+  const fields: APIEmbed["fields"] = [
     { name: "Type", value: payload.type, inline: true },
     { name: "Downloader", value: payload.downloader, inline: true },
     {
       name: "Duration",
-      value: formatDuration(payload.durationSeconds),
+      value: Duration.fromObject({ seconds: payload.durationSeconds })
+        .rescale()
+        .toHuman({ unitDisplay: "narrow" }),
       inline: true,
     },
   ];
@@ -38,7 +37,7 @@ function buildEmbed(payload: NotificationPayload) {
   }
 
   return {
-    title: "Downloaded: " + payload.fullTitle,
+    title: `Downloaded: ${payload.fullTitle}`,
     color: EMBED_COLOR_SUCCESS,
     fields,
     timestamp: payload.timestamp,
@@ -49,6 +48,9 @@ function buildEmbed(payload: NotificationPayload) {
 export const discordDispatcher: NotificationDispatcher<DiscordService> = {
   async send({ webhookId, webhookToken }, payload, api) {
     const url = [DISCORD_WEBHOOK_BASE, webhookId, webhookToken].join("/");
-    await api.postNotification(url, { embeds: [buildEmbed(payload)] });
+    const body: RESTPostAPIWebhookWithTokenJSONBody = {
+      embeds: [buildEmbed(payload)],
+    };
+    await api.postNotification(url, body);
   },
 };

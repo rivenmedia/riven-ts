@@ -10,10 +10,7 @@ export class NotificationsAPI extends BaseDataSource<NotificationsSettings> {
    * POST a notification payload to any full URL, routed through the
    * BullMQ queue for retries, rate limiting, and persistence.
    */
-  async postNotification(
-    fullUrl: string,
-    body: Record<string, unknown>,
-  ): Promise<void> {
+  async postNotification(fullUrl: string, body: object): Promise<void> {
     await this.post(fullUrl, { body });
   }
 

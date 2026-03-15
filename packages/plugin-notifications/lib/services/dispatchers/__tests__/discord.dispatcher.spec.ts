@@ -1,10 +1,17 @@
-import { DateTime } from "luxon";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
+import { DateTime } from "luxon";
+import { HttpResponse, http } from "msw";
+import { describe, expect } from "vitest";
+
+import { NotificationsAPI } from "../../../datasource/notifications.datasource.ts";
+import { pluginConfig } from "../../../notifications-plugin.config.ts";
 import { discordDispatcher } from "../discord.dispatcher.ts";
 
-import type { NotificationsAPI } from "../../../datasource/notifications.datasource.ts";
+import type { NotificationsSettings } from "../../../notifications-settings.schema.ts";
 import type { NotificationPayload } from "../../notification-payload.ts";
+
+const WEBHOOK_URL = "https://discord.com/api/webhooks/webhook-id/webhook-token";
 
 const mockPayload: NotificationPayload = {
   event: "download.success",
@@ -27,55 +34,86 @@ const mockService = {
   webhookToken: "webhook-token",
 };
 
+const testSettings = { urls: [] } satisfies NotificationsSettings;
+
 describe("discordDispatcher", () => {
-  const postNotification = vi.fn().mockResolvedValue(undefined);
-  let mockApi: NotificationsAPI;
+  it("sends an embed to the correct Discord webhook URL", async ({
+    server,
+    dataSourceConfig,
+  }) => {
+    let receivedBody: Record<string, unknown> | undefined;
 
-  beforeEach(() => {
-    postNotification.mockClear();
-    mockApi = { postNotification } as unknown as NotificationsAPI;
-  });
+    server.use(
+      http.post(WEBHOOK_URL, async ({ request }) => {
+        receivedBody = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json({});
+      }),
+    );
 
-  it("sends to the correct Discord webhook URL", async () => {
-    await discordDispatcher.send(mockService, mockPayload, mockApi);
+    const api = new NotificationsAPI({
+      ...dataSourceConfig,
+      pluginSymbol: pluginConfig.name,
+      settings: testSettings,
+    });
+    await discordDispatcher.send(mockService, mockPayload, api);
 
-    expect(postNotification).toHaveBeenCalledWith(
-      "https://discord.com/api/webhooks/webhook-id/webhook-token",
+    expect(receivedBody).toEqual(
       expect.objectContaining({
         embeds: expect.arrayContaining([
           expect.objectContaining({
             title: "Downloaded: Inception (2010)",
           }),
-        ]),
+        ]) as unknown,
       }),
     );
   });
 
-  it("includes poster thumbnail in embed", async () => {
-    await discordDispatcher.send(mockService, mockPayload, mockApi);
+  it("includes poster thumbnail in embed", async ({
+    server,
+    dataSourceConfig,
+  }) => {
+    let receivedBody: { embeds: { thumbnail?: { url: string } }[] } | undefined;
 
-    expect(postNotification).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({
-        embeds: expect.arrayContaining([
-          expect.objectContaining({
-            thumbnail: { url: "https://image.tmdb.org/t/p/w500/poster.jpg" },
-          }),
-        ]),
+    server.use(
+      http.post(WEBHOOK_URL, async ({ request }) => {
+        receivedBody = (await request.json()) as typeof receivedBody;
+        return HttpResponse.json({});
       }),
     );
+
+    const api = new NotificationsAPI({
+      ...dataSourceConfig,
+      pluginSymbol: pluginConfig.name,
+      settings: testSettings,
+    });
+    await discordDispatcher.send(mockService, mockPayload, api);
+
+    expect(receivedBody?.embeds[0]?.thumbnail).toEqual({
+      url: "https://image.tmdb.org/t/p/w500/poster.jpg",
+    });
   });
 
-  it("omits thumbnail when posterPath is null", async () => {
+  it("omits thumbnail when posterPath is null", async ({
+    server,
+    dataSourceConfig,
+  }) => {
+    let receivedBody: { embeds: { thumbnail?: unknown }[] } | undefined;
+
+    server.use(
+      http.post(WEBHOOK_URL, async ({ request }) => {
+        receivedBody = (await request.json()) as typeof receivedBody;
+        return HttpResponse.json({});
+      }),
+    );
+
+    const api = new NotificationsAPI({
+      ...dataSourceConfig,
+      pluginSymbol: pluginConfig.name,
+      settings: testSettings,
+    });
     const payloadWithoutPoster = { ...mockPayload, posterPath: null };
-    await discordDispatcher.send(mockService, payloadWithoutPoster, mockApi);
+    await discordDispatcher.send(mockService, payloadWithoutPoster, api);
 
-    const call = postNotification.mock.calls[0] as [
-      string,
-      Record<string, unknown>,
-    ];
-    const body = call[1] as { embeds: { thumbnail?: unknown }[] };
-
-    expect(body.embeds[0]?.thumbnail).toBeUndefined();
+    expect(receivedBody?.embeds[0]?.thumbnail).toBeUndefined();
   });
 });

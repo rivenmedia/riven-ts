@@ -23,11 +23,11 @@ describe("parseNotificationUrl", () => {
   });
 
   describe("json", () => {
-    it("parses a json:// URL as HTTPS", () => {
+    it("parses a json:// URL as HTTP", () => {
       const result = parseNotificationUrl("json://example.com/webhook");
       expect(result).toEqual({
         type: "json",
-        url: "https://example.com/webhook",
+        url: "http://example.com/webhook",
       });
     });
 
@@ -43,7 +43,7 @@ describe("parseNotificationUrl", () => {
       const result = parseNotificationUrl("json://example.com:8080/webhook");
       expect(result).toEqual({
         type: "json",
-        url: "https://example.com:8080/webhook",
+        url: "http://example.com:8080/webhook",
       });
     });
 
@@ -53,7 +53,7 @@ describe("parseNotificationUrl", () => {
       );
       expect(result).toEqual({
         type: "json",
-        url: "https://example.com/webhook?key=value",
+        url: "http://example.com/webhook?key=value",
       });
     });
   });
