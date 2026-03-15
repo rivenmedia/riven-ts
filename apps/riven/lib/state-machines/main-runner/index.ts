@@ -295,7 +295,7 @@ export const mainRunnerMachine = setup({
             src: "createEventScheduler",
             input: {
               event: "riven-internal.request-content-services",
-              interval: 10000,
+              interval: 120_000,
               runImmediately: true,
             },
           },
@@ -304,7 +304,7 @@ export const mainRunnerMachine = setup({
             src: "createEventScheduler",
             input: {
               event: "riven-internal.retry-library",
-              interval: 10000,
+              interval: 60_000,
             },
           },
         ],
