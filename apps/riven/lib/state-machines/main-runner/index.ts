@@ -278,10 +278,7 @@ export const mainRunnerMachine = setup({
           onDone: {
             target: "Running",
             actions: assign({
-              flows: ({ event }) => {
-                console.log(event.output);
-                return event.output;
-              },
+              flows: ({ event }) => event.output,
             }),
           },
         },

@@ -85,8 +85,6 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
           ...request.seasons.map(({ seasonNumber }) => seasonNumber),
         ]);
 
-        console.log(request);
-
         showMap.set(request.media.tvdbId, {
           tvdbId: request.media.tvdbId.toString(),
           externalRequestId:

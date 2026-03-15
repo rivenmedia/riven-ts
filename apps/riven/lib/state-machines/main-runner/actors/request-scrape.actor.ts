@@ -16,8 +16,6 @@ export const requestScrape = fromPromise<undefined, EnqueueScrapeItemInput>(
         refresh: true,
       });
 
-      console.log(input.item.requestedSeasons);
-
       await enqueueBulkScrapeItems({
         items: input.item.requestedSeasons.getItems(),
         subscribers: input.subscribers,
