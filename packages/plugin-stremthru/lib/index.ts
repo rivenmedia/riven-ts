@@ -2,7 +2,7 @@ import packageJson from "../package.json" with { type: "json" };
 import { StremThruAPI } from "./datasource/stremthru.datasource.ts";
 import { StremThruSettingsResolver } from "./schema/stremthru-settings.resolver.ts";
 import { StremThruResolver } from "./schema/stremthru.resolver.ts";
-import { Store } from "./schemas/store.schema.js";
+import { Store } from "./schemas/store.schema.ts";
 import { pluginConfig } from "./stremthru-plugin.config.ts";
 import { StoreKeys, StremThruSettings } from "./stremthru-settings.schema.ts";
 

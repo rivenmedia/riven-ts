@@ -1,8 +1,10 @@
-import { ItemRequestCreationErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.conflict.event";
-import { ItemRequestCreationError } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.event";
+import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
+import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
 import { requestContentServicesProcessorSchema } from "./request-content-services.schema.ts";
-import { processRequestedItem } from "./utilities/process-requested-item.ts";
+import { calculateRequestResults } from "./utilities/calculate-request-results.ts";
+import { persistRequestedMovie } from "./utilities/persist-requested-movie.ts";
+import { persistRequestedShow } from "./utilities/persist-requested-show.ts";
 
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
@@ -23,41 +25,32 @@ export const requestContentServicesProcessor =
       );
 
       const results = await Promise.allSettled([
-        ...items.movies.map((item) =>
-          processRequestedItem({
-            item,
-            type: "movie",
-          }),
-        ),
-        ...items.shows.map((item) =>
-          processRequestedItem({
-            item,
-            type: "show",
-          }),
-        ),
+        ...items.movies.map((item) => persistRequestedMovie(item)),
+        ...items.shows.map((item) => persistRequestedShow(item)),
       ]);
 
       for (const result of results) {
-        if (result.status === "rejected") {
+        if (result.status === "fulfilled") {
+          sendEvent({
+            type: `riven.item-request.${result.value.requestType}.success`,
+            item: result.value.item,
+          });
+        } else {
           if (
-            result.reason instanceof ItemRequestCreationError ||
-            result.reason instanceof ItemRequestCreationErrorConflict
+            result.reason instanceof ItemRequestCreateError ||
+            result.reason instanceof ItemRequestCreateErrorConflict
           ) {
             sendEvent(result.reason.payload);
           }
-        } else {
-          sendEvent({
-            type: "riven.item-request.creation.success",
-            item: result.value.item,
-          });
         }
       }
 
+      const { newItems, updatedItems } = calculateRequestResults(results);
+
       return {
         count: items.movies.length + items.shows.length,
-        newItems: results.filter(
-          (result) => result.status === "fulfilled" && result.value.isNewItem,
-        ).length,
+        newItems,
+        updatedItems,
       };
     },
   );

@@ -4,28 +4,15 @@ import {
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
 
-import type {
-  GetAuthMeQueryResponse,
-  GetRequestQueryResponse,
-  MediaRequest,
-} from "../__generated__/index.ts";
+import { RequestResponse } from "../schemas/request-response.schema.ts";
+
+import type { GetAuthMeQueryResponse } from "../__generated__/index.ts";
+import type { ExtendedMediaRequest } from "../schemas/extended-media-request.schema.ts";
 import type { SeerrSettings } from "../seerr-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
-import type { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
+import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
 export class SeerrAPIError extends Error {}
-
-/**
- * The Overseerr API returns a `type` field on MediaRequest at runtime
- * indicating "movie" or "tv", but it is not documented in the OpenAPI spec.
- */
-interface MediaRequestWithType extends MediaRequest {
-  type: "movie" | "tv";
-}
-
-interface GetRequestResponseWithType extends GetRequestQueryResponse {
-  results?: MediaRequestWithType[];
-}
 
 export class SeerrAPI extends BaseDataSource<SeerrSettings> {
   override get baseURL() {
@@ -58,59 +45,86 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     }
   }
 
-  async getContent(
-    filter: string,
-  ): Promise<{ movies: ExternalIds[]; shows: ExternalIds[] }> {
+  async getContent(filter: string): Promise<ContentServiceRequestedResponse> {
     const requests = await this.#getAllRequests(filter);
-    const movieMap = new Map<number, ExternalIds>();
-    const showMap = new Map<number, ExternalIds>();
+    const movieMap = new Map<
+      number,
+      ContentServiceRequestedResponse["movies"][number]
+    >();
+    const showMap = new Map<
+      number,
+      ContentServiceRequestedResponse["shows"][number]
+    >();
 
     for (const request of requests) {
-      if (!request.media?.tmdbId) {
-        continue;
-      }
-
       if (request.type === "movie") {
+        if (!request.media?.tmdbId) {
+          continue;
+        }
+
         movieMap.set(request.media.tmdbId, {
           tmdbId: request.media.tmdbId.toString(),
-          externalId: request.media.id?.toString(),
+          externalRequestId: request.id.toString(),
+          requestedBy: request.requestedBy?.email,
         });
-      } else {
-        showMap.set(request.media.tmdbId, {
-          tmdbId: request.media.tmdbId.toString(),
-          tvdbId: request.media.tvdbId?.toString(),
-          externalId: request.media.id?.toString(),
+      }
+
+      if (request.type === "tv") {
+        if (!request.media?.tvdbId) {
+          continue;
+        }
+
+        /**
+         * Seerr creates multiple requests within the same show,
+         * e.g. one request for seasons 1-3, then another request for season 4.
+         *
+         * To handle this, we combine seasons from multiple requests for the same show into a single entry in the response.
+         */
+        const combinedSeasons = new Set([
+          ...(showMap.get(request.media.tvdbId)?.seasons ?? []),
+          ...request.seasons.map(({ seasonNumber }) => seasonNumber),
+        ]);
+
+        showMap.set(request.media.tvdbId, {
+          tvdbId: request.media.tvdbId.toString(),
+          externalRequestId:
+            request.media.id?.toString() ?? request.id.toString(),
+          requestedBy: request.requestedBy?.email,
+          seasons: [...combinedSeasons],
         });
       }
     }
 
-    return { movies: [...movieMap.values()], shows: [...showMap.values()] };
+    return {
+      movies: [...movieMap.values()],
+      shows: [...showMap.values()],
+    };
   }
 
-  async #getAllRequests(filter: string): Promise<MediaRequestWithType[]> {
-    const allResults: MediaRequestWithType[] = [];
+  async #getAllRequests(filter: string): Promise<ExtendedMediaRequest[]> {
+    const allResults: ExtendedMediaRequest[] = [];
     const take = 20;
     let skip = 0;
     let totalResults = 0;
 
     do {
-      const response = await this.get<GetRequestResponseWithType>("request", {
+      const response = await this.get<unknown>("request", {
         params: {
           take: take.toString(),
           skip: skip.toString(),
           filter,
           sort: "added",
         },
-        cacheOptions: {
-          ttl: 60 * 2,
-        },
+        skipCache: true,
       });
 
-      if (response.results) {
-        allResults.push(...response.results);
+      const { results, pageInfo } = RequestResponse.parse(response);
+
+      if (results) {
+        allResults.push(...results);
       }
 
-      totalResults = response.pageInfo?.results ?? 0;
+      totalResults = pageInfo?.results ?? 0;
       skip += take;
     } while (skip < totalResults);
 

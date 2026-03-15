@@ -15,9 +15,9 @@ export default {
   resolvers: [TestResolver, TestSettingsResolver],
   hooks: {
     "riven.core.started": async () => {},
-    "riven.item-request.creation.error.conflict": async () => {},
-    "riven.item-request.creation.error": async () => {},
-    "riven.item-request.creation.success": async () => {},
+    "riven.item-request.create.error.conflict": async () => {},
+    "riven.item-request.create.error": async () => {},
+    "riven.item-request.create.success": async () => {},
   },
   settingsSchema: TestSettings,
   async validator() {

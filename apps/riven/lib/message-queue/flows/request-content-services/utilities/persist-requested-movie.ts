@@ -1,52 +1,37 @@
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
-import { ItemRequestCreationErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.conflict.event";
-import { ItemRequestCreationError } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.event";
+import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
+import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
 
 import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
+import { RequestType } from "../request-content-services.schema.ts";
 
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
-export type ProcessRequestedItemInput =
-  | {
-      type: "show";
-      item: ContentServiceRequestedResponse["shows"][number];
-    }
-  | {
-      type: "movie";
-      item: ContentServiceRequestedResponse["movies"][number];
-    };
-
-export interface ProcessRequestedItemOutput {
-  isNewItem: boolean;
-  item: ItemRequest;
-}
-
-export async function processRequestedItem({
-  item,
-  type,
-}: ProcessRequestedItemInput): Promise<ProcessRequestedItemOutput> {
+export async function persistRequestedMovie(
+  item: ContentServiceRequestedResponse["movies"][number],
+) {
   const externalIds = [
     item.imdbId ? `IMDB: ${item.imdbId}` : null,
-    type === "movie" && item.tmdbId ? `TMDB: ${item.tmdbId}` : null,
-    type === "show" && item.tvdbId ? `TVDB: ${item.tvdbId}` : null,
+    item.tmdbId ? `TMDB: ${item.tmdbId}` : null,
   ].filter(Boolean);
 
-  logger.silly(`Processing requested ${type}: ${externalIds.join(", ")}`);
+  logger.silly(`Processing requested movie: ${externalIds.join(", ")}`);
 
   const existingItem = await database.itemRequest.findOne({
     $or: [
       ...(item.imdbId ? [{ imdbId: item.imdbId }] : []),
-      ...(type === "movie" && item.tmdbId ? [{ tmdbId: item.tmdbId }] : []),
-      ...(type === "show" && item.tvdbId ? [{ tvdbId: item.tvdbId }] : []),
+      ...(item.tmdbId ? [{ tmdbId: item.tmdbId }] : []),
     ],
   });
 
   if (existingItem) {
-    throw new ItemRequestCreationErrorConflict({
+    // Movies will only ever have one request per item.
+    // Re-requesting the same item is a no-op.
+    throw new ItemRequestCreateErrorConflict({
       item: existingItem,
     });
   }
@@ -54,12 +39,11 @@ export async function processRequestedItem({
   const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
-    requestedBy: "unknown",
     state: "requested",
-    type,
+    requestedBy: item.requestedBy ?? null,
+    type: "movie",
     imdbId: item.imdbId ?? null,
-    tmdbId: (type === "movie" ? item.tmdbId : null) ?? null,
-    tvdbId: (type === "show" ? item.tvdbId : null) ?? null,
+    tmdbId: item.tmdbId ?? null,
     externalRequestId: item.externalRequestId ?? null,
   });
 
@@ -71,7 +55,7 @@ export async function processRequestedItem({
     await em.refreshOrFail(itemRequest);
 
     return {
-      isNewItem: true,
+      requestType: RequestType.enum.create,
       item: itemRequest,
     };
   } catch (error) {
@@ -90,7 +74,7 @@ export async function processRequestedItem({
       })
       .parse(error);
 
-    throw new ItemRequestCreationError({
+    throw new ItemRequestCreateError({
       item: itemRequest,
       error: errorMessage,
     });

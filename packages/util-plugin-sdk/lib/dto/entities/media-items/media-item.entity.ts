@@ -189,6 +189,9 @@ export abstract class MediaItem {
   @ManyToOne(() => ItemRequest)
   itemRequest!: Opt<Ref<ItemRequest>>;
 
+  @Property()
+  isRequested!: boolean;
+
   /**
    * A pretty name for the media item to be used in VFS paths.
    *

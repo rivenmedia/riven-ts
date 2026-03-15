@@ -12,10 +12,17 @@ export interface RetryLibraryActorInput {
 export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
   async ({ input: { parentRef } }) => {
     try {
+      logger.verbose("Retrying library items");
+
       const pendingItems = await database.mediaItem.find(
         {
+          isRequested: true,
           state: {
             $ne: "completed",
+          },
+          type: {
+            // Only retry movies and shows, as shows will fan out their seasons and episodes on failure
+            $in: ["movie", "show"],
           },
         },
         {
@@ -32,6 +39,24 @@ export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
         },
         { refresh: true },
       );
+
+      if (pendingItems.length === 0 && pendingRequests.length === 0) {
+        logger.verbose("No pending library items to retry");
+
+        return;
+      }
+
+      if (pendingItems.length > 0) {
+        logger.verbose(
+          `Found ${pendingItems.length.toString()} pending library items to retry`,
+        );
+      }
+
+      if (pendingRequests.length > 0) {
+        logger.verbose(
+          `Found ${pendingRequests.length.toString()} pending item requests to retry`,
+        );
+      }
 
       for (const request of pendingRequests) {
         parentRef.send({
