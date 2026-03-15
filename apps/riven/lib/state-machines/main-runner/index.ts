@@ -315,11 +315,6 @@ export const mainRunnerMachine = setup({
             },
           },
         ],
-        after: {
-          10000: {
-            actions: "requestContentServices",
-          },
-        },
         on: {
           /**
            * Item request lifecycle events
