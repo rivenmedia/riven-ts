@@ -92,13 +92,13 @@ export class CometAPI extends BaseDataSource<CometSettings> {
 
       const torrentsCount = Object.keys(torrents).length;
 
-      if (torrentsCount >= 0) {
+      if (torrentsCount > 0) {
         this.logger.info(
-          `Found ${torrentsCount.toString()} torrents for ${item.fullTitle} (IMDB: ${item.imdbId})`,
+          `Found ${torrentsCount.toString()} torrents from ${this.serviceName} for ${item.fullTitle} (IMDB: ${item.imdbId})`,
         );
       } else {
         this.logger.info(
-          `No torrents found for ${item.fullTitle} (IMDB: ${item.imdbId})`,
+          `No torrents found from ${this.serviceName} for ${item.fullTitle} (IMDB: ${item.imdbId})`,
         );
       }
 
