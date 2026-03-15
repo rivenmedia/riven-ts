@@ -108,7 +108,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     if (entity instanceof Show) {
       return this.#computeStateWithChildren(
         entity,
-        await entity.seasons.loadItems(),
+        await entity.requestedSeasons.loadItems(),
         nextStatesMap,
       );
     }
@@ -250,7 +250,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       );
 
       if (hasMediaEntry) {
-        return "downloaded";
+        return "completed";
       }
     }
 

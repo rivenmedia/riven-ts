@@ -8,7 +8,7 @@ import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state
 import { fromPromise } from "xstate";
 
 import { database } from "../../../database/database.ts";
-import { enqueueScrapeItem } from "../../../message-queue/flows/scrape-item/enqueue-scrape-item.ts";
+import { enqueueBulkScrapeItems } from "../../../message-queue/flows/scrape-item/enqueue-bulk-scrape-items.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
@@ -26,7 +26,7 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
     ]);
 
     if (item instanceof Show) {
-      await database.em.fork().populate(item, ["seasons"]);
+      await database.em.fork().populate(item, ["requestedSeasons"]);
 
       /**
        * Pulls all *standard* seasons when fanning out.
@@ -36,14 +36,10 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
        *
        * They should be handled after the main attempt has resolved.
        */
-      const seasons = await item.getRequestedSeasons(processableStates.options);
-
-      for (const season of seasons) {
-        await enqueueScrapeItem({
-          item: season,
-          subscribers,
-        });
-      }
+      await enqueueBulkScrapeItems({
+        items: item.requestedSeasons.getItems(),
+        subscribers,
+      });
     }
 
     if (item instanceof Season) {
@@ -55,12 +51,10 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
       });
 
       // TODO: Implement pagination for shows with a large number of episodes to avoid enqueueing thousands of scrape jobs at once
-      for (const episode of incompleteEpisodes) {
-        await enqueueScrapeItem({
-          item: episode,
-          subscribers,
-        });
-      }
+      await enqueueBulkScrapeItems({
+        items: incompleteEpisodes,
+        subscribers,
+      });
     }
   },
 );
