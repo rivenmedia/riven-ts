@@ -1,6 +1,6 @@
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
-import { ItemRequestCreationErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.conflict.event";
-import { ItemRequestCreationError } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.event";
+import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
+import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
@@ -19,7 +19,7 @@ export async function persistRequestedShow(
     item.tvdbId ? `TVDB: ${item.tvdbId}` : null,
   ].filter(Boolean);
 
-  logger.silly(`Processing requested movie: ${externalIds.join(", ")}`);
+  logger.silly(`Processing requested show: ${externalIds.join(", ")}`);
 
   const existingItem = await database.itemRequest.findOne({
     $or: [
@@ -33,7 +33,7 @@ export async function persistRequestedShow(
     const requestedItemSeasonsSet = new Set(item.seasons);
 
     if (existingItemSeasonsSet.difference(requestedItemSeasonsSet).size === 0) {
-      throw new ItemRequestCreationErrorConflict({
+      throw new ItemRequestCreateErrorConflict({
         item: existingItem,
       });
     }
@@ -41,15 +41,18 @@ export async function persistRequestedShow(
 
   const em = database.em.fork();
 
-  const itemRequest = em.create(ItemRequest, {
-    state: "requested",
-    requestedBy: item.requestedBy ?? null,
-    type: "show",
-    imdbId: item.imdbId ?? null,
-    tvdbId: item.tvdbId ?? null,
-    externalRequestId: item.externalRequestId ?? null,
-    seasons: item.seasons,
-  });
+  const itemRequest =
+    existingItem ??
+    em.create(ItemRequest, {
+      state: "requested",
+      requestedBy: item.requestedBy ?? null,
+      type: "show",
+      imdbId: item.imdbId ?? null,
+      tvdbId: item.tvdbId ?? null,
+      externalRequestId: item.externalRequestId ?? null,
+    });
+
+  itemRequest.seasons = item.seasons;
 
   try {
     await validateOrReject(itemRequest);
@@ -80,7 +83,7 @@ export async function persistRequestedShow(
       })
       .parse(error);
 
-    throw new ItemRequestCreationError({
+    throw new ItemRequestCreateError({
       item: itemRequest,
       error: errorMessage,
     });

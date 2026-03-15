@@ -13,17 +13,21 @@ import {
   CoreStartedEventHandler,
 } from "./core.started.event.ts";
 import {
-  ItemRequestCreationErrorConflictEvent,
-  ItemRequestCreationErrorConflictEventHandler,
-} from "./item-request.creation.error.conflict.event.ts";
+  ItemRequestCreateErrorConflictEvent,
+  ItemRequestCreateErrorConflictEventHandler,
+} from "./item-request.create.error.conflict.event.ts";
 import {
-  ItemRequestCreationErrorEvent,
-  ItemRequestCreationErrorEventHandler,
-} from "./item-request.creation.error.event.ts";
+  ItemRequestCreateErrorEvent,
+  ItemRequestCreateErrorEventHandler,
+} from "./item-request.create.error.event.ts";
 import {
-  ItemRequestCreationSuccessEvent,
-  ItemRequestCreationSuccessEventHandler,
-} from "./item-request.creation.success.event.ts";
+  ItemRequestCreateSuccessEvent,
+  ItemRequestCreateSuccessEventHandler,
+} from "./item-request.create.success.event.ts";
+import {
+  ItemRequestUpdateSuccessEvent,
+  ItemRequestUpdateSuccessEventHandler,
+} from "./item-request.update.success.event.ts";
 import {
   MediaItemDownloadRequestedEvent,
   MediaItemDownloadRequestedEventHandler,
@@ -95,9 +99,10 @@ import {
 
 export const RivenEvent = z.discriminatedUnion("type", [
   CoreStartedEvent,
-  ItemRequestCreationSuccessEvent,
-  ItemRequestCreationErrorEvent,
-  ItemRequestCreationErrorConflictEvent,
+  ItemRequestCreateSuccessEvent,
+  ItemRequestCreateErrorEvent,
+  ItemRequestCreateErrorConflictEvent,
+  ItemRequestUpdateSuccessEvent,
   MediaItemIndexRequestedEvent,
   MediaItemIndexSuccessEvent,
   MediaItemIndexErrorIncorrectStateEvent,
@@ -137,10 +142,11 @@ export const RivenEventHandler = {
   "riven.content-service.requested": ContentServiceRequestedEventHandler,
 
   // Item request
-  "riven.item-request.creation.success": ItemRequestCreationSuccessEventHandler,
-  "riven.item-request.creation.error": ItemRequestCreationErrorEventHandler,
-  "riven.item-request.creation.error.conflict":
-    ItemRequestCreationErrorConflictEventHandler,
+  "riven.item-request.create.success": ItemRequestCreateSuccessEventHandler,
+  "riven.item-request.create.error": ItemRequestCreateErrorEventHandler,
+  "riven.item-request.create.error.conflict":
+    ItemRequestCreateErrorConflictEventHandler,
+  "riven.item-request.update.success": ItemRequestUpdateSuccessEventHandler,
 
   // Item indexing
   "riven.media-item.index.requested": MediaItemIndexRequestedEventHandler,

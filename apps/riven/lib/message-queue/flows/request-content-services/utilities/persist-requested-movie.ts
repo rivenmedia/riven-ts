@@ -1,6 +1,6 @@
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
-import { ItemRequestCreationErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.conflict.event";
-import { ItemRequestCreationError } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.event";
+import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
+import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
@@ -31,7 +31,7 @@ export async function persistRequestedMovie(
   if (existingItem) {
     // Movies will only ever have one request per item.
     // Re-requesting the same item is a no-op.
-    throw new ItemRequestCreationErrorConflict({
+    throw new ItemRequestCreateErrorConflict({
       item: existingItem,
     });
   }
@@ -74,7 +74,7 @@ export async function persistRequestedMovie(
       })
       .parse(error);
 
-    throw new ItemRequestCreationError({
+    throw new ItemRequestCreateError({
       item: itemRequest,
       error: errorMessage,
     });

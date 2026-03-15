@@ -1,29 +1,23 @@
 import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
-import { enqueueActions, raise, setup } from "xstate";
+import {
+  type ActorRef,
+  type Snapshot,
+  assign,
+  enqueueActions,
+  raise,
+  setup,
+} from "xstate";
 
-import { downloadItemProcessor } from "../../message-queue/flows/download-item/download-item.processor.ts";
-import { DownloadItemFlow } from "../../message-queue/flows/download-item/download-item.schema.ts";
-import { findValidTorrentProcessor } from "../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.processor.ts";
-import { FindValidTorrentFlow } from "../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
-import { mapItemsToFilesProcessor } from "../../message-queue/flows/download-item/steps/map-items-to-files/map-items-to-files.processor.ts";
-import { MapItemsToFilesFlow } from "../../message-queue/flows/download-item/steps/map-items-to-files/map-items-to-files.schema.ts";
-import { rankStreamsProcessor } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.processor.ts";
-import { RankStreamsFlow } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.schema.ts";
-import { indexItemProcessor } from "../../message-queue/flows/index-item/index-item.processor.ts";
-import { RequestIndexDataFlow } from "../../message-queue/flows/index-item/index-item.schema.ts";
 import { flow } from "../../message-queue/flows/producer.ts";
-import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
-import { RequestContentServicesFlow } from "../../message-queue/flows/request-content-services/request-content-services.schema.ts";
-import { scrapeItemProcessor } from "../../message-queue/flows/scrape-item/scrape-item.processor.ts";
-import { ScrapeItemFlow } from "../../message-queue/flows/scrape-item/scrape-item.schema.ts";
-import { parseScrapeResultsProcessor } from "../../message-queue/flows/scrape-item/steps/parse-scrape-results/parse-scrape-results.processor.ts";
-import { ParseScrapeResultsFlow } from "../../message-queue/flows/scrape-item/steps/parse-scrape-results/parse-scrape-results.schema.ts";
-import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
 import { extractPluginNameFromJobId } from "../../message-queue/utilities/extract-plugin-name-from-job-id.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { SerialisedItemRequest } from "../../utilities/serialisers/serialised-item-request.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
+import {
+  type BootstrapFlowWorkersOutput,
+  bootstrapFlowWorkers,
+} from "./actors/bootstrap-flow-workers.actor.ts";
 import { fanOutDownload } from "./actors/fan-out-download.actor.ts";
 import { requestContentServices } from "./actors/request-content-services.actor.ts";
 import { requestDownload } from "./actors/request-download.actor.ts";
@@ -35,7 +29,6 @@ import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscrib
 import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
 import type { EnqueueDownloadItemInput } from "../../message-queue/flows/download-item/enqueue-download-item.ts";
 import type { EnqueueIndexItemInput } from "../../message-queue/flows/index-item/enqueue-index-item.ts";
-import type { Flow } from "../../message-queue/flows/index.ts";
 import type { EnqueueScrapeItemInput } from "../../message-queue/flows/scrape-item/enqueue-scrape-item.ts";
 import type {
   PluginQueueMap,
@@ -43,26 +36,21 @@ import type {
   PublishableEventSet,
   ValidPluginMap,
 } from "../../types/plugins.ts";
-import type { FlowJob, Queue, Worker } from "bullmq";
+import type { RivenMachineEvent } from "../program/index.ts";
+import type { FlowJob } from "bullmq";
 import type z from "zod";
 
 export interface MainRunnerMachineContext {
+  parentRef: ActorRef<Snapshot<unknown>, RivenMachineEvent>;
   plugins: ValidPluginMap;
-  flows: {
-    [K in Flow["name"]]: {
-      queue: Queue;
-      worker: Worker<
-        Extract<Flow, { name: K }>["input"],
-        Extract<Flow, { name: K }>["output"]
-      >;
-    };
-  };
+  flows: BootstrapFlowWorkersOutput | null;
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: PublishableEventSet;
 }
 
 export interface MainRunnerMachineInput {
+  parentRef: ActorRef<Snapshot<unknown>, RivenMachineEvent>;
   plugins: ValidPluginMap;
   publishableEvents: PublishableEventSet;
   pluginQueues: PluginQueueMap;
@@ -77,6 +65,7 @@ export const mainRunnerMachine = setup({
     input: {} as MainRunnerMachineInput,
     events: {} as MainRunnerMachineEvent,
     children: {} as {
+      bootstrapFlowWorkers: "bootstrapFlowWorkers";
       requestContentServices: "requestContentServices";
       requestIndexData: "requestIndexData";
       requestScrape: "requestScrape";
@@ -122,6 +111,11 @@ export const mainRunnerMachine = setup({
       );
 
       void flow.addBulk(jobs);
+    },
+    handleGracefulShutdown: ({ context }) => {
+      context.parentRef.send({
+        type: "riven.core.shutdown",
+      });
     },
     requestContentServices: enqueueActions(
       ({ enqueue, context: { plugins } }) => {
@@ -212,6 +206,7 @@ export const mainRunnerMachine = setup({
     }),
   },
   actors: {
+    bootstrapFlowWorkers,
     requestContentServices,
     requestIndexData,
     requestScrape,
@@ -250,332 +245,348 @@ export const mainRunnerMachine = setup({
   .createMachine({
     /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7ABABwCcB7KAgQwFscKzVcCBXLLMAgYgI2wDoLJUyAWlQAXMBW4AqANoAGALqJQeIrFGoiWJSAAeiAIwAmADQgAnogCsATmvcAHEcsBfZ6bSZchEuSo06OIzMrBxcWIJ4ADYMUHS8-EKi4twEYACODHBiEHKKSCAqaiIaWvl6CEamFggALJaGDjYAzADsLm4gHtj4xKSU1LT0TCzsnJ7xEALCYhIAxqlkxZrcrMQEudqF6pra5ZXmiE2yltzWsgBshu3uYT0+-f5DwaNhE1NJcwtLWNxkkQsQMyCMA6VCwESwDb5LbfXYGEwHCqWeynSxNJyuG6eO59PyDQLDEJjHipEQEIGRVAAI3I5KhylU21KoD2COqRlcHSwRAgcG0XS8vV8AwCQRGm0ZsLKiDa3FkhhaTRqrUsVRlln03Ba50sl3ariAA */
     id: "Riven program main runner",
-    context: ({ input, self }) => {
-      return {
-        plugins: input.plugins,
-        publishableEvents: input.publishableEvents,
-        pluginQueues: input.pluginQueues,
-        pluginWorkers: input.pluginWorkers,
-        flows: {
-          "index-item": createFlowWorker(
-            RequestIndexDataFlow,
-            indexItemProcessor,
-            self.send,
-            {},
-            { concurrency: 1 },
-          ),
-          "request-content-services": createFlowWorker(
-            RequestContentServicesFlow,
-            requestContentServicesProcessor,
-            self.send,
-            {},
-            { concurrency: 1 },
-          ),
-          "scrape-item": createFlowWorker(
-            ScrapeItemFlow,
-            scrapeItemProcessor,
-            self.send,
-            {},
-            { concurrency: 1 },
-          ),
-          "scrape-item.parse-scrape-results": createFlowWorker(
-            ParseScrapeResultsFlow,
-            parseScrapeResultsProcessor,
-            self.send,
-          ),
-          "download-item": createFlowWorker(
-            DownloadItemFlow,
-            downloadItemProcessor,
-            self.send,
-          ),
-          "download-item.map-items-to-files": createFlowWorker(
-            MapItemsToFilesFlow,
-            mapItemsToFilesProcessor,
-            self.send,
-          ),
-          "download-item.find-valid-torrent": createFlowWorker(
-            FindValidTorrentFlow,
-            findValidTorrentProcessor,
-            self.send,
-            {
-              streams: {
-                events: {
-                  maxLen: 10000,
-                },
-              },
-            },
-          ),
-          "download-item.rank-streams": createFlowWorker(
-            RankStreamsFlow,
-            rankStreamsProcessor,
-            self.send,
-          ),
-        },
-      };
-    },
-    entry: [
-      {
-        type: "broadcastEventToPlugins",
-        params: { type: "riven.core.started" },
-      },
-      { type: "requestContentServices" },
-      raise({ type: "riven-internal.retry-library" }),
-      {
-        type: "log",
-        params: { message: "Riven has started successfully." },
-      },
-    ],
-    always: [
-      {
-        guard: "shouldQueueEvent",
-        actions: {
-          type: "broadcastEventToPlugins",
-          params: ({ event }) => RivenEvent.encode(event as never),
-        },
-      },
-      {
-        guard: "isRivenEvent",
-        actions: {
-          type: "log",
-          params: ({ event }) => ({
-            message: `Received event: ${event.type}`,
-            level: "silly",
+    context: ({ input }) => ({
+      parentRef: input.parentRef,
+      plugins: input.plugins,
+      publishableEvents: input.publishableEvents,
+      pluginQueues: input.pluginQueues,
+      pluginWorkers: input.pluginWorkers,
+      flows: null,
+    }),
+    initial: "Bootstrapping Flow Workers",
+    states: {
+      "Bootstrapping Flow Workers": {
+        invoke: {
+          src: "bootstrapFlowWorkers",
+          id: "bootstrapFlowWorkers",
+          input: ({ self }) => ({
+            parentRef: self,
           }),
-        },
-      },
-    ],
-    on: {
-      /**
-       * Item request lifecycle events
-       */
-
-      "riven.item-request.creation.success": {
-        description:
-          "Indicates that a media item has been successfully created in the library.",
-        actions: [
-          {
-            type: "log",
-            params: ({ event: { item } }) => ({
-              message: `Successfully created item request: [${item.externalIdsLabel.join(" | ")}]`,
-              level: "silly",
-            }),
-          },
-          {
-            type: "requestIndexData",
-            params: ({ event: { item } }) => ({ item }),
-          },
-        ],
-      },
-
-      "riven.item-request.creation.error": {
-        description:
-          "Indicates that an error occurred while attempting to create an item request.",
-        actions: [
-          {
-            type: "log",
-            params: ({ event: { item, error } }) => ({
-              message: `Error creating item request ${JSON.stringify(SerialisedItemRequest.decode(item))}: ${String(error)}`,
-              level: "error",
-            }),
-          },
-        ],
-      },
-
-      "riven.item-request.creation.error.conflict": {
-        description:
-          "Indicates that an item request creation was attempted, but the item already exists in the library.",
-        actions: [
-          {
-            type: "log",
-            params: ({ event: { item } }) => ({
-              message: `Item request already exists: ${JSON.stringify(SerialisedItemRequest.decode(item))}`,
-              level: "verbose",
-            }),
-          },
-        ],
-      },
-
-      /**
-       * Index lifecycle events
-       */
-
-      "riven.media-item.index.requested": {
-        description:
-          "Indicates that a media item index has been requested for a media item.",
-        actions: {
-          type: "requestIndexData",
-          params: ({ event: { item } }) => ({ item }),
-        },
-      },
-
-      "riven.media-item.index.success": {
-        description:
-          "Indicates that a media item has been successfully indexed in the library.",
-        actions: [
-          {
-            type: "log",
-            params: ({ event: { item } }) => ({
-              message: `Successfully indexed ${item.type}: ${item.fullTitle}`,
-              level: "info",
-            }),
-          },
-          {
-            type: "requestScrape",
-            params: ({ event: { item } }) => ({ item }),
-          },
-        ],
-      },
-
-      "riven.media-item.index.error.incorrect-state": {
-        description:
-          "Indicates that a media item index was attempted, but the item was already indexed in the library.",
-        actions: [
-          {
-            type: "log",
-            params: ({ event: { item } }) => ({
-              message: `Media item has already been indexed: ${JSON.stringify(SerialisedItemRequest.decode(item))}`,
-              level: "verbose",
-            }),
-          },
-        ],
-      },
-
-      /**
-       * Scrape lifecycle events
-       */
-
-      "riven.media-item.scrape.requested": {
-        description:
-          "Indicates that a media item scrape has been requested for an indexed media item.",
-        actions: {
-          type: "requestScrape",
-          params: ({ event: { item } }) => ({ item }),
-        },
-      },
-
-      "riven.media-item.scrape.error.no-new-streams": {
-        description:
-          "Indicates that a media item scrape completed successfully, but no new streams were found.",
-        actions: [
-          {
-            type: "log",
-            params: ({ event: { item } }) => ({
-              message: `No new streams found for ${item.fullTitle}.`,
-              level: "verbose",
-            }),
-          },
-          {
-            type: "fanOutDownload",
-            params: ({ event: { item } }) => ({ item }),
-          },
-        ],
-      },
-
-      "riven.media-item.scrape.success": {
-        description:
-          "Indicates that a media item has been successfully scraped.",
-        actions: [
-          {
-            type: "log",
-            params: ({ event: { item } }) => ({
-              message: `Successfully scraped ${item.type}: ${item.fullTitle}`,
-              level: "info",
-            }),
-          },
-          {
-            type: "requestDownload",
-            params: ({ event: { item } }) => ({ item }),
-          },
-        ],
-      },
-
-      /**
-       * Download lifecycle events
-       */
-
-      "riven.media-item.download.success": {
-        description:
-          "Indicates that a media item has been successfully downloaded.",
-        actions: [
-          {
-            type: "log",
-            params: ({
-              event: {
-                downloader,
-                item: { fullTitle },
-                durationFromRequestToDownload,
-                provider,
+          onError: {
+            target: "Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event }) => ({
+                  message: `Error bootstrapping flow workers: ${String(event.error)}`,
+                  level: "error",
+                }),
               },
-            }) => ({
-              get message() {
-                const baseMessage = `Successfully downloaded ${fullTitle} in ${durationFromRequestToDownload.toString()} seconds using ${downloader}`;
-
-                if (provider) {
-                  return `${baseMessage} via ${provider}`;
-                }
-
-                return baseMessage;
+              { type: "handleGracefulShutdown" },
+            ],
+          },
+          onDone: {
+            target: "Running",
+            actions: assign({
+              flows: ({ event }) => {
+                console.log(event.output);
+                return event.output;
               },
             }),
           },
-        ],
+        },
       },
-
-      "riven.media-item.download.partial-success": {
-        description:
-          "Indicates that a show or season has been partially downloaded.",
-        actions: [
+      Running: {
+        entry: [
+          {
+            type: "broadcastEventToPlugins",
+            params: { type: "riven.core.started" },
+          },
+          { type: "requestContentServices" },
+          raise({ type: "riven-internal.retry-library" }),
           {
             type: "log",
-            params: ({
-              event: {
-                downloader,
-                item: { fullTitle },
+            params: { message: "Riven has started successfully." },
+          },
+        ],
+        always: [
+          {
+            guard: "shouldQueueEvent",
+            actions: {
+              type: "broadcastEventToPlugins",
+              params: ({ event }) => RivenEvent.encode(event as never),
+            },
+          },
+          {
+            guard: "isRivenEvent",
+            actions: {
+              type: "log",
+              params: ({ event }) => ({
+                message: `Received event: ${event.type}`,
+                level: "silly",
+              }),
+            },
+          },
+        ],
+        after: {
+          10000: {
+            actions: "requestContentServices",
+          },
+        },
+        on: {
+          /**
+           * Item request lifecycle events
+           */
+
+          "riven.item-request.create.success": {
+            description:
+              "Indicates that a media item has been successfully created in the library.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { item } }) => ({
+                  message: `Successfully created item request: [${item.externalIdsLabel.join(" | ")}]`,
+                  level: "silly",
+                }),
               },
-            }) => ({
-              message: `Partially downloaded ${fullTitle} using ${downloader}. Attempting to download the remaining items separately.`,
-            }),
+              {
+                type: "requestIndexData",
+                params: ({ event: { item } }) => ({ item }),
+              },
+            ],
           },
-          {
-            type: "fanOutDownload",
-            params: ({ event: { item } }) => ({ item }),
+
+          "riven.item-request.create.error": {
+            description:
+              "Indicates that an error occurred while attempting to create an item request.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { item, error } }) => ({
+                  message: `Error creating item request ${JSON.stringify(SerialisedItemRequest.decode(item))}: ${String(error)}`,
+                  level: "error",
+                }),
+              },
+            ],
           },
-        ],
+
+          "riven.item-request.create.error.conflict": {
+            description:
+              "Indicates that an item request creation was attempted, but the item already exists in the library.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { item } }) => ({
+                  message: `Skipping existing item request: ${JSON.stringify(SerialisedItemRequest.decode(item).externalIdsLabel.join(" | "))}`,
+                  level: "verbose",
+                }),
+              },
+            ],
+          },
+
+          "riven.item-request.update.success": {
+            description:
+              "Indicates that an item request has been successfully updated.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { item } }) => ({
+                  message: `Successfully updated item request: [${item.externalIdsLabel.join(" | ")}]`,
+                  level: "silly",
+                }),
+              },
+              {
+                type: "requestIndexData",
+                params: ({ event: { item } }) => ({ item }),
+              },
+            ],
+          },
+
+          /**
+           * Index lifecycle events
+           */
+
+          "riven.media-item.index.requested": {
+            description:
+              "Indicates that a media item index has been requested for a media item.",
+            actions: {
+              type: "requestIndexData",
+              params: ({ event: { item } }) => ({ item }),
+            },
+          },
+
+          "riven.media-item.index.success": {
+            description:
+              "Indicates that a media item has been successfully indexed in the library.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { item } }) => ({
+                  message: `Successfully indexed ${item.type}: ${item.fullTitle}`,
+                  level: "info",
+                }),
+              },
+              {
+                type: "requestScrape",
+                params: ({ event: { item } }) => ({ item }),
+              },
+            ],
+          },
+
+          "riven.media-item.index.error.incorrect-state": {
+            description:
+              "Indicates that a media item index was attempted, but the item was already indexed in the library.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { item } }) => ({
+                  message: `Media item has already been indexed: ${JSON.stringify(SerialisedItemRequest.decode(item))}`,
+                  level: "verbose",
+                }),
+              },
+            ],
+          },
+
+          /**
+           * Scrape lifecycle events
+           */
+
+          "riven.media-item.scrape.requested": {
+            description:
+              "Indicates that a media item scrape has been requested for an indexed media item.",
+            actions: {
+              type: "requestScrape",
+              params: ({ event: { item } }) => ({ item }),
+            },
+          },
+
+          "riven.media-item.scrape.error.no-new-streams": {
+            description:
+              "Indicates that a media item scrape completed successfully, but no new streams were found.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { item } }) => ({
+                  message: `No new streams found for ${item.fullTitle}.`,
+                  level: "verbose",
+                }),
+              },
+              {
+                type: "fanOutDownload",
+                params: ({ event: { item } }) => ({ item }),
+              },
+            ],
+          },
+
+          "riven.media-item.scrape.success": {
+            description:
+              "Indicates that a media item has been successfully scraped.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { item } }) => ({
+                  message: `Successfully scraped ${item.type}: ${item.fullTitle}`,
+                  level: "info",
+                }),
+              },
+              {
+                type: "requestDownload",
+                params: ({ event: { item } }) => ({ item }),
+              },
+            ],
+          },
+
+          /**
+           * Download lifecycle events
+           */
+
+          "riven.media-item.download.success": {
+            description:
+              "Indicates that a media item has been successfully downloaded.",
+            actions: [
+              {
+                type: "log",
+                params: ({
+                  event: {
+                    downloader,
+                    item: { fullTitle },
+                    durationFromRequestToDownload,
+                    provider,
+                  },
+                }) => ({
+                  get message() {
+                    const baseMessage = `Successfully downloaded ${fullTitle} in ${durationFromRequestToDownload.toString()} seconds using ${downloader}`;
+
+                    if (provider) {
+                      return `${baseMessage} via ${provider}`;
+                    }
+
+                    return baseMessage;
+                  },
+                }),
+              },
+            ],
+          },
+
+          "riven.media-item.download.partial-success": {
+            description:
+              "Indicates that a show or season has been partially downloaded.",
+            actions: [
+              {
+                type: "log",
+                params: ({
+                  event: {
+                    downloader,
+                    item: { fullTitle },
+                  },
+                }) => ({
+                  message: `Partially downloaded ${fullTitle} using ${downloader}. Attempting to download the remaining items separately.`,
+                }),
+              },
+              {
+                type: "fanOutDownload",
+                params: ({ event: { item } }) => ({ item }),
+              },
+            ],
+          },
+
+          "riven.media-item.download.error": {
+            description:
+              "Indicates that an error occurred during the download process for a media item.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { item, error } }) => ({
+                  message: `Error downloading ${item.fullTitle}: ${String(error)}`,
+                  level: "error",
+                }),
+              },
+              {
+                type: "fanOutDownload",
+                params: ({ event: { item } }) => ({ item }),
+              },
+            ],
+          },
+
+          /**
+           * Internal events
+           */
+
+          "riven-internal.retry-library": {
+            description:
+              "Retries any incomplete media items and item requests.",
+            actions: { type: "retryLibrary" },
+          },
+
+          "riven-internal.retry-item-download": {
+            description:
+              "Retries the download process for a scraped media item.",
+            actions: {
+              type: "requestDownload",
+              params: ({ event: { item } }) => ({
+                item,
+              }),
+            },
+          },
+        },
       },
-
-      "riven.media-item.download.error": {
-        description:
-          "Indicates that an error occurred during the download process for a media item.",
-        actions: [
-          {
-            type: "log",
-            params: ({ event: { item, error } }) => ({
-              message: `Error downloading ${item.fullTitle}: ${String(error)}`,
-              level: "error",
-            }),
-          },
-          {
-            type: "fanOutDownload",
-            params: ({ event: { item } }) => ({ item }),
-          },
-        ],
-      },
-
-      /**
-       * Internal events
-       */
-
-      "riven-internal.retry-library": {
-        description: "Retries any incomplete media items and item requests.",
-        actions: { type: "retryLibrary" },
-      },
-
-      "riven-internal.retry-item-download": {
-        description: "Retries the download process for a scraped media item.",
-        actions: {
-          type: "requestDownload",
-          params: ({ event: { item } }) => ({
-            item,
+      Errored: {
+        type: "final",
+        entry: {
+          type: "log",
+          params: () => ({
+            message: `Riven has entered an unrecoverable error state and will shut down. Please check previous logs for more details.`,
+            level: "error",
           }),
         },
       },

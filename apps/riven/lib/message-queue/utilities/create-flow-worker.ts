@@ -22,7 +22,7 @@ import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 Worker.setMaxListeners(200);
 
-export function createFlowWorker<
+export async function createFlowWorker<
   T extends ZodObject<{
     name: ZodLiteral<Flow["name"]>;
     input: ZodType;
@@ -87,7 +87,7 @@ export function createFlowWorker<
   });
 
   if (settings.unsafeClearQueuesOnStartup) {
-    void queue.obliterate({
+    await queue.obliterate({
       force: true,
     });
   }

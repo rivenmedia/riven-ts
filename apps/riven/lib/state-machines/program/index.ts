@@ -61,6 +61,7 @@ export const rivenMachine = setup({
             actions: assign(
               ({
                 spawn,
+                self,
                 event: {
                   output: {
                     server,
@@ -76,6 +77,7 @@ export const rivenMachine = setup({
                 vfs,
                 mainRunnerRef: spawn(mainRunnerMachine, {
                   input: {
+                    parentRef: self,
                     plugins,
                     publishableEvents,
                     pluginQueues,

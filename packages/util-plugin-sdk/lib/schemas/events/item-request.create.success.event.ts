@@ -7,17 +7,17 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 /**
  * Event emitted when a new media item has been created from a requested item.
  */
-export const ItemRequestCreationSuccessEvent = createProgramEventSchema(
-  "item-request.creation.success",
+export const ItemRequestCreateSuccessEvent = createProgramEventSchema(
+  "item-request.create.success",
   z.object({
     item: ItemRequestInstance,
   }),
 );
 
-export type ItemRequestCreationSuccessEvent = z.infer<
-  typeof ItemRequestCreationSuccessEvent
+export type ItemRequestCreateSuccessEvent = z.infer<
+  typeof ItemRequestCreateSuccessEvent
 >;
 
-export const ItemRequestCreationSuccessEventHandler = createEventHandlerSchema(
-  ItemRequestCreationSuccessEvent,
+export const ItemRequestCreateSuccessEventHandler = createEventHandlerSchema(
+  ItemRequestCreateSuccessEvent,
 );
