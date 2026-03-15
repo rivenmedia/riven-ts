@@ -1,5 +1,3 @@
-import { DateTime } from "luxon";
-
 import type { NotificationPayload } from "../notification-payload.ts";
 import type { DiscordService } from "../parse-notification-url.ts";
 import type { NotificationDispatcher } from "./notification-dispatcher.ts";
@@ -43,28 +41,14 @@ function buildEmbed(payload: NotificationPayload) {
     title: "Downloaded: " + payload.fullTitle,
     color: EMBED_COLOR_SUCCESS,
     fields,
-    timestamp: DateTime.utc().toISO(),
+    timestamp: payload.timestamp,
     ...(payload.posterPath ? { thumbnail: { url: payload.posterPath } } : {}),
   };
 }
 
 export const discordDispatcher: NotificationDispatcher<DiscordService> = {
-  async send({ webhookId, webhookToken }, payload) {
+  async send({ webhookId, webhookToken }, payload, api) {
     const url = [DISCORD_WEBHOOK_BASE, webhookId, webhookToken].join("/");
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ embeds: [buildEmbed(payload)] }),
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        "Discord webhook failed: " +
-          String(response.status) +
-          " " +
-          response.statusText,
-      );
-    }
+    await api.postNotification(url, { embeds: [buildEmbed(payload)] });
   },
 };

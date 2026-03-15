@@ -1,10 +1,13 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { DateTime } from "luxon";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { discordDispatcher } from "../discord.dispatcher.ts";
 
+import type { NotificationsAPI } from "../../../datasource/notifications.datasource.ts";
 import type { NotificationPayload } from "../../notification-payload.ts";
 
 const mockPayload: NotificationPayload = {
+  event: "download.success",
   title: "Inception",
   fullTitle: "Inception (2010)",
   type: "movie",
@@ -16,6 +19,7 @@ const mockPayload: NotificationPayload = {
   downloader: "realdebrid",
   provider: "torrentio",
   durationSeconds: 45,
+  timestamp: DateTime.utc().toISO(),
 };
 
 const mockService = {
@@ -24,53 +28,54 @@ const mockService = {
 };
 
 describe("discordDispatcher", () => {
+  const postNotification = vi.fn().mockResolvedValue(undefined);
+  let mockApi: NotificationsAPI;
+
   beforeEach(() => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({ ok: true, status: 204 }),
-    );
+    postNotification.mockClear();
+    mockApi = { postNotification } as unknown as NotificationsAPI;
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+  it("sends to the correct Discord webhook URL", async () => {
+    await discordDispatcher.send(mockService, mockPayload, mockApi);
 
-  it("sends a POST to the correct Discord webhook URL", async () => {
-    await discordDispatcher.send(mockService, mockPayload);
-
-    expect(fetch).toHaveBeenCalledWith(
+    expect(postNotification).toHaveBeenCalledWith(
       "https://discord.com/api/webhooks/webhook-id/webhook-token",
       expect.objectContaining({
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        embeds: expect.arrayContaining([
+          expect.objectContaining({
+            title: "Downloaded: Inception (2010)",
+          }),
+        ]),
       }),
     );
   });
 
-  it("sends an embed with the correct title", async () => {
-    await discordDispatcher.send(mockService, mockPayload);
+  it("includes poster thumbnail in embed", async () => {
+    await discordDispatcher.send(mockService, mockPayload, mockApi);
 
-    const call = vi.mocked(fetch).mock.calls[0];
-    const rawBody = call?.[1]?.body;
-    const body = JSON.parse(rawBody as string) as {
-      embeds: { title: string }[];
-    };
-
-    expect(body.embeds[0]?.title).toBe("Downloaded: Inception (2010)");
-  });
-
-  it("throws on non-ok response", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        ok: false,
-        status: 401,
-        statusText: "Unauthorized",
+    expect(postNotification).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        embeds: expect.arrayContaining([
+          expect.objectContaining({
+            thumbnail: { url: "https://image.tmdb.org/t/p/w500/poster.jpg" },
+          }),
+        ]),
       }),
     );
+  });
 
-    await expect(
-      discordDispatcher.send(mockService, mockPayload),
-    ).rejects.toThrow("Discord webhook failed: 401 Unauthorized");
+  it("omits thumbnail when posterPath is null", async () => {
+    const payloadWithoutPoster = { ...mockPayload, posterPath: null };
+    await discordDispatcher.send(mockService, payloadWithoutPoster, mockApi);
+
+    const call = postNotification.mock.calls[0] as [
+      string,
+      Record<string, unknown>,
+    ];
+    const body = call[1] as { embeds: { thumbnail?: unknown }[] };
+
+    expect(body.embeds[0]?.thumbnail).toBeUndefined();
   });
 });

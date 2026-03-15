@@ -1,6 +1,9 @@
+import { DateTime } from "luxon";
+
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 export interface NotificationPayload {
+  event: string;
   title: string;
   fullTitle: string;
   type: "movie" | "show" | "season" | "episode";
@@ -12,17 +15,22 @@ export interface NotificationPayload {
   downloader: string;
   provider: string | null;
   durationSeconds: number;
+  timestamp: string;
 }
 
-export function buildNotificationPayload(event: {
-  item: MediaItem;
-  downloader: string;
-  provider: string | null;
-  durationFromRequestToDownload: number;
-}): NotificationPayload {
+export function buildNotificationPayload(
+  event: {
+    item: MediaItem;
+    downloader: string;
+    provider: string | null;
+    durationFromRequestToDownload: number;
+  },
+  eventName: string,
+): NotificationPayload {
   const { item } = event;
 
   return {
+    event: eventName,
     title: item.title,
     fullTitle: item.fullTitle,
     type: item.type,
@@ -34,5 +42,6 @@ export function buildNotificationPayload(event: {
     downloader: event.downloader,
     provider: event.provider,
     durationSeconds: Math.round(event.durationFromRequestToDownload),
+    timestamp: DateTime.utc().toISO(),
   };
 }

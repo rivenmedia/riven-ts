@@ -1,8 +1,10 @@
+import type { NotificationsAPI } from "../../datasource/notifications.datasource.ts";
 import type { NotificationPayload } from "../notification-payload.ts";
 
 export interface NotificationDispatcher<TService> {
   send(
     service: Omit<TService, "type">,
     payload: NotificationPayload,
+    api: NotificationsAPI,
   ): Promise<void>;
 }
