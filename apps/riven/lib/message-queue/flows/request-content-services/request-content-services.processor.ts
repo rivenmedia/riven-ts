@@ -30,18 +30,18 @@ export const requestContentServicesProcessor =
       ]);
 
       for (const result of results) {
-        if (result.status === "rejected") {
+        if (result.status === "fulfilled") {
+          sendEvent({
+            type: `riven.item-request.${result.value.requestType}.success`,
+            item: result.value.item,
+          });
+        } else {
           if (
             result.reason instanceof ItemRequestCreateError ||
             result.reason instanceof ItemRequestCreateErrorConflict
           ) {
             sendEvent(result.reason.payload);
           }
-        } else {
-          sendEvent({
-            type: `riven.item-request.${result.value.requestType}.success`,
-            item: result.value.item,
-          });
         }
       }
 

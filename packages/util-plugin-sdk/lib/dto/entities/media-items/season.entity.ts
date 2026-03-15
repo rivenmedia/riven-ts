@@ -44,9 +44,6 @@ export class Season extends ShowLikeMediaItem {
   @Property()
   isSpecial!: boolean;
 
-  @Property()
-  isRequested!: boolean;
-
   override type: Opt<"season"> = "season" as const;
 
   declare tvdbId: Opt<string>;
@@ -87,17 +84,6 @@ export class Season extends ShowLikeMediaItem {
   @BeforeCreate()
   _copyItemRequest() {
     this.itemRequest = this.show.getProperty("itemRequest");
-
-    const requestedSeasons = this.itemRequest.getProperty("seasons");
-
-    /**
-     * If the item request has specific seasons requested, only mark this season as requested if it's included in that list.
-     *
-     * Otherwise, request all non-special seasons. This is the default behaviour of list ingestion.
-     */
-    this.isRequested = requestedSeasons
-      ? requestedSeasons.includes(this.number)
-      : this.number > 0;
   }
 
   @BeforeCreate()

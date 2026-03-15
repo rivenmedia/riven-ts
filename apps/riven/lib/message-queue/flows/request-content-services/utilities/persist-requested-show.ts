@@ -21,71 +21,97 @@ export async function persistRequestedShow(
 
   logger.silly(`Processing requested show: ${externalIds.join(", ")}`);
 
-  const existingItem = await database.itemRequest.findOne({
-    $or: [
-      ...(item.imdbId ? [{ imdbId: item.imdbId }] : []),
-      ...(item.tvdbId ? [{ tvdbId: item.tvdbId }] : []),
-    ],
-  });
+  return await database.em.fork().transactional(async (transaction) => {
+    const existingItem = await database.itemRequest.findOne(
+      {
+        $or: [
+          ...(item.imdbId ? [{ imdbId: item.imdbId }] : []),
+          ...(item.tvdbId ? [{ tvdbId: item.tvdbId }] : []),
+        ],
+      },
+      { refresh: true },
+    );
 
-  if (existingItem?.seasons && item.seasons) {
-    const existingItemSeasonsSet = new Set(existingItem.seasons);
-    const requestedItemSeasonsSet = new Set(item.seasons);
+    if (existingItem?.seasons && item.seasons) {
+      const existingItemSeasonsSet = new Set(existingItem.seasons);
+      const requestedItemSeasonsSet = new Set(item.seasons);
 
-    if (existingItemSeasonsSet.difference(requestedItemSeasonsSet).size === 0) {
-      throw new ItemRequestCreateErrorConflict({
-        item: existingItem,
+      if (
+        requestedItemSeasonsSet.difference(existingItemSeasonsSet).size === 0
+      ) {
+        throw new ItemRequestCreateErrorConflict({
+          item: existingItem,
+        });
+      }
+    }
+
+    const itemRequest =
+      existingItem ??
+      transaction.create(ItemRequest, {
+        state: "requested",
+        requestedBy: item.requestedBy ?? null,
+        type: "show",
+        imdbId: item.imdbId ?? null,
+        tvdbId: item.tvdbId ?? null,
+        externalRequestId: item.externalRequestId ?? null,
+      });
+
+    itemRequest.seasons = item.seasons;
+
+    if (existingItem && itemRequest.seasons) {
+      const linkedItemsToProcess = await existingItem.seasonItems.matching({
+        where: {
+          isRequested: false,
+          number: {
+            $in: itemRequest.seasons,
+          },
+        },
+      });
+
+      for (const linkedItem of linkedItemsToProcess) {
+        linkedItem.isRequested = true;
+
+        transaction.persist(linkedItem);
+      }
+    }
+
+    transaction.persist(itemRequest);
+
+    try {
+      await validateOrReject(itemRequest);
+
+      await transaction.flush();
+
+      await transaction.refreshOrFail(itemRequest);
+
+      return {
+        requestType: existingItem
+          ? RequestType.enum.update
+          : RequestType.enum.create,
+        item: itemRequest,
+      };
+    } catch (error) {
+      const errorMessage = z
+        .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
+        .transform((error) => {
+          if (Array.isArray(error)) {
+            return error
+              .map((err) =>
+                err.constraints
+                  ? Object.values(err.constraints).join("; ")
+                  : "",
+              )
+              .join("; ");
+          }
+
+          return error.message;
+        })
+        .parse(error);
+
+      throw new ItemRequestCreateError({
+        item: itemRequest,
+        error: errorMessage,
       });
     }
-  }
-
-  const em = database.em.fork();
-
-  const itemRequest =
-    existingItem ??
-    em.create(ItemRequest, {
-      state: "requested",
-      requestedBy: item.requestedBy ?? null,
-      type: "show",
-      imdbId: item.imdbId ?? null,
-      tvdbId: item.tvdbId ?? null,
-      externalRequestId: item.externalRequestId ?? null,
-    });
-
-  itemRequest.seasons = item.seasons;
-
-  try {
-    await validateOrReject(itemRequest);
-
-    await em.flush();
-
-    await em.refreshOrFail(itemRequest);
-
-    return {
-      requestType: existingItem
-        ? RequestType.enum.update
-        : RequestType.enum.create,
-      item: itemRequest,
-    };
-  } catch (error) {
-    const errorMessage = z
-      .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((error) => {
-        if (Array.isArray(error)) {
-          return error
-            .map((err) =>
-              err.constraints ? Object.values(err.constraints).join("; ") : "",
-            )
-            .join("; ");
-        }
-
-        return error.message;
-      })
-      .parse(error);
-
-    throw new ItemRequestCreateError({
-      item: itemRequest,
-      error: errorMessage,
-    });
-  }
+  });
 }

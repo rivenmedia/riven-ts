@@ -115,9 +115,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
           filter,
           sort: "added",
         },
-        cacheOptions: {
-          ttl: 60 * 2,
-        },
+        skipCache: true,
       });
 
       const { results, pageInfo } = RequestResponse.parse(response);

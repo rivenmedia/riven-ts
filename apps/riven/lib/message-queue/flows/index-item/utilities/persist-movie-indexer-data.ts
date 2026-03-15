@@ -61,6 +61,7 @@ export async function persistMovieIndexerData({
         genres: item.genres,
         itemRequest,
         runtime: item.runtime,
+        isRequested: true, // Movies will always be considered to be requested
       });
 
       await validateOrReject(mediaItem);

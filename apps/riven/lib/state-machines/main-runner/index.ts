@@ -5,7 +5,6 @@ import {
   type Snapshot,
   assign,
   enqueueActions,
-  raise,
   setup,
 } from "xstate";
 
@@ -18,7 +17,11 @@ import {
   type BootstrapFlowWorkersOutput,
   bootstrapFlowWorkers,
 } from "./actors/bootstrap-flow-workers.actor.ts";
-import { fanOutDownload } from "./actors/fan-out-download.actor.ts";
+import { eventScheduler } from "./actors/event-scheduler.actor.ts";
+import {
+  type FanOutDownloadInput,
+  fanOutDownload,
+} from "./actors/fan-out-download.actor.ts";
 import { requestContentServices } from "./actors/request-content-services.actor.ts";
 import { requestDownload } from "./actors/request-download.actor.ts";
 import { requestIndexData } from "./actors/request-index-data.actor.ts";
@@ -29,7 +32,7 @@ import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscrib
 import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
 import type { EnqueueDownloadItemInput } from "../../message-queue/flows/download-item/enqueue-download-item.ts";
 import type { EnqueueIndexItemInput } from "../../message-queue/flows/index-item/enqueue-index-item.ts";
-import type { EnqueueScrapeItemInput } from "../../message-queue/flows/scrape-item/enqueue-scrape-item.ts";
+import type { EnqueueScrapeItemInput } from "../../message-queue/flows/scrape-item/enqueue-scrape-items.ts";
 import type {
   PluginQueueMap,
   PluginWorkerMap,
@@ -66,6 +69,7 @@ export const mainRunnerMachine = setup({
     events: {} as MainRunnerMachineEvent,
     children: {} as {
       bootstrapFlowWorkers: "bootstrapFlowWorkers";
+      createEventScheduler: "createEventScheduler";
       requestContentServices: "requestContentServices";
       requestIndexData: "requestIndexData";
       requestScrape: "requestScrape";
@@ -152,7 +156,7 @@ export const mainRunnerMachine = setup({
       ) => {
         enqueue.spawnChild(requestScrape, {
           input: {
-            item: params.item,
+            items: params.items,
             subscribers: getPluginEventSubscribers(
               "riven.media-item.scrape.requested",
               plugins,
@@ -184,7 +188,7 @@ export const mainRunnerMachine = setup({
     fanOutDownload: enqueueActions(
       (
         { enqueue, context: { plugins } },
-        params: Omit<EnqueueScrapeItemInput, "subscribers">,
+        params: Omit<FanOutDownloadInput, "subscribers">,
       ) => {
         enqueue.spawnChild(fanOutDownload, {
           input: {
@@ -207,6 +211,7 @@ export const mainRunnerMachine = setup({
   },
   actors: {
     bootstrapFlowWorkers,
+    createEventScheduler: eventScheduler,
     requestContentServices,
     requestIndexData,
     requestScrape,
@@ -284,13 +289,30 @@ export const mainRunnerMachine = setup({
         },
       },
       Running: {
+        invoke: [
+          {
+            id: "createEventScheduler",
+            src: "createEventScheduler",
+            input: {
+              event: "riven-internal.request-content-services",
+              interval: 10000,
+              runImmediately: true,
+            },
+          },
+          {
+            id: "createEventScheduler",
+            src: "createEventScheduler",
+            input: {
+              event: "riven-internal.retry-library",
+              interval: 10000,
+            },
+          },
+        ],
         entry: [
           {
             type: "broadcastEventToPlugins",
             params: { type: "riven.core.started" },
           },
-          { type: "requestContentServices" },
-          raise({ type: "riven-internal.retry-library" }),
           {
             type: "log",
             params: { message: "Riven has started successfully." },
@@ -378,8 +400,13 @@ export const mainRunnerMachine = setup({
                 }),
               },
               {
-                type: "requestIndexData",
-                params: ({ event: { item } }) => ({ item }),
+                type: "requestScrape",
+                params: ({ event: { item } }) => ({
+                  items: item.requestedItems.filter(
+                    (item) =>
+                      item.state === "indexed" && item.type === "season",
+                  ),
+                }),
               },
             ],
           },
@@ -410,7 +437,7 @@ export const mainRunnerMachine = setup({
               },
               {
                 type: "requestScrape",
-                params: ({ event: { item } }) => ({ item }),
+                params: ({ event: { item } }) => ({ items: [item] }),
               },
             ],
           },
@@ -438,7 +465,7 @@ export const mainRunnerMachine = setup({
               "Indicates that a media item scrape has been requested for an indexed media item.",
             actions: {
               type: "requestScrape",
-              params: ({ event: { item } }) => ({ item }),
+              params: ({ event: { item } }) => ({ items: [item] }),
             },
           },
 
@@ -553,6 +580,11 @@ export const mainRunnerMachine = setup({
           /**
            * Internal events
            */
+
+          "riven-internal.request-content-services": {
+            description: "Requests content services for media items to ingest.",
+            actions: { type: "requestContentServices" },
+          },
 
           "riven-internal.retry-library": {
             description:

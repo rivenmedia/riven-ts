@@ -6,20 +6,17 @@ import { createScrapeItemJob } from "./scrape-item.schema.ts";
 import { createParseScrapeResultsJob } from "./steps/parse-scrape-results/parse-scrape-results.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
-import type { FlowJob } from "bullmq";
 
-export interface EnqueueBulkScrapeItemsInput {
+export interface EnqueueScrapeItemInput {
   items: MediaItemScrapeRequestedEvent["item"][];
   subscribers: RivenPlugin[];
 }
 
-export async function enqueueBulkScrapeItems({
+export async function enqueueScrapeItems({
   items,
   subscribers,
-}: EnqueueBulkScrapeItemsInput) {
-  const nodes: FlowJob[] = [];
-
-  for (const item of items) {
+}: EnqueueScrapeItemInput) {
+  const nodes = items.map((item) => {
     const childNodes = subscribers.map((plugin) =>
       createPluginFlowJob(
         MediaItemScrapeRequestedEvent,
@@ -30,7 +27,7 @@ export async function enqueueBulkScrapeItems({
       ),
     );
 
-    const rootNode = createScrapeItemJob(
+    return createScrapeItemJob(
       `Scraping ${item.fullTitle}`,
       { id: item.id },
       {
@@ -43,9 +40,7 @@ export async function enqueueBulkScrapeItems({
         ],
       },
     );
-
-    nodes.push(rootNode);
-  }
+  });
 
   return flow.addBulk(nodes);
 }

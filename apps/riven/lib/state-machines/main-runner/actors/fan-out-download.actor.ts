@@ -8,7 +8,7 @@ import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state
 import { fromPromise } from "xstate";
 
 import { database } from "../../../database/database.ts";
-import { enqueueBulkScrapeItems } from "../../../message-queue/flows/scrape-item/enqueue-bulk-scrape-items.ts";
+import { enqueueScrapeItems } from "../../../message-queue/flows/scrape-item/enqueue-scrape-items.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
@@ -36,7 +36,7 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
        *
        * They should be handled after the main attempt has resolved.
        */
-      await enqueueBulkScrapeItems({
+      await enqueueScrapeItems({
         items: item.requestedSeasons.getItems(),
         subscribers,
       });
@@ -51,7 +51,7 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
       });
 
       // TODO: Implement pagination for shows with a large number of episodes to avoid enqueueing thousands of scrape jobs at once
-      await enqueueBulkScrapeItems({
+      await enqueueScrapeItems({
         items: incompleteEpisodes,
         subscribers,
       });
