@@ -29,16 +29,18 @@ export default {
       const api = dataSources.get(NotificationsAPI);
       const payload = buildNotificationPayload(event, "download.success");
       const results = await Promise.allSettled(
-        urls.map((rawUrl) => {
+        urls.map(async (rawUrl) => {
           const service = parseNotificationUrl(rawUrl);
           return sendNotification(service, payload, api);
         }),
       );
 
-      for (const result of results) {
+      for (const [urlIndex, result] of results.entries()) {
         if (result.status === "rejected") {
           logger.error("Notification dispatch failed", {
             error: String(result.reason),
+            url: urls[urlIndex],
+            urlIndex,
           });
         }
       }
