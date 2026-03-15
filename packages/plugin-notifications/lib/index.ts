@@ -1,0 +1,48 @@
+import packageJson from "../package.json" with { type: "json" };
+import { pluginConfig } from "./notifications-plugin.config.ts";
+import { NotificationsSettings } from "./notifications-settings.schema.ts";
+import { NotificationsSettingsResolver } from "./schema/notifications-settings.resolver.ts";
+import { NotificationsResolver } from "./schema/notifications.resolver.ts";
+import { sendNotification } from "./services/dispatchers/index.ts";
+import { buildNotificationPayload } from "./services/notification-payload.ts";
+import { parseNotificationUrl } from "./services/parse-notification-url.ts";
+
+import type { RivenPlugin } from "@repo/util-plugin-sdk";
+
+export default {
+  name: pluginConfig.name,
+  version: packageJson.version,
+  resolvers: [NotificationsResolver, NotificationsSettingsResolver],
+  hooks: {
+    "riven.media-item.download.success": async ({
+      event,
+      settings,
+      logger,
+    }) => {
+      const { urls } = settings.get(NotificationsSettings);
+
+      if (urls.length === 0) return;
+
+      const payload = buildNotificationPayload(event);
+      const results = await Promise.allSettled(
+        urls.map((rawUrl) => {
+          const service = parseNotificationUrl(rawUrl);
+          return sendNotification(service, payload);
+        }),
+      );
+
+      for (const result of results) {
+        if (result.status === "rejected") {
+          logger.error("Notification dispatch failed", {
+            error: String(result.reason),
+          });
+        }
+      }
+    },
+  },
+  settingsSchema: NotificationsSettings,
+  validator({ settings }) {
+    const { urls } = settings.get(NotificationsSettings);
+    return Promise.resolve(urls.length > 0);
+  },
+} satisfies RivenPlugin as RivenPlugin;
