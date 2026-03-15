@@ -4,7 +4,7 @@
 
 ### Setup development environment
 
-Install `pnpm`,
+1. Install `pnpm`,
 
 ```
 curl -fsSL https://get.pnpm.io/install.sh | sh -
@@ -12,20 +12,20 @@ curl -fsSL https://get.pnpm.io/install.sh | sh -
 
 _Restart shell / source the shell config file to make `pnpm` command available._
 
-Then, install lts node & npm,
+2. Install lts node & npm,
 
 ```
 pnpm env use --global lts
 ```
 
-Then, install turbo globally (optional, but recommended),
+3. Install turbo globally (optional, but recommended),
 
 ```
 pnpm add turbo --global
 ```
 
-Then, you need to make sure fuse related deps are installed. These deps can differ based on the distribution you are using.
-You need to have `libfuse.so.2` installed. For example,
+4. Make sure fuse related deps are installed. These deps can differ based on the distribution you are using.
+   You need to have `libfuse.so.2` installed. For example,
 
 ```
 # Ubuntu
@@ -36,7 +36,7 @@ sudo apt install fuse3
 sudo pacman -S fuse fuse3
 ```
 
-Then, edit the `/etc/fuse.conf` file, and uncomment the line `user_allow_other` (remove the `#` at the beginning of the line).
+5. Edit the `/etc/fuse.conf` file, and uncomment the line `user_allow_other` (remove the `#` at the beginning of the line).
 
 ```
 sudo nano /etc/fuse.conf
@@ -68,6 +68,8 @@ sudo nano /etc/fuse.conf
 > [Install]
 > WantedBy=local-fs.target
 > ```
+>
+> Source: 3.1 https://wiki.archlinux.org/title/Install_Arch_Linux_on_WSL
 
 _Reboot your system after the above steps to make sure all the changes take effect._
 
