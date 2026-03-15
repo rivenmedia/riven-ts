@@ -31,7 +31,7 @@ export function parseNotificationUrl(raw: string): NotificationService {
 
       if (!webhookId || !webhookToken) {
         throw new Error(
-          `Invalid Discord URL: expected discord://webhookId/webhookToken, got ${raw}`,
+          `Invalid Discord URL: expected discord://webhookId/webhookToken`,
         );
       }
 

@@ -29,7 +29,7 @@
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
-    "discord-api-types": "^0.38.42",
+    "discord-api-types": "catalog:",
     "eslint": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",
