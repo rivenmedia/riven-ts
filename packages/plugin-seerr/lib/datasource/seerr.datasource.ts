@@ -4,28 +4,17 @@ import {
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
 
-import type {
-  GetAuthMeQueryResponse,
-  GetRequestQueryResponse,
-  MediaRequest,
-} from "../__generated__/index.ts";
+import {
+  type MediaRequestWithType,
+  RequestResponse,
+} from "../schemas/request-response.schema.ts";
+
+import type { GetAuthMeQueryResponse } from "../__generated__/index.ts";
 import type { SeerrSettings } from "../seerr-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
-import type { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
+import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
 export class SeerrAPIError extends Error {}
-
-/**
- * The Overseerr API returns a `type` field on MediaRequest at runtime
- * indicating "movie" or "tv", but it is not documented in the OpenAPI spec.
- */
-interface MediaRequestWithType extends MediaRequest {
-  type: "movie" | "tv";
-}
-
-interface GetRequestResponseWithType extends GetRequestQueryResponse {
-  results?: MediaRequestWithType[];
-}
 
 export class SeerrAPI extends BaseDataSource<SeerrSettings> {
   override get baseURL() {
@@ -58,33 +47,47 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     }
   }
 
-  async getContent(
-    filter: string,
-  ): Promise<{ movies: ExternalIds[]; shows: ExternalIds[] }> {
+  async getContent(filter: string): Promise<ContentServiceRequestedResponse> {
     const requests = await this.#getAllRequests(filter);
-    const movieMap = new Map<number, ExternalIds>();
-    const showMap = new Map<number, ExternalIds>();
+    const movieMap = new Map<
+      number,
+      ContentServiceRequestedResponse["movies"][number]
+    >();
+    const showMap = new Map<
+      number,
+      ContentServiceRequestedResponse["shows"][number]
+    >();
 
     for (const request of requests) {
-      if (!request.media?.tmdbId) {
-        continue;
-      }
-
       if (request.type === "movie") {
+        if (!request.media?.tmdbId) {
+          continue;
+        }
+
         movieMap.set(request.media.tmdbId, {
           tmdbId: request.media.tmdbId.toString(),
-          externalId: request.media.id?.toString(),
+          externalRequestId: request.id.toString(),
+          requestedBy: request.requestedBy?.email,
         });
-      } else {
-        showMap.set(request.media.tmdbId, {
-          tmdbId: request.media.tmdbId.toString(),
-          tvdbId: request.media.tvdbId?.toString(),
-          externalId: request.media.id?.toString(),
+      }
+
+      if (request.type === "tv") {
+        if (!request.media?.tvdbId) {
+          continue;
+        }
+
+        showMap.set(request.media.tvdbId, {
+          tvdbId: request.media.tvdbId.toString(),
+          externalRequestId: request.id.toString(),
+          requestedBy: request.requestedBy?.email,
         });
       }
     }
 
-    return { movies: [...movieMap.values()], shows: [...showMap.values()] };
+    return {
+      movies: [...movieMap.values()],
+      shows: [...showMap.values()],
+    };
   }
 
   async #getAllRequests(filter: string): Promise<MediaRequestWithType[]> {
@@ -94,7 +97,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     let totalResults = 0;
 
     do {
-      const response = await this.get<GetRequestResponseWithType>("request", {
+      const response = await this.get<unknown>("request", {
         params: {
           take: take.toString(),
           skip: skip.toString(),
@@ -106,11 +109,13 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
         },
       });
 
-      if (response.results) {
-        allResults.push(...response.results);
+      const { results, pageInfo } = RequestResponse.parse(response);
+
+      if (results) {
+        allResults.push(...results);
       }
 
-      totalResults = response.pageInfo?.results ?? 0;
+      totalResults = pageInfo?.results ?? 0;
       skip += take;
     } while (skip < totalResults);
 

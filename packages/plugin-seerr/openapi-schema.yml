@@ -57,6 +57,7 @@ components:
           readOnly: true
         username:
           type: string
+          nullable: true
         plexToken:
           type: string
           readOnly: true
@@ -1030,10 +1031,13 @@ components:
           example: false
         serverId:
           type: number
+          nullable: true
         profileId:
           type: number
+          nullable: true
         rootFolder:
           type: string
+          nullable: true
       required:
         - id
         - status

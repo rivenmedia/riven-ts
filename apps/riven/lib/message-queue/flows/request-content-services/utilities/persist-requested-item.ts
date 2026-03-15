@@ -10,7 +10,7 @@ import { logger } from "../../../../utilities/logger/logger.ts";
 
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
-export type ProcessRequestedItemInput =
+export type PersistRequestedItemInput =
   | {
       type: "show";
       item: ContentServiceRequestedResponse["shows"][number];
@@ -20,15 +20,15 @@ export type ProcessRequestedItemInput =
       item: ContentServiceRequestedResponse["movies"][number];
     };
 
-export interface ProcessRequestedItemOutput {
+export interface PersistRequestedItemOutput {
   isNewItem: boolean;
   item: ItemRequest;
 }
 
-export async function processRequestedItem({
+export async function persistRequestedItem({
   item,
   type,
-}: ProcessRequestedItemInput): Promise<ProcessRequestedItemOutput> {
+}: PersistRequestedItemInput): Promise<PersistRequestedItemOutput> {
   const externalIds = [
     item.imdbId ? `IMDB: ${item.imdbId}` : null,
     type === "movie" && item.tmdbId ? `TMDB: ${item.tmdbId}` : null,
@@ -54,8 +54,8 @@ export async function processRequestedItem({
   const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
-    requestedBy: "unknown",
     state: "requested",
+    requestedBy: item.requestedBy ?? null,
     type,
     imdbId: item.imdbId ?? null,
     tmdbId: (type === "movie" ? item.tmdbId : null) ?? null,

@@ -2,7 +2,7 @@ import { ItemRequestCreationErrorConflict } from "@repo/util-plugin-sdk/schemas/
 import { ItemRequestCreationError } from "@repo/util-plugin-sdk/schemas/events/item-request.creation.error.event";
 
 import { requestContentServicesProcessorSchema } from "./request-content-services.schema.ts";
-import { processRequestedItem } from "./utilities/process-requested-item.ts";
+import { persistRequestedItem } from "./utilities/persist-requested-item.ts";
 
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
@@ -24,13 +24,13 @@ export const requestContentServicesProcessor =
 
       const results = await Promise.allSettled([
         ...items.movies.map((item) =>
-          processRequestedItem({
+          persistRequestedItem({
             item,
             type: "movie",
           }),
         ),
         ...items.shows.map((item) =>
-          processRequestedItem({
+          persistRequestedItem({
             item,
             type: "show",
           }),

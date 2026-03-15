@@ -49,9 +49,9 @@ export class ItemRequest {
   @Enum(() => ItemRequestType.enum)
   type!: ItemRequestType;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
-  requestedBy!: string;
+  requestedBy!: string | null;
 
   @Field()
   @Property()
