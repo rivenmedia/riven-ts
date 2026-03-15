@@ -34,10 +34,15 @@ export const ContentServiceRequestedResponse = z.object({
       tvdbId: true,
       externalRequestId: true,
       requestedBy: true,
-    }).refine(
-      atLeastOnePropertyRequired,
-      "At least one identifier is required",
-    ),
+      seasons: true,
+    })
+      .required({
+        seasons: true,
+      })
+      .refine(
+        atLeastOnePropertyRequired,
+        "At least one identifier is required",
+      ),
   ),
 });
 

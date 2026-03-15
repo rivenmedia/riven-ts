@@ -29,14 +29,14 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
       await database.em.fork().populate(item, ["seasons"]);
 
       /**
-       * Ignore specials when fanning out.
+       * Pulls all *standard* seasons when fanning out.
        *
-       * These are unable to be downloaded in most instances,
+       * Specials are unable to be downloaded in most instances,
        * and end up burdening the queue with jobs.
        *
        * They should be handled after the main attempt has resolved.
        */
-      const seasons = await item.getStandardSeasons(processableStates.options);
+      const seasons = await item.getRequestedSeasons(processableStates.options);
 
       for (const season of seasons) {
         await enqueueScrapeItem({

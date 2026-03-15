@@ -41,9 +41,15 @@ export class Show extends ShowLikeMediaItem {
   @Enum(() => ShowStatus.enum)
   status!: ShowStatus;
 
-  @Field(() => [Season], { nullable: true })
+  @Field(() => [Season])
   @OneToMany(() => Season, (season) => season.show)
   seasons = new Collection<Season>(this);
+
+  @Field(() => [Season])
+  @OneToMany(() => Season, (season) => season.show, {
+    where: { isRequested: true },
+  })
+  requestedSeasons = new Collection<Season>(this);
 
   @Property({ persist: false, hidden: true, getter: true })
   get prettyName(): Opt<Hidden<string>> {

@@ -69,6 +69,10 @@ export class ItemRequest {
   @Enum(() => ItemRequestState.enum)
   state!: ItemRequestState;
 
+  @Field(() => [Number], { nullable: true })
+  @Property({ type: "json" })
+  seasons!: number[] | null;
+
   @Property({ persist: false, hidden: true, getter: true })
   get externalIdsLabel(): Hidden<Opt<string[]>> {
     const externalIds = [

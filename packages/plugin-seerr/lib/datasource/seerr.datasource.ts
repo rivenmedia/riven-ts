@@ -4,12 +4,10 @@ import {
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
 
-import {
-  type MediaRequestWithType,
-  RequestResponse,
-} from "../schemas/request-response.schema.ts";
+import { RequestResponse } from "../schemas/request-response.schema.ts";
 
 import type { GetAuthMeQueryResponse } from "../__generated__/index.ts";
+import type { ExtendedMediaRequest } from "../schemas/extended-media-request.schema.ts";
 import type { SeerrSettings } from "../seerr-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
@@ -76,10 +74,23 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
           continue;
         }
 
+        /**
+         * Seerr creates multiple requests within the same show,
+         * e.g. one request for seasons 1-3, then another request for season 4.
+         *
+         * To handle this, we combine seasons from multiple requests for the same show into a single entry in the response.
+         */
+        const combinedSeasons = new Set([
+          ...(showMap.get(request.media.tvdbId)?.seasons ?? []),
+          ...request.seasons.map(({ seasonNumber }) => seasonNumber),
+        ]);
+
         showMap.set(request.media.tvdbId, {
           tvdbId: request.media.tvdbId.toString(),
-          externalRequestId: request.id.toString(),
+          externalRequestId:
+            request.media.id?.toString() ?? request.id.toString(),
           requestedBy: request.requestedBy?.email,
+          seasons: [...combinedSeasons],
         });
       }
     }
@@ -90,8 +101,8 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     };
   }
 
-  async #getAllRequests(filter: string): Promise<MediaRequestWithType[]> {
-    const allResults: MediaRequestWithType[] = [];
+  async #getAllRequests(filter: string): Promise<ExtendedMediaRequest[]> {
+    const allResults: ExtendedMediaRequest[] = [];
     const take = 20;
     let skip = 0;
     let totalResults = 0;
