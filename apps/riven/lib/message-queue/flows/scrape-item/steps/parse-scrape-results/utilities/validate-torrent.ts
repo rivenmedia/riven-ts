@@ -24,6 +24,16 @@ export class SkippedTorrentError extends Error {
   }
 }
 
+/**
+ * Given a base year, return a list of candidate years that are valid for that base year.
+ *
+ * This is used to allow for some flexibility in torrent naming, where the year in the torrent title may be off by one year from the actual release year of the media item.
+ *
+ * @param year The base year to compare against
+ * @returns A list of possible years that are valid for the base year
+ */
+const getYearCandidates = (year: number) => [year - 1, year, year + 1];
+
 export const validateTorrent = async (
   item: MediaItem,
   itemTitle: string,
@@ -44,17 +54,30 @@ export const validateTorrent = async (
     );
   }
 
-  if (
-    parsedData.year &&
-    item.year &&
-    ![item.year - 1, item.year, item.year + 1].includes(parsedData.year)
-  ) {
-    throw new SkippedTorrentError(
-      "Skipping torrent with incorrect year",
-      itemTitle,
-      parsedData.rawTitle,
-      infoHash,
-    );
+  if (parsedData.year) {
+    const topLevelItem =
+      item instanceof ShowLikeMediaItem ? await item.getShow() : item;
+
+    const candidateYears = new Set<number>();
+
+    if (item.year) {
+      getYearCandidates(item.year).forEach((year) => candidateYears.add(year));
+    }
+
+    if (topLevelItem.year) {
+      getYearCandidates(topLevelItem.year).forEach((year) =>
+        candidateYears.add(year),
+      );
+    }
+
+    if (candidateYears.size && !candidateYears.has(parsedData.year)) {
+      throw new SkippedTorrentError(
+        "Skipping torrent with incorrect year",
+        itemTitle,
+        parsedData.rawTitle,
+        infoHash,
+      );
+    }
   }
 
   if (item instanceof Movie) {

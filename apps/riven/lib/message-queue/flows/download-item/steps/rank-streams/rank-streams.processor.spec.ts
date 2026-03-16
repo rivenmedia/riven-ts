@@ -43,6 +43,7 @@ const it = baseIt.extend<{
       contentRating: "g",
       itemRequest,
       tmdbId: "12345",
+      isRequested: true,
     });
 
     for (let i = 1; i <= 6; i++) {
@@ -175,6 +176,7 @@ it("handles foreign language movies with aliases correctly", async ({
       fr: ["Film Étranger"],
       jp: ["外国映画"],
     },
+    isRequested: true,
   });
 
   for (let i = 1; i <= 3; i++) {
@@ -241,6 +243,7 @@ it("handles foreign language shows with aliases correctly", async ({
       fr: ["Show Étranger"],
       jp: ["外国映画"],
     },
+    isRequested: true,
   });
 
   for (let i = 1; i <= 3; i++) {
