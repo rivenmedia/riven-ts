@@ -2,7 +2,7 @@ import { buildKubbConfig } from "@repo/core-util-kubb-config";
 
 export default buildKubbConfig({
   input: {
-    path: "./openapi-schema.yml",
+    path: "./openapi-schema.yaml",
   },
   name: "Seerr",
   baseURL: "http://localhost:5055",
