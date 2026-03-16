@@ -24,6 +24,16 @@ export class SkippedTorrentError extends Error {
   }
 }
 
+/**
+ * Given a base year, return a list of candidate years that are valid for that base year.
+ *
+ * This is used to allow for some flexibility in torrent naming, where the year in the torrent title may be off by one year from the actual release year of the media item.
+ *
+ * @param year The base year to compare against
+ * @returns A list of possible years that are valid for the base year
+ */
+const getYearCandidates = (year: number) => [year - 1, year, year + 1];
+
 export const validateTorrent = async (
   item: MediaItem,
   itemTitle: string,
@@ -44,10 +54,24 @@ export const validateTorrent = async (
     );
   }
 
+  const topLevelItem =
+    item instanceof ShowLikeMediaItem ? await item.getShow() : item;
+
+  const isIncorrectTopLevelItemYear =
+    topLevelItem.year && parsedData.year
+      ? !getYearCandidates(topLevelItem.year).includes(parsedData.year)
+      : false;
+
+  const isIncorrectItemYear =
+    item.year && parsedData.year
+      ? !getYearCandidates(item.year).includes(parsedData.year)
+      : false;
+
   if (
     parsedData.year &&
     item.year &&
-    ![item.year - 1, item.year, item.year + 1].includes(parsedData.year)
+    isIncorrectItemYear &&
+    isIncorrectTopLevelItemYear
   ) {
     throw new SkippedTorrentError(
       "Skipping torrent with incorrect year",
