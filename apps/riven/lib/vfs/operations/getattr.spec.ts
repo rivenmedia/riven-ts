@@ -77,6 +77,7 @@ it("returns file stats for movie files", async ({ em }) => {
     tmdbId: "27205",
     contentRating: "pg-13",
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -127,6 +128,7 @@ it("returns directory stats for /movies", async ({ em }) => {
       contentRating: "g",
       tmdbId: i.toString(),
       itemRequest,
+      isRequested: true,
     });
 
     await em.flush();
@@ -176,6 +178,7 @@ it("returns directory stats for /shows", async ({ em }) => {
       year: 2026,
       status: "continuing",
       itemRequest,
+      isRequested: true,
     });
 
     await em.flush();
@@ -185,6 +188,7 @@ it("returns directory stats for /shows", async ({ em }) => {
       year: 2020,
       number: i,
       isSpecial: false,
+      isRequested: true,
     });
 
     show.seasons.add(season);
@@ -198,6 +202,8 @@ it("returns directory stats for /shows", async ({ em }) => {
       number: 1,
       absoluteNumber: 1,
       isSpecial: false,
+      type: "episode",
+      isRequested: true,
     });
 
     season.episodes.add(episode);
@@ -246,6 +252,7 @@ it("returns directory stats for single shows", async ({ em }) => {
     year: 2026,
     status: "continuing",
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -256,6 +263,7 @@ it("returns directory stats for single shows", async ({ em }) => {
       year: 2020,
       number: i,
       isSpecial: false,
+      isRequested: true,
     });
 
     show.seasons.add(season);
@@ -269,6 +277,7 @@ it("returns directory stats for single shows", async ({ em }) => {
       number: 1,
       absoluteNumber: 1,
       isSpecial: false,
+      isRequested: true,
     });
 
     season.episodes.add(episode);
@@ -317,6 +326,7 @@ it("returns directory stats for single seasons", async ({ em }) => {
     year: 2026,
     status: "continuing",
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -326,6 +336,7 @@ it("returns directory stats for single seasons", async ({ em }) => {
     year: 2020,
     number: 1,
     isSpecial: false,
+    isRequested: true,
   });
 
   show.seasons.add(season);
@@ -340,6 +351,7 @@ it("returns directory stats for single seasons", async ({ em }) => {
       number: 1,
       absoluteNumber: 1,
       isSpecial: false,
+      isRequested: true,
     });
 
     season.episodes.add(episode);
@@ -388,6 +400,7 @@ it("returns file stats for episodes", async ({ em }) => {
     year: 2026,
     status: "continuing",
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -397,6 +410,7 @@ it("returns file stats for episodes", async ({ em }) => {
     year: 2020,
     number: 1,
     isSpecial: false,
+    isRequested: true,
   });
 
   show.seasons.add(season);
@@ -410,6 +424,7 @@ it("returns file stats for episodes", async ({ em }) => {
     number: 1,
     absoluteNumber: 1,
     isSpecial: false,
+    isRequested: true,
   });
 
   season.episodes.add(episode);

@@ -50,6 +50,7 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
     title: "Test Movie",
     year: 2024,
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();

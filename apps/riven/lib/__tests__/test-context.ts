@@ -107,6 +107,7 @@ export const rivenTestContext = testBase.extend<{
       contentRating: "g",
       tmdbId: "1",
       itemRequest,
+      isRequested: true,
     });
 
     await em.flush();
@@ -126,6 +127,7 @@ export const rivenTestContext = testBase.extend<{
       status: "ended",
       tvdbId: "1",
       itemRequest,
+      isRequested: true,
     });
 
     await em.flush();
@@ -137,6 +139,7 @@ export const rivenTestContext = testBase.extend<{
         title: `Season ${seasonNumber.toString()}`,
         number: seasonNumber,
         isSpecial: false,
+        isRequested: true,
       });
 
       show.seasons.add(season);
@@ -150,6 +153,7 @@ export const rivenTestContext = testBase.extend<{
           number: episodeNumber,
           absoluteNumber: absoluteEpisodeNumber++,
           isSpecial: false,
+          isRequested: true,
         });
 
         season.episodes.add(episode);

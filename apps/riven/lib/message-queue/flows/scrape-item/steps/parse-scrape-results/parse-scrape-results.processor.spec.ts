@@ -38,6 +38,7 @@ const it = baseIt.extend<{
       contentRating: "g",
       tmdbId: "1",
       itemRequest,
+      isRequested: true,
     });
 
     await em.flush();
@@ -58,6 +59,7 @@ const it = baseIt.extend<{
       status: "ended",
       tvdbId: "1",
       itemRequest,
+      isRequested: true,
     });
 
     await em.flush();
@@ -69,6 +71,7 @@ const it = baseIt.extend<{
         title: `Season ${i.toString()}`,
         number: i,
         isSpecial: false,
+        isRequested: true,
       });
 
       show.seasons.add(season);
@@ -82,6 +85,7 @@ const it = baseIt.extend<{
           number: i,
           absoluteNumber: ++episodeNumber,
           isSpecial: false,
+          isRequested: true,
         });
 
         season.episodes.add(episode);

@@ -37,6 +37,7 @@ it("throws an unrecoverable error if no valid torrent is found", async () => {
     title: "Test Movie",
     year: 2024,
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -83,6 +84,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     title: "Test Movie",
     year: 2024,
     itemRequest,
+    isRequested: true,
   });
 
   const streamInfoHash = "test-info-hash";
@@ -146,6 +148,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
     year: 2024,
     itemRequest,
     status: "continuing",
+    isRequested: true,
   });
 
   await em.flush();
@@ -155,6 +158,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
       number: i,
       title: `Season ${i.toString()}`,
       isSpecial: false,
+      isRequested: true,
     });
 
     show.seasons.add(season);
@@ -169,6 +173,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
         number: j,
         absoluteNumber: j,
         isSpecial: season.isSpecial,
+        isRequested: true,
       });
 
       season.episodes.add(episode);
@@ -253,6 +258,7 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
     title: "Test Movie",
     year: 2024,
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();

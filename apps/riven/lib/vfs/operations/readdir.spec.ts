@@ -42,6 +42,7 @@ it("returns all shows for the /shows path", async ({ em }) => {
     status: "continuing",
     contentRating: "tv-14",
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -51,6 +52,7 @@ it("returns all shows for the /shows path", async ({ em }) => {
     year: 2020,
     number: 1,
     isSpecial: false,
+    isRequested: true,
   });
 
   show.seasons.add(season);
@@ -65,6 +67,7 @@ it("returns all shows for the /shows path", async ({ em }) => {
     type: "episode",
     contentRating: "tv-14",
     isSpecial: false,
+    isRequested: true,
   });
 
   season.episodes.add(episode);
@@ -107,6 +110,7 @@ it('does not return entries for the "all shows" path for shows that do not have 
     status: "continuing",
     contentRating: "tv-14",
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -116,6 +120,7 @@ it('does not return entries for the "all shows" path for shows that do not have 
     year: 2020,
     number: 1,
     isSpecial: false,
+    isRequested: true,
   });
 
   show.seasons.add(season);
@@ -130,6 +135,7 @@ it('does not return entries for the "all shows" path for shows that do not have 
     type: "episode",
     contentRating: "tv-14",
     isSpecial: false,
+    isRequested: true,
   });
 
   season.episodes.add(episode);
@@ -159,6 +165,7 @@ it("returns all movies for the /movies path", async ({ em }) => {
       title: `Example Movie ${i.toString().padStart(2, "0")}`,
       contentRating: "unknown",
       itemRequest,
+      isRequested: true,
     });
 
     em.create(MediaEntry, {
@@ -198,6 +205,7 @@ it("returns all seasons for a single show path", async ({ em }) => {
     status: "continuing",
     contentRating: "tv-14",
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -208,6 +216,7 @@ it("returns all seasons for a single show path", async ({ em }) => {
       year: 2020,
       number: i,
       isSpecial: false,
+      isRequested: true,
     });
 
     show.seasons.add(season);
@@ -222,6 +231,7 @@ it("returns all seasons for a single show path", async ({ em }) => {
       type: "episode",
       contentRating: "tv-14",
       isSpecial: false,
+      isRequested: true,
     });
 
     season.episodes.add(episode);
@@ -267,6 +277,7 @@ it("does not return entries for a season that does not have any episodes with a 
     status: "continuing",
     contentRating: "tv-14",
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -277,6 +288,7 @@ it("does not return entries for a season that does not have any episodes with a 
       year: 2020,
       number: i,
       isSpecial: false,
+      isRequested: true,
     });
 
     show.seasons.add(season);
@@ -291,6 +303,7 @@ it("does not return entries for a season that does not have any episodes with a 
       type: "episode",
       contentRating: "tv-14",
       isSpecial: false,
+      isRequested: true,
     });
 
     season.episodes.add(episode);
@@ -332,6 +345,7 @@ it("returns all episodes for a single season path", async ({ em }) => {
     status: "continuing",
     contentRating: "tv-14",
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -341,6 +355,7 @@ it("returns all episodes for a single season path", async ({ em }) => {
     year: 2020,
     number: 1,
     isSpecial: false,
+    isRequested: true,
   });
 
   show.seasons.add(season);
@@ -356,6 +371,7 @@ it("returns all episodes for a single season path", async ({ em }) => {
       type: "episode",
       contentRating: "tv-14",
       isSpecial: false,
+      isRequested: true,
     });
 
     season.episodes.add(episode);
@@ -401,6 +417,7 @@ it("does not return entries for episodes that does not have a media entry when v
     status: "continuing",
     contentRating: "tv-14",
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -410,6 +427,7 @@ it("does not return entries for episodes that does not have a media entry when v
     year: 2020,
     number: 1,
     isSpecial: false,
+    isRequested: true,
   });
 
   show.seasons.add(season);
@@ -425,6 +443,7 @@ it("does not return entries for episodes that does not have a media entry when v
       type: "episode",
       contentRating: "tv-14",
       isSpecial: false,
+      isRequested: true,
     });
 
     season.episodes.add(episode);
@@ -470,6 +489,7 @@ it("returns the media entry's filename when viewing a single movie's directory",
     type: "movie",
     contentRating: MovieContentRating.enum.g,
     itemRequest,
+    isRequested: true,
   });
 
   em.create(MediaEntry, {
@@ -508,6 +528,7 @@ it('does not return entries for the "all movies" path when a movie does not have
       title: `Example Movie ${i.toString().padStart(2, "0")}`,
       contentRating: "unknown",
       itemRequest,
+      isRequested: true,
     });
 
     if (i === 1) {
