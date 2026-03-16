@@ -54,31 +54,30 @@ export const validateTorrent = async (
     );
   }
 
-  const topLevelItem =
-    item instanceof ShowLikeMediaItem ? await item.getShow() : item;
+  if (parsedData.year) {
+    const topLevelItem =
+      item instanceof ShowLikeMediaItem ? await item.getShow() : item;
 
-  const isIncorrectTopLevelItemYear =
-    topLevelItem.year && parsedData.year
-      ? !getYearCandidates(topLevelItem.year).includes(parsedData.year)
-      : false;
+    const candidateYears = new Set<number>();
 
-  const isIncorrectItemYear =
-    item.year && parsedData.year
-      ? !getYearCandidates(item.year).includes(parsedData.year)
-      : false;
+    if (item.year) {
+      getYearCandidates(item.year).forEach((year) => candidateYears.add(year));
+    }
 
-  if (
-    parsedData.year &&
-    item.year &&
-    isIncorrectItemYear &&
-    isIncorrectTopLevelItemYear
-  ) {
-    throw new SkippedTorrentError(
-      "Skipping torrent with incorrect year",
-      itemTitle,
-      parsedData.rawTitle,
-      infoHash,
-    );
+    if (topLevelItem.year) {
+      getYearCandidates(topLevelItem.year).forEach((year) =>
+        candidateYears.add(year),
+      );
+    }
+
+    if (candidateYears.size && !candidateYears.has(parsedData.year)) {
+      throw new SkippedTorrentError(
+        "Skipping torrent with incorrect year",
+        itemTitle,
+        parsedData.rawTitle,
+        infoHash,
+      );
+    }
   }
 
   if (item instanceof Movie) {
