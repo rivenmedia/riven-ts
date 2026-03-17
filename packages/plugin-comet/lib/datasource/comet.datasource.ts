@@ -81,6 +81,7 @@ export class CometAPI extends BaseDataSource<CometSettings> {
 
         const title =
           stream.behaviorHints.filename ??
+          // Comet prefixes description lines with emoji (e.g., "<emoji> Title"), strip it
           stream.description.split("\n")[0]?.substring(1).trim();
 
         if (!title) {
@@ -104,7 +105,10 @@ export class CometAPI extends BaseDataSource<CometSettings> {
 
       return torrents;
     } catch (error: unknown) {
-      this.logger.error(error);
+      this.logger.error(
+        `Failed to scrape ${item.fullTitle} (IMDB: ${item.imdbId ?? "N/A"}):`,
+        error,
+      );
 
       return {};
     }

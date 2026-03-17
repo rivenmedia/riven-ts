@@ -30,7 +30,9 @@ it('returns the validation status when calling "cometIsValid" query', async ({
           api: new CometAPI({
             ...dataSourceConfig,
             pluginSymbol: pluginConfig.name,
-            settings: {},
+            settings: {
+              url: "http://localhost",
+            },
           }),
         },
       },
