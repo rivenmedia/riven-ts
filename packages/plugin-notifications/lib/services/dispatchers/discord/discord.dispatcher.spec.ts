@@ -6,7 +6,8 @@ import { expect } from "vitest";
 
 import { NotificationsAPI } from "../../../datasource/notifications.datasource.ts";
 import { pluginConfig } from "../../../notifications-plugin.config.ts";
-import { buildEmbed, discordDispatcher } from "./discord.dispatcher.ts";
+import { discordDispatcher } from "./discord.dispatcher.ts";
+import { buildEmbed } from "./utilities/build-embed.ts";
 
 import type { NotificationPayload } from "../../../schemas/notification-payload.schema.ts";
 import type { DiscordService } from "../../parse-notification-url.ts";

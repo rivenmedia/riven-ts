@@ -3,7 +3,7 @@ import { it } from "@repo/util-plugin-testing/plugin-test-context";
 import { DateTime } from "luxon";
 import { expect } from "vitest";
 
-import { buildEmbed } from "../discord.dispatcher.ts";
+import { buildEmbed } from "./build-embed.ts";
 
 import type { NotificationPayload } from "../../../../schemas/notification-payload.schema.ts";
 
