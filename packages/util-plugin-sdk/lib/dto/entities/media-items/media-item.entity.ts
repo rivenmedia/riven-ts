@@ -2,7 +2,6 @@ import {
   Collection,
   Entity,
   Enum,
-  type EventArgs,
   type Hidden,
   Index,
   ManyToMany,
@@ -36,16 +35,17 @@ import { Stream } from "../streams/stream.entity.ts";
 export abstract class MediaItem {
   @Field((_type) => ID)
   @PrimaryKey()
-  id!: Opt<number>;
+  id!: number;
 
   @Field(() => String)
   @Index()
   @Property()
   title!: string;
 
+  // TODO: Remove default here
   @Field(() => String)
   @Property()
-  fullTitle!: Opt<string>;
+  fullTitle!: string;
 
   @Field(() => String, { nullable: true })
   @Property()
@@ -71,7 +71,7 @@ export abstract class MediaItem {
 
   @Field(() => Date)
   @Index()
-  @Property()
+  @Property({ default: DateTime.now().toISO() })
   createdAt: Opt<Date> = DateTime.now().toJSDate();
 
   @Field(() => Date, { nullable: true })
@@ -212,6 +212,4 @@ export abstract class MediaItem {
    * @returns An array of associated MediaEntries, which may be empty if none exist.
    */
   abstract getMediaEntries(): Promise<MediaEntry[]>;
-
-  abstract _persistFullTitle(args: EventArgs<any>): void;
 }

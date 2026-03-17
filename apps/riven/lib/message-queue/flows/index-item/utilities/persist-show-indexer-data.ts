@@ -1,4 +1,5 @@
 import { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequestState } from "@repo/util-plugin-sdk/dto/enums/item-request-state.enum";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
@@ -25,49 +26,81 @@ export async function persistShowIndexerData({
     id: item.id,
   });
 
+  const processableStates = ItemRequestState.extract(["requested", "ongoing"]);
+
   assert(
-    itemRequest.state === "requested",
+    processableStates.safeParse(itemRequest.state).success,
     new MediaItemIndexErrorIncorrectState({
       item: itemRequest,
     }),
   );
 
-  const { tvdbId } = itemRequest;
-
-  if (!tvdbId) {
-    throw new MediaItemIndexError({
-      item: itemRequest,
-      error: "Item request is missing tvdbId",
-    });
-  }
-
   try {
     return await database.em.fork().transactional(async (transaction) => {
+      const existingShow = await transaction.getRepository(Show).findOne(
+        {
+          itemRequest: { id: itemRequest.id },
+          status: {
+            $in: ["continuing", "upcoming"],
+          },
+        },
+        { populate: ["$infer"] },
+      );
+
+      const { tvdbId } = itemRequest;
+
+      if (!tvdbId) {
+        throw new MediaItemIndexError({
+          item: itemRequest,
+          error: "Item request is missing tvdbId",
+        });
+      }
+
       const firstAired = item.firstAired
         ? DateTime.fromISO(item.firstAired)
         : null;
 
-      const show = transaction.create(Show, {
-        title: item.title,
-        contentRating: item.contentRating,
-        imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
-        tvdbId,
-        status: item.status,
-        posterPath: item.posterUrl ?? null,
-        airedAt: firstAired?.toISODate() ?? null,
-        year: firstAired?.year ?? null,
-        country: item.country ?? null,
-        language: item.language ?? null,
-        aliases: item.aliases ?? null,
-        rating: item.rating ?? null,
-        genres: item.genres.map((genre) => genre.toLowerCase()),
-        itemRequest,
-        isRequested: true, // Shows will always be considered to be requested
-      });
+      const show =
+        existingShow ??
+        transaction.create(
+          Show,
+          {
+            tvdbId,
+            imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
+            itemRequest,
+            isRequested: true, // Shows will always be considered to be requested
+            state: "indexed",
+          },
+          { partial: true },
+        );
 
-      await transaction.flush();
+      show.title = item.title;
+      show.fullTitle = show.title;
+      show.contentRating = item.contentRating;
+      show.posterPath = item.posterUrl ?? show.posterPath ?? null;
+      show.airedAt = firstAired?.toJSDate() ?? show.airedAt ?? null;
+      show.year = firstAired?.year ?? show.year ?? null;
+      show.country = item.country ?? show.country ?? null;
+      show.language = item.language ?? show.language ?? null;
+      show.aliases = item.aliases ?? show.aliases ?? null;
+      show.rating = item.rating ?? show.rating ?? null;
+      show.status = item.status;
+      show.keepUpdated = item.keepUpdated;
+      show.genres = [...(show.genres ?? []), ...item.genres].map((genre) =>
+        genre.toLowerCase(),
+      );
+
+      await transaction.upsert(show);
 
       for (const season of Object.values(item.seasons)) {
+        const [existingSeason] = await show.seasons.matching({
+          limit: 1,
+          where: {
+            number: season.number,
+          },
+          populate: ["episodes"],
+        });
+
         const seasonFirstAired = season.episodes[0]?.airedAt ?? null;
 
         const seasonYear = seasonFirstAired
@@ -81,51 +114,99 @@ export async function persistShowIndexerData({
           .filter(Boolean)
           .join(" - ");
 
-        const seasonEntry = transaction.create(Season, {
-          title: seasonTitle,
-          year: seasonYear,
-          number: season.number,
-          airedAt: seasonFirstAired,
-          isSpecial: season.number === 0,
-          /**
-           * If the item request has specific seasons requested, only mark this season as requested if it's included in that list.
-           *
-           * Otherwise, request all non-special seasons. This is the default behaviour of list ingestion.
-           */
-          isRequested: itemRequest.seasons
-            ? itemRequest.seasons.includes(season.number)
-            : season.number > 0,
-        });
+        const seasonEntry =
+          existingSeason ??
+          transaction.create(
+            Season,
+            {
+              tvdbId: show.tvdbId,
+              imdbId: show.imdbId ?? null,
+              /**
+               * If the item request has specific seasons requested, only mark this season as requested if it's included in that list.
+               *
+               * Otherwise, request all non-special seasons. This is the default behaviour of list ingestion.
+               */
+              isRequested: itemRequest.seasons
+                ? itemRequest.seasons.includes(season.number)
+                : season.number > 0,
+              itemRequest,
+              state: "indexed",
+            },
+            { partial: true },
+          );
+
+        if (seasonFirstAired) {
+          seasonEntry.airedAt = DateTime.fromISO(seasonFirstAired).toJSDate();
+        }
+
+        seasonEntry.title = seasonTitle;
+        seasonEntry.number = season.number;
+        seasonEntry.fullTitle = `${show.title} - S${seasonEntry.number.toString().padStart(2, "0")}`;
+        seasonEntry.isSpecial = season.number === 0;
+        seasonEntry.year = seasonYear;
 
         show.seasons.add(seasonEntry);
 
-        await transaction.flush();
+        await transaction.upsert(seasonEntry);
 
         for (const episode of season.episodes) {
+          const [existingEpisode] = existingSeason
+            ? await existingSeason.episodes.matching({
+                limit: 1,
+                where: {
+                  number: episode.number,
+                },
+              })
+            : [null];
+
           const episodeYear = episode.airedAt
             ? DateTime.fromISO(episode.airedAt).year
             : seasonYear;
 
-          const episodeEntry = transaction.create(Episode, {
-            absoluteNumber: episode.absoluteNumber,
-            contentRating: episode.contentRating,
-            number: episode.number,
-            title: episode.title,
-            year: episodeYear,
-            airedAt: episode.airedAt ?? null,
-            isSpecial: season.number === 0,
-            isRequested: seasonEntry.isRequested,
-          });
+          const isUnreleased = episode.airedAt
+            ? DateTime.fromISO(episode.airedAt) > DateTime.now()
+            : true; // If there's no air date, assume the episode is unreleased
+
+          const episodeEntry =
+            existingEpisode ??
+            transaction.create(
+              Episode,
+              {
+                tvdbId: seasonEntry.tvdbId,
+                imdbId: seasonEntry.imdbId ?? null,
+                isSpecial: season.number === 0,
+                isRequested: seasonEntry.isRequested,
+                itemRequest,
+              },
+              { partial: true },
+            );
+
+          if (episode.airedAt) {
+            episodeEntry.airedAt = DateTime.fromISO(episode.airedAt).toJSDate();
+          }
+
+          episodeEntry.title = episode.title;
+          episodeEntry.number = episode.number;
+          episodeEntry.fullTitle = `${seasonEntry.fullTitle}E${episodeEntry.number.toString().padStart(2, "0")} - ${episodeEntry.title}`;
+          episodeEntry.absoluteNumber = episode.absoluteNumber;
+          episodeEntry.contentRating = episode.contentRating;
+          episodeEntry.runtime = episode.runtime;
+          episodeEntry.year = episodeYear;
+          episodeEntry.state = isUnreleased ? "unreleased" : "indexed";
 
           seasonEntry.episodes.add(episodeEntry);
+
+          await transaction.upsert(episodeEntry);
         }
       }
 
       await validateOrReject(show);
 
-      transaction.assign(itemRequest, { state: "completed" });
+      transaction.assign(itemRequest, {
+        state: item.keepUpdated ? "ongoing" : "completed",
+      });
 
-      await transaction.flush();
+      await transaction.upsert(show);
 
       return transaction.refreshOrFail(show);
     });

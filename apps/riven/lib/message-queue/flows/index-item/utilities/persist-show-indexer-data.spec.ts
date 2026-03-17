@@ -1,6 +1,8 @@
 import { ItemRequest, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
+import { wrap } from "@mikro-orm/core";
+import { DateTime } from "luxon";
 import { expect, it } from "vitest";
 
 import { database } from "../../../../database/database.ts";
@@ -32,6 +34,7 @@ it("returns the media item if processed successfully", async ({}) => {
       network: "Test Network",
       seasons: [],
       status: "ended",
+      keepUpdated: false,
     },
   });
 
@@ -72,7 +75,129 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorr
         network: "Test Network",
         seasons: [],
         status: "ended",
+        keepUpdated: false,
       },
     }),
   ).rejects.toThrow(MediaItemIndexErrorIncorrectState);
+});
+
+it("updates the media item with the latest data if it already exists", async () => {
+  const requestedId = "tt1234567";
+
+  const em = database.orm.em.fork();
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "test-user",
+    imdbId: requestedId,
+    tvdbId: "1234",
+    type: "show",
+    state: "requested",
+  });
+
+  await em.flush();
+
+  const initialShow = await persistShowIndexerData({
+    item: {
+      id: itemRequest.id,
+      title: "Test Show",
+      imdbId: requestedId,
+      contentRating: "tv-14",
+      genres: [],
+      type: "show",
+      firstAired: new Date("2020-01-01").toISOString(),
+      network: "Test Network",
+      seasons: [
+        {
+          number: 1,
+          title: "Season 1",
+          episodes: [
+            {
+              absoluteNumber: 0,
+              contentRating: "unknown",
+              number: 1,
+              airedAt: null,
+              title: "TBA",
+              runtime: null,
+            },
+          ],
+        },
+      ],
+      status: "continuing",
+      keepUpdated: true,
+    },
+  });
+
+  const episodes = await initialShow.getEpisodes();
+
+  expect(episodes).toHaveLength(1);
+
+  expect.assert(episodes[0]);
+
+  expect(wrap(episodes[0]).toJSON()).toEqual(
+    expect.objectContaining({
+      title: "TBA",
+      state: "unreleased",
+      absoluteNumber: 0,
+      contentRating: "unknown",
+      airedAt: null,
+      year: null,
+      runtime: null,
+      number: 1,
+    }),
+  );
+
+  const releasedAirDate = DateTime.utc().minus({ days: 1 }).toISO();
+
+  const updatedShow = await persistShowIndexerData({
+    item: {
+      id: itemRequest.id,
+      title: "Test Show",
+      imdbId: requestedId,
+      contentRating: "tv-14",
+      genres: [],
+      type: "show",
+      firstAired: new Date("2020-01-01").toISOString(),
+      network: "Test Network",
+      seasons: [
+        {
+          number: 1,
+          title: "Season 1",
+          episodes: [
+            {
+              absoluteNumber: 1,
+              contentRating: "tv-14",
+              number: 1,
+              airedAt: releasedAirDate,
+              title: "Episode 1",
+              runtime: 60,
+            },
+          ],
+        },
+      ],
+      status: "continuing",
+      keepUpdated: true,
+    },
+  });
+
+  const updatedEpisodes = await updatedShow.getEpisodes();
+
+  expect(updatedEpisodes).toHaveLength(1);
+
+  expect.assert(updatedEpisodes[0]);
+
+  expect(wrap(updatedEpisodes[0]).toJSON()).toEqual(
+    expect.objectContaining({
+      title: "Episode 1",
+      state: "indexed",
+      absoluteNumber: 1,
+      contentRating: "tv-14",
+      year: DateTime.fromISO(releasedAirDate).year,
+      airedAt: DateTime.fromISO(releasedAirDate).toJSDate(),
+      runtime: 60,
+      number: 1,
+    }),
+  );
+
+  const totalSeasonsCount = await updatedShow.seasons.loadCount();
+
+  expect(totalSeasonsCount).toBe(1);
 });

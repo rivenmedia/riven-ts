@@ -1,7 +1,5 @@
 import {
-  BeforeCreate,
   Entity,
-  type EventArgs,
   type Hidden,
   type Opt,
   Property,
@@ -44,10 +42,5 @@ export class Movie extends MediaItem {
   @Property({ persist: false, hidden: true, getter: true })
   get prettyName(): Opt<Hidden<string>> {
     return `${this.title} (${this.year?.toString() ?? "Unknown"}) {tmdb-${this.tmdbId}}`;
-  }
-
-  @BeforeCreate()
-  _persistFullTitle({ entity }: EventArgs<this>) {
-    this.fullTitle = entity.title;
   }
 }

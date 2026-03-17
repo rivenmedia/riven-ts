@@ -1,9 +1,7 @@
 import {
-  BeforeCreate,
   Collection,
   Entity,
   Enum,
-  type EventArgs,
   type Hidden,
   OneToMany,
   type Opt,
@@ -50,6 +48,14 @@ export class Show extends ShowLikeMediaItem {
     where: { isRequested: true },
   })
   requestedSeasons = new Collection<Season>(this);
+
+  /**
+   * Indicates whether updates should be scheduled to refresh indexer data for this media item.
+   *
+   * This will be `true` if the show is still airing or is unreleased.
+   */
+  @Property()
+  keepUpdated!: boolean;
 
   @Property({ persist: false, hidden: true, getter: true })
   get prettyName(): Opt<Hidden<string>> {
@@ -114,10 +120,5 @@ export class Show extends ShowLikeMediaItem {
           (entry) => entry.type === "media",
         ) as MediaEntry[],
     );
-  }
-
-  @BeforeCreate()
-  _persistFullTitle({ entity }: EventArgs<this>) {
-    this.fullTitle = entity.title;
   }
 }

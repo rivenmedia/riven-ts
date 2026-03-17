@@ -46,6 +46,7 @@ export async function persistMovieIndexerData({
     return await database.em.fork().transactional(async (transaction) => {
       const mediaItem = transaction.create(Movie, {
         title: item.title,
+        fullTitle: item.title,
         imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
         tmdbId,
         contentRating: item.contentRating,

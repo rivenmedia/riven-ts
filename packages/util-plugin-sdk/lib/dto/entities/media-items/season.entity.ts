@@ -1,8 +1,6 @@
 import {
-  BeforeCreate,
   Collection,
   Entity,
-  type EventArgs,
   type Hidden,
   ManyToOne,
   OneToMany,
@@ -73,21 +71,5 @@ export class Season extends ShowLikeMediaItem {
           (entry) => entry.type === "media",
         ) as MediaEntry[],
     );
-  }
-
-  @BeforeCreate()
-  _fallbackToShowExternalIds() {
-    this.tvdbId ||= this.show.getProperty("tvdbId");
-    this.imdbId ??= this.show.getProperty("imdbId") ?? null;
-  }
-
-  @BeforeCreate()
-  _copyItemRequest() {
-    this.itemRequest = this.show.getProperty("itemRequest");
-  }
-
-  @BeforeCreate()
-  _persistFullTitle({ entity }: EventArgs<this>) {
-    this.fullTitle = `${entity.show.getProperty("fullTitle")} - S${entity.number.toString().padStart(2, "0")}`;
   }
 }

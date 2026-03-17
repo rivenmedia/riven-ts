@@ -44,6 +44,7 @@ export const MediaItemIndexRequestedResponse = z
         firstAired: z.iso.date(),
         network: z.string().min(1).nullable(),
         status: ShowStatus,
+        keepUpdated: z.boolean(),
         seasons: z.record(
           z.int(),
           z.object({

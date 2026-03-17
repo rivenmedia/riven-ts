@@ -26,12 +26,12 @@ function findEnglishShowTitle(series: SeriesExtendedRecordSchema) {
 }
 
 export const transformSeries = (
-  eventItem: MediaItemIndexRequestedEvent["item"],
+  itemRequest: MediaItemIndexRequestedEvent["item"],
   series: SeriesExtendedRecordSchema,
   allEpisodes: EpisodeBaseRecordSchema[],
 ) => {
   const imdbId =
-    eventItem.imdbId ??
+    itemRequest.imdbId ??
     series.remoteIds?.find((id) => id.sourceName?.toLowerCase() === "imdb")
       ?.id ??
     null;
@@ -39,7 +39,7 @@ export const transformSeries = (
   const {
     slug = "",
     image: posterPath,
-    status: { name: tvdbStatus } = {},
+    status: { name: tvdbStatus, keepUpdated } = {},
   } = series;
 
   const title = findEnglishShowTitle(series);
@@ -151,7 +151,7 @@ export const transformSeries = (
   }, {});
 
   return {
-    id: eventItem.id,
+    id: itemRequest.id,
     type: "show",
     imdbId,
     title: sanitisedTitle,
@@ -172,6 +172,7 @@ export const transformSeries = (
       includeOffset: false,
     }),
     seasons,
+    keepUpdated: keepUpdated ?? false,
   } satisfies Extract<
     NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
     { type: "show" }
