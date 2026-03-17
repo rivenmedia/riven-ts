@@ -2,6 +2,7 @@ import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
+import z from "zod";
 
 import { NotificationsAPI } from "../../../datasource/notifications.datasource.ts";
 import { pluginConfig } from "../../../notifications-plugin.config.ts";
@@ -24,7 +25,12 @@ it("sends an embed to the correct Discord webhook URL", async ({
     http.post(
       `https://discord.com/api/webhooks/${mockService.webhookId}/${mockService.webhookToken}`,
       async ({ request }) => {
-        const params = (await request.json()) as { embeds: unknown[] };
+        const params = z
+          .object({
+            embeds: z.array(z.unknown()),
+          })
+          .parse(await request.json());
+
         const isExpectedPayload =
           JSON.stringify(params.embeds[0]) ===
           JSON.stringify(buildEmbed(notificationPayloadFixture));
