@@ -15,8 +15,8 @@ ENV PATH=$PNPM_HOME:$PATH
 RUN apk add --no-cache \
     wget \
     bash \
-    fuse3 \
-    fuse3-dev \
+    fuse \
+    fuse-dev \
     shadow
 
 # Modify existing node user to match desired UID/GID
@@ -50,12 +50,15 @@ WORKDIR ${HOME}/riven-ts
 
 # Copy dependency files
 COPY .husky/install.mjs .husky/install.mjs
-COPY pnpm-workspace.yaml .
-COPY pnpm-lock.yaml .
-COPY --parents **/package.json ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml ./
+
+# https://pnpm.io/cli/fetch
+RUN pnpm fetch
 
 # Install project dependencies
-RUN pnpm install --frozen-lockfile
+RUN pnpm install -r --offline
+
+COPY --parents **/package.json ./
 
 #---------------------------
 
