@@ -19,6 +19,8 @@ services:
     ports:
       - 8080:8080
     depends_on:
+      riven-cache:
+        condition: service_started
       riven-db:
         condition: service_healthy
 
