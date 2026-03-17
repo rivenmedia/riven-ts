@@ -8,20 +8,20 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 /**
  * Event emitted when a requested media item already exists in the library.
  */
-export const ItemRequestCreationErrorConflictEvent = createProgramEventSchema(
-  "item-request.creation.error.conflict",
+export const ItemRequestCreateErrorConflictEvent = createProgramEventSchema(
+  "item-request.create.error.conflict",
   z.object({
     item: ItemRequest,
   }),
 );
 
-export type ItemRequestCreationErrorConflictEvent = z.infer<
-  typeof ItemRequestCreationErrorConflictEvent
+export type ItemRequestCreateErrorConflictEvent = z.infer<
+  typeof ItemRequestCreateErrorConflictEvent
 >;
 
-export const ItemRequestCreationErrorConflictEventHandler =
-  createEventHandlerSchema(ItemRequestCreationErrorConflictEvent);
+export const ItemRequestCreateErrorConflictEventHandler =
+  createEventHandlerSchema(ItemRequestCreateErrorConflictEvent);
 
-export class ItemRequestCreationErrorConflict extends createProgramEventError(
-  ItemRequestCreationErrorConflictEvent,
+export class ItemRequestCreateErrorConflict extends createProgramEventError(
+  ItemRequestCreateErrorConflictEvent,
 ) {}

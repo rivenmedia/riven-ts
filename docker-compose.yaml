@@ -78,13 +78,5 @@ services:
       - all
       - services
 
-  stremthru:
-    extends:
-      file: ./packages/plugin-stremthru/docker-compose.yaml
-      service: stremthru
-    profiles:
-      - all
-      - services
-
 volumes:
   riven-db:

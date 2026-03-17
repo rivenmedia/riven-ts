@@ -62,6 +62,7 @@ export async function persistShowIndexerData({
         rating: item.rating ?? null,
         genres: item.genres.map((genre) => genre.toLowerCase()),
         itemRequest,
+        isRequested: true, // Shows will always be considered to be requested
       });
 
       await transaction.flush();
@@ -86,6 +87,14 @@ export async function persistShowIndexerData({
           number: season.number,
           airedAt: seasonFirstAired,
           isSpecial: season.number === 0,
+          /**
+           * If the item request has specific seasons requested, only mark this season as requested if it's included in that list.
+           *
+           * Otherwise, request all non-special seasons. This is the default behaviour of list ingestion.
+           */
+          isRequested: itemRequest.seasons
+            ? itemRequest.seasons.includes(season.number)
+            : season.number > 0,
         });
 
         show.seasons.add(seasonEntry);
@@ -105,6 +114,7 @@ export async function persistShowIndexerData({
             year: episodeYear,
             airedAt: episode.airedAt ?? null,
             isSpecial: season.number === 0,
+            isRequested: seasonEntry.isRequested,
           });
 
           seasonEntry.episodes.add(episodeEntry);

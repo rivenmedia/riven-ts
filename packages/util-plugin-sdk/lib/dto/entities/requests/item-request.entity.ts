@@ -16,6 +16,7 @@ import { DateTime } from "../../../helpers/dates.ts";
 import { ItemRequestState } from "../../enums/item-request-state.enum.ts";
 import { ItemRequestType } from "../../enums/item-request-type.enum.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
+import { Season } from "../media-items/season.entity.ts";
 
 @ObjectType()
 @Entity()
@@ -49,9 +50,9 @@ export class ItemRequest {
   @Enum(() => ItemRequestType.enum)
   type!: ItemRequestType;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
-  requestedBy!: string;
+  requestedBy!: string | null;
 
   @Field()
   @Property()
@@ -69,6 +70,10 @@ export class ItemRequest {
   @Enum(() => ItemRequestState.enum)
   state!: ItemRequestState;
 
+  @Field(() => [Number], { nullable: true })
+  @Property({ type: "json" })
+  seasons!: number[] | null;
+
   @Property({ persist: false, hidden: true, getter: true })
   get externalIdsLabel(): Hidden<Opt<string[]>> {
     const externalIds = [
@@ -82,4 +87,18 @@ export class ItemRequest {
 
   @OneToMany(() => MediaItem, (mediaItem) => mediaItem.itemRequest)
   mediaItems = new Collection<MediaItem>(this);
+
+  @OneToMany(() => Season, (mediaItem) => mediaItem.itemRequest, {
+    where: {
+      type: "season",
+    },
+  })
+  seasonItems = new Collection<Season>(this);
+
+  @OneToMany(() => MediaItem, (mediaItem) => mediaItem.itemRequest, {
+    where: {
+      isRequested: true,
+    },
+  })
+  requestedItems = new Collection<MediaItem>(this);
 }

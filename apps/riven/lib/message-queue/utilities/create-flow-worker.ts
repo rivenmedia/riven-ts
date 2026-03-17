@@ -9,6 +9,7 @@ import {
 } from "bullmq";
 import assert from "node:assert";
 import os from "node:os";
+import { fromError, isZodErrorLike } from "zod-validation-error";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
@@ -21,7 +22,7 @@ import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 Worker.setMaxListeners(200);
 
-export function createFlowWorker<
+export async function createFlowWorker<
   T extends ZodObject<{
     name: ZodLiteral<Flow["name"]>;
     input: ZodType;
@@ -78,11 +79,15 @@ export function createFlowWorker<
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
-    logger.error(`[${flowName}] ${error.message}`);
+    const maybeValidationError = isZodErrorLike(error)
+      ? fromError(error)
+      : error;
+
+    logger.error(`[${flowName}] ${maybeValidationError.message}`);
   });
 
   if (settings.unsafeClearQueuesOnStartup) {
-    void queue.obliterate({
+    await queue.obliterate({
       force: true,
     });
   }

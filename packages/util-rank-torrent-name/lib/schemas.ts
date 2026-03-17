@@ -6,7 +6,10 @@ const nonEmptyString = z.string().min(1);
 const positiveIntSchema = z.int().positive();
 const nonnegativeIntSchema = z.int().nonnegative();
 
-const bitDepthEnum = z.enum(["8bit", "10bit", "12bit"]);
+const bitDepthEnum = z.preprocess(
+  (val) => (typeof val === "string" ? val.replaceAll(".", "") : val),
+  z.enum(["8bit", "10bit", "12bit"]),
+);
 
 export type BitDepth = z.infer<typeof bitDepthEnum>;
 

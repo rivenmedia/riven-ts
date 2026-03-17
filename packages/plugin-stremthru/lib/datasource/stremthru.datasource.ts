@@ -9,11 +9,11 @@ import {
   ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
 
-import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.js";
-import { CacheCheckResponse } from "../schemas/cache-check-response.schema.js";
+import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
+import { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
 import { DeleteTorrentResponse } from "../schemas/delete-torrent-response.schema.ts";
-import { GenerateLinkResponse } from "../schemas/generate-link-response.schema.js";
-import { ItemStatus } from "../schemas/item-status.schema.js";
+import { GenerateLinkResponse } from "../schemas/generate-link-response.schema.ts";
+import { ItemStatus } from "../schemas/item-status.schema.ts";
 import { Store } from "../schemas/store.schema.ts";
 import { TorznabResponse } from "../schemas/torznab-response.schema.ts";
 

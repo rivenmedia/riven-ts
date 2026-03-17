@@ -5,6 +5,10 @@ import z from "zod";
 import { createFlowJobBuilder } from "../../utilities/create-flow-job-schema.ts";
 import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
 
+export const RequestType = z.enum(["create", "update"]);
+
+export type RequestType = z.infer<typeof RequestType>;
+
 export const RequestContentServicesFlow = createFlowSchema(
   "request-content-services",
   {
@@ -12,6 +16,7 @@ export const RequestContentServicesFlow = createFlowSchema(
     output: z.object({
       count: z.number().nonnegative(),
       newItems: z.number().nonnegative(),
+      updatedItems: z.number().nonnegative(),
     }),
   },
 );

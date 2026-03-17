@@ -7,7 +7,7 @@ import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
 import { rivenTestContext as it } from "../../../../__tests__/test-context.ts";
-import { MatchedFile } from "../steps/find-valid-torrent/find-valid-torrent.schema.js";
+import { MatchedFile } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { persistDownloadResults } from "./persist-download-results.ts";
 
 it("throws an error if the media item has no streams", async ({ movie }) => {
@@ -75,7 +75,7 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
   ).rejects.toThrow(MediaItemDownloadErrorIncorrectState);
 });
 
-it("sets the active stream and updates the state to downloaded if successful", async ({
+it("sets the active stream and updates the state to completed if successful", async ({
   movie,
   stream,
   em,
@@ -105,7 +105,7 @@ it("sets the active stream and updates the state to downloaded if successful", a
   });
 
   expect(updatedItem.activeStream?.id).toBe(stream.id);
-  expect(updatedItem.state).toBe("downloaded");
+  expect(updatedItem.state).toBe("completed");
 });
 
 it("adds a single media entry for movies", async ({ movie, em, stream }) => {

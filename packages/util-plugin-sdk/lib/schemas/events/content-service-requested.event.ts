@@ -22,6 +22,7 @@ export const ContentServiceRequestedResponse = z.object({
       imdbId: true,
       tmdbId: true,
       externalRequestId: true,
+      requestedBy: true,
     }).refine(
       atLeastOnePropertyRequired,
       "At least one identifier is required",
@@ -32,10 +33,16 @@ export const ContentServiceRequestedResponse = z.object({
       imdbId: true,
       tvdbId: true,
       externalRequestId: true,
-    }).refine(
-      atLeastOnePropertyRequired,
-      "At least one identifier is required",
-    ),
+      requestedBy: true,
+      seasons: true,
+    })
+      .required({
+        seasons: true,
+      })
+      .refine(
+        atLeastOnePropertyRequired,
+        "At least one identifier is required",
+      ),
   ),
 });
 

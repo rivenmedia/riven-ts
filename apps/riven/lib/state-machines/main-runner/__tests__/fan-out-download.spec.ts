@@ -22,7 +22,7 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
 }) => {
   const em = database.em.fork();
 
-  const flowAddSpy = vi.spyOn(flow, "add");
+  const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
 
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
@@ -37,6 +37,7 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
     id: 1,
     status: "ended",
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -47,6 +48,7 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
       title: `Season ${i.toString().padStart(2, "0")}`,
       tvdbId: i.toString(),
       isSpecial: false,
+      isRequested: true,
     });
 
     show.seasons.add(season);
@@ -71,13 +73,15 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
 
   await vi.waitFor(() => {
     for (const season of show.seasons) {
-      expect(flowAddSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          queueName: "scrape-item",
-          data: expect.objectContaining({
-            id: season.id,
+      expect(flowAddBulkSpy).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            queueName: "scrape-item",
+            data: expect.objectContaining({
+              id: season.id,
+            }),
           }),
-        }),
+        ]),
       );
     }
   });
@@ -86,7 +90,7 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
 it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is received for a season`, async ({
   actor,
 }) => {
-  const flowAddSpy = vi.spyOn(flow, "add");
+  const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
 
   const em = database.em.fork();
 
@@ -103,6 +107,7 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
     id: 1,
     status: "ended",
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -113,6 +118,7 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
       title: `Season ${i.toString().padStart(2, "0")}`,
       tvdbId: i.toString(),
       isSpecial: false,
+      isRequested: true,
     });
 
     show.seasons.add(season);
@@ -141,13 +147,15 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
 
   await vi.waitFor(() => {
     for (const episode of failedSeason.episodes) {
-      expect(flowAddSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          queueName: "scrape-item",
-          data: expect.objectContaining({
-            id: episode.id,
+      expect(flowAddBulkSpy).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            queueName: "scrape-item",
+            data: expect.objectContaining({
+              id: episode.id,
+            }),
           }),
-        }),
+        ]),
       );
     }
   });

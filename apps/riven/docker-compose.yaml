@@ -3,7 +3,7 @@ services:
     container_name: riven
     build:
       context: ../..
-      dockerfile: Dockerfile
+      dockerfile: apps/riven/Dockerfile
     restart: unless-stopped
     tty: true
     cap_add:
