@@ -24,8 +24,6 @@ export default {
     }) => {
       const { urls } = settings.get(NotificationsSettings);
 
-      if (urls.length === 0) return;
-
       const api = dataSources.get(NotificationsAPI);
       const payload = buildNotificationPayload(event, "download.success");
       const results = await Promise.allSettled(
@@ -37,18 +35,19 @@ export default {
 
       for (const [urlIndex, result] of results.entries()) {
         if (result.status === "rejected") {
-          logger.error("Notification dispatch failed", {
-            error: String(result.reason),
-            url: urls[urlIndex],
-            urlIndex,
-          });
+          logger.error(
+            `Notification dispatch failed: ${JSON.stringify({
+              error: String(result.reason),
+              url: urls[urlIndex],
+              urlIndex,
+            })}`,
+          );
         }
       }
     },
   },
   settingsSchema: NotificationsSettings,
-  validator({ settings }) {
-    const { urls } = settings.get(NotificationsSettings);
-    return Promise.resolve(urls.length > 0);
+  async validator() {
+    return true;
   },
 } satisfies RivenPlugin as RivenPlugin;

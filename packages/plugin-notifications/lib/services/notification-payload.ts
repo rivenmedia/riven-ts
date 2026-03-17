@@ -1,33 +1,18 @@
 import { DateTime } from "luxon";
-import z from "zod";
+
+import { NotificationPayload } from "../schemas/notification-payload.schema.ts";
 
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
-export const NotificationPayload = z.object({
-  event: z.string(),
-  title: z.string(),
-  fullTitle: z.string(),
-  type: z.enum(["movie", "show", "season", "episode"]),
-  year: z.number().nullable(),
-  imdbId: z.string().nullable(),
-  tmdbId: z.string().nullable(),
-  tvdbId: z.string().nullable(),
-  posterPath: z.string().nullable(),
-  downloader: z.string(),
-  provider: z.string().nullable(),
-  durationSeconds: z.number(),
-  timestamp: z.string(),
-});
-
-export type NotificationPayload = z.infer<typeof NotificationPayload>;
+interface NotificationEvent {
+  item: MediaItem;
+  downloader: string;
+  provider: string | null;
+  durationFromRequestToDownload: number;
+}
 
 export function buildNotificationPayload(
-  event: {
-    item: MediaItem;
-    downloader: string;
-    provider: string | null;
-    durationFromRequestToDownload: number;
-  },
+  event: NotificationEvent,
   eventName: string,
 ): NotificationPayload {
   const { item } = event;

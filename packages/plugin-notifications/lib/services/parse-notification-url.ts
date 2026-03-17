@@ -3,13 +3,13 @@ import { fromError } from "zod-validation-error";
 import { NotificationScheme } from "../schemas/notification-scheme.schema.ts";
 
 export interface DiscordService {
-  type: "discord";
+  type: typeof NotificationScheme.enum.discord;
   webhookId: string;
   webhookToken: string;
 }
 
 export interface JsonWebhookService {
-  type: "json";
+  type: typeof NotificationScheme.enum.json;
   url: string;
 }
 

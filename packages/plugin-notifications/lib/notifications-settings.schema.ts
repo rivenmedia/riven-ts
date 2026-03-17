@@ -20,11 +20,14 @@ const NotificationURLScheme = z.union([
 ]);
 
 export const NotificationsSettings = z.object({
-  urls: json(z.array(NotificationURLScheme))
-    .default([])
-    .describe(
-      "Notification service URLs (Apprise-style, e.g. discord://id/token, json://host/path)",
-    ),
+  urls: json(
+    z
+      .array(NotificationURLScheme)
+      .min(1)
+      .pipe(z.tuple([NotificationURLScheme], NotificationURLScheme)),
+  ).describe(
+    "Notification service URLs (Apprise-style, e.g. discord://id/token, json://host/path)",
+  ),
 });
 
 export type NotificationsSettings = z.infer<typeof NotificationsSettings>;

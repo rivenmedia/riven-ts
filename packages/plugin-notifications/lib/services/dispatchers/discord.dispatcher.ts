@@ -1,6 +1,6 @@
 import { Duration } from "luxon";
 
-import type { NotificationPayload } from "../notification-payload.ts";
+import type { NotificationPayload } from "../../schemas/notification-payload.schema.ts";
 import type { DiscordService } from "../parse-notification-url.ts";
 import type { NotificationDispatcher } from "./notification-dispatcher.ts";
 import type {
