@@ -2,11 +2,21 @@ import { json } from "@repo/util-plugin-sdk/validation";
 
 import z from "zod";
 
-export const SUPPORTED_SCHEMES = ["discord", "json", "jsons"] as const;
+import { NotificationScheme } from "./schemas/notification-scheme.schema.ts";
 
 const NotificationURLScheme = z.union([
-  z.templateLiteral(["discord://", z.string().min(1), "/", z.string().min(1)]),
-  z.templateLiteral([z.enum(["json://", "jsons://"]), z.string().min(1)]),
+  z.templateLiteral([
+    NotificationScheme.enum.discord,
+    "://",
+    z.string().min(1),
+    "/",
+    z.string().min(1),
+  ]),
+  z.templateLiteral([
+    NotificationScheme.extract(["json", "jsons"]),
+    "://",
+    z.string().min(1),
+  ]),
 ]);
 
 export const NotificationsSettings = z.object({

@@ -19,7 +19,8 @@
     "@repo/util-plugin-sdk": "workspace:^",
     "luxon": "catalog:",
     "type-graphql": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zod-validation-error": "catalog:"
   },
   "devDependencies": {
     "@repo/core-util-eslint-config": "workspace:^",

@@ -845,6 +845,9 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 4.3.6
+      zod-validation-error:
+        specifier: 'catalog:'
+        version: 5.0.0(zod@4.3.6)
     devDependencies:
       '@repo/core-util-eslint-config':
         specifier: workspace:^
