@@ -6,7 +6,7 @@ import { expect } from "vitest";
 import { NotificationsAPI } from "../../../datasource/notifications.datasource.ts";
 import { pluginConfig } from "../../../notifications-plugin.config.ts";
 import { notificationPayloadFixture } from "../../__tests__/payload.fixture.ts";
-import { sendNotification } from "../index.ts";
+import { sendNotification } from "../send-notification.ts";
 
 it('sends the expected payload to the configured HTTPS URL for the "jsons" scheme', async ({
   server,

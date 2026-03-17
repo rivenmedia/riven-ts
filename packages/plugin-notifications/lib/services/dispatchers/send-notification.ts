@@ -5,8 +5,6 @@ import { jsonWebhookDispatcher } from "./json-webhook/json-webhook.dispatcher.ts
 import type { NotificationsAPI } from "../../datasource/notifications.datasource.ts";
 import type { NotificationPayload } from "../../schemas/notification-payload.schema.ts";
 
-export type { NotificationDispatcher } from "./notification-dispatcher.ts";
-
 export function sendNotification(
   rawUrl: string,
   payload: NotificationPayload,

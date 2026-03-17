@@ -4,7 +4,7 @@ import { pluginConfig } from "./notifications-plugin.config.ts";
 import { NotificationsSettings } from "./notifications-settings.schema.ts";
 import { NotificationsSettingsResolver } from "./schema/notifications-settings.resolver.ts";
 import { NotificationsResolver } from "./schema/notifications.resolver.ts";
-import { sendNotification } from "./services/dispatchers/index.ts";
+import { sendNotification } from "./services/dispatchers/send-notification.ts";
 import { buildNotificationPayload } from "./services/notification-payload.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
