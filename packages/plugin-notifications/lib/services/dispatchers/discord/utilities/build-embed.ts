@@ -1,9 +1,9 @@
 import { Duration } from "luxon";
 
-import { EMBED_COLOR_SUCCESS } from "../discord.dispatcher.ts";
-
 import type { NotificationPayload } from "../../../../schemas/notification-payload.schema.ts";
 import type { APIEmbed } from "discord-api-types/v10";
+
+export const EMBED_COLOR_SUCCESS = 0x2ecc71; // Green
 
 export function buildEmbed(payload: NotificationPayload): APIEmbed {
   const fields: APIEmbed["fields"] = [
