@@ -1,4 +1,4 @@
-import * as Fuse from "@zkochan/fuse-native";
+import Fuse from "@zkochan/fuse-native";
 import * as fs from "node:fs/promises";
 import { expect, vi } from "vitest";
 import { toPromise } from "xstate";
@@ -67,20 +67,28 @@ it("throws an error if the mount path is not owned by the current user", async (
   );
 });
 
-// it("does not throw an error if the mount path is present and owned by the current user", async ({
-//   actor,
-// }) => {
-//   const uid = 1000;
-//   const gid = 1000;
+it("does not throw an error if the mount path is present and owned by the current user", async ({
+  actor,
+}) => {
+  const uid = 1000;
+  const gid = 1000;
 
-//   vi.spyOn(process, "getuid").mockReturnValue(uid);
-//   vi.spyOn(process, "getgid").mockReturnValue(gid);
+  vi.spyOn(process, "getuid").mockReturnValue(uid);
+  vi.spyOn(process, "getgid").mockReturnValue(gid);
 
-//   vi.spyOn(fs, "lstat").mockResolvedValue({
-//     isDirectory: vi.fn().mockReturnValue(true),
-//     uid,
-//     gid,
-//   } as never);
+  vi.spyOn(fs, "lstat").mockResolvedValue({
+    isDirectory: vi.fn().mockReturnValue(true),
+    uid,
+    gid,
+  } as never);
 
-//   await expect(toPromise(actor.start())).resolves.not.toThrow();
-// });
+  vi.mocked(Fuse).mockImplementation(function MockFuseConstructor() {
+    return {
+      mount: vi.fn((cb: (err?: Error | null) => void) => {
+        cb(null);
+      }),
+    } as never;
+  });
+
+  await expect(toPromise(actor.start())).resolves.not.toThrow();
+});
