@@ -1,17 +1,19 @@
-import { discordDispatcher } from "./discord.dispatcher.ts";
-import { jsonWebhookDispatcher } from "./json-webhook.dispatcher.ts";
+import { parseNotificationUrl } from "../parse-notification-url.ts";
+import { discordDispatcher } from "./discord/discord.dispatcher.ts";
+import { jsonWebhookDispatcher } from "./json-webhook/json-webhook.dispatcher.ts";
 
 import type { NotificationsAPI } from "../../datasource/notifications.datasource.ts";
 import type { NotificationPayload } from "../../schemas/notification-payload.schema.ts";
-import type { NotificationService } from "../parse-notification-url.ts";
 
 export type { NotificationDispatcher } from "./notification-dispatcher.ts";
 
-export async function sendNotification(
-  service: NotificationService,
+export function sendNotification(
+  rawUrl: string,
   payload: NotificationPayload,
   api: NotificationsAPI,
 ): Promise<void> {
+  const service = parseNotificationUrl(rawUrl);
+
   switch (service.type) {
     case "discord":
       return discordDispatcher.send(service, payload, api);

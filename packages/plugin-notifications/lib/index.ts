@@ -6,7 +6,6 @@ import { NotificationsSettingsResolver } from "./schema/notifications-settings.r
 import { NotificationsResolver } from "./schema/notifications.resolver.ts";
 import { sendNotification } from "./services/dispatchers/index.ts";
 import { buildNotificationPayload } from "./services/notification-payload.ts";
-import { parseNotificationUrl } from "./services/parse-notification-url.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
@@ -27,10 +26,7 @@ export default {
       const api = dataSources.get(NotificationsAPI);
       const payload = buildNotificationPayload(event, "download.success");
       const results = await Promise.allSettled(
-        urls.map(async (rawUrl) => {
-          const service = parseNotificationUrl(rawUrl);
-          return sendNotification(service, payload, api);
-        }),
+        urls.map(async (rawUrl) => sendNotification(rawUrl, payload, api)),
       );
 
       for (const [urlIndex, result] of results.entries()) {

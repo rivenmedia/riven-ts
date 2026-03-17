@@ -4,8 +4,8 @@
 
 _Object containing the following properties:_
 
-| Property | Description                                                                          | Type                    | Default |
-| :------- | :----------------------------------------------------------------------------------- | :---------------------- | :------ |
-| `urls`   | Notification service URLs (Apprise-style, e.g. discord://id/token, json://host/path) | `Array<never \| never>` | `[]`    |
+| Property        | Description                                                                          | Type                                  |
+| :-------------- | :----------------------------------------------------------------------------------- | :------------------------------------ |
+| **`urls`** (\*) | Notification service URLs (Apprise-style, e.g. discord://id/token, json://host/path) | [never \| never, ...never \| never[]] |
 
-_All properties are optional._
+_(\*) Required._

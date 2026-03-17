@@ -1,8 +1,8 @@
 import { Duration } from "luxon";
 
-import type { NotificationPayload } from "../../schemas/notification-payload.schema.ts";
-import type { DiscordService } from "../parse-notification-url.ts";
-import type { NotificationDispatcher } from "./notification-dispatcher.ts";
+import type { NotificationPayload } from "../../../schemas/notification-payload.schema.ts";
+import type { DiscordService } from "../../parse-notification-url.ts";
+import type { NotificationDispatcher } from "../notification-dispatcher.ts";
 import type {
   APIEmbed,
   RESTPostAPIWebhookWithTokenJSONBody,
@@ -11,7 +11,7 @@ import type {
 const DISCORD_WEBHOOK_BASE = "https://discord.com/api/webhooks";
 const EMBED_COLOR_SUCCESS = 0x2ecc71; // Green
 
-function buildEmbed(payload: NotificationPayload): APIEmbed {
+export function buildEmbed(payload: NotificationPayload): APIEmbed {
   const fields: APIEmbed["fields"] = [
     { name: "Type", value: payload.type, inline: true },
     { name: "Downloader", value: payload.downloader, inline: true },
@@ -51,6 +51,7 @@ export const discordDispatcher: NotificationDispatcher<DiscordService> = {
     const body: RESTPostAPIWebhookWithTokenJSONBody = {
       embeds: [buildEmbed(payload)],
     };
+
     await api.postNotification(url, body);
   },
 };
