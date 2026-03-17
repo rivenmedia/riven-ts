@@ -2,23 +2,16 @@ import { DateTime } from "luxon";
 
 import { NotificationPayload } from "../schemas/notification-payload.schema.ts";
 
-import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
-
-interface NotificationEvent {
-  item: MediaItem;
-  downloader: string;
-  provider: string | null;
-  durationFromRequestToDownload: number;
-}
+import type { MediaItemDownloadSuccessEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download.success.event";
 
 export function buildNotificationPayload(
-  event: NotificationEvent,
-  eventName: string,
+  event: Omit<MediaItemDownloadSuccessEvent, "type">,
+  eventType: MediaItemDownloadSuccessEvent["type"],
 ): NotificationPayload {
   const { item } = event;
 
   return NotificationPayload.parse({
-    event: eventName,
+    event: eventType,
     title: item.title,
     fullTitle: item.fullTitle,
     type: item.type,

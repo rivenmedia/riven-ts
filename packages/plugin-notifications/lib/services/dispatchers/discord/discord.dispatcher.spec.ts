@@ -1,32 +1,15 @@
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
-import { DateTime } from "luxon";
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
 import { NotificationsAPI } from "../../../datasource/notifications.datasource.ts";
 import { pluginConfig } from "../../../notifications-plugin.config.ts";
+import { notificationPayloadFixture } from "../../__tests__/payload.fixture.ts";
 import { discordDispatcher } from "./discord.dispatcher.ts";
 import { buildEmbed } from "./utilities/build-embed.ts";
 
-import type { NotificationPayload } from "../../../schemas/notification-payload.schema.ts";
 import type { DiscordService } from "../../parse-notification-url.ts";
-
-const mockPayload = {
-  event: "download.success",
-  title: "Inception",
-  fullTitle: "Inception (2010)",
-  type: "movie",
-  year: 2010,
-  imdbId: "tt1375666",
-  tmdbId: "27205",
-  tvdbId: null,
-  posterPath: "https://image.tmdb.org/t/p/w500/poster.jpg",
-  downloader: "realdebrid",
-  provider: "torrentio",
-  durationSeconds: 45,
-  timestamp: DateTime.utc().toISO(),
-} as const satisfies NotificationPayload;
 
 const mockService = {
   webhookId: "webhook-id",
@@ -44,7 +27,7 @@ it("sends an embed to the correct Discord webhook URL", async ({
         const params = (await request.json()) as { embeds: unknown[] };
         const isExpectedPayload =
           JSON.stringify(params.embeds[0]) ===
-          JSON.stringify(buildEmbed(mockPayload));
+          JSON.stringify(buildEmbed(notificationPayloadFixture));
 
         if (!isExpectedPayload) {
           return HttpResponse.error();
@@ -64,6 +47,6 @@ it("sends an embed to the correct Discord webhook URL", async ({
   });
 
   await expect(
-    discordDispatcher.send(mockService, mockPayload, api),
+    discordDispatcher.send(mockService, notificationPayloadFixture, api),
   ).resolves.not.toThrow();
 });

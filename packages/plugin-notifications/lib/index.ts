@@ -24,7 +24,10 @@ export default {
       const { urls } = settings.get(NotificationsSettings);
 
       const api = dataSources.get(NotificationsAPI);
-      const payload = buildNotificationPayload(event, "download.success");
+      const payload = buildNotificationPayload(
+        event,
+        "riven.media-item.download.success",
+      );
       const results = await Promise.allSettled(
         urls.map(async (rawUrl) => sendNotification(rawUrl, payload, api)),
       );

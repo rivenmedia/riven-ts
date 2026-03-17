@@ -3,19 +3,19 @@ import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.e
 import z from "zod";
 
 export const NotificationPayload = z.object({
-  event: z.string(),
-  title: z.string(),
-  fullTitle: z.string(),
+  event: z.string().min(1),
+  title: z.string().min(1),
+  fullTitle: z.string().min(1),
   type: MediaItemType,
-  year: z.number().nullable(),
+  year: z.int().nullable(),
   imdbId: z.string().nullable(),
   tmdbId: z.string().nullable(),
   tvdbId: z.string().nullable(),
-  posterPath: z.string().nullable(),
-  downloader: z.string(),
+  posterPath: z.url().nullable(),
+  downloader: z.string().min(1),
   provider: z.string().nullable(),
-  durationSeconds: z.number(),
-  timestamp: z.string(),
+  durationSeconds: z.number().nonnegative(),
+  timestamp: z.iso.datetime(),
 });
 
 export type NotificationPayload = z.infer<typeof NotificationPayload>;
