@@ -49,6 +49,12 @@ export const initialiseVfs = fromPromise<
     );
   }
 
+  if (!mountPathStats.isDirectory()) {
+    throw new Error(
+      `VFS mount path "${mountPath}" exists, but is not a directory.`,
+    );
+  }
+
   if (mountPathStats.uid !== processUid || mountPathStats.gid !== processGid) {
     throw new Error(
       dedent`
