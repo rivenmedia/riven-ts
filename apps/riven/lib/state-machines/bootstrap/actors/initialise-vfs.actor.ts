@@ -4,6 +4,8 @@ import {
 } from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
 
 import Fuse from "@zkochan/fuse-native";
+import dedent from "dedent";
+import { lstat } from "node:fs/promises";
 import { fromPromise } from "xstate";
 
 import { settings } from "../../../utilities/settings.ts";
@@ -26,6 +28,39 @@ export const initialiseVfs = fromPromise<
   InitialiseVfsOutput,
   InitialiseVfsInput
 >(async ({ input: { mountPath, pluginQueues } }) => {
+  const processUid = process.getuid?.() ?? null;
+  const processGid = process.getgid?.() ?? null;
+
+  if (processUid === null || processGid === null) {
+    throw new Error(
+      dedent`
+        Unable to determine process UID or GID.
+        This is likely because the process is not running on a Unix-like system, which is not supported.
+        VFS cannot be initialised without this information.
+      `,
+    );
+  }
+
+  const mountPathStats = await lstat(mountPath).catch(() => null);
+
+  if (!mountPathStats) {
+    throw new Error(
+      `VFS mount path "${mountPath}" does not exist. Please create this directory.`,
+    );
+  }
+
+  if (mountPathStats.uid !== processUid || mountPathStats.gid !== processGid) {
+    throw new Error(
+      dedent`
+        VFS mount path "${mountPath}" is not owned by the current user.
+
+        Please change the ownership of this directory to the current user by running the following command:
+
+        \`sudo chown ${processUid.toString()}:${processGid.toString()} ${mountPath}\`.
+      `,
+    );
+  }
+
   const linkRequestQueues = new Map<
     string,
     Queue<

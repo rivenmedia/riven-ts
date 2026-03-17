@@ -72,6 +72,9 @@ catalogs:
     class-validator:
       specifier: 0.14.3
       version: 0.14.3
+    dedent:
+      specifier: ^1.7.1
+      version: 1.7.1
     discord-api-types:
       specifier: 0.38.42
       version: 0.38.42
@@ -148,7 +151,7 @@ importers:
         specifier: ^2.6.3
         version: 2.6.3(@swc/core@1.15.7(@swc/helpers@0.5.17))(@types/node@25.0.2)(typescript@5.9.3)
       dedent:
-        specifier: ^1.7.1
+        specifier: 'catalog:'
         version: 1.7.1
       husky:
         specifier: ^9.1.7
@@ -243,6 +246,9 @@ importers:
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
+      dedent:
+        specifier: 'catalog:'
+        version: 1.7.1
       es-toolkit:
         specifier: 'catalog:'
         version: 1.44.0
