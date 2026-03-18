@@ -3,8 +3,14 @@ import {
   type BasePluginContext,
   type ParamsFor,
   type RateLimiterOptions,
-  getStremioScrapeConfig,
 } from "@repo/util-plugin-sdk";
+import {
+  Episode,
+  type MediaItem,
+  Movie,
+  Season,
+  Show,
+} from "@repo/util-plugin-sdk/dto/entities";
 import { z } from "@repo/util-plugin-sdk/validation";
 
 import { CometSettings } from "../comet-settings.schema.ts";
@@ -22,6 +28,12 @@ const CometScrapeResponse = z.object({
     }),
   ),
 });
+
+interface CometScrapeConfig {
+  identifier: string | null;
+  scrapeType: "series" | "movie";
+  imdbId: string;
+}
 
 export class CometAPIError extends Error {}
 
@@ -56,7 +68,7 @@ export class CometAPI extends BaseDataSource<CometSettings> {
       }
 
       const { identifier, imdbId, scrapeType } =
-        await getStremioScrapeConfig(item);
+        await this.getCometScrapeConfig(item);
 
       const response = await this.get<unknown>(
         `/stream/${scrapeType}/${imdbId}${identifier ?? ""}.json`,
@@ -106,12 +118,61 @@ export class CometAPI extends BaseDataSource<CometSettings> {
       return torrents;
     } catch (error: unknown) {
       this.logger.error(
-        `Failed to scrape ${item.fullTitle} (IMDB: ${item.imdbId ?? "N/A"}):`,
-        error,
+        `Failed to scrape ${item.fullTitle} (IMDB: ${item.imdbId ?? "N/A"}): ${String(error)}`,
       );
 
       return {};
     }
+  }
+
+  /**
+   * Gets the Comet scrape config for a given media item.
+   *
+   * @param item The media item to get the Comet scraper config for
+   * @returns The Comet scrape config
+   */
+  private async getCometScrapeConfig(
+    item: MediaItem,
+  ): Promise<CometScrapeConfig> {
+    if (!item.imdbId) {
+      throw new Error("IMDB ID is required for Comet scrape config");
+    }
+
+    if (item instanceof Show) {
+      return {
+        identifier: null,
+        imdbId: item.imdbId,
+        scrapeType: "series",
+      };
+    }
+
+    if (item instanceof Season) {
+      return {
+        identifier: `:${item.number.toString()}`,
+        imdbId: item.imdbId,
+        scrapeType: "series",
+      };
+    }
+
+    if (item instanceof Episode) {
+      const seasonNumber = await item.season.loadProperty("number");
+
+      return {
+        identifier: `:${seasonNumber.toString()}:${item.number.toString()}`,
+        imdbId: item.imdbId,
+        scrapeType: "series",
+      };
+    }
+
+    if (item instanceof Movie) {
+      return {
+        identifier: null,
+        imdbId: item.imdbId,
+        scrapeType: "movie",
+      };
+    }
+
+    throw new Error("Unsupported media item type for Comet identifier");
   }
 }
 
