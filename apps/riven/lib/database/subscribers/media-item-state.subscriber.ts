@@ -268,7 +268,10 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       return "scraped";
     }
 
-    if (item.airedAt && DateTime.fromJSDate(item.airedAt) > DateTime.now()) {
+    if (
+      item.releaseDate &&
+      DateTime.fromJSDate(item.releaseDate) > DateTime.now()
+    ) {
       return "unreleased";
     }
 

@@ -1,5 +1,7 @@
+import { type MediaItem, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
+import { DateTime } from "luxon";
 import {
   type ActorRef,
   type Snapshot,
@@ -27,6 +29,10 @@ import { requestDownload } from "./actors/request-download.actor.ts";
 import { requestIndexData } from "./actors/request-index-data.actor.ts";
 import { requestScrape } from "./actors/request-scrape.actor.ts";
 import { retryLibrary } from "./actors/retry-library.actor.ts";
+import {
+  type ScheduleReindexInput,
+  scheduleReindex,
+} from "./actors/schedule-reindex.actor.ts";
 import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscribers.ts";
 
 import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
@@ -149,6 +155,22 @@ export const mainRunnerMachine = setup({
         });
       },
     ),
+    scheduleReindex: enqueueActions(
+      (
+        { enqueue, context: { plugins } },
+        params: Omit<ScheduleReindexInput, "subscribers">,
+      ) => {
+        enqueue.spawnChild(scheduleReindex, {
+          input: {
+            item: params.item,
+            subscribers: getPluginEventSubscribers(
+              "riven.media-item.index.requested",
+              plugins,
+            ),
+          },
+        });
+      },
+    ),
     requestScrape: enqueueActions(
       (
         { enqueue, context: { plugins } },
@@ -218,6 +240,7 @@ export const mainRunnerMachine = setup({
     requestDownload,
     fanOutDownload,
     retryLibrary,
+    scheduleReindex,
   },
   guards: {
     /**
@@ -244,6 +267,18 @@ export const mainRunnerMachine = setup({
       return isPublishableEvent;
     },
     isRivenEvent: ({ event }) => RivenEvent.safeParse(event).success,
+    isOngoingItem: (_, item: MediaItem) => item.state === "ongoing",
+    isUnreleasedItem: (_, item: MediaItem) => item.state === "unreleased",
+    isCompletedItem: (_, item: MediaItem) => {
+      if (item instanceof Show) {
+        return item.status === "ended";
+      }
+
+      return (
+        item.releaseDate != null &&
+        DateTime.fromJSDate(item.releaseDate) <= DateTime.utc()
+      );
+    },
   },
 })
   .extend(withLogAction)
@@ -424,23 +459,84 @@ export const mainRunnerMachine = setup({
             },
           },
 
-          "riven.media-item.index.success": {
-            description:
-              "Indicates that a media item has been successfully indexed in the library.",
-            actions: [
-              {
+          "riven.media-item.index.success": [
+            {
+              description:
+                "Indicates that a media item has been successfully indexed, but is not yet released. It will be scheduled for re-indexing at a later date.",
+              guard: {
+                type: "isUnreleasedItem",
+                params: ({ event: { item } }) => item,
+              },
+              actions: [
+                {
+                  type: "scheduleReindex",
+                  params: ({ event: { item } }) => ({ item }),
+                },
+                {
+                  type: "log",
+                  params: ({ event: { item } }) => ({
+                    message: `Successfully indexed ${item.type}: ${item.fullTitle}. This item is not yet released and will be scheduled for re-indexing at a later date.`,
+                    level: "info",
+                  }),
+                },
+              ],
+            },
+            {
+              description:
+                "Indicates that a media item is partially released and should be scraped & be scheduled for re-indexing at a later date.",
+              guard: {
+                type: "isOngoingItem",
+                params: ({ event: { item } }) => item,
+              },
+              actions: [
+                {
+                  type: "requestScrape",
+                  params: ({ event: { item } }) => ({ items: [item] }),
+                },
+                {
+                  type: "scheduleReindex",
+                  params: ({ event: { item } }) => ({ item }),
+                },
+                {
+                  type: "log",
+                  params: ({ event: { item } }) => ({
+                    message: `Successfully indexed ${item.type}: ${item.fullTitle}. Attempting to download all available episodes; future episodes will be re-indexed after their air date.`,
+                    level: "info",
+                  }),
+                },
+              ],
+            },
+            {
+              description:
+                "Indicates that a media item is completely released and should be scraped with no re-indexing scheduled.",
+              guard: {
+                type: "isCompletedItem",
+                params: ({ event: { item } }) => item,
+              },
+              actions: [
+                {
+                  type: "requestScrape",
+                  params: ({ event: { item } }) => ({ items: [item] }),
+                },
+                {
+                  type: "log",
+                  params: ({ event: { item } }) => ({
+                    message: `Successfully indexed ${item.type}: ${item.fullTitle}`,
+                    level: "info",
+                  }),
+                },
+              ],
+            },
+            {
+              actions: {
                 type: "log",
                 params: ({ event: { item } }) => ({
-                  message: `Successfully indexed ${item.type}: ${item.fullTitle}`,
-                  level: "info",
+                  message: `Successfully indexed ${item.type}: ${item.fullTitle}, but could not determine the next action.`,
+                  level: "error",
                 }),
               },
-              {
-                type: "requestScrape",
-                params: ({ event: { item } }) => ({ items: [item] }),
-              },
-            ],
-          },
+            },
+          ],
 
           "riven.media-item.index.error.incorrect-state": {
             description:

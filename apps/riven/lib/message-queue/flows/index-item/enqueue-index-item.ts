@@ -6,16 +6,17 @@ import { createRequestIndexDataJob } from "./index-item.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+import type { JobsOptions } from "bullmq";
 
 export interface EnqueueIndexItemInput {
   item: ItemRequest;
   subscribers: RivenPlugin[];
 }
 
-export async function enqueueIndexItem({
-  item,
-  subscribers,
-}: EnqueueIndexItemInput) {
+export async function enqueueIndexItem(
+  { item, subscribers }: EnqueueIndexItemInput,
+  opts?: JobsOptions,
+) {
   const childNodes = subscribers.map((plugin) =>
     createPluginFlowJob(
       MediaItemIndexRequestedEvent,
@@ -28,7 +29,10 @@ export async function enqueueIndexItem({
 
   const rootNode = createRequestIndexDataJob(
     `Indexing [${item.externalIdsLabel.join(" | ")}]`,
-    { children: childNodes },
+    {
+      children: childNodes,
+      ...(opts ? { opts } : {}),
+    },
   );
 
   return flow.add(rootNode);

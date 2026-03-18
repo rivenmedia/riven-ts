@@ -59,4 +59,18 @@ export const RivenSettings = z.object({
     .positive()
     .optional()
     .describe("The minimum average bitrate for episodes."),
+  scheduleOffsetMinutes: z
+    .int()
+    .nonnegative()
+    .default(30)
+    .describe(
+      "The number of minutes to wait after an item's air date before attempting to re-index it.",
+    ),
+  unknownAirDateOffsetDays: z
+    .int()
+    .nonnegative()
+    .default(7)
+    .describe(
+      "When an episode has no air date, this number of days will be added to the current date to estimate a release date for scheduling purposes.",
+    ),
 });

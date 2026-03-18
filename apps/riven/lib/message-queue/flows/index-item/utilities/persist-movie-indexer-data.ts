@@ -52,7 +52,7 @@ export async function persistMovieIndexerData({
         contentRating: item.contentRating,
         rating: item.rating ?? null,
         posterPath: item.posterUrl ?? null,
-        airedAt: item.releaseDate
+        releaseDate: item.releaseDate
           ? DateTime.fromISO(item.releaseDate).toJSDate()
           : null,
         year: item.releaseDate ? DateTime.fromISO(item.releaseDate).year : null,
@@ -63,6 +63,7 @@ export async function persistMovieIndexerData({
         itemRequest,
         runtime: item.runtime,
         isRequested: true, // Movies will always be considered to be requested
+        state: "indexed",
       });
 
       await validateOrReject(mediaItem);

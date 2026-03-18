@@ -41,29 +41,50 @@ export const initialiseVfs = fromPromise<
     );
   }
 
-  const mountPathStats = await lstat(mountPath).catch(() => null);
+  try {
+    const mountPathStats = await lstat(mountPath);
 
-  if (!mountPathStats) {
+    if (!mountPathStats.isDirectory()) {
+      throw new Error(
+        `VFS mount path "${mountPath}" exists, but is not a directory.`,
+      );
+    }
+
+    if (
+      mountPathStats.uid !== processUid ||
+      mountPathStats.gid !== processGid
+    ) {
+      throw new Error(
+        dedent`
+          VFS mount path "${mountPath}" is not owned by the current user.
+
+          Please change the ownership of this directory to the current user by running the following command:
+
+          \`sudo chown ${processUid.toString()}:${processGid.toString()} ${mountPath}\`.
+        `,
+      );
+    }
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      "code" in error &&
+      error.code === "ENOTCONN"
+    ) {
+      throw new Error(
+        dedent`
+          The VFS mount path "${mountPath}" is not accessible. This typically occurs when the mount has become stale due to an unclean shutdown or crash.
+
+          To resolve this issue, try unmounting the VFS mount point by running one of the following commands in your terminal, and then restarting Riven:
+
+          - \`sudo umount -l ${mountPath}\`
+          - \`sudo fusermount -uz ${mountPath}\`
+          - \`sudo fusermount3 -uz ${mountPath}\`
+        `,
+      );
+    }
+
     throw new Error(
       `VFS mount path "${mountPath}" does not exist. Please create this directory.`,
-    );
-  }
-
-  if (!mountPathStats.isDirectory()) {
-    throw new Error(
-      `VFS mount path "${mountPath}" exists, but is not a directory.`,
-    );
-  }
-
-  if (mountPathStats.uid !== processUid || mountPathStats.gid !== processGid) {
-    throw new Error(
-      dedent`
-        VFS mount path "${mountPath}" is not owned by the current user.
-
-        Please change the ownership of this directory to the current user by running the following command:
-
-        \`sudo chown ${processUid.toString()}:${processGid.toString()} ${mountPath}\`.
-      `,
     );
   }
 

@@ -78,7 +78,10 @@ export async function persistShowIndexerData({
       show.fullTitle = show.title;
       show.contentRating = item.contentRating;
       show.posterPath = item.posterUrl ?? show.posterPath ?? null;
-      show.airedAt = firstAired?.toJSDate() ?? show.airedAt ?? null;
+      show.releaseDate = firstAired?.toJSDate() ?? show.releaseDate ?? null;
+      show.nextAirDate = item.nextAired
+        ? DateTime.fromISO(item.nextAired).toJSDate()
+        : null;
       show.year = firstAired?.year ?? show.year ?? null;
       show.country = item.country ?? show.country ?? null;
       show.language = item.language ?? show.language ?? null;
@@ -136,7 +139,8 @@ export async function persistShowIndexerData({
           );
 
         if (seasonFirstAired) {
-          seasonEntry.airedAt = DateTime.fromISO(seasonFirstAired).toJSDate();
+          seasonEntry.releaseDate =
+            DateTime.fromISO(seasonFirstAired).toJSDate();
         }
 
         seasonEntry.title = seasonTitle;
@@ -182,7 +186,13 @@ export async function persistShowIndexerData({
             );
 
           if (episode.airedAt) {
-            episodeEntry.airedAt = DateTime.fromISO(episode.airedAt).toJSDate();
+            episodeEntry.releaseDate = DateTime.fromISO(
+              episode.airedAt,
+            ).toJSDate();
+
+            if (show.status === "continuing" || show.status === "upcoming") {
+              show.nextAirDate = episodeEntry.releaseDate;
+            }
           }
 
           episodeEntry.title = episode.title;
@@ -192,7 +202,8 @@ export async function persistShowIndexerData({
           episodeEntry.contentRating = episode.contentRating;
           episodeEntry.runtime = episode.runtime;
           episodeEntry.year = episodeYear;
-          episodeEntry.state = isUnreleased ? "unreleased" : "indexed";
+          episodeEntry.state =
+            isUnreleased && season.number > 0 ? "unreleased" : "indexed";
 
           seasonEntry.episodes.add(episodeEntry);
 

@@ -31,7 +31,7 @@ import { Stream } from "../streams/stream.entity.ts";
   abstract: true,
   discriminatorColumn: "type",
 })
-@Index({ properties: ["type", "airedAt"] })
+@Index({ properties: ["type", "releaseDate"] })
 export abstract class MediaItem {
   @Field((_type) => ID)
   @PrimaryKey()
@@ -119,7 +119,7 @@ export abstract class MediaItem {
 
   @Field(() => Date, { nullable: true })
   @Property()
-  airedAt?: Date | null;
+  releaseDate?: Date | null;
 
   @Field(() => Number, { nullable: true })
   @Property()
@@ -150,12 +150,13 @@ export abstract class MediaItem {
     items: () => MediaItemState.enum,
     onCreate(entity: Partial<MediaItem>) {
       const isUnreleased =
-        entity.airedAt && DateTime.fromJSDate(entity.airedAt) > DateTime.now();
+        entity.releaseDate &&
+        DateTime.fromJSDate(entity.releaseDate) > DateTime.now();
 
       return isUnreleased ? "unreleased" : "indexed";
     },
   })
-  state!: Opt<MediaItemState>;
+  state!: MediaItemState;
 
   @Field(() => Number)
   @Property()
