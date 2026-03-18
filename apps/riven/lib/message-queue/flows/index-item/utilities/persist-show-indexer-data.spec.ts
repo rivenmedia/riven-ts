@@ -129,6 +129,8 @@ it("updates the media item with the latest data if it already exists", async () 
     },
   });
 
+  expect(initialShow.nextAirDate).toBeNull();
+
   const episodes = await initialShow.getEpisodes();
 
   expect(episodes).toHaveLength(1);

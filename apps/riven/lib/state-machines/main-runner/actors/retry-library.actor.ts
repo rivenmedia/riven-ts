@@ -40,8 +40,6 @@ export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
         { refresh: true },
       );
 
-      console.log(pendingRequests);
-
       if (pendingItems.length === 0 && pendingRequests.length === 0) {
         logger.verbose("No pending library items to retry");
 

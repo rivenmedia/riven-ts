@@ -44,6 +44,10 @@ export async function persistMovieIndexerData({
 
   try {
     return await database.em.fork().transactional(async (transaction) => {
+      const isUnreleased = item.releaseDate
+        ? DateTime.fromISO(item.releaseDate) > DateTime.now()
+        : true; // If no release date is provided, assume the movie is unreleased
+
       const mediaItem = transaction.create(Movie, {
         title: item.title,
         fullTitle: item.title,
@@ -63,12 +67,14 @@ export async function persistMovieIndexerData({
         itemRequest,
         runtime: item.runtime,
         isRequested: true, // Movies will always be considered to be requested
-        state: "indexed",
+        state: isUnreleased ? "unreleased" : "indexed",
       });
 
       await validateOrReject(mediaItem);
 
-      transaction.assign(itemRequest, { state: "completed" });
+      transaction.assign(itemRequest, {
+        state: isUnreleased ? "unreleased" : "completed",
+      });
 
       await transaction.flush();
 

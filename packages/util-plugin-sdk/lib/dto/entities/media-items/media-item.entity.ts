@@ -42,7 +42,6 @@ export abstract class MediaItem {
   @Property()
   title!: string;
 
-  // TODO: Remove default here
   @Field(() => String)
   @Property()
   fullTitle!: string;
@@ -72,7 +71,7 @@ export abstract class MediaItem {
   @Field(() => Date)
   @Index()
   @Property({ default: DateTime.now().toISO() })
-  createdAt: Opt<Date> = DateTime.now().toJSDate();
+  createdAt!: Opt<Date>;
 
   @Field(() => Date, { nullable: true })
   @Property({ onUpdate: () => DateTime.now().toJSDate() })
@@ -146,16 +145,7 @@ export abstract class MediaItem {
   guid?: string | null;
 
   @Field(() => MediaItemState.enum)
-  @Enum({
-    items: () => MediaItemState.enum,
-    onCreate(entity: Partial<MediaItem>) {
-      const isUnreleased =
-        entity.releaseDate &&
-        DateTime.fromJSDate(entity.releaseDate) > DateTime.now();
-
-      return isUnreleased ? "unreleased" : "indexed";
-    },
-  })
+  @Enum({ items: () => MediaItemState.enum })
   state!: MediaItemState;
 
   @Field(() => Number)

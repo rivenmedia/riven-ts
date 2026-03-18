@@ -26,7 +26,11 @@ export async function persistShowIndexerData({
     id: item.id,
   });
 
-  const processableStates = ItemRequestState.extract(["requested", "ongoing"]);
+  const processableStates = ItemRequestState.extract([
+    "requested",
+    "ongoing",
+    "unreleased",
+  ]);
 
   assert(
     processableStates.safeParse(itemRequest.state).success,
@@ -209,8 +213,16 @@ export async function persistShowIndexerData({
 
       await validateOrReject(show);
 
+      const isUnreleased = show.releaseDate
+        ? DateTime.fromJSDate(show.releaseDate) > DateTime.now()
+        : true; // If no release date is provided, assume the show is unreleased
+
       transaction.assign(itemRequest, {
-        state: item.keepUpdated ? "ongoing" : "completed",
+        state: isUnreleased
+          ? "unreleased"
+          : item.keepUpdated
+            ? "ongoing"
+            : "completed",
       });
 
       await transaction.upsert(show);
