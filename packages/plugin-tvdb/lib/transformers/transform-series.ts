@@ -171,6 +171,7 @@ export const transformSeries = (
       precision: "day",
       includeOffset: false,
     }),
+    nextAired: series.nextAired ?? null,
     seasons,
     keepUpdated: keepUpdated ?? false,
   } satisfies Extract<

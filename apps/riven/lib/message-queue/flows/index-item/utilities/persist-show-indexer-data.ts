@@ -85,7 +85,10 @@ export async function persistShowIndexerData({
       show.year = firstAired?.year ?? show.year ?? null;
       show.country = item.country ?? show.country ?? null;
       show.language = item.language ?? show.language ?? null;
-      show.aliases = item.aliases ?? show.aliases ?? null;
+      show.aliases = {
+        ...show.aliases,
+        ...item.aliases,
+      };
       show.rating = item.rating ?? show.rating ?? null;
       show.status = item.status;
       show.keepUpdated = item.keepUpdated;
