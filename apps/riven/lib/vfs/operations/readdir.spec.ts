@@ -43,6 +43,9 @@ it("returns all shows for the /shows path", async ({ em }) => {
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
+    fullTitle: "Example Show 1",
+    state: "indexed",
+    keepUpdated: false,
   });
 
   await em.flush();
@@ -53,6 +56,9 @@ it("returns all shows for the /shows path", async ({ em }) => {
     number: 1,
     isSpecial: false,
     isRequested: true,
+    fullTitle: `${show.fullTitle} - S01`,
+    state: "indexed",
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -68,6 +74,9 @@ it("returns all shows for the /shows path", async ({ em }) => {
     contentRating: "tv-14",
     isSpecial: false,
     isRequested: true,
+    fullTitle: `${season.fullTitle}E01`,
+    itemRequest,
+    state: "indexed",
   });
 
   season.episodes.add(episode);
@@ -111,6 +120,9 @@ it('does not return entries for the "all shows" path for shows that do not have 
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
+    fullTitle: "Example Show 1",
+    state: "indexed",
+    keepUpdated: false,
   });
 
   await em.flush();
@@ -121,6 +133,9 @@ it('does not return entries for the "all shows" path for shows that do not have 
     number: 1,
     isSpecial: false,
     isRequested: true,
+    fullTitle: `${show.fullTitle} - S01`,
+    state: "indexed",
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -136,6 +151,9 @@ it('does not return entries for the "all shows" path for shows that do not have 
     contentRating: "tv-14",
     isSpecial: false,
     isRequested: true,
+    fullTitle: `${season.fullTitle}E01`,
+    itemRequest,
+    state: "indexed",
   });
 
   season.episodes.add(episode);
@@ -166,6 +184,8 @@ it("returns all movies for the /movies path", async ({ em }) => {
       contentRating: "unknown",
       itemRequest,
       isRequested: true,
+      fullTitle: `Example Movie ${i.toString().padStart(2, "0")}`,
+      state: "indexed",
     });
 
     em.create(MediaEntry, {
@@ -206,17 +226,24 @@ it("returns all seasons for a single show path", async ({ em }) => {
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
+    fullTitle: "Example Show 1",
+    state: "completed",
+    keepUpdated: false,
   });
 
   await em.flush();
 
   for (let i = 1; i <= 3; i++) {
     const season = em.create(Season, {
+      tvdbId: show.tvdbId,
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
       isSpecial: false,
       isRequested: true,
+      fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
+      state: "completed",
+      itemRequest,
     });
 
     show.seasons.add(season);
@@ -224,6 +251,7 @@ it("returns all seasons for a single show path", async ({ em }) => {
     await em.flush();
 
     const episode = em.create(Episode, {
+      tvdbId: show.tvdbId,
       number: 1,
       absoluteNumber: 1,
       year: 2020,
@@ -232,6 +260,9 @@ it("returns all seasons for a single show path", async ({ em }) => {
       contentRating: "tv-14",
       isSpecial: false,
       isRequested: true,
+      fullTitle: `${season.fullTitle}E01`,
+      itemRequest,
+      state: "completed",
     });
 
     season.episodes.add(episode);
@@ -278,17 +309,24 @@ it("does not return entries for a season that does not have any episodes with a 
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
+    fullTitle: "Example Show 1",
+    state: "indexed",
+    keepUpdated: false,
   });
 
   await em.flush();
 
   for (let i = 1; i <= 3; i++) {
     const season = em.create(Season, {
+      tvdbId: show.tvdbId,
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
       isSpecial: false,
       isRequested: true,
+      fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
+      state: "indexed",
+      itemRequest,
     });
 
     show.seasons.add(season);
@@ -296,6 +334,7 @@ it("does not return entries for a season that does not have any episodes with a 
     await em.flush();
 
     const episode = em.create(Episode, {
+      tvdbId: show.tvdbId,
       number: 1,
       absoluteNumber: 1,
       year: 2020,
@@ -304,6 +343,9 @@ it("does not return entries for a season that does not have any episodes with a 
       contentRating: "tv-14",
       isSpecial: false,
       isRequested: true,
+      fullTitle: `${season.fullTitle}E01`,
+      itemRequest,
+      state: "indexed",
     });
 
     season.episodes.add(episode);
@@ -346,16 +388,23 @@ it("returns all episodes for a single season path", async ({ em }) => {
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
+    fullTitle: "Example Show 1",
+    state: "completed",
+    keepUpdated: false,
   });
 
   await em.flush();
 
   const season = em.create(Season, {
+    tvdbId: show.tvdbId,
     title: "Season 01",
     year: 2020,
     number: 1,
     isSpecial: false,
     isRequested: true,
+    fullTitle: `${show.fullTitle} - S01`,
+    state: "completed",
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -364,6 +413,7 @@ it("returns all episodes for a single season path", async ({ em }) => {
 
   for (let i = 1; i <= 3; i++) {
     const episode = em.create(Episode, {
+      tvdbId: show.tvdbId,
       number: i,
       absoluteNumber: i,
       year: 2020,
@@ -372,6 +422,9 @@ it("returns all episodes for a single season path", async ({ em }) => {
       contentRating: "tv-14",
       isSpecial: false,
       isRequested: true,
+      fullTitle: `${season.fullTitle}E${i.toString().padStart(2, "0")}`,
+      itemRequest,
+      state: "completed",
     });
 
     season.episodes.add(episode);
@@ -418,16 +471,23 @@ it("does not return entries for episodes that does not have a media entry when v
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
+    fullTitle: "Example Show 1",
+    state: "indexed",
+    keepUpdated: false,
   });
 
   await em.flush();
 
   const season = em.create(Season, {
+    tvdbId: show.tvdbId,
     title: "Season 01",
     year: 2020,
     number: 1,
     isSpecial: false,
     isRequested: true,
+    fullTitle: `${show.fullTitle} - S01`,
+    state: "indexed",
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -436,6 +496,7 @@ it("does not return entries for episodes that does not have a media entry when v
 
   for (let i = 1; i <= 3; i++) {
     const episode = em.create(Episode, {
+      tvdbId: show.tvdbId,
       number: i,
       absoluteNumber: i,
       year: 2020,
@@ -444,6 +505,9 @@ it("does not return entries for episodes that does not have a media entry when v
       contentRating: "tv-14",
       isSpecial: false,
       isRequested: true,
+      fullTitle: `${season.fullTitle}E${i.toString().padStart(2, "0")}`,
+      itemRequest,
+      state: "indexed",
     });
 
     season.episodes.add(episode);
@@ -490,6 +554,8 @@ it("returns the media entry's filename when viewing a single movie's directory",
     contentRating: MovieContentRating.enum.g,
     itemRequest,
     isRequested: true,
+    fullTitle: "Example Movie 01",
+    state: "indexed",
   });
 
   em.create(MediaEntry, {
@@ -529,6 +595,8 @@ it('does not return entries for the "all movies" path when a movie does not have
       contentRating: "unknown",
       itemRequest,
       isRequested: true,
+      fullTitle: `Example Movie ${i.toString().padStart(2, "0")}`,
+      state: "scraped",
     });
 
     if (i === 1) {

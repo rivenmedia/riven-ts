@@ -188,16 +188,6 @@ export async function persistShowIndexerData({
               { partial: true },
             );
 
-          if (episode.airedAt) {
-            episodeEntry.releaseDate = DateTime.fromISO(
-              episode.airedAt,
-            ).toJSDate();
-
-            if (show.status === "continuing" || show.status === "upcoming") {
-              show.nextAirDate = episodeEntry.releaseDate;
-            }
-          }
-
           episodeEntry.title = episode.title;
           episodeEntry.number = episode.number;
           episodeEntry.fullTitle = `${seasonEntry.fullTitle}E${episodeEntry.number.toString().padStart(2, "0")} - ${episodeEntry.title}`;
@@ -207,6 +197,9 @@ export async function persistShowIndexerData({
           episodeEntry.year = episodeYear;
           episodeEntry.state =
             isUnreleased && season.number > 0 ? "unreleased" : "indexed";
+          episodeEntry.releaseDate = episode.airedAt
+            ? DateTime.fromISO(episode.airedAt).toJSDate()
+            : null;
 
           seasonEntry.episodes.add(episodeEntry);
 

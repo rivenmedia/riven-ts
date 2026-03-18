@@ -78,6 +78,8 @@ it("returns file stats for movie files", async ({ em }) => {
     contentRating: "pg-13",
     itemRequest,
     isRequested: true,
+    fullTitle: "Inception (2010)",
+    state: "indexed",
   });
 
   await em.flush();
@@ -129,6 +131,8 @@ it("returns directory stats for /movies", async ({ em }) => {
       tmdbId: i.toString(),
       itemRequest,
       isRequested: true,
+      fullTitle: `Example Movie ${i.toString()}`,
+      state: "indexed",
     });
 
     await em.flush();
@@ -179,6 +183,9 @@ it("returns directory stats for /shows", async ({ em }) => {
       status: "continuing",
       itemRequest,
       isRequested: true,
+      fullTitle: `Example Show ${i.toString()}`,
+      state: "indexed",
+      keepUpdated: false,
     });
 
     await em.flush();
@@ -189,6 +196,9 @@ it("returns directory stats for /shows", async ({ em }) => {
       number: i,
       isSpecial: false,
       isRequested: true,
+      fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
+      state: "indexed",
+      itemRequest,
     });
 
     show.seasons.add(season);
@@ -204,6 +214,9 @@ it("returns directory stats for /shows", async ({ em }) => {
       isSpecial: false,
       type: "episode",
       isRequested: true,
+      fullTitle: `${season.fullTitle}E01`,
+      itemRequest,
+      state: "indexed",
     });
 
     season.episodes.add(episode);
@@ -253,6 +266,9 @@ it("returns directory stats for single shows", async ({ em }) => {
     status: "continuing",
     itemRequest,
     isRequested: true,
+    fullTitle: "Example Show 1",
+    state: "indexed",
+    keepUpdated: false,
   });
 
   await em.flush();
@@ -264,6 +280,9 @@ it("returns directory stats for single shows", async ({ em }) => {
       number: i,
       isSpecial: false,
       isRequested: true,
+      fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
+      state: "indexed",
+      itemRequest,
     });
 
     show.seasons.add(season);
@@ -278,6 +297,9 @@ it("returns directory stats for single shows", async ({ em }) => {
       absoluteNumber: 1,
       isSpecial: false,
       isRequested: true,
+      fullTitle: `${season.fullTitle}E01`,
+      itemRequest,
+      state: "indexed",
     });
 
     season.episodes.add(episode);
@@ -327,6 +349,9 @@ it("returns directory stats for single seasons", async ({ em }) => {
     status: "continuing",
     itemRequest,
     isRequested: true,
+    fullTitle: "Example Show 1",
+    state: "indexed",
+    keepUpdated: false,
   });
 
   await em.flush();
@@ -337,6 +362,9 @@ it("returns directory stats for single seasons", async ({ em }) => {
     number: 1,
     isSpecial: false,
     isRequested: true,
+    fullTitle: `${show.fullTitle} - S01`,
+    state: "indexed",
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -352,6 +380,9 @@ it("returns directory stats for single seasons", async ({ em }) => {
       absoluteNumber: 1,
       isSpecial: false,
       isRequested: true,
+      fullTitle: `${season.fullTitle}E${i.toString().padStart(2, "0")}`,
+      itemRequest,
+      state: "indexed",
     });
 
     season.episodes.add(episode);
@@ -401,6 +432,9 @@ it("returns file stats for episodes", async ({ em }) => {
     status: "continuing",
     itemRequest,
     isRequested: true,
+    fullTitle: "Example Show 1",
+    state: "indexed",
+    keepUpdated: false,
   });
 
   await em.flush();
@@ -411,6 +445,9 @@ it("returns file stats for episodes", async ({ em }) => {
     number: 1,
     isSpecial: false,
     isRequested: true,
+    fullTitle: `${show.fullTitle} - S01`,
+    state: "indexed",
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -425,6 +462,9 @@ it("returns file stats for episodes", async ({ em }) => {
     absoluteNumber: 1,
     isSpecial: false,
     isRequested: true,
+    fullTitle: `${season.fullTitle}E01`,
+    itemRequest,
+    state: "indexed",
   });
 
   season.episodes.add(episode);

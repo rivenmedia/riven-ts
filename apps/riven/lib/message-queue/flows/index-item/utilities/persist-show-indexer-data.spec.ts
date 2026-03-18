@@ -31,6 +31,7 @@ it("returns the media item if processed successfully", async ({}) => {
       genres: [],
       type: "show",
       firstAired: new Date("2020-01-01").toISOString(),
+      nextAired: null,
       network: "Test Network",
       seasons: [],
       status: "ended",
@@ -72,6 +73,7 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorr
         genres: [],
         type: "show",
         firstAired: new Date("2020-01-01").toISOString(),
+        nextAired: null,
         network: "Test Network",
         seasons: [],
         status: "ended",
@@ -103,7 +105,8 @@ it("updates the media item with the latest data if it already exists", async () 
       contentRating: "tv-14",
       genres: [],
       type: "show",
-      firstAired: new Date("2020-01-01").toISOString(),
+      firstAired: null,
+      nextAired: null,
       network: "Test Network",
       seasons: [
         {
@@ -138,14 +141,15 @@ it("updates the media item with the latest data if it already exists", async () 
       state: "unreleased",
       absoluteNumber: 0,
       contentRating: "unknown",
-      airedAt: null,
+      releaseDate: null,
       year: null,
       runtime: null,
       number: 1,
     }),
   );
 
-  const releasedAirDate = DateTime.utc().minus({ days: 1 }).toISO();
+  const releasedAirDate = DateTime.utc().minus({ days: 1 });
+  const nextAirDate = releasedAirDate.plus({ days: 7 });
 
   const updatedShow = await persistShowIndexerData({
     item: {
@@ -155,7 +159,8 @@ it("updates the media item with the latest data if it already exists", async () 
       contentRating: "tv-14",
       genres: [],
       type: "show",
-      firstAired: new Date("2020-01-01").toISOString(),
+      firstAired: releasedAirDate.toISO(),
+      nextAired: nextAirDate.toISO(),
       network: "Test Network",
       seasons: [
         {
@@ -166,7 +171,7 @@ it("updates the media item with the latest data if it already exists", async () 
               absoluteNumber: 1,
               contentRating: "tv-14",
               number: 1,
-              airedAt: releasedAirDate,
+              airedAt: releasedAirDate.toISO(),
               title: "Episode 1",
               runtime: 60,
             },
@@ -177,6 +182,8 @@ it("updates the media item with the latest data if it already exists", async () 
       keepUpdated: true,
     },
   });
+
+  expect(updatedShow.nextAirDate).toEqual(nextAirDate.toJSDate());
 
   const updatedEpisodes = await updatedShow.getEpisodes();
 
@@ -190,8 +197,8 @@ it("updates the media item with the latest data if it already exists", async () 
       state: "indexed",
       absoluteNumber: 1,
       contentRating: "tv-14",
-      year: DateTime.fromISO(releasedAirDate).year,
-      airedAt: DateTime.fromISO(releasedAirDate).toJSDate(),
+      year: releasedAirDate.year,
+      releaseDate: releasedAirDate.toJSDate(),
       runtime: 60,
       number: 1,
     }),

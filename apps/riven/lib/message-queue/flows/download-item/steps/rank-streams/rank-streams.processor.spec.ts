@@ -44,6 +44,8 @@ const it = baseIt.extend<{
       itemRequest,
       tmdbId: "12345",
       isRequested: true,
+      fullTitle: "Test Movie",
+      state: "indexed",
     });
 
     for (let i = 1; i <= 6; i++) {
@@ -177,6 +179,8 @@ it("handles foreign language movies with aliases correctly", async ({
       jp: ["外国映画"],
     },
     isRequested: true,
+    fullTitle: "Foreign Movie",
+    state: "indexed",
   });
 
   for (let i = 1; i <= 3; i++) {
@@ -244,6 +248,9 @@ it("handles foreign language shows with aliases correctly", async ({
       jp: ["外国映画"],
     },
     isRequested: true,
+    fullTitle: "Foreign Show",
+    state: "indexed",
+    keepUpdated: false,
   });
 
   for (let i = 1; i <= 3; i++) {

@@ -108,6 +108,8 @@ export const rivenTestContext = testBase.extend<{
       tmdbId: "1",
       itemRequest,
       isRequested: true,
+      fullTitle: "Test Movie",
+      state: "indexed",
     });
 
     await em.flush();
@@ -128,6 +130,9 @@ export const rivenTestContext = testBase.extend<{
       tvdbId: "1",
       itemRequest,
       isRequested: true,
+      fullTitle: "Test Show",
+      state: "indexed",
+      keepUpdated: false,
     });
 
     await em.flush();
@@ -136,10 +141,14 @@ export const rivenTestContext = testBase.extend<{
 
     for (let seasonNumber = 1; seasonNumber <= 6; seasonNumber++) {
       const season = em.create(Season, {
+        tvdbId: show.tvdbId,
         title: `Season ${seasonNumber.toString()}`,
         number: seasonNumber,
         isSpecial: false,
         isRequested: true,
+        fullTitle: `${show.fullTitle} - S${seasonNumber.toString().padStart(2, "0")}`,
+        state: "indexed",
+        itemRequest,
       });
 
       show.seasons.add(season);
@@ -148,12 +157,16 @@ export const rivenTestContext = testBase.extend<{
 
       for (let episodeNumber = 1; episodeNumber <= 10; episodeNumber++) {
         const episode = em.create(Episode, {
+          tvdbId: show.tvdbId,
           title: `Episode ${episodeNumber.toString().padStart(2, "0")}`,
           contentRating: "tv-14",
           number: episodeNumber,
           absoluteNumber: absoluteEpisodeNumber++,
           isSpecial: false,
           isRequested: true,
+          fullTitle: `${season.fullTitle}E${episodeNumber.toString().padStart(2, "0")}`,
+          itemRequest,
+          state: "indexed",
         });
 
         season.episodes.add(episode);

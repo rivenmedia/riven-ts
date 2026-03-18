@@ -39,6 +39,8 @@ const it = baseIt.extend<{
       tmdbId: "1",
       itemRequest,
       isRequested: true,
+      fullTitle: "Test Movie",
+      state: "indexed",
     });
 
     await em.flush();
@@ -60,6 +62,9 @@ const it = baseIt.extend<{
       tvdbId: "1",
       itemRequest,
       isRequested: true,
+      fullTitle: "Test Show",
+      state: "indexed",
+      keepUpdated: false,
     });
 
     await em.flush();
@@ -72,6 +77,9 @@ const it = baseIt.extend<{
         number: i,
         isSpecial: false,
         isRequested: true,
+        fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
+        state: "indexed",
+        itemRequest,
       });
 
       show.seasons.add(season);
@@ -86,6 +94,9 @@ const it = baseIt.extend<{
           absoluteNumber: ++episodeNumber,
           isSpecial: false,
           isRequested: true,
+          fullTitle: `${season.fullTitle}E${i.toString().padStart(2, "0")}`,
+          state: "indexed",
+          itemRequest,
         });
 
         season.episodes.add(episode);

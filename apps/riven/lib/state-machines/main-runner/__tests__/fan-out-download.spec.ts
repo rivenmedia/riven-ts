@@ -38,6 +38,10 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
     status: "ended",
     itemRequest,
     isRequested: true,
+    fullTitle: "Test Show",
+    state: "scraped",
+    keepUpdated: false,
+    releaseDate: new Date(),
   });
 
   await em.flush();
@@ -49,6 +53,9 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
       tvdbId: i.toString(),
       isSpecial: false,
       isRequested: true,
+      fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
+      state: "scraped",
+      itemRequest,
     });
 
     show.seasons.add(season);
@@ -108,6 +115,10 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
     status: "ended",
     itemRequest,
     isRequested: true,
+    fullTitle: "Test Show",
+    state: "scraped",
+    keepUpdated: false,
+    releaseDate: new Date(),
   });
 
   await em.flush();
@@ -116,9 +127,13 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
     const season = em.create(Season, {
       number: i,
       title: `Season ${i.toString().padStart(2, "0")}`,
-      tvdbId: i.toString(),
+      tvdbId: show.tvdbId,
       isSpecial: false,
       isRequested: true,
+      fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
+      state: "scraped",
+      itemRequest,
+      releaseDate: new Date(),
     });
 
     show.seasons.add(season);

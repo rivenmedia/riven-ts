@@ -65,13 +65,10 @@ export const initialiseVfs = fromPromise<
       );
     }
   } catch (error) {
-    if (
-      error instanceof Error &&
-      "code" in error &&
-      error.code === "ENOTCONN"
-    ) {
-      throw new Error(
-        dedent`
+    if (error instanceof Error && "code" in error) {
+      if (error.code === "ENOTCONN") {
+        throw new Error(
+          dedent`
           The VFS mount path "${mountPath}" is not accessible. This typically occurs when the mount has become stale due to an unclean shutdown or crash.
 
           To resolve this issue, try unmounting the VFS mount point by running one of the following commands in your terminal, and then restarting Riven:
@@ -80,12 +77,17 @@ export const initialiseVfs = fromPromise<
           - \`sudo fusermount -uz ${mountPath}\`
           - \`sudo fusermount3 -uz ${mountPath}\`
         `,
-      );
+        );
+      }
+
+      if (error.code === "ENOENT") {
+        throw new Error(
+          `VFS mount path "${mountPath}" does not exist. Please create this directory.`,
+        );
+      }
     }
 
-    throw new Error(
-      `VFS mount path "${mountPath}" does not exist. Please create this directory.`,
-    );
+    throw error;
   }
 
   const linkRequestQueues = new Map<

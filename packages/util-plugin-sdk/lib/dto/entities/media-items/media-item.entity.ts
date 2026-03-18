@@ -188,7 +188,7 @@ export abstract class MediaItem {
   type!: MediaItemType;
 
   @ManyToOne(() => ItemRequest)
-  itemRequest!: Opt<Ref<ItemRequest>>;
+  itemRequest!: Ref<ItemRequest>;
 
   @Property()
   isRequested!: boolean;

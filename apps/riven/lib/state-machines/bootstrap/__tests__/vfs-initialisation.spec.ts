@@ -26,9 +26,12 @@ it("throws an error if process UID or GID cannot be determined", async ({
 });
 
 it("throws an error if the mount path does not exist", async ({ actor }) => {
-  vi.spyOn(fs, "lstat").mockRejectedValue(
-    new Error("ENOENT: no such file or directory"),
-  );
+  const error = new Error("ENOENT: no such file or directory");
+
+  // @ts-expect-error - We are intentionally adding a code property to the error to simulate the ENOENT error condition
+  error.code = "ENOENT";
+
+  vi.spyOn(fs, "lstat").mockRejectedValue(error);
 
   await expect(toPromise(actor.start())).rejects.toThrow(
     /VFS mount path "(.*)" does not exist. Please create this directory./,

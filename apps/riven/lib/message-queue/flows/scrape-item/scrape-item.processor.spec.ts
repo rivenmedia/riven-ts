@@ -51,6 +51,8 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
     year: 2024,
     itemRequest,
     isRequested: true,
+    fullTitle: "Test Movie",
+    state: "indexed",
   });
 
   await em.flush();
