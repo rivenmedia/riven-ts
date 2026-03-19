@@ -3,11 +3,8 @@ import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
 import { join } from "node:path";
 
 import { PlexSettings } from "../plex-settings.schema.ts";
+import { LibrarySectionsResponse } from "../schemas/library-sections-response.schema.ts";
 
-import type {
-  LibrarySection,
-  LibrarySections,
-} from "../__generated__/index.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource.js";
 
@@ -27,9 +24,8 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
   }
 
   async updateSection(path: string) {
-    const sections = await this.get<
-      LibrarySections & { MediaContainer?: { Directory?: LibrarySection[] } }
-    >(`library/sections`);
+    const response = await this.get<unknown>(`library/sections`);
+    const sections = LibrarySectionsResponse.parse(response);
 
     for (const directory of sections.MediaContainer?.Directory ?? []) {
       for (const location of directory.Location ?? []) {
@@ -42,9 +38,10 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
             );
           }
 
-          await this.post(`library/sections/${directory.key}/refresh`, {
-            params: { path: fullPath },
-          });
+          await this.post<unknown>(
+            `library/sections/${directory.key}/refresh`,
+            { params: { path: fullPath } },
+          );
 
           return;
         }

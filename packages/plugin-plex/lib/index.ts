@@ -29,7 +29,7 @@ export default {
         );
       }
 
-      const sections = mediaEntries
+      const sectionPaths = mediaEntries
         .reduce<Set<string>>(
           (acc, entry) =>
             acc.add(path.join(entry.baseDirectory, path.dirname(entry.path))),
@@ -39,7 +39,7 @@ export default {
         .toArray();
 
       const results = await Promise.allSettled(
-        sections.map((section) => plexAPI.updateSection(section)),
+        sectionPaths.map((sectionPath) => plexAPI.updateSection(sectionPath)),
       );
 
       const errors = results

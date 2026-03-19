@@ -910,6 +910,9 @@ importers:
         specifier: 'catalog:'
         version: 4.3.6
     devDependencies:
+      '@faker-js/faker':
+        specifier: 'catalog:'
+        version: 10.1.0
       '@kubb/cli':
         specifier: 'catalog:'
         version: 4.20.1(@kubb/react-fabric@0.12.7)(typescript@5.9.3)
