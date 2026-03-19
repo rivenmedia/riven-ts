@@ -153,7 +153,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
 
     if (metadataSettings.tv !== "tvdb" || metadataSettings.anime !== "tvdb") {
       throw new SeerrAPIError(
-        `Invalid Seerr metadata provider settings. TV provider: ${metadataSettings.tv}, Anime provider: ${metadataSettings.anime}. Ensure both are set to TVDB.`,
+        `Invalid Seerr metadata provider settings. TV provider: ${metadataSettings.tv}, Anime provider: ${metadataSettings.anime}. Ensure both are set to TVDB at ${this.settings.url}/settings/metadata`,
       );
     }
   }
