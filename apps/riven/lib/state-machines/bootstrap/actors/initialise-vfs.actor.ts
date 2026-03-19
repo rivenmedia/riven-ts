@@ -8,7 +8,6 @@ import dedent from "dedent";
 import { lstat } from "node:fs/promises";
 import { fromPromise } from "xstate";
 
-import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
 import { fuseOperations } from "../../../vfs/index.ts";
 
