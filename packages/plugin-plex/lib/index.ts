@@ -31,7 +31,8 @@ export default {
 
       const sections = mediaEntries
         .reduce<Set<string>>(
-          (acc, entry) => new Set([...acc, path.dirname(entry.path)]),
+          (acc, entry) =>
+            acc.add(path.join(entry.baseDirectory, path.dirname(entry.path))),
           new Set<string>(),
         )
         .values()
@@ -46,13 +47,11 @@ export default {
           (result): result is PromiseRejectedResult =>
             result.status === "rejected",
         )
-        .map((result) => result.reason as unknown);
+        .map((result) => result.reason as Error);
 
-      const success = errors.length === 0;
-
-      if (!success) {
+      if (errors.length > 0) {
         throw new Error(
-          `Failed to update Plex library sections for media item ID ${event.item.id.toString()}`,
+          `Failed to update Plex library sections for ${event.item.fullTitle}. ${errors.map((error) => error.message).join(", ")}`,
           { cause: errors },
         );
       }

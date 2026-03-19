@@ -42,16 +42,18 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
             );
           }
 
-          await this.post(
-            `library/sections/${directory.key}/refresh?path=${encodeURIComponent(fullPath)}`,
-          );
+          await this.post(`library/sections/${directory.key}/refresh`, {
+            params: { path: fullPath },
+          });
 
-          return true;
+          return;
         }
       }
     }
 
-    return false;
+    throw new PlexAPIError(
+      `No matching library section found for path: ${path}`,
+    );
   }
 
   override async validate() {
