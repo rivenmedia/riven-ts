@@ -7,6 +7,7 @@ import {
   type Snapshot,
   assign,
   enqueueActions,
+  raise,
   setup,
 } from "xstate";
 
@@ -657,20 +658,13 @@ export const mainRunnerMachine = setup({
               runImmediately: true,
             },
           },
-          {
-            id: "retryLibraryScheduler",
-            src: "createEventScheduler",
-            input: {
-              event: "riven-internal.retry-library",
-              interval: 60_000,
-            },
-          },
         ],
         entry: [
           {
             type: "broadcastEventToPlugins",
             params: { type: "riven.core.started" },
           },
+          raise({ type: "riven-internal.retry-library" }),
           {
             type: "log",
             params: { message: "Riven has started successfully." },

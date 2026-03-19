@@ -1,9 +1,10 @@
 import { Parser, transforms } from "@viren070/parse-torrent-title";
+import { toMerged } from "es-toolkit";
 import { prettifyError } from "zod";
 
 import { sceneHandlers } from "../parser/handlers/scene.handlers.ts";
 import { trashHandlers } from "../parser/handlers/trash.handlers.ts";
-import { ParsedDataSchema } from "../schemas.ts";
+import { type ParsedData, ParsedDataSchema } from "../schemas.ts";
 import { adultHandlers } from "./handlers/adult.handlers.ts";
 
 const parser = new Parser()
@@ -86,4 +87,24 @@ export function parse(rawTitle: string) {
   }
 
   return parsedData.data;
+}
+
+/**
+ * An experimental function that attempts to parse torrent data from an individual file's path within the torrent, rather than the overall torrent title.
+ *
+ * @param filePath The file path to parse, e.g. /Season 01/Episode 01.mkv
+ * @returns Parsed data extracted from the file path parts, e.g. { seasons: [1], episodes: [1] }
+ */
+export function parseFilePath(filePath: string) {
+  const parts = filePath.split("/").filter(Boolean);
+
+  return parts.reduce<ParsedData>((acc, part) => {
+    try {
+      const parsedPart = parse(part);
+
+      return toMerged(acc, parsedPart);
+    } catch {
+      return acc;
+    }
+  }, {} as ParsedData);
 }

@@ -1,7 +1,6 @@
 import {
   Collection,
   Entity,
-  type Hidden,
   ManyToOne,
   OneToMany,
   type Opt,
@@ -34,8 +33,7 @@ export class Season extends ShowLikeMediaItem {
   @OneToMany(() => Episode, (episode) => episode.season)
   episodes = new Collection<Episode>(this);
 
-  @Property({ persist: false, hidden: true, getter: true })
-  get prettyName(): Opt<Hidden<string>> {
+  getPrettyName(): string {
     return `Season ${this.number.toString().padStart(2, "0")}`;
   }
 

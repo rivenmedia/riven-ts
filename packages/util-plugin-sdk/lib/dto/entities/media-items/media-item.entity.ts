@@ -26,6 +26,8 @@ import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import { ItemRequest, MediaEntry } from "../index.ts";
 import { Stream } from "../streams/stream.entity.ts";
 
+import type { Promisable } from "type-fest";
+
 @ObjectType()
 @Entity({
   abstract: true,
@@ -188,7 +190,7 @@ export abstract class MediaItem {
    *
    * @example "Inception (2010) {tmdb-27205}"
    */
-  abstract get prettyName(): Opt<Hidden<string>>;
+  abstract getPrettyName(): Promisable<string>;
 
   /**
    * Gets all media entries associated with this media item.

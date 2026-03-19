@@ -2,7 +2,6 @@ import {
   Collection,
   Entity,
   Enum,
-  type Hidden,
   OneToMany,
   type Opt,
   Property,
@@ -60,8 +59,7 @@ export class Show extends ShowLikeMediaItem {
   @Property()
   nextAirDate!: Date | null;
 
-  @Property({ persist: false, hidden: true, getter: true })
-  get prettyName(): Opt<Hidden<string>> {
+  getPrettyName(): string {
     return `${this.title} (${this.year?.toString() ?? "Unknown"}) {tvdb-${this.tvdbId}}`;
   }
 

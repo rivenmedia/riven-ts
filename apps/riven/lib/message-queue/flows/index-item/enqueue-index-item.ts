@@ -31,7 +31,12 @@ export async function enqueueIndexItem(
     `Indexing [${item.externalIdsLabel.join(" | ")}]`,
     {
       children: childNodes,
-      ...(opts ? { opts } : {}),
+      opts: {
+        deduplication: {
+          id: `index-item-${item.id.toString()}`,
+        },
+        ...(opts ?? {}),
+      },
     },
   );
 

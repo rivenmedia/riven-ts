@@ -18,7 +18,7 @@ export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
         {
           isRequested: true,
           state: {
-            $ne: "completed",
+            $in: ["indexed", "scraped", "partially_completed"],
           },
           type: {
             // Only retry movies and shows, as shows will fan out their seasons and episodes on failure
@@ -34,7 +34,7 @@ export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
       const pendingRequests = await database.itemRequest.find(
         {
           state: {
-            $ne: "completed",
+            $in: ["failed", "requested"],
           },
         },
         { refresh: true },
@@ -67,6 +67,7 @@ export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
 
       for (const item of pendingItems) {
         switch (item.state) {
+          case "partially_completed":
           case "indexed": {
             parentRef.send({
               type: "riven.media-item.scrape.requested",

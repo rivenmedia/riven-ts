@@ -1,10 +1,4 @@
-import {
-  Entity,
-  type Hidden,
-  type Opt,
-  Property,
-  type Ref,
-} from "@mikro-orm/core";
+import { Entity, type Opt, Property, type Ref } from "@mikro-orm/core";
 import { Field, ObjectType } from "type-graphql";
 
 import {
@@ -39,8 +33,7 @@ export class Movie extends MediaItem {
     });
   }
 
-  @Property({ persist: false, hidden: true, getter: true })
-  get prettyName(): Opt<Hidden<string>> {
+  getPrettyName(): string {
     return `${this.title} (${this.year?.toString() ?? "Unknown"}) {tmdb-${this.tmdbId}}`;
   }
 }

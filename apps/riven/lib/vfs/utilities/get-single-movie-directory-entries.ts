@@ -29,5 +29,5 @@ export const getSingleMovieDirectoryEntries = async (
     );
   }
 
-  return [mediaEntry.vfsFileName];
+  return [await mediaEntry.getVfsFileName()];
 };

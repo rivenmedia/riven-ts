@@ -56,9 +56,8 @@ export class MediaEntry extends FileSystemEntry {
   @Property({ type: "json" })
   mediaMetadata?: object;
 
-  @Property({ persist: false, hidden: true })
-  get vfsFileName(): Opt<string> {
-    const { prettyName } = this.mediaItem.getEntity();
+  async getVfsFileName(): Promise<string> {
+    const prettyName = await this.mediaItem.getEntity().getPrettyName();
 
     if (!prettyName) {
       throw new TypeError(

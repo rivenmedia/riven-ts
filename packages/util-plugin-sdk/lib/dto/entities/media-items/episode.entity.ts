@@ -1,8 +1,6 @@
 import {
   Entity,
   EntityRepositoryType,
-  type Hidden,
-  HiddenProps,
   ManyToOne,
   type Opt,
   Property,
@@ -25,8 +23,6 @@ import type { MediaEntry } from "../filesystem/media-entry.entity.ts";
 @Entity({ repository: () => EpisodeRepository })
 export class Episode extends ShowLikeMediaItem {
   [EntityRepositoryType]?: EpisodeRepository;
-
-  [HiddenProps]?: "prettyName";
 
   @Field()
   @Property()
@@ -58,9 +54,9 @@ export class Episode extends ShowLikeMediaItem {
     return season.show.loadOrFail();
   }
 
-  @Property({ persist: false, hidden: true, getter: true })
-  get prettyName(): Opt<Hidden<string>> {
-    const baseName = this.season.getProperty("show").getProperty("prettyName");
+  async getPrettyName(): Promise<string> {
+    const show = await this.getShow();
+    const baseName = show.getPrettyName();
 
     if (!baseName) {
       throw new TypeError(

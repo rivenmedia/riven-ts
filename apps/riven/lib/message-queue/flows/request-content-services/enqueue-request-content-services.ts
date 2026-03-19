@@ -26,6 +26,11 @@ export async function enqueueRequestContentServices({
 
   const rootNode = createRequestContentServicesJob("Request content services", {
     children: childNodes,
+    opts: {
+      deduplication: {
+        id: "request-content-services",
+      },
+    },
   });
 
   logger.silly(

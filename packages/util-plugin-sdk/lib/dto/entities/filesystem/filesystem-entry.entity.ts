@@ -19,6 +19,8 @@ import { Episode } from "../media-items/episode.entity.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
 import { Movie } from "../media-items/movie.entity.ts";
 
+import type { Promisable } from "type-fest";
+
 export const FileSystemEntryType = z.enum(["media", "subtitle"]);
 
 export type FileSystemEntryType = z.infer<typeof FileSystemEntryType>;
@@ -32,16 +34,17 @@ export type FileSystemEntryType = z.infer<typeof FileSystemEntryType>;
  * @throws {ReferenceError} if required properties are missing for path generation.
  * @throws {TypeError} if the media item type is unsupported. Only `Movie` and `Episode` have associated filesystem entries.
  */
-async function getMediaItemPathParts(mediaItem: MediaItem) {
+function getMediaItemPathParts(mediaItem: MediaItem) {
   if (mediaItem instanceof Movie) {
-    return [mediaItem.prettyName];
+    return [mediaItem.getPrettyName()];
   }
 
   if (mediaItem instanceof Episode) {
-    const seasonLabel = await mediaItem.season.loadProperty("prettyName");
-    const showLabel = await mediaItem.season
+    const seasonLabel = mediaItem.season.getEntity().getPrettyName();
+    const showLabel = mediaItem.season
       .getProperty("show")
-      .loadProperty("prettyName");
+      .getEntity()
+      .getPrettyName();
 
     if (!seasonLabel || !showLabel) {
       throw new ReferenceError(
@@ -113,16 +116,16 @@ export abstract class FileSystemEntry {
    *
    * @example "movie.mkv", "episode.srt"
    */
-  abstract get vfsFileName(): Opt<Hidden<string>>;
+  abstract getVfsFileName(): Promisable<string>;
 
   @BeforeCreate()
   async _setPath() {
     const mediaItem = this.mediaItem.getEntity();
-    const pathParts = await getMediaItemPathParts(mediaItem);
+    const pathParts = getMediaItemPathParts(mediaItem);
 
     // Remove periods from path parts to avoid directories being parsed as files
     const sanitisedPathParts = pathParts.map((part) => part.replace(/\./g, ""));
 
-    this.path = path.join(...sanitisedPathParts, this.vfsFileName);
+    this.path = path.join(...sanitisedPathParts, await this.getVfsFileName());
   }
 }

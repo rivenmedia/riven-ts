@@ -12,7 +12,7 @@ export interface EnqueueScrapeItemInput {
   subscribers: RivenPlugin[];
 }
 
-export async function enqueueScrapeItems({
+export function enqueueScrapeItems({
   items,
   subscribers,
 }: EnqueueScrapeItemInput) {
@@ -38,6 +38,11 @@ export async function enqueueScrapeItems({
             { children: childNodes },
           ),
         ],
+        opts: {
+          deduplication: {
+            id: `scrape-item-${item.id.toString()}`,
+          },
+        },
       },
     );
   });
