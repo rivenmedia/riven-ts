@@ -6,6 +6,7 @@ import {
   Show,
   type ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
 import { DateTime } from "luxon";
 
@@ -15,7 +16,6 @@ import type {
   FlushEventArgs,
   UnitOfWork,
 } from "@mikro-orm/core";
-import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import type { Promisable } from "type-fest";
 
 type NextStatesMap = Map<MediaItem, MediaItemState>;
@@ -155,13 +155,13 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       nextStatesMap,
     );
 
-    const propagableStates = [
+    const propagableStates = MediaItemState.extract([
       "paused",
       "failed",
       "downloaded",
-    ] satisfies MediaItemState[];
+    ]);
 
-    for (const propagableState of propagableStates) {
+    for (const propagableState of propagableStates.options) {
       if (parent.state === propagableState) {
         continue;
       }

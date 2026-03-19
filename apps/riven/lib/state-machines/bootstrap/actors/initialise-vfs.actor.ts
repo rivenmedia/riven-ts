@@ -8,6 +8,7 @@ import dedent from "dedent";
 import { lstat } from "node:fs/promises";
 import { fromPromise } from "xstate";
 
+import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
 import { fuseOperations } from "../../../vfs/index.ts";
 
@@ -66,17 +67,17 @@ export const initialiseVfs = fromPromise<
     }
   } catch (error) {
     if (error instanceof Error && "code" in error) {
-      if (error.code === "ENOTCONN") {
+      if (error.code === "ENOTCONN" && !settings.vfsForceMount) {
         throw new Error(
           dedent`
-          The VFS mount path "${mountPath}" is not accessible. This typically occurs when the mount has become stale due to an unclean shutdown or crash.
+            The VFS mount path "${mountPath}" is not accessible. This typically occurs when the mount has become stale due to an unclean shutdown or crash.
 
-          To resolve this issue, try unmounting the VFS mount point by running one of the following commands in your terminal, and then restarting Riven:
+            To resolve this issue, try unmounting the VFS mount point by running one of the following commands in your terminal, and then restarting Riven:
 
-          - \`sudo umount -l ${mountPath}\`
-          - \`sudo fusermount -uz ${mountPath}\`
-          - \`sudo fusermount3 -uz ${mountPath}\`
-        `,
+            - \`sudo umount -l ${mountPath}\`
+            - \`sudo fusermount -uz ${mountPath}\`
+            - \`sudo fusermount3 -uz ${mountPath}\`
+          `,
         );
       }
 
@@ -85,9 +86,9 @@ export const initialiseVfs = fromPromise<
           `VFS mount path "${mountPath}" does not exist. Please create this directory.`,
         );
       }
+    } else {
+      throw error;
     }
-
-    throw error;
   }
 
   const linkRequestQueues = new Map<
@@ -118,7 +119,7 @@ export const initialiseVfs = fromPromise<
     entryTimeout: 0,
     attrTimeout: 0,
     acAttrTimeout: 0,
-    force: true,
+    force: settings.vfsForceMount,
   });
 
   return new Promise((resolve, reject) => {

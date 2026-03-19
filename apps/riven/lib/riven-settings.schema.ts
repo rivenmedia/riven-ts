@@ -14,6 +14,12 @@ export const RivenSettings = z.object({
   vfsMountPath: z
     .string()
     .describe("The mount point for the virtual file system."),
+  vfsForceMount: z
+    .stringbool()
+    .default(true)
+    .describe(
+      "If true, attempts to unmount the mount-point before remounting.",
+    ),
   unsafeClearQueuesOnStartup: z
     .stringbool()
     .default(false)
