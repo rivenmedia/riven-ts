@@ -221,6 +221,7 @@ export const pluginRegistrarMachine = setup({
             input: {
               plugin,
               settings,
+              dataSources: plugin.dataSources,
             },
           });
 

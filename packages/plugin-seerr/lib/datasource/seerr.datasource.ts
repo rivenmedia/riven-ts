@@ -4,6 +4,9 @@ import {
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
 
+import path from "node:path";
+
+import { MetadataSettingsResponse } from "../schemas/metadata-settings-response.schema.ts";
 import { RequestResponse } from "../schemas/request-response.schema.ts";
 
 import type { GetAuthMeQueryResponse } from "../__generated__/index.ts";
@@ -15,12 +18,7 @@ import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/sche
 export class SeerrAPIError extends Error {}
 
 export class SeerrAPI extends BaseDataSource<SeerrSettings> {
-  override get baseURL() {
-    const url = this.settings.url.replace(/\/+$/, "");
-
-    return `${url}/api/v1/`;
-  }
-
+  override baseURL = path.join(this.settings.url, "/api/v1/");
   override serviceName = "Seerr";
 
   protected override readonly rateLimiterOptions: RateLimiterOptions = {
@@ -37,10 +35,20 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
 
   override async validate() {
     try {
-      await this.get<GetAuthMeQueryResponse>("auth/me");
+      try {
+        await this.get<GetAuthMeQueryResponse>("auth/me");
+      } catch {
+        throw new SeerrAPIError(
+          "Failed to authenticate with Seerr API. Please check the API key is correct and the Seerr instance is reachable.",
+        );
+      }
+
+      await this.#validateMetadataProviderSettings();
 
       return true;
-    } catch {
+    } catch (error: unknown) {
+      this.logger.error(String(error));
+
       return false;
     }
   }
@@ -129,6 +137,25 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     } while (skip < totalResults);
 
     return allResults;
+  }
+
+  /**
+   * Checks the Seerr instance settings to ensure the metadata providers have been set to TVDB.
+   *
+   * @throws {SeerrAPIError} If the metadata providers are not set to TVDB.
+   */
+  async #validateMetadataProviderSettings() {
+    const response = await this.get<unknown>("settings/metadatas", {
+      skipCache: true,
+    });
+
+    const metadataSettings = MetadataSettingsResponse.parse(response);
+
+    if (metadataSettings.tv !== "tvdb" || metadataSettings.anime !== "tvdb") {
+      throw new SeerrAPIError(
+        `Invalid Seerr metadata provider settings. TV provider: ${metadataSettings.tv}, Anime provider: ${metadataSettings.anime}. Ensure both are set to TVDB.`,
+      );
+    }
   }
 }
 
