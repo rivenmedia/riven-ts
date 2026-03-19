@@ -13,6 +13,9 @@ services:
     devices:
       - /dev/fuse
     env_file: .env.riven
+    environment:
+      PGID: 1000
+      PUID: 1000
     volumes:
       - ./docker-data/riven:/riven/data
       - /mnt/riven:/mount:rshared
