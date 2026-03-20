@@ -201,6 +201,10 @@ export async function persistShowIndexerData({
             ? DateTime.fromISO(episode.airedAt).toJSDate()
             : null;
 
+          // Upserts don't trigger the state subscriber,
+          // so we need to manually set the episode state based on the air date
+          episodeEntry.state = isUnreleased ? "unreleased" : "indexed";
+
           seasonEntry.episodes.add(episodeEntry);
 
           await transaction.upsert(episodeEntry);
