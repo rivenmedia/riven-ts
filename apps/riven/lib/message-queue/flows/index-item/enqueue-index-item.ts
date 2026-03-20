@@ -6,7 +6,7 @@ import { createRequestIndexDataJob } from "./index-item.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
-import type { JobsOptions } from "bullmq";
+import type { FlowJob } from "bullmq";
 
 export interface EnqueueIndexItemInput {
   item: ItemRequest;
@@ -15,7 +15,7 @@ export interface EnqueueIndexItemInput {
 
 export async function enqueueIndexItem(
   { item, subscribers }: EnqueueIndexItemInput,
-  opts?: JobsOptions,
+  opts?: FlowJob["opts"],
 ) {
   const childNodes = subscribers.map((plugin) =>
     createPluginFlowJob(

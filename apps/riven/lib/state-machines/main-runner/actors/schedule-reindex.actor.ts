@@ -32,11 +32,17 @@ export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
       );
     }
 
-    const scheduleFor = DateTime.fromJSDate(
-      knownScheduleDate ?? fallbackScheduleDate.toJSDate(),
-    ).plus({
-      minutes: settings.scheduleOffsetMinutes,
-    });
+    const scheduleFor = DateTime.max(
+      DateTime.fromJSDate(
+        knownScheduleDate ?? fallbackScheduleDate.toJSDate(),
+      ).plus({ minutes: settings.scheduleOffsetMinutes }),
+
+      // If the indexer hasn't updated the latest release date, the schedule date will be in the past.
+      // In this case, we want to schedule the re-index for a short time in the future to give the indexer time to update.
+      DateTime.now()
+        .startOf("minute")
+        .plus({ minutes: settings.scheduleOffsetMinutes }),
+    );
 
     const jobDelay = scheduleFor.diffNow().as("milliseconds");
     const itemRequest = await item.itemRequest.loadOrFail();
@@ -51,7 +57,6 @@ export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
         deduplication: {
           id: `reindex-${item.type}-${item.id.toString()}`,
           ttl: jobDelay,
-          replace: true,
         },
       },
     );

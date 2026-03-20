@@ -12,7 +12,6 @@ import type {
   MediaItemIndexRequestedEvent,
   MediaItemIndexRequestedPluginResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
-import type { TimezoneName } from "countries-and-timezones";
 
 function findEnglishShowTitle(series: SeriesExtendedRecordSchema) {
   if (series.originalLanguage === "eng") {
@@ -26,58 +25,11 @@ function findEnglishShowTitle(series: SeriesExtendedRecordSchema) {
   return translation?.name ?? null;
 }
 
-/**
- * A map of TVDB network slugs to their episode air times, based on the information provided in TVDB's FAQ.
- *
- * @see https://support.thetvdb.com/kb/faq.php?id=29
- */
-const networkSlugToAirTimeMap = new Map<
-  string,
-  [time: string, zone: TimezoneName]
->([
-  ["netflix", ["03:00", "America/New_York"]],
-  ["disney-plus", ["03:00", "America/New_York"]],
-  [
-    "49093-max", // HBO max
-    ["03:00", "America/New_York"],
-  ],
-  ["paramount-plus", ["03:00", "America/New_York"]],
-  ["amc-plus", ["03:00", "America/New_York"]],
-  ["allblk", ["03:00", "America/New_York"]],
-  ["bet-plus", ["03:00", "America/New_York"]],
-  ["hulu", ["00:00", "America/New_York"]],
-  ["apple-tv-plus", ["00:00", "America/New_York"]],
-  ["peacock", ["03:00", "America/New_York"]],
-  ["amazon-prime-video", ["00:00", "GMT"]],
-]);
-
-function calculateNextAiredTime(
-  series: SeriesExtendedRecordSchema,
-): DateTime | null {
-  if (!series.nextAired) {
-    return null;
-  }
-
-  const networkSlug = series.latestNetwork?.slug;
-  const networkAirTime = networkSlug
-    ? networkSlugToAirTimeMap.get(networkSlug)
-    : undefined;
-
-  if (!networkAirTime) {
-    return null;
-  }
-
-  const [airTime, timezone] = networkAirTime;
-
-  return DateTime.fromISO(`${series.nextAired}T${airTime}`, {
-    zone: timezone,
-  });
-}
-
 export const transformSeries = (
   itemRequest: MediaItemIndexRequestedEvent["item"],
   series: SeriesExtendedRecordSchema,
   allEpisodes: EpisodeBaseRecordSchema[],
+  releaseDateTime: DateTime | null,
 ) => {
   const imdbId =
     itemRequest.imdbId ??
@@ -220,7 +172,7 @@ export const transformSeries = (
       precision: "day",
       includeOffset: false,
     }),
-    nextAired: calculateNextAiredTime(series)?.toISO() ?? null,
+    nextAired: releaseDateTime?.toISO({ precision: "minute" }) ?? null,
     seasons,
     keepUpdated: keepUpdated ?? false,
   } satisfies Extract<

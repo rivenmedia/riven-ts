@@ -42,7 +42,7 @@ export const MediaItemIndexRequestedResponse = z
         type: z.literal("show"),
         contentRating: ShowContentRating,
         firstAired: z.iso.date().nullable(),
-        nextAired: z.iso.datetime().nullable(),
+        nextAired: z.iso.datetime({ offset: true, precision: -1 }).nullable(),
         network: z.string().min(1).nullable(),
         status: ShowStatus,
         keepUpdated: z.boolean(),
