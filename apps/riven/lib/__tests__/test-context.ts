@@ -109,7 +109,6 @@ export const rivenTestContext = testBase.extend<{
       itemRequest,
       isRequested: true,
       fullTitle: "Test Movie",
-      state: "indexed",
     });
 
     await em.flush();
@@ -131,7 +130,6 @@ export const rivenTestContext = testBase.extend<{
       itemRequest,
       isRequested: true,
       fullTitle: "Test Show",
-      state: "indexed",
       keepUpdated: false,
     });
 
@@ -147,7 +145,6 @@ export const rivenTestContext = testBase.extend<{
         isSpecial: false,
         isRequested: true,
         fullTitle: `${show.fullTitle} - S${seasonNumber.toString().padStart(2, "0")}`,
-        state: "indexed",
         itemRequest,
       });
 
@@ -166,7 +163,6 @@ export const rivenTestContext = testBase.extend<{
           isRequested: true,
           fullTitle: `${season.fullTitle}E${episodeNumber.toString().padStart(2, "0")}`,
           itemRequest,
-          state: "indexed",
         });
 
         season.episodes.add(episode);

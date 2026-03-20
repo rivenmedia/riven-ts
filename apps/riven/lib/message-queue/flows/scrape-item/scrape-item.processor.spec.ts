@@ -52,7 +52,6 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
     itemRequest,
     isRequested: true,
     fullTitle: "Test Movie",
-    state: "indexed",
   });
 
   await em.flush();

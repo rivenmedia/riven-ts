@@ -40,7 +40,6 @@ const it = baseIt.extend<{
       itemRequest,
       isRequested: true,
       fullTitle: "Test Movie",
-      state: "indexed",
     });
 
     await em.flush();
@@ -63,7 +62,6 @@ const it = baseIt.extend<{
       itemRequest,
       isRequested: true,
       fullTitle: "Test Show",
-      state: "indexed",
       keepUpdated: false,
     });
 
@@ -78,7 +76,6 @@ const it = baseIt.extend<{
         isSpecial: false,
         isRequested: true,
         fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
-        state: "indexed",
         itemRequest,
       });
 
@@ -95,7 +92,6 @@ const it = baseIt.extend<{
           isSpecial: false,
           isRequested: true,
           fullTitle: `${season.fullTitle}E${i.toString().padStart(2, "0")}`,
-          state: "indexed",
           itemRequest,
         });
 

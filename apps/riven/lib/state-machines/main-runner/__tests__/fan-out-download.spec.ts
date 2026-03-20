@@ -39,7 +39,6 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
     itemRequest,
     isRequested: true,
     fullTitle: "Test Show",
-    state: "scraped",
     keepUpdated: false,
     releaseDate: new Date(),
   });
@@ -54,7 +53,6 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
       isSpecial: false,
       isRequested: true,
       fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
-      state: "scraped",
       itemRequest,
     });
 
@@ -116,7 +114,6 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
     itemRequest,
     isRequested: true,
     fullTitle: "Test Show",
-    state: "scraped",
     keepUpdated: false,
     releaseDate: new Date(),
   });
@@ -131,7 +128,6 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
       isSpecial: false,
       isRequested: true,
       fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
-      state: "scraped",
       itemRequest,
       releaseDate: new Date(),
     });

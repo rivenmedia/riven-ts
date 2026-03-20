@@ -44,7 +44,6 @@ it("returns all shows for the /shows path", async ({ em }) => {
     itemRequest,
     isRequested: true,
     fullTitle: "Example Show 1",
-    state: "indexed",
     keepUpdated: false,
   });
 
@@ -57,7 +56,6 @@ it("returns all shows for the /shows path", async ({ em }) => {
     isSpecial: false,
     isRequested: true,
     fullTitle: `${show.fullTitle} - S01`,
-    state: "indexed",
     itemRequest,
   });
 
@@ -76,7 +74,6 @@ it("returns all shows for the /shows path", async ({ em }) => {
     isRequested: true,
     fullTitle: `${season.fullTitle}E01`,
     itemRequest,
-    state: "indexed",
   });
 
   season.episodes.add(episode);
@@ -121,7 +118,6 @@ it('does not return entries for the "all shows" path for shows that do not have 
     itemRequest,
     isRequested: true,
     fullTitle: "Example Show 1",
-    state: "indexed",
     keepUpdated: false,
   });
 
@@ -134,7 +130,6 @@ it('does not return entries for the "all shows" path for shows that do not have 
     isSpecial: false,
     isRequested: true,
     fullTitle: `${show.fullTitle} - S01`,
-    state: "indexed",
     itemRequest,
   });
 
@@ -153,7 +148,6 @@ it('does not return entries for the "all shows" path for shows that do not have 
     isRequested: true,
     fullTitle: `${season.fullTitle}E01`,
     itemRequest,
-    state: "indexed",
   });
 
   season.episodes.add(episode);
@@ -185,7 +179,6 @@ it("returns all movies for the /movies path", async ({ em }) => {
       itemRequest,
       isRequested: true,
       fullTitle: `Example Movie ${i.toString().padStart(2, "0")}`,
-      state: "indexed",
     });
 
     em.create(MediaEntry, {
@@ -227,7 +220,6 @@ it("returns all seasons for a single show path", async ({ em }) => {
     itemRequest,
     isRequested: true,
     fullTitle: "Example Show 1",
-    state: "completed",
     keepUpdated: false,
   });
 
@@ -242,7 +234,6 @@ it("returns all seasons for a single show path", async ({ em }) => {
       isSpecial: false,
       isRequested: true,
       fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
-      state: "completed",
       itemRequest,
     });
 
@@ -262,7 +253,6 @@ it("returns all seasons for a single show path", async ({ em }) => {
       isRequested: true,
       fullTitle: `${season.fullTitle}E01`,
       itemRequest,
-      state: "completed",
     });
 
     season.episodes.add(episode);
@@ -310,7 +300,6 @@ it("does not return entries for a season that does not have any episodes with a 
     itemRequest,
     isRequested: true,
     fullTitle: "Example Show 1",
-    state: "indexed",
     keepUpdated: false,
   });
 
@@ -325,7 +314,6 @@ it("does not return entries for a season that does not have any episodes with a 
       isSpecial: false,
       isRequested: true,
       fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
-      state: "indexed",
       itemRequest,
     });
 
@@ -345,7 +333,6 @@ it("does not return entries for a season that does not have any episodes with a 
       isRequested: true,
       fullTitle: `${season.fullTitle}E01`,
       itemRequest,
-      state: "indexed",
     });
 
     season.episodes.add(episode);
@@ -389,7 +376,6 @@ it("returns all episodes for a single season path", async ({ em }) => {
     itemRequest,
     isRequested: true,
     fullTitle: "Example Show 1",
-    state: "completed",
     keepUpdated: false,
   });
 
@@ -403,7 +389,6 @@ it("returns all episodes for a single season path", async ({ em }) => {
     isSpecial: false,
     isRequested: true,
     fullTitle: `${show.fullTitle} - S01`,
-    state: "completed",
     itemRequest,
   });
 
@@ -424,7 +409,6 @@ it("returns all episodes for a single season path", async ({ em }) => {
       isRequested: true,
       fullTitle: `${season.fullTitle}E${i.toString().padStart(2, "0")}`,
       itemRequest,
-      state: "completed",
     });
 
     season.episodes.add(episode);
@@ -472,7 +456,6 @@ it("does not return entries for episodes that does not have a media entry when v
     itemRequest,
     isRequested: true,
     fullTitle: "Example Show 1",
-    state: "indexed",
     keepUpdated: false,
   });
 
@@ -486,7 +469,6 @@ it("does not return entries for episodes that does not have a media entry when v
     isSpecial: false,
     isRequested: true,
     fullTitle: `${show.fullTitle} - S01`,
-    state: "indexed",
     itemRequest,
   });
 
@@ -507,7 +489,6 @@ it("does not return entries for episodes that does not have a media entry when v
       isRequested: true,
       fullTitle: `${season.fullTitle}E${i.toString().padStart(2, "0")}`,
       itemRequest,
-      state: "indexed",
     });
 
     season.episodes.add(episode);
@@ -555,7 +536,6 @@ it("returns the media entry's filename when viewing a single movie's directory",
     itemRequest,
     isRequested: true,
     fullTitle: "Example Movie 01",
-    state: "indexed",
   });
 
   em.create(MediaEntry, {
@@ -596,7 +576,6 @@ it('does not return entries for the "all movies" path when a movie does not have
       itemRequest,
       isRequested: true,
       fullTitle: `Example Movie ${i.toString().padStart(2, "0")}`,
-      state: "scraped",
     });
 
     if (i === 1) {

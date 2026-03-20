@@ -39,7 +39,6 @@ it("throws an unrecoverable error if no valid torrent is found", async () => {
     itemRequest,
     isRequested: true,
     fullTitle: "Test Movie",
-    state: "indexed",
   });
 
   await em.flush();
@@ -88,7 +87,6 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     itemRequest,
     isRequested: true,
     fullTitle: "Test Movie",
-    state: "indexed",
   });
 
   const streamInfoHash = "test-info-hash";
@@ -154,7 +152,6 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
     status: "continuing",
     isRequested: true,
     fullTitle: "Test Show",
-    state: "indexed",
     keepUpdated: false,
   });
 
@@ -167,7 +164,6 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
       isSpecial: false,
       isRequested: true,
       fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
-      state: "indexed",
       itemRequest,
     });
 
@@ -185,7 +181,6 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
         isSpecial: season.isSpecial,
         isRequested: true,
         fullTitle: `${season.fullTitle} - E${j.toString().padStart(2, "0")}`,
-        state: "indexed",
         itemRequest,
       });
 
@@ -273,7 +268,6 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
     itemRequest,
     isRequested: true,
     fullTitle: "Test Movie",
-    state: "indexed",
   });
 
   await em.flush();

@@ -73,7 +73,6 @@ export async function persistShowIndexerData({
             imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
             itemRequest,
             isRequested: true, // Shows will always be considered to be requested
-            state: "indexed",
           },
           { partial: true },
         );
@@ -140,7 +139,6 @@ export async function persistShowIndexerData({
                 ? itemRequest.seasons.includes(season.number)
                 : season.number > 0,
               itemRequest,
-              state: "indexed",
             },
             { partial: true },
           );
@@ -199,8 +197,6 @@ export async function persistShowIndexerData({
           episodeEntry.contentRating = episode.contentRating;
           episodeEntry.runtime = episode.runtime;
           episodeEntry.year = episodeYear;
-          episodeEntry.state =
-            isUnreleased && season.number > 0 ? "unreleased" : "indexed";
           episodeEntry.releaseDate = episode.airedAt
             ? DateTime.fromISO(episode.airedAt).toJSDate()
             : null;

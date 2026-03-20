@@ -7,6 +7,7 @@ import {
   ManyToMany,
   ManyToOne,
   type Opt,
+  OptionalProps,
   PrimaryKey,
   Property,
   type Ref,
@@ -35,6 +36,8 @@ import type { Promisable } from "type-fest";
 })
 @Index({ properties: ["type", "releaseDate"] })
 export abstract class MediaItem {
+  [OptionalProps]?: "state";
+
   @Field((_type) => ID)
   @PrimaryKey()
   id!: number;
@@ -147,7 +150,10 @@ export abstract class MediaItem {
   guid?: string | null;
 
   @Field(() => MediaItemState.enum)
-  @Enum({ items: () => MediaItemState.enum })
+  @Enum({
+    default: MediaItemState.enum.indexed,
+    items: () => MediaItemState.enum,
+  })
   state!: MediaItemState;
 
   @Field(() => Number)

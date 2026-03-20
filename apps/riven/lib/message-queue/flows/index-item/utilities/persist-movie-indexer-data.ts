@@ -67,7 +67,6 @@ export async function persistMovieIndexerData({
         itemRequest,
         runtime: item.runtime,
         isRequested: true, // Movies will always be considered to be requested
-        state: isUnreleased ? "unreleased" : "indexed",
       });
 
       await validateOrReject(mediaItem);
