@@ -172,10 +172,6 @@ export async function persistShowIndexerData({
             ? DateTime.fromISO(episode.airedAt).year
             : seasonYear;
 
-          const isUnreleased = episode.airedAt
-            ? DateTime.fromISO(episode.airedAt) > DateTime.now()
-            : true; // If there's no air date, assume the episode is unreleased
-
           const episodeEntry =
             existingEpisode ??
             transaction.create(
@@ -200,10 +196,6 @@ export async function persistShowIndexerData({
           episodeEntry.releaseDate = episode.airedAt
             ? DateTime.fromISO(episode.airedAt).toJSDate()
             : null;
-
-          // Upserts don't trigger the state subscriber,
-          // so we need to manually set the episode state based on the air date
-          episodeEntry.state = isUnreleased ? "unreleased" : "indexed";
 
           seasonEntry.episodes.add(episodeEntry);
 

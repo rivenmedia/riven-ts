@@ -12,6 +12,8 @@ import { DateTime } from "luxon";
 
 import type {
   ChangeSet,
+  EntityData,
+  EventArgs,
   EventSubscriber,
   FlushEventArgs,
   UnitOfWork,
@@ -21,6 +23,15 @@ import type { Promisable } from "type-fest";
 type NextStatesMap = Map<MediaItem, MediaItemState>;
 
 export class MediaItemStateSubscriber implements EventSubscriber {
+  beforeUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
+    const isUnreleased = entity.releaseDate
+      ? // eslint-disable-next-line no-restricted-globals
+        DateTime.fromJSDate(new Date(entity.releaseDate)) > DateTime.now()
+      : false;
+
+    entity.state ??= isUnreleased ? "unreleased" : "indexed";
+  }
+
   async onFlush({ uow }: FlushEventArgs): Promise<void> {
     const trackedItems = new Map<
       MediaItem,
