@@ -23,9 +23,11 @@ export class TvMazeAPI extends BaseDataSource<TvdbSettings> {
 
   /**
    * Gets the next episode air date for a TVDB item by looking up the corresponding show in TVMaze using the TVDB ID,
-   * and then extracting the relevant scheduling information.
+   * and then fetching the airstamp of the next episode.
    *
-   * @param series The series record
+   * This is necessary because TVDB does not provide a way to get the exact time of an episode's airing.
+   *
+   * @param tvdbId The TVDB series ID
    * @returns The next episode air date for the specified TVDB ID
    */
   async getNextEpisodeAirDate(tvdbId: string): Promise<DateTime | null> {
