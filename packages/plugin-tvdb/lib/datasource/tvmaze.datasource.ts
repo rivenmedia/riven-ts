@@ -31,10 +31,6 @@ export class TvMazeAPI extends BaseDataSource<TvdbSettings> {
    * @returns The next episode air date for the specified TVDB ID
    */
   async getNextEpisodeAirDate(tvdbId: string): Promise<DateTime | null> {
-    if (!tvdbId) {
-      throw new TvMazeAPIError("Series does not have a TVDB ID");
-    }
-
     const showResponse = await this.get<unknown>("lookup/shows", {
       params: {
         thetvdb: tvdbId,
