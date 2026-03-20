@@ -12,6 +12,7 @@ import type {
   MediaItemIndexRequestedEvent,
   MediaItemIndexRequestedPluginResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+import type { TimezoneName } from "countries-and-timezones";
 
 function findEnglishShowTitle(series: SeriesExtendedRecordSchema) {
   if (series.originalLanguage === "eng") {
@@ -29,7 +30,7 @@ export const transformSeries = (
   itemRequest: MediaItemIndexRequestedEvent["item"],
   series: SeriesExtendedRecordSchema,
   allEpisodes: EpisodeBaseRecordSchema[],
-  releaseDateTime: DateTime | null,
+  originalReleaseTimezone: TimezoneName | undefined,
 ) => {
   const imdbId =
     itemRequest.imdbId ??
@@ -41,17 +42,12 @@ export const transformSeries = (
     slug = "",
     image: posterPath,
     status: { name: tvdbStatus, keepUpdated } = {},
+    airsTime,
   } = series;
 
   const title = findEnglishShowTitle(series);
 
   assert(title, "Series must have a name");
-
-  const firstAired = series.firstAired
-    ? DateTime.fromISO(series.firstAired)
-    : null;
-
-  assert(firstAired);
 
   const network =
     series.latestNetwork?.name ?? series.originalNetwork?.name ?? null;
@@ -103,53 +99,75 @@ export const transformSeries = (
       series.contentRatings?.find(({ country }) => country === "usa")?.name,
     );
 
-  const seasons = allEpisodes.reduce<
-    Extract<
-      NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
-      { type: "show" }
-    >["seasons"]
-  >((acc, episode) => {
-    const { seasonNumber, number } = episode;
+  const airsDateTime = DateTime.fromFormat(airsTime ?? "00:00", "HH:mm");
 
-    if (seasonNumber === undefined || number === undefined) {
-      return acc;
-    }
+  const { seasons, firstEpisodeAirDate, nextEpisodeAirDate } =
+    allEpisodes.reduce<{
+      firstEpisodeAirDate: DateTime | null;
+      nextEpisodeAirDate: DateTime | null;
+      seasons: Extract<
+        NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
+        { type: "show" }
+      >["seasons"];
+    }>(
+      (acc, episode) => {
+        const { seasonNumber, number } = episode;
 
-    const season = acc[seasonNumber] ?? {
-      number: seasonNumber,
-      title: episode.seasonName ?? null,
-      episodes: [],
-    };
+        if (seasonNumber === undefined || number === undefined) {
+          return acc;
+        }
 
-    return {
-      ...acc,
-      [seasonNumber]: {
-        ...season,
-        episodes: [
-          ...season.episodes,
-          {
-            contentRating, // TODO: Get episode-specific content rating
-            number,
-            absoluteNumber: episode.absoluteNumber ?? 0,
-            title: episode.name ?? "Unknown",
-            posterPath: episode.image
-              ? new URL(
-                  episode.image,
-                  "https://artworks.thetvdb.com",
-                ).toString()
-              : posterPath,
-            airedAt: episode.aired
-              ? DateTime.fromISO(episode.aired).toISO({
-                  precision: "day",
-                  includeOffset: false,
-                })
-              : null,
-            runtime: episode.runtime ?? null,
-          },
-        ],
+        const episodeAiredDate = episode.aired
+          ? DateTime.fromISO(episode.aired)
+          : null;
+
+        const episodeAiredAtUtc = episodeAiredDate
+          ? DateTime.fromObject(
+              {
+                year: episodeAiredDate.year,
+                month: episodeAiredDate.month,
+                day: episodeAiredDate.day,
+                hour: airsDateTime.hour,
+                minute: airsDateTime.minute,
+              },
+              { zone: originalReleaseTimezone },
+            ).toUTC()
+          : null;
+
+        if (episodeAiredAtUtc && episodeAiredAtUtc > DateTime.utc()) {
+          acc.nextEpisodeAirDate ??= episodeAiredAtUtc;
+        }
+
+        const season = (acc.seasons[seasonNumber] ??= {
+          number: seasonNumber,
+          title: episode.seasonName ?? null,
+          episodes: [],
+        });
+
+        if (season.number === 1 && number === 1) {
+          acc.firstEpisodeAirDate ??= episodeAiredAtUtc;
+        }
+
+        acc.seasons[seasonNumber].episodes.push({
+          contentRating, // TODO: Get episode-specific content rating
+          number,
+          absoluteNumber: episode.absoluteNumber ?? 0,
+          title: episode.name ?? "Unknown",
+          posterPath: episode.image
+            ? new URL(episode.image, "https://artworks.thetvdb.com").toString()
+            : posterPath,
+          airedAt: episodeAiredAtUtc?.toISO({ precision: "minute" }) ?? null,
+          runtime: episode.runtime ?? null,
+        });
+
+        return acc;
       },
-    };
-  }, {});
+      {
+        firstEpisodeAirDate: null,
+        nextEpisodeAirDate: null,
+        seasons: {},
+      },
+    );
 
   return {
     id: itemRequest.id,
@@ -167,12 +185,9 @@ export const transformSeries = (
     ),
     contentRating,
     posterUrl: posterPath,
-    status: tvdbStatus === "Continuing" ? "continuing" : "ended",
-    firstAired: firstAired.toISO({
-      precision: "day",
-      includeOffset: false,
-    }),
-    nextAired: releaseDateTime?.toISO({ precision: "minute" }) ?? null,
+    status: tvdbStatus?.toLowerCase() === "continuing" ? "continuing" : "ended",
+    firstAired: firstEpisodeAirDate?.toISO({ precision: "minute" }) ?? null,
+    nextAired: nextEpisodeAirDate?.toISO({ precision: "minute" }) ?? null,
     seasons,
     keepUpdated: keepUpdated ?? false,
   } satisfies Extract<

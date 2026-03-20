@@ -15,12 +15,11 @@ export const indexTVDBMediaItem: z.infer<
 
     const series = await api.getSeries(event.item.tvdbId);
     const episodes = await api.getAllEpisodesInOfficialOrder(event.item.tvdbId);
-    const nextEpisodeAirDate = await tvMazeApi.getNextEpisodeAirDate(
-      event.item.tvdbId,
-    );
+
+    const timezone = await tvMazeApi.getShowTimezone(event.item.tvdbId);
 
     return {
-      item: transformSeries(event.item, series, episodes, nextEpisodeAirDate),
+      item: transformSeries(event.item, series, episodes, timezone),
     };
   } else if (event.item.imdbId) {
     // TODO: Implement IMDb-only indexing logic

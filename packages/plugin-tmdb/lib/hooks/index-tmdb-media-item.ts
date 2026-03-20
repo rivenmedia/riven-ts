@@ -1,4 +1,5 @@
 import { UnrecoverableError } from "@repo/util-plugin-sdk/errors/unrecoverable-error";
+import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 import { MediaItemIndexRequestedEventHandler } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
@@ -54,7 +55,11 @@ export const indexTMDBMediaItem: z.infer<
       posterUrl: result.poster_path
         ? `https://image.tmdb.org/t/p/w500${result.poster_path}`
         : null,
-      releaseDate: result.release_date,
+      releaseDate: result.release_date
+        ? DateTime.fromISO(result.release_date)
+            .toUTC()
+            .toISO({ precision: "minute" })
+        : null,
       runtime: result.runtime ?? null,
       language: result.original_language ?? null,
     },

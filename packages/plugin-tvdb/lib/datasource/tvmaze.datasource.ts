@@ -4,11 +4,10 @@ import {
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
 
-import { DateTime } from "luxon";
-
 import { LookupByTvdbIdResponse } from "../schemas/lookup-by-tvdb-id-response.schema.ts";
-import { TvMazeEpisode } from "../schemas/tvmaze-episode.schema.ts";
 import { TvdbSettings } from "../tvdb-settings.schema.ts";
+
+import type { TimezoneName } from "countries-and-timezones";
 
 export class TvMazeAPIError extends Error {}
 
@@ -22,33 +21,26 @@ export class TvMazeAPI extends BaseDataSource<TvdbSettings> {
   };
 
   /**
-   * Gets the next episode air date for a TVDB item by looking up the corresponding show in TVMaze using the TVDB ID,
-   * and then fetching the airstamp of the next episode.
+   * Gets the timezone of a show based on its TVDB ID by querying the TVMaze API.
+   * This is necessary because TVDB does not provide timezone information.
    *
-   * This is necessary because TVDB does not provide a way to get the exact time of an episode's airing.
-   *
-   * @param tvdbId The TVDB series ID
-   * @returns The next episode air date for the specified TVDB ID
+   * @param tvdbId The TVDB ID to retrieve timezone for
+   * @returns The IANA-compliant timezone of the show's original network, if present
    */
-  async getNextEpisodeAirDate(tvdbId: string): Promise<DateTime | null> {
+  async getShowTimezone(tvdbId: string): Promise<TimezoneName | undefined> {
     const showResponse = await this.get<unknown>("lookup/shows", {
       params: {
         thetvdb: tvdbId,
       },
     });
 
-    const {
-      _links: { nextepisode },
-    } = LookupByTvdbIdResponse.parse(showResponse);
+    const { data, success } = LookupByTvdbIdResponse.safeParse(showResponse);
 
-    if (!nextepisode?.href) {
-      return null;
+    if (!success) {
+      return;
     }
 
-    const episodeResponse = await this.get<unknown>(nextepisode.href);
-    const { airstamp } = TvMazeEpisode.parse(episodeResponse);
-
-    return DateTime.fromISO(airstamp);
+    return data.network?.country.timezone;
   }
 
   override validate() {
