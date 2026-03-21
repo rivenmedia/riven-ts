@@ -123,7 +123,7 @@ export abstract class MediaItem {
 
   @Field(() => Date, { nullable: true })
   @Property()
-  releaseDate?: Date | null;
+  releaseDate!: Date | null;
 
   @Field(() => Number, { nullable: true })
   @Property()

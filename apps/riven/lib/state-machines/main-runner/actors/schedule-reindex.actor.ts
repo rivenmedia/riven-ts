@@ -19,30 +19,20 @@ export interface ScheduleReindexInput extends Pick<
 
 export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
   async ({ input: { item, subscribers } }) => {
-    const knownScheduleDate =
+    const itemReleaseDate =
       item instanceof Movie ? item.releaseDate : item.nextAirDate;
 
-    const fallbackScheduleDate = DateTime.now().plus({
-      days: settings.unknownAirDateOffsetDays,
-    });
-
-    if (!knownScheduleDate) {
+    if (!itemReleaseDate) {
       logger.verbose(
-        `No known release date for ${item.type} "${item.fullTitle}". Scheduling re-index using fallback date.`,
+        `No known release date for ${item.type} "${item.fullTitle}". Using fallback of ${settings.unknownAirDateOffsetDays.toString()} days.`,
       );
     }
 
-    const scheduleFor = DateTime.max(
-      DateTime.fromJSDate(
-        knownScheduleDate ?? fallbackScheduleDate.toJSDate(),
-      ).plus({ minutes: settings.scheduleOffsetMinutes }),
-
-      // If the indexer hasn't updated the latest release date, the schedule date will be in the past.
-      // In this case, we want to schedule the re-index for a short time in the future to give the indexer time to update.
-      DateTime.now()
-        .startOf("minute")
-        .plus({ minutes: settings.scheduleOffsetMinutes }),
-    );
+    const scheduleFor = itemReleaseDate
+      ? DateTime.fromJSDate(itemReleaseDate).plus({
+          minutes: settings.scheduleOffsetMinutes,
+        })
+      : DateTime.now().plus({ days: settings.unknownAirDateOffsetDays });
 
     const jobDelay = scheduleFor.diffNow().as("milliseconds");
     const itemRequest = await item.itemRequest.loadOrFail();
