@@ -328,4 +328,58 @@ it("updates the media item with the latest data if it already exists", async () 
       year: firstEpisodeAirDate.year,
     }),
   );
+
+  vi.setSystemTime(DateTime.now().plus({ weeks: 1 }).toJSDate());
+
+  const updatedOngoingShowWeekTwo = await persistShowIndexerData({
+    item: {
+      id: itemRequest.id,
+      title: "Test Show",
+      imdbId: requestedId,
+      contentRating: "tv-14",
+      genres: [],
+      type: "show",
+      network: "Test Network",
+      seasons: {
+        1: {
+          number: 1,
+          title: "Season 1",
+          episodes: [
+            {
+              absoluteNumber: 1,
+              contentRating: "tv-14",
+              number: 1,
+              airedAt: firstEpisodeAirDate.toISO(),
+              title: "Episode 1",
+              runtime: 60,
+            },
+            {
+              absoluteNumber: 2,
+              contentRating: "tv-14",
+              number: 2,
+              airedAt: firstEpisodeAirDate.plus({ weeks: 1 }).toISO(),
+              title: "Episode 2",
+              runtime: 60,
+            },
+            {
+              absoluteNumber: 3,
+              contentRating: "tv-14",
+              number: 3,
+              airedAt: firstEpisodeAirDate.plus({ weeks: 2 }).toISO(),
+              title: "Episode 3",
+              runtime: 60,
+            },
+          ],
+        },
+      },
+      status: "continuing",
+    },
+  });
+
+  expect(wrap(updatedOngoingShowWeekTwo).toJSON()).toEqual(
+    expect.objectContaining({
+      state: "ongoing",
+      nextAirDate: firstEpisodeAirDate.plus({ weeks: 2 }).toJSDate(),
+    }),
+  );
 });
