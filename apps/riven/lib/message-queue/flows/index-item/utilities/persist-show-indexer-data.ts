@@ -95,9 +95,7 @@ export async function persistShowIndexerData({
       show.rating = item.rating ?? show.rating ?? null;
       show.status = item.status;
       show.keepUpdated = item.keepUpdated;
-      show.genres = [...(show.genres ?? []), ...item.genres].map((genre) =>
-        genre.toLowerCase(),
-      );
+      show.genres = item.genres.map((genre) => genre.toLowerCase());
 
       await transaction.upsert(show);
 
