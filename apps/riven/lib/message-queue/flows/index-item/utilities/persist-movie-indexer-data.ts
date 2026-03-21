@@ -3,7 +3,6 @@ import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
-import { DateTime } from "luxon";
 import assert from "node:assert";
 import z from "zod";
 
@@ -44,10 +43,6 @@ export async function persistMovieIndexerData({
 
   try {
     return await database.em.fork().transactional(async (transaction) => {
-      const isUnreleased = item.releaseDate
-        ? DateTime.fromISO(item.releaseDate) > DateTime.now()
-        : true; // If no release date is provided, assume the movie is unreleased
-
       const mediaItem = transaction.create(Movie, {
         title: item.title,
         fullTitle: item.title,
@@ -56,10 +51,7 @@ export async function persistMovieIndexerData({
         contentRating: item.contentRating,
         rating: item.rating ?? null,
         posterPath: item.posterUrl ?? null,
-        releaseDate: item.releaseDate
-          ? DateTime.fromISO(item.releaseDate).toJSDate()
-          : null,
-        year: item.releaseDate ? DateTime.fromISO(item.releaseDate).year : null,
+        releaseDate: item.releaseDate ?? null,
         country: item.country ?? null,
         language: item.language ?? null,
         aliases: item.aliases ?? null,
@@ -72,7 +64,7 @@ export async function persistMovieIndexerData({
       await validateOrReject(mediaItem);
 
       transaction.assign(itemRequest, {
-        state: isUnreleased ? "unreleased" : "completed",
+        state: mediaItem.isUnreleased ? "unreleased" : "completed",
       });
 
       await transaction.flush();

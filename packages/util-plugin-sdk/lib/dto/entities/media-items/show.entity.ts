@@ -56,6 +56,11 @@ export class Show extends ShowLikeMediaItem {
   @Property()
   keepUpdated!: boolean;
 
+  /**
+   * The date when the next episode of this show is expected to air.
+   *
+   * Primarily used internally for scheduling updates.
+   */
   @Property()
   nextAirDate!: Date | null;
 

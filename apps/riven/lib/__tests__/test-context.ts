@@ -11,6 +11,7 @@ import {
 import { parse } from "@repo/util-rank-torrent-name";
 
 import { ApolloServer } from "@apollo/server";
+import { DateTime } from "luxon";
 import { MockAgent, setGlobalDispatcher } from "undici";
 import { expect, test as testBase } from "vitest";
 
@@ -109,6 +110,7 @@ export const rivenTestContext = testBase.extend<{
       itemRequest,
       isRequested: true,
       fullTitle: "Test Movie",
+      releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
     });
 
     await em.flush();
@@ -131,6 +133,7 @@ export const rivenTestContext = testBase.extend<{
       isRequested: true,
       fullTitle: "Test Show",
       keepUpdated: false,
+      releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
     });
 
     await em.flush();
@@ -146,6 +149,7 @@ export const rivenTestContext = testBase.extend<{
         isRequested: true,
         fullTitle: `${show.fullTitle} - S${seasonNumber.toString().padStart(2, "0")}`,
         itemRequest,
+        releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
       });
 
       show.seasons.add(season);
@@ -163,6 +167,7 @@ export const rivenTestContext = testBase.extend<{
           isRequested: true,
           fullTitle: `${season.fullTitle}E${episodeNumber.toString().padStart(2, "0")}`,
           itemRequest,
+          releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
         });
 
         season.episodes.add(episode);

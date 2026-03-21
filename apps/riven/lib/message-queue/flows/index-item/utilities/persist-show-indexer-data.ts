@@ -154,8 +154,6 @@ export async function persistShowIndexerData({
 
         show.seasons.add(seasonEntry);
 
-        await transaction.upsert(seasonEntry);
-
         for (const episode of season.episodes) {
           const [existingEpisode] = existingSeason
             ? await existingSeason.episodes.matching({
@@ -196,26 +194,20 @@ export async function persistShowIndexerData({
             : null;
 
           seasonEntry.episodes.add(episodeEntry);
-
-          await transaction.upsert(episodeEntry);
         }
+
+        await transaction.upsert(seasonEntry);
       }
 
       await validateOrReject(show);
 
-      const isUnreleased = show.releaseDate
-        ? DateTime.fromJSDate(show.releaseDate) > DateTime.now()
-        : true; // If no release date is provided, assume the show is unreleased
-
       transaction.assign(itemRequest, {
-        state: isUnreleased
+        state: show.isUnreleased
           ? "unreleased"
           : item.keepUpdated
             ? "ongoing"
             : "completed",
       });
-
-      await transaction.upsert(show);
 
       return transaction.refreshOrFail(show);
     });

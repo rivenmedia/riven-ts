@@ -141,10 +141,6 @@ export abstract class MediaItem {
   @Enum(() => MediaItemContentRating.enum)
   contentRating?: MediaItemContentRating | null;
 
-  @Field(() => Boolean)
-  @Property({ default: false })
-  updated!: Opt<boolean>;
-
   @Field(() => String, { nullable: true })
   @Property()
   guid?: string | null;
@@ -190,6 +186,13 @@ export abstract class MediaItem {
 
   @Property()
   isRequested!: boolean;
+
+  @Property({ persist: false, getter: true })
+  get isUnreleased(): Opt<boolean> {
+    return this.releaseDate
+      ? DateTime.fromJSDate(this.releaseDate) > DateTime.now()
+      : true;
+  }
 
   /**
    * A pretty name for the media item to be used in VFS paths.

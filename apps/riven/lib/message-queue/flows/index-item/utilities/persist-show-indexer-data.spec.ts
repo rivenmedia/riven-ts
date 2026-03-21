@@ -30,7 +30,7 @@ it("returns the media item if processed successfully", async ({}) => {
       contentRating: "tv-14",
       genres: [],
       type: "show",
-      firstAired: new Date("2020-01-01").toISOString(),
+      firstAired: DateTime.fromISO("2020-01-01").toISO(),
       nextAired: null,
       network: "Test Network",
       seasons: [],
@@ -72,7 +72,7 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorr
         contentRating: "tv-14",
         genres: [],
         type: "show",
-        firstAired: new Date("2020-01-01").toISOString(),
+        firstAired: DateTime.fromISO("2020-01-01").toISO(),
         nextAired: null,
         network: "Test Network",
         seasons: [],
@@ -108,8 +108,8 @@ it("updates the media item with the latest data if it already exists", async () 
       firstAired: null,
       nextAired: null,
       network: "Test Network",
-      seasons: [
-        {
+      seasons: {
+        1: {
           number: 1,
           title: "Season 1",
           episodes: [
@@ -123,13 +123,18 @@ it("updates the media item with the latest data if it already exists", async () 
             },
           ],
         },
-      ],
-      status: "continuing",
+      },
+      status: "upcoming",
       keepUpdated: true,
     },
   });
 
-  expect(initialShow.nextAirDate).toBeNull();
+  expect(wrap(initialShow).toJSON()).toEqual(
+    expect.objectContaining({
+      state: "unreleased",
+      nextAirDate: null,
+    }),
+  );
 
   const episodes = await initialShow.getEpisodes();
 
@@ -164,8 +169,8 @@ it("updates the media item with the latest data if it already exists", async () 
       firstAired: releasedAirDate.toISO(),
       nextAired: nextAirDate.toISO(),
       network: "Test Network",
-      seasons: [
-        {
+      seasons: {
+        1: {
           number: 1,
           title: "Season 1",
           episodes: [
@@ -179,13 +184,18 @@ it("updates the media item with the latest data if it already exists", async () 
             },
           ],
         },
-      ],
+      },
       status: "continuing",
       keepUpdated: true,
     },
   });
 
-  expect(updatedShow.nextAirDate).toEqual(nextAirDate.toJSDate());
+  expect(wrap(updatedShow).toJSON()).toEqual(
+    expect.objectContaining({
+      state: "ongoing",
+      nextAirDate: nextAirDate.toJSDate(),
+    }),
+  );
 
   const updatedEpisodes = await updatedShow.getEpisodes();
 

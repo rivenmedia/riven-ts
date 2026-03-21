@@ -27,7 +27,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     const isUnreleased = entity.releaseDate
       ? // eslint-disable-next-line no-restricted-globals
         DateTime.fromJSDate(new Date(entity.releaseDate)) > DateTime.now()
-      : false;
+      : true;
 
     entity.state ??= isUnreleased ? "unreleased" : "indexed";
   }
@@ -170,13 +170,10 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       "paused",
       "failed",
       "downloaded",
+      "unreleased",
     ]);
 
     for (const propagableState of propagableStates.options) {
-      if (parent.state === propagableState) {
-        continue;
-      }
-
       const childrenStateCount = childrenStateCountMap[propagableState];
 
       if (!childrenStateCount) {
@@ -250,6 +247,10 @@ export class MediaItemStateSubscriber implements EventSubscriber {
   }
 
   async #computeState(item: MediaItem): Promise<MediaItemState> {
+    if (item.isUnreleased) {
+      return "unreleased";
+    }
+
     if (this.#determineFixedState(item)) {
       return item.state;
     }
@@ -277,13 +278,6 @@ export class MediaItemStateSubscriber implements EventSubscriber {
 
     if (hasAvailableStreams) {
       return "scraped";
-    }
-
-    if (
-      item.releaseDate &&
-      DateTime.fromJSDate(item.releaseDate) > DateTime.now()
-    ) {
-      return "unreleased";
     }
 
     return "indexed";
