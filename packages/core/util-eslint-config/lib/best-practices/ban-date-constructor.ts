@@ -1,9 +1,12 @@
+import { entityFiles, testFiles } from "../internal/file-types.ts";
+
 import type { ConfigArray } from "typescript-eslint";
 
 export const banDateConstructor = [
   {
     ignores: [
-      "**/*.entity.ts", // Database entities use the Date constructor to provide runtime type reflect metadata
+      testFiles,
+      entityFiles, // Database entities use the Date constructor to provide runtime type reflect metadata
     ],
     rules: {
       "no-restricted-globals": [

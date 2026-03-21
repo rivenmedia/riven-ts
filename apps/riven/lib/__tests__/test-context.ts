@@ -109,7 +109,6 @@ export const rivenTestContext = testBase.extend<{
       tmdbId: "1",
       itemRequest,
       isRequested: true,
-      fullTitle: "Test Movie",
       releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
     });
 
@@ -131,7 +130,6 @@ export const rivenTestContext = testBase.extend<{
       tvdbId: "1",
       itemRequest,
       isRequested: true,
-      fullTitle: "Test Show",
       keepUpdated: false,
       releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
     });
@@ -147,7 +145,6 @@ export const rivenTestContext = testBase.extend<{
         number: seasonNumber,
         isSpecial: false,
         isRequested: true,
-        fullTitle: `${show.fullTitle} - S${seasonNumber.toString().padStart(2, "0")}`,
         itemRequest,
         releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
       });
@@ -165,7 +162,6 @@ export const rivenTestContext = testBase.extend<{
           absoluteNumber: absoluteEpisodeNumber++,
           isSpecial: false,
           isRequested: true,
-          fullTitle: `${season.fullTitle}E${episodeNumber.toString().padStart(2, "0")}`,
           itemRequest,
           releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
         });

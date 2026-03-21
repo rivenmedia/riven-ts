@@ -20,7 +20,6 @@ test("getMediaEntries() returns the associated media entry for a Movie media ite
     contentRating: "pg-13",
     tmdbId: "1",
     itemRequest,
-    fullTitle: "Test Movie",
     isRequested: true,
   });
 
@@ -56,7 +55,6 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     tvdbId: "1",
     itemRequest,
     keepUpdated: false,
-    fullTitle: "Test Show",
     isRequested: true,
   });
 
@@ -67,7 +65,6 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     number: 1,
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${show.fullTitle} - S01`,
     itemRequest,
   });
 
@@ -82,7 +79,6 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     contentRating: "tv-14",
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${season.fullTitle}E01`,
     itemRequest,
   });
 
@@ -93,7 +89,6 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     contentRating: "tv-14",
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${season.fullTitle}E02`,
     itemRequest,
   });
 
@@ -139,7 +134,6 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     tvdbId: "1",
     itemRequest,
     keepUpdated: false,
-    fullTitle: "Test Show",
     isRequested: true,
   });
 
@@ -150,7 +144,6 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     number: 1,
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${show.fullTitle} - S01`,
     itemRequest,
   });
 
@@ -159,7 +152,6 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     number: 1,
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${show.fullTitle} - S02`,
     itemRequest,
   });
 
@@ -174,7 +166,6 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     contentRating: "tv-14",
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${season1.fullTitle}E01`,
     itemRequest,
   });
 
@@ -185,7 +176,6 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     contentRating: "tv-14",
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${season2.fullTitle}E01`,
     itemRequest,
   });
 
@@ -233,7 +223,6 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     tvdbId: "1",
     itemRequest,
     keepUpdated: false,
-    fullTitle: "Test Show",
     isRequested: true,
   });
 
@@ -244,7 +233,6 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     number: 1,
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${show.fullTitle} - S01`,
     itemRequest,
   });
 
@@ -259,7 +247,6 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     contentRating: "tv-14",
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${season.fullTitle}E01`,
     itemRequest,
   });
 

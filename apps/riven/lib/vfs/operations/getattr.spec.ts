@@ -78,7 +78,6 @@ it("returns file stats for movie files", async ({ em }) => {
     contentRating: "pg-13",
     itemRequest,
     isRequested: true,
-    fullTitle: "Inception (2010)",
   });
 
   await em.flush();
@@ -130,7 +129,6 @@ it("returns directory stats for /movies", async ({ em }) => {
       tmdbId: i.toString(),
       itemRequest,
       isRequested: true,
-      fullTitle: `Example Movie ${i.toString()}`,
     });
 
     await em.flush();
@@ -181,7 +179,6 @@ it("returns directory stats for /shows", async ({ em }) => {
       status: "continuing",
       itemRequest,
       isRequested: true,
-      fullTitle: `Example Show ${i.toString()}`,
       keepUpdated: false,
     });
 
@@ -193,7 +190,6 @@ it("returns directory stats for /shows", async ({ em }) => {
       number: i,
       isSpecial: false,
       isRequested: true,
-      fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
       itemRequest,
     });
 
@@ -210,7 +206,6 @@ it("returns directory stats for /shows", async ({ em }) => {
       isSpecial: false,
       type: "episode",
       isRequested: true,
-      fullTitle: `${season.fullTitle}E01`,
       itemRequest,
     });
 
@@ -261,7 +256,6 @@ it("returns directory stats for single shows", async ({ em }) => {
     status: "continuing",
     itemRequest,
     isRequested: true,
-    fullTitle: "Example Show 1",
     keepUpdated: false,
   });
 
@@ -274,7 +268,6 @@ it("returns directory stats for single shows", async ({ em }) => {
       number: i,
       isSpecial: false,
       isRequested: true,
-      fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
       itemRequest,
     });
 
@@ -290,7 +283,6 @@ it("returns directory stats for single shows", async ({ em }) => {
       absoluteNumber: 1,
       isSpecial: false,
       isRequested: true,
-      fullTitle: `${season.fullTitle}E01`,
       itemRequest,
     });
 
@@ -341,7 +333,6 @@ it("returns directory stats for single seasons", async ({ em }) => {
     status: "continuing",
     itemRequest,
     isRequested: true,
-    fullTitle: "Example Show 1",
     keepUpdated: false,
   });
 
@@ -353,7 +344,6 @@ it("returns directory stats for single seasons", async ({ em }) => {
     number: 1,
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${show.fullTitle} - S01`,
     itemRequest,
   });
 
@@ -370,7 +360,6 @@ it("returns directory stats for single seasons", async ({ em }) => {
       absoluteNumber: 1,
       isSpecial: false,
       isRequested: true,
-      fullTitle: `${season.fullTitle}E${i.toString().padStart(2, "0")}`,
       itemRequest,
     });
 
@@ -421,7 +410,6 @@ it("returns file stats for episodes", async ({ em }) => {
     status: "continuing",
     itemRequest,
     isRequested: true,
-    fullTitle: "Example Show 1",
     keepUpdated: false,
   });
 
@@ -433,7 +421,6 @@ it("returns file stats for episodes", async ({ em }) => {
     number: 1,
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${show.fullTitle} - S01`,
     itemRequest,
   });
 
@@ -449,7 +436,6 @@ it("returns file stats for episodes", async ({ em }) => {
     absoluteNumber: 1,
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${season.fullTitle}E01`,
     itemRequest,
   });
 

@@ -43,7 +43,6 @@ it("returns all shows for the /shows path", async ({ em }) => {
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
-    fullTitle: "Example Show 1",
     keepUpdated: false,
   });
 
@@ -55,7 +54,6 @@ it("returns all shows for the /shows path", async ({ em }) => {
     number: 1,
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${show.fullTitle} - S01`,
     itemRequest,
   });
 
@@ -72,7 +70,6 @@ it("returns all shows for the /shows path", async ({ em }) => {
     contentRating: "tv-14",
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${season.fullTitle}E01`,
     itemRequest,
   });
 
@@ -117,7 +114,6 @@ it('does not return entries for the "all shows" path for shows that do not have 
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
-    fullTitle: "Example Show 1",
     keepUpdated: false,
   });
 
@@ -129,7 +125,6 @@ it('does not return entries for the "all shows" path for shows that do not have 
     number: 1,
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${show.fullTitle} - S01`,
     itemRequest,
   });
 
@@ -146,7 +141,6 @@ it('does not return entries for the "all shows" path for shows that do not have 
     contentRating: "tv-14",
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${season.fullTitle}E01`,
     itemRequest,
   });
 
@@ -178,7 +172,6 @@ it("returns all movies for the /movies path", async ({ em }) => {
       contentRating: "unknown",
       itemRequest,
       isRequested: true,
-      fullTitle: `Example Movie ${i.toString().padStart(2, "0")}`,
     });
 
     em.create(MediaEntry, {
@@ -219,7 +212,6 @@ it("returns all seasons for a single show path", async ({ em }) => {
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
-    fullTitle: "Example Show 1",
     keepUpdated: false,
   });
 
@@ -233,7 +225,6 @@ it("returns all seasons for a single show path", async ({ em }) => {
       number: i,
       isSpecial: false,
       isRequested: true,
-      fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
       itemRequest,
     });
 
@@ -251,7 +242,6 @@ it("returns all seasons for a single show path", async ({ em }) => {
       contentRating: "tv-14",
       isSpecial: false,
       isRequested: true,
-      fullTitle: `${season.fullTitle}E01`,
       itemRequest,
     });
 
@@ -299,7 +289,6 @@ it("does not return entries for a season that does not have any episodes with a 
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
-    fullTitle: "Example Show 1",
     keepUpdated: false,
   });
 
@@ -313,7 +302,6 @@ it("does not return entries for a season that does not have any episodes with a 
       number: i,
       isSpecial: false,
       isRequested: true,
-      fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
       itemRequest,
     });
 
@@ -331,7 +319,6 @@ it("does not return entries for a season that does not have any episodes with a 
       contentRating: "tv-14",
       isSpecial: false,
       isRequested: true,
-      fullTitle: `${season.fullTitle}E01`,
       itemRequest,
     });
 
@@ -375,7 +362,6 @@ it("returns all episodes for a single season path", async ({ em }) => {
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
-    fullTitle: "Example Show 1",
     keepUpdated: false,
   });
 
@@ -388,7 +374,6 @@ it("returns all episodes for a single season path", async ({ em }) => {
     number: 1,
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${show.fullTitle} - S01`,
     itemRequest,
   });
 
@@ -407,7 +392,6 @@ it("returns all episodes for a single season path", async ({ em }) => {
       contentRating: "tv-14",
       isSpecial: false,
       isRequested: true,
-      fullTitle: `${season.fullTitle}E${i.toString().padStart(2, "0")}`,
       itemRequest,
     });
 
@@ -455,7 +439,6 @@ it("does not return entries for episodes that does not have a media entry when v
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
-    fullTitle: "Example Show 1",
     keepUpdated: false,
   });
 
@@ -468,7 +451,6 @@ it("does not return entries for episodes that does not have a media entry when v
     number: 1,
     isSpecial: false,
     isRequested: true,
-    fullTitle: `${show.fullTitle} - S01`,
     itemRequest,
   });
 
@@ -487,7 +469,6 @@ it("does not return entries for episodes that does not have a media entry when v
       contentRating: "tv-14",
       isSpecial: false,
       isRequested: true,
-      fullTitle: `${season.fullTitle}E${i.toString().padStart(2, "0")}`,
       itemRequest,
     });
 
@@ -535,7 +516,6 @@ it("returns the media entry's filename when viewing a single movie's directory",
     contentRating: MovieContentRating.enum.g,
     itemRequest,
     isRequested: true,
-    fullTitle: "Example Movie 01",
   });
 
   em.create(MediaEntry, {
@@ -575,7 +555,6 @@ it('does not return entries for the "all movies" path when a movie does not have
       contentRating: "unknown",
       itemRequest,
       isRequested: true,
-      fullTitle: `Example Movie ${i.toString().padStart(2, "0")}`,
     });
 
     if (i === 1) {

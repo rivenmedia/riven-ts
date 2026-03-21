@@ -39,7 +39,6 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
     status: "ended",
     itemRequest,
     isRequested: true,
-    fullTitle: "Test Show",
     keepUpdated: false,
     releaseDate: DateTime.now().toISO(),
   });
@@ -53,7 +52,6 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
       tvdbId: i.toString(),
       isSpecial: false,
       isRequested: true,
-      fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
       itemRequest,
     });
 
@@ -114,7 +112,6 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
     status: "ended",
     itemRequest,
     isRequested: true,
-    fullTitle: "Test Show",
     keepUpdated: false,
     releaseDate: DateTime.now().toISO(),
   });
@@ -128,7 +125,6 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
       tvdbId: show.tvdbId,
       isSpecial: false,
       isRequested: true,
-      fullTitle: `${show.fullTitle} - S${i.toString().padStart(2, "0")}`,
       itemRequest,
       releaseDate: DateTime.now().toISO(),
     });
