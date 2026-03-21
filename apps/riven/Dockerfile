@@ -76,7 +76,7 @@ RUN pnpm -r generate-schemas
 
 FROM schema-generator AS riven
 
-RUN chown -R ${PUID}:${PGID} ${HOME}/riven-ts
+RUN chown -R "${PUID}:${PGID}" "${HOME}/riven-ts"
 COPY --chown=${PUID}:${PGID} . .
 
 EXPOSE 8080

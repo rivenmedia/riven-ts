@@ -1,6 +1,5 @@
 import { Parser, transforms } from "@viren070/parse-torrent-title";
 import { toMerged } from "es-toolkit";
-import assert from "node:assert";
 import { prettifyError } from "zod";
 
 import { sceneHandlers } from "../parser/handlers/scene.handlers.ts";
@@ -105,15 +104,26 @@ export function parseFilePath(filePath: string) {
     );
   }
 
-  assert(parts[0]);
-
-  return parts.reduce<ParsedData>((acc, part) => {
+  const parseData = parts.reduce<ParsedData | null>((acc, part) => {
     try {
       const parsedPart = parse(part);
 
-      return toMerged(acc, parsedPart);
+      return toMerged(acc ?? {}, parsedPart);
     } catch {
       return acc;
     }
-  }, parse(parts[0]));
+  }, null);
+
+  const parsedData = ParsedDataSchema.safeParse({
+    ...parseData,
+    rawTitle: filePath,
+  });
+
+  if (!parsedData.success) {
+    throw new Error(
+      `Failed to parse file path ${filePath}: ${prettifyError(parsedData.error)}`,
+    );
+  }
+
+  return parsedData.data;
 }

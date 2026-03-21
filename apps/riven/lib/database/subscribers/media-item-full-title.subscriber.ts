@@ -6,19 +6,19 @@ import {
   Show,
 } from "@repo/util-plugin-sdk/dto/entities";
 
-import type { EventArgs, EventSubscriber } from "@mikro-orm/core";
+import type { EntityName, EventArgs, EventSubscriber } from "@mikro-orm/core";
 
 export class MediaItemFullTitleSubscriber implements EventSubscriber {
+  getSubscribedEntities(): EntityName<MediaItem>[] {
+    return [Movie, Show, Season, Episode];
+  }
+
   beforeCreate({ entity }: EventArgs<MediaItem>): void | Promise<void> {
-    if (entity instanceof MediaItem) {
-      this.#setFullTitle(entity);
-    }
+    this.#setFullTitle(entity);
   }
 
   beforeUpdate({ entity }: EventArgs<MediaItem>): void | Promise<void> {
-    if (entity instanceof MediaItem) {
-      this.#setFullTitle(entity);
-    }
+    this.#setFullTitle(entity);
   }
 
   #setFullTitle(item: MediaItem): void {

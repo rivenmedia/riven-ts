@@ -32,11 +32,7 @@ export class TvMazeAPI extends BaseDataSource<TvdbSettings> {
       },
     });
 
-    const { data, success } = LookupByTvdbIdResponse.safeParse(showResponse);
-
-    if (!success) {
-      return;
-    }
+    const data = LookupByTvdbIdResponse.parse(showResponse);
 
     return data.network?.country.timezone;
   }
