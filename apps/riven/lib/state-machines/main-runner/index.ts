@@ -1,7 +1,6 @@
-import { type MediaItem, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { type Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
-import { DateTime } from "luxon";
 import {
   type ActorRef,
   type Snapshot,
@@ -267,17 +266,20 @@ export const mainRunnerMachine = setup({
       return isPublishableEvent;
     },
     isRivenEvent: ({ event }) => RivenEvent.safeParse(event).success,
-    isOngoingItem: (_, item: MediaItem) => item.state === "ongoing",
-    isUnreleasedItem: (_, item: MediaItem) => item.state === "unreleased",
-    isCompletedItem: (_, item: MediaItem) => {
+    isOngoingItem: (_, item: Movie | Show) => {
+      if (item instanceof Show) {
+        return item.state === "ongoing";
+      }
+
+      return item.isUnreleased;
+    },
+    isUnreleasedItem: (_, item: Movie | Show) => item.state === "unreleased",
+    isEntirelyReleasedItem: (_, item: Movie | Show) => {
       if (item instanceof Show) {
         return item.status === "ended";
       }
 
-      return (
-        item.releaseDate != null &&
-        DateTime.fromJSDate(item.releaseDate) <= DateTime.utc()
-      );
+      return !item.isUnreleased;
     },
   },
 })
@@ -431,7 +433,7 @@ export const mainRunnerMachine = setup({
           description:
             "Indicates that a media item is completely released and should be scraped with no re-indexing scheduled.",
           guard: {
-            type: "isCompletedItem",
+            type: "isEntirelyReleasedItem",
             params: ({ event: { item } }) => item,
           },
           actions: [
