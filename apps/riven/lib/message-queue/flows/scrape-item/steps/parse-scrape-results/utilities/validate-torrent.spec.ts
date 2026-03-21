@@ -57,7 +57,6 @@ const it = baseIt.extend<{
       tvdbId: "1",
       itemRequest,
       isRequested: true,
-      keepUpdated: false,
     });
 
     await em.flush();

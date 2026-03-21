@@ -49,14 +49,6 @@ export class Show extends ShowLikeMediaItem {
   requestedSeasons = new Collection<Season>(this);
 
   /**
-   * Indicates whether updates should be scheduled to refresh indexer data for this media item.
-   *
-   * This will be `true` if the show is still airing or is unreleased.
-   */
-  @Property()
-  keepUpdated!: boolean;
-
-  /**
    * The date when the next episode of this show is expected to air.
    *
    * Primarily used internally for scheduling updates.

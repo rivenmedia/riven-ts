@@ -39,7 +39,6 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
     status: "ended",
     itemRequest,
     isRequested: true,
-    keepUpdated: false,
     releaseDate: DateTime.now().toISO(),
   });
 
@@ -112,7 +111,6 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
     status: "ended",
     itemRequest,
     isRequested: true,
-    keepUpdated: false,
     releaseDate: DateTime.now().toISO(),
   });
 

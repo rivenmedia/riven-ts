@@ -41,7 +41,7 @@ export const transformSeries = (
   const {
     slug = "",
     image: posterPath,
-    status: { name: tvdbStatus, keepUpdated } = {},
+    status: { name: tvdbStatus } = {},
     airsTime,
   } = series;
 
@@ -169,7 +169,6 @@ export const transformSeries = (
     posterUrl: posterPath,
     status: tvdbStatus?.toLowerCase() === "continuing" ? "continuing" : "ended",
     seasons,
-    keepUpdated: keepUpdated ?? false,
   } satisfies Extract<
     NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
     { type: "show" }

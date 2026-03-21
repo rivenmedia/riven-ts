@@ -179,7 +179,6 @@ it("returns directory stats for /shows", async ({ em }) => {
       status: "continuing",
       itemRequest,
       isRequested: true,
-      keepUpdated: false,
     });
 
     await em.flush();
@@ -256,7 +255,6 @@ it("returns directory stats for single shows", async ({ em }) => {
     status: "continuing",
     itemRequest,
     isRequested: true,
-    keepUpdated: false,
   });
 
   await em.flush();
@@ -333,7 +331,6 @@ it("returns directory stats for single seasons", async ({ em }) => {
     status: "continuing",
     itemRequest,
     isRequested: true,
-    keepUpdated: false,
   });
 
   await em.flush();
@@ -410,7 +407,6 @@ it("returns file stats for episodes", async ({ em }) => {
     status: "continuing",
     itemRequest,
     isRequested: true,
-    keepUpdated: false,
   });
 
   await em.flush();

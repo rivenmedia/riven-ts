@@ -54,7 +54,6 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     status: "ended",
     tvdbId: "1",
     itemRequest,
-    keepUpdated: false,
     isRequested: true,
   });
 
@@ -133,7 +132,6 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     status: "ended",
     tvdbId: "1",
     itemRequest,
-    keepUpdated: false,
     isRequested: true,
   });
 
@@ -222,7 +220,6 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     status: "ended",
     tvdbId: "1",
     itemRequest,
-    keepUpdated: false,
     isRequested: true,
   });
 

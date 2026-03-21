@@ -33,7 +33,6 @@ it("returns the media item if processed successfully", async ({}) => {
       network: "Test Network",
       seasons: [],
       status: "ended",
-      keepUpdated: false,
     },
   });
 
@@ -73,7 +72,6 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorr
         network: "Test Network",
         seasons: [],
         status: "ended",
-        keepUpdated: false,
       },
     }),
   ).rejects.toThrow(MediaItemIndexErrorIncorrectState);
@@ -139,7 +137,6 @@ it("updates the media item with the latest data if it already exists", async () 
         },
       },
       status: "upcoming",
-      keepUpdated: true,
     },
   });
 
@@ -213,7 +210,6 @@ it("updates the media item with the latest data if it already exists", async () 
         },
       },
       status: "upcoming",
-      keepUpdated: true,
     },
   });
 
@@ -291,7 +287,6 @@ it("updates the media item with the latest data if it already exists", async () 
         },
       },
       status: "continuing",
-      keepUpdated: true,
     },
   });
 

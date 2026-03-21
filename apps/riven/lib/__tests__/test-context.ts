@@ -130,7 +130,6 @@ export const rivenTestContext = testBase.extend<{
       tvdbId: "1",
       itemRequest,
       isRequested: true,
-      keepUpdated: false,
       releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
     });
 

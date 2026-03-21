@@ -93,7 +93,6 @@ export async function persistShowIndexerData({
       };
       show.rating = item.rating ?? show.rating ?? null;
       show.status = item.status;
-      show.keepUpdated = item.keepUpdated;
       show.genres = item.genres.map((genre) => genre.toLowerCase());
 
       await transaction.upsert(show);
@@ -204,7 +203,7 @@ export async function persistShowIndexerData({
       transaction.assign(itemRequest, {
         state: show.isUnreleased
           ? "unreleased"
-          : item.keepUpdated
+          : item.status === "continuing"
             ? "ongoing"
             : "completed",
       });

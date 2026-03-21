@@ -43,7 +43,6 @@ it("returns all shows for the /shows path", async ({ em }) => {
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
-    keepUpdated: false,
   });
 
   await em.flush();
@@ -114,7 +113,6 @@ it('does not return entries for the "all shows" path for shows that do not have 
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
-    keepUpdated: false,
   });
 
   await em.flush();
@@ -212,7 +210,6 @@ it("returns all seasons for a single show path", async ({ em }) => {
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
-    keepUpdated: false,
   });
 
   await em.flush();
@@ -289,7 +286,6 @@ it("does not return entries for a season that does not have any episodes with a 
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
-    keepUpdated: false,
   });
 
   await em.flush();
@@ -362,7 +358,6 @@ it("returns all episodes for a single season path", async ({ em }) => {
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
-    keepUpdated: false,
   });
 
   await em.flush();
@@ -439,7 +434,6 @@ it("does not return entries for episodes that does not have a media entry when v
     contentRating: "tv-14",
     itemRequest,
     isRequested: true,
-    keepUpdated: false,
   });
 
   await em.flush();

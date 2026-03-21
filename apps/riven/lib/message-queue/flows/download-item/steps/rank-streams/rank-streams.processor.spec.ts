@@ -244,7 +244,6 @@ it("handles foreign language shows with aliases correctly", async ({
       jp: ["外国映画"],
     },
     isRequested: true,
-    keepUpdated: false,
   });
 
   for (let i = 1; i <= 3; i++) {

@@ -150,7 +150,6 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
     itemRequest,
     status: "continuing",
     isRequested: true,
-    keepUpdated: false,
     releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
   });
 
