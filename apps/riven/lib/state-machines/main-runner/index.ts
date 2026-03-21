@@ -271,7 +271,7 @@ export const mainRunnerMachine = setup({
         return item.state === "ongoing";
       }
 
-      return item.isUnreleased;
+      return !item.isReleased;
     },
     isUnreleasedItem: (_, item: Movie | Show) => item.state === "unreleased",
     isEntirelyReleasedItem: (_, item: Movie | Show) => {
@@ -279,7 +279,7 @@ export const mainRunnerMachine = setup({
         return item.status === "ended";
       }
 
-      return !item.isUnreleased;
+      return item.isReleased;
     },
   },
 })

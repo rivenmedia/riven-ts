@@ -186,7 +186,7 @@ export async function persistShowIndexerData({
             ? DateTime.fromISO(episode.airedAt).toJSDate()
             : null;
 
-          if (episodeEntry.isUnreleased && !show.nextAirDate) {
+          if (!episodeEntry.isReleased && !show.nextAirDate) {
             show.nextAirDate = episodeEntry.releaseDate;
 
             await transaction.upsert(show);
@@ -201,7 +201,7 @@ export async function persistShowIndexerData({
       await validateOrReject(show);
 
       transaction.assign(itemRequest, {
-        state: show.isUnreleased
+        state: !show.isReleased
           ? "unreleased"
           : item.status === "continuing"
             ? "ongoing"

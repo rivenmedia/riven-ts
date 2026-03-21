@@ -22,7 +22,7 @@ type NextStatesMap = Map<MediaItem, MediaItemState>;
 
 export class MediaItemStateSubscriber implements EventSubscriber {
   afterUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
-    if (entity.state === "unreleased" && !entity.isUnreleased) {
+    if (entity.state === "unreleased" && entity.isReleased) {
       entity.state = "indexed";
     }
   }
@@ -242,7 +242,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
   }
 
   async #computeState(item: MediaItem): Promise<MediaItemState> {
-    if (item.isUnreleased) {
+    if (!item.isReleased) {
       return "unreleased";
     }
 

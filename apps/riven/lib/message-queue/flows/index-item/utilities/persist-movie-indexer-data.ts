@@ -63,7 +63,7 @@ export async function persistMovieIndexerData({
       await validateOrReject(mediaItem);
 
       transaction.assign(itemRequest, {
-        state: mediaItem.isUnreleased ? "unreleased" : "completed",
+        state: mediaItem.isReleased ? "completed" : "unreleased",
       });
 
       await transaction.flush();

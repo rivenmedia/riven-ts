@@ -187,11 +187,16 @@ export abstract class MediaItem {
   @Property()
   isRequested!: boolean;
 
+  /**
+   * Determines if the media item is considered to be released based on its release date.
+   *
+   * Returns true if the release date is in the past, false if it's in the future or not available.
+   */
   @Property({ persist: false, getter: true })
-  get isUnreleased(): Opt<boolean> {
+  get isReleased(): Opt<boolean> {
     return this.releaseDate
-      ? DateTime.fromJSDate(this.releaseDate) > DateTime.now()
-      : true;
+      ? DateTime.fromJSDate(this.releaseDate) <= DateTime.now()
+      : false;
   }
 
   /**
