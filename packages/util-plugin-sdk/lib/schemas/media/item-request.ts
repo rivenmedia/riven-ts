@@ -11,7 +11,7 @@ export const ItemRequest = z.object({
   type: ItemRequestType,
   externalRequestId: z.string().optional(),
   requestedBy: z.string().nullish(),
-  seasons: z.array(z.number().nonnegative()).min(1).nullable(),
+  seasons: z.array(z.number().nonnegative()).min(1).nullish(),
 });
 
 export const ItemRequestInstance = z.instanceof(ItemRequestEntity);
