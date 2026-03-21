@@ -11,23 +11,11 @@ import {
   Season,
   Show,
 } from "@repo/util-plugin-sdk/dto/entities";
-import { z } from "@repo/util-plugin-sdk/validation";
 
 import { CometSettings } from "../comet-settings.schema.ts";
+import { CometScrapeResponse } from "../schemas/scrape-response.schema.ts";
 
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
-
-const CometScrapeResponse = z.object({
-  streams: z.array(
-    z.object({
-      description: z.string(),
-      infoHash: z.hash("sha1"),
-      behaviorHints: z.object({
-        filename: z.string().optional(),
-      }),
-    }),
-  ),
-});
 
 interface CometScrapeConfig {
   identifier: string | null;
@@ -68,7 +56,7 @@ export class CometAPI extends BaseDataSource<CometSettings> {
       }
 
       const { identifier, imdbId, scrapeType } =
-        await this.getCometScrapeConfig(item);
+        await this.#getCometScrapeConfig(item);
 
       const response = await this.get<unknown>(
         `/stream/${scrapeType}/${imdbId}${identifier ?? ""}.json`,
@@ -131,9 +119,7 @@ export class CometAPI extends BaseDataSource<CometSettings> {
    * @param item The media item to get the Comet scraper config for
    * @returns The Comet scrape config
    */
-  private async getCometScrapeConfig(
-    item: MediaItem,
-  ): Promise<CometScrapeConfig> {
+  async #getCometScrapeConfig(item: MediaItem): Promise<CometScrapeConfig> {
     if (!item.imdbId) {
       throw new Error("IMDB ID is required for Comet scrape config");
     }
