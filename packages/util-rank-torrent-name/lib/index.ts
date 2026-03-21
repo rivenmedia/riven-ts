@@ -1,4 +1,4 @@
-export { parse } from "./parser/parse.ts";
+export { parse, parseFilePath } from "./parser/parse.ts";
 export { rank, rankTorrent } from "./ranker/rank.ts";
 export { checkFetch } from "./ranker/fetch.ts";
 export { createSettings, createRankingModel } from "./ranker/settings.ts";

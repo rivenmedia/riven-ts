@@ -1,10 +1,7 @@
 import {
-  BeforeCreate,
   Collection,
   Entity,
   Enum,
-  type EventArgs,
-  type Hidden,
   OneToMany,
   type Opt,
   Property,
@@ -51,8 +48,15 @@ export class Show extends ShowLikeMediaItem {
   })
   requestedSeasons = new Collection<Season>(this);
 
-  @Property({ persist: false, hidden: true, getter: true })
-  get prettyName(): Opt<Hidden<string>> {
+  /**
+   * The date when the next episode of this show is expected to air.
+   *
+   * Primarily used internally for scheduling updates.
+   */
+  @Property()
+  nextAirDate!: Date | null;
+
+  getPrettyName(): string {
     return `${this.title} (${this.year?.toString() ?? "Unknown"}) {tvdb-${this.tvdbId}}`;
   }
 
@@ -114,10 +118,5 @@ export class Show extends ShowLikeMediaItem {
           (entry) => entry.type === "media",
         ) as MediaEntry[],
     );
-  }
-
-  @BeforeCreate()
-  _persistFullTitle({ entity }: EventArgs<this>) {
-    this.fullTitle = entity.title;
   }
 }

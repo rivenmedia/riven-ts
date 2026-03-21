@@ -1,6 +1,5 @@
 import { Show } from "@repo/util-plugin-sdk/dto/entities";
 
-import { wrap } from "@mikro-orm/core";
 import { fromPromise } from "xstate";
 
 import {
@@ -12,12 +11,18 @@ export const requestScrape = fromPromise<undefined, EnqueueScrapeItemInput>(
   async ({ input }) => {
     for (const item of input.items) {
       if (item instanceof Show) {
-        await wrap(item).populate(["requestedSeasons"], {
-          refresh: true,
+        const itemsToScrape = await item.seasons.matching({
+          where: {
+            isRequested: true,
+            isSpecial: false,
+            state: {
+              $nin: ["completed", "unreleased", "paused", "failed"],
+            },
+          },
         });
 
         await enqueueScrapeItems({
-          items: item.requestedSeasons.getItems(),
+          items: itemsToScrape,
           subscribers: input.subscribers,
         });
 

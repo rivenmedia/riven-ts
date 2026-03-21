@@ -21,6 +21,7 @@ it("uses the english title translation if the series language is not english", (
       },
     },
     [],
+    "Europe/London",
   );
 
   expect(result.title).toBe("English Title");
@@ -38,6 +39,7 @@ it("uses the series title translation if the series language is in English", () 
       firstAired: "2020-01-01",
     },
     [],
+    "Europe/London",
   );
 
   expect(result.title).toBe("Show Title");

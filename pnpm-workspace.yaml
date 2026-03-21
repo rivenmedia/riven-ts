@@ -23,9 +23,11 @@ catalog:
   "@types/node": ^24.0.0
   "@typescript-eslint/parser": ^8.49.0
   "@vitest/coverage-v8": 4.0.15
-  bullmq: 5.66.4
+  bullmq: ^5.71.0
   bullmq-otel: ^1.2.0
   class-validator: 0.14.3
+  dedent: ^1.7.1
+  discord-api-types: 0.38.42
   es-toolkit: ^1.44.0
   eslint: ^9.39.2
   graphql: 16.12.0

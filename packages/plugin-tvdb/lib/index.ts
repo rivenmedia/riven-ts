@@ -1,5 +1,6 @@
 import packageJson from "../package.json" with { type: "json" };
 import { TvdbAPI } from "./datasource/tvdb.datasource.ts";
+import { TvMazeAPI } from "./datasource/tvmaze.datasource.ts";
 import { indexTVDBMediaItem } from "./hooks/index-tvdb-media-item.ts";
 import { TvdbSettingsResolver } from "./schema/tvdb-settings.resolver.ts";
 import { TvdbResolver } from "./schema/tvdb.resolver.ts";
@@ -11,7 +12,7 @@ import type { RivenPlugin } from "@repo/util-plugin-sdk";
 export default {
   name: pluginConfig.name,
   version: packageJson.version,
-  dataSources: [TvdbAPI],
+  dataSources: [TvdbAPI, TvMazeAPI],
   resolvers: [TvdbResolver, TvdbSettingsResolver],
   hooks: {
     "riven.media-item.index.requested": indexTVDBMediaItem,

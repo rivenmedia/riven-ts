@@ -21,7 +21,9 @@ export default {
     },
   },
   settingsSchema: SeerrSettings,
-  async validator() {
-    return true;
+  async validator({ dataSources }) {
+    const api = dataSources.get(SeerrAPI);
+
+    return await api.validate();
   },
 } satisfies RivenPlugin as RivenPlugin;

@@ -15,10 +15,12 @@ services:
     env_file: .env.riven
     volumes:
       - ./docker-data/riven:/riven/data
-      - /mnt/riven:/mount:rshared
+      - ${HOST_VFS_MOUNT_PATH}:/mount:rshared
     ports:
       - 8080:8080
     depends_on:
+      riven-cache:
+        condition: service_healthy
       riven-db:
         condition: service_healthy
 
@@ -44,6 +46,14 @@ services:
     image: redis
     restart: unless-stopped
     command: redis-server --maxmemory-policy noeviction --appendonly yes
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      interval: 5s
+      timeout: 3s
+      retries: 10
     ports:
       - 6379:6379
     volumes:

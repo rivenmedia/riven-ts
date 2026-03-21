@@ -10,7 +10,7 @@ import { it } from "@repo/util-plugin-testing/plugin-test-context";
 import { parse } from "@repo/util-rank-torrent-name";
 
 import { Job, UnrecoverableError } from "bullmq";
-import { Settings } from "luxon";
+import { DateTime, Settings } from "luxon";
 import { expect, vi } from "vitest";
 
 import { database } from "../../../database/database.ts";
@@ -85,6 +85,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     year: 2024,
     itemRequest,
     isRequested: true,
+    releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
   });
 
   const streamInfoHash = "test-info-hash";
@@ -149,6 +150,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
     itemRequest,
     status: "continuing",
     isRequested: true,
+    releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
   });
 
   await em.flush();
@@ -159,6 +161,8 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
       title: `Season ${i.toString()}`,
       isSpecial: false,
       isRequested: true,
+      itemRequest,
+      releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
     });
 
     show.seasons.add(season);
@@ -174,6 +178,8 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
         absoluteNumber: j,
         isSpecial: season.isSpecial,
         isRequested: true,
+        itemRequest,
+        releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
       });
 
       season.episodes.add(episode);
@@ -259,6 +265,7 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
     year: 2024,
     itemRequest,
     isRequested: true,
+    releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
   });
 
   await em.flush();

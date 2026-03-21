@@ -1,10 +1,6 @@
 import {
-  BeforeCreate,
   Entity,
   EntityRepositoryType,
-  type EventArgs,
-  type Hidden,
-  HiddenProps,
   ManyToOne,
   type Opt,
   Property,
@@ -27,8 +23,6 @@ import type { MediaEntry } from "../filesystem/media-entry.entity.ts";
 @Entity({ repository: () => EpisodeRepository })
 export class Episode extends ShowLikeMediaItem {
   [EntityRepositoryType]?: EpisodeRepository;
-
-  [HiddenProps]?: "prettyName";
 
   @Field()
   @Property()
@@ -60,9 +54,9 @@ export class Episode extends ShowLikeMediaItem {
     return season.show.loadOrFail();
   }
 
-  @Property({ persist: false, hidden: true, getter: true })
-  get prettyName(): Opt<Hidden<string>> {
-    const baseName = this.season.getProperty("show").getProperty("prettyName");
+  async getPrettyName(): Promise<string> {
+    const show = await this.getShow();
+    const baseName = show.getPrettyName();
 
     if (!baseName) {
       throw new TypeError(
@@ -91,28 +85,5 @@ export class Episode extends ShowLikeMediaItem {
       },
       refresh: true,
     });
-  }
-
-  @BeforeCreate()
-  _fallbackToSeasonExternalIds() {
-    this.tvdbId ||= this.season.getProperty("tvdbId");
-    this.imdbId ??= this.season.getProperty("imdbId") ?? null;
-  }
-
-  @BeforeCreate()
-  _copyItemRequest() {
-    this.itemRequest = this.season.getProperty("itemRequest");
-  }
-
-  @BeforeCreate()
-  _persistFullTitle({ entity }: EventArgs<this>) {
-    const showTitle = entity.season.getProperty("show").getProperty("title");
-    const seasonNumber = entity.season
-      .getProperty("number")
-      .toString()
-      .padStart(2, "0");
-    const episodeNumber = entity.number.toString().padStart(2, "0");
-
-    this.fullTitle = `${showTitle} - S${seasonNumber}E${episodeNumber} - ${this.title}`;
   }
 }

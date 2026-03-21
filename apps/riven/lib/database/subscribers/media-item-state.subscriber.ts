@@ -6,21 +6,27 @@ import {
   Show,
   type ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
-
-import { DateTime } from "luxon";
+import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
 import type {
   ChangeSet,
+  EntityData,
+  EventArgs,
   EventSubscriber,
   FlushEventArgs,
   UnitOfWork,
 } from "@mikro-orm/core";
-import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import type { Promisable } from "type-fest";
 
 type NextStatesMap = Map<MediaItem, MediaItemState>;
 
 export class MediaItemStateSubscriber implements EventSubscriber {
+  afterUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
+    if (entity.state === "unreleased" && entity.isReleased) {
+      entity.state = "indexed";
+    }
+  }
+
   async onFlush({ uow }: FlushEventArgs): Promise<void> {
     const trackedItems = new Map<
       MediaItem,
@@ -155,17 +161,14 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       nextStatesMap,
     );
 
-    const propagableStates = [
+    const propagableStates = MediaItemState.extract([
       "paused",
       "failed",
       "downloaded",
-    ] satisfies MediaItemState[];
+      "unreleased",
+    ]);
 
-    for (const propagableState of propagableStates) {
-      if (parent.state === propagableState) {
-        continue;
-      }
-
+    for (const propagableState of propagableStates.options) {
       const childrenStateCount = childrenStateCountMap[propagableState];
 
       if (!childrenStateCount) {
@@ -239,6 +242,10 @@ export class MediaItemStateSubscriber implements EventSubscriber {
   }
 
   async #computeState(item: MediaItem): Promise<MediaItemState> {
+    if (!item.isReleased) {
+      return "unreleased";
+    }
+
     if (this.#determineFixedState(item)) {
       return item.state;
     }
@@ -266,10 +273,6 @@ export class MediaItemStateSubscriber implements EventSubscriber {
 
     if (hasAvailableStreams) {
       return "scraped";
-    }
-
-    if (item.airedAt && DateTime.fromJSDate(item.airedAt) > DateTime.now()) {
-      return "unreleased";
     }
 
     return "indexed";

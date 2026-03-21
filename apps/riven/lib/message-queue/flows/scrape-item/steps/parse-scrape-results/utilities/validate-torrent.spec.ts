@@ -69,6 +69,7 @@ const it = baseIt.extend<{
         number: i,
         isSpecial: false,
         isRequested: true,
+        itemRequest,
       });
 
       show.seasons.add(season);
@@ -83,6 +84,7 @@ const it = baseIt.extend<{
           absoluteNumber: ++episodeNumber,
           isSpecial: false,
           isRequested: true,
+          itemRequest,
         });
 
         season.episodes.add(episode);

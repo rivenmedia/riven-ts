@@ -53,6 +53,7 @@ it("returns all shows for the /shows path", async ({ em }) => {
     number: 1,
     isSpecial: false,
     isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -68,6 +69,7 @@ it("returns all shows for the /shows path", async ({ em }) => {
     contentRating: "tv-14",
     isSpecial: false,
     isRequested: true,
+    itemRequest,
   });
 
   season.episodes.add(episode);
@@ -121,6 +123,7 @@ it('does not return entries for the "all shows" path for shows that do not have 
     number: 1,
     isSpecial: false,
     isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -136,6 +139,7 @@ it('does not return entries for the "all shows" path for shows that do not have 
     contentRating: "tv-14",
     isSpecial: false,
     isRequested: true,
+    itemRequest,
   });
 
   season.episodes.add(episode);
@@ -212,11 +216,13 @@ it("returns all seasons for a single show path", async ({ em }) => {
 
   for (let i = 1; i <= 3; i++) {
     const season = em.create(Season, {
+      tvdbId: show.tvdbId,
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
       isSpecial: false,
       isRequested: true,
+      itemRequest,
     });
 
     show.seasons.add(season);
@@ -224,6 +230,7 @@ it("returns all seasons for a single show path", async ({ em }) => {
     await em.flush();
 
     const episode = em.create(Episode, {
+      tvdbId: show.tvdbId,
       number: 1,
       absoluteNumber: 1,
       year: 2020,
@@ -232,6 +239,7 @@ it("returns all seasons for a single show path", async ({ em }) => {
       contentRating: "tv-14",
       isSpecial: false,
       isRequested: true,
+      itemRequest,
     });
 
     season.episodes.add(episode);
@@ -284,11 +292,13 @@ it("does not return entries for a season that does not have any episodes with a 
 
   for (let i = 1; i <= 3; i++) {
     const season = em.create(Season, {
+      tvdbId: show.tvdbId,
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
       isSpecial: false,
       isRequested: true,
+      itemRequest,
     });
 
     show.seasons.add(season);
@@ -296,6 +306,7 @@ it("does not return entries for a season that does not have any episodes with a 
     await em.flush();
 
     const episode = em.create(Episode, {
+      tvdbId: show.tvdbId,
       number: 1,
       absoluteNumber: 1,
       year: 2020,
@@ -304,6 +315,7 @@ it("does not return entries for a season that does not have any episodes with a 
       contentRating: "tv-14",
       isSpecial: false,
       isRequested: true,
+      itemRequest,
     });
 
     season.episodes.add(episode);
@@ -351,11 +363,13 @@ it("returns all episodes for a single season path", async ({ em }) => {
   await em.flush();
 
   const season = em.create(Season, {
+    tvdbId: show.tvdbId,
     title: "Season 01",
     year: 2020,
     number: 1,
     isSpecial: false,
     isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -364,6 +378,7 @@ it("returns all episodes for a single season path", async ({ em }) => {
 
   for (let i = 1; i <= 3; i++) {
     const episode = em.create(Episode, {
+      tvdbId: show.tvdbId,
       number: i,
       absoluteNumber: i,
       year: 2020,
@@ -372,6 +387,7 @@ it("returns all episodes for a single season path", async ({ em }) => {
       contentRating: "tv-14",
       isSpecial: false,
       isRequested: true,
+      itemRequest,
     });
 
     season.episodes.add(episode);
@@ -423,11 +439,13 @@ it("does not return entries for episodes that does not have a media entry when v
   await em.flush();
 
   const season = em.create(Season, {
+    tvdbId: show.tvdbId,
     title: "Season 01",
     year: 2020,
     number: 1,
     isSpecial: false,
     isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -436,6 +454,7 @@ it("does not return entries for episodes that does not have a media entry when v
 
   for (let i = 1; i <= 3; i++) {
     const episode = em.create(Episode, {
+      tvdbId: show.tvdbId,
       number: i,
       absoluteNumber: i,
       year: 2020,
@@ -444,6 +463,7 @@ it("does not return entries for episodes that does not have a media entry when v
       contentRating: "tv-14",
       isSpecial: false,
       isRequested: true,
+      itemRequest,
     });
 
     season.episodes.add(episode);

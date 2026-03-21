@@ -35,14 +35,10 @@ export const ContentServiceRequestedResponse = z.object({
       externalRequestId: true,
       requestedBy: true,
       seasons: true,
-    })
-      .required({
-        seasons: true,
-      })
-      .refine(
-        atLeastOnePropertyRequired,
-        "At least one identifier is required",
-      ),
+    }).refine(
+      atLeastOnePropertyRequired,
+      "At least one identifier is required",
+    ),
   ),
 });
 
