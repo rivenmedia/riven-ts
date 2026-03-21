@@ -186,7 +186,11 @@ export async function persistShowIndexerData({
             ? DateTime.fromISO(episode.airedAt).toJSDate()
             : null;
 
-          if (!episodeEntry.isReleased && !show.nextAirDate) {
+          if (
+            !seasonEntry.isSpecial &&
+            !episodeEntry.isReleased &&
+            !show.nextAirDate
+          ) {
             show.nextAirDate = episodeEntry.releaseDate;
 
             await transaction.upsert(show);

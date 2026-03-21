@@ -1,9 +1,14 @@
 import z from "zod";
 
+const MdbListNameSegment = z
+  .string()
+  .min(1)
+  .regex(/^[^/]+$/);
+
 export const MdbListName = z.templateLiteral([
-  z.string().min(1),
+  MdbListNameSegment,
   "/",
-  z.string().min(1),
+  MdbListNameSegment,
 ]);
 
 export type MdbListName = z.infer<typeof MdbListName>;

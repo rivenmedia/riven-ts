@@ -22,6 +22,7 @@ type NextStatesMap = Map<MediaItem, MediaItemState>;
 
 export class MediaItemStateSubscriber implements EventSubscriber {
   afterUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
+    console.log(entity);
     if (entity.state === "unreleased" && entity.isReleased) {
       entity.state = "indexed";
     }

@@ -80,9 +80,9 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
         season.releaseDate = firstEpisode.releaseDate;
 
         showsAwaitingUpdate.add(await season.getShow());
-      }
 
-      uow.computeChangeSet(season);
+        uow.computeChangeSet(season);
+      }
     }
 
     for (const show of showsAwaitingUpdate) {
@@ -96,9 +96,9 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
 
       if (firstSeason?.releaseDate) {
         show.releaseDate = firstSeason.releaseDate;
-      }
 
-      uow.computeChangeSet(show);
+        uow.computeChangeSet(show);
+      }
     }
   }
 }

@@ -56,9 +56,9 @@ export const indexTMDBMediaItem: z.infer<
         ? `https://image.tmdb.org/t/p/w500${result.poster_path}`
         : null,
       releaseDate: result.release_date
-        ? DateTime.fromISO(result.release_date)
-            .toUTC()
-            .toISO({ precision: "minute" })
+        ? DateTime.fromISO(result.release_date, { zone: "utc" }).toISO({
+            precision: "minute",
+          })
         : null,
       runtime: result.runtime ?? null,
       language: result.original_language ?? null,

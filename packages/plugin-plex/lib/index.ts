@@ -47,7 +47,11 @@ export default {
           (result): result is PromiseRejectedResult =>
             result.status === "rejected",
         )
-        .map((result) => result.reason as Error);
+        .map((result) =>
+          result.reason instanceof Error
+            ? result.reason
+            : new Error(String(result.reason)),
+        );
 
       if (errors.length > 0) {
         throw new Error(

@@ -24,10 +24,6 @@ export default {
   async validator({ dataSources }) {
     const api = dataSources.get(SeerrAPI);
 
-    try {
-      return await api.validate();
-    } catch {
-      return false;
-    }
+    return await api.validate();
   },
 } satisfies RivenPlugin as RivenPlugin;

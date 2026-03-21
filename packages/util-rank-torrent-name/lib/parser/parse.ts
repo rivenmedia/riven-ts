@@ -1,5 +1,6 @@
 import { Parser, transforms } from "@viren070/parse-torrent-title";
 import { toMerged } from "es-toolkit";
+import assert from "node:assert";
 import { prettifyError } from "zod";
 
 import { sceneHandlers } from "../parser/handlers/scene.handlers.ts";
@@ -98,6 +99,14 @@ export function parse(rawTitle: string) {
 export function parseFilePath(filePath: string) {
   const parts = filePath.split("/").filter(Boolean);
 
+  if (parts.length === 0) {
+    throw new TypeError(
+      "The input file path must contain at least one segment.",
+    );
+  }
+
+  assert(parts[0]);
+
   return parts.reduce<ParsedData>((acc, part) => {
     try {
       const parsedPart = parse(part);
@@ -106,5 +115,5 @@ export function parseFilePath(filePath: string) {
     } catch {
       return acc;
     }
-  }, {} as ParsedData);
+  }, parse(parts[0]));
 }

@@ -9,8 +9,6 @@ import { TvdbSettings } from "../tvdb-settings.schema.ts";
 
 import type { TimezoneName } from "countries-and-timezones";
 
-export class TvMazeAPIError extends Error {}
-
 export class TvMazeAPI extends BaseDataSource<TvdbSettings> {
   override baseURL = "https://api.tvmaze.com";
   override serviceName = "Tvdb - TvMaze";
