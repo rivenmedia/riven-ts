@@ -139,7 +139,14 @@ export async function enqueueDownloadItem({
   const rootNode = createDownloadItemJob(
     `Downloading ${item.fullTitle}`,
     { id: item.id },
-    { children: [findValidTorrentNode] },
+    {
+      children: [findValidTorrentNode],
+      opts: {
+        deduplication: {
+          id: `download-item-${item.id.toString()}`,
+        },
+      },
+    },
   );
 
   return flow.add(rootNode);

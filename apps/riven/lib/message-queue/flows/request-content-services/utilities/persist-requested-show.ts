@@ -56,7 +56,7 @@ export async function persistRequestedShow(
         externalRequestId: item.externalRequestId ?? null,
       });
 
-    itemRequest.seasons = item.seasons;
+    itemRequest.seasons = item.seasons ?? null;
 
     if (existingItem && itemRequest.seasons) {
       const linkedItemsToProcess = await existingItem.seasonItems.matching({

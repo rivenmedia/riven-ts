@@ -84,6 +84,7 @@ export const RivenPlugin = z.object({
   validator: z.function({
     input: [
       z.object({
+        dataSources: z.instanceof(DataSourceMap),
         settings: z.instanceof(PluginSettings),
       }),
     ],

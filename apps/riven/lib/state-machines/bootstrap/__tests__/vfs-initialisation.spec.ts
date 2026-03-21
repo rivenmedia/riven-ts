@@ -26,9 +26,12 @@ it("throws an error if process UID or GID cannot be determined", async ({
 });
 
 it("throws an error if the mount path does not exist", async ({ actor }) => {
-  vi.spyOn(fs, "lstat").mockRejectedValue(
-    new Error("ENOENT: no such file or directory"),
-  );
+  const error = new Error("ENOENT: no such file or directory");
+
+  // @ts-expect-error - We are intentionally adding a code property to the error to simulate the ENOENT error condition
+  error.code = "ENOENT";
+
+  vi.spyOn(fs, "stat").mockRejectedValue(error);
 
   await expect(toPromise(actor.start())).rejects.toThrow(
     /VFS mount path "(.*)" does not exist. Please create this directory./,
@@ -38,7 +41,7 @@ it("throws an error if the mount path does not exist", async ({ actor }) => {
 it("throws an error if the mount path is not a directory", async ({
   actor,
 }) => {
-  vi.spyOn(fs, "lstat").mockResolvedValue({
+  vi.spyOn(fs, "stat").mockResolvedValue({
     isDirectory: vi.fn().mockReturnValue(false),
   } as never);
 
@@ -56,7 +59,7 @@ it("throws an error if the mount path is not owned by the current user", async (
   vi.spyOn(process, "getuid").mockReturnValue(uid);
   vi.spyOn(process, "getgid").mockReturnValue(gid);
 
-  vi.spyOn(fs, "lstat").mockResolvedValue({
+  vi.spyOn(fs, "stat").mockResolvedValue({
     isDirectory: vi.fn().mockReturnValue(true),
     uid: 9999,
     gid: 9999,
@@ -76,7 +79,7 @@ it("does not throw an error if the mount path is present and owned by the curren
   vi.spyOn(process, "getuid").mockReturnValue(uid);
   vi.spyOn(process, "getgid").mockReturnValue(gid);
 
-  vi.spyOn(fs, "lstat").mockResolvedValue({
+  vi.spyOn(fs, "stat").mockResolvedValue({
     isDirectory: vi.fn().mockReturnValue(true),
     uid,
     gid,

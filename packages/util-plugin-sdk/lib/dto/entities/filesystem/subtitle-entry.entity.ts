@@ -35,8 +35,7 @@ export class SubtitleEntry extends FileSystemEntry {
   @Property()
   openSubtitlesId?: string; // TODO: Separate entity for external providers?
 
-  @Property({ persist: false, hidden: true })
-  get vfsFileName(): Opt<string> {
+  getVfsFileName(): string {
     throw new Error("SubtitleEntry vfsFileName not implemented yet");
   }
 }

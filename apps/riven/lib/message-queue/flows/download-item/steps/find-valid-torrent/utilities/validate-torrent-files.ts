@@ -7,7 +7,7 @@ import {
   ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
-import { parse } from "@repo/util-rank-torrent-name";
+import { parseFilePath } from "@repo/util-rank-torrent-name";
 
 import { reduceAsync } from "es-toolkit";
 import assert, { AssertionError } from "node:assert";
@@ -106,7 +106,7 @@ export const validateTorrentFiles = async (
 
       for (const file of files) {
         try {
-          const parseData = parse(file.name);
+          const parseData = parseFilePath(file.path);
 
           assert(parseData.type === "movie", "File must be a movie");
 
@@ -155,7 +155,7 @@ export const validateTorrentFiles = async (
         );
 
         try {
-          const parseData = parse(file.name);
+          const parseData = parseFilePath(file.path);
 
           assert(
             parseData.type === "show",

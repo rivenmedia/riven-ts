@@ -1,6 +1,7 @@
 import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
+import { DateTime } from "luxon";
 import { expect, it } from "vitest";
 
 import { database } from "../../../../database/database.ts";
@@ -29,6 +30,7 @@ it("returns the media item if processed successfully", async ({}) => {
       genres: [],
       type: "movie",
       runtime: 40,
+      releaseDate: DateTime.now().toISO(),
     },
   });
 
@@ -43,7 +45,7 @@ it("returns the media item if processed successfully", async ({}) => {
   );
 });
 
-it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorrect state", async () => {
+it("throws a MediaItemIndexErrorIncorrectState error if the item request is in an incorrect state", async () => {
   const requestedId = "1234";
 
   const em = database.orm.em.fork();
@@ -67,6 +69,7 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorr
         genres: [],
         type: "movie",
         runtime: 40,
+        releaseDate: DateTime.now().toISO(),
       },
     }),
   ).rejects.toThrow(MediaItemIndexErrorIncorrectState);

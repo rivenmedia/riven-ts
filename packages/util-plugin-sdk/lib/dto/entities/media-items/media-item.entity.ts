@@ -2,12 +2,12 @@ import {
   Collection,
   Entity,
   Enum,
-  type EventArgs,
   type Hidden,
   Index,
   ManyToMany,
   ManyToOne,
   type Opt,
+  OptionalProps,
   PrimaryKey,
   Property,
   type Ref,
@@ -27,16 +27,20 @@ import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
 import { ItemRequest, MediaEntry } from "../index.ts";
 import { Stream } from "../streams/stream.entity.ts";
 
+import type { Promisable } from "type-fest";
+
 @ObjectType()
 @Entity({
   abstract: true,
   discriminatorColumn: "type",
 })
-@Index({ properties: ["type", "airedAt"] })
+@Index({ properties: ["type", "releaseDate"] })
 export abstract class MediaItem {
+  [OptionalProps]?: "state";
+
   @Field((_type) => ID)
   @PrimaryKey()
-  id!: Opt<number>;
+  id!: number;
 
   @Field(() => String)
   @Index()
@@ -71,8 +75,8 @@ export abstract class MediaItem {
 
   @Field(() => Date)
   @Index()
-  @Property()
-  createdAt: Opt<Date> = DateTime.now().toJSDate();
+  @Property({ default: DateTime.now().toISO() })
+  createdAt!: Opt<Date>;
 
   @Field(() => Date, { nullable: true })
   @Property({ onUpdate: () => DateTime.now().toJSDate() })
@@ -119,7 +123,7 @@ export abstract class MediaItem {
 
   @Field(() => Date, { nullable: true })
   @Property()
-  airedAt?: Date | null;
+  releaseDate!: Date | null;
 
   @Field(() => Number, { nullable: true })
   @Property()
@@ -137,25 +141,16 @@ export abstract class MediaItem {
   @Enum(() => MediaItemContentRating.enum)
   contentRating?: MediaItemContentRating | null;
 
-  @Field(() => Boolean)
-  @Property({ default: false })
-  updated!: Opt<boolean>;
-
   @Field(() => String, { nullable: true })
   @Property()
   guid?: string | null;
 
   @Field(() => MediaItemState.enum)
   @Enum({
+    default: MediaItemState.enum.indexed,
     items: () => MediaItemState.enum,
-    onCreate(entity: Partial<MediaItem>) {
-      const isUnreleased =
-        entity.airedAt && DateTime.fromJSDate(entity.airedAt) > DateTime.now();
-
-      return isUnreleased ? "unreleased" : "indexed";
-    },
   })
-  state!: Opt<MediaItemState>;
+  state!: MediaItemState;
 
   @Field(() => Number)
   @Property()
@@ -187,17 +182,29 @@ export abstract class MediaItem {
   type!: MediaItemType;
 
   @ManyToOne(() => ItemRequest)
-  itemRequest!: Opt<Ref<ItemRequest>>;
+  itemRequest!: Ref<ItemRequest>;
 
   @Property()
   isRequested!: boolean;
+
+  /**
+   * Determines if the media item is considered to be released based on its release date.
+   *
+   * Returns true if the release date is in the past, false if it's in the future or not available.
+   */
+  @Property({ persist: false, getter: true })
+  get isReleased(): Opt<boolean> {
+    return this.releaseDate
+      ? DateTime.fromJSDate(this.releaseDate) <= DateTime.now()
+      : false;
+  }
 
   /**
    * A pretty name for the media item to be used in VFS paths.
    *
    * @example "Inception (2010) {tmdb-27205}"
    */
-  abstract get prettyName(): Opt<Hidden<string>>;
+  abstract getPrettyName(): Promisable<string>;
 
   /**
    * Gets all media entries associated with this media item.
@@ -212,6 +219,4 @@ export abstract class MediaItem {
    * @returns An array of associated MediaEntries, which may be empty if none exist.
    */
   abstract getMediaEntries(): Promise<MediaEntry[]>;
-
-  abstract _persistFullTitle(args: EventArgs<any>): void;
 }

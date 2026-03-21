@@ -3,7 +3,7 @@ import { it } from "@repo/util-plugin-testing/plugin-test-context";
 import { parse } from "@repo/util-rank-torrent-name";
 
 import { Job } from "bullmq";
-import { Settings } from "luxon";
+import { DateTime, Settings } from "luxon";
 import { expect, vi } from "vitest";
 
 import { database } from "../../../database/database.ts";
@@ -51,6 +51,7 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
     year: 2024,
     itemRequest,
     isRequested: true,
+    releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
   });
 
   await em.flush();

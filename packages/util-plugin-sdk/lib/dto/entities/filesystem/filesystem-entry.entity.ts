@@ -19,6 +19,8 @@ import { Episode } from "../media-items/episode.entity.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
 import { Movie } from "../media-items/movie.entity.ts";
 
+import type { Promisable } from "type-fest";
+
 export const FileSystemEntryType = z.enum(["media", "subtitle"]);
 
 export type FileSystemEntryType = z.infer<typeof FileSystemEntryType>;
@@ -34,14 +36,16 @@ export type FileSystemEntryType = z.infer<typeof FileSystemEntryType>;
  */
 async function getMediaItemPathParts(mediaItem: MediaItem) {
   if (mediaItem instanceof Movie) {
-    return [mediaItem.prettyName];
+    return [mediaItem.getPrettyName()];
   }
 
   if (mediaItem instanceof Episode) {
-    const seasonLabel = await mediaItem.season.loadProperty("prettyName");
-    const showLabel = await mediaItem.season
-      .getProperty("show")
-      .loadProperty("prettyName");
+    const season = await mediaItem.season.loadOrFail({
+      populate: ["show"],
+    });
+
+    const seasonLabel = season.getPrettyName();
+    const showLabel = season.show.getEntity().getPrettyName();
 
     if (!seasonLabel || !showLabel) {
       throw new ReferenceError(
@@ -63,7 +67,7 @@ async function getMediaItemPathParts(mediaItem: MediaItem) {
 export abstract class FileSystemEntry {
   @Field((_type) => ID)
   @PrimaryKey()
-  id!: Opt<number>;
+  id!: number;
 
   @Field()
   @Property({ type: "bigint" })
@@ -113,7 +117,7 @@ export abstract class FileSystemEntry {
    *
    * @example "movie.mkv", "episode.srt"
    */
-  abstract get vfsFileName(): Opt<Hidden<string>>;
+  abstract getVfsFileName(): Promisable<string>;
 
   @BeforeCreate()
   async _setPath() {
@@ -123,6 +127,6 @@ export abstract class FileSystemEntry {
     // Remove periods from path parts to avoid directories being parsed as files
     const sanitisedPathParts = pathParts.map((part) => part.replace(/\./g, ""));
 
-    this.path = path.join(...sanitisedPathParts, this.vfsFileName);
+    this.path = path.join(...sanitisedPathParts, await this.getVfsFileName());
   }
 }

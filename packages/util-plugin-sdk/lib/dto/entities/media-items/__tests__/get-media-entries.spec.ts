@@ -20,6 +20,7 @@ test("getMediaEntries() returns the associated media entry for a Movie media ite
     contentRating: "pg-13",
     tmdbId: "1",
     itemRequest,
+    isRequested: true,
   });
 
   const mediaEntry = em.create(MediaEntry, {
@@ -53,6 +54,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     status: "ended",
     tvdbId: "1",
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -61,6 +63,8 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     title: "Season 1",
     number: 1,
     isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -73,6 +77,8 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     absoluteNumber: 1,
     contentRating: "tv-14",
     isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   const episode2 = em.create(Episode, {
@@ -81,6 +87,8 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     absoluteNumber: 2,
     contentRating: "tv-14",
     isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   const mediaEntry1 = em.create(MediaEntry, {
@@ -124,6 +132,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     status: "ended",
     tvdbId: "1",
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -132,12 +141,16 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     title: "Season 1",
     number: 1,
     isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   const season2 = em.create(Season, {
     title: "Season 2",
     number: 1,
     isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season1, season2);
@@ -150,6 +163,8 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     absoluteNumber: 1,
     contentRating: "tv-14",
     isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   const season2Episode1 = em.create(Episode, {
@@ -158,6 +173,8 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     absoluteNumber: 2,
     contentRating: "tv-14",
     isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   const season1Episode1MediaEntry = em.create(MediaEntry, {
@@ -203,6 +220,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     status: "ended",
     tvdbId: "1",
     itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -211,6 +229,8 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     title: "Season 1",
     number: 1,
     isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -223,6 +243,8 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     absoluteNumber: 1,
     contentRating: "tv-14",
     isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   const mediaEntry = em.create(MediaEntry, {

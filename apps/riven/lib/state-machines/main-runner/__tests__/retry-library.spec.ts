@@ -31,6 +31,8 @@ it('sends a "riven.media-item.index.requested" event for each incomplete item re
 
   actor.start();
 
+  actor.send({ type: "riven-internal.retry-library" });
+
   for (const item of items) {
     await vi.waitFor(() => {
       expect(actor).toHaveReceivedEvent({

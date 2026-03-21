@@ -23,7 +23,7 @@ import { Season } from "../media-items/season.entity.ts";
 export class ItemRequest {
   @Field(() => ID)
   @PrimaryKey()
-  id!: Opt<number>;
+  id!: number;
 
   @Field(() => String, { nullable: true })
   @Property()

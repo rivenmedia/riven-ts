@@ -76,10 +76,13 @@ RUN pnpm -r generate-schemas
 
 FROM schema-generator AS riven
 
-COPY . .
+RUN chown -R "${PUID}:${PGID}" "${HOME}/riven-ts"
+COPY --chown=${PUID}:${PGID} . .
 
 EXPOSE 8080
 
 STOPSIGNAL SIGINT
+
+USER ${PUID}:${PGID}
 
 CMD [ "pnpm", "--filter=@repo/riven", "start" ]

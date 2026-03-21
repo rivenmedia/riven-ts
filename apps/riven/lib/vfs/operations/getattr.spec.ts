@@ -189,6 +189,7 @@ it("returns directory stats for /shows", async ({ em }) => {
       number: i,
       isSpecial: false,
       isRequested: true,
+      itemRequest,
     });
 
     show.seasons.add(season);
@@ -204,6 +205,7 @@ it("returns directory stats for /shows", async ({ em }) => {
       isSpecial: false,
       type: "episode",
       isRequested: true,
+      itemRequest,
     });
 
     season.episodes.add(episode);
@@ -264,6 +266,7 @@ it("returns directory stats for single shows", async ({ em }) => {
       number: i,
       isSpecial: false,
       isRequested: true,
+      itemRequest,
     });
 
     show.seasons.add(season);
@@ -278,6 +281,7 @@ it("returns directory stats for single shows", async ({ em }) => {
       absoluteNumber: 1,
       isSpecial: false,
       isRequested: true,
+      itemRequest,
     });
 
     season.episodes.add(episode);
@@ -337,6 +341,7 @@ it("returns directory stats for single seasons", async ({ em }) => {
     number: 1,
     isSpecial: false,
     isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -352,6 +357,7 @@ it("returns directory stats for single seasons", async ({ em }) => {
       absoluteNumber: 1,
       isSpecial: false,
       isRequested: true,
+      itemRequest,
     });
 
     season.episodes.add(episode);
@@ -411,6 +417,7 @@ it("returns file stats for episodes", async ({ em }) => {
     number: 1,
     isSpecial: false,
     isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -425,6 +432,7 @@ it("returns file stats for episodes", async ({ em }) => {
     absoluteNumber: 1,
     isSpecial: false,
     isRequested: true,
+    itemRequest,
   });
 
   season.episodes.add(episode);

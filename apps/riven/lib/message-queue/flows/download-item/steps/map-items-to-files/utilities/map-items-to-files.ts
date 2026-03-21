@@ -1,4 +1,4 @@
-import { parse } from "@repo/util-rank-torrent-name";
+import { parseFilePath } from "@repo/util-rank-torrent-name";
 
 import assert from "assert";
 import { extname } from "node:path";
@@ -25,10 +25,10 @@ export function mapItemsToFiles(items: DebridFile[]) {
 
         assert(
           VALID_FILE_EXTENSIONS.safeParse(fileExtension).success,
-          "Invalid file extension",
+          `Invalid file extension: ${fileExtension}`,
         );
 
-        const parseData = parse(file.name);
+        const parseData = parseFilePath(file.path);
 
         if (parseData.type === "movie") {
           return {

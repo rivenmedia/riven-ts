@@ -128,7 +128,7 @@ export abstract class BaseDataSource<
         } = await benchmark(async () => {
           this.logger.silly(
             [
-              `[${this.serviceName}] Initiating request to ${this.baseURL}${job.data.path}`,
+              `[${this.serviceName}] Initiating request to ${new URL(job.data.path, this.baseURL).toString()}`,
               ...(job.data.params ? [`?${job.data.params}`] : []),
             ].join(""),
           );

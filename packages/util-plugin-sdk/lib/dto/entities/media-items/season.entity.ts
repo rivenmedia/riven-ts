@@ -1,9 +1,6 @@
 import {
-  BeforeCreate,
   Collection,
   Entity,
-  type EventArgs,
-  type Hidden,
   ManyToOne,
   OneToMany,
   type Opt,
@@ -36,8 +33,7 @@ export class Season extends ShowLikeMediaItem {
   @OneToMany(() => Episode, (episode) => episode.season)
   episodes = new Collection<Episode>(this);
 
-  @Property({ persist: false, hidden: true, getter: true })
-  get prettyName(): Opt<Hidden<string>> {
+  getPrettyName(): string {
     return `Season ${this.number.toString().padStart(2, "0")}`;
   }
 
@@ -73,21 +69,5 @@ export class Season extends ShowLikeMediaItem {
           (entry) => entry.type === "media",
         ) as MediaEntry[],
     );
-  }
-
-  @BeforeCreate()
-  _fallbackToShowExternalIds() {
-    this.tvdbId ||= this.show.getProperty("tvdbId");
-    this.imdbId ??= this.show.getProperty("imdbId") ?? null;
-  }
-
-  @BeforeCreate()
-  _copyItemRequest() {
-    this.itemRequest = this.show.getProperty("itemRequest");
-  }
-
-  @BeforeCreate()
-  _persistFullTitle({ entity }: EventArgs<this>) {
-    this.fullTitle = `${entity.show.getProperty("fullTitle")} - S${entity.number.toString().padStart(2, "0")}`;
   }
 }

@@ -11,6 +11,7 @@ import {
 import { parse } from "@repo/util-rank-torrent-name";
 
 import { ApolloServer } from "@apollo/server";
+import { DateTime } from "luxon";
 import { MockAgent, setGlobalDispatcher } from "undici";
 import { expect, test as testBase } from "vitest";
 
@@ -108,6 +109,7 @@ export const rivenTestContext = testBase.extend<{
       tmdbId: "1",
       itemRequest,
       isRequested: true,
+      releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
     });
 
     await em.flush();
@@ -128,6 +130,7 @@ export const rivenTestContext = testBase.extend<{
       tvdbId: "1",
       itemRequest,
       isRequested: true,
+      releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
     });
 
     await em.flush();
@@ -136,10 +139,13 @@ export const rivenTestContext = testBase.extend<{
 
     for (let seasonNumber = 1; seasonNumber <= 6; seasonNumber++) {
       const season = em.create(Season, {
+        tvdbId: show.tvdbId,
         title: `Season ${seasonNumber.toString()}`,
         number: seasonNumber,
         isSpecial: false,
         isRequested: true,
+        itemRequest,
+        releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
       });
 
       show.seasons.add(season);
@@ -148,12 +154,15 @@ export const rivenTestContext = testBase.extend<{
 
       for (let episodeNumber = 1; episodeNumber <= 10; episodeNumber++) {
         const episode = em.create(Episode, {
+          tvdbId: show.tvdbId,
           title: `Episode ${episodeNumber.toString().padStart(2, "0")}`,
           contentRating: "tv-14",
           number: episodeNumber,
           absoluteNumber: absoluteEpisodeNumber++,
           isSpecial: false,
           isRequested: true,
+          itemRequest,
+          releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
         });
 
         season.episodes.add(episode);

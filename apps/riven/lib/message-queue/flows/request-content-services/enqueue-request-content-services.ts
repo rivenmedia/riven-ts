@@ -11,7 +11,7 @@ export interface EnqueueRequestContentServicesInput {
   subscribers: RivenPlugin[];
 }
 
-export async function enqueueRequestContentServices({
+export function enqueueRequestContentServices({
   subscribers,
 }: EnqueueRequestContentServicesInput) {
   const childNodes = subscribers.map((plugin) =>
@@ -26,6 +26,11 @@ export async function enqueueRequestContentServices({
 
   const rootNode = createRequestContentServicesJob("Request content services", {
     children: childNodes,
+    opts: {
+      deduplication: {
+        id: "request-content-services",
+      },
+    },
   });
 
   logger.silly(

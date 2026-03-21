@@ -8,6 +8,7 @@ import {
 import { MediaItemDownloadErrorEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { parse } from "@repo/util-rank-torrent-name";
 
+import { DateTime } from "luxon";
 import assert from "node:assert";
 import { expect, vi } from "vitest";
 
@@ -38,6 +39,7 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
     status: "ended",
     itemRequest,
     isRequested: true,
+    releaseDate: DateTime.now().toISO(),
   });
 
   await em.flush();
@@ -49,6 +51,7 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
       tvdbId: i.toString(),
       isSpecial: false,
       isRequested: true,
+      itemRequest,
     });
 
     show.seasons.add(season);
@@ -108,6 +111,7 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
     status: "ended",
     itemRequest,
     isRequested: true,
+    releaseDate: DateTime.now().toISO(),
   });
 
   await em.flush();
@@ -116,9 +120,11 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
     const season = em.create(Season, {
       number: i,
       title: `Season ${i.toString().padStart(2, "0")}`,
-      tvdbId: i.toString(),
+      tvdbId: show.tvdbId,
       isSpecial: false,
       isRequested: true,
+      itemRequest,
+      releaseDate: DateTime.now().toISO(),
     });
 
     show.seasons.add(season);

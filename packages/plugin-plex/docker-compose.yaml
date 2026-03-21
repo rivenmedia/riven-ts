@@ -17,7 +17,7 @@ services:
     volumes:
       - ./docker-data/plex/config:/config
       - ./docker-data/plex/transcode:/transcode
-      - /mnt/riven:/mount:rslave
+      - ${HOST_VFS_MOUNT_PATH}:/mount:rslave
     healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://127.0.0.1:32400/identity
       interval: 1m00s

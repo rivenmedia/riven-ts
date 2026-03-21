@@ -3,17 +3,19 @@ import { fromCallback } from "xstate";
 
 import type { RegisteredPlugin } from "../../../types/plugins.ts";
 import type { PluginRegistrarMachineEvent } from "../index.ts";
+import type { DataSourceMap } from "@repo/util-plugin-sdk";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 export interface ValidatePluginInput {
   plugin: RegisteredPlugin;
   settings: PluginSettings;
+  dataSources: DataSourceMap;
 }
 
 export const validatePlugin = fromCallback<
   PluginRegistrarMachineEvent,
   ValidatePluginInput
->(({ input: { plugin, settings }, sendBack }) => {
+>(({ input: { plugin, settings, dataSources }, sendBack }) => {
   function sendValidPluginEvent() {
     sendBack({
       type: "riven.plugin-valid",
@@ -40,7 +42,10 @@ export const validatePlugin = fromCallback<
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        const isValid = await plugin.config.validator({ settings });
+        const isValid = await plugin.config.validator({
+          settings,
+          dataSources,
+        });
 
         if (!isValid) {
           throw new Error("Plugin validation returned false");

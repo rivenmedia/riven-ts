@@ -3,7 +3,7 @@
   "info": {
     "title": "MDBList API",
     "version": "",
-    "description": "API service allows you to access information about ratings, votes, streaming services and more\n\n## Authentication\n\nMDBList API supports two authentication methods: **API Keys** (simple) and **OAuth 2.0** (for third-party apps).\n\n### API Keys\n\nAPI key can be generated for free in [mdblist.com preferences](https://mdblist.com/preferences/).\n\nTo authenticate with an API key, append it as a query parameter:\n\n```\nhttps://api.mdblist.com/lists/user/?apikey=YOUR_API_KEY\n```\n\n**Best for**: Personal scripts, testing, direct API access.\n\n### OAuth 2.0 (Beta)\n\nOAuth 2.0 allows third-party applications to access MDBList on behalf of users without requiring their API key. Users authorize your app once, and you receive an access token.\n\n**Status**: Currently in **beta**. The implementation is stable and fully functional, but we're gathering feedback from early adopters. Report issues or suggestions at [mdblist.com/developer/](https://mdblist.com/developer/).\n\n**Best for**: Third-party apps, mobile apps, web services that access MDBList on behalf of multiple users.\n\n#### Quick Start for Developers\n\n1. **Register Your App**\n   Go to [mdblist.com/developer/](https://mdblist.com/developer/) and create an OAuth application. You'll receive:\n   - `client_id` - Public identifier for your app\n   - `client_secret` - Secret key (keep this secure!)\n\n2. **Generate PKCE Challenge** (required for all clients)\n   ```python\n   import secrets, hashlib, base64\n   code_verifier = secrets.token_urlsafe(64)\n   code_challenge = base64.urlsafe_b64encode(\n       hashlib.sha256(code_verifier.encode()).digest()\n   ).rstrip(b'=').decode()\n   ```\n\n3. **Get Authorization**\n   Redirect users to the authorization URL with PKCE:\n   ```\n   https://mdblist.com/oauth/authorize/?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code&scope=read+write&code_challenge=YOUR_CODE_CHALLENGE&code_challenge_method=S256\n   ```\n\n4. **Exchange Code for Token**\n   After the user authorizes, they're redirected back with a `code`. Exchange it for an access token (include the original `code_verifier`):\n   ```bash\n   curl -X POST https://api.mdblist.com/oauth/token/ \\\n     -d \"grant_type=authorization_code\" \\\n     -d \"code=AUTHORIZATION_CODE\" \\\n     -d \"redirect_uri=YOUR_REDIRECT_URI\" \\\n     -d \"client_id=YOUR_CLIENT_ID\" \\\n     -d \"client_secret=YOUR_CLIENT_SECRET\" \\\n     -d \"code_verifier=YOUR_CODE_VERIFIER\"\n   ```\n\n   Response:\n   ```json\n   {\n     \"access_token\": \"abc123xyz789\",\n     \"token_type\": \"Bearer\",\n     \"expires_in\": 2592000,\n     \"refresh_token\": \"def456uvw\",\n     \"scope\": \"read write\"\n   }\n   ```\n\n   **Note**: `expires_in` is in seconds (2592000 = 30 days). Save the `refresh_token` to get new access tokens when this one expires.\n\n5. **Use the Token**\n   Include the access token in the `Authorization` header:\n   ```bash\n   curl -H \"Authorization: Bearer abc123xyz789\" \\\n     https://api.mdblist.com/lists/user/\n   ```\n\n#### OAuth Scopes\n\n| Scope | Description |\n| ----- | ----------- |\n| `read` | Read access to user's lists, watchlist, ratings, and profile |\n| `write` | Modify user's lists, watchlist, ratings, and collection |\n\nDefault scope is `read`. Request `read write` for full access.\n\n#### Token Refresh\n\nAccess tokens expire after 30 days. Use the refresh token to get a new access token without asking the user to re-authorize:\n\n```bash\ncurl -X POST https://api.mdblist.com/oauth/token/ \\\n  -d \"grant_type=refresh_token\" \\\n  -d \"refresh_token=YOUR_REFRESH_TOKEN\" \\\n  -d \"client_id=YOUR_CLIENT_ID\" \\\n  -d \"client_secret=YOUR_CLIENT_SECRET\"\n```\n\n#### OAuth Endpoints\n\n| Endpoint | Method | Purpose |\n| -------- | ------ | ------- |\n| `/oauth/authorize/` | GET | User authorization (WEB) |\n| `/oauth/token/` | POST | Exchange code or refresh token |\n| `/oauth/revoke_token/` | POST | Revoke access token |\n| `/oauth/introspect/` | POST | Check token validity |\n\n> **Important:** All OAuth endpoints require a trailing slash. For example, use `https://api.mdblist.com/oauth/token/` not `https://api.mdblist.com/oauth/token`. Requests without the trailing slash will fail.\n\n#### Security Best Practices\n\n- **Never expose** your `client_secret` in client-side code\n\n- **Use HTTPS** for all OAuth flows\n\n- **Store tokens securely** (encrypted, never in version control)\n\n- **Handle token expiration** gracefully with refresh tokens\n\n- **Revoke tokens** when users disconnect your app\n\n#### Native/Mobile Apps (PKCE)\n\nFor mobile or desktop apps, use PKCE with a loopback or custom scheme redirect URI:\n\n1. **Register app** with a redirect URI (loopback `http://127.0.0.1:PORT/callback` or custom scheme like `myapp://oauth/callback`).\n\n2. **Generate PKCE** `code_verifier` + `code_challenge` (S256).\n\n3. **Authorize** with `code_challenge` + `code_challenge_method=S256`.\n\n4. **Exchange code** with the `code_verifier` at the token endpoint.\n\n**Example PKCE Authorization URL:**\n\n```\nhttps://mdblist.com/oauth/authorize/?client_id=YOUR_CLIENT_ID&redirect_uri=myapp://oauth/callback&response_type=code&scope=read+write&code_challenge=YOUR_CODE_CHALLENGE&code_challenge_method=S256\n```\n\n**Python Example for PKCE Flow:**\n\n```python\nimport requests\nimport webbrowser\n\n# Step 1: Build PKCE authorization URL\nclient_id = \"YOUR_CLIENT_ID\"\nclient_secret = \"YOUR_CLIENT_SECRET\"\ncode_challenge = \"YOUR_CODE_CHALLENGE\"\nredirect_uri = \"myapp://oauth/callback\"\n\nauth_url = (\n    f\"https://mdblist.com/oauth/authorize/\"\n    f\"?client_id={client_id}\"\n    f\"&redirect_uri={redirect_uri}\"\n    f\"&response_type=code\"\n    f\"&scope=read+write\"\n    f\"&code_challenge={code_challenge}\"\n    f\"&code_challenge_method=S256\"\n)\n\n# Step 2: Open browser for user to authorize\nprint(\"Opening browser for authorization...\")\nwebbrowser.open(auth_url)\n\n# Step 3: Receive the authorization code from your redirect URI handler\nauth_code = input(\"Enter the authorization code: \").strip()\n\n# Step 4: Exchange code for access token\ntoken_response = requests.post(\n    \"https://api.mdblist.com/oauth/token/\",\n    data={\n        \"grant_type\": \"authorization_code\",\n        \"code\": auth_code,\n        \"redirect_uri\": redirect_uri,\n        \"client_id\": client_id,\n        \"client_secret\": client_secret,\n        \"code_verifier\": \"YOUR_CODE_VERIFIER\",\n    }\n)\n\nif token_response.status_code == 200:\n    token_data = token_response.json()\n    access_token = token_data[\"access_token\"]\n    print(f\"✓ Authorization successful!\")\n    print(f\"Access Token: {access_token}\")\n\n    # Step 5: Use the token\n    headers = {\"Authorization\": f\"Bearer {access_token}\"}\n    response = requests.get(\n        \"https://api.mdblist.com/lists/user/\",\n        headers=headers\n    )\n    print(f\"✓ Your lists: {response.json()}\")\nelse:\n    print(f\"✗ Error: {token_response.json()}\")\n```\n\n**PKCE is required for all clients** (web apps, mobile apps, desktop apps, CLI tools).\n\n#### Example: Web App OAuth Client\n\n```python\nimport requests\nimport secrets\nimport hashlib\nimport base64\n\n# Step 1: Generate PKCE code verifier and challenge\ncode_verifier = secrets.token_urlsafe(64)\ncode_challenge = base64.urlsafe_b64encode(\n    hashlib.sha256(code_verifier.encode()).digest()\n).rstrip(b'=').decode()\n\n# Step 2: Redirect user to authorization URL with PKCE\nauth_url = (\n    \"https://mdblist.com/oauth/authorize/\"\n    f\"?client_id=YOUR_CLIENT_ID\"\n    f\"&redirect_uri=https://yourapp.com/callback\"\n    f\"&response_type=code\"\n    f\"&scope=read+write\"\n    f\"&code_challenge={code_challenge}\"\n    f\"&code_challenge_method=S256\"\n)\nprint(f\"Visit: {auth_url}\")\n\n# Step 3: After user authorizes, exchange code for token (include code_verifier)\ncode = input(\"Enter authorization code: \")\ntoken_response = requests.post(\n    \"https://api.mdblist.com/oauth/token/\",\n    data={\n        \"grant_type\": \"authorization_code\",\n        \"code\": code,\n        \"redirect_uri\": \"https://yourapp.com/callback\",\n        \"client_id\": \"YOUR_CLIENT_ID\",\n        \"client_secret\": \"YOUR_CLIENT_SECRET\",\n        \"code_verifier\": code_verifier,  # Required for PKCE\n    }\n)\ntoken_data = token_response.json()\naccess_token = token_data[\"access_token\"]\n\n# Step 4: Use the token\nheaders = {\"Authorization\": f\"Bearer {access_token}\"}\nresponse = requests.get(\n    \"https://api.mdblist.com/lists/user/\",\n    headers=headers\n)\nprint(response.json())\n```\n\n#### Authentication Method Comparison\n\n| Feature | API Key | OAuth 2.0 |\n| ------- | ------- | --------- |\n| Setup complexity | ⭐ Simple | ⭐⭐⭐ Moderate |\n| Best for | Personal use | Third-party apps |\n| User experience | Copy/paste key | One-click authorize |\n| Token expiration | Never | 30 days (renewable) |\n| Revocable by user | Yes (regenerate) | Yes (per-app) |\n| Rate limits | Same as OAuth | Same as API key |\n\nBoth methods have the **same rate limits** and access to **all API endpoints**.\n\n## Rate Limiting\n\nThe API enforces daily rate limits to ensure fair usage across all users. Your rate limit depends on your supporter tier. Higher supporter tiers receive increased daily request limits.\n\n### Rate Limit Headers\n\nEvery API response includes the following headers to help you track your usage:\n\n| Header | Description |\n| ------ | ----------- |\n| `X-RateLimit-Limit` | Maximum number of requests allowed per day |\n| `X-RateLimit-Remaining` | Number of requests remaining in the current period |\n| `X-RateLimit-Reset` | Unix timestamp when the rate limit resets (midnight UTC) |\n\nYou can check your current rate limit by inspecting these headers in any API response, or by calling the `/user` endpoint.\n\n### Rate Limit Exceeded\n\nWhen you exceed your daily limit, the API returns a `429 Too Many Requests` status with additional headers:\n\n| Header | Description |\n| ------ | ----------- |\n| `Retry-After` | Number of seconds until the rate limit resets |\n\nExample response when rate limited:\n\n```json\n{\n    \"error\": \"Daily API limit exceeded!\"\n}\n```\n\nResponse headers:\n\n```\nX-RateLimit-Limit: 10000\nX-RateLimit-Remaining: 0\nX-RateLimit-Reset: 1734393600\nRetry-After: 43200\n```\n\n## Pagination\n\nSome methods support pagination 📄  \nAppend a query string like ?limit=`limit`&offset=`offset` to the URL to influence the results.\n\n| Parameter | Type | Value |\n| --------- | ---- | ----- |\n| `limit` | integer  | Number of results to return |\n| `offset` | integer  | Number of results to skip from the beginning  |\n\n## Media IDs\n\nWhen a response includes an `ids` block for a movie or show we return the collection of provider identifiers plus the MDBList public ID (`mdblist`).\n\nThe `mdblist` ID can also be used in sync endpoints (watched, ratings, collection) to identify movies and shows in your requests.\n\nExample:\n\n\"ids\": {\n            \"imdb\": \"tt0111161\",\n            \"tmdb\": 278,\n            \"trakt\": 389,\n            \"tvdb\": 832,\n            \"mal\": 999,\n            \"mdblist\": \"a0\"\n        }\n\n## API Endpoints\n\nAll endpoints support **both authentication methods** (API Key and OAuth 2.0). Throughout this documentation:\n\n- Endpoints show `apikey` as optional parameter - use it for API key auth OR use `Authorization: Bearer` header for OAuth\n\n- Rate limits apply equally to both methods\n\n- Same data is returned regardless of authentication method"
+    "description": "API service allows you to access information about ratings, votes, streaming services and more\n\n## Authentication\n\nMDBList API supports two authentication methods: **API Keys** (simple) and **OAuth 2.0** (for third-party apps).\n\n### API Keys\n\nAPI key can be generated for free in [mdblist.com preferences](https://mdblist.com/preferences/#api).\n\nTo authenticate with an API key, append it as a query parameter:\n\n```\nhttps://api.mdblist.com/lists/user/?apikey=YOUR_API_KEY\n```\n\n**Best for**: Personal scripts, testing, direct API access.\n\n### OAuth 2.0 (Beta)\n\nOAuth 2.0 allows third-party applications to access MDBList on behalf of users without requiring their API key. Users authorize your app once, and you receive an access token.\n\n**Status**: Currently in **beta**. The implementation is stable and fully functional, but we're gathering feedback from early adopters. Report issues or suggestions at [mdblist.com/developer/](https://mdblist.com/developer/).\n\n**Best for**: Third-party apps, mobile apps, web services that access MDBList on behalf of multiple users.\n\n#### Quick Start for Developers\n\n1. **Register Your App**\n   Go to [mdblist.com/developer/](https://mdblist.com/developer/) and create an OAuth application. You'll receive:\n   - `client_id` - Public identifier for your app\n   - `client_secret` - Secret key (keep this secure!)\n\n2. **Generate PKCE Challenge** (required for all clients)\n   ```python\n   import secrets, hashlib, base64\n   code_verifier = secrets.token_urlsafe(64)\n   code_challenge = base64.urlsafe_b64encode(\n       hashlib.sha256(code_verifier.encode()).digest()\n   ).rstrip(b'=').decode()\n   ```\n\n3. **Get Authorization**\n   Redirect users to the authorization URL with PKCE:\n   ```\n   https://mdblist.com/oauth/authorize/?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code&scope=read+write&code_challenge=YOUR_CODE_CHALLENGE&code_challenge_method=S256\n   ```\n\n4. **Exchange Code for Token**\n   After the user authorizes, they're redirected back with a `code`. Exchange it for an access token (include the original `code_verifier`):\n   ```bash\n   curl -X POST https://api.mdblist.com/oauth/token/ \\\n     -d \"grant_type=authorization_code\" \\\n     -d \"code=AUTHORIZATION_CODE\" \\\n     -d \"redirect_uri=YOUR_REDIRECT_URI\" \\\n     -d \"client_id=YOUR_CLIENT_ID\" \\\n     -d \"client_secret=YOUR_CLIENT_SECRET\" \\\n     -d \"code_verifier=YOUR_CODE_VERIFIER\"\n   ```\n\n   Response:\n   ```json\n   {\n     \"access_token\": \"abc123xyz789\",\n     \"token_type\": \"Bearer\",\n     \"expires_in\": 2592000,\n     \"refresh_token\": \"def456uvw\",\n     \"scope\": \"read write\"\n   }\n   ```\n\n   **Note**: `expires_in` is in seconds (2592000 = 30 days). Save the `refresh_token` to get new access tokens when this one expires.\n\n5. **Use the Token**\n   Include the access token in the `Authorization` header:\n   ```bash\n   curl -H \"Authorization: Bearer abc123xyz789\" \\\n     https://api.mdblist.com/lists/user/\n   ```\n\n#### OAuth Scopes\n\n| Scope | Description |\n| ----- | ----------- |\n| `read` | Read access to user's lists, watchlist, ratings, and profile |\n| `write` | Modify user's lists, watchlist, ratings, and collection |\n\nDefault scope is `read`. Request `read write` for full access.\n\n#### Token Refresh\n\nAccess tokens expire after 30 days. Use the refresh token to get a new access token without asking the user to re-authorize:\n\n```bash\ncurl -X POST https://api.mdblist.com/oauth/token/ \\\n  -d \"grant_type=refresh_token\" \\\n  -d \"refresh_token=YOUR_REFRESH_TOKEN\" \\\n  -d \"client_id=YOUR_CLIENT_ID\" \\\n  -d \"client_secret=YOUR_CLIENT_SECRET\"\n```\n\n#### OAuth Endpoints\n\n| Endpoint | Method | Purpose |\n| -------- | ------ | ------- |\n| `/oauth/authorize/` | GET | User authorization (WEB) |\n| `/oauth/token/` | POST | Exchange code or refresh token |\n| `/oauth/revoke_token/` | POST | Revoke access token |\n| `/oauth/introspect/` | POST | Check token validity |\n\n> **Important:** All OAuth endpoints require a trailing slash. For example, use `https://api.mdblist.com/oauth/token/` not `https://api.mdblist.com/oauth/token`. Requests without the trailing slash will fail.\n\n#### Security Best Practices\n\n- **Never expose** your `client_secret` in client-side code\n\n- **Use HTTPS** for all OAuth flows\n\n- **Store tokens securely** (encrypted, never in version control)\n\n- **Handle token expiration** gracefully with refresh tokens\n\n- **Revoke tokens** when users disconnect your app\n\n#### Native/Mobile Apps (PKCE)\n\nFor mobile or desktop apps, use PKCE with a loopback or custom scheme redirect URI:\n\n1. **Register app** with a redirect URI (loopback `http://127.0.0.1:PORT/callback` or custom scheme like `myapp://oauth/callback`).\n\n2. **Generate PKCE** `code_verifier` + `code_challenge` (S256).\n\n3. **Authorize** with `code_challenge` + `code_challenge_method=S256`.\n\n4. **Exchange code** with the `code_verifier` at the token endpoint.\n\n**Example PKCE Authorization URL:**\n\n```\nhttps://mdblist.com/oauth/authorize/?client_id=YOUR_CLIENT_ID&redirect_uri=myapp://oauth/callback&response_type=code&scope=read+write&code_challenge=YOUR_CODE_CHALLENGE&code_challenge_method=S256\n```\n\n**Python Example for PKCE Flow:**\n\n```python\nimport requests\nimport webbrowser\n\n# Step 1: Build PKCE authorization URL\nclient_id = \"YOUR_CLIENT_ID\"\nclient_secret = \"YOUR_CLIENT_SECRET\"\ncode_challenge = \"YOUR_CODE_CHALLENGE\"\nredirect_uri = \"myapp://oauth/callback\"\n\nauth_url = (\n    f\"https://mdblist.com/oauth/authorize/\"\n    f\"?client_id={client_id}\"\n    f\"&redirect_uri={redirect_uri}\"\n    f\"&response_type=code\"\n    f\"&scope=read+write\"\n    f\"&code_challenge={code_challenge}\"\n    f\"&code_challenge_method=S256\"\n)\n\n# Step 2: Open browser for user to authorize\nprint(\"Opening browser for authorization...\")\nwebbrowser.open(auth_url)\n\n# Step 3: Receive the authorization code from your redirect URI handler\nauth_code = input(\"Enter the authorization code: \").strip()\n\n# Step 4: Exchange code for access token\ntoken_response = requests.post(\n    \"https://api.mdblist.com/oauth/token/\",\n    data={\n        \"grant_type\": \"authorization_code\",\n        \"code\": auth_code,\n        \"redirect_uri\": redirect_uri,\n        \"client_id\": client_id,\n        \"client_secret\": client_secret,\n        \"code_verifier\": \"YOUR_CODE_VERIFIER\",\n    }\n)\n\nif token_response.status_code == 200:\n    token_data = token_response.json()\n    access_token = token_data[\"access_token\"]\n    print(f\"✓ Authorization successful!\")\n    print(f\"Access Token: {access_token}\")\n\n    # Step 5: Use the token\n    headers = {\"Authorization\": f\"Bearer {access_token}\"}\n    response = requests.get(\n        \"https://api.mdblist.com/lists/user/\",\n        headers=headers\n    )\n    print(f\"✓ Your lists: {response.json()}\")\nelse:\n    print(f\"✗ Error: {token_response.json()}\")\n```\n\n**PKCE is required for all clients** (web apps, mobile apps, desktop apps, CLI tools).\n\n#### Example: Web App OAuth Client\n\n```python\nimport requests\nimport secrets\nimport hashlib\nimport base64\n\n# Step 1: Generate PKCE code verifier and challenge\ncode_verifier = secrets.token_urlsafe(64)\ncode_challenge = base64.urlsafe_b64encode(\n    hashlib.sha256(code_verifier.encode()).digest()\n).rstrip(b'=').decode()\n\n# Step 2: Redirect user to authorization URL with PKCE\nauth_url = (\n    \"https://mdblist.com/oauth/authorize/\"\n    f\"?client_id=YOUR_CLIENT_ID\"\n    f\"&redirect_uri=https://yourapp.com/callback\"\n    f\"&response_type=code\"\n    f\"&scope=read+write\"\n    f\"&code_challenge={code_challenge}\"\n    f\"&code_challenge_method=S256\"\n)\nprint(f\"Visit: {auth_url}\")\n\n# Step 3: After user authorizes, exchange code for token (include code_verifier)\ncode = input(\"Enter authorization code: \")\ntoken_response = requests.post(\n    \"https://api.mdblist.com/oauth/token/\",\n    data={\n        \"grant_type\": \"authorization_code\",\n        \"code\": code,\n        \"redirect_uri\": \"https://yourapp.com/callback\",\n        \"client_id\": \"YOUR_CLIENT_ID\",\n        \"client_secret\": \"YOUR_CLIENT_SECRET\",\n        \"code_verifier\": code_verifier,  # Required for PKCE\n    }\n)\ntoken_data = token_response.json()\naccess_token = token_data[\"access_token\"]\n\n# Step 4: Use the token\nheaders = {\"Authorization\": f\"Bearer {access_token}\"}\nresponse = requests.get(\n    \"https://api.mdblist.com/lists/user/\",\n    headers=headers\n)\nprint(response.json())\n```\n\n#### Authentication Method Comparison\n\n| Feature | API Key | OAuth 2.0 |\n| ------- | ------- | --------- |\n| Setup complexity | ⭐ Simple | ⭐⭐⭐ Moderate |\n| Best for | Personal use | Third-party apps |\n| User experience | Copy/paste key | One-click authorize |\n| Token expiration | Never | 30 days (renewable) |\n| Revocable by user | Yes (regenerate) | Yes (per-app) |\n| Rate limits | Same as OAuth | Same as API key |\n\nBoth methods have the **same rate limits** and access to **all API endpoints**.\n\n## Rate Limiting\n\nThe API enforces daily rate limits to ensure fair usage across all users. Your rate limit depends on your supporter tier. Higher supporter tiers receive increased daily request limits.\n\n### Rate Limit Headers\n\nEvery API response includes the following headers to help you track your usage:\n\n| Header | Description |\n| ------ | ----------- |\n| `X-RateLimit-Limit` | Maximum number of requests allowed per day |\n| `X-RateLimit-Remaining` | Number of requests remaining in the current period |\n| `X-RateLimit-Reset` | Unix timestamp when the rate limit resets (midnight UTC) |\n\nYou can check your current rate limit by inspecting these headers in any API response, or by calling the `/user` endpoint.\n\n### Rate Limit Exceeded\n\nWhen you exceed your daily limit, the API returns a `429 Too Many Requests` status with additional headers:\n\n| Header | Description |\n| ------ | ----------- |\n| `Retry-After` | Number of seconds until the rate limit resets |\n\nExample response when rate limited:\n\n```json\n{\n    \"error\": \"Daily API limit exceeded!\"\n}\n```\n\nResponse headers:\n\n```\nX-RateLimit-Limit: 10000\nX-RateLimit-Remaining: 0\nX-RateLimit-Reset: 1734393600\nRetry-After: 43200\n```\n\n## Pagination\n\nSome methods support pagination 📄  \nAppend a query string like ?limit=`limit`&offset=`offset` to the URL to influence the results.\n\n| Parameter | Type | Value |\n| --------- | ---- | ----- |\n| `limit` | integer  | Number of results to return |\n| `offset` | integer  | Number of results to skip from the beginning  |\n\n## Media IDs\n\nWhen a response includes an `ids` block for a movie or show we return the collection of provider identifiers plus the MDBList public ID (`mdblist`).\n\nThe `mdblist` ID can also be used in sync endpoints (watched, ratings, collection) to identify movies and shows in your requests.\n\nExample:\n\n\"ids\": {\n            \"imdb\": \"tt0111161\",\n            \"tmdb\": 278,\n            \"trakt\": 389,\n            \"tvdb\": 832,\n            \"mal\": 999,\n            \"mdblist\": \"a0\"\n        }\n\n## API Endpoints\n\nAll endpoints support **both authentication methods** (API Key and OAuth 2.0). Throughout this documentation:\n\n- Endpoints show `apikey` as optional parameter - use it for API key auth OR use `Authorization: Bearer` header for OAuth\n\n- Rate limits apply equally to both methods\n\n- Same data is returned regardless of authentication method"
   },
   "paths": {
     "/user": {
@@ -26,19 +26,90 @@
                     "user_id": {
                       "type": "number"
                     },
+                    "username": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "avatar_url": {
+                      "type": "string"
+                    },
+                    "date_joined": {
+                      "type": "string"
+                    },
                     "patron_status": {
                       "type": "string"
                     },
                     "patreon_pledge": {
                       "type": "number"
+                    },
+                    "reward_tier": {
+                      "type": "number"
+                    },
+                    "is_supporter": {
+                      "type": "boolean"
+                    },
+                    "plan": {
+                      "type": "string"
+                    },
+                    "limits": {
+                      "type": "object",
+                      "properties": {
+                        "lists": {
+                          "type": "number"
+                        },
+                        "lists_items": {
+                          "type": "number"
+                        },
+                        "external_lists": {
+                          "type": "number"
+                        },
+                        "ai_lists": {
+                          "type": "number"
+                        },
+                        "catalog_queries": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "rate_limit": {
+                      "type": "number"
+                    },
+                    "rate_limit_remaining": {
+                      "type": "number"
+                    },
+                    "rate_limit_reset": {
+                      "type": "number"
+                    },
+                    "auth_method": {
+                      "type": "string"
                     }
                   },
                   "example": {
                     "api_requests": 100000,
                     "api_requests_count": 276,
                     "user_id": 3,
+                    "username": "linaspurinis",
+                    "name": "Linas",
+                    "avatar_url": "https://example.com/avatar.jpg",
+                    "date_joined": "2020-01-15T12:00:00",
                     "patron_status": "active_patron",
-                    "patreon_pledge": 300
+                    "patreon_pledge": 300,
+                    "reward_tier": 300,
+                    "is_supporter": true,
+                    "plan": "Supporter",
+                    "limits": {
+                      "lists": 40,
+                      "lists_items": 50000,
+                      "external_lists": 20,
+                      "ai_lists": 6,
+                      "catalog_queries": 40
+                    },
+                    "rate_limit": 100000,
+                    "rate_limit_remaining": 99724,
+                    "rate_limit_reset": 1706918400,
+                    "auth_method": "apikey"
                   }
                 },
                 "examples": {
@@ -47,8 +118,26 @@
                       "api_requests": 100000,
                       "api_requests_count": 276,
                       "user_id": 3,
+                      "username": "linaspurinis",
+                      "name": "Linas",
+                      "avatar_url": "https://example.com/avatar.jpg",
+                      "date_joined": "2020-01-15T12:00:00",
                       "patron_status": "active_patron",
-                      "patreon_pledge": 300
+                      "patreon_pledge": 300,
+                      "reward_tier": 300,
+                      "is_supporter": true,
+                      "plan": "Supporter",
+                      "limits": {
+                        "lists": 40,
+                        "lists_items": 50000,
+                        "external_lists": 20,
+                        "ai_lists": 6,
+                        "catalog_queries": 40
+                      },
+                      "rate_limit": 100000,
+                      "rate_limit_remaining": 99724,
+                      "rate_limit_reset": 1706918400,
+                      "auth_method": "apikey"
                     }
                   }
                 }
@@ -56,8 +145,8 @@
             }
           }
         },
-        "summary": "Get My Limits",
-        "operationId": "Get My Limits",
+        "summary": "Get User Information",
+        "operationId": "Get User Information",
         "description": "",
         "tags": [],
         "parameters": [
@@ -93,7 +182,7 @@
       "get": {
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Returns an array of lists. When `unified=true`, twin lists (movie + show pairs) are merged: `ids` array replaces `id`, `mediatype` is omitted, and `items` is the sum of both twins.",
             "headers": {},
             "content": {
               "application/json": {
@@ -104,6 +193,12 @@
                     "properties": {
                       "id": {
                         "type": "number"
+                      },
+                      "user_id": {
+                        "type": "number"
+                      },
+                      "user_name": {
+                        "type": "string"
                       },
                       "name": {
                         "type": "string"
@@ -122,45 +217,66 @@
                       },
                       "likes": {
                         "type": "number"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "dynamic": {
+                        "type": "boolean"
+                      },
+                      "private": {
+                        "type": "boolean"
+                      },
+                      "last_updated_at": {
+                        "type": "string"
                       }
                     },
                     "required": [
                       "id",
+                      "user_id",
+                      "user_name",
                       "name",
                       "slug",
                       "description",
                       "mediatype",
                       "items",
-                      "likes"
+                      "likes",
+                      "type",
+                      "dynamic",
+                      "private",
+                      "last_updated_at"
                     ]
                   },
                   "example": [
                     {
                       "id": 13,
+                      "user_id": 3,
+                      "user_name": "linaspurinis",
                       "name": "Top Watched Movies of The Week for KiDS",
                       "slug": "top-watched-movies-of-the-week-for-kids",
                       "description": "",
                       "mediatype": "movie",
                       "items": 12,
-                      "likes": 50
+                      "likes": 50,
+                      "type": "dynamic",
+                      "dynamic": true,
+                      "private": false,
+                      "last_updated_at": "2025-01-15T10:30:00Z"
                     },
                     {
                       "id": 14,
+                      "user_id": 3,
+                      "user_name": "linaspurinis",
                       "name": "Top Watched Movies of The Week / >60",
                       "slug": "top-watched-movies-of-the-week",
                       "description": "",
                       "mediatype": "movie",
                       "items": 75,
-                      "likes": 247
-                    },
-                    {
-                      "id": 69,
-                      "name": "IMDb Moviemeter (Top 100)",
-                      "slug": "imdb-moviemeter-top-100",
-                      "description": "",
-                      "mediatype": "movie",
-                      "items": 100,
-                      "likes": 57
+                      "likes": 247,
+                      "type": "dynamic",
+                      "dynamic": true,
+                      "private": false,
+                      "last_updated_at": "2025-01-14T08:00:00Z"
                     }
                   ]
                 },
@@ -169,30 +285,33 @@
                     "value": [
                       {
                         "id": 13,
+                        "user_id": 3,
+                        "user_name": "linaspurinis",
                         "name": "Top Watched Movies of The Week for KiDS",
                         "slug": "top-watched-movies-of-the-week-for-kids",
                         "description": "",
                         "mediatype": "movie",
                         "items": 12,
-                        "likes": 50
+                        "likes": 50,
+                        "type": "dynamic",
+                        "dynamic": true,
+                        "private": false,
+                        "last_updated_at": "2025-01-15T10:30:00Z"
                       },
                       {
                         "id": 14,
+                        "user_id": 3,
+                        "user_name": "linaspurinis",
                         "name": "Top Watched Movies of The Week / >60",
                         "slug": "top-watched-movies-of-the-week",
                         "description": "",
                         "mediatype": "movie",
                         "items": 75,
-                        "likes": 247
-                      },
-                      {
-                        "id": 69,
-                        "name": "IMDb Moviemeter (Top 100)",
-                        "slug": "imdb-moviemeter-top-100",
-                        "description": "",
-                        "mediatype": "movie",
-                        "items": 100,
-                        "likes": 57
+                        "likes": 247,
+                        "type": "dynamic",
+                        "dynamic": true,
+                        "private": false,
+                        "last_updated_at": "2025-01-14T08:00:00Z"
                       }
                     ]
                   }
@@ -229,6 +348,17 @@
             }
           },
           {
+            "name": "unified",
+            "in": "query",
+            "description": "When `true`, twin lists (movie + show pairs) are merged into a single entry with `ids` array instead of separate `id`. Items are summed and `mediatype` is omitted.",
+            "required": false,
+            "example": "false",
+            "schema": {
+              "type": "boolean",
+              "default": "false"
+            }
+          },
+          {
             "name": "Accept",
             "in": "header",
             "description": "e.g. application/json",
@@ -262,6 +392,12 @@
                       "id": {
                         "type": "number"
                       },
+                      "user_id": {
+                        "type": "number"
+                      },
+                      "user_name": {
+                        "type": "string"
+                      },
                       "name": {
                         "type": "string"
                       },
@@ -279,45 +415,36 @@
                       },
                       "likes": {
                         "type": "number"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "dynamic": {
+                        "type": "boolean"
+                      },
+                      "private": {
+                        "type": "boolean"
+                      },
+                      "last_updated_at": {
+                        "type": "string"
                       }
-                    },
-                    "required": [
-                      "id",
-                      "name",
-                      "slug",
-                      "description",
-                      "mediatype",
-                      "items",
-                      "likes"
-                    ]
+                    }
                   },
                   "example": [
                     {
                       "id": 13,
+                      "user_id": 3,
+                      "user_name": "linaspurinis",
                       "name": "Top Watched Movies of The Week for KiDS",
                       "slug": "top-watched-movies-of-the-week-for-kids",
                       "description": "",
                       "mediatype": "movie",
                       "items": 12,
-                      "likes": 50
-                    },
-                    {
-                      "id": 14,
-                      "name": "Top Watched Movies of The Week / >60",
-                      "slug": "top-watched-movies-of-the-week",
-                      "description": "",
-                      "mediatype": "movie",
-                      "items": 75,
-                      "likes": 247
-                    },
-                    {
-                      "id": 69,
-                      "name": "IMDb Moviemeter (Top 100)",
-                      "slug": "imdb-moviemeter-top-100",
-                      "description": "",
-                      "mediatype": "movie",
-                      "items": 100,
-                      "likes": 57
+                      "likes": 50,
+                      "type": "dynamic",
+                      "dynamic": true,
+                      "private": false,
+                      "last_updated_at": "2025-01-15T10:30:00Z"
                     }
                   ]
                 },
@@ -326,30 +453,18 @@
                     "value": [
                       {
                         "id": 13,
+                        "user_id": 3,
+                        "user_name": "linaspurinis",
                         "name": "Top Watched Movies of The Week for KiDS",
                         "slug": "top-watched-movies-of-the-week-for-kids",
                         "description": "",
                         "mediatype": "movie",
                         "items": 12,
-                        "likes": 50
-                      },
-                      {
-                        "id": 14,
-                        "name": "Top Watched Movies of The Week / >60",
-                        "slug": "top-watched-movies-of-the-week",
-                        "description": "",
-                        "mediatype": "movie",
-                        "items": 75,
-                        "likes": 247
-                      },
-                      {
-                        "id": 69,
-                        "name": "IMDb Moviemeter (Top 100)",
-                        "slug": "imdb-moviemeter-top-100",
-                        "description": "",
-                        "mediatype": "movie",
-                        "items": 100,
-                        "likes": 57
+                        "likes": 50,
+                        "type": "dynamic",
+                        "dynamic": true,
+                        "private": false,
+                        "last_updated_at": "2025-01-15T10:30:00Z"
                       }
                     ]
                   }
@@ -394,6 +509,17 @@
               "enum": ["ranked", "name", "created"],
               "default": "ranked"
             }
+          },
+          {
+            "name": "unified",
+            "in": "query",
+            "description": "When `true`, twin lists (movie + show pairs) are merged into a single entry with `ids` array. Items are summed and `mediatype` is omitted.",
+            "required": false,
+            "example": "false",
+            "schema": {
+              "type": "boolean",
+              "default": "false"
+            }
           }
         ]
       }
@@ -414,6 +540,12 @@
                       "id": {
                         "type": "number"
                       },
+                      "user_id": {
+                        "type": "number"
+                      },
+                      "user_name": {
+                        "type": "string"
+                      },
                       "name": {
                         "type": "string"
                       },
@@ -431,45 +563,36 @@
                       },
                       "likes": {
                         "type": "number"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "dynamic": {
+                        "type": "boolean"
+                      },
+                      "private": {
+                        "type": "boolean"
+                      },
+                      "last_updated_at": {
+                        "type": "string"
                       }
-                    },
-                    "required": [
-                      "id",
-                      "name",
-                      "slug",
-                      "description",
-                      "mediatype",
-                      "items",
-                      "likes"
-                    ]
+                    }
                   },
                   "example": [
                     {
                       "id": 13,
+                      "user_id": 3,
+                      "user_name": "linaspurinis",
                       "name": "Top Watched Movies of The Week for KiDS",
                       "slug": "top-watched-movies-of-the-week-for-kids",
                       "description": "",
                       "mediatype": "movie",
                       "items": 12,
-                      "likes": 50
-                    },
-                    {
-                      "id": 14,
-                      "name": "Top Watched Movies of The Week / >60",
-                      "slug": "top-watched-movies-of-the-week",
-                      "description": "",
-                      "mediatype": "movie",
-                      "items": 75,
-                      "likes": 247
-                    },
-                    {
-                      "id": 69,
-                      "name": "IMDb Moviemeter (Top 100)",
-                      "slug": "imdb-moviemeter-top-100",
-                      "description": "",
-                      "mediatype": "movie",
-                      "items": 100,
-                      "likes": 57
+                      "likes": 50,
+                      "type": "dynamic",
+                      "dynamic": true,
+                      "private": false,
+                      "last_updated_at": "2025-01-15T10:30:00Z"
                     }
                   ]
                 },
@@ -478,30 +601,18 @@
                     "value": [
                       {
                         "id": 13,
+                        "user_id": 3,
+                        "user_name": "linaspurinis",
                         "name": "Top Watched Movies of The Week for KiDS",
                         "slug": "top-watched-movies-of-the-week-for-kids",
                         "description": "",
                         "mediatype": "movie",
                         "items": 12,
-                        "likes": 50
-                      },
-                      {
-                        "id": 14,
-                        "name": "Top Watched Movies of The Week / >60",
-                        "slug": "top-watched-movies-of-the-week",
-                        "description": "",
-                        "mediatype": "movie",
-                        "items": 75,
-                        "likes": 247
-                      },
-                      {
-                        "id": 69,
-                        "name": "IMDb Moviemeter (Top 100)",
-                        "slug": "imdb-moviemeter-top-100",
-                        "description": "",
-                        "mediatype": "movie",
-                        "items": 100,
-                        "likes": 57
+                        "likes": 50,
+                        "type": "dynamic",
+                        "dynamic": true,
+                        "private": false,
+                        "last_updated_at": "2025-01-15T10:30:00Z"
                       }
                     ]
                   }
@@ -545,6 +656,17 @@
               "type": "string",
               "enum": ["ranked", "name", "created"],
               "default": "ranked"
+            }
+          },
+          {
+            "name": "unified",
+            "in": "query",
+            "description": "When `true`, twin lists (movie + show pairs) are merged into a single entry with `ids` array. Items are summed and `mediatype` is omitted.",
+            "required": false,
+            "example": "false",
+            "schema": {
+              "type": "boolean",
+              "default": "false"
             }
           }
         ]
@@ -1603,9 +1725,9 @@
           {
             "name": "append_to_response",
             "in": "query",
-            "description": "Additional information to append. Supported: `genres`, `poster`, `ratings`.",
+            "description": "Additional information to append. Supported: `genres`, `poster`, `description`, `ratings`.",
             "required": false,
-            "example": "genres,poster,ratings",
+            "example": "genres,poster,description,ratings",
             "schema": {
               "type": "string"
             }
@@ -2249,9 +2371,9 @@
           {
             "name": "append_to_response",
             "in": "query",
-            "description": "Additional information to append. Supported: `genres`, `poster`, `ratings`.",
+            "description": "Additional information to append. Supported: `genres`, `poster`, `description`, `ratings`.",
             "required": false,
-            "example": "genres,poster,ratings",
+            "example": "genres,poster,description,ratings",
             "schema": {
               "type": "string"
             }
@@ -3996,6 +4118,16 @@
             "schema": {
               "type": "number"
             }
+          },
+          {
+            "name": "hide_unreleased",
+            "in": "query",
+            "description": "When `true`, exclude episodes airing \"today\" (they will appear starting the next day). If omitted, uses the user's saved preference from mdblist.com settings.",
+            "required": false,
+            "example": "true",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ]
       }
@@ -5147,9 +5279,9 @@
           {
             "name": "append_to_response",
             "in": "query",
-            "description": "Additional information to append. Supported: `genres`, `poster`, `ratings`.",
+            "description": "Additional information to append. Supported: `genres`, `poster`, `description`, `ratings`.",
             "required": false,
-            "example": "genres,poster,ratings",
+            "example": "genres,poster,description,ratings",
             "schema": {
               "type": "string"
             }
@@ -5568,6 +5700,9 @@
                     "collected_at": {
                       "type": "string"
                     },
+                    "dropped_at": {
+                      "type": "string"
+                    },
                     "paused_at": {
                       "type": "string"
                     },
@@ -5585,6 +5720,7 @@
                     "episode_watched_at": "2025-10-22T07:53:32Z",
                     "rated_at": "2025-10-22T07:53:44Z",
                     "collected_at": "2025-10-22T07:56:39Z",
+                    "dropped_at": "2025-10-22T07:57:10Z",
                     "paused_at": "2025-10-22T08:00:00Z",
                     "episode_paused_at": "2025-10-22T08:00:00Z",
                     "list_updated_at": "2025-10-22T09:00:00Z"
@@ -5599,6 +5735,7 @@
                       "episode_watched_at": "2025-10-22T07:53:32Z",
                       "rated_at": "2025-10-22T07:53:44Z",
                       "collected_at": "2025-10-22T07:56:39Z",
+                      "dropped_at": "2025-10-22T07:57:10Z",
                       "paused_at": "2025-10-22T08:00:00Z",
                       "episode_paused_at": "2025-10-22T08:00:00Z",
                       "list_updated_at": "2025-10-22T09:00:00Z"
@@ -6688,6 +6825,465 @@
                           ]
                         }
                       ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sync/dropped": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "shows": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dropped_at": {
+                            "type": "string"
+                          },
+                          "show": {
+                            "type": "object",
+                            "properties": {
+                              "title": {
+                                "type": "string"
+                              },
+                              "year": {
+                                "type": "number"
+                              },
+                              "ids": {
+                                "type": "object",
+                                "properties": {
+                                  "trakt": {
+                                    "type": "number"
+                                  },
+                                  "imdb": {
+                                    "type": "string"
+                                  },
+                                  "tmdb": {
+                                    "type": "number"
+                                  },
+                                  "mdblist": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "offset": {
+                          "type": "number"
+                        },
+                        "limit": {
+                          "type": "number"
+                        },
+                        "total_shows": {
+                          "type": "number"
+                        },
+                        "has_more": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "shows": [
+                      {
+                        "dropped_at": "2025-10-15T20:00:00Z",
+                        "show": {
+                          "title": "Breaking Bad",
+                          "year": 2008,
+                          "ids": {
+                            "trakt": 1,
+                            "imdb": "tt0903747",
+                            "tmdb": 1396,
+                            "mdblist": "8plj"
+                          }
+                        }
+                      }
+                    ],
+                    "pagination": {
+                      "offset": 0,
+                      "limit": 1000,
+                      "total_shows": 25,
+                      "has_more": true
+                    }
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "shows": [
+                        {
+                          "dropped_at": "2025-10-15T20:00:00Z",
+                          "show": {
+                            "title": "Breaking Bad",
+                            "year": 2008,
+                            "ids": {
+                              "trakt": 1,
+                              "imdb": "tt0903747",
+                              "tmdb": 1396,
+                              "mdblist": "8plj"
+                            }
+                          }
+                        }
+                      ],
+                      "pagination": {
+                        "offset": 0,
+                        "limit": 1000,
+                        "total_shows": 25,
+                        "has_more": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Retrieve Dropped Shows",
+        "operationId": "Retrieve Dropped Shows",
+        "description": "",
+        "tags": ["Sync"],
+        "parameters": [
+          {
+            "name": "apikey",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "abc123",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "0",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "1000",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "2025-10-01T00:00:00Z",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "append_to_response",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "genres,ratings",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "updated": {
+                      "type": "object",
+                      "properties": {
+                        "shows": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "existing": {
+                      "type": "object",
+                      "properties": {
+                        "shows": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "not_found": {
+                      "type": "object",
+                      "properties": {
+                        "shows": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "updated": {
+                      "shows": 1
+                    },
+                    "existing": {
+                      "shows": 0
+                    },
+                    "not_found": {
+                      "shows": 0
+                    }
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "updated": {
+                        "shows": 1
+                      },
+                      "existing": {
+                        "shows": 0
+                      },
+                      "not_found": {
+                        "shows": 0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Add or Update Dropped Shows",
+        "operationId": "Add or Update Dropped Shows",
+        "description": "**Rules:**\n\n- **Shows only**\n\n- **No new `TraktWatched` rows** are created. If a show is not in watch history, it is returned as `not_found`.",
+        "tags": ["Sync"],
+        "parameters": [
+          {
+            "name": "apikey",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "abc123",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "0",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "1000",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "2025-10-01T00:00:00Z",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "append_to_response",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "genres,ratings",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "shows": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ids": {
+                          "type": "object",
+                          "properties": {
+                            "imdb": {
+                              "type": "string"
+                            },
+                            "mdblist": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "dropped_at": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "shows": [
+                    {
+                      "ids": {
+                        "imdb": "tt0903747",
+                        "mdblist": "8plj"
+                      },
+                      "dropped_at": "2025-10-15T20:00:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sync/dropped/remove": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "removed": {
+                      "type": "object",
+                      "properties": {
+                        "shows": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "not_found": {
+                      "type": "object",
+                      "properties": {
+                        "shows": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "removed": {
+                      "shows": 1
+                    },
+                    "not_found": {
+                      "shows": 0
+                    }
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "removed": {
+                        "shows": 1
+                      },
+                      "not_found": {
+                        "shows": 0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Remove Dropped Shows",
+        "operationId": "Remove Dropped Shows",
+        "description": "",
+        "tags": ["Sync"],
+        "parameters": [
+          {
+            "name": "apikey",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "abc123",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "shows": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ids": {
+                          "type": "object",
+                          "properties": {
+                            "imdb": {
+                              "type": "string"
+                            },
+                            "mdblist": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "shows": [
+                    {
+                      "ids": {
+                        "imdb": "tt0903747",
+                        "mdblist": "8plj"
+                      }
                     }
                   ]
                 }
@@ -8677,6 +9273,657 @@
         }
       }
     },
+    "/checkin": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Created",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "type": "string"
+                    },
+                    "progress": {
+                      "type": "number"
+                    },
+                    "movie": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string"
+                        },
+                        "year": {
+                          "type": "number"
+                        },
+                        "ids": {
+                          "type": "object",
+                          "properties": {
+                            "imdb": {
+                              "type": "string"
+                            },
+                            "tmdb": {
+                              "type": "number"
+                            },
+                            "trakt": {
+                              "type": "number"
+                            },
+                            "mdblist": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "show": {
+                      "nullable": true
+                    }
+                  },
+                  "example": {
+                    "action": "checkin",
+                    "progress": 0,
+                    "movie": {
+                      "title": "Inception",
+                      "year": 2010,
+                      "ids": {
+                        "imdb": "tt1375666",
+                        "tmdb": 27205,
+                        "trakt": 16662,
+                        "mdblist": "a1b2c"
+                      }
+                    },
+                    "show": null
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "action": "checkin",
+                      "progress": 0,
+                      "movie": {
+                        "title": "Inception",
+                        "year": 2010,
+                        "ids": {
+                          "imdb": "tt1375666",
+                          "tmdb": 27205,
+                          "trakt": 16662,
+                          "mdblist": "a1b2c"
+                        }
+                      },
+                      "show": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "error": "Either 'movie' or 'show' must be provided"
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "error": "Either 'movie' or 'show' must be provided"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "error": "Movie not found in database"
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "error": "Movie not found in database"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Returned when the item already has an active scrobble session managed by another app.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "error": "Session managed by API"
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "error": "Session managed by API"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Start Check-in",
+        "operationId": "Start Check-in",
+        "description": "Start watching a movie or episode. Creates a new manual session and cancels any existing manual check-in.",
+        "tags": ["Scrobble"],
+        "parameters": [
+          {
+            "name": "apikey",
+            "in": "query",
+            "description": "Your API key",
+            "required": true,
+            "example": "api_key_here",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "movie": {
+                    "type": "object",
+                    "properties": {
+                      "ids": {
+                        "type": "object",
+                        "properties": {
+                          "imdb": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "app_version": {
+                    "type": "string"
+                  },
+                  "app_date": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "movie": {
+                    "ids": {
+                      "imdb": "tt1375666"
+                    }
+                  },
+                  "app_version": "MyApp 1.0",
+                  "app_date": "2025-01-15"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "type": "string"
+                    },
+                    "progress": {
+                      "type": "number"
+                    },
+                    "movie": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string"
+                        },
+                        "year": {
+                          "type": "number"
+                        },
+                        "ids": {
+                          "type": "object",
+                          "properties": {
+                            "imdb": {
+                              "type": "string"
+                            },
+                            "tmdb": {
+                              "type": "number"
+                            },
+                            "trakt": {
+                              "type": "number"
+                            },
+                            "mdblist": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "show": {
+                      "nullable": true
+                    }
+                  },
+                  "example": {
+                    "action": "checkin",
+                    "progress": 45.25,
+                    "movie": {
+                      "title": "Inception",
+                      "year": 2010,
+                      "ids": {
+                        "imdb": "tt1375666",
+                        "tmdb": 27205,
+                        "trakt": 16662,
+                        "mdblist": "a1b2c"
+                      }
+                    },
+                    "show": null
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "action": "checkin",
+                      "progress": 45.25,
+                      "movie": {
+                        "title": "Inception",
+                        "year": 2010,
+                        "ids": {
+                          "imdb": "tt1375666",
+                          "tmdb": 27205,
+                          "trakt": 16662,
+                          "mdblist": "a1b2c"
+                        }
+                      },
+                      "show": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "error": "No active check-in"
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "error": "No active check-in"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get Current Check-in",
+        "operationId": "Get Current Check-in",
+        "description": "Get the currently active manual check-in session. Progress is computed based on elapsed time.",
+        "tags": ["Scrobble"],
+        "parameters": [
+          {
+            "name": "apikey",
+            "in": "query",
+            "description": "Your API key",
+            "required": true,
+            "example": "api_key_here",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "patch": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "type": "string"
+                    },
+                    "progress": {
+                      "type": "number"
+                    },
+                    "movie": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string"
+                        },
+                        "year": {
+                          "type": "number"
+                        },
+                        "ids": {
+                          "type": "object",
+                          "properties": {
+                            "imdb": {
+                              "type": "string"
+                            },
+                            "tmdb": {
+                              "type": "number"
+                            },
+                            "trakt": {
+                              "type": "number"
+                            },
+                            "mdblist": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "show": {
+                      "nullable": true
+                    }
+                  },
+                  "example": {
+                    "action": "pause",
+                    "progress": 45.25,
+                    "movie": {
+                      "title": "Inception",
+                      "year": 2010,
+                      "ids": {
+                        "imdb": "tt1375666",
+                        "tmdb": 27205,
+                        "trakt": 16662,
+                        "mdblist": "a1b2c"
+                      }
+                    },
+                    "show": null
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "action": "pause",
+                      "progress": 45.25,
+                      "movie": {
+                        "title": "Inception",
+                        "year": 2010,
+                        "ids": {
+                          "imdb": "tt1375666",
+                          "tmdb": 27205,
+                          "trakt": 16662,
+                          "mdblist": "a1b2c"
+                        }
+                      },
+                      "show": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "error": "No active check-in"
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "error": "No active check-in"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Update Check-in",
+        "operationId": "Update Check-in",
+        "description": "Update the current check-in session. Can pause/resume playback or update progress manually.",
+        "tags": ["Scrobble"],
+        "parameters": [
+          {
+            "name": "apikey",
+            "in": "query",
+            "description": "Your API key",
+            "required": true,
+            "example": "api_key_here",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "paused": {
+                    "type": "boolean"
+                  }
+                },
+                "example": {
+                  "paused": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "type": "string"
+                    },
+                    "progress": {
+                      "type": "number"
+                    },
+                    "deleted": {
+                      "type": "boolean"
+                    },
+                    "deleted_count": {
+                      "type": "number"
+                    },
+                    "movie": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string"
+                        },
+                        "year": {
+                          "type": "number"
+                        },
+                        "ids": {
+                          "type": "object",
+                          "properties": {
+                            "imdb": {
+                              "type": "string"
+                            },
+                            "tmdb": {
+                              "type": "number"
+                            },
+                            "trakt": {
+                              "type": "number"
+                            },
+                            "mdblist": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "show": {
+                      "nullable": true
+                    }
+                  },
+                  "example": {
+                    "action": "stop",
+                    "progress": 85.5,
+                    "deleted": true,
+                    "deleted_count": 1,
+                    "movie": {
+                      "title": "Inception",
+                      "year": 2010,
+                      "ids": {
+                        "imdb": "tt1375666",
+                        "tmdb": 27205,
+                        "trakt": 16662,
+                        "mdblist": "a1b2c"
+                      }
+                    },
+                    "show": null
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "action": "stop",
+                      "progress": 85.5,
+                      "deleted": true,
+                      "deleted_count": 1,
+                      "movie": {
+                        "title": "Inception",
+                        "year": 2010,
+                        "ids": {
+                          "imdb": "tt1375666",
+                          "tmdb": 27205,
+                          "trakt": 16662,
+                          "mdblist": "a1b2c"
+                        }
+                      },
+                      "show": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "error": "No active check-in"
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "error": "No active check-in"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Stop Check-in",
+        "operationId": "Stop Check-in",
+        "description": "Stop the current check-in. If progress ≥ 80%, the item is marked as watched. Can delete the current session (no body) or a specific item.",
+        "tags": ["Scrobble"],
+        "parameters": [
+          {
+            "name": "apikey",
+            "in": "query",
+            "description": "Your API key",
+            "required": true,
+            "example": "api_key_here",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "example": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/sync/playback": {
       "get": {
         "responses": {
@@ -9576,9 +10823,9 @@
           {
             "name": "append_to_response",
             "in": "query",
-            "description": "Additional information to append. Supported: `genres`, `poster`, `ratings`.",
+            "description": "Additional information to append. Supported: `genres`, `poster`, `description`, `ratings`.",
             "required": false,
-            "example": "genres,poster,ratings",
+            "example": "genres,poster,description,ratings",
             "schema": {
               "type": "string"
             }
@@ -9795,6 +11042,781 @@
           "$ref": "#/components/requestBodies/Modify_Static_List_ItemsBody"
         }
       }
+    },
+    "/catalog/movie": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "movies": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string"
+                          },
+                          "year": {
+                            "type": "number"
+                          },
+                          "score": {
+                            "type": "number"
+                          },
+                          "score_average": {
+                            "type": "number"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "ids": {
+                            "type": "object",
+                            "properties": {
+                              "imdbid": {
+                                "type": "string"
+                              },
+                              "tmdbid": {
+                                "type": "number"
+                              },
+                              "traktid": {
+                                "type": "number"
+                              },
+                              "malid": {
+                                "nullable": true
+                              },
+                              "tvdbid": {
+                                "nullable": true
+                              },
+                              "mdblist": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "limit": {
+                          "type": "number"
+                        },
+                        "has_more": {
+                          "type": "boolean"
+                        },
+                        "next_cursor": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "movies": [
+                      {
+                        "title": "The Dark Knight",
+                        "year": 2008,
+                        "score": 94,
+                        "score_average": 90,
+                        "type": "movie",
+                        "ids": {
+                          "imdbid": "tt0468569",
+                          "tmdbid": 155,
+                          "traktid": 16,
+                          "malid": null,
+                          "tvdbid": null,
+                          "mdblist": "abcd1234"
+                        }
+                      }
+                    ],
+                    "pagination": {
+                      "limit": 100,
+                      "has_more": true,
+                      "next_cursor": "eyJzIjo5NCwgImkiOiAxNTV9"
+                    }
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "movies": [
+                        {
+                          "title": "The Dark Knight",
+                          "year": 2008,
+                          "score": 94,
+                          "score_average": 90,
+                          "type": "movie",
+                          "ids": {
+                            "imdbid": "tt0468569",
+                            "tmdbid": 155,
+                            "traktid": 16,
+                            "malid": null,
+                            "tvdbid": null,
+                            "mdblist": "abcd1234"
+                          }
+                        }
+                      ],
+                      "pagination": {
+                        "limit": 100,
+                        "has_more": true,
+                        "next_cursor": "eyJzIjo5NCwgImkiOiAxNTV9"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Cache is being built. Retry after the number of seconds in the `Retry-After` header.",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "hash": {
+                      "type": "string"
+                    },
+                    "retry_after": {
+                      "type": "number"
+                    }
+                  },
+                  "example": {
+                    "error": "Catalog is being built. Please retry shortly.",
+                    "hash": "a3f1c2...",
+                    "retry_after": 5
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "error": "Catalog is being built. Please retry shortly.",
+                      "hash": "a3f1c2...",
+                      "retry_after": 5
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "error": "Invalid released_from. Use YYYY-MM-DD."
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "error": "Invalid released_from. Use YYYY-MM-DD."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "limit": {
+                      "type": "number"
+                    },
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "error": "Catalog query limit reached.",
+                    "limit": 5,
+                    "detail": "You have reached the maximum number of unique catalog queries for your plan."
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "error": "Catalog query limit reached.",
+                      "limit": 5,
+                      "detail": "You have reached the maximum number of unique catalog queries for your plan."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get movie catalog",
+        "operationId": "Get movie catalog",
+        "description": "",
+        "tags": ["Catalog"],
+        "parameters": [
+          {
+            "name": "apikey",
+            "in": "query",
+            "description": "Your API Key",
+            "required": true,
+            "example": "abc123",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "genre",
+            "in": "query",
+            "description": "Genre name(s). Repeat for multiple: `?genre=action&genre=comedy`. Also accepts CSV: `?genre=action,comedy`. Max 20.",
+            "required": false,
+            "example": "action",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "genre_mode",
+            "in": "query",
+            "description": "How to match multiple genres",
+            "required": false,
+            "example": "or",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "and"]
+            }
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "description": "CSV of 2-letter ISO 3166-1 country codes. Max 10. Example: `?country=us,gb`",
+            "required": false,
+            "example": "us",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "description": "CSV of 2-letter ISO 639-1 language codes. Max 10. Example: `?language=en,fr`",
+            "required": false,
+            "example": "en",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "score_min",
+            "in": "query",
+            "description": "Minimum MDBList score (0–100)",
+            "required": false,
+            "example": "60",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "score_max",
+            "in": "query",
+            "description": "Maximum MDBList score (0–100)",
+            "required": false,
+            "example": "100",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "released_from",
+            "in": "query",
+            "description": "Earliest release date (YYYY-MM-DD)",
+            "required": false,
+            "example": "2020-01-01",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "released_to",
+            "in": "query",
+            "description": "Latest release date (YYYY-MM-DD)",
+            "required": false,
+            "example": "2024-12-31",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year_min",
+            "in": "query",
+            "description": "Minimum production year",
+            "required": false,
+            "example": "2000",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "year_max",
+            "in": "query",
+            "description": "Maximum production year",
+            "required": false,
+            "example": "2024",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "runtime_min",
+            "in": "query",
+            "description": "Minimum runtime in minutes",
+            "required": false,
+            "example": "60",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "runtime_max",
+            "in": "query",
+            "description": "Maximum runtime in minutes",
+            "required": false,
+            "example": "180",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort field",
+            "required": false,
+            "example": "score",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "score",
+                "score_average",
+                "released",
+                "releasedigital",
+                "imdbrating",
+                "imdbvotes",
+                "imdbpopular",
+                "tmdbpopular",
+                "metacritic",
+                "rtomatoes",
+                "rtaudience",
+                "letterrating",
+                "title"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "description": "Sort direction",
+            "required": false,
+            "example": "desc",
+            "schema": {
+              "type": "string",
+              "enum": ["desc", "asc"]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (default: 100, max: 100)",
+            "required": false,
+            "example": "100",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Pagination cursor from `next_cursor` in previous response",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/catalog/show": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "shows": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string"
+                          },
+                          "year": {
+                            "type": "number"
+                          },
+                          "score": {
+                            "type": "number"
+                          },
+                          "score_average": {
+                            "type": "number"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "ids": {
+                            "type": "object",
+                            "properties": {
+                              "imdbid": {
+                                "type": "string"
+                              },
+                              "tmdbid": {
+                                "type": "number"
+                              },
+                              "traktid": {
+                                "type": "number"
+                              },
+                              "malid": {
+                                "nullable": true
+                              },
+                              "tvdbid": {
+                                "type": "number"
+                              },
+                              "mdblist": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "limit": {
+                          "type": "number"
+                        },
+                        "has_more": {
+                          "type": "boolean"
+                        },
+                        "next_cursor": {
+                          "nullable": true
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "shows": [
+                      {
+                        "title": "Breaking Bad",
+                        "year": 2008,
+                        "score": 97,
+                        "score_average": 95,
+                        "type": "show",
+                        "ids": {
+                          "imdbid": "tt0903747",
+                          "tmdbid": 1396,
+                          "traktid": 1,
+                          "malid": null,
+                          "tvdbid": 81189,
+                          "mdblist": "wxyz5678"
+                        }
+                      }
+                    ],
+                    "pagination": {
+                      "limit": 100,
+                      "has_more": false,
+                      "next_cursor": null
+                    }
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "shows": [
+                        {
+                          "title": "Breaking Bad",
+                          "year": 2008,
+                          "score": 97,
+                          "score_average": 95,
+                          "type": "show",
+                          "ids": {
+                            "imdbid": "tt0903747",
+                            "tmdbid": 1396,
+                            "traktid": 1,
+                            "malid": null,
+                            "tvdbid": 81189,
+                            "mdblist": "wxyz5678"
+                          }
+                        }
+                      ],
+                      "pagination": {
+                        "limit": 100,
+                        "has_more": false,
+                        "next_cursor": null
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Cache is being built. Retry after the number of seconds in the `Retry-After` header.",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "hash": {
+                      "type": "string"
+                    },
+                    "retry_after": {
+                      "type": "number"
+                    }
+                  },
+                  "example": {
+                    "error": "Catalog is being built. Please retry shortly.",
+                    "hash": "b7e9d1...",
+                    "retry_after": 5
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "error": "Catalog is being built. Please retry shortly.",
+                      "hash": "b7e9d1...",
+                      "retry_after": 5
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get show catalog",
+        "operationId": "Get show catalog",
+        "description": "",
+        "tags": ["Catalog"],
+        "parameters": [
+          {
+            "name": "apikey",
+            "in": "query",
+            "description": "Your API Key",
+            "required": true,
+            "example": "abc123",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "genre",
+            "in": "query",
+            "description": "Genre name(s). Repeat for multiple: `?genre=drama&genre=thriller`. Also accepts CSV. Max 20.",
+            "required": false,
+            "example": "drama",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "genre_mode",
+            "in": "query",
+            "description": "`or` (default) or `and`",
+            "required": false,
+            "example": "or",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "description": "CSV of 2-letter ISO country codes. Max 10.",
+            "required": false,
+            "example": "us",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "description": "CSV of 2-letter ISO language codes. Max 10.",
+            "required": false,
+            "example": "en",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "score_min",
+            "in": "query",
+            "description": "Minimum MDBList score (0–100)",
+            "required": false,
+            "example": "60",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "score_max",
+            "in": "query",
+            "description": "Maximum MDBList score (0–100)",
+            "required": false,
+            "example": "100",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "released_from",
+            "in": "query",
+            "description": "Earliest release date (YYYY-MM-DD)",
+            "required": false,
+            "example": "2020-01-01",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "released_to",
+            "in": "query",
+            "description": "Latest release date (YYYY-MM-DD)",
+            "required": false,
+            "example": "2024-12-31",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year_min",
+            "in": "query",
+            "description": "Minimum production year",
+            "required": false,
+            "example": "2000",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "year_max",
+            "in": "query",
+            "description": "Maximum production year",
+            "required": false,
+            "example": "2024",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "runtime_min",
+            "in": "query",
+            "description": "Minimum episode runtime in minutes",
+            "required": false,
+            "example": "20",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "runtime_max",
+            "in": "query",
+            "description": "Maximum episode runtime in minutes",
+            "required": false,
+            "example": "60",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort field (same options as Movie Catalog)",
+            "required": false,
+            "example": "score",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "description": "`desc` (default) or `asc`",
+            "required": false,
+            "example": "desc",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (default: 100, max: 100)",
+            "required": false,
+            "example": "100",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Pagination cursor from `next_cursor` in previous response",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
     }
   },
   "tags": [
@@ -9814,10 +11836,14 @@
     },
     {
       "name": "Scrobble",
-      "description": "> ⚠️ **Notice: Scrobble endpoints are currently in BETA.**\n\nScrobble endpoints allow you to track real-time playback progress of movies and TV episodes. These endpoints are designed for media players and applications that want to track what users are currently watching and resume playback across multiple devices.\n\n## Quick Example\n\n**Starting a movie scrobble:**\n\n```json\nPOST /scrobble/start?apikey=YOUR_API_KEY\n{\n  \"movie\": {\"ids\": {\"imdb\": \"tt0111161\", \"mdblist\": \"a0\"}},\n  \"progress\": 15.5\n}\n```\n\n**Starting an episode scrobble:**\n\n```json\nPOST /scrobble/start?apikey=YOUR_API_KEY\n{\n  \"show\": {\n    \"ids\": {\"imdb\": \"tt0108778\", \"mdblist\": \"8x1d\"},\n    \"season\": {\n      \"number\": 1,\n      \"episode\": {\n        \"number\": 3\n      }\n    }\n  },\n  \"progress\": 42.75\n}\n```\n\n## How Scrobbling Works\n\n1. **Start**: Call `/scrobble/start` when playback begins\n\n2. **Pause**: Call `/scrobble/pause` when user pauses (saves progress for resume)\n\n3. **Stop**: Call `/scrobble/stop` when playback ends\n   - If progress ≥ 80%, the item is automatically marked as watched\n   - If progress < 80%, it's saved as a paused session for later resume\n\n## Key Features\n\n- **Single active session per item**: Starting a new session replaces any existing one for that movie/episode\n\n- **Cross-device resume**: Paused sessions can be retrieved via `/sync/playback` to resume on any device\n\n- **Auto-watched**: Items are automatically marked as watched when stopped at 80% or higher progress\n\n- **Auto-expiration**: Active sessions automatically expire after the remaining runtime + 10 minute buffer\n\n- **Seamless sync integration**: Watched items automatically appear in `/sync/watched` responses"
+      "description": "Scrobble endpoints allow you to track real-time playback progress of movies and TV episodes. These endpoints are designed for media players and applications that want to track what users are currently watching and resume playback across multiple devices.\n\n## Quick Example\n\n**Starting a movie scrobble:**\n\n```json\nPOST /scrobble/start?apikey=YOUR_API_KEY\n{\n  \"movie\": {\"ids\": {\"imdb\": \"tt0111161\", \"mdblist\": \"a0\"}},\n  \"progress\": 15.5\n}\n```\n\n**Starting an episode scrobble:**\n\n```json\nPOST /scrobble/start?apikey=YOUR_API_KEY\n{\n  \"show\": {\n    \"ids\": {\"imdb\": \"tt0108778\", \"mdblist\": \"8x1d\"},\n    \"season\": {\n      \"number\": 1,\n      \"episode\": {\n        \"number\": 3\n      }\n    }\n  },\n  \"progress\": 42.75\n}\n```\n\n## How Scrobbling Works\n\n1. **Start**: Call `/scrobble/start` when playback begins\n\n2. **Pause**: Call `/scrobble/pause` when user pauses (saves progress for resume)\n\n3. **Stop**: Call `/scrobble/stop` when playback ends\n   - If progress ≥ 80%, the item is automatically marked as watched\n   - If progress < 80%, it's saved as a paused session for later resume\n\n## Key Features\n\n- **Single active session per item**: Starting a new session replaces any existing one for that movie/episode\n\n- **Cross-device resume**: Paused sessions can be retrieved via `/sync/playback` to resume on any device\n\n- **Auto-watched**: Items are automatically marked as watched when stopped at 80% or higher progress\n\n- **Auto-expiration**: Active sessions automatically expire after the remaining runtime + 10 minute buffer\n\n- **Seamless sync integration**: Watched items automatically appear in `/sync/watched` responses"
     },
     {
       "name": "Watchlist"
+    },
+    {
+      "name": "Catalog",
+      "description": "> ⚠️ **Notice: Catalog endpoints are currently in BETA.**\n\nDynamic, filtered catalogs for third-party apps. Results are cached for 6 hours and shared across all users with identical filter parameters.\n\n**Quota:** Each unique filter combination counts against your plan's catalog query limit (total dynamic lists). Reusing the same combination does not consume an additional slot while it remains in the 7-day quota window.\n\n**Pagination:** Cursor-based (no OFFSET). Pass `next_cursor` from the response as the `cursor` parameter to fetch the next page.\n\n**Thundering herd:** If a cache entry is being built for the first time, other requests for the same page receive `202 Accepted` with a `Retry-After: 5` header. Retry after 5 seconds."
     }
   ],
   "servers": [
@@ -9922,7 +11948,8 @@
     "schemas": {
       "Ratings": {},
       "Genres": {},
-      "My_Limits": {},
+      "Check-in": {},
+      "User_Information": {},
       "My_Lists": {},
       "User_Lists_by_ID": {},
       "User_Lists_by_Name": {},
@@ -9939,13 +11966,15 @@
       "Up_Next": {},
       "Create_Static_List": {},
       "Modify_Static_List_Items": {},
-      "Get_User_s_External_Lists": {},
+      "Get_Users_External_Lists": {},
       "Get_External_List_Info": {},
       "Movie_Updates": {},
       "Show_Updates": {},
       "Last_Activities": {},
       "Watched_History": {},
       "Remove_Watched_History": {},
+      "Dropped_Shows": {},
+      "Remove_Dropped_Shows": {},
       "Ratings_Sync": {},
       "Remove_Ratings": {},
       "Collection_Sync": {},
@@ -9956,7 +11985,9 @@
       "Scrobble_Clear": {},
       "Sync_Playback": {},
       "List_Watchlist_items": {},
-      "Modify_Watchlist": {}
+      "Modify_Watchlist": {},
+      "Movie_Catalog": {},
+      "Show_Catalog": {}
     }
   }
 }

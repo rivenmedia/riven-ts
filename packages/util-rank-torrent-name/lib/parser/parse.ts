@@ -1,9 +1,10 @@
 import { Parser, transforms } from "@viren070/parse-torrent-title";
+import { toMerged } from "es-toolkit";
 import { prettifyError } from "zod";
 
 import { sceneHandlers } from "../parser/handlers/scene.handlers.ts";
 import { trashHandlers } from "../parser/handlers/trash.handlers.ts";
-import { ParsedDataSchema } from "../schemas.ts";
+import { type ParsedData, ParsedDataSchema } from "../schemas.ts";
 import { adultHandlers } from "./handlers/adult.handlers.ts";
 
 const parser = new Parser()
@@ -82,6 +83,45 @@ export function parse(rawTitle: string) {
   if (!parsedData.success) {
     throw new Error(
       `Failed to parse ${rawTitle}: ${prettifyError(parsedData.error)}`,
+    );
+  }
+
+  return parsedData.data;
+}
+
+/**
+ * An experimental function that attempts to parse torrent data from an individual file's path within the torrent, rather than the overall torrent title.
+ *
+ * @param filePath The file path to parse, e.g. /Season 01/Episode 01.mkv
+ * @returns Parsed data extracted from the file path parts, e.g. { seasons: [1], episodes: [1] }
+ */
+export function parseFilePath(filePath: string) {
+  const parts = filePath.split("/").filter(Boolean);
+
+  if (parts.length === 0) {
+    throw new TypeError(
+      "The input file path must contain at least one segment.",
+    );
+  }
+
+  const parseData = parts.reduce<ParsedData | null>((acc, part) => {
+    try {
+      const parsedPart = parse(part);
+
+      return toMerged(acc ?? {}, parsedPart);
+    } catch {
+      return acc;
+    }
+  }, null);
+
+  const parsedData = ParsedDataSchema.safeParse({
+    ...parseData,
+    rawTitle: filePath,
+  });
+
+  if (!parsedData.success) {
+    throw new Error(
+      `Failed to parse file path ${filePath}: ${prettifyError(parsedData.error)}`,
     );
   }
 

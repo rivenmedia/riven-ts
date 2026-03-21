@@ -19,12 +19,6 @@ export interface FanOutDownloadInput {
 
 export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
   async ({ input: { item, subscribers } }) => {
-    const processableStates = MediaItemState.extract([
-      "ongoing",
-      "indexed",
-      "scraped",
-    ]);
-
     if (item instanceof Show) {
       await database.em.fork().populate(item, ["requestedSeasons"]);
 
@@ -44,6 +38,12 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
 
     if (item instanceof Season) {
       await database.em.fork().populate(item, ["episodes"]);
+
+      const processableStates = MediaItemState.extract([
+        "ongoing",
+        "indexed",
+        "scraped",
+      ]);
 
       const incompleteEpisodes = await item.episodes.matching({
         orderBy: { number: "asc" },

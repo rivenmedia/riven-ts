@@ -1,3 +1,5 @@
+import { reduceAsync } from "es-toolkit";
+
 import { database } from "../../database/database.ts";
 
 export const getMoviesDirectoryEntries = async (
@@ -14,18 +16,22 @@ export const getMoviesDirectoryEntries = async (
   );
 
   return Array.from(
-    entries.reduce<Set<string>>((acc, entry) => {
-      if (tmdbId) {
-        return new Set([...acc, entry.vfsFileName]);
-      }
+    await reduceAsync(
+      entries,
+      async (acc, entry) => {
+        if (tmdbId) {
+          return acc.add(await entry.getVfsFileName());
+        }
 
-      const { prettyName } = entry.mediaItem.getEntity();
+        const prettyName = await entry.mediaItem.getEntity().getPrettyName();
 
-      if (!prettyName) {
-        return acc;
-      }
+        if (!prettyName) {
+          return acc;
+        }
 
-      return new Set([...acc, prettyName]);
-    }, new Set<string>()),
+        return acc.add(prettyName);
+      },
+      new Set<string>(),
+    ),
   );
 };

@@ -12,6 +12,7 @@ import type {
   MediaItemIndexRequestedEvent,
   MediaItemIndexRequestedPluginResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+import type { TimezoneName } from "countries-and-timezones";
 
 function findEnglishShowTitle(series: SeriesExtendedRecordSchema) {
   if (series.originalLanguage === "eng") {
@@ -26,12 +27,13 @@ function findEnglishShowTitle(series: SeriesExtendedRecordSchema) {
 }
 
 export const transformSeries = (
-  eventItem: MediaItemIndexRequestedEvent["item"],
+  itemRequest: MediaItemIndexRequestedEvent["item"],
   series: SeriesExtendedRecordSchema,
   allEpisodes: EpisodeBaseRecordSchema[],
+  originalReleaseTimezone: TimezoneName | undefined,
 ) => {
   const imdbId =
-    eventItem.imdbId ??
+    itemRequest.imdbId ??
     series.remoteIds?.find((id) => id.sourceName?.toLowerCase() === "imdb")
       ?.id ??
     null;
@@ -40,17 +42,12 @@ export const transformSeries = (
     slug = "",
     image: posterPath,
     status: { name: tvdbStatus } = {},
+    airsTime,
   } = series;
 
   const title = findEnglishShowTitle(series);
 
   assert(title, "Series must have a name");
-
-  const firstAired = series.firstAired
-    ? DateTime.fromISO(series.firstAired)
-    : null;
-
-  assert(firstAired);
 
   const network =
     series.latestNetwork?.name ?? series.originalNetwork?.name ?? null;
@@ -102,6 +99,8 @@ export const transformSeries = (
       series.contentRatings?.find(({ country }) => country === "usa")?.name,
     );
 
+  const airsDateTime = DateTime.fromFormat(airsTime ?? "00:00", "HH:mm");
+
   const seasons = allEpisodes.reduce<
     Extract<
       NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
@@ -114,44 +113,46 @@ export const transformSeries = (
       return acc;
     }
 
-    const season = acc[seasonNumber] ?? {
+    const episodeAiredDate = episode.aired
+      ? DateTime.fromISO(episode.aired)
+      : null;
+
+    const episodeAiredAtUtc = episodeAiredDate
+      ? DateTime.fromObject(
+          {
+            year: episodeAiredDate.year,
+            month: episodeAiredDate.month,
+            day: episodeAiredDate.day,
+            hour: airsDateTime.hour,
+            minute: airsDateTime.minute,
+          },
+          { zone: originalReleaseTimezone },
+        ).toUTC()
+      : null;
+
+    acc[seasonNumber] ??= {
       number: seasonNumber,
-      title: episode.seasonName ?? null,
+      title: null,
       episodes: [],
     };
 
-    return {
-      ...acc,
-      [seasonNumber]: {
-        ...season,
-        episodes: [
-          ...season.episodes,
-          {
-            contentRating, // TODO: Get episode-specific content rating
-            number,
-            absoluteNumber: episode.absoluteNumber ?? 0,
-            title: episode.name ?? "Unknown",
-            posterPath: episode.image
-              ? new URL(
-                  episode.image,
-                  "https://artworks.thetvdb.com",
-                ).toString()
-              : posterPath,
-            airedAt: episode.aired
-              ? DateTime.fromISO(episode.aired).toISO({
-                  precision: "day",
-                  includeOffset: false,
-                })
-              : null,
-            runtime: episode.runtime ?? null,
-          },
-        ],
-      },
-    };
+    acc[seasonNumber].episodes.push({
+      contentRating, // TODO: Get episode-specific content rating
+      number,
+      absoluteNumber: episode.absoluteNumber ?? 0,
+      title: episode.name ?? "Unknown",
+      posterPath: episode.image
+        ? new URL(episode.image, "https://artworks.thetvdb.com").toString()
+        : posterPath,
+      airedAt: episodeAiredAtUtc?.toISO({ precision: "minute" }) ?? null,
+      runtime: episode.runtime ?? null,
+    });
+
+    return acc;
   }, {});
 
   return {
-    id: eventItem.id,
+    id: itemRequest.id,
     type: "show",
     imdbId,
     title: sanitisedTitle,
@@ -166,11 +167,7 @@ export const transformSeries = (
     ),
     contentRating,
     posterUrl: posterPath,
-    status: tvdbStatus === "Continuing" ? "continuing" : "ended",
-    firstAired: firstAired.toISO({
-      precision: "day",
-      includeOffset: false,
-    }),
+    status: tvdbStatus?.toLowerCase() === "continuing" ? "continuing" : "ended",
     seasons,
   } satisfies Extract<
     NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
