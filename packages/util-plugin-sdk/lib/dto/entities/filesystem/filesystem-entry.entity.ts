@@ -34,17 +34,18 @@ export type FileSystemEntryType = z.infer<typeof FileSystemEntryType>;
  * @throws {ReferenceError} if required properties are missing for path generation.
  * @throws {TypeError} if the media item type is unsupported. Only `Movie` and `Episode` have associated filesystem entries.
  */
-function getMediaItemPathParts(mediaItem: MediaItem) {
+async function getMediaItemPathParts(mediaItem: MediaItem) {
   if (mediaItem instanceof Movie) {
     return [mediaItem.getPrettyName()];
   }
 
   if (mediaItem instanceof Episode) {
-    const seasonLabel = mediaItem.season.getEntity().getPrettyName();
-    const showLabel = mediaItem.season
-      .getProperty("show")
-      .getEntity()
-      .getPrettyName();
+    const season = await mediaItem.season.loadOrFail({
+      populate: ["show"],
+    });
+
+    const seasonLabel = season.getPrettyName();
+    const showLabel = season.show.getEntity().getPrettyName();
 
     if (!seasonLabel || !showLabel) {
       throw new ReferenceError(
@@ -121,7 +122,7 @@ export abstract class FileSystemEntry {
   @BeforeCreate()
   async _setPath() {
     const mediaItem = this.mediaItem.getEntity();
-    const pathParts = getMediaItemPathParts(mediaItem);
+    const pathParts = await getMediaItemPathParts(mediaItem);
 
     // Remove periods from path parts to avoid directories being parsed as files
     const sanitisedPathParts = pathParts.map((part) => part.replace(/\./g, ""));
