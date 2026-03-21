@@ -4,8 +4,6 @@ import {
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
 
-import path from "node:path";
-
 import { MetadataSettingsResponse } from "../schemas/metadata-settings-response.schema.ts";
 import { RequestResponse } from "../schemas/request-response.schema.ts";
 
@@ -18,7 +16,7 @@ import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/sche
 export class SeerrAPIError extends Error {}
 
 export class SeerrAPI extends BaseDataSource<SeerrSettings> {
-  override baseURL = path.join(this.settings.url, "/api/v1/");
+  override baseURL = new URL("/api/v1/", this.settings.url).toString();
   override serviceName = "Seerr";
 
   protected override readonly rateLimiterOptions: RateLimiterOptions = {
