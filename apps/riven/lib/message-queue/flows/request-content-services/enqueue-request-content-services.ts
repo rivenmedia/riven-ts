@@ -11,7 +11,7 @@ export interface EnqueueRequestContentServicesInput {
   subscribers: RivenPlugin[];
 }
 
-export async function enqueueRequestContentServices({
+export function enqueueRequestContentServices({
   subscribers,
 }: EnqueueRequestContentServicesInput) {
   const childNodes = subscribers.map((plugin) =>

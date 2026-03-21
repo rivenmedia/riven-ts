@@ -50,17 +50,14 @@ export const initialiseVfs = fromPromise<
       );
     }
 
-    if (
-      mountPathStats.uid !== processUid ||
-      mountPathStats.gid !== processGid
-    ) {
+    if (mountPathStats.uid !== processUid) {
       throw new Error(
         dedent`
           VFS mount path "${mountPath}" is not owned by the current user.
 
           Please change the ownership of this directory to the current user by running the following command:
 
-          \`sudo chown ${processUid.toString()}:${processGid.toString()} ${mountPath}\`.
+          \`sudo chown ${processUid.toString()} ${mountPath}\`.
         `,
       );
     }

@@ -13,8 +13,8 @@ services:
     gpus: all
     env_file: .env.plex
     environment:
-      PGID: 1000
       PUID: 1000
+      PGID: 1000
     ports:
       - 32400:32400
     volumes:

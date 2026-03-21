@@ -14,7 +14,7 @@ export interface EnqueueMapItemsToFilesInput {
   jobId: string;
 }
 
-export async function enqueueMapItemsToFiles({
+export function enqueueMapItemsToFiles({
   parent,
   infoHash,
   files,

@@ -14,8 +14,8 @@ services:
       - /dev/fuse
     env_file: .env.riven
     environment:
-      PGID: 1000
       PUID: 1000
+      PGID: 1000
       RIVEN_SETTING__vfsMountPath: /mount
       RIVEN_SETTING__redisUrl: redis://riven-cache:6379
       RIVEN_SETTING__databaseUrl: postgresql+psycopg2://postgres:rkApFWOCN5hbNVYor9qLanWoplYqSP6N@riven-db:5432/riven
