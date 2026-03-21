@@ -14,16 +14,16 @@ services:
       - /dev/fuse
     env_file: .env.riven
     environment:
-      PUID: 1000
-      PGID: 1000
+      PUID: ${PUID}
+      PGID: ${PGID}
       RIVEN_SETTING__vfsMountPath: /mount
       RIVEN_SETTING__redisUrl: redis://riven-cache:6379
-      RIVEN_SETTING__databaseUrl: postgresql+psycopg2://postgres:rkApFWOCN5hbNVYor9qLanWoplYqSP6N@riven-db:5432/riven
+      RIVEN_SETTING__databaseUrl: postgresql+psycopg2://postgres:${DATABASE_PASSWORD}@riven-db:5432/riven
       RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__url: http://seerr:5055
       RIVEN_PLUGIN_SETTING__REPO_PLUGIN_PLEX__plexServerUrl: http://plex:32400
     volumes:
       - ./docker-data/riven:/riven/data
-      - /mnt/riven:/mount:rshared
+      - ${HOST_VFS_MOUNT_PATH}:/mount:rshared
     ports:
       - 8080:8080
     depends_on:

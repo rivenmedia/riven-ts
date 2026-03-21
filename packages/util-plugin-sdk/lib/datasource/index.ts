@@ -17,7 +17,6 @@ import {
   Worker,
 } from "bullmq";
 import { DateTime } from "luxon";
-import path from "node:path";
 import { Logger } from "winston";
 import z from "zod";
 
@@ -129,7 +128,7 @@ export abstract class BaseDataSource<
         } = await benchmark(async () => {
           this.logger.silly(
             [
-              `[${this.serviceName}] Initiating request to ${path.join(this.baseURL, job.data.path)}`,
+              `[${this.serviceName}] Initiating request to ${new URL(job.data.path, this.baseURL).toString()}`,
               ...(job.data.params ? [`?${job.data.params}`] : []),
             ].join(""),
           );

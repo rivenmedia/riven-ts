@@ -12,15 +12,12 @@ services:
     runtime: nvidia
     gpus: all
     env_file: .env.plex
-    environment:
-      PUID: 1000
-      PGID: 1000
     ports:
       - 32400:32400
     volumes:
       - ./docker-data/plex/config:/config
       - ./docker-data/plex/transcode:/transcode
-      - /mnt/riven:/mount:rslave
+      - ${HOST_VFS_MOUNT_PATH}:/mount:rslave
     healthcheck:
       test: curl --connect-timeout 15 --silent --show-error --fail http://127.0.0.1:32400/identity
       interval: 1m00s
