@@ -9,3 +9,5 @@
 **/*.log
 **/pnpm
 **/__generated__
+**/docker-data
+**/*.env*

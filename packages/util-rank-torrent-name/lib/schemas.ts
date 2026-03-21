@@ -4,8 +4,12 @@ import { normaliseTitle } from "./shared/normalise.ts";
 
 const nonEmptyString = z.string().min(1);
 const positiveIntSchema = z.int().positive();
+const nonnegativeIntSchema = z.int().nonnegative();
 
-const bitDepthEnum = z.enum(["8bit", "10bit", "12bit"]);
+const bitDepthEnum = z.preprocess(
+  (val) => (typeof val === "string" ? val.replaceAll(".", "") : val),
+  z.enum(["8bit", "10bit", "12bit"]),
+);
 
 export type BitDepth = z.infer<typeof bitDepthEnum>;
 
@@ -21,8 +25,8 @@ export const ParsedDataSchema = z
     quality: nonEmptyString.optional(),
     codec: nonEmptyString.optional(),
     bitDepth: bitDepthEnum.optional(),
-    seasons: z.array(positiveIntSchema).default([]),
-    episodes: z.array(positiveIntSchema).default([]),
+    seasons: z.array(nonnegativeIntSchema).default([]),
+    episodes: z.array(nonnegativeIntSchema).default([]),
     complete: z.boolean().optional(),
     volumes: z.array(positiveIntSchema).optional(),
     audio: z.array(nonEmptyString).optional(),
@@ -67,20 +71,25 @@ export const ParsedDataSchema = z
   })
   .transform((data) => ({
     ...data,
-    type: data.seasons.length || data.episodes.length ? "show" : "movie",
+    type:
+      data.seasons.length || data.episodes.length
+        ? ("show" as const)
+        : ("movie" as const),
     normalisedTitle: normaliseTitle(data.title),
     converted: data.convert ?? false,
     remux:
       data.remux ??
-      ["remux", "bluray remux"].includes(data.quality?.toLowerCase() ?? ""),
+      (data.quality
+        ? ["remux", "bluray remux"].includes(data.quality.toLowerCase())
+        : false),
   }));
 
 export type ParsedData = z.infer<typeof ParsedDataSchema>;
 
 export const Resolution = z.enum([
   "2160p",
-  "1080p",
   "1440p",
+  "1080p",
   "720p",
   "480p",
   "360p",
@@ -88,3 +97,13 @@ export const Resolution = z.enum([
 ]);
 
 export type Resolution = z.infer<typeof Resolution>;
+
+export const ResolutionRank = Resolution.options.reduce<
+  Record<Resolution, number>
+>(
+  (acc, res, index) => ({
+    ...acc,
+    [res]: Resolution.options.length - index,
+  }),
+  {} as Record<Resolution, number>,
+);

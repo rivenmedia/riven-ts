@@ -32,11 +32,15 @@ export class MediaEntry extends FileSystemEntry {
   @Property()
   @IsUrl()
   @IsOptional()
-  unrestrictedUrl?: string;
+  streamUrl?: string;
 
   @Field()
   @Property()
-  provider!: string;
+  plugin!: string;
+
+  @Field(() => String, { nullable: true })
+  @Property()
+  provider!: string | null;
 
   @Field({ nullable: true })
   @Property()
@@ -52,9 +56,8 @@ export class MediaEntry extends FileSystemEntry {
   @Property({ type: "json" })
   mediaMetadata?: object;
 
-  @Property({ persist: false, hidden: true })
-  get vfsFileName(): Opt<string> {
-    const { prettyName } = this.mediaItem.getEntity();
+  async getVfsFileName(): Promise<string> {
+    const prettyName = await this.mediaItem.getEntity().getPrettyName();
 
     if (!prettyName) {
       throw new TypeError(

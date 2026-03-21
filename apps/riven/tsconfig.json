@@ -11,6 +11,7 @@
     "vitest.d.ts",
     "vitest.config.ts",
     "vitest.setup.ts",
+    "vitest.global-setup.ts",
     "zod2md.config.ts"
   ],
   "include": [],

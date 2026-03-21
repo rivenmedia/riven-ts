@@ -366,6 +366,7 @@ paths:
                     type: string
                   links:
                     $ref: "#/components/schemas/Links"
+                    nullable: true
                 type: object
         "401":
           description: Unauthorized
@@ -513,6 +514,7 @@ paths:
                     type: string
                   links:
                     $ref: "#/components/schemas/Links"
+                    nullable: true
                 type: object
         "401":
           description: Unauthorized
@@ -771,6 +773,7 @@ paths:
                     type: string
                   links:
                     $ref: "#/components/schemas/Links"
+                    nullable: true
         "401":
           description: Unauthorized
       tags:
@@ -934,6 +937,7 @@ paths:
                     type: string
                   links:
                     $ref: "#/components/schemas/Links"
+                    nullable: true
                 type: object
         "401":
           description: Unauthorized
@@ -1250,6 +1254,7 @@ paths:
                     type: string
                   links:
                     $ref: "#/components/schemas/Links"
+                    nullable: true
                 type: object
         "401":
           description: Unauthorized
@@ -1471,6 +1476,7 @@ paths:
                     type: string
                   links:
                     $ref: "#/components/schemas/Links"
+                    nullable: true
                 type: object
         "401":
           description: Unauthorized
@@ -1682,6 +1688,7 @@ paths:
                     type: string
                   links:
                     $ref: "#/components/schemas/Links"
+                    nullable: true
                 type: object
         "401":
           description: Unauthorized
@@ -2302,6 +2309,7 @@ paths:
                     type: string
                   links:
                     $ref: "#/components/schemas/Links"
+                    nullable: true
                 type: object
         "400":
           description: Invalid since, type param.
@@ -2439,6 +2447,7 @@ components:
           type: boolean
         language:
           type: string
+          nullable: true
         score:
           type: number
         thumbnail:
@@ -2707,6 +2716,7 @@ components:
           x-go-name: ID
         image:
           type: string
+          nullable: true
         isFeatured:
           type: boolean
           x-go-name: IsFeatured
@@ -2718,6 +2728,7 @@ components:
           nullable: true
         name:
           type: string
+          nullable: true
         nameTranslations:
           items:
             type: string
@@ -2734,6 +2745,7 @@ components:
           type: integer
         personImgURL:
           type: string
+          nullable: true
         peopleType:
           type: string
         seriesId:
@@ -2777,6 +2789,7 @@ components:
           x-go-name: Aliases
         country:
           type: string
+          nullable: true
         id:
           format: int64
           type: integer
@@ -2983,15 +2996,18 @@ components:
           type: integer
         name:
           type: string
+          nullable: true
         nameTranslations:
           items:
             type: string
           type: array
+          nullable: true
           x-go-name: NameTranslations
         number:
           type: integer
         overview:
           type: string
+          nullable: true
         overviewTranslations:
           items:
             type: string
@@ -3077,6 +3093,7 @@ components:
           items:
             type: string
           type: array
+          nullable: true
           x-go-name: NameTranslations
         networks:
           items:
@@ -3263,6 +3280,7 @@ components:
           items:
             type: string
           type: array
+          nullable: true
           x-go-name: NameTranslations
         overview:
           type: string
@@ -3321,6 +3339,7 @@ components:
           items:
             type: string
           type: array
+          nullable: true
           x-go-name: NameTranslations
         overview:
           type: string
@@ -3363,6 +3382,7 @@ components:
           items:
             type: string
           type: array
+          nullable: true
           x-go-name: NameTranslations
         overviewTranslations:
           items:
@@ -3460,6 +3480,7 @@ components:
           items:
             type: string
           type: array
+          nullable: true
           x-go-name: NameTranslations
         originalCountry:
           type: string
@@ -3553,6 +3574,7 @@ components:
           items:
             type: string
           type: array
+          nullable: true
           x-go-name: NameTranslations
         overviewTranslations:
           items:
@@ -3611,6 +3633,7 @@ components:
           items:
             type: string
           type: array
+          nullable: true
           x-go-name: NameTranslations
         overviewTranslations:
           items:
@@ -3824,6 +3847,7 @@ components:
           items:
             type: string
           type: array
+          nullable: true
           x-go-name: NameTranslations
         number:
           format: int64
@@ -3878,6 +3902,7 @@ components:
           items:
             type: string
           type: array
+          nullable: true
           x-go-name: NameTranslations
         number:
           format: int64
@@ -4001,6 +4026,7 @@ components:
           items:
             type: string
           type: array
+          nullable: true
           x-go-name: NameTranslations
         nextAired:
           type: string
@@ -4036,6 +4062,7 @@ components:
           $ref: "#/components/schemas/SeriesAirsDays"
         airsTime:
           type: string
+          nullable: true
         aliases:
           items:
             $ref: "#/components/schemas/Alias"
@@ -4045,6 +4072,7 @@ components:
           items:
             $ref: "#/components/schemas/ArtworkExtendedRecord"
           type: array
+          nullable: true
           x-go-name: Artworks
         averageRuntime:
           type: integer
@@ -4053,6 +4081,7 @@ components:
           items:
             $ref: "#/components/schemas/Character"
           type: array
+          nullable: true
           x-go-name: Characters
         contentRatings:
           items:
@@ -4097,6 +4126,7 @@ components:
           items:
             type: string
           type: array
+          nullable: true
           x-go-name: NameTranslations
         companies:
           items:
@@ -4321,6 +4351,7 @@ components:
           items:
             $ref: "#/components/schemas/Translation"
           type: array
+          nullable: true
         overviewTranslations:
           items:
             $ref: "#/components/schemas/Translation"
@@ -4431,6 +4462,7 @@ components:
           nullable: true
         next:
           type: string
+          nullable: true
         total_items:
           type: integer
         page_size:

@@ -8,6 +8,7 @@
     "./types/*": "./lib/types/*.ts",
     "./dto/entities": "./lib/dto/entities/index.ts",
     "./dto/enums/*": "./lib/dto/enums/*.ts",
+    "./dto/repositories/*": "./lib/dto/repositories/*.ts",
     "./dto/unions/*": "./lib/dto/unions/*.ts",
     "./errors/*": "./lib/errors/*.ts",
     "./events": "./lib/schemas/events/index.ts",
@@ -29,7 +30,6 @@
     "@repo/util-rank-torrent-name": "workspace:^",
     "es-toolkit": "catalog:",
     "luxon": "catalog:",
-    "redis-memory-server": "^0.16.0",
     "zod": "catalog:",
     "zod-validation-error": "catalog:"
   },

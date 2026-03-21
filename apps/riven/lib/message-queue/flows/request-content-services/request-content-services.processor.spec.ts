@@ -7,9 +7,9 @@ it.todo(
 );
 
 it.todo(
-  'sends a "riven.item-request.creation.success" event with the created item if the item is successfully processed',
+  'sends a "riven.item-request.create.success" event with the created item if the item is successfully processed',
 );
 
 it.todo(
-  'sends a "riven.media-item.creation.error" event with the item and error message if the item processing fails',
+  'sends a "riven.media-item.create.error" event with the item and error message if the item processing fails',
 );

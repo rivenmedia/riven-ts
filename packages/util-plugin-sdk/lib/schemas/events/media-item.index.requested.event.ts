@@ -35,25 +35,29 @@ const IndexedItem = z.object({
   imdbId: z.string().nullable(),
 });
 
+const ReleaseDatetime = z.iso.datetime({ precision: -1 });
+
 export const MediaItemIndexRequestedResponse = z
   .object({
     item: z.discriminatedUnion("type", [
       IndexedItem.extend({
         type: z.literal("show"),
         contentRating: ShowContentRating,
-        firstAired: z.iso.date(),
         network: z.string().min(1).nullable(),
         status: ShowStatus,
-        seasons: z.array(
+        seasons: z.record(
+          z.int(),
           z.object({
             number: z.number(),
+            title: z.string().nullable(),
             episodes: z.array(
               z.object({
                 contentRating: ShowContentRating,
-                number: z.number(),
+                absoluteNumber: z.int().nonnegative(),
+                number: z.int().nonnegative(),
                 title: z.string(),
                 posterPath: z.url().nullish(),
-                airedAt: z.iso.date().nullish(),
+                airedAt: ReleaseDatetime.nullable(),
                 runtime: z.int().positive().nullable(),
               }),
             ),
@@ -62,8 +66,9 @@ export const MediaItemIndexRequestedResponse = z
       }),
       IndexedItem.extend({
         type: z.literal("movie"),
-        releaseDate: z.iso.date().nullish(),
+        releaseDate: ReleaseDatetime.nullable(),
         contentRating: MovieContentRating,
+        runtime: z.int().positive().nullable(),
       }),
     ]),
   })

@@ -1,5 +1,6 @@
 import {
   Episode,
+  ItemRequest,
   Movie,
   Season,
   Show,
@@ -22,11 +23,19 @@ const it = baseIt.extend<{
 }>({
   movie: async ({}, use) => {
     const em = database.em.fork();
+
+    const itemRequest = em.create(ItemRequest, {
+      requestedBy: "@repo/plugin-test",
+      state: "completed",
+      type: "movie",
+    });
+
     const movie = em.create(Movie, {
       title: "Test Movie",
       contentRating: "g",
-      state: "indexed",
       tmdbId: "1",
+      itemRequest,
+      isRequested: true,
     });
 
     await em.flush();
@@ -34,12 +43,20 @@ const it = baseIt.extend<{
   },
   show: async ({}, use) => {
     const em = database.em.fork();
+
+    const itemRequest = em.create(ItemRequest, {
+      requestedBy: "@repo/plugin-test",
+      state: "completed",
+      type: "show",
+    });
+
     const show = em.create(Show, {
       title: "Test Show",
       contentRating: "tv-14",
-      state: "indexed",
       status: "ended",
       tvdbId: "1",
+      itemRequest,
+      isRequested: true,
     });
 
     await em.flush();
@@ -50,7 +67,9 @@ const it = baseIt.extend<{
       const season = em.create(Season, {
         title: `Season ${i.toString()}`,
         number: i,
-        state: "indexed",
+        isSpecial: false,
+        isRequested: true,
+        itemRequest,
       });
 
       show.seasons.add(season);
@@ -63,7 +82,9 @@ const it = baseIt.extend<{
           contentRating: "tv-14",
           number: i,
           absoluteNumber: ++episodeNumber,
-          state: "indexed",
+          isSpecial: false,
+          isRequested: true,
+          itemRequest,
         });
 
         season.episodes.add(episode);
@@ -288,7 +309,7 @@ it("does not throw for torrents that contain all seasons for ended shows", async
   ).resolves.not.toThrow();
 });
 
-it("does not throw for torrents with an unknown number of seasons / episodes for shows", async ({
+it("throws for torrents with no seasons and episodes for show-like items", async ({
   show,
   infoHash,
 }) => {
@@ -298,7 +319,14 @@ it("does not throw for torrents with an unknown number of seasons / episodes for
 
   await expect(
     validateTorrent(show, show.title, parsedData, infoHash),
-  ).resolves.not.toThrow();
+  ).rejects.toThrow(
+    new SkippedTorrentError(
+      `Skipping torrent with no seasons or episodes for show item`,
+      show.title,
+      parsedData.rawTitle,
+      infoHash,
+    ),
+  );
 });
 
 it("throws for torrents with incorrect number of episodes for single-season shows", async ({
@@ -350,12 +378,32 @@ it("does not throw for torrents with the correct number of episodes for single-s
   ).resolves.not.toThrow();
 });
 
-it("throws for torrents with no seasons for season items", async ({
-  season,
+it("does not throw for torrents that have no seasons, but the correct absolute episode range for season items", async ({
+  show,
   infoHash,
 }) => {
-  const rawTitle = "Test Show 2024 E01-10";
-  const show = await season.getShow();
+  const season = show.seasons[2];
+
+  expect.assert(season);
+
+  const rawTitle = "Test Show 2024 20-50";
+
+  const parsedData = parse(rawTitle);
+
+  await expect(
+    validateTorrent(season, show.title, parsedData, infoHash),
+  ).resolves.not.toThrow();
+});
+
+it("throws for torrents that have no seasons and do not have the correct absolute episode range for season items", async ({
+  show,
+  infoHash,
+}) => {
+  const season = show.seasons[2];
+
+  expect.assert(season);
+
+  const rawTitle = "Test Show 2024 1-10";
 
   const parsedData = parse(rawTitle);
 
@@ -363,7 +411,7 @@ it("throws for torrents with no seasons for season items", async ({
     validateTorrent(season, show.title, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
-      `Skipping torrent with no seasons for season item`,
+      `Skipping torrent with incorrect absolute episode range for season item`,
       show.title,
       parsedData.rawTitle,
       infoHash,
@@ -404,27 +452,6 @@ it("does not throw for torrents with an unknown number of episodes for season it
   await expect(
     validateTorrent(season, show.title, parsedData, infoHash),
   ).resolves.not.toThrow();
-});
-
-it("throws for torrents with 2 or fewer episodes for season items", async ({
-  season,
-  infoHash,
-}) => {
-  const rawTitle = "Test Show 2024 S01E01";
-  const show = await season.getShow();
-
-  const parsedData = parse(rawTitle);
-
-  await expect(() =>
-    validateTorrent(season, show.title, parsedData, infoHash),
-  ).rejects.toThrow(
-    new SkippedTorrentError(
-      `Skipping torrent with 2 or fewer episodes for season item`,
-      show.title,
-      parsedData.rawTitle,
-      infoHash,
-    ),
-  );
 });
 
 it("throws for torrents with incorrect episodes for season items", async ({

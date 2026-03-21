@@ -14,8 +14,8 @@ import {
 } from "../__generated__/index.ts";
 
 import type { ListrrSettings } from "../listrr-settings.schema.ts";
-import type { ExternalIds } from "../schema/types/external-ids.type.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+import type { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
 
 export class ListrrAPIError extends Error {}
 

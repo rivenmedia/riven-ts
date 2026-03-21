@@ -5,11 +5,14 @@ import {
 } from "@repo/util-plugin-sdk";
 
 import { DateTime } from "luxon";
+import z from "zod";
 
 import {
-  getEpisodeExtendedQueryResponseSchema,
-  getSeasonExtendedQueryResponseSchema,
+  type EpisodeBaseRecordSchema,
+  episodeBaseRecordSchema,
+  getAllSeries200Schema,
   getSeriesExtendedQueryResponseSchema,
+  getSeriesTranslation200Schema,
   postLogin200Schema,
 } from "../__generated__/index.ts";
 import { TvdbSettings } from "../tvdb-settings.schema.ts";
@@ -50,6 +53,43 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
   }
 
   /**
+   * Retrieve all episodes with translated details for a series in official order
+   *
+   * @see {@link https://thetvdb.github.io/v4-api/#/Series/getSeriesSeasonEpisodesTranslated}
+   *
+   * @param id The TVDB id of the series to retrieve episodes for
+   * @param language The language code of the episodes to retrieve (default: "eng")
+   */
+  async getAllEpisodesInOfficialOrder(id: string, language = "eng") {
+    let nextUrl = `series/${id}/episodes/official/${language}`;
+
+    const responseSchema = getAllSeries200Schema.extend({
+      data: z.object({
+        episodes: z.array(episodeBaseRecordSchema),
+      }),
+    });
+
+    const allEpisodes: EpisodeBaseRecordSchema[] = [];
+
+    do {
+      const response = await this.get<unknown>(nextUrl);
+      const { data, links } = responseSchema.parse(response);
+
+      if (!data.episodes.length) {
+        throw new TvdbAPIError(
+          `Failed to retrieve episodes for series with id ${id}: No episodes in response`,
+        );
+      }
+
+      allEpisodes.push(...data.episodes);
+
+      nextUrl = links?.next ?? "";
+    } while (nextUrl);
+
+    return allEpisodes;
+  }
+
+  /**
    * Retrieve a TVDB series by its id
    *
    * @see {@link https://thetvdb.github.io/v4-api/#/Series/getSeriesExtended}
@@ -57,7 +97,12 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
    * @param id The TVDB id of the series to retrieve
    */
   async getSeries(id: string) {
-    const response = await this.get<unknown>(`series/${id}/extended`);
+    const response = await this.get<unknown>(`series/${id}/extended`, {
+      params: {
+        short: "true",
+        meta: "translations",
+      },
+    });
     const { data } = getSeriesExtendedQueryResponseSchema.parse(response);
 
     if (!data) {
@@ -70,41 +115,22 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
   }
 
   /**
-   * Retrieve a TVDB season by its id
+   * Retrieve a TVDB series translation by the series id and language code
    *
-   * @see {@link https://thetvdb.github.io/v4-api/#/Seasons/getSeasonExtended}
+   * @see {@link https://thetvdb.github.io/v4-api/#/Series/getSeriesTranslation}
    *
-   * @param id The TVDB id of the season to retrieve
+   * @param id The TVDB id of the series to retrieve translations for
+   * @param language The language code of the translation to retrieve (default: "eng")
    */
-  async getSeason(id: number) {
+  async getSeriesTranslations(id: string, language = "eng") {
     const response = await this.get<unknown>(
-      `seasons/${id.toString()}/extended`,
+      `series/${id}/translations/${language}`,
     );
-    const { data } = getSeasonExtendedQueryResponseSchema.parse(response);
+    const { data } = getSeriesTranslation200Schema.parse(response);
 
     if (!data) {
       throw new TvdbAPIError(
-        `Failed to retrieve season with id ${id.toString()}: No data in response`,
-      );
-    }
-
-    return data;
-  }
-
-  /**
-   * Retrieve a TVDB episode by its id
-   *
-   * @see {@link https://thetvdb.github.io/v4-api/#/Episodes/getEpisodeExtended}
-   *
-   * @param id The TVDB id of the episode to retrieve
-   */
-  async getEpisode(id: string) {
-    const response = await this.get<unknown>(`episodes/${id}/extended`);
-    const { data } = getEpisodeExtendedQueryResponseSchema.parse(response);
-
-    if (!data) {
-      throw new TvdbAPIError(
-        `Failed to retrieve episode with id ${id}: No data in response`,
+        `Failed to retrieve series translations with id ${id}: No data in response`,
       );
     }
 

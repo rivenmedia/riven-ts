@@ -77,7 +77,14 @@ export const registerPluginHookWorkers = fromPromise<
               logger,
             });
           },
-          { concurrency: os.availableParallelism() },
+          {
+            concurrency: os.availableParallelism(),
+            removeOnComplete: { count: 50 },
+            removeOnFail: {
+              age: 60 * 60 * 24,
+              count: 5000,
+            },
+          },
         );
 
         logger.debug(

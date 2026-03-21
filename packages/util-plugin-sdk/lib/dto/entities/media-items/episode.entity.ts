@@ -1,8 +1,6 @@
 import {
-  BeforeCreate,
   Entity,
-  type EventArgs,
-  type Hidden,
+  EntityRepositoryType,
   ManyToOne,
   type Opt,
   Property,
@@ -15,16 +13,20 @@ import {
   ShowContentRating,
   ShowContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
-import { MediaEntry } from "../filesystem/media-entry.entity.ts";
+import { EpisodeRepository } from "../../repositories/episode.repository.ts";
 import { Season } from "./season.entity.ts";
 import { ShowLikeMediaItem } from "./show-like.entity.ts";
 
+import type { MediaEntry } from "../filesystem/media-entry.entity.ts";
+
 @ObjectType()
-@Entity()
+@Entity({ repository: () => EpisodeRepository })
 export class Episode extends ShowLikeMediaItem {
+  [EntityRepositoryType]?: EpisodeRepository;
+
   @Field()
   @Property()
-  @Min(1)
+  @Min(0)
   number!: number;
 
   @Field(() => Number)
@@ -34,6 +36,12 @@ export class Episode extends ShowLikeMediaItem {
   @Field(() => Season)
   @ManyToOne()
   season!: Opt<Ref<Season>>;
+
+  @Property()
+  isSpecial!: boolean;
+
+  @Property()
+  runtime!: number | null;
 
   @Field(() => ShowContentRatingEnum)
   declare contentRating: ShowContentRating;
@@ -46,9 +54,9 @@ export class Episode extends ShowLikeMediaItem {
     return season.show.loadOrFail();
   }
 
-  @Property({ persist: false, hidden: true, getter: true })
-  get prettyName(): Opt<Hidden<string>> {
-    const baseName = this.season.getProperty("show").getProperty("prettyName");
+  async getPrettyName(): Promise<string> {
+    const show = await this.getShow();
+    const baseName = show.getPrettyName();
 
     if (!baseName) {
       throw new TypeError(
@@ -71,29 +79,11 @@ export class Episode extends ShowLikeMediaItem {
   declare tmdbId?: never;
 
   getMediaEntries() {
-    return this.filesystemEntries.loadItems<MediaEntry>({
+    return this.filesystemEntries.matching<MediaEntry>({
       where: {
         type: "media",
       },
       refresh: true,
     });
-  }
-
-  @BeforeCreate()
-  _fallbackToSeasonExternalIds() {
-    this.tvdbId ||= this.season.getProperty("tvdbId");
-    this.imdbId ??= this.season.getProperty("imdbId") ?? null;
-  }
-
-  @BeforeCreate()
-  _persistFullTitle({ entity }: EventArgs<this>) {
-    const showTitle = entity.season.getProperty("show").getProperty("title");
-    const seasonNumber = entity.season
-      .getProperty("number")
-      .toString()
-      .padStart(2, "0");
-    const episodeNumber = entity.number.toString().padStart(2, "0");
-
-    this.fullTitle = `${showTitle} - S${seasonNumber}E${episodeNumber} - ${this.title}`;
   }
 }

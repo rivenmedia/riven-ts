@@ -32,7 +32,7 @@ export function getLevRatio(
   correctTitle: string,
   parsedTitle: string,
   threshold: number,
-  aliases: Aliases = {},
+  aliases: Aliases,
 ): number {
   if (!correctTitle || !parsedTitle) {
     throw new Error("Both titles must be provided.");

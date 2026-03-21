@@ -1073,9 +1073,7 @@ export const adultHandlers: Handler[] = [
         return meta;
       }
 
-      const titleLower = title.toLowerCase();
-
-      if (adultPattern.test(titleLower)) {
+      if (adultPattern.test(title)) {
         meta.value = true;
       }
 

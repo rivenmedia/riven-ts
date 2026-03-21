@@ -13,6 +13,7 @@ import { logger } from "../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../utilities/settings.ts";
 import { SkippedTorrentError } from "../../../scrape-item/steps/parse-scrape-results/utilities/validate-torrent.ts";
 import { rankStreamsProcessorSchema } from "./rank-streams.schema.ts";
+import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution.ts";
 
 export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
   async function ({ job }) {
@@ -23,7 +24,11 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
       },
     });
 
-    const { title: itemTitle } =
+    if (!streams.length) {
+      return [];
+    }
+
+    const { title: itemTitle, aliases } =
       item instanceof ShowLikeMediaItem ? await item.getShow() : item;
 
     const rtnInstance = new RTN(job.data.rtnSettings, job.data.rtnRankingModel);
@@ -52,7 +57,10 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
           );
         }
 
-        return [...acc, rtnInstance.rankTorrent(rawTitle, hash, itemTitle)];
+        return [
+          ...acc,
+          rtnInstance.rankTorrent(rawTitle, hash, itemTitle, aliases ?? {}),
+        ];
       } catch (error) {
         if (
           error instanceof GarbageTorrentError ||
@@ -71,6 +79,11 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
       }
     }, []);
 
-    return rtnInstance.sortTorrents(rankedResults);
+    const bucketedTorrents = rtnInstance.sortTorrents(rankedResults);
+    const sortedTorrentsByResolution = bucketedTorrents.sort(
+      sortByRankAndResolution,
+    );
+
+    return sortedTorrentsByResolution;
   },
 );

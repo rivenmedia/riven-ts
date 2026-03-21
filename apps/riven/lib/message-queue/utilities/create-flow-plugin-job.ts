@@ -18,6 +18,7 @@ export const createPluginFlowJob = <
   pluginName: string,
   data: ParamsFor<z.input<T>>,
   opts: Partial<Omit<JobsOptions, "name" | "queueName" | "data">> = {},
+  children: FlowChildJob[] = [],
 ): FlowChildJob => {
   const [eventType] = schema.shape.type.def.values;
 
@@ -32,5 +33,6 @@ export const createPluginFlowJob = <
     queueName: queueNameFor(eventType, pluginName),
     data: serialiser.omit({ type: true }).encode(data),
     opts,
+    children,
   };
 };

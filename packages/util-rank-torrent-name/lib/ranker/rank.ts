@@ -16,7 +16,7 @@ import {
   TitleSimilarityError,
 } from "./exceptions.ts";
 import { checkFetch } from "./fetch.ts";
-import { getLevRatio } from "./lev.ts";
+import { type Aliases, getLevRatio } from "./lev.ts";
 import { defaultRankingModel, getCustomRank } from "./settings.ts";
 
 import type { ParsedData } from "../schemas.ts";
@@ -48,7 +48,7 @@ function rankFromMap(
     return 0;
   }
 
-  const entry = map.get(value);
+  const entry = map.get(value.toLowerCase());
 
   if (!entry) {
     return 0;
@@ -65,8 +65,8 @@ function rankFromList(
 ): number {
   let total = 0;
 
-  for (const v of values) {
-    const entry = map.get(v);
+  for (const value of values) {
+    const entry = map.get(value.toLowerCase());
 
     if (entry) {
       total += resolveRank(entry[0], entry[1], settings, rankingModel);
@@ -134,20 +134,14 @@ export function rank(
   );
 
   // Codec
-  scoreParts["codec"] = rankFromMap(
-    data.codec?.toLowerCase(),
-    CODEC_MAP,
-    settings,
-    rankingModel,
-  );
+  scoreParts["codec"] = data.codec
+    ? rankFromMap(data.codec, CODEC_MAP, settings, rankingModel)
+    : 0;
 
   // HDR
-  scoreParts["hdr"] = rankFromList(
-    data.hdr ?? [],
-    HDR_MAP,
-    settings,
-    rankingModel,
-  );
+  scoreParts["hdr"] = data.hdr
+    ? rankFromList(data.hdr, HDR_MAP, settings, rankingModel)
+    : 0;
 
   // Bit depth
   if (data.bitDepth) {
@@ -160,20 +154,14 @@ export function rank(
   }
 
   // Audio
-  scoreParts["audio"] = rankFromList(
-    data.audio ?? [],
-    AUDIO_MAP,
-    settings,
-    rankingModel,
-  );
+  scoreParts["audio"] = data.audio
+    ? rankFromList(data.audio, AUDIO_MAP, settings, rankingModel)
+    : 0;
 
   // Channels
-  scoreParts["channels"] = rankFromList(
-    data.channels ?? [],
-    CHANNEL_MAP,
-    settings,
-    rankingModel,
-  );
+  scoreParts["channels"] = data.channels
+    ? rankFromList(data.channels, CHANNEL_MAP, settings, rankingModel)
+    : 0;
 
   // Boolean flags (extras, trash.size, etc.)
   scoreParts["flags"] = rankFromFlags(data, FLAG_MAP, settings, rankingModel);
@@ -202,6 +190,7 @@ export function rankTorrent(
   rawTitle: string,
   hash: string,
   correctTitle: string,
+  aliases: Aliases,
   settings: Settings,
   rankingModel: RankingModel = defaultRankingModel,
 ) {
@@ -215,7 +204,12 @@ export function rankTorrent(
     settings.options;
   const data = parse(rawTitle);
 
-  const levRatio = getLevRatio(correctTitle, data.title, titleSimilarity);
+  const levRatio = getLevRatio(
+    correctTitle,
+    data.title,
+    titleSimilarity,
+    aliases,
+  );
 
   if (removeAllTrash) {
     const levRatioValidation = z

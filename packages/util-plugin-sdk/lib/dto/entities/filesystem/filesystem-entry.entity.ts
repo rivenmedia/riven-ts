@@ -1,4 +1,5 @@
 import {
+  BeforeCreate,
   Entity,
   Enum,
   type Hidden,
@@ -18,6 +19,8 @@ import { Episode } from "../media-items/episode.entity.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
 import { Movie } from "../media-items/movie.entity.ts";
 
+import type { Promisable } from "type-fest";
+
 export const FileSystemEntryType = z.enum(["media", "subtitle"]);
 
 export type FileSystemEntryType = z.infer<typeof FileSystemEntryType>;
@@ -31,16 +34,18 @@ export type FileSystemEntryType = z.infer<typeof FileSystemEntryType>;
  * @throws {ReferenceError} if required properties are missing for path generation.
  * @throws {TypeError} if the media item type is unsupported. Only `Movie` and `Episode` have associated filesystem entries.
  */
-function getMediaItemPathParts(mediaItem: MediaItem) {
+async function getMediaItemPathParts(mediaItem: MediaItem) {
   if (mediaItem instanceof Movie) {
-    return [mediaItem.prettyName];
+    return [mediaItem.getPrettyName()];
   }
 
   if (mediaItem instanceof Episode) {
-    const seasonLabel = mediaItem.season.getProperty("prettyName");
-    const showLabel = mediaItem.season
-      .getProperty("show")
-      .getProperty("prettyName");
+    const season = await mediaItem.season.loadOrFail({
+      populate: ["show"],
+    });
+
+    const seasonLabel = season.getPrettyName();
+    const showLabel = season.show.getEntity().getPrettyName();
 
     if (!seasonLabel || !showLabel) {
       throw new ReferenceError(
@@ -62,7 +67,7 @@ function getMediaItemPathParts(mediaItem: MediaItem) {
 export abstract class FileSystemEntry {
   @Field((_type) => ID)
   @PrimaryKey()
-  id!: Opt<number>;
+  id!: number;
 
   @Field()
   @Property({ type: "bigint" })
@@ -100,23 +105,28 @@ export abstract class FileSystemEntry {
   }
 
   /**
+   * The full path to this filesystem entry in the VFS.
+   *
+   * @example "Inception (2010) {tmdb-27205}/Inception (2010) {tmdb-27205}.mkv"
+   */
+  @Property()
+  path!: Opt<string>;
+
+  /**
    * The VFS file name for this entry
    *
    * @example "movie.mkv", "episode.srt"
    */
-  abstract get vfsFileName(): Opt<Hidden<string>>;
+  abstract getVfsFileName(): Promisable<string>;
 
-  /**
-   * The full path to this filesystem entry in the VFS
-   *
-   * @example "movies/Inception (2010) {tmdb-27205}/Inception (2010) {tmdb-27205}.mkv"
-   */
-  @Property({ persist: false, hidden: true })
-  get path(): Opt<Hidden<string>> {
-    return path.join(
-      this.baseDirectory,
-      ...getMediaItemPathParts(this.mediaItem.unwrap()).map(String),
-      this.vfsFileName,
-    );
+  @BeforeCreate()
+  async _setPath() {
+    const mediaItem = this.mediaItem.getEntity();
+    const pathParts = await getMediaItemPathParts(mediaItem);
+
+    // Remove periods from path parts to avoid directories being parsed as files
+    const sanitisedPathParts = pathParts.map((part) => part.replace(/\./g, ""));
+
+    this.path = path.join(...sanitisedPathParts, await this.getVfsFileName());
   }
 }

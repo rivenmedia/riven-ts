@@ -22,7 +22,7 @@ it.each([
   (rawTitle, correctTitle, expectedMatch, expectedRatio) => {
     const data = parse(rawTitle);
     const match = titleMatch(correctTitle, data.title, 0.85);
-    const ratio = getLevRatio(correctTitle, data.title, 0.85);
+    const ratio = getLevRatio(correctTitle, data.title, 0.85, {});
 
     expect(match).toBe(expectedMatch);
     expect(ratio).toBe(expectedRatio);
@@ -91,7 +91,7 @@ it("sorts torrents correctly", () => {
   const rtnInstance = new RTN(settings);
   const rankedTorrents = Object.entries(torrents).map(
     ([hash, [correctTitle, rawTitle]]) =>
-      rtnInstance.rankTorrent(rawTitle, hash, correctTitle),
+      rtnInstance.rankTorrent(rawTitle, hash, correctTitle, {}),
   );
   const sortedTorrents = rtnInstance.sortTorrents(rankedTorrents);
 
@@ -141,7 +141,7 @@ it("sorts torrents with a resolution filter correctly", () => {
   const rtnInstance = new RTN(settings);
   const rankedTorrents = Object.entries(torrents).map(
     ([hash, [correctTitle, rawTitle]]) =>
-      rtnInstance.rankTorrent(rawTitle, hash, correctTitle),
+      rtnInstance.rankTorrent(rawTitle, hash, correctTitle, {}),
   );
   const sortedTorrents = rtnInstance.sortTorrents(
     rankedTorrents,
@@ -266,7 +266,7 @@ it("handles bucket limits correctly", () => {
     ...unknownResTorrents,
     ...hdTorrents,
     ...sdTorrents,
-  }).map(([hash, title]) => rtnInstance.rankTorrent(title, hash, "Movie"));
+  }).map(([hash, title]) => rtnInstance.rankTorrent(title, hash, "Movie", {}));
 
   const sortedTorrents = rtnInstance.sortTorrents(rankedTorrents, 2);
 

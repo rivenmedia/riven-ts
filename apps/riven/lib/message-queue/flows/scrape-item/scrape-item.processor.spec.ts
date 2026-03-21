@@ -1,24 +1,16 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 import { parse } from "@repo/util-rank-torrent-name";
 
 import { Job } from "bullmq";
-import { Settings } from "luxon";
+import { DateTime, Settings } from "luxon";
 import { expect, vi } from "vitest";
 
 import { database } from "../../../database/database.ts";
-import * as settingsModule from "../../../utilities/settings.ts";
 import { createQueue } from "../../utilities/create-queue.ts";
 import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 
 import type { ScrapeItemFlow } from "./scrape-item.schema.ts";
-
-it.beforeEach(({ redisUrl }) => {
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
-    redisUrl,
-  });
-});
 
 it("throws an unrecoverable error if the item cannot be scraped", async () => {
   const sendEvent = vi.fn();
@@ -45,13 +37,21 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
 
   const em = database.orm.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "movie",
+  });
+
   em.create(Movie, {
     id: 1,
     tmdbId: "123",
     contentRating: "g",
-    state: "indexed",
     title: "Test Movie",
     year: 2024,
+    itemRequest,
+    isRequested: true,
+    releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
   });
 
   await em.flush();

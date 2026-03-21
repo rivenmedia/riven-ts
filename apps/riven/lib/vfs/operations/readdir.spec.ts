@@ -1,5 +1,6 @@
 import {
   Episode,
+  ItemRequest,
   MediaEntry,
   Movie,
   Season,
@@ -7,9 +8,9 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities";
 import { MovieContentRating } from "@repo/util-plugin-sdk/dto/enums/content-ratings.enum";
 
-import { expect, it, vi } from "vitest";
+import { expect, vi } from "vitest";
 
-import { database } from "../../database/database.ts";
+import { rivenTestContext as it } from "../../__tests__/test-context.ts";
 import { readDirSync } from "./readdir.ts";
 
 it("returns persistent directory entries for the root path", async () => {
@@ -25,19 +26,23 @@ it("returns persistent directory entries for the root path", async () => {
   });
 });
 
-it("returns all shows for the /shows path", async () => {
+it("returns all shows for the /shows path", async ({ em }) => {
   const callback = vi.fn();
 
-  const em = database.em.fork();
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
 
   const show = em.create(Show, {
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "ongoing",
-    releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
+    itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -45,8 +50,10 @@ it("returns all shows for the /shows path", async () => {
   const season = em.create(Season, {
     title: "Season 01",
     year: 2020,
-    state: "completed",
     number: 1,
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -58,9 +65,11 @@ it("returns all shows for the /shows path", async () => {
     absoluteNumber: 1,
     year: 2020,
     title: "Example Episode 1",
-    state: "downloaded",
     type: "episode",
     contentRating: "tv-14",
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   season.episodes.add(episode);
@@ -70,7 +79,7 @@ it("returns all shows for the /shows path", async () => {
   em.create(MediaEntry, {
     originalFilename: "Example Episode 1.mkv",
     fileSize: 123456789,
-    provider: "@repo/plugin-test",
+    plugin: "@repo/plugin-test",
     mediaItem: episode,
   });
 
@@ -85,19 +94,25 @@ it("returns all shows for the /shows path", async () => {
   });
 });
 
-it('does not return entries for the "all shows" path for shows that do not have any episodes with a media entry', async () => {
+it('does not return entries for the "all shows" path for shows that do not have any episodes with a media entry', async ({
+  em,
+}) => {
   const callback = vi.fn();
 
-  const em = database.em.fork();
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
 
   const show = em.create(Show, {
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "ongoing",
-    releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
+    itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -105,8 +120,10 @@ it('does not return entries for the "all shows" path for shows that do not have 
   const season = em.create(Season, {
     title: "Season 01",
     year: 2020,
-    state: "completed",
     number: 1,
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -118,9 +135,11 @@ it('does not return entries for the "all shows" path for shows that do not have 
     absoluteNumber: 1,
     year: 2020,
     title: "Example Episode 1",
-    state: "downloaded",
     type: "episode",
     contentRating: "tv-14",
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   season.episodes.add(episode);
@@ -134,24 +153,29 @@ it('does not return entries for the "all shows" path for shows that do not have 
   });
 });
 
-it("returns all movies for the /movies path", async () => {
+it("returns all movies for the /movies path", async ({ em }) => {
   const callback = vi.fn();
 
-  const em = database.em.fork();
-
   for (let i = 1; i <= 3; i++) {
+    const itemRequest = em.create(ItemRequest, {
+      requestedBy: "@repo/plugin-test",
+      state: "completed",
+      type: "movie",
+    });
+
     const movie = em.create(Movie, {
       tmdbId: i.toString(),
       year: 2020,
       title: `Example Movie ${i.toString().padStart(2, "0")}`,
-      state: "downloaded",
       contentRating: "unknown",
+      itemRequest,
+      isRequested: true,
     });
 
     em.create(MediaEntry, {
       originalFilename: `Example Movie ${i.toString().padStart(2, "0")}.mkv`,
       fileSize: 987654321,
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: movie,
     });
   }
@@ -169,29 +193,36 @@ it("returns all movies for the /movies path", async () => {
   });
 });
 
-it("returns all seasons for a single show path", async () => {
+it("returns all seasons for a single show path", async ({ em }) => {
   const callback = vi.fn();
 
-  const em = database.em.fork();
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
 
   const show = em.create(Show, {
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "ongoing",
-    releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
+    itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
 
   for (let i = 1; i <= 3; i++) {
     const season = em.create(Season, {
+      tvdbId: show.tvdbId,
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
-      state: "completed",
       number: i,
+      isSpecial: false,
+      isRequested: true,
+      itemRequest,
     });
 
     show.seasons.add(season);
@@ -199,13 +230,16 @@ it("returns all seasons for a single show path", async () => {
     await em.flush();
 
     const episode = em.create(Episode, {
+      tvdbId: show.tvdbId,
       number: 1,
       absoluteNumber: 1,
       year: 2020,
       title: "Example Episode 1",
-      state: "downloaded",
       type: "episode",
       contentRating: "tv-14",
+      isSpecial: false,
+      isRequested: true,
+      itemRequest,
     });
 
     season.episodes.add(episode);
@@ -215,7 +249,7 @@ it("returns all seasons for a single show path", async () => {
     em.create(MediaEntry, {
       originalFilename: "Example Episode 1.mkv",
       fileSize: 123456789,
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: episode,
     });
   }
@@ -233,29 +267,38 @@ it("returns all seasons for a single show path", async () => {
   });
 });
 
-it("does not return entries for a season that does not have any episodes with a media entry", async () => {
+it("does not return entries for a season that does not have any episodes with a media entry", async ({
+  em,
+}) => {
   const callback = vi.fn();
 
-  const em = database.em.fork();
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
 
   const show = em.create(Show, {
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "ongoing",
-    releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
+    itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
 
   for (let i = 1; i <= 3; i++) {
     const season = em.create(Season, {
+      tvdbId: show.tvdbId,
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
-      state: "completed",
       number: i,
+      isSpecial: false,
+      isRequested: true,
+      itemRequest,
     });
 
     show.seasons.add(season);
@@ -263,13 +306,16 @@ it("does not return entries for a season that does not have any episodes with a 
     await em.flush();
 
     const episode = em.create(Episode, {
+      tvdbId: show.tvdbId,
       number: 1,
       absoluteNumber: 1,
       year: 2020,
       title: "Example Episode 1",
-      state: "downloaded",
       type: "episode",
       contentRating: "tv-14",
+      isSpecial: false,
+      isRequested: true,
+      itemRequest,
     });
 
     season.episodes.add(episode);
@@ -280,7 +326,7 @@ it("does not return entries for a season that does not have any episodes with a 
       em.create(MediaEntry, {
         originalFilename: "Example Episode 1.mkv",
         fileSize: 123456789,
-        provider: "@repo/plugin-test",
+        plugin: "@repo/plugin-test",
         mediaItem: episode,
       });
     }
@@ -295,28 +341,35 @@ it("does not return entries for a season that does not have any episodes with a 
   });
 });
 
-it("returns all episodes for a single season path", async () => {
+it("returns all episodes for a single season path", async ({ em }) => {
   const callback = vi.fn();
 
-  const em = database.em.fork();
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
 
   const show = em.create(Show, {
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "ongoing",
-    releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
+    itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
 
   const season = em.create(Season, {
+    tvdbId: show.tvdbId,
     title: "Season 01",
     year: 2020,
-    state: "completed",
     number: 1,
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -325,13 +378,16 @@ it("returns all episodes for a single season path", async () => {
 
   for (let i = 1; i <= 3; i++) {
     const episode = em.create(Episode, {
+      tvdbId: show.tvdbId,
       number: i,
       absoluteNumber: i,
       year: 2020,
       title: `Example Episode ${i.toString().padStart(2, "0")}`,
-      state: "downloaded",
       type: "episode",
       contentRating: "tv-14",
+      isSpecial: false,
+      isRequested: true,
+      itemRequest,
     });
 
     season.episodes.add(episode);
@@ -341,7 +397,7 @@ it("returns all episodes for a single season path", async () => {
     em.create(MediaEntry, {
       originalFilename: `Example Episode ${i.toString().padStart(2, "0")}.mkv`,
       fileSize: 123456789,
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: episode,
     });
   }
@@ -359,28 +415,37 @@ it("returns all episodes for a single season path", async () => {
   });
 });
 
-it("does not return entries for episodes that does not have a media entry when viewing a season path", async () => {
+it("does not return entries for episodes that does not have a media entry when viewing a season path", async ({
+  em,
+}) => {
   const callback = vi.fn();
 
-  const em = database.em.fork();
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
 
   const show = em.create(Show, {
     tvdbId: "1",
     title: "Example Show 1",
     year: 2020,
-    state: "ongoing",
-    releaseData: {},
     status: "continuing",
     contentRating: "tv-14",
+    itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
 
   const season = em.create(Season, {
+    tvdbId: show.tvdbId,
     title: "Season 01",
     year: 2020,
-    state: "completed",
     number: 1,
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -389,13 +454,16 @@ it("does not return entries for episodes that does not have a media entry when v
 
   for (let i = 1; i <= 3; i++) {
     const episode = em.create(Episode, {
+      tvdbId: show.tvdbId,
       number: i,
       absoluteNumber: i,
       year: 2020,
       title: `Example Episode ${i.toString().padStart(2, "0")}`,
-      state: "downloaded",
       type: "episode",
       contentRating: "tv-14",
+      isSpecial: false,
+      isRequested: true,
+      itemRequest,
     });
 
     season.episodes.add(episode);
@@ -406,7 +474,7 @@ it("does not return entries for episodes that does not have a media entry when v
       em.create(MediaEntry, {
         originalFilename: `Example Episode ${i.toString().padStart(2, "0")}.mkv`,
         fileSize: 123456789,
-        provider: "@repo/plugin-test",
+        plugin: "@repo/plugin-test",
         mediaItem: episode,
       });
     }
@@ -423,24 +491,31 @@ it("does not return entries for episodes that does not have a media entry when v
   });
 });
 
-it("returns the media entry's filename when viewing a single movie's directory", async () => {
+it("returns the media entry's filename when viewing a single movie's directory", async ({
+  em,
+}) => {
   const callback = vi.fn();
 
-  const em = database.em.fork();
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "movie",
+  });
 
   const movie = em.create(Movie, {
     tmdbId: "1",
     year: 2020,
     title: "Example Movie 01",
-    state: "downloaded",
     type: "movie",
     contentRating: MovieContentRating.enum.g,
+    itemRequest,
+    isRequested: true,
   });
 
   em.create(MediaEntry, {
     originalFilename: "Example Movie 01.mkv",
     fileSize: 987654321,
-    provider: "@repo/plugin-test",
+    plugin: "@repo/plugin-test",
     mediaItem: movie,
   });
 
@@ -455,25 +530,32 @@ it("returns the media entry's filename when viewing a single movie's directory",
   });
 });
 
-it('does not return entries for the "all movies" path when a movie does not have a media entry', async () => {
+it('does not return entries for the "all movies" path when a movie does not have a media entry', async ({
+  em,
+}) => {
   const callback = vi.fn();
 
-  const em = database.em.fork();
-
   for (let i = 1; i <= 3; i++) {
+    const itemRequest = em.create(ItemRequest, {
+      requestedBy: "@repo/plugin-test",
+      state: "completed",
+      type: "movie",
+    });
+
     const movie = em.create(Movie, {
       tmdbId: i.toString(),
       year: 2020,
       title: `Example Movie ${i.toString().padStart(2, "0")}`,
-      state: "downloaded",
       contentRating: "unknown",
+      itemRequest,
+      isRequested: true,
     });
 
     if (i === 1) {
       em.create(MediaEntry, {
         originalFilename: `Example Movie ${i.toString().padStart(2, "0")}.mkv`,
         fileSize: 987654321,
-        provider: "@repo/plugin-test",
+        plugin: "@repo/plugin-test",
         mediaItem: movie,
       });
     }

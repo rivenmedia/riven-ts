@@ -1,12 +1,13 @@
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import {
+  type FlowChildJob,
   FlowProducer,
   type Job,
   type JobNode,
   type JobsOptions,
   type PluginJobNode,
-  type QueueOptions,
+  type QueueBaseOptions,
 } from "bullmq";
 
 import { logger } from "../../utilities/logger/logger.ts";
@@ -43,6 +44,7 @@ export class ExtendedFlowProducer extends FlowProducer {
     pluginName: string,
     data: ParamsFor<z.input<I>>,
     opts: Partial<Omit<JobsOptions, "name" | "queueName" | "data">>,
+    children?: FlowChildJob[],
   ): Promise<PluginJobNode<ParamsFor<z.input<I>>, z.infer<O>>> {
     const job = createPluginFlowJob(
       inputSchema,
@@ -50,6 +52,7 @@ export class ExtendedFlowProducer extends FlowProducer {
       pluginName,
       data,
       opts,
+      children,
     );
 
     return this.add(job);
@@ -57,7 +60,7 @@ export class ExtendedFlowProducer extends FlowProducer {
 }
 
 export function createFlowProducer(
-  options?: Omit<QueueOptions, "connection" | "telemetry">,
+  options?: Omit<QueueBaseOptions, "connection" | "telemetry">,
 ) {
   const flowProducer = new ExtendedFlowProducer({
     ...options,

@@ -1,8 +1,14 @@
 import { getEventTypeFromSchema } from "@repo/util-plugin-sdk";
-import { Season, Show, Stream } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  ItemRequest,
+  Season,
+  Show,
+  Stream,
+} from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemDownloadErrorEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { parse } from "@repo/util-rank-torrent-name";
 
+import { DateTime } from "luxon";
 import assert from "node:assert";
 import { expect, vi } from "vitest";
 
@@ -12,20 +18,28 @@ import { it } from "./helpers/test-context.ts";
 
 const eventType = getEventTypeFromSchema(MediaItemDownloadErrorEvent);
 
-it(`enqueues a scrape for each individual season when a "${eventType}" event is received for a show`, async ({
+it(`enqueues a scrape for each incomplete season when a "${eventType}" event is received for a show`, async ({
   actor,
 }) => {
   const em = database.em.fork();
 
-  const flowAddSpy = vi.spyOn(flow, "add");
+  const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
+
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
 
   const show = em.create(Show, {
     contentRating: "tv-14",
-    state: "scraped",
     title: "Test Show",
     tvdbId: "1",
     id: 1,
     status: "ended",
+    itemRequest,
+    isRequested: true,
+    releaseDate: DateTime.now().toISO(),
   });
 
   await em.flush();
@@ -33,9 +47,11 @@ it(`enqueues a scrape for each individual season when a "${eventType}" event is 
   for (let i = 1; i <= 3; i++) {
     const season = em.create(Season, {
       number: i,
-      state: "scraped",
       title: `Season ${i.toString().padStart(2, "0")}`,
       tvdbId: i.toString(),
+      isSpecial: false,
+      isRequested: true,
+      itemRequest,
     });
 
     show.seasons.add(season);
@@ -55,37 +71,47 @@ it(`enqueues a scrape for each individual season when a "${eventType}" event is 
   actor.send({
     type: "riven.media-item.download.error",
     item: show,
-    error: "No valid torrent containers found",
+    error: "No valid torrents found",
   });
 
   await vi.waitFor(() => {
     for (const season of show.seasons) {
-      expect(flowAddSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          queueName: "scrape-item",
-          data: expect.objectContaining({
-            id: season.id,
+      expect(flowAddBulkSpy).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            queueName: "scrape-item",
+            data: expect.objectContaining({
+              id: season.id,
+            }),
           }),
-        }),
+        ]),
       );
     }
   });
 });
 
-it(`enqueues a scrape for each individual season's episode when a "${eventType}" event is received for a season`, async ({
+it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is received for a season`, async ({
   actor,
 }) => {
+  const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
+
   const em = database.em.fork();
 
-  const flowAddSpy = vi.spyOn(flow, "add");
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
 
   const show = em.create(Show, {
     contentRating: "tv-14",
-    state: "scraped",
     title: "Test Show",
     tvdbId: "1",
     id: 1,
     status: "ended",
+    itemRequest,
+    isRequested: true,
+    releaseDate: DateTime.now().toISO(),
   });
 
   await em.flush();
@@ -93,9 +119,12 @@ it(`enqueues a scrape for each individual season's episode when a "${eventType}"
   for (let i = 1; i <= 3; i++) {
     const season = em.create(Season, {
       number: i,
-      state: "scraped",
       title: `Season ${i.toString().padStart(2, "0")}`,
-      tvdbId: i.toString(),
+      tvdbId: show.tvdbId,
+      isSpecial: false,
+      isRequested: true,
+      itemRequest,
+      releaseDate: DateTime.now().toISO(),
     });
 
     show.seasons.add(season);
@@ -119,18 +148,20 @@ it(`enqueues a scrape for each individual season's episode when a "${eventType}"
   actor.send({
     type: "riven.media-item.download.error",
     item: failedSeason,
-    error: "No valid torrent containers found",
+    error: "No valid torrents found",
   });
 
   await vi.waitFor(() => {
     for (const episode of failedSeason.episodes) {
-      expect(flowAddSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          queueName: "scrape-item",
-          data: expect.objectContaining({
-            id: episode.id,
+      expect(flowAddBulkSpy).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            queueName: "scrape-item",
+            data: expect.objectContaining({
+              id: episode.id,
+            }),
           }),
-        }),
+        ]),
       );
     }
   });

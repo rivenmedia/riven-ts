@@ -1,37 +1,8 @@
 services:
   riven:
-    container_name: riven
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    profiles:
-      - all
-    tty: true
-    cap_add:
-      - SYS_ADMIN
-    security_opt:
-      - apparmor:unconfined
-    devices:
-      - /dev/fuse
-    environment:
-      DATABASE_URL: postgres+psycopg2://postgres:${DATABASE_PASSWORD}@riven-db:5432/riven
-      NODE_ENV: development
-      REDIS_URL: redis://riven-cache:6379
-      RIVEN_VFS_MOUNT_PATH: /mount
-      LOG_DIRECTORY: /riven/data/logs
-      VFS_DEBUG_LOGGING: true
-      REAL_DEBRID_API_KEY: XCA2CWCDYX3B4KDDOD2M7677WB54S4QKEIG4YT43YU4TMFLWLTSA
-      LISTRR_API_KEY: f7f5a6871a944fb692d144eab2fde171722b5a79c5af4ac1a3f4fd225f94c3ba
-      UNSAFE_CLEAR_QUEUES_ON_STARTUP: true
-      UNSAFE_REFRESH_DATABASE_ON_STARTUP: false
-      LOG_LEVEL: silly
-      PLEX_TOKEN: ${PLEX_TOKEN}
-      PLEX_SERVER_URL: http://plex:32400
-      PLEX_LIBRARY_PATH: /mount
-    volumes:
-      - ./data:/riven/data
-      - /mnt/riven:/mount:rshared
+    extends:
+      file: ./apps/riven/docker-compose.yaml
+      service: riven
     develop:
       watch:
         - path: apps
@@ -45,42 +16,22 @@ services:
           target: /riven/pnpm-lock.yaml
           exec:
             command: pnpm install
-    ports:
-      - 8080:8080
-    depends_on:
-      riven-db:
-        condition: service_healthy
+    profiles:
+      - all
 
   riven-db:
-    image: postgres:17-alpine
-    container_name: riven-db
-    restart: unless-stopped
+    extends:
+      file: ./apps/riven/docker-compose.yaml
+      service: riven-db
     profiles:
       - all
       - services
-    ports:
-      - 5432:5432
-    environment:
-      PGDATA: /var/lib/postgresql/data/pgdata
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: riven
-    volumes:
-      - riven-db:/var/lib/postgresql/data/pgdata
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - pg_isready -U postgres
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - analytics
 
   riven-cache:
-    container_name: riven-cache
-    image: redis
-    restart: unless-stopped
-    ports:
-      - 6379:6379
+    extends:
+      file: ./apps/riven/docker-compose.yaml
+      service: riven-cache
     profiles:
       - all
       - services
@@ -102,37 +53,12 @@ services:
       - riven-cache
 
   plex:
-    container_name: plex
-    image: plexinc/pms-docker
-    restart: unless-stopped
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities:
-                - gpu
-    runtime: nvidia
-    gpus: all
-    environment:
-      TZ: Europe/London
-      PLEX_CLAIM: ${PLEX_CLAIM}
-    ports:
-      - 32400:32400
-    volumes:
-      - ./plex/config:/config
-      - ./plex/transcode:/transcode
-      - /mnt/riven:/mount:rslave
-    healthcheck:
-      test: curl --connect-timeout 15 --silent --show-error --fail http://0.0.0.0:32400/identity
-      interval: 1m00s
-      timeout: 15s
-      retries: 3
-      start_period: 1m00s
+    extends:
+      file: ./packages/plugin-plex/docker-compose.yaml
+      service: plex
     profiles:
       - all
       - services
-    # depends_on:
-    #   - riven
 
   spotlight:
     container_name: spotlight
@@ -144,6 +70,13 @@ services:
       - all
       - analytics
 
+  seerr:
+    extends:
+      file: ./packages/plugin-seerr/docker-compose.yaml
+      service: seerr
+    profiles:
+      - all
+      - services
+
 volumes:
   riven-db:
-  media-mount:

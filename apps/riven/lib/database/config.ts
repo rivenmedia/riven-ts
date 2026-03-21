@@ -11,12 +11,15 @@ import {
   SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
 
+// eslint-disable-next-line no-restricted-imports -- Core database config requires direct driver access
 import { type Options, PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 
 import { logger } from "../utilities/logger/logger.ts";
 import { settings } from "../utilities/settings.ts";
-import { MediaItemStatePropagationSubscriber } from "./subscribers/media-item-state-propagation.subscriber.ts";
+import { MediaItemFullTitleSubscriber } from "./subscribers/media-item-full-title.subscriber.ts";
+import { MediaItemStateSubscriber } from "./subscribers/media-item-state.subscriber.ts";
+import { ShowLikeMediaItemReleaseDateSubscriber } from "./subscribers/show-like-media-item-release-date.subscriber.ts";
 
 export const entities = [
   SubtitleEntry,
@@ -35,10 +38,14 @@ export const databaseConfig = {
   driver: PostgreSqlDriver,
   metadataProvider: TsMorphMetadataProvider,
   entities,
-  subscribers: [new MediaItemStatePropagationSubscriber()],
   forceUtcTimezone: true,
   clientUrl: settings.databaseUrl,
   logger: (message) => {
     logger.verbose(message);
   },
+  subscribers: [
+    new MediaItemFullTitleSubscriber(),
+    new ShowLikeMediaItemReleaseDateSubscriber(),
+    new MediaItemStateSubscriber(),
+  ],
 } satisfies Options;

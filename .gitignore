@@ -8,9 +8,10 @@ logs
 __generated__
 coverage
 .env*
-!.env.example
+!.env*.example
 *.typegen.ts
 dist
 temp
 plex
 *.bundled_*.mjs
+docker-data

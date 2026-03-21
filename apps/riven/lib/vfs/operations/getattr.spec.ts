@@ -1,5 +1,6 @@
 import {
   Episode,
+  ItemRequest,
   MediaEntry,
   Movie,
   Season,
@@ -7,9 +8,9 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities";
 
 import Fuse from "@zkochan/fuse-native";
-import { expect, it, vi } from "vitest";
+import { expect, vi } from "vitest";
 
-import { database } from "../../database/database.ts";
+import { rivenTestContext as it } from "../../__tests__/test-context.ts";
 import { getattrSync, parseMode } from "./getattr.ts";
 
 it("returns directory stats for the root directory", async () => {
@@ -61,17 +62,22 @@ it("returns ENOENT for unknown paths", async () => {
   });
 });
 
-it("returns file stats for movie files", async () => {
+it("returns file stats for movie files", async ({ em }) => {
   const callback = vi.fn();
 
-  const em = database.em.fork();
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "movie",
+  });
 
   const mediaItem = em.create(Movie, {
     title: "Inception",
     year: 2010,
-    state: "downloaded",
     tmdbId: "27205",
     contentRating: "pg-13",
+    itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -79,7 +85,7 @@ it("returns file stats for movie files", async () => {
   const mediaEntry = em.create(MediaEntry, {
     fileSize: 2147483648,
     originalFilename: "Inception (2010) {tmdb-27205}.mkv",
-    provider: "@repo/plugin-test",
+    plugin: "@repo/plugin-test",
     mediaItem,
   });
 
@@ -106,18 +112,23 @@ it("returns file stats for movie files", async () => {
   });
 });
 
-it("returns directory stats for /movies", async () => {
+it("returns directory stats for /movies", async ({ em }) => {
   const callback = vi.fn();
 
-  const em = database.em.fork();
-
   for (let i = 1; i <= 3; i++) {
+    const itemRequest = em.create(ItemRequest, {
+      requestedBy: "@repo/plugin-test",
+      state: "completed",
+      type: "movie",
+    });
+
     const movie = em.create(Movie, {
       title: `Example Movie ${i.toString()}`,
       year: 2020,
       contentRating: "g",
-      state: "downloaded",
       tmdbId: i.toString(),
+      itemRequest,
+      isRequested: true,
     });
 
     await em.flush();
@@ -125,7 +136,7 @@ it("returns directory stats for /movies", async () => {
     const mediaEntry = em.create(MediaEntry, {
       fileSize: 1234567890,
       originalFilename: "Example Show.mkv",
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: movie,
     });
 
@@ -150,19 +161,24 @@ it("returns directory stats for /movies", async () => {
   });
 });
 
-it("returns directory stats for /shows", async () => {
+it("returns directory stats for /shows", async ({ em }) => {
   const callback = vi.fn();
 
-  const em = database.em.fork();
-
   for (let i = 1; i <= 3; i++) {
+    const itemRequest = em.create(ItemRequest, {
+      requestedBy: "@repo/plugin-test",
+      state: "completed",
+      type: "show",
+    });
+
     const show = em.create(Show, {
       title: "Example Show",
       tvdbId: i.toString(),
       contentRating: "tv-14",
       year: 2026,
-      state: "downloaded",
       status: "continuing",
+      itemRequest,
+      isRequested: true,
     });
 
     await em.flush();
@@ -171,7 +187,9 @@ it("returns directory stats for /shows", async () => {
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
-      state: "downloaded",
+      isSpecial: false,
+      isRequested: true,
+      itemRequest,
     });
 
     show.seasons.add(season);
@@ -179,12 +197,15 @@ it("returns directory stats for /shows", async () => {
     await em.flush();
 
     const episode = em.create(Episode, {
-      title: `Episode 01`,
+      title: "Episode 01",
       year: 2020,
       contentRating: "tv-14",
       number: 1,
       absoluteNumber: 1,
-      state: "downloaded",
+      isSpecial: false,
+      type: "episode",
+      isRequested: true,
+      itemRequest,
     });
 
     season.episodes.add(episode);
@@ -192,7 +213,7 @@ it("returns directory stats for /shows", async () => {
     const mediaEntry = em.create(MediaEntry, {
       fileSize: 1234567890,
       originalFilename: "Example Show.mkv",
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: episode,
     });
 
@@ -217,18 +238,23 @@ it("returns directory stats for /shows", async () => {
   });
 });
 
-it("returns directory stats for single shows", async () => {
+it("returns directory stats for single shows", async ({ em }) => {
   const callback = vi.fn();
 
-  const em = database.em.fork();
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
 
   const show = em.create(Show, {
     title: "Example Show",
     tvdbId: "1",
     contentRating: "tv-14",
     year: 2026,
-    state: "downloaded",
     status: "continuing",
+    itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -238,7 +264,9 @@ it("returns directory stats for single shows", async () => {
       title: `Season ${i.toString().padStart(2, "0")}`,
       year: 2020,
       number: i,
-      state: "downloaded",
+      isSpecial: false,
+      isRequested: true,
+      itemRequest,
     });
 
     show.seasons.add(season);
@@ -246,12 +274,14 @@ it("returns directory stats for single shows", async () => {
     await em.flush();
 
     const episode = em.create(Episode, {
-      title: `Episode 01`,
+      title: "Episode 01",
       year: 2020,
       contentRating: "tv-14",
       number: 1,
       absoluteNumber: 1,
-      state: "downloaded",
+      isSpecial: false,
+      isRequested: true,
+      itemRequest,
     });
 
     season.episodes.add(episode);
@@ -259,7 +289,7 @@ it("returns directory stats for single shows", async () => {
     const mediaEntry = em.create(MediaEntry, {
       fileSize: 1234567890,
       originalFilename: "Example Show.mkv",
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: episode,
     });
 
@@ -284,27 +314,34 @@ it("returns directory stats for single shows", async () => {
   });
 });
 
-it("returns directory stats for single seasons", async () => {
+it("returns directory stats for single seasons", async ({ em }) => {
   const callback = vi.fn();
 
-  const em = database.em.fork();
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
 
   const show = em.create(Show, {
     title: "Example Show",
     tvdbId: "1",
     contentRating: "tv-14",
     year: 2026,
-    state: "downloaded",
     status: "continuing",
+    itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
 
   const season = em.create(Season, {
-    title: `Season 01`,
+    title: "Season 01",
     year: 2020,
     number: 1,
-    state: "downloaded",
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -313,12 +350,14 @@ it("returns directory stats for single seasons", async () => {
 
   for (let i = 1; i <= 10; i++) {
     const episode = em.create(Episode, {
-      title: `Episode 01`,
+      title: "Episode 01",
       year: 2020,
       contentRating: "tv-14",
       number: 1,
       absoluteNumber: 1,
-      state: "downloaded",
+      isSpecial: false,
+      isRequested: true,
+      itemRequest,
     });
 
     season.episodes.add(episode);
@@ -326,7 +365,7 @@ it("returns directory stats for single seasons", async () => {
     const mediaEntry = em.create(MediaEntry, {
       fileSize: 1234567890,
       originalFilename: "Example Show.mkv",
-      provider: "@repo/plugin-test",
+      plugin: "@repo/plugin-test",
       mediaItem: episode,
     });
 
@@ -351,27 +390,34 @@ it("returns directory stats for single seasons", async () => {
   });
 });
 
-it("returns file stats for episodes", async () => {
+it("returns file stats for episodes", async ({ em }) => {
   const callback = vi.fn();
 
-  const em = database.em.fork();
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
 
   const show = em.create(Show, {
     title: "Example Show",
     tvdbId: "1",
     contentRating: "tv-14",
     year: 2026,
-    state: "downloaded",
     status: "continuing",
+    itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
 
   const season = em.create(Season, {
-    title: `Season 01`,
+    title: "Season 01",
     year: 2020,
     number: 1,
-    state: "downloaded",
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -379,12 +425,14 @@ it("returns file stats for episodes", async () => {
   await em.flush();
 
   const episode = em.create(Episode, {
-    title: `Episode 01`,
+    title: "Episode 01",
     year: 2020,
     contentRating: "tv-14",
     number: 1,
     absoluteNumber: 1,
-    state: "downloaded",
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   season.episodes.add(episode);
@@ -392,7 +440,7 @@ it("returns file stats for episodes", async () => {
   const mediaEntry = em.create(MediaEntry, {
     fileSize: 1234567890,
     originalFilename: "Example Show.mkv",
-    provider: "@repo/plugin-test",
+    plugin: "@repo/plugin-test",
     mediaItem: episode,
   });
 

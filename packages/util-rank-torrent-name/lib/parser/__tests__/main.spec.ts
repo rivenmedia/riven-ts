@@ -4,6 +4,18 @@ import { parse } from "../parse.ts";
 
 it.each([
   [
+    "One Piece [ Episodes + Movies + OVAs + Specials ][Dual Audio][BD 720p & 1080p HEVC x265 10bit][Arabic & Multi-Subs]\nSpecials/One Piece - S00E03 - Adventure in the Ocean's Navel.mkv",
+    {
+      title: "One Piece",
+      resolution: "1080p",
+      seasons: [0],
+      episodes: [3],
+      quality: "BDRip",
+      codec: "hevc",
+      languages: ["multi subs", "dual audio", "ar"],
+    },
+  ],
+  [
     "sons.of.anarchy.s05e10.480p.BluRay.x264-GAnGSteR",
     {
       title: "sons of anarchy",
@@ -1149,7 +1161,6 @@ it.each([
       languages: ["zh"],
       resolution: "1080p",
       quality: "TeleCine",
-      trash: true,
     },
   ],
   [

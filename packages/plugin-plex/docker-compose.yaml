@@ -1,0 +1,29 @@
+services:
+  plex:
+    container_name: plex
+    image: plexinc/pms-docker
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities:
+                - gpu
+    runtime: nvidia
+    gpus: all
+    env_file: .env.plex
+    ports:
+      - 32400:32400
+    volumes:
+      - ./docker-data/plex/config:/config
+      - ./docker-data/plex/transcode:/transcode
+      - ${HOST_VFS_MOUNT_PATH}:/mount:rslave
+    healthcheck:
+      test: curl --connect-timeout 15 --silent --show-error --fail http://127.0.0.1:32400/identity
+      interval: 1m00s
+      timeout: 15s
+      retries: 3
+      start_period: 1m00s
+    profiles:
+      - all
+      - services

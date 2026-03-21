@@ -2,7 +2,7 @@ import testPlugin from "@repo/plugin-test";
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
 import { vi } from "vitest";
-import { type Actor, createActor } from "xstate";
+import { type Actor, createActor, createEmptyActor } from "xstate";
 
 import { rivenTestContext } from "../../../../__tests__/test-context.ts";
 import {
@@ -19,6 +19,7 @@ export const it = rivenTestContext.extend<{
 }>({
   machine: mainRunnerMachine,
   input: {
+    parentRef: createEmptyActor(),
     plugins: new Map<symbol, ValidPlugin>([
       [
         testPlugin.name,

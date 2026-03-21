@@ -4,6 +4,7 @@ import {
   Movie,
   Season,
   Show,
+  ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
 
 import { wrap } from "@mikro-orm/core";
@@ -22,6 +23,16 @@ export class SkippedTorrentError extends Error {
     this.name = "SkippedTorrentError";
   }
 }
+
+/**
+ * Given a base year, return a list of candidate years that are valid for that base year.
+ *
+ * This is used to allow for some flexibility in torrent naming, where the year in the torrent title may be off by one year from the actual release year of the media item.
+ *
+ * @param year The base year to compare against
+ * @returns A list of possible years that are valid for the base year
+ */
+const getYearCandidates = (year: number) => [year - 1, year, year + 1];
 
 export const validateTorrent = async (
   item: MediaItem,
@@ -43,23 +54,47 @@ export const validateTorrent = async (
     );
   }
 
-  if (
-    parsedData.year &&
-    item.year &&
-    ![item.year - 1, item.year, item.year + 1].includes(parsedData.year)
-  ) {
-    throw new SkippedTorrentError(
-      "Skipping torrent with incorrect year",
-      itemTitle,
-      parsedData.rawTitle,
-      infoHash,
-    );
+  if (parsedData.year) {
+    const topLevelItem =
+      item instanceof ShowLikeMediaItem ? await item.getShow() : item;
+
+    const candidateYears = new Set<number>();
+
+    if (item.year) {
+      getYearCandidates(item.year).forEach((year) => candidateYears.add(year));
+    }
+
+    if (topLevelItem.year) {
+      getYearCandidates(topLevelItem.year).forEach((year) =>
+        candidateYears.add(year),
+      );
+    }
+
+    if (candidateYears.size && !candidateYears.has(parsedData.year)) {
+      throw new SkippedTorrentError(
+        "Skipping torrent with incorrect year",
+        itemTitle,
+        parsedData.rawTitle,
+        infoHash,
+      );
+    }
   }
 
   if (item instanceof Movie) {
     if (parsedData.seasons.length || parsedData.episodes.length) {
       throw new SkippedTorrentError(
-        `Skipping show torrent for movie`,
+        "Skipping show torrent for movie",
+        itemTitle,
+        parsedData.rawTitle,
+        infoHash,
+      );
+    }
+  }
+
+  if (item instanceof ShowLikeMediaItem) {
+    if (parsedData.seasons.length === 0 && parsedData.episodes.length === 0) {
+      throw new SkippedTorrentError(
+        `Skipping torrent with no seasons or episodes for ${item.type} item`,
         itemTitle,
         parsedData.rawTitle,
         infoHash,
@@ -113,51 +148,53 @@ export const validateTorrent = async (
   }
 
   if (item instanceof Season) {
-    if (!parsedData.seasons.length) {
-      throw new SkippedTorrentError(
-        "Skipping torrent with no seasons for season item",
-        itemTitle,
-        parsedData.rawTitle,
-        infoHash,
-      );
-    }
+    await wrap(item).populate(["episodes"]);
 
-    if (!parsedData.seasons.includes(item.number)) {
-      throw new SkippedTorrentError(
-        "Skipping torrent with incorrect season number for season item",
-        itemTitle,
-        parsedData.rawTitle,
-        infoHash,
-      );
-    }
+    if (parsedData.seasons.length === 0) {
+      if (parsedData.episodes.length) {
+        // If we don't have seasons, check that each *absolute* number is found in the list.
+        // Some items name torrents using absolute episodes only (e.g. One Piece 0001-1000)
 
-    if (parsedData.episodes.length) {
-      if (parsedData.episodes.length <= 2) {
+        const episodes = item.episodes.getItems();
+        const absoluteEpisodesIntersection = new Set(
+          parsedData.episodes,
+        ).intersection(
+          new Set(episodes.map((episode) => episode.absoluteNumber)),
+        );
+
+        if (absoluteEpisodesIntersection.size !== episodes.length) {
+          throw new SkippedTorrentError(
+            "Skipping torrent with incorrect absolute episode range for season item",
+            itemTitle,
+            parsedData.rawTitle,
+            infoHash,
+          );
+        }
+      }
+    } else {
+      if (!parsedData.seasons.includes(item.number)) {
         throw new SkippedTorrentError(
-          "Skipping torrent with 2 or fewer episodes for season item",
+          "Skipping torrent with incorrect season number for season item",
           itemTitle,
           parsedData.rawTitle,
           infoHash,
         );
       }
 
-      await wrap(item).populate(["episodes"]);
+      if (parsedData.episodes.length) {
+        // If we have seasons and episodes, check that each *relative* number is found in the list
+        const relativeEpisodesIntersection = new Set(
+          parsedData.episodes,
+        ).intersection(new Set(item.episodes.map((episode) => episode.number)));
 
-      const episodesIntersection = new Set(parsedData.episodes).intersection(
-        new Set(
-          item.episodes
-            .map((episode) => [episode.number, episode.absoluteNumber])
-            .flat(),
-        ),
-      );
-
-      if (episodesIntersection.size !== item.episodes.length) {
-        throw new SkippedTorrentError(
-          "Skipping torrent with incorrect episodes for season item",
-          itemTitle,
-          parsedData.rawTitle,
-          infoHash,
-        );
+        if (relativeEpisodesIntersection.size !== item.episodes.length) {
+          throw new SkippedTorrentError(
+            "Skipping torrent with incorrect episodes for season item",
+            itemTitle,
+            parsedData.rawTitle,
+            infoHash,
+          );
+        }
       }
     }
   }

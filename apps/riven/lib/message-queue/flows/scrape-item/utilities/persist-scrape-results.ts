@@ -1,7 +1,10 @@
-import { Stream } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
+import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 
+import { ref } from "@mikro-orm/core";
 import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
 import assert from "node:assert";
@@ -21,79 +24,99 @@ export async function persistScrapeResults({
   id,
   results,
 }: PersistScrapeResultsInput) {
-  const existingItem = await database.mediaItem.findOneOrFail(
-    { id },
-    { populate: ["streams.infoHash"] },
-  );
+  const { existingItem, newStreamsCount } = await database.em
+    .fork()
+    .transactional(async (transaction) => {
+      const existingItem = await transaction
+        .getRepository(MediaItem)
+        .findOneOrFail({ id }, { populate: ["streams.infoHash"] });
 
-  assert(
-    existingItem.state === "indexed",
-    new MediaItemScrapeErrorIncorrectState({
-      item: existingItem,
-    }),
-  );
+      const processableStates = MediaItemState.extract([
+        "indexed",
+        "ongoing",
+        "scraped",
+        "partially_completed",
+      ]);
 
-  const em = database.em.fork();
-  const streamsCount = existingItem.streams.count();
+      assert(
+        processableStates.safeParse(existingItem.state).success,
+        new MediaItemScrapeErrorIncorrectState({
+          item: existingItem,
+        }),
+      );
 
-  const infoHashes = Object.keys(results);
-  const preScrapedStreams = await database.stream.find({
-    infoHash: { $in: infoHashes },
-  });
+      const streamsCount = existingItem.streams.count();
 
-  const preScrapedStreamsMap = preScrapedStreams.reduce<Record<string, Stream>>(
-    (acc, stream) => ({ ...acc, [stream.infoHash]: stream }),
-    {},
-  );
+      const infoHashes = Object.keys(results);
+      const preScrapedStreams = await transaction.getRepository(Stream).find({
+        infoHash: { $in: infoHashes },
+      });
 
-  for (const [infoHash, parsedData] of Object.entries(results)) {
-    const existingEntry = preScrapedStreamsMap[infoHash];
-    const stream = existingEntry ?? em.create(Stream, { infoHash, parsedData });
+      const preScrapedStreamsMap = new Map(
+        preScrapedStreams.map((stream) => [stream.infoHash, stream]),
+      );
 
-    existingItem.streams.add(stream);
-  }
+      for (const [infoHash, parsedData] of Object.entries(results)) {
+        const existingEntry = preScrapedStreamsMap.get(infoHash);
+        const stream =
+          existingEntry ?? transaction.create(Stream, { infoHash, parsedData });
 
-  const newStreamsCount = existingItem.streams.count() - streamsCount;
+        existingItem.streams.add(ref(stream));
+      }
+
+      const newStreamsCount = existingItem.streams.count() - streamsCount;
+
+      existingItem.failedAttempts =
+        newStreamsCount === 0 ? existingItem.failedAttempts + 1 : 0;
+
+      existingItem.scrapedAt = DateTime.now().toJSDate();
+      existingItem.scrapedTimes++;
+
+      try {
+        await validateOrReject(existingItem);
+
+        await transaction.persist(existingItem).flush();
+
+        if (newStreamsCount > 0) {
+          logger.info(
+            `Added ${newStreamsCount.toString()} new streams to ${existingItem.fullTitle}`,
+          );
+        }
+      } catch (error) {
+        const errorMessage = z
+          .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
+          .transform((error) => {
+            if (Array.isArray(error)) {
+              return error
+                .map((err) =>
+                  err.constraints
+                    ? Object.values(err.constraints).join("; ")
+                    : "",
+                )
+                .join("; ");
+            }
+
+            return error.message;
+          })
+          .parse(error);
+
+        throw new MediaItemScrapeError({
+          item: existingItem,
+          error: errorMessage,
+        });
+      }
+
+      return {
+        newStreamsCount,
+        existingItem,
+      };
+    });
 
   if (newStreamsCount === 0) {
-    existingItem.failedAttempts++;
-  }
-
-  existingItem.state = "scraped";
-  existingItem.scrapedAt = DateTime.now().toJSDate();
-  existingItem.scrapedTimes++;
-
-  try {
-    await validateOrReject(existingItem);
-
-    await em.flush();
-
-    logger.info(
-      newStreamsCount > 0
-        ? `Added ${newStreamsCount.toString()} new streams to ${existingItem.fullTitle}`
-        : `No new streams found for ${existingItem.fullTitle}`,
-    );
-
-    return existingItem;
-  } catch (error) {
-    const errorMessage = z
-      .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((error) => {
-        if (Array.isArray(error)) {
-          return error
-            .map((err) =>
-              err.constraints ? Object.values(err.constraints).join("; ") : "",
-            )
-            .join("; ");
-        }
-
-        return error.message;
-      })
-      .parse(error);
-
-    throw new MediaItemScrapeError({
+    throw new MediaItemScrapeErrorNoNewStreams({
       item: existingItem,
-      error: errorMessage,
     });
   }
+
+  return existingItem;
 }

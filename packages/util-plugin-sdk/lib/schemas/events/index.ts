@@ -13,21 +13,29 @@ import {
   CoreStartedEventHandler,
 } from "./core.started.event.ts";
 import {
-  ItemRequestCreationErrorConflictEvent,
-  ItemRequestCreationErrorConflictEventHandler,
-} from "./item-request.creation.error.conflict.event.ts";
+  ItemRequestCreateErrorConflictEvent,
+  ItemRequestCreateErrorConflictEventHandler,
+} from "./item-request.create.error.conflict.event.ts";
 import {
-  ItemRequestCreationErrorEvent,
-  ItemRequestCreationErrorEventHandler,
-} from "./item-request.creation.error.event.ts";
+  ItemRequestCreateErrorEvent,
+  ItemRequestCreateErrorEventHandler,
+} from "./item-request.create.error.event.ts";
 import {
-  ItemRequestCreationSuccessEvent,
-  ItemRequestCreationSuccessEventHandler,
-} from "./item-request.creation.success.event.ts";
+  ItemRequestCreateSuccessEvent,
+  ItemRequestCreateSuccessEventHandler,
+} from "./item-request.create.success.event.ts";
+import {
+  ItemRequestUpdateSuccessEvent,
+  ItemRequestUpdateSuccessEventHandler,
+} from "./item-request.update.success.event.ts";
 import {
   MediaItemDownloadRequestedEvent,
   MediaItemDownloadRequestedEventHandler,
 } from "./media-item.download-requested.event.ts";
+import {
+  MediaItemDownloadCacheCheckRequestedEvent,
+  MediaItemDownloadCacheCheckRequestedEventHandler,
+} from "./media-item.download.cache-check-requested.event.ts";
 import {
   MediaItemDownloadErrorEvent,
   MediaItemDownloadErrorEventHandler,
@@ -36,6 +44,14 @@ import {
   MediaItemDownloadErrorIncorrectStateEvent,
   MediaItemDownloadErrorIncorrectStateEventHandler,
 } from "./media-item.download.incorrect-state.event.ts";
+import {
+  MediaItemDownloadPartialSuccessEvent,
+  MediaItemDownloadPartialSuccessEventHandler,
+} from "./media-item.download.partial-success.event.ts";
+import {
+  MediaItemDownloadProviderListRequestedEvent,
+  MediaItemDownloadProviderListRequestedEventHandler,
+} from "./media-item.download.provider-list-requested.event.ts";
 import {
   MediaItemDownloadSuccessEvent,
   MediaItemDownloadSuccessEventHandler,
@@ -69,6 +85,10 @@ import {
   MediaItemScrapeErrorIncorrectStateEventHandler,
 } from "./media-item.scrape.error.incorrect-state.event.ts";
 import {
+  MediaItemScrapeErrorNoNewStreamsEvent,
+  MediaItemScrapeErrorNoNewStreamsEventHandler,
+} from "./media-item.scrape.error.no-new-streams.event.ts";
+import {
   MediaItemScrapeSuccessEvent,
   MediaItemScrapeSuccessEventHandler,
 } from "./media-item.scrape.success.event.ts";
@@ -79,9 +99,10 @@ import {
 
 export const RivenEvent = z.discriminatedUnion("type", [
   CoreStartedEvent,
-  ItemRequestCreationSuccessEvent,
-  ItemRequestCreationErrorEvent,
-  ItemRequestCreationErrorConflictEvent,
+  ItemRequestCreateSuccessEvent,
+  ItemRequestCreateErrorEvent,
+  ItemRequestCreateErrorConflictEvent,
+  ItemRequestUpdateSuccessEvent,
   MediaItemIndexRequestedEvent,
   MediaItemIndexSuccessEvent,
   MediaItemIndexErrorIncorrectStateEvent,
@@ -90,11 +111,15 @@ export const RivenEvent = z.discriminatedUnion("type", [
   CoreShutdownEvent,
   MediaItemScrapeRequestedEvent,
   MediaItemScrapeSuccessEvent,
+  MediaItemScrapeErrorNoNewStreamsEvent,
   MediaItemScrapeErrorIncorrectStateEvent,
   MediaItemScrapeErrorEvent,
   MediaItemDownloadRequestedEvent,
+  MediaItemDownloadCacheCheckRequestedEvent,
   MediaItemDownloadErrorIncorrectStateEvent,
   MediaItemDownloadErrorEvent,
+  MediaItemDownloadPartialSuccessEvent,
+  MediaItemDownloadProviderListRequestedEvent,
   MediaItemDownloadSuccessEvent,
   MediaItemStreamLinkRequestedEvent,
 ]);
@@ -117,10 +142,11 @@ export const RivenEventHandler = {
   "riven.content-service.requested": ContentServiceRequestedEventHandler,
 
   // Item request
-  "riven.item-request.creation.success": ItemRequestCreationSuccessEventHandler,
-  "riven.item-request.creation.error": ItemRequestCreationErrorEventHandler,
-  "riven.item-request.creation.error.conflict":
-    ItemRequestCreationErrorConflictEventHandler,
+  "riven.item-request.create.success": ItemRequestCreateSuccessEventHandler,
+  "riven.item-request.create.error": ItemRequestCreateErrorEventHandler,
+  "riven.item-request.create.error.conflict":
+    ItemRequestCreateErrorConflictEventHandler,
+  "riven.item-request.update.success": ItemRequestUpdateSuccessEventHandler,
 
   // Item indexing
   "riven.media-item.index.requested": MediaItemIndexRequestedEventHandler,
@@ -134,13 +160,21 @@ export const RivenEventHandler = {
   "riven.media-item.scrape.error": MediaItemScrapeErrorEventHandler,
   "riven.media-item.scrape.error.incorrect-state":
     MediaItemScrapeErrorIncorrectStateEventHandler,
+  "riven.media-item.scrape.error.no-new-streams":
+    MediaItemScrapeErrorNoNewStreamsEventHandler,
   "riven.media-item.scrape.success": MediaItemScrapeSuccessEventHandler,
 
   // Item downloading
   "riven.media-item.download.requested": MediaItemDownloadRequestedEventHandler,
+  "riven.media-item.download.cache-check-requested":
+    MediaItemDownloadCacheCheckRequestedEventHandler,
   "riven.media-item.download.error": MediaItemDownloadErrorEventHandler,
   "riven.media-item.download.error.incorrect-state":
     MediaItemDownloadErrorIncorrectStateEventHandler,
+  "riven.media-item.download.partial-success":
+    MediaItemDownloadPartialSuccessEventHandler,
+  "riven.media-item.download.provider-list-requested":
+    MediaItemDownloadProviderListRequestedEventHandler,
   "riven.media-item.download.success": MediaItemDownloadSuccessEventHandler,
 
   // Item streaming

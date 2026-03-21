@@ -7,8 +7,9 @@ import {
   defaultRankingModel,
 } from "./ranker/settings.ts";
 import { sortTorrents } from "./ranker/sort.ts";
-import { Resolution } from "./schemas.js";
+import { Resolution } from "./schemas.ts";
 
+import type { Aliases } from "./ranker/lev.ts";
 import type { RankedResult } from "./types.ts";
 
 export class RTN {
@@ -46,11 +47,17 @@ export class RTN {
     );
   }
 
-  rankTorrent(rawTitle: string, hash: string, correctTitle: string) {
+  rankTorrent(
+    rawTitle: string,
+    hash: string,
+    correctTitle: string,
+    aliases: Aliases,
+  ) {
     return rankTorrent(
       rawTitle,
       hash,
       correctTitle,
+      aliases,
       this.#settings,
       this.#rankingModel,
     );

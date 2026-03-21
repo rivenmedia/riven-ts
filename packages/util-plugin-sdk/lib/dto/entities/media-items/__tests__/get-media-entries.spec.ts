@@ -1,7 +1,7 @@
 import { expect } from "vitest";
 
 import { test } from "../../../../__tests__/test-context.ts";
-import { Episode, MediaEntry, Season, Show } from "../../index.ts";
+import { Episode, ItemRequest, MediaEntry, Season, Show } from "../../index.ts";
 import { Movie } from "../movie.entity.ts";
 
 test("getMediaEntries() returns the associated media entry for a Movie media item", async ({
@@ -9,17 +9,24 @@ test("getMediaEntries() returns the associated media entry for a Movie media ite
 }) => {
   const em = orm.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "movie",
+  });
+
   const movie = em.create(Movie, {
     title: "Test Movie",
     contentRating: "pg-13",
-    state: "completed",
     tmdbId: "1",
+    itemRequest,
+    isRequested: true,
   });
 
   const mediaEntry = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-movie.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: movie,
   });
 
@@ -35,12 +42,19 @@ test("getMediaEntries() returns the associated media entries for a Show media it
 }) => {
   const em = orm.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
+
   const show = em.create(Show, {
     title: "Test Show",
     contentRating: "tv-14",
-    state: "completed",
     status: "ended",
     tvdbId: "1",
+    itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -48,7 +62,9 @@ test("getMediaEntries() returns the associated media entries for a Show media it
   const season = em.create(Season, {
     title: "Season 1",
     number: 1,
-    state: "completed",
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -60,7 +76,9 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     number: 1,
     absoluteNumber: 1,
     contentRating: "tv-14",
-    state: "completed",
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   const episode2 = em.create(Episode, {
@@ -68,20 +86,22 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     number: 2,
     absoluteNumber: 2,
     contentRating: "tv-14",
-    state: "completed",
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   const mediaEntry1 = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-show-s01e01.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: episode1,
   });
 
   const mediaEntry2 = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-show-s01e01.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: episode2,
   });
 
@@ -100,12 +120,19 @@ test("getMediaEntries() returns the associated media entries for a Season media 
 }) => {
   const em = orm.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
+
   const show = em.create(Show, {
     title: "Test Show",
     contentRating: "tv-14",
-    state: "completed",
     status: "ended",
     tvdbId: "1",
+    itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -113,13 +140,17 @@ test("getMediaEntries() returns the associated media entries for a Season media 
   const season1 = em.create(Season, {
     title: "Season 1",
     number: 1,
-    state: "completed",
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   const season2 = em.create(Season, {
     title: "Season 2",
     number: 1,
-    state: "completed",
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season1, season2);
@@ -131,7 +162,9 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     number: 1,
     absoluteNumber: 1,
     contentRating: "tv-14",
-    state: "completed",
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   const season2Episode1 = em.create(Episode, {
@@ -139,20 +172,22 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     number: 1,
     absoluteNumber: 2,
     contentRating: "tv-14",
-    state: "completed",
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   const season1Episode1MediaEntry = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-show-s01e01.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: season1Episode1,
   });
 
   const season2Episode1MediaEntry = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-show-s02e01.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: season2Episode1,
   });
 
@@ -173,12 +208,19 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
 }) => {
   const em = orm.em.fork();
 
+  const itemRequest = em.create(ItemRequest, {
+    requestedBy: "@repo/plugin-test",
+    state: "completed",
+    type: "show",
+  });
+
   const show = em.create(Show, {
     title: "Test Show",
     contentRating: "tv-14",
-    state: "completed",
     status: "ended",
     tvdbId: "1",
+    itemRequest,
+    isRequested: true,
   });
 
   await em.flush();
@@ -186,7 +228,9 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
   const season = em.create(Season, {
     title: "Season 1",
     number: 1,
-    state: "completed",
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   show.seasons.add(season);
@@ -198,13 +242,15 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     number: 1,
     absoluteNumber: 1,
     contentRating: "tv-14",
-    state: "completed",
+    isSpecial: false,
+    isRequested: true,
+    itemRequest,
   });
 
   const mediaEntry = em.create(MediaEntry, {
     fileSize: 123456,
     originalFilename: "test-show-s01e01.mkv",
-    provider: "test",
+    plugin: "test",
     mediaItem: episode,
   });
 

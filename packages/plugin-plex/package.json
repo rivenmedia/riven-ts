@@ -22,6 +22,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@faker-js/faker": "catalog:",
     "@kubb/cli": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-kubb-config": "workspace:^",
