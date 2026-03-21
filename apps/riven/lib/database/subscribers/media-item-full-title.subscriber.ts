@@ -1,6 +1,6 @@
 import {
   Episode,
-  type MediaItem,
+  MediaItem,
   Movie,
   Season,
   Show,
@@ -10,11 +10,15 @@ import type { EventArgs, EventSubscriber } from "@mikro-orm/core";
 
 export class MediaItemFullTitleSubscriber implements EventSubscriber {
   beforeCreate({ entity }: EventArgs<MediaItem>): void | Promise<void> {
-    this.#setFullTitle(entity);
+    if (entity instanceof MediaItem) {
+      this.#setFullTitle(entity);
+    }
   }
 
   beforeUpdate({ entity }: EventArgs<MediaItem>): void | Promise<void> {
-    this.#setFullTitle(entity);
+    if (entity instanceof MediaItem) {
+      this.#setFullTitle(entity);
+    }
   }
 
   #setFullTitle(item: MediaItem): void {
