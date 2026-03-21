@@ -3,7 +3,7 @@ import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas
 
 import { wrap } from "@mikro-orm/core";
 import { DateTime } from "luxon";
-import { expect, it } from "vitest";
+import { expect, it, vi } from "vitest";
 
 import { database } from "../../../../database/database.ts";
 import { persistShowIndexerData } from "./persist-show-indexer-data.ts";
@@ -30,8 +30,6 @@ it("returns the media item if processed successfully", async ({}) => {
       contentRating: "tv-14",
       genres: [],
       type: "show",
-      firstAired: DateTime.fromISO("2020-01-01").toISO(),
-      nextAired: null,
       network: "Test Network",
       seasons: [],
       status: "ended",
@@ -72,8 +70,6 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorr
         contentRating: "tv-14",
         genres: [],
         type: "show",
-        firstAired: DateTime.fromISO("2020-01-01").toISO(),
-        nextAired: null,
         network: "Test Network",
         seasons: [],
         status: "ended",
@@ -84,6 +80,10 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorr
 });
 
 it("updates the media item with the latest data if it already exists", async () => {
+  vi.useFakeTimers({
+    now: DateTime.now().toJSDate(),
+  });
+
   const requestedId = "tt1234567";
 
   const em = database.orm.em.fork();
@@ -105,8 +105,6 @@ it("updates the media item with the latest data if it already exists", async () 
       contentRating: "tv-14",
       genres: [],
       type: "show",
-      firstAired: null,
-      nextAired: null,
       network: "Test Network",
       seasons: {
         1: {
@@ -117,6 +115,22 @@ it("updates the media item with the latest data if it already exists", async () 
               absoluteNumber: 0,
               contentRating: "unknown",
               number: 1,
+              airedAt: null,
+              title: "TBA",
+              runtime: null,
+            },
+            {
+              absoluteNumber: 0,
+              contentRating: "unknown",
+              number: 2,
+              airedAt: null,
+              title: "TBA",
+              runtime: null,
+            },
+            {
+              absoluteNumber: 0,
+              contentRating: "unknown",
+              number: 3,
               airedAt: null,
               title: "TBA",
               runtime: null,
@@ -136,13 +150,13 @@ it("updates the media item with the latest data if it already exists", async () 
     }),
   );
 
-  const episodes = await initialShow.getEpisodes();
+  const initialEpisodes = await initialShow.getEpisodes();
 
-  expect(episodes).toHaveLength(1);
+  expect(initialEpisodes).toHaveLength(3);
 
-  expect.assert(episodes[0]);
+  expect.assert(initialEpisodes[0]);
 
-  expect(wrap(episodes[0]).toJSON()).toEqual(
+  expect(wrap(initialEpisodes[0]).toJSON()).toEqual(
     expect.objectContaining({
       title: "TBA",
       state: "unreleased",
@@ -155,10 +169,9 @@ it("updates the media item with the latest data if it already exists", async () 
     }),
   );
 
-  const releasedAirDate = DateTime.utc().minus({ days: 1 });
-  const nextAirDate = releasedAirDate.plus({ days: 7 });
+  const firstEpisodeAirDate = DateTime.now().plus({ months: 1 });
 
-  const updatedShow = await persistShowIndexerData({
+  const updatedUpcomingShow = await persistShowIndexerData({
     item: {
       id: itemRequest.id,
       title: "Test Show",
@@ -166,8 +179,6 @@ it("updates the media item with the latest data if it already exists", async () 
       contentRating: "tv-14",
       genres: [],
       type: "show",
-      firstAired: releasedAirDate.toISO(),
-      nextAired: nextAirDate.toISO(),
       network: "Test Network",
       seasons: {
         1: {
@@ -178,8 +189,102 @@ it("updates the media item with the latest data if it already exists", async () 
               absoluteNumber: 1,
               contentRating: "tv-14",
               number: 1,
-              airedAt: releasedAirDate.toISO(),
+              airedAt: firstEpisodeAirDate.toISO(),
               title: "Episode 1",
+              runtime: 60,
+            },
+            {
+              absoluteNumber: 2,
+              contentRating: "tv-14",
+              number: 2,
+              airedAt: firstEpisodeAirDate.plus({ weeks: 1 }).toISO(),
+              title: "Episode 2",
+              runtime: 60,
+            },
+            {
+              absoluteNumber: 3,
+              contentRating: "tv-14",
+              number: 3,
+              airedAt: firstEpisodeAirDate.plus({ weeks: 2 }).toISO(),
+              title: "Episode 3",
+              runtime: 60,
+            },
+          ],
+        },
+      },
+      status: "upcoming",
+      keepUpdated: true,
+    },
+  });
+
+  expect(wrap(updatedUpcomingShow).toJSON()).toEqual(
+    expect.objectContaining({
+      state: "unreleased",
+      nextAirDate: firstEpisodeAirDate.toJSDate(),
+    }),
+  );
+
+  const updatedUpcomingEpisodes = await updatedUpcomingShow.getEpisodes();
+
+  expect(updatedUpcomingEpisodes).toHaveLength(3);
+
+  expect.assert(updatedUpcomingEpisodes[0]);
+
+  expect(wrap(updatedUpcomingEpisodes[0]).toJSON()).toEqual(
+    expect.objectContaining({
+      title: "Episode 1",
+      state: "unreleased",
+      absoluteNumber: 1,
+      contentRating: "tv-14",
+      year: firstEpisodeAirDate.year,
+      releaseDate: firstEpisodeAirDate.toJSDate(),
+      runtime: 60,
+      number: 1,
+    }),
+  );
+
+  const totalSeasonsCount = await updatedUpcomingShow.seasons.loadCount();
+
+  expect(totalSeasonsCount).toBe(1);
+
+  vi.setSystemTime(firstEpisodeAirDate.plus({ days: 1 }).toJSDate());
+
+  const updatedOngoingShow = await persistShowIndexerData({
+    item: {
+      id: itemRequest.id,
+      title: "Test Show",
+      imdbId: requestedId,
+      contentRating: "tv-14",
+      genres: [],
+      type: "show",
+      network: "Test Network",
+      seasons: {
+        1: {
+          number: 1,
+          title: "Season 1",
+          episodes: [
+            {
+              absoluteNumber: 1,
+              contentRating: "tv-14",
+              number: 1,
+              airedAt: firstEpisodeAirDate.toISO(),
+              title: "Episode 1",
+              runtime: 60,
+            },
+            {
+              absoluteNumber: 2,
+              contentRating: "tv-14",
+              number: 2,
+              airedAt: firstEpisodeAirDate.plus({ weeks: 1 }).toISO(),
+              title: "Episode 2",
+              runtime: 60,
+            },
+            {
+              absoluteNumber: 3,
+              contentRating: "tv-14",
+              number: 3,
+              airedAt: firstEpisodeAirDate.plus({ weeks: 2 }).toISO(),
+              title: "Episode 3",
               runtime: 60,
             },
           ],
@@ -190,33 +295,42 @@ it("updates the media item with the latest data if it already exists", async () 
     },
   });
 
-  expect(wrap(updatedShow).toJSON()).toEqual(
+  expect(wrap(updatedOngoingShow).toJSON()).toEqual(
     expect.objectContaining({
       state: "ongoing",
-      nextAirDate: nextAirDate.toJSDate(),
+      nextAirDate: firstEpisodeAirDate.plus({ weeks: 1 }).toJSDate(),
     }),
   );
 
-  const updatedEpisodes = await updatedShow.getEpisodes();
+  const updatedOngoingEpisodes = await updatedOngoingShow.getEpisodes();
 
-  expect(updatedEpisodes).toHaveLength(1);
+  expect(updatedOngoingEpisodes).toHaveLength(3);
 
-  expect.assert(updatedEpisodes[0]);
+  expect.assert(updatedOngoingEpisodes[0]);
 
-  expect(wrap(updatedEpisodes[0]).toJSON()).toEqual(
+  expect(wrap(updatedOngoingEpisodes[0]).toJSON()).toEqual(
     expect.objectContaining({
       title: "Episode 1",
       state: "indexed",
       absoluteNumber: 1,
       contentRating: "tv-14",
-      year: releasedAirDate.year,
-      releaseDate: releasedAirDate.toJSDate(),
+      year: firstEpisodeAirDate.year,
+      releaseDate: firstEpisodeAirDate.toJSDate(),
       runtime: 60,
       number: 1,
     }),
   );
 
-  const totalSeasonsCount = await updatedShow.seasons.loadCount();
+  const seasons = await updatedOngoingShow.seasons.loadItems();
 
-  expect(totalSeasonsCount).toBe(1);
+  expect(seasons).toHaveLength(1);
+
+  expect.assert(seasons[0]);
+
+  expect(wrap(seasons[0]).toJSON()).toEqual(
+    expect.objectContaining({
+      releaseDate: firstEpisodeAirDate.toJSDate(),
+      year: firstEpisodeAirDate.year,
+    }),
+  );
 });

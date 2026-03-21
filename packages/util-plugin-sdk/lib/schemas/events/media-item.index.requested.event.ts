@@ -43,8 +43,6 @@ export const MediaItemIndexRequestedResponse = z
       IndexedItem.extend({
         type: z.literal("show"),
         contentRating: ShowContentRating,
-        firstAired: ReleaseDatetime.nullable(),
-        nextAired: ReleaseDatetime.nullable(),
         network: z.string().min(1).nullable(),
         status: ShowStatus,
         keepUpdated: z.boolean(),

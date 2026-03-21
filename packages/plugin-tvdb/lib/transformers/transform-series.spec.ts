@@ -1,4 +1,3 @@
-import { DateTime } from "luxon";
 import { expect, it } from "vitest";
 
 import { transformSeries } from "./transform-series.ts";
@@ -22,7 +21,7 @@ it("uses the english title translation if the series language is not english", (
       },
     },
     [],
-    DateTime.now(),
+    "Europe/London",
   );
 
   expect(result.title).toBe("English Title");
@@ -40,7 +39,7 @@ it("uses the series title translation if the series language is in English", () 
       firstAired: "2020-01-01",
     },
     [],
-    DateTime.now(),
+    "Europe/London",
   );
 
   expect(result.title).toBe("Show Title");

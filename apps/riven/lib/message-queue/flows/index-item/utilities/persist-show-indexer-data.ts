@@ -60,8 +60,9 @@ export async function persistShowIndexerData({
         });
       }
 
-      const firstAired = item.firstAired
-        ? DateTime.fromISO(item.firstAired)
+      const firstEpisodeAirDate = item.seasons[1]?.episodes[0]?.airedAt;
+      const firstAired = firstEpisodeAirDate
+        ? DateTime.fromISO(firstEpisodeAirDate)
         : null;
 
       const show =
@@ -73,6 +74,7 @@ export async function persistShowIndexerData({
             imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
             itemRequest,
             isRequested: true, // Shows will always be considered to be requested
+            network: item.network,
           },
           { partial: true },
         );
@@ -81,10 +83,7 @@ export async function persistShowIndexerData({
       show.fullTitle = show.title;
       show.contentRating = item.contentRating;
       show.posterPath = item.posterUrl ?? show.posterPath ?? null;
-      show.releaseDate = firstAired?.toJSDate() ?? show.releaseDate ?? null;
-      show.nextAirDate = item.nextAired
-        ? DateTime.fromISO(item.nextAired).toJSDate()
-        : null;
+      show.nextAirDate = null; // Reset the next air date; it will be recalculated during episode processing
       show.year = firstAired?.year ?? show.year ?? null;
       show.country = item.country ?? show.country ?? null;
       show.language = item.language ?? show.language ?? null;
@@ -107,12 +106,6 @@ export async function persistShowIndexerData({
           },
           populate: ["episodes"],
         });
-
-        const seasonFirstAired = season.episodes[0]?.airedAt ?? null;
-
-        const seasonYear = seasonFirstAired
-          ? DateTime.fromISO(seasonFirstAired).year
-          : null;
 
         const seasonTitle = [
           `Season ${season.number.toString().padStart(2, "0")}`,
@@ -141,20 +134,21 @@ export async function persistShowIndexerData({
             { partial: true },
           );
 
-        if (seasonFirstAired) {
-          seasonEntry.releaseDate =
-            DateTime.fromISO(seasonFirstAired).toJSDate();
-        }
-
         seasonEntry.title = seasonTitle;
         seasonEntry.number = season.number;
         seasonEntry.fullTitle = `${show.title} - S${seasonEntry.number.toString().padStart(2, "0")}`;
         seasonEntry.isSpecial = season.number === 0;
-        seasonEntry.year = seasonYear;
 
         show.seasons.add(seasonEntry);
 
         for (const episode of season.episodes) {
+          if (episode.number === 1 && episode.airedAt) {
+            const episodeAirDate = DateTime.fromISO(episode.airedAt);
+
+            seasonEntry.releaseDate = episodeAirDate.toJSDate();
+            seasonEntry.year = episodeAirDate.year;
+          }
+
           const [existingEpisode] = existingSeason
             ? await existingSeason.episodes.matching({
                 limit: 1,
@@ -166,7 +160,7 @@ export async function persistShowIndexerData({
 
           const episodeYear = episode.airedAt
             ? DateTime.fromISO(episode.airedAt).year
-            : seasonYear;
+            : seasonEntry.year;
 
           const episodeEntry =
             existingEpisode ??
@@ -188,15 +182,21 @@ export async function persistShowIndexerData({
           episodeEntry.absoluteNumber = episode.absoluteNumber;
           episodeEntry.contentRating = episode.contentRating;
           episodeEntry.runtime = episode.runtime;
-          episodeEntry.year = episodeYear;
+          episodeEntry.year = episodeYear ?? null;
           episodeEntry.releaseDate = episode.airedAt
             ? DateTime.fromISO(episode.airedAt).toJSDate()
             : null;
 
-          seasonEntry.episodes.add(episodeEntry);
-        }
+          if (episodeEntry.isUnreleased && !show.nextAirDate) {
+            show.nextAirDate = episodeEntry.releaseDate;
 
-        await transaction.upsert(seasonEntry);
+            await transaction.upsert(show);
+          }
+
+          seasonEntry.episodes.add(episodeEntry);
+
+          await transaction.upsert(episodeEntry);
+        }
       }
 
       await validateOrReject(show);

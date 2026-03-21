@@ -8,8 +8,6 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
-import { DateTime } from "luxon";
-
 import type {
   ChangeSet,
   EntityData,
@@ -23,13 +21,10 @@ import type { Promisable } from "type-fest";
 type NextStatesMap = Map<MediaItem, MediaItemState>;
 
 export class MediaItemStateSubscriber implements EventSubscriber {
-  beforeUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
-    const isUnreleased = entity.releaseDate
-      ? // eslint-disable-next-line no-restricted-globals
-        DateTime.fromJSDate(new Date(entity.releaseDate)) > DateTime.now()
-      : true;
-
-    entity.state ??= isUnreleased ? "unreleased" : "indexed";
+  afterUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
+    if (entity.state === "unreleased" && !entity.isUnreleased) {
+      entity.state = "indexed";
+    }
   }
 
   async onFlush({ uow }: FlushEventArgs): Promise<void> {

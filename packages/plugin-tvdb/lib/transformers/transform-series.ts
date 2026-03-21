@@ -101,73 +101,55 @@ export const transformSeries = (
 
   const airsDateTime = DateTime.fromFormat(airsTime ?? "00:00", "HH:mm");
 
-  const { seasons, firstEpisodeAirDate, nextEpisodeAirDate } =
-    allEpisodes.reduce<{
-      firstEpisodeAirDate: DateTime | null;
-      nextEpisodeAirDate: DateTime | null;
-      seasons: Extract<
-        NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
-        { type: "show" }
-      >["seasons"];
-    }>(
-      (acc, episode) => {
-        const { seasonNumber, number } = episode;
+  const seasons = allEpisodes.reduce<
+    Extract<
+      NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
+      { type: "show" }
+    >["seasons"]
+  >((acc, episode) => {
+    const { seasonNumber, number } = episode;
 
-        if (seasonNumber === undefined || number === undefined) {
-          return acc;
-        }
+    if (seasonNumber === undefined || number === undefined) {
+      return acc;
+    }
 
-        const episodeAiredDate = episode.aired
-          ? DateTime.fromISO(episode.aired)
-          : null;
+    const episodeAiredDate = episode.aired
+      ? DateTime.fromISO(episode.aired)
+      : null;
 
-        const episodeAiredAtUtc = episodeAiredDate
-          ? DateTime.fromObject(
-              {
-                year: episodeAiredDate.year,
-                month: episodeAiredDate.month,
-                day: episodeAiredDate.day,
-                hour: airsDateTime.hour,
-                minute: airsDateTime.minute,
-              },
-              { zone: originalReleaseTimezone },
-            ).toUTC()
-          : null;
+    const episodeAiredAtUtc = episodeAiredDate
+      ? DateTime.fromObject(
+          {
+            year: episodeAiredDate.year,
+            month: episodeAiredDate.month,
+            day: episodeAiredDate.day,
+            hour: airsDateTime.hour,
+            minute: airsDateTime.minute,
+          },
+          { zone: originalReleaseTimezone },
+        ).toUTC()
+      : null;
 
-        if (episodeAiredAtUtc && episodeAiredAtUtc > DateTime.utc()) {
-          acc.nextEpisodeAirDate ??= episodeAiredAtUtc;
-        }
+    acc[seasonNumber] ??= {
+      number: seasonNumber,
+      title: null,
+      episodes: [],
+    };
 
-        const season = (acc.seasons[seasonNumber] ??= {
-          number: seasonNumber,
-          title: episode.seasonName ?? null,
-          episodes: [],
-        });
+    acc[seasonNumber].episodes.push({
+      contentRating, // TODO: Get episode-specific content rating
+      number,
+      absoluteNumber: episode.absoluteNumber ?? 0,
+      title: episode.name ?? "Unknown",
+      posterPath: episode.image
+        ? new URL(episode.image, "https://artworks.thetvdb.com").toString()
+        : posterPath,
+      airedAt: episodeAiredAtUtc?.toISO({ precision: "minute" }) ?? null,
+      runtime: episode.runtime ?? null,
+    });
 
-        if (season.number === 1 && number === 1) {
-          acc.firstEpisodeAirDate ??= episodeAiredAtUtc;
-        }
-
-        acc.seasons[seasonNumber].episodes.push({
-          contentRating, // TODO: Get episode-specific content rating
-          number,
-          absoluteNumber: episode.absoluteNumber ?? 0,
-          title: episode.name ?? "Unknown",
-          posterPath: episode.image
-            ? new URL(episode.image, "https://artworks.thetvdb.com").toString()
-            : posterPath,
-          airedAt: episodeAiredAtUtc?.toISO({ precision: "minute" }) ?? null,
-          runtime: episode.runtime ?? null,
-        });
-
-        return acc;
-      },
-      {
-        firstEpisodeAirDate: null,
-        nextEpisodeAirDate: null,
-        seasons: {},
-      },
-    );
+    return acc;
+  }, {});
 
   return {
     id: itemRequest.id,
@@ -186,8 +168,6 @@ export const transformSeries = (
     contentRating,
     posterUrl: posterPath,
     status: tvdbStatus?.toLowerCase() === "continuing" ? "continuing" : "ended",
-    firstAired: firstEpisodeAirDate?.toISO({ precision: "minute" }) ?? null,
-    nextAired: nextEpisodeAirDate?.toISO({ precision: "minute" }) ?? null,
     seasons,
     keepUpdated: keepUpdated ?? false,
   } satisfies Extract<

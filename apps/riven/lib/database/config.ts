@@ -18,6 +18,7 @@ import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 import { logger } from "../utilities/logger/logger.ts";
 import { settings } from "../utilities/settings.ts";
 import { MediaItemStateSubscriber } from "./subscribers/media-item-state.subscriber.ts";
+import { ShowLikeMediaItemReleaseDateSubscriber } from "./subscribers/show-like-media-item-release-date.subscriber.ts";
 
 export const entities = [
   SubtitleEntry,
@@ -41,5 +42,8 @@ export const databaseConfig = {
   logger: (message) => {
     logger.verbose(message);
   },
-  subscribers: [new MediaItemStateSubscriber()],
+  subscribers: [
+    new ShowLikeMediaItemReleaseDateSubscriber(),
+    new MediaItemStateSubscriber(),
+  ],
 } satisfies Options;
