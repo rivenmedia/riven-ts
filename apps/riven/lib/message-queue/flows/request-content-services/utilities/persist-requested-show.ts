@@ -22,7 +22,7 @@ export async function persistRequestedShow(
   logger.silly(`Processing requested show: ${externalIds.join(", ")}`);
 
   return await database.em.fork().transactional(async (transaction) => {
-    const existingItem = await database.itemRequest.findOne(
+    const existingItem = await transaction.getRepository(ItemRequest).findOne(
       {
         $or: [
           ...(item.imdbId ? [{ imdbId: item.imdbId }] : []),
