@@ -39,7 +39,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
       );
     }
 
-    requestOpts.params.append("apikey", this.settings.apiKey);
+    requestOpts.params.set("apikey", this.settings.apiKey);
   }
 
   override async validate() {
