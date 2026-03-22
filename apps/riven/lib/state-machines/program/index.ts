@@ -92,9 +92,10 @@ export const rivenMachine = setup({
             target: "Errored",
             actions: {
               type: "log",
-              params: ({ event }) => ({
-                message: `Error during bootstrap: ${(event.error as Error).message}`,
+              params: ({ event: { error } }) => ({
+                message: "Error during bootstrap",
                 level: "error",
+                error,
               }),
             },
           },
@@ -136,9 +137,10 @@ export const rivenMachine = setup({
                     target: "Stopped",
                     actions: {
                       type: "log",
-                      params: ({ event }) => ({
-                        message: `Error while shutting down GQL server: ${(event.error as Error).message}`,
+                      params: ({ event: { error } }) => ({
+                        message: "Error while shutting down GQL server",
                         level: "error",
+                        error,
                       }),
                     },
                   },
@@ -176,9 +178,10 @@ export const rivenMachine = setup({
                     target: "Unmounted",
                     actions: {
                       type: "log",
-                      params: ({ event }) => ({
-                        message: `Error while unmounting VFS: ${(event.error as Error).message}`,
+                      params: ({ event: { error } }) => ({
+                        message: "Error while unmounting VFS",
                         level: "error",
+                        error,
                       }),
                     },
                   },

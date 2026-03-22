@@ -7,14 +7,16 @@ export const withLogAction = {
     log: (
       _: unknown,
       {
+        error,
         message,
         level = "info",
       }: {
+        error?: unknown;
         message: string;
         level?: LogLevel;
       },
     ) => {
-      logger[level](message);
+      logger[level](message, { err: error });
     },
   },
 };

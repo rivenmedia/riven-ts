@@ -45,7 +45,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
 
       return true;
     } catch (error: unknown) {
-      this.logger.error(String(error));
+      this.logger.error("Seerr validation error", { err: error });
 
       return false;
     }

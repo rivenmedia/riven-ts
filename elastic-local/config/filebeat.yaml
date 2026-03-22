@@ -1,0 +1,20 @@
+output.elasticsearch:
+  hosts: ${ELASTICSEARCH_HOSTS}
+  username: ${ELASTICSEARCH_USERNAME}
+  password: ${ELASTICSEARCH_PASSWORD}
+
+filebeat.inputs:
+  - type: filestream
+    paths:
+      - /usr/share/filebeat/data/riven/logs/ecs-combined.json
+      - /usr/share/filebeat/data/riven/logs/ecs-error.json
+      - /usr/share/filebeat/data/riven/logs/ecs-exceptions.json
+    parsers:
+      - ndjson:
+        overwrite_keys: true
+        add_error_key: true
+        expand_keys: true
+
+processors:
+  - add_host_metadata: ~
+  - add_docker_metadata: ~

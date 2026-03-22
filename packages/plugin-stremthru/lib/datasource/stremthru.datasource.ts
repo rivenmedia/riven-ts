@@ -243,7 +243,7 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
 
       return torrents;
     } catch (error: unknown) {
-      this.logger.error(error);
+      this.logger.error("Stremthru scrape error", { err: error });
 
       return {};
     }

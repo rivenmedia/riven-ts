@@ -76,7 +76,7 @@ export const registerPluginHookWorkers = fromPromise<
               dataSources,
               settings,
               logger: baseLogger.child({
-                logSource: pluginName,
+                "log.source": pluginName,
               }),
             });
           },

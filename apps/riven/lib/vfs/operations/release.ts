@@ -72,14 +72,14 @@ export const releaseSync = function (_path, fd, callback) {
     })
     .catch((error: unknown) => {
       if (isFuseError(error)) {
-        logger.error(`VFS release FuseError: ${error.message}`);
+        logger.error("VFS release FuseError", { err: error });
 
         process.nextTick(callback, error.errorCode);
 
         return;
       }
 
-      logger.error(`VFS release unknown error: ${String(error)}`);
+      logger.error("VFS release unknown error", { err: error });
 
       process.nextTick(callback, Fuse.EIO);
     });

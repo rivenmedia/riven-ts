@@ -64,7 +64,7 @@ export const collectPluginsForRegistration = fromPromise(() => {
           ),
         };
       } catch (error) {
-        logger.error(`Unable to resolve plugin ${pluginName}:`, error);
+        logger.error(`Unable to resolve plugin ${pluginName}:`, { err: error });
 
         return {
           ...parsedPlugins,

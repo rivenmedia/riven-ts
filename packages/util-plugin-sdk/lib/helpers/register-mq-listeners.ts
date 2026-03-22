@@ -31,7 +31,7 @@ export function registerMQListeners(
     });
   }
 
-  (resource as EventEmitter).on("error", (error) => {
-    logger.error(error);
+  (resource as EventEmitter).on("error", (error: unknown) => {
+    logger.error(`BullMQ ${resource.constructor.name} error`, { err: error });
   });
 }

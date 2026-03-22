@@ -236,9 +236,11 @@ export const bootstrapMachine = setup({
                     actions: [
                       {
                         type: "log",
-                        params: ({ event }) => ({
-                          message: `Failed to initialise database connection during bootstrap. Error: ${(event.error as Error).message}`,
+                        params: ({ event: { error } }) => ({
+                          message:
+                            "Failed to initialise database connection during bootstrap.",
                           level: "error",
+                          error,
                         }),
                       },
                       {
@@ -313,9 +315,11 @@ export const bootstrapMachine = setup({
                     actions: [
                       {
                         type: "log",
-                        params: ({ event }) => ({
-                          message: `Failed to start GraphQL server during bootstrap. Error: ${(event.error as Error).message}`,
+                        params: ({ event: { error } }) => ({
+                          message:
+                            "Failed to start GraphQL server during bootstrap.",
                           level: "error",
+                          error,
                         }),
                       },
                       {
@@ -370,19 +374,10 @@ export const bootstrapMachine = setup({
               },
               onError: {
                 target: "#Bootstrap.Errored",
-                actions: [
-                  {
-                    type: "log",
-                    params: ({ event }) => ({
-                      message: `Failed to initialise VFS during bootstrap. Error: ${(event.error as Error).message}`,
-                      level: "error",
-                    }),
-                  },
-                  {
-                    type: "raiseError",
-                    params: ({ event }) => event.error as Error,
-                  },
-                ],
+                actions: {
+                  type: "raiseError",
+                  params: ({ event }) => event.error as Error,
+                },
               },
             },
           },

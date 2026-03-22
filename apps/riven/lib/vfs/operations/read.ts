@@ -198,18 +198,14 @@ export const readSync = function (
       }
 
       if (isFuseError(error)) {
-        logger.error(`VFS read FuseError: ${error.message}`);
+        logger.error("VFS read FuseError", { err: error });
 
         process.nextTick(callback, error.errorCode);
 
         return;
       }
 
-      if (error instanceof Error) {
-        logger.error(`VFS read Error: ${error.stack ?? error.message}`);
-      } else {
-        logger.error(`VFS read unknown error: ${String(error)}`);
-      }
+      logger.error("Unexpected VFS read error", { err: error });
 
       process.nextTick(callback, Fuse.EIO);
     });

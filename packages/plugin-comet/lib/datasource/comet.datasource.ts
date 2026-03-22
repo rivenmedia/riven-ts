@@ -106,7 +106,8 @@ export class CometAPI extends BaseDataSource<CometSettings> {
       return torrents;
     } catch (error: unknown) {
       this.logger.error(
-        `Failed to scrape ${item.fullTitle} (IMDB: ${item.imdbId ?? "N/A"}): ${String(error)}`,
+        `Failed to scrape ${item.fullTitle} (IMDB: ${item.imdbId ?? "N/A"})`,
+        { err: error },
       );
 
       return {};

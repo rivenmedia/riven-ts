@@ -1,6 +1,5 @@
 import { Parser, transforms } from "@viren070/parse-torrent-title";
 import { toMerged } from "es-toolkit";
-import { prettifyError } from "zod";
 
 import { sceneHandlers } from "../parser/handlers/scene.handlers.ts";
 import { trashHandlers } from "../parser/handlers/trash.handlers.ts";
@@ -81,9 +80,9 @@ export function parse(rawTitle: string) {
   });
 
   if (!parsedData.success) {
-    throw new Error(
-      `Failed to parse ${rawTitle}: ${prettifyError(parsedData.error)}`,
-    );
+    parsedData.error.message = `Failed to parse ${rawTitle}`;
+
+    throw parsedData.error;
   }
 
   return parsedData.data;
@@ -120,9 +119,9 @@ export function parseFilePath(filePath: string) {
   });
 
   if (!parsedData.success) {
-    throw new Error(
-      `Failed to parse file path ${filePath}: ${prettifyError(parsedData.error)}`,
-    );
+    parsedData.error.message = `Failed to parse ${filePath}`;
+
+    throw parsedData.error;
   }
 
   return parsedData.data;

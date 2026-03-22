@@ -71,9 +71,9 @@ export const initialiseVfs = fromPromise<
 
               To resolve this issue, try unmounting the VFS mount point by running one of the following commands in your terminal, and then restarting Riven:
 
-              - \`sudo umount -l ${mountPath}\`
-              - \`sudo fusermount -uz ${mountPath}\`
-              - \`sudo fusermount3 -uz ${mountPath}\`
+              sudo umount -l ${mountPath}
+              sudo fusermount -uz ${mountPath}
+              sudo fusermount3 -uz ${mountPath}
             `,
           );
         case "ENOENT":

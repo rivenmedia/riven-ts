@@ -327,8 +327,9 @@ export const mainRunnerMachine = setup({
           {
             type: "log",
             params: ({ event: { item, error } }) => ({
-              message: `Error creating item request ${JSON.stringify(SerialisedItemRequest.decode(item))}: ${String(error)}`,
+              message: `Error creating item request ${JSON.stringify(SerialisedItemRequest.decode(item))}`,
               level: "error",
+              error,
             }),
           },
         ],
@@ -596,8 +597,9 @@ export const mainRunnerMachine = setup({
           {
             type: "log",
             params: ({ event: { item, error } }) => ({
-              message: `Error downloading ${chalk.bold(item.fullTitle)}: ${String(error)}`,
+              message: `Error downloading ${chalk.bold(item.fullTitle)}`,
               level: "error",
+              error,
             }),
           },
           {
@@ -644,9 +646,10 @@ export const mainRunnerMachine = setup({
             actions: [
               {
                 type: "log",
-                params: ({ event }) => ({
-                  message: `Error bootstrapping flow workers: ${String(event.error)}`,
+                params: ({ event: { error } }) => ({
+                  message: "Error bootstrapping flow workers",
                   level: "error",
+                  error,
                 }),
               },
               { type: "handleGracefulShutdown" },
@@ -707,10 +710,11 @@ export const mainRunnerMachine = setup({
         type: "final",
         entry: {
           type: "log",
-          params: () => ({
-            message: `Riven has entered an unrecoverable error state and will shut down. Please check previous logs for more details.`,
+          params: {
+            message:
+              "Riven has entered an unrecoverable error state and will shut down. Please check previous logs for more details.",
             level: "error",
-          }),
+          },
         },
       },
     },

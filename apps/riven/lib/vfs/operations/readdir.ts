@@ -35,14 +35,14 @@ export const readDirSync = function (path, callback) {
     })
     .catch((error: unknown) => {
       if (isFuseError(error)) {
-        logger.error(`VFS readdir FuseError: ${error.message}`);
+        logger.error("VFS readdir FuseError", { err: error });
 
         process.nextTick(callback, error.errorCode);
 
         return;
       }
 
-      logger.error(`VFS readdir unknown error: ${String(error)}`);
+      logger.error("Unexpected VFS readdir error", { err: error });
 
       process.nextTick(callback, Fuse.ENOENT);
     });

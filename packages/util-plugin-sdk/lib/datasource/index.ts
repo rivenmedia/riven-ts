@@ -434,9 +434,9 @@ export abstract class BaseDataSource<
       return;
     }
 
-    this.logger.error(
-      `[${this.serviceName}] API Error for ${url}: ${error.message}`,
-    );
+    this.logger.error(`[${this.serviceName}] API Error for ${url}`, {
+      err: error,
+    });
   }
 
   abstract validate(): Promisable<boolean>;

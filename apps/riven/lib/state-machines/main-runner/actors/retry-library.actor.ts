@@ -87,7 +87,7 @@ export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
         }
       }
     } catch (error) {
-      logger.error(error);
+      logger.error("Error retrying library", { err: error });
     }
   },
 );

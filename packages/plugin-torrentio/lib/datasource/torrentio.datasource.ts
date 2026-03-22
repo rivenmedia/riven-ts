@@ -103,7 +103,7 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
 
       return torrents;
     } catch (error: unknown) {
-      this.logger.error(error);
+      this.logger.error("Torrentio scrape error", { err: error });
 
       return {};
     }

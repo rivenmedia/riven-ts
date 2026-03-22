@@ -8,7 +8,6 @@ import * as Sentry from "@sentry/node";
 import { type Processor, Worker, type WorkerOptions } from "bullmq";
 import chalk from "chalk";
 import z from "zod";
-import { fromError, isZodErrorLike } from "zod-validation-error";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
@@ -58,11 +57,7 @@ export async function createPluginWorker<
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
-    const maybeValidationError = isZodErrorLike(error)
-      ? fromError(error)
-      : error;
-
-    logger.error(`${chalk.dim(`[${name}]`)} ${maybeValidationError.message}`);
+    logger.error(chalk.dim(`[${name}]`), { err: error });
   });
 
   if (settings.unsafeClearQueuesOnStartup) {

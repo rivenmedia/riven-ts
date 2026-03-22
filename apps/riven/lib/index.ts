@@ -4,7 +4,7 @@ import { rivenMachine } from "./state-machines/program/index.ts";
 import { logger } from "./utilities/logger/logger.ts";
 
 process.on("uncaughtException", (error) => {
-  logger.error(error);
+  logger.error("Uncaught exception", { err: error });
 });
 
 const sessionId = crypto.randomUUID();

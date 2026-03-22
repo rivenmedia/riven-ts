@@ -356,7 +356,7 @@ export const getattrSync = function (path, callback) {
     })
     .catch((error: unknown) => {
       if (isFuseError(error)) {
-        logger.error(`VFS getattr FuseError: ${error.message}`);
+        logger.error("VFS getattr FuseError", { err: error });
 
         process.nextTick(callback, error.errorCode);
 
@@ -364,14 +364,14 @@ export const getattrSync = function (path, callback) {
       }
 
       if (isZodErrorLike(error)) {
-        logger.error(`VFS getattr validation error: ${error.message}`);
+        logger.error("VFS getattr validation error", { err: error });
 
         process.nextTick(callback, Fuse.ENOENT);
 
         return;
       }
 
-      logger.error(`VFS getattr unknown error: ${String(error)}`);
+      logger.error("Unexpected VFS getattr error", { err: error });
 
       process.nextTick(callback, Fuse.EIO);
     });

@@ -187,7 +187,7 @@ export const openSync = function (
       process.nextTick(callback, 0, fd);
     })
     .catch((error: unknown) => {
-      logger.error(`VFS open error: ${(error as Error).message}`);
+      logger.error("VFS open error", { err: error });
 
       process.nextTick(callback, Fuse.EIO);
     });
