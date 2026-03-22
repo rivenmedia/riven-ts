@@ -4,7 +4,7 @@ import os from "node:os";
 import { fromPromise } from "xstate";
 
 import { createPluginWorker } from "../../../message-queue/utilities/create-plugin-worker.ts";
-import { logger } from "../../../utilities/logger/logger.ts";
+import { baseLogger, logger } from "../../../utilities/logger/logger.ts";
 import { eventSerialiserSchemaMap } from "../../../utilities/serialisers/event-serialiser-schemas.ts";
 
 import type {
@@ -52,10 +52,11 @@ export const registerPluginHookWorkers = fromPromise<
     for (const [eventName, hook] of Object.entries(config.hooks)) {
       if (hook) {
         const typedEventName = eventName as RivenEvent["type"];
+        const pluginName = pluginSymbol.description ?? "unknown";
 
         const { queue, worker } = await createPluginWorker(
           typedEventName,
-          pluginSymbol.description ?? "unknown",
+          pluginName,
           (job) => {
             const eventSchemaWithDeserialiser =
               eventSerialiserSchemaMap.get(typedEventName);
@@ -74,8 +75,8 @@ export const registerPluginHookWorkers = fromPromise<
               event,
               dataSources,
               settings,
-              logger: logger.child({
-                logSource: String(pluginSymbol.description),
+              logger: baseLogger.child({
+                logSource: pluginName,
               }),
             });
           },

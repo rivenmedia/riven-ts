@@ -84,6 +84,7 @@ export const pluginRegistrarMachine = setup({
 
         for (const plugin of validPlugins) {
           const dataSources = new DataSourceMap();
+          const pluginName = plugin.name.description ?? "unknown";
 
           try {
             const pluginConfigPrefix = pluginConfigPrefixMap.get(plugin.name);
@@ -98,13 +99,11 @@ export const pluginRegistrarMachine = setup({
           } catch (error) {
             if (error instanceof ZodError) {
               logger.error(
-                `Invalid settings provided for plugin '${String(plugin.name.description)}: ${z.prettifyError(error)}'`,
+                `Invalid settings provided for plugin ${pluginName}: ${z.prettifyError(error)}`,
               );
             } else {
               logger.error(
-                `Failed to set settings for plugin '${String(
-                  plugin.name.description,
-                )}': ${String(error)}`,
+                `Failed to set settings for plugin ${pluginName}: ${String(error)}`,
               );
             }
 
@@ -118,7 +117,7 @@ export const pluginRegistrarMachine = setup({
                   pluginSymbol: plugin.name,
                   cache: redisCache,
                   logger: baseLogger.child({
-                    logSource: plugin.name.description,
+                    logSource: pluginName,
                   }),
                   connection: {
                     url: settings.redisUrl,
@@ -130,7 +129,7 @@ export const pluginRegistrarMachine = setup({
                 dataSources.set(DataSource, instance);
               } catch (error) {
                 logger.error(
-                  `Failed to construct data source ${DataSource.name} for ${plugin.name.toString()}: ${
+                  `Failed to construct data source ${DataSource.name} for ${pluginName}: ${
                     (error as Error).message
                   }`,
                 );

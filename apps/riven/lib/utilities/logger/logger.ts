@@ -7,21 +7,20 @@ import { settings } from "../settings.ts";
 const logDir = path.resolve(process.cwd(), settings.logDirectory);
 
 const fileFormat = format.combine(
-  format.json({ space: 2 }),
-  format.printf(({ level, message, ...meta }) =>
-    chalk.reset(
-      `${String(meta["timestamp"])} - ${String(meta["logSource"])} - ${level}: ${String(
-        meta["stack"] ?? message,
-      )}`,
-    ),
-  ),
   format.uncolorize(),
+  format((info) => {
+    info.message = String(info["stack"] ?? info.message);
+
+    return info;
+  })(),
+  format.json({ space: 2 }),
 );
 
 const consoleFormat = format.printf(({ level, message, ...meta }) => {
+  const renderedMessage = String(meta["stack"] ?? message);
   const maybeColoredMessage = level.includes("error")
-    ? chalk.red(message)
-    : String(message);
+    ? chalk.red(renderedMessage)
+    : renderedMessage;
 
   return `${chalk.dim.black(meta["timestamp"])} - ${chalk.dim(meta["logSource"])} - ${level}: ${maybeColoredMessage}`;
 });
@@ -34,9 +33,6 @@ export const baseLogger = createLogger({
     }),
     format.errors({ stack: true }),
     format.splat(),
-    format.json({
-      space: 2,
-    }),
   ),
   exitOnError: false,
   silent: !settings.loggingEnabled,
@@ -47,7 +43,6 @@ if (settings.loggingEnabled) {
     baseLogger.add(
       new transports.Console({
         format: format.combine(
-          format.json({ space: 2 }),
           format.colorize({
             level: process.stdout.isTTY,
           }),
