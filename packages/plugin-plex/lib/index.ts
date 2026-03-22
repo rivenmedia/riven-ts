@@ -55,13 +55,13 @@ export default {
 
       if (errors.length > 0) {
         throw new Error(
-          `Failed to update Plex library sections for ${event.item.fullTitle}. ${errors.map((error) => error.message).join(", ")}`,
+          `Failed to update library sections for ${event.item.fullTitle}. ${errors.map((error) => error.message).join(", ")}`,
           { cause: errors },
         );
       }
 
       logger.info(
-        `Plex updated ${results.length.toString()} paths for ${event.item.fullTitle}`,
+        `Updated ${results.length.toString()} paths for ${event.item.fullTitle}`,
       );
     },
   },
