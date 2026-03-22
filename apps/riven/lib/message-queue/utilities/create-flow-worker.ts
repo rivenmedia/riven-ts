@@ -85,7 +85,7 @@ export async function createFlowWorker<
       : error;
 
     logger.error(
-      `[${chalk.dim(`[${flowName}]`)}] ${maybeValidationError.message}`,
+      `${chalk.dim(`[${flowName}]`)} ${maybeValidationError.message}`,
     );
   });
 

@@ -1,4 +1,5 @@
 import { type ParentOptions, UnrecoverableError } from "bullmq";
+import chalk from "chalk";
 import assert from "node:assert";
 
 import { database } from "../../../../../database/database.ts";
@@ -80,7 +81,7 @@ export const findValidTorrentProcessor =
                 }
 
                 logger.verbose(
-                  `Found ${infoHash} in ${plugin.pluginName} cache for ${mediaItem.fullTitle}${provider ? ` on ${provider}` : ""}`,
+                  `Found ${chalk.bold(infoHash)} in ${plugin.pluginName} cache for ${mediaItem.fullTitle}${provider ? ` on ${provider}` : ""}`,
                 );
 
                 await getValidTorrentFiles(
@@ -144,7 +145,7 @@ export const findValidTorrentProcessor =
       }
 
       logger.debug(
-        `Info hash ${infoHash} failed validation for all plugins for ${mediaItem.type} ${mediaItem.fullTitle}`,
+        `Info hash ${chalk.bold(infoHash)} failed validation for all plugins for ${mediaItem.type} ${chalk.bold(mediaItem.fullTitle)}`,
       );
 
       await job.updateData({

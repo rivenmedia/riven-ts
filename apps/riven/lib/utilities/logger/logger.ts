@@ -8,22 +8,25 @@ const logDir = path.resolve(process.cwd(), settings.logDirectory);
 
 const fileFormat = format.combine(
   format.json({ space: 2 }),
-  format.printf(function (info) {
-    return chalk.reset(
-      `${String(info["timestamp"])} - ${info.level}: ${String(
-        info["stack"] ?? info.message,
+  format.printf(({ level, message, ...meta }) =>
+    chalk.reset(
+      `${String(meta["timestamp"])} - ${String(meta["logSource"])} - ${level}: ${String(
+        meta["stack"] ?? message,
       )}`,
-    );
-  }),
+    ),
+  ),
   format.uncolorize(),
 );
 
-const consoleFormat = format.printf(
-  ({ level, message, ...meta }) =>
-    `${chalk.dim.black(meta["timestamp"])} - ${level}: ${String(message)}`,
-);
+const consoleFormat = format.printf(({ level, message, ...meta }) => {
+  const maybeColoredMessage = level.includes("error")
+    ? chalk.red(message)
+    : String(message);
 
-export const logger = createLogger({
+  return `${chalk.dim.black(meta["timestamp"])} - ${chalk.dim(meta["logSource"])} - ${level}: ${maybeColoredMessage}`;
+});
+
+export const baseLogger = createLogger({
   level: settings.logLevel,
   format: format.combine(
     format.timestamp({
@@ -41,7 +44,7 @@ export const logger = createLogger({
 
 if (settings.loggingEnabled) {
   if (settings.enabledLogTransports.includes("console")) {
-    logger.add(
+    baseLogger.add(
       new transports.Console({
         format: format.combine(
           format.json({ space: 2 }),
@@ -49,14 +52,13 @@ if (settings.loggingEnabled) {
             level: process.stdout.isTTY,
           }),
           consoleFormat,
-          // logFormat,
         ),
       }),
     );
   }
 
   if (settings.enabledLogTransports.includes("file")) {
-    logger.add(
+    baseLogger.add(
       new transports.File({
         filename: "error.log",
         dirname: logDir,
@@ -68,7 +70,7 @@ if (settings.loggingEnabled) {
       }),
     );
 
-    logger.add(
+    baseLogger.add(
       new transports.File({
         filename: "combined.log",
         dirname: logDir,
@@ -79,7 +81,7 @@ if (settings.loggingEnabled) {
       }),
     );
 
-    logger.exceptions.handle(
+    baseLogger.exceptions.handle(
       new transports.File({
         filename: "exceptions.log",
         dirname: logDir,
@@ -91,3 +93,5 @@ if (settings.loggingEnabled) {
     );
   }
 }
+
+export const logger = baseLogger.child({ logSource: "core" });

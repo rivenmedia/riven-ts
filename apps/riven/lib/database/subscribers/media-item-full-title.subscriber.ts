@@ -13,25 +13,25 @@ export class MediaItemFullTitleSubscriber implements EventSubscriber {
     return [Movie, Show, Season, Episode];
   }
 
-  beforeCreate({ entity }: EventArgs<MediaItem>): void | Promise<void> {
-    this.#setFullTitle(entity);
+  async beforeCreate({ entity }: EventArgs<MediaItem>): Promise<void> {
+    await this.#setFullTitle(entity);
   }
 
-  beforeUpdate({ entity }: EventArgs<MediaItem>): void | Promise<void> {
-    this.#setFullTitle(entity);
+  async beforeUpdate({ entity }: EventArgs<MediaItem>): Promise<void> {
+    await this.#setFullTitle(entity);
   }
 
-  #setFullTitle(item: MediaItem): void {
+  async #setFullTitle(item: MediaItem): Promise<void> {
     if (item instanceof Movie || item instanceof Show) {
       item.fullTitle = item.title;
     }
 
     if (item instanceof Season) {
-      item.fullTitle = `${item.show.getProperty("fullTitle")} - S${item.number.toString().padStart(2, "0")}`;
+      item.fullTitle = `${await item.show.loadProperty("fullTitle")} - S${item.number.toString().padStart(2, "0")}`;
     }
 
     if (item instanceof Episode) {
-      item.fullTitle = `${item.season.getProperty("fullTitle")}E${item.number.toString().padStart(2, "0")} - ${item.title}`;
+      item.fullTitle = `${await item.season.loadProperty("fullTitle")}E${item.number.toString().padStart(2, "0")} - ${item.title}`;
     }
   }
 }

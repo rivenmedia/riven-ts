@@ -5,7 +5,7 @@ import chalk from "chalk";
 import { type AnyActorRef, type MachineContext, assign, setup } from "xstate";
 import z, { ZodError } from "zod";
 
-import { logger } from "../../utilities/logger/logger.ts";
+import { baseLogger, logger } from "../../utilities/logger/logger.ts";
 import { redisCache } from "../../utilities/redis-cache.ts";
 import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
@@ -117,7 +117,9 @@ export const pluginRegistrarMachine = setup({
                 const instance = new DataSource({
                   pluginSymbol: plugin.name,
                   cache: redisCache,
-                  logger,
+                  logger: baseLogger.child({
+                    logSource: plugin.name.description,
+                  }),
                   connection: {
                     url: settings.redisUrl,
                   },

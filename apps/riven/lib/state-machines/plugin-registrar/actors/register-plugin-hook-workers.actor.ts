@@ -74,7 +74,9 @@ export const registerPluginHookWorkers = fromPromise<
               event,
               dataSources,
               settings,
-              logger,
+              logger: logger.child({
+                logSource: String(pluginSymbol.description),
+              }),
             });
           },
           {

@@ -62,7 +62,7 @@ export async function createPluginWorker<
       ? fromError(error)
       : error;
 
-    logger.error(`[${chalk.dim(`[${name}]`)}] ${maybeValidationError.message}`);
+    logger.error(`${chalk.dim(`[${name}]`)} ${maybeValidationError.message}`);
   });
 
   if (settings.unsafeClearQueuesOnStartup) {
