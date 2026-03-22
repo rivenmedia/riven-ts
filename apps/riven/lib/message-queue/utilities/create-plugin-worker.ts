@@ -6,6 +6,7 @@ import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-l
 
 import * as Sentry from "@sentry/node";
 import { type Processor, Worker, type WorkerOptions } from "bullmq";
+import chalk from "chalk";
 import z from "zod";
 import { fromError, isZodErrorLike } from "zod-validation-error";
 
@@ -61,7 +62,7 @@ export async function createPluginWorker<
       ? fromError(error)
       : error;
 
-    logger.error(`[${name}] ${maybeValidationError.message}`);
+    logger.error(`${chalk.dim(`[${name}]`)} ${maybeValidationError.message}`);
   });
 
   if (settings.unsafeClearQueuesOnStartup) {

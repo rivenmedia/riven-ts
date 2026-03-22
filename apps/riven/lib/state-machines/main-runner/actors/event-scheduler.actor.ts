@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import { setInterval } from "node:timers";
 import { fromCallback } from "xstate";
 
@@ -17,7 +18,7 @@ export const eventScheduler = fromCallback<
   EventSchedulerInput
 >(({ sendBack, input }) => {
   logger.verbose(
-    `Scheduling event "${input.event}" to run every ${input.interval.toString()}ms`,
+    `Scheduling event ${chalk.blue(input.event)} to run every ${input.interval.toString()}ms`,
   );
 
   const handler = () => {
@@ -31,7 +32,7 @@ export const eventScheduler = fromCallback<
   const interval = setInterval(handler, input.interval);
 
   return () => {
-    logger.verbose(`Stopping event scheduler for "${input.event}"`);
+    logger.verbose(`Stopping event scheduler for ${chalk.blue(input.event)}`);
 
     clearInterval(interval);
   };

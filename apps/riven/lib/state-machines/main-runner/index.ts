@@ -1,6 +1,7 @@
 import { type Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
+import chalk from "chalk";
 import {
   type ActorRef,
   type Snapshot,
@@ -116,7 +117,7 @@ export const mainRunnerMachine = setup({
       }
 
       logger.debug(
-        `Enqueuing event "${type}" for ${jobs.map((job) => extractPluginNameFromJobId(job.queueName)).join(", ")} plugin(s).`,
+        `Enqueuing event ${chalk.blue(type)} for ${jobs.map((job) => chalk.bold(extractPluginNameFromJobId(job.queueName))).join(", ")}`,
       );
 
       void flow.addBulk(jobs);
@@ -467,10 +468,20 @@ export const mainRunnerMachine = setup({
         actions: [
           {
             type: "log",
-            params: ({ event: { item } }) => ({
-              message: `Media item has already been indexed: ${JSON.stringify(SerialisedItemRequest.decode(item))}`,
-              level: "verbose",
-            }),
+            params: ({ event: { item } }) => {
+              const externalIds = [
+                item.imdbId && `IMDB: ${item.imdbId}`,
+                item.tmdbId && `TMDB: ${item.tmdbId}`,
+                item.tvdbId && `TVDB: ${item.tvdbId}`,
+              ]
+                .filter(Boolean)
+                .join(" | ");
+
+              return {
+                message: `Media item has already been indexed: ${chalk.dim(externalIds)}`,
+                level: "verbose",
+              };
+            },
           },
         ],
       },
@@ -513,7 +524,7 @@ export const mainRunnerMachine = setup({
           {
             type: "log",
             params: ({ event: { item } }) => ({
-              message: `Successfully scraped ${item.type}: ${item.fullTitle}`,
+              message: `Successfully scraped ${item.type}: ${chalk.bold(item.fullTitle)}`,
               level: "info",
             }),
           },
@@ -585,7 +596,7 @@ export const mainRunnerMachine = setup({
           {
             type: "log",
             params: ({ event: { item, error } }) => ({
-              message: `Error downloading ${item.fullTitle}: ${String(error)}`,
+              message: `Error downloading ${chalk.bold(item.fullTitle)}: ${String(error)}`,
               level: "error",
             }),
           },

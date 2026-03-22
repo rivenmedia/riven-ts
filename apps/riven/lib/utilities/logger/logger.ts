@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import path from "node:path";
 import { createLogger, format, transports } from "winston";
 
@@ -5,15 +6,26 @@ import { settings } from "../settings.ts";
 
 const logDir = path.resolve(process.cwd(), settings.logDirectory);
 
-const logFormat = format.printf(function (info) {
-  return `${String(info["timestamp"])} - ${info.level}: ${JSON.stringify(
-    info["stack"] ?? info.message,
-    null,
-    2,
-  )}`;
+const fileFormat = format.combine(
+  format.uncolorize(),
+  format((info) => {
+    info.message = String(info["stack"] ?? info.message);
+
+    return info;
+  })(),
+  format.json({ space: 2 }),
+);
+
+const consoleFormat = format.printf(({ level, message, ...meta }) => {
+  const renderedMessage = String(meta["stack"] ?? message);
+  const maybeColoredMessage = level.includes("error")
+    ? chalk.red(renderedMessage)
+    : renderedMessage;
+
+  return `${chalk.dim.black(meta["timestamp"])} - ${chalk.dim(meta["logSource"])} - ${level}: ${maybeColoredMessage}`;
 });
 
-export const logger = createLogger({
+export const baseLogger = createLogger({
   level: settings.logLevel,
   format: format.combine(
     format.timestamp({
@@ -21,9 +33,6 @@ export const logger = createLogger({
     }),
     format.errors({ stack: true }),
     format.splat(),
-    format.json({
-      space: 2,
-    }),
   ),
   exitOnError: false,
   silent: !settings.loggingEnabled,
@@ -31,19 +40,20 @@ export const logger = createLogger({
 
 if (settings.loggingEnabled) {
   if (settings.enabledLogTransports.includes("console")) {
-    logger.add(
+    baseLogger.add(
       new transports.Console({
         format: format.combine(
-          format.json({ space: 2 }),
-          format.colorize(),
-          logFormat,
+          format.colorize({
+            level: process.stdout.isTTY,
+          }),
+          consoleFormat,
         ),
       }),
     );
   }
 
   if (settings.enabledLogTransports.includes("file")) {
-    logger.add(
+    baseLogger.add(
       new transports.File({
         filename: "error.log",
         dirname: logDir,
@@ -51,28 +61,32 @@ if (settings.loggingEnabled) {
         tailable: true,
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
-        zippedArchive: true,
+        format: fileFormat,
       }),
     );
 
-    logger.add(
+    baseLogger.add(
       new transports.File({
         filename: "combined.log",
         dirname: logDir,
         tailable: true,
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
+        format: fileFormat,
       }),
     );
 
-    logger.exceptions.handle(
+    baseLogger.exceptions.handle(
       new transports.File({
         filename: "exceptions.log",
         dirname: logDir,
         tailable: true,
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
+        format: fileFormat,
       }),
     );
   }
 }
+
+export const logger = baseLogger.child({ logSource: "core" });

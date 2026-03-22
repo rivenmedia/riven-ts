@@ -28,7 +28,7 @@ export const ParsedDataSchema = z
     seasons: z.array(nonnegativeIntSchema).default([]),
     episodes: z.array(nonnegativeIntSchema).default([]),
     complete: z.boolean().optional(),
-    volumes: z.array(positiveIntSchema).optional(),
+    volumes: z.array(nonnegativeIntSchema).optional(),
     audio: z.array(nonEmptyString).optional(),
     channels: z.array(nonEmptyString).optional(),
     hdr: z.array(nonEmptyString).optional(),

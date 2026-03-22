@@ -5,6 +5,7 @@ import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schema
 import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 
 import { ref } from "@mikro-orm/core";
+import chalk from "chalk";
 import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
 import assert from "node:assert";
@@ -79,7 +80,7 @@ export async function persistScrapeResults({
 
         if (newStreamsCount > 0) {
           logger.info(
-            `Added ${newStreamsCount.toString()} new streams to ${existingItem.fullTitle}`,
+            `Added ${newStreamsCount.toString()} new streams to ${chalk.bold(existingItem.fullTitle)}`,
           );
         }
       } catch (error) {

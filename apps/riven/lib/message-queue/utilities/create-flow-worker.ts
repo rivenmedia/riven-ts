@@ -7,6 +7,7 @@ import {
   Worker,
   type WorkerOptions,
 } from "bullmq";
+import chalk from "chalk";
 import assert from "node:assert";
 import os from "node:os";
 import { fromError, isZodErrorLike } from "zod-validation-error";
@@ -83,7 +84,9 @@ export async function createFlowWorker<
       ? fromError(error)
       : error;
 
-    logger.error(`[${flowName}] ${maybeValidationError.message}`);
+    logger.error(
+      `${chalk.dim(`[${flowName}]`)} ${maybeValidationError.message}`,
+    );
   });
 
   if (settings.unsafeClearQueuesOnStartup) {

@@ -9,6 +9,7 @@ import {
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { parseFilePath } from "@repo/util-rank-torrent-name";
 
+import chalk from "chalk";
 import { reduceAsync } from "es-toolkit";
 import assert, { AssertionError } from "node:assert";
 
@@ -82,7 +83,7 @@ export const validateTorrentFiles = async (
 ): Promise<MatchedFile[]> => {
   try {
     logger.verbose(
-      `Validating torrent files for item ${item.fullTitle}: ${infoHash}`,
+      `Validating torrent files for item ${chalk.bold(item.fullTitle)}: ${chalk.bold(infoHash)}`,
     );
 
     const expectedFileCount = await getExpectedFileCount(item);
@@ -132,7 +133,7 @@ export const validateTorrentFiles = async (
           break;
         } catch (error) {
           logger.debug(
-            `File ${file.name} failed validation: ${
+            `File ${chalk.bold(file.name)} failed validation: ${
               error instanceof Error ? error.message : String(error)
             }`,
           );
@@ -151,7 +152,7 @@ export const validateTorrentFiles = async (
         }
 
         logger.debug(
-          `Found match in ${isCacheCheck ? "cached files" : "torrent files"}: ${file.name} for item ${item.fullTitle} using lookup key '${lookupKey}'`,
+          `Found match in ${isCacheCheck ? "cached files" : "torrent files"}: ${chalk.bold(file.name)} for item ${chalk.bold(item.fullTitle)} using lookup key '${chalk.bold(lookupKey)}'`,
         );
 
         try {
@@ -216,7 +217,7 @@ export const validateTorrentFiles = async (
           );
         } catch (error) {
           logger.debug(
-            `File ${file.name} failed validation: ${
+            `File ${chalk.bold(file.name)} failed validation: ${
               error instanceof Error ? error.message : String(error)
             }`,
           );
