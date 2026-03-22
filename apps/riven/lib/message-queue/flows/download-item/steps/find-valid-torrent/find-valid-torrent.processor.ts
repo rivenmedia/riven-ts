@@ -62,7 +62,7 @@ export const findValidTorrentProcessor =
             try {
               if (plugin.hasCacheCheckHook) {
                 logger.debug(
-                  `Checking for ${infoHash} in ${plugin.pluginName} cache${provider ? ` for ${provider}` : ""}...`,
+                  `Checking for ${chalk.bold(infoHash)} in ${plugin.pluginName} cache${provider ? ` for ${provider}` : ""}...`,
                 );
 
                 const cachedFiles = await getCachedTorrentFiles(
