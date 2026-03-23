@@ -4,8 +4,11 @@ import { createActor, waitFor } from "xstate";
 import { logger } from "./utilities/logger/logger.ts";
 
 await Sentry.withScope(async (scope) => {
+  const sessionId = crypto.randomUUID();
+
   scope.setTags({
     "riven.log.source": "core",
+    "riven.session.id": sessionId,
   });
 
   // Dynamically import the main state machine so the log action obtains the current scope
@@ -14,8 +17,6 @@ await Sentry.withScope(async (scope) => {
   process.on("uncaughtException", (error) => {
     logger.error("Uncaught exception", { err: error });
   });
-
-  const sessionId = crypto.randomUUID();
 
   const actor = createActor(rivenMachine, {
     input: {
