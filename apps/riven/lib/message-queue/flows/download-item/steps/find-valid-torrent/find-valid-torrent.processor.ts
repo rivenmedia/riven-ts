@@ -12,7 +12,10 @@ import { getValidTorrentFiles } from "./utilities/get-valid-torrent-files.ts";
 import { InvalidTorrentError } from "./utilities/validate-torrent-files.ts";
 
 export const findValidTorrentProcessor =
-  findValidTorrentProcessorSchema.implementAsync(async function ({ job }) {
+  findValidTorrentProcessorSchema.implementAsync(async function ({
+    job,
+    scope,
+  }) {
     const [rankedStreams] = Object.values(await job.getChildrenValues());
 
     if (!rankedStreams?.length) {
@@ -42,7 +45,11 @@ export const findValidTorrentProcessor =
     } satisfies ParentOptions;
 
     for (const infoHash of uncheckedInfoHashes) {
+      scope.setTag("riven.info-hash", infoHash);
+
       for (const plugin of availableDownloaders) {
+        scope.setTag("riven.downloader-plugin", plugin.pluginName);
+
         try {
           const providers = plugin.hasProviderListHook
             ? await getPluginProviderList(plugin.pluginName, jobParentOptions)
@@ -56,9 +63,13 @@ export const findValidTorrentProcessor =
             continue;
           }
 
-          for (const provider of plugin.hasProviderListHook
-            ? providers
-            : [null]) {
+          const providerList = plugin.hasProviderListHook ? providers : [null];
+
+          for (const provider of providerList) {
+            if (provider) {
+              scope.setTag("riven.downloader-provider", provider);
+            }
+
             try {
               if (plugin.hasCacheCheckHook) {
                 logger.debug(

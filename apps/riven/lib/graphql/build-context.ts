@@ -28,7 +28,9 @@ export function buildContext(
 
   return async function context({ req }) {
     if (req.body.operationName) {
-      logger.http(`Received ${req.body.operationName} query`);
+      logger.http(`Received ${req.body.operationName} query`, {
+        "riven.gql.operation-name": req.body.operationName,
+      });
     }
 
     const pluginContexts = await Promise.all(
