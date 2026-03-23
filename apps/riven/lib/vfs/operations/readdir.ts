@@ -46,7 +46,7 @@ export const readDirSync = function (path, callback) {
 
       logger.error("Unexpected VFS readdir error", { err: error });
 
-      process.nextTick(callback, Fuse.ENOENT);
+      process.nextTick(callback, Fuse.EIO);
     }
   });
 } satisfies OPERATIONS["readdir"];

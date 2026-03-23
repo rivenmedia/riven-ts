@@ -9,9 +9,9 @@ filebeat.inputs:
       - /usr/share/filebeat/data/riven/logs/ecs.json
     parsers:
       - ndjson:
-        overwrite_keys: true
-        add_error_key: true
-        expand_keys: true
+          overwrite_keys: true
+          add_error_key: true
+          expand_keys: true
 
 processors:
   - add_host_metadata: ~

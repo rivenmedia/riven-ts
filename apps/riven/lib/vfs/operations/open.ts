@@ -5,7 +5,7 @@ import { setTimeout } from "node:timers/promises";
 import { database } from "../../database/database.ts";
 import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
 import { logger } from "../../utilities/logger/logger.ts";
-import { FuseError } from "../errors/fuse-error.ts";
+import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { attrCache } from "../utilities/attr-cache.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
@@ -189,6 +189,14 @@ export const openSync = function (
 
       process.nextTick(callback, 0, fd);
     } catch (error) {
+      if (isFuseError(error)) {
+        logger.error("VFS open FuseError", { err: error });
+
+        process.nextTick(callback, error.errorCode);
+
+        return;
+      }
+
       logger.error("VFS open error", { err: error });
 
       process.nextTick(callback, Fuse.EIO);

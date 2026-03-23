@@ -66,9 +66,7 @@ export const findValidTorrentProcessor =
           const providerList = plugin.hasProviderListHook ? providers : [null];
 
           for (const provider of providerList) {
-            if (provider) {
-              scope.setTag("riven.downloader-provider", provider);
-            }
+            scope.setTag("riven.downloader-provider", provider);
 
             try {
               if (plugin.hasCacheCheckHook) {

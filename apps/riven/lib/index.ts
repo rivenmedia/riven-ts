@@ -16,6 +16,12 @@ await Sentry.withScope(async (scope) => {
 
   process.on("uncaughtException", (error) => {
     logger.error("Uncaught exception", { err: error });
+
+    process.exit(1);
+  });
+
+  process.on("unhandledRejection", (error) => {
+    logger.error("Uncaught rejection", { err: error });
   });
 
   const actor = createActor(rivenMachine, {
@@ -42,6 +48,8 @@ await Sentry.withScope(async (scope) => {
   }
 
   logger.info("Riven has shut down");
+
+  await Sentry.close();
 
   process.exit(0);
 });

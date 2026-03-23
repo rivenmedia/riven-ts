@@ -103,7 +103,10 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
 
       return torrents;
     } catch (error: unknown) {
-      this.logger.error("Torrentio scrape error", { err: error });
+      this.logger.error(
+        `Failed to scrape ${item.fullTitle} (IMDB: ${item.imdbId ?? "N/A"})`,
+        { err: error },
+      );
 
       return {};
     }
