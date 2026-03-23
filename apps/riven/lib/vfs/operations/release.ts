@@ -1,7 +1,7 @@
 import Fuse from "@zkochan/fuse-native";
 
+import { logger } from "../../utilities/logger/logger.ts";
 import { isFuseError } from "../errors/fuse-error.ts";
-import { logger } from "../logger.ts";
 import {
   fdToCurrentStreamPositionMap,
   fdToFileHandleMeta,
@@ -11,6 +11,7 @@ import {
   fileNameToFdCountMap,
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
+import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
 import type { OPERATIONS } from "@zkochan/fuse-native";
 
@@ -66,11 +67,12 @@ async function release(_path: string, fd: number) {
 }
 
 export const releaseSync = function (_path, fd, callback) {
-  release(_path, fd)
-    .then(() => {
+  void withVfsScope(async () => {
+    try {
+      await release(_path, fd);
+
       process.nextTick(callback, 0);
-    })
-    .catch((error: unknown) => {
+    } catch (error) {
       if (isFuseError(error)) {
         logger.error("VFS release FuseError", { err: error });
 
@@ -82,5 +84,6 @@ export const releaseSync = function (_path, fd, callback) {
       logger.error("VFS release unknown error", { err: error });
 
       process.nextTick(callback, Fuse.EIO);
-    });
+    }
+  });
 } satisfies OPERATIONS["release"];

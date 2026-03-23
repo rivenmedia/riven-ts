@@ -13,7 +13,7 @@ import { validationErrorMetaFormat } from "./formatters/validation-error-meta.fo
 
 const logDir = path.resolve(process.cwd(), settings.logDirectory);
 
-export const baseLogger = createLogger({
+export const logger = createLogger({
   level: settings.logLevel,
   format: format.combine(
     otelMetaFormat(),
@@ -26,7 +26,7 @@ export const baseLogger = createLogger({
 
 if (settings.loggingEnabled) {
   if (settings.enabledLogTransports.includes("console")) {
-    baseLogger.add(
+    logger.add(
       new transports.Console({
         format: format.combine(
           format.colorize({
@@ -39,7 +39,7 @@ if (settings.loggingEnabled) {
   }
 
   if (settings.enabledLogTransports.includes("file")) {
-    baseLogger.add(
+    logger.add(
       new transports.File({
         filename: "error.log",
         dirname: logDir,
@@ -51,7 +51,7 @@ if (settings.loggingEnabled) {
       }),
     );
 
-    baseLogger.add(
+    logger.add(
       new transports.File({
         filename: "combined.log",
         dirname: logDir,
@@ -62,7 +62,7 @@ if (settings.loggingEnabled) {
       }),
     );
 
-    baseLogger.exceptions.handle(
+    logger.exceptions.handle(
       new transports.File({
         filename: "exceptions.log",
         dirname: logDir,
@@ -75,7 +75,7 @@ if (settings.loggingEnabled) {
   }
 
   if (settings.enabledLogTransports.includes("ecs")) {
-    baseLogger.add(
+    logger.add(
       new transports.File({
         filename: "ecs-error.json",
         dirname: logDir,
@@ -87,7 +87,7 @@ if (settings.loggingEnabled) {
       }),
     );
 
-    baseLogger.add(
+    logger.add(
       new transports.File({
         filename: "ecs-combined.json",
         dirname: logDir,
@@ -98,7 +98,7 @@ if (settings.loggingEnabled) {
       }),
     );
 
-    baseLogger.exceptions.handle(
+    logger.exceptions.handle(
       new transports.File({
         filename: "ecs-exceptions.json",
         dirname: logDir,
@@ -110,5 +110,3 @@ if (settings.loggingEnabled) {
     );
   }
 }
-
-export const logger = baseLogger.child({ "riven.log.source": "core" });

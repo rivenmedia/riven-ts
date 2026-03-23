@@ -1,7 +1,6 @@
 import type { LogLevel } from "../log-levels.ts";
 
 interface CustomLogMeta {
-  "riven.log.source": string;
   "riven.error.validation-message": string;
 }
 

@@ -2,9 +2,9 @@ import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 import { Buffer } from "node:buffer";
 import Undici from "undici";
 
+import { logger } from "../../utilities/logger/logger.ts";
 import { config } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
-import { logger } from "../logger.ts";
 import { calculateChunkRange } from "../utilities/chunks/calculate-chunk-range.ts";
 import { fetchDiscreteByteRange } from "../utilities/chunks/fetch-discrete-byte-range.ts";
 import { detectReadType } from "../utilities/detect-read-type.ts";
@@ -16,6 +16,7 @@ import {
 } from "../utilities/file-handle-map.ts";
 import { performBodyRead } from "../utilities/read-types/perform-body-read.ts";
 import { performCacheHit } from "../utilities/read-types/perform-cache-hit.ts";
+import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
 export interface ReadInput {
   buffer: Buffer;
@@ -177,17 +178,18 @@ export const readSync = function (
   position,
   callback,
 ) {
-  read({
-    buffer,
-    path,
-    fd,
-    length,
-    position,
-  })
-    .then((bytesRead) => {
+  void withVfsScope(async () => {
+    try {
+      const bytesRead = await read({
+        buffer,
+        path,
+        fd,
+        length,
+        position,
+      });
+
       process.nextTick(callback, bytesRead);
-    })
-    .catch((error: unknown) => {
+    } catch (error) {
       // This is triggered when a file handle is released
       if (error instanceof Undici.errors.RequestAbortedError) {
         logger.silly(`Read operation aborted for fd ${fd.toString()}`);
@@ -208,5 +210,6 @@ export const readSync = function (
       logger.error("Unexpected VFS read error", { err: error });
 
       process.nextTick(callback, Fuse.EIO);
-    });
+    }
+  });
 } satisfies OPERATIONS["read"];

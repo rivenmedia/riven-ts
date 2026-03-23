@@ -38,10 +38,9 @@ export async function createPluginWorker<
     queueName,
     async (job, token, signal) => {
       return await Sentry.withScope(async (scope) => {
-        scope.setFingerprint([queueName]);
-
         scope.setTags({
           "bullmq.job.id": job.id,
+          "riven.log.source": pluginName,
           "riven.event.name": name as string,
           "riven.plugin.name": pluginName,
           "riven.queue.name": queueName,

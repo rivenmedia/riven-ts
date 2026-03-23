@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer";
 
-import { logger } from "../../logger.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
 import { chunkCache } from "../chunk-cache.ts";
 import { createStreamRequest } from "../requests/create-stream-request.ts";
 import { createChunkCacheKey } from "./create-chunk-cache-key.ts";

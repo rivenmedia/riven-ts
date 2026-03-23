@@ -50,7 +50,6 @@ export async function createFlowWorker<
     flowName,
     async (job, token) => {
       return await Sentry.withScope(async (scope) => {
-        scope.setFingerprint([flowName, job.id ?? ""]);
         scope.setTags({
           "riven.flow.name": flowName,
           "riven.queue.name": flowName,
