@@ -8,7 +8,7 @@ import { settings } from "../settings.ts";
 import { consoleFormat } from "./formatters/console.format.ts";
 import { ecsFileFormat } from "./formatters/ecs-file.format.ts";
 import { fileFormat } from "./formatters/file.format.ts";
-import { otelMetaFormat } from "./formatters/otel-meta.format.ts";
+import { sentryMetaFormat } from "./formatters/sentry-meta.format.ts";
 import { validationErrorMetaFormat } from "./formatters/validation-error-meta.format.ts";
 
 const logDir = path.resolve(process.cwd(), settings.logDirectory);
@@ -16,7 +16,7 @@ const logDir = path.resolve(process.cwd(), settings.logDirectory);
 export const logger = createLogger({
   level: settings.logLevel,
   format: format.combine(
-    otelMetaFormat(),
+    sentryMetaFormat(),
     validationErrorMetaFormat(),
     baseEcsFormat() as Logform.Format,
   ),

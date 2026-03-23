@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/node";
 import { format } from "winston";
 
-export const otelMetaFormat = format((info) => {
+export const sentryMetaFormat = format((info) => {
   const activeSpan = Sentry.getActiveSpan();
   const scopeData = Sentry.getCurrentScope().getScopeData();
 
