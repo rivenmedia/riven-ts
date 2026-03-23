@@ -3,6 +3,7 @@ import { format } from "winston";
 
 export const otelMetaFormat = format((info) => {
   const activeSpan = Sentry.getActiveSpan();
+  const scopeData = Sentry.getCurrentScope().getScopeData();
 
   if (activeSpan) {
     const { spanId, traceId } = activeSpan.spanContext();
@@ -11,5 +12,8 @@ export const otelMetaFormat = format((info) => {
     info["span.id"] = spanId;
   }
 
-  return info;
+  return {
+    ...info,
+    ...scopeData.tags,
+  };
 });

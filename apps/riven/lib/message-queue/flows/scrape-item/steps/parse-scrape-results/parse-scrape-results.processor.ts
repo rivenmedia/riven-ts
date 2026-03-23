@@ -46,11 +46,7 @@ export const parseScrapeResultsProcessor =
           } else {
             logger.error(
               `Failed to parse torrent ${rawTitle} (${hash}) for ${itemTitle}`,
-              {
-                err: error,
-                "riven.flow.name": "scrape-item",
-                "riven.event.name": "scrape-item",
-              },
+              { err: error },
             );
           }
 

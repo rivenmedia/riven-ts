@@ -49,17 +49,26 @@ export async function createFlowWorker<
   const worker = new Worker(
     flowName,
     async (job, token) => {
-      try {
-        return await processor({ job, token } as never, sendEvent);
-      } catch (error) {
-        Sentry.captureException(error);
+      return await Sentry.withScope(async (scope) => {
+        scope.setFingerprint([flowName, job.id ?? ""]);
+        scope.setTags({
+          "riven.flow.name": flowName,
+          "riven.queue.name": flowName,
+          "bullmq.job.id": job.id,
+        });
 
-        if (error instanceof Error) {
-          throw error;
+        try {
+          return await processor({ job, token } as never, sendEvent);
+        } catch (error) {
+          Sentry.captureException(error);
+
+          if (error instanceof Error) {
+            throw error;
+          }
+
+          throw new UnrecoverableError(String(error));
         }
-
-        throw new UnrecoverableError(String(error));
-      }
+      });
     },
     {
       concurrency: os.availableParallelism(),
@@ -79,11 +88,7 @@ export async function createFlowWorker<
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
-    logger.error(chalk.dim(`[${flowName}]`), {
-      err: error,
-      "riven.event.name": flowName,
-      "riven.flow.name": flowName,
-    });
+    logger.error(chalk.dim(`[${flowName}]`), { err: error });
   });
 
   if (settings.unsafeClearQueuesOnStartup) {

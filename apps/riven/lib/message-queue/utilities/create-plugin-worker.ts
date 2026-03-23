@@ -37,13 +37,24 @@ export async function createPluginWorker<
   const worker = new Worker(
     queueName,
     async (job, token, signal) => {
-      try {
-        return await processor(job as never, token, signal);
-      } catch (error) {
-        Sentry.captureException(error);
+      return await Sentry.withScope(async (scope) => {
+        scope.setFingerprint([queueName]);
 
-        throw error;
-      }
+        scope.setTags({
+          "bullmq.job.id": job.id,
+          "riven.event.name": name as string,
+          "riven.plugin.name": pluginName,
+          "riven.queue.name": queueName,
+        });
+
+        try {
+          return await processor(job as never, token, signal);
+        } catch (error) {
+          Sentry.captureException(error);
+
+          throw error;
+        }
+      });
     },
     {
       ...workerOptions,
@@ -57,11 +68,7 @@ export async function createPluginWorker<
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
-    logger.error(chalk.dim(`[${name}]`), {
-      err: error,
-      "riven.event.name": name,
-      "riven.plugin.name": pluginName,
-    });
+    logger.error(chalk.dim(`[${name}]`), { err: error });
   });
 
   if (settings.unsafeClearQueuesOnStartup) {
