@@ -1279,7 +1279,8 @@
                             "type": "number"
                           },
                           "rank": {
-                            "type": "number"
+                            "type": "number",
+                            "nullable": true
                           },
                           "adult": {
                             "type": "number"
@@ -1900,7 +1901,8 @@
                             "type": "number"
                           },
                           "rank": {
-                            "type": "number"
+                            "type": "number",
+                            "nullable": true
                           },
                           "adult": {
                             "type": "number"
@@ -1972,7 +1974,8 @@
                             "type": "number"
                           },
                           "rank": {
-                            "type": "number"
+                            "type": "number",
+                            "nullable": true
                           },
                           "adult": {
                             "type": "number"
@@ -4896,7 +4899,8 @@
                             "type": "number"
                           },
                           "rank": {
-                            "type": "number"
+                            "type": "number",
+                            "nullable": true
                           },
                           "adult": {
                             "type": "number"
@@ -10242,7 +10246,8 @@
                             "type": "string"
                           },
                           "rank": {
-                            "type": "number"
+                            "type": "number",
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -10300,7 +10305,8 @@
                             "type": "string"
                           },
                           "rank": {
-                            "type": "number"
+                            "type": "number",
+                            "nullable": true
                           }
                         },
                         "required": [
