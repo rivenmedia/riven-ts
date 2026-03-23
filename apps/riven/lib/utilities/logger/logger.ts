@@ -1,103 +1,20 @@
 import { ecsFormat as baseEcsFormat } from "@elastic/ecs-winston-format";
-import chalk from "chalk";
-import { DateTime } from "luxon";
 import path from "node:path";
-import { SPLAT } from "triple-beam";
 import { type Logform, createLogger, format, transports } from "winston";
-import z, { ZodError } from "zod";
 
 import { settings } from "../settings.ts";
-
-import type { LogLevel } from "./log-levels.ts";
-
-interface CustomLogMeta {
-  "riven.log.source": string;
-  "riven.error.validation-message": string;
-}
-
-declare module "logform" {
-  export interface TransformableInfo extends CustomLogMeta {
-    "@timestamp": string;
-    "log.level": LogLevel;
-    "ecs.version": string;
-    error?: {
-      name?: string;
-      message: string;
-      type: string;
-      stack_trace: string;
-    };
-  }
-}
+import { consoleFormat } from "./formatters/console.format.ts";
+import { ecsFileFormat } from "./formatters/ecs-file.format.ts";
+import { fileFormat } from "./formatters/file.format.ts";
+import { otelMetaFormat } from "./formatters/otel-meta.format.ts";
+import { validationErrorMetaFormat } from "./formatters/validation-error-meta.format.ts";
 
 const logDir = path.resolve(process.cwd(), settings.logDirectory);
-
-const fileFormat = format.combine(
-  format.uncolorize(),
-  format((info) => {
-    info.message = String(info["stack"] ?? info.message);
-
-    return info;
-  })(),
-  format.json({ space: 2 }),
-);
-
-const ecsFileFormat = format.combine(
-  format.uncolorize(),
-  baseEcsFormat() as Logform.Format,
-);
-
-const ErrorSplat = z
-  .union([
-    z.object({
-      err: z.instanceof(ZodError),
-    }),
-    z.instanceof(ZodError),
-  ])
-  .transform((err) => (err instanceof Error ? err : err.err));
-
-const consoleFormat = format.printf(({ level, message, ...meta }) => {
-  const parsedSplat = Array.isArray(meta[SPLAT])
-    ? ErrorSplat.safeParse(meta[SPLAT][0])
-    : undefined;
-
-  const renderedMessage = [
-    typeof message === "string" ? message : parsedSplat?.data?.message,
-    parsedSplat?.success
-      ? z.prettifyError(parsedSplat.data)
-      : settings.logShowStackTraces
-        ? meta.error?.stack_trace
-        : meta.error?.message,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  const maybeColouredMessage =
-    meta["log.level"] === "error"
-      ? chalk.red(renderedMessage)
-      : renderedMessage;
-
-  const formattedTimestamp = DateTime.fromISO(meta["@timestamp"]).toFormat(
-    "yyyy-LL-dd TT",
-  );
-
-  return `${chalk.dim.black(formattedTimestamp)} - ${chalk.dim(meta["riven.log.source"])} - ${level}: ${maybeColouredMessage}`;
-});
-
-const validationErrorMetaFormat = format((info) => {
-  const parsedSplat = Array.isArray(info[SPLAT])
-    ? ErrorSplat.safeParse(info[SPLAT][0])
-    : undefined;
-
-  if (parsedSplat?.data) {
-    info["riven.error.validation-message"] = z.prettifyError(parsedSplat.data);
-  }
-
-  return info;
-});
 
 export const baseLogger = createLogger({
   level: settings.logLevel,
   format: format.combine(
+    otelMetaFormat(),
     validationErrorMetaFormat(),
     baseEcsFormat() as Logform.Format,
   ),
