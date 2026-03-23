@@ -6,7 +6,6 @@ import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-l
 
 import * as Sentry from "@sentry/node";
 import { type Processor, Worker, type WorkerOptions } from "bullmq";
-import chalk from "chalk";
 import z from "zod";
 
 import { logger } from "../../utilities/logger/logger.ts";
@@ -67,7 +66,7 @@ export async function createPluginWorker<
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
-    logger.error(chalk.dim(`[${name}]`), { err: error });
+    logger.error("Plugin worker encountered an error", { err: error });
   });
 
   if (settings.unsafeClearQueuesOnStartup) {

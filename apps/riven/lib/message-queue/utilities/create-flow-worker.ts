@@ -7,7 +7,6 @@ import {
   Worker,
   type WorkerOptions,
 } from "bullmq";
-import chalk from "chalk";
 import assert from "node:assert";
 import os from "node:os";
 
@@ -87,7 +86,7 @@ export async function createFlowWorker<
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
-    logger.error(chalk.dim(`[${flowName}]`), { err: error });
+    logger.error("Flow worker encountered an error", { err: error });
   });
 
   if (settings.unsafeClearQueuesOnStartup) {
