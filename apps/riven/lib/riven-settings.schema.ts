@@ -32,7 +32,7 @@ export const RivenSettings = z.object({
     .describe(
       "**UNSAFE**.\n \nIf true, the database will be wiped on application startup.",
     ),
-  enabledLogTransports: json(z.array(z.enum(["console", "file", "ecs"])))
+  enabledLogTransports: json(z.array(z.enum(["console", "file"])))
     .default(["console", "file"])
     .describe("The enabled logging transports."),
   loggingEnabled: z
@@ -48,7 +48,7 @@ export const RivenSettings = z.object({
     .describe("The directory where log files will be stored."),
   logShowStackTraces: z
     .stringbool()
-    .default(false)
+    .default(true)
     .describe("Whether to show detailed stack traces when logging errors"),
   gqlPort: z.coerce
     .number()

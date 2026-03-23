@@ -25,6 +25,19 @@ export const logger = createLogger({
 });
 
 if (settings.loggingEnabled) {
+  // ECS logs will always be created for debugging purposes
+  logger.add(
+    new transports.File({
+      filename: "ecs.json",
+      dirname: logDir,
+      tailable: true,
+      maxsize: 10 * 1024 * 1024, // 10MB
+      maxFiles: 5,
+      format: ecsFileFormat,
+      zippedArchive: true,
+    }),
+  );
+
   if (settings.enabledLogTransports.includes("console")) {
     logger.add(
       new transports.Console({
@@ -70,42 +83,6 @@ if (settings.loggingEnabled) {
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
         format: fileFormat,
-      }),
-    );
-  }
-
-  if (settings.enabledLogTransports.includes("ecs")) {
-    logger.add(
-      new transports.File({
-        filename: "ecs-error.json",
-        dirname: logDir,
-        level: "error",
-        tailable: true,
-        maxsize: 10 * 1024 * 1024, // 10MB
-        maxFiles: 5,
-        format: ecsFileFormat,
-      }),
-    );
-
-    logger.add(
-      new transports.File({
-        filename: "ecs-combined.json",
-        dirname: logDir,
-        tailable: true,
-        maxsize: 10 * 1024 * 1024, // 10MB
-        maxFiles: 5,
-        format: ecsFileFormat,
-      }),
-    );
-
-    logger.exceptions.handle(
-      new transports.File({
-        filename: "ecs-exceptions.json",
-        dirname: logDir,
-        tailable: true,
-        maxsize: 10 * 1024 * 1024, // 10MB
-        maxFiles: 5,
-        format: ecsFileFormat,
       }),
     );
   }

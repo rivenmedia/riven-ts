@@ -6,9 +6,7 @@ output.elasticsearch:
 filebeat.inputs:
   - type: filestream
     paths:
-      - /usr/share/filebeat/data/riven/logs/ecs-combined.json
-      - /usr/share/filebeat/data/riven/logs/ecs-error.json
-      - /usr/share/filebeat/data/riven/logs/ecs-exceptions.json
+      - /usr/share/filebeat/data/riven/logs/ecs.json
     parsers:
       - ndjson:
         overwrite_keys: true
