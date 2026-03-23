@@ -4,8 +4,8 @@ import fs from "node:fs";
 import { isZodErrorLike } from "zod-validation-error";
 
 import { database } from "../../database/database.ts";
-import { logger } from "../../utilities/logger/logger.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
+import { logger } from "../logger.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 import { attrCache } from "../utilities/attr-cache.ts";

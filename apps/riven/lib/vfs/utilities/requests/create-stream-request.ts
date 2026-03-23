@@ -1,7 +1,7 @@
 import { request } from "undici";
 
-import { logger } from "../../../utilities/logger/logger.ts";
 import { config } from "../../config.ts";
+import { logger } from "../../logger.ts";
 import { fdToResponsePromiseMap } from "../file-handle-map.ts";
 
 export function createStreamRequest(

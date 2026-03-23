@@ -1,8 +1,8 @@
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 
-import { logger } from "../../utilities/logger/logger.ts";
 import { config } from "../config.ts";
 import { isFuseError } from "../errors/fuse-error.ts";
+import { logger } from "../logger.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 import { getMoviesDirectoryEntries } from "../utilities/get-movies-directory-entries.ts";

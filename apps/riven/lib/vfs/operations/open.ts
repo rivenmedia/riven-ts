@@ -4,8 +4,8 @@ import { setTimeout } from "node:timers/promises";
 
 import { database } from "../../database/database.ts";
 import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
-import { logger } from "../../utilities/logger/logger.ts";
 import { FuseError } from "../errors/fuse-error.ts";
+import { logger } from "../logger.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { attrCache } from "../utilities/attr-cache.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
