@@ -16,7 +16,11 @@ export const withLogAction = {
         level?: LogLevel;
       },
     ) => {
-      logger[level](message, { err: error });
+      if (error) {
+        logger[level](message, { err: error });
+      } else {
+        logger[level](message);
+      }
     },
   },
 };
