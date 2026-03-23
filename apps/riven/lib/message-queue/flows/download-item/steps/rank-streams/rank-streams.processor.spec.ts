@@ -10,6 +10,7 @@ import {
   defaultRankingModel,
 } from "@repo/util-rank-torrent-name";
 
+import * as Sentry from "@sentry/node";
 import { Job, type Queue } from "bullmq";
 import { it as baseIt, expect, vi } from "vitest";
 
@@ -71,7 +72,10 @@ it("does not include trashed streams", async ({ item, mockQueue }) => {
     rtnRankingModel: defaultRankingModel,
   });
 
-  const result = await rankStreamsProcessor({ job }, vi.fn());
+  const result = await rankStreamsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(result).toEqual(
     expect.not.arrayContaining([
@@ -119,7 +123,10 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
     rtnRankingModel: defaultRankingModel,
   });
 
-  const result = await rankStreamsProcessor({ job }, vi.fn());
+  const result = await rankStreamsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(result).toEqual([
     expect.objectContaining({
@@ -200,7 +207,10 @@ it("handles foreign language movies with aliases correctly", async ({
     rtnRankingModel: defaultRankingModel,
   });
 
-  const result = await rankStreamsProcessor({ job }, vi.fn());
+  const result = await rankStreamsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(result).toEqual([
     expect.objectContaining({
@@ -267,7 +277,10 @@ it("handles foreign language shows with aliases correctly", async ({
     rtnRankingModel: defaultRankingModel,
   });
 
-  const result = await rankStreamsProcessor({ job }, vi.fn());
+  const result = await rankStreamsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(result).toEqual([
     expect.objectContaining({

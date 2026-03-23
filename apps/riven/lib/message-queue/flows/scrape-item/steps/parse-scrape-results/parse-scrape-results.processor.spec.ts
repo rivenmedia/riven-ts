@@ -6,6 +6,7 @@ import {
   Show,
 } from "@repo/util-plugin-sdk/dto/entities";
 
+import * as Sentry from "@sentry/node";
 import { Job, UnrecoverableError } from "bullmq";
 import { it as baseIt, expect, vi } from "vitest";
 
@@ -157,7 +158,7 @@ it("throws an UnrecoverableError if no results are found", async ({
   });
 
   await expect(() =>
-    parseScrapeResultsProcessor({ job }, vi.fn()),
+    parseScrapeResultsProcessor({ job, scope: new Sentry.Scope() }, vi.fn()),
   ).rejects.toThrow(UnrecoverableError);
 });
 
@@ -186,7 +187,10 @@ it("returns valid movie torrents if the item is a movie", async ({
     id: movie.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(3);
   expect(Object.values(results)).toEqual(
@@ -223,7 +227,10 @@ it("returns valid show torrents if the item is a show", async ({
     id: show.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(2);
   expect(Object.values(results)).toEqual(
@@ -262,7 +269,10 @@ it("returns valid season torrents if the item is a season", async ({
     id: season.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(3);
   expect(Object.values(results)).toEqual(
@@ -301,7 +311,10 @@ it("returns valid episode torrents if the item is an episode", async ({
     id: episode.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(3);
   expect(Object.values(results)).toEqual(
@@ -331,7 +344,10 @@ it("filters show torrents if the item is a movie", async ({ movie, job }) => {
     id: movie.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(Object.values(results)).not.toEqual(
@@ -362,7 +378,10 @@ it("filters out torrents with 2 or fewer episodes for shows", async ({
     id: show.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(Object.values(results)).not.toEqual(
@@ -395,7 +414,10 @@ it("filters out torrents with an incorrect number of seasons for shows", async (
     id: show.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -436,7 +458,10 @@ it("filters out torrents with incorrect number of episodes for single-season sho
     id: show.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -475,7 +500,10 @@ it("filters out duplicate torrents from different plugins", async ({
     id: movie.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(1);
   expect(Object.values(results)).toEqual([
@@ -504,7 +532,10 @@ it("filters out torrents with the incorrect season number for season items", asy
     id: season.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -537,7 +568,10 @@ it("filters out torrents with 2 or fewer episodes for season items", async ({
     id: season.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -570,7 +604,10 @@ it("filters out torrents with incorrect episodes for season items", async ({
     id: season.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -603,7 +640,10 @@ it("filters out torrents with incorrect episode numbers for episode items", asyn
     id: episode.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -636,7 +676,10 @@ it("filters out torrents with the incorrect season number for episode items", as
     id: episode.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -669,7 +712,10 @@ it("filters out torrents with no episodes for episode items", async ({
     id: episode.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(results).not.toEqual(
     expect.arrayContaining([
@@ -708,7 +754,10 @@ it("filters out torrents that do not match the media item's country", async ({
     id: episode.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -752,7 +801,10 @@ it("does not filter out torrents that do not match the media item's country if t
     id: episode.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(1);
   expect(Object.values(results)).toEqual(
@@ -802,7 +854,10 @@ it("filters out torrents that do not match the media item's year ± 1 year", asy
     id: movie.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(3);
   expect(Object.values(results)).toEqual(
@@ -854,7 +909,10 @@ it.skip('filters out torrents that are not dubbed if the media item is anime and
     id: movie.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(1);
   expect(Object.values(results)).toEqual([
@@ -902,7 +960,10 @@ it.skip('does not filter out torrents that are not dubbed if the media item is a
     id: movie.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   expect(Object.keys(results)).toHaveLength(2);
   expect(results).toEqual(
@@ -940,7 +1001,10 @@ it.skip("returns sorted results", async ({ movie, job }) => {
     id: movie.id,
   });
 
-  const { results } = await parseScrapeResultsProcessor({ job }, vi.fn());
+  const { results } = await parseScrapeResultsProcessor(
+    { job, scope: new Sentry.Scope() },
+    vi.fn(),
+  );
 
   const expectedOrder = [rawTitles[2], rawTitles[0], rawTitles[1]] as const;
 
