@@ -76,7 +76,7 @@ export const registerPluginHookWorkers = fromPromise<
               dataSources,
               settings,
               logger: baseLogger.child({
-                "log.source": pluginName,
+                "riven.log.source": pluginName,
               }),
             });
           },

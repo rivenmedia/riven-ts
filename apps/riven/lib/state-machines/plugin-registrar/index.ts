@@ -118,7 +118,7 @@ export const pluginRegistrarMachine = setup({
                   pluginSymbol: plugin.name,
                   cache: redisCache,
                   logger: baseLogger.child({
-                    "log.source": pluginName,
+                    "riven.log.source": pluginName,
                   }),
                   connection: {
                     url: settings.redisUrl,

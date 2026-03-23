@@ -11,7 +11,8 @@ import { settings } from "../settings.ts";
 import type { LogLevel } from "./log-levels.ts";
 
 interface CustomLogMeta {
-  "log.source": string;
+  "riven.log.source": string;
+  "riven.error.validation-message": string;
 }
 
 declare module "logform" {
@@ -79,12 +80,27 @@ const consoleFormat = format.printf(({ level, message, ...meta }) => {
     "yyyy-LL-dd TT",
   );
 
-  return `${chalk.dim.black(formattedTimestamp)} - ${chalk.dim(meta["log.source"])} - ${level}: ${maybeColouredMessage}`;
+  return `${chalk.dim.black(formattedTimestamp)} - ${chalk.dim(meta["riven.log.source"])} - ${level}: ${maybeColouredMessage}`;
+});
+
+const validationErrorMetaFormat = format((info) => {
+  const parsedSplat = Array.isArray(info[SPLAT])
+    ? ErrorSplat.safeParse(info[SPLAT][0])
+    : undefined;
+
+  if (parsedSplat?.data) {
+    info["riven.error.validation-message"] = z.prettifyError(parsedSplat.data);
+  }
+
+  return info;
 });
 
 export const baseLogger = createLogger({
   level: settings.logLevel,
-  format: baseEcsFormat() as Logform.Format,
+  format: format.combine(
+    validationErrorMetaFormat(),
+    baseEcsFormat() as Logform.Format,
+  ),
   exitOnError: false,
   silent: !settings.loggingEnabled,
 });
@@ -176,4 +192,4 @@ if (settings.loggingEnabled) {
   }
 }
 
-export const logger = baseLogger.child({ "log.source": "core" });
+export const logger = baseLogger.child({ "riven.log.source": "core" });

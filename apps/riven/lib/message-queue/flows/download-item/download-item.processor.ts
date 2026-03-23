@@ -16,16 +16,17 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
 
     if (!finalResult) {
       const item = await database.mediaItem.findOneOrFail(job.data.id);
+      const error = new UnrecoverableError(
+        "No valid torrent found after trying all downloaders",
+      );
 
       sendEvent({
         type: "riven.media-item.download.error",
         item,
-        error: "No valid torrent found",
+        error,
       });
 
-      throw new UnrecoverableError(
-        "No valid torrent found after trying all downloaders",
-      );
+      throw error;
     }
 
     try {

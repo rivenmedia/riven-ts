@@ -79,7 +79,11 @@ export async function createFlowWorker<
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
-    logger.error(chalk.dim(`[${flowName}]`), { err: error });
+    logger.error(chalk.dim(`[${flowName}]`), {
+      err: error,
+      "riven.event.name": flowName,
+      "riven.flow.name": flowName,
+    });
   });
 
   if (settings.unsafeClearQueuesOnStartup) {

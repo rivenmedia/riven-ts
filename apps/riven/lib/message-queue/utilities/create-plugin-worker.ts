@@ -57,7 +57,11 @@ export async function createPluginWorker<
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
-    logger.error(chalk.dim(`[${name}]`), { err: error });
+    logger.error(chalk.dim(`[${name}]`), {
+      err: error,
+      "riven.event.name": name,
+      "riven.plugin.name": pluginName,
+    });
   });
 
   if (settings.unsafeClearQueuesOnStartup) {
