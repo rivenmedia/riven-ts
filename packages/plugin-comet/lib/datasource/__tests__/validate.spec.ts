@@ -19,7 +19,9 @@ it("returns false if the request fails", async ({
   const cometApi = new CometAPI({
     ...dataSourceConfig,
     pluginSymbol: pluginConfig.name,
-    settings: {},
+    settings: {
+      url: "",
+    },
   });
   const isValid = await cometApi.validate();
 
@@ -37,7 +39,9 @@ it("returns true if the request succeeds", async ({
   const cometApi = new CometAPI({
     ...dataSourceConfig,
     pluginSymbol: pluginConfig.name,
-    settings: {},
+    settings: {
+      url: "",
+    },
   });
   const isValid = await cometApi.validate();
 

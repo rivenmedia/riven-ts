@@ -46,6 +46,10 @@ export const RivenSettings = z.object({
     .string()
     .default("./logs")
     .describe("The directory where log files will be stored."),
+  logShowStackTraces: z
+    .stringbool()
+    .default(true)
+    .describe("Whether to show detailed stack traces when logging errors"),
   gqlPort: z.coerce
     .number()
     .int()

@@ -11,6 +11,7 @@ import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 import { attrCache } from "../utilities/attr-cache.ts";
 import { isHiddenPath } from "../utilities/is-hidden-path.ts";
 import { isIgnoredPath } from "../utilities/is-ignored-path.ts";
+import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
 import type { SetOptional } from "type-fest";
 
@@ -328,35 +329,36 @@ async function getattr(path: string) {
 }
 
 export const getattrSync = function (path, callback) {
-  const cachedAttr = attrCache.get(path);
+  void withVfsScope(async () => {
+    try {
+      const cachedAttr = attrCache.get(path);
 
-  if (cachedAttr) {
-    logger.silly(`VFS getattr: Cache hit for path ${path}`);
+      if (cachedAttr) {
+        logger.silly(`VFS getattr: Cache hit for path ${path}`);
 
-    process.nextTick(callback, null, cachedAttr);
+        process.nextTick(callback, null, cachedAttr);
 
-    return;
-  }
+        return;
+      }
 
-  if (isHiddenPath(path) || isIgnoredPath(path)) {
-    logger.silly(`VFS getattr: Skipping hidden/ignored path ${path}`);
+      if (isHiddenPath(path) || isIgnoredPath(path)) {
+        logger.silly(`VFS getattr: Skipping hidden/ignored path ${path}`);
 
-    process.nextTick(callback, Fuse.ENOENT);
+        process.nextTick(callback, Fuse.ENOENT);
 
-    return;
-  }
+        return;
+      }
 
-  getattr(path)
-    .then((attrs) => {
+      const attrs = await getattr(path);
+
       attrCache.set(path, attrs);
 
       logger.silly(`VFS getattr: Cache miss for path ${path}`);
 
       process.nextTick(callback, null, attrs);
-    })
-    .catch((error: unknown) => {
+    } catch (error) {
       if (isFuseError(error)) {
-        logger.error(`VFS getattr FuseError: ${error.message}`);
+        logger.error("VFS getattr FuseError", { err: error });
 
         process.nextTick(callback, error.errorCode);
 
@@ -364,15 +366,16 @@ export const getattrSync = function (path, callback) {
       }
 
       if (isZodErrorLike(error)) {
-        logger.error(`VFS getattr validation error: ${error.message}`);
+        logger.error("VFS getattr validation error", { err: error });
 
         process.nextTick(callback, Fuse.ENOENT);
 
         return;
       }
 
-      logger.error(`VFS getattr unknown error: ${String(error)}`);
+      logger.error("Unexpected VFS getattr error", { err: error });
 
       process.nextTick(callback, Fuse.EIO);
-    });
+    }
+  });
 } satisfies OPERATIONS["getattr"];

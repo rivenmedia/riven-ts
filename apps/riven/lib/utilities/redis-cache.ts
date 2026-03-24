@@ -12,7 +12,7 @@ async function killInstance() {
 
     logger.debug("Keyv Redis connection closed.");
   } catch (error) {
-    logger.error("Error closing Keyv Redis connection:", error);
+    logger.error("Error closing Keyv Redis connection:", { err: error });
   }
 }
 

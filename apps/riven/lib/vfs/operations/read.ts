@@ -16,6 +16,7 @@ import {
 } from "../utilities/file-handle-map.ts";
 import { performBodyRead } from "../utilities/read-types/perform-body-read.ts";
 import { performCacheHit } from "../utilities/read-types/perform-cache-hit.ts";
+import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
 export interface ReadInput {
   buffer: Buffer;
@@ -177,17 +178,18 @@ export const readSync = function (
   position,
   callback,
 ) {
-  read({
-    buffer,
-    path,
-    fd,
-    length,
-    position,
-  })
-    .then((bytesRead) => {
+  void withVfsScope(async () => {
+    try {
+      const bytesRead = await read({
+        buffer,
+        path,
+        fd,
+        length,
+        position,
+      });
+
       process.nextTick(callback, bytesRead);
-    })
-    .catch((error: unknown) => {
+    } catch (error) {
       // This is triggered when a file handle is released
       if (error instanceof Undici.errors.RequestAbortedError) {
         logger.silly(`Read operation aborted for fd ${fd.toString()}`);
@@ -198,19 +200,16 @@ export const readSync = function (
       }
 
       if (isFuseError(error)) {
-        logger.error(`VFS read FuseError: ${error.message}`);
+        logger.error("VFS read FuseError", { err: error });
 
         process.nextTick(callback, error.errorCode);
 
         return;
       }
 
-      if (error instanceof Error) {
-        logger.error(`VFS read Error: ${error.stack ?? error.message}`);
-      } else {
-        logger.error(`VFS read unknown error: ${String(error)}`);
-      }
+      logger.error("Unexpected VFS read error", { err: error });
 
       process.nextTick(callback, Fuse.EIO);
-    });
+    }
+  });
 } satisfies OPERATIONS["read"];

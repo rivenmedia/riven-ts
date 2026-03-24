@@ -1,37 +1,55 @@
+import * as Sentry from "@sentry/node";
 import { createActor, waitFor } from "xstate";
 
-import { rivenMachine } from "./state-machines/program/index.ts";
 import { logger } from "./utilities/logger/logger.ts";
 
-process.on("uncaughtException", (error) => {
-  logger.error(error);
+await Sentry.withScope(async (scope) => {
+  const sessionId = crypto.randomUUID();
+
+  scope.setTags({
+    "riven.log.source": "core",
+    "riven.session.id": sessionId,
+  });
+
+  // Dynamically import the main state machine so the log action obtains the current scope
+  const { rivenMachine } = await import("./state-machines/program/index.ts");
+
+  process.on("uncaughtException", (error) => {
+    logger.error("Uncaught exception", { err: error });
+
+    process.exit(1);
+  });
+
+  process.on("unhandledRejection", (error) => {
+    logger.error("Uncaught rejection", { err: error });
+  });
+
+  const actor = createActor(rivenMachine, {
+    input: {
+      sessionId,
+    },
+  });
+
+  actor.start();
+
+  process.on("SIGINT", () => {
+    actor.send({ type: "riven.core.shutdown" });
+  });
+
+  await waitFor(
+    actor,
+    (state) => state.matches("Exited") || state.matches("Errored"),
+  );
+
+  const { value } = actor.getSnapshot();
+
+  if (value === "Errored") {
+    process.exit(1);
+  }
+
+  logger.info("Riven has shut down");
+
+  await Sentry.close();
+
+  process.exit(0);
 });
-
-const sessionId = crypto.randomUUID();
-
-const actor = createActor(rivenMachine, {
-  input: {
-    sessionId,
-  },
-});
-
-actor.start();
-
-process.on("SIGINT", () => {
-  actor.send({ type: "riven.core.shutdown" });
-});
-
-await waitFor(
-  actor,
-  (state) => state.matches("Exited") || state.matches("Errored"),
-);
-
-const { value } = actor.getSnapshot();
-
-if (value === "Errored") {
-  process.exit(1);
-}
-
-logger.info("Riven has shut down");
-
-process.exit(0);

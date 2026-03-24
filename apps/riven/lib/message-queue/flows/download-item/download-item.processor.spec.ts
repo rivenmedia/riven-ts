@@ -9,6 +9,7 @@ import {
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 import { parse } from "@repo/util-rank-torrent-name";
 
+import * as Sentry from "@sentry/node";
 import { Job, UnrecoverableError } from "bullmq";
 import { DateTime, Settings } from "luxon";
 import { expect, vi } from "vitest";
@@ -50,9 +51,9 @@ it("throws an unrecoverable error if no valid torrent is found", async () => {
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
-  await expect(() => downloadItemProcessor({ job }, sendEvent)).rejects.toThrow(
-    UnrecoverableError,
-  );
+  await expect(() =>
+    downloadItemProcessor({ job, scope: new Sentry.Scope() }, sendEvent),
+  ).rejects.toThrow(UnrecoverableError);
 });
 
 it('sends a "riven.media-item.download.success" event with the updated item and duration from request to download if the download result is valid', async () => {
@@ -120,7 +121,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     },
   });
 
-  await downloadItemProcessor({ job }, sendEvent);
+  await downloadItemProcessor({ job, scope: new Sentry.Scope() }, sendEvent);
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.success",
@@ -237,7 +238,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
     },
   });
 
-  await downloadItemProcessor({ job }, sendEvent);
+  await downloadItemProcessor({ job, scope: new Sentry.Scope() }, sendEvent);
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.partial-success",
@@ -278,13 +279,16 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
-  await downloadItemProcessor({ job }, sendEvent).catch(() => {
+  await downloadItemProcessor(
+    { job, scope: new Sentry.Scope() },
+    sendEvent,
+  ).catch(() => {
     /* empty */
   });
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.error",
     item: expect.any(Movie) as Movie,
-    error: "No valid torrent found",
+    error: expect.any(UnrecoverableError),
   });
 });

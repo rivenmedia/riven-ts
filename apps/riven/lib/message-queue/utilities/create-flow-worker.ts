@@ -7,10 +7,8 @@ import {
   Worker,
   type WorkerOptions,
 } from "bullmq";
-import chalk from "chalk";
 import assert from "node:assert";
 import os from "node:os";
-import { fromError, isZodErrorLike } from "zod-validation-error";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
@@ -50,17 +48,25 @@ export async function createFlowWorker<
   const worker = new Worker(
     flowName,
     async (job, token) => {
-      try {
-        return await processor({ job, token } as never, sendEvent);
-      } catch (error) {
-        Sentry.captureException(error);
+      return await Sentry.withScope(async (scope) => {
+        scope.setTags({
+          "riven.flow.name": flowName,
+          "riven.queue.name": flowName,
+          "bullmq.job.id": job.id,
+        });
 
-        if (error instanceof Error) {
-          throw error;
+        try {
+          return await processor({ job, token, scope } as never, sendEvent);
+        } catch (error) {
+          Sentry.captureException(error);
+
+          if (error instanceof Error) {
+            throw error;
+          }
+
+          throw new UnrecoverableError(String(error));
         }
-
-        throw new UnrecoverableError(String(error));
-      }
+      });
     },
     {
       concurrency: os.availableParallelism(),
@@ -80,13 +86,7 @@ export async function createFlowWorker<
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
-    const maybeValidationError = isZodErrorLike(error)
-      ? fromError(error)
-      : error;
-
-    logger.error(
-      `${chalk.dim(`[${flowName}]`)} ${maybeValidationError.message}`,
-    );
+    logger.error("Flow worker encountered an error", { err: error });
   });
 
   if (settings.unsafeClearQueuesOnStartup) {

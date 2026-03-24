@@ -2,6 +2,7 @@ import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 import { parse } from "@repo/util-rank-torrent-name";
 
+import * as Sentry from "@sentry/node";
 import { Job } from "bullmq";
 import { DateTime, Settings } from "luxon";
 import { expect, vi } from "vitest";
@@ -21,7 +22,9 @@ it("throws an unrecoverable error if the item cannot be scraped", async () => {
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
-  await expect(() => scrapeItemProcessor({ job }, sendEvent)).rejects.toThrow();
+  await expect(() =>
+    scrapeItemProcessor({ job, scope: new Sentry.Scope() }, sendEvent),
+  ).rejects.toThrow();
 });
 
 it.todo("throws an unrecoverable if no new streams were found");
@@ -67,7 +70,7 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
     },
   });
 
-  await scrapeItemProcessor({ job }, sendEvent);
+  await scrapeItemProcessor({ job, scope: new Sentry.Scope() }, sendEvent);
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.scrape.success",

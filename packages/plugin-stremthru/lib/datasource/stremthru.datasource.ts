@@ -243,7 +243,10 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
 
       return torrents;
     } catch (error: unknown) {
-      this.logger.error(error);
+      this.logger.error(
+        `Failed to scrape ${item.fullTitle} (IMDB: ${item.imdbId ?? "N/A"})`,
+        { err: error },
+      );
 
       return {};
     }

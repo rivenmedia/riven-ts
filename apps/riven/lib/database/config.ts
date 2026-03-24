@@ -14,6 +14,7 @@ import {
 // eslint-disable-next-line no-restricted-imports -- Core database config requires direct driver access
 import { type Options, PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
+import * as Sentry from "@sentry/node";
 
 import { logger } from "../utilities/logger/logger.ts";
 import { settings } from "../utilities/settings.ts";
@@ -41,7 +42,13 @@ export const databaseConfig = {
   forceUtcTimezone: true,
   clientUrl: settings.databaseUrl,
   logger: (message) => {
-    logger.verbose(message);
+    Sentry.withScope((scope) => {
+      scope.setTags({
+        "riven.log.source": "database",
+      });
+
+      logger.verbose(message);
+    });
   },
   subscribers: [
     new MediaItemFullTitleSubscriber(),

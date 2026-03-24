@@ -44,7 +44,7 @@ export const startGqlServer = fromPromise<
       responseCachePlugin(),
     ],
     formatError(formattedError, error) {
-      logger.error("GraphQL Error:", { error });
+      logger.error("GraphQL Error:", { err: error });
 
       return formattedError;
     },

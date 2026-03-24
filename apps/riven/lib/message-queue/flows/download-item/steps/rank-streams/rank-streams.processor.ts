@@ -69,9 +69,8 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
           logger.silly(error.message);
         } else {
           logger.error(
-            `Failed to rank torrent ${rawTitle} (${hash}) for ${itemTitle}: ${
-              (error as Error).message
-            }`,
+            `Failed to rank torrent ${rawTitle} (${hash}) for ${itemTitle}:`,
+            { err: error },
           );
         }
 

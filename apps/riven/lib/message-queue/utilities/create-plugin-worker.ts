@@ -6,9 +6,7 @@ import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-l
 
 import * as Sentry from "@sentry/node";
 import { type Processor, Worker, type WorkerOptions } from "bullmq";
-import chalk from "chalk";
 import z from "zod";
-import { fromError, isZodErrorLike } from "zod-validation-error";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
@@ -38,13 +36,23 @@ export async function createPluginWorker<
   const worker = new Worker(
     queueName,
     async (job, token, signal) => {
-      try {
-        return await processor(job as never, token, signal);
-      } catch (error) {
-        Sentry.captureException(error);
+      return await Sentry.withScope(async (scope) => {
+        scope.setTags({
+          "bullmq.job.id": job.id,
+          "riven.log.source": pluginName,
+          "riven.event.name": name as string,
+          "riven.plugin.name": pluginName,
+          "riven.queue.name": queueName,
+        });
 
-        throw error;
-      }
+        try {
+          return await processor(job as never, token, signal);
+        } catch (error) {
+          Sentry.captureException(error);
+
+          throw error;
+        }
+      });
     },
     {
       ...workerOptions,
@@ -58,11 +66,7 @@ export async function createPluginWorker<
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
-    const maybeValidationError = isZodErrorLike(error)
-      ? fromError(error)
-      : error;
-
-    logger.error(`${chalk.dim(`[${name}]`)} ${maybeValidationError.message}`);
+    logger.error("Plugin worker encountered an error", { err: error });
   });
 
   if (settings.unsafeClearQueuesOnStartup) {

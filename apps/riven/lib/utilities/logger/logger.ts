@@ -1,46 +1,45 @@
-import chalk from "chalk";
+import "./types/logform.ts";
+
+import { ecsFormat as baseEcsFormat } from "@elastic/ecs-winston-format";
 import path from "node:path";
-import { createLogger, format, transports } from "winston";
+import { type Logform, createLogger, format, transports } from "winston";
 
 import { settings } from "../settings.ts";
+import { consoleFormat } from "./formatters/console.format.ts";
+import { ecsFileFormat } from "./formatters/ecs-file.format.ts";
+import { fileFormat } from "./formatters/file.format.ts";
+import { sentryMetaFormat } from "./formatters/sentry-meta.format.ts";
+import { validationErrorMetaFormat } from "./formatters/validation-error-meta.format.ts";
 
 const logDir = path.resolve(process.cwd(), settings.logDirectory);
 
-const fileFormat = format.combine(
-  format.uncolorize(),
-  format((info) => {
-    info.message = String(info["stack"] ?? info.message);
-
-    return info;
-  })(),
-  format.json({ space: 2 }),
-);
-
-const consoleFormat = format.printf(({ level, message, ...meta }) => {
-  const renderedMessage = String(meta["stack"] ?? message);
-  const maybeColoredMessage = level.includes("error")
-    ? chalk.red(renderedMessage)
-    : renderedMessage;
-
-  return `${chalk.dim.black(meta["timestamp"])} - ${chalk.dim(meta["logSource"])} - ${level}: ${maybeColoredMessage}`;
-});
-
-export const baseLogger = createLogger({
+export const logger = createLogger({
   level: settings.logLevel,
   format: format.combine(
-    format.timestamp({
-      format: "YYYY-MM-DD HH:mm:ss",
-    }),
-    format.errors({ stack: true }),
-    format.splat(),
+    sentryMetaFormat(),
+    validationErrorMetaFormat(),
+    baseEcsFormat() as Logform.Format,
   ),
   exitOnError: false,
   silent: !settings.loggingEnabled,
 });
 
 if (settings.loggingEnabled) {
+  // ECS logs will always be created for debugging purposes
+  logger.add(
+    new transports.File({
+      filename: "ecs.json",
+      dirname: logDir,
+      tailable: true,
+      maxsize: 10 * 1024 * 1024, // 10MB
+      maxFiles: 5,
+      format: ecsFileFormat,
+      zippedArchive: true,
+    }),
+  );
+
   if (settings.enabledLogTransports.includes("console")) {
-    baseLogger.add(
+    logger.add(
       new transports.Console({
         format: format.combine(
           format.colorize({
@@ -53,7 +52,7 @@ if (settings.loggingEnabled) {
   }
 
   if (settings.enabledLogTransports.includes("file")) {
-    baseLogger.add(
+    logger.add(
       new transports.File({
         filename: "error.log",
         dirname: logDir,
@@ -65,7 +64,7 @@ if (settings.loggingEnabled) {
       }),
     );
 
-    baseLogger.add(
+    logger.add(
       new transports.File({
         filename: "combined.log",
         dirname: logDir,
@@ -76,7 +75,7 @@ if (settings.loggingEnabled) {
       }),
     );
 
-    baseLogger.exceptions.handle(
+    logger.exceptions.handle(
       new transports.File({
         filename: "exceptions.log",
         dirname: logDir,
@@ -88,5 +87,3 @@ if (settings.loggingEnabled) {
     );
   }
 }
-
-export const logger = baseLogger.child({ logSource: "core" });

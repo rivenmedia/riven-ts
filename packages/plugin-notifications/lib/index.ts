@@ -36,10 +36,10 @@ export default {
         if (result.status === "rejected") {
           logger.error(
             `Notification dispatch failed: ${JSON.stringify({
-              error: String(result.reason),
               url: urls[urlIndex],
               urlIndex,
             })}`,
+            { err: result.reason as unknown },
           );
         }
       }

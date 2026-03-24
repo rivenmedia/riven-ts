@@ -5,7 +5,7 @@ import { setTimeout } from "node:timers/promises";
 import { database } from "../../database/database.ts";
 import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
 import { logger } from "../../utilities/logger/logger.ts";
-import { FuseError } from "../errors/fuse-error.ts";
+import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { attrCache } from "../utilities/attr-cache.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
@@ -15,6 +15,7 @@ import {
   fileNameToFdCountMap,
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
+import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type {
@@ -182,13 +183,23 @@ export const openSync = function (
   >,
   callback: (err: number, fd?: number) => void,
 ) {
-  open(path, flags, linkRequestQueues)
-    .then((fd) => {
+  void withVfsScope(async () => {
+    try {
+      const fd = await open(path, flags, linkRequestQueues);
+
       process.nextTick(callback, 0, fd);
-    })
-    .catch((error: unknown) => {
-      logger.error(`VFS open error: ${(error as Error).message}`);
+    } catch (error) {
+      if (isFuseError(error)) {
+        logger.error("VFS open FuseError", { err: error });
+
+        process.nextTick(callback, error.errorCode);
+
+        return;
+      }
+
+      logger.error("VFS open error", { err: error });
 
       process.nextTick(callback, Fuse.EIO);
-    });
+    }
+  });
 };

@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import z, {
   type ZodNever,
   type ZodObject,
@@ -45,6 +46,7 @@ export const createFlowSchema = <
               >;
             }
           >(),
+          scope: z.custom<Sentry.Scope>(),
           token: z.string().optional(),
         }),
         z.custom<MainRunnerMachineIntake>(),

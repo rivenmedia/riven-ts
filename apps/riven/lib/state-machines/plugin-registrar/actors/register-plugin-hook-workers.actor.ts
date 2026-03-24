@@ -4,7 +4,7 @@ import os from "node:os";
 import { fromPromise } from "xstate";
 
 import { createPluginWorker } from "../../../message-queue/utilities/create-plugin-worker.ts";
-import { baseLogger, logger } from "../../../utilities/logger/logger.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
 import { eventSerialiserSchemaMap } from "../../../utilities/serialisers/event-serialiser-schemas.ts";
 
 import type {
@@ -75,9 +75,7 @@ export const registerPluginHookWorkers = fromPromise<
               event,
               dataSources,
               settings,
-              logger: baseLogger.child({
-                logSource: pluginName,
-              }),
+              logger,
             });
           },
           {

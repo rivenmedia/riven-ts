@@ -3,9 +3,9 @@ import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings"
 
 import chalk from "chalk";
 import { type AnyActorRef, type MachineContext, assign, setup } from "xstate";
-import z, { ZodError } from "zod";
+import { ZodError } from "zod";
 
-import { baseLogger, logger } from "../../utilities/logger/logger.ts";
+import { logger } from "../../utilities/logger/logger.ts";
 import { redisCache } from "../../utilities/redis-cache.ts";
 import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
@@ -99,12 +99,13 @@ export const pluginRegistrarMachine = setup({
           } catch (error) {
             if (error instanceof ZodError) {
               logger.error(
-                `Invalid settings provided for plugin ${pluginName}: ${z.prettifyError(error)}`,
+                `Invalid settings provided for plugin ${pluginName}`,
+                { err: error },
               );
             } else {
-              logger.error(
-                `Failed to set settings for plugin ${pluginName}: ${String(error)}`,
-              );
+              logger.error(`Failed to set settings for plugin ${pluginName}`, {
+                err: error,
+              });
             }
 
             continue;
@@ -116,9 +117,7 @@ export const pluginRegistrarMachine = setup({
                 const instance = new DataSource({
                   pluginSymbol: plugin.name,
                   cache: redisCache,
-                  logger: baseLogger.child({
-                    logSource: pluginName,
-                  }),
+                  logger,
                   connection: {
                     url: settings.redisUrl,
                   },
@@ -129,9 +128,8 @@ export const pluginRegistrarMachine = setup({
                 dataSources.set(DataSource, instance);
               } catch (error) {
                 logger.error(
-                  `Failed to construct data source ${DataSource.name} for ${pluginName}: ${
-                    (error as Error).message
-                  }`,
+                  `Failed to construct data source ${DataSource.name} for ${pluginName}`,
+                  { err: error },
                 );
               }
             }
