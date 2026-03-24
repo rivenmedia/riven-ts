@@ -61,6 +61,7 @@
   "devDependencies": {
     "@apollo/client-devtools-vscode": "^4.23.2",
     "@apollo/utils.fetcher": "^3.1.0",
+    "@faker-js/faker": "catalog:",
     "@graphql-codegen/cli": "^6.1.0",
     "@graphql-codegen/near-operation-file-preset": "^4.0.0",
     "@graphql-codegen/typescript": "^5.0.7",

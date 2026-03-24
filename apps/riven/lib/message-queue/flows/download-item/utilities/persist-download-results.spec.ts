@@ -2,7 +2,7 @@ import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
-import { ref } from "@mikro-orm/core";
+import { ref, wrap } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
@@ -184,6 +184,8 @@ it("does not create duplicate media entries for episodes with existing entries",
   mediaEntry,
 }) => {
   show.streams.add(stream);
+
+  await wrap(season).populate(["episodes"]);
 
   const [episode] = season.episodes;
 

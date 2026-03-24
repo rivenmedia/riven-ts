@@ -1,3 +1,4 @@
+import { wrap } from "@mikro-orm/core";
 import { expect } from "vitest";
 
 import { rivenTestContext as it } from "../../../../../../__tests__/test-context.ts";
@@ -10,6 +11,8 @@ type MappedFiles = MapItemsToFilesFlow["output"];
 it("throws an error if season-like torrent has fewer files than expected", async ({
   season,
 }) => {
+  await wrap(season).populate(["episodes"]);
+
   const mappedFiles = {
     episodes: {},
     movies: {
@@ -36,6 +39,8 @@ it("considers torrents for continuing shows as valid if missing a maximum of one
   show.status = "continuing";
 
   await em.persist(show).flush();
+
+  await wrap(show).populate(["seasons.episodes"]);
 
   const episodes = await show.getEpisodes();
 
@@ -68,6 +73,8 @@ it("considers torrents for continuing shows as valid if missing a maximum of one
 it("considers torrents for completed shows as invalid if missing any season", async ({
   show,
 }) => {
+  await wrap(show).populate(["seasons.episodes"]);
+
   const episodes = await show.getEpisodes();
 
   const files = episodes.reduce<MappedFiles["episodes"]>((acc, episode) => {
@@ -135,6 +142,8 @@ it("throws an error if movie file is parsed as a show", async ({ movie }) => {
 it("throws an error if show file has unknown episode number", async ({
   show,
 }) => {
+  await wrap(show).populate(["seasons.episodes"]);
+
   const episodes = await show.getEpisodes();
 
   const { "abs:1": _, ...files } = Object.fromEntries(
@@ -193,6 +202,8 @@ it("returns valid matched files for a movie", async ({ movie }) => {
 });
 
 it("returns valid matched files for a show", async ({ show }) => {
+  await wrap(show).populate(["seasons.episodes"]);
+
   const episodes = await show.getEpisodes();
 
   const files = Object.fromEntries(
@@ -224,6 +235,8 @@ it("returns valid matched files for a show", async ({ show }) => {
 });
 
 it("does not match episodes from a different season", async ({ season }) => {
+  await wrap(season).populate(["episodes"]);
+
   const files = Object.fromEntries(
     season.episodes.map((episode) => [
       `${(episode.season.unwrap().number + 1).toString()}:${episode.number.toString()}`,

@@ -1,23 +1,24 @@
 /* eslint-disable no-empty-pattern */
 import {
   Episode,
-  ItemRequest,
   MediaEntry,
   Movie,
   Season,
   Show,
   Stream,
 } from "@repo/util-plugin-sdk/dto/entities";
-import { parse } from "@repo/util-rank-torrent-name";
 
 import { ApolloServer } from "@apollo/server";
-import { DateTime } from "luxon";
+import { type EntityManager, type MikroORM, wrap } from "@mikro-orm/core";
 import { MockAgent, setGlobalDispatcher } from "undici";
 import { expect, test as testBase } from "vitest";
 
 import { database } from "../database/database.ts";
+import { MediaEntryFactory } from "../database/factories/media-entry.factory.ts";
+import { StreamFactory } from "../database/factories/stream.factory.ts";
+import { MovieSeeder } from "../database/seeders/movie.seeder.ts";
+import { ShowSeeder } from "../database/seeders/show.seeder.ts";
 
-import type { EntityManager } from "@mikro-orm/core";
 import type { SetupServerApi } from "msw/node";
 
 export const rivenTestContext = testBase.extend<{
@@ -26,6 +27,7 @@ export const rivenTestContext = testBase.extend<{
   gqlServer: ApolloServer;
   mockAgent: MockAgent;
   em: EntityManager;
+  orm: MikroORM;
   movie: Movie;
   show: Show;
   season: Season;
@@ -96,108 +98,46 @@ export const rivenTestContext = testBase.extend<{
 
     await use(em);
   },
-  movie: async ({ em }, use) => {
-    const itemRequest = em.create(ItemRequest, {
-      requestedBy: "@repo/plugin-test",
-      state: "completed",
+  orm: database.orm,
+  movie: async ({ em, orm }, use) => {
+    await orm.seeder.seed(MovieSeeder);
+
+    const movie = await em.findOneOrFail(Movie, {
       type: "movie",
     });
 
-    const movie = em.create(Movie, {
-      title: "Test Movie",
-      contentRating: "g",
-      tmdbId: "1",
-      itemRequest,
-      isRequested: true,
-      releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
-    });
-
-    await em.flush();
-
     await use(movie);
   },
-  show: async ({ em }, use) => {
-    const itemRequest = em.create(ItemRequest, {
-      requestedBy: "@repo/plugin-test",
-      state: "completed",
-      type: "show",
-    });
+  show: async ({ orm, em }, use) => {
+    await orm.seeder.seed(ShowSeeder);
 
-    const show = em.create(Show, {
-      title: "Test Show",
-      contentRating: "tv-14",
-      status: "ended",
-      tvdbId: "1",
-      itemRequest,
-      isRequested: true,
-      releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
-    });
+    const shows = await em.findAll(Show);
 
-    await em.flush();
+    expect.assert(shows[0]);
 
-    let absoluteEpisodeNumber = 1;
-
-    for (let seasonNumber = 1; seasonNumber <= 6; seasonNumber++) {
-      const season = em.create(Season, {
-        tvdbId: show.tvdbId,
-        title: `Season ${seasonNumber.toString()}`,
-        number: seasonNumber,
-        isSpecial: false,
-        isRequested: true,
-        itemRequest,
-        releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
-      });
-
-      show.seasons.add(season);
-
-      await em.flush();
-
-      for (let episodeNumber = 1; episodeNumber <= 10; episodeNumber++) {
-        const episode = em.create(Episode, {
-          tvdbId: show.tvdbId,
-          title: `Episode ${episodeNumber.toString().padStart(2, "0")}`,
-          contentRating: "tv-14",
-          number: episodeNumber,
-          absoluteNumber: absoluteEpisodeNumber++,
-          isSpecial: false,
-          isRequested: true,
-          itemRequest,
-          releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
-        });
-
-        season.episodes.add(episode);
-      }
-
-      show.seasons.add(season);
-    }
-
-    await em.flush();
-
-    await use(show);
+    await use(shows[0]);
   },
   season: async ({ show }, use) => {
+    await wrap(show).populate(["seasons"]);
+
     expect.assert(show.seasons[0]);
 
     await use(show.seasons[0]);
   },
   episode: async ({ season }, use) => {
+    await wrap(season).populate(["episodes"]);
+
     expect.assert(season.episodes[0]);
 
     await use(season.episodes[0]);
   },
   stream: async ({ em }, use) => {
-    const stream = em.create(Stream, {
-      infoHash: "1234567890abcdef1234567890abcdef12345678",
-      parsedData: parse("Example.Movie.2024.1080p.BluRay.x264-GROUP"),
-    });
-
-    await em.flush();
+    const stream = await new StreamFactory(em).createOne();
 
     await use(stream);
   },
   mediaEntry: async ({ em }, use) => {
-    const mediaEntry = em.create(MediaEntry, {
-      fileSize: 1024,
+    const mediaEntry = new MediaEntryFactory(em).makeOne({
       downloadUrl: "http://example.com/file.mp4",
       originalFilename: "file.mp4",
       plugin: "@repo/plugin-test",
