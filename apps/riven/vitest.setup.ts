@@ -29,8 +29,8 @@ vi.mock(import("@repo/plugin-test"), () => {
   class TestAPI extends BaseDataSource<Record<string, unknown>> {
     override baseURL = "https://api.test.com";
 
-    override validate(): Promise<boolean> {
-      return Promise.resolve(true);
+    override validate() {
+      return true;
     }
   }
 

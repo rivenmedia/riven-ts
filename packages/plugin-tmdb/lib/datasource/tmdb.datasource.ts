@@ -12,7 +12,6 @@ import type {
 } from "../__generated__/index.ts";
 import type { TmdbSettings } from "../tmdb-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
-import type { Promisable } from "type-fest";
 
 export class TmdbAPIError extends Error {}
 
@@ -32,7 +31,7 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     requestOpts.headers["authorization"] = `Bearer ${this.settings.apiKey}`;
   }
 
-  override validate(): Promisable<boolean> {
+  override validate() {
     return true;
   }
 
