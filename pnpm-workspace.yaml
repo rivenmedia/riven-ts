@@ -20,6 +20,7 @@ catalog:
   "@mikro-orm/decorators": ^7.0.5
   "@mikro-orm/postgresql": ^7.0.5
   "@mikro-orm/reflection": ^7.0.5
+  "@mikro-orm/seeder": ^7.0.5
   "@mikro-orm/sqlite": ^7.0.5
   "@types/luxon": ^3.7.1
   "@types/node": ^24.0.0
@@ -55,10 +56,14 @@ cleanupUnusedCatalogs: true
 configDependencies:
   "@pnpm/plugin-better-defaults": 0.2.1+sha512-3Fmur80S7+vmOKMmTdKS6JofiuvpUaBIdKEpgDyr9571FHo5Z4O2nrRUaSflxvwEakeYxIaFZ5MBaqAUnYHaeg==
 
+engineStrict: true
+
 ignoredBuiltDependencies:
   - redis-memory-server
 
 linkWorkspacePackages: true
+
+nodeVersion: 24.14.0
 
 onlyBuiltDependencies:
   - "@apollo/protobufjs"
@@ -93,7 +98,3 @@ publicHoistPattern:
   - vite-node
 
 useNodeVersion: 24.14.0
-
-nodeVersion: 24.14.0
-
-engineStrict: true

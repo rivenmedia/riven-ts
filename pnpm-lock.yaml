@@ -54,6 +54,9 @@ catalogs:
     '@mikro-orm/reflection':
       specifier: ^7.0.5
       version: 7.0.5
+    '@mikro-orm/seeder':
+      specifier: ^7.0.5
+      version: 7.0.5
     '@mikro-orm/sqlite':
       specifier: ^7.0.5
       version: 7.0.5
@@ -328,6 +331,9 @@ importers:
       '@graphql-typed-document-node/core':
         specifier: ^3.2.0
         version: 3.2.0(graphql@16.12.0)
+      '@mikro-orm/seeder':
+        specifier: 'catalog:'
+        version: 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))
       '@mikro-orm/sqlite':
         specifier: 'catalog:'
         version: 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))
@@ -2829,6 +2835,12 @@ packages:
 
   '@mikro-orm/reflection@7.0.5':
     resolution: {integrity: sha512-D1wvoY09XYMgHL6SDAgvtahPZMfvjduER/bgCBw/bT3KI4/DSchDgtFnGgBY2G1ANXcN+xu6vnBY6SEedvolQw==}
+    engines: {node: '>= 22.17.0'}
+    peerDependencies:
+      '@mikro-orm/core': 7.0.5
+
+  '@mikro-orm/seeder@7.0.5':
+    resolution: {integrity: sha512-8923bF/B9WYmjwzXGSLZVHXaoyQhWSJxos7VEcxUMriRsqmA5VvJidgbhu86/QaaOxu9VRtMOQeKmsWSPzHMXg==}
     engines: {node: '>= 22.17.0'}
     peerDependencies:
       '@mikro-orm/core': 7.0.5
@@ -9547,6 +9559,10 @@ snapshots:
     dependencies:
       '@mikro-orm/core': 7.0.5(dataloader@2.2.3)
       ts-morph: 27.0.2
+
+  '@mikro-orm/seeder@7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))':
+    dependencies:
+      '@mikro-orm/core': 7.0.5(dataloader@2.2.3)
 
   '@mikro-orm/sql@7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))':
     dependencies:
