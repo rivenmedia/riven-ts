@@ -91,3 +91,9 @@ packageExtensions:
 publicHoistPattern:
   - "*vitest*"
   - vite-node
+
+useNodeVersion: 24.13.0
+
+nodeVersion: 24.13.0
+
+engineStrict: true
