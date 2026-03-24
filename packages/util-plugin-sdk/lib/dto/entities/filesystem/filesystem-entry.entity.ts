@@ -2,13 +2,10 @@ import {
   BeforeCreate,
   Entity,
   Enum,
-  type Hidden,
   ManyToOne,
-  type Opt,
   PrimaryKey,
   Property,
-  type Ref,
-} from "@mikro-orm/core";
+} from "@mikro-orm/decorators/legacy";
 import { IsPositive } from "class-validator";
 import { DateTime } from "luxon";
 import path from "node:path";
@@ -19,6 +16,7 @@ import { Episode } from "../media-items/episode.entity.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
 import { Movie } from "../media-items/movie.entity.ts";
 
+import type { Hidden, Opt, Ref } from "@mikro-orm/core";
 import type { Promisable } from "type-fest";
 
 export const FileSystemEntryType = z.enum(["media", "subtitle"]);
@@ -75,8 +73,8 @@ export abstract class FileSystemEntry {
   fileSize!: number;
 
   @Field(() => Date)
-  @Property()
-  createdAt: Opt<Date> = DateTime.now().toJSDate();
+  @Property({ default: DateTime.now().toISO(), type: "datetime" })
+  createdAt!: Opt<Date>;
 
   @Field(() => Date, { nullable: true })
   @Property({ onUpdate: () => DateTime.now().toJSDate() })

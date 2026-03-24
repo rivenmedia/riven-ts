@@ -1,14 +1,12 @@
+import { Collection, type Hidden, type Opt } from "@mikro-orm/core";
 import {
-  Collection,
   Entity,
   Enum,
-  type Hidden,
   OneToMany,
-  type Opt,
   PrimaryKey,
   Property,
   Unique,
-} from "@mikro-orm/core";
+} from "@mikro-orm/decorators/legacy";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { Field, ID, ObjectType } from "type-graphql";
 
@@ -59,8 +57,8 @@ export class ItemRequest {
   externalRequestId?: string;
 
   @Field(() => Date)
-  @Property()
-  createdAt: Opt<Date> = DateTime.now().toJSDate();
+  @Property({ default: DateTime.now().toISO(), type: "datetime" })
+  createdAt!: Opt<Date>;
 
   @Field(() => Date, { nullable: true })
   @Property()

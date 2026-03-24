@@ -24,7 +24,7 @@ export default {
     },
   },
   settingsSchema: ListrrSettings,
-  async validator() {
-    return true;
+  validator() {
+    return Promise.resolve(true);
   },
 } satisfies RivenPlugin as RivenPlugin;

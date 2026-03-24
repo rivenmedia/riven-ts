@@ -7,8 +7,8 @@
   "author": "",
   "main": "index.js",
   "scripts": {
-    "format:check": "prettier --check .",
-    "format:fix": "prettier --write .",
+    "format:check": "prettier --check . '!**/docker-data'",
+    "format:fix": "prettier --write . '!**/docker-data'",
     "postinstall": "node .husky/install.mjs || true"
   },
   "devDependencies": {

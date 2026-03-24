@@ -13,5 +13,5 @@ export const initialiseDatabaseConnection = fromPromise(async () => {
     return;
   }
 
-  await orm.schema.refreshDatabase();
+  await orm.schema.refresh();
 });

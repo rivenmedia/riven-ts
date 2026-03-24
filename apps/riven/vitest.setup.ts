@@ -53,8 +53,8 @@ vi.mock(import("@repo/plugin-test"), () => {
         Object.keys(RivenEventHandler).map((key) => [key, vi.fn()]),
       ),
       settingsSchema: z.object({}),
-      async validator() {
-        return true;
+      validator() {
+        return Promise.resolve(true);
       },
     } satisfies RivenPlugin as RivenPlugin,
   };
@@ -69,11 +69,10 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
     ...databaseConfig,
     driver: SqliteDriver as never,
     dbName: ":memory:",
-    connect: false,
     debug: false,
   });
 
-  await database.orm.schema.createSchema();
+  await database.orm.schema.create();
 
   return {
     database,
@@ -103,7 +102,7 @@ expect.extend({
 afterEach(async () => {
   const { database } = await import("./lib/database/database.ts");
 
-  await database.orm.schema.clearDatabase();
+  await database.orm.schema.clear();
 
   // Clear all repositories to prevent caching issues between tests.
   Object.values(database).forEach((repo) => {

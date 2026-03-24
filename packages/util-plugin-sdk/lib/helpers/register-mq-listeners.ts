@@ -27,7 +27,12 @@ export function registerMQListeners(
 
   for (const on of [...signals, ...events]) {
     process.once(on, () => {
-      void shutdownHandler(resource);
+      shutdownHandler(resource).catch((error: unknown) => {
+        logger.error(
+          `Failed to shut down BullMQ ${resource.constructor.name}`,
+          { err: error },
+        );
+      });
     });
   }
 

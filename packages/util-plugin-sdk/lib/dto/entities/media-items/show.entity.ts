@@ -1,12 +1,10 @@
+import { Collection, type Opt, type Ref } from "@mikro-orm/core";
 import {
-  Collection,
   Entity,
   Enum,
   OneToMany,
-  type Opt,
   Property,
-  type Ref,
-} from "@mikro-orm/core";
+} from "@mikro-orm/decorators/legacy";
 import { Field, ObjectType } from "type-graphql";
 
 import {

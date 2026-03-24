@@ -1,4 +1,4 @@
-import { Entity, type Opt, Property, type Ref } from "@mikro-orm/core";
+import { Entity, Property } from "@mikro-orm/decorators/legacy";
 import { Field, ObjectType } from "type-graphql";
 
 import {
@@ -9,6 +9,7 @@ import { MediaEntry } from "../filesystem/media-entry.entity.ts";
 import { MediaItem } from "./media-item.entity.ts";
 
 import type { ItemRequest } from "../requests/item-request.entity.ts";
+import type { Opt, Ref } from "@mikro-orm/core";
 
 @ObjectType()
 @Entity()
