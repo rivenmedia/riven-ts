@@ -6,7 +6,6 @@ async function shutdownHandler(
   resource: Queue | Worker | QueueEvents | FlowProducer,
 ) {
   await resource.close();
-  await resource.disconnect();
 }
 
 /**
