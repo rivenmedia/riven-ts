@@ -92,8 +92,8 @@ publicHoistPattern:
   - "*vitest*"
   - vite-node
 
-useNodeVersion: 24.13.0
+useNodeVersion: 24.14.0
 
-nodeVersion: 24.13.0
+nodeVersion: 24.14.0
 
 engineStrict: true
