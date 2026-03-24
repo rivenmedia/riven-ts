@@ -51,7 +51,7 @@ export async function createFlowWorker<
       return await Sentry.withScope(async (scope) => {
         scope.setTags({
           "riven.flow.name": flowName,
-          "riven.queue.name": flowName,
+          "bullmq.queue.name": flowName,
           "bullmq.job.id": job.id,
         });
 

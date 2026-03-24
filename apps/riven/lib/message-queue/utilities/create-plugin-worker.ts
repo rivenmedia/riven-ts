@@ -39,10 +39,10 @@ export async function createPluginWorker<
       return await Sentry.withScope(async (scope) => {
         scope.setTags({
           "bullmq.job.id": job.id,
+          "bullmq.queue.name": queueName,
           "riven.log.source": pluginName,
           "riven.event.name": name as string,
           "riven.plugin.name": pluginName,
-          "riven.queue.name": queueName,
         });
 
         try {
