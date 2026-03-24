@@ -57,8 +57,8 @@ export class ItemRequest {
   externalRequestId?: string;
 
   @Field(() => Date)
-  @Property({ default: DateTime.now().toISO(), type: "datetime" })
-  createdAt!: Opt<Date>;
+  @Property()
+  createdAt: Opt<Date> = DateTime.now().toJSDate();
 
   @Field(() => Date, { nullable: true })
   @Property()
