@@ -15,6 +15,6 @@ export class NotificationsAPI extends BaseDataSource<NotificationsSettings> {
   }
 
   override validate() {
-    return Promise.resolve(true);
+    return true;
   }
 }

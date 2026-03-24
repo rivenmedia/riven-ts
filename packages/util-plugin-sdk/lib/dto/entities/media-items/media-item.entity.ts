@@ -1,17 +1,19 @@
 import {
   Collection,
+  type Hidden,
+  type Opt,
+  OptionalProps,
+  type Ref,
+} from "@mikro-orm/core";
+import {
   Entity,
   Enum,
-  type Hidden,
   Index,
   ManyToMany,
   ManyToOne,
-  type Opt,
-  OptionalProps,
   PrimaryKey,
   Property,
-  type Ref,
-} from "@mikro-orm/core";
+} from "@mikro-orm/decorators/legacy";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { DateTime } from "luxon";
 import { Field, ID, ObjectType } from "type-graphql";
@@ -75,8 +77,8 @@ export abstract class MediaItem {
 
   @Field(() => Date)
   @Index()
-  @Property({ default: DateTime.now().toISO() })
-  createdAt!: Opt<Date>;
+  @Property()
+  createdAt: Opt<Date> = DateTime.now().toJSDate();
 
   @Field(() => Date, { nullable: true })
   @Property({ onUpdate: () => DateTime.now().toJSDate() })

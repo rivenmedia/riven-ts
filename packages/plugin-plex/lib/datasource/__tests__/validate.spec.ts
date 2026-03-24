@@ -5,10 +5,7 @@ import { expect } from "vitest";
 
 import { PlexAPI } from "../plex.datasource.ts";
 
-it("returns false if the request fails", async ({
-  server,
-  dataSourceConfig,
-}) => {
+it("returns false if the request fails", ({ server, dataSourceConfig }) => {
   server.use(
     http.get("**/validate", () =>
       HttpResponse.json({ success: false }, { status: 401 }),
@@ -25,15 +22,12 @@ it("returns false if the request fails", async ({
     },
   });
 
-  const isValid = await plexApi.validate();
+  const isValid = plexApi.validate();
 
   expect(isValid).toBe(false);
 });
 
-it("returns true if the request succeeds", async ({
-  server,
-  dataSourceConfig,
-}) => {
+it("returns true if the request succeeds", ({ server, dataSourceConfig }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
   );
@@ -47,7 +41,7 @@ it("returns true if the request succeeds", async ({
       plexToken: "",
     },
   });
-  const isValid = await plexApi.validate();
+  const isValid = plexApi.validate();
 
   expect(isValid).toBe(true);
 });

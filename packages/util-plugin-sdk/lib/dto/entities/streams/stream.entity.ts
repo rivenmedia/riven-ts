@@ -1,11 +1,11 @@
+import { Collection } from "@mikro-orm/core";
 import {
-  Collection,
   Entity,
   ManyToMany,
   PrimaryKey,
   Property,
   Unique,
-} from "@mikro-orm/core";
+} from "@mikro-orm/decorators/legacy";
 import { Field, ID, ObjectType } from "type-graphql";
 
 import { MediaItem } from "../media-items/media-item.entity.ts";

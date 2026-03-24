@@ -18,7 +18,7 @@ export default {
     "riven.media-item.index.requested": indexTVDBMediaItem,
   },
   settingsSchema: TvdbSettings,
-  async validator() {
-    return true;
+  validator() {
+    return Promise.resolve(true);
   },
 } satisfies RivenPlugin as RivenPlugin;

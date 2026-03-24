@@ -19,11 +19,10 @@ export const test = baseTest.extend<{ orm: MikroORM }>({
         SubtitleEntry,
       } = await import("../dto/entities/index.ts");
 
-      const orm = MikroORM.initSync({
+      const orm = new MikroORM({
         driver: SqliteDriver,
         metadataProvider: TsMorphMetadataProvider,
         dbName: ":memory:",
-        connect: false,
         debug: false,
         entities: [
           FileSystemEntry,
@@ -38,7 +37,7 @@ export const test = baseTest.extend<{ orm: MikroORM }>({
         ],
       });
 
-      await orm.schema.createSchema();
+      await orm.schema.create();
 
       await use(orm);
 
@@ -51,7 +50,7 @@ export const test = baseTest.extend<{ orm: MikroORM }>({
 });
 
 test.afterEach(async ({ orm }) => {
-  await orm.schema.clearDatabase();
+  await orm.schema.clear();
 });
 
 export const it = test;

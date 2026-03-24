@@ -37,7 +37,7 @@ export interface Services {
 
 export let database: Services;
 
-export async function initORM(options?: Options): Promise<Services> {
+export async function initORM(options: Partial<Options>): Promise<Services> {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (database) {
     return database;

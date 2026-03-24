@@ -1,11 +1,5 @@
-import {
-  Entity,
-  EntityRepositoryType,
-  ManyToOne,
-  type Opt,
-  Property,
-  type Ref,
-} from "@mikro-orm/core";
+import { EntityRepositoryType, type Opt, type Ref } from "@mikro-orm/core";
+import { Entity, ManyToOne, Property } from "@mikro-orm/decorators/legacy";
 import { Min } from "class-validator";
 import { Field, ObjectType } from "type-graphql";
 

@@ -1,4 +1,4 @@
-import { Entity } from "@mikro-orm/core";
+import { Entity } from "@mikro-orm/decorators/legacy";
 
 import { ShowContentRating } from "../../enums/content-ratings.enum.ts";
 import { MediaItem } from "./media-item.entity.ts";

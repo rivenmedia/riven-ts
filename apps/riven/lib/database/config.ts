@@ -39,7 +39,6 @@ export const databaseConfig = {
   driver: PostgreSqlDriver,
   metadataProvider: TsMorphMetadataProvider,
   entities,
-  forceUtcTimezone: true,
   clientUrl: settings.databaseUrl,
   logger: (message) => {
     Sentry.withScope((scope) => {
@@ -55,4 +54,4 @@ export const databaseConfig = {
     new ShowLikeMediaItemReleaseDateSubscriber(),
     new MediaItemStateSubscriber(),
   ],
-} satisfies Options;
+} satisfies Partial<Options>;

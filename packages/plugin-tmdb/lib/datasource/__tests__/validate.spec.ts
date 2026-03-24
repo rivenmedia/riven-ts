@@ -5,10 +5,7 @@ import { expect } from "vitest";
 
 import { TmdbAPI } from "../tmdb.datasource.ts";
 
-it("returns false if the request fails", async ({
-  server,
-  dataSourceConfig,
-}) => {
+it("returns false if the request fails", ({ server, dataSourceConfig }) => {
   server.use(
     http.get("**/validate", () =>
       HttpResponse.json({ success: false }, { status: 401 }),
@@ -22,15 +19,12 @@ it("returns false if the request fails", async ({
       apiKey: "",
     },
   });
-  const isValid = await tmdbApi.validate();
+  const isValid = tmdbApi.validate();
 
   expect(isValid).toBe(false);
 });
 
-it("returns true if the request succeeds", async ({
-  server,
-  dataSourceConfig,
-}) => {
+it("returns true if the request succeeds", ({ server, dataSourceConfig }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
   );
@@ -42,7 +36,7 @@ it("returns true if the request succeeds", async ({
       apiKey: "",
     },
   });
-  const isValid = await tmdbApi.validate();
+  const isValid = tmdbApi.validate();
 
   expect(isValid).toBe(true);
 });
