@@ -1,4 +1,4 @@
-import { ItemRequest, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { Show } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { wrap } from "@mikro-orm/core";
@@ -6,21 +6,20 @@ import { DateTime } from "luxon";
 import { expect, it, vi } from "vitest";
 
 import { database } from "../../../../database/database.ts";
+import { ItemRequestFactory } from "../../../../database/factories/item-request.factory.ts";
 import { persistShowIndexerData } from "./persist-show-indexer-data.ts";
 
 it("returns the media item if processed successfully", async ({}) => {
   const requestedId = "tt1234567";
 
   const em = database.orm.em.fork();
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "test-user",
+
+  const itemRequest = await new ItemRequestFactory(em).createOne({
     imdbId: requestedId,
     tvdbId: "1234",
-    type: "show",
     state: "requested",
+    type: "show",
   });
-
-  await em.flush();
 
   const result = await persistShowIndexerData({
     item: {
@@ -50,15 +49,13 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorr
   const requestedId = "1234";
 
   const em = database.orm.em.fork();
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "test-user",
+
+  const itemRequest = await new ItemRequestFactory(em).createOne({
     imdbId: requestedId,
     tvdbId: "1234",
-    type: "show",
     state: "completed",
+    type: "show",
   });
-
-  await em.flush();
 
   await expect(
     persistShowIndexerData({
@@ -85,15 +82,12 @@ it("updates the media item with the latest data if it already exists", async () 
   const requestedId = "tt1234567";
 
   const em = database.orm.em.fork();
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "test-user",
+  const itemRequest = await new ItemRequestFactory(em).createOne({
     imdbId: requestedId,
     tvdbId: "1234",
-    type: "show",
     state: "requested",
+    type: "show",
   });
-
-  await em.flush();
 
   const initialShow = await persistShowIndexerData({
     item: {
