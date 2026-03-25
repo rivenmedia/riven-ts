@@ -36,9 +36,7 @@ export class Season extends ShowLikeMediaItem {
   }
 
   @Property()
-  get isSpecial() {
-    return this.number > 0;
-  }
+  isSpecial: Opt<boolean> = this.number > 0;
 
   override type: Opt<"season"> = "season" as const;
 

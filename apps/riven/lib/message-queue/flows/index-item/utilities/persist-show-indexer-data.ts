@@ -136,7 +136,6 @@ export async function persistShowIndexerData({
         seasonEntry.title = seasonTitle;
         seasonEntry.number = season.number;
         seasonEntry.fullTitle = `${show.title} - S${seasonEntry.number.toString().padStart(2, "0")}`;
-        seasonEntry.isSpecial = season.number === 0;
 
         show.seasons.add(seasonEntry);
 
@@ -168,7 +167,6 @@ export async function persistShowIndexerData({
               {
                 tvdbId: seasonEntry.tvdbId,
                 imdbId: seasonEntry.imdbId ?? null,
-                isSpecial: season.number === 0,
                 isRequested: seasonEntry.isRequested,
                 itemRequest,
               },
@@ -200,6 +198,8 @@ export async function persistShowIndexerData({
 
           await transaction.upsert(episodeEntry);
         }
+
+        await transaction.upsert(seasonEntry);
       }
 
       await validateOrReject(show);

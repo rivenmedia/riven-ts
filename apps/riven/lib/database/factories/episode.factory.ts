@@ -18,7 +18,6 @@ export class EpisodeFactory extends Factory<Episode> {
         title: faker.book.title(),
         number: faker.number.int({ min: 1 }),
         absoluteNumber: faker.number.int({ min: 1 }),
-        isSpecial: false,
         posterPath: faker.image.url(),
         isRequested: true,
         itemRequest: 1,

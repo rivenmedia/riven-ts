@@ -32,9 +32,6 @@ export class Episode extends ShowLikeMediaItem {
   season!: Opt<Ref<Season>>;
 
   @Property()
-  isSpecial!: boolean;
-
-  @Property()
   runtime!: number | null;
 
   @Field(() => ShowContentRatingEnum)
