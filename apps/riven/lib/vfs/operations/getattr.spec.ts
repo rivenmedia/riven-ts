@@ -1,11 +1,9 @@
-import { Episode, MediaEntry, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { Episode, MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import Fuse from "@zkochan/fuse-native";
 import { expect, vi } from "vitest";
 
 import { rivenTestContext as it } from "../../__tests__/test-context.ts";
-import { CompletedMovieSeeder } from "../../database/seeders/movies/completed-movie.seeder.ts";
-import { CompletedShowSeeder } from "../../database/seeders/shows/completed-show.seeder.ts";
 import { getattrSync, parseMode } from "./getattr.ts";
 
 it("returns directory stats for the root directory", async () => {
@@ -57,8 +55,11 @@ it("returns ENOENT for unknown paths", async () => {
   });
 });
 
-it("returns file stats for movie files", async ({ em, orm }) => {
-  await orm.seeder.seed(CompletedMovieSeeder);
+it("returns file stats for movie files", async ({
+  em,
+  seeders: { seedCompletedMovie },
+}) => {
+  await seedCompletedMovie();
 
   const mediaEntry = await em.findOneOrFail(
     MediaEntry,
@@ -84,12 +85,10 @@ it("returns file stats for movie files", async ({ em, orm }) => {
   });
 });
 
-it("returns directory stats for /movies", async ({ orm }) => {
-  await orm.seeder.seed(
-    CompletedMovieSeeder,
-    CompletedMovieSeeder,
-    CompletedMovieSeeder,
-  );
+it("returns directory stats for /movies", async ({
+  seeders: { seedCompletedMovie },
+}) => {
+  await seedCompletedMovie(3);
 
   const callback = vi.fn();
 
@@ -109,12 +108,10 @@ it("returns directory stats for /movies", async ({ orm }) => {
   });
 });
 
-it("returns directory stats for /shows", async ({ orm }) => {
-  await orm.seeder.seed(
-    CompletedShowSeeder,
-    CompletedShowSeeder,
-    CompletedShowSeeder,
-  );
+it("returns directory stats for /shows", async ({
+  seeders: { seedCompletedShow },
+}) => {
+  await seedCompletedShow(3);
 
   const callback = vi.fn();
 
@@ -134,18 +131,12 @@ it("returns directory stats for /shows", async ({ orm }) => {
   });
 });
 
-it("returns directory stats for single shows", async ({ em, orm }) => {
-  await orm.seeder.seed(CompletedShowSeeder);
-
-  const show = await em.findOneOrFail(Show, {
-    type: "show",
-  });
-
-  const seasonsCount = await show.seasons.loadCount();
+it("returns directory stats for single shows", async ({ completedShow }) => {
+  const seasonsCount = await completedShow.seasons.loadCount();
 
   const callback = vi.fn();
 
-  getattrSync(`/shows/{tvdb-${show.tvdbId}}`, callback);
+  getattrSync(`/shows/{tvdb-${completedShow.tvdbId}}`, callback);
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith(null, {
@@ -161,16 +152,10 @@ it("returns directory stats for single shows", async ({ em, orm }) => {
   });
 });
 
-it("returns directory stats for single seasons", async ({ em, orm }) => {
-  await orm.seeder.seed(CompletedShowSeeder);
-
-  const show = await em.findOneOrFail(Show, {
-    type: "show",
-  });
-
+it("returns directory stats for single seasons", async ({ completedShow }) => {
   const callback = vi.fn();
 
-  getattrSync(`/shows/{tvdb-${show.tvdbId}}/Season 01`, callback);
+  getattrSync(`/shows/{tvdb-${completedShow.tvdbId}}/Season 01`, callback);
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith(null, {
@@ -186,8 +171,11 @@ it("returns directory stats for single seasons", async ({ em, orm }) => {
   });
 });
 
-it("returns file stats for episodes", async ({ orm, em }) => {
-  await orm.seeder.seed(CompletedShowSeeder);
+it("returns file stats for episodes", async ({
+  em,
+  seeders: { seedCompletedShow },
+}) => {
+  await seedCompletedShow();
 
   const episode = await em.findOneOrFail(
     Episode,

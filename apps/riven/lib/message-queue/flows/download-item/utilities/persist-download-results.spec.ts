@@ -1,4 +1,3 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
@@ -9,8 +8,6 @@ import { expect, vi } from "vitest";
 
 import { rivenTestContext as it } from "../../../../__tests__/test-context.ts";
 import { StreamFactory } from "../../../../database/factories/stream.factory.ts";
-import { CompletedMovieSeeder } from "../../../../database/seeders/movies/completed-movie.seeder.ts";
-import { ScrapedMovieSeeder } from "../../../../database/seeders/movies/scraped-movie.seeder.ts";
 import { MatchedFile } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { persistDownloadResults } from "./persist-download-results.ts";
 
@@ -43,15 +40,12 @@ it("throws an error if the media item has no streams", async ({ movie }) => {
 });
 
 it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in the scraped or ongoing state", async ({
+  completedMovie,
   em,
-  orm,
 }) => {
-  await orm.seeder.seed(CompletedMovieSeeder);
-
-  const movie = await em.findOneOrFail(Movie, { type: "movie" });
   const infoHash = faker.git.commitSha();
 
-  movie.streams.add(
+  completedMovie.streams.add(
     new StreamFactory(em).makeEntity({
       infoHash,
     }),
@@ -61,7 +55,7 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
 
   await expect(
     persistDownloadResults({
-      id: movie.id,
+      id: completedMovie.id,
       processedBy: "@repo/plugin-test",
       torrent: {
         torrentId: "1",
@@ -73,7 +67,7 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
             link: "http://example.com/file.mp4",
             name: "file.mp4",
             path: "/file.mp4",
-            matchedMediaItemId: movie.id,
+            matchedMediaItemId: completedMovie.id,
             isCachedFile: false,
           },
         ],
@@ -83,22 +77,16 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
 });
 
 it("sets the active stream and updates the state to completed if successful", async ({
-  em,
-  orm,
+  scrapedMovie,
 }) => {
-  await orm.seeder.seed(ScrapedMovieSeeder);
+  await scrapedMovie.streams.load();
 
-  const movie = await em.findOneOrFail(
-    Movie,
-    { type: "movie" },
-    { populate: ["streams"] },
-  );
-  const stream = movie.streams[0];
+  const stream = scrapedMovie.streams[0];
 
   expect.assert(stream);
 
   const updatedItem = await persistDownloadResults({
-    id: movie.id,
+    id: scrapedMovie.id,
     processedBy: "@repo/plugin-test",
     torrent: {
       torrentId: "1",
@@ -110,7 +98,7 @@ it("sets the active stream and updates the state to completed if successful", as
           link: "http://example.com/file.mp4",
           name: "file.mp4",
           path: "/file.mp4",
-          matchedMediaItemId: movie.id,
+          matchedMediaItemId: scrapedMovie.id,
           isCachedFile: false,
         },
       ],
@@ -121,13 +109,17 @@ it("sets the active stream and updates the state to completed if successful", as
   expect(updatedItem.state).toBe("completed");
 });
 
-it("adds a single media entry for movies", async ({ movie, em, stream }) => {
-  movie.streams.add(stream);
+it("adds a single media entry for movies", async ({ scrapedMovie, em }) => {
+  await scrapedMovie.streams.load();
 
-  await em.persist(movie).flush();
+  const stream = scrapedMovie.streams[0];
+
+  expect.assert(stream);
+
+  await em.persist(scrapedMovie).flush();
 
   await persistDownloadResults({
-    id: movie.id,
+    id: scrapedMovie.id,
     processedBy: "@repo/plugin-test",
     torrent: {
       torrentId: "1",
@@ -139,14 +131,14 @@ it("adds a single media entry for movies", async ({ movie, em, stream }) => {
           link: "http://example.com/file.mp4",
           name: "file.mp4",
           path: "/file.mp4",
-          matchedMediaItemId: movie.id,
+          matchedMediaItemId: scrapedMovie.id,
           isCachedFile: false,
         },
       ],
     },
   });
 
-  const mediaEntries = await movie.getMediaEntries();
+  const mediaEntries = await scrapedMovie.getMediaEntries();
 
   expect(mediaEntries).toHaveLength(1);
 });

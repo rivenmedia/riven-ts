@@ -10,16 +10,27 @@ import {
 
 import { ApolloServer } from "@apollo/server";
 import { type EntityManager, type MikroORM, wrap } from "@mikro-orm/core";
+import assert from "node:assert";
 import { MockAgent, setGlobalDispatcher } from "undici";
 import { expect, test as testBase } from "vitest";
 
 import { database } from "../database/database.ts";
 import { MediaEntryFactory } from "../database/factories/media-entry.factory.ts";
 import { StreamFactory } from "../database/factories/stream.factory.ts";
+import { CompletedMovieSeeder } from "../database/seeders/movies/completed-movie.seeder.ts";
 import { MovieSeeder } from "../database/seeders/movies/movie.seeder.ts";
+import { ScrapedMovieSeeder } from "../database/seeders/movies/scraped-movie.seeder.ts";
+import { CompletedShowSeeder } from "../database/seeders/shows/completed-show.seeder.ts";
+import { ScrapedShowSeeder } from "../database/seeders/shows/scraped-show.seeder.ts";
 import { ShowSeeder } from "../database/seeders/shows/show.seeder.ts";
 
 import type { SetupServerApi } from "msw/node";
+
+type SeederResult<T, C extends number> = C extends 1 ? T : [T, ...T[]];
+
+type SeederFunction<T> = <C extends number = 1>(
+  count?: C,
+) => Promise<SeederResult<T, C>>;
 
 export const rivenTestContext = testBase.extend<{
   server: SetupServerApi;
@@ -27,9 +38,21 @@ export const rivenTestContext = testBase.extend<{
   gqlServer: ApolloServer;
   mockAgent: MockAgent;
   em: EntityManager;
+  seeders: {
+    seedMovie: SeederFunction<Movie>;
+    seedScrapedMovie: SeederFunction<Movie>;
+    seedCompletedMovie: SeederFunction<Movie>;
+    seedShow: SeederFunction<Show>;
+    seedScrapedShow: SeederFunction<Show>;
+    seedCompletedShow: SeederFunction<Show>;
+  };
   orm: MikroORM;
   movie: Movie;
+  scrapedMovie: Movie;
+  completedMovie: Movie;
   show: Show;
+  scrapedShow: Show;
+  completedShow: Show;
   season: Season;
   episode: Episode;
   stream: Stream;
@@ -99,23 +122,35 @@ export const rivenTestContext = testBase.extend<{
     await use(em);
   },
   orm: database.orm,
-  movie: async ({ em, orm }, use) => {
-    await orm.seeder.seed(MovieSeeder);
-
-    const movie = await em.findOneOrFail(Movie, {
-      type: "movie",
-    });
+  movie: async ({ seeders }, use) => {
+    const movie = await seeders.seedMovie();
 
     await use(movie);
   },
-  show: async ({ orm, em }, use) => {
-    await orm.seeder.seed(ShowSeeder);
+  scrapedMovie: async ({ seeders }, use) => {
+    const scrapedMovie = await seeders.seedScrapedMovie();
 
-    const shows = await em.findAll(Show);
+    await use(scrapedMovie);
+  },
+  completedMovie: async ({ seeders }, use) => {
+    const completedMovie = await seeders.seedCompletedMovie();
 
-    expect.assert(shows[0]);
+    await use(completedMovie);
+  },
+  show: async ({ seeders }, use) => {
+    const show = await seeders.seedShow();
 
-    await use(shows[0]);
+    await use(show);
+  },
+  scrapedShow: async ({ seeders }, use) => {
+    const scrapedShow = await seeders.seedScrapedShow();
+
+    await use(scrapedShow);
+  },
+  completedShow: async ({ seeders }, use) => {
+    const completedShow = await seeders.seedCompletedShow();
+
+    await use(completedShow);
   },
   season: async ({ show }, use) => {
     await wrap(show).populate(["seasons"]);
@@ -144,5 +179,141 @@ export const rivenTestContext = testBase.extend<{
     });
 
     await use(mediaEntry);
+  },
+  seeders: async ({ em, orm }, use) => {
+    await use({
+      async seedMovie<C extends number = 1>(
+        count?: C,
+      ): Promise<SeederResult<Movie, C>> {
+        const actualCount = count ?? (1 as C);
+
+        await orm.seeder.seed(
+          ...Array(actualCount)
+            .fill(null)
+            .map(() => MovieSeeder),
+        );
+
+        const movies = await em.findAll(Movie);
+
+        assert(movies[0]);
+
+        if (actualCount === 1) {
+          return movies[0] as SeederResult<Movie, C>;
+        }
+
+        return [movies[0], ...movies.slice(1)] as SeederResult<Movie, C>;
+      },
+      async seedScrapedMovie<C extends number = 1>(
+        count?: C,
+      ): Promise<SeederResult<Movie, C>> {
+        const actualCount = count ?? (1 as C);
+
+        await orm.seeder.seed(
+          ...Array(actualCount)
+            .fill(null)
+            .map(() => ScrapedMovieSeeder),
+        );
+
+        const movie = await em.find(Movie, {
+          state: "scraped",
+        });
+
+        assert(movie[0]);
+
+        if (actualCount === 1) {
+          return movie[0] as SeederResult<Movie, C>;
+        }
+
+        return [movie[0], ...movie.slice(1)] as SeederResult<Movie, C>;
+      },
+      async seedCompletedMovie<C extends number = 1>(
+        count?: C,
+      ): Promise<SeederResult<Movie, C>> {
+        const actualCount = count ?? (1 as C);
+
+        await orm.seeder.seed(
+          ...Array(actualCount)
+            .fill(null)
+            .map(() => CompletedMovieSeeder),
+        );
+
+        const movies = await em.find(Movie, {
+          state: "completed",
+        });
+
+        assert(movies[0]);
+
+        if (actualCount === 1) {
+          return movies[0] as SeederResult<Movie, C>;
+        }
+
+        return [movies[0], ...movies.slice(1)] as SeederResult<Movie, C>;
+      },
+      async seedShow<C extends number = 1>(
+        count?: C,
+      ): Promise<SeederResult<Show, C>> {
+        const actualCount = count ?? (1 as C);
+
+        await orm.seeder.seed(
+          ...Array(actualCount)
+            .fill(null)
+            .map(() => ShowSeeder),
+        );
+
+        const shows = await em.findAll(Show);
+
+        assert(shows[0]);
+
+        if (actualCount === 1) {
+          return shows[0] as SeederResult<Show, C>;
+        }
+
+        return [shows[0], ...shows.slice(1)] as SeederResult<Show, C>;
+      },
+      async seedScrapedShow<C extends number = 1>(
+        count?: C,
+      ): Promise<SeederResult<Show, C>> {
+        const actualCount = count ?? (1 as C);
+
+        await orm.seeder.seed(
+          ...Array(actualCount)
+            .fill(null)
+            .map(() => ScrapedShowSeeder),
+        );
+
+        const shows = await em.find(Show, {
+          state: "scraped",
+        });
+
+        assert(shows[0]);
+
+        if (actualCount === 1) {
+          return shows[0] as SeederResult<Show, C>;
+        }
+
+        return [shows[0], ...shows.slice(1)] as SeederResult<Show, C>;
+      },
+      async seedCompletedShow<C extends number = 1>(
+        count?: C,
+      ): Promise<SeederResult<Show, C>> {
+        const actualCount = count ?? (1 as C);
+
+        await orm.seeder.seed(
+          ...Array(actualCount)
+            .fill(null)
+            .map(() => CompletedShowSeeder),
+        );
+
+        const shows = await em.findAll(Show);
+
+        assert(shows[0]);
+
+        if (actualCount === 1) {
+          return shows[0] as SeederResult<Show, C>;
+        }
+
+        return [shows[0], ...shows.slice(1)] as SeederResult<Show, C>;
+      },
+    });
   },
 });

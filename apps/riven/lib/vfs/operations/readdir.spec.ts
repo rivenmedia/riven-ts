@@ -1,12 +1,8 @@
-import { MediaEntry, Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaEntry, Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import { expect, vi } from "vitest";
 
 import { rivenTestContext as it } from "../../__tests__/test-context.ts";
-import { CompletedMovieSeeder } from "../../database/seeders/movies/completed-movie.seeder.ts";
-import { ScrapedMovieSeeder } from "../../database/seeders/movies/scraped-movie.seeder.ts";
-import { CompletedShowSeeder } from "../../database/seeders/shows/completed-show.seeder.ts";
-import { ScrapedShowSeeder } from "../../database/seeders/shows/scraped-show.seeder.ts";
 import { readDirSync } from "./readdir.ts";
 
 it("returns persistent directory entries for the root path", async () => {
@@ -22,28 +18,22 @@ it("returns persistent directory entries for the root path", async () => {
   });
 });
 
-it("returns all shows for the /shows path", async ({ em, orm }) => {
-  await orm.seeder.seed(CompletedShowSeeder);
-
-  const show = await em.findOneOrFail(Show, {
-    type: "show",
-  });
-
+it("returns all shows for the /shows path", async ({ completedShow }) => {
   const callback = vi.fn();
 
   readDirSync("/shows", callback);
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
-      show.getPrettyName(),
+      completedShow.getPrettyName(),
     ]);
   });
 });
 
 it('does not return entries for the "all shows" path for shows that do not have any episodes with a media entry', async ({
-  orm,
+  seeders: { seedScrapedShow },
 }) => {
-  await orm.seeder.seed(ScrapedShowSeeder);
+  await seedScrapedShow();
 
   const callback = vi.fn();
 
@@ -54,12 +44,11 @@ it('does not return entries for the "all shows" path for shows that do not have 
   });
 });
 
-it("returns all movies for the /movies path", async ({ em, orm }) => {
-  await orm.seeder.seed(
-    CompletedMovieSeeder,
-    CompletedMovieSeeder,
-    CompletedMovieSeeder,
-  );
+it("returns all movies for the /movies path", async ({
+  em,
+  seeders: { seedCompletedMovie },
+}) => {
+  await seedCompletedMovie(3);
 
   const callback = vi.fn();
 
@@ -75,39 +64,25 @@ it("returns all movies for the /movies path", async ({ em, orm }) => {
   });
 });
 
-it("returns all seasons for a single show path", async ({ em, orm }) => {
-  await orm.seeder.seed(CompletedShowSeeder);
-
-  const show = await em.findOneOrFail(
-    Show,
-    { type: "show" },
-    { populate: ["seasons"] },
-  );
+it("returns all seasons for a single show path", async ({ completedShow }) => {
+  await completedShow.seasons.load();
 
   const callback = vi.fn();
 
-  readDirSync(`/shows/${show.getPrettyName()}`, callback);
+  readDirSync(`/shows/${completedShow.getPrettyName()}`, callback);
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith<[number, string[]]>(
       0,
-      show.seasons.map((season) => season.getPrettyName()),
+      completedShow.seasons.map((season) => season.getPrettyName()),
     );
   });
 });
 
 it("does not return entries for a season that does not have any episodes with a media entry", async ({
   em,
-  orm,
+  completedShow,
 }) => {
-  await orm.seeder.seed(CompletedShowSeeder);
-
-  const show = await em.findOneOrFail(
-    Show,
-    { type: "show" },
-    { populate: ["seasons"] },
-  );
-
   await em.nativeDelete(MediaEntry, {
     mediaItem: {
       type: "episode",
@@ -121,36 +96,37 @@ it("does not return entries for a season that does not have any episodes with a 
 
   const callback = vi.fn();
 
-  readDirSync(`/shows/${show.getPrettyName()}`, callback);
+  readDirSync(`/shows/${completedShow.getPrettyName()}`, callback);
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, ["Season 01"]);
   });
 });
 
-it("returns all episodes for a single season path", async ({ em, orm }) => {
-  await orm.seeder.seed(CompletedShowSeeder);
-
-  const show = await em.findOneOrFail(
-    Show,
-    { type: "show" },
-    { populate: ["seasons.episodes.filesystemEntries"] },
-  );
+it("returns all episodes for a single season path", async ({
+  em,
+  completedShow,
+}) => {
+  await completedShow.seasons.load();
 
   const seasonNumber = 1;
-  const mediaEntries = await em.find(MediaEntry, {
-    mediaItem: {
-      type: "episode",
-      season: {
-        number: seasonNumber,
+  const mediaEntries = await em.find(
+    MediaEntry,
+    {
+      mediaItem: {
+        type: "episode",
+        season: {
+          number: seasonNumber,
+        },
       },
     },
-  });
+    { populate: ["mediaItem"] },
+  );
 
   const callback = vi.fn();
 
   readDirSync(
-    `/shows/${show.getPrettyName()}/Season ${seasonNumber.toString().padStart(2, "0")}`,
+    `/shows/${completedShow.getPrettyName()}/Season ${seasonNumber.toString().padStart(2, "0")}`,
     callback,
   );
 
@@ -164,19 +140,8 @@ it("returns all episodes for a single season path", async ({ em, orm }) => {
 
 it("does not return entries for episodes that does not have a media entry when viewing a season path", async ({
   em,
-  orm,
+  completedShow,
 }) => {
-  await orm.seeder.seed(CompletedShowSeeder);
-
-  const show = await em.findOneOrFail(
-    Show,
-    {
-      type: "show",
-      state: "completed",
-    },
-    { populate: ["seasons.episodes.filesystemEntries"] },
-  );
-
   await em.nativeDelete(MediaEntry, {
     mediaItem: {
       type: "episode",
@@ -186,16 +151,20 @@ it("does not return entries for episodes that does not have a media entry when v
     },
   });
 
-  const mediaEntry = await em.findOneOrFail(MediaEntry, {
-    mediaItem: {
-      type: "episode",
-      number: 1,
+  const mediaEntry = await em.findOneOrFail(
+    MediaEntry,
+    {
+      mediaItem: {
+        type: "episode",
+        number: 1,
+      },
     },
-  });
+    { populate: ["mediaItem"] },
+  );
 
   const callback = vi.fn();
 
-  readDirSync(`/shows/${show.getPrettyName()}/Season 01`, callback);
+  readDirSync(`/shows/${completedShow.getPrettyName()}/Season 01`, callback);
 
   await vi.waitFor(async () => {
     expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
@@ -205,20 +174,13 @@ it("does not return entries for episodes that does not have a media entry when v
 });
 
 it("returns the media entry's filename when viewing a single movie's directory", async ({
-  em,
-  orm,
+  completedMovie,
 }) => {
-  await orm.seeder.seed(CompletedMovieSeeder);
-
-  const movie = await em.findOneOrFail(Movie, {
-    type: "movie",
-  });
-
   const callback = vi.fn();
 
-  const mediaEntries = await movie.getMediaEntries();
+  const mediaEntries = await completedMovie.getMediaEntries();
 
-  readDirSync(`/movies/${movie.getPrettyName()}`, callback);
+  readDirSync(`/movies/${completedMovie.getPrettyName()}`, callback);
 
   await vi.waitFor(async () => {
     expect.assert(mediaEntries[0]);
@@ -230,19 +192,10 @@ it("returns the media entry's filename when viewing a single movie's directory",
 });
 
 it('does not return entries for the "all movies" path when a movie does not have a media entry', async ({
-  em,
-  orm,
+  completedMovie,
+  seeders: { seedScrapedMovie },
 }) => {
-  await orm.seeder.seed(
-    CompletedMovieSeeder,
-    ScrapedMovieSeeder,
-    ScrapedMovieSeeder,
-  );
-
-  const movie = await em.findOneOrFail(Movie, {
-    type: "movie",
-    state: "completed",
-  });
+  await seedScrapedMovie(2);
 
   const callback = vi.fn();
 
@@ -250,7 +203,7 @@ it('does not return entries for the "all movies" path when a movie does not have
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
-      movie.getPrettyName(),
+      completedMovie.getPrettyName(),
     ]);
   });
 });

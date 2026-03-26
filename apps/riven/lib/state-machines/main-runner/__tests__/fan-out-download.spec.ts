@@ -1,12 +1,9 @@
 import { getEventTypeFromSchema } from "@repo/util-plugin-sdk";
-import { Show } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemDownloadErrorEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 
 import assert from "node:assert";
 import { expect, vi } from "vitest";
 
-import { database } from "../../../database/database.ts";
-import { ScrapedShowSeeder } from "../../../database/seeders/shows/scraped-show.seeder.ts";
 import { flow } from "../../../message-queue/flows/producer.ts";
 import { it } from "./helpers/test-context.ts";
 
@@ -14,12 +11,9 @@ const eventType = getEventTypeFromSchema(MediaItemDownloadErrorEvent);
 
 it(`enqueues a scrape for each incomplete season when a "${eventType}" event is received for a show`, async ({
   actor,
+  scrapedShow,
 }) => {
-  await database.orm.seeder.seed(ScrapedShowSeeder);
-
-  const show = await database.em
-    .fork()
-    .findOneOrFail(Show, { type: "show" }, { populate: ["seasons"] });
+  await scrapedShow.seasons.load();
 
   const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
 
@@ -27,12 +21,12 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
 
   actor.send({
     type: "riven.media-item.download.error",
-    item: show,
+    item: scrapedShow,
     error: "No valid torrents found",
   });
 
   await vi.waitFor(() => {
-    for (const season of show.seasons) {
+    for (const season of scrapedShow.seasons) {
       expect(flowAddBulkSpy).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
@@ -49,22 +43,15 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
 
 it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is received for a season`, async ({
   actor,
+  scrapedShow,
 }) => {
-  await database.orm.seeder.seed(ScrapedShowSeeder);
-
-  const show = await database.em
-    .fork()
-    .findOneOrFail(
-      Show,
-      { type: "show" },
-      { populate: ["seasons", "seasons.episodes"] },
-    );
+  await scrapedShow.seasons.load();
 
   const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
 
   actor.start();
 
-  const failedSeason = show.seasons[2];
+  const failedSeason = scrapedShow.seasons[2];
 
   assert(failedSeason);
 
