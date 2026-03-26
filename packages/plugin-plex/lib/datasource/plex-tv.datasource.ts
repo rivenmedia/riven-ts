@@ -23,17 +23,20 @@ export class PlexTvAPI extends BaseDataSource<PlexSettings> {
     requestOpts.headers["accept"] = "application/json";
   }
 
-  getUserUuid(): string | undefined {
+  async getUserUuid(): Promise<string> {
+    if (this.userUuid) {
+      return this.userUuid;
+    }
+
+    const res = await this.get<unknown>("user");
+    const data = userPlexAccountSchema.parse(res);
+    this.userUuid = data.uuid;
     return this.userUuid;
   }
 
   override async validate() {
     try {
-      const res = await this.get<unknown>(`user`);
-
-      const data = userPlexAccountSchema.parse(res);
-
-      this.userUuid = data.uuid;
+      await this.getUserUuid();
 
       return true;
     } catch (err: unknown) {

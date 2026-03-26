@@ -24,7 +24,7 @@ export default {
       const communityApi = dataSources.get(PlexCommunityAPI);
       const metadataApi = dataSources.get(PlexMetadataAPI);
 
-      const userUuid = tvApi.getUserUuid();
+      const userUuid = await tvApi.getUserUuid();
 
       if (!userUuid) {
         throw new Error("Failed to get Plex user UUID from PlexTvAPI");

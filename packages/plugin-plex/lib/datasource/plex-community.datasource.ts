@@ -130,7 +130,7 @@ export class PlexCommunityAPI extends BaseDataSource<PlexSettings> {
               body: JSON.stringify({
                 query: `{
                   user(id: "${_userUuid}") {
-                    customLists(first: 2) {
+                    customLists(first: 10${listsCursor ? `, after: "${listsCursor}"` : ""}) {
                       nodes {
                         id
                         metadataItems(first: 100, after: "${itemsCursor}") {

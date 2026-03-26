@@ -26,13 +26,11 @@ export const PlexSettings = z.object({
       'The start of Plex library paths, e.g. "/mount" in "/mount/movies"',
     )
     .default("/mount"),
-  lists: json(
-    z
-      .array(PlexListUrlSchema)
-      .describe(
-        "The Plex lists to pull items from, in the format https://watch.plex.tv/u/<user>/lists/<list-slug>",
-      ),
-  ),
+  lists: json(z.array(PlexListUrlSchema))
+    .describe(
+      "The Plex lists to pull items from, in the format https://watch.plex.tv/u/<user>/lists/<list-slug>",
+    )
+    .default([]),
 });
 
 export type PlexSettings = z.infer<typeof PlexSettings>;
