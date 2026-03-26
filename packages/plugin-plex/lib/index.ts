@@ -1,6 +1,9 @@
 import path from "node:path";
 
 import packageJson from "../package.json" with { type: "json" };
+import { PlexCommunityAPI } from "./datasource/plex-community.datasource.ts";
+import { PlexMetadataAPI } from "./datasource/plex-metadata.datasource.ts";
+import { PlexTvAPI } from "./datasource/plex-tv.datasource.ts";
 import { PlexAPI } from "./datasource/plex.datasource.ts";
 import { pluginConfig } from "./plex-plugin.config.ts";
 import { PlexSettings } from "./plex-settings.schema.ts";
@@ -12,9 +15,46 @@ import type { RivenPlugin } from "@repo/util-plugin-sdk";
 export default {
   name: pluginConfig.name,
   version: packageJson.version,
-  dataSources: [PlexAPI],
+  dataSources: [PlexAPI, PlexTvAPI, PlexCommunityAPI, PlexMetadataAPI],
   resolvers: [PlexResolver, PlexSettingsResolver],
   hooks: {
+    "riven.content-service.requested": async ({ dataSources, settings }) => {
+      const { lists } = settings.get(PlexSettings);
+      const tvApi = dataSources.get(PlexTvAPI);
+      const communityApi = dataSources.get(PlexCommunityAPI);
+      const metadataApi = dataSources.get(PlexMetadataAPI);
+
+      const userUuid = tvApi.getUserUuid();
+
+      if (!userUuid) {
+        throw new Error("Failed to get Plex user UUID from PlexTvAPI");
+      }
+
+      const listSlugs = lists
+        .map((list) => {
+          const parts = list.split("/");
+          return parts[parts.length - 1];
+        })
+        .filter((slug): slug is string => Boolean(slug));
+
+      const itemIds = await communityApi.getListItemIds(
+        new Set(listSlugs),
+        userUuid,
+      );
+
+      return {
+        movies: await Promise.all(
+          itemIds.movies
+            .values()
+            .map((guid) => metadataApi.convertPlexIdToExternalIds(guid)),
+        ),
+        shows: await Promise.all(
+          itemIds.shows
+            .values()
+            .map((guid) => metadataApi.convertPlexIdToExternalIds(guid)),
+        ),
+      };
+    },
     "riven.media-item.download.success": async ({
       dataSources,
       event,
@@ -66,7 +106,8 @@ export default {
     },
   },
   settingsSchema: PlexSettings,
-  validator() {
-    return Promise.resolve(true);
+  validator({ dataSources }) {
+    const plexTvApi = dataSources.get(PlexTvAPI);
+    return plexTvApi.validate();
   },
 } satisfies RivenPlugin as RivenPlugin;
