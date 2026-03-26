@@ -1,59 +1,15 @@
-import {
-  Episode,
-  Movie,
-  Season,
-  Show,
-} from "@repo/util-plugin-sdk/dto/entities";
 import { parse } from "@repo/util-rank-torrent-name";
 
-import { it as baseIt, expect, vi } from "vitest";
+import { faker } from "@faker-js/faker";
+import { wrap } from "@mikro-orm/core";
+import { expect, vi } from "vitest";
 
-import { database } from "../../../../../../database/database.ts";
-import { ScrapedMovieSeeder } from "../../../../../../database/seeders/movies/scraped-movie.seeder.ts";
-import { ScrapedShowSeeder } from "../../../../../../database/seeders/shows/scraped-show.seeder.ts";
+import { rivenTestContext as baseIt } from "../../../../../../__tests__/test-context.ts";
 import * as settingsModule from "../../../../../../utilities/settings.ts";
 import { SkippedTorrentError, validateTorrent } from "./validate-torrent.ts";
 
-const it = baseIt.extend<{
-  movie: Movie;
-  show: Show;
-  season: Season;
-  episode: Episode;
-  scrapeResults: Record<string, string>;
-  infoHash: string;
-}>({
-  movie: async ({}, use) => {
-    await database.orm.seeder.seed(ScrapedMovieSeeder);
-
-    const em = database.em.fork();
-    const movie = await em.findOneOrFail(Movie, { type: "movie" });
-
-    await use(movie);
-  },
-  show: async ({}, use) => {
-    await database.orm.seeder.seed(ScrapedShowSeeder);
-
-    const show = await database.em
-      .fork()
-      .findOneOrFail(
-        Show,
-        { type: "show" },
-        { populate: ["seasons.episodes"] },
-      );
-
-    await use(show);
-  },
-  season: async ({ show }, use) => {
-    expect.assert(show.seasons[0]);
-
-    await use(show.seasons[0]);
-  },
-  episode: async ({ season }, use) => {
-    expect.assert(season.episodes[0]);
-
-    await use(season.episodes[0]);
-  },
-  scrapeResults: {
+const it = baseIt
+  .extend("scrapeResults", {
     "1234567890123456789012345678901234567890": "Test Movie 2024 1080p WEB-DL",
     "2234567890123456789012345678901234567890": "Test Movie 2024 2160p WEB-DL",
     "3234567890123456789012345678901234567890": "Test Movie 2024 720p WEB-DL",
@@ -77,9 +33,8 @@ const it = baseIt.extend<{
       "Test Show 2024 1080p WEB-DL S01E02",
     "0234567890123456789012345678901234567890":
       "Test Show 2024 1080p WEB-DL S01E03",
-  },
-  infoHash: "1234567890123456789012345678901234567890",
-});
+  })
+  .extend("infoHash", () => faker.git.commitSha());
 
 it("does not throw for movie torrents if the item is a movie", async ({
   movie,
@@ -152,6 +107,7 @@ it("throws for show torrents if the item is a movie", async ({
 });
 
 it("throws for torrents with an incorrect number of seasons for ended shows", async ({
+  em,
   show,
   infoHash,
   annotate,
@@ -161,8 +117,6 @@ it("throws for torrents with an incorrect number of seasons for ended shows", as
   );
 
   const rawTitle = "Test Show: S01-03";
-
-  const em = database.em.fork();
 
   em.persist(show);
   em.assign(show, { status: "ended" });
@@ -184,6 +138,7 @@ it("throws for torrents with an incorrect number of seasons for ended shows", as
 });
 
 it("throws for torrents with an incorrect number of seasons for continuing shows", async ({
+  em,
   show,
   infoHash,
   annotate,
@@ -193,8 +148,6 @@ it("throws for torrents with an incorrect number of seasons for continuing shows
   );
 
   const rawTitle = "Test Show: S01-03";
-
-  const em = database.em.fork();
 
   em.persist(show);
   em.assign(show, { status: "continuing" });
@@ -216,12 +169,11 @@ it("throws for torrents with an incorrect number of seasons for continuing shows
 });
 
 it("does not throw for torrents that do not contain the most recent season for continuing shows", async ({
+  em,
   show,
   infoHash,
 }) => {
   const rawTitle = "Test Show: S01-05";
-
-  const em = database.em.fork();
 
   em.persist(show);
   em.assign(show, { status: "continuing" });
@@ -236,12 +188,11 @@ it("does not throw for torrents that do not contain the most recent season for c
 });
 
 it("does not throw for torrents that contain all seasons for ended shows", async ({
+  em,
   show,
   infoHash,
 }) => {
   const rawTitle = "Test Show: S01-06";
-
-  const em = database.em.fork();
 
   em.persist(show);
   em.assign(show, { status: "ended" });
@@ -276,12 +227,13 @@ it("throws for torrents with no seasons and episodes for show-like items", async
 });
 
 it("throws for torrents with incorrect number of episodes for single-season shows", async ({
+  em,
   show,
   infoHash,
 }) => {
-  const rawTitle = "Test Show: S01 E01-05";
+  await wrap(show).populate(["seasons"]);
 
-  const em = database.em.fork();
+  const rawTitle = "Test Show: S01 E01-05";
 
   const [, ...seasonsToRemove] = show.seasons;
 
@@ -304,12 +256,13 @@ it("throws for torrents with incorrect number of episodes for single-season show
 });
 
 it("does not throw for torrents with the correct number of episodes for single-season shows", async ({
+  em,
   show,
   infoHash,
 }) => {
   const rawTitle = "Test Show: S01 E01-10";
 
-  const em = database.em.fork();
+  await wrap(show).populate(["seasons"]);
 
   const [, ...seasonsToRemove] = show.seasons;
 
@@ -328,6 +281,8 @@ it("does not throw for torrents that have no seasons, but the correct absolute e
   show,
   infoHash,
 }) => {
+  await wrap(show).populate(["seasons"]);
+
   const season = show.seasons[2];
 
   expect.assert(season);
@@ -345,6 +300,8 @@ it("throws for torrents that have no seasons and do not have the correct absolut
   show,
   infoHash,
 }) => {
+  await wrap(show).populate(["seasons"]);
+
   const season = show.seasons[2];
 
   expect.assert(season);
@@ -485,12 +442,11 @@ it("throws for torrents with no episodes for episode items", async ({
 });
 
 it("throws for torrents that do not match the media item's country", async ({
+  em,
   movie,
   infoHash,
 }) => {
   const rawTitle = "Test Movie 2024 [US]";
-
-  const em = database.em.fork();
 
   em.persist(movie);
   em.assign(movie, { country: "UK" });
@@ -512,12 +468,11 @@ it("throws for torrents that do not match the media item's country", async ({
 });
 
 it("does not throw for torrents that do not match the media item's country if the media item is anime", async ({
+  em,
   movie,
   infoHash,
 }) => {
   const rawTitle = "Test Movie 2024 [US]";
-
-  const em = database.em.fork();
 
   em.persist(movie);
   em.assign(movie, {
@@ -536,6 +491,7 @@ it("does not throw for torrents that do not match the media item's country if th
 });
 
 it("throws for torrents that do not match the media item's year (± 1 year)", async ({
+  em,
   movie,
   infoHash,
 }) => {
@@ -546,8 +502,6 @@ it("throws for torrents that do not match the media item's year (± 1 year)", as
     "Test Movie 2020 1080p",
     "Test Movie 2021 1080p",
   ] as const;
-
-  const em = database.em.fork();
 
   em.persist(movie);
   em.assign(movie, { year: 2020 });
@@ -579,6 +533,7 @@ it("throws for torrents that do not match the media item's year (± 1 year)", as
 });
 
 it.skip('throws for torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is enabled', async ({
+  em,
   movie,
   infoHash,
 }) => {
@@ -588,8 +543,6 @@ it.skip('throws for torrents that are not dubbed if the media item is anime and 
     ...settingsModule.settings,
     dubbedAnimeOnly: true,
   });
-
-  const em = database.em.fork();
 
   em.persist(movie);
   em.assign(movie, { language: "jp", genres: ["animation", "anime"] });
@@ -611,6 +564,7 @@ it.skip('throws for torrents that are not dubbed if the media item is anime and 
 });
 
 it.skip('does not throw for torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is disabled', async ({
+  em,
   movie,
   infoHash,
 }) => {
@@ -620,8 +574,6 @@ it.skip('does not throw for torrents that are not dubbed if the media item is an
     ...settingsModule.settings,
     dubbedAnimeOnly: false,
   });
-
-  const em = database.em.fork();
 
   em.persist(movie);
   em.assign(movie, { language: "jp", genres: ["animation", "anime"] });
@@ -636,6 +588,7 @@ it.skip('does not throw for torrents that are not dubbed if the media item is an
 });
 
 it('does not throw for torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is enabled', async ({
+  em,
   movie,
   infoHash,
 }) => {
@@ -645,8 +598,6 @@ it('does not throw for torrents that are not dubbed if the media item is anime a
     ...settingsModule.settings,
     dubbedAnimeOnly: true,
   });
-
-  const em = database.em.fork();
 
   em.persist(movie);
   em.assign(movie, { language: "jp", genres: ["animation", "anime"] });

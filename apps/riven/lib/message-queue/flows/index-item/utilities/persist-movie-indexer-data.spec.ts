@@ -5,15 +5,14 @@ import { DateTime } from "luxon";
 import { expect } from "vitest";
 
 import { rivenTestContext as it } from "../../../../__tests__/test-context.ts";
-import { database } from "../../../../database/database.ts";
-import { ItemRequestFactory } from "../../../../database/factories/item-request.factory.ts";
 import { persistMovieIndexerData } from "./persist-movie-indexer-data.ts";
 
-it("returns the media item if processed successfully", async () => {
+it("returns the media item if processed successfully", async ({
+  factories: { itemRequestFactory },
+}) => {
   const requestedId = "tt1234567";
 
-  const em = database.orm.em.fork();
-  const itemRequest = await new ItemRequestFactory(em).createOne({
+  const itemRequest = await itemRequestFactory.createOne({
     imdbId: requestedId,
     tmdbId: "1234",
     state: "requested",
@@ -43,11 +42,12 @@ it("returns the media item if processed successfully", async () => {
   );
 });
 
-it("throws a MediaItemIndexErrorIncorrectState error if the item request is in an incorrect state", async () => {
+it("throws a MediaItemIndexErrorIncorrectState error if the item request is in an incorrect state", async ({
+  factories: { itemRequestFactory },
+}) => {
   const requestedId = "1234";
 
-  const em = database.orm.em.fork();
-  const itemRequest = await new ItemRequestFactory(em).createOne({
+  const itemRequest = await itemRequestFactory.createOne({
     imdbId: requestedId,
     tmdbId: "1234",
     state: "completed",

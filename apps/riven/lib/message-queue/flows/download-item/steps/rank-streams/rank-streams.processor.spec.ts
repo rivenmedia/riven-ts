@@ -4,38 +4,24 @@ import {
 } from "@repo/util-rank-torrent-name";
 
 import * as Sentry from "@sentry/node";
-import { Job, type Queue } from "bullmq";
-import { it as baseIt, expect, vi } from "vitest";
+import { Job } from "bullmq";
+import { expect, vi } from "vitest";
 
-import { database } from "../../../../../database/database.ts";
-import { StreamFactory } from "../../../../../database/factories/stream.factory.ts";
-import { MovieWithAliasesSeeder } from "../../../../../database/seeders/movies/movie-with-aliases.seeder.ts";
-import { MovieSeeder } from "../../../../../database/seeders/movies/movie.seeder.ts";
-import { ShowWithAliasesSeeder } from "../../../../../database/seeders/shows/show-with-aliases.seeder.ts";
+import { rivenTestContext as baseIt } from "../../../../../__tests__/test-context.ts";
 import { createQueue } from "../../../../utilities/create-queue.ts";
 import { rankStreamsProcessor } from "./rank-streams.processor.ts";
 
-import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
-
-const it = baseIt.extend<{
-  item: MediaItem;
-  mockQueue: Queue;
-}>({
-  mockQueue: async ({}, use) => {
+const it = baseIt
+  .extend("mockQueue", ({}, { onCleanup }) => {
     const queue = createQueue("mock-queue");
 
-    await use(queue);
+    onCleanup(() => queue.close());
 
-    await queue.close();
-  },
-  item: async ({}, use) => {
-    await database.orm.seeder.seed(MovieSeeder);
-
-    const em = database.em.fork();
-    const item = await database.movie.findOneOrFail({ type: "movie" });
-
-    item.streams.set(
-      new StreamFactory(em)
+    return queue;
+  })
+  .extend("item", async ({ em, movie, factories: { streamFactory } }) => {
+    movie.streams.set(
+      streamFactory
         .each((stream, i) => {
           stream.infoHash = `${i.toString()}234567890123456789012345678901234567890`;
           stream.parsedData = {} as never;
@@ -45,9 +31,8 @@ const it = baseIt.extend<{
 
     await em.flush();
 
-    await use(item);
-  },
-});
+    return movie;
+  });
 
 it("does not include trashed streams", async ({ item, mockQueue }) => {
   const job = await Job.create(mockQueue, "mock-rank-streams", {
@@ -153,16 +138,19 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
 
 it("handles foreign language movies with aliases correctly", async ({
   mockQueue,
+  seeders: { seedMovie },
+  factories: { streamFactory },
 }) => {
-  const em = database.em.fork();
-
-  await database.orm.seeder.seed(MovieWithAliasesSeeder);
-
-  const itemWithAliases = await database.movie.findOneOrFail({
+  const itemWithAliases = await seedMovie(1, {
     title: "Foreign Movie",
+    aliases: {
+      es: ["Película Extranjera"],
+      fr: ["Film Étranger"],
+      jp: ["外国映画"],
+    },
   });
 
-  await new StreamFactory(em)
+  await streamFactory
     .each((stream, i) => {
       stream.infoHash = `a${i.toString()}34567890123456789012345678901234567890`;
       stream.parsedData = {} as never;
@@ -207,22 +195,29 @@ it("handles foreign language movies with aliases correctly", async ({
 
 it("handles foreign language shows with aliases correctly", async ({
   mockQueue,
+  seeders: { seedShow },
+  factories: { streamFactory },
 }) => {
-  const em = database.em.fork();
+  const showWithAliases = await seedShow(1, {
+    showData: {
+      title: "Foreign Show",
+      aliases: {
+        es: ["Película Extranjera"],
+        fr: ["Show Étranger"],
+        jp: ["外国映画"],
+      },
+    },
+  });
 
-  await database.orm.seeder.seed(ShowWithAliasesSeeder);
-
-  await new StreamFactory(em)
+  await streamFactory
     .each((stream, i) => {
       stream.infoHash = `a${i.toString()}34567890123456789012345678901234567890`;
       stream.parsedData = {} as never;
     })
     .create(3);
 
-  const item = await database.show.findOneOrFail({ type: "show" });
-
   const job = await Job.create(mockQueue, "mock-rank-streams", {
-    id: item.id,
+    id: showWithAliases.id,
     streams: {
       a034567890123456789012345678901234567890:
         "Película Extranjera 1080p BluRay",

@@ -1,14 +1,18 @@
-import { MediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  MediaItem,
+  type Movie,
+  Stream,
+} from "@repo/util-plugin-sdk/dto/entities";
 
-import { Seeder } from "@mikro-orm/seeder";
 import assert from "node:assert";
 
+import { BaseSeeder } from "../base.seeder.ts";
 import { StreamsSeeder } from "../streams/streams.seeder.ts";
 import { MovieSeeder } from "./movie.seeder.ts";
 
-import type { EntityManager } from "@mikro-orm/core";
+import type { EntityData, EntityManager } from "@mikro-orm/core";
 
-export class ScrapedMovieSeeder extends Seeder {
+export class ScrapedMovieSeeder extends BaseSeeder<EntityData<Movie>> {
   async run(em: EntityManager) {
     await this.call(em, [MovieSeeder, StreamsSeeder]);
 

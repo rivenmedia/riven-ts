@@ -1,14 +1,14 @@
 import { Show, Stream } from "@repo/util-plugin-sdk/dto/entities";
 
-import { Seeder } from "@mikro-orm/seeder";
 import assert from "node:assert";
 
 import { MediaEntryFactory } from "../../factories/media-entry.factory.ts";
+import { BaseSeeder } from "../base.seeder.ts";
 import { ScrapedShowSeeder } from "./scraped-show.seeder.ts";
 
-import type { EntityManager } from "@mikro-orm/core";
+import type { EntityData, EntityManager } from "@mikro-orm/core";
 
-export class CompletedShowSeeder extends Seeder {
+export class CompletedShowSeeder extends BaseSeeder<EntityData<Show>> {
   async run(em: EntityManager) {
     await this.call(em, [ScrapedShowSeeder]);
 

@@ -7,7 +7,6 @@ import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
 import { rivenTestContext as it } from "../../../../__tests__/test-context.ts";
-import { StreamFactory } from "../../../../database/factories/stream.factory.ts";
 import { MatchedFile } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { persistDownloadResults } from "./persist-download-results.ts";
 
@@ -41,12 +40,13 @@ it("throws an error if the media item has no streams", async ({ movie }) => {
 
 it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in the scraped or ongoing state", async ({
   completedMovie,
+  factories: { streamFactory },
   em,
 }) => {
   const infoHash = faker.git.commitSha();
 
   completedMovie.streams.add(
-    new StreamFactory(em).makeEntity({
+    streamFactory.makeEntity({
       infoHash,
     }),
   );

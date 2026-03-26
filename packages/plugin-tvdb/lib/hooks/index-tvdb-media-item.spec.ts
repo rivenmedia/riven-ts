@@ -1,6 +1,5 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
-import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import { mockLogger } from "@repo/util-plugin-testing/create-mock-logger";
 import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
 import { it as baseIt } from "@repo/util-plugin-testing/plugin-test-context";
@@ -17,18 +16,10 @@ import { indexTVDBMediaItem } from "./index-tvdb-media-item.ts";
 
 import type { PostLogin200 } from "../__generated__/index.ts";
 
-const it = baseIt.extend<{
-  settings: PluginSettings;
-  dataSourceMap: DataSourceMap;
-  item: ItemRequest;
-}>({
-  async settings({}, use) {
-    const settings = createMockPluginSettings(TvdbSettings, {});
-
-    await use(settings);
-  },
-  async dataSourceMap({ dataSourceConfig, settings }, use) {
-    const dataSourceMap = new DataSourceMap([
+const it = baseIt
+  .extend("settings", () => createMockPluginSettings(TvdbSettings, {}))
+  .extend("dataSourceMap", ({ dataSourceConfig, settings }) => {
+    return new DataSourceMap([
       [
         TvdbAPI,
         new TvdbAPI({
@@ -39,17 +30,14 @@ const it = baseIt.extend<{
         }),
       ],
     ]);
-
-    await use(dataSourceMap);
-  },
-  async item({}, use) {
+  })
+  .extend("item", ({}) => {
     const item = new ItemRequest();
 
     item.id = 1;
 
-    await use(item);
-  },
-});
+    return item;
+  });
 
 it.beforeEach(({ server }) => {
   server.use(

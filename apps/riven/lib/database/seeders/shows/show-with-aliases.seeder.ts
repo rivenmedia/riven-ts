@@ -1,14 +1,15 @@
-import { Seeder } from "@mikro-orm/seeder";
 import { DateTime } from "luxon";
 
 import { EpisodeFactory } from "../../factories/episode.factory.ts";
 import { ItemRequestFactory } from "../../factories/item-request.factory.ts";
 import { SeasonFactory } from "../../factories/season.factory.ts";
 import { ShowFactory } from "../../factories/show.factory.ts";
+import { BaseSeeder } from "../base.seeder.ts";
 
-import type { EntityManager } from "@mikro-orm/core";
+import type { EntityData, EntityManager } from "@mikro-orm/core";
+import type { Show } from "@repo/util-plugin-sdk/dto/entities";
 
-export class ShowWithAliasesSeeder extends Seeder {
+export class ShowWithAliasesSeeder extends BaseSeeder<EntityData<Show>> {
   async run(em: EntityManager) {
     const itemRequest = await new ItemRequestFactory(em).createOne({
       state: "completed",

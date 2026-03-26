@@ -25,7 +25,7 @@ catalog:
   "@types/luxon": ^3.7.1
   "@types/node": ^24.0.0
   "@typescript-eslint/parser": ^8.49.0
-  "@vitest/coverage-v8": 4.0.15
+  "@vitest/coverage-v8": ^4.1.1
   bullmq: ^5.71.0
   bullmq-otel: ^1.2.0
   class-validator: 0.14.3
@@ -44,7 +44,7 @@ catalog:
   type-graphql: 2.0.0-rc.2
   typescript: ^5.9.3
   undici: ^7.18.2
-  vitest: 4.0.15
+  vitest: ^4.1.1
   winston: ^3.19.0
   xstate: ^5.25.0
   zod: ^4.3.6

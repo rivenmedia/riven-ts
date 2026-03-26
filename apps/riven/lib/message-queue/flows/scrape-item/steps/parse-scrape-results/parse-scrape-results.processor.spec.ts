@@ -1,73 +1,27 @@
-import {
-  Episode,
-  Movie,
-  Season,
-  Show,
-} from "@repo/util-plugin-sdk/dto/entities";
-
+import { wrap } from "@mikro-orm/core";
 import * as Sentry from "@sentry/node";
 import { Job, UnrecoverableError } from "bullmq";
-import { it as baseIt, expect, vi } from "vitest";
+import { expect, vi } from "vitest";
 
-import { database } from "../../../../../database/database.ts";
-import { MovieSeeder } from "../../../../../database/seeders/movies/movie.seeder.ts";
-import { CompletedShowSeeder } from "../../../../../database/seeders/shows/completed-show.seeder.ts";
+import { rivenTestContext as baseIt } from "../../../../../__tests__/test-context.ts";
 import * as settingsModule from "../../../../../utilities/settings.ts";
 import { createQueue } from "../../../../utilities/create-queue.ts";
 import { parseScrapeResultsProcessor } from "./parse-scrape-results.processor.ts";
 
 import type { ParseScrapeResultsFlow } from "./parse-scrape-results.schema.ts";
 
-const it = baseIt.extend<{
-  movie: Movie;
-  show: Show;
-  season: Season;
-  episode: Episode;
-  job: Parameters<ParseScrapeResultsFlow["processor"]>[0]["job"];
-  scrapeResults: Record<string, string>;
-}>({
-  movie: async ({}, use) => {
-    await database.orm.seeder.seed(MovieSeeder);
-
-    const movie = await database.em.fork().findOneOrFail(Movie, {
-      type: "movie",
-    });
-
-    await use(movie);
-  },
-  show: async ({}, use) => {
-    await database.orm.seeder.seed(CompletedShowSeeder);
-
-    const show = await database.em
-      .fork()
-      .findOneOrFail(
-        Show,
-        { type: "show" },
-        { populate: ["seasons.episodes"] },
-      );
-
-    await use(show);
-  },
-  season: async ({ show }, use) => {
-    expect.assert(show.seasons[0]);
-
-    await use(show.seasons[0]);
-  },
-  episode: async ({ season }, use) => {
-    expect.assert(season.episodes[0]);
-
-    await use(season.episodes[0]);
-  },
-  job: async ({}, use) => {
+const it = baseIt
+  .extend("job", async ({}) => {
     const mockQueue = createQueue("mock-queue");
-    const job = await Job.create(mockQueue, "mock-sort-scrape-results", {
-      id: 1,
-      title: "Test media item",
-    });
+    const job: Parameters<ParseScrapeResultsFlow["processor"]>[0]["job"] =
+      await Job.create(mockQueue, "mock-sort-scrape-results", {
+        id: 1,
+        title: "Test media item",
+      });
 
-    await use(job);
-  },
-  scrapeResults: {
+    return job;
+  })
+  .extend("scrapeResults", {
     "1234567890123456789012345678901234567890": "Test Movie 2024 1080p WEB-DL",
     "2234567890123456789012345678901234567890": "Test Movie 2024 2160p WEB-DL",
     "3234567890123456789012345678901234567890": "Test Movie 2024 720p WEB-DL",
@@ -91,8 +45,7 @@ const it = baseIt.extend<{
       "Test Show 2024 1080p WEB-DL S01E02",
     "0234567890123456789012345678901234567890":
       "Test Show 2024 1080p WEB-DL S01E03",
-  },
-});
+  });
 
 it("throws an UnrecoverableError if no results are found", async ({
   movie,
@@ -379,9 +332,12 @@ it("filters out torrents with an incorrect number of seasons for shows", async (
 });
 
 it("filters out torrents with incorrect number of episodes for single-season shows", async ({
+  em,
   show,
   job,
 }) => {
+  await wrap(show).populate(["seasons"]);
+
   const rawTitle = "Test Show: S01 E01-05";
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
@@ -392,8 +348,6 @@ it("filters out torrents with incorrect number of episodes for single-season sho
       },
     },
   });
-
-  const em = database.em.fork();
 
   const [, ...seasonsToRemove] = show.seasons;
 
@@ -676,12 +630,11 @@ it("filters out torrents with no episodes for episode items", async ({
 });
 
 it("filters out torrents that do not match the media item's country", async ({
+  em,
   episode,
   job,
 }) => {
   const rawTitle = "Test Show 2024 S01E01 [US]";
-
-  const em = database.em.fork();
 
   em.persist(episode);
   em.assign(episode, { country: "UK" });
@@ -719,12 +672,11 @@ it("filters out torrents that do not match the media item's country", async ({
 });
 
 it("does not filter out torrents that do not match the media item's country if the media item is anime", async ({
+  em,
   episode,
   job,
 }) => {
   const rawTitle = "Test Show 2024 S01E01 [US]";
-
-  const em = database.em.fork();
 
   em.persist(episode);
   em.assign(episode, {
@@ -764,6 +716,7 @@ it("does not filter out torrents that do not match the media item's country if t
 });
 
 it("filters out torrents that do not match the media item's year ± 1 year", async ({
+  em,
   movie,
   job,
 }) => {
@@ -774,8 +727,6 @@ it("filters out torrents that do not match the media item's year ± 1 year", asy
     "Test Movie 2021 1080p",
     "Test Movie 2022 1080p",
   ] as const;
-
-  const em = database.em.fork();
 
   em.persist(movie);
   em.assign(movie, {
@@ -819,6 +770,7 @@ it("filters out torrents that do not match the media item's year ± 1 year", asy
 });
 
 it.skip('filters out torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is enabled', async ({
+  em,
   movie,
   job,
 }) => {
@@ -826,8 +778,6 @@ it.skip('filters out torrents that are not dubbed if the media item is anime and
     "Test Movie 2018 1080p [Dubbed]",
     "Test Movie 2022 1080p",
   ] as const;
-
-  const em = database.em.fork();
 
   em.persist(movie);
   em.assign(movie, {
@@ -870,6 +820,7 @@ it.skip('filters out torrents that are not dubbed if the media item is anime and
 });
 
 it.skip('does not filter out torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is disabled', async ({
+  em,
   movie,
   job,
 }) => {
@@ -877,8 +828,6 @@ it.skip('does not filter out torrents that are not dubbed if the media item is a
     "Test Movie 2018 1080p [Dubbed]",
     "Test Movie 2022 1080p",
   ] as const;
-
-  const em = database.em.fork();
 
   em.persist(movie);
   em.assign(movie, {

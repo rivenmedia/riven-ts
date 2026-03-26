@@ -1,18 +1,20 @@
-import { Seeder } from "@mikro-orm/seeder";
-
+import { BaseSeeder } from "../base.seeder.ts";
 import { MovieSeeder } from "./movie.seeder.ts";
 
-import type { EntityManager } from "@mikro-orm/core";
+import type { EntityData, EntityManager } from "@mikro-orm/core";
+import type { Movie } from "@repo/util-plugin-sdk/dto/entities";
 
-export class MovieWithAliasesSeeder extends Seeder {
+export class MovieWithAliasesSeeder extends BaseSeeder<EntityData<Movie>> {
+  override context: EntityData<Movie> = {
+    title: "Foreign Movie",
+    aliases: {
+      es: ["Película Extranjera"],
+      fr: ["Film Étranger"],
+      jp: ["外国映画"],
+    },
+  };
+
   async run(em: EntityManager) {
-    await new MovieSeeder().run(em, {
-      title: "Foreign Movie",
-      aliases: {
-        es: ["Película Extranjera"],
-        fr: ["Film Étranger"],
-        jp: ["外国映画"],
-      },
-    });
+    await this.call(em, [MovieSeeder]);
   }
 }

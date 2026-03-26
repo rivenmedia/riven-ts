@@ -1,49 +1,53 @@
 /* eslint-disable @typescript-eslint/require-await */
 import Fuse from "@zkochan/fuse-native";
-import { type Actor, createActor, createEmptyActor, fromPromise } from "xstate";
+import { createActor, createEmptyActor, fromPromise } from "xstate";
 
 import { rivenTestContext } from "../../../../__tests__/test-context.ts";
-import { type BootstrapMachineInput, bootstrapMachine } from "../../index.ts";
+import { bootstrapMachine } from "../../index.ts";
 
-import type { initialiseDatabaseConnection } from "../../actors/initialise-database-connection.actor.ts";
-import type { initialiseVfs } from "../../actors/initialise-vfs.actor.ts";
-import type { startGqlServer } from "../../actors/start-gql-server.actor.ts";
+import type {
+  InitialiseVfsInput,
+  InitialiseVfsOutput,
+} from "../../actors/initialise-vfs.actor.ts";
+import type {
+  StartGQLServerInput,
+  StartGQLServerOutput,
+} from "../../actors/start-gql-server.actor.ts";
 
-export const it = rivenTestContext.extend<{
-  actor: Actor<typeof bootstrapMachine>;
-  input: BootstrapMachineInput;
-  machine: typeof bootstrapMachine;
-  initialiseDatabaseConnectionActorLogic: typeof initialiseDatabaseConnection;
-  startGqlServerActorLogic: typeof startGqlServer;
-  initialiseVfsActorLogic: typeof initialiseVfs;
-}>({
-  initialiseDatabaseConnectionActorLogic: fromPromise(async () => {
-    /* empty */
-  }),
-  initialiseVfsActorLogic: fromPromise(async () => {
-    return {
-      vfs: new Fuse("/mnt/fake-path", {}),
-    };
-  }),
-  async startGqlServerActorLogic({ apolloServerInstance }, use) {
-    await use(
-      fromPromise(async () => {
-        return {
-          server: apolloServerInstance,
-          url: "http://localhost:4000/graphql",
-        };
-      }),
-    );
-  },
-  machine: (
-    {
+export const it = rivenTestContext
+  .extend("input", () => ({
+    rootRef: createEmptyActor(),
+  }))
+
+  .extend(
+    "initialiseDatabaseConnectionActorLogic",
+    fromPromise(async () => {
+      /* empty */
+    }),
+  )
+  .extend("startGqlServerActorLogic", ({ apolloServerInstance }) =>
+    fromPromise<StartGQLServerOutput, StartGQLServerInput>(async () => {
+      return {
+        server: apolloServerInstance,
+        url: "http://localhost:4000/graphql",
+      };
+    }),
+  )
+  .extend(
+    "initialiseVfsActorLogic",
+    fromPromise<InitialiseVfsOutput, InitialiseVfsInput>(async () => {
+      return {
+        vfs: new Fuse("/mnt/fake-path", {}),
+      };
+    }),
+  )
+  .extend(
+    "machine",
+    ({
       initialiseDatabaseConnectionActorLogic,
       startGqlServerActorLogic,
       initialiseVfsActorLogic,
-    },
-    use,
-  ) =>
-    use(
+    }) =>
       bootstrapMachine.provide({
         actors: {
           initialiseDatabaseConnection: initialiseDatabaseConnectionActorLogic,
@@ -51,15 +55,13 @@ export const it = rivenTestContext.extend<{
           initialiseVfs: initialiseVfsActorLogic,
         },
       }),
-    ),
-  input: {
-    rootRef: createEmptyActor(),
-  },
-  actor: async ({ input, machine }, use) => {
+  )
+  .extend("actor", async ({ input, machine }, { onCleanup }) => {
     const actor = createActor(machine, { input });
 
-    await use(actor);
+    onCleanup(async () => {
+      actor.stop();
+    });
 
-    actor.stop();
-  },
-});
+    return actor;
+  });
