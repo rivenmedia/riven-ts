@@ -14,8 +14,6 @@ export class PlexCommunityAPI extends BaseDataSource<PlexSettings> {
 
   override serviceName = "Plex Community";
 
-  userUuid?: string;
-
   readonly #seenMovieIds = new Set<string>();
   readonly #seenShowIds = new Set<string>();
 
