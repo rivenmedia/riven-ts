@@ -1,11 +1,4 @@
 import {
-  ItemRequest,
-  type MediaItem,
-  Movie,
-  Show,
-  Stream,
-} from "@repo/util-plugin-sdk/dto/entities";
-import {
   createSettings,
   defaultRankingModel,
 } from "@repo/util-rank-torrent-name";
@@ -15,8 +8,14 @@ import { Job, type Queue } from "bullmq";
 import { it as baseIt, expect, vi } from "vitest";
 
 import { database } from "../../../../../database/database.ts";
+import { StreamFactory } from "../../../../../database/factories/stream.factory.ts";
+import { MovieWithAliasesSeeder } from "../../../../../database/seeders/movies/movie-with-aliases.seeder.ts";
+import { MovieSeeder } from "../../../../../database/seeders/movies/movie.seeder.ts";
+import { ShowWithAliasesSeeder } from "../../../../../database/seeders/shows/show-with-aliases.seeder.ts";
 import { createQueue } from "../../../../utilities/create-queue.ts";
 import { rankStreamsProcessor } from "./rank-streams.processor.ts";
+
+import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 const it = baseIt.extend<{
   item: MediaItem;
@@ -30,29 +29,19 @@ const it = baseIt.extend<{
     await queue.close();
   },
   item: async ({}, use) => {
+    await database.orm.seeder.seed(MovieSeeder);
+
     const em = database.em.fork();
+    const item = await database.movie.findOneOrFail({ type: "movie" });
 
-    const itemRequest = em.create(ItemRequest, {
-      requestedBy: "@repo/plugin-test",
-      state: "completed",
-      type: "movie",
-    });
-
-    const item = em.create(Movie, {
-      id: 1,
-      title: "Test Movie",
-      contentRating: "g",
-      itemRequest,
-      tmdbId: "12345",
-      isRequested: true,
-    });
-
-    for (let i = 1; i <= 6; i++) {
-      em.create(Stream, {
-        infoHash: `${i.toString()}234567890123456789012345678901234567890`,
-        parsedData: {} as never,
-      });
-    }
+    item.streams.set(
+      new StreamFactory(em)
+        .each((stream, i) => {
+          stream.infoHash = `${i.toString()}234567890123456789012345678901234567890`;
+          stream.parsedData = {} as never;
+        })
+        .make(6),
+    );
 
     await em.flush();
 
@@ -64,9 +53,9 @@ it("does not include trashed streams", async ({ item, mockQueue }) => {
   const job = await Job.create(mockQueue, "mock-rank-streams", {
     id: item.id,
     streams: {
-      "1234567890123456789012345678901234567890": "Test Movie 720p bdrip",
-      "2234567890123456789012345678901234567890": "Test Movie 1080p",
-      "3234567890123456789012345678901234567890": "Test Movie",
+      "0234567890123456789012345678901234567890": `${item.title} 720p bdrip`,
+      "1234567890123456789012345678901234567890": `${item.title} 1080p`,
+      "2234567890123456789012345678901234567890": item.title,
     },
     rtnSettings: createSettings(),
     rtnRankingModel: defaultRankingModel,
@@ -81,7 +70,7 @@ it("does not include trashed streams", async ({ item, mockQueue }) => {
     expect.not.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
-          rawTitle: "Test Movie 720p bdrip",
+          rawTitle: `${item.title} 720p bdrip`,
         }),
       }),
     ]),
@@ -95,12 +84,12 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
   const job = await Job.create(mockQueue, "mock-rank-streams", {
     id: item.id,
     streams: {
-      "1234567890123456789012345678901234567890": "Test Movie 720p",
-      "2234567890123456789012345678901234567890": "Test Movie 720p DDP",
-      "3234567890123456789012345678901234567890": "Test Movie 1080p",
-      "4234567890123456789012345678901234567890": "Test Movie 1080p atmos",
-      "5234567890123456789012345678901234567890": "Test Movie",
-      "6234567890123456789012345678901234567890": "Test Movie mp3",
+      "0234567890123456789012345678901234567890": `${item.title} 720p`,
+      "1234567890123456789012345678901234567890": `${item.title} 720p DDP`,
+      "2234567890123456789012345678901234567890": `${item.title} 1080p`,
+      "3234567890123456789012345678901234567890": `${item.title} 1080p atmos`,
+      "4234567890123456789012345678901234567890": item.title,
+      "5234567890123456789012345678901234567890": `${item.title} mp3`,
     },
     rtnSettings: createSettings({
       customRanks: {
@@ -131,32 +120,32 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
   expect(result).toEqual([
     expect.objectContaining({
       data: expect.objectContaining({
-        rawTitle: "Test Movie 720p DDP",
+        rawTitle: `${item.title} 720p DDP`,
       }),
     }),
     expect.objectContaining({
       data: expect.objectContaining({
-        rawTitle: "Test Movie 1080p atmos",
+        rawTitle: `${item.title} 1080p atmos`,
       }),
     }),
     expect.objectContaining({
       data: expect.objectContaining({
-        rawTitle: "Test Movie mp3",
+        rawTitle: `${item.title} mp3`,
       }),
     }),
     expect.objectContaining({
       data: expect.objectContaining({
-        rawTitle: "Test Movie 1080p",
+        rawTitle: `${item.title} 1080p`,
       }),
     }),
     expect.objectContaining({
       data: expect.objectContaining({
-        rawTitle: "Test Movie 720p",
+        rawTitle: `${item.title} 720p`,
       }),
     }),
     expect.objectContaining({
       data: expect.objectContaining({
-        rawTitle: "Test Movie",
+        rawTitle: item.title,
       }),
     }),
   ]);
@@ -167,41 +156,26 @@ it("handles foreign language movies with aliases correctly", async ({
 }) => {
   const em = database.em.fork();
 
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
-    state: "completed",
-    type: "movie",
-  });
+  await database.orm.seeder.seed(MovieWithAliasesSeeder);
 
-  const itemWithAliases = em.create(Movie, {
+  const itemWithAliases = await database.movie.findOneOrFail({
     title: "Foreign Movie",
-    contentRating: "g",
-    itemRequest,
-    tmdbId: "67890",
-    aliases: {
-      es: ["Película Extranjera"],
-      fr: ["Film Étranger"],
-      jp: ["外国映画"],
-    },
-    isRequested: true,
   });
 
-  for (let i = 1; i <= 3; i++) {
-    em.create(Stream, {
-      infoHash: `a${i.toString()}34567890123456789012345678901234567890`,
-      parsedData: {} as never,
-    });
-  }
-
-  await em.flush();
+  await new StreamFactory(em)
+    .each((stream, i) => {
+      stream.infoHash = `a${i.toString()}34567890123456789012345678901234567890`;
+      stream.parsedData = {} as never;
+    })
+    .create(3);
 
   const job = await Job.create(mockQueue, "mock-rank-streams", {
     id: itemWithAliases.id,
     streams: {
-      a134567890123456789012345678901234567890:
+      a034567890123456789012345678901234567890:
         "Película Extranjera 1080p BluRay",
-      a234567890123456789012345678901234567890: "Film Étranger 720p",
-      a334567890123456789012345678901234567890: "Foreign Movie 1080p",
+      a134567890123456789012345678901234567890: "Film Étranger 720p",
+      a234567890123456789012345678901234567890: "Foreign Movie 1080p",
     },
     rtnSettings: createSettings(),
     rtnRankingModel: defaultRankingModel,
@@ -236,42 +210,24 @@ it("handles foreign language shows with aliases correctly", async ({
 }) => {
   const em = database.em.fork();
 
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
-    state: "completed",
-    type: "show",
-  });
+  await database.orm.seeder.seed(ShowWithAliasesSeeder);
 
-  const itemWithAliases = em.create(Show, {
-    title: "Foreign Show",
-    contentRating: "tv-14",
-    itemRequest,
-    tvdbId: "67890",
-    status: "ended",
-    aliases: {
-      es: ["Película Extranjera"],
-      fr: ["Show Étranger"],
-      jp: ["外国映画"],
-    },
-    isRequested: true,
-  });
+  await new StreamFactory(em)
+    .each((stream, i) => {
+      stream.infoHash = `a${i.toString()}34567890123456789012345678901234567890`;
+      stream.parsedData = {} as never;
+    })
+    .create(3);
 
-  for (let i = 1; i <= 3; i++) {
-    em.create(Stream, {
-      infoHash: `a${i.toString()}34567890123456789012345678901234567890`,
-      parsedData: {} as never,
-    });
-  }
-
-  await em.flush();
+  const item = await database.show.findOneOrFail({ type: "show" });
 
   const job = await Job.create(mockQueue, "mock-rank-streams", {
-    id: itemWithAliases.id,
+    id: item.id,
     streams: {
-      a134567890123456789012345678901234567890:
+      a034567890123456789012345678901234567890:
         "Película Extranjera 1080p BluRay",
-      a234567890123456789012345678901234567890: "Show Étranger 720p",
-      a334567890123456789012345678901234567890: "Foreign Show 1080p",
+      a134567890123456789012345678901234567890: "Show Étranger 720p",
+      a234567890123456789012345678901234567890: "Foreign Show 1080p",
     },
     rtnSettings: createSettings(),
     rtnRankingModel: defaultRankingModel,

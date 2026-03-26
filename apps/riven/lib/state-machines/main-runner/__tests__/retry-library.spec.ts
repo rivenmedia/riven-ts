@@ -1,28 +1,29 @@
 import { expect, vi } from "vitest";
 
 import { database } from "../../../database/database.ts";
+import { ItemRequestFactory } from "../../../database/factories/item-request.factory.ts";
 import { it } from "./helpers/test-context.ts";
 
 it('sends a "riven.media-item.index.requested" event for each incomplete item request in the database', async ({
   actor,
 }) => {
+  const em = database.orm.em.fork();
+  const itemRequestFactory = new ItemRequestFactory(em);
+
   const items = [
-    database.itemRequest.create({
+    itemRequestFactory.makeEntity({
       imdbId: "tt1234567",
       type: "movie",
-      requestedBy: "@repo/plugin-test",
       state: "requested",
     }),
-    database.itemRequest.create({
+    itemRequestFactory.makeEntity({
       imdbId: "tt2345678",
       type: "show",
-      requestedBy: "@repo/plugin-test",
       state: "requested",
     }),
-    database.itemRequest.create({
+    itemRequestFactory.makeEntity({
       imdbId: "tt3456789",
       type: "show",
-      requestedBy: "@repo/plugin-test",
       state: "failed",
     }),
   ];

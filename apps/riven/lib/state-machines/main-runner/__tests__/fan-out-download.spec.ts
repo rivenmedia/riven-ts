@@ -1,18 +1,12 @@
 import { getEventTypeFromSchema } from "@repo/util-plugin-sdk";
-import {
-  ItemRequest,
-  Season,
-  Show,
-  Stream,
-} from "@repo/util-plugin-sdk/dto/entities";
+import { Show } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemDownloadErrorEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
-import { parse } from "@repo/util-rank-torrent-name";
 
-import { DateTime } from "luxon";
 import assert from "node:assert";
 import { expect, vi } from "vitest";
 
 import { database } from "../../../database/database.ts";
+import { ScrapedShowSeeder } from "../../../database/seeders/shows/scraped-show.seeder.ts";
 import { flow } from "../../../message-queue/flows/producer.ts";
 import { it } from "./helpers/test-context.ts";
 
@@ -21,50 +15,13 @@ const eventType = getEventTypeFromSchema(MediaItemDownloadErrorEvent);
 it(`enqueues a scrape for each incomplete season when a "${eventType}" event is received for a show`, async ({
   actor,
 }) => {
-  const em = database.em.fork();
+  await database.orm.seeder.seed(ScrapedShowSeeder);
+
+  const show = await database.em
+    .fork()
+    .findOneOrFail(Show, { type: "show" }, { populate: ["seasons"] });
 
   const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
-
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
-    state: "completed",
-    type: "show",
-  });
-
-  const show = em.create(Show, {
-    contentRating: "tv-14",
-    title: "Test Show",
-    tvdbId: "1",
-    id: 1,
-    status: "ended",
-    itemRequest,
-    isRequested: true,
-    releaseDate: DateTime.now().toISO(),
-  });
-
-  await em.flush();
-
-  for (let i = 1; i <= 3; i++) {
-    const season = em.create(Season, {
-      number: i,
-      title: `Season ${i.toString().padStart(2, "0")}`,
-      tvdbId: i.toString(),
-      isSpecial: false,
-      isRequested: true,
-      itemRequest,
-    });
-
-    show.seasons.add(season);
-  }
-
-  const stream = em.create(Stream, {
-    infoHash: "1234567890123456789012345678901234567890",
-    parsedData: parse("Test Show S01 1080p"),
-  });
-
-  show.streams.add(stream);
-
-  await em.flush();
 
   actor.start();
 
@@ -93,51 +50,17 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
 it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is received for a season`, async ({
   actor,
 }) => {
+  await database.orm.seeder.seed(ScrapedShowSeeder);
+
+  const show = await database.em
+    .fork()
+    .findOneOrFail(
+      Show,
+      { type: "show" },
+      { populate: ["seasons", "seasons.episodes"] },
+    );
+
   const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
-
-  const em = database.em.fork();
-
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
-    state: "completed",
-    type: "show",
-  });
-
-  const show = em.create(Show, {
-    contentRating: "tv-14",
-    title: "Test Show",
-    tvdbId: "1",
-    id: 1,
-    status: "ended",
-    itemRequest,
-    isRequested: true,
-    releaseDate: DateTime.now().toISO(),
-  });
-
-  await em.flush();
-
-  for (let i = 1; i <= 3; i++) {
-    const season = em.create(Season, {
-      number: i,
-      title: `Season ${i.toString().padStart(2, "0")}`,
-      tvdbId: show.tvdbId,
-      isSpecial: false,
-      isRequested: true,
-      itemRequest,
-      releaseDate: DateTime.now().toISO(),
-    });
-
-    show.seasons.add(season);
-  }
-
-  const stream = em.create(Stream, {
-    infoHash: "1234567890123456789012345678901234567890",
-    parsedData: parse("Test Show S01 1080p"),
-  });
-
-  show.streams.add(stream);
-
-  await em.flush();
 
   actor.start();
 

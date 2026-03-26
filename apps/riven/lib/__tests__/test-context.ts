@@ -16,8 +16,8 @@ import { expect, test as testBase } from "vitest";
 import { database } from "../database/database.ts";
 import { MediaEntryFactory } from "../database/factories/media-entry.factory.ts";
 import { StreamFactory } from "../database/factories/stream.factory.ts";
-import { MovieSeeder } from "../database/seeders/movie.seeder.ts";
-import { ShowSeeder } from "../database/seeders/show.seeder.ts";
+import { MovieSeeder } from "../database/seeders/movies/movie.seeder.ts";
+import { ShowSeeder } from "../database/seeders/shows/show.seeder.ts";
 
 import type { SetupServerApi } from "msw/node";
 

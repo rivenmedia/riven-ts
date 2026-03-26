@@ -1,6 +1,5 @@
 import {
   Episode,
-  ItemRequest,
   Movie,
   Season,
   Show,
@@ -10,6 +9,8 @@ import { parse } from "@repo/util-rank-torrent-name";
 import { it as baseIt, expect, vi } from "vitest";
 
 import { database } from "../../../../../../database/database.ts";
+import { ScrapedMovieSeeder } from "../../../../../../database/seeders/movies/scraped-movie.seeder.ts";
+import { ScrapedShowSeeder } from "../../../../../../database/seeders/shows/scraped-show.seeder.ts";
 import * as settingsModule from "../../../../../../utilities/settings.ts";
 import { SkippedTorrentError, validateTorrent } from "./validate-torrent.ts";
 
@@ -22,78 +23,23 @@ const it = baseIt.extend<{
   infoHash: string;
 }>({
   movie: async ({}, use) => {
+    await database.orm.seeder.seed(ScrapedMovieSeeder);
+
     const em = database.em.fork();
+    const movie = await em.findOneOrFail(Movie, { type: "movie" });
 
-    const itemRequest = em.create(ItemRequest, {
-      requestedBy: "@repo/plugin-test",
-      state: "completed",
-      type: "movie",
-    });
-
-    const movie = em.create(Movie, {
-      title: "Test Movie",
-      contentRating: "g",
-      tmdbId: "1",
-      itemRequest,
-      isRequested: true,
-    });
-
-    await em.flush();
     await use(movie);
   },
   show: async ({}, use) => {
-    const em = database.em.fork();
+    await database.orm.seeder.seed(ScrapedShowSeeder);
 
-    const itemRequest = em.create(ItemRequest, {
-      requestedBy: "@repo/plugin-test",
-      state: "completed",
-      type: "show",
-    });
-
-    const show = em.create(Show, {
-      title: "Test Show",
-      contentRating: "tv-14",
-      status: "ended",
-      tvdbId: "1",
-      itemRequest,
-      isRequested: true,
-    });
-
-    await em.flush();
-
-    let episodeNumber = 0;
-
-    for (let i = 1; i <= 6; i++) {
-      const season = em.create(Season, {
-        title: `Season ${i.toString()}`,
-        number: i,
-        isSpecial: false,
-        isRequested: true,
-        itemRequest,
-      });
-
-      show.seasons.add(season);
-
-      await em.flush();
-
-      for (let i = 1; i <= 10; i++) {
-        const episode = em.create(Episode, {
-          title: `Episode ${i.toString().padStart(2, "0")}`,
-          contentRating: "tv-14",
-          number: i,
-          absoluteNumber: ++episodeNumber,
-          isSpecial: false,
-          isRequested: true,
-          itemRequest,
-        });
-
-        season.episodes.add(episode);
-      }
-
-      show.seasons.add(season);
-    }
-
-    await em.flush();
+    const show = await database.em
+      .fork()
+      .findOneOrFail(
+        Show,
+        { type: "show" },
+        { populate: ["seasons.episodes"] },
+      );
 
     await use(show);
   },

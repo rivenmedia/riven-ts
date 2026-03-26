@@ -71,9 +71,7 @@ export class Episode extends ShowLikeMediaItem {
 
   getMediaEntries() {
     return this.filesystemEntries.matching<MediaEntry>({
-      where: {
-        type: "media",
-      },
+      where: { type: "media" },
       refresh: true,
     });
   }

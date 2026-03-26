@@ -1,16 +1,11 @@
-import {
-  Episode,
-  ItemRequest,
-  MediaEntry,
-  Movie,
-  Season,
-  Show,
-} from "@repo/util-plugin-sdk/dto/entities";
+import { Episode, MediaEntry, Show } from "@repo/util-plugin-sdk/dto/entities";
 
 import Fuse from "@zkochan/fuse-native";
 import { expect, vi } from "vitest";
 
 import { rivenTestContext as it } from "../../__tests__/test-context.ts";
+import { CompletedMovieSeeder } from "../../database/seeders/movies/completed-movie.seeder.ts";
+import { CompletedShowSeeder } from "../../database/seeders/shows/completed-show.seeder.ts";
 import { getattrSync, parseMode } from "./getattr.ts";
 
 it("returns directory stats for the root directory", async () => {
@@ -62,41 +57,18 @@ it("returns ENOENT for unknown paths", async () => {
   });
 });
 
-it("returns file stats for movie files", async ({ em }) => {
+it("returns file stats for movie files", async ({ em, orm }) => {
+  await orm.seeder.seed(CompletedMovieSeeder);
+
+  const mediaEntry = await em.findOneOrFail(
+    MediaEntry,
+    { type: "media" },
+    { populate: ["mediaItem"] },
+  );
+
   const callback = vi.fn();
 
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
-    state: "completed",
-    type: "movie",
-  });
-
-  const mediaItem = em.create(Movie, {
-    title: "Inception",
-    year: 2010,
-    tmdbId: "27205",
-    contentRating: "pg-13",
-    itemRequest,
-    isRequested: true,
-  });
-
-  await em.flush();
-
-  const mediaEntry = em.create(MediaEntry, {
-    fileSize: 2147483648,
-    originalFilename: "Inception (2010) {tmdb-27205}.mkv",
-    plugin: "@repo/plugin-test",
-    mediaItem,
-  });
-
-  mediaItem.filesystemEntries.add(mediaEntry);
-
-  await em.flush();
-
-  getattrSync(
-    "/movies/Inception (2010) {tmdb-27205}/Inception (2010) {tmdb-27205}.mkv",
-    callback,
-  );
+  getattrSync(`/${mediaEntry.baseDirectory}/${mediaEntry.path}`, callback);
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith(null, {
@@ -106,44 +78,20 @@ it("returns file stats for movie files", async ({ em }) => {
       mode: parseMode("file"),
       gid: 1000,
       uid: 1000,
-      size: 2147483648,
+      size: mediaEntry.fileSize,
       nlink: 1,
     });
   });
 });
 
-it("returns directory stats for /movies", async ({ em }) => {
+it("returns directory stats for /movies", async ({ orm }) => {
+  await orm.seeder.seed(
+    CompletedMovieSeeder,
+    CompletedMovieSeeder,
+    CompletedMovieSeeder,
+  );
+
   const callback = vi.fn();
-
-  for (let i = 1; i <= 3; i++) {
-    const itemRequest = em.create(ItemRequest, {
-      requestedBy: "@repo/plugin-test",
-      state: "completed",
-      type: "movie",
-    });
-
-    const movie = em.create(Movie, {
-      title: `Example Movie ${i.toString()}`,
-      year: 2020,
-      contentRating: "g",
-      tmdbId: i.toString(),
-      itemRequest,
-      isRequested: true,
-    });
-
-    await em.flush();
-
-    const mediaEntry = em.create(MediaEntry, {
-      fileSize: 1234567890,
-      originalFilename: "Example Show.mkv",
-      plugin: "@repo/plugin-test",
-      mediaItem: movie,
-    });
-
-    movie.filesystemEntries.add(mediaEntry);
-  }
-
-  await em.flush();
 
   getattrSync("/movies", callback);
 
@@ -161,66 +109,14 @@ it("returns directory stats for /movies", async ({ em }) => {
   });
 });
 
-it("returns directory stats for /shows", async ({ em }) => {
+it("returns directory stats for /shows", async ({ orm }) => {
+  await orm.seeder.seed(
+    CompletedShowSeeder,
+    CompletedShowSeeder,
+    CompletedShowSeeder,
+  );
+
   const callback = vi.fn();
-
-  for (let i = 1; i <= 3; i++) {
-    const itemRequest = em.create(ItemRequest, {
-      requestedBy: "@repo/plugin-test",
-      state: "completed",
-      type: "show",
-    });
-
-    const show = em.create(Show, {
-      title: "Example Show",
-      tvdbId: i.toString(),
-      contentRating: "tv-14",
-      year: 2026,
-      status: "continuing",
-      itemRequest,
-      isRequested: true,
-    });
-
-    await em.flush();
-
-    const season = em.create(Season, {
-      title: `Season ${i.toString().padStart(2, "0")}`,
-      year: 2020,
-      number: i,
-      isSpecial: false,
-      isRequested: true,
-      itemRequest,
-    });
-
-    show.seasons.add(season);
-
-    await em.flush();
-
-    const episode = em.create(Episode, {
-      title: "Episode 01",
-      year: 2020,
-      contentRating: "tv-14",
-      number: 1,
-      absoluteNumber: 1,
-      isSpecial: false,
-      type: "episode",
-      isRequested: true,
-      itemRequest,
-    });
-
-    season.episodes.add(episode);
-
-    const mediaEntry = em.create(MediaEntry, {
-      fileSize: 1234567890,
-      originalFilename: "Example Show.mkv",
-      plugin: "@repo/plugin-test",
-      mediaItem: episode,
-    });
-
-    episode.filesystemEntries.add(mediaEntry);
-  }
-
-  await em.flush();
 
   getattrSync("/shows", callback);
 
@@ -238,67 +134,18 @@ it("returns directory stats for /shows", async ({ em }) => {
   });
 });
 
-it("returns directory stats for single shows", async ({ em }) => {
-  const callback = vi.fn();
+it("returns directory stats for single shows", async ({ em, orm }) => {
+  await orm.seeder.seed(CompletedShowSeeder);
 
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
-    state: "completed",
+  const show = await em.findOneOrFail(Show, {
     type: "show",
   });
 
-  const show = em.create(Show, {
-    title: "Example Show",
-    tvdbId: "1",
-    contentRating: "tv-14",
-    year: 2026,
-    status: "continuing",
-    itemRequest,
-    isRequested: true,
-  });
+  const seasonsCount = await show.seasons.loadCount();
 
-  await em.flush();
+  const callback = vi.fn();
 
-  for (let i = 1; i <= 10; i++) {
-    const season = em.create(Season, {
-      title: `Season ${i.toString().padStart(2, "0")}`,
-      year: 2020,
-      number: i,
-      isSpecial: false,
-      isRequested: true,
-      itemRequest,
-    });
-
-    show.seasons.add(season);
-
-    await em.flush();
-
-    const episode = em.create(Episode, {
-      title: "Episode 01",
-      year: 2020,
-      contentRating: "tv-14",
-      number: 1,
-      absoluteNumber: 1,
-      isSpecial: false,
-      isRequested: true,
-      itemRequest,
-    });
-
-    season.episodes.add(episode);
-
-    const mediaEntry = em.create(MediaEntry, {
-      fileSize: 1234567890,
-      originalFilename: "Example Show.mkv",
-      plugin: "@repo/plugin-test",
-      mediaItem: episode,
-    });
-
-    episode.filesystemEntries.add(mediaEntry);
-  }
-
-  await em.flush();
-
-  getattrSync("/shows/Example Show (2026) {tvdb-1}", callback);
+  getattrSync(`/shows/{tvdb-${show.tvdbId}}`, callback);
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith(null, {
@@ -309,72 +156,21 @@ it("returns directory stats for single shows", async ({ em }) => {
       gid: 1000,
       uid: 1000,
       size: 0,
-      nlink: 12,
+      nlink: 2 + seasonsCount,
     });
   });
 });
 
-it("returns directory stats for single seasons", async ({ em }) => {
-  const callback = vi.fn();
+it("returns directory stats for single seasons", async ({ em, orm }) => {
+  await orm.seeder.seed(CompletedShowSeeder);
 
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
-    state: "completed",
+  const show = await em.findOneOrFail(Show, {
     type: "show",
   });
 
-  const show = em.create(Show, {
-    title: "Example Show",
-    tvdbId: "1",
-    contentRating: "tv-14",
-    year: 2026,
-    status: "continuing",
-    itemRequest,
-    isRequested: true,
-  });
+  const callback = vi.fn();
 
-  await em.flush();
-
-  const season = em.create(Season, {
-    title: "Season 01",
-    year: 2020,
-    number: 1,
-    isSpecial: false,
-    isRequested: true,
-    itemRequest,
-  });
-
-  show.seasons.add(season);
-
-  await em.flush();
-
-  for (let i = 1; i <= 10; i++) {
-    const episode = em.create(Episode, {
-      title: "Episode 01",
-      year: 2020,
-      contentRating: "tv-14",
-      number: 1,
-      absoluteNumber: 1,
-      isSpecial: false,
-      isRequested: true,
-      itemRequest,
-    });
-
-    season.episodes.add(episode);
-
-    const mediaEntry = em.create(MediaEntry, {
-      fileSize: 1234567890,
-      originalFilename: "Example Show.mkv",
-      plugin: "@repo/plugin-test",
-      mediaItem: episode,
-    });
-
-    episode.filesystemEntries.add(mediaEntry);
-  }
-
-  await em.flush();
-
-  getattrSync("/shows/Example Show (2026) {tvdb-1}/Season 01", callback);
+  getattrSync(`/shows/{tvdb-${show.tvdbId}}/Season 01`, callback);
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith(null, {
@@ -390,70 +186,24 @@ it("returns directory stats for single seasons", async ({ em }) => {
   });
 });
 
-it("returns file stats for episodes", async ({ em }) => {
-  const callback = vi.fn();
+it("returns file stats for episodes", async ({ orm, em }) => {
+  await orm.seeder.seed(CompletedShowSeeder);
 
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
-    state: "completed",
-    type: "show",
-  });
-
-  const show = em.create(Show, {
-    title: "Example Show",
-    tvdbId: "1",
-    contentRating: "tv-14",
-    year: 2026,
-    status: "continuing",
-    itemRequest,
-    isRequested: true,
-  });
-
-  await em.flush();
-
-  const season = em.create(Season, {
-    title: "Season 01",
-    year: 2020,
-    number: 1,
-    isSpecial: false,
-    isRequested: true,
-    itemRequest,
-  });
-
-  show.seasons.add(season);
-
-  await em.flush();
-
-  const episode = em.create(Episode, {
-    title: "Episode 01",
-    year: 2020,
-    contentRating: "tv-14",
-    number: 1,
-    absoluteNumber: 1,
-    isSpecial: false,
-    isRequested: true,
-    itemRequest,
-  });
-
-  season.episodes.add(episode);
-
-  const mediaEntry = em.create(MediaEntry, {
-    fileSize: 1234567890,
-    originalFilename: "Example Show.mkv",
-    plugin: "@repo/plugin-test",
-    mediaItem: episode,
-  });
-
-  episode.filesystemEntries.add(mediaEntry);
-
-  await em.flush();
-
-  getattrSync(
-    "/shows/Example Show (2026) {tvdb-1}/Season 01/Example Show - s01e01.mkv",
-    callback,
+  const episode = await em.findOneOrFail(
+    Episode,
+    { absoluteNumber: 1 },
+    { populate: ["filesystemEntries.fileSize"] },
   );
 
+  const mediaEntries = await episode.getMediaEntries();
+
+  const callback = vi.fn();
+
+  getattrSync(`/shows/{tvdb-${episode.tvdbId}}/Season 01/s01e01.mkv`, callback);
+
   await vi.waitFor(() => {
+    expect.assert(mediaEntries[0]);
+
     expect(callback).toHaveBeenCalledWith(null, {
       atime: expect.any(Date),
       ctime: expect.any(Date),
@@ -461,7 +211,7 @@ it("returns file stats for episodes", async ({ em }) => {
       mode: parseMode("file"),
       gid: 1000,
       uid: 1000,
-      size: 1234567890,
+      size: mediaEntries[0].fileSize,
       nlink: 1,
     });
   });

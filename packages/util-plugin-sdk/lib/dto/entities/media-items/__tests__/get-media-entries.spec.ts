@@ -76,7 +76,6 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     number: 1,
     absoluteNumber: 1,
     contentRating: "tv-14",
-    isSpecial: false,
     isRequested: true,
     itemRequest,
   });
@@ -86,7 +85,6 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     number: 2,
     absoluteNumber: 2,
     contentRating: "tv-14",
-    isSpecial: false,
     isRequested: true,
     itemRequest,
   });
@@ -162,7 +160,6 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     number: 1,
     absoluteNumber: 1,
     contentRating: "tv-14",
-    isSpecial: false,
     isRequested: true,
     itemRequest,
   });
@@ -172,7 +169,6 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     number: 1,
     absoluteNumber: 2,
     contentRating: "tv-14",
-    isSpecial: false,
     isRequested: true,
     itemRequest,
   });
@@ -242,7 +238,6 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     number: 1,
     absoluteNumber: 1,
     contentRating: "tv-14",
-    isSpecial: false,
     isRequested: true,
     itemRequest,
   });

@@ -1,12 +1,16 @@
-import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
+import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
+import { faker } from "@faker-js/faker";
 import { ref, wrap } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
 import { rivenTestContext as it } from "../../../../__tests__/test-context.ts";
+import { StreamFactory } from "../../../../database/factories/stream.factory.ts";
+import { CompletedMovieSeeder } from "../../../../database/seeders/movies/completed-movie.seeder.ts";
+import { ScrapedMovieSeeder } from "../../../../database/seeders/movies/scraped-movie.seeder.ts";
 import { MatchedFile } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { persistDownloadResults } from "./persist-download-results.ts";
 
@@ -31,26 +35,29 @@ it("throws an error if the media item has no streams", async ({ movie }) => {
         torrentId: "1",
       },
     }),
-  ).rejects.toThrow(UnrecoverableError);
+  ).rejects.toThrow(
+    new UnrecoverableError(
+      `No media item found with ID ${movie.id.toString()} and stream info hash 1234567890123456789012345678901234567890`,
+    ),
+  );
 });
 
 it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in the scraped or ongoing state", async ({
-  movie,
-  stream,
   em,
+  orm,
 }) => {
-  movie.streams.add(stream);
-  movie.filesystemEntries.add(
-    em.create(MediaEntry, {
-      fileSize: 1024,
-      downloadUrl: "http://example.com/file.mp4",
-      originalFilename: "file.mp4",
-      plugin: "@repo/plugin-test",
-      mediaItem: movie,
+  await orm.seeder.seed(CompletedMovieSeeder);
+
+  const movie = await em.findOneOrFail(Movie, { type: "movie" });
+  const infoHash = faker.git.commitSha();
+
+  movie.streams.add(
+    new StreamFactory(em).makeEntity({
+      infoHash,
     }),
   );
 
-  await em.persist(movie).flush();
+  await em.flush();
 
   await expect(
     persistDownloadResults({
@@ -58,7 +65,7 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
       processedBy: "@repo/plugin-test",
       torrent: {
         torrentId: "1",
-        infoHash: stream.infoHash,
+        infoHash,
         provider: null,
         files: [
           {
@@ -76,13 +83,19 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
 });
 
 it("sets the active stream and updates the state to completed if successful", async ({
-  movie,
-  stream,
   em,
+  orm,
 }) => {
-  movie.streams.add(stream);
+  await orm.seeder.seed(ScrapedMovieSeeder);
 
-  await em.persist(movie).flush();
+  const movie = await em.findOneOrFail(
+    Movie,
+    { type: "movie" },
+    { populate: ["streams"] },
+  );
+  const stream = movie.streams[0];
+
+  expect.assert(stream);
 
   const updatedItem = await persistDownloadResults({
     id: movie.id,

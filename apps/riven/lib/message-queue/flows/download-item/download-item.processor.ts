@@ -44,7 +44,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
 
       if (
         (updatedItem instanceof Show || updatedItem instanceof Season) &&
-        updatedItem.state === "ongoing"
+        updatedItem.state === "partially_completed"
       ) {
         const show = await updatedItem.getShow();
         const episodes = await show.getEpisodes();

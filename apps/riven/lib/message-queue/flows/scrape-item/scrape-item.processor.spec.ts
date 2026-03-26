@@ -1,13 +1,13 @@
-import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
+import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { parse } from "@repo/util-rank-torrent-name";
 
+import { faker } from "@faker-js/faker";
 import * as Sentry from "@sentry/node";
 import { Job } from "bullmq";
-import { DateTime, Settings } from "luxon";
 import { expect, vi } from "vitest";
 
-import { database } from "../../../database/database.ts";
+import { rivenTestContext as it } from "../../../__tests__/test-context.ts";
+import { MovieSeeder } from "../../../database/seeders/movies/movie.seeder.ts";
 import { createQueue } from "../../utilities/create-queue.ts";
 import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 
@@ -29,37 +29,16 @@ it("throws an unrecoverable error if the item cannot be scraped", async () => {
 
 it.todo("throws an unrecoverable if no new streams were found");
 
-it('sends a "riven.media-item.scrape.success" event with the updated item if the scrape is successful', async () => {
-  const sendEvent = vi.fn();
-
-  vi.spyOn(Settings, "now").mockReturnValue(10000);
+it('sends a "riven.media-item.scrape.success" event with the updated item if the scrape is successful', async ({
+  orm,
+}) => {
+  await orm.seeder.seed(MovieSeeder);
 
   const mockQueue = createQueue("mock-queue");
   const job: Parameters<ScrapeItemFlow["processor"]>[0]["job"] =
     await Job.create(mockQueue, "mock-scrape-item", { id: 1 });
 
-  const em = database.orm.em.fork();
-
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
-    state: "completed",
-    type: "movie",
-  });
-
-  em.create(Movie, {
-    id: 1,
-    tmdbId: "123",
-    contentRating: "g",
-    title: "Test Movie",
-    year: 2024,
-    itemRequest,
-    isRequested: true,
-    releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
-  });
-
-  await em.flush();
-
-  const streamInfoHash = "1234567890123456789012345678901234567890";
+  const streamInfoHash = faker.git.commitSha();
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -70,11 +49,19 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
     },
   });
 
-  await scrapeItemProcessor({ job, scope: new Sentry.Scope() }, sendEvent);
+  const sendEvent = vi.fn();
+
+  await scrapeItemProcessor(
+    {
+      job,
+      scope: new Sentry.Scope(),
+    },
+    sendEvent,
+  );
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.scrape.success",
-    item: expect.any(Movie) as Movie,
+    item: expect.any(Movie),
   });
 });
 

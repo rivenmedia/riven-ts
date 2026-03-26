@@ -47,7 +47,9 @@ export async function persistDownloadResults({
 
     assert(
       existingItem,
-      new UnrecoverableError(`Media item with ID ${id.toString()} not found`),
+      new UnrecoverableError(
+        `No media item found with ID ${id.toString()} and stream info hash ${torrent.infoHash}`,
+      ),
     );
 
     const processableStates = MediaItemState.extract([
@@ -71,7 +73,7 @@ export async function persistDownloadResults({
       assert(
         matchedStream,
         new UnrecoverableError(
-          `Media item with ID ${id.toString()} does not have a stream matching the torrent's info hash`,
+          `Media item with ID ${id.toString()} does not have a stream matching the torrent's info hash ${torrent.infoHash}`,
         ),
       );
 

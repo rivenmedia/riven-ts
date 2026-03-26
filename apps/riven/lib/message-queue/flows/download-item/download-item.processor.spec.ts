@@ -1,55 +1,34 @@
-import {
-  Episode,
-  ItemRequest,
-  Movie,
-  Season,
-  Show,
-  Stream,
-} from "@repo/util-plugin-sdk/dto/entities";
+import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
-import { parse } from "@repo/util-rank-torrent-name";
 
 import * as Sentry from "@sentry/node";
 import { Job, UnrecoverableError } from "bullmq";
-import { DateTime, Settings } from "luxon";
+import { Settings } from "luxon";
 import { expect, vi } from "vitest";
 
 import { database } from "../../../database/database.ts";
+import { MovieSeeder } from "../../../database/seeders/movies/movie.seeder.ts";
+import { ScrapedMovieSeeder } from "../../../database/seeders/movies/scraped-movie.seeder.ts";
+import { ScrapedShowSeeder } from "../../../database/seeders/shows/scraped-show.seeder.ts";
 import { createQueue } from "../../utilities/create-queue.ts";
 import { downloadItemProcessor } from "./download-item.processor.ts";
 
 import type { DownloadItemFlow } from "./download-item.schema.ts";
 
 it("throws an unrecoverable error if no valid torrent is found", async () => {
-  const sendEvent = vi.fn();
+  await database.orm.seeder.seed(MovieSeeder);
 
-  const em = database.em.fork();
-
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
-    state: "completed",
-    type: "movie",
-  });
-
-  em.create(Movie, {
-    id: 1,
-    contentRating: "g",
-    tmdbId: "1234",
-    title: "Test Movie",
-    year: 2024,
-    itemRequest,
-    isRequested: true,
-  });
-
-  await em.flush();
+  const movie = await database.movie.findOneOrFail({ type: "movie" });
 
   const mockQueue = createQueue("mock-queue");
   const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
     await Job.create(mockQueue, "mock-download-item", {
-      id: 1,
+      id: movie.id,
     });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
+
+  const sendEvent = vi.fn();
 
   await expect(() =>
     downloadItemProcessor({ job, scope: new Sentry.Scope() }, sendEvent),
@@ -57,48 +36,24 @@ it("throws an unrecoverable error if no valid torrent is found", async () => {
 });
 
 it('sends a "riven.media-item.download.success" event with the updated item and duration from request to download if the download result is valid', async () => {
-  const sendEvent = vi.fn();
-
   vi.spyOn(Settings, "now").mockReturnValue(10000);
+
+  await database.orm.seeder.seed(ScrapedMovieSeeder);
+
+  const movie = await database.movie.findOneOrFail({ type: "movie" });
+  const streams = await movie.streams.load();
+  const streamInfoHash = streams[0]?.infoHash;
 
   const mockQueue = createQueue("mock-queue");
   const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
     await Job.create(
       mockQueue,
       "mock-download-item",
-      { id: 1 },
+      { id: movie.id },
       { timestamp: 1000 },
     );
 
-  const em = database.orm.em.fork();
-
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
-    state: "completed",
-    type: "movie",
-  });
-
-  const movie = em.create(Movie, {
-    id: 1,
-    tmdbId: "123",
-    contentRating: "g",
-    title: "Test Movie",
-    year: 2024,
-    itemRequest,
-    isRequested: true,
-    releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
-  });
-
-  const streamInfoHash = "test-info-hash";
-
-  const stream = em.create(Stream, {
-    infoHash: streamInfoHash,
-    parsedData: parse("Test Movie 2024 1080p"),
-  });
-
-  movie.streams.add(stream);
-
-  await em.flush();
+  expect.assert(streamInfoHash);
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "find-valid-torrent": {
@@ -121,11 +76,13 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     },
   });
 
+  const sendEvent = vi.fn();
+
   await downloadItemProcessor({ job, scope: new Sentry.Scope() }, sendEvent);
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.success",
-    item: expect.any(Movie) as Movie,
+    item: expect.any(Movie),
     durationFromRequestToDownload: 9,
     downloader: "@repo/plugin-test",
     provider: null,
@@ -133,75 +90,22 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
 });
 
 it('sends a "riven.media-item.download.partial-success" event with the updated item if the download result is valid but does not contain all episodes', async () => {
-  const sendEvent = vi.fn();
+  await database.orm.seeder.seed(ScrapedShowSeeder);
 
-  const em = database.orm.em.fork();
-
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
-    state: "completed",
+  const show = await database.show.findOneOrFail({
     type: "show",
   });
-
-  const show = em.create(Show, {
-    tvdbId: "123",
-    contentRating: "tv-14",
-    title: "Test Show",
-    year: 2024,
-    itemRequest,
-    status: "continuing",
-    isRequested: true,
-    releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
-  });
-
-  await em.flush();
-
-  for (let i = 1; i <= 2; i++) {
-    const season = em.create(Season, {
-      number: i,
-      title: `Season ${i.toString()}`,
-      isSpecial: false,
-      isRequested: true,
-      itemRequest,
-      releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
-    });
-
-    show.seasons.add(season);
-
-    await em.flush();
-
-    for (let j = 1; j <= 2; j++) {
-      const episode = em.create(Episode, {
-        title: `Test Show S01E0${j.toString()}`,
-        contentRating: "tv-14",
-        year: 2024,
-        number: j,
-        absoluteNumber: j,
-        isSpecial: season.isSpecial,
-        isRequested: true,
-        itemRequest,
-        releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
-      });
-
-      season.episodes.add(episode);
-    }
-  }
-
-  const streamInfoHash = "test-info-hash";
-
-  const stream = em.create(Stream, {
-    infoHash: streamInfoHash,
-    parsedData: parse("Test Show 2024 1080p"),
-  });
-
-  show.streams.add(stream);
-
-  await em.flush();
 
   const episodes = await show.getEpisodes();
 
   expect.assert(episodes[0]);
   expect.assert(episodes[1]);
+
+  await show.streams.load();
+
+  const streamInfoHash = show.streams[0]?.infoHash;
+
+  expect.assert(streamInfoHash);
 
   const mockQueue = createQueue("mock-queue");
   const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
@@ -238,49 +142,37 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
     },
   });
 
+  const sendEvent = vi.fn();
+
   await downloadItemProcessor({ job, scope: new Sentry.Scope() }, sendEvent);
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.partial-success",
-    item: expect.any(Show) as Show,
+    item: expect.any(Show),
     downloader: "@repo/plugin-test",
   });
 });
 
 it('sends a "riven.media-item.download.error" event if no valid torrent is found', async () => {
-  const sendEvent = vi.fn();
+  await database.orm.seeder.seed(MovieSeeder);
 
-  const em = database.em.fork();
-
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
-    state: "completed",
-    type: "movie",
-  });
-
-  em.create(Movie, {
-    id: 1,
-    contentRating: "g",
-    tmdbId: "1234",
-    title: "Test Movie",
-    year: 2024,
-    itemRequest,
-    isRequested: true,
-    releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
-  });
-
-  await em.flush();
+  const movie = await database.movie.findOneOrFail({ type: "movie" });
 
   const mockQueue = createQueue("mock-queue");
   const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
     await Job.create(mockQueue, "mock-download-item", {
-      id: 1,
+      id: movie.id,
     });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
+  const sendEvent = vi.fn();
+
   await downloadItemProcessor(
-    { job, scope: new Sentry.Scope() },
+    {
+      job,
+      scope: new Sentry.Scope(),
+    },
     sendEvent,
   ).catch(() => {
     /* empty */
@@ -288,7 +180,7 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.error",
-    item: expect.any(Movie) as Movie,
+    item: expect.any(Movie),
     error: expect.any(UnrecoverableError),
   });
 });

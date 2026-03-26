@@ -1,10 +1,10 @@
 import { Seeder } from "@mikro-orm/seeder";
 import { DateTime } from "luxon";
 
-import { EpisodeFactory } from "../factories/episode.factory.ts";
-import { ItemRequestFactory } from "../factories/item-request.factory.ts";
-import { SeasonFactory } from "../factories/season.factory.ts";
-import { ShowFactory } from "../factories/show.factory.ts";
+import { EpisodeFactory } from "../../factories/episode.factory.ts";
+import { ItemRequestFactory } from "../../factories/item-request.factory.ts";
+import { SeasonFactory } from "../../factories/season.factory.ts";
+import { ShowFactory } from "../../factories/show.factory.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 
@@ -19,7 +19,6 @@ export class ShowSeeder extends Seeder {
 
     const show = await new ShowFactory(em).createOne({
       itemRequest,
-      tvdbId: "1",
       releaseDate,
     });
 
@@ -45,7 +44,5 @@ export class ShowSeeder extends Seeder {
         });
       }
     }
-
-    await em.flush();
   }
 }
