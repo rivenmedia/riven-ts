@@ -1,21 +1,28 @@
 import { BaseSeeder } from "../base.seeder.ts";
-import { IndexedMovieSeeder } from "./indexed-movie.seeder.ts";
+import {
+  IndexedMovieSeeder,
+  type IndexedMovieSeederContext,
+} from "./indexed-movie.seeder.ts";
 
-import type { EntityData, EntityManager } from "@mikro-orm/core";
-import type { Movie } from "@repo/util-plugin-sdk/dto/entities";
+import type { EntityManager } from "@mikro-orm/core";
 
-export class ForeignLanguageMovieSeeder extends BaseSeeder<EntityData<Movie>> {
-  override context: EntityData<Movie> = {
-    title: "外国映画",
-    language: "jp",
-    aliases: {
-      en: ["Foreign Movie"],
-      es: ["Película Extranjera"],
-      fr: ["Film Étranger"],
-    },
-  };
+export class ForeignLanguageMovieSeeder extends BaseSeeder<IndexedMovieSeederContext> {
+  async run(
+    em: EntityManager,
+    context: IndexedMovieSeederContext = this.context,
+  ) {
+    await this.call(em, [IndexedMovieSeeder], context);
 
-  async run(em: EntityManager) {
-    await this.call(em, [IndexedMovieSeeder]);
+    em.persist(context.movie);
+
+    em.assign(context.movie, {
+      title: "外国映画",
+      language: "ja",
+      aliases: {
+        en: ["Foreign Movie"],
+        es: ["Película Extranjera"],
+        fr: ["Film Étranger"],
+      },
+    });
   }
 }

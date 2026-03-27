@@ -1,37 +1,39 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities";
-
-import { type EntityData, type EntityManager, ref } from "@mikro-orm/core";
+import { type EntityManager, ref } from "@mikro-orm/core";
 import assert from "node:assert";
 
 import { MediaEntryFactory } from "../../factories/media-entry.factory.ts";
 import { BaseSeeder } from "../base.seeder.ts";
-import { ScrapedMovieSeeder } from "./scraped-movie.seeder.ts";
+import {
+  ScrapedMovieSeeder,
+  type ScrapedMovieSeederContext,
+} from "./scraped-movie.seeder.ts";
 
-export class CompletedMovieSeeder extends BaseSeeder<EntityData<Movie>> {
-  async run(em: EntityManager) {
-    await this.call(em, [ScrapedMovieSeeder]);
+export type CompletedMovieSeederContext = ScrapedMovieSeederContext;
 
-    const movie = await em.findOneOrFail(
-      Movie,
-      { type: "movie" },
-      {
-        populate: ["streams"],
-        orderBy: { createdAt: "desc" },
-      },
+export class CompletedMovieSeeder extends BaseSeeder<CompletedMovieSeederContext> {
+  async run(
+    em: EntityManager,
+    context: CompletedMovieSeederContext = this.context,
+  ) {
+    await this.call(em, [ScrapedMovieSeeder], context);
+
+    assert(
+      context.streams[0],
+      "Expected at least one stream to be present in context.streams",
     );
 
-    assert(movie.streams[0]);
+    em.persist(context.movie);
 
-    movie.activeStream = ref(movie.streams[0]);
-    movie.filesystemEntries.set([
-      new MediaEntryFactory(em).makeEntity({ mediaItem: movie }),
+    context.movie.activeStream = ref(context.streams[0]);
+    context.movie.filesystemEntries.set([
+      new MediaEntryFactory(em).makeEntity({ mediaItem: context.movie }),
     ]);
 
     await em.flush();
 
     assert(
-      movie.state === "completed",
-      `Expected movie state to be "completed", got "${movie.state}"`,
+      context.movie.state === "completed",
+      `Expected movie state to be "completed", got "${context.movie.state}"`,
     );
   }
 }

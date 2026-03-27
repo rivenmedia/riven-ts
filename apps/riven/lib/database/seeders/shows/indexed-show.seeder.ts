@@ -2,68 +2,58 @@ import { DateTime } from "luxon";
 import assert from "node:assert";
 
 import { EpisodeFactory } from "../../factories/episode.factory.ts";
-import { ItemRequestFactory } from "../../factories/item-request.factory.ts";
 import { SeasonFactory } from "../../factories/season.factory.ts";
 import { ShowFactory } from "../../factories/show.factory.ts";
 import { BaseSeeder } from "../base.seeder.ts";
 
-import type { EntityData, EntityManager } from "@mikro-orm/core";
+import type { EntityManager } from "@mikro-orm/core";
 import type { Show } from "@repo/util-plugin-sdk/dto/entities";
 
-export interface ShowSeederContext {
-  showData?: EntityData<Show>;
-  seasonCount?: number;
-  episodesPerSeason?: number;
+export interface IndexedShowSeederContext {
+  show: Show;
 }
 
-export class IndexedShowSeeder extends BaseSeeder<ShowSeederContext> {
+export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
   #episodesPerSeason = 10;
   #seasonCount = 6;
 
   async run(
     em: EntityManager,
-    {
-      episodesPerSeason = this.#episodesPerSeason,
-      seasonCount = this.#seasonCount,
-      ...context
-    } = this.context ?? {},
+    context: IndexedShowSeederContext = this.context,
   ) {
-    const itemRequest = await new ItemRequestFactory(em).createOne({
-      state: "completed",
-      type: "show",
-    });
-
     const releaseDate = DateTime.now().minus({ years: 1 }).toISO();
 
-    const show = await new ShowFactory(em).createOne({
-      itemRequest,
+    context.show = await new ShowFactory(em).createOne({
       releaseDate,
-      ...context.showData,
     });
 
     let absoluteEpisodeNumber = 1;
 
-    for (let seasonNumber = 1; seasonNumber <= seasonCount; seasonNumber++) {
+    for (
+      let seasonNumber = 1;
+      seasonNumber <= this.#seasonCount;
+      seasonNumber++
+    ) {
       const season = await new SeasonFactory(em).createOne({
-        tvdbId: show.tvdbId,
+        tvdbId: context.show.tvdbId,
         number: seasonNumber,
-        itemRequest,
         releaseDate,
-        show,
+        show: context.show,
+        itemRequest: context.show.itemRequest,
       });
 
       for (
         let episodeNumber = 1;
-        episodeNumber <= episodesPerSeason;
+        episodeNumber <= this.#episodesPerSeason;
         episodeNumber++
       ) {
         await new EpisodeFactory(em).createOne({
-          tvdbId: show.tvdbId,
+          tvdbId: context.show.tvdbId,
           number: episodeNumber,
           absoluteNumber: absoluteEpisodeNumber++,
-          itemRequest,
           releaseDate,
           season,
+          itemRequest: context.show.itemRequest,
         });
       }
     }
@@ -71,8 +61,8 @@ export class IndexedShowSeeder extends BaseSeeder<ShowSeederContext> {
     await em.flush();
 
     assert(
-      show.state === "indexed",
-      `Expected show state to be "indexed", got "${show.state}"`,
+      context.show.state === "indexed",
+      `Expected show state to be "indexed", got "${context.show.state}"`,
     );
   }
 }

@@ -36,7 +36,6 @@ const buildSeederFunction =
   ) =>
   async <C extends number = 1>(
     count: C = 1 as C,
-    context?: S,
   ): Promise<SeederResult<T, C>> => {
     if (count < 1) {
       throw new Error("Cannot seed a non-positive number of entities");
@@ -45,7 +44,7 @@ const buildSeederFunction =
     await database.orm.seeder.seed(
       ...Array(count)
         .fill(null)
-        .map(() => seeder.bind(null, context)),
+        .map(() => seeder),
     );
 
     const entities = await em.findAll(entity, {

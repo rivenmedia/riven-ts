@@ -1,33 +1,36 @@
-import { MediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
-
 import assert from "node:assert";
 
 import { BaseSeeder } from "../base.seeder.ts";
-import { StreamsSeeder } from "../streams/streams.seeder.ts";
+import {
+  StreamsSeeder,
+  type StreamsSeederContext,
+} from "../streams/streams.seeder.ts";
 import {
   IndexedShowSeeder,
-  type ShowSeederContext,
+  type IndexedShowSeederContext,
 } from "./indexed-show.seeder.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 
-export class ScrapedShowSeeder extends BaseSeeder<ShowSeederContext> {
-  async run(em: EntityManager) {
-    await this.call(em, [IndexedShowSeeder, StreamsSeeder]);
+export interface ScrapedShowSeederContext
+  extends IndexedShowSeederContext, StreamsSeederContext {}
 
-    const show = await em.findOneOrFail(
-      MediaItem,
-      { type: "show" },
-      { orderBy: { createdAt: "desc" } },
-    );
+export class ScrapedShowSeeder extends BaseSeeder<ScrapedShowSeederContext> {
+  async run(
+    em: EntityManager,
+    context: ScrapedShowSeederContext = this.context,
+  ) {
+    await this.call(em, [IndexedShowSeeder, StreamsSeeder], context);
 
-    show.streams.set(await em.findAll(Stream));
+    em.persist(context.show);
+
+    context.show.streams.set(context.streams);
 
     await em.flush();
 
     assert(
-      show.state === "scraped",
-      `Expected show state to be "scraped", got "${show.state}"`,
+      context.show.state === "scraped",
+      `Expected show state to be "scraped", got "${context.show.state}"`,
     );
   }
 }

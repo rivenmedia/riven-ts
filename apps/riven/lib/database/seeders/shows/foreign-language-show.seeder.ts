@@ -1,58 +1,28 @@
-import { DateTime } from "luxon";
-
-import { EpisodeFactory } from "../../factories/episode.factory.ts";
-import { ItemRequestFactory } from "../../factories/item-request.factory.ts";
-import { SeasonFactory } from "../../factories/season.factory.ts";
-import { ShowFactory } from "../../factories/show.factory.ts";
 import { BaseSeeder } from "../base.seeder.ts";
+import {
+  IndexedShowSeeder,
+  type IndexedShowSeederContext,
+} from "./indexed-show.seeder.ts";
 
-import type { EntityData, EntityManager } from "@mikro-orm/core";
-import type { Show } from "@repo/util-plugin-sdk/dto/entities";
+import type { EntityManager } from "@mikro-orm/core";
 
-export class ForeignLanguageShowSeeder extends BaseSeeder<EntityData<Show>> {
-  async run(em: EntityManager) {
-    const itemRequest = await new ItemRequestFactory(em).createOne({
-      state: "completed",
-      type: "show",
-    });
+export class ForeignLanguageShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
+  async run(
+    em: EntityManager,
+    context: IndexedShowSeederContext = this.context,
+  ) {
+    await this.call(em, [IndexedShowSeeder], context);
 
-    const releaseDate = DateTime.now().minus({ years: 1 }).toISO();
+    em.persist(context.show);
 
-    const show = await new ShowFactory(em).createOne({
+    em.assign(context.show, {
       title: "海外のショー",
       language: "jp",
-      itemRequest,
-      status: "ended",
       aliases: {
         en: ["Foreign Show"],
         es: ["Espectáculo Extranjero"],
         fr: ["Spectacle Étranger"],
       },
-      isRequested: true,
-      releaseDate,
     });
-
-    let absoluteEpisodeNumber = 1;
-
-    for (let seasonNumber = 1; seasonNumber <= 6; seasonNumber++) {
-      const season = await new SeasonFactory(em).createOne({
-        tvdbId: show.tvdbId,
-        number: seasonNumber,
-        itemRequest,
-        releaseDate,
-        show,
-      });
-
-      for (let episodeNumber = 1; episodeNumber <= 10; episodeNumber++) {
-        await new EpisodeFactory(em).createOne({
-          tvdbId: show.tvdbId,
-          number: episodeNumber,
-          absoluteNumber: absoluteEpisodeNumber++,
-          itemRequest,
-          releaseDate,
-          season,
-        });
-      }
-    }
   }
 }

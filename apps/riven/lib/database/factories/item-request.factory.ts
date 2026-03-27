@@ -14,7 +14,7 @@ export class ItemRequestFactory extends Factory<ItemRequest> {
     return {
       requestedBy: faker.internet.email(),
       state: "completed",
-      type: "movie",
+      type: faker.helpers.arrayElement(["movie", "show"]),
       ...input,
     };
   }

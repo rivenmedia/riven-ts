@@ -47,6 +47,8 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
 }) => {
   const infoHash = faker.git.commitSha();
 
+  em.persist(completedMovie);
+
   completedMovie.streams.add(
     streamFactory.makeEntity({
       infoHash,
@@ -139,11 +141,11 @@ it("adds a single media entry for movies", async ({ scrapedMovie }) => {
   expect(mediaEntries).toHaveLength(1);
 });
 
-it("adds one media entry per episode for shows", async ({
-  scrapedShow,
-  stream,
-}) => {
+it("adds one media entry per episode for shows", async ({ scrapedShow }) => {
   const episodes = await scrapedShow.getEpisodes();
+  const [stream] = await scrapedShow.streams.loadItems();
+
+  expect.assert(stream);
 
   await persistDownloadResults({
     id: scrapedShow.id,
@@ -176,13 +178,14 @@ it("does not create duplicate media entries for episodes with existing entries",
   scrapedShow,
   season,
   em,
-  stream,
   mediaEntry,
 }) => {
   await wrap(season).populate(["episodes"]);
 
   const [episode] = season.episodes;
+  const [stream] = await scrapedShow.streams.loadItems();
 
+  expect.assert(stream);
   expect.assert(episode);
 
   mediaEntry.mediaItem = ref(episode);
@@ -218,8 +221,11 @@ it("does not create duplicate media entries for episodes with existing entries",
 
 it("throws a MediaItemDownloadError if a validation error occurs during persistence", async ({
   scrapedMovie,
-  stream,
 }) => {
+  const [stream] = await scrapedMovie.streams.load();
+
+  expect.assert(stream);
+
   vi.spyOn(
     await import("class-validator"),
     "validateOrReject",
