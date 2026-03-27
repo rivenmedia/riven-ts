@@ -161,9 +161,12 @@ it("does not return entries for episodes that does not have a media entry when v
       mediaItem: {
         type: "episode",
         number: 1,
+        season: {
+          number: 1,
+        },
       },
     },
-    { populate: ["mediaItem"] },
+    { populate: ["$infer"] },
   );
 
   const callback = vi.fn();
