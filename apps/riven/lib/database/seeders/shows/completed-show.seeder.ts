@@ -28,7 +28,7 @@ export class CompletedShowSeeder extends BaseSeeder<CompletedShowSeederContext> 
       em.persist(episode);
 
       episode.filesystemEntries.set([
-        new MediaEntryFactory(em).makeOne({
+        new MediaEntryFactory(em).makeEntity({
           mediaItem: episode,
         }),
       ]);
