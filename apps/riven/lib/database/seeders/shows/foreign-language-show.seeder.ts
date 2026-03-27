@@ -19,14 +19,14 @@ export class ForeignLanguageShowSeeder extends BaseSeeder<EntityData<Show>> {
     const releaseDate = DateTime.now().minus({ years: 1 }).toISO();
 
     const show = await new ShowFactory(em).createOne({
-      title: "外国映画",
+      title: "海外のショー",
       language: "jp",
       itemRequest,
       status: "ended",
       aliases: {
         en: ["Foreign Show"],
-        es: ["Película Extranjera"],
-        fr: ["Show Étranger"],
+        es: ["Espectáculo Extranjero"],
+        fr: ["Spectacle Étranger"],
       },
       isRequested: true,
       releaseDate,
