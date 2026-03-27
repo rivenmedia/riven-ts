@@ -27,8 +27,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
 }) => {
   vi.spyOn(Settings, "now").mockReturnValue(10000);
 
-  const streams = await scrapedMovie.streams.load();
-  const streamInfoHash = streams[0]?.infoHash;
+  const [{ infoHash: streamInfoHash } = {}] = await scrapedMovie.streams.load();
 
   const job = await createMockJob({ id: scrapedMovie.id }, { timestamp: 1000 });
 
