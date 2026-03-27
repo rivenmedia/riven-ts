@@ -8,9 +8,9 @@ import { ForeignLanguageMovieSeeder } from "../../database/seeders/movies/foreig
 import { IndexedMovieSeeder } from "../../database/seeders/movies/indexed-movie.seeder.ts";
 import { ScrapedMovieSeeder } from "../../database/seeders/movies/scraped-movie.seeder.ts";
 import { CompletedShowSeeder } from "../../database/seeders/shows/completed-show.seeder.ts";
+import { ForeignLanguageShowSeeder } from "../../database/seeders/shows/foreign-language-show.seeder.ts";
 import { IndexedShowSeeder } from "../../database/seeders/shows/indexed-show.seeder.ts";
 import { ScrapedShowSeeder } from "../../database/seeders/shows/scraped-show.seeder.ts";
-import { ForeignLanguageShowSeeder } from "../../database/seeders/shows/show-with-aliases.seeder.ts";
 
 import type { BaseSeeder } from "../../database/seeders/base.seeder.ts";
 import type {
