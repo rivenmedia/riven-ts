@@ -9,7 +9,7 @@ import { BaseSeeder } from "../base.seeder.ts";
 import type { EntityData, EntityManager } from "@mikro-orm/core";
 import type { Show } from "@repo/util-plugin-sdk/dto/entities";
 
-export class ShowWithAliasesSeeder extends BaseSeeder<EntityData<Show>> {
+export class ForeignLanguageShowSeeder extends BaseSeeder<EntityData<Show>> {
   async run(em: EntityManager) {
     const itemRequest = await new ItemRequestFactory(em).createOne({
       state: "completed",
@@ -19,13 +19,14 @@ export class ShowWithAliasesSeeder extends BaseSeeder<EntityData<Show>> {
     const releaseDate = DateTime.now().minus({ years: 1 }).toISO();
 
     const show = await new ShowFactory(em).createOne({
-      title: "Foreign Show",
+      title: "外国映画",
+      language: "jp",
       itemRequest,
       status: "ended",
       aliases: {
+        en: ["Foreign Show"],
         es: ["Película Extranjera"],
         fr: ["Show Étranger"],
-        jp: ["外国映画"],
       },
       isRequested: true,
       releaseDate,

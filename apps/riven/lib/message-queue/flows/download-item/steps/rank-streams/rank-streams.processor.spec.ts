@@ -131,17 +131,10 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
 
 it("handles foreign language movies with aliases correctly", async ({
   createMockJob,
-  seeders: { seedIndexedMovie },
+  seeders: { seedForeignLanguageMovie },
   factories: { streamFactory },
 }) => {
-  const itemWithAliases = await seedIndexedMovie(1, {
-    title: "Foreign Movie",
-    aliases: {
-      es: ["Película Extranjera"],
-      fr: ["Film Étranger"],
-      jp: ["外国映画"],
-    },
-  });
+  const foreignLanguageMovie = await seedForeignLanguageMovie();
 
   await streamFactory
     .each((stream, i) => {
@@ -151,7 +144,7 @@ it("handles foreign language movies with aliases correctly", async ({
     .create(3);
 
   const job = await createMockJob({
-    id: itemWithAliases.id,
+    id: foreignLanguageMovie.id,
     streams: {
       a034567890123456789012345678901234567890:
         "Película Extranjera 1080p BluRay",
@@ -188,19 +181,10 @@ it("handles foreign language movies with aliases correctly", async ({
 
 it("handles foreign language shows with aliases correctly", async ({
   createMockJob,
-  seeders: { seedIndexedShow },
+  seeders: { seedForeignLanguageShow },
   factories: { streamFactory },
 }) => {
-  const showWithAliases = await seedIndexedShow(1, {
-    showData: {
-      title: "Foreign Show",
-      aliases: {
-        es: ["Película Extranjera"],
-        fr: ["Show Étranger"],
-        jp: ["外国映画"],
-      },
-    },
-  });
+  const foreignLanguageShow = await seedForeignLanguageShow();
 
   await streamFactory
     .each((stream, i) => {
@@ -210,7 +194,7 @@ it("handles foreign language shows with aliases correctly", async ({
     .create(3);
 
   const job = await createMockJob({
-    id: showWithAliases.id,
+    id: foreignLanguageShow.id,
     streams: {
       a034567890123456789012345678901234567890:
         "Película Extranjera 1080p BluRay",

@@ -4,12 +4,13 @@ import { assert } from "vitest";
 
 import { database } from "../../database/database.ts";
 import { CompletedMovieSeeder } from "../../database/seeders/movies/completed-movie.seeder.ts";
+import { ForeignLanguageMovieSeeder } from "../../database/seeders/movies/foreign-language-movie.seeder.ts";
 import { IndexedMovieSeeder } from "../../database/seeders/movies/indexed-movie.seeder.ts";
-import { MovieWithAliasesSeeder } from "../../database/seeders/movies/movie-with-aliases.seeder.ts";
 import { ScrapedMovieSeeder } from "../../database/seeders/movies/scraped-movie.seeder.ts";
 import { CompletedShowSeeder } from "../../database/seeders/shows/completed-show.seeder.ts";
 import { IndexedShowSeeder } from "../../database/seeders/shows/indexed-show.seeder.ts";
 import { ScrapedShowSeeder } from "../../database/seeders/shows/scraped-show.seeder.ts";
+import { ForeignLanguageShowSeeder } from "../../database/seeders/shows/show-with-aliases.seeder.ts";
 
 import type { BaseSeeder } from "../../database/seeders/base.seeder.ts";
 import type {
@@ -63,12 +64,8 @@ const buildSeederFunction =
 
 export const buildSeederFunctions = (em: EntityManager) => {
   return {
+    // Movies
     seedIndexedMovie: buildSeederFunction(em, Movie, IndexedMovieSeeder),
-    seedMovieWithAliases: buildSeederFunction(
-      em,
-      Movie,
-      MovieWithAliasesSeeder,
-    ),
     seedScrapedMovie: buildSeederFunction(em, Movie, ScrapedMovieSeeder, {
       where: {
         state: "scraped",
@@ -79,6 +76,13 @@ export const buildSeederFunctions = (em: EntityManager) => {
         state: "completed",
       },
     }),
+    seedForeignLanguageMovie: buildSeederFunction(
+      em,
+      Movie,
+      ForeignLanguageMovieSeeder,
+    ),
+
+    // Shows
     seedIndexedShow: buildSeederFunction(em, Show, IndexedShowSeeder),
     seedScrapedShow: buildSeederFunction(em, Show, ScrapedShowSeeder, {
       where: {
@@ -90,5 +94,10 @@ export const buildSeederFunctions = (em: EntityManager) => {
         state: "completed",
       },
     }),
+    seedForeignLanguageShow: buildSeederFunction(
+      em,
+      Show,
+      ForeignLanguageShowSeeder,
+    ),
   };
 };
