@@ -1,61 +1,43 @@
 import { wrap } from "@mikro-orm/core";
 import * as Sentry from "@sentry/node";
-import { Job, UnrecoverableError } from "bullmq";
+import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
 import { rivenTestContext as baseIt } from "../../../../../__tests__/test-context.ts";
 import * as settingsModule from "../../../../../utilities/settings.ts";
-import { createQueue } from "../../../../utilities/create-queue.ts";
 import { parseScrapeResultsProcessor } from "./parse-scrape-results.processor.ts";
 
-import type { ParseScrapeResultsFlow } from "./parse-scrape-results.schema.ts";
+const it = baseIt.extend("scrapeResults", {
+  "1234567890123456789012345678901234567890": "Test Movie 2024 1080p WEB-DL",
+  "2234567890123456789012345678901234567890": "Test Movie 2024 2160p WEB-DL",
+  "3234567890123456789012345678901234567890": "Test Movie 2024 720p WEB-DL",
 
-const it = baseIt
-  .extend("job", async ({}) => {
-    const mockQueue = createQueue("mock-queue");
-    const job: Parameters<ParseScrapeResultsFlow["processor"]>[0]["job"] =
-      await Job.create(mockQueue, "mock-sort-scrape-results", {
-        id: 1,
-        title: "Test media item",
-      });
+  // Show torrents
+  "4234567890123456789012345678901234567890":
+    "Test Show: The Complete Series (Season 1,2,3,4,5&6) E01-60",
+  "5234567890123456789012345678901234567890":
+    "Test Show: All Seasons (Season 1,2,3,4,5&6) E01-60",
 
-    return job;
-  })
-  .extend("scrapeResults", {
-    "1234567890123456789012345678901234567890": "Test Movie 2024 1080p WEB-DL",
-    "2234567890123456789012345678901234567890": "Test Movie 2024 2160p WEB-DL",
-    "3234567890123456789012345678901234567890": "Test Movie 2024 720p WEB-DL",
+  // Season torrents
+  "6234567890123456789012345678901234567890": "Test Show 2024 1080p WEB-DL S01",
+  "7234567890123456789012345678901234567890": "Test Show 2024 1080p WEB-DL S02",
 
-    // Show torrents
-    "4234567890123456789012345678901234567890":
-      "Test Show: The Complete Series (Season 1,2,3,4,5&6) E01-60",
-    "5234567890123456789012345678901234567890":
-      "Test Show: All Seasons (Season 1,2,3,4,5&6) E01-60",
-
-    // Season torrents
-    "6234567890123456789012345678901234567890":
-      "Test Show 2024 1080p WEB-DL S01",
-    "7234567890123456789012345678901234567890":
-      "Test Show 2024 1080p WEB-DL S02",
-
-    // Episode torrents
-    "8234567890123456789012345678901234567890":
-      "Test Show 2024 1080p WEB-DL S01E01",
-    "9234567890123456789012345678901234567890":
-      "Test Show 2024 1080p WEB-DL S01E02",
-    "0234567890123456789012345678901234567890":
-      "Test Show 2024 1080p WEB-DL S01E03",
-  });
+  // Episode torrents
+  "8234567890123456789012345678901234567890":
+    "Test Show 2024 1080p WEB-DL S01E01",
+  "9234567890123456789012345678901234567890":
+    "Test Show 2024 1080p WEB-DL S01E02",
+  "0234567890123456789012345678901234567890":
+    "Test Show 2024 1080p WEB-DL S01E03",
+});
 
 it("throws an UnrecoverableError if no results are found", async ({
+  createMockJob,
   movie,
-  job,
 }) => {
-  vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
+  const job = await createMockJob({ id: movie.id });
 
-  await job.updateData({
-    id: movie.id,
-  });
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
   await expect(() =>
     parseScrapeResultsProcessor({ job, scope: new Sentry.Scope() }, vi.fn()),
@@ -64,13 +46,15 @@ it("throws an UnrecoverableError if no results are found", async ({
 
 it("returns valid movie torrents if the item is a movie", async ({
   movie,
-  job,
+  createMockJob,
 }) => {
   const rawTitles = [
     "Test Movie 2024 1080p WEB-DL",
     "Test Movie 2024 2160p WEB-DL",
     "Test Movie 2024 720p WEB-DL",
   ] as const;
+
+  const job = await createMockJob({ id: movie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -81,10 +65,6 @@ it("returns valid movie torrents if the item is a movie", async ({
         "3234567890123456789012345678901234567890": rawTitles[2],
       },
     },
-  });
-
-  await job.updateData({
-    id: movie.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -106,12 +86,14 @@ it("returns valid movie torrents if the item is a movie", async ({
 
 it("returns valid show torrents if the item is a show", async ({
   show,
-  job,
+  createMockJob,
 }) => {
   const rawTitles = [
     "Test Show: The Complete Series (Season 1,2,3,4,5&6) E01-60",
     "Test Show: All Seasons (Season 1,2,3,4,5&6) E01-60",
   ] as const;
+
+  const job = await createMockJob({ id: show.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -121,10 +103,6 @@ it("returns valid show torrents if the item is a show", async ({
         "5234567890123456789012345678901234567890": rawTitles[1],
       },
     },
-  });
-
-  await job.updateData({
-    id: show.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -146,13 +124,15 @@ it("returns valid show torrents if the item is a show", async ({
 
 it("returns valid season torrents if the item is a season", async ({
   season,
-  job,
+  createMockJob,
 }) => {
   const rawTitles = [
     "Test Show 2024 1080p WEB-DL S01 E01-10",
     "Test Show 2024 2160p WEB-DL S01 E01-10",
     "Test Show 2024 720p WEB-DL S01 E01-10",
   ] as const;
+
+  const job = await createMockJob({ id: season.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -163,10 +143,6 @@ it("returns valid season torrents if the item is a season", async ({
         "6234567890123456789012345678901234567890": rawTitles[2],
       },
     },
-  });
-
-  await job.updateData({
-    id: season.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -188,13 +164,15 @@ it("returns valid season torrents if the item is a season", async ({
 
 it("returns valid episode torrents if the item is an episode", async ({
   episode,
-  job,
+  createMockJob,
 }) => {
   const rawTitles = [
     "Test Show 2024 1080p WEB-DL S01E01",
     "Test Show 2024 2160p WEB-DL S01E01",
     "Test Show 2024 720p WEB-DL S01E01",
   ] as const;
+
+  const job = await createMockJob({ id: episode.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -205,10 +183,6 @@ it("returns valid episode torrents if the item is an episode", async ({
         "6234567890123456789012345678901234567890": rawTitles[2],
       },
     },
-  });
-
-  await job.updateData({
-    id: episode.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -228,8 +202,13 @@ it("returns valid episode torrents if the item is an episode", async ({
   );
 });
 
-it("filters show torrents if the item is a movie", async ({ movie, job }) => {
+it("filters show torrents if the item is a movie", async ({
+  movie,
+  createMockJob,
+}) => {
   const rawTitle = "Test Movie S01E01";
+
+  const job = await createMockJob({ id: movie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -238,10 +217,6 @@ it("filters show torrents if the item is a movie", async ({ movie, job }) => {
         "1234567890123456789012345678901234567890": rawTitle,
       },
     },
-  });
-
-  await job.updateData({
-    id: movie.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -261,9 +236,11 @@ it("filters show torrents if the item is a movie", async ({ movie, job }) => {
 
 it("filters out torrents with 2 or fewer episodes for shows", async ({
   show,
-  job,
+  createMockJob,
 }) => {
   const rawTitle = "Test Show: S01E01";
+
+  const job = await createMockJob({ id: show.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -272,10 +249,6 @@ it("filters out torrents with 2 or fewer episodes for shows", async ({
         "1434567890123456789012345678901234567890": rawTitle,
       },
     },
-  });
-
-  await job.updateData({
-    id: show.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -297,9 +270,11 @@ it("filters out torrents with 2 or fewer episodes for shows", async ({
 
 it("filters out torrents with an incorrect number of seasons for shows", async ({
   show,
-  job,
+  createMockJob,
 }) => {
   const rawTitle = "Test Show: S01-03 E01-30";
+
+  const job = await createMockJob({ id: show.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -308,10 +283,6 @@ it("filters out torrents with an incorrect number of seasons for shows", async (
         "1434567890123456789012345678901234567890": rawTitle,
       },
     },
-  });
-
-  await job.updateData({
-    id: show.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -334,11 +305,13 @@ it("filters out torrents with an incorrect number of seasons for shows", async (
 it("filters out torrents with incorrect number of episodes for single-season shows", async ({
   em,
   show,
-  job,
+  createMockJob,
 }) => {
   await wrap(show).populate(["seasons"]);
 
   const rawTitle = "Test Show: S01 E01-05";
+
+  const job = await createMockJob({ id: show.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -354,10 +327,6 @@ it("filters out torrents with incorrect number of episodes for single-season sho
   em.remove(seasonsToRemove);
 
   await em.flush();
-
-  await job.updateData({
-    id: show.id,
-  });
 
   const { results } = await parseScrapeResultsProcessor(
     { job, scope: new Sentry.Scope() },
@@ -378,9 +347,11 @@ it("filters out torrents with incorrect number of episodes for single-season sho
 
 it("filters out duplicate torrents from different plugins", async ({
   movie,
-  job,
+  createMockJob,
 }) => {
   const rawTitle = "Test Movie: 1080p";
+
+  const job = await createMockJob({ id: movie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test-1]": {
@@ -395,10 +366,6 @@ it("filters out duplicate torrents from different plugins", async ({
         "1434567890123456789012345678901234567890": rawTitle,
       },
     },
-  });
-
-  await job.updateData({
-    id: movie.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -416,9 +383,11 @@ it("filters out duplicate torrents from different plugins", async ({
 
 it("filters out torrents with the incorrect season number for season items", async ({
   season,
-  job,
+  createMockJob,
 }) => {
   const rawTitle = "Test Show 2024 S02 E01-10";
+
+  const job = await createMockJob({ id: season.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -427,10 +396,6 @@ it("filters out torrents with the incorrect season number for season items", asy
         "1434567890123456789012345678901234567890": rawTitle,
       },
     },
-  });
-
-  await job.updateData({
-    id: season.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -452,9 +417,11 @@ it("filters out torrents with the incorrect season number for season items", asy
 
 it("filters out torrents with 2 or fewer episodes for season items", async ({
   season,
-  job,
+  createMockJob,
 }) => {
   const rawTitle = "Test Show 2024 S01 E01";
+
+  const job = await createMockJob({ id: season.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -463,10 +430,6 @@ it("filters out torrents with 2 or fewer episodes for season items", async ({
         "1434567890123456789012345678901234567890": rawTitle,
       },
     },
-  });
-
-  await job.updateData({
-    id: season.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -488,9 +451,11 @@ it("filters out torrents with 2 or fewer episodes for season items", async ({
 
 it("filters out torrents with incorrect episodes for season items", async ({
   season,
-  job,
+  createMockJob,
 }) => {
   const rawTitle = "Test Show 2024 S01 E30-50";
+
+  const job = await createMockJob({ id: season.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -499,10 +464,6 @@ it("filters out torrents with incorrect episodes for season items", async ({
         "1434567890123456789012345678901234567890": rawTitle,
       },
     },
-  });
-
-  await job.updateData({
-    id: season.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -524,9 +485,11 @@ it("filters out torrents with incorrect episodes for season items", async ({
 
 it("filters out torrents with incorrect episode numbers for episode items", async ({
   episode,
-  job,
+  createMockJob,
 }) => {
   const rawTitle = "Test Show 2024 S01E02";
+
+  const job = await createMockJob({ id: episode.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -535,10 +498,6 @@ it("filters out torrents with incorrect episode numbers for episode items", asyn
         "1434567890123456789012345678901234567890": rawTitle,
       },
     },
-  });
-
-  await job.updateData({
-    id: episode.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -560,9 +519,11 @@ it("filters out torrents with incorrect episode numbers for episode items", asyn
 
 it("filters out torrents with the incorrect season number for episode items", async ({
   episode,
-  job,
+  createMockJob,
 }) => {
   const rawTitle = "Test Show 2024 S02E01";
+
+  const job = await createMockJob({ id: episode.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -571,10 +532,6 @@ it("filters out torrents with the incorrect season number for episode items", as
         "1434567890123456789012345678901234567890": rawTitle,
       },
     },
-  });
-
-  await job.updateData({
-    id: episode.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -596,9 +553,11 @@ it("filters out torrents with the incorrect season number for episode items", as
 
 it("filters out torrents with no episodes for episode items", async ({
   episode,
-  job,
+  createMockJob,
 }) => {
   const rawTitle = "Test Show 2024";
+
+  const job = await createMockJob({ id: episode.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -607,10 +566,6 @@ it("filters out torrents with no episodes for episode items", async ({
         "1434567890123456789012345678901234567890": rawTitle,
       },
     },
-  });
-
-  await job.updateData({
-    id: episode.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -632,7 +587,7 @@ it("filters out torrents with no episodes for episode items", async ({
 it("filters out torrents that do not match the media item's country", async ({
   em,
   episode,
-  job,
+  createMockJob,
 }) => {
   const rawTitle = "Test Show 2024 S01E01 [US]";
 
@@ -641,6 +596,8 @@ it("filters out torrents that do not match the media item's country", async ({
 
   await em.flush();
 
+  const job = await createMockJob({ id: episode.id });
+
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
       id: job.data.id,
@@ -648,10 +605,6 @@ it("filters out torrents that do not match the media item's country", async ({
         "1434567890123456789012345678901234567890": rawTitle,
       },
     },
-  });
-
-  await job.updateData({
-    id: episode.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -674,7 +627,7 @@ it("filters out torrents that do not match the media item's country", async ({
 it("does not filter out torrents that do not match the media item's country if the media item is anime", async ({
   em,
   episode,
-  job,
+  createMockJob,
 }) => {
   const rawTitle = "Test Show 2024 S01E01 [US]";
 
@@ -687,6 +640,8 @@ it("does not filter out torrents that do not match the media item's country if t
 
   await em.flush();
 
+  const job = await createMockJob({ id: episode.id });
+
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
       id: job.data.id,
@@ -694,10 +649,6 @@ it("does not filter out torrents that do not match the media item's country if t
         "1434567890123456789012345678901234567890": rawTitle,
       },
     },
-  });
-
-  await job.updateData({
-    id: episode.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -718,7 +669,7 @@ it("does not filter out torrents that do not match the media item's country if t
 it("filters out torrents that do not match the media item's year ± 1 year", async ({
   em,
   movie,
-  job,
+  createMockJob,
 }) => {
   const rawTitles = [
     "Test Movie 2018 1080p",
@@ -735,6 +686,8 @@ it("filters out torrents that do not match the media item's year ± 1 year", asy
 
   await em.flush();
 
+  const job = await createMockJob({ id: movie.id });
+
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
       id: job.data.id,
@@ -746,10 +699,6 @@ it("filters out torrents that do not match the media item's year ± 1 year", asy
         "1434567890123456789012345678901234567894": rawTitles[4],
       },
     },
-  });
-
-  await job.updateData({
-    id: movie.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -772,7 +721,7 @@ it("filters out torrents that do not match the media item's year ± 1 year", asy
 it.skip('filters out torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is enabled', async ({
   em,
   movie,
-  job,
+  createMockJob,
 }) => {
   const rawTitles = [
     "Test Movie 2018 1080p [Dubbed]",
@@ -787,6 +736,8 @@ it.skip('filters out torrents that are not dubbed if the media item is anime and
 
   await em.flush();
 
+  const job = await createMockJob({ id: movie.id });
+
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
       id: job.data.id,
@@ -800,10 +751,6 @@ it.skip('filters out torrents that are not dubbed if the media item is anime and
   vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
     ...settingsModule.settings,
     dubbedAnimeOnly: true,
-  });
-
-  await job.updateData({
-    id: movie.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -822,7 +769,7 @@ it.skip('filters out torrents that are not dubbed if the media item is anime and
 it.skip('does not filter out torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is disabled', async ({
   em,
   movie,
-  job,
+  createMockJob,
 }) => {
   const rawTitles = [
     "Test Movie 2018 1080p [Dubbed]",
@@ -837,6 +784,8 @@ it.skip('does not filter out torrents that are not dubbed if the media item is a
 
   await em.flush();
 
+  const job = await createMockJob({ id: movie.id });
+
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
       id: job.data.id,
@@ -850,10 +799,6 @@ it.skip('does not filter out torrents that are not dubbed if the media item is a
   vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
     ...settingsModule.settings,
     dubbedAnimeOnly: false,
-  });
-
-  await job.updateData({
-    id: movie.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(
@@ -875,12 +820,14 @@ it.skip('does not filter out torrents that are not dubbed if the media item is a
   );
 });
 
-it.skip("returns sorted results", async ({ movie, job }) => {
+it.skip("returns sorted results", async ({ movie, createMockJob }) => {
   const rawTitles = [
     "Test Movie 2024 2160p",
     "Test Movie 2024 720p WEB-DL",
     "Test Movie 2024 1080p HDR10+ 5.1",
   ] as const;
+
+  const job = await createMockJob({ id: movie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -891,10 +838,6 @@ it.skip("returns sorted results", async ({ movie, job }) => {
         "1434567890123456789012345678901234567892": rawTitles[2],
       },
     },
-  });
-
-  await job.updateData({
-    id: movie.id,
   });
 
   const { results } = await parseScrapeResultsProcessor(

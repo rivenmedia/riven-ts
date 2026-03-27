@@ -1,26 +1,20 @@
 import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 
 import * as Sentry from "@sentry/node";
-import { Job, UnrecoverableError } from "bullmq";
+import { UnrecoverableError } from "bullmq";
 import { Settings } from "luxon";
 import { expect, vi } from "vitest";
 
 import { rivenTestContext as it } from "../../../__tests__/test-context.ts";
-import { createQueue } from "../../utilities/create-queue.ts";
 import { downloadItemProcessor } from "./download-item.processor.ts";
 
-import type { DownloadItemFlow } from "./download-item.schema.ts";
-
 it("throws an unrecoverable error if no valid torrent is found", async ({
+  createMockJob,
   seeders: { seedScrapedMovie },
 }) => {
   const movie = await seedScrapedMovie();
 
-  const mockQueue = createQueue("mock-queue");
-  const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
-    await Job.create(mockQueue, "mock-download-item", {
-      id: movie.id,
-    });
+  const job = await createMockJob({ id: movie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
@@ -33,20 +27,14 @@ it("throws an unrecoverable error if no valid torrent is found", async ({
 
 it('sends a "riven.media-item.download.success" event with the updated item and duration from request to download if the download result is valid', async ({
   scrapedMovie,
+  createMockJob,
 }) => {
   vi.spyOn(Settings, "now").mockReturnValue(10000);
 
   const streams = await scrapedMovie.streams.load();
   const streamInfoHash = streams[0]?.infoHash;
 
-  const mockQueue = createQueue("mock-queue");
-  const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
-    await Job.create(
-      mockQueue,
-      "mock-download-item",
-      { id: scrapedMovie.id },
-      { timestamp: 1000 },
-    );
+  const job = await createMockJob({ id: scrapedMovie.id }, { timestamp: 1000 });
 
   expect.assert(streamInfoHash);
 
@@ -85,6 +73,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
 });
 
 it('sends a "riven.media-item.download.partial-success" event with the updated item if the download result is valid but does not contain all episodes', async ({
+  createMockJob,
   scrapedShow,
 }) => {
   const episodes = await scrapedShow.getEpisodes();
@@ -98,11 +87,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
 
   expect.assert(streamInfoHash);
 
-  const mockQueue = createQueue("mock-queue");
-  const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
-    await Job.create(mockQueue, "mock-download-item", {
-      id: scrapedShow.id,
-    });
+  const job = await createMockJob({ id: scrapedShow.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "find-valid-torrent": {
@@ -145,13 +130,10 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
 });
 
 it('sends a "riven.media-item.download.error" event if no valid torrent is found', async ({
+  createMockJob,
   scrapedMovie,
 }) => {
-  const mockQueue = createQueue("mock-queue");
-  const job: Parameters<DownloadItemFlow["processor"]>[0]["job"] =
-    await Job.create(mockQueue, "mock-download-item", {
-      id: scrapedMovie.id,
-    });
+  const job = await createMockJob({ id: scrapedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 

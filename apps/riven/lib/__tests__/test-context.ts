@@ -1,5 +1,6 @@
 /* eslint-disable no-empty-pattern */
 import { wrap } from "@mikro-orm/core";
+import { Job, type JobsOptions } from "bullmq";
 import { MockAgent, setGlobalDispatcher } from "undici";
 import { expect, test as testBase } from "vitest";
 
@@ -11,6 +12,7 @@ import { MovieFactory } from "../database/factories/movie.factory.ts";
 import { SeasonFactory } from "../database/factories/season.factory.ts";
 import { ShowFactory } from "../database/factories/show.factory.ts";
 import { StreamFactory } from "../database/factories/stream.factory.ts";
+import { createQueue } from "../message-queue/utilities/create-queue.ts";
 import { createSeederFunctions } from "./create-seeder-functions.ts";
 
 export const rivenTestContext = testBase
@@ -111,4 +113,17 @@ export const rivenTestContext = testBase
     expect.assert(season.episodes[0]);
 
     return season.episodes[0];
-  });
+  })
+  .extend("mockQueue", ({}, { onCleanup }) => {
+    const queue = createQueue("mock-queue");
+
+    onCleanup(() => queue.close());
+
+    return queue;
+  })
+  .extend(
+    "createMockJob",
+    ({ mockQueue }) =>
+      <T>(data: T, opts?: JobsOptions) =>
+        Job.create(mockQueue, crypto.randomUUID(), data, opts),
+  );

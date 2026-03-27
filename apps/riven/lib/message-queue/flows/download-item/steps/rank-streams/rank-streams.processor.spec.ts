@@ -4,22 +4,14 @@ import {
 } from "@repo/util-rank-torrent-name";
 
 import * as Sentry from "@sentry/node";
-import { Job } from "bullmq";
 import { expect, vi } from "vitest";
 
 import { rivenTestContext as baseIt } from "../../../../../__tests__/test-context.ts";
-import { createQueue } from "../../../../utilities/create-queue.ts";
 import { rankStreamsProcessor } from "./rank-streams.processor.ts";
 
-const it = baseIt
-  .extend("mockQueue", ({}, { onCleanup }) => {
-    const queue = createQueue("mock-queue");
-
-    onCleanup(() => queue.close());
-
-    return queue;
-  })
-  .extend("item", async ({ em, movie, factories: { streamFactory } }) => {
+const it = baseIt.extend(
+  "item",
+  async ({ em, movie, factories: { streamFactory } }) => {
     movie.streams.set(
       streamFactory
         .each((stream, i) => {
@@ -32,10 +24,11 @@ const it = baseIt
     await em.flush();
 
     return movie;
-  });
+  },
+);
 
-it("does not include trashed streams", async ({ item, mockQueue }) => {
-  const job = await Job.create(mockQueue, "mock-rank-streams", {
+it("does not include trashed streams", async ({ createMockJob, item }) => {
+  const job = await createMockJob({
     id: item.id,
     streams: {
       "0234567890123456789012345678901234567890": `${item.title} 720p bdrip`,
@@ -63,10 +56,10 @@ it("does not include trashed streams", async ({ item, mockQueue }) => {
 });
 
 it("sorts torrents by resolution and rank within the same resolution", async ({
+  createMockJob,
   item,
-  mockQueue,
 }) => {
-  const job = await Job.create(mockQueue, "mock-rank-streams", {
+  const job = await createMockJob({
     id: item.id,
     streams: {
       "0234567890123456789012345678901234567890": `${item.title} 720p`,
@@ -137,7 +130,7 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
 });
 
 it("handles foreign language movies with aliases correctly", async ({
-  mockQueue,
+  createMockJob,
   seeders: { seedMovie },
   factories: { streamFactory },
 }) => {
@@ -157,7 +150,7 @@ it("handles foreign language movies with aliases correctly", async ({
     })
     .create(3);
 
-  const job = await Job.create(mockQueue, "mock-rank-streams", {
+  const job = await createMockJob({
     id: itemWithAliases.id,
     streams: {
       a034567890123456789012345678901234567890:
@@ -194,7 +187,7 @@ it("handles foreign language movies with aliases correctly", async ({
 });
 
 it("handles foreign language shows with aliases correctly", async ({
-  mockQueue,
+  createMockJob,
   seeders: { seedShow },
   factories: { streamFactory },
 }) => {
@@ -216,7 +209,7 @@ it("handles foreign language shows with aliases correctly", async ({
     })
     .create(3);
 
-  const job = await Job.create(mockQueue, "mock-rank-streams", {
+  const job = await createMockJob({
     id: showWithAliases.id,
     streams: {
       a034567890123456789012345678901234567890:
