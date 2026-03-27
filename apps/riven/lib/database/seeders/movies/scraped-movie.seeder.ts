@@ -8,7 +8,7 @@ import assert from "node:assert";
 
 import { BaseSeeder } from "../base.seeder.ts";
 import { StreamsSeeder } from "../streams/streams.seeder.ts";
-import { IndexedMovieSeeder } from "./movie.seeder.ts";
+import { IndexedMovieSeeder } from "./indexed-movie.seeder.ts";
 
 import type { EntityData, EntityManager } from "@mikro-orm/core";
 

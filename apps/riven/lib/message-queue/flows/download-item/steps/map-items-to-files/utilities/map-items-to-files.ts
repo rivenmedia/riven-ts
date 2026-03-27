@@ -1,6 +1,6 @@
 import { parseFilePath } from "@repo/util-rank-torrent-name";
 
-import assert from "assert";
+import assert from "node:assert";
 import { extname } from "node:path";
 import z from "zod";
 

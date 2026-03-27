@@ -1,4 +1,5 @@
 import { DateTime } from "luxon";
+import assert from "node:assert";
 
 import { EpisodeFactory } from "../../factories/episode.factory.ts";
 import { ItemRequestFactory } from "../../factories/item-request.factory.ts";
@@ -66,5 +67,12 @@ export class IndexedShowSeeder extends BaseSeeder<ShowSeederContext> {
         });
       }
     }
+
+    await em.flush();
+
+    assert(
+      show.state === "indexed",
+      `Expected show state to be "indexed", got "${show.state}"`,
+    );
   }
 }

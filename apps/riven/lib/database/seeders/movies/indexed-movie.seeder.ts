@@ -1,4 +1,5 @@
 import { DateTime } from "luxon";
+import assert from "node:assert";
 
 import { ItemRequestFactory } from "../../factories/item-request.factory.ts";
 import { MovieFactory } from "../../factories/movie.factory.ts";
@@ -14,10 +15,15 @@ export class IndexedMovieSeeder extends BaseSeeder<EntityData<Movie>> {
       type: "movie",
     });
 
-    new MovieFactory(em).makeOne({
+    const movie = await new MovieFactory(em).createOne({
       itemRequest,
       releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
       ...context,
     });
+
+    assert(
+      movie.state === "indexed",
+      `Expected movie state to be "indexed", got "${movie.state}"`,
+    );
   }
 }

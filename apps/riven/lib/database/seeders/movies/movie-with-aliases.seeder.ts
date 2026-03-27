@@ -1,5 +1,5 @@
 import { BaseSeeder } from "../base.seeder.ts";
-import { IndexedMovieSeeder } from "./movie.seeder.ts";
+import { IndexedMovieSeeder } from "./indexed-movie.seeder.ts";
 
 import type { EntityData, EntityManager } from "@mikro-orm/core";
 import type { Movie } from "@repo/util-plugin-sdk/dto/entities";

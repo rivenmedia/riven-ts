@@ -4,7 +4,10 @@ import assert from "node:assert";
 
 import { BaseSeeder } from "../base.seeder.ts";
 import { StreamsSeeder } from "../streams/streams.seeder.ts";
-import { IndexedShowSeeder, type ShowSeederContext } from "./show.seeder.ts";
+import {
+  IndexedShowSeeder,
+  type ShowSeederContext,
+} from "./indexed-show.seeder.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 
