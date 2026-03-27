@@ -197,8 +197,8 @@ it("handles foreign language shows with aliases correctly", async ({
     id: foreignLanguageShow.id,
     streams: {
       a034567890123456789012345678901234567890:
-        "Película Extranjera 1080p BluRay",
-      a134567890123456789012345678901234567890: "Show Étranger 720p",
+        "Espectáculo Extranjero 1080p BluRay",
+      a134567890123456789012345678901234567890: "Spectacle Étranger 720p",
       a234567890123456789012345678901234567890: "Foreign Show 1080p",
     },
     rtnSettings: createSettings(),
@@ -213,7 +213,7 @@ it("handles foreign language shows with aliases correctly", async ({
   expect(result).toEqual([
     expect.objectContaining({
       data: expect.objectContaining({
-        rawTitle: "Película Extranjera 1080p BluRay",
+        rawTitle: "Espectáculo Extranjero 1080p BluRay",
       }),
     }),
     expect.objectContaining({
@@ -223,7 +223,7 @@ it("handles foreign language shows with aliases correctly", async ({
     }),
     expect.objectContaining({
       data: expect.objectContaining({
-        rawTitle: "Show Étranger 720p",
+        rawTitle: "Spectacle Étranger 720p",
       }),
     }),
   ]);
