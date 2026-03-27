@@ -2,7 +2,6 @@ import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { parse } from "@repo/util-rank-torrent-name";
 
 import { faker } from "@faker-js/faker";
-import * as Sentry from "@sentry/node";
 import { expect, vi } from "vitest";
 
 import { it } from "../../../__tests__/test-context.ts";
@@ -10,13 +9,14 @@ import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 
 it("throws an unrecoverable error if the item cannot be scraped", async ({
   createMockJob,
+  mockSentryScope,
 }) => {
   const job = await createMockJob({ id: 1 });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
   await expect(() =>
-    scrapeItemProcessor({ job, scope: new Sentry.Scope() }, vi.fn()),
+    scrapeItemProcessor({ job, scope: mockSentryScope }, vi.fn()),
   ).rejects.toThrow();
 });
 
@@ -25,6 +25,7 @@ it.todo("throws an unrecoverable if no new streams were found");
 it('sends a "riven.media-item.scrape.success" event with the updated item if the scrape is successful', async ({
   seeders: { seedIndexedMovie },
   createMockJob,
+  mockSentryScope,
 }) => {
   await seedIndexedMovie();
 
@@ -46,7 +47,7 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
   await scrapeItemProcessor(
     {
       job,
-      scope: new Sentry.Scope(),
+      scope: mockSentryScope,
     },
     sendEvent,
   );

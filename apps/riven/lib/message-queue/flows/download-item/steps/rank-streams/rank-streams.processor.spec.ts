@@ -3,7 +3,6 @@ import {
   defaultRankingModel,
 } from "@repo/util-rank-torrent-name";
 
-import * as Sentry from "@sentry/node";
 import { expect, vi } from "vitest";
 
 import { it as baseIt } from "../../../../../__tests__/test-context.ts";
@@ -27,7 +26,11 @@ const it = baseIt.extend(
   },
 );
 
-it("does not include trashed streams", async ({ createMockJob, item }) => {
+it("does not include trashed streams", async ({
+  createMockJob,
+  item,
+  mockSentryScope,
+}) => {
   const job = await createMockJob({
     id: item.id,
     streams: {
@@ -40,7 +43,7 @@ it("does not include trashed streams", async ({ createMockJob, item }) => {
   });
 
   const result = await rankStreamsProcessor(
-    { job, scope: new Sentry.Scope() },
+    { job, scope: mockSentryScope },
     vi.fn(),
   );
 
@@ -58,6 +61,7 @@ it("does not include trashed streams", async ({ createMockJob, item }) => {
 it("sorts torrents by resolution and rank within the same resolution", async ({
   createMockJob,
   item,
+  mockSentryScope,
 }) => {
   const job = await createMockJob({
     id: item.id,
@@ -91,7 +95,7 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
   });
 
   const result = await rankStreamsProcessor(
-    { job, scope: new Sentry.Scope() },
+    { job, scope: mockSentryScope },
     vi.fn(),
   );
 
@@ -133,6 +137,7 @@ it("handles foreign language movies with aliases correctly", async ({
   createMockJob,
   seeders: { seedForeignLanguageMovie },
   factories: { streamFactory },
+  mockSentryScope,
 }) => {
   const foreignLanguageMovie = await seedForeignLanguageMovie();
 
@@ -156,7 +161,7 @@ it("handles foreign language movies with aliases correctly", async ({
   });
 
   const result = await rankStreamsProcessor(
-    { job, scope: new Sentry.Scope() },
+    { job, scope: mockSentryScope },
     vi.fn(),
   );
 
@@ -183,6 +188,7 @@ it("handles foreign language shows with aliases correctly", async ({
   createMockJob,
   seeders: { seedForeignLanguageShow },
   factories: { streamFactory },
+  mockSentryScope,
 }) => {
   const foreignLanguageShow = await seedForeignLanguageShow();
 
@@ -206,7 +212,7 @@ it("handles foreign language shows with aliases correctly", async ({
   });
 
   const result = await rankStreamsProcessor(
-    { job, scope: new Sentry.Scope() },
+    { job, scope: mockSentryScope },
     vi.fn(),
   );
 

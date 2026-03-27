@@ -1,5 +1,6 @@
 /* eslint-disable no-empty-pattern */
 import { wrap } from "@mikro-orm/core";
+import * as Sentry from "@sentry/node";
 import { Job, type JobsOptions } from "bullmq";
 import { MockAgent, setGlobalDispatcher } from "undici";
 import { expect, test as testBase } from "vitest";
@@ -126,4 +127,5 @@ export const it = testBase
     ({ mockQueue }) =>
       <T>(data: T, opts?: JobsOptions) =>
         Job.create(mockQueue, crypto.randomUUID(), data, opts),
-  );
+  )
+  .extend("mockSentryScope", new Sentry.Scope());

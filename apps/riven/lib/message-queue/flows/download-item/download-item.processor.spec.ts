@@ -1,6 +1,5 @@
 import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 
-import * as Sentry from "@sentry/node";
 import { UnrecoverableError } from "bullmq";
 import { Settings } from "luxon";
 import { expect, vi } from "vitest";
@@ -11,19 +10,21 @@ import { downloadItemProcessor } from "./download-item.processor.ts";
 it("throws an unrecoverable error if no valid torrent is found", async ({
   createMockJob,
   scrapedMovie,
+  mockSentryScope,
 }) => {
   const job = await createMockJob({ id: scrapedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
   await expect(() =>
-    downloadItemProcessor({ job, scope: new Sentry.Scope() }, vi.fn()),
+    downloadItemProcessor({ job, scope: mockSentryScope }, vi.fn()),
   ).rejects.toThrow(UnrecoverableError);
 });
 
 it('sends a "riven.media-item.download.success" event with the updated item and duration from request to download if the download result is valid', async ({
   scrapedMovie,
   createMockJob,
+  mockSentryScope,
 }) => {
   vi.spyOn(Settings, "now").mockReturnValue(10000);
 
@@ -56,7 +57,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
 
   const sendEvent = vi.fn();
 
-  await downloadItemProcessor({ job, scope: new Sentry.Scope() }, sendEvent);
+  await downloadItemProcessor({ job, scope: mockSentryScope }, sendEvent);
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.success",
@@ -70,6 +71,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
 it('sends a "riven.media-item.download.partial-success" event with the updated item if the download result is valid but does not contain all episodes', async ({
   createMockJob,
   scrapedShow,
+  mockSentryScope,
 }) => {
   const episodes = await scrapedShow.getEpisodes();
 
@@ -113,7 +115,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
 
   const sendEvent = vi.fn();
 
-  await downloadItemProcessor({ job, scope: new Sentry.Scope() }, sendEvent);
+  await downloadItemProcessor({ job, scope: mockSentryScope }, sendEvent);
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.partial-success",
@@ -125,6 +127,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
 it('sends a "riven.media-item.download.error" event if no valid torrent is found', async ({
   createMockJob,
   scrapedMovie,
+  mockSentryScope,
 }) => {
   const job = await createMockJob({ id: scrapedMovie.id });
 
@@ -135,7 +138,7 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
   await downloadItemProcessor(
     {
       job,
-      scope: new Sentry.Scope(),
+      scope: mockSentryScope,
     },
     sendEvent,
   ).catch(() => {
