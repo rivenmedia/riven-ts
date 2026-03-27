@@ -13,7 +13,7 @@ import { SeasonFactory } from "../database/factories/season.factory.ts";
 import { ShowFactory } from "../database/factories/show.factory.ts";
 import { StreamFactory } from "../database/factories/stream.factory.ts";
 import { createQueue } from "../message-queue/utilities/create-queue.ts";
-import { createSeederFunctions } from "./create-seeder-functions.ts";
+import { createSeederFunctions } from "./utilities/create-seeder-functions.ts";
 
 export const rivenTestContext = testBase
   .extend("apolloServerInstance", async ({}) => {

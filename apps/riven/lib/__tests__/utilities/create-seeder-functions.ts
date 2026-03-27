@@ -2,16 +2,16 @@ import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 
 import { assert } from "vitest";
 
-import { database } from "../database/database.ts";
-import { CompletedMovieSeeder } from "../database/seeders/movies/completed-movie.seeder.ts";
-import { MovieWithAliasesSeeder } from "../database/seeders/movies/movie-with-aliases.seeder.ts";
-import { MovieSeeder } from "../database/seeders/movies/movie.seeder.ts";
-import { ScrapedMovieSeeder } from "../database/seeders/movies/scraped-movie.seeder.ts";
-import { CompletedShowSeeder } from "../database/seeders/shows/completed-show.seeder.ts";
-import { ScrapedShowSeeder } from "../database/seeders/shows/scraped-show.seeder.ts";
-import { ShowSeeder } from "../database/seeders/shows/show.seeder.ts";
+import { database } from "../../database/database.ts";
+import { CompletedMovieSeeder } from "../../database/seeders/movies/completed-movie.seeder.ts";
+import { MovieWithAliasesSeeder } from "../../database/seeders/movies/movie-with-aliases.seeder.ts";
+import { MovieSeeder } from "../../database/seeders/movies/movie.seeder.ts";
+import { ScrapedMovieSeeder } from "../../database/seeders/movies/scraped-movie.seeder.ts";
+import { CompletedShowSeeder } from "../../database/seeders/shows/completed-show.seeder.ts";
+import { ScrapedShowSeeder } from "../../database/seeders/shows/scraped-show.seeder.ts";
+import { ShowSeeder } from "../../database/seeders/shows/show.seeder.ts";
 
-import type { BaseSeeder } from "../database/seeders/base.seeder.ts";
+import type { BaseSeeder } from "../../database/seeders/base.seeder.ts";
 import type {
   Constructor,
   Dictionary,
