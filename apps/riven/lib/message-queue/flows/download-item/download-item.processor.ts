@@ -37,15 +37,11 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
       });
 
       const incompleteChildStates = MediaItemState.extract([
-        "ongoing",
         "indexed",
         "scraped",
       ]);
 
-      if (
-        (updatedItem instanceof Show || updatedItem instanceof Season) &&
-        updatedItem.state === "partially_completed"
-      ) {
+      if (updatedItem instanceof Show || updatedItem instanceof Season) {
         const show = await updatedItem.getShow();
         const episodes = await show.getEpisodes();
 
