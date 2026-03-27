@@ -42,8 +42,10 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
       ]);
 
       if (updatedItem instanceof Show || updatedItem instanceof Season) {
-        const show = await updatedItem.getShow();
-        const episodes = await show.getEpisodes();
+        const episodes =
+          updatedItem instanceof Show
+            ? await updatedItem.getEpisodes()
+            : await updatedItem.episodes.loadItems();
 
         const hasIncompleteItems = episodes.some(
           ({ state }) => incompleteChildStates.safeParse(state).success,
