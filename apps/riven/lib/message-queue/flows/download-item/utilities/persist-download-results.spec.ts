@@ -6,7 +6,7 @@ import { ref, wrap } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
-import { rivenTestContext as it } from "../../../../__tests__/test-context.ts";
+import { it } from "../../../../__tests__/test-context.ts";
 import { MatchedFile } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { persistDownloadResults } from "./persist-download-results.ts";
 

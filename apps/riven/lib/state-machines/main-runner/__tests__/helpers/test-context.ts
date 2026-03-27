@@ -4,7 +4,7 @@ import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { vi } from "vitest";
 import { createActor, createEmptyActor } from "xstate";
 
-import { rivenTestContext } from "../../../../__tests__/test-context.ts";
+import { it as baseIt } from "../../../../__tests__/test-context.ts";
 import {
   type MainRunnerMachineInput,
   mainRunnerMachine,
@@ -12,7 +12,7 @@ import {
 
 import type { ValidPlugin } from "../../../../types/plugins.ts";
 
-export const it = rivenTestContext
+export const it = baseIt
 
   .extend(
     "input",

@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/node";
 import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
-import { rivenTestContext as baseIt } from "../../../../../__tests__/test-context.ts";
+import { it as baseIt } from "../../../../../__tests__/test-context.ts";
 import * as settingsModule from "../../../../../utilities/settings.ts";
 import { parseScrapeResultsProcessor } from "./parse-scrape-results.processor.ts";
 

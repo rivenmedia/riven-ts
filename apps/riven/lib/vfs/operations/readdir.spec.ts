@@ -2,7 +2,7 @@ import { MediaEntry, Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import { expect, vi } from "vitest";
 
-import { rivenTestContext as it } from "../../__tests__/test-context.ts";
+import { it } from "../../__tests__/test-context.ts";
 import { readDirSync } from "./readdir.ts";
 
 it("returns persistent directory entries for the root path", async () => {

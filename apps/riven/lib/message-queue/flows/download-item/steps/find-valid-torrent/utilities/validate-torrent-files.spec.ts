@@ -1,7 +1,7 @@
 import { wrap } from "@mikro-orm/core";
 import { expect } from "vitest";
 
-import { rivenTestContext as it } from "../../../../../../__tests__/test-context.ts";
+import { it } from "../../../../../../__tests__/test-context.ts";
 import { validateTorrentFiles } from "./validate-torrent-files.ts";
 
 import type { MapItemsToFilesFlow } from "../../map-items-to-files/map-items-to-files.schema.ts";

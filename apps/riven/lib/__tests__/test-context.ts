@@ -15,7 +15,7 @@ import { StreamFactory } from "../database/factories/stream.factory.ts";
 import { createQueue } from "../message-queue/utilities/create-queue.ts";
 import { buildSeederFunctions } from "./utilities/build-seeder-functions.ts";
 
-export const rivenTestContext = testBase
+export const it = testBase
   .extend("apolloServerInstance", async ({}) => {
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");

@@ -3,7 +3,7 @@ import { Episode, MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 import Fuse from "@zkochan/fuse-native";
 import { expect, vi } from "vitest";
 
-import { rivenTestContext as it } from "../../__tests__/test-context.ts";
+import { it } from "../../__tests__/test-context.ts";
 import { getattrSync, parseMode } from "./getattr.ts";
 
 it("returns directory stats for the root directory", async () => {

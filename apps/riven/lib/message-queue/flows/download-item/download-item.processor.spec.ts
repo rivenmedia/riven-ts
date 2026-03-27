@@ -5,7 +5,7 @@ import { UnrecoverableError } from "bullmq";
 import { Settings } from "luxon";
 import { expect, vi } from "vitest";
 
-import { rivenTestContext as it } from "../../../__tests__/test-context.ts";
+import { it } from "../../../__tests__/test-context.ts";
 import { downloadItemProcessor } from "./download-item.processor.ts";
 
 it("throws an unrecoverable error if no valid torrent is found", async ({

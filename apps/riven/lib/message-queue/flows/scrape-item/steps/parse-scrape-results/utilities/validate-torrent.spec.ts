@@ -4,7 +4,7 @@ import { faker } from "@faker-js/faker";
 import { wrap } from "@mikro-orm/core";
 import { expect, vi } from "vitest";
 
-import { rivenTestContext as baseIt } from "../../../../../../__tests__/test-context.ts";
+import { it as baseIt } from "../../../../../../__tests__/test-context.ts";
 import * as settingsModule from "../../../../../../utilities/settings.ts";
 import { SkippedTorrentError, validateTorrent } from "./validate-torrent.ts";
 

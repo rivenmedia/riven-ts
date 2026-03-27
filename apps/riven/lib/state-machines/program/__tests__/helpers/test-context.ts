@@ -4,13 +4,13 @@ import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { vi } from "vitest";
 import { createActor, fromPromise } from "xstate";
 
-import { rivenTestContext } from "../../../../__tests__/test-context.ts";
+import { it as baseIt } from "../../../../__tests__/test-context.ts";
 import { bootstrapMachine } from "../../../bootstrap/index.ts";
 import { rivenMachine } from "../../index.ts";
 
 import type { ValidPlugin } from "../../../../types/plugins.ts";
 
-export const it = rivenTestContext
+export const it = baseIt
 
   .extend("input", () => ({
     sessionId: crypto.randomUUID(),

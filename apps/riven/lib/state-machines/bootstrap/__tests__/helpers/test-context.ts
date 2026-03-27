@@ -2,7 +2,7 @@
 import Fuse from "@zkochan/fuse-native";
 import { createActor, createEmptyActor, fromPromise } from "xstate";
 
-import { rivenTestContext } from "../../../../__tests__/test-context.ts";
+import { it as baseIt } from "../../../../__tests__/test-context.ts";
 import { bootstrapMachine } from "../../index.ts";
 
 import type {
@@ -14,7 +14,7 @@ import type {
   StartGQLServerOutput,
 } from "../../actors/start-gql-server.actor.ts";
 
-export const it = rivenTestContext
+export const it = baseIt
   .extend("input", () => ({
     rootRef: createEmptyActor(),
   }))

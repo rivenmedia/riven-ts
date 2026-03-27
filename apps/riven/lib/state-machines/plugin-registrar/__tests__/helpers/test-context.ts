@@ -1,9 +1,9 @@
 import { createActor, createEmptyActor } from "xstate";
 
-import { rivenTestContext } from "../../../../__tests__/test-context.ts";
+import { it as baseIt } from "../../../../__tests__/test-context.ts";
 import { pluginRegistrarMachine } from "../../index.ts";
 
-export const it = rivenTestContext
+export const it = baseIt
   .extend("input", () => ({
     rootRef: createEmptyActor(),
   }))
