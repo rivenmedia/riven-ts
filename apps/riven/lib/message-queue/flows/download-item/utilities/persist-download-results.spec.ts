@@ -109,12 +109,10 @@ it("sets the active stream and updates the state to completed if successful", as
   expect(updatedItem.state).toBe("completed");
 });
 
-it("adds a single media entry for movies", async ({ scrapedMovie, em }) => {
+it("adds a single media entry for movies", async ({ scrapedMovie }) => {
   const [stream] = await scrapedMovie.streams.load();
 
   expect.assert(stream);
-
-  await em.persist(scrapedMovie).flush();
 
   await persistDownloadResults({
     id: scrapedMovie.id,
@@ -142,18 +140,13 @@ it("adds a single media entry for movies", async ({ scrapedMovie, em }) => {
 });
 
 it("adds one media entry per episode for shows", async ({
-  indexedShow,
-  em,
+  scrapedShow,
   stream,
 }) => {
-  indexedShow.streams.add(stream);
-
-  await em.persist(indexedShow).flush();
-
-  const episodes = await indexedShow.getEpisodes();
+  const episodes = await scrapedShow.getEpisodes();
 
   await persistDownloadResults({
-    id: indexedShow.id,
+    id: scrapedShow.id,
     processedBy: "@repo/plugin-test",
     torrent: {
       torrentId: "1",
@@ -170,7 +163,7 @@ it("adds one media entry per episode for shows", async ({
     },
   });
 
-  const updatedEpisodes = await indexedShow.getEpisodes();
+  const updatedEpisodes = await scrapedShow.getEpisodes();
 
   for (const episode of updatedEpisodes) {
     const mediaEntries = await episode.getMediaEntries();
@@ -180,14 +173,12 @@ it("adds one media entry per episode for shows", async ({
 });
 
 it("does not create duplicate media entries for episodes with existing entries", async ({
-  indexedShow,
+  scrapedShow,
   season,
   em,
   stream,
   mediaEntry,
 }) => {
-  indexedShow.streams.add(stream);
-
   await wrap(season).populate(["episodes"]);
 
   const [episode] = season.episodes;
@@ -198,10 +189,10 @@ it("does not create duplicate media entries for episodes with existing entries",
 
   episode.filesystemEntries.add(mediaEntry);
 
-  await em.persist(indexedShow).flush();
+  await em.persist(scrapedShow).flush();
 
   await persistDownloadResults({
-    id: indexedShow.id,
+    id: scrapedShow.id,
     processedBy: "@repo/plugin-test",
     torrent: {
       torrentId: "1",
@@ -226,14 +217,9 @@ it("does not create duplicate media entries for episodes with existing entries",
 });
 
 it("throws a MediaItemDownloadError if a validation error occurs during persistence", async ({
-  indexedMovie,
-  em,
+  scrapedMovie,
   stream,
 }) => {
-  indexedMovie.streams.add(stream);
-
-  await em.persist(indexedMovie).flush();
-
   vi.spyOn(
     await import("class-validator"),
     "validateOrReject",
@@ -241,7 +227,7 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
 
   await expect(
     persistDownloadResults({
-      id: indexedMovie.id,
+      id: scrapedMovie.id,
       processedBy: "@repo/plugin-test",
       torrent: {
         torrentId: "1",
@@ -253,7 +239,7 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
             link: "http://example.com/file.mp4",
             name: "file.mp4",
             path: "/file.mp4",
-            matchedMediaItemId: indexedMovie.id,
+            matchedMediaItemId: scrapedMovie.id,
             isCachedFile: false,
           },
         ],
