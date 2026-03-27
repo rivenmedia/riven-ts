@@ -11,8 +11,8 @@ import { rankStreamsProcessor } from "./rank-streams.processor.ts";
 
 const it = baseIt.extend(
   "item",
-  async ({ em, movie, factories: { streamFactory } }) => {
-    movie.streams.set(
+  async ({ em, indexedMovie, factories: { streamFactory } }) => {
+    indexedMovie.streams.set(
       streamFactory
         .each((stream, i) => {
           stream.infoHash = `${i.toString()}234567890123456789012345678901234567890`;
@@ -23,7 +23,7 @@ const it = baseIt.extend(
 
     await em.flush();
 
-    return movie;
+    return indexedMovie;
   },
 );
 
@@ -131,10 +131,10 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
 
 it("handles foreign language movies with aliases correctly", async ({
   createMockJob,
-  seeders: { seedMovie },
+  seeders: { seedIndexedMovie },
   factories: { streamFactory },
 }) => {
-  const itemWithAliases = await seedMovie(1, {
+  const itemWithAliases = await seedIndexedMovie(1, {
     title: "Foreign Movie",
     aliases: {
       es: ["Película Extranjera"],
@@ -188,10 +188,10 @@ it("handles foreign language movies with aliases correctly", async ({
 
 it("handles foreign language shows with aliases correctly", async ({
   createMockJob,
-  seeders: { seedShow },
+  seeders: { seedIndexedShow },
   factories: { streamFactory },
 }) => {
-  const showWithAliases = await seedShow(1, {
+  const showWithAliases = await seedIndexedShow(1, {
     showData: {
       title: "Foreign Show",
       aliases: {

@@ -33,9 +33,9 @@ const it = baseIt.extend("scrapeResults", {
 
 it("throws an UnrecoverableError if no results are found", async ({
   createMockJob,
-  movie,
+  indexedMovie,
 }) => {
-  const job = await createMockJob({ id: movie.id });
+  const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
@@ -45,7 +45,7 @@ it("throws an UnrecoverableError if no results are found", async ({
 });
 
 it("returns valid movie torrents if the item is a movie", async ({
-  movie,
+  indexedMovie,
   createMockJob,
 }) => {
   const rawTitles = [
@@ -54,7 +54,7 @@ it("returns valid movie torrents if the item is a movie", async ({
     "Test Movie 2024 720p WEB-DL",
   ] as const;
 
-  const job = await createMockJob({ id: movie.id });
+  const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -85,7 +85,7 @@ it("returns valid movie torrents if the item is a movie", async ({
 });
 
 it("returns valid show torrents if the item is a show", async ({
-  show,
+  indexedShow,
   createMockJob,
 }) => {
   const rawTitles = [
@@ -93,7 +93,7 @@ it("returns valid show torrents if the item is a show", async ({
     "Test Show: All Seasons (Season 1,2,3,4,5&6) E01-60",
   ] as const;
 
-  const job = await createMockJob({ id: show.id });
+  const job = await createMockJob({ id: indexedShow.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -203,12 +203,12 @@ it("returns valid episode torrents if the item is an episode", async ({
 });
 
 it("filters show torrents if the item is a movie", async ({
-  movie,
+  indexedMovie,
   createMockJob,
 }) => {
   const rawTitle = "Test Movie S01E01";
 
-  const job = await createMockJob({ id: movie.id });
+  const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -235,12 +235,12 @@ it("filters show torrents if the item is a movie", async ({
 });
 
 it("filters out torrents with 2 or fewer episodes for shows", async ({
-  show,
+  indexedShow,
   createMockJob,
 }) => {
   const rawTitle = "Test Show: S01E01";
 
-  const job = await createMockJob({ id: show.id });
+  const job = await createMockJob({ id: indexedShow.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -269,12 +269,12 @@ it("filters out torrents with 2 or fewer episodes for shows", async ({
 });
 
 it("filters out torrents with an incorrect number of seasons for shows", async ({
-  show,
+  indexedShow,
   createMockJob,
 }) => {
   const rawTitle = "Test Show: S01-03 E01-30";
 
-  const job = await createMockJob({ id: show.id });
+  const job = await createMockJob({ id: indexedShow.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -304,14 +304,14 @@ it("filters out torrents with an incorrect number of seasons for shows", async (
 
 it("filters out torrents with incorrect number of episodes for single-season shows", async ({
   em,
-  show,
+  indexedShow,
   createMockJob,
 }) => {
-  await wrap(show).populate(["seasons"]);
+  await wrap(indexedShow).populate(["seasons"]);
 
   const rawTitle = "Test Show: S01 E01-05";
 
-  const job = await createMockJob({ id: show.id });
+  const job = await createMockJob({ id: indexedShow.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -322,7 +322,7 @@ it("filters out torrents with incorrect number of episodes for single-season sho
     },
   });
 
-  const [, ...seasonsToRemove] = show.seasons;
+  const [, ...seasonsToRemove] = indexedShow.seasons;
 
   em.remove(seasonsToRemove);
 
@@ -346,12 +346,12 @@ it("filters out torrents with incorrect number of episodes for single-season sho
 });
 
 it("filters out duplicate torrents from different plugins", async ({
-  movie,
+  indexedMovie,
   createMockJob,
 }) => {
   const rawTitle = "Test Movie: 1080p";
 
-  const job = await createMockJob({ id: movie.id });
+  const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test-1]": {
@@ -668,7 +668,7 @@ it("does not filter out torrents that do not match the media item's country if t
 
 it("filters out torrents that do not match the media item's year ± 1 year", async ({
   em,
-  movie,
+  indexedMovie,
   createMockJob,
 }) => {
   const rawTitles = [
@@ -679,14 +679,14 @@ it("filters out torrents that do not match the media item's year ± 1 year", asy
     "Test Movie 2022 1080p",
   ] as const;
 
-  em.persist(movie);
-  em.assign(movie, {
+  em.persist(indexedMovie);
+  em.assign(indexedMovie, {
     year: 2020,
   });
 
   await em.flush();
 
-  const job = await createMockJob({ id: movie.id });
+  const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -720,7 +720,7 @@ it("filters out torrents that do not match the media item's year ± 1 year", asy
 
 it.skip('filters out torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is enabled', async ({
   em,
-  movie,
+  indexedMovie,
   createMockJob,
 }) => {
   const rawTitles = [
@@ -728,15 +728,15 @@ it.skip('filters out torrents that are not dubbed if the media item is anime and
     "Test Movie 2022 1080p",
   ] as const;
 
-  em.persist(movie);
-  em.assign(movie, {
+  em.persist(indexedMovie);
+  em.assign(indexedMovie, {
     language: "jp",
     genres: ["animation", "anime"],
   });
 
   await em.flush();
 
-  const job = await createMockJob({ id: movie.id });
+  const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -768,7 +768,7 @@ it.skip('filters out torrents that are not dubbed if the media item is anime and
 
 it.skip('does not filter out torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is disabled', async ({
   em,
-  movie,
+  indexedMovie,
   createMockJob,
 }) => {
   const rawTitles = [
@@ -776,15 +776,15 @@ it.skip('does not filter out torrents that are not dubbed if the media item is a
     "Test Movie 2022 1080p",
   ] as const;
 
-  em.persist(movie);
-  em.assign(movie, {
+  em.persist(indexedMovie);
+  em.assign(indexedMovie, {
     language: "jp",
     genres: ["animation", "anime"],
   });
 
   await em.flush();
 
-  const job = await createMockJob({ id: movie.id });
+  const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -820,14 +820,14 @@ it.skip('does not filter out torrents that are not dubbed if the media item is a
   );
 });
 
-it.skip("returns sorted results", async ({ movie, createMockJob }) => {
+it.skip("returns sorted results", async ({ indexedMovie, createMockJob }) => {
   const rawTitles = [
     "Test Movie 2024 2160p",
     "Test Movie 2024 720p WEB-DL",
     "Test Movie 2024 1080p HDR10+ 5.1",
   ] as const;
 
-  const job = await createMockJob({ id: movie.id });
+  const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {

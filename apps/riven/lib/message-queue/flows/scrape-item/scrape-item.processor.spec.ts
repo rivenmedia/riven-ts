@@ -25,10 +25,10 @@ it("throws an unrecoverable error if the item cannot be scraped", async ({
 it.todo("throws an unrecoverable if no new streams were found");
 
 it('sends a "riven.media-item.scrape.success" event with the updated item if the scrape is successful', async ({
-  seeders: { seedMovie },
+  seeders: { seedIndexedMovie },
   createMockJob,
 }) => {
-  await seedMovie();
+  await seedIndexedMovie();
 
   const job = await createMockJob({ id: 1 });
 

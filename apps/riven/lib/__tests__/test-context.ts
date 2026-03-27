@@ -13,7 +13,7 @@ import { SeasonFactory } from "../database/factories/season.factory.ts";
 import { ShowFactory } from "../database/factories/show.factory.ts";
 import { StreamFactory } from "../database/factories/stream.factory.ts";
 import { createQueue } from "../message-queue/utilities/create-queue.ts";
-import { createSeederFunctions } from "./utilities/create-seeder-functions.ts";
+import { buildSeederFunctions } from "./utilities/build-seeder-functions.ts";
 
 export const rivenTestContext = testBase
   .extend("apolloServerInstance", async ({}) => {
@@ -93,19 +93,19 @@ export const rivenTestContext = testBase
       plugin: "@repo/plugin-test",
     }),
   )
-  .extend("seeders", ({ em }) => createSeederFunctions(em))
-  .extend("movie", async ({ seeders }) => seeders.seedMovie())
+  .extend("seeders", ({ em }) => buildSeederFunctions(em))
+  .extend("indexedMovie", async ({ seeders }) => seeders.seedIndexedMovie())
   .extend("scrapedMovie", async ({ seeders }) => seeders.seedScrapedMovie())
   .extend("completedMovie", async ({ seeders }) => seeders.seedCompletedMovie())
-  .extend("show", async ({ seeders }) => seeders.seedShow())
+  .extend("indexedShow", async ({ seeders }) => seeders.seedIndexedShow())
   .extend("scrapedShow", async ({ seeders }) => seeders.seedScrapedShow())
   .extend("completedShow", async ({ seeders }) => seeders.seedCompletedShow())
-  .extend("season", async ({ show }) => {
-    await wrap(show).populate(["seasons"]);
+  .extend("season", async ({ indexedShow }) => {
+    await wrap(indexedShow).populate(["seasons"]);
 
-    expect.assert(show.seasons[0]);
+    expect.assert(indexedShow.seasons[0]);
 
-    return show.seasons[0];
+    return indexedShow.seasons[0];
   })
   .extend("episode", async ({ season }) => {
     await wrap(season).populate(["episodes"]);

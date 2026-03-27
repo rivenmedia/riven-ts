@@ -10,10 +10,12 @@ import { rivenTestContext as it } from "../../../../__tests__/test-context.ts";
 import { MatchedFile } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { persistDownloadResults } from "./persist-download-results.ts";
 
-it("throws an error if the media item has no streams", async ({ movie }) => {
+it("throws an error if the media item has no streams", async ({
+  indexedMovie,
+}) => {
   await expect(
     persistDownloadResults({
-      id: movie.id,
+      id: indexedMovie.id,
       processedBy: "@repo/plugin-test",
       torrent: {
         infoHash: "1234567890123456789012345678901234567890",
@@ -24,7 +26,7 @@ it("throws an error if the media item has no streams", async ({ movie }) => {
             link: "http://example.com/file.mp4",
             name: "file.mp4",
             path: "/file.mp4",
-            matchedMediaItemId: movie.id,
+            matchedMediaItemId: indexedMovie.id,
             isCachedFile: false,
           },
         ],
@@ -33,7 +35,7 @@ it("throws an error if the media item has no streams", async ({ movie }) => {
     }),
   ).rejects.toThrow(
     new UnrecoverableError(
-      `No media item found with ID ${movie.id.toString()} and stream info hash 1234567890123456789012345678901234567890`,
+      `No media item found with ID ${indexedMovie.id.toString()} and stream info hash 1234567890123456789012345678901234567890`,
     ),
   );
 });
@@ -144,18 +146,18 @@ it("adds a single media entry for movies", async ({ scrapedMovie, em }) => {
 });
 
 it("adds one media entry per episode for shows", async ({
-  show,
+  indexedShow,
   em,
   stream,
 }) => {
-  show.streams.add(stream);
+  indexedShow.streams.add(stream);
 
-  await em.persist(show).flush();
+  await em.persist(indexedShow).flush();
 
-  const episodes = await show.getEpisodes();
+  const episodes = await indexedShow.getEpisodes();
 
   await persistDownloadResults({
-    id: show.id,
+    id: indexedShow.id,
     processedBy: "@repo/plugin-test",
     torrent: {
       torrentId: "1",
@@ -172,7 +174,7 @@ it("adds one media entry per episode for shows", async ({
     },
   });
 
-  const updatedEpisodes = await show.getEpisodes();
+  const updatedEpisodes = await indexedShow.getEpisodes();
 
   for (const episode of updatedEpisodes) {
     const mediaEntries = await episode.getMediaEntries();
@@ -182,13 +184,13 @@ it("adds one media entry per episode for shows", async ({
 });
 
 it("does not create duplicate media entries for episodes with existing entries", async ({
-  show,
+  indexedShow,
   season,
   em,
   stream,
   mediaEntry,
 }) => {
-  show.streams.add(stream);
+  indexedShow.streams.add(stream);
 
   await wrap(season).populate(["episodes"]);
 
@@ -200,10 +202,10 @@ it("does not create duplicate media entries for episodes with existing entries",
 
   episode.filesystemEntries.add(mediaEntry);
 
-  await em.persist(show).flush();
+  await em.persist(indexedShow).flush();
 
   await persistDownloadResults({
-    id: show.id,
+    id: indexedShow.id,
     processedBy: "@repo/plugin-test",
     torrent: {
       torrentId: "1",
@@ -228,13 +230,13 @@ it("does not create duplicate media entries for episodes with existing entries",
 });
 
 it("throws a MediaItemDownloadError if a validation error occurs during persistence", async ({
-  movie,
+  indexedMovie,
   em,
   stream,
 }) => {
-  movie.streams.add(stream);
+  indexedMovie.streams.add(stream);
 
-  await em.persist(movie).flush();
+  await em.persist(indexedMovie).flush();
 
   vi.spyOn(
     await import("class-validator"),
@@ -243,7 +245,7 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
 
   await expect(
     persistDownloadResults({
-      id: movie.id,
+      id: indexedMovie.id,
       processedBy: "@repo/plugin-test",
       torrent: {
         torrentId: "1",
@@ -255,7 +257,7 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
             link: "http://example.com/file.mp4",
             name: "file.mp4",
             path: "/file.mp4",
-            matchedMediaItemId: movie.id,
+            matchedMediaItemId: indexedMovie.id,
             isCachedFile: false,
           },
         ],

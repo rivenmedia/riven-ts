@@ -7,7 +7,7 @@ import { BaseSeeder } from "../base.seeder.ts";
 import type { EntityData, EntityManager } from "@mikro-orm/core";
 import type { Movie } from "@repo/util-plugin-sdk/dto/entities";
 
-export class MovieSeeder extends BaseSeeder<EntityData<Movie>> {
+export class IndexedMovieSeeder extends BaseSeeder<EntityData<Movie>> {
   async run(em: EntityManager, context = this.context) {
     const itemRequest = await new ItemRequestFactory(em).createOne({
       state: "completed",

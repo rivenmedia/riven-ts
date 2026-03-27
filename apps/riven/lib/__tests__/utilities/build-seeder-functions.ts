@@ -5,11 +5,11 @@ import { assert } from "vitest";
 import { database } from "../../database/database.ts";
 import { CompletedMovieSeeder } from "../../database/seeders/movies/completed-movie.seeder.ts";
 import { MovieWithAliasesSeeder } from "../../database/seeders/movies/movie-with-aliases.seeder.ts";
-import { MovieSeeder } from "../../database/seeders/movies/movie.seeder.ts";
+import { IndexedMovieSeeder } from "../../database/seeders/movies/movie.seeder.ts";
 import { ScrapedMovieSeeder } from "../../database/seeders/movies/scraped-movie.seeder.ts";
 import { CompletedShowSeeder } from "../../database/seeders/shows/completed-show.seeder.ts";
 import { ScrapedShowSeeder } from "../../database/seeders/shows/scraped-show.seeder.ts";
-import { ShowSeeder } from "../../database/seeders/shows/show.seeder.ts";
+import { IndexedShowSeeder } from "../../database/seeders/shows/show.seeder.ts";
 
 import type { BaseSeeder } from "../../database/seeders/base.seeder.ts";
 import type {
@@ -26,7 +26,7 @@ type SeederResult<T, C extends number> = C extends 0
     ? T
     : [T, ...T[]];
 
-const createSeederFunction =
+const buildSeederFunction =
   <T extends object, S extends Dictionary>(
     em: EntityManager,
     entity: EntityName<T>,
@@ -61,31 +61,31 @@ const createSeederFunction =
     return [entities[0], ...entities.slice(1)] as SeederResult<T, C>;
   };
 
-export const createSeederFunctions = (em: EntityManager) => {
+export const buildSeederFunctions = (em: EntityManager) => {
   return {
-    seedMovie: createSeederFunction(em, Movie, MovieSeeder),
-    seedMovieWithAliases: createSeederFunction(
+    seedIndexedMovie: buildSeederFunction(em, Movie, IndexedMovieSeeder),
+    seedMovieWithAliases: buildSeederFunction(
       em,
       Movie,
       MovieWithAliasesSeeder,
     ),
-    seedScrapedMovie: createSeederFunction(em, Movie, ScrapedMovieSeeder, {
+    seedScrapedMovie: buildSeederFunction(em, Movie, ScrapedMovieSeeder, {
       where: {
         state: "scraped",
       },
     }),
-    seedCompletedMovie: createSeederFunction(em, Movie, CompletedMovieSeeder, {
+    seedCompletedMovie: buildSeederFunction(em, Movie, CompletedMovieSeeder, {
       where: {
         state: "completed",
       },
     }),
-    seedShow: createSeederFunction(em, Show, ShowSeeder),
-    seedScrapedShow: createSeederFunction(em, Show, ScrapedShowSeeder, {
+    seedIndexedShow: buildSeederFunction(em, Show, IndexedShowSeeder),
+    seedScrapedShow: buildSeederFunction(em, Show, ScrapedShowSeeder, {
       where: {
         state: "scraped",
       },
     }),
-    seedCompletedShow: createSeederFunction(em, Show, CompletedShowSeeder, {
+    seedCompletedShow: buildSeederFunction(em, Show, CompletedShowSeeder, {
       where: {
         state: "completed",
       },

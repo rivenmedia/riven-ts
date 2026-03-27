@@ -8,13 +8,13 @@ import assert from "node:assert";
 
 import { BaseSeeder } from "../base.seeder.ts";
 import { StreamsSeeder } from "../streams/streams.seeder.ts";
-import { MovieSeeder } from "./movie.seeder.ts";
+import { IndexedMovieSeeder } from "./movie.seeder.ts";
 
 import type { EntityData, EntityManager } from "@mikro-orm/core";
 
 export class ScrapedMovieSeeder extends BaseSeeder<EntityData<Movie>> {
   async run(em: EntityManager) {
-    await this.call(em, [MovieSeeder, StreamsSeeder]);
+    await this.call(em, [IndexedMovieSeeder, StreamsSeeder]);
 
     const movie = await em.findOneOrFail(
       MediaItem,

@@ -15,7 +15,7 @@ export interface ShowSeederContext {
   episodesPerSeason?: number;
 }
 
-export class ShowSeeder extends BaseSeeder<ShowSeederContext> {
+export class IndexedShowSeeder extends BaseSeeder<ShowSeederContext> {
   #episodesPerSeason = 10;
   #seasonCount = 6;
 

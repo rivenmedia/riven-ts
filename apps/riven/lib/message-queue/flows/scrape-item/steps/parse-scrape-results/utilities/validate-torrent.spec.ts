@@ -37,26 +37,26 @@ const it = baseIt
   .extend("infoHash", () => faker.git.commitSha());
 
 it("does not throw for movie torrents if the item is a movie", async ({
-  movie,
+  indexedMovie,
   infoHash,
 }) => {
   const rawTitle = "Test Movie 2024 1080p WEB-DL";
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(movie, movie.title, parsedData, infoHash),
+    validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
 it("does not throw for show torrents if the item is a show", async ({
-  show,
+  indexedShow,
   infoHash,
 }) => {
   const rawTitle = "Test Show: The Complete Series (Season 1,2,3,4,5&6) E01-60";
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(show, show.title, parsedData, infoHash),
+    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
@@ -88,18 +88,18 @@ it("does not throw for episode torrents if the item is an episode", async ({
 });
 
 it("throws for show torrents if the item is a movie", async ({
-  movie,
+  indexedMovie,
   infoHash,
 }) => {
   const rawTitle = "Test Movie S01E01";
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(movie, movie.title, parsedData, infoHash),
+    validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping show torrent for movie`,
-      movie.title,
+      indexedMovie.title,
       parsedData.rawTitle,
       infoHash,
     ),
@@ -108,7 +108,7 @@ it("throws for show torrents if the item is a movie", async ({
 
 it("throws for torrents with an incorrect number of seasons for ended shows", async ({
   em,
-  show,
+  indexedShow,
   infoHash,
   annotate,
 }) => {
@@ -118,19 +118,19 @@ it("throws for torrents with an incorrect number of seasons for ended shows", as
 
   const rawTitle = "Test Show: S01-03";
 
-  em.persist(show);
-  em.assign(show, { status: "ended" });
+  em.persist(indexedShow);
+  em.assign(indexedShow, { status: "ended" });
 
   await em.flush();
 
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(show, show.title, parsedData, infoHash),
+    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect number of seasons`,
-      show.title,
+      indexedShow.title,
       parsedData.rawTitle,
       infoHash,
     ),
@@ -139,7 +139,7 @@ it("throws for torrents with an incorrect number of seasons for ended shows", as
 
 it("throws for torrents with an incorrect number of seasons for continuing shows", async ({
   em,
-  show,
+  indexedShow,
   infoHash,
   annotate,
 }) => {
@@ -149,19 +149,19 @@ it("throws for torrents with an incorrect number of seasons for continuing shows
 
   const rawTitle = "Test Show: S01-03";
 
-  em.persist(show);
-  em.assign(show, { status: "continuing" });
+  em.persist(indexedShow);
+  em.assign(indexedShow, { status: "continuing" });
 
   await em.flush();
 
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(show, show.title, parsedData, infoHash),
+    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect number of seasons`,
-      show.title,
+      indexedShow.title,
       parsedData.rawTitle,
       infoHash,
     ),
@@ -170,44 +170,44 @@ it("throws for torrents with an incorrect number of seasons for continuing shows
 
 it("does not throw for torrents that do not contain the most recent season for continuing shows", async ({
   em,
-  show,
+  indexedShow,
   infoHash,
 }) => {
   const rawTitle = "Test Show: S01-05";
 
-  em.persist(show);
-  em.assign(show, { status: "continuing" });
+  em.persist(indexedShow);
+  em.assign(indexedShow, { status: "continuing" });
 
   await em.flush();
 
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(show, show.title, parsedData, infoHash),
+    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
 it("does not throw for torrents that contain all seasons for ended shows", async ({
   em,
-  show,
+  indexedShow,
   infoHash,
 }) => {
   const rawTitle = "Test Show: S01-06";
 
-  em.persist(show);
-  em.assign(show, { status: "ended" });
+  em.persist(indexedShow);
+  em.assign(indexedShow, { status: "ended" });
 
   await em.flush();
 
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(show, show.title, parsedData, infoHash),
+    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
 it("throws for torrents with no seasons and episodes for show-like items", async ({
-  show,
+  indexedShow,
   infoHash,
 }) => {
   const rawTitle = "Test Show";
@@ -215,11 +215,11 @@ it("throws for torrents with no seasons and episodes for show-like items", async
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(show, show.title, parsedData, infoHash),
+    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with no seasons or episodes for show item`,
-      show.title,
+      indexedShow.title,
       parsedData.rawTitle,
       infoHash,
     ),
@@ -228,14 +228,14 @@ it("throws for torrents with no seasons and episodes for show-like items", async
 
 it("throws for torrents with incorrect number of episodes for single-season shows", async ({
   em,
-  show,
+  indexedShow,
   infoHash,
 }) => {
-  await wrap(show).populate(["seasons"]);
+  await wrap(indexedShow).populate(["seasons"]);
 
   const rawTitle = "Test Show: S01 E01-05";
 
-  const [, ...seasonsToRemove] = show.seasons;
+  const [, ...seasonsToRemove] = indexedShow.seasons;
 
   em.remove(seasonsToRemove);
 
@@ -244,11 +244,11 @@ it("throws for torrents with incorrect number of episodes for single-season show
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(show, show.title, parsedData, infoHash),
+    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect number of episodes for single-season show`,
-      show.title,
+      indexedShow.title,
       parsedData.rawTitle,
       infoHash,
     ),
@@ -257,14 +257,14 @@ it("throws for torrents with incorrect number of episodes for single-season show
 
 it("does not throw for torrents with the correct number of episodes for single-season shows", async ({
   em,
-  show,
+  indexedShow,
   infoHash,
 }) => {
   const rawTitle = "Test Show: S01 E01-10";
 
-  await wrap(show).populate(["seasons"]);
+  await wrap(indexedShow).populate(["seasons"]);
 
-  const [, ...seasonsToRemove] = show.seasons;
+  const [, ...seasonsToRemove] = indexedShow.seasons;
 
   em.remove(seasonsToRemove);
 
@@ -273,17 +273,17 @@ it("does not throw for torrents with the correct number of episodes for single-s
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(show, show.title, parsedData, infoHash),
+    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
 it("does not throw for torrents that have no seasons, but the correct absolute episode range for season items", async ({
-  show,
+  indexedShow,
   infoHash,
 }) => {
-  await wrap(show).populate(["seasons"]);
+  await wrap(indexedShow).populate(["seasons"]);
 
-  const season = show.seasons[2];
+  const season = indexedShow.seasons[2];
 
   expect.assert(season);
 
@@ -292,17 +292,17 @@ it("does not throw for torrents that have no seasons, but the correct absolute e
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(season, show.title, parsedData, infoHash),
+    validateTorrent(season, indexedShow.title, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
 it("throws for torrents that have no seasons and do not have the correct absolute episode range for season items", async ({
-  show,
+  indexedShow,
   infoHash,
 }) => {
-  await wrap(show).populate(["seasons"]);
+  await wrap(indexedShow).populate(["seasons"]);
 
-  const season = show.seasons[2];
+  const season = indexedShow.seasons[2];
 
   expect.assert(season);
 
@@ -311,11 +311,11 @@ it("throws for torrents that have no seasons and do not have the correct absolut
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(season, show.title, parsedData, infoHash),
+    validateTorrent(season, indexedShow.title, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect absolute episode range for season item`,
-      show.title,
+      indexedShow.title,
       parsedData.rawTitle,
       infoHash,
     ),
@@ -443,24 +443,24 @@ it("throws for torrents with no episodes for episode items", async ({
 
 it("throws for torrents that do not match the media item's country", async ({
   em,
-  movie,
+  indexedMovie,
   infoHash,
 }) => {
   const rawTitle = "Test Movie 2024 [US]";
 
-  em.persist(movie);
-  em.assign(movie, { country: "UK" });
+  em.persist(indexedMovie);
+  em.assign(indexedMovie, { country: "UK" });
 
   await em.flush();
 
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(movie, movie.title, parsedData, infoHash),
+    validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect country`,
-      movie.title,
+      indexedMovie.title,
       parsedData.rawTitle,
       infoHash,
     ),
@@ -469,13 +469,13 @@ it("throws for torrents that do not match the media item's country", async ({
 
 it("does not throw for torrents that do not match the media item's country if the media item is anime", async ({
   em,
-  movie,
+  indexedMovie,
   infoHash,
 }) => {
   const rawTitle = "Test Movie 2024 [US]";
 
-  em.persist(movie);
-  em.assign(movie, {
+  em.persist(indexedMovie);
+  em.assign(indexedMovie, {
     country: "UK",
     language: "jp",
     genres: ["animation", "anime"],
@@ -486,13 +486,13 @@ it("does not throw for torrents that do not match the media item's country if th
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(movie, movie.title, parsedData, infoHash),
+    validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
 it("throws for torrents that do not match the media item's year (± 1 year)", async ({
   em,
-  movie,
+  indexedMovie,
   infoHash,
 }) => {
   const badTitles = ["Test Movie 2018 1080p", "Test Movie 2022 1080p"] as const;
@@ -503,8 +503,8 @@ it("throws for torrents that do not match the media item's year (± 1 year)", as
     "Test Movie 2021 1080p",
   ] as const;
 
-  em.persist(movie);
-  em.assign(movie, { year: 2020 });
+  em.persist(indexedMovie);
+  em.assign(indexedMovie, { year: 2020 });
 
   await em.flush();
 
@@ -512,11 +512,11 @@ it("throws for torrents that do not match the media item's year (± 1 year)", as
     const parsedData = parse(rawTitle);
 
     await expect(
-      validateTorrent(movie, movie.title, parsedData, infoHash),
+      validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
     ).rejects.toThrow(
       new SkippedTorrentError(
         `Skipping torrent with incorrect year`,
-        movie.title,
+        indexedMovie.title,
         parsedData.rawTitle,
         infoHash,
       ),
@@ -527,14 +527,14 @@ it("throws for torrents that do not match the media item's year (± 1 year)", as
     const parsedData = parse(rawTitle);
 
     await expect(
-      validateTorrent(movie, movie.title, parsedData, infoHash),
+      validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
     ).resolves.not.toThrow();
   }
 });
 
 it.skip('throws for torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is enabled', async ({
   em,
-  movie,
+  indexedMovie,
   infoHash,
 }) => {
   const rawTitle = "Test Movie 2020 1080p";
@@ -544,19 +544,19 @@ it.skip('throws for torrents that are not dubbed if the media item is anime and 
     dubbedAnimeOnly: true,
   });
 
-  em.persist(movie);
-  em.assign(movie, { language: "jp", genres: ["animation", "anime"] });
+  em.persist(indexedMovie);
+  em.assign(indexedMovie, { language: "jp", genres: ["animation", "anime"] });
 
   await em.flush();
 
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(movie, movie.title, parsedData, infoHash),
+    validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping non-dubbed anime torrent`,
-      movie.title,
+      indexedMovie.title,
       parsedData.rawTitle,
       infoHash,
     ),
@@ -565,7 +565,7 @@ it.skip('throws for torrents that are not dubbed if the media item is anime and 
 
 it.skip('does not throw for torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is disabled', async ({
   em,
-  movie,
+  indexedMovie,
   infoHash,
 }) => {
   const rawTitle = "Test Movie 2020 1080p";
@@ -575,21 +575,21 @@ it.skip('does not throw for torrents that are not dubbed if the media item is an
     dubbedAnimeOnly: false,
   });
 
-  em.persist(movie);
-  em.assign(movie, { language: "jp", genres: ["animation", "anime"] });
+  em.persist(indexedMovie);
+  em.assign(indexedMovie, { language: "jp", genres: ["animation", "anime"] });
 
   await em.flush();
 
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(movie, movie.title, parsedData, infoHash),
+    validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
 it('does not throw for torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is enabled', async ({
   em,
-  movie,
+  indexedMovie,
   infoHash,
 }) => {
   const rawTitle = "Test Movie 2020 1080p [Dubbed]";
@@ -599,14 +599,14 @@ it('does not throw for torrents that are not dubbed if the media item is anime a
     dubbedAnimeOnly: true,
   });
 
-  em.persist(movie);
-  em.assign(movie, { language: "jp", genres: ["animation", "anime"] });
+  em.persist(indexedMovie);
+  em.assign(indexedMovie, { language: "jp", genres: ["animation", "anime"] });
 
   await em.flush();
 
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(movie, movie.title, parsedData, infoHash),
+    validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
   ).resolves.not.toThrow();
 });

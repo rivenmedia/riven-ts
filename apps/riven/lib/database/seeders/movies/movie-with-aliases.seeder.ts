@@ -1,5 +1,5 @@
 import { BaseSeeder } from "../base.seeder.ts";
-import { MovieSeeder } from "./movie.seeder.ts";
+import { IndexedMovieSeeder } from "./movie.seeder.ts";
 
 import type { EntityData, EntityManager } from "@mikro-orm/core";
 import type { Movie } from "@repo/util-plugin-sdk/dto/entities";
@@ -15,6 +15,6 @@ export class MovieWithAliasesSeeder extends BaseSeeder<EntityData<Movie>> {
   };
 
   async run(em: EntityManager) {
-    await this.call(em, [MovieSeeder]);
+    await this.call(em, [IndexedMovieSeeder]);
   }
 }
