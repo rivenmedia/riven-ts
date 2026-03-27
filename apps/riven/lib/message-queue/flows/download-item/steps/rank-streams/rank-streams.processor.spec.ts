@@ -143,17 +143,19 @@ it("handles foreign language movies with aliases correctly", async ({
   factories: { streamFactory },
   mockSentryScope,
 }) => {
-  const foreignLanguageMovie = await seedForeignLanguageMovie();
+  const { movie: foreignLanguageMovie } = await seedForeignLanguageMovie();
 
-  await streamFactory
-    .each((stream, i) => {
-      stream.infoHash = `a${i.toString()}34567890123456789012345678901234567890`;
-      stream.parsedData = {} as never;
-    })
-    .create(3);
+  foreignLanguageMovie.streams.set(
+    await streamFactory
+      .each((stream, i) => {
+        stream.infoHash = `a${i.toString()}34567890123456789012345678901234567890`;
+        stream.parsedData = {} as never;
+      })
+      .create(3),
+  );
 
   const job = await createMockJob({
-    id: foreignLanguageMovie.movie.id,
+    id: foreignLanguageMovie.id,
     streams: {
       a034567890123456789012345678901234567890:
         "Película Extranjera 1080p BluRay",
@@ -194,17 +196,19 @@ it("handles foreign language shows with aliases correctly", async ({
   factories: { streamFactory },
   mockSentryScope,
 }) => {
-  const foreignLanguageShow = await seedForeignLanguageShow();
+  const { show: foreignLanguageShow } = await seedForeignLanguageShow();
 
-  await streamFactory
-    .each((stream, i) => {
-      stream.infoHash = `a${i.toString()}34567890123456789012345678901234567890`;
-      stream.parsedData = {} as never;
-    })
-    .create(3);
+  foreignLanguageShow.streams.set(
+    await streamFactory
+      .each((stream, i) => {
+        stream.infoHash = `a${i.toString()}34567890123456789012345678901234567890`;
+        stream.parsedData = {} as never;
+      })
+      .create(3),
+  );
 
   const job = await createMockJob({
-    id: foreignLanguageShow.show.id,
+    id: foreignLanguageShow.id,
     streams: {
       a034567890123456789012345678901234567890:
         "Espectáculo Extranjero 1080p BluRay",
