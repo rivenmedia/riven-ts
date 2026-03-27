@@ -10,11 +10,9 @@ import { downloadItemProcessor } from "./download-item.processor.ts";
 
 it("throws an unrecoverable error if no valid torrent is found", async ({
   createMockJob,
-  seeders: { seedScrapedMovie },
+  scrapedMovie,
 }) => {
-  const movie = await seedScrapedMovie();
-
-  const job = await createMockJob({ id: movie.id });
+  const job = await createMockJob({ id: scrapedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
