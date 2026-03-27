@@ -13,7 +13,7 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
   actor,
   scrapedShow,
 }) => {
-  await scrapedShow.seasons.load();
+  const seasons = await scrapedShow.seasons.load();
 
   const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
 
@@ -26,7 +26,7 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
   });
 
   await vi.waitFor(() => {
-    for (const season of scrapedShow.seasons) {
+    for (const season of seasons) {
       expect(flowAddBulkSpy).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
@@ -45,15 +45,13 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
   actor,
   scrapedShow,
 }) => {
-  await scrapedShow.seasons.load();
+  const [, , failedSeason] = await scrapedShow.seasons.load();
+
+  assert(failedSeason);
 
   const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
 
   actor.start();
-
-  const failedSeason = scrapedShow.seasons[2];
-
-  assert(failedSeason);
 
   actor.send({
     type: "riven.media-item.download.error",

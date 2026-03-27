@@ -81,9 +81,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
   expect.assert(episodes[0]);
   expect.assert(episodes[1]);
 
-  await scrapedShow.streams.load();
-
-  const streamInfoHash = scrapedShow.streams[0]?.infoHash;
+  const [{ infoHash: streamInfoHash } = {}] = await scrapedShow.streams.load();
 
   expect.assert(streamInfoHash);
 

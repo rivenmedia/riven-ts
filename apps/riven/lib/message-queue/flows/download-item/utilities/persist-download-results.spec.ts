@@ -81,9 +81,7 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
 it("sets the active stream and updates the state to completed if successful", async ({
   scrapedMovie,
 }) => {
-  await scrapedMovie.streams.load();
-
-  const stream = scrapedMovie.streams[0];
+  const [stream] = await scrapedMovie.streams.load();
 
   expect.assert(stream);
 
@@ -112,9 +110,7 @@ it("sets the active stream and updates the state to completed if successful", as
 });
 
 it("adds a single media entry for movies", async ({ scrapedMovie, em }) => {
-  await scrapedMovie.streams.load();
-
-  const stream = scrapedMovie.streams[0];
+  const [stream] = await scrapedMovie.streams.load();
 
   expect.assert(stream);
 

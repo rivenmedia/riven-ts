@@ -65,7 +65,7 @@ it("returns all movies for the /movies path", async ({
 });
 
 it("returns all seasons for a single show path", async ({ completedShow }) => {
-  await completedShow.seasons.load();
+  const seasons = await completedShow.seasons.load();
 
   const callback = vi.fn();
 
@@ -74,7 +74,7 @@ it("returns all seasons for a single show path", async ({ completedShow }) => {
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith<[number, string[]]>(
       0,
-      completedShow.seasons.map((season) => season.getPrettyName()),
+      seasons.map((season) => season.getPrettyName()),
     );
   });
 });
