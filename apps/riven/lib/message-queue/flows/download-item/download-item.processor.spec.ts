@@ -18,10 +18,8 @@ it("throws an unrecoverable error if no valid torrent is found", async ({
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
-  const sendEvent = vi.fn();
-
   await expect(() =>
-    downloadItemProcessor({ job, scope: new Sentry.Scope() }, sendEvent),
+    downloadItemProcessor({ job, scope: new Sentry.Scope() }, vi.fn()),
   ).rejects.toThrow(UnrecoverableError);
 });
 

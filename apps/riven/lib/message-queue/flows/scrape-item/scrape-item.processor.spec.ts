@@ -11,14 +11,12 @@ import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 it("throws an unrecoverable error if the item cannot be scraped", async ({
   createMockJob,
 }) => {
-  const sendEvent = vi.fn();
-
   const job = await createMockJob({ id: 1 });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
   await expect(() =>
-    scrapeItemProcessor({ job, scope: new Sentry.Scope() }, sendEvent),
+    scrapeItemProcessor({ job, scope: new Sentry.Scope() }, vi.fn()),
   ).rejects.toThrow();
 });
 
