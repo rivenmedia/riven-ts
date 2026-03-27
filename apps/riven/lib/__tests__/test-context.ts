@@ -2,7 +2,7 @@
 import * as Sentry from "@sentry/node";
 import { Job, type JobsOptions } from "bullmq";
 import assert from "node:assert";
-import { MockAgent, setGlobalDispatcher } from "undici";
+import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "undici";
 import { test as testBase } from "vitest";
 
 import { database } from "../database/database.ts";
@@ -66,12 +66,17 @@ export const it = testBase
   })
   .extend("mockAgent", ({}, { onCleanup }) => {
     const mockAgent = new MockAgent();
+    const previousGlobalDispatcher = getGlobalDispatcher();
 
     mockAgent.disableNetConnect();
 
     setGlobalDispatcher(mockAgent);
 
-    onCleanup(() => mockAgent.close());
+    onCleanup(async () => {
+      await mockAgent.close();
+
+      setGlobalDispatcher(previousGlobalDispatcher);
+    });
 
     return mockAgent;
   })
