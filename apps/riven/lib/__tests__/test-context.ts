@@ -1,9 +1,9 @@
 /* eslint-disable no-empty-pattern */
-import { wrap } from "@mikro-orm/core";
 import * as Sentry from "@sentry/node";
 import { Job, type JobsOptions } from "bullmq";
+import assert from "node:assert";
 import { MockAgent, setGlobalDispatcher } from "undici";
-import { expect, test as testBase } from "vitest";
+import { test as testBase } from "vitest";
 
 import { database } from "../database/database.ts";
 import { EpisodeFactory } from "../database/factories/episode.factory.ts";
@@ -94,26 +94,75 @@ export const it = testBase
       plugin: "@repo/plugin-test",
     }),
   )
-  .extend("seeders", ({ em }) => buildSeederFunctions(em))
-  .extend("indexedMovie", async ({ seeders }) => seeders.seedIndexedMovie())
-  .extend("scrapedMovie", async ({ seeders }) => seeders.seedScrapedMovie())
-  .extend("completedMovie", async ({ seeders }) => seeders.seedCompletedMovie())
-  .extend("indexedShow", async ({ seeders }) => seeders.seedIndexedShow())
-  .extend("scrapedShow", async ({ seeders }) => seeders.seedScrapedShow())
-  .extend("completedShow", async ({ seeders }) => seeders.seedCompletedShow())
-  .extend("season", async ({ indexedShow }) => {
-    await wrap(indexedShow).populate(["seasons"]);
+  .extend("seeders", ({ em, orm }) => buildSeederFunctions(orm, em))
+  .extend("indexedMovieContext", async ({ seeders }) => {
+    const result = await seeders.seedIndexedMovie();
 
-    expect.assert(indexedShow.seasons[0]);
-
-    return indexedShow.seasons[0];
+    return {
+      indexedMovie: result.movie,
+    };
   })
-  .extend("episode", async ({ season }) => {
-    await wrap(season).populate(["episodes"]);
+  .extend("scrapedMovieContext", async ({ seeders }) => {
+    const result = await seeders.seedScrapedMovie();
 
-    expect.assert(season.episodes[0]);
+    return {
+      scrapedMovie: result.movie,
+      streams: result.streams,
+    };
+  })
+  .extend("completedMovieContext", async ({ seeders }) => {
+    const result = await seeders.seedCompletedMovie();
 
-    return season.episodes[0];
+    return {
+      completedMovie: result.movie,
+      streams: result.streams,
+    };
+  })
+  .extend("indexedShowContext", async ({ seeders }) => {
+    const result = await seeders.seedIndexedShow();
+
+    return {
+      indexedShow: result.show,
+      seasons: result.seasons ?? [],
+      episodes: result.episodes ?? [],
+    };
+  })
+  .extend("scrapedShowContext", async ({ seeders }) => {
+    const result = await seeders.seedScrapedShow();
+
+    return {
+      scrapedShow: result.show,
+      streams: result.streams,
+      seasons: result.seasons ?? [],
+      episodes: result.episodes ?? [],
+    };
+  })
+  .extend("completedShowContext", async ({ seeders }) => {
+    const result = await seeders.seedCompletedShow();
+
+    return {
+      completedShow: result.show,
+      streams: result.streams,
+      seasons: result.seasons ?? [],
+      episodes: result.episodes ?? [],
+    };
+  })
+  .extend(
+    "season",
+    ({
+      indexedShowContext: {
+        seasons: [season],
+      },
+    }) => {
+      assert(season);
+
+      return season;
+    },
+  )
+  .extend("episode", ({ indexedShowContext: { episodes: [episode] = [] } }) => {
+    assert(episode);
+
+    return episode;
   })
   .extend("mockQueue", ({}, { onCleanup }) => {
     const queue = createQueue("mock-queue");

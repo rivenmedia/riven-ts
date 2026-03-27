@@ -10,7 +10,11 @@ import { rankStreamsProcessor } from "./rank-streams.processor.ts";
 
 const it = baseIt.extend(
   "item",
-  async ({ em, indexedMovie, factories: { streamFactory } }) => {
+  async ({
+    em,
+    indexedMovieContext: { indexedMovie },
+    factories: { streamFactory },
+  }) => {
     indexedMovie.streams.set(
       streamFactory
         .each((stream, i) => {
@@ -149,7 +153,7 @@ it("handles foreign language movies with aliases correctly", async ({
     .create(3);
 
   const job = await createMockJob({
-    id: foreignLanguageMovie.id,
+    id: foreignLanguageMovie.movie.id,
     streams: {
       a034567890123456789012345678901234567890:
         "Película Extranjera 1080p BluRay",
@@ -200,7 +204,7 @@ it("handles foreign language shows with aliases correctly", async ({
     .create(3);
 
   const job = await createMockJob({
-    id: foreignLanguageShow.id,
+    id: foreignLanguageShow.show.id,
     streams: {
       a034567890123456789012345678901234567890:
         "Espectáculo Extranjero 1080p BluRay",

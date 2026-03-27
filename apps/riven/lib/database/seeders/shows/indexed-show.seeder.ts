@@ -7,10 +7,12 @@ import { ShowFactory } from "../../factories/show.factory.ts";
 import { BaseSeeder } from "../base.seeder.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
-import type { Show } from "@repo/util-plugin-sdk/dto/entities";
+import type { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 
 export interface IndexedShowSeederContext {
   show: Show;
+  seasons?: Season[];
+  episodes?: Episode[];
 }
 
 export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
@@ -42,20 +44,27 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
         itemRequest: context.show.itemRequest,
       });
 
+      context.seasons ??= [];
+      context.seasons.push(season);
+
       for (
         let episodeNumber = 1;
         episodeNumber <= this.#episodesPerSeason;
         episodeNumber++
       ) {
-        await new EpisodeFactory(em).createOne({
-          tvdbId: context.show.tvdbId,
-          number: episodeNumber,
-          absoluteNumber: absoluteEpisodeNumber++,
-          releaseDate,
-          season,
-          itemRequest: context.show.itemRequest,
-        });
+        season.episodes.add(
+          new EpisodeFactory(em).makeEntity({
+            tvdbId: context.show.tvdbId,
+            number: episodeNumber,
+            absoluteNumber: absoluteEpisodeNumber++,
+            releaseDate,
+            itemRequest: context.show.itemRequest,
+          }),
+        );
       }
+
+      context.episodes ??= [];
+      context.episodes.push(...season.episodes);
     }
 
     await em.flush();

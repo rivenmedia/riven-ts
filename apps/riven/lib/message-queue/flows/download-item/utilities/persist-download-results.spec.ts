@@ -1,8 +1,7 @@
 import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
-import { faker } from "@faker-js/faker";
-import { ref, wrap } from "@mikro-orm/core";
+import { ref } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
@@ -11,7 +10,7 @@ import { MatchedFile } from "../steps/find-valid-torrent/find-valid-torrent.sche
 import { persistDownloadResults } from "./persist-download-results.ts";
 
 it("throws an error if the media item has no streams", async ({
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
 }) => {
   await expect(
     persistDownloadResults({
@@ -41,19 +40,15 @@ it("throws an error if the media item has no streams", async ({
 });
 
 it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in the scraped or ongoing state", async ({
-  completedMovie,
+  completedMovieContext: { completedMovie },
   factories: { streamFactory },
   em,
 }) => {
-  const infoHash = faker.git.commitSha();
+  const stream = streamFactory.makeEntity();
 
   em.persist(completedMovie);
 
-  completedMovie.streams.add(
-    streamFactory.makeEntity({
-      infoHash,
-    }),
-  );
+  completedMovie.streams.add(stream);
 
   await em.flush();
 
@@ -63,7 +58,7 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
       processedBy: "@repo/plugin-test",
       torrent: {
         torrentId: "1",
-        infoHash,
+        infoHash: stream.infoHash,
         provider: null,
         files: [
           {
@@ -81,7 +76,7 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
 });
 
 it("sets the active stream and updates the state to completed if successful", async ({
-  scrapedMovie,
+  scrapedMovieContext: { scrapedMovie },
 }) => {
   const [stream] = await scrapedMovie.streams.load();
 
@@ -111,7 +106,9 @@ it("sets the active stream and updates the state to completed if successful", as
   expect(updatedItem.state).toBe("completed");
 });
 
-it("adds a single media entry for movies", async ({ scrapedMovie }) => {
+it("adds a single media entry for movies", async ({
+  scrapedMovieContext: { scrapedMovie },
+}) => {
   const [stream] = await scrapedMovie.streams.load();
 
   expect.assert(stream);
@@ -141,9 +138,13 @@ it("adds a single media entry for movies", async ({ scrapedMovie }) => {
   expect(mediaEntries).toHaveLength(1);
 });
 
-it("adds one media entry per episode for shows", async ({ scrapedShow }) => {
+it("adds one media entry per episode for shows", async ({
+  scrapedShowContext: {
+    scrapedShow,
+    streams: [stream],
+  },
+}) => {
   const episodes = await scrapedShow.getEpisodes();
-  const [stream] = await scrapedShow.streams.loadItems();
 
   expect.assert(stream);
 
@@ -175,24 +176,27 @@ it("adds one media entry per episode for shows", async ({ scrapedShow }) => {
 });
 
 it("does not create duplicate media entries for episodes with existing entries", async ({
-  scrapedShow,
-  season,
+  scrapedShowContext: {
+    scrapedShow,
+    streams: [stream],
+    episodes: [episode],
+  },
   em,
-  mediaEntry,
+  factories: { mediaEntryFactory },
 }) => {
-  await wrap(season).populate(["episodes"]);
-
-  const [episode] = season.episodes;
-  const [stream] = await scrapedShow.streams.loadItems();
-
   expect.assert(stream);
   expect.assert(episode);
 
-  mediaEntry.mediaItem = ref(episode);
+  em.persist(episode);
+  em.persist(scrapedShow);
 
-  episode.filesystemEntries.add(mediaEntry);
+  episode.filesystemEntries.add(
+    mediaEntryFactory.makeOne({
+      mediaItem: ref(episode),
+    }),
+  );
 
-  await em.persist(scrapedShow).flush();
+  await em.flush();
 
   await persistDownloadResults({
     id: scrapedShow.id,
@@ -220,10 +224,11 @@ it("does not create duplicate media entries for episodes with existing entries",
 });
 
 it("throws a MediaItemDownloadError if a validation error occurs during persistence", async ({
-  scrapedMovie,
+  scrapedMovieContext: {
+    scrapedMovie,
+    streams: [stream],
+  },
 }) => {
-  const [stream] = await scrapedMovie.streams.load();
-
   expect.assert(stream);
 
   vi.spyOn(

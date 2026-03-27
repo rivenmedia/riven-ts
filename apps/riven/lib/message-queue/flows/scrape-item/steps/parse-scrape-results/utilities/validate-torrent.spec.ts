@@ -37,7 +37,7 @@ const it = baseIt
   .extend("infoHash", () => faker.git.commitSha());
 
 it("does not throw for movie torrents if the item is a movie", async ({
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   infoHash,
 }) => {
   const rawTitle = "Test Movie 2024 1080p WEB-DL";
@@ -49,7 +49,7 @@ it("does not throw for movie torrents if the item is a movie", async ({
 });
 
 it("does not throw for show torrents if the item is a show", async ({
-  indexedShow,
+  indexedShowContext: { indexedShow },
   infoHash,
 }) => {
   const rawTitle = "Test Show: The Complete Series (Season 1,2,3,4,5&6) E01-60";
@@ -88,7 +88,7 @@ it("does not throw for episode torrents if the item is an episode", async ({
 });
 
 it("throws for show torrents if the item is a movie", async ({
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   infoHash,
 }) => {
   const rawTitle = "Test Movie S01E01";
@@ -108,7 +108,7 @@ it("throws for show torrents if the item is a movie", async ({
 
 it("throws for torrents with an incorrect number of seasons for ended shows", async ({
   em,
-  indexedShow,
+  indexedShowContext: { indexedShow },
   infoHash,
   annotate,
 }) => {
@@ -139,7 +139,7 @@ it("throws for torrents with an incorrect number of seasons for ended shows", as
 
 it("throws for torrents with an incorrect number of seasons for continuing shows", async ({
   em,
-  indexedShow,
+  indexedShowContext: { indexedShow },
   infoHash,
   annotate,
 }) => {
@@ -170,7 +170,7 @@ it("throws for torrents with an incorrect number of seasons for continuing shows
 
 it("does not throw for torrents that do not contain the most recent season for continuing shows", async ({
   em,
-  indexedShow,
+  indexedShowContext: { indexedShow },
   infoHash,
 }) => {
   const rawTitle = "Test Show: S01-05";
@@ -189,7 +189,7 @@ it("does not throw for torrents that do not contain the most recent season for c
 
 it("does not throw for torrents that contain all seasons for ended shows", async ({
   em,
-  indexedShow,
+  indexedShowContext: { indexedShow },
   infoHash,
 }) => {
   const rawTitle = "Test Show: S01-06";
@@ -207,7 +207,7 @@ it("does not throw for torrents that contain all seasons for ended shows", async
 });
 
 it("throws for torrents with no seasons and episodes for show-like items", async ({
-  indexedShow,
+  indexedShowContext: { indexedShow },
   infoHash,
 }) => {
   const rawTitle = "Test Show";
@@ -228,7 +228,7 @@ it("throws for torrents with no seasons and episodes for show-like items", async
 
 it("throws for torrents with incorrect number of episodes for single-season shows", async ({
   em,
-  indexedShow,
+  indexedShowContext: { indexedShow },
   infoHash,
 }) => {
   await wrap(indexedShow).populate(["seasons"]);
@@ -257,7 +257,7 @@ it("throws for torrents with incorrect number of episodes for single-season show
 
 it("does not throw for torrents with the correct number of episodes for single-season shows", async ({
   em,
-  indexedShow,
+  indexedShowContext: { indexedShow },
   infoHash,
 }) => {
   const rawTitle = "Test Show: S01 E01-10";
@@ -278,7 +278,7 @@ it("does not throw for torrents with the correct number of episodes for single-s
 });
 
 it("does not throw for torrents that have no seasons, but the correct absolute episode range for season items", async ({
-  indexedShow,
+  indexedShowContext: { indexedShow },
   infoHash,
 }) => {
   await wrap(indexedShow).populate(["seasons"]);
@@ -297,7 +297,7 @@ it("does not throw for torrents that have no seasons, but the correct absolute e
 });
 
 it("throws for torrents that have no seasons and do not have the correct absolute episode range for season items", async ({
-  indexedShow,
+  indexedShowContext: { indexedShow },
   infoHash,
 }) => {
   await wrap(indexedShow).populate(["seasons"]);
@@ -443,7 +443,7 @@ it("throws for torrents with no episodes for episode items", async ({
 
 it("throws for torrents that do not match the media item's country", async ({
   em,
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   infoHash,
 }) => {
   const rawTitle = "Test Movie 2024 [US]";
@@ -469,7 +469,7 @@ it("throws for torrents that do not match the media item's country", async ({
 
 it("does not throw for torrents that do not match the media item's country if the media item is anime", async ({
   em,
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   infoHash,
 }) => {
   const rawTitle = "Test Movie 2024 [US]";
@@ -492,7 +492,7 @@ it("does not throw for torrents that do not match the media item's country if th
 
 it("throws for torrents that do not match the media item's year (± 1 year)", async ({
   em,
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   infoHash,
 }) => {
   const badTitles = ["Test Movie 2018 1080p", "Test Movie 2022 1080p"] as const;
@@ -534,7 +534,7 @@ it("throws for torrents that do not match the media item's year (± 1 year)", as
 
 it.skip('throws for torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is enabled', async ({
   em,
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   infoHash,
 }) => {
   const rawTitle = "Test Movie 2020 1080p";
@@ -565,7 +565,7 @@ it.skip('throws for torrents that are not dubbed if the media item is anime and 
 
 it.skip('does not throw for torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is disabled', async ({
   em,
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   infoHash,
 }) => {
   const rawTitle = "Test Movie 2020 1080p";
@@ -589,7 +589,7 @@ it.skip('does not throw for torrents that are not dubbed if the media item is an
 
 it('does not throw for torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is enabled', async ({
   em,
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   infoHash,
 }) => {
   const rawTitle = "Test Movie 2020 1080p [Dubbed]";

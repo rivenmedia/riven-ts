@@ -11,7 +11,7 @@ const eventType = getEventTypeFromSchema(MediaItemDownloadErrorEvent);
 
 it(`enqueues a scrape for each incomplete season when a "${eventType}" event is received for a show`, async ({
   actor,
-  scrapedShow,
+  scrapedShowContext: { scrapedShow },
 }) => {
   const seasons = await scrapedShow.seasons.load();
 
@@ -43,7 +43,7 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
 
 it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is received for a season`, async ({
   actor,
-  scrapedShow,
+  scrapedShowContext: { scrapedShow },
 }) => {
   const [, , failedSeason] = await scrapedShow.seasons.load();
 

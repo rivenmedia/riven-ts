@@ -9,7 +9,7 @@ import { downloadItemProcessor } from "./download-item.processor.ts";
 
 it("throws an unrecoverable error if no valid torrent is found", async ({
   createMockJob,
-  scrapedMovie,
+  scrapedMovieContext: { scrapedMovie },
   mockSentryScope,
 }) => {
   const job = await createMockJob({ id: scrapedMovie.id });
@@ -22,7 +22,7 @@ it("throws an unrecoverable error if no valid torrent is found", async ({
 });
 
 it('sends a "riven.media-item.download.success" event with the updated item and duration from request to download if the download result is valid', async ({
-  scrapedMovie,
+  scrapedMovieContext: { scrapedMovie },
   createMockJob,
   mockSentryScope,
 }) => {
@@ -70,7 +70,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
 
 it('sends a "riven.media-item.download.partial-success" event with the updated item if the download result is valid but does not contain all episodes', async ({
   createMockJob,
-  scrapedShow,
+  scrapedShowContext: { scrapedShow },
   mockSentryScope,
 }) => {
   const episodes = await scrapedShow.getEpisodes();
@@ -126,7 +126,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
 
 it('sends a "riven.media-item.download.error" event if no valid torrent is found', async ({
   createMockJob,
-  scrapedMovie,
+  scrapedMovieContext: { scrapedMovie },
   mockSentryScope,
 }) => {
   const job = await createMockJob({ id: scrapedMovie.id });

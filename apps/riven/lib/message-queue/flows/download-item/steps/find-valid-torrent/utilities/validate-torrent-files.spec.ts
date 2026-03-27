@@ -33,7 +33,7 @@ it("throws an error if season-like torrent has fewer files than expected", async
 });
 
 it("considers torrents for continuing shows as valid if missing a maximum of one season", async ({
-  indexedShow,
+  indexedShowContext: { indexedShow },
   em,
 }) => {
   indexedShow.status = "continuing";
@@ -71,7 +71,7 @@ it("considers torrents for continuing shows as valid if missing a maximum of one
 });
 
 it("considers torrents for completed shows as invalid if missing any season", async ({
-  indexedShow,
+  indexedShowContext: { indexedShow },
 }) => {
   await wrap(indexedShow).populate(["seasons.episodes"]);
 
@@ -103,7 +103,9 @@ it("considers torrents for completed shows as invalid if missing any season", as
   ).rejects.toThrow(`Show torrent must have at least 60 episodes, but has 50`);
 });
 
-it("throws an error if file has no download URL", async ({ indexedMovie }) => {
+it("throws an error if file has no download URL", async ({
+  indexedMovieContext: { indexedMovie },
+}) => {
   const mappedFiles = {
     movies: {
       1: {
@@ -122,7 +124,7 @@ it("throws an error if file has no download URL", async ({ indexedMovie }) => {
 });
 
 it("throws an error if movie file is parsed as a show", async ({
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
 }) => {
   const mappedFiles = {
     movies: {
@@ -142,7 +144,7 @@ it("throws an error if movie file is parsed as a show", async ({
 });
 
 it("throws an error if show file has unknown episode number", async ({
-  indexedShow,
+  indexedShowContext: { indexedShow },
 }) => {
   await wrap(indexedShow).populate(["seasons.episodes"]);
 
@@ -180,7 +182,9 @@ it("throws an error if show file has unknown episode number", async ({
   );
 });
 
-it("returns valid matched files for a movie", async ({ indexedMovie }) => {
+it("returns valid matched files for a movie", async ({
+  indexedMovieContext: { indexedMovie },
+}) => {
   const mappedFiles = {
     movies: {
       0: {
@@ -208,7 +212,9 @@ it("returns valid matched files for a movie", async ({ indexedMovie }) => {
   expect(result[0].name).toBe("Test.Movie.2024.1080p.WEB-DL.mkv");
 });
 
-it("returns valid matched files for a show", async ({ indexedShow }) => {
+it("returns valid matched files for a show", async ({
+  indexedShowContext: { indexedShow },
+}) => {
   await wrap(indexedShow).populate(["seasons.episodes"]);
 
   const episodes = await indexedShow.getEpisodes();

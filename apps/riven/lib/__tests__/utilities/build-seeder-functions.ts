@@ -1,8 +1,5 @@
-import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
-
 import { assert } from "vitest";
 
-import { database } from "../../database/database.ts";
 import { CompletedMovieSeeder } from "../../database/seeders/movies/completed-movie.seeder.ts";
 import { ForeignLanguageMovieSeeder } from "../../database/seeders/movies/foreign-language-movie.seeder.ts";
 import { IndexedMovieSeeder } from "../../database/seeders/movies/indexed-movie.seeder.ts";
@@ -17,86 +14,64 @@ import type {
   Constructor,
   Dictionary,
   EntityManager,
-  EntityName,
-  FindAllOptions,
+  MikroORM,
 } from "@mikro-orm/core";
 
-type SeederResult<T, C extends number> = C extends 0
+type SeederResult<T extends Dictionary, C extends number> = C extends 0
   ? never
   : C extends 1
     ? T
     : [T, ...T[]];
 
 const buildSeederFunction =
-  <T extends object, S extends Dictionary>(
+  <S extends Dictionary>(
     em: EntityManager,
-    entity: EntityName<T>,
-    seeder: Constructor<BaseSeeder<S>>,
-    options?: FindAllOptions<NoInfer<T>>,
+    SeederClass: Constructor<BaseSeeder<S>>,
   ) =>
   async <C extends number = 1>(
     count: C = 1 as C,
-  ): Promise<SeederResult<T, C>> => {
+  ): Promise<SeederResult<S, C>> => {
     if (count < 1) {
       throw new Error("Cannot seed a non-positive number of entities");
     }
 
-    await database.orm.seeder.seed(
-      ...Array(count)
-        .fill(null)
-        .map(() => seeder),
-    );
+    const results: S[] = [];
 
-    const entities = await em.findAll(entity, {
-      ...options,
-      last: count,
-    });
+    for (let i = 0; i < count; i++) {
+      const seeder = new SeederClass();
 
-    assert(entities[0], "Could not find any entities after seeding.");
+      await seeder.run(em, seeder.context);
+      await em.flush();
 
-    if (count === 1) {
-      return entities[0] as SeederResult<T, C>;
+      results.push(seeder.context);
+
+      em.clear();
     }
 
-    return [entities[0], ...entities.slice(1)] as SeederResult<T, C>;
+    if (count === 1) {
+      assert(results.length === 1, "Expected exactly one result");
+
+      return results[0] as SeederResult<S, C>;
+    }
+
+    return results as SeederResult<S, C>;
   };
 
-export const buildSeederFunctions = (em: EntityManager) => {
+export const buildSeederFunctions = (orm: MikroORM, em: EntityManager) => {
   return {
     // Movies
-    seedIndexedMovie: buildSeederFunction(em, Movie, IndexedMovieSeeder),
-    seedScrapedMovie: buildSeederFunction(em, Movie, ScrapedMovieSeeder, {
-      where: {
-        state: "scraped",
-      },
-    }),
-    seedCompletedMovie: buildSeederFunction(em, Movie, CompletedMovieSeeder, {
-      where: {
-        state: "completed",
-      },
-    }),
+    seedIndexedMovie: buildSeederFunction(em, IndexedMovieSeeder),
+    seedScrapedMovie: buildSeederFunction(em, ScrapedMovieSeeder),
+    seedCompletedMovie: buildSeederFunction(em, CompletedMovieSeeder),
     seedForeignLanguageMovie: buildSeederFunction(
       em,
-      Movie,
       ForeignLanguageMovieSeeder,
     ),
 
     // Shows
-    seedIndexedShow: buildSeederFunction(em, Show, IndexedShowSeeder),
-    seedScrapedShow: buildSeederFunction(em, Show, ScrapedShowSeeder, {
-      where: {
-        state: "scraped",
-      },
-    }),
-    seedCompletedShow: buildSeederFunction(em, Show, CompletedShowSeeder, {
-      where: {
-        state: "completed",
-      },
-    }),
-    seedForeignLanguageShow: buildSeederFunction(
-      em,
-      Show,
-      ForeignLanguageShowSeeder,
-    ),
+    seedIndexedShow: buildSeederFunction(em, IndexedShowSeeder),
+    seedScrapedShow: buildSeederFunction(em, ScrapedShowSeeder),
+    seedCompletedShow: buildSeederFunction(em, CompletedShowSeeder),
+    seedForeignLanguageShow: buildSeederFunction(em, ForeignLanguageShowSeeder),
   };
 };

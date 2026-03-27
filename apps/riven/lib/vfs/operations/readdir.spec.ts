@@ -18,14 +18,16 @@ it("returns persistent directory entries for the root path", async () => {
   });
 });
 
-it("returns all shows for the /shows path", async ({ completedShow }) => {
+it("returns all shows for the /shows path", async ({
+  completedShowContext: { completedShow },
+}) => {
   const callback = vi.fn();
 
   readDirSync("/shows", callback);
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
-      completedShow.getPrettyName(),
+      completedShow.getPrettyName().replaceAll(".", ""),
     ]);
   });
 });
@@ -64,7 +66,9 @@ it("returns all movies for the /movies path", async ({
   });
 });
 
-it("returns all seasons for a single show path", async ({ completedShow }) => {
+it("returns all seasons for a single show path", async ({
+  completedShowContext: { completedShow },
+}) => {
   const seasons = await completedShow.seasons.load();
 
   const callback = vi.fn();
@@ -81,7 +85,7 @@ it("returns all seasons for a single show path", async ({ completedShow }) => {
 
 it("does not return entries for a season that does not have any episodes with a media entry", async ({
   em,
-  completedShow,
+  completedShowContext: { completedShow },
 }) => {
   await em.nativeDelete(MediaEntry, {
     mediaItem: {
@@ -105,7 +109,7 @@ it("does not return entries for a season that does not have any episodes with a 
 
 it("returns all episodes for a single season path", async ({
   em,
-  completedShow,
+  completedShowContext: { completedShow },
 }) => {
   await completedShow.seasons.load();
 
@@ -140,7 +144,7 @@ it("returns all episodes for a single season path", async ({
 
 it("does not return entries for episodes that does not have a media entry when viewing a season path", async ({
   em,
-  completedShow,
+  completedShowContext: { completedShow },
 }) => {
   await em.nativeDelete(MediaEntry, {
     mediaItem: {
@@ -174,7 +178,7 @@ it("does not return entries for episodes that does not have a media entry when v
 });
 
 it("returns the media entry's filename when viewing a single movie's directory", async ({
-  completedMovie,
+  completedMovieContext: { completedMovie },
 }) => {
   const callback = vi.fn();
 
@@ -192,7 +196,7 @@ it("returns the media entry's filename when viewing a single movie's directory",
 });
 
 it('does not return entries for the "all movies" path when a movie does not have a media entry', async ({
-  completedMovie,
+  completedMovieContext: { completedMovie },
   seeders: { seedScrapedMovie },
 }) => {
   await seedScrapedMovie(2);

@@ -131,7 +131,9 @@ it("returns directory stats for /shows", async ({
   });
 });
 
-it("returns directory stats for single shows", async ({ completedShow }) => {
+it("returns directory stats for single shows", async ({
+  completedShowContext: { completedShow },
+}) => {
   const seasonsCount = await completedShow.seasons.loadCount();
 
   const callback = vi.fn();
@@ -152,7 +154,9 @@ it("returns directory stats for single shows", async ({ completedShow }) => {
   });
 });
 
-it("returns directory stats for single seasons", async ({ completedShow }) => {
+it("returns directory stats for single seasons", async ({
+  completedShowContext: { completedShow },
+}) => {
   const callback = vi.fn();
 
   getattrSync(`/shows/{tvdb-${completedShow.tvdbId}}/Season 01`, callback);

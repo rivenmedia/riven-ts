@@ -32,7 +32,7 @@ const it = baseIt.extend("scrapeResults", {
 
 it("throws an UnrecoverableError if no results are found", async ({
   createMockJob,
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   mockSentryScope,
 }) => {
   const job = await createMockJob({ id: indexedMovie.id });
@@ -45,7 +45,7 @@ it("throws an UnrecoverableError if no results are found", async ({
 });
 
 it("returns valid movie torrents if the item is a movie", async ({
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   createMockJob,
   mockSentryScope,
 }) => {
@@ -86,7 +86,7 @@ it("returns valid movie torrents if the item is a movie", async ({
 });
 
 it("returns valid show torrents if the item is a show", async ({
-  indexedShow,
+  indexedShowContext: { indexedShow },
   createMockJob,
   mockSentryScope,
 }) => {
@@ -207,7 +207,7 @@ it("returns valid episode torrents if the item is an episode", async ({
 });
 
 it("filters show torrents if the item is a movie", async ({
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   createMockJob,
   mockSentryScope,
 }) => {
@@ -240,7 +240,7 @@ it("filters show torrents if the item is a movie", async ({
 });
 
 it("filters out torrents with 2 or fewer episodes for shows", async ({
-  indexedShow,
+  indexedShowContext: { indexedShow },
   createMockJob,
   mockSentryScope,
 }) => {
@@ -275,7 +275,7 @@ it("filters out torrents with 2 or fewer episodes for shows", async ({
 });
 
 it("filters out torrents with an incorrect number of seasons for shows", async ({
-  indexedShow,
+  indexedShowContext: { indexedShow },
   createMockJob,
   mockSentryScope,
 }) => {
@@ -311,7 +311,7 @@ it("filters out torrents with an incorrect number of seasons for shows", async (
 
 it("filters out torrents with incorrect number of episodes for single-season shows", async ({
   em,
-  indexedShow,
+  indexedShowContext: { indexedShow },
   createMockJob,
   mockSentryScope,
 }) => {
@@ -354,7 +354,7 @@ it("filters out torrents with incorrect number of episodes for single-season sho
 });
 
 it("filters out duplicate torrents from different plugins", async ({
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   createMockJob,
   mockSentryScope,
 }) => {
@@ -685,7 +685,7 @@ it("does not filter out torrents that do not match the media item's country if t
 
 it("filters out torrents that do not match the media item's year ± 1 year", async ({
   em,
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   createMockJob,
   mockSentryScope,
 }) => {
@@ -738,7 +738,7 @@ it("filters out torrents that do not match the media item's year ± 1 year", asy
 
 it.skip('filters out torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is enabled', async ({
   em,
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   createMockJob,
   mockSentryScope,
 }) => {
@@ -787,7 +787,7 @@ it.skip('filters out torrents that are not dubbed if the media item is anime and
 
 it.skip('does not filter out torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is disabled', async ({
   em,
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   createMockJob,
   mockSentryScope,
 }) => {
@@ -841,7 +841,7 @@ it.skip('does not filter out torrents that are not dubbed if the media item is a
 });
 
 it.skip("returns sorted results", async ({
-  indexedMovie,
+  indexedMovieContext: { indexedMovie },
   createMockJob,
   mockSentryScope,
 }) => {
