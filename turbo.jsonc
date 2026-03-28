@@ -1,8 +1,12 @@
 {
-  "$schema": "https://turborepo.com/schema.json",
+  "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
   "globalEnv": ["NODE_ENV"],
   "globalPassThroughEnv": ["DEBUG"],
+  "globalDependencies": [
+    ".github/actions/**/*.yaml",
+    ".github/workflows/*.yaml"
+  ],
   "tasks": {
     "transit": {
       "dependsOn": ["^transit"]
