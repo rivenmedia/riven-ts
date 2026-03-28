@@ -1,4 +1,4 @@
-import { Episode, MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import Fuse from "@zkochan/fuse-native";
 import { expect, vi } from "vitest";
@@ -176,26 +176,21 @@ it("returns directory stats for single seasons", async ({
 });
 
 it("returns file stats for episodes", async ({
-  em,
   seeders: { seedCompletedShow },
 }) => {
-  await seedCompletedShow();
+  const { episodes: [episode] = [] } = await seedCompletedShow();
 
-  const episode = await em.findOneOrFail(
-    Episode,
-    { absoluteNumber: 1 },
-    { populate: ["filesystemEntries.fileSize"] },
-  );
+  expect.assert(episode);
 
-  const mediaEntries = await episode.getMediaEntries();
+  const [mediaEntry] = await episode.getMediaEntries();
+
+  expect.assert(mediaEntry);
 
   const callback = vi.fn();
 
-  getattrSync(`/shows/{tvdb-${episode.tvdbId}}/Season 01/s01e01.mkv`, callback);
+  getattrSync(`/shows/${mediaEntry.path}`, callback);
 
   await vi.waitFor(() => {
-    expect.assert(mediaEntries[0]);
-
     expect(callback).toHaveBeenCalledWith(null, {
       atime: expect.any(Date),
       ctime: expect.any(Date),
@@ -203,7 +198,7 @@ it("returns file stats for episodes", async ({
       mode: parseMode("file"),
       gid: 1000,
       uid: 1000,
-      size: mediaEntries[0].fileSize,
+      size: mediaEntry.fileSize,
       nlink: 1,
     });
   });

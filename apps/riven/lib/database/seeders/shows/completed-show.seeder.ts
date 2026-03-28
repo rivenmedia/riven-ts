@@ -18,10 +18,6 @@ export class CompletedShowSeeder extends BaseSeeder<CompletedShowSeederContext> 
   ) {
     await this.call(em, [ScrapedShowSeeder], context);
 
-    em.persist(context.show);
-
-    context.show.streams.set(context.streams);
-
     const episodes = await context.show.getEpisodes();
 
     for (const episode of episodes) {

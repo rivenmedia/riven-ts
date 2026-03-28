@@ -1,4 +1,3 @@
-import { wrap } from "@mikro-orm/core";
 import { expect } from "vitest";
 
 import { it } from "../../../../../../__tests__/test-context.ts";
@@ -11,8 +10,6 @@ type MappedFiles = MapItemsToFilesFlow["output"];
 it("throws an error if season-like torrent has fewer files than expected", async ({
   season,
 }) => {
-  await wrap(season).populate(["episodes"]);
-
   const mappedFiles = {
     episodes: {},
     movies: {
@@ -39,8 +36,6 @@ it("considers torrents for continuing shows as valid if missing a maximum of one
   indexedShow.status = "continuing";
 
   await em.persist(indexedShow).flush();
-
-  await wrap(indexedShow).populate(["seasons.episodes"]);
 
   const episodes = await indexedShow.getEpisodes();
 
@@ -73,8 +68,6 @@ it("considers torrents for continuing shows as valid if missing a maximum of one
 it("considers torrents for completed shows as invalid if missing any season", async ({
   indexedShowContext: { indexedShow },
 }) => {
-  await wrap(indexedShow).populate(["seasons.episodes"]);
-
   const episodes = await indexedShow.getEpisodes();
 
   const files = episodes.reduce<MappedFiles["episodes"]>((acc, episode) => {
@@ -146,8 +139,6 @@ it("throws an error if movie file is parsed as a show", async ({
 it("throws an error if show file has unknown episode number", async ({
   indexedShowContext: { indexedShow },
 }) => {
-  await wrap(indexedShow).populate(["seasons.episodes"]);
-
   const episodes = await indexedShow.getEpisodes();
 
   const { "abs:1": _, ...files } = Object.fromEntries(
@@ -215,8 +206,6 @@ it("returns valid matched files for a movie", async ({
 it("returns valid matched files for a show", async ({
   indexedShowContext: { indexedShow },
 }) => {
-  await wrap(indexedShow).populate(["seasons.episodes"]);
-
   const episodes = await indexedShow.getEpisodes();
 
   const files = Object.fromEntries(
@@ -253,8 +242,6 @@ it("returns valid matched files for a show", async ({
 });
 
 it("does not match episodes from a different season", async ({ season }) => {
-  await wrap(season).populate(["episodes"]);
-
   const files = Object.fromEntries(
     season.episodes.map((episode) => [
       `${(episode.season.unwrap().number + 1).toString()}:${episode.number.toString()}`,

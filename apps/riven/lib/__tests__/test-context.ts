@@ -182,4 +182,4 @@ export const it = testBase
       <T>(data: T, opts?: JobsOptions) =>
         Job.create(mockQueue, crypto.randomUUID(), data, opts),
   )
-  .extend("mockSentryScope", new Sentry.Scope());
+  .extend("mockSentryScope", () => new Sentry.Scope());
