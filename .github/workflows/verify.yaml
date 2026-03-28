@@ -65,11 +65,10 @@ jobs:
       - name: Setup Turborepo --affected SHAs
         uses: ./.github/actions/setup-turborepo-affected-shas
 
-      - uses: shogo82148/actions-setup-redis@v1
+      - name: Download redis-server
+        uses: shogo82148/actions-setup-redis@v1
         with:
           redis-version: 8.x
-
-      - run: which redis-server
 
       - name: Run test
         run: pnpm turbo test --affected --continue
