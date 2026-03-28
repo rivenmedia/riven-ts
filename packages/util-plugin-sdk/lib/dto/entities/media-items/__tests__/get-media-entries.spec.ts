@@ -5,10 +5,8 @@ import { Episode, ItemRequest, MediaEntry, Season, Show } from "../../index.ts";
 import { Movie } from "../movie.entity.ts";
 
 test("getMediaEntries() returns the associated media entry for a Movie media item", async ({
-  orm,
+  em,
 }) => {
-  const em = orm.em.fork();
-
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
     state: "completed",
@@ -17,6 +15,7 @@ test("getMediaEntries() returns the associated media entry for a Movie media ite
 
   const movie = em.create(Movie, {
     title: "Test Movie",
+    fullTitle: "Test Movie",
     contentRating: "pg-13",
     tmdbId: "1",
     itemRequest,
@@ -38,10 +37,8 @@ test("getMediaEntries() returns the associated media entry for a Movie media ite
 });
 
 test("getMediaEntries() returns the associated media entries for a Show media item", async ({
-  orm,
+  em,
 }) => {
-  const em = orm.em.fork();
-
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
     state: "completed",
@@ -50,6 +47,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
 
   const show = em.create(Show, {
     title: "Test Show",
+    fullTitle: "Test Show",
     contentRating: "tv-14",
     status: "ended",
     tvdbId: "1",
@@ -61,6 +59,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
 
   const season = em.create(Season, {
     title: "Season 1",
+    fullTitle: "Test Show - S01",
     number: 1,
     isSpecial: false,
     isRequested: true,
@@ -73,20 +72,20 @@ test("getMediaEntries() returns the associated media entries for a Show media it
 
   const episode1 = em.create(Episode, {
     title: "Episode 1",
+    fullTitle: "Test Show - S01E01",
     number: 1,
     absoluteNumber: 1,
     contentRating: "tv-14",
-    isSpecial: false,
     isRequested: true,
     itemRequest,
   });
 
   const episode2 = em.create(Episode, {
     title: "Episode 2",
+    fullTitle: "Test Show - S01E02",
     number: 2,
     absoluteNumber: 2,
     contentRating: "tv-14",
-    isSpecial: false,
     isRequested: true,
     itemRequest,
   });
@@ -100,7 +99,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
 
   const mediaEntry2 = em.create(MediaEntry, {
     fileSize: 123456,
-    originalFilename: "test-show-s01e01.mkv",
+    originalFilename: "test-show-s01e02.mkv",
     plugin: "test",
     mediaItem: episode2,
   });
@@ -116,10 +115,8 @@ test("getMediaEntries() returns the associated media entries for a Show media it
 });
 
 test("getMediaEntries() returns the associated media entries for a Season media item", async ({
-  orm,
+  em,
 }) => {
-  const em = orm.em.fork();
-
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
     state: "completed",
@@ -128,6 +125,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
 
   const show = em.create(Show, {
     title: "Test Show",
+    fullTitle: "Test Show",
     contentRating: "tv-14",
     status: "ended",
     tvdbId: "1",
@@ -139,6 +137,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
 
   const season1 = em.create(Season, {
     title: "Season 1",
+    fullTitle: "Test Show - S01",
     number: 1,
     isSpecial: false,
     isRequested: true,
@@ -147,6 +146,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
 
   const season2 = em.create(Season, {
     title: "Season 2",
+    fullTitle: "Test Show - S02",
     number: 1,
     isSpecial: false,
     isRequested: true,
@@ -159,20 +159,20 @@ test("getMediaEntries() returns the associated media entries for a Season media 
 
   const season1Episode1 = em.create(Episode, {
     title: "Episode 1",
+    fullTitle: "Test Show - S01E01",
     number: 1,
     absoluteNumber: 1,
     contentRating: "tv-14",
-    isSpecial: false,
     isRequested: true,
     itemRequest,
   });
 
   const season2Episode1 = em.create(Episode, {
     title: "Episode 1",
+    fullTitle: "Test Show - S02E01",
     number: 1,
     absoluteNumber: 2,
     contentRating: "tv-14",
-    isSpecial: false,
     isRequested: true,
     itemRequest,
   });
@@ -204,10 +204,8 @@ test("getMediaEntries() returns the associated media entries for a Season media 
 });
 
 test("getMediaEntries() returns the associated media entry for an Episode media item", async ({
-  orm,
+  em,
 }) => {
-  const em = orm.em.fork();
-
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
     state: "completed",
@@ -216,6 +214,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
 
   const show = em.create(Show, {
     title: "Test Show",
+    fullTitle: "Test Show",
     contentRating: "tv-14",
     status: "ended",
     tvdbId: "1",
@@ -227,6 +226,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
 
   const season = em.create(Season, {
     title: "Season 1",
+    fullTitle: "Test Show - S01",
     number: 1,
     isSpecial: false,
     isRequested: true,
@@ -239,10 +239,10 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
 
   const episode = em.create(Episode, {
     title: "Episode 1",
+    fullTitle: "Test Show - S01E01",
     number: 1,
     absoluteNumber: 1,
     contentRating: "tv-14",
-    isSpecial: false,
     isRequested: true,
     itemRequest,
   });

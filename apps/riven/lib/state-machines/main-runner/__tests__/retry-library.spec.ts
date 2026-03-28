@@ -5,24 +5,19 @@ import { it } from "./helpers/test-context.ts";
 
 it('sends a "riven.media-item.index.requested" event for each incomplete item request in the database', async ({
   actor,
+  factories: { showItemRequestFactory, movieItemRequestFactory },
 }) => {
   const items = [
-    database.itemRequest.create({
+    movieItemRequestFactory.makeEntity({
       imdbId: "tt1234567",
-      type: "movie",
-      requestedBy: "@repo/plugin-test",
       state: "requested",
     }),
-    database.itemRequest.create({
+    showItemRequestFactory.makeEntity({
       imdbId: "tt2345678",
-      type: "show",
-      requestedBy: "@repo/plugin-test",
       state: "requested",
     }),
-    database.itemRequest.create({
+    showItemRequestFactory.makeEntity({
       imdbId: "tt3456789",
-      type: "show",
-      requestedBy: "@repo/plugin-test",
       state: "failed",
     }),
   ];

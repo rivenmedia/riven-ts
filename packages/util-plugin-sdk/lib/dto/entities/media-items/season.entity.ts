@@ -35,8 +35,10 @@ export class Season extends ShowLikeMediaItem {
     return `Season ${this.number.toString().padStart(2, "0")}`;
   }
 
-  @Property()
-  isSpecial!: boolean;
+  @Property({ persist: true, hydrate: false })
+  get isSpecial(): Opt<boolean> {
+    return this.number === 0;
+  }
 
   override type: Opt<"season"> = "season" as const;
 

@@ -1,26 +1,22 @@
-import { ItemRequest, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { Show } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { wrap } from "@mikro-orm/core";
 import { DateTime } from "luxon";
-import { expect, it, vi } from "vitest";
+import { expect, vi } from "vitest";
 
-import { database } from "../../../../database/database.ts";
+import { it } from "../../../../__tests__/test-context.ts";
 import { persistShowIndexerData } from "./persist-show-indexer-data.ts";
 
-it("returns the media item if processed successfully", async ({}) => {
+it("returns the media item if processed successfully", async ({
+  factories: { showItemRequestFactory },
+}) => {
   const requestedId = "tt1234567";
 
-  const em = database.orm.em.fork();
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "test-user",
+  const itemRequest = await showItemRequestFactory.createOne({
     imdbId: requestedId,
-    tvdbId: "1234",
-    type: "show",
     state: "requested",
   });
-
-  await em.flush();
 
   const result = await persistShowIndexerData({
     item: {
@@ -46,19 +42,15 @@ it("returns the media item if processed successfully", async ({}) => {
   );
 });
 
-it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorrect state", async () => {
+it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorrect state", async ({
+  factories: { showItemRequestFactory },
+}) => {
   const requestedId = "1234";
 
-  const em = database.orm.em.fork();
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "test-user",
+  const itemRequest = await showItemRequestFactory.createOne({
     imdbId: requestedId,
-    tvdbId: "1234",
-    type: "show",
     state: "completed",
   });
-
-  await em.flush();
 
   await expect(
     persistShowIndexerData({
@@ -77,23 +69,19 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorr
   ).rejects.toThrow(MediaItemIndexErrorIncorrectState);
 });
 
-it("updates the media item with the latest data if it already exists", async () => {
+it("updates the media item with the latest data if it already exists", async ({
+  factories: { showItemRequestFactory },
+}) => {
   vi.useFakeTimers({
     now: DateTime.now().toJSDate(),
   });
 
   const requestedId = "tt1234567";
 
-  const em = database.orm.em.fork();
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "test-user",
+  const itemRequest = await showItemRequestFactory.createOne({
     imdbId: requestedId,
-    tvdbId: "1234",
-    type: "show",
     state: "requested",
   });
-
-  await em.flush();
 
   const initialShow = await persistShowIndexerData({
     item: {

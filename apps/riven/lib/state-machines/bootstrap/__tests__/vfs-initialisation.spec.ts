@@ -9,7 +9,7 @@ import { it } from "./helpers/test-context.ts";
 vi.mock(import("@zkochan/fuse-native"));
 vi.mock(import("node:fs/promises"), { spy: true });
 
-it.scoped({
+it.override({
   initialiseVfsActorLogic: initialiseVfs,
 });
 

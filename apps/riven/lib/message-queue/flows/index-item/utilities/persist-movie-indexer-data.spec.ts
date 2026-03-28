@@ -1,25 +1,21 @@
-import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { DateTime } from "luxon";
-import { expect, it } from "vitest";
+import { expect } from "vitest";
 
-import { database } from "../../../../database/database.ts";
+import { it } from "../../../../__tests__/test-context.ts";
 import { persistMovieIndexerData } from "./persist-movie-indexer-data.ts";
 
-it("returns the media item if processed successfully", async ({}) => {
+it("returns the media item if processed successfully", async ({
+  factories: { movieItemRequestFactory },
+}) => {
   const requestedId = "tt1234567";
 
-  const em = database.orm.em.fork();
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "test-user",
+  const itemRequest = await movieItemRequestFactory.createOne({
     imdbId: requestedId,
-    tmdbId: "1234",
-    type: "movie",
     state: "requested",
   });
-
-  await em.flush();
 
   const result = await persistMovieIndexerData({
     item: {
@@ -45,19 +41,15 @@ it("returns the media item if processed successfully", async ({}) => {
   );
 });
 
-it("throws a MediaItemIndexErrorIncorrectState error if the item request is in an incorrect state", async () => {
+it("throws a MediaItemIndexErrorIncorrectState error if the item request is in an incorrect state", async ({
+  factories: { movieItemRequestFactory },
+}) => {
   const requestedId = "1234";
 
-  const em = database.orm.em.fork();
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "test-user",
+  const itemRequest = await movieItemRequestFactory.createOne({
     imdbId: requestedId,
-    tmdbId: "1234",
-    type: "movie",
     state: "completed",
   });
-
-  await em.flush();
 
   await expect(
     persistMovieIndexerData({
