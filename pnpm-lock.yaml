@@ -1479,9 +1479,15 @@ importers:
       '@apollo/utils.keyvaluecache':
         specifier: 'catalog:'
         version: 4.0.0
+      '@repo/core-util-mock-graphql-server':
+        specifier: workspace:^
+        version: link:../core/util-mock-graphql-server
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      msw:
+        specifier: 'catalog:'
+        version: 2.12.4(@types/node@24.0.0)(typescript@5.9.3)
       redis-memory-server:
         specifier: 'catalog:'
         version: 0.16.0
@@ -1495,9 +1501,6 @@ importers:
       '@repo/core-util-eslint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
-      '@repo/core-util-mock-graphql-server':
-        specifier: workspace:^
-        version: link:../core/util-mock-graphql-server
       '@repo/core-util-typescript-config':
         specifier: workspace:^
         version: link:../core/util-typescript-config
@@ -1516,9 +1519,6 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
-      msw:
-        specifier: 'catalog:'
-        version: 2.12.4(@types/node@24.0.0)(typescript@5.9.3)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
