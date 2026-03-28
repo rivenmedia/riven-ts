@@ -46,6 +46,7 @@
       "dependsOn": ["generate-schemas"]
     },
     "lint": {
+      "dependsOn": ["generate-schemas"],
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
         "!**/{__generated__,.next,coverage,docker-data}/**"
