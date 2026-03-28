@@ -30,6 +30,7 @@ jobs:
         task:
           - lint
           - check-types
+          - //#format:check
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

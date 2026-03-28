@@ -52,6 +52,7 @@
         "!**/{__generated__,.next,coverage,docker-data}/**"
       ]
     },
-    "lint:fix": {}
+    "lint:fix": {},
+    "//#format:check": {}
   }
 }
