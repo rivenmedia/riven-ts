@@ -108,31 +108,15 @@ it("does not return entries for a season that does not have any episodes with a 
 });
 
 it("returns all episodes for a single season path", async ({
-  em,
   completedShowContext: { completedShow },
 }) => {
-  await completedShow.seasons.load();
+  const mediaEntries = await completedShow.seasons[0]?.getMediaEntries();
 
-  const seasonNumber = 1;
-  const mediaEntries = await em.find(
-    MediaEntry,
-    {
-      mediaItem: {
-        type: "episode",
-        season: {
-          number: seasonNumber,
-        },
-      },
-    },
-    { populate: ["mediaItem"] },
-  );
+  expect.assert(mediaEntries);
 
   const callback = vi.fn();
 
-  readDirSync(
-    `/shows/${completedShow.getPrettyName()}/Season ${seasonNumber.toString().padStart(2, "0")}`,
-    callback,
-  );
+  readDirSync(`/shows/${completedShow.getPrettyName()}/Season 01`, callback);
 
   await vi.waitFor(async () => {
     expect(callback).toHaveBeenCalledWith<[number, string[]]>(
@@ -144,7 +128,7 @@ it("returns all episodes for a single season path", async ({
 
 it("does not return entries for episodes that does not have a media entry when viewing a season path", async ({
   em,
-  completedShowContext: { completedShow },
+  completedShowContext: { completedShow, episodes },
 }) => {
   await em.nativeDelete(MediaEntry, {
     mediaItem: {
@@ -155,19 +139,9 @@ it("does not return entries for episodes that does not have a media entry when v
     },
   });
 
-  const mediaEntry = await em.findOneOrFail(
-    MediaEntry,
-    {
-      mediaItem: {
-        type: "episode",
-        number: 1,
-        season: {
-          number: 1,
-        },
-      },
-    },
-    { populate: ["$infer"] },
-  );
+  const [mediaEntry] = (await episodes[0]?.getMediaEntries()) ?? [];
+
+  expect.assert(mediaEntry);
 
   const callback = vi.fn();
 

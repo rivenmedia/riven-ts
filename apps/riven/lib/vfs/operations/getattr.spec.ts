@@ -1,5 +1,3 @@
-import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
-
 import Fuse from "@zkochan/fuse-native";
 import { expect, vi } from "vitest";
 
@@ -56,16 +54,12 @@ it("returns ENOENT for unknown paths", async () => {
 });
 
 it("returns file stats for movie files", async ({
-  em,
   seeders: { seedCompletedMovie },
 }) => {
-  await seedCompletedMovie();
+  const { movie } = await seedCompletedMovie();
+  const [mediaEntry] = await movie.getMediaEntries();
 
-  const mediaEntry = await em.findOneOrFail(
-    MediaEntry,
-    { type: "media" },
-    { populate: ["mediaItem"] },
-  );
+  expect.assert(mediaEntry);
 
   const callback = vi.fn();
 

@@ -44,8 +44,6 @@ const buildSeederFunction =
       await em.flush();
 
       results.push(seeder.context);
-
-      em.clear();
     }
 
     if (count === 1) {

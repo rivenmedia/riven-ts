@@ -1,4 +1,3 @@
-import { wrap } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
@@ -315,8 +314,6 @@ it("filters out torrents with incorrect number of episodes for single-season sho
   createMockJob,
   mockSentryScope,
 }) => {
-  await wrap(indexedShow).populate(["seasons"]);
-
   const rawTitle = "Test Show: S01 E01-05";
 
   const job = await createMockJob({ id: indexedShow.id });

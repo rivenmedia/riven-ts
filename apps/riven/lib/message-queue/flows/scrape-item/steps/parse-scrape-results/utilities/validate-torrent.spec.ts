@@ -1,7 +1,6 @@
 import { parse } from "@repo/util-rank-torrent-name";
 
 import { faker } from "@faker-js/faker";
-import { wrap } from "@mikro-orm/core";
 import { expect, vi } from "vitest";
 
 import { it as baseIt } from "../../../../../../__tests__/test-context.ts";
@@ -231,8 +230,6 @@ it("throws for torrents with incorrect number of episodes for single-season show
   indexedShowContext: { indexedShow },
   infoHash,
 }) => {
-  await wrap(indexedShow).populate(["seasons"]);
-
   const rawTitle = "Test Show: S01 E01-05";
 
   const [, ...seasonsToRemove] = indexedShow.seasons;
@@ -262,8 +259,6 @@ it("does not throw for torrents with the correct number of episodes for single-s
 }) => {
   const rawTitle = "Test Show: S01 E01-10";
 
-  await wrap(indexedShow).populate(["seasons"]);
-
   const [, ...seasonsToRemove] = indexedShow.seasons;
 
   em.remove(seasonsToRemove);
@@ -281,8 +276,6 @@ it("does not throw for torrents that have no seasons, but the correct absolute e
   indexedShowContext: { indexedShow },
   infoHash,
 }) => {
-  await wrap(indexedShow).populate(["seasons"]);
-
   const season = indexedShow.seasons[2];
 
   expect.assert(season);
@@ -300,8 +293,6 @@ it("throws for torrents that have no seasons and do not have the correct absolut
   indexedShowContext: { indexedShow },
   infoHash,
 }) => {
-  await wrap(indexedShow).populate(["seasons"]);
-
   const season = indexedShow.seasons[2];
 
   expect.assert(season);
