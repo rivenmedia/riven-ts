@@ -5,7 +5,7 @@ import { Factory } from "@mikro-orm/seeder";
 
 import type { EntityData } from "@mikro-orm/core";
 
-export class ItemRequestFactory extends Factory<ItemRequest> {
+export class ShowItemRequestFactory extends Factory<ItemRequest> {
   model = ItemRequest;
 
   protected override definition(
@@ -14,7 +14,8 @@ export class ItemRequestFactory extends Factory<ItemRequest> {
     return {
       requestedBy: faker.internet.email(),
       state: "completed",
-      type: faker.helpers.arrayElement(["movie", "show"]),
+      type: "show",
+      tvdbId: faker.number.int({ min: 1 }).toString(),
       ...input,
     };
   }

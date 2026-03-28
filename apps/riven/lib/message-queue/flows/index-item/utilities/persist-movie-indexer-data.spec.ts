@@ -8,13 +8,12 @@ import { it } from "../../../../__tests__/test-context.ts";
 import { persistMovieIndexerData } from "./persist-movie-indexer-data.ts";
 
 it("returns the media item if processed successfully", async ({
-  factories: { itemRequestFactory },
+  factories: { movieItemRequestFactory },
 }) => {
   const requestedId = "tt1234567";
 
-  const itemRequest = await itemRequestFactory.createOne({
+  const itemRequest = await movieItemRequestFactory.createOne({
     imdbId: requestedId,
-    tmdbId: "1234",
     state: "requested",
   });
 
@@ -43,13 +42,12 @@ it("returns the media item if processed successfully", async ({
 });
 
 it("throws a MediaItemIndexErrorIncorrectState error if the item request is in an incorrect state", async ({
-  factories: { itemRequestFactory },
+  factories: { movieItemRequestFactory },
 }) => {
   const requestedId = "1234";
 
-  const itemRequest = await itemRequestFactory.createOne({
+  const itemRequest = await movieItemRequestFactory.createOne({
     imdbId: requestedId,
-    tmdbId: "1234",
     state: "completed",
   });
 

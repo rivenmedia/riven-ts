@@ -9,15 +9,13 @@ import { it } from "../../../../__tests__/test-context.ts";
 import { persistShowIndexerData } from "./persist-show-indexer-data.ts";
 
 it("returns the media item if processed successfully", async ({
-  factories: { itemRequestFactory },
+  factories: { showItemRequestFactory },
 }) => {
   const requestedId = "tt1234567";
 
-  const itemRequest = await itemRequestFactory.createOne({
+  const itemRequest = await showItemRequestFactory.createOne({
     imdbId: requestedId,
-    tvdbId: "1234",
     state: "requested",
-    type: "show",
   });
 
   const result = await persistShowIndexerData({
@@ -45,15 +43,13 @@ it("returns the media item if processed successfully", async ({
 });
 
 it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorrect state", async ({
-  factories: { itemRequestFactory },
+  factories: { showItemRequestFactory },
 }) => {
   const requestedId = "1234";
 
-  const itemRequest = await itemRequestFactory.createOne({
+  const itemRequest = await showItemRequestFactory.createOne({
     imdbId: requestedId,
-    tvdbId: "1234",
     state: "completed",
-    type: "show",
   });
 
   await expect(
@@ -74,7 +70,7 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorr
 });
 
 it("updates the media item with the latest data if it already exists", async ({
-  factories: { itemRequestFactory },
+  factories: { showItemRequestFactory },
 }) => {
   vi.useFakeTimers({
     now: DateTime.now().toJSDate(),
@@ -82,11 +78,9 @@ it("updates the media item with the latest data if it already exists", async ({
 
   const requestedId = "tt1234567";
 
-  const itemRequest = await itemRequestFactory.createOne({
+  const itemRequest = await showItemRequestFactory.createOne({
     imdbId: requestedId,
-    tvdbId: "1234",
     state: "requested",
-    type: "show",
   });
 
   const initialShow = await persistShowIndexerData({

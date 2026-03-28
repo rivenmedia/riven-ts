@@ -7,10 +7,11 @@ import { test as testBase } from "vitest";
 
 import { database } from "../database/database.ts";
 import { EpisodeFactory } from "../database/factories/episode.factory.ts";
-import { ItemRequestFactory } from "../database/factories/item-request.factory.ts";
 import { MediaEntryFactory } from "../database/factories/media-entry.factory.ts";
+import { MovieItemRequestFactory } from "../database/factories/movie-item-request.factory.ts";
 import { MovieFactory } from "../database/factories/movie.factory.ts";
 import { SeasonFactory } from "../database/factories/season.factory.ts";
+import { ShowItemRequestFactory } from "../database/factories/show-item-request.factory.ts";
 import { ShowFactory } from "../database/factories/show.factory.ts";
 import { StreamFactory } from "../database/factories/stream.factory.ts";
 import { createQueue } from "../message-queue/utilities/create-queue.ts";
@@ -83,8 +84,9 @@ export const it = testBase
   .extend("em", () => database.em.fork())
   .extend("orm", () => database.orm)
   .extend("factories", ({ em }) => ({
-    itemRequestFactory: new ItemRequestFactory(em),
+    movieItemRequestFactory: new MovieItemRequestFactory(em),
     movieFactory: new MovieFactory(em),
+    showItemRequestFactory: new ShowItemRequestFactory(em),
     showFactory: new ShowFactory(em),
     seasonFactory: new SeasonFactory(em),
     episodeFactory: new EpisodeFactory(em),
@@ -99,7 +101,7 @@ export const it = testBase
       plugin: "@repo/plugin-test",
     }),
   )
-  .extend("seeders", ({ em, orm }) => buildSeederFunctions(orm, em))
+  .extend("seeders", ({ em }) => buildSeederFunctions(em))
   .extend("indexedMovieContext", async ({ seeders }) => {
     const result = await seeders.seedIndexedMovie();
 

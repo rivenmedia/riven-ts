@@ -1,9 +1,10 @@
 import { Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { MovieContentRating } from "@repo/util-plugin-sdk/dto/enums/content-ratings.enum";
 
 import { faker } from "@faker-js/faker";
 import { Factory } from "@mikro-orm/seeder";
 
-import { ItemRequestFactory } from "./item-request.factory.ts";
+import { MovieItemRequestFactory } from "./movie-item-request.factory.ts";
 
 import type { EntityData } from "@mikro-orm/core";
 
@@ -14,17 +15,16 @@ export class MovieFactory extends Factory<Movie> {
     input: EntityData<Movie> = {},
   ): EntityData<Movie> {
     const itemRequest =
-      input.itemRequest ??
-      new ItemRequestFactory(this.em).makeEntity({ type: "movie" });
+      input.itemRequest ?? new MovieItemRequestFactory(this.em).makeEntity();
 
     return {
       title: faker.book.title(),
       posterPath: faker.image.url(),
-      contentRating: "g",
-      isRequested: true,
+      contentRating: faker.helpers.arrayElement(MovieContentRating.options),
       itemRequest,
       tmdbId: faker.number.int({ min: 1 }).toString(),
       ...input,
+      isRequested: true, // Movies are always requested
     };
   }
 }

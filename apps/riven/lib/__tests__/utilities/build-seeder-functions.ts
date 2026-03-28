@@ -10,12 +10,7 @@ import { IndexedShowSeeder } from "../../database/seeders/shows/indexed-show.see
 import { ScrapedShowSeeder } from "../../database/seeders/shows/scraped-show.seeder.ts";
 
 import type { BaseSeeder } from "../../database/seeders/base.seeder.ts";
-import type {
-  Constructor,
-  Dictionary,
-  EntityManager,
-  MikroORM,
-} from "@mikro-orm/core";
+import type { Constructor, Dictionary, EntityManager } from "@mikro-orm/core";
 
 type SeederResult<T extends Dictionary, C extends number> = C extends 0
   ? never
@@ -55,7 +50,7 @@ const buildSeederFunction =
     return results as SeederResult<S, C>;
   };
 
-export const buildSeederFunctions = (orm: MikroORM, em: EntityManager) => {
+export const buildSeederFunctions = (em: EntityManager) => {
   return {
     // Movies
     seedIndexedMovie: buildSeederFunction(em, IndexedMovieSeeder),

@@ -182,7 +182,7 @@ it("returns file stats for episodes", async ({
 
   const callback = vi.fn();
 
-  getattrSync(`/shows/${mediaEntry.path}`, callback);
+  getattrSync(`/${mediaEntry.baseDirectory}/${mediaEntry.path}`, callback);
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith(null, {
