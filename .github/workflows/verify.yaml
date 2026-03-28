@@ -16,6 +16,10 @@ env:
   TURBO_RUN_SUMMARY: 1
   DO_NOT_TRACK: true # Disable Turborepo telemetry - https://turborepo.dev/docs/telemetry
 
+concurrency:
+  group: "verify-${{ github.event.pull_request.number }}"
+  cancel-in-progress: true
+
 jobs:
   verify:
     name: Verify
