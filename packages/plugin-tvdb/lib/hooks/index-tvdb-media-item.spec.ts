@@ -1,6 +1,5 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
-import { mockLogger } from "@repo/util-plugin-testing/create-mock-logger";
 import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
 import { it as baseIt } from "@repo/util-plugin-testing/plugin-test-context";
 
@@ -55,15 +54,14 @@ it("returns null if the item has no tvdbId", async ({
   item,
   dataSourceMap,
   settings,
+  logger,
 }) => {
   const result = await indexTVDBMediaItem({
     dataSources: dataSourceMap,
     event: {
       item,
     },
-
-    logger: mockLogger,
-
+    logger,
     settings,
   });
 
@@ -75,6 +73,7 @@ it("returns the series if the item has a tvdbId", async ({
   dataSourceMap,
   settings,
   server,
+  logger,
 }) => {
   item.tvdbId = breakingBadOfficialOrderFixture.data.id.toString();
 
@@ -94,7 +93,7 @@ it("returns the series if the item has a tvdbId", async ({
     event: {
       item,
     },
-    logger: mockLogger,
+    logger,
     settings,
   });
 

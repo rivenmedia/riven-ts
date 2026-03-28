@@ -1479,9 +1479,6 @@ importers:
       '@apollo/utils.keyvaluecache':
         specifier: 'catalog:'
         version: 4.0.0
-      '@repo/core-util-mock-graphql-server':
-        specifier: workspace:^
-        version: link:../core/util-mock-graphql-server
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
@@ -1501,6 +1498,9 @@ importers:
       '@repo/core-util-eslint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
+      '@repo/core-util-mock-graphql-server':
+        specifier: workspace:^
+        version: link:../core/util-mock-graphql-server
       '@repo/core-util-typescript-config':
         specifier: workspace:^
         version: link:../core/util-typescript-config

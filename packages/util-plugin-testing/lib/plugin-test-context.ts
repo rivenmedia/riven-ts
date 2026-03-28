@@ -11,6 +11,7 @@ export const it = testBase
   .extend("gqlServer", async ({}, { onCleanup }) => {
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");
+
     const mockServer = await buildMockServer();
 
     await mockServer.start();
@@ -19,7 +20,7 @@ export const it = testBase
 
     return mockServer;
   })
-  .extend("redisUrl", {}, async ({}, { onCleanup }) => {
+  .extend("redisUrl", async ({}, { onCleanup }) => {
     const { RedisMemoryServer } = await import("redis-memory-server");
 
     try {
@@ -45,12 +46,7 @@ export const it = testBase
       );
     }
   })
-  .extend("httpCache", {}, async () => {
-    const { InMemoryLRUCache } = await import("@apollo/utils.keyvaluecache");
-
-    return new InMemoryLRUCache();
-  })
-  .extend("server", {}, async ({}, { onCleanup }) => {
+  .extend("server", async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
     const server = setupServer();
@@ -86,14 +82,16 @@ export const it = testBase
   })
   .extend("logger", mockLogger)
   .extend("telemetry", undefined as unknown as Telemetry)
-  .extend("dataSourceConfig", ({ httpCache, redisUrl, logger, telemetry }) => {
+  .extend("dataSourceConfig", async ({ redisUrl, logger, telemetry }) => {
+    const { InMemoryLRUCache } = await import("@apollo/utils.keyvaluecache");
+
     return {
-      cache: httpCache,
+      cache: new InMemoryLRUCache(),
       connection: {
         url: redisUrl,
       },
       logger,
-      pluginSymbol: Symbol.for(""),
+      pluginSymbol: Symbol.for("@repo/util-plugin-testing"),
       telemetry,
       requestAttempts: 1,
     };
