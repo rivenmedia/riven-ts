@@ -5,43 +5,52 @@
   "globalPassThroughEnv": ["DEBUG"],
   "globalDependencies": [
     ".github/actions/**/*.yaml",
-    ".github/workflows/*.yaml"
+    ".github/workflows/*.yaml",
+    ".node-version"
   ],
   "tasks": {
     "transit": {
       "dependsOn": ["^transit"]
     },
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**"]
-    },
     "check-types": {
-      "dependsOn": ["codegen", "transit"]
+      "dependsOn": ["generate-schemas", "transit"],
+      "inputs": [
+        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
+        "!**/{coverage,docker-data}/**"
+      ]
     },
     "dev": {
       "persistent": true,
       "cache": false,
-      "dependsOn": ["codegen"]
-    },
-    "generate-schemas": {
-      "outputs": ["lib/__generated__/**"],
-      "inputs": ["openapi-schema.json", "openapi-schema.yaml", "*.apib"]
+      "dependsOn": ["generate-schemas"]
     },
     "generate-config-docs": {
       "inputs": ["**/*-settings.schema.ts", "zod2md.config.ts"],
       "outputs": ["docs/*.md"]
     },
-    "codegen": {
-      "dependsOn": ["generate-schemas", "^generate-schemas"]
+    "generate-schemas": {
+      "dependsOn": ["^generate-schemas"],
+      "outputs": ["lib/__generated__/**"],
+      "inputs": ["openapi-schema.{json,yaml}", "kubb.config.ts", "*.apib"]
     },
     "test": {
-      "dependsOn": ["codegen"]
+      "dependsOn": ["generate-schemas"],
+      "inputs": [
+        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
+        "!**/{docker-data}/**",
+        "!**/*.{md}"
+      ]
     },
     "test:watch": {
       "persistent": true,
-      "dependsOn": ["codegen"]
+      "dependsOn": ["generate-schemas"]
     },
-    "lint": {},
+    "lint": {
+      "inputs": [
+        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
+        "!**/{__generated__,.next,coverage,docker-data}/**"
+      ]
+    },
     "lint:fix": {}
   }
 }
