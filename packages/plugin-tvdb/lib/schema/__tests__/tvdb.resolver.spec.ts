@@ -1,20 +1,22 @@
+import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
-import { HttpResponse, http } from "msw";
 import assert from "node:assert";
 import { expect } from "vitest";
 
+import { postLoginHandler } from "../../__generated__/index.ts";
 import { TvdbAPI } from "../../datasource/tvdb.datasource.ts";
+import plugin from "../../index.ts";
 import { pluginConfig } from "../../tvdb-plugin.config.ts";
+
+it.override("plugin", plugin);
 
 it('returns the validation status when calling "tvdbIsValid" query', async ({
   gqlServer,
   server,
   dataSourceConfig,
 }) => {
-  server.use(
-    http.get("**/validate", () => HttpResponse.json({ success: true })),
-  );
+  server.use(postLoginHandler({ data: { token: "mock-token" } }));
 
   const { body } = await gqlServer.executeOperation(
     {
@@ -27,13 +29,18 @@ it('returns the validation status when calling "tvdbIsValid" query', async ({
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new TvdbAPI({
-            ...dataSourceConfig,
-            pluginSymbol: pluginConfig.name,
-            settings: {
-              apiKey: "",
-            },
-          }),
+          dataSources: new DataSourceMap([
+            [
+              TvdbAPI,
+              new TvdbAPI({
+                ...dataSourceConfig,
+                pluginSymbol: pluginConfig.name,
+                settings: {
+                  apiKey: "",
+                },
+              }),
+            ],
+          ]),
         },
       },
     },

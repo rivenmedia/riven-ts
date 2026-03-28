@@ -1,18 +1,23 @@
 /* eslint-disable no-empty-pattern */
+import assert from "node:assert";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { expect, test as testBase } from "vitest";
 
 import { mockLogger } from "./create-mock-logger.ts";
 
+import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { Telemetry } from "bullmq";
 
 export const it = testBase
-  .extend("gqlServer", async ({}, { onCleanup }) => {
+  .extend("plugin", undefined as RivenPlugin | undefined)
+  .extend("gqlServer", async ({ plugin }, { onCleanup }) => {
+    assert(plugin, "Plugin instance must be provided to use gqlServer context");
+
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");
 
-    const mockServer = await buildMockServer();
+    const mockServer = await buildMockServer(plugin.resolvers);
 
     await mockServer.start();
 

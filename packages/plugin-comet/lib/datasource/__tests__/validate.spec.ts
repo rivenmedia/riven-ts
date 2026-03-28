@@ -23,6 +23,7 @@ it("returns false if the request fails", async ({
       url: "",
     },
   });
+
   const isValid = await cometApi.validate();
 
   expect(isValid).toBe(false);
@@ -43,6 +44,7 @@ it("returns true if the request succeeds", async ({
       url: "",
     },
   });
+
   const isValid = await cometApi.validate();
 
   expect(isValid).toBe(true);

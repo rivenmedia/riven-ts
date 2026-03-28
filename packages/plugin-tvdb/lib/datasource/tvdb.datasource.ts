@@ -157,6 +157,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
         apikey: this.settings.apiKey,
       },
     });
+
     const { data } = postLogin200Schema.parse(response);
 
     if (!data?.token) {

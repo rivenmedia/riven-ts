@@ -1,3 +1,4 @@
+import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { HttpResponse, http } from "msw";
@@ -6,6 +7,9 @@ import { expect } from "vitest";
 
 import { pluginConfig } from "../../comet-plugin.config.ts";
 import { CometAPI } from "../../datasource/comet.datasource.ts";
+import plugin from "../../index.ts";
+
+it.override("plugin", plugin);
 
 it('returns the validation status when calling "cometIsValid" query', async ({
   gqlServer,
@@ -27,13 +31,18 @@ it('returns the validation status when calling "cometIsValid" query', async ({
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new CometAPI({
-            ...dataSourceConfig,
-            pluginSymbol: pluginConfig.name,
-            settings: {
-              url: "http://localhost",
-            },
-          }),
+          dataSources: new DataSourceMap([
+            [
+              CometAPI,
+              new CometAPI({
+                ...dataSourceConfig,
+                pluginSymbol: pluginConfig.name,
+                settings: {
+                  url: "http://localhost",
+                },
+              }),
+            ],
+          ]),
         },
       },
     },

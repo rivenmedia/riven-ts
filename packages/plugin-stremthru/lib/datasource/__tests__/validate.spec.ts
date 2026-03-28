@@ -3,7 +3,10 @@ import { it } from "@repo/util-plugin-testing/plugin-test-context";
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
+import plugin from "../../index.ts";
 import { StremThruAPI } from "../stremthru.datasource.ts";
+
+it.override("plugin", plugin);
 
 it("returns false if the request fails", async ({
   server,

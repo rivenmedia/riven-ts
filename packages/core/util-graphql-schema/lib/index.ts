@@ -16,6 +16,13 @@ import {
 
 import { buildSchema as baseBuildSchema } from "type-graphql";
 
+import type { DataSourceMap } from "@repo/util-plugin-sdk";
+
+export type ApolloServerContext = Record<
+  symbol,
+  { dataSources: DataSourceMap }
+>;
+
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export const buildSchema = async (pluginResolvers: Function[]) =>
   baseBuildSchema({

@@ -1,6 +1,9 @@
-import { buildSchema } from "@repo/core-util-graphql-schema";
+import {
+  type ApolloServerContext,
+  buildSchema,
+} from "@repo/core-util-graphql-schema";
 
-import { ApolloServer, type BaseContext } from "@apollo/server";
+import { ApolloServer } from "@apollo/server";
 import responseCachePlugin from "@apollo/server-plugin-response-cache";
 import { ApolloServerPluginCacheControl } from "@apollo/server/plugin/cacheControl";
 import { startStandaloneServer } from "@apollo/server/standalone";
@@ -32,7 +35,7 @@ export const startGqlServer = fromPromise<
     (p) => p.config.resolvers,
   );
 
-  const server = new ApolloServer<BaseContext>({
+  const server = new ApolloServer<ApolloServerContext>({
     cache: redisCache,
     schema: await buildSchema(pluginResolvers),
     introspection: true,

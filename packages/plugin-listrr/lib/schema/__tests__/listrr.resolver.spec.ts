@@ -1,3 +1,4 @@
+import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { HttpResponse } from "msw";
@@ -16,7 +17,10 @@ import {
   getApiListShowsIdSortbySortbydirectionPageHandler,
 } from "../../__generated__/index.ts";
 import { ListrrAPI } from "../../datasource/listrr.datasource.ts";
+import plugin from "../../index.ts";
 import { pluginConfig } from "../../listrr-plugin.config.ts";
+
+it.override("plugin", plugin);
 
 it("returns movies when calling listrrMovies query", async ({
   gqlServer,
@@ -70,15 +74,20 @@ it("returns movies when calling listrrMovies query", async ({
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new ListrrAPI({
-            ...dataSourceConfig,
-            pluginSymbol: pluginConfig.name,
-            settings: {
-              apiKey: "",
-              movieLists: [],
-              showLists: [],
-            },
-          }),
+          dataSources: new DataSourceMap([
+            [
+              ListrrAPI,
+              new ListrrAPI({
+                ...dataSourceConfig,
+                pluginSymbol: pluginConfig.name,
+                settings: {
+                  apiKey: "",
+                  movieLists: [],
+                  showLists: [],
+                },
+              }),
+            ],
+          ]),
         },
       },
     },
@@ -142,15 +151,20 @@ it("returns shows when calling listrrShows query", async ({
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new ListrrAPI({
-            ...dataSourceConfig,
-            pluginSymbol: pluginConfig.name,
-            settings: {
-              apiKey: "",
-              movieLists: [],
-              showLists: [],
-            },
-          }),
+          dataSources: new DataSourceMap([
+            [
+              ListrrAPI,
+              new ListrrAPI({
+                ...dataSourceConfig,
+                pluginSymbol: pluginConfig.name,
+                settings: {
+                  apiKey: "",
+                  movieLists: [],
+                  showLists: [],
+                },
+              }),
+            ],
+          ]),
         },
       },
     },
@@ -180,15 +194,20 @@ it('returns the user validation status when calling "listrrIsValid" query', asyn
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new ListrrAPI({
-            ...dataSourceConfig,
-            pluginSymbol: pluginConfig.name,
-            settings: {
-              apiKey: "",
-              movieLists: [],
-              showLists: [],
-            },
-          }),
+          dataSources: new DataSourceMap([
+            [
+              ListrrAPI,
+              new ListrrAPI({
+                ...dataSourceConfig,
+                pluginSymbol: pluginConfig.name,
+                settings: {
+                  apiKey: "",
+                  movieLists: [],
+                  showLists: [],
+                },
+              }),
+            ],
+          ]),
         },
       },
     },
