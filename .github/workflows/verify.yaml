@@ -1,0 +1,52 @@
+name: Verify
+
+run-name: "Verify PR #${{ github.event.pull_request.number }}"
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  setup-yaml-anchors:
+    # This job is only for setting up the environment for the next job, it should never be ran
+    if: false
+    name: Setup YAML anchors
+    runs-on: ubuntu-latest
+    steps:
+      - &complete-history-checkout
+        name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Check out the entire git history for use with Turborepo's --affected flag
+          filter: blob:none # Blobless clones omit file contents whilst maintaining commit history, resulting in much faster checkouts
+
+      - &setup-project-environment
+        name: Setup project environment
+        uses: ./.github/actions/setup-project-environment
+
+      - &setup-turborepo-environment
+        name: Setup Turborepo environment
+        uses: ./.github/actions/setup-turborepo-environment
+        with:
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          turbo-team: ${{ vars.TURBO_TEAM }}
+
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        task:
+          - test
+          - lint
+          - check-types
+    steps:
+      - *complete-history-checkout
+      - *setup-project-environment
+      - *setup-turborepo-environment
+      - name: Run ${{ matrix.task }}
+        run: turbo ${{ matrix.task }} --affected --continue --verbose
