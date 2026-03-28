@@ -15,6 +15,7 @@ jobs:
     name: Verify
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         task:
           - test
@@ -23,6 +24,7 @@ jobs:
     env:
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_RUN_SUMMARY: 1
       DO_NOT_TRACK: true # Disable Turborepo telemetry - https://turborepo.dev/docs/telemetry
     steps:
       - name: Checkout repository
@@ -39,3 +41,6 @@ jobs:
 
       - name: Run ${{ matrix.task }}
         run: pnpm turbo ${{ matrix.task }} --affected --continue
+
+      - uses: charpeni/turborepo-summary-action@v1
+        if: always()
