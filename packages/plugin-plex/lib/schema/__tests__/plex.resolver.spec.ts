@@ -1,18 +1,11 @@
-import { DataSourceMap } from "@repo/util-plugin-sdk";
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
 import assert from "node:assert";
 import { expect } from "vitest";
 
-import { PlexAPI } from "../../datasource/plex.datasource.ts";
-import plugin from "../../index.ts";
-import { pluginConfig } from "../../plex-plugin.config.ts";
-
-it.override("plugin", plugin);
+import { it } from "../../__tests__/plex.test-context.ts";
 
 it('returns the validation status when calling "plexIsValid" query', async ({
+  gqlContext,
   gqlServer,
-  dataSourceConfig,
 }) => {
   const { body } = await gqlServer.executeOperation(
     {
@@ -22,26 +15,7 @@ it('returns the validation status when calling "plexIsValid" query', async ({
         }
       `,
     },
-    {
-      contextValue: {
-        [pluginConfig.name]: {
-          dataSources: new DataSourceMap([
-            [
-              PlexAPI,
-              new PlexAPI({
-                ...dataSourceConfig,
-                pluginSymbol: pluginConfig.name,
-                settings: {
-                  plexLibraryPath: "",
-                  plexServerUrl: "",
-                  plexToken: "",
-                },
-              }),
-            ],
-          ]),
-        },
-      },
-    },
+    { contextValue: gqlContext },
   );
 
   assert(body.kind === "single");

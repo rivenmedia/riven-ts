@@ -12,3 +12,5 @@ export const buildMockServer = async (resolvers: Function[] = []) =>
   new ApolloServer<ApolloServerContext>({
     schema: await buildSchema(resolvers),
   });
+
+export type { ApolloServerContext } from "@repo/core-util-graphql-schema";

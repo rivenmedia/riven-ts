@@ -1,5 +1,3 @@
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
@@ -10,21 +8,13 @@ import {
   getApiListShowsIdSortbySortbydirectionPageHandler as getShowsHandler,
   createGetApiListShowsIdSortbySortbydirectionPageQueryResponse as getShowsResponse,
 } from "../../__generated__/index.ts";
-import { pluginConfig } from "../../listrr-plugin.config.ts";
+import { it } from "../../__tests__/listrr.test-context.ts";
 import { ListrrAPI } from "../listrr.datasource.ts";
 
 it("returns an empty array if no content lists are provided", async ({
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
-  const listrrApi = new ListrrAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      apiKey: "",
-      movieLists: [],
-      showLists: [],
-    },
-  });
+  const listrrApi = dataSourceMap.get(ListrrAPI);
   const shows = await listrrApi.getShows(new Set());
 
   expect(shows).toEqual([]);
@@ -32,7 +22,7 @@ it("returns an empty array if no content lists are provided", async ({
 
 it("retrieves shows from each provided list", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   const contentLists = new Set([
     "64b7f2f5e13e4b6f8c8e4d1a",
@@ -62,15 +52,7 @@ it("retrieves shows from each provided list", async ({
     }),
   );
 
-  const listrrApi = new ListrrAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      apiKey: "",
-      movieLists: [],
-      showLists: [],
-    },
-  });
+  const listrrApi = dataSourceMap.get(ListrrAPI);
   const shows = await listrrApi.getShows(contentLists);
 
   expect(shows.length).toBe(2);
@@ -78,7 +60,7 @@ it("retrieves shows from each provided list", async ({
 
 it("paginates through all pages of the list", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   const contentLists = new Set(["64b7f2f5e13e4b6f8c8e4d1c"]);
   const totalPages = 3;
@@ -110,15 +92,7 @@ it("paginates through all pages of the list", async ({
     }),
   );
 
-  const listrrApi = new ListrrAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      apiKey: "",
-      movieLists: [],
-      showLists: [],
-    },
-  });
+  const listrrApi = dataSourceMap.get(ListrrAPI);
   const shows = await listrrApi.getShows(contentLists);
 
   expect(shows.length).toBe(totalPages * itemsPerPage);
@@ -126,7 +100,7 @@ it("paginates through all pages of the list", async ({
 
 it("deduplicates shows that appear in multiple lists", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   const buildMockShow = (id: number) =>
     createListrrContractsModelsAPIShowDto({
@@ -153,15 +127,7 @@ it("deduplicates shows that appear in multiple lists", async ({
     ),
   );
 
-  const listrrApi = new ListrrAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      apiKey: "",
-      movieLists: [],
-      showLists: [],
-    },
-  });
+  const listrrApi = dataSourceMap.get(ListrrAPI);
   const shows = await listrrApi.getShows(new Set(Object.keys(items)));
 
   expect(shows).toHaveLength(8);

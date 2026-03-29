@@ -6,13 +6,14 @@ import type { ZodObject, z } from "zod";
 
 export const createMockPluginSettings = <T extends ZodObject>(
   schema: T,
-  settings: z.input<T>,
+  settings: z.input<T> | z.output<T>,
 ) => {
-  const mockPluginKey = "MOCK_PLUGIN";
+  const mockPluginKey = schema.constructor.name;
   const env: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(settings)) {
-    env[`RIVEN_PLUGIN_SETTING__${mockPluginKey}__${key}`] = String(value);
+    env[`RIVEN_PLUGIN_SETTING__${mockPluginKey}__${key}`] =
+      JSON.stringify(value);
   }
 
   const pluginSettings = new PluginSettings(env, [mockPluginKey], mockLogger);

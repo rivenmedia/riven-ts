@@ -1,5 +1,3 @@
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
@@ -10,21 +8,13 @@ import {
   getApiListMoviesIdSortbySortbydirectionPageHandler as getMoviesHandler,
   createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse as getMoviesResponse,
 } from "../../__generated__/index.ts";
-import { pluginConfig } from "../../listrr-plugin.config.ts";
+import { it } from "../../__tests__/listrr.test-context.ts";
 import { ListrrAPI } from "../listrr.datasource.ts";
 
 it("returns an empty array if no content lists are provided", async ({
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
-  const listrrApi = new ListrrAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      apiKey: "",
-      movieLists: [],
-      showLists: [],
-    },
-  });
+  const listrrApi = dataSourceMap.get(ListrrAPI);
   const movies = await listrrApi.getMovies(new Set());
 
   expect(movies).toEqual([]);
@@ -32,7 +22,7 @@ it("returns an empty array if no content lists are provided", async ({
 
 it("retrieves movies from each provided list", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   const contentLists = new Set([
     "64b7f2f5e13e4b6f8c8e4d1a",
@@ -62,15 +52,7 @@ it("retrieves movies from each provided list", async ({
     }),
   );
 
-  const listrrApi = new ListrrAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      apiKey: "",
-      movieLists: [],
-      showLists: [],
-    },
-  });
+  const listrrApi = dataSourceMap.get(ListrrAPI);
   const movies = await listrrApi.getMovies(contentLists);
 
   expect(movies.length).toBe(2);
@@ -78,7 +60,7 @@ it("retrieves movies from each provided list", async ({
 
 it("paginates through all pages of the list", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   const contentLists = new Set(["64b7f2f5e13e4b6f8c8e4d1c"]);
   const totalPages = 3;
@@ -110,15 +92,7 @@ it("paginates through all pages of the list", async ({
     }),
   );
 
-  const listrrApi = new ListrrAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      apiKey: "",
-      movieLists: [],
-      showLists: [],
-    },
-  });
+  const listrrApi = dataSourceMap.get(ListrrAPI);
   const movies = await listrrApi.getMovies(contentLists);
 
   expect(movies.length).toBe(totalPages * itemsPerPage);
@@ -126,7 +100,7 @@ it("paginates through all pages of the list", async ({
 
 it("dedupes movies that appear in multiple lists", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   const buildMockMovie = (id: number) =>
     createListrrContractsModelsAPIMovieDto({
@@ -153,15 +127,7 @@ it("dedupes movies that appear in multiple lists", async ({
     ),
   );
 
-  const listrrApi = new ListrrAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      apiKey: "",
-      movieLists: [],
-      showLists: [],
-    },
-  });
+  const listrrApi = dataSourceMap.get(ListrrAPI);
   const movies = await listrrApi.getMovies(new Set(Object.keys(items)));
 
   expect(movies).toHaveLength(8);

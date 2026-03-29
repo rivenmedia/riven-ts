@@ -1,20 +1,13 @@
-import { DataSourceMap } from "@repo/util-plugin-sdk";
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
 import { HttpResponse, http } from "msw";
 import assert from "node:assert";
 import { expect } from "vitest";
 
-import { TestAPI } from "../../datasource/test.datasource.ts";
-import plugin from "../../index.ts";
-import { pluginConfig } from "../../test-plugin.config.ts";
-
-it.override("plugin", plugin);
+import { it } from "../../__tests__/test.test-context.ts";
 
 it('returns the validation status when calling "testIsValid" query', async ({
+  gqlContext,
   gqlServer,
   server,
-  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -28,24 +21,7 @@ it('returns the validation status when calling "testIsValid" query', async ({
         }
       `,
     },
-    {
-      contextValue: {
-        [pluginConfig.name]: {
-          dataSources: new DataSourceMap([
-            [
-              TestAPI,
-              new TestAPI({
-                ...dataSourceConfig,
-                pluginSymbol: pluginConfig.name,
-                settings: {
-                  apiKey: "",
-                },
-              }),
-            ],
-          ]),
-        },
-      },
-    },
+    { contextValue: gqlContext },
   );
 
   assert(body.kind === "single");

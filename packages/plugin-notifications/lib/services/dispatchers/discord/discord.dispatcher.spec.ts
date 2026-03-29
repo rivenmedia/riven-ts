@@ -1,11 +1,12 @@
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
+import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
 
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 import z from "zod";
 
+import { it } from "../../../__tests__/notifications.test-context.ts";
 import { NotificationsAPI } from "../../../datasource/notifications.datasource.ts";
-import { pluginConfig } from "../../../notifications-plugin.config.ts";
+import { NotificationsSettings } from "../../../notifications-settings.schema.ts";
 import { notificationPayloadFixture } from "../../__tests__/payload.fixture.ts";
 import { discordDispatcher } from "./discord.dispatcher.ts";
 import { buildEmbed } from "./utilities/build-embed.ts";
@@ -17,9 +18,16 @@ const mockService = {
   webhookToken: "webhook-token",
 } as const satisfies Omit<DiscordService, "type">;
 
+it.override(
+  "settings",
+  createMockPluginSettings(NotificationsSettings, {
+    urls: [`discord://${mockService.webhookId}/${mockService.webhookToken}`],
+  }),
+);
+
 it("sends an embed to the correct Discord webhook URL", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   server.use(
     http.post(
@@ -44,13 +52,7 @@ it("sends an embed to the correct Discord webhook URL", async ({
     ),
   );
 
-  const api = new NotificationsAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      urls: [`discord://${mockService.webhookId}/${mockService.webhookToken}`],
-    },
-  });
+  const api = dataSourceMap.get(NotificationsAPI);
 
   await expect(
     discordDispatcher.send(mockService, notificationPayloadFixture, api),

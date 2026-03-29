@@ -1,56 +1,47 @@
 /* eslint-disable no-empty-pattern */
-import assert from "node:assert";
+import { DataSourceMap, type RivenPlugin } from "@repo/util-plugin-sdk";
+
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { expect, test as testBase } from "vitest";
 
 import { mockLogger } from "./create-mock-logger.ts";
+import { createMockPluginSettings } from "./create-mock-plugin-settings.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { ApolloServerContext } from "@repo/core-util-mock-graphql-server";
 import type { Telemetry } from "bullmq";
 
+async function getRedisUrl(
+  onCleanup: (cleanupFunction: () => Promise<void>) => void,
+): Promise<string> {
+  const { RedisMemoryServer } = await import("redis-memory-server");
+
+  try {
+    const { stdout: redisServerBinary } =
+      await promisify(exec)("which redis-server");
+
+    const redisServer = new RedisMemoryServer({
+      binary: {
+        systemBinary: redisServerBinary.trim(),
+      },
+    });
+
+    const host = await redisServer.getHost();
+    const port = await redisServer.getPort();
+
+    onCleanup(async () => {
+      await redisServer.stop();
+    });
+
+    return `redis://${host}:${port.toString()}`;
+  } catch (error) {
+    expect.fail(
+      `Failed to start Redis Memory Server. Is "redis-server" is installed?\n${String(error)}`,
+    );
+  }
+}
+
 export const it = testBase
-  .extend("plugin", undefined as RivenPlugin | undefined)
-  .extend("gqlServer", async ({ plugin }, { onCleanup }) => {
-    assert(plugin, "Plugin instance must be provided to use gqlServer context");
-
-    const { buildMockServer } =
-      await import("@repo/core-util-mock-graphql-server");
-
-    const mockServer = await buildMockServer(plugin.resolvers);
-
-    await mockServer.start();
-
-    onCleanup(() => mockServer.stop());
-
-    return mockServer;
-  })
-  .extend("redisUrl", async ({}, { onCleanup }) => {
-    const { RedisMemoryServer } = await import("redis-memory-server");
-
-    try {
-      const { stdout: redisServerBinary } =
-        await promisify(exec)("which redis-server");
-
-      const redisServer = new RedisMemoryServer({
-        binary: {
-          systemBinary: redisServerBinary.trim(),
-        },
-      });
-      const host = await redisServer.getHost();
-      const port = await redisServer.getPort();
-
-      onCleanup(async () => {
-        await redisServer.stop();
-      });
-
-      return `redis://${host}:${port.toString()}`;
-    } catch (error) {
-      expect.fail(
-        `Failed to start Redis Memory Server. Is "redis-server" is installed?\n${String(error)}`,
-      );
-    }
-  })
   .extend("server", async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
@@ -86,21 +77,68 @@ export const it = testBase
     return server;
   })
   .extend("logger", mockLogger)
-  .extend("telemetry", undefined as unknown as Telemetry)
-  .extend("dataSourceConfig", async ({ redisUrl, logger, telemetry }) => {
-    const { InMemoryLRUCache } = await import("@apollo/utils.keyvaluecache");
+  .extend<"plugin", RivenPlugin>("plugin", () => {
+    throw new Error(
+      'Plugin config must be provided before using the plugin test context. Use `it.override("plugin", <pluginConfig>)` to set the plugin config for your tests.',
+    );
+  })
+  .extend("settings", ({ plugin }) =>
+    createMockPluginSettings(plugin.settingsSchema, {}),
+  )
+  .extend(
+    "dataSourceMap",
+    async ({ plugin, logger, settings }, { onCleanup }) => {
+      const dataSourceMap = new DataSourceMap();
 
-    return {
-      cache: new InMemoryLRUCache(),
-      connection: {
-        url: redisUrl,
+      if (plugin.dataSources) {
+        const { InMemoryLRUCache } =
+          await import("@apollo/utils.keyvaluecache");
+
+        const dataSourceConfig = {
+          cache: new InMemoryLRUCache(),
+          connection: {
+            url: await getRedisUrl(onCleanup),
+          },
+          logger,
+          pluginSymbol: plugin.name,
+          telemetry: undefined as unknown as Telemetry,
+          requestAttempts: 1,
+        };
+
+        for (const DataSourceClass of plugin.dataSources) {
+          const dataSourceInstance = new DataSourceClass({
+            ...dataSourceConfig,
+            pluginSymbol: plugin.name,
+            settings: settings.get(plugin.settingsSchema),
+          });
+
+          dataSourceMap.set(DataSourceClass, dataSourceInstance);
+        }
+      }
+
+      return dataSourceMap;
+    },
+  )
+  .extend("gqlServer", async ({ plugin }, { onCleanup }) => {
+    const { buildMockServer } =
+      await import("@repo/core-util-mock-graphql-server");
+
+    const mockServer = await buildMockServer(plugin.resolvers);
+
+    await mockServer.start();
+
+    onCleanup(() => mockServer.stop());
+
+    return mockServer;
+  })
+  .extend(
+    "gqlContext",
+    ({ plugin, dataSourceMap }): ApolloServerContext => ({
+      [plugin.name]: {
+        dataSources: dataSourceMap,
       },
-      logger,
-      pluginSymbol: Symbol.for("@repo/util-plugin-testing"),
-      telemetry,
-      requestAttempts: 1,
-    };
-  });
+    }),
+  );
 
 export type {
   KeyValueCache,

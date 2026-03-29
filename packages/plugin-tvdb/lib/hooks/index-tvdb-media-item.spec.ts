@@ -1,7 +1,4 @@
-import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
-import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
-import { it as baseIt } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
@@ -10,43 +7,16 @@ import breakingBadExtendedSeriesFixture from "../__fixtures__/breaking-bad/exten
 import breakingBadOfficialOrderFixture from "../__fixtures__/breaking-bad/official-order.json" with { type: "json" };
 import breakingBadTvMazeLookupFixture from "../__fixtures__/breaking-bad/tvmaze-lookup.json" with { type: "json" };
 import { postLoginHandler } from "../__generated__/index.ts";
-import { TvdbAPI } from "../datasource/tvdb.datasource.ts";
-import { TvMazeAPI } from "../datasource/tvmaze.datasource.ts";
-import { pluginConfig } from "../tvdb-plugin.config.ts";
-import { TvdbSettings } from "../tvdb-settings.schema.ts";
+import { it as baseIt } from "../__tests__/tvdb.test-context.ts";
 import { indexTVDBMediaItem } from "./index-tvdb-media-item.ts";
 
-const it = baseIt
-  .extend("settings", () => createMockPluginSettings(TvdbSettings, {}))
-  .extend("dataSourceMap", ({ dataSourceConfig, settings }) => {
-    return new DataSourceMap([
-      [
-        TvdbAPI,
-        new TvdbAPI({
-          ...dataSourceConfig,
-          requestAttempts: 1,
-          pluginSymbol: pluginConfig.name,
-          settings: settings.get(TvdbSettings),
-        }),
-      ],
-      [
-        TvMazeAPI,
-        new TvMazeAPI({
-          ...dataSourceConfig,
-          requestAttempts: 1,
-          pluginSymbol: pluginConfig.name,
-          settings: settings.get(TvdbSettings),
-        }),
-      ],
-    ]);
-  })
-  .extend("item", ({}) => {
-    const item = new ItemRequest();
+const it = baseIt.extend("item", ({}) => {
+  const item = new ItemRequest();
 
-    item.id = 1;
+  item.id = 1;
 
-    return item;
-  });
+  return item;
+});
 
 it.beforeEach(({ server }) => {
   server.use(postLoginHandler());

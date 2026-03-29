@@ -1,5 +1,3 @@
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
@@ -7,14 +5,11 @@ import {
   createGetAuthMeQueryResponse,
   getAuthMeHandler,
 } from "../../__generated__/index.ts";
+import { it } from "../../__tests__/seerr.test-context.ts";
 import { MetadataSettingsResponse } from "../../schemas/metadata-settings-response.schema.ts";
-import { pluginConfig } from "../../seerr-plugin.config.ts";
 import { SeerrAPI } from "../seerr.datasource.ts";
 
-it("returns false if the request fails", async ({
-  server,
-  dataSourceConfig,
-}) => {
+it("returns false if the request fails", async ({ server, dataSourceMap }) => {
   server.use(
     getAuthMeHandler(() => HttpResponse.error()),
     http.get("**/settings/metadatas", () =>
@@ -25,16 +20,7 @@ it("returns false if the request fails", async ({
     ),
   );
 
-  const seerrApi = new SeerrAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      apiKey: "test-api-key",
-      url: "http://localhost:5055",
-      filter: "approved",
-    },
-  });
-
+  const seerrApi = dataSourceMap.get(SeerrAPI);
   const isValid = await seerrApi.validate();
 
   expect(isValid).toBe(false);
@@ -42,7 +28,7 @@ it("returns false if the request fails", async ({
 
 it("returns true if the request succeeds", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   server.use(
     getAuthMeHandler(() => HttpResponse.json(createGetAuthMeQueryResponse())),
@@ -54,15 +40,7 @@ it("returns true if the request succeeds", async ({
     ),
   );
 
-  const seerrApi = new SeerrAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      apiKey: "test-api-key",
-      url: "http://localhost:5055",
-      filter: "approved",
-    },
-  });
+  const seerrApi = dataSourceMap.get(SeerrAPI);
 
   const isValid = await seerrApi.validate();
 

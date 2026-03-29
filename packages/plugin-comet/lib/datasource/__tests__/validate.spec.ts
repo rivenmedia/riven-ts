@@ -1,29 +1,17 @@
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { pluginConfig } from "../../comet-plugin.config.ts";
+import { it } from "../../__tests__/comet.test-context.ts";
 import { CometAPI } from "../comet.datasource.ts";
 
-it("returns false if the request fails", async ({
-  server,
-  dataSourceConfig,
-}) => {
+it("returns false if the request fails", async ({ server, dataSourceMap }) => {
   server.use(
     http.get("**/validate", () =>
       HttpResponse.json({ success: false }, { status: 401 }),
     ),
   );
 
-  const cometApi = new CometAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      url: "http://localhost",
-    },
-  });
-
+  const cometApi = dataSourceMap.get(CometAPI);
   const isValid = await cometApi.validate();
 
   expect(isValid).toBe(false);
@@ -31,20 +19,13 @@ it("returns false if the request fails", async ({
 
 it("returns true if the request succeeds", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
   );
 
-  const cometApi = new CometAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      url: "http://localhost",
-    },
-  });
-
+  const cometApi = dataSourceMap.get(CometAPI);
   const isValid = await cometApi.validate();
 
   expect(isValid).toBe(true);

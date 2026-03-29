@@ -1,25 +1,20 @@
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { http, HttpResponse } from "msw";
 import { expect } from "vitest";
 
+import { it } from "../../__tests__/{{kebabCase pluginName}}.test-context.ts";
 import { pluginConfig } from "../../{{kebabCase pluginName}}-plugin.config.ts";
 import { {{pascalCase pluginName}}API } from "../{{kebabCase pluginName}}.datasource.ts";
 
 it("returns false if the request fails", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: false }, { status: 401 })),
   )
 
-  const {{camelCase pluginName}}Api = new {{pascalCase pluginName}}API({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {},
-  });
-
+  const {{camelCase pluginName}}Api = dataSourceMap.get({{pascalCase pluginName}}API);
   const isValid = await {{camelCase pluginName}}Api.validate();
 
   expect(isValid).toBe(false);
@@ -27,18 +22,13 @@ it("returns false if the request fails", async ({
 
 it("returns true if the request succeeds", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
   )
 
-  const {{camelCase pluginName}}Api = new {{pascalCase pluginName}}API({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {},
-  });
-
+  const {{camelCase pluginName}}Api = dataSourceMap.get({{pascalCase pluginName}}API);
   const isValid = await {{camelCase pluginName}}Api.validate();
 
   expect(isValid).toBe(true);

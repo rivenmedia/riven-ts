@@ -1,20 +1,15 @@
-import { DataSourceMap } from "@repo/util-plugin-sdk";
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
 import { http, HttpResponse } from "msw";
 import assert from "node:assert";
 import { expect } from "vitest";
 
+import { it } from "../../__tests__/{{kebabCase pluginName}}.test-context.ts";
 import { {{pascalCase pluginName}}API } from "../../datasource/{{kebabCase pluginName}}.datasource.ts";
-import plugin from "../../index.ts";
 import { pluginConfig } from "../../{{kebabCase pluginName}}-plugin.config.ts";
 
-it.override("plugin", plugin);
-
 it('returns the validation status when calling "{{camelCase pluginName}}IsValid" query', async ({
+  gqlContext,
   gqlServer,
   server,
-  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -28,22 +23,7 @@ it('returns the validation status when calling "{{camelCase pluginName}}IsValid"
         }
       `,
     },
-    {
-      contextValue: {
-        [pluginConfig.name]: {
-          dataSources: new DataSourceMap([
-            [
-              {{pascalCase pluginName}}API,
-              new {{pascalCase pluginName}}API({
-                ...dataSourceConfig,
-                pluginSymbol: pluginConfig.name,
-                settings: {},
-              }),
-            ]
-          ])
-        }
-      },
-    },
+    { contextValue: gqlContext },
   );
 
   assert(body.kind === "single");

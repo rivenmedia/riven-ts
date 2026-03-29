@@ -1,20 +1,13 @@
-import { DataSourceMap } from "@repo/util-plugin-sdk";
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
 import { HttpResponse, http } from "msw";
 import assert from "node:assert";
 import { expect } from "vitest";
 
-import { TorrentioAPI } from "../../datasource/torrentio.datasource.ts";
-import plugin from "../../index.ts";
-import { pluginConfig } from "../../torrentio-plugin.config.ts";
-
-it.override("plugin", plugin);
+import { it } from "../../__tests__/torrentio.test-context.ts";
 
 it('returns the validation status when calling "torrentioIsValid" query', async ({
+  gqlContext,
   gqlServer,
   server,
-  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -28,24 +21,7 @@ it('returns the validation status when calling "torrentioIsValid" query', async 
         }
       `,
     },
-    {
-      contextValue: {
-        [pluginConfig.name]: {
-          dataSources: new DataSourceMap([
-            [
-              TorrentioAPI,
-              new TorrentioAPI({
-                ...dataSourceConfig,
-                pluginSymbol: pluginConfig.name,
-                settings: {
-                  filter: "",
-                },
-              }),
-            ],
-          ]),
-        },
-      },
-    },
+    { contextValue: gqlContext },
   );
 
   assert(body.kind === "single");

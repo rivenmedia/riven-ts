@@ -1,83 +1,90 @@
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
+import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
 
 import { HttpResponse, http } from "msw";
-import { expect } from "vitest";
+import { describe, expect } from "vitest";
 
+import { it } from "../../../__tests__/notifications.test-context.ts";
 import { NotificationsAPI } from "../../../datasource/notifications.datasource.ts";
-import { pluginConfig } from "../../../notifications-plugin.config.ts";
+import { NotificationsSettings } from "../../../notifications-settings.schema.ts";
 import { notificationPayloadFixture } from "../../__tests__/payload.fixture.ts";
 import { sendNotification } from "../send-notification.ts";
 
-it('sends the expected payload to the configured HTTPS URL for the "jsons" scheme', async ({
-  server,
-  dataSourceConfig,
-}) => {
-  server.use(
-    http.post("https://example.com/webhook", async ({ request }) => {
-      const params = await request.json();
-      const isExpectedPayload =
-        JSON.stringify(params) === JSON.stringify(notificationPayloadFixture);
-
-      if (!isExpectedPayload) {
-        return HttpResponse.error();
-      }
-
-      return HttpResponse.json({
-        success: true,
-      });
+describe("json://", () => {
+  it.override(
+    "settings",
+    createMockPluginSettings(NotificationsSettings, {
+      urls: ["json://example.com/webhook"],
     }),
   );
 
-  const api = new NotificationsAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      urls: ["jsons://example.com/webhook"],
-    },
-  });
+  it("sends the expected payload to the configured HTTPS URL", async ({
+    server,
+    dataSourceMap,
+  }) => {
+    server.use(
+      http.post("https://example.com/webhook", async ({ request }) => {
+        const params = await request.json();
+        const isExpectedPayload =
+          JSON.stringify(params) === JSON.stringify(notificationPayloadFixture);
 
-  await expect(
-    sendNotification(
-      "jsons://example.com/webhook",
-      notificationPayloadFixture,
-      api,
-    ),
-  ).resolves.not.toThrow();
+        if (!isExpectedPayload) {
+          return HttpResponse.error();
+        }
+
+        return HttpResponse.json({
+          success: true,
+        });
+      }),
+    );
+
+    const api = dataSourceMap.get(NotificationsAPI);
+
+    await expect(
+      sendNotification(
+        "jsons://example.com/webhook",
+        notificationPayloadFixture,
+        api,
+      ),
+    ).resolves.not.toThrow();
+  });
 });
 
-it('sends the expected payload to the configured HTTP URL for the "json" scheme', async ({
-  server,
-  dataSourceConfig,
-}) => {
-  server.use(
-    http.post("http://example.com/webhook", async ({ request }) => {
-      const params = await request.json();
-      const isExpectedPayload =
-        JSON.stringify(params) === JSON.stringify(notificationPayloadFixture);
-
-      if (!isExpectedPayload) {
-        return HttpResponse.error();
-      }
-
-      return HttpResponse.json({
-        success: true,
-      });
+describe("jsons://", () => {
+  it.override(
+    "settings",
+    createMockPluginSettings(NotificationsSettings, {
+      urls: ["jsons://example.com/webhook"],
     }),
   );
 
-  const api = new NotificationsAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      urls: ["json://example.com/webhook"],
-    },
-  });
+  it("sends the expected payload to the configured HTTP URL", async ({
+    server,
+    dataSourceMap,
+  }) => {
+    server.use(
+      http.post("http://example.com/webhook", async ({ request }) => {
+        const params = await request.json();
+        const isExpectedPayload =
+          JSON.stringify(params) === JSON.stringify(notificationPayloadFixture);
 
-  await expect(
-    sendNotification(
-      "json://example.com/webhook",
-      notificationPayloadFixture,
-      api,
-    ),
-  ).resolves.not.toThrow();
+        if (!isExpectedPayload) {
+          return HttpResponse.error();
+        }
+
+        return HttpResponse.json({
+          success: true,
+        });
+      }),
+    );
+
+    const api = dataSourceMap.get(NotificationsAPI);
+
+    await expect(
+      sendNotification(
+        "json://example.com/webhook",
+        notificationPayloadFixture,
+        api,
+      ),
+    ).resolves.not.toThrow();
+  });
 });

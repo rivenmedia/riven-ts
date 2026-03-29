@@ -1,20 +1,13 @@
-import { DataSourceMap } from "@repo/util-plugin-sdk";
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
 import assert from "node:assert";
 import { expect } from "vitest";
 
 import { postLoginHandler } from "../../__generated__/index.ts";
-import { TvdbAPI } from "../../datasource/tvdb.datasource.ts";
-import plugin from "../../index.ts";
-import { pluginConfig } from "../../tvdb-plugin.config.ts";
-
-it.override("plugin", plugin);
+import { it } from "../../__tests__/tvdb.test-context.ts";
 
 it('returns the validation status when calling "tvdbIsValid" query', async ({
+  gqlContext,
   gqlServer,
   server,
-  dataSourceConfig,
 }) => {
   server.use(postLoginHandler({ data: { token: "mock-token" } }));
 
@@ -26,24 +19,7 @@ it('returns the validation status when calling "tvdbIsValid" query', async ({
         }
       `,
     },
-    {
-      contextValue: {
-        [pluginConfig.name]: {
-          dataSources: new DataSourceMap([
-            [
-              TvdbAPI,
-              new TvdbAPI({
-                ...dataSourceConfig,
-                pluginSymbol: pluginConfig.name,
-                settings: {
-                  apiKey: "",
-                },
-              }),
-            ],
-          ]),
-        },
-      },
-    },
+    { contextValue: gqlContext },
   );
 
   assert(body.kind === "single");
