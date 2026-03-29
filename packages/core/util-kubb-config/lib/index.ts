@@ -5,6 +5,8 @@ import { pluginOas } from "@kubb/plugin-oas";
 import { pluginTs } from "@kubb/plugin-ts";
 import { pluginZod } from "@kubb/plugin-zod";
 
+const outputPath = "./lib/__generated__";
+
 interface KubbConfigOptions {
   name: string;
   input: InputPath | InputData;
@@ -21,8 +23,12 @@ export const buildKubbConfig = ({
     root: ".",
     input,
     output: {
-      path: "./lib/__generated__",
+      path: outputPath,
       clean: true,
+      format: false, // Disable formatting to allow Prettier to handle it in the hooks.
+    },
+    hooks: {
+      done: [`prettier --log-level silent --write ${outputPath}/**/*.ts`],
     },
     plugins: [
       pluginOas({
