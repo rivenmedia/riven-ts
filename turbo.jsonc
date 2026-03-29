@@ -3,11 +3,7 @@
   "ui": "tui",
   "globalEnv": ["NODE_ENV"],
   "globalPassThroughEnv": ["DEBUG", "CI"],
-  "globalDependencies": [
-    ".github/actions/**/*.yaml",
-    ".github/workflows/*.yaml",
-    ".node-version"
-  ],
+  "globalDependencies": [".node-version"],
   "tasks": {
     "transit": {
       "dependsOn": ["^transit"]
