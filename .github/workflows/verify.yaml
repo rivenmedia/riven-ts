@@ -55,7 +55,7 @@ jobs:
           install-redis-server: ${{ contains(matrix.task.runner-requirements, 'redis-server') }}
 
       - name: Run ${{ matrix.task.name }}
-        run: pnpm turbo ${{ matrix.task.name }} --affected --continue
+        run: pnpm turbo ${{ matrix.task.name }} --affected --continue --concurrency 100%
 
       - uses: charpeni/turborepo-summary-action@v1
         if: always()
