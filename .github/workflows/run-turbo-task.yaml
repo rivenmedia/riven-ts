@@ -1,0 +1,90 @@
+name: Run turbo task
+
+on:
+  workflow_call:
+    inputs:
+      task:
+        description: The name of the turbo task to run
+        type: string
+        required: true
+      concurrency:
+        description: The concurrency level to use when running the turbo task
+        type: string
+        required: true
+      runner-requirements:
+        description: A list of requirements for the verification runner
+        type: string
+        required: true
+
+env:
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_RUN_SUMMARY: 1
+  DO_NOT_TRACK: true # Disable Turborepo telemetry - https://turborepo.dev/docs/telemetry
+
+jobs:
+  get-required-tasks:
+    name: Check if required
+    runs-on: ubuntu-latest
+    outputs:
+      required-tasks: ${{ steps.get-required-tasks.outputs.required-tasks || '[]' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Check out the entire git history for use with Turborepo's --affected flag
+          filter: blob:none # Blobless clones omit file contents whilst maintaining commit history, resulting in much faster checkouts
+
+      - name: Set Turborepo --affected SHAs
+        uses: ./.github/actions/set-turborepo-affected-shas
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: Get required tasks
+        id: get-required-tasks
+        run: |
+          REQUIRED_TASKS=$(pnpx turbo --dry=json --affected ${{ inputs.task }} | jq -c --arg task "${{ inputs.task }}" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and .task == $task) | .taskId]')
+
+          echo "required-tasks=$REQUIRED_TASKS" >> $GITHUB_OUTPUT
+
+      - name: Output required tasks
+        run: |
+          echo "Required tasks: ${{ steps.get-required-tasks.outputs.required-tasks }}"
+
+  run-turbo-task:
+    name: Run ${{ inputs.task }}
+    needs: get-required-tasks
+    if: needs.get-required-tasks.outputs.required-tasks != '[]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up project environment
+        uses: ./.github/actions/set-up-project-environment
+
+      - name: Set Turborepo --affected SHAs
+        uses: ./.github/actions/set-turborepo-affected-shas
+
+      - name: Set up verification runner
+        uses: ./.github/actions/set-up-verification-runner
+        with:
+          install-fuse: ${{ contains(fromJson(inputs.runner-requirements || '[]'), 'fuse') }}
+          install-redis-server: ${{ contains(fromJson(inputs.runner-requirements || '[]'), 'redis-server') }}
+
+      - name: Run ${{ inputs.task }}
+        run: pnpm turbo ${{ join(fromJson(needs.get-required-tasks.outputs.required-tasks), ' ') }} --continue --concurrency ${{ inputs.concurrency }}
+
+      - uses: charpeni/turborepo-summary-action@v1
+        if: always()
+
+  success:
+    name: Success
+    needs: run-turbo-task
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Verification failed
+        if: contains(fromJson('["failure", "cancelled"]'), needs.run-turbo-task.result)
+        run: exit 1

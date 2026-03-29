@@ -1,3 +1,4 @@
+import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { HttpResponse, http } from "msw";
@@ -5,7 +6,10 @@ import assert from "node:assert";
 import { expect } from "vitest";
 
 import { TestAPI } from "../../datasource/test.datasource.ts";
+import plugin from "../../index.ts";
 import { pluginConfig } from "../../test-plugin.config.ts";
+
+it.override("plugin", plugin);
 
 it('returns the validation status when calling "testIsValid" query', async ({
   gqlServer,
@@ -27,13 +31,18 @@ it('returns the validation status when calling "testIsValid" query', async ({
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new TestAPI({
-            ...dataSourceConfig,
-            pluginSymbol: Symbol("@repo/plugin-test"),
-            settings: {
-              apiKey: "",
-            },
-          }),
+          dataSources: new DataSourceMap([
+            [
+              TestAPI,
+              new TestAPI({
+                ...dataSourceConfig,
+                pluginSymbol: pluginConfig.name,
+                settings: {
+                  apiKey: "",
+                },
+              }),
+            ],
+          ]),
         },
       },
     },

@@ -1,21 +1,19 @@
+import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
-import { HttpResponse, http } from "msw";
 import assert from "node:assert";
 import { expect } from "vitest";
 
 import { PlexAPI } from "../../datasource/plex.datasource.ts";
+import plugin from "../../index.ts";
 import { pluginConfig } from "../../plex-plugin.config.ts";
+
+it.override("plugin", plugin);
 
 it('returns the validation status when calling "plexIsValid" query', async ({
   gqlServer,
   dataSourceConfig,
-  server,
 }) => {
-  server.use(
-    http.get("**/validate", () => HttpResponse.json({ success: true })),
-  );
-
   const { body } = await gqlServer.executeOperation(
     {
       query: `
@@ -27,15 +25,20 @@ it('returns the validation status when calling "plexIsValid" query', async ({
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new PlexAPI({
-            ...dataSourceConfig,
-            pluginSymbol: Symbol("@repo/plugin-plex"),
-            settings: {
-              plexLibraryPath: "",
-              plexServerUrl: "",
-              plexToken: "",
-            },
-          }),
+          dataSources: new DataSourceMap([
+            [
+              PlexAPI,
+              new PlexAPI({
+                ...dataSourceConfig,
+                pluginSymbol: pluginConfig.name,
+                settings: {
+                  plexLibraryPath: "",
+                  plexServerUrl: "",
+                  plexToken: "",
+                },
+              }),
+            ],
+          ]),
         },
       },
     },

@@ -10,6 +10,7 @@ import {
   getApiListMoviesIdSortbySortbydirectionPageHandler as getMoviesHandler,
   createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse as getMoviesResponse,
 } from "../../__generated__/index.ts";
+import { pluginConfig } from "../../listrr-plugin.config.ts";
 import { ListrrAPI } from "../listrr.datasource.ts";
 
 it("returns an empty array if no content lists are provided", async ({
@@ -17,7 +18,7 @@ it("returns an empty array if no content lists are provided", async ({
 }) => {
   const listrrApi = new ListrrAPI({
     ...dataSourceConfig,
-    pluginSymbol: Symbol("@repo/plugin-listrr"),
+    pluginSymbol: pluginConfig.name,
     settings: {
       apiKey: "",
       movieLists: [],
@@ -63,7 +64,7 @@ it("retrieves movies from each provided list", async ({
 
   const listrrApi = new ListrrAPI({
     ...dataSourceConfig,
-    pluginSymbol: Symbol("@repo/plugin-listrr"),
+    pluginSymbol: pluginConfig.name,
     settings: {
       apiKey: "",
       movieLists: [],
@@ -111,7 +112,7 @@ it("paginates through all pages of the list", async ({
 
   const listrrApi = new ListrrAPI({
     ...dataSourceConfig,
-    pluginSymbol: Symbol("@repo/plugin-listrr"),
+    pluginSymbol: pluginConfig.name,
     settings: {
       apiKey: "",
       movieLists: [],
@@ -154,7 +155,7 @@ it("dedupes movies that appear in multiple lists", async ({
 
   const listrrApi = new ListrrAPI({
     ...dataSourceConfig,
-    pluginSymbol: Symbol("@repo/plugin-listrr"),
+    pluginSymbol: pluginConfig.name,
     settings: {
       apiKey: "",
       movieLists: [],

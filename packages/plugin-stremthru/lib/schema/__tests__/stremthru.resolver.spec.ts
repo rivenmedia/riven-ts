@@ -1,3 +1,4 @@
+import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { HttpResponse, http } from "msw";
@@ -5,7 +6,10 @@ import assert from "node:assert";
 import { expect } from "vitest";
 
 import { StremThruAPI } from "../../datasource/stremthru.datasource.ts";
+import plugin from "../../index.ts";
 import { pluginConfig } from "../../stremthru-plugin.config.ts";
+
+it.override("plugin", plugin);
 
 it('returns the validation status when calling "stremthruIsValid" query', async ({
   gqlServer,
@@ -13,27 +17,33 @@ it('returns the validation status when calling "stremthruIsValid" query', async 
   dataSourceConfig,
 }) => {
   server.use(
-    http.get("**/validate", () => HttpResponse.json({ success: true })),
+    http.get("**/v0/torznab/api", () => HttpResponse.json({ success: true })),
   );
 
   const { body } = await gqlServer.executeOperation(
     {
       query: `
         query StremThruIsValid {
-          stremThruIsValid
+          stremthruIsValid
         }
       `,
     },
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new StremThruAPI({
-            ...dataSourceConfig,
-            pluginSymbol: Symbol("@repo/plugin-stremthru"),
-            settings: {
-              stremThruUrl: "https://stremthru.13377001.xyz/",
-            },
-          }),
+          dataSources: new DataSourceMap([
+            [
+              StremThruAPI,
+              new StremThruAPI({
+                ...dataSourceConfig,
+                pluginSymbol: pluginConfig.name,
+                settings: {
+                  stremThruUrl: "https://stremthru.13377001.xyz/",
+                  realdebridApiKey: "1234",
+                },
+              }),
+            ],
+          ]),
         },
       },
     },
@@ -42,5 +52,5 @@ it('returns the validation status when calling "stremthruIsValid" query', async 
   assert(body.kind === "single");
 
   expect(body.singleResult.errors).toBeUndefined();
-  expect(body.singleResult.data?.["stremThruIsValid"]).toBe(true);
+  expect(body.singleResult.data?.["stremthruIsValid"]).toBe(true);
 });

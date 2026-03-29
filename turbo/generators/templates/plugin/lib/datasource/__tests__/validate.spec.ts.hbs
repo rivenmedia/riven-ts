@@ -19,6 +19,7 @@ it("returns false if the request fails", async ({
     pluginSymbol: pluginConfig.name,
     settings: {},
   });
+
   const isValid = await {{camelCase pluginName}}Api.validate();
 
   expect(isValid).toBe(false);
@@ -37,6 +38,7 @@ it("returns true if the request succeeds", async ({
     pluginSymbol: pluginConfig.name,
     settings: {},
   });
+
   const isValid = await {{camelCase pluginName}}Api.validate();
 
   expect(isValid).toBe(true);

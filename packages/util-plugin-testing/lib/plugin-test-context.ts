@@ -1,17 +1,23 @@
 /* eslint-disable no-empty-pattern */
+import assert from "node:assert";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { expect, test as testBase } from "vitest";
 
 import { mockLogger } from "./create-mock-logger.ts";
 
+import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { Telemetry } from "bullmq";
 
 export const it = testBase
-  .extend("gqlServer", async ({}, { onCleanup }) => {
+  .extend("plugin", undefined as RivenPlugin | undefined)
+  .extend("gqlServer", async ({ plugin }, { onCleanup }) => {
+    assert(plugin, "Plugin instance must be provided to use gqlServer context");
+
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");
-    const mockServer = await buildMockServer();
+
+    const mockServer = await buildMockServer(plugin.resolvers);
 
     await mockServer.start();
 
@@ -19,7 +25,7 @@ export const it = testBase
 
     return mockServer;
   })
-  .extend("redisUrl", {}, async ({}, { onCleanup }) => {
+  .extend("redisUrl", async ({}, { onCleanup }) => {
     const { RedisMemoryServer } = await import("redis-memory-server");
 
     try {
@@ -45,12 +51,7 @@ export const it = testBase
       );
     }
   })
-  .extend("httpCache", {}, async () => {
-    const { InMemoryLRUCache } = await import("@apollo/utils.keyvaluecache");
-
-    return new InMemoryLRUCache();
-  })
-  .extend("server", {}, async ({}, { onCleanup }) => {
+  .extend("server", async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
     const server = setupServer();
@@ -86,14 +87,16 @@ export const it = testBase
   })
   .extend("logger", mockLogger)
   .extend("telemetry", undefined as unknown as Telemetry)
-  .extend("dataSourceConfig", ({ httpCache, redisUrl, logger, telemetry }) => {
+  .extend("dataSourceConfig", async ({ redisUrl, logger, telemetry }) => {
+    const { InMemoryLRUCache } = await import("@apollo/utils.keyvaluecache");
+
     return {
-      cache: httpCache,
+      cache: new InMemoryLRUCache(),
       connection: {
         url: redisUrl,
       },
       logger,
-      pluginSymbol: Symbol.for(""),
+      pluginSymbol: Symbol.for("@repo/util-plugin-testing"),
       telemetry,
       requestAttempts: 1,
     };
