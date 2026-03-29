@@ -46,6 +46,11 @@ jobs:
         run: |
           TURBO_VERSION=$(pnpm why turbo --json | jq -r '.[] | select(.devDependencies.turbo) | .devDependencies.turbo.version')
 
+          if [ -z "$TURBO_VERSION" ]; then
+            echo "::error::Failed to detect turbo version"
+            exit 1
+          fi
+
           echo "version=$TURBO_VERSION" >> $GITHUB_OUTPUT
 
       - name: Get required tasks
