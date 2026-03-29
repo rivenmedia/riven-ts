@@ -41,10 +41,18 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v5
 
+      - name: Get installed turbo version
+        id: get-installed-turbo-version
+        run: |
+          TURBO_VERSION=$(pnpm why turbo --json | jq -r '.[] | select(.devDependencies.turbo) | .devDependencies.turbo.version')
+
+          echo "version=$TURBO_VERSION" >> $GITHUB_OUTPUT
+
       - name: Get required tasks
         id: get-required-tasks
         run: |
-          REQUIRED_TASKS=$(pnpx turbo --dry=json --affected ${{ inputs.task }} | jq -c --arg task "${{ inputs.task }}" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and .task == $task) | .taskId]')
+          DRY_RUN_OUTPUT=$(pnpx turbo@${{ steps.get-installed-turbo-version.outputs.version }} --dry=json --affected ${{ inputs.task }})
+          REQUIRED_TASKS=$(echo "$DRY_RUN_OUTPUT" | jq -c --arg task "${{ inputs.task }}" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and .task == $task) | .taskId]')
 
           echo "required-tasks=$REQUIRED_TASKS" >> $GITHUB_OUTPUT
 
