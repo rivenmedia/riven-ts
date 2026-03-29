@@ -1,4 +1,4 @@
-name: Setup verification runner
+name: Set up verification runner
 
 description: |
   Sets up the runner for a verification job.

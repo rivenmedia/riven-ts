@@ -1,4 +1,4 @@
-name: Setup Turborepo --affected SHAs
+name: Set Turborepo --affected SHAs
 
 description: Sets the environment variable(s) needed for Turborepo's --affected flag to work
 

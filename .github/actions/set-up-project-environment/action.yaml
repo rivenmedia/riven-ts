@@ -1,6 +1,6 @@
-name: Setup project environment
+name: Set up project environment
 
-description: Setup Node.js environment and install dependencies for the project
+description: Sets up the Node.js environment and installs dependencies for the project
 
 runs:
   using: composite

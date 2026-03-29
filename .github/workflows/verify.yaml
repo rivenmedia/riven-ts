@@ -42,14 +42,14 @@ jobs:
           fetch-depth: 0 # Check out the entire git history for use with Turborepo's --affected flag
           filter: blob:none # Blobless clones omit file contents whilst maintaining commit history, resulting in much faster checkouts
 
-      - name: Setup project environment
-        uses: ./.github/actions/setup-project-environment
+      - name: Set up project environment
+        uses: ./.github/actions/set-up-project-environment
 
-      - name: Setup Turborepo --affected SHAs
-        uses: ./.github/actions/setup-turborepo-affected-shas
+      - name: Set Turborepo --affected SHAs
+        uses: ./.github/actions/set-turborepo-affected-shas
 
-      - name: Setup verification runner
-        uses: ./.github/actions/setup-verification-runner
+      - name: Set up verification runner
+        uses: ./.github/actions/set-up-verification-runner
         with:
           install-fuse: ${{ contains(matrix.task.runner-requirements, 'fuse') }}
           install-redis-server: ${{ contains(matrix.task.runner-requirements, 'redis-server') }}
