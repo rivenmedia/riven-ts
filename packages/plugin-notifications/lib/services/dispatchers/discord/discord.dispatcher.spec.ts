@@ -21,7 +21,9 @@ const mockService = {
 it.override(
   "settings",
   createMockPluginSettings(NotificationsSettings, {
-    urls: [`discord://${mockService.webhookId}/${mockService.webhookToken}`],
+    urls: JSON.stringify([
+      `discord://${mockService.webhookId}/${mockService.webhookToken}`,
+    ]),
   }),
 );
 

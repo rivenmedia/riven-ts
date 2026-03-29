@@ -13,7 +13,7 @@ describe("json://", () => {
   it.override(
     "settings",
     createMockPluginSettings(NotificationsSettings, {
-      urls: ["json://example.com/webhook"],
+      urls: JSON.stringify(["json://example.com/webhook"]),
     }),
   );
 
@@ -53,7 +53,7 @@ describe("jsons://", () => {
   it.override(
     "settings",
     createMockPluginSettings(NotificationsSettings, {
-      urls: ["jsons://example.com/webhook"],
+      urls: JSON.stringify(["jsons://example.com/webhook"]),
     }),
   );
 

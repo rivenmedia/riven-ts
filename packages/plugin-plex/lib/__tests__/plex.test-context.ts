@@ -10,7 +10,7 @@ export const it: typeof pluginTestContext = pluginTestContext
     "settings",
     createMockPluginSettings(PlexSettings, {
       plexLibraryPath: "plex-library-path",
-      plexServerUrl: "plex-server-url",
+      plexServerUrl: "http://localhost:32400",
       plexToken: "plex-token",
     }),
   );

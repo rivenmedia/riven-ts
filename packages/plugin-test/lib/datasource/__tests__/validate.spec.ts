@@ -1,8 +1,7 @@
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
+import { it } from "../../__tests__/test.test-context.ts";
 import { TestAPI } from "../test.datasource.ts";
 
 it("returns false if the request fails", async ({ server, dataSourceMap }) => {
