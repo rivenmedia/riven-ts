@@ -1,16 +1,13 @@
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
 import { HttpResponse, http } from "msw";
 import assert from "node:assert";
 import { expect } from "vitest";
 
-import { pluginConfig } from "../../comet-plugin.config.ts";
-import { CometAPI } from "../../datasource/comet.datasource.ts";
+import { it } from "../../__tests__/comet.test-context.ts";
 
 it('returns the validation status when calling "cometIsValid" query', async ({
+  gqlContext,
   gqlServer,
   server,
-  dataSourceConfig,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
@@ -24,19 +21,7 @@ it('returns the validation status when calling "cometIsValid" query', async ({
         }
       `,
     },
-    {
-      contextValue: {
-        [pluginConfig.name]: {
-          api: new CometAPI({
-            ...dataSourceConfig,
-            pluginSymbol: pluginConfig.name,
-            settings: {
-              url: "http://localhost",
-            },
-          }),
-        },
-      },
-    },
+    { contextValue: gqlContext },
   );
 
   assert(body.kind === "single");

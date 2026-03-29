@@ -1,43 +1,63 @@
 {
-  "$schema": "https://turborepo.com/schema.json",
+  "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
   "globalEnv": ["NODE_ENV"],
-  "globalPassThroughEnv": ["DEBUG"],
+  "globalPassThroughEnv": ["DEBUG", "CI"],
+  "globalDependencies": [
+    ".github/actions/**/*.yaml",
+    ".github/workflows/*.yaml",
+    ".node-version"
+  ],
   "tasks": {
     "transit": {
       "dependsOn": ["^transit"]
     },
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**"]
-    },
     "check-types": {
-      "dependsOn": ["codegen", "transit"]
+      "dependsOn": ["generate-schemas", "transit"],
+      "inputs": [
+        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data}/**"
+      ]
     },
     "dev": {
       "persistent": true,
       "cache": false,
-      "dependsOn": ["codegen"]
-    },
-    "generate-schemas": {
-      "outputs": ["lib/__generated__/**"],
-      "inputs": ["openapi-schema.json", "openapi-schema.yaml", "*.apib"]
+      "dependsOn": ["generate-schemas"]
     },
     "generate-config-docs": {
       "inputs": ["**/*-settings.schema.ts", "zod2md.config.ts"],
       "outputs": ["docs/*.md"]
     },
-    "codegen": {
-      "dependsOn": ["generate-schemas", "^generate-schemas"]
+    "generate-schemas": {
+      "dependsOn": ["^generate-schemas"],
+      "outputs": ["lib/__generated__/**"],
+      "inputs": ["openapi-schema.{json,yaml}", "kubb.config.ts", "*.apib"]
     },
     "test": {
-      "dependsOn": ["codegen"]
+      "dependsOn": ["generate-schemas", "transit"],
+      "inputs": [
+        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data}/**",
+        "!*.md"
+      ]
     },
     "test:watch": {
       "persistent": true,
-      "dependsOn": ["codegen"]
+      "dependsOn": ["generate-schemas"]
     },
-    "lint": {},
-    "lint:fix": {}
+    "lint": {
+      "dependsOn": ["generate-schemas"],
+      "inputs": [
+        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data}/**"
+      ]
+    },
+    "lint:fix": {},
+    "//#format:check:ci": {
+      "inputs": [
+        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql,.md,.markdown,.mdx}",
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data}/**"
+      ]
+    }
   }
 }

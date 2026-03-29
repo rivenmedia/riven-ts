@@ -1,65 +1,37 @@
-import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
+import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { parse } from "@repo/util-rank-torrent-name";
 
-import * as Sentry from "@sentry/node";
-import { Job } from "bullmq";
-import { DateTime, Settings } from "luxon";
+import { faker } from "@faker-js/faker";
 import { expect, vi } from "vitest";
 
-import { database } from "../../../database/database.ts";
-import { createQueue } from "../../utilities/create-queue.ts";
+import { it } from "../../../__tests__/test-context.ts";
 import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 
-import type { ScrapeItemFlow } from "./scrape-item.schema.ts";
-
-it("throws an unrecoverable error if the item cannot be scraped", async () => {
-  const sendEvent = vi.fn();
-
-  const mockQueue = createQueue("mock-queue");
-  const job: Parameters<ScrapeItemFlow["processor"]>[0]["job"] =
-    await Job.create(mockQueue, "mock-scrape-item", { id: 1 });
+it("throws an unrecoverable error if the item cannot be scraped", async ({
+  createMockJob,
+  mockSentryScope,
+}) => {
+  const job = await createMockJob({ id: 1 });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
   await expect(() =>
-    scrapeItemProcessor({ job, scope: new Sentry.Scope() }, sendEvent),
+    scrapeItemProcessor({ job, scope: mockSentryScope }, vi.fn()),
   ).rejects.toThrow();
 });
 
 it.todo("throws an unrecoverable if no new streams were found");
 
-it('sends a "riven.media-item.scrape.success" event with the updated item if the scrape is successful', async () => {
-  const sendEvent = vi.fn();
+it('sends a "riven.media-item.scrape.success" event with the updated item if the scrape is successful', async ({
+  seeders: { seedIndexedMovie },
+  createMockJob,
+  mockSentryScope,
+}) => {
+  await seedIndexedMovie();
 
-  vi.spyOn(Settings, "now").mockReturnValue(10000);
+  const job = await createMockJob({ id: 1 });
 
-  const mockQueue = createQueue("mock-queue");
-  const job: Parameters<ScrapeItemFlow["processor"]>[0]["job"] =
-    await Job.create(mockQueue, "mock-scrape-item", { id: 1 });
-
-  const em = database.orm.em.fork();
-
-  const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
-    state: "completed",
-    type: "movie",
-  });
-
-  em.create(Movie, {
-    id: 1,
-    tmdbId: "123",
-    contentRating: "g",
-    title: "Test Movie",
-    year: 2024,
-    itemRequest,
-    isRequested: true,
-    releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
-  });
-
-  await em.flush();
-
-  const streamInfoHash = "1234567890123456789012345678901234567890";
+  const streamInfoHash = faker.git.commitSha();
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
@@ -70,11 +42,19 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
     },
   });
 
-  await scrapeItemProcessor({ job, scope: new Sentry.Scope() }, sendEvent);
+  const sendEvent = vi.fn();
+
+  await scrapeItemProcessor(
+    {
+      job,
+      scope: mockSentryScope,
+    },
+    sendEvent,
+  );
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.scrape.success",
-    item: expect.any(Movie) as Movie,
+    item: expect.any(Movie),
   });
 });
 

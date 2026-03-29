@@ -1,28 +1,16 @@
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
-import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { pluginConfig } from "../../tvdb-plugin.config.ts";
+import {
+  postLoginHandler,
+  postLoginHandlerResponse401,
+} from "../../__generated__/index.ts";
+import { it } from "../../__tests__/tvdb.test-context.ts";
 import { TvdbAPI } from "../tvdb.datasource.ts";
 
-it("returns false if the request fails", async ({
-  server,
-  dataSourceConfig,
-}) => {
-  server.use(
-    http.get("**/validate", () =>
-      HttpResponse.json({ success: false }, { status: 401 }),
-    ),
-  );
+it("returns false if the request fails", async ({ server, dataSourceMap }) => {
+  server.use(postLoginHandler(postLoginHandlerResponse401));
 
-  const tvdbApi = new TvdbAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      apiKey: "",
-    },
-  });
+  const tvdbApi = dataSourceMap.get(TvdbAPI);
   const isValid = await tvdbApi.validate();
 
   expect(isValid).toBe(false);
@@ -30,19 +18,11 @@ it("returns false if the request fails", async ({
 
 it("returns true if the request succeeds", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
-  server.use(
-    http.get("**/validate", () => HttpResponse.json({ success: true })),
-  );
+  server.use(postLoginHandler({ data: { token: "mock-token" } }));
 
-  const tvdbApi = new TvdbAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      apiKey: "",
-    },
-  });
+  const tvdbApi = dataSourceMap.get(TvdbAPI);
   const isValid = await tvdbApi.validate();
 
   expect(isValid).toBe(true);

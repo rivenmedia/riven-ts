@@ -1,4 +1,3 @@
-import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
@@ -6,14 +5,16 @@ import { ref } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
-import { rivenTestContext as it } from "../../../../__tests__/test-context.ts";
+import { it } from "../../../../__tests__/test-context.ts";
 import { MatchedFile } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { persistDownloadResults } from "./persist-download-results.ts";
 
-it("throws an error if the media item has no streams", async ({ movie }) => {
+it("throws an error if the media item has no streams", async ({
+  indexedMovieContext: { indexedMovie },
+}) => {
   await expect(
     persistDownloadResults({
-      id: movie.id,
+      id: indexedMovie.id,
       processedBy: "@repo/plugin-test",
       torrent: {
         infoHash: "1234567890123456789012345678901234567890",
@@ -24,37 +25,36 @@ it("throws an error if the media item has no streams", async ({ movie }) => {
             link: "http://example.com/file.mp4",
             name: "file.mp4",
             path: "/file.mp4",
-            matchedMediaItemId: movie.id,
+            matchedMediaItemId: indexedMovie.id,
             isCachedFile: false,
           },
         ],
         torrentId: "1",
       },
     }),
-  ).rejects.toThrow(UnrecoverableError);
+  ).rejects.toThrow(
+    new UnrecoverableError(
+      `No media item found with ID ${indexedMovie.id.toString()} and stream info hash 1234567890123456789012345678901234567890`,
+    ),
+  );
 });
 
 it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in the scraped or ongoing state", async ({
-  movie,
-  stream,
+  completedMovieContext: { completedMovie },
+  factories: { streamFactory },
   em,
 }) => {
-  movie.streams.add(stream);
-  movie.filesystemEntries.add(
-    em.create(MediaEntry, {
-      fileSize: 1024,
-      downloadUrl: "http://example.com/file.mp4",
-      originalFilename: "file.mp4",
-      plugin: "@repo/plugin-test",
-      mediaItem: movie,
-    }),
-  );
+  const stream = streamFactory.makeEntity();
 
-  await em.persist(movie).flush();
+  em.persist(completedMovie);
+
+  completedMovie.streams.add(stream);
+
+  await em.flush();
 
   await expect(
     persistDownloadResults({
-      id: movie.id,
+      id: completedMovie.id,
       processedBy: "@repo/plugin-test",
       torrent: {
         torrentId: "1",
@@ -66,7 +66,7 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
             link: "http://example.com/file.mp4",
             name: "file.mp4",
             path: "/file.mp4",
-            matchedMediaItemId: movie.id,
+            matchedMediaItemId: completedMovie.id,
             isCachedFile: false,
           },
         ],
@@ -76,16 +76,14 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
 });
 
 it("sets the active stream and updates the state to completed if successful", async ({
-  movie,
-  stream,
-  em,
+  scrapedMovieContext: { scrapedMovie },
 }) => {
-  movie.streams.add(stream);
+  const [stream] = await scrapedMovie.streams.load();
 
-  await em.persist(movie).flush();
+  expect.assert(stream);
 
   const updatedItem = await persistDownloadResults({
-    id: movie.id,
+    id: scrapedMovie.id,
     processedBy: "@repo/plugin-test",
     torrent: {
       torrentId: "1",
@@ -97,7 +95,7 @@ it("sets the active stream and updates the state to completed if successful", as
           link: "http://example.com/file.mp4",
           name: "file.mp4",
           path: "/file.mp4",
-          matchedMediaItemId: movie.id,
+          matchedMediaItemId: scrapedMovie.id,
           isCachedFile: false,
         },
       ],
@@ -108,13 +106,15 @@ it("sets the active stream and updates the state to completed if successful", as
   expect(updatedItem.state).toBe("completed");
 });
 
-it("adds a single media entry for movies", async ({ movie, em, stream }) => {
-  movie.streams.add(stream);
+it("adds a single media entry for movies", async ({
+  scrapedMovieContext: { scrapedMovie },
+}) => {
+  const [stream] = await scrapedMovie.streams.load();
 
-  await em.persist(movie).flush();
+  expect.assert(stream);
 
   await persistDownloadResults({
-    id: movie.id,
+    id: scrapedMovie.id,
     processedBy: "@repo/plugin-test",
     torrent: {
       torrentId: "1",
@@ -126,31 +126,30 @@ it("adds a single media entry for movies", async ({ movie, em, stream }) => {
           link: "http://example.com/file.mp4",
           name: "file.mp4",
           path: "/file.mp4",
-          matchedMediaItemId: movie.id,
+          matchedMediaItemId: scrapedMovie.id,
           isCachedFile: false,
         },
       ],
     },
   });
 
-  const mediaEntries = await movie.getMediaEntries();
+  const mediaEntries = await scrapedMovie.getMediaEntries();
 
   expect(mediaEntries).toHaveLength(1);
 });
 
 it("adds one media entry per episode for shows", async ({
-  show,
-  em,
-  stream,
+  scrapedShowContext: {
+    scrapedShow,
+    streams: [stream],
+  },
 }) => {
-  show.streams.add(stream);
+  const episodes = await scrapedShow.getEpisodes();
 
-  await em.persist(show).flush();
-
-  const episodes = await show.getEpisodes();
+  expect.assert(stream);
 
   await persistDownloadResults({
-    id: show.id,
+    id: scrapedShow.id,
     processedBy: "@repo/plugin-test",
     torrent: {
       torrentId: "1",
@@ -167,7 +166,7 @@ it("adds one media entry per episode for shows", async ({
     },
   });
 
-  const updatedEpisodes = await show.getEpisodes();
+  const updatedEpisodes = await scrapedShow.getEpisodes();
 
   for (const episode of updatedEpisodes) {
     const mediaEntries = await episode.getMediaEntries();
@@ -177,26 +176,30 @@ it("adds one media entry per episode for shows", async ({
 });
 
 it("does not create duplicate media entries for episodes with existing entries", async ({
-  show,
-  season,
+  scrapedShowContext: {
+    scrapedShow,
+    streams: [stream],
+    episodes: [episode],
+  },
   em,
-  stream,
-  mediaEntry,
+  factories: { mediaEntryFactory },
 }) => {
-  show.streams.add(stream);
-
-  const [episode] = season.episodes;
-
+  expect.assert(stream);
   expect.assert(episode);
 
-  mediaEntry.mediaItem = ref(episode);
+  em.persist(episode);
+  em.persist(scrapedShow);
 
-  episode.filesystemEntries.add(mediaEntry);
+  episode.filesystemEntries.add(
+    mediaEntryFactory.makeOne({
+      mediaItem: ref(episode),
+    }),
+  );
 
-  await em.persist(show).flush();
+  await em.flush();
 
   await persistDownloadResults({
-    id: show.id,
+    id: scrapedShow.id,
     processedBy: "@repo/plugin-test",
     torrent: {
       torrentId: "1",
@@ -221,13 +224,12 @@ it("does not create duplicate media entries for episodes with existing entries",
 });
 
 it("throws a MediaItemDownloadError if a validation error occurs during persistence", async ({
-  movie,
-  em,
-  stream,
+  scrapedMovieContext: {
+    scrapedMovie,
+    streams: [stream],
+  },
 }) => {
-  movie.streams.add(stream);
-
-  await em.persist(movie).flush();
+  expect.assert(stream);
 
   vi.spyOn(
     await import("class-validator"),
@@ -236,7 +238,7 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
 
   await expect(
     persistDownloadResults({
-      id: movie.id,
+      id: scrapedMovie.id,
       processedBy: "@repo/plugin-test",
       torrent: {
         torrentId: "1",
@@ -248,7 +250,7 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
             link: "http://example.com/file.mp4",
             name: "file.mp4",
             path: "/file.mp4",
-            matchedMediaItemId: movie.id,
+            matchedMediaItemId: scrapedMovie.id,
             isCachedFile: false,
           },
         ],

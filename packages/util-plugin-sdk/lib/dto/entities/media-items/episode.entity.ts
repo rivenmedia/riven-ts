@@ -32,9 +32,6 @@ export class Episode extends ShowLikeMediaItem {
   season!: Opt<Ref<Season>>;
 
   @Property()
-  isSpecial!: boolean;
-
-  @Property()
   runtime!: number | null;
 
   @Field(() => ShowContentRatingEnum)
@@ -74,9 +71,7 @@ export class Episode extends ShowLikeMediaItem {
 
   getMediaEntries() {
     return this.filesystemEntries.matching<MediaEntry>({
-      where: {
-        type: "media",
-      },
+      where: { type: "media" },
       refresh: true,
     });
   }

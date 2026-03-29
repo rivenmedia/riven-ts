@@ -5,5 +5,5 @@ export default buildKubbConfig({
     path: "./openapi-schema.yaml",
   },
   name: "Seerr",
-  baseURL: "http://localhost:5055",
+  baseURL: "http://localhost:5055/api/v1",
 });

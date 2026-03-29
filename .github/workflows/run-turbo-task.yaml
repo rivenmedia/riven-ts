@@ -1,0 +1,127 @@
+name: Run turbo task
+
+on:
+  workflow_call:
+    inputs:
+      task:
+        description: The name of the turbo task to run
+        type: string
+        required: true
+      concurrency:
+        description: The concurrency level to use when running the turbo task
+        type: string
+        required: true
+      runner-requirements:
+        description: A list of requirements for the verification runner
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  TURBO_RUN_SUMMARY: 1
+  DO_NOT_TRACK: true # Disable Turborepo telemetry - https://turborepo.dev/docs/telemetry
+
+jobs:
+  get-required-tasks:
+    name: Check if required
+    runs-on: ubuntu-latest
+    outputs:
+      required-tasks: ${{ steps.get-required-tasks.outputs.required-tasks || '[]' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Check out the entire git history for use with Turborepo's --affected flag
+          filter: blob:none # Blobless clones omit file contents whilst maintaining commit history, resulting in much faster checkouts
+
+      - name: Set Turborepo --affected SHAs
+        uses: ./.github/actions/set-turborepo-affected-shas
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: Get turbo version
+        id: get-turbo-version
+        uses: mikefarah/yq@v4
+        with:
+          cmd: yq '.importers["."].devDependencies.turbo.version' 'pnpm-lock.yaml'
+
+      - name: Get required tasks
+        id: get-required-tasks
+        run: |
+          if [ "$TURBO_VERSION" = "null" ]; then
+            echo "::error::Failed to detect turbo version"
+            exit 1
+          fi
+
+          case "$TASK" in
+            (""|*[!A-Za-z0-9:_-]*)
+              echo "::error::Invalid turbo task: $TASK"
+              exit 1
+              ;;
+          esac
+
+          DRY_RUN_OUTPUT=$(pnpx "turbo@${TURBO_VERSION}" --dry=json --affected "$TASK")
+          REQUIRED_TASKS=$(jq -c --arg task "$TASK" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and .task == $task) | .taskId]' <<<"$DRY_RUN_OUTPUT")
+
+          echo "required-tasks=$REQUIRED_TASKS" >> $GITHUB_OUTPUT
+        env:
+          TASK: ${{ inputs.task }}
+          TURBO_VERSION: ${{ steps.get-turbo-version.outputs.result }}
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+
+      - name: Output required tasks
+        run: |
+          echo "Required tasks: ${{ steps.get-required-tasks.outputs.required-tasks }}"
+
+  run-turbo-task:
+    name: Run ${{ inputs.task }}
+    needs: get-required-tasks
+    if: needs.get-required-tasks.outputs.required-tasks != '[]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up project environment
+        uses: ./.github/actions/set-up-project-environment
+
+      - name: Set Turborepo --affected SHAs
+        uses: ./.github/actions/set-turborepo-affected-shas
+
+      - name: Set up verification runner
+        uses: ./.github/actions/set-up-verification-runner
+        with:
+          install-fuse: ${{ contains(fromJson(inputs.runner-requirements || '[]'), 'fuse') }}
+          install-redis-server: ${{ contains(fromJson(inputs.runner-requirements || '[]'), 'redis-server') }}
+
+      - name: Run ${{ inputs.task }}
+        run: |
+          [[ "$CONCURRENCY" =~ ^[0-9]+%?$ ]] || {
+            echo "::error::Invalid concurrency: $CONCURRENCY"
+            exit 1
+          }
+
+          pnpm turbo ${{ join(fromJson(needs.get-required-tasks.outputs.required-tasks), ' ') }} --continue --concurrency "$CONCURRENCY"
+        env:
+          CONCURRENCY: ${{ inputs.concurrency }}
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+
+      - uses: charpeni/turborepo-summary-action@v1
+        if: always()
+
+  success:
+    name: Success
+    needs:
+      - get-required-tasks
+      - run-turbo-task
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Verification failed
+        if: needs.get-required-tasks.result != 'success' || contains(fromJson('["failure", "cancelled"]'), needs.run-turbo-task.result)
+        run: exit 1

@@ -4,7 +4,7 @@ import { fromPromise, toPromise } from "xstate";
 
 import { it } from "./helpers/test-context.ts";
 
-it.scoped({
+it.override({
   initialiseDatabaseConnectionActorLogic: fromPromise(
     vi.fn().mockImplementation(async () => {
       // Simulate a delay to allow the other states to complete,

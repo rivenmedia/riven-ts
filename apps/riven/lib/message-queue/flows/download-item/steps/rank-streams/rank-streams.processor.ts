@@ -17,7 +17,6 @@ import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution
 
 export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
   async function ({ job }) {
-    const item = await database.mediaItem.findOneOrFail(job.data.id);
     const streams = await database.stream.find({
       infoHash: {
         $in: Object.keys(job.data.streams),
@@ -27,6 +26,8 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
     if (!streams.length) {
       return [];
     }
+
+    const item = await database.mediaItem.findOneOrFail(job.data.id);
 
     const { title: itemTitle, aliases } =
       item instanceof ShowLikeMediaItem ? await item.getShow() : item;

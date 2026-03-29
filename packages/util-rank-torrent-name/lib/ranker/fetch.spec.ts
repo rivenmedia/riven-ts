@@ -2,11 +2,9 @@ import { it as baseIt, describe, expect } from "vitest";
 
 import { parse } from "../parser/parse.ts";
 import { checkFetch } from "./fetch.ts";
-import { type Settings, createSettings } from "./settings.ts";
+import { createSettings } from "./settings.ts";
 
-const it = baseIt.extend<{ settings: Settings }>({
-  settings: createSettings(),
-});
+const it = baseIt.extend("settings", () => createSettings());
 
 it("accepts a standard 1080p BluRay", ({ settings }) => {
   const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");

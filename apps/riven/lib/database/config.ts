@@ -14,6 +14,7 @@ import {
 // eslint-disable-next-line no-restricted-imports -- Core database config requires direct driver access
 import { type Options, PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
+import { SeedManager } from "@mikro-orm/seeder";
 import * as Sentry from "@sentry/node";
 
 import { logger } from "../utilities/logger/logger.ts";
@@ -39,6 +40,7 @@ export const databaseConfig = {
   driver: PostgreSqlDriver,
   metadataProvider: TsMorphMetadataProvider,
   entities,
+  extensions: [SeedManager],
   clientUrl: settings.databaseUrl,
   logger: (message) => {
     Sentry.withScope((scope) => {
@@ -48,6 +50,9 @@ export const databaseConfig = {
 
       logger.verbose(message);
     });
+  },
+  seeder: {
+    pathTs: "./seeders",
   },
   subscribers: [
     new MediaItemFullTitleSubscriber(),

@@ -1,0 +1,20 @@
+name: Set up project environment
+
+description: Sets up the Node.js environment and installs dependencies for the project
+
+runs:
+  using: composite
+  steps:
+    - name: Install pnpm
+      uses: pnpm/action-setup@v5
+      with:
+        cache: true
+
+    - uses: actions/setup-node@v5
+      with:
+        node-version-file: .node-version
+        cache: pnpm
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install

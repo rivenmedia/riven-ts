@@ -81,7 +81,7 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
   override async validate() {
     try {
       // Implement your own validation logic here
-      await this.get("validate");
+      await this.get("v0/torznab/api");
 
       return true;
     } catch {
