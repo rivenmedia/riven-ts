@@ -9,6 +9,7 @@ on:
     types:
       - opened
       - synchronize
+      - ready_for_review
 
 concurrency:
   group: "verify-${{ github.event.pull_request.number }}"
