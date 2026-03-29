@@ -46,7 +46,7 @@ jobs:
       - name: Get required tasks
         id: get-required-tasks
         run: |
-          REQUIRED_TASKS=$(pnpx turbo --dry=json --affected ${{ inputs.task }} | jq --arg task "${{ inputs.task }}" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and .task == $task) | .taskId]')
+          REQUIRED_TASKS=$(pnpx turbo --dry=json --affected ${{ inputs.task }} | jq -c --arg task "${{ inputs.task }}" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and .task == $task) | .taskId]')
 
           echo "required-tasks=$REQUIRED_TASKS" >> $GITHUB_OUTPUT
 
