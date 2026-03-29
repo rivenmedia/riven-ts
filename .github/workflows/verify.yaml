@@ -37,6 +37,6 @@ jobs:
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
       task: ${{ matrix.task.task }}
-      concurrency: ${{ matrix.task.concurrency || 10 }}
+      concurrency: ${{ matrix.task.concurrency }}
       runner-requirements: ${{ toJson(matrix.task.runner-requirements) }}
     secrets: inherit
