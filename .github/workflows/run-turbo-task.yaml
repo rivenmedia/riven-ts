@@ -40,6 +40,8 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v5
+        with:
+          cache: true
 
       - name: Get installed turbo version
         id: get-installed-turbo-version
