@@ -36,7 +36,7 @@ it('returns the validation status when calling "testIsValid" query', async ({
               TestAPI,
               new TestAPI({
                 ...dataSourceConfig,
-                pluginSymbol: Symbol("@repo/plugin-test"),
+                pluginSymbol: pluginConfig.name,
                 settings: {
                   apiKey: "",
                 },

@@ -3,6 +3,7 @@ import { it } from "@repo/util-plugin-testing/plugin-test-context";
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
+import { pluginConfig } from "../../listrr-plugin.config.ts";
 import { ListrrAPI } from "../listrr.datasource.ts";
 
 it('assigns the API key to the "x-api-key" header', async ({
@@ -11,7 +12,7 @@ it('assigns the API key to the "x-api-key" header', async ({
 }) => {
   const listrrApi = new ListrrAPI({
     ...dataSourceConfig,
-    pluginSymbol: Symbol("@repo/plugin-listrr"),
+    pluginSymbol: pluginConfig.name,
     settings: {
       apiKey: "test-token",
       movieLists: [],

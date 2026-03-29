@@ -36,7 +36,7 @@ it('returns the validation status when calling "torrentioIsValid" query', async 
               TorrentioAPI,
               new TorrentioAPI({
                 ...dataSourceConfig,
-                pluginSymbol: Symbol("@repo/plugin-torrentio"),
+                pluginSymbol: pluginConfig.name,
                 settings: {
                   filter: "",
                 },

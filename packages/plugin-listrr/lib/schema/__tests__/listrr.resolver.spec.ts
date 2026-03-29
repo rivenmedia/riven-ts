@@ -9,6 +9,7 @@ import {
   type GetApiListMoviesIdSortbySortbydirectionPageQueryResponse,
   type GetApiListShowsIdSortbySortbydirectionPageQueryResponse,
   createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse,
+  createGetApiListMyPageQueryResponse,
   createGetApiListShowsIdSortbySortbydirectionPageQueryResponse,
   createListrrContractsModelsAPIMovieDto,
   createListrrContractsModelsAPIShowDto,
@@ -181,7 +182,11 @@ it('returns the user validation status when calling "listrrIsValid" query', asyn
   dataSourceConfig,
   server,
 }) => {
-  server.use(getApiListMyPageHandler());
+  server.use(
+    getApiListMyPageHandler(() =>
+      HttpResponse.json(createGetApiListMyPageQueryResponse()),
+    ),
+  );
 
   const { body } = await gqlServer.executeOperation(
     {

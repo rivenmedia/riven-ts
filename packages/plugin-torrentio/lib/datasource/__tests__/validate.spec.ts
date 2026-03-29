@@ -23,6 +23,7 @@ it("returns false if the request fails", async ({
       filter: "",
     },
   });
+
   const isValid = await torrentioApi.validate();
 
   expect(isValid).toBe(false);

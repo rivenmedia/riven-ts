@@ -3,6 +3,7 @@ import { it } from "@repo/util-plugin-testing/plugin-test-context";
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
+import { pluginConfig } from "../../test-plugin.config.ts";
 import { TestAPI } from "../test.datasource.ts";
 
 it("returns false if the request fails", async ({
@@ -17,9 +18,10 @@ it("returns false if the request fails", async ({
 
   const testApi = new TestAPI({
     ...dataSourceConfig,
-    pluginSymbol: Symbol("@repo/plugin-test"),
+    pluginSymbol: pluginConfig.name,
     settings: {},
   });
+
   const isValid = await testApi.validate();
 
   expect(isValid).toBe(false);
@@ -35,9 +37,10 @@ it("returns true if the request succeeds", async ({
 
   const testApi = new TestAPI({
     ...dataSourceConfig,
-    pluginSymbol: Symbol("@repo/plugin-test"),
+    pluginSymbol: pluginConfig.name,
     settings: {},
   });
+
   const isValid = await testApi.validate();
 
   expect(isValid).toBe(true);
