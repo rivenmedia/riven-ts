@@ -2,6 +2,10 @@ name: Verify
 
 run-name: "Verify PR #${{ github.event.pull_request.number }}"
 
+permissions:
+  contents: read
+  packages: read
+
 on:
   pull_request:
     branches:
