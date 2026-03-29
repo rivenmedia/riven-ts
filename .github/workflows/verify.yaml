@@ -16,22 +16,26 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify (${{ matrix.task.name }})
+    name: Verify - ${{ matrix.task.name }}
     strategy:
       fail-fast: false
       matrix:
         task:
-          - name: lint
-          - name: check-types
-          - name: //#format:check:ci
-          - name: test
+          - name: Lint
+            task: lint
+          - name: Types
+            task: check-types
+          - name: Formatting
+            task: format:check:ci
+          - name: Tests
+            task: test
             concurrency: "100%"
             runner-requirements:
               - redis-server
               - fuse
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
-      task: ${{ matrix.task.name }}
+      task: ${{ matrix.task.task }}
       concurrency: ${{ matrix.task.concurrency || 10 }}
       runner-requirements: ${{ toJson(matrix.task.runner-requirements) }}
     secrets: inherit
