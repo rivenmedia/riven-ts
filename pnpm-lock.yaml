@@ -621,9 +621,6 @@ importers:
       '@repo/core-util-vitest-config':
         specifier: workspace:^
         version: link:../util-vitest-config
-      '@repo/util-plugin-sdk':
-        specifier: workspace:^
-        version: link:../../util-plugin-sdk
       '@types/node':
         specifier: 'catalog:'
         version: 24.0.0

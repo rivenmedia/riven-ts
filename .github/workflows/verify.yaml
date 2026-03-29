@@ -24,20 +24,20 @@ jobs:
       matrix:
         task:
           - name: Linting
-            task: lint
+            command: lint
           - name: Types
-            task: check-types
+            command: check-types
           - name: Formatting
-            task: format:check:ci
+            command: format:check:ci
           - name: Tests
-            task: test
+            command: test
             concurrency: "100%"
             runner-requirements:
               - redis-server
               - fuse
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
-      task: ${{ matrix.task.task }}
-      concurrency: ${{ matrix.task.concurrency }}
-      runner-requirements: ${{ toJson(matrix.task.runner-requirements) }}
+      task: ${{ matrix.task.command }}
+      concurrency: ${{ matrix.task.concurrency || '10' }}
+      runner-requirements: ${{ toJson(matrix.task.runner-requirements || '[]') }}
     secrets: inherit

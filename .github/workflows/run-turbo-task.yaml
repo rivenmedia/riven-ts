@@ -10,13 +10,11 @@ on:
       concurrency:
         description: The concurrency level to use when running the turbo task
         type: string
-        required: false
-        default: "10"
+        required: true
       runner-requirements:
         description: A list of requirements for the verification runner
         type: string
-        required: false
-        default: ""
+        required: true
 
 env:
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}

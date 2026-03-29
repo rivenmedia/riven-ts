@@ -2,7 +2,7 @@
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
   "globalEnv": ["NODE_ENV"],
-  "globalPassThroughEnv": ["DEBUG"],
+  "globalPassThroughEnv": ["DEBUG", "CI"],
   "globalDependencies": [
     ".github/actions/**/*.yaml",
     ".github/workflows/*.yaml",
