@@ -43,8 +43,8 @@ catalogs:
       specifier: 4.20.1
       version: 4.20.1
     '@mikro-orm/core':
-      specifier: ^7.0.5
-      version: 7.0.5
+      specifier: ^7.0.6
+      version: 7.0.6
     '@mikro-orm/decorators':
       specifier: ^7.0.5
       version: 7.0.5
@@ -203,13 +203,13 @@ importers:
         version: 5.1.5(keyv@5.5.5)
       '@mikro-orm/core':
         specifier: 'catalog:'
-        version: 7.0.5(dataloader@2.2.3)
+        version: 7.0.6(dataloader@2.2.3)
       '@mikro-orm/postgresql':
         specifier: 'catalog:'
-        version: 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))
+        version: 7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))
       '@mikro-orm/reflection':
         specifier: 'catalog:'
-        version: 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))
+        version: 7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))
       '@repo/core-util-graphql-schema':
         specifier: workspace:^
         version: link:../../packages/core/util-graphql-schema
@@ -336,10 +336,10 @@ importers:
         version: 3.2.0(graphql@16.12.0)
       '@mikro-orm/seeder':
         specifier: 'catalog:'
-        version: 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))
+        version: 7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))
       '@mikro-orm/sqlite':
         specifier: 'catalog:'
-        version: 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))
+        version: 7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))
       '@parcel/watcher':
         specifier: ^2.5.1
         version: 2.5.1
@@ -1384,7 +1384,7 @@ importers:
     dependencies:
       '@mikro-orm/decorators':
         specifier: 'catalog:'
-        version: 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))(reflect-metadata@0.2.2)
+        version: 7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))(reflect-metadata@0.2.2)
       '@repo/util-rank-torrent-name':
         specifier: workspace:^
         version: link:../util-rank-torrent-name
@@ -1415,16 +1415,16 @@ importers:
         version: 4.0.1
       '@mikro-orm/core':
         specifier: 'catalog:'
-        version: 7.0.5(dataloader@2.2.3)
+        version: 7.0.6(dataloader@2.2.3)
       '@mikro-orm/postgresql':
         specifier: 'catalog:'
-        version: 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))
+        version: 7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))
       '@mikro-orm/reflection':
         specifier: 'catalog:'
-        version: 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))
+        version: 7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))
       '@mikro-orm/sqlite':
         specifier: 'catalog:'
-        version: 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))
+        version: 7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))
       '@repo/core-util-eslint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
@@ -2821,8 +2821,8 @@ packages:
     resolution: {integrity: sha512-odWDlTzGeFL5onxIdTN7LYaN+q3ckFrQQ+zXT9TAnkXEieDBSRFev5uR0hWQRnd+fJLPC1GgQH/xhT5zwGLa6w==}
     engines: {node: '>=20'}
 
-  '@mikro-orm/core@7.0.5':
-    resolution: {integrity: sha512-ZoFpL7o4PbWYoDlVodiuU86RjAxuwsEA4N/n7eXE4irmqjJjMBdexoj/h6Knt9rBC56cBwyKX4Uahek36bxjpQ==}
+  '@mikro-orm/core@7.0.6':
+    resolution: {integrity: sha512-f5j6ymtL2w2SlV8NRr72otF5FeZQl7g22VyUxwI7ts+VrP4jfOTt6zzoCUX3R/uf1XXriPiIcCc8v9KLuozuSA==}
     engines: {node: '>= 22.17.0'}
     peerDependencies:
       dataloader: 2.2.3
@@ -9573,20 +9573,20 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@mikro-orm/core@7.0.5(dataloader@2.2.3)':
+  '@mikro-orm/core@7.0.6(dataloader@2.2.3)':
     optionalDependencies:
       dataloader: 2.2.3
 
-  '@mikro-orm/decorators@7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))(reflect-metadata@0.2.2)':
+  '@mikro-orm/decorators@7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))(reflect-metadata@0.2.2)':
     dependencies:
-      '@mikro-orm/core': 7.0.5(dataloader@2.2.3)
+      '@mikro-orm/core': 7.0.6(dataloader@2.2.3)
     optionalDependencies:
       reflect-metadata: 0.2.2
 
-  '@mikro-orm/postgresql@7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))':
+  '@mikro-orm/postgresql@7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))':
     dependencies:
-      '@mikro-orm/core': 7.0.5(dataloader@2.2.3)
-      '@mikro-orm/sql': 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))
+      '@mikro-orm/core': 7.0.6(dataloader@2.2.3)
+      '@mikro-orm/sql': 7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))
       kysely: 0.28.14
       pg: 8.20.0
       pg-cursor: 2.19.0(pg@8.20.0)
@@ -9596,24 +9596,24 @@ snapshots:
     transitivePeerDependencies:
       - pg-native
 
-  '@mikro-orm/reflection@7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))':
+  '@mikro-orm/reflection@7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))':
     dependencies:
-      '@mikro-orm/core': 7.0.5(dataloader@2.2.3)
+      '@mikro-orm/core': 7.0.6(dataloader@2.2.3)
       ts-morph: 27.0.2
 
-  '@mikro-orm/seeder@7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))':
+  '@mikro-orm/seeder@7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))':
     dependencies:
-      '@mikro-orm/core': 7.0.5(dataloader@2.2.3)
+      '@mikro-orm/core': 7.0.6(dataloader@2.2.3)
 
-  '@mikro-orm/sql@7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))':
+  '@mikro-orm/sql@7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))':
     dependencies:
-      '@mikro-orm/core': 7.0.5(dataloader@2.2.3)
+      '@mikro-orm/core': 7.0.6(dataloader@2.2.3)
       kysely: 0.28.14
 
-  '@mikro-orm/sqlite@7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))':
+  '@mikro-orm/sqlite@7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))':
     dependencies:
-      '@mikro-orm/core': 7.0.5(dataloader@2.2.3)
-      '@mikro-orm/sql': 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))
+      '@mikro-orm/core': 7.0.6(dataloader@2.2.3)
+      '@mikro-orm/sql': 7.0.5(@mikro-orm/core@7.0.6(dataloader@2.2.3))
       better-sqlite3: 12.8.0
       kysely: 0.28.14
 

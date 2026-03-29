@@ -16,7 +16,7 @@ catalog:
   "@kubb/plugin-oas": 4.20.1
   "@kubb/plugin-ts": 4.20.1
   "@kubb/plugin-zod": 4.20.1
-  "@mikro-orm/core": ^7.0.5
+  "@mikro-orm/core": ^7.0.6
   "@mikro-orm/decorators": ^7.0.5
   "@mikro-orm/postgresql": ^7.0.5
   "@mikro-orm/reflection": ^7.0.5
