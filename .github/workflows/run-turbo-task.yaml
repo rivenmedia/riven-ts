@@ -47,9 +47,14 @@ jobs:
 
           echo "required-tasks=$REQUIRED_TASKS" >> $GITHUB_OUTPUT
 
+      - name: Output required tasks
+        run: |
+          echo "Required tasks: ${{ steps.get-required-tasks.outputs.required-tasks }}"
+
   run-turbo-task:
     name: Run ${{ inputs.task }}
     needs: get-required-tasks
+    if: needs.get-required-tasks.outputs.required-tasks != '[]'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
