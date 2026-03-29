@@ -35,7 +35,6 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
             "./setup-files/restore-environment.ts",
           ),
         ],
-        testTimeout: 60_000,
         retry: 2,
       },
       plugins: [swc.vite() as Plugin],
