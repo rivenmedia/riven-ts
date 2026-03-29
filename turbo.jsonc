@@ -34,7 +34,7 @@
       "inputs": ["openapi-schema.{json,yaml}", "kubb.config.ts", "*.apib"]
     },
     "test": {
-      "dependsOn": ["generate-schemas"],
+      "dependsOn": ["generate-schemas", "transit"],
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
         "!**/{docker-data}/**",
