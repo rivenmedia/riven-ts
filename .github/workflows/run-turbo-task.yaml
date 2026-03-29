@@ -38,27 +38,23 @@ jobs:
       - name: Set Turborepo --affected SHAs
         uses: ./.github/actions/set-turborepo-affected-shas
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v5
+      - name: Get turbo version
+        id: get-turbo-version
+        uses: mikefarah/yq@v4
         with:
-          cache: true
-
-      - name: Get installed turbo version
-        id: get-installed-turbo-version
-        run: |
-          TURBO_VERSION=$(pnpm why turbo --json | jq -r '.[] | select(.devDependencies.turbo) | .devDependencies.turbo.version')
-
-          if [ -z "$TURBO_VERSION" ]; then
-            echo "::error::Failed to detect turbo version"
-            exit 1
-          fi
-
-          echo "version=$TURBO_VERSION" >> $GITHUB_OUTPUT
+          cmd: yq '.importers["."].devDependencies.turbo.version' 'pnpm-lock.yaml'
 
       - name: Get required tasks
         id: get-required-tasks
         run: |
-          DRY_RUN_OUTPUT=$(pnpx turbo@${{ steps.get-installed-turbo-version.outputs.version }} --dry=json --affected ${{ inputs.task }})
+          TURBO_VERSION="${{ steps.get-turbo-version.outputs.result }}"
+
+          if [ "$TURBO_VERSION" = "null" ]; then
+            echo "::error::Failed to detect turbo version"
+            exit 1
+          fi
+
+          DRY_RUN_OUTPUT=$(pnpx turbo@${TURBO_VERSION} --dry=json --affected ${{ inputs.task }})
           REQUIRED_TASKS=$(echo "$DRY_RUN_OUTPUT" | jq -c --arg task "${{ inputs.task }}" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and .task == $task) | .taskId]')
 
           echo "required-tasks=$REQUIRED_TASKS" >> $GITHUB_OUTPUT
