@@ -24,7 +24,8 @@ runs:
       if: ${{ inputs.install-redis-server == 'true' }}
       uses: shogo82148/actions-setup-redis@v1
       with:
-        redis-version: 8.x
+        redis-version: "8"
+        auto-start: "false"
 
     - name: Install FUSE
       shell: bash
