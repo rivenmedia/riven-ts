@@ -9,6 +9,6 @@ export const it: typeof pluginTestContext = pluginTestContext
   .override(
     "settings",
     createMockPluginSettings(ListrrSettings, {
-      apiKey: "mock-api-key",
+      apiKey: "listrr-api-key",
     }),
   );

@@ -12,7 +12,7 @@ it('assigns the API key to the "x-api-key" header', async ({
 
   server.use(
     http.get("https://listrr.pro/api/test-endpoint", ({ request }) => {
-      if (request.headers.get("x-api-key") !== "test-token") {
+      if (request.headers.get("x-api-key") !== "listrr-api-key") {
         return HttpResponse.error();
       }
 
