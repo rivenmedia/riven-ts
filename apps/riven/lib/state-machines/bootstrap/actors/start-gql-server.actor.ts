@@ -23,7 +23,7 @@ export interface StartGQLServerInput {
 }
 
 export interface StartGQLServerOutput {
-  server: ApolloServer;
+  server: ApolloServer<ApolloServerContext>;
   url: string;
 }
 

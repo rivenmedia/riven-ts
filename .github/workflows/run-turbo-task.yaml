@@ -70,8 +70,8 @@ jobs:
       - name: Set up verification runner
         uses: ./.github/actions/set-up-verification-runner
         with:
-          install-fuse: ${{ contains(fromJson(inputs.runner-requirements), 'fuse') }}
-          install-redis-server: ${{ contains(fromJson(inputs.runner-requirements), 'redis-server') }}
+          install-fuse: ${{ contains(fromJson(inputs.runner-requirements || '[]'), 'fuse') }}
+          install-redis-server: ${{ contains(fromJson(inputs.runner-requirements || '[]'), 'redis-server') }}
 
       - name: Run ${{ inputs.task }}
         run: pnpm turbo ${{ join(fromJson(needs.get-required-tasks.outputs.required-tasks), ' ') }} --continue --concurrency ${{ inputs.concurrency }}
