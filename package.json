@@ -8,6 +8,7 @@
   "main": "index.js",
   "scripts": {
     "format:check": "prettier --check . '!**/docker-data'",
+    "format:check:ci": "pnpm format:check --log-level warn",
     "format:fix": "prettier --write . '!**/docker-data'",
     "postinstall": "node .husky/install.mjs || true"
   },

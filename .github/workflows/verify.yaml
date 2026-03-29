@@ -23,7 +23,7 @@ jobs:
         task:
           - name: lint
           - name: check-types
-          - name: //#format:check
+          - name: //#format:check:ci
           - name: test
             concurrency: "100%"
             runner-requirements:

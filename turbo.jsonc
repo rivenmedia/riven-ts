@@ -16,7 +16,7 @@
       "dependsOn": ["generate-schemas", "transit"],
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
-        "!**/{coverage,docker-data}/**"
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data}/**"
       ]
     },
     "dev": {
@@ -37,8 +37,8 @@
       "dependsOn": ["generate-schemas", "transit"],
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
-        "!**/{docker-data}/**",
-        "!**/*.{md}"
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data}/**",
+        "!*.md"
       ]
     },
     "test:watch": {
@@ -49,10 +49,15 @@
       "dependsOn": ["generate-schemas"],
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
-        "!**/{__generated__,.next,coverage,docker-data}/**"
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data}/**"
       ]
     },
     "lint:fix": {},
-    "//#format:check": {}
+    "//#format:check:ci": {
+      "inputs": [
+        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql,.md,.markdown,.mdx}",
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data}/**"
+      ]
+    }
   }
 }
