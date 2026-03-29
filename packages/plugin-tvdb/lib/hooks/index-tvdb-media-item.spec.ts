@@ -1,69 +1,39 @@
-import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
-import { mockLogger } from "@repo/util-plugin-testing/create-mock-logger";
-import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
-import { it as baseIt } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
 import breakingBadExtendedSeriesFixture from "../__fixtures__/breaking-bad/extended-series.json" with { type: "json" };
 import breakingBadOfficialOrderFixture from "../__fixtures__/breaking-bad/official-order.json" with { type: "json" };
-import { TvdbAPI } from "../datasource/tvdb.datasource.ts";
-import { pluginConfig } from "../tvdb-plugin.config.ts";
-import { TvdbSettings } from "../tvdb-settings.schema.ts";
+import breakingBadTvMazeLookupFixture from "../__fixtures__/breaking-bad/tvmaze-lookup.json" with { type: "json" };
+import { postLoginHandler } from "../__generated__/index.ts";
+import { it as baseIt } from "../__tests__/tvdb.test-context.ts";
 import { indexTVDBMediaItem } from "./index-tvdb-media-item.ts";
 
-import type { PostLogin200 } from "../__generated__/index.ts";
+const it = baseIt.extend("item", ({}) => {
+  const item = new ItemRequest();
 
-const it = baseIt
-  .extend("settings", () => createMockPluginSettings(TvdbSettings, {}))
-  .extend("dataSourceMap", ({ dataSourceConfig, settings }) => {
-    return new DataSourceMap([
-      [
-        TvdbAPI,
-        new TvdbAPI({
-          ...dataSourceConfig,
-          requestAttempts: 1,
-          pluginSymbol: pluginConfig.name,
-          settings: settings.get(TvdbSettings),
-        }),
-      ],
-    ]);
-  })
-  .extend("item", ({}) => {
-    const item = new ItemRequest();
+  item.id = 1;
 
-    item.id = 1;
-
-    return item;
-  });
+  return item;
+});
 
 it.beforeEach(({ server }) => {
-  server.use(
-    http.post("https://api4.thetvdb.com/v4/login", () =>
-      HttpResponse.json<PostLogin200>({
-        data: {
-          token: "mock-token",
-        },
-      }),
-    ),
-  );
+  server.use(postLoginHandler());
 });
 
 it("returns null if the item has no tvdbId", async ({
   item,
   dataSourceMap,
   settings,
+  logger,
 }) => {
   const result = await indexTVDBMediaItem({
     dataSources: dataSourceMap,
     event: {
       item,
     },
-
-    logger: mockLogger,
-
+    logger,
     settings,
   });
 
@@ -75,6 +45,7 @@ it("returns the series if the item has a tvdbId", async ({
   dataSourceMap,
   settings,
   server,
+  logger,
 }) => {
   item.tvdbId = breakingBadOfficialOrderFixture.data.id.toString();
 
@@ -87,6 +58,18 @@ it("returns the series if the item has a tvdbId", async ({
       `https://api4.thetvdb.com/v4/series/${breakingBadOfficialOrderFixture.data.id.toString()}/extended`,
       () => HttpResponse.json(breakingBadExtendedSeriesFixture),
     ),
+    http.get(`https://api.tvmaze.com/lookup/shows`, ({ request }) => {
+      const searchParams = new URL(request.url).searchParams;
+
+      if (
+        searchParams.get("thetvdb") !==
+        breakingBadOfficialOrderFixture.data.id.toString()
+      ) {
+        return HttpResponse.json(null, { status: 404 });
+      }
+
+      return HttpResponse.json(breakingBadTvMazeLookupFixture);
+    }),
   );
 
   const result = await indexTVDBMediaItem({
@@ -94,7 +77,7 @@ it("returns the series if the item has a tvdbId", async ({
     event: {
       item,
     },
-    logger: mockLogger,
+    logger,
     settings,
   });
 
@@ -126,7 +109,6 @@ it("returns the series if the item has a tvdbId", async ({
     },
     contentRating: "tv-ma",
     posterUrl: "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
-    firstAired: "2008-01-20",
     status: "ended",
     seasons: {
       0: {
@@ -134,7 +116,7 @@ it("returns the series if the item has a tvdbId", async ({
           {
             absoluteNumber: 0,
             title: "Good Cop / Bad Cop",
-            airedAt: "2009-02-17",
+            airedAt: "2009-02-18T02:00Z",
             contentRating: "tv-ma",
             runtime: 3,
             number: 1,
@@ -144,7 +126,7 @@ it("returns the series if the item has a tvdbId", async ({
           {
             contentRating: "tv-ma",
             title: "Wedding Day",
-            airedAt: "2009-02-17",
+            airedAt: "2009-02-18T02:00Z",
             runtime: 5,
             posterPath:
               "https://artworks.thetvdb.com/banners/episodes/81189/3859791.jpg",
@@ -153,7 +135,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             title: "TwaüghtHammër",
-            airedAt: "2009-02-17",
+            airedAt: "2009-02-18T02:00Z",
             contentRating: "tv-ma",
             runtime: 4,
             posterPath:
@@ -163,7 +145,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             title: "Marie's Confession",
-            airedAt: "2009-02-17",
+            airedAt: "2009-02-18T02:00Z",
             contentRating: "tv-ma",
             runtime: 3,
             posterPath:
@@ -173,7 +155,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             title: "The Break-In",
-            airedAt: "2009-02-17",
+            airedAt: "2009-02-18T02:00Z",
             contentRating: "tv-ma",
             runtime: 5,
             posterPath:
@@ -303,7 +285,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             title: "Snow Globe: A Breaking Bad Short",
-            airedAt: "2020-02-17",
+            airedAt: "2020-02-18T02:00Z",
             contentRating: "tv-ma",
             runtime: 3,
             posterPath:
@@ -319,7 +301,7 @@ it("returns the series if the item has a tvdbId", async ({
         episodes: [
           {
             absoluteNumber: 1,
-            airedAt: "2008-01-20",
+            airedAt: "2008-01-21T02:00Z",
             contentRating: "tv-ma",
             number: 1,
             posterPath:
@@ -329,7 +311,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 2,
-            airedAt: "2008-01-27",
+            airedAt: "2008-01-28T02:00Z",
             contentRating: "tv-ma",
             number: 2,
             posterPath:
@@ -339,7 +321,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 3,
-            airedAt: "2008-02-10",
+            airedAt: "2008-02-11T02:00Z",
             contentRating: "tv-ma",
             number: 3,
             posterPath:
@@ -349,7 +331,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 4,
-            airedAt: "2008-02-17",
+            airedAt: "2008-02-18T02:00Z",
             contentRating: "tv-ma",
             number: 4,
             posterPath:
@@ -359,7 +341,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 5,
-            airedAt: "2008-02-24",
+            airedAt: "2008-02-25T02:00Z",
             contentRating: "tv-ma",
             number: 5,
             posterPath:
@@ -369,7 +351,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 6,
-            airedAt: "2008-03-02",
+            airedAt: "2008-03-03T02:00Z",
             contentRating: "tv-ma",
             number: 6,
             posterPath:
@@ -379,7 +361,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 7,
-            airedAt: "2008-03-09",
+            airedAt: "2008-03-10T01:00Z",
             contentRating: "tv-ma",
             number: 7,
             posterPath:
@@ -395,7 +377,7 @@ it("returns the series if the item has a tvdbId", async ({
         episodes: [
           {
             absoluteNumber: 8,
-            airedAt: "2009-03-08",
+            airedAt: "2009-03-09T01:00Z",
             contentRating: "tv-ma",
             number: 1,
             posterPath:
@@ -405,7 +387,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 9,
-            airedAt: "2009-03-15",
+            airedAt: "2009-03-16T01:00Z",
             contentRating: "tv-ma",
             number: 2,
             posterPath:
@@ -415,7 +397,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 10,
-            airedAt: "2009-03-22",
+            airedAt: "2009-03-23T01:00Z",
             contentRating: "tv-ma",
             number: 3,
             posterPath:
@@ -425,7 +407,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 11,
-            airedAt: "2009-03-29",
+            airedAt: "2009-03-30T01:00Z",
             contentRating: "tv-ma",
             number: 4,
             posterPath:
@@ -435,7 +417,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 12,
-            airedAt: "2009-04-05",
+            airedAt: "2009-04-06T01:00Z",
             contentRating: "tv-ma",
             number: 5,
             posterPath:
@@ -445,7 +427,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 13,
-            airedAt: "2009-04-12",
+            airedAt: "2009-04-13T01:00Z",
             contentRating: "tv-ma",
             number: 6,
             posterPath:
@@ -455,7 +437,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 14,
-            airedAt: "2009-04-19",
+            airedAt: "2009-04-20T01:00Z",
             contentRating: "tv-ma",
             number: 7,
             posterPath:
@@ -465,7 +447,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 15,
-            airedAt: "2009-04-26",
+            airedAt: "2009-04-27T01:00Z",
             contentRating: "tv-ma",
             number: 8,
             posterPath:
@@ -475,7 +457,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 16,
-            airedAt: "2009-05-03",
+            airedAt: "2009-05-04T01:00Z",
             contentRating: "tv-ma",
             number: 9,
             posterPath:
@@ -485,7 +467,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 17,
-            airedAt: "2009-05-10",
+            airedAt: "2009-05-11T01:00Z",
             contentRating: "tv-ma",
             number: 10,
             posterPath:
@@ -495,7 +477,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 18,
-            airedAt: "2009-05-17",
+            airedAt: "2009-05-18T01:00Z",
             contentRating: "tv-ma",
             number: 11,
             posterPath:
@@ -505,7 +487,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 19,
-            airedAt: "2009-05-24",
+            airedAt: "2009-05-25T01:00Z",
             contentRating: "tv-ma",
             number: 12,
             posterPath:
@@ -515,7 +497,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 20,
-            airedAt: "2009-05-31",
+            airedAt: "2009-06-01T01:00Z",
             contentRating: "tv-ma",
             number: 13,
             posterPath:
@@ -531,7 +513,7 @@ it("returns the series if the item has a tvdbId", async ({
         episodes: [
           {
             absoluteNumber: 21,
-            airedAt: "2010-03-21",
+            airedAt: "2010-03-22T01:00Z",
             contentRating: "tv-ma",
             number: 1,
             posterPath:
@@ -541,7 +523,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 22,
-            airedAt: "2010-03-28",
+            airedAt: "2010-03-29T01:00Z",
             contentRating: "tv-ma",
             number: 2,
             posterPath:
@@ -551,7 +533,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 23,
-            airedAt: "2010-04-04",
+            airedAt: "2010-04-05T01:00Z",
             contentRating: "tv-ma",
             number: 3,
             posterPath:
@@ -561,7 +543,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 24,
-            airedAt: "2010-04-11",
+            airedAt: "2010-04-12T01:00Z",
             contentRating: "tv-ma",
             number: 4,
             posterPath:
@@ -571,7 +553,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 25,
-            airedAt: "2010-04-18",
+            airedAt: "2010-04-19T01:00Z",
             contentRating: "tv-ma",
             number: 5,
             posterPath:
@@ -581,7 +563,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 26,
-            airedAt: "2010-04-25",
+            airedAt: "2010-04-26T01:00Z",
             contentRating: "tv-ma",
             number: 6,
             posterPath:
@@ -591,7 +573,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 27,
-            airedAt: "2010-05-02",
+            airedAt: "2010-05-03T01:00Z",
             contentRating: "tv-ma",
             number: 7,
             posterPath:
@@ -601,7 +583,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 28,
-            airedAt: "2010-05-09",
+            airedAt: "2010-05-10T01:00Z",
             contentRating: "tv-ma",
             number: 8,
             posterPath:
@@ -611,7 +593,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 29,
-            airedAt: "2010-05-16",
+            airedAt: "2010-05-17T01:00Z",
             contentRating: "tv-ma",
             number: 9,
             posterPath:
@@ -621,7 +603,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 30,
-            airedAt: "2010-05-23",
+            airedAt: "2010-05-24T01:00Z",
             contentRating: "tv-ma",
             number: 10,
             posterPath:
@@ -631,7 +613,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 31,
-            airedAt: "2010-05-30",
+            airedAt: "2010-05-31T01:00Z",
             contentRating: "tv-ma",
             number: 11,
             posterPath:
@@ -641,7 +623,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 32,
-            airedAt: "2010-06-06",
+            airedAt: "2010-06-07T01:00Z",
             contentRating: "tv-ma",
             number: 12,
             posterPath:
@@ -651,7 +633,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 33,
-            airedAt: "2010-06-13",
+            airedAt: "2010-06-14T01:00Z",
             contentRating: "tv-ma",
             number: 13,
             posterPath:
@@ -667,7 +649,7 @@ it("returns the series if the item has a tvdbId", async ({
         episodes: [
           {
             absoluteNumber: 34,
-            airedAt: "2011-07-17",
+            airedAt: "2011-07-18T01:00Z",
             contentRating: "tv-ma",
             number: 1,
             posterPath:
@@ -677,7 +659,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 35,
-            airedAt: "2011-07-24",
+            airedAt: "2011-07-25T01:00Z",
             contentRating: "tv-ma",
             number: 2,
             posterPath:
@@ -687,7 +669,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 36,
-            airedAt: "2011-07-31",
+            airedAt: "2011-08-01T01:00Z",
             contentRating: "tv-ma",
             number: 3,
             posterPath:
@@ -697,7 +679,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 37,
-            airedAt: "2011-08-07",
+            airedAt: "2011-08-08T01:00Z",
             contentRating: "tv-ma",
             number: 4,
             posterPath:
@@ -707,7 +689,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 38,
-            airedAt: "2011-08-14",
+            airedAt: "2011-08-15T01:00Z",
             contentRating: "tv-ma",
             number: 5,
             posterPath:
@@ -717,7 +699,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 39,
-            airedAt: "2011-08-21",
+            airedAt: "2011-08-22T01:00Z",
             contentRating: "tv-ma",
             number: 6,
             posterPath:
@@ -727,7 +709,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 40,
-            airedAt: "2011-08-28",
+            airedAt: "2011-08-29T01:00Z",
             contentRating: "tv-ma",
             number: 7,
             posterPath:
@@ -737,7 +719,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 41,
-            airedAt: "2011-09-04",
+            airedAt: "2011-09-05T01:00Z",
             contentRating: "tv-ma",
             number: 8,
             posterPath:
@@ -747,7 +729,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 42,
-            airedAt: "2011-09-11",
+            airedAt: "2011-09-12T01:00Z",
             contentRating: "tv-ma",
             number: 9,
             posterPath:
@@ -757,7 +739,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 43,
-            airedAt: "2011-09-18",
+            airedAt: "2011-09-19T01:00Z",
             contentRating: "tv-ma",
             number: 10,
             posterPath:
@@ -767,7 +749,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 44,
-            airedAt: "2011-09-25",
+            airedAt: "2011-09-26T01:00Z",
             contentRating: "tv-ma",
             number: 11,
             posterPath:
@@ -777,7 +759,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 45,
-            airedAt: "2011-10-02",
+            airedAt: "2011-10-03T01:00Z",
             contentRating: "tv-ma",
             number: 12,
             posterPath:
@@ -787,7 +769,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 46,
-            airedAt: "2011-10-09",
+            airedAt: "2011-10-10T01:00Z",
             contentRating: "tv-ma",
             number: 13,
             posterPath:
@@ -803,7 +785,7 @@ it("returns the series if the item has a tvdbId", async ({
         episodes: [
           {
             absoluteNumber: 47,
-            airedAt: "2012-07-15",
+            airedAt: "2012-07-16T01:00Z",
             contentRating: "tv-ma",
             number: 1,
             posterPath:
@@ -813,7 +795,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 48,
-            airedAt: "2012-07-22",
+            airedAt: "2012-07-23T01:00Z",
             contentRating: "tv-ma",
             number: 2,
             posterPath:
@@ -823,7 +805,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 49,
-            airedAt: "2012-07-29",
+            airedAt: "2012-07-30T01:00Z",
             contentRating: "tv-ma",
             number: 3,
             posterPath:
@@ -833,7 +815,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 50,
-            airedAt: "2012-08-05",
+            airedAt: "2012-08-06T01:00Z",
             contentRating: "tv-ma",
             number: 4,
             posterPath:
@@ -843,7 +825,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 51,
-            airedAt: "2012-08-12",
+            airedAt: "2012-08-13T01:00Z",
             contentRating: "tv-ma",
             number: 5,
             posterPath:
@@ -853,7 +835,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 52,
-            airedAt: "2012-08-19",
+            airedAt: "2012-08-20T01:00Z",
             contentRating: "tv-ma",
             number: 6,
             posterPath:
@@ -863,7 +845,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 53,
-            airedAt: "2012-08-26",
+            airedAt: "2012-08-27T01:00Z",
             contentRating: "tv-ma",
             number: 7,
             posterPath:
@@ -873,7 +855,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 54,
-            airedAt: "2012-09-02",
+            airedAt: "2012-09-03T01:00Z",
             contentRating: "tv-ma",
             number: 8,
             posterPath:
@@ -883,7 +865,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 55,
-            airedAt: "2013-08-11",
+            airedAt: "2013-08-12T01:00Z",
             contentRating: "tv-ma",
             number: 9,
             posterPath:
@@ -893,7 +875,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 56,
-            airedAt: "2013-08-18",
+            airedAt: "2013-08-19T01:00Z",
             contentRating: "tv-ma",
             number: 10,
             posterPath:
@@ -903,7 +885,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 57,
-            airedAt: "2013-08-25",
+            airedAt: "2013-08-26T01:00Z",
             contentRating: "tv-ma",
             number: 11,
             posterPath:
@@ -913,7 +895,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 58,
-            airedAt: "2013-09-01",
+            airedAt: "2013-09-02T01:00Z",
             contentRating: "tv-ma",
             number: 12,
             posterPath:
@@ -923,7 +905,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 59,
-            airedAt: "2013-09-08",
+            airedAt: "2013-09-09T01:00Z",
             contentRating: "tv-ma",
             number: 13,
             posterPath:
@@ -933,7 +915,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 60,
-            airedAt: "2013-09-15",
+            airedAt: "2013-09-16T01:00Z",
             contentRating: "tv-ma",
             number: 14,
             posterPath:
@@ -943,7 +925,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 61,
-            airedAt: "2013-09-22",
+            airedAt: "2013-09-23T01:00Z",
             contentRating: "tv-ma",
             number: 15,
             posterPath:
@@ -953,7 +935,7 @@ it("returns the series if the item has a tvdbId", async ({
           },
           {
             absoluteNumber: 62,
-            airedAt: "2013-09-29",
+            airedAt: "2013-09-30T01:00Z",
             contentRating: "tv-ma",
             number: 16,
             posterPath:

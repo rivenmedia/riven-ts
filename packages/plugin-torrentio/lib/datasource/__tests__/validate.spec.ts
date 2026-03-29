@@ -1,28 +1,17 @@
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { pluginConfig } from "../../torrentio-plugin.config.ts";
+import { it } from "../../__tests__/torrentio.test-context.ts";
 import { TorrentioAPI } from "../torrentio.datasource.ts";
 
-it("returns false if the request fails", async ({
-  server,
-  dataSourceConfig,
-}) => {
+it("returns false if the request fails", async ({ server, dataSourceMap }) => {
   server.use(
     http.get("**/validate", () =>
       HttpResponse.json({ success: false }, { status: 401 }),
     ),
   );
 
-  const torrentioApi = new TorrentioAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      filter: "",
-    },
-  });
+  const torrentioApi = dataSourceMap.get(TorrentioAPI);
   const isValid = await torrentioApi.validate();
 
   expect(isValid).toBe(false);
@@ -30,19 +19,13 @@ it("returns false if the request fails", async ({
 
 it("returns true if the request succeeds", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json({ success: true })),
   );
 
-  const torrentioApi = new TorrentioAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: {
-      filter: "",
-    },
-  });
+  const torrentioApi = dataSourceMap.get(TorrentioAPI);
   const isValid = await torrentioApi.validate();
 
   expect(isValid).toBe(true);

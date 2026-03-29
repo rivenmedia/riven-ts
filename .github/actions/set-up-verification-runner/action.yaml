@@ -1,0 +1,35 @@
+name: Set up verification runner
+
+description: |
+  Sets up the runner for a verification job.
+
+  Depending on the task being ran, it may need additional services to be installed.
+
+  For example, integration tests require `redis-server` and `fuse`.
+
+inputs:
+  install-fuse:
+    description: Whether to install FUSE (required for integration tests)
+    required: false
+    default: "false"
+  install-redis-server:
+    description: Whether to install redis-server (required for integration tests)
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Download redis-server
+      if: ${{ inputs.install-redis-server == 'true' }}
+      uses: shogo82148/actions-setup-redis@v1
+      with:
+        redis-version: "8"
+        auto-start: "false"
+
+    - name: Install FUSE
+      shell: bash
+      if: ${{ inputs.install-fuse == 'true' }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y fuse libfuse-dev

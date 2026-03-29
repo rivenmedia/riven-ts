@@ -8,7 +8,7 @@ export const createMockPluginSettings = <T extends ZodObject>(
   schema: T,
   settings: z.input<T>,
 ) => {
-  const mockPluginKey = "MOCK_PLUGIN";
+  const mockPluginKey = schema.constructor.name;
   const env: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(settings)) {

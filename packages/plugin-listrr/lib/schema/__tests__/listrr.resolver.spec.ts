@@ -1,5 +1,3 @@
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
 import { HttpResponse } from "msw";
 import assert from "node:assert";
 import { expect } from "vitest";
@@ -8,6 +6,7 @@ import {
   type GetApiListMoviesIdSortbySortbydirectionPageQueryResponse,
   type GetApiListShowsIdSortbySortbydirectionPageQueryResponse,
   createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse,
+  createGetApiListMyPageQueryResponse,
   createGetApiListShowsIdSortbySortbydirectionPageQueryResponse,
   createListrrContractsModelsAPIMovieDto,
   createListrrContractsModelsAPIShowDto,
@@ -15,13 +14,12 @@ import {
   getApiListMyPageHandler,
   getApiListShowsIdSortbySortbydirectionPageHandler,
 } from "../../__generated__/index.ts";
-import { ListrrAPI } from "../../datasource/listrr.datasource.ts";
-import { pluginConfig } from "../../listrr-plugin.config.ts";
+import { it } from "../../__tests__/listrr.test-context.ts";
 
 it("returns movies when calling listrrMovies query", async ({
+  gqlContext,
   gqlServer,
   server,
-  dataSourceConfig,
 }) => {
   const contentLists = new Set([
     "64b7f2f5e13e4b6f8c8e4d1a",
@@ -67,21 +65,7 @@ it("returns movies when calling listrrMovies query", async ({
         listIds: ["64b7f2f5e13e4b6f8c8e4d1a", "64b7f2f5e13e4b6f8c8e4d1b"],
       },
     },
-    {
-      contextValue: {
-        [pluginConfig.name]: {
-          api: new ListrrAPI({
-            ...dataSourceConfig,
-            pluginSymbol: pluginConfig.name,
-            settings: {
-              apiKey: "",
-              movieLists: [],
-              showLists: [],
-            },
-          }),
-        },
-      },
-    },
+    { contextValue: gqlContext },
   );
 
   assert(body.kind === "single");
@@ -91,8 +75,8 @@ it("returns movies when calling listrrMovies query", async ({
 });
 
 it("returns shows when calling listrrShows query", async ({
+  gqlContext,
   gqlServer,
-  dataSourceConfig,
   server,
 }) => {
   const contentLists = new Set([
@@ -139,21 +123,7 @@ it("returns shows when calling listrrShows query", async ({
         listIds: ["64b7f2f5e13e4b6f8c8e4d1a", "64b7f2f5e13e4b6f8c8e4d1b"],
       },
     },
-    {
-      contextValue: {
-        [pluginConfig.name]: {
-          api: new ListrrAPI({
-            ...dataSourceConfig,
-            pluginSymbol: pluginConfig.name,
-            settings: {
-              apiKey: "",
-              movieLists: [],
-              showLists: [],
-            },
-          }),
-        },
-      },
-    },
+    { contextValue: gqlContext },
   );
 
   assert(body.kind === "single");
@@ -163,11 +133,15 @@ it("returns shows when calling listrrShows query", async ({
 });
 
 it('returns the user validation status when calling "listrrIsValid" query', async ({
+  gqlContext,
   gqlServer,
-  dataSourceConfig,
   server,
 }) => {
-  server.use(getApiListMyPageHandler());
+  server.use(
+    getApiListMyPageHandler(() =>
+      HttpResponse.json(createGetApiListMyPageQueryResponse()),
+    ),
+  );
 
   const { body } = await gqlServer.executeOperation(
     {
@@ -177,21 +151,7 @@ it('returns the user validation status when calling "listrrIsValid" query', asyn
         }
       `,
     },
-    {
-      contextValue: {
-        [pluginConfig.name]: {
-          api: new ListrrAPI({
-            ...dataSourceConfig,
-            pluginSymbol: pluginConfig.name,
-            settings: {
-              apiKey: "",
-              movieLists: [],
-              showLists: [],
-            },
-          }),
-        },
-      },
-    },
+    { contextValue: gqlContext },
   );
 
   assert(body.kind === "single");

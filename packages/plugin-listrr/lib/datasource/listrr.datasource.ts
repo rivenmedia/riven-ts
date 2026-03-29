@@ -5,7 +5,6 @@ import {
 } from "@repo/util-plugin-sdk";
 
 import {
-  type GetApiListMyPageQueryResponse,
   type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIMovieDtoSchema as GetMoviesResponse,
   type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIShowDtoSchema as GetShowsResponse,
   getApiListMyPageQueryResponseSchema,
@@ -37,8 +36,7 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
 
   override async validate() {
     try {
-      const response =
-        await this.get<GetApiListMyPageQueryResponse>("List/My/1");
+      const response = await this.get<unknown>("List/My/1");
 
       return getApiListMyPageQueryResponseSchema.safeParse(response).success;
     } catch {
