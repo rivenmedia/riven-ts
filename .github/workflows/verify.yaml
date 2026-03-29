@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         task:
-          - name: Lint
+          - name: Linting
             task: lint
           - name: Types
             task: check-types
