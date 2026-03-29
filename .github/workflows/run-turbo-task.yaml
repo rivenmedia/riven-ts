@@ -38,6 +38,9 @@ jobs:
       - name: Set Turborepo --affected SHAs
         uses: ./.github/actions/set-turborepo-affected-shas
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+
       - name: Get turbo version
         id: get-turbo-version
         uses: mikefarah/yq@v4
