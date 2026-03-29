@@ -40,6 +40,11 @@ jobs:
       - name: Set Turborepo --affected SHAs
         uses: ./.github/actions/set-turborepo-affected-shas
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          cache: true
+
       - name: Get required tasks
         id: get-required-tasks
         run: |
