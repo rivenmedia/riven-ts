@@ -88,5 +88,5 @@ jobs:
     if: always()
     steps:
       - name: Verification failed
-        if: always() && contains(fromJson('["failure", "cancelled"]'), needs.run-turbo-task.result)
+        if: contains(fromJson('["failure", "cancelled"]'), needs.run-turbo-task.result)
         run: exit 1
