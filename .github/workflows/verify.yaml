@@ -32,7 +32,7 @@ jobs:
           - name: check-types
           - name: //#format:check
           - name: test
-            concurrency: 1
+            concurrency: "100%"
             runner-requirements:
               - redis-server
               - fuse
