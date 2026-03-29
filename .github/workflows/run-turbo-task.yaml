@@ -80,3 +80,13 @@ jobs:
 
       - uses: charpeni/turborepo-summary-action@v1
         if: always()
+
+  success:
+    name: Success
+    needs: run-turbo-task
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Verification failed
+        if: always() && contains(fromJson('["failure", "cancelled"]'), needs.run-turbo-task.result)
+        run: exit 1
