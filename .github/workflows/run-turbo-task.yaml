@@ -94,10 +94,12 @@ jobs:
 
   success:
     name: Success
-    needs: run-turbo-task
+    needs:
+      - get-required-tasks
+      - run-turbo-task
     runs-on: ubuntu-latest
     if: always()
     steps:
       - name: Verification failed
-        if: contains(fromJson('["failure", "cancelled"]'), needs.run-turbo-task.result)
+        if: needs.get-required-tasks.result != 'success' || contains(fromJson('["failure", "cancelled"]'), needs.run-turbo-task.result)
         run: exit 1
