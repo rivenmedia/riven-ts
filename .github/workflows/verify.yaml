@@ -34,7 +34,7 @@ jobs:
           - name: test
             runner-requirements:
               - redis-server
-              # - fuse
+              - fuse
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
