@@ -1,7 +1,6 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
-import { HttpResponse, http } from "msw";
 import assert from "node:assert";
 import { expect } from "vitest";
 
@@ -14,12 +13,7 @@ it.override("plugin", plugin);
 it('returns the validation status when calling "plexIsValid" query', async ({
   gqlServer,
   dataSourceConfig,
-  server,
 }) => {
-  server.use(
-    http.get("**/validate", () => HttpResponse.json({ success: true })),
-  );
-
   const { body } = await gqlServer.executeOperation(
     {
       query: `

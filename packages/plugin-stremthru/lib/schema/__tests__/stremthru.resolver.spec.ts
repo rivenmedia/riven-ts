@@ -17,14 +17,14 @@ it('returns the validation status when calling "stremthruIsValid" query', async 
   dataSourceConfig,
 }) => {
   server.use(
-    http.get("**/validate", () => HttpResponse.json({ success: true })),
+    http.get("**/v0/torznab/api", () => HttpResponse.json({ success: true })),
   );
 
   const { body } = await gqlServer.executeOperation(
     {
       query: `
         query StremThruIsValid {
-          stremThruIsValid
+          stremthruIsValid
         }
       `,
     },
@@ -36,9 +36,10 @@ it('returns the validation status when calling "stremthruIsValid" query', async 
               StremThruAPI,
               new StremThruAPI({
                 ...dataSourceConfig,
-                pluginSymbol: Symbol("@repo/plugin-stremthru"),
+                pluginSymbol: pluginConfig.name,
                 settings: {
                   stremThruUrl: "https://stremthru.13377001.xyz/",
+                  realdebridApiKey: "1234",
                 },
               }),
             ],
@@ -51,5 +52,5 @@ it('returns the validation status when calling "stremthruIsValid" query', async 
   assert(body.kind === "single");
 
   expect(body.singleResult.errors).toBeUndefined();
-  expect(body.singleResult.data?.["stremThruIsValid"]).toBe(true);
+  expect(body.singleResult.data?.["stremthruIsValid"]).toBe(true);
 });

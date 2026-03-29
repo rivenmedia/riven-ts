@@ -20,7 +20,7 @@ it("returns false if the request fails", async ({
     ...dataSourceConfig,
     pluginSymbol: pluginConfig.name,
     settings: {
-      url: "",
+      url: "http://localhost",
     },
   });
 
@@ -41,7 +41,7 @@ it("returns true if the request succeeds", async ({
     ...dataSourceConfig,
     pluginSymbol: pluginConfig.name,
     settings: {
-      url: "",
+      url: "http://localhost",
     },
   });
 
