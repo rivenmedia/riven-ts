@@ -5,6 +5,8 @@ import { EntityRepository } from "@mikro-orm/core";
 import { type Mock, afterEach, expect, vi } from "vitest";
 import z from "zod";
 
+vi.mock(import("@zkochan/fuse-native"));
+
 vi.mock<{ default: Record<string, unknown> }>(
   import("./package.json"),
   () =>
