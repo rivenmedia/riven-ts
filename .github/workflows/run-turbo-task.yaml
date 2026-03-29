@@ -29,7 +29,7 @@ jobs:
     name: Check if required
     runs-on: ubuntu-latest
     outputs:
-      required-tasks: ${{ steps.get-required-tasks.outputs.required-tasks }}
+      required-tasks: ${{ steps.get-required-tasks.outputs.required-tasks || '[]' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
