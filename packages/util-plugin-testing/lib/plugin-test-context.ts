@@ -6,7 +6,7 @@ import {
 } from "@repo/util-plugin-sdk";
 
 import { RedisConnection } from "bullmq";
-import { test as testBase } from "vitest";
+import { it as baseIt } from "vitest";
 
 import { mockLogger } from "./create-mock-logger.ts";
 import { createMockPluginSettings } from "./create-mock-plugin-settings.ts";
@@ -14,7 +14,7 @@ import { createMockPluginSettings } from "./create-mock-plugin-settings.ts";
 import type { ApolloServerContext } from "@repo/core-util-mock-graphql-server";
 import type { Telemetry } from "bullmq";
 
-export const it = testBase
+export const it = baseIt
   .extend("server", async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
