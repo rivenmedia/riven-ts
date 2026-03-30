@@ -71,7 +71,7 @@ export default {
       // Pick the best subtitle per language (first result per language)
       const bestPerLanguage = new Map<string, (typeof results)[0]>();
       for (const sub of results) {
-        const subLangLower = sub.language.toLowerCase();
+        const subLangLower = sub.lang.toLowerCase();
         if (!bestPerLanguage.has(subLangLower)) {
           bestPerLanguage.set(subLangLower, sub);
         }
