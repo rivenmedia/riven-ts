@@ -1,9 +1,12 @@
 /* eslint-disable no-empty-pattern */
-import { DataSourceMap, type RivenPlugin } from "@repo/util-plugin-sdk";
+import {
+  type BaseDataSourceConfig,
+  DataSourceMap,
+  type RivenPlugin,
+} from "@repo/util-plugin-sdk";
 
-import { exec } from "node:child_process";
-import { promisify } from "node:util";
-import { expect, test as testBase } from "vitest";
+import { RedisConnection } from "bullmq";
+import { test as testBase } from "vitest";
 
 import { mockLogger } from "./create-mock-logger.ts";
 import { createMockPluginSettings } from "./create-mock-plugin-settings.ts";
@@ -11,38 +14,8 @@ import { createMockPluginSettings } from "./create-mock-plugin-settings.ts";
 import type { ApolloServerContext } from "@repo/core-util-mock-graphql-server";
 import type { Telemetry } from "bullmq";
 
-async function getRedisUrl(
-  onCleanup: (cleanupFunction: () => Promise<void>) => void,
-): Promise<string> {
-  const { RedisMemoryServer } = await import("redis-memory-server");
-
-  try {
-    const { stdout: redisServerBinary } =
-      await promisify(exec)("which redis-server");
-
-    const redisServer = new RedisMemoryServer({
-      binary: {
-        systemBinary: redisServerBinary.trim(),
-      },
-    });
-
-    const host = await redisServer.getHost();
-    const port = await redisServer.getPort();
-
-    onCleanup(async () => {
-      await redisServer.stop();
-    });
-
-    return `redis://${host}:${port.toString()}`;
-  } catch (error) {
-    expect.fail(
-      `Failed to start Redis Memory Server. Is "redis-server" is installed?\n${String(error)}`,
-    );
-  }
-}
-
 export const it = testBase
-  .extend("server", { scope: "file" }, async ({}, { onCleanup }) => {
+  .extend("server", async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
     const server = setupServer();
@@ -59,24 +32,17 @@ export const it = testBase
       });
     }
 
-    // Start the worker before the test.
     server.listen({
       onUnhandledRequest: "error",
     });
 
     onCleanup(() => {
-      // Remove any request handlers added in individual test cases.
-      // This prevents them from affecting unrelated tests.
-      server.resetHandlers();
-
-      // Stop the worker after the test.
       server.close();
     });
 
-    // Expose the worker object on the test's context.
     return server;
   })
-  .extend("logger", { scope: "worker" }, mockLogger)
+  .extend("logger", { scope: "file" }, mockLogger)
   .extend<"plugin", RivenPlugin>("plugin", { scope: "file" }, () => {
     throw new Error(
       'Plugin config must be provided before using the plugin test context. Use `it.override("plugin", <pluginConfig>)` to set the plugin config for your tests.',
@@ -84,41 +50,6 @@ export const it = testBase
   })
   .extend("settings", { scope: "file" }, ({ plugin }) =>
     createMockPluginSettings(plugin.settingsSchema, {}),
-  )
-  .extend(
-    "dataSourceMap",
-    { scope: "file" },
-    async ({ plugin, logger, settings }, { onCleanup }) => {
-      const dataSourceMap = new DataSourceMap();
-
-      if (plugin.dataSources) {
-        const { InMemoryLRUCache } =
-          await import("@apollo/utils.keyvaluecache");
-
-        const dataSourceConfig = {
-          cache: new InMemoryLRUCache(),
-          connection: {
-            url: await getRedisUrl(onCleanup),
-          },
-          logger,
-          pluginSymbol: plugin.name,
-          telemetry: undefined as unknown as Telemetry,
-          requestAttempts: 1,
-        };
-
-        for (const DataSourceClass of plugin.dataSources) {
-          const dataSourceInstance = new DataSourceClass({
-            ...dataSourceConfig,
-            pluginSymbol: plugin.name,
-            settings: settings.get(plugin.settingsSchema),
-          });
-
-          dataSourceMap.set(DataSourceClass, dataSourceInstance);
-        }
-      }
-
-      return dataSourceMap;
-    },
   )
   .extend("gqlServer", { scope: "file" }, async ({ plugin }, { onCleanup }) => {
     const { buildMockServer } =
@@ -132,15 +63,93 @@ export const it = testBase
 
     return mockServer;
   })
+  .extend("httpCache", { scope: "file" }, async () => {
+    const { InMemoryLRUCache } = await import("@apollo/utils.keyvaluecache");
+
+    return new InMemoryLRUCache();
+  })
+  .extend("redisClient", { scope: "file" }, async ({}, { onCleanup }) => {
+    const { RedisMemoryServer } = await import("redis-memory-server");
+    const { exec } = await import("node:child_process");
+    const { promisify } = await import("node:util");
+
+    async function getRedisServerBinary() {
+      try {
+        const { stdout: redisServerBinary } =
+          await promisify(exec)("which redis-server");
+
+        return redisServerBinary.trim();
+      } catch (error) {
+        throw new Error(
+          `Failed to find "redis-server" binary. Is Redis installed and available in your PATH?\n${String(error)}`,
+        );
+      }
+    }
+
+    try {
+      const systemBinary = await getRedisServerBinary();
+      const redisServer = new RedisMemoryServer({ binary: { systemBinary } });
+
+      const host = await redisServer.getHost();
+      const port = await redisServer.getPort();
+
+      const connection = new RedisConnection({ host, port });
+      const client = await connection.client;
+
+      await RedisConnection.waitUntilReady(client);
+
+      onCleanup(async () => {
+        await connection.close();
+        await redisServer.stop();
+      });
+
+      return client;
+    } catch (error) {
+      throw new Error(`Failed to get Redis URL.\n${String(error)}`);
+    }
+  })
+  .extend(
+    "dataSourceMap",
+    { scope: "file" },
+    ({ plugin, logger, settings, httpCache, redisClient }) => {
+      const dataSourceMap = new DataSourceMap();
+
+      if (plugin.dataSources) {
+        const dataSourceConfig = {
+          cache: httpCache,
+          connection: redisClient,
+          logger,
+          pluginSymbol: plugin.name,
+          telemetry: undefined as unknown as Telemetry,
+          requestAttempts: 1,
+          settings: settings.get(plugin.settingsSchema),
+        } satisfies BaseDataSourceConfig<Record<string, unknown>>;
+
+        for (const DataSourceClass of plugin.dataSources) {
+          dataSourceMap.set(
+            DataSourceClass,
+            new DataSourceClass(dataSourceConfig),
+          );
+        }
+      }
+
+      return dataSourceMap;
+    },
+  )
   .extend(
     "gqlContext",
-    { scope: "file" },
     ({ plugin, dataSourceMap }): ApolloServerContext => ({
       [plugin.name]: {
         dataSources: dataSourceMap,
       },
     }),
   );
+
+it.afterEach(async ({ httpCache, redisClient }) => {
+  httpCache.clear();
+
+  await redisClient.flushdb();
+});
 
 export type {
   KeyValueCache,

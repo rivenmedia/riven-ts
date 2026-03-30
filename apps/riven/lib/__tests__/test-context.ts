@@ -2,6 +2,7 @@
 import * as Sentry from "@sentry/node";
 import { Job, type JobsOptions } from "bullmq";
 import assert from "node:assert";
+import { randomUUID } from "node:crypto";
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "undici";
 import { test as testBase } from "vitest";
 
@@ -54,10 +55,6 @@ export const it = testBase
     });
 
     onCleanup(() => {
-      // Remove any request handlers added in individual test cases.
-      // This prevents them from affecting unrelated tests.
-      server.resetHandlers();
-
       // Stop the worker after the test.
       server.close();
     });
@@ -182,6 +179,10 @@ export const it = testBase
     "createMockJob",
     ({ mockQueue }) =>
       <T>(data: T, opts?: JobsOptions) =>
-        Job.create(mockQueue, crypto.randomUUID(), data, opts),
+        Job.create(mockQueue, randomUUID(), data, opts),
   )
   .extend("mockSentryScope", () => new Sentry.Scope());
+
+it.afterEach(({ mockSentryScope }) => {
+  mockSentryScope.clear();
+});
