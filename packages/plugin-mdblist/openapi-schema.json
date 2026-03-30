@@ -1321,7 +1321,8 @@
                             "type": "number"
                           },
                           "spoken_language": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "country": {
                             "type": "string"
@@ -1943,7 +1944,8 @@
                             "type": "number"
                           },
                           "spoken_language": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "country": {
                             "type": "string"
@@ -1987,7 +1989,8 @@
                             "type": "string"
                           },
                           "tvdb_id": {
-                            "type": "number"
+                            "type": "number",
+                            "nullable": true
                           },
                           "language": {
                             "type": "string"
@@ -1999,7 +2002,8 @@
                             "type": "number"
                           },
                           "spoken_language": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "country": {
                             "type": "string"
@@ -2753,7 +2757,8 @@
                       "type": "string"
                     },
                     "spoken_language": {
-                      "type": "string"
+                      "type": "string",
+                      "nullable": true
                     },
                     "country": {
                       "type": "string"
@@ -4941,7 +4946,8 @@
                             "type": "number"
                           },
                           "spoken_language": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "country": {
                             "type": "string"
@@ -10240,7 +10246,8 @@
                             "type": "string"
                           },
                           "spoken_language": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "country": {
                             "type": "string"
@@ -10284,7 +10291,8 @@
                             "type": "string"
                           },
                           "tvdb_id": {
-                            "type": "number"
+                            "type": "number",
+                            "nullable": true
                           },
                           "language": {
                             "type": "string"
@@ -10299,7 +10307,8 @@
                             "type": "string"
                           },
                           "spoken_language": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "country": {
                             "type": "string"
