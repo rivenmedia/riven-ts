@@ -42,7 +42,7 @@ async function getRedisUrl(
 }
 
 export const it = testBase
-  .extend("server", async ({}, { onCleanup }) => {
+  .extend("server", { scope: "file" }, async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
     const server = setupServer();
@@ -76,17 +76,18 @@ export const it = testBase
     // Expose the worker object on the test's context.
     return server;
   })
-  .extend("logger", mockLogger)
-  .extend<"plugin", RivenPlugin>("plugin", () => {
+  .extend("logger", { scope: "worker" }, mockLogger)
+  .extend<"plugin", RivenPlugin>("plugin", { scope: "file" }, () => {
     throw new Error(
       'Plugin config must be provided before using the plugin test context. Use `it.override("plugin", <pluginConfig>)` to set the plugin config for your tests.',
     );
   })
-  .extend("settings", ({ plugin }) =>
+  .extend("settings", { scope: "file" }, ({ plugin }) =>
     createMockPluginSettings(plugin.settingsSchema, {}),
   )
   .extend(
     "dataSourceMap",
+    { scope: "file" },
     async ({ plugin, logger, settings }, { onCleanup }) => {
       const dataSourceMap = new DataSourceMap();
 
@@ -119,7 +120,7 @@ export const it = testBase
       return dataSourceMap;
     },
   )
-  .extend("gqlServer", async ({ plugin }, { onCleanup }) => {
+  .extend("gqlServer", { scope: "file" }, async ({ plugin }, { onCleanup }) => {
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");
 
@@ -133,6 +134,7 @@ export const it = testBase
   })
   .extend(
     "gqlContext",
+    { scope: "file" },
     ({ plugin, dataSourceMap }): ApolloServerContext => ({
       [plugin.name]: {
         dataSources: dataSourceMap,
