@@ -8,14 +8,16 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
-import type {
-  ChangeSet,
-  EntityData,
-  EventArgs,
-  EventSubscriber,
-  FlushEventArgs,
-  UnitOfWork,
+import {
+  type ChangeSet,
+  type EntityData,
+  type EventArgs,
+  type EventSubscriber,
+  type FlushEventArgs,
+  type UnitOfWork,
+  wrap,
 } from "@mikro-orm/core";
+
 import type { Promisable } from "type-fest";
 
 type NextStatesMap = Map<MediaItem, MediaItemState>;
@@ -104,6 +106,12 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     nextStatesMap: NextStatesMap,
   ): Promise<MediaItemState> {
     if (entity instanceof Season) {
+      const wrappedEntity = wrap(entity);
+
+      if (!wrappedEntity.isInitialized()) {
+        await wrappedEntity.init();
+      }
+
       return this.#computeStateWithChildren(
         entity,
         await entity.episodes.loadItems(),
@@ -112,6 +120,12 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     }
 
     if (entity instanceof Show) {
+      const wrappedEntity = wrap(entity);
+
+      if (!wrappedEntity.isInitialized()) {
+        await wrappedEntity.init();
+      }
+
       return this.#computeStateWithChildren(
         entity,
         await entity.requestedSeasons.loadItems(),

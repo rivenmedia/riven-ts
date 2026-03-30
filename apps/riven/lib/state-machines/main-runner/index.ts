@@ -555,7 +555,7 @@ export const mainRunnerMachine = setup({
               },
             }) => ({
               get message() {
-                const baseMessage = `Successfully downloaded ${fullTitle} in ${durationFromRequestToDownload.toString()} seconds using ${downloader}`;
+                const baseMessage = `Successfully downloaded ${chalk.bold(fullTitle)} in ${durationFromRequestToDownload.toString()} seconds using ${downloader}`;
 
                 if (provider) {
                   return `${baseMessage} via ${provider}`;

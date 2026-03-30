@@ -14,8 +14,9 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
   async function ({ job }, sendEvent) {
     const [finalResult] = Object.values(await job.getChildrenValues());
 
+    const item = await database.mediaItem.findOneOrFail(job.data.id);
+
     if (!finalResult) {
-      const item = await database.mediaItem.findOneOrFail(job.data.id);
       const error = new UnrecoverableError(
         "No valid torrent found after trying all downloaders",
       );
@@ -79,7 +80,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
         sendEvent(error.payload);
 
         throw new UnrecoverableError(
-          `Failed to persist download results: ${String(error)}`,
+          `Failed to persist download results for ${item.fullTitle}: ${String(error)}`,
         );
       }
 
