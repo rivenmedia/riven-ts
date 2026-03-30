@@ -27,10 +27,7 @@ export async function createPluginWorker<
     ParamsFor<Extract<RivenEvent, { type: T }>>,
     Awaited<ReturnType<z.infer<R>>>
   >,
-  workerOptions?: Omit<
-    WorkerOptions,
-    "connection" | "telemetry" | "removeOnComplete" | "removeOnFail"
-  >,
+  workerOptions?: Omit<WorkerOptions, "connection" | "telemetry">,
 ) {
   const queueName = `${name}.plugin[${pluginName}]`;
 
