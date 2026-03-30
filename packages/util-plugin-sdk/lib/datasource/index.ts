@@ -106,8 +106,14 @@ export abstract class BaseDataSource<
           delay: 5000,
           jitter: 0.5,
         },
-        removeOnComplete: true,
-        removeOnFail: true,
+        removeOnComplete: {
+          age: 60 * 60,
+          count: 500,
+        },
+        removeOnFail: {
+          age: 60 * 60 * 24,
+          count: 5000,
+        },
       },
       streams: {
         events: {
@@ -162,7 +168,9 @@ export abstract class BaseDataSource<
           ? { limiter: this.rateLimiterOptions }
           : {}),
         telemetry,
-        concurrency: 1,
+        // The datasource worker only handles I/O operations, so a high concurrency can be used.
+        // https://docs.bullmq.io/guide/parallelism-and-concurrency#how-to-best-use-bullmqs-concurrency-then
+        concurrency: 200,
       },
     );
 
@@ -324,10 +332,10 @@ export abstract class BaseDataSource<
     throw new Error("Unable to determine the request body type.");
   }
 
-  override async fetch<TResult>(
+  override async fetch<T>(
     path: string,
     incomingRequest?: DataSourceRequest,
-  ): Promise<DataSourceFetchResult<TResult>> {
+  ): Promise<DataSourceFetchResult<T>> {
     const { augmentedRequest, url } = await this.#createAugmentedRequest(
       path,
       incomingRequest,
@@ -368,7 +376,7 @@ export abstract class BaseDataSource<
       },
     );
 
-    const result = await job.waitUntilFinished(this.#queueEvents, 60000);
+    const result = await job.waitUntilFinished(this.#queueEvents, 60_000);
 
     const logMessage = result.responseFromCache
       ? `[${this.serviceName}] Returned cached response for ${augmentedRequest.method ?? "GET"} ${url}`
@@ -383,7 +391,7 @@ export abstract class BaseDataSource<
     const { ok, ...responseInit } = result.response;
 
     return {
-      parsedBody: result.parsedBody as TResult,
+      parsedBody: result.parsedBody as T,
       response: new Response(null, responseInit),
 
       // The following fields aren't used by our application,
