@@ -2,7 +2,7 @@ import { BaseDataSource, type RivenPlugin } from "@repo/util-plugin-sdk";
 import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
 
 import { EntityRepository } from "@mikro-orm/core";
-import { RedisConnection } from "bullmq";
+import { type RedisClient, RedisConnection } from "bullmq";
 import { type Mock, afterAll, afterEach, expect, vi } from "vitest";
 import z from "zod";
 
@@ -104,7 +104,7 @@ expect.extend({
 
 let redisServer: RedisMemoryServer | undefined;
 let redisConnection: RedisConnection | undefined;
-let redisClient: Awaited<RedisConnection["client"]> | undefined;
+let redisClient: RedisClient | undefined;
 
 vi.doMock(import("./lib/utilities/settings.ts"), async (importOriginal) => {
   const { RedisMemoryServer } = await import("redis-memory-server");
