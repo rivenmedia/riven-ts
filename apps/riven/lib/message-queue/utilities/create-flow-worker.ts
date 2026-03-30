@@ -1,14 +1,10 @@
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
-import * as Sentry from "@sentry/node";
-import {
-  type QueueOptions,
-  UnrecoverableError,
-  Worker,
-  type WorkerOptions,
-} from "bullmq";
+import { type QueueOptions, Worker, type WorkerOptions } from "bullmq";
 import assert from "node:assert";
 import os from "node:os";
+import { URL } from "node:url";
+import { serialize } from "node:v8";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
@@ -16,26 +12,23 @@ import { telemetry } from "../../utilities/telemetry.ts";
 import { createQueue } from "./create-queue.ts";
 
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
-import type { Flow, FlowHandlers } from "../flows/index.ts";
+import type { Flow } from "../flows/index.ts";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 Worker.setMaxListeners(200);
 
-export async function createFlowWorker<
-  T extends ZodObject<{
+export async function createFlowWorker(
+  flowSchema: ZodObject<{
     name: ZodLiteral<Flow["name"]>;
     input: ZodType;
     output: ZodType;
   }>,
->(
-  flowSchema: T,
-  processor: ReturnType<
-    (typeof FlowHandlers)[T["shape"]["name"]["value"]]["implementAsync"]
-  >,
+  processorURL: URL,
   sendEvent: MainRunnerMachineIntake,
   queueOptions?: Omit<QueueOptions, "connection" | "telemetry">,
   workerOptions?: Omit<WorkerOptions, "connection" | "telemetry">,
 ) {
+  console.log(processorURL);
   const [flowName] = flowSchema.shape.name.def.values;
 
   assert(
@@ -47,27 +40,7 @@ export async function createFlowWorker<
 
   const worker = new Worker(
     flowName,
-    async (job, token) => {
-      return await Sentry.withScope(async (scope) => {
-        scope.setTags({
-          "riven.flow.name": flowName,
-          "bullmq.queue.name": flowName,
-          "bullmq.job.id": job.id,
-        });
-
-        try {
-          return await processor({ job, token, scope } as never, sendEvent);
-        } catch (error) {
-          Sentry.captureException(error);
-
-          if (error instanceof Error) {
-            throw error;
-          }
-
-          throw new UnrecoverableError(String(error));
-        }
-      });
-    },
+    new URL(import.meta.resolve("./test-worker.js")),
     {
       concurrency: os.availableParallelism(),
       removeOnComplete: { count: 50 },
@@ -76,6 +49,10 @@ export async function createFlowWorker<
         count: 5000,
       },
       ...workerOptions,
+      useWorkerThreads: true,
+      workerThreadsOptions: {
+        execArgv: [],
+      },
       connection: {
         url: settings.redisUrl,
       },
@@ -84,6 +61,10 @@ export async function createFlowWorker<
   );
 
   registerMQListeners(worker, logger);
+
+  worker.on("completed", (job) => {
+    console.log(job.returnvalue);
+  });
 
   worker.on("failed", (_job, error) => {
     logger.error("Flow worker encountered an error", { err: error });

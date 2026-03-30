@@ -1,20 +1,12 @@
 import { type ActorRef, type Snapshot, fromPromise } from "xstate";
 
-import { downloadItemProcessor } from "../../../message-queue/flows/download-item/download-item.processor.ts";
 import { DownloadItemFlow } from "../../../message-queue/flows/download-item/download-item.schema.ts";
-import { findValidTorrentProcessor } from "../../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.processor.ts";
 import { FindValidTorrentFlow } from "../../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
-import { mapItemsToFilesProcessor } from "../../../message-queue/flows/download-item/steps/map-items-to-files/map-items-to-files.processor.ts";
 import { MapItemsToFilesFlow } from "../../../message-queue/flows/download-item/steps/map-items-to-files/map-items-to-files.schema.ts";
-import { rankStreamsProcessor } from "../../../message-queue/flows/download-item/steps/rank-streams/rank-streams.processor.ts";
 import { RankStreamsFlow } from "../../../message-queue/flows/download-item/steps/rank-streams/rank-streams.schema.ts";
-import { indexItemProcessor } from "../../../message-queue/flows/index-item/index-item.processor.ts";
 import { RequestIndexDataFlow } from "../../../message-queue/flows/index-item/index-item.schema.ts";
-import { requestContentServicesProcessor } from "../../../message-queue/flows/request-content-services/request-content-services.processor.ts";
 import { RequestContentServicesFlow } from "../../../message-queue/flows/request-content-services/request-content-services.schema.ts";
-import { scrapeItemProcessor } from "../../../message-queue/flows/scrape-item/scrape-item.processor.ts";
 import { ScrapeItemFlow } from "../../../message-queue/flows/scrape-item/scrape-item.schema.ts";
-import { parseScrapeResultsProcessor } from "../../../message-queue/flows/scrape-item/steps/parse-scrape-results/parse-scrape-results.processor.ts";
 import { ParseScrapeResultsFlow } from "../../../message-queue/flows/scrape-item/steps/parse-scrape-results/parse-scrape-results.schema.ts";
 import { createFlowWorker } from "../../../message-queue/utilities/create-flow-worker.ts";
 
@@ -43,43 +35,64 @@ export const bootstrapFlowWorkers = fromPromise<
   return {
     "index-item": await createFlowWorker(
       RequestIndexDataFlow,
-      indexItemProcessor,
+      new URL(
+        import.meta
+          .resolve("../../../message-queue/flows/index-item/index-item.processor.js"),
+      ),
       parentRef.send,
       {},
       { concurrency: 1 },
     ),
     "request-content-services": await createFlowWorker(
       RequestContentServicesFlow,
-      requestContentServicesProcessor,
+      new URL(
+        import.meta
+          .resolve("../../../message-queue/flows/request-content-services/request-content-services.processor.js"),
+      ),
       parentRef.send,
       {},
       { concurrency: 1 },
     ),
     "scrape-item": await createFlowWorker(
       ScrapeItemFlow,
-      scrapeItemProcessor,
+      new URL(
+        import.meta
+          .resolve("../../../message-queue/flows/scrape-item/scrape-item.processor.js"),
+      ),
       parentRef.send,
       {},
       { concurrency: 1 },
     ),
     "scrape-item.parse-scrape-results": await createFlowWorker(
       ParseScrapeResultsFlow,
-      parseScrapeResultsProcessor,
+      new URL(
+        import.meta
+          .resolve("../../../message-queue/flows/scrape-item/steps/parse-scrape-results/parse-scrape-results.processor.js"),
+      ),
       parentRef.send,
     ),
     "download-item": await createFlowWorker(
       DownloadItemFlow,
-      downloadItemProcessor,
+      new URL(
+        import.meta
+          .resolve("../../../message-queue/flows/download-item/download-item.processor.js"),
+      ),
       parentRef.send,
     ),
     "download-item.map-items-to-files": await createFlowWorker(
       MapItemsToFilesFlow,
-      mapItemsToFilesProcessor,
+      new URL(
+        import.meta
+          .resolve("../../../message-queue/flows/download-item/steps/map-items-to-files/map-items-to-files.processor.js"),
+      ),
       parentRef.send,
     ),
     "download-item.find-valid-torrent": await createFlowWorker(
       FindValidTorrentFlow,
-      findValidTorrentProcessor,
+      new URL(
+        import.meta
+          .resolve("../../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.processor.js"),
+      ),
       parentRef.send,
       {
         streams: {
@@ -91,7 +104,10 @@ export const bootstrapFlowWorkers = fromPromise<
     ),
     "download-item.rank-streams": await createFlowWorker(
       RankStreamsFlow,
-      rankStreamsProcessor,
+      new URL(
+        import.meta
+          .resolve("../../../message-queue/flows/download-item/steps/rank-streams/rank-streams.processor.js"),
+      ),
       parentRef.send,
     ),
   };

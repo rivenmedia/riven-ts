@@ -4,13 +4,18 @@ import { UnrecoverableError } from "bullmq";
 
 import { database } from "../../../../../database/database.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
-import { parseScrapeResultsProcessorSchema } from "./parse-scrape-results.schema.ts";
+import { createSandboxedJobProcessor } from "../../../../utilities/create-sandboxed-job.processor.ts";
+import {
+  ParseScrapeResultsFlow,
+  parseScrapeResultsProcessorSchema,
+} from "./parse-scrape-results.schema.ts";
 import {
   SkippedTorrentError,
   validateTorrent,
 } from "./utilities/validate-torrent.ts";
 
-export const parseScrapeResultsProcessor =
+module.exports = createSandboxedJobProcessor(
+  ParseScrapeResultsFlow,
   parseScrapeResultsProcessorSchema.implementAsync(async function ({ job }) {
     const children = await job.getChildrenValues();
 
@@ -66,4 +71,5 @@ export const parseScrapeResultsProcessor =
       title: itemTitle,
       results: validResults,
     };
-  });
+  }),
+);

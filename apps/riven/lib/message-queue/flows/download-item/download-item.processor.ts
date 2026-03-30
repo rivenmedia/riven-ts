@@ -7,11 +7,19 @@ import { UnrecoverableError } from "bullmq";
 import { DateTime } from "luxon";
 
 import { database } from "../../../database/database.ts";
-import { downloadItemProcessorSchema } from "./download-item.schema.ts";
+import { createSandboxedJobProcessor } from "../../utilities/create-sandboxed-job.processor.js";
+import {
+  DownloadItemFlow,
+  downloadItemProcessorSchema,
+} from "./download-item.schema.ts";
 import { persistDownloadResults } from "./utilities/persist-download-results.ts";
 
-export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
-  async function ({ job }, sendEvent) {
+module.exports = createSandboxedJobProcessor(
+  DownloadItemFlow,
+  downloadItemProcessorSchema.implementAsync(async function (
+    { job },
+    sendEvent,
+  ) {
     const [finalResult] = Object.values(await job.getChildrenValues());
 
     if (!finalResult) {
@@ -85,5 +93,5 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
 
       throw error;
     }
-  },
+  }),
 );

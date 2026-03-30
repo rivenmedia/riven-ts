@@ -1,14 +1,19 @@
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
-import { requestContentServicesProcessorSchema } from "./request-content-services.schema.ts";
+import { createSandboxedJobProcessor } from "../../utilities/create-sandboxed-job.processor.ts";
+import {
+  RequestContentServicesFlow,
+  requestContentServicesProcessorSchema,
+} from "./request-content-services.schema.ts";
 import { calculateRequestResults } from "./utilities/calculate-request-results.ts";
 import { persistRequestedMovie } from "./utilities/persist-requested-movie.ts";
 import { persistRequestedShow } from "./utilities/persist-requested-show.ts";
 
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
-export const requestContentServicesProcessor =
+module.exports = createSandboxedJobProcessor(
+  RequestContentServicesFlow,
   requestContentServicesProcessorSchema.implementAsync(
     async ({ job }, sendEvent) => {
       const data = await job.getChildrenValues();
@@ -53,4 +58,5 @@ export const requestContentServicesProcessor =
         updatedItems,
       };
     },
-  );
+  ),
+);
