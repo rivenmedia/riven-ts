@@ -40,9 +40,8 @@ import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscrib
 import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
 import type { EnqueueDownloadItemInput } from "../../message-queue/flows/download-item/enqueue-download-item.ts";
 import type { EnqueueIndexItemInput } from "../../message-queue/flows/index-item/enqueue-index-item.ts";
-import type { EnqueueScrapeItemInput } from "../../message-queue/flows/scrape-item/enqueue-scrape-items.ts";
 import type { EnqueueRequestSubtitlesInput } from "../../message-queue/flows/request-subtitles/enqueue-request-subtitles.ts";
-
+import type { EnqueueScrapeItemInput } from "../../message-queue/flows/scrape-item/enqueue-scrape-items.ts";
 import type {
   PluginQueueMap,
   PluginWorkerMap,
