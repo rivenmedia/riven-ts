@@ -2,7 +2,7 @@
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
   "globalEnv": ["NODE_ENV"],
-  "globalPassThroughEnv": ["DEBUG", "CI"],
+  "globalPassThroughEnv": ["DEBUG", "CI", "l"],
   "globalDependencies": [".node-version"],
   "tasks": {
     "transit": {
