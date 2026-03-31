@@ -88,6 +88,7 @@ export const bootstrapFlowWorkers = fromPromise<
           },
         },
       },
+      { concurrency: 10 },
     ),
     "download-item.rank-streams": await createFlowWorker(
       RankStreamsFlow,
