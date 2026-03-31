@@ -3,11 +3,11 @@ import z from "zod";
 import {
   MapItemsToFilesSandboxedJob,
   mapItemsToFilesProcessorSchema,
-} from "./map-items-to-files/map-items-to-files.schema.ts";
+} from "./jobs/map-items-to-files/map-items-to-files.schema.ts";
 import {
   ParseScrapeResultsSandboxedJob,
   parseScrapeResultsProcessorSchema,
-} from "./parse-scrape-results/parse-scrape-results.schema.ts";
+} from "./jobs/parse-scrape-results/parse-scrape-results.schema.ts";
 
 export const SandboxedJobDefinition = z.discriminatedUnion("name", [
   ParseScrapeResultsSandboxedJob,

@@ -3,8 +3,8 @@ import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 
 import z from "zod";
 
-import { createFlowJobBuilder } from "../../utilities/create-flow-job-builder.ts";
-import { createSandboxedJobSchema } from "../utilities/create-sandboxed-job-schema.ts";
+import { createFlowJobBuilder } from "../../../utilities/create-flow-job-builder.ts";
+import { createSandboxedJobSchema } from "../../utilities/create-sandboxed-job-schema.ts";
 
 export const MapItemsToFilesSandboxedJob = createSandboxedJobSchema(
   "download-item.map-items-to-files",

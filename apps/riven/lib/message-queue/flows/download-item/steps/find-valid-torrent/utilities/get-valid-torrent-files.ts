@@ -1,6 +1,6 @@
+import { validateTorrentFiles } from "../../../../../sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.ts";
 import { runSingleJob } from "../../../../../utilities/run-single-job.ts";
 import { enqueueMapItemsToFiles } from "../../../enqueue-map-items-to-files.ts";
-import { validateTorrentFiles } from "./validate-torrent-files.ts";
 
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";

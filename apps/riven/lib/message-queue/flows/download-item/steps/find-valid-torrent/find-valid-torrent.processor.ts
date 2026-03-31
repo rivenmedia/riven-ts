@@ -4,12 +4,12 @@ import assert from "node:assert";
 
 import { database } from "../../../../../database/database.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
+import { InvalidTorrentError } from "../../../../sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.ts";
 import { findValidTorrentProcessorSchema } from "./find-valid-torrent.schema.ts";
 import { getCachedTorrentFiles } from "./utilities/get-cached-torrent-files.ts";
 import { getPluginDownloadResult } from "./utilities/get-plugin-download-result.ts";
 import { getPluginProviderList } from "./utilities/get-plugin-provider-list.ts";
 import { getValidTorrentFiles } from "./utilities/get-valid-torrent-files.ts";
-import { InvalidTorrentError } from "./utilities/validate-torrent-files.ts";
 
 export const findValidTorrentProcessor =
   findValidTorrentProcessorSchema.implementAsync(async function ({

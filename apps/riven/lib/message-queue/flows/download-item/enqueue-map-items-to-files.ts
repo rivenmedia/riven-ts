@@ -1,7 +1,7 @@
 import {
   type MapItemsToFilesSandboxedJob,
   createMapItemsToFilesJob,
-} from "../../sandboxed-jobs/map-items-to-files/map-items-to-files.schema.ts";
+} from "../../sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
 import { flow } from "../producer.ts";
 
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";

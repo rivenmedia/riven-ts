@@ -1,7 +1,7 @@
 import { fromPromise } from "xstate";
 
-import { MapItemsToFilesSandboxedJob } from "../../../message-queue/sandboxed-jobs/map-items-to-files/map-items-to-files.schema.ts";
-import { ParseScrapeResultsSandboxedJob } from "../../../message-queue/sandboxed-jobs/parse-scrape-results/parse-scrape-results.schema.ts";
+import { MapItemsToFilesSandboxedJob } from "../../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
+import { ParseScrapeResultsSandboxedJob } from "../../../message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.schema.ts";
 import { createSandboxedWorker } from "../../../message-queue/sandboxed-jobs/utilities/create-sandboxed-worker.ts";
 
 import type { SandboxedJobDefinition } from "../../../message-queue/sandboxed-jobs/index.ts";
@@ -24,7 +24,7 @@ export const bootstrapSandboxedWorkers =
         ParseScrapeResultsSandboxedJob,
         new URL(
           import.meta
-            .resolve("../../../message-queue/sandboxed-jobs/parse-scrape-results/parse-scrape-results.processor.ts"),
+            .resolve("../../../message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.processor.ts"),
         ),
         {},
         { concurrency: 5 },
@@ -33,7 +33,7 @@ export const bootstrapSandboxedWorkers =
         MapItemsToFilesSandboxedJob,
         new URL(
           import.meta
-            .resolve("../../../message-queue/sandboxed-jobs/map-items-to-files/map-items-to-files.processor.ts"),
+            .resolve("../../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.processor.ts"),
         ),
         {},
         { concurrency: 5 },

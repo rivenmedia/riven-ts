@@ -1,8 +1,8 @@
 import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
-import { it as baseIt } from "../../../__tests__/test-context.ts";
-import * as settingsModule from "../../../utilities/settings.ts";
+import { it as baseIt } from "../../../../__tests__/test-context.ts";
+import * as settingsModule from "../../../../utilities/settings.ts";
 import parseScrapeResultsProcessor from "./parse-scrape-results.processor.ts";
 
 const it = baseIt.extend("scrapeResults", {

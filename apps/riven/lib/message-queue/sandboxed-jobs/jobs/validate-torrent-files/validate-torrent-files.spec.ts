@@ -1,9 +1,9 @@
 import { expect } from "vitest";
 
-import { it } from "../../../../../../__tests__/test-context.ts";
+import { it } from "../../../../__tests__/test-context.ts";
 import { validateTorrentFiles } from "./validate-torrent-files.ts";
 
-import type { MapItemsToFilesSandboxedJob } from "../../../../../sandboxed-jobs/map-items-to-files/map-items-to-files.schema.ts";
+import type { MapItemsToFilesSandboxedJob } from "../map-items-to-files/map-items-to-files.schema.ts";
 
 type MappedFiles = MapItemsToFilesSandboxedJob["output"];
 
