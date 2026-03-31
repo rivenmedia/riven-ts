@@ -1,20 +1,20 @@
 import type { FileChunkCalculations } from "../schemas/file-chunk-calculations.schema.ts";
 import type { Dispatcher } from "undici";
 
-export interface MediaFileHandleMetadata {
-  type: "media";
+interface FileHandleMetadataBase {
   fileSize: number;
   filePath: string;
   fileBaseName: string;
+}
+
+export interface MediaFileHandleMetadata extends FileHandleMetadataBase {
+  type: "media";
   originalFileName: string;
   url: string;
 }
 
-export interface SubtitleFileHandleMetadata {
+export interface SubtitleFileHandleMetadata extends FileHandleMetadataBase {
   type: "subtitle";
-  fileSize: number;
-  filePath: string;
-  fileBaseName: string;
   contentBuffer: Buffer;
 }
 

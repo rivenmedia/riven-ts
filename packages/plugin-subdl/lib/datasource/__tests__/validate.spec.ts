@@ -65,10 +65,27 @@ it("returns subtitles for a movie search", async ({
   server.use(
     http.get("https://api.subdl.com/api/v1/subtitles", ({ request }) => {
       const url = new URL(request.url);
-      expect(url.search).toContain("27205");
-      expect(url.search).toContain("movie");
-      expect(url.search).toContain("en");
-      expect(url.search).toContain("de");
+
+      if (url.searchParams.get("tmdbId") !== "27205") {
+        return HttpResponse.json(
+          { status: false, error: "Invalid tmdbId" },
+          { status: 200 },
+        );
+      }
+
+      if (url.searchParams.get("type") !== "movie") {
+        return HttpResponse.json(
+          { status: false, error: "Invalid type" },
+          { status: 200 },
+        );
+      }
+
+      if (url.searchParams.getAll("languages").sort().join(",") !== "de,en") {
+        return HttpResponse.json(
+          { status: false, error: "Invalid languages" },
+          { status: 200 },
+        );
+      }
 
       return HttpResponse.json({
         status: true,

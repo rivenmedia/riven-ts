@@ -22,7 +22,7 @@ export const SubtitleData = z.object({
   language: z.string().min(1),
   content: z.string().min(1),
   fileHash: z.string().min(1),
-  fileSize: z.number().int().nonnegative(),
+  fileSize: z.int().nonnegative(),
   sourceProvider: z.string().min(1),
   sourceId: z.string().optional(),
 });

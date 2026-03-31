@@ -8,6 +8,7 @@ import { SubdlSettingsResolver } from "./schema/subdl-settings.resolver.ts";
 import { SubdlResolver } from "./schema/subdl.resolver.ts";
 import { pluginConfig } from "./subdl-plugin.config.ts";
 import { SubdlSettings } from "./subdl-settings.schema.ts";
+import { getItemMetadata } from "./utilities/get-item-metadata.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { SubtitleData } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";
@@ -20,32 +21,23 @@ export default {
   hooks: {
     "riven.media-item.subtitle.requested": async ({
       dataSources,
-      event,
+      event: { item },
       settings,
       logger,
     }) => {
       const api = dataSources.get(SubdlAPI);
       const { languages } = settings.get(SubdlSettings);
-      const item = event.item;
 
-      let tmdbId: string | undefined;
-      let imdbId: string | undefined;
-      let seasonNumber: number | undefined;
-      let episodeNumber: number | undefined;
-      let type: "movie" | "tv";
+      const meta = getItemMetadata(item);
 
-      if (item instanceof Movie) {
-        tmdbId = item.tmdbId;
-        imdbId = item.imdbId ?? undefined;
-        type = "movie";
-      } else if (item instanceof Episode) {
-        imdbId = item.imdbId ?? undefined;
-        type = "tv";
-        seasonNumber = item.season.getProperty("number");
-        episodeNumber = item.number;
-      } else {
+      if (!meta) {
+        logger.warn(
+          `Unsupported media item type for ${item.fullTitle}, skipping subtitle download`,
+        );
         return { subtitles: [] };
       }
+
+      const { tmdbId, imdbId, seasonNumber, episodeNumber, type } = meta;
 
       if (!tmdbId && !imdbId) {
         logger.warn(
