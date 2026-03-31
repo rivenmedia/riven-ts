@@ -44,7 +44,7 @@ export const parseScrapeResultsProcessor =
           if (error instanceof SkippedTorrentError) {
             logger.silly(error.message);
           } else {
-            logger.error(
+            logger.debug(
               `Failed to parse torrent ${rawTitle} (${hash}) for ${itemTitle}`,
               { err: error },
             );
