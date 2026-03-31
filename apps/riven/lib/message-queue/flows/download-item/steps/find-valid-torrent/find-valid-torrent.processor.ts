@@ -15,7 +15,7 @@ import { getPluginProviderList } from "./utilities/get-plugin-provider-list.ts";
 import { getValidTorrentFiles } from "./utilities/get-valid-torrent-files.ts";
 import { InvalidTorrentError } from "./utilities/validate-torrent-files.ts";
 
-module.exports = createSandboxedJobProcessor(
+export default createSandboxedJobProcessor(
   FindValidTorrentFlow,
   findValidTorrentProcessorSchema.implementAsync(async function ({
     job,

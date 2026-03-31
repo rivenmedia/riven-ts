@@ -12,7 +12,7 @@ import { persistRequestedShow } from "./utilities/persist-requested-show.ts";
 
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
-module.exports = createSandboxedJobProcessor(
+export default createSandboxedJobProcessor(
   RequestContentServicesFlow,
   requestContentServicesProcessorSchema.implementAsync(
     async ({ job }, sendEvent) => {

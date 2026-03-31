@@ -14,7 +14,7 @@ import {
   validateTorrent,
 } from "./utilities/validate-torrent.ts";
 
-module.exports = createSandboxedJobProcessor(
+export default createSandboxedJobProcessor(
   ParseScrapeResultsFlow,
   parseScrapeResultsProcessorSchema.implementAsync(async function ({ job }) {
     const children = await job.getChildrenValues();

@@ -13,7 +13,7 @@ import { persistShowIndexerData } from "./utilities/persist-show-indexer-data.ts
 
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-module.exports = createSandboxedJobProcessor(
+export default createSandboxedJobProcessor(
   RequestIndexDataFlow,
   requestIndexDataProcessorSchema.implementAsync(async function (
     { job },

@@ -14,7 +14,7 @@ import {
 } from "./download-item.schema.ts";
 import { persistDownloadResults } from "./utilities/persist-download-results.ts";
 
-module.exports = createSandboxedJobProcessor(
+export default createSandboxedJobProcessor(
   DownloadItemFlow,
   downloadItemProcessorSchema.implementAsync(async function (
     { job },

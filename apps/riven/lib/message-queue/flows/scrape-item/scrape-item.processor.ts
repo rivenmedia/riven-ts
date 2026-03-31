@@ -13,7 +13,7 @@ import { persistScrapeResults } from "./utilities/persist-scrape-results.ts";
 
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
-module.exports = createSandboxedJobProcessor(
+export default createSandboxedJobProcessor(
   ScrapeItemFlow,
   scrapeItemProcessorSchema.implementAsync(async function ({ job }, sendEvent) {
     const children = await job.getChildrenValues();

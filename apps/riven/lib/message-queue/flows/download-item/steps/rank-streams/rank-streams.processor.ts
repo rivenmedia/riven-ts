@@ -19,7 +19,7 @@ import {
 } from "./rank-streams.schema.ts";
 import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution.ts";
 
-module.exports = createSandboxedJobProcessor(
+export default createSandboxedJobProcessor(
   RankStreamsFlow,
   rankStreamsProcessorSchema.implementAsync(async function ({ job }) {
     const streams = await database.stream.find({
