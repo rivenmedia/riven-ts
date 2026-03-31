@@ -5,15 +5,19 @@ import { database } from "../../database/database.ts";
 export const getMoviesDirectoryEntries = async (
   tmdbId: string | undefined,
 ): Promise<string[]> => {
-  const entries = await database.mediaEntry.find(
-    {
-      mediaItem: {
-        type: "movie",
-        ...(tmdbId && { tmdbId }),
-      },
+  const filter = {
+    mediaItem: {
+      type: "movie" as const,
+      ...(tmdbId && { tmdbId }),
     },
-    { populate: ["$infer"] },
-  );
+  };
+
+  const [mediaEntries, subtitleEntries] = await Promise.all([
+    database.mediaEntry.find(filter, { populate: ["$infer"] }),
+    database.subtitleEntry.find(filter, { populate: ["$infer"] }),
+  ]);
+
+  const entries = [...mediaEntries, ...subtitleEntries];
 
   return Array.from(
     await reduceAsync(
