@@ -65,10 +65,8 @@ export const bootstrapFlowWorkers = fromPromise<
     "scrape-item.parse-scrape-results": await createSandboxedWorker(
       ParseScrapeResultsSandboxedJob,
       new URL(
-        import.meta.resolve(
-          "../../../message-queue/sandboxed-jobs/parse-scrape-results/parse-scrape-results.processor.ts",
-          import.meta.url,
-        ),
+        import.meta
+          .resolve("../../../message-queue/sandboxed-jobs/parse-scrape-results/parse-scrape-results.processor.ts"),
       ),
       {},
       { concurrency: 5 },
