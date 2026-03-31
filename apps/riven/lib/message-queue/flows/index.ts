@@ -1,6 +1,10 @@
 import z from "zod";
 
 import {
+  ParseScrapeResultsSandboxedJob,
+  parseScrapeResultsProcessorSchema,
+} from "../sandboxed-jobs/parse-scrape-results/parse-scrape-results.schema.ts";
+import {
   DownloadItemFlow,
   downloadItemProcessorSchema,
 } from "./download-item/download-item.schema.ts";
@@ -28,10 +32,6 @@ import {
   ScrapeItemFlow,
   scrapeItemProcessorSchema,
 } from "./scrape-item/scrape-item.schema.ts";
-import {
-  ParseScrapeResultsSandboxedJob,
-  parseScrapeResultsProcessorSchema,
-} from "./scrape-item/steps/parse-scrape-results/parse-scrape-results.schema.ts";
 
 export const Flow = z.discriminatedUnion("name", [
   RequestIndexDataFlow,

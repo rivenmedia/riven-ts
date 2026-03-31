@@ -8,7 +8,7 @@ import assert from "node:assert";
 import type {
   SandboxedJobDefinition,
   SandboxedJobHandlers,
-} from "../flows/index.ts";
+} from "../../flows/index.ts";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 export function createSandboxedJobProcessor<

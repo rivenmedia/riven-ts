@@ -5,12 +5,12 @@ import assert from "node:assert";
 import os from "node:os";
 import { URL } from "node:url";
 
-import { logger } from "../../utilities/logger/logger.ts";
-import { settings } from "../../utilities/settings.ts";
-import { telemetry } from "../../utilities/telemetry.ts";
-import { createQueue } from "./create-queue.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
+import { settings } from "../../../utilities/settings.ts";
+import { telemetry } from "../../../utilities/telemetry.ts";
+import { createQueue } from "../../utilities/create-queue.ts";
 
-import type { SandboxedJobDefinition } from "../flows/index.ts";
+import type { SandboxedJobDefinition } from "../../flows/index.ts";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 Worker.setMaxListeners(200);

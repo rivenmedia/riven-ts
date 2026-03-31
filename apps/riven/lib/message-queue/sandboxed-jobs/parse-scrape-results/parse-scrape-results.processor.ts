@@ -1,6 +1,6 @@
 import { UnrecoverableError } from "bullmq";
 
-import { createSandboxedJobProcessor } from "../../../../utilities/create-sandboxed-job.processor.js";
+import { createSandboxedJobProcessor } from "../utilities/create-sandboxed-job.processor.ts";
 import {
   ParseScrapeResultsSandboxedJob,
   parseScrapeResultsProcessorSchema,
@@ -24,12 +24,11 @@ export default createSandboxedJobProcessor(
       {},
     );
 
-    const { withORM } = await import("../../../../utilities/with-orm.ts");
+    const { withORM } = await import("../utilities/with-orm.ts");
     const { parse } = await import("@repo/util-rank-torrent-name");
     const { SkippedTorrentError, validateTorrent } =
       await import("./utilities/validate-torrent.ts");
-    const { logger } =
-      await import("../../../../../utilities/logger/logger.ts");
+    const { logger } = await import("../../../utilities/logger/logger.ts");
 
     return withORM(async (database) => {
       const item = await database.mediaItem.findOneOrFail(job.data.id);

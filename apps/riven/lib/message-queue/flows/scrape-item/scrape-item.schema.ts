@@ -1,8 +1,8 @@
 import z from "zod";
 
+import { ParseScrapeResultsSandboxedJob } from "../../sandboxed-jobs/parse-scrape-results/parse-scrape-results.schema.ts";
 import { createFlowJobBuilder } from "../../utilities/create-flow-job-builder.ts";
 import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
-import { ParseScrapeResultsSandboxedJob } from "./steps/parse-scrape-results/parse-scrape-results.schema.ts";
 
 export const ScrapeItemFlow = createFlowSchema("scrape-item", {
   children: ParseScrapeResultsSandboxedJob.shape.output,

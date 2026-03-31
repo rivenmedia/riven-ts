@@ -1,4 +1,4 @@
-import type { Services } from "../../database/database.ts";
+import type { Services } from "../../../database/database.ts";
 import type { Promisable } from "type-fest";
 
 type WithORMCallback<T> = (database: Services) => Promisable<T>;
@@ -11,8 +11,8 @@ type WithORMCallback<T> = (database: Services) => Promisable<T>;
  * @returns The return value of the callback.
  */
 export async function withORM<T>(callback: WithORMCallback<T>): Promise<T> {
-  const { initORM } = await import("../../database/database.ts");
-  const { databaseConfig } = await import("../../database/config.ts");
+  const { initORM } = await import("../../../database/database.ts");
+  const { databaseConfig } = await import("../../../database/config.ts");
 
   const database = await initORM(databaseConfig);
 
