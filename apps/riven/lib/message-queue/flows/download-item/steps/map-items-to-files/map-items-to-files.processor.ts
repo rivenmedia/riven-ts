@@ -1,13 +1,7 @@
-import { createSandboxedJobProcessor } from "../../../../utilities/create-sandboxed-job.processor.ts";
-import {
-  MapItemsToFilesFlow,
-  mapItemsToFilesProcessorSchema,
-} from "./map-items-to-files.schema.ts";
+import { mapItemsToFilesProcessorSchema } from "./map-items-to-files.schema.ts";
 import { mapItemsToFiles } from "./utilities/map-items-to-files.ts";
 
-export default createSandboxedJobProcessor(
-  MapItemsToFilesFlow,
+export const mapItemsToFilesProcessor =
   mapItemsToFilesProcessorSchema.implementAsync(function ({ job }) {
     return mapItemsToFiles(job.data.files);
-  }),
-);
+  });

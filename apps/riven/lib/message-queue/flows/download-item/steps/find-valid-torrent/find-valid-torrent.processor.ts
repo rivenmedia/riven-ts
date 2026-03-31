@@ -4,19 +4,14 @@ import assert from "node:assert";
 
 import { database } from "../../../../../database/database.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
-import { createSandboxedJobProcessor } from "../../../../utilities/create-sandboxed-job.processor.ts";
-import {
-  FindValidTorrentFlow,
-  findValidTorrentProcessorSchema,
-} from "./find-valid-torrent.schema.ts";
+import { findValidTorrentProcessorSchema } from "./find-valid-torrent.schema.ts";
 import { getCachedTorrentFiles } from "./utilities/get-cached-torrent-files.ts";
 import { getPluginDownloadResult } from "./utilities/get-plugin-download-result.ts";
 import { getPluginProviderList } from "./utilities/get-plugin-provider-list.ts";
 import { getValidTorrentFiles } from "./utilities/get-valid-torrent-files.ts";
 import { InvalidTorrentError } from "./utilities/validate-torrent-files.ts";
 
-export default createSandboxedJobProcessor(
-  FindValidTorrentFlow,
+export const findValidTorrentProcessor =
   findValidTorrentProcessorSchema.implementAsync(async function ({
     job,
     scope,
@@ -171,5 +166,4 @@ export default createSandboxedJobProcessor(
     throw new UnrecoverableError(
       `No valid torrent found for ${mediaItem.fullTitle} after trying ${availableDownloaders.length.toString()} plugins`,
     );
-  }),
-);
+  });

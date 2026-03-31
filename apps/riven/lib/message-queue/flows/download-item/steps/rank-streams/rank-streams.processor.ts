@@ -11,17 +11,12 @@ import chalk from "chalk";
 import { database } from "../../../../../database/database.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../utilities/settings.ts";
-import { createSandboxedJobProcessor } from "../../../../utilities/create-sandboxed-job.processor.ts";
 import { SkippedTorrentError } from "../../../scrape-item/steps/parse-scrape-results/utilities/validate-torrent.ts";
-import {
-  RankStreamsFlow,
-  rankStreamsProcessorSchema,
-} from "./rank-streams.schema.ts";
+import { rankStreamsProcessorSchema } from "./rank-streams.schema.ts";
 import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution.ts";
 
-export default createSandboxedJobProcessor(
-  RankStreamsFlow,
-  rankStreamsProcessorSchema.implementAsync(async function ({ job }) {
+export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
+  async function ({ job }) {
     const streams = await database.stream.find({
       infoHash: {
         $in: Object.keys(job.data.streams),
@@ -90,5 +85,5 @@ export default createSandboxedJobProcessor(
     );
 
     return sortedTorrentsByResolution;
-  }),
+  },
 );

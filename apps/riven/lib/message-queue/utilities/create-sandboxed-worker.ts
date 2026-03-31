@@ -1,14 +1,9 @@
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
-import * as Sentry from "@sentry/node";
-import {
-  type QueueOptions,
-  UnrecoverableError,
-  Worker,
-  type WorkerOptions,
-} from "bullmq";
+import { type QueueOptions, Worker, type WorkerOptions } from "bullmq";
 import assert from "node:assert";
 import os from "node:os";
+import { URL } from "node:url";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
@@ -16,22 +11,18 @@ import { telemetry } from "../../utilities/telemetry.ts";
 import { createQueue } from "./create-queue.ts";
 
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
-import type { Flow, FlowHandlers } from "../flows/index.ts";
+import type { Flow } from "../flows/index.ts";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 Worker.setMaxListeners(200);
 
-export async function createFlowWorker<
-  T extends ZodObject<{
+export async function createSandboxedWorker(
+  flowSchema: ZodObject<{
     name: ZodLiteral<Flow["name"]>;
     input: ZodType;
     output: ZodType;
   }>,
->(
-  flowSchema: T,
-  processor: ReturnType<
-    (typeof FlowHandlers)[T["shape"]["name"]["value"]]["implementAsync"]
-  >,
+  processor: URL,
   sendEvent: MainRunnerMachineIntake,
   queueOptions?: Omit<QueueOptions, "connection" | "telemetry">,
   workerOptions?: Omit<
@@ -52,47 +43,35 @@ export async function createFlowWorker<
 
   const queue = createQueue(flowName, queueOptions);
 
-  const worker = new Worker(
-    flowName,
-    (job, token) =>
-      Sentry.withScope(async (scope) => {
-        scope.setTags({
-          "riven.flow.name": flowName,
-          "bullmq.queue.name": flowName,
-          "bullmq.job.id": job.id,
-        });
-
-        try {
-          return await processor({ job, token, scope } as never, sendEvent);
-        } catch (error) {
-          Sentry.captureException(error);
-
-          if (error instanceof Error) {
-            throw error;
-          }
-
-          throw new UnrecoverableError(String(error));
-        }
-      }),
-    {
-      concurrency: os.availableParallelism(),
-      removeOnComplete: { count: 50 },
-      removeOnFail: {
-        age: 60 * 60 * 24,
-        count: 5000,
-      },
-      ...workerOptions,
-      connection: {
-        url: settings.redisUrl,
-      },
-      telemetry,
+  const worker = new Worker(flowName, processor, {
+    concurrency: os.availableParallelism(),
+    removeOnComplete: { count: 50 },
+    removeOnFail: {
+      age: 60 * 60 * 24,
+      count: 5000,
     },
-  );
+    ...workerOptions,
+    useWorkerThreads: true,
+    workerThreadsOptions: {
+      execArgv: [
+        "--env-file=.env.riven",
+        "--import=@swc-node/register/esm-register",
+      ],
+    },
+    connection: {
+      url: settings.redisUrl,
+    },
+    telemetry,
+  });
 
   registerMQListeners(worker, logger);
 
+  worker.on("completed", (job) => {
+    console.log(job.returnvalue);
+  });
+
   worker.on("failed", (_job, error) => {
-    logger.error("Flow worker encountered an error", { err: error });
+    logger.error("Sandboxed worker encountered an error", { err: error });
   });
 
   if (settings.unsafeClearQueuesOnStartup) {

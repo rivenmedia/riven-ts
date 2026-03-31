@@ -3,18 +3,13 @@ import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas
 
 import { UnrecoverableError } from "bullmq";
 
-import { createSandboxedJobProcessor } from "../../utilities/create-sandboxed-job.processor.js";
-import {
-  RequestIndexDataFlow,
-  requestIndexDataProcessorSchema,
-} from "./index-item.schema.ts";
+import { requestIndexDataProcessorSchema } from "./index-item.schema.ts";
 import { persistMovieIndexerData } from "./utilities/persist-movie-indexer-data.ts";
 import { persistShowIndexerData } from "./utilities/persist-show-indexer-data.ts";
 
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-export default createSandboxedJobProcessor(
-  RequestIndexDataFlow,
+export const indexItemProcessor =
   requestIndexDataProcessorSchema.implementAsync(async function (
     { job },
     sendEvent,
@@ -63,5 +58,4 @@ export default createSandboxedJobProcessor(
 
       throw error;
     }
-  }),
-);
+  });
