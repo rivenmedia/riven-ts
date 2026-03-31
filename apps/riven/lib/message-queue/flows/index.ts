@@ -29,7 +29,7 @@ import {
   scrapeItemProcessorSchema,
 } from "./scrape-item/scrape-item.schema.ts";
 import {
-  ParseScrapeResultsFlow,
+  ParseScrapeResultsSandboxedJob,
   parseScrapeResultsProcessorSchema,
 } from "./scrape-item/steps/parse-scrape-results/parse-scrape-results.schema.ts";
 
@@ -37,7 +37,6 @@ export const Flow = z.discriminatedUnion("name", [
   RequestIndexDataFlow,
   RequestContentServicesFlow,
   ScrapeItemFlow,
-  ParseScrapeResultsFlow,
   DownloadItemFlow,
   FindValidTorrentFlow,
   MapItemsToFilesFlow,
@@ -50,9 +49,18 @@ export const FlowHandlers = {
   "index-item": requestIndexDataProcessorSchema,
   "request-content-services": requestContentServicesProcessorSchema,
   "scrape-item": scrapeItemProcessorSchema,
-  "scrape-item.parse-scrape-results": parseScrapeResultsProcessorSchema,
   "download-item": downloadItemProcessorSchema,
   "download-item.find-valid-torrent": findValidTorrentProcessorSchema,
   "download-item.map-items-to-files": mapItemsToFilesProcessorSchema,
   "download-item.rank-streams": rankStreamsProcessorSchema,
 } satisfies Record<Flow["name"], z.ZodFunction>;
+
+export const SandboxedJobDefinition = z.discriminatedUnion("name", [
+  ParseScrapeResultsSandboxedJob,
+]);
+
+export type SandboxedJobDefinition = z.infer<typeof SandboxedJobDefinition>;
+
+export const SandboxedJobHandlers = {
+  "scrape-item.parse-scrape-results": parseScrapeResultsProcessorSchema,
+} satisfies Record<SandboxedJobDefinition["name"], z.ZodFunction>;

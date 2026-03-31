@@ -10,20 +10,18 @@ import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
 import { createQueue } from "./create-queue.ts";
 
-import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
-import type { Flow } from "../flows/index.ts";
+import type { SandboxedJobDefinition } from "../flows/index.ts";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 Worker.setMaxListeners(200);
 
 export async function createSandboxedWorker(
-  flowSchema: ZodObject<{
-    name: ZodLiteral<Flow["name"]>;
+  sandboxedJobSchema: ZodObject<{
+    name: ZodLiteral<SandboxedJobDefinition["name"]>;
     input: ZodType;
     output: ZodType;
   }>,
-  processor: URL,
-  sendEvent: MainRunnerMachineIntake,
+  processorURL: URL,
   queueOptions?: Omit<QueueOptions, "connection" | "telemetry">,
   workerOptions?: Omit<
     WorkerOptions,
@@ -34,16 +32,16 @@ export async function createSandboxedWorker(
     | "workerForkOptions"
   >,
 ) {
-  const [flowName] = flowSchema.shape.name.def.values;
+  const [sandboxedJobName] = sandboxedJobSchema.shape.name.def.values;
 
   assert(
-    flowName,
-    `No queue name found for flow: ${flowSchema.shape.name.value}`,
+    sandboxedJobName,
+    `No queue name found for flow: ${sandboxedJobSchema.shape.name.value}`,
   );
 
-  const queue = createQueue(flowName, queueOptions);
+  const queue = createQueue(sandboxedJobName, queueOptions);
 
-  const worker = new Worker(flowName, processor, {
+  const worker = new Worker(sandboxedJobName, processorURL, {
     concurrency: os.availableParallelism(),
     removeOnComplete: { count: 50 },
     removeOnFail: {
@@ -57,6 +55,7 @@ export async function createSandboxedWorker(
         "--env-file=.env.riven",
         "--import=@swc-node/register/esm-register",
       ],
+      name: sandboxedJobName,
     },
     connection: {
       url: settings.redisUrl,
@@ -65,10 +64,6 @@ export async function createSandboxedWorker(
   });
 
   registerMQListeners(worker, logger);
-
-  worker.on("completed", (job) => {
-    console.log(job.returnvalue);
-  });
 
   worker.on("failed", (_job, error) => {
     logger.error("Sandboxed worker encountered an error", { err: error });

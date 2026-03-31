@@ -1,43 +1,51 @@
+// Load entity definitions via a side-effect import to ensure they're initialised before use
+import "@repo/util-plugin-sdk/dto/entities";
+
 import * as Sentry from "@sentry/node";
 import { type SandboxedJob, UnrecoverableError } from "bullmq";
 import assert from "node:assert";
 
-import type { Flow, FlowHandlers } from "../flows/index.ts";
+import type {
+  SandboxedJobDefinition,
+  SandboxedJobHandlers,
+} from "../flows/index.ts";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 export function createSandboxedJobProcessor<
   T extends ZodObject<{
-    name: ZodLiteral<Flow["name"]>;
+    name: ZodLiteral<SandboxedJobDefinition["name"]>;
     input: ZodType;
     output: ZodType;
   }>,
 >(
-  flowSchema: T,
+  sandboxedJobSchema: T,
   processor: ReturnType<
-    (typeof FlowHandlers)[T["shape"]["name"]["value"]]["implementAsync"]
+    (typeof SandboxedJobHandlers)[T["shape"]["name"]["value"]]["implementAsync"]
   >,
 ) {
-  const [flowName] = flowSchema.shape.name.def.values;
+  const [sandboxedJobName] = sandboxedJobSchema.shape.name.def.values;
 
   assert(
-    flowName,
-    `No queue name found for flow: ${flowSchema.shape.name.value}`,
+    sandboxedJobName,
+    `No queue name found for sandboxed job: ${sandboxedJobSchema.shape.name.value}`,
   );
 
   return async (job: SandboxedJob) => {
-    console.log("Processing job for flow:", flowName, "with job id:", job.id);
     return await Sentry.withScope(async (scope) => {
+      const { threadId } = await import("node:worker_threads");
+
       scope.setTags({
-        "riven.flow.name": flowName,
-        "bullmq.queue.name": flowName,
+        "riven.log.source": "core",
+        "riven.session.id":
+          Sentry.getCurrentScope().getScopeData().tags["riven.session.id"],
+        "riven.sandboxed-job.name": sandboxedJobName,
+        "riven.worker.id": `${sandboxedJobName}:worker-${threadId.toString()}`,
+        "bullmq.queue.name": sandboxedJobName,
         "bullmq.job.id": job.id,
       });
 
       try {
-        return await processor(
-          { job, token: "", scope } as never,
-          (() => {}) as never,
-        );
+        return await processor({ job, scope } as never);
       } catch (error) {
         Sentry.captureException(error);
 

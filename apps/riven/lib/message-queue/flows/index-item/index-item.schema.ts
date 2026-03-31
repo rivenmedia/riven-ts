@@ -2,7 +2,7 @@ import { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/e
 
 import z from "zod";
 
-import { createFlowJobBuilder } from "../../utilities/create-flow-job-schema.ts";
+import { createFlowJobBuilder } from "../../utilities/create-flow-job-builder.ts";
 import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
 
 export const RequestIndexDataFlow = createFlowSchema("index-item", {

@@ -14,9 +14,9 @@ import { requestContentServicesProcessor } from "../../../message-queue/flows/re
 import { RequestContentServicesFlow } from "../../../message-queue/flows/request-content-services/request-content-services.schema.ts";
 import { scrapeItemProcessor } from "../../../message-queue/flows/scrape-item/scrape-item.processor.ts";
 import { ScrapeItemFlow } from "../../../message-queue/flows/scrape-item/scrape-item.schema.ts";
-import { parseScrapeResultsProcessor } from "../../../message-queue/flows/scrape-item/steps/parse-scrape-results/parse-scrape-results.processor.ts";
-import { ParseScrapeResultsFlow } from "../../../message-queue/flows/scrape-item/steps/parse-scrape-results/parse-scrape-results.schema.ts";
+import { ParseScrapeResultsSandboxedJob } from "../../../message-queue/flows/scrape-item/steps/parse-scrape-results/parse-scrape-results.schema.ts";
 import { createFlowWorker } from "../../../message-queue/utilities/create-flow-worker.ts";
+import { createSandboxedWorker } from "../../../message-queue/utilities/create-sandboxed-worker.ts";
 
 import type { Flow } from "../../../message-queue/flows/index.ts";
 import type { MainRunnerMachineEvent } from "../index.ts";
@@ -62,10 +62,16 @@ export const bootstrapFlowWorkers = fromPromise<
       {},
       { concurrency: 1 },
     ),
-    "scrape-item.parse-scrape-results": await createFlowWorker(
-      ParseScrapeResultsFlow,
-      parseScrapeResultsProcessor,
-      parentRef.send,
+    "scrape-item.parse-scrape-results": await createSandboxedWorker(
+      ParseScrapeResultsSandboxedJob,
+      new URL(
+        import.meta.resolve(
+          "../../../message-queue/flows/scrape-item/steps/parse-scrape-results/parse-scrape-results.processor.ts",
+          import.meta.url,
+        ),
+      ),
+      {},
+      { concurrency: 5 },
     ),
     "download-item": await createFlowWorker(
       DownloadItemFlow,

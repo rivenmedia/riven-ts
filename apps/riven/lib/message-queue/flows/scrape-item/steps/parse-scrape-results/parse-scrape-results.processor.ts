@@ -1,16 +1,15 @@
-import { type ParsedData, parse } from "@repo/util-rank-torrent-name";
-
 import { UnrecoverableError } from "bullmq";
 
-import { database } from "../../../../../database/database.ts";
-import { logger } from "../../../../../utilities/logger/logger.ts";
-import { parseScrapeResultsProcessorSchema } from "./parse-scrape-results.schema.ts";
+import { createSandboxedJobProcessor } from "../../../../utilities/create-sandboxed-job.processor.js";
 import {
-  SkippedTorrentError,
-  validateTorrent,
-} from "./utilities/validate-torrent.ts";
+  ParseScrapeResultsSandboxedJob,
+  parseScrapeResultsProcessorSchema,
+} from "./parse-scrape-results.schema.ts";
 
-export const parseScrapeResultsProcessor =
+import type { ParsedData } from "@repo/util-rank-torrent-name";
+
+export default createSandboxedJobProcessor(
+  ParseScrapeResultsSandboxedJob,
   parseScrapeResultsProcessorSchema.implementAsync(async function ({ job }) {
     const children = await job.getChildrenValues();
 
@@ -25,45 +24,55 @@ export const parseScrapeResultsProcessor =
       {},
     );
 
-    const item = await database.mediaItem.findOneOrFail(job.data.id);
-    const { fullTitle: itemTitle } = item;
+    const { withORM } = await import("../../../../utilities/with-orm.ts");
+    const { parse } = await import("@repo/util-rank-torrent-name");
+    const { SkippedTorrentError, validateTorrent } =
+      await import("./utilities/validate-torrent.ts");
+    const { logger } =
+      await import("../../../../../utilities/logger/logger.ts");
 
-    if (!Object.keys(aggregatedResults).length) {
-      throw new UnrecoverableError(`No streams found for ${itemTitle}`);
-    }
+    return withORM(async (database) => {
+      const item = await database.mediaItem.findOneOrFail(job.data.id);
+      const { fullTitle: itemTitle } = item;
 
-    const parsedResults = await Promise.all(
-      Object.entries(aggregatedResults).map(async ([hash, rawTitle]) => {
-        try {
-          const parsedData = parse(rawTitle);
+      if (!Object.keys(aggregatedResults).length) {
+        throw new UnrecoverableError(`No streams found for ${itemTitle}`);
+      }
 
-          await validateTorrent(item, itemTitle, parsedData, hash);
+      const parsedResults = await Promise.all(
+        Object.entries(aggregatedResults).map(async ([hash, rawTitle]) => {
+          try {
+            const parsedData = parse(rawTitle);
 
-          return [hash, parsedData] as const;
-        } catch (error) {
-          if (error instanceof SkippedTorrentError) {
-            logger.silly(error.message);
-          } else {
-            logger.debug(
-              `Failed to parse torrent ${rawTitle} (${hash}) for ${itemTitle}`,
-              { err: error },
-            );
+            await validateTorrent(item, itemTitle, parsedData, hash);
+
+            return [hash, parsedData] as const;
+          } catch (error) {
+            if (error instanceof SkippedTorrentError) {
+              logger.silly(error.message);
+            } else {
+              logger.debug(
+                `Failed to parse torrent ${rawTitle} (${hash}) for ${itemTitle}`,
+                { err: error },
+              );
+            }
+
+            return [hash, null] as const;
           }
+        }),
+      );
 
-          return [hash, null] as const;
-        }
-      }),
-    );
+      const validResults = Object.fromEntries(
+        parsedResults.filter(
+          (entry): entry is [string, ParsedData] => entry[1] !== null,
+        ),
+      );
 
-    const validResults = Object.fromEntries(
-      parsedResults.filter(
-        (entry): entry is [string, ParsedData] => entry[1] !== null,
-      ),
-    );
-
-    return {
-      id: job.data.id,
-      title: itemTitle,
-      results: validResults,
-    };
-  });
+      return {
+        id: job.data.id,
+        title: itemTitle,
+        results: validResults,
+      };
+    });
+  }),
+);
