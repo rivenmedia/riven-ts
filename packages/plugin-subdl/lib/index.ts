@@ -1,5 +1,3 @@
-import { Episode, Movie } from "@repo/util-plugin-sdk/dto/entities";
-
 import { createHash } from "node:crypto";
 
 import packageJson from "../package.json" with { type: "json" };

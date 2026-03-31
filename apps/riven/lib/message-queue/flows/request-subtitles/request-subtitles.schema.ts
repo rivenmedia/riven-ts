@@ -11,7 +11,7 @@ export const RequestSubtitlesFlow = createFlowSchema("request-subtitles", {
     id: z.int(),
   }),
   output: z.object({
-    count: z.number().nonnegative(),
+    count: z.int().nonnegative(),
   }),
 });
 
