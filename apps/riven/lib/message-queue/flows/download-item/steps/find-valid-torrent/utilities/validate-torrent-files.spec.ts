@@ -3,9 +3,9 @@ import { expect } from "vitest";
 import { it } from "../../../../../../__tests__/test-context.ts";
 import { validateTorrentFiles } from "./validate-torrent-files.ts";
 
-import type { MapItemsToFilesFlow } from "../../map-items-to-files/map-items-to-files.schema.ts";
+import type { MapItemsToFilesSandboxedJob } from "../../../../../sandboxed-jobs/map-items-to-files/map-items-to-files.schema.ts";
 
-type MappedFiles = MapItemsToFilesFlow["output"];
+type MappedFiles = MapItemsToFilesSandboxedJob["output"];
 
 it("throws an error if season-like torrent has fewer files than expected", async ({
   season,

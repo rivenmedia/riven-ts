@@ -2,6 +2,7 @@ import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-l
 
 import { type QueueOptions, Worker, type WorkerOptions } from "bullmq";
 import assert from "node:assert";
+import { existsSync } from "node:fs";
 import os from "node:os";
 import { URL } from "node:url";
 
@@ -10,7 +11,7 @@ import { settings } from "../../../utilities/settings.ts";
 import { telemetry } from "../../../utilities/telemetry.ts";
 import { createQueue } from "../../utilities/create-queue.ts";
 
-import type { SandboxedJobDefinition } from "../../flows/index.ts";
+import type { SandboxedJobDefinition } from "../index.ts";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 Worker.setMaxListeners(200);
@@ -37,6 +38,11 @@ export async function createSandboxedWorker(
   assert(
     sandboxedJobName,
     `No queue name found for flow: ${sandboxedJobSchema.shape.name.value}`,
+  );
+
+  assert(
+    existsSync(processorURL),
+    `Processor file not found at path: ${processorURL.toString()}`,
   );
 
   const queue = createQueue(sandboxedJobName, queueOptions);

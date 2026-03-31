@@ -1,8 +1,8 @@
-import { flow } from "../producer.ts";
 import {
-  type MapItemsToFilesFlow,
+  type MapItemsToFilesSandboxedJob,
   createMapItemsToFilesJob,
-} from "./steps/map-items-to-files/map-items-to-files.schema.ts";
+} from "../../sandboxed-jobs/map-items-to-files/map-items-to-files.schema.ts";
+import { flow } from "../producer.ts";
 
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 import type { ParentOptions, PluginJobNode } from "bullmq";
@@ -20,7 +20,10 @@ export function enqueueMapItemsToFiles({
   files,
   jobId,
 }: EnqueueMapItemsToFilesInput): Promise<
-  PluginJobNode<MapItemsToFilesFlow["input"], MapItemsToFilesFlow["output"]>
+  PluginJobNode<
+    MapItemsToFilesSandboxedJob["input"],
+    MapItemsToFilesSandboxedJob["output"]
+  >
 > {
   const rootNode = createMapItemsToFilesJob(
     `Mapping items to file indexes for ${infoHash}`,

@@ -1,9 +1,9 @@
 import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
-import { it as baseIt } from "../../../../../__tests__/test-context.ts";
-import * as settingsModule from "../../../../../utilities/settings.ts";
-import { parseScrapeResultsProcessor } from "./parse-scrape-results.processor.ts";
+import { it as baseIt } from "../../../__tests__/test-context.ts";
+import * as settingsModule from "../../../utilities/settings.ts";
+import parseScrapeResultsProcessor from "./parse-scrape-results.processor.ts";
 
 const it = baseIt.extend("scrapeResults", {
   "1234567890123456789012345678901234567890": "Test Movie 2024 1080p WEB-DL",

@@ -11,7 +11,14 @@ type WithORMCallback<T> = (database: Services) => Promisable<T>;
  * @returns The return value of the callback.
  */
 export async function withORM<T>(callback: WithORMCallback<T>): Promise<T> {
-  const { initORM } = await import("../../../database/database.ts");
+  const { initORM, database: existingDatabase } =
+    await import("../../../database/database.ts");
+
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (existingDatabase) {
+    return await callback(existingDatabase);
+  }
+
   const { databaseConfig } = await import("../../../database/config.ts");
 
   const database = await initORM(databaseConfig);

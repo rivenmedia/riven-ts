@@ -5,10 +5,7 @@ import * as Sentry from "@sentry/node";
 import { type SandboxedJob, UnrecoverableError } from "bullmq";
 import assert from "node:assert";
 
-import type {
-  SandboxedJobDefinition,
-  SandboxedJobHandlers,
-} from "../../flows/index.ts";
+import type { SandboxedJobDefinition, SandboxedJobHandlers } from "../index.ts";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 export function createSandboxedJobProcessor<

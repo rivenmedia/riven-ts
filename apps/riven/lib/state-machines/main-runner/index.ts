@@ -20,6 +20,10 @@ import {
   type BootstrapFlowWorkersOutput,
   bootstrapFlowWorkers,
 } from "./actors/bootstrap-flow-workers.actor.ts";
+import {
+  type BootstrapSandboxedWorkersOutput,
+  bootstrapSandboxedWorkers,
+} from "./actors/bootstrap-sandboxed-workers.actor.ts";
 import { eventScheduler } from "./actors/event-scheduler.actor.ts";
 import {
   type FanOutDownloadInput,
@@ -53,7 +57,8 @@ import type z from "zod";
 export interface MainRunnerMachineContext {
   parentRef: ActorRef<Snapshot<unknown>, RivenMachineEvent>;
   plugins: ValidPluginMap;
-  flows: BootstrapFlowWorkersOutput | null;
+  flowWorkers: BootstrapFlowWorkersOutput | null;
+  sandboxedWorkers: BootstrapSandboxedWorkersOutput | null;
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: PublishableEventSet;
@@ -233,6 +238,7 @@ export const mainRunnerMachine = setup({
   },
   actors: {
     bootstrapFlowWorkers,
+    bootstrapSandboxedWorkers,
     createEventScheduler: eventScheduler,
     requestContentServices,
     requestIndexData,
@@ -294,9 +300,10 @@ export const mainRunnerMachine = setup({
       publishableEvents: input.publishableEvents,
       pluginQueues: input.pluginQueues,
       pluginWorkers: input.pluginWorkers,
-      flows: null,
+      flowWorkers: null,
+      sandboxedWorkers: null,
     }),
-    initial: "Bootstrapping flow workers",
+    initial: "Bootstrapping workers",
     on: {
       /**
        * Item request lifecycle events
@@ -634,32 +641,100 @@ export const mainRunnerMachine = setup({
       },
     },
     states: {
-      "Bootstrapping flow workers": {
-        invoke: {
-          src: "bootstrapFlowWorkers",
-          id: "bootstrapFlowWorkers",
-          input: ({ self }) => ({
-            parentRef: self,
-          }),
-          onError: {
-            target: "Errored",
-            actions: [
-              {
-                type: "log",
-                params: ({ event: { error } }) => ({
-                  message: "Error bootstrapping flow workers",
-                  level: "error",
-                  error,
-                }),
-              },
-              { type: "handleGracefulShutdown" },
-            ],
+      "Bootstrapping workers": {
+        type: "parallel",
+        onDone: {
+          target: "Running",
+          actions: {
+            type: "log",
+            params: {
+              message: "Finished bootstrapping all workers.",
+            },
           },
-          onDone: {
-            target: "Running",
-            actions: assign({
-              flows: ({ event }) => event.output,
-            }),
+        },
+        states: {
+          "Bootstrapping flow workers": {
+            initial: "Bootstrapping",
+            states: {
+              Bootstrapping: {
+                invoke: {
+                  src: "bootstrapFlowWorkers",
+                  id: "bootstrapFlowWorkers",
+                  input: ({ self }) => ({
+                    parentRef: self,
+                  }),
+                  onError: {
+                    target: "#Riven program main runner.Errored",
+                    actions: [
+                      {
+                        type: "log",
+                        params: ({ event: { error } }) => ({
+                          message: "Error bootstrapping flow workers",
+                          level: "error",
+                          error,
+                        }),
+                      },
+                      { type: "handleGracefulShutdown" },
+                    ],
+                  },
+                  onDone: {
+                    target: "Done",
+                    actions: assign({
+                      flowWorkers: ({ event }) => event.output,
+                    }),
+                  },
+                },
+              },
+              Done: {
+                type: "final",
+                entry: {
+                  type: "log",
+                  params: {
+                    message: "Successfully bootstrapped flow workers",
+                  },
+                },
+              },
+            },
+          },
+          "Bootstrapping sandboxed workers": {
+            initial: "Bootstrapping",
+            states: {
+              Bootstrapping: {
+                invoke: {
+                  src: "bootstrapSandboxedWorkers",
+                  id: "bootstrapSandboxedWorkers",
+                  onError: {
+                    target: "#Riven program main runner.Errored",
+                    actions: [
+                      {
+                        type: "log",
+                        params: ({ event: { error } }) => ({
+                          message: "Error bootstrapping sandboxed workers",
+                          level: "error",
+                          error,
+                        }),
+                      },
+                      { type: "handleGracefulShutdown" },
+                    ],
+                  },
+                  onDone: {
+                    target: "Done",
+                    actions: assign({
+                      sandboxedWorkers: ({ event }) => event.output,
+                    }),
+                  },
+                },
+              },
+              Done: {
+                type: "final",
+                entry: {
+                  type: "log",
+                  params: {
+                    message: "Successfully bootstrapped sandboxed workers",
+                  },
+                },
+              },
+            },
           },
         },
       },
