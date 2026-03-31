@@ -1,38 +1,24 @@
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { pluginConfig } from "../../subdl-plugin.config.ts";
+import { it } from "../../__tests__/subdl.test-context.ts";
 import { SubdlAPI } from "../subdl.datasource.ts";
 
-const testSettings = {
-  apiKey: "test-api-key",
-  languages: ["en"],
-};
-
-it("returns false if the request fails", async ({
-  server,
-  dataSourceConfig,
-}) => {
+it("returns false if the request fails", async ({ server, dataSourceMap }) => {
   server.use(
     http.get("https://api.subdl.com/api/v1/subtitles", () =>
       HttpResponse.json({ status: false }, { status: 401 }),
     ),
   );
 
-  const api = new SubdlAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: testSettings,
-  });
+  const api = dataSourceMap.get(SubdlAPI);
 
   expect(await api.validate()).toBe(false);
 });
 
 it("returns true if the request succeeds", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   server.use(
     http.get("https://api.subdl.com/api/v1/subtitles", () =>
@@ -44,29 +30,34 @@ it("returns true if the request succeeds", async ({
             name: "Inception",
           },
         ],
-        subtitles: [],
+        subtitles: [
+          {
+            release_name: "Inception.2010.1080p",
+            name: "Inception.2010.1080p.srt",
+            lang: "en",
+            author: "testuser",
+            url: "/subtitle/123.zip",
+            subtitlePage: "/subtitle/123",
+          },
+        ],
       }),
     ),
   );
 
-  const api = new SubdlAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: testSettings,
-  });
+  const api = dataSourceMap.get(SubdlAPI);
 
   expect(await api.validate()).toBe(true);
 });
 
 it("returns subtitles for a movie search", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   server.use(
     http.get("https://api.subdl.com/api/v1/subtitles", ({ request }) => {
       const url = new URL(request.url);
 
-      if (url.searchParams.get("tmdbId") !== "27205") {
+      if (url.searchParams.get("tmdb_id") !== "27205") {
         return HttpResponse.json(
           { status: false, error: "Invalid tmdbId" },
           { status: 200 },
@@ -80,7 +71,10 @@ it("returns subtitles for a movie search", async ({
         );
       }
 
-      if (url.searchParams.getAll("languages").sort().join(",") !== "de,en") {
+      if (
+        url.searchParams.get("languages")?.split(",").sort().join(",") !==
+        "de,en"
+      ) {
         return HttpResponse.json(
           { status: false, error: "Invalid languages" },
           { status: 200 },
@@ -110,11 +104,7 @@ it("returns subtitles for a movie search", async ({
     }),
   );
 
-  const api = new SubdlAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: testSettings,
-  });
+  const api = dataSourceMap.get(SubdlAPI);
 
   const results = await api.searchSubtitles({
     tmdbId: "27205",
@@ -129,7 +119,7 @@ it("returns subtitles for a movie search", async ({
 
 it("returns empty array when API returns no subtitles", async ({
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   server.use(
     http.get("https://api.subdl.com/api/v1/subtitles", () =>
@@ -141,11 +131,7 @@ it("returns empty array when API returns no subtitles", async ({
     ),
   );
 
-  const api = new SubdlAPI({
-    ...dataSourceConfig,
-    pluginSymbol: pluginConfig.name,
-    settings: testSettings,
-  });
+  const api = dataSourceMap.get(SubdlAPI);
 
   const results = await api.searchSubtitles({
     tmdbId: "999999",

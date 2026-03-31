@@ -122,3 +122,12 @@ RIVEN_SETTING__unsafeClearQueuesOnStartup=true
 # refresh database on startup
 RIVEN_SETTING__unsafeRefreshDatabaseOnStartup=true
 ```
+
+### Running tests
+
+To run the tests, you can use the following command.
+Make sure that you have a redis-server running locally before running the tests, as some of the tests require it.
+
+```bash
+pnpm --filter @repo/plugin-subdl test
+```

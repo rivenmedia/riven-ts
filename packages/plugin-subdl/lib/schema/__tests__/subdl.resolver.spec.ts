@@ -1,16 +1,14 @@
-import { it } from "@repo/util-plugin-testing/plugin-test-context";
-
 import { HttpResponse, http } from "msw";
 import assert from "node:assert";
 import { expect } from "vitest";
 
-import { SubdlAPI } from "../../datasource/subdl.datasource.ts";
+import { it } from "../../__tests__/subdl.test-context.ts";
 import { pluginConfig } from "../../subdl-plugin.config.ts";
 
 it('returns the validation status when calling "subdlIsValid" query', async ({
   gqlServer,
   server,
-  dataSourceConfig,
+  dataSourceMap,
 }) => {
   server.use(
     http.get("https://api.subdl.com/api/v1/subtitles", () =>
@@ -33,11 +31,7 @@ it('returns the validation status when calling "subdlIsValid" query', async ({
     {
       contextValue: {
         [pluginConfig.name]: {
-          api: new SubdlAPI({
-            ...dataSourceConfig,
-            pluginSymbol: pluginConfig.name,
-            settings: { apiKey: "test-key", languages: ["en"] },
-          }),
+          dataSources: dataSourceMap,
         },
       },
     },

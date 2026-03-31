@@ -43,7 +43,7 @@ export class SubdlAPI extends BaseDataSource<SubdlSettings> {
 
   override async validate() {
     try {
-      const response = await this.get<SubtitleSearchResponse>("subtitles", {
+      const response = await this.get<unknown>("subtitles", {
         params: {
           tmdb_id: "27205",
           type: "movie",
@@ -51,7 +51,7 @@ export class SubdlAPI extends BaseDataSource<SubdlSettings> {
         },
       });
 
-      return Boolean(SubtitleResponse.parse(response));
+      return Boolean(subtitleSearchResponseSchema.parse(response));
     } catch {
       return false;
     }
