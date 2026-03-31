@@ -2,6 +2,7 @@ import { fromPromise } from "xstate";
 
 import { MapItemsToFilesSandboxedJob } from "../../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
 import { ParseScrapeResultsSandboxedJob } from "../../../message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.schema.ts";
+import { ValidateTorrentFilesSandboxedJob } from "../../../message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.schema.ts";
 import { createSandboxedWorker } from "../../../message-queue/sandboxed-jobs/utilities/create-sandboxed-worker.ts";
 
 import type { SandboxedJobDefinition } from "../../../message-queue/sandboxed-jobs/index.ts";
@@ -34,6 +35,15 @@ export const bootstrapSandboxedWorkers =
         new URL(
           import.meta
             .resolve("../../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.processor.ts"),
+        ),
+        {},
+        { concurrency: 5 },
+      ),
+      "download-item.validate-torrent-files": await createSandboxedWorker(
+        ValidateTorrentFilesSandboxedJob,
+        new URL(
+          import.meta
+            .resolve("../../../message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.ts"),
         ),
         {},
         { concurrency: 5 },

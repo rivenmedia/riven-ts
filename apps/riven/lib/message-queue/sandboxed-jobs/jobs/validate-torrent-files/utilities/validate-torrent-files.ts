@@ -13,12 +13,12 @@ import chalk from "chalk";
 import { reduceAsync } from "es-toolkit";
 import assert, { AssertionError } from "node:assert";
 
-import { database } from "../../../../database/database.ts";
-import { logger } from "../../../../utilities/logger/logger.ts";
-import { settings } from "../../../../utilities/settings.ts";
-import { MatchedFile } from "../../../flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import { database } from "../../../../../database/database.ts";
+import { logger } from "../../../../../utilities/logger/logger.ts";
+import { settings } from "../../../../../utilities/settings.ts";
+import { MatchedFile } from "../../../../flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 
-import type { MapItemsToFilesSandboxedJob } from "../map-items-to-files/map-items-to-files.schema.ts";
+import type { MapItemsToFilesSandboxedJob } from "../../map-items-to-files/map-items-to-files.schema.ts";
 
 export class InvalidTorrentError extends Error {}
 
