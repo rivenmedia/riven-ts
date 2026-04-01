@@ -1,3 +1,5 @@
+import "./sentry.ts";
+
 import * as Sentry from "@sentry/node";
 import { createActor, waitFor } from "xstate";
 

@@ -1,6 +1,7 @@
 import { UnrecoverableError } from "bullmq";
 
 import { createSandboxedJobProcessor } from "../../utilities/create-sandboxed-job.processor.ts";
+import { withORM } from "../../utilities/with-orm.ts";
 import {
   InvalidTorrentError,
   validateTorrentFiles,
@@ -22,8 +23,6 @@ export default createSandboxedJobProcessor(
         `Missing mapped items to files result for job ${job.id}`,
       );
     }
-
-    const { withORM } = await import("../../utilities/with-orm.ts");
 
     return withORM(async (database) => {
       const item = await database.mediaItem.findOneOrFail(job.data.id);

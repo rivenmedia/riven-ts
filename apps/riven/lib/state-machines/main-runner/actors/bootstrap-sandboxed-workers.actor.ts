@@ -25,7 +25,7 @@ export const bootstrapSandboxedWorkers =
         ParseScrapeResultsSandboxedJob,
         new URL(
           import.meta
-            .resolve("../../../message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.processor.ts"),
+            .resolve("../../../message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.processor.js"),
         ),
         {},
         { concurrency: 5 },
@@ -34,7 +34,7 @@ export const bootstrapSandboxedWorkers =
         MapItemsToFilesSandboxedJob,
         new URL(
           import.meta
-            .resolve("../../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.processor.ts"),
+            .resolve("../../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.processor.js"),
         ),
         {},
         { concurrency: 5 },
@@ -43,7 +43,7 @@ export const bootstrapSandboxedWorkers =
         ValidateTorrentFilesSandboxedJob,
         new URL(
           import.meta
-            .resolve("../../../message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.ts"),
+            .resolve("../../../message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.js"),
         ),
         {},
         { concurrency: 5 },
