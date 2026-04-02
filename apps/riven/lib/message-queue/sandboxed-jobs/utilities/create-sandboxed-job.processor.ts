@@ -1,12 +1,25 @@
-// Load entity definitions via a side-effect import to ensure they're initialised before use
-import "@repo/util-plugin-sdk/dto/entities";
-
-import * as Sentry from "@sentry/node";
+import { captureException, getCurrentScope, withScope } from "@sentry/node";
 import { type SandboxedJob, UnrecoverableError } from "bullmq";
 import assert from "node:assert";
 
 import type { SandboxedJobDefinition, SandboxedJobHandlers } from "../index.ts";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
+
+const timeoutDuration = 5_000;
+
+function startIdleTimer(duration: number) {
+  return setTimeout(() => {
+    process.exit(0);
+  }, duration);
+}
+
+function maybeStopIdleTimer(timerId: NodeJS.Timeout | null) {
+  if (timerId) {
+    clearTimeout(timerId);
+  }
+
+  return null;
+}
 
 export function createSandboxedJobProcessor<
   T extends ZodObject<{
@@ -27,14 +40,18 @@ export function createSandboxedJobProcessor<
     `No queue name found for sandboxed job: ${sandboxedJobSchema.shape.name.value}`,
   );
 
+  let idleTimerId: NodeJS.Timeout | null = null;
+
   return async (job: SandboxedJob) => {
-    return await Sentry.withScope(async (scope) => {
+    idleTimerId = maybeStopIdleTimer(idleTimerId);
+
+    const result = await withScope(async (scope) => {
       const { threadId } = await import("node:worker_threads");
 
       scope.setTags({
         "riven.log.source": "core",
         "riven.session.id":
-          Sentry.getCurrentScope().getScopeData().tags["riven.session.id"],
+          getCurrentScope().getScopeData().tags["riven.session.id"],
         "riven.sandboxed-job.name": sandboxedJobName,
         "riven.worker.id": `${sandboxedJobName}:worker-${threadId.toString()}`,
         "bullmq.queue.name": sandboxedJobName,
@@ -44,7 +61,7 @@ export function createSandboxedJobProcessor<
       try {
         return await processor({ job, scope } as never);
       } catch (error) {
-        Sentry.captureException(error);
+        captureException(error);
 
         if (error instanceof Error) {
           throw error;
@@ -53,5 +70,9 @@ export function createSandboxedJobProcessor<
         throw new UnrecoverableError(String(error));
       }
     });
+
+    idleTimerId = startIdleTimer(timeoutDuration);
+
+    return result;
   };
 }

@@ -75,7 +75,7 @@ export async function createFlowWorker<
           throw new UnrecoverableError(String(error));
         }
       }),
-    toMerged(
+    toMerged<WorkerOptions, typeof workerOptions>(
       {
         concurrency: os.availableParallelism(),
         removeOnComplete: { count: 50 },

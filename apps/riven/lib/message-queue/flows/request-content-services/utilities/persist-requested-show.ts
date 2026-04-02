@@ -22,15 +22,12 @@ export async function persistRequestedShow(
   logger.silly(`Processing requested show: ${externalIds.join(", ")}`);
 
   return await database.em.fork().transactional(async (transaction) => {
-    const existingItem = await database.itemRequest.findOne(
-      {
-        $or: [
-          ...(item.imdbId ? [{ imdbId: item.imdbId }] : []),
-          ...(item.tvdbId ? [{ tvdbId: item.tvdbId }] : []),
-        ],
-      },
-      { refresh: true },
-    );
+    const existingItem = await transaction.getRepository(ItemRequest).findOne({
+      $or: [
+        ...(item.imdbId ? [{ imdbId: item.imdbId }] : []),
+        ...(item.tvdbId ? [{ tvdbId: item.tvdbId }] : []),
+      ],
+    });
 
     if (existingItem?.seasons && item.seasons) {
       const existingItemSeasonsSet = new Set(existingItem.seasons);

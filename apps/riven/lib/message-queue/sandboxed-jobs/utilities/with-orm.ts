@@ -1,3 +1,5 @@
+import "@repo/util-plugin-sdk/dto/entities";
+
 import type { Services } from "../../../database/database.ts";
 import type { Promisable } from "type-fest";
 

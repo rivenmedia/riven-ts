@@ -15,7 +15,7 @@ export function createQueue(
 ) {
   const queue = new Queue(
     name,
-    toMerged(
+    toMerged<QueueOptions, typeof options>(
       {
         streams: {
           events: {

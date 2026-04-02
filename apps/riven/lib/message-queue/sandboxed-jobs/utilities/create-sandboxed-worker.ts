@@ -4,7 +4,6 @@ import { type QueueOptions, Worker, type WorkerOptions } from "bullmq";
 import { toMerged } from "es-toolkit";
 import assert from "node:assert";
 import { existsSync } from "node:fs";
-import os from "node:os";
 import { URL } from "node:url";
 
 import { logger } from "../../../utilities/logger/logger.ts";
@@ -51,21 +50,16 @@ export async function createSandboxedWorker(
   const worker = new Worker(
     sandboxedJobName,
     processorURL,
-    toMerged(
+    toMerged<WorkerOptions, typeof workerOptions>(
       {
-        concurrency: os.availableParallelism(),
         removeOnComplete: { count: 50 },
-        removeOnFail: {
-          age: 60 * 60 * 24,
-          count: 5000,
-        },
+        removeOnFail: { count: 50 },
         useWorkerThreads: true,
         workerThreadsOptions: {
           execArgv: [
             "--env-file=.env.riven",
             "--import=@swc-node/register/esm-register",
           ],
-          name: sandboxedJobName,
         },
         connection: {
           url: settings.redisUrl,
