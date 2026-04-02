@@ -57,7 +57,7 @@ export const registerPluginHookWorkers = fromPromise<
         const { queue, worker } = await createPluginWorker(
           typedEventName,
           pluginName,
-          (job) => {
+          async (job) => {
             const eventSchemaWithDeserialiser =
               eventSerialiserSchemaMap.get(typedEventName);
 
@@ -67,12 +67,12 @@ export const registerPluginHookWorkers = fromPromise<
               );
             }
 
-            const event = eventSchemaWithDeserialiser
+            const event = await eventSchemaWithDeserialiser
               .omit({ type: true })
-              .decode(job.data) as never;
+              .decodeAsync(job.data);
 
             return hook({
-              event,
+              event: event as never,
               dataSources,
               settings,
               logger,

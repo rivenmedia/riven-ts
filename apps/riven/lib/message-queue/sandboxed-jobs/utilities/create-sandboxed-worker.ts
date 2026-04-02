@@ -1,6 +1,7 @@
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import { type QueueOptions, Worker, type WorkerOptions } from "bullmq";
+import { toMerged } from "es-toolkit";
 import assert from "node:assert";
 import { existsSync } from "node:fs";
 import os from "node:os";
@@ -23,15 +24,15 @@ export async function createSandboxedWorker(
     output: ZodType;
   }>,
   processorURL: URL,
-  queueOptions?: Omit<QueueOptions, "connection" | "telemetry">,
-  workerOptions?: Omit<
+  queueOptions: Omit<QueueOptions, "connection" | "telemetry"> = {},
+  workerOptions: Omit<
     WorkerOptions,
     | "connection"
     | "telemetry"
     | "useWorkerThreads"
     | "workerThreadsOptions"
     | "workerForkOptions"
-  >,
+  > = {},
 ) {
   const [sandboxedJobName] = sandboxedJobSchema.shape.name.def.values;
 
@@ -47,27 +48,33 @@ export async function createSandboxedWorker(
 
   const queue = createQueue(sandboxedJobName, queueOptions);
 
-  const worker = new Worker(sandboxedJobName, processorURL, {
-    concurrency: os.availableParallelism(),
-    removeOnComplete: { count: 50 },
-    removeOnFail: {
-      age: 60 * 60 * 24,
-      count: 5000,
-    },
-    ...workerOptions,
-    useWorkerThreads: true,
-    workerThreadsOptions: {
-      execArgv: [
-        "--env-file=.env.riven",
-        "--import=@swc-node/register/esm-register",
-      ],
-      name: sandboxedJobName,
-    },
-    connection: {
-      url: settings.redisUrl,
-    },
-    telemetry,
-  });
+  const worker = new Worker(
+    sandboxedJobName,
+    processorURL,
+    toMerged(
+      {
+        concurrency: os.availableParallelism(),
+        removeOnComplete: { count: 50 },
+        removeOnFail: {
+          age: 60 * 60 * 24,
+          count: 5000,
+        },
+        useWorkerThreads: true,
+        workerThreadsOptions: {
+          execArgv: [
+            "--env-file=.env.riven",
+            "--import=@swc-node/register/esm-register",
+          ],
+          name: sandboxedJobName,
+        },
+        connection: {
+          url: settings.redisUrl,
+        },
+        telemetry,
+      },
+      workerOptions,
+    ),
+  );
 
   registerMQListeners(worker, logger);
 

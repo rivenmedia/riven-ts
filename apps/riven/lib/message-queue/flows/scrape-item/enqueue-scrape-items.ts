@@ -33,7 +33,7 @@ export function enqueueScrapeItems({
       {
         children: [
           createParseScrapeResultsJob(
-            "Sort scrape results",
+            "Parse scrape results",
             { id: item.id },
             { children: childNodes },
           ),
