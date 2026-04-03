@@ -61,7 +61,6 @@ export default createSandboxedJobProcessor(
 
       return {
         id: job.data.id,
-        title: itemTitle,
         results: Object.fromEntries(validResults),
       };
     });

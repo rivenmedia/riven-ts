@@ -60,9 +60,9 @@ export const jobEnqueuer = fromCallback<RivenEvent, JobEnqueuerInput>(
           );
         })
         .catch((error: unknown) => {
-          logger.error(
-            `Failed to enqueue event ${chalk.red(type)}: ${String(error)}`,
-          );
+          logger.error(`Failed to enqueue event ${chalk.red(type)}`, {
+            err: error,
+          });
         });
     });
   },
