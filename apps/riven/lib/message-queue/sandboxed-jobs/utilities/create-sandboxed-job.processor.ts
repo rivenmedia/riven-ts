@@ -3,7 +3,7 @@ import { type SandboxedJob, UnrecoverableError } from "bullmq";
 import assert from "node:assert";
 
 import type { SandboxedJobDefinition, SandboxedJobHandlers } from "../index.ts";
-import type { ZodLiteral, ZodObject, ZodType } from "zod";
+import type { ZodLiteral, ZodObject, ZodType, z } from "zod";
 
 const timeoutDuration = 5_000;
 
@@ -59,7 +59,9 @@ export function createSandboxedJobProcessor<
       });
 
       try {
-        return await processor({ job, scope } as never);
+        return (await processor({ job, scope } as never)) as z.infer<
+          T["shape"]["output"]
+        >;
       } catch (error) {
         captureException(error);
 

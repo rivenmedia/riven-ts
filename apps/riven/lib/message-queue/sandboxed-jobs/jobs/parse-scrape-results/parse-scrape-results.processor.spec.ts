@@ -32,21 +32,19 @@ const it = baseIt.extend("scrapeResults", {
 it("throws an UnrecoverableError if no results are found", async ({
   createMockJob,
   indexedMovieContext: { indexedMovie },
-  mockSentryScope,
 }) => {
   const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
-  await expect(() =>
-    parseScrapeResultsProcessor({ job, scope: mockSentryScope }, vi.fn()),
-  ).rejects.toThrow(UnrecoverableError);
+  await expect(() => parseScrapeResultsProcessor(job as never)).rejects.toThrow(
+    UnrecoverableError,
+  );
 });
 
 it("returns valid movie torrents if the item is a movie", async ({
   indexedMovieContext: { indexedMovie },
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitles = [
     "Test Movie 2024 1080p WEB-DL",
@@ -67,10 +65,7 @@ it("returns valid movie torrents if the item is a movie", async ({
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(3);
   expect(Object.values(results)).toEqual(
@@ -87,7 +82,6 @@ it("returns valid movie torrents if the item is a movie", async ({
 it("returns valid show torrents if the item is a show", async ({
   indexedShowContext: { indexedShow },
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitles = [
     "Test Show: The Complete Series (Season 1,2,3,4,5&6) E01-60",
@@ -106,10 +100,7 @@ it("returns valid show torrents if the item is a show", async ({
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(2);
   expect(Object.values(results)).toEqual(
@@ -126,7 +117,6 @@ it("returns valid show torrents if the item is a show", async ({
 it("returns valid season torrents if the item is a season", async ({
   season,
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitles = [
     "Test Show 2024 1080p WEB-DL S01 E01-10",
@@ -147,10 +137,7 @@ it("returns valid season torrents if the item is a season", async ({
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(3);
   expect(Object.values(results)).toEqual(
@@ -167,7 +154,6 @@ it("returns valid season torrents if the item is a season", async ({
 it("returns valid episode torrents if the item is an episode", async ({
   episode,
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitles = [
     "Test Show 2024 1080p WEB-DL S01E01",
@@ -188,10 +174,7 @@ it("returns valid episode torrents if the item is an episode", async ({
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(3);
   expect(Object.values(results)).toEqual(
@@ -208,7 +191,6 @@ it("returns valid episode torrents if the item is an episode", async ({
 it("filters show torrents if the item is a movie", async ({
   indexedMovieContext: { indexedMovie },
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitle = "Test Movie S01E01";
 
@@ -223,10 +205,7 @@ it("filters show torrents if the item is a movie", async ({
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(Object.values(results)).not.toEqual(
@@ -241,7 +220,6 @@ it("filters show torrents if the item is a movie", async ({
 it("filters out torrents with 2 or fewer episodes for shows", async ({
   indexedShowContext: { indexedShow },
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitle = "Test Show: S01E01";
 
@@ -256,10 +234,7 @@ it("filters out torrents with 2 or fewer episodes for shows", async ({
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(Object.values(results)).not.toEqual(
@@ -276,7 +251,6 @@ it("filters out torrents with 2 or fewer episodes for shows", async ({
 it("filters out torrents with an incorrect number of seasons for shows", async ({
   indexedShowContext: { indexedShow },
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitle = "Test Show: S01-03 E01-30";
 
@@ -291,10 +265,7 @@ it("filters out torrents with an incorrect number of seasons for shows", async (
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -312,7 +283,6 @@ it("filters out torrents with incorrect number of episodes for single-season sho
   em,
   indexedShowContext: { indexedShow },
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitle = "Test Show: S01 E01-05";
 
@@ -333,10 +303,7 @@ it("filters out torrents with incorrect number of episodes for single-season sho
 
   await em.flush();
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -353,7 +320,6 @@ it("filters out torrents with incorrect number of episodes for single-season sho
 it("filters out duplicate torrents from different plugins", async ({
   indexedMovieContext: { indexedMovie },
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitle = "Test Movie: 1080p";
 
@@ -374,10 +340,7 @@ it("filters out duplicate torrents from different plugins", async ({
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(1);
   expect(Object.values(results)).toEqual([
@@ -390,7 +353,6 @@ it("filters out duplicate torrents from different plugins", async ({
 it("filters out torrents with the incorrect season number for season items", async ({
   season,
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitle = "Test Show 2024 S02 E01-10";
 
@@ -405,10 +367,7 @@ it("filters out torrents with the incorrect season number for season items", asy
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -425,7 +384,6 @@ it("filters out torrents with the incorrect season number for season items", asy
 it("filters out torrents with 2 or fewer episodes for season items", async ({
   season,
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitle = "Test Show 2024 S01 E01";
 
@@ -440,10 +398,7 @@ it("filters out torrents with 2 or fewer episodes for season items", async ({
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -460,7 +415,6 @@ it("filters out torrents with 2 or fewer episodes for season items", async ({
 it("filters out torrents with incorrect episodes for season items", async ({
   season,
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitle = "Test Show 2024 S01 E30-50";
 
@@ -475,10 +429,7 @@ it("filters out torrents with incorrect episodes for season items", async ({
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -495,7 +446,6 @@ it("filters out torrents with incorrect episodes for season items", async ({
 it("filters out torrents with incorrect episode numbers for episode items", async ({
   episode,
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitle = "Test Show 2024 S01E02";
 
@@ -510,10 +460,7 @@ it("filters out torrents with incorrect episode numbers for episode items", asyn
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -530,7 +477,6 @@ it("filters out torrents with incorrect episode numbers for episode items", asyn
 it("filters out torrents with the incorrect season number for episode items", async ({
   episode,
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitle = "Test Show 2024 S02E01";
 
@@ -545,10 +491,7 @@ it("filters out torrents with the incorrect season number for episode items", as
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -565,7 +508,6 @@ it("filters out torrents with the incorrect season number for episode items", as
 it("filters out torrents with no episodes for episode items", async ({
   episode,
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitle = "Test Show 2024";
 
@@ -580,10 +522,7 @@ it("filters out torrents with no episodes for episode items", async ({
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(results).not.toEqual(
     expect.arrayContaining([
@@ -600,7 +539,6 @@ it("filters out torrents that do not match the media item's country", async ({
   em,
   episode,
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitle = "Test Show 2024 S01E01 [US]";
 
@@ -620,10 +558,7 @@ it("filters out torrents that do not match the media item's country", async ({
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
   expect(results).not.toEqual(
@@ -641,7 +576,6 @@ it("does not filter out torrents that do not match the media item's country if t
   em,
   episode,
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitle = "Test Show 2024 S01E01 [US]";
 
@@ -665,10 +599,7 @@ it("does not filter out torrents that do not match the media item's country if t
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(1);
   expect(Object.values(results)).toEqual(
@@ -684,7 +615,6 @@ it("filters out torrents that do not match the media item's year ± 1 year", asy
   em,
   indexedMovieContext: { indexedMovie },
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitles = [
     "Test Movie 2018 1080p",
@@ -716,10 +646,7 @@ it("filters out torrents that do not match the media item's year ± 1 year", asy
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(3);
   expect(Object.values(results)).toEqual(
@@ -737,7 +664,6 @@ it.skip('filters out torrents that are not dubbed if the media item is anime and
   em,
   indexedMovieContext: { indexedMovie },
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitles = [
     "Test Movie 2018 1080p [Dubbed]",
@@ -769,10 +695,7 @@ it.skip('filters out torrents that are not dubbed if the media item is anime and
     dubbedAnimeOnly: true,
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(1);
   expect(Object.values(results)).toEqual([
@@ -786,7 +709,6 @@ it.skip('does not filter out torrents that are not dubbed if the media item is a
   em,
   indexedMovieContext: { indexedMovie },
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitles = [
     "Test Movie 2018 1080p [Dubbed]",
@@ -818,10 +740,7 @@ it.skip('does not filter out torrents that are not dubbed if the media item is a
     dubbedAnimeOnly: false,
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(2);
   expect(results).toEqual(
@@ -840,7 +759,6 @@ it.skip('does not filter out torrents that are not dubbed if the media item is a
 it.skip("returns sorted results", async ({
   indexedMovieContext: { indexedMovie },
   createMockJob,
-  mockSentryScope,
 }) => {
   const rawTitles = [
     "Test Movie 2024 2160p",
@@ -861,10 +779,7 @@ it.skip("returns sorted results", async ({
     },
   });
 
-  const { results } = await parseScrapeResultsProcessor(
-    { job, scope: mockSentryScope },
-    vi.fn(),
-  );
+  const { results } = await parseScrapeResultsProcessor(job as never);
 
   const expectedOrder = [rawTitles[2], rawTitles[0], rawTitles[1]] as const;
 
