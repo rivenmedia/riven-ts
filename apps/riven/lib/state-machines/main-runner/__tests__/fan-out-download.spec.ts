@@ -3,6 +3,7 @@ import { MediaItemDownloadErrorEvent } from "@repo/util-plugin-sdk/schemas/event
 
 import assert from "node:assert";
 import { expect, vi } from "vitest";
+import { waitFor } from "xstate";
 
 import { flow } from "../../../message-queue/flows/producer.ts";
 import { it } from "./helpers/test-context.ts";
@@ -18,6 +19,8 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
   const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
 
   actor.start();
+
+  await waitFor(actor, (state) => state.matches("Running"));
 
   actor.send({
     type: "riven.media-item.download.error",
@@ -52,6 +55,8 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
   const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
 
   actor.start();
+
+  await waitFor(actor, (state) => state.matches("Running"));
 
   actor.send({
     type: "riven.media-item.download.error",

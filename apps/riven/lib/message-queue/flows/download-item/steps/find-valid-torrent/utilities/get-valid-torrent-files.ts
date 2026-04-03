@@ -1,6 +1,6 @@
+import { enqueueValidateTorrentFiles } from "../../../../../sandboxed-jobs/jobs/validate-torrent-files/enqueue-validate-torrent-files.ts";
+import { InvalidTorrentError } from "../../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
 import { runSingleJob } from "../../../../../utilities/run-single-job.ts";
-import { enqueueMapItemsToFiles } from "../../../enqueue-map-items-to-files.ts";
-import { validateTorrentFiles } from "./validate-torrent-files.ts";
 
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
@@ -13,19 +13,19 @@ export async function getValidTorrentFiles(
   isCachedFiles: boolean,
   parent: ParentOptions,
 ) {
-  const mapItemsNode = await enqueueMapItemsToFiles({
+  const validateTorrentFilesNode = await enqueueValidateTorrentFiles({
     parent,
     infoHash,
     files,
-    jobId: `${infoHash}-map-items-to-files-${isCachedFiles ? "cached" : "downloaded"}`,
+    mediaItemId: item.id,
+    isCacheCheck: isCachedFiles,
   });
 
-  const mappedTorrentFiles = await runSingleJob(mapItemsNode.job);
+  const result = await runSingleJob(validateTorrentFilesNode.job);
 
-  return validateTorrentFiles(
-    item,
-    infoHash,
-    mappedTorrentFiles,
-    isCachedFiles,
-  );
+  if (!result.success) {
+    throw new InvalidTorrentError(result.reason);
+  }
+
+  return result.files;
 }

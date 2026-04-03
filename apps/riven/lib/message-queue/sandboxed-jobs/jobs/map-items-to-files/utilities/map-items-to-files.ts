@@ -4,7 +4,9 @@ import assert from "node:assert";
 import { extname } from "node:path";
 import z from "zod";
 
-import type { MapItemsToFilesFlow } from "../map-items-to-files.schema.ts";
+import { logger } from "../../../../../utilities/logger/logger.ts";
+
+import type { MapItemsToFilesSandboxedJob } from "../map-items-to-files.schema.ts";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 
 const VALID_FILE_EXTENSIONS = z.enum([
@@ -18,7 +20,7 @@ const VALID_FILE_EXTENSIONS = z.enum([
 ]);
 
 export function mapItemsToFiles(items: DebridFile[]) {
-  return items.reduce<MapItemsToFilesFlow["output"]>(
+  return items.reduce<MapItemsToFilesSandboxedJob["output"]>(
     (acc, file) => {
       try {
         const fileExtension = extname(file.name);
@@ -54,7 +56,9 @@ export function mapItemsToFiles(items: DebridFile[]) {
             [key]: file,
           },
         };
-      } catch {
+      } catch (error) {
+        logger.silly(`Error mapping file ${file.name}: ${String(error)}`);
+
         return acc;
       }
     },

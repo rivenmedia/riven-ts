@@ -13,12 +13,12 @@ import chalk from "chalk";
 import { reduceAsync } from "es-toolkit";
 import assert, { AssertionError } from "node:assert";
 
-import { database } from "../../../../../../database/database.ts";
-import { logger } from "../../../../../../utilities/logger/logger.ts";
-import { settings } from "../../../../../../utilities/settings.ts";
-import { MatchedFile } from "../find-valid-torrent.schema.ts";
+import { database } from "../../../../../database/database.ts";
+import { logger } from "../../../../../utilities/logger/logger.ts";
+import { settings } from "../../../../../utilities/settings.ts";
+import { MatchedFile } from "../../../../flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 
-import type { MapItemsToFilesFlow } from "../../map-items-to-files/map-items-to-files.schema.ts";
+import type { MapItemsToFilesSandboxedJob } from "../../map-items-to-files/map-items-to-files.schema.ts";
 
 export class InvalidTorrentError extends Error {}
 
@@ -56,7 +56,7 @@ async function getItemLookupKeys(item: ShowLikeMediaItem) {
     const episodes =
       item instanceof Show
         ? await item.getEpisodes()
-        : item.episodes.getItems();
+        : await item.episodes.loadItems();
 
     return episodes.reduce<string[]>(
       (acc, episode) => [...acc, ...getEpisodeLookupKeys(episode)],
@@ -78,7 +78,7 @@ function calculateAverageBitrate(fileSize: number, runtime: number) {
 export const validateTorrentFiles = async (
   item: MediaItem,
   infoHash: string,
-  { episodes, movies }: MapItemsToFilesFlow["output"],
+  { episodes, movies }: MapItemsToFilesSandboxedJob["output"],
   isCacheCheck: boolean,
 ): Promise<MatchedFile[]> => {
   try {

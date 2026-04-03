@@ -2,12 +2,12 @@ import { MediaItemScrapeRequestedResponse } from "@repo/util-plugin-sdk/schemas/
 
 import z from "zod";
 
-import { createFlowJobBuilder } from "../../../../utilities/create-flow-job-schema.ts";
-import { createFlowSchema } from "../../../../utilities/create-flow-schema.ts";
+import { createFlowJobBuilder } from "../../../utilities/create-flow-job-builder.ts";
+import { createSandboxedJobSchema } from "../../utilities/create-sandboxed-job-schema.ts";
 
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
-export const ParseScrapeResultsFlow = createFlowSchema(
+export const ParseScrapeResultsSandboxedJob = createSandboxedJobSchema(
   "scrape-item.parse-scrape-results",
   {
     children: MediaItemScrapeRequestedResponse,
@@ -21,11 +21,13 @@ export const ParseScrapeResultsFlow = createFlowSchema(
   },
 );
 
-export type ParseScrapeResultsFlow = z.infer<typeof ParseScrapeResultsFlow>;
+export type ParseScrapeResultsSandboxedJob = z.infer<
+  typeof ParseScrapeResultsSandboxedJob
+>;
 
 export const parseScrapeResultsProcessorSchema =
-  ParseScrapeResultsFlow.shape.processor;
+  ParseScrapeResultsSandboxedJob.shape.processor;
 
 export const createParseScrapeResultsJob = createFlowJobBuilder(
-  ParseScrapeResultsFlow,
+  ParseScrapeResultsSandboxedJob,
 );

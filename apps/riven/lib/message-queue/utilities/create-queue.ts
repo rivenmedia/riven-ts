@@ -1,6 +1,7 @@
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import { Queue, type QueueOptions } from "bullmq";
+import { toMerged } from "es-toolkit";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
@@ -10,30 +11,35 @@ Queue.setMaxListeners(200);
 
 export function createQueue(
   name: string,
-  options?: Omit<QueueOptions, "connection" | "telemetry">,
+  options: Omit<QueueOptions, "connection" | "telemetry"> = {},
 ) {
-  const queue = new Queue(name, {
-    streams: {
-      events: {
-        maxLen: 100,
+  const queue = new Queue(
+    name,
+    toMerged<QueueOptions, typeof options>(
+      {
+        streams: {
+          events: {
+            maxLen: 100,
+          },
+        },
+        defaultJobOptions: {
+          removeOnComplete: {
+            age: 60 * 60 * 6,
+            count: 500,
+          },
+          removeOnFail: {
+            age: 60 * 60 * 24,
+            count: 5000,
+          },
+        },
+        connection: {
+          url: settings.redisUrl,
+        },
+        telemetry,
       },
-    },
-    defaultJobOptions: {
-      removeOnComplete: {
-        age: 60 * 60 * 6,
-        count: 500,
-      },
-      removeOnFail: {
-        age: 60 * 60 * 24,
-        count: 5000,
-      },
-    },
-    ...options,
-    connection: {
-      url: settings.redisUrl,
-    },
-    telemetry,
-  });
+      options,
+    ),
+  );
 
   registerMQListeners(queue, logger);
 

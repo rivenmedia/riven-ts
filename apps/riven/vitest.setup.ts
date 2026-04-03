@@ -79,6 +79,7 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
 
   return {
     database,
+    initORM,
   };
 });
 
