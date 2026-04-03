@@ -5,12 +5,8 @@ import {
   OneToMany,
   Property,
 } from "@mikro-orm/decorators/legacy";
-import { Field, ObjectType } from "type-graphql";
 
-import {
-  ShowContentRating,
-  ShowContentRatingEnum,
-} from "../../enums/content-ratings.enum.ts";
+import { ShowContentRating } from "../../enums/content-ratings.enum.ts";
 import { ShowStatus } from "../../enums/show-status.enum.ts";
 import { MediaEntry } from "../filesystem/media-entry.entity.ts";
 import { Season } from "./season.entity.ts";
@@ -19,10 +15,8 @@ import { ShowLikeMediaItem } from "./show-like.entity.ts";
 import type { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import type { ItemRequest } from "../requests/item-request.entity.ts";
 
-@ObjectType()
 @Entity()
 export class Show extends ShowLikeMediaItem {
-  @Field(() => ShowContentRatingEnum)
   declare contentRating: ShowContentRating;
 
   override type: Opt<"show"> = "show" as const;
@@ -32,15 +26,12 @@ export class Show extends ShowLikeMediaItem {
   declare itemRequest: Ref<ItemRequest>;
   declare filesystemEntries: never;
 
-  @Field(() => ShowStatus.enum, { nullable: true })
   @Enum(() => ShowStatus.enum)
   status!: ShowStatus;
 
-  @Field(() => [Season])
   @OneToMany(() => Season, (season) => season.show)
   seasons = new Collection<Season>(this);
 
-  @Field(() => [Season])
   @OneToMany(() => Season, (season) => season.show, {
     where: { isRequested: true },
   })

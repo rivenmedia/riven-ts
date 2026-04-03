@@ -9,7 +9,6 @@ import {
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
-import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
 import type {
   InvalidPluginMap,
@@ -19,7 +18,6 @@ import type {
   ValidPlugin,
   ValidPluginMap,
 } from "../../types/plugins.ts";
-import type { ApolloServer } from "@apollo/server";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";
@@ -30,7 +28,6 @@ export interface BootstrapMachineContext {
   validatingPlugins: RegisteredPluginMap;
   validPlugins: ValidPluginMap;
   invalidPlugins: InvalidPluginMap;
-  server?: ApolloServer;
   vfs?: Fuse;
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
@@ -43,7 +40,6 @@ export interface BootstrapMachineInput {
 }
 
 export interface BootstrapMachineOutput {
-  server: ApolloServer;
   plugins: ValidPluginMap;
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
@@ -57,16 +53,12 @@ export const bootstrapMachine = setup({
     input: {} as BootstrapMachineInput,
     output: {} as BootstrapMachineOutput,
     children: {} as {
-      startGqlServer: "startGqlServer";
       initialiseDatabaseConnection: "initialiseDatabaseConnection";
       pluginRegistrarMachine: "pluginRegistrarMachine";
       initialiseVfs: "initialiseVfs";
     },
   },
   actions: {
-    assignGqlServer: assign((_, server: ApolloServer) => ({
-      server,
-    })),
     assignVfs: assign((_, vfs: Fuse) => ({
       vfs,
     })),
@@ -100,7 +92,6 @@ export const bootstrapMachine = setup({
     }),
   },
   actors: {
-    startGqlServer,
     initialiseDatabaseConnection,
     pluginRegistrarMachine,
     initialiseVfs,
@@ -127,7 +118,6 @@ export const bootstrapMachine = setup({
     }),
     output: ({
       context: {
-        server,
         vfs,
         validPlugins,
         pluginQueues,
@@ -135,19 +125,12 @@ export const bootstrapMachine = setup({
         publishableEvents,
       },
     }) => {
-      if (!server) {
-        throw new Error(
-          "Bootstrap machine completed without a GraphQL server instance",
-        );
-      }
-
       if (!vfs) {
         throw new Error("Bootstrap machine completed without a VFS instance");
       }
 
       return {
         plugins: validPlugins,
-        server,
         vfs,
         pluginQueues,
         pluginWorkers,
@@ -259,85 +242,6 @@ export const bootstrapMachine = setup({
                   },
                 },
                 type: "final",
-              },
-            },
-          },
-          "Bootstrapping GraphQL Server": {
-            initial: "Starting",
-            states: {
-              Starting: {
-                entry: {
-                  type: "log",
-                  params: {
-                    message: "Starting GraphQL server...",
-                  },
-                },
-                invoke: {
-                  id: "startGqlServer",
-                  src: "startGqlServer",
-                  input: ({ context: { validPlugins, pluginSettings } }) => {
-                    if (!pluginSettings) {
-                      throw new Error(
-                        "Plugin settings not available when starting GraphQL server. Ensure the plugin registrar has been run first.",
-                      );
-                    }
-
-                    return {
-                      validPlugins,
-                      pluginSettings,
-                    };
-                  },
-                  onDone: {
-                    target: "Complete",
-                    actions: [
-                      {
-                        type: "assignGqlServer",
-                        params: ({
-                          event: {
-                            output: { server },
-                          },
-                        }) => server,
-                      },
-                      {
-                        type: "log",
-                        params: ({
-                          event: {
-                            output: { url },
-                          },
-                        }) => ({
-                          message: `GraphQL server ready at ${url}`,
-                        }),
-                      },
-                    ],
-                  },
-                  onError: {
-                    target: "#Bootstrap.Errored",
-                    actions: [
-                      {
-                        type: "log",
-                        params: ({ event: { error } }) => ({
-                          message:
-                            "Failed to start GraphQL server during bootstrap.",
-                          level: "error",
-                          error,
-                        }),
-                      },
-                      {
-                        type: "raiseError",
-                        params: ({ event }) => event.error as Error,
-                      },
-                    ],
-                  },
-                },
-              },
-              Complete: {
-                type: "final",
-                entry: {
-                  type: "log",
-                  params: {
-                    message: "GraphQL bootstrap complete.",
-                  },
-                },
               },
             },
           },

@@ -9,10 +9,6 @@ import type {
   InitialiseVfsInput,
   InitialiseVfsOutput,
 } from "../../actors/initialise-vfs.actor.ts";
-import type {
-  StartGQLServerInput,
-  StartGQLServerOutput,
-} from "../../actors/start-gql-server.actor.ts";
 
 export const it = baseIt
   .extend("input", () => ({
@@ -25,14 +21,6 @@ export const it = baseIt
       /* empty */
     }),
   )
-  .extend("startGqlServerActorLogic", ({ apolloServerInstance }) =>
-    fromPromise<StartGQLServerOutput, StartGQLServerInput>(async () => {
-      return {
-        server: apolloServerInstance,
-        url: "http://localhost:4000/graphql",
-      };
-    }),
-  )
   .extend(
     "initialiseVfsActorLogic",
     fromPromise<InitialiseVfsOutput, InitialiseVfsInput>(async () => {
@@ -43,15 +31,10 @@ export const it = baseIt
   )
   .extend(
     "machine",
-    ({
-      initialiseDatabaseConnectionActorLogic,
-      startGqlServerActorLogic,
-      initialiseVfsActorLogic,
-    }) =>
+    ({ initialiseDatabaseConnectionActorLogic, initialiseVfsActorLogic }) =>
       bootstrapMachine.provide({
         actors: {
           initialiseDatabaseConnection: initialiseDatabaseConnectionActorLogic,
-          startGqlServer: startGqlServerActorLogic,
           initialiseVfs: initialiseVfsActorLogic,
         },
       }),

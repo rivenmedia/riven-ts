@@ -20,7 +20,6 @@
     "@repo/util-plugin-sdk": "workspace:^",
     "countries-and-timezones": "^3.8.0",
     "luxon": "catalog:",
-    "type-graphql": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -22,12 +22,6 @@ vi.mock<{ default: Record<string, unknown> }>(
     }) as const,
 );
 
-vi.mock(import("@apollo/server/standalone"), () => ({
-  startStandaloneServer: vi.fn().mockResolvedValue({
-    url: "http://localhost:4000/mocked-server",
-  }),
-}));
-
 vi.mock(import("@repo/plugin-test"), () => {
   class TestAPI extends BaseDataSource<Record<string, unknown>> {
     override baseURL = "https://api.test.com";
@@ -49,7 +43,6 @@ vi.mock(import("@repo/plugin-test"), () => {
       version: "1.0.0-mock",
       name: Symbol.for("@repo/plugin-test"),
       dataSources: [TestAPI],
-      resolvers: [TestResolver],
       // Listen to all events with a mock function, as plugin subscribers are filtered based
       // on the presence of a handler for the event type.
       hooks: Object.fromEntries(

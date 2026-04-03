@@ -17,14 +17,12 @@
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@repo/util-plugin-sdk": "workspace:^",
-    "type-graphql": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@faker-js/faker": "catalog:",
     "@kubb/cli": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
-    "@repo/core-util-graphql-helpers": "workspace:^",
     "@repo/core-util-kubb-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",

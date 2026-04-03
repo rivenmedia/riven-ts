@@ -17,11 +17,8 @@
   },
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
-    "@repo/core-util-graphql-helpers": "workspace:^",
-    "@repo/feature-settings": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "class-validator": "catalog:",
-    "type-graphql": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -35,13 +32,9 @@
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
-    "graphql-tag": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "zod2md": "catalog:"
-  },
-  "peerDependencies": {
-    "graphql-tag": "catalog:"
   }
 }

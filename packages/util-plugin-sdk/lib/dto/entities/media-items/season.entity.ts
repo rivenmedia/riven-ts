@@ -6,28 +6,23 @@ import {
   Property,
 } from "@mikro-orm/decorators/legacy";
 import { Min } from "class-validator";
-import { Field, ObjectType } from "type-graphql";
 
 import { MediaEntry } from "../filesystem/media-entry.entity.ts";
 import { Episode } from "./episode.entity.ts";
 import { ShowLikeMediaItem } from "./show-like.entity.ts";
 import { Show } from "./show.entity.ts";
 
-@ObjectType()
 @Entity()
 export class Season extends ShowLikeMediaItem {
   declare filesystemEntries: never;
 
-  @Field()
   @Property()
   @Min(0)
   number!: number;
 
-  @Field(() => Show)
   @ManyToOne()
   show!: Opt<Ref<Show>>;
 
-  @Field(() => [Episode])
   @OneToMany(() => Episode, (episode) => episode.season)
   episodes = new Collection<Episode>(this);
 

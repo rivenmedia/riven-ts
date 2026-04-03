@@ -3,11 +3,9 @@ import { type AnyActorRef, assign, setup } from "xstate";
 import { bootstrapMachine } from "../bootstrap/index.ts";
 import { mainRunnerMachine } from "../main-runner/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
-import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 import { unmountVfs } from "./actors/unmount-vfs.actor.ts";
 
 import type { ValidPluginMap } from "../../types/plugins.ts";
-import type { ApolloServer } from "@apollo/server";
 import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";
 import type Fuse from "@zkochan/fuse-native";
 import type { UUID } from "node:crypto";
@@ -15,7 +13,6 @@ import type { UUID } from "node:crypto";
 export interface RivenMachineContext {
   mainRunnerRef?: AnyActorRef;
   plugins?: ValidPluginMap;
-  server?: ApolloServer;
   vfs?: Fuse;
 }
 
@@ -40,7 +37,6 @@ export const rivenMachine = setup({
   actors: {
     bootstrapMachine,
     mainRunnerMachine,
-    stopGqlServer,
     unmountVfs,
   },
 })
@@ -64,7 +60,6 @@ export const rivenMachine = setup({
                 self,
                 event: {
                   output: {
-                    server,
                     vfs,
                     plugins,
                     publishableEvents,
@@ -73,7 +68,6 @@ export const rivenMachine = setup({
                   },
                 },
               }) => ({
-                server,
                 vfs,
                 mainRunnerRef: spawn(mainRunnerMachine, {
                   input: {
@@ -124,39 +118,6 @@ export const rivenMachine = setup({
         ],
         onDone: "Exited",
         states: {
-          "Shutting down GQL server": {
-            initial: "Shutting down",
-            states: {
-              "Shutting down": {
-                invoke: {
-                  id: "stopGqlServer",
-                  src: "stopGqlServer",
-                  input: ({ context: { server } }) => server,
-                  onDone: "Stopped",
-                  onError: {
-                    target: "Stopped",
-                    actions: {
-                      type: "log",
-                      params: ({ event: { error } }) => ({
-                        message: "Error while shutting down GQL server",
-                        level: "error",
-                        error,
-                      }),
-                    },
-                  },
-                },
-              },
-              Stopped: {
-                type: "final",
-                entry: {
-                  type: "log",
-                  params: {
-                    message: "GQL server has been stopped.",
-                  },
-                },
-              },
-            },
-          },
           "Unmounting VFS": {
             initial: "Unmounting",
             states: {

@@ -71,10 +71,7 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
           (answers as PluginAnswers).pluginName,
         );
 
-        return formatOutputCode([
-          `packages/plugin-${pluginName}/**/*`,
-          require.resolve("../../../packages/core/util-graphql-schema/lib/index.ts"),
-        ]);
+        return formatOutputCode([`packages/plugin-${pluginName}/**/*`]);
       },
     ],
   });

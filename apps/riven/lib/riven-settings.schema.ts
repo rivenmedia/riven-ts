@@ -50,11 +50,6 @@ export const RivenSettings = z.object({
     .stringbool()
     .default(true)
     .describe("Whether to show detailed stack traces when logging errors"),
-  gqlPort: z.coerce
-    .number()
-    .int()
-    .default(3000)
-    .describe("The GraphQL server port."),
   dubbedAnimeOnly: z
     .stringbool()
     .default(false)

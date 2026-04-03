@@ -9,7 +9,6 @@ import {
 import { IsPositive } from "class-validator";
 import { DateTime } from "luxon";
 import path from "node:path";
-import { Field, ID, ObjectType } from "type-graphql";
 import z from "zod";
 
 import { Episode } from "../media-items/episode.entity.ts";
@@ -57,34 +56,27 @@ async function getMediaItemPathParts(mediaItem: MediaItem) {
   throw new TypeError("Unsupported media item type for path generation");
 }
 
-@ObjectType()
 @Entity({
   abstract: true,
   discriminatorColumn: "type",
 })
 export abstract class FileSystemEntry {
-  @Field((_type) => ID)
   @PrimaryKey()
   id!: number;
 
-  @Field()
   @Property({ type: "bigint" })
   @IsPositive()
   fileSize!: number;
 
-  @Field(() => Date)
   @Property()
   createdAt: Opt<Date> = DateTime.now().toJSDate();
 
-  @Field(() => Date, { nullable: true })
   @Property({ onUpdate: () => DateTime.now().toJSDate() })
   updatedAt?: Opt<Date>;
 
-  @Field(() => MediaItem)
   @ManyToOne(() => MediaItem)
   mediaItem!: Opt<Ref<Movie | Episode>>;
 
-  @Field(() => String)
   @Enum(() => FileSystemEntryType.enum)
   type!: FileSystemEntryType;
 

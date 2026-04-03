@@ -18,7 +18,6 @@
     "@apollo/datasource-rest": "catalog:",
     "@repo/util-plugin-sdk": "workspace:^",
     "luxon": "catalog:",
-    "type-graphql": "catalog:",
     "zod": "catalog:",
     "zod-validation-error": "catalog:"
   },

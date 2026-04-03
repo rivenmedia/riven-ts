@@ -11,7 +11,6 @@ import { it as baseIt } from "vitest";
 import { mockLogger } from "./create-mock-logger.ts";
 import { createMockPluginSettings } from "./create-mock-plugin-settings.ts";
 
-import type { ApolloServerContext } from "@repo/core-util-mock-graphql-server";
 import type { Telemetry } from "bullmq";
 
 export const it = baseIt
@@ -51,18 +50,6 @@ export const it = baseIt
   .extend("settings", { scope: "file" }, ({ plugin }) =>
     createMockPluginSettings(plugin.settingsSchema, {}),
   )
-  .extend("gqlServer", { scope: "file" }, async ({ plugin }, { onCleanup }) => {
-    const { buildMockServer } =
-      await import("@repo/core-util-mock-graphql-server");
-
-    const mockServer = await buildMockServer(plugin.resolvers);
-
-    await mockServer.start();
-
-    onCleanup(() => mockServer.stop());
-
-    return mockServer;
-  })
   .extend("httpCache", { scope: "file" }, async () => {
     const { InMemoryLRUCache } = await import("@apollo/utils.keyvaluecache");
 
@@ -135,14 +122,6 @@ export const it = baseIt
 
       return dataSourceMap;
     },
-  )
-  .extend(
-    "gqlContext",
-    ({ plugin, dataSourceMap }): ApolloServerContext => ({
-      [plugin.name]: {
-        dataSources: dataSourceMap,
-      },
-    }),
   );
 
 it.afterEach(async ({ httpCache, redisClient }) => {

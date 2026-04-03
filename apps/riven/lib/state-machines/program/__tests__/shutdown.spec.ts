@@ -20,30 +20,6 @@ it('transitions to "Shutdown" then "Exited" when the "riven.shutdown" event is s
   });
 });
 
-it("stops the GraphQL server when shutting down", async ({
-  machine,
-  input,
-}) => {
-  const stopGqlServerMock = vi.fn().mockResolvedValue(undefined);
-
-  const actor = createActor(
-    machine.provide({
-      actors: {
-        stopGqlServer: fromPromise(stopGqlServerMock),
-      },
-    }),
-    { input },
-  );
-
-  actor.start().send({ type: "riven.core.shutdown" });
-
-  await vi.waitFor(() => {
-    expect(actor.getSnapshot().value).toBe("Exited");
-  });
-
-  expect(stopGqlServerMock).toHaveBeenCalledOnce();
-});
-
 it("unmounts the VFS when shutting down", async ({ machine, input }) => {
   const unmountVfsMock = vi.fn().mockResolvedValue(undefined);
   const actor = createActor(

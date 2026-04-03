@@ -1,9 +1,0 @@
-{
-  "client": {
-    "includes": ["apps/riven/lib/**/*.ts"],
-    "service": {
-      "name": "Riven",
-      "url": "http://localhost:3000/graphql"
-    }
-  }
-}

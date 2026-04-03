@@ -8,7 +8,6 @@ import {
   Unique,
 } from "@mikro-orm/decorators/legacy";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
-import { Field, ID, ObjectType } from "type-graphql";
 
 import { DateTime } from "../../../helpers/dates.ts";
 import { ItemRequestState } from "../../enums/item-request-state.enum.ts";
@@ -16,59 +15,47 @@ import { ItemRequestType } from "../../enums/item-request-type.enum.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
 import { Season } from "../media-items/season.entity.ts";
 
-@ObjectType()
 @Entity()
 export class ItemRequest {
-  @Field(() => ID)
   @PrimaryKey()
   id!: number;
 
-  @Field(() => String, { nullable: true })
   @Property()
   @Matches(/^tt\d+$/)
   @IsOptional()
   @Unique()
   imdbId?: string | null;
 
-  @Field(() => String, { nullable: true })
   @Property()
   @IsNumberString()
   @IsOptional()
   @Unique()
   tmdbId?: string | null;
 
-  @Field(() => String, { nullable: true })
   @Property()
   @IsNumberString()
   @IsOptional()
   @Unique()
   tvdbId?: string | null;
 
-  @Field()
   @Enum(() => ItemRequestType.enum)
   type!: ItemRequestType;
 
-  @Field(() => String, { nullable: true })
   @Property()
   requestedBy!: string | null;
 
-  @Field()
   @Property()
   externalRequestId?: string;
 
-  @Field(() => Date)
   @Property()
   createdAt: Opt<Date> = DateTime.now().toJSDate();
 
-  @Field(() => Date, { nullable: true })
   @Property()
   completedAt?: Opt<Date> | null;
 
-  @Field()
   @Enum(() => ItemRequestState.enum)
   state!: ItemRequestState;
 
-  @Field(() => [Number], { nullable: true })
   @Property({ type: "json" })
   seasons!: number[] | null;
 

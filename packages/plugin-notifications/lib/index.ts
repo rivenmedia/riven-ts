@@ -2,8 +2,6 @@ import packageJson from "../package.json" with { type: "json" };
 import { NotificationsAPI } from "./datasource/notifications.datasource.ts";
 import { pluginConfig } from "./notifications-plugin.config.ts";
 import { NotificationsSettings } from "./notifications-settings.schema.ts";
-import { NotificationsSettingsResolver } from "./schema/notifications-settings.resolver.ts";
-import { NotificationsResolver } from "./schema/notifications.resolver.ts";
 import { sendNotification } from "./services/dispatchers/send-notification.ts";
 import { buildNotificationPayload } from "./services/notification-payload.ts";
 
@@ -13,7 +11,6 @@ export default {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [NotificationsAPI],
-  resolvers: [NotificationsResolver, NotificationsSettingsResolver],
   hooks: {
     "riven.media-item.download.success": async ({
       event,

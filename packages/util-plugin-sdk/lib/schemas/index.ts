@@ -67,7 +67,6 @@ export const RivenPlugin = z.object({
   ),
   name: z.symbol(),
   dataSources: z.tuple([dataSourceSchema]).rest(dataSourceSchema).optional(),
-  resolvers: z.array(z.instanceof(Function)).min(1),
   hooks: z.object(RivenEventHandler).partial(),
   context: z
     .function({

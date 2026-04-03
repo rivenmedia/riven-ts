@@ -19,19 +19,6 @@ import { createQueue } from "../message-queue/utilities/create-queue.ts";
 import { buildSeederFunctions } from "./utilities/build-seeder-functions.ts";
 
 export const it = testBase
-  .extend("apolloServerInstance", async ({}) => {
-    const { buildMockServer } =
-      await import("@repo/core-util-mock-graphql-server");
-
-    return buildMockServer();
-  })
-  .extend("gqlServer", async ({ apolloServerInstance }, { onCleanup }) => {
-    await apolloServerInstance.start();
-
-    onCleanup(() => apolloServerInstance.stop());
-
-    return apolloServerInstance;
-  })
   .extend("server", async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 

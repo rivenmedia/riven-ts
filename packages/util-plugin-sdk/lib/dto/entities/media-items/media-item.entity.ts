@@ -16,12 +16,8 @@ import {
 } from "@mikro-orm/decorators/legacy";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { DateTime } from "luxon";
-import { Field, ID, ObjectType } from "type-graphql";
 
-import {
-  MediaItemContentRating,
-  MediaItemContentRatingEnum,
-} from "../../enums/content-ratings.enum.ts";
+import { MediaItemContentRating } from "../../enums/content-ratings.enum.ts";
 import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { MediaItemType } from "../../enums/media-item-type.enum.ts";
 import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
@@ -31,7 +27,6 @@ import { Stream } from "../streams/stream.entity.ts";
 
 import type { Promisable } from "type-fest";
 
-@ObjectType()
 @Entity({
   abstract: true,
   discriminatorColumn: "type",
@@ -40,67 +35,53 @@ import type { Promisable } from "type-fest";
 export abstract class MediaItem {
   [OptionalProps]?: "state";
 
-  @Field((_type) => ID)
   @PrimaryKey()
   id!: number;
 
-  @Field(() => String)
   @Index()
   @Property()
   title!: string;
 
-  @Field(() => String)
   @Property()
   fullTitle!: Opt<string>;
 
-  @Field(() => String, { nullable: true })
   @Property()
   @Matches(/^tt\d+$/)
   @IsOptional()
   imdbId?: string | null;
 
-  @Field(() => String, { nullable: true })
   @Property()
   @IsNumberString()
   @IsOptional()
   tvdbId?: string | null;
 
-  @Field(() => String, { nullable: true })
   @Property()
   @IsNumberString()
   @IsOptional()
   tmdbId?: string | null;
 
-  @Field(() => String, { nullable: true })
   @Property()
   posterPath?: string | null;
 
-  @Field(() => Date)
   @Index()
   @Property()
   createdAt: Opt<Date> = DateTime.now().toJSDate();
 
-  @Field(() => Date, { nullable: true })
   @Property({ onUpdate: () => DateTime.now().toJSDate() })
   updatedAt?: Opt<Date> | null;
 
-  @Field(() => Date, { nullable: true })
   @Property()
   indexedAt?: Date | null;
 
-  @Field(() => Date, { nullable: true })
   @Property()
   scrapedAt?: Date | null;
 
-  @Field(() => Number)
   @Property({ default: 0 })
   scrapedTimes!: Opt<number>;
 
-  @Field(() => String, { nullable: true })
   @Property({ nullable: true, type: "json" })
   aliases?: Record<string, string[]> | null;
 
-  @Field(() => Boolean)
   @Property({ persist: false, hidden: true })
   get isAnime(): Opt<Hidden<boolean>> {
     return (
@@ -111,75 +92,59 @@ export abstract class MediaItem {
     );
   }
 
-  @Field(() => String, { nullable: true })
   @Property()
   network?: string | null;
 
-  @Field(() => String, { nullable: true })
+  @Property()
   @Property()
   country?: string | null;
 
-  @Field(() => String, { nullable: true })
   @Property()
   language?: string | null;
 
-  @Field(() => Date, { nullable: true })
   @Property()
   releaseDate!: Date | null;
 
-  @Field(() => Number, { nullable: true })
   @Property()
   year?: number | null;
 
-  @Field(() => [String], { nullable: true })
   @Property()
   genres?: string[] | null;
 
-  @Field(() => Number, { nullable: true })
   @Property()
   rating?: number | null;
 
-  @Field(() => MediaItemContentRatingEnum, { nullable: true })
   @Enum(() => MediaItemContentRating.enum)
   contentRating?: MediaItemContentRating | null;
 
-  @Field(() => String, { nullable: true })
   @Property()
   guid?: string | null;
 
-  @Field(() => MediaItemState.enum)
   @Enum({
     default: MediaItemState.enum.indexed,
     items: () => MediaItemState.enum,
   })
   state!: MediaItemState;
 
-  @Field(() => Number)
   @Property()
   failedAttempts: Opt<number> = 0;
 
-  @Field(() => [FileSystemEntry])
   @ManyToMany()
   filesystemEntries: Collection<FileSystemEntry> =
     new Collection<FileSystemEntry>(this);
 
-  @Field(() => [SubtitleEntry])
   @ManyToMany()
   subtitles: Collection<SubtitleEntry> = new Collection<SubtitleEntry>(this);
 
-  @Field(() => Stream, { nullable: true })
   @ManyToOne()
   activeStream?: Ref<Stream> | null;
 
-  @Field(() => [Stream])
   @ManyToMany()
   streams: Collection<Stream> = new Collection<Stream>(this);
 
-  @Field(() => [Stream])
   @ManyToMany()
   blacklistedStreams: Collection<Stream> = new Collection<Stream>(this);
 
-  @Field(() => String)
   @Enum(() => MediaItemType.enum)
   type!: MediaItemType;
 
