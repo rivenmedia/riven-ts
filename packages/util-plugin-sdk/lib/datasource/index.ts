@@ -106,8 +106,14 @@ export abstract class BaseDataSource<
           delay: 5000,
           jitter: 0.5,
         },
-        removeOnComplete: true,
-        removeOnFail: true,
+        removeOnComplete: {
+          age: 60 * 60,
+          count: 500,
+        },
+        removeOnFail: {
+          age: 60 * 60 * 24,
+          count: 5000,
+        },
       },
       streams: {
         events: {
