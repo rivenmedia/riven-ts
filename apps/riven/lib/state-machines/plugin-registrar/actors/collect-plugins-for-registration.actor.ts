@@ -46,12 +46,12 @@ export const collectPluginsForRegistration = fromPromise(async () => {
       const validationResult = await RivenPluginPackage.safeParseAsync(plugin);
 
       if (!validationResult.success) {
-        return {
-          ...parsedPlugins,
-          invalidPlugins: parsedPlugins.invalidPlugins.concat([
-            [pluginName, z.treeifyError(validationResult.error)],
-          ]),
-        };
+        parsedPlugins.invalidPlugins.push([
+          pluginName,
+          z.treeifyError(validationResult.error),
+        ]);
+
+        continue;
       }
 
       const { name: pluginSymbol } = validationResult.data.default;
