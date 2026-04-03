@@ -8,7 +8,7 @@ import {
   Unique,
 } from "@mikro-orm/decorators/legacy";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ID, Int, ObjectType } from "type-graphql";
 
 import { DateTime } from "../../../helpers/dates.ts";
 import { ItemRequestState } from "../../enums/item-request-state.enum.ts";
@@ -44,7 +44,7 @@ export class ItemRequest {
   @Unique()
   tvdbId?: string | null;
 
-  @Field()
+  @Field(() => ItemRequestType.enum)
   @Enum(() => ItemRequestType.enum)
   type!: ItemRequestType;
 
@@ -52,7 +52,7 @@ export class ItemRequest {
   @Property()
   requestedBy!: string | null;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   externalRequestId?: string;
 
@@ -64,11 +64,11 @@ export class ItemRequest {
   @Property()
   completedAt?: Opt<Date> | null;
 
-  @Field()
+  @Field(() => ItemRequestState.enum)
   @Enum(() => ItemRequestState.enum)
   state!: ItemRequestState;
 
-  @Field(() => [Number], { nullable: true })
+  @Field(() => [Int], { nullable: true })
   @Property({ type: "json" })
   seasons!: number[] | null;
 

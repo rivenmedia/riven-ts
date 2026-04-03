@@ -26,6 +26,7 @@ export const bootstrapSandboxedWorkers =
         new URL(
           import.meta
             .resolve("../../../message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.processor.js"),
+          import.meta.url,
         ),
         {},
         { concurrency: 5 },
@@ -35,6 +36,7 @@ export const bootstrapSandboxedWorkers =
         new URL(
           import.meta
             .resolve("../../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.processor.js"),
+          import.meta.url,
         ),
         {},
         { concurrency: 5 },
@@ -44,6 +46,7 @@ export const bootstrapSandboxedWorkers =
         new URL(
           import.meta
             .resolve("../../../message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.js"),
+          import.meta.url,
         ),
         {},
         { concurrency: 5 },
