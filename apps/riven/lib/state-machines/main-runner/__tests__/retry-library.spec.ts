@@ -1,4 +1,5 @@
 import { expect, vi } from "vitest";
+import { waitFor } from "xstate";
 
 import { database } from "../../../database/database.ts";
 import { it } from "./helpers/test-context.ts";
@@ -25,6 +26,8 @@ it('sends a "riven.media-item.index.requested" event for each incomplete item re
   await database.itemRequest.insertMany(items);
 
   actor.start();
+
+  await waitFor(actor, (state) => state.matches("Running"));
 
   actor.send({ type: "riven-internal.retry-library" });
 
