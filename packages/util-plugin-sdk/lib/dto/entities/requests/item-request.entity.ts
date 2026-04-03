@@ -6,8 +6,7 @@ import {
   PrimaryKey,
   Property,
   Unique,
-} from "@mikro-orm/decorators/legacy";
-import { IsNumberString, IsOptional, Matches } from "class-validator";
+} from "@mikro-orm/decorators/es";
 
 import { DateTime } from "../../../helpers/dates.ts";
 import { ItemRequestState } from "../../enums/item-request-state.enum.ts";
@@ -21,20 +20,14 @@ export class ItemRequest {
   id!: number;
 
   @Property()
-  @Matches(/^tt\d+$/)
-  @IsOptional()
   @Unique()
   imdbId?: string | null;
 
   @Property()
-  @IsNumberString()
-  @IsOptional()
   @Unique()
   tmdbId?: string | null;
 
   @Property()
-  @IsNumberString()
-  @IsOptional()
   @Unique()
   tvdbId?: string | null;
 

@@ -5,7 +5,7 @@ import {
   PrimaryKey,
   Property,
   Unique,
-} from "@mikro-orm/decorators/legacy";
+} from "@mikro-orm/decorators/es";
 
 import { MediaItem } from "../media-items/media-item.entity.ts";
 

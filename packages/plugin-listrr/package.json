@@ -19,7 +19,6 @@
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@repo/util-plugin-sdk": "workspace:^",
-    "class-validator": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

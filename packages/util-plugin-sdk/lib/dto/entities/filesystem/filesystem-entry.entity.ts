@@ -1,12 +1,10 @@
 import {
   BeforeCreate,
-  Entity,
   Enum,
   ManyToOne,
   PrimaryKey,
   Property,
-} from "@mikro-orm/decorators/legacy";
-import { IsPositive } from "class-validator";
+} from "@mikro-orm/decorators/es";
 import { DateTime } from "luxon";
 import path from "node:path";
 import z from "zod";
@@ -56,16 +54,11 @@ async function getMediaItemPathParts(mediaItem: MediaItem) {
   throw new TypeError("Unsupported media item type for path generation");
 }
 
-@Entity({
-  abstract: true,
-  discriminatorColumn: "type",
-})
 export abstract class FileSystemEntry {
   @PrimaryKey()
   id!: number;
 
   @Property({ type: "bigint" })
-  @IsPositive()
   fileSize!: number;
 
   @Property()

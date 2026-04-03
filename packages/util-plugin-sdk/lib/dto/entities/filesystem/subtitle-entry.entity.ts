@@ -1,4 +1,4 @@
-import { Entity, Index, Property } from "@mikro-orm/decorators/legacy";
+import { Entity, Index, Property } from "@mikro-orm/decorators/es";
 
 import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 

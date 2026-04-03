@@ -2,9 +2,6 @@ import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
-import { ValidationError, validateOrReject } from "class-validator";
-import z from "zod";
-
 import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
 import { RequestType } from "../request-content-services.schema.ts";
@@ -48,8 +45,6 @@ export async function persistRequestedMovie(
   });
 
   try {
-    await validateOrReject(itemRequest);
-
     await em.flush();
 
     await em.refreshOrFail(itemRequest);
@@ -59,24 +54,9 @@ export async function persistRequestedMovie(
       item: itemRequest,
     };
   } catch (error) {
-    const errorMessage = z
-      .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((error) => {
-        if (Array.isArray(error)) {
-          return error
-            .map((err) =>
-              err.constraints ? Object.values(err.constraints).join("; ") : "",
-            )
-            .join("; ");
-        }
-
-        return error.message;
-      })
-      .parse(error);
-
     throw new ItemRequestCreateError({
       item: itemRequest,
-      error: errorMessage,
+      error: String(error),
     });
   }
 }

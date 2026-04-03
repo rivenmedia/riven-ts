@@ -4,8 +4,7 @@ import {
   ManyToOne,
   OneToMany,
   Property,
-} from "@mikro-orm/decorators/legacy";
-import { Min } from "class-validator";
+} from "@mikro-orm/decorators/es";
 
 import { MediaEntry } from "../filesystem/media-entry.entity.ts";
 import { Episode } from "./episode.entity.ts";
@@ -17,7 +16,6 @@ export class Season extends ShowLikeMediaItem {
   declare filesystemEntries: never;
 
   @Property()
-  @Min(0)
   number!: number;
 
   @ManyToOne()

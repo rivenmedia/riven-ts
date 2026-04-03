@@ -6,15 +6,13 @@ import {
   type Ref,
 } from "@mikro-orm/core";
 import {
-  Entity,
   Enum,
   Index,
   ManyToMany,
   ManyToOne,
   PrimaryKey,
   Property,
-} from "@mikro-orm/decorators/legacy";
-import { IsNumberString, IsOptional, Matches } from "class-validator";
+} from "@mikro-orm/decorators/es";
 import { DateTime } from "luxon";
 
 import { MediaItemContentRating } from "../../enums/content-ratings.enum.ts";
@@ -27,10 +25,6 @@ import { Stream } from "../streams/stream.entity.ts";
 
 import type { Promisable } from "type-fest";
 
-@Entity({
-  abstract: true,
-  discriminatorColumn: "type",
-})
 @Index({ properties: ["type", "releaseDate"] })
 export abstract class MediaItem {
   [OptionalProps]?: "state";
@@ -46,18 +40,12 @@ export abstract class MediaItem {
   fullTitle!: Opt<string>;
 
   @Property()
-  @Matches(/^tt\d+$/)
-  @IsOptional()
   imdbId?: string | null;
 
   @Property()
-  @IsNumberString()
-  @IsOptional()
   tvdbId?: string | null;
 
   @Property()
-  @IsNumberString()
-  @IsOptional()
   tmdbId?: string | null;
 
   @Property()

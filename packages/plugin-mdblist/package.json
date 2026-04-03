@@ -29,7 +29,6 @@
     "@repo/util-plugin-testing": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
-    "class-validator": "catalog:",
     "eslint": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",

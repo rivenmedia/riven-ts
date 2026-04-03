@@ -11,7 +11,8 @@
     "vitest.d.ts",
     "vitest.config.ts",
     "vitest.setup.ts",
-    "zod2md.config.ts"
+    "zod2md.config.ts",
+    "mikro-orm.config.ts"
   ],
   "include": [],
   "exclude": []

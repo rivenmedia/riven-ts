@@ -27,7 +27,6 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@mikro-orm/decorators": "catalog:",
     "@repo/util-rank-torrent-name": "workspace:^",
     "es-toolkit": "catalog:",
     "luxon": "catalog:",
@@ -38,6 +37,7 @@
     "@apollo/datasource-rest": "catalog:",
     "@apollo/utils.keyvadapter": "catalog:",
     "@mikro-orm/core": "catalog:",
+    "@mikro-orm/decorators": "catalog:",
     "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",
     "@mikro-orm/sqlite": "catalog:",
@@ -48,7 +48,6 @@
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "bullmq": "catalog:",
-    "class-validator": "catalog:",
     "eslint": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",
@@ -63,7 +62,6 @@
     "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",
     "bullmq": "catalog:",
-    "class-validator": "catalog:",
     "xstate": "^5.25.0"
   }
 }

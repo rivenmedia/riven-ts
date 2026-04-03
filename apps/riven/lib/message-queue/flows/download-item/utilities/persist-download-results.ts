@@ -12,9 +12,7 @@ import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/sche
 
 import { ref } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
-import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
-import z from "zod";
 
 import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
@@ -156,32 +154,13 @@ export async function persistDownloadResults({
         }
       }
 
-      await validateOrReject(existingItem);
-
       await transaction.persist(existingItem).flush();
 
       return existingItem;
     } catch (error) {
-      const errorMessage = z
-        .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-        .transform((error) => {
-          if (Array.isArray(error)) {
-            return error
-              .map((err) =>
-                err.constraints
-                  ? Object.values(err.constraints).join("; ")
-                  : "",
-              )
-              .join("; ");
-          }
-
-          return error.message;
-        })
-        .parse(error);
-
       throw new MediaItemDownloadError({
         item: existingItem,
-        error: errorMessage,
+        error: String(error),
       });
     }
   });

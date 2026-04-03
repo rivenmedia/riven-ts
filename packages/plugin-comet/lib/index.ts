@@ -2,7 +2,6 @@ import packageJson from "../package.json" with { type: "json" };
 import { pluginConfig } from "./comet-plugin.config.ts";
 import { CometSettings } from "./comet-settings.schema.ts";
 import { CometAPI } from "./datasource/comet.datasource.ts";
-import { CometResolver } from "./schema/comet.resolver.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 

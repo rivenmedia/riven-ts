@@ -2,9 +2,7 @@ import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
-import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
-import z from "zod";
 
 import { database } from "../../../../database/database.ts";
 
@@ -60,8 +58,6 @@ export async function persistMovieIndexerData({
         isRequested: true, // Movies will always be considered to be requested
       });
 
-      await validateOrReject(mediaItem);
-
       transaction.assign(itemRequest, {
         state: mediaItem.isReleased ? "completed" : "unreleased",
       });
@@ -71,24 +67,9 @@ export async function persistMovieIndexerData({
       return await transaction.refreshOrFail(mediaItem);
     });
   } catch (error) {
-    const errorMessage = z
-      .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((error) => {
-        if (Array.isArray(error)) {
-          return error
-            .map((err) =>
-              err.constraints ? Object.values(err.constraints).join("; ") : "",
-            )
-            .join("; ");
-        }
-
-        return error.message;
-      })
-      .parse(error);
-
     throw new MediaItemIndexError({
       item: itemRequest,
-      error: errorMessage,
+      error: String(error),
     });
   }
 }

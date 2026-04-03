@@ -15,6 +15,7 @@ catalog:
   "@kubb/plugin-oas": 4.20.1
   "@kubb/plugin-ts": 4.20.1
   "@kubb/plugin-zod": 4.20.1
+  "@mikro-orm/cli": ^7.0.5
   "@mikro-orm/core": ^7.0.5
   "@mikro-orm/decorators": ^7.0.5
   "@mikro-orm/postgresql": ^7.0.5
@@ -27,7 +28,6 @@ catalog:
   "@vitest/coverage-v8": ^4.1.1
   bullmq: ^5.71.0
   bullmq-otel: ^1.2.0
-  class-validator: 0.14.3
   dedent: ^1.7.1
   discord-api-types: 0.38.42
   es-toolkit: ^1.44.0
@@ -48,8 +48,8 @@ catalog:
 
 cleanupUnusedCatalogs: true
 
-configDependencies:
-  "@pnpm/plugin-better-defaults": 0.2.1+sha512-3Fmur80S7+vmOKMmTdKS6JofiuvpUaBIdKEpgDyr9571FHo5Z4O2nrRUaSflxvwEakeYxIaFZ5MBaqAUnYHaeg==
+# configDependencies:
+#   "@pnpm/plugin-better-defaults": 0.2.1+sha512-3Fmur80S7+vmOKMmTdKS6JofiuvpUaBIdKEpgDyr9571FHo5Z4O2nrRUaSflxvwEakeYxIaFZ5MBaqAUnYHaeg==
 
 engineStrict: true
 

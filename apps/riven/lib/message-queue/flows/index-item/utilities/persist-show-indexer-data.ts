@@ -4,9 +4,7 @@ import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
-import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
-import z from "zod";
 
 import { database } from "../../../../database/database.ts";
 
@@ -202,8 +200,6 @@ export async function persistShowIndexerData({
         await transaction.upsert(seasonEntry);
       }
 
-      await validateOrReject(show);
-
       transaction.assign(itemRequest, {
         state: !show.isReleased
           ? "unreleased"
@@ -215,24 +211,9 @@ export async function persistShowIndexerData({
       return transaction.refreshOrFail(show);
     });
   } catch (error) {
-    const errorMessage = z
-      .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((error) => {
-        if (Array.isArray(error)) {
-          return error
-            .map((err) =>
-              err.constraints ? Object.values(err.constraints).join("; ") : "",
-            )
-            .join("; ");
-        }
-
-        return error.message;
-      })
-      .parse(error);
-
     throw new MediaItemIndexError({
       item: itemRequest,
-      error: errorMessage,
+      error: String(error),
     });
   }
 }

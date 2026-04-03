@@ -1,6 +1,5 @@
 import { EntityRepositoryType, type Opt, type Ref } from "@mikro-orm/core";
-import { Entity, ManyToOne, Property } from "@mikro-orm/decorators/legacy";
-import { Min } from "class-validator";
+import { Entity, ManyToOne, Property } from "@mikro-orm/decorators/es";
 
 import { ShowContentRating } from "../../enums/content-ratings.enum.ts";
 import { EpisodeRepository } from "../../repositories/episode.repository.ts";
@@ -14,7 +13,6 @@ export class Episode extends ShowLikeMediaItem {
   [EntityRepositoryType]?: EpisodeRepository;
 
   @Property()
-  @Min(0)
   number!: number;
 
   @Property()

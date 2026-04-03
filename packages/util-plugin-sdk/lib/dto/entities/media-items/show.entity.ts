@@ -1,10 +1,5 @@
 import { Collection, type Opt, type Ref } from "@mikro-orm/core";
-import {
-  Entity,
-  Enum,
-  OneToMany,
-  Property,
-} from "@mikro-orm/decorators/legacy";
+import { Entity, Enum, OneToMany, Property } from "@mikro-orm/decorators/es";
 
 import { ShowContentRating } from "../../enums/content-ratings.enum.ts";
 import { ShowStatus } from "../../enums/show-status.enum.ts";
