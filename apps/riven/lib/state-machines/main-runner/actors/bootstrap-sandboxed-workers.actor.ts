@@ -28,7 +28,7 @@ export const bootstrapSandboxedWorkers =
             .resolve("../../../message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.processor.js"),
         ),
         {},
-        { concurrency: 5 },
+        { concurrency: 2 },
       ),
       "download-item.map-items-to-files": await createSandboxedWorker(
         MapItemsToFilesSandboxedJob,
@@ -37,7 +37,7 @@ export const bootstrapSandboxedWorkers =
             .resolve("../../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.processor.js"),
         ),
         {},
-        { concurrency: 5 },
+        { concurrency: 2 },
       ),
       "download-item.validate-torrent-files": await createSandboxedWorker(
         ValidateTorrentFilesSandboxedJob,
@@ -46,7 +46,7 @@ export const bootstrapSandboxedWorkers =
             .resolve("../../../message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.js"),
         ),
         {},
-        { concurrency: 5 },
+        { concurrency: 2 },
       ),
     };
   });
