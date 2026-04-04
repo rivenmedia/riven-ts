@@ -1,24 +1,22 @@
+import { type } from "arktype";
 import { expect, it } from "vitest";
-import z from "zod";
 
 import { atLeastOnePropertyRequired } from "./at-least-one-property-required.ts";
 
 it("throws an error if all properties are nullish", () => {
-  const schema = z
-    .object({
-      propA: z.string().optional(),
-      propB: z.number().nullish(),
-      propC: z.boolean().optional(),
-    })
-    .refine(atLeastOnePropertyRequired, "At least one property is required");
+  const schema = type({
+    "propA?": "string",
+    "propB?": "number | null",
+    "propC?": "boolean",
+  }).narrow(atLeastOnePropertyRequired);
 
-  const { success, error } = schema.safeParse({
+  const validationResult = schema({
     propA: "",
     propB: null,
   });
 
-  expect(success).toBe(false);
-  expect(error).toEqual(
+  expect(validationResult).toBeInstanceOf(type.errors);
+  expect(validationResult).toEqual(
     expect.objectContaining({
       issues: [
         expect.objectContaining({
@@ -30,41 +28,35 @@ it("throws an error if all properties are nullish", () => {
 });
 
 it("does not throw an error if at least one property is not nullish", () => {
-  const schema = z
-    .object({
-      propA: z.string().optional(),
-      propB: z.number().nullish(),
-      propC: z.boolean().optional(),
-    })
-    .refine(atLeastOnePropertyRequired, "At least one property is required");
+  const schema = type({
+    "propA?": "string",
+    "propB?": "number | null",
+    "propC?": "boolean",
+  }).narrow(atLeastOnePropertyRequired);
 
-  const { success, error } = schema.safeParse({
+  const validationResult = schema({
     propA: "value",
     propB: null,
     propC: undefined,
   });
 
-  expect(success).toBe(true);
-  expect(error).toBeUndefined();
+  expect(validationResult).toBe(true);
 });
 
 it("allows falsy values that are not nullish", () => {
-  const schema = z
-    .object({
-      propA: z.string().optional(),
-      propB: z.number().nullish(),
-      propC: z.boolean().optional(),
-      propD: z.array(z.string()).optional(),
-    })
-    .refine(atLeastOnePropertyRequired, "At least one property is required");
+  const schema = type({
+    "propA?": "string",
+    "propB?": "number | null",
+    "propC?": "boolean",
+    "propD?": "string[]",
+  }).narrow(atLeastOnePropertyRequired);
 
-  const { success, error } = schema.safeParse({
+  const validationResult = schema({
     propA: "",
     propB: 0,
     propC: false,
     propD: [],
   });
 
-  expect(success).toBe(true);
-  expect(error).toBeUndefined();
+  expect(validationResult).toBe(true);
 });

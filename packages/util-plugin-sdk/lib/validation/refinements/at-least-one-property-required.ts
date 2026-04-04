@@ -1,4 +1,9 @@
-export const atLeastOnePropertyRequired = (obj: Record<string, unknown>) => {
+import type { Traversal } from "arktype";
+
+export const atLeastOnePropertyRequired = (
+  obj: Record<string, unknown>,
+  ctx: Traversal,
+) => {
   const values = Object.values(obj);
 
   for (const value of values) {
@@ -19,5 +24,5 @@ export const atLeastOnePropertyRequired = (obj: Record<string, unknown>) => {
     }
   }
 
-  return false;
+  return ctx.reject("At least one property is required");
 };

@@ -1,21 +1,19 @@
+import { type } from "arktype";
 import { expect, it } from "vitest";
-import z from "zod";
 
 import { recordIsNotEmpty } from "./record-is-not-empty.ts";
 
 it("throws an error if the record is empty", () => {
-  const schema = z
-    .object({
-      propA: z.string().optional(),
-      propB: z.number().nullish(),
-      propC: z.boolean().optional(),
-    })
-    .refine(recordIsNotEmpty, "Record must not be empty");
+  const schema = type({
+    "propA?": "string",
+    "propB?": "number | null",
+    "propC?": "boolean",
+  }).narrow(recordIsNotEmpty);
 
-  const { success, error } = schema.safeParse({});
+  const validationResult = schema({});
 
-  expect(success).toBe(false);
-  expect(error).toEqual(
+  expect(validationResult).toBeInstanceOf(type.errors);
+  expect(validationResult).toEqual(
     expect.objectContaining({
       issues: [
         expect.objectContaining({
@@ -27,18 +25,15 @@ it("throws an error if the record is empty", () => {
 });
 
 it("does not throw an error if the record is not empty", () => {
-  const schema = z
-    .object({
-      propA: z.string().optional(),
-      propB: z.number().nullish(),
-      propC: z.boolean().optional(),
-    })
-    .refine(recordIsNotEmpty, "Record must not be empty");
+  const schema = type({
+    "propA?": "string",
+    "propB?": "number | null",
+    "propC?": "boolean",
+  }).narrow(recordIsNotEmpty);
 
-  const { success, error } = schema.safeParse({
+  const validationResult = schema({
     propA: "value",
   });
 
-  expect(success).toBe(true);
-  expect(error).toBeUndefined();
+  expect(validationResult).toBe(true);
 });
