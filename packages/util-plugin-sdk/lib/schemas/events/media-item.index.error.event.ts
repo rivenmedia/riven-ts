@@ -1,4 +1,4 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { ItemRequestInstance } from "../media/item-request.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
@@ -10,13 +10,13 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
  */
 export const MediaItemIndexErrorEvent = createProgramEventSchema(
   "media-item.index.error",
-  z.object({
+  type({
     item: ItemRequestInstance,
-    error: z.unknown(),
+    error: "unknown",
   }),
 );
 
-export type MediaItemIndexErrorEvent = z.infer<typeof MediaItemIndexErrorEvent>;
+export type MediaItemIndexErrorEvent = typeof MediaItemIndexErrorEvent.infer;
 
 export const MediaItemIndexErrorEventHandler = createEventHandlerSchema(
   MediaItemIndexErrorEvent,

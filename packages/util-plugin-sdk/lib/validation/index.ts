@@ -1,4 +1,4 @@
-export { z } from "zod";
+export { type } from "arktype";
 
 export * from "./json.ts";
 

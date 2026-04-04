@@ -1,11 +1,11 @@
-import z from "zod";
+import { type } from "arktype";
 
 /**
  * Possible status values of a Torz torrent
  *
  * @see {@link https://docs.stremthru.13377001.xyz/api/torz#torzstatus}
  */
-export const TorrentStatus = z.enum([
+export const TorrentStatus = type.enumerated(
   /**
    * Content is cached on the store
    */
@@ -50,6 +50,6 @@ export const TorrentStatus = z.enum([
    * Unknown status
    */
   "unknown",
-]);
+);
 
-export type TorrentStatus = z.infer<typeof TorrentStatus>;
+export type TorrentStatus = typeof TorrentStatus.infer;

@@ -1,4 +1,4 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
@@ -9,17 +9,15 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 export const MediaItemDownloadProviderListRequestedEvent =
   createProgramEventSchema("media-item.download.provider-list-requested");
 
-export type MediaItemDownloadProviderListRequestedEvent = z.infer<
-  typeof MediaItemDownloadProviderListRequestedEvent
->;
+export type MediaItemDownloadProviderListRequestedEvent =
+  typeof MediaItemDownloadProviderListRequestedEvent.infer;
 
-export const MediaItemDownloadProviderListRequestedResponse = z.object({
-  providers: z.array(z.string().min(1)).min(1),
+export const MediaItemDownloadProviderListRequestedResponse = type({
+  providers: "(string > 0)[] > 0",
 });
 
-export type MediaItemDownloadProviderListRequestedResponse = z.infer<
-  typeof MediaItemDownloadProviderListRequestedResponse
->;
+export type MediaItemDownloadProviderListRequestedResponse =
+  typeof MediaItemDownloadProviderListRequestedResponse.infer;
 
 export const MediaItemDownloadProviderListRequestedEventHandler =
   createEventHandlerSchema(

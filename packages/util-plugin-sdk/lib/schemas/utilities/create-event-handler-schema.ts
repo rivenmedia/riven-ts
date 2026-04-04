@@ -1,31 +1,27 @@
+import { type Type, type } from "arktype";
 import { Logger } from "winston";
-import z, {
-  type ZodLiteral,
-  type ZodObject,
-  type ZodType,
-  type ZodVoid,
-} from "zod";
 
 import { DataSourceMap } from "../../utilities/datasource-map.ts";
 import { PluginSettings } from "../../utilities/plugin-settings.ts";
 
 import type { RivenEvent } from "../events/index.ts";
 
+const jobContext = type({
+  dataSources: type.instanceOf(DataSourceMap),
+  settings: type.instanceOf(PluginSettings),
+  logger: type.instanceOf(Logger),
+});
+
+type JobContext = typeof jobContext.infer;
+
 export const createEventHandlerSchema = <
-  I extends { type: ZodLiteral<RivenEvent["type"]> },
-  O extends ZodType = ZodVoid,
+  I extends Type<{ type: RivenEvent["type"] }>,
+  O extends Type,
 >(
-  inputSchema: ZodObject<I & { type: ZodLiteral<RivenEvent["type"]> }>,
-  outputSchema: O = z.void() as never,
+  inputSchema: I,
+  outputSchema?: O,
 ) =>
-  z.function({
-    input: [
-      z.object({
-        event: inputSchema.omit({ type: true }),
-        dataSources: z.instanceof(DataSourceMap),
-        settings: z.instanceof(PluginSettings),
-        logger: z.instanceof(Logger),
-      }),
-    ],
-    output: z.promise(outputSchema),
-  });
+  type.fn.raw(inputSchema.omit("type"), jobContext, ":", outputSchema) as (
+    event: I["infer"],
+    context: JobContext,
+  ) => Promise<O["infer"]>;

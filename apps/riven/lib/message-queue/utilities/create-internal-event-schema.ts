@@ -1,14 +1,20 @@
-import z, { type ZodType } from "zod";
+import { type Type, type } from "arktype";
+
+import type { Spread } from "type-fest";
 
 export const createInternalEventSchema = <
-  Type extends string,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  Payload extends Record<string, ZodType> = {},
+  const T extends string,
+  I extends Type,
 >(
-  type: Type,
-  payloadSchema: z.ZodObject<Payload> = z.object<Payload>(),
-) =>
-  z.object({
-    ...payloadSchema.shape,
-    type: z.literal(`riven-internal.${type}`),
-  });
+  eventName: T,
+  payloadSchema?: I,
+): Type<
+  Spread<
+    { type: `riven.${T}` },
+    I["inferOut"] extends object ? I["inferOut"] : object
+  >
+> =>
+  type.raw({
+    ...payloadSchema,
+    type: `riven-internal.${eventName}` as const,
+  }) as never;

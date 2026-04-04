@@ -1,4 +1,4 @@
-import z from "zod";
+import { type } from "arktype";
 
 import {
   MovieContentRating,
@@ -14,76 +14,67 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
  */
 export const MediaItemIndexRequestedEvent = createProgramEventSchema(
   "media-item.index.requested",
-  z.object({
+  type({
     item: ItemRequestInstance,
   }),
 );
 
-export type MediaItemIndexRequestedEvent = z.infer<
-  typeof MediaItemIndexRequestedEvent
->;
+export type MediaItemIndexRequestedEvent =
+  typeof MediaItemIndexRequestedEvent.infer;
 
-const IndexedItem = z.object({
-  id: z.number(),
-  title: z.string(),
-  genres: z.array(z.string()),
-  country: z.string().nullish(),
-  rating: z.number().nullish(),
-  aliases: z.record(z.string(), z.array(z.string())).nullish(),
-  posterUrl: z.url().nullish(),
-  language: z.string().nullish(),
-  imdbId: z.string().nullable(),
+const IndexedItem = type({
+  id: "number",
+  title: "string",
+  genres: "string[]",
+  "country?": "string | null",
+  "rating?": "number | null",
+  "aliases?": "Record<string, string[]> | null",
+  "posterUrl?": "string | null",
+  "language?": "string | null",
+  imdbId: "string | null",
 });
 
-const ReleaseDatetime = z.iso.datetime({ precision: -1 });
+const ShowItem = IndexedItem.merge({
+  type: /^show$/,
+  contentRating: ShowContentRating,
+  network: "string > 0 | null",
+  status: ShowStatus,
+  seasons: {
+    "[string > 0]": {
+      number: "number.integer >= 0",
+      title: "string | null",
+      episodes: {
+        "[string > 0]": type({
+          contentRating: ShowContentRating,
+          absoluteNumber: "number.integer >= 0",
+          number: "number.integer >= 0",
+          title: "string",
+          "posterUrl?": "string.url | null",
+          airedAt: "string.date.iso | null",
+          runtime: "number.integer > 0 | null",
+        }).array(),
+      },
+    },
+  },
+});
 
-export const MediaItemIndexRequestedResponse = z
-  .object({
-    item: z.discriminatedUnion("type", [
-      IndexedItem.extend({
-        type: z.literal("show"),
-        contentRating: ShowContentRating,
-        network: z.string().min(1).nullable(),
-        status: ShowStatus,
-        seasons: z.record(
-          z.int(),
-          z.object({
-            number: z.number(),
-            title: z.string().nullable(),
-            episodes: z.array(
-              z.object({
-                contentRating: ShowContentRating,
-                absoluteNumber: z.int().nonnegative(),
-                number: z.int().nonnegative(),
-                title: z.string(),
-                posterPath: z.url().nullish(),
-                airedAt: ReleaseDatetime.nullable(),
-                runtime: z.int().positive().nullable(),
-              }),
-            ),
-          }),
-        ),
-      }),
-      IndexedItem.extend({
-        type: z.literal("movie"),
-        releaseDate: ReleaseDatetime.nullable(),
-        contentRating: MovieContentRating,
-        runtime: z.int().positive().nullable(),
-      }),
-    ]),
-  })
-  .nullable()
-  .describe(
-    "The indexed media item data, or null if no indexing was performed",
-  );
+const MovieItem = IndexedItem.merge({
+  type: /^movie$/,
+  releaseDate: "string.date.iso | null",
+  contentRating: MovieContentRating,
+  runtime: "number.integer > 0 | null",
+});
 
-export type MediaItemIndexRequestedPluginResponse = z.input<
-  typeof MediaItemIndexRequestedResponse
->;
+export const MediaItemIndexRequestedResponse = type({
+  item: ShowItem.or(MovieItem)
+    .or("null")
+    .describe(
+      "The indexed media item data, or null if no indexing was performed",
+    ),
+});
 
-export type MediaItemIndexRequestedResponse = z.infer<
-  typeof MediaItemIndexRequestedResponse
->;
+export type MediaItemIndexRequestedResponse =
+  typeof MediaItemIndexRequestedResponse.infer;
 
 export const MediaItemIndexRequestedEventHandler = createEventHandlerSchema(
   MediaItemIndexRequestedEvent,

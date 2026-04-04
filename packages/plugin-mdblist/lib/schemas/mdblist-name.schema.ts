@@ -1,9 +1,6 @@
-import z from "zod";
+import { type } from "arktype";
 
-const MdbListNameSegment = z
-  .string()
-  .min(1)
-  .regex(/^[^/]+$/);
+const MdbListNameSegment = type(/^[^/]+$/);
 
 export const MdbListName = z.templateLiteral([
   MdbListNameSegment,

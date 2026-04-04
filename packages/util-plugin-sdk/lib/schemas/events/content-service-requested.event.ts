@@ -1,5 +1,3 @@
-import z from "zod";
-
 import { atLeastOnePropertyRequired } from "../../validation/refinements/at-least-one-property-required.ts";
 import { ItemRequest } from "../media/item-request.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
@@ -12,9 +10,8 @@ export const ContentServiceRequestedEvent = createProgramEventSchema(
   "content-service.requested",
 );
 
-export type ContentServiceRequestedEvent = z.infer<
-  typeof ContentServiceRequestedEvent
->;
+export type ContentServiceRequestedEvent =
+  typeof ContentServiceRequestedEvent.infer;
 
 export const ContentServiceRequestedResponse = z.object({
   movies: z.array(

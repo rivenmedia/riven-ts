@@ -1,7 +1,5 @@
 import { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-import z from "zod";
-
 import { createFlowJobBuilder } from "../../utilities/create-flow-job-builder.ts";
 import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
 
@@ -9,10 +7,10 @@ export const RequestIndexDataFlow = createFlowSchema("index-item", {
   children: MediaItemIndexRequestedResponse,
 });
 
-export type RequestIndexDataFlow = z.infer<typeof RequestIndexDataFlow>;
+export type RequestIndexDataFlow = typeof RequestIndexDataFlow.infer;
 
 export const requestIndexDataProcessorSchema =
-  RequestIndexDataFlow.shape.processor;
+  RequestIndexDataFlow.get("processor");
 
 export const createRequestIndexDataJob =
   createFlowJobBuilder(RequestIndexDataFlow);

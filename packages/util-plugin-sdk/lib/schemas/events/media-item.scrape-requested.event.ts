@@ -1,4 +1,4 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { MediaItemInstance } from "../media/media-item-instance.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
@@ -9,14 +9,13 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
  */
 export const MediaItemScrapeRequestedEvent = createProgramEventSchema(
   "media-item.scrape.requested",
-  z.object({
+  type({
     item: MediaItemInstance,
   }),
 );
 
-export type MediaItemScrapeRequestedEvent = z.infer<
-  typeof MediaItemScrapeRequestedEvent
->;
+export type MediaItemScrapeRequestedEvent =
+  typeof MediaItemScrapeRequestedEvent.infer;
 
 export const MediaItemScrapeRequestedResponse = z.object({
   id: z.int(),

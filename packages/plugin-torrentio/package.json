@@ -17,8 +17,8 @@
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@repo/util-plugin-sdk": "workspace:^",
-    "type-graphql": "catalog:",
-    "zod": "catalog:"
+    "arktype": "catalog:",
+    "type-graphql": "catalog:"
   },
   "devDependencies": {
     "@repo/core-util-eslint-config": "workspace:^",

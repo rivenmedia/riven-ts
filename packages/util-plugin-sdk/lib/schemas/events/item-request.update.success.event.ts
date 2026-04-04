@@ -1,4 +1,4 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { ItemRequestInstance } from "../media/item-request.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
@@ -9,14 +9,13 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
  */
 export const ItemRequestUpdateSuccessEvent = createProgramEventSchema(
   "item-request.update.success",
-  z.object({
+  type({
     item: ItemRequestInstance,
   }),
 );
 
-export type ItemRequestUpdateSuccessEvent = z.infer<
-  typeof ItemRequestUpdateSuccessEvent
->;
+export type ItemRequestUpdateSuccessEvent =
+  typeof ItemRequestUpdateSuccessEvent.infer;
 
 export const ItemRequestUpdateSuccessEventHandler = createEventHandlerSchema(
   ItemRequestUpdateSuccessEvent,

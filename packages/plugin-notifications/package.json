@@ -17,9 +17,9 @@
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@repo/util-plugin-sdk": "workspace:^",
+    "arktype": "catalog:",
     "luxon": "catalog:",
     "type-graphql": "catalog:",
-    "zod": "catalog:",
     "zod-validation-error": "catalog:"
   },
   "devDependencies": {

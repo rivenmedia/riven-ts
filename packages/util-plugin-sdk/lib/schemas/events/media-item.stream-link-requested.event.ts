@@ -1,4 +1,4 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { MediaEntryInstance } from "../media/media-entry-instance.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
@@ -9,22 +9,20 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
  */
 export const MediaItemStreamLinkRequestedEvent = createProgramEventSchema(
   "media-item.stream-link.requested",
-  z.object({
+  type({
     item: MediaEntryInstance,
   }),
 );
 
-export type MediaItemStreamLinkRequestedEvent = z.infer<
-  typeof MediaItemStreamLinkRequestedEvent
->;
+export type MediaItemStreamLinkRequestedEvent =
+  typeof MediaItemStreamLinkRequestedEvent.infer;
 
-export const MediaItemStreamLinkRequestedResponse = z.object({
-  link: z.url(),
+export const MediaItemStreamLinkRequestedResponse = type({
+  link: "string.url",
 });
 
-export type MediaItemStreamLinkRequestedResponse = z.infer<
-  typeof MediaItemStreamLinkRequestedResponse
->;
+export type MediaItemStreamLinkRequestedResponse =
+  typeof MediaItemStreamLinkRequestedResponse.infer;
 
 export const MediaItemStreamLinkRequestedEventHandler =
   createEventHandlerSchema(

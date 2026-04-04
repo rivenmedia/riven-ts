@@ -1,16 +1,16 @@
+import { type } from "arktype";
 import { registerEnumType } from "type-graphql";
-import z from "zod";
 
-export const ShowStatus = z.enum([
+export const ShowStatus = type.enumerated(
   "continuing",
   "upcoming",
   "ended",
   "unknown",
-]);
+);
 
-export type ShowStatus = z.infer<typeof ShowStatus>;
+export type ShowStatus = typeof ShowStatus.infer;
 
-registerEnumType(ShowStatus.enum, {
+registerEnumType(ShowStatus, {
   name: "ShowStatus",
   description:
     "The current status of a TV show, either 'continuing', 'upcoming', 'ended', or 'unknown'.",

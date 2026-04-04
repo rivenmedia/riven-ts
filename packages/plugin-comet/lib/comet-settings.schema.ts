@@ -1,10 +1,9 @@
-import z from "zod";
+import { type } from "arktype";
 
-export const CometSettings = z.object({
-  url: z
-    .url()
-    .default("https://comet.feels.legal")
-    .describe("The URL of the Comet instance to connect to."),
+export const CometSettings = type({
+  url: type("string.url")
+    .describe("The URL of the Comet instance to connect to.")
+    .default("https://comet.feels.legal"),
 });
 
-export type CometSettings = z.infer<typeof CometSettings>;
+export type CometSettings = typeof CometSettings.infer;

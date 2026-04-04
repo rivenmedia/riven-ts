@@ -1,4 +1,4 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { DebridFile } from "../torrents/debrid-file.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
@@ -10,15 +10,14 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 export const MediaItemDownloadCacheCheckRequestedEvent =
   createProgramEventSchema(
     "media-item.download.cache-check-requested",
-    z.object({
-      infoHashes: z.array(z.hash("sha1")).min(1),
-      provider: z.string().nullable(),
+    type({
+      infoHashes: "(string.hex == 40)[] > 0",
+      provider: "string | null",
     }),
   );
 
-export type MediaItemDownloadCacheCheckRequestedEvent = z.infer<
-  typeof MediaItemDownloadCacheCheckRequestedEvent
->;
+export type MediaItemDownloadCacheCheckRequestedEvent =
+  typeof MediaItemDownloadCacheCheckRequestedEvent.infer;
 
 export const MediaItemDownloadCacheCheckRequestedResponse = z.record(
   z.hash("sha1"),

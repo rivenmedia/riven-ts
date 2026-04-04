@@ -1,5 +1,5 @@
-import z from "zod";
+import { type } from "arktype";
 
-export const NotificationScheme = z.enum(["discord", "json", "jsons"]);
+export const NotificationScheme = type.enumerated("discord", "json", "jsons");
 
-export type NotificationScheme = z.infer<typeof NotificationScheme>;
+export type NotificationScheme = typeof NotificationScheme.infer;

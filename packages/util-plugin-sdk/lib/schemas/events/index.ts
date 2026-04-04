@@ -1,4 +1,4 @@
-import z, { type ZodObject } from "zod";
+import { type Type, type } from "arktype";
 
 import {
   ContentServiceRequestedEvent,
@@ -97,41 +97,44 @@ import {
   MediaItemStreamLinkRequestedEventHandler,
 } from "./media-item.stream-link-requested.event.ts";
 
-export const RivenEvent = z.discriminatedUnion("type", [
-  CoreStartedEvent,
-  ItemRequestCreateSuccessEvent,
-  ItemRequestCreateErrorEvent,
-  ItemRequestCreateErrorConflictEvent,
-  ItemRequestUpdateSuccessEvent,
-  MediaItemIndexRequestedEvent,
-  MediaItemIndexSuccessEvent,
-  MediaItemIndexErrorIncorrectStateEvent,
-  MediaItemIndexErrorEvent,
-  ContentServiceRequestedEvent,
-  CoreShutdownEvent,
-  MediaItemScrapeRequestedEvent,
-  MediaItemScrapeSuccessEvent,
-  MediaItemScrapeErrorNoNewStreamsEvent,
-  MediaItemScrapeErrorIncorrectStateEvent,
-  MediaItemScrapeErrorEvent,
-  MediaItemDownloadRequestedEvent,
-  MediaItemDownloadCacheCheckRequestedEvent,
-  MediaItemDownloadErrorIncorrectStateEvent,
-  MediaItemDownloadErrorEvent,
-  MediaItemDownloadPartialSuccessEvent,
-  MediaItemDownloadProviderListRequestedEvent,
-  MediaItemDownloadSuccessEvent,
-  MediaItemStreamLinkRequestedEvent,
-]);
+export const RivenEvent = CoreStartedEvent.or(ItemRequestCreateSuccessEvent)
+  .or(ItemRequestCreateErrorEvent)
+  .or(ItemRequestCreateErrorConflictEvent)
+  .or(ItemRequestUpdateSuccessEvent)
+  .or(MediaItemIndexRequestedEvent)
+  .or(MediaItemIndexSuccessEvent)
+  .or(MediaItemIndexErrorIncorrectStateEvent)
+  .or(MediaItemIndexErrorEvent)
+  .or(ContentServiceRequestedEvent)
+  .or(CoreShutdownEvent)
+  .or(MediaItemScrapeRequestedEvent)
+  .or(MediaItemScrapeSuccessEvent)
+  .or(MediaItemScrapeErrorNoNewStreamsEvent)
+  .or(MediaItemScrapeErrorIncorrectStateEvent)
+  .or(MediaItemScrapeErrorEvent)
+  .or(MediaItemDownloadRequestedEvent)
+  .or(MediaItemDownloadCacheCheckRequestedEvent)
+  .or(MediaItemDownloadErrorIncorrectStateEvent)
+  .or(MediaItemDownloadErrorEvent)
+  .or(MediaItemDownloadPartialSuccessEvent)
+  .or(MediaItemDownloadProviderListRequestedEvent)
+  .or(MediaItemDownloadSuccessEvent)
+  .or(MediaItemStreamLinkRequestedEvent);
 
-export type RivenEvent = z.infer<typeof RivenEvent>;
+export type RivenEvent = typeof RivenEvent.infer;
 
-export const RivenEventSchemaMap = new Map<RivenEvent["type"], ZodObject>(
-  RivenEvent.options.map((option) => [
-    option.shape.type.value,
-    z.object(option.shape),
-  ]),
+export const RivenEventSchemaMap = new Map<RivenEvent["type"], Type>(
+  RivenEvent.distribute((branch) => [branch.expression, branch]),
 );
+
+console.log({ RivenEventSchemaMap });
+
+// export const RivenEventSchemaMap = new Map<RivenEvent["type"], Type>(
+//   RivenEvent.distribute((option) => [
+//     option.shape.type.value,
+//     type(option.shape),
+//   ]),
+// );
 
 export const RivenEventHandler = {
   // Program lifecycle
@@ -180,4 +183,4 @@ export const RivenEventHandler = {
   // Item streaming
   "riven.media-item.stream-link.requested":
     MediaItemStreamLinkRequestedEventHandler,
-} as const satisfies Record<RivenEvent["type"], z.ZodFunction>;
+} as const;

@@ -15,9 +15,9 @@
   },
   "dependencies": {
     "@viren070/parse-torrent-title": "^0.6.5",
+    "arktype": "catalog:",
     "es-toolkit": "catalog:",
-    "fastest-levenshtein": "^1.0.16",
-    "zod": "catalog:"
+    "fastest-levenshtein": "^1.0.16"
   },
   "devDependencies": {
     "@repo/core-util-eslint-config": "workspace:^",

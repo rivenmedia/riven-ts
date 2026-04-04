@@ -1,4 +1,4 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { MediaItemInstance } from "../media/media-item-instance.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
@@ -11,14 +11,13 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 export const MediaItemDownloadErrorIncorrectStateEvent =
   createProgramEventSchema(
     "media-item.download.error.incorrect-state",
-    z.object({
+    type({
       item: MediaItemInstance,
     }),
   );
 
-export type MediaItemDownloadErrorIncorrectStateEvent = z.infer<
-  typeof MediaItemDownloadErrorIncorrectStateEvent
->;
+export type MediaItemDownloadErrorIncorrectStateEvent =
+  typeof MediaItemDownloadErrorIncorrectStateEvent.infer;
 
 export const MediaItemDownloadErrorIncorrectStateEventHandler =
   createEventHandlerSchema(MediaItemDownloadErrorIncorrectStateEvent);

@@ -1,5 +1,5 @@
+import { type } from "arktype";
 import path from "node:path";
-import z from "zod";
 
 const PATH_PATTERN =
   /^\/(?<type>movies|shows)(\/(?<title>[^/]+)(\/Season (?<season>\d{2})?)?)?/;
@@ -8,17 +8,17 @@ const TMDB_ID_PATTERN = /\{tmdb-(?<tmdbId>\d+)\}/;
 const TVDB_ID_PATTERN = /\{tvdb-(?<tvdbId>\d+)\}/;
 const EPISODE_PATTERN = /s\d{2}e(?<episode>\d{2})/;
 
-const pathGroupsSchema = z.object({
-  type: z.enum(["movies", "shows"]),
-  title: z.string().optional(),
-  season: z.coerce.number().optional(),
+const pathGroupsSchema = type({
+  type: type.enumerated("movies", "shows"),
+  "title?": "string",
+  "season?": "number",
 });
 
-const episodeGroupsSchema = z.object({
-  episode: z.coerce.number(),
+const episodeGroupsSchema = type({
+  episode: type("number | string.integer.parse"),
 });
 
-type PathGroups = z.infer<typeof pathGroupsSchema>;
+type PathGroups = typeof pathGroupsSchema.infer;
 
 const determinePathType = (
   pathGroups: PathGroups,

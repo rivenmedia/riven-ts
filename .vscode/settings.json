@@ -1,5 +1,6 @@
 {
   "cSpell.words": [
+    "arktype",
     "bullmq",
     "deserialise",
     "Deserialiser",
@@ -15,7 +16,12 @@
     "tvdb",
     "zkochan"
   ],
-  "js/ts.preferences.autoImportSpecifierExcludeRegexes": ["node:test"],
+  // allow autocomplete for ArkType expressions like "string | num"
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+  // prioritize ArkType's "type" for autoimports
+  "js/ts.preferences.autoImportSpecifierExcludeRegexes": ["^(node:)?os$"],
   "js/ts.preferences.preferTypeOnlyAutoImports": true,
   "js/ts.tsserver.useSyntaxServer": "auto",
   "js/ts.tsserver.watchOptions": {

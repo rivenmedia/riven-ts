@@ -1,19 +1,19 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { ItemRequest as ItemRequestEntity } from "../../dto/entities/index.ts";
 import { ItemRequestType } from "../../dto/enums/item-request-type.enum.ts";
 
-export const ItemRequest = z.object({
-  id: z.int(),
-  imdbId: z.string().nullish(),
-  tmdbId: z.string().nullish(),
-  tvdbId: z.string().nullish(),
+export const ItemRequest = type({
+  id: "number.integer",
+  "imdbId?": "string | null",
+  "tmdbId?": "string | null",
+  "tvdbId?": "string | null",
   type: ItemRequestType,
-  externalRequestId: z.string().optional(),
-  requestedBy: z.string().nullish(),
-  seasons: z.array(z.number().nonnegative()).min(1).nullish(),
+  externalRequestId: "string?",
+  requestedBy: "string | null",
+  "seasons?": "number.integer[] | null",
 });
 
-export const ItemRequestInstance = z.instanceof(ItemRequestEntity);
+export const ItemRequestInstance = type.instanceOf(ItemRequestEntity);
 
-export type ItemRequestInstance = z.infer<typeof ItemRequestInstance>;
+export type ItemRequestInstance = typeof ItemRequestInstance.infer;

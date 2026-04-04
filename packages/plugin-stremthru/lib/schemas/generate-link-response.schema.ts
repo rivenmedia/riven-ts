@@ -1,9 +1,9 @@
-import z from "zod";
+import { type } from "arktype";
 
-export const GenerateLinkResponse = z.object({
-  data: z.object({
-    link: z.url(),
-  }),
+export const GenerateLinkResponse = type({
+  data: {
+    link: "string.url",
+  },
 });
 
-export type GenerateLinkResponse = z.infer<typeof GenerateLinkResponse>;
+export type GenerateLinkResponse = typeof GenerateLinkResponse.infer;

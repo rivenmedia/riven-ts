@@ -1,6 +1,6 @@
-import z from "zod";
+import { type } from "arktype";
 
-export const LogLevel = z.enum([
+export const LogLevel = type.enumerated(
   "error",
   "warn",
   "info",
@@ -8,6 +8,6 @@ export const LogLevel = z.enum([
   "verbose",
   "debug",
   "silly",
-]);
+);
 
-export type LogLevel = z.infer<typeof LogLevel>;
+export type LogLevel = typeof LogLevel.infer;

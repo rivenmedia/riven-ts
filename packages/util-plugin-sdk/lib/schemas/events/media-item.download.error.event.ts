@@ -1,4 +1,4 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { MediaItemInstance } from "../media/media-item-instance.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
@@ -10,15 +10,14 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
  */
 export const MediaItemDownloadErrorEvent = createProgramEventSchema(
   "media-item.download.error",
-  z.object({
+  type({
     item: MediaItemInstance,
-    error: z.unknown(),
+    error: "unknown",
   }),
 );
 
-export type MediaItemDownloadErrorEvent = z.infer<
-  typeof MediaItemDownloadErrorEvent
->;
+export type MediaItemDownloadErrorEvent =
+  typeof MediaItemDownloadErrorEvent.infer;
 
 export const MediaItemDownloadErrorEventHandler = createEventHandlerSchema(
   MediaItemDownloadErrorEvent,

@@ -29,11 +29,11 @@
     "@repo/core-util-vitest-config": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
+    "arktype": "catalog:",
     "bullmq": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "zod": "catalog:"
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "msw": "catalog:"

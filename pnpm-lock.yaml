@@ -72,6 +72,9 @@ catalogs:
     '@vitest/coverage-v8':
       specifier: ^4.1.1
       version: 4.1.1
+    arktype:
+      specifier: ^2.2.0
+      version: 2.2.0
     bullmq:
       specifier: ^5.71.0
       version: 5.71.0
@@ -135,9 +138,6 @@ catalogs:
     xstate:
       specifier: ^5.25.0
       version: 5.25.0
-    zod:
-      specifier: ^4.3.6
-      version: 4.3.6
     zod-validation-error:
       specifier: ^5.0.0
       version: 5.0.0
@@ -252,6 +252,9 @@ importers:
       '@zkochan/fuse-native':
         specifier: ^0.1.0
         version: 0.1.0
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       bullmq:
         specifier: 'catalog:'
         version: 5.71.0
@@ -303,9 +306,6 @@ importers:
       xstate:
         specifier: 'catalog:'
         version: 5.25.0
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
       zod-validation-error:
         specifier: 'catalog:'
         version: 5.0.0(zod@4.3.6)
@@ -562,6 +562,9 @@ importers:
       '@kubb/plugin-zod':
         specifier: 'catalog:'
         version: 4.20.1(encoding@0.1.13)(typescript@5.9.3)
+      zod:
+        specifier: ^4.0.0
+        version: 4.3.6
     devDependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -581,6 +584,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
@@ -593,9 +599,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.1(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(vite@7.3.0(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.2))
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
 
   packages/core/util-mock-graphql-server:
     dependencies:
@@ -744,12 +747,12 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
     devDependencies:
       '@repo/core-util-eslint-config':
         specifier: workspace:^
@@ -799,15 +802,15 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
     devDependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -863,12 +866,12 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
     devDependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -924,15 +927,15 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       luxon:
         specifier: 'catalog:'
         version: 3.7.2
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
       zod-validation-error:
         specifier: 'catalog:'
         version: 5.0.0(zod@4.3.6)
@@ -985,12 +988,12 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
     devDependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -1049,15 +1052,15 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
     devDependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -1113,12 +1116,12 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
     devDependencies:
       '@repo/core-util-eslint-config':
         specifier: workspace:^
@@ -1162,12 +1165,12 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
     devDependencies:
       '@repo/core-util-eslint-config':
         specifier: workspace:^
@@ -1214,12 +1217,12 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
     devDependencies:
       '@kubb/cli':
         specifier: 'catalog:'
@@ -1269,12 +1272,12 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
     devDependencies:
       '@repo/core-util-eslint-config':
         specifier: workspace:^
@@ -1318,6 +1321,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       countries-and-timezones:
         specifier: ^3.8.0
         version: 3.8.0
@@ -1327,9 +1333,6 @@ importers:
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
     devDependencies:
       '@faker-js/faker':
         specifier: 'catalog:'
@@ -1388,15 +1391,18 @@ importers:
       '@repo/util-rank-torrent-name':
         specifier: workspace:^
         version: link:../util-rank-torrent-name
+      arkregex:
+        specifier: ^0.0.5
+        version: 0.0.5
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       es-toolkit:
         specifier: 'catalog:'
         version: 1.44.0
       luxon:
         specifier: 'catalog:'
         version: 3.7.2
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
       zod-validation-error:
         specifier: 'catalog:'
         version: 5.0.0(zod@4.3.6)
@@ -1513,6 +1519,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       bullmq:
         specifier: 'catalog:'
         version: 5.71.0
@@ -1525,24 +1534,21 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.1(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(msw@2.12.4(@types/node@24.0.0)(typescript@5.9.3))(vite@7.3.0(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.2))
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
 
   packages/util-rank-torrent-name:
     dependencies:
       '@viren070/parse-torrent-title':
         specifier: ^0.6.5
         version: 0.6.5
+      arktype:
+        specifier: 'catalog:'
+        version: 2.2.0
       es-toolkit:
         specifier: 'catalog:'
         version: 1.44.0
       fastest-levenshtein:
         specifier: ^1.0.16
         version: 1.0.16
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
     devDependencies:
       '@repo/core-util-eslint-config':
         specifier: workspace:^
@@ -1725,6 +1731,12 @@ packages:
     hasBin: true
     peerDependencies:
       graphql: '*'
+
+  '@ark/schema@0.56.0':
+    resolution: {integrity: sha512-ECg3hox/6Z/nLajxXqNhgPtNdHWC9zNsDyskwO28WinoFEnWow4IsERNz9AnXRhTZJnYIlAJ4uGn3nlLk65vZA==}
+
+  '@ark/util@0.56.0':
+    resolution: {integrity: sha512-BghfRC8b9pNs3vBoDJhcta0/c1J1rsoS1+HgVUreMFPdhz/CRAKReAu57YEllNaSy98rWAdY1gE+gFup7OXpgA==}
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -4212,6 +4224,12 @@ packages:
 
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
+
+  arkregex@0.0.5:
+    resolution: {integrity: sha512-ncYjBdLlh5/QnVsAA8De16Tc9EqmYM7y/WU9j+236KcyYNUXogpz3sC4ATIZYzzLxwI+0sEOaQLEmLmRleaEXw==}
+
+  arktype@2.2.0:
+    resolution: {integrity: sha512-t54MZ7ti5BhOEvzEkgKnWvqj+UbDfWig+DHr5I34xatymPusKLS0lQpNJd8M6DzmIto2QGszHfNKoFIT8tMCZQ==}
 
   array-buffer-byte-length@1.0.2:
     resolution: {integrity: sha512-LHE+8BuR7RYGDKvnrmcuSq3tDcKv9OFEXQt/HpbZhY7V6h0zlUXutnAD82GiFx9rdieCMjkvtcsPqBwgUl1Iiw==}
@@ -7791,6 +7809,12 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
+  '@ark/schema@0.56.0':
+    dependencies:
+      '@ark/util': 0.56.0
+
+  '@ark/util@0.56.0': {}
+
   '@babel/code-frame@7.27.1':
     dependencies:
       '@babel/helper-validator-identifier': 7.28.5
@@ -10571,6 +10595,16 @@ snapshots:
   ansi-styles@6.2.3: {}
 
   argparse@2.0.1: {}
+
+  arkregex@0.0.5:
+    dependencies:
+      '@ark/util': 0.56.0
+
+  arktype@2.2.0:
+    dependencies:
+      '@ark/schema': 0.56.0
+      '@ark/util': 0.56.0
+      arkregex: 0.0.5
 
   array-buffer-byte-length@1.0.2:
     dependencies:

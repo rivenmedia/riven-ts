@@ -29,9 +29,10 @@
   "dependencies": {
     "@mikro-orm/decorators": "catalog:",
     "@repo/util-rank-torrent-name": "workspace:^",
+    "arkregex": "^0.0.5",
+    "arktype": "catalog:",
     "es-toolkit": "catalog:",
     "luxon": "catalog:",
-    "zod": "catalog:",
     "zod-validation-error": "catalog:"
   },
   "devDependencies": {

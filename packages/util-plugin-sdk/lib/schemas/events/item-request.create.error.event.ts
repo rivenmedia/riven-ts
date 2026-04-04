@@ -1,4 +1,4 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { ItemRequest } from "../media/item-request.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
@@ -10,17 +10,14 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
  */
 export const ItemRequestCreateErrorEvent = createProgramEventSchema(
   "item-request.create.error",
-  z.object({
-    item: ItemRequest.transform(({ id, ...data }) => ({ ...data })).pipe(
-      ItemRequest.omit({ id: true }),
-    ),
-    error: z.unknown(),
+  type({
+    item: ItemRequest.pipe(({ id, ...data }) => ({ ...data })),
+    error: "unknown",
   }),
 );
 
-export type ItemRequestCreateErrorEvent = z.infer<
-  typeof ItemRequestCreateErrorEvent
->;
+export type ItemRequestCreateErrorEvent =
+  typeof ItemRequestCreateErrorEvent.infer;
 
 export const ItemRequestCreateErrorEventHandler = createEventHandlerSchema(
   ItemRequestCreateErrorEvent,

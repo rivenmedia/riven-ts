@@ -18,10 +18,10 @@
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@repo/util-plugin-sdk": "workspace:^",
+    "arktype": "catalog:",
     "countries-and-timezones": "^3.8.0",
     "luxon": "catalog:",
-    "type-graphql": "catalog:",
-    "zod": "catalog:"
+    "type-graphql": "catalog:"
   },
   "devDependencies": {
     "@faker-js/faker": "catalog:",

@@ -20,9 +20,9 @@
     "@repo/core-util-graphql-helpers": "workspace:^",
     "@repo/feature-settings": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
+    "arktype": "catalog:",
     "class-validator": "catalog:",
-    "type-graphql": "catalog:",
-    "zod": "catalog:"
+    "type-graphql": "catalog:"
   },
   "devDependencies": {
     "@faker-js/faker": "catalog:",

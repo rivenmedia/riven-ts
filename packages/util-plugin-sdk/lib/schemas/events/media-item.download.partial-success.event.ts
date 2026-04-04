@@ -1,4 +1,4 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { MediaItemInstance } from "../media/media-item-instance.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
@@ -9,15 +9,14 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
  */
 export const MediaItemDownloadPartialSuccessEvent = createProgramEventSchema(
   "media-item.download.partial-success",
-  z.object({
+  type({
     item: MediaItemInstance,
-    downloader: z.string(),
+    downloader: "string",
   }),
 );
 
-export type MediaItemDownloadPartialSuccessEvent = z.infer<
-  typeof MediaItemDownloadPartialSuccessEvent
->;
+export type MediaItemDownloadPartialSuccessEvent =
+  typeof MediaItemDownloadPartialSuccessEvent.infer;
 
 export const MediaItemDownloadPartialSuccessEventHandler =
   createEventHandlerSchema(MediaItemDownloadPartialSuccessEvent);

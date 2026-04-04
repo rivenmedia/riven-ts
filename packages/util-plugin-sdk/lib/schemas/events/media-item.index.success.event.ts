@@ -1,4 +1,4 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { MovieInstance } from "../media/movie-instance.ts";
 import { ShowInstance } from "../media/show-instance.ts";
@@ -10,14 +10,13 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
  */
 export const MediaItemIndexSuccessEvent = createProgramEventSchema(
   "media-item.index.success",
-  z.object({
-    item: z.xor([MovieInstance, ShowInstance]),
+  type({
+    item: MovieInstance.or(ShowInstance),
   }),
 );
 
-export type MediaItemIndexSuccessEvent = z.infer<
-  typeof MediaItemIndexSuccessEvent
->;
+export type MediaItemIndexSuccessEvent =
+  typeof MediaItemIndexSuccessEvent.infer;
 
 export const MediaItemIndexSuccessEventHandler = createEventHandlerSchema(
   MediaItemIndexSuccessEvent,

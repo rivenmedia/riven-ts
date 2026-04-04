@@ -1,15 +1,13 @@
-import z from "zod";
+import { type } from "arktype";
 
-export const CometScrapeResponse = z.object({
-  streams: z.array(
-    z.object({
-      description: z.string(),
-      infoHash: z.hash("sha1"),
-      behaviorHints: z.object({
-        filename: z.string().optional(),
-      }),
+export const CometScrapeResponse = type({
+  streams: type({
+    description: "string",
+    infoHash: "string.hex == 40",
+    behaviorHints: type({
+      "filename?": "string",
     }),
-  ),
+  }).array(),
 });
 
-export type CometScrapeResponse = z.infer<typeof CometScrapeResponse>;
+export type CometScrapeResponse = typeof CometScrapeResponse.infer;

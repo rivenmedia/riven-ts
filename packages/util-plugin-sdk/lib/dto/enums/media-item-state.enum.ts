@@ -1,7 +1,7 @@
+import { type } from "arktype";
 import { registerEnumType } from "type-graphql";
-import z from "zod";
 
-export const MediaItemState = z.enum([
+export const MediaItemState = type.enumerated(
   "unknown",
   "unreleased",
   "ongoing",
@@ -12,11 +12,10 @@ export const MediaItemState = z.enum([
   "partially_completed",
   "failed",
   "paused",
-]);
+);
+export type MediaItemState = typeof MediaItemState.infer;
 
-export type MediaItemState = z.infer<typeof MediaItemState>;
-
-registerEnumType(MediaItemState.enum, {
+registerEnumType(MediaItemState, {
   name: "MediaItemState",
   description: "The state of a media item in the processing pipeline",
 });

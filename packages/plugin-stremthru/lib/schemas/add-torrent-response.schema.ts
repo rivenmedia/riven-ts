@@ -1,17 +1,15 @@
 import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 
-import z from "zod";
+import { type } from "arktype";
 
 import { TorrentStatus } from "./torrent-status.schema.ts";
 
-export const AddTorrentResponse = z.object({
-  data: z
-    .object({
-      id: z.string(),
-      files: z.array(DebridFile),
-      status: TorrentStatus,
-    })
-    .nullable(),
+export const AddTorrentResponse = type({
+  data: type({
+    id: "string",
+    files: DebridFile.array(),
+    status: TorrentStatus,
+  }).or("null"),
 });
 
-export type AddTorrentResponse = z.infer<typeof AddTorrentResponse>;
+export type AddTorrentResponse = typeof AddTorrentResponse.infer;

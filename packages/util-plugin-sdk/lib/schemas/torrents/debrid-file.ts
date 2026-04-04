@@ -1,10 +1,10 @@
-import z from "zod";
+import { type } from "arktype";
 
-export const DebridFile = z.object({
-  link: z.string().min(1).optional(),
-  name: z.string(),
-  path: z.string(),
-  size: z.int(),
+export const DebridFile = type({
+  "link?": "string > 0",
+  name: "string",
+  path: "string",
+  size: "number.integer >= 0",
 });
 
-export type DebridFile = z.infer<typeof DebridFile>;
+export type DebridFile = typeof DebridFile.infer;

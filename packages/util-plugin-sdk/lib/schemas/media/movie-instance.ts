@@ -1,5 +1,7 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { Movie } from "../../dto/entities/media-items/movie.entity.ts";
 
-export const MovieInstance = z.instanceof(Movie);
+export const MovieInstance = type.instanceOf(Movie);
+
+export type MovieInstance = typeof MovieInstance.infer;

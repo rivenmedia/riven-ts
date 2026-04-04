@@ -1,14 +1,14 @@
 import { MediaItemInstance } from "@repo/util-plugin-sdk/schemas/media/media-item-instance";
 
-import z from "zod";
+import { type } from "arktype";
 
 import { createInternalEventSchema } from "../utilities/create-internal-event-schema.ts";
 
 export const RetryItemDownload = createInternalEventSchema(
   "retry-item-download",
-  z.object({
+  type({
     item: MediaItemInstance,
   }),
 );
 
-export type RetryItemDownload = z.infer<typeof RetryItemDownload>;
+export type RetryItemDownload = typeof RetryItemDownload.infer;

@@ -10,7 +10,7 @@ import type {
 } from "../__generated__/index.ts";
 import type {
   MediaItemIndexRequestedEvent,
-  MediaItemIndexRequestedPluginResponse,
+  MediaItemIndexRequestedResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 import type { TimezoneName } from "countries-and-timezones";
 
@@ -103,7 +103,7 @@ export const transformSeries = (
 
   const seasons = allEpisodes.reduce<
     Extract<
-      NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
+      NonNullable<MediaItemIndexRequestedResponse>["item"],
       { type: "show" }
     >["seasons"]
   >((acc, episode) => {
@@ -170,7 +170,7 @@ export const transformSeries = (
     status: tvdbStatus?.toLowerCase() === "continuing" ? "continuing" : "ended",
     seasons,
   } satisfies Extract<
-    NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
+    NonNullable<MediaItemIndexRequestedResponse>["item"],
     { type: "show" }
   >;
 };

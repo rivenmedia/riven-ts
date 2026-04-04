@@ -1,5 +1,5 @@
-import z from "zod";
+import { type } from "arktype";
 
-export const PersistentDirectory = z.enum(["movies", "shows"]);
+export const PersistentDirectory = type.enumerated("movies", "shows");
 
-export type PersistentDirectory = z.infer<typeof PersistentDirectory>;
+export type PersistentDirectory = typeof PersistentDirectory.infer;

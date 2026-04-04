@@ -1,19 +1,19 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { logger } from "./utilities/logger/logger.ts";
 
 import type { LogEntry } from "winston";
 
-const { data: spotlightEnabled } = z
-  .stringbool()
-  .safeParse(process.env["SENTRY_SPOTLIGHT"] ?? "0");
+const spotlightEnabled = type("'true' | 'false'").pipe((val) => !!val)(
+  process.env["SENTRY_SPOTLIGHT"] ?? "false",
+);
 
 if (spotlightEnabled) {
   const Sentry = await import("@sentry/node");
 
-  const { data: spotlightClearOnStartup } = z
-    .stringbool()
-    .safeParse(process.env["SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"] ?? "0");
+  const spotlightClearOnStartup = type("'true' | 'false'").pipe((val) => !!val)(
+    process.env["SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"] ?? "0",
+  );
 
   // Clear any existing Sentry events from the local server before starting the application.
   if (spotlightClearOnStartup) {
@@ -50,22 +50,22 @@ if (spotlightEnabled) {
     },
   });
 
-  const sentryLogLevelEnum = z.enum([
+  const sentryLogLevelEnum = type.enumerated(
     "trace",
     "debug",
     "info",
     "warn",
     "error",
     "fatal",
-  ]);
+  );
 
   logger.on("data", ({ message, level, ...rest }: LogEntry) => {
-    const parsedLogLevel = sentryLogLevelEnum.safeParse(level);
+    const parsedLogLevel = sentryLogLevelEnum(level);
 
-    if (parsedLogLevel.success) {
-      Sentry.logger[parsedLogLevel.data](message, rest);
-    } else {
+    if (parsedLogLevel instanceof type.errors) {
       Sentry.logger.trace(message, rest);
+    } else {
+      Sentry.logger[parsedLogLevel](message, rest);
     }
   });
 } else {
