@@ -1,15 +1,20 @@
 import { MediaItemInstance } from "@repo/util-plugin-sdk/schemas/media/media-item-instance";
 
-import z from "zod";
+import { type } from "arktype";
 
 import { database } from "../../database/database.ts";
+import { createCodec } from "./create-codec.ts";
 
 /**
  * A schema that converts to/from a serialised media item.
  */
-export const SerialisedMediaItem = z.codec(z.int().min(1), MediaItemInstance, {
-  decode: (data) => database.mediaItem.findOneOrFail(data),
-  encode: (data) => data.id,
-});
+export const SerialisedMediaItem = createCodec(
+  type("number.integer > 0"),
+  MediaItemInstance,
+  {
+    decode: (data) => database.mediaItem.findOneOrFail(data),
+    encode: (data) => data.id,
+  },
+);
 
-export type SerialisedMediaItem = z.infer<typeof SerialisedMediaItem>;
+export type SerialisedMediaItem = typeof SerialisedMediaItem;

@@ -1,10 +1,31 @@
-import z from "zod";
+import { type } from "arktype";
 
-import { getRequest200Schema } from "../__generated__/index.ts";
 import { ExtendedMediaRequest } from "./extended-media-request.schema.ts";
 
-export const RequestResponse = getRequest200Schema.extend({
-  results: z.array(ExtendedMediaRequest).optional(),
-});
+import type { GetRequest200 } from "../__generated__/index.ts";
 
-export type RequestResponse = z.infer<typeof RequestResponse>;
+export const RequestResponse = type
+  .declare<GetRequest200>()
+  .type({
+    "pageInfo?": {
+      "page?": "number",
+      "pages?": "number",
+      "results?": "number",
+    },
+    "results?": [
+      {
+        "createdAt?": "string",
+        "is4k?": "boolean",
+        "media?": {},
+        "mediaId?": "number",
+        "requestId?": "number",
+        "status?": "string",
+        "updatedAt?": "string",
+      },
+    ],
+  })
+  .merge({
+    results: ExtendedMediaRequest.array(),
+  });
+
+export type RequestResponse = typeof RequestResponse.infer;
