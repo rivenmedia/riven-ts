@@ -17,7 +17,7 @@ import { createPluginFlowJob } from "./create-flow-plugin-job.ts";
 
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
-import type { ZodLiteral, ZodObject, ZodType, z } from "zod";
+import type { Type } from "arktype";
 
 FlowProducer.setMaxListeners(200);
 
@@ -33,19 +33,19 @@ declare module "bullmq" {
 
 export class ExtendedFlowProducer extends FlowProducer {
   addPluginJob<
-    I extends ZodObject<{
-      type: ZodLiteral<RivenEvent["type"]>;
+    I extends Type<{
+      type: RivenEvent["type"];
     }>,
-    O extends ZodType,
+    O extends Type<object>,
   >(
     inputSchema: I,
     _outputSchema: O,
     jobName: string,
     pluginName: string,
-    data: ParamsFor<z.input<I>>,
+    data: ParamsFor<I["infer"]>,
     opts: Partial<Omit<JobsOptions, "name" | "queueName" | "data">>,
     children?: FlowChildJob[],
-  ): Promise<PluginJobNode<ParamsFor<z.input<I>>, z.infer<O>>> {
+  ): Promise<PluginJobNode<ParamsFor<I["infer"]>, O["infer"]>> {
     const job = createPluginFlowJob(
       inputSchema,
       jobName,

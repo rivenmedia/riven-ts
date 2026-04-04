@@ -2,9 +2,9 @@ import { BaseDataSource, type RivenPlugin } from "@repo/util-plugin-sdk";
 import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
 
 import { EntityRepository } from "@mikro-orm/core";
+import { type } from "arktype";
 import { type RedisClient, RedisConnection } from "bullmq";
 import { type Mock, afterAll, afterEach, expect, vi } from "vitest";
-import z from "zod";
 
 import type { RedisMemoryServer } from "redis-memory-server";
 
@@ -55,7 +55,7 @@ vi.mock(import("@repo/plugin-test"), () => {
       hooks: Object.fromEntries(
         Object.keys(RivenEventHandler).map((key) => [key, vi.fn()]),
       ),
-      settingsSchema: z.object({}),
+      settingsSchema: type({}),
       validator() {
         return Promise.resolve(true);
       },

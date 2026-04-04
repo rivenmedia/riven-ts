@@ -67,7 +67,7 @@ export const RivenPlugin = type({
     ":",
     "Record<string, unknown>",
   ),
-  settingsSchema: type.instanceOf(Type).as<Type<Record<string, unknown>>>(),
+  settingsSchema: type.instanceOf(Type).as<Type<object>>(),
   validator: type.fn(
     {
       dataSources: type.instanceOf(DataSourceMap),

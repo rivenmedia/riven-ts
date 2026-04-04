@@ -1,30 +1,25 @@
-import z, { type ZodOptional, type ZodString } from "zod";
+import { type } from "arktype";
 
 import { Store } from "./schemas/store.schema.ts";
 
-export const StoreKeys = z.object<
-  Record<`${Store}ApiKey`, ZodOptional<ZodString>>
->({
-  realdebridApiKey: z.string().optional(),
-  alldebridApiKey: z.string().optional(),
-  debriderApiKey: z.string().optional(),
-  debridlinkApiKey: z.string().optional(),
-  easydebridApiKey: z.string().optional(),
-  offcloudApiKey: z.string().optional(),
-  pikpakApiKey: z.string().optional(),
-  premiumizeApiKey: z.string().optional(),
-  torboxApiKey: z.string().optional(),
+export const StoreKeys = type<Record<`${Store}ApiKey?`, "string">>({
+  "realdebridApiKey?": "string",
+  "alldebridApiKey?": "string",
+  "debriderApiKey?": "string",
+  "debridlinkApiKey?": "string",
+  "easydebridApiKey?": "string",
+  "offcloudApiKey?": "string",
+  "pikpakApiKey?": "string",
+  "premiumizeApiKey?": "string",
+  "torboxApiKey?": "string",
 });
 
-export type StoreKeys = z.infer<typeof StoreKeys>;
+export type StoreKeys = typeof StoreKeys.infer;
 
-export const StremThruSettings = z
-  .object({
-    stremThruUrl: z
-      .url()
-      .default("https://stremthru.13377001.xyz/")
-      .describe("The URL of the StremThru instance to request"),
-  })
-  .extend(StoreKeys.shape);
+export const StremThruSettings = type({
+  stremThruUrl: type("string.url")
+    .describe("The URL of the StremThru instance to request")
+    .default("https://stremthru.13377001.xyz/"),
+}).merge(StoreKeys);
 
-export type StremThruSettings = z.infer<typeof StremThruSettings>;
+export type StremThruSettings = typeof StremThruSettings.infer;

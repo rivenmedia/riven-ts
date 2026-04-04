@@ -1,4 +1,4 @@
-import { type ZodError, prettifyError } from "zod";
+import type { ArkError } from "arktype";
 
 export class GarbageTorrentError extends Error {
   constructor(title: string, message: string) {
@@ -20,8 +20,8 @@ export class TitleSimilarityError extends GarbageTorrentError {
 }
 
 export class InvalidHashError extends GarbageTorrentError {
-  constructor(title: string, error: ZodError) {
-    super(title, prettifyError(error));
+  constructor(title: string, error: ArkError) {
+    super(title, error.message);
 
     this.name = "InvalidHashError";
   }

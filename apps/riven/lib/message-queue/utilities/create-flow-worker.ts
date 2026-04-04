@@ -18,15 +18,15 @@ import { createQueue } from "./create-queue.ts";
 
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
 import type { Flow, FlowHandlers } from "../flows/index.ts";
-import type { ZodLiteral, ZodObject, ZodType } from "zod";
+import type { Type } from "arktype";
 
 Worker.setMaxListeners(200);
 
 export async function createFlowWorker<
-  T extends ZodObject<{
-    name: ZodLiteral<Flow["name"]>;
-    input: ZodType;
-    output: ZodType;
+  T extends Type<{
+    name: Flow["name"];
+    input: Type;
+    output: Type;
   }>,
 >(
   flowSchema: T,
@@ -44,7 +44,7 @@ export async function createFlowWorker<
     | "workerForkOptions"
   > = {},
 ) {
-  const [flowName] = flowSchema.shape.name.def.values;
+  const flowName = flowSchema.get("name");
 
   assert(
     flowName,

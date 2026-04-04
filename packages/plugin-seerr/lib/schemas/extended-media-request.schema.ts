@@ -1,3 +1,4 @@
+import { type } from "arktype";
 import z from "zod";
 
 import { mediaRequestSchema } from "../__generated__/index.ts";
@@ -5,8 +6,8 @@ import { mediaRequestSchema } from "../__generated__/index.ts";
 /**
  * Extends the base `MediaRequest` to include season information and the `tv` type
  */
-export const TvMediaRequest = mediaRequestSchema.extend({
-  type: z.literal("tv"),
+export const TvMediaRequest = type({
+  type: "'tv'",
   seasons: z
     .array(
       mediaRequestSchema.extend({
@@ -33,9 +34,6 @@ export type MovieMediaRequest = z.infer<typeof MovieMediaRequest>;
  * @see {@link TvMediaRequest}
  * @see {@link MovieMediaRequest}
  */
-export const ExtendedMediaRequest = z.discriminatedUnion("type", [
-  MovieMediaRequest,
-  TvMediaRequest,
-]);
+export const ExtendedMediaRequest = type.or(MovieMediaRequest, TvMediaRequest);
 
 export type ExtendedMediaRequest = z.infer<typeof ExtendedMediaRequest>;
