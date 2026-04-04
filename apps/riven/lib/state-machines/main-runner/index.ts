@@ -1,6 +1,7 @@
 import { type Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
+import { type } from "arktype";
 import chalk from "chalk";
 import {
   type ActorRef,
@@ -224,23 +225,23 @@ export const mainRunnerMachine = setup({
      * @returns boolean
      */
     shouldQueueEvent: ({ event, context: { publishableEvents } }) => {
-      const parsedEvent = RivenEvent.safeParse(event);
+      const parsedEvent = RivenEvent(event);
 
-      if (!parsedEvent.success) {
+      if (parsedEvent instanceof type.errors) {
         return false;
       }
 
-      const isPublishableEvent = publishableEvents.has(parsedEvent.data.type);
+      const isPublishableEvent = publishableEvents.has(parsedEvent.type);
 
       if (!isPublishableEvent) {
         logger.silly(
-          `Event "${parsedEvent.data.type}" will not be queued, as no plugins have registered hooks for it.`,
+          `Event "${parsedEvent.type}" will not be queued, as no plugins have registered hooks for it.`,
         );
       }
 
       return isPublishableEvent;
     },
-    isRivenEvent: ({ event }) => RivenEvent.safeParse(event).success,
+    isRivenEvent: ({ event }) => RivenEvent.allows(event),
     isOngoingItem: (_, item: Movie | Show) => {
       if (item instanceof Show) {
         return item.state === "ongoing";

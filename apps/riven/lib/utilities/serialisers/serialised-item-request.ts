@@ -1,14 +1,15 @@
 import { ItemRequestInstance } from "@repo/util-plugin-sdk/schemas/media/item-request";
 
-import z from "zod";
+import { type } from "arktype";
 
 import { database } from "../../database/database.ts";
+import { createCodec } from "./create-codec.ts";
 
 /**
  * A schema that converts to/from a serialised item request.
  */
-export const SerialisedItemRequest = z.codec(
-  z.int().min(1),
+export const SerialisedItemRequest = createCodec(
+  type("number.integer > 0"),
   ItemRequestInstance,
   {
     decode: (id) => database.itemRequest.findOneOrFail(id),
@@ -16,4 +17,4 @@ export const SerialisedItemRequest = z.codec(
   },
 );
 
-export type SerialisedItemRequest = z.infer<typeof SerialisedItemRequest>;
+export type SerialisedItemRequest = typeof SerialisedItemRequest;

@@ -1,12 +1,11 @@
-import z from "zod";
-import { createErrorMap } from "zod-validation-error";
+// import { createErrorMap } from "zod-validation-error";
 
 // Improve Zod's error messages by including the input value in the error report
-z.config({
-  customError: createErrorMap({
-    reportInput: "typeAndValue",
-  }),
-});
+// z.config({
+//   customError: createErrorMap({
+//     reportInput: "typeAndValue",
+//   }),
+// });
 
 export * from "./datasource/index.ts";
 

@@ -13,5 +13,5 @@ export const serialiseEventData = <T extends RivenEvent["type"]>(
 
   assert(serialiser, `No serialiser schema found for event type: ${type}`);
 
-  return serialiser.omit({ type: true }).encode(data);
+  return serialiser.omit("type").encode(data);
 };

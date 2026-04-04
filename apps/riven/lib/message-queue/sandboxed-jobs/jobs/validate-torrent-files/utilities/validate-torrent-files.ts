@@ -24,9 +24,13 @@ export class InvalidTorrentError extends Error {}
 
 async function getExpectedFileCount(item: MediaItem) {
   if (item instanceof Show) {
-    const processableStates = MediaItemState.exclude(["unreleased", "ongoing"]);
+    const processableStates = MediaItemState.exclude(
+      "'unreleased' | 'ongoing'",
+    );
 
-    const seasons = await item.getStandardSeasons(processableStates.options);
+    const seasons = await item.getStandardSeasons(
+      processableStates.distribute((branch) => branch),
+    );
     const expectedSeasons =
       item.status === "continuing" ? seasons.length - 1 : seasons.length;
 
@@ -123,7 +127,7 @@ export const validateTorrentFiles = async (
           }
 
           validFiles.push(
-            MatchedFile.encode({
+            MatchedFile.assert({
               ...file,
               matchedMediaItemId: item.id,
               isCachedFile: isCacheCheck,
@@ -209,7 +213,7 @@ export const validateTorrentFiles = async (
           }
 
           validFiles.push(
-            MatchedFile.encode({
+            MatchedFile.assert({
               ...file,
               matchedMediaItemId: episode.id,
               isCachedFile: isCacheCheck,

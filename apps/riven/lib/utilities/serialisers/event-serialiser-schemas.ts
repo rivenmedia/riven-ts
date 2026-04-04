@@ -7,13 +7,13 @@ import { SerialisedFileSystemEntry } from "./serialised-filesystem-entry.ts";
 import { SerialisedItemRequest } from "./serialised-item-request.ts";
 import { SerialisedMediaItem } from "./serialised-media-item.ts";
 
+import type { Codec } from "./create-codec.ts";
 import type { Type } from "arktype";
-import type { ZodCodec, ZodObject, ZodType } from "zod";
 
 /**
  * A map of schemas to their corresponding serialiser codec.
  */
-const serialiserMap = new Map<ZodType, ZodCodec>([
+const serialiserMap = new Map<Type, Codec<Type, Type>>([
   [MediaItemInstance, SerialisedMediaItem],
   [MediaEntryInstance, SerialisedFileSystemEntry],
   [ItemRequestInstance, SerialisedItemRequest],
@@ -26,8 +26,8 @@ const serialiserMap = new Map<ZodType, ZodCodec>([
  *
  * @returns The augmented base schema with any required serialisers attached
  */
-function buildSerialiserSchema(schema: Type): ZodObject {
-  for (const [key, value] of Object.entries<ZodType>(schema.shape)) {
+function buildSerialiserSchema(schema: Type): Type {
+  for (const [key, value] of Object.entries<Type>(schema.shape)) {
     schema.shape[key as never] = serialiserMap.get(value) ?? value;
   }
 
@@ -37,7 +37,10 @@ function buildSerialiserSchema(schema: Type): ZodObject {
 /**
  * A map of {@link RivenEvent} types to their serialiser schemas.
  */
-export const eventSerialiserSchemaMap = new Map<RivenEvent["type"], ZodObject>(
+export const eventSerialiserSchemaMap = new Map<
+  RivenEvent["type"],
+  Type<{ type: RivenEvent["type"] }>
+>(
   RivenEventSchemaMap.entries().map(([eventType, schema]) => [
     eventType,
     buildSerialiserSchema(schema),

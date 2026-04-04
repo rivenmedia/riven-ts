@@ -1,13 +1,13 @@
+import { type } from "arktype";
 import chalk from "chalk";
 import { DateTime } from "luxon";
 import { SPLAT } from "triple-beam";
 import { format } from "winston";
-import z, { ZodError } from "zod";
 
 import { settings } from "../../settings.ts";
 import { ErrorSplat } from "../schemas/error-splat.schema.ts";
 
-function getErrorOutput(error: Error | string) {
+function getErrorOutput(error: Error | type.errors | string) {
   if (!error) {
     return;
   }
@@ -19,9 +19,9 @@ function getErrorOutput(error: Error | string) {
     return logShowStackTraces ? error : undefined;
   }
 
-  if (error instanceof ZodError) {
+  if (error instanceof type.errors) {
     // If we have a validation error, prettify the output if stack traces are disabled
-    return logShowStackTraces ? error.stack : z.prettifyError(error);
+    return logShowStackTraces ? error.summary : error.summary; // TODO: Find stack trace for Ark errors
   }
 
   // For regular errors, always show the raw error output if stack traces are enabled, else show the message
@@ -30,12 +30,12 @@ function getErrorOutput(error: Error | string) {
 
 export const consoleFormat = format.printf(({ level, message, ...meta }) => {
   const parsedSplat = Array.isArray(meta[SPLAT])
-    ? ErrorSplat.safeParse(meta[SPLAT][0])
+    ? ErrorSplat(meta[SPLAT][0])
     : undefined;
 
   const renderedMessage = [
-    typeof message === "string" ? message : parsedSplat?.data?.message,
-    getErrorOutput(parsedSplat?.data ?? meta.error?.stack_trace ?? ""),
+    typeof message === "string" ? message : parsedSplat?.summary,
+    getErrorOutput(parsedSplat ?? meta.error?.stack_trace ?? ""),
   ]
     .filter(Boolean)
     .join(" ");

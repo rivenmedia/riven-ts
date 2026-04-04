@@ -1,14 +1,15 @@
 import { FileSystemEntryInstance } from "@repo/util-plugin-sdk/schemas/media/filesystem-entry-instance";
 
-import z from "zod";
+import { type } from "arktype";
 
 import { database } from "../../database/database.ts";
+import { createCodec } from "./create-codec.ts";
 
 /**
  * A schema that converts to/from a serialised filesystem entry.
  */
-export const SerialisedFileSystemEntry = z.codec(
-  z.int().min(1),
+export const SerialisedFileSystemEntry = createCodec(
+  type("number > 0"),
   FileSystemEntryInstance,
   {
     decode: (id) => database.filesystemEntry.findOneOrFail(id),
@@ -16,6 +17,4 @@ export const SerialisedFileSystemEntry = z.codec(
   },
 );
 
-export type SerialisedFileSystemEntry = z.infer<
-  typeof SerialisedFileSystemEntry
->;
+export type SerialisedFileSystemEntry = typeof SerialisedFileSystemEntry;

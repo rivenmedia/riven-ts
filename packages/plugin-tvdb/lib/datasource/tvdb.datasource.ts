@@ -4,17 +4,16 @@ import {
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
 
+import { type } from "arktype";
 import { DateTime } from "luxon";
-import z from "zod";
 
 import {
-  type EpisodeBaseRecordSchema,
-  episodeBaseRecordSchema,
-  getAllSeries200Schema,
-  getSeriesExtendedQueryResponseSchema,
+  type EpisodeBaseRecord,
   getSeriesTranslation200Schema,
   postLogin200Schema,
 } from "../__generated__/index.ts";
+import { GetAllSeriesResponse } from "../schemas/get-all-series-response.schema.ts";
+import { GetSeriesExtendedQueryResponse } from "../schemas/get-series-extended-query-response.schema.ts";
 import { TvdbSettings } from "../tvdb-settings.schema.ts";
 
 import type { AugmentedRequest } from "@apollo/datasource-rest";
@@ -63,17 +62,17 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
   async getAllEpisodesInOfficialOrder(id: string, language = "eng") {
     let nextUrl = `series/${id}/episodes/official/${language}`;
 
-    const responseSchema = getAllSeries200Schema.extend({
-      data: z.object({
-        episodes: z.array(episodeBaseRecordSchema),
-      }),
+    const responseSchema = GetAllSeriesResponse.merge({
+      data: {
+        episodes: type({}).array(),
+      },
     });
 
-    const allEpisodes: EpisodeBaseRecordSchema[] = [];
+    const allEpisodes: EpisodeBaseRecord[] = [];
 
     do {
       const response = await this.get<unknown>(nextUrl);
-      const { data, links } = responseSchema.parse(response);
+      const { data, links } = responseSchema.assert(response);
 
       if (!data.episodes.length) {
         throw new TvdbAPIError(
@@ -103,7 +102,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
         meta: "translations",
       },
     });
-    const { data } = getSeriesExtendedQueryResponseSchema.parse(response);
+    const { data } = GetSeriesExtendedQueryResponse.assert(response);
 
     if (!data) {
       throw new TvdbAPIError(
@@ -126,7 +125,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
     const response = await this.get<unknown>(
       `series/${id}/translations/${language}`,
     );
-    const { data } = getSeriesTranslation200Schema.parse(response);
+    const { data } = getSeriesTranslation200Schema.assert(response);
 
     if (!data) {
       throw new TvdbAPIError(
@@ -158,7 +157,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
       },
     });
 
-    const { data } = postLogin200Schema.parse(response);
+    const { data } = postLogin200Schema.assert(response);
 
     if (!data?.token) {
       throw new TvdbAPIError(

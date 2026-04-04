@@ -1,5 +1,5 @@
-import z from "zod";
+import { type } from "arktype";
 
-export const {{pascalCase pluginName}}Settings = z.object({});
+export const {{pascalCase pluginName}}Settings = type({});
 
-export type {{pascalCase pluginName}}Settings = z.infer<typeof {{pascalCase pluginName}}Settings>;
+export type {{pascalCase pluginName}}Settings = typeof {{pascalCase pluginName}}Settings.infer;

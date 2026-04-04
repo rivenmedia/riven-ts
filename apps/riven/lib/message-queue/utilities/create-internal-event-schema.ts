@@ -10,7 +10,7 @@ export const createInternalEventSchema = <
   payloadSchema?: I,
 ): Type<
   Spread<
-    { type: `riven.${T}` },
+    { type: `riven-internal.${T}` },
     I["inferOut"] extends object ? I["inferOut"] : object
   >
 > =>

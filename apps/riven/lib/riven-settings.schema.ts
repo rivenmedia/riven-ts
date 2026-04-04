@@ -39,6 +39,7 @@ export const RivenSettings = type({
     .describe("The directory where log files will be stored.")
     .default("./logs"),
   logShowStackTraces: type('boolean | "true" | "false"')
+    .pipe((value) => value === true || value === "true")
     .describe("Whether to show detailed stack traces when logging errors")
     .default(true),
   gqlPort: type("number.integer | string.integer.parse")
@@ -48,21 +49,21 @@ export const RivenSettings = type({
     .describe("Only scrape dubbed anime.")
     .default(false),
   "minimumAverageBitrateMovies?": type("number.integer | string.integer.parse")
-    .pipe((number) => number > 0)
+    .to("number.integer > 0")
     .describe("The minimum average bitrate for movies."),
   "minimumAverageBitrateEpisodes?": type(
     "number.integer | string.integer.parse",
   )
-    .pipe((number) => number > 0)
+    .to("number.integer > 0")
     .describe("The minimum average bitrate for episodes."),
   scheduleOffsetMinutes: type("number.integer | string.integer.parse")
-    .pipe((number) => number >= 0)
+    .to("number.integer >= 0")
     .describe(
       "The number of minutes to wait after an item's air date before attempting to re-index it.",
     )
     .default(30),
   unknownAirDateOffsetDays: type("number.integer | string.integer.parse")
-    .pipe((number) => number >= 0)
+    .to("number.integer >= 0")
     .describe(
       "When an episode has no air date, this number of days will be added to the current date to estimate a release date for scheduling purposes.",
     )
