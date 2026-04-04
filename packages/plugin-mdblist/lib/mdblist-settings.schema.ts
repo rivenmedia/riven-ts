@@ -1,10 +1,11 @@
-import { json, type } from "@repo/util-plugin-sdk/validation";
+import { type } from "arktype";
 
 export const MdbListSettings = type({
   apiKey: type("string > 0").describe("Your MdbList API Key"),
-  lists: json(z.array(z.string().min(1)))
-    .default([])
-    .describe("List of MdbList lists to request"),
+  lists: type("string.json.parse")
+    .to("(string > 0)[]")
+    .describe("List of MdbList lists to request")
+    .default("[]"),
 });
 
-export type MdbListSettings = z.infer<typeof MdbListSettings>;
+export type MdbListSettings = typeof MdbListSettings.infer;

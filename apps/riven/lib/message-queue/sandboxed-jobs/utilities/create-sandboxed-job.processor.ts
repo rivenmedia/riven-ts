@@ -3,7 +3,7 @@ import { type SandboxedJob, UnrecoverableError } from "bullmq";
 import assert from "node:assert";
 
 import type { SandboxedJobDefinition, SandboxedJobHandlers } from "../index.ts";
-import type { ZodLiteral, ZodObject, ZodType, z } from "zod";
+import type { Type } from "arktype";
 
 const timeoutDuration = 5_000;
 
@@ -22,10 +22,10 @@ function maybeStopIdleTimer(timerId: NodeJS.Timeout | null) {
 }
 
 export function createSandboxedJobProcessor<
-  T extends ZodObject<{
-    name: ZodLiteral<SandboxedJobDefinition["name"]>;
-    input: ZodType;
-    output: ZodType;
+  T extends Type<{
+    name: SandboxedJobDefinition["name"];
+    input: Type;
+    output: Type;
   }>,
 >(
   sandboxedJobSchema: T,
@@ -33,7 +33,7 @@ export function createSandboxedJobProcessor<
     (typeof SandboxedJobHandlers)[T["shape"]["name"]["value"]]["implementAsync"]
   >,
 ) {
-  const [sandboxedJobName] = sandboxedJobSchema.shape.name.def.values;
+  const sandboxedJobName = sandboxedJobSchema.get("name");
 
   assert(
     sandboxedJobName,

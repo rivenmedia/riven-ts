@@ -6,6 +6,7 @@ import {
   RESTDataSource,
   type RequestOptions,
 } from "@apollo/datasource-rest";
+import { type } from "arktype";
 import {
   type ConnectionOptions,
   type Job,
@@ -18,12 +19,9 @@ import {
 } from "bullmq";
 import { DateTime } from "luxon";
 import { Logger } from "winston";
-import z from "zod";
 
 import { benchmark } from "../helpers/benchmark.ts";
 import { registerMQListeners } from "../helpers/register-mq-listeners.ts";
-import { json } from "../validation/json.ts";
-import { urlSearchParamsCodec } from "../validation/url-search-params-parser.ts";
 
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import type { Promisable } from "type-fest";
@@ -142,7 +140,7 @@ export abstract class BaseDataSource<
           this.#decodeRequestBody(job);
 
           if (job.data.incomingRequest) {
-            job.data.incomingRequest.params = urlSearchParamsCodec.decode(
+            job.data.incomingRequest.params = new URLSearchParams(
               job.data.params,
             );
           }
@@ -195,16 +193,16 @@ export abstract class BaseDataSource<
     }
 
     if (bodyType === "url-search-params") {
-      job.data.incomingRequest.body = urlSearchParamsCodec.decode(
+      job.data.incomingRequest.body = new URLSearchParams(
         job.data.incomingRequest.body,
       );
 
       return;
     }
 
-    job.data.incomingRequest.body = json(
-      z.record(z.string(), z.unknown()),
-    ).decode(job.data.incomingRequest.body);
+    job.data.incomingRequest.body = type("object.json.stringify")(
+      job.data.incomingRequest.body,
+    );
   }
 
   #parseHTTPDate(dateString: string): number | null {
@@ -355,9 +353,9 @@ export abstract class BaseDataSource<
     const bodyType = this.#determineRequestBodyType(augmentedRequest.body);
 
     if (bodyType === "url-search-params") {
-      augmentedRequest.body = urlSearchParamsCodec.encode(
-        augmentedRequest.body as URLSearchParams,
-      );
+      augmentedRequest.body = (
+        augmentedRequest.body as URLSearchParams
+      ).toString();
     }
 
     const job = await this.#queue.add(
@@ -366,7 +364,7 @@ export abstract class BaseDataSource<
         path,
         incomingRequest: augmentedRequest,
         bodyType,
-        params: urlSearchParamsCodec.encode(augmentedRequest.params),
+        params: augmentedRequest.params.toString(),
       },
       {
         // Use a stable job ID to enable deduplication of idempotent GET requests

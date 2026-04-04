@@ -1,15 +1,15 @@
-import { json } from "@repo/util-plugin-sdk/validation";
-
 import { type } from "arktype";
 
 export const ListrrSettings = type({
   apiKey: type("string > 0").describe("Your Listrr API Key"),
-  movieLists: json(z.array(z.string().min(1)))
-    .default([])
-    .describe("List of Listrr movie lists to request"),
-  showLists: json(z.array(z.string().min(1)))
-    .default([])
-    .describe("List of Listrr show lists to request"),
+  movieLists: type("string.json.parse")
+    .to("(string > 0)[]")
+    .describe("List of Listrr movie lists to request")
+    .default("[]"),
+  showLists: type("string.json.parse")
+    .to("(string > 0)[]")
+    .describe("List of Listrr show lists to request")
+    .default("[]"),
 });
 
-export type ListrrSettings = z.infer<typeof ListrrSettings>;
+export type ListrrSettings = typeof ListrrSettings.infer;
