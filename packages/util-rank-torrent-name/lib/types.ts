@@ -1,21 +1,29 @@
-import type { ParsedData } from "./schemas.ts";
+import { type } from "arktype";
 
-export interface FetchResult {
-  fetch: boolean;
-  failedChecks: Set<string>;
-}
+import { ParsedData } from "./schemas.ts";
 
-export interface RankResult {
-  totalScore: number;
-  scoreParts: Record<string, number>;
-}
+export const FetchResult = type({
+  fetch: "boolean",
+  failedChecks: type("Set").as<Set<string>>(),
+});
 
-export interface RankedResult {
-  data: ParsedData;
-  hash: string;
-  rank: number;
-  fetch: boolean;
-  failedChecks: Set<string>;
-  scoreParts: Record<string, number>;
-  levRatio: number;
-}
+export type FetchResult = typeof FetchResult.infer;
+
+export const RankResult = type({
+  totalScore: "number.integer",
+  scoreParts: "Record<string > 0, number.integer>",
+});
+
+export type RankResult = typeof RankResult.infer;
+
+export const RankedResult = type({
+  data: ParsedData,
+  hash: "string.hex == 40",
+  rank: "number.integer",
+  fetch: "boolean",
+  failedChecks: type("Set").as<Set<string>>(),
+  scoreParts: "Record<string > 0, number.integer>",
+  levRatio: "0 <= number <= 1",
+});
+
+export type RankedResult = typeof RankedResult.infer;

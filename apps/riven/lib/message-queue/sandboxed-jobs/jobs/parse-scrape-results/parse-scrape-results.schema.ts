@@ -1,32 +1,32 @@
 import { MediaItemScrapeRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
+import { ParsedData } from "@repo/util-rank-torrent-name";
 
-import z from "zod";
+import { type } from "arktype";
 
 import { createFlowJobBuilder } from "../../../utilities/create-flow-job-builder.ts";
 import { createSandboxedJobSchema } from "../../utilities/create-sandboxed-job-schema.ts";
-
-import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export const ParseScrapeResultsSandboxedJob = createSandboxedJobSchema(
   "scrape-item.parse-scrape-results",
   {
     children: MediaItemScrapeRequestedResponse,
-    output: z.object({
-      id: z.int(),
-      results: z.record(z.hash("sha1"), z.custom<ParsedData>()),
+    output: type({
+      id: "number.integer >= 0",
+      results: {
+        "[string.hex == 40]": ParsedData,
+      },
     }),
-    input: z.object({
-      id: z.int(),
+    input: type({
+      id: "number.integer >= 0",
     }),
   },
 );
 
-export type ParseScrapeResultsSandboxedJob = z.infer<
-  typeof ParseScrapeResultsSandboxedJob
->;
+export type ParseScrapeResultsSandboxedJob =
+  typeof ParseScrapeResultsSandboxedJob.infer;
 
 export const parseScrapeResultsProcessorSchema =
-  ParseScrapeResultsSandboxedJob.shape.processor;
+  ParseScrapeResultsSandboxedJob.get("processor");
 
 export const createParseScrapeResultsJob = createFlowJobBuilder(
   ParseScrapeResultsSandboxedJob,

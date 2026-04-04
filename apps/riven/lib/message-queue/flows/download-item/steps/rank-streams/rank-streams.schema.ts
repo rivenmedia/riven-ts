@@ -1,33 +1,30 @@
 import { Torrent } from "@repo/util-plugin-sdk/schemas/torrents/torrent";
-import { atLeastOnePropertyRequired } from "@repo/util-plugin-sdk/validation";
+import { type } from "@repo/util-plugin-sdk/validation";
 import {
-  type RankedResult,
+  RankedResult,
   RankingModelSchema,
   SettingsSchema,
 } from "@repo/util-rank-torrent-name";
-
-import z from "zod";
 
 import { createFlowJobBuilder } from "../../../../utilities/create-flow-job-builder.ts";
 import { createFlowSchema } from "../../../../utilities/create-flow-schema.ts";
 
 export const RankStreamsFlow = createFlowSchema("download-item.rank-streams", {
   children: Torrent,
-  input: z.object({
-    id: z.int(),
-    streams: z
-      .record(z.hash("sha1"), z.string())
-      .refine(atLeastOnePropertyRequired, {
-        message: "At least one stream must be provided",
-      }),
+  input: type({
+    id: "number.integer > 0",
+    // TODO: Non-empty record validation
+    streams: {
+      "[string.hex == 40]": "string > 0",
+    },
     rtnSettings: SettingsSchema,
-    rtnRankingModel: RankingModelSchema,
+    rtnSettingsModel: RankingModelSchema,
   }),
-  output: z.custom<RankedResult[]>(),
+  output: RankedResult.array(),
 });
 
-export type RankStreamsFlow = z.infer<typeof RankStreamsFlow>;
+export type RankStreamsFlow = typeof RankStreamsFlow.infer;
 
-export const rankStreamsProcessorSchema = RankStreamsFlow.shape.processor;
+export const rankStreamsProcessorSchema = RankStreamsFlow.get("processor");
 
 export const createRankStreamsJob = createFlowJobBuilder(RankStreamsFlow);

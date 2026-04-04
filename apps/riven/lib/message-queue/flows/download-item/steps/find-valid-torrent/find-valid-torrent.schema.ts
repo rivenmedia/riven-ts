@@ -1,61 +1,51 @@
 import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+import { RankedResult } from "@repo/util-rank-torrent-name";
 
-import z from "zod";
+import { type } from "arktype";
 
 import { createFlowJobBuilder } from "../../../../utilities/create-flow-job-builder.ts";
 import { createPluginResultSchema } from "../../../../utilities/create-flow-plugin-result-schema.ts";
 import { createFlowSchema } from "../../../../utilities/create-flow-schema.ts";
 
-import type { RankedResult } from "@repo/util-rank-torrent-name";
-
-export const MatchedFile = DebridFile.extend({
-  matchedMediaItemId: z.int().positive(),
-  isCachedFile: z.boolean(),
-}).refine(
-  (file) => file.isCachedFile || file.link !== undefined,
-  "File must have a download URL",
-);
-
-export type MatchedFile = z.infer<typeof MatchedFile>;
-
-export const ValidTorrent = z.object({
-  torrentId: z.string().min(1),
-  infoHash: z.hash("sha1"),
-  provider: z.string().nullable(),
-  files: z
-    .array(MatchedFile)
-    .min(1)
-    .pipe(z.tuple([MatchedFile], MatchedFile)),
+export const MatchedFile = DebridFile.merge({
+  matchedMediaItemId: "number.integer > 0",
+  isCachedFile: "true",
+  link: "string.url",
 });
 
-export type ValidTorrent = z.infer<typeof ValidTorrent>;
+export type MatchedFile = typeof MatchedFile.infer;
+
+export const ValidTorrent = type({
+  torrentId: "string > 0",
+  infoHash: "string.hex == 40",
+  provider: "string | null",
+  files: [MatchedFile, "...", MatchedFile.array()],
+});
+
+export type ValidTorrent = typeof ValidTorrent.infer;
 
 export const FindValidTorrentFlow = createFlowSchema(
   "download-item.find-valid-torrent",
   {
-    children: z.array(z.custom<RankedResult>()),
-    input: z.object({
-      id: z.int(),
-      itemTitle: z.string().min(1),
-      availableDownloaders: z
-        .array(
-          z.object({
-            pluginName: z.string(),
-            hasCacheCheckHook: z.boolean(),
-            hasProviderListHook: z.boolean(),
-          }),
-        )
-        .min(1),
-      failedInfoHashes: z.array(z.hash("sha1")),
+    children: RankedResult.array(),
+    input: type({
+      id: "number.integer > 0",
+      itemTitle: "string > 0",
+      availableDownloaders: type({
+        pluginName: "string",
+        hasCacheCheckHook: "boolean",
+        hasProviderListHook: "boolean",
+      }).array(),
+      failedInfoHashes: "'string.hex == 40'[]",
     }),
     output: createPluginResultSchema(ValidTorrent),
   },
 );
 
-export type FindValidTorrentFlow = z.infer<typeof FindValidTorrentFlow>;
+export type FindValidTorrentFlow = typeof FindValidTorrentFlow.infer;
 
 export const findValidTorrentProcessorSchema =
-  FindValidTorrentFlow.shape.processor;
+  FindValidTorrentFlow.get("processor");
 
 export const createFindValidTorrentJob =
   createFlowJobBuilder(FindValidTorrentFlow);

@@ -1,7 +1,9 @@
-import z, { type ZodType } from "zod";
+import { type } from "arktype";
 
-export const createPluginResultSchema = <T extends ZodType>(resultSchema: T) =>
-  z.object({
-    result: resultSchema,
-    plugin: z.string(),
+export const createPluginResultSchema = <T extends Record<string, unknown>>(
+  resultSchema: type.Any<T & object>,
+) =>
+  type({
+    "...": resultSchema,
+    plugin: "string > 0",
   });

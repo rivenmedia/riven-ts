@@ -1,92 +1,86 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { normaliseTitle } from "./shared/normalise.ts";
 
-const nonEmptyString = z.string().min(1);
-const positiveIntSchema = z.int().positive();
-const nonnegativeIntSchema = z.int().nonnegative();
+const nonEmptyString = type("string > 0");
+const positiveIntSchema = type("number.integer > 0");
+const nonnegativeIntSchema = type("number.integer >= 0");
 
-const bitDepthEnum = z.preprocess(
-  (val) => (typeof val === "string" ? val.replaceAll(".", "") : val),
-  z.enum(["8bit", "10bit", "12bit"]),
-);
+const bitDepthEnum = type("string")
+  .pipe((val) => val.replaceAll(".", ""))
+  .pipe(type.enumerated("8bit", "10bit", "12bit"));
 
-export type BitDepth = z.infer<typeof bitDepthEnum>;
+export type BitDepth = typeof bitDepthEnum.infer;
 
-export const ParsedDataSchema = z
-  .object({
-    rawTitle: nonEmptyString,
-    title: nonEmptyString,
-    year: z.preprocess(
-      (val) => (typeof val === "string" ? parseInt(val, 10) : val),
-      positiveIntSchema.optional(),
-    ),
-    resolution: nonEmptyString.default("unknown"),
-    quality: nonEmptyString.optional(),
-    codec: nonEmptyString.optional(),
-    bitDepth: bitDepthEnum.optional(),
-    seasons: z.array(nonnegativeIntSchema).default([]),
-    episodes: z.array(nonnegativeIntSchema).default([]),
-    complete: z.boolean().optional(),
-    volumes: z.array(nonnegativeIntSchema).optional(),
-    audio: z.array(nonEmptyString).optional(),
-    channels: z.array(nonEmptyString).optional(),
-    hdr: z.array(nonEmptyString).optional(),
-    languages: z.array(nonEmptyString).default([]),
-    dubbed: z.boolean().optional(),
-    subbed: z.boolean().optional(),
-    hardcoded: z.boolean().optional(),
-    proper: z.boolean().optional(),
-    repack: z.boolean().optional(),
-    remux: z.boolean().optional(),
-    retail: z.boolean().optional(),
-    upscaled: z.boolean().optional(),
-    remastered: z.boolean().optional(),
-    extended: z.boolean().optional(),
-    convert: z.boolean().optional(),
-    unrated: z.boolean().optional(),
-    uncensored: z.boolean().optional(),
-    documentary: z.boolean().optional(),
-    commentary: z.boolean().optional(),
-    threeD: z.coerce.boolean().optional(),
-    ppv: z.boolean().optional(),
-    date: nonEmptyString.optional(),
-    group: nonEmptyString.optional(),
-    edition: nonEmptyString.optional(),
-    network: nonEmptyString.optional(),
-    region: nonEmptyString.optional(),
-    site: nonEmptyString.optional(),
-    size: nonEmptyString.optional(),
-    container: nonEmptyString.optional(),
-    extension: nonEmptyString.optional(),
-    episodeCode: nonEmptyString.optional(),
-    releaseTypes: z.array(nonEmptyString).optional(),
+export const ParsedData = type({
+  rawTitle: nonEmptyString,
+  title: nonEmptyString,
+  "year?": type("string.integer.parse").pipe(positiveIntSchema),
+  resolution: nonEmptyString.default("unknown"),
+  "quality?": nonEmptyString,
+  "codec?": nonEmptyString,
+  bitDepth: bitDepthEnum.optional(),
+  seasons: nonnegativeIntSchema.array().default(() => []),
+  episodes: nonnegativeIntSchema.array().default(() => []),
+  "complete?": "boolean",
+  "volumes?": nonnegativeIntSchema.array(),
+  "audio?": nonEmptyString.array(),
+  "channels?": nonEmptyString.array(),
+  "hdr?": nonEmptyString.array(),
+  languages: nonEmptyString.array().default(() => []),
+  "dubbed?": "boolean",
+  "subbed?": "boolean",
+  "hardcoded?": "boolean",
+  "proper?": "boolean",
+  "repack?": "boolean",
+  "remux?": "boolean",
+  "retail?": "boolean",
+  "upscaled?": "boolean",
+  "remastered?": "boolean",
+  "extended?": "boolean",
+  "convert?": "boolean",
+  "unrated?": "boolean",
+  "uncensored?": "boolean",
+  "documentary?": "boolean",
+  "commentary?": "boolean",
+  "threeD?": "boolean",
+  "ppv?": "boolean",
+  "date?": nonEmptyString,
+  "group?": nonEmptyString,
+  "edition?": nonEmptyString,
+  "network?": nonEmptyString,
+  "region?": nonEmptyString,
+  "site?": nonEmptyString,
+  "size?": nonEmptyString,
+  "container?": nonEmptyString,
+  "extension?": nonEmptyString,
+  "episodeCode?": nonEmptyString,
+  "releaseTypes?": nonEmptyString.array(),
 
-    // Custom fields
-    adult: z.boolean().optional(),
-    scene: z.boolean().optional(),
-    trash: z.boolean().optional(),
-    country: nonEmptyString.optional(),
-    bitrate: nonEmptyString.optional(),
-  })
-  .transform((data) => ({
-    ...data,
-    type:
-      data.seasons.length || data.episodes.length
-        ? ("show" as const)
-        : ("movie" as const),
-    normalisedTitle: normaliseTitle(data.title),
-    converted: data.convert ?? false,
-    remux:
-      data.remux ??
-      (data.quality
-        ? ["remux", "bluray remux"].includes(data.quality.toLowerCase())
-        : false),
-  }));
+  // Custom fields
+  "adult?": "boolean",
+  "scene?": "boolean",
+  "trash?": "boolean",
+  "country?": nonEmptyString,
+  "bitrate?": nonEmptyString,
+}).pipe((data) => ({
+  ...data,
+  type:
+    data.seasons.length || data.episodes.length
+      ? ("show" as const)
+      : ("movie" as const),
+  normalisedTitle: normaliseTitle(data.title),
+  converted: data.convert ?? false,
+  remux:
+    data.remux ??
+    (data.quality
+      ? ["remux", "bluray remux"].includes(data.quality.toLowerCase())
+      : false),
+}));
 
-export type ParsedData = z.infer<typeof ParsedDataSchema>;
+export type ParsedData = typeof ParsedData.infer;
 
-export const Resolution = z.enum([
+export const Resolution = type.enumerated(
   "2160p",
   "1440p",
   "1080p",
@@ -94,16 +88,18 @@ export const Resolution = z.enum([
   "480p",
   "360p",
   "unknown",
-]);
+);
 
-export type Resolution = z.infer<typeof Resolution>;
+export type Resolution = typeof Resolution.infer;
 
-export const ResolutionRank = Resolution.options.reduce<
-  Record<Resolution, number>
->(
-  (acc, res, index) => ({
-    ...acc,
-    [res]: Resolution.options.length - index,
-  }),
-  {} as Record<Resolution, number>,
+export const ResolutionRank = Resolution.distribute(
+  (branch) => branch,
+  (branches) =>
+    branches.reduce<Record<Resolution, number>>(
+      (acc, res, index) => ({
+        ...acc,
+        [res]: Resolution.options.length - index,
+      }),
+      {} as Record<Resolution, number>,
+    ),
 );

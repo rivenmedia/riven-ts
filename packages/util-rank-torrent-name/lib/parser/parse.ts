@@ -4,7 +4,7 @@ import z from "zod";
 
 import { sceneHandlers } from "../parser/handlers/scene.handlers.ts";
 import { trashHandlers } from "../parser/handlers/trash.handlers.ts";
-import { type ParsedData, ParsedDataSchema } from "../schemas.ts";
+import { ParsedData } from "../schemas.ts";
 import { adultHandlers } from "./handlers/adult.handlers.ts";
 
 const parser = new Parser()
@@ -75,7 +75,7 @@ export function parse(rawTitle: string) {
     throw new TypeError("The input title must be a non-empty string.");
   }
 
-  const parsedData = ParsedDataSchema.safeParse({
+  const parsedData = ParsedData.safeParse({
     ...parser.parse(rawTitle),
     rawTitle,
   });
@@ -114,7 +114,7 @@ export function parseFilePath(filePath: string) {
     }
   }, null);
 
-  const parsedData = ParsedDataSchema.safeParse({
+  const parsedData = ParsedData.safeParse({
     ...parseData,
     rawTitle: filePath,
   });

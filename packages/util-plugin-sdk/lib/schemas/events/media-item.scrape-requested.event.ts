@@ -17,14 +17,15 @@ export const MediaItemScrapeRequestedEvent = createProgramEventSchema(
 export type MediaItemScrapeRequestedEvent =
   typeof MediaItemScrapeRequestedEvent.infer;
 
-export const MediaItemScrapeRequestedResponse = z.object({
-  id: z.int(),
-  results: z.record(z.string(), z.string().nonempty()),
+export const MediaItemScrapeRequestedResponse = type({
+  id: "number.integer >= 0",
+  results: {
+    "[string > 0]": "string > 0",
+  },
 });
 
-export type MediaItemScrapeRequestedResponse = z.infer<
-  typeof MediaItemScrapeRequestedResponse
->;
+export type MediaItemScrapeRequestedResponse =
+  typeof MediaItemScrapeRequestedResponse.infer;
 
 export const MediaItemScrapeRequestedEventHandler = createEventHandlerSchema(
   MediaItemScrapeRequestedEvent,

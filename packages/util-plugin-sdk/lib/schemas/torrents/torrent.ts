@@ -1,14 +1,15 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { DebridFile } from "./debrid-file.ts";
 
-export const Torrent = z.object({
-  infoHash: z.hash("sha1"),
-  files: z.tuple(
-    [DebridFile.required({ link: true })],
-    DebridFile.required({ link: true }),
-  ),
-  id: z.union([z.string(), z.number()]),
+export const Torrent = type({
+  infoHash: "string.hex == 40",
+  files: [
+    DebridFile.merge({ link: "string.url" }),
+    "...",
+    DebridFile.merge({ link: "string.url" }).array(),
+  ],
+  id: "string | number",
 });
 
-export type Torrent = z.infer<typeof Torrent>;
+export type Torrent = typeof Torrent.infer;

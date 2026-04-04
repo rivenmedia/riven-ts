@@ -1,5 +1,3 @@
-import z from "zod";
-
 import {
   DownloadItemFlow,
   downloadItemProcessorSchema,
@@ -25,16 +23,13 @@ import {
   scrapeItemProcessorSchema,
 } from "./scrape-item/scrape-item.schema.ts";
 
-export const Flow = z.discriminatedUnion("name", [
-  RequestIndexDataFlow,
-  RequestContentServicesFlow,
-  ScrapeItemFlow,
-  DownloadItemFlow,
-  FindValidTorrentFlow,
-  RankStreamsFlow,
-]);
+export const Flow = RequestIndexDataFlow.or(RequestContentServicesFlow)
+  .or(ScrapeItemFlow)
+  .or(DownloadItemFlow)
+  .or(FindValidTorrentFlow)
+  .or(RankStreamsFlow);
 
-export type Flow = z.infer<typeof Flow>;
+export type Flow = typeof Flow.infer;
 
 export const FlowHandlers = {
   "index-item": requestIndexDataProcessorSchema,
