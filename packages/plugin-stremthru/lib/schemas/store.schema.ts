@@ -1,6 +1,6 @@
-import z from "zod";
+import { type } from "arktype";
 
-export const Store = z.enum([
+export const Store = type.enumerated(
   "alldebrid",
   "debrider",
   "debridlink",
@@ -10,6 +10,6 @@ export const Store = z.enum([
   "premiumize",
   "realdebrid",
   "torbox",
-]);
+);
 
-export type Store = z.infer<typeof Store>;
+export type Store = typeof Store.infer;

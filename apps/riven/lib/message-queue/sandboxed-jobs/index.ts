@@ -1,5 +1,3 @@
-import z from "zod";
-
 import {
   MapItemsToFilesSandboxedJob,
   mapItemsToFilesProcessorSchema,
@@ -13,16 +11,14 @@ import {
   validateTorrentFilesProcessorSchema,
 } from "./jobs/validate-torrent-files/validate-torrent-files.schema.ts";
 
-export const SandboxedJobDefinition = z.discriminatedUnion("name", [
-  ParseScrapeResultsSandboxedJob,
+export const SandboxedJobDefinition = ParseScrapeResultsSandboxedJob.or(
   MapItemsToFilesSandboxedJob,
-  ValidateTorrentFilesSandboxedJob,
-]);
+).or(ValidateTorrentFilesSandboxedJob);
 
-export type SandboxedJobDefinition = z.infer<typeof SandboxedJobDefinition>;
+export type SandboxedJobDefinition = typeof SandboxedJobDefinition.infer;
 
 export const SandboxedJobHandlers = {
   "scrape-item.parse-scrape-results": parseScrapeResultsProcessorSchema,
   "download-item.map-items-to-files": mapItemsToFilesProcessorSchema,
   "download-item.validate-torrent-files": validateTorrentFilesProcessorSchema,
-} satisfies Record<SandboxedJobDefinition["name"], z.ZodFunction>;
+} satisfies Record<SandboxedJobDefinition["name"], Function>;

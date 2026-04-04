@@ -1,4 +1,4 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { parse } from "../parser/parse.ts";
 import {
@@ -184,7 +184,7 @@ export function rank(
   } as const satisfies RankResult;
 }
 
-const hashSchema = z.hash("sha1");
+const hashSchema = type("string.hex == 40");
 
 export function rankTorrent(
   rawTitle: string,
@@ -194,10 +194,10 @@ export function rankTorrent(
   settings: Settings,
   rankingModel: RankingModel = defaultRankingModel,
 ) {
-  const hashValidation = hashSchema.safeParse(hash);
+  const hashValidation = hashSchema(hash);
 
-  if (!hashValidation.success) {
-    throw new InvalidHashError(rawTitle, hashValidation.error);
+  if (hashValidation instanceof type.errors) {
+    throw new InvalidHashError(rawTitle, hashValidation);
   }
 
   const { titleSimilarity, removeAllTrash, removeRanksUnder } =
@@ -212,15 +212,11 @@ export function rankTorrent(
   );
 
   if (removeAllTrash) {
-    const levRatioValidation = z
-      .number()
-      .min(
-        titleSimilarity,
-        `Title similarity ${levRatio.toString()} is below threshold of ${titleSimilarity.toString()}`,
-      )
-      .safeParse(levRatio);
+    const levRatioValidation = type("number")
+      .atLeast(titleSimilarity)
+      .atMost(1);
 
-    if (!levRatioValidation.success) {
+    if (levRatioValidation instanceof type.errors) {
       throw new TitleSimilarityError(rawTitle, data.title, correctTitle);
     }
   }
@@ -238,7 +234,7 @@ export function rankTorrent(
 
   return {
     data,
-    hash: hashValidation.data,
+    hash: hashValidation,
     scoreParts,
     levRatio,
     rank: totalScore,

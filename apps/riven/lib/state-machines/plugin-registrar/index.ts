@@ -1,9 +1,9 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
+import { type } from "arktype";
 import chalk from "chalk";
 import { type AnyActorRef, type MachineContext, assign, setup } from "xstate";
-import { ZodError } from "zod";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { redisCache } from "../../utilities/redis-cache.ts";
@@ -97,7 +97,7 @@ export const pluginRegistrarMachine = setup({
 
             pluginSettings._set(pluginConfigPrefix, plugin.settingsSchema);
           } catch (error) {
-            if (error instanceof ZodError) {
+            if (error instanceof type.errors) {
               logger.error(
                 `Invalid settings provided for plugin ${pluginName}`,
                 { err: error },

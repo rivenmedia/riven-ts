@@ -6,11 +6,11 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/decorators/legacy";
+import { type } from "arktype";
 import { IsPositive } from "class-validator";
 import { DateTime } from "luxon";
 import path from "node:path";
 import { Field, ID, ObjectType } from "type-graphql";
-import z from "zod";
 
 import { Episode } from "../media-items/episode.entity.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
@@ -19,9 +19,9 @@ import { Movie } from "../media-items/movie.entity.ts";
 import type { Hidden, Opt, Ref } from "@mikro-orm/core";
 import type { Promisable } from "type-fest";
 
-export const FileSystemEntryType = z.enum(["media", "subtitle"]);
+export const FileSystemEntryType = type.enumerated("media", "subtitle");
 
-export type FileSystemEntryType = z.infer<typeof FileSystemEntryType>;
+export type FileSystemEntryType = typeof FileSystemEntryType.infer;
 
 /**
  * Builds the path parts for a given media item, used for generating the VFS path for filesystem entries.
@@ -85,7 +85,7 @@ export abstract class FileSystemEntry {
   mediaItem!: Opt<Ref<Movie | Episode>>;
 
   @Field(() => String)
-  @Enum(() => FileSystemEntryType.enum)
+  @Enum(() => FileSystemEntryType)
   type!: FileSystemEntryType;
 
   /**

@@ -1,12 +1,14 @@
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
+import { Type } from "arktype";
+
 import { mockLogger } from "./create-mock-logger.ts";
 
-import type { ZodObject, z } from "zod";
-
-export const createMockPluginSettings = <T extends ZodObject>(
+export const createMockPluginSettings = <
+  T extends Type<Record<string, unknown>>,
+>(
   schema: T,
-  settings: z.input<T>,
+  settings: T["in"],
 ) => {
   const mockPluginKey = schema.constructor.name;
   const env: Record<string, string> = {};

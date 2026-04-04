@@ -1,15 +1,15 @@
 import { parseFilePath } from "@repo/util-rank-torrent-name";
 
+import { type } from "arktype";
 import assert from "node:assert";
 import { extname } from "node:path";
-import z from "zod";
 
 import { logger } from "../../../../../utilities/logger/logger.ts";
 
 import type { MapItemsToFilesSandboxedJob } from "../map-items-to-files.schema.ts";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 
-const VALID_FILE_EXTENSIONS = z.enum([
+const VALID_FILE_EXTENSIONS = type.enumerated(
   ".mp4",
   ".mkv",
   ".avi",
@@ -17,7 +17,7 @@ const VALID_FILE_EXTENSIONS = z.enum([
   ".wmv",
   ".flv",
   ".webm",
-]);
+);
 
 export function mapItemsToFiles(items: DebridFile[]) {
   return items.reduce<MapItemsToFilesSandboxedJob["output"]>(
@@ -26,7 +26,7 @@ export function mapItemsToFiles(items: DebridFile[]) {
         const fileExtension = extname(file.name);
 
         assert(
-          VALID_FILE_EXTENSIONS.safeParse(fileExtension).success,
+          VALID_FILE_EXTENSIONS.assert(fileExtension),
           `Invalid file extension: ${fileExtension}`,
         );
 

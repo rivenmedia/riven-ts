@@ -1,4 +1,4 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { MatchedFile } from "../../../flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { createFlowJobBuilder } from "../../../utilities/create-flow-job-builder.ts";
@@ -8,31 +8,29 @@ import { MapItemsToFilesSandboxedJob } from "../map-items-to-files/map-items-to-
 export const ValidateTorrentFilesSandboxedJob = createSandboxedJobSchema(
   "download-item.validate-torrent-files",
   {
-    children: MapItemsToFilesSandboxedJob.shape.output,
-    output: z.discriminatedUnion("success", [
-      z.object({
-        success: z.literal(true),
-        files: z.array(MatchedFile).min(1),
+    children: MapItemsToFilesSandboxedJob.get("output"),
+    output: type({
+      success: "true",
+      files: MatchedFile.array(), // min 1
+    }).or(
+      type({
+        success: "false",
+        reason: "string > 0",
       }),
-      z.object({
-        success: z.literal(false),
-        reason: z.string(),
-      }),
-    ]),
-    input: z.object({
-      id: z.int(),
-      infoHash: z.hash("sha1"),
-      isCacheCheck: z.boolean(),
+    ),
+    input: type({
+      id: "number.integer > 0",
+      infoHash: "string.hex == 40",
+      isCacheCheck: "boolean",
     }),
   },
 );
 
-export type ValidateTorrentFilesSandboxedJob = z.infer<
-  typeof ValidateTorrentFilesSandboxedJob
->;
+export type ValidateTorrentFilesSandboxedJob =
+  typeof ValidateTorrentFilesSandboxedJob.infer;
 
 export const validateTorrentFilesProcessorSchema =
-  ValidateTorrentFilesSandboxedJob.shape.processor;
+  ValidateTorrentFilesSandboxedJob.get("processor");
 
 export const createValidateTorrentFilesJob = createFlowJobBuilder(
   ValidateTorrentFilesSandboxedJob,

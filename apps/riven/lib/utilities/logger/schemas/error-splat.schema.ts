@@ -1,12 +1,7 @@
-import z, { ZodError } from "zod";
+import { ArkError, type } from "arktype";
 
-export const ErrorSplat = z
-  .union([
-    z.object({
-      err: z.instanceof(ZodError),
-    }),
-    z.instanceof(ZodError),
-  ])
-  .transform((err) => (err instanceof Error ? err : err.err));
+export const ErrorSplat = type
+  .or({ err: type.instanceOf(ArkError) }, type.instanceOf(ArkError))
+  .pipe((err) => (err instanceof ArkError ? err : err.err));
 
-export type ErrorSplat = z.infer<typeof ErrorSplat>;
+export type ErrorSplat = typeof ErrorSplat.infer;

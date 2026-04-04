@@ -1,7 +1,7 @@
 import { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
 import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 
-import z from "zod";
+import { type } from "arktype";
 
 import { createFlowJobBuilder } from "../../../utilities/create-flow-job-builder.ts";
 import { createSandboxedJobSchema } from "../../utilities/create-sandboxed-job-schema.ts";
@@ -9,22 +9,23 @@ import { createSandboxedJobSchema } from "../../utilities/create-sandboxed-job-s
 export const MapItemsToFilesSandboxedJob = createSandboxedJobSchema(
   "download-item.map-items-to-files",
   {
-    input: MediaItemDownloadRequestedResponse.pick({
-      files: true,
-    }),
-    output: z.object({
-      episodes: z.record(z.string(), DebridFile),
-      movies: z.record(z.string(), DebridFile),
+    input: MediaItemDownloadRequestedResponse.pick("files"),
+    output: type({
+      episodes: {
+        "[string]": DebridFile,
+      },
+      movies: {
+        "[string]": DebridFile,
+      },
     }),
   },
 );
 
-export type MapItemsToFilesSandboxedJob = z.infer<
-  typeof MapItemsToFilesSandboxedJob
->;
+export type MapItemsToFilesSandboxedJob =
+  typeof MapItemsToFilesSandboxedJob.infer;
 
 export const mapItemsToFilesProcessorSchema =
-  MapItemsToFilesSandboxedJob.shape.processor;
+  MapItemsToFilesSandboxedJob.get("processor");
 
 export const createMapItemsToFilesJob = createFlowJobBuilder(
   MapItemsToFilesSandboxedJob,

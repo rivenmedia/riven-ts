@@ -1,8 +1,8 @@
 import { ShowContentRating } from "@repo/util-plugin-sdk/dto/enums/content-ratings.enum";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 
+import { type } from "arktype";
 import assert from "node:assert";
-import z from "zod";
 
 import type {
   EpisodeBaseRecordSchema,
@@ -90,12 +90,10 @@ export const transformSeries = (
 
   const sanitisedTitle = title.replaceAll(/\s*\(.*\)\s*$/g, "");
 
-  const contentRating = z
-    .string()
-    .toLowerCase()
+  const contentRating = type("string.lower")
+    // .default("unknown")
     .pipe(ShowContentRating)
-    .default("unknown")
-    .parse(
+    .assert(
       series.contentRatings?.find(({ country }) => country === "usa")?.name,
     );
 

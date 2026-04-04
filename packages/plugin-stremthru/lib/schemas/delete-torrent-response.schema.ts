@@ -1,9 +1,9 @@
-import z from "zod";
+import { type } from "arktype";
 
-export const DeleteTorrentResponse = z.object({
-  data: z.object({
-    id: z.string(),
-  }),
+export const DeleteTorrentResponse = type({
+  data: {
+    id: "string > 0",
+  },
 });
 
-export type DeleteTorrentResponse = z.infer<typeof DeleteTorrentResponse>;
+export type DeleteTorrentResponse = typeof DeleteTorrentResponse.infer;

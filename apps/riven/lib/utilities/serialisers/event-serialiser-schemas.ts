@@ -7,6 +7,7 @@ import { SerialisedFileSystemEntry } from "./serialised-filesystem-entry.ts";
 import { SerialisedItemRequest } from "./serialised-item-request.ts";
 import { SerialisedMediaItem } from "./serialised-media-item.ts";
 
+import type { Type } from "arktype";
 import type { ZodCodec, ZodObject, ZodType } from "zod";
 
 /**
@@ -25,7 +26,7 @@ const serialiserMap = new Map<ZodType, ZodCodec>([
  *
  * @returns The augmented base schema with any required serialisers attached
  */
-function buildSerialiserSchema(schema: ZodObject): ZodObject {
+function buildSerialiserSchema(schema: Type): ZodObject {
   for (const [key, value] of Object.entries<ZodType>(schema.shape)) {
     schema.shape[key as never] = serialiserMap.get(value) ?? value;
   }

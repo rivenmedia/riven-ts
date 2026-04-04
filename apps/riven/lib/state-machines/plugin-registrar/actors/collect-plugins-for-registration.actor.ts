@@ -1,18 +1,16 @@
 import { type RivenPlugin, RivenPluginPackage } from "@repo/util-plugin-sdk";
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
+import { type } from "arktype";
 import { constantCase } from "es-toolkit";
 import { fromPromise } from "xstate";
-import z from "zod";
 
 import packageJson from "../../../../package.json" with { type: "json" };
 import { logger } from "../../../utilities/logger/logger.ts";
 
-import type { $ZodErrorTree } from "zod/v4/core";
-
 export interface ParsedPlugins {
   validPlugins: RivenPlugin[];
-  invalidPlugins: [string, $ZodErrorTree<typeof RivenPluginPackage>][];
+  invalidPlugins: [string, type.errors][];
   unresolvablePlugins: string[];
   pluginConfigPrefixMap: Map<symbol, string>;
   pluginSettings: PluginSettings;
@@ -43,24 +41,24 @@ export const collectPluginsForRegistration = fromPromise(async () => {
     try {
       const plugin = (await import(pluginName)) as unknown;
 
-      const validationResult = await RivenPluginPackage.safeParseAsync(plugin);
+      const validationResult = RivenPluginPackage(plugin);
 
-      if (!validationResult.success) {
-        parsedPlugins.invalidPlugins.push([
-          pluginName,
-          z.treeifyError(validationResult.error),
-        ]);
+      if (validationResult instanceof type.errors) {
+        parsedPlugins.invalidPlugins.push([pluginName, validationResult]);
 
         continue;
       }
 
-      const { name: pluginSymbol } = validationResult.data.default;
+      const {
+        default: { name: pluginSymbol },
+      } = validationResult;
 
       parsedPlugins.pluginConfigPrefixMap.set(
         pluginSymbol,
         constantCase(pluginName),
       );
-      parsedPlugins.validPlugins.push(validationResult.data.default);
+
+      parsedPlugins.validPlugins.push(validationResult.default);
     } catch (error) {
       logger.error(`Unable to resolve plugin ${pluginName}:`, { err: error });
 

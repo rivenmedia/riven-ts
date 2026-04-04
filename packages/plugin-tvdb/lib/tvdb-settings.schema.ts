@@ -1,10 +1,9 @@
-import z from "zod";
+import { type } from "arktype";
 
-export const TvdbSettings = z.object({
-  apiKey: z
-    .string()
-    .default("6be85335-5c4f-4d8d-b945-d3ed0eb8cdce")
-    .describe("The TVDB API key used to request a token."),
+export const TvdbSettings = type({
+  apiKey: type("string")
+    .describe("The TVDB API key used to request a token.")
+    .default("6be85335-5c4f-4d8d-b945-d3ed0eb8cdce"),
 });
 
-export type TvdbSettings = z.infer<typeof TvdbSettings>;
+export type TvdbSettings = typeof TvdbSettings.infer;

@@ -1,15 +1,14 @@
-import z from "zod";
+import { type } from "arktype";
 
-import { librarySectionSchema } from "../__generated__/index.ts";
-
-export const LibrarySectionsResponse = z.object({
-  MediaContainer: z
-    .object({
-      Directory: z
-        .array(librarySectionSchema.omit({ hidden: true }))
-        .optional(),
-    })
-    .optional(),
+export const LibrarySectionsResponse = type({
+  "MediaContainer?": {
+    "Directory?": type({
+      key: "string > 0",
+      "Location?": type({
+        path: "string > 0",
+      }).array(),
+    }).array(),
+  },
 });
 
-export type LibrarySectionsResponse = z.infer<typeof LibrarySectionsResponse>;
+export type LibrarySectionsResponse = typeof LibrarySectionsResponse.infer;

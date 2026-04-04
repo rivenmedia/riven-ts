@@ -1,6 +1,6 @@
+import { type } from "arktype";
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
-import z from "zod";
 
 import { it } from "../../../__tests__/notifications.test-context.ts";
 import { NotificationsAPI } from "../../../datasource/notifications.datasource.ts";
@@ -23,11 +23,9 @@ it("sends an embed to the correct Discord webhook URL when using discord:// sche
     http.post(
       `https://discord.com/api/webhooks/${mockService.webhookId}/${mockService.webhookToken}`,
       async ({ request }) => {
-        const params = z
-          .object({
-            embeds: z.array(z.unknown()),
-          })
-          .parse(await request.json());
+        const params = type({ embeds: "unknown[]" }).assert(
+          await request.json(),
+        );
 
         const isExpectedPayload =
           JSON.stringify(params.embeds[0]) ===

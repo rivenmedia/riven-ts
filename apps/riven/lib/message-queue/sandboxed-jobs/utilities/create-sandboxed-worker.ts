@@ -12,15 +12,15 @@ import { telemetry } from "../../../utilities/telemetry.ts";
 import { createQueue } from "../../utilities/create-queue.ts";
 
 import type { SandboxedJobDefinition } from "../index.ts";
-import type { ZodLiteral, ZodObject, ZodType } from "zod";
+import type { Type } from "arktype";
 
 Worker.setMaxListeners(200);
 
 export async function createSandboxedWorker(
-  sandboxedJobSchema: ZodObject<{
-    name: ZodLiteral<SandboxedJobDefinition["name"]>;
-    input: ZodType;
-    output: ZodType;
+  sandboxedJobSchema: Type<{
+    name: SandboxedJobDefinition["name"];
+    input: Type;
+    output: Type;
   }>,
   processorURL: URL,
   queueOptions: Omit<QueueOptions, "connection" | "telemetry"> = {},
@@ -33,12 +33,7 @@ export async function createSandboxedWorker(
     | "workerForkOptions"
   > = {},
 ) {
-  const [sandboxedJobName] = sandboxedJobSchema.shape.name.def.values;
-
-  assert(
-    sandboxedJobName,
-    `No queue name found for flow: ${sandboxedJobSchema.shape.name.value}`,
-  );
+  const sandboxedJobName = sandboxedJobSchema.get("name");
 
   assert(
     existsSync(processorURL),

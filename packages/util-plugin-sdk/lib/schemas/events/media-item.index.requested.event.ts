@@ -1,3 +1,4 @@
+import { regex } from "arkregex";
 import { type } from "arktype";
 
 import {
@@ -35,7 +36,7 @@ const IndexedItem = type({
 });
 
 const ShowItem = IndexedItem.merge({
-  type: /^show$/,
+  type: "'show'",
   contentRating: ShowContentRating,
   network: "string > 0 | null",
   status: ShowStatus,
@@ -59,15 +60,15 @@ const ShowItem = IndexedItem.merge({
 });
 
 const MovieItem = IndexedItem.merge({
-  type: /^movie$/,
+  type: "'movie'",
   releaseDate: "string.date.iso | null",
   contentRating: MovieContentRating,
   runtime: "number.integer > 0 | null",
 });
 
 export const MediaItemIndexRequestedResponse = type({
-  item: ShowItem.or(MovieItem)
-    .or("null")
+  item: type
+    .or(ShowItem, MovieItem, "null")
     .describe(
       "The indexed media item data, or null if no indexing was performed",
     ),

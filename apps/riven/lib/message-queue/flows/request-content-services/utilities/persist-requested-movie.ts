@@ -3,7 +3,6 @@ import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/ev
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
-import z from "zod";
 
 import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
@@ -55,7 +54,7 @@ export async function persistRequestedMovie(
     await em.refreshOrFail(itemRequest);
 
     return {
-      requestType: RequestType.enum.create,
+      requestType: "create",
       item: itemRequest,
     };
   } catch (error) {

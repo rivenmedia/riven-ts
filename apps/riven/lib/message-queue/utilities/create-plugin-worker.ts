@@ -6,7 +6,6 @@ import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-l
 
 import * as Sentry from "@sentry/node";
 import { type Processor, Worker, type WorkerOptions } from "bullmq";
-import z from "zod";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
@@ -25,7 +24,7 @@ export async function createPluginWorker<
   pluginName: string,
   processor: Processor<
     ParamsFor<Extract<RivenEvent, { type: T }>>,
-    Awaited<ReturnType<z.infer<R>>>
+    Awaited<ReturnType<R>>
   >,
   workerOptions?: Omit<WorkerOptions, "connection" | "telemetry">,
 ) {
@@ -41,12 +40,12 @@ export async function createPluginWorker<
           "bullmq.job.id": job.id,
           "bullmq.queue.name": queueName,
           "riven.log.source": pluginName,
-          "riven.event.name": name as string,
+          "riven.event.name": name,
           "riven.plugin.name": pluginName,
         });
 
         try {
-          return await processor(job as never, token, signal);
+          return (await processor(job as never, token, signal)) as never;
         } catch (error) {
           Sentry.captureException(error);
 

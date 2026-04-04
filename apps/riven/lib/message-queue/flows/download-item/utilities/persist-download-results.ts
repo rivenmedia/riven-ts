@@ -11,10 +11,10 @@ import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/med
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
 import { ref } from "@mikro-orm/core";
+import { type } from "arktype";
 import { UnrecoverableError } from "bullmq";
-import { ValidationError, validateOrReject } from "class-validator";
+import { validateOrReject } from "class-validator";
 import assert from "node:assert";
-import z from "zod";
 
 import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
@@ -40,9 +40,7 @@ export async function persistDownloadResults({
         },
         id,
       },
-      {
-        populate: ["streams.infoHash", "filesystemEntries:ref"],
-      },
+      { populate: ["streams.infoHash", "filesystemEntries:ref"] },
     );
 
     assert(
@@ -52,14 +50,12 @@ export async function persistDownloadResults({
       ),
     );
 
-    const processableStates = MediaItemState.extract([
-      "scraped",
-      "ongoing",
-      "partially_completed",
-    ]);
+    const processableStates = MediaItemState.extract(
+      "'scraped' | 'ongoing' | 'partially_completed'",
+    );
 
     assert(
-      processableStates.safeParse(existingItem.state).success,
+      !(processableStates(existingItem.state) instanceof type.errors),
       new MediaItemDownloadErrorIncorrectState({
         item: existingItem,
       }),
@@ -115,10 +111,9 @@ export async function persistDownloadResults({
           episodes.map((episode) => [episode.id, episode]),
         );
 
-        const processableStates = MediaItemState.exclude([
-          "completed",
-          "downloaded",
-        ]);
+        const processableStates = MediaItemState.exclude(
+          "'completed' | 'downloaded'",
+        );
 
         for (const file of torrent.files) {
           assert(file.link, "Download URL is missing for the matched file");
@@ -132,7 +127,7 @@ export async function persistDownloadResults({
             ),
           );
 
-          if (!processableStates.safeParse(episode.state).success) {
+          if (!(processableStates(episode.state) instanceof type.errors)) {
             logger.debug(
               `Skipping media entry creation for ${episode.fullTitle} due to "${episode.state}" state`,
             );
@@ -162,26 +157,26 @@ export async function persistDownloadResults({
 
       return existingItem;
     } catch (error) {
-      const errorMessage = z
-        .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-        .transform((error) => {
-          if (Array.isArray(error)) {
-            return error
-              .map((err) =>
-                err.constraints
-                  ? Object.values(err.constraints).join("; ")
-                  : "",
-              )
-              .join("; ");
-          }
+      // const errorMessage = z
+      //   .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
+      //   .transform((error) => {
+      //     if (Array.isArray(error)) {
+      //       return error
+      //         .map((err) =>
+      //           err.constraints
+      //             ? Object.values(err.constraints).join("; ")
+      //             : "",
+      //         )
+      //         .join("; ");
+      //     }
 
-          return error.message;
-        })
-        .parse(error);
+      //     return error.message;
+      //   })
+      //   .parse(error);
 
       throw new MediaItemDownloadError({
         item: existingItem,
-        error: errorMessage,
+        error,
       });
     }
   });

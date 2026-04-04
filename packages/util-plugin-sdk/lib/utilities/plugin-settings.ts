@@ -1,5 +1,4 @@
-import { type ZodObject, z } from "zod";
-
+import type { Type } from "arktype";
 import type { Jsonifiable, ReadonlyDeep } from "type-fest";
 import type { Logger } from "winston";
 
@@ -23,7 +22,7 @@ export class PluginSettings {
   /**
    * A map to hold parsed settings for each schema.
    */
-  #settingsMap = new Map<ZodObject, Record<string, unknown>>();
+  #settingsMap = new Map<Type, Record<string, unknown>>();
 
   /**
    * A flag to indicate if the settings are locked. The settings are locked once all plugins have been registered.
@@ -136,7 +135,7 @@ export class PluginSettings {
    * @param schema The schema that should be used to parse the settings.
    * @throws {Error} if settings are locked
    */
-  _set(configPrefix: string, schema: ZodObject): void {
+  _set(configPrefix: string, schema: Type<Record<string, unknown>>): void {
     if (this.#isLocked) {
       throw new Error("Settings are locked and cannot be modified.");
     }
@@ -149,7 +148,7 @@ export class PluginSettings {
       );
     }
 
-    const parsedSettings = schema.parse(
+    const parsedSettings = schema.assert(
       Object.fromEntries(
         [...rawPluginSettings].map(([key, value]) => [key, value]),
       ),
@@ -168,11 +167,13 @@ export class PluginSettings {
    * @param schema The Zod schema used to parse the settings.
    * @returns The parsed settings for the provided schema.
    */
-  get<T extends ZodObject>(schema: T): z.infer<T> {
-    if (!this.#settingsMap.has(schema)) {
+  get(schema: Type<Record<string, unknown>>): Record<string, unknown> {
+    const parsedSettings = this.#settingsMap.get(schema);
+
+    if (!parsedSettings) {
       throw new Error("Schema not found in settings map.");
     }
 
-    return this.#settingsMap.get(schema) as z.infer<T>;
+    return parsedSettings;
   }
 }

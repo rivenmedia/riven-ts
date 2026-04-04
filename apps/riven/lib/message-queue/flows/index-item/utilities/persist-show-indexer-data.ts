@@ -4,9 +4,9 @@ import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
+import { type } from "arktype";
 import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
-import z from "zod";
 
 import { database } from "../../../../database/database.ts";
 
@@ -26,14 +26,12 @@ export async function persistShowIndexerData({
     id: item.id,
   });
 
-  const processableStates = ItemRequestState.extract([
-    "requested",
-    "ongoing",
-    "unreleased",
-  ]);
+  const processableStates = ItemRequestState.extract(
+    "'requested' | 'ongoing' | 'unreleased'",
+  );
 
   assert(
-    processableStates.safeParse(itemRequest.state).success,
+    !(processableStates(itemRequest.state) instanceof type.errors),
     new MediaItemIndexErrorIncorrectState({
       item: itemRequest,
     }),
@@ -60,7 +58,7 @@ export async function persistShowIndexerData({
         });
       }
 
-      const firstEpisodeAirDate = item.seasons[1]?.episodes[0]?.airedAt;
+      const firstEpisodeAirDate = item.seasons["1"]?.episodes["0"]?.airedAt;
       const firstAired = firstEpisodeAirDate
         ? DateTime.fromISO(firstEpisodeAirDate)
         : null;

@@ -18,14 +18,13 @@ export const MediaItemDownloadRequestedEvent = createProgramEventSchema(
 export type MediaItemDownloadRequestedEvent =
   typeof MediaItemDownloadRequestedEvent.infer;
 
-export const MediaItemDownloadRequestedResponse = z.object({
-  torrentId: z.string().min(1),
-  files: z.array(DebridFile).min(1),
+export const MediaItemDownloadRequestedResponse = type({
+  torrentId: "string > 0",
+  files: DebridFile.array(), // TODO: min 1
 });
 
-export type MediaItemDownloadRequestedResponse = z.infer<
-  typeof MediaItemDownloadRequestedResponse
->;
+export type MediaItemDownloadRequestedResponse =
+  typeof MediaItemDownloadRequestedResponse.infer;
 
 export const MediaItemDownloadRequestedEventHandler = createEventHandlerSchema(
   MediaItemDownloadRequestedEvent,

@@ -25,13 +25,13 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
 
   async updateSection(path: string) {
     const response = await this.get<unknown>(`library/sections`);
-    const sections = LibrarySectionsResponse.parse(response);
+    const sections = LibrarySectionsResponse.assert(response);
 
     for (const directory of sections.MediaContainer?.Directory ?? []) {
       for (const location of directory.Location ?? []) {
         const fullPath = join(this.settings.plexLibraryPath, path);
 
-        if (fullPath.startsWith(location.path as string)) {
+        if (fullPath.startsWith(location.path)) {
           if (!directory.key) {
             throw new PlexAPIError(
               `Directory key is missing for path: ${fullPath}`,

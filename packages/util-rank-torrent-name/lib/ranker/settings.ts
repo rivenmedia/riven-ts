@@ -582,7 +582,7 @@ export const RankingModelSchema = type({
 export type RankingModel = typeof RankingModelSchema.infer;
 
 export const createRankingModel = (input: typeof RankingModelSchema.inferIn) =>
-  RankingModelSchema(input);
+  RankingModelSchema.from(input);
 
 export const defaultRankingModel = createRankingModel({
   // Quality

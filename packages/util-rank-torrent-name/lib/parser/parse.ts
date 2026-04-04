@@ -1,6 +1,6 @@
 import { Parser, transforms } from "@viren070/parse-torrent-title";
+import { type } from "arktype";
 import { toMerged } from "es-toolkit";
-import z from "zod";
 
 import { sceneHandlers } from "../parser/handlers/scene.handlers.ts";
 import { trashHandlers } from "../parser/handlers/trash.handlers.ts";
@@ -75,18 +75,18 @@ export function parse(rawTitle: string) {
     throw new TypeError("The input title must be a non-empty string.");
   }
 
-  const parsedData = ParsedData.safeParse({
+  const parsedData = ParsedData({
     ...parser.parse(rawTitle),
     rawTitle,
   });
 
-  if (!parsedData.success) {
-    parsedData.error.message = `Failed to parse ${rawTitle}: ${z.prettifyError(parsedData.error)}`;
+  if (parsedData instanceof type.errors) {
+    // parsedData.error.message = `Failed to parse ${rawTitle}: ${z.prettifyError(parsedData.error)}`;
 
-    throw parsedData.error;
+    return parsedData.throw();
   }
 
-  return parsedData.data;
+  return parsedData;
 }
 
 /**
@@ -114,16 +114,16 @@ export function parseFilePath(filePath: string) {
     }
   }, null);
 
-  const parsedData = ParsedData.safeParse({
+  const parsedData = ParsedData({
     ...parseData,
     rawTitle: filePath,
   });
 
-  if (!parsedData.success) {
-    parsedData.error.message = `Failed to parse ${filePath}: ${z.prettifyError(parsedData.error)}`;
+  if (parsedData instanceof type.errors) {
+    // parsedData.error.message = `Failed to parse ${filePath}: ${z.prettifyError(parsedData.error)}`;
 
-    throw parsedData.error;
+    return parsedData.throw();
   }
 
-  return parsedData.data;
+  return parsedData;
 }

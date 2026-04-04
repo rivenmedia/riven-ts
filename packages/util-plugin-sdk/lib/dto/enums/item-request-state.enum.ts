@@ -1,17 +1,17 @@
+import { type } from "arktype";
 import { registerEnumType } from "type-graphql";
-import z from "zod";
 
-export const ItemRequestState = z.enum([
+export const ItemRequestState = type.enumerated(
   "requested",
   "completed",
   "failed",
   "ongoing",
   "unreleased",
-]);
+);
 
-export type ItemRequestState = z.infer<typeof ItemRequestState>;
+export type ItemRequestState = typeof ItemRequestState.infer;
 
-registerEnumType(ItemRequestState.enum, {
+registerEnumType(ItemRequestState, {
   name: "ItemRequestState",
   description:
     "The state of an item request, either 'requested', 'completed', 'failed', 'ongoing', or 'unreleased'.",

@@ -1,7 +1,7 @@
-import z from "zod";
+import { type } from "arktype";
 
-export const TvMazeEpisode = z.object({
-  airstamp: z.iso.datetime({ offset: true }),
+export const TvMazeEpisode = type({
+  airstamp: "string.date.iso",
 });
 
-export type TvMazeEpisode = z.infer<typeof TvMazeEpisode>;
+export type TvMazeEpisode = typeof TvMazeEpisode.infer;

@@ -1,11 +1,16 @@
+import { type } from "arktype";
 import { registerEnumType } from "type-graphql";
-import z from "zod";
 
-export const MediaItemType = z.enum(["movie", "show", "season", "episode"]);
+export const MediaItemType = type.enumerated(
+  "movie",
+  "show",
+  "season",
+  "episode",
+);
 
-export type MediaItemType = z.infer<typeof MediaItemType>;
+export type MediaItemType = typeof MediaItemType.infer;
 
-registerEnumType(MediaItemType.enum, {
+registerEnumType(MediaItemType, {
   name: "MediaItemType",
   description: "The type of a media item",
 });

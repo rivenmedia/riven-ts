@@ -1,19 +1,17 @@
-import z from "zod";
+import { type } from "arktype";
 
-const TorznabItem = z.object({
-  title: z.string(),
-  attr: z.array(
-    z.object({
-      "@attributes": z.object({
-        name: z.string(),
-        value: z.string(),
-      }),
-    }),
-  ),
+const TorznabItem = type({
+  title: "string > 0",
+  attr: type({
+    "@attributes": {
+      name: "string",
+      value: "string",
+    },
+  }).array(),
 });
 
-export const TorznabResponse = z.object({
-  channel: z.object({
-    items: z.array(TorznabItem).default([]),
-  }),
+export const TorznabResponse = type({
+  channel: {
+    items: TorznabItem.array().default(() => []),
+  },
 });

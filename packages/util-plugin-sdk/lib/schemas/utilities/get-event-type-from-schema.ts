@@ -1,16 +1,6 @@
 import type { RivenEvent } from "../events/index.ts";
-import type { ZodLiteral, ZodObject } from "zod";
+import type { Type } from "arktype";
 
-export const getEventTypeFromSchema = <Type extends RivenEvent["type"]>(
-  schema: ZodObject<{ type: ZodLiteral<Type> }>,
-): Type => {
-  const [value] = [...schema.shape.type.values];
-
-  if (!value) {
-    throw new Error(
-      `Unable to extract event type from schema: no literal value found in "type" property`,
-    );
-  }
-
-  return value;
-};
+export const getEventTypeFromSchema = (
+  schema: Type<{ type: RivenEvent["type"] }>,
+) => schema.get("type");

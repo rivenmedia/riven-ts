@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { Type, type } from "arktype";
 
 import {
   BaseDataSource,
@@ -11,28 +11,22 @@ import { RivenEventHandler } from "./events/index.ts";
 import type { RateLimiterOptions } from "bullmq";
 import type { Constructor } from "type-fest";
 
-export const RivenPluginConfig = z.readonly(
-  z.object({
-    name: z.symbol(),
-  }),
-);
+export const RivenPluginConfig = type({
+  name: "symbol",
+}).readonly();
 
-export type RivenPluginConfig = z.infer<typeof RivenPluginConfig>;
+export type RivenPluginConfig = typeof RivenPluginConfig.infer;
 
-const instantiatableSchema = z.object({
-  constructor: z.any(),
+export const basePluginContextSchema = type({
+  dataSources: type.instanceOf(DataSourceMap),
 });
 
-export const basePluginContextSchema = z.object({
-  dataSources: z.instanceof(DataSourceMap),
-});
-
-export type BasePluginContext = z.infer<typeof basePluginContextSchema>;
+export type BasePluginContext = typeof basePluginContextSchema.infer;
 
 export const isBasePluginContext = (
   value: unknown,
 ): value is BasePluginContext => {
-  return basePluginContextSchema.safeParse(value).success;
+  return !(basePluginContextSchema(value) instanceof type.errors);
 };
 
 /**
@@ -48,56 +42,48 @@ export interface DataSourceConstructor<
   new (options: BaseDataSourceConfig<T>): BaseDataSource<T>;
 }
 
-const dataSourceSchema = z.custom<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Constructor<BaseDataSource<Record<string, any>>, [BaseDataSourceConfig<any>]>
->((value) => {
-  if (typeof value !== "function") {
-    return false;
-  }
+const dataSourceSchema = type({
+  prototype: {
+    constructor: "unknown",
+  },
+}).as<
+  Constructor<
+    BaseDataSource<Record<string, unknown>>,
+    [BaseDataSourceConfig<Record<string, unknown>>]
+  >
+>();
 
-  return instantiatableSchema.safeParse(value.prototype).success;
-});
-
-export const RivenPlugin = z.object({
-  version: z.string().regex(
-    // https://regex101.com/r/vkijKf/1/
-    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/,
-    "Invalid version format",
+export const RivenPlugin = type({
+  version: "string.semver",
+  name: "symbol",
+  "dataSources?": [dataSourceSchema, "...", dataSourceSchema.array()],
+  resolvers: "Function[] > 0",
+  hooks: type(RivenEventHandler).partial(),
+  "context?": type.fn(
+    {
+      dataSources: type.instanceOf(DataSourceMap),
+      settings: type.instanceOf(PluginSettings),
+    },
+    ":",
+    "Record<string, unknown>",
   ),
-  name: z.symbol(),
-  dataSources: z.tuple([dataSourceSchema]).rest(dataSourceSchema).optional(),
-  resolvers: z.array(z.instanceof(Function)).min(1),
-  hooks: z.object(RivenEventHandler).partial(),
-  context: z
-    .function({
-      input: [
-        z.object({
-          dataSources: z.instanceof(DataSourceMap),
-          settings: z.instanceof(PluginSettings),
-        }),
-      ],
-      output: z.promise(z.record(z.string(), z.unknown())),
-    })
-    .optional(),
-  settingsSchema: z.instanceof(z.ZodObject),
-  validator: z.function({
-    input: [
-      z.object({
-        dataSources: z.instanceof(DataSourceMap),
-        settings: z.instanceof(PluginSettings),
-      }),
-    ],
-    output: z.promise(z.boolean()),
-  }),
+  settingsSchema: type.instanceOf(Type).as<Type<Record<string, unknown>>>(),
+  validator: type.fn(
+    {
+      dataSources: type.instanceOf(DataSourceMap),
+      settings: type.instanceOf(PluginSettings),
+    },
+    ":",
+    "boolean",
+  ),
 });
 
-export type RivenPlugin = z.infer<typeof RivenPlugin>;
+export type RivenPlugin = typeof RivenPlugin.infer;
 
-export const RivenPluginPackage = z.object({
+export const RivenPluginPackage = type({
   default: RivenPlugin,
 });
 
-export type RivenPluginPackage = z.infer<typeof RivenPluginPackage>;
+export type RivenPluginPackage = typeof RivenPluginPackage.infer;
 
 export { getEventTypeFromSchema } from "./utilities/get-event-type-from-schema.ts";

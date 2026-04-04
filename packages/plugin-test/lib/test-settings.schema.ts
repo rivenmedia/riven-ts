@@ -1,5 +1,5 @@
-import z from "zod";
+import { type } from "arktype";
 
-export const TestSettings = z.object({});
+export const TestSettings = type({});
 
-export type TestSettings = z.infer<typeof TestSettings>;
+export type TestSettings = typeof TestSettings.infer;

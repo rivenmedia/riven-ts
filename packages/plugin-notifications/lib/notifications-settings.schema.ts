@@ -1,33 +1,20 @@
-import { json } from "@repo/util-plugin-sdk/validation";
+import { type } from "arktype";
 
-import z from "zod";
+const NotificationURLScheme = type.or(
+  type(["'discord'", "'://'", "string > 0", "/", "string > 0"]),
+  type(["'json' | 'jsons'", "'://'", "string > 0"]),
+);
 
-import { NotificationScheme } from "./schemas/notification-scheme.schema.ts";
-
-const NotificationURLScheme = z.union([
-  z.templateLiteral([
-    NotificationScheme.enum.discord,
-    "://",
-    z.string().min(1),
-    "/",
-    z.string().min(1),
-  ]),
-  z.templateLiteral([
-    NotificationScheme.extract(["json", "jsons"]),
-    "://",
-    z.string().min(1),
-  ]),
-]);
-
-export const NotificationsSettings = z.object({
-  urls: json(
-    z
-      .array(NotificationURLScheme)
-      .min(1)
-      .pipe(z.tuple([NotificationURLScheme], NotificationURLScheme)),
-  ).describe(
-    "Notification service URLs (Apprise-style, e.g. discord://id/token, json://host/path)",
+export const NotificationsSettings = type({
+  urls: type("string.json.parse").pipe(
+    type([
+      NotificationURLScheme,
+      "...",
+      NotificationURLScheme.array(),
+    ]).describe(
+      "Notification service URLs (Apprise-style, e.g. discord://id/token, json://host/path)",
+    ),
   ),
 });
 
-export type NotificationsSettings = z.infer<typeof NotificationsSettings>;
+export type NotificationsSettings = typeof NotificationsSettings.infer;

@@ -1,6 +1,6 @@
-import z from "zod";
+import { type } from "arktype";
 
-export const ItemStatus = z.enum([
+export const ItemStatus = type.enumerated(
   "cached",
   "downloaded",
   "downloading",
@@ -10,6 +10,6 @@ export const ItemStatus = z.enum([
   "queued",
   "unknown",
   "uploading",
-]);
+);
 
-export type ItemStatus = z.infer<typeof ItemStatus>;
+export type ItemStatus = typeof ItemStatus.infer;

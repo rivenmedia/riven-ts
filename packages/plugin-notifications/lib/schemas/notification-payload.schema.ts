@@ -1,21 +1,21 @@
 import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 
-import z from "zod";
+import { type } from "arktype";
 
-export const NotificationPayload = z.object({
-  event: z.string().min(1),
-  title: z.string().min(1),
-  fullTitle: z.string().min(1),
+export const NotificationPayload = type({
+  event: "string > 0",
+  title: "string > 0",
+  fullTitle: "string > 0",
   type: MediaItemType,
-  year: z.int().nullable(),
-  imdbId: z.string().nullable(),
-  tmdbId: z.string().nullable(),
-  tvdbId: z.string().nullable(),
-  posterPath: z.url().nullable(),
-  downloader: z.string().min(1),
-  provider: z.string().nullable(),
-  durationSeconds: z.number().nonnegative(),
-  timestamp: z.iso.datetime(),
+  year: "number > 0",
+  imdbId: "string | null",
+  tmdbId: "string | null",
+  tvdbId: "string | null",
+  posterPath: "string.url",
+  downloader: "string > 0",
+  provider: "string | null",
+  durationSeconds: "number >= 0",
+  timestamp: "string.date.iso",
 });
 
-export type NotificationPayload = z.infer<typeof NotificationPayload>;
+export type NotificationPayload = typeof NotificationPayload.infer;

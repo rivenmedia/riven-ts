@@ -6,10 +6,9 @@ import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/
 
 import { ref } from "@mikro-orm/core";
 import chalk from "chalk";
-import { ValidationError, validateOrReject } from "class-validator";
+import { validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
 import assert from "node:assert";
-import z from "zod";
 
 import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
@@ -32,15 +31,12 @@ export async function persistScrapeResults({
         .getRepository(MediaItem)
         .findOneOrFail({ id }, { populate: ["streams.infoHash"] });
 
-      const processableStates = MediaItemState.extract([
-        "indexed",
-        "ongoing",
-        "scraped",
-        "partially_completed",
-      ]);
+      const processableStates = MediaItemState.extract(
+        "'indexed' | 'ongoing' | 'scraped' | 'partially_completed'",
+      );
 
       assert(
-        processableStates.safeParse(existingItem.state).success,
+        processableStates.assert(existingItem.state),
         new MediaItemScrapeErrorIncorrectState({
           item: existingItem,
         }),
@@ -84,26 +80,26 @@ export async function persistScrapeResults({
           );
         }
       } catch (error) {
-        const errorMessage = z
-          .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-          .transform((error) => {
-            if (Array.isArray(error)) {
-              return error
-                .map((err) =>
-                  err.constraints
-                    ? Object.values(err.constraints).join("; ")
-                    : "",
-                )
-                .join("; ");
-            }
+        // const errorMessage = z
+        //   .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
+        //   .transform((error) => {
+        //     if (Array.isArray(error)) {
+        //       return error
+        //         .map((err) =>
+        //           err.constraints
+        //             ? Object.values(err.constraints).join("; ")
+        //             : "",
+        //         )
+        //         .join("; ");
+        //     }
 
-            return error.message;
-          })
-          .parse(error);
+        //     return error.message;
+        //   })
+        //   .parse(error);
 
         throw new MediaItemScrapeError({
           item: existingItem,
-          error: errorMessage,
+          error: String(error),
         });
       }
 

@@ -2,10 +2,9 @@ import { RivenSettings } from "../riven-settings.schema.ts";
 import { deepFreeze } from "./deep-freeze.ts";
 
 import type { ReadonlyDeep } from "type-fest";
-import type z from "zod";
 
 class Settings {
-  readonly settings: ReadonlyDeep<z.infer<typeof RivenSettings>>;
+  readonly settings: ReadonlyDeep<typeof RivenSettings.infer>;
 
   constructor(environment: NodeJS.ProcessEnv) {
     const settingPattern = /^RIVEN_SETTING__(?<setting>.+)$/;
@@ -25,9 +24,10 @@ class Settings {
       delete environment[key];
     }
 
-    this.settings = deepFreeze(RivenSettings.parse(rawSettings));
+    this.settings = deepFreeze(RivenSettings.assert(rawSettings));
   }
 }
 
-export const settings: ReadonlyDeep<z.infer<typeof RivenSettings>> =
-  new Settings(process.env).settings;
+export const settings: ReadonlyDeep<typeof RivenSettings.infer> = new Settings(
+  process.env,
+).settings;

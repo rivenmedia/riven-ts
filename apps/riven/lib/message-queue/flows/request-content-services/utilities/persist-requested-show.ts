@@ -2,12 +2,10 @@ import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
-import { ValidationError, validateOrReject } from "class-validator";
-import z from "zod";
+import { validateOrReject } from "class-validator";
 
 import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
-import { RequestType } from "../request-content-services.schema.ts";
 
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
@@ -82,32 +80,30 @@ export async function persistRequestedShow(
       await transaction.refreshOrFail(itemRequest);
 
       return {
-        requestType: existingItem
-          ? RequestType.enum.update
-          : RequestType.enum.create,
+        requestType: existingItem ? "update" : "create",
         item: itemRequest,
       };
     } catch (error) {
-      const errorMessage = z
-        .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-        .transform((error) => {
-          if (Array.isArray(error)) {
-            return error
-              .map((err) =>
-                err.constraints
-                  ? Object.values(err.constraints).join("; ")
-                  : "",
-              )
-              .join("; ");
-          }
+      // const errorMessage = z
+      //   .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
+      //   .transform((error) => {
+      //     if (Array.isArray(error)) {
+      //       return error
+      //         .map((err) =>
+      //           err.constraints
+      //             ? Object.values(err.constraints).join("; ")
+      //             : "",
+      //         )
+      //         .join("; ");
+      //     }
 
-          return error.message;
-        })
-        .parse(error);
+      //     return error.message;
+      //   })
+      //   .parse(error);
 
       throw new ItemRequestCreateError({
         item: itemRequest,
-        error: errorMessage,
+        error: String(error),
       });
     }
   });

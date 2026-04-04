@@ -1,4 +1,4 @@
-import z from "zod";
+import { type } from "arktype";
 
 import { createChunkRangeLabel } from "../utilities/chunks/create-chunk-range-label.ts";
 import { fileNameToFileChunkCalculationsMap } from "../utilities/file-handle-map.ts";
@@ -52,7 +52,7 @@ const calculateRequiredChunks = (
     );
 
     chunks.push(
-      ChunkMetadata.parse({
+      ChunkMetadata.assert({
         index: i + 1,
         fileName,
         start: chunkStart,
@@ -107,22 +107,29 @@ export const transformRequestRangeToBounds = z.transform(
   },
 );
 
-export const RequestRange = z
-  .object({
-    fileName: z.string(),
-    start: z.int().nonnegative(),
-    end: z.int().nonnegative(),
-    fileSize: z.int().nonnegative(),
-    chunkSize: z.int().positive(),
-  })
-  .refine(({ end, fileSize, start }) => {
-    if (start >= fileSize) {
-      return false;
-    }
+export const RequestRange = type({
+  fileName: "string > 0",
+  start: "number.integer >= 0",
+  end: "number.integer >= 0",
+  fileSize: "number.integer >= 0",
+  chunkSize: "number.integer > 0",
+}).narrow(({ end, fileSize, start }, ctx) => {
+  if (start >= fileSize) {
+    return ctx.reject(
+      `Start byte ${start.toString()} exceeds file size ${fileSize.toString()}`,
+    );
+  }
 
-    const effectiveEnd = Math.min(end, fileSize - 1);
+  const effectiveEnd = Math.min(end, fileSize - 1);
+  const isValidRange = effectiveEnd >= start;
 
-    return effectiveEnd >= start;
-  }, "Invalid request range");
+  if (!isValidRange) {
+    return ctx.reject(
+      `End byte ${end.toString()} is before start byte ${start.toString()}`,
+    );
+  }
 
-export type RequestRange = z.infer<typeof RequestRange>;
+  return true;
+});
+
+export type RequestRange = typeof RequestRange.infer;

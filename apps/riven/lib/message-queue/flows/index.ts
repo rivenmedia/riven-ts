@@ -38,4 +38,4 @@ export const FlowHandlers = {
   "download-item": downloadItemProcessorSchema,
   "download-item.find-valid-torrent": findValidTorrentProcessorSchema,
   "download-item.rank-streams": rankStreamsProcessorSchema,
-} satisfies Record<Flow["name"], z.ZodFunction>;
+} satisfies Record<Flow["name"], Function>;

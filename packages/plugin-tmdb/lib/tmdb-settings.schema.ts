@@ -1,10 +1,7 @@
-import z from "zod";
+import { type } from "arktype";
 
-export const TmdbSettings = z.object({
-  apiKey: z
-    .string()
-    .min(1, "API Key is required")
-    .describe("Your TMDB API Key"),
+export const TmdbSettings = type({
+  apiKey: type("string > 0").describe("Your TMDB API Key"),
 });
 
-export type TmdbSettings = z.infer<typeof TmdbSettings>;
+export type TmdbSettings = typeof TmdbSettings.infer;
