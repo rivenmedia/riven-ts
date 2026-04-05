@@ -10,7 +10,7 @@ import { fromPromise } from "xstate";
 import { database } from "../../../database/database.ts";
 import { enqueueScrapeItems } from "../../../message-queue/flows/scrape-item/enqueue-scrape-items.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { RivenPlugin } from "@repo/util-plugin-sdk/schemas";
 
 export interface FanOutDownloadInput {
   item: MediaItem;

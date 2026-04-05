@@ -5,7 +5,7 @@ import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
 import { flow } from "../producer.ts";
 import { createScrapeItemJob } from "./scrape-item.schema.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { RivenPlugin } from "@repo/util-plugin-sdk/schemas";
 
 export interface EnqueueScrapeItemInput {
   items: MediaItemScrapeRequestedEvent["item"][];

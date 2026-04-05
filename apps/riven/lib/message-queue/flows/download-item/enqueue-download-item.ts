@@ -8,8 +8,8 @@ import { createDownloadItemJob } from "./download-item.schema.ts";
 import { createFindValidTorrentJob } from "./steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { createRankStreamsJob } from "./steps/rank-streams/rank-streams.schema.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
+import type { RivenPlugin } from "@repo/util-plugin-sdk/schemas";
 
 const rtnSettings = createSettings({
   exclude: ["\\bmatte\\b"],

@@ -1,4 +1,4 @@
-import { PluginDataSource } from "@repo/util-plugin-sdk";
+import { PluginDataSource } from "@repo/util-plugin-sdk/decorators";
 
 import { Query, Resolver } from "type-graphql";
 

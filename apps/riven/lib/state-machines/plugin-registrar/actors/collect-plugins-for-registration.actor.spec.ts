@@ -1,4 +1,4 @@
-import { RivenPluginPackage } from "@repo/util-plugin-sdk";
+import { RivenPluginPackage } from "@repo/util-plugin-sdk/schemas";
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import { expect, it, vi } from "vitest";

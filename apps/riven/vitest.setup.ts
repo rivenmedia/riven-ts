@@ -1,4 +1,4 @@
-import { BaseDataSource, type RivenPlugin } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk/datasource";
 import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
 
 import { EntityRepository } from "@mikro-orm/core";
@@ -6,6 +6,7 @@ import { type RedisClient, RedisConnection } from "bullmq";
 import { type Mock, afterAll, afterEach, expect, vi } from "vitest";
 import z from "zod";
 
+import type { RivenPlugin } from "@repo/util-plugin-sdk/schemas";
 import type { RedisMemoryServer } from "redis-memory-server";
 
 vi.mock<{ default: Record<string, unknown> }>(

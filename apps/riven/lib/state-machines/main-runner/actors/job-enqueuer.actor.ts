@@ -1,5 +1,3 @@
-import { RivenEvent } from "@repo/util-plugin-sdk/events";
-
 import chalk from "chalk";
 import { fromCallback } from "xstate";
 
@@ -9,6 +7,7 @@ import { logger } from "../../../utilities/logger/logger.ts";
 import { serialiseEventData } from "../../../utilities/serialisers/serialise-event-data.ts";
 
 import type { PluginQueueMap, ValidPluginMap } from "../../../types/plugins.ts";
+import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { FlowJob } from "bullmq";
 
 export interface JobEnqueuerInput {

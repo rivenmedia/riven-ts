@@ -1,8 +1,7 @@
 import {
   BaseDataSource,
-  type BasePluginContext,
   type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+} from "@repo/util-plugin-sdk/datasource";
 
 import { DateTime } from "luxon";
 import z from "zod";
@@ -18,6 +17,7 @@ import { postLogin200Schema } from "../__generated__/zod/postLoginSchema.ts";
 import { TvdbSettings } from "../tvdb-settings.schema.ts";
 
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+import type { BasePluginContext } from "@repo/util-plugin-sdk/schemas";
 
 export class TvdbAPIError extends Error {}
 

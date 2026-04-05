@@ -15,336 +15,339 @@ function customRank(fetch: boolean): CustomRank {
   return { fetch };
 }
 
+const customRankDefaultFalse = CustomRankSchema.default(customRank(false));
+const customRankDefaultTrue = CustomRankSchema.default(customRank(true));
+
 const QualityRanksSchema = z.object({
   /**
    * @default { fetch: false }
    */
-  av1: CustomRankSchema.default(customRank(false)),
+  av1: customRankDefaultFalse,
 
   /**
    * @default { fetch: true }
    */
-  avc: CustomRankSchema.default(customRank(true)),
+  avc: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  bluray: CustomRankSchema.default(customRank(true)),
+  bluray: customRankDefaultTrue,
 
   /**
    * @default { fetch: false }
    */
-  dvd: CustomRankSchema.default(customRank(false)),
+  dvd: customRankDefaultFalse,
 
   /**
    * @default { fetch: true }
    */
-  hdtv: CustomRankSchema.default(customRank(true)),
+  hdtv: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  hevc: CustomRankSchema.default(customRank(true)),
+  hevc: customRankDefaultTrue,
 
   /**
    * @default { fetch: false }
    */
-  mpeg: CustomRankSchema.default(customRank(false)),
+  mpeg: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  remux: CustomRankSchema.default(customRank(false)),
+  remux: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  vhs: CustomRankSchema.default(customRank(false)),
+  vhs: customRankDefaultFalse,
 
   /**
    * @default { fetch: true }
    */
-  web: CustomRankSchema.default(customRank(true)),
+  web: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  webdl: CustomRankSchema.default(customRank(true)),
+  webdl: customRankDefaultTrue,
 
   /**
    * @default { fetch: false }
    */
-  webmux: CustomRankSchema.default(customRank(false)),
+  webmux: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  xvid: CustomRankSchema.default(customRank(false)),
+  xvid: customRankDefaultFalse,
 });
 
 const RipsRanksSchema = z.object({
   /**
    * @default { fetch: false }
    */
-  bdrip: CustomRankSchema.default(customRank(false)),
+  bdrip: customRankDefaultFalse,
 
   /**
    * @default { fetch: true }
    */
-  brrip: CustomRankSchema.default(customRank(true)),
+  brrip: customRankDefaultTrue,
 
   /**
    * @default { fetch: false }
    */
-  dvdrip: CustomRankSchema.default(customRank(false)),
+  dvdrip: customRankDefaultFalse,
 
   /**
    * @default { fetch: true }
    */
-  hdrip: CustomRankSchema.default(customRank(true)),
+  hdrip: customRankDefaultTrue,
 
   /**
    * @default { fetch: false }
    */
-  ppvrip: CustomRankSchema.default(customRank(false)),
+  ppvrip: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  satrip: CustomRankSchema.default(customRank(false)),
+  satrip: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  tvrip: CustomRankSchema.default(customRank(false)),
+  tvrip: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  uhdrip: CustomRankSchema.default(customRank(false)),
+  uhdrip: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  vhsrip: CustomRankSchema.default(customRank(false)),
+  vhsrip: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  webdlrip: CustomRankSchema.default(customRank(false)),
+  webdlrip: customRankDefaultFalse,
 
   /**
    * @default { fetch: true }
    */
-  webrip: CustomRankSchema.default(customRank(true)),
+  webrip: customRankDefaultTrue,
 });
 
 const HdrRanksSchema = z.object({
   /**
    * @default { fetch: true }
    */
-  bit10: CustomRankSchema.default(customRank(true)),
+  bit10: customRankDefaultTrue,
 
   /**
    * @default { fetch: false }
    */
-  dolbyVision: CustomRankSchema.default(customRank(false)),
+  dolbyVision: customRankDefaultFalse,
 
   /**
    * @default { fetch: true }
    */
-  hdr: CustomRankSchema.default(customRank(true)),
+  hdr: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  hdr10plus: CustomRankSchema.default(customRank(true)),
+  hdr10plus: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  sdr: CustomRankSchema.default(customRank(true)),
+  sdr: customRankDefaultTrue,
 });
 
 const AudioRanksSchema = z.object({
   /**
    * @default { fetch: true }
    */
-  aac: CustomRankSchema.default(customRank(true)),
+  aac: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  atmos: CustomRankSchema.default(customRank(true)),
+  atmos: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  dolbyDigital: CustomRankSchema.default(customRank(true)),
+  dolbyDigital: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  dolbyDigitalPlus: CustomRankSchema.default(customRank(true)),
+  dolbyDigitalPlus: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  dtsLossy: CustomRankSchema.default(customRank(true)),
+  dtsLossy: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  dtsLossless: CustomRankSchema.default(customRank(true)),
+  dtsLossless: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  flac: CustomRankSchema.default(customRank(true)),
+  flac: customRankDefaultTrue,
 
   /**
    * @default { fetch: false }
    */
-  mono: CustomRankSchema.default(customRank(false)),
+  mono: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  mp3: CustomRankSchema.default(customRank(false)),
+  mp3: customRankDefaultFalse,
 
   /**
    * @default { fetch: true }
    */
-  stereo: CustomRankSchema.default(customRank(true)),
+  stereo: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  surround: CustomRankSchema.default(customRank(true)),
+  surround: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  truehd: CustomRankSchema.default(customRank(true)),
+  truehd: customRankDefaultTrue,
 });
 
 const ExtrasRanksSchema = z.object({
   /**
    * @default { fetch: false }
    */
-  threeD: CustomRankSchema.default(customRank(false)),
+  threeD: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  converted: CustomRankSchema.default(customRank(false)),
+  converted: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  documentary: CustomRankSchema.default(customRank(false)),
+  documentary: customRankDefaultFalse,
 
   /**
    * @default { fetch: true }
    */
-  dubbed: CustomRankSchema.default(customRank(true)),
+  dubbed: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  edition: CustomRankSchema.default(customRank(true)),
+  edition: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  hardcoded: CustomRankSchema.default(customRank(true)),
+  hardcoded: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  network: CustomRankSchema.default(customRank(true)),
+  network: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  proper: CustomRankSchema.default(customRank(true)),
+  proper: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  repack: CustomRankSchema.default(customRank(true)),
+  repack: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  retail: CustomRankSchema.default(customRank(true)),
+  retail: customRankDefaultTrue,
 
   /**
    * @default { fetch: false }
    */
-  site: CustomRankSchema.default(customRank(false)),
+  site: customRankDefaultFalse,
 
   /**
    * @default { fetch: true }
    */
-  subbed: CustomRankSchema.default(customRank(true)),
+  subbed: customRankDefaultTrue,
 
   /**
    * @default { fetch: false }
    */
-  upscaled: CustomRankSchema.default(customRank(false)),
+  upscaled: customRankDefaultFalse,
 
   /**
    * @default { fetch: true }
    */
-  scene: CustomRankSchema.default(customRank(true)),
+  scene: customRankDefaultTrue,
 
   /**
    * @default { fetch: true }
    */
-  uncensored: CustomRankSchema.default(customRank(true)),
+  uncensored: customRankDefaultTrue,
 });
 
 const TrashRanksSchema = z.object({
   /**
    * @default { fetch: false }
    */
-  cam: CustomRankSchema.default(customRank(false)),
+  cam: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  cleanAudio: CustomRankSchema.default(customRank(false)),
+  cleanAudio: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  pdtv: CustomRankSchema.default(customRank(false)),
+  pdtv: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  r5: CustomRankSchema.default(customRank(false)),
+  r5: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  screener: CustomRankSchema.default(customRank(false)),
+  screener: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  size: CustomRankSchema.default(customRank(false)),
+  size: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  telecine: CustomRankSchema.default(customRank(false)),
+  telecine: customRankDefaultFalse,
 
   /**
    * @default { fetch: false }
    */
-  telesync: CustomRankSchema.default(customRank(false)),
+  telesync: customRankDefaultFalse,
 });
 
 const CustomRanksConfigSchema = z.object({
@@ -496,83 +499,85 @@ export function getCustomRank(
   return cat[key as keyof typeof cat];
 }
 
+const rankingModelField = z.int().default(0);
+
 export const RankingModelSchema = z.object({
   // Quality
-  av1: z.int().default(0),
-  avc: z.int().default(0),
-  bluray: z.int().default(0),
-  dvd: z.int().default(0),
-  hdtv: z.int().default(0),
-  hevc: z.int().default(0),
-  mpeg: z.int().default(0),
-  remux: z.int().default(0),
-  vhs: z.int().default(0),
-  web: z.int().default(0),
-  webdl: z.int().default(0),
-  webmux: z.int().default(0),
-  xvid: z.int().default(0),
+  av1: rankingModelField,
+  avc: rankingModelField,
+  bluray: rankingModelField,
+  dvd: rankingModelField,
+  hdtv: rankingModelField,
+  hevc: rankingModelField,
+  mpeg: rankingModelField,
+  remux: rankingModelField,
+  vhs: rankingModelField,
+  web: rankingModelField,
+  webdl: rankingModelField,
+  webmux: rankingModelField,
+  xvid: rankingModelField,
 
   // Rips
-  bdrip: z.int().default(0),
-  brrip: z.int().default(0),
-  dvdrip: z.int().default(0),
-  hdrip: z.int().default(0),
-  ppvrip: z.int().default(0),
-  tvrip: z.int().default(0),
-  uhdrip: z.int().default(0),
-  vhsrip: z.int().default(0),
-  webdlrip: z.int().default(0),
-  webrip: z.int().default(0),
+  bdrip: rankingModelField,
+  brrip: rankingModelField,
+  dvdrip: rankingModelField,
+  hdrip: rankingModelField,
+  ppvrip: rankingModelField,
+  tvrip: rankingModelField,
+  uhdrip: rankingModelField,
+  vhsrip: rankingModelField,
+  webdlrip: rankingModelField,
+  webrip: rankingModelField,
 
   // HDR
-  bit10: z.int().default(0),
-  dolbyVision: z.int().default(0),
-  hdr: z.int().default(0),
-  hdr10plus: z.int().default(0),
-  sdr: z.int().default(0),
+  bit10: rankingModelField,
+  dolbyVision: rankingModelField,
+  hdr: rankingModelField,
+  hdr10plus: rankingModelField,
+  sdr: rankingModelField,
 
   // Audio
-  aac: z.int().default(0),
-  atmos: z.int().default(0),
-  dolbyDigital: z.int().default(0),
-  dolbyDigitalPlus: z.int().default(0),
-  dtsLossy: z.int().default(0),
-  dtsLossless: z.int().default(0),
-  flac: z.int().default(0),
-  mono: z.int().default(0),
-  mp3: z.int().default(0),
-  stereo: z.int().default(0),
-  surround: z.int().default(0),
-  truehd: z.int().default(0),
+  aac: rankingModelField,
+  atmos: rankingModelField,
+  dolbyDigital: rankingModelField,
+  dolbyDigitalPlus: rankingModelField,
+  dtsLossy: rankingModelField,
+  dtsLossless: rankingModelField,
+  flac: rankingModelField,
+  mono: rankingModelField,
+  mp3: rankingModelField,
+  stereo: rankingModelField,
+  surround: rankingModelField,
+  truehd: rankingModelField,
 
   // Extras
-  threeD: z.int().default(0),
-  converted: z.int().default(0),
-  documentary: z.int().default(0),
-  commentary: z.int().default(0),
-  uncensored: z.int().default(0),
-  dubbed: z.int().default(0),
-  edition: z.int().default(0),
-  hardcoded: z.int().default(0),
-  network: z.int().default(0),
-  proper: z.int().default(0),
-  repack: z.int().default(0),
-  retail: z.int().default(0),
-  subbed: z.int().default(0),
-  upscaled: z.int().default(0),
-  scene: z.int().default(0),
+  threeD: rankingModelField,
+  converted: rankingModelField,
+  documentary: rankingModelField,
+  commentary: rankingModelField,
+  uncensored: rankingModelField,
+  dubbed: rankingModelField,
+  edition: rankingModelField,
+  hardcoded: rankingModelField,
+  network: rankingModelField,
+  proper: rankingModelField,
+  repack: rankingModelField,
+  retail: rankingModelField,
+  subbed: rankingModelField,
+  upscaled: rankingModelField,
+  scene: rankingModelField,
 
   // Trash
-  cam: z.int().default(0),
-  cleanAudio: z.int().default(0),
-  r5: z.int().default(0),
-  pdtv: z.int().default(0),
-  satrip: z.int().default(0),
-  screener: z.int().default(0),
-  site: z.int().default(0),
-  size: z.int().default(0),
-  telecine: z.int().default(0),
-  telesync: z.int().default(0),
+  cam: rankingModelField,
+  cleanAudio: rankingModelField,
+  r5: rankingModelField,
+  pdtv: rankingModelField,
+  satrip: rankingModelField,
+  screener: rankingModelField,
+  site: rankingModelField,
+  size: rankingModelField,
+  telecine: rankingModelField,
+  telesync: rankingModelField,
 });
 
 export type RankingModel = z.infer<typeof RankingModelSchema>;

@@ -1,8 +1,4 @@
-import {
-  BaseDataSource,
-  type BasePluginContext,
-  type ParamsFor,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk/datasource";
 import {
   Episode,
   Season,
@@ -23,9 +19,11 @@ import type {
   RequestOptions,
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
+import type { BasePluginContext } from "@repo/util-plugin-sdk/schemas";
 import type { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+import type { ParamsFor } from "@repo/util-plugin-sdk/types/events";
 
 const storeNameHeader = "x-stremthru-store-name";
 

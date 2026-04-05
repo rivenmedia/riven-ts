@@ -6,7 +6,7 @@ import { Store } from "./schemas/store.schema.ts";
 import { pluginConfig } from "./stremthru-plugin.config.ts";
 import { StoreKeys, StremThruSettings } from "./stremthru-settings.schema.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { RivenPlugin } from "@repo/util-plugin-sdk/schemas";
 
 export default {
   name: pluginConfig.name,

@@ -181,3 +181,5 @@ export const RivenEventHandler = {
   "riven.media-item.stream-link.requested":
     MediaItemStreamLinkRequestedEventHandler,
 } as const satisfies Record<RivenEvent["type"], z.ZodFunction>;
+
+export type RivenEventHandler = typeof RivenEventHandler;

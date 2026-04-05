@@ -1,8 +1,7 @@
 import {
   BaseDataSource,
-  type BasePluginContext,
   type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+} from "@repo/util-plugin-sdk/datasource";
 
 import { getApiListMyPageQueryResponseSchema } from "../__generated__/zod/getApiListMyPageSchema.ts";
 import {
@@ -16,6 +15,7 @@ import {
 
 import type { ListrrSettings } from "../listrr-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+import type { BasePluginContext } from "@repo/util-plugin-sdk/schemas";
 import type { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
 
 export class ListrrAPIError extends Error {}

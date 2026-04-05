@@ -1,4 +1,4 @@
-import { parseFilePath } from "@repo/util-rank-torrent-name";
+import { parseFilePath } from "@repo/util-rank-torrent-name/parser";
 
 import assert from "node:assert";
 import { extname } from "node:path";

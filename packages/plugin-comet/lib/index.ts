@@ -5,7 +5,7 @@ import { CometAPI } from "./datasource/comet.datasource.ts";
 import { CometSettingsResolver } from "./schema/comet-settings.resolver.ts";
 import { CometResolver } from "./schema/comet.resolver.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { RivenPlugin } from "@repo/util-plugin-sdk/schemas";
 
 export default {
   name: pluginConfig.name,

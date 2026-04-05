@@ -1,9 +1,7 @@
 import { captureException, getCurrentScope, withScope } from "@sentry/node";
 import { type SandboxedJob, UnrecoverableError } from "bullmq";
-import assert from "node:assert";
 
-import type { SandboxedJobDefinition, SandboxedJobHandlers } from "../index.ts";
-import type { ZodLiteral, ZodObject, ZodType, z } from "zod";
+import type { SandboxedJobDefinition } from "../index.ts";
 
 const timeoutDuration = 5_000;
 
@@ -22,24 +20,11 @@ function maybeStopIdleTimer(timerId: NodeJS.Timeout | null) {
 }
 
 export function createSandboxedJobProcessor<
-  T extends ZodObject<{
-    name: ZodLiteral<SandboxedJobDefinition["name"]>;
-    input: ZodType;
-    output: ZodType;
-  }>,
+  JobName extends SandboxedJobDefinition["name"],
 >(
-  sandboxedJobSchema: T,
-  processor: ReturnType<
-    (typeof SandboxedJobHandlers)[T["shape"]["name"]["value"]]["implementAsync"]
-  >,
+  sandboxedJobName: JobName,
+  processor: Extract<SandboxedJobDefinition, { name: JobName }>["processor"],
 ) {
-  const [sandboxedJobName] = sandboxedJobSchema.shape.name.def.values;
-
-  assert(
-    sandboxedJobName,
-    `No queue name found for sandboxed job: ${sandboxedJobSchema.shape.name.value}`,
-  );
-
   let idleTimerId: NodeJS.Timeout | null = null;
 
   return async (job: SandboxedJob) => {
@@ -59,9 +44,7 @@ export function createSandboxedJobProcessor<
       });
 
       try {
-        return (await processor({ job, scope } as never)) as z.infer<
-          T["shape"]["output"]
-        >;
+        return await processor({ job, scope } as never);
       } catch (error) {
         captureException(error);
 

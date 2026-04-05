@@ -1,8 +1,7 @@
 import {
   BaseDataSource,
-  type BasePluginContext,
   type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+} from "@repo/util-plugin-sdk/datasource";
 
 import type {
   FindById200,
@@ -12,6 +11,7 @@ import type { MovieDetails200 } from "../__generated__/types/MovieDetails.ts";
 import type { MovieExternalIds200 } from "../__generated__/types/MovieExternalIds.ts";
 import type { TmdbSettings } from "../tmdb-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+import type { BasePluginContext } from "@repo/util-plugin-sdk/schemas";
 
 export class TmdbAPIError extends Error {}
 

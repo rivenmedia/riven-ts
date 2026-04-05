@@ -6,11 +6,11 @@ import { readSync } from "./operations/read.ts";
 import { readDirSync } from "./operations/readdir.ts";
 import { releaseSync } from "./operations/release.ts";
 
-import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type {
   MediaItemStreamLinkRequestedEvent,
   MediaItemStreamLinkRequestedResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
+import type { ParamsFor } from "@repo/util-plugin-sdk/types/events";
 import type { OPERATIONS } from "@zkochan/fuse-native";
 import type { Queue } from "bullmq";
 

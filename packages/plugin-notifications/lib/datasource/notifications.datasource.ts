@@ -1,4 +1,4 @@
-import { BaseDataSource } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk/datasource";
 
 import type { NotificationsSettings } from "../notifications-settings.schema.ts";
 

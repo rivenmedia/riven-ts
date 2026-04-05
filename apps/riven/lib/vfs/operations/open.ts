@@ -18,11 +18,11 @@ import {
 } from "../utilities/file-handle-map.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
-import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type {
   MediaItemStreamLinkRequestedEvent,
   MediaItemStreamLinkRequestedResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
+import type { ParamsFor } from "@repo/util-plugin-sdk/types/events";
 import type { Queue } from "bullmq";
 
 let fd = 0;

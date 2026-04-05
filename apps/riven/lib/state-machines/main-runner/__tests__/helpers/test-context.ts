@@ -1,5 +1,5 @@
 import testPlugin from "@repo/plugin-test";
-import { DataSourceMap } from "@repo/util-plugin-sdk";
+import { DataSourceMap } from "@repo/util-plugin-sdk/utilities/datasource-map";
 
 import { vi } from "vitest";
 import { createActor, createEmptyActor, fromPromise } from "xstate";

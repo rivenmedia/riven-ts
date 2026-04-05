@@ -1,4 +1,4 @@
-import { DataSourceMap, type RivenPlugin } from "@repo/util-plugin-sdk";
+import { DataSourceMap } from "@repo/util-plugin-sdk/utilities/datasource-map";
 
 import { logger } from "../utilities/logger/logger.ts";
 import { settings } from "../utilities/settings.ts";
@@ -11,6 +11,7 @@ import type {
   GraphQLRequest,
 } from "@apollo/server";
 import type { StandaloneServerContextFunctionArgument } from "@apollo/server/standalone";
+import type { RivenPlugin } from "@repo/util-plugin-sdk/schemas";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 declare module "node:http" {

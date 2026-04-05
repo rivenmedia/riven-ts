@@ -1,9 +1,7 @@
 import {
   BaseDataSource,
-  type BasePluginContext,
-  type ParamsFor,
   type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+} from "@repo/util-plugin-sdk/datasource";
 import {
   Episode,
   type MediaItem,
@@ -15,7 +13,9 @@ import {
 import { CometSettings } from "../comet-settings.schema.ts";
 import { CometScrapeResponse } from "../schemas/scrape-response.schema.ts";
 
+import type { BasePluginContext } from "@repo/util-plugin-sdk/schemas";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
+import type { ParamsFor } from "@repo/util-plugin-sdk/types/events";
 
 interface CometScrapeConfig {
   identifier: string | null;

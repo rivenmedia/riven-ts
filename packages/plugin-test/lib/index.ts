@@ -6,7 +6,7 @@ import { TestResolver } from "./schema/test.resolver.ts";
 import { pluginConfig } from "./test-plugin.config.ts";
 import { TestSettings } from "./test-settings.schema.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { RivenPlugin } from "@repo/util-plugin-sdk/schemas";
 
 export default {
   name: pluginConfig.name,

@@ -5,7 +5,7 @@ import { ListrrSettings } from "./listrr-settings.schema.ts";
 import { ListrrSettingsResolver } from "./schema/listrr-settings.resolver.ts";
 import { ListrrResolver } from "./schema/listrr.resolver.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { RivenPlugin } from "@repo/util-plugin-sdk/schemas";
 
 export default {
   name: pluginConfig.name,

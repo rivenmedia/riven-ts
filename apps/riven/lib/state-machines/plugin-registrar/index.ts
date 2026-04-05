@@ -1,4 +1,4 @@
-import { DataSourceMap } from "@repo/util-plugin-sdk";
+import { DataSourceMap } from "@repo/util-plugin-sdk/utilities/datasource-map";
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import chalk from "chalk";

@@ -3,8 +3,8 @@ import assert from "node:assert";
 import { serialiseEventData } from "../../utilities/serialisers/serialise-event-data.ts";
 import { queueNameFor } from "./queue-name-for.ts";
 
-import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { ParamsFor } from "@repo/util-plugin-sdk/types/events";
 import type { FlowChildJob, JobsOptions } from "bullmq";
 import type { ZodLiteral, ZodObject, z } from "zod";
 

@@ -7,7 +7,7 @@ import { PlexSettings } from "./plex-settings.schema.ts";
 import { PlexSettingsResolver } from "./schema/plex-settings.resolver.ts";
 import { PlexResolver } from "./schema/plex.resolver.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { RivenPlugin } from "@repo/util-plugin-sdk/schemas";
 
 export default {
   name: pluginConfig.name,

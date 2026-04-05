@@ -1,4 +1,7 @@
-import { type RivenPlugin, RivenPluginPackage } from "@repo/util-plugin-sdk";
+import {
+  type RivenPlugin,
+  RivenPluginPackage,
+} from "@repo/util-plugin-sdk/schemas";
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import { constantCase } from "es-toolkit";

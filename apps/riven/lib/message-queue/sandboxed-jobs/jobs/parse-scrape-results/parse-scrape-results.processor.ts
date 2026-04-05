@@ -1,22 +1,13 @@
-import { type ParsedData, parse } from "@repo/util-rank-torrent-name";
-
 import { UnrecoverableError } from "bullmq";
 
 import { logger } from "../../../../utilities/logger/logger.ts";
 import { createSandboxedJobProcessor } from "../../utilities/create-sandboxed-job.processor.ts";
-import { withORM } from "../../utilities/with-orm.ts";
-import {
-  ParseScrapeResultsSandboxedJob,
-  parseScrapeResultsProcessorSchema,
-} from "./parse-scrape-results.schema.ts";
-import {
-  SkippedTorrentError,
-  validateTorrent,
-} from "./utilities/validate-torrent.ts";
+
+import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export default createSandboxedJobProcessor(
-  ParseScrapeResultsSandboxedJob,
-  parseScrapeResultsProcessorSchema.implementAsync(async function ({ job }) {
+  "scrape-item.parse-scrape-results",
+  async function ({ job }) {
     const children = await job.getChildrenValues();
 
     const childResults = Object.values(children);
@@ -30,6 +21,8 @@ export default createSandboxedJobProcessor(
       {},
     );
 
+    const { withORM } = await import("../../utilities/with-orm.ts");
+
     return withORM(async (database) => {
       const item = await database.mediaItem.findOneOrFail(job.data.id);
       const { fullTitle: itemTitle } = item;
@@ -39,6 +32,10 @@ export default createSandboxedJobProcessor(
       }
 
       const validResults = new Map<string, ParsedData>();
+
+      const { parse } = await import("@repo/util-rank-torrent-name/parser");
+      const { SkippedTorrentError, validateTorrent } =
+        await import("./utilities/validate-torrent.ts");
 
       for (const [hash, rawTitle] of Object.entries(aggregatedResults)) {
         try {
@@ -64,5 +61,5 @@ export default createSandboxedJobProcessor(
         results: Object.fromEntries(validResults),
       };
     });
-  }),
+  },
 );

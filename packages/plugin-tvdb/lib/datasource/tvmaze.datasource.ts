@@ -1,12 +1,12 @@
 import {
   BaseDataSource,
-  type BasePluginContext,
   type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+} from "@repo/util-plugin-sdk/datasource";
 
 import { LookupByTvdbIdResponse } from "../schemas/lookup-by-tvdb-id-response.schema.ts";
 import { TvdbSettings } from "../tvdb-settings.schema.ts";
 
+import type { BasePluginContext } from "@repo/util-plugin-sdk/schemas";
 import type { TimezoneName } from "countries-and-timezones";
 
 export class TvMazeAPI extends BaseDataSource<TvdbSettings> {

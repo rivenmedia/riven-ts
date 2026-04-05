@@ -5,7 +5,7 @@ import { SeerrResolver } from "./schema/seerr.resolver.ts";
 import { pluginConfig } from "./seerr-plugin.config.ts";
 import { SeerrSettings } from "./seerr-settings.schema.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { RivenPlugin } from "@repo/util-plugin-sdk/schemas";
 
 export default {
   name: pluginConfig.name,

@@ -1,8 +1,7 @@
 import {
   BaseDataSource,
-  type BasePluginContext,
   type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+} from "@repo/util-plugin-sdk/datasource";
 
 import { getListItemsByName200Schema as getListItemsResponseSchema } from "../__generated__/zod/getListItemsByNameSchema.ts";
 import { MdbListName } from "../schemas/mdblist-name.schema.ts";
@@ -11,6 +10,7 @@ import type { GetListItemsByNameQueryResponse } from "../__generated__/types/Get
 import type { MdbListSettings } from "../mdblist-settings.schema.ts";
 import type { MdbListExternalIds } from "../schema/types/mdblist-external-ids.type.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+import type { BasePluginContext } from "@repo/util-plugin-sdk/schemas";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
 export class MdblistAPIError extends Error {}

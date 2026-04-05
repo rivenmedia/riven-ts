@@ -54,8 +54,8 @@ export async function createSandboxedWorker(
       {
         removeOnComplete: { count: 50 },
         removeOnFail: { count: 50 },
-        useWorkerThreads: true,
-        workerThreadsOptions: {
+        // useWorkerThreads: true,
+        workerForkOptions: {
           execArgv: [
             "--env-file=.env.riven",
             "--import=@swc-node/register/esm-register",

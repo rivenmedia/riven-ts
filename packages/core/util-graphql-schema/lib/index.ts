@@ -13,10 +13,9 @@ import {
   Stream,
   SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
+import { DataSourceMap } from "@repo/util-plugin-sdk/utilities/datasource-map";
 
 import { buildSchema as baseBuildSchema } from "type-graphql";
-
-import type { DataSourceMap } from "@repo/util-plugin-sdk";
 
 export type ApolloServerContext = Partial<
   Record<symbol, { dataSources: DataSourceMap }>

@@ -4,8 +4,8 @@ import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
 import { flow } from "../producer.ts";
 import { createRequestIndexDataJob } from "./index-item.schema.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+import type { RivenPlugin } from "@repo/util-plugin-sdk/schemas";
 import type { FlowJob } from "bullmq";
 
 export interface EnqueueIndexItemInput {

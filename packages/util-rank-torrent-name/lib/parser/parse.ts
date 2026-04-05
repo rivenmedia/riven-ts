@@ -1,5 +1,5 @@
 import { Parser, transforms } from "@viren070/parse-torrent-title";
-import { toMerged } from "es-toolkit";
+import { merge } from "es-toolkit";
 import z from "zod";
 
 import { sceneHandlers } from "../parser/handlers/scene.handlers.ts";
@@ -108,7 +108,7 @@ export function parseFilePath(filePath: string) {
     try {
       const parsedPart = parse(part);
 
-      return toMerged(acc ?? {}, parsedPart);
+      return merge(acc ?? {}, parsedPart);
     } catch {
       return acc;
     }

@@ -1,4 +1,6 @@
-import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk/datasource";
+
+import type { BasePluginContext } from "@repo/util-plugin-sdk/schemas";
 
 export class TestAPIError extends Error {}
 

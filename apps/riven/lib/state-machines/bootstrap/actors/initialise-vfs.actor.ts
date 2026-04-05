@@ -12,7 +12,7 @@ import { settings } from "../../../utilities/settings.ts";
 import { fuseOperations } from "../../../vfs/index.ts";
 
 import type { PluginQueueMap } from "../../../types/plugins.ts";
-import type { ParamsFor } from "@repo/util-plugin-sdk";
+import type { ParamsFor } from "@repo/util-plugin-sdk/types/events";
 import type { Queue } from "bullmq";
 
 export interface InitialiseVfsOutput {

@@ -1,9 +1,5 @@
 /* eslint-disable no-empty-pattern */
-import {
-  type BaseDataSourceConfig,
-  DataSourceMap,
-  type RivenPlugin,
-} from "@repo/util-plugin-sdk";
+import { DataSourceMap } from "@repo/util-plugin-sdk/utilities/datasource-map";
 
 import { RedisConnection } from "bullmq";
 import { it as baseIt } from "vitest";
@@ -12,6 +8,8 @@ import { mockLogger } from "./create-mock-logger.ts";
 import { createMockPluginSettings } from "./create-mock-plugin-settings.ts";
 
 import type { ApolloServerContext } from "@repo/core-util-mock-graphql-server";
+import type { BaseDataSourceConfig } from "@repo/util-plugin-sdk/datasource";
+import type { RivenPlugin } from "@repo/util-plugin-sdk/schemas";
 import type { Telemetry } from "bullmq";
 
 export const it = baseIt

@@ -1,5 +1,5 @@
 import { CacheControl } from "@repo/core-util-graphql-helpers/caching/cache-control.directive";
-import { PluginDataSource } from "@repo/util-plugin-sdk";
+import { PluginDataSource } from "@repo/util-plugin-sdk/decorators";
 import { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
 
 import { Args, Query, Resolver } from "type-graphql";

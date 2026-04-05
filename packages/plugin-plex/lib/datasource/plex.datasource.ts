@@ -1,4 +1,4 @@
-import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk/datasource";
 
 import { join } from "node:path";
 
@@ -7,6 +7,7 @@ import { LibrarySectionsResponse } from "../schemas/library-sections-response.sc
 
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource.js";
+import type { BasePluginContext } from "@repo/util-plugin-sdk/schemas";
 
 export class PlexAPIError extends Error {}
 

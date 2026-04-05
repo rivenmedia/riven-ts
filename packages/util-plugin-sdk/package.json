@@ -5,6 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./lib/index.ts",
+    "./datasource": "./lib/datasource/index.ts",
+    "./decorators": "./lib/decorators/index.ts",
     "./types/*": "./lib/types/*.ts",
     "./dto/entities": "./lib/dto/entities/index.ts",
     "./dto/enums/*": "./lib/dto/enums/*.ts",
@@ -13,6 +15,7 @@
     "./errors/*": "./lib/errors/*.ts",
     "./events": "./lib/schemas/events/index.ts",
     "./events/*": "./lib/schemas/plugin-to-program-events/*.ts",
+    "./schemas": "./lib/schemas/index.ts",
     "./schemas/*": "./lib/schemas/*.ts",
     "./helpers/*": "./lib/helpers/*.ts",
     "./testing/*": "./lib/testing/*.ts",

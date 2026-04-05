@@ -1,4 +1,4 @@
-import { Settings } from "@repo/util-plugin-sdk";
+import { Settings } from "@repo/util-plugin-sdk/schemas/settings.type";
 
 import { FieldResolver, Query, Resolver } from "type-graphql";
 

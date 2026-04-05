@@ -1,4 +1,4 @@
-import { getEventTypeFromSchema } from "@repo/util-plugin-sdk";
+import { getEventTypeFromSchema } from "@repo/util-plugin-sdk/schemas";
 import { MediaItemDownloadErrorEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 
 import assert from "node:assert";

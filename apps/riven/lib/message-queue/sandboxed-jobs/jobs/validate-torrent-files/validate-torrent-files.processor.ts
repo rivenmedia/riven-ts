@@ -1,19 +1,10 @@
 import { UnrecoverableError } from "bullmq";
 
 import { createSandboxedJobProcessor } from "../../utilities/create-sandboxed-job.processor.ts";
-import { withORM } from "../../utilities/with-orm.ts";
-import {
-  InvalidTorrentError,
-  validateTorrentFiles,
-} from "./utilities/validate-torrent-files.ts";
-import {
-  ValidateTorrentFilesSandboxedJob,
-  validateTorrentFilesProcessorSchema,
-} from "./validate-torrent-files.schema.ts";
 
 export default createSandboxedJobProcessor(
-  ValidateTorrentFilesSandboxedJob,
-  validateTorrentFilesProcessorSchema.implementAsync(async function ({ job }) {
+  "download-item.validate-torrent-files",
+  async function ({ job }) {
     const [mapItemsToFilesResult] = Object.values(
       await job.getChildrenValues(),
     );
@@ -24,8 +15,13 @@ export default createSandboxedJobProcessor(
       );
     }
 
+    const { withORM } = await import("../../utilities/with-orm.ts");
+
     return withORM(async (database) => {
       const item = await database.mediaItem.findOneOrFail(job.data.id);
+
+      const { InvalidTorrentError, validateTorrentFiles } =
+        await import("./utilities/validate-torrent-files.ts");
 
       try {
         const result = await validateTorrentFiles(
@@ -50,5 +46,5 @@ export default createSandboxedJobProcessor(
         throw error;
       }
     });
-  }),
+  },
 );

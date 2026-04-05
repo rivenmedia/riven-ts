@@ -1,7 +1,3 @@
-import {
-  type RivenEvent,
-  RivenEventHandler,
-} from "@repo/util-plugin-sdk/events";
 import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import * as Sentry from "@sentry/node";
@@ -13,13 +9,17 @@ import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
 import { createQueue } from "./create-queue.ts";
 
-import type { ParamsFor } from "@repo/util-plugin-sdk";
+import type {
+  RivenEvent,
+  RivenEventHandler,
+} from "@repo/util-plugin-sdk/events";
+import type { ParamsFor } from "@repo/util-plugin-sdk/types/events";
 
 Worker.setMaxListeners(200);
 
 export async function createPluginWorker<
   T extends RivenEvent["type"],
-  R extends (typeof RivenEventHandler)[T],
+  R extends RivenEventHandler[T],
 >(
   name: T,
   pluginName: string,

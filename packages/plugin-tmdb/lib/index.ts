@@ -6,7 +6,7 @@ import { TmdbResolver } from "./schema/tmdb.resolver.ts";
 import { pluginConfig } from "./tmdb-plugin.config.ts";
 import { TmdbSettings } from "./tmdb-settings.schema.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { RivenPlugin } from "@repo/util-plugin-sdk/schemas";
 
 export default {
   name: pluginConfig.name,
