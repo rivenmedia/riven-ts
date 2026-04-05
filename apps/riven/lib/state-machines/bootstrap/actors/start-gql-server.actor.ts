@@ -10,6 +10,9 @@ import { startStandaloneServer } from "@apollo/server/standalone";
 import { fromPromise } from "xstate";
 
 import { buildContext } from "../../../graphql/build-context.ts";
+import { MovieResolver } from "../../../graphql/movies/resolvers/movie.resolver.ts";
+import { ShowResolver } from "../../../graphql/shows/resolvers/show.resolver.ts";
+import { initApolloClient } from "../../../utilities/apollo-client.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { redisCache } from "../../../utilities/redis-cache.ts";
 import { settings } from "../../../utilities/settings.ts";
@@ -37,7 +40,11 @@ export const startGqlServer = fromPromise<
 
   const server = new ApolloServer<ApolloServerContext>({
     cache: redisCache,
-    schema: await buildSchema(pluginResolvers),
+    schema: await buildSchema([
+      MovieResolver,
+      ShowResolver,
+      ...pluginResolvers,
+    ]),
     introspection: true,
     plugins: [
       ApolloServerPluginCacheControl({
@@ -53,7 +60,7 @@ export const startGqlServer = fromPromise<
     },
   });
 
-  const { url } = await startStandaloneServer(server, {
+  const { url } = await startStandaloneServer<ApolloServerContext>(server, {
     listen: {
       port: settings.gqlPort,
     },
@@ -63,6 +70,8 @@ export const startGqlServer = fromPromise<
       [...validPlugins.entries()].map(([_, plugin]) => plugin.config),
     ),
   });
+
+  initApolloClient(url);
 
   return {
     server,

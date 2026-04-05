@@ -372,15 +372,15 @@ export const mainRunnerMachine = setup({
       },
       Running: {
         invoke: [
-          {
-            id: "requestContentServicesScheduler",
-            src: "createEventScheduler",
-            input: {
-              event: "riven-internal.request-content-services",
-              interval: 120_000,
-              runImmediately: true,
-            },
-          },
+          // {
+          //   id: "requestContentServicesScheduler",
+          //   src: "createEventScheduler",
+          //   input: {
+          //     event: "riven-internal.request-content-services",
+          //     interval: 120_000,
+          //     runImmediately: true,
+          //   },
+          // },
           {
             id: "jobEnqueuer",
             src: "jobEnqueuer",

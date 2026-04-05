@@ -96,6 +96,9 @@ catalogs:
     graphql:
       specifier: 16.12.0
       version: 16.12.0
+    graphql-scalars:
+      specifier: ^1.25.0
+      version: 1.25.0
     graphql-tag:
       specifier: ^2.12.6
       version: 2.12.6
@@ -210,6 +213,9 @@ importers:
       '@mikro-orm/reflection':
         specifier: 'catalog:'
         version: 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))
+      '@repo/core-util-graphql-helpers':
+        specifier: workspace:^
+        version: link:../../packages/core/util-graphql-helpers
       '@repo/core-util-graphql-schema':
         specifier: workspace:^
         version: link:../../packages/core/util-graphql-schema
@@ -264,12 +270,18 @@ importers:
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
+      dataloader:
+        specifier: ^2.2.3
+        version: 2.2.3
       dedent:
         specifier: 'catalog:'
         version: 1.7.1
       es-toolkit:
         specifier: 'catalog:'
         version: 1.44.0
+      graphql-scalars:
+        specifier: 'catalog:'
+        version: 1.25.0(graphql@16.12.0)
       keyv:
         specifier: ^5.5.5
         version: 5.5.5
@@ -294,6 +306,9 @@ importers:
       triple-beam:
         specifier: ^1.4.1
         version: 1.4.1
+      type-graphql:
+        specifier: 'catalog:'
+        version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
       undici:
         specifier: 'catalog:'
         version: 7.18.2
@@ -504,6 +519,9 @@ importers:
       graphql:
         specifier: 'catalog:'
         version: 16.12.0
+      graphql-scalars:
+        specifier: 'catalog:'
+        version: 1.25.0(graphql@16.12.0)
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
@@ -511,6 +529,12 @@ importers:
       '@apollo/cache-control-types':
         specifier: ^1.0.3
         version: 1.0.3(graphql@16.12.0)
+      '@apollo/server':
+        specifier: 'catalog:'
+        version: 5.2.0(graphql@16.12.0)
+      '@mikro-orm/core':
+        specifier: 'catalog:'
+        version: 7.0.5(dataloader@2.2.3)
       '@repo/core-util-eslint-config':
         specifier: workspace:^
         version: link:../util-eslint-config

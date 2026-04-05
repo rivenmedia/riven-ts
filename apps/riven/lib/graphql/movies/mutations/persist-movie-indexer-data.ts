@@ -1,26 +1,70 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  type MovieContentRating,
+  MovieContentRatingEnum,
+} from "@repo/util-plugin-sdk/dto/enums/content-ratings.enum";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
+import { JSONObjectResolver } from "graphql-scalars";
 import assert from "node:assert";
+import { Field, InputType, Int } from "type-graphql";
 import z from "zod";
 
-import { database } from "../../../../database/database.ts";
-
+import type { EntityManager } from "@mikro-orm/core";
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-export interface PersistMovieIndexerDataInput {
-  item: Extract<
+@InputType()
+export class PersistMovieIndexerDataInput implements Omit<
+  Extract<
     NonNullable<MediaItemIndexRequestedResponse>["item"],
     { type: "movie" }
-  >;
+  >,
+  "type"
+> {
+  @Field(() => Int)
+  id!: number;
+
+  @Field(() => String)
+  title!: string;
+
+  @Field(() => [String])
+  genres!: string[];
+
+  @Field(() => String, { nullable: true })
+  imdbId!: string | null;
+
+  @Field(() => String, { nullable: true })
+  releaseDate!: string | null;
+
+  @Field(() => MovieContentRatingEnum)
+  contentRating!: MovieContentRating;
+
+  @Field(() => Int)
+  runtime!: number;
+
+  @Field(() => Int, { nullable: true })
+  rating?: number;
+
+  @Field(() => String, { nullable: true })
+  posterUrl?: string | null;
+
+  @Field(() => String, { nullable: true })
+  country?: string | null;
+
+  @Field(() => String, { nullable: true })
+  language?: string | null;
+
+  @Field(() => JSONObjectResolver, { nullable: true })
+  aliases?: Record<string, string[]> | null;
 }
 
-export async function persistMovieIndexerData({
-  item,
-}: PersistMovieIndexerDataInput) {
-  const itemRequest = await database.itemRequest.findOneOrFail({
+export async function persistMovieIndexerData(
+  item: PersistMovieIndexerDataInput,
+  em: EntityManager,
+) {
+  const itemRequest = await em.findOneOrFail(ItemRequest, {
     id: item.id,
   });
 
@@ -42,7 +86,7 @@ export async function persistMovieIndexerData({
   }
 
   try {
-    return await database.em.fork().transactional(async (transaction) => {
+    return await em.transactional(async (transaction) => {
       const mediaItem = transaction.create(Movie, {
         title: item.title,
         imdbId: item.imdbId ?? itemRequest.imdbId ?? null,

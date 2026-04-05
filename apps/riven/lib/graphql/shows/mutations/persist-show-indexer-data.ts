@@ -1,28 +1,122 @@
-import { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  Episode,
+  ItemRequest,
+  Season,
+  Show,
+} from "@repo/util-plugin-sdk/dto/entities";
+import {
+  ShowContentRating,
+  ShowContentRatingEnum,
+} from "@repo/util-plugin-sdk/dto/enums/content-ratings.enum";
 import { ItemRequestState } from "@repo/util-plugin-sdk/dto/enums/item-request-state.enum";
+import { ShowStatus } from "@repo/util-plugin-sdk/dto/enums/show-status.enum";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
+import { Field, GraphQLISODateTime, InputType, Int } from "type-graphql";
 import z from "zod";
 
-import { database } from "../../../../database/database.ts";
-
+import type { EntityManager } from "@mikro-orm/core";
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-export interface PersistShowIndexerDataInput {
-  item: Extract<
-    NonNullable<MediaItemIndexRequestedResponse>["item"],
-    { type: "show" }
-  >;
+type ShowData = Extract<
+  NonNullable<MediaItemIndexRequestedResponse>["item"],
+  { type: "show" }
+>;
+
+type SeasonData = ShowData["seasons"][number];
+
+type EpisodeData = SeasonData["episodes"][number];
+
+@InputType()
+class EpisodeInput implements EpisodeData {
+  @Field(() => Int)
+  absoluteNumber!: number;
+
+  @Field(() => GraphQLISODateTime)
+  airedAt!: string;
+
+  @Field(() => ShowContentRatingEnum)
+  contentRating!: ShowContentRating;
+
+  @Field(() => Int)
+  number!: number;
+
+  @Field(() => String)
+  posterPath!: string;
+
+  @Field(() => Int)
+  runtime!: number;
+
+  @Field(() => String)
+  title!: string;
 }
 
-export async function persistShowIndexerData({
-  item,
-}: PersistShowIndexerDataInput) {
-  const itemRequest = await database.itemRequest.findOneOrFail({
+@InputType()
+class SeasonInput implements SeasonData {
+  @Field(() => Int)
+  number!: number;
+
+  @Field(() => String)
+  title!: string;
+
+  @Field(() => [EpisodeInput])
+  episodes!: EpisodeInput[];
+}
+
+@InputType()
+export class PersistShowIndexerDataInput implements ShowData {
+  @Field(() => String)
+  title!: string;
+
+  @Field(() => ShowStatus.enum)
+  status!: ShowStatus;
+
+  @Field(() => String)
+  type!: "show";
+
+  @Field(() => String)
+  aliases!: Record<string, string[]>;
+
+  @Field(() => ShowContentRatingEnum)
+  contentRating!: ShowContentRating;
+
+  @Field(() => String, { nullable: true })
+  country!: string | null;
+
+  @Field(() => [String])
+  genres!: string[];
+
+  @Field(() => String, { nullable: true })
+  id!: number;
+
+  @Field(() => String, { nullable: true })
+  imdbId!: string | null;
+
+  @Field(() => String, { nullable: true })
+  language!: string | null;
+
+  @Field(() => String, { nullable: true })
+  network!: string | null;
+
+  @Field(() => String, { nullable: true })
+  posterUrl!: string | null;
+
+  @Field(() => Number, { nullable: true })
+  rating!: number | null;
+
+  @Field(() => [SeasonInput])
+  seasons!: SeasonInput[];
+}
+
+export async function persistShowIndexerData(
+  item: PersistShowIndexerDataInput,
+  em: EntityManager,
+) {
+  const itemRequest = await em.findOneOrFail(ItemRequest, {
     id: item.id,
   });
 
@@ -40,7 +134,7 @@ export async function persistShowIndexerData({
   );
 
   try {
-    return await database.em.fork().transactional(async (transaction) => {
+    return await em.fork().transactional(async (transaction) => {
       const existingShow = await transaction.getRepository(Show).findOne(
         {
           itemRequest: { id: itemRequest.id },

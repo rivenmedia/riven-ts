@@ -3,9 +3,9 @@ import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas
 
 import { UnrecoverableError } from "bullmq";
 
+import { persistMovieIndexerData } from "../../../graphql/movies/mutations/persist-movie-indexer-data.ts";
+import { persistShowIndexerData } from "../../../graphql/shows/mutations/persist-show-indexer-data.ts";
 import { requestIndexDataProcessorSchema } from "./index-item.schema.ts";
-import { persistMovieIndexerData } from "./utilities/persist-movie-indexer-data.ts";
-import { persistShowIndexerData } from "./utilities/persist-show-indexer-data.ts";
 
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 

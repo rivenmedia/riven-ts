@@ -4,7 +4,7 @@ import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas
 import { DateTime } from "luxon";
 import { expect } from "vitest";
 
-import { it } from "../../../../__tests__/test-context.ts";
+import { it } from "../../../__tests__/test-context.ts";
 import { persistMovieIndexerData } from "./persist-movie-indexer-data.ts";
 
 it("returns the media item if processed successfully", async ({

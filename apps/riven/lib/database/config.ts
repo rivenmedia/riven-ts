@@ -11,6 +11,7 @@ import {
   SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
 
+import { DataloaderType } from "@mikro-orm/core";
 // eslint-disable-next-line no-restricted-imports -- Core database config requires direct driver access
 import { type Options, PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
@@ -42,6 +43,7 @@ export const databaseConfig = {
   entities,
   extensions: [SeedManager],
   clientUrl: settings.databaseUrl,
+  dataloader: DataloaderType.ALL,
   logger: (message) => {
     Sentry.withScope((scope) => {
       scope.setTags({

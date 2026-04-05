@@ -7,23 +7,27 @@ import {
   FileSystemEntry,
   MediaEntry,
   MediaItem,
-  Movie,
   Season,
-  Show,
   Stream,
   SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
 
+import { EntityManager } from "@mikro-orm/core";
+import { JSONObjectResolver } from "graphql-scalars";
 import { buildSchema as baseBuildSchema } from "type-graphql";
 
+import type { BaseContext } from "@apollo/server";
 import type { DataSourceMap } from "@repo/util-plugin-sdk";
 
-export type ApolloServerContext = Partial<
-  Record<symbol, { dataSources: DataSourceMap }>
->;
+export interface ApolloServerContext extends BaseContext {
+  [pluginSymbol: symbol]: {
+    dataSources: DataSourceMap;
+  };
+  em: EntityManager;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-export const buildSchema = async (pluginResolvers: Function[]) =>
+export const buildSchema = async (resolvers: Function[]) =>
   baseBuildSchema({
     orphanedTypes: [
       SubtitleEntry,
@@ -31,15 +35,10 @@ export const buildSchema = async (pluginResolvers: Function[]) =>
       MediaEntry,
       MediaItem,
       Episode,
-      Movie,
       Season,
-      Show,
       Stream,
     ],
-    resolvers: [
-      CoreSettingsResolver,
-      RivenSettingsResolver,
-      ...pluginResolvers,
-    ],
+    resolvers: [CoreSettingsResolver, RivenSettingsResolver, ...resolvers],
+    scalarsMap: [{ type: Object, scalar: JSONObjectResolver }],
     validate: true,
   });
