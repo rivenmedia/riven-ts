@@ -7,8 +7,8 @@ import { UnrecoverableError } from "bullmq";
 import { DateTime } from "luxon";
 
 import { database } from "../../../database/database.ts";
+import { persistDownloadResults } from "../../../graphql/downloading/mutations/persist-download-results.ts";
 import { downloadItemProcessorSchema } from "./download-item.schema.ts";
-import { persistDownloadResults } from "./utilities/persist-download-results.ts";
 
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
   async function ({ job }, sendEvent) {

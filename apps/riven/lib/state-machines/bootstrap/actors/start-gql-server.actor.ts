@@ -10,6 +10,7 @@ import { startStandaloneServer } from "@apollo/server/standalone";
 import { fromPromise } from "xstate";
 
 import { buildContext } from "../../../graphql/build-context.ts";
+import { DownloadingResolver } from "../../../graphql/downloading/resolvers/downloading.resolver.ts";
 import { MovieResolver } from "../../../graphql/movies/resolvers/movie.resolver.ts";
 import { ScrapingResolver } from "../../../graphql/scraping/scraping.resolver.ts";
 import { ShowResolver } from "../../../graphql/shows/resolvers/show.resolver.ts";
@@ -45,6 +46,7 @@ export const startGqlServer = fromPromise<
       MovieResolver,
       ShowResolver,
       ScrapingResolver,
+      DownloadingResolver,
       ...pluginResolvers,
     ]),
     introspection: true,

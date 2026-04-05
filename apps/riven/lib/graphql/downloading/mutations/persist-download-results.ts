@@ -14,25 +14,69 @@ import { ref } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
 import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
+import { Field, ID, InputType, Int } from "type-graphql";
 import z from "zod";
 
-import { database } from "../../../../database/database.ts";
-import { logger } from "../../../../utilities/logger/logger.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
 
-import type { ValidTorrent } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import type {
+  MatchedFile,
+  ValidTorrent,
+} from "../../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import type { EntityManager } from "@mikro-orm/core";
 
-export interface PersistDownloadResultsInput {
-  id: number;
-  torrent: ValidTorrent;
-  processedBy: string;
+@InputType()
+class MatchedFileInput implements Omit<MatchedFile, "isCachedFile"> {
+  @Field(() => String)
+  link!: string;
+
+  @Field(() => Int)
+  matchedMediaItemId!: number;
+
+  @Field(() => String)
+  name!: string;
+
+  @Field(() => Int)
+  size!: number;
+
+  @Field(() => String)
+  path!: string;
+
+  isCachedFile: true = true as const;
 }
 
-export async function persistDownloadResults({
-  id,
-  torrent,
-  processedBy,
-}: PersistDownloadResultsInput) {
-  return await database.em.fork().transactional(async (transaction) => {
+@InputType()
+class TorrentInput implements ValidTorrent {
+  @Field(() => [MatchedFileInput])
+  files!: [MatchedFileInput, ...MatchedFileInput[]];
+
+  @Field(() => String)
+  infoHash!: string;
+
+  @Field(() => String, { nullable: true })
+  provider!: string | null;
+
+  @Field(() => String)
+  torrentId!: string;
+}
+
+@InputType()
+export class PersistDownloadResultsInput {
+  @Field(() => ID)
+  id!: number;
+
+  @Field(() => TorrentInput)
+  torrent!: ValidTorrent;
+
+  @Field(() => String)
+  processedBy!: string;
+}
+
+export async function persistDownloadResults(
+  { id, torrent, processedBy }: PersistDownloadResultsInput,
+  em: EntityManager,
+) {
+  return await em.transactional(async (transaction) => {
     const existingItem = await transaction.getRepository(MediaItem).findOne(
       {
         streams: {
