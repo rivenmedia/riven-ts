@@ -71,10 +71,9 @@ export function buildContext(
     return {
       ...pluginContexts.reduce<Record<symbol, unknown>>(
         (acc, [pluginSymbol, pluginContext]) => {
-          return {
-            ...acc,
-            [pluginSymbol]: pluginContext,
-          };
+          acc[pluginSymbol] = pluginContext;
+
+          return acc;
         },
         {},
       ),

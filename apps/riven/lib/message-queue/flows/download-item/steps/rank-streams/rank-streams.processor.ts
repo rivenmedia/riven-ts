@@ -58,10 +58,11 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
           );
         }
 
-        return [
-          ...acc,
+        acc.push(
           rtnInstance.rankTorrent(rawTitle, hash, itemTitle, aliases ?? {}),
-        ];
+        );
+
+        return acc;
       } catch (error) {
         if (
           error instanceof GarbageTorrentError ||

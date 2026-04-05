@@ -27,7 +27,12 @@
     "generate-schemas": {
       "dependsOn": ["^generate-schemas"],
       "outputs": ["lib/__generated__/**"],
-      "inputs": ["openapi-schema.{json,yaml}", "kubb.config.ts", "*.apib"]
+      "inputs": [
+        "openapi-schema.{json,yaml}",
+        "kubb.config.ts",
+        "*.apib",
+        "$TURBO_ROOT$/packages/core/util-kubb-config/lib/**/*.ts"
+      ]
     },
     "test": {
       "dependsOn": ["generate-schemas", "transit"],

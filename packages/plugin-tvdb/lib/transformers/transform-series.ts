@@ -84,7 +84,9 @@ export const transformSeries = (
           return acc;
         }
 
-        return [...acc, genre.name];
+        acc.push(genre.name);
+
+        return acc;
       }, [])
     : [];
 

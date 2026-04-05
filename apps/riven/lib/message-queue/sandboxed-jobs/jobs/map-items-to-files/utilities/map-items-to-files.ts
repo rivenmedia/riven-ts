@@ -33,13 +33,9 @@ export function mapItemsToFiles(items: DebridFile[]) {
         const parseData = parseFilePath(file.path);
 
         if (parseData.type === "movie") {
-          return {
-            ...acc,
-            movies: {
-              ...acc.movies,
-              [Object.keys(acc.movies).length.toString()]: file,
-            },
-          };
+          acc.movies[Object.keys(acc.movies).length.toString()] = file;
+
+          return acc;
         }
 
         const seasonNumber = parseData.seasons[0] ?? "abs";
@@ -49,13 +45,9 @@ export function mapItemsToFiles(items: DebridFile[]) {
 
         const key = `${seasonNumber.toString()}:${episodeNumber.toString()}`;
 
-        return {
-          ...acc,
-          episodes: {
-            ...acc.episodes,
-            [key]: file,
-          },
-        };
+        acc.episodes[key] = file;
+
+        return acc;
       } catch (error) {
         logger.silly(`Error mapping file ${file.name}: ${String(error)}`);
 

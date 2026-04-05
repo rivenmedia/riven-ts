@@ -39,7 +39,7 @@ export const getShowsDirectoryEntries = async (
         return acc;
       }
 
-      return new Set([...acc, part]);
+      return acc.add(part);
     }, new Set<string>()),
   );
 };

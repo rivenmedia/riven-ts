@@ -30,14 +30,13 @@ export const jobEnqueuer = fromCallback<RivenEvent, JobEnqueuerInput>(
           return acc;
         }
 
-        return [
-          ...acc,
-          {
-            name: type,
-            queueName: queue.name,
-            data: serialiseEventData(type, event),
-          },
-        ];
+        acc.push({
+          name: type,
+          queueName: queue.name,
+          data: serialiseEventData(type, event),
+        });
+
+        return acc;
       }, []);
 
       if (jobs.length === 0) {

@@ -58,10 +58,11 @@ async function getItemLookupKeys(item: ShowLikeMediaItem) {
         ? await item.getEpisodes()
         : await item.episodes.loadItems();
 
-    return episodes.reduce<string[]>(
-      (acc, episode) => [...acc, ...getEpisodeLookupKeys(episode)],
-      [],
-    );
+    return episodes.reduce<string[]>((acc, episode) => {
+      acc.push(...getEpisodeLookupKeys(episode));
+
+      return acc;
+    }, []);
   }
 
   if (item instanceof Episode) {

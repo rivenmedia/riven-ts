@@ -9,12 +9,13 @@ import { extractPluginNameFromJobId } from "./extract-plugin-name-from-job-id.ts
  */
 export const zipFlowChildrenResults = <T>(children: Record<string, T>) =>
   Object.entries(children).reduce<{ result: T; plugin: string }[]>(
-    (acc, [key, value]) => [
-      ...acc,
-      {
+    (acc, [key, value]) => {
+      acc.push({
         result: value,
         plugin: extractPluginNameFromJobId(key),
-      },
-    ],
+      });
+
+      return acc;
+    },
     [],
   );
