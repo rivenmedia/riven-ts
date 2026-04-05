@@ -3,16 +3,37 @@ import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/ev
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
+import { Field, Int } from "type-graphql";
 import z from "zod";
 
-import { database } from "../../../../database/database.ts";
-import { logger } from "../../../../utilities/logger/logger.ts";
-import { RequestType } from "../request-content-services.schema.ts";
+import { RequestType } from "../../../message-queue/flows/request-content-services/request-content-services.schema.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
 
+import type { EntityManager } from "@mikro-orm/core";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
+type ShowData = ContentServiceRequestedResponse["shows"][number];
+
+export class PersistRequestedShowInput implements ShowData {
+  @Field(() => String, { nullable: true })
+  externalRequestId?: string;
+
+  @Field(() => String, { nullable: true })
+  imdbId?: string;
+
+  @Field(() => String, { nullable: true })
+  tvdbId?: string;
+
+  @Field(() => [Int], { nullable: true })
+  seasons?: number[];
+
+  @Field(() => String, { nullable: true })
+  requestedBy?: string;
+}
+
 export async function persistRequestedShow(
-  item: ContentServiceRequestedResponse["shows"][number],
+  item: PersistRequestedShowInput,
+  em: EntityManager,
 ) {
   const externalIds = [
     item.imdbId ? `IMDB: ${item.imdbId}` : null,
@@ -21,7 +42,7 @@ export async function persistRequestedShow(
 
   logger.silly(`Processing requested show: ${externalIds.join(", ")}`);
 
-  return await database.em.fork().transactional(async (transaction) => {
+  return await em.transactional(async (transaction) => {
     const existingItem = await transaction.getRepository(ItemRequest).findOne({
       $or: [
         ...(item.imdbId ? [{ imdbId: item.imdbId }] : []),

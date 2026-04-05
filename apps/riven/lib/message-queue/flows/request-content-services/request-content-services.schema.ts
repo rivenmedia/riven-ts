@@ -1,5 +1,6 @@
 import { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
+import { registerEnumType } from "type-graphql";
 import z from "zod";
 
 import { createFlowJobBuilder } from "../../utilities/create-flow-job-builder.ts";
@@ -8,6 +9,18 @@ import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
 export const RequestType = z.enum(["create", "update"]);
 
 export type RequestType = z.infer<typeof RequestType>;
+
+registerEnumType(RequestType.enum, {
+  name: "RequestType",
+  valuesConfig: {
+    create: {
+      description: "Indicates a new item request.",
+    },
+    update: {
+      description: "Indicates an update to an existing item request.",
+    },
+  },
+});
 
 export const RequestContentServicesFlow = createFlowSchema(
   "request-content-services",

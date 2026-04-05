@@ -4,7 +4,7 @@ import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/
 
 import { UnrecoverableError } from "bullmq";
 
-import { persistScrapeResults } from "../../../graphql/scraping/utilities/persist-scrape-results.ts";
+import { persistScrapeResults } from "../../../graphql/scraping/mutations/persist-scrape-results.ts";
 import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
 
 import type { ParsedData } from "@repo/util-rank-torrent-name";

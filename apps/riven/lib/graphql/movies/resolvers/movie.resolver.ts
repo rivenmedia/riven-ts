@@ -6,6 +6,11 @@ import {
   PersistMovieIndexerDataInput,
   persistMovieIndexerData,
 } from "../mutations/persist-movie-indexer-data.ts";
+import {
+  PersistMovieItemRequestInput,
+  PersistMovieItemRequestOutput,
+  persistMovieItemRequest,
+} from "../mutations/persist-movie-item-request.ts";
 
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 
@@ -17,6 +22,15 @@ export class MovieResolver {
     @Arg("id") id: number,
   ): Promise<Movie> {
     return em.findOneOrFail(Movie, id);
+  }
+
+  @Mutation(() => PersistMovieItemRequestOutput)
+  async persistMovieItemRequest(
+    @Ctx() { em }: ApolloServerContext,
+    @Arg("input", () => PersistMovieItemRequestInput)
+    input: PersistMovieItemRequestInput,
+  ): Promise<PersistMovieItemRequestOutput> {
+    return persistMovieItemRequest(input, em);
   }
 
   @Mutation(() => Movie)

@@ -3,16 +3,44 @@ import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/ev
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
+import { Field, InputType, ObjectType } from "type-graphql";
 import z from "zod";
 
-import { database } from "../../../../database/database.ts";
-import { logger } from "../../../../utilities/logger/logger.ts";
-import { RequestType } from "../request-content-services.schema.ts";
+import { RequestType } from "../../../message-queue/flows/request-content-services/request-content-services.schema.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
 
+import type { EntityManager } from "@mikro-orm/core";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
-export async function persistRequestedMovie(
-  item: ContentServiceRequestedResponse["movies"][number],
+type MovieItemRequest = ContentServiceRequestedResponse["movies"][number];
+
+@InputType()
+export class PersistMovieItemRequestInput implements MovieItemRequest {
+  @Field(() => String, { nullable: true })
+  externalRequestId?: string;
+
+  @Field(() => String, { nullable: true })
+  imdbId?: string;
+
+  @Field(() => String, { nullable: true })
+  tmdbId?: string;
+
+  @Field(() => String, { nullable: true })
+  requestedBy?: string;
+}
+
+@ObjectType()
+export class PersistMovieItemRequestOutput {
+  @Field(() => RequestType.enum)
+  requestType!: RequestType;
+
+  @Field(() => ItemRequest)
+  item!: ItemRequest;
+}
+
+export async function persistMovieItemRequest(
+  item: PersistMovieItemRequestInput,
+  em: EntityManager,
 ) {
   const externalIds = [
     item.imdbId ? `IMDB: ${item.imdbId}` : null,
@@ -21,7 +49,7 @@ export async function persistRequestedMovie(
 
   logger.silly(`Processing requested movie: ${externalIds.join(", ")}`);
 
-  const existingItem = await database.itemRequest.findOne({
+  const existingItem = await em.findOne(ItemRequest, {
     $or: [
       ...(item.imdbId ? [{ imdbId: item.imdbId }] : []),
       ...(item.tmdbId ? [{ tmdbId: item.tmdbId }] : []),
@@ -35,8 +63,6 @@ export async function persistRequestedMovie(
       item: existingItem,
     });
   }
-
-  const em = database.em.fork();
 
   const itemRequest = em.create(ItemRequest, {
     state: "requested",

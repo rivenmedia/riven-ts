@@ -1,10 +1,10 @@
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
+import { persistMovieItemRequest } from "../../../graphql/movies/mutations/persist-movie-item-request.ts";
+import { persistRequestedShow } from "../../../graphql/shows/mutations/persist-requested-show.ts";
 import { requestContentServicesProcessorSchema } from "./request-content-services.schema.ts";
 import { calculateRequestResults } from "./utilities/calculate-request-results.ts";
-import { persistRequestedMovie } from "./utilities/persist-requested-movie.ts";
-import { persistRequestedShow } from "./utilities/persist-requested-show.ts";
 
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
@@ -32,7 +32,7 @@ export const requestContentServicesProcessor =
       );
 
       const results = await Promise.allSettled([
-        ...items.movies.map((item) => persistRequestedMovie(item)),
+        ...items.movies.map((item) => persistMovieItemRequest(item)),
         ...items.shows.map((item) => persistRequestedShow(item)),
       ]);
 

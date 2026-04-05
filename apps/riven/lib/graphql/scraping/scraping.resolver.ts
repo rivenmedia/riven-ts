@@ -5,7 +5,7 @@ import { Arg, Ctx, Mutation, Resolver } from "type-graphql";
 import {
   PersistScrapeResultsInput,
   persistScrapeResults,
-} from "./utilities/persist-scrape-results.ts";
+} from "./mutations/persist-scrape-results.ts";
 
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 

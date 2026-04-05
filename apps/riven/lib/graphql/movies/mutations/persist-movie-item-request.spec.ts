@@ -2,16 +2,15 @@ import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
-import { expect, it } from "vitest";
+import { expect } from "vitest";
 
-import { persistRequestedMovie } from "./persist-requested-movie.ts";
+import { it } from "../../../__tests__/test-context.ts";
+import { persistMovieItemRequest } from "./persist-movie-item-request.ts";
 
-it("returns the item request if processed successfully", async () => {
+it("returns the item request if processed successfully", async ({ em }) => {
   const requestedId = "tt1234567";
 
-  const result = await persistRequestedMovie({
-    imdbId: requestedId,
-  });
+  const result = await persistMovieItemRequest({ imdbId: requestedId }, em);
 
   expect(result.item).toEqual(
     expect.objectContaining({
@@ -21,24 +20,25 @@ it("returns the item request if processed successfully", async () => {
   );
 });
 
-it("sends an error event if the item processing fails", async () => {
+it("sends an error event if the item processing fails", async ({ em }) => {
   const requestedId = "1234";
 
   await expect(
-    persistRequestedMovie({
-      imdbId: requestedId,
-    }),
+    persistMovieItemRequest({ imdbId: requestedId }, em),
   ).rejects.toThrow(ItemRequestCreateError);
 });
 
-it("saves the external request ID if provided", async () => {
+it("saves the external request ID if provided", async ({ em }) => {
   const requestedId = "tt1234568";
   const externalRequestId = "external-req-123";
 
-  const result = await persistRequestedMovie({
-    imdbId: requestedId,
-    externalRequestId,
-  });
+  const result = await persistMovieItemRequest(
+    {
+      imdbId: requestedId,
+      externalRequestId,
+    },
+    em,
+  );
 
   expect(result.item).toEqual(
     expect.objectContaining<Partial<ItemRequest>>({
@@ -47,19 +47,27 @@ it("saves the external request ID if provided", async () => {
   );
 });
 
-it("throws an ItemRequestCreateErrorConflict error if the item request already exists", async () => {
+it("throws an ItemRequestCreateErrorConflict error if the item request already exists", async ({
+  em,
+}) => {
   const requestedId = "tt1234568";
   const externalRequestId = "external-req-123";
 
-  await persistRequestedMovie({
-    imdbId: requestedId,
-    externalRequestId,
-  });
-
-  await expect(
-    persistRequestedMovie({
+  await persistMovieItemRequest(
+    {
       imdbId: requestedId,
       externalRequestId,
-    }),
+    },
+    em,
+  );
+
+  await expect(
+    persistMovieItemRequest(
+      {
+        imdbId: requestedId,
+        externalRequestId,
+      },
+      em,
+    ),
   ).rejects.toThrow(ItemRequestCreateErrorConflict);
 });
