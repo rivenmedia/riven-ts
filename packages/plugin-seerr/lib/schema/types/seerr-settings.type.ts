@@ -1,6 +1,9 @@
 import { Field, ObjectType, registerEnumType } from "type-graphql";
 
-import { getRequestQueryParamsFilterEnum } from "../../__generated__/index.ts";
+import {
+  type GetRequestQueryParamsFilterEnumKey,
+  getRequestQueryParamsFilterEnum,
+} from "../../__generated__/index.ts";
 
 registerEnumType(getRequestQueryParamsFilterEnum, {
   name: "SeerrRequestFilter",
@@ -9,12 +12,12 @@ registerEnumType(getRequestQueryParamsFilterEnum, {
 
 @ObjectType()
 export class SeerrSettings {
-  @Field()
+  @Field(() => String)
   apiKey!: string;
 
-  @Field()
+  @Field(() => String)
   url!: string;
 
   @Field(() => getRequestQueryParamsFilterEnum)
-  filter!: string;
+  filter!: GetRequestQueryParamsFilterEnumKey;
 }

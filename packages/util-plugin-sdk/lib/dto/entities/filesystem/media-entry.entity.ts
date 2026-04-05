@@ -14,7 +14,7 @@ import type { Opt } from "@mikro-orm/core";
 export class MediaEntry extends FileSystemEntry {
   override type: Opt<"media"> = "media" as const;
 
-  @Field()
+  @Field(() => String)
   @Index()
   @Property()
   originalFilename!: string;
@@ -36,7 +36,7 @@ export class MediaEntry extends FileSystemEntry {
   @IsOptional()
   streamUrl?: string;
 
-  @Field()
+  @Field(() => String)
   @Property()
   plugin!: string;
 

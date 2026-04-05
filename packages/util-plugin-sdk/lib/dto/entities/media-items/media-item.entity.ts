@@ -16,7 +16,7 @@ import {
 } from "@mikro-orm/decorators/legacy";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { DateTime } from "luxon";
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ID, Int, ObjectType } from "type-graphql";
 
 import {
   MediaItemContentRating,
@@ -92,7 +92,7 @@ export abstract class MediaItem {
   @Property()
   scrapedAt?: Date | null;
 
-  @Field(() => Number)
+  @Field(() => Int)
   @Property({ default: 0 })
   scrapedTimes!: Opt<number>;
 
@@ -127,7 +127,7 @@ export abstract class MediaItem {
   @Property()
   releaseDate!: Date | null;
 
-  @Field(() => Number, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @Property()
   year?: number | null;
 
@@ -154,7 +154,7 @@ export abstract class MediaItem {
   })
   state!: MediaItemState;
 
-  @Field(() => Number)
+  @Field(() => Int)
   @Property()
   failedAttempts: Opt<number> = 0;
 
@@ -183,9 +183,11 @@ export abstract class MediaItem {
   @Enum(() => MediaItemType.enum)
   type!: MediaItemType;
 
+  @Field(() => ItemRequest)
   @ManyToOne(() => ItemRequest)
   itemRequest!: Ref<ItemRequest>;
 
+  @Field(() => Boolean)
   @Property()
   isRequested!: boolean;
 
@@ -194,6 +196,7 @@ export abstract class MediaItem {
    *
    * Returns true if the release date is in the past, false if it's in the future or not available.
    */
+  @Field(() => Boolean)
   @Property({ persist: false, getter: true })
   get isReleased(): Opt<boolean> {
     return this.releaseDate

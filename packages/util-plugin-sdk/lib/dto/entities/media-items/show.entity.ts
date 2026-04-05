@@ -5,7 +5,7 @@ import {
   OneToMany,
   Property,
 } from "@mikro-orm/decorators/legacy";
-import { Field, ObjectType } from "type-graphql";
+import { Field, GraphQLISODateTime, ObjectType } from "type-graphql";
 
 import {
   ShowContentRating,
@@ -51,6 +51,7 @@ export class Show extends ShowLikeMediaItem {
    *
    * Primarily used internally for scheduling updates.
    */
+  @Field(() => GraphQLISODateTime, { nullable: true })
   @Property()
   nextAirDate!: Date | null;
 

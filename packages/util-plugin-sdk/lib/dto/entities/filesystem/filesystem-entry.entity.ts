@@ -9,7 +9,7 @@ import {
 import { IsPositive } from "class-validator";
 import { DateTime } from "luxon";
 import path from "node:path";
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ID, Int, ObjectType } from "type-graphql";
 import z from "zod";
 
 import { Episode } from "../media-items/episode.entity.ts";
@@ -67,7 +67,7 @@ export abstract class FileSystemEntry {
   @PrimaryKey()
   id!: number;
 
-  @Field()
+  @Field(() => Int)
   @Property({ type: "bigint" })
   @IsPositive()
   fileSize!: number;
