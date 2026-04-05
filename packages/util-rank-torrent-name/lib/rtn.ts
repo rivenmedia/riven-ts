@@ -35,7 +35,7 @@ export class RTN {
 
         return acc;
       },
-      {} as RankingModel,
+      { ...rankingModel },
     );
 
     this.#enabledResolutions = new Set(
