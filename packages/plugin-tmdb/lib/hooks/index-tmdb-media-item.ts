@@ -45,7 +45,9 @@ export const indexTMDBMediaItem: z.infer<
           return acc;
         }
 
-        return [...acc, genre.name];
+        acc.push(genre.name);
+
+        return acc;
       }, []),
       title: result.title ?? "Unknown title",
       aliases: {},

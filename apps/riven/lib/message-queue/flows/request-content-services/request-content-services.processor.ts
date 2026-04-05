@@ -14,10 +14,17 @@ export const requestContentServicesProcessor =
       const data = await job.getChildrenValues();
 
       const items = Object.values(data).reduce<ContentServiceRequestedResponse>(
-        (acc, childData) => ({
-          movies: acc.movies.concat(childData.movies),
-          shows: acc.shows.concat(childData.shows),
-        }),
+        (acc, childData) => {
+          if (childData.movies.length) {
+            acc.movies.push(...childData.movies);
+          }
+
+          if (childData.shows.length) {
+            acc.shows.push(...childData.shows);
+          }
+
+          return acc;
+        },
         {
           movies: [],
           shows: [],

@@ -44,15 +44,14 @@ it("considers torrents for continuing shows as valid if missing a maximum of one
       return acc;
     }
 
-    return {
-      ...acc,
-      [`abs:${episode.absoluteNumber.toString()}`]: {
-        name: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        path: `/Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        size: 5000000000,
-        link: "http://example.com/file.mkv",
-      },
+    acc[`abs:${episode.absoluteNumber.toString()}`] = {
+      name: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+      path: `/Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+      size: 5000000000,
+      link: "http://example.com/file.mkv",
     };
+
+    return acc;
   }, {});
 
   const mappedFiles = {
@@ -75,15 +74,14 @@ it("considers torrents for completed shows as invalid if missing any season", as
       return acc;
     }
 
-    return {
-      ...acc,
-      [`abs:${episode.absoluteNumber.toString()}`]: {
-        name: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        path: `/Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        size: 5000000000,
-        link: "http://example.com/file.mkv",
-      },
+    acc[`abs:${episode.absoluteNumber.toString()}`] = {
+      name: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+      path: `/Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+      size: 5000000000,
+      link: "http://example.com/file.mkv",
     };
+
+    return acc;
   }, {});
 
   const mappedFiles = {
