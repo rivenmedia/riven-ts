@@ -1,10 +1,8 @@
 import { HttpResponse } from "msw";
 import { expect } from "vitest";
 
-import {
-  createGetApiListMyPageQueryResponse,
-  getApiListMyPageHandler,
-} from "../../__generated__/index.ts";
+import { getApiListMyPageHandler } from "../../__generated__/handlers/getApiListMyPageHandler.js";
+import { createGetApiListMyPageQueryResponse } from "../../__generated__/mocks/createGetApiListMyPage.ts";
 import { it } from "../../__tests__/listrr.test-context.ts";
 import { ListrrAPI } from "../listrr.datasource.ts";
 

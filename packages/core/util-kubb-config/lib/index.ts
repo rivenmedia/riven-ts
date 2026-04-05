@@ -26,6 +26,7 @@ export const buildKubbConfig = ({
       path: outputPath,
       clean: true,
       format: false, // Disable formatting to allow Prettier to handle it in the hooks.
+      barrelType: false,
     },
     hooks: {
       done: [`prettier --log-level silent --write ${outputPath}/**/*.ts`],
@@ -40,6 +41,7 @@ export const buildKubbConfig = ({
         output: {
           banner: "// @ts-nocheck",
           path: "zod",
+          barrelType: false,
         },
       }),
       pluginFaker({
@@ -47,15 +49,22 @@ export const buildKubbConfig = ({
         output: {
           banner: "// @ts-nocheck",
           path: "mocks",
+          barrelType: false,
         },
       }),
-      pluginTs(),
+      pluginTs({
+        output: {
+          path: "types",
+          barrelType: false,
+        },
+      }),
       pluginMsw({
         baseURL,
         parser: "faker",
         output: {
           banner: "// @ts-nocheck",
           path: "handlers",
+          barrelType: false,
         },
       }),
     ],

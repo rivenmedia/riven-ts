@@ -1,15 +1,14 @@
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import {
-  type GetApiListMoviesIdSortbySortbydirectionPageQueryResponse as GetMoviesResponse,
-  type ListrrContractsModelsAPIMovieDto as ListrrMovie,
-  createListrrContractsModelsAPIMovieDto,
-  getApiListMoviesIdSortbySortbydirectionPageHandler as getMoviesHandler,
-  createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse as getMoviesResponse,
-} from "../../__generated__/index.ts";
+import { getApiListMoviesIdSortbySortbydirectionPageHandler as getMoviesHandler } from "../../__generated__/handlers/getApiListMoviesIdSortbySortbydirectionPageHandler.ts";
+import { createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse as getMoviesResponse } from "../../__generated__/mocks/createGetApiListMoviesIdSortbySortbydirectionPage.ts";
+import { createListrrContractsModelsAPIMovieDto } from "../../__generated__/mocks/listrr/contracts/models/API/createMovieDto.ts";
 import { it } from "../../__tests__/listrr.test-context.ts";
 import { ListrrAPI } from "../listrr.datasource.ts";
+
+import type { GetApiListMoviesIdSortbySortbydirectionPageQueryResponseSchema as GetMoviesResponse } from "../../__generated__/zod/getApiListMoviesIdSortbySortbydirectionPageSchema.ts";
+import type { ListrrContractsModelsAPIMovieDtoSchema as ListrrMovie } from "../../__generated__/zod/listrr/contracts/models/API/movieDtoSchema.ts";
 
 it("returns an empty array if no content lists are provided", async ({
   dataSourceMap,

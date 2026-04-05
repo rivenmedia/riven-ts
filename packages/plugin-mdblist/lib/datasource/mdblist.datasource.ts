@@ -4,12 +4,10 @@ import {
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
 
-import {
-  type GetListItemsByNameQueryResponse,
-  getListItemsByName200Schema as getListItemsResponseSchema,
-} from "../__generated__/index.ts";
+import { getListItemsByName200Schema as getListItemsResponseSchema } from "../__generated__/zod/getListItemsByNameSchema.ts";
 import { MdbListName } from "../schemas/mdblist-name.schema.ts";
 
+import type { GetListItemsByNameQueryResponse } from "../__generated__/types/GetListItemsByName.ts";
 import type { MdbListSettings } from "../mdblist-settings.schema.ts";
 import type { MdbListExternalIds } from "../schema/types/mdblist-external-ids.type.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";

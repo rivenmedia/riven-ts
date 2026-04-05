@@ -1,15 +1,14 @@
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import {
-  type GetApiListShowsIdSortbySortbydirectionPageQueryResponse as GetShowsResponse,
-  type ListrrContractsModelsAPIShowDto as ListrrShow,
-  createListrrContractsModelsAPIShowDto,
-  getApiListShowsIdSortbySortbydirectionPageHandler as getShowsHandler,
-  createGetApiListShowsIdSortbySortbydirectionPageQueryResponse as getShowsResponse,
-} from "../../__generated__/index.ts";
+import { getApiListShowsIdSortbySortbydirectionPageHandler as getShowsHandler } from "../../__generated__/handlers/getApiListShowsIdSortbySortbydirectionPageHandler.ts";
+import { createGetApiListShowsIdSortbySortbydirectionPageQueryResponse as getShowsResponse } from "../../__generated__/mocks/createGetApiListShowsIdSortbySortbydirectionPage.ts";
+import { createListrrContractsModelsAPIShowDto } from "../../__generated__/mocks/listrr/contracts/models/API/createShowDto.ts";
 import { it } from "../../__tests__/listrr.test-context.ts";
 import { ListrrAPI } from "../listrr.datasource.ts";
+
+import type { GetApiListShowsIdSortbySortbydirectionPageQueryResponseSchema as GetShowsResponse } from "../../__generated__/zod/getApiListShowsIdSortbySortbydirectionPageSchema.ts";
+import type { ListrrContractsModelsAPIShowDtoSchema as ListrrShow } from "../../__generated__/zod/listrr/contracts/models/API/showDtoSchema.ts";
 
 it("returns an empty array if no content lists are provided", async ({
   dataSourceMap,

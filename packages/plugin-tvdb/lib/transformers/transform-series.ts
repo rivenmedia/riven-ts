@@ -4,10 +4,8 @@ import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 import assert from "node:assert";
 import z from "zod";
 
-import type {
-  EpisodeBaseRecordSchema,
-  SeriesExtendedRecordSchema,
-} from "../__generated__/index.ts";
+import type { EpisodeBaseRecordSchema } from "../__generated__/zod/episodeBaseRecordSchema.ts";
+import type { SeriesExtendedRecordSchema } from "../__generated__/zod/seriesExtendedRecordSchema.ts";
 import type {
   MediaItemIndexRequestedEvent,
   MediaItemIndexRequestedPluginResponse,

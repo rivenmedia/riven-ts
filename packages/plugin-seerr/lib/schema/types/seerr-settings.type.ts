@@ -1,6 +1,6 @@
 import { Field, ObjectType, registerEnumType } from "type-graphql";
 
-import { getRequestQueryParamsFilterEnum } from "../../__generated__/index.ts";
+import { getRequestQueryParamsFilterEnum } from "../../__generated__/types/GetRequest.ts";
 
 registerEnumType(getRequestQueryParamsFilterEnum, {
   name: "SeerrRequestFilter",

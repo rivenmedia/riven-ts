@@ -7,9 +7,9 @@ import {
 import type {
   FindById200,
   FindByIdQueryParams,
-  MovieDetails200,
-  MovieExternalIds200,
-} from "../__generated__/index.ts";
+} from "../__generated__/types/FindById.ts";
+import type { MovieDetails200 } from "../__generated__/types/MovieDetails.ts";
+import type { MovieExternalIds200 } from "../__generated__/types/MovieExternalIds.ts";
 import type { TmdbSettings } from "../tmdb-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 

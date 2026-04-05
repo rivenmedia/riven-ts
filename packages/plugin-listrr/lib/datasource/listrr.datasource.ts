@@ -4,13 +4,15 @@ import {
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
 
+import { getApiListMyPageQueryResponseSchema } from "../__generated__/zod/getApiListMyPageSchema.ts";
 import {
   type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIMovieDtoSchema as GetMoviesResponse,
-  type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIShowDtoSchema as GetShowsResponse,
-  getApiListMyPageQueryResponseSchema,
   listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIMovieDtoSchema as getMoviesResponseSchema,
+} from "../__generated__/zod/listrr/contracts/models/API/pagedResponse1listrr/contracts/models/API/movieDtoSchema.ts";
+import {
+  type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIShowDtoSchema as GetShowsResponse,
   listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIShowDtoSchema as getShowsResponseSchema,
-} from "../__generated__/index.ts";
+} from "../__generated__/zod/listrr/contracts/models/API/pagedResponse1listrr/contracts/models/API/showDtoSchema.ts";
 
 import type { ListrrSettings } from "../listrr-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
