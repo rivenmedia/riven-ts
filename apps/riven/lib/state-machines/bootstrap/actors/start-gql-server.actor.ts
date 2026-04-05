@@ -11,6 +11,7 @@ import { fromPromise } from "xstate";
 
 import { buildContext } from "../../../graphql/build-context.ts";
 import { MovieResolver } from "../../../graphql/movies/resolvers/movie.resolver.ts";
+import { ScrapingResolver } from "../../../graphql/scraping/scraping.resolver.ts";
 import { ShowResolver } from "../../../graphql/shows/resolvers/show.resolver.ts";
 import { initApolloClient } from "../../../utilities/apollo-client.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
@@ -43,6 +44,7 @@ export const startGqlServer = fromPromise<
     schema: await buildSchema([
       MovieResolver,
       ShowResolver,
+      ScrapingResolver,
       ...pluginResolvers,
     ]),
     introspection: true,

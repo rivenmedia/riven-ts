@@ -112,6 +112,12 @@ export class PersistShowIndexerDataInput implements ShowData {
   seasons!: SeasonInput[];
 }
 
+const processableStates = ItemRequestState.extract([
+  "requested",
+  "ongoing",
+  "unreleased",
+]);
+
 export async function persistShowIndexerData(
   item: PersistShowIndexerDataInput,
   em: EntityManager,
@@ -119,12 +125,6 @@ export async function persistShowIndexerData(
   const itemRequest = await em.findOneOrFail(ItemRequest, {
     id: item.id,
   });
-
-  const processableStates = ItemRequestState.extract([
-    "requested",
-    "ongoing",
-    "unreleased",
-  ]);
 
   assert(
     processableStates.safeParse(itemRequest.state).success,

@@ -4,40 +4,44 @@ import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
 import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 
-import { ref } from "@mikro-orm/core";
+import { type EntityManager, ref } from "@mikro-orm/core";
 import chalk from "chalk";
 import { ValidationError, validateOrReject } from "class-validator";
+import { JSONObjectResolver } from "graphql-scalars";
 import { DateTime } from "luxon";
 import assert from "node:assert";
+import { Field, ID, InputType } from "type-graphql";
 import z from "zod";
 
-import { database } from "../../../../database/database.ts";
-import { logger } from "../../../../utilities/logger/logger.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
 
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
-export interface PersistScrapeResultsInput {
-  id: number;
-  results: Record<string, ParsedData>;
+@InputType()
+export class PersistScrapeResultsInput {
+  @Field(() => ID)
+  id!: number;
+
+  @Field(() => JSONObjectResolver)
+  results!: Record<string, ParsedData>;
 }
 
-export async function persistScrapeResults({
-  id,
-  results,
-}: PersistScrapeResultsInput) {
-  const { existingItem, newStreamsCount } = await database.em
-    .fork()
-    .transactional(async (transaction) => {
+const processableStates = MediaItemState.extract([
+  "indexed",
+  "ongoing",
+  "scraped",
+  "partially_completed",
+]);
+
+export async function persistScrapeResults(
+  { id, results }: PersistScrapeResultsInput,
+  em: EntityManager,
+) {
+  const { existingItem, newStreamsCount } = await em.transactional(
+    async (transaction) => {
       const existingItem = await transaction
         .getRepository(MediaItem)
         .findOneOrFail({ id }, { populate: ["streams.infoHash"] });
-
-      const processableStates = MediaItemState.extract([
-        "indexed",
-        "ongoing",
-        "scraped",
-        "partially_completed",
-      ]);
 
       assert(
         processableStates.safeParse(existingItem.state).success,
@@ -111,7 +115,8 @@ export async function persistScrapeResults({
         newStreamsCount,
         existingItem,
       };
-    });
+    },
+  );
 
   if (newStreamsCount === 0) {
     throw new MediaItemScrapeErrorNoNewStreams({
