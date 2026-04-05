@@ -6,6 +6,11 @@ import {
   PersistShowIndexerDataInput,
   persistShowIndexerData,
 } from "../mutations/persist-show-indexer-data.ts";
+import {
+  PersistShowItemRequestInput,
+  PersistShowItemRequestOutput,
+  persistShowItemRequest,
+} from "../mutations/persist-show-item-request.ts";
 
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 
@@ -17,6 +22,15 @@ export class ShowResolver {
     @Arg("id") id: number,
   ): Promise<Show> {
     return em.findOneOrFail(Show, id);
+  }
+
+  @Mutation(() => PersistShowItemRequestOutput)
+  async persistShowItemRequest(
+    @Ctx() { em }: ApolloServerContext,
+    @Arg("input", () => PersistShowItemRequestInput)
+    input: PersistShowItemRequestInput,
+  ) {
+    return persistShowItemRequest(input, em);
   }
 
   @Mutation(() => Show)

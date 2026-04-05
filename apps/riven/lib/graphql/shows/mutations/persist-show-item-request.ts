@@ -3,7 +3,7 @@ import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/ev
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
-import { Field, Int } from "type-graphql";
+import { Field, InputType, Int, ObjectType } from "type-graphql";
 import z from "zod";
 
 import { RequestType } from "../../../message-queue/flows/request-content-services/request-content-services.schema.ts";
@@ -14,7 +14,8 @@ import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/sche
 
 type ShowData = ContentServiceRequestedResponse["shows"][number];
 
-export class PersistRequestedShowInput implements ShowData {
+@InputType()
+export class PersistShowItemRequestInput implements ShowData {
   @Field(() => String, { nullable: true })
   externalRequestId?: string;
 
@@ -31,8 +32,17 @@ export class PersistRequestedShowInput implements ShowData {
   requestedBy?: string;
 }
 
-export async function persistRequestedShow(
-  item: PersistRequestedShowInput,
+@ObjectType()
+export class PersistShowItemRequestOutput {
+  @Field(() => RequestType.enum)
+  requestType!: RequestType;
+
+  @Field(() => ItemRequest)
+  item!: ItemRequest;
+}
+
+export async function persistShowItemRequest(
+  item: PersistShowItemRequestInput,
   em: EntityManager,
 ) {
   const externalIds = [
