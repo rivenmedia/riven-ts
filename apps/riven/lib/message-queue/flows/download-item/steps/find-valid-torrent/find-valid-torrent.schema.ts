@@ -26,9 +26,9 @@ export type ValidTorrent = typeof ValidTorrent.infer;
 
 export const FindValidTorrentFlow = createFlowSchema(
   "download-item.find-valid-torrent",
-  {
+  type({
     children: RankedResult.array(),
-    input: type({
+    input: {
       id: "number.integer > 0",
       itemTitle: "string > 0",
       availableDownloaders: type({
@@ -37,9 +37,9 @@ export const FindValidTorrentFlow = createFlowSchema(
         hasProviderListHook: "boolean",
       }).array(),
       failedInfoHashes: "'string.hex == 40'[]",
-    }),
+    },
     output: createPluginResultSchema(ValidTorrent),
-  },
+  }),
 );
 
 export type FindValidTorrentFlow = typeof FindValidTorrentFlow.infer;

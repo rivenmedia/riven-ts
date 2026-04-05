@@ -1,19 +1,21 @@
+import { json } from "@repo/util-plugin-sdk/validation";
+
 import { type } from "arktype";
 
 import { logger } from "./utilities/logger/logger.ts";
 
 import type { LogEntry } from "winston";
 
-const spotlightEnabled = type("'true' | 'false'").pipe((val) => !!val)(
-  process.env["SENTRY_SPOTLIGHT"] ?? "false",
-);
+const spotlightEnabled = json
+  .to("boolean")
+  .assert(process.env["SENTRY_SPOTLIGHT"] ?? "false");
 
 if (spotlightEnabled) {
   const Sentry = await import("@sentry/node");
 
-  const spotlightClearOnStartup = type("'true' | 'false'").pipe((val) => !!val)(
-    process.env["SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"] ?? "0",
-  );
+  const spotlightClearOnStartup = json
+    .to("boolean")
+    .assert(process.env["SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"] ?? "false");
 
   // Clear any existing Sentry events from the local server before starting the application.
   if (spotlightClearOnStartup) {

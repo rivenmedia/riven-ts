@@ -16,5 +16,5 @@ export const createProgramEventSchema = <
 > =>
   type.raw({
     ...payloadSchema,
-    type: `riven.${eventName}` as const,
+    type: `'riven.${eventName}'` as const,
   }) as never;

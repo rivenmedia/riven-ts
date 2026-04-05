@@ -10,9 +10,7 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
  */
 export const MediaItemScrapeErrorIncorrectStateEvent = createProgramEventSchema(
   "media-item.scrape.error.incorrect-state",
-  type({
-    item: MediaItemInstance,
-  }),
+  type({ item: MediaItemInstance }),
 );
 
 export type MediaItemScrapeErrorIncorrectStateEvent =

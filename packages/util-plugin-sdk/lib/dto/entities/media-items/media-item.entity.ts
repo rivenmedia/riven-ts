@@ -140,17 +140,17 @@ export abstract class MediaItem {
   rating?: number | null;
 
   @Field(() => MediaItemContentRatingEnum, { nullable: true })
-  @Enum(() => MediaItemContentRating.enum)
+  @Enum(() => MediaItemContentRating)
   contentRating?: MediaItemContentRating | null;
 
   @Field(() => String, { nullable: true })
   @Property()
   guid?: string | null;
 
-  @Field(() => MediaItemState.enum)
+  @Field(() => MediaItemState)
   @Enum({
-    default: MediaItemState.enum.indexed,
-    items: () => MediaItemState.enum,
+    default: "indexed",
+    items: () => MediaItemState,
   })
   state!: MediaItemState;
 
@@ -180,7 +180,7 @@ export abstract class MediaItem {
   blacklistedStreams: Collection<Stream> = new Collection<Stream>(this);
 
   @Field(() => String)
-  @Enum(() => MediaItemType.enum)
+  @Enum(() => MediaItemType)
   type!: MediaItemType;
 
   @ManyToOne(() => ItemRequest)

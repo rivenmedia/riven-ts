@@ -1,20 +1,20 @@
 import * as Sentry from "@sentry/node";
-import { type Type, type } from "arktype";
+import { Type, type } from "arktype";
 import { Job } from "bullmq";
 
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
 
 type FlowProcessorFunction<
-  Input extends Type | undefined,
-  Output extends Type | undefined,
-  Children extends Type | undefined,
+  Input extends object | undefined,
+  Output extends object | undefined,
+  Children extends object | undefined,
 > = (
   job: Job<
-    Input extends Type ? Input["infer"] : never,
-    Output extends Type ? Output["infer"] : never
+    Input extends object ? Type<Input>["infer"] : never,
+    Output extends object ? Type<Output>["infer"] : never
   > &
-    (Children extends Type
-      ? { getChildrenValues: () => Promise<Children["infer"]> }
+    (Children extends object
+      ? { getChildrenValues: () => Promise<Type<Children>["infer"]> }
       : unknown),
   scope: Sentry.Scope,
   token?: string,
@@ -22,20 +22,16 @@ type FlowProcessorFunction<
 
 export const createFlowSchema = <
   FlowName extends string,
-  Input extends Type | undefined = undefined,
-  Output extends Type | undefined = undefined,
-  Children extends Type | undefined = undefined,
+  Input extends object | undefined = undefined,
+  Output extends object | undefined = undefined,
+  Children extends object | undefined = undefined,
 >(
   flowName: FlowName,
-  {
-    input: inputSchema,
-    output: outputSchema,
-    children: childrenSchema,
-  }: {
-    input?: Input;
+  configuration: Type<{
+    input: Input;
     output?: Output;
     children?: Children;
-  },
+  }>,
 ): Type<
   {
     name: FlowName;
@@ -52,8 +48,14 @@ export const createFlowSchema = <
     }),
     type.declare<MainRunnerMachineIntake>(),
     ":",
-    outputSchema ?? type("never"),
+    configuration.get("output"),
   ) as FlowProcessorFunction<Input, Output, Children>;
+
+  const childrenSchema = configuration.get("children");
+  const inputSchema = configuration.get("input");
+  const outputSchema = configuration.get("output");
+
+  console.log(childrenSchema);
 
   return type.raw({
     name: flowName,

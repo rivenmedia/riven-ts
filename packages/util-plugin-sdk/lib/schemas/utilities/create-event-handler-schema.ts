@@ -16,12 +16,14 @@ type JobContext = typeof jobContext.infer;
 
 export const createEventHandlerSchema = <
   I extends Type<{ type: RivenEvent["type"] }>,
-  O extends Type,
+  O,
 >(
   inputSchema: I,
   outputSchema?: O,
-) =>
-  type.fn.raw(inputSchema.omit("type"), jobContext, ":", outputSchema) as (
-    event: I["infer"],
-    context: JobContext,
-  ) => Promise<O["infer"]>;
+) => {
+  if (outputSchema) {
+    return type.fn(inputSchema.omit("type"), jobContext, outputSchema);
+  }
+
+  return type.fn(inputSchema.omit("type"), jobContext);
+};
