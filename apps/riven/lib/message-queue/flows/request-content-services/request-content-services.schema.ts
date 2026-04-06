@@ -22,14 +22,19 @@ registerEnumType(RequestType.enum, {
   },
 });
 
+const RequestResult = z.object({
+  new: z.number().nonnegative(),
+  updated: z.number().nonnegative(),
+});
+
 export const RequestContentServicesFlow = createFlowSchema(
   "request-content-services",
   {
     children: ContentServiceRequestedResponse,
     output: z.object({
       count: z.number().nonnegative(),
-      newItems: z.number().nonnegative(),
-      updatedItems: z.number().nonnegative(),
+      movies: RequestResult,
+      shows: RequestResult,
     }),
   },
 );

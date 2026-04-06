@@ -31,10 +31,19 @@ export function buildContext(
   const { cache } = server;
 
   return async function context({ req }) {
-    if (req.body.operationName) {
-      logger.http(`Received ${req.body.operationName} query`, {
-        "riven.gql.operation-name": req.body.operationName,
-      });
+    if (
+      req.body.operationName &&
+      req.body.operationName !== "IntrospectionQuery"
+    ) {
+      const isMutation = req.body.query?.startsWith("mutation");
+
+      logger.http(
+        `Received ${req.body.operationName} ${isMutation ? "mutation" : "query"}`,
+        {
+          "riven.gql.operation-name": req.body.operationName,
+          "riven.gql.is-mutation": isMutation,
+        },
+      );
     }
 
     const pluginContexts = await Promise.all(

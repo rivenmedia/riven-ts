@@ -6,12 +6,20 @@ import {
 import { ApolloServer } from "@apollo/server";
 import responseCachePlugin from "@apollo/server-plugin-response-cache";
 import { ApolloServerPluginCacheControl } from "@apollo/server/plugin/cacheControl";
-import { startStandaloneServer } from "@apollo/server/standalone";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import { expressMiddleware } from "@as-integrations/express5";
+import cors from "cors";
+import express from "express";
+import { useServer } from "graphql-ws/use/ws";
+import http from "node:http";
+import { URL } from "node:url";
+import { WebSocketServer } from "ws";
 import { fromPromise } from "xstate";
 
 import { buildContext } from "../../../graphql/build-context.ts";
 import { DownloadingResolver } from "../../../graphql/downloading/resolvers/downloading.resolver.ts";
 import { MovieResolver } from "../../../graphql/movies/resolvers/movie.resolver.ts";
+import { pubSub } from "../../../graphql/pub-sub.ts";
 import { ScrapingResolver } from "../../../graphql/scraping/scraping.resolver.ts";
 import { ShowResolver } from "../../../graphql/shows/resolvers/show.resolver.ts";
 import { initApolloClient } from "../../../utilities/apollo-client.ts";
@@ -29,7 +37,7 @@ export interface StartGQLServerInput {
 
 export interface StartGQLServerOutput {
   server: ApolloServer<ApolloServerContext>;
-  url: string;
+  url: URL;
 }
 
 export const startGqlServer = fromPromise<
@@ -40,17 +48,44 @@ export const startGqlServer = fromPromise<
     (p) => p.config.resolvers,
   );
 
-  const server = new ApolloServer<ApolloServerContext>({
-    cache: redisCache,
-    schema: await buildSchema([
+  const schema = await buildSchema(
+    [
       MovieResolver,
       ShowResolver,
       ScrapingResolver,
       DownloadingResolver,
       ...pluginResolvers,
-    ]),
+    ],
+    pubSub,
+  );
+
+  const gqlPath = "/graphql";
+
+  const app = express();
+  const httpServer = http.createServer(app);
+  const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: gqlPath,
+  });
+
+  const serverCleanup = useServer({ schema }, wsServer);
+
+  const apolloServer = new ApolloServer<ApolloServerContext>({
+    cache: redisCache,
+    schema,
     introspection: true,
+    logger,
     plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      {
+        serverWillStart() {
+          return Promise.resolve({
+            async drainServer() {
+              await serverCleanup.dispose();
+            },
+          });
+        },
+      },
       ApolloServerPluginCacheControl({
         // Cache everything for 60 seconds by default.
         defaultMaxAge: 60,
@@ -64,21 +99,36 @@ export const startGqlServer = fromPromise<
     },
   });
 
-  const { url } = await startStandaloneServer<ApolloServerContext>(server, {
-    listen: {
-      port: settings.gqlPort,
-    },
-    context: buildContext(
-      server,
-      pluginSettings,
-      [...validPlugins.entries()].map(([_, plugin]) => plugin.config),
-    ),
+  await apolloServer.start();
+
+  const contextFn = buildContext(
+    apolloServer,
+    pluginSettings,
+    [...validPlugins.entries()].map(([_, plugin]) => plugin.config),
+  );
+
+  app.use(
+    gqlPath,
+    cors(),
+    express.json(),
+    expressMiddleware(apolloServer, {
+      context: contextFn,
+    }),
+  );
+
+  await new Promise<void>((resolve) => {
+    httpServer.listen(settings.gqlPort, resolve);
   });
+
+  const url = new URL(
+    gqlPath,
+    `http://localhost:${settings.gqlPort.toString()}`,
+  );
 
   initApolloClient(url);
 
   return {
-    server,
+    server: apolloServer,
     url,
   };
 });

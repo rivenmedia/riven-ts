@@ -84,6 +84,9 @@ onlyBuiltDependencies:
   - unrs-resolver
 
 packageExtensions:
+  "@as-integrations/express5":
+    dependencies:
+      "@types/express": ^5.0.0
   "@opentelemetry/sdk-node":
     dependencies:
       "@opentelemetry/context-async-hooks": ^2.0.0

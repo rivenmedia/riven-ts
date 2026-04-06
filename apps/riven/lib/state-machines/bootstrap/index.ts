@@ -20,6 +20,7 @@ import type {
   ValidPluginMap,
 } from "../../types/plugins.ts";
 import type { ApolloServer } from "@apollo/server";
+import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";
@@ -30,7 +31,7 @@ export interface BootstrapMachineContext {
   validatingPlugins: RegisteredPluginMap;
   validPlugins: ValidPluginMap;
   invalidPlugins: InvalidPluginMap;
-  server?: ApolloServer;
+  server?: ApolloServer<ApolloServerContext>;
   vfs?: Fuse;
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
@@ -43,7 +44,7 @@ export interface BootstrapMachineInput {
 }
 
 export interface BootstrapMachineOutput {
-  server: ApolloServer;
+  server: ApolloServer<ApolloServerContext>;
   plugins: ValidPluginMap;
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
@@ -64,7 +65,7 @@ export const bootstrapMachine = setup({
     },
   },
   actions: {
-    assignGqlServer: assign((_, server: ApolloServer) => ({
+    assignGqlServer: assign((_, server: ApolloServer<ApolloServerContext>) => ({
       server,
     })),
     assignVfs: assign((_, vfs: Fuse) => ({
@@ -305,7 +306,7 @@ export const bootstrapMachine = setup({
                             output: { url },
                           },
                         }) => ({
-                          message: `GraphQL server ready at ${url}`,
+                          message: `GraphQL server ready at ${url.toString()}`,
                         }),
                       },
                     ],

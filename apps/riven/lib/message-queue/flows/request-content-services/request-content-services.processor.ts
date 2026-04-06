@@ -1,12 +1,49 @@
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
-import { persistMovieItemRequest } from "../../../graphql/movies/mutations/persist-movie-item-request.ts";
-import { persistShowItemRequest } from "../../../graphql/shows/mutations/persist-show-item-request.ts";
-import { requestContentServicesProcessorSchema } from "./request-content-services.schema.ts";
-import { calculateRequestResults } from "./utilities/calculate-request-results.ts";
+import { type TypedDocumentNode, gql } from "@apollo/client";
 
+import { client } from "../../../utilities/apollo-client.ts";
+import { requestContentServicesProcessorSchema } from "./request-content-services.schema.ts";
+
+import type {
+  PersistMovieItemRequestMutation,
+  PersistMovieItemRequestMutationVariables,
+  PersistShowItemRequestMutation,
+  PersistShowItemRequestMutationVariables,
+} from "./request-content-services.processor.typegen.ts";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
+
+const PERSIST_MOVIE_ITEM_REQUEST_MUTATION: TypedDocumentNode<
+  PersistMovieItemRequestMutation,
+  PersistMovieItemRequestMutationVariables
+> = gql`
+  mutation PersistMovieItemRequest($input: PersistMovieItemRequestInput!) {
+    persistMovieItemRequest(input: $input) {
+      requestType
+      item {
+        id
+        tvdbId
+        tmdbId
+        imdbId
+      }
+    }
+  }
+`;
+
+const PERSIST_SHOW_ITEM_REQUEST_MUTATION: TypedDocumentNode<
+  PersistShowItemRequestMutation,
+  PersistShowItemRequestMutationVariables
+> = gql`
+  mutation PersistShowItemRequest($input: PersistShowItemRequestInput!) {
+    persistShowItemRequest(input: $input) {
+      requestType
+      item {
+        id
+      }
+    }
+  }
+`;
 
 export const requestContentServicesProcessor =
   requestContentServicesProcessorSchema.implementAsync(
@@ -31,17 +68,36 @@ export const requestContentServicesProcessor =
         },
       );
 
-      const results = await Promise.allSettled([
-        ...items.movies.map((item) => persistMovieItemRequest(item)),
-        ...items.shows.map((item) => persistShowItemRequest(item)),
-      ]);
+      const movieResults = await Promise.allSettled(
+        items.movies.map((item) =>
+          client.mutate({
+            mutation: PERSIST_MOVIE_ITEM_REQUEST_MUTATION,
+            variables: {
+              input: item,
+            },
+          }),
+        ),
+      );
 
-      for (const result of results) {
+      let newMovies = 0;
+      let updatedMovies = 0;
+
+      for (const result of movieResults) {
         if (result.status === "fulfilled") {
-          sendEvent({
-            type: `riven.item-request.${result.value.requestType}.success`,
-            item: result.value.item,
-          });
+          if (result.value.data?.persistMovieItemRequest) {
+            if (
+              result.value.data.persistMovieItemRequest.requestType === "create"
+            ) {
+              newMovies = newMovies + 1;
+            } else {
+              updatedMovies = updatedMovies + 1;
+            }
+
+            sendEvent({
+              type: `riven.item-request.${result.value.data.persistMovieItemRequest.requestType}.success`,
+              itemId: result.value.data.persistMovieItemRequest.item.id,
+            });
+          }
         } else {
           if (
             result.reason instanceof ItemRequestCreateError ||
@@ -52,12 +108,56 @@ export const requestContentServicesProcessor =
         }
       }
 
-      const { newItems, updatedItems } = calculateRequestResults(results);
+      let newShows = 0;
+      let updatedShows = 0;
+
+      const showResults = await Promise.allSettled(
+        items.shows.map((item) =>
+          client.mutate({
+            mutation: PERSIST_SHOW_ITEM_REQUEST_MUTATION,
+            variables: {
+              input: item,
+            },
+          }),
+        ),
+      );
+
+      for (const result of showResults) {
+        if (result.status === "fulfilled") {
+          if (result.value.data?.persistShowItemRequest) {
+            if (
+              result.value.data.persistShowItemRequest.requestType === "create"
+            ) {
+              newShows = newShows + 1;
+            } else {
+              updatedShows = updatedShows + 1;
+            }
+
+            sendEvent({
+              type: `riven.item-request.${result.value.data.persistShowItemRequest.requestType}.success`,
+              itemId: result.value.data.persistShowItemRequest.item.id,
+            });
+          }
+        } else {
+          if (
+            result.reason instanceof ItemRequestCreateError ||
+            result.reason instanceof ItemRequestCreateErrorConflict
+          ) {
+            sendEvent(result.reason.payload);
+          }
+        }
+      }
 
       return {
         count: items.movies.length + items.shows.length,
-        newItems,
-        updatedItems,
+        movies: {
+          new: newMovies,
+          updated: updatedMovies,
+        },
+        shows: {
+          new: newShows,
+          updated: updatedShows,
+        },
       };
     },
   );

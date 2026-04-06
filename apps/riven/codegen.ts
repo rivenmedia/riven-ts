@@ -3,7 +3,7 @@ import type { TypeScriptPluginConfig } from "@graphql-codegen/typescript";
 import type { TypeScriptDocumentsPluginConfig } from "@graphql-codegen/typescript-operations";
 
 export default {
-  schema: "http://localhost:3000",
+  schema: "http://localhost:3000/graphql",
   documents: ["lib/**/*.ts", "!lib/**/__generated__/**/*"],
   ignoreNoDocuments: true,
   overwrite: true,
@@ -11,7 +11,9 @@ export default {
   generates: {
     "./lib/types/__generated__/graphql.ts": {
       plugins: ["typescript"],
-      config: {} satisfies TypeScriptPluginConfig,
+      config: {
+        enumsAsTypes: true,
+      } satisfies TypeScriptPluginConfig,
     },
     "./lib/": {
       preset: "near-operation-file",
@@ -27,8 +29,6 @@ export default {
         avoidOptionals: {
           // Use `null` for nullable fields instead of optionals
           field: true,
-          // Allow nullable input fields to remain unspecified
-          inputValue: false,
         },
         // Use `unknown` instead of `any` for unconfigured scalars
         defaultScalarType: "unknown",
@@ -37,6 +37,8 @@ export default {
         // Apollo Client doesn't add the `__typename` field to root types so
         // don't generate a type for the `__typename` for root operation types.
         skipTypeNameForRoot: true,
+        // Use string literal enums (e.g. 'one' | 'two') instead of TypeScript enums
+        allowEnumStringTypes: true,
       } satisfies TypeScriptDocumentsPluginConfig,
     },
   },

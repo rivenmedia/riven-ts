@@ -9,7 +9,7 @@ import type { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import type { FlowJob } from "bullmq";
 
 export interface EnqueueIndexItemInput {
-  item: ItemRequest;
+  item: Pick<ItemRequest, "id" | "externalIdsLabel">;
   subscribers: RivenPlugin[];
 }
 
@@ -20,7 +20,7 @@ export async function enqueueIndexItem(
   const childNodes = subscribers.map((plugin) =>
     createPluginFlowJob(
       MediaItemIndexRequestedEvent,
-      `Index ${item.externalIdsLabel.join(" | ")}`,
+      `Index ${item.externalIdsLabel}`,
       plugin.name.description ?? "unknown",
       { item },
       { ignoreDependencyOnFailure: true },
@@ -28,7 +28,7 @@ export async function enqueueIndexItem(
   );
 
   const rootNode = createRequestIndexDataJob(
-    `Indexing [${item.externalIdsLabel.join(" | ")}]`,
+    `Indexing [${item.externalIdsLabel}]`,
     {
       children: childNodes,
       opts: {

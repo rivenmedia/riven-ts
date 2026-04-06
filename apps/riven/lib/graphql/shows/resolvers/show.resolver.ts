@@ -1,7 +1,16 @@
-import { Show } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequest, Show } from "@repo/util-plugin-sdk/dto/entities";
 
-import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  Ctx,
+  Mutation,
+  Query,
+  Resolver,
+  Root,
+  Subscription,
+} from "type-graphql";
 
+import { pubSub } from "../../pub-sub.ts";
 import {
   PersistShowIndexerDataInput,
   persistShowIndexerData,
@@ -24,13 +33,22 @@ export class ShowResolver {
     return em.findOneOrFail(Show, id);
   }
 
+  @Subscription(() => ItemRequest, { topics: "SHOW_REQUEST_CREATED" })
+  newShowRequested(@Root() payload: ItemRequest): ItemRequest {
+    return payload;
+  }
+
   @Mutation(() => PersistShowItemRequestOutput)
   async persistShowItemRequest(
     @Ctx() { em }: ApolloServerContext,
     @Arg("input", () => PersistShowItemRequestInput)
     input: PersistShowItemRequestInput,
   ) {
-    return persistShowItemRequest(input, em);
+    const itemRequest = await persistShowItemRequest(input, em);
+
+    pubSub.publish("SHOW_REQUEST_CREATED", itemRequest.item);
+
+    return itemRequest;
   }
 
   @Mutation(() => Show)

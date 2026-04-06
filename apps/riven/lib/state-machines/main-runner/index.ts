@@ -38,6 +38,7 @@ import {
   type ScheduleReindexInput,
   scheduleReindex,
 } from "./actors/schedule-reindex.actor.ts";
+import { onNewShowRequestedSubscriber } from "./actors/subscribers/on-new-show-requested.subscriber.ts";
 import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscribers.ts";
 
 import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
@@ -215,6 +216,7 @@ export const mainRunnerMachine = setup({
     requestScrape,
     requestDownload,
     scheduleReindex,
+    onNewShowRequestedSubscriber,
   },
   guards: {
     /**
@@ -372,15 +374,15 @@ export const mainRunnerMachine = setup({
       },
       Running: {
         invoke: [
-          // {
-          //   id: "requestContentServicesScheduler",
-          //   src: "createEventScheduler",
-          //   input: {
-          //     event: "riven-internal.request-content-services",
-          //     interval: 120_000,
-          //     runImmediately: true,
-          //   },
-          // },
+          {
+            id: "requestContentServicesScheduler",
+            src: "createEventScheduler",
+            input: {
+              event: "riven-internal.request-content-services",
+              interval: 120_000,
+              runImmediately: true,
+            },
+          },
           {
             id: "jobEnqueuer",
             src: "jobEnqueuer",
@@ -388,6 +390,26 @@ export const mainRunnerMachine = setup({
               plugins,
               pluginQueues,
             }),
+          },
+          {
+            id: "onNewShowRequestedSubscriber",
+            src: "onNewShowRequestedSubscriber",
+            onSnapshot: {
+              actions: enqueueActions(({ event, enqueue }) => {
+                if (!event.snapshot.context?.data?.newShowRequested) {
+                  return;
+                }
+
+                console.log(event.snapshot.context.data);
+
+                return;
+
+                enqueue.raise({
+                  type: "riven.item-request.create.success",
+                  item: event.snapshot.context.data.newShowRequested,
+                });
+              }),
+            },
           },
         ],
         always: [
@@ -423,17 +445,17 @@ export const mainRunnerMachine = setup({
             description:
               "Indicates that a media item has been successfully created in the library.",
             actions: [
-              {
-                type: "log",
-                params: ({ event: { item } }) => ({
-                  message: `Successfully created item request: [${item.externalIdsLabel.join(" | ")}]`,
-                  level: "silly",
-                }),
-              },
-              {
-                type: "requestIndexData",
-                params: ({ event: { item } }) => ({ item }),
-              },
+              // {
+              //   type: "log",
+              //   params: ({ event: { item } }) => ({
+              //     message: `Successfully created item request: [${item.externalIdsLabel}]`,
+              //     level: "silly",
+              //   }),
+              // },
+              // {
+              //   type: "requestIndexData",
+              //   params: ({ event: { item } }) => ({ item }),
+              // },
             ],
           },
 
@@ -459,7 +481,7 @@ export const mainRunnerMachine = setup({
               {
                 type: "log",
                 params: ({ event: { item } }) => ({
-                  message: `Skipping existing item request: ${JSON.stringify(SerialisedItemRequest.decode(item.id).externalIdsLabel.join(" | "))}`,
+                  message: `Skipping existing item request: ${JSON.stringify(SerialisedItemRequest.decode(item.id).externalIdsLabel)}`,
                   level: "verbose",
                 }),
               },
@@ -470,22 +492,22 @@ export const mainRunnerMachine = setup({
             description:
               "Indicates that an item request has been successfully updated.",
             actions: [
-              {
-                type: "log",
-                params: ({ event: { item } }) => ({
-                  message: `Successfully updated item request: [${item.externalIdsLabel.join(" | ")}]`,
-                  level: "silly",
-                }),
-              },
-              {
-                type: "requestScrape",
-                params: ({ event: { item } }) => ({
-                  items: item.requestedItems.filter(
-                    (item) =>
-                      item.state === "indexed" && item.type === "season",
-                  ),
-                }),
-              },
+              // {
+              //   type: "log",
+              //   params: ({ event: { item } }) => ({
+              //     message: `Successfully updated item request: [${item.externalIdsLabel.join(" | ")}]`,
+              //     level: "silly",
+              //   }),
+              // },
+              // {
+              //   type: "requestScrape",
+              //   params: ({ event: { item } }) => ({
+              //     items: item.requestedItems.filter(
+              //       (item) =>
+              //         item.state === "indexed" && item.type === "season",
+              //     ),
+              //   }),
+              // },
             ],
           },
 

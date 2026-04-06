@@ -72,15 +72,16 @@ export class ItemRequest {
   @Property({ type: "json" })
   seasons!: number[] | null;
 
+  @Field(() => String)
   @Property({ persist: false, hidden: true, getter: true })
-  get externalIdsLabel(): Hidden<Opt<string[]>> {
+  get externalIdsLabel(): Hidden<Opt<string>> {
     const externalIds = [
       this.imdbId ? `IMDB: ${this.imdbId}` : null,
       this.type === "movie" && this.tmdbId ? `TMDB: ${this.tmdbId}` : null,
       this.type === "show" && this.tvdbId ? `TVDB: ${this.tvdbId}` : null,
     ].filter((str) => str != null);
 
-    return externalIds;
+    return externalIds.join(" | ");
   }
 
   @Field(() => [MediaItem])
