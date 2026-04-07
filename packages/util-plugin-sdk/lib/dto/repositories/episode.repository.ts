@@ -1,6 +1,6 @@
 import { EntityRepository, type FilterQuery } from "@mikro-orm/core";
 
-import { Episode } from "../entities/index.ts";
+import type { Episode } from "../entities/index.ts";
 
 export class EpisodeRepository extends EntityRepository<Episode> {
   async findAbsoluteEpisode(

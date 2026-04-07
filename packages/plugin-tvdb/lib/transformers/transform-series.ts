@@ -171,6 +171,7 @@ export const transformSeries = (
     posterUrl: posterPath,
     status: tvdbStatus?.toLowerCase() === "continuing" ? "continuing" : "ended",
     seasons,
+    language: series.originalLanguage,
   } satisfies Extract<
     NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
     { type: "show" }

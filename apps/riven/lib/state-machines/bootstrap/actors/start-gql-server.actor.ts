@@ -12,7 +12,10 @@ import { fromPromise } from "xstate";
 
 import { initApolloClient } from "../../../graphql/apollo-client.ts";
 import { buildContext } from "../../../graphql/build-context.ts";
+import { EpisodeResolver } from "../../../graphql/resolvers/episode.resolver.ts";
 import { MediaItemResolver } from "../../../graphql/resolvers/media-item.resolver.ts";
+import { SeasonResolver } from "../../../graphql/resolvers/season.resolver.ts";
+import { ShowResolver } from "../../../graphql/resolvers/show.resolver.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { redisCache } from "../../../utilities/redis-cache.ts";
 import { settings } from "../../../utilities/settings.ts";
@@ -40,7 +43,13 @@ export const startGqlServer = fromPromise<
 
   const server = new ApolloServer<ApolloServerContext>({
     cache: redisCache,
-    schema: await buildSchema([MediaItemResolver, ...pluginResolvers]),
+    schema: await buildSchema([
+      MediaItemResolver,
+      ShowResolver,
+      EpisodeResolver,
+      SeasonResolver,
+      ...pluginResolvers,
+    ]),
     introspection: true,
     plugins: [
       ApolloServerPluginCacheControl({

@@ -264,6 +264,9 @@ importers:
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
+      dataloader:
+        specifier: ^2.2.3
+        version: 2.2.3
       dedent:
         specifier: 'catalog:'
         version: 1.7.1

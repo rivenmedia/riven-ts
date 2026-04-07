@@ -1,5 +1,5 @@
 import z from "zod";
 
-import { Show } from "../../dto/entities/media-items/show.entity.ts";
+import { Show } from "../../dto/entities/index.ts";
 
 export const ShowInstance = z.instanceof(Show);

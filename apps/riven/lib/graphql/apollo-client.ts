@@ -7,7 +7,7 @@ export let client: ApolloClient;
 export function initApolloClient(uri: URL) {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (client) {
-    throw new Error("Apollo Client has already been initialized.");
+    return client;
   }
 
   return (client = new ApolloClient({
