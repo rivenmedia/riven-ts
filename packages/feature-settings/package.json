@@ -4,9 +4,18 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./dist/index.js",
-    "./resolver": "./dist/schema/settings.resolver.js",
-    "./settings.type": "./dist/schema/types/settings.type.js"
+    ".": [
+      "./lib/index.ts",
+      "./dist/index.js"
+    ],
+    "./resolver": [
+      "./lib/schema/settings.resolver.ts",
+      "./dist/schema/settings.resolver.js"
+    ],
+    "./settings.type": [
+      "./lib/schema/types/settings.type.ts",
+      "./dist/schema/types/settings.type.js"
+    ]
   },
   "scripts": {
     "build": "tsc --build tsconfig.lib.json",

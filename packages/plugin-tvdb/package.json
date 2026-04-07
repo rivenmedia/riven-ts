@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./dist/index.js"
+    ".": [
+      "./lib/index.ts",
+      "./dist/index.js"
+    ]
   },
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",

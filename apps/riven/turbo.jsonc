@@ -6,7 +6,7 @@
       "outputs": ["dist/workers/**"]
     },
     "dev": {
-      "dependsOn": ["^build", "build:workers"],
+      "dependsOn": ["@repo/util-plugin-sdk#build", "build:workers"],
       "passThroughEnv": [
         "SENTRY_SPOTLIGHT",
         "SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"
