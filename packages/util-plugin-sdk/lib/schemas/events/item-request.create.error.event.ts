@@ -8,14 +8,15 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 /**
  * Event emitted when there was an error creating an item request.
  */
-export const ItemRequestCreateErrorEvent = createProgramEventSchema(
+export const ItemRequestCreateErrorEvent = await createProgramEventSchema(
   "item-request.create.error",
-  z.object({
-    item: ItemRequest.transform(({ id, ...data }) => ({ ...data })).pipe(
-      ItemRequest.omit({ id: true }),
-    ),
-    error: z.unknown(),
-  }),
+  () =>
+    z.object({
+      item: ItemRequest.transform(({ id, ...data }) => ({ ...data })).pipe(
+        ItemRequest.omit({ id: true }),
+      ),
+      error: z.unknown(),
+    }),
 );
 
 export type ItemRequestCreateErrorEvent = z.infer<

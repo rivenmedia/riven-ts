@@ -56,10 +56,7 @@ export async function createSandboxedWorker(
         removeOnFail: { count: 50 },
         useWorkerThreads: true,
         workerThreadsOptions: {
-          execArgv: [
-            "--env-file=.env.riven",
-            "--import=@swc-node/register/esm-register",
-          ],
+          execArgv: ["--env-file=.env.riven"],
           name: `${sandboxedJobName}-worker`,
           workerData: {
             gqlUrl: `http://localhost:${settings.gqlPort.toString()}`,

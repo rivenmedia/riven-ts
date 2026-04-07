@@ -5,18 +5,21 @@ import {
   ShowContentRating,
 } from "../../dto/enums/content-ratings.enum.ts";
 import { ShowStatus } from "../../dto/enums/show-status.enum.ts";
-import { ItemRequestInstance } from "../media/item-request.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
 /**
  * Event emitted when an index has been requested for a newly created media item.
  */
-export const MediaItemIndexRequestedEvent = createProgramEventSchema(
+export const MediaItemIndexRequestedEvent = await createProgramEventSchema(
   "media-item.index.requested",
-  z.object({
-    item: ItemRequestInstance,
-  }),
+  async () => {
+    const { ItemRequestInstance } = await import("../media/item-request.ts");
+
+    return z.object({
+      item: ItemRequestInstance,
+    });
+  },
 );
 
 export type MediaItemIndexRequestedEvent = z.infer<

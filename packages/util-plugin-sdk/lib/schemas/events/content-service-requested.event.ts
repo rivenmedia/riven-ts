@@ -8,7 +8,7 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 /**
  * Event emitted when content services have been requested.
  */
-export const ContentServiceRequestedEvent = createProgramEventSchema(
+export const ContentServiceRequestedEvent = await createProgramEventSchema(
   "content-service.requested",
 );
 

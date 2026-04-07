@@ -1,17 +1,21 @@
 import z from "zod";
 
-import { MediaItemInstance } from "../media/media-item-instance.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
 /**
  * Event emitted when a media item has been successfully scraped.
  */
-export const MediaItemScrapeSuccessEvent = createProgramEventSchema(
+export const MediaItemScrapeSuccessEvent = await createProgramEventSchema(
   "media-item.scrape.success",
-  z.object({
-    item: MediaItemInstance,
-  }),
+  async () => {
+    const { MediaItemInstance } =
+      await import("../media/media-item-instance.ts");
+
+    return z.object({
+      item: MediaItemInstance,
+    });
+  },
 );
 
 export type MediaItemScrapeSuccessEvent = z.infer<

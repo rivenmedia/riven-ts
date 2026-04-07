@@ -8,11 +8,12 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 /**
  * Event emitted when a media item's state has been updated.
  */
-export const MediaItemIndexSuccessEvent = createProgramEventSchema(
+export const MediaItemIndexSuccessEvent = await createProgramEventSchema(
   "media-item.index.success",
-  z.object({
-    item: z.xor([MovieInstance, ShowInstance]),
-  }),
+  () =>
+    z.object({
+      item: z.xor([MovieInstance, ShowInstance]),
+    }),
 );
 
 export type MediaItemIndexSuccessEvent = z.infer<

@@ -8,12 +8,12 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 /**
  * Event emitted when a media item being indexed has already been indexed.
  */
-export const MediaItemIndexErrorIncorrectStateEvent = createProgramEventSchema(
-  "media-item.index.error.incorrect-state",
-  z.object({
-    item: ItemRequest,
-  }),
-);
+export const MediaItemIndexErrorIncorrectStateEvent =
+  await createProgramEventSchema("media-item.index.error.incorrect-state", () =>
+    z.object({
+      item: ItemRequest,
+    }),
+  );
 
 export type MediaItemIndexErrorIncorrectStateEvent = z.infer<
   typeof MediaItemIndexErrorIncorrectStateEvent

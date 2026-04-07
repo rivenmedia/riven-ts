@@ -6,7 +6,8 @@ import type z from "zod";
 /**
  * Event emitted when the program is shutting down.
  */
-export const CoreShutdownEvent = createProgramEventSchema("core.shutdown");
+export const CoreShutdownEvent =
+  await createProgramEventSchema("core.shutdown");
 
 export type CoreShutdownEvent = z.infer<typeof CoreShutdownEvent>;
 

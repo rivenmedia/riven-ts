@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc --project tsconfig.app.json",
+    "build": "rm -rf dist && node esbuild.config.ts",
     "check-types": "tsc --noEmit --project tsconfig.app.json && tsc --noEmit --project tsconfig.spec.json",
     "dev": "node --watch --env-file-if-exists=.env.riven --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
     "generate-config-docs": "zod2md",
@@ -85,6 +85,7 @@
     "@types/node": "catalog:",
     "@types/triple-beam": "^1.3.5",
     "@typescript-eslint/parser": "catalog:",
+    "esbuild": "^0.28.0",
     "eslint": "catalog:",
     "logform": "^2.7.0",
     "msw": "catalog:",

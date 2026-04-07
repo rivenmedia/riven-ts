@@ -1,17 +1,20 @@
 import z from "zod";
 
-import { ItemRequestInstance } from "../media/item-request.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
 /**
  * Event emitted when an item request has been successfully updated.
  */
-export const ItemRequestUpdateSuccessEvent = createProgramEventSchema(
+export const ItemRequestUpdateSuccessEvent = await createProgramEventSchema(
   "item-request.update.success",
-  z.object({
-    item: ItemRequestInstance,
-  }),
+  async () => {
+    const { ItemRequestInstance } = await import("../media/item-request.ts");
+
+    return z.object({
+      item: ItemRequestInstance,
+    });
+  },
 );
 
 export type ItemRequestUpdateSuccessEvent = z.infer<

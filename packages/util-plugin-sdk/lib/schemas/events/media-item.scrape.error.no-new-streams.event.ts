@@ -1,6 +1,5 @@
 import z from "zod";
 
-import { MediaItemInstance } from "../media/media-item-instance.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventError } from "../utilities/create-program-event-error.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
@@ -8,12 +7,18 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 /**
  * Event emitted when there were no new streams found while scraping a media item.
  */
-export const MediaItemScrapeErrorNoNewStreamsEvent = createProgramEventSchema(
-  "media-item.scrape.error.no-new-streams",
-  z.object({
-    item: MediaItemInstance,
-  }),
-);
+export const MediaItemScrapeErrorNoNewStreamsEvent =
+  await createProgramEventSchema(
+    "media-item.scrape.error.no-new-streams",
+    async () => {
+      const { MediaItemInstance } =
+        await import("../media/media-item-instance.ts");
+
+      return z.object({
+        item: MediaItemInstance,
+      });
+    },
+  );
 
 export type MediaItemScrapeErrorNoNewStreamsEvent = z.infer<
   typeof MediaItemScrapeErrorNoNewStreamsEvent

@@ -7,12 +7,13 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 /**
  * Event emitted when a download has been requested for an scraped media item.
  */
-export const MediaItemDownloadRequestedEvent = createProgramEventSchema(
+export const MediaItemDownloadRequestedEvent = await createProgramEventSchema(
   "media-item.download.requested",
-  z.object({
-    infoHash: z.hash("sha1"),
-    provider: z.string().nullable(),
-  }),
+  () =>
+    z.object({
+      infoHash: z.hash("sha1"),
+      provider: z.string().nullable(),
+    }),
 );
 
 export type MediaItemDownloadRequestedEvent = z.infer<

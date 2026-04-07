@@ -6,7 +6,7 @@ import type z from "zod";
 /**
  * Event emitted when the program has started.
  */
-export const CoreStartedEvent = createProgramEventSchema(`core.started`);
+export const CoreStartedEvent = await createProgramEventSchema(`core.started`);
 
 export type CoreStartedEvent = z.infer<typeof CoreStartedEvent>;
 
