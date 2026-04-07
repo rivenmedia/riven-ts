@@ -13,7 +13,6 @@ import {
 } from "xstate";
 
 import { logger } from "../../utilities/logger/logger.ts";
-import { SerialisedItemRequest } from "../../utilities/serialisers/serialised-item-request.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import {
   type BootstrapFlowWorkersOutput,
