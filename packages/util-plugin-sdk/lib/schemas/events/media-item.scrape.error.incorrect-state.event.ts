@@ -1,5 +1,6 @@
 import z from "zod";
 
+import { MediaItemInstance } from "../media/media-item-instance.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventError } from "../utilities/create-program-event-error.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
@@ -7,18 +8,12 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 /**
  * Event emitted when a media item being scraped is in an incorrect state.
  */
-export const MediaItemScrapeErrorIncorrectStateEvent =
-  await createProgramEventSchema(
-    "media-item.scrape.error.incorrect-state",
-    async () => {
-      const { MediaItemInstance } =
-        await import("../media/media-item-instance.ts");
-
-      return z.object({
-        item: MediaItemInstance,
-      });
-    },
-  );
+export const MediaItemScrapeErrorIncorrectStateEvent = createProgramEventSchema(
+  "media-item.scrape.error.incorrect-state",
+  z.object({
+    item: MediaItemInstance,
+  }),
+);
 
 export type MediaItemScrapeErrorIncorrectStateEvent = z.infer<
   typeof MediaItemScrapeErrorIncorrectStateEvent

@@ -6,19 +6,17 @@ import {
   Property,
 } from "@mikro-orm/decorators/legacy";
 import { Min } from "class-validator";
-import { Field, ObjectType } from "type-graphql";
+import { Field, Int, ObjectType } from "type-graphql";
 
-import { MediaEntry } from "../filesystem/media-entry.entity.ts";
-import { Episode } from "./episode.entity.ts";
-import { ShowLikeMediaItem } from "./show-like.entity.ts";
-import { Show } from "./show.entity.ts";
+import { MediaEntry } from "../filesystem/index.ts";
+import { Episode, Show, ShowLikeMediaItem } from "./index.ts";
 
 @ObjectType({ implements: ShowLikeMediaItem })
 @Entity()
 export class Season extends ShowLikeMediaItem {
   declare filesystemEntries: never;
 
-  @Field()
+  @Field(() => Int)
   @Property()
   @Min(0)
   number!: number;

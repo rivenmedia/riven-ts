@@ -24,8 +24,9 @@ export const bootstrapSandboxedWorkers =
       "scrape-item.parse-scrape-results": await createSandboxedWorker(
         ParseScrapeResultsSandboxedJob,
         new URL(
-          import.meta
-            .resolve("../../../message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.processor.js"),
+          import.meta.resolve(
+            `${process.cwd()}/dist/workers/parse-scrape-results/parse-scrape-results.processor.js`,
+          ),
         ),
         {},
         { concurrency: 2 },
@@ -33,8 +34,9 @@ export const bootstrapSandboxedWorkers =
       "download-item.map-items-to-files": await createSandboxedWorker(
         MapItemsToFilesSandboxedJob,
         new URL(
-          import.meta
-            .resolve("../../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.processor.js"),
+          import.meta.resolve(
+            `${process.cwd()}/dist/workers/map-items-to-files/map-items-to-files.processor.js`,
+          ),
         ),
         {},
         { concurrency: 2 },
@@ -42,8 +44,9 @@ export const bootstrapSandboxedWorkers =
       "download-item.validate-torrent-files": await createSandboxedWorker(
         ValidateTorrentFilesSandboxedJob,
         new URL(
-          import.meta
-            .resolve("../../../message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.js"),
+          import.meta.resolve(
+            `${process.cwd()}/dist/workers/validate-torrent-files/validate-torrent-files.processor.js`,
+          ),
         ),
         {},
         { concurrency: 2 },

@@ -5,6 +5,10 @@
   "globalPassThroughEnv": ["DEBUG", "CI"],
   "globalDependencies": [".node-version"],
   "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
     "transit": {
       "dependsOn": ["^transit"]
     },

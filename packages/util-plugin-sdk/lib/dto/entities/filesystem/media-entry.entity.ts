@@ -3,7 +3,7 @@ import { IsOptional, IsUrl } from "class-validator";
 import path from "node:path";
 import { Field, ObjectType } from "type-graphql";
 
-import { FileSystemEntry } from "./filesystem-entry.entity.ts";
+import { FileSystemEntry } from "./index.ts";
 
 import type { Opt } from "@mikro-orm/core";
 
@@ -14,7 +14,7 @@ import type { Opt } from "@mikro-orm/core";
 export class MediaEntry extends FileSystemEntry {
   override type: Opt<"media"> = "media" as const;
 
-  @Field()
+  @Field(() => String)
   @Index()
   @Property()
   originalFilename!: string;
@@ -24,19 +24,19 @@ export class MediaEntry extends FileSystemEntry {
   // TODO: separate entity?
   // ------------------------
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
   @IsUrl()
   @IsOptional()
   downloadUrl?: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
   @IsUrl()
   @IsOptional()
   streamUrl?: string;
 
-  @Field()
+  @Field(() => String)
   @Property()
   plugin!: string;
 
@@ -44,7 +44,7 @@ export class MediaEntry extends FileSystemEntry {
   @Property()
   provider!: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
   providerDownloadId?: string;
 

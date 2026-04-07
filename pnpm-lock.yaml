@@ -388,6 +388,9 @@ importers:
       esbuild:
         specifier: ^0.28.0
         version: 0.28.0
+      esbuild-node-externals:
+        specifier: ^1.21.0
+        version: 1.21.0(esbuild@0.28.0)
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
@@ -4960,6 +4963,12 @@ packages:
 
   es6-weak-map@2.0.3:
     resolution: {integrity: sha512-p5um32HOTO1kP+w7PRnB+5lQ43Z6muuMuIMffvDN8ZB4GcnjLBV6zGStpbASIMk4DCAvEaamhe2zhyCb/QXXsA==}
+
+  esbuild-node-externals@1.21.0:
+    resolution: {integrity: sha512-bty/rLyPoB/YwshACVOPyVoWkhqKFFyP3RK4wUo2K0UkD/6ESnvCR3aLIvtNzvXgqURgq8ryGXVDMg0q2fwZpQ==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      esbuild: 0.12 - 0.28
 
   esbuild@0.25.12:
     resolution: {integrity: sha512-bbPBYYrtZbkt6Os6FiTLCTFxvq4tt3JKall1vRwshA3fdVztsLAatFaZobhkBC8/BrPetoa0oksYoKXoG4ryJg==}
@@ -11514,6 +11523,11 @@ snapshots:
       es5-ext: 0.10.64
       es6-iterator: 2.0.3
       es6-symbol: 3.1.4
+
+  esbuild-node-externals@1.21.0(esbuild@0.28.0):
+    dependencies:
+      esbuild: 0.28.0
+      find-up: 5.0.0
 
   esbuild@0.25.12:
     optionalDependencies:

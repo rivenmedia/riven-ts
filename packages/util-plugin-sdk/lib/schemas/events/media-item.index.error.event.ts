@@ -1,5 +1,6 @@
 import z from "zod";
 
+import { ItemRequestInstance } from "../media/item-request.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventError } from "../utilities/create-program-event-error.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
@@ -7,16 +8,12 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
 /**
  * Event emitted when there was an error persisting media item index data.
  */
-export const MediaItemIndexErrorEvent = await createProgramEventSchema(
+export const MediaItemIndexErrorEvent = createProgramEventSchema(
   "media-item.index.error",
-  async () => {
-    const { ItemRequestInstance } = await import("../media/item-request.ts");
-
-    return z.object({
-      item: ItemRequestInstance,
-      error: z.unknown(),
-    });
-  },
+  z.object({
+    item: ItemRequestInstance,
+    error: z.unknown(),
+  }),
 );
 
 export type MediaItemIndexErrorEvent = z.infer<typeof MediaItemIndexErrorEvent>;

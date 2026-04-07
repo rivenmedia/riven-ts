@@ -142,6 +142,7 @@ export const it = baseIt
       [plugin.name]: {
         dataSources: dataSourceMap,
       },
+      em: {} as never,
     }),
   );
 

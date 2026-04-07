@@ -21,8 +21,7 @@ import { Field, ID, InterfaceType } from "type-graphql";
 import { MediaItemContentRating } from "../../enums/content-ratings.enum.ts";
 import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { MediaItemType } from "../../enums/media-item-type.enum.ts";
-import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
-import { SubtitleEntry } from "../filesystem/subtitle-entry.entity.ts";
+import { FileSystemEntry, SubtitleEntry } from "../filesystem/index.ts";
 import { ItemRequest, MediaEntry } from "../index.ts";
 import { Stream } from "../streams/stream.entity.ts";
 

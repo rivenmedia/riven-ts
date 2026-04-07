@@ -12,9 +12,8 @@ import {
   ShowContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
 import { ShowStatus } from "../../enums/show-status.enum.ts";
-import { MediaEntry } from "../filesystem/media-entry.entity.ts";
-import { Season } from "./season.entity.ts";
-import { ShowLikeMediaItem } from "./show-like.entity.ts";
+import { MediaEntry } from "../filesystem/index.ts";
+import { Season, ShowLikeMediaItem } from "./index.ts";
 
 import type { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import type { ItemRequest } from "../requests/item-request.entity.ts";

@@ -5,9 +5,9 @@ import { constantCase } from "es-toolkit";
 import { fromPromise } from "xstate";
 import z from "zod";
 
-import packageJson from "../../../../package.json" with { type: "json" };
 import { logger } from "../../../utilities/logger/logger.ts";
 
+import type { PackageJson } from "type-fest";
 import type { $ZodErrorTree } from "zod/v4/core";
 
 export interface ParsedPlugins {
@@ -19,7 +19,12 @@ export interface ParsedPlugins {
 }
 
 export const collectPluginsForRegistration = fromPromise(async () => {
-  const pluginNames = Object.keys(packageJson.dependencies).filter(
+  const { default: packageJson } = (await import(
+    `${process.cwd()}/package.json`,
+    { with: { type: "json" } }
+  )) as { default: PackageJson };
+
+  const pluginNames = Object.keys(packageJson.dependencies ?? {}).filter(
     (pluginName) => pluginName.startsWith("@repo/plugin-"),
   );
 

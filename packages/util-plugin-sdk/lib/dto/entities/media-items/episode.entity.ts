@@ -8,8 +8,7 @@ import {
   ShowContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
 import { EpisodeRepository } from "../../repositories/episode.repository.ts";
-import { Season } from "./season.entity.ts";
-import { ShowLikeMediaItem } from "./show-like.entity.ts";
+import { Season, ShowLikeMediaItem } from "./index.ts";
 
 import type { MediaEntry } from "../filesystem/media-entry.entity.ts";
 
@@ -18,12 +17,12 @@ import type { MediaEntry } from "../filesystem/media-entry.entity.ts";
 export class Episode extends ShowLikeMediaItem {
   [EntityRepositoryType]?: EpisodeRepository;
 
-  @Field()
+  @Field(() => Int)
   @Property()
   @Min(0)
   number!: number;
 
-  @Field(() => Number)
+  @Field(() => Int)
   @Property()
   absoluteNumber!: number;
 

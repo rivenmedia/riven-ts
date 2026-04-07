@@ -1,7 +1,7 @@
 import { Entity, Index, Property } from "@mikro-orm/decorators/legacy";
-import { Field, ObjectType } from "type-graphql";
+import { Field, Int, ObjectType } from "type-graphql";
 
-import { FileSystemEntry } from "./filesystem-entry.entity.ts";
+import { FileSystemEntry } from "./index.ts";
 
 import type { Opt } from "@mikro-orm/core";
 
@@ -12,28 +12,28 @@ import type { Opt } from "@mikro-orm/core";
 export class SubtitleEntry extends FileSystemEntry {
   override type: Opt<"subtitle"> = "subtitle" as const;
 
-  @Field()
+  @Field(() => String)
   @Index()
   @Property()
   language!: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
   parentOriginalFilename?: string;
 
-  @Field()
+  @Field(() => String)
   @Property()
   content!: string;
 
-  @Field()
+  @Field(() => String)
   @Property()
   fileHash!: string;
 
-  @Field()
+  @Field(() => Int)
   @Property()
   videoFileSize!: number;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Property()
   openSubtitlesId?: string; // TODO: Separate entity for external providers?
 

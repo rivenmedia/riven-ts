@@ -444,7 +444,17 @@ export const mainRunnerMachine = setup({
               {
                 type: "log",
                 params: ({ event: { item, error } }) => ({
-                  message: `Error creating item request: ${[item.imdbId && `IMDB: ${item.imdbId}`, item.tmdbId && `TMDB: ${item.tmdbId}`, item.tvdbId && `TVDB: ${item.tvdbId}`].filter(Boolean).join(" | ")}`,
+                  get message() {
+                    const labels = [
+                      item.imdbId && `IMDB: ${item.imdbId}`,
+                      item.tmdbId && `TMDB: ${item.tmdbId}`,
+                      item.tvdbId && `TVDB: ${item.tvdbId}`,
+                    ]
+                      .filter(Boolean)
+                      .join(" | ");
+
+                    return `Error creating item request for [${labels}]`;
+                  },
                   level: "error",
                   error,
                 }),
@@ -459,7 +469,7 @@ export const mainRunnerMachine = setup({
               {
                 type: "log",
                 params: ({ event: { item } }) => ({
-                  message: `Skipping existing item request: ${JSON.stringify(SerialisedItemRequest.decode(item.id).externalIdsLabel.join(" | "))}`,
+                  message: `Skipping existing item request: ${[item.imdbId && `IMDB: ${item.imdbId}`, item.tmdbId && `TMDB: ${item.tmdbId}`, item.tvdbId && `TVDB: ${item.tvdbId}`].filter(Boolean).join(" | ")}`,
                   level: "verbose",
                 }),
               },

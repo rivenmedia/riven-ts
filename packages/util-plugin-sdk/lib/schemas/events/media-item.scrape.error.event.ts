@@ -8,13 +8,12 @@ import { MediaItemScrapeRequestedEvent } from "./media-item.scrape-requested.eve
 /**
  * Event emitted when there was an error persisting media item scrape data.
  */
-export const MediaItemScrapeErrorEvent = await createProgramEventSchema(
+export const MediaItemScrapeErrorEvent = createProgramEventSchema(
   "media-item.scrape.error",
-  () =>
-    z.object({
-      item: MediaItemScrapeRequestedEvent.shape.item,
-      error: z.unknown(),
-    }),
+  z.object({
+    item: MediaItemScrapeRequestedEvent.shape.item,
+    error: z.unknown(),
+  }),
 );
 
 export type MediaItemScrapeErrorEvent = z.infer<
