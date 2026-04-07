@@ -1,7 +1,7 @@
 import { EntityRepositoryType, type Opt, type Ref } from "@mikro-orm/core";
 import { Entity, ManyToOne, Property } from "@mikro-orm/decorators/legacy";
 import { Min } from "class-validator";
-import { Field, ObjectType } from "type-graphql";
+import { Field, Int, ObjectType } from "type-graphql";
 
 import {
   ShowContentRating,
@@ -31,6 +31,7 @@ export class Episode extends ShowLikeMediaItem {
   @ManyToOne()
   season!: Opt<Ref<Season>>;
 
+  @Field(() => Int, { nullable: true })
   @Property()
   runtime!: number | null;
 

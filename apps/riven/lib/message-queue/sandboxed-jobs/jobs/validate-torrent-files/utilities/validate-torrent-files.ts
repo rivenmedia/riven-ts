@@ -1,106 +1,137 @@
 import {
   Episode,
-  type MediaItem,
-  Movie,
   Season,
-  Show,
   ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { parseFilePath } from "@repo/util-rank-torrent-name";
 
+import { type TypedDocumentNode, gql } from "@apollo/client";
 import chalk from "chalk";
-import { reduceAsync } from "es-toolkit";
 import assert, { AssertionError } from "node:assert";
 
-import { database } from "../../../../../database/database.ts";
+import { client } from "../../../../../graphql/apollo-client.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../utilities/settings.ts";
 import { MatchedFile } from "../../../../flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 
 import type { MapItemsToFilesSandboxedJob } from "../../map-items-to-files/map-items-to-files.schema.ts";
+import type {
+  GetAbsoluteEpisodeQuery,
+  GetAbsoluteEpisodeQueryVariables,
+  GetValidateTorrentFilesItemQuery,
+  GetValidateTorrentFilesItemQueryVariables,
+} from "./validate-torrent-files.typegen.ts";
 
 export class InvalidTorrentError extends Error {}
-
-async function getExpectedFileCount(item: MediaItem) {
-  if (item instanceof Show) {
-    const processableStates = MediaItemState.exclude(["unreleased", "ongoing"]);
-
-    const seasons = await item.getStandardSeasons(processableStates.options);
-    const expectedSeasons =
-      item.status === "continuing" ? seasons.length - 1 : seasons.length;
-
-    return reduceAsync(
-      seasons.slice(0, Math.max(1, expectedSeasons)),
-      async (acc, season) => acc + (await season.episodes.loadCount()),
-      0,
-    );
-  }
-
-  if (item instanceof Season) {
-    return item.episodes.loadCount();
-  }
-
-  return 1;
-}
-
-function getEpisodeLookupKeys(episode: Episode) {
-  return [
-    `abs:${episode.absoluteNumber.toString()}`,
-    `${episode.season.unwrap().number.toString()}:${episode.number.toString()}`,
-  ];
-}
-
-async function getItemLookupKeys(item: ShowLikeMediaItem) {
-  if (item instanceof Show || item instanceof Season) {
-    const episodes =
-      item instanceof Show
-        ? await item.getEpisodes()
-        : await item.episodes.loadItems();
-
-    return episodes.reduce<string[]>((acc, episode) => {
-      acc.push(...getEpisodeLookupKeys(episode));
-
-      return acc;
-    }, []);
-  }
-
-  if (item instanceof Episode) {
-    return getEpisodeLookupKeys(item);
-  }
-
-  throw new Error("Movies do not have lookup keys");
-}
 
 function calculateAverageBitrate(fileSize: number, runtime: number) {
   return fileSize / runtime / (1024 * 1024);
 }
 
+const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
+  GetValidateTorrentFilesItemQuery,
+  GetValidateTorrentFilesItemQueryVariables
+> = gql`
+  query GetValidateTorrentFilesItem($id: Int!) {
+    mediaItem(id: $id) {
+      ... on MediaItem {
+        fullTitle
+        type
+        expectedFileCount
+      }
+
+      ... on ShowLikeMediaItem {
+        tvdbId
+      }
+
+      ... on Movie {
+        runtime
+      }
+
+      ... on Episode {
+        tvdbId
+        runtime
+        lookupKeys
+      }
+
+      ... on Season {
+        tvdbId
+        episodes {
+          lookupKeys
+        }
+      }
+
+      ... on Show {
+        status
+        tvdbId
+        seasons {
+          totalEpisodes
+          episodes {
+            lookupKeys
+          }
+        }
+      }
+    }
+  }
+`;
+
+const GET_ABSOLUTE_EPISODE_QUERY: TypedDocumentNode<
+  GetAbsoluteEpisodeQuery,
+  GetAbsoluteEpisodeQueryVariables
+> = gql`
+  query GetAbsoluteEpisode(
+    $tvdbId: String!
+    $episodeNumber: Int!
+    $seasonNumber: Int
+  ) {
+    absoluteEpisode(
+      tvdbId: $tvdbId
+      episodeNumber: $episodeNumber
+      seasonNumber: $seasonNumber
+    ) {
+      id
+      number
+      season {
+        number
+      }
+    }
+  }
+`;
+
 export const validateTorrentFiles = async (
-  item: MediaItem,
+  itemId: number,
   infoHash: string,
   { episodes, movies }: MapItemsToFilesSandboxedJob["output"],
   isCacheCheck: boolean,
 ): Promise<MatchedFile[]> => {
   try {
+    const itemResult = await client.query({
+      query: GET_VALIDATE_TORRENT_FILES_ITEM_QUERY,
+      variables: { id: itemId },
+    });
+
+    if (!itemResult.data?.mediaItem) {
+      throw new Error(`Media item with ID ${itemId.toString()} not found`);
+    }
+
+    const item = itemResult.data.mediaItem;
+
     logger.verbose(
       `Validating torrent files for item ${chalk.bold(item.fullTitle)}: ${chalk.bold(infoHash)}`,
     );
 
-    const expectedFileCount = await getExpectedFileCount(item);
-
     const groupMap = new Map(
-      Object.entries(item instanceof ShowLikeMediaItem ? episodes : movies),
+      Object.entries(item.__typename === "Movie" ? movies : episodes),
     );
 
     assert(
-      groupMap.size >= expectedFileCount,
-      `${item.type.substring(0, 1).toUpperCase() + item.type.substring(1)} torrent must have at least ${expectedFileCount.toString()} ${item instanceof ShowLikeMediaItem ? "episodes" : "movies"}, but has ${groupMap.size.toString()}`,
+      groupMap.size >= item.expectedFileCount,
+      `${item.type.substring(0, 1).toUpperCase() + item.type.substring(1)} torrent must have at least ${item.expectedFileCount.toString()} ${item instanceof ShowLikeMediaItem ? "episodes" : "movies"}, but has ${groupMap.size.toString()}`,
     );
 
     const validFiles: MatchedFile[] = [];
 
-    if (item instanceof Movie) {
+    if (item.__typename === "Movie") {
       const files = groupMap
         .values()
         .toArray()
@@ -126,7 +157,7 @@ export const validateTorrentFiles = async (
           validFiles.push(
             MatchedFile.encode({
               ...file,
-              matchedMediaItemId: item.id,
+              matchedMediaItemId: itemId,
               isCachedFile: isCacheCheck,
             }),
           );
@@ -142,8 +173,19 @@ export const validateTorrentFiles = async (
       }
     }
 
-    if (item instanceof ShowLikeMediaItem) {
-      const lookupKeys = await getItemLookupKeys(item);
+    if (
+      item.__typename === "Episode" ||
+      item.__typename === "Season" ||
+      item.__typename === "Show"
+    ) {
+      const lookupKeys =
+        item.__typename === "Episode"
+          ? item.lookupKeys
+          : item.__typename === "Season"
+            ? item.episodes.flatMap((episode) => episode.lookupKeys)
+            : item.seasons.flatMap((season) =>
+                season.episodes.flatMap((episode) => episode.lookupKeys),
+              );
 
       for (const lookupKey of lookupKeys) {
         const file = groupMap.get(lookupKey);
@@ -169,23 +211,25 @@ export const validateTorrentFiles = async (
             "File must have at least one episode number",
           );
 
-          const episode = await database.episode.findAbsoluteEpisode(
-            item.tvdbId,
-            parseData.episodes[0],
-            parseData.seasons[0],
-          );
+          const absoluteEpisodeResult = await client.query({
+            query: GET_ABSOLUTE_EPISODE_QUERY,
+            variables: {
+              tvdbId: item.tvdbId,
+              episodeNumber: parseData.episodes[0],
+              seasonNumber: parseData.seasons[0] ?? null,
+            },
+          });
 
           assert(
-            episode,
+            absoluteEpisodeResult.data?.absoluteEpisode,
             `File must correspond to a valid episode in ${item.fullTitle}`,
           );
 
-          const episodeSeasonNumber =
-            await episode.season.loadProperty("number");
+          const { absoluteEpisode } = absoluteEpisodeResult.data;
 
           if (item instanceof Season) {
             assert(
-              episodeSeasonNumber === item.number,
+              absoluteEpisode.season.number === item.number,
               `File must correspond to a valid episode in ${item.fullTitle}`,
             );
           }
@@ -194,8 +238,8 @@ export const validateTorrentFiles = async (
             const itemSeasonNumber = await item.season.loadProperty("number");
 
             assert(
-              episode.number === item.number &&
-                episodeSeasonNumber === itemSeasonNumber,
+              absoluteEpisode.number === item.number &&
+                absoluteEpisode.season.number === itemSeasonNumber,
               `Incorrect episode for ${item.fullTitle}`,
             );
 
@@ -212,7 +256,7 @@ export const validateTorrentFiles = async (
           validFiles.push(
             MatchedFile.encode({
               ...file,
-              matchedMediaItemId: episode.id,
+              matchedMediaItemId: Number(absoluteEpisode.id),
               isCachedFile: isCacheCheck,
             }),
           );
@@ -227,8 +271,8 @@ export const validateTorrentFiles = async (
     }
 
     assert(
-      expectedFileCount <= validFiles.length,
-      `Expected at least ${expectedFileCount.toString()} valid files, but found ${validFiles.length.toString()}`,
+      item.expectedFileCount <= validFiles.length,
+      `Expected at least ${item.expectedFileCount.toString()} valid files, but found ${validFiles.length.toString()}`,
     );
 
     return validFiles;

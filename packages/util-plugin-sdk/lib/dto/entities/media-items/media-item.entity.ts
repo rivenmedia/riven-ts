@@ -56,13 +56,11 @@ export abstract class MediaItem {
   @IsOptional()
   imdbId?: string | null;
 
-  @Field(() => String, { nullable: true })
   @Property()
   @IsNumberString()
   @IsOptional()
   tvdbId?: string | null;
 
-  @Field(() => String, { nullable: true })
   @Property()
   @IsNumberString()
   @IsOptional()

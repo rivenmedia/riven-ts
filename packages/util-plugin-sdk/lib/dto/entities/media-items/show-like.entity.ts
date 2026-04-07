@@ -16,7 +16,9 @@ import type { Promisable } from "type-fest";
   discriminatorColumn: "type",
 })
 export abstract class ShowLikeMediaItem extends MediaItem {
+  @Field(() => String)
   declare tvdbId: string;
+
   declare tmdbId?: never;
 
   @Field(() => ShowContentRatingEnum)

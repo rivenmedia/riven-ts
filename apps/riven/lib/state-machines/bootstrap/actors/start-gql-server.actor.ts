@@ -14,6 +14,7 @@ import { initApolloClient } from "../../../graphql/apollo-client.ts";
 import { buildContext } from "../../../graphql/build-context.ts";
 import { EpisodeResolver } from "../../../graphql/resolvers/episode.resolver.ts";
 import { MediaItemResolver } from "../../../graphql/resolvers/media-item.resolver.ts";
+import { MovieResolver } from "../../../graphql/resolvers/movie.resolver.ts";
 import { SeasonResolver } from "../../../graphql/resolvers/season.resolver.ts";
 import { ShowResolver } from "../../../graphql/resolvers/show.resolver.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
@@ -45,6 +46,7 @@ export const startGqlServer = fromPromise<
     cache: redisCache,
     schema: await buildSchema([
       MediaItemResolver,
+      MovieResolver,
       ShowResolver,
       EpisodeResolver,
       SeasonResolver,
@@ -57,6 +59,17 @@ export const startGqlServer = fromPromise<
         defaultMaxAge: 60,
       }),
       responseCachePlugin(),
+      {
+        requestDidStart({ request: { operationName } }) {
+          if (operationName) {
+            logger.silly(`Received ${operationName}`, {
+              "riven.gql.operation-name": operationName,
+            });
+          }
+
+          return Promise.resolve();
+        },
+      },
     ],
     formatError(formattedError, error) {
       logger.error("GraphQL Error:", { err: error });

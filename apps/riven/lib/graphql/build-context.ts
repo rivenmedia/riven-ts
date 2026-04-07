@@ -30,13 +30,7 @@ export function buildContext(
 > {
   const { cache } = server;
 
-  return async function context({ req }) {
-    if (req.body.operationName) {
-      logger.http(`Received ${req.body.operationName} query`, {
-        "riven.gql.operation-name": req.body.operationName,
-      });
-    }
-
+  return async function context() {
     const pluginContexts = await Promise.all(
       validPlugins.map<Promise<[symbol, unknown]>>(async (plugin) => {
         const dataSources = new DataSourceMap();

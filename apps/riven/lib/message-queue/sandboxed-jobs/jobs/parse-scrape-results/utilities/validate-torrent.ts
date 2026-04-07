@@ -3,8 +3,8 @@ import { type TypedDocumentNode, gql } from "@apollo/client";
 import { client } from "../../../../../graphql/apollo-client.ts";
 
 import type {
-  GetItemQuery,
-  GetItemQueryVariables,
+  GetValidateTorrentItemQuery,
+  GetValidateTorrentItemQueryVariables,
 } from "./validate-torrent.typegen.ts";
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
@@ -31,56 +31,58 @@ export class SkippedTorrentError extends Error {
  */
 const getYearCandidates = (year: number) => [year - 1, year, year + 1];
 
-const GET_ITEM_QUERY: TypedDocumentNode<GetItemQuery, GetItemQueryVariables> =
-  gql`
-    query GetItem($id: Int!) {
-      mediaItem(id: $id) {
-        ... on Show {
-          status
-          seasons {
-            number
-            episodes {
-              ...EpisodeFields
-            }
-          }
-        }
-
-        ... on Season {
+const GET_VALIDATE_TORRENT_ITEM_QUERY: TypedDocumentNode<
+  GetValidateTorrentItemQuery,
+  GetValidateTorrentItemQueryVariables
+> = gql`
+  query GetValidateTorrentItem($id: Int!) {
+    mediaItem(id: $id) {
+      ... on Show {
+        status
+        seasons {
           number
-          show {
-            year
-          }
           episodes {
             ...EpisodeFields
           }
         }
+      }
 
-        ... on Episode {
-          ...EpisodeFields
-          season {
-            number
-            show {
-              year
-            }
-          }
-        }
-
-        ... on MediaItem {
-          id
-          fullTitle
-          country
-          isAnime
-          type
+      ... on Season {
+        number
+        show {
           year
         }
+        episodes {
+          ...EpisodeFields
+        }
+      }
+
+      ... on Episode {
+        ...EpisodeFields
+        season {
+          number
+          show {
+            year
+          }
+        }
+      }
+
+      ... on MediaItem {
+        id
+        fullTitle
+        country
+        isAnime
+        type
+        year
       }
     }
+  }
 
-    fragment EpisodeFields on Episode {
-      absoluteNumber
-      number
-    }
-  `;
+  fragment EpisodeFields on Episode {
+    absoluteNumber
+    number
+  }
+`;
 
 export const validateTorrent = async (
   itemId: number,
@@ -88,7 +90,7 @@ export const validateTorrent = async (
   infoHash: string,
 ) => {
   const itemResult = await client.query({
-    query: GET_ITEM_QUERY,
+    query: GET_VALIDATE_TORRENT_ITEM_QUERY,
     variables: { id: itemId },
   });
 

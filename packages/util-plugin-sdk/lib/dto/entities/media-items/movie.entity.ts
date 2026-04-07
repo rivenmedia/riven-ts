@@ -1,5 +1,5 @@
 import { Entity, Property } from "@mikro-orm/decorators/legacy";
-import { Field, ObjectType } from "type-graphql";
+import { Field, Int, ObjectType } from "type-graphql";
 
 import {
   MovieContentRating,
@@ -14,6 +14,7 @@ import type { Opt, Ref } from "@mikro-orm/core";
 @ObjectType({ implements: MediaItem })
 @Entity()
 export class Movie extends MediaItem {
+  @Field(() => Int, { nullable: true })
   @Property()
   runtime!: number | null;
 
@@ -22,7 +23,9 @@ export class Movie extends MediaItem {
 
   override type: Opt<"movie"> = "movie" as const;
 
+  @Field(() => String)
   declare tmdbId: string;
+
   declare tvdbId: never;
   declare itemRequest: Ref<ItemRequest>;
 

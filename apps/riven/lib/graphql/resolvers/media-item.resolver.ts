@@ -1,7 +1,7 @@
 import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
-import { Arg, Ctx, Int, Query, Resolver } from "type-graphql";
+import { Arg, Ctx, FieldResolver, Int, Query, Resolver } from "type-graphql";
 
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 
@@ -25,5 +25,12 @@ export class MediaItemResolver {
     @Arg("id", () => Int) id: number,
   ): Promise<MediaItem | null> {
     return em.findOneOrFail(MediaItem, id);
+  }
+
+  @FieldResolver(() => Int)
+  expectedFileCount() {
+    throw new Error(
+      "expectedFileCount field resolver must be implemented in child resolvers",
+    );
   }
 }
