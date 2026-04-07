@@ -8,7 +8,7 @@ import { database } from "../../database/database.ts";
  * A schema that converts to/from a serialised filesystem entry.
  */
 export const SerialisedFileSystemEntry = z.codec(
-  z.int().min(1),
+  z.uuidv4(),
   FileSystemEntryInstance,
   {
     decode: (id) => database.filesystemEntry.findOneOrFail(id),

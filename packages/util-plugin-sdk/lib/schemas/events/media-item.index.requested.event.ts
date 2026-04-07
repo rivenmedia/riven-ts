@@ -24,7 +24,7 @@ export type MediaItemIndexRequestedEvent = z.infer<
 >;
 
 const IndexedItem = z.object({
-  id: z.number(),
+  id: z.uuidv4(),
   title: z.string(),
   genres: z.array(z.string()),
   country: z.string().nullish(),

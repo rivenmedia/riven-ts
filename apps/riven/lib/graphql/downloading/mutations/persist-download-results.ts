@@ -30,8 +30,8 @@ class MatchedFileInput implements Omit<MatchedFile, "isCachedFile"> {
   @Field(() => String)
   link!: string;
 
-  @Field(() => Int)
-  matchedMediaItemId!: number;
+  @Field(() => String)
+  matchedMediaItemId!: string;
 
   @Field(() => String)
   name!: string;
@@ -63,7 +63,7 @@ class TorrentInput implements ValidTorrent {
 @InputType()
 export class PersistDownloadResultsInput {
   @Field(() => ID)
-  id!: number;
+  id!: string;
 
   @Field(() => TorrentInput)
   torrent!: ValidTorrent;
@@ -92,7 +92,7 @@ export async function persistDownloadResults(
     assert(
       existingItem,
       new UnrecoverableError(
-        `No media item found with ID ${id.toString()} and stream info hash ${torrent.infoHash}`,
+        `No media item found with ID ${id} and stream info hash ${torrent.infoHash}`,
       ),
     );
 
@@ -117,7 +117,7 @@ export async function persistDownloadResults(
       assert(
         matchedStream,
         new UnrecoverableError(
-          `Media item with ID ${id.toString()} does not have a stream matching the torrent's info hash ${torrent.infoHash}`,
+          `Media item with ID ${id} does not have a stream matching the torrent's info hash ${torrent.infoHash}`,
         ),
       );
 
@@ -155,7 +155,7 @@ export async function persistDownloadResults(
           ),
         );
 
-        const episodeMap = new Map<number, Episode>(
+        const episodeMap = new Map<string, Episode>(
           episodes.map((episode) => [episode.id, episode]),
         );
 

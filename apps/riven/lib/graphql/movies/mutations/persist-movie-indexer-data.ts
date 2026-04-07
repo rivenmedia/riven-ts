@@ -9,7 +9,7 @@ import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas
 import { ValidationError, validateOrReject } from "class-validator";
 import { JSONObjectResolver } from "graphql-scalars";
 import assert from "node:assert";
-import { Field, InputType, Int } from "type-graphql";
+import { Field, ID, InputType, Int } from "type-graphql";
 import z from "zod";
 
 import type { EntityManager } from "@mikro-orm/core";
@@ -23,8 +23,8 @@ export class PersistMovieIndexerDataInput implements Omit<
   >,
   "type"
 > {
-  @Field(() => Int)
-  id!: number;
+  @Field(() => ID)
+  id!: string;
 
   @Field(() => String)
   title!: string;

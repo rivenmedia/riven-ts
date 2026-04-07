@@ -9,7 +9,7 @@ import { createFlowSchema } from "../../../../utilities/create-flow-schema.ts";
 import type { RankedResult } from "@repo/util-rank-torrent-name";
 
 export const MatchedFile = DebridFile.extend({
-  matchedMediaItemId: z.int().positive(),
+  matchedMediaItemId: z.uuidv4(),
   isCachedFile: z.boolean(),
 }).refine(
   (file) => file.isCachedFile || file.link !== undefined,

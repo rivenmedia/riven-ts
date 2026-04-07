@@ -88,15 +88,10 @@ export const requestContentServicesProcessor =
             if (
               result.value.data.persistMovieItemRequest.requestType === "create"
             ) {
-              newMovies = newMovies + 1;
+              newMovies += 1;
             } else {
-              updatedMovies = updatedMovies + 1;
+              updatedMovies += 1;
             }
-
-            sendEvent({
-              type: `riven.item-request.${result.value.data.persistMovieItemRequest.requestType}.success`,
-              itemId: result.value.data.persistMovieItemRequest.item.id,
-            });
           }
         } else {
           if (
@@ -128,15 +123,10 @@ export const requestContentServicesProcessor =
             if (
               result.value.data.persistShowItemRequest.requestType === "create"
             ) {
-              newShows = newShows + 1;
+              newShows += 1;
             } else {
-              updatedShows = updatedShows + 1;
+              updatedShows += 1;
             }
-
-            sendEvent({
-              type: `riven.item-request.${result.value.data.persistShowItemRequest.requestType}.success`,
-              itemId: result.value.data.persistShowItemRequest.item.id,
-            });
           }
         } else {
           if (

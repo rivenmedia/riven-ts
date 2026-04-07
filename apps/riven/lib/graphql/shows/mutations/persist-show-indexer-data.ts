@@ -69,6 +69,9 @@ class SeasonInput implements SeasonData {
 
 @InputType()
 export class PersistShowIndexerDataInput implements ShowData {
+  @Field(() => String, { nullable: true })
+  id!: string;
+
   @Field(() => String)
   title!: string;
 
@@ -89,9 +92,6 @@ export class PersistShowIndexerDataInput implements ShowData {
 
   @Field(() => [String])
   genres!: string[];
-
-  @Field(() => String, { nullable: true })
-  id!: number;
 
   @Field(() => String, { nullable: true })
   imdbId!: string | null;

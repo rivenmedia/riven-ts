@@ -7,7 +7,7 @@ import { database } from "../../database/database.ts";
 /**
  * A schema that converts to/from a serialised media item.
  */
-export const SerialisedMediaItem = z.codec(z.int().min(1), MediaItemInstance, {
+export const SerialisedMediaItem = z.codec(z.uuidv4(), MediaItemInstance, {
   decode: (data) => database.mediaItem.findOneOrFail(data),
   encode: (data) => data.id,
 });

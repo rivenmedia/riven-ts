@@ -20,7 +20,7 @@ import type { ParsedData } from "@repo/util-rank-torrent-name";
 @InputType()
 export class PersistScrapeResultsInput {
   @Field(() => ID)
-  id!: number;
+  id!: string;
 
   @Field(() => JSONObjectResolver)
   results!: Record<string, ParsedData>;
