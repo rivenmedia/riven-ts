@@ -1,8 +1,3 @@
-import {
-  Episode,
-  Season,
-  ShowLikeMediaItem,
-} from "@repo/util-plugin-sdk/dto/entities";
 import { parseFilePath } from "@repo/util-rank-torrent-name";
 
 import { type TypedDocumentNode, gql } from "@apollo/client";
@@ -52,9 +47,14 @@ const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
         tvdbId
         runtime
         lookupKeys
+        number
+        season {
+          number
+        }
       }
 
       ... on Season {
+        number
         tvdbId
         episodes {
           lookupKeys
@@ -126,7 +126,7 @@ export const validateTorrentFiles = async (
 
     assert(
       groupMap.size >= item.expectedFileCount,
-      `${item.type.substring(0, 1).toUpperCase() + item.type.substring(1)} torrent must have at least ${item.expectedFileCount.toString()} ${item instanceof ShowLikeMediaItem ? "episodes" : "movies"}, but has ${groupMap.size.toString()}`,
+      `${item.type.substring(0, 1).toUpperCase() + item.type.substring(1)} torrent must have at least ${item.expectedFileCount.toString()} ${item.__typename === "Movie" ? "movies" : "episodes"}, but has ${groupMap.size.toString()}`,
     );
 
     const validFiles: MatchedFile[] = [];
@@ -227,19 +227,17 @@ export const validateTorrentFiles = async (
 
           const { absoluteEpisode } = absoluteEpisodeResult.data;
 
-          if (item instanceof Season) {
+          if (item.__typename === "Season") {
             assert(
               absoluteEpisode.season.number === item.number,
               `File must correspond to a valid episode in ${item.fullTitle}`,
             );
           }
 
-          if (item instanceof Episode) {
-            const itemSeasonNumber = await item.season.loadProperty("number");
-
+          if (item.__typename === "Episode") {
             assert(
               absoluteEpisode.number === item.number &&
-                absoluteEpisode.season.number === itemSeasonNumber,
+                absoluteEpisode.season.number === item.season.number,
               `Incorrect episode for ${item.fullTitle}`,
             );
 
