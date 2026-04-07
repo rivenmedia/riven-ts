@@ -1,4 +1,4 @@
-import { type ParsedData, parse } from "@repo/util-rank-torrent-name";
+import { parse } from "@repo/util-rank-torrent-name/parser";
 
 import { UnrecoverableError } from "bullmq";
 
@@ -12,6 +12,8 @@ import {
   SkippedTorrentError,
   validateTorrent,
 } from "./utilities/validate-torrent.ts";
+
+import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export default createSandboxedJobProcessor(
   ParseScrapeResultsSandboxedJob,

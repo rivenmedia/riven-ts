@@ -1,18 +1,19 @@
-import { DataSourceMap, type RivenPlugin } from "@repo/util-plugin-sdk";
-
+// import { DataSourceMap, type RivenPlugin } from "@repo/util-plugin-sdk";
 import { database } from "../database/database.ts";
-import { logger } from "../utilities/logger/logger.ts";
-import { settings } from "../utilities/settings.ts";
-import { telemetry } from "../utilities/telemetry.ts";
+
+// import { logger } from "../utilities/logger/logger.ts";
+// import { settings } from "../utilities/settings.ts";
+// import { telemetry } from "../utilities/telemetry.ts";
 
 import type {
-  ApolloServer,
+  // ApolloServer,
   ContextFunction,
   GraphQLRequest,
 } from "@apollo/server";
 import type { StandaloneServerContextFunctionArgument } from "@apollo/server/standalone";
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
-import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+
+// import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 declare module "node:http" {
   interface IncomingMessage {
@@ -20,61 +21,60 @@ declare module "node:http" {
   }
 }
 
-export function buildContext(
-  server: ApolloServer<ApolloServerContext>,
-  pluginSettings: PluginSettings,
-  validPlugins: RivenPlugin[],
-): ContextFunction<
+export function buildContext(): ContextFunction<
+  // server: ApolloServer<ApolloServerContext>,
+  // pluginSettings: PluginSettings,
+  // validPlugins: RivenPlugin[],
   [StandaloneServerContextFunctionArgument],
   ApolloServerContext
 > {
-  const { cache } = server;
+  // const { cache } = server;
 
   return async function context() {
-    const pluginContexts = await Promise.all(
-      validPlugins.map<Promise<[symbol, unknown]>>(async (plugin) => {
-        const dataSources = new DataSourceMap();
+    // const pluginContexts = await Promise.all(
+    //   validPlugins.map<Promise<[symbol, unknown]>>(async (plugin) => {
+    //     const dataSources = new DataSourceMap();
 
-        if (plugin.dataSources) {
-          for (const DataSourceConstructor of plugin.dataSources) {
-            const instance = new DataSourceConstructor({
-              cache,
-              logger,
-              pluginSymbol: plugin.name,
-              connection: {
-                url: settings.redisUrl,
-              },
-              settings: pluginSettings.get(plugin.settingsSchema),
-              telemetry,
-            });
+    //     if (plugin.dataSources) {
+    //       for (const DataSourceConstructor of plugin.dataSources) {
+    //         const instance = new DataSourceConstructor({
+    //           cache,
+    //           logger,
+    //           pluginSymbol: plugin.name,
+    //           connection: {
+    //             url: settings.redisUrl,
+    //           },
+    //           settings: pluginSettings.get(plugin.settingsSchema),
+    //           telemetry,
+    //         });
 
-            dataSources.set(DataSourceConstructor, instance);
-          }
-        }
+    //         dataSources.set(DataSourceConstructor, instance);
+    //       }
+    //     }
 
-        const additionalContext = await plugin.context?.call(plugin, {
-          dataSources,
-          settings: pluginSettings,
-        });
+    //     const additionalContext = await plugin.context?.call(plugin, {
+    //       dataSources,
+    //       settings: pluginSettings,
+    //     });
 
-        const pluginContext = {
-          ...additionalContext,
-          dataSources,
-        };
+    //     const pluginContext = {
+    //       ...additionalContext,
+    //       dataSources,
+    //     };
 
-        return [plugin.name, pluginContext];
-      }),
-    );
+    //     return [plugin.name, pluginContext];
+    //   }),
+    // );
 
     return {
-      ...pluginContexts.reduce<Record<symbol, unknown>>(
-        (acc, [pluginSymbol, pluginContext]) => {
-          acc[pluginSymbol] = pluginContext;
+      // ...pluginContexts.reduce<Record<symbol, unknown>>(
+      //   (acc, [pluginSymbol, pluginContext]) => {
+      //     acc[pluginSymbol] = pluginContext;
 
-          return acc;
-        },
-        {},
-      ),
+      //     return acc;
+      //   },
+      //   {},
+      // ),
       em: database.em.fork(),
     } satisfies ApolloServerContext;
   };

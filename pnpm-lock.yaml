@@ -147,8 +147,6 @@ catalogs:
 
 packageExtensionsChecksum: sha256-52ytyDngGLNrT8fS7JdRcp3HNXVON3Jtk7C1Ci4JjWs=
 
-pnpmfileChecksum: sha256-UtXZV825NqHOBG69jsYGuWZ97+do7mk2t42sK5gvG2I=
-
 importers:
 
   .:

@@ -29,7 +29,7 @@ export const bootstrapSandboxedWorkers =
           ),
         ),
         {},
-        { concurrency: 2 },
+        { concurrency: 5 },
       ),
       "download-item.map-items-to-files": await createSandboxedWorker(
         MapItemsToFilesSandboxedJob,
@@ -39,7 +39,7 @@ export const bootstrapSandboxedWorkers =
           ),
         ),
         {},
-        { concurrency: 2 },
+        { concurrency: 5 },
       ),
       "download-item.validate-torrent-files": await createSandboxedWorker(
         ValidateTorrentFilesSandboxedJob,
@@ -49,7 +49,7 @@ export const bootstrapSandboxedWorkers =
           ),
         ),
         {},
-        { concurrency: 2 },
+        { concurrency: 5 },
       ),
     };
   });
