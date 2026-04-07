@@ -4,7 +4,6 @@ import { UnrecoverableError } from "bullmq";
 
 import { logger } from "../../../../utilities/logger/logger.ts";
 import { createSandboxedJobProcessor } from "../../utilities/create-sandboxed-job.processor.ts";
-import { withORM } from "../../utilities/with-orm.ts";
 import {
   ParseScrapeResultsSandboxedJob,
   parseScrapeResultsProcessorSchema,
@@ -27,39 +26,34 @@ export default createSandboxedJobProcessor(
       {},
     );
 
-    return withORM(async (database) => {
-      const item = await database.mediaItem.findOneOrFail(job.data.id);
-      const { fullTitle: itemTitle } = item;
+    if (!Object.keys(aggregatedResults).length) {
+      throw new UnrecoverableError(`No streams found for ${job.name}`);
+    }
 
-      if (!Object.keys(aggregatedResults).length) {
-        throw new UnrecoverableError(`No streams found for ${itemTitle}`);
-      }
+    const validResults = new Map<string, ParsedData>();
 
-      const validResults = new Map<string, ParsedData>();
+    for (const [hash, rawTitle] of Object.entries(aggregatedResults)) {
+      try {
+        const parsedData = parse(rawTitle);
 
-      for (const [hash, rawTitle] of Object.entries(aggregatedResults)) {
-        try {
-          const parsedData = parse(rawTitle);
+        await validateTorrent(job.data.id, parsedData, hash);
 
-          await validateTorrent(item, itemTitle, parsedData, hash);
-
-          validResults.set(hash, parsedData);
-        } catch (error) {
-          if (error instanceof SkippedTorrentError) {
-            logger.silly(error.message);
-          } else {
-            logger.debug(
-              `Failed to parse torrent ${rawTitle} (${hash}) for ${itemTitle}`,
-              { err: error },
-            );
-          }
+        validResults.set(hash, parsedData);
+      } catch (error) {
+        if (error instanceof SkippedTorrentError) {
+          logger.silly(error.message);
+        } else {
+          logger.debug(
+            `Failed to parse torrent ${rawTitle} (${hash}) for ${job.name}`,
+            { err: error },
+          );
         }
       }
+    }
 
-      return {
-        id: job.data.id,
-        results: Object.fromEntries(validResults),
-      };
-    });
+    return {
+      id: job.data.id,
+      results: Object.fromEntries(validResults),
+    };
   }),
 );

@@ -7,9 +7,12 @@ import { ApolloServer } from "@apollo/server";
 import responseCachePlugin from "@apollo/server-plugin-response-cache";
 import { ApolloServerPluginCacheControl } from "@apollo/server/plugin/cacheControl";
 import { startStandaloneServer } from "@apollo/server/standalone";
+import { URL } from "node:url";
 import { fromPromise } from "xstate";
 
+import { initApolloClient } from "../../../graphql/apollo-client.ts";
 import { buildContext } from "../../../graphql/build-context.ts";
+import { MediaItemResolver } from "../../../graphql/resolvers/media-item.resolver.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { redisCache } from "../../../utilities/redis-cache.ts";
 import { settings } from "../../../utilities/settings.ts";
@@ -37,7 +40,7 @@ export const startGqlServer = fromPromise<
 
   const server = new ApolloServer<ApolloServerContext>({
     cache: redisCache,
-    schema: await buildSchema(pluginResolvers),
+    schema: await buildSchema([MediaItemResolver, ...pluginResolvers]),
     introspection: true,
     plugins: [
       ApolloServerPluginCacheControl({
@@ -63,6 +66,8 @@ export const startGqlServer = fromPromise<
       [...validPlugins.entries()].map(([_, plugin]) => plugin.config),
     ),
   });
+
+  initApolloClient(new URL(url));
 
   return {
     server,

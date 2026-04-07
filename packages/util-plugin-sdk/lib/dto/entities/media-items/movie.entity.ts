@@ -11,7 +11,7 @@ import { MediaItem } from "./media-item.entity.ts";
 import type { ItemRequest } from "../requests/item-request.entity.ts";
 import type { Opt, Ref } from "@mikro-orm/core";
 
-@ObjectType()
+@ObjectType({ implements: MediaItem })
 @Entity()
 export class Movie extends MediaItem {
   @Property()

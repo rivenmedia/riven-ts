@@ -1,11 +1,16 @@
 import { Entity } from "@mikro-orm/decorators/legacy";
+import { Field, InterfaceType } from "type-graphql";
 
-import { ShowContentRating } from "../../enums/content-ratings.enum.ts";
+import {
+  ShowContentRating,
+  ShowContentRatingEnum,
+} from "../../enums/content-ratings.enum.ts";
 import { MediaItem } from "./media-item.entity.ts";
 
 import type { Show } from "./show.entity.ts";
 import type { Promisable } from "type-fest";
 
+@InterfaceType({ implements: MediaItem })
 @Entity({
   abstract: true,
   discriminatorColumn: "type",
@@ -13,6 +18,8 @@ import type { Promisable } from "type-fest";
 export abstract class ShowLikeMediaItem extends MediaItem {
   declare tvdbId: string;
   declare tmdbId?: never;
+
+  @Field(() => ShowContentRatingEnum)
   declare contentRating: ShowContentRating;
 
   /**

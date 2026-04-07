@@ -1,3 +1,4 @@
+import { ApolloClient } from "@apollo/client";
 import * as Sentry from "@sentry/node";
 import z, {
   type ZodNever,
@@ -49,6 +50,7 @@ export const createSandboxedJobSchema = <
             }
           >(),
           scope: z.custom<Sentry.Scope>(),
+          client: z.instanceof(ApolloClient),
         }),
       ],
       output: z.promise(outputSchema),

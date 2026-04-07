@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@apollo/cache-control-types": "^1.0.3",
+    "@mikro-orm/core": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",

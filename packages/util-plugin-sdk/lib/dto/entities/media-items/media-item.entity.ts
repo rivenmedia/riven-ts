@@ -16,12 +16,9 @@ import {
 } from "@mikro-orm/decorators/legacy";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { DateTime } from "luxon";
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ID, InterfaceType } from "type-graphql";
 
-import {
-  MediaItemContentRating,
-  MediaItemContentRatingEnum,
-} from "../../enums/content-ratings.enum.ts";
+import { MediaItemContentRating } from "../../enums/content-ratings.enum.ts";
 import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { MediaItemType } from "../../enums/media-item-type.enum.ts";
 import { FileSystemEntry } from "../filesystem/filesystem-entry.entity.ts";
@@ -31,7 +28,7 @@ import { Stream } from "../streams/stream.entity.ts";
 
 import type { Promisable } from "type-fest";
 
-@ObjectType()
+@InterfaceType()
 @Entity({
   abstract: true,
   discriminatorColumn: "type",
@@ -139,7 +136,6 @@ export abstract class MediaItem {
   @Property()
   rating?: number | null;
 
-  @Field(() => MediaItemContentRatingEnum, { nullable: true })
   @Enum(() => MediaItemContentRating.enum)
   contentRating?: MediaItemContentRating | null;
 

@@ -13,7 +13,7 @@ import { ShowLikeMediaItem } from "./show-like.entity.ts";
 
 import type { MediaEntry } from "../filesystem/media-entry.entity.ts";
 
-@ObjectType()
+@ObjectType({ implements: ShowLikeMediaItem })
 @Entity({ repository: () => EpisodeRepository })
 export class Episode extends ShowLikeMediaItem {
   [EntityRepositoryType]?: EpisodeRepository;

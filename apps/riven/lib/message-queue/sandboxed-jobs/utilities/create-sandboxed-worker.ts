@@ -60,6 +60,10 @@ export async function createSandboxedWorker(
             "--env-file=.env.riven",
             "--import=@swc-node/register/esm-register",
           ],
+          name: `${sandboxedJobName}-worker`,
+          workerData: {
+            gqlUrl: `http://localhost:${settings.gqlPort.toString()}`,
+          },
         },
         connection: {
           url: settings.redisUrl,

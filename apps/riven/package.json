@@ -53,6 +53,7 @@
     "reflect-metadata": "catalog:",
     "safe-stringify": "^1.2.0",
     "triple-beam": "^1.4.1",
+    "type-graphql": "catalog:",
     "undici": "catalog:",
     "winston": "catalog:",
     "xstate": "catalog:",

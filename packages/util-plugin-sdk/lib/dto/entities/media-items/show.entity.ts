@@ -19,7 +19,7 @@ import { ShowLikeMediaItem } from "./show-like.entity.ts";
 import type { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import type { ItemRequest } from "../requests/item-request.entity.ts";
 
-@ObjectType()
+@ObjectType({ implements: ShowLikeMediaItem })
 @Entity()
 export class Show extends ShowLikeMediaItem {
   @Field(() => ShowContentRatingEnum)

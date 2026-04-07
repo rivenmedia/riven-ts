@@ -11,7 +11,9 @@ export default {
   generates: {
     "./lib/types/__generated__/graphql.ts": {
       plugins: ["typescript"],
-      config: {} satisfies TypeScriptPluginConfig,
+      config: {
+        enumsAsTypes: true,
+      } satisfies TypeScriptPluginConfig,
     },
     "./lib/": {
       preset: "near-operation-file",
@@ -37,6 +39,8 @@ export default {
         // Apollo Client doesn't add the `__typename` field to root types so
         // don't generate a type for the `__typename` for root operation types.
         skipTypeNameForRoot: true,
+        // Use string values for enums (e.g. 'one' | 'two')
+        allowEnumStringTypes: true,
       } satisfies TypeScriptDocumentsPluginConfig,
     },
   },

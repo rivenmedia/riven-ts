@@ -1,14 +1,11 @@
-import {
-  Episode,
-  type MediaItem,
-  Movie,
-  Season,
-  Show,
-  ShowLikeMediaItem,
-} from "@repo/util-plugin-sdk/dto/entities";
+import { type TypedDocumentNode, gql } from "@apollo/client";
 
-import { wrap } from "@mikro-orm/core";
+import { client } from "../../../../../graphql/apollo-client.ts";
 
+import type {
+  GetItemQuery,
+  GetItemQueryVariables,
+} from "./validate-torrent.typegen.ts";
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export class SkippedTorrentError extends Error {
@@ -34,12 +31,73 @@ export class SkippedTorrentError extends Error {
  */
 const getYearCandidates = (year: number) => [year - 1, year, year + 1];
 
+const GET_ITEM_QUERY: TypedDocumentNode<GetItemQuery, GetItemQueryVariables> =
+  gql`
+    query GetItem($id: Int!) {
+      mediaItem(id: $id) {
+        ... on Show {
+          status
+          seasons {
+            number
+            episodes {
+              ...EpisodeFields
+            }
+          }
+        }
+
+        ... on Season {
+          number
+          show {
+            year
+          }
+          episodes {
+            ...EpisodeFields
+          }
+        }
+
+        ... on Episode {
+          ...EpisodeFields
+          season {
+            number
+            show {
+              year
+            }
+          }
+        }
+
+        ... on MediaItem {
+          id
+          fullTitle
+          country
+          isAnime
+          type
+          year
+        }
+      }
+    }
+
+    fragment EpisodeFields on Episode {
+      absoluteNumber
+      number
+    }
+  `;
+
 export const validateTorrent = async (
-  item: MediaItem,
-  itemTitle: string,
+  itemId: number,
   parsedData: ParsedData,
   infoHash: string,
 ) => {
+  const itemResult = await client.query({
+    query: GET_ITEM_QUERY,
+    variables: { id: itemId },
+  });
+
+  if (!itemResult.data?.mediaItem) {
+    throw new Error(`Media item with ID ${itemId.toString()} not found`);
+  }
+
+  const item = itemResult.data.mediaItem;
+
   if (
     parsedData.country &&
     item.country &&
@@ -48,7 +106,7 @@ export const validateTorrent = async (
   ) {
     throw new SkippedTorrentError(
       "Skipping torrent with incorrect country",
-      itemTitle,
+      item.fullTitle,
       parsedData.rawTitle,
       infoHash,
     );
@@ -56,7 +114,11 @@ export const validateTorrent = async (
 
   if (parsedData.year) {
     const topLevelItem =
-      item instanceof ShowLikeMediaItem ? await item.getShow() : item;
+      item.__typename === "Episode"
+        ? item.season.show
+        : item.__typename === "Season"
+          ? item.show
+          : item;
 
     const candidateYears = new Set<number>();
 
@@ -73,38 +135,34 @@ export const validateTorrent = async (
     if (candidateYears.size && !candidateYears.has(parsedData.year)) {
       throw new SkippedTorrentError(
         "Skipping torrent with incorrect year",
-        itemTitle,
+        item.fullTitle,
         parsedData.rawTitle,
         infoHash,
       );
     }
   }
 
-  if (item instanceof Movie) {
+  if (item.__typename === "Movie") {
     if (parsedData.seasons.length || parsedData.episodes.length) {
       throw new SkippedTorrentError(
         "Skipping show torrent for movie",
-        itemTitle,
+        item.fullTitle,
         parsedData.rawTitle,
         infoHash,
       );
     }
-  }
-
-  if (item instanceof ShowLikeMediaItem) {
+  } else {
     if (parsedData.seasons.length === 0 && parsedData.episodes.length === 0) {
       throw new SkippedTorrentError(
         `Skipping torrent with no seasons or episodes for ${item.type} item`,
-        itemTitle,
+        item.fullTitle,
         parsedData.rawTitle,
         infoHash,
       );
     }
   }
 
-  if (item instanceof Show) {
-    await wrap(item).populate(["seasons"]);
-
+  if (item.__typename === "Show") {
     if (parsedData.seasons.length) {
       const seasonsIntersection = new Set(parsedData.seasons).intersection(
         new Set(item.seasons.map((season) => season.number)),
@@ -116,19 +174,17 @@ export const validateTorrent = async (
       if (seasonsIntersection.size < expectedSeasonCount) {
         throw new SkippedTorrentError(
           "Skipping torrent with incorrect number of seasons",
-          itemTitle,
+          item.fullTitle,
           parsedData.rawTitle,
           infoHash,
         );
       }
     }
 
-    await wrap(item).populate(["seasons.episodes"]);
-
     if (
       parsedData.episodes.length &&
       item.seasons.length === 1 &&
-      item.seasons[0]?.episodes.count()
+      item.seasons[0]?.episodes.length
     ) {
       const { episodes } = item.seasons[0];
 
@@ -139,7 +195,7 @@ export const validateTorrent = async (
       if (episodesIntersection.size !== episodes.length) {
         throw new SkippedTorrentError(
           "Skipping torrent with incorrect number of episodes for single-season show",
-          itemTitle,
+          item.fullTitle,
           parsedData.rawTitle,
           infoHash,
         );
@@ -147,25 +203,22 @@ export const validateTorrent = async (
     }
   }
 
-  if (item instanceof Season) {
-    await wrap(item).populate(["episodes"]);
-
+  if (item.__typename === "Season") {
     if (parsedData.seasons.length === 0) {
       if (parsedData.episodes.length) {
         // If we don't have seasons, check that each *absolute* number is found in the list.
         // Some items name torrents using absolute episodes only (e.g. One Piece 0001-1000)
 
-        const episodes = item.episodes.getItems();
         const absoluteEpisodesIntersection = new Set(
           parsedData.episodes,
         ).intersection(
-          new Set(episodes.map((episode) => episode.absoluteNumber)),
+          new Set(item.episodes.map((episode) => episode.absoluteNumber)),
         );
 
-        if (absoluteEpisodesIntersection.size !== episodes.length) {
+        if (absoluteEpisodesIntersection.size !== item.episodes.length) {
           throw new SkippedTorrentError(
             "Skipping torrent with incorrect absolute episode range for season item",
-            itemTitle,
+            item.fullTitle,
             parsedData.rawTitle,
             infoHash,
           );
@@ -175,7 +228,7 @@ export const validateTorrent = async (
       if (!parsedData.seasons.includes(item.number)) {
         throw new SkippedTorrentError(
           "Skipping torrent with incorrect season number for season item",
-          itemTitle,
+          item.fullTitle,
           parsedData.rawTitle,
           infoHash,
         );
@@ -190,7 +243,7 @@ export const validateTorrent = async (
         if (relativeEpisodesIntersection.size !== item.episodes.length) {
           throw new SkippedTorrentError(
             "Skipping torrent with incorrect episodes for season item",
-            itemTitle,
+            item.fullTitle,
             parsedData.rawTitle,
             infoHash,
           );
@@ -199,9 +252,7 @@ export const validateTorrent = async (
     }
   }
 
-  if (item instanceof Episode) {
-    await wrap(item).populate(["season"]);
-
+  if (item.__typename === "Episode") {
     const episodesIntersection = new Set(parsedData.episodes).intersection(
       new Set([item.number, item.absoluteNumber]),
     );
@@ -212,19 +263,16 @@ export const validateTorrent = async (
     if (hasEpisodes && episodesIntersection.size === 0) {
       throw new SkippedTorrentError(
         "Skipping torrent with incorrect episode number for episode item",
-        itemTitle,
+        item.fullTitle,
         parsedData.rawTitle,
         infoHash,
       );
     }
 
-    if (
-      hasSeasons &&
-      !parsedData.seasons.includes(item.season.getProperty("number"))
-    ) {
+    if (hasSeasons && !parsedData.seasons.includes(item.season.number)) {
       throw new SkippedTorrentError(
         "Skipping torrent with incorrect season number for episode item",
-        itemTitle,
+        item.fullTitle,
         parsedData.rawTitle,
         infoHash,
       );
@@ -233,7 +281,7 @@ export const validateTorrent = async (
     if (!hasEpisodes && !hasSeasons) {
       throw new SkippedTorrentError(
         "Skipping torrent with no seasons or episodes for episode item",
-        itemTitle,
+        item.fullTitle,
         parsedData.rawTitle,
         infoHash,
       );

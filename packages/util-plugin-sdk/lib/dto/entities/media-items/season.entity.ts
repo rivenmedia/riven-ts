@@ -13,7 +13,7 @@ import { Episode } from "./episode.entity.ts";
 import { ShowLikeMediaItem } from "./show-like.entity.ts";
 import { Show } from "./show.entity.ts";
 
-@ObjectType()
+@ObjectType({ implements: ShowLikeMediaItem })
 @Entity()
 export class Season extends ShowLikeMediaItem {
   declare filesystemEntries: never;

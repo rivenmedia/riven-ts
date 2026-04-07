@@ -16,14 +16,17 @@ import {
 
 import { buildSchema as baseBuildSchema } from "type-graphql";
 
+import type { EntityManager } from "@mikro-orm/core";
 import type { DataSourceMap } from "@repo/util-plugin-sdk";
 
 export type ApolloServerContext = Partial<
   Record<symbol, { dataSources: DataSourceMap }>
->;
+> & {
+  em: EntityManager;
+};
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-export const buildSchema = async (pluginResolvers: Function[]) =>
+export const buildSchema = async (resolvers: Function[]) =>
   baseBuildSchema({
     orphanedTypes: [
       SubtitleEntry,
@@ -36,10 +39,6 @@ export const buildSchema = async (pluginResolvers: Function[]) =>
       Show,
       Stream,
     ],
-    resolvers: [
-      CoreSettingsResolver,
-      RivenSettingsResolver,
-      ...pluginResolvers,
-    ],
+    resolvers: [CoreSettingsResolver, RivenSettingsResolver, ...resolvers],
     validate: true,
   });
