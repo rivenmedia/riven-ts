@@ -39,7 +39,7 @@ export const bootstrapSandboxedWorkers =
           ),
         ),
         {},
-        { concurrency: 5 },
+        { concurrency: 15 },
       ),
       "download-item.validate-torrent-files": await createSandboxedWorker(
         ValidateTorrentFilesSandboxedJob,

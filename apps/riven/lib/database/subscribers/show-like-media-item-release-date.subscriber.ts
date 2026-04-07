@@ -38,11 +38,21 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
 
     // Process direct updates from the unit of work
     for (const [item, changeSet] of trackedItems) {
-      if (changeSet?.payload.releaseDate === undefined) {
-        continue;
-      }
-
       if (item instanceof Show) {
+        const [firstSeason] = await item.seasons.matching({
+          where: { number: 1 },
+        });
+
+        if (firstSeason?.releaseDate) {
+          item.releaseDate = firstSeason.releaseDate;
+
+          if (changeSet) {
+            uow.recomputeSingleChangeSet(item);
+          } else {
+            uow.computeChangeSet(item);
+          }
+        }
+
         continue;
       }
 
