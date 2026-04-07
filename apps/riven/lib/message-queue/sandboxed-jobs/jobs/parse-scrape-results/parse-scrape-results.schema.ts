@@ -12,11 +12,11 @@ export const ParseScrapeResultsSandboxedJob = createSandboxedJobSchema(
   {
     children: MediaItemScrapeRequestedResponse,
     output: z.object({
-      id: z.int(),
+      id: z.uuidv4(),
       results: z.record(z.hash("sha1"), z.custom<ParsedData>()),
     }),
     input: z.object({
-      id: z.int(),
+      id: z.uuidv4(),
     }),
   },
 );

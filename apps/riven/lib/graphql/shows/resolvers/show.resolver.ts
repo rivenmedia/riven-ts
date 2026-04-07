@@ -28,7 +28,7 @@ export class ShowResolver {
   @Query(() => Show)
   async show(
     @Ctx() { em }: ApolloServerContext,
-    @Arg("id") id: number,
+    @Arg("id") id: string,
   ): Promise<Show> {
     return em.findOneOrFail(Show, id);
   }

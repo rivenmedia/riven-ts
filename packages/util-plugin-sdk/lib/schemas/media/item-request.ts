@@ -4,7 +4,7 @@ import { ItemRequest as ItemRequestEntity } from "../../dto/entities/index.ts";
 import { ItemRequestType } from "../../dto/enums/item-request-type.enum.ts";
 
 export const ItemRequest = z.object({
-  id: z.int(),
+  id: z.uuidv4(),
   imdbId: z.string().nullish(),
   tmdbId: z.string().nullish(),
   tvdbId: z.string().nullish(),

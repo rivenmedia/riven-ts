@@ -20,7 +20,7 @@ export const ValidateTorrentFilesSandboxedJob = createSandboxedJobSchema(
       }),
     ]),
     input: z.object({
-      id: z.int(),
+      id: z.uuidv4(),
       infoHash: z.hash("sha1"),
       isCacheCheck: z.boolean(),
     }),

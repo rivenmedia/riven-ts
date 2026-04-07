@@ -35,7 +35,7 @@ export const FindValidTorrentFlow = createFlowSchema(
   {
     children: z.array(z.custom<RankedResult>()),
     input: z.object({
-      id: z.int(),
+      id: z.uuidv4(),
       itemTitle: z.string().min(1),
       availableDownloaders: z
         .array(

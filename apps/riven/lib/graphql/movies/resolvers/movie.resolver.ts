@@ -19,7 +19,7 @@ export class MovieResolver {
   @Query(() => Movie)
   async movie(
     @Ctx() { em }: ApolloServerContext,
-    @Arg("id") id: number,
+    @Arg("id") id: string,
   ): Promise<Movie> {
     return em.findOneOrFail(Movie, id);
   }

@@ -7,7 +7,7 @@ import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
 export const ScrapeItemFlow = createFlowSchema("scrape-item", {
   children: ParseScrapeResultsSandboxedJob.shape.output,
   input: z.object({
-    id: z.int(),
+    id: z.uuidv4(),
   }),
 });
 
