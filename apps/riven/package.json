@@ -8,7 +8,7 @@
     "build:program": "tsc --build tsconfig.app.json",
     "build:workers": "rm -rf dist/workers && node esbuild.config.ts",
     "check-types": "tsc --noEmit --project tsconfig.app.json && tsc --noEmit --project tsconfig.spec.json",
-    "dev": "node --watch --env-file-if-exists=.env.riven --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
+    "dev": "pnpm --filter @repo/riven build:workers && node --watch --env-file-if-exists=.env.riven --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
     "generate-config-docs": "zod2md",
     "graphql-codegen": "graphql-codegen",
     "lint": "eslint",

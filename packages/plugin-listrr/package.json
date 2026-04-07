@@ -4,14 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": [
-      "./lib/index.ts",
-      "./dist/index.js"
-    ],
-    "./datasource": [
-      "./lib/datasource/listrr.datasource.ts",
-      "./dist/datasource/listrr.datasource.js"
-    ]
+    ".": "./dist/index.js",
+    "./datasource": "./dist/datasource/listrr.datasource.js"
   },
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",

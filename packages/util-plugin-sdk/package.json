@@ -4,62 +4,20 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": [
-      "./lib/index.ts",
-      "./dist/index.js"
-    ],
-    "./types/*": [
-      "./lib/types/*.ts",
-      "./dist/types/*.js"
-    ],
-    "./dto/entities": [
-      "./lib/dto/entities/index.ts",
-      "./dist/dto/entities/index.js"
-    ],
-    "./dto/enums/*": [
-      "./lib/dto/enums/*.ts",
-      "./dist/dto/enums/*.js"
-    ],
-    "./dto/repositories/*": [
-      "./lib/dto/repositories/*.ts",
-      "./dist/dto/repositories/*.js"
-    ],
-    "./dto/unions/*": [
-      "./lib/dto/unions/*.ts",
-      "./dist/dto/unions/*.js"
-    ],
-    "./errors/*": [
-      "./lib/errors/*.ts",
-      "./dist/errors/*.js"
-    ],
-    "./events": [
-      "./lib/schemas/events/index.ts",
-      "./dist/schemas/events/index.js"
-    ],
-    "./events/*": [
-      "./lib/schemas/plugin-to-program-events/*.ts",
-      "./dist/schemas/plugin-to-program-events/*.js"
-    ],
-    "./schemas/*": [
-      "./lib/schemas/*.ts",
-      "./dist/schemas/*.js"
-    ],
-    "./helpers/*": [
-      "./lib/helpers/*.ts",
-      "./dist/helpers/*.js"
-    ],
-    "./testing/*": [
-      "./lib/testing/*.ts",
-      "./dist/testing/*.js"
-    ],
-    "./utilities/*": [
-      "./lib/utilities/*.ts",
-      "./dist/utilities/*.js"
-    ],
-    "./validation": [
-      "./lib/validation/index.ts",
-      "./dist/validation/index.js"
-    ]
+    ".": "./dist/index.js",
+    "./types/*": "./dist/types/*.js",
+    "./dto/entities": "./dist/dto/entities/index.js",
+    "./dto/enums/*": "./dist/dto/enums/*.js",
+    "./dto/repositories/*": "./dist/dto/repositories/*.js",
+    "./dto/unions/*": "./dist/dto/unions/*.js",
+    "./errors/*": "./dist/errors/*.js",
+    "./events": "./dist/schemas/events/index.js",
+    "./events/*": "./dist/schemas/plugin-to-program-events/*.js",
+    "./schemas/*": "./dist/schemas/*.js",
+    "./helpers/*": "./dist/helpers/*.js",
+    "./testing/*": "./dist/testing/*.js",
+    "./utilities/*": "./dist/utilities/*.js",
+    "./validation": "./dist/validation/index.js"
   },
   "scripts": {
     "build": "tsc --build tsconfig.lib.json",
