@@ -11,7 +11,7 @@ import { URL } from "node:url";
 import { fromPromise } from "xstate";
 
 import { initApolloClient } from "../../../graphql/apollo-client.ts";
-import { buildContext } from "../../../graphql/build-context.ts";
+import { buildContextFunction } from "../../../graphql/build-context-function.ts";
 import { resolvers } from "../../../graphql/resolvers/index.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { redisCache } from "../../../utilities/redis-cache.ts";
@@ -33,63 +33,53 @@ export interface StartGQLServerOutput {
 export const startGqlServer = fromPromise<
   StartGQLServerOutput,
   StartGQLServerInput
->(
-  async ({
-    input: {
-      validPlugins,
-      // pluginSettings
-    },
-  }) => {
-    const pluginResolvers = [...validPlugins.values()].flatMap(
-      (p) => p.config.resolvers,
-    );
+>(async ({ input: { validPlugins } }) => {
+  const pluginResolvers = [...validPlugins.values()].flatMap(
+    (p) => p.config.resolvers,
+  );
 
-    const server = new ApolloServer<ApolloServerContext>({
-      cache: redisCache,
-      schema: await buildSchema({
-        resolvers: [...resolvers, ...pluginResolvers],
+  const server = new ApolloServer<ApolloServerContext>({
+    cache: redisCache,
+    schema: await buildSchema({
+      resolvers: [...resolvers, ...pluginResolvers],
+    }),
+    introspection: true,
+    plugins: [
+      ApolloServerPluginCacheControl({
+        // Cache everything for 60 seconds by default.
+        defaultMaxAge: 60,
       }),
-      introspection: true,
-      plugins: [
-        ApolloServerPluginCacheControl({
-          // Cache everything for 60 seconds by default.
-          defaultMaxAge: 60,
-        }),
-        responseCachePlugin(),
-        {
-          requestDidStart({ request: { operationName } }) {
-            if (operationName) {
-              logger.silly(`Received ${operationName}`, {
-                "riven.gql.operation-name": operationName,
-              });
-            }
+      responseCachePlugin(),
+      {
+        requestDidStart({ request: { operationName } }) {
+          if (operationName) {
+            logger.silly(`Received ${operationName}`, {
+              "riven.gql.operation-name": operationName,
+            });
+          }
 
-            return Promise.resolve();
-          },
+          return Promise.resolve();
         },
-      ],
-      formatError(formattedError, error) {
-        logger.error("GraphQL Error:", { err: error });
-
-        return formattedError;
       },
-    });
+    ],
+    formatError(formattedError, error) {
+      logger.error("GraphQL Error:", { err: error });
 
-    const { url } = await startStandaloneServer(server, {
-      listen: {
-        port: settings.gqlPort,
-      },
-      context: buildContext(),
-      // server,
-      // pluginSettings,
-      // [...validPlugins.entries()].map(([_, plugin]) => plugin.config),
-    });
+      return formattedError;
+    },
+  });
 
-    initApolloClient(new URL(url));
+  const { url } = await startStandaloneServer(server, {
+    listen: {
+      port: settings.gqlPort,
+    },
+    context: buildContextFunction(),
+  });
 
-    return {
-      server,
-      url,
-    };
-  },
-);
+  initApolloClient(new URL(url));
+
+  return {
+    server,
+    url,
+  };
+});

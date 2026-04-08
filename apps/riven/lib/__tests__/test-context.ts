@@ -1,28 +1,9 @@
 /* eslint-disable no-empty-pattern */
-import { startStandaloneServer } from "@apollo/server/standalone";
-import * as Sentry from "@sentry/node";
-import { Job, type JobsOptions } from "bullmq";
-import { toMerged } from "es-toolkit";
 import assert from "node:assert";
-import { randomUUID } from "node:crypto";
-import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "undici";
 import { test as testBase, vi } from "vitest";
 
-import { database } from "../database/database.ts";
-import { EpisodeFactory } from "../database/factories/episode.factory.ts";
-import { MediaEntryFactory } from "../database/factories/media-entry.factory.ts";
-import { MovieItemRequestFactory } from "../database/factories/movie-item-request.factory.ts";
-import { MovieFactory } from "../database/factories/movie.factory.ts";
-import { SeasonFactory } from "../database/factories/season.factory.ts";
-import { ShowItemRequestFactory } from "../database/factories/show-item-request.factory.ts";
-import { ShowFactory } from "../database/factories/show.factory.ts";
-import { StreamFactory } from "../database/factories/stream.factory.ts";
-import { initApolloClient } from "../graphql/apollo-client.ts";
-import { resolvers } from "../graphql/resolvers/index.ts";
-import { createQueue } from "../message-queue/utilities/create-queue.ts";
-import { buildSeederFunctions } from "./utilities/build-seeder-functions.ts";
-
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
+import type { JobsOptions } from "bullmq";
 
 export const it = testBase
   .extend("server", { auto: false }, async ({}, { onCleanup }) => {
@@ -55,7 +36,10 @@ export const it = testBase
     // Expose the worker object on the test's context.
     return server;
   })
-  .extend("mockAgent", ({}, { onCleanup }) => {
+  .extend("mockAgent", async ({}, { onCleanup }) => {
+    const { MockAgent, getGlobalDispatcher, setGlobalDispatcher } =
+      await import("undici");
+
     const mockAgent = new MockAgent();
     const previousGlobalDispatcher = getGlobalDispatcher();
 
@@ -71,18 +55,41 @@ export const it = testBase
 
     return mockAgent;
   })
-  .extend("em", () => database.em.fork())
-  .extend("orm", () => database.orm)
-  .extend("factories", ({ em }) => ({
-    movieItemRequestFactory: new MovieItemRequestFactory(em),
-    movieFactory: new MovieFactory(em),
-    showItemRequestFactory: new ShowItemRequestFactory(em),
-    showFactory: new ShowFactory(em),
-    seasonFactory: new SeasonFactory(em),
-    episodeFactory: new EpisodeFactory(em),
-    streamFactory: new StreamFactory(em),
-    mediaEntryFactory: new MediaEntryFactory(em),
-  }))
+  .extend("orm", { scope: "file" }, async () => {
+    const { database } = await import("../database/database.ts");
+
+    return database.orm;
+  })
+  .extend("em", ({ orm }) => orm.em.fork())
+  .extend("factories", async ({ em }) => {
+    const { EpisodeFactory } =
+      await import("../database/factories/episode.factory.ts");
+    const { MediaEntryFactory } =
+      await import("../database/factories/media-entry.factory.ts");
+    const { MovieItemRequestFactory } =
+      await import("../database/factories/movie-item-request.factory.ts");
+    const { MovieFactory } =
+      await import("../database/factories/movie.factory.ts");
+    const { SeasonFactory } =
+      await import("../database/factories/season.factory.ts");
+    const { ShowItemRequestFactory } =
+      await import("../database/factories/show-item-request.factory.ts");
+    const { ShowFactory } =
+      await import("../database/factories/show.factory.ts");
+    const { StreamFactory } =
+      await import("../database/factories/stream.factory.ts");
+
+    return {
+      movieItemRequestFactory: new MovieItemRequestFactory(em),
+      movieFactory: new MovieFactory(em),
+      showItemRequestFactory: new ShowItemRequestFactory(em),
+      showFactory: new ShowFactory(em),
+      seasonFactory: new SeasonFactory(em),
+      episodeFactory: new EpisodeFactory(em),
+      streamFactory: new StreamFactory(em),
+      mediaEntryFactory: new MediaEntryFactory(em),
+    };
+  })
   .extend("stream", ({ factories }) => factories.streamFactory.createOne())
   .extend("mediaEntry", ({ factories }) =>
     factories.mediaEntryFactory.makeOne({
@@ -91,7 +98,12 @@ export const it = testBase
       plugin: "@repo/plugin-test",
     }),
   )
-  .extend("seeders", ({ em }) => buildSeederFunctions(em))
+  .extend("seeders", async ({ em }) => {
+    const { buildSeederFunctions } =
+      await import("./utilities/build-seeder-functions.ts");
+
+    return buildSeederFunctions(em);
+  })
   .extend("indexedMovieContext", async ({ seeders }) => {
     const result = await seeders.seedIndexedMovie();
 
@@ -161,36 +173,49 @@ export const it = testBase
 
     return episode;
   })
-  .extend("mockQueue", ({}, { onCleanup }) => {
+  .extend("mockQueue", async ({}, { onCleanup }) => {
+    const { createQueue } =
+      await import("../message-queue/utilities/create-queue.ts");
+
     const queue = createQueue("mock-queue");
 
     onCleanup(() => queue.close());
 
     return queue;
   })
-  .extend(
-    "createMockJob",
-    ({ mockQueue }) =>
-      <T>(data: T, opts?: JobsOptions) =>
-        Job.create(mockQueue, randomUUID(), data, opts),
-  )
-  .extend("mockSentryScope", () => new Sentry.Scope())
-  .extend("apolloServerInstance", { scope: "file" }, async ({}) => {
+  .extend("createMockJob", async ({ mockQueue }) => {
+    const { randomUUID } = await import("node:crypto");
+    const { Job } = await import("bullmq");
+
+    return <T>(data: T, opts?: JobsOptions) =>
+      Job.create(mockQueue, randomUUID(), data, opts);
+  })
+  .extend("mockSentryScope", async () => {
+    const Sentry = await import("@sentry/node");
+
+    return new Sentry.Scope();
+  })
+  .extend("apolloServerInstance", { scope: "file" }, async () => {
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");
+    const { resolvers } = await import("../graphql/resolvers/index.ts");
 
     return buildMockServer(resolvers);
   })
   .extend(
     "gqlServer",
     { scope: "file" },
-    async ({ apolloServerInstance }, { onCleanup }) => {
+    async ({ apolloServerInstance, orm }, { onCleanup }) => {
+      const { initApolloClient } = await import("../graphql/apollo-client.ts");
+      const { startStandaloneServer } =
+        await import("@apollo/server/standalone");
+
       const { url } = await startStandaloneServer<ApolloServerContext>(
         apolloServerInstance,
         {
           context: () =>
             Promise.resolve({
-              em: database.em.fork(),
+              em: orm.em.fork(),
             }),
           listen: { port: 0 },
         },
@@ -200,6 +225,7 @@ export const it = testBase
 
       vi.doMock(import("node:worker_threads"), async (importOriginal) => {
         const originalModule = await importOriginal();
+        const { toMerged } = await import("es-toolkit");
 
         return toMerged(originalModule, {
           workerData: {
