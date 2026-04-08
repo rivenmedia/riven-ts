@@ -43,7 +43,7 @@ it("does not throw for movie torrents if the item is a movie", async ({
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
+    validateTorrent(indexedMovie.id, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
@@ -55,7 +55,7 @@ it("does not throw for show torrents if the item is a show", async ({
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
+    validateTorrent(indexedShow.id, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
@@ -64,12 +64,11 @@ it("does not throw for season torrents if the item is a season", async ({
   infoHash,
 }) => {
   const rawTitle = "Test Show 2024 1080p WEB-DL S01 E01-10";
-  const show = await season.getShow();
 
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(season, show.title, parsedData, infoHash),
+    validateTorrent(season.id, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
@@ -78,11 +77,10 @@ it("does not throw for episode torrents if the item is an episode", async ({
   infoHash,
 }) => {
   const rawTitle = "Test Show 2024 1080p WEB-DL S01E01";
-  const show = await episode.getShow();
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(episode, show.title, parsedData, infoHash),
+    validateTorrent(episode.id, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
@@ -94,7 +92,7 @@ it("throws for show torrents if the item is a movie", async ({
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
+    validateTorrent(indexedMovie.id, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping show torrent for movie`,
@@ -125,7 +123,7 @@ it("throws for torrents with an incorrect number of seasons for ended shows", as
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
+    validateTorrent(indexedShow.id, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect number of seasons`,
@@ -156,7 +154,7 @@ it("throws for torrents with an incorrect number of seasons for continuing shows
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
+    validateTorrent(indexedShow.id, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect number of seasons`,
@@ -182,7 +180,7 @@ it("does not throw for torrents that do not contain the most recent season for c
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
+    validateTorrent(indexedShow.id, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
@@ -201,7 +199,7 @@ it("does not throw for torrents that contain all seasons for ended shows", async
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
+    validateTorrent(indexedShow.id, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
@@ -214,7 +212,7 @@ it("throws for torrents with no seasons and episodes for show-like items", async
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
+    validateTorrent(indexedShow.id, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with no seasons or episodes for show item`,
@@ -241,7 +239,7 @@ it("throws for torrents with incorrect number of episodes for single-season show
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
+    validateTorrent(indexedShow.id, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect number of episodes for single-season show`,
@@ -268,7 +266,7 @@ it("does not throw for torrents with the correct number of episodes for single-s
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(indexedShow, indexedShow.title, parsedData, infoHash),
+    validateTorrent(indexedShow.id, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
@@ -285,7 +283,7 @@ it("does not throw for torrents that have no seasons, but the correct absolute e
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(season, indexedShow.title, parsedData, infoHash),
+    validateTorrent(season.id, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
@@ -302,7 +300,7 @@ it("throws for torrents that have no seasons and do not have the correct absolut
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(season, indexedShow.title, parsedData, infoHash),
+    validateTorrent(season.id, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect absolute episode range for season item`,
@@ -323,7 +321,7 @@ it("throws for torrents with incorrect season number for season items", async ({
   const parsedData = parse(rawTitle);
 
   await expect(() =>
-    validateTorrent(season, show.title, parsedData, infoHash),
+    validateTorrent(season.id, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect season number for season item`,
@@ -339,12 +337,11 @@ it("does not throw for torrents with an unknown number of episodes for season it
   infoHash,
 }) => {
   const rawTitle = "Test Show: S01";
-  const show = await season.getShow();
 
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(season, show.title, parsedData, infoHash),
+    validateTorrent(season.id, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
@@ -358,7 +355,7 @@ it("throws for torrents with incorrect episodes for season items", async ({
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(season, show.title, parsedData, infoHash),
+    validateTorrent(season.id, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect episodes for season item`,
@@ -379,7 +376,7 @@ it("throws for torrents with incorrect episode number for episode items", async 
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(episode, show.title, parsedData, infoHash),
+    validateTorrent(episode.id, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect episode number for episode item`,
@@ -400,7 +397,7 @@ it("throws for torrents with incorrect season number for episode items", async (
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(episode, show.title, parsedData, infoHash),
+    validateTorrent(episode.id, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect season number for episode item`,
@@ -421,7 +418,7 @@ it("throws for torrents with no episodes for episode items", async ({
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(episode, show.title, parsedData, infoHash),
+    validateTorrent(episode.id, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with no seasons or episodes for episode item`,
@@ -447,7 +444,7 @@ it("throws for torrents that do not match the media item's country", async ({
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
+    validateTorrent(indexedMovie.id, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping torrent with incorrect country`,
@@ -477,7 +474,7 @@ it("does not throw for torrents that do not match the media item's country if th
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
+    validateTorrent(indexedMovie.id, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
@@ -503,7 +500,7 @@ it("throws for torrents that do not match the media item's year (± 1 year)", as
     const parsedData = parse(rawTitle);
 
     await expect(
-      validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
+      validateTorrent(indexedMovie.id, parsedData, infoHash),
     ).rejects.toThrow(
       new SkippedTorrentError(
         `Skipping torrent with incorrect year`,
@@ -518,7 +515,7 @@ it("throws for torrents that do not match the media item's year (± 1 year)", as
     const parsedData = parse(rawTitle);
 
     await expect(
-      validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
+      validateTorrent(indexedMovie.id, parsedData, infoHash),
     ).resolves.not.toThrow();
   }
 });
@@ -543,7 +540,7 @@ it.skip('throws for torrents that are not dubbed if the media item is anime and 
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
+    validateTorrent(indexedMovie.id, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
       `Skipping non-dubbed anime torrent`,
@@ -574,7 +571,7 @@ it.skip('does not throw for torrents that are not dubbed if the media item is an
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
+    validateTorrent(indexedMovie.id, parsedData, infoHash),
   ).resolves.not.toThrow();
 });
 
@@ -598,6 +595,6 @@ it('does not throw for torrents that are not dubbed if the media item is anime a
   const parsedData = parse(rawTitle);
 
   await expect(
-    validateTorrent(indexedMovie, indexedMovie.title, parsedData, infoHash),
+    validateTorrent(indexedMovie.id, parsedData, infoHash),
   ).resolves.not.toThrow();
 });

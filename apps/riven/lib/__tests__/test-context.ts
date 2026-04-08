@@ -32,7 +32,7 @@ export const it = testBase
 
     return apolloServerInstance;
   })
-  .extend("server", async ({}, { onCleanup }) => {
+  .extend("server", { auto: true }, async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
     const server = setupServer();
