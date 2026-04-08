@@ -91,6 +91,7 @@ it("returns the series if the item has a tvdbId", async ({
     genres: ["Drama", "Crime", "Thriller", "Western"],
     network: "AMC",
     country: "usa",
+    language: "eng",
     aliases: {
       ara: ["اختلال ضال"],
       ces: ["Perníkový táta"],

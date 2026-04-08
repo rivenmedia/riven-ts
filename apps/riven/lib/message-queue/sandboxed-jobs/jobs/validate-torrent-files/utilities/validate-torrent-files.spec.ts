@@ -23,7 +23,7 @@ it("throws an error if season-like torrent has fewer files than expected", async
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(season, "test", mappedFiles, false),
+    validateTorrentFiles(season.id, "test", mappedFiles, false),
   ).rejects.toThrow(
     `Season torrent must have at least ${season.episodes.length.toString()} episodes, but has 0`,
   );
@@ -60,7 +60,7 @@ it("considers torrents for continuing shows as valid if missing a maximum of one
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(indexedShow, "test", mappedFiles, false),
+    validateTorrentFiles(indexedShow.id, "test", mappedFiles, false),
   ).resolves.toHaveLength(episodes.length - 10);
 });
 
@@ -90,7 +90,7 @@ it("considers torrents for completed shows as invalid if missing any season", as
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(indexedShow, "test", mappedFiles, false),
+    validateTorrentFiles(indexedShow.id, "test", mappedFiles, false),
   ).rejects.toThrow(`Show torrent must have at least 60 episodes, but has 50`);
 });
 
@@ -110,7 +110,7 @@ it("throws an error if file has no download URL", async ({
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(indexedMovie, "test", mappedFiles, false),
+    validateTorrentFiles(indexedMovie.id, "test", mappedFiles, false),
   ).rejects.toThrow("Expected at least 1 valid files, but found 0");
 });
 
@@ -130,7 +130,7 @@ it("throws an error if movie file is parsed as a show", async ({
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(indexedMovie, "test", mappedFiles, false),
+    validateTorrentFiles(indexedMovie.id, "test", mappedFiles, false),
   ).rejects.toThrow("Expected at least 1 valid files, but found 0");
 });
 
@@ -165,7 +165,7 @@ it("throws an error if show file has unknown episode number", async ({
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(indexedShow, "test", mappedFiles, false),
+    validateTorrentFiles(indexedShow.id, "test", mappedFiles, false),
   ).rejects.toThrow(
     `Expected at least ${episodes.length.toString()} valid files, but found ${Object.keys(files).length.toString()}`,
   );
@@ -187,7 +187,7 @@ it("returns valid matched files for a movie", async ({
   } satisfies MappedFiles;
 
   const result = await validateTorrentFiles(
-    indexedMovie,
+    indexedMovie.id,
     "test",
     mappedFiles,
     false,
@@ -224,7 +224,7 @@ it("returns valid matched files for a show", async ({
   } satisfies MappedFiles;
 
   const result = await validateTorrentFiles(
-    indexedShow,
+    indexedShow.id,
     "test",
     mappedFiles,
     false,
@@ -258,7 +258,7 @@ it("does not match episodes from a different season", async ({ season }) => {
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(season, "test", mappedFiles, false),
+    validateTorrentFiles(season.id, "test", mappedFiles, false),
   ).rejects.toThrow(
     `Expected at least ${season.episodes.length.toString()} valid files, but found 0`,
   );
@@ -280,6 +280,6 @@ it("throws an error if episode file does not match the episode", async ({
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(episode, "test", mappedFiles, false),
+    validateTorrentFiles(episode.id, "test", mappedFiles, false),
   ).rejects.toThrow("Expected at least 1 valid files, but found 0");
 });
