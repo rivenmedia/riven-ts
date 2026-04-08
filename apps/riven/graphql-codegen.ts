@@ -3,7 +3,7 @@ import type { TypeScriptPluginConfig } from "@graphql-codegen/typescript";
 import type { TypeScriptDocumentsPluginConfig } from "@graphql-codegen/typescript-operations";
 
 export default {
-  schema: "http://localhost:3000",
+  schema: "schema.graphql",
   documents: ["lib/**/*.ts", "!lib/**/__generated__/**/*"],
   ignoreNoDocuments: true,
   overwrite: true,

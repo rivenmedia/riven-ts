@@ -46,7 +46,9 @@ export const startGqlServer = fromPromise<
 
     const server = new ApolloServer<ApolloServerContext>({
       cache: redisCache,
-      schema: await buildSchema([...resolvers, ...pluginResolvers]),
+      schema: await buildSchema({
+        resolvers: [...resolvers, ...pluginResolvers],
+      }),
       introspection: true,
       plugins: [
         ApolloServerPluginCacheControl({

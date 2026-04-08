@@ -6,8 +6,9 @@
     { "path": "./tsconfig.spec.json" }
   ],
   "files": [
+    "scripts/generate-gql-schema.ts",
     "eslint.config.ts",
-    "codegen.ts",
+    "graphql-codegen.ts",
     "esbuild.config.ts",
     "vitest.d.ts",
     "vitest.config.ts",

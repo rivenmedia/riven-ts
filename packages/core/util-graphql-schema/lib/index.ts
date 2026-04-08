@@ -14,7 +14,10 @@ import {
   SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
 
-import { buildSchema as baseBuildSchema } from "type-graphql";
+import {
+  type BuildSchemaOptions,
+  buildSchema as baseBuildSchema,
+} from "type-graphql";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { DataSourceMap } from "@repo/util-plugin-sdk";
@@ -25,9 +28,9 @@ export type ApolloServerContext = Partial<
   em: EntityManager;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-export const buildSchema = async (resolvers: readonly Function[]) =>
+export const buildSchema = async (options: BuildSchemaOptions) =>
   baseBuildSchema({
+    ...options,
     orphanedTypes: [
       SubtitleEntry,
       FileSystemEntry,
@@ -39,6 +42,10 @@ export const buildSchema = async (resolvers: readonly Function[]) =>
       Show,
       Stream,
     ],
-    resolvers: [CoreSettingsResolver, RivenSettingsResolver, ...resolvers],
+    resolvers: [
+      CoreSettingsResolver,
+      RivenSettingsResolver,
+      ...options.resolvers,
+    ],
     validate: true,
   });
