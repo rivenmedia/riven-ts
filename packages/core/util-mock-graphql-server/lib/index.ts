@@ -7,10 +7,14 @@ import { ApolloServer } from "@apollo/server";
 
 import "reflect-metadata";
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-export const buildMockServer = async (resolvers: readonly Function[] = []) =>
+export const buildMockServer = async (
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+  resolvers: readonly [Function, ...Function[]] = [] as never,
+) =>
   new ApolloServer<ApolloServerContext>({
-    schema: await buildSchema(resolvers),
+    schema: await buildSchema({
+      resolvers,
+    }),
   });
 
 export type { ApolloServerContext } from "@repo/core-util-graphql-schema";
