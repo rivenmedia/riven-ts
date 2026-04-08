@@ -66,7 +66,7 @@ export function buildContext(): ContextFunction<
     //   }),
     // );
 
-    return {
+    return Promise.resolve({
       // ...pluginContexts.reduce<Record<symbol, unknown>>(
       //   (acc, [pluginSymbol, pluginContext]) => {
       //     acc[pluginSymbol] = pluginContext;
@@ -76,6 +76,6 @@ export function buildContext(): ContextFunction<
       //   {},
       // ),
       em: database.em.fork(),
-    } satisfies ApolloServerContext;
+    } satisfies ApolloServerContext);
   };
 }

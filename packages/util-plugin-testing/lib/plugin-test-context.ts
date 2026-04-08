@@ -55,7 +55,10 @@ export const it = baseIt
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");
 
-    const mockServer = await buildMockServer(plugin.resolvers);
+    const mockServer = await buildMockServer(
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+      plugin.resolvers as [Function, ...Function[]],
+    );
 
     await mockServer.start();
 
