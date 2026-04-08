@@ -4,8 +4,10 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./dist/index.js",
-    "./datasource": "./dist/datasource/listrr.datasource.js"
+    ".": {
+      "production": "./dist/index.js",
+      "default": "./lib/index.ts"
+    }
   },
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",

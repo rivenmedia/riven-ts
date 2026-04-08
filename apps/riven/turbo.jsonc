@@ -6,7 +6,6 @@
       "outputs": ["dist/workers/**"]
     },
     "dev": {
-      "dependsOn": ["^build"],
       "passThroughEnv": [
         "SENTRY_SPOTLIGHT",
         "SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"

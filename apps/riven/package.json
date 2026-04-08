@@ -13,7 +13,7 @@
     "graphql-codegen": "graphql-codegen",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
-    "start": "node --env-file-if-exists=.env.riven --enable-source-maps dist/program/index.js",
+    "start": "node --conditions production --env-file-if-exists=.env.riven --enable-source-maps dist/program/index.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },

@@ -4,20 +4,62 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./dist/index.js",
-    "./types/*": "./dist/types/*.js",
-    "./dto/entities": "./dist/dto/entities/index.js",
-    "./dto/enums/*": "./dist/dto/enums/*.js",
-    "./dto/repositories/*": "./dist/dto/repositories/*.js",
-    "./dto/unions/*": "./dist/dto/unions/*.js",
-    "./errors/*": "./dist/errors/*.js",
-    "./events": "./dist/schemas/events/index.js",
-    "./events/*": "./dist/schemas/plugin-to-program-events/*.js",
-    "./schemas/*": "./dist/schemas/*.js",
-    "./helpers/*": "./dist/helpers/*.js",
-    "./testing/*": "./dist/testing/*.js",
-    "./utilities/*": "./dist/utilities/*.js",
-    "./validation": "./dist/validation/index.js"
+    ".": {
+      "production": "./dist/index.js",
+      "default": "./lib/index.ts"
+    },
+    "./types/*": {
+      "production": "./dist/types/*.js",
+      "default": "./lib/types/*.ts"
+    },
+    "./dto/entities": {
+      "production": "./dist/dto/entities/index.js",
+      "default": "./lib/dto/entities/index.ts"
+    },
+    "./dto/enums/*": {
+      "production": "./dist/dto/enums/*.js",
+      "default": "./lib/dto/enums/*.ts"
+    },
+    "./dto/repositories/*": {
+      "production": "./dist/dto/repositories/*.js",
+      "default": "./lib/dto/repositories/*.ts"
+    },
+    "./dto/unions/*": {
+      "production": "./dist/dto/unions/*.js",
+      "default": "./lib/dto/unions/*.ts"
+    },
+    "./errors/*": {
+      "production": "./dist/errors/*.js",
+      "default": "./lib/errors/*.ts"
+    },
+    "./events": {
+      "production": "./dist/schemas/events/index.js",
+      "default": "./lib/schemas/events/index.ts"
+    },
+    "./events/*": {
+      "production": "./dist/schemas/plugin-to-program-events/*.js",
+      "default": "./lib/schemas/plugin-to-program-events/*.ts"
+    },
+    "./schemas/*": {
+      "production": "./dist/schemas/*.js",
+      "default": "./lib/schemas/*.ts"
+    },
+    "./helpers/*": {
+      "production": "./dist/helpers/*.js",
+      "default": "./lib/helpers/*.ts"
+    },
+    "./testing/*": {
+      "production": "./dist/testing/*.js",
+      "default": "./lib/testing/*.ts"
+    },
+    "./utilities/*": {
+      "production": "./dist/utilities/*.js",
+      "default": "./lib/utilities/*.ts"
+    },
+    "./validation": {
+      "production": "./dist/validation/index.js",
+      "default": "./lib/validation/index.ts"
+    }
   },
   "scripts": {
     "build": "tsc --build tsconfig.lib.json",

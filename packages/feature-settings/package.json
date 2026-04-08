@@ -4,9 +4,18 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./dist/index.js",
-    "./resolver": "./dist/schema/settings.resolver.js",
-    "./settings.type": "./dist/schema/types/settings.type.js"
+    ".": {
+      "production": "./dist/index.js",
+      "default": "./lib/index.ts"
+    },
+    "./resolver": {
+      "production": "./dist/schema/settings.resolver.js",
+      "default": "./lib/schema/settings.resolver.ts"
+    },
+    "./settings.type": {
+      "production": "./dist/schema/types/settings.type.js",
+      "default": "./lib/schema/types/settings.type.ts"
+    }
   },
   "scripts": {
     "build": "tsc --build tsconfig.lib.json",
