@@ -29,12 +29,14 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
         uow.computeChangeSet(parent);
       }
 
-      const show = await parent.show.loadOrFail();
+      if (parent.number === 1) {
+        const show = await parent.show.loadOrFail();
 
-      if (show.releaseDate == null) {
-        show.releaseDate = parent.releaseDate;
+        if (show.releaseDate == null) {
+          show.releaseDate = parent.releaseDate;
 
-        uow.computeChangeSet(show);
+          uow.computeChangeSet(show);
+        }
       }
     }
   }

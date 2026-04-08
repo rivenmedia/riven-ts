@@ -7,9 +7,10 @@ import {
   Property,
 } from "@mikro-orm/decorators/legacy";
 import { IsPositive } from "class-validator";
+import { BigIntResolver } from "graphql-scalars";
 import { DateTime } from "luxon";
 import path from "node:path";
-import { Field, ID, Int, ObjectType } from "type-graphql";
+import { Field, ID, ObjectType } from "type-graphql";
 import z from "zod";
 
 import { Episode, MediaItem, Movie } from "../media-items/index.ts";
@@ -65,7 +66,7 @@ export abstract class FileSystemEntry {
   @PrimaryKey()
   id!: number;
 
-  @Field(() => Int)
+  @Field(() => BigIntResolver)
   @Property({ type: "bigint" })
   @IsPositive()
   fileSize!: number;

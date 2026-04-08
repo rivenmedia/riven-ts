@@ -234,7 +234,11 @@ export const it = testBase
         });
       });
 
-      onCleanup(() => apolloServerInstance.stop());
+      onCleanup(async () => {
+        vi.doUnmock(import("node:worker_threads"));
+
+        await apolloServerInstance.stop();
+      });
 
       return apolloServerInstance;
     },

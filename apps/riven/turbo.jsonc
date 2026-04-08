@@ -3,7 +3,7 @@
   "extends": ["//"],
   "tasks": {
     "build:workers": {
-      "dependsOn": ["transit"],
+      "dependsOn": ["graphql-codegen", "transit"],
       "outputs": ["dist/workers/**"]
     },
     "dev": {

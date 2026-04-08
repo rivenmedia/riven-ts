@@ -73,6 +73,7 @@
     "@mikro-orm/decorators": "catalog:",
     "@repo/util-rank-torrent-name": "workspace:^",
     "es-toolkit": "catalog:",
+    "graphql-scalars": "catalog:",
     "luxon": "catalog:",
     "zod": "catalog:",
     "zod-validation-error": "catalog:"

@@ -96,6 +96,9 @@ catalogs:
     graphql:
       specifier: 16.12.0
       version: 16.12.0
+    graphql-scalars:
+      specifier: ^1.25.0
+      version: 1.25.0
     graphql-tag:
       specifier: ^2.12.6
       version: 2.12.6
@@ -511,6 +514,9 @@ importers:
       graphql:
         specifier: 'catalog:'
         version: 16.12.0
+      graphql-scalars:
+        specifier: 'catalog:'
+        version: 1.25.0(graphql@16.12.0)
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
@@ -1401,6 +1407,9 @@ importers:
       es-toolkit:
         specifier: 'catalog:'
         version: 1.44.0
+      graphql-scalars:
+        specifier: 'catalog:'
+        version: 1.25.0(graphql@16.12.0)
       luxon:
         specifier: 'catalog:'
         version: 3.7.2

@@ -15,6 +15,7 @@ import {
   Property,
 } from "@mikro-orm/decorators/legacy";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
+import { JSONObjectResolver } from "graphql-scalars";
 import { DateTime } from "luxon";
 import { Field, ID, InterfaceType } from "type-graphql";
 
@@ -90,7 +91,7 @@ export abstract class MediaItem {
   @Property({ default: 0 })
   scrapedTimes!: Opt<number>;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => JSONObjectResolver, { nullable: true })
   @Property({ nullable: true, type: "json" })
   aliases?: Record<string, string[]> | null;
 

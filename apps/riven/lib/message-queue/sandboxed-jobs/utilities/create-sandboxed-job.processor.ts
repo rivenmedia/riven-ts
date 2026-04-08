@@ -53,8 +53,6 @@ export function createSandboxedJobProcessor<
 
     const result = await withScope(async (scope) => {
       const thread = await import("node:worker_threads");
-      const data = WorkerData.parse(thread.workerData);
-      const client = initApolloClient(new URL(data.gqlUrl));
 
       scope.setTags({
         "riven.log.source": "core",
@@ -67,9 +65,18 @@ export function createSandboxedJobProcessor<
       });
 
       try {
-        return (await processor({ job, scope, client } as never)) as z.infer<
-          T["shape"]["output"]
-        >;
+        const data = WorkerData.parse(thread.workerData);
+        const client = initApolloClient(new URL(data.gqlUrl));
+
+        const result = (await processor({
+          job,
+          scope,
+          client,
+        } as never)) as z.infer<T["shape"]["output"]>;
+
+        await client.clearStore();
+
+        return result;
       } catch (error) {
         captureException(error);
 

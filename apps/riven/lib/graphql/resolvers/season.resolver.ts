@@ -1,4 +1,4 @@
-import { Season, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 
 import { FieldResolver, Int, Resolver, Root } from "type-graphql";
 
@@ -9,7 +9,7 @@ export class SeasonResolver {
     return season.show.loadOrFail();
   }
 
-  @FieldResolver(() => [Season])
+  @FieldResolver(() => [Episode])
   episodes(@Root() season: Season) {
     return season.episodes.loadItems();
   }

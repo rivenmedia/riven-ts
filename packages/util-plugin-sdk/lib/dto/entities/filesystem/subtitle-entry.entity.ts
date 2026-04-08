@@ -1,7 +1,7 @@
 import { Entity, Index, Property } from "@mikro-orm/decorators/legacy";
 import { Field, Int, ObjectType } from "type-graphql";
 
-import { FileSystemEntry } from "./index.ts";
+import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 
 import type { Opt } from "@mikro-orm/core";
 

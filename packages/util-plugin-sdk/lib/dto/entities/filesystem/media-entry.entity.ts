@@ -3,7 +3,7 @@ import { IsOptional, IsUrl } from "class-validator";
 import path from "node:path";
 import { Field, ObjectType } from "type-graphql";
 
-import { FileSystemEntry } from "./index.ts";
+import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 
 import type { Opt } from "@mikro-orm/core";
 

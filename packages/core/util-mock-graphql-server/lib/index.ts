@@ -9,7 +9,7 @@ import "reflect-metadata";
 
 export const buildMockServer = async (
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  resolvers: readonly [Function, ...Function[]] = [] as never,
+  resolvers?: readonly Function[],
 ) =>
   new ApolloServer<ApolloServerContext>({
     schema: await buildSchema({

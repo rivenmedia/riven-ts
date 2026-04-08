@@ -20,7 +20,7 @@ export interface ParsedPlugins {
 
 export const collectPluginsForRegistration = fromPromise(async () => {
   const { default: packageJson } = (await import(
-    `${process.cwd()}/package.json`,
+    import.meta.resolve(`${process.cwd()}/package.json`),
     { with: { type: "json" } }
   )) as { default: PackageJson };
 
