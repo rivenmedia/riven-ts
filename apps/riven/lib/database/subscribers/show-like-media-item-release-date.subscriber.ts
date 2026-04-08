@@ -1,7 +1,6 @@
 import {
   Episode,
   Season,
-  Show,
   ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
 
@@ -33,34 +32,26 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
       }
     }
 
-    const seasonsAwaitingUpdate = new Set<Season>();
-    const showsAwaitingUpdate = new Set<Show>();
-
-    // Process direct updates from the unit of work
     for (const [item, changeSet] of trackedItems) {
-      if (item instanceof Show) {
-        const [firstSeason] = await item.seasons.matching({
-          where: { number: 1 },
-        });
-
-        if (firstSeason?.releaseDate) {
-          item.releaseDate = firstSeason.releaseDate;
-
-          if (changeSet) {
-            uow.recomputeSingleChangeSet(item);
-          } else {
-            uow.computeChangeSet(item);
-          }
-        }
-
+      if (!changeSet?.payload.releaseDate) {
         continue;
       }
 
       if (item instanceof Episode) {
         const parent = await item.season.loadOrFail();
 
-        if (parent.releaseDate == null) {
-          seasonsAwaitingUpdate.add(parent);
+        if (item.number === 1 && parent.releaseDate == null) {
+          parent.releaseDate = item.releaseDate;
+
+          uow.computeChangeSet(parent);
+
+          const show = await parent.getShow();
+
+          if (show.releaseDate == null) {
+            show.releaseDate = parent.releaseDate;
+
+            uow.computeChangeSet(show);
+          }
         }
 
         continue;
@@ -69,45 +60,13 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
       if (item instanceof Season) {
         const parent = await item.getShow();
 
-        if (parent.releaseDate == null) {
-          showsAwaitingUpdate.add(parent);
+        if (item.number === 1 && parent.releaseDate == null) {
+          parent.releaseDate = item.releaseDate;
+
+          uow.computeChangeSet(parent);
         }
 
         continue;
-      }
-    }
-
-    for (const season of seasonsAwaitingUpdate) {
-      if (season.releaseDate != null) {
-        continue;
-      }
-
-      const [firstEpisode] = await season.episodes.matching({
-        where: { number: 1 },
-      });
-
-      if (firstEpisode?.releaseDate) {
-        season.releaseDate = firstEpisode.releaseDate;
-
-        showsAwaitingUpdate.add(await season.getShow());
-
-        uow.computeChangeSet(season);
-      }
-    }
-
-    for (const show of showsAwaitingUpdate) {
-      if (show.releaseDate != null) {
-        continue;
-      }
-
-      const [firstSeason] = await show.seasons.matching({
-        where: { number: 1 },
-      });
-
-      if (firstSeason?.releaseDate) {
-        show.releaseDate = firstSeason.releaseDate;
-
-        uow.computeChangeSet(show);
       }
     }
   }

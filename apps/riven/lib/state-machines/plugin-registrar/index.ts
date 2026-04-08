@@ -293,10 +293,6 @@ export const pluginRegistrarMachine = setup({
         );
       }
 
-      if (!validPlugins.size) {
-        throw new Error("No valid plugins were registered.");
-      }
-
       return {
         validPlugins,
         invalidPlugins,

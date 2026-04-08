@@ -1,10 +1,12 @@
 /* eslint-disable no-empty-pattern */
+import { startStandaloneServer } from "@apollo/server/standalone";
 import * as Sentry from "@sentry/node";
 import { Job, type JobsOptions } from "bullmq";
+import { toMerged } from "es-toolkit";
 import assert from "node:assert";
 import { randomUUID } from "node:crypto";
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "undici";
-import { test as testBase } from "vitest";
+import { test as testBase, vi } from "vitest";
 
 import { database } from "../database/database.ts";
 import { EpisodeFactory } from "../database/factories/episode.factory.ts";
@@ -15,24 +17,15 @@ import { SeasonFactory } from "../database/factories/season.factory.ts";
 import { ShowItemRequestFactory } from "../database/factories/show-item-request.factory.ts";
 import { ShowFactory } from "../database/factories/show.factory.ts";
 import { StreamFactory } from "../database/factories/stream.factory.ts";
+import { initApolloClient } from "../graphql/apollo-client.ts";
+import { resolvers } from "../graphql/resolvers/index.ts";
 import { createQueue } from "../message-queue/utilities/create-queue.ts";
 import { buildSeederFunctions } from "./utilities/build-seeder-functions.ts";
 
+import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
+
 export const it = testBase
-  .extend("apolloServerInstance", async ({}) => {
-    const { buildMockServer } =
-      await import("@repo/core-util-mock-graphql-server");
-
-    return buildMockServer();
-  })
-  .extend("gqlServer", async ({ apolloServerInstance }, { onCleanup }) => {
-    await apolloServerInstance.start();
-
-    onCleanup(() => apolloServerInstance.stop());
-
-    return apolloServerInstance;
-  })
-  .extend("server", { auto: true }, async ({}, { onCleanup }) => {
+  .extend("server", { auto: false }, async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
     const server = setupServer();
@@ -181,7 +174,45 @@ export const it = testBase
       <T>(data: T, opts?: JobsOptions) =>
         Job.create(mockQueue, randomUUID(), data, opts),
   )
-  .extend("mockSentryScope", () => new Sentry.Scope());
+  .extend("mockSentryScope", () => new Sentry.Scope())
+  .extend("apolloServerInstance", { scope: "file" }, async ({}) => {
+    const { buildMockServer } =
+      await import("@repo/core-util-mock-graphql-server");
+
+    return buildMockServer(resolvers);
+  })
+  .extend(
+    "gqlServer",
+    { scope: "file" },
+    async ({ apolloServerInstance }, { onCleanup }) => {
+      const { url } = await startStandaloneServer<ApolloServerContext>(
+        apolloServerInstance,
+        {
+          context: () =>
+            Promise.resolve({
+              em: database.em.fork(),
+            }),
+          listen: { port: 0 },
+        },
+      );
+
+      initApolloClient(new URL(url));
+
+      vi.doMock(import("node:worker_threads"), async (importOriginal) => {
+        const originalModule = await importOriginal();
+
+        return toMerged(originalModule, {
+          workerData: {
+            gqlUrl: url,
+          },
+        });
+      });
+
+      onCleanup(() => apolloServerInstance.stop());
+
+      return apolloServerInstance;
+    },
+  );
 
 it.afterEach(({ mockSentryScope }) => {
   mockSentryScope.clear();

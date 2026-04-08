@@ -26,7 +26,7 @@ export type ApolloServerContext = Partial<
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-export const buildSchema = async (resolvers: Function[]) =>
+export const buildSchema = async (resolvers: readonly Function[]) =>
   baseBuildSchema({
     orphanedTypes: [
       SubtitleEntry,

@@ -19,7 +19,8 @@ export class EpisodeResolver {
     @Ctx() { em }: ApolloServerContext,
     @Arg("tvdbId", () => String) tvdbId: string,
     @Arg("episodeNumber", () => Int) episodeNumber: number,
-    @Arg("seasonNumber", () => Int, { nullable: true }) seasonNumber?: number,
+    @Arg("seasonNumber", () => Int, { nullable: true })
+    seasonNumber: number | null,
   ) {
     return em
       .getRepository(Episode)

@@ -6,10 +6,10 @@ export class EpisodeRepository extends EntityRepository<Episode> {
   async findAbsoluteEpisode(
     tvdbId: string,
     episodeNumber: number,
-    seasonNumber: number | undefined,
+    seasonNumber: number | null,
   ) {
     const query = (
-      seasonNumber !== undefined
+      seasonNumber !== null
         ? {
             tvdbId,
             season: { number: seasonNumber },

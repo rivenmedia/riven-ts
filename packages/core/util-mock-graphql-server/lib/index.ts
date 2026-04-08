@@ -8,7 +8,7 @@ import { ApolloServer } from "@apollo/server";
 import "reflect-metadata";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-export const buildMockServer = async (resolvers: Function[] = []) =>
+export const buildMockServer = async (resolvers: readonly Function[] = []) =>
   new ApolloServer<ApolloServerContext>({
     schema: await buildSchema(resolvers),
   });

@@ -31,7 +31,7 @@ export class SkippedTorrentError extends Error {
  */
 const getYearCandidates = (year: number) => [year - 1, year, year + 1];
 
-const GET_VALIDATE_TORRENT_ITEM_QUERY: TypedDocumentNode<
+export const GET_VALIDATE_TORRENT_ITEM_QUERY: TypedDocumentNode<
   GetValidateTorrentItemQuery,
   GetValidateTorrentItemQueryVariables
 > = gql`
