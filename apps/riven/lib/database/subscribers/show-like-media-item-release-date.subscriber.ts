@@ -1,8 +1,4 @@
-import {
-  Episode,
-  Season,
-  ShowLikeMediaItem,
-} from "@repo/util-plugin-sdk/dto/entities";
+import { Episode } from "@repo/util-plugin-sdk/dto/entities";
 
 import type {
   ChangeSet,
@@ -12,61 +8,33 @@ import type {
 
 export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
   async onFlush({ uow }: FlushEventArgs): Promise<void> {
-    const trackedItems = new Map<
-      ShowLikeMediaItem,
-      ChangeSet<Partial<ShowLikeMediaItem>> | null
-    >();
+    const trackedItems = new Map<Episode, ChangeSet<Partial<Episode>> | null>();
 
     for (const changeSet of uow.getChangeSets()) {
-      if (changeSet.entity instanceof ShowLikeMediaItem) {
+      if (changeSet.entity instanceof Episode) {
         trackedItems.set(changeSet.entity, changeSet);
       }
     }
 
-    for (const collection of uow.getCollectionUpdates()) {
-      if (
-        collection.owner instanceof ShowLikeMediaItem &&
-        !trackedItems.has(collection.owner)
-      ) {
-        trackedItems.set(collection.owner, null);
-      }
-    }
-
     for (const [item, changeSet] of trackedItems) {
-      if (!changeSet?.payload.releaseDate) {
+      if (!changeSet?.entity.season || item.number !== 1) {
         continue;
       }
 
-      if (item instanceof Episode) {
-        const parent = await item.season.loadOrFail();
+      const parent = await changeSet.entity.season.loadOrFail();
 
-        if (item.number === 1 && parent.releaseDate == null) {
-          parent.releaseDate = item.releaseDate;
+      if (parent.releaseDate == null) {
+        parent.releaseDate = item.releaseDate;
 
-          uow.computeChangeSet(parent);
-
-          const show = await parent.getShow();
-
-          if (show.releaseDate == null) {
-            show.releaseDate = parent.releaseDate;
-
-            uow.computeChangeSet(show);
-          }
-        }
-
-        continue;
+        uow.computeChangeSet(parent);
       }
 
-      if (item instanceof Season) {
-        const parent = await item.getShow();
+      const show = await parent.show.loadOrFail();
 
-        if (item.number === 1 && parent.releaseDate == null) {
-          parent.releaseDate = item.releaseDate;
+      if (show.releaseDate == null) {
+        show.releaseDate = parent.releaseDate;
 
-          uow.computeChangeSet(parent);
-        }
-
-        continue;
+        uow.computeChangeSet(show);
       }
     }
   }
