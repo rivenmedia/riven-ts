@@ -27,13 +27,13 @@
     },
     "start": {},
     "test": {
-      "dependsOn": ["$TURBO_EXTEND$", "graphql-codegen"]
+      "dependsOn": ["$TURBO_EXTENDS$", "graphql-codegen"]
     },
     "lint": {
-      "dependsOn": ["$TURBO_EXTEND$", "graphql-codegen"]
+      "dependsOn": ["$TURBO_EXTENDS$", "graphql-codegen"]
     },
     "check-types": {
-      "dependsOn": ["$TURBO_EXTEND$", "graphql-codegen"]
+      "dependsOn": ["$TURBO_EXTENDS$", "graphql-codegen"]
     }
   }
 }
