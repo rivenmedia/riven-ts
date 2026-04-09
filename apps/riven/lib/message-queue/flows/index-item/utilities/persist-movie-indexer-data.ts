@@ -3,6 +3,7 @@ import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
+import { DateTime } from "luxon";
 import assert from "node:assert";
 import z from "zod";
 
@@ -51,6 +52,7 @@ export async function persistMovieIndexerData({
         rating: item.rating ?? null,
         posterPath: item.posterUrl ?? null,
         releaseDate: item.releaseDate ?? null,
+        year: item.releaseDate ? DateTime.fromISO(item.releaseDate).year : null,
         country: item.country ?? null,
         language: item.language ?? null,
         aliases: item.aliases ?? null,

@@ -13,6 +13,8 @@ import { isHiddenPath } from "../utilities/is-hidden-path.ts";
 import { isIgnoredPath } from "../utilities/is-ignored-path.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
+import type { Loaded } from "@mikro-orm/core";
+import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type { SetOptional } from "type-fest";
 
 type StatMode = "dir" | "file" | "link" | number;
@@ -130,6 +132,29 @@ function getEntry(pathInfo: PathInfo) {
     case "all-movies":
       return null;
   }
+}
+
+async function getFileSize(
+  entry: Loaded<MediaItem, never, "filesystemEntries.fileSize">,
+  pathInfo: PathInfo,
+): Promise<number> {
+  const isSubtitleFile = pathInfo.isFile && pathInfo.ext === ".srt";
+
+  if (!isSubtitleFile) {
+    return entry.filesystemEntries[0]?.fileSize ?? 0;
+  }
+
+  // For subtitle files, look up the SubtitleEntry to get the correct file size
+  const subtitleEntry = await database.subtitleEntry.findOne({
+    mediaItem: { id: entry.id },
+    path: { $like: `%${pathInfo.base}` },
+  });
+
+  if (!subtitleEntry) {
+    throw new FuseError(Fuse.ENOENT, "Subtitle file not found");
+  }
+
+  return Buffer.byteLength(subtitleEntry.content, "utf8");
 }
 
 async function getattr(path: string) {
@@ -310,6 +335,8 @@ async function getattr(path: string) {
         })
       : 0;
 
+  const fileSize = await getFileSize(entry, pathInfo);
+
   const attrs = stat(
     {
       ctime: entry.createdAt,
@@ -317,7 +344,7 @@ async function getattr(path: string) {
       mtime: entry.updatedAt ?? entry.createdAt,
       ...(pathInfo.isFile
         ? {
-            size: entry.filesystemEntries[0]?.fileSize ?? 0,
+            size: fileSize,
             mode: "file",
           }
         : { mode: "dir" }),

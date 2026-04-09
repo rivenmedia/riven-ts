@@ -1,5 +1,5 @@
 import Fuse from "@zkochan/fuse-native";
-import { basename } from "node:path";
+import { basename, extname } from "node:path";
 import { setTimeout } from "node:timers/promises";
 
 import { database } from "../../database/database.ts";
@@ -25,7 +25,41 @@ import type {
 } from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
 import type { Queue } from "bullmq";
 
+type LinkRequestQueues = Map<
+  string,
+  Queue<
+    ParamsFor<MediaItemStreamLinkRequestedEvent>,
+    MediaItemStreamLinkRequestedResponse
+  >
+>;
+
 let fd = 0;
+
+async function getSubtitleEntry(path: string) {
+  const pathInfo = PathInfo.parse(path);
+  const fileName = pathInfo.base;
+
+  if (pathInfo.tmdbId) {
+    return database.subtitleEntry.findOne({
+      mediaItem: { tmdbId: pathInfo.tmdbId },
+      path: { $like: `%${fileName}` },
+    });
+  }
+
+  if (pathInfo.tvdbId && pathInfo.season && pathInfo.episode) {
+    return database.subtitleEntry.findOne({
+      mediaItem: {
+        type: "episode",
+        number: pathInfo.episode,
+        season: { number: pathInfo.season },
+        tvdbId: pathInfo.tvdbId,
+      },
+      path: { $like: `%${fileName}` },
+    });
+  }
+
+  return null;
+}
 
 async function getItemEntry(path: string) {
   const pathInfo = PathInfo.parse(path);
@@ -46,6 +80,7 @@ async function getItemEntry(path: string) {
         season: {
           number: pathInfo.season,
         },
+        tvdbId: pathInfo.tvdbId,
       },
     });
   }
@@ -53,16 +88,34 @@ async function getItemEntry(path: string) {
   throw new FuseError(Fuse.ENOENT, `Invalid path for open: ${path}`);
 }
 
-async function open(
+async function serveSubtitleFile(path: string) {
+  const subtitleEntry = await getSubtitleEntry(path);
+
+  if (!subtitleEntry) {
+    throw new FuseError(Fuse.ENOENT, `Subtitle not found for path: ${path}`);
+  }
+
+  const contentBuffer = Buffer.from(subtitleEntry.content, "utf8");
+  const nextFd = fd++;
+
+  fdToFileHandleMeta.set(nextFd, {
+    type: "subtitle",
+    fileSize: contentBuffer.length,
+    filePath: path,
+    fileBaseName: basename(path),
+    contentBuffer,
+  });
+
+  logger.debug(
+    `Opened subtitle file at path ${path} with fd ${nextFd.toString()}`,
+  );
+
+  return nextFd;
+}
+
+async function serveMediaFile(
   path: string,
-  _flags: number,
-  linkRequestQueues: Map<
-    string,
-    Queue<
-      ParamsFor<MediaItemStreamLinkRequestedEvent>,
-      MediaItemStreamLinkRequestedResponse
-    >
-  >,
+  linkRequestQueues: LinkRequestQueues,
 ) {
   const entry = await getItemEntry(path);
 
@@ -160,6 +213,7 @@ async function open(
   );
 
   fdToFileHandleMeta.set(nextFd, {
+    type: "media",
     fileSize: entry.fileSize,
     filePath: path,
     fileBaseName: basename(path),
@@ -177,16 +231,23 @@ async function open(
   return nextFd;
 }
 
+async function open(
+  path: string,
+  _flags: number,
+  linkRequestQueues: LinkRequestQueues,
+) {
+  // Handle subtitle files (.srt) — serve directly from DB content
+  if (extname(path) === ".srt") {
+    return serveSubtitleFile(path);
+  }
+
+  return serveMediaFile(path, linkRequestQueues);
+}
+
 export const openSync = function (
   path: string,
   flags: number,
-  linkRequestQueues: Map<
-    string,
-    Queue<
-      ParamsFor<MediaItemStreamLinkRequestedEvent>,
-      MediaItemStreamLinkRequestedResponse
-    >
-  >,
+  linkRequestQueues: LinkRequestQueues,
   callback: (err: number, fd?: number) => void,
 ) {
   void withVfsScope(async () => {

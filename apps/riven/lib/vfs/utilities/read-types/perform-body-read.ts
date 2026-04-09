@@ -8,7 +8,7 @@ import { FuseError } from "../../errors/fuse-error.ts";
 import { chunkCache } from "../chunk-cache.ts";
 import { waitForChunk } from "../chunks/wait-for-chunk.ts";
 import {
-  type FileHandleMetadata,
+  type MediaFileHandleMetadata,
   fdToCurrentStreamPositionMap,
   fdToResponsePromiseMap,
 } from "../file-handle-map.ts";
@@ -29,7 +29,7 @@ import type { ChunkMetadata } from "../../schemas/chunk.schema.ts";
 export async function performBodyRead(
   fd: number,
   chunks: readonly ChunkMetadata[],
-  fileHandle: FileHandleMetadata,
+  fileHandle: MediaFileHandleMetadata,
 ) {
   const cachedChunksMetadata = chunks.filter((chunk) => chunk.isCached);
   const missingChunksMetadata = chunks.filter((chunk) => !chunk.isCached);

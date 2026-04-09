@@ -36,6 +36,7 @@
     "@repo/plugin-plex": "workspace:^",
     "@repo/plugin-seerr": "workspace:^",
     "@repo/plugin-stremthru": "workspace:^",
+    "@repo/plugin-subdl": "workspace:^",
     "@repo/plugin-tmdb": "workspace:^",
     "@repo/plugin-torrentio": "workspace:^",
     "@repo/plugin-tvdb": "workspace:^",

@@ -10,6 +10,8 @@ import { indexItemProcessor } from "../../../message-queue/flows/index-item/inde
 import { RequestIndexDataFlow } from "../../../message-queue/flows/index-item/index-item.schema.ts";
 import { requestContentServicesProcessor } from "../../../message-queue/flows/request-content-services/request-content-services.processor.ts";
 import { RequestContentServicesFlow } from "../../../message-queue/flows/request-content-services/request-content-services.schema.ts";
+import { requestSubtitlesProcessor } from "../../../message-queue/flows/request-subtitles/request-subtitles.processor.ts";
+import { RequestSubtitlesFlow } from "../../../message-queue/flows/request-subtitles/request-subtitles.schema.ts";
 import { scrapeItemProcessor } from "../../../message-queue/flows/scrape-item/scrape-item.processor.ts";
 import { ScrapeItemFlow } from "../../../message-queue/flows/scrape-item/scrape-item.schema.ts";
 import { createFlowWorker } from "../../../message-queue/utilities/create-flow-worker.ts";
@@ -80,6 +82,13 @@ export const bootstrapFlowWorkers = fromPromise<
       RankStreamsFlow,
       rankStreamsProcessor,
       parentRef.send,
+    ),
+    "request-subtitles": await createFlowWorker(
+      RequestSubtitlesFlow,
+      requestSubtitlesProcessor,
+      parentRef.send,
+      {},
+      { concurrency: 1 },
     ),
   };
 });

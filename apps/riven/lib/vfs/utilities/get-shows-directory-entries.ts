@@ -2,44 +2,62 @@ import path from "node:path";
 
 import { database } from "../../database/database.ts";
 
+import type { FilterQuery, FindOptions } from "@mikro-orm/core";
+import type { FileSystemEntry } from "@repo/util-plugin-sdk/dto/entities";
+
+const extractPart = (
+  entry: FileSystemEntry,
+  names: Set<string>,
+  tvdbId?: string,
+  season?: number,
+) => {
+  if (!entry.path) {
+    return;
+  }
+
+  const { dir, base } = path.parse(entry.path);
+  const [showName, seasonName] = dir.split(path.sep);
+  const part = tvdbId ? (season ? base : seasonName) : showName;
+
+  if (part) {
+    names.add(part);
+  }
+
+  return names;
+};
+
 export const getShowsDirectoryEntries = async (
   tvdbId: string | undefined,
   season: number | undefined,
 ): Promise<string[]> => {
-  const entries = await database.mediaEntry.find(
-    {
-      mediaItem: {
-        type: "episode",
-        ...(tvdbId && { tvdbId }),
-        ...(season && {
-          season: {
-            number: season,
-          },
-        }),
-      },
+  const filter = {
+    mediaItem: {
+      type: "episode" as const,
+      ...(tvdbId && { tvdbId }),
+      ...(season && {
+        season: {
+          number: season,
+        },
+      }),
     },
-    {
-      // TODO: Is there a better way to do this?
-      // @ts-expect-error - MikroORM doesn't like `mediaItem.season.show` in the type definition
-      populate: ["mediaItem.season.show"],
-    },
-  );
+  } satisfies FilterQuery<FileSystemEntry>;
 
-  return Array.from(
-    entries.reduce<Set<string>>((acc, entry) => {
-      if (!entry.path) {
-        return acc;
-      }
+  // TODO: Is there a better way to do this?
+  // MikroORM doesn't like `mediaItem.season.show` in the type definition
+  const populateOpts = {
+    populate: ["mediaItem.season.show"] as never,
+  } satisfies FindOptions<FileSystemEntry>;
 
-      const { dir, base } = path.parse(entry.path);
-      const [showName, seasonName] = dir.split(path.sep);
-      const part = tvdbId ? (season ? base : seasonName) : showName;
+  const [mediaEntries, subtitleEntries] = await Promise.all([
+    database.mediaEntry.find(filter, populateOpts),
+    database.subtitleEntry.find(filter, populateOpts),
+  ]);
 
-      if (!part) {
-        return acc;
-      }
+  const names = new Set<string>();
 
-      return acc.add(part);
-    }, new Set<string>()),
-  );
+  for (const entry of [...mediaEntries, ...subtitleEntries]) {
+    extractPart(entry, names, tvdbId, season);
+  }
+
+  return Array.from(names);
 };

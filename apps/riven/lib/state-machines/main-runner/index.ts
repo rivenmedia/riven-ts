@@ -32,6 +32,7 @@ import { requestContentServices } from "./actors/request-content-services.actor.
 import { requestDownload } from "./actors/request-download.actor.ts";
 import { requestIndexData } from "./actors/request-index-data.actor.ts";
 import { requestScrape } from "./actors/request-scrape.actor.ts";
+import { requestSubtitles } from "./actors/request-subtitles.actor.ts";
 import { retryLibrary } from "./actors/retry-library.actor.ts";
 import {
   type ScheduleReindexInput,
@@ -42,6 +43,7 @@ import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscrib
 import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
 import type { EnqueueDownloadItemInput } from "../../message-queue/flows/download-item/enqueue-download-item.ts";
 import type { EnqueueIndexItemInput } from "../../message-queue/flows/index-item/enqueue-index-item.ts";
+import type { EnqueueRequestSubtitlesInput } from "../../message-queue/flows/request-subtitles/enqueue-request-subtitles.ts";
 import type { EnqueueScrapeItemInput } from "../../message-queue/flows/scrape-item/enqueue-scrape-items.ts";
 import type {
   PluginQueueMap,
@@ -82,6 +84,7 @@ export const mainRunnerMachine = setup({
       requestContentServices: "requestContentServices";
       requestIndexData: "requestIndexData";
       requestScrape: "requestScrape";
+      requestSubtitles: "requestSubtitles";
       fanOutDownload: "fanOutDownload";
     },
   },
@@ -193,6 +196,22 @@ export const mainRunnerMachine = setup({
         });
       },
     ),
+    requestSubtitles: enqueueActions(
+      (
+        { enqueue, context: { plugins } },
+        params: Omit<EnqueueRequestSubtitlesInput, "subscribers">,
+      ) => {
+        enqueue.spawnChild(requestSubtitles, {
+          input: {
+            item: params.item,
+            subscribers: getPluginEventSubscribers(
+              "riven.media-item.subtitle.requested",
+              plugins,
+            ),
+          },
+        });
+      },
+    ),
     retryLibrary: enqueueActions(({ enqueue, self }) => {
       enqueue.spawnChild("retryLibrary", {
         id: "retryLibrary",
@@ -213,6 +232,7 @@ export const mainRunnerMachine = setup({
     requestIndexData,
     requestScrape,
     requestDownload,
+    requestSubtitles,
     scheduleReindex,
   },
   guards: {
@@ -691,6 +711,10 @@ export const mainRunnerMachine = setup({
                     return baseMessage;
                   },
                 }),
+              },
+              {
+                type: "requestSubtitles",
+                params: ({ event: { item } }) => ({ item }),
               },
             ],
           },

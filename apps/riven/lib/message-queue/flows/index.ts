@@ -21,6 +21,10 @@ import {
   requestContentServicesProcessorSchema,
 } from "./request-content-services/request-content-services.schema.ts";
 import {
+  RequestSubtitlesFlow,
+  requestSubtitlesProcessorSchema,
+} from "./request-subtitles/request-subtitles.schema.ts";
+import {
   ScrapeItemFlow,
   scrapeItemProcessorSchema,
 } from "./scrape-item/scrape-item.schema.ts";
@@ -32,6 +36,7 @@ export const Flow = z.discriminatedUnion("name", [
   DownloadItemFlow,
   FindValidTorrentFlow,
   RankStreamsFlow,
+  RequestSubtitlesFlow,
 ]);
 
 export type Flow = z.infer<typeof Flow>;
@@ -43,4 +48,5 @@ export const FlowHandlers = {
   "download-item": downloadItemProcessorSchema,
   "download-item.find-valid-torrent": findValidTorrentProcessorSchema,
   "download-item.rank-streams": rankStreamsProcessorSchema,
+  "request-subtitles": requestSubtitlesProcessorSchema,
 } satisfies Record<Flow["name"], z.ZodFunction>;
