@@ -4,7 +4,7 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "lib",
-    "outDir": "dist"
+    "outDir": "dist/program"
   },
   "files": [],
   "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],

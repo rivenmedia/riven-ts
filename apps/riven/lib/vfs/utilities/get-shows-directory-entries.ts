@@ -2,7 +2,29 @@ import path from "node:path";
 
 import { database } from "../../database/database.ts";
 
+import type { FindOptions } from "@mikro-orm/core";
 import type { FileSystemEntry } from "@repo/util-plugin-sdk/dto/entities";
+
+const extractPart = (
+  entry: FileSystemEntry,
+  names: Set<string>,
+  tvdbId?: string,
+  season?: number,
+) => {
+  if (!entry.path) {
+    return;
+  }
+
+  const { dir, base } = path.parse(entry.path);
+  const [showName, seasonName] = dir.split(path.sep);
+  const part = tvdbId ? (season ? base : seasonName) : showName;
+
+  if (part) {
+    names.add(part);
+  }
+
+  return names;
+};
 
 export const getShowsDirectoryEntries = async (
   tvdbId: string | undefined,
@@ -24,7 +46,7 @@ export const getShowsDirectoryEntries = async (
   // MikroORM doesn't like `mediaItem.season.show` in the type definition
   const populateOpts = {
     populate: ["mediaItem.season.show"] as never,
-  };
+  } satisfies FindOptions<FileSystemEntry>;
 
   const [mediaEntries, subtitleEntries] = await Promise.all([
     database.mediaEntry.find(filter, populateOpts),
@@ -33,24 +55,8 @@ export const getShowsDirectoryEntries = async (
 
   const names = new Set<string>();
 
-  const extractPart = (entry: FileSystemEntry) => {
-    if (!entry.path) return;
-
-    const { dir, base } = path.parse(entry.path);
-    const [showName, seasonName] = dir.split(path.sep);
-    const part = tvdbId ? (season ? base : seasonName) : showName;
-
-    if (part) {
-      names.add(part);
-    }
-  };
-
-  for (const entry of mediaEntries) {
-    extractPart(entry);
-  }
-
-  for (const entry of subtitleEntries) {
-    extractPart(entry);
+  for (const entry of [...mediaEntries, ...subtitleEntries]) {
+    extractPart(entry, names, tvdbId, season);
   }
 
   return Array.from(names);

@@ -144,10 +144,9 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       (acc, child) => {
         const childState = nextStatesMap.get(child) ?? child.state;
 
-        return {
-          ...acc,
-          [childState]: (acc[childState] ?? 0) + 1,
-        };
+        acc[childState] = (acc[childState] ?? 0) + 1;
+
+        return acc;
       },
       {},
     );

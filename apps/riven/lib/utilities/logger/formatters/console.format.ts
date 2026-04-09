@@ -49,5 +49,14 @@ export const consoleFormat = format.printf(({ level, message, ...meta }) => {
     "yyyy-LL-dd TT",
   );
 
-  return `${chalk.dim.black(formattedTimestamp)} - ${chalk.dim(meta["riven.log.source"])} - ${level}: ${maybeColouredMessage}`;
+  const tags = [
+    chalk.dim.black(formattedTimestamp),
+    ...[meta["riven.log.source"], meta["riven.worker.id"]].map(
+      (tag) => tag && chalk.dim(tag),
+    ),
+  ]
+    .filter(Boolean)
+    .join(" - ");
+
+  return `${tags} - ${level}: ${maybeColouredMessage}`;
 });

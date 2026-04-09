@@ -84,7 +84,9 @@ export const transformSeries = (
           return acc;
         }
 
-        return [...acc, genre.name];
+        acc.push(genre.name);
+
+        return acc;
       }, [])
     : [];
 
@@ -169,6 +171,7 @@ export const transformSeries = (
     posterUrl: posterPath,
     status: tvdbStatus?.toLowerCase() === "continuing" ? "continuing" : "ended",
     seasons,
+    language: series.originalLanguage,
   } satisfies Extract<
     NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
     { type: "show" }

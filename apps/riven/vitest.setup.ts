@@ -22,12 +22,6 @@ vi.mock<{ default: Record<string, unknown> }>(
     }) as const,
 );
 
-vi.mock(import("@apollo/server/standalone"), () => ({
-  startStandaloneServer: vi.fn().mockResolvedValue({
-    url: "http://localhost:4000/mocked-server",
-  }),
-}));
-
 vi.mock(import("@repo/plugin-test"), () => {
   class TestAPI extends BaseDataSource<Record<string, unknown>> {
     override baseURL = "https://api.test.com";
@@ -79,6 +73,7 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
 
   return {
     database,
+    initORM,
   };
 });
 

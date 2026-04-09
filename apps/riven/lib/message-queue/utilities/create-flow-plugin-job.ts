@@ -1,6 +1,6 @@
 import assert from "node:assert";
 
-import { eventSerialiserSchemaMap } from "../../utilities/serialisers/event-serialiser-schemas.ts";
+import { serialiseEventData } from "../../utilities/serialisers/serialise-event-data.ts";
 import { queueNameFor } from "./queue-name-for.ts";
 
 import type { ParamsFor } from "@repo/util-plugin-sdk";
@@ -24,14 +24,10 @@ export const createPluginFlowJob = <
 
   assert(eventType);
 
-  const serialiser = eventSerialiserSchemaMap.get(eventType);
-
-  assert(serialiser, `No event serialiser found for event type: ${eventType}`);
-
   return {
     name: `${pluginName} - ${jobName}`,
     queueName: queueNameFor(eventType, pluginName),
-    data: serialiser.omit({ type: true }).encode(data),
+    data: serialiseEventData(eventType, data),
     opts,
     children,
   };

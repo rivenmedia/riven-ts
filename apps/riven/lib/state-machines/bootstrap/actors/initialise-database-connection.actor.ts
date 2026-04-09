@@ -7,7 +7,7 @@ import { settings } from "../../../utilities/settings.ts";
 export const initialiseDatabaseConnection = fromPromise(async () => {
   const { orm } = await initORM(databaseConfig);
 
-  // await orm.schema.createSchema();
+  // await orm.schema.create();
 
   if (!settings.unsafeRefreshDatabaseOnStartup) {
     return;

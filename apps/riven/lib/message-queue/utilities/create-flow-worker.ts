@@ -7,6 +7,7 @@ import {
   Worker,
   type WorkerOptions,
 } from "bullmq";
+import { toMerged } from "es-toolkit";
 import assert from "node:assert";
 import os from "node:os";
 
@@ -33,8 +34,15 @@ export async function createFlowWorker<
     (typeof FlowHandlers)[T["shape"]["name"]["value"]]["implementAsync"]
   >,
   sendEvent: MainRunnerMachineIntake,
-  queueOptions?: Omit<QueueOptions, "connection" | "telemetry">,
-  workerOptions?: Omit<WorkerOptions, "connection" | "telemetry">,
+  queueOptions: Omit<QueueOptions, "connection" | "telemetry"> = {},
+  workerOptions: Omit<
+    WorkerOptions,
+    | "connection"
+    | "telemetry"
+    | "useWorkerThreads"
+    | "workerThreadsOptions"
+    | "workerForkOptions"
+  > = {},
 ) {
   const [flowName] = flowSchema.shape.name.def.values;
 
@@ -47,8 +55,8 @@ export async function createFlowWorker<
 
   const worker = new Worker(
     flowName,
-    async (job, token) => {
-      return await Sentry.withScope(async (scope) => {
+    (job, token) =>
+      Sentry.withScope(async (scope) => {
         scope.setTags({
           "riven.flow.name": flowName,
           "bullmq.queue.name": flowName,
@@ -66,21 +74,22 @@ export async function createFlowWorker<
 
           throw new UnrecoverableError(String(error));
         }
-      });
-    },
-    {
-      concurrency: os.availableParallelism(),
-      removeOnComplete: { count: 50 },
-      removeOnFail: {
-        age: 60 * 60 * 24,
-        count: 5000,
+      }),
+    toMerged<WorkerOptions, typeof workerOptions>(
+      {
+        concurrency: os.availableParallelism(),
+        removeOnComplete: { count: 50 },
+        removeOnFail: {
+          age: 60 * 60 * 24,
+          count: 5000,
+        },
+        connection: {
+          url: settings.redisUrl,
+        },
+        telemetry,
       },
-      ...workerOptions,
-      connection: {
-        url: settings.redisUrl,
-      },
-      telemetry,
-    },
+      workerOptions,
+    ),
   );
 
   registerMQListeners(worker, logger);

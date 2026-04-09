@@ -7,15 +7,15 @@ import { logger } from "../../../utilities/logger/logger.ts";
 import type { RivenInternalEvent } from "../../../message-queue/events/index.ts";
 import type { MainRunnerMachineEvent } from "../index.ts";
 
-export interface EventSchedulerInput {
+export interface CreateEventSchedulerInput {
   interval: number;
   event: RivenInternalEvent["type"];
   runImmediately?: boolean;
 }
 
-export const eventScheduler = fromCallback<
+export const createEventScheduler = fromCallback<
   MainRunnerMachineEvent,
-  EventSchedulerInput
+  CreateEventSchedulerInput
 >(({ sendBack, input }) => {
   logger.verbose(
     `Scheduling event ${chalk.blue(input.event)} to run every ${input.interval.toString()}ms`,

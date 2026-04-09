@@ -2,7 +2,7 @@ import testPlugin from "@repo/plugin-test";
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
 import { vi } from "vitest";
-import { createActor, createEmptyActor } from "xstate";
+import { createActor, createEmptyActor, fromPromise } from "xstate";
 
 import { it as baseIt } from "../../../../__tests__/test-context.ts";
 import {
@@ -33,7 +33,16 @@ export const it = baseIt
       pluginWorkers: new Map(),
     }),
   )
-  .extend("machine", () => mainRunnerMachine)
+  .extend("machine", () =>
+    mainRunnerMachine.provide({
+      actors: {
+        bootstrapFlowWorkers: fromPromise(() => Promise.resolve()) as never,
+        bootstrapSandboxedWorkers: fromPromise(() =>
+          Promise.resolve(),
+        ) as never,
+      },
+    }),
+  )
   .extend("actor", ({ input, machine }, { onCleanup }) => {
     const actor = createActor(machine, { id: "Main runner", input });
 

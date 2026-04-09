@@ -5,6 +5,7 @@ import { setTimeout } from "node:timers/promises";
 import { database } from "../../database/database.ts";
 import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
 import { logger } from "../../utilities/logger/logger.ts";
+import { serialiseEventData } from "../../utilities/serialisers/serialise-event-data.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { attrCache } from "../utilities/attr-cache.ts";
@@ -169,7 +170,12 @@ async function open(
     try {
       fileNameIsFetchingLinkMap.set(entry.originalFilename, true);
 
-      const job = await requestQueue.add(entry.id.toString(), { item: entry });
+      const job = await requestQueue.add(
+        entry.id.toString(),
+        serialiseEventData("riven.media-item.stream-link.requested", {
+          item: entry,
+        }) as ParamsFor<MediaItemStreamLinkRequestedEvent>,
+      );
 
       const { link: streamUrl } = await runSingleJob(job);
 

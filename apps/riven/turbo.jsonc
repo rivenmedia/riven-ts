@@ -2,12 +2,38 @@
   "$schema": "https://turborepo.dev/schema.json",
   "extends": ["//"],
   "tasks": {
+    "build:workers": {
+      "dependsOn": ["graphql-codegen", "transit"],
+      "outputs": ["dist/workers/**"]
+    },
     "dev": {
       "passThroughEnv": [
         "SENTRY_SPOTLIGHT",
         "SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"
       ]
     },
-    "start": {}
+    "generate-gql-schema": {
+      "dependsOn": ["transit"],
+      "outputs": ["schema.graphql"]
+    },
+    "graphql-codegen": {
+      "dependsOn": ["generate-gql-schema", "transit"],
+      "inputs": [
+        "lib/**/*.ts",
+        "!lib/**/__generated__/**/*",
+        "graphql-codegen.ts"
+      ],
+      "outputs": ["lib/types/__generated__/graphql.ts", "lib/**/*.typegen.ts"]
+    },
+    "start": {},
+    "test": {
+      "dependsOn": ["$TURBO_EXTENDS$", "graphql-codegen"]
+    },
+    "lint": {
+      "dependsOn": ["$TURBO_EXTENDS$", "graphql-codegen"]
+    },
+    "check-types": {
+      "dependsOn": ["$TURBO_EXTENDS$", "graphql-codegen"]
+    }
   }
 }

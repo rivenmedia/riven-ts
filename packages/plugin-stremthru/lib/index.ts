@@ -62,7 +62,9 @@ export default {
             return acc;
           }
 
-          return [...acc, Store.parse(val.replace("ApiKey", ""))];
+          acc.push(Store.parse(val.replace("ApiKey", "")));
+
+          return acc;
         },
         [],
       );

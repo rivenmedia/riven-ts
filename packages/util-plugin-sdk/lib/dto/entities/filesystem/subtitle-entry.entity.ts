@@ -1,5 +1,5 @@
 import { Entity, Index, Property } from "@mikro-orm/decorators/legacy";
-import { Field, ObjectType } from "type-graphql";
+import { Field, Int, ObjectType } from "type-graphql";
 
 import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 
@@ -12,20 +12,20 @@ import type { Opt } from "@mikro-orm/core";
 export class SubtitleEntry extends FileSystemEntry {
   override type: Opt<"subtitle"> = "subtitle" as const;
 
-  @Field()
+  @Field(() => String)
   @Index()
   @Property()
   language!: string;
 
-  @Field()
+  @Field(() => String)
   @Property({ type: "text" })
   content!: string;
 
-  @Field()
+  @Field(() => String)
   @Property()
   fileHash!: string;
 
-  @Field()
+  @Field(() => Int)
   @Property()
   sourceProvider!: string;
 
