@@ -156,10 +156,9 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
         return acc;
       }
 
-      return {
-        ...acc,
-        [item.hash]: item.files,
-      };
+      acc[item.hash] = item.files;
+
+      return acc;
     }, {});
   }
 

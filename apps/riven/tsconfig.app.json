@@ -4,9 +4,9 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "lib",
-    "outDir": "dist"
+    "outDir": "dist/program"
   },
   "files": [],
   "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],
-  "exclude": ["lib/**/*.spec.ts"]
+  "exclude": ["lib/**/*.spec.ts", "**/__tests__/**/*.ts"]
 }

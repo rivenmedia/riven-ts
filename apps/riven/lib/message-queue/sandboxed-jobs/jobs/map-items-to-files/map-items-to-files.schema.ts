@@ -3,10 +3,10 @@ import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 
 import z from "zod";
 
-import { createFlowJobBuilder } from "../../../../utilities/create-flow-job-schema.ts";
-import { createFlowSchema } from "../../../../utilities/create-flow-schema.ts";
+import { createFlowJobBuilder } from "../../../utilities/create-flow-job-builder.ts";
+import { createSandboxedJobSchema } from "../../utilities/create-sandboxed-job-schema.ts";
 
-export const MapItemsToFilesFlow = createFlowSchema(
+export const MapItemsToFilesSandboxedJob = createSandboxedJobSchema(
   "download-item.map-items-to-files",
   {
     input: MediaItemDownloadRequestedResponse.pick({
@@ -19,10 +19,13 @@ export const MapItemsToFilesFlow = createFlowSchema(
   },
 );
 
-export type MapItemsToFilesFlow = z.infer<typeof MapItemsToFilesFlow>;
+export type MapItemsToFilesSandboxedJob = z.infer<
+  typeof MapItemsToFilesSandboxedJob
+>;
 
 export const mapItemsToFilesProcessorSchema =
-  MapItemsToFilesFlow.shape.processor;
+  MapItemsToFilesSandboxedJob.shape.processor;
 
-export const createMapItemsToFilesJob =
-  createFlowJobBuilder(MapItemsToFilesFlow);
+export const createMapItemsToFilesJob = createFlowJobBuilder(
+  MapItemsToFilesSandboxedJob,
+);

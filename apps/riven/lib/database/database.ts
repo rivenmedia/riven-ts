@@ -1,5 +1,10 @@
-import {
-  Episode,
+import type {
+  EntityManager,
+  EntityRepository,
+  MikroORM,
+  Options,
+} from "@mikro-orm/core";
+import type {
   FileSystemEntry,
   ItemRequest,
   MediaEntry,
@@ -10,14 +15,6 @@ import {
   Stream,
   SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
-
-import {
-  EntityManager,
-  EntityRepository,
-  MikroORM,
-  type Options,
-} from "@mikro-orm/core";
-
 import type { EpisodeRepository } from "@repo/util-plugin-sdk/dto/repositories/episode.repository";
 
 export interface Services {
@@ -42,6 +39,20 @@ export async function initORM(options: Partial<Options>): Promise<Services> {
   if (database) {
     return database;
   }
+
+  const {
+    Episode,
+    FileSystemEntry,
+    ItemRequest,
+    MediaEntry,
+    MediaItem,
+    Movie,
+    Season,
+    Show,
+    Stream,
+    SubtitleEntry,
+  } = await import("@repo/util-plugin-sdk/dto/entities");
+  const { MikroORM } = await import("@mikro-orm/core");
 
   const orm = await MikroORM.init(options);
 

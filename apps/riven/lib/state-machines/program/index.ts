@@ -8,6 +8,7 @@ import { unmountVfs } from "./actors/unmount-vfs.actor.ts";
 
 import type { ValidPluginMap } from "../../types/plugins.ts";
 import type { ApolloServer } from "@apollo/server";
+import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";
 import type Fuse from "@zkochan/fuse-native";
 import type { UUID } from "node:crypto";
@@ -15,7 +16,7 @@ import type { UUID } from "node:crypto";
 export interface RivenMachineContext {
   mainRunnerRef?: AnyActorRef;
   plugins?: ValidPluginMap;
-  server?: ApolloServer;
+  server?: ApolloServer<ApolloServerContext>;
   vfs?: Fuse;
 }
 

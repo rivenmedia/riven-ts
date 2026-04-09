@@ -1,12 +1,7 @@
 import path from "node:path";
 import { loadEnvFile } from "node:process";
 import swc from "unplugin-swc";
-import {
-  type Plugin,
-  configDefaults,
-  defineConfig,
-  mergeConfig,
-} from "vitest/config";
+import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
 
 export const baseVitestConfig = defineConfig(({ mode }) => {
   try {
@@ -37,7 +32,7 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
         ],
         retry: process.env["CI"] ? 2 : 0,
       },
-      plugins: [swc.vite() as Plugin],
+      plugins: [swc.vite()],
     }),
   );
 });

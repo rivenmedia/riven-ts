@@ -1,5 +1,6 @@
 import { rankTorrent } from "./ranker/rank.ts";
 import {
+  type CustomRank,
   type RankingModel,
   type Settings,
   type SettingsInput,
@@ -24,20 +25,17 @@ export class RTN {
     this.#settings = createSettings(settings);
 
     this.#rankingModel = Object.values(this.#settings.customRanks).reduce(
-      (acc, category) => ({
-        ...acc,
-        ...Object.entries(category).reduce(
-          (a, [key, rank]) => {
-            return {
-              ...a,
-              [key as keyof RankingModel]:
-                rank.rank ?? rankingModel[key as keyof RankingModel],
-            };
-          },
-          {} as Record<keyof RankingModel, number>,
-        ),
-      }),
-      {} as RankingModel,
+      (acc, category) => {
+        for (const [key, rank] of Object.entries(category) as [
+          keyof RankingModel,
+          CustomRank,
+        ][]) {
+          acc[key] = rank.rank ?? rankingModel[key];
+        }
+
+        return acc;
+      },
+      { ...rankingModel },
     );
 
     this.#enabledResolutions = new Set(

@@ -29,7 +29,7 @@ export const it = baseIt
     fromPromise<StartGQLServerOutput, StartGQLServerInput>(async () => {
       return {
         server: apolloServerInstance,
-        url: "http://localhost:4000/graphql",
+        url: "http://localhost:3000",
       };
     }),
   )
