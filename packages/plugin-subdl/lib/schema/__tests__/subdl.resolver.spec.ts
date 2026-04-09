@@ -3,12 +3,11 @@ import assert from "node:assert";
 import { expect } from "vitest";
 
 import { it } from "../../__tests__/subdl.test-context.ts";
-import { pluginConfig } from "../../subdl-plugin.config.ts";
 
 it('returns the validation status when calling "subdlIsValid" query', async ({
   gqlServer,
   server,
-  dataSourceMap,
+  gqlContext,
 }) => {
   server.use(
     http.get("https://api.subdl.com/api/v1/subtitles", () =>
@@ -28,13 +27,7 @@ it('returns the validation status when calling "subdlIsValid" query', async ({
         }
       `,
     },
-    {
-      contextValue: {
-        [pluginConfig.name]: {
-          dataSources: dataSourceMap,
-        },
-      },
-    },
+    { contextValue: gqlContext },
   );
 
   assert(body.kind === "single");

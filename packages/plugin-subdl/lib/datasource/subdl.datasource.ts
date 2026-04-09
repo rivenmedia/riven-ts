@@ -4,6 +4,8 @@ import {
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
 
+import { URL } from "node:url";
+
 import { SubtitleResponse } from "../schemas/subtitle-response.schema.ts";
 import {
   type SubtitleSearchResponse,
@@ -89,16 +91,20 @@ export class SubdlAPI extends BaseDataSource<SubdlSettings> {
     });
 
     const parsed = subtitleSearchResponseSchema.safeParse(response);
+
     if (!parsed.success) {
       this.logger.error("Failed to parse subtitle search response from SubDL", {
         err: parsed.error,
       });
+
       throw new SubdlAPIError("Invalid response format from SubDL");
     }
+
     if (!parsed.data.status) {
       this.logger.error("Subtitle search failed on SubDL", {
         err: parsed.data.error,
       });
+
       throw new SubdlAPIError(`Subtitle search failed: ${parsed.data.error}`);
     }
 
@@ -109,18 +115,21 @@ export class SubdlAPI extends BaseDataSource<SubdlSettings> {
    * Download a subtitle ZIP from SubDL, extract the first .srt file, and return its content.
    */
   async downloadSubtitle(subtitleUrl: string): Promise<string | undefined> {
-    const url = subtitleUrl.startsWith("http")
-      ? subtitleUrl
-      : `https://dl.subdl.com${subtitleUrl}`;
+    const url = new URL(
+      subtitleUrl,
+      subtitleUrl.startsWith("http") ? undefined : `https://dl.subdl.com`,
+    );
 
     const response = await fetch(url);
+
     if (!response.ok) {
       throw new SubdlAPIError(
-        `Failed to download subtitle from ${url}: ${response.statusText}`,
+        `Failed to download subtitle from ${url.toString()}: ${response.statusText}`,
       );
     }
 
     const buffer = Buffer.from(await response.arrayBuffer());
+
     return extractSrtFromZip(buffer);
   }
 }

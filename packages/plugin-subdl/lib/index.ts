@@ -32,6 +32,7 @@ export default {
         logger.warn(
           `Unsupported media item type for ${item.fullTitle}, skipping subtitle download`,
         );
+
         return { subtitles: [] };
       }
 
@@ -41,6 +42,7 @@ export default {
         logger.warn(
           `No TMDB/IMDB ID found for ${item.fullTitle}, skipping subtitle download`,
         );
+
         return { subtitles: [] };
       }
 
@@ -55,13 +57,16 @@ export default {
 
       if (results.length === 0) {
         logger.debug(`No subtitles found for ${item.fullTitle}`);
+
         return { subtitles: [] };
       }
 
       // Pick the best subtitle per language (first result per language)
       const bestPerLanguage = new Map<string, (typeof results)[0]>();
+
       for (const sub of results) {
         const subLangLower = sub.lang.toLowerCase();
+
         if (!bestPerLanguage.has(subLangLower)) {
           bestPerLanguage.set(subLangLower, sub);
         }
@@ -72,10 +77,12 @@ export default {
       for (const [language, sub] of bestPerLanguage) {
         try {
           const content = await api.downloadSubtitle(sub.url);
+
           if (!content) {
             logger.warn(
               `Failed to extract .srt from ZIP for ${item.fullTitle} (${language})`,
             );
+
             continue;
           }
 

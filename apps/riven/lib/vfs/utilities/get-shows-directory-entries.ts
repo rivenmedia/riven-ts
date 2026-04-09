@@ -2,7 +2,7 @@ import path from "node:path";
 
 import { database } from "../../database/database.ts";
 
-import type { FindOptions } from "@mikro-orm/core";
+import type { FilterQuery, FindOptions } from "@mikro-orm/core";
 import type { FileSystemEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 const extractPart = (
@@ -40,7 +40,7 @@ export const getShowsDirectoryEntries = async (
         },
       }),
     },
-  };
+  } satisfies FilterQuery<FileSystemEntry>;
 
   // TODO: Is there a better way to do this?
   // MikroORM doesn't like `mediaItem.season.show` in the type definition

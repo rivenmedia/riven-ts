@@ -27,8 +27,6 @@ export interface ReadInput {
 }
 
 async function read({ fd, length, position, buffer }: ReadInput) {
-  const previousReadPosition = fdToPreviousReadPositionMap.get(fd);
-
   const fileHandle = fdToFileHandleMeta.get(fd);
 
   if (!fileHandle) {
@@ -74,6 +72,8 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     requestRange: [position, position + length - 1],
     fileName: fileHandle.originalFileName,
   });
+
+  const previousReadPosition = fdToPreviousReadPositionMap.get(fd);
 
   const readType = detectReadType(
     previousReadPosition,

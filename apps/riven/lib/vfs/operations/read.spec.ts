@@ -344,8 +344,7 @@ it("saves a copy of each chunk to the cache when reading during playback within 
 
   const fileHandle = fdToFileHandleMeta.get(0);
 
-  expect.assert(fileHandle);
-  expect.assert(fileHandle.type === "media");
+  expect.assert(fileHandle?.type === "media");
 
   fdToResponsePromiseMap.set(
     0,

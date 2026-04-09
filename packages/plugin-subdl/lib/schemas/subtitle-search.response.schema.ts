@@ -20,7 +20,7 @@ const subtitleSearchErrorResponseSchema = z.object({
   error: z.string(),
 });
 
-export const subtitleSearchResponseSchema = z.union([
+export const subtitleSearchResponseSchema = z.discriminatedUnion("status", [
   subtitleSearchSuccessResponseSchema,
   subtitleSearchErrorResponseSchema,
 ]);

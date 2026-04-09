@@ -2,6 +2,9 @@ import { reduceAsync } from "es-toolkit";
 
 import { database } from "../../database/database.ts";
 
+import type { FilterQuery } from "@mikro-orm/core";
+import type { FileSystemEntry } from "@repo/util-plugin-sdk/dto/entities";
+
 export const getMoviesDirectoryEntries = async (
   tmdbId: string | undefined,
 ): Promise<string[]> => {
@@ -10,18 +13,16 @@ export const getMoviesDirectoryEntries = async (
       type: "movie" as const,
       ...(tmdbId && { tmdbId }),
     },
-  };
+  } satisfies FilterQuery<FileSystemEntry>;
 
   const [mediaEntries, subtitleEntries] = await Promise.all([
     database.mediaEntry.find(filter, { populate: ["$infer"] }),
     database.subtitleEntry.find(filter, { populate: ["$infer"] }),
   ]);
 
-  const entries = [...mediaEntries, ...subtitleEntries];
-
   return Array.from(
     await reduceAsync(
-      entries,
+      [...mediaEntries, ...subtitleEntries],
       async (acc, entry) => {
         if (tmdbId) {
           return acc.add(await entry.getVfsFileName());
