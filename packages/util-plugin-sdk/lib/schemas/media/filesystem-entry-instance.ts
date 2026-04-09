@@ -1,5 +1,5 @@
 import z from "zod";
 
-import { FileSystemEntry } from "../../dto/entities/filesystem/filesystem-entry.entity.ts";
+import { FileSystemEntry } from "../../dto/entities/index.ts";
 
 export const FileSystemEntryInstance = z.instanceof(FileSystemEntry);

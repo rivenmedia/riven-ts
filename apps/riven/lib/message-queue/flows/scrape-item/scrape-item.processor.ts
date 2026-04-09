@@ -15,13 +15,7 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
 
     const parsedResults = Object.values(children).reduce<
       Record<string, ParsedData>
-    >(
-      (acc, scrapeResult) => ({
-        ...acc,
-        ...scrapeResult.results,
-      }),
-      {},
-    );
+    >((acc, scrapeResult) => Object.assign(acc, scrapeResult.results), {});
 
     try {
       const item = await persistScrapeResults({

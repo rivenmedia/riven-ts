@@ -1,21 +1,26 @@
 import { expect } from "vitest";
 
-import { it } from "../../../../../../__tests__/test-context.ts";
+import { it } from "../../../../../__tests__/test-context.ts";
 import { validateTorrentFiles } from "./validate-torrent-files.ts";
 
-import type { MapItemsToFilesFlow } from "../../map-items-to-files/map-items-to-files.schema.ts";
+import type { MapItemsToFilesSandboxedJob } from "../../map-items-to-files/map-items-to-files.schema.ts";
 
-type MappedFiles = MapItemsToFilesFlow["output"];
+type MappedFiles = MapItemsToFilesSandboxedJob["output"];
+
+it.beforeAll(({ gqlServer: _gqlServer }) => {
+  return;
+});
 
 it("throws an error if season-like torrent has fewer files than expected", async ({
   season,
+  stream,
 }) => {
   const mappedFiles = {
     episodes: {},
     movies: {
       "1": {
-        name: "Test.Show.S01E01.1080p.WEB-DL.mkv",
-        path: "/Test.Show.S01E01.1080p.WEB-DL.mkv",
+        name: `${season.show.getProperty("title")}.S01E01.1080p.WEB-DL.mkv`,
+        path: `/${season.show.getProperty("title")}.S01E01.1080p.WEB-DL.mkv`,
         size: 5000000000,
         link: "http://example.com/file.mkv",
       },
@@ -23,7 +28,7 @@ it("throws an error if season-like torrent has fewer files than expected", async
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(season, "test", mappedFiles, false),
+    validateTorrentFiles(season.id, stream.infoHash, mappedFiles, false),
   ).rejects.toThrow(
     `Season torrent must have at least ${season.episodes.length.toString()} episodes, but has 0`,
   );
@@ -31,6 +36,7 @@ it("throws an error if season-like torrent has fewer files than expected", async
 
 it("considers torrents for continuing shows as valid if missing a maximum of one season", async ({
   indexedShowContext: { indexedShow },
+  stream,
   em,
 }) => {
   indexedShow.status = "continuing";
@@ -44,15 +50,14 @@ it("considers torrents for continuing shows as valid if missing a maximum of one
       return acc;
     }
 
-    return {
-      ...acc,
-      [`abs:${episode.absoluteNumber.toString()}`]: {
-        name: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        path: `/Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        size: 5000000000,
-        link: "http://example.com/file.mkv",
-      },
+    acc[`abs:${episode.absoluteNumber.toString()}`] = {
+      name: `${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+      path: `/${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+      size: 5000000000,
+      link: "http://example.com/file.mkv",
     };
+
+    return acc;
   }, {});
 
   const mappedFiles = {
@@ -61,12 +66,13 @@ it("considers torrents for continuing shows as valid if missing a maximum of one
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(indexedShow, "test", mappedFiles, false),
+    validateTorrentFiles(indexedShow.id, stream.infoHash, mappedFiles, false),
   ).resolves.toHaveLength(episodes.length - 10);
 });
 
 it("considers torrents for completed shows as invalid if missing any season", async ({
   indexedShowContext: { indexedShow },
+  stream,
 }) => {
   const episodes = await indexedShow.getEpisodes();
 
@@ -75,15 +81,14 @@ it("considers torrents for completed shows as invalid if missing any season", as
       return acc;
     }
 
-    return {
-      ...acc,
-      [`abs:${episode.absoluteNumber.toString()}`]: {
-        name: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        path: `/Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        size: 5000000000,
-        link: "http://example.com/file.mkv",
-      },
+    acc[`abs:${episode.absoluteNumber.toString()}`] = {
+      name: `${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+      path: `/${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+      size: 5000000000,
+      link: "http://example.com/file.mkv",
     };
+
+    return acc;
   }, {});
 
   const mappedFiles = {
@@ -92,18 +97,19 @@ it("considers torrents for completed shows as invalid if missing any season", as
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(indexedShow, "test", mappedFiles, false),
+    validateTorrentFiles(indexedShow.id, stream.infoHash, mappedFiles, false),
   ).rejects.toThrow(`Show torrent must have at least 60 episodes, but has 50`);
 });
 
 it("throws an error if file has no download URL", async ({
   indexedMovieContext: { indexedMovie },
+  stream,
 }) => {
   const mappedFiles = {
     movies: {
       1: {
-        name: "Test.Movie.2024.1080p.WEB-DL.mkv",
-        path: "/Test.Movie.2024.1080p.WEB-DL.mkv",
+        name: `${indexedMovie.title}.2024.1080p.WEB-DL.mkv`,
+        path: `/${indexedMovie.title}.2024.1080p.WEB-DL.mkv`,
         size: 5000000000,
         link: "",
       },
@@ -112,18 +118,19 @@ it("throws an error if file has no download URL", async ({
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(indexedMovie, "test", mappedFiles, false),
+    validateTorrentFiles(indexedMovie.id, stream.infoHash, mappedFiles, false),
   ).rejects.toThrow("Expected at least 1 valid files, but found 0");
 });
 
 it("throws an error if movie file is parsed as a show", async ({
   indexedMovieContext: { indexedMovie },
+  stream,
 }) => {
   const mappedFiles = {
     movies: {
       1: {
-        name: "Test.Show.S01E01.1080p.WEB-DL.mkv",
-        path: "/Test.Show.S01E01.1080p.WEB-DL.mkv",
+        name: `${indexedMovie.title}.S01E01.1080p.WEB-DL.mkv`,
+        path: `/${indexedMovie.title}.S01E01.1080p.WEB-DL.mkv`,
         size: 5000000000,
         link: "http://example.com/file.mkv",
       },
@@ -132,12 +139,13 @@ it("throws an error if movie file is parsed as a show", async ({
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(indexedMovie, "test", mappedFiles, false),
+    validateTorrentFiles(indexedMovie.id, stream.infoHash, mappedFiles, false),
   ).rejects.toThrow("Expected at least 1 valid files, but found 0");
 });
 
 it("throws an error if show file has unknown episode number", async ({
   indexedShowContext: { indexedShow },
+  stream,
 }) => {
   const episodes = await indexedShow.getEpisodes();
 
@@ -145,8 +153,8 @@ it("throws an error if show file has unknown episode number", async ({
     episodes.map((episode) => [
       `abs:${episode.absoluteNumber.toString()}`,
       {
-        name: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        path: `/Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        name: `${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        path: `/${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
         size: 5000000000,
         link: "http://example.com/file.mkv",
       },
@@ -157,8 +165,8 @@ it("throws an error if show file has unknown episode number", async ({
     episodes: {
       ...files,
       "abs:1": {
-        name: "Test.Show.S01E00.1080p.WEB-DL.mkv",
-        path: "Test.Show.S01E00.1080p.WEB-DL.mkv",
+        name: `${indexedShow.title}.S01E00.1080p.WEB-DL.mkv`,
+        path: `/${indexedShow.title}.S01E00.1080p.WEB-DL.mkv`,
         size: 5000000000,
         link: "http://example.com/file.mkv",
       },
@@ -167,7 +175,7 @@ it("throws an error if show file has unknown episode number", async ({
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(indexedShow, "test", mappedFiles, false),
+    validateTorrentFiles(indexedShow.id, stream.infoHash, mappedFiles, false),
   ).rejects.toThrow(
     `Expected at least ${episodes.length.toString()} valid files, but found ${Object.keys(files).length.toString()}`,
   );
@@ -175,12 +183,13 @@ it("throws an error if show file has unknown episode number", async ({
 
 it("returns valid matched files for a movie", async ({
   indexedMovieContext: { indexedMovie },
+  stream,
 }) => {
   const mappedFiles = {
     movies: {
       0: {
-        name: "Test.Movie.2024.1080p.WEB-DL.mkv",
-        path: "/Test.Movie.2024.1080p.WEB-DL.mkv",
+        name: `${indexedMovie.title}.2024.1080p.WEB-DL.mkv`,
+        path: `/${indexedMovie.title}.2024.1080p.WEB-DL.mkv`,
         size: 5000000000,
         link: "http://example.com/file.mkv",
       },
@@ -189,8 +198,8 @@ it("returns valid matched files for a movie", async ({
   } satisfies MappedFiles;
 
   const result = await validateTorrentFiles(
-    indexedMovie,
-    "test",
+    indexedMovie.id,
+    stream.infoHash,
     mappedFiles,
     false,
   );
@@ -200,11 +209,12 @@ it("returns valid matched files for a movie", async ({
   expect.assert(result[0]);
 
   expect(result[0].matchedMediaItemId).toBe(indexedMovie.id);
-  expect(result[0].name).toBe("Test.Movie.2024.1080p.WEB-DL.mkv");
+  expect(result[0].name).toBe(`${indexedMovie.title}.2024.1080p.WEB-DL.mkv`);
 });
 
 it("returns valid matched files for a show", async ({
   indexedShowContext: { indexedShow },
+  stream,
 }) => {
   const episodes = await indexedShow.getEpisodes();
 
@@ -212,8 +222,8 @@ it("returns valid matched files for a show", async ({
     episodes.map((episode) => [
       `abs:${episode.absoluteNumber.toString()}`,
       {
-        name: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        path: `/Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        name: `${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        path: `/${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
         size: 5000000000,
         link: "http://example.com/file.mkv",
       },
@@ -226,8 +236,8 @@ it("returns valid matched files for a show", async ({
   } satisfies MappedFiles;
 
   const result = await validateTorrentFiles(
-    indexedShow,
-    "test",
+    indexedShow.id,
+    stream.infoHash,
     mappedFiles,
     false,
   );
@@ -237,17 +247,20 @@ it("returns valid matched files for a show", async ({
   expect.assert(result[0]);
   expect.assert(episodes[0]);
 
-  expect(result[0].name).toBe("Test.Show.E1.1080p.WEB-DL.mkv");
+  expect(result[0].name).toBe(`${indexedShow.title}.E1.1080p.WEB-DL.mkv`);
   expect(result[0].matchedMediaItemId).toBe(episodes[0].id);
 });
 
-it("does not match episodes from a different season", async ({ season }) => {
+it("does not match episodes from a different season", async ({
+  season,
+  stream,
+}) => {
   const files = Object.fromEntries(
     season.episodes.map((episode) => [
       `${(episode.season.unwrap().number + 1).toString()}:${episode.number.toString()}`,
       {
-        name: `Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        path: `/Test.Show.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        name: `${season.show.getProperty("title")}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
+        path: `/${season.show.getProperty("title")}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
         size: 5000000000,
         link: "http://example.com/file.mkv",
       },
@@ -260,7 +273,7 @@ it("does not match episodes from a different season", async ({ season }) => {
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(season, "test", mappedFiles, false),
+    validateTorrentFiles(season.id, stream.infoHash, mappedFiles, false),
   ).rejects.toThrow(
     `Expected at least ${season.episodes.length.toString()} valid files, but found 0`,
   );
@@ -268,13 +281,15 @@ it("does not match episodes from a different season", async ({ season }) => {
 
 it("throws an error if episode file does not match the episode", async ({
   episode,
+  stream,
 }) => {
+  const show = await episode.getShow();
   const mappedFiles = {
     movies: {},
     episodes: {
       1: {
-        name: "Test.Show.S02E01.1080p.WEB-DL.mkv",
-        path: "/Test.Show.S02E01.1080p.WEB-DL.mkv",
+        name: `${show.title}.S02E01.1080p.WEB-DL.mkv`,
+        path: `/${show.title}.S02E01.1080p.WEB-DL.mkv`,
         size: 5000000000,
         link: "http://example.com/file.mkv",
       },
@@ -282,6 +297,6 @@ it("throws an error if episode file does not match the episode", async ({
   } satisfies MappedFiles;
 
   await expect(
-    validateTorrentFiles(episode, "test", mappedFiles, false),
+    validateTorrentFiles(episode.id, stream.infoHash, mappedFiles, false),
   ).rejects.toThrow("Expected at least 1 valid files, but found 0");
 });

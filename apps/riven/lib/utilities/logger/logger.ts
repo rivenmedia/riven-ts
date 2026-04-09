@@ -2,7 +2,7 @@ import "./types/logform.ts";
 
 import { ecsFormat as baseEcsFormat } from "@elastic/ecs-winston-format";
 import path from "node:path";
-import { type Logform, createLogger, format, transports } from "winston";
+import { createLogger, format, transports } from "winston";
 
 import { settings } from "../settings.ts";
 import { consoleFormat } from "./formatters/console.format.ts";
@@ -18,7 +18,7 @@ export const logger = createLogger({
   format: format.combine(
     sentryMetaFormat(),
     validationErrorMetaFormat(),
-    baseEcsFormat() as Logform.Format,
+    baseEcsFormat(),
   ),
   exitOnError: false,
   silent: !settings.loggingEnabled,

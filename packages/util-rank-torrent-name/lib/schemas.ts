@@ -101,9 +101,10 @@ export type Resolution = z.infer<typeof Resolution>;
 export const ResolutionRank = Resolution.options.reduce<
   Record<Resolution, number>
 >(
-  (acc, res, index) => ({
-    ...acc,
-    [res]: Resolution.options.length - index,
-  }),
+  (acc, res, index) => {
+    acc[res] = Resolution.options.length - index;
+
+    return acc;
+  },
   {} as Record<Resolution, number>,
 );

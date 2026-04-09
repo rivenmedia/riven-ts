@@ -5,9 +5,9 @@ import { constantCase } from "es-toolkit";
 import { fromPromise } from "xstate";
 import z from "zod";
 
-import packageJson from "../../../../package.json" with { type: "json" };
 import { logger } from "../../../utilities/logger/logger.ts";
 
+import type { PackageJson } from "type-fest";
 import type { $ZodErrorTree } from "zod/v4/core";
 
 export interface ParsedPlugins {
@@ -18,8 +18,13 @@ export interface ParsedPlugins {
   pluginSettings: PluginSettings;
 }
 
-export const collectPluginsForRegistration = fromPromise(() => {
-  const pluginNames = Object.keys(packageJson.dependencies).filter(
+export const collectPluginsForRegistration = fromPromise(async () => {
+  const { default: packageJson } = (await import(
+    import.meta.resolve(`${process.cwd()}/package.json`),
+    { with: { type: "json" } }
+  )) as { default: PackageJson };
+
+  const pluginNames = Object.keys(packageJson.dependencies ?? {}).filter(
     (pluginName) => pluginName.startsWith("@repo/plugin-"),
   );
 
@@ -31,54 +36,42 @@ export const collectPluginsForRegistration = fromPromise(() => {
     logger,
   );
 
-  return pluginNames.reduce<Promise<ParsedPlugins>>(
-    async (acc, pluginName) => {
-      const parsedPlugins = await acc;
+  const parsedPlugins: ParsedPlugins = {
+    invalidPlugins: [],
+    pluginConfigPrefixMap: new Map(),
+    pluginSettings,
+    unresolvablePlugins: [],
+    validPlugins: [],
+  };
 
-      try {
-        const plugin = (await import(pluginName)) as unknown;
+  for (const pluginName of pluginNames) {
+    try {
+      const plugin = (await import(pluginName)) as unknown;
 
-        const validationResult =
-          await RivenPluginPackage.safeParseAsync(plugin);
+      const validationResult = await RivenPluginPackage.safeParseAsync(plugin);
 
-        if (!validationResult.success) {
-          return {
-            ...parsedPlugins,
-            invalidPlugins: parsedPlugins.invalidPlugins.concat([
-              [pluginName, z.treeifyError(validationResult.error)],
-            ]),
-          };
-        }
+      if (!validationResult.success) {
+        parsedPlugins.invalidPlugins.push([
+          pluginName,
+          z.treeifyError(validationResult.error),
+        ]);
 
-        const { name: pluginSymbol } = validationResult.data.default;
-        const configPrefix = constantCase(pluginName);
-
-        return {
-          ...parsedPlugins,
-          pluginConfigPrefixMap: parsedPlugins.pluginConfigPrefixMap.set(
-            pluginSymbol,
-            configPrefix,
-          ),
-          validPlugins: parsedPlugins.validPlugins.concat(
-            validationResult.data.default,
-          ),
-        };
-      } catch (error) {
-        logger.error(`Unable to resolve plugin ${pluginName}:`, { err: error });
-
-        return {
-          ...parsedPlugins,
-          unresolvablePlugins:
-            parsedPlugins.unresolvablePlugins.concat(pluginName),
-        };
+        continue;
       }
-    },
-    Promise.resolve<ParsedPlugins>({
-      validPlugins: [],
-      invalidPlugins: [],
-      unresolvablePlugins: [],
-      pluginConfigPrefixMap: new Map(),
-      pluginSettings,
-    }),
-  );
+
+      const { name: pluginSymbol } = validationResult.data.default;
+
+      parsedPlugins.pluginConfigPrefixMap.set(
+        pluginSymbol,
+        constantCase(pluginName),
+      );
+      parsedPlugins.validPlugins.push(validationResult.data.default);
+    } catch (error) {
+      logger.error(`Unable to resolve plugin ${pluginName}:`, { err: error });
+
+      parsedPlugins.unresolvablePlugins.push(pluginName);
+    }
+  }
+
+  return parsedPlugins;
 });

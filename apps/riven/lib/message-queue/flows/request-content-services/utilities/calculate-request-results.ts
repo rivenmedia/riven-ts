@@ -13,16 +13,14 @@ export function calculateRequestResults(
       }
 
       if (val.value.requestType === "create") {
-        return {
-          ...acc,
-          newItems: acc.newItems + 1,
-        };
+        acc.newItems = acc.newItems + 1;
+
+        return acc;
       }
 
-      return {
-        ...acc,
-        updatedItems: acc.updatedItems + 1,
-      };
+      acc.updatedItems = acc.updatedItems + 1;
+
+      return acc;
     },
     {
       newItems: 0,

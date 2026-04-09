@@ -1,19 +1,20 @@
 import { Entity, Property } from "@mikro-orm/decorators/legacy";
-import { Field, ObjectType } from "type-graphql";
+import { Field, Int, ObjectType } from "type-graphql";
 
 import {
   MovieContentRating,
   MovieContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
-import { MediaEntry } from "../filesystem/media-entry.entity.ts";
-import { MediaItem } from "./media-item.entity.ts";
+import { MediaEntry } from "../filesystem/index.ts";
+import { MediaItem } from "./index.ts";
 
 import type { ItemRequest } from "../requests/item-request.entity.ts";
 import type { Opt, Ref } from "@mikro-orm/core";
 
-@ObjectType()
+@ObjectType({ implements: MediaItem })
 @Entity()
 export class Movie extends MediaItem {
+  @Field(() => Int, { nullable: true })
   @Property()
   runtime!: number | null;
 
@@ -22,7 +23,9 @@ export class Movie extends MediaItem {
 
   override type: Opt<"movie"> = "movie" as const;
 
+  @Field(() => String)
   declare tmdbId: string;
+
   declare tvdbId: never;
   declare itemRequest: Ref<ItemRequest>;
 

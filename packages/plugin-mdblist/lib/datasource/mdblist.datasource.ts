@@ -116,7 +116,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
               if (!this.#seenShowIds.has(item.id)) {
                 showIdsMap.set(item.id, {
                   imdbId: item.imdb_id,
-                  tvdbId: item.tvdb_id.toString(),
+                  tvdbId: item.tvdb_id?.toString(),
                 });
               }
             }

@@ -26,10 +26,7 @@ export const indexItemProcessor =
           return acc;
         }
 
-        return {
-          ...acc,
-          ...value.item,
-        };
+        return Object.assign(acc, value.item);
       },
       {} as NonNullable<MediaItemIndexRequestedResponse>["item"],
     );

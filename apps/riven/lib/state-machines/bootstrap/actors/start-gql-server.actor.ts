@@ -7,9 +7,12 @@ import { ApolloServer } from "@apollo/server";
 import responseCachePlugin from "@apollo/server-plugin-response-cache";
 import { ApolloServerPluginCacheControl } from "@apollo/server/plugin/cacheControl";
 import { startStandaloneServer } from "@apollo/server/standalone";
+import { URL } from "node:url";
 import { fromPromise } from "xstate";
 
-import { buildContext } from "../../../graphql/build-context.ts";
+import { initApolloClient } from "../../../graphql/apollo-client.ts";
+import { buildContextFunction } from "../../../graphql/build-context-function.ts";
+import { resolvers } from "../../../graphql/resolvers/index.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { redisCache } from "../../../utilities/redis-cache.ts";
 import { settings } from "../../../utilities/settings.ts";
@@ -30,14 +33,16 @@ export interface StartGQLServerOutput {
 export const startGqlServer = fromPromise<
   StartGQLServerOutput,
   StartGQLServerInput
->(async ({ input: { validPlugins, pluginSettings } }) => {
+>(async ({ input: { validPlugins } }) => {
   const pluginResolvers = [...validPlugins.values()].flatMap(
     (p) => p.config.resolvers,
   );
 
   const server = new ApolloServer<ApolloServerContext>({
     cache: redisCache,
-    schema: await buildSchema(pluginResolvers),
+    schema: await buildSchema({
+      resolvers: [...resolvers, ...pluginResolvers],
+    }),
     introspection: true,
     plugins: [
       ApolloServerPluginCacheControl({
@@ -45,6 +50,17 @@ export const startGqlServer = fromPromise<
         defaultMaxAge: 60,
       }),
       responseCachePlugin(),
+      {
+        requestDidStart({ request: { operationName } }) {
+          if (operationName) {
+            logger.silly(`Received ${operationName}`, {
+              "riven.gql.operation-name": operationName,
+            });
+          }
+
+          return Promise.resolve();
+        },
+      },
     ],
     formatError(formattedError, error) {
       logger.error("GraphQL Error:", { err: error });
@@ -57,12 +73,10 @@ export const startGqlServer = fromPromise<
     listen: {
       port: settings.gqlPort,
     },
-    context: buildContext(
-      server,
-      pluginSettings,
-      [...validPlugins.entries()].map(([_, plugin]) => plugin.config),
-    ),
+    context: buildContextFunction(),
   });
+
+  initApolloClient(new URL(url));
 
   return {
     server,

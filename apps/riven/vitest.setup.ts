@@ -2,8 +2,11 @@ import { BaseDataSource, type RivenPlugin } from "@repo/util-plugin-sdk";
 import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
 
 import { EntityRepository } from "@mikro-orm/core";
-import { type Mock, afterEach, expect, vi } from "vitest";
+import { type RedisClient, RedisConnection } from "bullmq";
+import { type Mock, afterAll, afterEach, expect, vi } from "vitest";
 import z from "zod";
+
+import type { RedisMemoryServer } from "redis-memory-server";
 
 vi.mock<{ default: Record<string, unknown> }>(
   import("./package.json"),
@@ -18,12 +21,6 @@ vi.mock<{ default: Record<string, unknown> }>(
       },
     }) as const,
 );
-
-vi.mock(import("@apollo/server/standalone"), () => ({
-  startStandaloneServer: vi.fn().mockResolvedValue({
-    url: "http://localhost:4000/mocked-server",
-  }),
-}));
 
 vi.mock(import("@repo/plugin-test"), () => {
   class TestAPI extends BaseDataSource<Record<string, unknown>> {
@@ -76,6 +73,7 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
 
   return {
     database,
+    initORM,
   };
 });
 
@@ -99,10 +97,63 @@ expect.extend({
   },
 });
 
+let redisServer: RedisMemoryServer | undefined;
+let redisConnection: RedisConnection | undefined;
+let redisClient: RedisClient | undefined;
+
+vi.doMock(import("./lib/utilities/settings.ts"), async (importOriginal) => {
+  const { RedisMemoryServer } = await import("redis-memory-server");
+  const { exec } = await import("child_process");
+  const { promisify } = await import("util");
+
+  async function getRedisServerBinary() {
+    try {
+      const { stdout: redisServerBinary } =
+        await promisify(exec)("which redis-server");
+
+      return redisServerBinary.trim();
+    } catch (error) {
+      throw new Error(
+        `Failed to find "redis-server" binary. Is Redis installed and available in your PATH?\n${String(error)}`,
+      );
+    }
+  }
+
+  async function getRedisUrl() {
+    try {
+      const systemBinary = await getRedisServerBinary();
+
+      redisServer = new RedisMemoryServer({ binary: { systemBinary } });
+
+      const host = await redisServer.getHost();
+      const port = await redisServer.getPort();
+
+      redisConnection = new RedisConnection({ host, port });
+      redisClient = await redisConnection.client;
+
+      await RedisConnection.waitUntilReady(redisClient);
+
+      return `redis://${host}:${port.toString()}`;
+    } catch (error) {
+      throw new Error(`Failed to get Redis URL.\n${String(error)}`);
+    }
+  }
+
+  // Set the Redis URL setting before importing the settings module,
+  // as the settings are validated and frozen on first import.
+  // This allows us to use a dynamically created Redis instance per test file.
+
+  // eslint-disable-next-line turbo/no-undeclared-env-vars
+  process.env["RIVEN_SETTING__redisUrl"] = await getRedisUrl();
+
+  return await importOriginal();
+});
+
 afterEach(async () => {
   const { database } = await import("./lib/database/database.ts");
 
   await database.orm.schema.clear();
+  await redisClient?.flushdb();
 
   // Clear all repositories to prevent caching issues between tests.
   Object.values(database).forEach((repo) => {
@@ -110,4 +161,9 @@ afterEach(async () => {
       repo.getEntityManager().clear();
     }
   });
+});
+
+afterAll(async () => {
+  await redisConnection?.close();
+  await redisServer?.stop();
 });

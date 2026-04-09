@@ -40,6 +40,13 @@
     "**/node_modules/**": true,
     "**/__generated__/**": true,
     "**/*.log": true,
-    "**/docker-data/**": true
+    "**/docker-data/**": true,
+    "**/dist/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/dist": true
   }
 }
