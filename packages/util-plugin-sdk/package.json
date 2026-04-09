@@ -36,10 +36,6 @@
       "production": "./dist/schemas/events/index.js",
       "default": "./lib/schemas/events/index.ts"
     },
-    "./events/*": {
-      "production": "./dist/schemas/plugin-to-program-events/*.js",
-      "default": "./lib/schemas/plugin-to-program-events/*.ts"
-    },
     "./schemas/*": {
       "production": "./dist/schemas/*.js",
       "default": "./lib/schemas/*.ts"

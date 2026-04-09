@@ -17,7 +17,15 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
     }
 
     for (const [item, changeSet] of trackedItems) {
-      if (!changeSet?.entity.season || item.number !== 1) {
+      if (item.releaseDate === null) {
+        continue;
+      }
+
+      if (item.number !== 1) {
+        continue;
+      }
+
+      if (!changeSet?.entity.season) {
         continue;
       }
 

@@ -19,11 +19,11 @@ export class MediaItemResolver {
     );
   }
 
-  @Query(() => MediaItemUnion, { nullable: true })
+  @Query(() => MediaItemUnion)
   mediaItem(
     @Ctx() { em }: ApolloServerContext,
     @Arg("id", () => Int) id: number,
-  ): Promise<MediaItem | null> {
+  ) {
     return em.findOneOrFail(MediaItem, id);
   }
 
