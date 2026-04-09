@@ -9,6 +9,7 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
  */
 export const ItemRequestUpdateSuccessEvent = createProgramEventSchema(
   "item-request.update.success",
+
   z.object({
     item: ItemRequestInstance,
   }),

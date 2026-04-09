@@ -1,5 +1,5 @@
 import { Movie } from "@repo/util-plugin-sdk/dto/entities";
-import { parse } from "@repo/util-rank-torrent-name";
+import { parse } from "@repo/util-rank-torrent-name/parser";
 
 import { faker } from "@faker-js/faker";
 import { expect, vi } from "vitest";

@@ -7,14 +7,13 @@ import {
   Property,
 } from "@mikro-orm/decorators/legacy";
 import { IsPositive } from "class-validator";
+import { BigIntResolver } from "graphql-scalars";
 import { DateTime } from "luxon";
 import path from "node:path";
 import { Field, ID, ObjectType } from "type-graphql";
 import z from "zod";
 
-import { Episode } from "../media-items/episode.entity.ts";
-import { MediaItem } from "../media-items/media-item.entity.ts";
-import { Movie } from "../media-items/movie.entity.ts";
+import { Episode, MediaItem, Movie } from "../media-items/index.ts";
 
 import type { Hidden, Opt, Ref } from "@mikro-orm/core";
 import type { Promisable } from "type-fest";
@@ -67,7 +66,7 @@ export abstract class FileSystemEntry {
   @PrimaryKey()
   id!: number;
 
-  @Field()
+  @Field(() => BigIntResolver)
   @Property({ type: "bigint" })
   @IsPositive()
   fileSize!: number;

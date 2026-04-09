@@ -4,13 +4,15 @@ import { LogLevel } from "../enums/log-level.enum.ts";
 
 @ObjectType()
 export class RivenSettings {
-  @Field({ description: "The current version of the application" })
+  @Field(() => String, {
+    description: "The current version of the application",
+  })
   version!: string;
 
-  @Field({ description: "The API key for accessing the service" })
+  @Field(() => String, { description: "The API key for accessing the service" })
   apiKey!: string;
 
-  @Field((_type) => LogLevel, {
+  @Field(() => LogLevel, {
     description: "The logging level for the application",
   })
   logLevel: keyof typeof LogLevel = "SILLY";

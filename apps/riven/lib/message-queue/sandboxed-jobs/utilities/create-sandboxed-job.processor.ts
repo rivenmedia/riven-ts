@@ -1,9 +1,11 @@
 import { captureException, getCurrentScope, withScope } from "@sentry/node";
 import { type SandboxedJob, UnrecoverableError } from "bullmq";
 import assert from "node:assert";
+import { type ZodLiteral, type ZodObject, type ZodType, z } from "zod";
+
+import { initApolloClient } from "../../../graphql/apollo-client.ts";
 
 import type { SandboxedJobDefinition, SandboxedJobHandlers } from "../index.ts";
-import type { ZodLiteral, ZodObject, ZodType, z } from "zod";
 
 const timeoutDuration = 5_000;
 
@@ -20,6 +22,10 @@ function maybeStopIdleTimer(timerId: NodeJS.Timeout | null) {
 
   return null;
 }
+
+const WorkerData = z.object({
+  gqlUrl: z.url(),
+});
 
 export function createSandboxedJobProcessor<
   T extends ZodObject<{
@@ -46,22 +52,31 @@ export function createSandboxedJobProcessor<
     idleTimerId = maybeStopIdleTimer(idleTimerId);
 
     const result = await withScope(async (scope) => {
-      const { threadId } = await import("node:worker_threads");
+      const thread = await import("node:worker_threads");
 
       scope.setTags({
         "riven.log.source": "core",
         "riven.session.id":
           getCurrentScope().getScopeData().tags["riven.session.id"],
         "riven.sandboxed-job.name": sandboxedJobName,
-        "riven.worker.id": `${sandboxedJobName}:worker-${threadId.toString()}`,
+        "riven.worker.id": `${sandboxedJobName}:worker-${thread.threadId.toString()}`,
         "bullmq.queue.name": sandboxedJobName,
         "bullmq.job.id": job.id,
       });
 
       try {
-        return (await processor({ job, scope } as never)) as z.infer<
-          T["shape"]["output"]
-        >;
+        const data = WorkerData.parse(thread.workerData);
+        const client = initApolloClient(new URL(data.gqlUrl));
+
+        const result = (await processor({
+          job,
+          scope,
+          client,
+        } as never)) as z.infer<T["shape"]["output"]>;
+
+        await client.clearStore();
+
+        return result;
       } catch (error) {
         captureException(error);
 
