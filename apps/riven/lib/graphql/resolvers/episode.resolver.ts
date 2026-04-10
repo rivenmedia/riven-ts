@@ -14,6 +14,25 @@ import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 
 @Resolver((_of) => Episode)
 export class EpisodeResolver {
+  @Query(() => Episode, {
+    description:
+      "Fetches an episode by its TVDB ID, season number, and episode number.",
+  })
+  episode(
+    @Ctx() { em }: ApolloServerContext,
+    @Arg("tvdbId", () => String) tvdbId: string,
+    @Arg("season", () => Int) season: number,
+    @Arg("episode", () => Int) episode: number,
+  ) {
+    return em.findOneOrFail(Episode, {
+      tvdbId,
+      number: episode,
+      season: {
+        number: season,
+      },
+    });
+  }
+
   @Query(() => Episode, { nullable: true })
   absoluteEpisode(
     @Ctx() { em }: ApolloServerContext,

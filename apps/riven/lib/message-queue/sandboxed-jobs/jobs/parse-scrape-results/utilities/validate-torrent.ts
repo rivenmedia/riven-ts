@@ -36,7 +36,7 @@ export const GET_VALIDATE_TORRENT_ITEM_QUERY: TypedDocumentNode<
   GetValidateTorrentItemQueryVariables
 > = gql`
   query GetValidateTorrentItem($id: ID!) {
-    mediaItem(id: $id) {
+    mediaItemById(id: $id) {
       ... on Show {
         status
         seasons {
@@ -94,11 +94,11 @@ export const validateTorrent = async (
     variables: { id: itemId },
   });
 
-  if (!itemResult.data?.mediaItem) {
+  if (!itemResult.data?.mediaItemById) {
     throw new Error(`Media item with ID ${itemId} not found`);
   }
 
-  const item = itemResult.data.mediaItem;
+  const item = itemResult.data.mediaItemById;
 
   if (
     parsedData.country &&

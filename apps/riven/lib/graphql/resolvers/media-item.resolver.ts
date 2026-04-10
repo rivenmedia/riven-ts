@@ -15,6 +15,17 @@ import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 
 @Resolver((_of) => MediaItem)
 export class MediaItemResolver {
+  @Query(() => MediaItemUnion, {
+    description:
+      "Fetches a media item by its ID. The returned type will be one of the specific media item types (e.g., Movie, Episode) based on the underlying data.",
+  })
+  mediaItemById(
+    @Ctx() { em }: ApolloServerContext,
+    @Arg("id", () => ID) id: string,
+  ) {
+    return em.findOneOrFail(MediaItem, id);
+  }
+
   @Query(() => [MediaItem])
   mediaItems(@Ctx() { em }: ApolloServerContext): Promise<MediaItem[]> {
     return em.find(
@@ -25,14 +36,6 @@ export class MediaItemResolver {
         overfetch: true,
       },
     );
-  }
-
-  @Query(() => MediaItemUnion)
-  mediaItem(
-    @Ctx() { em }: ApolloServerContext,
-    @Arg("id", () => ID) id: string,
-  ) {
-    return em.findOneOrFail(MediaItem, id);
   }
 
   @FieldResolver(() => Int)

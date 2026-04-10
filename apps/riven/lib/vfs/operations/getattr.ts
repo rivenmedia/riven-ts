@@ -1,9 +1,11 @@
+import { type TypedDocumentNode, gql } from "@apollo/client";
 import Fuse, { type OPERATIONS, type Stats } from "@zkochan/fuse-native";
 import { DateTime } from "luxon";
 import fs from "node:fs";
 import { isZodErrorLike } from "zod-validation-error";
 
 import { database } from "../../database/database.ts";
+import { client } from "../../graphql/apollo-client.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
@@ -13,6 +15,17 @@ import { isHiddenPath } from "../utilities/is-hidden-path.ts";
 import { isIgnoredPath } from "../utilities/is-ignored-path.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
+import type {
+  GetEpisodeAttrsQuery,
+  GetEpisodeAttrsQueryVariables,
+  GetMovieAttrsQuery,
+  GetMovieAttrsQueryVariables,
+  GetSeasonAttrsQuery,
+  GetSeasonAttrsQueryVariables,
+  GetShowAttrsQuery,
+  GetShowAttrsQueryVariables,
+  VfsAttrsFragment,
+} from "./getattr.typegen.ts";
 import type { SetOptional } from "type-fest";
 
 type StatMode = "dir" | "file" | "link" | number;
@@ -68,17 +81,87 @@ const stat = (st: StatInput, subDirectoryCount = 0) => {
   } satisfies Partial<Stats>;
 };
 
-function getEntry(pathInfo: PathInfo) {
+const VFS_ATTRS_FRAGMENT: TypedDocumentNode<VfsAttrsFragment> = gql`
+  fragment VfsAttrs on MediaItem {
+    createdAt
+    updatedAt
+    filesystemEntries {
+      fileSize
+    }
+  }
+`;
+
+const GET_MOVIE_ATTRS_QUERY: TypedDocumentNode<
+  GetMovieAttrsQuery,
+  GetMovieAttrsQueryVariables
+> = gql`
+  query GetMovieAttrs($tmdbId: String!) {
+    movie(tmdbId: $tmdbId) {
+      ...VfsAttrs
+    }
+  }
+
+  ${VFS_ATTRS_FRAGMENT}
+`;
+
+const GET_EPISODE_ATTRS_QUERY: TypedDocumentNode<
+  GetEpisodeAttrsQuery,
+  GetEpisodeAttrsQueryVariables
+> = gql`
+  query GetEpisodeAttrs($tvdbId: String!, $season: Int!, $episode: Int!) {
+    episode(tvdbId: $tvdbId, season: $season, episode: $episode) {
+      ...VfsAttrs
+    }
+  }
+
+  ${VFS_ATTRS_FRAGMENT}
+`;
+
+const GET_SEASON_ATTRS_QUERY: TypedDocumentNode<
+  GetSeasonAttrsQuery,
+  GetSeasonAttrsQueryVariables
+> = gql`
+  query GetSeasonAttrs($tvdbId: String!, $season: Int!) {
+    season(tvdbId: $tvdbId, season: $season) {
+      ...VfsAttrs
+    }
+  }
+
+  ${VFS_ATTRS_FRAGMENT}
+`;
+
+const GET_SHOW_ATTRS_QUERY: TypedDocumentNode<
+  GetShowAttrsQuery,
+  GetShowAttrsQueryVariables
+> = gql`
+  query GetShowAttrs($tvdbId: String!) {
+    show(tvdbId: $tvdbId) {
+      ...VfsAttrs
+    }
+  }
+
+  ${VFS_ATTRS_FRAGMENT}
+`;
+
+async function getEntry(pathInfo: PathInfo) {
   switch (pathInfo.pathType) {
     case "single-movie": {
       if (!pathInfo.tmdbId) {
         throw new TypeError("Missing tmdbId for movie path");
       }
 
-      return database.movie.findOneOrFail(
-        { tmdbId: pathInfo.tmdbId },
-        { fields: ["createdAt", "updatedAt", "filesystemEntries.fileSize"] },
-      );
+      const result = await client.query({
+        query: GET_MOVIE_ATTRS_QUERY,
+        variables: {
+          tmdbId: pathInfo.tmdbId,
+        },
+      });
+
+      if (!result.data?.movie) {
+        throw new FuseError(Fuse.ENOENT, "Movie not found");
+      }
+
+      return result.data.movie;
     }
     case "single-episode": {
       if (!pathInfo.tvdbId || !pathInfo.season || !pathInfo.episode) {
@@ -87,27 +170,38 @@ function getEntry(pathInfo: PathInfo) {
         );
       }
 
-      return database.episode.findOneOrFail(
-        {
-          season: {
-            number: pathInfo.season,
-            show: {
-              tvdbId: pathInfo.tvdbId,
-            },
-          },
-          number: pathInfo.episode,
+      const result = await client.query({
+        query: GET_EPISODE_ATTRS_QUERY,
+        variables: {
+          tvdbId: pathInfo.tvdbId,
+          season: pathInfo.season,
+          episode: pathInfo.episode,
         },
-        { fields: ["createdAt", "updatedAt", "filesystemEntries.fileSize"] },
-      );
+      });
+
+      if (!result.data?.episode) {
+        throw new FuseError(Fuse.ENOENT, "Episode not found");
+      }
+
+      return result.data.episode;
     }
     case "show-seasons": {
       if (!pathInfo.tvdbId) {
         throw new TypeError("Missing tvdbId for show seasons path");
       }
 
-      return database.show.findOneOrFail({
-        tvdbId: pathInfo.tvdbId,
+      const result = await client.query({
+        query: GET_SHOW_ATTRS_QUERY,
+        variables: {
+          tvdbId: pathInfo.tvdbId,
+        },
       });
+
+      if (!result.data?.show) {
+        throw new FuseError(Fuse.ENOENT, "Show not found");
+      }
+
+      return result.data.show;
     }
     case "season-episodes": {
       if (!pathInfo.tvdbId || !pathInfo.season) {
@@ -116,15 +210,19 @@ function getEntry(pathInfo: PathInfo) {
         );
       }
 
-      return database.season.findOneOrFail(
-        {
-          show: {
-            tvdbId: pathInfo.tvdbId,
-          },
-          number: pathInfo.season,
+      const result = await client.query({
+        query: GET_SEASON_ATTRS_QUERY,
+        variables: {
+          tvdbId: pathInfo.tvdbId,
+          season: pathInfo.season,
         },
-        { populate: ["*"] },
-      );
+      });
+
+      if (!result.data?.season) {
+        throw new FuseError(Fuse.ENOENT, "Season not found");
+      }
+
+      return result.data.season;
     }
     case "all-shows":
     case "all-movies":

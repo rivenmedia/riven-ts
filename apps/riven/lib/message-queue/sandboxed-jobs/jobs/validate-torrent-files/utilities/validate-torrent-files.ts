@@ -28,7 +28,7 @@ const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
   GetValidateTorrentFilesItemQueryVariables
 > = gql`
   query GetValidateTorrentFilesItem($id: ID!) {
-    mediaItem(id: $id) {
+    mediaItemById(id: $id) {
       ... on MediaItem {
         fullTitle
         type
@@ -110,11 +110,11 @@ export const validateTorrentFiles = async (
       variables: { id: itemId },
     });
 
-    if (!itemResult.data?.mediaItem) {
+    if (!itemResult.data?.mediaItemById) {
       throw new Error(`Media item with ID ${itemId} not found`);
     }
 
-    const item = itemResult.data.mediaItem;
+    const item = itemResult.data.mediaItemById;
 
     logger.verbose(
       `Validating torrent files for item ${chalk.bold(item.fullTitle)}: ${chalk.bold(infoHash)}`,

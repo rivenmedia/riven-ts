@@ -2,10 +2,30 @@ import { Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
 import { reduceAsync } from "es-toolkit";
-import { Arg, FieldResolver, Int, Resolver, Root } from "type-graphql";
+import {
+  Arg,
+  Ctx,
+  FieldResolver,
+  Int,
+  Query,
+  Resolver,
+  Root,
+} from "type-graphql";
+
+import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 
 @Resolver((_of) => Show)
 export class ShowResolver {
+  @Query(() => Show, {
+    description: "Fetches a show by its TVDB ID.",
+  })
+  show(
+    @Ctx() { em }: ApolloServerContext,
+    @Arg("tvdbId", () => String) tvdbId: string,
+  ) {
+    return em.findOneOrFail(Show, { tvdbId });
+  }
+
   @FieldResolver(() => [Season])
   seasons(
     @Root() show: Show,
