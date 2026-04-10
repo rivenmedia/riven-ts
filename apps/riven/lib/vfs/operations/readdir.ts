@@ -7,13 +7,13 @@ import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
 import type {
-  VfsDirectoryEntryPathsQuery,
-  VfsDirectoryEntryPathsQueryVariables,
+  GetVfsDirectoryEntryPathsQuery,
+  GetVfsDirectoryEntryPathsQueryVariables,
 } from "./readdir.typegen.ts";
 
 const VFS_DIRECTORY_ENTRY_PATHS_QUERY: TypedDocumentNode<
-  VfsDirectoryEntryPathsQuery,
-  VfsDirectoryEntryPathsQueryVariables
+  GetVfsDirectoryEntryPathsQuery,
+  GetVfsDirectoryEntryPathsQueryVariables
 > = gql`
   query GetVfsDirectoryEntryPaths($path: String!) {
     vfsDirectoryEntryPaths(path: $path)

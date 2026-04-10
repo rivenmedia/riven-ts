@@ -17,7 +17,7 @@ import { logger } from "../../../../utilities/logger/logger.ts";
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export interface PersistScrapeResultsInput {
-  id: number;
+  id: string;
   results: Record<string, ParsedData>;
 }
 
@@ -30,7 +30,7 @@ export async function persistScrapeResults({
     .transactional(async (transaction) => {
       const existingItem = await transaction
         .getRepository(MediaItem)
-        .findOneOrFail({ id }, { populate: ["streams.infoHash"] });
+        .findOneOrFail(id, { populate: ["streams.infoHash"] });
 
       const processableStates = MediaItemState.extract([
         "indexed",
