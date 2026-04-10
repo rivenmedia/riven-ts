@@ -7,7 +7,7 @@ import { FindValidTorrentFlow } from "./steps/find-valid-torrent/find-valid-torr
 export const DownloadItemFlow = createFlowSchema("download-item", {
   children: FindValidTorrentFlow.shape.output,
   input: z.object({
-    id: z.int(),
+    id: z.uuidv4(),
   }),
 });
 

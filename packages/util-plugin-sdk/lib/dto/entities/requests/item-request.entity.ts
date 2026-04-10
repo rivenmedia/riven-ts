@@ -20,8 +20,8 @@ import { Season } from "../media-items/season.entity.ts";
 @Entity()
 export class ItemRequest {
   @Field(() => ID)
-  @PrimaryKey()
-  id!: number;
+  @PrimaryKey({ defaultRaw: "gen_random_uuid()" })
+  id!: string;
 
   @Field(() => String, { nullable: true })
   @Property()

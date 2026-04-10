@@ -9,15 +9,15 @@ export const ParseScrapeResultsSandboxedJob = createSandboxedJobSchema(
   "scrape-item.parse-scrape-results",
   {
     children: z.object({
-      id: z.int(),
+      id: z.uuidv4(),
       results: z.record(z.string(), z.string().nonempty()),
     }),
     output: z.object({
-      id: z.int(),
+      id: z.uuidv4(),
       results: z.record(z.hash("sha1"), z.custom<ParsedData>()),
     }),
     input: z.object({
-      id: z.int(),
+      id: z.uuidv4(),
     }),
   },
 );

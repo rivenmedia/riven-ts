@@ -63,8 +63,8 @@ async function getMediaItemPathParts(mediaItem: MediaItem) {
 })
 export abstract class FileSystemEntry {
   @Field((_type) => ID)
-  @PrimaryKey()
-  id!: number;
+  @PrimaryKey({ defaultRaw: "gen_random_uuid()" })
+  id!: string;
 
   @Field(() => BigIntResolver)
   @Property({ type: "bigint" })

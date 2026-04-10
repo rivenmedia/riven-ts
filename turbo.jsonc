@@ -4,6 +4,10 @@
   "globalEnv": ["NODE_ENV"],
   "globalPassThroughEnv": ["DEBUG", "CI"],
   "globalDependencies": [".node-version"],
+  "futureFlags": {
+    "affectedUsingTaskInputs": true,
+    "watchUsingTaskInputs": true
+  },
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

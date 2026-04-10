@@ -1,5 +1,8 @@
 import z from "zod";
 
-import { Movie } from "../../dto/entities/index.ts";
+import type { Movie } from "../../dto/entities/index.ts";
+import type { EntityData } from "@mikro-orm/core";
 
-export const MovieInstance = z.instanceof(Movie);
+export const MovieInstance = z.custom<EntityData<Movie>>();
+
+export type MovieInstance = z.infer<typeof MovieInstance>;

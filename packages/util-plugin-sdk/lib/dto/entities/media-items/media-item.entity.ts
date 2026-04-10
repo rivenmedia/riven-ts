@@ -38,8 +38,8 @@ export abstract class MediaItem {
   [OptionalProps]?: "state";
 
   @Field((_type) => ID)
-  @PrimaryKey()
-  id!: number;
+  @PrimaryKey({ defaultRaw: "gen_random_uuid()" })
+  id!: string;
 
   @Field(() => String)
   @Index()

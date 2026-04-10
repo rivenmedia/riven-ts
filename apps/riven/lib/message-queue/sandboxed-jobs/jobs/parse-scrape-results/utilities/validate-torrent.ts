@@ -35,7 +35,7 @@ export const GET_VALIDATE_TORRENT_ITEM_QUERY: TypedDocumentNode<
   GetValidateTorrentItemQuery,
   GetValidateTorrentItemQueryVariables
 > = gql`
-  query GetValidateTorrentItem($id: Int!) {
+  query GetValidateTorrentItem($id: ID!) {
     mediaItem(id: $id) {
       ... on Show {
         status
@@ -85,7 +85,7 @@ export const GET_VALIDATE_TORRENT_ITEM_QUERY: TypedDocumentNode<
 `;
 
 export const validateTorrent = async (
-  itemId: number,
+  itemId: string,
   parsedData: ParsedData,
   infoHash: string,
 ) => {
@@ -95,7 +95,7 @@ export const validateTorrent = async (
   });
 
   if (!itemResult.data?.mediaItem) {
-    throw new Error(`Media item with ID ${itemId.toString()} not found`);
+    throw new Error(`Media item with ID ${itemId} not found`);
   }
 
   const item = itemResult.data.mediaItem;

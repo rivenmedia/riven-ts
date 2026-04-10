@@ -14,7 +14,7 @@ import { createFlowSchema } from "../../../../utilities/create-flow-schema.ts";
 export const RankStreamsFlow = createFlowSchema("download-item.rank-streams", {
   children: Torrent,
   input: z.object({
-    id: z.int(),
+    id: z.uuidv4(),
     streams: z
       .record(z.hash("sha1"), z.string())
       .refine(atLeastOnePropertyRequired, {

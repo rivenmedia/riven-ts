@@ -5,7 +5,7 @@ import {
   ShowContentRating,
 } from "../../dto/enums/content-ratings.enum.ts";
 import { ShowStatus } from "../../dto/enums/show-status.enum.ts";
-import { ItemRequestInstance } from "../media/item-request.ts";
+import { ItemRequestInstance } from "../media/item-request-instance.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
@@ -24,7 +24,7 @@ export type MediaItemIndexRequestedEvent = z.infer<
 >;
 
 const IndexedItem = z.object({
-  id: z.number(),
+  id: z.uuidv4(),
   title: z.string(),
   genres: z.array(z.string()),
   country: z.string().nullish(),

@@ -19,7 +19,7 @@ export type MediaItemScrapeRequestedEvent = z.infer<
 >;
 
 export const MediaItemScrapeRequestedResponse = z.object({
-  id: z.int(),
+  id: z.uuidv4(),
   results: z.record(z.string(), z.string().nonempty()),
 });
 

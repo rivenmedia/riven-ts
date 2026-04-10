@@ -27,7 +27,7 @@ const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
   GetValidateTorrentFilesItemQuery,
   GetValidateTorrentFilesItemQueryVariables
 > = gql`
-  query GetValidateTorrentFilesItem($id: Int!) {
+  query GetValidateTorrentFilesItem($id: ID!) {
     mediaItem(id: $id) {
       ... on MediaItem {
         fullTitle
@@ -99,7 +99,7 @@ const GET_ABSOLUTE_EPISODE_QUERY: TypedDocumentNode<
 `;
 
 export const validateTorrentFiles = async (
-  itemId: number,
+  itemId: string,
   infoHash: string,
   { episodes, movies }: MapItemsToFilesSandboxedJob["output"],
   isCacheCheck: boolean,
@@ -111,7 +111,7 @@ export const validateTorrentFiles = async (
     });
 
     if (!itemResult.data?.mediaItem) {
-      throw new Error(`Media item with ID ${itemId.toString()} not found`);
+      throw new Error(`Media item with ID ${itemId} not found`);
     }
 
     const item = itemResult.data.mediaItem;
@@ -254,7 +254,7 @@ export const validateTorrentFiles = async (
           validFiles.push(
             MatchedFile.encode({
               ...file,
-              matchedMediaItemId: Number(absoluteEpisode.id),
+              matchedMediaItemId: absoluteEpisode.id,
               isCachedFile: isCacheCheck,
             }),
           );

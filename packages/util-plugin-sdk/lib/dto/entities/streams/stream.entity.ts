@@ -16,8 +16,8 @@ import type { ParsedData } from "@repo/util-rank-torrent-name";
 @Entity()
 export class Stream {
   @Field(() => ID)
-  @PrimaryKey()
-  id!: number;
+  @PrimaryKey({ defaultRaw: "gen_random_uuid()" })
+  id!: string;
 
   @Field(() => String)
   @Property()
