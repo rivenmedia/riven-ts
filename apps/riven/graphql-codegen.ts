@@ -28,7 +28,7 @@ export default {
       config: {
         scalars: {
           BigInt: "number",
-          DateTimeISO: "Date",
+          DateTimeISO: "string",
           JSONObject: "Record<string, unknown>",
         },
         strictScalars: true,
@@ -45,6 +45,10 @@ export default {
         skipTypeNameForRoot: true,
         // Use string values for enums (e.g. 'one' | 'two')
         allowEnumStringTypes: true,
+        inlineFragmentTypes: "mask",
+        customDirectives: {
+          apolloUnmask: true,
+        },
       } satisfies TypeScriptDocumentsPluginConfig,
     },
   },

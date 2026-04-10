@@ -8,7 +8,6 @@ import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { serialiseEventData } from "../../utilities/serialisers/serialise-event-data.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
-import { PathInfo } from "../schemas/path-info.schema.ts";
 import { attrCache } from "../utilities/attr-cache.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
 import {
@@ -20,10 +19,8 @@ import {
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
 import type {
-  GetEpisodeItemEntryQuery,
-  GetEpisodeItemEntryQueryVariables,
-  GetMovieItemEntryQuery,
-  GetMovieItemEntryQueryVariables,
+  GetVfsEntryQuery,
+  GetVfsEntryQueryVariables,
   MediaEntryStreamUrlFragment,
   SaveStreamUrlMutation,
   SaveStreamUrlMutationVariables,
@@ -36,36 +33,6 @@ import type {
 import type { Queue } from "bullmq";
 
 let fd = 0;
-
-const GET_MOVIE_ITEM_ENTRY_QUERY: TypedDocumentNode<
-  GetMovieItemEntryQuery,
-  GetMovieItemEntryQueryVariables
-> = gql`
-  query GetMovieItemEntry($movieFilter: MovieMediaEntryFilterArgs!) {
-    mediaEntries(movieFilter: $movieFilter) {
-      id
-      originalFilename
-      fileSize
-      streamUrl
-      plugin
-    }
-  }
-`;
-
-const GET_EPISODE_ITEM_ENTRY_QUERY: TypedDocumentNode<
-  GetEpisodeItemEntryQuery,
-  GetEpisodeItemEntryQueryVariables
-> = gql`
-  query GetEpisodeItemEntry($episodeFilter: EpisodeMediaEntryFilterArgs!) {
-    mediaEntries(episodeFilter: $episodeFilter) {
-      id
-      originalFilename
-      fileSize
-      streamUrl
-      plugin
-    }
-  }
-`;
 
 const SAVE_STREAM_URL_MUTATION: TypedDocumentNode<
   SaveStreamUrlMutation,
@@ -88,56 +55,32 @@ const STREAM_URL_FRAGMENT: TypedDocumentNode<
   }
 `;
 
+const GET_VFS_ENTRY_QUERY: TypedDocumentNode<
+  GetVfsEntryQuery,
+  GetVfsEntryQueryVariables
+> = gql`
+  query GetVfsEntry($path: String!) {
+    vfsEntry(path: $path) {
+      id
+      originalFilename
+      fileSize
+      streamUrl
+      plugin
+    }
+  }
+`;
+
 async function getItemEntry(path: string) {
-  const pathInfo = PathInfo.parse(path);
+  const { data } = await client.query({
+    query: GET_VFS_ENTRY_QUERY,
+    variables: { path },
+  });
 
-  if (pathInfo.tmdbId) {
-    const { data } = await client.query({
-      query: GET_MOVIE_ITEM_ENTRY_QUERY,
-      variables: {
-        movieFilter: {
-          tmdbId: pathInfo.tmdbId,
-        },
-      },
-    });
-
-    const entry = data?.mediaEntries[0];
-
-    if (!entry) {
-      throw new FuseError(
-        Fuse.ENOENT,
-        `No media entry found for TMDB ID ${pathInfo.tmdbId}`,
-      );
-    }
-
-    return entry;
+  if (!data?.vfsEntry) {
+    throw new FuseError(Fuse.ENOENT, "Entry not found");
   }
 
-  if (pathInfo.tvdbId && pathInfo.season && pathInfo.episode) {
-    const { data } = await client.query({
-      query: GET_EPISODE_ITEM_ENTRY_QUERY,
-      variables: {
-        episodeFilter: {
-          tvdbId: pathInfo.tvdbId,
-          seasonNumber: pathInfo.season,
-          episodeNumber: pathInfo.episode,
-        },
-      },
-    });
-
-    const entry = data?.mediaEntries[0];
-
-    if (!entry) {
-      throw new FuseError(
-        Fuse.ENOENT,
-        `No media entry found for TVDB ID ${pathInfo.tvdbId}, season ${pathInfo.season.toString()}, episode ${pathInfo.episode.toString()}`,
-      );
-    }
-
-    return entry;
-  }
-
-  throw new FuseError(Fuse.ENOENT, `Invalid path for open: ${path}`);
+  return data.vfsEntry;
 }
 
 async function waitForStreamUrl(entry: MediaEntryStreamUrlFragment) {

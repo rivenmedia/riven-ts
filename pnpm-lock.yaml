@@ -211,6 +211,9 @@ importers:
       '@mikro-orm/reflection':
         specifier: 'catalog:'
         version: 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))
+      '@repo/core-util-graphql-helpers':
+        specifier: workspace:^
+        version: link:../../packages/core/util-graphql-helpers
       '@repo/core-util-graphql-schema':
         specifier: workspace:^
         version: link:../../packages/core/util-graphql-schema
@@ -274,6 +277,9 @@ importers:
       es-toolkit:
         specifier: 'catalog:'
         version: 1.44.0
+      graphql-scalars:
+        specifier: 'catalog:'
+        version: 1.25.0(graphql@16.12.0)
       keyv:
         specifier: ^5.5.5
         version: 5.5.5

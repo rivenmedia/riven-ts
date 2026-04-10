@@ -1,10 +1,5 @@
 export const config = {
   /**
-   * Root path for the virtual file system.
-   */
-  rootPath: "/",
-
-  /**
    * Kernel block size; the byte length the OS reads/writes at a time.
    */
   blockSize: 131072, // 128 KB

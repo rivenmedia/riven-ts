@@ -3,6 +3,7 @@ import { type TypedDocumentNode, gql } from "@apollo/client";
 import { client } from "../../../../../graphql/apollo-client.ts";
 
 import type {
+  EpisodeFieldsFragment,
   GetValidateTorrentItemQuery,
   GetValidateTorrentItemQueryVariables,
 } from "./validate-torrent.typegen.ts";
@@ -31,6 +32,13 @@ export class SkippedTorrentError extends Error {
  */
 const getYearCandidates = (year: number) => [year - 1, year, year + 1];
 
+const EPISODE_FIELDS_FRAGMENT: TypedDocumentNode<EpisodeFieldsFragment> = gql`
+  fragment EpisodeFields on Episode {
+    absoluteNumber
+    number
+  }
+`;
+
 export const GET_VALIDATE_TORRENT_ITEM_QUERY: TypedDocumentNode<
   GetValidateTorrentItemQuery,
   GetValidateTorrentItemQueryVariables
@@ -43,6 +51,7 @@ export const GET_VALIDATE_TORRENT_ITEM_QUERY: TypedDocumentNode<
           number
           episodes {
             ...EpisodeFields
+            id
           }
         }
       }
@@ -54,11 +63,13 @@ export const GET_VALIDATE_TORRENT_ITEM_QUERY: TypedDocumentNode<
         }
         episodes {
           ...EpisodeFields
+          id
         }
       }
 
       ... on Episode {
         ...EpisodeFields
+        id
         season {
           number
           show {
@@ -78,10 +89,7 @@ export const GET_VALIDATE_TORRENT_ITEM_QUERY: TypedDocumentNode<
     }
   }
 
-  fragment EpisodeFields on Episode {
-    absoluteNumber
-    number
-  }
+  ${EPISODE_FIELDS_FRAGMENT}
 `;
 
 export const validateTorrent = async (
@@ -191,7 +199,16 @@ export const validateTorrent = async (
       const { episodes } = item.seasons[0];
 
       const episodesIntersection = new Set(parsedData.episodes).intersection(
-        new Set(episodes.map((episode) => episode.absoluteNumber)),
+        new Set(
+          episodes.map((episode) => {
+            const fragmentData = client.readFragment({
+              fragment: EPISODE_FIELDS_FRAGMENT,
+              id: episode.id,
+            });
+
+            return fragmentData?.absoluteNumber;
+          }),
+        ),
       );
 
       if (episodesIntersection.size !== episodes.length) {
@@ -214,7 +231,16 @@ export const validateTorrent = async (
         const absoluteEpisodesIntersection = new Set(
           parsedData.episodes,
         ).intersection(
-          new Set(item.episodes.map((episode) => episode.absoluteNumber)),
+          new Set(
+            item.episodes.map((episode) => {
+              const fragmentData = client.readFragment({
+                fragment: EPISODE_FIELDS_FRAGMENT,
+                id: episode.id,
+              });
+
+              return fragmentData?.absoluteNumber;
+            }),
+          ),
         );
 
         if (absoluteEpisodesIntersection.size !== item.episodes.length) {
@@ -240,7 +266,18 @@ export const validateTorrent = async (
         // If we have seasons and episodes, check that each *relative* number is found in the list
         const relativeEpisodesIntersection = new Set(
           parsedData.episodes,
-        ).intersection(new Set(item.episodes.map((episode) => episode.number)));
+        ).intersection(
+          new Set(
+            item.episodes.map((episode) => {
+              const fragmentData = client.readFragment({
+                fragment: EPISODE_FIELDS_FRAGMENT,
+                id: episode.id,
+              });
+
+              return fragmentData?.number;
+            }),
+          ),
+        );
 
         if (relativeEpisodesIntersection.size !== item.episodes.length) {
           throw new SkippedTorrentError(
@@ -255,8 +292,13 @@ export const validateTorrent = async (
   }
 
   if (item.__typename === "Episode") {
+    const fragmentData = client.readFragment({
+      fragment: EPISODE_FIELDS_FRAGMENT,
+      id: item.id,
+    });
+
     const episodesIntersection = new Set(parsedData.episodes).intersection(
-      new Set([item.number, item.absoluteNumber]),
+      new Set([fragmentData?.number, fragmentData?.absoluteNumber]),
     );
 
     const hasEpisodes = parsedData.episodes.length > 0;

@@ -46,9 +46,7 @@ services:
     image: redis
     restart: unless-stopped
     command: redis-server --maxmemory-policy noeviction --appendonly yes
-    environment:
-      PUID: 1000
-      PGID: 1000
+    user: "1000:1000"
     healthcheck:
       test:
         - CMD

@@ -16,6 +16,8 @@ export function initApolloClient(uri: URL) {
         MediaItem: ["Movie", "Show", "Season", "Episode"],
       },
     }),
+    dataMasking: true,
+    assumeImmutableResults: true,
     link: new HttpLink({
       uri: uri.toString(),
     }),
