@@ -21,7 +21,6 @@
   "dependencies": {
     "@apollo/client": "^4.0.11",
     "@apollo/server": "catalog:",
-    "@apollo/server-plugin-response-cache": "^5.0.0",
     "@apollo/utils.keyvadapter": "catalog:",
     "@apollo/utils.keyvaluecache": "catalog:",
     "@elastic/ecs-winston-format": "^1.5.3",

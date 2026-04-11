@@ -4,7 +4,6 @@ import {
 } from "@repo/core-util-graphql-schema";
 
 import { ApolloServer } from "@apollo/server";
-import responseCachePlugin from "@apollo/server-plugin-response-cache";
 import { startStandaloneServer } from "@apollo/server/standalone";
 import { URL } from "node:url";
 import { fromPromise } from "xstate";
@@ -44,7 +43,6 @@ export const startGqlServer = fromPromise<
     }),
     introspection: true,
     plugins: [
-      responseCachePlugin(),
       {
         requestDidStart({ request: { operationName } }) {
           if (operationName) {
