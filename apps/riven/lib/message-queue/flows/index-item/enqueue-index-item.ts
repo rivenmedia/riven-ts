@@ -1,6 +1,6 @@
 import { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-import { merge } from "es-toolkit";
+import { toMerged } from "es-toolkit";
 
 import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
 import { flow } from "../producer.ts";
@@ -33,7 +33,7 @@ export async function enqueueIndexItem(
     `Indexing [${item.externalIdsLabel.join(" | ")}]`,
     {
       children: childNodes,
-      opts: merge(opts, {
+      opts: toMerged(opts, {
         deduplication: {
           id: `index-item-${item.id}`,
         },
