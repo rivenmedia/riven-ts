@@ -203,7 +203,7 @@ export const validateTorrent = async (
           episodes.map((episode) => {
             const fragmentData = client.readFragment({
               fragment: EPISODE_FIELDS_FRAGMENT,
-              id: episode.id,
+              id: client.cache.identify(episode),
             });
 
             return fragmentData?.absoluteNumber;
@@ -235,7 +235,7 @@ export const validateTorrent = async (
             item.episodes.map((episode) => {
               const fragmentData = client.readFragment({
                 fragment: EPISODE_FIELDS_FRAGMENT,
-                id: episode.id,
+                id: client.cache.identify(episode),
               });
 
               return fragmentData?.absoluteNumber;
@@ -271,7 +271,7 @@ export const validateTorrent = async (
             item.episodes.map((episode) => {
               const fragmentData = client.readFragment({
                 fragment: EPISODE_FIELDS_FRAGMENT,
-                id: episode.id,
+                id: client.cache.identify(episode),
               });
 
               return fragmentData?.number;
@@ -294,7 +294,7 @@ export const validateTorrent = async (
   if (item.__typename === "Episode") {
     const fragmentData = client.readFragment({
       fragment: EPISODE_FIELDS_FRAGMENT,
-      id: item.id,
+      id: client.cache.identify(item),
     });
 
     const episodesIntersection = new Set(parsedData.episodes).intersection(

@@ -41,12 +41,36 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       }
     }
 
+    const episodesAwaitingUpdate = new Set<Episode>();
+
     for (const collection of uow.getCollectionUpdates()) {
       if (
         collection.owner instanceof MediaItem &&
         !trackedItems.has(collection.owner)
       ) {
         trackedItems.set(collection.owner, null);
+      }
+
+      if (collection.owner instanceof Season) {
+        const episodesToUpdate = collection.reduce((acc, episode) => {
+          if (!(episode instanceof Episode)) {
+            return acc;
+          }
+
+          if (episode.state === "unreleased" && !episode.isReleased) {
+            return acc;
+          }
+
+          if (episode.state !== "unreleased" && episode.isReleased) {
+            return acc;
+          }
+
+          return acc.add(episode);
+        }, new Set<Episode>());
+
+        for (const episode of episodesToUpdate) {
+          episodesAwaitingUpdate.add(episode);
+        }
       }
     }
 
@@ -73,6 +97,19 @@ export class MediaItemStateSubscriber implements EventSubscriber {
 
       if (item instanceof Episode) {
         seasonsAwaitingUpdate.add(await item.season.loadOrFail());
+      }
+    }
+
+    for (const episode of episodesAwaitingUpdate) {
+      const stateChanged = await this.#maybeUpdateState(
+        episode,
+        trackedItems.get(episode) ?? null,
+        uow,
+        nextStatesMap,
+      );
+
+      if (stateChanged) {
+        seasonsAwaitingUpdate.add(await episode.season.loadOrFail());
       }
     }
 
