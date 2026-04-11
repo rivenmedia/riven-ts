@@ -16,12 +16,12 @@ catalog:
   "@kubb/plugin-oas": 4.20.1
   "@kubb/plugin-ts": 4.20.1
   "@kubb/plugin-zod": 4.20.1
-  "@mikro-orm/core": ^7.0.5
-  "@mikro-orm/decorators": ^7.0.5
-  "@mikro-orm/postgresql": ^7.0.5
-  "@mikro-orm/reflection": ^7.0.5
-  "@mikro-orm/seeder": ^7.0.5
-  "@mikro-orm/sqlite": ^7.0.5
+  "@mikro-orm/core": ^7.0.9
+  "@mikro-orm/decorators": ^7.0.9
+  "@mikro-orm/postgresql": ^7.0.9
+  "@mikro-orm/reflection": ^7.0.9
+  "@mikro-orm/seeder": ^7.0.9
+  "@mikro-orm/sqlite": ^7.0.9
   "@types/luxon": ^3.7.1
   "@types/node": ^24.0.0
   "@typescript-eslint/parser": ^8.49.0
