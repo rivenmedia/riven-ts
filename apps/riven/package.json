@@ -3,6 +3,20 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    "./workers/map-items-to-files": {
+      "production": "./dist/workers/map-items-to-files/map-items-to-files.processor.js",
+      "default": "./lib/message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.processor.ts"
+    },
+    "./workers/parse-scrape-results": {
+      "production": "./dist/workers/parse-scrape-results/parse-scrape-results.processor.js",
+      "default": "./lib/message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.processor.ts"
+    },
+    "./workers/validate-torrent-files": {
+      "production": "./dist/workers/validate-torrent-files/validate-torrent-files.processor.js",
+      "default": "./lib/message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.ts"
+    }
+  },
   "scripts": {
     "build": "pnpm build:program && pnpm build:workers",
     "build:program": "tsc --build tsconfig.app.json",

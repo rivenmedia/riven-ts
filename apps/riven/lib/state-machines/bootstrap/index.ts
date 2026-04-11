@@ -116,7 +116,7 @@ export const bootstrapMachine = setup({
   .extend(withLogAction)
   .createMachine({
     id: "Bootstrap",
-    initial: "Clearing previous instance state",
+    initial: "Bootstrapping plugins",
     context: ({ input }) => ({
       rootRef: input.rootRef,
       validatingPlugins: new Map(),
@@ -157,18 +157,6 @@ export const bootstrapMachine = setup({
       };
     },
     states: {
-      "Clearing previous instance state": {
-        invoke: {
-          id: "clearPreviousInstanceState",
-          src: "clearPreviousInstanceState",
-          input: () => ({
-            wipeDatabase: settings.unsafeWipeDatabaseOnStartup,
-            wipeRedis: settings.unsafeWipeRedisOnStartup,
-          }),
-          onDone: "Bootstrapping plugins",
-          onError: "Errored",
-        },
-      },
       "Bootstrapping plugins": {
         entry: [
           {
@@ -229,7 +217,7 @@ export const bootstrapMachine = setup({
       },
       "Initialising services": {
         type: "parallel",
-        onDone: "Bootstrapping VFS",
+        onDone: "Clearing previous instance state",
         states: {
           "Bootstrapping database connection": {
             initial: "Starting",
@@ -355,6 +343,18 @@ export const bootstrapMachine = setup({
               },
             },
           },
+        },
+      },
+      "Clearing previous instance state": {
+        invoke: {
+          id: "clearPreviousInstanceState",
+          src: "clearPreviousInstanceState",
+          input: () => ({
+            wipeDatabase: settings.unsafeWipeDatabaseOnStartup,
+            wipeRedis: settings.unsafeWipeRedisOnStartup,
+          }),
+          onDone: "Bootstrapping VFS",
+          onError: "Errored",
         },
       },
       "Bootstrapping VFS": {

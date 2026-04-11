@@ -341,9 +341,7 @@ export const mainRunnerMachine = setup({
         "scrape-item.parse-scrape-results": createSandboxedWorker(
           ParseScrapeResultsSandboxedJob,
           new URL(
-            import.meta.resolve(
-              `${process.cwd()}/dist/workers/parse-scrape-results/parse-scrape-results.processor.js`,
-            ),
+            import.meta.resolve("@repo/riven/workers/parse-scrape-results"),
           ),
           {},
           { concurrency: 5 },
@@ -351,9 +349,7 @@ export const mainRunnerMachine = setup({
         "download-item.map-items-to-files": createSandboxedWorker(
           MapItemsToFilesSandboxedJob,
           new URL(
-            import.meta.resolve(
-              `${process.cwd()}/dist/workers/map-items-to-files/map-items-to-files.processor.js`,
-            ),
+            import.meta.resolve("@repo/riven/workers/map-items-to-files"),
           ),
           {},
           { concurrency: 15 },
@@ -361,9 +357,7 @@ export const mainRunnerMachine = setup({
         "download-item.validate-torrent-files": createSandboxedWorker(
           ValidateTorrentFilesSandboxedJob,
           new URL(
-            import.meta.resolve(
-              `${process.cwd()}/dist/workers/validate-torrent-files/validate-torrent-files.processor.js`,
-            ),
+            import.meta.resolve("@repo/riven/workers/validate-torrent-files"),
           ),
           {},
           { concurrency: 5 },
