@@ -16,25 +16,10 @@ import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 export class EpisodeResolver {
   @Query(() => Episode, {
     description:
-      "Fetches an episode by its TVDB ID, season number, and episode number.",
+      "Fetches an episode by its TVDB ID, season number, and episode number. If season number is not provided, it will lookup using absolute episode numbering.",
+    nullable: true,
   })
   episode(
-    @Ctx() { em }: ApolloServerContext,
-    @Arg("tvdbId", () => String) tvdbId: string,
-    @Arg("season", () => Int) season: number,
-    @Arg("episode", () => Int) episode: number,
-  ) {
-    return em.findOneOrFail(Episode, {
-      tvdbId,
-      number: episode,
-      season: {
-        number: season,
-      },
-    });
-  }
-
-  @Query(() => Episode, { nullable: true })
-  absoluteEpisode(
     @Ctx() { em }: ApolloServerContext,
     @Arg("tvdbId", () => String) tvdbId: string,
     @Arg("episodeNumber", () => Int) episodeNumber: number,
