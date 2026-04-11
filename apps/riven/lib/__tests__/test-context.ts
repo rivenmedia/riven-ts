@@ -242,8 +242,18 @@ export const it = testBase
 
       return apolloServerInstance;
     },
-  );
+  )
+  .extend("apolloClient", { scope: "file" }, async () => {
+    const { client } = await import("../graphql/apollo-client.ts");
 
-it.afterEach(({ mockSentryScope }) => {
+    return client;
+  });
+
+it.afterEach(async ({ mockSentryScope, apolloClient }) => {
   mockSentryScope.clear();
+
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (apolloClient) {
+    await apolloClient.clearStore();
+  }
 });

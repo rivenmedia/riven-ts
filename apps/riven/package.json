@@ -50,6 +50,7 @@
     "dataloader": "^2.2.3",
     "dedent": "catalog:",
     "es-toolkit": "catalog:",
+    "graphql": "catalog:",
     "graphql-scalars": "catalog:",
     "keyv": "^5.5.5",
     "limiter": "catalog:",

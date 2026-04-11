@@ -277,6 +277,9 @@ importers:
       es-toolkit:
         specifier: 'catalog:'
         version: 1.44.0
+      graphql:
+        specifier: 'catalog:'
+        version: 16.12.0
       graphql-scalars:
         specifier: 'catalog:'
         version: 1.25.0(graphql@16.12.0)

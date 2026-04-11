@@ -6,9 +6,9 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities";
 
 import Fuse from "@zkochan/fuse-native";
+import { GraphQLError } from "graphql";
 import { DateTime } from "luxon";
 
-import { FuseError } from "../../../../vfs/errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 import { getEntry } from "./get-vfs-path-entry.ts";
@@ -202,18 +202,31 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
     }
   }
 
-  const pathInfo = PathInfo.parse(path);
-  const entry = await getEntry(em, pathInfo);
+  const pathInfo = PathInfo.safeParse(path);
+
+  if (!pathInfo.success) {
+    throw new GraphQLError("Invalid path", {
+      extensions: {
+        fuseErrorCode: Fuse.ENOENT,
+      },
+    });
+  }
+
+  const entry = await getEntry(em, pathInfo.data);
 
   if (!entry) {
-    throw new FuseError(Fuse.ENOENT, "Entry not found");
+    throw new GraphQLError("Entry not found", {
+      extensions: {
+        fuseErrorCode: Fuse.ENOENT,
+      },
+    });
   }
 
   const subDirectoryCount =
-    pathInfo.pathType === "show-seasons"
+    pathInfo.data.pathType === "show-seasons"
       ? await em.count(Season, {
           show: {
-            tvdbId: String(pathInfo.tvdbId),
+            tvdbId: String(pathInfo.data.tvdbId),
           },
           episodes: {
             filesystemEntries: {
@@ -230,7 +243,7 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
       ctime: entry.createdAt,
       atime: entry.updatedAt ?? entry.createdAt,
       mtime: entry.updatedAt ?? entry.createdAt,
-      ...(pathInfo.isFile
+      ...(pathInfo.data.isFile
         ? {
             size: entry.filesystemEntries[0]?.fileSize ?? 0,
             mode: "file",

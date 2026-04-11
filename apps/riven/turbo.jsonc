@@ -2,6 +2,9 @@
   "$schema": "https://turborepo.dev/schema.json",
   "extends": ["//"],
   "tasks": {
+    "build": {
+      "dependsOn": ["$TURBO_EXTENDS$", "build:workers"]
+    },
     "build:workers": {
       "dependsOn": ["@repo/util-plugin-sdk#build", "codegen:gql", "transit"],
       "outputs": ["dist/workers/**"]
@@ -28,7 +31,7 @@
       "outputs": ["lib/types/__generated__/graphql.ts", "lib/**/*.typegen.ts"]
     },
     "start": {
-      "dependsOn": ["$TURBO_EXTENDS$", "build", "build:workers"],
+      "dependsOn": ["$TURBO_EXTENDS$", "build"],
       "passThroughEnv": [
         "SENTRY_SPOTLIGHT",
         "SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"

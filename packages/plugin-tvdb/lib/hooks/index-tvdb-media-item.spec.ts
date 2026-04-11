@@ -85,7 +85,7 @@ it("returns the series if the item has a tvdbId", async ({
   expect.assert(result);
 
   expect(result.item).toStrictEqual({
-    id: 1,
+    id: expect.any(String),
     imdbId: "tt0903747",
     type: "show",
     title: "Breaking Bad",

@@ -10,7 +10,7 @@
   },
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "codegen:api-schemas", "transit"],
       "outputs": ["dist/**"]
     },
     "transit": {
@@ -40,7 +40,8 @@
         "kubb.config.ts",
         "*.apib",
         "$TURBO_ROOT$/packages/core/util-kubb-config/lib/**/*.ts"
-      ]
+      ],
+      "outputLogs": "new-only"
     },
     "test": {
       "dependsOn": ["codegen:api-schemas", "transit"],

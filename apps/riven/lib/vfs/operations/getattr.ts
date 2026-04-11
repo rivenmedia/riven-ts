@@ -1,10 +1,14 @@
-import { type TypedDocumentNode, gql } from "@apollo/client";
+import {
+  CombinedGraphQLErrors,
+  type TypedDocumentNode,
+  gql,
+} from "@apollo/client";
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 import { isZodErrorLike } from "zod-validation-error";
 
 import { client } from "../../graphql/apollo-client.ts";
 import { logger } from "../../utilities/logger/logger.ts";
-import { FuseError, isFuseError } from "../errors/fuse-error.ts";
+import { FuseError, FuseErrorCode, isFuseError } from "../errors/fuse-error.ts";
 import { attrCache } from "../utilities/attr-cache.ts";
 import { isHiddenPath } from "../utilities/is-hidden-path.ts";
 import { isIgnoredPath } from "../utilities/is-ignored-path.ts";
@@ -36,25 +40,49 @@ const GET_VFS_ENTRY_STAT_QUERY: TypedDocumentNode<
 `;
 
 async function getAttr(path: string) {
-  const { data } = await client.query({
-    query: GET_VFS_ENTRY_STAT_QUERY,
-    variables: { path },
-    fetchPolicy: "network-only", // Always fetch fresh data; the server will handle its own caching
-  });
+  try {
+    const { data } = await client.query({
+      query: GET_VFS_ENTRY_STAT_QUERY,
+      variables: { path },
+      fetchPolicy: "network-only", // Always fetch fresh data; the server will handle its own caching
+    });
 
-  if (!data?.vfsEntryStat) {
-    throw new FuseError(Fuse.ENOENT, "Entry not found");
+    if (!data?.vfsEntryStat) {
+      throw new FuseError(Fuse.ENOENT, "Entry not found");
+    }
+
+    const { __typename, ...vfsEntryStat } = data.vfsEntryStat;
+
+    return {
+      ...vfsEntryStat,
+      // FUSE expects Date objects for atime, ctime, and mtime, but GraphQL returns ISO strings, so we need to convert them back to Date objects
+      /* eslint-disable no-restricted-globals */
+      atime: new Date(vfsEntryStat.atime),
+      ctime: new Date(vfsEntryStat.ctime),
+      mtime: new Date(vfsEntryStat.mtime),
+      /* eslint-enable no-restricted-globals */
+    };
+  } catch (error) {
+    if (CombinedGraphQLErrors.is(error)) {
+      for (const graphQLError of error.errors) {
+        if (typeof graphQLError.extensions?.["fuseErrorCode"] === "number") {
+          const errorCode = FuseErrorCode.safeParse(
+            graphQLError.extensions["fuseErrorCode"],
+          );
+
+          if (!errorCode.success) {
+            throw new Error(
+              `Invalid Fuse error code: ${graphQLError.extensions["fuseErrorCode"].toString()}`,
+            );
+          }
+
+          throw new FuseError(errorCode.data, graphQLError.message);
+        }
+      }
+    }
+
+    throw error;
   }
-
-  return {
-    ...data.vfsEntryStat,
-    // FUSE expects Date objects for atime, ctime, and mtime, but GraphQL returns ISO strings, so we need to convert them back to Date objects
-    /* eslint-disable no-restricted-globals */
-    atime: new Date(data.vfsEntryStat.atime),
-    ctime: new Date(data.vfsEntryStat.ctime),
-    mtime: new Date(data.vfsEntryStat.mtime),
-    /* eslint-enable no-restricted-globals */
-  };
 }
 
 export const getattrSync = function (path, callback) {

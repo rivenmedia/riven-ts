@@ -28,9 +28,9 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
   createMockJob,
   mockSentryScope,
 }) => {
-  await seedIndexedMovie();
+  const indexedMovie = await seedIndexedMovie();
 
-  const job = await createMockJob({ id: randomUUID() });
+  const job = await createMockJob({ id: indexedMovie.movie.id });
 
   const streamInfoHash = faker.git.commitSha();
 
