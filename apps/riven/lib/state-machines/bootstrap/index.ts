@@ -162,6 +162,7 @@ export const bootstrapMachine = setup({
           id: "clearPreviousInstanceState",
           src: "clearPreviousInstanceState",
           input: () => ({
+            wipeDatabase: settings.unsafeWipeDatabaseOnStartup,
             wipeRedis: settings.unsafeWipeRedisOnStartup,
           }),
           onDone: "Bootstrapping plugins",
