@@ -46,7 +46,7 @@ const SAVE_STREAM_URL_MUTATION: TypedDocumentNode<
   }
 `;
 
-const STREAM_URL_FRAGMENT: TypedDocumentNode<
+const MEDIA_ENTRY_STREAM_URL_FRAGMENT: TypedDocumentNode<
   MediaEntryStreamUrlFragment,
   never
 > = gql`
@@ -86,7 +86,7 @@ async function getItemEntry(path: string) {
 async function waitForStreamUrl(entry: MediaEntryStreamUrlFragment) {
   const streamUrlObservable = client.watchFragment({
     from: entry,
-    fragment: STREAM_URL_FRAGMENT,
+    fragment: MEDIA_ENTRY_STREAM_URL_FRAGMENT,
   });
 
   const {
