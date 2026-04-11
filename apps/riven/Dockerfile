@@ -76,6 +76,4 @@ STOPSIGNAL SIGINT
 
 USER ${PUID}:${PGID}
 
-ENV NODE_ENV=${NODE_ENV:-production}
-
 CMD [ "pnpm", "--filter=@repo/riven", "start" ]
