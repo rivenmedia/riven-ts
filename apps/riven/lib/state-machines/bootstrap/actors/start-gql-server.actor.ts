@@ -41,7 +41,7 @@ export const startGqlServer = fromPromise<
     schema: await buildSchema({
       resolvers: [...resolvers, ...pluginResolvers],
     }),
-    introspection: true,
+    introspection: process.env["NODE_ENV"] !== "production",
     plugins: [
       {
         requestDidStart({ request: { operationName } }) {

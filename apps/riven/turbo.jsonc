@@ -3,11 +3,11 @@
   "extends": ["//"],
   "tasks": {
     "build:workers": {
-      "dependsOn": ["codegen:graphql", "transit"],
+      "dependsOn": ["@repo/util-plugin-sdk#build", "codegen:gql", "transit"],
       "outputs": ["dist/workers/**"]
     },
     "dev": {
-      "dependsOn": ["$TURBO_EXTENDS$", "codegen:graphql"],
+      "dependsOn": ["$TURBO_EXTENDS$", "build:workers"],
       "passThroughEnv": [
         "SENTRY_SPOTLIGHT",
         "SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"
@@ -17,7 +17,7 @@
       "dependsOn": ["transit"],
       "outputs": ["schema.graphql"]
     },
-    "codegen:graphql": {
+    "codegen:gql": {
       "dependsOn": ["codegen:gql-schema", "transit"],
       "inputs": [
         "lib/**/*.ts",
@@ -27,15 +27,21 @@
       ],
       "outputs": ["lib/types/__generated__/graphql.ts", "lib/**/*.typegen.ts"]
     },
-    "start": {},
+    "start": {
+      "dependsOn": ["$TURBO_EXTENDS$", "build", "build:workers"],
+      "passThroughEnv": [
+        "SENTRY_SPOTLIGHT",
+        "SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"
+      ]
+    },
     "test": {
-      "dependsOn": ["$TURBO_EXTENDS$", "codegen:graphql"]
+      "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
     },
     "lint": {
-      "dependsOn": ["$TURBO_EXTENDS$", "codegen:graphql"]
+      "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
     },
     "check-types": {
-      "dependsOn": ["$TURBO_EXTENDS$", "codegen:graphql"]
+      "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
     }
   }
 }

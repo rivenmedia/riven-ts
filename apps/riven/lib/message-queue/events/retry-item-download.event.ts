@@ -1,4 +1,4 @@
-import { SerialisedMediaItem } from "@repo/util-plugin-sdk/schemas/media/serialised-media-item.schema";
+import { MediaItemInstance } from "@repo/util-plugin-sdk/schemas/media/media-item-instance";
 
 import z from "zod";
 
@@ -7,7 +7,7 @@ import { createInternalEventSchema } from "../utilities/create-internal-event-sc
 export const RetryItemDownload = createInternalEventSchema(
   "retry-item-download",
   z.object({
-    item: SerialisedMediaItem,
+    item: MediaItemInstance,
   }),
 );
 
