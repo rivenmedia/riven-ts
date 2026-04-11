@@ -28,8 +28,12 @@ jobs:
         task:
           - name: Linting
             command: lint
+            runner-requirements:
+              - fuse
           - name: Types
             command: check-types
+            runner-requirements:
+              - fuse
           - name: Formatting
             command: format:check:ci
           - name: Tests
