@@ -6,6 +6,7 @@ import {
   Property,
   Unique,
 } from "@mikro-orm/decorators/legacy";
+import { randomUUID } from "node:crypto";
 import { Field, ID, ObjectType } from "type-graphql";
 
 import { MediaItem } from "../media-items/media-item.entity.ts";
@@ -16,8 +17,8 @@ import type { ParsedData } from "@repo/util-rank-torrent-name";
 @Entity()
 export class Stream {
   @Field(() => ID)
-  @PrimaryKey()
-  id!: number;
+  @PrimaryKey({ type: "uuid" })
+  id = randomUUID();
 
   @Field(() => String)
   @Property()

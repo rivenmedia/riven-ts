@@ -3,6 +3,7 @@ import z from "zod";
 import { MediaItemInstance } from "../media/media-item-instance.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
+import { UUID } from "../utilities/uuid.schema.ts";
 
 /**
  * Event emitted when a scrape has been requested for an indexed media item.
@@ -19,7 +20,7 @@ export type MediaItemScrapeRequestedEvent = z.infer<
 >;
 
 export const MediaItemScrapeRequestedResponse = z.object({
-  id: z.int(),
+  id: UUID,
   results: z.record(z.string(), z.string().nonempty()),
 });
 

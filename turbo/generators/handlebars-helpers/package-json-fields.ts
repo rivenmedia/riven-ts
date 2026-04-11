@@ -30,7 +30,8 @@ const commonFields: PackageJsonDefinition = {
 const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
   plugin: {
     scripts: {
-      "generate-config-docs": "zod2md",
+      build: "tsc --project tsconfig.lib.json",
+      "codegen:config-docs": "zod2md",
     },
     dependencies: {
       "@apollo/datasource-rest": "catalog:",

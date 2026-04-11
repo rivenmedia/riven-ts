@@ -17,7 +17,7 @@ import type { ParamsFor } from "@repo/util-plugin-sdk";
 
 Worker.setMaxListeners(200);
 
-export async function createPluginWorker<
+export function createPluginWorker<
   T extends RivenEvent["type"],
   R extends (typeof RivenEventHandler)[T],
 >(
@@ -68,12 +68,6 @@ export async function createPluginWorker<
   worker.on("failed", (_job, error) => {
     logger.error("Plugin worker encountered an error", { err: error });
   });
-
-  if (settings.unsafeClearQueuesOnStartup) {
-    await queue.obliterate({
-      force: true,
-    });
-  }
 
   return {
     queue,

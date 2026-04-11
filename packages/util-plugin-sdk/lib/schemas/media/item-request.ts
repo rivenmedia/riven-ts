@@ -1,10 +1,10 @@
 import z from "zod";
 
-import { ItemRequest as ItemRequestEntity } from "../../dto/entities/index.ts";
 import { ItemRequestType } from "../../dto/enums/item-request-type.enum.ts";
+import { UUID } from "../utilities/uuid.schema.ts";
 
 export const ItemRequest = z.object({
-  id: z.int(),
+  id: UUID,
   imdbId: z.string().nullish(),
   tmdbId: z.string().nullish(),
   tvdbId: z.string().nullish(),
@@ -13,7 +13,3 @@ export const ItemRequest = z.object({
   requestedBy: z.string().nullish(),
   seasons: z.array(z.number().nonnegative()).min(1).nullish(),
 });
-
-export const ItemRequestInstance = z.instanceof(ItemRequestEntity);
-
-export type ItemRequestInstance = z.infer<typeof ItemRequestInstance>;

@@ -33,7 +33,6 @@ it("returns the media item if processed successfully", async ({
   expect(result).instanceOf(Movie);
   expect(result).toEqual(
     expect.objectContaining({
-      id: 1,
       title: "Test Movie",
       type: "movie",
       runtime: 40,

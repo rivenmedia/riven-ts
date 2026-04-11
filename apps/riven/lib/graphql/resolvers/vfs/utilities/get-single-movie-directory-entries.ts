@@ -1,11 +1,14 @@
+import { Movie } from "@repo/util-plugin-sdk/dto/entities";
+
 import Fuse from "@zkochan/fuse-native";
 
-import { database } from "../../database/database.ts";
-import { FuseError } from "../errors/fuse-error.ts";
+import { FuseError } from "../../../../vfs/errors/fuse-error.ts";
 
 import type { PathInfo } from "../schemas/path-info.schema.ts";
+import type { EntityManager } from "@mikro-orm/core";
 
 export const getSingleMovieDirectoryEntries = async (
+  em: EntityManager,
   pathInfo: PathInfo,
 ): Promise<string[]> => {
   if (!pathInfo.tmdbId) {
@@ -15,7 +18,8 @@ export const getSingleMovieDirectoryEntries = async (
     );
   }
 
-  const entry = await database.movie.findOneOrFail(
+  const entry = await em.findOneOrFail(
+    Movie,
     { tmdbId: pathInfo.tmdbId },
     { populate: ["filesystemEntries"] },
   );

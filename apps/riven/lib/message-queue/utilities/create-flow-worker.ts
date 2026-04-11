@@ -22,7 +22,7 @@ import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 Worker.setMaxListeners(200);
 
-export async function createFlowWorker<
+export function createFlowWorker<
   T extends ZodObject<{
     name: ZodLiteral<Flow["name"]>;
     input: ZodType;
@@ -97,12 +97,6 @@ export async function createFlowWorker<
   worker.on("failed", (_job, error) => {
     logger.error("Flow worker encountered an error", { err: error });
   });
-
-  if (settings.unsafeClearQueuesOnStartup) {
-    await queue.obliterate({
-      force: true,
-    });
-  }
 
   return { worker, queue };
 }

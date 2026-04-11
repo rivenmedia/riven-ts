@@ -8,14 +8,11 @@ export function CacheControl({ maxAge, scope }: RequireAtLeastOne<CacheHint>) {
     throw new Error("Missing maxAge or scope param for @CacheControl");
   }
 
-  let sdl = "@cacheControl(";
-  if (maxAge !== undefined) {
-    sdl += `maxAge: ${maxAge.toString()}`;
-  }
-  if (scope) {
-    sdl += ` scope: ${scope}`;
-  }
-  sdl += ")";
+  const sdl = String.raw(
+    { raw: ["@cacheControl(", " ", ")"] },
+    maxAge !== undefined ? `maxAge: ${maxAge.toString()}` : "",
+    scope ? `scope: ${scope}` : "",
+  );
 
   return Directive(sdl);
 }

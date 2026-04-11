@@ -34,7 +34,7 @@ it("throws an error if the media item has no streams", async ({
     }),
   ).rejects.toThrow(
     new UnrecoverableError(
-      `No media item found with ID ${indexedMovie.id.toString()} and stream info hash 1234567890123456789012345678901234567890`,
+      `No media item found with ID ${indexedMovie.id} and stream info hash 1234567890123456789012345678901234567890`,
     ),
   );
 });

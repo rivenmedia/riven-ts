@@ -1,13 +1,13 @@
+import { type TypedDocumentNode, gql } from "@apollo/client";
 import Fuse from "@zkochan/fuse-native";
 import { basename } from "node:path";
-import { setTimeout } from "node:timers/promises";
+import { firstValueFrom, timeout } from "rxjs";
 
-import { database } from "../../database/database.ts";
+import { client } from "../../graphql/apollo-client.ts";
 import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { serialiseEventData } from "../../utilities/serialisers/serialise-event-data.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
-import { PathInfo } from "../schemas/path-info.schema.ts";
 import { attrCache } from "../utilities/attr-cache.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
 import {
@@ -18,6 +18,13 @@ import {
 } from "../utilities/file-handle-map.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
+import type {
+  GetVfsEntryQuery,
+  GetVfsEntryQueryVariables,
+  MediaEntryStreamUrlFragment,
+  SaveStreamUrlMutation,
+  SaveStreamUrlMutationVariables,
+} from "./open.typegen.ts";
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type {
   MediaItemStreamLinkRequestedEvent,
@@ -27,30 +34,74 @@ import type { Queue } from "bullmq";
 
 let fd = 0;
 
+const SAVE_STREAM_URL_MUTATION: TypedDocumentNode<
+  SaveStreamUrlMutation,
+  SaveStreamUrlMutationVariables
+> = gql`
+  mutation SaveStreamUrl($id: ID!, $url: String!) {
+    saveStreamUrl(id: $id, url: $url) {
+      id
+      streamUrl
+    }
+  }
+`;
+
+const MEDIA_ENTRY_STREAM_URL_FRAGMENT: TypedDocumentNode<
+  MediaEntryStreamUrlFragment,
+  never
+> = gql`
+  fragment MediaEntryStreamUrl on MediaEntry {
+    id
+    streamUrl
+  }
+`;
+
+const GET_VFS_ENTRY_QUERY: TypedDocumentNode<
+  GetVfsEntryQuery,
+  GetVfsEntryQueryVariables
+> = gql`
+  query GetVfsEntry($path: String!) {
+    vfsEntry(path: $path) {
+      id
+      originalFilename
+      fileSize
+      streamUrl
+      plugin
+    }
+  }
+`;
+
 async function getItemEntry(path: string) {
-  const pathInfo = PathInfo.parse(path);
+  const { data } = await client.query({
+    query: GET_VFS_ENTRY_QUERY,
+    variables: { path },
+  });
 
-  if (pathInfo.tmdbId) {
-    return database.mediaEntry.findOneOrFail({
-      mediaItem: {
-        tmdbId: pathInfo.tmdbId,
-      },
-    });
+  if (!data?.vfsEntry) {
+    throw new FuseError(Fuse.ENOENT, "Entry not found");
   }
 
-  if (pathInfo.tvdbId && pathInfo.season && pathInfo.episode) {
-    return database.mediaEntry.findOneOrFail({
-      mediaItem: {
-        type: "episode",
-        number: pathInfo.episode,
-        season: {
-          number: pathInfo.season,
-        },
-      },
-    });
-  }
+  return data.vfsEntry;
+}
 
-  throw new FuseError(Fuse.ENOENT, `Invalid path for open: ${path}`);
+async function waitForStreamUrl(entry: MediaEntryStreamUrlFragment) {
+  const streamUrlObservable = client.watchFragment({
+    from: entry,
+    fragment: MEDIA_ENTRY_STREAM_URL_FRAGMENT,
+  });
+
+  const {
+    data: { streamUrl },
+  } = await firstValueFrom(
+    streamUrlObservable.pipe(
+      timeout({
+        first: 10_000,
+        meta: "Timed out waiting for stream URL",
+      }),
+    ),
+  );
+
+  return streamUrl;
 }
 
 async function open(
@@ -68,39 +119,10 @@ async function open(
 
   if (
     !entry.streamUrl &&
-    fileNameIsFetchingLinkMap.get(entry.originalFilename)
-  ) {
-    logger.silly(
-      `Waiting for stream URL for media entry ${entry.id.toString()}...`,
-    );
-
-    // Wait until the stream URL is fetched
-    while (fileNameIsFetchingLinkMap.get(entry.originalFilename)) {
-      await setTimeout(100);
-    }
-
-    const em = database.em.fork();
-
-    // Refresh the item to get the updated stream URL
-    await em.refreshOrFail(entry, {
-      populate: ["*"],
-      refresh: true,
-    });
-
-    if (!entry.streamUrl) {
-      throw new FuseError(
-        Fuse.ENOENT,
-        `Media entry ${entry.id.toString()} has no stream URL after waiting`,
-      );
-    }
-  }
-
-  if (
-    !entry.streamUrl &&
     !fileNameIsFetchingLinkMap.get(entry.originalFilename)
   ) {
     logger.silly(
-      `No stream URL for media entry ${entry.id.toString()}, requesting from ${entry.plugin}...`,
+      `No stream URL for media entry ${entry.id}, requesting from ${entry.plugin}...`,
     );
 
     const requestQueue = linkRequestQueues.get(entry.plugin);
@@ -112,7 +134,7 @@ async function open(
 
       throw new FuseError(
         Fuse.ENOENT,
-        `Media entry ${entry.id.toString()} has no stream URL and no link request queue is available`,
+        `Media entry ${entry.id} has no stream URL and no link request queue is available`,
       );
     }
 
@@ -120,19 +142,21 @@ async function open(
       fileNameIsFetchingLinkMap.set(entry.originalFilename, true);
 
       const job = await requestQueue.add(
-        entry.id.toString(),
+        entry.id,
         serialiseEventData("riven.media-item.stream-link.requested", {
-          item: entry,
+          item: entry as never, // TODO: Fix type. serialiseEventData should be aware of the event serialiser map's types
         }) as ParamsFor<MediaItemStreamLinkRequestedEvent>,
       );
 
       const { link: streamUrl } = await runSingleJob(job);
 
-      const em = database.em.fork();
-
-      em.assign(entry, { streamUrl });
-
-      await em.persist(entry).flush();
+      await client.mutate({
+        mutation: SAVE_STREAM_URL_MUTATION,
+        variables: {
+          id: entry.id,
+          url: streamUrl,
+        },
+      });
 
       attrCache.delete(path);
     } catch (error: unknown) {
@@ -145,10 +169,12 @@ async function open(
     }
   }
 
-  if (!entry.streamUrl) {
+  const streamUrl = entry.streamUrl ?? (await waitForStreamUrl(entry));
+
+  if (!streamUrl) {
     throw new FuseError(
       Fuse.ENOENT,
-      `Media entry ${entry.id.toString()} has no stream URL`,
+      `Media entry ${entry.id} has no stream URL`,
     );
   }
 
@@ -164,7 +190,7 @@ async function open(
     filePath: path,
     fileBaseName: basename(path),
     originalFileName: entry.originalFilename,
-    url: entry.streamUrl,
+    url: streamUrl,
   });
 
   fileNameToFdCountMap.set(

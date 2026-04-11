@@ -5,7 +5,6 @@ import type { PathLike } from "node:fs";
 
 export const attrCache = new LRUCache<PathLike, Partial<Stats>>({
   ttl: 300_000,
-  ttlAutopurge: false,
   max: 1000,
   dispose: (_value, key, reason) => {
     if (reason === "delete" && key !== "/") {

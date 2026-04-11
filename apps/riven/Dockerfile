@@ -55,29 +55,20 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml ./
 # https://pnpm.io/cli/fetch
 RUN pnpm fetch
 
+COPY --parents **/package.json ./
+
 # Install project dependencies
 RUN pnpm install -r --offline
 
-COPY --parents **/package.json ./
-
 #---------------------------
 
-FROM dependencies AS schema-generator
+FROM dependencies AS riven-builder
 
-COPY --parents --from=dependencies ${HOME}/riven-ts/**/node_modules ./node_modules/
-COPY --parents **/kubb.config.ts ./
-COPY --parents **/openapi-schema.json ./
-COPY --parents **/openapi-schema.yaml ./
-COPY ./packages/core/util-kubb-config ./packages/core/util-kubb-config
-
-RUN pnpm -r generate-schemas
-
-# ---------------------------
-
-FROM schema-generator AS riven
-
-RUN chown -R "${PUID}:${PGID}" "${HOME}/riven-ts"
 COPY --chown=${PUID}:${PGID} . .
+
+RUN pnpm turbo @repo/riven#build
+
+FROM riven-builder AS riven
 
 EXPOSE 8080
 

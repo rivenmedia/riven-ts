@@ -6,6 +6,12 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
   async onFlush({ uow }: FlushEventArgs): Promise<void> {
     const trackedEpisodes = new Set<Partial<Episode>>();
 
+    for (const changeSet of uow.getChangeSets()) {
+      if (changeSet.entity instanceof Episode) {
+        trackedEpisodes.add(changeSet.entity);
+      }
+    }
+
     for (const collectionUpdate of uow.getCollectionUpdates()) {
       if (collectionUpdate.owner instanceof Season) {
         const firstEpisode = collectionUpdate.find(

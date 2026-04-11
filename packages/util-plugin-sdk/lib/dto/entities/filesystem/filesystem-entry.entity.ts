@@ -9,6 +9,7 @@ import {
 import { IsPositive } from "class-validator";
 import { BigIntResolver } from "graphql-scalars";
 import { DateTime } from "luxon";
+import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { Field, ID, ObjectType } from "type-graphql";
 import z from "zod";
@@ -63,8 +64,8 @@ async function getMediaItemPathParts(mediaItem: MediaItem) {
 })
 export abstract class FileSystemEntry {
   @Field((_type) => ID)
-  @PrimaryKey()
-  id!: number;
+  @PrimaryKey({ type: "uuid" })
+  id = randomUUID();
 
   @Field(() => BigIntResolver)
   @Property({ type: "bigint" })

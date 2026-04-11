@@ -20,9 +20,10 @@ import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
 
 import type { ValidTorrent } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import type { UUID } from "node:crypto";
 
 export interface PersistDownloadResultsInput {
-  id: number;
+  id: UUID;
   torrent: ValidTorrent;
   processedBy: string;
 }
@@ -48,7 +49,7 @@ export async function persistDownloadResults({
     assert(
       existingItem,
       new UnrecoverableError(
-        `No media item found with ID ${id.toString()} and stream info hash ${torrent.infoHash}`,
+        `No media item found with ID ${id} and stream info hash ${torrent.infoHash}`,
       ),
     );
 
@@ -73,7 +74,7 @@ export async function persistDownloadResults({
       assert(
         matchedStream,
         new UnrecoverableError(
-          `Media item with ID ${id.toString()} does not have a stream matching the torrent's info hash ${torrent.infoHash}`,
+          `Media item with ID ${id} does not have a stream matching the torrent's info hash ${torrent.infoHash}`,
         ),
       );
 
@@ -82,7 +83,7 @@ export async function persistDownloadResults({
       if (existingItem instanceof Movie || existingItem instanceof Episode) {
         const [file] = torrent.files;
 
-        assert(file.link, "Download URL is missing for the matched file");
+        assert(file?.link, "Download URL is missing for the matched file");
 
         existingItem.filesystemEntries.add(
           transaction.create(MediaEntry, {
@@ -111,7 +112,7 @@ export async function persistDownloadResults({
           ),
         );
 
-        const episodeMap = new Map<number, Episode>(
+        const episodeMap = new Map<string, Episode>(
           episodes.map((episode) => [episode.id, episode]),
         );
 

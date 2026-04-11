@@ -29,7 +29,7 @@ export const indexTMDBMediaItem: z.infer<
 
   if (!resolvedTmdbId) {
     throw new UnrecoverableError(
-      `Unable to determine TMDB ID for media item ${event.item.id.toString()}`,
+      `Unable to determine TMDB ID for media item ${event.item.id}`,
     );
   }
 

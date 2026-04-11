@@ -15,7 +15,6 @@ it("returns the item request if processed successfully", async () => {
 
   expect(result.item).toEqual(
     expect.objectContaining({
-      id: 1,
       imdbId: requestedId,
     }),
   );

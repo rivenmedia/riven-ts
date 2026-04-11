@@ -1,32 +1,37 @@
+import { type TypedDocumentNode, gql } from "@apollo/client";
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 
+import { client } from "../../graphql/apollo-client.ts";
 import { logger } from "../../utilities/logger/logger.ts";
-import { config } from "../config.ts";
-import { isFuseError } from "../errors/fuse-error.ts";
-import { PathInfo } from "../schemas/path-info.schema.ts";
-import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
-import { getMoviesDirectoryEntries } from "../utilities/get-movies-directory-entries.ts";
-import { getShowsDirectoryEntries } from "../utilities/get-shows-directory-entries.ts";
+import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
+import type {
+  GetVfsDirectoryEntryPathsQuery,
+  GetVfsDirectoryEntryPathsQueryVariables,
+} from "./readdir.typegen.ts";
+
+const VFS_DIRECTORY_ENTRY_PATHS_QUERY: TypedDocumentNode<
+  GetVfsDirectoryEntryPathsQuery,
+  GetVfsDirectoryEntryPathsQueryVariables
+> = gql`
+  query GetVfsDirectoryEntryPaths($path: String!) {
+    vfsDirectoryEntryPaths(path: $path)
+  }
+`;
+
 async function readdir(path: string): Promise<string[]> {
-  if (path === config.rootPath) {
-    return PersistentDirectory.options;
+  const { data } = await client.query({
+    query: VFS_DIRECTORY_ENTRY_PATHS_QUERY,
+    variables: { path },
+    fetchPolicy: "network-only",
+  });
+
+  if (!data?.vfsDirectoryEntryPaths) {
+    throw new FuseError(Fuse.ENOENT, "Directory not found");
   }
 
-  const pathInfo = PathInfo.parse(path);
-
-  switch (pathInfo.pathType) {
-    case "all-movies":
-    case "single-movie":
-      return getMoviesDirectoryEntries(pathInfo.tmdbId);
-    case "all-shows":
-    case "show-seasons":
-    case "season-episodes":
-      return getShowsDirectoryEntries(pathInfo.tvdbId, pathInfo.season);
-    case "single-episode":
-      return [pathInfo.base];
-  }
+  return data.vfsDirectoryEntryPaths;
 }
 
 export const readDirSync = function (path, callback) {

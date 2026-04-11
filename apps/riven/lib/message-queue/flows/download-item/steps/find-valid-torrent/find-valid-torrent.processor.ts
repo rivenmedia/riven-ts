@@ -132,7 +132,7 @@ export const findValidTorrentProcessor =
               }
 
               logger.debug(
-                `${mediaItem.type} ${mediaItem.fullTitle} (${mediaItem.id.toString()}) - ${String(error)}`,
+                `${mediaItem.type} ${mediaItem.fullTitle} (${mediaItem.id}) - ${String(error)}`,
               );
 
               continue;

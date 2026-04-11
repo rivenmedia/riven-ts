@@ -20,13 +20,13 @@ export const RivenSettings = z.object({
     .describe(
       "If true, attempts to unmount the mount-point before remounting.",
     ),
-  unsafeClearQueuesOnStartup: z
+  unsafeWipeRedisOnStartup: z
     .stringbool()
     .default(false)
     .describe(
-      "**UNSAFE**.\n \nIf true, all queues will be cleared on application startup.",
+      "**UNSAFE**.\n \nIf true, all Redis data will be removed on application startup.",
     ),
-  unsafeRefreshDatabaseOnStartup: z
+  unsafeWipeDatabaseOnStartup: z
     .stringbool()
     .default(false)
     .describe(
