@@ -28,5 +28,5 @@ for (const signal of ["SIGINT", "SIGTERM", "beforeExit"] as const) {
 }
 
 export const redisCache = new ErrorsAreMissesCache(
-  new KeyvAdapter(instance as never),
+  new KeyvAdapter<string>(instance as never),
 );
