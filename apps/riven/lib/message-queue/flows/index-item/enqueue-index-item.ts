@@ -1,5 +1,7 @@
 import { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
+import { merge } from "es-toolkit";
+
 import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
 import { flow } from "../producer.ts";
 import { createRequestIndexDataJob } from "./index-item.schema.ts";
@@ -15,7 +17,7 @@ export interface EnqueueIndexItemInput {
 
 export async function enqueueIndexItem(
   { item, subscribers }: EnqueueIndexItemInput,
-  opts?: FlowJob["opts"],
+  opts: FlowJob["opts"] = {},
 ) {
   const childNodes = subscribers.map((plugin) =>
     createPluginFlowJob(
@@ -31,12 +33,11 @@ export async function enqueueIndexItem(
     `Indexing [${item.externalIdsLabel.join(" | ")}]`,
     {
       children: childNodes,
-      opts: {
+      opts: merge(opts, {
         deduplication: {
           id: `index-item-${item.id}`,
         },
-        ...(opts ?? {}),
-      },
+      }),
     },
   );
 

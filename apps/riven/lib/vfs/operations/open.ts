@@ -1,7 +1,7 @@
 import { type TypedDocumentNode, gql } from "@apollo/client";
 import Fuse from "@zkochan/fuse-native";
 import { basename } from "node:path";
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, timeout } from "rxjs";
 
 import { client } from "../../graphql/apollo-client.ts";
 import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
@@ -51,6 +51,7 @@ const MEDIA_ENTRY_STREAM_URL_FRAGMENT: TypedDocumentNode<
   never
 > = gql`
   fragment MediaEntryStreamUrl on MediaEntry {
+    id
     streamUrl
   }
 `;
@@ -91,7 +92,14 @@ async function waitForStreamUrl(entry: MediaEntryStreamUrlFragment) {
 
   const {
     data: { streamUrl },
-  } = await firstValueFrom(streamUrlObservable);
+  } = await firstValueFrom(
+    streamUrlObservable.pipe(
+      timeout({
+        first: 10_000,
+        meta: "Timed out waiting for stream URL",
+      }),
+    ),
+  );
 
   return streamUrl;
 }

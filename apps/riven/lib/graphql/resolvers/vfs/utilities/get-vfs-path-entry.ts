@@ -47,7 +47,11 @@ export function getEntry(em: EntityManager, pathInfo: PathInfo) {
         throw new TypeError("Missing tvdbId for show seasons path");
       }
 
-      return em.findOneOrFail(Show, { tvdbId: pathInfo.tvdbId });
+      return em.findOneOrFail(
+        Show,
+        { tvdbId: pathInfo.tvdbId },
+        { fields: ["createdAt", "updatedAt"] },
+      );
     }
     case "season-episodes": {
       if (!pathInfo.tvdbId || !pathInfo.season) {
@@ -64,7 +68,7 @@ export function getEntry(em: EntityManager, pathInfo: PathInfo) {
           },
           number: pathInfo.season,
         },
-        { populate: ["*"] },
+        { fields: ["createdAt", "updatedAt"] },
       );
     }
     default:

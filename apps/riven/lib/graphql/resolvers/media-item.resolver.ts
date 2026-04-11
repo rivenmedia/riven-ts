@@ -7,7 +7,6 @@ import {
   FieldResolver,
   ID,
   Int,
-  ObjectType,
   Query,
   Resolver,
 } from "type-graphql";
@@ -15,7 +14,6 @@ import {
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 import type { UUID } from "node:crypto";
 
-@ObjectType()
 @Resolver((_of) => MediaItem)
 export class MediaItemResolver {
   @Query(() => MediaItemUnion, {

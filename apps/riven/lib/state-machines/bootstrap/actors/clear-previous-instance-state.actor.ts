@@ -25,9 +25,13 @@ export const clearPreviousInstanceState = fromPromise<
         "This may lead to data loss if there are pending items in the cache.",
     );
 
-    await client.flushall();
+    try {
+      await client.flushall();
 
-    logger.info("Redis cleared.");
+      logger.info("Redis cleared.");
+    } finally {
+      await connection.close();
+    }
   }
 
   if (wipeDatabase) {

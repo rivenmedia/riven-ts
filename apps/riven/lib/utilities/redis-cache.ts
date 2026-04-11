@@ -5,7 +5,11 @@ import KeyvRedis, { Keyv } from "@keyv/redis";
 import { logger } from "./logger/logger.ts";
 import { settings } from "./settings.ts";
 
-const instance = new Keyv(new KeyvRedis(settings.redisUrl));
+const instance = new Keyv<string>(new KeyvRedis(settings.redisUrl));
+
+instance.on("error", (error: unknown) => {
+  logger.error("Keyv Redis error:", { err: error });
+});
 
 async function killInstance() {
   try {
@@ -24,5 +28,5 @@ for (const signal of ["SIGINT", "SIGTERM", "beforeExit"] as const) {
 }
 
 export const redisCache = new ErrorsAreMissesCache(
-  new KeyvAdapter<string>(instance as never),
+  new KeyvAdapter(instance as never),
 );

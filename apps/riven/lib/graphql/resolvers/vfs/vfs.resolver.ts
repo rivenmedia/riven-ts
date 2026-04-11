@@ -23,7 +23,7 @@ export class VfsResolver {
   async vfsEntry(
     @Ctx() { em }: ApolloServerContext,
     @Arg("path") path: string,
-  ) {
+  ): Promise<MediaEntry | null> {
     return getVfsEntry(em, path);
   }
 

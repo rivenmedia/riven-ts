@@ -116,7 +116,7 @@ If everything works, you should see a bunch of logs, else you can check for erro
 Also for dev, it's recommended to enable these env in `.env.riven`
 
 ```bash
-# Clear Redis cache on startup
+# Wipe Redis cache on startup
 RIVEN_SETTING__unsafeWipeRedisOnStartup=true
 
 # Wipe database on startup

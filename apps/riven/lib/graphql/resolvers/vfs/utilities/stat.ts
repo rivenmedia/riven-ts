@@ -3,13 +3,9 @@ import fs from "node:fs";
 import type { Stats } from "@zkochan/fuse-native";
 import type { SetOptional } from "type-fest";
 
-export type StatMode = "dir" | "file" | "link" | number;
+export type StatMode = "dir" | "file" | "link";
 
 function parseMode(mode: StatMode): number {
-  if (typeof mode === "number") {
-    return mode;
-  }
-
   switch (mode) {
     case "dir":
       return fs.constants.S_IFDIR | 0o755;

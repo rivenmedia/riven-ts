@@ -354,7 +354,24 @@ export const bootstrapMachine = setup({
             wipeRedis: settings.unsafeWipeRedisOnStartup,
           }),
           onDone: "Bootstrapping VFS",
-          onError: "Errored",
+          onError: {
+            target: "Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message:
+                    "Failed to clear previous instance state during bootstrap.",
+                  level: "error",
+                  error,
+                }),
+              },
+              {
+                type: "raiseError",
+                params: ({ event }) => event.error as Error,
+              },
+            ],
+          },
         },
       },
       "Bootstrapping VFS": {

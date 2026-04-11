@@ -8,7 +8,7 @@ export async function getVfsEntry(em: EntityManager, path: string) {
   const pathInfo = PathInfo.parse(path);
 
   if (pathInfo.tmdbId) {
-    return em.findOneOrFail(MediaEntry, {
+    return em.findOne(MediaEntry, {
       mediaItem: {
         type: "movie",
         tmdbId: pathInfo.tmdbId,
@@ -17,7 +17,7 @@ export async function getVfsEntry(em: EntityManager, path: string) {
   }
 
   if (pathInfo.tvdbId && pathInfo.season && pathInfo.episode) {
-    return em.findOneOrFail(MediaEntry, {
+    return em.findOne(MediaEntry, {
       mediaItem: {
         type: "episode",
         tvdbId: pathInfo.tvdbId,

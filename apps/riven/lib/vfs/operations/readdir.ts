@@ -24,6 +24,7 @@ async function readdir(path: string): Promise<string[]> {
   const { data } = await client.query({
     query: VFS_DIRECTORY_ENTRY_PATHS_QUERY,
     variables: { path },
+    fetchPolicy: "network-only",
   });
 
   if (!data?.vfsDirectoryEntryPaths) {
