@@ -20,9 +20,10 @@ import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
 
 import type { ValidTorrent } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import type { UUID } from "node:crypto";
 
 export interface PersistDownloadResultsInput {
-  id: string;
+  id: UUID;
   torrent: ValidTorrent;
   processedBy: string;
 }
@@ -82,7 +83,7 @@ export async function persistDownloadResults({
       if (existingItem instanceof Movie || existingItem instanceof Episode) {
         const [file] = torrent.files;
 
-        assert(file.link, "Download URL is missing for the matched file");
+        assert(file?.link, "Download URL is missing for the matched file");
 
         existingItem.filesystemEntries.add(
           transaction.create(MediaEntry, {

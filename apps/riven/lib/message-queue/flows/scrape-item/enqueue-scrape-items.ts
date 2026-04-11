@@ -40,7 +40,7 @@ export function enqueueScrapeItems({
         ],
         opts: {
           deduplication: {
-            id: `scrape-item-${item.id.toString()}`,
+            id: `scrape-item-${item.id}`,
           },
         },
       },

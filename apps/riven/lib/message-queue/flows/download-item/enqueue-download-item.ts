@@ -143,7 +143,7 @@ export async function enqueueDownloadItem({
       children: [findValidTorrentNode],
       opts: {
         deduplication: {
-          id: `download-item-${item.id.toString()}`,
+          id: `download-item-${item.id}`,
         },
       },
     },

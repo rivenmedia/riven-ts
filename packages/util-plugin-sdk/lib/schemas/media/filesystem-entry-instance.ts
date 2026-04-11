@@ -1,6 +1,7 @@
 import z from "zod";
 
-import type { FileSystemEntry } from "../../dto/entities/index.ts";
-import type { EntityData } from "@mikro-orm/core";
+import { FileSystemEntry } from "../../dto/entities/index.ts";
 
-export const FileSystemEntryInstance = z.custom<EntityData<FileSystemEntry>>();
+export const FileSystemEntryInstance = z.instanceof(FileSystemEntry);
+
+export type FileSystemEntryInstance = z.infer<typeof FileSystemEntryInstance>;

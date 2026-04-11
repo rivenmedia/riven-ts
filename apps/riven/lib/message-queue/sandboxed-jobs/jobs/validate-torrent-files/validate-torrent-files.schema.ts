@@ -1,3 +1,5 @@
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
+
 import z from "zod";
 
 import { MatchedFile } from "../../../flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
@@ -20,7 +22,7 @@ export const ValidateTorrentFilesSandboxedJob = createSandboxedJobSchema(
       }),
     ]),
     input: z.object({
-      id: z.uuidv4(),
+      id: UUID,
       infoHash: z.hash("sha1"),
       isCacheCheck: z.boolean(),
     }),

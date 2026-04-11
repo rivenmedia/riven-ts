@@ -25,7 +25,7 @@ export default {
 
       if (mediaEntries.length === 0) {
         throw new Error(
-          `No media filesystem entry found for media item ID ${event.item.id.toString()}`,
+          `No media filesystem entry found for media item ID ${event.item.id}`,
         );
       }
 

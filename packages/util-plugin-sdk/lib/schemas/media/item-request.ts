@@ -1,9 +1,10 @@
 import z from "zod";
 
 import { ItemRequestType } from "../../dto/enums/item-request-type.enum.ts";
+import { UUID } from "../utilities/uuid.schema.ts";
 
 export const ItemRequest = z.object({
-  id: z.uuidv4(),
+  id: UUID,
   imdbId: z.string().nullish(),
   tmdbId: z.string().nullish(),
   tvdbId: z.string().nullish(),

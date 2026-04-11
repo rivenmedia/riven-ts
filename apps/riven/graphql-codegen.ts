@@ -27,6 +27,7 @@ export default {
       // Note: these config options moved from the other generated file config
       config: {
         scalars: {
+          ID: "`${string}-${string}-${string}-${string}-${string}`",
           BigInt: "number",
           DateTimeISO: "string",
           JSONObject: "Record<string, unknown>",

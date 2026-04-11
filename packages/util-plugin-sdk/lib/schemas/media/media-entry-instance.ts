@@ -1,8 +1,7 @@
 import z from "zod";
 
-import type { MediaEntry } from "../../dto/entities/index.ts";
-import type { EntityData } from "@mikro-orm/core";
+import { MediaEntry } from "../../dto/entities/index.ts";
 
-export const MediaEntryInstance = z.custom<EntityData<MediaEntry>>();
+export const MediaEntryInstance = z.instanceof(MediaEntry);
 
 export type MediaEntryInstance = z.infer<typeof MediaEntryInstance>;

@@ -2,6 +2,7 @@ import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { parse } from "@repo/util-rank-torrent-name/parser";
 
 import { faker } from "@faker-js/faker";
+import { randomUUID } from "node:crypto";
 import { expect, vi } from "vitest";
 
 import { it } from "../../../__tests__/test-context.ts";
@@ -11,7 +12,7 @@ it("throws an unrecoverable error if the item cannot be scraped", async ({
   createMockJob,
   mockSentryScope,
 }) => {
-  const job = await createMockJob({ id: 1 });
+  const job = await createMockJob({ id: randomUUID() });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
@@ -29,13 +30,13 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
 }) => {
   await seedIndexedMovie();
 
-  const job = await createMockJob({ id: 1 });
+  const job = await createMockJob({ id: randomUUID() });
 
   const streamInfoHash = faker.git.commitSha();
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
     "plugin[@repo/plugin-test]": {
-      id: 1,
+      id: randomUUID(),
       results: {
         [streamInfoHash]: parse("Test Movie 2024 1080p WEB-DL"),
       },

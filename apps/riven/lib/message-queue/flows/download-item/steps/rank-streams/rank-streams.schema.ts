@@ -1,4 +1,5 @@
 import { Torrent } from "@repo/util-plugin-sdk/schemas/torrents/torrent";
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 import { atLeastOnePropertyRequired } from "@repo/util-plugin-sdk/validation";
 import {
   type RankedResult,
@@ -14,7 +15,7 @@ import { createFlowSchema } from "../../../../utilities/create-flow-schema.ts";
 export const RankStreamsFlow = createFlowSchema("download-item.rank-streams", {
   children: Torrent,
   input: z.object({
-    id: z.uuidv4(),
+    id: UUID,
     streams: z
       .record(z.hash("sha1"), z.string())
       .refine(atLeastOnePropertyRequired, {

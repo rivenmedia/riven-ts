@@ -15,9 +15,10 @@ import { database } from "../../../../database/database.ts";
 import { logger } from "../../../../utilities/logger/logger.ts";
 
 import type { ParsedData } from "@repo/util-rank-torrent-name";
+import type { UUID } from "node:crypto";
 
 export interface PersistScrapeResultsInput {
-  id: string;
+  id: UUID;
   results: Record<string, ParsedData>;
 }
 

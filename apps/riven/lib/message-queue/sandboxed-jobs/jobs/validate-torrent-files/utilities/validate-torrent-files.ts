@@ -16,6 +16,7 @@ import type {
   GetValidateTorrentFilesItemQuery,
   GetValidateTorrentFilesItemQueryVariables,
 } from "./validate-torrent-files.typegen.ts";
+import type { UUID } from "node:crypto";
 
 export class InvalidTorrentError extends Error {}
 
@@ -99,7 +100,7 @@ const GET_ABSOLUTE_EPISODE_QUERY: TypedDocumentNode<
 `;
 
 export const validateTorrentFiles = async (
-  itemId: string,
+  itemId: UUID,
   infoHash: string,
   { episodes, movies }: MapItemsToFilesSandboxedJob["output"],
   isCacheCheck: boolean,
@@ -155,7 +156,7 @@ export const validateTorrentFiles = async (
           }
 
           validFiles.push(
-            MatchedFile.encode({
+            MatchedFile.parse({
               ...file,
               matchedMediaItemId: itemId,
               isCachedFile: isCacheCheck,
@@ -252,7 +253,7 @@ export const validateTorrentFiles = async (
           }
 
           validFiles.push(
-            MatchedFile.encode({
+            MatchedFile.parse({
               ...file,
               matchedMediaItemId: absoluteEpisode.id,
               isCachedFile: isCacheCheck,

@@ -6,7 +6,7 @@ import { createEventHandlerSchema } from "../utilities/create-event-handler-sche
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
 /**
- * Event emitted when a media item's state has been updated.
+ * Event emitted when a media item has been successfully indexed.
  */
 export const MediaItemIndexSuccessEvent = createProgramEventSchema(
   "media-item.index.success",

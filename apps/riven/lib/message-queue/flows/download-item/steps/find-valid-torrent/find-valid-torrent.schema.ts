@@ -1,4 +1,5 @@
 import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 
@@ -9,7 +10,7 @@ import { createFlowSchema } from "../../../../utilities/create-flow-schema.ts";
 import type { RankedResult } from "@repo/util-rank-torrent-name";
 
 export const MatchedFile = DebridFile.extend({
-  matchedMediaItemId: z.uuidv4(),
+  matchedMediaItemId: UUID,
   isCachedFile: z.boolean(),
 }).refine(
   (file) => file.isCachedFile || file.link !== undefined,
@@ -22,10 +23,7 @@ export const ValidTorrent = z.object({
   torrentId: z.string().min(1),
   infoHash: z.hash("sha1"),
   provider: z.string().nullable(),
-  files: z
-    .array(MatchedFile)
-    .min(1)
-    .pipe(z.tuple([MatchedFile], MatchedFile)),
+  files: z.array(MatchedFile).min(1),
 });
 
 export type ValidTorrent = z.infer<typeof ValidTorrent>;
@@ -35,7 +33,7 @@ export const FindValidTorrentFlow = createFlowSchema(
   {
     children: z.array(z.custom<RankedResult>()),
     input: z.object({
-      id: z.uuidv4(),
+      id: UUID,
       itemTitle: z.string().min(1),
       availableDownloaders: z
         .array(

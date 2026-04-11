@@ -1,3 +1,5 @@
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
+
 import z from "zod";
 
 import { createFlowJobBuilder } from "../../../utilities/create-flow-job-builder.ts";
@@ -9,15 +11,15 @@ export const ParseScrapeResultsSandboxedJob = createSandboxedJobSchema(
   "scrape-item.parse-scrape-results",
   {
     children: z.object({
-      id: z.uuidv4(),
+      id: UUID,
       results: z.record(z.string(), z.string().nonempty()),
     }),
     output: z.object({
-      id: z.uuidv4(),
+      id: UUID,
       results: z.record(z.hash("sha1"), z.custom<ParsedData>()),
     }),
     input: z.object({
-      id: z.uuidv4(),
+      id: UUID,
     }),
   },
 );

@@ -13,6 +13,7 @@ import {
 } from "type-graphql";
 
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
+import type { UUID } from "node:crypto";
 
 @ObjectType()
 @Resolver((_of) => MediaItem)
@@ -23,7 +24,7 @@ export class MediaItemResolver {
   })
   mediaItemById(
     @Ctx() { em }: ApolloServerContext,
-    @Arg("id", () => ID) id: string,
+    @Arg("id", () => ID) id: UUID,
   ) {
     return em.findOneOrFail(MediaItem, id);
   }

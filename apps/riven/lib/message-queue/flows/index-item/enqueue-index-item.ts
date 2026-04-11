@@ -33,7 +33,7 @@ export async function enqueueIndexItem(
       children: childNodes,
       opts: {
         deduplication: {
-          id: `index-item-${item.id.toString()}`,
+          id: `index-item-${item.id}`,
         },
         ...(opts ?? {}),
       },

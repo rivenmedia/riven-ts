@@ -45,7 +45,7 @@ export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
       {
         delay: jobDelay,
         deduplication: {
-          id: `reindex-item-${item.id.toString()}`,
+          id: `reindex-item-${item.id}`,
           ttl: jobDelay,
         },
       },

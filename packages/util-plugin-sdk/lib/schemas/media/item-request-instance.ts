@@ -1,8 +1,7 @@
 import z from "zod";
 
-import type { ItemRequest as ItemRequestEntity } from "../../dto/entities/index.ts";
-import type { EntityData } from "@mikro-orm/core";
+import { ItemRequest } from "../../dto/entities/index.ts";
 
-export const ItemRequestInstance = z.custom<EntityData<ItemRequestEntity>>();
+export const ItemRequestInstance = z.instanceof(ItemRequest);
 
 export type ItemRequestInstance = z.infer<typeof ItemRequestInstance>;

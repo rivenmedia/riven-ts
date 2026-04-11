@@ -15,6 +15,7 @@ import {
 } from "type-graphql";
 
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
+import type { UUID } from "node:crypto";
 
 @InputType()
 class MovieMediaEntryFilterArgs {
@@ -100,7 +101,7 @@ export class MediaEntryResolver {
   @Mutation(() => MediaEntry)
   async saveStreamUrl(
     @Ctx() { em }: ApolloServerContext,
-    @Arg("id", () => ID) id: string,
+    @Arg("id", () => ID) id: UUID,
     @Arg("url", () => String) url: string,
   ): Promise<MediaEntry> {
     const entry = await em.findOneOrFail(MediaEntry, id);

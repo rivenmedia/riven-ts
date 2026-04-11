@@ -139,11 +139,12 @@ export async function persistShowIndexerData({
 
         show.seasons.add(seasonEntry);
 
+        await transaction.upsert(seasonEntry);
+
         for (const episode of season.episodes) {
           if (episode.number === 1 && episode.airedAt) {
             const episodeAirDate = DateTime.fromISO(episode.airedAt);
 
-            seasonEntry.releaseDate = episodeAirDate.toJSDate();
             seasonEntry.year = episodeAirDate.year;
           }
 
@@ -198,8 +199,6 @@ export async function persistShowIndexerData({
 
           await transaction.upsert(episodeEntry);
         }
-
-        await transaction.upsert(seasonEntry);
       }
 
       await validateOrReject(show);

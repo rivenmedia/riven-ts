@@ -17,6 +17,7 @@ import {
 import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { JSONObjectResolver } from "graphql-scalars";
 import { DateTime } from "luxon";
+import { type UUID, randomUUID } from "node:crypto";
 import { Field, ID, InterfaceType } from "type-graphql";
 
 import { MediaItemContentRating } from "../../enums/content-ratings.enum.ts";
@@ -38,8 +39,8 @@ export abstract class MediaItem {
   [OptionalProps]?: "state";
 
   @Field((_type) => ID)
-  @PrimaryKey({ defaultRaw: "gen_random_uuid()" })
-  id!: string;
+  @PrimaryKey({ type: "uuid" })
+  id: UUID = randomUUID();
 
   @Field(() => String)
   @Index()

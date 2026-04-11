@@ -1,8 +1,9 @@
 import Fuse from "@zkochan/fuse-native";
+import fs from "node:fs";
 import { expect, vi } from "vitest";
 
 import { it } from "../../__tests__/test-context.ts";
-import { getattrSync, parseMode } from "./getattr.ts";
+import { getattrSync } from "./getattr.ts";
 
 it("returns directory stats for the root directory", async () => {
   const callback = vi.fn();
@@ -14,7 +15,7 @@ it("returns directory stats for the root directory", async () => {
       atime: expect.any(Date),
       ctime: expect.any(Date),
       mtime: expect.any(Date),
-      mode: parseMode("dir"),
+      mode: fs.constants.S_IFDIR,
       gid: expect.any(Number),
       uid: expect.any(Number),
       size: 0,
@@ -70,7 +71,7 @@ it("returns file stats for movie files", async ({
       atime: expect.any(Date),
       ctime: expect.any(Date),
       mtime: expect.any(Date),
-      mode: parseMode("file"),
+      mode: fs.constants.S_IFREG,
       gid: expect.any(Number),
       uid: expect.any(Number),
       size: mediaEntry.fileSize,
@@ -93,7 +94,7 @@ it("returns directory stats for /movies", async ({
       atime: expect.any(Date),
       ctime: expect.any(Date),
       mtime: expect.any(Date),
-      mode: parseMode("dir"),
+      mode: fs.constants.S_IFDIR,
       gid: expect.any(Number),
       uid: expect.any(Number),
       size: 0,
@@ -116,7 +117,7 @@ it("returns directory stats for /shows", async ({
       atime: expect.any(Date),
       ctime: expect.any(Date),
       mtime: expect.any(Date),
-      mode: parseMode("dir"),
+      mode: fs.constants.S_IFDIR,
       gid: expect.any(Number),
       uid: expect.any(Number),
       size: 0,
@@ -139,7 +140,7 @@ it("returns directory stats for single shows", async ({
       atime: expect.any(Date),
       ctime: expect.any(Date),
       mtime: expect.any(Date),
-      mode: parseMode("dir"),
+      mode: fs.constants.S_IFDIR,
       gid: expect.any(Number),
       uid: expect.any(Number),
       size: 0,
@@ -160,7 +161,7 @@ it("returns directory stats for single seasons", async ({
       atime: expect.any(Date),
       ctime: expect.any(Date),
       mtime: expect.any(Date),
-      mode: parseMode("dir"),
+      mode: fs.constants.S_IFDIR,
       gid: expect.any(Number),
       uid: expect.any(Number),
       size: 0,
@@ -189,7 +190,7 @@ it("returns file stats for episodes", async ({
       atime: expect.any(Date),
       ctime: expect.any(Date),
       mtime: expect.any(Date),
-      mode: parseMode("file"),
+      mode: fs.constants.S_IFREG,
       gid: expect.any(Number),
       uid: expect.any(Number),
       size: mediaEntry.fileSize,

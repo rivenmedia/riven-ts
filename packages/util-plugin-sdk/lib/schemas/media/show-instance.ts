@@ -1,8 +1,7 @@
 import z from "zod";
 
-import type { Show } from "../../dto/entities/index.ts";
-import type { EntityData } from "@mikro-orm/core";
+import { Show } from "../../dto/entities/index.ts";
 
-export const ShowInstance = z.custom<EntityData<Show>>();
+export const ShowInstance = z.instanceof(Show);
 
 export type ShowInstance = z.infer<typeof ShowInstance>;
