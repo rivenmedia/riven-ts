@@ -87,7 +87,7 @@ sudo chown -R 1000:1000 packages/plugin-seerr/docker-data
 After setting up the `.env` files, you need to do a one-time schema generation for different services,
 
 ```bash
-turbo generate-schemas
+turbo codegen:api-schemas
 ```
 
 Then, you can start the different services required,

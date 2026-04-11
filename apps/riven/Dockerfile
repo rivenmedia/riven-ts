@@ -70,7 +70,7 @@ COPY --parents **/openapi-schema.json ./
 COPY --parents **/openapi-schema.yaml ./
 COPY ./packages/core/util-kubb-config ./packages/core/util-kubb-config
 
-RUN pnpm -r generate-schemas
+RUN pnpm -r codegen:api-schemas
 
 # ---------------------------
 

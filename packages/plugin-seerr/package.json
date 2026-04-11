@@ -12,8 +12,8 @@
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
-    "generate-config-docs": "zod2md",
-    "generate-schemas": "kubb generate",
+    "codegen:api-schemas": "kubb generate",
+    "codegen:config-docs": "zod2md",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run --passWithNoTests",

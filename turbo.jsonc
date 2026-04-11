@@ -17,7 +17,7 @@
       "dependsOn": ["^transit"]
     },
     "check-types": {
-      "dependsOn": ["generate-schemas", "transit"],
+      "dependsOn": ["codegen:api-schemas", "transit"],
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
         "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data}/**"
@@ -26,14 +26,14 @@
     "dev": {
       "persistent": true,
       "cache": false,
-      "dependsOn": ["generate-schemas"]
+      "dependsOn": ["codegen:api-schemas"]
     },
-    "generate-config-docs": {
+    "codegen:config-docs": {
       "inputs": ["**/*-settings.schema.ts", "zod2md.config.ts"],
       "outputs": ["docs/*.md"]
     },
-    "generate-schemas": {
-      "dependsOn": ["^generate-schemas"],
+    "codegen:api-schemas": {
+      "dependsOn": ["^codegen:api-schemas"],
       "outputs": ["lib/__generated__/**"],
       "inputs": [
         "openapi-schema.{json,yaml}",
@@ -43,7 +43,7 @@
       ]
     },
     "test": {
-      "dependsOn": ["generate-schemas", "transit"],
+      "dependsOn": ["codegen:api-schemas", "transit"],
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
         "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data}/**",
@@ -52,10 +52,10 @@
     },
     "test:watch": {
       "persistent": true,
-      "dependsOn": ["generate-schemas"]
+      "dependsOn": ["codegen:api-schemas"]
     },
     "lint": {
-      "dependsOn": ["generate-schemas"],
+      "dependsOn": ["codegen:api-schemas"],
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
         "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data}/**"
