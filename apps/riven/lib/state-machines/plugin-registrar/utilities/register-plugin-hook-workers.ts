@@ -1,7 +1,6 @@
 import { type Queue, Worker } from "bullmq";
 import chalk from "chalk";
 import os from "node:os";
-import { fromPromise } from "xstate";
 
 import { createPluginWorker } from "../../../message-queue/utilities/create-plugin-worker.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
@@ -16,21 +15,16 @@ import type {
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
-export interface RegisterPluginHookWorkersInput {
-  plugins: ValidPluginMap;
-  settings: PluginSettings;
-}
-
 export interface RegisterPluginHookWorkersOutput {
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: PublishableEventSet;
 }
 
-export const registerPluginHookWorkers = fromPromise<
-  RegisterPluginHookWorkersOutput,
-  RegisterPluginHookWorkersInput
->(async ({ input: { plugins, settings } }) => {
+export const registerPluginHookWorkers = (
+  plugins: ValidPluginMap,
+  settings: PluginSettings,
+) => {
   const pluginQueueMap = new Map<
     symbol,
     Map<RivenEvent["type"], Queue>
@@ -54,7 +48,7 @@ export const registerPluginHookWorkers = fromPromise<
         const typedEventName = eventName as RivenEvent["type"];
         const pluginName = pluginSymbol.description ?? "unknown";
 
-        const { queue, worker } = await createPluginWorker(
+        const { queue, worker } = createPluginWorker(
           typedEventName,
           pluginName,
           async (job) => {
@@ -108,5 +102,5 @@ export const registerPluginHookWorkers = fromPromise<
     pluginQueues: pluginQueueMap,
     pluginWorkers: pluginWorkerMap,
     publishableEvents,
-  };
-});
+  } satisfies RegisterPluginHookWorkersOutput;
+};

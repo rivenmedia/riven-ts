@@ -14,11 +14,11 @@ import {
   type ParsedPlugins,
   collectPluginsForRegistration,
 } from "./actors/collect-plugins-for-registration.actor.ts";
+import { validatePlugin } from "./actors/validate-plugin.actor.ts";
 import {
   type RegisterPluginHookWorkersOutput,
   registerPluginHookWorkers,
-} from "./actors/register-plugin-hook-workers.actor.ts";
-import { validatePlugin } from "./actors/validate-plugin.actor.ts";
+} from "./utilities/register-plugin-hook-workers.ts";
 
 import type {
   InvalidPlugin,
@@ -69,7 +69,6 @@ export const pluginRegistrarMachine = setup({
     events: {} as PluginRegistrarMachineEvent,
     children: {} as {
       collectPluginsForRegistration: "collectPluginsForRegistration";
-      registerPluginHookWorkers: "registerPluginHookWorkers";
       validatePlugin: "validatePlugin";
     },
     output: {} as PluginRegistrarMachineOutput,
@@ -253,7 +252,6 @@ export const pluginRegistrarMachine = setup({
   actors: {
     collectPluginsForRegistration,
     validatePlugin,
-    registerPluginHookWorkers,
   },
   guards: {
     allPluginsValidated: ({ context: { pendingPlugins } }) =>
@@ -338,13 +336,27 @@ export const pluginRegistrarMachine = setup({
         entry: "spawnValidators",
         always: {
           guard: "allPluginsValidated",
-          target: "Registering plugin hook workers",
-          actions: {
-            type: "log",
-            params: {
-              message: "Plugin validation complete.",
+          target: "Validated",
+          actions: [
+            {
+              type: "assignPluginHooks",
+              params: ({ context: { validPlugins, settings } }) => {
+                if (!settings) {
+                  throw new Error(
+                    "PluginSettings is not initialised. Have the plugins been registered?",
+                  );
+                }
+
+                return registerPluginHookWorkers(validPlugins, settings);
+              },
             },
-          },
+            {
+              type: "log",
+              params: {
+                message: "Plugin validation complete.",
+              },
+            },
+          ],
         },
         on: {
           "riven.plugin-valid": {
@@ -360,31 +372,6 @@ export const pluginRegistrarMachine = setup({
               type: "handleInvalidPlugin",
               params: ({ event: { plugin } }) => plugin,
             },
-          },
-        },
-      },
-      "Registering plugin hook workers": {
-        invoke: {
-          id: "registerPluginHookWorkers",
-          src: "registerPluginHookWorkers",
-          input: ({ context: { validPlugins, settings } }) => {
-            if (!settings) {
-              throw new Error(
-                "PluginSettings is not initialised. Have the plugins been registered?",
-              );
-            }
-
-            return {
-              plugins: validPlugins,
-              settings,
-            };
-          },
-          onDone: {
-            actions: {
-              type: "assignPluginHooks",
-              params: ({ event: { output } }) => output,
-            },
-            target: "Validated",
           },
         },
       },
