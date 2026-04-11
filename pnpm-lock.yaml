@@ -196,6 +196,9 @@ importers:
       '@apollo/utils.keyvadapter':
         specifier: 'catalog:'
         version: 4.0.1
+      '@apollo/utils.keyvaluecache':
+        specifier: 'catalog:'
+        version: 4.0.0
       '@elastic/ecs-winston-format':
         specifier: ^1.5.3
         version: 1.5.3

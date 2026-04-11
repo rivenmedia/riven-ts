@@ -23,6 +23,7 @@
     "@apollo/server": "catalog:",
     "@apollo/server-plugin-response-cache": "^5.0.0",
     "@apollo/utils.keyvadapter": "catalog:",
+    "@apollo/utils.keyvaluecache": "catalog:",
     "@elastic/ecs-winston-format": "^1.5.3",
     "@keyv/redis": "^5.1.5",
     "@mikro-orm/core": "catalog:",

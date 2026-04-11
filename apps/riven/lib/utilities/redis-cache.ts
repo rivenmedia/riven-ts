@@ -1,10 +1,11 @@
 import { KeyvAdapter } from "@apollo/utils.keyvadapter";
+import { ErrorsAreMissesCache } from "@apollo/utils.keyvaluecache";
 import KeyvRedis, { Keyv } from "@keyv/redis";
 
 import { logger } from "./logger/logger.ts";
 import { settings } from "./settings.ts";
 
-const instance = new KeyvRedis(settings.redisUrl);
+const instance = new Keyv(new KeyvRedis(settings.redisUrl));
 
 async function killInstance() {
   try {
@@ -22,4 +23,6 @@ for (const signal of ["SIGINT", "SIGTERM", "beforeExit"] as const) {
   });
 }
 
-export const redisCache = new KeyvAdapter(new Keyv(instance) as never);
+export const redisCache = new ErrorsAreMissesCache(
+  new KeyvAdapter<string>(instance as never),
+);
