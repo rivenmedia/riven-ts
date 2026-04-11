@@ -16,7 +16,7 @@ import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 Worker.setMaxListeners(200);
 
-export async function createSandboxedWorker(
+export function createSandboxedWorker(
   sandboxedJobSchema: ZodObject<{
     name: ZodLiteral<SandboxedJobDefinition["name"]>;
     input: ZodType;
@@ -76,12 +76,6 @@ export async function createSandboxedWorker(
   worker.on("failed", (_job, error) => {
     logger.error("Sandboxed worker encountered an error", { err: error });
   });
-
-  if (settings.unsafeClearQueuesOnStartup) {
-    await queue.obliterate({
-      force: true,
-    });
-  }
 
   return { worker, queue };
 }

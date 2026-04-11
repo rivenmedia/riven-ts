@@ -9,7 +9,7 @@ export const initialiseDatabaseConnection = fromPromise(async () => {
 
   // await orm.schema.create();
 
-  if (!settings.unsafeRefreshDatabaseOnStartup) {
+  if (!settings.unsafeWipeDatabaseOnStartup) {
     return;
   }
 

@@ -5,23 +5,31 @@ import chalk from "chalk";
 import {
   type ActorRef,
   type Snapshot,
-  assign,
   enqueueActions,
   raise,
   sendTo,
   setup,
 } from "xstate";
 
+import { downloadItemProcessor } from "../../message-queue/flows/download-item/download-item.processor.ts";
+import { DownloadItemFlow } from "../../message-queue/flows/download-item/download-item.schema.ts";
+import { findValidTorrentProcessor } from "../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.processor.ts";
+import { FindValidTorrentFlow } from "../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import { rankStreamsProcessor } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.processor.ts";
+import { RankStreamsFlow } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.schema.ts";
+import { indexItemProcessor } from "../../message-queue/flows/index-item/index-item.processor.ts";
+import { RequestIndexDataFlow } from "../../message-queue/flows/index-item/index-item.schema.ts";
+import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
+import { RequestContentServicesFlow } from "../../message-queue/flows/request-content-services/request-content-services.schema.ts";
+import { scrapeItemProcessor } from "../../message-queue/flows/scrape-item/scrape-item.processor.ts";
+import { ScrapeItemFlow } from "../../message-queue/flows/scrape-item/scrape-item.schema.ts";
+import { MapItemsToFilesSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
+import { ParseScrapeResultsSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.schema.ts";
+import { ValidateTorrentFilesSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.schema.ts";
+import { createSandboxedWorker } from "../../message-queue/sandboxed-jobs/utilities/create-sandboxed-worker.ts";
+import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
-import {
-  type BootstrapFlowWorkersOutput,
-  bootstrapFlowWorkers,
-} from "./actors/bootstrap-flow-workers.actor.ts";
-import {
-  type BootstrapSandboxedWorkersOutput,
-  bootstrapSandboxedWorkers,
-} from "./actors/bootstrap-sandboxed-workers.actor.ts";
 import { createEventScheduler } from "./actors/event-scheduler.actor.ts";
 import {
   type FanOutDownloadInput,
@@ -42,7 +50,9 @@ import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscrib
 import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
 import type { EnqueueDownloadItemInput } from "../../message-queue/flows/download-item/enqueue-download-item.ts";
 import type { EnqueueIndexItemInput } from "../../message-queue/flows/index-item/enqueue-index-item.ts";
+import type { Flow } from "../../message-queue/flows/index.ts";
 import type { EnqueueScrapeItemInput } from "../../message-queue/flows/scrape-item/enqueue-scrape-items.ts";
+import type { SandboxedJobDefinition } from "../../message-queue/sandboxed-jobs/index.ts";
 import type {
   PluginQueueMap,
   PluginWorkerMap,
@@ -50,12 +60,29 @@ import type {
   ValidPluginMap,
 } from "../../types/plugins.ts";
 import type { RivenMachineEvent } from "../program/index.ts";
+import type { Queue, Worker } from "bullmq";
 
 export interface MainRunnerMachineContext {
   parentRef: ActorRef<Snapshot<unknown>, RivenMachineEvent>;
   plugins: ValidPluginMap;
-  flowWorkers: BootstrapFlowWorkersOutput | null;
-  sandboxedWorkers: BootstrapSandboxedWorkersOutput | null;
+  flowWorkers: {
+    [K in Flow["name"]]: {
+      queue: Queue;
+      worker: Worker<
+        Extract<Flow, { name: K }>["input"],
+        Extract<Flow, { name: K }>["output"]
+      >;
+    };
+  };
+  sandboxedWorkers: {
+    [K in SandboxedJobDefinition["name"]]: {
+      queue: Queue;
+      worker: Worker<
+        Extract<SandboxedJobDefinition, { name: K }>["input"],
+        Extract<SandboxedJobDefinition, { name: K }>["output"]
+      >;
+    };
+  };
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: PublishableEventSet;
@@ -77,8 +104,6 @@ export const mainRunnerMachine = setup({
     input: {} as MainRunnerMachineInput,
     events: {} as MainRunnerMachineEvent,
     children: {} as {
-      bootstrapFlowWorkers: "bootstrapFlowWorkers";
-      bootstrapSandboxedWorkers: "bootstrapSandboxedWorkers";
       requestContentServices: "requestContentServices";
       requestIndexData: "requestIndexData";
       requestScrape: "requestScrape";
@@ -203,8 +228,6 @@ export const mainRunnerMachine = setup({
     }),
   },
   actors: {
-    bootstrapFlowWorkers,
-    bootstrapSandboxedWorkers,
     createEventScheduler,
     fanOutDownload,
     jobEnqueuer,
@@ -261,114 +284,93 @@ export const mainRunnerMachine = setup({
   .createMachine({
     /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7ABABwCcB7KAgQwFscKzVcCBXLLMAgYgI2wDoLJUyAWlQAXMBW4AqANoAGALqJQeIrFGoiWJSAAeiAIwAmADQgAnogCsATmvcAHEcsBfZ6bSZchEuSo06OIzMrBxcWIJ4ADYMUHS8-EKi4twEYACODHBiEHKKSCAqaiIaWvl6CEamFggALJaGDjYAzADsLm4gHtj4xKSU1LT0TCzsnJ7xEALCYhIAxqlkxZrcrMQEudqF6pra5ZXmiE2yltzWsgBshu3uYT0+-f5DwaNhE1NJcwtLWNxkkQsQMyCMA6VCwESwDb5LbfXYGEwHCqWeynSxNJyuG6eO59PyDQLDEJjHipEQEIGRVAAI3I5KhylU21KoD2COqRlcHSwRAgcG0XS8vV8AwCQRGm0ZsLKiDa3FkhhaTRqrUsVRlln03Ba50sl3ariAA */
     id: "Riven program main runner",
-    context: ({ input }) => ({
+    initial: "Running",
+    context: ({ input, self }) => ({
       parentRef: input.parentRef,
       plugins: input.plugins,
       publishableEvents: input.publishableEvents,
       pluginQueues: input.pluginQueues,
       pluginWorkers: input.pluginWorkers,
-      flowWorkers: null,
-      sandboxedWorkers: null,
-    }),
-    initial: "Bootstrapping workers",
-    states: {
-      "Bootstrapping workers": {
-        type: "parallel",
-        onDone: {
-          target: "Running",
-          actions: {
-            type: "log",
-            params: {
-              message: "Finished bootstrapping all workers.",
-            },
-          },
-        },
-        states: {
-          "Bootstrapping flow workers": {
-            initial: "Bootstrapping",
-            states: {
-              Bootstrapping: {
-                invoke: {
-                  src: "bootstrapFlowWorkers",
-                  id: "bootstrapFlowWorkers",
-                  input: ({ self }) => ({
-                    parentRef: self,
-                  }),
-                  onError: {
-                    target: "#Riven program main runner.Errored",
-                    actions: [
-                      {
-                        type: "log",
-                        params: ({ event: { error } }) => ({
-                          message: "Error bootstrapping flow workers",
-                          level: "error",
-                          error,
-                        }),
-                      },
-                      { type: "handleGracefulShutdown" },
-                    ],
-                  },
-                  onDone: {
-                    target: "Done",
-                    actions: assign({
-                      flowWorkers: ({ event }) => event.output,
-                    }),
-                  },
-                },
-              },
-              Done: {
-                type: "final",
-                entry: {
-                  type: "log",
-                  params: {
-                    message: "Successfully bootstrapped flow workers",
-                  },
-                },
+      flowWorkers: {
+        "index-item": createFlowWorker(
+          RequestIndexDataFlow,
+          indexItemProcessor,
+          self.send,
+          {},
+          { concurrency: 1 },
+        ),
+        "request-content-services": createFlowWorker(
+          RequestContentServicesFlow,
+          requestContentServicesProcessor,
+          self.send,
+          {},
+          { concurrency: 1 },
+        ),
+        "scrape-item": createFlowWorker(
+          ScrapeItemFlow,
+          scrapeItemProcessor,
+          self.send,
+          {},
+          { concurrency: 1 },
+        ),
+        "download-item": createFlowWorker(
+          DownloadItemFlow,
+          downloadItemProcessor,
+          self.send,
+        ),
+        "download-item.find-valid-torrent": createFlowWorker(
+          FindValidTorrentFlow,
+          findValidTorrentProcessor,
+          self.send,
+          {
+            streams: {
+              events: {
+                maxLen: 10000,
               },
             },
           },
-          "Bootstrapping sandboxed workers": {
-            initial: "Bootstrapping",
-            states: {
-              Bootstrapping: {
-                invoke: {
-                  src: "bootstrapSandboxedWorkers",
-                  id: "bootstrapSandboxedWorkers",
-                  onError: {
-                    target: "#Riven program main runner.Errored",
-                    actions: [
-                      {
-                        type: "log",
-                        params: ({ event: { error } }) => ({
-                          message: "Error bootstrapping sandboxed workers",
-                          level: "error",
-                          error,
-                        }),
-                      },
-                      { type: "handleGracefulShutdown" },
-                    ],
-                  },
-                  onDone: {
-                    target: "Done",
-                    actions: assign({
-                      sandboxedWorkers: ({ event }) => event.output,
-                    }),
-                  },
-                },
-              },
-              Done: {
-                type: "final",
-                entry: {
-                  type: "log",
-                  params: {
-                    message: "Successfully bootstrapped sandboxed workers",
-                  },
-                },
-              },
-            },
-          },
-        },
+          { concurrency: 10 },
+        ),
+        "download-item.rank-streams": createFlowWorker(
+          RankStreamsFlow,
+          rankStreamsProcessor,
+          self.send,
+        ),
       },
+      sandboxedWorkers: {
+        "scrape-item.parse-scrape-results": createSandboxedWorker(
+          ParseScrapeResultsSandboxedJob,
+          new URL(
+            import.meta.resolve(
+              `${process.cwd()}/dist/workers/parse-scrape-results/parse-scrape-results.processor.js`,
+            ),
+          ),
+          {},
+          { concurrency: 5 },
+        ),
+        "download-item.map-items-to-files": createSandboxedWorker(
+          MapItemsToFilesSandboxedJob,
+          new URL(
+            import.meta.resolve(
+              `${process.cwd()}/dist/workers/map-items-to-files/map-items-to-files.processor.js`,
+            ),
+          ),
+          {},
+          { concurrency: 15 },
+        ),
+        "download-item.validate-torrent-files": createSandboxedWorker(
+          ValidateTorrentFilesSandboxedJob,
+          new URL(
+            import.meta.resolve(
+              `${process.cwd()}/dist/workers/validate-torrent-files/validate-torrent-files.processor.js`,
+            ),
+          ),
+          {},
+          { concurrency: 5 },
+        ),
+      },
+    }),
+    states: {
       Running: {
         invoke: [
           {
