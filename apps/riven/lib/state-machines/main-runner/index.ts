@@ -1,4 +1,4 @@
-import { type Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { type Movie, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 import chalk from "chalk";
@@ -418,13 +418,13 @@ export const mainRunnerMachine = setup({
             description:
               "Indicates that a media item has been successfully created in the library.",
             actions: [
-              {
-                type: "log",
-                params: ({ event: { item } }) => ({
-                  message: `Successfully created item request: [${item.externalIdsLabel.join(" | ")}]`,
-                  level: "silly",
-                }),
-              },
+              // {
+              //   type: "log",
+              //   params: ({ event: { item } }) => ({
+              //     message: `Successfully created item request: [${item.externalIdsLabel.join(" | ")}]`,
+              //     level: "silly",
+              //   }),
+              // },
               {
                 type: "requestIndexData",
                 params: ({ event: { item } }) => ({ item }),
@@ -487,7 +487,7 @@ export const mainRunnerMachine = setup({
                 params: ({ event: { item } }) => ({
                   items: item.requestedItems.filter(
                     (item) =>
-                      item.state === "indexed" && item.type === "season",
+                      item.state === "indexed" && item instanceof Season,
                   ),
                 }),
               },

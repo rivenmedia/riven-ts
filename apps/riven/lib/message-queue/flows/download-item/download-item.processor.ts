@@ -5,6 +5,7 @@ import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/sche
 
 import { UnrecoverableError } from "bullmq";
 import { DateTime } from "luxon";
+import z from "zod";
 
 import { database } from "../../../database/database.ts";
 import { downloadItemProcessorSchema } from "./download-item.schema.ts";
@@ -37,10 +38,9 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
         processedBy: finalResult.plugin,
       });
 
-      const incompleteChildStates = MediaItemState.extract([
-        "indexed",
-        "scraped",
-      ]);
+      const incompleteChildStates = z
+        .enum(MediaItemState)
+        .extract(["INDEXED", "SCRAPED"]);
 
       if (updatedItem instanceof Show || updatedItem instanceof Season) {
         const episodes =

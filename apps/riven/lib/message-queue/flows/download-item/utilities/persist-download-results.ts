@@ -53,11 +53,9 @@ export async function persistDownloadResults({
       ),
     );
 
-    const processableStates = MediaItemState.extract([
-      "scraped",
-      "ongoing",
-      "partially_completed",
-    ]);
+    const processableStates = z
+      .enum(MediaItemState)
+      .extract(["SCRAPED", "ONGOING", "PARTIALLY_COMPLETED"]);
 
     assert(
       processableStates.safeParse(existingItem.state).success,
@@ -116,10 +114,9 @@ export async function persistDownloadResults({
           episodes.map((episode) => [episode.id, episode]),
         );
 
-        const processableStates = MediaItemState.exclude([
-          "completed",
-          "downloaded",
-        ]);
+        const processableStates = z
+          .enum(MediaItemState)
+          .exclude(["COMPLETED", "DOWNLOADED"]);
 
         for (const file of torrent.files) {
           assert(file.link, "Download URL is missing for the matched file");

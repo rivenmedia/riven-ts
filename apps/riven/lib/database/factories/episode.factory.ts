@@ -24,7 +24,7 @@ export class EpisodeFactory extends Factory<Episode> {
       posterPath: faker.image.url(),
       isRequested: true,
       tvdbId: faker.number.int({ min: 1 }).toString(),
-      contentRating: "tv-14",
+      contentRating: "tv_14",
       releaseDate: faker.date.between({
         from: DateTime.now().minus({ years: 1 }).toISO(),
         to: DateTime.now().plus({ years: 1 }).toISO(),

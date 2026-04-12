@@ -1,4 +1,5 @@
 import { ShowContentRating } from "@repo/util-plugin-sdk/dto/enums/content-ratings.enum";
+import { ShowStatus } from "@repo/util-plugin-sdk/dto/enums/show-status.enum";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 
 import assert from "node:assert";
@@ -96,7 +97,7 @@ export const transformSeries = (
     .string()
     .toLowerCase()
     .pipe(ShowContentRating)
-    .default("unknown")
+    .catch("unknown")
     .parse(
       series.contentRatings?.find(({ country }) => country === "usa")?.name,
     );
@@ -169,7 +170,10 @@ export const transformSeries = (
     ),
     contentRating,
     posterUrl: posterPath,
-    status: tvdbStatus?.toLowerCase() === "continuing" ? "continuing" : "ended",
+    status: z
+      .enum(ShowStatus)
+      .catch("unknown")
+      .parse(tvdbStatus?.toLowerCase()),
     seasons,
     language: series.originalLanguage,
   } satisfies Extract<

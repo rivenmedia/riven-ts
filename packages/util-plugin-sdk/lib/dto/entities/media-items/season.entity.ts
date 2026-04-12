@@ -61,11 +61,8 @@ export class Season extends ShowLikeMediaItem {
       refresh: true,
     });
 
-    return episodes.flatMap<MediaEntry>(
-      (episode) =>
-        episode.filesystemEntries.filter(
-          (entry) => entry.type === "media",
-        ) as MediaEntry[],
+    return episodes.flatMap((episode) =>
+      episode.filesystemEntries.filter((entry) => entry instanceof MediaEntry),
     );
   }
 }

@@ -1,10 +1,4 @@
-import {
-  Collection,
-  type Hidden,
-  type Opt,
-  OptionalProps,
-  type Ref,
-} from "@mikro-orm/core";
+import { Collection, type Hidden, type Opt, type Ref } from "@mikro-orm/core";
 import {
   Entity,
   Enum,
@@ -18,7 +12,7 @@ import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { JSONObjectResolver } from "graphql-scalars";
 import { DateTime } from "luxon";
 import { type UUID, randomUUID } from "node:crypto";
-import { Field, ID, InterfaceType } from "type-graphql";
+import { Field, ID, Int, InterfaceType } from "type-graphql";
 
 import { MediaItemContentRating } from "../../enums/content-ratings.enum.ts";
 import { MediaItemState } from "../../enums/media-item-state.enum.ts";
@@ -36,8 +30,6 @@ import type { Promisable } from "type-fest";
 })
 @Index({ properties: ["type", "releaseDate"] })
 export abstract class MediaItem {
-  [OptionalProps]?: "state";
-
   @Field((_type) => ID)
   @PrimaryKey({ type: "uuid" })
   id: UUID = randomUUID();
@@ -123,7 +115,7 @@ export abstract class MediaItem {
   @Property()
   releaseDate!: Date | null;
 
-  @Field(() => Number, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @Property()
   year?: number | null;
 
@@ -135,21 +127,22 @@ export abstract class MediaItem {
   @Property()
   rating?: number | null;
 
-  @Enum(() => MediaItemContentRating.enum)
+  // NOTE: GraphQL field is not defined here as it is resolved in the subclasses with different return types
+  @Enum(() => MediaItemContentRating)
   contentRating?: MediaItemContentRating | null;
 
   @Field(() => String, { nullable: true })
   @Property()
   guid?: string | null;
 
-  @Field(() => MediaItemState.enum)
+  @Field(() => MediaItemState)
   @Enum({
-    default: MediaItemState.enum.indexed,
-    items: () => MediaItemState.enum,
+    default: MediaItemState.INDEXED,
+    items: () => MediaItemState,
   })
-  state!: MediaItemState;
+  state!: Opt<MediaItemState>;
 
-  @Field(() => Number)
+  @Field(() => Int)
   @Property()
   failedAttempts: Opt<number> = 0;
 
@@ -174,9 +167,9 @@ export abstract class MediaItem {
   @ManyToMany()
   blacklistedStreams: Collection<Stream> = new Collection<Stream>(this);
 
-  @Field(() => String)
-  @Enum(() => MediaItemType.enum)
-  type!: MediaItemType;
+  @Field(() => MediaItemType)
+  @Enum(() => MediaItemType)
+  type!: Opt<MediaItemType>;
 
   @ManyToOne(() => ItemRequest)
   itemRequest!: Ref<ItemRequest>;

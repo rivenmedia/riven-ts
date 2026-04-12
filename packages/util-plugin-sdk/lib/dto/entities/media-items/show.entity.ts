@@ -7,10 +7,7 @@ import {
 } from "@mikro-orm/decorators/legacy";
 import { Field, ObjectType } from "type-graphql";
 
-import {
-  ShowContentRating,
-  ShowContentRatingEnum,
-} from "../../enums/content-ratings.enum.ts";
+import { ShowContentRating } from "../../enums/content-ratings.enum.ts";
 import { ShowStatus } from "../../enums/show-status.enum.ts";
 import { MediaEntry } from "../filesystem/index.ts";
 import { Season, ShowLikeMediaItem } from "./index.ts";
@@ -21,7 +18,7 @@ import type { ItemRequest } from "../requests/item-request.entity.ts";
 @ObjectType({ implements: ShowLikeMediaItem })
 @Entity()
 export class Show extends ShowLikeMediaItem {
-  @Field(() => ShowContentRatingEnum)
+  @Field(() => ShowContentRating.enum)
   declare contentRating: ShowContentRating;
 
   override type: Opt<"show"> = "show" as const;
@@ -31,8 +28,8 @@ export class Show extends ShowLikeMediaItem {
   declare itemRequest: Ref<ItemRequest>;
   declare filesystemEntries: never;
 
-  @Field(() => ShowStatus.enum, { nullable: true })
-  @Enum(() => ShowStatus.enum)
+  @Field(() => ShowStatus)
+  @Enum(() => ShowStatus)
   status!: ShowStatus;
 
   @Field(() => [Season])
@@ -109,11 +106,8 @@ export class Show extends ShowLikeMediaItem {
 
     const episodes = seasons.flatMap((season) => season.episodes.getItems());
 
-    return episodes.flatMap(
-      (episode) =>
-        episode.filesystemEntries.filter(
-          (entry) => entry.type === "media",
-        ) as MediaEntry[],
+    return episodes.flatMap((episode) =>
+      episode.filesystemEntries.filter((entry) => entry instanceof MediaEntry),
     );
   }
 }

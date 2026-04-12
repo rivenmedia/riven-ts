@@ -1,9 +1,15 @@
 import {
   ApolloClient,
+  ApolloLink,
+  CombinedGraphQLErrors,
+  CombinedProtocolErrors,
   HttpLink,
   InMemoryCache,
   type StoreObject,
 } from "@apollo/client";
+import { ErrorLink } from "@apollo/client/link/error";
+
+import { logger } from "../utilities/logger/logger.ts";
 
 import type { URL } from "node:url";
 
@@ -38,6 +44,38 @@ export function initApolloClient(uri: URL) {
     return client;
   }
 
+  const errorLink = new ErrorLink(({ error }) => {
+    if (CombinedGraphQLErrors.is(error)) {
+      error.errors.forEach((err) => {
+        const { message, locations, path } = err;
+
+        logger.error(
+          `[GraphQL error]: Message: ${message}, Location: ${JSON.stringify(locations)}, Path: ${JSON.stringify(path)}`,
+          { err },
+        );
+      });
+    } else if (CombinedProtocolErrors.is(error)) {
+      error.errors.forEach((err) => {
+        const { message, extensions } = err;
+
+        logger.error(
+          `[Protocol error]: Message: ${message}, Extensions: ${JSON.stringify(
+            extensions,
+          )}`,
+          { err },
+        );
+      });
+    } else {
+      logger.error(`[Network error]: ${error.message}`, { err: error });
+    }
+  });
+
+  const httpLink = new HttpLink({
+    uri: uri.toString(),
+  });
+
+  const link = ApolloLink.from([errorLink, httpLink]);
+
   return (client = new ApolloClient({
     cache: new InMemoryCache({
       possibleTypes: {
@@ -46,8 +84,6 @@ export function initApolloClient(uri: URL) {
     }),
     dataMasking: true,
     assumeImmutableResults: true,
-    link: new HttpLink({
-      uri: uri.toString(),
-    }),
+    link,
   }));
 }

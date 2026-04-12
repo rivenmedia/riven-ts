@@ -11,17 +11,32 @@ import { BigIntResolver } from "graphql-scalars";
 import { DateTime } from "luxon";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { Field, ID, ObjectType } from "type-graphql";
-import z from "zod";
+import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
 
 import { Episode, MediaItem, Movie } from "../media-items/index.ts";
 
 import type { Hidden, Opt, Ref } from "@mikro-orm/core";
-import type { Promisable } from "type-fest";
+import type { Promisable, ValueOf } from "type-fest";
 
-export const FileSystemEntryType = z.enum(["media", "subtitle"]);
+export const FileSystemEntryType = {
+  MEDIA: "media",
+  SUBTITLE: "subtitle",
+} as const;
 
-export type FileSystemEntryType = z.infer<typeof FileSystemEntryType>;
+export type FileSystemEntryType = ValueOf<typeof FileSystemEntryType>;
+
+registerEnumType(FileSystemEntryType, {
+  name: "FileSystemEntryType",
+  description: "The type of the filesystem entry.",
+  valuesConfig: {
+    MEDIA: {
+      description: "A media file, e.g. a movie or episode file.",
+    },
+    SUBTITLE: {
+      description: "A subtitle file associated with a media file.",
+    },
+  },
+});
 
 /**
  * Builds the path parts for a given media item, used for generating the VFS path for filesystem entries.
@@ -84,8 +99,8 @@ export abstract class FileSystemEntry {
   @ManyToOne(() => MediaItem)
   mediaItem!: Opt<Ref<Movie | Episode>>;
 
-  @Field(() => String)
-  @Enum(() => FileSystemEntryType.enum)
+  @Field(() => FileSystemEntryType)
+  @Enum(() => FileSystemEntryType)
   type!: FileSystemEntryType;
 
   /**

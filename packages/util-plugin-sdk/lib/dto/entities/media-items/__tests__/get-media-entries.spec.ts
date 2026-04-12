@@ -16,7 +16,7 @@ test("getMediaEntries() returns the associated media entry for a Movie media ite
   const movie = em.create(Movie, {
     title: "Test Movie",
     fullTitle: "Test Movie",
-    contentRating: "pg-13",
+    contentRating: "pg_13",
     tmdbId: "1",
     itemRequest,
     isRequested: true,
@@ -48,7 +48,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
   const show = em.create(Show, {
     title: "Test Show",
     fullTitle: "Test Show",
-    contentRating: "tv-14",
+    contentRating: "tv_14",
     status: "ended",
     tvdbId: "1",
     itemRequest,
@@ -75,7 +75,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     fullTitle: "Test Show - S01E01",
     number: 1,
     absoluteNumber: 1,
-    contentRating: "tv-14",
+    contentRating: "tv_14",
     isRequested: true,
     itemRequest,
   });
@@ -85,7 +85,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     fullTitle: "Test Show - S01E02",
     number: 2,
     absoluteNumber: 2,
-    contentRating: "tv-14",
+    contentRating: "tv_14",
     isRequested: true,
     itemRequest,
   });
@@ -126,7 +126,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
   const show = em.create(Show, {
     title: "Test Show",
     fullTitle: "Test Show",
-    contentRating: "tv-14",
+    contentRating: "tv_14",
     status: "ended",
     tvdbId: "1",
     itemRequest,
@@ -147,7 +147,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
   const season2 = em.create(Season, {
     title: "Season 2",
     fullTitle: "Test Show - S02",
-    number: 1,
+    number: 2,
     isSpecial: false,
     isRequested: true,
     itemRequest,
@@ -162,7 +162,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     fullTitle: "Test Show - S01E01",
     number: 1,
     absoluteNumber: 1,
-    contentRating: "tv-14",
+    contentRating: "tv_14",
     isRequested: true,
     itemRequest,
   });
@@ -172,7 +172,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     fullTitle: "Test Show - S02E01",
     number: 1,
     absoluteNumber: 2,
-    contentRating: "tv-14",
+    contentRating: "tv_14",
     isRequested: true,
     itemRequest,
   });
@@ -215,7 +215,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
   const show = em.create(Show, {
     title: "Test Show",
     fullTitle: "Test Show",
-    contentRating: "tv-14",
+    contentRating: "tv_14",
     status: "ended",
     tvdbId: "1",
     itemRequest,
@@ -242,7 +242,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     fullTitle: "Test Show - S01E01",
     number: 1,
     absoluteNumber: 1,
-    contentRating: "tv-14",
+    contentRating: "tv_14",
     isRequested: true,
     itemRequest,
   });

@@ -5,15 +5,17 @@ import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/ite
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
 
-import { database } from "../../../../database/database.ts";
-import { logger } from "../../../../utilities/logger/logger.ts";
-import { RequestType } from "../request-content-services.schema.ts";
+import { RequestType } from "../../../../message-queue/flows/request-content-services/request-content-services.schema.ts";
 
+import type { EntityManager } from "@mikro-orm/core";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
-export async function persistRequestedShow(
+export async function requestShowMutation(
+  em: EntityManager,
   item: ContentServiceRequestedResponse["shows"][number],
 ) {
+  const { logger } = await import("../../../../utilities/logger/logger.ts");
+
   const externalIds = [
     item.imdbId ? `IMDB: ${item.imdbId}` : null,
     item.tvdbId ? `TVDB: ${item.tvdbId}` : null,
@@ -21,7 +23,7 @@ export async function persistRequestedShow(
 
   logger.silly(`Processing requested show: ${externalIds.join(", ")}`);
 
-  return await database.em.fork().transactional(async (transaction) => {
+  return em.transactional(async (transaction) => {
     const existingItem = await transaction.getRepository(ItemRequest).findOne({
       $or: [
         ...(item.imdbId ? [{ imdbId: item.imdbId }] : []),
@@ -78,8 +80,6 @@ export async function persistRequestedShow(
       await validateOrReject(itemRequest);
 
       await transaction.flush();
-
-      await transaction.refreshOrFail(itemRequest);
 
       return {
         requestType: existingItem

@@ -1,11 +1,15 @@
 import { registerEnumType } from "type-graphql";
-import z from "zod";
 
-export const ItemRequestType = z.enum(["movie", "show"]);
+import type { ValueOf } from "type-fest";
 
-export type ItemRequestType = z.infer<typeof ItemRequestType>;
+export const ItemRequestType = {
+  MOVIE: "movie",
+  SHOW: "show",
+} as const;
 
-registerEnumType(ItemRequestType.enum, {
+export type ItemRequestType = ValueOf<typeof ItemRequestType>;
+
+registerEnumType(ItemRequestType, {
   name: "ItemRequestType",
-  description: "The type of a media item request, either 'movie' or 'show'.",
+  description: "The type of a media item request.",
 });

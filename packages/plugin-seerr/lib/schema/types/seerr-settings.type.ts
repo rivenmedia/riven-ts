@@ -9,10 +9,10 @@ registerEnumType(getRequestQueryParamsFilterEnum, {
 
 @ObjectType()
 export class SeerrSettings {
-  @Field()
+  @Field(() => String)
   apiKey!: string;
 
-  @Field()
+  @Field(() => String)
   url!: string;
 
   @Field(() => getRequestQueryParamsFilterEnum)

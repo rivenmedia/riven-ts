@@ -1,10 +1,7 @@
 import { Entity, Property } from "@mikro-orm/decorators/legacy";
 import { Field, Int, ObjectType } from "type-graphql";
 
-import {
-  MovieContentRating,
-  MovieContentRatingEnum,
-} from "../../enums/content-ratings.enum.ts";
+import { MovieContentRating } from "../../enums/content-ratings.enum.ts";
 import { MediaEntry } from "../filesystem/index.ts";
 import { MediaItem } from "./index.ts";
 
@@ -18,7 +15,7 @@ export class Movie extends MediaItem {
   @Property()
   runtime!: number | null;
 
-  @Field(() => MovieContentRatingEnum)
+  @Field(() => MovieContentRating.enum)
   declare contentRating: MovieContentRating;
 
   override type: Opt<"movie"> = "movie" as const;

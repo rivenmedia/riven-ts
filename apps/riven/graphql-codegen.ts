@@ -13,6 +13,7 @@ export default {
       plugins: ["typescript"],
       config: {
         enumsAsTypes: true,
+        enumValues: await import("./lib/graphql/enums/index.ts"),
       } satisfies TypeScriptPluginConfig,
     },
     "./lib/": {
@@ -50,6 +51,7 @@ export default {
         customDirectives: {
           apolloUnmask: true,
         },
+        useTypeImports: true,
       } satisfies TypeScriptDocumentsPluginConfig,
     },
   },

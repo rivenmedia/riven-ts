@@ -1,31 +1,26 @@
-import { constantCase } from "es-toolkit";
 import { registerEnumType } from "type-graphql";
 import z from "zod";
 
-export const MediaItemContentRating = z.enum([
-  "g",
-  "pg",
-  "pg-13",
-  "r",
-  "nc-17",
-  "tv-y",
-  "tv-y7",
-  "tv-g",
-  "tv-pg",
-  "tv-14",
-  "tv-ma",
-  "unknown",
-]);
+import type { ValueOf } from "type-fest";
 
-export type MediaItemContentRating = z.infer<typeof MediaItemContentRating>;
+export const MediaItemContentRating = {
+  G: "g",
+  PG: "pg",
+  PG_13: "pg_13",
+  R: "r",
+  NC_17: "nc_17",
+  TV_Y: "tv_y",
+  TV_Y7: "tv_y7",
+  TV_G: "tv_g",
+  TV_PG: "tv_pg",
+  TV_14: "tv_14",
+  TV_MA: "tv_ma",
+  unknown: "unknown",
+} as const;
 
-export const MediaItemContentRatingEnum = Object.fromEntries(
-  Object.entries(MediaItemContentRating.enum).map(
-    ([key, value]) => [constantCase(key), value] as const,
-  ),
-);
+export type MediaItemContentRating = ValueOf<typeof MediaItemContentRating>;
 
-registerEnumType(MediaItemContentRatingEnum, {
+registerEnumType(MediaItemContentRating, {
   name: "MediaItemContentRating",
   description:
     "The content rating of a media item. See MovieContentRating and ShowContentRating for more specific ratings.",
@@ -36,24 +31,13 @@ registerEnumType(MediaItemContentRatingEnum, {
  *
  * @see {@link https://en.wikipedia.org/wiki/MPAA_film_rating_system MPAA film rating system} for more details.
  */
-export const MovieContentRating = MediaItemContentRating.extract([
-  "g",
-  "pg",
-  "pg-13",
-  "r",
-  "nc-17",
-  "unknown",
-]);
+export const MovieContentRating = z
+  .enum(MediaItemContentRating)
+  .extract(["G", "PG", "PG_13", "R", "NC_17", "unknown"]);
 
 export type MovieContentRating = z.infer<typeof MovieContentRating>;
 
-export const MovieContentRatingEnum = Object.fromEntries(
-  Object.entries(MovieContentRating.enum).map(
-    ([key, value]) => [constantCase(key), value] as const,
-  ),
-);
-
-registerEnumType(MovieContentRatingEnum, {
+registerEnumType(MovieContentRating.enum, {
   name: "MovieContentRating",
   description:
     "The content rating of a movie. See https://en.wikipedia.org/wiki/MPAA_film_rating_system for more details.",
@@ -64,25 +48,13 @@ registerEnumType(MovieContentRatingEnum, {
  *
  * @see {@link https://en.wikipedia.org/wiki/TV_Parental_Guidelines TV Parental Guidelines} for more details.
  */
-export const ShowContentRating = MediaItemContentRating.extract([
-  "tv-y",
-  "tv-y7",
-  "tv-g",
-  "tv-pg",
-  "tv-14",
-  "tv-ma",
-  "unknown",
-]);
+export const ShowContentRating = z
+  .enum(MediaItemContentRating)
+  .extract(["TV_Y", "TV_Y7", "TV_G", "TV_PG", "TV_14", "TV_MA", "unknown"]);
 
 export type ShowContentRating = z.infer<typeof ShowContentRating>;
 
-export const ShowContentRatingEnum = Object.fromEntries(
-  Object.entries(ShowContentRating.enum).map(
-    ([key, value]) => [constantCase(key), value] as const,
-  ),
-);
-
-registerEnumType(ShowContentRatingEnum, {
+registerEnumType(ShowContentRating.enum, {
   name: "ShowContentRating",
   description:
     "The content rating of a TV show, based on the TV Parental Guidelines. See https://en.wikipedia.org/wiki/TV_Parental_Guidelines for more details.",

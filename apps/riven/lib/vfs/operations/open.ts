@@ -40,8 +40,10 @@ const SAVE_STREAM_URL_MUTATION: TypedDocumentNode<
 > = gql`
   mutation SaveStreamUrl($id: ID!, $url: String!) {
     saveStreamUrl(id: $id, url: $url) {
-      id
-      streamUrl
+      item {
+        id
+        streamUrl
+      }
     }
   }
 `;

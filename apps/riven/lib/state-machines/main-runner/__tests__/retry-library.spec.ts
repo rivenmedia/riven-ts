@@ -49,8 +49,8 @@ it.todo(
   'does not send a "riven.media-item.index.requested" event for completed item requests',
 );
 
-it.todo('requests a scrape for each media item in the "Indexed" state');
+it.todo('requests a scrape for each media item in the "indexed" state');
 
-it.todo('requests a download for each media item in the "Scraped" state');
+it.todo('requests a download for each media item in the "scraped" state');
 
 it.todo("does not send events for media items in other states");

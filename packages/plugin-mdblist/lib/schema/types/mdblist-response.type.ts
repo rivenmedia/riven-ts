@@ -4,9 +4,9 @@ import { MdbListExternalIds } from "./mdblist-external-ids.type.ts";
 
 @ObjectType()
 export class MdblistContentServiceResponse {
-  @Field((_type) => [MdbListExternalIds])
+  @Field(() => [MdbListExternalIds])
   movies!: MdbListExternalIds[];
 
-  @Field((_type) => [MdbListExternalIds])
+  @Field(() => [MdbListExternalIds])
   shows!: MdbListExternalIds[];
 }

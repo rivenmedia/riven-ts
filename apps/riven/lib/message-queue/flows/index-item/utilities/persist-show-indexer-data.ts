@@ -26,11 +26,9 @@ export async function persistShowIndexerData({
     id: item.id,
   });
 
-  const processableStates = ItemRequestState.extract([
-    "requested",
-    "ongoing",
-    "unreleased",
-  ]);
+  const processableStates = z
+    .enum(ItemRequestState)
+    .extract(["REQUESTED", "ONGOING", "UNRELEASED"]);
 
   assert(
     processableStates.safeParse(itemRequest.state).success,

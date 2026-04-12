@@ -33,12 +33,9 @@ export async function persistScrapeResults({
         .getRepository(MediaItem)
         .findOneOrFail(id, { populate: ["streams.infoHash"] });
 
-      const processableStates = MediaItemState.extract([
-        "indexed",
-        "ongoing",
-        "scraped",
-        "partially_completed",
-      ]);
+      const processableStates = z
+        .enum(MediaItemState)
+        .extract(["INDEXED", "ONGOING", "SCRAPED", "PARTIALLY_COMPLETED"]);
 
       assert(
         processableStates.safeParse(existingItem.state).success,

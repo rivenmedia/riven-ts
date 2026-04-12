@@ -17,6 +17,7 @@ import {
   type UnitOfWork,
   wrap,
 } from "@mikro-orm/core";
+import z from "zod";
 
 import type { Promisable } from "type-fest";
 
@@ -211,12 +212,9 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       nextStatesMap,
     );
 
-    const propagableStates = MediaItemState.extract([
-      "paused",
-      "failed",
-      "downloaded",
-      "unreleased",
-    ]);
+    const propagableStates = z
+      .enum(MediaItemState)
+      .extract(["PAUSED", "FAILED", "DOWNLOADED", "UNRELEASED"]);
 
     for (const propagableState of propagableStates.options) {
       const childrenStateCount = childrenStateCountMap[propagableState];
@@ -296,8 +294,10 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       return "unreleased";
     }
 
-    if (this.#determineFixedState(item)) {
-      return item.state;
+    const fixedState = this.#determineFixedState(item);
+
+    if (fixedState) {
+      return fixedState;
     }
 
     if (item instanceof Episode || item instanceof Movie) {

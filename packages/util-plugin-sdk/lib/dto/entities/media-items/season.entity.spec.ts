@@ -15,7 +15,7 @@ const test = baseIt
     const show = em.create(Show, {
       title: "Test Show",
       fullTitle: "Test Show",
-      contentRating: "tv-14",
+      contentRating: "tv_14",
       status: "ended",
       tvdbId: "1",
       itemRequest,

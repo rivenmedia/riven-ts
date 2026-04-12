@@ -183,7 +183,7 @@ export const validateTorrent = async (
   } else {
     if (parsedData.seasons.length === 0 && parsedData.episodes.length === 0) {
       throw new SkippedTorrentError(
-        `Skipping torrent with no seasons or episodes for ${item.type} item`,
+        `Skipping torrent with no seasons or episodes for ${item.type.toLowerCase()} item`,
         item.fullTitle,
         parsedData.rawTitle,
         infoHash,

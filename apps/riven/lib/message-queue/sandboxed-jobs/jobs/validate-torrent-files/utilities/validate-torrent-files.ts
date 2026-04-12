@@ -2,6 +2,7 @@ import { parseFilePath } from "@repo/util-rank-torrent-name";
 
 import { type TypedDocumentNode, gql } from "@apollo/client";
 import chalk from "chalk";
+import { startCase } from "es-toolkit";
 import assert, { AssertionError } from "node:assert";
 
 import { client } from "../../../../../graphql/apollo-client.ts";
@@ -127,7 +128,7 @@ export const validateTorrentFiles = async (
 
     assert(
       groupMap.size >= item.expectedFileCount,
-      `${item.type.substring(0, 1).toUpperCase() + item.type.substring(1)} torrent must have at least ${item.expectedFileCount.toString()} ${item.__typename === "Movie" ? "movies" : "episodes"}, but has ${groupMap.size.toString()}`,
+      `${startCase(item.type)} torrent must have at least ${item.expectedFileCount.toString()} ${item.__typename === "Movie" ? "movies" : "episodes"}, but has ${groupMap.size.toString()}`,
     );
 
     const validFiles: MatchedFile[] = [];

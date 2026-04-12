@@ -1,13 +1,13 @@
-import { Field, ObjectType } from "type-graphql";
+import { Field, Int, ObjectType } from "type-graphql";
 
 import type { ListrrContractsModelsAPIMovieDto } from "../../__generated__/index.ts";
 
 @ObjectType()
 export class ListrrItem implements Partial<ListrrContractsModelsAPIMovieDto> {
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   imDbId?: string;
 
-  @Field({ nullable: true })
+  @Field(() => Int, { nullable: true })
   tmDbId?: number;
 }
 

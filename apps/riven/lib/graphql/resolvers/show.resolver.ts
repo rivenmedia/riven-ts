@@ -3,6 +3,7 @@ import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state
 
 import { reduceAsync } from "es-toolkit";
 import { Arg, FieldResolver, Int, Resolver, Root } from "type-graphql";
+import z from "zod";
 
 @Resolver((_of) => Show)
 export class ShowResolver {
@@ -21,7 +22,9 @@ export class ShowResolver {
 
   @FieldResolver(() => Int)
   async expectedFileCount(@Root() show: Show) {
-    const processableStates = MediaItemState.exclude(["unreleased", "ongoing"]);
+    const processableStates = z
+      .enum(MediaItemState)
+      .exclude(["UNRELEASED", "ONGOING"]);
 
     const seasons = await show.getStandardSeasons(processableStates.options);
     const expectedSeasons =

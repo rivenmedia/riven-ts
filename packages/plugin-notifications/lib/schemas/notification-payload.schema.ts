@@ -6,7 +6,7 @@ export const NotificationPayload = z.object({
   event: z.string().min(1),
   title: z.string().min(1),
   fullTitle: z.string().min(1),
-  type: MediaItemType,
+  type: z.enum(MediaItemType),
   year: z.int().nullable(),
   imdbId: z.string().nullable(),
   tmdbId: z.string().nullable(),

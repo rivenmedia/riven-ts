@@ -45,7 +45,7 @@ export const MediaItemIndexRequestedResponse = z
         type: z.literal("show"),
         contentRating: ShowContentRating,
         network: z.string().min(1).nullable(),
-        status: ShowStatus,
+        status: z.enum(ShowStatus),
         seasons: z.record(
           z.int(),
           z.object({

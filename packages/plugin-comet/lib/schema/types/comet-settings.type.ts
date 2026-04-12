@@ -2,6 +2,6 @@ import { Field, ObjectType } from "type-graphql";
 
 @ObjectType()
 export class CometSettings {
-  @Field()
+  @Field(() => String)
   apiKey!: string;
 }

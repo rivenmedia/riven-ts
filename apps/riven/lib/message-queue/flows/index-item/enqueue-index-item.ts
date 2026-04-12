@@ -22,24 +22,21 @@ export async function enqueueIndexItem(
   const childNodes = subscribers.map((plugin) =>
     createPluginFlowJob(
       MediaItemIndexRequestedEvent,
-      `Index ${item.externalIdsLabel.join(" | ")}`,
+      `Index item`,
       plugin.name.description ?? "unknown",
       { item },
       { ignoreDependencyOnFailure: true },
     ),
   );
 
-  const rootNode = createRequestIndexDataJob(
-    `Indexing [${item.externalIdsLabel.join(" | ")}]`,
-    {
-      children: childNodes,
-      opts: toMerged(opts, {
-        deduplication: {
-          id: `index-item-${item.id}`,
-        },
-      }),
-    },
-  );
+  const rootNode = createRequestIndexDataJob(`Indexing item`, {
+    children: childNodes,
+    opts: toMerged(opts, {
+      deduplication: {
+        id: `index-item-${item.id}`,
+      },
+    }),
+  });
 
   return flow.add(rootNode);
 }

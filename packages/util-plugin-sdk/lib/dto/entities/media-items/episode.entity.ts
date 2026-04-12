@@ -3,10 +3,7 @@ import { Entity, ManyToOne, Property } from "@mikro-orm/decorators/legacy";
 import { Min } from "class-validator";
 import { Field, Int, ObjectType } from "type-graphql";
 
-import {
-  ShowContentRating,
-  ShowContentRatingEnum,
-} from "../../enums/content-ratings.enum.ts";
+import { ShowContentRating } from "../../enums/content-ratings.enum.ts";
 import { EpisodeRepository } from "../../repositories/episode.repository.ts";
 import { Season, ShowLikeMediaItem } from "./index.ts";
 
@@ -34,7 +31,7 @@ export class Episode extends ShowLikeMediaItem {
   @Property()
   runtime!: number | null;
 
-  @Field(() => ShowContentRatingEnum)
+  @Field(() => ShowContentRating.enum)
   declare contentRating: ShowContentRating;
 
   async getShow() {
