@@ -307,7 +307,7 @@ export const bootstrapMachine = setup({
                             output: { url },
                           },
                         }) => ({
-                          message: `GraphQL server ready at ${url}`,
+                          message: `GraphQL server ready at ${url.toString()}`,
                         }),
                       },
                     ],

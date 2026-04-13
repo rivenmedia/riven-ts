@@ -1,8 +1,10 @@
+import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
-import { Arg, Ctx, Mutation, Resolver } from "type-graphql";
+import { Arg, Ctx, Mutation, Resolver, Root, Subscription } from "type-graphql";
 
+import { pubSub } from "../../pub-sub.ts";
 import { MovieRequestInput } from "./inputs/movie-request.input.ts";
 import { ShowRequestInput } from "./inputs/show-request.input.ts";
 import { requestMovieMutation } from "./mutations/request-movie.mutation.ts";
@@ -13,6 +15,17 @@ import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 
 @Resolver()
 export class ItemRequestResolver {
+  //#region Movie Requests
+
+  @Subscription(() => ItemRequest, {
+    topics: "ITEM_REQUEST_CREATED",
+    filter: ({ payload }) =>
+      payload instanceof ItemRequest && payload.type === "movie",
+  })
+  movieRequested(@Root() payload: ItemRequest): ItemRequest {
+    return payload;
+  }
+
   @Mutation(() => RequestItemMutationResponse)
   async requestMovie(
     @Ctx() { em }: ApolloServerContext,
@@ -50,6 +63,28 @@ export class ItemRequestResolver {
     }
   }
 
+  //#endregion
+
+  //#region Show Requests
+
+  @Subscription(() => ItemRequest, {
+    topics: "ITEM_REQUEST_CREATED",
+    filter: ({ payload }) =>
+      payload instanceof ItemRequest && payload.type === "show",
+  })
+  showRequested(@Root() payload: ItemRequest): ItemRequest {
+    return payload;
+  }
+
+  @Subscription(() => ItemRequest, {
+    topics: "ITEM_REQUEST_UPDATED",
+    filter: ({ payload }) =>
+      payload instanceof ItemRequest && payload.type === "show",
+  })
+  showRequestUpdated(@Root() payload: ItemRequest): ItemRequest {
+    return payload;
+  }
+
   @Mutation(() => RequestItemMutationResponse)
   async requestShow(
     @Ctx() { em }: ApolloServerContext,
@@ -59,6 +94,8 @@ export class ItemRequestResolver {
       const itemRequest = await requestShowMutation(em, input);
 
       if (itemRequest.requestType === "create") {
+        pubSub.publish("ITEM_REQUEST_CREATED", itemRequest.item);
+
         return {
           statusText: "created",
           success: true,
@@ -66,6 +103,8 @@ export class ItemRequestResolver {
           item: itemRequest.item,
         };
       }
+
+      pubSub.publish("ITEM_REQUEST_UPDATED", itemRequest.item);
 
       return {
         statusText: "ok",
@@ -95,4 +134,6 @@ export class ItemRequestResolver {
       throw error;
     }
   }
+
+  //#endregion
 }

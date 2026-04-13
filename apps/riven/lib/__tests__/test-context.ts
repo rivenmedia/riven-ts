@@ -2,6 +2,8 @@
 import assert from "node:assert";
 import { test as testBase, vi } from "vitest";
 
+import { pubSub } from "../graphql/pub-sub.ts";
+
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 import type { JobsOptions } from "bullmq";
 
@@ -11,6 +13,7 @@ export const it = testBase
 
     const server = setupServer();
 
+    // eslint-disable-next-line turbo/no-undeclared-env-vars
     if (/^(\*|msw)/.test(process.env["DEBUG"] ?? "")) {
       server.events.on("response:mocked", ({ request, response }) => {
         console.log(
@@ -200,7 +203,10 @@ export const it = testBase
       await import("@repo/core-util-mock-graphql-server");
     const { resolvers } = await import("../graphql/resolvers/index.ts");
 
-    return buildMockServer(resolvers);
+    return buildMockServer({
+      resolvers,
+      pubSub,
+    });
   })
   .extend(
     "gqlServer",

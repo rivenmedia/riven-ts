@@ -34,14 +34,17 @@ export const it = baseIt
     }),
   )
   .extend("machine", mainRunnerMachine)
-  .extend("actor", ({ input, machine }, { onCleanup }) => {
-    const actor = createActor(machine, { id: "Main runner", input });
+  .extend(
+    "actor",
+    ({ input, machine, gqlServer: _gqlServer }, { onCleanup }) => {
+      const actor = createActor(machine, { id: "Main runner", input });
 
-    vi.spyOn(actor, "send");
+      vi.spyOn(actor, "send");
 
-    onCleanup(() => {
-      actor.stop();
-    });
+      onCleanup(() => {
+        actor.stop();
+      });
 
-    return actor;
-  });
+      return actor;
+    },
+  );

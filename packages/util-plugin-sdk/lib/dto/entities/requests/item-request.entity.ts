@@ -73,6 +73,7 @@ export class ItemRequest {
   @Property({ type: "json" })
   seasons!: number[] | null;
 
+  @Field(() => [String])
   @Property({ persist: false, hidden: true, getter: true })
   get externalIdsLabel(): Hidden<Opt<string[]>> {
     const externalIds = [

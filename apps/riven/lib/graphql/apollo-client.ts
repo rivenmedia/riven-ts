@@ -8,10 +8,12 @@ import {
   type StoreObject,
 } from "@apollo/client";
 import { ErrorLink } from "@apollo/client/link/error";
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
+import { OperationTypeNode } from "graphql";
+import { createClient } from "graphql-ws";
+import { URL } from "node:url";
 
 import { logger } from "../utilities/logger/logger.ts";
-
-import type { URL } from "node:url";
 
 declare module "@apollo/client" {
   interface ApolloCache {
@@ -70,11 +72,27 @@ export function initApolloClient(uri: URL) {
     }
   });
 
+  const wsUrl = new URL(uri.toString());
+
+  wsUrl.protocol = "ws";
+
+  const wsLink = new GraphQLWsLink(
+    createClient({
+      url: wsUrl.toString(),
+    }),
+  );
+
   const httpLink = new HttpLink({
     uri: uri.toString(),
   });
 
-  const link = ApolloLink.from([errorLink, httpLink]);
+  const splitLink = ApolloLink.split(
+    ({ operationType }) => operationType === OperationTypeNode.SUBSCRIPTION,
+    wsLink,
+    httpLink,
+  );
+
+  const link = ApolloLink.from([errorLink, splitLink]);
 
   return (client = new ApolloClient({
     cache: new InMemoryCache({

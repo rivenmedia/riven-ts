@@ -45,6 +45,7 @@ import {
   type ScheduleReindexInput,
   scheduleReindex,
 } from "./actors/schedule-reindex.actor.ts";
+import { onNewShowRequestedSubscriber } from "./actors/subscribers/on-new-show-requested.subscriber.ts";
 import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscribers.ts";
 
 import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
@@ -231,6 +232,7 @@ export const mainRunnerMachine = setup({
     createEventScheduler,
     fanOutDownload,
     jobEnqueuer,
+    onNewShowRequestedSubscriber,
     retryLibrary,
     requestContentServices,
     requestIndexData,
@@ -383,6 +385,26 @@ export const mainRunnerMachine = setup({
               plugins,
               pluginQueues,
             }),
+          },
+          {
+            id: "onNewShowRequestedSubscriber",
+            src: "onNewShowRequestedSubscriber",
+            onSnapshot: {
+              actions: enqueueActions(({ event, enqueue }) => {
+                if (!event.snapshot.context?.data?.showRequested) {
+                  return;
+                }
+
+                console.log(event.snapshot.context.data);
+
+                return;
+
+                enqueue.raise({
+                  type: "riven.item-request.create.success",
+                  item: event.snapshot.context.data.newShowRequested,
+                });
+              }),
+            },
           },
         ],
         always: [

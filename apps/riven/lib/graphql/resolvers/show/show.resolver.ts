@@ -10,6 +10,7 @@ import {
   Mutation,
   Resolver,
   Root,
+  Subscription,
 } from "type-graphql";
 
 import {
@@ -22,6 +23,14 @@ import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 
 @Resolver((_of) => Show)
 export class ShowResolver {
+  @Subscription(() => Show, {
+    description: "Subscription triggered when a show is indexed",
+    topics: "MEDIA_ITEM_INDEXED",
+  })
+  showIndexed(@Root() payload: Show): Show {
+    return payload;
+  }
+
   @Mutation(() => IndexShowMutationResponse)
   async indexShow(
     @Ctx() { em }: ApolloServerContext,

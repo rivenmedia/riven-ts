@@ -19,7 +19,6 @@ export interface ScheduleReindexInput extends Pick<
 
 export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
   async ({ input: { item, subscribers } }) => {
-    console.log(item);
     const itemReleaseDate =
       item instanceof Movie ? item.releaseDate : item.nextAirDate;
 

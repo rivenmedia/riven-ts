@@ -44,12 +44,15 @@ export const it = baseIt
   )
   .extend("bootstrapMachineActorLogic", bootstrapMachine)
   .extend("stopGqlServerActorLogic", fromPromise(vi.fn()))
-  .extend("actor", ({ machine, input }, { onCleanup }) => {
-    const actor = createActor(machine, { input });
+  .extend(
+    "actor",
+    ({ machine, input, gqlServer: _gqlServer }, { onCleanup }) => {
+      const actor = createActor(machine, { input });
 
-    onCleanup(() => {
-      actor.stop();
-    });
+      onCleanup(() => {
+        actor.stop();
+      });
 
-    return actor;
-  });
+      return actor;
+    },
+  );
