@@ -1,30 +1,29 @@
 import { registerEnumType } from "type-graphql";
+import z from "zod";
 
-import type { ValueOf } from "type-fest";
+export const ShowStatus = z.enum([
+  "continuing",
+  "upcoming",
+  "ended",
+  "unknown",
+]);
 
-export const ShowStatus = {
-  CONTINUING: "continuing",
-  UPCOMING: "upcoming",
-  ENDED: "ended",
-  UNKNOWN: "unknown",
-} as const;
+export type ShowStatus = z.infer<typeof ShowStatus>;
 
-export type ShowStatus = ValueOf<typeof ShowStatus>;
-
-registerEnumType(ShowStatus, {
+registerEnumType(ShowStatus.enum, {
   name: "ShowStatus",
   description: "The current status of a TV show.",
   valuesConfig: {
-    CONTINUING: {
+    continuing: {
       description: "The show is currently airing new episodes.",
     },
-    UPCOMING: {
+    upcoming: {
       description: "The show has been announced but has not yet aired.",
     },
-    ENDED: {
+    ended: {
       description: "The show has finished airing all episodes.",
     },
-    UNKNOWN: {
+    unknown: {
       description: "The status of the show is unknown.",
     },
   },

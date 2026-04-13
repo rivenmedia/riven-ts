@@ -184,7 +184,7 @@ export const requestContentServicesProcessor =
           }
 
           switch (result.data.requestMovie.statusText) {
-            case "CONFLICT": {
+            case "conflict": {
               sendEvent({
                 type: "riven.item-request.create.error.conflict",
                 item: fragmentData,
@@ -192,7 +192,7 @@ export const requestContentServicesProcessor =
 
               break;
             }
-            case "CREATED": {
+            case "created": {
               sendEvent({
                 type: "riven.item-request.create.success",
                 item: fragmentData,
@@ -225,7 +225,7 @@ export const requestContentServicesProcessor =
           }
 
           switch (result.data.requestShow.statusText) {
-            case "CONFLICT": {
+            case "conflict": {
               sendEvent({
                 type: "riven.item-request.create.error.conflict",
                 item: fragmentData,
@@ -233,7 +233,7 @@ export const requestContentServicesProcessor =
 
               break;
             }
-            case "CREATED": {
+            case "created": {
               sendEvent({
                 type: "riven.item-request.create.success",
                 item: fragmentData,
@@ -243,7 +243,7 @@ export const requestContentServicesProcessor =
 
               break;
             }
-            case "OK": {
+            case "ok": {
               sendEvent({
                 type: "riven.item-request.update.success",
                 item: fragmentData,

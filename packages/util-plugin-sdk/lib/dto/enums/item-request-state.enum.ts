@@ -1,18 +1,17 @@
 import { registerEnumType } from "type-graphql";
+import z from "zod";
 
-import type { ValueOf } from "type-fest";
+export const ItemRequestState = z.enum([
+  "requested",
+  "completed",
+  "failed",
+  "ongoing",
+  "unreleased",
+]);
 
-export const ItemRequestState = {
-  REQUESTED: "requested",
-  COMPLETED: "completed",
-  FAILED: "failed",
-  ONGOING: "ongoing",
-  UNRELEASED: "unreleased",
-} as const;
+export type ItemRequestState = z.infer<typeof ItemRequestState>;
 
-export type ItemRequestState = ValueOf<typeof ItemRequestState>;
-
-registerEnumType(ItemRequestState, {
+registerEnumType(ItemRequestState.enum, {
   name: "ItemRequestState",
   description: "The state of an item request.",
 });

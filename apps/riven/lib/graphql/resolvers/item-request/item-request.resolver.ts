@@ -22,7 +22,7 @@ export class ItemRequestResolver {
       const itemRequest = await requestMovieMutation(em, input);
 
       return {
-        statusText: "CREATED",
+        statusText: "created",
         success: true,
         message: "Movie request created successfully.",
         item: itemRequest.item,
@@ -32,7 +32,7 @@ export class ItemRequestResolver {
         return {
           success: false,
           message: "A request for this movie already exists.",
-          statusText: "CONFLICT",
+          statusText: "conflict",
           item: null,
         };
       }
@@ -41,7 +41,7 @@ export class ItemRequestResolver {
         return {
           success: false,
           message: error.message,
-          statusText: "BAD_REQUEST",
+          statusText: "bad_request",
           item: null,
         };
       }
@@ -60,7 +60,7 @@ export class ItemRequestResolver {
 
       if (itemRequest.requestType === "create") {
         return {
-          statusText: "CREATED",
+          statusText: "created",
           success: true,
           message: "Show request created successfully.",
           item: itemRequest.item,
@@ -68,7 +68,7 @@ export class ItemRequestResolver {
       }
 
       return {
-        statusText: "OK",
+        statusText: "ok",
         success: true,
         message: "Show request updated successfully.",
         item: itemRequest.item,
@@ -78,7 +78,7 @@ export class ItemRequestResolver {
         return {
           success: false,
           message: "A request for this show already exists.",
-          statusText: "CONFLICT",
+          statusText: "conflict",
           item: null,
         };
       }
@@ -87,7 +87,7 @@ export class ItemRequestResolver {
         return {
           success: false,
           message: error.message,
-          statusText: "BAD_REQUEST",
+          statusText: "bad_request",
           item: null,
         };
       }

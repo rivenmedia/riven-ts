@@ -2,6 +2,8 @@ import type { CodegenConfig } from "@graphql-codegen/cli";
 import type { TypeScriptPluginConfig } from "@graphql-codegen/typescript";
 import type { TypeScriptDocumentsPluginConfig } from "@graphql-codegen/typescript-operations";
 
+const enums = await import("./lib/graphql/enums/index.ts");
+
 export default {
   schema: "schema.graphql",
   documents: ["lib/**/*.ts", "!lib/**/__generated__/**/*"],
@@ -13,7 +15,13 @@ export default {
       plugins: ["typescript"],
       config: {
         enumsAsTypes: true,
-        enumValues: await import("./lib/graphql/enums/index.ts"),
+        enumValues: Object.entries(enums).reduce<
+          Record<string, Record<string, string>>
+        >((acc, [key, value]) => {
+          acc[key] = value.enum;
+
+          return acc;
+        }, {}),
       } satisfies TypeScriptPluginConfig,
     },
     "./lib/": {

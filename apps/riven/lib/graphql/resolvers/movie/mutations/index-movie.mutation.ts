@@ -1,26 +1,74 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { MovieContentRating } from "@repo/util-plugin-sdk/dto/enums/content-ratings.enum";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
+import { Field, ID, InputType, Int, ObjectType } from "type-graphql";
 import z from "zod";
 
-import { database } from "../../../../database/database.ts";
+import { MutationResponse } from "../../../interfaces/mutation-response.interface.ts";
 
+import type { EntityManager } from "@mikro-orm/core";
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+import type { UUID } from "node:crypto";
 
-export interface PersistMovieIndexerDataInput {
-  item: Extract<
-    NonNullable<MediaItemIndexRequestedResponse>["item"],
-    { type: "movie" }
-  >;
+type IndexMovieData = Extract<
+  NonNullable<MediaItemIndexRequestedResponse>["item"],
+  { type: "movie" }
+>;
+
+@InputType()
+export class IndexMovieInput implements Omit<IndexMovieData, "type"> {
+  @Field(() => ID)
+  id!: UUID;
+
+  @Field(() => String)
+  title!: string;
+
+  @Field(() => String, { nullable: true })
+  imdbId!: string | null;
+
+  @Field(() => MovieContentRating.enum)
+  contentRating!: z.infer<typeof MovieContentRating>;
+
+  @Field(() => Number, { nullable: true })
+  rating?: number | null;
+
+  @Field(() => String, { nullable: true })
+  posterUrl?: string | null;
+
+  @Field(() => String, { nullable: true })
+  releaseDate!: string | null;
+
+  @Field(() => String, { nullable: true })
+  country?: string | null;
+
+  @Field(() => String, { nullable: true })
+  language?: string | null;
+
+  @Field(() => Object, { nullable: true })
+  aliases?: Record<string, string[]> | null;
+
+  @Field(() => [String])
+  genres!: string[];
+
+  @Field(() => Int, { nullable: true })
+  runtime!: number | null;
 }
 
-export async function persistMovieIndexerData({
-  item,
-}: PersistMovieIndexerDataInput) {
-  const itemRequest = await database.itemRequest.findOneOrFail({
+@ObjectType({ implements: MutationResponse })
+export class IndexMovieMutationResponse extends MutationResponse {
+  @Field(() => Movie, { nullable: true })
+  movie!: Movie | null;
+}
+
+export async function indexMovieMutation(
+  em: EntityManager,
+  item: IndexMovieInput,
+) {
+  const itemRequest = await em.findOneOrFail(ItemRequest, {
     id: item.id,
   });
 
@@ -42,7 +90,7 @@ export async function persistMovieIndexerData({
   }
 
   try {
-    return await database.em.fork().transactional(async (transaction) => {
+    return await em.transactional(async (transaction) => {
       const mediaItem = transaction.create(Movie, {
         title: item.title,
         imdbId: item.imdbId ?? itemRequest.imdbId ?? null,

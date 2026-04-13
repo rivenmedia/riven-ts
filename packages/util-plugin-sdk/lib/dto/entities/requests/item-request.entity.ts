@@ -45,8 +45,8 @@ export class ItemRequest {
   @Unique()
   tvdbId?: string | null;
 
-  @Field(() => ItemRequestType)
-  @Enum(() => ItemRequestType)
+  @Field(() => ItemRequestType.enum)
+  @Enum(() => ItemRequestType.enum)
   type!: ItemRequestType;
 
   @Field(() => String, { nullable: true })
@@ -65,8 +65,8 @@ export class ItemRequest {
   @Property()
   completedAt?: Opt<Date> | null;
 
-  @Field(() => ItemRequestState)
-  @Enum(() => ItemRequestState)
+  @Field(() => ItemRequestState.enum)
+  @Enum(() => ItemRequestState.enum)
   state!: ItemRequestState;
 
   @Field(() => [Number], { nullable: true })

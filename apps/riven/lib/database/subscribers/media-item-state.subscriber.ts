@@ -17,13 +17,19 @@ import {
   type UnitOfWork,
   wrap,
 } from "@mikro-orm/core";
-import z from "zod";
 
 import type { Promisable } from "type-fest";
 
 type NextStatesMap = Map<MediaItem, MediaItemState>;
 
 export class MediaItemStateSubscriber implements EventSubscriber {
+  #propagableStates = MediaItemState.extract([
+    "paused",
+    "failed",
+    "completed",
+    "unreleased",
+  ]);
+
   afterUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
     if (entity.state === "unreleased" && entity.isReleased) {
       entity.state = "indexed";
@@ -212,11 +218,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       nextStatesMap,
     );
 
-    const propagableStates = z
-      .enum(MediaItemState)
-      .extract(["PAUSED", "FAILED", "DOWNLOADED", "UNRELEASED"]);
-
-    for (const propagableState of propagableStates.options) {
+    for (const propagableState of this.#propagableStates.options) {
       const childrenStateCount = childrenStateCountMap[propagableState];
 
       if (!childrenStateCount) {

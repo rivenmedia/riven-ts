@@ -19,7 +19,7 @@ export class RivenSettingsResolver {
     return {
       version: "1.0.0",
       apiKey: "1234",
-      logLevel: "SILLY",
+      logLevel: "silly",
     };
   }
 }

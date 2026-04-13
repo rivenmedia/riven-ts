@@ -1,17 +1,11 @@
 import { registerEnumType } from "type-graphql";
+import z from "zod";
 
-import type { ValueOf } from "type-fest";
+export const MediaItemType = z.enum(["movie", "show", "season", "episode"]);
 
-export const MediaItemType = {
-  MOVIE: "movie",
-  SHOW: "show",
-  SEASON: "season",
-  EPISODE: "episode",
-} as const;
+export type MediaItemType = z.infer<typeof MediaItemType>;
 
-export type MediaItemType = ValueOf<typeof MediaItemType>;
-
-registerEnumType(MediaItemType, {
+registerEnumType(MediaItemType.enum, {
   name: "MediaItemType",
   description: "The type of a media item",
 });

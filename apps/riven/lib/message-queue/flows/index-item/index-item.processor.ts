@@ -1,13 +1,56 @@
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
+import { type TypedDocumentNode, gql } from "@apollo/client";
 import { UnrecoverableError } from "bullmq";
 
+import { client } from "../../../graphql/apollo-client.ts";
 import { requestIndexDataProcessorSchema } from "./index-item.schema.ts";
-import { persistMovieIndexerData } from "./utilities/persist-movie-indexer-data.ts";
-import { persistShowIndexerData } from "./utilities/persist-show-indexer-data.ts";
 
+import type {
+  IndexMovieMutation,
+  IndexMovieMutationVariables,
+  IndexShowMutation,
+  IndexShowMutationVariables,
+} from "./index-item.processor.typegen.ts";
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+
+const INDEX_MOVIE_MUTATION: TypedDocumentNode<
+  IndexMovieMutation,
+  IndexMovieMutationVariables
+> = gql`
+  mutation IndexMovie($input: IndexMovieInput!) {
+    indexMovie(input: $input) {
+      success
+      statusText
+      message
+      movie {
+        id
+        fullTitle
+      }
+    }
+  }
+`;
+
+const INDEX_SHOW_MUTATION: TypedDocumentNode<
+  IndexShowMutation,
+  IndexShowMutationVariables
+> = gql`
+  mutation IndexShow($input: IndexShowInput!) {
+    indexShow(input: $input) {
+      success
+      statusText
+      message
+      show {
+        id
+        fullTitle
+        type
+        state
+        status
+      }
+    }
+  }
+`;
 
 export const indexItemProcessor =
   requestIndexDataProcessorSchema.implementAsync(async function (
@@ -32,15 +75,46 @@ export const indexItemProcessor =
     );
 
     try {
-      const updatedItem =
-        item.type === "movie"
-          ? await persistMovieIndexerData({ item })
-          : await persistShowIndexerData({ item });
+      switch (item.type) {
+        case "movie": {
+          const updatedItem = await client.mutate({
+            mutation: INDEX_MOVIE_MUTATION,
+            variables: {
+              input: item,
+            },
+          });
 
-      sendEvent({
-        type: "riven.media-item.index.success",
-        item: updatedItem,
-      });
+          if (!updatedItem.data?.indexMovie.movie) {
+            throw new UnrecoverableError("Failed to index movie");
+          }
+
+          sendEvent({
+            type: "riven.media-item.index.success",
+            item: updatedItem.data.indexMovie.movie,
+          });
+
+          break;
+        }
+        case "show": {
+          const updatedItem = await client.mutate({
+            mutation: INDEX_SHOW_MUTATION,
+            variables: {
+              input: item,
+            },
+          });
+
+          if (!updatedItem.data?.indexShow.show) {
+            throw new UnrecoverableError("Failed to index show");
+          }
+
+          sendEvent({
+            type: "riven.media-item.index.success",
+            item: updatedItem.data.indexShow.show,
+          });
+
+          break;
+        }
+      }
     } catch (error) {
       if (
         error instanceof MediaItemIndexError ||

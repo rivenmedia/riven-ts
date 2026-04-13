@@ -3,25 +3,25 @@ import { registerEnumType } from "type-graphql";
 import z from "zod";
 
 const StatusText = z.enum([
-  "OK",
-  "CREATED",
-  "BAD_REQUEST",
-  "UNAUTHORIZED",
-  "NOT_FOUND",
-  "CONFLICT",
-  "INTERNAL_SERVER_ERROR",
+  "ok",
+  "created",
+  "bad_request",
+  "unauthorized",
+  "not_found",
+  "conflict",
+  "internal_server_error",
 ]);
 
 registerEnumType(StatusText.enum, {
   name: "StatusText",
   valuesConfig: {
-    OK: { description: "Success" },
-    CREATED: { description: "Created" },
-    BAD_REQUEST: { description: "Bad Request" },
-    UNAUTHORIZED: { description: "Unauthorized" },
-    NOT_FOUND: { description: "Not Found" },
-    CONFLICT: { description: "Conflict" },
-    INTERNAL_SERVER_ERROR: { description: "Internal Server Error" },
+    ok: { description: "Success" },
+    created: { description: "Created" },
+    bad_request: { description: "Bad Request" },
+    unauthorized: { description: "Unauthorized" },
+    not_found: { description: "Not Found" },
+    conflict: { description: "Conflict" },
+    internal_server_error: { description: "Internal Server Error" },
   },
 });
 

@@ -35,6 +35,8 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
   override baseURL = this.settings.stremThruUrl;
   override serviceName = "StremThru";
 
+  #allowedStatuses = ItemStatus.extract(["cached"]);
+
   #buildCommonHeaders(store: Store) {
     return {
       [storeNameHeader]: store,
@@ -149,10 +151,8 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
       data: { items },
     } = CacheCheckResponse.parse(response);
 
-    const allowedStatuses = ItemStatus.extract(["cached"]);
-
     return items.reduce<Record<string, DebridFile[]>>((acc, item) => {
-      if (!allowedStatuses.safeParse(item.status).success) {
+      if (!this.#allowedStatuses.safeParse(item.status).success) {
         return acc;
       }
 

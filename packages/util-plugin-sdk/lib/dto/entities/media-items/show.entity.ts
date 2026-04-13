@@ -28,8 +28,8 @@ export class Show extends ShowLikeMediaItem {
   declare itemRequest: Ref<ItemRequest>;
   declare filesystemEntries: never;
 
-  @Field(() => ShowStatus)
-  @Enum(() => ShowStatus)
+  @Field(() => ShowStatus.enum)
+  @Enum(() => ShowStatus.enum)
   status!: ShowStatus;
 
   @Field(() => [Season])

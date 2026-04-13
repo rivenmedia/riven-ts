@@ -12,27 +12,25 @@ import { DateTime } from "luxon";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
+import z from "zod";
 
 import { Episode, MediaItem, Movie } from "../media-items/index.ts";
 
 import type { Hidden, Opt, Ref } from "@mikro-orm/core";
-import type { Promisable, ValueOf } from "type-fest";
+import type { Promisable } from "type-fest";
 
-export const FileSystemEntryType = {
-  MEDIA: "media",
-  SUBTITLE: "subtitle",
-} as const;
+export const FileSystemEntryType = z.enum(["media", "subtitle"] as const);
 
-export type FileSystemEntryType = ValueOf<typeof FileSystemEntryType>;
+export type FileSystemEntryType = z.infer<typeof FileSystemEntryType>;
 
-registerEnumType(FileSystemEntryType, {
+registerEnumType(FileSystemEntryType.enum, {
   name: "FileSystemEntryType",
   description: "The type of the filesystem entry.",
   valuesConfig: {
-    MEDIA: {
+    media: {
       description: "A media file, e.g. a movie or episode file.",
     },
-    SUBTITLE: {
+    subtitle: {
       description: "A subtitle file associated with a media file.",
     },
   },
@@ -99,8 +97,8 @@ export abstract class FileSystemEntry {
   @ManyToOne(() => MediaItem)
   mediaItem!: Opt<Ref<Movie | Episode>>;
 
-  @Field(() => FileSystemEntryType)
-  @Enum(() => FileSystemEntryType)
+  @Field(() => FileSystemEntryType.enum)
+  @Enum(() => FileSystemEntryType.enum)
   type!: FileSystemEntryType;
 
   /**

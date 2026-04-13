@@ -2,8 +2,10 @@ import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import { Arg, Ctx, ID, Mutation, Resolver } from "type-graphql";
 
-import { saveStreamUrlMutation } from "./mutations/save-stream-url.mutation.ts";
-import { SaveStreamUrlMutationResponse } from "./types/save-stream-url-mutation-response.type.ts";
+import {
+  SaveStreamUrlMutationResponse,
+  saveStreamUrlMutation,
+} from "./mutations/save-stream-url.mutation.ts";
 
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 import type { UUID } from "node:crypto";
@@ -19,7 +21,7 @@ export class MediaEntryResolver {
     const updatedItem = await saveStreamUrlMutation(em, id, url);
 
     return {
-      statusText: "OK",
+      statusText: "ok",
       success: true,
       message: "Stream URL saved successfully",
       item: updatedItem,

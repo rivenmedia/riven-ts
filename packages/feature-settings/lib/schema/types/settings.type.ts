@@ -12,8 +12,8 @@ export class RivenSettings {
   @Field(() => String, { description: "The API key for accessing the service" })
   apiKey!: string;
 
-  @Field(() => LogLevel, {
+  @Field(() => LogLevel.enum, {
     description: "The logging level for the application",
   })
-  logLevel: keyof typeof LogLevel = "SILLY";
+  logLevel: LogLevel = "silly";
 }

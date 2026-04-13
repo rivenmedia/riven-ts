@@ -17,6 +17,13 @@ import { logger } from "../../../../utilities/logger/logger.ts";
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 import type { UUID } from "node:crypto";
 
+const processableStates = MediaItemState.extract([
+  "indexed",
+  "ongoing",
+  "scraped",
+  "partially_completed",
+]);
+
 export interface PersistScrapeResultsInput {
   id: UUID;
   results: Record<string, ParsedData>;
@@ -32,10 +39,6 @@ export async function persistScrapeResults({
       const existingItem = await transaction
         .getRepository(MediaItem)
         .findOneOrFail(id, { populate: ["streams.infoHash"] });
-
-      const processableStates = z
-        .enum(MediaItemState)
-        .extract(["INDEXED", "ONGOING", "SCRAPED", "PARTIALLY_COMPLETED"]);
 
       assert(
         processableStates.safeParse(existingItem.state).success,

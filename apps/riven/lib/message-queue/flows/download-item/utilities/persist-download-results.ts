@@ -22,6 +22,17 @@ import { logger } from "../../../../utilities/logger/logger.ts";
 import type { ValidTorrent } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import type { UUID } from "node:crypto";
 
+const processableStates = MediaItemState.extract([
+  "scraped",
+  "ongoing",
+  "partially_completed",
+]);
+
+const processableEpisodeStates = MediaItemState.exclude([
+  "completed",
+  "downloaded",
+]);
+
 export interface PersistDownloadResultsInput {
   id: UUID;
   torrent: ValidTorrent;
@@ -52,10 +63,6 @@ export async function persistDownloadResults({
         `No media item found with ID ${id} and stream info hash ${torrent.infoHash}`,
       ),
     );
-
-    const processableStates = z
-      .enum(MediaItemState)
-      .extract(["SCRAPED", "ONGOING", "PARTIALLY_COMPLETED"]);
 
     assert(
       processableStates.safeParse(existingItem.state).success,
@@ -114,10 +121,6 @@ export async function persistDownloadResults({
           episodes.map((episode) => [episode.id, episode]),
         );
 
-        const processableStates = z
-          .enum(MediaItemState)
-          .exclude(["COMPLETED", "DOWNLOADED"]);
-
         for (const file of torrent.files) {
           assert(file.link, "Download URL is missing for the matched file");
 
@@ -130,7 +133,7 @@ export async function persistDownloadResults({
             ),
           );
 
-          if (!processableStates.safeParse(episode.state).success) {
+          if (!processableEpisodeStates.safeParse(episode.state).success) {
             logger.debug(
               `Skipping media entry creation for ${episode.fullTitle} due to "${episode.state}" state`,
             );

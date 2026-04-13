@@ -1,34 +1,139 @@
-import { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  Episode,
+  ItemRequest,
+  Season,
+  Show,
+} from "@repo/util-plugin-sdk/dto/entities";
+import { ShowContentRating } from "@repo/util-plugin-sdk/dto/enums/content-ratings.enum";
 import { ItemRequestState } from "@repo/util-plugin-sdk/dto/enums/item-request-state.enum";
+import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
+import { Equals } from "class-validator";
 import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
+import { Field, ID, InputType, Int, ObjectType } from "type-graphql";
 import z from "zod";
 
-import { database } from "../../../../database/database.ts";
+import { MutationResponse } from "../../../interfaces/mutation-response.interface.ts";
 
+import type { EntityManager } from "@mikro-orm/core";
+import type { ShowStatus } from "@repo/util-plugin-sdk/dto/enums/show-status.enum";
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+import type { UUID } from "node:crypto";
 
-export interface PersistShowIndexerDataInput {
-  item: Extract<
-    NonNullable<MediaItemIndexRequestedResponse>["item"],
-    { type: "show" }
-  >;
+type IndexShowData = Extract<
+  NonNullable<MediaItemIndexRequestedResponse>["item"],
+  { type: "show" }
+>;
+
+type IndexShowSeasonData = IndexShowData["seasons"][number];
+
+type IndexShowEpisodeData = IndexShowSeasonData["episodes"][number];
+
+@InputType()
+class IndexShowEpisodeInput implements Required<IndexShowEpisodeData> {
+  @Field(() => String)
+  title!: string;
+
+  @Field(() => Int)
+  number!: number;
+
+  @Field(() => Int, { nullable: true })
+  absoluteNumber!: number;
+
+  @Field(() => ShowContentRating.enum, { nullable: true })
+  contentRating!: z.infer<typeof ShowContentRating>;
+
+  @Field(() => Int, { nullable: true })
+  runtime!: number | null;
+
+  @Field(() => String, { nullable: true })
+  airedAt!: string | null;
+
+  @Field(() => String, { nullable: true })
+  posterPath!: string | null;
 }
 
-export async function persistShowIndexerData({
-  item,
-}: PersistShowIndexerDataInput) {
-  const itemRequest = await database.itemRequest.findOneOrFail({
+@InputType()
+class IndexShowSeasonInput implements IndexShowSeasonData {
+  @Field(() => Int)
+  number!: number;
+
+  @Field(() => String, { nullable: true })
+  title!: string | null;
+
+  @Field(() => [IndexShowEpisodeInput])
+  episodes!: IndexShowEpisodeInput[];
+}
+
+@InputType()
+export class IndexShowInput implements Omit<IndexShowData, "type"> {
+  @Field(() => ID)
+  id!: UUID;
+
+  @Field(() => String)
+  title!: string;
+
+  @Field(() => String, { nullable: true })
+  imdbId!: string | null;
+
+  @Field(() => ShowContentRating.enum)
+  contentRating!: z.infer<typeof ShowContentRating>;
+
+  @Field(() => String, { nullable: true })
+  posterUrl?: string;
+
+  @Field(() => String, { nullable: true })
+  country?: string;
+
+  @Field(() => String, { nullable: true })
+  language?: string;
+
+  @Field(() => [Object], { nullable: true })
+  aliases?: Record<string, string[]>;
+
+  @Field(() => Number, { nullable: true })
+  rating?: number;
+
+  @Field(() => String)
+  status!: ShowStatus;
+
+  @Field(() => String)
+  network!: string;
+
+  @Field(() => [IndexShowSeasonInput])
+  seasons!: IndexShowSeasonInput[];
+
+  @Field(() => [String])
+  genres!: string[];
+
+  @Equals(MediaItemType.enum.show)
+  @Field(() => MediaItemType.enum, { defaultValue: "show" })
+  type = "show" as const;
+}
+
+@ObjectType({ implements: MutationResponse })
+export class IndexShowMutationResponse extends MutationResponse {
+  @Field(() => Show, { nullable: true })
+  show!: Show | null;
+}
+
+const processableStates = ItemRequestState.extract([
+  "requested",
+  "ongoing",
+  "unreleased",
+]);
+
+export async function indexShowMutation(
+  em: EntityManager,
+  item: IndexShowInput,
+) {
+  const itemRequest = await em.findOneOrFail(ItemRequest, {
     id: item.id,
   });
-
-  const processableStates = z
-    .enum(ItemRequestState)
-    .extract(["REQUESTED", "ONGOING", "UNRELEASED"]);
 
   assert(
     processableStates.safeParse(itemRequest.state).success,
@@ -38,8 +143,9 @@ export async function persistShowIndexerData({
   );
 
   try {
-    return await database.em.fork().transactional(async (transaction) => {
-      const existingShow = await transaction.getRepository(Show).findOne(
+    return await em.transactional(async (transaction) => {
+      const existingShow = await transaction.findOne(
+        Show,
         {
           itemRequest: { id: itemRequest.id },
           status: {
@@ -58,7 +164,7 @@ export async function persistShowIndexerData({
         });
       }
 
-      const firstEpisodeAirDate = item.seasons[1]?.episodes[0]?.airedAt;
+      const firstEpisodeAirDate = item.seasons[0]?.episodes[0]?.airedAt;
       const firstAired = firstEpisodeAirDate
         ? DateTime.fromISO(firstEpisodeAirDate)
         : null;
@@ -95,7 +201,7 @@ export async function persistShowIndexerData({
 
       await transaction.upsert(show);
 
-      for (const season of Object.values(item.seasons)) {
+      for (const season of item.seasons) {
         const [existingSeason] = await show.seasons.matching({
           limit: 1,
           where: {

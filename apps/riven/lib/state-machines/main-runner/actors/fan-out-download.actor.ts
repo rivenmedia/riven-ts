@@ -6,12 +6,17 @@ import {
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
 import { fromPromise } from "xstate";
-import z from "zod";
 
 import { database } from "../../../database/database.ts";
 import { enqueueScrapeItems } from "../../../message-queue/flows/scrape-item/enqueue-scrape-items.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
+
+const processableStates = MediaItemState.extract([
+  "ongoing",
+  "indexed",
+  "scraped",
+]);
 
 export interface FanOutDownloadInput {
   item: MediaItem;
@@ -39,10 +44,6 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
 
     if (item instanceof Season) {
       await database.em.fork().populate(item, ["episodes"]);
-
-      const processableStates = z
-        .enum(MediaItemState)
-        .extract(["ONGOING", "INDEXED", "SCRAPED"]);
 
       const incompleteEpisodes = await item.episodes.matching({
         orderBy: { number: "asc" },

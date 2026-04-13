@@ -6,7 +6,11 @@
       "dependsOn": ["$TURBO_EXTENDS$", "build:workers"]
     },
     "build:workers": {
-      "dependsOn": ["@repo/util-plugin-sdk#build", "codegen:gql", "transit"],
+      "dependsOn": [
+        "@repo/util-plugin-sdk#build",
+        "codegen:gql",
+        "transit:source-files"
+      ],
       "outputs": ["dist/workers/**"]
     },
     "dev": {
@@ -17,14 +21,22 @@
       ]
     },
     "codegen:gql-schema": {
-      "dependsOn": ["transit"],
+      "dependsOn": ["^transit:source-files"],
+      "inputs": [
+        "lib/**/*.ts",
+        "!**/__tests__/**/*",
+        "!**/*.typegen.ts",
+        "!**/*.spec.ts"
+      ],
       "outputs": ["schema.graphql"]
     },
     "codegen:gql": {
-      "dependsOn": ["codegen:gql-schema", "transit"],
+      "dependsOn": ["codegen:gql-schema", "^transit:source-files"],
       "inputs": [
         "lib/**/*.ts",
-        "!lib/**/__generated__/**/*",
+        "!**/__tests__/**/*",
+        "!**/*.typegen.ts",
+        "!**/*.spec.ts",
         "schema.graphql",
         "graphql-codegen.ts"
       ],

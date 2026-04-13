@@ -128,17 +128,17 @@ export abstract class MediaItem {
   rating?: number | null;
 
   // NOTE: GraphQL field is not defined here as it is resolved in the subclasses with different return types
-  @Enum(() => MediaItemContentRating)
+  @Enum(() => MediaItemContentRating.enum)
   contentRating?: MediaItemContentRating | null;
 
   @Field(() => String, { nullable: true })
   @Property()
   guid?: string | null;
 
-  @Field(() => MediaItemState)
+  @Field(() => MediaItemState.enum)
   @Enum({
-    default: MediaItemState.INDEXED,
-    items: () => MediaItemState,
+    default: MediaItemState.enum.indexed,
+    items: () => MediaItemState.enum,
   })
   state!: Opt<MediaItemState>;
 
@@ -167,8 +167,8 @@ export abstract class MediaItem {
   @ManyToMany()
   blacklistedStreams: Collection<Stream> = new Collection<Stream>(this);
 
-  @Field(() => MediaItemType)
-  @Enum(() => MediaItemType)
+  @Field(() => MediaItemType.enum)
+  @Enum(() => MediaItemType.enum)
   type!: Opt<MediaItemType>;
 
   @ManyToOne(() => ItemRequest)

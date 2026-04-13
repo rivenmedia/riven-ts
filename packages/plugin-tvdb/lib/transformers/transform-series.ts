@@ -152,7 +152,7 @@ export const transformSeries = (
     });
 
     return acc;
-  }, {});
+  }, []);
 
   return {
     id: itemRequest.id,
@@ -170,10 +170,7 @@ export const transformSeries = (
     ),
     contentRating,
     posterUrl: posterPath,
-    status: z
-      .enum(ShowStatus)
-      .catch("unknown")
-      .parse(tvdbStatus?.toLowerCase()),
+    status: ShowStatus.catch("unknown").parse(tvdbStatus?.toLowerCase()),
     seasons,
     language: series.originalLanguage,
   } satisfies Extract<
