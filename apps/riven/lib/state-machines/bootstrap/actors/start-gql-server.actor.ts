@@ -57,7 +57,13 @@ export const startGqlServer = fromPromise<
     pubSub,
   });
 
-  const serverCleanup = useServer({ schema }, wsServer);
+  const serverCleanup = useServer(
+    {
+      schema,
+      context: buildContextFunction(),
+    },
+    wsServer,
+  );
 
   const server = new ApolloServer<ApolloServerContext>({
     cache: redisCache,
