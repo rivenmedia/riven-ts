@@ -9,6 +9,7 @@
     "scripts/generate-gql-schema.ts",
     "eslint.config.ts",
     "graphql-codegen.ts",
+    "graphql.config.ts",
     "esbuild.config.ts",
     "vitest.d.ts",
     "vitest.config.ts",
