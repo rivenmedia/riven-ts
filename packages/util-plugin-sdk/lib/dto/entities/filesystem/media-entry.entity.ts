@@ -7,7 +7,7 @@ import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 
 import type { Opt } from "@mikro-orm/core";
 
-@ObjectType()
+@ObjectType({ implements: FileSystemEntry })
 @Entity({
   discriminatorValue: "media",
 })

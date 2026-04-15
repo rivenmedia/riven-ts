@@ -3,17 +3,15 @@ import {
   Entity,
   Enum,
   ManyToOne,
-  PrimaryKey,
   Property,
 } from "@mikro-orm/decorators/legacy";
 import { IsPositive } from "class-validator";
 import { BigIntResolver } from "graphql-scalars";
-import { DateTime } from "luxon";
-import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
+import { Field, InterfaceType, registerEnumType } from "type-graphql";
 import z from "zod";
 
+import { Node } from "../core/node.entity.ts";
 import { Episode, MediaItem, Movie } from "../media-items/index.ts";
 
 import type { Hidden, Opt, Ref } from "@mikro-orm/core";
@@ -70,28 +68,16 @@ async function getMediaItemPathParts(mediaItem: MediaItem) {
   throw new TypeError("Unsupported media item type for path generation");
 }
 
-@ObjectType()
+@InterfaceType({ implements: Node })
 @Entity({
   abstract: true,
   discriminatorColumn: "type",
 })
-export abstract class FileSystemEntry {
-  @Field((_type) => ID)
-  @PrimaryKey({ type: "uuid" })
-  id = randomUUID();
-
+export abstract class FileSystemEntry extends Node {
   @Field(() => BigIntResolver)
   @Property({ type: "bigint" })
   @IsPositive()
   fileSize!: number;
-
-  @Field(() => Date)
-  @Property()
-  createdAt: Opt<Date> = DateTime.now().toJSDate();
-
-  @Field(() => Date, { nullable: true })
-  @Property({ onUpdate: () => DateTime.now().toJSDate() })
-  updatedAt?: Opt<Date>;
 
   @Field(() => MediaItem)
   @ManyToOne(() => MediaItem)

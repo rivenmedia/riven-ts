@@ -3,27 +3,21 @@ import {
   Entity,
   Enum,
   OneToMany,
-  PrimaryKey,
   Property,
   Unique,
 } from "@mikro-orm/decorators/legacy";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
-import { randomUUID } from "node:crypto";
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ObjectType } from "type-graphql";
 
-import { DateTime } from "../../../helpers/dates.ts";
 import { ItemRequestState } from "../../enums/item-request-state.enum.ts";
 import { ItemRequestType } from "../../enums/item-request-type.enum.ts";
+import { Node } from "../core/node.entity.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
 import { Season } from "../media-items/season.entity.ts";
 
-@ObjectType()
+@ObjectType({ implements: Node })
 @Entity()
-export class ItemRequest {
-  @Field(() => ID)
-  @PrimaryKey({ type: "uuid" })
-  id = randomUUID();
-
+export class ItemRequest extends Node {
   @Field(() => String, { nullable: true })
   @Property()
   @Matches(/^tt\d+$/)
@@ -57,10 +51,6 @@ export class ItemRequest {
   @Property()
   externalRequestId?: string;
 
-  @Field(() => Date)
-  @Property()
-  createdAt: Opt<Date> = DateTime.now().toJSDate();
-
   @Field(() => Date, { nullable: true })
   @Property()
   completedAt?: Opt<Date> | null;
@@ -85,9 +75,11 @@ export class ItemRequest {
     return externalIds;
   }
 
+  @Field(() => [MediaItem])
   @OneToMany(() => MediaItem, (mediaItem) => mediaItem.itemRequest)
   mediaItems = new Collection<MediaItem>(this);
 
+  @Field(() => [Season])
   @OneToMany(() => Season, (mediaItem) => mediaItem.itemRequest, {
     where: {
       type: "season",
@@ -95,6 +87,7 @@ export class ItemRequest {
   })
   seasonItems = new Collection<Season>(this);
 
+  @Field(() => [MediaItem])
   @OneToMany(() => MediaItem, (mediaItem) => mediaItem.itemRequest, {
     where: {
       isRequested: true,

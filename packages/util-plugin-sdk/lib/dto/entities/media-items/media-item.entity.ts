@@ -5,35 +5,30 @@ import {
   Index,
   ManyToMany,
   ManyToOne,
-  PrimaryKey,
   Property,
 } from "@mikro-orm/decorators/legacy";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { JSONObjectResolver } from "graphql-scalars";
 import { DateTime } from "luxon";
-import { type UUID, randomUUID } from "node:crypto";
-import { Field, ID, Int, InterfaceType } from "type-graphql";
+import { Field, Int, InterfaceType } from "type-graphql";
 
 import { MediaItemContentRating } from "../../enums/content-ratings.enum.ts";
 import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { MediaItemType } from "../../enums/media-item-type.enum.ts";
+import { Node } from "../core/node.entity.ts";
 import { FileSystemEntry, SubtitleEntry } from "../filesystem/index.ts";
 import { ItemRequest, MediaEntry } from "../index.ts";
 import { Stream } from "../streams/stream.entity.ts";
 
 import type { Promisable } from "type-fest";
 
-@InterfaceType()
+@InterfaceType({ implements: Node })
 @Entity({
   abstract: true,
   discriminatorColumn: "type",
 })
 @Index({ properties: ["type", "releaseDate"] })
-export abstract class MediaItem {
-  @Field((_type) => ID)
-  @PrimaryKey({ type: "uuid" })
-  id: UUID = randomUUID();
-
+export abstract class MediaItem extends Node {
   @Field(() => String)
   @Index()
   @Property()
@@ -62,15 +57,6 @@ export abstract class MediaItem {
   @Field(() => String, { nullable: true })
   @Property()
   posterPath?: string | null;
-
-  @Field(() => Date)
-  @Index()
-  @Property()
-  createdAt: Opt<Date> = DateTime.now().toJSDate();
-
-  @Field(() => Date, { nullable: true })
-  @Property({ onUpdate: () => DateTime.now().toJSDate() })
-  updatedAt?: Opt<Date> | null;
 
   @Field(() => Date, { nullable: true })
   @Property()
