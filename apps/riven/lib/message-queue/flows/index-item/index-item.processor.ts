@@ -1,6 +1,3 @@
-import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
-import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
-
 import { type TypedDocumentNode, gql } from "@apollo/client";
 import { UnrecoverableError } from "bullmq";
 
@@ -74,49 +71,34 @@ export const indexItemProcessor =
       {} as NonNullable<MediaItemIndexRequestedResponse>["item"],
     );
 
-    try {
-      switch (item.type) {
-        case "movie": {
-          const updatedItem = await client.mutate({
-            mutation: INDEX_MOVIE_MUTATION,
-            variables: {
-              input: item,
-            },
-          });
+    switch (item.type) {
+      case "movie": {
+        const updatedItem = await client.mutate({
+          mutation: INDEX_MOVIE_MUTATION,
+          variables: {
+            input: item,
+          },
+        });
 
-          if (!updatedItem.data?.indexMovie.movie) {
-            throw new UnrecoverableError("Failed to index movie");
-          }
-
-          break;
+        if (!updatedItem.data?.indexMovie.success) {
+          throw new UnrecoverableError("Failed to index movie");
         }
-        case "show": {
-          const updatedItem = await client.mutate({
-            mutation: INDEX_SHOW_MUTATION,
-            variables: {
-              input: item,
-            },
-          });
 
-          if (!updatedItem.data?.indexShow.show) {
-            throw new UnrecoverableError("Failed to index show");
-          }
+        break;
+      }
+      case "show": {
+        const updatedItem = await client.mutate({
+          mutation: INDEX_SHOW_MUTATION,
+          variables: {
+            input: item,
+          },
+        });
 
-          break;
+        if (!updatedItem.data?.indexShow.success) {
+          throw new UnrecoverableError("Failed to index show");
         }
-      }
-    } catch (error) {
-      if (
-        error instanceof MediaItemIndexError ||
-        error instanceof MediaItemIndexErrorIncorrectState
-      ) {
-        sendEvent(error.payload);
 
-        throw new UnrecoverableError(
-          `Failed to persist indexer data: ${String(error)}`,
-        );
+        break;
       }
-
-      throw error;
     }
   });

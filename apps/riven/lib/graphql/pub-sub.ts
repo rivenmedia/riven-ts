@@ -12,6 +12,12 @@ export const pubSub = createPubSub<{
   ITEM_REQUEST_CREATED: [ItemRequest];
   ITEM_REQUEST_UPDATED: [ItemRequest];
   MEDIA_ITEM_INDEXED: [Movie | Show];
+  MEDIA_ITEM_SCRAPED: [
+    {
+      item: MediaItem;
+      streamsAdded: number;
+    },
+  ];
   MEDIA_ITEM_STATE_CHANGED: [
     {
       item: MediaItem;

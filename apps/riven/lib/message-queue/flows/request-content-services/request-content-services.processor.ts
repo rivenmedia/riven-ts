@@ -115,142 +115,140 @@ async function requestItem(
 }
 
 export const requestContentServicesProcessor =
-  requestContentServicesProcessorSchema.implementAsync(
-    async ({ job }, sendEvent) => {
-      const data = await job.getChildrenValues();
+  requestContentServicesProcessorSchema.implementAsync(async ({ job }) => {
+    const data = await job.getChildrenValues();
 
-      const items = Object.values(data).reduce((acc, childData) => {
-        if (childData.movies.length) {
-          for (const movie of childData.movies) {
-            const key = buildExternalIdKey(movie.tmdbId, movie.imdbId);
+    const items = Object.values(data).reduce((acc, childData) => {
+      if (childData.movies.length) {
+        for (const movie of childData.movies) {
+          const key = buildExternalIdKey(movie.tmdbId, movie.imdbId);
 
-            if (!key) {
-              logger.warn(
-                `Skipping requested movie with no valid external ID: ${JSON.stringify(movie)}`,
-              );
+          if (!key) {
+            logger.warn(
+              `Skipping requested movie with no valid external ID: ${JSON.stringify(movie)}`,
+            );
 
-              continue;
-            }
-
-            acc.set(key, movie);
+            continue;
           }
+
+          acc.set(key, movie);
         }
+      }
 
-        if (childData.shows.length) {
-          for (const show of childData.shows) {
-            const key = buildExternalIdKey(show.tvdbId, show.imdbId);
+      if (childData.shows.length) {
+        for (const show of childData.shows) {
+          const key = buildExternalIdKey(show.tvdbId, show.imdbId);
 
-            if (!key) {
-              logger.warn(
-                `Skipping requested show with no valid external ID: ${JSON.stringify(show)}`,
-              );
+          if (!key) {
+            logger.warn(
+              `Skipping requested show with no valid external ID: ${JSON.stringify(show)}`,
+            );
 
-              continue;
-            }
-
-            acc.set(key, show);
+            continue;
           }
+
+          acc.set(key, show);
         }
+      }
 
-        return acc;
-      }, new Map<string, ContentServiceRequestedResponse["movies" | "shows"][number]>());
+      return acc;
+    }, new Map<string, ContentServiceRequestedResponse["movies" | "shows"][number]>());
 
-      let newItemsCount = 0;
-      let updatedItemsCount = 0;
+    let newItemsCount = 0;
+    let updatedItemsCount = 0;
 
-      for (const [key, item] of items) {
-        const result = await requestItem(item);
+    for (const [key, item] of items) {
+      const result = await requestItem(item);
 
-        if (!result.data) {
+      if (!result.data) {
+        logger.error(
+          `No data returned from requestItem for item with key ${key}`,
+        );
+
+        continue;
+      }
+
+      if ("requestMovie" in result.data && result.data.requestMovie.item) {
+        const fragmentData = client.readFragment({
+          id: client.cache.identify(result.data.requestMovie.item),
+          fragment: REQUEST_ITEM_FIELDS_FRAGMENT,
+        });
+
+        if (!fragmentData) {
           logger.error(
-            `No data returned from requestItem for item with key ${key}`,
+            `Failed to read fragment for ${client.cache.identify(result.data.requestMovie.item)}`,
           );
 
           continue;
         }
 
-        if ("requestMovie" in result.data && result.data.requestMovie.item) {
-          const fragmentData = client.readFragment({
-            id: client.cache.identify(result.data.requestMovie.item),
-            fragment: REQUEST_ITEM_FIELDS_FRAGMENT,
-          });
+        switch (result.data.requestMovie.statusText) {
+          case "conflict": {
+            // sendEvent({
+            //   type: "riven.item-request.create.error.conflict",
+            //   item: fragmentData,
+            // });
 
-          if (!fragmentData) {
-            logger.error(
-              `Failed to read fragment for ${client.cache.identify(result.data.requestMovie.item)}`,
+            break;
+          }
+          case "created": {
+            newItemsCount++;
+
+            break;
+          }
+          default: {
+            logger.warn(
+              `Unexpected response code ${result.data.requestMovie.statusText} for movie request with item key ${key}`,
             );
-
-            continue;
-          }
-
-          switch (result.data.requestMovie.statusText) {
-            case "conflict": {
-              sendEvent({
-                type: "riven.item-request.create.error.conflict",
-                item: fragmentData,
-              });
-
-              break;
-            }
-            case "created": {
-              newItemsCount++;
-
-              break;
-            }
-            default: {
-              logger.warn(
-                `Unexpected response code ${result.data.requestMovie.statusText} for movie request with item key ${key}`,
-              );
-            }
-          }
-        }
-
-        if ("requestShow" in result.data && result.data.requestShow.item) {
-          const fragmentData = client.readFragment({
-            id: client.cache.identify(result.data.requestShow.item),
-            fragment: REQUEST_ITEM_FIELDS_FRAGMENT,
-          });
-
-          if (!fragmentData) {
-            logger.error(
-              `Failed to read fragment for ${client.cache.identify(result.data.requestShow.item)}`,
-            );
-
-            continue;
-          }
-
-          switch (result.data.requestShow.statusText) {
-            case "conflict": {
-              sendEvent({
-                type: "riven.item-request.create.error.conflict",
-                item: fragmentData,
-              });
-
-              break;
-            }
-            case "created": {
-              newItemsCount++;
-
-              break;
-            }
-            case "ok": {
-              updatedItemsCount++;
-
-              break;
-            }
-            default: {
-              logger.warn(
-                `Unexpected response code ${result.data.requestShow.statusText} for show request with item key ${key}`,
-              );
-            }
           }
         }
       }
 
-      return {
-        count: items.size,
-        newItems: newItemsCount,
-        updatedItems: updatedItemsCount,
-      };
-    },
-  );
+      if ("requestShow" in result.data && result.data.requestShow.item) {
+        const fragmentData = client.readFragment({
+          id: client.cache.identify(result.data.requestShow.item),
+          fragment: REQUEST_ITEM_FIELDS_FRAGMENT,
+        });
+
+        if (!fragmentData) {
+          logger.error(
+            `Failed to read fragment for ${client.cache.identify(result.data.requestShow.item)}`,
+          );
+
+          continue;
+        }
+
+        switch (result.data.requestShow.statusText) {
+          case "conflict": {
+            // sendEvent({
+            //   type: "riven.item-request.create.error.conflict",
+            //   item: fragmentData,
+            // });
+
+            break;
+          }
+          case "created": {
+            newItemsCount++;
+
+            break;
+          }
+          case "ok": {
+            updatedItemsCount++;
+
+            break;
+          }
+          default: {
+            logger.warn(
+              `Unexpected response code ${result.data.requestShow.statusText} for show request with item key ${key}`,
+            );
+          }
+        }
+      }
+    }
+
+    return {
+      count: items.size,
+      newItems: newItemsCount,
+      updatedItems: updatedItemsCount,
+    };
+  });

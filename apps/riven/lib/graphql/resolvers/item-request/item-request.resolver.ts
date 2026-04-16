@@ -38,6 +38,7 @@ export class ItemRequestResolver {
         success: true,
         message: "Movie request created successfully.",
         item: itemRequest.item,
+        errorCode: null,
       };
     } catch (error) {
       if (error instanceof ItemRequestCreateErrorConflict) {
@@ -46,6 +47,7 @@ export class ItemRequestResolver {
           message: "A request for this movie already exists.",
           statusText: "conflict",
           item: null,
+          errorCode: "conflict",
         };
       }
 
@@ -55,6 +57,7 @@ export class ItemRequestResolver {
           message: error.message,
           statusText: "bad_request",
           item: null,
+          errorCode: "unexpected_error",
         };
       }
 
@@ -98,6 +101,7 @@ export class ItemRequestResolver {
           success: true,
           message: "Show request created successfully.",
           item: itemRequest.item,
+          errorCode: null,
         };
       }
 
@@ -106,6 +110,7 @@ export class ItemRequestResolver {
         success: true,
         message: "Show request updated successfully.",
         item: itemRequest.item,
+        errorCode: null,
       };
     } catch (error) {
       if (error instanceof ItemRequestCreateErrorConflict) {
@@ -114,6 +119,7 @@ export class ItemRequestResolver {
           message: "A request for this show already exists.",
           statusText: "conflict",
           item: null,
+          errorCode: "conflict",
         };
       }
 
@@ -123,6 +129,7 @@ export class ItemRequestResolver {
           message: error.message,
           statusText: "bad_request",
           item: null,
+          errorCode: "unexpected_error",
         };
       }
 

@@ -1,44 +1,72 @@
-import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
-import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
-import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
+import { type TypedDocumentNode, gql } from "@apollo/client";
 
-import { UnrecoverableError } from "bullmq";
-
+import { client } from "../../../graphql/apollo-client.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
 import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
-import { persistScrapeResults } from "./utilities/persist-scrape-results.ts";
 
+import type {
+  ScrapeMediaItemMutation,
+  ScrapeMediaItemMutationVariables,
+} from "./scrape-item.processor.typegen.ts";
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
+const SCRAPE_MEDIA_ITEM_MUTATION: TypedDocumentNode<
+  ScrapeMediaItemMutation,
+  ScrapeMediaItemMutationVariables
+> = gql`
+  mutation ScrapeMediaItem($input: ScrapeMediaItemMutationInput!) {
+    scrapeMediaItem(input: $input) {
+      item {
+        ... on Node {
+          id
+        }
+      }
+      newStreamsCount
+      errorCode
+    }
+  }
+`;
+
 export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
-  async function ({ job }, sendEvent) {
+  async function ({ job }) {
     const children = await job.getChildrenValues();
 
     const parsedResults = Object.values(children).reduce<
       Record<string, ParsedData>
     >((acc, scrapeResult) => Object.assign(acc, scrapeResult.results), {});
 
-    try {
-      const item = await persistScrapeResults({
-        id: job.data.id,
-        results: parsedResults,
-      });
+    const { data } = await client.mutate({
+      mutation: SCRAPE_MEDIA_ITEM_MUTATION,
+      variables: {
+        input: {
+          id: job.data.id,
+          results: parsedResults,
+        },
+      },
+    });
 
-      sendEvent({
-        type: "riven.media-item.scrape.success",
-        item,
-      });
-    } catch (error) {
-      if (
-        error instanceof MediaItemScrapeErrorNoNewStreams ||
-        error instanceof MediaItemScrapeErrorIncorrectState ||
-        error instanceof MediaItemScrapeError
-      ) {
-        sendEvent(error.payload);
+    if (!data?.scrapeMediaItem) {
+      throw new Error("No data returned from scrapeMediaItem mutation");
+    }
 
-        throw new UnrecoverableError(error.message);
+    switch (data.scrapeMediaItem.errorCode) {
+      case "no_new_streams": {
+        logger.warn(
+          "No new streams found for media item with ID: " + job.data.id,
+        );
+
+        break;
       }
+      case "incorrect_state": {
+        logger.error("Incorrect state for media item with ID: " + job.data.id);
 
-      throw error;
+        break;
+      }
+      case "scrape_error": {
+        logger.error("Scrape error for media item with ID: " + job.data.id);
+
+        break;
+      }
     }
   },
 );

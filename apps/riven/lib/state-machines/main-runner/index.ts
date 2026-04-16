@@ -45,6 +45,7 @@ import { itemRequestCreatedListener } from "./actors/item-request-created.listen
 import { itemRequestUpdatedListener } from "./actors/item-request-updated.listener.ts";
 import { jobEnqueuer } from "./actors/job-enqueuer.actor.ts";
 import { mediaItemIndexedListener } from "./actors/media-item-indexed.listener.ts";
+import { mediaItemScrapedListener } from "./actors/media-item-scraped.listener.ts";
 import { mediaItemStateChangeListener } from "./actors/media-item-state-change.listener.ts";
 import { requestContentServices } from "./actors/request-content-services.actor.ts";
 import { requestDownload } from "./actors/request-download.actor.ts";
@@ -258,6 +259,7 @@ export const mainRunnerMachine = setup({
     itemRequestUpdatedListener,
     mediaItemIndexedListener,
     mediaItemStateChangeListener,
+    mediaItemScrapedListener,
   },
   guards: {
     /**
@@ -403,6 +405,10 @@ export const mainRunnerMachine = setup({
           {
             src: "mediaItemStateChangeListener",
             id: "mediaItemStateChangeListener",
+          },
+          {
+            src: "mediaItemScrapedListener",
+            id: "mediaItemScrapedListener",
           },
           {
             id: "requestContentServicesScheduler",

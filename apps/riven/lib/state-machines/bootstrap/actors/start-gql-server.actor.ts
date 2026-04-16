@@ -104,7 +104,7 @@ export const startGqlServer = fromPromise<
   app.use(
     gqlPath,
     cors(),
-    express.json(),
+    express.json({ limit: "50mb" }),
     expressMiddleware(server, {
       context: buildContextFunction(),
     }),
