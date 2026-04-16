@@ -18,6 +18,7 @@ import { Field, ID, InputType, Int, ObjectType } from "type-graphql";
 import z from "zod";
 
 import { MutationResponse } from "../../../interfaces/mutation-response.interface.ts";
+import { pubSub } from "../../../pub-sub.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { ShowStatus } from "@repo/util-plugin-sdk/dto/enums/show-status.enum";
@@ -92,7 +93,7 @@ export class IndexShowInput implements Omit<IndexShowData, "type"> {
   @Field(() => String, { nullable: true })
   language?: string;
 
-  @Field(() => [Object], { nullable: true })
+  @Field(() => Object, { nullable: true })
   aliases?: Record<string, string[]>;
 
   @Field(() => Number, { nullable: true })
@@ -143,7 +144,7 @@ export async function indexShowMutation(
   );
 
   try {
-    return await em.transactional(async (transaction) => {
+    const show = await em.transactional(async (transaction) => {
       const existingShow = await transaction.findOne(
         Show,
         {
@@ -317,6 +318,10 @@ export async function indexShowMutation(
 
       return transaction.refreshOrFail(show);
     });
+
+    pubSub.publish("MEDIA_ITEM_INDEXED", show);
+
+    return show;
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

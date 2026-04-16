@@ -1,11 +1,13 @@
-import type { RegisteredPluginMap } from "../../../types/plugins.ts";
+import type { ValidPluginMap } from "../../../types/plugins.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 export function getPluginEventSubscribers(
   event: RivenEvent["type"],
-  pluginMap: RegisteredPluginMap,
+  pluginMap: ValidPluginMap,
 ) {
-  return [...pluginMap.values()]
+  return pluginMap
+    .values()
     .map((plugin) => plugin.config)
-    .filter(({ hooks }) => hooks[event]);
+    .filter(({ hooks }) => hooks[event])
+    .toArray();
 }

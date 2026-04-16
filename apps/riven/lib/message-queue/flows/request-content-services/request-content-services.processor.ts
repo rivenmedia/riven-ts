@@ -193,11 +193,6 @@ export const requestContentServicesProcessor =
               break;
             }
             case "created": {
-              sendEvent({
-                type: "riven.item-request.create.success",
-                item: fragmentData,
-              });
-
               newItemsCount++;
 
               break;
@@ -234,21 +229,11 @@ export const requestContentServicesProcessor =
               break;
             }
             case "created": {
-              sendEvent({
-                type: "riven.item-request.create.success",
-                item: fragmentData,
-              });
-
               newItemsCount++;
 
               break;
             }
             case "ok": {
-              sendEvent({
-                type: "riven.item-request.update.success",
-                item: fragmentData,
-              });
-
               updatedItemsCount++;
 
               break;

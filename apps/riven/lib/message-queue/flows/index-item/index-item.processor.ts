@@ -88,11 +88,6 @@ export const indexItemProcessor =
             throw new UnrecoverableError("Failed to index movie");
           }
 
-          sendEvent({
-            type: "riven.media-item.index.success",
-            item: updatedItem.data.indexMovie.movie,
-          });
-
           break;
         }
         case "show": {
@@ -106,11 +101,6 @@ export const indexItemProcessor =
           if (!updatedItem.data?.indexShow.show) {
             throw new UnrecoverableError("Failed to index show");
           }
-
-          sendEvent({
-            type: "riven.media-item.index.success",
-            item: updatedItem.data.indexShow.show,
-          });
 
           break;
         }

@@ -10,6 +10,7 @@ import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state
 
 import {
   type ChangeSet,
+  ChangeSetType,
   type EntityData,
   type EventArgs,
   type EventSubscriber,
@@ -17,6 +18,8 @@ import {
   type UnitOfWork,
   wrap,
 } from "@mikro-orm/core";
+
+import { pubSub } from "../../graphql/pub-sub.ts";
 
 import type { Promisable } from "type-fest";
 
@@ -33,6 +36,41 @@ export class MediaItemStateSubscriber implements EventSubscriber {
   afterUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
     if (entity.state === "unreleased" && entity.isReleased) {
       entity.state = "indexed";
+    }
+  }
+
+  afterFlush(args: FlushEventArgs): void | Promise<void> {
+    for (const changeSet of args.uow.getChangeSets()) {
+      if (changeSet.type !== ChangeSetType.UPDATE) {
+        continue;
+      }
+
+      if (!(changeSet.entity instanceof MediaItem)) {
+        continue;
+      }
+
+      const typedChangeSet = changeSet as ChangeSet<Partial<MediaItem>>;
+
+      if (!typedChangeSet.payload.state) {
+        continue;
+      }
+
+      if (changeSet.entity.state === typedChangeSet.payload.state) {
+        continue;
+      }
+
+      const validatedState = MediaItemState.safeParse(
+        typedChangeSet.payload.state,
+      );
+
+      if (!validatedState.success) {
+        continue;
+      }
+
+      pubSub.publish("MEDIA_ITEM_STATE_CHANGED", {
+        item: changeSet.entity,
+        stateChange: [changeSet.entity.state, validatedState.data],
+      });
     }
   }
 

@@ -6,6 +6,7 @@ import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
 
 import { RequestType } from "../../../../message-queue/flows/request-content-services/request-content-services.schema.ts";
+import { pubSub } from "../../../pub-sub.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
@@ -80,6 +81,11 @@ export async function requestShowMutation(
       await validateOrReject(itemRequest);
 
       await transaction.flush();
+
+      pubSub.publish(
+        !existingItem ? "ITEM_REQUEST_CREATED" : "ITEM_REQUEST_UPDATED",
+        itemRequest,
+      );
 
       return {
         requestType: existingItem

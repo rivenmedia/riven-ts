@@ -6,6 +6,7 @@ import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
 
 import { RequestType } from "../../../../message-queue/flows/request-content-services/request-content-services.schema.ts";
+import { pubSub } from "../../../pub-sub.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
@@ -54,6 +55,8 @@ export async function requestMovieMutation(
       await transaction.flush();
 
       await transaction.refreshOrFail(itemRequest);
+
+      pubSub.publish("ITEM_REQUEST_CREATED", itemRequest);
 
       return {
         requestType: RequestType.enum.create,

@@ -1,4 +1,9 @@
-import { type Movie, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  type MediaItem,
+  type Movie,
+  Season,
+  Show,
+} from "@repo/util-plugin-sdk/dto/entities";
 import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 import chalk from "chalk";
@@ -17,6 +22,7 @@ import { findValidTorrentProcessor } from "../../message-queue/flows/download-it
 import { FindValidTorrentFlow } from "../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { rankStreamsProcessor } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.processor.ts";
 import { RankStreamsFlow } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.schema.ts";
+import { type EnqueueIndexItemInput } from "../../message-queue/flows/index-item/enqueue-index-item.ts";
 import { indexItemProcessor } from "../../message-queue/flows/index-item/index-item.processor.ts";
 import { RequestIndexDataFlow } from "../../message-queue/flows/index-item/index-item.schema.ts";
 import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
@@ -35,7 +41,11 @@ import {
   type FanOutDownloadInput,
   fanOutDownload,
 } from "./actors/fan-out-download.actor.ts";
+import { itemRequestCreatedListener } from "./actors/item-request-created.listener.ts";
+import { itemRequestUpdatedListener } from "./actors/item-request-updated.listener.ts";
 import { jobEnqueuer } from "./actors/job-enqueuer.actor.ts";
+import { mediaItemIndexedListener } from "./actors/media-item-indexed.listener.ts";
+import { mediaItemStateChangeListener } from "./actors/media-item-state-change.listener.ts";
 import { requestContentServices } from "./actors/request-content-services.actor.ts";
 import { requestDownload } from "./actors/request-download.actor.ts";
 import { requestIndexData } from "./actors/request-index-data.actor.ts";
@@ -49,7 +59,6 @@ import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscrib
 
 import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
 import type { EnqueueDownloadItemInput } from "../../message-queue/flows/download-item/enqueue-download-item.ts";
-import type { EnqueueIndexItemInput } from "../../message-queue/flows/index-item/enqueue-index-item.ts";
 import type { Flow } from "../../message-queue/flows/index.ts";
 import type { EnqueueScrapeItemInput } from "../../message-queue/flows/scrape-item/enqueue-scrape-items.ts";
 import type { SandboxedJobDefinition } from "../../message-queue/sandboxed-jobs/index.ts";
@@ -96,7 +105,14 @@ export interface MainRunnerMachineInput {
   pluginWorkers: PluginWorkerMap;
 }
 
-export type MainRunnerMachineEvent = RivenInternalEvent | RivenEvent;
+export type MainRunnerMachineEvent =
+  | RivenInternalEvent
+  | RivenEvent
+  | {
+      type: "state-change";
+      item: MediaItem;
+      stateChange: [string, string];
+    };
 
 export const mainRunnerMachine = setup({
   types: {
@@ -108,6 +124,7 @@ export const mainRunnerMachine = setup({
       requestIndexData: "requestIndexData";
       requestScrape: "requestScrape";
       fanOutDownload: "fanOutDownload";
+      itemRequestCreatedListener: "itemRequestCreatedListener";
     },
   },
   actions: {
@@ -237,6 +254,10 @@ export const mainRunnerMachine = setup({
     requestScrape,
     requestDownload,
     scheduleReindex,
+    itemRequestCreatedListener,
+    itemRequestUpdatedListener,
+    mediaItemIndexedListener,
+    mediaItemStateChangeListener,
   },
   guards: {
     /**
@@ -368,6 +389,22 @@ export const mainRunnerMachine = setup({
       Running: {
         invoke: [
           {
+            src: "itemRequestCreatedListener",
+            id: "itemRequestCreatedListener",
+          },
+          {
+            src: "itemRequestUpdatedListener",
+            id: "itemRequestUpdatedListener",
+          },
+          {
+            src: "mediaItemIndexedListener",
+            id: "mediaItemIndexedListener",
+          },
+          {
+            src: "mediaItemStateChangeListener",
+            id: "mediaItemStateChangeListener",
+          },
+          {
             id: "requestContentServicesScheduler",
             src: "createEventScheduler",
             input: {
@@ -414,17 +451,26 @@ export const mainRunnerMachine = setup({
            * Item request lifecycle events
            */
 
+          "state-change": {
+            actions: {
+              type: "log",
+              params: ({ event: { item, stateChange } }) => ({
+                message: `Media item state changed for ${item.fullTitle}: ${stateChange[0]} -> ${stateChange[1]}`,
+              }),
+            },
+          },
+
           "riven.item-request.create.success": {
             description:
               "Indicates that a media item has been successfully created in the library.",
             actions: [
-              // {
-              //   type: "log",
-              //   params: ({ event: { item } }) => ({
-              //     message: `Successfully created item request: [${item.externalIdsLabel.join(" | ")}]`,
-              //     level: "silly",
-              //   }),
-              // },
+              {
+                type: "log",
+                params: ({ event: { item } }) => ({
+                  message: `Successfully created item request: [${item.externalIdsLabel.join(" | ")}]`,
+                  level: "silly",
+                }),
+              },
               {
                 type: "requestIndexData",
                 params: ({ event: { item } }) => ({ item }),

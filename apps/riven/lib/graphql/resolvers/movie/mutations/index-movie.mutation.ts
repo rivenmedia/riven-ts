@@ -9,6 +9,7 @@ import { Field, ID, InputType, Int, ObjectType } from "type-graphql";
 import z from "zod";
 
 import { MutationResponse } from "../../../interfaces/mutation-response.interface.ts";
+import { pubSub } from "../../../pub-sub.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
@@ -90,7 +91,7 @@ export async function indexMovieMutation(
   }
 
   try {
-    return await em.transactional(async (transaction) => {
+    const movie = await em.transactional(async (transaction) => {
       const mediaItem = transaction.create(Movie, {
         title: item.title,
         imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
@@ -116,8 +117,12 @@ export async function indexMovieMutation(
 
       await transaction.flush();
 
-      return await transaction.refreshOrFail(mediaItem);
+      return mediaItem;
     });
+
+    pubSub.publish("MEDIA_ITEM_INDEXED", movie);
+
+    return movie;
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

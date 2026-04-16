@@ -4,7 +4,6 @@ import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/ite
 
 import { Arg, Ctx, Mutation, Resolver, Root, Subscription } from "type-graphql";
 
-import { pubSub } from "../../pub-sub.ts";
 import { MovieRequestInput } from "./inputs/movie-request.input.ts";
 import { ShowRequestInput } from "./inputs/show-request.input.ts";
 import { requestMovieMutation } from "./mutations/request-movie.mutation.ts";
@@ -94,8 +93,6 @@ export class ItemRequestResolver {
       const itemRequest = await requestShowMutation(em, input);
 
       if (itemRequest.requestType === "create") {
-        pubSub.publish("ITEM_REQUEST_CREATED", itemRequest.item);
-
         return {
           statusText: "created",
           success: true,
@@ -103,8 +100,6 @@ export class ItemRequestResolver {
           item: itemRequest.item,
         };
       }
-
-      pubSub.publish("ITEM_REQUEST_UPDATED", itemRequest.item);
 
       return {
         statusText: "ok",
