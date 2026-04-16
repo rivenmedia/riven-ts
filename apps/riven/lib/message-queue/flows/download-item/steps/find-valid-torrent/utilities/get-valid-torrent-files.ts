@@ -2,12 +2,12 @@ import { enqueueValidateTorrentFiles } from "../../../../../sandboxed-jobs/jobs/
 import { InvalidTorrentError } from "../../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
 import { runSingleJob } from "../../../../../utilities/run-single-job.ts";
 
-import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 import type { ParentOptions } from "bullmq";
+import type { UUID } from "node:crypto";
 
 export async function getValidTorrentFiles(
-  item: MediaItem,
+  itemId: UUID,
   infoHash: string,
   files: DebridFile[],
   isCachedFiles: boolean,
@@ -17,7 +17,7 @@ export async function getValidTorrentFiles(
     parent,
     infoHash,
     files,
-    mediaItemId: item.id,
+    mediaItemId: itemId,
     isCacheCheck: isCachedFiles,
   });
 

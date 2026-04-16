@@ -20,6 +20,7 @@ export class Stream extends Node {
   @Unique()
   infoHash!: string;
 
+  @Field(() => Object)
   @Property({ type: "json" })
   parsedData!: ParsedData;
 

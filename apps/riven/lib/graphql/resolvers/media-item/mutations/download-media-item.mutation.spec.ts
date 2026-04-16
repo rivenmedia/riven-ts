@@ -6,14 +6,15 @@ import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
 import { it } from "../../../../__tests__/test-context.ts";
-import { MatchedFile } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
-import { persistDownloadResults } from "./persist-download-results.ts";
+import { MatchedFile } from "../../../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import { downloadMediaItemMutation } from "./download-media-item.mutation.ts";
 
 it("throws an error if the media item has no streams", async ({
+  em,
   indexedMovieContext: { indexedMovie },
 }) => {
   await expect(
-    persistDownloadResults({
+    downloadMediaItemMutation(em, {
       id: indexedMovie.id,
       processedBy: "@repo/plugin-test",
       torrent: {
@@ -53,7 +54,7 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
   await em.flush();
 
   await expect(
-    persistDownloadResults({
+    downloadMediaItemMutation(em, {
       id: completedMovie.id,
       processedBy: "@repo/plugin-test",
       torrent: {
@@ -76,13 +77,14 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
 });
 
 it("sets the active stream and updates the state to completed if successful", async ({
+  em,
   scrapedMovieContext: { scrapedMovie },
 }) => {
   const [stream] = await scrapedMovie.streams.load();
 
   expect.assert(stream);
 
-  const updatedItem = await persistDownloadResults({
+  const updatedItem = await downloadMediaItemMutation(em, {
     id: scrapedMovie.id,
     processedBy: "@repo/plugin-test",
     torrent: {
@@ -107,13 +109,14 @@ it("sets the active stream and updates the state to completed if successful", as
 });
 
 it("adds a single media entry for movies", async ({
+  em,
   scrapedMovieContext: { scrapedMovie },
 }) => {
   const [stream] = await scrapedMovie.streams.load();
 
   expect.assert(stream);
 
-  await persistDownloadResults({
+  await downloadMediaItemMutation(em, {
     id: scrapedMovie.id,
     processedBy: "@repo/plugin-test",
     torrent: {
@@ -139,6 +142,7 @@ it("adds a single media entry for movies", async ({
 });
 
 it("adds one media entry per episode for shows", async ({
+  em,
   scrapedShowContext: {
     scrapedShow,
     streams: [stream],
@@ -148,7 +152,7 @@ it("adds one media entry per episode for shows", async ({
 
   expect.assert(stream);
 
-  await persistDownloadResults({
+  await downloadMediaItemMutation(em, {
     id: scrapedShow.id,
     processedBy: "@repo/plugin-test",
     torrent: {
@@ -198,7 +202,7 @@ it("does not create duplicate media entries for episodes with existing entries",
 
   await em.flush();
 
-  await persistDownloadResults({
+  await downloadMediaItemMutation(em, {
     id: scrapedShow.id,
     processedBy: "@repo/plugin-test",
     torrent: {
@@ -228,6 +232,7 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
     scrapedMovie,
     streams: [stream],
   },
+  em,
 }) => {
   expect.assert(stream);
 
@@ -237,7 +242,7 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
   ).mockRejectedValue(new Error("Validation error"));
 
   await expect(
-    persistDownloadResults({
+    downloadMediaItemMutation(em, {
       id: scrapedMovie.id,
       processedBy: "@repo/plugin-test",
       torrent: {

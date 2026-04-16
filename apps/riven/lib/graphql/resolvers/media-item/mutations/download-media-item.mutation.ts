@@ -7,19 +7,22 @@ import {
   Show,
 } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
+import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
-import { ref } from "@mikro-orm/core";
+import { type EntityManager, ref } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
 import { ValidationError, validateOrReject } from "class-validator";
+import { DateTime } from "luxon";
 import assert from "node:assert";
+import { Field, ID, InputType, ObjectType } from "type-graphql";
 import z from "zod";
 
-import { database } from "../../../../database/database.ts";
-import { logger } from "../../../../utilities/logger/logger.ts";
+import { MutationResponse } from "../../../interfaces/mutation-response.interface.ts";
+import { pubSub } from "../../../pub-sub.ts";
 
-import type { ValidTorrent } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import type { ValidTorrent } from "../../../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import type { UUID } from "node:crypto";
 
 const processableStates = MediaItemState.extract([
@@ -33,18 +36,29 @@ const processableEpisodeStates = MediaItemState.exclude([
   "downloaded",
 ]);
 
-export interface PersistDownloadResultsInput {
-  id: UUID;
-  torrent: ValidTorrent;
-  processedBy: string;
+@InputType()
+export class DownloadMediaItemMutationInput {
+  @Field(() => ID)
+  id!: UUID;
+
+  @Field(() => Object)
+  torrent!: ValidTorrent;
+
+  @Field(() => String)
+  processedBy!: string;
 }
 
-export async function persistDownloadResults({
-  id,
-  torrent,
-  processedBy,
-}: PersistDownloadResultsInput) {
-  return await database.em.fork().transactional(async (transaction) => {
+@ObjectType({ implements: MutationResponse })
+export class DownloadMediaItemMutationResponse extends MutationResponse {
+  @Field(() => MediaItemUnion, { nullable: true })
+  item!: MediaItem;
+}
+
+export async function downloadMediaItemMutation(
+  em: EntityManager,
+  { id, torrent, processedBy }: DownloadMediaItemMutationInput,
+) {
+  const result = await em.transactional(async (transaction) => {
     const existingItem = await transaction.getRepository(MediaItem).findOne(
       {
         streams: {
@@ -134,6 +148,9 @@ export async function persistDownloadResults({
           );
 
           if (!processableEpisodeStates.safeParse(episode.state).success) {
+            const { logger } =
+              await import("../../../../utilities/logger/logger.ts");
+
             logger.debug(
               `Skipping media entry creation for ${episode.fullTitle} due to "${episode.state}" state`,
             );
@@ -186,4 +203,15 @@ export async function persistDownloadResults({
       });
     }
   });
+
+  pubSub.publish("MEDIA_ITEM_DOWNLOADED", {
+    item: result,
+    downloader: processedBy,
+    provider: torrent.provider,
+    durationFromRequestToDownload: DateTime.utc()
+      .diff(DateTime.fromJSDate(result.createdAt))
+      .as("seconds"),
+  });
+
+  return result;
 }

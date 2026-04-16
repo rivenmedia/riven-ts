@@ -18,6 +18,14 @@ export const pubSub = createPubSub<{
       streamsAdded: number;
     },
   ];
+  MEDIA_ITEM_DOWNLOADED: [
+    {
+      item: MediaItem;
+      downloader: string;
+      provider: string | null;
+      durationFromRequestToDownload: number;
+    },
+  ];
   MEDIA_ITEM_STATE_CHANGED: [
     {
       item: MediaItem;

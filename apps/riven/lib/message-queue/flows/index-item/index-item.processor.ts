@@ -50,10 +50,7 @@ const INDEX_SHOW_MUTATION: TypedDocumentNode<
 `;
 
 export const indexItemProcessor =
-  requestIndexDataProcessorSchema.implementAsync(async function (
-    { job },
-    sendEvent,
-  ) {
+  requestIndexDataProcessorSchema.implementAsync(async function ({ job }) {
     const data = await job.getChildrenValues();
 
     if (!Object.values(data).filter(Boolean).length) {

@@ -1,5 +1,7 @@
-import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
+import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
+import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
 import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
@@ -13,8 +15,14 @@ import {
   Mutation,
   Query,
   Resolver,
+  Root,
 } from "type-graphql";
 
+import {
+  DownloadMediaItemMutationInput,
+  DownloadMediaItemMutationResponse,
+  downloadMediaItemMutation,
+} from "./mutations/download-media-item.mutation.ts";
 import {
   ScrapeMediaItemMutationInput,
   ScrapeMediaItemMutationResponse,
@@ -47,6 +55,25 @@ export class MediaItemResolver {
         overfetch: true,
       },
     );
+  }
+
+  @FieldResolver(() => [Stream])
+  streams(
+    @Root() mediaItem: MediaItem,
+    @Arg("infoHashes", () => [String], { nullable: true })
+    infoHashes?: string[],
+  ) {
+    return mediaItem.streams.loadItems({
+      where: {
+        ...(infoHashes
+          ? {
+              infoHash: {
+                $in: infoHashes,
+              },
+            }
+          : {}),
+      },
+    });
   }
 
   @FieldResolver(() => Int)
@@ -104,6 +131,44 @@ export class MediaItemResolver {
           item: error.payload.item,
           newStreamsCount: null,
           errorCode: "scrape_error",
+        };
+      }
+
+      throw error;
+    }
+  }
+
+  @Mutation(() => DownloadMediaItemMutationResponse)
+  async downloadMediaItem(
+    @Ctx() { em }: ApolloServerContext,
+    @Arg("input", () => DownloadMediaItemMutationInput)
+    input: DownloadMediaItemMutationInput,
+  ): Promise<DownloadMediaItemMutationResponse> {
+    try {
+      const result = await downloadMediaItemMutation(em, input);
+
+      return {
+        item: result,
+        message: "Media item download results processed successfully",
+        statusText: "ok",
+        success: true,
+      };
+    } catch (error) {
+      if (error instanceof MediaItemDownloadErrorIncorrectState) {
+        return {
+          item: error.payload.item,
+          message: error.message,
+          statusText: "bad_request",
+          success: false,
+        };
+      }
+
+      if (error instanceof MediaItemDownloadError) {
+        return {
+          item: error.payload.item,
+          message: error.message,
+          statusText: "internal_server_error",
+          success: false,
         };
       }
 

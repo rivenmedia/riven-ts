@@ -1,8 +1,9 @@
+import { type TypedDocumentNode, gql } from "@apollo/client";
 import { type ParentOptions, UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 import assert from "node:assert";
 
-import { database } from "../../../../../database/database.ts";
+import { client } from "../../../../../graphql/apollo-client.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
 import { InvalidTorrentError } from "../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
 import { findValidTorrentProcessorSchema } from "./find-valid-torrent.schema.ts";
@@ -10,6 +11,26 @@ import { getCachedTorrentFiles } from "./utilities/get-cached-torrent-files.ts";
 import { getPluginDownloadResult } from "./utilities/get-plugin-download-result.ts";
 import { getPluginProviderList } from "./utilities/get-plugin-provider-list.ts";
 import { getValidTorrentFiles } from "./utilities/get-valid-torrent-files.ts";
+
+import type {
+  FindValidTorrentProcessorGetMediaItemQuery,
+  FindValidTorrentProcessorGetMediaItemQueryVariables,
+} from "./find-valid-torrent.processor.typegen.ts";
+
+const FIND_VALID_TORRENT_PROCESSOR_GET_MEDIA_ITEM_QUERY: TypedDocumentNode<
+  FindValidTorrentProcessorGetMediaItemQuery,
+  FindValidTorrentProcessorGetMediaItemQueryVariables
+> = gql`
+  query FindValidTorrentProcessorGetMediaItem($id: ID!) {
+    mediaItemById(id: $id) {
+      ... on MediaItem {
+        id
+        fullTitle
+        type
+      }
+    }
+  }
+`;
 
 export const findValidTorrentProcessor =
   findValidTorrentProcessorSchema.implementAsync(async function ({
@@ -31,7 +52,20 @@ export const findValidTorrentProcessor =
 
     assert(jobId);
 
-    const mediaItem = await database.mediaItem.findOneOrFail(mediaItemId);
+    const { data } = await client.query({
+      query: FIND_VALID_TORRENT_PROCESSOR_GET_MEDIA_ITEM_QUERY,
+      variables: {
+        id: mediaItemId,
+      },
+    });
+
+    if (!data?.mediaItemById) {
+      throw new Error(
+        "Failed to fetch media item info for find valid torrent processor",
+      );
+    }
+
+    const mediaItem = data.mediaItemById;
 
     const infoHashes = rankedStreams.map((stream) => stream.hash);
     const uncheckedInfoHashes = new Set(infoHashes)
@@ -94,7 +128,7 @@ export const findValidTorrentProcessor =
                 );
 
                 await getValidTorrentFiles(
-                  mediaItem,
+                  mediaItem.id,
                   infoHash,
                   cachedFiles,
                   true,
@@ -110,7 +144,7 @@ export const findValidTorrentProcessor =
               );
 
               const validatedFiles = await getValidTorrentFiles(
-                mediaItem,
+                mediaItem.id,
                 infoHash,
                 pluginDownloadResult.files,
                 false,
