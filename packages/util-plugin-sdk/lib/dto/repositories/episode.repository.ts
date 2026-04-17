@@ -1,8 +1,9 @@
-import { EntityRepository, type FilterQuery } from "@mikro-orm/core";
+import { MediaItemRepository } from "./media-item.repository.ts";
 
 import type { Episode } from "../entities/index.ts";
+import type { FilterQuery } from "@mikro-orm/core";
 
-export class EpisodeRepository extends EntityRepository<Episode> {
+export class EpisodeRepository extends MediaItemRepository<Episode> {
   async findAbsoluteEpisode(
     tvdbId: string,
     episodeNumber: number,

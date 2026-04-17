@@ -1,4 +1,9 @@
-import { Collection, type Opt, type Ref } from "@mikro-orm/core";
+import {
+  Collection,
+  EntityRepositoryType,
+  type Opt,
+  type Ref,
+} from "@mikro-orm/core";
 import {
   Entity,
   Enum,
@@ -11,24 +16,26 @@ import {
   ShowContentRating,
   ShowContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
+import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { ShowStatus } from "../../enums/show-status.enum.ts";
+import { ShowRepository } from "../../repositories/show.repsository.js";
 import { MediaEntry } from "../filesystem/index.ts";
 import { Season, ShowLikeMediaItem } from "./index.ts";
 
-import type { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import type { ItemRequest } from "../requests/item-request.entity.ts";
 
 @ObjectType({ implements: ShowLikeMediaItem })
-@Entity()
+@Entity({ repository: () => ShowRepository })
 export class Show extends ShowLikeMediaItem {
+  [EntityRepositoryType]?: ShowRepository;
+
   @Field(() => ShowContentRatingEnum)
   declare contentRating: ShowContentRating;
 
   override type: Opt<"show"> = "show" as const;
 
-  declare tvdbId: string;
-  declare tmdbId?: never;
   declare itemRequest: Ref<ItemRequest>;
+
   declare filesystemEntries: never;
 
   @Field(() => ShowStatus.enum, { nullable: true })
@@ -114,6 +121,22 @@ export class Show extends ShowLikeMediaItem {
         episode.filesystemEntries.filter(
           (entry) => entry.type === "media",
         ) as MediaEntry[],
+    );
+  }
+
+  async getExpectedFileCount(): Promise<number> {
+    const { reduceAsync } = await import("es-toolkit");
+
+    const processableStates = MediaItemState.exclude(["unreleased", "ongoing"]);
+
+    const seasons = await this.getStandardSeasons(processableStates.options);
+    const expectedSeasons =
+      this.status === "continuing" ? seasons.length - 1 : seasons.length;
+
+    return reduceAsync(
+      seasons.slice(0, Math.max(1, expectedSeasons)),
+      async (acc, season) => acc + (await season.episodes.loadCount()),
+      0,
     );
   }
 }

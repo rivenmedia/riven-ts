@@ -1,10 +1,11 @@
 import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
+import { database } from "../../../database/database.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 
-import type { EntityManager } from "@mikro-orm/core";
+export async function getVfsEntry(path: string) {
+  const em = database.em.getContext();
 
-export async function getVfsEntry(em: EntityManager, path: string) {
   const pathInfo = PathInfo.parse(path);
 
   if (pathInfo.tmdbId) {

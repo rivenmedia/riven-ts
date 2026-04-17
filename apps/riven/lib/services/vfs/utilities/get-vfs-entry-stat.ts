@@ -1,4 +1,5 @@
 import {
+  Episode,
   MediaEntry,
   Movie,
   Season,
@@ -9,14 +10,15 @@ import Fuse from "@zkochan/fuse-native";
 import { GraphQLError } from "graphql";
 import { DateTime } from "luxon";
 
+import { database } from "../../../database/database.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 import { getEntry } from "./get-vfs-path-entry.ts";
 import { stat } from "./stat.ts";
 
-import type { EntityManager } from "@mikro-orm/core";
+export async function getVfsEntryStat(path: string) {
+  const em = database.em.getContext();
 
-export async function getVfsEntryStat(em: EntityManager, path: string) {
   switch (path) {
     case "/": {
       const oldestMediaEntryQuery = em.findOne(
@@ -212,7 +214,7 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
     });
   }
 
-  const entry = await getEntry(em, pathInfo.data);
+  const entry = await getEntry(pathInfo.data);
 
   if (!entry) {
     throw new GraphQLError("Entry not found", {
@@ -243,7 +245,7 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
       ctime: entry.createdAt,
       atime: entry.updatedAt ?? entry.createdAt,
       mtime: entry.updatedAt ?? entry.createdAt,
-      ...(pathInfo.data.isFile
+      ...(entry instanceof Movie || entry instanceof Episode
         ? {
             size: entry.filesystemEntries[0]?.fileSize ?? 0,
             mode: "file",

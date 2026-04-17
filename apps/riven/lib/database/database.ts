@@ -1,3 +1,5 @@
+import { VfsService } from "../services/vfs/vfs.service.js";
+
 import type {
   EntityManager,
   EntityRepository,
@@ -30,6 +32,7 @@ export interface Services {
   mediaEntry: EntityRepository<MediaEntry>;
   subtitleEntry: EntityRepository<SubtitleEntry>;
   stream: EntityRepository<Stream>;
+  vfs: VfsService;
 }
 
 export let database: Services;
@@ -70,5 +73,6 @@ export async function initORM(options: Partial<Options>): Promise<Services> {
     mediaEntry: orm.em.fork().getRepository(MediaEntry),
     subtitleEntry: orm.em.fork().getRepository(SubtitleEntry),
     stream: orm.em.fork().getRepository(Stream),
+    vfs: new VfsService(orm.em.fork()),
   });
 }

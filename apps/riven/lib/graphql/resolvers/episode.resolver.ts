@@ -12,7 +12,7 @@ import {
 
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 
-@Resolver((_of) => Episode)
+@Resolver(() => Episode)
 export class EpisodeResolver {
   @Query(() => Episode, {
     description:

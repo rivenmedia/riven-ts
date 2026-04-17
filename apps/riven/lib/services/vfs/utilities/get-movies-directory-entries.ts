@@ -2,12 +2,13 @@ import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import { reduceAsync } from "es-toolkit";
 
-import type { EntityManager } from "@mikro-orm/core";
+import { database } from "../../../database/database.ts";
 
 export const getMoviesDirectoryEntries = async (
-  em: EntityManager,
   tmdbId: string | undefined,
 ): Promise<string[]> => {
+  const em = database.em.getContext();
+
   const entries = await em.find(
     MediaEntry,
     {

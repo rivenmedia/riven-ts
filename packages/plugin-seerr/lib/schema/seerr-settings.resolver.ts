@@ -4,9 +4,9 @@ import { FieldResolver, Resolver } from "type-graphql";
 
 import { SeerrSettings } from "./types/seerr-settings.type.ts";
 
-@Resolver((_of) => Settings)
+@Resolver(() => Settings)
 export class SeerrSettingsResolver {
-  @FieldResolver((_returns) => SeerrSettings)
+  @FieldResolver(() => SeerrSettings)
   seerr(): SeerrSettings {
     return {
       apiKey: "seerr-api-key",

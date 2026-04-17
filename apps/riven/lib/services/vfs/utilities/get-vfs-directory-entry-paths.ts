@@ -3,12 +3,7 @@ import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 import { getMoviesDirectoryEntries } from "./get-movies-directory-entries.ts";
 import { getShowsDirectoryEntries } from "./get-shows-directory-entries.ts";
 
-import type { EntityManager } from "@mikro-orm/core";
-
-export async function getVfsDirectoryEntryPaths(
-  em: EntityManager,
-  path: string,
-) {
+export async function getVfsDirectoryEntryPaths(path: string) {
   if (path === "/") {
     return PersistentDirectory.options;
   }
@@ -18,11 +13,11 @@ export async function getVfsDirectoryEntryPaths(
   switch (pathInfo.pathType) {
     case "all-movies":
     case "single-movie":
-      return getMoviesDirectoryEntries(em, pathInfo.tmdbId);
+      return getMoviesDirectoryEntries(pathInfo.tmdbId);
     case "all-shows":
     case "show-seasons":
     case "season-episodes":
-      return getShowsDirectoryEntries(em, pathInfo.tvdbId, pathInfo.season);
+      return getShowsDirectoryEntries(pathInfo.tvdbId, pathInfo.season);
     case "single-episode":
       return [pathInfo.base];
   }

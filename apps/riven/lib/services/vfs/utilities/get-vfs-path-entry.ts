@@ -5,10 +5,13 @@ import {
   Show,
 } from "@repo/util-plugin-sdk/dto/entities";
 
-import type { PathInfo } from "../schemas/path-info.schema.ts";
-import type { EntityManager } from "@mikro-orm/core";
+import { database } from "../../../database/database.ts";
 
-export function getEntry(em: EntityManager, pathInfo: PathInfo) {
+import type { PathInfo } from "../schemas/path-info.schema.ts";
+
+export function getEntry(pathInfo: PathInfo) {
+  const em = database.em.getContext();
+
   switch (pathInfo.pathType) {
     case "single-movie": {
       if (!pathInfo.tmdbId) {

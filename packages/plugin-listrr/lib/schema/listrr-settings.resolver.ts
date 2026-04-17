@@ -4,9 +4,9 @@ import { FieldResolver, Resolver } from "type-graphql";
 
 import { ListrrSettings } from "./types/listrr-settings.type.ts";
 
-@Resolver((_of) => Settings)
+@Resolver(() => Settings)
 export class ListrrSettingsResolver {
-  @FieldResolver((_returns) => ListrrSettings)
+  @FieldResolver(() => ListrrSettings)
   listrr(): ListrrSettings {
     return {
       apiKey: "listrr-api-key",

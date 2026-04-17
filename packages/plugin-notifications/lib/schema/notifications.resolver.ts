@@ -2,7 +2,7 @@ import { Query, Resolver } from "type-graphql";
 
 @Resolver()
 export class NotificationsResolver {
-  @Query((_returns) => Boolean)
+  @Query(() => Boolean)
   notificationsIsConfigured(): boolean {
     return true;
   }
