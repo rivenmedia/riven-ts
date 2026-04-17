@@ -7,10 +7,10 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities";
 
 import Fuse from "@zkochan/fuse-native";
-import { GraphQLError } from "graphql";
 import { DateTime } from "luxon";
 
 import { database } from "../../../database/database.ts";
+import { FuseError } from "../../../vfs/errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 import { getEntry } from "./get-vfs-path-entry.ts";
@@ -207,21 +207,13 @@ export async function getVfsEntryStat(path: string) {
   const pathInfo = PathInfo.safeParse(path);
 
   if (!pathInfo.success) {
-    throw new GraphQLError("Invalid path", {
-      extensions: {
-        fuseErrorCode: Fuse.ENOENT,
-      },
-    });
+    throw new FuseError(Fuse.ENOENT, "Invalid path");
   }
 
   const entry = await getEntry(pathInfo.data);
 
   if (!entry) {
-    throw new GraphQLError("Entry not found", {
-      extensions: {
-        fuseErrorCode: Fuse.ENOENT,
-      },
-    });
+    throw new FuseError(Fuse.ENOENT, "Entry not found");
   }
 
   const subDirectoryCount =

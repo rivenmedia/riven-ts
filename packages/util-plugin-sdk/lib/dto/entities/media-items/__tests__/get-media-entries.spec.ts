@@ -39,6 +39,7 @@ test("getMediaEntries() returns the associated media entry for a Movie media ite
 test("getMediaEntries() returns the associated media entries for a Show media item", async ({
   em,
 }) => {
+  const tvdbId = "1";
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
     state: "completed",
@@ -50,7 +51,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     fullTitle: "Test Show",
     contentRating: "tv-14",
     status: "ended",
-    tvdbId: "1",
+    tvdbId,
     itemRequest,
     isRequested: true,
   });
@@ -64,6 +65,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     isSpecial: false,
     isRequested: true,
     itemRequest,
+    tvdbId,
   });
 
   show.seasons.add(season);
@@ -78,6 +80,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     contentRating: "tv-14",
     isRequested: true,
     itemRequest,
+    tvdbId,
   });
 
   const episode2 = em.create(Episode, {
@@ -88,6 +91,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     contentRating: "tv-14",
     isRequested: true,
     itemRequest,
+    tvdbId,
   });
 
   const mediaEntry1 = em.create(MediaEntry, {
@@ -117,6 +121,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
 test("getMediaEntries() returns the associated media entries for a Season media item", async ({
   em,
 }) => {
+  const tvdbId = "1";
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
     state: "completed",
@@ -128,7 +133,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     fullTitle: "Test Show",
     contentRating: "tv-14",
     status: "ended",
-    tvdbId: "1",
+    tvdbId,
     itemRequest,
     isRequested: true,
   });
@@ -142,15 +147,17 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     isSpecial: false,
     isRequested: true,
     itemRequest,
+    tvdbId,
   });
 
   const season2 = em.create(Season, {
     title: "Season 2",
     fullTitle: "Test Show - S02",
-    number: 1,
+    number: 2,
     isSpecial: false,
     isRequested: true,
     itemRequest,
+    tvdbId,
   });
 
   show.seasons.add(season1, season2);
@@ -165,6 +172,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     contentRating: "tv-14",
     isRequested: true,
     itemRequest,
+    tvdbId,
   });
 
   const season2Episode1 = em.create(Episode, {
@@ -175,6 +183,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     contentRating: "tv-14",
     isRequested: true,
     itemRequest,
+    tvdbId,
   });
 
   const season1Episode1MediaEntry = em.create(MediaEntry, {
@@ -206,6 +215,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
 test("getMediaEntries() returns the associated media entry for an Episode media item", async ({
   em,
 }) => {
+  const tvdbId = "1";
   const itemRequest = em.create(ItemRequest, {
     requestedBy: "@repo/plugin-test",
     state: "completed",
@@ -217,7 +227,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     fullTitle: "Test Show",
     contentRating: "tv-14",
     status: "ended",
-    tvdbId: "1",
+    tvdbId,
     itemRequest,
     isRequested: true,
   });
@@ -231,6 +241,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     isSpecial: false,
     isRequested: true,
     itemRequest,
+    tvdbId,
   });
 
   show.seasons.add(season);
@@ -245,6 +256,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     contentRating: "tv-14",
     isRequested: true,
     itemRequest,
+    tvdbId,
   });
 
   const mediaEntry = em.create(MediaEntry, {
