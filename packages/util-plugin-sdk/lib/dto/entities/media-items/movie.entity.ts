@@ -7,7 +7,7 @@ import {
   MovieContentRating,
   MovieContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
-import { MovieRepository } from "../../repositories/movie.repository.js";
+import { MovieRepository } from "../../repositories/movie.repository.ts";
 import { MediaEntry } from "../filesystem/index.ts";
 import { MediaItem } from "./index.ts";
 

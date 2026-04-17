@@ -1,4 +1,4 @@
-import { VfsService } from "../services/vfs/vfs.service.js";
+import { VfsService } from "../services/vfs/vfs.service.ts";
 
 import type {
   EntityManager,

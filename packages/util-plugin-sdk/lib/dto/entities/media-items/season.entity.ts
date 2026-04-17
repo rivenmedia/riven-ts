@@ -13,7 +13,7 @@ import {
 import { Min } from "class-validator";
 import { Field, Int, ObjectType } from "type-graphql";
 
-import { SeasonRepository } from "../../repositories/season.repository.js";
+import { SeasonRepository } from "../../repositories/season.repository.ts";
 import { MediaEntry } from "../filesystem/index.ts";
 import { Episode, Show, ShowLikeMediaItem } from "./index.ts";
 
