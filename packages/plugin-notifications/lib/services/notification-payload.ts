@@ -1,3 +1,5 @@
+import { Movie, ShowLikeMediaItem } from "@repo/util-plugin-sdk/dto/entities";
+
 import { DateTime } from "luxon";
 
 import { NotificationPayload } from "../schemas/notification-payload.schema.ts";
@@ -17,8 +19,8 @@ export function buildNotificationPayload(
     type: item.type,
     year: item.year ?? null,
     imdbId: item.imdbId ?? null,
-    tmdbId: item.tmdbId ?? null,
-    tvdbId: item.tvdbId ?? null,
+    ...(item instanceof ShowLikeMediaItem ? { tvdbId: item.tvdbId } : {}),
+    ...(item instanceof Movie ? { tmdbId: item.tmdbId } : {}),
     posterPath: item.posterPath ?? null,
     downloader: event.downloader,
     provider: event.provider,
