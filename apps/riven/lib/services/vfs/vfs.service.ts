@@ -2,7 +2,6 @@ import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import { EnsureRequestContext } from "@mikro-orm/decorators/legacy";
 
-import { database } from "../../database/database.ts";
 import { BaseService } from "../base-service.ts";
 import { getVfsDirectoryEntryPaths } from "./utilities/get-vfs-directory-entry-paths.ts";
 import { getVfsEntryStat } from "./utilities/get-vfs-entry-stat.ts";
@@ -13,22 +12,22 @@ import type { UUID } from "node:crypto";
 export class VfsService extends BaseService {
   @EnsureRequestContext()
   async getEntry(path: string) {
-    return getVfsEntry(path);
+    return getVfsEntry(this.em.getContext(), path);
   }
 
   @EnsureRequestContext()
   async getEntryStat(path: string) {
-    return getVfsEntryStat(path);
+    return getVfsEntryStat(this.em.getContext(), path);
   }
 
   @EnsureRequestContext()
   async getDirectoryEntryPaths(path: string) {
-    return getVfsDirectoryEntryPaths(path);
+    return getVfsDirectoryEntryPaths(this.em.getContext(), path);
   }
 
   @EnsureRequestContext()
   async saveStreamUrl(entryId: UUID, streamUrl: string) {
-    return database.em
+    return this.em
       .getContext()
       .getRepository(MediaEntry)
       .saveStreamUrl(entryId, streamUrl);

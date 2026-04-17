@@ -9,16 +9,15 @@ import {
 import Fuse from "@zkochan/fuse-native";
 import { DateTime } from "luxon";
 
-import { database } from "../../../database/database.ts";
 import { FuseError } from "../../../vfs/errors/fuse-error.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
 import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 import { getEntry } from "./get-vfs-path-entry.ts";
 import { stat } from "./stat.ts";
 
-export async function getVfsEntryStat(path: string) {
-  const em = database.em.getContext();
+import type { EntityManager } from "@mikro-orm/core";
 
+export async function getVfsEntryStat(em: EntityManager, path: string) {
   switch (path) {
     case "/": {
       const oldestMediaEntryQuery = em.findOne(
@@ -210,7 +209,7 @@ export async function getVfsEntryStat(path: string) {
     throw new FuseError(Fuse.ENOENT, "Invalid path");
   }
 
-  const entry = await getEntry(pathInfo.data);
+  const entry = await getEntry(em, pathInfo.data);
 
   if (!entry) {
     throw new FuseError(Fuse.ENOENT, "Entry not found");

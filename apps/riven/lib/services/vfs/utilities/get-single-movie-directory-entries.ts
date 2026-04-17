@@ -2,12 +2,13 @@ import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import Fuse from "@zkochan/fuse-native";
 
-import { database } from "../../../database/database.ts";
 import { FuseError } from "../../../vfs/errors/fuse-error.ts";
 
 import type { PathInfo } from "../schemas/path-info.schema.ts";
+import type { EntityManager } from "@mikro-orm/core";
 
 export const getSingleMovieDirectoryEntries = async (
+  em: EntityManager,
   pathInfo: PathInfo,
 ): Promise<string[]> => {
   if (!pathInfo.tmdbId) {
@@ -16,8 +17,6 @@ export const getSingleMovieDirectoryEntries = async (
       "TMDB ID is required for single movie directory",
     );
   }
-
-  const em = database.em.getContext();
 
   const entry = await em.findOneOrFail(
     Movie,
