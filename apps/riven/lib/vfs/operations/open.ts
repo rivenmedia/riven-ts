@@ -1,6 +1,5 @@
-import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
-
 import Fuse from "@zkochan/fuse-native";
+import { DateTime } from "luxon";
 import { basename } from "node:path";
 import { setTimeout } from "node:timers/promises";
 
@@ -28,12 +27,24 @@ import type { Queue } from "bullmq";
 
 let fd = 0;
 
-async function waitForStreamUrl(entry: MediaEntry) {
-  while (!entry.streamUrl) {
+async function waitForStreamUrl(path: string) {
+  const timeout = 10_000;
+  const startTime = DateTime.now().toMillis();
+
+  while (DateTime.now().toMillis() - startTime < timeout) {
+    const refreshed = await database.vfs.getEntry(path);
+
+    if (refreshed?.streamUrl) {
+      return refreshed.streamUrl;
+    }
+
     await setTimeout(100);
   }
 
-  return entry.streamUrl;
+  throw new FuseError(
+    Fuse.ETIMEDOUT,
+    `Timed out waiting for stream URL for path ${path}`,
+  );
 }
 
 async function open(
@@ -99,7 +110,7 @@ async function open(
     }
   }
 
-  const streamUrl = entry.streamUrl ?? (await waitForStreamUrl(entry));
+  const streamUrl = entry.streamUrl ?? (await waitForStreamUrl(path));
 
   if (!streamUrl) {
     throw new FuseError(
