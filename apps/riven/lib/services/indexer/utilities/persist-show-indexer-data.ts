@@ -42,30 +42,30 @@ export async function persistShowIndexerData(
     }),
   );
 
+  const existingShow = await em.getRepository(Show).findOne(
+    {
+      itemRequest: { id: itemRequest.id },
+    },
+    { populate: ["$infer"] },
+  );
+
+  if (existingShow?.status === "ended") {
+    throw new MediaItemIndexError({
+      item: itemRequest,
+      error: `${existingShow.fullTitle} has already ended and will not be re-indexed.`,
+    });
+  }
+
+  const { tvdbId } = itemRequest;
+
+  if (!tvdbId) {
+    throw new MediaItemIndexError({
+      item: itemRequest,
+      error: "Item request is missing tvdbId",
+    });
+  }
+
   try {
-    const existingShow = await em.getRepository(Show).findOne(
-      {
-        itemRequest: { id: itemRequest.id },
-      },
-      { populate: ["$infer"] },
-    );
-
-    if (existingShow?.status === "ended") {
-      throw new MediaItemIndexError({
-        item: itemRequest,
-        error: `${existingShow.fullTitle} has already ended and will not be re-indexed.`,
-      });
-    }
-
-    const { tvdbId } = itemRequest;
-
-    if (!tvdbId) {
-      throw new MediaItemIndexError({
-        item: itemRequest,
-        error: "Item request is missing tvdbId",
-      });
-    }
-
     const firstEpisodeAirDate = item.seasons[1]?.episodes[0]?.airedAt;
     const firstAired = firstEpisodeAirDate
       ? DateTime.fromISO(firstEpisodeAirDate)
