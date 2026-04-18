@@ -11,13 +11,17 @@ import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 it("throws an unrecoverable error if the item cannot be scraped", async ({
   createMockJob,
   mockSentryScope,
+  services,
 }) => {
   const job = await createMockJob({ id: randomUUID() });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
   await expect(() =>
-    scrapeItemProcessor({ job, scope: mockSentryScope }, vi.fn()),
+    scrapeItemProcessor(
+      { job, scope: mockSentryScope },
+      { sendEvent: vi.fn(), services },
+    ),
   ).rejects.toThrow();
 });
 
@@ -27,6 +31,7 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
   seeders: { seedIndexedMovie },
   createMockJob,
   mockSentryScope,
+  services,
 }) => {
   const indexedMovie = await seedIndexedMovie();
 
@@ -50,7 +55,7 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
       job,
       scope: mockSentryScope,
     },
-    sendEvent,
+    { sendEvent, services },
   );
 
   expect(sendEvent).toHaveBeenCalledWith({

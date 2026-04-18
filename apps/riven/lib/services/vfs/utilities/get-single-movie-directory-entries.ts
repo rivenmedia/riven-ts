@@ -2,7 +2,7 @@ import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import Fuse from "@zkochan/fuse-native";
 
-import { FuseError } from "../../../../vfs/errors/fuse-error.ts";
+import { FuseError } from "../../../vfs/errors/fuse-error.ts";
 
 import type { PathInfo } from "../schemas/path-info.schema.ts";
 import type { EntityManager } from "@mikro-orm/core";

@@ -63,7 +63,7 @@ async function getMediaItemPathParts(mediaItem: MediaItem) {
   discriminatorColumn: "type",
 })
 export abstract class FileSystemEntry {
-  @Field((_type) => ID)
+  @Field(() => ID)
   @PrimaryKey({ type: "uuid" })
   id = randomUUID();
 

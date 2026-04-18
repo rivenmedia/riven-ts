@@ -5,10 +5,6 @@ import { expect, vi } from "vitest";
 import { it } from "../../__tests__/test-context.ts";
 import { readDirSync } from "./readdir.ts";
 
-it.beforeAll(({ gqlServer: _gqlServer }) => {
-  return;
-});
-
 it("returns persistent directory entries for the root path", async () => {
   const callback = vi.fn();
 

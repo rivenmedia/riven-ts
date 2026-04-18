@@ -205,6 +205,9 @@ importers:
       '@mikro-orm/core':
         specifier: 'catalog:'
         version: 7.0.5(dataloader@2.2.3)
+      '@mikro-orm/decorators':
+        specifier: 'catalog:'
+        version: 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))(reflect-metadata@0.2.2)
       '@mikro-orm/postgresql':
         specifier: 'catalog:'
         version: 7.0.5(@mikro-orm/core@7.0.5(dataloader@2.2.3))

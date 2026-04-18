@@ -40,6 +40,7 @@
     "@elastic/ecs-winston-format": "^1.5.3",
     "@keyv/redis": "^5.1.5",
     "@mikro-orm/core": "catalog:",
+    "@mikro-orm/decorators": "catalog:",
     "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",
     "@repo/core-util-graphql-schema": "workspace:^",

@@ -1,3 +1,9 @@
+import { DownloaderService } from "../services/downloader/downloader.service.ts";
+import { IndexerService } from "../services/indexer/indexer.service.ts";
+import { ItemRequestService } from "../services/item-request/item-request.service.ts";
+import { ScraperService } from "../services/scraper/scraper.service.ts";
+import { VfsService } from "../services/vfs/vfs.service.ts";
+
 import type {
   EntityManager,
   EntityRepository,
@@ -30,6 +36,13 @@ export interface Services {
   mediaEntry: EntityRepository<MediaEntry>;
   subtitleEntry: EntityRepository<SubtitleEntry>;
   stream: EntityRepository<Stream>;
+  services: {
+    downloaderService: DownloaderService;
+    indexerService: IndexerService;
+    itemRequestService: ItemRequestService;
+    scraperService: ScraperService;
+    vfsService: VfsService;
+  };
 }
 
 export let database: Services;
@@ -70,5 +83,12 @@ export async function initORM(options: Partial<Options>): Promise<Services> {
     mediaEntry: orm.em.fork().getRepository(MediaEntry),
     subtitleEntry: orm.em.fork().getRepository(SubtitleEntry),
     stream: orm.em.fork().getRepository(Stream),
+    services: {
+      downloaderService: new DownloaderService(orm),
+      indexerService: new IndexerService(orm),
+      itemRequestService: new ItemRequestService(orm),
+      scraperService: new ScraperService(orm),
+      vfsService: new VfsService(orm),
+    },
   });
 }

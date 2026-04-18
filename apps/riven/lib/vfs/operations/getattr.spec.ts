@@ -5,10 +5,6 @@ import { expect, vi } from "vitest";
 import { it } from "../../__tests__/test-context.ts";
 import { getattrSync } from "./getattr.ts";
 
-it.beforeAll(({ gqlServer: _gqlServer }) => {
-  return;
-});
-
 const dirMode = fs.constants.S_IFDIR | 0o755;
 const fileMode = fs.constants.S_IFREG | 0o644;
 

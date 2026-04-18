@@ -1,19 +1,21 @@
+import { EntityRepositoryType, type Opt } from "@mikro-orm/core";
 import { Entity, Property } from "@mikro-orm/decorators/legacy";
+import { IsNumberString } from "class-validator";
 import { Field, Int, ObjectType } from "type-graphql";
 
 import {
   MovieContentRating,
   MovieContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
+import { MovieRepository } from "../../repositories/movie.repository.ts";
 import { MediaEntry } from "../filesystem/index.ts";
 import { MediaItem } from "./index.ts";
 
-import type { ItemRequest } from "../requests/item-request.entity.ts";
-import type { Opt, Ref } from "@mikro-orm/core";
-
 @ObjectType({ implements: MediaItem })
-@Entity()
+@Entity({ repository: () => MovieRepository })
 export class Movie extends MediaItem {
+  [EntityRepositoryType]?: MovieRepository;
+
   @Field(() => Int, { nullable: true })
   @Property()
   runtime!: number | null;
@@ -24,10 +26,9 @@ export class Movie extends MediaItem {
   override type: Opt<"movie"> = "movie" as const;
 
   @Field(() => String)
-  declare tmdbId: string;
-
-  declare tvdbId: never;
-  declare itemRequest: Ref<ItemRequest>;
+  @Property()
+  @IsNumberString()
+  tmdbId!: string;
 
   getMediaEntries() {
     return this.filesystemEntries.matching<MediaEntry>({
@@ -39,5 +40,9 @@ export class Movie extends MediaItem {
 
   getPrettyName(): string {
     return `${this.title} (${this.year?.toString() ?? "Unknown"}) {tmdb-${this.tmdbId}}`;
+  }
+
+  getExpectedFileCount(): number {
+    return 1;
   }
 }

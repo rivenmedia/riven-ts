@@ -4,9 +4,9 @@ import { FieldResolver, Resolver } from "type-graphql";
 
 import { MdblistSettings } from "./types/mdblist-settings.type.ts";
 
-@Resolver((_of) => Settings)
+@Resolver(() => Settings)
 export class MdblistSettingsResolver {
-  @FieldResolver((_returns) => MdblistSettings)
+  @FieldResolver(() => MdblistSettings)
   mdblist(): MdblistSettings {
     return {
       apiKey: "mdblist-api-key",

@@ -4,9 +4,9 @@ import { FieldResolver, Resolver } from "type-graphql";
 
 import { NotificationsSettings } from "./types/notifications-settings.type.ts";
 
-@Resolver((_of) => Settings)
+@Resolver(() => Settings)
 export class NotificationsSettingsResolver {
-  @FieldResolver((_returns) => NotificationsSettings)
+  @FieldResolver(() => NotificationsSettings)
   notifications(): NotificationsSettings {
     return {
       urls: [],

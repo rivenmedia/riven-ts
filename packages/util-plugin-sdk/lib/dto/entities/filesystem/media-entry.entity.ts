@@ -1,17 +1,20 @@
+import { EntityRepositoryType, type Opt } from "@mikro-orm/core";
 import { Entity, Index, Property } from "@mikro-orm/decorators/legacy";
 import { IsOptional, IsUrl } from "class-validator";
 import path from "node:path";
 import { Field, ObjectType } from "type-graphql";
 
+import { MediaEntryRepository } from "../../repositories/media-entry.repository.ts";
 import { FileSystemEntry } from "./filesystem-entry.entity.ts";
-
-import type { Opt } from "@mikro-orm/core";
 
 @ObjectType()
 @Entity({
   discriminatorValue: "media",
+  repository: () => MediaEntryRepository,
 })
 export class MediaEntry extends FileSystemEntry {
+  [EntityRepositoryType]?: MediaEntryRepository;
+
   override type: Opt<"media"> = "media" as const;
 
   @Field(() => String)
@@ -54,7 +57,7 @@ export class MediaEntry extends FileSystemEntry {
   @Property({ type: "json" })
   libraryProfiles?: string[];
 
-  @Field(() => String, { nullable: true })
+  @Field(() => Object, { nullable: true })
   @Property({ type: "json" })
   mediaMetadata?: object;
 

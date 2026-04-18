@@ -4,9 +4,9 @@ import { FieldResolver, Resolver } from "type-graphql";
 
 import { CometSettings } from "./types/comet-settings.type.ts";
 
-@Resolver((_of) => Settings)
+@Resolver(() => Settings)
 export class CometSettingsResolver {
-  @FieldResolver((_returns) => CometSettings)
+  @FieldResolver(() => CometSettings)
   comet(): CometSettings {
     return {
       apiKey: "comet-api-key",

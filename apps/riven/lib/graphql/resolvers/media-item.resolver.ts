@@ -14,7 +14,7 @@ import {
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 import type { UUID } from "node:crypto";
 
-@Resolver((_of) => MediaItem)
+@Resolver(() => MediaItem)
 export class MediaItemResolver {
   @Query(() => MediaItemUnion, {
     description:

@@ -1,4 +1,5 @@
-import { Entity } from "@mikro-orm/decorators/legacy";
+import { Entity, Property } from "@mikro-orm/decorators/legacy";
+import { IsNumberString } from "class-validator";
 import { Field, InterfaceType } from "type-graphql";
 
 import {
@@ -17,9 +18,9 @@ import type { Promisable } from "type-fest";
 })
 export abstract class ShowLikeMediaItem extends MediaItem {
   @Field(() => String)
-  declare tvdbId: string;
-
-  declare tmdbId?: never;
+  @Property()
+  @IsNumberString()
+  tvdbId!: string;
 
   @Field(() => ShowContentRatingEnum)
   declare contentRating: ShowContentRating;

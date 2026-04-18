@@ -3,14 +3,12 @@ import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/ite
 
 import { requestContentServicesProcessorSchema } from "./request-content-services.schema.ts";
 import { calculateRequestResults } from "./utilities/calculate-request-results.ts";
-import { persistRequestedMovie } from "./utilities/persist-requested-movie.ts";
-import { persistRequestedShow } from "./utilities/persist-requested-show.ts";
 
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
 export const requestContentServicesProcessor =
   requestContentServicesProcessorSchema.implementAsync(
-    async ({ job }, sendEvent) => {
+    async ({ job }, { sendEvent, services }) => {
       const data = await job.getChildrenValues();
 
       const items = Object.values(data).reduce<ContentServiceRequestedResponse>(
@@ -32,8 +30,12 @@ export const requestContentServicesProcessor =
       );
 
       const results = await Promise.allSettled([
-        ...items.movies.map((item) => persistRequestedMovie(item)),
-        ...items.shows.map((item) => persistRequestedShow(item)),
+        ...items.movies.map((item) =>
+          services.itemRequestService.requestMovie(item),
+        ),
+        ...items.shows.map((item) =>
+          services.itemRequestService.requestShow(item),
+        ),
       ]);
 
       for (const result of results) {

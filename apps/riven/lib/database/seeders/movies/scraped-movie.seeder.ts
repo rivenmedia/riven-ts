@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import assert from "node:assert";
 
 import { BaseSeeder } from "../base.seeder.ts";
@@ -23,6 +24,10 @@ export class ScrapedMovieSeeder extends BaseSeeder<ScrapedMovieSeederContext> {
     await this.call(em, [IndexedMovieSeeder, StreamsSeeder], context);
 
     em.persist(context.movie);
+
+    em.assign(context.movie, {
+      scrapedAt: DateTime.now().toJSDate(),
+    });
 
     context.movie.streams.set(context.streams);
 

@@ -1,9 +1,9 @@
-import { type TypedDocumentNode, gql } from "@apollo/client";
 import Fuse from "@zkochan/fuse-native";
+import { DateTime } from "luxon";
 import { basename } from "node:path";
-import { firstValueFrom, timeout } from "rxjs";
+import { setTimeout } from "node:timers/promises";
 
-import { client } from "../../graphql/apollo-client.ts";
+import { database } from "../../database/database.ts";
 import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { serialiseEventData } from "../../utilities/serialisers/serialise-event-data.ts";
@@ -18,13 +18,6 @@ import {
 } from "../utilities/file-handle-map.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
-import type {
-  GetVfsEntryQuery,
-  GetVfsEntryQueryVariables,
-  MediaEntryStreamUrlFragment,
-  SaveStreamUrlMutation,
-  SaveStreamUrlMutationVariables,
-} from "./open.typegen.ts";
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type {
   MediaItemStreamLinkRequestedEvent,
@@ -34,74 +27,24 @@ import type { Queue } from "bullmq";
 
 let fd = 0;
 
-const SAVE_STREAM_URL_MUTATION: TypedDocumentNode<
-  SaveStreamUrlMutation,
-  SaveStreamUrlMutationVariables
-> = gql`
-  mutation SaveStreamUrl($id: ID!, $url: String!) {
-    saveStreamUrl(id: $id, url: $url) {
-      id
-      streamUrl
+async function waitForStreamUrl(path: string) {
+  const timeout = 10_000;
+  const startTime = DateTime.now().toMillis();
+
+  while (DateTime.now().toMillis() - startTime < timeout) {
+    const refreshed = await database.services.vfsService.getEntry(path);
+
+    if (refreshed?.streamUrl) {
+      return refreshed.streamUrl;
     }
-  }
-`;
 
-const MEDIA_ENTRY_STREAM_URL_FRAGMENT: TypedDocumentNode<
-  MediaEntryStreamUrlFragment,
-  never
-> = gql`
-  fragment MediaEntryStreamUrl on MediaEntry {
-    id
-    streamUrl
-  }
-`;
-
-const GET_VFS_ENTRY_QUERY: TypedDocumentNode<
-  GetVfsEntryQuery,
-  GetVfsEntryQueryVariables
-> = gql`
-  query GetVfsEntry($path: String!) {
-    vfsEntry(path: $path) {
-      id
-      originalFilename
-      fileSize
-      streamUrl
-      plugin
-    }
-  }
-`;
-
-async function getItemEntry(path: string) {
-  const { data } = await client.query({
-    query: GET_VFS_ENTRY_QUERY,
-    variables: { path },
-  });
-
-  if (!data?.vfsEntry) {
-    throw new FuseError(Fuse.ENOENT, "Entry not found");
+    await setTimeout(100);
   }
 
-  return data.vfsEntry;
-}
-
-async function waitForStreamUrl(entry: MediaEntryStreamUrlFragment) {
-  const streamUrlObservable = client.watchFragment({
-    from: entry,
-    fragment: MEDIA_ENTRY_STREAM_URL_FRAGMENT,
-  });
-
-  const {
-    data: { streamUrl },
-  } = await firstValueFrom(
-    streamUrlObservable.pipe(
-      timeout({
-        first: 10_000,
-        meta: "Timed out waiting for stream URL",
-      }),
-    ),
+  throw new FuseError(
+    Fuse.ETIMEDOUT,
+    `Timed out waiting for stream URL for path ${path}`,
   );
-
-  return streamUrl;
 }
 
 async function open(
@@ -115,7 +58,11 @@ async function open(
     >
   >,
 ) {
-  const entry = await getItemEntry(path);
+  const entry = await database.services.vfsService.getEntry(path);
+
+  if (!entry) {
+    throw new FuseError(Fuse.ENOENT, `No media entry found for path ${path}`);
+  }
 
   if (
     !entry.streamUrl &&
@@ -144,19 +91,13 @@ async function open(
       const job = await requestQueue.add(
         entry.id,
         serialiseEventData("riven.media-item.stream-link.requested", {
-          item: entry as never, // TODO: Fix type. serialiseEventData should be aware of the event serialiser map's types
+          item: entry,
         }) as ParamsFor<MediaItemStreamLinkRequestedEvent>,
       );
 
       const { link: streamUrl } = await runSingleJob(job);
 
-      await client.mutate({
-        mutation: SAVE_STREAM_URL_MUTATION,
-        variables: {
-          id: entry.id,
-          url: streamUrl,
-        },
-      });
+      await database.services.vfsService.saveStreamUrl(entry.id, streamUrl);
 
       attrCache.delete(path);
     } catch (error: unknown) {
@@ -169,7 +110,7 @@ async function open(
     }
   }
 
-  const streamUrl = entry.streamUrl ?? (await waitForStreamUrl(entry));
+  const streamUrl = entry.streamUrl ?? (await waitForStreamUrl(path));
 
   if (!streamUrl) {
     throw new FuseError(

@@ -8,10 +8,9 @@ import { DateTime } from "luxon";
 
 import { database } from "../../../database/database.ts";
 import { downloadItemProcessorSchema } from "./download-item.schema.ts";
-import { persistDownloadResults } from "./utilities/persist-download-results.ts";
 
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
-  async function ({ job }, sendEvent) {
+  async function ({ job }, { sendEvent, services }) {
     const [finalResult] = Object.values(await job.getChildrenValues());
 
     const item = await database.mediaItem.findOneOrFail(job.data.id);
@@ -31,11 +30,11 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
     }
 
     try {
-      const updatedItem = await persistDownloadResults({
-        id: job.data.id,
-        torrent: finalResult.result,
-        processedBy: finalResult.plugin,
-      });
+      const updatedItem = await services.downloaderService.downloadItem(
+        job.data.id,
+        finalResult.result,
+        finalResult.plugin,
+      );
 
       const incompleteChildStates = MediaItemState.extract([
         "indexed",

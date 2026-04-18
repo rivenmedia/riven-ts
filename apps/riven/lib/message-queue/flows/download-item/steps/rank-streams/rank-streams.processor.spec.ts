@@ -19,6 +19,7 @@ it("does not include trashed streams", async ({
   streams,
   indexedMovieContext: { indexedMovie },
   mockSentryScope,
+  services,
 }) => {
   expect.assert(streams[0]);
   expect.assert(streams[1]);
@@ -37,7 +38,7 @@ it("does not include trashed streams", async ({
 
   const result = await rankStreamsProcessor(
     { job, scope: mockSentryScope },
-    vi.fn(),
+    { sendEvent: vi.fn(), services },
   );
 
   expect(result).toEqual(
@@ -56,6 +57,7 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
   indexedMovieContext: { indexedMovie },
   mockSentryScope,
   streams,
+  services,
 }) => {
   expect.assert(streams[0]);
   expect.assert(streams[1]);
@@ -97,7 +99,7 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
 
   const result = await rankStreamsProcessor(
     { job, scope: mockSentryScope },
-    vi.fn(),
+    { sendEvent: vi.fn(), services },
   );
 
   expect(result).toEqual([
@@ -139,6 +141,7 @@ it("handles foreign language movies with aliases correctly", async ({
   seeders: { seedForeignLanguageMovie },
   streams,
   mockSentryScope,
+  services,
 }) => {
   expect.assert(streams[0]);
   expect.assert(streams[1]);
@@ -159,7 +162,7 @@ it("handles foreign language movies with aliases correctly", async ({
 
   const result = await rankStreamsProcessor(
     { job, scope: mockSentryScope },
-    vi.fn(),
+    { sendEvent: vi.fn(), services },
   );
 
   expect(result).toEqual([
@@ -186,6 +189,7 @@ it("handles foreign language shows with aliases correctly", async ({
   seeders: { seedForeignLanguageShow },
   streams,
   mockSentryScope,
+  services,
 }) => {
   expect.assert(streams[0]);
   expect.assert(streams[1]);
@@ -206,7 +210,7 @@ it("handles foreign language shows with aliases correctly", async ({
 
   const result = await rankStreamsProcessor(
     { job, scope: mockSentryScope },
-    vi.fn(),
+    { sendEvent: vi.fn(), services },
   );
 
   expect(result).toEqual([

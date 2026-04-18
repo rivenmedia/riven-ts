@@ -17,6 +17,7 @@ export class IndexedMovieSeeder extends BaseSeeder<IndexedMovieSeederContext> {
     context: IndexedMovieSeederContext = this.context,
   ) {
     context.movie = await new MovieFactory(em).createOne({
+      indexedAt: DateTime.now().toJSDate(),
       releaseDate: DateTime.now().minus({ years: 1 }).toISO(),
     });
 

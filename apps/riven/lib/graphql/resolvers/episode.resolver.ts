@@ -12,7 +12,7 @@ import {
 
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 
-@Resolver((_of) => Episode)
+@Resolver(() => Episode)
 export class EpisodeResolver {
   @Query(() => Episode, {
     description:
@@ -47,7 +47,7 @@ export class EpisodeResolver {
   }
 
   @FieldResolver(() => Int)
-  expectedFileCount() {
-    return 1;
+  expectedFileCount(@Root() episode: Episode) {
+    return episode.getExpectedFileCount();
   }
 }

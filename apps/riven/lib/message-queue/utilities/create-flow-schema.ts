@@ -6,6 +6,7 @@ import z, {
   type ZodType,
 } from "zod";
 
+import type { Services } from "../../database/database.ts";
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
 import type { Job } from "bullmq";
 
@@ -49,7 +50,10 @@ export const createFlowSchema = <
           scope: z.custom<Sentry.Scope>(),
           token: z.string().optional(),
         }),
-        z.custom<MainRunnerMachineIntake>(),
+        z.object({
+          services: z.custom<Services["services"]>(),
+          sendEvent: z.custom<MainRunnerMachineIntake>(),
+        }),
       ],
       output: z.promise(outputSchema),
     }),

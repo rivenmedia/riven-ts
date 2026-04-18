@@ -1,4 +1,4 @@
-import { Collection } from "@mikro-orm/core";
+import { Collection, EntityRepositoryType } from "@mikro-orm/core";
 import {
   Entity,
   ManyToMany,
@@ -9,13 +9,16 @@ import {
 import { randomUUID } from "node:crypto";
 import { Field, ID, ObjectType } from "type-graphql";
 
+import { StreamRepository } from "../../repositories/stream.repository.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
 
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 @ObjectType()
-@Entity()
+@Entity({ repository: () => StreamRepository })
 export class Stream {
+  [EntityRepositoryType]?: StreamRepository;
+
   @Field(() => ID)
   @PrimaryKey({ type: "uuid" })
   id = randomUUID();

@@ -4,11 +4,11 @@ import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas
 import { DateTime } from "luxon";
 import { expect } from "vitest";
 
-import { it } from "../../../../__tests__/test-context.ts";
-import { persistMovieIndexerData } from "./persist-movie-indexer-data.ts";
+import { it } from "../../../__tests__/test-context.ts";
 
 it("returns the media item if processed successfully", async ({
   factories: { movieItemRequestFactory },
+  services,
 }) => {
   const requestedId = "tt1234567";
 
@@ -17,17 +17,15 @@ it("returns the media item if processed successfully", async ({
     state: "requested",
   });
 
-  const result = await persistMovieIndexerData({
-    item: {
-      id: itemRequest.id,
-      title: "Test Movie",
-      imdbId: requestedId,
-      contentRating: "g",
-      genres: [],
-      type: "movie",
-      runtime: 40,
-      releaseDate: DateTime.now().toISO(),
-    },
+  const result = await services.indexerService.indexItem({
+    id: itemRequest.id,
+    title: "Test Movie",
+    imdbId: requestedId,
+    contentRating: "g",
+    genres: [],
+    type: "movie",
+    runtime: 40,
+    releaseDate: DateTime.now().toISO(),
   });
 
   expect(result).instanceOf(Movie);
@@ -41,6 +39,7 @@ it("returns the media item if processed successfully", async ({
 });
 
 it("throws a MediaItemIndexErrorIncorrectState error if the item request is in an incorrect state", async ({
+  services,
   factories: { movieItemRequestFactory },
 }) => {
   const requestedId = "1234";
@@ -51,17 +50,15 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item request is in a
   });
 
   await expect(
-    persistMovieIndexerData({
-      item: {
-        id: itemRequest.id,
-        title: "Test Movie",
-        imdbId: requestedId,
-        contentRating: "g",
-        genres: [],
-        type: "movie",
-        runtime: 40,
-        releaseDate: DateTime.now().toISO(),
-      },
+    services.indexerService.indexItem({
+      id: itemRequest.id,
+      title: "Test Movie",
+      imdbId: requestedId,
+      contentRating: "g",
+      genres: [],
+      type: "movie",
+      runtime: 40,
+      releaseDate: DateTime.now().toISO(),
     }),
   ).rejects.toThrow(MediaItemIndexErrorIncorrectState);
 });
