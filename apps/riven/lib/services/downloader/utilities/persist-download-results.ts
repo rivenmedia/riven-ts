@@ -95,13 +95,6 @@ export async function persistDownloadResults(
         },
       });
 
-      assert(
-        episodes.length === torrent.files.length,
-        new NotFoundError(
-          "Unable to find all matched media items from the torrent",
-        ),
-      );
-
       const episodeMap = new Map<string, Episode>(
         episodes.map((episode) => [episode.id, episode]),
       );
