@@ -1,9 +1,13 @@
-import type { EntityManager } from "@mikro-orm/core";
+import type { MikroORM } from "@mikro-orm/core";
 
 export abstract class BaseService {
-  protected readonly em!: EntityManager;
+  protected readonly orm!: MikroORM;
 
-  constructor(em: EntityManager) {
-    this.em = em;
+  get em() {
+    return this.orm.em;
+  }
+
+  constructor(orm: MikroORM) {
+    this.orm = orm;
   }
 }

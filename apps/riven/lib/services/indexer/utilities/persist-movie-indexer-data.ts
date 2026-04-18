@@ -1,4 +1,4 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
@@ -6,21 +6,19 @@ import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
 import z from "zod";
 
-import { database } from "../../../../database/database.ts";
-
+import type { EntityManager } from "@mikro-orm/core";
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-export interface PersistMovieIndexerDataInput {
-  item: Extract<
-    NonNullable<MediaItemIndexRequestedResponse>["item"],
-    { type: "movie" }
-  >;
-}
+export type MovieIndexData = Extract<
+  NonNullable<MediaItemIndexRequestedResponse>["item"],
+  { type: "movie" }
+>;
 
-export async function persistMovieIndexerData({
-  item,
-}: PersistMovieIndexerDataInput) {
-  const itemRequest = await database.itemRequest.findOneOrFail({
+export async function persistMovieIndexerData(
+  em: EntityManager,
+  item: MovieIndexData,
+) {
+  const itemRequest = await em.findOneOrFail(ItemRequest, {
     id: item.id,
   });
 
@@ -42,34 +40,32 @@ export async function persistMovieIndexerData({
   }
 
   try {
-    return await database.em.fork().transactional(async (transaction) => {
-      const mediaItem = transaction.create(Movie, {
-        title: item.title,
-        imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
-        tmdbId,
-        contentRating: item.contentRating,
-        rating: item.rating ?? null,
-        posterPath: item.posterUrl ?? null,
-        releaseDate: item.releaseDate ?? null,
-        country: item.country ?? null,
-        language: item.language ?? null,
-        aliases: item.aliases ?? null,
-        genres: item.genres,
-        itemRequest,
-        runtime: item.runtime,
-        isRequested: true, // Movies will always be considered to be requested
-      });
-
-      await validateOrReject(mediaItem);
-
-      transaction.assign(itemRequest, {
-        state: mediaItem.isReleased ? "completed" : "unreleased",
-      });
-
-      await transaction.flush();
-
-      return await transaction.refreshOrFail(mediaItem);
+    const mediaItem = em.create(Movie, {
+      title: item.title,
+      imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
+      tmdbId,
+      contentRating: item.contentRating,
+      rating: item.rating ?? null,
+      posterPath: item.posterUrl ?? null,
+      releaseDate: item.releaseDate ?? null,
+      country: item.country ?? null,
+      language: item.language ?? null,
+      aliases: item.aliases ?? null,
+      genres: item.genres,
+      itemRequest,
+      runtime: item.runtime,
+      isRequested: true, // Movies will always be considered to be requested
     });
+
+    await validateOrReject(mediaItem);
+
+    em.assign(itemRequest, {
+      state: mediaItem.isReleased ? "completed" : "unreleased",
+    });
+
+    await em.flush();
+
+    return mediaItem;
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

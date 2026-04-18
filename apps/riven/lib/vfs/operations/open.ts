@@ -32,7 +32,7 @@ async function waitForStreamUrl(path: string) {
   const startTime = DateTime.now().toMillis();
 
   while (DateTime.now().toMillis() - startTime < timeout) {
-    const refreshed = await database.vfs.getEntry(path);
+    const refreshed = await database.vfsService.getEntry(path);
 
     if (refreshed?.streamUrl) {
       return refreshed.streamUrl;
@@ -58,7 +58,7 @@ async function open(
     >
   >,
 ) {
-  const entry = await database.vfs.getEntry(path);
+  const entry = await database.vfsService.getEntry(path);
 
   if (!entry) {
     throw new FuseError(Fuse.ENOENT, `No media entry found for path ${path}`);
@@ -97,7 +97,7 @@ async function open(
 
       const { link: streamUrl } = await runSingleJob(job);
 
-      await database.vfs.saveStreamUrl(entry.id, streamUrl);
+      await database.vfsService.saveStreamUrl(entry.id, streamUrl);
 
       attrCache.delete(path);
     } catch (error: unknown) {

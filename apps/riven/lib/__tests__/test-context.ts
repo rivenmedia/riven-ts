@@ -2,6 +2,9 @@
 import assert from "node:assert";
 import { test as testBase, vi } from "vitest";
 
+import { IndexerService } from "../services/indexer/indexer.service.ts";
+import { VfsService } from "../services/vfs/vfs.service.ts";
+
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 import type { JobsOptions } from "bullmq";
 
@@ -247,7 +250,9 @@ export const it = testBase
     "apolloClient",
     { scope: "file" },
     await import("../graphql/apollo-client.ts"),
-  );
+  )
+  .extend("indexerService", ({ orm }) => new IndexerService(orm))
+  .extend("vfsService", ({ orm }) => new VfsService(orm));
 
 it.afterEach(async ({ mockSentryScope, apolloClient }) => {
   mockSentryScope.clear();

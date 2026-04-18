@@ -8,7 +8,7 @@ import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 export const readDirSync = function (path, callback) {
   void withVfsScope(async () => {
     try {
-      const data = await database.vfs.getDirectoryEntryPaths(path);
+      const data = await database.vfsService.getDirectoryEntryPaths(path);
 
       process.nextTick(callback, 0, data);
     } catch (error) {
