@@ -8,7 +8,6 @@ import chalk from "chalk";
 import { DateTime } from "luxon";
 import assert from "node:assert";
 
-import { logger } from "../../utilities/logger/logger.ts";
 import { BaseService } from "../base-service.ts";
 import { persistScrapeResults } from "./utilities/persist-scrape-results.ts";
 
@@ -44,6 +43,8 @@ export class ScraperService extends BaseService {
       );
 
       existingItem.failedAttempts = 0;
+
+      const { logger } = await import("../../utilities/logger/logger.ts");
 
       logger.info(
         `Added ${newStreamsCount.toString()} new streams to ${chalk.bold(existingItem.fullTitle)}`,
