@@ -91,7 +91,7 @@ async function open(
       const job = await requestQueue.add(
         entry.id,
         serialiseEventData("riven.media-item.stream-link.requested", {
-          item: entry as never, // TODO: Fix type. serialiseEventData should be aware of the event serialiser map's types
+          item: entry,
         }) as ParamsFor<MediaItemStreamLinkRequestedEvent>,
       );
 
