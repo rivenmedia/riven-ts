@@ -1,3 +1,4 @@
+import { DownloaderService } from "../services/downloader/downloader.service.js";
 import { IndexerService } from "../services/indexer/indexer.service.js";
 import { ScraperService } from "../services/scraper/scraper.service.js";
 import { VfsService } from "../services/vfs/vfs.service.ts";
@@ -35,6 +36,7 @@ export interface Services {
   subtitleEntry: EntityRepository<SubtitleEntry>;
   stream: EntityRepository<Stream>;
   services: {
+    downloaderService: DownloaderService;
     indexerService: IndexerService;
     scraperService: ScraperService;
     vfsService: VfsService;
@@ -80,6 +82,7 @@ export async function initORM(options: Partial<Options>): Promise<Services> {
     subtitleEntry: orm.em.fork().getRepository(SubtitleEntry),
     stream: orm.em.fork().getRepository(Stream),
     services: {
+      downloaderService: new DownloaderService(orm),
       indexerService: new IndexerService(orm),
       scraperService: new ScraperService(orm),
       vfsService: new VfsService(orm),

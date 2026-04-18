@@ -1,22 +1,20 @@
 import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
-import { ref } from "@mikro-orm/core";
-import { UnrecoverableError } from "bullmq";
+import { NotFoundError, ref } from "@mikro-orm/core";
 import { expect, vi } from "vitest";
 
-import { it } from "../../../../__tests__/test-context.ts";
-import { MatchedFile } from "../steps/find-valid-torrent/find-valid-torrent.schema.ts";
-import { persistDownloadResults } from "./persist-download-results.ts";
+import { it } from "../../../__tests__/test-context.ts";
+import { MatchedFile } from "../../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 
 it("throws an error if the media item has no streams", async ({
   indexedMovieContext: { indexedMovie },
+  services,
 }) => {
   await expect(
-    persistDownloadResults({
-      id: indexedMovie.id,
-      processedBy: "@repo/plugin-test",
-      torrent: {
+    services.downloaderService.downloadItem(
+      indexedMovie.id,
+      {
         infoHash: "1234567890123456789012345678901234567890",
         provider: null,
         files: [
@@ -31,9 +29,10 @@ it("throws an error if the media item has no streams", async ({
         ],
         torrentId: "1",
       },
-    }),
+      "@repo/plugin-test",
+    ),
   ).rejects.toThrow(
-    new UnrecoverableError(
+    new NotFoundError(
       `No media item found with ID ${indexedMovie.id} and stream info hash 1234567890123456789012345678901234567890`,
     ),
   );
@@ -43,6 +42,7 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
   completedMovieContext: { completedMovie },
   factories: { streamFactory },
   em,
+  services,
 }) => {
   const stream = streamFactory.makeEntity();
 
@@ -53,10 +53,9 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
   await em.flush();
 
   await expect(
-    persistDownloadResults({
-      id: completedMovie.id,
-      processedBy: "@repo/plugin-test",
-      torrent: {
+    services.downloaderService.downloadItem(
+      completedMovie.id,
+      {
         torrentId: "1",
         infoHash: stream.infoHash,
         provider: null,
@@ -71,21 +70,22 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
           },
         ],
       },
-    }),
+      "@repo/plugin-test",
+    ),
   ).rejects.toThrow(MediaItemDownloadErrorIncorrectState);
 });
 
 it("sets the active stream and updates the state to completed if successful", async ({
   scrapedMovieContext: { scrapedMovie },
+  services,
 }) => {
   const [stream] = await scrapedMovie.streams.load();
 
   expect.assert(stream);
 
-  const updatedItem = await persistDownloadResults({
-    id: scrapedMovie.id,
-    processedBy: "@repo/plugin-test",
-    torrent: {
+  const updatedItem = await services.downloaderService.downloadItem(
+    scrapedMovie.id,
+    {
       torrentId: "1",
       infoHash: stream.infoHash,
       provider: null,
@@ -100,7 +100,8 @@ it("sets the active stream and updates the state to completed if successful", as
         },
       ],
     },
-  });
+    "@repo/plugin-test",
+  );
 
   expect(updatedItem.activeStream?.id).toBe(stream.id);
   expect(updatedItem.state).toBe("completed");
@@ -108,15 +109,15 @@ it("sets the active stream and updates the state to completed if successful", as
 
 it("adds a single media entry for movies", async ({
   scrapedMovieContext: { scrapedMovie },
+  services,
 }) => {
   const [stream] = await scrapedMovie.streams.load();
 
   expect.assert(stream);
 
-  await persistDownloadResults({
-    id: scrapedMovie.id,
-    processedBy: "@repo/plugin-test",
-    torrent: {
+  await services.downloaderService.downloadItem(
+    scrapedMovie.id,
+    {
       torrentId: "1",
       infoHash: stream.infoHash,
       provider: null,
@@ -131,7 +132,8 @@ it("adds a single media entry for movies", async ({
         },
       ],
     },
-  });
+    "@repo/plugin-test",
+  );
 
   const mediaEntries = await scrapedMovie.getMediaEntries();
 
@@ -143,15 +145,15 @@ it("adds one media entry per episode for shows", async ({
     scrapedShow,
     streams: [stream],
   },
+  services,
 }) => {
   const episodes = await scrapedShow.getEpisodes();
 
   expect.assert(stream);
 
-  await persistDownloadResults({
-    id: scrapedShow.id,
-    processedBy: "@repo/plugin-test",
-    torrent: {
+  await services.downloaderService.downloadItem(
+    scrapedShow.id,
+    {
       torrentId: "1",
       infoHash: stream.infoHash,
       provider: null,
@@ -164,7 +166,8 @@ it("adds one media entry per episode for shows", async ({
         isCachedFile: false,
       })) as [MatchedFile, ...MatchedFile[]],
     },
-  });
+    "@repo/plugin-test",
+  );
 
   const updatedEpisodes = await scrapedShow.getEpisodes();
 
@@ -183,6 +186,7 @@ it("does not create duplicate media entries for episodes with existing entries",
   },
   em,
   factories: { mediaEntryFactory },
+  services,
 }) => {
   expect.assert(stream);
   expect.assert(episode);
@@ -198,10 +202,9 @@ it("does not create duplicate media entries for episodes with existing entries",
 
   await em.flush();
 
-  await persistDownloadResults({
-    id: scrapedShow.id,
-    processedBy: "@repo/plugin-test",
-    torrent: {
+  await services.downloaderService.downloadItem(
+    scrapedShow.id,
+    {
       torrentId: "1",
       infoHash: stream.infoHash,
       provider: null,
@@ -216,7 +219,8 @@ it("does not create duplicate media entries for episodes with existing entries",
         },
       ],
     },
-  });
+    "@repo/plugin-test",
+  );
 
   const mediaEntries = await episode.getMediaEntries();
 
@@ -228,6 +232,7 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
     scrapedMovie,
     streams: [stream],
   },
+  services,
 }) => {
   expect.assert(stream);
 
@@ -237,10 +242,9 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
   ).mockRejectedValue(new Error("Validation error"));
 
   await expect(
-    persistDownloadResults({
-      id: scrapedMovie.id,
-      processedBy: "@repo/plugin-test",
-      torrent: {
+    services.downloaderService.downloadItem(
+      scrapedMovie.id,
+      {
         torrentId: "1",
         infoHash: stream.infoHash,
         provider: null,
@@ -255,6 +259,7 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
           },
         ],
       },
-    }),
+      "@repo/plugin-test",
+    ),
   ).rejects.toThrow(MediaItemDownloadError);
 });
