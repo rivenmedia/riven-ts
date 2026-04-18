@@ -103,12 +103,12 @@ export abstract class BaseDataSource<
         attempts: requestAttempts,
         backoff: {
           type: "exponential",
-          delay: 5000,
-          jitter: 0.5,
+          delay: 10000,
+          jitter: 2,
         },
         removeOnComplete: {
           age: 60 * 60,
-          count: 500,
+          count: 5000,
         },
         removeOnFail: {
           age: 60 * 60 * 24,
@@ -117,7 +117,7 @@ export abstract class BaseDataSource<
       },
       streams: {
         events: {
-          maxLen: 100,
+          maxLen: 100000,
         },
       },
       telemetry,
@@ -128,6 +128,8 @@ export abstract class BaseDataSource<
     this.#worker = new Worker(
       this.#queueId,
       async (job) => {
+        await job.log(`Processing request for ${job.data.path}`);
+
         const {
           timeTaken,
           result: { parsedBody, response, responseFromCache },
@@ -150,6 +152,8 @@ export abstract class BaseDataSource<
           return super.fetch(job.data.path, job.data.incomingRequest);
         });
 
+        await job.log(`Request completed`);
+
         return {
           parsedBody,
           response: {
@@ -170,7 +174,7 @@ export abstract class BaseDataSource<
         telemetry,
         // The datasource worker only handles I/O operations, so a high concurrency can be used.
         // https://docs.bullmq.io/guide/parallelism-and-concurrency#how-to-best-use-bullmqs-concurrency-then
-        concurrency: 200,
+        concurrency: 10,
       },
     );
 
@@ -427,7 +431,13 @@ export abstract class BaseDataSource<
           : `[${this.serviceName}] Received 429 response without valid Retry-After header for ${url}. Using default wait time of 5 seconds.`,
       );
 
-      await this.#queue.rateLimit(waitMs ?? 5000);
+      const currentRateLimit = await this.#queue.getRateLimitTtl(0);
+
+      if (currentRateLimit <= 0) {
+        await this.#queue.rateLimit(
+          waitMs === null || waitMs <= 0 ? 5000 : waitMs,
+        );
+      }
 
       throw Worker.RateLimitError();
     }

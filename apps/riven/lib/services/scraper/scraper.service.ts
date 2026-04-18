@@ -3,7 +3,10 @@ import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
 import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 
-import { Transactional } from "@mikro-orm/decorators/legacy";
+import {
+  EnsureRequestContext,
+  Transactional,
+} from "@mikro-orm/decorators/legacy";
 import chalk from "chalk";
 import { DateTime } from "luxon";
 import assert from "node:assert";
@@ -20,6 +23,7 @@ export class ScraperService extends BaseService {
     item.scrapedTimes++;
   }
 
+  @EnsureRequestContext()
   @Transactional()
   async scrapeItem(id: UUID, results: Record<string, ParsedData>) {
     const existingItem = await this.em

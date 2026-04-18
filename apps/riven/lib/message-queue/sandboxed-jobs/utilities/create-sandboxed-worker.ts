@@ -52,8 +52,8 @@ export function createSandboxedWorker(
     processorURL,
     toMerged<WorkerOptions, typeof workerOptions>(
       {
-        removeOnComplete: { count: 50 },
-        removeOnFail: { count: 50 },
+        removeOnComplete: { count: 5000 },
+        removeOnFail: { count: 5000 },
         useWorkerThreads: true,
         workerThreadsOptions: {
           execArgv: ["--env-file=.env.riven"],
