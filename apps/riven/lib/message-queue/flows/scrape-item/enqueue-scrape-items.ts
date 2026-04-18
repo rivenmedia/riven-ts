@@ -34,7 +34,10 @@ export function enqueueScrapeItems({
         children: [
           createParseScrapeResultsJob(
             "Parse scrape results",
-            { id: item.id },
+            {
+              id: item.id,
+              title: item.fullTitle,
+            },
             { children: childNodes },
           ),
         ],

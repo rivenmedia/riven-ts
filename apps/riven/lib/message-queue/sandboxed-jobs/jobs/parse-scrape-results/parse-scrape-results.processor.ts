@@ -29,9 +29,7 @@ export default createSandboxedJobProcessor(
     );
 
     if (!Object.keys(aggregatedResults).length) {
-      throw new UnrecoverableError(
-        `No streams found for media item ${job.data.id}`,
-      );
+      throw new UnrecoverableError(`No streams found for ${job.data.title}`);
     }
 
     const validResults = new Map<string, ParsedData>();
