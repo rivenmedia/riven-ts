@@ -1,7 +1,7 @@
-import { DownloaderService } from "../services/downloader/downloader.service.js";
-import { IndexerService } from "../services/indexer/indexer.service.js";
+import { DownloaderService } from "../services/downloader/downloader.service.ts";
+import { IndexerService } from "../services/indexer/indexer.service.ts";
 import { ItemRequestService } from "../services/item-request/item-request.service.ts";
-import { ScraperService } from "../services/scraper/scraper.service.js";
+import { ScraperService } from "../services/scraper/scraper.service.ts";
 import { VfsService } from "../services/vfs/vfs.service.ts";
 
 import type {
