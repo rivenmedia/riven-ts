@@ -1,4 +1,5 @@
 import { IndexerService } from "../services/indexer/indexer.service.js";
+import { ScraperService } from "../services/scraper/scraper.service.js";
 import { VfsService } from "../services/vfs/vfs.service.ts";
 
 import type {
@@ -35,6 +36,7 @@ export interface Services {
   stream: EntityRepository<Stream>;
   services: {
     indexerService: IndexerService;
+    scraperService: ScraperService;
     vfsService: VfsService;
   };
 }
@@ -79,6 +81,7 @@ export async function initORM(options: Partial<Options>): Promise<Services> {
     stream: orm.em.fork().getRepository(Stream),
     services: {
       indexerService: new IndexerService(orm),
+      scraperService: new ScraperService(orm),
       vfsService: new VfsService(orm),
     },
   });
