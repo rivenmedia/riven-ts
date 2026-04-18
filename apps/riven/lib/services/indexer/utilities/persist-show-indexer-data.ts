@@ -46,12 +46,16 @@ export async function persistShowIndexerData(
     const existingShow = await em.getRepository(Show).findOne(
       {
         itemRequest: { id: itemRequest.id },
-        status: {
-          $in: ["continuing", "upcoming"],
-        },
       },
       { populate: ["$infer"] },
     );
+
+    if (existingShow?.status === "ended") {
+      throw new MediaItemIndexError({
+        item: itemRequest,
+        error: `${existingShow.fullTitle} has already ended and will not be re-indexed.`,
+      });
+    }
 
     const { tvdbId } = itemRequest;
 
@@ -190,6 +194,7 @@ export async function persistShowIndexerData(
         if (
           !seasonEntry.isSpecial &&
           !episodeEntry.isReleased &&
+          episodeEntry.releaseDate &&
           !show.nextAirDate
         ) {
           show.nextAirDate = episodeEntry.releaseDate;

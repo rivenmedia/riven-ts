@@ -145,8 +145,6 @@ export async function persistDownloadResults(
             plugin: processedBy,
           }),
         );
-
-        em.persist(episode);
       }
     }
 

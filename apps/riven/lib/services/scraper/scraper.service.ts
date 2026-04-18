@@ -59,12 +59,14 @@ export class ScraperService extends BaseService {
         // We only want to consider an attempt as failed if no new streams were added
         // instead of on *any* error (e.g. a database error) that occurs during the persist process.
         existingItem.failedAttempts++;
+
+        return {
+          item: existingItem,
+          newStreamsCount: 0,
+        };
       }
 
-      return {
-        item: existingItem,
-        newStreamsCount: 0,
-      };
+      throw error;
     } finally {
       existingItem.scrapedAt = DateTime.now().toJSDate();
       existingItem.scrapedTimes++;
