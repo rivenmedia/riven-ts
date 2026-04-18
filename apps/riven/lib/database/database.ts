@@ -1,5 +1,6 @@
 import { DownloaderService } from "../services/downloader/downloader.service.js";
 import { IndexerService } from "../services/indexer/indexer.service.js";
+import { ItemRequestService } from "../services/item-request/item-request.service.ts";
 import { ScraperService } from "../services/scraper/scraper.service.js";
 import { VfsService } from "../services/vfs/vfs.service.ts";
 
@@ -38,6 +39,7 @@ export interface Services {
   services: {
     downloaderService: DownloaderService;
     indexerService: IndexerService;
+    itemRequestService: ItemRequestService;
     scraperService: ScraperService;
     vfsService: VfsService;
   };
@@ -84,6 +86,7 @@ export async function initORM(options: Partial<Options>): Promise<Services> {
     services: {
       downloaderService: new DownloaderService(orm),
       indexerService: new IndexerService(orm),
+      itemRequestService: new ItemRequestService(orm),
       scraperService: new ScraperService(orm),
       vfsService: new VfsService(orm),
     },

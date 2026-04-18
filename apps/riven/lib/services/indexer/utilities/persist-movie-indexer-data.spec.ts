@@ -7,8 +7,8 @@ import { expect } from "vitest";
 import { it } from "../../../__tests__/test-context.ts";
 
 it("returns the media item if processed successfully", async ({
-  indexerService,
   factories: { movieItemRequestFactory },
+  services,
 }) => {
   const requestedId = "tt1234567";
 
@@ -17,7 +17,7 @@ it("returns the media item if processed successfully", async ({
     state: "requested",
   });
 
-  const result = await indexerService.indexItem({
+  const result = await services.indexerService.indexItem({
     id: itemRequest.id,
     title: "Test Movie",
     imdbId: requestedId,
@@ -39,7 +39,7 @@ it("returns the media item if processed successfully", async ({
 });
 
 it("throws a MediaItemIndexErrorIncorrectState error if the item request is in an incorrect state", async ({
-  indexerService,
+  services,
   factories: { movieItemRequestFactory },
 }) => {
   const requestedId = "1234";
@@ -50,7 +50,7 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item request is in a
   });
 
   await expect(
-    indexerService.indexItem({
+    services.indexerService.indexItem({
       id: itemRequest.id,
       title: "Test Movie",
       imdbId: requestedId,

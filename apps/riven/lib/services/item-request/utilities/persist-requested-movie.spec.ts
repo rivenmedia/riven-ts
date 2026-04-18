@@ -2,14 +2,16 @@ import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
-import { expect, it } from "vitest";
+import { expect } from "vitest";
 
-import { persistRequestedMovie } from "./persist-requested-movie.ts";
+import { it } from "../../../__tests__/test-context.ts";
 
-it("returns the item request if processed successfully", async () => {
+it("returns the item request if processed successfully", async ({
+  services,
+}) => {
   const requestedId = "tt1234567";
 
-  const result = await persistRequestedMovie({
+  const result = await services.itemRequestService.requestMovie({
     imdbId: requestedId,
   });
 
@@ -20,21 +22,23 @@ it("returns the item request if processed successfully", async () => {
   );
 });
 
-it("sends an error event if the item processing fails", async () => {
+it("sends an error event if the item processing fails", async ({
+  services,
+}) => {
   const requestedId = "1234";
 
   await expect(
-    persistRequestedMovie({
+    services.itemRequestService.requestMovie({
       imdbId: requestedId,
     }),
   ).rejects.toThrow(ItemRequestCreateError);
 });
 
-it("saves the external request ID if provided", async () => {
+it("saves the external request ID if provided", async ({ services }) => {
   const requestedId = "tt1234568";
   const externalRequestId = "external-req-123";
 
-  const result = await persistRequestedMovie({
+  const result = await services.itemRequestService.requestMovie({
     imdbId: requestedId,
     externalRequestId,
   });
@@ -46,17 +50,19 @@ it("saves the external request ID if provided", async () => {
   );
 });
 
-it("throws an ItemRequestCreateErrorConflict error if the item request already exists", async () => {
+it("throws an ItemRequestCreateErrorConflict error if the item request already exists", async ({
+  services,
+}) => {
   const requestedId = "tt1234568";
   const externalRequestId = "external-req-123";
 
-  await persistRequestedMovie({
+  await services.itemRequestService.requestMovie({
     imdbId: requestedId,
     externalRequestId,
   });
 
   await expect(
-    persistRequestedMovie({
+    services.itemRequestService.requestMovie({
       imdbId: requestedId,
       externalRequestId,
     }),

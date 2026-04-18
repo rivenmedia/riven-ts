@@ -8,7 +8,7 @@ import { expect, vi } from "vitest";
 import { it } from "../../../__tests__/test-context.ts";
 
 it("returns the media item if processed successfully", async ({
-  indexerService,
+  services,
   factories: { showItemRequestFactory },
 }) => {
   const requestedId = "tt1234567";
@@ -18,7 +18,7 @@ it("returns the media item if processed successfully", async ({
     state: "requested",
   });
 
-  const result = await indexerService.indexItem({
+  const result = await services.indexerService.indexItem({
     id: itemRequest.id,
     title: "Test Show",
     imdbId: requestedId,
@@ -40,7 +40,7 @@ it("returns the media item if processed successfully", async ({
 });
 
 it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorrect state", async ({
-  indexerService,
+  services,
   factories: { showItemRequestFactory },
 }) => {
   const requestedId = "1234";
@@ -51,7 +51,7 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorr
   });
 
   await expect(
-    indexerService.indexItem({
+    services.indexerService.indexItem({
       id: itemRequest.id,
       title: "Test Show",
       imdbId: requestedId,
@@ -66,7 +66,7 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorr
 });
 
 it("updates the media item with the latest data if it already exists", async ({
-  indexerService,
+  services,
   factories: { showItemRequestFactory },
 }) => {
   vi.useFakeTimers({
@@ -80,7 +80,7 @@ it("updates the media item with the latest data if it already exists", async ({
     state: "requested",
   });
 
-  const initialShow = await indexerService.indexItem({
+  const initialShow = await services.indexerService.indexItem({
     id: itemRequest.id,
     title: "Test Show",
     imdbId: requestedId,
@@ -151,7 +151,7 @@ it("updates the media item with the latest data if it already exists", async ({
 
   const firstEpisodeAirDate = DateTime.now().plus({ months: 1 });
 
-  const updatedUpcomingShow = await indexerService.indexItem({
+  const updatedUpcomingShow = await services.indexerService.indexItem({
     id: itemRequest.id,
     title: "Test Show",
     imdbId: requestedId,
@@ -226,7 +226,7 @@ it("updates the media item with the latest data if it already exists", async ({
 
   vi.setSystemTime(firstEpisodeAirDate.plus({ days: 1 }).toJSDate());
 
-  const updatedOngoingShow = await indexerService.indexItem({
+  const updatedOngoingShow = await services.indexerService.indexItem({
     id: itemRequest.id,
     title: "Test Show",
     imdbId: requestedId,
@@ -310,7 +310,7 @@ it("updates the media item with the latest data if it already exists", async ({
 
   vi.setSystemTime(DateTime.now().plus({ weeks: 1 }).toJSDate());
 
-  const updatedOngoingShowWeekTwo = await indexerService.indexItem({
+  const updatedOngoingShowWeekTwo = await services.indexerService.indexItem({
     id: itemRequest.id,
     title: "Test Show",
     imdbId: requestedId,
