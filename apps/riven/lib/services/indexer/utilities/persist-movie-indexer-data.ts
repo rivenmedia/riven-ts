@@ -63,8 +63,6 @@ export async function persistMovieIndexerData(
       state: mediaItem.isReleased ? "completed" : "unreleased",
     });
 
-    await em.flush();
-
     return mediaItem;
   } catch (error) {
     const errorMessage = z
