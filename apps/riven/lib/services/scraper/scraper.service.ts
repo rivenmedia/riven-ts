@@ -15,6 +15,11 @@ import type { ParsedData } from "@repo/util-rank-torrent-name";
 import type { UUID } from "node:crypto";
 
 export class ScraperService extends BaseService {
+  #updateScrapeMetadata(item: MediaItem) {
+    item.scrapedAt = DateTime.now().toJSDate();
+    item.scrapedTimes++;
+  }
+
   @Transactional()
   async scrapeItem(id: UUID, results: Record<string, ParsedData>) {
     const existingItem = await this.em
@@ -50,6 +55,8 @@ export class ScraperService extends BaseService {
         `Added ${newStreamsCount.toString()} new streams to ${chalk.bold(existingItem.fullTitle)}`,
       );
 
+      this.#updateScrapeMetadata(existingItem);
+
       return {
         item: existingItem,
         newStreamsCount,
@@ -60,6 +67,8 @@ export class ScraperService extends BaseService {
         // instead of on *any* error (e.g. a database error) that occurs during the persist process.
         existingItem.failedAttempts++;
 
+        this.#updateScrapeMetadata(existingItem);
+
         return {
           item: existingItem,
           newStreamsCount: 0,
@@ -67,9 +76,6 @@ export class ScraperService extends BaseService {
       }
 
       throw error;
-    } finally {
-      existingItem.scrapedAt = DateTime.now().toJSDate();
-      existingItem.scrapedTimes++;
     }
   }
 }
