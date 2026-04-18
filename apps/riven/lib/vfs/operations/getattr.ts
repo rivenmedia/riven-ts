@@ -32,7 +32,7 @@ export const getattrSync = function (path, callback) {
         return;
       }
 
-      const attrs = await database.vfsService.getEntryStat(path);
+      const attrs = await database.services.vfsService.getEntryStat(path);
 
       attrCache.set(path, attrs);
 

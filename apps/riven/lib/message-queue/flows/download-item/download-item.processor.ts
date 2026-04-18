@@ -11,7 +11,7 @@ import { downloadItemProcessorSchema } from "./download-item.schema.ts";
 import { persistDownloadResults } from "./utilities/persist-download-results.ts";
 
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
-  async function ({ job }, sendEvent) {
+  async function ({ job }, { sendEvent }) {
     const [finalResult] = Object.values(await job.getChildrenValues());
 
     const item = await database.mediaItem.findOneOrFail(job.data.id);

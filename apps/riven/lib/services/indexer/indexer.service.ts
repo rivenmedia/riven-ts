@@ -31,6 +31,7 @@ export class IndexerService extends BaseService {
 
   async indexItem(item: MovieIndexData): Promise<Movie>;
   async indexItem(item: ShowIndexData): Promise<Show>;
+  async indexItem(item: MovieIndexData | ShowIndexData): Promise<Movie | Show>;
   @CreateRequestContext()
   async indexItem(item: MovieIndexData | ShowIndexData) {
     switch (item.type) {

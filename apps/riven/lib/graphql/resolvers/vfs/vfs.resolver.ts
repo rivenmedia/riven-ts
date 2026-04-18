@@ -9,16 +9,16 @@ import { VfsEntryStat } from "./types/vfs-entry-stat.type.ts";
 export class VfsResolver {
   @Query(() => VfsEntryStat)
   vfsEntryStat(@Arg("path") path: string): Promise<VfsEntryStat> {
-    return database.vfsService.getEntryStat(path);
+    return database.services.vfsService.getEntryStat(path);
   }
 
   @Query(() => MediaEntry, { nullable: true })
   vfsEntry(@Arg("path") path: string): Promise<MediaEntry | null> {
-    return database.vfsService.getEntry(path);
+    return database.services.vfsService.getEntry(path);
   }
 
   @Query(() => [String])
   vfsDirectoryEntryPaths(@Arg("path") path: string): Promise<string[]> {
-    return database.vfsService.getDirectoryEntryPaths(path);
+    return database.services.vfsService.getDirectoryEntryPaths(path);
   }
 }

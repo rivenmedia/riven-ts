@@ -11,13 +11,17 @@ it("throws an unrecoverable error if no valid torrent is found", async ({
   createMockJob,
   scrapedMovieContext: { scrapedMovie },
   mockSentryScope,
+  services,
 }) => {
   const job = await createMockJob({ id: scrapedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
   await expect(() =>
-    downloadItemProcessor({ job, scope: mockSentryScope }, vi.fn()),
+    downloadItemProcessor(
+      { job, scope: mockSentryScope },
+      { sendEvent: vi.fn(), services },
+    ),
   ).rejects.toThrow(UnrecoverableError);
 });
 
@@ -25,6 +29,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   scrapedMovieContext: { scrapedMovie },
   createMockJob,
   mockSentryScope,
+  services,
 }) => {
   vi.spyOn(Settings, "now").mockReturnValue(10000);
 
@@ -57,7 +62,10 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
 
   const sendEvent = vi.fn();
 
-  await downloadItemProcessor({ job, scope: mockSentryScope }, sendEvent);
+  await downloadItemProcessor(
+    { job, scope: mockSentryScope },
+    { sendEvent, services },
+  );
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.success",
@@ -72,6 +80,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
   createMockJob,
   scrapedShowContext: { scrapedShow },
   mockSentryScope,
+  services,
 }) => {
   const episodes = await scrapedShow.getEpisodes();
 
@@ -115,7 +124,10 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
 
   const sendEvent = vi.fn();
 
-  await downloadItemProcessor({ job, scope: mockSentryScope }, sendEvent);
+  await downloadItemProcessor(
+    { job, scope: mockSentryScope },
+    { sendEvent, services },
+  );
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.partial-success",
@@ -128,6 +140,7 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
   createMockJob,
   scrapedMovieContext: { scrapedMovie },
   mockSentryScope,
+  services,
 }) => {
   const job = await createMockJob({ id: scrapedMovie.id });
 
@@ -140,7 +153,7 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
       job,
       scope: mockSentryScope,
     },
-    sendEvent,
+    { sendEvent, services },
   ).catch(() => {
     /* empty */
   });

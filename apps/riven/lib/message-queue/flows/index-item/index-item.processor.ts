@@ -3,7 +3,6 @@ import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas
 
 import { UnrecoverableError } from "bullmq";
 
-import { database } from "../../../database/database.ts";
 import { requestIndexDataProcessorSchema } from "./index-item.schema.ts";
 
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
@@ -11,7 +10,7 @@ import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/sche
 export const indexItemProcessor =
   requestIndexDataProcessorSchema.implementAsync(async function (
     { job },
-    sendEvent,
+    { sendEvent, services },
   ) {
     const data = await job.getChildrenValues();
 
@@ -31,10 +30,7 @@ export const indexItemProcessor =
     );
 
     try {
-      const updatedItem =
-        item.type === "movie"
-          ? await database.indexerService.indexMovie({ item })
-          : await database.indexerService.indexShow({ item });
+      const updatedItem = await services.indexerService.indexItem(item);
 
       sendEvent({
         type: "riven.media-item.index.success",

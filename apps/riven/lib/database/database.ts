@@ -33,8 +33,10 @@ export interface Services {
   mediaEntry: EntityRepository<MediaEntry>;
   subtitleEntry: EntityRepository<SubtitleEntry>;
   stream: EntityRepository<Stream>;
-  indexerService: IndexerService;
-  vfsService: VfsService;
+  services: {
+    indexerService: IndexerService;
+    vfsService: VfsService;
+  };
 }
 
 export let database: Services;
@@ -75,7 +77,9 @@ export async function initORM(options: Partial<Options>): Promise<Services> {
     mediaEntry: orm.em.fork().getRepository(MediaEntry),
     subtitleEntry: orm.em.fork().getRepository(SubtitleEntry),
     stream: orm.em.fork().getRepository(Stream),
-    indexerService: new IndexerService(orm),
-    vfsService: new VfsService(orm),
+    services: {
+      indexerService: new IndexerService(orm),
+      vfsService: new VfsService(orm),
+    },
   });
 }

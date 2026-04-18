@@ -64,7 +64,12 @@ export function createFlowWorker<
         });
 
         try {
-          return await processor({ job, token, scope } as never, sendEvent);
+          const { database } = await import("../../database/database.ts");
+
+          return await processor({ job, token, scope } as never, {
+            sendEvent,
+            services: database.services,
+          });
         } catch (error) {
           Sentry.captureException(error);
 
