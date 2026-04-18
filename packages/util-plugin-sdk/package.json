@@ -77,7 +77,7 @@
   "devDependencies": {
     "@apollo/client": "^4.0.11",
     "@apollo/datasource-rest": "catalog:",
-    "@apollo/server": "^5.2.0",
+    "@apollo/server": "^5.5.0",
     "@apollo/utils.keyvadapter": "catalog:",
     "@mikro-orm/core": "catalog:",
     "@mikro-orm/postgresql": "catalog:",
