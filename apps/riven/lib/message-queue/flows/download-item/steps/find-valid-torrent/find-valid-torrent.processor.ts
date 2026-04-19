@@ -81,12 +81,12 @@ export const findValidTorrentProcessor =
 
                 const cachedFiles = await getCachedTorrentFiles(
                   plugin.pluginName,
-                  infoHash,
+                  infoHashes,
                   jobParentOptions,
                   provider,
                 );
 
-                if (!cachedFiles) {
+                if (!cachedFiles[infoHash]) {
                   await job.log(`${infoHash}: No cached files found`);
 
                   logger.verbose(
@@ -103,7 +103,7 @@ export const findValidTorrentProcessor =
                 await getValidTorrentFiles(
                   mediaItem,
                   infoHash,
-                  cachedFiles,
+                  cachedFiles[infoHash],
                   true,
                   jobParentOptions,
                 );

@@ -2,10 +2,10 @@ import { MediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
 import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 
-import { type EntityManager, ref } from "@mikro-orm/core";
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
 
+import type { EntityManager } from "@mikro-orm/core";
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export async function persistScrapeResults(
@@ -15,21 +15,18 @@ export async function persistScrapeResults(
 ) {
   const streamsCount = item.streams.count();
 
-  const infoHashes = Object.keys(results);
-  const preScrapedStreams = await em.getRepository(Stream).find({
-    infoHash: { $in: infoHashes },
-  });
-
-  const preScrapedStreamsMap = new Map(
-    preScrapedStreams.map((stream) => [stream.infoHash, stream]),
+  const streams = await em.upsertMany(
+    Stream,
+    Object.entries(results).map(([infoHash, parsedData]) =>
+      em.create(Stream, {
+        infoHash,
+        parsedData,
+      }),
+    ),
+    { onConflictAction: "ignore", onConflictFields: ["infoHash"] },
   );
 
-  for (const [infoHash, parsedData] of Object.entries(results)) {
-    const existingEntry = preScrapedStreamsMap.get(infoHash);
-    const stream = existingEntry ?? em.create(Stream, { infoHash, parsedData });
-
-    item.streams.add(ref(stream));
-  }
+  item.streams.add(streams);
 
   const newStreamsCount = item.streams.count() - streamsCount;
 

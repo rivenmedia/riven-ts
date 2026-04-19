@@ -222,24 +222,18 @@ export const mainRunnerMachine = setup({
           indexItemProcessor,
           self.send,
           input.plugins,
-          {},
-          { concurrency: 1 },
         ),
         "request-content-services": createFlowWorker(
           RequestContentServicesFlow,
           requestContentServicesProcessor,
           self.send,
           input.plugins,
-          {},
-          { concurrency: 1 },
         ),
         "scrape-item": createFlowWorker(
           ScrapeItemFlow,
           scrapeItemProcessor,
           self.send,
           input.plugins,
-          {},
-          { concurrency: 1 },
         ),
         "download-item": createFlowWorker(
           DownloadItemFlow,
@@ -259,7 +253,6 @@ export const mainRunnerMachine = setup({
               },
             },
           },
-          { concurrency: 1 },
         ),
         "download-item.rank-streams": createFlowWorker(
           RankStreamsFlow,
@@ -272,8 +265,6 @@ export const mainRunnerMachine = setup({
           processItemProcessor,
           self.send,
           input.plugins,
-          {},
-          { concurrency: 1 },
         ),
       },
       sandboxedWorkers: {

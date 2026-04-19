@@ -85,7 +85,7 @@ export function createFlowWorker<
       }),
     toMerged<WorkerOptions, typeof workerOptions>(
       {
-        concurrency: os.availableParallelism(),
+        concurrency: os.availableParallelism() * 1.5,
         removeOnComplete: { count: 5000 },
         removeOnFail: {
           age: 60 * 60 * 24,
