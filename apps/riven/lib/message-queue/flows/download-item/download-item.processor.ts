@@ -22,7 +22,9 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
         error: new Error("No valid torrent found after trying all downloaders"),
       });
 
-      return;
+      throw new UnrecoverableError(
+        `Failed to download ${item.fullTitle}: No valid torrent found after trying all downloaders`,
+      );
     }
 
     try {

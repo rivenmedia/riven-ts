@@ -17,6 +17,7 @@ import { telemetry } from "../../utilities/telemetry.ts";
 import { createQueue } from "./create-queue.ts";
 
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
+import type { ValidPluginMap } from "../../types/plugins.ts";
 import type { Flow, FlowHandlers } from "../flows/index.ts";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
@@ -34,6 +35,7 @@ export function createFlowWorker<
     (typeof FlowHandlers)[T["shape"]["name"]["value"]]["implementAsync"]
   >,
   sendEvent: MainRunnerMachineIntake,
+  plugins: ValidPluginMap,
   queueOptions: Omit<QueueOptions, "connection" | "telemetry"> = {},
   workerOptions: Omit<
     WorkerOptions,
@@ -69,6 +71,7 @@ export function createFlowWorker<
           return await processor({ job, token, scope } as never, {
             sendEvent,
             services: database.services,
+            plugins,
           });
         } catch (error) {
           Sentry.captureException(error);

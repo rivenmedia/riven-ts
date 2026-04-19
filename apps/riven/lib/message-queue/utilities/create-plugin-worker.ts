@@ -50,7 +50,7 @@ export function createPluginWorker<
         assert(job.token, "Job token is not set");
 
         try {
-          return await dataSourceContext.run({ job }, () =>
+          return await dataSourceContext.run({ job, token: job.token }, () =>
             processor(job as never, token, signal),
           );
         } catch (error) {

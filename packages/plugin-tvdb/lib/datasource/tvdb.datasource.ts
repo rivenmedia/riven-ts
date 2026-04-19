@@ -32,6 +32,8 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
 
   #token: TvdbToken | null = null;
 
+  #inFlightLoginRequest: Promise<unknown> | null = null;
+
   protected override rateLimiterOptions: RateLimiterOptions = {
     duration: 1000,
     max: 25,
@@ -152,10 +154,14 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
       return this.#token;
     }
 
-    const response = await this.post<unknown>("login", {
+    this.#inFlightLoginRequest ??= this.post<unknown>("login", {
       body: {
         apikey: this.settings.apiKey,
       },
+    });
+
+    const response = await this.#inFlightLoginRequest.finally(() => {
+      this.#inFlightLoginRequest = null;
     });
 
     const { data } = postLogin200Schema.parse(response);
