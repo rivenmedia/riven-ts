@@ -2,6 +2,7 @@ import { type Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 import chalk from "chalk";
+import os from "node:os";
 import {
   type ActorRef,
   type Snapshot,
@@ -210,90 +211,94 @@ export const mainRunnerMachine = setup({
     /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7ABABwCcB7KAgQwFscKzVcCBXLLMAgYgI2wDoLJUyAWlQAXMBW4AqANoAGALqJQeIrFGoiWJSAAeiAIwAmADQgAnogCsATmvcAHEcsBfZ6bSZchEuSo06OIzMrBxcWIJ4ADYMUHS8-EKi4twEYACODHBiEHKKSCAqaiIaWvl6CEamFggALJaGDjYAzADsLm4gHtj4xKSU1LT0TCzsnJ7xEALCYhIAxqlkxZrcrMQEudqF6pra5ZXmiE2yltzWsgBshu3uYT0+-f5DwaNhE1NJcwtLWNxkkQsQMyCMA6VCwESwDb5LbfXYGEwHCqWeynSxNJyuG6eO59PyDQLDEJjHipEQEIGRVAAI3I5KhylU21KoD2COqRlcHSwRAgcG0XS8vV8AwCQRGm0ZsLKiDa3FkhhaTRqrUsVRlln03Ba50sl3ariAA */
     id: "Riven program main runner",
     initial: "Running",
-    context: ({ input, self }) => ({
-      parentRef: input.parentRef,
-      plugins: input.plugins,
-      publishableEvents: input.publishableEvents,
-      pluginQueues: input.pluginQueues,
-      pluginWorkers: input.pluginWorkers,
-      flowWorkers: {
-        "index-item": createFlowWorker(
-          RequestIndexDataFlow,
-          indexItemProcessor,
-          self.send,
-          input.plugins,
-        ),
-        "request-content-services": createFlowWorker(
-          RequestContentServicesFlow,
-          requestContentServicesProcessor,
-          self.send,
-          input.plugins,
-        ),
-        "scrape-item": createFlowWorker(
-          ScrapeItemFlow,
-          scrapeItemProcessor,
-          self.send,
-          input.plugins,
-        ),
-        "download-item": createFlowWorker(
-          DownloadItemFlow,
-          downloadItemProcessor,
-          self.send,
-          input.plugins,
-        ),
-        "download-item.find-valid-torrent": createFlowWorker(
-          FindValidTorrentFlow,
-          findValidTorrentProcessor,
-          self.send,
-          input.plugins,
-          {
-            streams: {
-              events: {
-                maxLen: 10000,
+    context: ({ input, self }) => {
+      const availableParallelism = os.availableParallelism();
+
+      return {
+        parentRef: input.parentRef,
+        plugins: input.plugins,
+        publishableEvents: input.publishableEvents,
+        pluginQueues: input.pluginQueues,
+        pluginWorkers: input.pluginWorkers,
+        flowWorkers: {
+          "index-item": createFlowWorker(
+            RequestIndexDataFlow,
+            indexItemProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "request-content-services": createFlowWorker(
+            RequestContentServicesFlow,
+            requestContentServicesProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "scrape-item": createFlowWorker(
+            ScrapeItemFlow,
+            scrapeItemProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "download-item": createFlowWorker(
+            DownloadItemFlow,
+            downloadItemProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "download-item.find-valid-torrent": createFlowWorker(
+            FindValidTorrentFlow,
+            findValidTorrentProcessor,
+            self.send,
+            input.plugins,
+            {
+              streams: {
+                events: {
+                  maxLen: 10000,
+                },
               },
             },
-          },
-        ),
-        "download-item.rank-streams": createFlowWorker(
-          RankStreamsFlow,
-          rankStreamsProcessor,
-          self.send,
-          input.plugins,
-        ),
-        "process-item": createFlowWorker(
-          ProcessItemFlow,
-          processItemProcessor,
-          self.send,
-          input.plugins,
-        ),
-      },
-      sandboxedWorkers: {
-        "scrape-item.parse-scrape-results": createSandboxedWorker(
-          ParseScrapeResultsSandboxedJob,
-          new URL(
-            import.meta.resolve("@repo/riven/workers/parse-scrape-results"),
           ),
-          {},
-          { concurrency: 5 },
-        ),
-        "download-item.map-items-to-files": createSandboxedWorker(
-          MapItemsToFilesSandboxedJob,
-          new URL(
-            import.meta.resolve("@repo/riven/workers/map-items-to-files"),
+          "download-item.rank-streams": createFlowWorker(
+            RankStreamsFlow,
+            rankStreamsProcessor,
+            self.send,
+            input.plugins,
           ),
-          {},
-          { concurrency: 15 },
-        ),
-        "download-item.validate-torrent-files": createSandboxedWorker(
-          ValidateTorrentFilesSandboxedJob,
-          new URL(
-            import.meta.resolve("@repo/riven/workers/validate-torrent-files"),
+          "process-item": createFlowWorker(
+            ProcessItemFlow,
+            processItemProcessor,
+            self.send,
+            input.plugins,
           ),
-          {},
-          { concurrency: 5 },
-        ),
-      },
-    }),
+        },
+        sandboxedWorkers: {
+          "scrape-item.parse-scrape-results": createSandboxedWorker(
+            ParseScrapeResultsSandboxedJob,
+            new URL(
+              import.meta.resolve("@repo/riven/workers/parse-scrape-results"),
+            ),
+            {},
+            { concurrency: availableParallelism * 0.25 },
+          ),
+          "download-item.map-items-to-files": createSandboxedWorker(
+            MapItemsToFilesSandboxedJob,
+            new URL(
+              import.meta.resolve("@repo/riven/workers/map-items-to-files"),
+            ),
+            {},
+            { concurrency: availableParallelism * 0.75 },
+          ),
+          "download-item.validate-torrent-files": createSandboxedWorker(
+            ValidateTorrentFilesSandboxedJob,
+            new URL(
+              import.meta.resolve("@repo/riven/workers/validate-torrent-files"),
+            ),
+            {},
+            { concurrency: availableParallelism * 0.25 },
+          ),
+        },
+      };
+    },
     states: {
       Running: {
         invoke: [
