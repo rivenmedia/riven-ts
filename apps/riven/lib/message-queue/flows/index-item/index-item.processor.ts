@@ -44,7 +44,7 @@ export const indexItemProcessor =
         sendEvent(error.payload);
 
         throw new UnrecoverableError(
-          `Failed to persist indexer data: ${String(error)}`,
+          `Failed to persist indexer data: ${error.message}`,
         );
       }
 

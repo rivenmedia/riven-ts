@@ -46,7 +46,7 @@ export const FindValidTorrentFlow = createFlowSchema(
         .min(1),
       failedInfoHashes: z.array(z.hash("sha1")),
     }),
-    output: createPluginResultSchema(ValidTorrent),
+    output: createPluginResultSchema(ValidTorrent).nullable(),
   },
 );
 

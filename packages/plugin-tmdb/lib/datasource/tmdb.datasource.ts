@@ -57,14 +57,14 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     }
   }
 
-  async findById(externalId: string, params: FindByIdQueryParams) {
-    return await this.get<FindById200>(`find/${externalId}`, {
+  findById(externalId: string, params: FindByIdQueryParams) {
+    return this.get<FindById200>(`find/${externalId}`, {
       params,
     });
   }
 
-  async getMovieDetails(movieId: string) {
-    return await this.get<
+  getMovieDetails(movieId: string) {
+    return this.get<
       MovieDetails200 & {
         external_ids: MovieExternalIds200;
       }

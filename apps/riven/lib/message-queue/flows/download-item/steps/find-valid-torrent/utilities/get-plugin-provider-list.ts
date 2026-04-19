@@ -27,7 +27,6 @@ export async function getPluginProviderList(
 
   const pluginProviderListResult = await runSingleJob(
     pluginProviderListNode.job,
-    60_000,
   );
 
   return pluginProviderListResult.providers;

@@ -27,10 +27,7 @@ export async function getCachedTorrentFiles(
     },
   );
 
-  const pluginCacheCheckResult = await runSingleJob(
-    pluginCacheCheckNode.job,
-    60_000,
-  );
+  const pluginCacheCheckResult = await runSingleJob(pluginCacheCheckNode.job);
 
   return pluginCacheCheckResult[infoHash];
 }

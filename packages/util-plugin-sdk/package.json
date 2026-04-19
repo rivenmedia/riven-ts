@@ -55,6 +55,10 @@
     "./validation": {
       "production": "./dist/validation/index.js",
       "default": "./lib/validation/index.ts"
+    },
+    "./datasource-context": {
+      "production": "./dist/datasource/context.js",
+      "default": "./lib/datasource/context.ts"
     }
   },
   "scripts": {

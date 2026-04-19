@@ -24,6 +24,8 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
   override baseURL = this.settings.stremThruUrl;
   override serviceName = "StremThru [Torz]";
 
+  protected override concurrency = 5;
+
   #buildCommonHeaders(store: Store) {
     return {
       [storeNameHeader]: store,
@@ -88,8 +90,9 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     const { data } = AddTorrentResponse.parse(response);
 
     if (!data) {
-      console.log(response);
-      throw new StremThruAPIError(`No data returned from ${store}`);
+      throw new StremThruAPIError(
+        `No data returned from ${store} for ${infoHash}`,
+      );
     }
 
     if (data.status !== "downloaded") {
@@ -97,7 +100,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
         await this.removeTorrent(data.id, store);
       } catch (removeError) {
         this.logger.warn(
-          `Failed to remove torrent ${data.id}: ${String(removeError)}`,
+          `Failed to remove torrent ${data.id} for ${infoHash} on ${store}: ${String(removeError)}`,
         );
       }
 
