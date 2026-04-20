@@ -17,8 +17,6 @@ export const processItemProcessor = processItemProcessorSchema.implementAsync(
       queue: job.queueQualifiedName,
     } satisfies ParentOptions;
 
-    const { priority } = job;
-
     while (job.data.step !== "complete") {
       switch (job.data.step) {
         case "index": {
@@ -41,8 +39,6 @@ export const processItemProcessor = processItemProcessorSchema.implementAsync(
             ...job.data,
             step: "scrape",
           });
-
-          await job.changePriority({ priority: priority - 1 });
 
           if (await job.moveToWaitingChildren(token)) {
             throw new WaitingChildrenError();
@@ -69,8 +65,6 @@ export const processItemProcessor = processItemProcessorSchema.implementAsync(
             ...job.data,
             step: "download",
           });
-
-          await job.changePriority({ priority: priority - 1 });
 
           if (await job.moveToWaitingChildren(token)) {
             throw new WaitingChildrenError();
@@ -105,8 +99,6 @@ export const processItemProcessor = processItemProcessorSchema.implementAsync(
             ...job.data,
             step: "complete",
           });
-
-          await job.changePriority({ priority: priority - 1 });
 
           if (await job.moveToWaitingChildren(token)) {
             throw new WaitingChildrenError();

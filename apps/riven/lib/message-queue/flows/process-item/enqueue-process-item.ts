@@ -35,7 +35,6 @@ export async function enqueueProcessItem(
           deduplication: {
             id: `process-item-${item.id}`,
           },
-          priority: ProcessItemFlow.shape.input.shape.step.options.length,
         },
       ),
     },
