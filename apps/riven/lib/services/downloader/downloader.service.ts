@@ -1,3 +1,5 @@
+import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
+
 import {
   EnsureRequestContext,
   Transactional,
@@ -14,5 +16,15 @@ export class DownloaderService extends BaseService {
   @Transactional()
   async downloadItem(id: UUID, torrent: ValidTorrent, processedBy: string) {
     return persistDownloadResults(this.em, id, torrent, processedBy);
+  }
+
+  @EnsureRequestContext()
+  async getItemToDownload(mediaItemId: UUID) {
+    return this.em.getRepository(MediaItem).findOne({
+      id: mediaItemId,
+      state: {
+        $in: ["scraped", "ongoing", "partially_completed"],
+      },
+    });
   }
 }

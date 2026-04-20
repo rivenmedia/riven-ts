@@ -74,7 +74,7 @@ export function createSandboxedWorker(
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
-    logger.error("Sandboxed worker encountered an error", { err: error });
+    logger.error(`${sandboxedJobName} failed:`, { err: error });
   });
 
   return { worker, queue };

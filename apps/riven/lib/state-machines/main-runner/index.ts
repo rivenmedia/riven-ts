@@ -2,6 +2,7 @@ import { type Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 import chalk from "chalk";
+import { Duration } from "luxon";
 import os from "node:os";
 import {
   type ActorRef,
@@ -18,10 +19,10 @@ import { findValidTorrentProcessor } from "../../message-queue/flows/download-it
 import { FindValidTorrentFlow } from "../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { rankStreamsProcessor } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.processor.ts";
 import { RankStreamsFlow } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.schema.ts";
-import { indexItemProcessor } from "../../message-queue/flows/index-item/index-item.processor.ts";
-import { RequestIndexDataFlow } from "../../message-queue/flows/index-item/index-item.schema.ts";
-import { processItemProcessor } from "../../message-queue/flows/process-item/process-item.processor.ts";
-import { ProcessItemFlow } from "../../message-queue/flows/process-item/process-item.schema.ts";
+import { processItemRequestProcessor } from "../../message-queue/flows/process-item-request/process-item-request.processor.ts";
+import { ProcessItemRequestFlow } from "../../message-queue/flows/process-item-request/process-item-request.schema.ts";
+import { processItemProcessor } from "../../message-queue/flows/process-media-item/process-media-item.processor.ts";
+import { ProcessMediaItemFlow } from "../../message-queue/flows/process-media-item/process-media-item.schema.ts";
 import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
 import { RequestContentServicesFlow } from "../../message-queue/flows/request-content-services/request-content-services.schema.ts";
 import { scrapeItemProcessor } from "../../message-queue/flows/scrape-item/scrape-item.processor.ts";
@@ -32,10 +33,16 @@ import { ValidateTorrentFilesSandboxedJob } from "../../message-queue/sandboxed-
 import { createSandboxedWorker } from "../../message-queue/sandboxed-jobs/utilities/create-sandboxed-worker.ts";
 import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
 import { logger } from "../../utilities/logger/logger.ts";
+import { settings } from "../../utilities/settings.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { createEventScheduler } from "./actors/event-scheduler.actor.ts";
+import {
+  type FanOutDownloadInput,
+  fanOutDownload,
+} from "./actors/fan-out-download.actor.ts";
 import { jobEnqueuer } from "./actors/job-enqueuer.actor.ts";
-import { processItem } from "./actors/process-item.actor.ts";
+import { processItemRequest } from "./actors/process-item-request.actor.ts";
+import { processMediaItem } from "./actors/process-media-item.actor.ts";
 import { requestContentServices } from "./actors/request-content-services.actor.ts";
 import { retryLibrary } from "./actors/retry-library.actor.ts";
 import {
@@ -46,7 +53,8 @@ import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscrib
 
 import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
 import type { Flow } from "../../message-queue/flows/index.ts";
-import type { EnqueueProcessItemInput } from "../../message-queue/flows/process-item/enqueue-process-item.ts";
+import type { ProcessItemRequestInput } from "../../message-queue/flows/process-item-request/enqueue-process-item-request.ts";
+import type { EnqueueProcessMediaItemInput } from "../../message-queue/flows/process-media-item/enqueue-process-media-item.ts";
 import type { SandboxedJobDefinition } from "../../message-queue/sandboxed-jobs/index.ts";
 import type {
   PluginQueueMap,
@@ -100,7 +108,8 @@ export const mainRunnerMachine = setup({
     events: {} as MainRunnerMachineEvent,
     children: {} as {
       requestContentServices: "requestContentServices";
-      processItem: "processItem";
+      processItemRequest: "processItemRequest";
+      processMediaItem: "processMediaItem";
     },
   },
   actions: {
@@ -122,10 +131,27 @@ export const mainRunnerMachine = setup({
         });
       },
     ),
-    processItem: enqueueActions(
-      ({ enqueue }, input: Omit<EnqueueProcessItemInput, "subscribers">) => {
-        enqueue.spawnChild("processItem", {
-          id: "processItem",
+    processItemRequest: enqueueActions(
+      (
+        { enqueue, context: { plugins } },
+        input: Omit<ProcessItemRequestInput, "subscribers">,
+      ) => {
+        enqueue.spawnChild("processItemRequest", {
+          id: "processItemRequest",
+          input: {
+            item: input.item,
+            subscribers: getPluginEventSubscribers(
+              "riven.media-item.index.requested",
+              plugins,
+            ),
+          },
+        });
+      },
+    ),
+    processMediaItem: enqueueActions(
+      ({ enqueue }, input: EnqueueProcessMediaItemInput) => {
+        enqueue.spawnChild("processMediaItem", {
+          id: "processMediaItem",
           input,
         });
       },
@@ -155,14 +181,26 @@ export const mainRunnerMachine = setup({
         },
       });
     }),
+    fanOutDownload: enqueueActions(
+      ({ enqueue }, params: FanOutDownloadInput) => {
+        enqueue.spawnChild("fanOutDownload", {
+          id: "fanOutDownload",
+          input: {
+            item: params.item,
+          },
+        });
+      },
+    ),
   },
   actors: {
     createEventScheduler,
     jobEnqueuer,
-    processItem,
+    processMediaItem,
+    processItemRequest,
     retryLibrary,
     requestContentServices,
     scheduleReindex,
+    fanOutDownload,
   },
   guards: {
     /**
@@ -221,9 +259,15 @@ export const mainRunnerMachine = setup({
         pluginQueues: input.pluginQueues,
         pluginWorkers: input.pluginWorkers,
         flowWorkers: {
-          "index-item": createFlowWorker(
-            RequestIndexDataFlow,
-            indexItemProcessor,
+          "process-item-request": createFlowWorker(
+            ProcessItemRequestFlow,
+            processItemRequestProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "process-media-item": createFlowWorker(
+            ProcessMediaItemFlow,
+            processItemProcessor,
             self.send,
             input.plugins,
           ),
@@ -238,6 +282,37 @@ export const mainRunnerMachine = setup({
             scrapeItemProcessor,
             self.send,
             input.plugins,
+            {},
+            {
+              settings: {
+                backoffStrategy: (attemptsMade) => {
+                  const [after2, after5, after10] =
+                    settings.scrapeCooldownHours;
+
+                  if (attemptsMade >= 10) {
+                    return Duration.fromObject({ hours: after10 }).as(
+                      "milliseconds",
+                    );
+                  }
+
+                  if (attemptsMade >= 5) {
+                    return Duration.fromObject({ hours: after5 }).as(
+                      "milliseconds",
+                    );
+                  }
+
+                  if (attemptsMade >= 2) {
+                    return Duration.fromObject({ hours: after2 }).as(
+                      "milliseconds",
+                    );
+                  }
+
+                  return Duration.fromObject({ minutes: 30 }).as(
+                    "milliseconds",
+                  );
+                },
+              },
+            },
           ),
           "download-item": createFlowWorker(
             DownloadItemFlow,
@@ -261,12 +336,6 @@ export const mainRunnerMachine = setup({
           "download-item.rank-streams": createFlowWorker(
             RankStreamsFlow,
             rankStreamsProcessor,
-            self.send,
-            input.plugins,
-          ),
-          "process-item": createFlowWorker(
-            ProcessItemFlow,
-            processItemProcessor,
             self.send,
             input.plugins,
           ),
@@ -361,17 +430,9 @@ export const mainRunnerMachine = setup({
                 }),
               },
               {
-                type: "processItem",
-                params: ({ event: { item } }) => ({
-                  item,
-                  step: "index",
-                  scrapeLevel: item.type === "show" ? "season" : "movie",
-                }),
+                type: "processItemRequest",
+                params: ({ event: { item } }) => ({ item }),
               },
-              // {
-              //   type: "requestIndexData",
-              //   params: ({ event: { item } }) => ({ item }),
-              // },
             ],
           },
 
@@ -498,6 +559,10 @@ export const mainRunnerMachine = setup({
                     level: "info",
                   }),
                 },
+                {
+                  type: "processMediaItem",
+                  params: ({ event: { item } }) => ({ item }),
+                },
               ],
             },
             {
@@ -559,10 +624,10 @@ export const mainRunnerMachine = setup({
                   level: "verbose",
                 }),
               },
-              // {
-              //   type: "fanOutDownload",
-              //   params: ({ event: { item } }) => ({ item }),
-              // },
+              {
+                type: "fanOutDownload",
+                params: ({ event: { item } }) => ({ item }),
+              },
             ],
           },
 
@@ -631,10 +696,10 @@ export const mainRunnerMachine = setup({
                   message: `Partially downloaded ${fullTitle} using ${downloader}. Attempting to download the remaining items separately.`,
                 }),
               },
-              // {
-              //   type: "fanOutDownload",
-              //   params: ({ event: { item } }) => ({ item }),
-              // },
+              {
+                type: "fanOutDownload",
+                params: ({ event: { item } }) => ({ item }),
+              },
             ],
           },
 
@@ -643,17 +708,9 @@ export const mainRunnerMachine = setup({
               "Indicates that an error occurred during the download process for a media item.",
             actions: [
               {
-                type: "log",
-                params: ({ event: { item, error } }) => ({
-                  message: `Error downloading ${chalk.bold(item.fullTitle)}`,
-                  level: "error",
-                  error,
-                }),
+                type: "fanOutDownload",
+                params: ({ event: { item } }) => ({ item }),
               },
-              // {
-              //   type: "fanOutDownload",
-              //   params: ({ event: { item } }) => ({ item }),
-              // },
             ],
           },
 

@@ -17,14 +17,10 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
     >((acc, scrapeResult) => Object.assign(acc, scrapeResult.results), {});
 
     try {
-      const { item, newStreamsCount } =
-        await services.scraperService.scrapeItem(job.data.id, parsedResults);
-
-      if (newStreamsCount === 0) {
-        throw new MediaItemScrapeErrorNoNewStreams({
-          item,
-        });
-      }
+      const { item } = await services.scraperService.scrapeItem(
+        job.data.id,
+        parsedResults,
+      );
 
       sendEvent({
         type: "riven.media-item.scrape.success",
@@ -32,13 +28,16 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
       });
     } catch (error) {
       if (
-        error instanceof MediaItemScrapeErrorNoNewStreams ||
         error instanceof MediaItemScrapeErrorIncorrectState ||
         error instanceof MediaItemScrapeError
       ) {
         sendEvent(error.payload);
 
         throw new UnrecoverableError(error.message);
+      }
+
+      if (error instanceof MediaItemScrapeErrorNoNewStreams) {
+        sendEvent(error.payload);
       }
 
       throw error;

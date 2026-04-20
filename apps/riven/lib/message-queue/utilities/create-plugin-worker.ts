@@ -72,7 +72,7 @@ export function createPluginWorker<
   registerMQListeners(worker, logger);
 
   worker.on("failed", (_job, error) => {
-    logger.error("Plugin worker encountered an error", { err: error });
+    logger.error(`${queueName} failed:`, { err: error });
   });
 
   return {

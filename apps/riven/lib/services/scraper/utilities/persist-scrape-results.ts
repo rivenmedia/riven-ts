@@ -54,9 +54,5 @@ export async function persistScrapeResults(
     });
   }
 
-  if (newStreamsCount === 0) {
-    throw new MediaItemScrapeErrorNoNewStreams({ item });
-  }
-
   return newStreamsCount;
 }

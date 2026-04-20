@@ -4,14 +4,14 @@ import { DateTime } from "luxon";
 import { fromPromise } from "xstate";
 
 import {
-  type EnqueueIndexItemInput,
-  enqueueIndexItem,
-} from "../../../message-queue/flows/index-item/enqueue-index-item.ts";
+  type ProcessItemRequestInput,
+  enqueueProcessItemRequest,
+} from "../../../message-queue/flows/process-item-request/enqueue-process-item-request.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
 
 export interface ScheduleReindexInput extends Pick<
-  EnqueueIndexItemInput,
+  ProcessItemRequestInput,
   "subscribers"
 > {
   item: Movie | Show;
@@ -37,7 +37,7 @@ export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
     const jobDelay = scheduleFor.diffNow().as("milliseconds");
     const itemRequest = await item.itemRequest.loadOrFail();
 
-    await enqueueIndexItem(
+    await enqueueProcessItemRequest(
       {
         item: itemRequest,
         subscribers,

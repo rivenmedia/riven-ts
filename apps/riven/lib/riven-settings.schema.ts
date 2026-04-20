@@ -1,5 +1,6 @@
 import { json } from "@repo/util-plugin-sdk/validation";
 
+import dedent from "dedent";
 import z from "zod";
 
 import { LogLevel } from "./utilities/logger/log-levels.ts";
@@ -63,6 +64,23 @@ export const RivenSettings = z.object({
     .stringbool()
     .default(false)
     .describe("Only scrape dubbed anime."),
+  scrapeCooldownHours: json(
+    z.tuple([
+      z.int().nonnegative().default(2),
+      z.int().nonnegative().default(6),
+      z.int().nonnegative().default(24),
+    ]),
+  ).default([2, 6, 24]).describe(dedent`
+      The cooldown periods (in hours) to apply after failed scrape attempts,
+      in the format [> 2 attempts, > 5 attempts, > 10 attempts].
+    `),
+  maximumScrapeAttempts: z
+    .int()
+    .nonnegative()
+    .default(Number.MAX_SAFE_INTEGER)
+    .describe(
+      "The maximum number of scrape attempts before giving up on an item.",
+    ),
   minimumAverageBitrateMovies: z
     .int()
     .positive()

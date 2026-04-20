@@ -147,12 +147,12 @@ export async function enqueueDownloadItem({
     { id: item.id },
     {
       children: [findValidTorrentNode],
-      opts: toMerged<typeof opts, PartialDeep<NonNullable<FlowJob["opts"]>>>(
-        opts,
-        {
-          failParentOnFailure: true,
-        },
-      ),
+      opts: toMerged<
+        NonNullable<FlowJob["opts"]>,
+        PartialDeep<NonNullable<FlowJob["opts"]>>
+      >(opts, {
+        continueParentOnFailure: true,
+      }),
     },
   );
 

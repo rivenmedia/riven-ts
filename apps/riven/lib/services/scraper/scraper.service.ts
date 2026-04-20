@@ -19,9 +19,15 @@ import type { ParsedData } from "@repo/util-rank-torrent-name";
 import type { UUID } from "node:crypto";
 
 export class ScraperService extends BaseService {
-  #updateScrapeMetadata(item: MediaItem) {
+  #updateScrapeMetadata(item: MediaItem, success: boolean) {
     item.scrapedAt = DateTime.now().toJSDate();
     item.scrapedTimes++;
+
+    if (success) {
+      item.failedAttempts = 0;
+    } else {
+      item.failedAttempts++;
+    }
   }
 
   @EnsureRequestContext()
@@ -31,28 +37,44 @@ export class ScraperService extends BaseService {
       .getRepository(MediaItem)
       .findOneOrFail(id, { populate: ["streams.infoHash"] });
 
-    const processableStates = MediaItemState.extract([
-      "indexed",
-      "ongoing",
-      "scraped",
-      "partially_completed",
-    ]);
-
-    assert(
-      processableStates.safeParse(existingItem.state).success,
-      new MediaItemScrapeErrorIncorrectState({
-        item: existingItem,
-      }),
-    );
-
     try {
+      if (Object.keys(results).length === 0) {
+        throw new MediaItemScrapeErrorNoNewStreams({
+          item: existingItem,
+          error: new Error(
+            `No streams returned from scrapers for ${chalk.bold(existingItem.fullTitle)}`,
+          ),
+        });
+      }
+
+      const processableStates = MediaItemState.extract([
+        "indexed",
+        "ongoing",
+        "scraped",
+        "partially_completed",
+      ]);
+
+      assert(
+        processableStates.safeParse(existingItem.state).success,
+        new MediaItemScrapeErrorIncorrectState({
+          item: existingItem,
+        }),
+      );
+
       const newStreamsCount = await persistScrapeResults(
         this.em,
         existingItem,
         results,
       );
 
-      existingItem.failedAttempts = 0;
+      if (newStreamsCount === 0) {
+        throw new MediaItemScrapeErrorNoNewStreams({
+          item: existingItem,
+          error: new Error(
+            `No new streams added for ${chalk.bold(existingItem.fullTitle)}`,
+          ),
+        });
+      }
 
       const { logger } = await import("../../utilities/logger/logger.ts");
 
@@ -60,7 +82,7 @@ export class ScraperService extends BaseService {
         `Added ${newStreamsCount.toString()} new streams to ${chalk.bold(existingItem.fullTitle)}`,
       );
 
-      this.#updateScrapeMetadata(existingItem);
+      this.#updateScrapeMetadata(existingItem, true);
 
       return {
         item: existingItem,
@@ -70,14 +92,7 @@ export class ScraperService extends BaseService {
       if (error instanceof MediaItemScrapeErrorNoNewStreams) {
         // We only want to consider an attempt as failed if no new streams were added
         // instead of on *any* error (e.g. a database error) that occurs during the persist process.
-        existingItem.failedAttempts++;
-
-        this.#updateScrapeMetadata(existingItem);
-
-        return {
-          item: existingItem,
-          newStreamsCount: 0,
-        };
+        this.#updateScrapeMetadata(error.payload.item, false);
       }
 
       throw error;
@@ -85,13 +100,13 @@ export class ScraperService extends BaseService {
   }
 
   @EnsureRequestContext()
-  async getItemsToScrape(requestId: UUID, requestType: MediaItemType) {
+  async getItemsToScrape(mediaItemId: UUID, mediaItemType: MediaItemType) {
     return this.em.getRepository(MediaItem).find({
-      itemRequest: { id: requestId },
+      id: mediaItemId,
       state: {
         $in: ["indexed", "ongoing", "scraped", "partially_completed"],
       },
-      type: requestType,
+      type: mediaItemType,
       isRequested: true,
     });
   }

@@ -3,12 +3,12 @@ import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas
 
 import { UnrecoverableError } from "bullmq";
 
-import { requestIndexDataProcessorSchema } from "./index-item.schema.ts";
+import { processItemRequestProcessorSchema } from "./process-item-request.schema.ts";
 
 import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-export const indexItemProcessor =
-  requestIndexDataProcessorSchema.implementAsync(async function (
+export const processItemRequestProcessor =
+  processItemRequestProcessorSchema.implementAsync(async function (
     { job },
     { sendEvent, services },
   ) {
