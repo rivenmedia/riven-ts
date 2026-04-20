@@ -201,7 +201,7 @@ export async function persistShowIndexerData(
           : "completed",
     });
 
-    return await em.refreshOrFail(show);
+    return show;
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

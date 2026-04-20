@@ -93,6 +93,11 @@ export class ScraperService extends BaseService {
         // We only want to consider an attempt as failed if no new streams were added
         // instead of on *any* error (e.g. a database error) that occurs during the persist process.
         this.#updateScrapeMetadata(error.payload.item, false);
+
+        return {
+          item: error.payload.item,
+          newStreamsCount: 0,
+        };
       }
 
       throw error;

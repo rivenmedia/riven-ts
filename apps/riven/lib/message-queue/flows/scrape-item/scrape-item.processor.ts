@@ -3,6 +3,7 @@ import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schema
 import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 
 import { UnrecoverableError } from "bullmq";
+import chalk from "chalk";
 
 import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
 
@@ -17,10 +18,17 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
     >((acc, scrapeResult) => Object.assign(acc, scrapeResult.results), {});
 
     try {
-      const { item } = await services.scraperService.scrapeItem(
-        job.data.id,
-        parsedResults,
-      );
+      const { item, newStreamsCount } =
+        await services.scraperService.scrapeItem(job.data.id, parsedResults);
+
+      if (newStreamsCount === 0) {
+        throw new MediaItemScrapeErrorNoNewStreams({
+          error: new Error(
+            `No new streams added for ${chalk.bold(item.fullTitle)}`,
+          ),
+          item,
+        });
+      }
 
       sendEvent({
         type: "riven.media-item.scrape.success",
