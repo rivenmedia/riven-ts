@@ -135,6 +135,11 @@ export const processItemProcessor =
               step: "scrape",
               nextScrapeAttemptTimestamp: nextScrapeAttemptTimestamp.toMillis(),
             });
+          } else {
+            await job.updateData({
+              ...job.data,
+              step: "complete",
+            });
           }
 
           break;
@@ -154,4 +159,20 @@ export const processItemProcessor =
         `Processing of ${chalk.bold(item.fullTitle)} did not complete successfully. Final state: ${item.state}`,
       );
     }
+
+    const duration = DateTime.fromMillis(job.timestamp)
+      .diffNow(["seconds", "minutes", "hours", "days", "weeks"])
+      .rescale()
+      .negate()
+      .toHuman({
+        showZeros: false,
+        maximumFractionDigits: 0,
+        unitDisplay: "narrow",
+      });
+
+    logger.info(
+      chalk.greenBright(
+        `${chalk.bold(item.fullTitle)} has been downloaded in ${duration}`,
+      ),
+    );
   });

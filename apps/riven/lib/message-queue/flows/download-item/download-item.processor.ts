@@ -4,6 +4,7 @@ import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/med
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
 import { UnrecoverableError } from "bullmq";
+import chalk from "chalk";
 import { DateTime } from "luxon";
 
 import { database } from "../../../database/database.ts";
@@ -23,7 +24,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
       });
 
       throw new UnrecoverableError(
-        "No valid torrent found after trying all downloaders",
+        `Failed to download ${chalk.bold(item.fullTitle)}: No valid torrent found after trying all downloaders`,
       );
     }
 

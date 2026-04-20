@@ -486,15 +486,6 @@ export const mainRunnerMachine = setup({
                   level: "silly",
                 }),
               },
-              // {
-              //   type: "requestScrape",
-              //   params: ({ event: { item } }) => ({
-              //     items: item.requestedItems.filter(
-              //       (item) =>
-              //         item.state === "indexed" && item.type === "season",
-              //     ),
-              //   }),
-              // },
             ],
           },
 
