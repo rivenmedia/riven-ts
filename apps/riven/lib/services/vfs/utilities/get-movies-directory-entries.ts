@@ -1,6 +1,7 @@
 import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import { reduceAsync } from "es-toolkit";
+import path from "node:path";
 
 import type { PathInfo } from "../schemas/path-info.schema.ts";
 import type { EntityManager } from "@mikro-orm/core";
@@ -18,7 +19,6 @@ export const getMoviesDirectoryEntries = async (
       },
     },
     {
-      populate: ["mediaItem"],
       fields: [
         "originalFilename",
         "mediaItem.title",
@@ -32,17 +32,13 @@ export const getMoviesDirectoryEntries = async (
     await reduceAsync(
       entries,
       async (acc, entry) => {
-        if (pathType === "single-movie") {
-          return acc.add(await entry.getVfsFileName());
-        }
+        const vfsFileName = await entry.getVfsFileName();
 
-        const prettyName = await entry.mediaItem.getEntity().getPrettyName();
-
-        if (!prettyName) {
-          return acc;
-        }
-
-        return acc.add(prettyName);
+        return acc.add(
+          pathType === "single-movie"
+            ? vfsFileName
+            : path.parse(vfsFileName).name,
+        );
       },
       new Set<string>(),
     ),

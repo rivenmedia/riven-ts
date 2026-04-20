@@ -93,7 +93,7 @@ export abstract class FileSystemEntry {
    */
   @Property({ persist: false, hidden: true })
   get baseDirectory(): Opt<Hidden<"movies" | "shows">> {
-    const mediaItemType = this.mediaItem.getEntity().type;
+    const { type: mediaItemType } = this.mediaItem.getEntity();
 
     if (mediaItemType === "movie") {
       return "movies";

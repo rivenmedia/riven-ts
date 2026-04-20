@@ -39,7 +39,7 @@ export class Movie extends MediaItem {
   }
 
   getPrettyName(): string {
-    return `${this.title} (${this.year?.toString() ?? "Unknown"}) {tmdb-${this.tmdbId}}`;
+    return `${this.title.replaceAll(".", "")} (${this.year?.toString() ?? "Unknown"}) {tmdb-${this.tmdbId}}`;
   }
 
   getExpectedFileCount(): number {
