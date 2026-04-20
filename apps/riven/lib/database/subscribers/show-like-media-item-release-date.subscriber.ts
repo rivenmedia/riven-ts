@@ -46,6 +46,7 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
 
       if (season.releaseDate == null) {
         season.releaseDate = item.releaseDate;
+        season.year = item.releaseDate.getUTCFullYear();
 
         uow.computeChangeSet(season);
       }
@@ -55,6 +56,7 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
 
         if (show.releaseDate == null) {
           show.releaseDate = season.releaseDate;
+          show.year = season.releaseDate.getUTCFullYear();
 
           uow.computeChangeSet(show);
         }

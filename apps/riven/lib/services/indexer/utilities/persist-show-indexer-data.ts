@@ -66,11 +66,6 @@ export async function persistShowIndexerData(
   }
 
   try {
-    const firstEpisodeAirDate = item.seasons[1]?.episodes[0]?.airedAt;
-    const firstAired = firstEpisodeAirDate
-      ? DateTime.fromISO(firstEpisodeAirDate)
-      : null;
-
     const show =
       existingShow ??
       em.create(
@@ -90,7 +85,6 @@ export async function persistShowIndexerData(
     show.contentRating = item.contentRating;
     show.posterPath = item.posterUrl ?? show.posterPath ?? null;
     show.nextAirDate = null; // Reset the next air date; it will be recalculated during episode processing
-    show.year = firstAired?.year ?? show.year ?? null;
     show.country = item.country ?? show.country ?? null;
     show.language = item.language ?? show.language ?? null;
     show.aliases = {
@@ -148,12 +142,6 @@ export async function persistShowIndexerData(
       await em.upsert(seasonEntry);
 
       for (const episode of season.episodes) {
-        if (episode.number === 1 && episode.airedAt) {
-          const episodeAirDate = DateTime.fromISO(episode.airedAt);
-
-          seasonEntry.year = episodeAirDate.year;
-        }
-
         const [existingEpisode] = existingSeason
           ? await existingSeason.episodes.matching({
               limit: 1,
@@ -162,10 +150,6 @@ export async function persistShowIndexerData(
               },
             })
           : [null];
-
-        const episodeYear = episode.airedAt
-          ? DateTime.fromISO(episode.airedAt).year
-          : seasonEntry.year;
 
         const episodeEntry =
           existingEpisode ??
@@ -186,7 +170,6 @@ export async function persistShowIndexerData(
         episodeEntry.absoluteNumber = episode.absoluteNumber;
         episodeEntry.contentRating = episode.contentRating;
         episodeEntry.runtime = episode.runtime;
-        episodeEntry.year = episodeYear ?? null;
         episodeEntry.releaseDate = episode.airedAt
           ? DateTime.fromISO(episode.airedAt).toJSDate()
           : null;

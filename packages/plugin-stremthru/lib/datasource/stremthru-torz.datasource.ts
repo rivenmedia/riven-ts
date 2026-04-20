@@ -163,8 +163,6 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     for (let i = 0; i < infoHashes.length; i += chunkSize) {
       const chunk = infoHashSet.values().drop(i).take(chunkSize).toArray();
 
-      console.log(infoHashSet.size, chunk.length);
-
       requests.push(this.#processCacheCheckChunk(chunk, store));
     }
 
