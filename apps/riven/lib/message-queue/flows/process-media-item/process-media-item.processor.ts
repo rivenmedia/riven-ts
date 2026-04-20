@@ -115,9 +115,12 @@ export const processItemProcessor =
 
     // Validate the final state of the item after all processing is complete
 
-    const item = await database.em.getRepository(MediaItem).findOneOrFail({
-      id: job.data.mediaItem.id,
-    });
+    const item = await database.em
+      .fork()
+      .getRepository(MediaItem)
+      .findOneOrFail({
+        id: job.data.mediaItem.id,
+      });
 
     if (item.state !== "completed") {
       throw new UnrecoverableError(
