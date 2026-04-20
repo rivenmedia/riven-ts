@@ -100,8 +100,8 @@ export class ScraperService extends BaseService {
   }
 
   @EnsureRequestContext()
-  async getItemsToScrape(mediaItemId: UUID, mediaItemType: MediaItemType) {
-    return this.em.getRepository(MediaItem).find({
+  async getItemToScrape(mediaItemId: UUID, mediaItemType: MediaItemType) {
+    return this.em.getRepository(MediaItem).findOneOrFail({
       id: mediaItemId,
       state: {
         $in: ["indexed", "ongoing", "scraped", "partially_completed"],

@@ -642,10 +642,6 @@ export const mainRunnerMachine = setup({
                   level: "info",
                 }),
               },
-              // {
-              //   type: "requestDownload",
-              //   params: ({ event: { item } }) => ({ item }),
-              // },
             ],
           },
 
@@ -728,17 +724,6 @@ export const mainRunnerMachine = setup({
               "Retries any incomplete media items and item requests.",
             actions: { type: "retryLibrary" },
           },
-
-          // "riven-internal.retry-item-download": {
-          //   description:
-          //     "Retries the download process for a scraped media item.",
-          //   actions: {
-          //     // type: "requestDownload",
-          //     // params: ({ event: { item } }) => ({
-          //     //   item,
-          //     // }),
-          //   },
-          // },
         },
       },
       Errored: {

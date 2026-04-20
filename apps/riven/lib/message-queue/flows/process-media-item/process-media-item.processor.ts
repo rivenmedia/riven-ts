@@ -1,15 +1,18 @@
 import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 import {
+  DelayedError,
   type ParentOptions,
   UnrecoverableError,
   WaitingChildrenError,
 } from "bullmq";
 import chalk from "chalk";
+import { DateTime } from "luxon";
 import assert from "node:assert";
 
 import { database } from "../../../database/database.ts";
 import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
 import { enqueueDownloadItem } from "../download-item/enqueue-download-item.ts";
 import { enqueueScrapeItems } from "../scrape-item/enqueue-scrape-items.ts";
 import { processMediaItemProcessorSchema } from "./process-media-item.schema.ts";
@@ -30,13 +33,22 @@ export const processItemProcessor =
     while (job.data.step !== "complete") {
       switch (job.data.step) {
         case "scrape": {
-          const itemsToScrape = await services.scraperService.getItemsToScrape(
+          if (
+            job.data.nextScrapeAttemptTimestamp &&
+            DateTime.utc().toMillis() <= job.data.nextScrapeAttemptTimestamp
+          ) {
+            await job.moveToDelayed(job.data.nextScrapeAttemptTimestamp);
+
+            throw new DelayedError();
+          }
+
+          const itemToScrape = await services.scraperService.getItemToScrape(
             job.data.mediaItem.id,
             job.data.mediaItem.type,
           );
 
           await enqueueScrapeItems({
-            items: itemsToScrape,
+            items: [itemToScrape],
             subscribers: getPluginEventSubscribers(
               "riven.media-item.scrape.requested",
               plugins,
@@ -44,8 +56,10 @@ export const processItemProcessor =
             parent: jobParent,
           });
 
+          const { nextScrapeAttemptTimestamp, ...data } = job.data;
+
           await job.updateData({
-            ...job.data,
+            ...data,
             step: "download",
           });
 
@@ -93,7 +107,7 @@ export const processItemProcessor =
 
           await job.updateData({
             ...job.data,
-            step: "complete",
+            step: "validate",
           });
 
           if (await job.moveToWaitingChildren(token)) {
@@ -102,18 +116,31 @@ export const processItemProcessor =
 
           break;
         }
+        case "validate": {
+          const childFailures = Object.values(
+            await job.getIgnoredChildrenFailures(),
+          );
+
+          if (childFailures[0]) {
+            const nextScrapeAttemptTimestamp = DateTime.utc().plus({
+              minutes: 30,
+            });
+
+            logger.info(
+              `Scheduling re-scrape for ${chalk.bold(job.data.mediaItem.title)} in ${nextScrapeAttemptTimestamp.diffNow("minutes").toHuman()}`,
+            );
+
+            await job.updateData({
+              ...job.data,
+              step: "scrape",
+              nextScrapeAttemptTimestamp: nextScrapeAttemptTimestamp.toMillis(),
+            });
+          }
+
+          break;
+        }
       }
     }
-
-    const childFailures = Object.values(await job.getIgnoredChildrenFailures());
-
-    if (childFailures[0]) {
-      throw new UnrecoverableError(
-        `${chalk.bold(job.data.mediaItem.title)} failed to download: ${childFailures[0]}`,
-      );
-    }
-
-    // Validate the final state of the item after all processing is complete
 
     const item = await database.em
       .fork()
