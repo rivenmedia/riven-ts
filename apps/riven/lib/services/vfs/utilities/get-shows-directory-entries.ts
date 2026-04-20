@@ -2,12 +2,12 @@ import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import path from "node:path";
 
+import type { PathInfo } from "../schemas/path-info.schema.ts";
 import type { EntityManager } from "@mikro-orm/core";
 
 export const getShowsDirectoryEntries = async (
   em: EntityManager,
-  tvdbId: string | undefined,
-  season: number | undefined,
+  { tvdbId, season }: PathInfo,
 ): Promise<string[]> => {
   const entries = await em.find(
     MediaEntry,

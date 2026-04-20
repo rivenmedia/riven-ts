@@ -18,11 +18,11 @@ export async function getVfsDirectoryEntryPaths(
   switch (pathInfo.pathType) {
     case "all-movies":
     case "single-movie":
-      return getMoviesDirectoryEntries(em, pathInfo.tmdbId);
+      return getMoviesDirectoryEntries(em, pathInfo);
     case "all-shows":
     case "show-seasons":
     case "season-episodes":
-      return getShowsDirectoryEntries(em, pathInfo.tvdbId, pathInfo.season);
+      return getShowsDirectoryEntries(em, pathInfo);
     case "single-episode":
       return [pathInfo.base];
   }

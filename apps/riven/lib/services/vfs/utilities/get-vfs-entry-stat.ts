@@ -74,6 +74,9 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
             filesystemEntries: {
               $some: {
                 type: "media",
+                mediaItem: {
+                  type: "episode",
+                },
               },
             },
           },
@@ -139,6 +142,9 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
         filesystemEntries: {
           $some: {
             type: "media",
+            mediaItem: {
+              type: "movie",
+            },
           },
         },
       });
@@ -231,12 +237,14 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
         })
       : 0;
 
+  const isFileEntry = entry instanceof Movie || entry instanceof Episode;
+
   const attrs = stat(
     {
       ctime: entry.createdAt,
       atime: entry.updatedAt ?? entry.createdAt,
       mtime: entry.updatedAt ?? entry.createdAt,
-      ...(entry instanceof Movie || entry instanceof Episode
+      ...(isFileEntry && pathInfo.data.isFile
         ? {
             size: entry.filesystemEntries[0]?.fileSize ?? 0,
             mode: "file",

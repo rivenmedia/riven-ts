@@ -52,9 +52,10 @@ export const databaseConfig = {
         "riven.log.source": "database",
       });
 
-      logger.verbose(message);
+      logger.data(message);
     });
   },
+  debug: settings.databaseDebugLogging,
   seeder: {
     pathTs: "./seeders",
   },

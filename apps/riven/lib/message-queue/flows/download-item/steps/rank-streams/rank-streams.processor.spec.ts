@@ -37,8 +37,15 @@ it("does not include trashed streams", async ({
   });
 
   const result = await rankStreamsProcessor(
-    { job, scope: mockSentryScope },
-    { sendEvent: vi.fn(), services },
+    {
+      job,
+      scope: mockSentryScope,
+    },
+    {
+      sendEvent: vi.fn(),
+      services,
+      plugins: new Map(),
+    },
   );
 
   expect(result).toEqual(
@@ -98,8 +105,15 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
   });
 
   const result = await rankStreamsProcessor(
-    { job, scope: mockSentryScope },
-    { sendEvent: vi.fn(), services },
+    {
+      job,
+      scope: mockSentryScope,
+    },
+    {
+      sendEvent: vi.fn(),
+      services,
+      plugins: new Map(),
+    },
   );
 
   expect(result).toEqual([
@@ -161,8 +175,15 @@ it("handles foreign language movies with aliases correctly", async ({
   });
 
   const result = await rankStreamsProcessor(
-    { job, scope: mockSentryScope },
-    { sendEvent: vi.fn(), services },
+    {
+      job,
+      scope: mockSentryScope,
+    },
+    {
+      sendEvent: vi.fn(),
+      services,
+      plugins: new Map(),
+    },
   );
 
   expect(result).toEqual([
@@ -209,8 +230,15 @@ it("handles foreign language shows with aliases correctly", async ({
   });
 
   const result = await rankStreamsProcessor(
-    { job, scope: mockSentryScope },
-    { sendEvent: vi.fn(), services },
+    {
+      job,
+      scope: mockSentryScope,
+    },
+    {
+      sendEvent: vi.fn(),
+      services,
+      plugins: new Map(),
+    },
   );
 
   expect(result).toEqual([

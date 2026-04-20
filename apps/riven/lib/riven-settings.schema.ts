@@ -6,6 +6,10 @@ import { LogLevel } from "./utilities/logger/log-levels.ts";
 
 export const RivenSettings = z.object({
   databaseUrl: z.url().describe("The database connection URL."),
+  databaseDebugLogging: z
+    .stringbool()
+    .default(false)
+    .describe("Enable debug logging for the database."),
   redisUrl: z.url().describe("The Redis server URL."),
   vfsDebugLogging: z
     .stringbool()

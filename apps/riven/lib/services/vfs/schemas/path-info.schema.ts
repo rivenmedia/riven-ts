@@ -20,29 +20,37 @@ const episodeGroupsSchema = z.object({
 
 type PathGroups = z.infer<typeof pathGroupsSchema>;
 
+type PathType =
+  | "all-movies"
+  | "single-movie"
+  | "all-shows"
+  | "show-seasons"
+  | "season-episodes"
+  | "single-episode";
+
 const determinePathType = (
   pathGroups: PathGroups,
   episode: number | undefined,
   tvdbId: string | undefined,
   tmdbId: string | undefined,
-) => {
+): PathType => {
   if (pathGroups.type === "movies") {
-    return tmdbId ? ("single-movie" as const) : ("all-movies" as const);
+    return tmdbId ? "single-movie" : "all-movies";
   }
 
   if (tvdbId && !pathGroups.season) {
-    return "show-seasons" as const;
+    return "show-seasons";
   }
 
   if (tvdbId && pathGroups.season && !episode) {
-    return "season-episodes" as const;
+    return "season-episodes";
   }
 
   if (tvdbId && pathGroups.season && episode) {
-    return "single-episode" as const;
+    return "single-episode";
   }
 
-  return "all-shows" as const;
+  return "all-shows";
 };
 
 export const PathInfo = z

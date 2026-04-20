@@ -2,11 +2,12 @@ import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import { reduceAsync } from "es-toolkit";
 
+import type { PathInfo } from "../schemas/path-info.schema.ts";
 import type { EntityManager } from "@mikro-orm/core";
 
 export const getMoviesDirectoryEntries = async (
   em: EntityManager,
-  tmdbId: string | undefined,
+  { tmdbId, pathType }: PathInfo,
 ): Promise<string[]> => {
   const entries = await em.find(
     MediaEntry,
@@ -16,14 +17,22 @@ export const getMoviesDirectoryEntries = async (
         ...(tmdbId && { tmdbId }),
       },
     },
-    { populate: ["$infer"] },
+    {
+      populate: ["mediaItem"],
+      fields: [
+        "originalFilename",
+        "mediaItem.title",
+        "mediaItem.year",
+        "mediaItem.tmdbId",
+      ],
+    },
   );
 
   return Array.from(
     await reduceAsync(
       entries,
       async (acc, entry) => {
-        if (tmdbId) {
+        if (pathType === "single-movie") {
           return acc.add(await entry.getVfsFileName());
         }
 

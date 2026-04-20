@@ -44,8 +44,15 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   const sendEvent = vi.fn();
 
   await downloadItemProcessor(
-    { job, scope: mockSentryScope },
-    { sendEvent, services },
+    {
+      job,
+      scope: mockSentryScope,
+    },
+    {
+      sendEvent,
+      services,
+      plugins: new Map(),
+    },
   );
 
   expect(sendEvent).toHaveBeenCalledWith({
@@ -106,8 +113,15 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
   const sendEvent = vi.fn();
 
   await downloadItemProcessor(
-    { job, scope: mockSentryScope },
-    { sendEvent, services },
+    {
+      job,
+      scope: mockSentryScope,
+    },
+    {
+      sendEvent,
+      services,
+      plugins: new Map(),
+    },
   );
 
   expect(sendEvent).toHaveBeenCalledWith({
@@ -134,7 +148,11 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
       job,
       scope: mockSentryScope,
     },
-    { sendEvent, services },
+    {
+      sendEvent,
+      services,
+      plugins: new Map(),
+    },
   ).catch(() => {
     /* empty */
   });

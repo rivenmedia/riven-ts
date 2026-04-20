@@ -19,8 +19,15 @@ it("throws an unrecoverable error if the item cannot be scraped", async ({
 
   await expect(() =>
     scrapeItemProcessor(
-      { job, scope: mockSentryScope },
-      { sendEvent: vi.fn(), services },
+      {
+        job,
+        scope: mockSentryScope,
+      },
+      {
+        sendEvent: vi.fn(),
+        services,
+        plugins: new Map(),
+      },
     ),
   ).rejects.toThrow();
 });
@@ -55,7 +62,11 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
       job,
       scope: mockSentryScope,
     },
-    { sendEvent, services },
+    {
+      sendEvent,
+      services,
+      plugins: new Map(),
+    },
   );
 
   expect(sendEvent).toHaveBeenCalledWith({
