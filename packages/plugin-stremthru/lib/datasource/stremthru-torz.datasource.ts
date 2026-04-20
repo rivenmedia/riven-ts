@@ -123,11 +123,11 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     return DeleteTorrentResponse.parse(response).data;
   }
 
-  async getCachedTorrents(infoHashes: string[], store: Store) {
+  async #processCacheCheckChunk(chunk: string[], store: Store) {
     const response = await this.get<unknown>("v0/store/torz/check", {
       headers: this.#buildCommonHeaders(store),
       params: {
-        hash: infoHashes.join(","),
+        hash: chunk.join(","),
       },
       cacheOptions: {
         ttl: 60 * 60 * 24,
@@ -152,6 +152,26 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
       acc[item.hash] = item.files;
 
       return acc;
+    }, {});
+  }
+
+  async getCachedTorrents(infoHashes: string[], store: Store) {
+    const chunkSize = 500;
+    const infoHashSet = new Set(infoHashes);
+    const requests: Promise<Record<string, DebridFile[]>>[] = [];
+
+    for (let i = 0; i < infoHashes.length; i += chunkSize) {
+      const chunk = infoHashSet.values().drop(i).take(chunkSize).toArray();
+
+      console.log(infoHashSet.size, chunk.length);
+
+      requests.push(this.#processCacheCheckChunk(chunk, store));
+    }
+
+    const results = await Promise.all(requests);
+
+    return results.reduce<Record<string, DebridFile[]>>((acc, result) => {
+      return Object.assign(acc, result);
     }, {});
   }
 
