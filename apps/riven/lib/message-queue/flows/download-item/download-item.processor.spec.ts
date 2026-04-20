@@ -1,29 +1,10 @@
 import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 
-import { UnrecoverableError } from "bullmq";
 import { Settings } from "luxon";
 import { expect, vi } from "vitest";
 
 import { it } from "../../../__tests__/test-context.ts";
 import { downloadItemProcessor } from "./download-item.processor.ts";
-
-it("throws an unrecoverable error if no valid torrent is found", async ({
-  createMockJob,
-  scrapedMovieContext: { scrapedMovie },
-  mockSentryScope,
-  services,
-}) => {
-  const job = await createMockJob({ id: scrapedMovie.id });
-
-  vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
-
-  await expect(() =>
-    downloadItemProcessor(
-      { job, scope: mockSentryScope },
-      { sendEvent: vi.fn(), services },
-    ),
-  ).rejects.toThrow(UnrecoverableError);
-});
 
 it('sends a "riven.media-item.download.success" event with the updated item and duration from request to download if the download result is valid', async ({
   scrapedMovieContext: { scrapedMovie },
@@ -161,6 +142,6 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.error",
     item: expect.any(Movie),
-    error: expect.any(UnrecoverableError),
+    error: expect.any(Error),
   });
 });

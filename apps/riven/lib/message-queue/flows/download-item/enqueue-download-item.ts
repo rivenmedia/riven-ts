@@ -3,6 +3,8 @@ import {
   createSettings,
 } from "@repo/util-rank-torrent-name";
 
+import { toMerged } from "es-toolkit";
+
 import { flow } from "../producer.ts";
 import { createDownloadItemJob } from "./download-item.schema.ts";
 import { createFindValidTorrentJob } from "./steps/find-valid-torrent/find-valid-torrent.schema.ts";
@@ -10,6 +12,8 @@ import { createRankStreamsJob } from "./steps/rank-streams/rank-streams.schema.t
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
+import type { FlowJob } from "bullmq";
+import type { PartialDeep, SetRequired } from "type-fest";
 
 const rtnSettings = createSettings({
   exclude: ["\\bmatte\\b"],
@@ -92,11 +96,13 @@ const rtnRankingModel = createRankingModel({
 export interface EnqueueDownloadItemInput {
   item: MediaItem;
   subscribers: RivenPlugin[];
+  opts: SetRequired<NonNullable<FlowJob["opts"]>, "parent">;
 }
 
 export async function enqueueDownloadItem({
   item,
   subscribers,
+  opts,
 }: EnqueueDownloadItemInput) {
   const streams = await item.streams.loadItems();
 
@@ -141,11 +147,12 @@ export async function enqueueDownloadItem({
     { id: item.id },
     {
       children: [findValidTorrentNode],
-      opts: {
-        deduplication: {
-          id: `download-item-${item.id}`,
+      opts: toMerged<typeof opts, PartialDeep<NonNullable<FlowJob["opts"]>>>(
+        opts,
+        {
+          failParentOnFailure: true,
         },
-      },
+      ),
     },
   );
 

@@ -36,8 +36,7 @@ export const findValidTorrentProcessor =
     const infoHashes = rankedStreams.map((stream) => stream.hash);
     const uncheckedInfoHashes = new Set(infoHashes)
       .difference(new Set(failedInfoHashes))
-      .values()
-      .toArray();
+      .values();
 
     const jobParentOptions = {
       id: jobId,
@@ -68,20 +67,28 @@ export const findValidTorrentProcessor =
           for (const provider of providerList) {
             scope.setTag("riven.downloader-provider", provider);
 
+            await job.log(
+              `Checking ${infoHash} on ${plugin.pluginName}${provider ? ` via ${provider}` : ""}`,
+            );
+
             try {
               if (plugin.hasCacheCheckHook) {
+                await job.log(`${infoHash}: Checking for cached files`);
+
                 logger.debug(
                   `Checking for ${chalk.bold(infoHash)} in ${plugin.pluginName} cache${provider ? ` for ${provider}` : ""}...`,
                 );
 
                 const cachedFiles = await getCachedTorrentFiles(
                   plugin.pluginName,
-                  infoHash,
+                  infoHashes,
                   jobParentOptions,
                   provider,
                 );
 
-                if (!cachedFiles) {
+                if (!cachedFiles[infoHash]) {
+                  await job.log(`${infoHash}: No cached files found`);
+
                   logger.verbose(
                     `${infoHash} is not immediately available on ${plugin.pluginName}${provider ? ` via ${provider}` : ""} for ${mediaItem.fullTitle}; skipping...`,
                   );
@@ -96,10 +103,12 @@ export const findValidTorrentProcessor =
                 await getValidTorrentFiles(
                   mediaItem,
                   infoHash,
-                  cachedFiles,
+                  cachedFiles[infoHash],
                   true,
                   jobParentOptions,
                 );
+
+                await job.log(`${infoHash}: Cached files are valid`);
               }
 
               const pluginDownloadResult = await getPluginDownloadResult(
@@ -109,6 +118,8 @@ export const findValidTorrentProcessor =
                 jobParentOptions,
               );
 
+              await job.log(`${infoHash}: Downloaded torrent metadata`);
+
               const validatedFiles = await getValidTorrentFiles(
                 mediaItem,
                 infoHash,
@@ -116,6 +127,8 @@ export const findValidTorrentProcessor =
                 false,
                 jobParentOptions,
               );
+
+              await job.log(`${infoHash}: Downloaded files are valid`);
 
               return {
                 plugin: plugin.pluginName,
@@ -146,6 +159,8 @@ export const findValidTorrentProcessor =
               `Skipping all further processing of ${infoHash} due to failed files validation for ${mediaItem.fullTitle}`,
             );
 
+            await job.log(`${infoHash} failed validation: ${error.message}`);
+
             break;
           }
 
@@ -157,13 +172,13 @@ export const findValidTorrentProcessor =
         `Info hash ${chalk.bold(infoHash)} failed validation for all plugins for ${mediaItem.type} ${chalk.bold(mediaItem.fullTitle)}`,
       );
 
+      await job.log(`${infoHash} failed validation for all plugins`);
+
       await job.updateData({
         ...job.data,
         failedInfoHashes: [...failedInfoHashes, infoHash],
       });
     }
 
-    throw new UnrecoverableError(
-      `No valid torrent found for ${mediaItem.fullTitle} after trying ${availableDownloaders.length.toString()} plugins`,
-    );
+    return null;
   });

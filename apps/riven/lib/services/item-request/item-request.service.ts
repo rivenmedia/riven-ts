@@ -1,3 +1,5 @@
+import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+
 import {
   CreateRequestContext,
   Transactional,
@@ -8,6 +10,7 @@ import { persistRequestedMovie } from "./utilities/persist-requested-movie.ts";
 import { persistRequestedShow } from "./utilities/persist-requested-show.ts";
 
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
+import type { UUID } from "node:crypto";
 
 export class ItemRequestService extends BaseService {
   @CreateRequestContext()
@@ -38,5 +41,10 @@ export class ItemRequestService extends BaseService {
     logger.silly(`Processing requested show: ${externalIds.join(", ")}`);
 
     return persistRequestedShow(this.em, item);
+  }
+
+  @CreateRequestContext()
+  async getItemRequest(id: UUID) {
+    return this.em.findOneOrFail(ItemRequest, { id });
   }
 }

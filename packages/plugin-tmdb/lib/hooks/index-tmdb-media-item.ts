@@ -10,9 +10,7 @@ export const indexTMDBMediaItem: z.infer<
   typeof MediaItemIndexRequestedEventHandler
 > = async ({ dataSources, event }) => {
   if (event.item.type !== "movie") {
-    throw new UnrecoverableError(
-      `TMDB plugin can only index movies. Received item of type ${event.item.type}`,
-    );
+    return null;
   }
 
   if (!event.item.tmdbId && !event.item.imdbId) {

@@ -1,3 +1,4 @@
+import { dataSourceContext } from "@repo/util-plugin-sdk/datasource-context";
 import {
   type RivenEvent,
   RivenEventHandler,
@@ -6,6 +7,7 @@ import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-l
 
 import * as Sentry from "@sentry/node";
 import { type Processor, Worker, type WorkerOptions } from "bullmq";
+import assert from "node:assert";
 import z from "zod";
 
 import { logger } from "../../utilities/logger/logger.ts";
@@ -45,8 +47,12 @@ export function createPluginWorker<
           "riven.plugin.name": pluginName,
         });
 
+        assert(job.token, "Job token is not set");
+
         try {
-          return await processor(job as never, token, signal);
+          return await dataSourceContext.run({ job, token: job.token }, () =>
+            processor(job as never, token, signal),
+          );
         } catch (error) {
           Sentry.captureException(error);
 

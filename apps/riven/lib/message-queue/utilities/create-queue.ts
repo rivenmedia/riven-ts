@@ -19,13 +19,13 @@ export function createQueue(
       {
         streams: {
           events: {
-            maxLen: 100,
+            maxLen: 10000,
           },
         },
         defaultJobOptions: {
           removeOnComplete: {
             age: 60 * 60 * 6,
-            count: 500,
+            count: 5000,
           },
           removeOnFail: {
             age: 60 * 60 * 24,

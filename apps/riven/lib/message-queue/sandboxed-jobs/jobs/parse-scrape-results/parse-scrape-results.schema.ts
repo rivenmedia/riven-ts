@@ -20,6 +20,7 @@ export const ParseScrapeResultsSandboxedJob = createSandboxedJobSchema(
     }),
     input: z.object({
       id: UUID,
+      title: z.string(),
     }),
   },
 );

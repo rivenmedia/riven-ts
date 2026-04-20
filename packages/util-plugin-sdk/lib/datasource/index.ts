@@ -8,15 +8,18 @@ import {
 } from "@apollo/datasource-rest";
 import {
   type ConnectionOptions,
-  type Job,
+  Job,
+  type ParentOptions,
   Queue,
   QueueEvents,
   RateLimitError,
   type RateLimiterOptions,
   type Telemetry,
+  UnrecoverableError,
   Worker,
 } from "bullmq";
 import { DateTime } from "luxon";
+import { URL } from "node:url";
 import { Logger } from "winston";
 import z from "zod";
 
@@ -24,6 +27,7 @@ import { benchmark } from "../helpers/benchmark.ts";
 import { registerMQListeners } from "../helpers/register-mq-listeners.ts";
 import { json } from "../validation/json.ts";
 import { urlSearchParamsCodec } from "../validation/url-search-params-parser.ts";
+import { dataSourceContext } from "./context.ts";
 
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import type { Promisable } from "type-fest";
@@ -75,6 +79,10 @@ export abstract class BaseDataSource<
 
   protected readonly rateLimiterOptions?: RateLimiterOptions | undefined;
 
+  protected readonly concurrency: number = 1;
+
+  #requestAttempts: number;
+
   #queue: Queue<FetchJobInput, FetchResponse>;
   #queueEvents: QueueEvents;
   #worker: Worker<FetchJobInput, FetchResponse>;
@@ -96,19 +104,14 @@ export abstract class BaseDataSource<
     this.#keyv = apolloDataSourceOptions.cache as KeyvAdapter;
 
     this.serviceName = this.constructor.name;
+    this.#requestAttempts = requestAttempts;
     this.#queueId = `${pluginSymbol.description ?? "unknown"}-${this.serviceName}-fetch-queue`;
     this.#queue = new Queue(this.#queueId, {
       connection,
       defaultJobOptions: {
-        attempts: requestAttempts,
-        backoff: {
-          type: "exponential",
-          delay: 5000,
-          jitter: 0.5,
-        },
         removeOnComplete: {
           age: 60 * 60,
-          count: 500,
+          count: 5000,
         },
         removeOnFail: {
           age: 60 * 60 * 24,
@@ -117,7 +120,7 @@ export abstract class BaseDataSource<
       },
       streams: {
         events: {
-          maxLen: 100,
+          maxLen: 100000,
         },
       },
       telemetry,
@@ -128,6 +131,8 @@ export abstract class BaseDataSource<
     this.#worker = new Worker(
       this.#queueId,
       async (job) => {
+        await job.log(`Processing request for ${job.data.path}`);
+
         const {
           timeTaken,
           result: { parsedBody, response, responseFromCache },
@@ -150,6 +155,8 @@ export abstract class BaseDataSource<
           return super.fetch(job.data.path, job.data.incomingRequest);
         });
 
+        await job.log(`Request completed`);
+
         return {
           parsedBody,
           response: {
@@ -170,7 +177,7 @@ export abstract class BaseDataSource<
         telemetry,
         // The datasource worker only handles I/O operations, so a high concurrency can be used.
         // https://docs.bullmq.io/guide/parallelism-and-concurrency#how-to-best-use-bullmqs-concurrency-then
-        concurrency: 200,
+        concurrency: this.concurrency,
       },
     );
 
@@ -273,6 +280,8 @@ export abstract class BaseDataSource<
       headers: incomingRequest?.headers ?? {},
     };
 
+    augmentedRequest.method ??= "GET";
+
     await this.willSendRequest?.(path, augmentedRequest);
 
     const downcasedHeaders: Record<string, string> = {};
@@ -332,6 +341,52 @@ export abstract class BaseDataSource<
     throw new Error("Unable to determine the request body type.");
   }
 
+  async #getOrCreateRequestJob(
+    path: string,
+    request: AugmentedRequest,
+    cacheKey: string,
+    parentOptions?: ParentOptions,
+  ) {
+    const jobId =
+      request.method === "GET" ? cacheKey.replaceAll(/[: ]/g, "_") : undefined;
+
+    const pendingJob = jobId ? await this.#queue.getJob(jobId) : undefined;
+
+    if (pendingJob) {
+      return pendingJob;
+    }
+
+    const bodyType = this.#determineRequestBodyType(request.body);
+
+    if (bodyType === "url-search-params") {
+      request.body = urlSearchParamsCodec.encode(
+        request.body as URLSearchParams,
+      );
+    }
+
+    return this.#queue.add(
+      cacheKey,
+      {
+        path,
+        incomingRequest: request,
+        bodyType,
+        params: urlSearchParamsCodec.encode(request.params),
+      },
+      {
+        // Use a stable job ID to enable deduplication of idempotent GET requests
+        ...(jobId && { jobId }),
+        ...(parentOptions ? { parent: parentOptions } : {}),
+        attempts: this.#requestAttempts,
+        backoff: {
+          type: "exponential",
+          delay: 10_000,
+          jitter: 0.5,
+        },
+        removeDependencyOnFailure: true,
+      },
+    );
+  }
+
   override async fetch<T>(
     path: string,
     incomingRequest?: DataSourceRequest,
@@ -352,35 +407,27 @@ export abstract class BaseDataSource<
       return await super.fetch(path, augmentedRequest);
     }
 
-    const bodyType = this.#determineRequestBodyType(augmentedRequest.body);
+    const context = dataSourceContext.getStore();
 
-    if (bodyType === "url-search-params") {
-      augmentedRequest.body = urlSearchParamsCodec.encode(
-        augmentedRequest.body as URLSearchParams,
-      );
-    }
+    const jobParentOptions = context?.job.id
+      ? ({
+          id: context.job.id,
+          queue: context.job.queueQualifiedName,
+        } satisfies ParentOptions)
+      : undefined;
 
-    const job = await this.#queue.add(
+    const job = await this.#getOrCreateRequestJob(
+      path,
+      augmentedRequest,
       cacheKey,
-      {
-        path,
-        incomingRequest: augmentedRequest,
-        bodyType,
-        params: urlSearchParamsCodec.encode(augmentedRequest.params),
-      },
-      {
-        // Use a stable job ID to enable deduplication of idempotent GET requests
-        ...(augmentedRequest.method === "GET" && {
-          jobId: cacheKey.replaceAll(":", "_"),
-        }),
-      },
+      jobParentOptions,
     );
 
     const result = await job.waitUntilFinished(this.#queueEvents, 60_000);
 
     const logMessage = result.responseFromCache
-      ? `[${this.serviceName}] Returned cached response for ${augmentedRequest.method ?? "GET"} ${url}`
-      : `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url} in ${(result.responseTime / 1000).toFixed(2)} seconds`;
+      ? `[${this.serviceName}] Returned cached response for ${augmentedRequest.method ?? "GET"} ${url.toString()}`
+      : `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url.toString()} in ${(result.responseTime / 1000).toFixed(2)} seconds`;
 
     if (!result.response.ok) {
       throw new Error(logMessage);
@@ -420,16 +467,23 @@ export abstract class BaseDataSource<
       const waitMs = this.#parseRetryAfterHeader(
         response.headers.get("Retry-After") ?? "",
       );
+      const defaultWaitMs = 10000;
+
+      await this.#queue.rateLimit(
+        waitMs === null || waitMs <= 0 ? defaultWaitMs : waitMs,
+      );
 
       this.logger.warn(
         waitMs
-          ? `[${this.serviceName}] Received 429 Too Many Requests response for ${url}; retrying after ${Math.round(waitMs / 1000).toFixed(0)} seconds`
-          : `[${this.serviceName}] Received 429 response without valid Retry-After header for ${url}. Using default wait time of 5 seconds.`,
+          ? `[${this.serviceName}] Received 429 Too Many Requests response for ${url.toString()}; retrying after ${Math.round(waitMs / 1000).toFixed(0)} seconds`
+          : `[${this.serviceName}] Received 429 response without valid Retry-After header for ${url.toString()}. Using default wait time of ${(defaultWaitMs / 1000).toFixed(0)} seconds.`,
       );
 
-      await this.#queue.rateLimit(waitMs ?? 5000);
-
       throw Worker.RateLimitError();
+    }
+
+    if (response.status === 404) {
+      throw new UnrecoverableError(`Resource not found at ${url.toString()}`);
     }
   }
 
@@ -442,7 +496,19 @@ export abstract class BaseDataSource<
       return;
     }
 
-    this.logger.error(`[${this.serviceName}] API Error for ${url}`, {
+    if (error instanceof UnrecoverableError) {
+      return;
+    }
+
+    if ("code" in error && error.code === "ETIMEDOUT") {
+      this.logger.warn(
+        `[${this.serviceName}] Request to ${url.toString()} timed out.`,
+      );
+
+      return;
+    }
+
+    this.logger.error(`[${this.serviceName}] API Error for ${url.toString()}`, {
       err: error,
     });
   }

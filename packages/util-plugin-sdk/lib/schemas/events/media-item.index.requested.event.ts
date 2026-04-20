@@ -59,7 +59,7 @@ export const MediaItemIndexRequestedResponse = z
                 title: z.string(),
                 posterPath: z.url().nullish(),
                 airedAt: ReleaseDatetime.nullable(),
-                runtime: z.int().positive().nullable(),
+                runtime: z.int().nonnegative().nullable(),
               }),
             ),
           }),
@@ -69,7 +69,7 @@ export const MediaItemIndexRequestedResponse = z
         type: z.literal("movie"),
         releaseDate: ReleaseDatetime.nullable(),
         contentRating: MovieContentRating,
-        runtime: z.int().positive().nullable(),
+        runtime: z.int().nonnegative().nullable(),
       }),
     ]),
   })

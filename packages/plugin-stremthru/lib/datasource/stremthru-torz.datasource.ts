@@ -1,13 +1,4 @@
-import {
-  BaseDataSource,
-  type BasePluginContext,
-  type ParamsFor,
-} from "@repo/util-plugin-sdk";
-import {
-  Episode,
-  Season,
-  ShowLikeMediaItem,
-} from "@repo/util-plugin-sdk/dto/entities";
+import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
 
 import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
 import { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
@@ -15,7 +6,6 @@ import { DeleteTorrentResponse } from "../schemas/delete-torrent-response.schema
 import { GenerateLinkResponse } from "../schemas/generate-link-response.schema.ts";
 import { ItemStatus } from "../schemas/item-status.schema.ts";
 import { Store } from "../schemas/store.schema.ts";
-import { TorznabResponse } from "../schemas/torznab-response.schema.ts";
 
 import type { StremThruSettings } from "../stremthru-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
@@ -24,16 +14,17 @@ import type {
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
 import type { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
-import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 
 const storeNameHeader = "x-stremthru-store-name";
 
 export class StremThruAPIError extends Error {}
 
-export class StremThruAPI extends BaseDataSource<StremThruSettings> {
+export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
   override baseURL = this.settings.stremThruUrl;
-  override serviceName = "StremThru";
+  override serviceName = "StremThru [Torz]";
+
+  protected override concurrency = 5;
 
   #buildCommonHeaders(store: Store) {
     return {
@@ -42,13 +33,9 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
   }
 
   protected override willSendRequest(
-    path: string,
+    _path: string,
     requestOpts: AugmentedRequest,
   ): ValueOrPromise<void> {
-    if (path.startsWith("v0/torznab")) {
-      return;
-    }
-
     const { data: store } = Store.safeParse(
       requestOpts.headers[storeNameHeader],
     );
@@ -103,7 +90,9 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
     const { data } = AddTorrentResponse.parse(response);
 
     if (!data) {
-      throw new StremThruAPIError(`No data returned from ${store}`);
+      throw new StremThruAPIError(
+        `No data returned from ${store} for ${infoHash}`,
+      );
     }
 
     if (data.status !== "downloaded") {
@@ -111,7 +100,7 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
         await this.removeTorrent(data.id, store);
       } catch (removeError) {
         this.logger.warn(
-          `Failed to remove torrent ${data.id}: ${String(removeError)}`,
+          `Failed to remove torrent ${data.id} for ${infoHash} on ${store}: ${String(removeError)}`,
         );
       }
 
@@ -149,7 +138,11 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
       data: { items },
     } = CacheCheckResponse.parse(response);
 
-    const allowedStatuses = ItemStatus.extract(["cached"]);
+    const allowedStatuses = ItemStatus.extract([
+      "cached",
+      "downloaded",
+      "unknown",
+    ]);
 
     return items.reduce<Record<string, DebridFile[]>>((acc, item) => {
       if (!allowedStatuses.safeParse(item.status).success) {
@@ -171,84 +164,6 @@ export class StremThruAPI extends BaseDataSource<StremThruSettings> {
     const { data } = GenerateLinkResponse.parse(response);
 
     return data;
-  }
-
-  async scrape({
-    item,
-  }: ParamsFor<MediaItemScrapeRequestedEvent>): Promise<
-    Record<string, string>
-  > {
-    try {
-      const params = new URLSearchParams({
-        o: "json",
-      });
-
-      if (item.imdbId) {
-        params.set("imdbid", item.imdbId);
-      } else {
-        params.set("q", item.title);
-      }
-
-      if (item instanceof ShowLikeMediaItem) {
-        params.set("t", "tvsearch");
-        params.set("cat", "5000");
-      } else {
-        params.set("t", "movie");
-        params.set("cat", "2000");
-      }
-
-      if (item instanceof Season) {
-        params.set("season", item.number.toString());
-      }
-
-      if (item instanceof Episode) {
-        const seasonNumber = await item.season.loadProperty("number");
-
-        params.set("season", seasonNumber.toString());
-        params.set("ep", item.number.toString());
-      }
-
-      const response = await this.get<unknown>("v0/torznab/api", { params });
-
-      const parsed = TorznabResponse.safeParse(response);
-
-      if (!parsed.success) {
-        this.logger.warn(
-          `Invalid torznab response for ${item.fullTitle} (IMDB: ${item.imdbId ?? "N/A"})`,
-        );
-
-        return {};
-      }
-
-      const torrents: Record<string, string> = {};
-
-      for (const torznabItem of parsed.data.channel.items) {
-        const infoHashAttr = torznabItem.attr.find(
-          (a) => a["@attributes"].name === "infohash",
-        );
-
-        const infoHash = infoHashAttr?.["@attributes"].value;
-
-        if (!infoHash || !torznabItem.title) {
-          continue;
-        }
-
-        torrents[infoHash] = torznabItem.title;
-      }
-
-      this.logger.info(
-        `Found ${Object.keys(torrents).length.toString()} torrents from ${this.serviceName} for ${item.fullTitle} (IMDB: ${item.imdbId ?? "N/A"})`,
-      );
-
-      return torrents;
-    } catch (error: unknown) {
-      this.logger.error(
-        `Failed to scrape ${item.fullTitle} (IMDB: ${item.imdbId ?? "N/A"})`,
-        { err: error },
-      );
-
-      return {};
-    }
   }
 }
 

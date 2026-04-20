@@ -1,6 +1,5 @@
 import { type Queue, Worker } from "bullmq";
 import chalk from "chalk";
-import os from "node:os";
 
 import { createPluginWorker } from "../../../message-queue/utilities/create-plugin-worker.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
@@ -72,7 +71,7 @@ export const registerPluginHookWorkers = (
               logger,
             });
           },
-          { concurrency: os.availableParallelism() },
+          { concurrency: 1 },
         );
 
         logger.debug(

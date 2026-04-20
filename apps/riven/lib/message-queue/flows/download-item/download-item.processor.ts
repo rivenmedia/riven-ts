@@ -16,17 +16,15 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
     const item = await database.mediaItem.findOneOrFail(job.data.id);
 
     if (!finalResult) {
-      const error = new UnrecoverableError(
-        "No valid torrent found after trying all downloaders",
-      );
-
       sendEvent({
         type: "riven.media-item.download.error",
         item,
-        error,
+        error: new Error("No valid torrent found after trying all downloaders"),
       });
 
-      throw error;
+      throw new UnrecoverableError(
+        `Failed to download ${item.fullTitle}: No valid torrent found after trying all downloaders`,
+      );
     }
 
     try {
@@ -79,7 +77,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
         sendEvent(error.payload);
 
         throw new UnrecoverableError(
-          `Failed to persist download results for ${item.fullTitle}: ${String(error)}`,
+          `Failed to persist download results for ${item.fullTitle}: ${error.message}`,
         );
       }
 

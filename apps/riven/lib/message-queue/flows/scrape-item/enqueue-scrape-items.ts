@@ -6,15 +6,18 @@ import { flow } from "../producer.ts";
 import { createScrapeItemJob } from "./scrape-item.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { ParentOptions } from "bullmq";
 
 export interface EnqueueScrapeItemInput {
   items: MediaItemScrapeRequestedEvent["item"][];
   subscribers: RivenPlugin[];
+  parent: ParentOptions;
 }
 
 export function enqueueScrapeItems({
   items,
   subscribers,
+  parent,
 }: EnqueueScrapeItemInput) {
   const nodes = items.map((item) => {
     const childNodes = subscribers.map((plugin) =>
@@ -34,14 +37,15 @@ export function enqueueScrapeItems({
         children: [
           createParseScrapeResultsJob(
             "Parse scrape results",
-            { id: item.id },
+            {
+              id: item.id,
+              title: item.fullTitle,
+            },
             { children: childNodes },
           ),
         ],
         opts: {
-          deduplication: {
-            id: `scrape-item-${item.id}`,
-          },
+          parent,
         },
       },
     );

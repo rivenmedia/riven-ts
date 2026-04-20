@@ -3,7 +3,10 @@ import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
 import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 
-import { Transactional } from "@mikro-orm/decorators/legacy";
+import {
+  EnsureRequestContext,
+  Transactional,
+} from "@mikro-orm/decorators/legacy";
 import chalk from "chalk";
 import { DateTime } from "luxon";
 import assert from "node:assert";
@@ -11,6 +14,7 @@ import assert from "node:assert";
 import { BaseService } from "../base-service.ts";
 import { persistScrapeResults } from "./utilities/persist-scrape-results.ts";
 
+import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 import type { UUID } from "node:crypto";
 
@@ -20,6 +24,7 @@ export class ScraperService extends BaseService {
     item.scrapedTimes++;
   }
 
+  @EnsureRequestContext()
   @Transactional()
   async scrapeItem(id: UUID, results: Record<string, ParsedData>) {
     const existingItem = await this.em
@@ -77,5 +82,17 @@ export class ScraperService extends BaseService {
 
       throw error;
     }
+  }
+
+  @EnsureRequestContext()
+  async getItemsToScrape(requestId: UUID, requestType: MediaItemType) {
+    return this.em.getRepository(MediaItem).find({
+      itemRequest: { id: requestId },
+      state: {
+        $in: ["indexed", "ongoing", "scraped", "partially_completed"],
+      },
+      type: requestType,
+      isRequested: true,
+    });
   }
 }
