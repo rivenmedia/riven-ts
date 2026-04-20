@@ -138,7 +138,11 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
       data: { items },
     } = CacheCheckResponse.parse(response);
 
-    const allowedStatuses = ItemStatus.extract(["cached"]);
+    const allowedStatuses = ItemStatus.extract([
+      "cached",
+      "downloaded",
+      "unknown",
+    ]);
 
     return items.reduce<Record<string, DebridFile[]>>((acc, item) => {
       if (!allowedStatuses.safeParse(item.status).success) {
