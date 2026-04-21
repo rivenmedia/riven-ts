@@ -58,7 +58,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.success",
     item: expect.any(Movie),
-    durationFromRequestToDownload: 9,
+    durationMs: 9000,
     downloader: "@repo/plugin-test",
     provider: null,
   });
