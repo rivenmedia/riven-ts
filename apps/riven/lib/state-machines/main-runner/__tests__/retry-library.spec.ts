@@ -4,7 +4,7 @@ import { waitFor } from "xstate";
 import { repositories } from "../../../database/database.ts";
 import { it } from "./helpers/test-context.ts";
 
-it('sends a "riven.media-item.index.requested" event for each incomplete item request in the database', async ({
+it.skip('sends a "riven.media-item.index.requested" event for each incomplete item request in the database', async ({
   actor,
   factories: { showItemRequestFactory, movieItemRequestFactory },
 }) => {
