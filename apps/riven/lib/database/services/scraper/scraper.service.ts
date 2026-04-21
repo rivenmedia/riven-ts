@@ -3,6 +3,7 @@ import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
 import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 
+import { ValidationError } from "@mikro-orm/core";
 import {
   EnsureRequestContext,
   Transactional,
@@ -19,6 +20,31 @@ import type { ParsedData } from "@repo/util-rank-torrent-name";
 import type { UUID } from "node:crypto";
 
 export class ScraperService extends BaseService {
+  @EnsureRequestContext()
+  async getItemToScrape(id: UUID, type: MediaItemType) {
+    const item = await this.em.getRepository(MediaItem).findOneOrFail({
+      id,
+      type,
+      isRequested: true,
+    });
+
+    const processableStates: MediaItemState[] = [
+      "indexed",
+      "ongoing",
+      "scraped",
+      "partially_completed",
+    ];
+
+    if (!processableStates.includes(item.state)) {
+      throw new ValidationError(
+        `${chalk.bold(item.fullTitle)} is ${chalk.bold(item.state)} and cannot be scraped`,
+        item,
+      );
+    }
+
+    return item;
+  }
+
   #updateScrapeMetadata(item: MediaItem, success: boolean) {
     item.scrapedAt = DateTime.now().toJSDate();
     item.scrapedTimes++;
@@ -102,17 +128,5 @@ export class ScraperService extends BaseService {
 
       throw error;
     }
-  }
-
-  @EnsureRequestContext()
-  async getItemToScrape(mediaItemId: UUID, mediaItemType: MediaItemType) {
-    return this.em.getRepository(MediaItem).findOneOrFail({
-      id: mediaItemId,
-      state: {
-        $in: ["indexed", "ongoing", "scraped", "partially_completed"],
-      },
-      type: mediaItemType,
-      isRequested: true,
-    });
   }
 }

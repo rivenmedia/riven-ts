@@ -2,6 +2,7 @@ import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { UnrecoverableError } from "bullmq";
+import chalk from "chalk";
 
 import { processItemRequestProcessorSchema } from "./process-item-request.schema.ts";
 
@@ -15,7 +16,13 @@ export const processItemRequestProcessor =
     const data = await job.getChildrenValues();
 
     if (!Object.values(data).filter(Boolean).length) {
-      throw new UnrecoverableError("No data returned from indexers");
+      const itemRequest = await services.itemRequestService.markAsFailed(
+        job.data.itemRequestId,
+      );
+
+      throw new UnrecoverableError(
+        `Unable to index ${chalk.bold(itemRequest.externalIdsLabel.join(" | "))}`,
+      );
     }
 
     const item = Object.values(data).reduce(

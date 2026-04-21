@@ -47,4 +47,18 @@ export class ItemRequestService extends BaseService {
   async getItemRequest(id: UUID) {
     return this.em.findOneOrFail(ItemRequest, { id });
   }
+
+  @CreateRequestContext()
+  async markAsFailed(id: UUID) {
+    const itemRequest = await this.getItemRequest(id);
+
+    this.em.persist(itemRequest);
+    this.em.assign(itemRequest, {
+      state: "failed",
+    });
+
+    await this.em.flush();
+
+    return itemRequest;
+  }
 }

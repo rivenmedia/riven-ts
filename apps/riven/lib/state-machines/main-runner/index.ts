@@ -533,6 +533,10 @@ export const mainRunnerMachine = setup({
                     level: "info",
                   }),
                 },
+                {
+                  type: "processMediaItem",
+                  params: ({ event: { item } }) => ({ id: item.id }),
+                },
               ],
             },
             {
@@ -552,7 +556,7 @@ export const mainRunnerMachine = setup({
                 },
                 {
                   type: "processMediaItem",
-                  params: ({ event: { item } }) => ({ item }),
+                  params: ({ event: { item } }) => ({ id: item.id }),
                 },
               ],
             },

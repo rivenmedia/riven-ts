@@ -32,6 +32,7 @@ export async function enqueueProcessItemRequest(
 
   const rootNode = createProcessItemRequestJob(
     `Indexing [${item.externalIdsLabel.join(" | ")}]`,
+    { itemRequestId: item.id },
     {
       children: childNodes,
       opts: toMerged<

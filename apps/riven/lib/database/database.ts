@@ -1,6 +1,7 @@
 import { DownloaderService } from "./services/downloader/downloader.service.ts";
 import { IndexerService } from "./services/indexer/indexer.service.ts";
 import { ItemRequestService } from "./services/item-request/item-request.service.ts";
+import { MediaItemService } from "./services/media-item/media-item.service.js";
 import { ScraperService } from "./services/scraper/scraper.service.ts";
 import { VfsService } from "./services/vfs/vfs.service.ts";
 
@@ -45,6 +46,7 @@ export interface Services {
   downloaderService: DownloaderService;
   indexerService: IndexerService;
   itemRequestService: ItemRequestService;
+  mediaItemService: MediaItemService;
   scraperService: ScraperService;
   vfsService: VfsService;
 }
@@ -104,6 +106,7 @@ export async function initORM(options: Partial<Options>) {
     downloaderService: new DownloaderService(orm),
     indexerService: new IndexerService(orm),
     itemRequestService: new ItemRequestService(orm),
+    mediaItemService: new MediaItemService(orm),
     scraperService: new ScraperService(orm),
     vfsService: new VfsService(orm),
   };
