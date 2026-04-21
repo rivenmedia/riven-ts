@@ -1,6 +1,6 @@
 import { type ActorRef, type Snapshot, fromPromise } from "xstate";
 
-import { database } from "../../../database/database.ts";
+import { repositories } from "../../../database/database.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 
 import type { MainRunnerMachineEvent } from "../index.ts";
@@ -14,7 +14,7 @@ export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
     try {
       logger.verbose("Retrying library items");
 
-      const pendingItems = await database.mediaItem.find(
+      const pendingItems = await repositories.mediaItem.find(
         {
           isRequested: true,
           state: {
@@ -31,7 +31,7 @@ export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
         },
       );
 
-      const pendingRequests = await database.itemRequest.find(
+      const pendingRequests = await repositories.itemRequest.find(
         {
           state: {
             $in: ["failed", "requested"],

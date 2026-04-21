@@ -6,7 +6,7 @@ import z, {
   type ZodType,
 } from "zod";
 
-import type { Services } from "../../database/database.ts";
+import type { services } from "../../database/database.ts";
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
 import type { ValidPlugin } from "../../types/plugins.ts";
 import type { Job } from "bullmq";
@@ -52,7 +52,7 @@ export const createFlowSchema = <
           token: z.string().optional(),
         }),
         z.object({
-          services: z.custom<Services["services"]>(),
+          services: z.custom<typeof services>(),
           sendEvent: z.custom<MainRunnerMachineIntake>(),
           plugins: z.map(z.symbol(), z.custom<ValidPlugin>()),
         }),

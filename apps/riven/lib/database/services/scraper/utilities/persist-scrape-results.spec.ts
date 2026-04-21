@@ -6,7 +6,7 @@ import { faker } from "@faker-js/faker";
 import { DateTime } from "luxon";
 import { expect, vi } from "vitest";
 
-import { it } from "../../../__tests__/test-context.ts";
+import { it } from "../../../../__tests__/test-context.ts";
 
 it("returns the updated item if persisting the scrape results is successful", async ({
   seeders: { seedIndexedMovie },

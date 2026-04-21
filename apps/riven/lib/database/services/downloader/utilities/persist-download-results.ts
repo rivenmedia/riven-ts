@@ -15,7 +15,7 @@ import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
 import z from "zod";
 
-import type { ValidTorrent } from "../../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import type { ValidTorrent } from "../../../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import type { UUID } from "node:crypto";
 
 export async function persistDownloadResults(
@@ -118,7 +118,7 @@ export async function persistDownloadResults(
 
         if (!processableStates.safeParse(episode.state).success) {
           const { logger } =
-            await import("../../../utilities/logger/logger.ts");
+            await import("../../../../utilities/logger/logger.ts");
 
           logger.debug(
             `Skipping media entry creation for ${episode.fullTitle} due to "${episode.state}" state`,

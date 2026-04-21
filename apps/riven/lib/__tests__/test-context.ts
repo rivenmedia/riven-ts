@@ -60,10 +60,10 @@ export const it = testBase
 
     return database.orm;
   })
-  .extend("services", { scope: "file" }, async () => {
-    const { database } = await import("../database/database.ts");
+  .extend("services", { scope: "file" }, async ({ orm: _orm }) => {
+    const { services } = await import("../database/database.ts");
 
-    return database.services;
+    return services;
   })
   .extend("em", ({ orm }) => orm.em.fork())
   .extend("factories", async ({ em }) => {

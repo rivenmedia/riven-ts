@@ -66,11 +66,11 @@ export function createFlowWorker<
         });
 
         try {
-          const { database } = await import("../../database/database.ts");
+          const { services } = await import("../../database/database.ts");
 
           return await processor({ job, token, scope } as never, {
             sendEvent,
-            services: database.services,
+            services,
             plugins,
           });
         } catch (error) {

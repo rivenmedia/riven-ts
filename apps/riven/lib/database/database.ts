@@ -1,8 +1,8 @@
-import { DownloaderService } from "../services/downloader/downloader.service.ts";
-import { IndexerService } from "../services/indexer/indexer.service.ts";
-import { ItemRequestService } from "../services/item-request/item-request.service.ts";
-import { ScraperService } from "../services/scraper/scraper.service.ts";
-import { VfsService } from "../services/vfs/vfs.service.ts";
+import { DownloaderService } from "./services/downloader/downloader.service.ts";
+import { IndexerService } from "./services/indexer/indexer.service.ts";
+import { ItemRequestService } from "./services/item-request/item-request.service.ts";
+import { ScraperService } from "./services/scraper/scraper.service.ts";
+import { VfsService } from "./services/vfs/vfs.service.ts";
 
 import type {
   EntityManager,
@@ -23,9 +23,12 @@ import type {
 } from "@repo/util-plugin-sdk/dto/entities";
 import type { EpisodeRepository } from "@repo/util-plugin-sdk/dto/repositories/episode.repository";
 
-export interface Services {
+export interface Database {
   orm: MikroORM;
   em: EntityManager;
+}
+
+export interface Repositories {
   filesystemEntry: EntityRepository<FileSystemEntry>;
   mediaItem: EntityRepository<MediaItem>;
   itemRequest: EntityRepository<ItemRequest>;
@@ -36,21 +39,30 @@ export interface Services {
   mediaEntry: EntityRepository<MediaEntry>;
   subtitleEntry: EntityRepository<SubtitleEntry>;
   stream: EntityRepository<Stream>;
-  services: {
-    downloaderService: DownloaderService;
-    indexerService: IndexerService;
-    itemRequestService: ItemRequestService;
-    scraperService: ScraperService;
-    vfsService: VfsService;
-  };
 }
 
-export let database: Services;
+export interface Services {
+  downloaderService: DownloaderService;
+  indexerService: IndexerService;
+  itemRequestService: ItemRequestService;
+  scraperService: ScraperService;
+  vfsService: VfsService;
+}
 
-export async function initORM(options: Partial<Options>): Promise<Services> {
+export let database: Database;
+
+export let repositories: Repositories;
+
+export let services: Services;
+
+export async function initORM(options: Partial<Options>) {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (database) {
-    return database;
+    return {
+      database,
+      repositories,
+      services,
+    };
   }
 
   const {
@@ -70,9 +82,12 @@ export async function initORM(options: Partial<Options>): Promise<Services> {
   const orm = await MikroORM.init(options);
 
   // Save to cache before returning
-  return (database = {
+  database = {
     orm,
     em: orm.em,
+  };
+
+  repositories = {
     filesystemEntry: orm.em.fork().getRepository(FileSystemEntry),
     mediaItem: orm.em.fork().getRepository(MediaItem),
     itemRequest: orm.em.fork().getRepository(ItemRequest),
@@ -83,12 +98,19 @@ export async function initORM(options: Partial<Options>): Promise<Services> {
     mediaEntry: orm.em.fork().getRepository(MediaEntry),
     subtitleEntry: orm.em.fork().getRepository(SubtitleEntry),
     stream: orm.em.fork().getRepository(Stream),
-    services: {
-      downloaderService: new DownloaderService(orm),
-      indexerService: new IndexerService(orm),
-      itemRequestService: new ItemRequestService(orm),
-      scraperService: new ScraperService(orm),
-      vfsService: new VfsService(orm),
-    },
-  });
+  };
+
+  services = {
+    downloaderService: new DownloaderService(orm),
+    indexerService: new IndexerService(orm),
+    itemRequestService: new ItemRequestService(orm),
+    scraperService: new ScraperService(orm),
+    vfsService: new VfsService(orm),
+  };
+
+  return {
+    database,
+    repositories,
+    services,
+  };
 }

@@ -8,7 +8,7 @@ import {
 import { NotFoundError } from "@mikro-orm/core";
 import chalk from "chalk";
 
-import { database } from "../../../../../database/database.ts";
+import { repositories } from "../../../../../database/database.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../utilities/settings.ts";
 import { SkippedTorrentError } from "../../../../sandboxed-jobs/jobs/parse-scrape-results/utilities/validate-torrent.ts";
@@ -17,7 +17,7 @@ import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution
 
 export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
   async function ({ job }) {
-    const streams = await database.stream.find({
+    const streams = await repositories.stream.find({
       infoHash: {
         $in: Object.keys(job.data.streams),
       },
@@ -27,7 +27,7 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
       return [];
     }
 
-    const item = await database.mediaItem.findOneOrFail(job.data.id);
+    const item = await repositories.mediaItem.findOneOrFail(job.data.id);
 
     const { title: itemTitle, aliases } =
       item instanceof ShowLikeMediaItem ? await item.getShow() : item;

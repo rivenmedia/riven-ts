@@ -1,7 +1,7 @@
 import { expect, vi } from "vitest";
 import { waitFor } from "xstate";
 
-import { database } from "../../../database/database.ts";
+import { repositories } from "../../../database/database.ts";
 import { it } from "./helpers/test-context.ts";
 
 it('sends a "riven.media-item.index.requested" event for each incomplete item request in the database', async ({
@@ -23,7 +23,7 @@ it('sends a "riven.media-item.index.requested" event for each incomplete item re
     }),
   ];
 
-  await database.itemRequest.insertMany(items);
+  await repositories.itemRequest.insertMany(items);
 
   actor.start();
 

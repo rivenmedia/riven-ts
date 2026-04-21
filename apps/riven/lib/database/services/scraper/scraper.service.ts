@@ -11,7 +11,7 @@ import chalk from "chalk";
 import { DateTime } from "luxon";
 import assert from "node:assert";
 
-import { BaseService } from "../base-service.ts";
+import { BaseService } from "../core/base-service.ts";
 import { persistScrapeResults } from "./utilities/persist-scrape-results.ts";
 
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
@@ -76,7 +76,7 @@ export class ScraperService extends BaseService {
         });
       }
 
-      const { logger } = await import("../../utilities/logger/logger.ts");
+      const { logger } = await import("../../../utilities/logger/logger.ts");
 
       logger.info(
         `Added ${newStreamsCount.toString()} new streams to ${chalk.bold(existingItem.fullTitle)}`,

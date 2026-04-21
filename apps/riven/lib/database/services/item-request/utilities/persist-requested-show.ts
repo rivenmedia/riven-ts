@@ -5,7 +5,7 @@ import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/ite
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
 
-import { RequestType } from "../../../message-queue/flows/request-content-services/request-content-services.schema.ts";
+import { RequestType } from "../../../../message-queue/flows/request-content-services/request-content-services.schema.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";

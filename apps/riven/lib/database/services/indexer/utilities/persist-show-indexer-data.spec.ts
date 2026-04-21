@@ -5,7 +5,7 @@ import { wrap } from "@mikro-orm/core";
 import { DateTime } from "luxon";
 import { expect, vi } from "vitest";
 
-import { it } from "../../../__tests__/test-context.ts";
+import { it } from "../../../../__tests__/test-context.ts";
 
 it("returns the media item if processed successfully", async ({
   services,

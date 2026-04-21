@@ -2,7 +2,7 @@ import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
 
-import { BaseService } from "../base-service.ts";
+import { BaseService } from "../core/base-service.ts";
 import { getVfsDirectoryEntryPaths } from "./utilities/get-vfs-directory-entry-paths.ts";
 import { getVfsEntryStat } from "./utilities/get-vfs-entry-stat.ts";
 import { getVfsEntry } from "./utilities/get-vfs-entry.ts";

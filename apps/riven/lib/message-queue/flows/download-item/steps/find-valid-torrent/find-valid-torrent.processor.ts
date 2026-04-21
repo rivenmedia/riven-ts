@@ -2,7 +2,7 @@ import { type ParentOptions, UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 import assert from "node:assert";
 
-import { database } from "../../../../../database/database.ts";
+import { repositories } from "../../../../../database/database.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
 import { InvalidTorrentError } from "../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
 import { findValidTorrentProcessorSchema } from "./find-valid-torrent.schema.ts";
@@ -31,7 +31,7 @@ export const findValidTorrentProcessor =
 
     assert(jobId);
 
-    const mediaItem = await database.mediaItem.findOneOrFail(mediaItemId);
+    const mediaItem = await repositories.mediaItem.findOneOrFail(mediaItemId);
 
     const infoHashes = rankedStreams.map((stream) => stream.hash);
     const uncheckedInfoHashes = new Set(infoHashes)

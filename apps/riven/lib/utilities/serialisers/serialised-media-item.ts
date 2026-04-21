@@ -3,7 +3,7 @@ import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 
-import { database } from "../../database/database.ts";
+import { repositories } from "../../database/database.ts";
 import { createApolloInstanceSchema } from "./create-apollo-instance-schema.ts";
 
 /**
@@ -13,7 +13,7 @@ export const SerialisedMediaItem = z.codec(
   UUID,
   z.xor([z.instanceof(MediaItem), createApolloInstanceSchema(MediaItem)]),
   {
-    decode: (id) => database.mediaItem.findOneOrFail(id),
+    decode: (id) => repositories.mediaItem.findOneOrFail(id),
     encode: (data) => UUID.parse(data.id),
   },
 );

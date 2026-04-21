@@ -6,7 +6,7 @@ import {
   Transactional,
 } from "@mikro-orm/decorators/legacy";
 
-import { BaseService } from "../base-service.ts";
+import { BaseService } from "../core/base-service.ts";
 import {
   type MovieIndexData,
   persistMovieIndexerData,

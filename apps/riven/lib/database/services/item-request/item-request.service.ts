@@ -5,7 +5,7 @@ import {
   Transactional,
 } from "@mikro-orm/decorators/legacy";
 
-import { BaseService } from "../base-service.ts";
+import { BaseService } from "../core/base-service.ts";
 import { persistRequestedMovie } from "./utilities/persist-requested-movie.ts";
 import { persistRequestedShow } from "./utilities/persist-requested-show.ts";
 
@@ -16,7 +16,7 @@ export class ItemRequestService extends BaseService {
   @CreateRequestContext()
   @Transactional()
   async requestMovie(item: ContentServiceRequestedResponse["movies"][number]) {
-    const { logger } = await import("../../utilities/logger/logger.ts");
+    const { logger } = await import("../../../utilities/logger/logger.ts");
 
     const externalIds = [
       item.imdbId ? `IMDB: ${item.imdbId}` : null,
@@ -31,7 +31,7 @@ export class ItemRequestService extends BaseService {
   @CreateRequestContext()
   @Transactional()
   async requestShow(item: ContentServiceRequestedResponse["shows"][number]) {
-    const { logger } = await import("../../utilities/logger/logger.ts");
+    const { logger } = await import("../../../utilities/logger/logger.ts");
 
     const externalIds = [
       item.imdbId ? `IMDB: ${item.imdbId}` : null,

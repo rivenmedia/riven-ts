@@ -2,7 +2,7 @@ import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
 import { it } from "../../__tests__/stremthru.test-context.ts";
-import { StremThruAPI } from "../stremthru.datasource.ts";
+import { StremThruTorzAPI } from "../stremthru-torz.datasource.ts";
 
 it("returns false if the request fails", async ({ server, dataSourceMap }) => {
   server.use(
@@ -11,7 +11,7 @@ it("returns false if the request fails", async ({ server, dataSourceMap }) => {
     ),
   );
 
-  const stremThruApi = dataSourceMap.get(StremThruAPI);
+  const stremThruApi = dataSourceMap.get(StremThruTorzAPI);
   const isValid = await stremThruApi.validate();
 
   expect(isValid).toBe(false);
@@ -25,7 +25,7 @@ it("returns true if the request succeeds", async ({
     http.get("**/v0/torznab/api", () => HttpResponse.json({ success: true })),
   );
 
-  const stremThruApi = dataSourceMap.get(StremThruAPI);
+  const stremThruApi = dataSourceMap.get(StremThruTorzAPI);
   const isValid = await stremThruApi.validate();
 
   expect(isValid).toBe(true);

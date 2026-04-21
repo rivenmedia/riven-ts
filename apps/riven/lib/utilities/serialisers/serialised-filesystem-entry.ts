@@ -7,7 +7,7 @@ import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 
-import { database } from "../../database/database.ts";
+import { repositories } from "../../database/database.ts";
 import { createApolloInstanceSchema } from "./create-apollo-instance-schema.ts";
 
 /**
@@ -20,7 +20,7 @@ export const SerialisedFileSystemEntry = z.codec(
     createApolloInstanceSchema(FileSystemEntry, MediaEntry, SubtitleEntry),
   ]),
   {
-    decode: (id) => database.filesystemEntry.findOneOrFail(id),
+    decode: (id) => repositories.filesystemEntry.findOneOrFail(id),
     encode: (data) => UUID.parse(data.id),
   },
 );

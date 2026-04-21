@@ -1,6 +1,6 @@
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 
-import { database } from "../../database/database.ts";
+import { services } from "../../database/database.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { isFuseError } from "../errors/fuse-error.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
@@ -8,8 +8,7 @@ import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 export const readDirSync = function (path, callback) {
   void withVfsScope(async () => {
     try {
-      const data =
-        await database.services.vfsService.getDirectoryEntryPaths(path);
+      const data = await services.vfsService.getDirectoryEntryPaths(path);
 
       process.nextTick(callback, 0, data);
     } catch (error) {

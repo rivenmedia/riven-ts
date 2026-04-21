@@ -4,7 +4,7 @@ import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/ite
 
 import { expect } from "vitest";
 
-import { it } from "../../../__tests__/test-context.ts";
+import { it } from "../../../../__tests__/test-context.ts";
 
 it("returns the item request if processed successfully", async ({
   services,
