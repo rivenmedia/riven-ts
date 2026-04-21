@@ -1,5 +1,7 @@
 import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
 
+import { DateTime } from "luxon";
+
 import type { EventSubscriber, FlushEventArgs } from "@mikro-orm/core";
 
 export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
@@ -42,11 +44,13 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
         continue;
       }
 
+      item.year ??= DateTime.fromJSDate(item.releaseDate).year;
+
       const season = await item.season.loadOrFail();
 
       if (season.releaseDate == null) {
         season.releaseDate = item.releaseDate;
-        season.year = item.releaseDate.getUTCFullYear();
+        season.year = item.year;
 
         uow.computeChangeSet(season);
       }
@@ -56,7 +60,7 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
 
         if (show.releaseDate == null) {
           show.releaseDate = season.releaseDate;
-          show.year = season.releaseDate.getUTCFullYear();
+          show.year = DateTime.fromJSDate(season.releaseDate).year;
 
           uow.computeChangeSet(show);
         }

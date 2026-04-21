@@ -66,46 +66,32 @@ export async function persistShowIndexerData(
   }
 
   try {
-    const show =
-      existingShow ??
-      em.create(
-        Show,
-        {
-          tvdbId,
-          imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
-          itemRequest,
-          isRequested: true, // Shows will always be considered to be requested
-          network: item.network,
-        },
-        { partial: true },
-      );
-
-    show.title = item.title;
-    show.fullTitle = show.title;
-    show.contentRating = item.contentRating;
-    show.posterPath = item.posterUrl ?? show.posterPath ?? null;
-    show.nextAirDate = null; // Reset the next air date; it will be recalculated during episode processing
-    show.country = item.country ?? show.country ?? null;
-    show.language = item.language ?? show.language ?? null;
-    show.aliases = {
-      ...show.aliases,
-      ...item.aliases,
-    };
-    show.rating = item.rating ?? show.rating ?? null;
-    show.status = item.status;
-    show.genres = item.genres.map((genre) => genre.toLowerCase());
+    const show = em.create(
+      Show,
+      {
+        title: item.title,
+        fullTitle: item.title,
+        contentRating: item.contentRating,
+        posterPath: item.posterUrl ?? existingShow?.posterPath ?? null,
+        country: item.country ?? existingShow?.country ?? null,
+        language: item.language ?? existingShow?.language ?? null,
+        rating: item.rating ?? existingShow?.rating ?? null,
+        status: item.status,
+        tvdbId,
+        imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
+        itemRequest,
+        isRequested: true, // Shows will always be considered to be requested
+        network: item.network,
+        aliases: item.aliases,
+        genres: item.genres.map((genre) => genre.toLowerCase()),
+        nextAirDate: null, // Reset the next air date; it will be recalculated during episode processing
+      },
+      { partial: true },
+    );
 
     await em.upsert(show);
 
     for (const season of Object.values(item.seasons)) {
-      const [existingSeason] = await show.seasons.matching({
-        limit: 1,
-        where: {
-          number: season.number,
-        },
-        populate: ["episodes"],
-      });
-
       const seasonTitle = [
         `Season ${season.number.toString().padStart(2, "0")}`,
         season.title,
@@ -113,66 +99,43 @@ export async function persistShowIndexerData(
         .filter(Boolean)
         .join(" - ");
 
-      const seasonEntry =
-        existingSeason ??
-        em.create(
-          Season,
-          {
-            tvdbId: show.tvdbId,
-            imdbId: show.imdbId ?? null,
-            /**
-             * If the item request has specific seasons requested, only mark this season as requested if it's included in that list.
-             *
-             * Otherwise, request all non-special seasons. This is the default behaviour of list ingestion.
-             */
-            isRequested: itemRequest.seasons
-              ? itemRequest.seasons.includes(season.number)
-              : season.number > 0,
-            itemRequest,
-          },
-          { partial: true },
-        );
-
-      seasonEntry.title = seasonTitle;
-      seasonEntry.number = season.number;
-      seasonEntry.fullTitle = `${show.title} - S${seasonEntry.number.toString().padStart(2, "0")}`;
+      const seasonEntry = em.create(Season, {
+        title: seasonTitle,
+        fullTitle: `${show.title} - S${season.number.toString().padStart(2, "0")}`,
+        number: season.number,
+        tvdbId: show.tvdbId,
+        imdbId: show.imdbId ?? null,
+        /**
+         * If the item request has specific seasons requested, only mark this season as requested if it's included in that list.
+         *
+         * Otherwise, request all non-special seasons. This is the default behaviour of list ingestion.
+         */
+        isRequested: itemRequest.seasons
+          ? itemRequest.seasons.includes(season.number)
+          : season.number > 0,
+        itemRequest,
+      });
 
       show.seasons.add(seasonEntry);
 
       await em.upsert(seasonEntry);
 
       for (const episode of season.episodes) {
-        const [existingEpisode] = existingSeason
-          ? await existingSeason.episodes.matching({
-              limit: 1,
-              where: {
-                number: episode.number,
-              },
-            })
-          : [null];
-
-        const episodeEntry =
-          existingEpisode ??
-          em.create(
-            Episode,
-            {
-              tvdbId: seasonEntry.tvdbId,
-              imdbId: seasonEntry.imdbId ?? null,
-              isRequested: seasonEntry.isRequested,
-              itemRequest,
-            },
-            { partial: true },
-          );
-
-        episodeEntry.title = episode.title;
-        episodeEntry.number = episode.number;
-        episodeEntry.fullTitle = `${seasonEntry.fullTitle}E${episodeEntry.number.toString().padStart(2, "0")} - ${episodeEntry.title}`;
-        episodeEntry.absoluteNumber = episode.absoluteNumber;
-        episodeEntry.contentRating = episode.contentRating;
-        episodeEntry.runtime = episode.runtime;
-        episodeEntry.releaseDate = episode.airedAt
-          ? DateTime.fromISO(episode.airedAt).toJSDate()
-          : null;
+        const episodeEntry = em.create(Episode, {
+          title: episode.title,
+          fullTitle: `${seasonEntry.fullTitle}E${episode.number.toString().padStart(2, "0")} - ${episode.title}`,
+          number: episode.number,
+          absoluteNumber: episode.absoluteNumber,
+          contentRating: episode.contentRating,
+          runtime: episode.runtime,
+          releaseDate: episode.airedAt
+            ? DateTime.fromISO(episode.airedAt).toJSDate()
+            : null,
+          tvdbId: seasonEntry.tvdbId,
+          imdbId: seasonEntry.imdbId ?? null,
+          isRequested: seasonEntry.isRequested,
+          itemRequest,
+        });
 
         if (
           !seasonEntry.isSpecial &&

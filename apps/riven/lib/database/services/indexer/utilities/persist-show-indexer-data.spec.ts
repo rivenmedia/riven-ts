@@ -85,7 +85,10 @@ it("updates the media item with the latest data if it already exists", async ({
     title: "Test Show",
     imdbId: requestedId,
     contentRating: "tv-14",
-    genres: [],
+    aliases: {
+      en: ["en-alias"],
+    },
+    genres: ["animation"],
     type: "show",
     network: "Test Network",
     seasons: {
@@ -125,6 +128,10 @@ it("updates the media item with the latest data if it already exists", async ({
 
   expect(wrap(initialShow).toJSON()).toEqual(
     expect.objectContaining({
+      aliases: {
+        en: ["en-alias"],
+      },
+      genres: ["animation"],
       state: "unreleased",
       nextAirDate: null,
     }),
@@ -156,7 +163,10 @@ it("updates the media item with the latest data if it already exists", async ({
     title: "Test Show",
     imdbId: requestedId,
     contentRating: "tv-14",
-    genres: [],
+    aliases: {
+      fr: ["fr-alias"],
+    },
+    genres: ["sci-fi"],
     type: "show",
     network: "Test Network",
     seasons: {
@@ -196,6 +206,10 @@ it("updates the media item with the latest data if it already exists", async ({
 
   expect(wrap(updatedUpcomingShow).toJSON()).toEqual(
     expect.objectContaining({
+      aliases: {
+        fr: ["fr-alias"],
+      },
+      genres: ["sci-fi"],
       state: "unreleased",
       nextAirDate: firstEpisodeAirDate.toJSDate(),
     }),
