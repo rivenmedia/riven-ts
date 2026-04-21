@@ -37,7 +37,10 @@ export const processItemProcessor =
             job.data.nextScrapeAttemptTimestamp &&
             DateTime.utc().toMillis() <= job.data.nextScrapeAttemptTimestamp
           ) {
-            await job.moveToDelayed(job.data.nextScrapeAttemptTimestamp);
+            const { nextScrapeAttemptTimestamp, ...data } = job.data;
+
+            await job.moveToDelayed(job.data.nextScrapeAttemptTimestamp, token);
+            await job.updateData(data);
 
             throw new DelayedError();
           }
@@ -56,10 +59,8 @@ export const processItemProcessor =
             parent: jobParent,
           });
 
-          const { nextScrapeAttemptTimestamp, ...data } = job.data;
-
           await job.updateData({
-            ...data,
+            ...job.data,
             step: "download",
           });
 
@@ -130,6 +131,7 @@ export const processItemProcessor =
               `Scheduling re-scrape for ${chalk.bold(job.data.mediaItem.title)} in ${nextScrapeAttemptTimestamp.diffNow("minutes").toHuman()}`,
             );
 
+            await job.log("Scheduling re-scrape due to download failure");
             await job.updateData({
               ...job.data,
               step: "scrape",
