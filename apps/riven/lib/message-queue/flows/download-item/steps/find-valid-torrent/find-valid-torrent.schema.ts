@@ -35,15 +35,6 @@ export const FindValidTorrentFlow = createFlowSchema(
     input: z.object({
       id: UUID,
       itemTitle: z.string().min(1),
-      availableDownloaders: z
-        .array(
-          z.object({
-            pluginName: z.string(),
-            hasCacheCheckHook: z.boolean(),
-            hasProviderListHook: z.boolean(),
-          }),
-        )
-        .min(1),
       failedInfoHashes: z.array(z.hash("sha1")),
     }),
     output: createPluginResultSchema(ValidTorrent).nullable(),

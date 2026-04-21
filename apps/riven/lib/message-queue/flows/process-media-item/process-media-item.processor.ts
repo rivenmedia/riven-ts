@@ -97,13 +97,7 @@ export const processItemProcessor =
 
           await enqueueDownloadItem({
             item,
-            subscribers: getPluginEventSubscribers(
-              "riven.media-item.download.requested",
-              plugins,
-            ),
-            opts: {
-              parent: jobParent,
-            },
+            opts: { parent: jobParent },
           });
 
           await job.updateData({
