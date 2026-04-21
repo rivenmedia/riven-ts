@@ -174,7 +174,7 @@ export const processItemProcessor =
 
     logger.info(
       chalk.greenBright(
-        `${chalk.bold(item.fullTitle)} has been downloaded in ${duration}`,
+        `${chalk.bold(item.fullTitle)} completed in ${duration}`,
       ),
     );
   });

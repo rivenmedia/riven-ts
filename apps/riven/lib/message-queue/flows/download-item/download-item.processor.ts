@@ -65,9 +65,9 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
         type: "riven.media-item.download.success",
         item: updatedItem,
         downloader: finalResult.plugin,
-        durationFromRequestToDownload: DateTime.utc()
+        durationMs: DateTime.utc()
           .diff(DateTime.fromMillis(job.timestamp))
-          .as("seconds"),
+          .as("milliseconds"),
         provider: finalResult.result.provider,
       });
     } catch (error) {

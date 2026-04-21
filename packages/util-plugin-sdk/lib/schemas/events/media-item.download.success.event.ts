@@ -12,7 +12,7 @@ export const MediaItemDownloadSuccessEvent = createProgramEventSchema(
   z.object({
     item: MediaItemInstance,
     downloader: z.string(),
-    durationFromRequestToDownload: z.number(),
+    durationMs: z.number(),
     provider: z.string().nullable(),
   }),
 );

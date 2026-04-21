@@ -650,12 +650,20 @@ export const mainRunnerMachine = setup({
                   event: {
                     downloader,
                     item: { fullTitle },
-                    durationFromRequestToDownload,
+                    durationMs,
                     provider,
                   },
                 }) => ({
                   get message() {
-                    const baseMessage = `Successfully downloaded ${chalk.bold(fullTitle)} in ${durationFromRequestToDownload.toString()} seconds using ${downloader}`;
+                    const formattedDuration = Duration.fromMillis(durationMs)
+                      .rescale()
+                      .toHuman({
+                        showZeros: false,
+                        maximumFractionDigits: 0,
+                        unitDisplay: "narrow",
+                      });
+
+                    const baseMessage = `Successfully downloaded ${chalk.bold(fullTitle)} in ${formattedDuration} using ${downloader}`;
 
                     if (provider) {
                       return `${baseMessage} via ${provider}`;
