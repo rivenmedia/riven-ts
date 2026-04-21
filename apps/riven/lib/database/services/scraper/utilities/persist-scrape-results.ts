@@ -12,8 +12,6 @@ export async function persistScrapeResults(
   item: MediaItem,
   results: Record<string, ParsedData>,
 ) {
-  const streamsCount = item.streams.count();
-
   const streams = await em.upsertMany(
     Stream,
     Object.entries(results).map(([infoHash, parsedData]) =>
@@ -22,12 +20,10 @@ export async function persistScrapeResults(
         parsedData,
       }),
     ),
-    { onConflictAction: "ignore", onConflictFields: ["infoHash"] },
+    { onConflictAction: "ignore" },
   );
 
-  item.streams.add(streams);
-
-  const newStreamsCount = item.streams.count() - streamsCount;
+  const newStreamsCount = item.streams.add(streams);
 
   try {
     await validateOrReject(item);
