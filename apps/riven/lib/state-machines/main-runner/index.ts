@@ -454,7 +454,7 @@ export const mainRunnerMachine = setup({
               {
                 type: "log",
                 params: ({ event: { item } }) => ({
-                  message: `Skipping existing item request: ${[item.imdbId && `IMDB: ${item.imdbId}`, item.tmdbId && `TMDB: ${item.tmdbId}`, item.tvdbId && `TVDB: ${item.tvdbId}`].filter(Boolean).join(" | ")}`,
+                  message: `Skipping existing item request: ${chalk.bold([item.imdbId && `IMDB: ${item.imdbId}`, item.tmdbId && `TMDB: ${item.tmdbId}`, item.tvdbId && `TVDB: ${item.tvdbId}`].filter(Boolean).join(" | "))}`,
                   level: "verbose",
                 }),
               },
@@ -468,7 +468,7 @@ export const mainRunnerMachine = setup({
               {
                 type: "log",
                 params: ({ event: { item } }) => ({
-                  message: `Successfully updated item request: [${item.externalIdsLabel.join(" | ")}]`,
+                  message: `Successfully updated item request: [${chalk.bold(item.externalIdsLabel.join(" | "))}]`,
                   level: "silly",
                 }),
               },
@@ -494,7 +494,7 @@ export const mainRunnerMachine = setup({
                 {
                   type: "log",
                   params: ({ event: { item } }) => ({
-                    message: `Successfully indexed ${item.type}: ${item.fullTitle}. This item is not yet released and will be scheduled for re-indexing at a later date.`,
+                    message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}. This item is not yet released and will be scheduled for re-indexing at a later date.`,
                     level: "info",
                   }),
                 },
@@ -515,7 +515,7 @@ export const mainRunnerMachine = setup({
                 {
                   type: "log",
                   params: ({ event: { item } }) => ({
-                    message: `Successfully indexed ${item.type}: ${item.fullTitle}. Attempting to download all available episodes; future episodes will be re-indexed after their air date.`,
+                    message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}. Attempting to download all available episodes; future episodes will be re-indexed after their air date.`,
                     level: "info",
                   }),
                 },
@@ -536,7 +536,7 @@ export const mainRunnerMachine = setup({
                 {
                   type: "log",
                   params: ({ event: { item } }) => ({
-                    message: `Successfully indexed ${item.type}: ${item.fullTitle}`,
+                    message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}`,
                     level: "info",
                   }),
                 },
@@ -550,7 +550,7 @@ export const mainRunnerMachine = setup({
               actions: {
                 type: "log",
                 params: ({ event: { item } }) => ({
-                  message: `Successfully indexed ${item.type}: ${item.fullTitle}, but could not determine the next action.`,
+                  message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}, but could not determine the next action.`,
                   level: "error",
                 }),
               },
@@ -573,7 +573,7 @@ export const mainRunnerMachine = setup({
                     .join(" | ");
 
                   return {
-                    message: `Media item has already been indexed: ${chalk.dim(externalIds)}`,
+                    message: `Media item has already been indexed: ${chalk.bold.dim(externalIds)}`,
                     level: "verbose",
                   };
                 },
@@ -585,15 +585,6 @@ export const mainRunnerMachine = setup({
            * Scrape lifecycle events
            */
 
-          // "riven.media-item.scrape.requested": {
-          //   description:
-          //     "Indicates that a media item scrape has been requested for an indexed media item.",
-          //   actions: {
-          //     type: "requestScrape",
-          //     params: ({ event: { item } }) => ({ items: [item] }),
-          //   },
-          // },
-
           "riven.media-item.scrape.error.no-new-streams": {
             description:
               "Indicates that a media item scrape completed successfully, but no new streams were found.",
@@ -601,7 +592,7 @@ export const mainRunnerMachine = setup({
               {
                 type: "log",
                 params: ({ event: { item } }) => ({
-                  message: `No new streams found for ${item.fullTitle}.`,
+                  message: `No new streams found for ${chalk.bold(item.fullTitle)}.`,
                   level: "verbose",
                 }),
               },
@@ -678,7 +669,7 @@ export const mainRunnerMachine = setup({
                     item: { fullTitle },
                   },
                 }) => ({
-                  message: `Partially downloaded ${fullTitle} using ${downloader}. Attempting to download the remaining items separately.`,
+                  message: `Partially downloaded ${chalk.bold(fullTitle)} using ${downloader}. Attempting to download the remaining items separately.`,
                 }),
               },
               {
