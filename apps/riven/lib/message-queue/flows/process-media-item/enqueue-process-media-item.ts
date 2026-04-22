@@ -25,7 +25,7 @@ export async function enqueueProcessMediaItem(
 
   const rootNodes = mediaItemsToProcess.map((mediaItem) =>
     createProcessMediaItemJob(
-      `Processing - ${mediaItem.fullTitle}`,
+      mediaItem.fullTitle,
       {
         step,
         mediaItem,
