@@ -74,7 +74,7 @@ export class Show extends ShowLikeMediaItem {
       orderBy: { number: "asc" },
       populate: ["episodes"],
       where: {
-        ...(!includeSpecials ? { isSpecial: false } : {}),
+        ...(!includeSpecials && { isSpecial: false }),
       },
     });
 
@@ -85,7 +85,7 @@ export class Show extends ShowLikeMediaItem {
     return this.seasons.matching({
       orderBy: { number: "asc" },
       where: {
-        ...(stateFilter ? { state: { $in: stateFilter } } : {}),
+        ...(stateFilter && { state: { $in: stateFilter } }),
         isSpecial: false,
       },
     });

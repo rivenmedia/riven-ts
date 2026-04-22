@@ -12,7 +12,7 @@ export class ShowResolver {
   ) {
     return show.seasons.matching({
       where: {
-        ...(includeSpecials ? {} : { number: { $ne: 0 } }),
+        ...(!includeSpecials && { number: { $ne: 0 } }),
       },
     });
   }

@@ -179,9 +179,7 @@ export abstract class BaseDataSource<
       },
       {
         connection,
-        ...(this.rateLimiterOptions
-          ? { limiter: this.rateLimiterOptions }
-          : {}),
+        ...(this.rateLimiterOptions && { limiter: this.rateLimiterOptions }),
         telemetry,
         concurrency: this.concurrency,
       },
@@ -379,7 +377,7 @@ export abstract class BaseDataSource<
       {
         // Use a stable job ID to enable deduplication of idempotent GET requests
         ...(jobId && { jobId }),
-        ...(parentOptions ? { parent: parentOptions } : {}),
+        ...(parentOptions && { parent: parentOptions }),
         attempts: this.#requestAttempts,
         backoff: {
           type: "exponential",

@@ -35,6 +35,6 @@ export function buildEmbed(payload: NotificationPayload): APIEmbed {
     color: EMBED_COLOR_SUCCESS,
     fields,
     timestamp: payload.timestamp,
-    ...(payload.posterPath ? { thumbnail: { url: payload.posterPath } } : {}),
+    ...(payload.posterPath && { thumbnail: { url: payload.posterPath } }),
   };
 }
