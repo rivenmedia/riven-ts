@@ -81,7 +81,6 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
       body: JSON.stringify({
         link: infoHash,
       }),
-      cacheKey: infoHash,
     });
 
     const { data } = AddTorrentResponse.parse(response);
