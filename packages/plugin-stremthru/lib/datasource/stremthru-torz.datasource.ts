@@ -58,7 +58,11 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     const baseKey = super.cacheKeyFor(url, request);
     const store = request.headers?.[storeNameHeader];
 
-    return [baseKey, store, request.cacheKey].filter(Boolean).join(":");
+    if (!store) {
+      return baseKey;
+    }
+
+    return `${baseKey}:${store}`;
   }
 
   override async validate() {
