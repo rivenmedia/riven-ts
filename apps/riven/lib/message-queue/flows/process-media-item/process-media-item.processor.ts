@@ -11,9 +11,9 @@ import assert from "node:assert";
 
 import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
-import { enqueueDownloadItem } from "../download-item/enqueue-download-item.ts";
-import { enqueueScrapeItems } from "../scrape-item/enqueue-scrape-items.ts";
 import { processMediaItemProcessorSchema } from "./process-media-item.schema.ts";
+import { enqueueDownloadItem } from "./steps/download/enqueue-download-item.ts";
+import { enqueueScrapeItems } from "./steps/scrape/enqueue-scrape-items.ts";
 
 export const processItemProcessor =
   processMediaItemProcessorSchema.implementAsync(async function (

@@ -15,7 +15,7 @@ import chalk from "chalk";
 import { BaseService } from "../core/base-service.ts";
 import { persistDownloadResults } from "./utilities/persist-download-results.ts";
 
-import type { ValidTorrent } from "../../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import type { ValidTorrent } from "../../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import type { UUID } from "node:crypto";
 

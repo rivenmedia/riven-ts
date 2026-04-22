@@ -15,7 +15,7 @@ import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
 import z from "zod";
 
-import type { ValidTorrent } from "../../../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import type { ValidTorrent } from "../../../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import type { UUID } from "node:crypto";
 
 export async function persistDownloadResults(

@@ -155,7 +155,9 @@ export abstract class BaseDataSource<
           return super.fetch(job.data.path, job.data.incomingRequest);
         });
 
-        await job.log(`Request completed`);
+        await job.log(
+          `Request completed in ${(timeTaken / 1000).toFixed(2)} seconds`,
+        );
 
         return {
           parsedBody,

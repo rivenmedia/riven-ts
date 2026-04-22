@@ -5,7 +5,7 @@ import { NotFoundError, ref } from "@mikro-orm/core";
 import { expect, vi } from "vitest";
 
 import { it } from "../../../../__tests__/test-context.ts";
-import { MatchedFile } from "../../../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import { MatchedFile } from "../../../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 
 it("throws an error if the media item has no streams", async ({
   indexedMovieContext: { indexedMovie },

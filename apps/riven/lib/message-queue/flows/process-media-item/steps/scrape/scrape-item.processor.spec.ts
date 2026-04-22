@@ -5,7 +5,7 @@ import { faker } from "@faker-js/faker";
 import { randomUUID } from "node:crypto";
 import { expect, vi } from "vitest";
 
-import { it } from "../../../__tests__/test-context.ts";
+import { it } from "../../../../../__tests__/test-context.ts";
 import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 
 it("throws an unrecoverable error if the item cannot be scraped", async ({

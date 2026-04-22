@@ -2,7 +2,7 @@ import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 
-import { MatchedFile } from "../../../flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import { MatchedFile } from "../../../flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { createFlowJobBuilder } from "../../../utilities/create-flow-job-builder.ts";
 import { createSandboxedJobSchema } from "../../utilities/create-sandboxed-job-schema.ts";
 import { MapItemsToFilesSandboxedJob } from "../map-items-to-files/map-items-to-files.schema.ts";

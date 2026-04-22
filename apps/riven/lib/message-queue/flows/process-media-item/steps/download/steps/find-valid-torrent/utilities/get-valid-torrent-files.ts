@@ -1,6 +1,6 @@
-import { enqueueValidateTorrentFiles } from "../../../../../sandboxed-jobs/jobs/validate-torrent-files/enqueue-validate-torrent-files.ts";
-import { InvalidTorrentError } from "../../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
-import { runSingleJob } from "../../../../../utilities/run-single-job.ts";
+import { enqueueValidateTorrentFiles } from "../../../../../../../sandboxed-jobs/jobs/validate-torrent-files/enqueue-validate-torrent-files.ts";
+import { InvalidTorrentError } from "../../../../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
+import { runSingleJob } from "../../../../../../../utilities/run-single-job.ts";
 
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";

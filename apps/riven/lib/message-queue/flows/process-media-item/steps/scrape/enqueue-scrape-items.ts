@@ -1,9 +1,9 @@
 import { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
-import { settings } from "../../../utilities/settings.ts";
-import { createParseScrapeResultsJob } from "../../sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.schema.ts";
-import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
-import { flow } from "../producer.ts";
+import { settings } from "../../../../../utilities/settings.ts";
+import { createParseScrapeResultsJob } from "../../../../sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.schema.ts";
+import { createPluginFlowJob } from "../../../../utilities/create-flow-plugin-job.ts";
+import { flow } from "../../../producer.ts";
 import { createScrapeItemJob } from "./scrape-item.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";

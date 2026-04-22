@@ -1,18 +1,6 @@
 import z from "zod";
 
 import {
-  DownloadItemFlow,
-  downloadItemProcessorSchema,
-} from "./download-item/download-item.schema.ts";
-import {
-  FindValidTorrentFlow,
-  findValidTorrentProcessorSchema,
-} from "./download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
-import {
-  RankStreamsFlow,
-  rankStreamsProcessorSchema,
-} from "./download-item/steps/rank-streams/rank-streams.schema.ts";
-import {
   ProcessItemRequestFlow,
   processItemRequestProcessorSchema,
 } from "./process-item-request/process-item-request.schema.ts";
@@ -21,13 +9,25 @@ import {
   processMediaItemProcessorSchema,
 } from "./process-media-item/process-media-item.schema.ts";
 import {
-  RequestContentServicesFlow,
-  requestContentServicesProcessorSchema,
-} from "./request-content-services/request-content-services.schema.ts";
+  DownloadItemFlow,
+  downloadItemProcessorSchema,
+} from "./process-media-item/steps/download/download-item.schema.ts";
+import {
+  FindValidTorrentFlow,
+  findValidTorrentProcessorSchema,
+} from "./process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import {
+  RankStreamsFlow,
+  rankStreamsProcessorSchema,
+} from "./process-media-item/steps/download/steps/rank-streams/rank-streams.schema.ts";
 import {
   ScrapeItemFlow,
   scrapeItemProcessorSchema,
-} from "./scrape-item/scrape-item.schema.ts";
+} from "./process-media-item/steps/scrape/scrape-item.schema.ts";
+import {
+  RequestContentServicesFlow,
+  requestContentServicesProcessorSchema,
+} from "./request-content-services/request-content-services.schema.ts";
 
 export const Flow = z.discriminatedUnion("name", [
   ProcessItemRequestFlow,

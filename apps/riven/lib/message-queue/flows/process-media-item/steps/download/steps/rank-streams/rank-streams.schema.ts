@@ -9,8 +9,8 @@ import {
 
 import z from "zod";
 
-import { createFlowJobBuilder } from "../../../../utilities/create-flow-job-builder.ts";
-import { createFlowSchema } from "../../../../utilities/create-flow-schema.ts";
+import { createFlowJobBuilder } from "../../../../../../utilities/create-flow-job-builder.ts";
+import { createFlowSchema } from "../../../../../../utilities/create-flow-schema.ts";
 
 export const RankStreamsFlow = createFlowSchema("download-item.rank-streams", {
   children: Torrent,

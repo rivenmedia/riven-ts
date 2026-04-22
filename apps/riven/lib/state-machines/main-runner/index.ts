@@ -13,20 +13,20 @@ import {
   setup,
 } from "xstate";
 
-import { downloadItemProcessor } from "../../message-queue/flows/download-item/download-item.processor.ts";
-import { DownloadItemFlow } from "../../message-queue/flows/download-item/download-item.schema.ts";
-import { findValidTorrentProcessor } from "../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.processor.ts";
-import { FindValidTorrentFlow } from "../../message-queue/flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
-import { rankStreamsProcessor } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.processor.ts";
-import { RankStreamsFlow } from "../../message-queue/flows/download-item/steps/rank-streams/rank-streams.schema.ts";
 import { processItemRequestProcessor } from "../../message-queue/flows/process-item-request/process-item-request.processor.ts";
 import { ProcessItemRequestFlow } from "../../message-queue/flows/process-item-request/process-item-request.schema.ts";
 import { processItemProcessor } from "../../message-queue/flows/process-media-item/process-media-item.processor.ts";
 import { ProcessMediaItemFlow } from "../../message-queue/flows/process-media-item/process-media-item.schema.ts";
+import { downloadItemProcessor } from "../../message-queue/flows/process-media-item/steps/download/download-item.processor.ts";
+import { DownloadItemFlow } from "../../message-queue/flows/process-media-item/steps/download/download-item.schema.ts";
+import { findValidTorrentProcessor } from "../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.processor.ts";
+import { FindValidTorrentFlow } from "../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import { rankStreamsProcessor } from "../../message-queue/flows/process-media-item/steps/download/steps/rank-streams/rank-streams.processor.ts";
+import { RankStreamsFlow } from "../../message-queue/flows/process-media-item/steps/download/steps/rank-streams/rank-streams.schema.ts";
+import { scrapeItemProcessor } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.processor.ts";
+import { ScrapeItemFlow } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.schema.ts";
 import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
 import { RequestContentServicesFlow } from "../../message-queue/flows/request-content-services/request-content-services.schema.ts";
-import { scrapeItemProcessor } from "../../message-queue/flows/scrape-item/scrape-item.processor.ts";
-import { ScrapeItemFlow } from "../../message-queue/flows/scrape-item/scrape-item.schema.ts";
 import { MapItemsToFilesSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
 import { ParseScrapeResultsSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.schema.ts";
 import { ValidateTorrentFilesSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.schema.ts";

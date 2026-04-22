@@ -5,7 +5,7 @@ import {
 
 import { expect, vi } from "vitest";
 
-import { it as baseIt } from "../../../../../__tests__/test-context.ts";
+import { it as baseIt } from "../../../../../../../__tests__/test-context.ts";
 import { rankStreamsProcessor } from "./rank-streams.processor.ts";
 
 const it = baseIt.extend("streams", ({ factories: { streamFactory } }) =>

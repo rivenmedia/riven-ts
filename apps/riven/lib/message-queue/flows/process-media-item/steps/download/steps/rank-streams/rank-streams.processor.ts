@@ -8,9 +8,9 @@ import {
 import { NotFoundError } from "@mikro-orm/core";
 import chalk from "chalk";
 
-import { logger } from "../../../../../utilities/logger/logger.ts";
-import { settings } from "../../../../../utilities/settings.ts";
-import { SkippedTorrentError } from "../../../../sandboxed-jobs/jobs/parse-scrape-results/utilities/validate-torrent.ts";
+import { logger } from "../../../../../../../utilities/logger/logger.ts";
+import { settings } from "../../../../../../../utilities/settings.ts";
+import { SkippedTorrentError } from "../../../../../../sandboxed-jobs/jobs/parse-scrape-results/utilities/validate-torrent.ts";
 import { rankStreamsProcessorSchema } from "./rank-streams.schema.ts";
 import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution.ts";
 

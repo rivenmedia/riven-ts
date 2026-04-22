@@ -5,7 +5,7 @@ import {
 
 import { toMerged } from "es-toolkit";
 
-import { flow } from "../producer.ts";
+import { flow } from "../../../producer.ts";
 import { createDownloadItemJob } from "./download-item.schema.ts";
 import { createFindValidTorrentJob } from "./steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { createRankStreamsJob } from "./steps/rank-streams/rank-streams.schema.ts";

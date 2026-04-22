@@ -2,9 +2,9 @@ import { type ParentOptions, UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 import assert from "node:assert";
 
-import { getPluginEventSubscribers } from "../../../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
-import { logger } from "../../../../../utilities/logger/logger.ts";
-import { InvalidTorrentError } from "../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
+import { getPluginEventSubscribers } from "../../../../../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
+import { logger } from "../../../../../../../utilities/logger/logger.ts";
+import { InvalidTorrentError } from "../../../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
 import { findValidTorrentProcessorSchema } from "./find-valid-torrent.schema.ts";
 import { getCachedTorrentFiles } from "./utilities/get-cached-torrent-files.ts";
 import { getPluginDownloadResult } from "./utilities/get-plugin-download-result.ts";

@@ -1,11 +1,13 @@
+import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+
 import { expect, vi } from "vitest";
 import { waitFor } from "xstate";
 
-import { repositories } from "../../../database/database.ts";
 import { it } from "./helpers/test-context.ts";
 
 it.skip('sends a "riven.media-item.index.requested" event for each incomplete item request in the database', async ({
   actor,
+  em,
   factories: { showItemRequestFactory, movieItemRequestFactory },
 }) => {
   const items = [
@@ -23,7 +25,7 @@ it.skip('sends a "riven.media-item.index.requested" event for each incomplete it
     }),
   ];
 
-  await repositories.itemRequest.insertMany(items);
+  await em.getRepository(ItemRequest).insertMany(items);
 
   actor.start();
 
