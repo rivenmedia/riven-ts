@@ -8,10 +8,13 @@ import { DateTime } from "luxon";
 import { downloadItemProcessorSchema } from "./download-item.schema.ts";
 
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
-  async function ({ job }, { sendEvent, services }) {
+  async function (
+    { job },
+    { sendEvent, services: { mediaItemService, downloaderService } },
+  ) {
     const [finalResult] = Object.values(await job.getChildrenValues());
 
-    const item = await services.mediaItemService.getMediaItem(job.data.id);
+    const item = await mediaItemService.getMediaItem(job.data.id);
 
     if (!finalResult) {
       const error = new Error(
@@ -30,7 +33,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
     }
 
     try {
-      const updatedItem = await services.downloaderService.downloadItem(
+      const updatedItem = await downloaderService.downloadItem(
         job.data.id,
         finalResult.result,
         finalResult.plugin,

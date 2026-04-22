@@ -17,7 +17,10 @@ import { calculateRequestResults } from "./utilities/calculate-request-results.t
 
 export const requestContentServicesProcessor =
   requestContentServicesProcessorSchema.implementAsync(
-    async ({ job, token }, { sendEvent, services, plugins }) => {
+    async (
+      { job, token },
+      { sendEvent, services: { itemRequestService }, plugins },
+    ) => {
       switch (job.data.step) {
         case "request": {
           assert(token, "Token is required to create child jobs");
@@ -86,11 +89,9 @@ export const requestContentServicesProcessor =
 
           const results = await Promise.allSettled([
             ...items.movies.map((item) =>
-              services.itemRequestService.requestMovie(item),
+              itemRequestService.requestMovie(item),
             ),
-            ...items.shows.map((item) =>
-              services.itemRequestService.requestShow(item),
-            ),
+            ...items.shows.map((item) => itemRequestService.requestShow(item)),
           ]);
 
           for (const result of results) {

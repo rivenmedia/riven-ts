@@ -10,11 +10,11 @@ import { it } from "../../../../__tests__/test-context.ts";
 
 it("returns the updated item if persisting the scrape results is successful", async ({
   seeders: { seedIndexedMovie },
-  services,
+  services: { scraperService },
 }) => {
   const indexedMovie = await seedIndexedMovie();
 
-  const { item, newStreamsCount } = await services.scraperService.scrapeItem(
+  const { item, newStreamsCount } = await scraperService.scrapeItem(
     indexedMovie.movie.id,
     {
       [faker.git.commitSha()]: parse("Some.Movie.2024.1080p.WEBRip.x264-GROUP"),
@@ -35,12 +35,12 @@ it("returns the updated item if persisting the scrape results is successful", as
 
 it('throws a MediaItemScrapeErrorIncorrectState error if the item is not in the "indexed" state', async ({
   seeders: { seedCompletedMovie },
-  services,
+  services: { scraperService },
 }) => {
   const completedMovie = await seedCompletedMovie();
 
   await expect(() =>
-    services.scraperService.scrapeItem(completedMovie.movie.id, {
+    scraperService.scrapeItem(completedMovie.movie.id, {
       [faker.git.commitSha()]: parse("Some.Movie.2024.1080p.WEBRip.x264-GROUP"),
     }),
   ).rejects.toThrow(MediaItemScrapeErrorIncorrectState);
@@ -52,17 +52,14 @@ it.todo(
 
 it("updates the scrape metadata when re-scraping a failed item", async ({
   seeders: { seedScrapedMovie },
-  services,
+  services: { scraperService },
 }) => {
   const scrapedMovie = await seedScrapedMovie();
   const now = DateTime.now().plus({ days: 1 }).toJSDate();
 
   vi.setSystemTime(now);
 
-  const { item } = await services.scraperService.scrapeItem(
-    scrapedMovie.movie.id,
-    {},
-  );
+  const { item } = await scraperService.scrapeItem(scrapedMovie.movie.id, {});
 
   expect(item.scrapedTimes).toEqual(scrapedMovie.movie.scrapedTimes + 1);
   expect(item.scrapedAt).toEqual(now);
@@ -70,11 +67,11 @@ it("updates the scrape metadata when re-scraping a failed item", async ({
 
 it("increases the failed attempts count when no new streams are added", async ({
   seeders: { seedScrapedMovie },
-  services,
+  services: { scraperService },
 }) => {
   const scrapedMovie = await seedScrapedMovie();
 
-  const { item } = await services.scraperService.scrapeItem(
+  const { item } = await scraperService.scrapeItem(
     scrapedMovie.movie.id,
     Object.fromEntries(
       scrapedMovie.streams.map((stream) => [
@@ -89,7 +86,7 @@ it("increases the failed attempts count when no new streams are added", async ({
 
 it("resets the failed attempts count when new streams are added", async ({
   seeders: { seedIndexedMovie },
-  services,
+  services: { scraperService },
   em,
 }) => {
   const indexedMovie = await seedIndexedMovie();
@@ -99,7 +96,7 @@ it("resets the failed attempts count when new streams are added", async ({
     scrapedTimes: 2,
   });
 
-  const { item, newStreamsCount } = await services.scraperService.scrapeItem(
+  const { item, newStreamsCount } = await scraperService.scrapeItem(
     indexedMovie.movie.id,
     {
       [faker.git.commitSha()]: parse("Some.Movie.2024.1080p.WEBRip.x264-GROUP"),

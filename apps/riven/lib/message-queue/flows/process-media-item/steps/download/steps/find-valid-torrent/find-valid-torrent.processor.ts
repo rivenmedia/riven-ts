@@ -14,7 +14,7 @@ import { getValidTorrentFiles } from "./utilities/get-valid-torrent-files.ts";
 export const findValidTorrentProcessor =
   findValidTorrentProcessorSchema.implementAsync(async function (
     { job, scope },
-    { services, plugins },
+    { services: { mediaItemService }, plugins },
   ) {
     const [rankedStreams] = Object.values(await job.getChildrenValues());
 
@@ -31,7 +31,7 @@ export const findValidTorrentProcessor =
 
     assert(jobId);
 
-    const mediaItem = await services.mediaItemService.getMediaItem(mediaItemId);
+    const mediaItem = await mediaItemService.getMediaItem(mediaItemId);
 
     const infoHashes = rankedStreams.map((stream) => stream.hash);
     const uncheckedInfoHashes = new Set(infoHashes)

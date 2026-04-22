@@ -9,10 +9,10 @@ import { MatchedFile } from "../../../../message-queue/flows/process-media-item/
 
 it("throws an error if the media item has no streams", async ({
   indexedMovieContext: { indexedMovie },
-  services,
+  services: { downloaderService },
 }) => {
   await expect(
-    services.downloaderService.downloadItem(
+    downloaderService.downloadItem(
       indexedMovie.id,
       {
         infoHash: "1234567890123456789012345678901234567890",
@@ -42,7 +42,7 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
   completedMovieContext: { completedMovie },
   factories: { streamFactory },
   em,
-  services,
+  services: { downloaderService },
 }) => {
   const stream = streamFactory.makeEntity();
 
@@ -53,7 +53,7 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
   await em.flush();
 
   await expect(
-    services.downloaderService.downloadItem(
+    downloaderService.downloadItem(
       completedMovie.id,
       {
         torrentId: "1",
@@ -77,13 +77,13 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
 
 it("sets the active stream and updates the state to completed if successful", async ({
   scrapedMovieContext: { scrapedMovie },
-  services,
+  services: { downloaderService },
 }) => {
   const [stream] = await scrapedMovie.streams.load();
 
   expect.assert(stream);
 
-  const updatedItem = await services.downloaderService.downloadItem(
+  const updatedItem = await downloaderService.downloadItem(
     scrapedMovie.id,
     {
       torrentId: "1",
@@ -109,13 +109,13 @@ it("sets the active stream and updates the state to completed if successful", as
 
 it("adds a single media entry for movies", async ({
   scrapedMovieContext: { scrapedMovie },
-  services,
+  services: { downloaderService },
 }) => {
   const [stream] = await scrapedMovie.streams.load();
 
   expect.assert(stream);
 
-  await services.downloaderService.downloadItem(
+  await downloaderService.downloadItem(
     scrapedMovie.id,
     {
       torrentId: "1",
@@ -145,13 +145,13 @@ it("adds one media entry per episode for shows", async ({
     scrapedShow,
     streams: [stream],
   },
-  services,
+  services: { downloaderService },
 }) => {
   const episodes = await scrapedShow.getEpisodes();
 
   expect.assert(stream);
 
-  await services.downloaderService.downloadItem(
+  await downloaderService.downloadItem(
     scrapedShow.id,
     {
       torrentId: "1",
@@ -186,7 +186,7 @@ it("does not create duplicate media entries for episodes with existing entries",
   },
   em,
   factories: { mediaEntryFactory },
-  services,
+  services: { downloaderService },
 }) => {
   expect.assert(stream);
   expect.assert(episode);
@@ -202,7 +202,7 @@ it("does not create duplicate media entries for episodes with existing entries",
 
   await em.flush();
 
-  await services.downloaderService.downloadItem(
+  await downloaderService.downloadItem(
     scrapedShow.id,
     {
       torrentId: "1",
@@ -232,7 +232,7 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
     scrapedMovie,
     streams: [stream],
   },
-  services,
+  services: { downloaderService },
 }) => {
   expect.assert(stream);
 
@@ -242,7 +242,7 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
   ).mockRejectedValue(new Error("Validation error"));
 
   await expect(
-    services.downloaderService.downloadItem(
+    downloaderService.downloadItem(
       scrapedMovie.id,
       {
         torrentId: "1",

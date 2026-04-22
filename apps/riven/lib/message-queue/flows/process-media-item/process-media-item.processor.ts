@@ -22,7 +22,15 @@ import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-
 export const processItemProcessor =
   processMediaItemProcessorSchema.implementAsync(async function (
     { job, token },
-    { services, plugins },
+    {
+      services: {
+        downloaderService,
+        indexerService,
+        scraperService,
+        mediaItemService,
+      },
+      plugins,
+    },
   ) {
     assert(job.id, "Job ID is required");
     assert(token, "Job token is required");
@@ -52,7 +60,7 @@ export const processItemProcessor =
               throw new DelayedError();
             }
 
-            const itemToScrape = await services.scraperService.getItemToScrape(
+            const itemToScrape = await scraperService.getItemToScrape(
               job.data.mediaItem.id,
               job.data.mediaItem.type,
             );
@@ -86,7 +94,7 @@ export const processItemProcessor =
               );
             }
 
-            const item = await services.downloaderService.getItemToDownload(
+            const item = await downloaderService.getItemToDownload(
               job.data.mediaItem.id,
             );
 
@@ -139,9 +147,7 @@ export const processItemProcessor =
         }
       }
 
-      const item = await services.mediaItemService.getMediaItem(
-        job.data.mediaItem.id,
-      );
+      const item = await mediaItemService.getMediaItem(job.data.mediaItem.id);
 
       const successfulStates: MediaItemState[] = [
         "completed",
@@ -182,7 +188,7 @@ export const processItemProcessor =
         if (showIncompleteItems.length === 0) {
           if (show.state === "ongoing") {
             const { reindexTime } =
-              await services.indexerService.calculateReindexTime(show);
+              await indexerService.calculateReindexTime(show);
 
             const nextAirDateMessage = show.nextAirDate
               ? `New episodes will attempt to be downloaded at ${chalk.bold(reindexTime.toLocaleString(DateTime.DATETIME_SHORT))}.`

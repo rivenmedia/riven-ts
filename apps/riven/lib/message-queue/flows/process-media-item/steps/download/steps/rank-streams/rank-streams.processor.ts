@@ -15,8 +15,11 @@ import { rankStreamsProcessorSchema } from "./rank-streams.schema.ts";
 import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution.ts";
 
 export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
-  async function ({ job }, { services }) {
-    const streams = await services.downloaderService.findMatchingStreams(
+  async function (
+    { job },
+    { services: { mediaItemService, downloaderService } },
+  ) {
+    const streams = await downloaderService.findMatchingStreams(
       Object.keys(job.data.streams),
     );
 
@@ -24,7 +27,7 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
       return [];
     }
 
-    const item = await services.mediaItemService.getMediaItem(job.data.id);
+    const item = await mediaItemService.getMediaItem(job.data.id);
 
     const { title: itemTitle, aliases } =
       item instanceof ShowLikeMediaItem ? await item.getShow() : item;

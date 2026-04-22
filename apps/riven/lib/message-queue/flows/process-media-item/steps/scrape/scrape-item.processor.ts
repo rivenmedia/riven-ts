@@ -10,7 +10,7 @@ import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
-  async function ({ job }, { sendEvent, services }) {
+  async function ({ job }, { sendEvent, services: { scraperService } }) {
     const children = await job.getChildrenValues();
 
     const parsedResults = Object.values(children).reduce<
@@ -18,8 +18,10 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
     >((acc, scrapeResult) => Object.assign(acc, scrapeResult.results), {});
 
     try {
-      const { item, newStreamsCount } =
-        await services.scraperService.scrapeItem(job.data.id, parsedResults);
+      const { item, newStreamsCount } = await scraperService.scrapeItem(
+        job.data.id,
+        parsedResults,
+      );
 
       if (newStreamsCount === 0) {
         throw new MediaItemScrapeErrorNoNewStreams({

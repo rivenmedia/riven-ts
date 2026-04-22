@@ -25,7 +25,7 @@ import { processItemRequestProcessorSchema } from "./process-item-request.schema
 export const processItemRequestProcessor =
   processItemRequestProcessorSchema.implementAsync(async function (
     { job, token },
-    { sendEvent, services, plugins },
+    { sendEvent, services: { itemRequestService, indexerService }, plugins },
   ) {
     switch (job.data.step) {
       case "request": {
@@ -37,7 +37,7 @@ export const processItemRequestProcessor =
           queue: job.queueQualifiedName,
         } satisfies ParentOptions;
 
-        const itemRequest = await services.itemRequestService.getItemRequest(
+        const itemRequest = await itemRequestService.getItemRequest(
           job.data.itemRequestId,
         );
 
@@ -76,7 +76,7 @@ export const processItemRequestProcessor =
         const data = await job.getChildrenValues();
 
         if (!Object.values(data).filter(Boolean).length) {
-          const itemRequest = await services.itemRequestService.markAsFailed(
+          const itemRequest = await itemRequestService.markAsFailed(
             job.data.itemRequestId,
           );
 
@@ -102,7 +102,7 @@ export const processItemRequestProcessor =
         );
 
         try {
-          const updatedItem = await services.indexerService.indexItem(item);
+          const updatedItem = await indexerService.indexItem(item);
 
           sendEvent({
             type: "riven.media-item.index.success",
