@@ -8,10 +8,10 @@ import { pluginConfig } from "../stremthru-plugin.config.ts";
 @Resolver()
 export class StremThruResolver {
   @Query(() => Boolean)
-  async stremthruIsValid(
+  stremthruIsValid(
     @PluginDataSource(pluginConfig.name, StremThruTorzAPI)
     api: StremThruTorzAPI,
   ): Promise<boolean> {
-    return await api.validate();
+    return api.validate();
   }
 }

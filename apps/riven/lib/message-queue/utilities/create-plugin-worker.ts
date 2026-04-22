@@ -37,8 +37,8 @@ export function createPluginWorker<
 
   const worker = new Worker(
     queueName,
-    async (job, token, signal) => {
-      return await Sentry.withScope(async (scope) => {
+    (job, token, signal) => {
+      return Sentry.withScope(async (scope) => {
         scope.setTags({
           "bullmq.job.id": job.id,
           "bullmq.queue.name": queueName,

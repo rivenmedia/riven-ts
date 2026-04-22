@@ -146,7 +146,7 @@ vi.doMock(import("./lib/utilities/settings.ts"), async (importOriginal) => {
   // eslint-disable-next-line turbo/no-undeclared-env-vars
   process.env["RIVEN_SETTING__redisUrl"] = await getRedisUrl();
 
-  return await importOriginal();
+  return importOriginal();
 });
 
 beforeEach(async () => {

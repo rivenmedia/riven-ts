@@ -8,9 +8,9 @@ import { pluginConfig } from "../torrentio-plugin.config.ts";
 @Resolver()
 export class TorrentioResolver {
   @Query(() => Boolean)
-  async torrentioIsValid(
+  torrentioIsValid(
     @PluginDataSource(pluginConfig.name, TorrentioAPI) api: TorrentioAPI,
   ): Promise<boolean> {
-    return await api.validate();
+    return api.validate();
   }
 }

@@ -11,27 +11,27 @@ import { ListIdsArguments } from "./arguments/list-ids.arguments.ts";
 @Resolver()
 export class ListrrResolver {
   @Query(() => Boolean)
-  async listrrIsValid(
+  listrrIsValid(
     @PluginDataSource(pluginConfig.name, ListrrAPI) api: ListrrAPI,
   ): Promise<boolean> {
-    return await api.validate();
+    return api.validate();
   }
 
   @CacheControl({ maxAge: 300 })
   @Query(() => [ExternalIds])
-  async listrrMovies(
+  listrrMovies(
     @Args() { listIds }: ListIdsArguments,
     @PluginDataSource(pluginConfig.name, ListrrAPI) api: ListrrAPI,
   ): Promise<ExternalIds[]> {
-    return await api.getMovies(new Set<string>(listIds));
+    return api.getMovies(new Set<string>(listIds));
   }
 
   @CacheControl({ maxAge: 300 })
   @Query(() => [ExternalIds])
-  async listrrShows(
+  listrrShows(
     @Args() { listIds }: ListIdsArguments,
     @PluginDataSource(pluginConfig.name, ListrrAPI) api: ListrrAPI,
   ): Promise<ExternalIds[]> {
-    return await api.getShows(new Set<string>(listIds));
+    return api.getShows(new Set<string>(listIds));
   }
 }

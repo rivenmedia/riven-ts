@@ -13,17 +13,17 @@ export default {
   dataSources: [SeerrAPI],
   resolvers: [SeerrResolver, SeerrSettingsResolver],
   hooks: {
-    "riven.content-service.requested": async ({ dataSources, settings }) => {
+    "riven.content-service.requested": ({ dataSources, settings }) => {
       const { filter } = settings.get(SeerrSettings);
       const api = dataSources.get(SeerrAPI);
 
-      return await api.getContent(filter);
+      return api.getContent(filter);
     },
   },
   settingsSchema: SeerrSettings,
-  async validator({ dataSources }) {
+  validator({ dataSources }) {
     const api = dataSources.get(SeerrAPI);
 
-    return await api.validate();
+    return api.validate();
   },
 } satisfies RivenPlugin as RivenPlugin;

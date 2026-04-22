@@ -399,7 +399,7 @@ export abstract class BaseDataSource<
 
     if (isCached) {
       // If we have a cached response, bypass the message queue and fetch directly
-      return await super.fetch(path, augmentedRequest);
+      return super.fetch(path, augmentedRequest);
     }
 
     const context = dataSourceContext.getStore();
