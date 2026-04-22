@@ -49,7 +49,6 @@ import {
   type ScheduleReindexInput,
   scheduleReindex,
 } from "./actors/schedule-reindex.actor.ts";
-import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscribers.ts";
 
 import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
 import type { Flow } from "../../message-queue/flows/index.ts";
@@ -118,19 +117,11 @@ export const mainRunnerMachine = setup({
         type: "riven.core.shutdown",
       });
     },
-    requestContentServices: enqueueActions(
-      ({ enqueue, context: { plugins } }) => {
-        enqueue.spawnChild("requestContentServices", {
-          id: "requestContentServices",
-          input: {
-            subscribers: getPluginEventSubscribers(
-              "riven.content-service.requested",
-              plugins,
-            ),
-          },
-        });
-      },
-    ),
+    requestContentServices: enqueueActions(({ enqueue }) => {
+      enqueue.spawnChild("requestContentServices", {
+        id: "requestContentServices",
+      });
+    }),
     processItemRequest: enqueueActions(
       ({ enqueue }, input: ProcessItemRequestInput) => {
         enqueue.spawnChild("processItemRequest", {
