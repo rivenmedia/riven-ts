@@ -8,10 +8,13 @@ import {
 } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
 import {
+  DelayedError,
   type ParentOptions,
   UnrecoverableError,
   WaitingChildrenError,
 } from "bullmq";
+import chalk from "chalk";
+import { DateTime } from "luxon";
 import assert from "node:assert";
 
 import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
@@ -71,6 +74,18 @@ export const processItemRequestProcessor =
       }
       case "process": {
         const data = await job.getChildrenValues();
+
+        if (!Object.values(data).filter(Boolean).length) {
+          const itemRequest = await services.itemRequestService.markAsFailed(
+            job.data.itemRequestId,
+          );
+
+          await job.moveToDelayed(DateTime.now().plus({ days: 1 }).toMillis());
+
+          throw new DelayedError(
+            `Unable to index ${chalk.bold(itemRequest.externalIdsLabel.join(" | "))}. Retrying in 24 hours.`,
+          );
+        }
 
         const item = Object.values(data).reduce(
           (acc, value) => {
