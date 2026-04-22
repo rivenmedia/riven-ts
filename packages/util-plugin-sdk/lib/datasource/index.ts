@@ -486,8 +486,10 @@ export abstract class BaseDataSource<
       throw Worker.RateLimitError();
     }
 
-    if (response.status === 404) {
-      throw new UnrecoverableError(`Resource not found at ${url.toString()}`);
+    if (String(response.status).startsWith("4")) {
+      throw new UnrecoverableError(
+        `${response.status.toString()} ${response.statusText} for ${url.toString()}`,
+      );
     }
   }
 
