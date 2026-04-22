@@ -6,6 +6,17 @@ import z from "zod";
 import { LogLevel } from "./utilities/logger/log-levels.ts";
 
 export const RivenSettings = z.object({
+  attemptUnknownDownloads: z
+    .stringbool()
+    .default(false)
+    .describe(
+      dedent`
+        If true, Riven will attempt to download torrents whose contents cannot be verified without first attempting to download.
+
+        **Note**: Enabling this will degrade performance as more download attempts will be made for all items,
+        however it may be useful to enable if Riven's plugins are unable to find your requested items.
+      `,
+    ),
   databaseUrl: z.url().describe("The database connection URL."),
   databaseDebugLogging: z
     .stringbool()

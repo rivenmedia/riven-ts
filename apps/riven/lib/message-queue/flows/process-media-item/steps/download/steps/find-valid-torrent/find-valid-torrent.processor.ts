@@ -1,9 +1,11 @@
 import { type ParentOptions, UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 import assert from "node:assert";
+import z, { ZodError } from "zod";
 
 import { getPluginEventSubscribers } from "../../../../../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
 import { logger } from "../../../../../../../utilities/logger/logger.ts";
+import { settings } from "../../../../../../../utilities/settings.ts";
 import { InvalidTorrentError } from "../../../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
 import { findValidTorrentProcessorSchema } from "./find-valid-torrent.schema.ts";
 import { getCachedTorrentFiles } from "./utilities/get-cached-torrent-files.ts";
@@ -101,7 +103,21 @@ export const findValidTorrentProcessor =
                   provider,
                 );
 
-                if (!cachedFiles[infoHash]) {
+                if (cachedFiles[infoHash]?.length) {
+                  logger.verbose(
+                    `Found ${chalk.bold(infoHash)} in ${pluginName} cache for ${mediaItem.fullTitle}${provider ? ` on ${provider}` : ""}`,
+                  );
+
+                  await getValidTorrentFiles(
+                    mediaItem,
+                    infoHash,
+                    cachedFiles[infoHash],
+                    true,
+                    jobParentOptions,
+                  );
+
+                  await job.log(`${infoHash}: Cached files are valid`);
+                } else if (settings.attemptUnknownDownloads) {
                   await job.log(`${infoHash}: No cached files found`);
 
                   logger.verbose(
@@ -110,20 +126,6 @@ export const findValidTorrentProcessor =
 
                   continue;
                 }
-
-                logger.verbose(
-                  `Found ${chalk.bold(infoHash)} in ${pluginName} cache for ${mediaItem.fullTitle}${provider ? ` on ${provider}` : ""}`,
-                );
-
-                await getValidTorrentFiles(
-                  mediaItem,
-                  infoHash,
-                  cachedFiles[infoHash],
-                  true,
-                  jobParentOptions,
-                );
-
-                await job.log(`${infoHash}: Cached files are valid`);
               }
 
               const pluginDownloadResult = await getPluginDownloadResult(
@@ -159,8 +161,13 @@ export const findValidTorrentProcessor =
                 throw error;
               }
 
+              const errorMessage =
+                error instanceof ZodError
+                  ? z.prettifyError(error)
+                  : String(error);
+
               logger.debug(
-                `${mediaItem.type} ${mediaItem.fullTitle} (${mediaItem.id}) - ${String(error)}`,
+                `${mediaItem.type} ${mediaItem.fullTitle} - ${errorMessage}`,
               );
 
               continue;
