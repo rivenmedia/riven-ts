@@ -8,6 +8,7 @@ import {
 import { ValidationError } from "@mikro-orm/core";
 import {
   CreateRequestContext,
+  EnsureRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
 import chalk from "chalk";
@@ -46,20 +47,12 @@ export class DownloaderService extends BaseService {
     return persistDownloadResults(this.em, id, torrent, processedBy);
   }
 
-  @CreateRequestContext()
+  @EnsureRequestContext()
   async getFanOutDownloadItems(id: UUID) {
     const item = await this.em.getRepository(MediaItem).findOneOrFail(id);
 
     if (item instanceof Show) {
-      return item.seasons.matching({
-        where: {
-          isRequested: true,
-          isSpecial: false,
-          state: {
-            $in: ["ongoing", "indexed", "scraped", "partially_completed"],
-          },
-        },
-      });
+      return item.getIncompleteItems();
     }
 
     if (item instanceof Season) {

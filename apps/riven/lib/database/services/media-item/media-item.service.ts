@@ -42,13 +42,26 @@ export class MediaItemService extends BaseService {
 
   @CreateRequestContext()
   async getItemsToProcess(id: UUID) {
-    const item = await this.getMediaItem(id);
+    try {
+      const item = await this.getMediaItem({
+        id,
+        state: {
+          $nin: ["failed", "paused"],
+        },
+      });
 
-    if (item instanceof Show) {
-      // TODO: Add config var to control show packs vs season packs
-      return services.downloaderService.getFanOutDownloadItems(id);
+      const { settings } = await import("../../../utilities/settings.ts");
+
+      if (
+        (item instanceof Show && settings.preferSeasonPacks) ||
+        item.state === "ongoing"
+      ) {
+        return await services.downloaderService.getFanOutDownloadItems(id);
+      }
+
+      return [item];
+    } catch {
+      return [];
     }
-
-    return [item];
   }
 }

@@ -78,4 +78,8 @@ export class Episode extends ShowLikeMediaItem {
   getExpectedFileCount(): number {
     return 1;
   }
+
+  getIncompleteItems() {
+    return [];
+  }
 }

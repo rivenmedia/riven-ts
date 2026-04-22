@@ -1,10 +1,11 @@
-import { type Movie, type Show } from "@repo/util-plugin-sdk/dto/entities";
+import { Movie, type Show } from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   CreateRequestContext,
   EnsureRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
+import { DateTime } from "luxon";
 
 import { BaseService } from "../core/base-service.ts";
 import {
@@ -40,5 +41,24 @@ export class IndexerService extends BaseService {
       case "show":
         return this.indexShow(item);
     }
+  }
+
+  async calculateReindexTime(
+    item: Movie | Show,
+  ): Promise<{ reindexTime: DateTime; isFallback: boolean }> {
+    const { settings } = await import("../../../utilities/settings.ts");
+    const baseDate =
+      item instanceof Movie ? item.releaseDate : item.nextAirDate;
+
+    const reindexTime = baseDate
+      ? DateTime.fromJSDate(baseDate).plus({
+          minutes: settings.scheduleOffsetMinutes,
+        })
+      : DateTime.now().plus({ days: settings.unknownAirDateOffsetDays });
+
+    return {
+      reindexTime,
+      isFallback: !baseDate,
+    };
   }
 }

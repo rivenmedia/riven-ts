@@ -64,16 +64,6 @@ export const RivenSettings = z.object({
     .stringbool()
     .default(false)
     .describe("Only scrape dubbed anime."),
-  scrapeCooldownHours: json(
-    z.tuple([
-      z.int().nonnegative().default(2),
-      z.int().nonnegative().default(6),
-      z.int().nonnegative().default(24),
-    ]),
-  ).default([2, 6, 24]).describe(dedent`
-      The cooldown periods (in hours) to apply after failed scrape attempts,
-      in the format [> 2 attempts, > 5 attempts, > 10 attempts].
-    `),
   maximumScrapeAttempts: z
     .int()
     .nonnegative()
@@ -91,6 +81,12 @@ export const RivenSettings = z.object({
     .positive()
     .optional()
     .describe("The minimum average bitrate for episodes."),
+  preferSeasonPacks: z
+    .stringbool()
+    .default(false)
+    .describe(
+      "If true, Riven will prefer to download season packs over show packs.",
+    ),
   scheduleOffsetMinutes: z
     .int()
     .nonnegative()
@@ -98,6 +94,16 @@ export const RivenSettings = z.object({
     .describe(
       "The number of minutes to wait after an item's air date before attempting to re-index it.",
     ),
+  scrapeCooldownHours: json(
+    z.tuple([
+      z.int().nonnegative().default(2),
+      z.int().nonnegative().default(6),
+      z.int().nonnegative().default(24),
+    ]),
+  ).default([2, 6, 24]).describe(dedent`
+      The cooldown periods (in hours) to apply after failed scrape attempts,
+      in the format [> 2 attempts, > 5 attempts, > 10 attempts].
+    `),
   unknownAirDateOffsetDays: z
     .int()
     .nonnegative()

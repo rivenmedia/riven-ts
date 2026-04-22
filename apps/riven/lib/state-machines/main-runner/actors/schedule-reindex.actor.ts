@@ -1,8 +1,10 @@
 import { Movie, type Show } from "@repo/util-plugin-sdk/dto/entities";
 
+import chalk from "chalk";
 import { DateTime } from "luxon";
 import { fromPromise } from "xstate";
 
+import { services } from "../../../database/database.ts";
 import { enqueueProcessItemRequest } from "../../../message-queue/flows/process-item-request/enqueue-process-item-request.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
@@ -13,22 +15,16 @@ export interface ScheduleReindexInput {
 
 export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
   async ({ input: { item } }) => {
-    const itemReleaseDate =
-      item instanceof Movie ? item.releaseDate : item.nextAirDate;
+    const { isFallback, reindexTime } =
+      await services.indexerService.calculateReindexTime(item);
 
-    if (!itemReleaseDate) {
+    if (isFallback) {
       logger.verbose(
-        `No known release date for ${item.type} "${item.fullTitle}". Using fallback of ${settings.unknownAirDateOffsetDays.toString()} days.`,
+        `No known release date for ${item.type} "${chalk(item.fullTitle)}". Using fallback of ${settings.unknownAirDateOffsetDays.toString()} days.`,
       );
     }
 
-    const scheduleFor = itemReleaseDate
-      ? DateTime.fromJSDate(itemReleaseDate).plus({
-          minutes: settings.scheduleOffsetMinutes,
-        })
-      : DateTime.now().plus({ days: settings.unknownAirDateOffsetDays });
-
-    const jobDelay = scheduleFor.diffNow().as("milliseconds");
+    const jobDelay = reindexTime.diffNow().as("milliseconds");
     const itemRequest = await item.itemRequest.loadOrFail();
 
     await enqueueProcessItemRequest(
@@ -43,7 +39,7 @@ export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
     );
 
     logger.info(
-      `Scheduled re-index at ${scheduleFor.toLocaleString(DateTime.DATETIME_MED_WITH_WEEKDAY)} for ${item.type} "${item.fullTitle}".`,
+      `Scheduled re-index at ${chalk.bold(reindexTime.toLocaleString(DateTime.DATETIME_MED_WITH_WEEKDAY))} for ${item.type} ${chalk.bold(item.fullTitle)}.`,
     );
   },
 );

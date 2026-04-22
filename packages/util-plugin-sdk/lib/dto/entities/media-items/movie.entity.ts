@@ -45,4 +45,8 @@ export class Movie extends MediaItem {
   getExpectedFileCount(): number {
     return 1;
   }
+
+  getIncompleteItems() {
+    return [];
+  }
 }

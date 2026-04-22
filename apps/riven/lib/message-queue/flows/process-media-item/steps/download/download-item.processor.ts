@@ -1,5 +1,3 @@
-import { Season, Show } from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
@@ -16,14 +14,18 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
     const item = await services.mediaItemService.getMediaItem(job.data.id);
 
     if (!finalResult) {
+      const error = new Error(
+        "No valid torrent found after trying all downloaders",
+      );
+
       sendEvent({
         type: "riven.media-item.download.error",
         item,
-        error: new Error("No valid torrent found after trying all downloaders"),
+        error,
       });
 
       throw new UnrecoverableError(
-        `Failed to download ${chalk.bold(item.fullTitle)}: No valid torrent found after trying all downloaders`,
+        `Failed to download ${chalk.bold(item.fullTitle)}: ${error.message}`,
       );
     }
 
@@ -34,30 +36,16 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
         finalResult.plugin,
       );
 
-      const incompleteChildStates = MediaItemState.extract([
-        "indexed",
-        "scraped",
-      ]);
+      const incompleteItems = await updatedItem.getIncompleteItems();
 
-      if (updatedItem instanceof Show || updatedItem instanceof Season) {
-        const episodes =
-          updatedItem instanceof Show
-            ? await updatedItem.getEpisodes()
-            : await updatedItem.episodes.loadItems();
+      if (incompleteItems.length) {
+        sendEvent({
+          type: "riven.media-item.download.partial-success",
+          item: updatedItem,
+          downloader: finalResult.plugin,
+        });
 
-        const hasIncompleteItems = episodes.some(
-          ({ state }) => incompleteChildStates.safeParse(state).success,
-        );
-
-        if (hasIncompleteItems) {
-          sendEvent({
-            type: "riven.media-item.download.partial-success",
-            item: updatedItem,
-            downloader: finalResult.plugin,
-          });
-
-          return;
-        }
+        return;
       }
 
       sendEvent({

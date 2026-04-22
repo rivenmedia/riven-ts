@@ -10,6 +10,7 @@ import {
   OneToMany,
   Property,
 } from "@mikro-orm/decorators/legacy";
+import { reduceAsync } from "es-toolkit";
 import { Field, ObjectType } from "type-graphql";
 
 import {
@@ -80,8 +81,8 @@ export class Show extends ShowLikeMediaItem {
     return seasons.flatMap((season) => season.episodes.getItems());
   }
 
-  async getStandardSeasons(stateFilter?: MediaItemState[]) {
-    return await this.seasons.matching({
+  getStandardSeasons(stateFilter?: MediaItemState[]) {
+    return this.seasons.matching({
       orderBy: { number: "asc" },
       where: {
         ...(stateFilter ? { state: { $in: stateFilter } } : {}),
@@ -125,18 +126,30 @@ export class Show extends ShowLikeMediaItem {
   }
 
   async getExpectedFileCount(): Promise<number> {
-    const { reduceAsync } = await import("es-toolkit");
-
-    const processableStates = MediaItemState.exclude(["unreleased", "ongoing"]);
+    const processableStates = MediaItemState.exclude(["unreleased"]);
 
     const seasons = await this.getStandardSeasons(processableStates.options);
     const expectedSeasons =
       this.status === "continuing" ? seasons.length - 1 : seasons.length;
 
-    return reduceAsync(
+    const count = await reduceAsync(
       seasons.slice(0, Math.max(1, expectedSeasons)),
       async (acc, season) => acc + (await season.episodes.loadCount()),
       0,
     );
+
+    return count;
+  }
+
+  async getIncompleteItems() {
+    return this.seasons.matching({
+      where: {
+        isRequested: true,
+        isSpecial: false,
+        episodes: {
+          state: ["indexed", "scraped"],
+        },
+      },
+    });
   }
 }

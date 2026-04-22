@@ -110,17 +110,12 @@ export abstract class BaseDataSource<
       connection,
       defaultJobOptions: {
         removeOnComplete: {
-          age: 60 * 60,
+          age: 60,
           count: 5000,
         },
         removeOnFail: {
           age: 60 * 60 * 24,
           count: 5000,
-        },
-      },
-      streams: {
-        events: {
-          maxLen: 100000,
         },
       },
       telemetry,
@@ -218,9 +213,7 @@ export abstract class BaseDataSource<
 
   #parseHTTPDate(dateString: string): number | null {
     try {
-      const httpDate = DateTime.fromHTTP(dateString);
-
-      return httpDate.diffNow().milliseconds;
+      return DateTime.fromHTTP(dateString).diffNow().toMillis();
     } catch {
       return null;
     }
@@ -425,7 +418,7 @@ export abstract class BaseDataSource<
       jobParentOptions,
     );
 
-    const result = await job.waitUntilFinished(this.#queueEvents, 60_000);
+    const result = await job.waitUntilFinished(this.#queueEvents);
 
     const logMessage = result.responseFromCache
       ? `[${this.serviceName}] Returned cached response for ${augmentedRequest.method ?? "GET"} ${url.toString()}`

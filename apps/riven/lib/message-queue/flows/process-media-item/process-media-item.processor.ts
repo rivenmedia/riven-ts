@@ -1,3 +1,5 @@
+import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
+
 import { ValidationError } from "@mikro-orm/core";
 import {
   DelayedError,
@@ -14,6 +16,8 @@ import { logger } from "../../../utilities/logger/logger.ts";
 import { processMediaItemProcessorSchema } from "./process-media-item.schema.ts";
 import { enqueueDownloadItem } from "./steps/download/enqueue-download-item.ts";
 import { enqueueScrapeItems } from "./steps/scrape/enqueue-scrape-items.ts";
+
+import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
 export const processItemProcessor =
   processMediaItemProcessorSchema.implementAsync(async function (
@@ -139,27 +143,63 @@ export const processItemProcessor =
         job.data.mediaItem.id,
       );
 
-      if (item.state !== "completed") {
+      const successfulStates: MediaItemState[] = [
+        "completed",
+        "ongoing",
+        "partially_completed",
+      ];
+
+      if (!successfulStates.includes(item.state)) {
         throw new UnrecoverableError(
           `Processing of ${chalk.bold(item.fullTitle)} did not complete successfully. Final state: ${item.state}`,
         );
       }
 
-      const duration = DateTime.fromMillis(job.timestamp)
-        .diffNow(["seconds", "minutes", "hours", "days", "weeks"])
-        .rescale()
-        .negate()
-        .toHuman({
-          showZeros: false,
-          maximumFractionDigits: 0,
-          unitDisplay: "narrow",
-        });
+      const incompleteItems = await item.getIncompleteItems();
 
-      logger.info(
-        chalk.greenBright(
-          `${chalk.bold(item.fullTitle)} completed in ${duration}`,
-        ),
-      );
+      if (incompleteItems.length === 0) {
+        const duration = DateTime.fromMillis(job.timestamp)
+          .diffNow(["seconds", "minutes", "hours", "days", "weeks"])
+          .rescale()
+          .negate()
+          .toHuman({
+            showZeros: false,
+            maximumFractionDigits: 0,
+            unitDisplay: "narrow",
+          });
+
+        logger.info(
+          chalk.greenBright(
+            `${chalk.bold(item.fullTitle)} completed in ${chalk.bold(duration)}`,
+          ),
+        );
+      }
+
+      if (item instanceof Season || item instanceof Episode) {
+        const show = await item.getShow();
+        const showIncompleteItems = await show.getIncompleteItems();
+
+        if (showIncompleteItems.length === 0) {
+          if (show.state === "ongoing") {
+            const { reindexTime } =
+              await services.indexerService.calculateReindexTime(show);
+
+            const nextAirDateMessage = show.nextAirDate
+              ? `New episodes will attempt to be downloaded at ${chalk.bold(reindexTime.toLocaleString(DateTime.DATETIME_SHORT))}.`
+              : "";
+
+            logger.info(
+              chalk.greenBright(
+                `${chalk.bold(show.fullTitle)} completed all available episodes. ${nextAirDateMessage}`.trim(),
+              ),
+            );
+          } else {
+            logger.info(
+              chalk.greenBright(`${chalk.bold(show.fullTitle)} completed`),
+            );
+          }
+        }
+      }
     } catch (error) {
       if (error instanceof ValidationError) {
         throw new UnrecoverableError(error.message);

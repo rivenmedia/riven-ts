@@ -214,4 +214,9 @@ export abstract class MediaItem {
    * @returns A positive integer representing the expected file count for this media item.
    */
   abstract getExpectedFileCount(): Promisable<number>;
+
+  /**
+   * @returns Any incomplete immediate children of this media item.
+   */
+  abstract getIncompleteItems(): Promisable<MediaItem[]>;
 }
