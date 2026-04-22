@@ -24,7 +24,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
   override baseURL = this.settings.stremThruUrl;
   override serviceName = "StremThru [Torz]";
 
-  protected override concurrency = 5;
+  protected override concurrency = 1; // Lower the concurrency to prevent queue build-ups, as this API aggressively rate-limits itself
 
   #buildCommonHeaders(store: Store) {
     return {
@@ -58,11 +58,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     const baseKey = super.cacheKeyFor(url, request);
     const store = request.headers?.[storeNameHeader];
 
-    if (!store) {
-      return baseKey;
-    }
-
-    return `${baseKey}:${store}`;
+    return [baseKey, store, request.cacheKey].filter(Boolean).join(":");
   }
 
   override async validate() {
@@ -85,6 +81,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
       body: JSON.stringify({
         link: `magnet:?xt=urn:btih:${infoHash}`.toLowerCase(),
       }),
+      cacheKey: infoHash,
     });
 
     const { data } = AddTorrentResponse.parse(response);

@@ -79,7 +79,18 @@ export abstract class BaseDataSource<
 
   protected readonly rateLimiterOptions?: RateLimiterOptions | undefined;
 
-  protected readonly concurrency: number = 1;
+  /**
+   * Controls the concurrency (i.e. how many jobs it works on simultaneously) for the datasource worker.
+   *
+   * The default is `200`, as the worker only handles I/O operations, so a high concurrency can be used.
+   *
+   * If your API throws a lot of timeout errors, try reducing this value.
+   *
+   * @see https://docs.bullmq.io/guide/parallelism-and-concurrency#how-to-best-use-bullmqs-concurrency-then
+   *
+   * @default 200
+   */
+  protected readonly concurrency: number = 200;
 
   #requestAttempts: number;
 
@@ -172,8 +183,6 @@ export abstract class BaseDataSource<
           ? { limiter: this.rateLimiterOptions }
           : {}),
         telemetry,
-        // The datasource worker only handles I/O operations, so a high concurrency can be used.
-        // https://docs.bullmq.io/guide/parallelism-and-concurrency#how-to-best-use-bullmqs-concurrency-then
         concurrency: this.concurrency,
       },
     );
