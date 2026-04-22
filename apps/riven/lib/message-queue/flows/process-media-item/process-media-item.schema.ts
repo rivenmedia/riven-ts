@@ -12,7 +12,7 @@ export const ProcessMediaItemFlow = createFlowSchema("process-media-item", {
     mediaItem: z.object({
       id: UUID,
       type: MediaItemType,
-      title: z.string(),
+      fullTitle: z.string(),
     }),
     nextScrapeAttemptTimestamp: z.number().optional(),
   }),

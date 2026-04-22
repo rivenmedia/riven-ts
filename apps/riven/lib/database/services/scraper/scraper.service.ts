@@ -5,7 +5,7 @@ import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/
 
 import { ValidationError } from "@mikro-orm/core";
 import {
-  EnsureRequestContext,
+  CreateRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
 import chalk from "chalk";
@@ -20,7 +20,7 @@ import type { ParsedData } from "@repo/util-rank-torrent-name";
 import type { UUID } from "node:crypto";
 
 export class ScraperService extends BaseService {
-  @EnsureRequestContext()
+  @CreateRequestContext()
   async getItemToScrape(id: UUID, type: MediaItemType) {
     const item = await this.em.getRepository(MediaItem).findOneOrFail({
       id,
@@ -56,7 +56,7 @@ export class ScraperService extends BaseService {
     }
   }
 
-  @EnsureRequestContext()
+  @CreateRequestContext()
   @Transactional()
   async scrapeItem(id: UUID, results: Record<string, ParsedData>) {
     const existingItem = await this.em

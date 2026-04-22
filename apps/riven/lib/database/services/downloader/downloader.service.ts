@@ -1,8 +1,13 @@
-import { MediaItem, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  MediaItem,
+  Season,
+  Show,
+  Stream,
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import { ValidationError } from "@mikro-orm/core";
 import {
-  EnsureRequestContext,
+  CreateRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
 import chalk from "chalk";
@@ -15,7 +20,7 @@ import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-
 import type { UUID } from "node:crypto";
 
 export class DownloaderService extends BaseService {
-  @EnsureRequestContext()
+  @CreateRequestContext()
   async getItemToDownload(id: UUID) {
     const item = await this.em.getRepository(MediaItem).findOneOrFail(id);
 
@@ -35,13 +40,13 @@ export class DownloaderService extends BaseService {
     return item;
   }
 
-  @EnsureRequestContext()
+  @CreateRequestContext()
   @Transactional()
   async downloadItem(id: UUID, torrent: ValidTorrent, processedBy: string) {
     return persistDownloadResults(this.em, id, torrent, processedBy);
   }
 
-  @EnsureRequestContext()
+  @CreateRequestContext()
   async getFanOutDownloadItems(id: UUID) {
     const item = await this.em.getRepository(MediaItem).findOneOrFail(id);
 
@@ -65,5 +70,14 @@ export class DownloaderService extends BaseService {
     }
 
     return [];
+  }
+
+  @CreateRequestContext()
+  async findMatchingStreams(infoHashes: string[]) {
+    return this.em.getRepository(Stream).find({
+      infoHash: {
+        $in: infoHashes,
+      },
+    });
   }
 }

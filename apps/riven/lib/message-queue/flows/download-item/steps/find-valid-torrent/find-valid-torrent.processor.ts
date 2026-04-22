@@ -2,7 +2,6 @@ import { type ParentOptions, UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 import assert from "node:assert";
 
-import { repositories } from "../../../../../database/database.ts";
 import { getPluginEventSubscribers } from "../../../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
 import { InvalidTorrentError } from "../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
@@ -15,7 +14,7 @@ import { getValidTorrentFiles } from "./utilities/get-valid-torrent-files.ts";
 export const findValidTorrentProcessor =
   findValidTorrentProcessorSchema.implementAsync(async function (
     { job, scope },
-    { plugins },
+    { services, plugins },
   ) {
     const [rankedStreams] = Object.values(await job.getChildrenValues());
 
@@ -32,7 +31,7 @@ export const findValidTorrentProcessor =
 
     assert(jobId);
 
-    const mediaItem = await repositories.mediaItem.findOneOrFail(mediaItemId);
+    const mediaItem = await services.mediaItemService.getMediaItem(mediaItemId);
 
     const infoHashes = rankedStreams.map((stream) => stream.hash);
     const uncheckedInfoHashes = new Set(infoHashes)

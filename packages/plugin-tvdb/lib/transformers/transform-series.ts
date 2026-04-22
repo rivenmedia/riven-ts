@@ -8,10 +8,8 @@ import type {
   EpisodeBaseRecordSchema,
   SeriesExtendedRecordSchema,
 } from "../__generated__/index.ts";
-import type {
-  MediaItemIndexRequestedEvent,
-  MediaItemIndexRequestedPluginResponse,
-} from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+import type { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+import type { MediaItemIndexRequestedShowResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 import type { TimezoneName } from "countries-and-timezones";
 
 function findEnglishShowTitle(series: SeriesExtendedRecordSchema) {
@@ -27,7 +25,7 @@ function findEnglishShowTitle(series: SeriesExtendedRecordSchema) {
 }
 
 export const transformSeries = (
-  itemRequest: MediaItemIndexRequestedEvent["item"],
+  itemRequest: ItemRequest,
   series: SeriesExtendedRecordSchema,
   allEpisodes: EpisodeBaseRecordSchema[],
   originalReleaseTimezone: TimezoneName | undefined,
@@ -105,7 +103,7 @@ export const transformSeries = (
 
   const seasons = allEpisodes.reduce<
     Extract<
-      NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
+      NonNullable<MediaItemIndexRequestedShowResponse>["item"],
       { type: "show" }
     >["seasons"]
   >((acc, episode) => {
@@ -173,7 +171,7 @@ export const transformSeries = (
     seasons,
     language: series.originalLanguage,
   } satisfies Extract<
-    NonNullable<MediaItemIndexRequestedPluginResponse>["item"],
+    NonNullable<MediaItemIndexRequestedShowResponse>["item"],
     { type: "show" }
   >;
 };

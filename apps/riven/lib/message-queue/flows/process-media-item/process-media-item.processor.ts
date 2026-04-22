@@ -78,7 +78,7 @@ export const processItemProcessor =
 
             if (Object.keys(childFailures).length) {
               throw new UnrecoverableError(
-                `${chalk.bold(job.data.mediaItem.title)} failed to scrape after all attempts`,
+                `${chalk.bold(job.data.mediaItem.fullTitle)} failed to scrape after all attempts`,
               );
             }
 
@@ -113,7 +113,7 @@ export const processItemProcessor =
               });
 
               logger.info(
-                `Scheduling re-scrape for ${chalk.bold(job.data.mediaItem.title)} in ${nextScrapeAttemptTimestamp.diffNow("minutes").toHuman()}`,
+                `Scheduling re-scrape for ${chalk.bold(job.data.mediaItem.fullTitle)} in ${nextScrapeAttemptTimestamp.diffNow("minutes").toHuman()}`,
               );
 
               await job.log("Scheduling re-scrape due to download failure");

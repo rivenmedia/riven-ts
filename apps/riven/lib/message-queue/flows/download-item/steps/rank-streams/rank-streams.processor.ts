@@ -8,7 +8,6 @@ import {
 import { NotFoundError } from "@mikro-orm/core";
 import chalk from "chalk";
 
-import { repositories } from "../../../../../database/database.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../utilities/settings.ts";
 import { SkippedTorrentError } from "../../../../sandboxed-jobs/jobs/parse-scrape-results/utilities/validate-torrent.ts";
@@ -16,18 +15,16 @@ import { rankStreamsProcessorSchema } from "./rank-streams.schema.ts";
 import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution.ts";
 
 export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
-  async function ({ job }) {
-    const streams = await repositories.stream.find({
-      infoHash: {
-        $in: Object.keys(job.data.streams),
-      },
-    });
+  async function ({ job }, { services }) {
+    const streams = await services.downloaderService.findMatchingStreams(
+      Object.keys(job.data.streams),
+    );
 
     if (!streams.length) {
       return [];
     }
 
-    const item = await repositories.mediaItem.findOneOrFail(job.data.id);
+    const item = await services.mediaItemService.getMediaItem(job.data.id);
 
     const { title: itemTitle, aliases } =
       item instanceof ShowLikeMediaItem ? await item.getShow() : item;

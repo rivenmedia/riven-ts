@@ -34,7 +34,7 @@ it.skip('sends a "riven.media-item.index.requested" event for each incomplete it
   for (const item of items) {
     await vi.waitFor(() => {
       expect(actor).toHaveReceivedEvent({
-        type: "riven.media-item.index.requested",
+        type: `riven.media-item.index.requested.${item.type}`,
         item: expect.objectContaining({
           id: item.id,
           imdbId: item.imdbId,

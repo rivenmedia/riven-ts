@@ -14,12 +14,10 @@ import assert from "node:assert";
 import z from "zod";
 
 import type { EntityManager } from "@mikro-orm/core";
-import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+import type { MediaItemIndexRequestedShowResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-export type ShowIndexData = Extract<
-  NonNullable<MediaItemIndexRequestedResponse>["item"],
-  { type: "show" }
->;
+export type ShowIndexData =
+  NonNullable<MediaItemIndexRequestedShowResponse>["item"];
 
 export async function persistShowIndexerData(
   em: EntityManager,

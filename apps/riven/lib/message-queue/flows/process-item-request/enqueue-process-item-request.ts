@@ -1,50 +1,42 @@
-import { MediaItemIndexRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
-
 import { toMerged } from "es-toolkit";
 
-import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
 import { flow } from "../producer.ts";
 import { createProcessItemRequestJob } from "./process-item-request.schema.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import type { FlowJob } from "bullmq";
 import type { PartialDeep } from "type-fest";
 
 export interface ProcessItemRequestInput {
   item: ItemRequest;
-  subscribers: RivenPlugin[];
 }
 
 export async function enqueueProcessItemRequest(
-  { item, subscribers }: ProcessItemRequestInput,
+  { item }: ProcessItemRequestInput,
   opts: FlowJob["opts"] = {},
 ) {
-  const childNodes = subscribers.map((plugin) =>
-    createPluginFlowJob(
-      MediaItemIndexRequestedEvent,
-      `Index ${item.externalIdsLabel.join(" | ")}`,
-      plugin.name.description ?? "unknown",
-      { item },
-      { ignoreDependencyOnFailure: true },
-    ),
-  );
+  const indexType = opts.delay ? "Reindexing" : "Indexing";
 
-  const rootNode = createProcessItemRequestJob(
-    `Indexing [${item.externalIdsLabel.join(" | ")}]`,
-    { itemRequestId: item.id },
+  const job = createProcessItemRequestJob(
+    `${indexType} [${item.externalIdsLabel.join(" | ")}]`,
     {
-      children: childNodes,
+      itemRequestId: item.id,
+      step: "request",
+    },
+    {
       opts: toMerged<
-        NonNullable<FlowJob["opts"]>,
-        PartialDeep<NonNullable<FlowJob["opts"]>>
-      >(opts, {
-        deduplication: {
-          id: `process-item-request-${item.id}`,
+        PartialDeep<NonNullable<FlowJob["opts"]>>,
+        NonNullable<FlowJob["opts"]>
+      >(
+        {
+          deduplication: {
+            id: `process-item-request-${item.id}`,
+          },
         },
-      }),
+        opts,
+      ),
     },
   );
 
-  return flow.add(rootNode);
+  return flow.add(job);
 }

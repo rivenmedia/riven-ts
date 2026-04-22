@@ -7,14 +7,13 @@ import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 import { DateTime } from "luxon";
 
-import { repositories } from "../../../database/database.ts";
 import { downloadItemProcessorSchema } from "./download-item.schema.ts";
 
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
   async function ({ job }, { sendEvent, services }) {
     const [finalResult] = Object.values(await job.getChildrenValues());
 
-    const item = await repositories.mediaItem.findOneOrFail(job.data.id);
+    const item = await services.mediaItemService.getMediaItem(job.data.id);
 
     if (!finalResult) {
       sendEvent({

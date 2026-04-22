@@ -8,12 +8,10 @@ import assert from "node:assert";
 import z from "zod";
 
 import type { EntityManager } from "@mikro-orm/core";
-import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+import type { MediaItemIndexRequestedMovieResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-export type MovieIndexData = Extract<
-  NonNullable<MediaItemIndexRequestedResponse>["item"],
-  { type: "movie" }
->;
+export type MovieIndexData =
+  NonNullable<MediaItemIndexRequestedMovieResponse>["item"];
 
 export async function persistMovieIndexerData(
   em: EntityManager,

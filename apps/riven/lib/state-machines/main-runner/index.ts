@@ -132,18 +132,11 @@ export const mainRunnerMachine = setup({
       },
     ),
     processItemRequest: enqueueActions(
-      (
-        { enqueue, context: { plugins } },
-        input: Omit<ProcessItemRequestInput, "subscribers">,
-      ) => {
+      ({ enqueue }, input: ProcessItemRequestInput) => {
         enqueue.spawnChild("processItemRequest", {
           id: "processItemRequest",
           input: {
             item: input.item,
-            subscribers: getPluginEventSubscribers(
-              "riven.media-item.index.requested",
-              plugins,
-            ),
           },
         });
       },
@@ -157,18 +150,11 @@ export const mainRunnerMachine = setup({
       },
     ),
     scheduleReindex: enqueueActions(
-      (
-        { enqueue, context: { plugins } },
-        params: Omit<ScheduleReindexInput, "subscribers">,
-      ) => {
+      ({ enqueue }, params: ScheduleReindexInput) => {
         enqueue.spawnChild("scheduleReindex", {
           id: "scheduleReindex",
           input: {
             item: params.item,
-            subscribers: getPluginEventSubscribers(
-              "riven.media-item.index.requested",
-              plugins,
-            ),
           },
         });
       },

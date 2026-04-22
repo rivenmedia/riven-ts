@@ -3,22 +3,16 @@ import { Movie, type Show } from "@repo/util-plugin-sdk/dto/entities";
 import { DateTime } from "luxon";
 import { fromPromise } from "xstate";
 
-import {
-  type ProcessItemRequestInput,
-  enqueueProcessItemRequest,
-} from "../../../message-queue/flows/process-item-request/enqueue-process-item-request.ts";
+import { enqueueProcessItemRequest } from "../../../message-queue/flows/process-item-request/enqueue-process-item-request.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
 
-export interface ScheduleReindexInput extends Pick<
-  ProcessItemRequestInput,
-  "subscribers"
-> {
+export interface ScheduleReindexInput {
   item: Movie | Show;
 }
 
 export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
-  async ({ input: { item, subscribers } }) => {
+  async ({ input: { item } }) => {
     const itemReleaseDate =
       item instanceof Movie ? item.releaseDate : item.nextAirDate;
 
@@ -38,10 +32,7 @@ export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
     const itemRequest = await item.itemRequest.loadOrFail();
 
     await enqueueProcessItemRequest(
-      {
-        item: itemRequest,
-        subscribers,
-      },
+      { item: itemRequest },
       {
         delay: jobDelay,
         deduplication: {

@@ -103,7 +103,7 @@ it("sets the active stream and updates the state to completed if successful", as
     "@repo/plugin-test",
   );
 
-  expect(updatedItem.activeStream?.id).toBe(stream.id);
+  expect(updatedItem.activeStream?.unwrap().infoHash).toBe(stream.infoHash);
   expect(updatedItem.state).toBe("completed");
 });
 

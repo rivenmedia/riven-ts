@@ -1,4 +1,7 @@
-import { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+import {
+  MediaItemIndexRequestedMovieResponse,
+  MediaItemIndexRequestedShowResponse,
+} from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
@@ -7,9 +10,13 @@ import { createFlowJobBuilder } from "../../utilities/create-flow-job-builder.ts
 import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
 
 export const ProcessItemRequestFlow = createFlowSchema("process-item-request", {
-  children: MediaItemIndexRequestedResponse,
+  children: z.union([
+    MediaItemIndexRequestedMovieResponse,
+    MediaItemIndexRequestedShowResponse,
+  ]),
   input: z.object({
     itemRequestId: UUID,
+    step: z.enum(["request", "process"]),
   }),
 });
 

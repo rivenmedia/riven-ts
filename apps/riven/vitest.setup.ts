@@ -1,9 +1,8 @@
 import { BaseDataSource, type RivenPlugin } from "@repo/util-plugin-sdk";
 import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
 
-import { EntityRepository } from "@mikro-orm/core";
 import { type RedisClient, RedisConnection } from "bullmq";
-import { type Mock, afterAll, afterEach, expect, vi } from "vitest";
+import { type Mock, afterAll, beforeEach, expect, vi } from "vitest";
 import z from "zod";
 
 import type { RedisMemoryServer } from "redis-memory-server";
@@ -62,7 +61,7 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
   const { databaseConfig } = await import("./lib/database/config.ts");
   const { SqliteDriver } = await import("@mikro-orm/sqlite");
 
-  const { database, repositories, services } = await initORM({
+  const { database, services } = await initORM({
     ...databaseConfig,
     driver: SqliteDriver as never,
     dbName: ":memory:",
@@ -73,7 +72,6 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
 
   return {
     database,
-    repositories,
     services,
     initORM,
   };
@@ -151,18 +149,11 @@ vi.doMock(import("./lib/utilities/settings.ts"), async (importOriginal) => {
   return await importOriginal();
 });
 
-afterEach(async () => {
+beforeEach(async () => {
   const { database } = await import("./lib/database/database.ts");
 
   await database.orm.schema.clear();
   await redisClient?.flushdb();
-
-  // Clear all repositories to prevent caching issues between tests.
-  Object.values(database).forEach((repo) => {
-    if (repo instanceof EntityRepository) {
-      repo.getEntityManager().clear();
-    }
-  });
 });
 
 afterAll(async () => {

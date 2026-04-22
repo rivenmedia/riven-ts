@@ -1,60 +1,112 @@
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
+import {
+  MediaItemIndexRequestedMovieEvent,
+  MediaItemIndexRequestedMovieResponse,
+  MediaItemIndexRequestedShowEvent,
+  MediaItemIndexRequestedShowResponse,
+} from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-import { UnrecoverableError } from "bullmq";
-import chalk from "chalk";
+import {
+  type ParentOptions,
+  UnrecoverableError,
+  WaitingChildrenError,
+} from "bullmq";
+import assert from "node:assert";
 
+import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
+import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
+import { flow } from "../producer.ts";
 import { processItemRequestProcessorSchema } from "./process-item-request.schema.ts";
-
-import type { MediaItemIndexRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
 export const processItemRequestProcessor =
   processItemRequestProcessorSchema.implementAsync(async function (
-    { job },
-    { sendEvent, services },
+    { job, token },
+    { sendEvent, services, plugins },
   ) {
-    const data = await job.getChildrenValues();
+    switch (job.data.step) {
+      case "request": {
+        assert(token, "Token is required to create child jobs");
+        assert(job.id, "Job ID is required to create child jobs");
 
-    if (!Object.values(data).filter(Boolean).length) {
-      const itemRequest = await services.itemRequestService.markAsFailed(
-        job.data.itemRequestId,
-      );
+        const parent = {
+          id: job.id,
+          queue: job.queueQualifiedName,
+        } satisfies ParentOptions;
 
-      throw new UnrecoverableError(
-        `Unable to index ${chalk.bold(itemRequest.externalIdsLabel.join(" | "))}`,
-      );
-    }
-
-    const item = Object.values(data).reduce(
-      (acc, value) => {
-        if (!value?.item) {
-          return acc;
-        }
-
-        return Object.assign(acc, value.item);
-      },
-      {} as NonNullable<MediaItemIndexRequestedResponse>["item"],
-    );
-
-    try {
-      const updatedItem = await services.indexerService.indexItem(item);
-
-      sendEvent({
-        type: "riven.media-item.index.success",
-        item: updatedItem,
-      });
-    } catch (error) {
-      if (
-        error instanceof MediaItemIndexError ||
-        error instanceof MediaItemIndexErrorIncorrectState
-      ) {
-        sendEvent(error.payload);
-
-        throw new UnrecoverableError(
-          `Failed to persist indexer data: ${error.message}`,
+        const itemRequest = await services.itemRequestService.getItemRequest(
+          job.data.itemRequestId,
         );
-      }
 
-      throw error;
+        const subscribers = getPluginEventSubscribers(
+          `riven.media-item.index.requested.${itemRequest.type}`,
+          plugins,
+        );
+
+        const childNodes = subscribers.map((plugin) =>
+          createPluginFlowJob(
+            itemRequest.type === "movie"
+              ? MediaItemIndexRequestedMovieEvent
+              : MediaItemIndexRequestedShowEvent,
+            `Index ${itemRequest.externalIdsLabel.join(" | ")}`,
+            plugin.name.description ?? "unknown",
+            { item: itemRequest },
+            {
+              parent,
+              ignoreDependencyOnFailure: true,
+            },
+          ),
+        );
+
+        await flow.addBulk(childNodes);
+
+        await job.updateData({
+          ...job.data,
+          step: "process",
+        });
+
+        await job.moveToWaitingChildren(token);
+
+        throw new WaitingChildrenError();
+      }
+      case "process": {
+        const data = await job.getChildrenValues();
+
+        const item = Object.values(data).reduce(
+          (acc, value) => {
+            if (!value?.item) {
+              return acc;
+            }
+
+            return Object.assign(acc, value.item);
+          },
+          {} as NonNullable<
+            | MediaItemIndexRequestedMovieResponse
+            | MediaItemIndexRequestedShowResponse
+          >["item"],
+        );
+
+        try {
+          const updatedItem = await services.indexerService.indexItem(item);
+
+          sendEvent({
+            type: "riven.media-item.index.success",
+            item: updatedItem,
+          });
+        } catch (error) {
+          if (
+            error instanceof MediaItemIndexError ||
+            error instanceof MediaItemIndexErrorIncorrectState
+          ) {
+            sendEvent(error.payload);
+
+            throw new UnrecoverableError(
+              `Failed to persist indexer data: ${error.message}`,
+            );
+          }
+
+          throw error;
+        }
+      }
     }
   });
