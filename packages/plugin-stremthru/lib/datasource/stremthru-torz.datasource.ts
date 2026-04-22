@@ -79,7 +79,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     const response = await this.post<unknown>("v0/store/torz", {
       headers: this.#buildCommonHeaders(store),
       body: JSON.stringify({
-        link: `magnet:?xt=urn:btih:${infoHash}`.toLowerCase(),
+        link: infoHash,
       }),
       cacheKey: infoHash,
     });
