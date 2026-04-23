@@ -49,11 +49,11 @@ export function createSandboxedJobProcessor<
 
   let idleTimerId: NodeJS.Timeout | null = null;
 
-  return async (job: SandboxedJob, _token: string, signal: AbortSignal) => {
+  return async (job: SandboxedJob, _token?: string, signal?: AbortSignal) => {
     idleTimerId = maybeStopIdleTimer(idleTimerId);
 
-    return new Promise((resolve, reject) => {
-      signal.addEventListener("abort", () => {
+    return new Promise<z.infer<T["shape"]["output"]>>((resolve, reject) => {
+      signal?.addEventListener("abort", () => {
         reject(new AbortError(`${job.name} aborted`));
       });
 

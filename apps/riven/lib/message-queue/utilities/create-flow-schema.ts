@@ -49,13 +49,15 @@ export const createFlowSchema = <
               >;
             }
           >(),
-          signal: z.custom<AbortSignal>(
-            (data) =>
-              typeof data === "object" &&
-              data != null &&
-              "eventEmitter" in data &&
-              data.eventEmitter instanceof EventEmitter,
-          ),
+          signal: z
+            .custom<AbortSignal>(
+              (data) =>
+                typeof data === "object" &&
+                data != null &&
+                "eventEmitter" in data &&
+                data.eventEmitter instanceof EventEmitter,
+            )
+            .optional(),
           scope: z.custom<Sentry.Scope>(),
           token: z.string().optional(),
         }),

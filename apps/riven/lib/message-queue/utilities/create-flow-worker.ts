@@ -56,10 +56,8 @@ export function createFlowWorker<
   const worker = new Worker(
     flowName,
     (job, token, signal) => {
-      assert(signal, "Signal is required for flow workers");
-
       return new Promise((resolve, reject) => {
-        signal.addEventListener("abort", () => {
+        signal?.addEventListener("abort", () => {
           reject(new AbortError(`${job.name} aborted`));
         });
 

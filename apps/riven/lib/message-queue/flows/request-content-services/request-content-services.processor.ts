@@ -120,7 +120,7 @@ export const requestContentServicesProcessor =
           let updatedItemsCount = 0;
 
           for (const { item, type } of items.values()) {
-            signal.throwIfAborted();
+            signal?.throwIfAborted();
 
             try {
               const result =
