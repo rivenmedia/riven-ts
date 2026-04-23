@@ -1,5 +1,10 @@
 name: Verify
 
+description: |
+  This workflow runs various verification tasks (linting, type checking, tests, etc.) on pull requests.
+
+  It also tests that the Docker images are buildable, optionally pushing to the container registry if the "build-docker" label is present.
+
 run-name: "Verify: ${{ github.event.pull_request.title }} (#${{
   github.event.pull_request.number }})"
 

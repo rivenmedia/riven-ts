@@ -1,5 +1,7 @@
 name: Build Docker Images
 
+description: Build Docker images for the Riven app and optionally push them to the registry.
+
 on:
   push:
     branches:
