@@ -29,7 +29,7 @@ export class ScrapedMovieSeeder extends BaseSeeder<ScrapedMovieSeederContext> {
       scrapedAt: DateTime.now().toJSDate(),
     });
 
-    context.movie.streams.add(context.streams);
+    context.movie.streams.set(context.streams);
 
     await em.flush();
 

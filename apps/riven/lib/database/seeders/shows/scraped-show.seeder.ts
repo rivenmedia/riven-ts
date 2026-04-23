@@ -24,7 +24,7 @@ export class ScrapedShowSeeder extends BaseSeeder<ScrapedShowSeederContext> {
 
     em.persist(context.show);
 
-    context.show.streams.add(context.streams);
+    context.show.streams.set(context.streams);
 
     await em.flush();
 

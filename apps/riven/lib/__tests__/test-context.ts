@@ -60,7 +60,7 @@ export const it = testBase
 
     return database.orm;
   })
-  .extend("services", { scope: "file" }, async ({ orm: _orm }) => {
+  .extend("services", { scope: "file" }, async () => {
     const { services } = await import("../database/database.ts");
 
     return services;

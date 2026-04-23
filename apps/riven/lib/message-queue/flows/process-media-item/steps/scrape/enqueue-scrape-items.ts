@@ -31,6 +31,9 @@ export function enqueueScrapeItems({
       ),
     );
 
+    const remainingScrapeAttempts =
+      settings.maximumScrapeAttempts - item.failedScrapeAttempts;
+
     return createScrapeItemJob(
       `Scraping ${item.fullTitle}`,
       { id: item.id },
@@ -48,7 +51,7 @@ export function enqueueScrapeItems({
         opts: {
           parent,
           continueParentOnFailure: true,
-          attempts: settings.maximumScrapeAttempts,
+          attempts: remainingScrapeAttempts,
           backoff: {
             type: "custom",
           },

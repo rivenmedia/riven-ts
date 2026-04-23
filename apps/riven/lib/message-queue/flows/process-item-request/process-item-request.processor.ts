@@ -7,18 +7,14 @@ import {
   MediaItemIndexRequestedShowResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
-import {
-  DelayedError,
-  type ParentOptions,
-  UnrecoverableError,
-  WaitingChildrenError,
-} from "bullmq";
+import { DelayedError, UnrecoverableError, WaitingChildrenError } from "bullmq";
 import chalk from "chalk";
 import { DateTime } from "luxon";
 import assert from "node:assert";
 
 import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
 import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
+import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
 import { flow } from "../producer.ts";
 import { processItemRequestProcessorSchema } from "./process-item-request.schema.ts";
 
@@ -30,12 +26,8 @@ export const processItemRequestProcessor =
     switch (job.data.step) {
       case "request": {
         assert(token, "Token is required to create child jobs");
-        assert(job.id, "Job ID is required to create child jobs");
 
-        const parent = {
-          id: job.id,
-          queue: job.queueQualifiedName,
-        } satisfies ParentOptions;
+        const parent = createJobParentConfig(job);
 
         const itemRequest = await itemRequestService.getItemRequest(
           job.data.itemRequestId,

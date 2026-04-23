@@ -302,7 +302,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       return item.state;
     }
 
-    if (item.failedAttempts >= settings.maximumScrapeAttempts) {
+    if (item.failedScrapeAttempts >= settings.maximumScrapeAttempts) {
       return "failed";
     }
 

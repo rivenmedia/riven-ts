@@ -1,18 +1,14 @@
 import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
 
 import { ValidationError } from "@mikro-orm/core";
-import {
-  DelayedError,
-  type ParentOptions,
-  UnrecoverableError,
-  WaitingChildrenError,
-} from "bullmq";
+import { DelayedError, UnrecoverableError, WaitingChildrenError } from "bullmq";
 import chalk from "chalk";
 import { DateTime } from "luxon";
 import assert from "node:assert";
 
 import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
+import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
 import { processMediaItemProcessorSchema } from "./process-media-item.schema.ts";
 import { enqueueDownloadItem } from "./steps/download/enqueue-download-item.ts";
 import { enqueueScrapeItems } from "./steps/scrape/enqueue-scrape-items.ts";
@@ -32,13 +28,9 @@ export const processItemProcessor =
       plugins,
     },
   ) {
-    assert(job.id, "Job ID is required");
     assert(token, "Job token is required");
 
-    const jobParent = {
-      id: job.id,
-      queue: job.queueQualifiedName,
-    } satisfies ParentOptions;
+    const parent = createJobParentConfig(job);
 
     try {
       while (job.data.step !== "complete") {
@@ -71,7 +63,7 @@ export const processItemProcessor =
                 "riven.media-item.scrape.requested",
                 plugins,
               ),
-              parent: jobParent,
+              parent,
             });
 
             await job.updateData({
@@ -100,7 +92,7 @@ export const processItemProcessor =
 
             await enqueueDownloadItem({
               item,
-              opts: { parent: jobParent },
+              opts: { parent: parent },
             });
 
             await job.updateData({

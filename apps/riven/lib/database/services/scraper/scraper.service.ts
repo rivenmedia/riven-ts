@@ -45,15 +45,10 @@ export class ScraperService extends BaseService {
     return item;
   }
 
-  #updateScrapeMetadata(item: MediaItem, success: boolean) {
+  #updateScrapeMetadata(item: MediaItem, newFailedScrapeAttempts: number) {
     item.scrapedAt = DateTime.now().toJSDate();
     item.scrapedTimes++;
-
-    if (success) {
-      item.failedAttempts = 0;
-    } else {
-      item.failedAttempts++;
-    }
+    item.failedScrapeAttempts = newFailedScrapeAttempts;
   }
 
   @CreateRequestContext()
@@ -108,7 +103,7 @@ export class ScraperService extends BaseService {
         `Added ${newStreamsCount.toString()} new streams to ${chalk.bold(existingItem.fullTitle)}`,
       );
 
-      this.#updateScrapeMetadata(existingItem, true);
+      this.#updateScrapeMetadata(existingItem, 0);
 
       return {
         item: existingItem,
@@ -116,9 +111,12 @@ export class ScraperService extends BaseService {
       };
     } catch (error) {
       if (error instanceof MediaItemScrapeErrorNoNewStreams) {
-        // We only want to consider an attempt as failed if no new streams were added
+        // We only want to consider an attempt as failed if scraping succeeded and no new streams were added
         // instead of on *any* error (e.g. a database error) that occurs during the persist process.
-        this.#updateScrapeMetadata(error.payload.item, false);
+        this.#updateScrapeMetadata(
+          error.payload.item,
+          error.payload.item.failedScrapeAttempts + 1,
+        );
 
         return {
           item: error.payload.item,

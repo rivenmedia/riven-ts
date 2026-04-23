@@ -31,8 +31,7 @@ vi.mock(import("@repo/plugin-test"), () => {
   }
 
   class TestResolver {
-    // eslint-disable-next-line @typescript-eslint/require-await
-    async testIsValid(): Promise<boolean> {
+    testIsValid() {
       return true;
     }
   }

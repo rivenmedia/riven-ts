@@ -141,7 +141,7 @@ export abstract class MediaItem {
 
   @Field(() => Number)
   @Property()
-  failedAttempts: Opt<number> = 0;
+  failedScrapeAttempts: Opt<number> = 0;
 
   @Field(() => [FileSystemEntry])
   @ManyToMany()

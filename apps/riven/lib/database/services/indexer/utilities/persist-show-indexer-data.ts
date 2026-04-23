@@ -64,28 +64,24 @@ export async function persistShowIndexerData(
   }
 
   try {
-    const show = em.create(
-      Show,
-      {
-        title: item.title,
-        fullTitle: item.title,
-        contentRating: item.contentRating,
-        posterPath: item.posterUrl ?? existingShow?.posterPath ?? null,
-        country: item.country ?? existingShow?.country ?? null,
-        language: item.language ?? existingShow?.language ?? null,
-        rating: item.rating ?? existingShow?.rating ?? null,
-        status: item.status,
-        tvdbId,
-        imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
-        itemRequest,
-        isRequested: true, // Shows will always be considered to be requested
-        network: item.network,
-        aliases: item.aliases,
-        genres: item.genres.map((genre) => genre.toLowerCase()),
-        nextAirDate: null, // Reset the next air date; it will be recalculated during episode processing
-      },
-      { partial: true },
-    );
+    const show = em.create(Show, {
+      title: item.title,
+      fullTitle: item.title,
+      contentRating: item.contentRating,
+      posterPath: item.posterUrl ?? existingShow?.posterPath ?? null,
+      country: item.country ?? existingShow?.country ?? null,
+      language: item.language ?? existingShow?.language ?? null,
+      rating: item.rating ?? existingShow?.rating ?? null,
+      status: item.status,
+      tvdbId,
+      imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
+      itemRequest,
+      isRequested: true, // Shows will always be considered to be requested
+      network: item.network,
+      aliases: item.aliases,
+      genres: item.genres.map((genre) => genre.toLowerCase()),
+      nextAirDate: null, // Reset the next air date; it will be recalculated during episode processing
+    });
 
     await em.upsert(show);
 

@@ -22,25 +22,6 @@ export class MediaItemService extends BaseService {
   }
 
   @CreateRequestContext()
-  async getItemsToRetry() {
-    return this.em.getRepository(MediaItem).find(
-      {
-        isRequested: true,
-        state: {
-          $in: ["indexed", "scraped", "partially_completed"],
-        },
-        type: {
-          // Only retry movies and shows, as shows will fan out their seasons and episodes on failure
-          $in: ["movie", "show"],
-        },
-      },
-      {
-        populate: ["activeStream", "streams"],
-      },
-    );
-  }
-
-  @CreateRequestContext()
   async getItemsToProcess(id: UUID) {
     try {
       const item = await this.getMediaItem({

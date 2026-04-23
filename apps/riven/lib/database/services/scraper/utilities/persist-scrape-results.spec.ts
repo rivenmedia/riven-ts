@@ -81,7 +81,9 @@ it("increases the failed attempts count when no new streams are added", async ({
     ),
   );
 
-  expect(item.failedAttempts).toEqual(scrapedMovie.movie.failedAttempts + 1);
+  expect(item.failedScrapeAttempts).toEqual(
+    scrapedMovie.movie.failedScrapeAttempts + 1,
+  );
 });
 
 it("resets the failed attempts count when new streams are added", async ({
@@ -92,7 +94,7 @@ it("resets the failed attempts count when new streams are added", async ({
   const indexedMovie = await seedIndexedMovie();
 
   em.assign(indexedMovie.movie, {
-    failedAttempts: 2,
+    failedScrapeAttempts: 2,
     scrapedTimes: 2,
   });
 
@@ -104,5 +106,5 @@ it("resets the failed attempts count when new streams are added", async ({
   );
 
   expect(newStreamsCount).toEqual(1);
-  expect(item.failedAttempts).toEqual(0);
+  expect(item.failedScrapeAttempts).toEqual(0);
 });

@@ -1,4 +1,4 @@
-import { type ParentOptions, UnrecoverableError } from "bullmq";
+import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 import assert from "node:assert";
 import z, { ZodError } from "zod";
@@ -7,6 +7,7 @@ import { getPluginEventSubscribers } from "../../../../../../../state-machines/m
 import { logger } from "../../../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../../../utilities/settings.ts";
 import { InvalidTorrentError } from "../../../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
+import { createJobParentConfig } from "../../../../../../utilities/create-job-parent-config.ts";
 import { findValidTorrentProcessorSchema } from "./find-valid-torrent.schema.ts";
 import { getCachedTorrentFiles } from "./utilities/get-cached-torrent-files.ts";
 import { getPluginDownloadResult } from "./utilities/get-plugin-download-result.ts";
@@ -27,11 +28,8 @@ export const findValidTorrentProcessor =
     }
 
     const {
-      id: jobId,
       data: { id: mediaItemId, failedInfoHashes },
     } = job;
-
-    assert(jobId);
 
     const mediaItem = await mediaItemService.getMediaItem(mediaItemId);
 
@@ -40,10 +38,7 @@ export const findValidTorrentProcessor =
       .difference(new Set(failedInfoHashes))
       .values();
 
-    const jobParentOptions = {
-      id: jobId,
-      queue: job.queueQualifiedName,
-    } satisfies ParentOptions;
+    const parent = createJobParentConfig(job);
 
     const availableDownloaders = getPluginEventSubscribers(
       "riven.media-item.download.requested",
@@ -68,7 +63,7 @@ export const findValidTorrentProcessor =
 
         try {
           const providers = hasProviderListHook
-            ? await getPluginProviderList(pluginName, jobParentOptions)
+            ? await getPluginProviderList(pluginName, parent)
             : [];
 
           if (hasProviderListHook && !providers.length) {
@@ -99,7 +94,7 @@ export const findValidTorrentProcessor =
                 const cachedFiles = await getCachedTorrentFiles(
                   pluginName,
                   infoHashes,
-                  jobParentOptions,
+                  parent,
                   provider,
                 );
 
@@ -113,7 +108,7 @@ export const findValidTorrentProcessor =
                     infoHash,
                     cachedFiles[infoHash],
                     true,
-                    jobParentOptions,
+                    parent,
                   );
 
                   await job.log(`${infoHash}: Cached files are valid`);
@@ -132,7 +127,7 @@ export const findValidTorrentProcessor =
                 infoHash,
                 pluginName,
                 provider,
-                jobParentOptions,
+                parent,
               );
 
               await job.log(`${infoHash}: Downloaded torrent metadata`);
@@ -142,7 +137,7 @@ export const findValidTorrentProcessor =
                 infoHash,
                 pluginDownloadResult.files,
                 false,
-                jobParentOptions,
+                parent,
               );
 
               await job.log(`${infoHash}: Downloaded files are valid`);
