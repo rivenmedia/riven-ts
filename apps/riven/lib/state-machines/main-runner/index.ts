@@ -302,13 +302,6 @@ export const mainRunnerMachine = setup({
             findValidTorrentProcessor,
             self.send,
             input.plugins,
-            {
-              streams: {
-                events: {
-                  maxLen: 10000,
-                },
-              },
-            },
           ),
           "download-item.rank-streams": createFlowWorker(
             RankStreamsFlow,

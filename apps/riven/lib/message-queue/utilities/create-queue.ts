@@ -17,11 +17,6 @@ export function createQueue(
     name,
     toMerged<QueueOptions, typeof options>(
       {
-        streams: {
-          events: {
-            maxLen: 10000,
-          },
-        },
         defaultJobOptions: {
           removeOnComplete: {
             age: 60 * 60 * 6,
