@@ -26,15 +26,28 @@ export class TvMazeAPI extends BaseDataSource<TvdbSettings> {
    * @returns The IANA-compliant timezone of the show's original network, if present
    */
   async getShowTimezone(tvdbId: string): Promise<TimezoneName | undefined> {
-    const showResponse = await this.get<unknown>("lookup/shows", {
-      params: {
-        thetvdb: tvdbId,
-      },
-    });
+    try {
+      const showResponse = await this.get<unknown>("lookup/shows", {
+        params: {
+          thetvdb: tvdbId,
+        },
+      });
 
-    const data = LookupByTvdbIdResponse.parse(showResponse);
+      const data = LookupByTvdbIdResponse.nullable().parse(showResponse);
 
-    return data.network?.country.timezone;
+      if (data === null) {
+        return;
+      }
+
+      return data.network?.country.timezone;
+    } catch (error) {
+      this.logger.warn(
+        `Failed to retrieve show timezone from TVMaze for TVDB ID ${tvdbId}`,
+        { err: error },
+      );
+
+      return;
+    }
   }
 
   override validate() {

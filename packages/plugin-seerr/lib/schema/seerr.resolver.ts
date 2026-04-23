@@ -11,10 +11,10 @@ import { FilterArguments } from "./arguments/filter.arguments.ts";
 @Resolver()
 export class SeerrResolver {
   @Query(() => Boolean)
-  async seerrIsValid(
+  seerrIsValid(
     @PluginDataSource(pluginConfig.name, SeerrAPI) api: SeerrAPI,
   ): Promise<boolean> {
-    return await api.validate();
+    return api.validate();
   }
 
   @CacheControl({ maxAge: 300 })

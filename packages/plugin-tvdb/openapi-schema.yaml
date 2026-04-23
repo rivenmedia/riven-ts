@@ -491,7 +491,9 @@ paths:
         - Entity Types
   "/episodes":
     get:
-      description: Returns a list of episodes base records with the basic attributes.<br> Note that all episodes are returned, even those that may not be included in a series' default season order.
+      description: Returns a list of episodes base records with the basic
+        attributes.<br> Note that all episodes are returned, even those that may
+        not be included in a series' default season order.
       operationId: getAllEpisodes
       parameters:
         - description: page number
@@ -993,7 +995,9 @@ paths:
             type: string
             enum: [translations]
             example: translations
-        - description: reduce the payload and returns the short version of this record without characters, artworks and trailers.
+        - description:
+            reduce the payload and returns the short version of this record
+            without characters, artworks and trailers.
           in: query
           name: short
           required: false
@@ -1391,61 +1395,89 @@ paths:
 
   /search:
     get:
-      description: Our search index includes series, movies, people, and companies. Search is limited to 5k results max.
+      description:
+        Our search index includes series, movies, people, and companies.
+        Search is limited to 5k results max.
       operationId: getSearchResults
       parameters:
-        - description: The primary search string, which can include the main title for a record including all translations and aliases.
+        - description:
+            The primary search string, which can include the main title for a
+            record including all translations and aliases.
           in: query
           name: query
           schema:
             type: string
-        - description: Alias of the "query" parameter.  Recommend using query instead as this field will eventually be deprecated.
+        - description:
+            Alias of the "query" parameter.  Recommend using query instead as
+            this field will eventually be deprecated.
           in: query
           name: q
           schema:
             type: string
-        - description: Restrict results to a specific entity type.  Can be movie, series, person, or company.
+        - description:
+            Restrict results to a specific entity type.  Can be movie, series,
+            person, or company.
           in: query
           name: type
           schema:
             type: string
-        - description: Restrict results to a specific year. Currently only used for series and movies.
+        - description:
+            Restrict results to a specific year. Currently only used for series
+            and movies.
           in: query
           name: year
           schema:
             type: number
-        - description: Restrict results to a specific company (original network, production company, studio, etc).  As an example, "The Walking Dead" would have companies of "AMC", "AMC+", and "Disney+".
+        - description: Restrict results to a specific company (original network,
+            production company, studio, etc).  As an example, "The Walking Dead"
+            would have companies of "AMC", "AMC+", and "Disney+".
           in: query
           name: company
           schema:
             type: string
-        - description: Restrict results to a specific country of origin. Should contain a 3 character country code. Currently only used for series and movies.
+        - description:
+            Restrict results to a specific country of origin. Should contain a
+            3 character country code. Currently only used for series and movies.
           in: query
           name: country
           schema:
             type: string
-        - description: Restrict results to a specific director.  Generally only used for movies.  Should include the full name of the director, such as "Steven Spielberg".
+        - description:
+            Restrict results to a specific director.  Generally only used for
+            movies.  Should include the full name of the director, such as
+            "Steven Spielberg".
           in: query
           name: director
           schema:
             type: string
-        - description: Restrict results to a specific primary language.  Should include the 3 character language code.  Currently only used for series and movies.
+        - description:
+            Restrict results to a specific primary language.  Should include
+            the 3 character language code.  Currently only used for series and
+            movies.
           in: query
           name: language
           schema:
             type: string
-        - description: Restrict results to a specific type of company.  Should include the full name of the type of company, such as "Production Company".  Only used for companies.
+        - description:
+            Restrict results to a specific type of company.  Should include the
+            full name of the type of company, such as "Production
+            Company".  Only used for companies.
           in: query
           name: primaryType
           schema:
             type: string
-        - description: Restrict results to a specific network.  Used for TV and TV movies, and functions the same as the company parameter with more specificity.
+        - description:
+            Restrict results to a specific network.  Used for TV and TV movies,
+            and functions the same as the company parameter with more
+            specificity.
           in: query
           name: network
           schema:
             type: string
 
-        - description: Search for a specific remote id.  Allows searching for an IMDB or EIDR id, for example.
+        - description:
+            Search for a specific remote id.  Allows searching for an IMDB or
+            EIDR id, for example.
           in: query
           name: remote_id
           schema:
@@ -1486,10 +1518,13 @@ paths:
         - Search
   /search/remoteid/{remoteId}:
     get:
-      description: Search a series, movie, people, episode, company or season by specific remote id and returns a base record for that entity.
+      description: Search a series, movie, people, episode, company or season by
+        specific remote id and returns a base record for that entity.
       operationId: getSearchResultsByRemoteId
       parameters:
-        - description: Search for a specific remote id.  Allows searching for an IMDB or EIDR id, for example.
+        - description:
+            Search for a specific remote id.  Allows searching for an IMDB or
+            EIDR id, for example.
           in: path
           required: true
           name: remoteId
@@ -1727,7 +1762,10 @@ paths:
         - Series
   "/series/{id}/artworks":
     get:
-      description: Returns series artworks base on language and type. <br> Note&#58; Artwork type is an id that can be found using **/artwork/types** endpoint.
+      description:
+        Returns series artworks base on language and type. <br> Note&#58;
+        Artwork type is an id that can be found using **/artwork/types**
+        endpoint.
       operationId: getSeriesArtworks
       parameters:
         - description: id
@@ -1772,7 +1810,11 @@ paths:
         - Series
   "/series/{id}/nextAired":
     get:
-      description: Returns series base record including the nextAired field. <br> Note&#58; nextAired was included in the base record endpoint but that field will deprecated in the future so developers should use the nextAired endpoint.
+      description:
+        Returns series base record including the nextAired field. <br>
+        Note&#58; nextAired was included in the base record endpoint but that
+        field will deprecated in the future so developers should use the
+        nextAired endpoint.
       operationId: getSeriesNextAired
       parameters:
         - description: id
@@ -1820,7 +1862,9 @@ paths:
             type: string
             enum: [translations, episodes]
             example: translations
-        - description: reduce the payload and returns the short version of this record without characters and artworks
+        - description:
+            reduce the payload and returns the short version of this record
+            without characters and artworks
           in: query
           name: short
           required: false
@@ -1849,7 +1893,9 @@ paths:
         - Series
   "/series/{id}/episodes/{season-type}":
     get:
-      description: Returns series episodes from the specified season type, default returns the episodes in the series default season type
+      description:
+        Returns series episodes from the specified season type, default
+        returns the episodes in the series default season type
       operationId: getSeriesEpisodes
       parameters:
         - in: query
@@ -1921,7 +1967,9 @@ paths:
                     type: string
                 type: object
         "400":
-          description: Invalid series id, episodeNumber is not null then season must be present
+          description:
+            Invalid series id, episodeNumber is not null then season must be
+            present
         "401":
           description: Unauthorized
         "404":
@@ -1930,7 +1978,10 @@ paths:
         - Series
   "/series/{id}/episodes/{season-type}/{lang}":
     get:
-      description: Returns series base record with episodes from the specified season type and language. Default returns the episodes in the series default season type.
+      description:
+        Returns series base record with episodes from the specified season
+        type and language. Default returns the episodes in the series default
+        season type.
       operationId: getSeriesSeasonEpisodesTranslated
       parameters:
         - in: query
@@ -2231,7 +2282,11 @@ paths:
         - Source Types
   /updates:
     get:
-      description: Returns updated entities.  methodInt indicates a created record (1), an updated record (2), or a deleted record (3).  If a record is deleted because it was a duplicate of another record, the target record's information is provided in mergeToType and mergeToId.
+      description:
+        Returns updated entities.  methodInt indicates a created record
+        (1), an updated record (2), or a deleted record (3).  If a record is
+        deleted because it was a duplicate of another record, the target
+        record's information is provided in mergeToType and mergeToId.
       operationId: updates
       parameters:
         - in: query
@@ -2414,18 +2469,23 @@ servers:
   - url: "https://api4.thetvdb.com/v4"
 components:
   securitySchemes:
-    bearerAuth: # arbitrary name for the security scheme
+    bearerAuth:
+      # arbitrary name for the security scheme
       type: http
       scheme: bearer
       bearerFormat: JWT
   schemas:
     Alias:
-      description: An alias model, which can be associated with a series, season, movie, person, or list.
+      description:
+        An alias model, which can be associated with a series, season,
+        movie, person, or list.
       properties:
         language:
           type: string
           maximum: 4
-          description: A 3-4 character string indicating the language of the alias, as defined in Language.
+          description:
+            A 3-4 character string indicating the language of the alias, as
+            defined in Language.
         name:
           type: string
           maximum: 100
@@ -2457,7 +2517,9 @@ components:
           format: int64
           type: integer
           x-go-name: Type
-          description: The artwork type corresponds to the ids from the /artwork/types endpoint.
+          description:
+            The artwork type corresponds to the ids from the /artwork/types
+            endpoint.
         width:
           format: int64
           type: integer
@@ -2522,7 +2584,9 @@ components:
           format: int64
           type: integer
           x-go-name: Type
-          description: The artwork type corresponds to the ids from the /artwork/types endpoint.
+          description:
+            The artwork type corresponds to the ids from the /artwork/types
+            endpoint.
         updatedAt:
           format: int64
           type: integer
@@ -3810,7 +3874,8 @@ components:
           type: string
       type: object
     SearchByRemoteIdResult:
-      description: search by remote reuslt is a base record for a movie, series, people, season or company search result
+      description: search by remote reuslt is a base record for a movie, series,
+        people, season or company search result
       properties:
         series:
           type: object
@@ -3986,7 +4051,12 @@ components:
       type: object
       x-go-package: github.com/whip-networks/tvdb-api-v4-core/tvdb-api-v4-core/pkg/model
     SeriesBaseRecord:
-      description: The base record for a series. All series airs time like firstAired, lastAired, nextAired, etc. are in US EST for US series, and for all non-US series, the time of the showâ€™s country capital or most populous city. For streaming services, is the official release time. See https://support.thetvdb.com/kb/faq.php?id=29.
+      description:
+        The base record for a series. All series airs time like firstAired,
+        lastAired, nextAired, etc. are in US EST for US series, and for all
+        non-US series, the time of the showâ€™s country capital or most populous
+        city. For streaming services, is the official release time. See
+        https://support.thetvdb.com/kb/faq.php?id=29.
       properties:
         aliases:
           items:
@@ -4013,6 +4083,7 @@ components:
           type: integer
         image:
           type: string
+          nullable: true
         isOrderRandomized:
           type: boolean
           x-go-name: IsOrderRandomized
@@ -4054,7 +4125,11 @@ components:
       type: object
       x-go-package: github.com/whip-networks/tvdb-api-v4-core/tvdb-api-v4-core/pkg/model
     SeriesExtendedRecord:
-      description: The extended record for a series. All series airs time like firstAired, lastAired, nextAired, etc. are in US EST for US series, and for all non-US series, the time of the showâ€™s country capital or most populous city. For streaming services, is the official release time. See https://support.thetvdb.com/kb/faq.php?id=29.
+      description: The extended record for a series. All series airs time like
+        firstAired, lastAired, nextAired, etc. are in US EST for US series, and
+        for all non-US series, the time of the showâ€™s country capital or most
+        populous city. For streaming services, is the official release time. See
+        https://support.thetvdb.com/kb/faq.php?id=29.
       properties:
         abbreviation:
           type: string
@@ -4113,6 +4188,7 @@ components:
           type: integer
         image:
           type: string
+          nullable: true
         isOrderRandomized:
           type: boolean
           x-go-name: IsOrderRandomized
@@ -4332,14 +4408,17 @@ components:
           type: string
         tagline:
           type: string
-          description: Only populated for movie translations.  We disallow taglines without a title.
+          description:
+            Only populated for movie translations.  We disallow taglines
+            without a title.
       type: object
       x-go-package: github.com/whip-networks/tvdb-api-v4-core/tvdb-api-v4-core/pkg/model
     TranslationSimple:
       description: translation simple record
       additionalProperties:
         type: string
-      example: # Ejemplo especÃ­fico del objeto
+      example:
+        # Ejemplo especÃ­fico del objeto
         ara: "ØªØ¯ÙˆØ± Ù‚ØµØ© Ø§Ù„Ù…Ø³Ù„Ø³Ù„ Ø­ÙˆÙ„..."
         ces: "BÄ›hem letu Ä. 815 spoleÄnosti Oceanic..."
         deu: "Im Bruchteil einer Sekunde gerÃ¤t das Leben..."

@@ -12,7 +12,7 @@ export function buildNotificationPayload(
     downloader,
     item,
     provider,
-    durationFromRequestToDownload,
+    durationMs,
   }: ParamsFor<MediaItemDownloadSuccessEvent>,
   eventType: MediaItemDownloadSuccessEvent["type"],
 ): NotificationPayload {
@@ -28,7 +28,7 @@ export function buildNotificationPayload(
     posterPath: item.posterPath ?? null,
     downloader,
     provider,
-    durationSeconds: Math.round(durationFromRequestToDownload),
+    durationSeconds: Math.round(durationMs / 1000),
     timestamp: DateTime.utc().toISO(),
   });
 }

@@ -188,3 +188,30 @@ it('does not return entries for the "all movies" path when a movie does not have
     ]);
   });
 });
+
+it("does not include periods in movie titles", async ({
+  em,
+  completedMovieContext: { completedMovie },
+}) => {
+  const callback = vi.fn();
+
+  em.assign(completedMovie, {
+    title: "Mr. Robot",
+    year: 2016,
+    tmdbId: "1234",
+  });
+
+  await em.flush();
+
+  const mediaEntries = await completedMovie.getMediaEntries();
+
+  readDirSync(`/movies`, callback);
+
+  await vi.waitFor(() => {
+    expect.assert(mediaEntries[0]);
+
+    expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
+      "Mr Robot (2016) {tmdb-1234}",
+    ]);
+  });
+});

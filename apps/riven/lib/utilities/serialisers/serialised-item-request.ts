@@ -3,7 +3,7 @@ import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 
-import { database } from "../../database/database.ts";
+import { services } from "../../database/database.ts";
 import { createApolloInstanceSchema } from "./create-apollo-instance-schema.ts";
 
 /**
@@ -13,7 +13,7 @@ export const SerialisedItemRequest = z.codec(
   UUID,
   z.xor([z.instanceof(ItemRequest), createApolloInstanceSchema(ItemRequest)]),
   {
-    decode: (id) => database.itemRequest.findOneOrFail(id),
+    decode: (id) => services.itemRequestService.getItemRequest(id),
     encode: (data) => UUID.parse(data.id),
   },
 );

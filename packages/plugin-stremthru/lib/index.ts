@@ -1,5 +1,6 @@
 import packageJson from "../package.json" with { type: "json" };
-import { StremThruAPI } from "./datasource/stremthru.datasource.ts";
+import { StremThruTorzAPI } from "./datasource/stremthru-torz.datasource.ts";
+import { StremThruTorznabAPI } from "./datasource/stremthru-torznab.datasource.ts";
 import { StremThruSettingsResolver } from "./schema/stremthru-settings.resolver.ts";
 import { StremThruResolver } from "./schema/stremthru.resolver.ts";
 import { Store } from "./schemas/store.schema.ts";
@@ -11,14 +12,14 @@ import type { RivenPlugin } from "@repo/util-plugin-sdk";
 export default {
   name: pluginConfig.name,
   version: packageJson.version,
-  dataSources: [StremThruAPI],
+  dataSources: [StremThruTorzAPI, StremThruTorznabAPI],
   resolvers: [StremThruResolver, StremThruSettingsResolver],
   hooks: {
     "riven.media-item.download.requested": async ({
       dataSources,
       event: { infoHash, provider: rawStore },
     }) => {
-      const api = dataSources.get(StremThruAPI);
+      const api = dataSources.get(StremThruTorzAPI);
       const store = Store.parse(rawStore);
 
       try {
@@ -35,7 +36,7 @@ export default {
       dataSources,
       event: { infoHashes, provider: rawStore },
     }) => {
-      const api = dataSources.get(StremThruAPI);
+      const api = dataSources.get(StremThruTorzAPI);
       const store = Store.parse(rawStore);
 
       try {
@@ -74,7 +75,7 @@ export default {
       };
     },
     "riven.media-item.scrape.requested": async ({ dataSources, event }) => {
-      const api = dataSources.get(StremThruAPI);
+      const api = dataSources.get(StremThruTorznabAPI);
       const results = await api.scrape(event);
 
       return {
@@ -86,7 +87,7 @@ export default {
       dataSources,
       event,
     }) => {
-      const api = dataSources.get(StremThruAPI);
+      const api = dataSources.get(StremThruTorzAPI);
       const parsedStore = Store.safeParse(event.item.provider);
 
       if (!event.item.downloadUrl) {

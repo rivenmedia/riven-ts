@@ -77,4 +77,12 @@ export class Season extends ShowLikeMediaItem {
   async getExpectedFileCount(): Promise<number> {
     return this.episodes.loadCount();
   }
+
+  async getIncompleteItems() {
+    return this.episodes.matching({
+      where: {
+        state: ["indexed", "scraped"],
+      },
+    });
+  }
 }

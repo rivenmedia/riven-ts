@@ -43,7 +43,7 @@ export const createFlowJobBuilder = <
   ): O extends { parent: ParentOptions } ? FlowChildJob : FlowJob => {
     const baseJob = jobSchema.parse({
       queueName,
-      ...(inputIsNever ? {} : { data: args[0] }),
+      ...(!inputIsNever && { data: args[0] }),
     });
 
     return {

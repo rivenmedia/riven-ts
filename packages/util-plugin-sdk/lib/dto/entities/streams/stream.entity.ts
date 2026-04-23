@@ -4,9 +4,7 @@ import {
   ManyToMany,
   PrimaryKey,
   Property,
-  Unique,
 } from "@mikro-orm/decorators/legacy";
-import { randomUUID } from "node:crypto";
 import { Field, ID, ObjectType } from "type-graphql";
 
 import { StreamRepository } from "../../repositories/stream.repository.ts";
@@ -20,12 +18,7 @@ export class Stream {
   [EntityRepositoryType]?: StreamRepository;
 
   @Field(() => ID)
-  @PrimaryKey({ type: "uuid" })
-  id = randomUUID();
-
-  @Field(() => String)
-  @Property()
-  @Unique()
+  @PrimaryKey()
   infoHash!: string;
 
   @Property({ type: "json" })

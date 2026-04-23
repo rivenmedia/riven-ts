@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/node";
+import EventEmitter from "node:events";
 import z, {
   type ZodNever,
   type ZodObject,
@@ -6,8 +7,9 @@ import z, {
   type ZodType,
 } from "zod";
 
-import type { Services } from "../../database/database.ts";
+import type { services } from "../../database/database.ts";
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
+import type { ValidPlugin } from "../../types/plugins.ts";
 import type { Job } from "bullmq";
 
 export const createFlowSchema = <
@@ -47,12 +49,22 @@ export const createFlowSchema = <
               >;
             }
           >(),
+          signal: z
+            .custom<AbortSignal>(
+              (data) =>
+                typeof data === "object" &&
+                data != null &&
+                "eventEmitter" in data &&
+                data.eventEmitter instanceof EventEmitter,
+            )
+            .optional(),
           scope: z.custom<Sentry.Scope>(),
           token: z.string().optional(),
         }),
         z.object({
-          services: z.custom<Services["services"]>(),
+          services: z.custom<typeof services>(),
           sendEvent: z.custom<MainRunnerMachineIntake>(),
+          plugins: z.map(z.symbol(), z.custom<ValidPlugin>()),
         }),
       ],
       output: z.promise(outputSchema),

@@ -23,7 +23,7 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
     em: EntityManager,
     context: IndexedShowSeederContext = this.context,
   ) {
-    const releaseDate = DateTime.now().minus({ years: 1 }).toISO();
+    const releaseDate = DateTime.utc().minus({ years: 1 }).toISO();
 
     context.show = await new ShowFactory(em).createOne({
       releaseDate: null, // Allow the subscriber to set the release date based on the first episode's release date

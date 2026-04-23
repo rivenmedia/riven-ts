@@ -116,7 +116,7 @@ export const bootstrapMachine = setup({
   .extend(withLogAction)
   .createMachine({
     id: "Bootstrap",
-    initial: "Bootstrapping plugins",
+    initial: "Bootstrapping database connection",
     context: ({ input }) => ({
       rootRef: input.rootRef,
       validatingPlugins: new Map(),
@@ -157,6 +157,74 @@ export const bootstrapMachine = setup({
       };
     },
     states: {
+      "Bootstrapping database connection": {
+        entry: {
+          type: "log",
+          params: {
+            message: "Initialising database connection...",
+          },
+        },
+        invoke: {
+          id: "initialiseDatabaseConnection",
+          src: "initialiseDatabaseConnection",
+          onDone: {
+            target: "Clearing previous instance state",
+            actions: {
+              type: "log",
+              params: {
+                message: "Database connection bootstrap complete.",
+              },
+            },
+          },
+          onError: {
+            target: "#Bootstrap.Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message:
+                    "Failed to initialise database connection during bootstrap.",
+                  level: "error",
+                  error,
+                }),
+              },
+              {
+                type: "raiseError",
+                params: ({ event }) => event.error as Error,
+              },
+            ],
+          },
+        },
+      },
+      "Clearing previous instance state": {
+        invoke: {
+          id: "clearPreviousInstanceState",
+          src: "clearPreviousInstanceState",
+          input: () => ({
+            wipeDatabase: settings.unsafeWipeDatabaseOnStartup,
+            wipeRedis: settings.unsafeWipeRedisOnStartup,
+          }),
+          onDone: "Bootstrapping plugins",
+          onError: {
+            target: "Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message:
+                    "Failed to clear previous instance state during bootstrap.",
+                  level: "error",
+                  error,
+                }),
+              },
+              {
+                type: "raiseError",
+                params: ({ event }) => event.error as Error,
+              },
+            ],
+          },
+        },
+      },
       "Bootstrapping plugins": {
         entry: [
           {
@@ -217,53 +285,8 @@ export const bootstrapMachine = setup({
       },
       "Initialising services": {
         type: "parallel",
-        onDone: "Clearing previous instance state",
+        onDone: "Bootstrapping VFS",
         states: {
-          "Bootstrapping database connection": {
-            initial: "Starting",
-            states: {
-              Starting: {
-                entry: {
-                  type: "log",
-                  params: {
-                    message: "Initialising database connection...",
-                  },
-                },
-                invoke: {
-                  id: "initialiseDatabaseConnection",
-                  src: "initialiseDatabaseConnection",
-                  onDone: "Complete",
-                  onError: {
-                    target: "#Bootstrap.Errored",
-                    actions: [
-                      {
-                        type: "log",
-                        params: ({ event: { error } }) => ({
-                          message:
-                            "Failed to initialise database connection during bootstrap.",
-                          level: "error",
-                          error,
-                        }),
-                      },
-                      {
-                        type: "raiseError",
-                        params: ({ event }) => event.error as Error,
-                      },
-                    ],
-                  },
-                },
-              },
-              Complete: {
-                entry: {
-                  type: "log",
-                  params: {
-                    message: "Database connection bootstrap complete.",
-                  },
-                },
-                type: "final",
-              },
-            },
-          },
           "Bootstrapping GraphQL Server": {
             initial: "Starting",
             states: {
@@ -342,35 +365,6 @@ export const bootstrapMachine = setup({
                 },
               },
             },
-          },
-        },
-      },
-      "Clearing previous instance state": {
-        invoke: {
-          id: "clearPreviousInstanceState",
-          src: "clearPreviousInstanceState",
-          input: () => ({
-            wipeDatabase: settings.unsafeWipeDatabaseOnStartup,
-            wipeRedis: settings.unsafeWipeRedisOnStartup,
-          }),
-          onDone: "Bootstrapping VFS",
-          onError: {
-            target: "Errored",
-            actions: [
-              {
-                type: "log",
-                params: ({ event: { error } }) => ({
-                  message:
-                    "Failed to clear previous instance state during bootstrap.",
-                  level: "error",
-                  error,
-                }),
-              },
-              {
-                type: "raiseError",
-                params: ({ event }) => event.error as Error,
-              },
-            ],
           },
         },
       },

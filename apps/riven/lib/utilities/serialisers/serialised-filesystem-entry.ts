@@ -20,7 +20,7 @@ export const SerialisedFileSystemEntry = z.codec(
     createApolloInstanceSchema(FileSystemEntry, MediaEntry, SubtitleEntry),
   ]),
   {
-    decode: (id) => database.filesystemEntry.findOneOrFail(id),
+    decode: (id) => database.em.fork().findOneOrFail(FileSystemEntry, id),
     encode: (data) => UUID.parse(data.id),
   },
 );

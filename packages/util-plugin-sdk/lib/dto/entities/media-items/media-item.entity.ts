@@ -64,10 +64,10 @@ export abstract class MediaItem {
   @Field(() => Date)
   @Index()
   @Property()
-  createdAt: Opt<Date> = DateTime.now().toJSDate();
+  createdAt: Opt<Date> = DateTime.utc().toJSDate();
 
   @Field(() => Date, { nullable: true })
-  @Property({ onUpdate: () => DateTime.now().toJSDate() })
+  @Property({ onUpdate: () => DateTime.utc().toJSDate() })
   updatedAt?: Opt<Date> | null;
 
   @Field(() => Date, { nullable: true })
@@ -141,7 +141,7 @@ export abstract class MediaItem {
 
   @Field(() => Number)
   @Property()
-  failedAttempts: Opt<number> = 0;
+  failedScrapeAttempts: Opt<number> = 0;
 
   @Field(() => [FileSystemEntry])
   @ManyToMany()
@@ -182,7 +182,7 @@ export abstract class MediaItem {
   @Property({ persist: false, getter: true })
   get isReleased(): Opt<boolean> {
     return this.releaseDate
-      ? DateTime.fromJSDate(this.releaseDate) <= DateTime.now()
+      ? DateTime.fromJSDate(this.releaseDate) <= DateTime.utc()
       : false;
   }
 
@@ -214,4 +214,9 @@ export abstract class MediaItem {
    * @returns A positive integer representing the expected file count for this media item.
    */
   abstract getExpectedFileCount(): Promisable<number>;
+
+  /**
+   * @returns Any incomplete immediate children of this media item.
+   */
+  abstract getIncompleteItems(): Promisable<MediaItem[]>;
 }

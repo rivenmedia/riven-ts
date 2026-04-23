@@ -74,10 +74,10 @@ export abstract class FileSystemEntry {
 
   @Field(() => Date)
   @Property()
-  createdAt: Opt<Date> = DateTime.now().toJSDate();
+  createdAt: Opt<Date> = DateTime.utc().toJSDate();
 
   @Field(() => Date, { nullable: true })
-  @Property({ onUpdate: () => DateTime.now().toJSDate() })
+  @Property({ onUpdate: () => DateTime.utc().toJSDate() })
   updatedAt?: Opt<Date>;
 
   @Field(() => MediaItem)
@@ -93,7 +93,7 @@ export abstract class FileSystemEntry {
    */
   @Property({ persist: false, hidden: true })
   get baseDirectory(): Opt<Hidden<"movies" | "shows">> {
-    const mediaItemType = this.mediaItem.getEntity().type;
+    const { type: mediaItemType } = this.mediaItem.getEntity();
 
     if (mediaItemType === "movie") {
       return "movies";

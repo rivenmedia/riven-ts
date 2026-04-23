@@ -23,8 +23,8 @@ export class SeasonFactory extends Factory<Season> {
       isRequested: true,
       tvdbId: faker.number.int({ min: 1 }).toString(),
       releaseDate: faker.date.between({
-        from: DateTime.now().minus({ years: 1 }).toISO(),
-        to: DateTime.now().plus({ years: 1 }).toISO(),
+        from: DateTime.utc().minus({ years: 1 }).toISO(),
+        to: DateTime.utc().plus({ years: 1 }).toISO(),
       }),
       show,
       ...input,

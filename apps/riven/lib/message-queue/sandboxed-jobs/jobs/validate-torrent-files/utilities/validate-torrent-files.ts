@@ -7,7 +7,7 @@ import assert, { AssertionError } from "node:assert";
 import { client } from "../../../../../graphql/apollo-client.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../utilities/settings.ts";
-import { MatchedFile } from "../../../../flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import { MatchedFile } from "../../../../flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 
 import type { MapItemsToFilesSandboxedJob } from "../../map-items-to-files/map-items-to-files.schema.ts";
 import type {

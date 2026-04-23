@@ -1,9 +1,8 @@
 import Fuse from "@zkochan/fuse-native";
-import { DateTime } from "luxon";
 import { basename } from "node:path";
 import { setTimeout } from "node:timers/promises";
 
-import { database } from "../../database/database.ts";
+import { services } from "../../database/database.ts";
 import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { serialiseEventData } from "../../utilities/serialisers/serialise-event-data.ts";
@@ -28,11 +27,10 @@ import type { Queue } from "bullmq";
 let fd = 0;
 
 async function waitForStreamUrl(path: string) {
-  const timeout = 10_000;
-  const startTime = DateTime.now().toMillis();
+  const timeoutController = AbortSignal.timeout(10_000);
 
-  while (DateTime.now().toMillis() - startTime < timeout) {
-    const refreshed = await database.services.vfsService.getEntry(path);
+  while (!timeoutController.aborted) {
+    const refreshed = await services.vfsService.getEntry(path);
 
     if (refreshed?.streamUrl) {
       return refreshed.streamUrl;
@@ -58,7 +56,7 @@ async function open(
     >
   >,
 ) {
-  const entry = await database.services.vfsService.getEntry(path);
+  const entry = await services.vfsService.getEntry(path);
 
   if (!entry) {
     throw new FuseError(Fuse.ENOENT, `No media entry found for path ${path}`);
@@ -97,7 +95,7 @@ async function open(
 
       const { link: streamUrl } = await runSingleJob(job);
 
-      await database.services.vfsService.saveStreamUrl(entry.id, streamUrl);
+      await services.vfsService.saveStreamUrl(entry.id, streamUrl);
 
       attrCache.delete(path);
     } catch (error: unknown) {

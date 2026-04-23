@@ -12,11 +12,7 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities";
 
 // eslint-disable-next-line no-restricted-imports -- Core database config requires direct driver access
-import {
-  DataloaderType,
-  type Options,
-  PostgreSqlDriver,
-} from "@mikro-orm/postgresql";
+import { type Options, PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 import { SeedManager } from "@mikro-orm/seeder";
 import * as Sentry from "@sentry/node";
@@ -52,13 +48,13 @@ export const databaseConfig = {
         "riven.log.source": "database",
       });
 
-      logger.verbose(message);
+      logger.data(message);
     });
   },
+  debug: settings.databaseDebugLogging,
   seeder: {
     pathTs: "./seeders",
   },
-  dataloader: DataloaderType.ALL,
   subscribers: [
     new MediaItemFullTitleSubscriber(),
     new ShowLikeMediaItemReleaseDateSubscriber(),

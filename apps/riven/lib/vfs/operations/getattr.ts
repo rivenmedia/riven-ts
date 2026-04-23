@@ -1,7 +1,7 @@
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 import { isZodErrorLike } from "zod-validation-error";
 
-import { database } from "../../database/database.ts";
+import { services } from "../../database/database.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { isFuseError } from "../errors/fuse-error.ts";
 import { attrCache } from "../utilities/attr-cache.ts";
@@ -32,7 +32,7 @@ export const getattrSync = function (path, callback) {
         return;
       }
 
-      const attrs = await database.services.vfsService.getEntryStat(path);
+      const attrs = await services.vfsService.getEntryStat(path);
 
       attrCache.set(path, attrs);
 
