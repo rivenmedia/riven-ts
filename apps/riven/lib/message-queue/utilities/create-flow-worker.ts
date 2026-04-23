@@ -1,5 +1,3 @@
-import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
-
 import * as Sentry from "@sentry/node";
 import {
   type QueueOptions,
@@ -7,7 +5,7 @@ import {
   Worker,
   type WorkerOptions,
 } from "bullmq";
-import { toMerged } from "es-toolkit";
+import { AbortError, toMerged } from "es-toolkit";
 import assert from "node:assert";
 import os from "node:os";
 
@@ -57,32 +55,51 @@ export function createFlowWorker<
 
   const worker = new Worker(
     flowName,
-    (job, token) =>
-      Sentry.withScope(async (scope) => {
-        scope.setTags({
-          "riven.flow.name": flowName,
-          "bullmq.queue.name": flowName,
-          "bullmq.job.id": job.id,
+    (job, token, signal) => {
+      assert(signal, "Signal is required for flow workers");
+
+      return new Promise((resolve, reject) => {
+        signal.addEventListener("abort", () => {
+          reject(new AbortError(`${job.name} aborted`));
         });
 
-        try {
-          const { services } = await import("../../database/database.ts");
-
-          return await processor({ job, token, scope } as never, {
-            sendEvent,
-            services,
-            plugins,
+        Sentry.withScope(async (scope) => {
+          scope.setTags({
+            "riven.flow.name": flowName,
+            "bullmq.queue.name": flowName,
+            "bullmq.job.id": job.id,
           });
-        } catch (error) {
-          Sentry.captureException(error);
 
-          if (error instanceof Error) {
-            throw error;
+          try {
+            const { services } = await import("../../database/database.ts");
+
+            return await processor(
+              {
+                job: job as never,
+                token,
+                signal,
+                scope,
+              },
+              {
+                sendEvent,
+                services,
+                plugins,
+              },
+            );
+          } catch (error) {
+            Sentry.captureException(error);
+
+            if (error instanceof Error) {
+              throw error;
+            }
+
+            throw new UnrecoverableError(String(error));
           }
-
-          throw new UnrecoverableError(String(error));
-        }
-      }),
+        })
+          .then(resolve)
+          .catch(reject);
+      });
+    },
     toMerged<WorkerOptions, typeof workerOptions>(
       {
         concurrency: os.availableParallelism() * 1.5,
@@ -100,9 +117,19 @@ export function createFlowWorker<
     ),
   );
 
-  registerMQListeners(worker, logger);
+  queue.on("error", (error) => {
+    logger.error(`${flowName} queue error`, { err: error });
+  });
+
+  worker.on("error", (error) => {
+    logger.error(`${flowName} worker error`, { err: error });
+  });
 
   worker.on("failed", (_job, error) => {
+    if (error instanceof AbortError) {
+      return;
+    }
+
     logger.error(`${flowName} failed:`, { err: error });
   });
 

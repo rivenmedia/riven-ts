@@ -3,10 +3,10 @@ import {
   type RivenEvent,
   RivenEventHandler,
 } from "@repo/util-plugin-sdk/events";
-import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import * as Sentry from "@sentry/node";
 import { type Processor, Worker, type WorkerOptions } from "bullmq";
+import { AbortError } from "es-toolkit";
 import assert from "node:assert";
 import z from "zod";
 
@@ -38,26 +38,34 @@ export function createPluginWorker<
   const worker = new Worker(
     queueName,
     (job, token, signal) => {
-      return Sentry.withScope(async (scope) => {
-        scope.setTags({
-          "bullmq.job.id": job.id,
-          "bullmq.queue.name": queueName,
-          "riven.log.source": pluginName,
-          "riven.event.name": name as string,
-          "riven.plugin.name": pluginName,
+      return new Promise((resolve, reject) => {
+        signal?.addEventListener("abort", () => {
+          reject(new AbortError(`${job.name} aborted`));
         });
 
-        assert(job.token, "Job token is not set");
+        Sentry.withScope(async (scope) => {
+          scope.setTags({
+            "bullmq.job.id": job.id,
+            "bullmq.queue.name": queueName,
+            "riven.log.source": pluginName,
+            "riven.event.name": name as string,
+            "riven.plugin.name": pluginName,
+          });
 
-        try {
-          return await dataSourceContext.run({ job, token: job.token }, () =>
-            processor(job as never, token, signal),
-          );
-        } catch (error) {
-          Sentry.captureException(error);
+          assert(job.token, "Job token is not set");
 
-          throw error;
-        }
+          try {
+            return await dataSourceContext.run({ job, token: job.token }, () =>
+              processor(job as never, token, signal),
+            );
+          } catch (error) {
+            Sentry.captureException(error);
+
+            throw error;
+          }
+        })
+          .then(resolve)
+          .catch(reject);
       });
     },
     {
@@ -69,9 +77,19 @@ export function createPluginWorker<
     },
   );
 
-  registerMQListeners(worker, logger);
+  queue.on("error", (error) => {
+    logger.error(`${queueName} queue error`, { err: error });
+  });
+
+  worker.on("error", (error) => {
+    logger.error(`${queueName} worker error`, { err: error });
+  });
 
   worker.on("failed", (_job, error) => {
+    if (error instanceof AbortError) {
+      return;
+    }
+
     logger.error(`${queueName} failed:`, { err: error });
   });
 

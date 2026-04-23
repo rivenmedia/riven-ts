@@ -24,12 +24,12 @@ import { Logger } from "winston";
 import z from "zod";
 
 import { benchmark } from "../helpers/benchmark.ts";
-import { registerMQListeners } from "../helpers/register-mq-listeners.ts";
 import { json } from "../validation/json.ts";
 import { urlSearchParamsCodec } from "../validation/url-search-params-parser.ts";
 import { dataSourceContext } from "./context.ts";
 
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
+import type EventEmitter from "events";
 import type { Promisable } from "type-fest";
 
 interface FetchJobInput {
@@ -96,10 +96,10 @@ export abstract class BaseDataSource<
 
   #requestAttempts: number;
 
-  #queue: Queue<FetchJobInput, FetchResponse>;
-  #queueEvents: QueueEvents;
-  #worker: Worker<FetchJobInput, FetchResponse>;
   #queueId: string;
+  #queueEvents: QueueEvents;
+  queue: Queue<FetchJobInput, FetchResponse>;
+  worker: Worker<FetchJobInput, FetchResponse>;
 
   #keyv: KeyvAdapter;
   #keyvPrefix = "httpcache:";
@@ -119,7 +119,7 @@ export abstract class BaseDataSource<
     this.serviceName = this.constructor.name;
     this.#requestAttempts = requestAttempts;
     this.#queueId = `${pluginSymbol.description ?? "unknown"}-${this.serviceName}-fetch-queue`;
-    this.#queue = new Queue(this.#queueId, {
+    this.queue = new Queue(this.#queueId, {
       connection,
       defaultJobOptions: {
         removeOnComplete: {
@@ -136,9 +136,9 @@ export abstract class BaseDataSource<
 
     this.#queueEvents = new QueueEvents(this.#queueId, { connection });
 
-    this.#worker = new Worker(
+    this.worker = new Worker(
       this.#queueId,
-      async (job) => {
+      async (job, _token, signal) => {
         await job.log(`Processing request for ${job.data.path}`);
 
         const {
@@ -154,11 +154,11 @@ export abstract class BaseDataSource<
 
           this.#decodeRequestBody(job);
 
-          if (job.data.incomingRequest) {
-            job.data.incomingRequest.params = urlSearchParamsCodec.decode(
-              job.data.params,
-            );
-          }
+          job.data.incomingRequest ??= {};
+          job.data.incomingRequest.signal = signal;
+          job.data.incomingRequest.params = urlSearchParamsCodec.decode(
+            job.data.params,
+          );
 
           return super.fetch(job.data.path, job.data.incomingRequest);
         });
@@ -189,8 +189,13 @@ export abstract class BaseDataSource<
 
     this.logger = apolloDataSourceOptions.logger;
 
-    [this.#queue, this.#queueEvents, this.#worker].forEach((resource) => {
-      registerMQListeners(resource, this.logger);
+    [this.queue, this.#queueEvents, this.worker].forEach((resource) => {
+      (resource as EventEmitter).on("error", (error: unknown) => {
+        this.logger.error(
+          `${this.#queueId} ${resource.constructor.name} error`,
+          { err: error },
+        );
+      });
     });
 
     this.settings = settings;
@@ -354,7 +359,7 @@ export abstract class BaseDataSource<
     const jobId =
       request.method === "GET" ? cacheKey.replaceAll(/[: ]/g, "_") : undefined;
 
-    const pendingJob = jobId ? await this.#queue.getJob(jobId) : undefined;
+    const pendingJob = jobId ? await this.queue.getJob(jobId) : undefined;
 
     if (pendingJob) {
       return pendingJob;
@@ -368,7 +373,7 @@ export abstract class BaseDataSource<
       );
     }
 
-    return this.#queue.add(
+    return this.queue.add(
       cacheKey,
       {
         path,
@@ -473,7 +478,7 @@ export abstract class BaseDataSource<
       );
       const defaultWaitMs = 10000;
 
-      await this.#queue.rateLimit(
+      await this.queue.rateLimit(
         waitMs === null || waitMs <= 0 ? defaultWaitMs : waitMs,
       );
 
@@ -503,6 +508,10 @@ export abstract class BaseDataSource<
     }
 
     if (error instanceof UnrecoverableError) {
+      return;
+    }
+
+    if (error.name === "AbortError") {
       return;
     }
 

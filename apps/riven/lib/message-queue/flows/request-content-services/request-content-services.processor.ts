@@ -35,7 +35,7 @@ function buildExternalIdKey(
 export const requestContentServicesProcessor =
   requestContentServicesProcessorSchema.implementAsync(
     async (
-      { job, token },
+      { job, token, signal },
       { sendEvent, services: { itemRequestService }, plugins },
     ) => {
       switch (job.data.step) {
@@ -120,6 +120,8 @@ export const requestContentServicesProcessor =
           let updatedItemsCount = 0;
 
           for (const { item, type } of items.values()) {
+            signal.throwIfAborted();
+
             try {
               const result =
                 type === "show"

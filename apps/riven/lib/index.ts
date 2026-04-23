@@ -1,12 +1,13 @@
 import "./sentry.ts";
 
 import * as Sentry from "@sentry/node";
+import { randomUUID } from "node:crypto";
 import { createActor, waitFor } from "xstate";
 
 import { logger } from "./utilities/logger/logger.ts";
 
 await Sentry.withScope(async (scope) => {
-  const sessionId = crypto.randomUUID();
+  const sessionId = randomUUID();
 
   scope.setTags({
     "riven.log.source": "core",
@@ -35,7 +36,12 @@ await Sentry.withScope(async (scope) => {
   actor.start();
 
   process.on("SIGINT", () => {
-    actor.send({ type: "riven.core.shutdown" });
+    const { value } = actor.getSnapshot();
+    const stoppableStates: (typeof value)[] = ["Running", "Bootstrapping"];
+
+    if (stoppableStates.includes(value)) {
+      actor.send({ type: "riven.core.shutdown" });
+    }
   });
 
   await waitFor(
@@ -50,8 +56,6 @@ await Sentry.withScope(async (scope) => {
   }
 
   logger.info("Riven has shut down");
-
-  await Sentry.close();
 
   process.exit(0);
 });

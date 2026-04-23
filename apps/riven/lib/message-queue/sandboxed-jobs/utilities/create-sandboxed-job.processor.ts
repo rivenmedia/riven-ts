@@ -1,5 +1,6 @@
 import { captureException, getCurrentScope, withScope } from "@sentry/node";
 import { type SandboxedJob, UnrecoverableError } from "bullmq";
+import { AbortError } from "es-toolkit";
 import assert from "node:assert";
 import { type ZodLiteral, type ZodObject, type ZodType, z } from "zod";
 
@@ -48,48 +49,56 @@ export function createSandboxedJobProcessor<
 
   let idleTimerId: NodeJS.Timeout | null = null;
 
-  return async (job: SandboxedJob) => {
+  return async (job: SandboxedJob, _token: string, signal: AbortSignal) => {
     idleTimerId = maybeStopIdleTimer(idleTimerId);
 
-    const result = await withScope(async (scope) => {
-      const thread = await import("node:worker_threads");
-
-      scope.setTags({
-        "riven.log.source": "core",
-        "riven.session.id":
-          getCurrentScope().getScopeData().tags["riven.session.id"],
-        "riven.sandboxed-job.name": sandboxedJobName,
-        "riven.worker.id": `${sandboxedJobName}:worker-${thread.threadId.toString()}`,
-        "bullmq.queue.name": sandboxedJobName,
-        "bullmq.job.id": job.id,
+    return new Promise((resolve, reject) => {
+      signal.addEventListener("abort", () => {
+        reject(new AbortError(`${job.name} aborted`));
       });
 
-      try {
-        const data = WorkerData.parse(thread.workerData);
-        const client = initApolloClient(new URL(data.gqlUrl));
+      withScope(async (scope) => {
+        const thread = await import("node:worker_threads");
 
-        const result = (await processor({
-          job,
-          scope,
-          client,
-        } as never)) as z.infer<T["shape"]["output"]>;
+        scope.setTags({
+          "riven.log.source": "core",
+          "riven.session.id":
+            getCurrentScope().getScopeData().tags["riven.session.id"],
+          "riven.sandboxed-job.name": sandboxedJobName,
+          "riven.worker.id": `${sandboxedJobName}:worker-${thread.threadId.toString()}`,
+          "bullmq.queue.name": sandboxedJobName,
+          "bullmq.job.id": job.id,
+        });
 
-        await client.clearStore();
+        try {
+          const data = WorkerData.parse(thread.workerData);
+          const client = initApolloClient(new URL(data.gqlUrl), signal);
 
-        return result;
-      } catch (error) {
-        captureException(error);
+          const result = (await processor({
+            job,
+            scope,
+            client,
+          } as never)) as z.infer<T["shape"]["output"]>;
 
-        if (error instanceof Error) {
-          throw error;
+          await client.clearStore();
+
+          return result;
+        } catch (error) {
+          captureException(error);
+
+          if (error instanceof Error) {
+            throw error;
+          }
+
+          throw new UnrecoverableError(String(error));
         }
+      })
+        .then((result) => {
+          idleTimerId = startIdleTimer(timeoutDuration);
 
-        throw new UnrecoverableError(String(error));
-      }
+          resolve(result);
+        })
+        .catch(reject);
     });
-
-    idleTimerId = startIdleTimer(timeoutDuration);
-
-    return result;
   };
 }

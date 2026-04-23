@@ -1,5 +1,3 @@
-import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
-
 import { Queue, type QueueOptions } from "bullmq";
 import { toMerged } from "es-toolkit";
 
@@ -28,6 +26,7 @@ export function createQueue(
           },
         },
         connection: {
+          enableOfflineQueue: false,
           url: settings.redisUrl,
         },
         telemetry,
@@ -36,7 +35,9 @@ export function createQueue(
     ),
   );
 
-  registerMQListeners(queue, logger);
+  queue.on("error", (error) => {
+    logger.error(`${name} queue error`, { err: error });
+  });
 
   return queue;
 }

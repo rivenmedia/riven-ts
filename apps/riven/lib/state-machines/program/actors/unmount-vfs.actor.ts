@@ -1,4 +1,5 @@
 import Fuse from "@zkochan/fuse-native";
+import { getGlobalDispatcher } from "undici";
 import { fromPromise } from "xstate";
 
 import { logger } from "../../../utilities/logger/logger.ts";
@@ -22,5 +23,7 @@ export const unmountVfs = fromPromise<undefined, Fuse | undefined>(
         resolve(undefined);
       });
     });
+
+    await getGlobalDispatcher().destroy();
   },
 );

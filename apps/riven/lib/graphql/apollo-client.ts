@@ -32,7 +32,7 @@ declare module "@apollo/client" {
 
 export let client: ApolloClient;
 
-export function initApolloClient(uri: URL) {
+export function initApolloClient(uri: URL, signal?: AbortSignal) {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (client) {
     return client;
@@ -48,6 +48,9 @@ export function initApolloClient(uri: URL) {
     assumeImmutableResults: true,
     link: new HttpLink({
       uri: uri.toString(),
+      fetchOptions: {
+        signal: signal ?? null,
+      },
     }),
   }));
 }

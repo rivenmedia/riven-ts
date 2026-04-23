@@ -1,5 +1,4 @@
 import Fuse from "@zkochan/fuse-native";
-import { DateTime } from "luxon";
 import { basename } from "node:path";
 import { setTimeout } from "node:timers/promises";
 
@@ -28,10 +27,9 @@ import type { Queue } from "bullmq";
 let fd = 0;
 
 async function waitForStreamUrl(path: string) {
-  const timeout = 10_000;
-  const startTime = DateTime.utc().toMillis();
+  const timeoutController = AbortSignal.timeout(10_000);
 
-  while (DateTime.utc().toMillis() - startTime < timeout) {
+  while (!timeoutController.aborted) {
     const refreshed = await services.vfsService.getEntry(path);
 
     if (refreshed?.streamUrl) {
