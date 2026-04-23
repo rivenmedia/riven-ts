@@ -10,7 +10,7 @@
     "format:check": "prettier --check . '!**/docker-data'",
     "format:check:ci": "pnpm format:check --log-level warn",
     "format:fix": "prettier --write . '!**/docker-data'",
-    "postinstall": "node .husky/install.mjs || true"
+    "postinstall": "pnpm node .husky/install.mjs || true"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",

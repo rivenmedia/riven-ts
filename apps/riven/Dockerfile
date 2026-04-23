@@ -1,8 +1,14 @@
-FROM node:24.14.0-alpine AS base
+FROM --platform=$BUILDPLATFORM node:24.15.0-alpine AS base
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+ARG TURBO_TEAM
 
 ARG PUID
 ARG PGID
 
+ENV TURBO_TEAM=${TURBO_TEAM}
 ENV PUID=${PUID:-1000}
 ENV PGID=${PGID:-1000}
 ENV USERNAME=riven
@@ -57,8 +63,13 @@ RUN pnpm fetch
 
 COPY --parents **/package.json ./
 
+RUN if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then \
+        apk add --no-cache git; \
+        pnpm config set overrides --location project --json '{ "fuse-shared-library-linux": "github:runkit-forks/fuse-shared-library-linux-arm64" }'; \
+    fi
+
 # Install project dependencies
-RUN pnpm install -r --offline
+RUN pnpm install -r --prefer-offline
 
 #---------------------------
 
@@ -66,7 +77,7 @@ FROM dependencies AS riven-builder
 
 COPY --chown=${PUID}:${PGID} . .
 
-RUN pnpm turbo @repo/riven#build
+RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN pnpm turbo @repo/riven#build
 
 FROM riven-builder AS riven
 
