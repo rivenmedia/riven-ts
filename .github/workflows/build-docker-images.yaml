@@ -45,7 +45,7 @@ jobs:
           context: .
           file: apps/riven/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/riven:${{ github.sha }}
+          tags: ghcr.io/${{ github.repository }}/riven:${{ github.sha }}
           build-args: |
             TURBO_TEAM=${{ vars.TURBO_TEAM }}
             PUID=1000
