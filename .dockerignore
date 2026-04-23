@@ -11,3 +11,4 @@
 **/__generated__
 **/docker-data
 **/*.env*
+**/elastic-local
