@@ -4,7 +4,6 @@ run-name: "Verify PR #${{ github.event.pull_request.number }}"
 
 permissions:
   contents: read
-  packages: read
 
 on:
   pull_request:
@@ -53,6 +52,9 @@ jobs:
     name: Build Docker Images
     needs: verify
     uses: ./.github/workflows/build-docker-images.yaml
+    permissions:
+      contents: read
+      packages: write
     with:
       push: ${{ contains(github.event.pull_request.labels.*.name, 'build-docker') }}
     secrets: inherit
