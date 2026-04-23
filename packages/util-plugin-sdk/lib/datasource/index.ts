@@ -84,6 +84,8 @@ export abstract class BaseDataSource<
    *
    * The default is `200`, as the worker only handles I/O operations, so a high concurrency can be used.
    *
+   * This works in combination with the queue rate limiter to control the overall request rate from the datasource.
+   *
    * If your API throws a lot of timeout errors, try reducing this value.
    *
    * @see https://docs.bullmq.io/guide/parallelism-and-concurrency#how-to-best-use-bullmqs-concurrency-then

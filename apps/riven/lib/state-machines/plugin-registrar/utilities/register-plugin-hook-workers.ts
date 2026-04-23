@@ -71,7 +71,6 @@ export const registerPluginHookWorkers = (
               logger,
             });
           },
-          { concurrency: 1 },
         );
 
         logger.debug(

@@ -14,7 +14,6 @@ import { TorznabResponse } from "../schemas/torznab-response.schema.ts";
 
 import type { StremThruSettings } from "../stremthru-settings.schema.ts";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
-import type { Promisable } from "type-fest";
 
 export class StremThruAPIError extends Error {}
 
@@ -27,8 +26,15 @@ export class StremThruTorznabAPI extends BaseDataSource<StremThruSettings> {
     duration: 60 * 1000,
   };
 
-  override validate(): Promisable<boolean> {
-    return true;
+  override async validate(): Promise<boolean> {
+    try {
+      // Implement your own validation logic here
+      await this.get("v0/torznab/api");
+
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async scrape({

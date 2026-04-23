@@ -26,7 +26,5 @@ export const attrCache = new LRUCache<PathLike, Partial<Stats>>({
 
       return;
     }
-
-    return;
   },
 });
