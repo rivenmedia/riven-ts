@@ -39,7 +39,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 #---------------------------
 
-FROM base AS dependencies
+FROM --platform=$BUILDPLATFORM base AS dependencies
 
 # Disable Husky Git hooks during installation
 ENV HUSKY=0
@@ -73,13 +73,13 @@ RUN pnpm install -r --prefer-offline
 
 #---------------------------
 
-FROM dependencies AS riven-builder
+FROM --platform=$BUILDPLATFORM dependencies AS riven-builder
 
 COPY --chown=${PUID}:${PGID} . .
 
 RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN pnpm turbo @repo/riven#build
 
-FROM riven-builder AS riven
+FROM --platform=$BUILDPLATFORM riven-builder AS riven
 
 EXPOSE 8080
 
