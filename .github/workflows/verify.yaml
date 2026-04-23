@@ -48,3 +48,11 @@ jobs:
       concurrency: ${{ matrix.task.concurrency || '10' }}
       runner-requirements: ${{ toJson(matrix.task.runner-requirements || '[]') }}
     secrets: inherit
+
+  build-docker-images:
+    name: Build Docker Images
+    needs: verify
+    uses: ./.github/workflows/build-docker-images.yaml
+    with:
+      push: ${{ contains(github.event.pull_request.labels.*.name, 'build-docker') }}
+    secrets: inherit

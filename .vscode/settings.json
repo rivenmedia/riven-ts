@@ -1,6 +1,7 @@
 {
   "cSpell.words": [
     "btih",
+    "buildx",
     "bullmq",
     "codegen",
     "deserialise",
@@ -12,7 +13,9 @@
     "listrr",
     "mikro",
     "millis",
+    "PGID",
     "promisable",
+    "PUID",
     "serialiser",
     "serialisers",
     "strem",
@@ -25,6 +28,7 @@
     "torznab",
     "tvdb",
     "tvsearch",
+    "vars",
     "zkochan"
   ],
   "js/ts.preferences.autoImportSpecifierExcludeRegexes": ["node:test"],
