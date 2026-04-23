@@ -26,7 +26,7 @@ export class ScrapedMovieSeeder extends BaseSeeder<ScrapedMovieSeederContext> {
     em.persist(context.movie);
 
     em.assign(context.movie, {
-      scrapedAt: DateTime.now().toJSDate(),
+      scrapedAt: DateTime.utc().toJSDate(),
     });
 
     context.movie.streams.set(context.streams);

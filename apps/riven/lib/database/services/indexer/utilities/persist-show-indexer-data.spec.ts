@@ -70,7 +70,7 @@ it("updates the media item with the latest data if it already exists", async ({
   factories: { showItemRequestFactory },
 }) => {
   vi.useFakeTimers({
-    now: DateTime.now().toJSDate(),
+    now: DateTime.utc().toJSDate(),
   });
 
   const requestedId = "tt1234567";
@@ -156,7 +156,7 @@ it("updates the media item with the latest data if it already exists", async ({
     }),
   );
 
-  const firstEpisodeAirDate = DateTime.now().plus({ months: 1 });
+  const firstEpisodeAirDate = DateTime.utc().plus({ months: 1 });
 
   const updatedUpcomingShow = await indexerService.indexItem({
     id: itemRequest.id,
@@ -322,7 +322,7 @@ it("updates the media item with the latest data if it already exists", async ({
     }),
   );
 
-  vi.setSystemTime(DateTime.now().plus({ weeks: 1 }).toJSDate());
+  vi.setSystemTime(DateTime.utc().plus({ weeks: 1 }).toJSDate());
 
   const updatedOngoingShowWeekTwo = await indexerService.indexItem({
     id: itemRequest.id,

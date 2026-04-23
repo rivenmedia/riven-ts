@@ -107,11 +107,9 @@ export const processItemProcessor =
             break;
           }
           case "validate": {
-            const childFailures = Object.values(
-              await job.getIgnoredChildrenFailures(),
-            );
+            const childFailures = await job.getIgnoredChildrenFailures();
 
-            if (childFailures[0]) {
+            if (Object.keys(childFailures).length) {
               const nextScrapeAttemptTimestamp = DateTime.utc().plus({
                 minutes: 30,
               });

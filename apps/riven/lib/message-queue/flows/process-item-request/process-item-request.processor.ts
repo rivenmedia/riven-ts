@@ -72,7 +72,7 @@ export const processItemRequestProcessor =
             job.data.itemRequestId,
           );
 
-          await job.moveToDelayed(DateTime.now().plus({ days: 1 }).toMillis());
+          await job.moveToDelayed(DateTime.utc().plus({ days: 1 }).toMillis());
 
           throw new DelayedError(
             `Unable to index ${chalk.bold(itemRequest.externalIdsLabel.join(" | "))}. Retrying in 24 hours.`,

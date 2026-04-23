@@ -29,9 +29,9 @@ let fd = 0;
 
 async function waitForStreamUrl(path: string) {
   const timeout = 10_000;
-  const startTime = DateTime.now().toMillis();
+  const startTime = DateTime.utc().toMillis();
 
-  while (DateTime.now().toMillis() - startTime < timeout) {
+  while (DateTime.utc().toMillis() - startTime < timeout) {
     const refreshed = await services.vfsService.getEntry(path);
 
     if (refreshed?.streamUrl) {

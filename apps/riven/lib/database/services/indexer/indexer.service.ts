@@ -54,7 +54,7 @@ export class IndexerService extends BaseService {
       ? DateTime.fromJSDate(baseDate).plus({
           minutes: settings.scheduleOffsetMinutes,
         })
-      : DateTime.now().plus({ days: settings.unknownAirDateOffsetDays });
+      : DateTime.utc().plus({ days: settings.unknownAirDateOffsetDays });
 
     return {
       reindexTime,

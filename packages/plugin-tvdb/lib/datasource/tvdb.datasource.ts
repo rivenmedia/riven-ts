@@ -147,7 +147,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
    * @returns The {@link TvdbToken} from the `/login` response
    */
   async #getAuthToken() {
-    const now = DateTime.now();
+    const now = DateTime.utc();
 
     // Return cached token if valid
     if (this.#token && this.#token.expiresAt > now) {

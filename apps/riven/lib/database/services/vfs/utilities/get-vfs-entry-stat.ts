@@ -47,7 +47,7 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
         mostRecentlyUpdatedMediaEntry,
       ]);
 
-      const fallbackDate = DateTime.now().toJSDate();
+      const fallbackDate = DateTime.utc().toJSDate();
 
       const entryStat = stat(
         {
@@ -121,7 +121,7 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
         lastUpdatedShowQuery,
       ]);
 
-      const fallbackDate = DateTime.now().toJSDate();
+      const fallbackDate = DateTime.utc().toJSDate();
 
       const entryStat = stat(
         {
@@ -187,7 +187,7 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
         oldestMovieQuery,
       ]);
 
-      const fallbackDate = DateTime.now().toJSDate();
+      const fallbackDate = DateTime.utc().toJSDate();
 
       const entryStat = stat(
         {

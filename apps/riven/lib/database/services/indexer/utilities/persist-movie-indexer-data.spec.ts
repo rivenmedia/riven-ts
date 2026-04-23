@@ -25,7 +25,7 @@ it("returns the media item if processed successfully", async ({
     genres: [],
     type: "movie",
     runtime: 40,
-    releaseDate: DateTime.now().toISO(),
+    releaseDate: DateTime.utc().toISO(),
   });
 
   expect(result).instanceOf(Movie);
@@ -58,7 +58,7 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item request is in a
       genres: [],
       type: "movie",
       runtime: 40,
-      releaseDate: DateTime.now().toISO(),
+      releaseDate: DateTime.utc().toISO(),
     }),
   ).rejects.toThrow(MediaItemIndexErrorIncorrectState);
 });

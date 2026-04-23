@@ -55,7 +55,7 @@ it("updates the scrape metadata when re-scraping a failed item", async ({
   services: { scraperService },
 }) => {
   const scrapedMovie = await seedScrapedMovie();
-  const now = DateTime.now().plus({ days: 1 }).toJSDate();
+  const now = DateTime.utc().plus({ days: 1 }).toJSDate();
 
   vi.setSystemTime(now);
 

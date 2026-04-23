@@ -64,10 +64,10 @@ export abstract class MediaItem {
   @Field(() => Date)
   @Index()
   @Property()
-  createdAt: Opt<Date> = DateTime.now().toJSDate();
+  createdAt: Opt<Date> = DateTime.utc().toJSDate();
 
   @Field(() => Date, { nullable: true })
-  @Property({ onUpdate: () => DateTime.now().toJSDate() })
+  @Property({ onUpdate: () => DateTime.utc().toJSDate() })
   updatedAt?: Opt<Date> | null;
 
   @Field(() => Date, { nullable: true })
@@ -182,7 +182,7 @@ export abstract class MediaItem {
   @Property({ persist: false, getter: true })
   get isReleased(): Opt<boolean> {
     return this.releaseDate
-      ? DateTime.fromJSDate(this.releaseDate) <= DateTime.now()
+      ? DateTime.fromJSDate(this.releaseDate) <= DateTime.utc()
       : false;
   }
 

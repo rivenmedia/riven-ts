@@ -46,7 +46,7 @@ export class ScraperService extends BaseService {
   }
 
   #updateScrapeMetadata(item: MediaItem, newFailedScrapeAttempts: number) {
-    item.scrapedAt = DateTime.now().toJSDate();
+    item.scrapedAt = DateTime.utc().toJSDate();
     item.scrapedTimes++;
     item.failedScrapeAttempts = newFailedScrapeAttempts;
   }

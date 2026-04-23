@@ -59,7 +59,7 @@ export class ItemRequest {
 
   @Field(() => Date)
   @Property()
-  createdAt: Opt<Date> = DateTime.now().toJSDate();
+  createdAt: Opt<Date> = DateTime.utc().toJSDate();
 
   @Field(() => Date, { nullable: true })
   @Property()
