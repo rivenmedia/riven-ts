@@ -14,7 +14,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@apollo/server": "^5.2.0",
+    "@apollo/server": "^5.5.0",
     "@repo/core-util-graphql-schema": "workspace:^",
     "graphql": "catalog:",
     "reflect-metadata": "catalog:"
