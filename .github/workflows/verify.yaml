@@ -1,6 +1,6 @@
 name: Verify
 
-run-name: "Verify PR ${{ github.event.pull_request.title }} (#${{
+run-name: "Verify: ${{ github.event.pull_request.title }} (#${{
   github.event.pull_request.number }})"
 
 permissions:
