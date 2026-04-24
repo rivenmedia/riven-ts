@@ -1,90 +1,126 @@
-FROM --platform=$BUILDPLATFORM node:24.15.0-alpine AS base
+ARG NODE_VERSION=24.15.0
+ARG TURBO_VERSION=2.9.5
+ARG PNPM_VERSION=10.28.2
+ARG USER=riven
+ARG PUID=1000
+ARG PGID=1000
+ARG HOME=/app
 
-ARG TARGETPLATFORM
-ARG BUILDPLATFORM
+FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS base
 
-ARG TURBO_TEAM
+    LABEL stage="core-os"
 
-ARG PUID
-ARG PGID
+    ARG TARGETPLATFORM
+    ARG BUILDPLATFORM
+    ARG USER
+    ARG PNPM_VERSION
+    ARG HOME
 
-ENV TURBO_TEAM=${TURBO_TEAM}
-ENV PUID=${PUID:-1000}
-ENV PGID=${PGID:-1000}
-ENV USERNAME=riven
-ENV USERGROUP=riven
-ENV HOME=/home/${USERNAME}
-ENV PNPM_HOME=${HOME}/.local/share/pnpm
-ENV PATH=$PNPM_HOME:$PATH
+    ENV PNPM_HOME=${HOME}/.local/share/pnpm
+    ENV PATH=$PNPM_HOME:$PATH
 
-# Install core dependencies and FUSE
-RUN apk add --no-cache \
-    wget \
-    bash \
-    fuse \
-    fuse-dev \
-    shadow
+    # Install build dependencies
+    RUN apt update && apt install -y \
+        wget \
+        fuse3 \
+        libfuse3-dev \
+        libfuse-dev \
+        make \
+        gcc \
+        python3 \
+        build-essential
 
-# Modify existing node user to match desired UID/GID
-RUN deluser --remove-home node && \
-    addgroup -g ${PGID} ${USERGROUP} && \
-    adduser -D -u ${PUID} -G ${USERGROUP} -h ${HOME} ${USERNAME}
-
-# Configure FUSE
-RUN sed -i 's/^#\s*user_allow_other/user_allow_other/' /etc/fuse.conf || \
-    echo 'user_allow_other' >> /etc/fuse.conf
-
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+    # Install pnpm
+    RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
 #---------------------------
 
-FROM --platform=$BUILDPLATFORM base AS dependencies
+FROM base AS prepare
 
-# Disable Husky Git hooks during installation
-ENV HUSKY=0
+    LABEL builder="true"
 
-# Install build dependencies
-RUN apk add --no-cache \
-    make \
-    gcc \
-    g++ \
-    python3 \
-    linux-headers
+    ARG TURBO_VERSION
+    ARG HOME
 
-WORKDIR ${HOME}/riven-ts
+    WORKDIR ${HOME}
 
-# Copy dependency files
-COPY .husky/install.mjs .husky/install.mjs
-COPY pnpm-lock.yaml pnpm-workspace.yaml ./
+    RUN pnpm add turbo@${TURBO_VERSION} --global
 
-# https://pnpm.io/cli/fetch
-RUN pnpm fetch
+    COPY . .
 
-COPY --parents **/package.json ./
+    RUN turbo prune @repo/riven --docker
 
-RUN if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then \
-        apk add --no-cache git; \
-        pnpm config set overrides --location project --json '{ "fuse-shared-library-linux": "github:runkit-forks/fuse-shared-library-linux-arm64" }'; \
-    fi
+FROM base AS builder
 
-# Install project dependencies
-RUN pnpm install -r --prefer-offline
+    LABEL builder="true"
+
+    ARG HOME
+
+    WORKDIR ${HOME}
+
+    COPY --from=prepare ${HOME}/out/json/ .
+
+    RUN pnpm fetch
+    RUN if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then \
+            apt install -y git; \
+            pnpm config set overrides --location project --json '{ "fuse-shared-library-linux": "github:runkit-forks/fuse-shared-library-linux-arm64" }'; \
+        fi
+    RUN pnpm install -r --prefer-offline
+
+    COPY --from=prepare ${HOME}/out/full/ .
+
+    ARG TURBO_TEAM
+    ENV TURBO_TEAM=${TURBO_TEAM}
+
+    RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN pnpm turbo @repo/riven#build
 
 #---------------------------
 
-FROM --platform=$BUILDPLATFORM dependencies AS riven-builder
+FROM node:${NODE_VERSION}-alpine AS runner
 
-COPY --chown=${PUID}:${PGID} . .
+    LABEL name="Riven TS" \
+          description="Riven(TS) Media Server" \
+          url="https://github.com/rivenmedia/riven-ts" \
+          stage="runner"
 
-RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN pnpm turbo @repo/riven#build
+    ARG HOME
 
-FROM --platform=$BUILDPLATFORM riven-builder AS riven
+    WORKDIR ${HOME}
 
-EXPOSE 8080
+    ARG USER
 
-STOPSIGNAL SIGINT
+    ENV USERNAME=${USER}
+    ENV USERGROUP=${USER}
 
-USER ${PUID}:${PGID}
+    ARG PUID
+    ARG PGID
 
-CMD [ "pnpm", "--filter=@repo/riven", "start" ]
+    ENV PUID=${PUID}
+    ENV PGID=${PGID}
+
+    ARG HOME
+    ENV HOME=${HOME}
+
+    # Modify existing node user to match desired UID/GID
+    RUN deluser --remove-home node && \
+        addgroup -g ${PGID} ${USERGROUP} && \
+        adduser -D -u ${PUID} -G ${USERGROUP} -h ${HOME} ${USERNAME}
+
+    # Install FUSE dependencies
+    RUN apk add --no-cache \
+        fuse \
+        fuse-dev
+
+    # Ensure user_allow_other is enabled in /etc/fuse.conf (needed for VFS to work properly)
+    RUN sed -i 's/^#\s*user_allow_other/user_allow_other/' /etc/fuse.conf || \
+        echo 'user_allow_other' >> /etc/fuse.conf
+
+    USER ${PUID}:${PGID}
+
+    COPY --from=builder --chown=${PUID}:${PGID} ${HOME} .
+
+    STOPSIGNAL SIGTERM
+
+    WORKDIR ${HOME}/apps/riven
+
+    CMD ["node", "--conditions=production", "--enable-source-maps", "dist/program/index.js"]

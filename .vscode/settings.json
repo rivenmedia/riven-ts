@@ -10,6 +10,7 @@
     "imdbid",
     "infohash",
     "kubb",
+    "libfuse",
     "listrr",
     "mikro",
     "millis",
@@ -28,6 +29,7 @@
     "torznab",
     "tvdb",
     "tvsearch",
+    "USERGROUP",
     "vars",
     "zkochan"
   ],

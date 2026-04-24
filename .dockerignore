@@ -1,5 +1,4 @@
 **/.git
-**/.gitignore
 **/*.md
 **/dist
 **/node_modules
@@ -12,3 +11,4 @@
 **/docker-data
 **/*.env*
 **/elastic-local
+**/docker-compose*.yaml

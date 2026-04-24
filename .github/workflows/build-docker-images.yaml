@@ -68,9 +68,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             TURBO_TEAM=${{ vars.TURBO_TEAM }}
-            PUID=1000
-            PGID=1000
           secret-envs: |
             TURBO_TOKEN=TURBO_TOKEN
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          target: runner

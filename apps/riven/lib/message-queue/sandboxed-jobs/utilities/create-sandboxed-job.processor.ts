@@ -2,9 +2,11 @@ import { captureException, getCurrentScope, withScope } from "@sentry/node";
 import { type SandboxedJob, UnrecoverableError } from "bullmq";
 import { AbortError } from "es-toolkit";
 import assert from "node:assert";
+import { threadId } from "node:worker_threads";
 import { type ZodLiteral, type ZodObject, type ZodType, z } from "zod";
 
 import { initApolloClient } from "../../../graphql/apollo-client.ts";
+import { settings } from "../../../utilities/settings.ts";
 
 import type { SandboxedJobDefinition, SandboxedJobHandlers } from "../index.ts";
 
@@ -23,10 +25,6 @@ function maybeStopIdleTimer(timerId: NodeJS.Timeout | null) {
 
   return null;
 }
-
-const WorkerData = z.object({
-  gqlUrl: z.url(),
-});
 
 export function createSandboxedJobProcessor<
   T extends ZodObject<{
@@ -58,21 +56,21 @@ export function createSandboxedJobProcessor<
       });
 
       withScope(async (scope) => {
-        const thread = await import("node:worker_threads");
-
         scope.setTags({
           "riven.log.source": "core",
           "riven.session.id":
             getCurrentScope().getScopeData().tags["riven.session.id"],
           "riven.sandboxed-job.name": sandboxedJobName,
-          "riven.worker.id": `${sandboxedJobName}:worker-${thread.threadId.toString()}`,
+          "riven.worker.id": `${sandboxedJobName}:worker-${threadId.toString()}`,
           "bullmq.queue.name": sandboxedJobName,
           "bullmq.job.id": job.id,
         });
 
         try {
-          const data = WorkerData.parse(thread.workerData);
-          const client = initApolloClient(new URL(data.gqlUrl), signal);
+          const client = initApolloClient(
+            new URL(`http://localhost:${settings.gqlPort.toString()}`),
+            signal,
+          );
 
           const result = (await processor({
             job,

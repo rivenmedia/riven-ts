@@ -18,14 +18,14 @@
     }
   },
   "scripts": {
-    "build": "pnpm build:program && pnpm build:workers",
+    "build": "pnpm build:program",
     "build:program": "tsc --build tsconfig.app.json",
     "build:workers": "rm -rf dist/workers && pnpm node esbuild.config.ts",
     "check-types": "tsc --noEmit --project tsconfig.app.json && tsc --noEmit --project tsconfig.spec.json",
     "codegen:config-docs": "zod2md",
     "codegen:gql": "graphql-codegen --config graphql-codegen.ts",
     "codegen:gql-schema": "pnpm node --import=@swc-node/register/esm-register scripts/generate-gql-schema.ts",
-    "dev": "pnpm --filter @repo/riven build:workers && pnpm node --watch --env-file-if-exists=.env.riven --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
+    "dev": "pnpm node --watch --env-file-if-exists=.env.riven --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "start": "pnpm node --conditions production --env-file-if-exists=.env.riven --enable-source-maps dist/program/index.js",

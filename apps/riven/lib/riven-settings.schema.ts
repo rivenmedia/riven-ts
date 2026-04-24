@@ -123,3 +123,5 @@ export const RivenSettings = z.object({
       "When an episode has no air date, this number of days will be added to the current date to estimate a release date for scheduling purposes.",
     ),
 });
+
+export type RivenSettings = z.infer<typeof RivenSettings>;
