@@ -61,6 +61,8 @@ FROM base AS builder
 
     COPY --from=prepare ${HOME}/out/json/ .
 
+    ENV HUSKY=0
+
     RUN pnpm fetch
     RUN if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then \
             apt-get install -y git; \
