@@ -45,6 +45,7 @@ FROM base AS prepare
     WORKDIR ${HOME}
 
     RUN pnpm add turbo@${TURBO_VERSION} --global
+    RUN turbo telemetry disable
 
     COPY . .
 
