@@ -20,7 +20,7 @@ FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS base
     ENV PATH=$PNPM_HOME:$PATH
 
     # Install build dependencies
-    RUN apt update && apt install -y \
+    RUN apt-get update && apt-get install -y \
         wget \
         fuse3 \
         libfuse3-dev \
@@ -62,7 +62,7 @@ FROM base AS builder
 
     RUN pnpm fetch
     RUN if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then \
-            apt install -y git; \
+            apt-get install -y git; \
             pnpm config set overrides --location project --json '{ "fuse-shared-library-linux": "github:runkit-forks/fuse-shared-library-linux-arm64" }'; \
         fi
     RUN pnpm install -r --prefer-offline
