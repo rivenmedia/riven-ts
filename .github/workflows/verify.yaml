@@ -60,6 +60,7 @@ jobs:
       task: ${{ matrix.task.command }}
       concurrency: ${{ matrix.task.concurrency || '10' }}
       runner-requirements: ${{ toJson(matrix.task.runner-requirements || '[]') }}
+      env: ${{ toJson(matrix.task.env || '{}') }}
     secrets: inherit
 
   build-docker-images:

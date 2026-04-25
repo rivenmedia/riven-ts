@@ -15,6 +15,10 @@ on:
         description: A list of requirements for the verification runner
         type: string
         required: true
+      env:
+        description: Environment variables to set when running the turbo task
+        type: string
+        required: true
 
 permissions:
   contents: read
@@ -91,6 +95,11 @@ jobs:
 
       - name: Set Turborepo --affected SHAs
         uses: ./.github/actions/set-turborepo-affected-shas
+
+      - name: Set environment variables
+        if: inputs.env != '{}'
+        run: echo '${{ fromJson(inputs.env) }}' | jq -r 'to_entries[] |
+          "\(.key)=\(.value)"' >> $GITHUB_ENV
 
       - name: Set up verification runner
         uses: ./.github/actions/set-up-verification-runner
