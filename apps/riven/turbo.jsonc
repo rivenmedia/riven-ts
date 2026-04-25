@@ -47,6 +47,7 @@
       "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
     },
     "migration:check": {
+      "passThroughEnv": ["RIVEN_SETTING__*"],
       "dependsOn": ["$TURBO_EXTENDS$", "transit"],
       "inputs": [
         "$TURBO_ROOT$/**/*.entity.ts",
