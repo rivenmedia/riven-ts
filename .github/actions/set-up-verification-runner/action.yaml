@@ -44,4 +44,4 @@ runs:
       run: |
         sudo service postgresql start
         pg_isready
-        sudo -u postgres createuser -s -d -r -P postgres
+        sudo -u postgres createuser -s -d -r -P runner
