@@ -41,4 +41,7 @@ runs:
     - name: Start Postgres service
       shell: bash
       if: ${{ inputs.start-postgres-service == 'true' }}
-      run: sudo service postgresql start
+      run: |
+        sudo service postgresql start
+        pg_isready
+        sudo -u postgres createuser -s -d -r -w runner
