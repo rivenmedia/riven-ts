@@ -44,4 +44,5 @@ runs:
       run: |
         sudo service postgresql start
         pg_isready
-        sudo -u postgres createuser -s -d -r -P runner runner
+        sudo -u postgres createuser -s -d -r -w runner
+        sudo -u postgres psql -c "ALTER ROLE runner WITH PASSWORD 'runner';"
