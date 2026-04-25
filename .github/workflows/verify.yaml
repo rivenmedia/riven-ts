@@ -51,6 +51,10 @@ jobs:
             command: migration:check
             runner-requirements:
               - postgres-service
+            env:
+              RIVEN_SETTING__databaseUrl: database-url
+              RIVEN_SETTING__redisUrl: redis-url
+              RIVEN_SETTING__vfsMountPath: /vfs
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
       task: ${{ matrix.task.command }}
