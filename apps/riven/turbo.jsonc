@@ -45,6 +45,16 @@
     },
     "check-types": {
       "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
+    },
+    "migration:check": {
+      "dependsOn": ["$TURBO_EXTENDS$", "transit"],
+      "inputs": [
+        "$TURBO_ROOT$/**/*.entity.ts",
+        "lib/database/config.ts",
+        "lib/database/database.ts",
+        "lib/database/migrations/*.ts",
+        "lib/database/migrations/.snapshot-*.json"
+      ]
     }
   }
 }

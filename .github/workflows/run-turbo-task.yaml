@@ -96,7 +96,9 @@ jobs:
         uses: ./.github/actions/set-up-verification-runner
         with:
           install-fuse: ${{ contains(fromJson(inputs.runner-requirements || '[]'), 'fuse') }}
-          install-redis-server: ${{ contains(fromJson(inputs.runner-requirements || '[]'), 'redis-server') }}
+          install-redis-server:
+            ${{ contains(fromJson(inputs.runner-requirements || '[]'),
+            'redis-server') }}
 
       - name: Run ${{ inputs.task }}
         run: |
@@ -123,5 +125,7 @@ jobs:
     if: always()
     steps:
       - name: Verification failed
-        if: needs.get-required-tasks.result != 'success' || contains(fromJson('["failure", "cancelled"]'), needs.run-turbo-task.result)
+        if: needs.get-required-tasks.result != 'success' ||
+          contains(fromJson('["failure", "cancelled"]'),
+          needs.run-turbo-task.result)
         run: exit 1
