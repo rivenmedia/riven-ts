@@ -69,6 +69,9 @@ jobs:
           --health-cmd pg_isready --health-interval 10s --health-timeout 5s
           --health-retries 5
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
       - name: Check for missing migrations
         uses: ./.github/workflows/run-turbo-task.yaml
         with:
