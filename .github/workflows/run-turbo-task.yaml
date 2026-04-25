@@ -99,6 +99,9 @@ jobs:
           install-redis-server:
             ${{ contains(fromJson(inputs.runner-requirements || '[]'),
             'redis-server') }}
+          start-postgres-service:
+            ${{ contains(fromJson(inputs.runner-requirements ||
+            '[]'), 'postgres-service') }}
 
       - name: Run ${{ inputs.task }}
         run: |
