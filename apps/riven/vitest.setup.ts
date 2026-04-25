@@ -57,11 +57,11 @@ vi.mock(import("@repo/plugin-test"), () => {
 
 vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
   const { initORM } = await importOriginal();
-  const { databaseConfig } = await import("./lib/database/config.ts");
+  const { createDatabaseConfig } = await import("./lib/database/config.ts");
   const { SqliteDriver } = await import("@mikro-orm/sqlite");
 
   const { database, services } = await initORM({
-    ...databaseConfig,
+    ...createDatabaseConfig(),
     driver: SqliteDriver as never,
     dbName: ":memory:",
     debug: false,

@@ -45,15 +45,17 @@ export function createDatabaseConfig(logger?: Logger) {
     entities,
     extensions: [SeedManager, Migrator],
     clientUrl: settings.databaseUrl,
-    logger: (message) => {
-      Sentry.withScope((scope) => {
-        scope.setTags({
-          "riven.log.source": "database",
-        });
+    ...(logger && {
+      logger: (message) => {
+        Sentry.withScope((scope) => {
+          scope.setTags({
+            "riven.log.source": "database",
+          });
 
-        logger?.data(message);
-      });
-    },
+          logger.data(message);
+        });
+      },
+    }),
     debug: settings.databaseDebugLogging,
     seeder: {
       pathTs: "./seeders",
