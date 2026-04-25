@@ -62,6 +62,7 @@ jobs:
         uses: docker/build-push-action@v7
         id: build
         with:
+          file: apps/riven/Dockerfile
           load: true
           tags: ${{ env.TEST_TAG }}
 
