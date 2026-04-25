@@ -98,8 +98,9 @@ jobs:
 
       - name: Set environment variables
         if: inputs.env != '{}'
-        run: echo '${{ fromJson(inputs.env) }}' | jq -r 'to_entries[] |
-          "\(.key)=\(.value)"' >> $GITHUB_ENV
+        run:
+          echo ${{ inputs.env }} | jq -r 'to_entries[] | "\(.key)=\(.value)"' >>
+          $GITHUB_ENV
 
       - name: Set up verification runner
         uses: ./.github/actions/set-up-verification-runner
