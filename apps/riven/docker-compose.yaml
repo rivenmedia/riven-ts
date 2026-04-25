@@ -1,7 +1,11 @@
 services:
   riven:
     container_name: riven
-    image: ghcr.io/rivenmedia/riven-ts:pr-81
+    build:
+      context: ../..
+      dockerfile: apps/riven/Dockerfile
+      target: runner
+    pull_policy: build
     restart: unless-stopped
     tty: true
     cap_add:

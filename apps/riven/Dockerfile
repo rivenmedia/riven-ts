@@ -1,12 +1,14 @@
+ARG HOME=/app
 ARG NODE_VERSION=24.15.0
 ARG TURBO_VERSION=2.9.5
 ARG PNPM_VERSION=10.28.2
+ARG PNPM_HOME=${HOME}/.local/share/pnpm
 ARG USER=riven
 ARG PUID=1000
 ARG PGID=1000
-ARG HOME=/app
+ARG CI=true
 
-FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS base
+FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS core-os
 
     LABEL stage="core-os"
 
@@ -14,9 +16,10 @@ FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS base
     ARG BUILDPLATFORM
     ARG USER
     ARG PNPM_VERSION
+    ARG PNPM_HOME
     ARG HOME
 
-    ENV PNPM_HOME=${HOME}/.local/share/pnpm
+    ENV PNPM_HOME=${PNPM_HOME}
     ENV PATH=$PNPM_HOME:$PATH
 
     # Install build dependencies
@@ -33,9 +36,7 @@ FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS base
     # Install pnpm
     RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
-#---------------------------
-
-FROM base AS prepare
+FROM core-os AS prepare
 
     LABEL builder="true"
 
@@ -51,7 +52,7 @@ FROM base AS prepare
 
     RUN turbo prune @repo/riven --docker
 
-FROM base AS builder
+FROM core-os AS builder
 
     LABEL builder="true"
 
@@ -61,13 +62,17 @@ FROM base AS builder
 
     COPY --from=prepare ${HOME}/out/json/ .
 
-    ENV HUSKY=0
 
     RUN pnpm fetch
+
     RUN if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then \
             apt-get install -y git; \
             pnpm config set overrides --location project --json '{ "fuse-shared-library-linux": "github:runkit-forks/fuse-shared-library-linux-arm64" }'; \
         fi
+
+    ARG CI
+    ENV CI=${CI}
+
     RUN pnpm install -r --prefer-offline
 
     COPY --from=prepare ${HOME}/out/full/ .
@@ -77,7 +82,18 @@ FROM base AS builder
 
     RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN pnpm turbo @repo/riven#build
 
-#---------------------------
+FROM builder AS production-deploy
+
+    LABEL builder="true"
+
+    ARG HOME
+
+    WORKDIR ${HOME}
+
+    ARG CI
+    ENV CI=${CI}
+
+    RUN pnpm --filter @repo/riven --prod deploy pruned
 
 FROM node:${NODE_VERSION}-alpine AS runner
 
@@ -120,10 +136,8 @@ FROM node:${NODE_VERSION}-alpine AS runner
 
     USER ${PUID}:${PGID}
 
-    COPY --from=builder --chown=${PUID}:${PGID} ${HOME} .
+    COPY --from=production-deploy ${HOME}/pruned .
 
     STOPSIGNAL SIGTERM
 
-    WORKDIR ${HOME}/apps/riven
-
-    CMD ["node", "--conditions=production", "--enable-source-maps", "dist/program/index.js"]
+    CMD ["sh", "-c", "NODE_ENV=production node --conditions=production --enable-source-maps dist/program/lib/index.js"]

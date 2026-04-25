@@ -1,10 +1,8 @@
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import {
-  createGetAuthMeQueryResponse,
-  getAuthMeHandler,
-} from "../../__generated__/index.ts";
+import { getAuthMeHandler } from "../../__generated__/handlers/getAuthMeHandler.ts";
+import { createGetAuthMeQueryResponse } from "../../__generated__/mocks/createGetAuthMe.ts";
 import { it } from "../../__tests__/seerr.test-context.ts";
 import { MetadataSettingsResponse } from "../../schemas/metadata-settings-response.schema.ts";
 import { SeerrAPI } from "../seerr.datasource.ts";

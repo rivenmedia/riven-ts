@@ -15,8 +15,15 @@
     "./workers/validate-torrent-files": {
       "production": "./dist/workers/validate-torrent-files/validate-torrent-files.processor.js",
       "default": "./lib/message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.ts"
+    },
+    "./database-metadata-cache": {
+      "production": "./dist/program/temp/metadata.json",
+      "default": "./temp/metadata.json"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "pnpm build:program",
     "build:program": "tsc --build tsconfig.app.json",
@@ -25,12 +32,13 @@
     "codegen:config-docs": "zod2md",
     "codegen:gql": "graphql-codegen --config graphql-codegen.ts",
     "codegen:gql-schema": "pnpm node --import=@swc-node/register/esm-register scripts/generate-gql-schema.ts",
+    "database:cache:generate": "mikro-orm cache:generate --combined --contextName slim",
     "dev": "pnpm node --watch --env-file-if-exists=.env.riven --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "migration:check": "mikro-orm migration:check",
     "mikro-orm": "mikro-orm",
-    "start": "pnpm node --conditions production --env-file-if-exists=.env.riven --enable-source-maps dist/program/index.js",
+    "start": "pnpm node --conditions=production --env-file-if-exists=.env.riven --enable-source-maps dist/program/index.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -59,6 +67,7 @@
     "@repo/plugin-tvdb": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "@repo/util-rank-torrent-name": "workspace:^",
+    "@sentry/node": "^10.38.0",
     "@zkochan/fuse-native": "^0.1.0",
     "bullmq": "catalog:",
     "bullmq-otel": "catalog:",
@@ -70,7 +79,6 @@
     "graphql": "catalog:",
     "graphql-scalars": "catalog:",
     "keyv": "^5.5.5",
-    "limiter": "catalog:",
     "lru-cache": "^11.2.4",
     "luxon": "^3.7.2",
     "parse-torrent-title": "^2.1.0",
@@ -104,7 +112,6 @@
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/plugin-test": "workspace:^",
     "@repo/util-plugin-testing": "workspace:^",
-    "@sentry/node": "^10.38.0",
     "@swc-node/register": "^1.11.1",
     "@types/luxon": "^3.7.1",
     "@types/node": "catalog:",
@@ -118,5 +125,10 @@
     "typescript": "catalog:",
     "vitest": "catalog:",
     "zod2md": "catalog:"
+  },
+  "mikro-orm": {
+    "configPaths": [
+      "./lib/mikro-orm.config.ts"
+    ]
   }
 }

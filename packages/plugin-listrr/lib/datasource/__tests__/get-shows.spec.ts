@@ -1,15 +1,14 @@
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import {
-  type GetApiListShowsIdSortbySortbydirectionPageQueryResponse as GetShowsResponse,
-  type ListrrContractsModelsAPIShowDto as ListrrShow,
-  createListrrContractsModelsAPIShowDto,
-  getApiListShowsIdSortbySortbydirectionPageHandler as getShowsHandler,
-  createGetApiListShowsIdSortbySortbydirectionPageQueryResponse as getShowsResponse,
-} from "../../__generated__/index.ts";
+import { getApiListShowsIdSortbySortbydirectionPageHandler } from "../../__generated__/handlers/getApiListShowsIdSortbySortbydirectionPageHandler.ts";
+import { createGetApiListShowsIdSortbySortbydirectionPageQueryResponse } from "../../__generated__/mocks/createGetApiListShowsIdSortbySortbydirectionPage.ts";
+import { createListrrContractsModelsAPIShowDto } from "../../__generated__/mocks/listrr/contracts/models/API/createShowDto.ts";
 import { it } from "../../__tests__/listrr.test-context.ts";
 import { ListrrAPI } from "../listrr.datasource.ts";
+
+import type { GetApiListShowsIdSortbySortbydirectionPageQueryResponse } from "../../__generated__/types/GetApiListShowsIdSortbySortbydirectionPage.ts";
+import type { ListrrContractsModelsAPIShowDto } from "../../__generated__/types/index.ts";
 
 it("returns an empty array if no content lists are provided", async ({
   dataSourceMap,
@@ -30,7 +29,7 @@ it("retrieves shows from each provided list", async ({
   ]);
 
   server.use(
-    getShowsHandler((info) => {
+    getApiListShowsIdSortbySortbydirectionPageHandler((info) => {
       if (
         !info.params["id"] ||
         !contentLists.has(info.params["id"].toString())
@@ -38,8 +37,8 @@ it("retrieves shows from each provided list", async ({
         return HttpResponse.error();
       }
 
-      return HttpResponse.json<GetShowsResponse>(
-        getShowsResponse({
+      return HttpResponse.json<GetApiListShowsIdSortbySortbydirectionPageQueryResponse>(
+        createGetApiListShowsIdSortbySortbydirectionPageQueryResponse({
           pages: 1,
           count: 1,
           items: [
@@ -67,7 +66,7 @@ it("paginates through all pages of the list", async ({
   const itemsPerPage = 2;
 
   server.use(
-    getShowsHandler((info) => {
+    getApiListShowsIdSortbySortbydirectionPageHandler((info) => {
       if (!info.params["id"] || !info.params["page"]) {
         return HttpResponse.error();
       }
@@ -78,8 +77,8 @@ it("paginates through all pages of the list", async ({
         return HttpResponse.error();
       }
 
-      return HttpResponse.json<GetShowsResponse>(
-        getShowsResponse({
+      return HttpResponse.json<GetApiListShowsIdSortbySortbydirectionPageQueryResponse>(
+        createGetApiListShowsIdSortbySortbydirectionPageQueryResponse({
           pages: totalPages,
           count: totalPages * itemsPerPage,
           items: Array.from({ length: itemsPerPage }).map((_, i) =>
@@ -113,13 +112,13 @@ it("deduplicates shows that appear in multiple lists", async ({
     "64b7f2f5e13e4b6f8c8e4d1a": [1, 2, 3].map(buildMockShow),
     "64b7f2f5e13e4b6f8c8e4d1b": [3, 4, 5].map(buildMockShow),
     "64b7f2f5e13e4b6f8c8e4d1c": [2, 4, 5, 6, 7, 8].map(buildMockShow),
-  } satisfies Record<string, ListrrShow[]>;
+  } satisfies Record<string, ListrrContractsModelsAPIShowDto[]>;
 
   server.use(
     ...Object.entries(items).map(([id, shows]) =>
       http.get(`**/api/List/Shows/${id}/:sortBy/:sortByDirection/:page`, () =>
-        HttpResponse.json(
-          getShowsResponse({
+        HttpResponse.json<GetApiListShowsIdSortbySortbydirectionPageQueryResponse>(
+          createGetApiListShowsIdSortbySortbydirectionPageQueryResponse({
             items: shows,
           }),
         ),

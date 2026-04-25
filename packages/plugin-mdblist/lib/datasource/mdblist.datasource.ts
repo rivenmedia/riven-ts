@@ -4,7 +4,7 @@ import {
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
 
-import { getListItemsByName200Schema as getListItemsResponseSchema } from "../__generated__/index.ts";
+import { getListItemsByName200Schema } from "../__generated__/zod/getListItemsByNameSchema.ts";
 import { MdbListName } from "../schemas/mdblist-name.schema.ts";
 
 import type { MdbListSettings } from "../mdblist-settings.schema.ts";
@@ -81,7 +81,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
           },
         });
 
-        const parsed = getListItemsResponseSchema.parse(response.parsedBody);
+        const parsed = getListItemsByName200Schema.parse(response.parsedBody);
 
         let pageItemCount = 0;
 

@@ -111,9 +111,6 @@ catalogs:
     jiti:
       specifier: 2.6.1
       version: 2.6.1
-    limiter:
-      specifier: 3.0.0
-      version: 3.0.0
     luxon:
       specifier: ^3.7.2
       version: 3.7.2
@@ -169,6 +166,9 @@ importers:
       dedent:
         specifier: 'catalog:'
         version: 1.7.1
+      es-toolkit:
+        specifier: 'catalog:'
+        version: 1.44.0
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -262,6 +262,9 @@ importers:
       '@repo/util-rank-torrent-name':
         specifier: workspace:^
         version: link:../../packages/util-rank-torrent-name
+      '@sentry/node':
+        specifier: ^10.38.0
+        version: 10.38.0
       '@zkochan/fuse-native':
         specifier: ^0.1.0
         version: 0.1.0
@@ -295,9 +298,6 @@ importers:
       keyv:
         specifier: ^5.5.5
         version: 5.5.5
-      limiter:
-        specifier: 'catalog:'
-        version: 3.0.0
       lru-cache:
         specifier: ^11.2.4
         version: 11.2.4
@@ -392,9 +392,6 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../../packages/util-plugin-testing
-      '@sentry/node':
-        specifier: ^10.38.0
-        version: 10.38.0
       '@swc-node/register':
         specifier: ^1.11.1
         version: 1.11.1(@swc/core@1.15.7(@swc/helpers@0.5.17))(@swc/types@0.1.25)(typescript@5.9.3)
@@ -1495,9 +1492,6 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)
-      limiter:
-        specifier: 'catalog:'
-        version: 3.0.0
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.0.0)(typescript@5.9.3)
@@ -5990,9 +5984,6 @@ packages:
   lightningcss@1.31.1:
     resolution: {integrity: sha512-l51N2r93WmGUye3WuFoN5k10zyvrVs0qfKBhyC5ogUQ6Ew6JUSswh78mbSO+IU3nTWsyOArqPCcShdQSadghBQ==}
     engines: {node: '>= 12.0.0'}
-
-  limiter@3.0.0:
-    resolution: {integrity: sha512-hev7DuXojsTFl2YwyzUJMDnZ/qBDd3yZQLSH3aD4tdL1cqfc3TMnoecEJtWFaQFdErZsKoFMBTxF/FBSkgDbEg==}
 
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
@@ -12677,8 +12668,6 @@ snapshots:
       lightningcss-win32-arm64-msvc: 1.31.1
       lightningcss-win32-x64-msvc: 1.31.1
     optional: true
-
-  limiter@3.0.0: {}
 
   lines-and-columns@1.2.4: {}
 

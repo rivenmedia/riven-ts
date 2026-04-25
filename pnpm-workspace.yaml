@@ -39,7 +39,6 @@ catalog:
   graphql-scalars: ^1.25.0
   graphql-tag: ^2.12.6
   jiti: 2.6.1
-  limiter: 3.0.0
   luxon: ^3.7.2
   msw: 2.13.2
   redis-memory-server: ^0.16.0
@@ -59,6 +58,8 @@ catalogMode: prefer
 cleanupUnusedCatalogs: true
 
 engineStrict: true
+
+forceLegacyDeploy: true
 
 ignoredBuiltDependencies:
   - redis-memory-server

@@ -10,7 +10,6 @@
     "eslint.config.ts",
     "graphql-codegen.ts",
     "esbuild.config.ts",
-    "mikro-orm.config.ts",
     "vitest.d.ts",
     "vitest.config.ts",
     "vitest.setup.ts",

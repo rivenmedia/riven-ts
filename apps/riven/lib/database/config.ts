@@ -13,12 +13,13 @@ import {
 
 import { Migrator } from "@mikro-orm/migrations";
 // eslint-disable-next-line no-restricted-imports -- Core database config requires direct driver access
-import { type Options, PostgreSqlDriver } from "@mikro-orm/postgresql";
-import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
-import { SeedManager } from "@mikro-orm/seeder";
+import {
+  GeneratedCacheAdapter,
+  type Options,
+  PostgreSqlDriver,
+} from "@mikro-orm/postgresql";
 import * as Sentry from "@sentry/node";
 
-import { settings } from "../utilities/settings.ts";
 import { MediaItemFullTitleSubscriber } from "./subscribers/media-item-full-title.subscriber.ts";
 import { MediaItemStateSubscriber } from "./subscribers/media-item-state.subscriber.ts";
 import { ShowLikeMediaItemReleaseDateSubscriber } from "./subscribers/show-like-media-item-release-date.subscriber.ts";
@@ -38,13 +39,57 @@ export const entities = [
   Stream,
 ];
 
-export function createDatabaseConfig(logger?: Logger) {
+async function getMetadataCacheConfig(): Promise<Options> {
+  if (process.env["NODE_ENV"] === "production") {
+    const { default: metadata } = await import(
+      "@repo/riven/database-metadata-cache",
+      { with: { type: "json" } }
+    );
+
+    return {
+      metadataCache: {
+        enabled: true,
+        adapter: GeneratedCacheAdapter,
+        options: {
+          data: metadata,
+        },
+      },
+    };
+  }
+
+  const { TsMorphMetadataProvider } = await import("@mikro-orm/reflection");
+
+  return {
+    metadataProvider: TsMorphMetadataProvider,
+  };
+}
+
+async function getExtensions() {
+  const extensions: Options["extensions"] = [Migrator];
+
+  if (process.env["NODE_ENV"] !== "production") {
+    const { SeedManager } = await import("@mikro-orm/seeder");
+
+    extensions.push(SeedManager);
+  }
+
+  return extensions;
+}
+
+interface CreateDatabaseConfigOptions extends Omit<Partial<Options>, "logger"> {
+  logger?: Logger;
+}
+
+export async function createDatabaseConfig({
+  logger,
+  ...options
+}: CreateDatabaseConfigOptions = {}): Promise<Partial<Options>> {
+  const metadataCacheConfig = await getMetadataCacheConfig();
+
   return {
     driver: PostgreSqlDriver,
-    metadataProvider: TsMorphMetadataProvider,
     entities,
-    extensions: [SeedManager, Migrator],
-    clientUrl: settings.databaseUrl,
+    extensions: await getExtensions(),
     ...(logger && {
       logger: (message) => {
         Sentry.withScope((scope) => {
@@ -56,7 +101,6 @@ export function createDatabaseConfig(logger?: Logger) {
         });
       },
     }),
-    debug: settings.databaseDebugLogging,
     seeder: {
       pathTs: "./seeders",
     },
@@ -68,5 +112,7 @@ export function createDatabaseConfig(logger?: Logger) {
       new ShowLikeMediaItemReleaseDateSubscriber(),
       new MediaItemStateSubscriber(),
     ],
-  } satisfies Partial<Options>;
+    ...metadataCacheConfig,
+    ...options,
+  };
 }

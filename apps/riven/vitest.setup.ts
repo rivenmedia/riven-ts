@@ -59,12 +59,13 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
   const { initORM } = await importOriginal();
   const { createDatabaseConfig } = await import("./lib/database/config.ts");
   const { SqliteDriver } = await import("@mikro-orm/sqlite");
+  const databaseConfig = await createDatabaseConfig({
+    debug: false,
+  });
 
   const { database, services } = await initORM({
-    ...createDatabaseConfig(),
+    ...databaseConfig,
     driver: SqliteDriver as never,
-    dbName: ":memory:",
-    debug: false,
   });
 
   await database.orm.schema.create();
@@ -142,7 +143,6 @@ vi.doMock(import("./lib/utilities/settings.ts"), async (importOriginal) => {
   // as the settings are validated and frozen on first import.
   // This allows us to use a dynamically created Redis instance per test file.
 
-  // eslint-disable-next-line turbo/no-undeclared-env-vars
   process.env["RIVEN_SETTING__redisUrl"] = await getRedisUrl();
 
   return importOriginal();

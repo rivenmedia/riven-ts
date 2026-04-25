@@ -4,11 +4,24 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./lib/index.ts",
-    "./context": "./lib/context.ts",
-    "./cache-control-directive": "./lib/cache-control.directive.ts"
+    ".": {
+      "production": "./dist/index.js",
+      "default": "./lib/index.ts"
+    },
+    "./context": {
+      "production": "./dist/context.js",
+      "default": "./lib/context.ts"
+    },
+    "./cache-control-directive": {
+      "production": "./dist/cache-control.directive.js",
+      "default": "./lib/cache-control.directive.ts"
+    }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "tsc --project tsconfig.lib.json",
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",

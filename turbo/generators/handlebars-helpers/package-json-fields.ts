@@ -1,3 +1,5 @@
+import { toMerged } from "es-toolkit";
+
 import type { PlopTypes } from "@turbo/gen";
 
 type PackageType = "plugin" | "util" | "domain";
@@ -8,12 +10,17 @@ type PackageJsonDefinition = {
   devDependencies?: Record<string, string | null>;
   dependencies?: Record<string, string | null>;
   peerDependencies?: Record<string, string | null>;
+  files?: string[];
 };
 
 const commonFields: PackageJsonDefinition = {
   exports: {
-    ".": "./lib/index.ts",
+    ".": {
+      production: "./dist/index.js",
+      default: "./lib/index.ts",
+    },
   },
+  files: ["dist"],
   devDependencies: {
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
@@ -25,12 +32,14 @@ const commonFields: PackageJsonDefinition = {
     typescript: "catalog:",
     vitest: "catalog:",
   },
+  scripts: {
+    build: "tsc --project tsconfig.lib.json",
+  },
 };
 
 const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
   plugin: {
     scripts: {
-      build: "tsc --project tsconfig.lib.json",
       "codegen:config-docs": "zod2md",
     },
     dependencies: {
@@ -47,17 +56,17 @@ const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
 };
 
 export function registerPackageJsonFieldsHelper(plop: PlopTypes.NodePlopAPI) {
-  plop.addHelper(
+  plop.setHelper(
     "packageJsonFields",
     function (
       this: Record<string, unknown>, // Handlebars context
       packageType: PackageType,
       packageJsonFieldType: keyof PackageJsonDefinition,
     ) {
-      const fields = {
-        ...commonFields[packageJsonFieldType],
-        ...(packageTypeFields[packageType]?.[packageJsonFieldType] ?? {}),
-      };
+      const fields = toMerged(
+        commonFields[packageJsonFieldType] ?? {},
+        packageTypeFields[packageType]?.[packageJsonFieldType] ?? {},
+      );
 
       if (Object.keys(fields).length === 0) {
         return null;
