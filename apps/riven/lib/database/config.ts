@@ -11,17 +11,19 @@ import {
   SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
 
+import { Migrator } from "@mikro-orm/migrations";
 // eslint-disable-next-line no-restricted-imports -- Core database config requires direct driver access
 import { type Options, PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 import { SeedManager } from "@mikro-orm/seeder";
 import * as Sentry from "@sentry/node";
 
-import { logger } from "../utilities/logger/logger.ts";
 import { settings } from "../utilities/settings.ts";
 import { MediaItemFullTitleSubscriber } from "./subscribers/media-item-full-title.subscriber.ts";
 import { MediaItemStateSubscriber } from "./subscribers/media-item-state.subscriber.ts";
 import { ShowLikeMediaItemReleaseDateSubscriber } from "./subscribers/show-like-media-item-release-date.subscriber.ts";
+
+import type { Logger } from "winston";
 
 export const entities = [
   SubtitleEntry,
@@ -36,28 +38,33 @@ export const entities = [
   Stream,
 ];
 
-export const databaseConfig = {
-  driver: PostgreSqlDriver,
-  metadataProvider: TsMorphMetadataProvider,
-  entities,
-  extensions: [SeedManager],
-  clientUrl: settings.databaseUrl,
-  logger: (message) => {
-    Sentry.withScope((scope) => {
-      scope.setTags({
-        "riven.log.source": "database",
-      });
+export function createDatabaseConfig(logger?: Logger) {
+  return {
+    driver: PostgreSqlDriver,
+    metadataProvider: TsMorphMetadataProvider,
+    entities,
+    extensions: [SeedManager, Migrator],
+    clientUrl: settings.databaseUrl,
+    logger: (message) => {
+      Sentry.withScope((scope) => {
+        scope.setTags({
+          "riven.log.source": "database",
+        });
 
-      logger.data(message);
-    });
-  },
-  debug: settings.databaseDebugLogging,
-  seeder: {
-    pathTs: "./seeders",
-  },
-  subscribers: [
-    new MediaItemFullTitleSubscriber(),
-    new ShowLikeMediaItemReleaseDateSubscriber(),
-    new MediaItemStateSubscriber(),
-  ],
-} satisfies Partial<Options>;
+        logger?.data(message);
+      });
+    },
+    debug: settings.databaseDebugLogging,
+    seeder: {
+      pathTs: "./seeders",
+    },
+    migrations: {
+      path: `${import.meta.dirname}/migrations`,
+    },
+    subscribers: [
+      new MediaItemFullTitleSubscriber(),
+      new ShowLikeMediaItemReleaseDateSubscriber(),
+      new MediaItemStateSubscriber(),
+    ],
+  } satisfies Partial<Options>;
+}
