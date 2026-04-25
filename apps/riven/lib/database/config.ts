@@ -11,7 +11,6 @@ import {
   SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
 
-import { Migrator } from "@mikro-orm/migrations";
 // eslint-disable-next-line no-restricted-imports -- Core database config requires direct driver access
 import {
   GeneratedCacheAdapter,
@@ -64,18 +63,6 @@ async function getMetadataCacheConfig(): Promise<Options> {
   };
 }
 
-async function getExtensions() {
-  const extensions: Options["extensions"] = [Migrator];
-
-  if (process.env["NODE_ENV"] !== "production") {
-    const { SeedManager } = await import("@mikro-orm/seeder");
-
-    extensions.push(SeedManager);
-  }
-
-  return extensions;
-}
-
 interface CreateDatabaseConfigOptions extends Omit<Partial<Options>, "logger"> {
   logger?: Logger;
 }
@@ -89,7 +76,6 @@ export async function createDatabaseConfig({
   return {
     driver: PostgreSqlDriver,
     entities,
-    extensions: await getExtensions(),
     ...(logger && {
       logger: (message) => {
         Sentry.withScope((scope) => {
@@ -101,9 +87,6 @@ export async function createDatabaseConfig({
         });
       },
     }),
-    seeder: {
-      pathTs: "./seeders",
-    },
     migrations: {
       path: `${import.meta.dirname}/migrations`,
     },

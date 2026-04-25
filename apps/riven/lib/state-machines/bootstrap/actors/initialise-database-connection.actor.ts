@@ -1,3 +1,4 @@
+import { Migrator } from "@mikro-orm/migrations";
 import { fromPromise } from "xstate";
 
 import { createDatabaseConfig } from "../../../database/config.ts";
@@ -7,11 +8,14 @@ import { settings } from "../../../utilities/settings.ts";
 
 export const initialiseDatabaseConnection = fromPromise(async () => {
   const databaseConfig = await createDatabaseConfig({
-    clientUrl: settings.databaseUrl,
     logger,
-    debug: settings.databaseDebugLogging,
   });
-  const { database } = await initORM(databaseConfig);
+  const { database } = await initORM({
+    ...databaseConfig,
+    clientUrl: settings.databaseUrl,
+    debug: settings.databaseDebugLogging,
+    extensions: [Migrator],
+  });
 
   const requiresMigration = await database.orm.migrator.checkSchema();
 

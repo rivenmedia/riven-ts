@@ -1,3 +1,4 @@
+import { Migrator } from "@mikro-orm/migrations";
 import z from "zod";
 
 if (!process.env["CI"]) {
@@ -43,6 +44,7 @@ export default async (contextName: string) => {
       return createDatabaseConfig({
         clientUrl: databaseUrl,
         debug: true,
+        extensions: [Migrator],
       });
     }
   }
