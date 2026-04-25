@@ -97,7 +97,7 @@ jobs:
         uses: ./.github/actions/set-turborepo-affected-shas
 
       - name: Set environment variables
-        if: inputs.env != '{}'
+        if: inputs.env != '"{}"'
         run:
           echo '${{ inputs.env }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' >>
           $GITHUB_ENV
