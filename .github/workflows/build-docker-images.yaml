@@ -58,17 +58,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Build and export to Docker
-        uses: docker/build-push-action@v7
-        id: build
-        with:
-          file: apps/riven/Dockerfile
-          load: true
-          tags: ${{ env.TEST_TAG }}
-
-      - name: Test image
-        run: docker run --rm ${{ env.TEST_TAG }}
-
       - name: Build and push Docker images
         uses: docker/build-push-action@v7
         env:
