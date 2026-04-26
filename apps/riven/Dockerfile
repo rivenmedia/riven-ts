@@ -62,13 +62,9 @@ FROM core-os AS builder
 
     COPY --from=prepare ${HOME}/out/json/ .
 
-
     RUN pnpm fetch
 
-    RUN if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then \
-            apt-get install -y git; \
-            pnpm config set overrides --location project --json '{ "fuse-shared-library-linux": "github:runkit-forks/fuse-shared-library-linux-arm64" }'; \
-        fi
+    COPY patches patches
 
     ARG CI
     ENV CI=${CI}

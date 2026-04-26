@@ -1,0 +1,23 @@
+diff --git a/index.js b/index.js
+index e110d398cd6d0b4705bf1c7e08373d255b012c35..7e045ba83389ced8ac0272f367145236c8d03425 100644
+--- a/index.js
++++ b/index.js
+@@ -1,7 +1,7 @@
+ const os = require('os')
+ 
+ const arch = os.arch()
+-const platform = os.platform() + (arch === 'arm' ? '-arm' : '')
++const platform = os.platform() + (arch === 'arm' ? '-arm' : '') + (arch === 'arm64' ? '-arm64' : '')
+ 
+ switch (platform) {
+   case 'darwin':
+@@ -13,6 +13,9 @@ switch (platform) {
+   case 'linux-arm':
+     module.exports = require('fuse-shared-library-linux-arm')
+     break
++  case 'linux-arm64':
++    module.exports = require('fuse-shared-library-linux-arm64')
++    break
+   case 'win32':
+     module.exports = require('fuse-shared-library-win32')
+     break
