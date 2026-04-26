@@ -16,18 +16,16 @@ export const initialiseDatabaseConnection = fromPromise(async () => {
     clientUrl: settings.databaseUrl,
     debug: settings.databaseDebugLogging,
     driverOptions: {
-      connection: {
-        ssl: {
-          ca: settings.databaseSslRootCert
-            ? readFileSync(settings.databaseSslRootCert)
-            : undefined,
-          cert: settings.databaseSslCert
-            ? readFileSync(settings.databaseSslCert)
-            : undefined,
-          key: settings.databaseSslKey
-            ? readFileSync(settings.databaseSslKey)
-            : undefined,
-        },
+      ssl: {
+        ca: settings.databaseSslRootCert
+          ? readFileSync(settings.databaseSslRootCert)
+          : undefined,
+        cert: settings.databaseSslCert
+          ? readFileSync(settings.databaseSslCert)
+          : undefined,
+        key: settings.databaseSslKey
+          ? readFileSync(settings.databaseSslKey)
+          : undefined,
       },
     },
     extensions: [Migrator],
