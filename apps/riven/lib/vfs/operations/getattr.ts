@@ -12,34 +12,35 @@ import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 export type StatMode = "dir" | "file" | "link" | number;
 
 export const getattrSync = function (path, callback) {
-  void withVfsScope(async () => {
-    try {
-      const cachedAttr = attrCache.get(path);
+  withVfsScope(async () => {
+    const cachedAttr = attrCache.get(path);
 
-      if (cachedAttr) {
-        logger.silly(`VFS getattr: Cache hit for path ${path}`);
+    if (cachedAttr) {
+      logger.silly(`VFS getattr: Cache hit for path ${path}`);
 
-        process.nextTick(callback, null, cachedAttr);
+      return cachedAttr;
+    }
 
-        return;
-      }
+    if (isHiddenPath(path) || isIgnoredPath(path)) {
+      logger.silly(`VFS getattr: Skipping hidden/ignored path ${path}`);
 
-      if (isHiddenPath(path) || isIgnoredPath(path)) {
-        logger.silly(`VFS getattr: Skipping hidden/ignored path ${path}`);
+      process.nextTick(callback, Fuse.ENOENT);
 
-        process.nextTick(callback, Fuse.ENOENT);
+      return;
+    }
 
-        return;
-      }
+    const attrs = await services.vfsService.getEntryStat(path);
 
-      const attrs = await services.vfsService.getEntryStat(path);
+    attrCache.set(path, attrs);
 
-      attrCache.set(path, attrs);
+    logger.silly(`VFS getattr: Cache miss for path ${path}`);
 
-      logger.silly(`VFS getattr: Cache miss for path ${path}`);
-
-      process.nextTick(callback, null, attrs);
-    } catch (error) {
+    return attrs;
+  })
+    .then((data) => {
+      process.nextTick(callback, null, data);
+    })
+    .catch((error: unknown) => {
       if (isFuseError(error)) {
         logger.error("VFS getattr FuseError", { err: error });
 
@@ -59,6 +60,5 @@ export const getattrSync = function (path, callback) {
       logger.error("Unexpected VFS getattr error", { err: error });
 
       process.nextTick(callback, Fuse.EIO);
-    }
-  });
+    });
 } satisfies OPERATIONS["getattr"];

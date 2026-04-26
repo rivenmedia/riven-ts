@@ -1,4 +1,4 @@
-import { captureException, getCurrentScope, withScope } from "@sentry/node";
+import * as Sentry from "@sentry/node";
 import { type SandboxedJob, UnrecoverableError } from "bullmq";
 import { AbortError } from "es-toolkit";
 import assert from "node:assert";
@@ -6,6 +6,7 @@ import { threadId } from "node:worker_threads";
 import { type ZodLiteral, type ZodObject, type ZodType, z } from "zod";
 
 import { initApolloClient } from "../../../graphql/apollo-client.ts";
+import { withLogContext } from "../../../utilities/logger/log-context.ts";
 import { settings } from "../../../utilities/settings.ts";
 
 import type { SandboxedJobDefinition, SandboxedJobHandlers } from "../index.ts";
@@ -55,42 +56,41 @@ export function createSandboxedJobProcessor<
         reject(new AbortError(`${job.name} aborted`));
       });
 
-      withScope(async (scope) => {
-        scope.setTags({
+      withLogContext(
+        {
           "riven.log.source": "core",
-          "riven.session.id":
-            getCurrentScope().getScopeData().tags["riven.session.id"],
           "riven.sandboxed-job.name": sandboxedJobName,
           "riven.worker.id": `${sandboxedJobName}:worker-${threadId.toString()}`,
           "bullmq.queue.name": sandboxedJobName,
           "bullmq.job.id": job.id,
-        });
+        },
+        async (scope) => {
+          try {
+            const client = initApolloClient(
+              new URL(`http://localhost:${settings.gqlPort.toString()}`),
+              signal,
+            );
 
-        try {
-          const client = initApolloClient(
-            new URL(`http://localhost:${settings.gqlPort.toString()}`),
-            signal,
-          );
+            const result = (await processor({
+              job,
+              scope,
+              client,
+            } as never)) as z.infer<T["shape"]["output"]>;
 
-          const result = (await processor({
-            job,
-            scope,
-            client,
-          } as never)) as z.infer<T["shape"]["output"]>;
+            await client.clearStore();
 
-          await client.clearStore();
+            return result;
+          } catch (error) {
+            Sentry.captureException(error);
 
-          return result;
-        } catch (error) {
-          captureException(error);
+            if (error instanceof Error) {
+              throw error;
+            }
 
-          if (error instanceof Error) {
-            throw error;
+            throw new UnrecoverableError(String(error));
           }
-
-          throw new UnrecoverableError(String(error));
-        }
-      })
+        },
+      )
         .then((result) => {
           idleTimerId = startIdleTimer(timeoutDuration);
 
