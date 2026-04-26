@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/node";
 import { AsyncLocalStorage } from "node:async_hooks";
-import { getEnvironmentData, isMainThread } from "node:worker_threads";
+import { getEnvironmentData } from "node:worker_threads";
 import z from "zod";
 
 export const SessionID = z.uuidv4().brand<"SessionID">();
@@ -25,18 +25,6 @@ export function withLogContext<T>(
   context: LogContext,
   callback: (scope: Sentry.Scope) => T,
 ): T {
-  if (isMainThread && context["riven.worker.id"]) {
-    throw new Error(
-      "riven.worker.id context value should only be set in worker threads",
-    );
-  }
-
-  if (!isMainThread && !context["riven.worker.id"]) {
-    throw new Error(
-      "riven.worker.id context value must be set in worker threads",
-    );
-  }
-
   context["riven.session.id"] ??= SessionID.parse(
     getEnvironmentData("riven.session.id"),
   );
