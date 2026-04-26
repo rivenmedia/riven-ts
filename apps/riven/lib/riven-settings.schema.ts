@@ -1,6 +1,7 @@
 import { json } from "@repo/util-plugin-sdk/validation";
 
 import dedent from "dedent";
+import { readFileSync } from "node:fs";
 import z from "zod";
 
 import { LogLevel } from "./utilities/logger/log-levels.ts";
@@ -22,6 +23,25 @@ export const RivenSettings = z.object({
     .stringbool()
     .default(false)
     .describe("Enable debug logging for the database."),
+  databaseSslRootCert: z
+    .string()
+    .transform((val) => readFileSync(val, "utf8"))
+    .optional()
+    .describe(
+      "The file path to the SSL root certificate for the database connection.",
+    ),
+  databaseSslCert: z
+    .string()
+    .transform((val) => readFileSync(val, "utf8"))
+    .optional()
+    .describe(
+      "The file path to the SSL certificate for the database connection.",
+    ),
+  databaseSslKey: z
+    .string()
+    .transform((val) => readFileSync(val, "utf8"))
+    .optional()
+    .describe("The file path to the SSL key for the database connection."),
   redisUrl: z.url().describe("The Redis server URL."),
   vfsDebugLogging: z
     .stringbool()
