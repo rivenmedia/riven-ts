@@ -2,7 +2,9 @@ import { BaseDataSource, type RivenPlugin } from "@repo/util-plugin-sdk";
 import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
 
 import { type RedisClient, RedisConnection } from "bullmq";
-import { type Mock, afterAll, beforeEach, expect, vi } from "vitest";
+import { randomUUID } from "node:crypto";
+import { setEnvironmentData } from "node:worker_threads";
+import { type Mock, afterAll, beforeAll, beforeEach, expect, vi } from "vitest";
 import z from "zod";
 
 import type { RedisMemoryServer } from "redis-memory-server";
@@ -154,6 +156,10 @@ vi.doMock(import("./lib/utilities/settings.ts"), async (importOriginal) => {
   process.env["RIVEN_SETTING__redisUrl"] = await getRedisUrl();
 
   return importOriginal();
+});
+
+beforeAll(() => {
+  setEnvironmentData("riven.session.id", randomUUID());
 });
 
 beforeEach(async () => {

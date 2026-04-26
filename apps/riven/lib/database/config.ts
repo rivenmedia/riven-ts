@@ -17,8 +17,8 @@ import {
   type Options,
   PostgreSqlDriver,
 } from "@mikro-orm/postgresql";
-import * as Sentry from "@sentry/node";
 
+import { withLogContext } from "../utilities/logger/log-context.ts";
 import { MediaItemFullTitleSubscriber } from "./subscribers/media-item-full-title.subscriber.ts";
 import { MediaItemStateSubscriber } from "./subscribers/media-item-state.subscriber.ts";
 import { ShowLikeMediaItemReleaseDateSubscriber } from "./subscribers/show-like-media-item-release-date.subscriber.ts";
@@ -78,11 +78,7 @@ export async function createDatabaseConfig({
     entities,
     ...(logger && {
       logger: (message) => {
-        Sentry.withScope((scope) => {
-          scope.setTags({
-            "riven.log.source": "database",
-          });
-
+        withLogContext({ "riven.log.source": "database" }, () => {
           logger.data(message);
         });
       },

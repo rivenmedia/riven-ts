@@ -67,12 +67,11 @@ async function release(_path: string, fd: number) {
 }
 
 export const releaseSync = function (_path, fd, callback) {
-  void withVfsScope(async () => {
-    try {
-      await release(_path, fd);
-
+  withVfsScope(async () => release(_path, fd))
+    .then(() => {
       process.nextTick(callback, 0);
-    } catch (error) {
+    })
+    .catch((error: unknown) => {
       if (isFuseError(error)) {
         logger.error("VFS release FuseError", { err: error });
 
@@ -84,6 +83,5 @@ export const releaseSync = function (_path, fd, callback) {
       logger.error("VFS release unknown error", { err: error });
 
       process.nextTick(callback, Fuse.EIO);
-    }
-  });
+    });
 } satisfies OPERATIONS["release"];

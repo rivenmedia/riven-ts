@@ -16,8 +16,8 @@ inputs:
     description: Whether to install redis-server (required for integration tests)
     required: false
     default: "false"
-  start-postgres-service:
-    description: Whether to start the postgres service (required for migration check)
+  set-up-postgres-service:
+    description: Whether to set up the postgres service (required for migration check)
     required: false
     default: "false"
 
@@ -38,9 +38,9 @@ runs:
         sudo apt-get update
         sudo apt-get install -y fuse libfuse-dev
 
-    - name: Start Postgres service
+    - name: Set up Postgres service
       shell: bash
-      if: ${{ inputs.start-postgres-service == 'true' }}
+      if: ${{ inputs.set-up-postgres-service == 'true' }}
       run: |
         sudo service postgresql start
         pg_isready

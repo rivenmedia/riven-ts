@@ -6,12 +6,11 @@ import { isFuseError } from "../errors/fuse-error.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
 export const readDirSync = function (path, callback) {
-  void withVfsScope(async () => {
-    try {
-      const data = await services.vfsService.getDirectoryEntryPaths(path);
-
+  withVfsScope(() => services.vfsService.getDirectoryEntryPaths(path))
+    .then((data) => {
       process.nextTick(callback, 0, data);
-    } catch (error) {
+    })
+    .catch((error: unknown) => {
       if (isFuseError(error)) {
         logger.error("VFS readdir FuseError", { err: error });
 
@@ -23,6 +22,5 @@ export const readDirSync = function (path, callback) {
       logger.error("Unexpected VFS readdir error", { err: error });
 
       process.nextTick(callback, Fuse.EIO);
-    }
-  });
+    });
 } satisfies OPERATIONS["readdir"];

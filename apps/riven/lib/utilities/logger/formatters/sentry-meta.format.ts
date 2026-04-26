@@ -1,9 +1,10 @@
 import * as Sentry from "@sentry/node";
 import { format } from "winston";
 
+import { getLogContext } from "../log-context.ts";
+
 export const sentryMetaFormat = format((info) => {
   const activeSpan = Sentry.getActiveSpan();
-  const scopeData = Sentry.getCurrentScope().getScopeData();
 
   if (activeSpan) {
     const { spanId, traceId } = activeSpan.spanContext();
@@ -14,6 +15,6 @@ export const sentryMetaFormat = format((info) => {
 
   return {
     ...info,
-    ...scopeData.tags,
+    ...getLogContext(),
   };
 });

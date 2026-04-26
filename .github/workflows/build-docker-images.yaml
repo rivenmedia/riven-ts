@@ -16,9 +16,6 @@ on:
 permissions:
   contents: read
 
-env:
-  TEST_TAG: ${{ github.repository }}:test
-
 jobs:
   build-docker-images:
     name: Build Docker Images
@@ -34,7 +31,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v6
         with:
-          # https://docs.docker.com/build/ci/github-actions/manage-tags-labels/
+          # See https://docs.docker.com/build/ci/github-actions/manage-tags-labels
           images: |
             ghcr.io/${{ github.repository }}
           tags: |
@@ -60,8 +57,6 @@ jobs:
 
       - name: Build and push Docker images
         uses: docker/build-push-action@v7
-        env:
-          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
         with:
           file: apps/riven/Dockerfile
           platforms: linux/amd64,linux/arm64
@@ -75,3 +70,5 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           target: runner
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}

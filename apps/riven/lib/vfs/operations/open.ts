@@ -154,12 +154,11 @@ export const openSync = function (
   >,
   callback: (err: number, fd?: number) => void,
 ) {
-  void withVfsScope(async () => {
-    try {
-      const fd = await open(path, flags, linkRequestQueues);
-
+  withVfsScope(() => open(path, flags, linkRequestQueues))
+    .then((fd) => {
       process.nextTick(callback, 0, fd);
-    } catch (error) {
+    })
+    .catch((error: unknown) => {
       if (isFuseError(error)) {
         logger.error("VFS open FuseError", { err: error });
 
@@ -171,6 +170,5 @@ export const openSync = function (
       logger.error("VFS open error", { err: error });
 
       process.nextTick(callback, Fuse.EIO);
-    }
-  });
+    });
 };

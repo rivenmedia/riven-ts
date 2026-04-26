@@ -9,6 +9,7 @@ import { AbortError, toMerged } from "es-toolkit";
 import assert from "node:assert";
 import os from "node:os";
 
+import { withLogContext } from "../../utilities/logger/log-context.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
@@ -61,39 +62,41 @@ export function createFlowWorker<
           reject(new AbortError(`${job.name} aborted`));
         });
 
-        Sentry.withScope(async (scope) => {
-          scope.setTags({
+        withLogContext(
+          {
+            "riven.log.source": "core",
             "riven.flow.name": flowName,
             "bullmq.queue.name": flowName,
-            "bullmq.job.id": job.id,
-          });
+            ...(job.id ? { "bullmq.job.id": job.id } : {}),
+          },
+          async (scope) => {
+            try {
+              const { services } = await import("../../database/database.ts");
 
-          try {
-            const { services } = await import("../../database/database.ts");
+              return await processor(
+                {
+                  job: job as never,
+                  token,
+                  signal,
+                  scope,
+                },
+                {
+                  sendEvent,
+                  services,
+                  plugins,
+                },
+              );
+            } catch (error) {
+              Sentry.captureException(error);
 
-            return await processor(
-              {
-                job: job as never,
-                token,
-                signal,
-                scope,
-              },
-              {
-                sendEvent,
-                services,
-                plugins,
-              },
-            );
-          } catch (error) {
-            Sentry.captureException(error);
+              if (error instanceof Error) {
+                throw error;
+              }
 
-            if (error instanceof Error) {
-              throw error;
+              throw new UnrecoverableError(String(error));
             }
-
-            throw new UnrecoverableError(String(error));
-          }
-        })
+          },
+        )
           .then(resolve)
           .catch(reject);
       });

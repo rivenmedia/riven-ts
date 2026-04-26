@@ -1,61 +1,65 @@
-import "./sentry.ts";
-
-import * as Sentry from "@sentry/node";
 import { randomUUID } from "node:crypto";
-import { createActor, waitFor } from "xstate";
+import { setEnvironmentData } from "node:worker_threads";
 
-import { logger } from "./utilities/logger/logger.ts";
+import { SessionID, withLogContext } from "./utilities/logger/log-context.ts";
 
-await Sentry.withScope(async (scope) => {
-  const sessionId = randomUUID();
+const sessionId = SessionID.parse(randomUUID());
 
-  scope.setTags({
+setEnvironmentData("riven.session.id", sessionId);
+
+await withLogContext(
+  {
     "riven.log.source": "core",
     "riven.session.id": sessionId,
-  });
+  },
+  async () => {
+    await import("./sentry.ts");
 
-  // Dynamically import the main state machine so the log action obtains the current scope
-  const { rivenMachine } = await import("./state-machines/program/index.ts");
+    const { createActor, waitFor } = await import("xstate");
 
-  process.on("uncaughtException", (error) => {
-    logger.error("Uncaught exception", { err: error });
+    const { rivenMachine } = await import("./state-machines/program/index.ts");
+    const { logger } = await import("./utilities/logger/logger.ts");
 
-    process.exit(1);
-  });
+    process.on("uncaughtException", (error) => {
+      logger.error("Uncaught exception", { err: error });
 
-  process.on("unhandledRejection", (error) => {
-    logger.error("Uncaught rejection", { err: error });
-  });
+      process.exit(1);
+    });
 
-  const actor = createActor(rivenMachine, {
-    input: {
-      sessionId,
-    },
-  });
+    process.on("unhandledRejection", (error) => {
+      logger.error("Uncaught rejection", { err: error });
+    });
 
-  actor.start();
+    const actor = createActor(rivenMachine, {
+      input: {
+        sessionId,
+      },
+    });
 
-  process.on("SIGINT", () => {
+    actor.start();
+
+    process.on("SIGINT", () => {
+      const { value } = actor.getSnapshot();
+      const stoppableStates: (typeof value)[] = ["Running", "Bootstrapping"];
+
+      if (stoppableStates.includes(value)) {
+        actor.send({ type: "riven.core.shutdown" });
+      }
+    });
+
+    await waitFor(
+      actor,
+      (state) => state.matches("Exited") || state.matches("Errored"),
+    );
+
     const { value } = actor.getSnapshot();
-    const stoppableStates: (typeof value)[] = ["Running", "Bootstrapping"];
 
-    if (stoppableStates.includes(value)) {
-      actor.send({ type: "riven.core.shutdown" });
+    if (value === "Errored") {
+      process.exit(1);
     }
-  });
 
-  await waitFor(
-    actor,
-    (state) => state.matches("Exited") || state.matches("Errored"),
-  );
+    logger.info("Riven has shut down");
 
-  const { value } = actor.getSnapshot();
-
-  if (value === "Errored") {
-    process.exit(1);
-  }
-
-  logger.info("Riven has shut down");
-
-  process.exit(0);
-});
+    process.exit(0);
+  },
+);

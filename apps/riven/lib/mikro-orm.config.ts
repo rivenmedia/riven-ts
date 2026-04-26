@@ -1,16 +1,6 @@
 import { Migrator } from "@mikro-orm/migrations";
 import z from "zod";
 
-if (!process.env["CI"]) {
-  try {
-    process.loadEnvFile(".env.riven");
-  } catch {
-    throw new Error(
-      "Riven environment file must be present to use the MikroORM CLI",
-    );
-  }
-}
-
 const { createDatabaseConfig } = await import("./database/config.ts");
 
 const cliContexts = z.enum(["default", "slim"]);
@@ -37,6 +27,16 @@ export default async (contextName: string) => {
     }
 
     case "default": {
+      if (!process.env["CI"]) {
+        try {
+          process.loadEnvFile(".env.riven");
+        } catch {
+          throw new Error(
+            "Riven environment file must be present to use database-aware MikroORM CLI methods. See `.env.riven.example` for reference.",
+          );
+        }
+      }
+
       const databaseUrl = z
         .url()
         .parse(process.env["RIVEN_SETTING__databaseUrl"]);

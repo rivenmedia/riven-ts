@@ -53,8 +53,6 @@ jobs:
               - postgres-service
             env:
               RIVEN_SETTING__databaseUrl: postgres+psycopg2://runner:runner@0.0.0.0:5432/riven
-              RIVEN_SETTING__redisUrl: redis://0.0.0.0:6379
-              RIVEN_SETTING__vfsMountPath: /vfs
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
       task: ${{ matrix.task.command }}
