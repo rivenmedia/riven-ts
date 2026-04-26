@@ -22,6 +22,9 @@ export const RivenSettings = z.object({
     .stringbool()
     .default(false)
     .describe("Enable debug logging for the database."),
+  databaseSslRootCert: z.string().optional().describe("The file path to the SSL root certificate for the database connection."),
+  databaseSslCert: z.string().optional().describe("The file path to the SSL certificate for the database connection."),
+  databaseSslKey: z.string().optional().describe("The file path to the SSL key for the database connection."),
   redisUrl: z.url().describe("The Redis server URL."),
   vfsDebugLogging: z
     .stringbool()

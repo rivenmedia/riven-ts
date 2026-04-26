@@ -1,4 +1,5 @@
 import { Migrator } from "@mikro-orm/migrations";
+import { readFileSync } from "node:fs";
 import { fromPromise } from "xstate";
 
 import { createDatabaseConfig } from "../../../database/config.ts";
@@ -14,6 +15,21 @@ export const initialiseDatabaseConnection = fromPromise(async () => {
     ...databaseConfig,
     clientUrl: settings.databaseUrl,
     debug: settings.databaseDebugLogging,
+    driverOptions: {
+      connection: {
+        ssl: {
+          ca: settings.databaseSslRootCert
+            ? readFileSync(settings.databaseSslRootCert)
+            : undefined,
+          cert: settings.databaseSslCert
+            ? readFileSync(settings.databaseSslCert)
+            : undefined,
+          key: settings.databaseSslKey
+            ? readFileSync(settings.databaseSslKey)
+            : undefined,
+        },
+      },
+    },
     extensions: [Migrator],
   });
 
