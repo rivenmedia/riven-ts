@@ -74,7 +74,7 @@ FROM core-os AS builder
     ARG CI
     ENV CI=${CI}
 
-    RUN pnpm install -r --prefer-offline
+    RUN pnpm install -r --offline
 
     COPY --from=prepare ${HOME}/out/full/ .
 
