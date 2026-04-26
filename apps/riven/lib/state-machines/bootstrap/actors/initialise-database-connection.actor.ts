@@ -1,5 +1,4 @@
 import { Migrator } from "@mikro-orm/migrations";
-import { readFileSync } from "node:fs";
 import { fromPromise } from "xstate";
 
 import { createDatabaseConfig } from "../../../database/config.ts";
@@ -8,15 +7,9 @@ import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
 
 function createDatabaseSslOptions() {
-  const ca = settings.databaseSslRootCert
-    ? readFileSync(settings.databaseSslRootCert, "utf8")
-    : undefined;
-  const cert = settings.databaseSslCert
-    ? readFileSync(settings.databaseSslCert, "utf8")
-    : undefined;
-  const key = settings.databaseSslKey
-    ? readFileSync(settings.databaseSslKey, "utf8")
-    : undefined;
+  const ca = settings.databaseSslRootCert;
+  const cert = settings.databaseSslCert;
+  const key = settings.databaseSslKey;
 
   if (!ca && !cert && !key) {
     return undefined;
