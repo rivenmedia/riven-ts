@@ -31,13 +31,8 @@ FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS core-os
         make \
         gcc \
         python3 \
-        build-essential
-
-    # Needed to install the ARM64 version of the fuse-shared-library dependency,
-    # which is required for the VFS to work properly on ARM64 platforms
-    RUN if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then \
-            apt-get install -y git; \
-        fi
+        build-essential \
+        git
 
     # Install pnpm
     RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
