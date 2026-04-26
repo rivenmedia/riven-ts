@@ -10,11 +10,7 @@
       ]
     },
     "build:workers": {
-      "dependsOn": [
-        "@repo/util-plugin-sdk#build",
-        "codegen:gql",
-        "transit:source-files"
-      ],
+      "dependsOn": ["codegen:gql", "transit:source-files"],
       "outputs": ["dist/workers/**"]
     },
     "dev": {
@@ -25,11 +21,8 @@
       ]
     },
     "codegen:gql-schema": {
-      "dependsOn": [
-        "$TURBO_EXTENDS$",
-        "@repo/core-util-graphql-schema#build",
-        "transit:source-files"
-      ],
+      "dependsOn": ["$TURBO_EXTENDS$", "transit:source-files"],
+      "inputs": ["lib/**/*.ts"],
       "outputs": ["schema.graphql"]
     },
     "codegen:gql": {
@@ -74,11 +67,7 @@
     },
     "database:cache:generate": {
       "passThroughEnv": ["RIVEN_SETTING__*"],
-      "dependsOn": [
-        "$TURBO_EXTENDS$",
-        "@repo/util-plugin-sdk#build",
-        "transit:source-files"
-      ],
+      "dependsOn": ["$TURBO_EXTENDS$", "transit:source-files"],
       "inputs": [
         "lib/database/config.ts",
         "lib/database/database.ts",
