@@ -90,12 +90,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Set up project environment
-        uses: ./.github/actions/set-up-project-environment
-
-      - name: Set Turborepo --affected SHAs
-        uses: ./.github/actions/set-turborepo-affected-shas
-
       - name: Set environment variables
         if: inputs.env != '"{}"'
         run:
@@ -103,15 +97,20 @@ jobs:
           $GITHUB_ENV
 
       - name: Set up verification runner
+        if: inputs.runner-requirements != '[]'
         uses: ./.github/actions/set-up-verification-runner
         with:
-          install-fuse: ${{ contains(fromJson(inputs.runner-requirements || '[]'), 'fuse') }}
-          install-redis-server:
-            ${{ contains(fromJson(inputs.runner-requirements || '[]'),
-            'redis-server') }}
-          start-postgres-service:
-            ${{ contains(fromJson(inputs.runner-requirements ||
-            '[]'), 'postgres-service') }}
+          install-fuse: ${{ contains(fromJson(inputs.runner-requirements), 'fuse') }}
+          install-redis-server: ${{ contains(fromJson(inputs.runner-requirements), 'redis-server') }}
+          set-up-postgres-service:
+            ${{ contains(fromJson(inputs.runner-requirements),
+            'postgres-service') }}
+
+      - name: Set up project environment
+        uses: ./.github/actions/set-up-project-environment
+
+      - name: Set Turborepo --affected SHAs
+        uses: ./.github/actions/set-turborepo-affected-shas
 
       - name: Run ${{ inputs.task }}
         run: |

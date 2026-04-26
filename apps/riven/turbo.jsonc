@@ -68,12 +68,7 @@
     "database:cache:generate": {
       "passThroughEnv": ["RIVEN_SETTING__*"],
       "dependsOn": ["$TURBO_EXTENDS$", "transit:source-files"],
-      "inputs": [
-        "lib/database/config.ts",
-        "lib/database/database.ts",
-        "lib/database/migrations/*.ts",
-        "lib/database/migrations/.snapshot-*.json"
-      ],
+      "inputs": ["lib/database/config.ts", "lib/database/database.ts"],
       "outputs": ["temp/metadata.json"]
     }
   }
