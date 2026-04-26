@@ -57,10 +57,10 @@
       "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
     },
     "lint": {
-      "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
+      "dependsOn": ["$TURBO_EXTENDS$", "database:cache:generate", "codegen:gql"]
     },
     "check-types": {
-      "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
+      "dependsOn": ["$TURBO_EXTENDS$", "database:cache:generate", "codegen:gql"]
     },
     "migration:check": {
       "passThroughEnv": ["RIVEN_SETTING__*"],
