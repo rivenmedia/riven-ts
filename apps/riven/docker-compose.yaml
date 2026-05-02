@@ -1,7 +1,7 @@
 services:
   riven:
     container_name: riven
-    image: ghcr.io/rivenmedia/riven-ts
+    image: ghcr.io/rivenmedia/riven-ts:main
     restart: unless-stopped
     tty: true
     cap_add:
