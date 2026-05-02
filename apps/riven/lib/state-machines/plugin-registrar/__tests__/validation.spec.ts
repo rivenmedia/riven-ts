@@ -1,5 +1,4 @@
-import * as testPlugin from "@repo/plugin-test";
-
+import * as testPlugin from "@rivenmedia/riven-plugin-test";
 import { expect, vi } from "vitest";
 import { toPromise } from "xstate";
 

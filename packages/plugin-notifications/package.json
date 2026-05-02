@@ -1,6 +1,9 @@
 {
-  "name": "@repo/plugin-notifications",
+  "name": "@rivenmedia/riven-plugin-notifications",
   "version": "0.0.0",
+  "keywords": [
+    "riven-plugin"
+  ],
   "type": "module",
   "exports": {
     ".": {

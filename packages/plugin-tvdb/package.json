@@ -1,5 +1,5 @@
 {
-  "name": "@repo/plugin-tvdb",
+  "name": "@rivenmedia/riven-plugin-tvdb",
   "version": "0.0.0",
   "private": true,
   "type": "module",

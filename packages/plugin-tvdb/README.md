@@ -1,1 +1,1 @@
-# @repo/plugin-tvdb
+# @rivenmedia/riven-plugin-tvdb

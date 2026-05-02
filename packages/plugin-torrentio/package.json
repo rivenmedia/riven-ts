@@ -1,6 +1,9 @@
 {
-  "name": "@repo/plugin-torrentio",
+  "name": "@rivenmedia/riven-plugin-torrentio",
   "version": "0.0.0",
+  "keywords": [
+    "riven-plugin"
+  ],
   "type": "module",
   "exports": {
     ".": {

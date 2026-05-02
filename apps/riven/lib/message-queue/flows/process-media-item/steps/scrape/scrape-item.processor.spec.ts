@@ -47,7 +47,7 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
   const streamInfoHash = faker.git.commitSha();
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: indexedMovie.movie.id,
       results: {
         [streamInfoHash]: parse("Test Movie 2024 1080p WEB-DL"),

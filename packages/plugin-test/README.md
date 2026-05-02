@@ -1,1 +1,1 @@
-# @repo/plugin-test
+# @rivenmedia/riven-plugin-test

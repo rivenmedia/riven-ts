@@ -18,6 +18,8 @@ export interface ParsedPlugins {
   pluginSettings: PluginSettings;
 }
 
+const RIVEN_PLUGIN_PATTERN = /^((@[\w-]+(\.[\w-]+)*)\/)?(riven-plugin-[\w-]+)$/;
+
 export const collectPluginsForRegistration = fromPromise(async () => {
   const { default: packageJson } = (await import(
     import.meta.resolve(`${process.cwd()}/package.json`),
@@ -25,7 +27,7 @@ export const collectPluginsForRegistration = fromPromise(async () => {
   )) as { default: PackageJson };
 
   const pluginNames = Object.keys(packageJson.dependencies ?? {}).filter(
-    (pluginName) => pluginName.startsWith("@repo/plugin-"),
+    (pluginName) => RIVEN_PLUGIN_PATTERN.test(pluginName),
   );
 
   // Initialise PluginSettings BEFORE importing plugins, to ensure `process.env` has been parsed.

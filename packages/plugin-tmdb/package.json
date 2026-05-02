@@ -1,5 +1,5 @@
 {
-  "name": "@repo/plugin-tmdb",
+  "name": "@rivenmedia/riven-plugin-tmdb",
   "version": "0.0.0",
   "private": true,
   "type": "module",

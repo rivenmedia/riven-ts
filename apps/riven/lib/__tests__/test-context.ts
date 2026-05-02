@@ -100,7 +100,7 @@ export const it = testBase
     factories.mediaEntryFactory.makeOne({
       downloadUrl: "http://example.com/file.mp4",
       originalFilename: "file.mp4",
-      plugin: "@repo/plugin-test",
+      plugin: "@rivenmedia/riven-plugin-test",
     }),
   )
   .extend("seeders", async ({ em }) => {

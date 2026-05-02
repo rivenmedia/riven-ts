@@ -59,7 +59,7 @@ it("returns valid movie torrents if the item is a movie", async ({
   const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1234567890123456789012345678901234567890": rawTitles[0],
@@ -95,7 +95,7 @@ it("returns valid show torrents if the item is a show", async ({
   const job = await createMockJob({ id: indexedShow.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "4234567890123456789012345678901234567890": rawTitles[0],
@@ -131,7 +131,7 @@ it("returns valid season torrents if the item is a season", async ({
   const job = await createMockJob({ id: season.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "4234567890123456789012345678901234567890": rawTitles[0],
@@ -168,7 +168,7 @@ it("returns valid episode torrents if the item is an episode", async ({
   const job = await createMockJob({ id: episode.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "4234567890123456789012345678901234567890": rawTitles[0],
@@ -201,7 +201,7 @@ it("filters show torrents if the item is a movie", async ({
   const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1234567890123456789012345678901234567890": rawTitle,
@@ -230,7 +230,7 @@ it("filters out torrents with 2 or fewer episodes for shows", async ({
   const job = await createMockJob({ id: indexedShow.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitle,
@@ -261,7 +261,7 @@ it("filters out torrents with an incorrect number of seasons for shows", async (
   const job = await createMockJob({ id: indexedShow.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitle,
@@ -293,7 +293,7 @@ it("filters out torrents with incorrect number of episodes for single-season sho
   const job = await createMockJob({ id: indexedShow.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitle,
@@ -330,13 +330,13 @@ it("filters out duplicate torrents from different plugins", async ({
   const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test-1]": {
+    "plugin[@rivenmedia/riven-plugin-test-1]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitle,
       },
     },
-    "plugin[@repo/plugin-test-2]": {
+    "plugin[@rivenmedia/riven-plugin-test-2]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitle,
@@ -363,7 +363,7 @@ it("filters out torrents with the incorrect season number for season items", asy
   const job = await createMockJob({ id: season.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitle,
@@ -394,7 +394,7 @@ it("filters out torrents with 2 or fewer episodes for season items", async ({
   const job = await createMockJob({ id: season.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitle,
@@ -425,7 +425,7 @@ it("filters out torrents with incorrect episodes for season items", async ({
   const job = await createMockJob({ id: season.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitle,
@@ -456,7 +456,7 @@ it("filters out torrents with incorrect episode numbers for episode items", asyn
   const job = await createMockJob({ id: episode.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitle,
@@ -487,7 +487,7 @@ it("filters out torrents with the incorrect season number for episode items", as
   const job = await createMockJob({ id: episode.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitle,
@@ -518,7 +518,7 @@ it("filters out torrents with no episodes for episode items", async ({
   const job = await createMockJob({ id: episode.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitle,
@@ -554,7 +554,7 @@ it("filters out torrents that do not match the media item's country", async ({
   const job = await createMockJob({ id: episode.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitle,
@@ -595,7 +595,7 @@ it("does not filter out torrents that do not match the media item's country if t
   const job = await createMockJob({ id: episode.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitle,
@@ -638,7 +638,7 @@ it("filters out torrents that do not match the media item's year ± 1 year", asy
   const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitles[0],
@@ -685,7 +685,7 @@ it.skip('filters out torrents that are not dubbed if the media item is anime and
   const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitles[0],
@@ -730,7 +730,7 @@ it.skip('does not filter out torrents that are not dubbed if the media item is a
   const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitles[0],
@@ -773,7 +773,7 @@ it.skip("returns sorted results", async ({
   const job = await createMockJob({ id: indexedMovie.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    "plugin[@rivenmedia/riven-plugin-test]": {
       id: job.data.id,
       results: {
         "1434567890123456789012345678901234567890": rawTitles[0],

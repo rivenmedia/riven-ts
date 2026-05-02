@@ -37,7 +37,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
           },
         ],
       },
-      plugin: "@repo/plugin-test",
+      plugin: "@rivenmedia/riven-plugin-test",
     },
   });
 
@@ -59,7 +59,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     type: "riven.media-item.download.success",
     item: expect.any(Movie),
     durationMs: 9000,
-    downloader: "@repo/plugin-test",
+    downloader: "@rivenmedia/riven-plugin-test",
     provider: null,
   });
 });
@@ -106,7 +106,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
           },
         ],
       },
-      plugin: "@repo/plugin-test",
+      plugin: "@rivenmedia/riven-plugin-test",
     },
   });
 
@@ -127,7 +127,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.partial-success",
     item: expect.any(Show),
-    downloader: "@repo/plugin-test",
+    downloader: "@rivenmedia/riven-plugin-test",
   });
 });
 

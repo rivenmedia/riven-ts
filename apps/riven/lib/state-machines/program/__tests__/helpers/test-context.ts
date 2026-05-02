@@ -22,7 +22,7 @@ export const it = baseIt
   .extend(
     "bootstrapMachineOutput",
     async ({}): Promise<BootstrapMachineOutput> => {
-      const testPlugin = await import("@repo/plugin-test");
+      const testPlugin = await import("@rivenmedia/riven-plugin-test");
 
       return {
         server: {} as never,

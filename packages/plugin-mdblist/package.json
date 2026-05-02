@@ -1,6 +1,9 @@
 {
-  "name": "@repo/plugin-mdblist",
+  "name": "@rivenmedia/riven-plugin-mdblist",
   "version": "0.0.0",
+  "keywords": [
+    "riven-plugin"
+  ],
   "type": "module",
   "exports": {
     ".": {

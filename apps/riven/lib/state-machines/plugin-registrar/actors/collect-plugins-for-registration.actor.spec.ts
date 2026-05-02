@@ -13,7 +13,7 @@ import {
 
 it("returns the installed plugins from the package.json file", async () => {
   const actor = createActor(collectPluginsForRegistration);
-  const testPlugin = await import("@repo/plugin-test");
+  const testPlugin = await import("@rivenmedia/riven-plugin-test");
 
   const validatedPlugin = RivenPluginPackage.parse(testPlugin);
 
@@ -31,7 +31,7 @@ it("returns any invalid plugins from the package.json file along with their vali
 
   const actor = createActor(collectPluginsForRegistration);
 
-  vi.doMock(import("@repo/plugin-test"), () => {
+  vi.doMock(import("@rivenmedia/riven-plugin-test"), () => {
     return {
       default: {
         name: "Test",
@@ -40,7 +40,7 @@ it("returns any invalid plugins from the package.json file along with their vali
   });
 
   const validationResult = RivenPluginPackage.safeParse(
-    await import("@repo/plugin-test"),
+    await import("@rivenmedia/riven-plugin-test"),
   );
 
   const plugins = await toPromise(actor.start());
@@ -49,7 +49,7 @@ it("returns any invalid plugins from the package.json file along with their vali
 
   expect(plugins).toEqual<ParsedPlugins>({
     invalidPlugins: [
-      ["@repo/plugin-test", z.treeifyError(validationResult.error)],
+      ["@rivenmedia/riven-plugin-test", z.treeifyError(validationResult.error)],
     ] as const,
     unresolvablePlugins: [],
     validPlugins: [],

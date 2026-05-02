@@ -1,6 +1,9 @@
 {
-  "name": "@repo/plugin-stremthru",
+  "name": "@rivenmedia/riven-plugin-stremthru",
   "version": "0.0.0",
+  "keywords": [
+    "riven-plugin"
+  ],
   "type": "module",
   "exports": {
     ".": {

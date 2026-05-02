@@ -17,13 +17,13 @@ vi.mock<{ default: Record<string, unknown> }>(
         name: "riven",
         version: "1.0.0-mock",
         dependencies: {
-          "@repo/plugin-test": "workspace:^",
+          "@rivenmedia/riven-plugin-test": "workspace:^",
         },
       },
     }) as const,
 );
 
-vi.mock(import("@repo/plugin-test"), () => {
+vi.mock(import("@rivenmedia/riven-plugin-test"), () => {
   class TestAPI extends BaseDataSource<Record<string, unknown>> {
     override baseURL = "https://api.test.com";
 
@@ -41,7 +41,7 @@ vi.mock(import("@repo/plugin-test"), () => {
   return {
     default: {
       version: "1.0.0-mock",
-      name: Symbol.for("@repo/plugin-test"),
+      name: Symbol.for("@rivenmedia/riven-plugin-test"),
       dataSources: [TestAPI],
       resolvers: [TestResolver],
       // Listen to all events with a mock function, as plugin subscribers are filtered based

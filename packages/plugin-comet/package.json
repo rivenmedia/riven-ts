@@ -1,6 +1,9 @@
 {
-  "name": "@repo/plugin-comet",
+  "name": "@rivenmedia/riven-plugin-comet",
   "version": "0.0.0",
+  "keywords": [
+    "riven-plugin"
+  ],
   "type": "module",
   "exports": {
     ".": {

@@ -1,6 +1,9 @@
 {
-  "name": "@repo/plugin-seerr",
+  "name": "@rivenmedia/riven-plugin-seerr",
   "version": "0.0.0",
+  "keywords": [
+    "riven-plugin"
+  ],
   "type": "module",
   "exports": {
     ".": {

@@ -1,1 +1,1 @@
-# @repo/plugin-tmdb
+# @rivenmedia/riven-plugin-tmdb

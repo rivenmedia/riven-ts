@@ -1,1 +1,1 @@
-# @repo/plugin-torrentio
+# @rivenmedia/riven-plugin-torrentio

@@ -1,1 +1,1 @@
-# @repo/plugin-plex
+# @rivenmedia/riven-plugin-plex

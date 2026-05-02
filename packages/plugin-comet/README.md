@@ -1,1 +1,1 @@
-# @repo/plugin-comet
+# riven-plugin-comet

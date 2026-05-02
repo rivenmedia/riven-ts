@@ -62,9 +62,13 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
           (answers as PluginAnswers).pluginName,
         );
 
-        return installDependenciesToPackages(["@repo/riven"], "dependencies", {
-          [`@repo/plugin-${pluginName}`]: "workspace:^",
-        });
+        return installDependenciesToPackages(
+          ["@repo/riven"],
+          "devDependencies",
+          {
+            [`@rivenmedia/riven-plugin-${pluginName}`]: "workspace:^",
+          },
+        );
       },
     ],
   });

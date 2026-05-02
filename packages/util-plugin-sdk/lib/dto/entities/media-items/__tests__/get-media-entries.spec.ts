@@ -8,7 +8,7 @@ test("getMediaEntries() returns the associated media entry for a Movie media ite
   em,
 }) => {
   const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
+    requestedBy: "@rivenmedia/riven-plugin-test",
     state: "completed",
     type: "movie",
   });
@@ -41,7 +41,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
 }) => {
   const tvdbId = "1";
   const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
+    requestedBy: "@rivenmedia/riven-plugin-test",
     state: "completed",
     type: "show",
   });
@@ -123,7 +123,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
 }) => {
   const tvdbId = "1";
   const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
+    requestedBy: "@rivenmedia/riven-plugin-test",
     state: "completed",
     type: "show",
   });
@@ -217,7 +217,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
 }) => {
   const tvdbId = "1";
   const itemRequest = em.create(ItemRequest, {
-    requestedBy: "@repo/plugin-test",
+    requestedBy: "@rivenmedia/riven-plugin-test",
     state: "completed",
     type: "show",
   });

@@ -1,4 +1,4 @@
-# @repo/plugin-mdblist
+# @rivenmedia/riven-plugin-mdblist
 
 ## Contributing
 

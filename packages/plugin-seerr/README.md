@@ -1,1 +1,1 @@
-# @repo/plugin-seerr
+# @rivenmedia/riven-plugin-seerr

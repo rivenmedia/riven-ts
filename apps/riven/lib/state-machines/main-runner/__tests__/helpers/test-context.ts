@@ -1,6 +1,6 @@
-import testPlugin from "@repo/plugin-test";
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
+import testPlugin from "@rivenmedia/riven-plugin-test";
 import { vi } from "vitest";
 import { createActor, createEmptyActor } from "xstate";
 

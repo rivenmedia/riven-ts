@@ -1,1 +1,1 @@
-# @repo/plugin-listrr
+# @rivenmedia/riven-plugin-listrr

@@ -4,13 +4,13 @@ import { toPromise } from "xstate";
 import { it } from "./helpers/test-context.ts";
 
 it.skip("instantiates plugin datasources", async ({ actor }) => {
-  const testPlugin = await import("@repo/plugin-test");
+  const testPlugin = await import("@rivenmedia/riven-plugin-test");
 
   await toPromise(actor.start());
 
   const registeredPlugin = actor
     .getSnapshot()
-    .context.validPlugins.get(Symbol.for("@repo/plugin-test"));
+    .context.validPlugins.get(Symbol.for("@rivenmedia/riven-plugin-test"));
 
   expect(registeredPlugin).toBeDefined();
 

@@ -1,6 +1,9 @@
 {
-  "name": "@repo/plugin-listrr",
+  "name": "@rivenmedia/riven-plugin-listrr",
   "version": "0.0.0",
+  "keywords": [
+    "riven-plugin"
+  ],
   "type": "module",
   "exports": {
     ".": {

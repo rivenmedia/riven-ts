@@ -6,7 +6,7 @@ import { ItemRequest, Season, Show } from "../index.ts";
 const test = baseIt
   .extend("itemRequest", ({ em }) => {
     return em.create(ItemRequest, {
-      requestedBy: "@repo/plugin-test",
+      requestedBy: "@rivenmedia/riven-plugin-test",
       state: "completed",
       type: "show",
     });

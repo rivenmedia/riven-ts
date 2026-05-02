@@ -1,5 +1,5 @@
 import type { RivenPluginConfig } from "@repo/util-plugin-sdk";
 
 export const pluginConfig = {
-  name: Symbol.for("@repo/plugin-test"),
+  name: Symbol.for("@rivenmedia/riven-plugin-test"),
 } satisfies RivenPluginConfig;

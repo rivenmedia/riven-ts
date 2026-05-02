@@ -1,1 +1,1 @@
-# @repo/plugin-notifications
+# @rivenmedia/riven-plugin-notifications

@@ -1,1 +1,1 @@
-# @repo/plugin-stremthru
+# @rivenmedia/riven-plugin-stremthru

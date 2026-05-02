@@ -29,7 +29,7 @@ it("throws an error if the media item has no streams", async ({
         ],
         torrentId: "1",
       },
-      "@repo/plugin-test",
+      "@rivenmedia/riven-plugin-test",
     ),
   ).rejects.toThrow(
     new NotFoundError(
@@ -70,7 +70,7 @@ it("throws a MediaItemDownloadErrorIncorrectState if the media item is not in th
           },
         ],
       },
-      "@repo/plugin-test",
+      "@rivenmedia/riven-plugin-test",
     ),
   ).rejects.toThrow(MediaItemDownloadErrorIncorrectState);
 });
@@ -100,7 +100,7 @@ it("sets the active stream and updates the state to completed if successful", as
         },
       ],
     },
-    "@repo/plugin-test",
+    "@rivenmedia/riven-plugin-test",
   );
 
   expect(updatedItem.activeStream?.getProperty("infoHash")).toBe(
@@ -134,7 +134,7 @@ it("adds a single media entry for movies", async ({
         },
       ],
     },
-    "@repo/plugin-test",
+    "@rivenmedia/riven-plugin-test",
   );
 
   const mediaEntries = await scrapedMovie.getMediaEntries();
@@ -168,7 +168,7 @@ it("adds one media entry per episode for shows", async ({
         isCachedFile: false,
       })) as [MatchedFile, ...MatchedFile[]],
     },
-    "@repo/plugin-test",
+    "@rivenmedia/riven-plugin-test",
   );
 
   const updatedEpisodes = await scrapedShow.getEpisodes();
@@ -221,7 +221,7 @@ it("does not create duplicate media entries for episodes with existing entries",
         },
       ],
     },
-    "@repo/plugin-test",
+    "@rivenmedia/riven-plugin-test",
   );
 
   const mediaEntries = await episode.getMediaEntries();
@@ -261,7 +261,7 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
           },
         ],
       },
-      "@repo/plugin-test",
+      "@rivenmedia/riven-plugin-test",
     ),
   ).rejects.toThrow(MediaItemDownloadError);
 });

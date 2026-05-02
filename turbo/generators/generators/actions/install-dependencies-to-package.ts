@@ -32,13 +32,13 @@ export const installDependenciesToPackages = (
       },
     );
 
-    child.on("close", (code) =>
+    child.on("close", (code: number) =>
       code === 0
         ? resolve("Dependencies installation complete.")
         : reject(new Error(`Installation process exited with code ${code}`)),
     );
 
-    child.on("error", (err) =>
+    child.on("error", (err: Error) =>
       reject(new Error(`Installation encountered an error: ${err.message}`)),
     );
   });
