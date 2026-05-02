@@ -178,19 +178,18 @@ export const readSync = function (
   position,
   callback,
 ) {
-  withVfsScope(() =>
-    read({
-      buffer,
-      path,
-      fd,
-      length,
-      position,
-    }),
-  )
-    .then((bytesRead) => {
+  withVfsScope(async () => {
+    try {
+      const bytesRead = await read({
+        buffer,
+        path,
+        fd,
+        length,
+        position,
+      });
+
       process.nextTick(callback, bytesRead);
-    })
-    .catch((error: unknown) => {
+    } catch (error) {
       // This is triggered when a file handle is released
       if (error instanceof Undici.errors.RequestAbortedError) {
         logger.silly(`Read operation aborted for fd ${fd.toString()}`);
@@ -211,5 +210,6 @@ export const readSync = function (
       logger.error("Unexpected VFS read error", { err: error });
 
       process.nextTick(callback, Fuse.EIO);
-    });
+    }
+  });
 } satisfies OPERATIONS["read"];
