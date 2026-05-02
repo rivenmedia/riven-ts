@@ -29,7 +29,6 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@repo/feature-settings": "workspace:^",
     "graphql": "catalog:",
     "graphql-scalars": "catalog:",
     "type-graphql": "catalog:"

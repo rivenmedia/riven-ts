@@ -1,6 +1,5 @@
 import { DebridFile } from "@rivenmedia/plugin-sdk/schemas/torrents/debrid-file";
-
-import z from "zod";
+import { z } from "@rivenmedia/plugin-sdk/validation";
 
 import { TorrentStatus } from "./torrent-status.schema.ts";
 

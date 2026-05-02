@@ -1,9 +1,9 @@
-import z, { type ZodOptional, type ZodString } from "zod";
+import { z } from "@rivenmedia/plugin-sdk/validation";
 
 import { Store } from "./schemas/store.schema.ts";
 
 export const StoreKeys = z.object<
-  Record<`${Store}ApiKey`, ZodOptional<ZodString>>
+  Record<`${Store}ApiKey`, z.ZodOptional<z.ZodString>>
 >({
   realdebridApiKey: z.string().optional(),
   alldebridApiKey: z.string().optional(),

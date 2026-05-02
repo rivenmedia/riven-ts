@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "@rivenmedia/plugin-sdk/validation";
 
 import { librarySectionSchema } from "../__generated__/zod/librarySectionSchema.ts";
 

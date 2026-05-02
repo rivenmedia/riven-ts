@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "@rivenmedia/plugin-sdk/validation";
 
 export const DeleteTorrentResponse = z.object({
   data: z.object({

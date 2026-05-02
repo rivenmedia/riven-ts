@@ -25,26 +25,30 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@apollo/datasource-rest": "catalog:",
-    "@rivenmedia/plugin-sdk": "workspace:^",
     "luxon": "catalog:",
-    "type-graphql": "catalog:",
-    "zod": "catalog:",
     "zod-validation-error": "catalog:"
   },
   "devDependencies": {
+    "@apollo/datasource-rest": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/util-plugin-testing": "workspace:^",
+    "@rivenmedia/plugin-sdk": "workspace:^",
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "discord-api-types": "catalog:",
     "eslint": "catalog:",
     "msw": "catalog:",
+    "type-graphql": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "zod2md": "catalog:"
+  },
+  "peerDependencies": {
+    "@apollo/datasource-rest": "catalog:",
+    "@rivenmedia/plugin-sdk": "workspace:^",
+    "type-graphql": "catalog:"
   }
 }

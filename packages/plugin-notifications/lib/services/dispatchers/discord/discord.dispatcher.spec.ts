@@ -1,6 +1,7 @@
+import { z } from "@rivenmedia/plugin-sdk/validation";
+
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
-import z from "zod";
 
 import { it } from "../../../__tests__/notifications.test-context.ts";
 import { NotificationsAPI } from "../../../datasource/notifications.datasource.ts";

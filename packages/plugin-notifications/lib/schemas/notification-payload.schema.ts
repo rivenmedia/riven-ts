@@ -1,6 +1,5 @@
 import { MediaItemType } from "@rivenmedia/plugin-sdk/dto/enums/media-item-type.enum";
-
-import z from "zod";
+import { z } from "@rivenmedia/plugin-sdk/validation";
 
 export const NotificationPayload = z.object({
   event: z.string().min(1),

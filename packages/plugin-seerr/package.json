@@ -28,11 +28,9 @@
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@repo/core-util-graphql-helpers": "workspace:^",
-    "@repo/feature-settings": "workspace:^",
     "@rivenmedia/plugin-sdk": "workspace:^",
     "class-validator": "catalog:",
-    "type-graphql": "catalog:",
-    "zod": "catalog:"
+    "type-graphql": "catalog:"
   },
   "devDependencies": {
     "@faker-js/faker": "catalog:",

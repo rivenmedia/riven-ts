@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "@rivenmedia/plugin-sdk/validation";
 
 export const Store = z.enum([
   "alldebrid",

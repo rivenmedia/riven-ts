@@ -2,7 +2,7 @@ import { Settings } from "@rivenmedia/plugin-sdk";
 
 import { FieldResolver, Query, Resolver } from "type-graphql";
 
-import { RivenSettings } from "./types/settings.type.ts";
+import { RivenSettings } from "./settings.type.ts";
 
 @Resolver()
 export class CoreSettingsResolver {

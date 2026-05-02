@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "@rivenmedia/plugin-sdk/validation";
 
 import { getRequest200Schema } from "../__generated__/zod/getRequestSchema.ts";
 import { ExtendedMediaRequest } from "./extended-media-request.schema.ts";

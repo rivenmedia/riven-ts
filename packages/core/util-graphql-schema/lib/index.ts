@@ -1,13 +1,13 @@
-import {
-  CoreSettingsResolver,
-  RivenSettingsResolver,
-} from "@repo/feature-settings/resolver";
-
 import { BigIntResolver, JSONObjectResolver } from "graphql-scalars";
 import {
   type BuildSchemaOptions,
   buildSchema as baseBuildSchema,
 } from "type-graphql";
+
+import {
+  CoreSettingsResolver,
+  RivenSettingsResolver,
+} from "./settings/settings.resolver.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { DataSourceMap } from "@rivenmedia/plugin-sdk";

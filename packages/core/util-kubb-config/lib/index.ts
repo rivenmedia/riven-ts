@@ -37,6 +37,7 @@ export const buildKubbConfig = ({
       }),
       pluginZod({
         inferred: true,
+        importPath: "@rivenmedia/plugin-sdk/validation",
         version: "4",
         output: {
           barrelType: false,

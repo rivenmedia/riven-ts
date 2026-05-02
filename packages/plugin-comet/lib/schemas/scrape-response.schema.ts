@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "@rivenmedia/plugin-sdk/validation";
 
 const FirstSearchResult = z.object({
   name: z.literal("[🔄] Comet"),

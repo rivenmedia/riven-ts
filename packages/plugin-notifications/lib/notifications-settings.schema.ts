@@ -1,6 +1,4 @@
-import { json } from "@rivenmedia/plugin-sdk/validation";
-
-import z from "zod";
+import { json, z } from "@rivenmedia/plugin-sdk/validation";
 
 import { NotificationScheme } from "./schemas/notification-scheme.schema.ts";
 

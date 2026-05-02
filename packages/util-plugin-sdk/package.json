@@ -12,6 +12,10 @@
       "types": "./lib/types/*.ts",
       "default": "./dist/types/*.js"
     },
+    "./graphql/*": {
+      "types": "./lib/graphql/*.ts",
+      "default": "./dist/graphql/*.js"
+    },
     "./dto/entities": {
       "types": "./lib/dto/entities/index.ts",
       "default": "./dist/dto/entities/index.js"

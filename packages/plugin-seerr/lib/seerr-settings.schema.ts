@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "@rivenmedia/plugin-sdk/validation";
 
 import { getRequestQueryParamsFilterEnum } from "./__generated__/types/GetRequest.ts";
 

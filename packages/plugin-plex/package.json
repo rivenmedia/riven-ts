@@ -25,13 +25,8 @@
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   },
-  "dependencies": {
-    "@apollo/datasource-rest": "catalog:",
-    "@rivenmedia/plugin-sdk": "workspace:^",
-    "type-graphql": "catalog:",
-    "zod": "catalog:"
-  },
   "devDependencies": {
+    "@apollo/datasource-rest": "catalog:",
     "@faker-js/faker": "catalog:",
     "@kubb/cli": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
@@ -39,12 +34,19 @@
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/util-plugin-testing": "workspace:^",
+    "@rivenmedia/plugin-sdk": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
     "msw": "catalog:",
+    "type-graphql": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "zod2md": "catalog:"
+  },
+  "peerDependencies": {
+    "@apollo/datasource-rest": "catalog:",
+    "@rivenmedia/plugin-sdk": "workspace:^",
+    "type-graphql": "catalog:"
   }
 }

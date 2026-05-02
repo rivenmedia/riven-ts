@@ -42,14 +42,16 @@ const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
     scripts: {
       "codegen:config-docs": "zod2md",
     },
-    dependencies: {
+    peerDependencies: {
       "@apollo/datasource-rest": "catalog:",
       "@rivenmedia/plugin-sdk": "workspace:^",
       "type-graphql": "catalog:",
-      zod: "catalog:",
     },
     devDependencies: {
       "@repo/util-plugin-testing": "workspace:^",
+      "@apollo/datasource-rest": "catalog:",
+      "@rivenmedia/plugin-sdk": "workspace:^",
+      "type-graphql": "catalog:",
       zod2md: "catalog:",
     },
   },

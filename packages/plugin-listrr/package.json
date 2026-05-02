@@ -26,15 +26,12 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@apollo/datasource-rest": "catalog:",
     "@repo/core-util-graphql-helpers": "workspace:^",
-    "@repo/feature-settings": "workspace:^",
-    "@rivenmedia/plugin-sdk": "workspace:^",
     "class-validator": "catalog:",
-    "type-graphql": "catalog:",
-    "zod": "catalog:"
+    "type-graphql": "catalog:"
   },
   "devDependencies": {
+    "@apollo/datasource-rest": "catalog:",
     "@faker-js/faker": "catalog:",
     "@kubb/cli": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
@@ -42,16 +39,17 @@
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/util-plugin-testing": "workspace:^",
+    "@rivenmedia/plugin-sdk": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
-    "graphql-tag": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "zod2md": "catalog:"
   },
   "peerDependencies": {
-    "graphql-tag": "catalog:"
+    "@apollo/datasource-rest": "catalog:",
+    "@rivenmedia/plugin-sdk": "workspace:^"
   }
 }
