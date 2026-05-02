@@ -17,3 +17,7 @@ plex
 *.bundled_*.mjs
 docker-data
 *.graphql
+
+# Local-only Compose overrides (auto-loaded by docker compose)
+docker-compose.override.yaml
+docker-compose.override.yml
