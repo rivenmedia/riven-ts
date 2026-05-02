@@ -52,9 +52,11 @@ export const consoleFormat = format.printf(({ level, message, ...meta }) => {
 
   const tags = [
     chalk.dim.black(formattedTimestamp),
-    ...[meta["riven.log.source"], meta["riven.worker.id"]].map(
-      (tag) => tag && chalk.dim(tag),
-    ),
+    ...[
+      meta["riven.log.source"],
+      meta["riven.plugin.name"],
+      meta["riven.worker.id"],
+    ].map((tag) => tag && chalk.dim(tag)),
   ]
     .filter(Boolean)
     .join(" - ");

@@ -3,7 +3,7 @@ import { expect } from "vitest";
 import {
   postLoginHandler,
   postLoginHandlerResponse401,
-} from "../../__generated__/index.ts";
+} from "../../__generated__/handlers/postLoginHandler.ts";
 import { it } from "../../__tests__/tvdb.test-context.ts";
 import { TvdbAPI } from "../tvdb.datasource.ts";
 

@@ -10,6 +10,7 @@ import { AbortError } from "es-toolkit";
 import assert from "node:assert";
 import z from "zod";
 
+import { withLogContext } from "../../utilities/logger/log-context.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
@@ -43,27 +44,29 @@ export function createPluginWorker<
           reject(new AbortError(`${job.name} aborted`));
         });
 
-        Sentry.withScope(async (scope) => {
-          scope.setTags({
-            "bullmq.job.id": job.id,
+        withLogContext(
+          {
             "bullmq.queue.name": queueName,
-            "riven.log.source": pluginName,
+            "riven.log.source": "plugin",
             "riven.event.name": name as string,
             "riven.plugin.name": pluginName,
-          });
+            ...(job.id && { "bullmq.job.id": job.id }),
+          },
+          async () => {
+            try {
+              assert(job.token, "Job token is not set");
 
-          assert(job.token, "Job token is not set");
+              return await dataSourceContext.run(
+                { job, token: job.token },
+                () => processor(job as never, token, signal),
+              );
+            } catch (error) {
+              Sentry.captureException(error);
 
-          try {
-            return await dataSourceContext.run({ job, token: job.token }, () =>
-              processor(job as never, token, signal),
-            );
-          } catch (error) {
-            Sentry.captureException(error);
-
-            throw error;
-          }
-        })
+              throw error;
+            }
+          },
+        )
           .then(resolve)
           .catch(reject);
       });

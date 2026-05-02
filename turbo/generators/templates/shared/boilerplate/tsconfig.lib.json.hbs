@@ -7,6 +7,12 @@
     "outDir": "dist"
   },
   "files": [],
-  "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],
-  "exclude": ["lib/**/*.spec.ts"]
+  "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts",],
+  "exclude": [
+    "lib/**/*.spec.ts",
+    "lib/__tests__/**/*.ts",
+    "lib/__generated__/handlers",
+    "lib/__generated__/schemas",
+    "lib/__generated__/mocks"
+  ]
 }

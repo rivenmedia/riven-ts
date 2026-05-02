@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { mediaRequestSchema } from "../__generated__/index.ts";
+import { mediaRequestSchema } from "../__generated__/zod/mediaRequestSchema.ts";
 
 /**
  * Extends the base `MediaRequest` to include season information and the `tv` type

@@ -10,12 +10,13 @@
     "format:check": "prettier --check . '!**/docker-data'",
     "format:check:ci": "pnpm format:check --log-level warn",
     "format:fix": "prettier --write . '!**/docker-data'",
-    "postinstall": "node .husky/install.mjs || true"
+    "postinstall": "pnpm node .husky/install.mjs || true"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@turbo/gen": "^2.8.21",
     "dedent": "catalog:",
+    "es-toolkit": "catalog:",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
@@ -23,5 +24,5 @@
     "turbo": "^2.9.5",
     "type-fest": "^5.3.1"
   },
-  "packageManager": "pnpm@10.28.2+sha512.41872f037ad22f7348e3b1debbaf7e867cfd448f2726d9cf74c08f19507c31d2c8e7a11525b983febc2df640b5438dee6023ebb1f84ed43cc2d654d2bc326264"
+  "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8"
 }

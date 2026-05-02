@@ -1,79 +1,141 @@
-FROM node:24.14.0-alpine AS base
+ARG HOME=/app
+ARG NODE_VERSION=24.15.0
+ARG TURBO_VERSION=2.9.5
+ARG PNPM_VERSION=10.28.2
+ARG PNPM_HOME=${HOME}/.local/share/pnpm
+ARG USER=riven
+ARG PUID=1000
+ARG PGID=1000
+ARG CI=true
 
-ARG PUID
-ARG PGID
+FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS core-os
 
-ENV PUID=${PUID:-1000}
-ENV PGID=${PGID:-1000}
-ENV USERNAME=riven
-ENV USERGROUP=riven
-ENV HOME=/home/${USERNAME}
-ENV PNPM_HOME=${HOME}/.local/share/pnpm
-ENV PATH=$PNPM_HOME:$PATH
+    LABEL stage="core-os"
 
-# Install core dependencies and FUSE
-RUN apk add --no-cache \
-    wget \
-    bash \
-    fuse \
-    fuse-dev \
-    shadow
+    ARG TARGETPLATFORM
+    ARG BUILDPLATFORM
+    ARG USER
+    ARG PNPM_VERSION
+    ARG PNPM_HOME
+    ARG HOME
 
-# Modify existing node user to match desired UID/GID
-RUN deluser --remove-home node && \
-    addgroup -g ${PGID} ${USERGROUP} && \
-    adduser -D -u ${PUID} -G ${USERGROUP} -h ${HOME} ${USERNAME}
+    ENV PNPM_HOME=${PNPM_HOME}
+    ENV PATH=$PNPM_HOME:$PATH
 
-# Configure FUSE
-RUN sed -i 's/^#\s*user_allow_other/user_allow_other/' /etc/fuse.conf || \
-    echo 'user_allow_other' >> /etc/fuse.conf
+    # Install build dependencies
+    RUN apt-get update && apt-get install -y \
+        wget \
+        fuse3 \
+        libfuse3-dev \
+        libfuse-dev \
+        make \
+        gcc \
+        python3 \
+        build-essential \
+        git
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+    # Install pnpm
+    RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
-#---------------------------
+FROM core-os AS prepare
 
-FROM base AS dependencies
+    LABEL builder="true"
 
-# Disable Husky Git hooks during installation
-ENV HUSKY=0
+    ARG TURBO_VERSION
+    ARG HOME
 
-# Install build dependencies
-RUN apk add --no-cache \
-    make \
-    gcc \
-    g++ \
-    python3 \
-    linux-headers
+    WORKDIR ${HOME}
 
-WORKDIR ${HOME}/riven-ts
+    RUN pnpm add turbo@${TURBO_VERSION} --global
+    RUN turbo telemetry disable
 
-# Copy dependency files
-COPY .husky/install.mjs .husky/install.mjs
-COPY pnpm-lock.yaml pnpm-workspace.yaml ./
+    COPY . .
 
-# https://pnpm.io/cli/fetch
-RUN pnpm fetch
+    RUN turbo prune @repo/riven --docker
 
-COPY --parents **/package.json ./
+FROM core-os AS builder
 
-# Install project dependencies
-RUN pnpm install -r --offline
+    LABEL builder="true"
 
-#---------------------------
+    ARG HOME
 
-FROM dependencies AS riven-builder
+    WORKDIR ${HOME}
 
-COPY --chown=${PUID}:${PGID} . .
+    COPY --from=prepare ${HOME}/out/json/ .
 
-RUN pnpm turbo @repo/riven#build
 
-FROM riven-builder AS riven
+    RUN pnpm fetch
 
-EXPOSE 8080
+    ARG CI
+    ENV CI=${CI}
 
-STOPSIGNAL SIGINT
+    RUN pnpm install -r --offline
 
-USER ${PUID}:${PGID}
+    COPY --from=prepare ${HOME}/out/full/ .
 
-CMD [ "pnpm", "--filter=@repo/riven", "start" ]
+    ARG TURBO_TEAM
+    ENV TURBO_TEAM=${TURBO_TEAM}
+
+    RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN pnpm turbo @repo/riven#build
+
+FROM builder AS production-deploy
+
+    LABEL builder="true"
+
+    ARG HOME
+
+    WORKDIR ${HOME}
+
+    ARG CI
+    ENV CI=${CI}
+
+    RUN pnpm --filter @repo/riven --prod deploy pruned
+
+FROM node:${NODE_VERSION}-alpine AS runner
+
+    LABEL name="Riven TS" \
+          description="Riven(TS) Media Server" \
+          url="https://github.com/rivenmedia/riven-ts" \
+          stage="runner"
+
+    ARG HOME
+
+    WORKDIR ${HOME}
+
+    ARG USER
+
+    ENV USERNAME=${USER}
+    ENV USERGROUP=${USER}
+
+    ARG PUID
+    ARG PGID
+
+    ENV PUID=${PUID}
+    ENV PGID=${PGID}
+
+    ARG HOME
+    ENV HOME=${HOME}
+
+    # Modify existing node user to match desired UID/GID
+    RUN deluser --remove-home node && \
+        addgroup -g ${PGID} ${USERGROUP} && \
+        adduser -D -u ${PUID} -G ${USERGROUP} -h ${HOME} ${USERNAME}
+
+    # Install FUSE dependencies
+    RUN apk add --no-cache \
+        fuse \
+        fuse-dev
+
+    # Ensure user_allow_other is enabled in /etc/fuse.conf (needed for VFS to work properly)
+    RUN sed -i 's/^#\s*user_allow_other/user_allow_other/' /etc/fuse.conf || \
+        echo 'user_allow_other' >> /etc/fuse.conf
+
+    USER ${PUID}:${PGID}
+
+    COPY --from=production-deploy ${HOME}/pruned .
+
+    STOPSIGNAL SIGTERM
+
+    ENV NODE_ENV=production
+
+    CMD ["node", "--conditions=production", "--enable-source-maps", "dist/program/lib/index.js"]

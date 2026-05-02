@@ -3,10 +3,14 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "dependsOn": ["$TURBO_EXTENDS$", "build:workers"]
+      "dependsOn": [
+        "$TURBO_EXTENDS$",
+        "build:workers",
+        "database:cache:generate"
+      ]
     },
     "build:workers": {
-      "dependsOn": ["@repo/util-plugin-sdk#build", "codegen:gql", "transit"],
+      "dependsOn": ["codegen:gql", "transit:source-files"],
       "outputs": ["dist/workers/**"]
     },
     "dev": {
@@ -17,11 +21,16 @@
       ]
     },
     "codegen:gql-schema": {
-      "dependsOn": ["transit"],
+      "dependsOn": ["$TURBO_EXTENDS$", "transit:source-files"],
+      "inputs": ["lib/**/*.ts"],
       "outputs": ["schema.graphql"]
     },
     "codegen:gql": {
-      "dependsOn": ["codegen:gql-schema", "transit"],
+      "dependsOn": [
+        "$TURBO_EXTENDS$",
+        "codegen:gql-schema",
+        "transit:source-files"
+      ],
       "inputs": [
         "lib/**/*.ts",
         "!lib/**/__generated__/**/*",
@@ -41,10 +50,26 @@
       "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
     },
     "lint": {
-      "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
+      "dependsOn": ["$TURBO_EXTENDS$", "database:cache:generate", "codegen:gql"]
     },
     "check-types": {
-      "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
+      "dependsOn": ["$TURBO_EXTENDS$", "database:cache:generate", "codegen:gql"]
+    },
+    "migration:check": {
+      "passThroughEnv": ["RIVEN_SETTING__*"],
+      "dependsOn": ["$TURBO_EXTENDS$", "transit:source-files"],
+      "inputs": [
+        "lib/database/config.ts",
+        "lib/database/database.ts",
+        "lib/database/migrations/*.ts",
+        "lib/database/migrations/.snapshot-*.json"
+      ]
+    },
+    "database:cache:generate": {
+      "passThroughEnv": ["RIVEN_SETTING__*"],
+      "dependsOn": ["$TURBO_EXTENDS$", "transit:source-files"],
+      "inputs": ["lib/database/config.ts", "lib/database/database.ts"],
+      "outputs": ["temp/metadata.json"]
     }
   }
 }

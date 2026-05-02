@@ -1,11 +1,16 @@
+import {
+  getEnvironmentData,
+  isMainThread,
+  setEnvironmentData,
+} from "node:worker_threads";
+
 import { RivenSettings } from "../riven-settings.schema.ts";
 import { deepFreeze } from "./deep-freeze.ts";
 
 import type { ReadonlyDeep } from "type-fest";
-import type z from "zod";
 
 class Settings {
-  readonly settings: ReadonlyDeep<z.infer<typeof RivenSettings>>;
+  readonly settings: ReadonlyDeep<RivenSettings>;
 
   constructor(environment: NodeJS.ProcessEnv) {
     const settingPattern = /^RIVEN_SETTING__(?<setting>.+)$/;
@@ -26,8 +31,18 @@ class Settings {
     }
 
     this.settings = deepFreeze(RivenSettings.parse(rawSettings));
+
+    setEnvironmentData("settings", rawSettings);
   }
 }
 
-export const settings: ReadonlyDeep<z.infer<typeof RivenSettings>> =
-  new Settings(process.env).settings;
+function getWorkerSettings() {
+  const rawEnvironmentData = getEnvironmentData("settings");
+  const parsedEnvironmentData = RivenSettings.parse(rawEnvironmentData);
+
+  return deepFreeze(parsedEnvironmentData);
+}
+
+export const settings: ReadonlyDeep<RivenSettings> = isMainThread
+  ? new Settings(process.env).settings
+  : getWorkerSettings();

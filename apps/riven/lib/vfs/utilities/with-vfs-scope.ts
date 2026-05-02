@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/node";
+import { withLogContext } from "../../utilities/logger/log-context.ts";
 
 /**
  * Wraps a VFS operation handler with a Sentry scope to provide extra log metadata.
@@ -7,10 +7,4 @@ import * as Sentry from "@sentry/node";
  * @returns A Sentry scope pre-loaded with VFS meta tags
  */
 export const withVfsScope = <T>(callback: () => Promise<T>) =>
-  Sentry.withScope(async (scope) => {
-    scope.setTags({
-      "riven.log.source": "vfs",
-    });
-
-    return callback();
-  });
+  withLogContext({ "riven.log.source": "vfs" }, callback);

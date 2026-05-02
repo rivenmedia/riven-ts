@@ -20,12 +20,25 @@
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   },
+  {{#with (packageJsonFields packageType 'files') as |files|}}
+  {{#if files}}
+  "files": [
+    {{#each files}}
+    "{{this}}"{{#unless @last}},{{/unless}}
+    {{/each}}
+  ],
+  {{/if}}
+  {{/with}}
+  {{!-- Output dependencies for the package based on the packageJsonFields helper --}}
   "exports": {
     {{#with (packageJsonFields packageType 'exports') as |exports|}}
     {{#if exports}}
     {{#each exports}}
     {{#if this}}
-    "{{@key}}": "{{this}}"{{#unless @last}},{{/unless}}
+    "{{@key}}": {
+      "production": "{{this.production}}",
+      "default": "{{this.default}}"
+    }{{#unless @last}},{{/unless}}
     {{/if}}
     {{/each}}
     {{/if}}

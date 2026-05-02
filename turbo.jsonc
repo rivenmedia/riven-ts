@@ -10,17 +10,31 @@
   },
   "tasks": {
     "build": {
-      "dependsOn": ["^build", "codegen:api-schemas", "transit"],
-      "outputs": ["dist/**"]
+      "dependsOn": ["^build", "codegen:api-schemas", "transit:source-files"],
+      "outputs": ["dist/**", "**/tsconfig.lib.tsbuildinfo"]
     },
     "transit": {
+      // "transit" links ALL files from ALL dependencies
+      // Use with caution, as this will invalidate the cache on ANY change.
       "dependsOn": ["^transit"]
     },
+    "transit:source-files": {
+      // "transit:source-files" only links source files from dependencies, resulting in fewer cache misses.
+      // Use this when you want to invalidate a task's cache when its dependencies' source files change.
+      "dependsOn": ["^transit:source-files"],
+      "inputs": [
+        "lib/**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
+        "!**/__tests__",
+        "!**/*.spec.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx}",
+        "!**/*.test.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx}",
+        "!**/{logs,node_modules,temp,.turbo,.next,coverage,docker-data,dist}/**"
+      ]
+    },
     "check-types": {
-      "dependsOn": ["codegen:api-schemas", "transit"],
+      "dependsOn": ["codegen:api-schemas", "transit:source-files"],
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
-        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data}/**"
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
       ]
     },
     "dev": {
@@ -44,29 +58,29 @@
       "outputLogs": "new-only"
     },
     "test": {
-      "dependsOn": ["codegen:api-schemas", "transit"],
+      "dependsOn": ["codegen:api-schemas", "transit:source-files"],
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
-        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data}/**",
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**",
         "!*.md"
       ]
     },
     "test:watch": {
       "persistent": true,
-      "dependsOn": ["codegen:api-schemas"]
+      "dependsOn": ["codegen:api-schemas", "transit:source-files"]
     },
     "lint": {
       "dependsOn": ["codegen:api-schemas"],
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
-        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data}/**"
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
       ]
     },
     "lint:fix": {},
     "//#format:check:ci": {
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql,.md,.markdown,.mdx}",
-        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data}/**"
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
       ]
     }
   }

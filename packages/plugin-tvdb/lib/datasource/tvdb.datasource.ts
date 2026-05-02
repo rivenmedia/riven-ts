@@ -10,11 +10,11 @@ import z from "zod";
 import {
   type EpisodeBaseRecordSchema,
   episodeBaseRecordSchema,
-  getAllSeries200Schema,
-  getSeriesExtendedQueryResponseSchema,
-  getSeriesTranslation200Schema,
-  postLogin200Schema,
-} from "../__generated__/index.ts";
+} from "../__generated__/zod/episodeBaseRecordSchema.ts";
+import { getAllSeries200Schema } from "../__generated__/zod/getAllSeriesSchema.ts";
+import { getSeriesExtendedQueryResponseSchema } from "../__generated__/zod/getSeriesExtendedSchema.ts";
+import { getSeriesTranslation200Schema } from "../__generated__/zod/getSeriesTranslationSchema.ts";
+import { postLogin200Schema } from "../__generated__/zod/postLoginSchema.ts";
 import { TvdbSettings } from "../tvdb-settings.schema.ts";
 
 import type { AugmentedRequest } from "@apollo/datasource-rest";

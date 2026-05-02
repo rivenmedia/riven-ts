@@ -61,6 +61,9 @@
       "default": "./lib/datasource/context.ts"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc --build tsconfig.lib.json",
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
@@ -96,7 +99,6 @@
     "bullmq": "catalog:",
     "class-validator": "catalog:",
     "eslint": "catalog:",
-    "limiter": "catalog:",
     "msw": "catalog:",
     "type-graphql": "catalog:",
     "typescript": "catalog:",
@@ -113,7 +115,6 @@
     "@mikro-orm/reflection": "catalog:",
     "bullmq": "catalog:",
     "class-validator": "catalog:",
-    "limiter": "catalog:",
     "xstate": "^5.25.0"
   }
 }

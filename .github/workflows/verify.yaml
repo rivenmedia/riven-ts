@@ -1,10 +1,15 @@
 name: Verify
 
-run-name: "Verify PR #${{ github.event.pull_request.number }}"
+description: |
+  This workflow runs various verification tasks (linting, type checking, tests, etc.) on pull requests.
+
+  It also tests that the Docker images are buildable, optionally pushing to the container registry if the "build-docker" label is present.
+
+run-name: "Verify: ${{ github.event.pull_request.title }} (#${{
+  github.event.pull_request.number }})"
 
 permissions:
   contents: read
-  packages: read
 
 on:
   pull_request:
@@ -42,9 +47,28 @@ jobs:
             runner-requirements:
               - redis-server
               - fuse
+          - name: Check for missing migrations
+            command: migration:check
+            runner-requirements:
+              - postgres-service
+            env:
+              RIVEN_SETTING__databaseUrl: postgres+psycopg2://runner:runner@127.0.0.1:5432/riven
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
       task: ${{ matrix.task.command }}
       concurrency: ${{ matrix.task.concurrency || '10' }}
-      runner-requirements: ${{ toJson(matrix.task.runner-requirements || '[]') }}
+      runner-requirements: ${{ matrix.task.runner-requirements &&
+        toJson(matrix.task.runner-requirements) || '[]' }}
+      env: ${{ matrix.task.env && toJson(matrix.task.env) || '{}' }}
+    secrets: inherit
+
+  build-docker-images:
+    name: Build Docker Images
+    needs: verify
+    uses: ./.github/workflows/build-docker-images.yaml
+    permissions:
+      contents: read
+      packages: write
+    with:
+      push: ${{ contains(github.event.pull_request.labels.*.name, 'build-docker') }}
     secrets: inherit

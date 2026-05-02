@@ -18,8 +18,6 @@ import {
   wrap,
 } from "@mikro-orm/core";
 
-import { settings } from "../../utilities/settings.ts";
-
 import type { Promisable } from "type-fest";
 
 type NextStatesMap = Map<MediaItem, MediaItemState>;
@@ -301,6 +299,8 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     if (this.#determineFixedState(item)) {
       return item.state;
     }
+
+    const { settings } = await import("../../utilities/settings.ts");
 
     if (item.failedScrapeAttempts >= settings.maximumScrapeAttempts) {
       return "failed";

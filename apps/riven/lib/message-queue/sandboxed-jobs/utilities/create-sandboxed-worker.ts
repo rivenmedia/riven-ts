@@ -54,11 +54,8 @@ export function createSandboxedWorker(
         removeOnFail: { count: 5000 },
         useWorkerThreads: true,
         workerThreadsOptions: {
-          execArgv: ["--env-file=.env.riven"],
+          execArgv: ["--enable-source-maps"],
           name: `${sandboxedJobName}-worker`,
-          workerData: {
-            gqlUrl: `http://localhost:${settings.gqlPort.toString()}`,
-          },
         },
         connection: {
           url: settings.redisUrl,

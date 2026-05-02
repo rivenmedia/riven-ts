@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { getRequestQueryParamsFilterEnum } from "./__generated__/index.ts";
+import { getRequestQueryParamsFilterEnum } from "./__generated__/types/GetRequest.ts";
 
 export const SeerrSettings = z.object({
   apiKey: z
