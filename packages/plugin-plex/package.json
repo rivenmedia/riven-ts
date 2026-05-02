@@ -1,7 +1,6 @@
 {
   "name": "@repo/plugin-plex",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "exports": {
     ".": {
