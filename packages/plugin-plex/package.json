@@ -4,6 +4,7 @@
   "keywords": [
     "riven-plugin"
   ],
+  "license": "MIT",
   "type": "module",
   "exports": {
     ".": {
