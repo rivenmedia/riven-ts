@@ -154,7 +154,7 @@ export const openSync = function (
   >,
   callback: (err: number, fd?: number) => void,
 ) {
-  withVfsScope(async () => {
+  void withVfsScope(async () => {
     try {
       const fd = await open(path, flags, linkRequestQueues);
 

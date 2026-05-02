@@ -12,7 +12,7 @@ import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 export type StatMode = "dir" | "file" | "link" | number;
 
 export const getattrSync = function (path, callback) {
-  withVfsScope(async () => {
+  void withVfsScope(async () => {
     try {
       const cachedAttr = attrCache.get(path);
 

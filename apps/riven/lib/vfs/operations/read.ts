@@ -178,7 +178,7 @@ export const readSync = function (
   position,
   callback,
 ) {
-  withVfsScope(async () => {
+  void withVfsScope(async () => {
     try {
       const bytesRead = await read({
         buffer,

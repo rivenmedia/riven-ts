@@ -6,7 +6,7 @@ import { isFuseError } from "../errors/fuse-error.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
 export const readDirSync = function (path, callback) {
-  withVfsScope(async () => {
+  void withVfsScope(async () => {
     try {
       const data = await services.vfsService.getDirectoryEntryPaths(path);
 

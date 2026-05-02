@@ -67,7 +67,7 @@ async function release(_path: string, fd: number) {
 }
 
 export const releaseSync = function (_path, fd, callback) {
-  withVfsScope(async () => {
+  void withVfsScope(async () => {
     try {
       await release(_path, fd);
 
