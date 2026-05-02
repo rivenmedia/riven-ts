@@ -25,7 +25,10 @@
     {{#if exports}}
     {{#each exports}}
     {{#if this}}
-    "{{@key}}": "{{this}}"{{#unless @last}},{{/unless}}
+    "{{@key}}": {
+      "production": "{{this.production}}",
+      "default": "{{this.default}}"
+    }{{#unless @last}},{{/unless}}
     {{/if}}
     {{/each}}
     {{/if}}
