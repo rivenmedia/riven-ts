@@ -1,5 +1,5 @@
-import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
-import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
+import { MediaItemType } from "@rivenmedia/plugin-sdk/dto/enums/media-item-type.enum";
+import { UUID } from "@rivenmedia/plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 

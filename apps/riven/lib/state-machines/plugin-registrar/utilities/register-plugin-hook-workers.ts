@@ -11,8 +11,8 @@ import type {
   PublishableEventSet,
   ValidPluginMap,
 } from "../../../types/plugins.ts";
-import type { RivenEvent } from "@repo/util-plugin-sdk/events";
-import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+import type { RivenEvent } from "@rivenmedia/plugin-sdk/events";
+import type { PluginSettings } from "@rivenmedia/plugin-sdk/utilities/plugin-settings";
 
 export interface RegisterPluginHookWorkersOutput {
   pluginQueues: PluginQueueMap;

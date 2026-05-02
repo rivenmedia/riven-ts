@@ -3,7 +3,7 @@ import {
   Season,
   Show,
   Stream,
-} from "@repo/util-plugin-sdk/dto/entities";
+} from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { ValidationError } from "@mikro-orm/core";
 import {
@@ -17,7 +17,7 @@ import { BaseService } from "../core/base-service.ts";
 import { persistDownloadResults } from "./utilities/persist-download-results.ts";
 
 import type { ValidTorrent } from "../../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
-import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
+import type { MediaItemState } from "@rivenmedia/plugin-sdk/dto/enums/media-item-state.enum";
 import type { UUID } from "node:crypto";
 
 export class DownloaderService extends BaseService {

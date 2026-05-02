@@ -1,4 +1,4 @@
-import { MediaItemInstance } from "@repo/util-plugin-sdk/schemas/media/media-item-instance";
+import { MediaItemInstance } from "@rivenmedia/plugin-sdk/schemas/media/media-item-instance";
 
 import z from "zod";
 

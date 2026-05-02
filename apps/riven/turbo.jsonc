@@ -21,7 +21,7 @@
       ]
     },
     "codegen:gql-schema": {
-      "dependsOn": ["$TURBO_EXTENDS$", "transit:source-files"],
+      "dependsOn": ["$TURBO_EXTENDS$", "^build", "transit:source-files"],
       "inputs": ["lib/**/*.ts"],
       "outputs": ["schema.graphql"]
     },

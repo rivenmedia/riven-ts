@@ -1,4 +1,4 @@
-import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
+import { Episode, Season } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import {
   Arg,

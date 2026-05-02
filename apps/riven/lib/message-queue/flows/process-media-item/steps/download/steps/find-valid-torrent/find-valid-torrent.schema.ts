@@ -1,5 +1,5 @@
-import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
-import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
+import { DebridFile } from "@rivenmedia/plugin-sdk/schemas/torrents/debrid-file";
+import { UUID } from "@rivenmedia/plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 

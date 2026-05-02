@@ -3,7 +3,7 @@ import { toMerged } from "es-toolkit";
 import { flow } from "../producer.ts";
 import { createProcessItemRequestJob } from "./process-item-request.schema.ts";
 
-import type { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+import type { ItemRequest } from "@rivenmedia/plugin-sdk/dto/entities";
 import type { FlowJob } from "bullmq";
 import type { PartialDeep } from "type-fest";
 

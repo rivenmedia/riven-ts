@@ -3,7 +3,7 @@ import {
   Movie,
   Season,
   Show,
-} from "@repo/util-plugin-sdk/dto/entities";
+} from "@rivenmedia/plugin-sdk/dto/entities";
 
 import type { PathInfo } from "../schemas/path-info.schema.ts";
 import type { EntityManager } from "@mikro-orm/core";

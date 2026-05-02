@@ -1,5 +1,5 @@
-import { DataSourceMap } from "@repo/util-plugin-sdk";
-import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+import { DataSourceMap } from "@rivenmedia/plugin-sdk";
+import { PluginSettings } from "@rivenmedia/plugin-sdk/utilities/plugin-settings";
 
 import chalk from "chalk";
 import { type AnyActorRef, type MachineContext, assign, setup } from "xstate";

@@ -231,12 +231,12 @@ importers:
       '@repo/core-util-graphql-schema':
         specifier: workspace:^
         version: link:../../packages/core/util-graphql-schema
-      '@repo/util-plugin-sdk':
-        specifier: workspace:^
-        version: link:../../packages/util-plugin-sdk
       '@repo/util-rank-torrent-name':
         specifier: workspace:^
         version: link:../../packages/util-rank-torrent-name
+      '@rivenmedia/plugin-sdk':
+        specifier: workspace:^
+        version: link:../../packages/util-plugin-sdk
       '@rivenmedia/riven-plugin-tmdb':
         specifier: workspace:^
         version: link:../../packages/plugin-tmdb
@@ -538,7 +538,7 @@ importers:
       '@repo/core-util-vitest-config':
         specifier: workspace:^
         version: link:../util-vitest-config
-      '@repo/util-plugin-sdk':
+      '@rivenmedia/plugin-sdk':
         specifier: workspace:^
         version: link:../../util-plugin-sdk
       '@types/node':
@@ -719,7 +719,7 @@ importers:
 
   packages/feature-settings:
     dependencies:
-      '@repo/util-plugin-sdk':
+      '@rivenmedia/plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
       type-graphql:
@@ -759,9 +759,6 @@ importers:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(encoding@0.1.13)(graphql@16.12.0)
-      '@repo/util-plugin-sdk':
-        specifier: workspace:^
-        version: link:../util-plugin-sdk
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
@@ -781,6 +778,9 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
+      '@rivenmedia/plugin-sdk':
+        specifier: workspace:^
+        version: link:../util-plugin-sdk
       '@types/node':
         specifier: 'catalog:'
         version: 24.0.0
@@ -814,7 +814,7 @@ importers:
       '@repo/feature-settings':
         specifier: workspace:^
         version: link:../feature-settings
-      '@repo/util-plugin-sdk':
+      '@rivenmedia/plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
       class-validator:
@@ -878,7 +878,7 @@ importers:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(encoding@0.1.13)(graphql@16.12.0)
-      '@repo/util-plugin-sdk':
+      '@rivenmedia/plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
       type-graphql:
@@ -939,7 +939,7 @@ importers:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(encoding@0.1.13)(graphql@16.12.0)
-      '@repo/util-plugin-sdk':
+      '@rivenmedia/plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
       luxon:
@@ -1000,7 +1000,7 @@ importers:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(encoding@0.1.13)(graphql@16.12.0)
-      '@repo/util-plugin-sdk':
+      '@rivenmedia/plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
       type-graphql:
@@ -1064,7 +1064,7 @@ importers:
       '@repo/feature-settings':
         specifier: workspace:^
         version: link:../feature-settings
-      '@repo/util-plugin-sdk':
+      '@rivenmedia/plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
       class-validator:
@@ -1128,7 +1128,7 @@ importers:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(encoding@0.1.13)(graphql@16.12.0)
-      '@repo/util-plugin-sdk':
+      '@rivenmedia/plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
       type-graphql:
@@ -1177,7 +1177,7 @@ importers:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(encoding@0.1.13)(graphql@16.12.0)
-      '@repo/util-plugin-sdk':
+      '@rivenmedia/plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
       type-graphql:
@@ -1229,7 +1229,7 @@ importers:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(encoding@0.1.13)(graphql@16.12.0)
-      '@repo/util-plugin-sdk':
+      '@rivenmedia/plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
       type-graphql:
@@ -1284,7 +1284,7 @@ importers:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(encoding@0.1.13)(graphql@16.12.0)
-      '@repo/util-plugin-sdk':
+      '@rivenmedia/plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
       type-graphql:
@@ -1333,7 +1333,7 @@ importers:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(encoding@0.1.13)(graphql@16.12.0)
-      '@repo/util-plugin-sdk':
+      '@rivenmedia/plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
       countries-and-timezones:
@@ -1497,7 +1497,7 @@ importers:
       '@apollo/utils.keyvaluecache':
         specifier: 'catalog:'
         version: 4.0.0
-      '@repo/util-plugin-sdk':
+      '@rivenmedia/plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
       msw:

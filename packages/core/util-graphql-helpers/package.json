@@ -5,8 +5,8 @@
   "type": "module",
   "exports": {
     "./caching/cache-control.directive": {
-      "production": "./dist/caching/cache-control.directive.js",
-      "default": "./lib/caching/cache-control.directive.ts"
+      "types": "./lib/caching/cache-control.directive.ts",
+      "default": "./dist/caching/cache-control.directive.js"
     }
   },
   "files": [

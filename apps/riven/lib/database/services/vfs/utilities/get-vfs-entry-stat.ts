@@ -4,7 +4,7 @@ import {
   Movie,
   Season,
   Show,
-} from "@repo/util-plugin-sdk/dto/entities";
+} from "@rivenmedia/plugin-sdk/dto/entities";
 
 import Fuse from "@zkochan/fuse-native";
 import { DateTime } from "luxon";

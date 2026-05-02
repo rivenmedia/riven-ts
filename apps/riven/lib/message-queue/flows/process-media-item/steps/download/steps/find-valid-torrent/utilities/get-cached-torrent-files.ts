@@ -1,7 +1,7 @@
 import {
   MediaItemDownloadCacheCheckRequestedEvent,
   MediaItemDownloadCacheCheckRequestedResponse,
-} from "@repo/util-plugin-sdk/schemas/events/media-item.download.cache-check-requested.event";
+} from "@rivenmedia/plugin-sdk/schemas/events/media-item.download.cache-check-requested.event";
 
 import { runSingleJob } from "../../../../../../../utilities/run-single-job.ts";
 import { flow } from "../../../../../../producer.ts";

@@ -1,4 +1,4 @@
-import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { Movie, Show } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { Settings } from "luxon";
 import { expect, vi } from "vitest";

@@ -1,9 +1,9 @@
 import {
   ContentServiceRequestedEvent,
   type ContentServiceRequestedResponse,
-} from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
-import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
-import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
+} from "@rivenmedia/plugin-sdk/schemas/events/content-service-requested.event";
+import { ItemRequestCreateErrorConflict } from "@rivenmedia/plugin-sdk/schemas/events/item-request.create.error.conflict.event";
+import { ItemRequestCreateError } from "@rivenmedia/plugin-sdk/schemas/events/item-request.create.error.event";
 
 import { WaitingChildrenError } from "bullmq";
 import assert from "node:assert";

@@ -2,7 +2,7 @@ import {
   BaseDataSource,
   type BasePluginContext,
   type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+} from "@rivenmedia/plugin-sdk";
 
 import { MetadataSettingsResponse } from "../schemas/metadata-settings-response.schema.ts";
 import { RequestResponse } from "../schemas/request-response.schema.ts";
@@ -11,7 +11,7 @@ import type { GetAuthMeQueryResponse } from "../__generated__/types/GetAuthMe.ts
 import type { ExtendedMediaRequest } from "../schemas/extended-media-request.schema.ts";
 import type { SeerrSettings } from "../seerr-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
-import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
+import type { ContentServiceRequestedResponse } from "@rivenmedia/plugin-sdk/schemas/events/content-service-requested.event";
 
 export class SeerrAPIError extends Error {}
 

@@ -1,4 +1,4 @@
-import { Settings } from "@repo/util-plugin-sdk";
+import { Settings } from "@rivenmedia/plugin-sdk";
 
 import { FieldResolver, Query, Resolver } from "type-graphql";
 

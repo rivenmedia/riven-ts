@@ -5,7 +5,7 @@ import { MdbListSettings } from "./mdblist-settings.schema.ts";
 import { MdblistSettingsResolver } from "./schema/mdblist-settings.resolver.ts";
 import { MdblistResolver } from "./schema/mdblist.resolver.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { RivenPlugin } from "@rivenmedia/plugin-sdk";
 
 export default {
   name: pluginConfig.name,

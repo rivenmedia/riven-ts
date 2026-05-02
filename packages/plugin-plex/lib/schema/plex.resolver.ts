@@ -1,4 +1,4 @@
-import { PluginDataSource } from "@repo/util-plugin-sdk";
+import { PluginDataSource } from "@rivenmedia/plugin-sdk";
 
 import { Query, Resolver } from "type-graphql";
 

@@ -1,4 +1,4 @@
-import { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
+import { ContentServiceRequestedResponse } from "@rivenmedia/plugin-sdk/schemas/events/content-service-requested.event";
 
 import z from "zod";
 

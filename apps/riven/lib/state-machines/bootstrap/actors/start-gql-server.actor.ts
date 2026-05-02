@@ -16,7 +16,7 @@ import { redisCache } from "../../../utilities/redis-cache.ts";
 import { settings } from "../../../utilities/settings.ts";
 
 import type { ValidPluginMap } from "../../../types/plugins.ts";
-import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+import type { PluginSettings } from "@rivenmedia/plugin-sdk/utilities/plugin-settings";
 
 export interface StartGQLServerInput {
   pluginSettings: PluginSettings;

@@ -1,1 +1,1 @@
-# @repo/util-plugin-sdk
+# @rivenmedia/plugin-sdk

@@ -1,5 +1,5 @@
 /* eslint-disable no-empty-pattern */
-import { DataSourceMap } from "@repo/util-plugin-sdk";
+import { DataSourceMap } from "@rivenmedia/plugin-sdk";
 
 import { vi } from "vitest";
 import { createActor, fromPromise } from "xstate";

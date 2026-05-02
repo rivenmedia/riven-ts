@@ -1,4 +1,4 @@
-import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
+import { UUID } from "@rivenmedia/plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 

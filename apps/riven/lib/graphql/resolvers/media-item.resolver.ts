@@ -1,5 +1,5 @@
-import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
+import { MediaItem } from "@rivenmedia/plugin-sdk/dto/entities";
+import { MediaItemUnion } from "@rivenmedia/plugin-sdk/dto/unions/media-item.union";
 
 import {
   Arg,

@@ -1,4 +1,4 @@
-import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
+import { MediaItemType } from "@rivenmedia/plugin-sdk/dto/enums/media-item-type.enum";
 
 import z from "zod";
 

@@ -1,5 +1,5 @@
-import { MediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
+import { MediaItem, Stream } from "@rivenmedia/plugin-sdk/dto/entities";
+import { MediaItemScrapeError } from "@rivenmedia/plugin-sdk/schemas/events/media-item.scrape.error.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";

@@ -5,12 +5,12 @@
   "type": "module",
   "exports": {
     ".": {
-      "production": "./dist/index.js",
-      "default": "./lib/index.ts"
+      "types": "./lib/index.ts",
+      "default": "./dist/index.js"
     },
     "./parser": {
-      "production": "./dist/parser/parse.js",
-      "default": "./lib/parser/parse.ts"
+      "types": "./lib/parser/parse.ts",
+      "default": "./dist/parser/parse.js"
     }
   },
   "files": [

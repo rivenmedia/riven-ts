@@ -5,7 +5,7 @@ import { TorrentioResolver } from "./schema/torrentio.resolver.ts";
 import { pluginConfig } from "./torrentio-plugin.config.ts";
 import { TorrentioSettings } from "./torrentio-settings.schema.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { RivenPlugin } from "@rivenmedia/plugin-sdk";
 
 export default {
   name: pluginConfig.name,

@@ -4,11 +4,11 @@ import {
   type ParamsFor,
   type RateLimiterOptions,
   getStremioScrapeConfig,
-} from "@repo/util-plugin-sdk";
-import { z } from "@repo/util-plugin-sdk/validation";
+} from "@rivenmedia/plugin-sdk";
+import { z } from "@rivenmedia/plugin-sdk/validation";
 
 import type { TorrentioSettings } from "../torrentio-settings.schema.ts";
-import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
+import type { MediaItemScrapeRequestedEvent } from "@rivenmedia/plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 const TorrentioScrapeResponse = z.object({
   streams: z.array(

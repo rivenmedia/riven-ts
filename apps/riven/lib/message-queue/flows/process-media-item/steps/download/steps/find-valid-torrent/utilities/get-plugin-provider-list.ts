@@ -1,7 +1,7 @@
 import {
   MediaItemDownloadProviderListRequestedEvent,
   MediaItemDownloadProviderListRequestedResponse,
-} from "@repo/util-plugin-sdk/schemas/events/media-item.download.provider-list-requested.event";
+} from "@rivenmedia/plugin-sdk/schemas/events/media-item.download.provider-list-requested.event";
 
 import { runSingleJob } from "../../../../../../../utilities/run-single-job.ts";
 import { flow } from "../../../../../../producer.ts";

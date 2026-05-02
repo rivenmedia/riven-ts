@@ -1,4 +1,4 @@
-import { RivenEvent } from "@repo/util-plugin-sdk/events";
+import { RivenEvent } from "@rivenmedia/plugin-sdk/events";
 
 import chalk from "chalk";
 import { fromCallback } from "xstate";

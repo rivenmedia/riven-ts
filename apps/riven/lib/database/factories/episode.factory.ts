@@ -1,4 +1,4 @@
-import { Episode } from "@repo/util-plugin-sdk/dto/entities";
+import { Episode } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { faker } from "@faker-js/faker";
 import { Factory } from "@mikro-orm/seeder";

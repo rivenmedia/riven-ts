@@ -1,4 +1,4 @@
-import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
+import { Episode, Season } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { ValidationError } from "@mikro-orm/core";
 import { DelayedError, UnrecoverableError, WaitingChildrenError } from "bullmq";
@@ -13,7 +13,7 @@ import { processMediaItemProcessorSchema } from "./process-media-item.schema.ts"
 import { enqueueDownloadItem } from "./steps/download/enqueue-download-item.ts";
 import { enqueueScrapeItems } from "./steps/scrape/enqueue-scrape-items.ts";
 
-import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
+import type { MediaItemState } from "@rivenmedia/plugin-sdk/dto/enums/media-item-state.enum";
 
 export const processItemProcessor =
   processMediaItemProcessorSchema.implementAsync(async function (

@@ -1,4 +1,4 @@
-import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequest } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { HttpResponse, http } from "msw";
 import { randomUUID } from "node:crypto";

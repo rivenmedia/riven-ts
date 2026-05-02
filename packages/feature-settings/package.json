@@ -5,12 +5,12 @@
   "type": "module",
   "exports": {
     "./resolver": {
-      "production": "./dist/schema/settings.resolver.js",
-      "default": "./lib/schema/settings.resolver.ts"
+      "types": "./lib/schema/settings.resolver.ts",
+      "default": "./dist/schema/settings.resolver.js"
     },
     "./settings.type": {
-      "production": "./dist/schema/types/settings.type.js",
-      "default": "./lib/schema/types/settings.type.ts"
+      "types": "./lib/schema/types/settings.type.ts",
+      "default": "./dist/schema/types/settings.type.js"
     }
   },
   "files": [
@@ -25,7 +25,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@repo/util-plugin-sdk": "workspace:^",
+    "@rivenmedia/plugin-sdk": "workspace:^",
     "type-graphql": "catalog:"
   },
   "devDependencies": {

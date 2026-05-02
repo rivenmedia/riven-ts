@@ -1,13 +1,13 @@
-import { ShowContentRating } from "@repo/util-plugin-sdk/dto/enums/content-ratings.enum";
-import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
+import { ShowContentRating } from "@rivenmedia/plugin-sdk/dto/enums/content-ratings.enum";
+import { DateTime } from "@rivenmedia/plugin-sdk/helpers/dates";
 
 import assert from "node:assert";
 import z from "zod";
 
 import type { EpisodeBaseRecordSchema } from "../__generated__/zod/episodeBaseRecordSchema.ts";
 import type { SeriesExtendedRecordSchema } from "../__generated__/zod/seriesExtendedRecordSchema.ts";
-import type { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
-import type { MediaItemIndexRequestedShowResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+import type { ItemRequest } from "@rivenmedia/plugin-sdk/dto/entities";
+import type { MediaItemIndexRequestedShowResponse } from "@rivenmedia/plugin-sdk/schemas/events/media-item.index.requested.event";
 import type { TimezoneName } from "countries-and-timezones";
 
 function findEnglishShowTitle(series: SeriesExtendedRecordSchema) {

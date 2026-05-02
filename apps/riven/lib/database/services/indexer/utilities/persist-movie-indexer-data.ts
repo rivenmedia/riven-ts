@@ -1,6 +1,6 @@
-import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
-import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
+import { ItemRequest, Movie } from "@rivenmedia/plugin-sdk/dto/entities";
+import { MediaItemIndexError } from "@rivenmedia/plugin-sdk/schemas/events/media-item.index.error.event";
+import { MediaItemIndexErrorIncorrectState } from "@rivenmedia/plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
@@ -8,7 +8,7 @@ import assert from "node:assert";
 import z from "zod";
 
 import type { EntityManager } from "@mikro-orm/core";
-import type { MediaItemIndexRequestedMovieResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+import type { MediaItemIndexRequestedMovieResponse } from "@rivenmedia/plugin-sdk/schemas/events/media-item.index.requested.event";
 
 export type MovieIndexData =
   NonNullable<MediaItemIndexRequestedMovieResponse>["item"];

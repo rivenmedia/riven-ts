@@ -1,5 +1,5 @@
-import { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
-import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+import { MediaItemDownloadRequestedResponse } from "@rivenmedia/plugin-sdk/schemas/events/media-item.download-requested.event";
+import { DebridFile } from "@rivenmedia/plugin-sdk/schemas/torrents/debrid-file";
 
 import z from "zod";
 

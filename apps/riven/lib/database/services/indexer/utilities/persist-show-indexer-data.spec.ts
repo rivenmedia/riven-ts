@@ -1,5 +1,5 @@
-import { Show } from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
+import { Show } from "@rivenmedia/plugin-sdk/dto/entities";
+import { MediaItemIndexErrorIncorrectState } from "@rivenmedia/plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { wrap } from "@mikro-orm/core";
 import { DateTime } from "luxon";

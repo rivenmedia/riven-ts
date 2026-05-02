@@ -1,4 +1,4 @@
-import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+import { PluginSettings } from "@rivenmedia/plugin-sdk/utilities/plugin-settings";
 
 import { mockLogger } from "./create-mock-logger.ts";
 

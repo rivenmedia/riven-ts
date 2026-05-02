@@ -2,8 +2,8 @@ import { enqueueValidateTorrentFiles } from "../../../../../../../sandboxed-jobs
 import { InvalidTorrentError } from "../../../../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
 import { runSingleJob } from "../../../../../../../utilities/run-single-job.ts";
 
-import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
-import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+import type { MediaItem } from "@rivenmedia/plugin-sdk/dto/entities";
+import type { DebridFile } from "@rivenmedia/plugin-sdk/schemas/torrents/debrid-file";
 import type { ParentOptions } from "bullmq";
 
 export async function getValidTorrentFiles(

@@ -1,5 +1,5 @@
-import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
-import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
+import { MediaItemDownloadError } from "@rivenmedia/plugin-sdk/schemas/events/media-item.download.error.event";
+import { MediaItemDownloadErrorIncorrectState } from "@rivenmedia/plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
 import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";

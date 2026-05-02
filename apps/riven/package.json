@@ -5,20 +5,20 @@
   "type": "module",
   "exports": {
     "./workers/map-items-to-files": {
-      "production": "./dist/workers/map-items-to-files/map-items-to-files.processor.js",
-      "default": "./lib/message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.processor.ts"
+      "types": "./lib/message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.processor.ts",
+      "default": "./dist/workers/map-items-to-files/map-items-to-files.processor.js"
     },
     "./workers/parse-scrape-results": {
-      "production": "./dist/workers/parse-scrape-results/parse-scrape-results.processor.js",
-      "default": "./lib/message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.processor.ts"
+      "types": "./lib/message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.processor.ts",
+      "default": "./dist/workers/parse-scrape-results/parse-scrape-results.processor.js"
     },
     "./workers/validate-torrent-files": {
-      "production": "./dist/workers/validate-torrent-files/validate-torrent-files.processor.js",
-      "default": "./lib/message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.ts"
+      "types": "./lib/message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.ts",
+      "default": "./dist/workers/validate-torrent-files/validate-torrent-files.processor.js"
     },
     "./database-metadata-cache": {
-      "production": "./dist/program/temp/metadata.json",
-      "default": "./temp/metadata.json"
+      "types": "./temp/metadata.json",
+      "default": "./dist/program/temp/metadata.json"
     }
   },
   "files": [
@@ -55,8 +55,8 @@
     "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",
     "@repo/core-util-graphql-schema": "workspace:^",
-    "@repo/util-plugin-sdk": "workspace:^",
     "@repo/util-rank-torrent-name": "workspace:^",
+    "@rivenmedia/plugin-sdk": "workspace:^",
     "@rivenmedia/riven-plugin-tmdb": "workspace:^",
     "@rivenmedia/riven-plugin-tvdb": "workspace:^",
     "@sentry/node": "^10.38.0",

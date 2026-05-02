@@ -1,64 +1,64 @@
 {
-  "name": "@repo/util-plugin-sdk",
+  "name": "@rivenmedia/plugin-sdk",
   "version": "0.0.0",
-  "private": true,
+  "license": "MIT",
   "type": "module",
   "exports": {
     ".": {
-      "production": "./dist/index.js",
-      "default": "./lib/index.ts"
+      "types": "./lib/index.ts",
+      "default": "./dist/index.js"
     },
     "./types/*": {
-      "production": "./dist/types/*.js",
-      "default": "./lib/types/*.ts"
+      "types": "./lib/types/*.ts",
+      "default": "./dist/types/*.js"
     },
     "./dto/entities": {
-      "production": "./dist/dto/entities/index.js",
-      "default": "./lib/dto/entities/index.ts"
+      "types": "./lib/dto/entities/index.ts",
+      "default": "./dist/dto/entities/index.js"
     },
     "./dto/enums/*": {
-      "production": "./dist/dto/enums/*.js",
-      "default": "./lib/dto/enums/*.ts"
+      "types": "./lib/dto/enums/*.ts",
+      "default": "./dist/dto/enums/*.js"
     },
     "./dto/repositories/*": {
-      "production": "./dist/dto/repositories/*.js",
-      "default": "./lib/dto/repositories/*.ts"
+      "types": "./lib/dto/repositories/*.ts",
+      "default": "./dist/dto/repositories/*.js"
     },
     "./dto/unions/*": {
-      "production": "./dist/dto/unions/*.js",
-      "default": "./lib/dto/unions/*.ts"
+      "types": "./lib/dto/unions/*.ts",
+      "default": "./dist/dto/unions/*.js"
     },
     "./errors/*": {
-      "production": "./dist/errors/*.js",
-      "default": "./lib/errors/*.ts"
+      "types": "./lib/errors/*.ts",
+      "default": "./dist/errors/*.js"
     },
     "./events": {
-      "production": "./dist/schemas/events/index.js",
-      "default": "./lib/schemas/events/index.ts"
+      "types": "./lib/schemas/events/index.ts",
+      "default": "./dist/schemas/events/index.js"
     },
     "./schemas/*": {
-      "production": "./dist/schemas/*.js",
-      "default": "./lib/schemas/*.ts"
+      "types": "./lib/schemas/*.ts",
+      "default": "./dist/schemas/*.js"
     },
     "./helpers/*": {
-      "production": "./dist/helpers/*.js",
-      "default": "./lib/helpers/*.ts"
+      "types": "./lib/helpers/*.ts",
+      "default": "./dist/helpers/*.js"
     },
     "./testing/*": {
-      "production": "./dist/testing/*.js",
-      "default": "./lib/testing/*.ts"
+      "types": "./lib/testing/*.ts",
+      "default": "./dist/testing/*.js"
     },
     "./utilities/*": {
-      "production": "./dist/utilities/*.js",
-      "default": "./lib/utilities/*.ts"
+      "types": "./lib/utilities/*.ts",
+      "default": "./dist/utilities/*.js"
     },
     "./validation": {
-      "production": "./dist/validation/index.js",
-      "default": "./lib/validation/index.ts"
+      "types": "./lib/validation/index.ts",
+      "default": "./dist/validation/index.js"
     },
     "./datasource-context": {
-      "production": "./dist/datasource/context.js",
-      "default": "./lib/datasource/context.ts"
+      "types": "./lib/datasource/context.ts",
+      "default": "./dist/datasource/context.js"
     }
   },
   "files": [

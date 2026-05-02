@@ -1,4 +1,4 @@
-import { Season, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { Season, Show } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { Arg, FieldResolver, Int, Resolver, Root } from "type-graphql";
 

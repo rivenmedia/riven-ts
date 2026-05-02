@@ -1,4 +1,4 @@
-import { benchmark } from "@repo/util-plugin-sdk/helpers/benchmark";
+import { benchmark } from "@rivenmedia/plugin-sdk/helpers/benchmark";
 
 import Fuse from "@zkochan/fuse-native";
 import { Buffer } from "node:buffer";

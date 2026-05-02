@@ -2,7 +2,7 @@ import { StreamFactory } from "../../factories/stream.factory.ts";
 import { BaseSeeder } from "../base.seeder.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
-import type { Stream } from "@repo/util-plugin-sdk/dto/entities";
+import type { Stream } from "@rivenmedia/plugin-sdk/dto/entities";
 
 export interface StreamsSeederContext {
   streams: Stream[];

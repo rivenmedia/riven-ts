@@ -2,7 +2,7 @@ import {
   BaseDataSource,
   type BasePluginContext,
   type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+} from "@rivenmedia/plugin-sdk";
 
 import { LookupByTvdbIdResponse } from "../schemas/lookup-by-tvdb-id-response.schema.ts";
 import { TvdbSettings } from "../tvdb-settings.schema.ts";

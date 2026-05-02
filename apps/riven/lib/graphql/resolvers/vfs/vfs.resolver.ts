@@ -1,4 +1,4 @@
-import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaEntry } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { Arg, Query, Resolver } from "type-graphql";
 

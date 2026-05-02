@@ -3,17 +3,17 @@ import {
   type BasePluginContext,
   type ParamsFor,
   type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+} from "@rivenmedia/plugin-sdk";
 import {
   Episode,
   Season,
   ShowLikeMediaItem,
-} from "@repo/util-plugin-sdk/dto/entities";
+} from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { TorznabResponse } from "../schemas/torznab-response.schema.ts";
 
 import type { StremThruSettings } from "../stremthru-settings.schema.ts";
-import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
+import type { MediaItemScrapeRequestedEvent } from "@rivenmedia/plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 export class StremThruAPIError extends Error {}
 

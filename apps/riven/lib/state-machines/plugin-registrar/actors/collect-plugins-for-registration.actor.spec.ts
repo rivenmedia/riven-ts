@@ -1,5 +1,5 @@
-import { RivenPluginPackage } from "@repo/util-plugin-sdk";
-import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+import { RivenPluginPackage } from "@rivenmedia/plugin-sdk";
+import { PluginSettings } from "@rivenmedia/plugin-sdk/utilities/plugin-settings";
 
 import { expect, it, vi } from "vitest";
 import { createActor, toPromise } from "xstate";

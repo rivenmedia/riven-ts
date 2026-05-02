@@ -1,4 +1,4 @@
-import { Movie, type Show } from "@repo/util-plugin-sdk/dto/entities";
+import { Movie, type Show } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import chalk from "chalk";
 import { DateTime } from "luxon";

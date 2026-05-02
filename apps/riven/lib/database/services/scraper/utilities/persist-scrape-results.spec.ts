@@ -1,6 +1,6 @@
-import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
 import { parse } from "@repo/util-rank-torrent-name";
+import { MediaItem } from "@rivenmedia/plugin-sdk/dto/entities";
+import { MediaItemScrapeErrorIncorrectState } from "@rivenmedia/plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
 
 import { faker } from "@faker-js/faker";
 import { DateTime } from "luxon";

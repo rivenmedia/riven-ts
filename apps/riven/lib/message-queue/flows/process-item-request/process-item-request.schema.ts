@@ -1,8 +1,8 @@
 import {
   MediaItemIndexRequestedMovieResponse,
   MediaItemIndexRequestedShowResponse,
-} from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
-import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
+} from "@rivenmedia/plugin-sdk/schemas/events/media-item.index.requested.event";
+import { UUID } from "@rivenmedia/plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 

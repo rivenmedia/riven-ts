@@ -22,8 +22,8 @@ import type {
 } from "../../types/plugins.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
-import type { RivenEvent } from "@repo/util-plugin-sdk/events";
-import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+import type { RivenEvent } from "@rivenmedia/plugin-sdk/events";
+import type { PluginSettings } from "@rivenmedia/plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";
 
 export interface BootstrapMachineContext {

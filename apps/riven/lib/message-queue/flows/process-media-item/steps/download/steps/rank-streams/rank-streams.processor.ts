@@ -1,9 +1,9 @@
-import { ShowLikeMediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
 import {
   GarbageTorrentError,
   RTN,
   type RankedResult,
 } from "@repo/util-rank-torrent-name";
+import { ShowLikeMediaItem, Stream } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { NotFoundError } from "@mikro-orm/core";
 import chalk from "chalk";

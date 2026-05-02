@@ -5,10 +5,10 @@ import {
   Movie,
   Season,
   Show,
-} from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
-import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
-import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
+} from "@rivenmedia/plugin-sdk/dto/entities";
+import { MediaItemState } from "@rivenmedia/plugin-sdk/dto/enums/media-item-state.enum";
+import { MediaItemDownloadError } from "@rivenmedia/plugin-sdk/schemas/events/media-item.download.error.event";
+import { MediaItemDownloadErrorIncorrectState } from "@rivenmedia/plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
 import { type EntityManager, NotFoundError, ref } from "@mikro-orm/core";
 import { ValidationError, validateOrReject } from "class-validator";

@@ -4,7 +4,7 @@ import {
   Movie,
   Season,
   Show,
-} from "@repo/util-plugin-sdk/dto/entities";
+} from "@rivenmedia/plugin-sdk/dto/entities";
 
 import type { EntityName, EventArgs, EventSubscriber } from "@mikro-orm/core";
 

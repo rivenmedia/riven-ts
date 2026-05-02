@@ -1,4 +1,4 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { Movie } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { FieldResolver, Int, Resolver, Root } from "type-graphql";
 

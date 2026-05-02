@@ -1,5 +1,5 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { parse } from "@repo/util-rank-torrent-name/parser";
+import { Movie } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { faker } from "@faker-js/faker";
 import { randomUUID } from "node:crypto";

@@ -1,5 +1,5 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities";
-import { MovieContentRating } from "@repo/util-plugin-sdk/dto/enums/content-ratings.enum";
+import { Movie } from "@rivenmedia/plugin-sdk/dto/entities";
+import { MovieContentRating } from "@rivenmedia/plugin-sdk/dto/enums/content-ratings.enum";
 
 import { faker } from "@faker-js/faker";
 import { Factory } from "@mikro-orm/seeder";

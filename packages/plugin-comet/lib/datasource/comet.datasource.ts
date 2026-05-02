@@ -3,19 +3,19 @@ import {
   type BasePluginContext,
   type ParamsFor,
   type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+} from "@rivenmedia/plugin-sdk";
 import {
   Episode,
   type MediaItem,
   Movie,
   Season,
   Show,
-} from "@repo/util-plugin-sdk/dto/entities";
+} from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { CometSettings } from "../comet-settings.schema.ts";
 import { CometScrapeResponse } from "../schemas/scrape-response.schema.ts";
 
-import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
+import type { MediaItemScrapeRequestedEvent } from "@rivenmedia/plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 interface CometScrapeConfig {
   identifier: string | null;

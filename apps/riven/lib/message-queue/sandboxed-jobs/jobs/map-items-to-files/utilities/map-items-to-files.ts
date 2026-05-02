@@ -7,7 +7,7 @@ import z from "zod";
 import { logger } from "../../../../../utilities/logger/logger.ts";
 
 import type { MapItemsToFilesSandboxedJob } from "../map-items-to-files.schema.ts";
-import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+import type { DebridFile } from "@rivenmedia/plugin-sdk/schemas/torrents/debrid-file";
 
 const VALID_FILE_EXTENSIONS = z.enum([
   ".mp4",

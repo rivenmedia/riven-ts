@@ -1,6 +1,6 @@
-import { UnrecoverableError } from "@repo/util-plugin-sdk/errors/unrecoverable-error";
-import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
-import { MediaItemIndexRequestedMovieEventHandler } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+import { UnrecoverableError } from "@rivenmedia/plugin-sdk/errors/unrecoverable-error";
+import { DateTime } from "@rivenmedia/plugin-sdk/helpers/dates";
+import { MediaItemIndexRequestedMovieEventHandler } from "@rivenmedia/plugin-sdk/schemas/events/media-item.index.requested.event";
 
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 

@@ -1,11 +1,11 @@
-import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
-import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
+import { MediaItemIndexError } from "@rivenmedia/plugin-sdk/schemas/events/media-item.index.error.event";
+import { MediaItemIndexErrorIncorrectState } from "@rivenmedia/plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 import {
   MediaItemIndexRequestedMovieEvent,
   MediaItemIndexRequestedMovieResponse,
   MediaItemIndexRequestedShowEvent,
   MediaItemIndexRequestedShowResponse,
-} from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+} from "@rivenmedia/plugin-sdk/schemas/events/media-item.index.requested.event";
 
 import { DelayedError, UnrecoverableError, WaitingChildrenError } from "bullmq";
 import chalk from "chalk";

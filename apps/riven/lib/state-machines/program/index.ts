@@ -11,7 +11,7 @@ import type { ValidPluginMap } from "../../types/plugins.ts";
 import type { SessionID } from "../../utilities/logger/log-context.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
-import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";
+import type { CoreShutdownEvent } from "@rivenmedia/plugin-sdk/schemas/events/core.shutdown.event";
 import type Fuse from "@zkochan/fuse-native";
 
 export interface RivenMachineContext {

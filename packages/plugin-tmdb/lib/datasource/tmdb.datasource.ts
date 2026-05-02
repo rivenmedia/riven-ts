@@ -2,7 +2,7 @@ import {
   BaseDataSource,
   type BasePluginContext,
   type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+} from "@rivenmedia/plugin-sdk";
 
 import type {
   FindById200,

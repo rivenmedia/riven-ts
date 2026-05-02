@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@apollo/utils.keyvaluecache": "catalog:",
-    "@repo/util-plugin-sdk": "workspace:^",
+    "@rivenmedia/plugin-sdk": "workspace:^",
     "redis-memory-server": "catalog:",
     "winston": "catalog:"
   },

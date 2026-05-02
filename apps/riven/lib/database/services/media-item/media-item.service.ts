@@ -1,4 +1,4 @@
-import { MediaItem, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItem, Show } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
 

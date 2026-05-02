@@ -2,7 +2,7 @@ import {
   BaseDataSource,
   type BasePluginContext,
   type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+} from "@rivenmedia/plugin-sdk";
 
 import { getApiListMyPageQueryResponseSchema } from "../__generated__/zod/getApiListMyPageSchema.ts";
 import { listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIMovieDtoSchema as getMoviesResponseSchema } from "../__generated__/zod/listrr/contracts/models/API/pagedResponse1listrr/contracts/models/API/movieDtoSchema.ts";
@@ -10,7 +10,7 @@ import { listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIShowDtoSc
 
 import type { ListrrSettings } from "../listrr-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
-import type { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
+import type { ExternalIds } from "@rivenmedia/plugin-sdk/schemas/external-ids.type";
 
 export class ListrrAPIError extends Error {}
 

@@ -1,11 +1,11 @@
-import { Movie, ShowLikeMediaItem } from "@repo/util-plugin-sdk/dto/entities";
+import { Movie, ShowLikeMediaItem } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { DateTime } from "luxon";
 
 import { NotificationPayload } from "../schemas/notification-payload.schema.ts";
 
-import type { ParamsFor } from "@repo/util-plugin-sdk";
-import type { MediaItemDownloadSuccessEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download.success.event";
+import type { ParamsFor } from "@rivenmedia/plugin-sdk";
+import type { MediaItemDownloadSuccessEvent } from "@rivenmedia/plugin-sdk/schemas/events/media-item.download.success.event";
 
 export function buildNotificationPayload(
   {

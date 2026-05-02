@@ -1,4 +1,4 @@
-import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
+import { BaseDataSource, type BasePluginContext } from "@rivenmedia/plugin-sdk";
 
 export class TestAPIError extends Error {}
 

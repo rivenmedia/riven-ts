@@ -3,7 +3,7 @@ import {
   type BaseDataSourceConfig,
   DataSourceMap,
   type RivenPlugin,
-} from "@repo/util-plugin-sdk";
+} from "@rivenmedia/plugin-sdk";
 
 import { RedisConnection } from "bullmq";
 import { it as baseIt } from "vitest";

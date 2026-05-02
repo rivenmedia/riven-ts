@@ -1,4 +1,4 @@
-import { MediaItemIndexRequestedShowEventHandler } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+import { MediaItemIndexRequestedShowEventHandler } from "@rivenmedia/plugin-sdk/schemas/events/media-item.index.requested.event";
 
 import { TvdbAPI } from "../datasource/tvdb.datasource.ts";
 import { TvMazeAPI } from "../datasource/tvmaze.datasource.ts";

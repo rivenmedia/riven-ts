@@ -1,6 +1,6 @@
-import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
-import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
-import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
+import { ItemRequest } from "@rivenmedia/plugin-sdk/dto/entities";
+import { ItemRequestCreateErrorConflict } from "@rivenmedia/plugin-sdk/schemas/events/item-request.create.error.conflict.event";
+import { ItemRequestCreateError } from "@rivenmedia/plugin-sdk/schemas/events/item-request.create.error.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
@@ -8,7 +8,7 @@ import z from "zod";
 import { RequestType } from "../../../../message-queue/flows/request-content-services/request-content-services.schema.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
-import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
+import type { ContentServiceRequestedResponse } from "@rivenmedia/plugin-sdk/schemas/events/content-service-requested.event";
 
 export async function persistRequestedShow(
   em: EntityManager,

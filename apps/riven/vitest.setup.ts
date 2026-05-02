@@ -1,5 +1,5 @@
-import { BaseDataSource, type RivenPlugin } from "@repo/util-plugin-sdk";
-import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
+import { BaseDataSource, type RivenPlugin } from "@rivenmedia/plugin-sdk";
+import { RivenEventHandler } from "@rivenmedia/plugin-sdk/events";
 
 import { type RedisClient, RedisConnection } from "bullmq";
 import { randomUUID } from "node:crypto";

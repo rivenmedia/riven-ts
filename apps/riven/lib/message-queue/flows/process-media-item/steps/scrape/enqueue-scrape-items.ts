@@ -1,4 +1,4 @@
-import { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
+import { MediaItemScrapeRequestedEvent } from "@rivenmedia/plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 import { settings } from "../../../../../utilities/settings.ts";
 import { createParseScrapeResultsJob } from "../../../../sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.schema.ts";
@@ -6,7 +6,7 @@ import { createPluginFlowJob } from "../../../../utilities/create-flow-plugin-jo
 import { flow } from "../../../producer.ts";
 import { createScrapeItemJob } from "./scrape-item.schema.ts";
 
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { RivenPlugin } from "@rivenmedia/plugin-sdk";
 import type { ParentOptions } from "bullmq";
 
 export interface EnqueueScrapeItemInput {

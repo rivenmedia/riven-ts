@@ -7,7 +7,11 @@ import { ShowFactory } from "../../factories/show.factory.ts";
 import { BaseSeeder } from "../base.seeder.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
-import type { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
+import type {
+  Episode,
+  Season,
+  Show,
+} from "@rivenmedia/plugin-sdk/dto/entities";
 
 export interface IndexedShowSeederContext {
   show: Show;

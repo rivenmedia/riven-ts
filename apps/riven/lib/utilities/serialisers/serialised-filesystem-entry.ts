@@ -2,8 +2,8 @@ import {
   FileSystemEntry,
   MediaEntry,
   SubtitleEntry,
-} from "@repo/util-plugin-sdk/dto/entities";
-import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
+} from "@rivenmedia/plugin-sdk/dto/entities";
+import { UUID } from "@rivenmedia/plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 

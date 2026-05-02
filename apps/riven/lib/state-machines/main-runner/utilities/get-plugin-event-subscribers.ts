@@ -1,5 +1,5 @@
 import type { RegisteredPluginMap } from "../../../types/plugins.ts";
-import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { RivenEvent } from "@rivenmedia/plugin-sdk/events";
 
 export function getPluginEventSubscribers(
   event: RivenEvent["type"],

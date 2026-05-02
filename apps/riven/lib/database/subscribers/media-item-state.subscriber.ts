@@ -5,8 +5,8 @@ import {
   Season,
   Show,
   type ShowLikeMediaItem,
-} from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
+} from "@rivenmedia/plugin-sdk/dto/entities";
+import { MediaItemState } from "@rivenmedia/plugin-sdk/dto/enums/media-item-state.enum";
 
 import {
   type ChangeSet,

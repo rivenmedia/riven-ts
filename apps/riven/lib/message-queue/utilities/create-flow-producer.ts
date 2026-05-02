@@ -13,8 +13,8 @@ import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
 import { createPluginFlowJob } from "./create-flow-plugin-job.ts";
 
-import type { ParamsFor } from "@repo/util-plugin-sdk";
-import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { ParamsFor } from "@rivenmedia/plugin-sdk";
+import type { RivenEvent } from "@rivenmedia/plugin-sdk/events";
 import type { ZodLiteral, ZodObject, ZodType, z } from "zod";
 
 FlowProducer.setMaxListeners(200);

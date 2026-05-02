@@ -40,7 +40,7 @@
     "dev": {
       "persistent": true,
       "cache": false,
-      "dependsOn": ["codegen:api-schemas"]
+      "dependsOn": ["codegen:api-schemas", "^build"]
     },
     "codegen:config-docs": {
       "inputs": ["**/*-settings.schema.ts", "zod2md.config.ts"],

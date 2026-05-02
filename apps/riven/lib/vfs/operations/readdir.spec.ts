@@ -1,4 +1,4 @@
-import { MediaEntry, Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaEntry, Movie } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { expect, vi } from "vitest";
 

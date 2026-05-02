@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports -- Core database config requires direct driver access
 import {
   Episode,
   FileSystemEntry,
@@ -9,9 +10,8 @@ import {
   Show,
   Stream,
   SubtitleEntry,
-} from "@repo/util-plugin-sdk/dto/entities";
+} from "@rivenmedia/plugin-sdk/dto/entities";
 
-// eslint-disable-next-line no-restricted-imports -- Core database config requires direct driver access
 import {
   GeneratedCacheAdapter,
   type Options,

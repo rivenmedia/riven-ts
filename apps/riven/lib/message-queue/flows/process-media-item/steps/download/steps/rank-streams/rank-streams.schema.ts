@@ -1,11 +1,11 @@
-import { Torrent } from "@repo/util-plugin-sdk/schemas/torrents/torrent";
-import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
-import { atLeastOnePropertyRequired } from "@repo/util-plugin-sdk/validation";
 import {
   type RankedResult,
   RankingModelSchema,
   SettingsSchema,
 } from "@repo/util-rank-torrent-name";
+import { Torrent } from "@rivenmedia/plugin-sdk/schemas/torrents/torrent";
+import { UUID } from "@rivenmedia/plugin-sdk/schemas/utilities/uuid.schema";
+import { atLeastOnePropertyRequired } from "@rivenmedia/plugin-sdk/validation";
 
 import z from "zod";
 

@@ -5,16 +5,16 @@
   "type": "module",
   "exports": {
     ".": {
-      "production": "./dist/index.js",
-      "default": "./lib/index.ts"
+      "types": "./lib/index.ts",
+      "default": "./dist/index.js"
     },
     "./context": {
-      "production": "./dist/context.js",
-      "default": "./lib/context.ts"
+      "types": "./lib/context.ts",
+      "default": "./dist/context.js"
     },
     "./cache-control-directive": {
-      "production": "./dist/cache-control.directive.js",
-      "default": "./lib/cache-control.directive.ts"
+      "types": "./lib/cache-control.directive.ts",
+      "default": "./dist/cache-control.directive.js"
     }
   },
   "files": [
@@ -40,7 +40,7 @@
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
-    "@repo/util-plugin-sdk": "workspace:^",
+    "@rivenmedia/plugin-sdk": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",

@@ -1,6 +1,6 @@
-import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
-import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
-import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
+import { MediaItemScrapeError } from "@rivenmedia/plugin-sdk/schemas/events/media-item.scrape.error.event";
+import { MediaItemScrapeErrorIncorrectState } from "@rivenmedia/plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
+import { MediaItemScrapeErrorNoNewStreams } from "@rivenmedia/plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 
 import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";

@@ -12,7 +12,7 @@
   ],
   "plugins": ["@trivago/prettier-plugin-sort-imports"],
   "importOrder": [
-    "^@repo/(.*)$",
+    "^@(repo|rivenmedia)/(.*)$",
     "<THIRD_PARTY_MODULES>",
     "^[./]",
     "<TS_TYPES>"

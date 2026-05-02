@@ -1,7 +1,7 @@
 import {
   type MediaItemStreamLinkRequestedEvent,
   MediaItemStreamLinkRequestedResponse,
-} from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
+} from "@rivenmedia/plugin-sdk/schemas/events/media-item.stream-link-requested.event";
 
 import Fuse from "@zkochan/fuse-native";
 import dedent from "dedent";
@@ -12,7 +12,7 @@ import { settings } from "../../../utilities/settings.ts";
 import { fuseOperations } from "../../../vfs/index.ts";
 
 import type { PluginQueueMap } from "../../../types/plugins.ts";
-import type { ParamsFor } from "@repo/util-plugin-sdk";
+import type { ParamsFor } from "@rivenmedia/plugin-sdk";
 import type { Queue } from "bullmq";
 
 export interface InitialiseVfsOutput {

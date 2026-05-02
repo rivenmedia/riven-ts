@@ -3,8 +3,8 @@ import { fromCallback } from "xstate";
 
 import type { RegisteredPlugin } from "../../../types/plugins.ts";
 import type { PluginRegistrarMachineEvent } from "../index.ts";
-import type { DataSourceMap } from "@repo/util-plugin-sdk";
-import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+import type { DataSourceMap } from "@rivenmedia/plugin-sdk";
+import type { PluginSettings } from "@rivenmedia/plugin-sdk/utilities/plugin-settings";
 
 export interface ValidatePluginInput {
   plugin: RegisteredPlugin;

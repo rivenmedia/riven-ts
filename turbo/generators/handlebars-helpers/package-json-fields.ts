@@ -44,7 +44,7 @@ const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
     },
     dependencies: {
       "@apollo/datasource-rest": "catalog:",
-      "@repo/util-plugin-sdk": "workspace:^",
+      "@rivenmedia/plugin-sdk": "workspace:^",
       "type-graphql": "catalog:",
       zod: "catalog:",
     },

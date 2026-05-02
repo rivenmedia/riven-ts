@@ -1,4 +1,4 @@
-import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+import { DebridFile } from "@rivenmedia/plugin-sdk/schemas/torrents/debrid-file";
 
 import z from "zod";
 

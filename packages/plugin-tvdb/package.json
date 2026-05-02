@@ -5,8 +5,8 @@
   "type": "module",
   "exports": {
     ".": {
-      "production": "./dist/index.js",
-      "default": "./lib/index.ts"
+      "types": "./lib/index.ts",
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
-    "@repo/util-plugin-sdk": "workspace:^",
+    "@rivenmedia/plugin-sdk": "workspace:^",
     "countries-and-timezones": "^3.8.0",
     "luxon": "catalog:",
     "type-graphql": "catalog:",

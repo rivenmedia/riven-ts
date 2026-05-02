@@ -1,5 +1,5 @@
-import { Stream } from "@repo/util-plugin-sdk/dto/entities";
 import { parse } from "@repo/util-rank-torrent-name/parser";
+import { Stream } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import { faker } from "@faker-js/faker";
 import { Factory } from "@mikro-orm/seeder";

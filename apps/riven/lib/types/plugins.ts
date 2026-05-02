@@ -1,5 +1,5 @@
-import type { DataSourceMap, RivenPlugin } from "@repo/util-plugin-sdk";
-import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { DataSourceMap, RivenPlugin } from "@rivenmedia/plugin-sdk";
+import type { RivenEvent } from "@rivenmedia/plugin-sdk/events";
 import type { Queue, Worker } from "bullmq";
 
 export type PluginQueueMap = Map<symbol, Map<RivenEvent["type"], Queue>>;

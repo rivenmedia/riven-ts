@@ -4,7 +4,7 @@ import {
   createMapItemsToFilesJob,
 } from "./map-items-to-files.schema.ts";
 
-import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+import type { DebridFile } from "@rivenmedia/plugin-sdk/schemas/torrents/debrid-file";
 import type { ParentOptions, PluginJobNode } from "bullmq";
 
 export interface EnqueueMapItemsToFilesInput {

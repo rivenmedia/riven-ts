@@ -1,5 +1,5 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
+import { Movie } from "@rivenmedia/plugin-sdk/dto/entities";
+import { MediaItemIndexErrorIncorrectState } from "@rivenmedia/plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { DateTime } from "luxon";
 import { expect } from "vitest";

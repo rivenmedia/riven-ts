@@ -1,7 +1,7 @@
-import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
-import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
-import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
+import { MediaItem } from "@rivenmedia/plugin-sdk/dto/entities";
+import { MediaItemState } from "@rivenmedia/plugin-sdk/dto/enums/media-item-state.enum";
+import { MediaItemScrapeErrorIncorrectState } from "@rivenmedia/plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
+import { MediaItemScrapeErrorNoNewStreams } from "@rivenmedia/plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 
 import { ValidationError } from "@mikro-orm/core";
 import {
@@ -15,8 +15,8 @@ import assert from "node:assert";
 import { BaseService } from "../core/base-service.ts";
 import { persistScrapeResults } from "./utilities/persist-scrape-results.ts";
 
-import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { ParsedData } from "@repo/util-rank-torrent-name";
+import type { MediaItemType } from "@rivenmedia/plugin-sdk/dto/enums/media-item-type.enum";
 import type { UUID } from "node:crypto";
 
 export class ScraperService extends BaseService {

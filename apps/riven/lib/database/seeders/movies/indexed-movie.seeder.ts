@@ -5,7 +5,7 @@ import { MovieFactory } from "../../factories/movie.factory.ts";
 import { BaseSeeder } from "../base.seeder.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
-import type { Movie } from "@repo/util-plugin-sdk/dto/entities";
+import type { Movie } from "@rivenmedia/plugin-sdk/dto/entities";
 
 export interface IndexedMovieSeederContext {
   movie: Movie;

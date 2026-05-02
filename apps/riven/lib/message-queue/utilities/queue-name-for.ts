@@ -1,6 +1,6 @@
 import { Flow } from "../flows/index.ts";
 
-import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { RivenEvent } from "@rivenmedia/plugin-sdk/events";
 
 export function queueNameFor<T extends Flow["name"]>(eventName: T): T;
 

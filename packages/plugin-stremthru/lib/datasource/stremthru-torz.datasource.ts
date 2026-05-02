@@ -1,4 +1,4 @@
-import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
+import { BaseDataSource, type BasePluginContext } from "@rivenmedia/plugin-sdk";
 
 import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
 import { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
@@ -13,8 +13,8 @@ import type {
   RequestOptions,
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
-import type { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
-import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+import type { MediaItemDownloadRequestedResponse } from "@rivenmedia/plugin-sdk/schemas/events/media-item.download-requested.event";
+import type { DebridFile } from "@rivenmedia/plugin-sdk/schemas/torrents/debrid-file";
 
 const storeNameHeader = "x-stremthru-store-name";
 

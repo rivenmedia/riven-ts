@@ -10,7 +10,7 @@ import {
 } from "type-graphql";
 
 import type { EntityManager } from "@mikro-orm/core";
-import type { DataSourceMap } from "@repo/util-plugin-sdk";
+import type { DataSourceMap } from "@rivenmedia/plugin-sdk";
 
 export type ApolloServerContext = Partial<
   Record<symbol, { dataSources: DataSourceMap }>

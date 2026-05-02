@@ -1,5 +1,5 @@
-import { getEventTypeFromSchema } from "@repo/util-plugin-sdk";
-import { MediaItemDownloadErrorEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
+import { getEventTypeFromSchema } from "@rivenmedia/plugin-sdk";
+import { MediaItemDownloadErrorEvent } from "@rivenmedia/plugin-sdk/schemas/events/media-item.download.error.event";
 
 import assert from "node:assert";
 import { expect, vi } from "vitest";

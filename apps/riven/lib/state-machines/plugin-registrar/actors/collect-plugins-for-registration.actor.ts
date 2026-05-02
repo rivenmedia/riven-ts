@@ -1,5 +1,5 @@
-import { type RivenPlugin, RivenPluginPackage } from "@repo/util-plugin-sdk";
-import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+import { type RivenPlugin, RivenPluginPackage } from "@rivenmedia/plugin-sdk";
+import { PluginSettings } from "@rivenmedia/plugin-sdk/utilities/plugin-settings";
 
 import { constantCase } from "es-toolkit";
 import { fromPromise } from "xstate";

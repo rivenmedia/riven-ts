@@ -1,4 +1,4 @@
-import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequest } from "@rivenmedia/plugin-sdk/dto/entities";
 
 import {
   CreateRequestContext,
@@ -10,7 +10,7 @@ import { persistRequestedMovie } from "./utilities/persist-requested-movie.ts";
 import { persistRequestedShow } from "./utilities/persist-requested-show.ts";
 
 import type { FilterQuery } from "@mikro-orm/core";
-import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
+import type { ContentServiceRequestedResponse } from "@rivenmedia/plugin-sdk/schemas/events/content-service-requested.event";
 import type { UUID } from "node:crypto";
 
 export class ItemRequestService extends BaseService {

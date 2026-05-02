@@ -1,4 +1,4 @@
-import { json } from "@repo/util-plugin-sdk/validation";
+import { json } from "@rivenmedia/plugin-sdk/validation";
 
 import dedent from "dedent";
 import { readFileSync } from "node:fs";

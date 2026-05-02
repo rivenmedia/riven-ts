@@ -1,6 +1,6 @@
 import { CacheControl } from "@repo/core-util-graphql-helpers/caching/cache-control.directive";
-import { PluginDataSource } from "@repo/util-plugin-sdk";
-import { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
+import { PluginDataSource } from "@rivenmedia/plugin-sdk";
+import { ExternalIds } from "@rivenmedia/plugin-sdk/schemas/external-ids.type";
 
 import { Args, Query, Resolver } from "type-graphql";
 

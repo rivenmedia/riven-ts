@@ -3,18 +3,18 @@ import {
   ItemRequest,
   Season,
   Show,
-} from "@repo/util-plugin-sdk/dto/entities";
-import { ItemRequestState } from "@repo/util-plugin-sdk/dto/enums/item-request-state.enum";
-import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
-import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
-import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
+} from "@rivenmedia/plugin-sdk/dto/entities";
+import { ItemRequestState } from "@rivenmedia/plugin-sdk/dto/enums/item-request-state.enum";
+import { DateTime } from "@rivenmedia/plugin-sdk/helpers/dates";
+import { MediaItemIndexError } from "@rivenmedia/plugin-sdk/schemas/events/media-item.index.error.event";
+import { MediaItemIndexErrorIncorrectState } from "@rivenmedia/plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
 import z from "zod";
 
 import type { EntityManager } from "@mikro-orm/core";
-import type { MediaItemIndexRequestedShowResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+import type { MediaItemIndexRequestedShowResponse } from "@rivenmedia/plugin-sdk/schemas/events/media-item.index.requested.event";
 
 export type ShowIndexData =
   NonNullable<MediaItemIndexRequestedShowResponse>["item"];

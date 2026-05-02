@@ -1,5 +1,5 @@
-import { type Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
-import { RivenEvent } from "@repo/util-plugin-sdk/events";
+import { type Movie, Show } from "@rivenmedia/plugin-sdk/dto/entities";
+import { RivenEvent } from "@rivenmedia/plugin-sdk/events";
 
 import chalk from "chalk";
 import { Duration } from "luxon";

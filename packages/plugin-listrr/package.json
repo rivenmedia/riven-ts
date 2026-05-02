@@ -8,8 +8,8 @@
   "type": "module",
   "exports": {
     ".": {
-      "production": "./dist/index.js",
-      "default": "./lib/index.ts"
+      "types": "./lib/index.ts",
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -29,7 +29,7 @@
     "@apollo/datasource-rest": "catalog:",
     "@repo/core-util-graphql-helpers": "workspace:^",
     "@repo/feature-settings": "workspace:^",
-    "@repo/util-plugin-sdk": "workspace:^",
+    "@rivenmedia/plugin-sdk": "workspace:^",
     "class-validator": "catalog:",
     "type-graphql": "catalog:",
     "zod": "catalog:"
