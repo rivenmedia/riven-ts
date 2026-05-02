@@ -43,6 +43,6 @@ runs:
       if: ${{ inputs.set-up-postgres-service == 'true' }}
       run: |
         sudo service postgresql start
-        pg_isready
+        until pg_isready; do sleep 1; done
         sudo -u postgres createuser -s -d -r -w runner
         sudo -u postgres psql -c "ALTER ROLE runner WITH PASSWORD 'runner';"

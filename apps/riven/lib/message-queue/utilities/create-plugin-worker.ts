@@ -47,7 +47,7 @@ export function createPluginWorker<
         withLogContext(
           {
             "bullmq.queue.name": queueName,
-            "riven.log.source": pluginName,
+            "riven.log.source": "plugin",
             "riven.event.name": name as string,
             "riven.plugin.name": pluginName,
             ...(job.id && { "bullmq.job.id": job.id }),

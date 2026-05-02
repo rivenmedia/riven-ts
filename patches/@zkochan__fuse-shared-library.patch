@@ -1,8 +1,8 @@
-diff --git a/index.js b/index.js
-index e110d398cd6d0b4705bf1c7e08373d255b012c35..7e045ba83389ced8ac0272f367145236c8d03425 100644
---- a/index.js
-+++ b/index.js
-@@ -1,7 +1,7 @@
+diff --git a/include.js b/include.js
+index 78486a71fb428228cf9e9273cc84c90d9c2a42b1..eb1c4c4e086d47b4a109a90864d4f3a98c804e24 100644
+--- a/include.js
++++ b/include.js
+@@ -1,18 +1,22 @@
  const os = require('os')
  
  const arch = os.arch()
@@ -10,14 +10,19 @@ index e110d398cd6d0b4705bf1c7e08373d255b012c35..7e045ba83389ced8ac0272f367145236
 +const platform = os.platform() + (arch === 'arm' ? '-arm' : '') + (arch === 'arm64' ? '-arm64' : '')
  
  switch (platform) {
+   case 'linux':
+     require('fuse-shared-library-linux/include')
+     break
    case 'darwin':
-@@ -13,6 +13,9 @@ switch (platform) {
++  case 'darwin-arm64':
+     require('fuse-shared-library-darwin/include')
+     break
    case 'linux-arm':
-     module.exports = require('fuse-shared-library-linux-arm')
+     require('fuse-shared-library-linux-arm/include')
      break
 +  case 'linux-arm64':
 +    module.exports = require('fuse-shared-library-linux-arm64')
 +    break
    case 'win32':
-     module.exports = require('fuse-shared-library-win32')
+     require('fuse-shared-library-win32/include')
      break

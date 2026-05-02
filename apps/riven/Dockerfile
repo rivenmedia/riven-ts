@@ -136,4 +136,6 @@ FROM node:${NODE_VERSION}-alpine AS runner
 
     STOPSIGNAL SIGTERM
 
-    CMD ["sh", "-c", "NODE_ENV=production node --conditions=production --enable-source-maps dist/program/lib/index.js"]
+    ENV NODE_ENV=production
+
+    CMD ["node", "--conditions=production", "--enable-source-maps", "dist/program/lib/index.js"]

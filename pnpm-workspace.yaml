@@ -94,11 +94,10 @@ packageExtensions:
       node-gyp: ^12.0.0
   "@zkochan/fuse-shared-library@*":
     dependencies:
-      fuse-shared-library-linux-arm64: github:runkit-forks/fuse-shared-library-linux-arm64
+      fuse-shared-library-linux-arm64: github:runkit-forks/fuse-shared-library-linux-arm64#11e96e0745fd800ea3e0a4c8cc3b57fceba461cb
   bullmq-otel:
     dependencies:
       tslib: ^2.0.0
-
 patchedDependencies:
   "@zkochan/fuse-shared-library": patches/@zkochan__fuse-shared-library.patch
 

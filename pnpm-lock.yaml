@@ -151,11 +151,11 @@ catalogs:
       specifier: ^0.2.5
       version: 0.2.5
 
-packageExtensionsChecksum: sha256-Q3UJGYPLMWkvWN9avaIpgvApl/LoCUdMbs5zBvNvXGs=
+packageExtensionsChecksum: sha256-lmqPczCHsZjEudlMldfSNaZq7e+eaddMNumuy/0Y5Ys=
 
 patchedDependencies:
   '@zkochan/fuse-shared-library':
-    hash: 14f0ad6c6c26237256a50e99e5a491d7156d5a673db10d0da58aa95f10f289db
+    hash: 946e9d6baa89ccdc38e7afe743b21fbb697159ff15f693061c911c8ab08c50fc
     path: patches/@zkochan__fuse-shared-library.patch
 
 importers:
@@ -10805,7 +10805,7 @@ snapshots:
 
   '@zkochan/fuse-native@0.1.0':
     dependencies:
-      fuse-shared-library: '@zkochan/fuse-shared-library@0.0.0(patch_hash=14f0ad6c6c26237256a50e99e5a491d7156d5a673db10d0da58aa95f10f289db)'
+      fuse-shared-library: '@zkochan/fuse-shared-library@0.0.0(patch_hash=946e9d6baa89ccdc38e7afe743b21fbb697159ff15f693061c911c8ab08c50fc)'
       nanoresource: 1.3.0
       napi-macros: 2.2.2
       node-gyp: 12.1.0
@@ -10815,7 +10815,7 @@ snapshots:
 
   '@zkochan/fuse-shared-library-darwin@0.0.0': {}
 
-  '@zkochan/fuse-shared-library@0.0.0(patch_hash=14f0ad6c6c26237256a50e99e5a491d7156d5a673db10d0da58aa95f10f289db)':
+  '@zkochan/fuse-shared-library@0.0.0(patch_hash=946e9d6baa89ccdc38e7afe743b21fbb697159ff15f693061c911c8ab08c50fc)':
     dependencies:
       fuse-shared-library-darwin: '@zkochan/fuse-shared-library-darwin@0.0.0'
       fuse-shared-library-linux: 1.0.1

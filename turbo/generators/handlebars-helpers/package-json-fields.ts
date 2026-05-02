@@ -68,6 +68,10 @@ export function registerPackageJsonFieldsHelper(plop: PlopTypes.NodePlopAPI) {
         packageTypeFields[packageType]?.[packageJsonFieldType] ?? {},
       );
 
+      if (Array.isArray(fields)) {
+        return fields;
+      }
+
       if (Object.keys(fields).length === 0) {
         return null;
       }

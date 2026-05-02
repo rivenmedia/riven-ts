@@ -27,7 +27,7 @@
         "!**/__tests__",
         "!**/*.spec.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx}",
         "!**/*.test.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx}",
-        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
+        "!**/{logs,node_modules,temp,.turbo,.next,coverage,docker-data,dist}/**"
       ]
     },
     "check-types": {
