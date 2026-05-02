@@ -25,16 +25,19 @@ export function withLogContext<T>(
   context: LogContext,
   callback: (scope: Sentry.Scope) => T,
 ): T {
-  context["riven.session.id"] ??= SessionID.parse(
+  const mergedContext = {
+    ...(logContext.getStore() ?? {}),
+    ...context,
+  };
+
+  mergedContext["riven.session.id"] ??= SessionID.parse(
     getEnvironmentData("riven.session.id"),
   );
 
   return Sentry.withScope((scope) => {
-    scope.setTags({
-      ...context,
-    });
+    scope.setTags(mergedContext);
 
-    return logContext.run(context, callback.bind(null, scope));
+    return logContext.run(mergedContext, callback.bind(null, scope));
   });
 }
 

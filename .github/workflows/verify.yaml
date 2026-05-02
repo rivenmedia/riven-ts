@@ -52,7 +52,7 @@ jobs:
             runner-requirements:
               - postgres-service
             env:
-              RIVEN_SETTING__databaseUrl: postgres+psycopg2://runner:runner@0.0.0.0:5432/riven
+              RIVEN_SETTING__databaseUrl: postgres+psycopg2://runner:runner@127.0.0.1:5432/riven
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
       task: ${{ matrix.task.command }}
