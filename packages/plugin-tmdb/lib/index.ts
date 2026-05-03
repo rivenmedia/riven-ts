@@ -14,7 +14,7 @@ export default {
   dataSources: [TmdbAPI],
   resolvers: [TmdbResolver, TmdbSettingsResolver],
   hooks: {
-    "riven.media-item.index.requested": indexTMDBMediaItem,
+    "riven.media-item.index.requested.movie": indexTMDBMediaItem,
   },
   settingsSchema: TmdbSettings,
   validator() {

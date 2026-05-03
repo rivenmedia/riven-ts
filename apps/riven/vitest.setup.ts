@@ -1,9 +1,10 @@
 import { BaseDataSource, type RivenPlugin } from "@repo/util-plugin-sdk";
 import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
 
-import { EntityRepository } from "@mikro-orm/core";
 import { type RedisClient, RedisConnection } from "bullmq";
-import { type Mock, afterAll, afterEach, expect, vi } from "vitest";
+import { randomUUID } from "node:crypto";
+import { setEnvironmentData } from "node:worker_threads";
+import { type Mock, afterAll, beforeAll, beforeEach, expect, vi } from "vitest";
 import z from "zod";
 
 import type { RedisMemoryServer } from "redis-memory-server";
@@ -32,8 +33,7 @@ vi.mock(import("@repo/plugin-test"), () => {
   }
 
   class TestResolver {
-    // eslint-disable-next-line @typescript-eslint/require-await
-    async testIsValid(): Promise<boolean> {
+    testIsValid() {
       return true;
     }
   }
@@ -59,20 +59,30 @@ vi.mock(import("@repo/plugin-test"), () => {
 
 vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
   const { initORM } = await importOriginal();
-  const { databaseConfig } = await import("./lib/database/config.ts");
+  const { createDatabaseConfig } = await import("./lib/database/config.ts");
+  const { SeedManager } = await import("@mikro-orm/seeder");
   const { SqliteDriver } = await import("@mikro-orm/sqlite");
+  const databaseConfig = await createDatabaseConfig();
 
-  const database = await initORM({
+  const { database, services } = await initORM({
     ...databaseConfig,
-    driver: SqliteDriver as never,
     dbName: ":memory:",
+    driver: SqliteDriver as never,
+    migrations: {
+      migrationsList: [],
+    },
     debug: false,
+    extensions: [SeedManager],
+    seeder: {
+      pathTs: "./seeders",
+    },
   });
 
   await database.orm.schema.create();
 
   return {
     database,
+    services,
     initORM,
   };
 });
@@ -143,24 +153,20 @@ vi.doMock(import("./lib/utilities/settings.ts"), async (importOriginal) => {
   // as the settings are validated and frozen on first import.
   // This allows us to use a dynamically created Redis instance per test file.
 
-  // eslint-disable-next-line turbo/no-undeclared-env-vars
   process.env["RIVEN_SETTING__redisUrl"] = await getRedisUrl();
 
-  return await importOriginal();
+  return importOriginal();
 });
 
-afterEach(async () => {
+beforeAll(() => {
+  setEnvironmentData("riven.session.id", randomUUID());
+});
+
+beforeEach(async () => {
   const { database } = await import("./lib/database/database.ts");
 
   await database.orm.schema.clear();
   await redisClient?.flushdb();
-
-  // Clear all repositories to prevent caching issues between tests.
-  Object.values(database).forEach((repo) => {
-    if (repo instanceof EntityRepository) {
-      repo.getEntityManager().clear();
-    }
-  });
 });
 
 afterAll(async () => {

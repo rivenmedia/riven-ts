@@ -12,6 +12,7 @@ export const MediaItemScrapeErrorNoNewStreamsEvent = createProgramEventSchema(
   "media-item.scrape.error.no-new-streams",
   z.object({
     item: MediaItemInstance,
+    error: z.unknown(),
   }),
 );
 

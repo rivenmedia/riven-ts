@@ -9,7 +9,7 @@ export const preferMikroOrmCore = [
           patterns: [
             {
               regex:
-                "@mikro-orm/(?!(core|reflection|decorators|seeder)(?:$|/))",
+                "@mikro-orm/(?!(core|reflection|decorators|seeder|migrations)(?:$|/))",
               message:
                 "Prefer to use @mikro-orm/core over other @mikro-orm packages.",
             },

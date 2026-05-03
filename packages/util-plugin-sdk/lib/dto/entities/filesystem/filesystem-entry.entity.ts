@@ -9,6 +9,7 @@ import {
 import { IsPositive } from "class-validator";
 import { BigIntResolver } from "graphql-scalars";
 import { DateTime } from "luxon";
+import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { Field, ID, ObjectType } from "type-graphql";
 import z from "zod";
@@ -62,9 +63,9 @@ async function getMediaItemPathParts(mediaItem: MediaItem) {
   discriminatorColumn: "type",
 })
 export abstract class FileSystemEntry {
-  @Field((_type) => ID)
-  @PrimaryKey()
-  id!: number;
+  @Field(() => ID)
+  @PrimaryKey({ type: "uuid" })
+  id = randomUUID();
 
   @Field(() => BigIntResolver)
   @Property({ type: "bigint" })
@@ -73,10 +74,10 @@ export abstract class FileSystemEntry {
 
   @Field(() => Date)
   @Property()
-  createdAt: Opt<Date> = DateTime.now().toJSDate();
+  createdAt: Opt<Date> = DateTime.utc().toJSDate();
 
   @Field(() => Date, { nullable: true })
-  @Property({ onUpdate: () => DateTime.now().toJSDate() })
+  @Property({ onUpdate: () => DateTime.utc().toJSDate() })
   updatedAt?: Opt<Date>;
 
   @Field(() => MediaItem)
@@ -92,7 +93,7 @@ export abstract class FileSystemEntry {
    */
   @Property({ persist: false, hidden: true })
   get baseDirectory(): Opt<Hidden<"movies" | "shows">> {
-    const mediaItemType = this.mediaItem.getEntity().type;
+    const { type: mediaItemType } = this.mediaItem.getEntity();
 
     if (mediaItemType === "movie") {
       return "movies";

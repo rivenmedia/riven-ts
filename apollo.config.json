@@ -3,7 +3,7 @@
     "includes": ["apps/riven/lib/**/*.ts"],
     "service": {
       "name": "Riven",
-      "url": "http://localhost:3000/graphql"
+      "localSchemaFile": "apps/riven/schema.graphql"
     }
   }
 }

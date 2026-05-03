@@ -1,5 +1,3 @@
-import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
-
 import { Queue, type QueueOptions } from "bullmq";
 import { toMerged } from "es-toolkit";
 
@@ -17,15 +15,10 @@ export function createQueue(
     name,
     toMerged<QueueOptions, typeof options>(
       {
-        streams: {
-          events: {
-            maxLen: 100,
-          },
-        },
         defaultJobOptions: {
           removeOnComplete: {
             age: 60 * 60 * 6,
-            count: 500,
+            count: 5000,
           },
           removeOnFail: {
             age: 60 * 60 * 24,
@@ -33,6 +26,7 @@ export function createQueue(
           },
         },
         connection: {
+          enableOfflineQueue: false,
           url: settings.redisUrl,
         },
         telemetry,
@@ -41,7 +35,9 @@ export function createQueue(
     ),
   );
 
-  registerMQListeners(queue, logger);
+  queue.on("error", (error) => {
+    logger.error(`${name} queue error`, { err: error });
+  });
 
   return queue;
 }

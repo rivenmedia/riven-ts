@@ -1,13 +1,16 @@
+import { dataSourceContext } from "@repo/util-plugin-sdk/datasource-context";
 import {
   type RivenEvent,
   RivenEventHandler,
 } from "@repo/util-plugin-sdk/events";
-import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
 
 import * as Sentry from "@sentry/node";
 import { type Processor, Worker, type WorkerOptions } from "bullmq";
+import { AbortError } from "es-toolkit";
+import assert from "node:assert";
 import z from "zod";
 
+import { withLogContext } from "../../utilities/logger/log-context.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
@@ -17,7 +20,7 @@ import type { ParamsFor } from "@repo/util-plugin-sdk";
 
 Worker.setMaxListeners(200);
 
-export async function createPluginWorker<
+export function createPluginWorker<
   T extends RivenEvent["type"],
   R extends (typeof RivenEventHandler)[T],
 >(
@@ -35,23 +38,37 @@ export async function createPluginWorker<
 
   const worker = new Worker(
     queueName,
-    async (job, token, signal) => {
-      return await Sentry.withScope(async (scope) => {
-        scope.setTags({
-          "bullmq.job.id": job.id,
-          "bullmq.queue.name": queueName,
-          "riven.log.source": pluginName,
-          "riven.event.name": name as string,
-          "riven.plugin.name": pluginName,
+    (job, token, signal) => {
+      return new Promise((resolve, reject) => {
+        signal?.addEventListener("abort", () => {
+          reject(new AbortError(`${job.name} aborted`));
         });
 
-        try {
-          return await processor(job as never, token, signal);
-        } catch (error) {
-          Sentry.captureException(error);
+        withLogContext(
+          {
+            "bullmq.queue.name": queueName,
+            "riven.log.source": "plugin",
+            "riven.event.name": name as string,
+            "riven.plugin.name": pluginName,
+            ...(job.id && { "bullmq.job.id": job.id }),
+          },
+          async () => {
+            try {
+              assert(job.token, "Job token is not set");
 
-          throw error;
-        }
+              return await dataSourceContext.run(
+                { job, token: job.token },
+                () => processor(job as never, token, signal),
+              );
+            } catch (error) {
+              Sentry.captureException(error);
+
+              throw error;
+            }
+          },
+        )
+          .then(resolve)
+          .catch(reject);
       });
     },
     {
@@ -63,17 +80,21 @@ export async function createPluginWorker<
     },
   );
 
-  registerMQListeners(worker, logger);
-
-  worker.on("failed", (_job, error) => {
-    logger.error("Plugin worker encountered an error", { err: error });
+  queue.on("error", (error) => {
+    logger.error(`${queueName} queue error`, { err: error });
   });
 
-  if (settings.unsafeClearQueuesOnStartup) {
-    await queue.obliterate({
-      force: true,
-    });
-  }
+  worker.on("error", (error) => {
+    logger.error(`${queueName} worker error`, { err: error });
+  });
+
+  worker.on("failed", (_job, error) => {
+    if (error instanceof AbortError) {
+      return;
+    }
+
+    logger.error(`${queueName} failed:`, { err: error });
+  });
 
   return {
     queue,

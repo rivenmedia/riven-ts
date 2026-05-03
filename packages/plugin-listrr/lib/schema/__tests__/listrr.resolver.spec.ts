@@ -2,19 +2,18 @@ import { HttpResponse } from "msw";
 import assert from "node:assert";
 import { expect } from "vitest";
 
-import {
-  type GetApiListMoviesIdSortbySortbydirectionPageQueryResponse,
-  type GetApiListShowsIdSortbySortbydirectionPageQueryResponse,
-  createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse,
-  createGetApiListMyPageQueryResponse,
-  createGetApiListShowsIdSortbySortbydirectionPageQueryResponse,
-  createListrrContractsModelsAPIMovieDto,
-  createListrrContractsModelsAPIShowDto,
-  getApiListMoviesIdSortbySortbydirectionPageHandler,
-  getApiListMyPageHandler,
-  getApiListShowsIdSortbySortbydirectionPageHandler,
-} from "../../__generated__/index.ts";
+import { getApiListMoviesIdSortbySortbydirectionPageHandler } from "../../__generated__/handlers/getApiListMoviesIdSortbySortbydirectionPageHandler.ts";
+import { getApiListMyPageHandler } from "../../__generated__/handlers/getApiListMyPageHandler.ts";
+import { getApiListShowsIdSortbySortbydirectionPageHandler } from "../../__generated__/handlers/getApiListShowsIdSortbySortbydirectionPageHandler.ts";
+import { createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse } from "../../__generated__/mocks/createGetApiListMoviesIdSortbySortbydirectionPage.ts";
+import { createGetApiListMyPageQueryResponse } from "../../__generated__/mocks/createGetApiListMyPage.ts";
+import { createGetApiListShowsIdSortbySortbydirectionPageQueryResponse } from "../../__generated__/mocks/createGetApiListShowsIdSortbySortbydirectionPage.ts";
+import { createListrrContractsModelsAPIMovieDto } from "../../__generated__/mocks/listrr/contracts/models/API/createMovieDto.ts";
+import { createListrrContractsModelsAPIShowDto } from "../../__generated__/mocks/listrr/contracts/models/API/createShowDto.ts";
 import { it } from "../../__tests__/listrr.test-context.ts";
+
+import type { GetApiListMoviesIdSortbySortbydirectionPageQueryResponse } from "../../__generated__/types/GetApiListMoviesIdSortbySortbydirectionPage.ts";
+import type { GetApiListShowsIdSortbySortbydirectionPageQueryResponse } from "../../__generated__/types/GetApiListShowsIdSortbySortbydirectionPage.ts";
 
 it("returns movies when calling listrrMovies query", async ({
   gqlContext,

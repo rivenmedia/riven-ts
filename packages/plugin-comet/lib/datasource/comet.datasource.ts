@@ -75,6 +75,11 @@ export class CometAPI extends BaseDataSource<CometSettings> {
       const torrents: Record<string, string> = {};
 
       for (const stream of parsed.streams) {
+        if ("url" in stream) {
+          // Skip the "[🔄] Comet" stream which is not an actual torrent result
+          continue;
+        }
+
         if (!stream.infoHash) {
           continue;
         }

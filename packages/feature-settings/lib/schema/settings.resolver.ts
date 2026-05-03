@@ -12,9 +12,9 @@ export class CoreSettingsResolver {
   }
 }
 
-@Resolver((_of) => Settings)
+@Resolver(() => Settings)
 export class RivenSettingsResolver {
-  @FieldResolver((_returns) => RivenSettings)
+  @FieldResolver(() => RivenSettings)
   riven(): RivenSettings {
     return {
       version: "1.0.0",

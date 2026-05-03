@@ -23,11 +23,16 @@ export const waitForChunk = async (
   let chunk: Buffer | null = null;
   let fetchedFromCache = false;
 
-  const timeout = setTimeout(() => {
-    throw new FuseError(Fuse.ETIMEDOUT, "Timeout waiting for chunk");
-  }, config.chunkTimeoutSeconds * 1000);
+  const timeoutSignal = AbortSignal.timeout(config.chunkTimeoutSeconds * 1000);
 
   while ((chunk = reader.read(targetChunk.size) as Buffer | null) === null) {
+    if (timeoutSignal.aborted) {
+      throw new FuseError(
+        Fuse.ETIMEDOUT,
+        `Timed out waiting for chunk ${targetChunk.rangeLabel} for fd ${fd.toString()}`,
+      );
+    }
+
     await sleep(50);
 
     // Check if the chunk got cached by another read whilst waiting
@@ -43,13 +48,13 @@ export const waitForChunk = async (
   }
 
   if (!fetchedFromCache) {
+    const currentStreamPosition = fdToCurrentStreamPositionMap.get(fd) ?? 0;
+
     fdToCurrentStreamPositionMap.set(
       fd,
-      (fdToCurrentStreamPositionMap.get(fd) ?? 0) + chunk.byteLength,
+      currentStreamPosition + chunk.byteLength,
     );
   }
-
-  clearTimeout(timeout);
 
   return {
     chunk,

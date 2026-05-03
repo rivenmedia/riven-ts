@@ -39,6 +39,7 @@ test("isSpecial is true if the season number is 0", async ({
     number: 0,
     show,
     itemRequest,
+    tvdbId: "1",
   });
 
   await em.flush();

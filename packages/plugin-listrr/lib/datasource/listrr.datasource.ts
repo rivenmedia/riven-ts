@@ -4,13 +4,9 @@ import {
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
 
-import {
-  type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIMovieDtoSchema as GetMoviesResponse,
-  type ListrrContractsModelsAPIPagedResponse1ListrrContractsModelsAPIShowDtoSchema as GetShowsResponse,
-  getApiListMyPageQueryResponseSchema,
-  listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIMovieDtoSchema as getMoviesResponseSchema,
-  listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIShowDtoSchema as getShowsResponseSchema,
-} from "../__generated__/index.ts";
+import { getApiListMyPageQueryResponseSchema } from "../__generated__/zod/getApiListMyPageSchema.ts";
+import { listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIMovieDtoSchema as getMoviesResponseSchema } from "../__generated__/zod/listrr/contracts/models/API/pagedResponse1listrr/contracts/models/API/movieDtoSchema.ts";
+import { listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIShowDtoSchema as getShowsResponseSchema } from "../__generated__/zod/listrr/contracts/models/API/pagedResponse1listrr/contracts/models/API/showDtoSchema.ts";
 
 import type { ListrrSettings } from "../listrr-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
@@ -66,7 +62,7 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
       let totalPages = 1;
 
       while (page <= totalPages) {
-        const response = await this.get<GetShowsResponse>(
+        const response = await this.get<unknown>(
           `List/Shows/${listId}/ReleaseDate/Descending/${page.toString()}`,
           {
             cacheOptions: {
@@ -119,7 +115,7 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
       let totalPages = 1;
 
       while (page <= totalPages) {
-        const response = await this.get<GetMoviesResponse>(
+        const response = await this.get<unknown>(
           `List/Movies/${listId}/ReleaseDate/Descending/${page.toString()}`,
           {
             cacheOptions: {

@@ -5,19 +5,26 @@ import type { PathLike } from "node:fs";
 
 export const attrCache = new LRUCache<PathLike, Partial<Stats>>({
   ttl: 300_000,
-  ttlAutopurge: false,
   max: 1000,
   dispose: (_value, key, reason) => {
     if (reason === "delete" && key !== "/") {
-      const match = /^.*(?=\/)/.exec(key.toString());
+      let match = /^.*(?=\/)/.exec(key.toString());
 
-      if (match) {
-        attrCache.delete(match[0] || "/");
+      if (!match) {
+        return;
       }
 
-      return true;
-    }
+      while (match) {
+        const [matchPath] = match;
 
-    return true;
+        attrCache.delete(matchPath || "/");
+
+        const nextPart = matchPath.split("/").slice(0, -1).join("/");
+
+        match = /^.*(?=\/)/.exec(nextPart);
+      }
+
+      return;
+    }
   },
 });

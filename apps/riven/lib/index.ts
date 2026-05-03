@@ -1,57 +1,65 @@
-import "./sentry.ts";
+import { randomUUID } from "node:crypto";
+import { setEnvironmentData } from "node:worker_threads";
 
-import * as Sentry from "@sentry/node";
-import { createActor, waitFor } from "xstate";
+import { SessionID, withLogContext } from "./utilities/logger/log-context.ts";
 
-import { logger } from "./utilities/logger/logger.ts";
+const sessionId = SessionID.parse(randomUUID());
 
-await Sentry.withScope(async (scope) => {
-  const sessionId = crypto.randomUUID();
+setEnvironmentData("riven.session.id", sessionId);
 
-  scope.setTags({
+await withLogContext(
+  {
     "riven.log.source": "core",
     "riven.session.id": sessionId,
-  });
+  },
+  async () => {
+    await import("./sentry.ts");
 
-  // Dynamically import the main state machine so the log action obtains the current scope
-  const { rivenMachine } = await import("./state-machines/program/index.ts");
+    const { createActor, waitFor } = await import("xstate");
 
-  process.on("uncaughtException", (error) => {
-    logger.error("Uncaught exception", { err: error });
+    const { rivenMachine } = await import("./state-machines/program/index.ts");
+    const { logger } = await import("./utilities/logger/logger.ts");
 
-    process.exit(1);
-  });
+    process.on("uncaughtException", (error) => {
+      logger.error("Uncaught exception", { err: error });
 
-  process.on("unhandledRejection", (error) => {
-    logger.error("Uncaught rejection", { err: error });
-  });
+      process.exit(1);
+    });
 
-  const actor = createActor(rivenMachine, {
-    input: {
-      sessionId,
-    },
-  });
+    process.on("unhandledRejection", (error) => {
+      logger.error("Uncaught rejection", { err: error });
+    });
 
-  actor.start();
+    const actor = createActor(rivenMachine, {
+      input: {
+        sessionId,
+      },
+    });
 
-  process.on("SIGINT", () => {
-    actor.send({ type: "riven.core.shutdown" });
-  });
+    actor.start();
 
-  await waitFor(
-    actor,
-    (state) => state.matches("Exited") || state.matches("Errored"),
-  );
+    process.on("SIGINT", () => {
+      const { value } = actor.getSnapshot();
+      const stoppableStates: (typeof value)[] = ["Running", "Bootstrapping"];
 
-  const { value } = actor.getSnapshot();
+      if (stoppableStates.includes(value)) {
+        actor.send({ type: "riven.core.shutdown" });
+      }
+    });
 
-  if (value === "Errored") {
-    process.exit(1);
-  }
+    await waitFor(
+      actor,
+      (state) => state.matches("Exited") || state.matches("Errored"),
+    );
 
-  logger.info("Riven has shut down");
+    const { value } = actor.getSnapshot();
 
-  await Sentry.close();
+    if (value === "Errored") {
+      process.exit(1);
+    }
 
-  process.exit(0);
-});
+    logger.info("Riven has shut down");
+
+    process.exit(0);
+  },
+);

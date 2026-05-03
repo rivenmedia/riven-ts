@@ -7,7 +7,7 @@ import { pluginConfig } from "../tmdb-plugin.config.ts";
 
 @Resolver()
 export class TmdbResolver {
-  @Query((_returns) => Boolean)
+  @Query(() => Boolean)
   tmdbIsValid(@PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI) {
     return api.validate();
   }

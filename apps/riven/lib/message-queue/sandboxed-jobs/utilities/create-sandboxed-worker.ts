@@ -1,5 +1,3 @@
-import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
-
 import { type QueueOptions, Worker, type WorkerOptions } from "bullmq";
 import { toMerged } from "es-toolkit";
 import assert from "node:assert";
@@ -16,7 +14,7 @@ import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 Worker.setMaxListeners(200);
 
-export async function createSandboxedWorker(
+export function createSandboxedWorker(
   sandboxedJobSchema: ZodObject<{
     name: ZodLiteral<SandboxedJobDefinition["name"]>;
     input: ZodType;
@@ -52,15 +50,12 @@ export async function createSandboxedWorker(
     processorURL,
     toMerged<WorkerOptions, typeof workerOptions>(
       {
-        removeOnComplete: { count: 50 },
-        removeOnFail: { count: 50 },
+        removeOnComplete: { count: 5000 },
+        removeOnFail: { count: 5000 },
         useWorkerThreads: true,
         workerThreadsOptions: {
-          execArgv: ["--env-file=.env.riven"],
+          execArgv: ["--enable-source-maps"],
           name: `${sandboxedJobName}-worker`,
-          workerData: {
-            gqlUrl: `http://localhost:${settings.gqlPort.toString()}`,
-          },
         },
         connection: {
           url: settings.redisUrl,
@@ -71,17 +66,17 @@ export async function createSandboxedWorker(
     ),
   );
 
-  registerMQListeners(worker, logger);
-
-  worker.on("failed", (_job, error) => {
-    logger.error("Sandboxed worker encountered an error", { err: error });
+  worker.on("error", (error) => {
+    logger.error(`${sandboxedJobName} worker error`, { err: error });
   });
 
-  if (settings.unsafeClearQueuesOnStartup) {
-    await queue.obliterate({
-      force: true,
-    });
-  }
+  worker.on("failed", (_job, error) => {
+    if (error.name === "AbortError") {
+      return;
+    }
+
+    logger.error(`${sandboxedJobName} failed:`, { err: error });
+  });
 
   return { worker, queue };
 }

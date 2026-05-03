@@ -2,7 +2,7 @@ import { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 
 import { FieldResolver, Int, Resolver, Root } from "type-graphql";
 
-@Resolver((_of) => Season)
+@Resolver(() => Season)
 export class SeasonResolver {
   @FieldResolver(() => Show)
   show(@Root() season: Season) {

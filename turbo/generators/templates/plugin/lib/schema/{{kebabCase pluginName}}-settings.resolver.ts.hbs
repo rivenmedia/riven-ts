@@ -4,9 +4,9 @@ import { FieldResolver, Resolver } from "type-graphql";
 
 import { {{pascalCase pluginName}}Settings } from "./types/{{kebabCase pluginName}}-settings.type.ts";
 
-@Resolver((_of) => Settings)
+@Resolver(() => Settings)
 export class {{pascalCase pluginName}}SettingsResolver {
-  @FieldResolver((_returns) => {{pascalCase pluginName}}Settings)
+  @FieldResolver(() => {{pascalCase pluginName}}Settings)
   {{camelCase pluginName}}(): {{pascalCase pluginName}}Settings {
     return {
       apiKey: "{{camelCase pluginName}}-api-key",

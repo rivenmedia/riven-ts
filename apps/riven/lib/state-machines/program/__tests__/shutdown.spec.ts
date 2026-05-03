@@ -9,10 +9,7 @@ it('transitions to "Shutdown" then "Exited" when the "riven.shutdown" event is s
   actor.start().send({ type: "riven.core.shutdown" });
 
   expect(actor.getSnapshot().value).toStrictEqual({
-    Shutdown: {
-      "Shutting down GQL server": "Shutting down",
-      "Unmounting VFS": "Unmounting",
-    },
+    Shutdown: "Shutting down main runner",
   });
 
   await vi.waitFor(() => {
@@ -63,3 +60,5 @@ it("unmounts the VFS when shutting down", async ({ machine, input }) => {
 
   expect(unmountVfsMock).toHaveBeenCalledOnce();
 });
+
+it.todo("stops the main runner when shutting down");

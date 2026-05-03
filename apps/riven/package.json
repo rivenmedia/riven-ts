@@ -3,29 +3,52 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    "./workers/map-items-to-files": {
+      "production": "./workers/map-items-to-files/map-items-to-files.processor.js",
+      "default": "./lib/message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.processor.ts"
+    },
+    "./workers/parse-scrape-results": {
+      "production": "./workers/parse-scrape-results/parse-scrape-results.processor.js",
+      "default": "./lib/message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.processor.ts"
+    },
+    "./workers/validate-torrent-files": {
+      "production": "./workers/validate-torrent-files/validate-torrent-files.processor.js",
+      "default": "./lib/message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.ts"
+    },
+    "./database-metadata-cache": "./temp/metadata.json"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "pnpm build:program && pnpm build:workers",
+    "build": "pnpm build:program",
     "build:program": "tsc --build tsconfig.app.json",
-    "build:workers": "rm -rf dist/workers && node esbuild.config.ts",
+    "build:workers": "rm -rf dist/workers && pnpm node esbuild.config.ts",
     "check-types": "tsc --noEmit --project tsconfig.app.json && tsc --noEmit --project tsconfig.spec.json",
-    "dev": "pnpm --filter @repo/riven build:workers && node --watch --env-file-if-exists=.env.riven --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
-    "generate-config-docs": "zod2md",
-    "generate-gql-schema": "node --import=@swc-node/register/esm-register scripts/generate-gql-schema.ts",
-    "graphql-codegen": "graphql-codegen --config graphql-codegen.ts",
+    "codegen:config-docs": "zod2md",
+    "codegen:gql": "graphql-codegen --config graphql-codegen.ts",
+    "codegen:gql-schema": "pnpm node --import=@swc-node/register/esm-register scripts/generate-gql-schema.ts",
+    "database:cache:generate": "mikro-orm cache:generate --combined --contextName slim",
+    "dev": "pnpm node --watch --env-file-if-exists=.env.riven --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
-    "start": "node --conditions production --env-file-if-exists=.env.riven --enable-source-maps dist/program/index.js",
+    "migration:check": "mikro-orm migration:check",
+    "mikro-orm": "mikro-orm",
+    "start": "pnpm node --conditions=production --env-file-if-exists=.env.riven --enable-source-maps dist/lib/index.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
     "@apollo/client": "^4.0.11",
     "@apollo/server": "catalog:",
-    "@apollo/server-plugin-response-cache": "^5.0.0",
     "@apollo/utils.keyvadapter": "catalog:",
+    "@apollo/utils.keyvaluecache": "catalog:",
     "@elastic/ecs-winston-format": "^1.5.3",
     "@keyv/redis": "^5.1.5",
     "@mikro-orm/core": "catalog:",
+    "@mikro-orm/decorators": "catalog:",
+    "@mikro-orm/migrations": "catalog:",
     "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",
     "@repo/core-util-graphql-schema": "workspace:^",
@@ -41,6 +64,7 @@
     "@repo/plugin-tvdb": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "@repo/util-rank-torrent-name": "workspace:^",
+    "@sentry/node": "^10.38.0",
     "@zkochan/fuse-native": "^0.1.0",
     "bullmq": "catalog:",
     "bullmq-otel": "catalog:",
@@ -49,12 +73,14 @@
     "dataloader": "^2.2.3",
     "dedent": "catalog:",
     "es-toolkit": "catalog:",
+    "graphql": "catalog:",
+    "graphql-scalars": "catalog:",
     "keyv": "^5.5.5",
-    "limiter": "catalog:",
     "lru-cache": "^11.2.4",
     "luxon": "^3.7.2",
     "parse-torrent-title": "^2.1.0",
     "reflect-metadata": "catalog:",
+    "rxjs": "^7.8.2",
     "safe-stringify": "^1.2.0",
     "triple-beam": "^1.4.1",
     "type-graphql": "catalog:",
@@ -73,6 +99,7 @@
     "@graphql-codegen/typescript": "^5.0.7",
     "@graphql-codegen/typescript-operations": "^5.0.7",
     "@graphql-typed-document-node/core": "^3.2.0",
+    "@mikro-orm/cli": "catalog:",
     "@mikro-orm/seeder": "catalog:",
     "@mikro-orm/sqlite": "catalog:",
     "@parcel/watcher": "^2.5.1",
@@ -82,7 +109,6 @@
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/plugin-test": "workspace:^",
     "@repo/util-plugin-testing": "workspace:^",
-    "@sentry/node": "^10.38.0",
     "@swc-node/register": "^1.11.1",
     "@types/luxon": "^3.7.1",
     "@types/node": "catalog:",
@@ -96,5 +122,10 @@
     "typescript": "catalog:",
     "vitest": "catalog:",
     "zod2md": "catalog:"
+  },
+  "mikro-orm": {
+    "configPaths": [
+      "./lib/mikro-orm.config.ts"
+    ]
   }
 }

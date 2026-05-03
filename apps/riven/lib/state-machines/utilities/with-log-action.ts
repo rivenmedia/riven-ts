@@ -23,4 +23,4 @@ export const withLogAction = {
       }
     },
   },
-};
+} as const;

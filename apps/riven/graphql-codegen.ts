@@ -26,14 +26,19 @@ export default {
       plugins: ["typescript-operations"],
       // Note: these config options moved from the other generated file config
       config: {
+        scalars: {
+          ID: "`${string}-${string}-${string}-${string}-${string}`",
+          BigInt: "number",
+          DateTimeISO: "string",
+          JSONObject: "Record<string, unknown>",
+        },
+        strictScalars: true,
         avoidOptionals: {
           // Use `null` for nullable fields instead of optionals
           field: true,
           // Allow nullable input fields to remain unspecified
           inputValue: false,
         },
-        // Use `unknown` instead of `any` for unconfigured scalars
-        defaultScalarType: "unknown",
         // Apollo Client always includes `__typename` fields
         nonOptionalTypename: true,
         // Apollo Client doesn't add the `__typename` field to root types so
@@ -41,6 +46,10 @@ export default {
         skipTypeNameForRoot: true,
         // Use string values for enums (e.g. 'one' | 'two')
         allowEnumStringTypes: true,
+        inlineFragmentTypes: "mask",
+        customDirectives: {
+          apolloUnmask: true,
+        },
       } satisfies TypeScriptDocumentsPluginConfig,
     },
   },

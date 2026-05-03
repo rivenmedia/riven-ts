@@ -4,9 +4,9 @@ import { FieldResolver, Resolver } from "type-graphql";
 
 import { TmdbSettings } from "./types/tmdb-settings.type.ts";
 
-@Resolver((_of) => Settings)
+@Resolver(() => Settings)
 export class TmdbSettingsResolver {
-  @FieldResolver((_returns) => TmdbSettings)
+  @FieldResolver(() => TmdbSettings)
   tmdb(): TmdbSettings {
     return {
       apiKey: "tmdb-api-key",

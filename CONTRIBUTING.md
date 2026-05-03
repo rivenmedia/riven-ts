@@ -87,7 +87,7 @@ sudo chown -R 1000:1000 packages/plugin-seerr/docker-data
 After setting up the `.env` files, you need to do a one-time schema generation for different services,
 
 ```bash
-turbo generate-schemas
+turbo codegen:api-schemas
 ```
 
 Then, you can start the different services required,
@@ -113,12 +113,12 @@ pnpm --filter @repo/riven dev
 
 If everything works, you should see a bunch of logs, else you can check for errors on http://localhost:8969.
 
-Also for dev, it's recommened to enable these env in `.env.riven`
+Also for dev, it's recommended to enable these env in `.env.riven`
 
 ```bash
-# clear queues on startup
-RIVEN_SETTING__unsafeClearQueuesOnStartup=true
+# Wipe Redis cache on startup
+RIVEN_SETTING__unsafeWipeRedisOnStartup=true
 
-# refresh database on startup
-RIVEN_SETTING__unsafeRefreshDatabaseOnStartup=true
+# Wipe database on startup
+RIVEN_SETTING__unsafeWipeDatabaseOnStartup=true
 ```

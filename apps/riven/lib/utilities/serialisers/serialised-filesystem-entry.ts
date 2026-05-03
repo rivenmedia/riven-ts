@@ -1,18 +1,27 @@
-import { FileSystemEntryInstance } from "@repo/util-plugin-sdk/schemas/media/filesystem-entry-instance";
+import {
+  FileSystemEntry,
+  MediaEntry,
+  SubtitleEntry,
+} from "@repo/util-plugin-sdk/dto/entities";
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 
 import { database } from "../../database/database.ts";
+import { createApolloInstanceSchema } from "./create-apollo-instance-schema.ts";
 
 /**
  * A schema that converts to/from a serialised filesystem entry.
  */
 export const SerialisedFileSystemEntry = z.codec(
-  z.int().min(1),
-  FileSystemEntryInstance,
+  UUID,
+  z.xor([
+    z.instanceof(FileSystemEntry),
+    createApolloInstanceSchema(FileSystemEntry, MediaEntry, SubtitleEntry),
+  ]),
   {
-    decode: (id) => database.filesystemEntry.findOneOrFail(id),
-    encode: (data) => data.id,
+    decode: (id) => database.em.fork().findOneOrFail(FileSystemEntry, id),
+    encode: (data) => UUID.parse(data.id),
   },
 );
 

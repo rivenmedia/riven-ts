@@ -1,9 +1,7 @@
 services:
   riven:
     container_name: riven
-    build:
-      context: ../..
-      dockerfile: apps/riven/Dockerfile
+    image: ghcr.io/rivenmedia/riven-ts:main
     restart: unless-stopped
     tty: true
     cap_add:
@@ -46,6 +44,7 @@ services:
     image: redis
     restart: unless-stopped
     command: redis-server --maxmemory-policy noeviction --appendonly yes
+    user: "1000:1000"
     healthcheck:
       test:
         - CMD

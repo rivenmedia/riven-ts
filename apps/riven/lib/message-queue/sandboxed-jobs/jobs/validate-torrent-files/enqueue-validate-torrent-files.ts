@@ -7,10 +7,11 @@ import {
 
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 import type { ParentOptions, PluginJobNode } from "bullmq";
+import type { UUID } from "node:crypto";
 
 export interface EnqueueValidateTorrentFilesInput {
   parent: ParentOptions;
-  mediaItemId: number;
+  mediaItemId: UUID;
   infoHash: string;
   files: DebridFile[];
   isCacheCheck: boolean;
@@ -33,7 +34,7 @@ export function enqueueValidateTorrentFiles({
     { files },
     {
       opts: {
-        jobId: `${mediaItemId.toString()}-${infoHash}-map-items-to-files-${isCacheCheck ? "cached" : "downloaded"}`,
+        jobId: `${mediaItemId}-${infoHash}-map-items-to-files-${isCacheCheck ? "cached" : "downloaded"}`,
         removeDependencyOnFailure: true,
       },
     },
@@ -48,7 +49,7 @@ export function enqueueValidateTorrentFiles({
     },
     {
       opts: {
-        jobId: `${mediaItemId.toString()}-${infoHash}-validate-torrent-files-${isCacheCheck ? "cached" : "downloaded"}`,
+        jobId: `${mediaItemId}-${infoHash}-validate-torrent-files-${isCacheCheck ? "cached" : "downloaded"}`,
         parent,
         removeDependencyOnFailure: true,
       },

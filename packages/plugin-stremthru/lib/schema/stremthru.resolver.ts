@@ -2,15 +2,16 @@ import { PluginDataSource } from "@repo/util-plugin-sdk";
 
 import { Query, Resolver } from "type-graphql";
 
-import { StremThruAPI } from "../datasource/stremthru.datasource.ts";
+import { StremThruTorznabAPI } from "../datasource/stremthru-torznab.datasource.ts";
 import { pluginConfig } from "../stremthru-plugin.config.ts";
 
 @Resolver()
 export class StremThruResolver {
-  @Query((_returns) => Boolean)
-  async stremthruIsValid(
-    @PluginDataSource(pluginConfig.name, StremThruAPI) api: StremThruAPI,
+  @Query(() => Boolean)
+  stremthruIsValid(
+    @PluginDataSource(pluginConfig.name, StremThruTorznabAPI)
+    api: StremThruTorznabAPI,
   ): Promise<boolean> {
-    return await api.validate();
+    return api.validate();
   }
 }

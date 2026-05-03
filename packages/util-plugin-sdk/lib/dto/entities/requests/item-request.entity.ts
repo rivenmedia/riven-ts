@@ -8,6 +8,7 @@ import {
   Unique,
 } from "@mikro-orm/decorators/legacy";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
+import { randomUUID } from "node:crypto";
 import { Field, ID, ObjectType } from "type-graphql";
 
 import { DateTime } from "../../../helpers/dates.ts";
@@ -20,8 +21,8 @@ import { Season } from "../media-items/season.entity.ts";
 @Entity()
 export class ItemRequest {
   @Field(() => ID)
-  @PrimaryKey()
-  id!: number;
+  @PrimaryKey({ type: "uuid" })
+  id = randomUUID();
 
   @Field(() => String, { nullable: true })
   @Property()
@@ -58,7 +59,7 @@ export class ItemRequest {
 
   @Field(() => Date)
   @Property()
-  createdAt: Opt<Date> = DateTime.now().toJSDate();
+  createdAt: Opt<Date> = DateTime.utc().toJSDate();
 
   @Field(() => Date, { nullable: true })
   @Property()
