@@ -8,7 +8,7 @@ ARG PUID=1000
 ARG PGID=1000
 ARG CI=true
 
-FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS core-os
+FROM node:${NODE_VERSION}-slim AS core-os
 
     LABEL stage="core-os"
 
