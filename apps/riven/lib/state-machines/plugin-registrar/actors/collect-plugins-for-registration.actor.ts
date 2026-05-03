@@ -69,7 +69,7 @@ export const collectPluginsForRegistration = fromPromise(async () => {
 
     if (
       !permanentlyEnabledPlugins.includes(validatedPluginName.data) &&
-      !settings.enabledPlugins.includes(validatedPluginName.data as never)
+      !settings.enabledPlugins.includes(validatedPluginName.data)
     ) {
       logger.info(
         `Plugin ${chalk.bold(pluginName)} is not enabled, skipping registration.`,
