@@ -145,9 +145,7 @@ export const RivenSettings = z.object({
     ),
   enabledPlugins: json(z.array(CorePlugins.exclude(["tmdb", "tvdb"])))
     .default([])
-    .describe(
-      "A list of core plugins to enable. TVDB and TMDB will always be enabled regardless of this setting, as they are required for Riven's core functionality.",
-    ),
+    .describe("A list of core plugins to enable."),
 });
 
 export type RivenSettings = z.infer<typeof RivenSettings>;
