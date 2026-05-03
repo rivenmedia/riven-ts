@@ -4,6 +4,7 @@ import dedent from "dedent";
 import { readFileSync } from "node:fs";
 import z from "zod";
 
+import { CorePlugins } from "./schemas/core-plugins.schema.ts";
 import { LogLevel } from "./utilities/logger/log-levels.ts";
 
 export const RivenSettings = z.object({
@@ -142,6 +143,9 @@ export const RivenSettings = z.object({
     .describe(
       "When an episode has no air date, this number of days will be added to the current date to estimate a release date for scheduling purposes.",
     ),
+  enabledPlugins: json(z.array(CorePlugins))
+    .default([])
+    .describe("A list of core plugins to enable."),
 });
 
 export type RivenSettings = z.infer<typeof RivenSettings>;

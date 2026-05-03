@@ -48,9 +48,9 @@ it("returns any invalid plugins from the package.json file along with their vali
   expect.assert(validationResult.error);
 
   expect(plugins).toEqual<ParsedPlugins>({
-    invalidPlugins: [
-      ["@repo/plugin-test", z.treeifyError(validationResult.error)],
-    ] as const,
+    invalidPlugins: new Map([
+      ["@repo/plugin-test", z.prettifyError(validationResult.error)],
+    ]),
     unresolvablePlugins: [],
     validPlugins: [],
     pluginConfigPrefixMap: new Map(),
