@@ -15,7 +15,7 @@ catalog:
   "@kubb/plugin-msw": 4.20.1
   "@kubb/plugin-oas": 4.20.1
   "@kubb/plugin-ts": 4.20.1
-  "@kubb/plugin-zod": 4.20.1
+  "@kubb/plugin-zod": 4.37.5
   "@mikro-orm/cli": ^7.0.12
   "@mikro-orm/core": ^7.0.12
   "@mikro-orm/decorators": ^7.0.12
