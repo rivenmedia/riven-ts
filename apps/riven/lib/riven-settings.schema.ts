@@ -143,7 +143,7 @@ export const RivenSettings = z.object({
     .describe(
       "When an episode has no air date, this number of days will be added to the current date to estimate a release date for scheduling purposes.",
     ),
-  enabledPlugins: json(z.array(CorePlugins.exclude(["tmdb", "tvdb"])))
+  enabledPlugins: json(z.array(CorePlugins))
     .default([])
     .describe("A list of core plugins to enable."),
 });

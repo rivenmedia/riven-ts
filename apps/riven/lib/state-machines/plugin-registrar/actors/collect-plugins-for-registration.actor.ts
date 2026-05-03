@@ -6,7 +6,10 @@ import { constantCase } from "es-toolkit";
 import { fromPromise } from "xstate";
 import z from "zod";
 
-import { CorePlugins } from "../../../schemas/core-plugins.schema.ts";
+import {
+  type CorePluginName,
+  CorePlugins,
+} from "../../../schemas/core-plugins.schema.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
 
@@ -48,7 +51,7 @@ export const collectPluginsForRegistration = fromPromise(async () => {
     validPlugins: [],
   };
 
-  const permanentlyEnabledPlugins = CorePlugins.extract(["tmdb", "tvdb"]);
+  const permanentlyEnabledPlugins: CorePluginName[] = ["tmdb", "tvdb"];
 
   for (const pluginName of pluginNames) {
     const match = PLUGIN_NAME_PATTERN.exec(pluginName);
@@ -65,7 +68,7 @@ export const collectPluginsForRegistration = fromPromise(async () => {
     }
 
     if (
-      !permanentlyEnabledPlugins.safeParse(validatedPluginName.data).success &&
+      !permanentlyEnabledPlugins.includes(validatedPluginName.data) &&
       !settings.enabledPlugins.includes(validatedPluginName.data as never)
     ) {
       logger.info(

@@ -4,7 +4,7 @@ import packageJson from "../../package.json" with { type: "json" };
 
 import type { Replace } from "type-fest";
 
-type CorePluginName = Replace<
+export type CorePluginName = Replace<
   Extract<keyof typeof packageJson.dependencies, `@repo/plugin-${string}`>,
   "@repo/plugin-",
   ""
