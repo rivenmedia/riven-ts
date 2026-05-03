@@ -2,7 +2,13 @@ import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import chalk from "chalk";
-import { type AnyActorRef, type MachineContext, assign, setup } from "xstate";
+import {
+  type AnyActorRef,
+  type MachineContext,
+  assign,
+  enqueueActions,
+  setup,
+} from "xstate";
 import { ZodError } from "zod";
 
 import { logger } from "../../utilities/logger/logger.ts";
@@ -308,18 +314,51 @@ export const pluginRegistrarMachine = setup({
           onDone: {
             target: "Validating",
             actions: [
-              {
-                type: "log",
-                params: ({ event: { output: parsedPlugins } }) => ({
-                  message: [
-                    `Collected ${chalk.bold(parsedPlugins.validPlugins.length.toString())} plugins for validation:`,
-                    parsedPlugins.validPlugins
-                      .map((p) => chalk.bold(p.name.description?.toString()))
-                      .join(", "),
-                  ].join(" "),
-                  level: "verbose",
-                }),
-              },
+              enqueueActions(
+                ({ event: { output: parsedPlugins }, enqueue }) => {
+                  if (parsedPlugins.validPlugins.length === 0) {
+                    enqueue({
+                      type: "log",
+                      params: {
+                        message: "No valid plugins found. Skipping validation.",
+                        level: "error",
+                      },
+                    });
+                  } else {
+                    enqueue({
+                      type: "log",
+                      params: {
+                        message: [
+                          `Collected ${chalk.bold(parsedPlugins.validPlugins.length.toString())} plugins for validation:`,
+                          parsedPlugins.validPlugins
+                            .map((p) =>
+                              chalk.bold(p.name.description?.toString()),
+                            )
+                            .join(", "),
+                        ].join(" "),
+                        level: "verbose",
+                      },
+                    });
+                  }
+
+                  if (parsedPlugins.invalidPlugins.size > 0) {
+                    enqueue({
+                      type: "log",
+                      params: {
+                        message: [
+                          `Found ${chalk.bold(parsedPlugins.invalidPlugins.size.toString())} invalid plugins:`,
+                          Array.from(
+                            parsedPlugins.invalidPlugins
+                              .keys()
+                              .map((pluginName) => chalk.bold(pluginName)),
+                          ).join(", "),
+                        ].join(" "),
+                        level: "warn",
+                      },
+                    });
+                  }
+                },
+              ),
               assign({
                 parsedPlugins: ({ event: { output: parsedPlugins } }) =>
                   parsedPlugins,

@@ -4,7 +4,20 @@ import dedent from "dedent";
 import { readFileSync } from "node:fs";
 import z from "zod";
 
+import packageJson from "../package.json" with { type: "json" };
 import { LogLevel } from "./utilities/logger/log-levels.ts";
+
+import type { Replace } from "type-fest";
+
+export const CorePlugins = z.enum(
+  Object.keys(packageJson.dependencies)
+    .filter((dependency) => dependency.startsWith("@repo/plugin-"))
+    .map((dependency) => dependency.replace("@repo/plugin-", "")) as Replace<
+    Extract<keyof typeof packageJson.dependencies, `@repo/plugin-${string}`>,
+    "@repo/plugin-",
+    ""
+  >[],
+);
 
 export const RivenSettings = z.object({
   attemptUnknownDownloads: z
@@ -141,6 +154,11 @@ export const RivenSettings = z.object({
     .default(7)
     .describe(
       "When an episode has no air date, this number of days will be added to the current date to estimate a release date for scheduling purposes.",
+    ),
+  enabledPlugins: json(z.array(CorePlugins))
+    .default([])
+    .describe(
+      "A list of core plugins to enable. TVDB and TMDB will always be enabled regardless of this setting, as they are required for Riven's core functionality.",
     ),
 });
 
