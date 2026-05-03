@@ -7,9 +7,9 @@ import {
 import type {
   FindById200,
   FindByIdQueryParams,
-  MovieDetails200,
-  MovieExternalIds200,
-} from "../__generated__/index.ts";
+} from "../__generated__/types/FindById.ts";
+import type { MovieDetails200 } from "../__generated__/types/MovieDetails.ts";
+import type { MovieExternalIds200 } from "../__generated__/types/MovieExternalIds.ts";
 import type { TmdbSettings } from "../tmdb-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 
@@ -57,14 +57,14 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     }
   }
 
-  async findById(externalId: string, params: FindByIdQueryParams) {
-    return await this.get<FindById200>(`find/${externalId}`, {
+  findById(externalId: string, params: FindByIdQueryParams) {
+    return this.get<FindById200>(`find/${externalId}`, {
       params,
     });
   }
 
-  async getMovieDetails(movieId: string) {
-    return await this.get<
+  getMovieDetails(movieId: string) {
+    return this.get<
       MovieDetails200 & {
         external_ids: MovieExternalIds200;
       }

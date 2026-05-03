@@ -15,7 +15,7 @@ export default {
   dataSources: [TvdbAPI, TvMazeAPI],
   resolvers: [TvdbResolver, TvdbSettingsResolver],
   hooks: {
-    "riven.media-item.index.requested": indexTVDBMediaItem,
+    "riven.media-item.index.requested.show": indexTVDBMediaItem,
   },
   settingsSchema: TvdbSettings,
   validator() {

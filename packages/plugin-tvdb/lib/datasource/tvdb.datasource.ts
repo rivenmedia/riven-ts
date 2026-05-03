@@ -10,11 +10,11 @@ import z from "zod";
 import {
   type EpisodeBaseRecordSchema,
   episodeBaseRecordSchema,
-  getAllSeries200Schema,
-  getSeriesExtendedQueryResponseSchema,
-  getSeriesTranslation200Schema,
-  postLogin200Schema,
-} from "../__generated__/index.ts";
+} from "../__generated__/zod/episodeBaseRecordSchema.ts";
+import { getAllSeries200Schema } from "../__generated__/zod/getAllSeriesSchema.ts";
+import { getSeriesExtendedQueryResponseSchema } from "../__generated__/zod/getSeriesExtendedSchema.ts";
+import { getSeriesTranslation200Schema } from "../__generated__/zod/getSeriesTranslationSchema.ts";
+import { postLogin200Schema } from "../__generated__/zod/postLoginSchema.ts";
 import { TvdbSettings } from "../tvdb-settings.schema.ts";
 
 import type { AugmentedRequest } from "@apollo/datasource-rest";
@@ -31,6 +31,8 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
   override serviceName = "Tvdb";
 
   #token: TvdbToken | null = null;
+
+  #inFlightLoginRequest: Promise<unknown> | null = null;
 
   protected override rateLimiterOptions: RateLimiterOptions = {
     duration: 1000,
@@ -145,17 +147,21 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
    * @returns The {@link TvdbToken} from the `/login` response
    */
   async #getAuthToken() {
-    const now = DateTime.now();
+    const now = DateTime.utc();
 
     // Return cached token if valid
     if (this.#token && this.#token.expiresAt > now) {
       return this.#token;
     }
 
-    const response = await this.post<unknown>("login", {
+    this.#inFlightLoginRequest ??= this.post<unknown>("login", {
       body: {
         apikey: this.settings.apiKey,
       },
+    });
+
+    const response = await this.#inFlightLoginRequest.finally(() => {
+      this.#inFlightLoginRequest = null;
     });
 
     const { data } = postLogin200Schema.parse(response);

@@ -4,9 +4,9 @@ import { FieldResolver, Resolver } from "type-graphql";
 
 import { StremThruSettings } from "./types/stremthru-settings.type.ts";
 
-@Resolver((_of) => Settings)
+@Resolver(() => Settings)
 export class StremThruSettingsResolver {
-  @FieldResolver((_returns) => StremThruSettings)
+  @FieldResolver(() => StremThruSettings)
   stremthru(): StremThruSettings {
     return {
       apiKey: "stremthru-api-key",

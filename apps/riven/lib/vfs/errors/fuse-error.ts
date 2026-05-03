@@ -1,132 +1,134 @@
-import type Fuse from "@zkochan/fuse-native";
+import Fuse from "@zkochan/fuse-native";
+import z from "zod";
 
-type FuseErrorCode =
-  | typeof Fuse.EPERM
-  | typeof Fuse.ENOENT
-  | typeof Fuse.ESRCH
-  | typeof Fuse.EINTR
-  | typeof Fuse.EIO
-  | typeof Fuse.ENXIO
-  | typeof Fuse.E2BIG
-  | typeof Fuse.ENOEXEC
-  | typeof Fuse.EBADF
-  | typeof Fuse.ECHILD
-  | typeof Fuse.EAGAIN
-  | typeof Fuse.ENOMEM
-  | typeof Fuse.EACCES
-  | typeof Fuse.EFAULT
-  | typeof Fuse.ENOTBLK
-  | typeof Fuse.EBUSY
-  | typeof Fuse.EEXIST
-  | typeof Fuse.EXDEV
-  | typeof Fuse.ENODEV
-  | typeof Fuse.ENOTDIR
-  | typeof Fuse.EISDIR
-  | typeof Fuse.EINVAL
-  | typeof Fuse.ENFILE
-  | typeof Fuse.EMFILE
-  | typeof Fuse.ENOTTY
-  | typeof Fuse.ETXTBSY
-  | typeof Fuse.EFBIG
-  | typeof Fuse.ENOSPC
-  | typeof Fuse.ESPIPE
-  | typeof Fuse.EROFS
-  | typeof Fuse.EMLINK
-  | typeof Fuse.EPIPE
-  | typeof Fuse.EDOM
-  | typeof Fuse.ERANGE
-  | typeof Fuse.EDEADLK
-  | typeof Fuse.ENAMETOOLONG
-  | typeof Fuse.ENOLCK
-  | typeof Fuse.ENOSYS
-  | typeof Fuse.ENOTEMPTY
-  | typeof Fuse.ELOOP
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
-  | typeof Fuse.EWOULDBLOCK // Duplicate of EAGAIN
-  | typeof Fuse.ENOMSG
-  | typeof Fuse.EIDRM
-  | typeof Fuse.ECHRNG
-  | typeof Fuse.EL2NSYNC
-  | typeof Fuse.EL3HLT
-  | typeof Fuse.EL3RST
-  | typeof Fuse.ELNRNG
-  | typeof Fuse.EUNATCH
-  | typeof Fuse.ENOCSI
-  | typeof Fuse.EL2HLT
-  | typeof Fuse.EBADE
-  | typeof Fuse.EBADR
-  | typeof Fuse.EXFULL
-  | typeof Fuse.ENOANO
-  | typeof Fuse.EBADRQC
-  | typeof Fuse.EBADSLT
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
-  | typeof Fuse.EDEADLOCK // Duplicate of EDEADLK
-  | typeof Fuse.EBFONT
-  | typeof Fuse.ENOSTR
-  | typeof Fuse.ENODATA
-  | typeof Fuse.ETIME
-  | typeof Fuse.ENOSR
-  | typeof Fuse.ENONET
-  | typeof Fuse.ENOPKG
-  | typeof Fuse.EREMOTE
-  | typeof Fuse.ENOLINK
-  | typeof Fuse.EADV
-  | typeof Fuse.ESRMNT
-  | typeof Fuse.ECOMM
-  | typeof Fuse.EPROTO
-  | typeof Fuse.EMULTIHOP
-  | typeof Fuse.EDOTDOT
-  | typeof Fuse.EBADMSG
-  | typeof Fuse.EOVERFLOW
-  | typeof Fuse.ENOTUNIQ
-  | typeof Fuse.EBADFD
-  | typeof Fuse.EREMCHG
-  | typeof Fuse.ELIBACC
-  | typeof Fuse.ELIBBAD
-  | typeof Fuse.ELIBSCN
-  | typeof Fuse.ELIBMAX
-  | typeof Fuse.ELIBEXEC
-  | typeof Fuse.EILSEQ
-  | typeof Fuse.ERESTART
-  | typeof Fuse.ESTRPIPE
-  | typeof Fuse.EUSERS
-  | typeof Fuse.ENOTSOCK
-  | typeof Fuse.EDESTADDRREQ
-  | typeof Fuse.EMSGSIZE
-  | typeof Fuse.EPROTOTYPE
-  | typeof Fuse.ENOPROTOOPT
-  | typeof Fuse.EPROTONOSUPPORT
-  | typeof Fuse.ESOCKTNOSUPPORT
-  | typeof Fuse.EOPNOTSUPP
-  | typeof Fuse.EPFNOSUPPORT
-  | typeof Fuse.EAFNOSUPPORT
-  | typeof Fuse.EADDRINUSE
-  | typeof Fuse.EADDRNOTAVAIL
-  | typeof Fuse.ENETDOWN
-  | typeof Fuse.ENETUNREACH
-  | typeof Fuse.ENETRESET
-  | typeof Fuse.ECONNABORTED
-  | typeof Fuse.ECONNRESET
-  | typeof Fuse.ENOBUFS
-  | typeof Fuse.EISCONN
-  | typeof Fuse.ENOTCONN
-  | typeof Fuse.ESHUTDOWN
-  | typeof Fuse.ETOOMANYREFS
-  | typeof Fuse.ETIMEDOUT
-  | typeof Fuse.ECONNREFUSED
-  | typeof Fuse.EHOSTDOWN
-  | typeof Fuse.EHOSTUNREACH
-  | typeof Fuse.EALREADY
-  | typeof Fuse.EINPROGRESS
-  | typeof Fuse.ESTALE
-  | typeof Fuse.EUCLEAN
-  | typeof Fuse.ENOTNAM
-  | typeof Fuse.ENAVAIL
-  | typeof Fuse.EISNAM
-  | typeof Fuse.EREMOTEIO
-  | typeof Fuse.EDQUOT
-  | typeof Fuse.ENOMEDIUM
-  | typeof Fuse.EMEDIUMTYPE;
+export const FuseErrorCode = z.literal([
+  Fuse.EPERM,
+  Fuse.ENOENT,
+  Fuse.ESRCH,
+  Fuse.EINTR,
+  Fuse.EIO,
+  Fuse.ENXIO,
+  Fuse.E2BIG,
+  Fuse.ENOEXEC,
+  Fuse.EBADF,
+  Fuse.ECHILD,
+  Fuse.EAGAIN,
+  Fuse.ENOMEM,
+  Fuse.EACCES,
+  Fuse.EFAULT,
+  Fuse.ENOTBLK,
+  Fuse.EBUSY,
+  Fuse.EEXIST,
+  Fuse.EXDEV,
+  Fuse.ENODEV,
+  Fuse.ENOTDIR,
+  Fuse.EISDIR,
+  Fuse.EINVAL,
+  Fuse.ENFILE,
+  Fuse.EMFILE,
+  Fuse.ENOTTY,
+  Fuse.ETXTBSY,
+  Fuse.EFBIG,
+  Fuse.ENOSPC,
+  Fuse.ESPIPE,
+  Fuse.EROFS,
+  Fuse.EMLINK,
+  Fuse.EPIPE,
+  Fuse.EDOM,
+  Fuse.ERANGE,
+  Fuse.EDEADLK,
+  Fuse.ENAMETOOLONG,
+  Fuse.ENOLCK,
+  Fuse.ENOSYS,
+  Fuse.ENOTEMPTY,
+  Fuse.ELOOP,
+  Fuse.EWOULDBLOCK, // Duplicate of EAGAIN
+  Fuse.ENOMSG,
+  Fuse.EIDRM,
+  Fuse.ECHRNG,
+  Fuse.EL2NSYNC,
+  Fuse.EL3HLT,
+  Fuse.EL3RST,
+  Fuse.ELNRNG,
+  Fuse.EUNATCH,
+  Fuse.ENOCSI,
+  Fuse.EL2HLT,
+  Fuse.EBADE,
+  Fuse.EBADR,
+  Fuse.EXFULL,
+  Fuse.ENOANO,
+  Fuse.EBADRQC,
+  Fuse.EBADSLT,
+  Fuse.EDEADLOCK, // Duplicate of EDEADLK
+  Fuse.EBFONT,
+  Fuse.ENOSTR,
+  Fuse.ENODATA,
+  Fuse.ETIME,
+  Fuse.ENOSR,
+  Fuse.ENONET,
+  Fuse.ENOPKG,
+  Fuse.EREMOTE,
+  Fuse.ENOLINK,
+  Fuse.EADV,
+  Fuse.ESRMNT,
+  Fuse.ECOMM,
+  Fuse.EPROTO,
+  Fuse.EMULTIHOP,
+  Fuse.EDOTDOT,
+  Fuse.EBADMSG,
+  Fuse.EOVERFLOW,
+  Fuse.ENOTUNIQ,
+  Fuse.EBADFD,
+  Fuse.EREMCHG,
+  Fuse.ELIBACC,
+  Fuse.ELIBBAD,
+  Fuse.ELIBSCN,
+  Fuse.ELIBMAX,
+  Fuse.ELIBEXEC,
+  Fuse.EILSEQ,
+  Fuse.ERESTART,
+  Fuse.ESTRPIPE,
+  Fuse.EUSERS,
+  Fuse.ENOTSOCK,
+  Fuse.EDESTADDRREQ,
+  Fuse.EMSGSIZE,
+  Fuse.EPROTOTYPE,
+  Fuse.ENOPROTOOPT,
+  Fuse.EPROTONOSUPPORT,
+  Fuse.ESOCKTNOSUPPORT,
+  Fuse.EOPNOTSUPP,
+  Fuse.EPFNOSUPPORT,
+  Fuse.EAFNOSUPPORT,
+  Fuse.EADDRINUSE,
+  Fuse.EADDRNOTAVAIL,
+  Fuse.ENETDOWN,
+  Fuse.ENETUNREACH,
+  Fuse.ENETRESET,
+  Fuse.ECONNABORTED,
+  Fuse.ECONNRESET,
+  Fuse.ENOBUFS,
+  Fuse.EISCONN,
+  Fuse.ENOTCONN,
+  Fuse.ESHUTDOWN,
+  Fuse.ETOOMANYREFS,
+  Fuse.ETIMEDOUT,
+  Fuse.ECONNREFUSED,
+  Fuse.EHOSTDOWN,
+  Fuse.EHOSTUNREACH,
+  Fuse.EALREADY,
+  Fuse.EINPROGRESS,
+  Fuse.ESTALE,
+  Fuse.EUCLEAN,
+  Fuse.ENOTNAM,
+  Fuse.ENAVAIL,
+  Fuse.EISNAM,
+  Fuse.EREMOTEIO,
+  Fuse.EDQUOT,
+  Fuse.ENOMEDIUM,
+  Fuse.EMEDIUMTYPE,
+]);
+
+type FuseErrorCode = z.infer<typeof FuseErrorCode>;
 
 export class FuseError extends Error {
   errorCode: FuseErrorCode;

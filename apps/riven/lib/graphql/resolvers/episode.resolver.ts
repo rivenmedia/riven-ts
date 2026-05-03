@@ -12,10 +12,14 @@ import {
 
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 
-@Resolver((_of) => Episode)
+@Resolver(() => Episode)
 export class EpisodeResolver {
-  @Query(() => Episode, { nullable: true })
-  absoluteEpisode(
+  @Query(() => Episode, {
+    description:
+      "Fetches an episode by its TVDB ID, season number, and episode number. If season number is not provided, it will lookup using absolute episode numbering.",
+    nullable: true,
+  })
+  episode(
     @Ctx() { em }: ApolloServerContext,
     @Arg("tvdbId", () => String) tvdbId: string,
     @Arg("episodeNumber", () => Int) episodeNumber: number,
@@ -43,7 +47,7 @@ export class EpisodeResolver {
   }
 
   @FieldResolver(() => Int)
-  expectedFileCount() {
-    return 1;
+  expectedFileCount(@Root() episode: Episode) {
+    return episode.getExpectedFileCount();
   }
 }

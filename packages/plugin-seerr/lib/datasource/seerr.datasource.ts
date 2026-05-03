@@ -7,7 +7,7 @@ import {
 import { MetadataSettingsResponse } from "../schemas/metadata-settings-response.schema.ts";
 import { RequestResponse } from "../schemas/request-response.schema.ts";
 
-import type { GetAuthMeQueryResponse } from "../__generated__/index.ts";
+import type { GetAuthMeQueryResponse } from "../__generated__/types/GetAuthMe.ts";
 import type { ExtendedMediaRequest } from "../schemas/extended-media-request.schema.ts";
 import type { SeerrSettings } from "../seerr-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";

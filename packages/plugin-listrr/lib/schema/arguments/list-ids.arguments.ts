@@ -3,7 +3,7 @@ import { ArgsType, Field } from "type-graphql";
 
 @ArgsType()
 export class ListIdsArguments {
-  @Field((_type) => [String])
+  @Field(() => [String])
   @Length(24, 24, {
     each: true,
   })

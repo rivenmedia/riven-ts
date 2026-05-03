@@ -2,7 +2,13 @@ import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import chalk from "chalk";
-import { type AnyActorRef, type MachineContext, assign, setup } from "xstate";
+import {
+  type AnyActorRef,
+  type MachineContext,
+  assign,
+  enqueueActions,
+  setup,
+} from "xstate";
 import { ZodError } from "zod";
 
 import { logger } from "../../utilities/logger/logger.ts";
@@ -14,11 +20,11 @@ import {
   type ParsedPlugins,
   collectPluginsForRegistration,
 } from "./actors/collect-plugins-for-registration.actor.ts";
+import { validatePlugin } from "./actors/validate-plugin.actor.ts";
 import {
   type RegisterPluginHookWorkersOutput,
   registerPluginHookWorkers,
-} from "./actors/register-plugin-hook-workers.actor.ts";
-import { validatePlugin } from "./actors/validate-plugin.actor.ts";
+} from "./utilities/register-plugin-hook-workers.ts";
 
 import type {
   InvalidPlugin,
@@ -69,7 +75,6 @@ export const pluginRegistrarMachine = setup({
     events: {} as PluginRegistrarMachineEvent,
     children: {} as {
       collectPluginsForRegistration: "collectPluginsForRegistration";
-      registerPluginHookWorkers: "registerPluginHookWorkers";
       validatePlugin: "validatePlugin";
     },
     output: {} as PluginRegistrarMachineOutput,
@@ -253,7 +258,6 @@ export const pluginRegistrarMachine = setup({
   actors: {
     collectPluginsForRegistration,
     validatePlugin,
-    registerPluginHookWorkers,
   },
   guards: {
     allPluginsValidated: ({ context: { pendingPlugins } }) =>
@@ -310,18 +314,51 @@ export const pluginRegistrarMachine = setup({
           onDone: {
             target: "Validating",
             actions: [
-              {
-                type: "log",
-                params: ({ event: { output: parsedPlugins } }) => ({
-                  message: [
-                    `Collected ${chalk.bold(parsedPlugins.validPlugins.length.toString())} plugins for validation:`,
-                    parsedPlugins.validPlugins
-                      .map((p) => chalk.bold(p.name.description?.toString()))
-                      .join(", "),
-                  ].join(" "),
-                  level: "verbose",
-                }),
-              },
+              enqueueActions(
+                ({ event: { output: parsedPlugins }, enqueue }) => {
+                  if (parsedPlugins.validPlugins.length === 0) {
+                    enqueue({
+                      type: "log",
+                      params: {
+                        message: "No valid plugins found. Skipping validation.",
+                        level: "error",
+                      },
+                    });
+                  } else {
+                    enqueue({
+                      type: "log",
+                      params: {
+                        message: [
+                          `Collected ${chalk.bold(parsedPlugins.validPlugins.length.toString())} plugins for validation:`,
+                          parsedPlugins.validPlugins
+                            .map((p) =>
+                              chalk.bold(p.name.description?.toString()),
+                            )
+                            .join(", "),
+                        ].join(" "),
+                        level: "verbose",
+                      },
+                    });
+                  }
+
+                  if (parsedPlugins.invalidPlugins.size > 0) {
+                    enqueue({
+                      type: "log",
+                      params: {
+                        message: [
+                          `Found ${chalk.bold(parsedPlugins.invalidPlugins.size.toString())} invalid plugins:`,
+                          Array.from(
+                            parsedPlugins.invalidPlugins
+                              .keys()
+                              .map((pluginName) => chalk.bold(pluginName)),
+                          ).join(", "),
+                        ].join(" "),
+                        level: "warn",
+                      },
+                    });
+                  }
+                },
+              ),
               assign({
                 parsedPlugins: ({ event: { output: parsedPlugins } }) =>
                   parsedPlugins,
@@ -338,13 +375,27 @@ export const pluginRegistrarMachine = setup({
         entry: "spawnValidators",
         always: {
           guard: "allPluginsValidated",
-          target: "Registering plugin hook workers",
-          actions: {
-            type: "log",
-            params: {
-              message: "Plugin validation complete.",
+          target: "Validated",
+          actions: [
+            {
+              type: "assignPluginHooks",
+              params: ({ context: { validPlugins, settings } }) => {
+                if (!settings) {
+                  throw new Error(
+                    "PluginSettings is not initialised. Have the plugins been registered?",
+                  );
+                }
+
+                return registerPluginHookWorkers(validPlugins, settings);
+              },
             },
-          },
+            {
+              type: "log",
+              params: {
+                message: "Plugin validation complete.",
+              },
+            },
+          ],
         },
         on: {
           "riven.plugin-valid": {
@@ -360,31 +411,6 @@ export const pluginRegistrarMachine = setup({
               type: "handleInvalidPlugin",
               params: ({ event: { plugin } }) => plugin,
             },
-          },
-        },
-      },
-      "Registering plugin hook workers": {
-        invoke: {
-          id: "registerPluginHookWorkers",
-          src: "registerPluginHookWorkers",
-          input: ({ context: { validPlugins, settings } }) => {
-            if (!settings) {
-              throw new Error(
-                "PluginSettings is not initialised. Have the plugins been registered?",
-              );
-            }
-
-            return {
-              plugins: validPlugins,
-              settings,
-            };
-          },
-          onDone: {
-            actions: {
-              type: "assignPluginHooks",
-              params: ({ event: { output } }) => output,
-            },
-            target: "Validated",
           },
         },
       },

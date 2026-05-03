@@ -5,6 +5,7 @@ import { vi } from "vitest";
 import { createActor, fromPromise } from "xstate";
 
 import { it as baseIt } from "../../../../__tests__/test-context.ts";
+import { SessionID } from "../../../../utilities/logger/log-context.ts";
 import {
   type BootstrapMachineOutput,
   bootstrapMachine,
@@ -15,7 +16,7 @@ import type { ValidPlugin } from "../../../../types/plugins.ts";
 
 export const it = baseIt
   .extend("input", () => ({
-    sessionId: crypto.randomUUID(),
+    sessionId: SessionID.parse(crypto.randomUUID()),
   }))
   .extend("machine", () => rivenMachine)
   .extend(

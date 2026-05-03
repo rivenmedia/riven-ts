@@ -2,38 +2,74 @@
   "$schema": "https://turborepo.dev/schema.json",
   "extends": ["//"],
   "tasks": {
+    "build": {
+      "dependsOn": [
+        "$TURBO_EXTENDS$",
+        "build:workers",
+        "database:cache:generate"
+      ]
+    },
     "build:workers": {
-      "dependsOn": ["graphql-codegen", "transit"],
+      "dependsOn": ["codegen:gql", "transit:source-files"],
       "outputs": ["dist/workers/**"]
     },
     "dev": {
+      "dependsOn": ["$TURBO_EXTENDS$", "build:workers"],
       "passThroughEnv": [
         "SENTRY_SPOTLIGHT",
         "SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"
       ]
     },
-    "generate-gql-schema": {
-      "dependsOn": ["transit"],
+    "codegen:gql-schema": {
+      "dependsOn": ["$TURBO_EXTENDS$", "transit:source-files"],
+      "inputs": ["lib/**/*.ts"],
       "outputs": ["schema.graphql"]
     },
-    "graphql-codegen": {
-      "dependsOn": ["generate-gql-schema", "transit"],
+    "codegen:gql": {
+      "dependsOn": [
+        "$TURBO_EXTENDS$",
+        "codegen:gql-schema",
+        "transit:source-files"
+      ],
       "inputs": [
         "lib/**/*.ts",
         "!lib/**/__generated__/**/*",
+        "schema.graphql",
         "graphql-codegen.ts"
       ],
       "outputs": ["lib/types/__generated__/graphql.ts", "lib/**/*.typegen.ts"]
     },
-    "start": {},
+    "start": {
+      "dependsOn": ["$TURBO_EXTENDS$", "build"],
+      "passThroughEnv": [
+        "SENTRY_SPOTLIGHT",
+        "SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"
+      ]
+    },
     "test": {
-      "dependsOn": ["$TURBO_EXTENDS$", "graphql-codegen"]
+      "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
     },
     "lint": {
-      "dependsOn": ["$TURBO_EXTENDS$", "graphql-codegen"]
+      "dependsOn": ["$TURBO_EXTENDS$", "database:cache:generate", "codegen:gql"]
     },
     "check-types": {
-      "dependsOn": ["$TURBO_EXTENDS$", "graphql-codegen"]
+      "dependsOn": ["$TURBO_EXTENDS$", "database:cache:generate", "codegen:gql"]
+    },
+    "migration:check": {
+      "passThroughEnv": ["RIVEN_SETTING__*"],
+      "dependsOn": ["$TURBO_EXTENDS$", "transit:source-files"],
+      "inputs": [
+        "lib/database/config.ts",
+        "lib/database/database.ts",
+        "lib/database/migrations/*.ts",
+        "lib/database/migrations/.snapshot-*.json"
+      ]
+    },
+    "database:cache:generate": {
+      "passThroughEnv": ["RIVEN_SETTING__*"],
+      "dependsOn": ["$TURBO_EXTENDS$", "transit:source-files"],
+      "inputs": ["lib/database/config.ts", "lib/database/database.ts"],
+      "outputs": ["temp/metadata.json"]
     }
   }
 }

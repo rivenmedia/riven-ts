@@ -4,9 +4,9 @@ import { FieldResolver, Resolver } from "type-graphql";
 
 import { PlexSettings } from "./types/plex-settings.type.ts";
 
-@Resolver((_of) => Settings)
+@Resolver(() => Settings)
 export class PlexSettingsResolver {
-  @FieldResolver((_returns) => PlexSettings)
+  @FieldResolver(() => PlexSettings)
   plex(): PlexSettings {
     return {
       apiKey: "plex-api-key",

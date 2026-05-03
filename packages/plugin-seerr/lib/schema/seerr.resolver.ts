@@ -10,15 +10,15 @@ import { FilterArguments } from "./arguments/filter.arguments.ts";
 
 @Resolver()
 export class SeerrResolver {
-  @Query((_returns) => Boolean)
-  async seerrIsValid(
+  @Query(() => Boolean)
+  seerrIsValid(
     @PluginDataSource(pluginConfig.name, SeerrAPI) api: SeerrAPI,
   ): Promise<boolean> {
-    return await api.validate();
+    return api.validate();
   }
 
   @CacheControl({ maxAge: 300 })
-  @Query((_returns) => [ExternalIds])
+  @Query(() => [ExternalIds])
   async seerrMovies(
     @Args() { filter }: FilterArguments,
     @PluginDataSource(pluginConfig.name, SeerrAPI) api: SeerrAPI,
@@ -27,7 +27,7 @@ export class SeerrResolver {
   }
 
   @CacheControl({ maxAge: 300 })
-  @Query((_returns) => [ExternalIds])
+  @Query(() => [ExternalIds])
   async seerrShows(
     @Args() { filter }: FilterArguments,
     @PluginDataSource(pluginConfig.name, SeerrAPI) api: SeerrAPI,

@@ -1,15 +1,14 @@
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import {
-  type GetApiListMoviesIdSortbySortbydirectionPageQueryResponse as GetMoviesResponse,
-  type ListrrContractsModelsAPIMovieDto as ListrrMovie,
-  createListrrContractsModelsAPIMovieDto,
-  getApiListMoviesIdSortbySortbydirectionPageHandler as getMoviesHandler,
-  createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse as getMoviesResponse,
-} from "../../__generated__/index.ts";
+import { getApiListMoviesIdSortbySortbydirectionPageHandler } from "../../__generated__/handlers/getApiListMoviesIdSortbySortbydirectionPageHandler.ts";
+import { createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse } from "../../__generated__/mocks/createGetApiListMoviesIdSortbySortbydirectionPage.ts";
+import { createListrrContractsModelsAPIMovieDto } from "../../__generated__/mocks/listrr/contracts/models/API/createMovieDto.ts";
 import { it } from "../../__tests__/listrr.test-context.ts";
 import { ListrrAPI } from "../listrr.datasource.ts";
+
+import type { GetApiListMoviesIdSortbySortbydirectionPageQueryResponse } from "../../__generated__/types/GetApiListMoviesIdSortbySortbydirectionPage.ts";
+import type { ListrrContractsModelsAPIMovieDto } from "../../__generated__/types/index.ts";
 
 it("returns an empty array if no content lists are provided", async ({
   dataSourceMap,
@@ -30,7 +29,7 @@ it("retrieves movies from each provided list", async ({
   ]);
 
   server.use(
-    getMoviesHandler((info) => {
+    getApiListMoviesIdSortbySortbydirectionPageHandler((info) => {
       if (
         !info.params["id"] ||
         !contentLists.has(info.params["id"].toString())
@@ -38,8 +37,8 @@ it("retrieves movies from each provided list", async ({
         return HttpResponse.error();
       }
 
-      return HttpResponse.json<GetMoviesResponse>(
-        getMoviesResponse({
+      return HttpResponse.json<GetApiListMoviesIdSortbySortbydirectionPageQueryResponse>(
+        createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse({
           pages: 1,
           count: 1,
           items: [
@@ -67,7 +66,7 @@ it("paginates through all pages of the list", async ({
   const itemsPerPage = 2;
 
   server.use(
-    getMoviesHandler((info) => {
+    getApiListMoviesIdSortbySortbydirectionPageHandler((info) => {
       if (!info.params["id"] || !info.params["page"]) {
         return HttpResponse.error();
       }
@@ -78,8 +77,8 @@ it("paginates through all pages of the list", async ({
         return HttpResponse.error();
       }
 
-      return HttpResponse.json<GetMoviesResponse>(
-        getMoviesResponse({
+      return HttpResponse.json<GetApiListMoviesIdSortbySortbydirectionPageQueryResponse>(
+        createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse({
           pages: totalPages,
           count: totalPages * itemsPerPage,
           items: Array.from({ length: itemsPerPage }).map((_, i) =>
@@ -113,13 +112,13 @@ it("dedupes movies that appear in multiple lists", async ({
     "64b7f2f5e13e4b6f8c8e4d1a": [1, 2, 3].map(buildMockMovie),
     "64b7f2f5e13e4b6f8c8e4d1b": [3, 4, 5].map(buildMockMovie),
     "64b7f2f5e13e4b6f8c8e4d1c": [2, 4, 5, 6, 7, 8].map(buildMockMovie),
-  } satisfies Record<string, ListrrMovie[]>;
+  } satisfies Record<string, ListrrContractsModelsAPIMovieDto[]>;
 
   server.use(
     ...Object.entries(items).map(([id, movies]) =>
       http.get(`**/api/List/Movies/${id}/:sortBy/:sortByDirection/:page`, () =>
         HttpResponse.json(
-          getMoviesResponse({
+          createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse({
             items: movies,
           }),
         ),

@@ -7,15 +7,16 @@ import assert, { AssertionError } from "node:assert";
 import { client } from "../../../../../graphql/apollo-client.ts";
 import { logger } from "../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../utilities/settings.ts";
-import { MatchedFile } from "../../../../flows/download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import { MatchedFile } from "../../../../flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 
 import type { MapItemsToFilesSandboxedJob } from "../../map-items-to-files/map-items-to-files.schema.ts";
 import type {
-  GetAbsoluteEpisodeQuery,
-  GetAbsoluteEpisodeQueryVariables,
+  GetValidateTorrentFilesEpisodeQuery,
+  GetValidateTorrentFilesEpisodeQueryVariables,
   GetValidateTorrentFilesItemQuery,
   GetValidateTorrentFilesItemQueryVariables,
 } from "./validate-torrent-files.typegen.ts";
+import type { UUID } from "node:crypto";
 
 export class InvalidTorrentError extends Error {}
 
@@ -27,8 +28,8 @@ const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
   GetValidateTorrentFilesItemQuery,
   GetValidateTorrentFilesItemQueryVariables
 > = gql`
-  query GetValidateTorrentFilesItem($id: Int!) {
-    mediaItem(id: $id) {
+  query GetValidateTorrentFilesItem($id: ID!) {
+    mediaItemById(id: $id) {
       ... on MediaItem {
         fullTitle
         type
@@ -75,16 +76,16 @@ const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
   }
 `;
 
-const GET_ABSOLUTE_EPISODE_QUERY: TypedDocumentNode<
-  GetAbsoluteEpisodeQuery,
-  GetAbsoluteEpisodeQueryVariables
+const GET_VALIDATE_TORRENT_FILES_EPISODE_QUERY: TypedDocumentNode<
+  GetValidateTorrentFilesEpisodeQuery,
+  GetValidateTorrentFilesEpisodeQueryVariables
 > = gql`
-  query GetAbsoluteEpisode(
+  query GetValidateTorrentFilesEpisode(
     $tvdbId: String!
     $episodeNumber: Int!
     $seasonNumber: Int
   ) {
-    absoluteEpisode(
+    episode(
       tvdbId: $tvdbId
       episodeNumber: $episodeNumber
       seasonNumber: $seasonNumber
@@ -99,7 +100,7 @@ const GET_ABSOLUTE_EPISODE_QUERY: TypedDocumentNode<
 `;
 
 export const validateTorrentFiles = async (
-  itemId: number,
+  itemId: UUID,
   infoHash: string,
   { episodes, movies }: MapItemsToFilesSandboxedJob["output"],
   isCacheCheck: boolean,
@@ -110,11 +111,11 @@ export const validateTorrentFiles = async (
       variables: { id: itemId },
     });
 
-    if (!itemResult.data?.mediaItem) {
-      throw new Error(`Media item with ID ${itemId.toString()} not found`);
+    if (!itemResult.data?.mediaItemById) {
+      throw new Error(`Media item with ID ${itemId} not found`);
     }
 
-    const item = itemResult.data.mediaItem;
+    const item = itemResult.data.mediaItemById;
 
     logger.verbose(
       `Validating torrent files for item ${chalk.bold(item.fullTitle)}: ${chalk.bold(infoHash)}`,
@@ -155,7 +156,7 @@ export const validateTorrentFiles = async (
           }
 
           validFiles.push(
-            MatchedFile.encode({
+            MatchedFile.parse({
               ...file,
               matchedMediaItemId: itemId,
               isCachedFile: isCacheCheck,
@@ -211,8 +212,8 @@ export const validateTorrentFiles = async (
             "File must have at least one episode number",
           );
 
-          const absoluteEpisodeResult = await client.query({
-            query: GET_ABSOLUTE_EPISODE_QUERY,
+          const episodeResult = await client.query({
+            query: GET_VALIDATE_TORRENT_FILES_EPISODE_QUERY,
             variables: {
               tvdbId: item.tvdbId,
               episodeNumber: parseData.episodes[0],
@@ -221,23 +222,23 @@ export const validateTorrentFiles = async (
           });
 
           assert(
-            absoluteEpisodeResult.data?.absoluteEpisode,
+            episodeResult.data?.episode,
             `File must correspond to a valid episode in ${item.fullTitle}`,
           );
 
-          const { absoluteEpisode } = absoluteEpisodeResult.data;
+          const { episode } = episodeResult.data;
 
           if (item.__typename === "Season") {
             assert(
-              absoluteEpisode.season.number === item.number,
+              episode.season.number === item.number,
               `File must correspond to a valid episode in ${item.fullTitle}`,
             );
           }
 
           if (item.__typename === "Episode") {
             assert(
-              absoluteEpisode.number === item.number &&
-                absoluteEpisode.season.number === item.season.number,
+              episode.number === item.number &&
+                episode.season.number === item.season.number,
               `Incorrect episode for ${item.fullTitle}`,
             );
 
@@ -252,9 +253,9 @@ export const validateTorrentFiles = async (
           }
 
           validFiles.push(
-            MatchedFile.encode({
+            MatchedFile.parse({
               ...file,
-              matchedMediaItemId: Number(absoluteEpisode.id),
+              matchedMediaItemId: episode.id,
               isCachedFile: isCacheCheck,
             }),
           );

@@ -18,9 +18,7 @@ export const requestSubtitlesProcessor =
     >((childData) => childData.subtitles);
 
     if (allSubtitles.length === 0) {
-      logger.debug(
-        `No subtitles returned for media item ID ${job.data.id.toString()}`,
-      );
+      logger.debug(`No subtitles returned for media item ID ${job.data.id}`);
 
       return { count: 0 };
     }
@@ -44,9 +42,7 @@ export const requestSubtitlesProcessor =
 
         assert(
           item,
-          new UnrecoverableError(
-            `Media item with ID ${job.data.id.toString()} not found`,
-          ),
+          new UnrecoverableError(`Media item with ID ${job.data.id} not found`),
         );
 
         // Check for existing subtitles to avoid duplicates

@@ -67,12 +67,19 @@ export class Episode extends ShowLikeMediaItem {
   override type: Opt<"episode"> = "episode" as const;
 
   declare tvdbId: Opt<string>;
-  declare tmdbId?: never;
 
   getMediaEntries() {
     return this.filesystemEntries.matching<MediaEntry>({
       where: { type: "media" },
       refresh: true,
     });
+  }
+
+  getExpectedFileCount(): number {
+    return 1;
+  }
+
+  getIncompleteItems() {
+    return [];
   }
 }

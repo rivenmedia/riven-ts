@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import { expect } from "vitest";
 
-import { postLoginHandler } from "../../__generated__/index.ts";
+import { postLoginHandler } from "../../__generated__/handlers/postLoginHandler.ts";
 import { it } from "../../__tests__/tvdb.test-context.ts";
 
 it('returns the validation status when calling "tvdbIsValid" query', async ({

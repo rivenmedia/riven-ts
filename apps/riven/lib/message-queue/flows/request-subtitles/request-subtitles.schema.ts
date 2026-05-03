@@ -1,4 +1,5 @@
 import { MediaItemSubtitleRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 
@@ -8,7 +9,7 @@ import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
 export const RequestSubtitlesFlow = createFlowSchema("request-subtitles", {
   children: MediaItemSubtitleRequestedResponse,
   input: z.object({
-    id: z.int(),
+    id: UUID,
   }),
   output: z.object({
     count: z.int().nonnegative(),

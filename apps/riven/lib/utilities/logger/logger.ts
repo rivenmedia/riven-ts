@@ -15,6 +15,16 @@ const logDir = path.resolve(process.cwd(), settings.logDirectory);
 
 export const logger = createLogger({
   level: settings.logLevel,
+  levels: {
+    data: 0, // Log level used for low-level debug logging (e.g. database debugging) - we always want this to log even with the log level set to a lower value
+    error: 0,
+    warn: 1,
+    info: 2,
+    http: 3,
+    verbose: 4,
+    debug: 5,
+    silly: 6,
+  },
   format: format.combine(
     sentryMetaFormat(),
     validationErrorMetaFormat(),

@@ -1,5 +1,3 @@
-import { registerMQListeners } from "@repo/util-plugin-sdk/helpers/register-mq-listeners";
-
 import {
   type FlowChildJob,
   FlowProducer,
@@ -70,7 +68,9 @@ export function createFlowProducer(
     telemetry,
   });
 
-  registerMQListeners(flowProducer, logger);
+  flowProducer.on("error", (error) => {
+    logger.error(`FlowProducer error`, { err: error });
+  });
 
   return flowProducer;
 }

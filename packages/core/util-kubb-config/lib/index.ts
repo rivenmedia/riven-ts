@@ -23,6 +23,7 @@ export const buildKubbConfig = ({
     root: ".",
     input,
     output: {
+      barrelType: false,
       path: outputPath,
       clean: true,
       format: false, // Disable formatting to allow Prettier to handle it in the hooks.
@@ -38,6 +39,8 @@ export const buildKubbConfig = ({
         inferred: true,
         version: "4",
         output: {
+          barrelType: false,
+
           banner: "// @ts-nocheck",
           path: "zod",
         },
@@ -45,6 +48,7 @@ export const buildKubbConfig = ({
       pluginFaker({
         unknownType: "unknown",
         output: {
+          barrelType: false,
           banner: "// @ts-nocheck",
           path: "mocks",
         },
@@ -54,6 +58,7 @@ export const buildKubbConfig = ({
         baseURL,
         parser: "faker",
         output: {
+          barrelType: false,
           banner: "// @ts-nocheck",
           path: "handlers",
         },

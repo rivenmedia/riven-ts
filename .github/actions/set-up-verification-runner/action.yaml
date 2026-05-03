@@ -16,6 +16,10 @@ inputs:
     description: Whether to install redis-server (required for integration tests)
     required: false
     default: "false"
+  set-up-postgres-service:
+    description: Whether to set up the postgres service (required for migration check)
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -33,3 +37,12 @@ runs:
       run: |
         sudo apt-get update
         sudo apt-get install -y fuse libfuse-dev
+
+    - name: Set up Postgres service
+      shell: bash
+      if: ${{ inputs.set-up-postgres-service == 'true' }}
+      run: |
+        sudo service postgresql start
+        until pg_isready; do sleep 1; done
+        sudo -u postgres createuser -s -d -r -w runner
+        sudo -u postgres psql -c "ALTER ROLE runner WITH PASSWORD 'runner';"

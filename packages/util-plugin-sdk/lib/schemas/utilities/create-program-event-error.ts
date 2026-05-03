@@ -9,6 +9,18 @@ type BaseErrorSchema = ZodObject<{
   error?: ZodUnknown;
 }>;
 
+function buildErrorMessage(type: string, error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  return `Error of type ${type}`;
+}
+
 export class ProgramEventError<
   Schema extends BaseErrorSchema,
   Data extends ParamsFor<z.infer<Schema>>,
@@ -18,7 +30,7 @@ export class ProgramEventError<
   } & Data;
 
   constructor(type: z.infer<Schema>["type"], data: Data) {
-    super(data.error ? String(data.error) : `Error of type ${type}`);
+    super(buildErrorMessage(type, data.error));
 
     this.payload = { type, ...data };
   }

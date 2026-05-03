@@ -1,21 +1,29 @@
 import z from "zod";
 
 import {
+  ProcessItemRequestFlow,
+  processItemRequestProcessorSchema,
+} from "./process-item-request/process-item-request.schema.ts";
+import {
+  ProcessMediaItemFlow,
+  processMediaItemProcessorSchema,
+} from "./process-media-item/process-media-item.schema.ts";
+import {
   DownloadItemFlow,
   downloadItemProcessorSchema,
-} from "./download-item/download-item.schema.ts";
+} from "./process-media-item/steps/download/download-item.schema.ts";
 import {
   FindValidTorrentFlow,
   findValidTorrentProcessorSchema,
-} from "./download-item/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+} from "./process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import {
   RankStreamsFlow,
   rankStreamsProcessorSchema,
-} from "./download-item/steps/rank-streams/rank-streams.schema.ts";
+} from "./process-media-item/steps/download/steps/rank-streams/rank-streams.schema.ts";
 import {
-  RequestIndexDataFlow,
-  requestIndexDataProcessorSchema,
-} from "./index-item/index-item.schema.ts";
+  ScrapeItemFlow,
+  scrapeItemProcessorSchema,
+} from "./process-media-item/steps/scrape/scrape-item.schema.ts";
 import {
   RequestContentServicesFlow,
   requestContentServicesProcessorSchema,
@@ -24,26 +32,24 @@ import {
   RequestSubtitlesFlow,
   requestSubtitlesProcessorSchema,
 } from "./request-subtitles/request-subtitles.schema.ts";
-import {
-  ScrapeItemFlow,
-  scrapeItemProcessorSchema,
-} from "./scrape-item/scrape-item.schema.ts";
 
 export const Flow = z.discriminatedUnion("name", [
-  RequestIndexDataFlow,
+  ProcessItemRequestFlow,
   RequestContentServicesFlow,
   ScrapeItemFlow,
   DownloadItemFlow,
   FindValidTorrentFlow,
   RankStreamsFlow,
   RequestSubtitlesFlow,
+  ProcessMediaItemFlow,
 ]);
 
 export type Flow = z.infer<typeof Flow>;
 
 export const FlowHandlers = {
-  "index-item": requestIndexDataProcessorSchema,
   "request-content-services": requestContentServicesProcessorSchema,
+  "process-item-request": processItemRequestProcessorSchema,
+  "process-media-item": processMediaItemProcessorSchema,
   "scrape-item": scrapeItemProcessorSchema,
   "download-item": downloadItemProcessorSchema,
   "download-item.find-valid-torrent": findValidTorrentProcessorSchema,

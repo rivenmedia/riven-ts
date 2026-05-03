@@ -1,18 +1,20 @@
-import { ItemRequestInstance } from "@repo/util-plugin-sdk/schemas/media/item-request";
+import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 
-import { database } from "../../database/database.ts";
+import { services } from "../../database/database.ts";
+import { createApolloInstanceSchema } from "./create-apollo-instance-schema.ts";
 
 /**
  * A schema that converts to/from a serialised item request.
  */
 export const SerialisedItemRequest = z.codec(
-  z.int().min(1),
-  ItemRequestInstance,
+  UUID,
+  z.xor([z.instanceof(ItemRequest), createApolloInstanceSchema(ItemRequest)]),
   {
-    decode: (id) => database.itemRequest.findOneOrFail(id),
-    encode: (data) => data.id,
+    decode: (id) => services.itemRequestService.getItemRequest(id),
+    encode: (data) => UUID.parse(data.id),
   },
 );
 

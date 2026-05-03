@@ -2,49 +2,61 @@ import { type Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 import chalk from "chalk";
+import { Duration } from "luxon";
+import os from "node:os";
 import {
   type ActorRef,
   type Snapshot,
-  assign,
   enqueueActions,
   raise,
   sendTo,
   setup,
 } from "xstate";
 
+import { processItemRequestProcessor } from "../../message-queue/flows/process-item-request/process-item-request.processor.ts";
+import { ProcessItemRequestFlow } from "../../message-queue/flows/process-item-request/process-item-request.schema.ts";
+import { processItemProcessor } from "../../message-queue/flows/process-media-item/process-media-item.processor.ts";
+import { ProcessMediaItemFlow } from "../../message-queue/flows/process-media-item/process-media-item.schema.ts";
+import { downloadItemProcessor } from "../../message-queue/flows/process-media-item/steps/download/download-item.processor.ts";
+import { DownloadItemFlow } from "../../message-queue/flows/process-media-item/steps/download/download-item.schema.ts";
+import { findValidTorrentProcessor } from "../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.processor.ts";
+import { FindValidTorrentFlow } from "../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import { rankStreamsProcessor } from "../../message-queue/flows/process-media-item/steps/download/steps/rank-streams/rank-streams.processor.ts";
+import { RankStreamsFlow } from "../../message-queue/flows/process-media-item/steps/download/steps/rank-streams/rank-streams.schema.ts";
+import { scrapeItemProcessor } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.processor.ts";
+import { ScrapeItemFlow } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.schema.ts";
+import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
+import { RequestContentServicesFlow } from "../../message-queue/flows/request-content-services/request-content-services.schema.ts";
+import { requestSubtitlesProcessor } from "../../message-queue/flows/request-subtitles/request-subtitles.processor.ts";
+import { RequestSubtitlesFlow } from "../../message-queue/flows/request-subtitles/request-subtitles.schema.ts";
+import { MapItemsToFilesSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
+import { ParseScrapeResultsSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.schema.ts";
+import { ValidateTorrentFilesSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.schema.ts";
+import { createSandboxedWorker } from "../../message-queue/sandboxed-jobs/utilities/create-sandboxed-worker.ts";
+import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
 import { logger } from "../../utilities/logger/logger.ts";
+import { settings } from "../../utilities/settings.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
-import {
-  type BootstrapFlowWorkersOutput,
-  bootstrapFlowWorkers,
-} from "./actors/bootstrap-flow-workers.actor.ts";
-import {
-  type BootstrapSandboxedWorkersOutput,
-  bootstrapSandboxedWorkers,
-} from "./actors/bootstrap-sandboxed-workers.actor.ts";
 import { createEventScheduler } from "./actors/event-scheduler.actor.ts";
 import {
   type FanOutDownloadInput,
   fanOutDownload,
 } from "./actors/fan-out-download.actor.ts";
 import { jobEnqueuer } from "./actors/job-enqueuer.actor.ts";
+import { processItemRequest } from "./actors/process-item-request.actor.ts";
+import { processMediaItem } from "./actors/process-media-item.actor.ts";
 import { requestContentServices } from "./actors/request-content-services.actor.ts";
-import { requestDownload } from "./actors/request-download.actor.ts";
-import { requestIndexData } from "./actors/request-index-data.actor.ts";
-import { requestScrape } from "./actors/request-scrape.actor.ts";
-import { requestSubtitles } from "./actors/request-subtitles.actor.ts";
 import { retryLibrary } from "./actors/retry-library.actor.ts";
 import {
   type ScheduleReindexInput,
   scheduleReindex,
 } from "./actors/schedule-reindex.actor.ts";
-import { getPluginEventSubscribers } from "./utilities/get-plugin-event-subscribers.ts";
 
 import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
-import type { EnqueueDownloadItemInput } from "../../message-queue/flows/download-item/enqueue-download-item.ts";
-import type { EnqueueIndexItemInput } from "../../message-queue/flows/index-item/enqueue-index-item.ts";
-import type { EnqueueRequestSubtitlesInput } from "../../message-queue/flows/request-subtitles/enqueue-request-subtitles.ts";
-import type { EnqueueScrapeItemInput } from "../../message-queue/flows/scrape-item/enqueue-scrape-items.ts";
+import type { Flow } from "../../message-queue/flows/index.ts";
+import type { ProcessItemRequestInput } from "../../message-queue/flows/process-item-request/enqueue-process-item-request.ts";
+import type { EnqueueProcessMediaItemInput } from "../../message-queue/flows/process-media-item/enqueue-process-media-item.ts";
+import type { SandboxedJobDefinition } from "../../message-queue/sandboxed-jobs/index.ts";
 import type {
   PluginQueueMap,
   PluginWorkerMap,
@@ -52,12 +64,29 @@ import type {
   ValidPluginMap,
 } from "../../types/plugins.ts";
 import type { RivenMachineEvent } from "../program/index.ts";
+import type { Queue, Worker } from "bullmq";
 
 export interface MainRunnerMachineContext {
   parentRef: ActorRef<Snapshot<unknown>, RivenMachineEvent>;
   plugins: ValidPluginMap;
-  flowWorkers: BootstrapFlowWorkersOutput | null;
-  sandboxedWorkers: BootstrapSandboxedWorkersOutput | null;
+  flowWorkers: {
+    [K in Flow["name"]]: {
+      queue: Queue;
+      worker: Worker<
+        Extract<Flow, { name: K }>["input"],
+        Extract<Flow, { name: K }>["output"]
+      >;
+    };
+  };
+  sandboxedWorkers: {
+    [K in SandboxedJobDefinition["name"]]: {
+      queue: Queue;
+      worker: Worker<
+        Extract<SandboxedJobDefinition, { name: K }>["input"],
+        Extract<SandboxedJobDefinition, { name: K }>["output"]
+      >;
+    };
+  };
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: PublishableEventSet;
@@ -79,13 +108,9 @@ export const mainRunnerMachine = setup({
     input: {} as MainRunnerMachineInput,
     events: {} as MainRunnerMachineEvent,
     children: {} as {
-      bootstrapFlowWorkers: "bootstrapFlowWorkers";
-      bootstrapSandboxedWorkers: "bootstrapSandboxedWorkers";
       requestContentServices: "requestContentServices";
-      requestIndexData: "requestIndexData";
-      requestScrape: "requestScrape";
-      requestSubtitles: "requestSubtitles";
-      fanOutDownload: "fanOutDownload";
+      processItemRequest: "processItemRequest";
+      processMediaItem: "processMediaItem";
     },
   },
   actions: {
@@ -94,120 +119,35 @@ export const mainRunnerMachine = setup({
         type: "riven.core.shutdown",
       });
     },
-    requestContentServices: enqueueActions(
-      ({ enqueue, context: { plugins } }) => {
-        enqueue.spawnChild("requestContentServices", {
-          id: "requestContentServices",
+    requestContentServices: enqueueActions(({ enqueue }) => {
+      enqueue.spawnChild("requestContentServices", {
+        id: "requestContentServices",
+      });
+    }),
+    processItemRequest: enqueueActions(
+      ({ enqueue }, input: ProcessItemRequestInput) => {
+        enqueue.spawnChild("processItemRequest", {
+          id: "processItemRequest",
           input: {
-            subscribers: getPluginEventSubscribers(
-              "riven.content-service.requested",
-              plugins,
-            ),
+            item: input.item,
           },
         });
       },
     ),
-    requestIndexData: enqueueActions(
-      (
-        { enqueue, context: { plugins } },
-        params: Omit<EnqueueIndexItemInput, "subscribers">,
-      ) => {
-        enqueue.spawnChild("requestIndexData", {
-          id: "requestIndexData",
-          input: {
-            item: params.item,
-            subscribers: getPluginEventSubscribers(
-              "riven.media-item.index.requested",
-              plugins,
-            ),
-          },
+    processMediaItem: enqueueActions(
+      ({ enqueue }, input: EnqueueProcessMediaItemInput) => {
+        enqueue.spawnChild("processMediaItem", {
+          id: "processMediaItem",
+          input,
         });
       },
     ),
     scheduleReindex: enqueueActions(
-      (
-        { enqueue, context: { plugins } },
-        params: Omit<ScheduleReindexInput, "subscribers">,
-      ) => {
+      ({ enqueue }, params: ScheduleReindexInput) => {
         enqueue.spawnChild("scheduleReindex", {
           id: "scheduleReindex",
           input: {
             item: params.item,
-            subscribers: getPluginEventSubscribers(
-              "riven.media-item.index.requested",
-              plugins,
-            ),
-          },
-        });
-      },
-    ),
-    requestScrape: enqueueActions(
-      (
-        { enqueue, context: { plugins } },
-        params: Omit<EnqueueScrapeItemInput, "subscribers">,
-      ) => {
-        enqueue.spawnChild("requestScrape", {
-          id: "requestScrape",
-          input: {
-            items: params.items,
-            subscribers: getPluginEventSubscribers(
-              "riven.media-item.scrape.requested",
-              plugins,
-            ),
-          },
-        });
-      },
-    ),
-    requestDownload: enqueueActions(
-      (
-        { enqueue, context: { plugins } },
-        params: Omit<EnqueueDownloadItemInput, "subscribers">,
-      ) => {
-        if (params.item.streams.length === 0) {
-          return;
-        }
-
-        enqueue.spawnChild("requestDownload", {
-          id: "requestDownload",
-          input: {
-            item: params.item,
-            subscribers: getPluginEventSubscribers(
-              "riven.media-item.download.requested",
-              plugins,
-            ),
-          },
-        });
-      },
-    ),
-    fanOutDownload: enqueueActions(
-      (
-        { enqueue, context: { plugins } },
-        params: Omit<FanOutDownloadInput, "subscribers">,
-      ) => {
-        enqueue.spawnChild("fanOutDownload", {
-          id: "fanOutDownload",
-          input: {
-            item: params.item,
-            subscribers: getPluginEventSubscribers(
-              "riven.media-item.scrape.requested",
-              plugins,
-            ),
-          },
-        });
-      },
-    ),
-    requestSubtitles: enqueueActions(
-      (
-        { enqueue, context: { plugins } },
-        params: Omit<EnqueueRequestSubtitlesInput, "subscribers">,
-      ) => {
-        enqueue.spawnChild(requestSubtitles, {
-          input: {
-            item: params.item,
-            subscribers: getPluginEventSubscribers(
-              "riven.media-item.subtitle.requested",
-              plugins,
-            ),
           },
         });
       },
@@ -220,20 +160,26 @@ export const mainRunnerMachine = setup({
         },
       });
     }),
+    fanOutDownload: enqueueActions(
+      ({ enqueue }, params: FanOutDownloadInput) => {
+        enqueue.spawnChild("fanOutDownload", {
+          id: "fanOutDownload",
+          input: {
+            item: params.item,
+          },
+        });
+      },
+    ),
   },
   actors: {
-    bootstrapFlowWorkers,
-    bootstrapSandboxedWorkers,
     createEventScheduler,
-    fanOutDownload,
     jobEnqueuer,
+    processMediaItem,
+    processItemRequest,
     retryLibrary,
     requestContentServices,
-    requestIndexData,
-    requestScrape,
-    requestDownload,
-    requestSubtitles,
     scheduleReindex,
+    fanOutDownload,
   },
   guards: {
     /**
@@ -281,114 +227,126 @@ export const mainRunnerMachine = setup({
   .createMachine({
     /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7ABABwCcB7KAgQwFscKzVcCBXLLMAgYgI2wDoLJUyAWlQAXMBW4AqANoAGALqJQeIrFGoiWJSAAeiAIwAmADQgAnogCsATmvcAHEcsBfZ6bSZchEuSo06OIzMrBxcWIJ4ADYMUHS8-EKi4twEYACODHBiEHKKSCAqaiIaWvl6CEamFggALJaGDjYAzADsLm4gHtj4xKSU1LT0TCzsnJ7xEALCYhIAxqlkxZrcrMQEudqF6pra5ZXmiE2yltzWsgBshu3uYT0+-f5DwaNhE1NJcwtLWNxkkQsQMyCMA6VCwESwDb5LbfXYGEwHCqWeynSxNJyuG6eO59PyDQLDEJjHipEQEIGRVAAI3I5KhylU21KoD2COqRlcHSwRAgcG0XS8vV8AwCQRGm0ZsLKiDa3FkhhaTRqrUsVRlln03Ba50sl3ariAA */
     id: "Riven program main runner",
-    context: ({ input }) => ({
-      parentRef: input.parentRef,
-      plugins: input.plugins,
-      publishableEvents: input.publishableEvents,
-      pluginQueues: input.pluginQueues,
-      pluginWorkers: input.pluginWorkers,
-      flowWorkers: null,
-      sandboxedWorkers: null,
-    }),
-    initial: "Bootstrapping workers",
+    initial: "Running",
+    context: ({ input, self }) => {
+      const availableParallelism = os.availableParallelism();
+
+      return {
+        parentRef: input.parentRef,
+        plugins: input.plugins,
+        publishableEvents: input.publishableEvents,
+        pluginQueues: input.pluginQueues,
+        pluginWorkers: input.pluginWorkers,
+        flowWorkers: {
+          "process-item-request": createFlowWorker(
+            ProcessItemRequestFlow,
+            processItemRequestProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "process-media-item": createFlowWorker(
+            ProcessMediaItemFlow,
+            processItemProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "request-content-services": createFlowWorker(
+            RequestContentServicesFlow,
+            requestContentServicesProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "scrape-item": createFlowWorker(
+            ScrapeItemFlow,
+            scrapeItemProcessor,
+            self.send,
+            input.plugins,
+            {},
+            {
+              settings: {
+                backoffStrategy: (attemptsMade) => {
+                  const [after2, after5, after10] =
+                    settings.scrapeCooldownHours;
+
+                  if (attemptsMade >= 10) {
+                    return Duration.fromObject({ hours: after10 }).as(
+                      "milliseconds",
+                    );
+                  }
+
+                  if (attemptsMade >= 5) {
+                    return Duration.fromObject({ hours: after5 }).as(
+                      "milliseconds",
+                    );
+                  }
+
+                  if (attemptsMade >= 2) {
+                    return Duration.fromObject({ hours: after2 }).as(
+                      "milliseconds",
+                    );
+                  }
+
+                  return Duration.fromObject({ minutes: 30 }).as(
+                    "milliseconds",
+                  );
+                },
+              },
+            },
+          ),
+          "download-item": createFlowWorker(
+            DownloadItemFlow,
+            downloadItemProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "download-item.find-valid-torrent": createFlowWorker(
+            FindValidTorrentFlow,
+            findValidTorrentProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "download-item.rank-streams": createFlowWorker(
+            RankStreamsFlow,
+            rankStreamsProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "request-subtitles": createFlowWorker(
+            RequestSubtitlesFlow,
+            requestSubtitlesProcessor,
+            self.send,
+            input.plugins,
+          ),
+        },
+        sandboxedWorkers: {
+          "scrape-item.parse-scrape-results": createSandboxedWorker(
+            ParseScrapeResultsSandboxedJob,
+            new URL(
+              import.meta.resolve("@repo/riven/workers/parse-scrape-results"),
+            ),
+            {},
+            { concurrency: availableParallelism * 0.25 },
+          ),
+          "download-item.map-items-to-files": createSandboxedWorker(
+            MapItemsToFilesSandboxedJob,
+            new URL(
+              import.meta.resolve("@repo/riven/workers/map-items-to-files"),
+            ),
+            {},
+            { concurrency: availableParallelism * 0.75 },
+          ),
+          "download-item.validate-torrent-files": createSandboxedWorker(
+            ValidateTorrentFilesSandboxedJob,
+            new URL(
+              import.meta.resolve("@repo/riven/workers/validate-torrent-files"),
+            ),
+            {},
+            { concurrency: availableParallelism * 0.25 },
+          ),
+        },
+      };
+    },
     states: {
-      "Bootstrapping workers": {
-        type: "parallel",
-        onDone: {
-          target: "Running",
-          actions: {
-            type: "log",
-            params: {
-              message: "Finished bootstrapping all workers.",
-            },
-          },
-        },
-        states: {
-          "Bootstrapping flow workers": {
-            initial: "Bootstrapping",
-            states: {
-              Bootstrapping: {
-                invoke: {
-                  src: "bootstrapFlowWorkers",
-                  id: "bootstrapFlowWorkers",
-                  input: ({ self }) => ({
-                    parentRef: self,
-                  }),
-                  onError: {
-                    target: "#Riven program main runner.Errored",
-                    actions: [
-                      {
-                        type: "log",
-                        params: ({ event: { error } }) => ({
-                          message: "Error bootstrapping flow workers",
-                          level: "error",
-                          error,
-                        }),
-                      },
-                      { type: "handleGracefulShutdown" },
-                    ],
-                  },
-                  onDone: {
-                    target: "Done",
-                    actions: assign({
-                      flowWorkers: ({ event }) => event.output,
-                    }),
-                  },
-                },
-              },
-              Done: {
-                type: "final",
-                entry: {
-                  type: "log",
-                  params: {
-                    message: "Successfully bootstrapped flow workers",
-                  },
-                },
-              },
-            },
-          },
-          "Bootstrapping sandboxed workers": {
-            initial: "Bootstrapping",
-            states: {
-              Bootstrapping: {
-                invoke: {
-                  src: "bootstrapSandboxedWorkers",
-                  id: "bootstrapSandboxedWorkers",
-                  onError: {
-                    target: "#Riven program main runner.Errored",
-                    actions: [
-                      {
-                        type: "log",
-                        params: ({ event: { error } }) => ({
-                          message: "Error bootstrapping sandboxed workers",
-                          level: "error",
-                          error,
-                        }),
-                      },
-                      { type: "handleGracefulShutdown" },
-                    ],
-                  },
-                  onDone: {
-                    target: "Done",
-                    actions: assign({
-                      sandboxedWorkers: ({ event }) => event.output,
-                    }),
-                  },
-                },
-              },
-              Done: {
-                type: "final",
-                entry: {
-                  type: "log",
-                  params: {
-                    message: "Successfully bootstrapped sandboxed workers",
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
       Running: {
         invoke: [
           {
@@ -450,7 +408,7 @@ export const mainRunnerMachine = setup({
                 }),
               },
               {
-                type: "requestIndexData",
+                type: "processItemRequest",
                 params: ({ event: { item } }) => ({ item }),
               },
             ],
@@ -488,7 +446,7 @@ export const mainRunnerMachine = setup({
               {
                 type: "log",
                 params: ({ event: { item } }) => ({
-                  message: `Skipping existing item request: ${[item.imdbId && `IMDB: ${item.imdbId}`, item.tmdbId && `TMDB: ${item.tmdbId}`, item.tvdbId && `TVDB: ${item.tvdbId}`].filter(Boolean).join(" | ")}`,
+                  message: `Skipping existing item request: ${chalk.bold([item.imdbId && `IMDB: ${item.imdbId}`, item.tmdbId && `TMDB: ${item.tmdbId}`, item.tvdbId && `TVDB: ${item.tvdbId}`].filter(Boolean).join(" | "))}`,
                   level: "verbose",
                 }),
               },
@@ -502,17 +460,8 @@ export const mainRunnerMachine = setup({
               {
                 type: "log",
                 params: ({ event: { item } }) => ({
-                  message: `Successfully updated item request: [${item.externalIdsLabel.join(" | ")}]`,
+                  message: `Successfully updated item request: [${chalk.bold(item.externalIdsLabel.join(" | "))}]`,
                   level: "silly",
-                }),
-              },
-              {
-                type: "requestScrape",
-                params: ({ event: { item } }) => ({
-                  items: item.requestedItems.filter(
-                    (item) =>
-                      item.state === "indexed" && item.type === "season",
-                  ),
                 }),
               },
             ],
@@ -521,16 +470,6 @@ export const mainRunnerMachine = setup({
           /**
            * Index lifecycle events
            */
-
-          "riven.media-item.index.requested": {
-            description:
-              "Indicates that a media item index has been requested for a media item.",
-            actions: {
-              type: "requestIndexData",
-              params: ({ event: { item } }) => ({ item }),
-            },
-          },
-
           "riven.media-item.index.success": [
             {
               description:
@@ -547,7 +486,7 @@ export const mainRunnerMachine = setup({
                 {
                   type: "log",
                   params: ({ event: { item } }) => ({
-                    message: `Successfully indexed ${item.type}: ${item.fullTitle}. This item is not yet released and will be scheduled for re-indexing at a later date.`,
+                    message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}. This item is not yet released and will be scheduled for re-indexing at a later date.`,
                     level: "info",
                   }),
                 },
@@ -562,19 +501,19 @@ export const mainRunnerMachine = setup({
               },
               actions: [
                 {
-                  type: "requestScrape",
-                  params: ({ event: { item } }) => ({ items: [item] }),
-                },
-                {
                   type: "scheduleReindex",
                   params: ({ event: { item } }) => ({ item }),
                 },
                 {
                   type: "log",
                   params: ({ event: { item } }) => ({
-                    message: `Successfully indexed ${item.type}: ${item.fullTitle}. Attempting to download all available episodes; future episodes will be re-indexed after their air date.`,
+                    message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}. Attempting to download all available episodes; future episodes will be re-indexed after their air date.`,
                     level: "info",
                   }),
+                },
+                {
+                  type: "processMediaItem",
+                  params: ({ event: { item } }) => ({ id: item.id }),
                 },
               ],
             },
@@ -587,15 +526,15 @@ export const mainRunnerMachine = setup({
               },
               actions: [
                 {
-                  type: "requestScrape",
-                  params: ({ event: { item } }) => ({ items: [item] }),
-                },
-                {
                   type: "log",
                   params: ({ event: { item } }) => ({
-                    message: `Successfully indexed ${item.type}: ${item.fullTitle}`,
+                    message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}`,
                     level: "info",
                   }),
+                },
+                {
+                  type: "processMediaItem",
+                  params: ({ event: { item } }) => ({ id: item.id }),
                 },
               ],
             },
@@ -603,7 +542,7 @@ export const mainRunnerMachine = setup({
               actions: {
                 type: "log",
                 params: ({ event: { item } }) => ({
-                  message: `Successfully indexed ${item.type}: ${item.fullTitle}, but could not determine the next action.`,
+                  message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}, but could not determine the next action.`,
                   level: "error",
                 }),
               },
@@ -626,7 +565,7 @@ export const mainRunnerMachine = setup({
                     .join(" | ");
 
                   return {
-                    message: `Media item has already been indexed: ${chalk.dim(externalIds)}`,
+                    message: `Media item has already been indexed: ${chalk.bold.dim(externalIds)}`,
                     level: "verbose",
                   };
                 },
@@ -638,15 +577,6 @@ export const mainRunnerMachine = setup({
            * Scrape lifecycle events
            */
 
-          "riven.media-item.scrape.requested": {
-            description:
-              "Indicates that a media item scrape has been requested for an indexed media item.",
-            actions: {
-              type: "requestScrape",
-              params: ({ event: { item } }) => ({ items: [item] }),
-            },
-          },
-
           "riven.media-item.scrape.error.no-new-streams": {
             description:
               "Indicates that a media item scrape completed successfully, but no new streams were found.",
@@ -654,7 +584,7 @@ export const mainRunnerMachine = setup({
               {
                 type: "log",
                 params: ({ event: { item } }) => ({
-                  message: `No new streams found for ${item.fullTitle}.`,
+                  message: `No new streams found for ${chalk.bold(item.fullTitle)}.`,
                   level: "verbose",
                 }),
               },
@@ -676,10 +606,6 @@ export const mainRunnerMachine = setup({
                   level: "info",
                 }),
               },
-              {
-                type: "requestDownload",
-                params: ({ event: { item } }) => ({ item }),
-              },
             ],
           },
 
@@ -697,12 +623,20 @@ export const mainRunnerMachine = setup({
                   event: {
                     downloader,
                     item: { fullTitle },
-                    durationFromRequestToDownload,
+                    durationMs,
                     provider,
                   },
                 }) => ({
                   get message() {
-                    const baseMessage = `Successfully downloaded ${chalk.bold(fullTitle)} in ${durationFromRequestToDownload.toString()} seconds using ${downloader}`;
+                    const formattedDuration = Duration.fromMillis(durationMs)
+                      .rescale()
+                      .toHuman({
+                        showZeros: false,
+                        maximumFractionDigits: 0,
+                        unitDisplay: "narrow",
+                      });
+
+                    const baseMessage = `Successfully downloaded ${chalk.bold(fullTitle)} in ${formattedDuration} using ${downloader}`;
 
                     if (provider) {
                       return `${baseMessage} via ${provider}`;
@@ -711,10 +645,6 @@ export const mainRunnerMachine = setup({
                     return baseMessage;
                   },
                 }),
-              },
-              {
-                type: "requestSubtitles",
-                params: ({ event: { item } }) => ({ item }),
               },
             ],
           },
@@ -731,7 +661,7 @@ export const mainRunnerMachine = setup({
                     item: { fullTitle },
                   },
                 }) => ({
-                  message: `Partially downloaded ${fullTitle} using ${downloader}. Attempting to download the remaining items separately.`,
+                  message: `Partially downloaded ${chalk.bold(fullTitle)} using ${downloader}. Attempting to download the remaining items separately.`,
                 }),
               },
               {
@@ -745,14 +675,6 @@ export const mainRunnerMachine = setup({
             description:
               "Indicates that an error occurred during the download process for a media item.",
             actions: [
-              {
-                type: "log",
-                params: ({ event: { item, error } }) => ({
-                  message: `Error downloading ${chalk.bold(item.fullTitle)}`,
-                  level: "error",
-                  error,
-                }),
-              },
               {
                 type: "fanOutDownload",
                 params: ({ event: { item } }) => ({ item }),
@@ -769,22 +691,11 @@ export const mainRunnerMachine = setup({
             actions: { type: "requestContentServices" },
           },
 
-          "riven-internal.retry-library": {
-            description:
-              "Retries any incomplete media items and item requests.",
-            actions: { type: "retryLibrary" },
-          },
-
-          "riven-internal.retry-item-download": {
-            description:
-              "Retries the download process for a scraped media item.",
-            actions: {
-              type: "requestDownload",
-              params: ({ event: { item } }) => ({
-                item,
-              }),
-            },
-          },
+          // "riven-internal.retry-library": {
+          //   description:
+          //     "Retries any incomplete media items and item requests.",
+          //   actions: { type: "retryLibrary" },
+          // },
         },
       },
       Errored: {

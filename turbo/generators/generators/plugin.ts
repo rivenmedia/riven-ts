@@ -66,15 +66,5 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
           [`@repo/plugin-${pluginName}`]: "workspace:^",
         });
       },
-      (answers) => {
-        const pluginName = plop.getHelper("kebabCase")(
-          (answers as PluginAnswers).pluginName,
-        );
-
-        return formatOutputCode([
-          `packages/plugin-${pluginName}/**/*`,
-          require.resolve("../../../packages/core/util-graphql-schema/lib/index.ts"),
-        ]);
-      },
     ],
   });

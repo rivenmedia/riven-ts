@@ -16,12 +16,14 @@ catalog:
   "@kubb/plugin-oas": 4.20.1
   "@kubb/plugin-ts": 4.20.1
   "@kubb/plugin-zod": 4.20.1
-  "@mikro-orm/core": ^7.0.5
-  "@mikro-orm/decorators": ^7.0.5
-  "@mikro-orm/postgresql": ^7.0.5
-  "@mikro-orm/reflection": ^7.0.5
-  "@mikro-orm/seeder": ^7.0.5
-  "@mikro-orm/sqlite": ^7.0.5
+  "@mikro-orm/cli": ^7.0.12
+  "@mikro-orm/core": ^7.0.12
+  "@mikro-orm/decorators": ^7.0.12
+  "@mikro-orm/migrations": ^7.0.12
+  "@mikro-orm/postgresql": ^7.0.12
+  "@mikro-orm/reflection": ^7.0.12
+  "@mikro-orm/seeder": ^7.0.12
+  "@mikro-orm/sqlite": ^7.0.12
   "@types/luxon": ^3.7.1
   "@types/node": ^24.0.0
   "@typescript-eslint/parser": ^8.49.0
@@ -37,7 +39,6 @@ catalog:
   graphql-scalars: ^1.25.0
   graphql-tag: ^2.12.6
   jiti: 2.6.1
-  limiter: 3.0.0
   luxon: ^3.7.2
   msw: 2.13.2
   redis-memory-server: ^0.16.0
@@ -52,16 +53,20 @@ catalog:
   zod-validation-error: ^5.0.0
   zod2md: ^0.2.5
 
+catalogMode: prefer
+
 cleanupUnusedCatalogs: true
 
 engineStrict: true
+
+forceLegacyDeploy: true
 
 ignoredBuiltDependencies:
   - redis-memory-server
 
 linkWorkspacePackages: true
 
-nodeVersion: 24.14.0
+nodeVersion: 24.15.0
 
 onlyBuiltDependencies:
   - "@apollo/protobufjs"
@@ -87,12 +92,17 @@ packageExtensions:
   "@zkochan/fuse-native@*":
     dependencies:
       node-gyp: ^12.0.0
+  "@zkochan/fuse-shared-library@*":
+    dependencies:
+      fuse-shared-library-linux-arm64: github:runkit-forks/fuse-shared-library-linux-arm64#11e96e0745fd800ea3e0a4c8cc3b57fceba461cb
   bullmq-otel:
     dependencies:
       tslib: ^2.0.0
+patchedDependencies:
+  "@zkochan/fuse-shared-library": patches/@zkochan__fuse-shared-library.patch
 
 publicHoistPattern:
   - "*vitest*"
   - vite-node
 
-useNodeVersion: 24.14.0
+useNodeVersion: 24.15.0

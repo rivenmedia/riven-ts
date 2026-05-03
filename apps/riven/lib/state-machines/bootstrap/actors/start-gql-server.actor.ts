@@ -4,8 +4,6 @@ import {
 } from "@repo/core-util-graphql-schema";
 
 import { ApolloServer } from "@apollo/server";
-import responseCachePlugin from "@apollo/server-plugin-response-cache";
-import { ApolloServerPluginCacheControl } from "@apollo/server/plugin/cacheControl";
 import { startStandaloneServer } from "@apollo/server/standalone";
 import { URL } from "node:url";
 import { fromPromise } from "xstate";
@@ -43,13 +41,8 @@ export const startGqlServer = fromPromise<
     schema: await buildSchema({
       resolvers: [...resolvers, ...pluginResolvers],
     }),
-    introspection: true,
+    introspection: process.env["NODE_ENV"] !== "production",
     plugins: [
-      ApolloServerPluginCacheControl({
-        // Cache everything for 60 seconds by default.
-        defaultMaxAge: 60,
-      }),
-      responseCachePlugin(),
       {
         requestDidStart({ request: { operationName } }) {
           if (operationName) {

@@ -1,34 +1,42 @@
-import { Collection, type Opt, type Ref } from "@mikro-orm/core";
+import {
+  Collection,
+  EntityRepositoryType,
+  type Opt,
+  type Ref,
+} from "@mikro-orm/core";
 import {
   Entity,
   Enum,
   OneToMany,
   Property,
 } from "@mikro-orm/decorators/legacy";
+import { reduceAsync } from "es-toolkit";
 import { Field, ObjectType } from "type-graphql";
 
 import {
   ShowContentRating,
   ShowContentRatingEnum,
 } from "../../enums/content-ratings.enum.ts";
+import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { ShowStatus } from "../../enums/show-status.enum.ts";
+import { ShowRepository } from "../../repositories/show.repository.ts";
 import { MediaEntry } from "../filesystem/index.ts";
 import { Season, ShowLikeMediaItem } from "./index.ts";
 
-import type { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import type { ItemRequest } from "../requests/item-request.entity.ts";
 
 @ObjectType({ implements: ShowLikeMediaItem })
-@Entity()
+@Entity({ repository: () => ShowRepository })
 export class Show extends ShowLikeMediaItem {
+  [EntityRepositoryType]?: ShowRepository;
+
   @Field(() => ShowContentRatingEnum)
   declare contentRating: ShowContentRating;
 
   override type: Opt<"show"> = "show" as const;
 
-  declare tvdbId: string;
-  declare tmdbId?: never;
   declare itemRequest: Ref<ItemRequest>;
+
   declare filesystemEntries: never;
 
   @Field(() => ShowStatus.enum, { nullable: true })
@@ -54,7 +62,7 @@ export class Show extends ShowLikeMediaItem {
   nextAirDate!: Date | null;
 
   getPrettyName(): string {
-    return `${this.title} (${this.year?.toString() ?? "Unknown"}) {tvdb-${this.tvdbId}}`;
+    return `${this.title.replaceAll(".", "")} (${this.year?.toString() ?? "Unknown"}) {tvdb-${this.tvdbId}}`;
   }
 
   getShow() {
@@ -66,18 +74,18 @@ export class Show extends ShowLikeMediaItem {
       orderBy: { number: "asc" },
       populate: ["episodes"],
       where: {
-        ...(!includeSpecials ? { isSpecial: false } : {}),
+        ...(!includeSpecials && { isSpecial: false }),
       },
     });
 
     return seasons.flatMap((season) => season.episodes.getItems());
   }
 
-  async getStandardSeasons(stateFilter?: MediaItemState[]) {
-    return await this.seasons.matching({
+  getStandardSeasons(stateFilter?: MediaItemState[]) {
+    return this.seasons.matching({
       orderBy: { number: "asc" },
       where: {
-        ...(stateFilter ? { state: { $in: stateFilter } } : {}),
+        ...(stateFilter && { state: { $in: stateFilter } }),
         isSpecial: false,
       },
     });
@@ -115,5 +123,33 @@ export class Show extends ShowLikeMediaItem {
           (entry) => entry.type === "media",
         ) as MediaEntry[],
     );
+  }
+
+  async getExpectedFileCount(): Promise<number> {
+    const processableStates = MediaItemState.exclude(["unreleased"]);
+
+    const seasons = await this.getStandardSeasons(processableStates.options);
+    const expectedSeasons =
+      this.status === "continuing" ? seasons.length - 1 : seasons.length;
+
+    const count = await reduceAsync(
+      seasons.slice(0, Math.max(1, expectedSeasons)),
+      async (acc, season) => acc + (await season.episodes.loadCount()),
+      0,
+    );
+
+    return count;
+  }
+
+  async getIncompleteItems() {
+    return this.seasons.matching({
+      where: {
+        isRequested: true,
+        isSpecial: false,
+        episodes: {
+          state: ["indexed", "scraped"],
+        },
+      },
+    });
   }
 }

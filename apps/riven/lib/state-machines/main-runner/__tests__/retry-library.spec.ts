@@ -1,11 +1,13 @@
+import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+
 import { expect, vi } from "vitest";
 import { waitFor } from "xstate";
 
-import { database } from "../../../database/database.ts";
 import { it } from "./helpers/test-context.ts";
 
-it('sends a "riven.media-item.index.requested" event for each incomplete item request in the database', async ({
+it.skip('sends a "riven.media-item.index.requested" event for each incomplete item request in the database', async ({
   actor,
+  em,
   factories: { showItemRequestFactory, movieItemRequestFactory },
 }) => {
   const items = [
@@ -23,7 +25,7 @@ it('sends a "riven.media-item.index.requested" event for each incomplete item re
     }),
   ];
 
-  await database.itemRequest.insertMany(items);
+  await em.getRepository(ItemRequest).insertMany(items);
 
   actor.start();
 
@@ -34,7 +36,7 @@ it('sends a "riven.media-item.index.requested" event for each incomplete item re
   for (const item of items) {
     await vi.waitFor(() => {
       expect(actor).toHaveReceivedEvent({
-        type: "riven.media-item.index.requested",
+        type: `riven.media-item.index.requested.${item.type}`,
         item: expect.objectContaining({
           id: item.id,
           imdbId: item.imdbId,

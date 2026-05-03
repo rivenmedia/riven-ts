@@ -7,6 +7,7 @@ import {
   pluginRegistrarMachine,
 } from "../plugin-registrar/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
+import { clearPreviousInstanceState } from "./actors/clear-previous-instance-state.actor.ts";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
@@ -101,10 +102,11 @@ export const bootstrapMachine = setup({
     }),
   },
   actors: {
-    startGqlServer,
+    clearPreviousInstanceState,
     initialiseDatabaseConnection,
-    pluginRegistrarMachine,
     initialiseVfs,
+    pluginRegistrarMachine,
+    startGqlServer,
   },
   guards: {
     hasInvalidPlugins: ({ context: { invalidPlugins } }) =>
@@ -113,9 +115,8 @@ export const bootstrapMachine = setup({
 })
   .extend(withLogAction)
   .createMachine({
-    /** @xstate-layout N4IgpgJg5mDOIC5QCED2qAusMCcCGADgHRqbb4EECWAdlAAQEA2ArlLbEQEpjvZg5aUAMQRUNMEVoA3VAGtJzNrR59ceHAFk8AYwAWtMAG0ADAF1EoAqlhUMVcZZAAPRAFYAjAHYiATgBsJgBMJr4hYb4ALP4ANCAAnohB-j7Rbv6RHgDM6ZG+Jh4AvoVxpFjqxGXkhNR0jKzsNJyqVPyCdKLikjLyig0qvK3qWroGEkYeFkgg1rb2jtOuCJ4+AcGh4UFRsQmIHm4mRFlBAByBWVkmJv5BQW7FpejlFEQAkjR2VHhMrUL0sAJpFQdHBOhIiNg8BhJFUKm8PvZvr86gCcECQbBTFMrDZPgtQEsPB4CkQDl4vPs3PkMrc4okEClDidiSZ0mFIhSskUSiBYS93p8kbYUYDgXASE9qpQ-hAoXgAEZ4AH0HTiCQ6eY0IgAZQwGnsHTE4J6CikCK+PwBABE5YqAQBhNVgDUOGhYpyzPE0JxLNwnSJELyRaJZclZaIUoJ0xC+Dz+IiRA5BSInIJeE6hrIPXmSuECxGWv6o9Hivk1GW2pVgFVOl3iHV6nAGkQCHCoHBEZhQgBm7YAtmbBZawDa9XawI6aOrNe7pp7NT6Y15owgPCdfFlA-tImmPKdgl5-Nmy8R8xbkQxi2LOCfagwAOIUPQARQAMvRtYCBA39UIwd0aFkU1ISbe8AEcmE-NEBFnHE5ldRcGS8TcPA3LYLjyTx-RXdIgj8LkLn8KIOX9blHjIPNzSFItRQxCUKIoO96EfQgX3fKDpG-XVfw6Vt207Jge37CFGwwcDIK-HBYJmXEF0WPZiQ8UkTHJSlqR3KNdgQCl418PSTgzEwDP8VCTmPXMXlvP4ADUADFtX-ESoRhCzCHo55yzqOztWk+cEPk1dFOU1S3Cpa4NJXfYsl8I4DM8LlfDcQ9-CzHkT3cqUmO8n8mz-I0AKAgCh1aMBrO7TFzA9WT-IJRAbjwzw0giDkvGTSLEwDDMCJCdcgxU8yGLcqyvPsnLm2EPiOy7DBexwAdaGKgEyoq7EZPg-EXAUkkyQpUL1NpLT9hONxSXTLJ1xUoI42KHkaFQCA4CcE8qvW70AuSFcAFogk3PS-v+-6koGjzKlc6U6iURp4DnaqNqWIMVxSog40iS44wOLk938I80rBjKKiYyGOG4QY2iEF6vUQvdNPpH7Ny8XwKXTK5IgKfwTi8YGpXxxi-iJpoiEdPtmDAaEKbk2qEDCeNkgCRL0muM4ThXZI8KiKkViMvc3CCLnKMWmi0WvcWas2qW8PTYNTh1txQ2xldzpOIhAjTQjgzja7ccG08qMLEUjbo4aGFlMcqxrKdnQltbKYCjxWcDf0d2Ou47Z2ekThMTdFZ3MJjkTdI9f5X2L3+WjSzBpiQ4VMPVQjustW43K6BNuG9gMhOreT23kpXC7neS5lolItxIkLtyz2o-2SxvCuK1D5Va+nV1BdQYWmFFsAW7eyWOaUkJkKuYlHdjXv8iIH7XaM1Nkt8MefYNqfrx5zyHyfN8P0krfELRohM5MgoCiZDOCuDkJ1DxeEzjrYirUzh33hA-S8ZcZ7eyYixAgbEP7QQ7I3ZsX8Arhhin-RSgC1xp3cOmPwgRjqsm1hmHG5EQbwILCXK8gdZ51DQRgji34hYizFjDV6iFd7nxUpcABx8PA4VasjDmO5yQj2ZEROBQd6DeTwZLLYeEQwpFuNFVCgQyGriyEjY6h5MihUzjA5R7CGDZRweTARMdJbhkONo1qP1YxrEMXHJKgZErRUuEGHIqUGHcxUdlXh69+FwScWbBmMVQEhl8P6LYRJ2qeF-ldKIxwrjs1Hl7Rh2oWA6AxNDGJUdCSXCdmuDq7NjgZHTJFW28Y8gH2ZKEHI+w4EAFEcBthwJAdRZtshGRkbUjMyQSKRQ5jFZkttkxxnONjG6hQgA */
     id: "Bootstrap",
-    initial: "Bootstrapping plugins",
+    initial: "Bootstrapping database connection",
     context: ({ input }) => ({
       rootRef: input.rootRef,
       validatingPlugins: new Map(),
@@ -156,6 +157,74 @@ export const bootstrapMachine = setup({
       };
     },
     states: {
+      "Bootstrapping database connection": {
+        entry: {
+          type: "log",
+          params: {
+            message: "Initialising database connection...",
+          },
+        },
+        invoke: {
+          id: "initialiseDatabaseConnection",
+          src: "initialiseDatabaseConnection",
+          onDone: {
+            target: "Clearing previous instance state",
+            actions: {
+              type: "log",
+              params: {
+                message: "Database connection bootstrap complete.",
+              },
+            },
+          },
+          onError: {
+            target: "#Bootstrap.Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message:
+                    "Failed to initialise database connection during bootstrap.",
+                  level: "error",
+                  error,
+                }),
+              },
+              {
+                type: "raiseError",
+                params: ({ event }) => event.error as Error,
+              },
+            ],
+          },
+        },
+      },
+      "Clearing previous instance state": {
+        invoke: {
+          id: "clearPreviousInstanceState",
+          src: "clearPreviousInstanceState",
+          input: () => ({
+            wipeDatabase: settings.unsafeWipeDatabaseOnStartup,
+            wipeRedis: settings.unsafeWipeRedisOnStartup,
+          }),
+          onDone: "Bootstrapping plugins",
+          onError: {
+            target: "Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message:
+                    "Failed to clear previous instance state during bootstrap.",
+                  level: "error",
+                  error,
+                }),
+              },
+              {
+                type: "raiseError",
+                params: ({ event }) => event.error as Error,
+              },
+            ],
+          },
+        },
+      },
       "Bootstrapping plugins": {
         entry: [
           {
@@ -218,51 +287,6 @@ export const bootstrapMachine = setup({
         type: "parallel",
         onDone: "Bootstrapping VFS",
         states: {
-          "Bootstrapping database connection": {
-            initial: "Starting",
-            states: {
-              Starting: {
-                entry: {
-                  type: "log",
-                  params: {
-                    message: "Initialising database connection...",
-                  },
-                },
-                invoke: {
-                  id: "initialiseDatabaseConnection",
-                  src: "initialiseDatabaseConnection",
-                  onDone: "Complete",
-                  onError: {
-                    target: "#Bootstrap.Errored",
-                    actions: [
-                      {
-                        type: "log",
-                        params: ({ event: { error } }) => ({
-                          message:
-                            "Failed to initialise database connection during bootstrap.",
-                          level: "error",
-                          error,
-                        }),
-                      },
-                      {
-                        type: "raiseError",
-                        params: ({ event }) => event.error as Error,
-                      },
-                    ],
-                  },
-                },
-              },
-              Complete: {
-                entry: {
-                  type: "log",
-                  params: {
-                    message: "Database connection bootstrap complete.",
-                  },
-                },
-                type: "final",
-              },
-            },
-          },
           "Bootstrapping GraphQL Server": {
             initial: "Starting",
             states: {

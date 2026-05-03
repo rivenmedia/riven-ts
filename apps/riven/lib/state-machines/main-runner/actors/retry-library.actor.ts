@@ -1,6 +1,6 @@
 import { type ActorRef, type Snapshot, fromPromise } from "xstate";
 
-import { database } from "../../../database/database.ts";
+import { services } from "../../../database/database.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 
 import type { MainRunnerMachineEvent } from "../index.ts";
@@ -14,31 +14,11 @@ export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
     try {
       logger.verbose("Retrying library items");
 
-      const pendingItems = await database.mediaItem.find(
-        {
-          isRequested: true,
-          state: {
-            $in: ["indexed", "scraped", "partially_completed"],
-          },
-          type: {
-            // Only retry movies and shows, as shows will fan out their seasons and episodes on failure
-            $in: ["movie", "show"],
-          },
-        },
-        {
-          populate: ["activeStream", "streams"],
-          refresh: true,
-        },
-      );
+      const pendingItems =
+        await services.retryLibraryService.getMediaItemsToRetry();
 
-      const pendingRequests = await database.itemRequest.find(
-        {
-          state: {
-            $in: ["failed", "requested"],
-          },
-        },
-        { refresh: true },
-      );
+      const pendingRequests =
+        await services.retryLibraryService.getItemRequestsToRetry();
 
       if (pendingItems.length === 0 && pendingRequests.length === 0) {
         logger.verbose("No pending library items to retry");
@@ -60,7 +40,7 @@ export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
 
       for (const request of pendingRequests) {
         parentRef.send({
-          type: "riven.media-item.index.requested",
+          type: `riven.media-item.index.requested.${request.type}`,
           item: request,
         });
       }

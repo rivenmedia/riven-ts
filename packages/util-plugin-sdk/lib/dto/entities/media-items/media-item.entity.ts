@@ -14,9 +14,10 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/decorators/legacy";
-import { IsNumberString, IsOptional, Matches } from "class-validator";
+import { IsOptional, Matches } from "class-validator";
 import { JSONObjectResolver } from "graphql-scalars";
 import { DateTime } from "luxon";
+import { type UUID, randomUUID } from "node:crypto";
 import { Field, ID, InterfaceType } from "type-graphql";
 
 import { MediaItemContentRating } from "../../enums/content-ratings.enum.ts";
@@ -37,9 +38,9 @@ import type { Promisable } from "type-fest";
 export abstract class MediaItem {
   [OptionalProps]?: "state";
 
-  @Field((_type) => ID)
-  @PrimaryKey()
-  id!: number;
+  @Field(() => ID)
+  @PrimaryKey({ type: "uuid" })
+  id: UUID = randomUUID();
 
   @Field(() => String)
   @Index()
@@ -56,16 +57,6 @@ export abstract class MediaItem {
   @IsOptional()
   imdbId?: string | null;
 
-  @Property()
-  @IsNumberString()
-  @IsOptional()
-  tvdbId?: string | null;
-
-  @Property()
-  @IsNumberString()
-  @IsOptional()
-  tmdbId?: string | null;
-
   @Field(() => String, { nullable: true })
   @Property()
   posterPath?: string | null;
@@ -73,10 +64,10 @@ export abstract class MediaItem {
   @Field(() => Date)
   @Index()
   @Property()
-  createdAt: Opt<Date> = DateTime.now().toJSDate();
+  createdAt: Opt<Date> = DateTime.utc().toJSDate();
 
   @Field(() => Date, { nullable: true })
-  @Property({ onUpdate: () => DateTime.now().toJSDate() })
+  @Property({ onUpdate: () => DateTime.utc().toJSDate() })
   updatedAt?: Opt<Date> | null;
 
   @Field(() => Date, { nullable: true })
@@ -150,7 +141,7 @@ export abstract class MediaItem {
 
   @Field(() => Number)
   @Property()
-  failedAttempts: Opt<number> = 0;
+  failedScrapeAttempts: Opt<number> = 0;
 
   @Field(() => [FileSystemEntry])
   @ManyToMany()
@@ -191,7 +182,7 @@ export abstract class MediaItem {
   @Property({ persist: false, getter: true })
   get isReleased(): Opt<boolean> {
     return this.releaseDate
-      ? DateTime.fromJSDate(this.releaseDate) <= DateTime.now()
+      ? DateTime.fromJSDate(this.releaseDate) <= DateTime.utc()
       : false;
   }
 
@@ -215,4 +206,17 @@ export abstract class MediaItem {
    * @returns An array of associated MediaEntries, which may be empty if none exist.
    */
   abstract getMediaEntries(): Promise<MediaEntry[]>;
+
+  /**
+   * Returns the minimum amount of files that must be returned from a torrent
+   * in order to satisfy this media item.
+   *
+   * @returns A positive integer representing the expected file count for this media item.
+   */
+  abstract getExpectedFileCount(): Promisable<number>;
+
+  /**
+   * @returns Any incomplete immediate children of this media item.
+   */
+  abstract getIncompleteItems(): Promisable<MediaItem[]>;
 }

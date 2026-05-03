@@ -1,0 +1,28 @@
+diff --git a/include.js b/include.js
+index 78486a71fb428228cf9e9273cc84c90d9c2a42b1..e092c9c14f06a4d549d0e4321e923830713aa3f2 100644
+--- a/include.js
++++ b/include.js
+@@ -1,18 +1,22 @@
+ const os = require('os')
+ 
+ const arch = os.arch()
+-const platform = os.platform() + (arch === 'arm' ? '-arm' : '')
++const platform = os.platform() + (arch === 'arm' ? '-arm' : '') + (arch === 'arm64' ? '-arm64' : '')
+ 
+ switch (platform) {
+   case 'linux':
+     require('fuse-shared-library-linux/include')
+     break
+   case 'darwin':
++  case 'darwin-arm':
+     require('fuse-shared-library-darwin/include')
+     break
+   case 'linux-arm':
+     require('fuse-shared-library-linux-arm/include')
+     break
++  case 'linux-arm64':
++    require('fuse-shared-library-linux-arm64/include')
++    break
+   case 'win32':
+     require('fuse-shared-library-win32/include')
+     break

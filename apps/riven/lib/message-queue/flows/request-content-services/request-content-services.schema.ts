@@ -13,6 +13,9 @@ export const RequestContentServicesFlow = createFlowSchema(
   "request-content-services",
   {
     children: ContentServiceRequestedResponse,
+    input: z.object({
+      step: z.enum(["request", "process"]),
+    }),
     output: z.object({
       count: z.number().nonnegative(),
       newItems: z.number().nonnegative(),

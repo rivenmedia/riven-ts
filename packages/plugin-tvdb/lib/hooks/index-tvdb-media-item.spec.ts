@@ -1,19 +1,20 @@
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 
 import { HttpResponse, http } from "msw";
+import { randomUUID } from "node:crypto";
 import { expect } from "vitest";
 
 import breakingBadExtendedSeriesFixture from "../__fixtures__/breaking-bad/extended-series.json" with { type: "json" };
 import breakingBadOfficialOrderFixture from "../__fixtures__/breaking-bad/official-order.json" with { type: "json" };
 import breakingBadTvMazeLookupFixture from "../__fixtures__/breaking-bad/tvmaze-lookup.json" with { type: "json" };
-import { postLoginHandler } from "../__generated__/index.ts";
+import { postLoginHandler } from "../__generated__/handlers/postLoginHandler.ts";
 import { it as baseIt } from "../__tests__/tvdb.test-context.ts";
 import { indexTVDBMediaItem } from "./index-tvdb-media-item.ts";
 
 const it = baseIt.extend("item", ({}) => {
   const item = new ItemRequest();
 
-  item.id = 1;
+  item.id = randomUUID();
 
   return item;
 });
@@ -84,7 +85,7 @@ it("returns the series if the item has a tvdbId", async ({
   expect.assert(result);
 
   expect(result.item).toStrictEqual({
-    id: 1,
+    id: item.id,
     imdbId: "tt0903747",
     type: "show",
     title: "Breaking Bad",

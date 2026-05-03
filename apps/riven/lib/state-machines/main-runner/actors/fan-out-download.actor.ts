@@ -1,60 +1,38 @@
 import {
+  Episode,
   type MediaItem,
-  Season,
-  Show,
+  Movie,
 } from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
 import { fromPromise } from "xstate";
 
-import { database } from "../../../database/database.ts";
-import { enqueueScrapeItems } from "../../../message-queue/flows/scrape-item/enqueue-scrape-items.ts";
-
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import { services } from "../../../database/database.ts";
+import { enqueueProcessMediaItem } from "../../../message-queue/flows/process-media-item/enqueue-process-media-item.ts";
 
 export interface FanOutDownloadInput {
   item: MediaItem;
-  subscribers: RivenPlugin[];
 }
 
 export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
-  async ({ input: { item, subscribers } }) => {
-    if (item instanceof Show) {
-      await database.em.fork().populate(item, ["requestedSeasons"]);
-
-      /**
-       * Pulls all *standard* seasons when fanning out.
-       *
-       * Specials are unable to be downloaded in most instances,
-       * and end up burdening the queue with jobs.
-       *
-       * They should be handled after the main attempt has resolved.
-       */
-      await enqueueScrapeItems({
-        items: item.requestedSeasons.getItems(),
-        subscribers,
-      });
+  async ({ input: { item } }) => {
+    if (item instanceof Movie || item instanceof Episode) {
+      // No fan-out necessary for movies or individual episodes,
+      // as they are the leaf nodes in the media item hierarchy
+      return;
     }
 
-    if (item instanceof Season) {
-      await database.em.fork().populate(item, ["episodes"]);
+    const itemsToProcess =
+      await services.downloaderService.getFanOutDownloadItems(item.id);
 
-      const processableStates = MediaItemState.extract([
-        "ongoing",
-        "indexed",
-        "scraped",
-      ]);
-
-      const incompleteEpisodes = await item.episodes.matching({
-        orderBy: { number: "asc" },
-        where: { state: { $in: processableStates.options } },
-      });
-
-      // TODO: Implement pagination for shows with a large number of episodes to avoid enqueueing thousands of scrape jobs at once
-      await enqueueScrapeItems({
-        items: incompleteEpisodes,
-        subscribers,
-      });
+    for (const item of itemsToProcess) {
+      await enqueueProcessMediaItem(
+        { id: item.id },
+        {
+          // Insert at the front of the queue to process
+          // the fanned-out items after the parent item
+          lifo: true,
+        },
+      );
     }
   },
 );

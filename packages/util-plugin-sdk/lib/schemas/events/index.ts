@@ -65,8 +65,10 @@ import {
   MediaItemIndexErrorIncorrectStateEventHandler,
 } from "./media-item.index.incorrect-state.event.ts";
 import {
-  MediaItemIndexRequestedEvent,
-  MediaItemIndexRequestedEventHandler,
+  MediaItemIndexRequestedMovieEvent,
+  MediaItemIndexRequestedMovieEventHandler,
+  MediaItemIndexRequestedShowEvent,
+  MediaItemIndexRequestedShowEventHandler,
 } from "./media-item.index.requested.event.ts";
 import {
   MediaItemIndexSuccessEvent,
@@ -107,7 +109,8 @@ export const RivenEvent = z.discriminatedUnion("type", [
   ItemRequestCreateErrorEvent,
   ItemRequestCreateErrorConflictEvent,
   ItemRequestUpdateSuccessEvent,
-  MediaItemIndexRequestedEvent,
+  MediaItemIndexRequestedMovieEvent,
+  MediaItemIndexRequestedShowEvent,
   MediaItemIndexSuccessEvent,
   MediaItemIndexErrorIncorrectStateEvent,
   MediaItemIndexErrorEvent,
@@ -154,7 +157,10 @@ export const RivenEventHandler = {
   "riven.item-request.update.success": ItemRequestUpdateSuccessEventHandler,
 
   // Item indexing
-  "riven.media-item.index.requested": MediaItemIndexRequestedEventHandler,
+  "riven.media-item.index.requested.movie":
+    MediaItemIndexRequestedMovieEventHandler,
+  "riven.media-item.index.requested.show":
+    MediaItemIndexRequestedShowEventHandler,
   "riven.media-item.index.error": MediaItemIndexErrorEventHandler,
   "riven.media-item.index.error.incorrect-state":
     MediaItemIndexErrorIncorrectStateEventHandler,

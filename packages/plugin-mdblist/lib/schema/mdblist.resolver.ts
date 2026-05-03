@@ -12,19 +12,19 @@ import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/sche
 
 @Resolver()
 export class MdblistResolver {
-  @Query((_returns) => Boolean)
-  async mdblistIsValid(
+  @Query(() => Boolean)
+  mdblistIsValid(
     @PluginDataSource(pluginConfig.name, MdblistAPI) api: MdblistAPI,
   ): Promise<boolean> {
-    return await api.validate();
+    return api.validate();
   }
 
   @CacheControl({ maxAge: 300 })
-  @Query((_returns) => MdblistContentServiceResponse)
-  async mdbListItems(
+  @Query(() => MdblistContentServiceResponse)
+  mdbListItems(
     @Args() { listNames }: ListNamesArguments,
     @PluginDataSource(pluginConfig.name, MdblistAPI) api: MdblistAPI,
   ): Promise<ContentServiceRequestedResponse> {
-    return await api.getListItems(new Set<string>(listNames));
+    return api.getListItems(new Set<string>(listNames));
   }
 }

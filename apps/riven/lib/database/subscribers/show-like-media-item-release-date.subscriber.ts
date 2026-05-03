@@ -1,10 +1,18 @@
 import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
 
+import { DateTime } from "luxon";
+
 import type { EventSubscriber, FlushEventArgs } from "@mikro-orm/core";
 
 export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
   async onFlush({ uow }: FlushEventArgs): Promise<void> {
     const trackedEpisodes = new Set<Partial<Episode>>();
+
+    for (const changeSet of uow.getChangeSets()) {
+      if (changeSet.entity instanceof Episode) {
+        trackedEpisodes.add(changeSet.entity);
+      }
+    }
 
     for (const collectionUpdate of uow.getCollectionUpdates()) {
       if (collectionUpdate.owner instanceof Season) {
@@ -36,10 +44,13 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
         continue;
       }
 
+      item.year ??= DateTime.fromJSDate(item.releaseDate).year;
+
       const season = await item.season.loadOrFail();
 
       if (season.releaseDate == null) {
         season.releaseDate = item.releaseDate;
+        season.year = item.year;
 
         uow.computeChangeSet(season);
       }
@@ -49,6 +60,7 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
 
         if (show.releaseDate == null) {
           show.releaseDate = season.releaseDate;
+          show.year = DateTime.fromJSDate(season.releaseDate).year;
 
           uow.computeChangeSet(show);
         }
