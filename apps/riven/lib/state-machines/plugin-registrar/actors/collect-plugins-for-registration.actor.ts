@@ -6,7 +6,7 @@ import { constantCase } from "es-toolkit";
 import { fromPromise } from "xstate";
 import z from "zod";
 
-import { CorePlugins } from "../../../riven-settings.schema.ts";
+import { CorePlugins } from "../../../schemas/core-plugins.schema.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
 
