@@ -7,10 +7,7 @@ import {
 import { URL } from "node:url";
 
 import { SubtitleResponse } from "../schemas/subtitle-response.schema.ts";
-import {
-  type SubtitleSearchResponse,
-  subtitleSearchResponseSchema,
-} from "../schemas/subtitle-search.response.schema.ts";
+import { subtitleSearchResponseSchema } from "../schemas/subtitle-search.response.schema.ts";
 import { extractSrtFromZip } from "../utilities/extract-srt-from-zip.ts";
 
 import type { SubdlSettings } from "../subdl-settings.schema.ts";
@@ -62,7 +59,7 @@ export class SubdlAPI extends BaseDataSource<SubdlSettings> {
   async searchSubtitles(
     options: SubtitleSearchOptions,
   ): Promise<SubtitleResponse[]> {
-    const params: URLSearchParams = new URLSearchParams({
+    const params = new URLSearchParams({
       type: options.type,
       subs_per_page: "30",
     });
@@ -85,7 +82,7 @@ export class SubdlAPI extends BaseDataSource<SubdlSettings> {
       params.set("languages", options.languages.join(","));
     }
 
-    const response = await this.get<SubtitleSearchResponse>("subtitles", {
+    const response = await this.get<unknown>("subtitles", {
       params,
       cacheOptions: { ttl: 1000 * 60 * 30 },
     });
@@ -112,7 +109,7 @@ export class SubdlAPI extends BaseDataSource<SubdlSettings> {
   }
 
   /**
-   * Download a subtitle ZIP from SubDL, extract the first .srt file, and return its content.
+   * Download a subtitle ZIP from SubDL, extract the first `.srt` file, and return its content.
    */
   async downloadSubtitle(subtitleUrl: string): Promise<string | undefined> {
     const url = new URL(
@@ -120,7 +117,8 @@ export class SubdlAPI extends BaseDataSource<SubdlSettings> {
       subtitleUrl.startsWith("http") ? undefined : `https://dl.subdl.com`,
     );
 
-    const response = await fetch(url);
+    const signal = AbortSignal.timeout(1000 * 60);
+    const response = await fetch(url, { signal });
 
     if (!response.ok) {
       throw new SubdlAPIError(

@@ -1206,7 +1206,7 @@ importers:
         version: 6.4.1(encoding@0.1.13)(graphql@16.12.0)
       '@mikro-orm/core':
         specifier: 'catalog:'
-        version: 7.0.5(dataloader@2.2.3)
+        version: 7.0.12(dataloader@2.2.3)
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
