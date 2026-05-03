@@ -5,21 +5,18 @@
   "type": "module",
   "exports": {
     "./workers/map-items-to-files": {
-      "production": "./dist/workers/map-items-to-files/map-items-to-files.processor.js",
+      "production": "./workers/map-items-to-files/map-items-to-files.processor.js",
       "default": "./lib/message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.processor.ts"
     },
     "./workers/parse-scrape-results": {
-      "production": "./dist/workers/parse-scrape-results/parse-scrape-results.processor.js",
+      "production": "./workers/parse-scrape-results/parse-scrape-results.processor.js",
       "default": "./lib/message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.processor.ts"
     },
     "./workers/validate-torrent-files": {
-      "production": "./dist/workers/validate-torrent-files/validate-torrent-files.processor.js",
+      "production": "./workers/validate-torrent-files/validate-torrent-files.processor.js",
       "default": "./lib/message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.ts"
     },
-    "./database-metadata-cache": {
-      "production": "./dist/program/temp/metadata.json",
-      "default": "./temp/metadata.json"
-    }
+    "./database-metadata-cache": "./temp/metadata.json"
   },
   "files": [
     "dist"
@@ -38,7 +35,7 @@
     "lint:fix": "pnpm lint --fix",
     "migration:check": "mikro-orm migration:check",
     "mikro-orm": "mikro-orm",
-    "start": "pnpm node --conditions=production --env-file-if-exists=.env.riven --enable-source-maps dist/program/index.js",
+    "start": "pnpm node --conditions=production --env-file-if-exists=.env.riven --enable-source-maps dist/lib/index.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },

@@ -138,4 +138,4 @@ FROM node:${NODE_VERSION}-alpine AS runner
 
     ENV NODE_ENV=production
 
-    CMD ["node", "--conditions=production", "--enable-source-maps", "dist/program/lib/index.js"]
+    CMD ["node", "--conditions=production", "--enable-source-maps", "dist/lib/index.js"]
