@@ -1,8 +1,9 @@
+import { createPluginSettings } from "@rivenmedia/plugin-sdk/utilities/create-plugin-settings-schema";
 import { z } from "@rivenmedia/plugin-sdk/validation";
 
 import { getRequestQueryParamsFilterEnum } from "./__generated__/types/GetRequest.ts";
 
-export const SeerrSettings = z.object({
+export const SeerrSettings = createPluginSettings({
   apiKey: z
     .string()
     .min(1, "Seerr API Key is required")

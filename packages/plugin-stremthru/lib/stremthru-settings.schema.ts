@@ -1,3 +1,4 @@
+import { createPluginSettings } from "@rivenmedia/plugin-sdk/utilities/create-plugin-settings-schema";
 import { z } from "@rivenmedia/plugin-sdk/validation";
 
 import { Store } from "./schemas/store.schema.ts";
@@ -18,13 +19,11 @@ export const StoreKeys = z.object<
 
 export type StoreKeys = z.infer<typeof StoreKeys>;
 
-export const StremThruSettings = z
-  .object({
-    stremThruUrl: z
-      .url()
-      .default("https://stremthru.13377001.xyz/")
-      .describe("The URL of the StremThru instance to request"),
-  })
-  .extend(StoreKeys.shape);
+export const StremThruSettings = createPluginSettings({
+  stremThruUrl: z
+    .url()
+    .default("https://stremthru.13377001.xyz/")
+    .describe("The URL of the StremThru instance to request"),
+}).extend(StoreKeys.shape);
 
 export type StremThruSettings = z.infer<typeof StremThruSettings>;

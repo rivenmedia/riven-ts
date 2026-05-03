@@ -1,6 +1,7 @@
+import { createPluginSettings } from "@rivenmedia/plugin-sdk/utilities/create-plugin-settings-schema";
 import { z } from "@rivenmedia/plugin-sdk/validation";
 
-export const PlexSettings = z.object({
+export const PlexSettings = createPluginSettings({
   plexToken: z
     .string()
     .min(1, "Plex Token is required")

@@ -61,12 +61,22 @@ export const collectPluginsForRegistration = fromPromise(async () => {
         continue;
       }
 
-      const { name: pluginSymbol } = validationResult.data.default;
+      const { name: pluginSymbol, settingsSchema } =
+        validationResult.data.default;
+
+      if (!pluginSettings.get(settingsSchema).enabled) {
+        logger.debug(
+          `Plugin ${pluginName} is disabled via settings and will be skipped.`,
+        );
+
+        continue;
+      }
 
       parsedPlugins.pluginConfigPrefixMap.set(
         pluginSymbol,
         constantCase(pluginName),
       );
+
       parsedPlugins.validPlugins.push(validationResult.data.default);
     } catch (error) {
       logger.error(`Unable to resolve plugin ${pluginName}:`, { err: error });

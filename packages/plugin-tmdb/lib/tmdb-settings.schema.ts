@@ -1,6 +1,7 @@
-import z from "zod";
+import { createPluginSettings } from "@rivenmedia/plugin-sdk/utilities/create-plugin-settings-schema";
+import { z } from "@rivenmedia/plugin-sdk/validation";
 
-export const TmdbSettings = z.object({
+export const TmdbSettings = createPluginSettings({
   apiKey: z
     .string()
     .min(1, "API Key is required")

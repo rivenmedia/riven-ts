@@ -7,6 +7,7 @@ import {
 import { DataSourceMap } from "../utilities/datasource-map.ts";
 import { PluginSettings } from "../utilities/plugin-settings.ts";
 import { RivenEventHandler } from "./events/index.ts";
+import { BasePluginSettings } from "./settings/base-plugin-settings.schema.ts";
 
 import type { RateLimiterOptions } from "bullmq";
 import type { Constructor } from "type-fest";
@@ -80,7 +81,12 @@ export const RivenPlugin = z.object({
       output: z.promise(z.record(z.string(), z.unknown())),
     })
     .optional(),
-  settingsSchema: z.instanceof(z.ZodObject),
+  settingsSchema: z.custom<typeof BasePluginSettings>(
+    (val) =>
+      val instanceof z.ZodObject &&
+      val.shape["enabled"] instanceof
+        BasePluginSettings.shape.enabled._zod.constr,
+  ),
   validator: z.function({
     input: [
       z.object({

@@ -1,3 +1,4 @@
+import { createPluginSettings } from "@rivenmedia/plugin-sdk/utilities/create-plugin-settings-schema";
 import { json, z } from "@rivenmedia/plugin-sdk/validation";
 
 import { NotificationScheme } from "./schemas/notification-scheme.schema.ts";
@@ -17,7 +18,7 @@ const NotificationURLScheme = z.union([
   ]),
 ]);
 
-export const NotificationsSettings = z.object({
+export const NotificationsSettings = createPluginSettings({
   urls: json(
     z
       .array(NotificationURLScheme)

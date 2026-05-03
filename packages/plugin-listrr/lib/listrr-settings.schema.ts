@@ -1,6 +1,7 @@
+import { createPluginSettings } from "@rivenmedia/plugin-sdk/utilities/create-plugin-settings-schema";
 import { json, z } from "@rivenmedia/plugin-sdk/validation";
 
-export const ListrrSettings = z.object({
+export const ListrrSettings = createPluginSettings({
   apiKey: z
     .string()
     .min(1, "Listrr API Key is required")

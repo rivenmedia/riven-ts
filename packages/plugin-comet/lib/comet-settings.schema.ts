@@ -1,6 +1,7 @@
+import { createPluginSettings } from "@rivenmedia/plugin-sdk/utilities/create-plugin-settings-schema";
 import { z } from "@rivenmedia/plugin-sdk/validation";
 
-export const CometSettings = z.object({
+export const CometSettings = createPluginSettings({
   url: z
     .url()
     .default("https://comet.feels.legal")

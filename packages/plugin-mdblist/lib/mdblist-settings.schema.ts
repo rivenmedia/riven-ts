@@ -1,6 +1,7 @@
+import { createPluginSettings } from "@rivenmedia/plugin-sdk/utilities/create-plugin-settings-schema";
 import { json, z } from "@rivenmedia/plugin-sdk/validation";
 
-export const MdbListSettings = z.object({
+export const MdbListSettings = createPluginSettings({
   apiKey: z
     .string()
     .min(1, "MdbList API Key is required")
