@@ -9,13 +9,14 @@ import assert from "node:assert";
 import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
+import { enqueuePostProcessMediaItem } from "../post-process-media-item/enqueue-post-process-media-item.ts";
 import { processMediaItemProcessorSchema } from "./process-media-item.schema.ts";
 import { enqueueDownloadItem } from "./steps/download/enqueue-download-item.ts";
 import { enqueueScrapeItems } from "./steps/scrape/enqueue-scrape-items.ts";
 
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
-export const processItemProcessor =
+export const processMediaItemProcessor =
   processMediaItemProcessorSchema.implementAsync(async function (
     { job, token },
     {
@@ -24,6 +25,7 @@ export const processItemProcessor =
         indexerService,
         scraperService,
         mediaItemService,
+        postProcessingService,
       },
       plugins,
     },
@@ -97,7 +99,7 @@ export const processItemProcessor =
 
             await job.updateData({
               ...job.data,
-              step: "validate",
+              step: "validate-download",
             });
 
             if (await job.moveToWaitingChildren(token)) {
@@ -106,7 +108,7 @@ export const processItemProcessor =
 
             break;
           }
-          case "validate": {
+          case "validate-download": {
             const childFailures = await job.getIgnoredChildrenFailures();
 
             if (Object.keys(childFailures).length) {
@@ -166,7 +168,7 @@ export const processItemProcessor =
 
         logger.info(
           chalk.greenBright(
-            `${chalk.bold(item.fullTitle)} completed in ${chalk.bold(duration)}`,
+            `${chalk.bold(item.fullTitle)} downloaded in ${chalk.bold(duration)}`,
           ),
         );
       }
@@ -180,21 +182,28 @@ export const processItemProcessor =
             const { reindexTime } =
               await indexerService.calculateReindexTime(show);
 
+            const showUnrequestedItems = await show.getUnrequestedItems();
+            const hasUnrequestedItems = showUnrequestedItems.length > 0;
+
             const nextAirDateMessage = show.nextAirDate
-              ? `New episodes will attempt to be downloaded at ${chalk.bold(reindexTime.toLocaleString(DateTime.DATETIME_SHORT))}.`
+              ? `New episodes will ${hasUnrequestedItems ? "be indexed" : "attempt to be downloaded"} at ${chalk.bold(reindexTime.toLocaleString(DateTime.DATETIME_SHORT))}.`
               : "";
 
             logger.info(
               chalk.greenBright(
-                `${chalk.bold(show.fullTitle)} completed all available episodes. ${nextAirDateMessage}`.trim(),
+                `${chalk.bold(show.fullTitle)} downloaded all ${hasUnrequestedItems ? "requested" : "available"} episodes. ${nextAirDateMessage}`.trim(),
               ),
             );
           } else {
             logger.info(
-              chalk.greenBright(`${chalk.bold(show.fullTitle)} completed`),
+              chalk.greenBright(`${chalk.bold(show.fullTitle)} downloaded`),
             );
           }
         }
+      }
+
+      if (postProcessingService.itemRequiresPostProcessing(item, plugins)) {
+        await enqueuePostProcessMediaItem({ id: item.id });
       }
     } catch (error) {
       if (error instanceof ValidationError) {

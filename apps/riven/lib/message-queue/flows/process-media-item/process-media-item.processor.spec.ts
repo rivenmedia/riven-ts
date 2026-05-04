@@ -11,6 +11,14 @@ it.todo(
 );
 
 it.todo(
+  "enqueues item post-processing on completion if post-processing is required",
+);
+
+it.todo(
+  "does not enqueue item post-processing on completion if post-processing is not required",
+);
+
+it.todo(
   'throws an UnrecoverableError if the step is "downloaded" and scraping has not succeeded',
 );
 

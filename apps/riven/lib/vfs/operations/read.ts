@@ -27,8 +27,6 @@ export interface ReadInput {
 }
 
 async function read({ fd, length, position, buffer }: ReadInput) {
-  const previousReadPosition = fdToPreviousReadPositionMap.get(fd);
-
   const fileHandle = fdToFileHandleMeta.get(fd);
 
   if (!fileHandle) {
@@ -36,6 +34,20 @@ async function read({ fd, length, position, buffer }: ReadInput) {
       Fuse.EBADF,
       `Invalid file handle for read: ${fd.toString()}`,
     );
+  }
+
+  // Subtitle files are served directly from an in-memory buffer
+  if (fileHandle.type === "subtitle") {
+    const end = Math.min(position + length, fileHandle.contentBuffer.length);
+    const bytesRead = end - position;
+
+    if (bytesRead <= 0) {
+      return 0;
+    }
+
+    fileHandle.contentBuffer.copy(buffer, 0, position, end);
+
+    return bytesRead;
   }
 
   const fileChunkCalculations = fileNameToFileChunkCalculationsMap.get(
@@ -60,6 +72,8 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     requestRange: [position, position + length - 1],
     fileName: fileHandle.originalFileName,
   });
+
+  const previousReadPosition = fdToPreviousReadPositionMap.get(fd);
 
   const readType = detectReadType(
     previousReadPosition,

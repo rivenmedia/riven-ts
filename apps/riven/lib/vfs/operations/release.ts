@@ -44,21 +44,24 @@ async function release(_path: string, fd: number) {
     return;
   }
 
-  const nextFdCount =
-    (fileNameToFdCountMap.get(fileHandleMeta.originalFileName) ?? 1) - 1;
+  // Subtitle file handles don't use the file-name based maps
+  if (fileHandleMeta.type === "media") {
+    const nextFdCount =
+      (fileNameToFdCountMap.get(fileHandleMeta.originalFileName) ?? 1) - 1;
 
-  if (nextFdCount > 0) {
-    fileNameToFdCountMap.set(fileHandleMeta.originalFileName, nextFdCount);
-  } else {
-    fileNameToFdCountMap.delete(fileHandleMeta.originalFileName);
+    if (nextFdCount > 0) {
+      fileNameToFdCountMap.set(fileHandleMeta.originalFileName, nextFdCount);
+    } else {
+      fileNameToFdCountMap.delete(fileHandleMeta.originalFileName);
 
-    // If there are no more file descriptors referencing this file,
-    // we can clean up the file-name based mappings as well to free up memory.
-    [fileNameToFileChunkCalculationsMap, fileNameIsFetchingLinkMap].forEach(
-      (map) => {
-        map.delete(fileHandleMeta.originalFileName);
-      },
-    );
+      // If there are no more file descriptors referencing this file,
+      // we can clean up the file-name based mappings as well to free up memory.
+      [fileNameToFileChunkCalculationsMap, fileNameIsFetchingLinkMap].forEach(
+        (map) => {
+          map.delete(fileHandleMeta.originalFileName);
+        },
+      );
+    }
   }
 
   logger.verbose(

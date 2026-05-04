@@ -152,4 +152,13 @@ export class Show extends ShowLikeMediaItem {
       },
     });
   }
+
+  async getUnrequestedItems() {
+    return this.seasons.matching({
+      where: {
+        isRequested: false,
+        isSpecial: false,
+      },
+    });
+  }
 }

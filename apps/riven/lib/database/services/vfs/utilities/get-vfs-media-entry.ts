@@ -4,9 +4,7 @@ import { PathInfo } from "../schemas/path-info.schema.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 
-export async function getVfsEntry(em: EntityManager, path: string) {
-  const pathInfo = PathInfo.parse(path);
-
+export async function getVfsMediaEntry(em: EntityManager, pathInfo: PathInfo) {
   if (pathInfo.tmdbId) {
     return em.findOne(MediaEntry, {
       mediaItem: {

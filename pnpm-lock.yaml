@@ -252,6 +252,9 @@ importers:
       '@repo/plugin-stremthru':
         specifier: workspace:^
         version: link:../../packages/plugin-stremthru
+      '@repo/plugin-subdl':
+        specifier: workspace:^
+        version: link:../../packages/plugin-subdl
       '@repo/plugin-tmdb':
         specifier: workspace:^
         version: link:../../packages/plugin-tmdb
@@ -1152,6 +1155,58 @@ importers:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(encoding@0.1.13)(graphql@16.12.0)
+      '@repo/util-plugin-sdk':
+        specifier: workspace:^
+        version: link:../util-plugin-sdk
+      type-graphql:
+        specifier: 'catalog:'
+        version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.6
+    devDependencies:
+      '@repo/core-util-eslint-config':
+        specifier: workspace:^
+        version: link:../core/util-eslint-config
+      '@repo/core-util-typescript-config':
+        specifier: workspace:^
+        version: link:../core/util-typescript-config
+      '@repo/core-util-vitest-config':
+        specifier: workspace:^
+        version: link:../core/util-vitest-config
+      '@repo/util-plugin-testing':
+        specifier: workspace:^
+        version: link:../util-plugin-testing
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.0.0
+      '@typescript-eslint/parser':
+        specifier: 'catalog:'
+        version: 8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      msw:
+        specifier: 'catalog:'
+        version: 2.13.2(@types/node@24.0.0)(typescript@5.9.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.1(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(msw@2.13.2(@types/node@24.0.0)(typescript@5.9.3))(vite@7.3.0(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.2))
+      zod2md:
+        specifier: 'catalog:'
+        version: 0.2.5(zod@4.3.6)
+
+  packages/plugin-subdl:
+    dependencies:
+      '@apollo/datasource-rest':
+        specifier: 'catalog:'
+        version: 6.4.1(encoding@0.1.13)(graphql@16.12.0)
+      '@mikro-orm/core':
+        specifier: 'catalog:'
+        version: 7.0.12(dataloader@2.2.3)
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk

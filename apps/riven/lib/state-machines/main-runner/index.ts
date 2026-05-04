@@ -13,9 +13,13 @@ import {
   setup,
 } from "xstate";
 
+import { postProcessItemProcessor } from "../../message-queue/flows/post-process-media-item/post-process-media-item.processor.ts";
+import { PostProcessMediaItemFlow } from "../../message-queue/flows/post-process-media-item/post-process-media-item.schema.ts";
+import { requestSubtitlesProcessor } from "../../message-queue/flows/post-process-media-item/steps/request-subtitles/request-subtitles.processor.ts";
+import { RequestSubtitlesFlow } from "../../message-queue/flows/post-process-media-item/steps/request-subtitles/request-subtitles.schema.ts";
 import { processItemRequestProcessor } from "../../message-queue/flows/process-item-request/process-item-request.processor.ts";
 import { ProcessItemRequestFlow } from "../../message-queue/flows/process-item-request/process-item-request.schema.ts";
-import { processItemProcessor } from "../../message-queue/flows/process-media-item/process-media-item.processor.ts";
+import { processMediaItemProcessor } from "../../message-queue/flows/process-media-item/process-media-item.processor.ts";
 import { ProcessMediaItemFlow } from "../../message-queue/flows/process-media-item/process-media-item.schema.ts";
 import { downloadItemProcessor } from "../../message-queue/flows/process-media-item/steps/download/download-item.processor.ts";
 import { DownloadItemFlow } from "../../message-queue/flows/process-media-item/steps/download/download-item.schema.ts";
@@ -244,7 +248,7 @@ export const mainRunnerMachine = setup({
           ),
           "process-media-item": createFlowWorker(
             ProcessMediaItemFlow,
-            processItemProcessor,
+            processMediaItemProcessor,
             self.send,
             input.plugins,
           ),
@@ -306,6 +310,18 @@ export const mainRunnerMachine = setup({
           "download-item.rank-streams": createFlowWorker(
             RankStreamsFlow,
             rankStreamsProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "request-subtitles": createFlowWorker(
+            RequestSubtitlesFlow,
+            requestSubtitlesProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "post-process-media-item": createFlowWorker(
+            PostProcessMediaItemFlow,
+            postProcessItemProcessor,
             self.send,
             input.plugins,
           ),

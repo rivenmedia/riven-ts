@@ -9,8 +9,6 @@ import { isHiddenPath } from "../utilities/is-hidden-path.ts";
 import { isIgnoredPath } from "../utilities/is-ignored-path.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
-export type StatMode = "dir" | "file" | "link" | number;
-
 export const getattrSync = function (path, callback) {
   void withVfsScope(async () => {
     try {

@@ -24,6 +24,7 @@ export async function getVfsDirectoryEntryPaths(
     case "season-episodes":
       return getShowsDirectoryEntries(em, pathInfo);
     case "single-episode":
+    case "subtitle-file":
       return [pathInfo.base];
   }
 }
