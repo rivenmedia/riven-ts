@@ -18,6 +18,8 @@ const episodeGroupsSchema = z.object({
   episode: z.coerce.number(),
 });
 
+const SubtitleFileExtension = z.enum([".srt"]);
+
 type PathGroups = z.infer<typeof pathGroupsSchema>;
 
 type PathType =
@@ -36,7 +38,7 @@ const determinePathType = (
   tmdbId: string | undefined,
   extension: string,
 ): PathType => {
-  if (extension === ".srt") {
+  if (SubtitleFileExtension.safeParse(extension).success) {
     return "subtitle-file";
   }
 
@@ -75,6 +77,7 @@ export const PathInfo = z
       return {
         ...pathGroups,
         ...pathInfo,
+        rawPath: val,
         season: pathGroups.season,
         episode: episodeGroups?.episode,
         isFile: pathInfo.ext !== "",

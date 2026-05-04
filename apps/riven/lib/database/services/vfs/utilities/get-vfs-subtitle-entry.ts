@@ -4,9 +4,10 @@ import { PathInfo } from "../schemas/path-info.schema.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 
-export async function getVfsSubtitleEntry(em: EntityManager, path: string) {
-  const pathInfo = PathInfo.parse(path);
-
+export async function getVfsSubtitleEntry(
+  em: EntityManager,
+  pathInfo: PathInfo,
+) {
   if (pathInfo.tmdbId) {
     return em.findOne(SubtitleEntry, {
       mediaItem: { tmdbId: pathInfo.tmdbId },
