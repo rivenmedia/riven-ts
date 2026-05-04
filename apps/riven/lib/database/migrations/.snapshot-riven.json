@@ -1131,37 +1131,21 @@
           "enumItems": [],
           "mappedType": "string"
         },
-        "parent_original_filename": {
-          "name": "parent_original_filename",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "unique": false,
-          "length": 255,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "enumItems": [],
-          "mappedType": "string"
-        },
         "content": {
           "name": "content",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
           "unique": false,
-          "length": 255,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "enumItems": [],
-          "mappedType": "string"
+          "mappedType": "text"
         },
         "file_hash": {
           "name": "file_hash",
@@ -1179,24 +1163,24 @@
           "enumItems": [],
           "mappedType": "string"
         },
-        "video_file_size": {
-          "name": "video_file_size",
-          "type": "int",
+        "source_provider": {
+          "name": "source_provider",
+          "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
           "unique": false,
-          "length": null,
+          "length": 255,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "enumItems": [],
-          "mappedType": "integer"
+          "mappedType": "string"
         },
-        "open_subtitles_id": {
-          "name": "open_subtitles_id",
+        "source_id": {
+          "name": "source_id",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
