@@ -9,6 +9,11 @@ const SUBTITLE_FILE_EXTENSION = ".srt";
 /**
  * Extract the first .srt file from a ZIP buffer using Node.js built-in zlib.
  *
+ * Limitations:
+ * - Only supports stored (0) and deflate (8) compression methods
+ * - Does not support ZIP64 format, encrypted files, or data descriptors
+ * - Suitable for small subtitle files; use a proper ZIP library for complex archives
+ *
  * ZIP local file header format:
  *
  * | Offset (bytes) | Size (bytes)  | Description                                        |
