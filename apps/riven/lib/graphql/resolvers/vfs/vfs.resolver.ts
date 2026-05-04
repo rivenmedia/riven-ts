@@ -14,7 +14,7 @@ export class VfsResolver {
 
   @Query(() => MediaEntry, { nullable: true })
   vfsEntry(@Arg("path") path: string): Promise<MediaEntry | null> {
-    return services.vfsService.getEntry(path);
+    return services.vfsService.getMediaEntry(path);
   }
 
   @Query(() => [String])
