@@ -1,4 +1,4 @@
-import { Entity, Index, Property } from "@mikro-orm/decorators/legacy";
+import { Entity, Index, Property, Unique } from "@mikro-orm/decorators/legacy";
 import { Field, Int, ObjectType } from "type-graphql";
 
 import { FileSystemEntry } from "./filesystem-entry.entity.ts";
@@ -9,6 +9,7 @@ import type { Opt } from "@mikro-orm/core";
 @Entity({
   discriminatorValue: "subtitle",
 })
+@Unique({ properties: ["mediaItem", "language"] })
 export class SubtitleEntry extends FileSystemEntry {
   override type: Opt<"subtitle"> = "subtitle" as const;
 

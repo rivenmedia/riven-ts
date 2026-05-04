@@ -1350,6 +1350,14 @@
           "unique": false
         },
         {
+          "keyName": "file_system_entry_media_item_id_language_unique",
+          "columnNames": ["media_item_id", "language"],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "file_system_entry_pkey",
           "columnNames": ["id"],
           "composite": false,

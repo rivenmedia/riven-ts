@@ -7,6 +7,8 @@ export const SubtitleResponse = z.object({
   author: z.string().optional(),
   url: z.string(),
   subtitlePage: z.string().optional(),
+  season: z.int().nullish(),
+  episode: z.int().nullish(),
 });
 
 export type SubtitleResponse = z.infer<typeof SubtitleResponse>;

@@ -66,6 +66,15 @@ export default {
       const bestPerLanguage = new Map<string, SubtitleResponse>();
 
       for (const sub of results) {
+        const isMatchingSubtitle =
+          type === "tv" && seasonNumber && episodeNumber
+            ? sub.season === seasonNumber && sub.episode === episodeNumber
+            : true;
+
+        if (!isMatchingSubtitle) {
+          continue;
+        }
+
         const subLangLower = sub.lang.toLowerCase();
 
         if (!bestPerLanguage.has(subLangLower)) {
