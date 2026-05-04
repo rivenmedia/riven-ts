@@ -23,6 +23,8 @@ import { findValidTorrentProcessor } from "../../message-queue/flows/process-med
 import { FindValidTorrentFlow } from "../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { rankStreamsProcessor } from "../../message-queue/flows/process-media-item/steps/download/steps/rank-streams/rank-streams.processor.ts";
 import { RankStreamsFlow } from "../../message-queue/flows/process-media-item/steps/download/steps/rank-streams/rank-streams.schema.ts";
+import { requestSubtitlesProcessor } from "../../message-queue/flows/process-media-item/steps/post-process/request-subtitles/request-subtitles.processor.ts";
+import { RequestSubtitlesFlow } from "../../message-queue/flows/process-media-item/steps/post-process/request-subtitles/request-subtitles.schema.ts";
 import { scrapeItemProcessor } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.processor.ts";
 import { ScrapeItemFlow } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.schema.ts";
 import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
@@ -306,6 +308,12 @@ export const mainRunnerMachine = setup({
           "download-item.rank-streams": createFlowWorker(
             RankStreamsFlow,
             rankStreamsProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "request-subtitles": createFlowWorker(
+            RequestSubtitlesFlow,
+            requestSubtitlesProcessor,
             self.send,
             input.plugins,
           ),

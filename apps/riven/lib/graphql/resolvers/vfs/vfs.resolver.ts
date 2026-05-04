@@ -1,4 +1,4 @@
-import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
+import { FileSystemEntryUnion } from "@repo/util-plugin-sdk/dto/unions/filesystem-entry.union";
 
 import { Arg, Query, Resolver } from "type-graphql";
 
@@ -12,9 +12,11 @@ export class VfsResolver {
     return services.vfsService.getEntryStat(path);
   }
 
-  @Query(() => MediaEntry, { nullable: true })
-  vfsEntry(@Arg("path") path: string): Promise<MediaEntry | null> {
-    return services.vfsService.getEntry(path);
+  @Query(() => FileSystemEntryUnion, { nullable: true })
+  vfsEntry(
+    @Arg("path") path: string,
+  ): Promise<typeof FileSystemEntryUnion | null> {
+    return services.vfsService.getVfsEntry(path);
   }
 
   @Query(() => [String])

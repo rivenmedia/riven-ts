@@ -1,18 +1,43 @@
 import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
-import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
+import {
+  CreateRequestContext,
+  EnsureRequestContext,
+} from "@mikro-orm/decorators/legacy";
 
 import { BaseService } from "../core/base-service.ts";
+import { PathInfo } from "./schemas/path-info.schema.js";
 import { getVfsDirectoryEntryPaths } from "./utilities/get-vfs-directory-entry-paths.ts";
 import { getVfsEntryStat } from "./utilities/get-vfs-entry-stat.ts";
-import { getVfsEntry } from "./utilities/get-vfs-entry.ts";
+import { getVfsMediaEntry } from "./utilities/get-vfs-media-entry.ts";
+import { getVfsSubtitleEntry } from "./utilities/get-vfs-subtitle-entry.ts";
 
 import type { UUID } from "node:crypto";
 
 export class VfsService extends BaseService {
+  parsePath(path: string) {
+    return PathInfo.parse(path);
+  }
+
+  @EnsureRequestContext()
+  async getMediaEntry(pathInfo: PathInfo) {
+    return getVfsMediaEntry(this.em, pathInfo);
+  }
+
+  @EnsureRequestContext()
+  async getSubtitleEntry(pathInfo: PathInfo) {
+    return getVfsSubtitleEntry(this.em, pathInfo);
+  }
+
   @CreateRequestContext()
-  async getEntry(path: string) {
-    return getVfsEntry(this.em, path);
+  async getVfsEntry(path: string) {
+    const pathInfo = this.parsePath(path);
+
+    if (pathInfo.pathType === "subtitle-file") {
+      return this.getSubtitleEntry(pathInfo);
+    }
+
+    return this.getMediaEntry(pathInfo);
   }
 
   @CreateRequestContext()

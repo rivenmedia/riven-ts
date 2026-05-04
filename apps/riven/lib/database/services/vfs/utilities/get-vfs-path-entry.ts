@@ -3,6 +3,7 @@ import {
   Movie,
   Season,
   Show,
+  SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
 
 import type { PathInfo } from "../schemas/path-info.schema.ts";
@@ -10,6 +11,33 @@ import type { EntityManager } from "@mikro-orm/core";
 
 export function getEntry(em: EntityManager, pathInfo: PathInfo) {
   switch (pathInfo.pathType) {
+    case "subtitle-file": {
+      if (pathInfo.tmdbId) {
+        return em.findOneOrFail(SubtitleEntry, {
+          mediaItem: {
+            type: "movie",
+            tmdbId: pathInfo.tmdbId,
+          },
+        });
+      }
+
+      if (pathInfo.tvdbId && pathInfo.season && pathInfo.episode) {
+        return em.findOneOrFail(SubtitleEntry, {
+          mediaItem: {
+            type: "episode",
+            tvdbId: pathInfo.tvdbId,
+            number: pathInfo.episode,
+            season: {
+              number: pathInfo.season,
+            },
+          },
+        });
+      }
+
+      throw new TypeError(
+        "Unable to determine media item for subtitle file path",
+      );
+    }
     case "single-movie": {
       if (!pathInfo.tmdbId) {
         throw new TypeError("Missing tmdbId for movie path");

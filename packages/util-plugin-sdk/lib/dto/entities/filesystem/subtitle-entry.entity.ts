@@ -17,12 +17,8 @@ export class SubtitleEntry extends FileSystemEntry {
   @Property()
   language!: string;
 
-  @Field(() => String, { nullable: true })
-  @Property()
-  parentOriginalFilename?: string;
-
   @Field(() => String)
-  @Property()
+  @Property({ type: "text" })
   content!: string;
 
   @Field(() => String)
@@ -31,13 +27,22 @@ export class SubtitleEntry extends FileSystemEntry {
 
   @Field(() => Int)
   @Property()
-  videoFileSize!: number;
+  sourceProvider!: string;
 
   @Field(() => String, { nullable: true })
   @Property()
-  openSubtitlesId?: string; // TODO: Separate entity for external providers?
+  sourceId?: string | null;
 
-  getVfsFileName(): string {
-    throw new Error("SubtitleEntry vfsFileName not implemented yet");
+  @Property({ persist: false, hidden: true })
+  async getVfsFileName(): Promise<string> {
+    const prettyName = await this.mediaItem.getEntity().getPrettyName();
+
+    if (!prettyName) {
+      throw new TypeError(
+        "Unable to determine VFS file name without associated MediaItem",
+      );
+    }
+
+    return `${prettyName}.${this.language}.srt`;
   }
 }

@@ -4,6 +4,7 @@ import {
   Movie,
   Season,
   Show,
+  SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
 
 import Fuse from "@zkochan/fuse-native";
@@ -16,6 +17,20 @@ import { getEntry } from "./get-vfs-path-entry.ts";
 import { stat } from "./stat.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
+
+async function getEntryFileSize(entry: Movie | Episode | SubtitleEntry) {
+  if (entry instanceof Movie || entry instanceof Episode) {
+    const [mediaEntry] = await entry.filesystemEntries.matching({
+      where: {
+        type: "media",
+      },
+    });
+
+    return mediaEntry?.fileSize ?? 0;
+  }
+
+  return entry.fileSize;
+}
 
 export async function getVfsEntryStat(em: EntityManager, path: string) {
   switch (path) {
@@ -237,7 +252,10 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
         })
       : 0;
 
-  const isFileEntry = entry instanceof Movie || entry instanceof Episode;
+  const isFileEntry =
+    entry instanceof Movie ||
+    entry instanceof Episode ||
+    entry instanceof SubtitleEntry;
 
   const attrs = stat(
     {
@@ -246,7 +264,7 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
       mtime: entry.updatedAt ?? entry.createdAt,
       ...(isFileEntry && pathInfo.data.isFile
         ? {
-            size: entry.filesystemEntries[0]?.fileSize ?? 0,
+            size: await getEntryFileSize(entry),
             mode: "file",
           }
         : { mode: "dir" }),

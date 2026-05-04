@@ -65,6 +65,9 @@
         "lib/database/migrations/.snapshot-*.json"
       ]
     },
+    "migration:create": {
+      "cache": false
+    },
     "database:cache:generate": {
       "passThroughEnv": ["RIVEN_SETTING__*"],
       "dependsOn": ["$TURBO_EXTENDS$", "transit:source-files"],

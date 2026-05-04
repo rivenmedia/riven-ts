@@ -61,6 +61,7 @@ it.beforeEach(() => {
   const fileSize = 1024 * 1024 * 1024 * 10; // 10 GB
 
   fdToFileHandleMeta.set(0, {
+    type: "media",
     fileSize,
     filePath: `/files/${fileName}`,
     fileBaseName: fileName,
@@ -343,7 +344,7 @@ it("saves a copy of each chunk to the cache when reading during playback within 
 
   const fileHandle = fdToFileHandleMeta.get(0);
 
-  expect.assert(fileHandle);
+  expect.assert(fileHandle?.type === "media");
 
   fdToResponsePromiseMap.set(
     0,

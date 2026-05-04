@@ -11,6 +11,7 @@ import { logger } from "../../../utilities/logger/logger.ts";
 import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
 import { processMediaItemProcessorSchema } from "./process-media-item.schema.ts";
 import { enqueueDownloadItem } from "./steps/download/enqueue-download-item.ts";
+import { enqueueRequestSubtitles } from "./steps/post-process/request-subtitles/enqueue-request-subtitles.ts";
 import { enqueueScrapeItems } from "./steps/scrape/enqueue-scrape-items.ts";
 
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
@@ -24,6 +25,7 @@ export const processItemProcessor =
         indexerService,
         scraperService,
         mediaItemService,
+        subtitlesService,
       },
       plugins,
     },
@@ -97,7 +99,7 @@ export const processItemProcessor =
 
             await job.updateData({
               ...job.data,
-              step: "validate",
+              step: "validate-download",
             });
 
             if (await job.moveToWaitingChildren(token)) {
@@ -106,7 +108,7 @@ export const processItemProcessor =
 
             break;
           }
-          case "validate": {
+          case "validate-download": {
             const childFailures = await job.getIgnoredChildrenFailures();
 
             if (Object.keys(childFailures).length) {
@@ -128,11 +130,51 @@ export const processItemProcessor =
             } else {
               await job.updateData({
                 ...job.data,
-                step: "complete",
+                step: "post-process",
               });
             }
 
             break;
+          }
+          case "post-process": {
+            const items = await subtitlesService.getItemsForSubtitlesProcessing(
+              job.data.mediaItem.id,
+            );
+
+            for (const item of items) {
+              await enqueueRequestSubtitles({
+                item,
+                subscribers: getPluginEventSubscribers(
+                  "riven.media-item.subtitle.requested",
+                  plugins,
+                ),
+              });
+            }
+
+            await job.updateData({
+              ...job.data,
+              step: "validate-post-process",
+            });
+
+            if (await job.moveToWaitingChildren(token)) {
+              throw new WaitingChildrenError();
+            }
+
+            break;
+          }
+          case "validate-post-process": {
+            const childFailures = await job.getIgnoredChildrenFailures();
+
+            if (Object.keys(childFailures).length) {
+              logger.warn(
+                `Post-processing failed for ${chalk.bold(job.data.mediaItem.fullTitle)}`,
+              );
+            }
+
+            await job.updateData({
+              ...job.data,
+              step: "complete",
+            });
           }
         }
       }
