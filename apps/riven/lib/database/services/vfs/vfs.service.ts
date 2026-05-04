@@ -6,7 +6,7 @@ import {
 } from "@mikro-orm/decorators/legacy";
 
 import { BaseService } from "../core/base-service.ts";
-import { PathInfo } from "./schemas/path-info.schema.js";
+import { PathInfo } from "./schemas/path-info.schema.ts";
 import { getVfsDirectoryEntryPaths } from "./utilities/get-vfs-directory-entry-paths.ts";
 import { getVfsEntryStat } from "./utilities/get-vfs-entry-stat.ts";
 import { getVfsMediaEntry } from "./utilities/get-vfs-media-entry.ts";

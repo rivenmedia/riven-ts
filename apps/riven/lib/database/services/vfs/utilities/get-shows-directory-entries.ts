@@ -7,7 +7,6 @@ import type { EntityManager } from "@mikro-orm/core";
 
 const extractPart = (
   entry: FileSystemEntry,
-  names: Set<string>,
   tvdbId?: string,
   season?: number,
 ) => {
@@ -17,13 +16,8 @@ const extractPart = (
 
   const { dir, base } = path.parse(entry.path);
   const [showName, seasonName] = dir.split(path.sep);
-  const part = tvdbId ? (season ? base : seasonName) : showName;
 
-  if (part) {
-    names.add(part);
-  }
-
-  return names;
+  return tvdbId ? (season ? base : seasonName) : showName;
 };
 
 export const getShowsDirectoryEntries = async (
@@ -48,7 +42,11 @@ export const getShowsDirectoryEntries = async (
   const names = new Set<string>();
 
   for (const entry of entries) {
-    extractPart(entry, names, tvdbId, season);
+    const part = extractPart(entry, tvdbId, season);
+
+    if (part) {
+      names.add(part);
+    }
   }
 
   return Array.from(names);
