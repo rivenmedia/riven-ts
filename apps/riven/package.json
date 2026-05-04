@@ -34,6 +34,7 @@
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "migration:check": "mikro-orm migration:check",
+    "migration:create": "mikro-orm migration:create",
     "mikro-orm": "mikro-orm",
     "start": "pnpm node --conditions=production --env-file-if-exists=.env.riven --enable-source-maps dist/lib/index.js",
     "test": "vitest run",
