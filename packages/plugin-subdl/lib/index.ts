@@ -8,6 +8,7 @@ import { pluginConfig } from "./subdl-plugin.config.ts";
 import { SubdlSettings } from "./subdl-settings.schema.ts";
 import { getItemMetadata } from "./utilities/get-item-metadata.ts";
 
+import type { SubtitleResponse } from "./schemas/subtitle-response.schema.ts";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { SubtitleData } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";
 
@@ -62,7 +63,7 @@ export default {
       }
 
       // Pick the best subtitle per language (first result per language)
-      const bestPerLanguage = new Map<string, (typeof results)[0]>();
+      const bestPerLanguage = new Map<string, SubtitleResponse>();
 
       for (const sub of results) {
         const subLangLower = sub.lang.toLowerCase();
