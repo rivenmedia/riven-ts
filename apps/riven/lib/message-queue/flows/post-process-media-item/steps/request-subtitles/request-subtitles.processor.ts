@@ -1,5 +1,7 @@
-import { services } from "../../../../../../database/database.ts";
-import { logger } from "../../../../../../utilities/logger/logger.ts";
+import chalk from "chalk";
+
+import { services } from "../../../../../database/database.ts";
+import { logger } from "../../../../../utilities/logger/logger.ts";
 import { requestSubtitlesProcessorSchema } from "./request-subtitles.schema.ts";
 
 import type { SubtitleData } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";
@@ -13,7 +15,9 @@ export const requestSubtitlesProcessor =
     );
 
     if (allSubtitles.length === 0) {
-      logger.debug(`No subtitles returned for media item ID ${job.data.id}`);
+      logger.debug(
+        `No subtitles returned for ${chalk.bold(job.data.mediaItem.fullTitle)}`,
+      );
 
       return { count: 0 };
     }
@@ -28,9 +32,15 @@ export const requestSubtitlesProcessor =
     }
 
     const count = await services.subtitlesService.saveSubtitles(
-      job.data.id,
+      job.data.mediaItem.id,
       uniqueByLanguage,
     );
+
+    if (count > 0) {
+      logger.info(
+        `Saved ${count.toString()} subtitle(s) for ${chalk.bold(job.data.mediaItem.fullTitle)}`,
+      );
+    }
 
     return { count };
   });

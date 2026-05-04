@@ -8,14 +8,7 @@ import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
 
 export const ProcessMediaItemFlow = createFlowSchema("process-media-item", {
   input: z.object({
-    step: z.enum([
-      "scrape",
-      "download",
-      "validate-download",
-      "post-process",
-      "validate-post-process",
-      "complete",
-    ]),
+    step: z.enum(["scrape", "download", "validate-download", "complete"]),
     mediaItem: z.object({
       id: UUID,
       type: MediaItemType,

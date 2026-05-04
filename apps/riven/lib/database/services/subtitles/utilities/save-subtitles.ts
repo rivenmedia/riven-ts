@@ -63,10 +63,6 @@ export async function saveSubtitles(
 
   if (newEntriesCount > 0) {
     await em.flush();
-
-    logger.info(
-      `Persisted ${newEntriesCount.toString()} subtitle(s) for ${item.fullTitle}`,
-    );
   }
 
   return newEntriesCount;

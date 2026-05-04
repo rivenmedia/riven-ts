@@ -13,9 +13,13 @@ import {
   setup,
 } from "xstate";
 
+import { postProcessItemProcessor } from "../../message-queue/flows/post-process-media-item/post-process-media-item.processor.ts";
+import { PostProcessMediaItemFlow } from "../../message-queue/flows/post-process-media-item/post-process-media-item.schema.ts";
+import { requestSubtitlesProcessor } from "../../message-queue/flows/post-process-media-item/steps/request-subtitles/request-subtitles.processor.ts";
+import { RequestSubtitlesFlow } from "../../message-queue/flows/post-process-media-item/steps/request-subtitles/request-subtitles.schema.ts";
 import { processItemRequestProcessor } from "../../message-queue/flows/process-item-request/process-item-request.processor.ts";
 import { ProcessItemRequestFlow } from "../../message-queue/flows/process-item-request/process-item-request.schema.ts";
-import { processItemProcessor } from "../../message-queue/flows/process-media-item/process-media-item.processor.ts";
+import { processMediaItemProcessor } from "../../message-queue/flows/process-media-item/process-media-item.processor.ts";
 import { ProcessMediaItemFlow } from "../../message-queue/flows/process-media-item/process-media-item.schema.ts";
 import { downloadItemProcessor } from "../../message-queue/flows/process-media-item/steps/download/download-item.processor.ts";
 import { DownloadItemFlow } from "../../message-queue/flows/process-media-item/steps/download/download-item.schema.ts";
@@ -23,8 +27,6 @@ import { findValidTorrentProcessor } from "../../message-queue/flows/process-med
 import { FindValidTorrentFlow } from "../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { rankStreamsProcessor } from "../../message-queue/flows/process-media-item/steps/download/steps/rank-streams/rank-streams.processor.ts";
 import { RankStreamsFlow } from "../../message-queue/flows/process-media-item/steps/download/steps/rank-streams/rank-streams.schema.ts";
-import { requestSubtitlesProcessor } from "../../message-queue/flows/process-media-item/steps/post-process/request-subtitles/request-subtitles.processor.ts";
-import { RequestSubtitlesFlow } from "../../message-queue/flows/process-media-item/steps/post-process/request-subtitles/request-subtitles.schema.ts";
 import { scrapeItemProcessor } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.processor.ts";
 import { ScrapeItemFlow } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.schema.ts";
 import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
@@ -246,7 +248,7 @@ export const mainRunnerMachine = setup({
           ),
           "process-media-item": createFlowWorker(
             ProcessMediaItemFlow,
-            processItemProcessor,
+            processMediaItemProcessor,
             self.send,
             input.plugins,
           ),
@@ -314,6 +316,12 @@ export const mainRunnerMachine = setup({
           "request-subtitles": createFlowWorker(
             RequestSubtitlesFlow,
             requestSubtitlesProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "post-process-media-item": createFlowWorker(
+            PostProcessMediaItemFlow,
+            postProcessItemProcessor,
             self.send,
             input.plugins,
           ),
