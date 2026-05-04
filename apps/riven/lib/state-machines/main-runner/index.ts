@@ -23,12 +23,12 @@ import { findValidTorrentProcessor } from "../../message-queue/flows/process-med
 import { FindValidTorrentFlow } from "../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { rankStreamsProcessor } from "../../message-queue/flows/process-media-item/steps/download/steps/rank-streams/rank-streams.processor.ts";
 import { RankStreamsFlow } from "../../message-queue/flows/process-media-item/steps/download/steps/rank-streams/rank-streams.schema.ts";
+import { requestSubtitlesProcessor } from "../../message-queue/flows/process-media-item/steps/post-process/request-subtitles/request-subtitles.processor.ts";
+import { RequestSubtitlesFlow } from "../../message-queue/flows/process-media-item/steps/post-process/request-subtitles/request-subtitles.schema.ts";
 import { scrapeItemProcessor } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.processor.ts";
 import { ScrapeItemFlow } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.schema.ts";
 import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
 import { RequestContentServicesFlow } from "../../message-queue/flows/request-content-services/request-content-services.schema.ts";
-import { requestSubtitlesProcessor } from "../../message-queue/flows/request-subtitles/request-subtitles.processor.ts";
-import { RequestSubtitlesFlow } from "../../message-queue/flows/request-subtitles/request-subtitles.schema.ts";
 import { MapItemsToFilesSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
 import { ParseScrapeResultsSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.schema.ts";
 import { ValidateTorrentFilesSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.schema.ts";

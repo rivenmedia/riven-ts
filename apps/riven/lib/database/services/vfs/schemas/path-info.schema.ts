@@ -26,14 +26,20 @@ type PathType =
   | "all-shows"
   | "show-seasons"
   | "season-episodes"
-  | "single-episode";
+  | "single-episode"
+  | "subtitle-file";
 
 const determinePathType = (
   pathGroups: PathGroups,
   episode: number | undefined,
   tvdbId: string | undefined,
   tmdbId: string | undefined,
+  extension: string,
 ): PathType => {
+  if (extension === ".srt") {
+    return "subtitle-file";
+  }
+
   if (pathGroups.type === "movies") {
     return tmdbId ? "single-movie" : "all-movies";
   }
@@ -79,6 +85,7 @@ export const PathInfo = z
           episodeGroups?.episode,
           tvdbId,
           tmdbId,
+          pathInfo.ext,
         ),
       };
     }),

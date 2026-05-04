@@ -12,7 +12,9 @@ interface ItemMetadata {
   episodeNumber: number | undefined;
 }
 
-export function getItemMetadata(item: MediaItem): ItemMetadata | null {
+export async function getItemMetadata(
+  item: MediaItem,
+): Promise<ItemMetadata | null> {
   if (item instanceof Movie) {
     return {
       type: "movie",
@@ -28,7 +30,7 @@ export function getItemMetadata(item: MediaItem): ItemMetadata | null {
       type: "tv",
       tmdbId: undefined,
       imdbId: item.imdbId ?? undefined,
-      seasonNumber: item.season.getProperty("number"),
+      seasonNumber: await item.season.loadProperty("number"),
       episodeNumber: item.number,
     };
   }

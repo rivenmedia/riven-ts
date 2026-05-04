@@ -30,7 +30,7 @@ export class SubtitleEntry extends FileSystemEntry {
   sourceProvider!: string;
 
   @Field(() => String, { nullable: true })
-  @Property({ nullable: true })
+  @Property()
   sourceId?: string | null;
 
   @Property({ persist: false, hidden: true })

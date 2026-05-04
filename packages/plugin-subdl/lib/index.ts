@@ -26,7 +26,7 @@ export default {
       const api = dataSources.get(SubdlAPI);
       const { languages } = settings.get(SubdlSettings);
 
-      const meta = getItemMetadata(item);
+      const meta = await getItemMetadata(item);
 
       if (!meta) {
         logger.warn(

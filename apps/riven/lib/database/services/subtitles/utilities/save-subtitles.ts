@@ -1,6 +1,9 @@
-import { MediaItem, SubtitleEntry } from "@repo/util-plugin-sdk/dto/entities";
-
-import { logger } from "../../../../utilities/logger/logger.ts";
+import {
+  Episode,
+  MediaItem,
+  Movie,
+  SubtitleEntry,
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { SubtitleData } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";
@@ -12,6 +15,12 @@ export async function saveSubtitles(
   subtitles: Map<string, SubtitleData>,
 ) {
   const item = await em.findOneOrFail(MediaItem, mediaItemId);
+
+  if (!(item instanceof Movie || item instanceof Episode)) {
+    throw new Error(
+      `MediaItem with ID ${mediaItemId} is not a Movie or Episode, cannot save subtitles`,
+    );
+  }
 
   // Check for existing subtitles to avoid duplicates
   const existingSubtitles = await em.find(
@@ -25,6 +34,8 @@ export async function saveSubtitles(
   );
 
   const newEntities: SubtitleEntry[] = [];
+
+  const { logger } = await import("../../../../utilities/logger/logger.ts");
 
   for (const [language, subtitle] of subtitles) {
     if (existingLanguages.has(language)) {
@@ -42,6 +53,7 @@ export async function saveSubtitles(
       fileSize: subtitle.fileSize,
       sourceProvider: subtitle.sourceProvider,
       sourceId: subtitle.sourceId ?? null,
+      mediaItem: item,
     });
 
     newEntities.push(entry);

@@ -1,8 +1,7 @@
 import { MediaItemSubtitleRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";
 
-import { logger } from "../../../utilities/logger/logger.ts";
-import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
-import { flow } from "../producer.ts";
+import { createPluginFlowJob } from "../../../../../utilities/create-flow-plugin-job.ts";
+import { flow } from "../../../../producer.ts";
 import { createRequestSubtitlesJob } from "./request-subtitles.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
@@ -30,10 +29,6 @@ export async function enqueueRequestSubtitles({
     `Requesting subtitles for ${item.fullTitle}`,
     { id: item.id },
     { children: childNodes },
-  );
-
-  logger.silly(
-    `Requesting subtitles for ${item.fullTitle} from ${subscribers.map((plugin) => plugin.name.description ?? "unknown").join(", ")}.`,
   );
 
   return flow.add(rootNode);

@@ -1,5 +1,5 @@
-import { services } from "../../../database/database.ts";
-import { logger } from "../../../utilities/logger/logger.ts";
+import { services } from "../../../../../../database/database.ts";
+import { logger } from "../../../../../../utilities/logger/logger.ts";
 import { requestSubtitlesProcessorSchema } from "./request-subtitles.schema.ts";
 
 import type { SubtitleData } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";

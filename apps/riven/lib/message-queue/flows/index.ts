@@ -21,6 +21,10 @@ import {
   rankStreamsProcessorSchema,
 } from "./process-media-item/steps/download/steps/rank-streams/rank-streams.schema.ts";
 import {
+  RequestSubtitlesFlow,
+  requestSubtitlesProcessorSchema,
+} from "./process-media-item/steps/post-process/request-subtitles/request-subtitles.schema.ts";
+import {
   ScrapeItemFlow,
   scrapeItemProcessorSchema,
 } from "./process-media-item/steps/scrape/scrape-item.schema.ts";
@@ -28,10 +32,6 @@ import {
   RequestContentServicesFlow,
   requestContentServicesProcessorSchema,
 } from "./request-content-services/request-content-services.schema.ts";
-import {
-  RequestSubtitlesFlow,
-  requestSubtitlesProcessorSchema,
-} from "./request-subtitles/request-subtitles.schema.ts";
 
 export const Flow = z.discriminatedUnion("name", [
   ProcessItemRequestFlow,
