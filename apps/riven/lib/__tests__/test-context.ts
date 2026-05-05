@@ -1,8 +1,12 @@
 /* eslint-disable no-empty-pattern */
+import {
+  type ApolloServerContext,
+  CoreKey,
+} from "@repo/core-util-graphql-schema";
+
 import assert from "node:assert";
 import { test as testBase, vi } from "vitest";
 
-import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 import type { JobsOptions } from "bullmq";
 
 export const it = testBase
@@ -220,7 +224,11 @@ export const it = testBase
         {
           context: () =>
             Promise.resolve({
-              em: orm.em.fork(),
+              [CoreKey]: {
+                em: orm.em.fork(),
+              },
+              sendEvent: vi.fn(),
+              plugins: {},
             }),
           listen: { port: 0 },
         },
