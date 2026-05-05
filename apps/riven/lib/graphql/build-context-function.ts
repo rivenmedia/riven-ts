@@ -4,6 +4,7 @@ import {
 } from "@repo/core-util-graphql-schema";
 
 import { database } from "../database/database.ts";
+import { logger } from "../utilities/logger/logger.ts";
 
 import type { ContextFunction } from "@apollo/server";
 import type { StandaloneServerContextFunctionArgument } from "@apollo/server/standalone";
@@ -19,6 +20,7 @@ export const buildContextFunction: (
     [CoreKey]: {
       em: database.em.fork(),
     },
+    logger,
     sendEvent,
     plugins: {},
   });

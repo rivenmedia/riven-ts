@@ -227,6 +227,7 @@ export const it = testBase
               [CoreKey]: {
                 em: orm.em.fork(),
               },
+              logger: {} as never,
               sendEvent: vi.fn(),
               plugins: {},
             }),

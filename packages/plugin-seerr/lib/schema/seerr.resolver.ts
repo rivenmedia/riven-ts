@@ -42,39 +42,38 @@ export class SeerrResolver {
   @Mutation(() => Boolean)
   seerrHandleWebhook(
     @Arg("input", () => SeerrHandleWebhookInput) input: SeerrHandleWebhookInput,
-    @Ctx() context: GraphQLContext,
+    @Ctx() { logger, sendEvent }: GraphQLContext,
   ) {
     const parsedInput = WebhookInput.parse(input.payload);
 
-    if (parsedInput.media.media_type === "movie") {
-      context.sendEvent({
-        type: "riven-external.item-requested",
-        item: {
-          type: "movie",
-          externalRequestId: parsedInput.request.request_id,
-          imdbId: parsedInput.media.imdbId,
-          requestedBy: parsedInput.request.requestedBy_email,
-          tmdbId: parsedInput.media.tmdbId,
-        },
-      });
-    } else {
-      const requestedSeasons = parsedInput.extra
-        .find((extra) => extra.name.toLowerCase() === "requested seasons")
-        ?.value.split(",")
-        .map((s) => parseInt(s.trim(), 10));
+    if (parsedInput.notification_type === "TEST_NOTIFICATION") {
+      logger.info("Seerr webhook notification received");
 
-      context.sendEvent({
-        type: "riven-external.item-requested",
-        item: {
-          type: "show",
-          externalRequestId: parsedInput.request.request_id,
-          imdbId: parsedInput.media.imdbId,
-          requestedBy: parsedInput.request.requestedBy_email,
-          tvdbId: parsedInput.media.tvdbId,
-          seasons: requestedSeasons,
-        },
-      });
+      return true;
     }
+
+    const commonFields = {
+      externalRequestId: parsedInput.request.request_id,
+      requestedBy: parsedInput.request.requestedBy_email,
+      imdbId: parsedInput.media.imdbId,
+    };
+
+    sendEvent({
+      type: "riven-external.item-requested",
+      item: {
+        ...commonFields,
+        ...(parsedInput.media.media_type === "movie"
+          ? {
+              type: "movie",
+              tmdbId: parsedInput.media.tmdbId,
+            }
+          : {
+              type: "show",
+              tvdbId: parsedInput.media.tvdbId,
+              seasons: parsedInput.requestedSeasons,
+            }),
+      },
+    });
 
     return true;
   }

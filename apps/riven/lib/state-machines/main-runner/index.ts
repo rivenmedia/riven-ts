@@ -113,6 +113,7 @@ export interface StartEvent {
     pluginWorkers: PluginWorkerMap;
   };
 }
+
 export type MainRunnerMachineEvent =
   | RivenInternalEvent
   | RivenEvent
@@ -392,12 +393,6 @@ export const mainRunnerMachine = setup({
         target: ".Running",
         actions: [
           {
-            type: "log",
-            params: {
-              message: "Start received",
-            },
-          },
-          {
             type: "handleStart",
             params: ({ event }) => event.input,
           },
@@ -405,14 +400,7 @@ export const mainRunnerMachine = setup({
       },
     },
     states: {
-      Idle: {
-        entry: {
-          type: "log",
-          params: {
-            message: "Idle",
-          },
-        },
-      },
+      Idle: {},
       Running: {
         invoke: [
           {
