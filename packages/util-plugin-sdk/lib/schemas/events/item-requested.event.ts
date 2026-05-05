@@ -1,13 +1,13 @@
 import z from "zod";
 
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
-import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
+import { createExternalEventSchema } from "../utilities/create-external-event-schema.ts";
 import { ContentServiceRequestedResponse } from "./content-service-requested.event.ts";
 
 /**
- * Event emitted when a media item is requested.
+ * Event emitted when a media item is requested from an external source.
  */
-export const ItemRequestedEvent = createProgramEventSchema(
+export const ItemRequestedEvent = createExternalEventSchema(
   "item-requested",
   z.object({
     item: z.discriminatedUnion("type", [

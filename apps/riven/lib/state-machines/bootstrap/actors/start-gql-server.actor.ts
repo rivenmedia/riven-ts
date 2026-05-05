@@ -6,7 +6,7 @@ import {
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
 import { URL } from "node:url";
-import { fromPromise } from "xstate";
+import { type ActorRefFromLogic, fromPromise } from "xstate";
 
 import { initApolloClient } from "../../../graphql/apollo-client.ts";
 import { buildContextFunction } from "../../../graphql/build-context-function.ts";
@@ -14,11 +14,14 @@ import { resolvers } from "../../../graphql/resolvers/index.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { redisCache } from "../../../utilities/redis-cache.ts";
 import { settings } from "../../../utilities/settings.ts";
+import { mainRunnerMachine } from "../../main-runner/index.js";
 
 import type { ValidPluginMap } from "../../../types/plugins.ts";
+import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 export interface StartGQLServerInput {
+  mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine>;
   pluginSettings: PluginSettings;
   validPlugins: ValidPluginMap;
 }
@@ -31,7 +34,7 @@ export interface StartGQLServerOutput {
 export const startGqlServer = fromPromise<
   StartGQLServerOutput,
   StartGQLServerInput
->(async ({ input: { validPlugins } }) => {
+>(async ({ input: { mainRunnerRef, validPlugins } }) => {
   const pluginResolvers = validPlugins
     .values()
     .flatMap((p) => p.config.resolvers)
@@ -63,11 +66,21 @@ export const startGqlServer = fromPromise<
     },
   });
 
+  const sendEvent: GraphQLContext["sendEvent"] = (event) => {
+    if (!event.type.startsWith("riven-external.")) {
+      throw new Error(
+        "Only `riven-external.` events can be sent from the GraphQL server",
+      );
+    }
+
+    mainRunnerRef.send(event);
+  };
+
   const { url } = await startStandaloneServer(server, {
     listen: {
       port: settings.gqlPort,
     },
-    context: buildContextFunction(),
+    context: buildContextFunction(sendEvent),
   });
 
   initApolloClient(new URL(url));

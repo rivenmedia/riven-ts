@@ -160,7 +160,6 @@ export const RivenEventHandler = {
   "riven.item-request.create.error.conflict":
     ItemRequestCreateErrorConflictEventHandler,
   "riven.item-request.update.success": ItemRequestUpdateSuccessEventHandler,
-  "riven.item-requested": ItemRequestedEventHandler,
 
   // Item indexing
   "riven.media-item.index.requested.movie":
@@ -200,4 +199,7 @@ export const RivenEventHandler = {
 
   // Subtitles
   "riven.media-item.subtitle.requested": MediaItemSubtitleRequestedEventHandler,
+
+  // External events
+  "riven-external.item-requested": ItemRequestedEventHandler,
 } as const satisfies Record<RivenEvent["type"], z.ZodFunction>;

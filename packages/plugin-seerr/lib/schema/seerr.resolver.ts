@@ -10,7 +10,7 @@ import { pluginConfig } from "../seerr-plugin.config.ts";
 import { FilterArguments } from "./arguments/filter.arguments.ts";
 import { SeerrHandleWebhookInput } from "./types/seerr-handle-webhook.input.ts";
 
-import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 
 @Resolver()
 export class SeerrResolver {
@@ -42,13 +42,13 @@ export class SeerrResolver {
   @Mutation(() => Boolean)
   seerrHandleWebhook(
     @Arg("input", () => SeerrHandleWebhookInput) input: SeerrHandleWebhookInput,
-    @Ctx() context: { sendEvent: (event: RivenEvent) => void },
+    @Ctx() context: GraphQLContext,
   ) {
     const parsedInput = WebhookInput.parse(input.payload);
 
     if (parsedInput.media.media_type === "movie") {
       context.sendEvent({
-        type: "riven.item-requested",
+        type: "riven-external.item-requested",
         item: {
           type: "movie",
           externalRequestId: parsedInput.request.request_id,
@@ -64,7 +64,7 @@ export class SeerrResolver {
         .map((s) => parseInt(s.trim(), 10));
 
       context.sendEvent({
-        type: "riven.item-requested",
+        type: "riven-external.item-requested",
         item: {
           type: "show",
           externalRequestId: parsedInput.request.request_id,

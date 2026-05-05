@@ -1,6 +1,9 @@
-import { type AnyActorRef, assign, setup } from "xstate";
+import { type ActorRefFromLogic, enqueueActions, setup } from "xstate";
 
-import { bootstrapMachine } from "../bootstrap/index.ts";
+import {
+  type BootstrapMachineOutput,
+  bootstrapMachine,
+} from "../bootstrap/index.ts";
 import { mainRunnerMachine } from "../main-runner/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { shutdown } from "./actors/shutdown.actor.ts";
@@ -15,7 +18,7 @@ import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/cor
 import type Fuse from "@zkochan/fuse-native";
 
 export interface RivenMachineContext {
-  mainRunnerRef?: AnyActorRef;
+  mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine>;
   plugins?: ValidPluginMap;
   server?: ApolloServer<ApolloServerContext>;
   vfs?: Fuse;
@@ -47,11 +50,45 @@ export const rivenMachine = setup({
     stopGqlServer,
     unmountVfs,
   },
+  actions: {
+    handleBootstrapComplete: enqueueActions(
+      (
+        { enqueue, context: { mainRunnerRef } },
+        {
+          pluginQueues,
+          pluginWorkers,
+          plugins,
+          publishableEvents,
+          server,
+          vfs,
+        }: BootstrapMachineOutput,
+      ) => {
+        enqueue.assign({ vfs, server });
+        enqueue.sendTo(mainRunnerRef, {
+          type: "START",
+          input: {
+            pluginQueues,
+            pluginWorkers,
+            plugins,
+            publishableEvents,
+          },
+        });
+      },
+    ),
+  },
 })
   .extend(withLogAction)
   .createMachine({
     id: "Riven",
     initial: "Bootstrapping",
+    context: ({ self, spawn }) => ({
+      mainRunnerRef: spawn("mainRunnerMachine", {
+        id: "mainRunnerMachine",
+        input: {
+          parentRef: self,
+        },
+      }),
+    }),
     on: {
       "riven.core.shutdown": ".Shutdown",
     },
@@ -60,38 +97,16 @@ export const rivenMachine = setup({
         invoke: {
           id: "bootstrapMachine",
           src: "bootstrapMachine",
-          input: ({ self }) => ({ rootRef: self }),
+          input: ({ context: { mainRunnerRef }, self }) => ({
+            mainRunnerRef,
+            rootRef: self,
+          }),
           onDone: {
-            actions: assign(
-              ({
-                spawn,
-                self,
-                event: {
-                  output: {
-                    server,
-                    vfs,
-                    plugins,
-                    publishableEvents,
-                    pluginQueues,
-                    pluginWorkers,
-                  },
-                },
-              }) => ({
-                server,
-                vfs,
-                mainRunnerRef: spawn(mainRunnerMachine, {
-                  input: {
-                    apolloServer: server,
-                    parentRef: self,
-                    plugins,
-                    publishableEvents,
-                    pluginQueues,
-                    pluginWorkers,
-                  },
-                }),
-              }),
-            ),
             target: "Running",
+            actions: {
+              type: "handleBootstrapComplete",
+              params: ({ event: { output } }) => output,
+            },
           },
           onError: {
             target: "Errored",

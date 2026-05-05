@@ -7,13 +7,13 @@ import os from "node:os";
 import {
   type ActorRef,
   type Snapshot,
+  assign,
   enqueueActions,
   raise,
   sendTo,
   setup,
 } from "xstate";
 
-import { setSendEvent } from "../../graphql/send-event.ts";
 import { postProcessItemProcessor } from "../../message-queue/flows/post-process-media-item/post-process-media-item.processor.ts";
 import { PostProcessMediaItemFlow } from "../../message-queue/flows/post-process-media-item/post-process-media-item.schema.ts";
 import { requestSubtitlesProcessor } from "../../message-queue/flows/post-process-media-item/steps/request-subtitles/request-subtitles.processor.ts";
@@ -74,9 +74,10 @@ import type { RivenMachineEvent } from "../program/index.ts";
 import type { Queue, Worker } from "bullmq";
 
 export interface MainRunnerMachineContext {
+  availableParallelism: number;
   parentRef: ActorRef<Snapshot<unknown>, RivenMachineEvent>;
   plugins: ValidPluginMap;
-  flowWorkers: {
+  flowWorkers?: {
     [K in Flow["name"]]: {
       queue: Queue;
       worker: Worker<
@@ -85,7 +86,7 @@ export interface MainRunnerMachineContext {
       >;
     };
   };
-  sandboxedWorkers: {
+  sandboxedWorkers?: {
     [K in SandboxedJobDefinition["name"]]: {
       queue: Queue;
       worker: Worker<
@@ -101,13 +102,21 @@ export interface MainRunnerMachineContext {
 
 export interface MainRunnerMachineInput {
   parentRef: ActorRef<Snapshot<unknown>, RivenMachineEvent>;
-  plugins: ValidPluginMap;
-  publishableEvents: PublishableEventSet;
-  pluginQueues: PluginQueueMap;
-  pluginWorkers: PluginWorkerMap;
 }
 
-export type MainRunnerMachineEvent = RivenInternalEvent | RivenEvent;
+export interface StartEvent {
+  type: "START";
+  input: {
+    plugins: ValidPluginMap;
+    publishableEvents: PublishableEventSet;
+    pluginQueues: PluginQueueMap;
+    pluginWorkers: PluginWorkerMap;
+  };
+}
+export type MainRunnerMachineEvent =
+  | RivenInternalEvent
+  | RivenEvent
+  | StartEvent;
 
 export const mainRunnerMachine = setup({
   types: {
@@ -121,6 +130,129 @@ export const mainRunnerMachine = setup({
     },
   },
   actions: {
+    handleStart: (
+      { context: { availableParallelism }, self },
+      input: StartEvent["input"],
+    ) =>
+      assign({
+        plugins: input.plugins,
+        publishableEvents: input.publishableEvents,
+        pluginQueues: input.pluginQueues,
+        pluginWorkers: input.pluginWorkers,
+        flowWorkers: {
+          "process-item-request": createFlowWorker(
+            ProcessItemRequestFlow,
+            processItemRequestProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "process-media-item": createFlowWorker(
+            ProcessMediaItemFlow,
+            processMediaItemProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "request-content-services": createFlowWorker(
+            RequestContentServicesFlow,
+            requestContentServicesProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "scrape-item": createFlowWorker(
+            ScrapeItemFlow,
+            scrapeItemProcessor,
+            self.send,
+            input.plugins,
+            {},
+            {
+              settings: {
+                backoffStrategy: (attemptsMade) => {
+                  const [after2, after5, after10] =
+                    settings.scrapeCooldownHours;
+
+                  if (attemptsMade >= 10) {
+                    return Duration.fromObject({ hours: after10 }).as(
+                      "milliseconds",
+                    );
+                  }
+
+                  if (attemptsMade >= 5) {
+                    return Duration.fromObject({ hours: after5 }).as(
+                      "milliseconds",
+                    );
+                  }
+
+                  if (attemptsMade >= 2) {
+                    return Duration.fromObject({ hours: after2 }).as(
+                      "milliseconds",
+                    );
+                  }
+
+                  return Duration.fromObject({ minutes: 30 }).as(
+                    "milliseconds",
+                  );
+                },
+              },
+            },
+          ),
+          "download-item": createFlowWorker(
+            DownloadItemFlow,
+            downloadItemProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "download-item.find-valid-torrent": createFlowWorker(
+            FindValidTorrentFlow,
+            findValidTorrentProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "download-item.rank-streams": createFlowWorker(
+            RankStreamsFlow,
+            rankStreamsProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "request-subtitles": createFlowWorker(
+            RequestSubtitlesFlow,
+            requestSubtitlesProcessor,
+            self.send,
+            input.plugins,
+          ),
+          "post-process-media-item": createFlowWorker(
+            PostProcessMediaItemFlow,
+            postProcessItemProcessor,
+            self.send,
+            input.plugins,
+          ),
+        },
+        sandboxedWorkers: {
+          "scrape-item.parse-scrape-results": createSandboxedWorker(
+            ParseScrapeResultsSandboxedJob,
+            new URL(
+              import.meta.resolve("@repo/riven/workers/parse-scrape-results"),
+            ),
+            {},
+            { concurrency: availableParallelism * 0.25 },
+          ),
+          "download-item.map-items-to-files": createSandboxedWorker(
+            MapItemsToFilesSandboxedJob,
+            new URL(
+              import.meta.resolve("@repo/riven/workers/map-items-to-files"),
+            ),
+            {},
+            { concurrency: availableParallelism * 0.75 },
+          ),
+          "download-item.validate-torrent-files": createSandboxedWorker(
+            ValidateTorrentFilesSandboxedJob,
+            new URL(
+              import.meta.resolve("@repo/riven/workers/validate-torrent-files"),
+            ),
+            {},
+            { concurrency: availableParallelism * 0.25 },
+          ),
+        },
+      }),
     handleGracefulShutdown: ({ context }) => {
       context.parentRef.send({
         type: "riven.core.shutdown",
@@ -246,134 +378,41 @@ export const mainRunnerMachine = setup({
   .createMachine({
     /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7ABABwCcB7KAgQwFscKzVcCBXLLMAgYgI2wDoLJUyAWlQAXMBW4AqANoAGALqJQeIrFGoiWJSAAeiAIwAmADQgAnogCsATmvcAHEcsBfZ6bSZchEuSo06OIzMrBxcWIJ4ADYMUHS8-EKi4twEYACODHBiEHKKSCAqaiIaWvl6CEamFggALJaGDjYAzADsLm4gHtj4xKSU1LT0TCzsnJ7xEALCYhIAxqlkxZrcrMQEudqF6pra5ZXmiE2yltzWsgBshu3uYT0+-f5DwaNhE1NJcwtLWNxkkQsQMyCMA6VCwESwDb5LbfXYGEwHCqWeynSxNJyuG6eO59PyDQLDEJjHipEQEIGRVAAI3I5KhylU21KoD2COqRlcHSwRAgcG0XS8vV8AwCQRGm0ZsLKiDa3FkhhaTRqrUsVRlln03Ba50sl3ariAA */
     id: "Riven program main runner",
-    initial: "Running",
-    context: ({ input, self }) => {
-      const availableParallelism = os.availableParallelism();
-
-      setSendEvent(self.send);
-
-      return {
-        parentRef: input.parentRef,
-        plugins: input.plugins,
-        publishableEvents: input.publishableEvents,
-        pluginQueues: input.pluginQueues,
-        pluginWorkers: input.pluginWorkers,
-        flowWorkers: {
-          "process-item-request": createFlowWorker(
-            ProcessItemRequestFlow,
-            processItemRequestProcessor,
-            self.send,
-            input.plugins,
-          ),
-          "process-media-item": createFlowWorker(
-            ProcessMediaItemFlow,
-            processMediaItemProcessor,
-            self.send,
-            input.plugins,
-          ),
-          "request-content-services": createFlowWorker(
-            RequestContentServicesFlow,
-            requestContentServicesProcessor,
-            self.send,
-            input.plugins,
-          ),
-          "scrape-item": createFlowWorker(
-            ScrapeItemFlow,
-            scrapeItemProcessor,
-            self.send,
-            input.plugins,
-            {},
-            {
-              settings: {
-                backoffStrategy: (attemptsMade) => {
-                  const [after2, after5, after10] =
-                    settings.scrapeCooldownHours;
-
-                  if (attemptsMade >= 10) {
-                    return Duration.fromObject({ hours: after10 }).as(
-                      "milliseconds",
-                    );
-                  }
-
-                  if (attemptsMade >= 5) {
-                    return Duration.fromObject({ hours: after5 }).as(
-                      "milliseconds",
-                    );
-                  }
-
-                  if (attemptsMade >= 2) {
-                    return Duration.fromObject({ hours: after2 }).as(
-                      "milliseconds",
-                    );
-                  }
-
-                  return Duration.fromObject({ minutes: 30 }).as(
-                    "milliseconds",
-                  );
-                },
-              },
+    initial: "Idle",
+    context: ({ input }) => ({
+      availableParallelism: os.availableParallelism(),
+      parentRef: input.parentRef,
+      plugins: new Map(),
+      pluginQueues: new Map(),
+      pluginWorkers: new Map(),
+      publishableEvents: new Set(),
+    }),
+    on: {
+      START: {
+        target: ".Running",
+        actions: [
+          {
+            type: "log",
+            params: {
+              message: "Start received",
             },
-          ),
-          "download-item": createFlowWorker(
-            DownloadItemFlow,
-            downloadItemProcessor,
-            self.send,
-            input.plugins,
-          ),
-          "download-item.find-valid-torrent": createFlowWorker(
-            FindValidTorrentFlow,
-            findValidTorrentProcessor,
-            self.send,
-            input.plugins,
-          ),
-          "download-item.rank-streams": createFlowWorker(
-            RankStreamsFlow,
-            rankStreamsProcessor,
-            self.send,
-            input.plugins,
-          ),
-          "request-subtitles": createFlowWorker(
-            RequestSubtitlesFlow,
-            requestSubtitlesProcessor,
-            self.send,
-            input.plugins,
-          ),
-          "post-process-media-item": createFlowWorker(
-            PostProcessMediaItemFlow,
-            postProcessItemProcessor,
-            self.send,
-            input.plugins,
-          ),
-        },
-        sandboxedWorkers: {
-          "scrape-item.parse-scrape-results": createSandboxedWorker(
-            ParseScrapeResultsSandboxedJob,
-            new URL(
-              import.meta.resolve("@repo/riven/workers/parse-scrape-results"),
-            ),
-            {},
-            { concurrency: availableParallelism * 0.25 },
-          ),
-          "download-item.map-items-to-files": createSandboxedWorker(
-            MapItemsToFilesSandboxedJob,
-            new URL(
-              import.meta.resolve("@repo/riven/workers/map-items-to-files"),
-            ),
-            {},
-            { concurrency: availableParallelism * 0.75 },
-          ),
-          "download-item.validate-torrent-files": createSandboxedWorker(
-            ValidateTorrentFilesSandboxedJob,
-            new URL(
-              import.meta.resolve("@repo/riven/workers/validate-torrent-files"),
-            ),
-            {},
-            { concurrency: availableParallelism * 0.25 },
-          ),
-        },
-      };
+          },
+          {
+            type: "handleStart",
+            params: ({ event }) => event.input,
+          },
+        ],
+      },
     },
     states: {
+      Idle: {
+        entry: {
+          type: "log",
+          params: {
+            message: "Idle",
+          },
+        },
+      },
       Running: {
         invoke: [
           {
@@ -422,15 +461,6 @@ export const mainRunnerMachine = setup({
           /**
            * Item request lifecycle events
            */
-
-          "riven.item-requested": {
-            actions: [
-              {
-                type: "requestItem",
-                params: ({ event: { item } }) => ({ item }),
-              },
-            ],
-          },
 
           "riven.item-request.create.success": {
             description:
@@ -732,6 +762,19 @@ export const mainRunnerMachine = setup({
           //     "Retries any incomplete media items and item requests.",
           //   actions: { type: "retryLibrary" },
           // },
+
+          /**
+           * External events
+           */
+
+          "riven-external.item-requested": {
+            actions: [
+              {
+                type: "requestItem",
+                params: ({ event: { item } }) => ({ item }),
+              },
+            ],
+          },
         },
       },
       Errored: {

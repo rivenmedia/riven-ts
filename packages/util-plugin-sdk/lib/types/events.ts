@@ -28,5 +28,20 @@ export type PluginEvent<
   Payload extends never ? {} : Payload
 >;
 
-export type ParamsFor<T extends PluginEvent<string> | ProgramEvent<string>> =
-  Omit<T, "type">;
+/**
+ * Base type for external events.
+ */
+export type ExternalEvent<
+  Type extends string,
+  Payload extends Record<string, unknown> = {},
+> = Merge<
+  {
+    type: `riven-external.${Type}`;
+    plugin: string;
+  },
+  Payload extends never ? {} : Payload
+>;
+
+export type ParamsFor<
+  T extends PluginEvent<string> | ProgramEvent<string> | ExternalEvent<string>,
+> = Omit<T, "type">;

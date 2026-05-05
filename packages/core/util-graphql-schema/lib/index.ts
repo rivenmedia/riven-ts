@@ -10,17 +10,14 @@ import {
 } from "type-graphql";
 
 import type { EntityManager } from "@mikro-orm/core";
-import type { DataSourceMap } from "@repo/util-plugin-sdk";
-import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 
 export const CoreKey = Symbol("Riven Core");
 
-export interface ApolloServerContext {
+export interface ApolloServerContext extends GraphQLContext {
   [CoreKey]: {
     em: EntityManager;
   };
-  sendEvent: (event: RivenEvent) => void;
-  plugins: Partial<Record<symbol, { dataSources: DataSourceMap }>>;
 }
 
 export const buildSchema = async (

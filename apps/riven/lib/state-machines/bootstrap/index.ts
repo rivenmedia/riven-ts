@@ -28,6 +28,7 @@ import type Fuse from "@zkochan/fuse-native";
 
 export interface BootstrapMachineContext {
   error?: Error;
+  mainRunnerRef: AnyActorRef;
   rootRef: AnyActorRef;
   validatingPlugins: RegisteredPluginMap;
   validPlugins: ValidPluginMap;
@@ -41,6 +42,7 @@ export interface BootstrapMachineContext {
 }
 
 export interface BootstrapMachineInput {
+  mainRunnerRef: AnyActorRef;
   rootRef: AnyActorRef;
 }
 
@@ -118,6 +120,7 @@ export const bootstrapMachine = setup({
     id: "Bootstrap",
     initial: "Bootstrapping database connection",
     context: ({ input }) => ({
+      mainRunnerRef: input.mainRunnerRef,
       rootRef: input.rootRef,
       validatingPlugins: new Map(),
       validPlugins: new Map(),
@@ -300,7 +303,9 @@ export const bootstrapMachine = setup({
                 invoke: {
                   id: "startGqlServer",
                   src: "startGqlServer",
-                  input: ({ context: { validPlugins, pluginSettings } }) => {
+                  input: ({
+                    context: { mainRunnerRef, validPlugins, pluginSettings },
+                  }) => {
                     if (!pluginSettings) {
                       throw new Error(
                         "Plugin settings not available when starting GraphQL server. Ensure the plugin registrar has been run first.",
@@ -308,8 +313,9 @@ export const bootstrapMachine = setup({
                     }
 
                     return {
-                      validPlugins,
+                      mainRunnerRef,
                       pluginSettings,
+                      validPlugins,
                     };
                   },
                   onDone: {
