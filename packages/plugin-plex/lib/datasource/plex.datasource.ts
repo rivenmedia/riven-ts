@@ -1,4 +1,4 @@
-import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { join } from "node:path";
 
@@ -57,5 +57,3 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
     return true;
   }
 }
-
-export type PlexContextSlice = BasePluginContext;

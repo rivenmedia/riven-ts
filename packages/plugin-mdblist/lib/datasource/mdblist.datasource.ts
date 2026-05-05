@@ -1,8 +1,4 @@
-import {
-  BaseDataSource,
-  type BasePluginContext,
-  type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
 
 import { getListItemsByName200Schema } from "../__generated__/zod/getListItemsByNameSchema.ts";
 import { MdbListName } from "../schemas/mdblist-name.schema.ts";
@@ -135,5 +131,3 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
     };
   }
 }
-
-export type MdblistContextSlice = BasePluginContext;

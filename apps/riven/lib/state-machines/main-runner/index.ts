@@ -13,6 +13,7 @@ import {
   setup,
 } from "xstate";
 
+import { setSendEvent } from "../../graphql/send-event.ts";
 import { postProcessItemProcessor } from "../../message-queue/flows/post-process-media-item/post-process-media-item.processor.ts";
 import { PostProcessMediaItemFlow } from "../../message-queue/flows/post-process-media-item/post-process-media-item.schema.ts";
 import { requestSubtitlesProcessor } from "../../message-queue/flows/post-process-media-item/steps/request-subtitles/request-subtitles.processor.ts";
@@ -48,6 +49,10 @@ import { jobEnqueuer } from "./actors/job-enqueuer.actor.ts";
 import { processItemRequest } from "./actors/process-item-request.actor.ts";
 import { processMediaItem } from "./actors/process-media-item.actor.ts";
 import { requestContentServices } from "./actors/request-content-services.actor.ts";
+import {
+  type RequestItemInput,
+  requestItem,
+} from "./actors/request-item.actor.ts";
 import { retryLibrary } from "./actors/retry-library.actor.ts";
 import {
   type ScheduleReindexInput,
@@ -172,6 +177,17 @@ export const mainRunnerMachine = setup({
         });
       },
     ),
+    requestItem: enqueueActions(
+      ({ enqueue, self }, input: Omit<RequestItemInput, "parentRef">) => {
+        enqueue.spawnChild("requestItem", {
+          id: "requestItem",
+          input: {
+            ...input,
+            parentRef: self,
+          },
+        });
+      },
+    ),
   },
   actors: {
     createEventScheduler,
@@ -182,6 +198,7 @@ export const mainRunnerMachine = setup({
     requestContentServices,
     scheduleReindex,
     fanOutDownload,
+    requestItem,
   },
   guards: {
     /**
@@ -232,6 +249,8 @@ export const mainRunnerMachine = setup({
     initial: "Running",
     context: ({ input, self }) => {
       const availableParallelism = os.availableParallelism();
+
+      setSendEvent(self.send);
 
       return {
         parentRef: input.parentRef,
@@ -403,6 +422,15 @@ export const mainRunnerMachine = setup({
           /**
            * Item request lifecycle events
            */
+
+          "riven.item-requested": {
+            actions: [
+              {
+                type: "requestItem",
+                params: ({ event: { item } }) => ({ item }),
+              },
+            ],
+          },
 
           "riven.item-request.create.success": {
             description:

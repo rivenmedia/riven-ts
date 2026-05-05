@@ -32,9 +32,10 @@ export const startGqlServer = fromPromise<
   StartGQLServerOutput,
   StartGQLServerInput
 >(async ({ input: { validPlugins } }) => {
-  const pluginResolvers = [...validPlugins.values()].flatMap(
-    (p) => p.config.resolvers,
-  );
+  const pluginResolvers = validPlugins
+    .values()
+    .flatMap((p) => p.config.resolvers)
+    .toArray();
 
   const server = new ApolloServer<ApolloServerContext>({
     cache: redisCache,

@@ -1289,7 +1289,8 @@
                             "type": "string"
                           },
                           "imdb_id": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "tvdb_id": {
                             "nullable": true
@@ -1912,7 +1913,8 @@
                             "type": "string"
                           },
                           "imdb_id": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "tvdb_id": {
                             "nullable": true
@@ -1986,7 +1988,8 @@
                             "type": "string"
                           },
                           "imdb_id": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "tvdb_id": {
                             "type": "number",
@@ -4914,7 +4917,8 @@
                             "type": "string"
                           },
                           "imdb_id": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "tvdb_id": {
                             "nullable": true
@@ -10228,7 +10232,8 @@
                             "type": "string"
                           },
                           "imdb_id": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "tvdb_id": {
                             "nullable": true
@@ -10288,7 +10293,8 @@
                             "type": "string"
                           },
                           "imdb_id": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "tvdb_id": {
                             "type": "number",

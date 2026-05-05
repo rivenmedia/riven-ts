@@ -81,6 +81,7 @@ export const rivenMachine = setup({
                 vfs,
                 mainRunnerRef: spawn(mainRunnerMachine, {
                   input: {
+                    apolloServer: server,
                     parentRef: self,
                     plugins,
                     publishableEvents,

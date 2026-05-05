@@ -1,8 +1,4 @@
-import {
-  BaseDataSource,
-  type BasePluginContext,
-  type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
 
 import { MetadataSettingsResponse } from "../schemas/metadata-settings-response.schema.ts";
 import { RequestResponse } from "../schemas/request-response.schema.ts";
@@ -156,5 +152,3 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     }
   }
 }
-
-export type SeerrContextSlice = BasePluginContext;

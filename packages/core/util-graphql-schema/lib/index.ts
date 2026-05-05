@@ -11,12 +11,17 @@ import {
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { DataSourceMap } from "@repo/util-plugin-sdk";
+import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 
-export type ApolloServerContext = Partial<
-  Record<symbol, { dataSources: DataSourceMap }>
-> & {
-  em: EntityManager;
-};
+export const CoreKey = Symbol("Riven Core");
+
+export interface ApolloServerContext {
+  [CoreKey]: {
+    em: EntityManager;
+  };
+  sendEvent: (event: RivenEvent) => void;
+  plugins: Partial<Record<symbol, { dataSources: DataSourceMap }>>;
+}
 
 export const buildSchema = async (
   options: Omit<BuildSchemaOptions, "resolvers"> & {
