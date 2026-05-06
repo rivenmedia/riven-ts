@@ -158,11 +158,7 @@ export const requestContentServiceProcessor =
           }
 
           if (requestInterval) {
-            if (job.delay > 0) {
-              // Only remove deduplication key for repeated jobs to allow for rescheduling.
-              await job.removeDeduplicationKey();
-            }
-
+            await job.removeDeduplicationKey();
             await enqueueRequestContentService(
               job.data.contentServicePlugin,
               requestInterval,

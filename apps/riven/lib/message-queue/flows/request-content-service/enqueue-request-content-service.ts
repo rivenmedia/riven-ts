@@ -5,7 +5,6 @@ export function enqueueRequestContentService(
   contentServicePlugin: string,
   delay?: number,
 ) {
-  const deduplicationId = `request-content-service-${contentServicePlugin}${delay ? "-refetch" : ""}`;
   const job = createRequestContentServiceJob(
     `Request content: ${contentServicePlugin}`,
     {
@@ -14,8 +13,9 @@ export function enqueueRequestContentService(
     },
     {
       opts: {
+        ...(delay && { delay }),
         deduplication: {
-          id: deduplicationId,
+          id: `request-content-service-${contentServicePlugin}`,
         },
       },
     },
