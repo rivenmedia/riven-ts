@@ -14,7 +14,7 @@ export const requestContentServices = fromPromise<
   RequestContentServicesInput
 >(async ({ input: { plugins } }) => {
   const subscribers = getPluginEventSubscribers(
-    "riven/content-service.requested",
+    "riven.content-service.requested",
     plugins,
   );
 

@@ -22,7 +22,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
       );
 
       sendEvent({
-        type: "riven/media-item.download/error",
+        type: "riven.media-item.download/error",
         item,
         error,
       });
@@ -43,7 +43,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
 
       if (incompleteItems.length) {
         sendEvent({
-          type: "riven/media-item.download.partial-success",
+          type: "riven.media-item.download.partial-success",
           item: updatedItem,
           downloader: finalResult.plugin,
         });
@@ -52,7 +52,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
       }
 
       sendEvent({
-        type: "riven/media-item.download.success",
+        type: "riven.media-item.download.success",
         item: updatedItem,
         downloader: finalResult.plugin,
         durationMs: DateTime.utc()

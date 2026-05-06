@@ -153,59 +153,59 @@ export const RivenEventSchemaMap = new Map<RivenEvent["type"], ZodObject>(
 
 export const RivenEventHandler = {
   // Program lifecycle
-  "riven/core.started": CoreStartedEventHandler,
-  "riven/core.shutdown": CoreShutdownEventHandler,
+  "riven.core.started": CoreStartedEventHandler,
+  "riven.core.shutdown": CoreShutdownEventHandler,
 
   // Content services
-  "riven/content-service.requested": ContentServiceRequestedEventHandler,
+  "riven.content-service.requested": ContentServiceRequestedEventHandler,
 
   // Item request
-  "riven/item-request.create.success": ItemRequestCreateSuccessEventHandler,
-  "riven/item-request.create/error": ItemRequestCreateErrorEventHandler,
-  "riven/item-request.create/error.conflict":
+  "riven.item-request.create.success": ItemRequestCreateSuccessEventHandler,
+  "riven.item-request.create.error": ItemRequestCreateErrorEventHandler,
+  "riven.item-request.create.error.conflict":
     ItemRequestCreateErrorConflictEventHandler,
-  "riven/item-request.update.success": ItemRequestUpdateSuccessEventHandler,
+  "riven.item-request.update.success": ItemRequestUpdateSuccessEventHandler,
 
   // Item indexing
-  "riven/media-item.index.requested.movie":
+  "riven.media-item.index.requested.movie":
     MediaItemIndexRequestedMovieEventHandler,
-  "riven/media-item.index.requested.show":
+  "riven.media-item.index.requested.show":
     MediaItemIndexRequestedShowEventHandler,
-  "riven/media-item.index/error": MediaItemIndexErrorEventHandler,
-  "riven/media-item.index/error.incorrect-state":
+  "riven.media-item.index.error": MediaItemIndexErrorEventHandler,
+  "riven.media-item.index.error.incorrect-state":
     MediaItemIndexErrorIncorrectStateEventHandler,
-  "riven/media-item.index.success": MediaItemIndexSuccessEventHandler,
+  "riven.media-item.index.success": MediaItemIndexSuccessEventHandler,
 
   // Item scraping
-  "riven/media-item.scrape.requested": MediaItemScrapeRequestedEventHandler,
-  "riven/media-item.scrape/error": MediaItemScrapeErrorEventHandler,
-  "riven/media-item.scrape/error.incorrect-state":
+  "riven.media-item.scrape.requested": MediaItemScrapeRequestedEventHandler,
+  "riven.media-item.scrape.error": MediaItemScrapeErrorEventHandler,
+  "riven.media-item.scrape.error.incorrect-state":
     MediaItemScrapeErrorIncorrectStateEventHandler,
-  "riven/media-item.scrape/error.no-new-streams":
+  "riven.media-item.scrape.error.no-new-streams":
     MediaItemScrapeErrorNoNewStreamsEventHandler,
-  "riven/media-item.scrape.success": MediaItemScrapeSuccessEventHandler,
+  "riven.media-item.scrape.success": MediaItemScrapeSuccessEventHandler,
 
   // Item downloading
-  "riven/media-item.download.requested": MediaItemDownloadRequestedEventHandler,
-  "riven/media-item.download.cache-check-requested":
+  "riven.media-item.download.requested": MediaItemDownloadRequestedEventHandler,
+  "riven.media-item.download.cache-check-requested":
     MediaItemDownloadCacheCheckRequestedEventHandler,
-  "riven/media-item.download/error": MediaItemDownloadErrorEventHandler,
-  "riven/media-item.download/error.incorrect-state":
+  "riven.media-item.download.error": MediaItemDownloadErrorEventHandler,
+  "riven.media-item.download.error.incorrect-state":
     MediaItemDownloadErrorIncorrectStateEventHandler,
-  "riven/media-item.download.partial-success":
+  "riven.media-item.download.partial-success":
     MediaItemDownloadPartialSuccessEventHandler,
-  "riven/media-item.download.provider-list-requested":
+  "riven.media-item.download.provider-list-requested":
     MediaItemDownloadProviderListRequestedEventHandler,
-  "riven/media-item.download.success": MediaItemDownloadSuccessEventHandler,
+  "riven.media-item.download.success": MediaItemDownloadSuccessEventHandler,
 
   // Item streaming
-  "riven/media-item.stream-link.requested":
+  "riven.media-item.stream-link.requested":
     MediaItemStreamLinkRequestedEventHandler,
 
   // Subtitles
-  "riven/media-item.subtitle.requested": MediaItemSubtitleRequestedEventHandler,
+  "riven.media-item.subtitle.requested": MediaItemSubtitleRequestedEventHandler,
 } as const satisfies Record<RivenEvent["type"], z.ZodFunction>;
 
 export const RivenExternalEventHandler = {
-  "riven-external/item-requested": ItemRequestedEventHandler,
+  "riven-external.item-requested": ItemRequestedEventHandler,
 } as const satisfies Record<RivenExternalEvent["type"], z.ZodFunction>;

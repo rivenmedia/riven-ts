@@ -41,7 +41,7 @@ export const findValidTorrentProcessor =
     const parent = createJobParentConfig(job);
 
     const availableDownloaders = getPluginEventSubscribers(
-      "riven/media-item.download.requested",
+      "riven.media-item.download.requested",
       plugins,
     );
 
@@ -56,10 +56,10 @@ export const findValidTorrentProcessor =
         scope.setTag("riven.downloader-plugin", pluginName);
 
         const hasCacheCheckHook =
-          !!plugin.hooks["riven/media-item.download.cache-check-requested"];
+          !!plugin.hooks["riven.media-item.download.cache-check-requested"];
 
         const hasProviderListHook =
-          !!plugin.hooks["riven/media-item.download.provider-list-requested"];
+          !!plugin.hooks["riven.media-item.download.provider-list-requested"];
 
         try {
           const providers = hasProviderListHook

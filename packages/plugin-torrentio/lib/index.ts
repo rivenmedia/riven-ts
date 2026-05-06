@@ -13,7 +13,7 @@ export default {
   dataSources: [TorrentioAPI],
   resolvers: [TorrentioResolver, TorrentioSettingsResolver],
   hooks: {
-    "riven/media-item.scrape.requested": async ({ dataSources, event }) => {
+    "riven.media-item.scrape.requested": async ({ dataSources, event }) => {
       const api = dataSources.get(TorrentioAPI);
       const results = await api.scrape(event);
 

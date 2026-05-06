@@ -19,6 +19,6 @@ export function createProgramEventErrorSchema<
 
   return z.object({
     ...payloadSchema.shape,
-    type: z.literal(`riven/${type}/error${errorSuffix}`),
+    type: z.literal(`riven.${type}.error${errorSuffix}`),
   });
 }

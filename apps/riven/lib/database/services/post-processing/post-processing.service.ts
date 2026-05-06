@@ -8,7 +8,7 @@ import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 export class PostProcessingService extends BaseService {
   #postProcessingEvents = new Set<RivenEvent["type"]>([
-    "riven/media-item.subtitle.requested",
+    "riven.media-item.subtitle.requested",
   ]);
 
   itemRequiresPostProcessing(_item: MediaItem, plugins: ValidPluginMap) {

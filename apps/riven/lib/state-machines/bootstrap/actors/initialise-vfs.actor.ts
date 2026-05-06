@@ -104,7 +104,7 @@ export const initialiseVfs = fromPromise<
   for (const [pluginSymbol, queueMap] of pluginQueues.entries()) {
     for (const [event, queue] of queueMap.entries()) {
       if (
-        event !== "riven/media-item.stream-link.requested" ||
+        event !== "riven.media-item.stream-link.requested" ||
         !pluginSymbol.description
       ) {
         continue;

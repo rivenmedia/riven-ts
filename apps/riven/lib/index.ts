@@ -58,7 +58,7 @@ await withLogContext(baseLogContext, async () => {
     const stoppableStates: (typeof value)[] = ["Running", "Bootstrapping"];
 
     if (stoppableStates.includes(value)) {
-      actor.send({ type: "riven/core.shutdown" });
+      actor.send({ type: "riven.core.shutdown" });
     }
   });
 

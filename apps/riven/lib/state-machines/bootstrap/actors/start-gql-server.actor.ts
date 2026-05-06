@@ -67,7 +67,7 @@ export const startGqlServer = fromPromise<
   });
 
   const sendEvent: GraphQLContext["sendEvent"] = (event) => {
-    if (!event.type.startsWith("riven-external/")) {
+    if (!event.type.startsWith("riven-external.")) {
       throw new Error(
         "Only `riven-external/` events can be sent from the GraphQL server",
       );

@@ -15,7 +15,7 @@ export default {
   dataSources: [NotificationsAPI],
   resolvers: [NotificationsResolver, NotificationsSettingsResolver],
   hooks: {
-    "riven/media-item.download.success": async ({
+    "riven.media-item.download.success": async ({
       event,
       dataSources,
       settings,
@@ -26,7 +26,7 @@ export default {
       const api = dataSources.get(NotificationsAPI);
       const payload = buildNotificationPayload(
         event,
-        "riven/media-item.download.success",
+        "riven.media-item.download.success",
       );
       const results = await Promise.allSettled(
         urls.map(async (rawUrl) => sendNotification(rawUrl, payload, api)),

@@ -13,7 +13,7 @@ export default {
   dataSources: [MdblistAPI],
   resolvers: [MdblistResolver, MdblistSettingsResolver],
   hooks: {
-    "riven/content-service.requested": async ({ dataSources, settings }) => {
+    "riven.content-service.requested": async ({ dataSources, settings }) => {
       const { lists } = settings.get(MdbListSettings);
       const api = dataSources.get(MdblistAPI);
 

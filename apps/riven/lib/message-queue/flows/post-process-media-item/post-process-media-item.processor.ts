@@ -28,7 +28,7 @@ export const postProcessItemProcessor =
             );
 
             const subtitlesSubscribers = getPluginEventSubscribers(
-              "riven/media-item.subtitle.requested",
+              "riven.media-item.subtitle.requested",
               plugins,
             );
 

@@ -33,7 +33,7 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
       }
 
       sendEvent({
-        type: "riven/media-item.scrape.success",
+        type: "riven.media-item.scrape.success",
         item,
       });
     } catch (error) {

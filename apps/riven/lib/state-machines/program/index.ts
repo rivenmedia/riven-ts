@@ -90,7 +90,7 @@ export const rivenMachine = setup({
       }),
     }),
     on: {
-      "riven/core.shutdown": ".Shutdown",
+      "riven.core.shutdown": ".Shutdown",
     },
     states: {
       Bootstrapping: {

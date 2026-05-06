@@ -137,7 +137,7 @@ export const mainRunnerMachine = setup({
   actions: {
     handleGracefulShutdown: ({ context }) => {
       context.parentRef.send({
-        type: "riven/core.shutdown",
+        type: "riven.core.shutdown",
       });
     },
     requestContentServices: enqueueActions(
@@ -432,20 +432,20 @@ export const mainRunnerMachine = setup({
           },
         ],
         entry: [
-          raise({ type: "riven/core.started" }),
+          raise({ type: "riven.core.started" }),
           {
             type: "log",
             params: { message: "Riven has started successfully." },
           },
-          raise({ type: "riven-internal/request-content-services" }),
-          raise({ type: "riven-internal/retry-library" }),
+          raise({ type: "riven-internal.request-content-services" }),
+          raise({ type: "riven-internal.retry-library" }),
         ],
         on: {
           /**
            * Item request lifecycle events
            */
 
-          "riven/item-request.create.success": {
+          "riven.item-request.create.success": {
             description:
               "Indicates that a media item has been successfully created in the library.",
             actions: [
@@ -463,7 +463,7 @@ export const mainRunnerMachine = setup({
             ],
           },
 
-          "riven/item-request.create/error": {
+          "riven.item-request.create.error": {
             description:
               "Indicates that an error occurred while attempting to create an item request.",
             actions: [
@@ -488,7 +488,7 @@ export const mainRunnerMachine = setup({
             ],
           },
 
-          "riven/item-request.create/error.conflict": {
+          "riven.item-request.create.error.conflict": {
             description:
               "Indicates that an item request creation was attempted, but the item already exists in the library.",
             actions: [
@@ -502,7 +502,7 @@ export const mainRunnerMachine = setup({
             ],
           },
 
-          "riven/item-request.update.success": {
+          "riven.item-request.update.success": {
             description:
               "Indicates that an item request has been successfully updated.",
             actions: [
@@ -519,7 +519,7 @@ export const mainRunnerMachine = setup({
           /**
            * Index lifecycle events
            */
-          "riven/media-item.index.success": [
+          "riven.media-item.index.success": [
             {
               description:
                 "Indicates that a media item has been successfully indexed, but is not yet released. It will be scheduled for re-indexing at a later date.",
@@ -598,7 +598,7 @@ export const mainRunnerMachine = setup({
             },
           ],
 
-          "riven/media-item.index/error.incorrect-state": {
+          "riven.media-item.index.error.incorrect-state": {
             description:
               "Indicates that a media item index was attempted, but the item was already indexed in the library.",
             actions: [
@@ -626,7 +626,7 @@ export const mainRunnerMachine = setup({
            * Scrape lifecycle events
            */
 
-          "riven/media-item.scrape/error.no-new-streams": {
+          "riven.media-item.scrape.error.no-new-streams": {
             description:
               "Indicates that a media item scrape completed successfully, but no new streams were found.",
             actions: [
@@ -644,7 +644,7 @@ export const mainRunnerMachine = setup({
             ],
           },
 
-          "riven/media-item.scrape.success": {
+          "riven.media-item.scrape.success": {
             description:
               "Indicates that a media item has been successfully scraped.",
             actions: [
@@ -662,7 +662,7 @@ export const mainRunnerMachine = setup({
            * Download lifecycle events
            */
 
-          "riven/media-item.download.success": {
+          "riven.media-item.download.success": {
             description:
               "Indicates that a media item has been successfully downloaded.",
             actions: [
@@ -698,7 +698,7 @@ export const mainRunnerMachine = setup({
             ],
           },
 
-          "riven/media-item.download.partial-success": {
+          "riven.media-item.download.partial-success": {
             description:
               "Indicates that a show or season has been partially downloaded.",
             actions: [
@@ -720,7 +720,7 @@ export const mainRunnerMachine = setup({
             ],
           },
 
-          "riven/media-item.download/error": {
+          "riven.media-item.download.error": {
             description:
               "Indicates that an error occurred during the download process for a media item.",
             actions: [
@@ -750,7 +750,7 @@ export const mainRunnerMachine = setup({
            * External events
            */
 
-          "riven-external/item-requested": {
+          "riven-external.item-requested": {
             actions: [
               {
                 type: "requestItem",

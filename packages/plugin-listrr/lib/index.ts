@@ -13,7 +13,7 @@ export default {
   resolvers: [ListrrResolver, ListrrSettingsResolver],
   dataSources: [ListrrAPI],
   hooks: {
-    "riven/content-service.requested": async ({ dataSources, settings }) => {
+    "riven.content-service.requested": async ({ dataSources, settings }) => {
       const { movieLists, showLists } = settings.get(ListrrSettings);
       const api = dataSources.get(ListrrAPI);
 

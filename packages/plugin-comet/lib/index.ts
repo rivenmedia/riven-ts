@@ -13,7 +13,7 @@ export default {
   dataSources: [CometAPI],
   resolvers: [CometResolver, CometSettingsResolver],
   hooks: {
-    "riven/media-item.scrape.requested": async ({ dataSources, event }) => {
+    "riven.media-item.scrape.requested": async ({ dataSources, event }) => {
       const api = dataSources.get(CometAPI);
       const results = await api.scrape(event);
 

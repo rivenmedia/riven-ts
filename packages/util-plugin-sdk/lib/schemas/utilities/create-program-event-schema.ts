@@ -10,5 +10,5 @@ export const createProgramEventSchema = <
 ) =>
   z.object({
     ...payloadSchema.shape,
-    type: z.literal(`riven/${type}`),
+    type: z.literal(`riven.${type}`),
   });
