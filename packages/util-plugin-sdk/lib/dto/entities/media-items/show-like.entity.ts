@@ -18,7 +18,7 @@ import type { Promisable } from "type-fest";
 })
 export abstract class ShowLikeMediaItem extends MediaItem {
   @Field(() => String)
-  @Property()
+  @Property({ type: "varchar", length: 10 })
   @IsNumberString()
   tvdbId!: string;
 
