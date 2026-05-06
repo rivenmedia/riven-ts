@@ -20,14 +20,9 @@ export const SeerrSettings = z.object({
     .describe(
       "Request status filter (all, approved, available, pending, processing, ...)",
     ),
-  updateIntervalSeconds: json(
-    z
-      .int()
-      .nonnegative()
-      .nullable()
-      .default(Duration.fromObject({ minutes: 1 }).as("seconds")),
-  )
+  updateIntervalSeconds: json(z.int().nonnegative())
     .nullable()
+    .default(Duration.fromObject({ minutes: 1 }).as("seconds"))
     .describe(
       "Interval in seconds to update content. If using the webhook, set to `null` to disable automatic updates (an initial request will still be made on startup)",
     ),
