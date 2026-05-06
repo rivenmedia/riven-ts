@@ -47,7 +47,9 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     }
   }
 
-  async getContent(filter: string): Promise<ContentServiceRequestedResponse> {
+  async getContent(
+    filter: string,
+  ): Promise<Pick<ContentServiceRequestedResponse, "movies" | "shows">> {
     const requests = await this.#getAllRequests(filter);
     const movieMap = new Map<
       number,

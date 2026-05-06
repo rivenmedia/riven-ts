@@ -17,6 +17,7 @@ export type ContentServiceRequestedEvent = z.infer<
 >;
 
 export const ContentServiceRequestedResponse = z.object({
+  requestInterval: z.int().nonnegative().nullable(),
   movies: z.array(
     ItemRequest.pick({
       imdbId: true,

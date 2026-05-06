@@ -20,6 +20,7 @@ export default {
       return {
         movies: await api.getMovies(new Set(movieLists)),
         shows: await api.getShows(new Set(showLists)),
+        requestInterval: 1000 * 60 * 60,
       };
     },
   },

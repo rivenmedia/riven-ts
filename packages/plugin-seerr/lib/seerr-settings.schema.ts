@@ -17,6 +17,12 @@ export const SeerrSettings = z.object({
     .describe(
       "Request status filter (all, approved, available, pending, processing, ...)",
     ),
+  useWebhook: z
+    .stringbool()
+    .default(false)
+    .describe(
+      "If true, Seerr will rely on the webhook for requesting items. All items will still be requested on first load.",
+    ),
 });
 
 export type SeerrSettings = z.infer<typeof SeerrSettings>;

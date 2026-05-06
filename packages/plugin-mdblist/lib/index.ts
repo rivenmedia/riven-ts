@@ -13,11 +13,17 @@ export default {
   dataSources: [MdblistAPI],
   resolvers: [MdblistResolver, MdblistSettingsResolver],
   hooks: {
-    "riven.content-service.requested": ({ dataSources, settings }) => {
+    "riven.content-service.requested": async ({ dataSources, settings }) => {
       const { lists } = settings.get(MdbListSettings);
       const api = dataSources.get(MdblistAPI);
 
-      return api.getListItems(new Set(lists));
+      const { movies, shows } = await api.getListItems(new Set(lists));
+
+      return {
+        movies,
+        shows,
+        requestInterval: 1000 * 60 * 60,
+      };
     },
   },
   settingsSchema: MdbListSettings,

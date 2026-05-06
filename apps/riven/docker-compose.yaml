@@ -58,5 +58,25 @@ services:
     volumes:
       - ./docker-data/riven-cache:/data
 
+  redis-insight:
+    container_name: redis-insight
+    image: redislabs/redisinsight:latest
+    restart: unless-stopped
+    environment:
+      RI_REDIS_HOST: riven-cache
+    ports:
+      - 5540:5540
+    healthcheck:
+      test:
+        wget --no-verbose --tries=1 --spider http://localhost:55400/api/health ||
+        exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      retries: 3
+    depends_on:
+      riven-cache:
+        condition: service_healthy
+
 volumes:
   riven-db:

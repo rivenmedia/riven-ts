@@ -47,7 +47,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
 
   async getListItems(
     contentLists: Set<string>,
-  ): Promise<ContentServiceRequestedResponse> {
+  ): Promise<Pick<ContentServiceRequestedResponse, "movies" | "shows">> {
     if (!contentLists.size) {
       return {
         movies: [],

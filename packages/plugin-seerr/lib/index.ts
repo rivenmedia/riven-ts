@@ -13,11 +13,18 @@ export default {
   dataSources: [SeerrAPI],
   resolvers: [SeerrResolver, SeerrSettingsResolver],
   hooks: {
-    "riven.content-service.requested": ({ dataSources, settings }) => {
-      const { filter } = settings.get(SeerrSettings);
+    "riven.content-service.requested": async ({ dataSources, settings }) => {
+      const { filter, useWebhook } = settings.get(SeerrSettings);
       const api = dataSources.get(SeerrAPI);
+      const requestInterval = useWebhook ? null : 1000 * 60 * 2;
 
-      return api.getContent(filter);
+      const { movies, shows } = await api.getContent(filter);
+
+      return {
+        movies,
+        shows,
+        requestInterval,
+      };
     },
   },
   settingsSchema: SeerrSettings,
