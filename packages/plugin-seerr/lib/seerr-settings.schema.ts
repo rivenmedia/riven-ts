@@ -20,7 +20,7 @@ export const SeerrSettings = z.object({
     .describe(
       "Request status filter (all, approved, available, pending, processing, ...)",
     ),
-  updateIntervalSeconds: json(z.int().nonnegative())
+  updateIntervalSeconds: json(z.int().nonnegative().nullable())
     .nullable()
     .default(Duration.fromObject({ minutes: 1 }).as("seconds"))
     .describe(
