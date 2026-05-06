@@ -26,9 +26,11 @@ export const SeerrSettings = z.object({
       .nonnegative()
       .nullable()
       .default(Duration.fromObject({ minutes: 1 }).as("seconds")),
-  ).describe(
-    "Interval in seconds to update content. If using the webhook, set to `null` to disable automatic updates (an initial request will still be made on startup)",
-  ),
+  )
+    .nullable()
+    .describe(
+      "Interval in seconds to update content. If using the webhook, set to `null` to disable automatic updates (an initial request will still be made on startup)",
+    ),
 });
 
 export type SeerrSettings = z.infer<typeof SeerrSettings>;
