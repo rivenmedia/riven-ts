@@ -735,12 +735,12 @@ export const mainRunnerMachine = setup({
            * Internal events
            */
 
-          "riven-internal:request-content-services": {
+          "riven-internal.request-content-services": {
             description: "Requests content services for media items to ingest.",
             actions: { type: "requestContentServices" },
           },
 
-          // "riven-internal:retry-library": {
+          // "riven-internal.retry-library": {
           //   description:
           //     "Retries any incomplete media items and item requests.",
           //   actions: { type: "retryLibrary" },
