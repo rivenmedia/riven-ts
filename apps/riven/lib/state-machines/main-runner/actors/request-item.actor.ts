@@ -1,3 +1,6 @@
+import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
+import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
+
 import { type ActorRef, type Snapshot, fromPromise } from "xstate";
 
 import { services } from "../../../database/database.ts";
@@ -12,26 +15,27 @@ export interface RequestItemInput {
 
 export const requestItem = fromPromise<undefined, RequestItemInput>(
   async ({ input }) => {
-    if (input.item.type === "movie") {
-      const itemRequest = await services.itemRequestService.requestMovie(
-        input.item,
-      );
+    try {
+      const itemRequest =
+        input.item.type === "movie"
+          ? await services.itemRequestService.requestMovie(input.item)
+          : await services.itemRequestService.requestShow(input.item);
 
       input.parentRef.send({
         type: "riven.item-request.create.success",
         item: itemRequest.item,
       });
-    }
+    } catch (error) {
+      if (
+        error instanceof ItemRequestCreateError ||
+        error instanceof ItemRequestCreateErrorConflict
+      ) {
+        input.parentRef.send(error.payload);
 
-    if (input.item.type === "show") {
-      const itemRequest = await services.itemRequestService.requestShow(
-        input.item,
-      );
+        return;
+      }
 
-      input.parentRef.send({
-        type: "riven.item-request.create.success",
-        item: itemRequest.item,
-      });
+      throw error;
     }
   },
 );
