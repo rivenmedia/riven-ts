@@ -131,7 +131,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
   });
 });
 
-it('sends a "riven.media-item.download/error" event if no valid torrent is found', async ({
+it('sends a "riven.media-item.download.error" event if no valid torrent is found', async ({
   createMockJob,
   scrapedMovieContext: { scrapedMovie },
   mockSentryScope,
@@ -158,7 +158,7 @@ it('sends a "riven.media-item.download/error" event if no valid torrent is found
   });
 
   expect(sendEvent).toHaveBeenCalledWith({
-    type: "riven.media-item.download/error",
+    type: "riven.media-item.download.error",
     item: expect.any(Movie),
     error: expect.any(Error),
   });

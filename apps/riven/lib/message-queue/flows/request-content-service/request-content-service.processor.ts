@@ -144,7 +144,7 @@ export const requestContentServiceProcessor =
               }
 
               sendEvent({
-                type: `riven/item-request.${result.requestType}.success`,
+                type: `riven.item-request.${result.requestType}.success`,
                 item: result.item,
               });
             } catch (error) {

@@ -40,7 +40,7 @@ export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
 
       for (const request of pendingRequests) {
         parentRef.send({
-          type: `riven/media-item.index.requested.${request.type}`,
+          type: `riven.media-item.index.requested.${request.type}`,
           item: request,
         });
       }

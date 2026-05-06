@@ -9,7 +9,7 @@ export type ProgramEvent<
   Payload extends Record<string, unknown> = {},
 > = Merge<
   {
-    type: `riven/${Type}`;
+    type: `riven.${Type}`;
   },
   Payload extends never ? {} : Payload
 >;

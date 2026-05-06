@@ -22,7 +22,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
       );
 
       sendEvent({
-        type: "riven.media-item.download/error",
+        type: "riven.media-item.download.error",
         item,
         error,
       });
