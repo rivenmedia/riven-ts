@@ -37,7 +37,6 @@ export type ExternalEvent<
 > = Merge<
   {
     type: `riven-external.${Type}`;
-    plugin: string;
   },
   Payload extends never ? {} : Payload
 >;

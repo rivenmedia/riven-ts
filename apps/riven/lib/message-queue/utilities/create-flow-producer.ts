@@ -32,7 +32,7 @@ declare module "bullmq" {
 export class ExtendedFlowProducer extends FlowProducer {
   addPluginJob<
     I extends ZodObject<{
-      type: ZodLiteral<RivenEvent["type"]>;
+      type: ZodLiteral<Exclude<RivenEvent["type"], `riven-external.${string}`>>;
     }>,
     O extends ZodType,
   >(
