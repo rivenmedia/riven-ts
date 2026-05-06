@@ -24,13 +24,6 @@ await withLogContext(baseLogContext, async () => {
   const { rivenMachine } = await import("./state-machines/program/index.ts");
   const { logger } = await import("./utilities/logger/logger.ts");
 
-  // Node fires `uncaughtException` and `unhandledRejection` listeners from
-  // a fresh execution context, not the AsyncLocalStorage scope of the
-  // registration site. Without an explicit `withLogContext` wrap here, the
-  // `logger.error(...)` calls below resolve no log context and trip the
-  // intentional throw in `getLogContext`, which masks the original error
-  // in `exceptions.log` and exits the process. Re-establish the same base
-  // context on each invocation so the logger can do its job.
   process.on("uncaughtException", (error) => {
     withLogContext(baseLogContext, () => {
       logger.error("Uncaught exception", { err: error });
