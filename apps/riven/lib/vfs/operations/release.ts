@@ -19,7 +19,7 @@ import type { OPERATIONS } from "@zkochan/fuse-native";
 async function release(fd: number) {
   const response = await fdToResponsePromiseMap.get(fd);
 
-  if (response?.body) {
+  if (response) {
     try {
       await response.body.dump();
     } catch (error) {
