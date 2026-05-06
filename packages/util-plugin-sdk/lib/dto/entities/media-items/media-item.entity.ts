@@ -52,7 +52,7 @@ export abstract class MediaItem {
   fullTitle!: Opt<string>;
 
   @Field(() => String, { nullable: true })
-  @Property()
+  @Property({ type: "varchar", length: 10 })
   @Matches(/^tt\d+$/)
   @IsOptional()
   imdbId?: string | null;
@@ -127,10 +127,6 @@ export abstract class MediaItem {
 
   @Enum(() => MediaItemContentRating.enum)
   contentRating?: MediaItemContentRating | null;
-
-  @Field(() => String, { nullable: true })
-  @Property()
-  guid?: string | null;
 
   @Field(() => MediaItemState.enum)
   @Enum({

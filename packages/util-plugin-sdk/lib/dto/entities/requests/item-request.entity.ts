@@ -25,21 +25,21 @@ export class ItemRequest {
   id = randomUUID();
 
   @Field(() => String, { nullable: true })
-  @Property()
+  @Property({ type: "varchar", length: 10 })
   @Matches(/^tt\d+$/)
   @IsOptional()
   @Unique()
   imdbId?: string | null;
 
   @Field(() => String, { nullable: true })
-  @Property()
+  @Property({ type: "varchar", length: 10 })
   @IsNumberString()
   @IsOptional()
   @Unique()
   tmdbId?: string | null;
 
   @Field(() => String, { nullable: true })
-  @Property()
+  @Property({ type: "varchar", length: 10 })
   @IsNumberString()
   @IsOptional()
   @Unique()

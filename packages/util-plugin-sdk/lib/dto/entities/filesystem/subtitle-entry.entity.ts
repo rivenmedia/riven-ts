@@ -19,7 +19,7 @@ export class SubtitleEntry extends FileSystemEntry {
   language!: string;
 
   @Field(() => String)
-  @Property({ type: "text" })
+  @Property()
   content!: string;
 
   @Field(() => String)
