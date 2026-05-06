@@ -9,13 +9,17 @@ import z, {
 import { DataSourceMap } from "../../utilities/datasource-map.ts";
 import { PluginSettings } from "../../utilities/plugin-settings.ts";
 
-import type { RivenEvent } from "../events/index.ts";
+import type { RivenEvent, RivenExternalEvent } from "../events/index.ts";
 
 export const createEventHandlerSchema = <
-  I extends { type: ZodLiteral<RivenEvent["type"]> },
+  I extends {
+    type: ZodLiteral<RivenEvent["type"] | RivenExternalEvent["type"]>;
+  },
   O extends ZodType = ZodVoid,
 >(
-  inputSchema: ZodObject<I & { type: ZodLiteral<RivenEvent["type"]> }>,
+  inputSchema: ZodObject<
+    I & { type: ZodLiteral<RivenEvent["type"] | RivenExternalEvent["type"]> }
+  >,
   outputSchema: O = z.void() as never,
 ) =>
   z.function({

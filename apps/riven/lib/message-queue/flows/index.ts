@@ -33,13 +33,13 @@ import {
   scrapeItemProcessorSchema,
 } from "./process-media-item/steps/scrape/scrape-item.schema.ts";
 import {
-  RequestContentServicesFlow,
-  requestContentServicesProcessorSchema,
-} from "./request-content-services/request-content-services.schema.ts";
+  RequestContentServiceFlow,
+  requestContentServiceProcessorSchema,
+} from "./request-content-service/request-content-service.schema.ts";
 
 export const Flow = z.discriminatedUnion("name", [
   ProcessItemRequestFlow,
-  RequestContentServicesFlow,
+  RequestContentServiceFlow,
   ScrapeItemFlow,
   DownloadItemFlow,
   FindValidTorrentFlow,
@@ -52,7 +52,7 @@ export const Flow = z.discriminatedUnion("name", [
 export type Flow = z.infer<typeof Flow>;
 
 export const FlowHandlers = {
-  "request-content-services": requestContentServicesProcessorSchema,
+  "request-content-services": requestContentServiceProcessorSchema,
   "process-item-request": processItemRequestProcessorSchema,
   "process-media-item": processMediaItemProcessorSchema,
   "scrape-item": scrapeItemProcessorSchema,

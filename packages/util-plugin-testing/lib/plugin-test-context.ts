@@ -6,12 +6,12 @@ import {
 } from "@repo/util-plugin-sdk";
 
 import { RedisConnection } from "bullmq";
-import { it as baseIt } from "vitest";
+import { it as baseIt, vi } from "vitest";
 
 import { mockLogger } from "./create-mock-logger.ts";
 import { createMockPluginSettings } from "./create-mock-plugin-settings.ts";
 
-import type { ApolloServerContext } from "@repo/core-util-mock-graphql-server";
+import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { Telemetry } from "bullmq";
 
 export const it = baseIt
@@ -55,7 +55,7 @@ export const it = baseIt
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");
 
-    const mockServer = await buildMockServer(
+    const mockServer = await buildMockServer<GraphQLContext>(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
       plugin.resolvers as [Function, ...Function[]],
     );
@@ -141,11 +141,13 @@ export const it = baseIt
   )
   .extend(
     "gqlContext",
-    ({ plugin, dataSourceMap }): ApolloServerContext => ({
+    ({ plugin, dataSourceMap }): GraphQLContext => ({
       [plugin.name]: {
         dataSources: dataSourceMap,
       },
-      em: {} as never,
+      logger: {} as never,
+      plugins: {},
+      sendEvent: vi.fn(),
     }),
   );
 

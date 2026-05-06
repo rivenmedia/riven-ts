@@ -1,15 +1,16 @@
 import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
-import { Arg, Ctx, ID, Mutation, Resolver } from "type-graphql";
+import { Arg, ID, Mutation, Resolver } from "type-graphql";
 
-import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
+import { CoreContext } from "../decorators/core-context.ts";
+
 import type { UUID } from "node:crypto";
 
 @Resolver(() => MediaEntry)
 export class MediaEntryResolver {
   @Mutation(() => MediaEntry)
   async saveStreamUrl(
-    @Ctx() { em }: ApolloServerContext,
+    @CoreContext() { em }: CoreContext,
     @Arg("id", () => ID) id: UUID,
     @Arg("url", () => String) url: string,
   ): Promise<MediaEntry> {

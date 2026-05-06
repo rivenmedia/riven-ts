@@ -1,8 +1,4 @@
-import {
-  BaseDataSource,
-  type BasePluginContext,
-  type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
 
 import type {
   FindById200,
@@ -75,5 +71,3 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     });
   }
 }
-
-export type TmdbContextSlice = BasePluginContext;

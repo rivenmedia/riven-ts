@@ -1,8 +1,4 @@
-import {
-  BaseDataSource,
-  type BasePluginContext,
-  type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
 
 import { URL } from "node:url";
 
@@ -131,5 +127,3 @@ export class SubdlAPI extends BaseDataSource<SubdlSettings> {
     return extractSrtFromZip(buffer);
   }
 }
-
-export type SubdlContextSlice = BasePluginContext;

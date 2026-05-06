@@ -8,12 +8,12 @@ import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/ite
 import { WaitingChildrenError } from "bullmq";
 import assert from "node:assert";
 
-import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
 import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
 import { flow } from "../producer.ts";
-import { requestContentServicesProcessorSchema } from "./request-content-services.schema.ts";
+import { enqueueRequestContentService } from "./enqueue-request-content-service.ts";
+import { requestContentServiceProcessorSchema } from "./request-content-service.schema.ts";
 
 function buildExternalIdKey(
   /**
@@ -32,40 +32,33 @@ function buildExternalIdKey(
   return primaryExternalKey ?? imdbKey;
 }
 
-export const requestContentServicesProcessor =
-  requestContentServicesProcessorSchema.implementAsync(
+export const requestContentServiceProcessor =
+  requestContentServiceProcessorSchema.implementAsync(
     async (
       { job, token, signal },
-      { sendEvent, services: { itemRequestService }, plugins },
+      { sendEvent, services: { itemRequestService } },
     ) => {
+      assert(token, "Token is required to create child jobs");
+
+      const parent = createJobParentConfig(job);
+
       switch (job.data.step) {
         case "request": {
-          assert(token, "Token is required to create child jobs");
-
-          const parent = createJobParentConfig(job);
-
-          const subscribers = getPluginEventSubscribers(
-            "riven.content-service.requested",
-            plugins,
+          const childJob = createPluginFlowJob(
+            ContentServiceRequestedEvent,
+            "Request content service",
+            job.data.contentServicePlugin,
+            {},
+            {
+              parent,
+              ignoreDependencyOnFailure: true,
+            },
           );
 
-          const childNodes = subscribers.map((plugin) =>
-            createPluginFlowJob(
-              ContentServiceRequestedEvent,
-              "Request content service",
-              plugin.name.description ?? "unknown",
-              {},
-              {
-                parent,
-                ignoreDependencyOnFailure: true,
-              },
-            ),
-          );
-
-          await flow.addBulk(childNodes);
+          await flow.add(childJob);
 
           logger.silly(
-            `Requesting content from ${subscribers.map((plugin) => plugin.name.description ?? "unknown").join(", ")}.`,
+            `Requesting content from ${job.data.contentServicePlugin}`,
           );
 
           await job.updateData({
@@ -80,41 +73,57 @@ export const requestContentServicesProcessor =
         case "process": {
           const data = await job.getChildrenValues();
 
-          const items = Object.values(data).reduce((acc, childData) => {
-            if (childData.movies.length) {
-              for (const movie of childData.movies) {
-                const key = buildExternalIdKey(movie.tmdbId, movie.imdbId);
+          const { items, updateIntervalSeconds } = Object.values(data).reduce(
+            (acc, childData) => {
+              acc.updateIntervalSeconds ??= childData.updateIntervalSeconds;
 
-                if (!key) {
-                  logger.warn(
-                    `Skipping requested movie with no valid external ID: ${JSON.stringify(movie)}`,
-                  );
+              if (childData.movies.length) {
+                for (const movie of childData.movies) {
+                  const key = buildExternalIdKey(movie.tmdbId, movie.imdbId);
 
-                  continue;
+                  if (!key) {
+                    logger.warn(
+                      `Skipping requested movie with no valid external ID: ${JSON.stringify(movie)}`,
+                    );
+
+                    continue;
+                  }
+
+                  acc.items.set(key, { item: movie, type: "movie" });
                 }
-
-                acc.set(key, { item: movie, type: "movie" });
               }
-            }
 
-            if (childData.shows.length) {
-              for (const show of childData.shows) {
-                const key = buildExternalIdKey(show.tvdbId, show.imdbId);
+              if (childData.shows.length) {
+                for (const show of childData.shows) {
+                  const key = buildExternalIdKey(show.tvdbId, show.imdbId);
 
-                if (!key) {
-                  logger.warn(
-                    `Skipping requested show with no valid external ID: ${JSON.stringify(show)}`,
-                  );
+                  if (!key) {
+                    logger.warn(
+                      `Skipping requested show with no valid external ID: ${JSON.stringify(show)}`,
+                    );
 
-                  continue;
+                    continue;
+                  }
+
+                  acc.items.set(key, { item: show, type: "show" });
                 }
-
-                acc.set(key, { item: show, type: "show" });
               }
-            }
 
-            return acc;
-          }, new Map<string, { item: ContentServiceRequestedResponse["movies" | "shows"][number]; type: "movie" | "show" }>());
+              return acc;
+            },
+            {
+              updateIntervalSeconds: null as number | null,
+              items: new Map<
+                string,
+                {
+                  item: ContentServiceRequestedResponse[
+                    | "movies"
+                    | "shows"][number];
+                  type: "movie" | "show";
+                }
+              >(),
+            },
+          );
 
           let newItemsCount = 0;
           let updatedItemsCount = 0;
@@ -146,6 +155,14 @@ export const requestContentServicesProcessor =
                 sendEvent(error.payload);
               }
             }
+          }
+
+          if (updateIntervalSeconds) {
+            await job.removeDeduplicationKey();
+            await enqueueRequestContentService(
+              job.data.contentServicePlugin,
+              updateIntervalSeconds,
+            );
           }
 
           return {

@@ -960,6 +960,9 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.1(@opentelemetry/api@1.9.0)(@types/node@24.0.0)(msw@2.13.2(@types/node@24.0.0)(typescript@5.9.3))(vite@7.3.0(@types/node@24.0.0)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.2))
+      zod2md:
+        specifier: 'catalog:'
+        version: 0.2.5(zod@4.3.6)
 
   packages/plugin-notifications:
     dependencies:

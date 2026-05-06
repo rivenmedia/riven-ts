@@ -3,7 +3,7 @@ import Fuse from "@zkochan/fuse-native";
 import { createActor, createEmptyActor, fromPromise } from "xstate";
 
 import { it as baseIt } from "../../../../__tests__/test-context.ts";
-import { bootstrapMachine } from "../../index.ts";
+import { type BootstrapMachineInput, bootstrapMachine } from "../../index.ts";
 
 import type {
   InitialiseVfsInput,
@@ -15,9 +15,13 @@ import type {
 } from "../../actors/start-gql-server.actor.ts";
 
 export const it = baseIt
-  .extend("input", () => ({
-    rootRef: createEmptyActor(),
-  }))
+  .extend(
+    "input",
+    (): BootstrapMachineInput => ({
+      rootRef: createEmptyActor(),
+      mainRunnerRef: createEmptyActor(),
+    }),
+  )
 
   .extend(
     "initialiseDatabaseConnectionActorLogic",

@@ -25,8 +25,8 @@ export const shutdown = fromPromise<undefined, ShutdownInput>(
       },
     } = mainRunnerRef.getSnapshot();
 
-    const flowWorkers = Object.values(flowWorkerMap);
-    const sandboxedWorkers = Object.values(sandboxedWorkerMap);
+    const flowWorkers = Object.values(flowWorkerMap ?? {});
+    const sandboxedWorkers = Object.values(sandboxedWorkerMap ?? {});
 
     // Pause queues first to prevent them from picking up more jobs whilst we are shutting down
     await Promise.all(flowWorkers.map(({ queue }) => queue.pause()));

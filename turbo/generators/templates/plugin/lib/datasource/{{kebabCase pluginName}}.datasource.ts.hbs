@@ -1,4 +1,4 @@
-import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { {{pascalCase pluginName}}Settings } from "../{{kebabCase pluginName}}-settings.schema.ts";
 
@@ -19,5 +19,3 @@ export class {{pascalCase pluginName}}API extends BaseDataSource<{{pascalCase pl
     }
   }
 }
-
-export type {{pascalCase pluginName}}ContextSlice = BasePluginContext

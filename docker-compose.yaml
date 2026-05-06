@@ -37,6 +37,14 @@ services:
       - services
       - analytics
 
+  redis-insight:
+    extends:
+      file: ./apps/riven/docker-compose.yaml
+      service: redis-insight
+    profiles:
+      - all
+      - analytics
+
   bullboard:
     container_name: bullboard
     image: venatum/bull-board

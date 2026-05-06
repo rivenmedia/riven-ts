@@ -1,6 +1,5 @@
 import {
   BaseDataSource,
-  type BasePluginContext,
   type ParamsFor,
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
@@ -167,5 +166,3 @@ export class CometAPI extends BaseDataSource<CometSettings> {
     throw new Error("Unsupported media item type for Comet identifier");
   }
 }
-
-export type CometContextSlice = BasePluginContext;

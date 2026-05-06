@@ -1,8 +1,4 @@
-import {
-  BaseDataSource,
-  type BasePluginContext,
-  type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
 
 import { MetadataSettingsResponse } from "../schemas/metadata-settings-response.schema.ts";
 import { RequestResponse } from "../schemas/request-response.schema.ts";
@@ -51,7 +47,9 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     }
   }
 
-  async getContent(filter: string): Promise<ContentServiceRequestedResponse> {
+  async getContent(
+    filter: string,
+  ): Promise<Pick<ContentServiceRequestedResponse, "movies" | "shows">> {
     const requests = await this.#getAllRequests(filter);
     const movieMap = new Map<
       number,
@@ -156,5 +154,3 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     }
   }
 }
-
-export type SeerrContextSlice = BasePluginContext;

@@ -1,6 +1,5 @@
 import {
   BaseDataSource,
-  type BasePluginContext,
   type ParamsFor,
   type RateLimiterOptions,
   getStremioScrapeConfig,
@@ -112,5 +111,3 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
     }
   }
 }
-
-export type TorrentioContextSlice = BasePluginContext;
