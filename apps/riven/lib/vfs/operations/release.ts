@@ -21,13 +21,17 @@ async function release(fd: number) {
 
   if (response?.body) {
     try {
-      response.body.destroy();
+      await response.body.dump();
     } catch (error) {
       if (error instanceof Undici.errors.RequestAbortedError) {
         /*
          * Intentionally squash AbortError exceptions as they are
          * expected to occur when aborting an in-flight request.
          */
+
+        logger.data(
+          "Caught and squashed expected Undici RequestAbortedError during release",
+        );
       } else {
         throw error;
       }
