@@ -7,6 +7,9 @@ import {
   withLogContext,
 } from "./utilities/logger/log-context.ts";
 
+import type { rivenMachine } from "./state-machines/program/index.ts";
+import type { ActorRefFromLogic } from "xstate";
+
 const sessionId = SessionID.parse(randomUUID());
 
 setEnvironmentData("riven.session.id", sessionId);
@@ -16,6 +19,25 @@ const baseLogContext: LogContext = {
   "riven.session.id": sessionId,
 };
 
+/**
+ * Conditionally sends a shutdown event to the program state machine if it's in a state that can be shutdown.
+ *
+ * @param actor The program state machine
+ * @returns true if a shutdown event was sent, otherwise false
+ */
+function maybeSendShutdownEvent(actor: ActorRefFromLogic<typeof rivenMachine>) {
+  const { value } = actor.getSnapshot();
+  const stoppableStates: (typeof value)[] = ["Running", "Bootstrapping"];
+
+  if (stoppableStates.includes(value)) {
+    actor.send({ type: "riven.core.shutdown" });
+
+    return true;
+  }
+
+  return false;
+}
+
 await withLogContext(baseLogContext, async () => {
   await import("./sentry.ts");
 
@@ -24,11 +46,36 @@ await withLogContext(baseLogContext, async () => {
   const { rivenMachine } = await import("./state-machines/program/index.ts");
   const { logger } = await import("./utilities/logger/logger.ts");
 
+  const actor = createActor(rivenMachine, {
+    input: {
+      sessionId,
+    },
+  });
+
   process.on("uncaughtException", (error) => {
+    process.exitCode = 1;
+
     withLogContext(baseLogContext, () => {
       logger.error("Uncaught exception", { err: error });
 
-      process.exit(1);
+      if (maybeSendShutdownEvent(actor)) {
+        const signal = AbortSignal.timeout(10_000);
+
+        signal.addEventListener("abort", () => {
+          logger.error("Timeout whilst waiting for shutdown; forcing exit");
+
+          process.exit();
+        });
+
+        waitFor(
+          actor,
+          (state) => state.matches("Exited") || state.matches("Errored"),
+        ).catch((error: unknown) => {
+          logger.error("Error while waiting for shutdown", { err: error });
+
+          process.exit();
+        });
+      }
     });
   });
 
@@ -38,21 +85,10 @@ await withLogContext(baseLogContext, async () => {
     });
   });
 
-  const actor = createActor(rivenMachine, {
-    input: {
-      sessionId,
-    },
-  });
-
   actor.start();
 
   process.on("SIGINT", () => {
-    const { value } = actor.getSnapshot();
-    const stoppableStates: (typeof value)[] = ["Running", "Bootstrapping"];
-
-    if (stoppableStates.includes(value)) {
-      actor.send({ type: "riven.core.shutdown" });
-    }
+    maybeSendShutdownEvent(actor);
   });
 
   await waitFor(
@@ -63,10 +99,8 @@ await withLogContext(baseLogContext, async () => {
   const { value } = actor.getSnapshot();
 
   if (value === "Errored") {
-    process.exit(1);
+    process.exitCode = 1;
   }
 
-  logger.info("Riven has shut down");
-
-  process.exit(0);
+  process.exit();
 });

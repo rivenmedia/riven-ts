@@ -1,4 +1,5 @@
 import { Duration } from "@repo/util-plugin-sdk/helpers/dates";
+import { json } from "@repo/util-plugin-sdk/validation";
 
 import z from "zod";
 
@@ -19,9 +20,7 @@ export const SeerrSettings = z.object({
     .describe(
       "Request status filter (all, approved, available, pending, processing, ...)",
     ),
-  updateIntervalSeconds: z
-    .int()
-    .nonnegative()
+  updateIntervalSeconds: json(z.int().nonnegative().nullable())
     .nullable()
     .default(Duration.fromObject({ minutes: 1 }).as("seconds"))
     .describe(
