@@ -10,5 +10,5 @@ export const createInternalEventSchema = <
 ) =>
   z.object({
     ...payloadSchema.shape,
-    type: z.literal(`riven-internal.${type}`),
+    type: z.literal(`riven-internal/${type}`),
   });

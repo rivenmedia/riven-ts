@@ -6,7 +6,7 @@ import { expect, vi } from "vitest";
 import { it } from "../../../../../__tests__/test-context.ts";
 import { downloadItemProcessor } from "./download-item.processor.ts";
 
-it('sends a "riven.media-item.download.success" event with the updated item and duration from request to download if the download result is valid', async ({
+it('sends a "riven/media-item.download.success" event with the updated item and duration from request to download if the download result is valid', async ({
   scrapedMovieContext: { scrapedMovie },
   createMockJob,
   mockSentryScope,
@@ -56,7 +56,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   );
 
   expect(sendEvent).toHaveBeenCalledWith({
-    type: "riven.media-item.download.success",
+    type: "riven/media-item.download.success",
     item: expect.any(Movie),
     durationMs: 9000,
     downloader: "@repo/plugin-test",
@@ -64,7 +64,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   });
 });
 
-it('sends a "riven.media-item.download.partial-success" event with the updated item if the download result is valid but does not contain all episodes', async ({
+it('sends a "riven/media-item.download.partial-success" event with the updated item if the download result is valid but does not contain all episodes', async ({
   createMockJob,
   scrapedShowContext: { scrapedShow },
   mockSentryScope,
@@ -125,13 +125,13 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
   );
 
   expect(sendEvent).toHaveBeenCalledWith({
-    type: "riven.media-item.download.partial-success",
+    type: "riven/media-item.download.partial-success",
     item: expect.any(Show),
     downloader: "@repo/plugin-test",
   });
 });
 
-it('sends a "riven.media-item.download.error" event if no valid torrent is found', async ({
+it('sends a "riven/media-item.download/error" event if no valid torrent is found', async ({
   createMockJob,
   scrapedMovieContext: { scrapedMovie },
   mockSentryScope,
@@ -158,7 +158,7 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
   });
 
   expect(sendEvent).toHaveBeenCalledWith({
-    type: "riven.media-item.download.error",
+    type: "riven/media-item.download/error",
     item: expect.any(Movie),
     error: expect.any(Error),
   });

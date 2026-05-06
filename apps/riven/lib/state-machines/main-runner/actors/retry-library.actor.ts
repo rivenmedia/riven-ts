@@ -40,7 +40,7 @@ export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
 
       for (const request of pendingRequests) {
         parentRef.send({
-          type: `riven.media-item.index.requested.${request.type}`,
+          type: `riven/media-item.index.requested.${request.type}`,
           item: request,
         });
       }
@@ -50,7 +50,7 @@ export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
           case "partially_completed":
           case "indexed": {
             parentRef.send({
-              type: "riven.media-item.scrape.requested",
+              type: "riven/media-item.scrape.requested",
               item,
             });
 
@@ -58,7 +58,7 @@ export const retryLibrary = fromPromise<undefined, RetryLibraryActorInput>(
           }
           case "scraped": {
             parentRef.send({
-              type: "riven-internal.retry-item-download",
+              type: "riven-internal/retry-item-download",
               item,
             });
 

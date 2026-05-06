@@ -23,7 +23,7 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
   await waitFor(actor, (state) => state.matches("Running"));
 
   actor.send({
-    type: "riven.media-item.download.error",
+    type: "riven/media-item.download/error",
     item: scrapedShow,
     error: "No valid torrents found",
   });
@@ -59,7 +59,7 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
   await waitFor(actor, (state) => state.matches("Running"));
 
   actor.send({
-    type: "riven.media-item.download.error",
+    type: "riven/media-item.download/error",
     item: failedSeason,
     error: "No valid torrents found",
   });

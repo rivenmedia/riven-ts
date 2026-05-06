@@ -18,7 +18,7 @@ export const requestItem = fromPromise<undefined, RequestItemInput>(
       );
 
       input.parentRef.send({
-        type: "riven.item-request.create.success",
+        type: "riven/item-request.create.success",
         item: itemRequest.item,
       });
     }
@@ -29,7 +29,7 @@ export const requestItem = fromPromise<undefined, RequestItemInput>(
       );
 
       input.parentRef.send({
-        type: "riven.item-request.create.success",
+        type: "riven/item-request.create.success",
         item: itemRequest.item,
       });
     }

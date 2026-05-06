@@ -2,14 +2,14 @@ import z from "zod";
 
 import { ItemRequestInstance } from "../media/item-request-instance.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
+import { createProgramEventErrorSchema } from "../utilities/create-program-event-error-schema.ts";
 import { createProgramEventError } from "../utilities/create-program-event-error.ts";
-import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
 /**
  * Event emitted when there was an error persisting media item index data.
  */
-export const MediaItemIndexErrorEvent = createProgramEventSchema(
-  "media-item.index.error",
+export const MediaItemIndexErrorEvent = createProgramEventErrorSchema(
+  "media-item.index",
   z.object({
     item: ItemRequestInstance,
     error: z.unknown(),

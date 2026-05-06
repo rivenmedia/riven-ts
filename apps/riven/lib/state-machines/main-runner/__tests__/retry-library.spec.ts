@@ -5,7 +5,7 @@ import { waitFor } from "xstate";
 
 import { it } from "./helpers/test-context.ts";
 
-it.skip('sends a "riven.media-item.index.requested" event for each incomplete item request in the database', async ({
+it.skip('sends a "riven/media-item.index.requested" event for each incomplete item request in the database', async ({
   actor,
   em,
   factories: { showItemRequestFactory, movieItemRequestFactory },
@@ -31,12 +31,12 @@ it.skip('sends a "riven.media-item.index.requested" event for each incomplete it
 
   await waitFor(actor, (state) => state.matches("Running"));
 
-  actor.send({ type: "riven-internal.retry-library" });
+  actor.send({ type: "riven-internal/retry-library" });
 
   for (const item of items) {
     await vi.waitFor(() => {
       expect(actor).toHaveReceivedEvent({
-        type: `riven.media-item.index.requested.${item.type}`,
+        type: `riven/media-item.index.requested.${item.type}`,
         item: expect.objectContaining({
           id: item.id,
           imdbId: item.imdbId,
@@ -48,7 +48,7 @@ it.skip('sends a "riven.media-item.index.requested" event for each incomplete it
 });
 
 it.todo(
-  'does not send a "riven.media-item.index.requested" event for completed item requests',
+  'does not send a "riven/media-item.index.requested" event for completed item requests',
 );
 
 it.todo('requests a scrape for each media item in the "Indexed" state');

@@ -209,7 +209,7 @@ export const it = testBase
       await import("@repo/core-util-mock-graphql-server");
     const { resolvers } = await import("../graphql/resolvers/index.ts");
 
-    return buildMockServer(resolvers);
+    return buildMockServer<ApolloServerContext>(resolvers);
   })
   .extend(
     "gqlServer",

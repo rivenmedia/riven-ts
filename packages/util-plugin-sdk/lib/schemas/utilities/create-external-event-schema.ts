@@ -10,5 +10,5 @@ export const createExternalEventSchema = <
 ) =>
   z.object({
     ...payloadSchema.shape,
-    type: z.literal(`riven-external.${type}`),
+    type: z.literal(`riven-external/${type}`),
   });

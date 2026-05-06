@@ -15,7 +15,7 @@ export default {
   dataSources: [PlexAPI],
   resolvers: [PlexResolver, PlexSettingsResolver],
   hooks: {
-    "riven.media-item.download.success": async ({
+    "riven/media-item.download.success": async ({
       dataSources,
       event,
       logger,

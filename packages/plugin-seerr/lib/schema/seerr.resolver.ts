@@ -59,7 +59,7 @@ export class SeerrResolver {
     };
 
     sendEvent({
-      type: "riven-external.item-requested",
+      type: "riven-external/item-requested",
       item: {
         ...commonFields,
         ...(parsedInput.media.media_type === "movie"

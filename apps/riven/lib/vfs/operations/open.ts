@@ -121,7 +121,7 @@ async function serveMediaFile(
 
       const job = await requestQueue.add(
         entry.id,
-        serialiseEventData("riven.media-item.stream-link.requested", {
+        serialiseEventData("riven/media-item.stream-link.requested", {
           item: entry,
         }) as ParamsFor<MediaItemStreamLinkRequestedEvent>,
       );

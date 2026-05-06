@@ -15,7 +15,7 @@ export default {
   dataSources: [StremThruTorzAPI, StremThruTorznabAPI],
   resolvers: [StremThruResolver, StremThruSettingsResolver],
   hooks: {
-    "riven.media-item.download.requested": async ({
+    "riven/media-item.download.requested": async ({
       dataSources,
       event: { infoHash, provider: rawStore },
     }) => {
@@ -32,7 +32,7 @@ export default {
         );
       }
     },
-    "riven.media-item.download.cache-check-requested": async ({
+    "riven/media-item.download.cache-check-requested": async ({
       dataSources,
       event: { infoHashes, provider: rawStore },
     }) => {
@@ -50,7 +50,7 @@ export default {
       }
     },
     // eslint-disable-next-line @typescript-eslint/require-await
-    "riven.media-item.download.provider-list-requested": async ({
+    "riven/media-item.download.provider-list-requested": async ({
       settings,
     }) => {
       const stremthruSettings = settings.get(StremThruSettings);
@@ -74,7 +74,7 @@ export default {
         providers: enabledProviders,
       };
     },
-    "riven.media-item.scrape.requested": async ({ dataSources, event }) => {
+    "riven/media-item.scrape.requested": async ({ dataSources, event }) => {
       const api = dataSources.get(StremThruTorznabAPI);
       const results = await api.scrape(event);
 
@@ -83,7 +83,7 @@ export default {
         results,
       };
     },
-    "riven.media-item.stream-link.requested": async ({
+    "riven/media-item.stream-link.requested": async ({
       dataSources,
       event,
     }) => {

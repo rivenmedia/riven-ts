@@ -18,7 +18,7 @@ export default {
   dataSources: [SubdlAPI],
   resolvers: [SubdlResolver, SubdlSettingsResolver],
   hooks: {
-    "riven.media-item.subtitle.requested": async ({
+    "riven/media-item.subtitle.requested": async ({
       dataSources,
       event: { item },
       settings,

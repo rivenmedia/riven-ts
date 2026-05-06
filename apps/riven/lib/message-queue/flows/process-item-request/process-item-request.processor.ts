@@ -34,7 +34,7 @@ export const processItemRequestProcessor =
         );
 
         const subscribers = getPluginEventSubscribers(
-          `riven.media-item.index.requested.${itemRequest.type}`,
+          `riven/media-item.index.requested.${itemRequest.type}`,
           plugins,
         );
 
@@ -97,7 +97,7 @@ export const processItemRequestProcessor =
           const updatedItem = await indexerService.indexItem(item);
 
           sendEvent({
-            type: "riven.media-item.index.success",
+            type: "riven/media-item.index.success",
             item: updatedItem,
           });
         } catch (error) {

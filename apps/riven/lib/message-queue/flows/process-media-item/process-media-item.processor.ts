@@ -62,7 +62,7 @@ export const processMediaItemProcessor =
             await enqueueScrapeItems({
               items: [itemToScrape],
               subscribers: getPluginEventSubscribers(
-                "riven.media-item.scrape.requested",
+                "riven/media-item.scrape.requested",
                 plugins,
               ),
               parent,

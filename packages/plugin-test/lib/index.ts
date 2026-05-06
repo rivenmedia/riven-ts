@@ -14,10 +14,10 @@ export default {
   dataSources: [TestAPI],
   resolvers: [TestResolver, TestSettingsResolver],
   hooks: {
-    "riven.core.started": async () => {},
-    "riven.item-request.create.error.conflict": async () => {},
-    "riven.item-request.create.error": async () => {},
-    "riven.item-request.create.success": async () => {},
+    "riven/core.started": async () => {},
+    "riven/item-request.create/error.conflict": async () => {},
+    "riven/item-request.create/error": async () => {},
+    "riven/item-request.create.success": async () => {},
   },
   settingsSchema: TestSettings,
   validator() {
