@@ -73,9 +73,9 @@ export const requestContentServiceProcessor =
         case "process": {
           const data = await job.getChildrenValues();
 
-          const { items, requestInterval } = Object.values(data).reduce(
+          const { items, updateIntervalSeconds } = Object.values(data).reduce(
             (acc, childData) => {
-              acc.requestInterval ??= childData.requestInterval;
+              acc.updateIntervalSeconds ??= childData.updateIntervalSeconds;
 
               if (childData.movies.length) {
                 for (const movie of childData.movies) {
@@ -112,7 +112,7 @@ export const requestContentServiceProcessor =
               return acc;
             },
             {
-              requestInterval: null as number | null,
+              updateIntervalSeconds: null as number | null,
               items: new Map<
                 string,
                 {
@@ -157,11 +157,11 @@ export const requestContentServiceProcessor =
             }
           }
 
-          if (requestInterval) {
+          if (updateIntervalSeconds) {
             await job.removeDeduplicationKey();
             await enqueueRequestContentService(
               job.data.contentServicePlugin,
-              requestInterval,
+              updateIntervalSeconds,
             );
           }
 

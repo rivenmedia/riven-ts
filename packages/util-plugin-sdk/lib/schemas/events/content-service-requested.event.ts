@@ -17,7 +17,6 @@ export type ContentServiceRequestedEvent = z.infer<
 >;
 
 export const ContentServiceRequestedResponse = z.object({
-  requestInterval: z.int().nonnegative().nullable(),
   movies: z.array(
     ItemRequest.pick({
       imdbId: true,
@@ -41,6 +40,7 @@ export const ContentServiceRequestedResponse = z.object({
       "At least one identifier is required",
     ),
   ),
+  updateIntervalSeconds: z.int().nonnegative().nullable(),
 });
 
 export type ContentServiceRequestedResponse = z.infer<

@@ -3,7 +3,7 @@ import { createRequestContentServiceJob } from "./request-content-service.schema
 
 export function enqueueRequestContentService(
   contentServicePlugin: string,
-  delay?: number,
+  delaySeconds?: number,
 ) {
   const job = createRequestContentServiceJob(
     `Request content: ${contentServicePlugin}`,
@@ -13,7 +13,7 @@ export function enqueueRequestContentService(
     },
     {
       opts: {
-        ...(delay && { delay }),
+        ...(delaySeconds && { delay: delaySeconds * 1000 }),
         deduplication: {
           id: `request-content-service-${contentServicePlugin}`,
         },

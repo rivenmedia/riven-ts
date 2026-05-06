@@ -14,13 +14,14 @@ export default {
   dataSources: [ListrrAPI],
   hooks: {
     "riven.content-service.requested": async ({ dataSources, settings }) => {
-      const { movieLists, showLists } = settings.get(ListrrSettings);
+      const { movieLists, showLists, updateIntervalSeconds } =
+        settings.get(ListrrSettings);
       const api = dataSources.get(ListrrAPI);
 
       return {
         movies: await api.getMovies(new Set(movieLists)),
         shows: await api.getShows(new Set(showLists)),
-        requestInterval: 1000 * 60 * 60,
+        updateIntervalSeconds,
       };
     },
   },
