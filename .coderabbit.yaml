@@ -1,0 +1,4 @@
+reviews:
+  profile: chill
+  path_filters:
+    - "!packages/plugin-*/openapi-schema.*"
