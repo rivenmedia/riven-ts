@@ -1,4 +1,3 @@
-import { Movie, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 import { settings } from "../../../../../utilities/settings.ts";
@@ -14,12 +13,14 @@ export interface EnqueueScrapeItemInput {
   items: MediaItemScrapeRequestedEvent["item"][];
   subscribers: RivenPlugin[];
   parent: ParentOptions;
+  isRootItem: boolean;
 }
 
 export function enqueueScrapeItems({
   items,
   subscribers,
   parent,
+  isRootItem,
 }: EnqueueScrapeItemInput) {
   const nodes = items.map((item) => {
     const childNodes = subscribers.map((plugin) =>
@@ -32,10 +33,9 @@ export function enqueueScrapeItems({
       ),
     );
 
-    const shouldReattemptOnFailure =
-      item instanceof Movie ||
-      (settings.preferSeasonPacks && item instanceof Season) ||
-      (!settings.preferSeasonPacks && item instanceof Show);
+    const attempts = isRootItem
+      ? settings.maximumScrapeAttempts - item.failedScrapeAttempts
+      : 1;
 
     return createScrapeItemJob(
       `Scraping ${item.fullTitle}`,
@@ -59,9 +59,7 @@ export function enqueueScrapeItems({
         opts: {
           parent,
           continueParentOnFailure: true,
-          attempts: shouldReattemptOnFailure
-            ? settings.maximumScrapeAttempts - item.failedScrapeAttempts
-            : 1,
+          attempts,
           backoff: {
             type: "custom",
           },

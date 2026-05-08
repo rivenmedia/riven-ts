@@ -71,6 +71,7 @@ export async function persistShowIndexerData(
   }
 
   try {
+    const indexedAt = DateTime.utc().toJSDate();
     const show = em.create(Show, {
       title: item.title,
       fullTitle: item.title,
@@ -88,9 +89,10 @@ export async function persistShowIndexerData(
       aliases: item.aliases,
       genres: item.genres.map((genre) => genre.toLowerCase()),
       nextAirDate: null, // Reset the next air date; it will be recalculated during episode processing
+      indexedAt,
     });
 
-    await em.upsert(show);
+    await em.upsert(Show, show, { onConflictExcludeFields: ["indexedAt"] });
 
     for (const season of Object.values(item.seasons)) {
       const seasonTitle = [
@@ -115,11 +117,14 @@ export async function persistShowIndexerData(
           ? itemRequest.seasons.includes(season.number)
           : season.number > 0,
         itemRequest,
+        indexedAt,
       });
 
       show.seasons.add(seasonEntry);
 
-      await em.upsert(seasonEntry);
+      await em.upsert(Season, seasonEntry, {
+        onConflictExcludeFields: ["indexedAt"],
+      });
 
       for (const episode of season.episodes) {
         const episodeEntry = em.create(Episode, {
@@ -136,6 +141,7 @@ export async function persistShowIndexerData(
           imdbId: seasonEntry.imdbId ?? null,
           isRequested: seasonEntry.isRequested,
           itemRequest,
+          indexedAt,
         });
 
         if (
@@ -146,12 +152,16 @@ export async function persistShowIndexerData(
         ) {
           show.nextAirDate = episodeEntry.releaseDate;
 
-          await em.upsert(show);
+          await em.upsert(Show, show, {
+            onConflictExcludeFields: ["indexedAt"],
+          });
         }
 
         seasonEntry.episodes.add(episodeEntry);
 
-        await em.upsert(episodeEntry);
+        await em.upsert(Episode, episodeEntry, {
+          onConflictExcludeFields: ["indexedAt"],
+        });
       }
     }
 

@@ -50,6 +50,7 @@ export const processMediaItemProcessor =
                 plugins,
               ),
               parent,
+              isRootItem: job.data.isRootItem,
             });
 
             await job.updateData({
@@ -64,9 +65,11 @@ export const processMediaItemProcessor =
             break;
           }
           case "validate-scrape": {
-            const childFailures = await job.getIgnoredChildrenFailures();
+            const { failed = 0 } = await job.getDependenciesCount({
+              ignored: true,
+            });
 
-            if (Object.keys(childFailures).length) {
+            if (failed > 0) {
               if (job.data.isRootItem) {
                 // If the root item got to this point, it has exhausted all scraping attempts.
                 throw new UnrecoverableError(
@@ -110,9 +113,11 @@ export const processMediaItemProcessor =
             break;
           }
           case "validate-download": {
-            const childFailures = await job.getIgnoredChildrenFailures();
+            const { failed = 0 } = await job.getDependenciesCount({
+              ignored: true,
+            });
 
-            if (Object.keys(childFailures).length) {
+            if (failed > 0) {
               const nextScrapeAttemptTimestamp = DateTime.utc().plus({
                 minutes: 30,
               });
