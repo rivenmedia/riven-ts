@@ -65,11 +65,11 @@ export const processMediaItemProcessor =
             break;
           }
           case "validate-scrape": {
-            const { failed = 0 } = await job.getDependenciesCount({
+            const { ignored = 0 } = await job.getDependenciesCount({
               ignored: true,
             });
 
-            if (failed > 0) {
+            if (ignored > 0) {
               if (job.data.isRootItem) {
                 // If the root item got to this point, it has exhausted all scraping attempts.
                 throw new UnrecoverableError(
@@ -113,11 +113,11 @@ export const processMediaItemProcessor =
             break;
           }
           case "validate-download": {
-            const { failed = 0 } = await job.getDependenciesCount({
+            const { ignored = 0 } = await job.getDependenciesCount({
               ignored: true,
             });
 
-            if (failed > 0) {
+            if (ignored > 0) {
               const nextScrapeAttemptTimestamp = DateTime.utc().plus({
                 minutes: 30,
               });
