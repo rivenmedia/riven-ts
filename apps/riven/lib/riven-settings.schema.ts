@@ -87,6 +87,7 @@ export const RivenSettings = z.object({
     .stringbool()
     .default(true)
     .describe("Whether to show detailed stack traces when logging errors"),
+  gqlHost: z.string().default("localhost").describe("The GraphQL server host."),
   gqlPort: z.coerce
     .number()
     .int()

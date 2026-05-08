@@ -78,6 +78,7 @@ export const startGqlServer = fromPromise<
 
   const { url } = await startStandaloneServer(server, {
     listen: {
+      host: settings.gqlHost,
       port: settings.gqlPort,
     },
     context: buildContextFunction(sendEvent),
