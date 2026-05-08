@@ -26,7 +26,10 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
 
     for (const item of itemsToProcess) {
       await enqueueProcessMediaItem(
-        { id: item.id },
+        {
+          id: item.id,
+          isRootItem: false,
+        },
         {
           // Insert at the front of the queue to process
           // the fanned-out items after the parent item

@@ -20,6 +20,7 @@ export const ProcessMediaItemFlow = createFlowSchema("process-media-item", {
       type: MediaItemType,
       fullTitle: z.string(),
     }),
+    isRootItem: z.boolean(),
   }),
 });
 

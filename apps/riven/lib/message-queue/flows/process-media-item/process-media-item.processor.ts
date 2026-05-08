@@ -67,8 +67,17 @@ export const processMediaItemProcessor =
             const childFailures = await job.getIgnoredChildrenFailures();
 
             if (Object.keys(childFailures).length) {
+              if (job.data.isRootItem) {
+                // If the root item got to this point, it has exhausted all scraping attempts.
+                throw new UnrecoverableError(
+                  `${chalk.bold(job.data.mediaItem.fullTitle)} failed to scrape after all attempts`,
+                );
+              }
+
+              // For child items, we only try once, as they are enqueued as part of a fan-out process.
+              // If they fail, the parent will retry in the future and recreate the child attempts.
               throw new UnrecoverableError(
-                `${chalk.bold(job.data.mediaItem.fullTitle)} failed to scrape after all attempts`,
+                `${chalk.bold(job.data.mediaItem.fullTitle)} failed to download`,
               );
             }
 
@@ -176,12 +185,12 @@ export const processMediaItemProcessor =
         const showIncompleteItems = await show.getIncompleteItems();
 
         if (showIncompleteItems.length === 0) {
+          const showUnrequestedItems = await show.getUnrequestedItems();
+          const hasUnrequestedItems = showUnrequestedItems.length > 0;
+
           if (show.state === "ongoing") {
             const { reindexTime } =
               await indexerService.calculateReindexTime(show);
-
-            const showUnrequestedItems = await show.getUnrequestedItems();
-            const hasUnrequestedItems = showUnrequestedItems.length > 0;
 
             const nextAirDateMessage = show.nextAirDate
               ? `New episodes will ${hasUnrequestedItems ? "be indexed" : "attempt to be downloaded"} at ${chalk.bold(reindexTime.toLocaleString(DateTime.DATETIME_SHORT))}.`
@@ -194,7 +203,9 @@ export const processMediaItemProcessor =
             );
           } else {
             logger.info(
-              chalk.greenBright(`${chalk.bold(show.fullTitle)} downloaded`),
+              chalk.greenBright(
+                `${chalk.bold(show.fullTitle)} successfully downloaded${hasUnrequestedItems ? " all requested episodes" : ""}.`,
+              ),
             );
           }
         }
