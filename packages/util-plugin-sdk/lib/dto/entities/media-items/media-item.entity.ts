@@ -71,8 +71,9 @@ export abstract class MediaItem {
   updatedAt?: Opt<Date> | null;
 
   @Field(() => Date, { nullable: true })
-  @Property()
-  indexedAt?: Date | null;
+  get indexedAt(): Date | null {
+    return this.createdAt;
+  }
 
   @Field(() => Date, { nullable: true })
   @Property()

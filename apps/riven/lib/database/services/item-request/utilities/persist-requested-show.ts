@@ -52,6 +52,8 @@ export async function persistRequestedShow(
       : (item.seasons ?? existingItem?.seasons ?? null);
 
   if (existingItem && itemRequest.seasons) {
+    existingItem.state = "requested_additional_seasons";
+
     const linkedItemsToProcess = await existingItem.seasonItems.matching({
       where: {
         isRequested: false,
@@ -63,6 +65,12 @@ export async function persistRequestedShow(
 
     for (const linkedItem of linkedItemsToProcess) {
       linkedItem.isRequested = true;
+
+      const episodes = await linkedItem.episodes.loadItems();
+
+      for (const episode of episodes) {
+        episode.isRequested = true;
+      }
 
       em.persist(linkedItem);
     }

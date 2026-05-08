@@ -1,3 +1,4 @@
+import { Movie, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 import { settings } from "../../../../../utilities/settings.ts";
@@ -31,8 +32,10 @@ export function enqueueScrapeItems({
       ),
     );
 
-    const remainingScrapeAttempts =
-      settings.maximumScrapeAttempts - item.failedScrapeAttempts;
+    const shouldReattemptOnFailure =
+      item instanceof Movie ||
+      (settings.preferSeasonPacks && item instanceof Season) ||
+      (!settings.preferSeasonPacks && item instanceof Show);
 
     return createScrapeItemJob(
       `Scraping ${item.fullTitle}`,
@@ -45,13 +48,20 @@ export function enqueueScrapeItems({
               id: item.id,
               title: item.fullTitle,
             },
-            { children: childNodes },
+            {
+              children: childNodes,
+              opts: {
+                ignoreDependencyOnFailure: true,
+              },
+            },
           ),
         ],
         opts: {
           parent,
           continueParentOnFailure: true,
-          attempts: remainingScrapeAttempts,
+          attempts: shouldReattemptOnFailure
+            ? settings.maximumScrapeAttempts - item.failedScrapeAttempts
+            : 1,
           backoff: {
             type: "custom",
           },

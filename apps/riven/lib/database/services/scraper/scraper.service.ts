@@ -121,6 +121,7 @@ export class ScraperService extends BaseService {
         return {
           item: error.payload.item,
           newStreamsCount: 0,
+          error,
         };
       }
 

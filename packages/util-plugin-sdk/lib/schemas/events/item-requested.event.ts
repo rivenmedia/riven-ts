@@ -11,10 +11,10 @@ export const ItemRequestedEvent = createExternalEventSchema(
   "item-requested",
   z.object({
     item: z.discriminatedUnion("type", [
-      ContentServiceRequestedResponse.shape.movies.element.extend({
+      ContentServiceRequestedResponse.shape.movies.element.safeExtend({
         type: z.literal("movie"),
       }),
-      ContentServiceRequestedResponse.shape.shows.element.extend({
+      ContentServiceRequestedResponse.shape.shows.element.safeExtend({
         type: z.literal("show"),
       }),
     ]),

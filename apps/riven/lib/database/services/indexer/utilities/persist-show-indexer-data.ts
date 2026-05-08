@@ -29,6 +29,7 @@ export async function persistShowIndexerData(
 
   const processableStates = ItemRequestState.extract([
     "requested",
+    "requested_additional_seasons",
     "ongoing",
     "unreleased",
   ]);
@@ -47,10 +48,16 @@ export async function persistShowIndexerData(
     { populate: ["$infer"] },
   );
 
-  if (existingShow?.status === "ended") {
+  if (itemRequest.state === "requested_additional_seasons") {
+    itemRequest.state = "completed";
+
+    return existingShow;
+  }
+
+  if (existingShow?.status === "ended" && itemRequest.state === "completed") {
     throw new MediaItemIndexError({
       item: itemRequest,
-      error: `${existingShow.fullTitle} has already ended and will not be re-indexed.`,
+      error: `${existingShow.fullTitle} has already been ingested and will not be re-indexed.`,
     });
   }
 
@@ -150,12 +157,23 @@ export async function persistShowIndexerData(
 
     await validateOrReject(show);
 
+    const isPartialRequest = itemRequest.seasons
+      ? itemRequest.seasons.length > 0 &&
+        itemRequest.seasons.length <
+          show.seasons.filter((season) => !season.isSpecial).length
+      : false;
+
     em.assign(itemRequest, {
       state: !show.isReleased
         ? "unreleased"
         : item.status === "continuing"
           ? "ongoing"
           : "completed",
+      ...(!isPartialRequest && {
+        // If the request is not a partial request, clear the seasons filter.
+        // This allows future re-indexing to attempt downloads without user input.
+        seasons: null,
+      }),
     });
 
     return show;
