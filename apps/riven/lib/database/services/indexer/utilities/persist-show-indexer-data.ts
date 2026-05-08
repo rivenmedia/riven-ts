@@ -164,11 +164,9 @@ export async function persistShowIndexerData(
       : false;
 
     em.assign(itemRequest, {
-      state: !show.isReleased
-        ? "unreleased"
-        : item.status === "continuing"
-          ? "ongoing"
-          : "completed",
+      // Fill in any missing external IDs
+      imdbId: itemRequest.imdbId ?? show.imdbId ?? null,
+      tvdbId: itemRequest.tvdbId ?? show.tvdbId,
       ...(!isPartialRequest && {
         // If the request is not a partial request, clear the seasons filter.
         // This allows future re-indexing to attempt downloads without user input.

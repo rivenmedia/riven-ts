@@ -71,6 +71,15 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
           show.releaseDate = season.releaseDate;
           show.year = DateTime.fromJSDate(season.releaseDate).year;
 
+          const itemRequest = await show.itemRequest.loadOrFail();
+
+          itemRequest.state = !show.isReleased
+            ? "unreleased"
+            : show.status === "continuing"
+              ? "ongoing"
+              : "completed";
+
+          uow.computeChangeSet(itemRequest);
           uow.computeChangeSet(show);
         }
       }

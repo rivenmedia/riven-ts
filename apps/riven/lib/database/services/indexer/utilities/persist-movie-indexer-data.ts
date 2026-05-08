@@ -65,6 +65,9 @@ export async function persistMovieIndexerData(
 
     em.assign(itemRequest, {
       state: mediaItem.isReleased ? "completed" : "unreleased",
+      // Fill in any missing external IDs
+      imdbId: itemRequest.imdbId ?? mediaItem.imdbId ?? null,
+      tmdbId: itemRequest.tmdbId ?? mediaItem.tmdbId,
     });
 
     return mediaItem;
