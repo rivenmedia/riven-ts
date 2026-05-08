@@ -38,22 +38,6 @@ export const processMediaItemProcessor =
       while (job.data.step !== "complete") {
         switch (job.data.step) {
           case "scrape": {
-            if (
-              job.data.nextScrapeAttemptTimestamp &&
-              DateTime.utc().toMillis() <= job.data.nextScrapeAttemptTimestamp
-            ) {
-              const { nextScrapeAttemptTimestamp, ...data } = job.data;
-
-              await job.moveToDelayed(
-                job.data.nextScrapeAttemptTimestamp,
-                token,
-              );
-
-              await job.updateData(data);
-
-              throw new DelayedError();
-            }
-
             const itemToScrape = await scraperService.getItemToScrape(
               job.data.mediaItem.id,
               job.data.mediaItem.type,
@@ -70,7 +54,7 @@ export const processMediaItemProcessor =
 
             await job.updateData({
               ...job.data,
-              step: "download",
+              step: "validate-scrape",
             });
 
             if (await job.moveToWaitingChildren(token)) {
@@ -79,7 +63,7 @@ export const processMediaItemProcessor =
 
             break;
           }
-          case "download": {
+          case "validate-scrape": {
             const childFailures = await job.getIgnoredChildrenFailures();
 
             if (Object.keys(childFailures).length) {
@@ -88,6 +72,14 @@ export const processMediaItemProcessor =
               );
             }
 
+            await job.updateData({
+              ...job.data,
+              step: "download",
+            });
+
+            break;
+          }
+          case "download": {
             const item = await downloaderService.getItemToDownload(
               job.data.mediaItem.id,
             );
@@ -121,12 +113,18 @@ export const processMediaItemProcessor =
               );
 
               await job.log("Scheduling re-scrape due to download failure");
+
               await job.updateData({
                 ...job.data,
                 step: "scrape",
-                nextScrapeAttemptTimestamp:
-                  nextScrapeAttemptTimestamp.toMillis(),
               });
+
+              await job.moveToDelayed(
+                nextScrapeAttemptTimestamp.toMillis(),
+                token,
+              );
+
+              throw new DelayedError();
             } else {
               await job.updateData({
                 ...job.data,
