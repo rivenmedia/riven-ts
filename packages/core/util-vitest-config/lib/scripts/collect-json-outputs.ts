@@ -85,4 +85,6 @@ try {
   console.log(`Coverage collected into: ${path.join(process.cwd())}`);
 } catch (error) {
   console.error("Error collecting coverage files:", error);
+
+  process.exitCode = 1;
 }
