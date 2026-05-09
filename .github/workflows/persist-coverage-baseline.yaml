@@ -1,0 +1,52 @@
+name: Generate Coverage Baseline
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  BASE_PATH: packages/core/util-vitest-config/coverage
+
+jobs:
+  check-for-generated-summary:
+    name: Check for generated coverage summary
+    runs-on: ubuntu-latest
+    outputs:
+      coverage-exists: ${{ steps.check-coverage-summary.outputs.cache-hit == 'true' }}
+    steps:
+      - name: Check for generated summary on PR ref
+        id: check-coverage-summary
+        uses: actions/cache/restore@v5
+        with:
+          key: coverage-summary-${{ github.event.base_ref }}
+          path: ${{ env.BASE_PATH }}/summary/coverage-summary.json
+          lookup-only: true
+
+  persist-coverage-baseline:
+    name: Persist coverage baseline to main branch cache
+    runs-on: ubuntu-latest
+    needs: check-for-generated-summary
+    if: needs.check-for-generated-summary.outputs.coverage-exists == 'true'
+    steps:
+      - name: Get coverage summary
+        uses: actions/cache/restore@v5
+        with:
+          key: coverage-summary-${{ github.event.base_ref }}
+          path: ${{ env.BASE_PATH }}/summary/coverage-summary.json
+
+      - name: Move summary comparison to expected location
+        shell: bash
+        working-directory: ${{ env.BASE_PATH }}
+        run: |
+          mkdir compare
+          mv summary/coverage-summary.json compare/coverage-summary.json
+
+      - name: Save coverage summary to cache
+        uses: actions/cache/save@v5
+        with:
+          key: coverage-summary-main
+          path: ${{ env.BASE_PATH }}/compare/coverage-summary.json
