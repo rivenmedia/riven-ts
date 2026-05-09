@@ -165,6 +165,7 @@
           "comment": null,
           "enumItems": [
             "requested",
+            "requested_additional_seasons",
             "completed",
             "failed",
             "ongoing",
@@ -187,6 +188,22 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "json"
+        },
+        "is_partial_request": {
+          "name": "is_partial_request",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "false",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "boolean"
         }
       },
       "indexes": [
@@ -232,8 +249,8 @@
         },
         {
           "name": "item_request_state_check",
-          "expression": "\"state\" in ('requested', 'completed', 'failed', 'ongoing', 'unreleased')",
-          "definition": "check (\"state\" in ('requested', 'completed', 'failed', 'ongoing', 'unreleased'))",
+          "expression": "\"state\" in ('requested', 'requested_additional_seasons', 'completed', 'failed', 'ongoing', 'unreleased')",
+          "definition": "check (\"state\" in ('requested', 'requested_additional_seasons', 'completed', 'failed', 'ongoing', 'unreleased'))",
           "columnName": "state"
         }
       ],
@@ -413,7 +430,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": true,
+          "nullable": false,
           "unique": false,
           "length": 6,
           "precision": null,

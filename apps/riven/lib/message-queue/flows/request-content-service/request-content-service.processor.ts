@@ -115,12 +115,14 @@ export const requestContentServiceProcessor =
               updateIntervalSeconds: null as number | null,
               items: new Map<
                 string,
-                {
-                  item: ContentServiceRequestedResponse[
-                    | "movies"
-                    | "shows"][number];
-                  type: "movie" | "show";
-                }
+                | {
+                    item: ContentServiceRequestedResponse["movies"][number];
+                    type: "movie";
+                  }
+                | {
+                    type: "show";
+                    item: ContentServiceRequestedResponse["shows"][number];
+                  }
               >(),
             },
           );

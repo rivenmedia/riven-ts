@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { expect } from "vitest";
 
 import { it as baseIt } from "../../../__tests__/test-context.ts";
@@ -20,6 +21,7 @@ const test = baseIt
       tvdbId: "1",
       itemRequest,
       isRequested: true,
+      indexedAt: DateTime.utc().toJSDate(),
     });
 
     await em.flush();
@@ -40,6 +42,7 @@ test("isSpecial is true if the season number is 0", async ({
     show,
     itemRequest,
     tvdbId: "1",
+    indexedAt: DateTime.utc().toJSDate(),
   });
 
   await em.flush();

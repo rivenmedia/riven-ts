@@ -24,9 +24,11 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
     context: IndexedShowSeederContext = this.context,
   ) {
     const releaseDate = DateTime.utc().minus({ years: 1 }).toISO();
+    const indexedAt = DateTime.utc().toJSDate();
 
     context.show = await new ShowFactory(em).createOne({
       releaseDate: null, // Allow the subscriber to set the release date based on the first episode's release date
+      indexedAt,
     });
 
     let absoluteEpisodeNumber = 1;
@@ -42,6 +44,7 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
         releaseDate: null, // Allow the subscriber to set the release date based on the first episode's release date
         show: context.show,
         itemRequest: context.show.itemRequest,
+        indexedAt,
       });
 
       context.seasons ??= [];
@@ -59,6 +62,7 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
             absoluteNumber: absoluteEpisodeNumber++,
             releaseDate,
             itemRequest: context.show.itemRequest,
+            indexedAt,
           }),
         );
       }

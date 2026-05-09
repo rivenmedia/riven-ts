@@ -16,29 +16,35 @@ export type ContentServiceRequestedEvent = z.infer<
   typeof ContentServiceRequestedEvent
 >;
 
+const ExternalIdsSchema = ItemRequest.pick({
+  imdbId: true,
+  tvdbId: true,
+  tmdbId: true,
+}).refine(
+  (val) => atLeastOnePropertyRequired(val, ["imdbId", "tvdbId", "tmdbId"]),
+  "At least one external ID (imdbId, tvdbId, or tmdbId) is required",
+);
+
+const BaseItemRequestData = ItemRequest.pick({
+  externalRequestId: true,
+  requestedBy: true,
+});
+
 export const ContentServiceRequestedResponse = z.object({
   movies: z.array(
-    ItemRequest.pick({
-      imdbId: true,
-      tmdbId: true,
-      externalRequestId: true,
-      requestedBy: true,
-    }).refine(
-      atLeastOnePropertyRequired,
-      "At least one identifier is required",
+    BaseItemRequestData.extend(ExternalIdsSchema.shape).refine(
+      (val) => atLeastOnePropertyRequired(val, ["imdbId", "tmdbId"]),
+      "At least one external ID (imdbId or tmdbId) is required for movies",
     ),
   ),
   shows: z.array(
-    ItemRequest.pick({
-      imdbId: true,
-      tvdbId: true,
-      externalRequestId: true,
-      requestedBy: true,
-      seasons: true,
-    }).refine(
-      atLeastOnePropertyRequired,
-      "At least one identifier is required",
-    ),
+    BaseItemRequestData.extend(ItemRequest.pick({ seasons: true }).shape)
+      .extend(ExternalIdsSchema.shape)
+      .refine(
+        (val) =>
+          atLeastOnePropertyRequired(val, ["imdbId", "tmdbId", "tvdbId"]),
+        "At least one external ID (imdbId, tmdbId, or tvdbId) is required for shows",
+      ),
   ),
   updateIntervalSeconds: z.int().nonnegative().nullable(),
 });

@@ -2,3 +2,4 @@ reviews:
   profile: chill
   path_filters:
     - "!packages/plugin-*/openapi-schema.*"
+    - "!apps/riven/lib/database/migrations/**"

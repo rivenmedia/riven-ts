@@ -59,12 +59,16 @@ export async function persistMovieIndexerData(
       runtime: item.runtime,
       isRequested: true, // Movies will always be considered to be requested
       year: releaseDate?.year ?? null,
+      indexedAt: DateTime.utc().toJSDate(),
     });
 
     await validateOrReject(mediaItem);
 
     em.assign(itemRequest, {
       state: mediaItem.isReleased ? "completed" : "unreleased",
+      // Fill in any missing external IDs
+      imdbId: itemRequest.imdbId ?? mediaItem.imdbId ?? null,
+      tmdbId: itemRequest.tmdbId ?? mediaItem.tmdbId,
     });
 
     return mediaItem;

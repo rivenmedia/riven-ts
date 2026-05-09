@@ -2,55 +2,64 @@ import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
 
 import { DateTime } from "luxon";
 
-import type { EventSubscriber, FlushEventArgs } from "@mikro-orm/core";
+import type {
+  ChangeSet,
+  EventSubscriber,
+  FlushEventArgs,
+} from "@mikro-orm/core";
 
 export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
   async onFlush({ uow }: FlushEventArgs): Promise<void> {
-    const trackedEpisodes = new Set<Partial<Episode>>();
+    const trackedEpisodes = new Map<
+      Partial<Episode>,
+      ChangeSet<Partial<Episode>> | null
+    >();
 
     for (const changeSet of uow.getChangeSets()) {
       if (changeSet.entity instanceof Episode) {
-        trackedEpisodes.add(changeSet.entity);
+        trackedEpisodes.set(changeSet.entity, changeSet);
       }
     }
 
     for (const collectionUpdate of uow.getCollectionUpdates()) {
       if (collectionUpdate.owner instanceof Season) {
-        const firstEpisode = collectionUpdate.find(
+        const collectionEpisodes = collectionUpdate.filter(
           (episode): episode is Partial<Episode> =>
-            episode instanceof Episode &&
-            episode.number === 1 &&
-            episode.releaseDate != null,
+            episode instanceof Episode && episode.releaseDate != null,
         );
 
-        if (!firstEpisode) {
-          continue;
+        for (const episode of collectionEpisodes) {
+          trackedEpisodes.set(episode, trackedEpisodes.get(episode) ?? null);
         }
-
-        trackedEpisodes.add(firstEpisode);
       }
     }
 
-    for (const item of trackedEpisodes) {
-      if (item.releaseDate == null) {
+    for (const [episode, changeSet] of trackedEpisodes) {
+      if (episode.releaseDate == null) {
         continue;
       }
 
-      if (item.number !== 1) {
+      episode.year ??= DateTime.fromJSDate(episode.releaseDate).year;
+
+      if (changeSet) {
+        uow.recomputeSingleChangeSet(episode);
+      } else {
+        uow.computeChangeSet(episode);
+      }
+
+      if (episode.number !== 1) {
         continue;
       }
 
-      if (!item.season) {
+      if (!episode.season) {
         continue;
       }
 
-      item.year ??= DateTime.fromJSDate(item.releaseDate).year;
-
-      const season = await item.season.loadOrFail();
+      const season = await episode.season.loadOrFail();
 
       if (season.releaseDate == null) {
-        season.releaseDate = item.releaseDate;
-        season.year = item.year;
+        season.releaseDate = episode.releaseDate;
+        season.year = episode.year;
 
         uow.computeChangeSet(season);
       }
@@ -62,6 +71,15 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
           show.releaseDate = season.releaseDate;
           show.year = DateTime.fromJSDate(season.releaseDate).year;
 
+          const itemRequest = await show.itemRequest.loadOrFail();
+
+          itemRequest.state = !show.isReleased
+            ? "unreleased"
+            : show.status === "continuing"
+              ? "ongoing"
+              : "completed";
+
+          uow.computeChangeSet(itemRequest);
           uow.computeChangeSet(show);
         }
       }
