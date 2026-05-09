@@ -9,12 +9,13 @@ export const RequestType = z.enum(["create", "update"]);
 
 export type RequestType = z.infer<typeof RequestType>;
 
-export const RequestContentServicesFlow = createFlowSchema(
+export const RequestContentServiceFlow = createFlowSchema(
   "request-content-services",
   {
     children: ContentServiceRequestedResponse,
     input: z.object({
       step: z.enum(["request", "process"]),
+      contentServicePlugin: z.string(),
     }),
     output: z.object({
       count: z.number().nonnegative(),
@@ -24,13 +25,13 @@ export const RequestContentServicesFlow = createFlowSchema(
   },
 );
 
-export type RequestContentServicesFlow = z.infer<
-  typeof RequestContentServicesFlow
+export type RequestContentServiceFlow = z.infer<
+  typeof RequestContentServiceFlow
 >;
 
-export const requestContentServicesProcessorSchema =
-  RequestContentServicesFlow.shape.processor;
+export const requestContentServiceProcessorSchema =
+  RequestContentServiceFlow.shape.processor;
 
-export const createRequestContentServicesJob = createFlowJobBuilder(
-  RequestContentServicesFlow,
+export const createRequestContentServiceJob = createFlowJobBuilder(
+  RequestContentServiceFlow,
 );

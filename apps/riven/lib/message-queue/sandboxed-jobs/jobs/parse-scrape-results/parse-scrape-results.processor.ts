@@ -1,8 +1,5 @@
 import { parse } from "@repo/util-rank-torrent-name/parser";
 
-import { UnrecoverableError } from "bullmq";
-import chalk from "chalk";
-
 import { logger } from "../../../../utilities/logger/logger.ts";
 import { createSandboxedJobProcessor } from "../../utilities/create-sandboxed-job.processor.ts";
 import {
@@ -30,9 +27,10 @@ export default createSandboxedJobProcessor(
     );
 
     if (!Object.keys(aggregatedResults).length) {
-      throw new UnrecoverableError(
-        `No streams found for ${chalk.bold(job.data.title)}`,
-      );
+      return {
+        id: job.data.id,
+        results: {},
+      };
     }
 
     const validResults = new Map<string, ParsedData>();

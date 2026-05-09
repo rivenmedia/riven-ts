@@ -1,16 +1,8 @@
 import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
 
-import {
-  Arg,
-  Ctx,
-  FieldResolver,
-  Int,
-  Query,
-  Resolver,
-  Root,
-} from "type-graphql";
+import { Arg, FieldResolver, Int, Query, Resolver, Root } from "type-graphql";
 
-import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
+import { CoreContext } from "../decorators/core-context.ts";
 
 @Resolver(() => Episode)
 export class EpisodeResolver {
@@ -20,7 +12,7 @@ export class EpisodeResolver {
     nullable: true,
   })
   episode(
-    @Ctx() { em }: ApolloServerContext,
+    @CoreContext() { em }: CoreContext,
     @Arg("tvdbId", () => String) tvdbId: string,
     @Arg("episodeNumber", () => Int) episodeNumber: number,
     @Arg("seasonNumber", () => Int, { nullable: true })

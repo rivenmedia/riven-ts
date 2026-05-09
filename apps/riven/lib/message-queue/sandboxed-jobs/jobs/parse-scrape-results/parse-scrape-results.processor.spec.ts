@@ -1,4 +1,3 @@
-import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
 import { it as baseIt } from "../../../../__tests__/test-context.ts";
@@ -41,9 +40,12 @@ it("throws an UnrecoverableError if no results are found", async ({
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
-  await expect(() => parseScrapeResultsProcessor(job as never)).rejects.toThrow(
-    UnrecoverableError,
-  );
+  const result = await parseScrapeResultsProcessor(job as never);
+
+  expect(result).toEqual({
+    id: indexedMovie.id,
+    results: {},
+  });
 });
 
 it("returns valid movie torrents if the item is a movie", async ({

@@ -1,11 +1,5 @@
 import { format } from "winston";
 
-export const fileFormat = format.combine(
-  format.uncolorize(),
-  format((info) => {
-    info.message = String(info["stack"] ?? info.message);
+import { consoleFormat } from "./console.format.ts";
 
-    return info;
-  })(),
-  format.json({ space: 2 }),
-);
+export const fileFormat = format.combine(consoleFormat, format.uncolorize());

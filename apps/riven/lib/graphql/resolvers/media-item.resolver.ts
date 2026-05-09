@@ -1,17 +1,10 @@
 import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
-import {
-  Arg,
-  Ctx,
-  FieldResolver,
-  ID,
-  Int,
-  Query,
-  Resolver,
-} from "type-graphql";
+import { Arg, FieldResolver, ID, Int, Query, Resolver } from "type-graphql";
 
-import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
+import { CoreContext } from "../decorators/core-context.ts";
+
 import type { UUID } from "node:crypto";
 
 @Resolver(() => MediaItem)
@@ -21,14 +14,14 @@ export class MediaItemResolver {
       "Fetches a media item by its ID. The returned type will be one of the specific media item types (e.g., Movie, Episode) based on the underlying data.",
   })
   mediaItemById(
-    @Ctx() { em }: ApolloServerContext,
+    @CoreContext() { em }: CoreContext,
     @Arg("id", () => ID) id: UUID,
   ) {
     return em.findOneOrFail(MediaItem, id);
   }
 
   @Query(() => [MediaItem])
-  mediaItems(@Ctx() { em }: ApolloServerContext): Promise<MediaItem[]> {
+  mediaItems(@CoreContext() { em }: CoreContext): Promise<MediaItem[]> {
     return em.find(
       MediaItem,
       {},

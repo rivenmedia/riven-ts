@@ -1,5 +1,8 @@
 import { type Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
-import { RivenEvent } from "@repo/util-plugin-sdk/events";
+import {
+  RivenEvent,
+  type RivenExternalEvent,
+} from "@repo/util-plugin-sdk/events";
 
 import chalk from "chalk";
 import { Duration } from "luxon";
@@ -7,9 +10,10 @@ import os from "node:os";
 import {
   type ActorRef,
   type Snapshot,
+  assign,
   enqueueActions,
+  forwardTo,
   raise,
-  sendTo,
   setup,
 } from "xstate";
 
@@ -29,8 +33,8 @@ import { rankStreamsProcessor } from "../../message-queue/flows/process-media-it
 import { RankStreamsFlow } from "../../message-queue/flows/process-media-item/steps/download/steps/rank-streams/rank-streams.schema.ts";
 import { scrapeItemProcessor } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.processor.ts";
 import { ScrapeItemFlow } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.schema.ts";
-import { requestContentServicesProcessor } from "../../message-queue/flows/request-content-services/request-content-services.processor.ts";
-import { RequestContentServicesFlow } from "../../message-queue/flows/request-content-services/request-content-services.schema.ts";
+import { requestContentServiceProcessor } from "../../message-queue/flows/request-content-service/request-content-service.processor.ts";
+import { RequestContentServiceFlow } from "../../message-queue/flows/request-content-service/request-content-service.schema.ts";
 import { MapItemsToFilesSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
 import { ParseScrapeResultsSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.schema.ts";
 import { ValidateTorrentFilesSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.schema.ts";
@@ -48,6 +52,10 @@ import { jobEnqueuer } from "./actors/job-enqueuer.actor.ts";
 import { processItemRequest } from "./actors/process-item-request.actor.ts";
 import { processMediaItem } from "./actors/process-media-item.actor.ts";
 import { requestContentServices } from "./actors/request-content-services.actor.ts";
+import {
+  type RequestItemInput,
+  requestItem,
+} from "./actors/request-item.actor.ts";
 import { retryLibrary } from "./actors/retry-library.actor.ts";
 import {
   type ScheduleReindexInput,
@@ -69,9 +77,10 @@ import type { RivenMachineEvent } from "../program/index.ts";
 import type { Queue, Worker } from "bullmq";
 
 export interface MainRunnerMachineContext {
+  availableParallelism: number;
   parentRef: ActorRef<Snapshot<unknown>, RivenMachineEvent>;
   plugins: ValidPluginMap;
-  flowWorkers: {
+  flowWorkers?: {
     [K in Flow["name"]]: {
       queue: Queue;
       worker: Worker<
@@ -80,7 +89,7 @@ export interface MainRunnerMachineContext {
       >;
     };
   };
-  sandboxedWorkers: {
+  sandboxedWorkers?: {
     [K in SandboxedJobDefinition["name"]]: {
       queue: Queue;
       worker: Worker<
@@ -96,13 +105,23 @@ export interface MainRunnerMachineContext {
 
 export interface MainRunnerMachineInput {
   parentRef: ActorRef<Snapshot<unknown>, RivenMachineEvent>;
-  plugins: ValidPluginMap;
-  publishableEvents: PublishableEventSet;
-  pluginQueues: PluginQueueMap;
-  pluginWorkers: PluginWorkerMap;
 }
 
-export type MainRunnerMachineEvent = RivenInternalEvent | RivenEvent;
+export interface StartEvent {
+  type: "START";
+  input: {
+    plugins: ValidPluginMap;
+    publishableEvents: PublishableEventSet;
+    pluginQueues: PluginQueueMap;
+    pluginWorkers: PluginWorkerMap;
+  };
+}
+
+export type MainRunnerMachineEvent =
+  | RivenInternalEvent
+  | RivenEvent
+  | RivenExternalEvent
+  | StartEvent;
 
 export const mainRunnerMachine = setup({
   types: {
@@ -121,11 +140,16 @@ export const mainRunnerMachine = setup({
         type: "riven.core.shutdown",
       });
     },
-    requestContentServices: enqueueActions(({ enqueue }) => {
-      enqueue.spawnChild("requestContentServices", {
-        id: "requestContentServices",
-      });
-    }),
+    requestContentServices: enqueueActions(
+      ({ enqueue, context: { plugins } }) => {
+        enqueue.spawnChild("requestContentServices", {
+          id: "requestContentServices",
+          input: {
+            plugins,
+          },
+        });
+      },
+    ),
     processItemRequest: enqueueActions(
       ({ enqueue }, input: ProcessItemRequestInput) => {
         enqueue.spawnChild("processItemRequest", {
@@ -172,6 +196,17 @@ export const mainRunnerMachine = setup({
         });
       },
     ),
+    requestItem: enqueueActions(
+      ({ enqueue, self }, input: Omit<RequestItemInput, "parentRef">) => {
+        enqueue.spawnChild("requestItem", {
+          id: "requestItem",
+          input: {
+            ...input,
+            parentRef: self,
+          },
+        });
+      },
+    ),
   },
   actors: {
     createEventScheduler,
@@ -182,6 +217,7 @@ export const mainRunnerMachine = setup({
     requestContentServices,
     scheduleReindex,
     fanOutDownload,
+    requestItem,
   },
   guards: {
     /**
@@ -229,143 +265,147 @@ export const mainRunnerMachine = setup({
   .createMachine({
     /** @xstate-layout N4IgpgJg5mDOIC5QCUCWA3MA7ABABwCcB7KAgQwFscKzVcCBXLLMAgYgI2wDoLJUyAWlQAXMBW4AqANoAGALqJQeIrFGoiWJSAAeiAIwAmADQgAnogCsATmvcAHEcsBfZ6bSZchEuSo06OIzMrBxcWIJ4ADYMUHS8-EKi4twEYACODHBiEHKKSCAqaiIaWvl6CEamFggALJaGDjYAzADsLm4gHtj4xKSU1LT0TCzsnJ7xEALCYhIAxqlkxZrcrMQEudqF6pra5ZXmiE2yltzWsgBshu3uYT0+-f5DwaNhE1NJcwtLWNxkkQsQMyCMA6VCwESwDb5LbfXYGEwHCqWeynSxNJyuG6eO59PyDQLDEJjHipEQEIGRVAAI3I5KhylU21KoD2COqRlcHSwRAgcG0XS8vV8AwCQRGm0ZsLKiDa3FkhhaTRqrUsVRlln03Ba50sl3ariAA */
     id: "Riven program main runner",
-    initial: "Running",
-    context: ({ input, self }) => {
-      const availableParallelism = os.availableParallelism();
+    initial: "Idle",
+    context: ({ input }) => ({
+      availableParallelism: os.availableParallelism(),
+      parentRef: input.parentRef,
+      plugins: new Map(),
+      pluginQueues: new Map(),
+      pluginWorkers: new Map(),
+      publishableEvents: new Set(),
+    }),
+    on: {
+      START: {
+        target: ".Running",
+        actions: assign(
+          ({ context: { availableParallelism }, event: { input }, self }) => ({
+            plugins: input.plugins,
+            publishableEvents: input.publishableEvents,
+            pluginQueues: input.pluginQueues,
+            pluginWorkers: input.pluginWorkers,
+            flowWorkers: {
+              "process-item-request": createFlowWorker(
+                ProcessItemRequestFlow,
+                processItemRequestProcessor,
+                self.send,
+                input.plugins,
+              ),
+              "process-media-item": createFlowWorker(
+                ProcessMediaItemFlow,
+                processMediaItemProcessor,
+                self.send,
+                input.plugins,
+              ),
+              "request-content-services": createFlowWorker(
+                RequestContentServiceFlow,
+                requestContentServiceProcessor,
+                self.send,
+                input.plugins,
+              ),
+              "scrape-item": createFlowWorker(
+                ScrapeItemFlow,
+                scrapeItemProcessor,
+                self.send,
+                input.plugins,
+                {},
+                {
+                  settings: {
+                    backoffStrategy: (attemptsMade) => {
+                      const [after2, after5, after10] =
+                        settings.scrapeCooldownHours;
 
-      return {
-        parentRef: input.parentRef,
-        plugins: input.plugins,
-        publishableEvents: input.publishableEvents,
-        pluginQueues: input.pluginQueues,
-        pluginWorkers: input.pluginWorkers,
-        flowWorkers: {
-          "process-item-request": createFlowWorker(
-            ProcessItemRequestFlow,
-            processItemRequestProcessor,
-            self.send,
-            input.plugins,
-          ),
-          "process-media-item": createFlowWorker(
-            ProcessMediaItemFlow,
-            processMediaItemProcessor,
-            self.send,
-            input.plugins,
-          ),
-          "request-content-services": createFlowWorker(
-            RequestContentServicesFlow,
-            requestContentServicesProcessor,
-            self.send,
-            input.plugins,
-          ),
-          "scrape-item": createFlowWorker(
-            ScrapeItemFlow,
-            scrapeItemProcessor,
-            self.send,
-            input.plugins,
-            {},
-            {
-              settings: {
-                backoffStrategy: (attemptsMade) => {
-                  const [after2, after5, after10] =
-                    settings.scrapeCooldownHours;
+                      if (attemptsMade >= 10) {
+                        return Duration.fromObject({ hours: after10 }).as(
+                          "milliseconds",
+                        );
+                      }
 
-                  if (attemptsMade >= 10) {
-                    return Duration.fromObject({ hours: after10 }).as(
-                      "milliseconds",
-                    );
-                  }
+                      if (attemptsMade >= 5) {
+                        return Duration.fromObject({ hours: after5 }).as(
+                          "milliseconds",
+                        );
+                      }
 
-                  if (attemptsMade >= 5) {
-                    return Duration.fromObject({ hours: after5 }).as(
-                      "milliseconds",
-                    );
-                  }
+                      if (attemptsMade >= 2) {
+                        return Duration.fromObject({ hours: after2 }).as(
+                          "milliseconds",
+                        );
+                      }
 
-                  if (attemptsMade >= 2) {
-                    return Duration.fromObject({ hours: after2 }).as(
-                      "milliseconds",
-                    );
-                  }
-
-                  return Duration.fromObject({ minutes: 30 }).as(
-                    "milliseconds",
-                  );
+                      return Duration.fromObject({ minutes: 30 }).as(
+                        "milliseconds",
+                      );
+                    },
+                  },
                 },
-              },
+              ),
+              "download-item": createFlowWorker(
+                DownloadItemFlow,
+                downloadItemProcessor,
+                self.send,
+                input.plugins,
+              ),
+              "download-item.find-valid-torrent": createFlowWorker(
+                FindValidTorrentFlow,
+                findValidTorrentProcessor,
+                self.send,
+                input.plugins,
+              ),
+              "download-item.rank-streams": createFlowWorker(
+                RankStreamsFlow,
+                rankStreamsProcessor,
+                self.send,
+                input.plugins,
+              ),
+              "request-subtitles": createFlowWorker(
+                RequestSubtitlesFlow,
+                requestSubtitlesProcessor,
+                self.send,
+                input.plugins,
+              ),
+              "post-process-media-item": createFlowWorker(
+                PostProcessMediaItemFlow,
+                postProcessItemProcessor,
+                self.send,
+                input.plugins,
+              ),
             },
-          ),
-          "download-item": createFlowWorker(
-            DownloadItemFlow,
-            downloadItemProcessor,
-            self.send,
-            input.plugins,
-          ),
-          "download-item.find-valid-torrent": createFlowWorker(
-            FindValidTorrentFlow,
-            findValidTorrentProcessor,
-            self.send,
-            input.plugins,
-          ),
-          "download-item.rank-streams": createFlowWorker(
-            RankStreamsFlow,
-            rankStreamsProcessor,
-            self.send,
-            input.plugins,
-          ),
-          "request-subtitles": createFlowWorker(
-            RequestSubtitlesFlow,
-            requestSubtitlesProcessor,
-            self.send,
-            input.plugins,
-          ),
-          "post-process-media-item": createFlowWorker(
-            PostProcessMediaItemFlow,
-            postProcessItemProcessor,
-            self.send,
-            input.plugins,
-          ),
-        },
-        sandboxedWorkers: {
-          "scrape-item.parse-scrape-results": createSandboxedWorker(
-            ParseScrapeResultsSandboxedJob,
-            new URL(
-              import.meta.resolve("@repo/riven/workers/parse-scrape-results"),
-            ),
-            {},
-            { concurrency: availableParallelism * 0.25 },
-          ),
-          "download-item.map-items-to-files": createSandboxedWorker(
-            MapItemsToFilesSandboxedJob,
-            new URL(
-              import.meta.resolve("@repo/riven/workers/map-items-to-files"),
-            ),
-            {},
-            { concurrency: availableParallelism * 0.75 },
-          ),
-          "download-item.validate-torrent-files": createSandboxedWorker(
-            ValidateTorrentFilesSandboxedJob,
-            new URL(
-              import.meta.resolve("@repo/riven/workers/validate-torrent-files"),
-            ),
-            {},
-            { concurrency: availableParallelism * 0.25 },
-          ),
-        },
-      };
+            sandboxedWorkers: {
+              "scrape-item.parse-scrape-results": createSandboxedWorker(
+                ParseScrapeResultsSandboxedJob,
+                new URL(
+                  import.meta
+                    .resolve("@repo/riven/workers/parse-scrape-results"),
+                ),
+                {},
+                { concurrency: availableParallelism * 0.25 },
+              ),
+              "download-item.map-items-to-files": createSandboxedWorker(
+                MapItemsToFilesSandboxedJob,
+                new URL(
+                  import.meta.resolve("@repo/riven/workers/map-items-to-files"),
+                ),
+                {},
+                { concurrency: availableParallelism * 0.75 },
+              ),
+              "download-item.validate-torrent-files": createSandboxedWorker(
+                ValidateTorrentFilesSandboxedJob,
+                new URL(
+                  import.meta
+                    .resolve("@repo/riven/workers/validate-torrent-files"),
+                ),
+                {},
+                { concurrency: availableParallelism * 0.25 },
+              ),
+            },
+          }),
+        ),
+      },
     },
     states: {
+      Idle: {},
       Running: {
         invoke: [
-          {
-            id: "requestContentServicesScheduler",
-            src: "createEventScheduler",
-            input: {
-              event: "riven-internal.request-content-services",
-              interval: 120_000,
-              runImmediately: true,
-            },
-          },
           {
             id: "jobEnqueuer",
             src: "jobEnqueuer",
@@ -378,7 +418,7 @@ export const mainRunnerMachine = setup({
         always: [
           {
             guard: "shouldQueueEvent",
-            actions: sendTo("jobEnqueuer", ({ event }) => event),
+            actions: forwardTo("jobEnqueuer"),
           },
           {
             guard: "isRivenEvent",
@@ -393,11 +433,12 @@ export const mainRunnerMachine = setup({
         ],
         entry: [
           raise({ type: "riven.core.started" }),
-          raise({ type: "riven-internal.retry-library" }),
           {
             type: "log",
             params: { message: "Riven has started successfully." },
           },
+          raise({ type: "riven-internal.request-content-services" }),
+          raise({ type: "riven-internal.retry-library" }),
         ],
         on: {
           /**
@@ -704,6 +745,19 @@ export const mainRunnerMachine = setup({
           //     "Retries any incomplete media items and item requests.",
           //   actions: { type: "retryLibrary" },
           // },
+
+          /**
+           * External events
+           */
+
+          "riven-external.item-requested": {
+            actions: [
+              {
+                type: "requestItem",
+                params: ({ event: { item } }) => ({ item }),
+              },
+            ],
+          },
         },
       },
       Errored: {

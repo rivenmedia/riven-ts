@@ -1,6 +1,5 @@
 import {
   BaseDataSource,
-  type BasePluginContext,
   type ParamsFor,
   type RateLimiterOptions,
 } from "@repo/util-plugin-sdk";
@@ -115,5 +114,3 @@ export class StremThruTorznabAPI extends BaseDataSource<StremThruSettings> {
     }
   }
 }
-
-export type StremThruContextSlice = BasePluginContext;

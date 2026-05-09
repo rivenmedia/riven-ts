@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { expect } from "vitest";
 
 import { test } from "../../../../__tests__/test-context.ts";
@@ -20,6 +21,7 @@ test("getMediaEntries() returns the associated media entry for a Movie media ite
     tmdbId: "1",
     itemRequest,
     isRequested: true,
+    indexedAt: DateTime.utc().toJSDate(),
   });
 
   const mediaEntry = em.create(MediaEntry, {
@@ -46,6 +48,8 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     type: "show",
   });
 
+  const indexedAt = DateTime.utc().toJSDate();
+
   const show = em.create(Show, {
     title: "Test Show",
     fullTitle: "Test Show",
@@ -54,6 +58,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     tvdbId,
     itemRequest,
     isRequested: true,
+    indexedAt,
   });
 
   await em.flush();
@@ -66,6 +71,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     isRequested: true,
     itemRequest,
     tvdbId,
+    indexedAt,
   });
 
   show.seasons.add(season);
@@ -81,6 +87,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     isRequested: true,
     itemRequest,
     tvdbId,
+    indexedAt,
   });
 
   const episode2 = em.create(Episode, {
@@ -92,6 +99,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
     isRequested: true,
     itemRequest,
     tvdbId,
+    indexedAt,
   });
 
   const mediaEntry1 = em.create(MediaEntry, {
@@ -128,6 +136,8 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     type: "show",
   });
 
+  const indexedAt = DateTime.utc().toJSDate();
+
   const show = em.create(Show, {
     title: "Test Show",
     fullTitle: "Test Show",
@@ -136,6 +146,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     tvdbId,
     itemRequest,
     isRequested: true,
+    indexedAt,
   });
 
   await em.flush();
@@ -148,6 +159,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     isRequested: true,
     itemRequest,
     tvdbId,
+    indexedAt,
   });
 
   const season2 = em.create(Season, {
@@ -158,6 +170,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     isRequested: true,
     itemRequest,
     tvdbId,
+    indexedAt,
   });
 
   show.seasons.add(season1, season2);
@@ -173,6 +186,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     isRequested: true,
     itemRequest,
     tvdbId,
+    indexedAt,
   });
 
   const season2Episode1 = em.create(Episode, {
@@ -184,6 +198,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
     isRequested: true,
     itemRequest,
     tvdbId,
+    indexedAt,
   });
 
   const season1Episode1MediaEntry = em.create(MediaEntry, {
@@ -222,6 +237,8 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     type: "show",
   });
 
+  const indexedAt = DateTime.utc().toJSDate();
+
   const show = em.create(Show, {
     title: "Test Show",
     fullTitle: "Test Show",
@@ -230,6 +247,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     tvdbId,
     itemRequest,
     isRequested: true,
+    indexedAt,
   });
 
   await em.flush();
@@ -242,6 +260,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     isRequested: true,
     itemRequest,
     tvdbId,
+    indexedAt,
   });
 
   show.seasons.add(season);
@@ -257,6 +276,7 @@ test("getMediaEntries() returns the associated media entry for an Episode media 
     isRequested: true,
     itemRequest,
     tvdbId,
+    indexedAt,
   });
 
   const mediaEntry = em.create(MediaEntry, {

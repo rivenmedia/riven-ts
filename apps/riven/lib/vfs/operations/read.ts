@@ -214,14 +214,14 @@ export const readSync = function (
       }
 
       if (isFuseError(error)) {
-        logger.error("VFS read FuseError", { err: error });
+        logger.error(`VFS read FuseError for ${path}`, { err: error });
 
         process.nextTick(callback, error.errorCode);
 
         return;
       }
 
-      logger.error("Unexpected VFS read error", { err: error });
+      logger.error(`Unexpected VFS read error for ${path}`, { err: error });
 
       process.nextTick(callback, Fuse.EIO);
     }

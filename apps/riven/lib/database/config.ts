@@ -11,6 +11,7 @@ import {
   SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
 
+import { type Platform, TextType, Type } from "@mikro-orm/core";
 // eslint-disable-next-line no-restricted-imports -- Core database config requires direct driver access
 import {
   GeneratedCacheAdapter,
@@ -93,5 +94,14 @@ export async function createDatabaseConfig({
     ],
     ...metadataCacheConfig,
     ...options,
+    discovery: {
+      getMappedType(type: string, platform: Platform) {
+        if (type === "string") {
+          return Type.getType(TextType);
+        }
+
+        return platform.getDefaultMappedType(type);
+      },
+    },
   };
 }

@@ -86,6 +86,9 @@ jobs:
     needs: get-required-tasks
     if: needs.get-required-tasks.outputs.required-tasks != '[]'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -124,6 +127,12 @@ jobs:
           CONCURRENCY: ${{ inputs.concurrency }}
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+
+      - name: Post-verification steps
+        if: always()
+        uses: ./.github/actions/post-verify
+        with:
+          task: ${{ inputs.task }}
 
       - uses: charpeni/turborepo-summary-action@v1
         if: always()
