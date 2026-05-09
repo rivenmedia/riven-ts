@@ -1,9 +1,13 @@
 import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
+import { NonRetriableValidationError } from "@repo/util-plugin-sdk/errors/non-retriable-validation-error";
 
+import { webhookSettingsSchema } from "../__generated__/zod/webhookSettingsSchema.ts";
 import { MetadataSettingsResponse } from "../schemas/metadata-settings-response.schema.ts";
 import { RequestResponse } from "../schemas/request-response.schema.ts";
+import webhookBodyContent from "./webhook-body.json" with { type: "json" };
 
 import type { GetAuthMeQueryResponse } from "../__generated__/types/GetAuthMe.ts";
+import type { WebhookSettings } from "../__generated__/types/WebhookSettings.ts";
 import type { ExtendedMediaRequest } from "../schemas/extended-media-request.schema.ts";
 import type { SeerrSettings } from "../seerr-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
@@ -32,18 +36,21 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
       try {
         await this.get<GetAuthMeQueryResponse>("auth/me");
       } catch (error: unknown) {
-        this.logger.error("Failed to authenticate with Seerr API", {
-          err: error,
-        });
         throw new SeerrAPIError(
-          "Failed to authenticate with Seerr API. Please check the API key is correct and the Seerr instance is reachable.",
+          "Failed to authenticate with Seerr API. Please check the API key is correct and the Seerr instance is reachable" +
+            `. Error: ${(error as Error).message}`,
         );
       }
 
       await this.#validateMetadataProviderSettings();
+      await this.#validateWebhookBodySettings();
 
       return true;
     } catch (error: unknown) {
+      if (error instanceof NonRetriableValidationError) {
+        throw error;
+      }
+
       this.logger.error("Seerr validation error", { err: error });
 
       return false;
@@ -151,8 +158,93 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     const metadataSettings = MetadataSettingsResponse.parse(response);
 
     if (metadataSettings.tv !== "tvdb" || metadataSettings.anime !== "tvdb") {
-      throw new SeerrAPIError(
-        `Invalid Seerr metadata provider settings. TV provider: ${metadataSettings.tv}, Anime provider: ${metadataSettings.anime}. Ensure both are set to TVDB at ${this.settings.url}/settings/metadata`,
+      if (this.settings.autofixMetadataProvider) {
+        await this.put<MetadataSettingsResponse>("settings/metadatas", {
+          body: JSON.stringify({ tv: "tvdb", anime: "tvdb" }),
+        });
+
+        this.logger.info(
+          "Automatically fixed Seerr metadata provider settings to TVDB",
+        );
+
+        return;
+      }
+
+      throw new NonRetriableValidationError(
+        `Invalid Seerr metadata provider settings. TV provider: ${metadataSettings.tv}, Anime provider: ${metadataSettings.anime}. Ensure both are set to TVDB at ${this.settings.url}/settings/metadata or enable the "Automatically fix metadata provider settings" option in the plugin settings to have this automatically fixed by the plugin.`,
+      );
+    }
+  }
+
+  /**
+   * Validates that the Seerr webhook has the required notification types enabled:
+   * - Request Approved (bit 4)
+   * - Request Automatically Approved (bit 128)
+   *
+   * These are checked via bitmask (4 | 128 = 132).
+   */
+  async #validateWebhookBodySettings() {
+    const REQUIRED_TYPES = 4 | 128; // 132: Request Approved + Request Automatically Approved
+
+    const response = await this.get<unknown>("settings/notifications/webhook", {
+      skipCache: true,
+    });
+
+    const webhookSettings = webhookSettingsSchema.parse(response);
+
+    if (!webhookSettings.enabled) {
+      return;
+    }
+
+    const currentTypes = webhookSettings.types ?? 0;
+    const hasRequiredTypes = (currentTypes & REQUIRED_TYPES) === REQUIRED_TYPES;
+    const hasExtraTypes = (currentTypes & ~REQUIRED_TYPES) !== 0;
+    const hasValidPayload =
+      webhookSettings.options?.jsonPayload &&
+      JSON.stringify(webhookSettings.options.jsonPayload) ===
+        JSON.stringify(webhookBodyContent);
+
+    if (hasExtraTypes) {
+      this.logger.warn(
+        "Seerr webhook has additional notification types enabled beyond the required ones. This is fine but may result in unnecessary webhook calls.",
+      );
+    }
+
+    if (!hasRequiredTypes || !hasValidPayload) {
+      if (this.settings.autofixWebhookBody) {
+        const settings: WebhookSettings = {
+          types: currentTypes | REQUIRED_TYPES,
+          options: {
+            jsonPayload: JSON.stringify(webhookBodyContent),
+          },
+        };
+        await this.post("settings/notifications/webhook", {
+          body: JSON.stringify(settings),
+        });
+
+        this.logger.info(
+          "Automatically fixed Seerr webhook settings to include required notification types and payload",
+        );
+
+        return;
+      }
+
+      const issues: string[] = [];
+
+      if (!(currentTypes & 4)) {
+        issues.push('"Request Approved" notification type is not enabled');
+      }
+      if (!(currentTypes & 128)) {
+        issues.push(
+          '"Request Automatically Approved" notification type is not enabled',
+        );
+      }
+      if (!hasValidPayload) {
+        issues.push("webhook JSON payload does not match the expected body");
+      }
+
+      throw new NonRetriableValidationError(
+        `Invalid Seerr webhook settings: ${issues.join("; ")}. Fix these in the webhook settings at ${this.settings.url}/settings/webhooks or enable the "Automatically fix webhook body settings" option in the plugin settings to have this automatically fixed by the plugin.`,
       );
     }
   }

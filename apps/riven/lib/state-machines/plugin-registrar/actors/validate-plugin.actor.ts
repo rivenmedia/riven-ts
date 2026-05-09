@@ -1,5 +1,9 @@
+import { NonRetriableValidationError } from "@repo/util-plugin-sdk/errors/non-retriable-validation-error";
+
 import { setTimeout } from "node:timers/promises";
 import { fromCallback } from "xstate";
+
+import { logger } from "../../../utilities/logger/logger.ts";
 
 import type { RegisteredPlugin } from "../../../types/plugins.ts";
 import type { PluginRegistrarMachineEvent } from "../index.ts";
@@ -42,10 +46,19 @@ export const validatePlugin = fromCallback<
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
+        const pluginName =
+          plugin.config.name.description ?? String(plugin.config.name);
+        const start = performance.now();
+
         const isValid = await plugin.config.validator({
           settings,
           dataSources,
         });
+
+        const duration = (performance.now() - start).toFixed(2);
+        logger.debug(
+          `Plugin "${pluginName}" validation attempt ${attempt} took ${duration}ms (result: ${isValid})`,
+        );
 
         if (!isValid) {
           throw new Error("Plugin validation returned false");
@@ -55,7 +68,24 @@ export const validatePlugin = fromCallback<
 
         return;
       } catch (error) {
-        if (attempt >= maxAttempts) {
+        if (
+          error instanceof NonRetriableValidationError ||
+          attempt >= maxAttempts
+        ) {
+          const pluginName =
+            plugin.config.name.description ?? String(plugin.config.name);
+
+          if (error instanceof NonRetriableValidationError) {
+            logger.error(
+              `Plugin "${pluginName}" validation failed (non-retriable): ${error.message}`,
+            );
+          } else {
+            logger.error(
+              `Plugin "${pluginName}" validation failed after ${attempt} attempts`,
+              { err: error },
+            );
+          }
+
           sendInvalidPluginEvent(error);
 
           return;
