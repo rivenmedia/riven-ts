@@ -59,6 +59,7 @@ export async function persistMovieIndexerData(
       runtime: item.runtime,
       isRequested: true, // Movies will always be considered to be requested
       year: releaseDate?.year ?? null,
+      indexedAt: DateTime.utc().toJSDate(),
     });
 
     await validateOrReject(mediaItem);
