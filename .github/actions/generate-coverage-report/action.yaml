@@ -5,21 +5,16 @@ description: Generates a coverage report from a test run
 runs:
   using: composite
   steps:
-    - name: Get summary comparison from default branch
+    - name: Get coverage baseline
+      id: get-coverage-baseline
       uses: actions/cache/restore@v5
       with:
-        key: coverage-summary-${{ github.event.repository.default_branch }}
+        key: coverage-baseline
         path: packages/core/util-vitest-config/coverage/compare/coverage-summary.json
 
     - name: Merge reports
       shell: bash
       run: pnpm turbo report
-
-    - name: Save coverage summary to cache
-      uses: actions/cache/save@v5
-      with:
-        key: coverage-summary-${{ github.event.base_ref }}
-        path: packages/core/util-vitest-config/coverage/summary/coverage-summary.json
 
     - name: Generate coverage report
       uses: davelosert/vitest-coverage-report-action@v2
@@ -27,4 +22,4 @@ runs:
         working-directory: packages/core/util-vitest-config/coverage
         json-final-path: merged/merged-coverage.json
         json-summary-path: summary/coverage-summary.json
-        json-summary-compare-path: compare/coverage-summary.json
+        json-summary-compare-path: ${{ steps.get-coverage-baseline.outputs.cache-hit == 'true' && 'compare/coverage-summary.json' || '' }}
