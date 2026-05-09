@@ -21,7 +21,7 @@ const ExternalIdsSchema = ItemRequest.pick({
   tvdbId: true,
   tmdbId: true,
 }).refine(
-  atLeastOnePropertyRequired,
+  (val) => atLeastOnePropertyRequired(val, ["imdbId", "tvdbId", "tmdbId"]),
   "At least one external ID (imdbId, tvdbId, or tmdbId) is required",
 );
 
@@ -31,11 +31,20 @@ const BaseItemRequestData = ItemRequest.pick({
 });
 
 export const ContentServiceRequestedResponse = z.object({
-  movies: z.array(BaseItemRequestData.safeExtend(ExternalIdsSchema.shape)),
+  movies: z.array(
+    BaseItemRequestData.extend(ExternalIdsSchema.shape).refine(
+      (val) => atLeastOnePropertyRequired(val, ["imdbId", "tmdbId"]),
+      "At least one external ID (imdbId or tmdbId) is required for movies",
+    ),
+  ),
   shows: z.array(
-    BaseItemRequestData.extend(
-      ItemRequest.pick({ seasons: true }).shape,
-    ).safeExtend(ExternalIdsSchema.shape),
+    BaseItemRequestData.extend(ItemRequest.pick({ seasons: true }).shape)
+      .extend(ExternalIdsSchema.shape)
+      .refine(
+        (val) =>
+          atLeastOnePropertyRequired(val, ["imdbId", "tmdbId", "tvdbId"]),
+        "At least one external ID (imdbId, tmdbId, or tvdbId) is required for shows",
+      ),
   ),
   updateIntervalSeconds: z.int().nonnegative().nullable(),
 });

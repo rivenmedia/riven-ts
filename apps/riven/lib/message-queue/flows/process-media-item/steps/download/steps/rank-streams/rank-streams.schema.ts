@@ -18,7 +18,7 @@ export const RankStreamsFlow = createFlowSchema("download-item.rank-streams", {
     id: UUID,
     streams: z
       .record(z.hash("sha1"), z.string())
-      .refine(atLeastOnePropertyRequired, {
+      .refine((val) => atLeastOnePropertyRequired(val), {
         message: "At least one stream must be provided",
       }),
     rtnSettings: SettingsSchema,
