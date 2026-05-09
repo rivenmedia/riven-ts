@@ -28,10 +28,6 @@ async function release(fd: number) {
          * Intentionally squash AbortError exceptions as they are
          * expected to occur when aborting an in-flight request.
          */
-
-        logger.data(
-          "Caught and squashed expected Undici RequestAbortedError during release",
-        );
       } else {
         throw error;
       }
