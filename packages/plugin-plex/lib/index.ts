@@ -19,7 +19,7 @@ export default {
   resolvers: [PlexResolver, PlexSettingsResolver],
   hooks: {
     "riven.content-service.requested": async ({ dataSources, settings }) => {
-      const { lists } = settings.get(PlexSettings);
+      const { lists, updateIntervalSeconds } = settings.get(PlexSettings);
       const tvApi = dataSources.get(PlexTvAPI);
       const communityApi = dataSources.get(PlexCommunityAPI);
       const metadataApi = dataSources.get(PlexMetadataAPI);
@@ -53,6 +53,7 @@ export default {
             .values()
             .map((guid) => metadataApi.convertPlexIdToExternalIds(guid)),
         ),
+        updateIntervalSeconds,
       };
     },
     "riven.media-item.download.success": async ({

@@ -1,3 +1,4 @@
+import { Duration } from "@repo/util-plugin-sdk/helpers/dates";
 import { json } from "@repo/util-plugin-sdk/validation";
 
 import z from "zod";
@@ -31,6 +32,11 @@ export const PlexSettings = z.object({
       "The Plex lists to pull items from, in the format https://watch.plex.tv/u/<user>/lists/<list-slug>",
     )
     .default([]),
+  updateIntervalSeconds: z
+    .int()
+    .nonnegative()
+    .default(Duration.fromObject({ days: 1 }).as("seconds"))
+    .describe("Interval in seconds to update content"),
 });
 
 export type PlexSettings = z.infer<typeof PlexSettings>;

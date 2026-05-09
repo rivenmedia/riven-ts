@@ -10,5 +10,6 @@ _Object containing the following properties:_
 | **`plexServerUrl`** (\*) | The URL of your Plex server, e.g., http://localhost:32400/                                                                          | `string` (_url_)                                                                 |            |
 | `plexLibraryPath`        | The start of Plex library paths, e.g. "/mount" in "/mount/movies"                                                                   | `string` (_min length: 1_)                                                       | `'/mount'` |
 | `lists`                  | The Plex lists to pull items from, in the format https://watch.plex.tv/u/<user>/lists/<list-slug>                                   | `Array<string (_regex: /^https:\/\/watch\.plex\.tv\/u\/[^/]+\/lists\/[^/]+$/_)>` | `[]`       |
+| `updateIntervalSeconds`  | Interval in seconds to update content                                                                                               | `number` (_≥0_)                                                                  | `86400`    |
 
 _(\*) Required._
