@@ -31,7 +31,10 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     try {
       try {
         await this.get<GetAuthMeQueryResponse>("auth/me");
-      } catch {
+      } catch (error: unknown) {
+        this.logger.error("Failed to authenticate with Seerr API", {
+          err: error,
+        });
         throw new SeerrAPIError(
           "Failed to authenticate with Seerr API. Please check the API key is correct and the Seerr instance is reachable.",
         );
