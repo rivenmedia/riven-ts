@@ -45,8 +45,8 @@ export class ItemRequestService extends BaseService {
   }
 
   @CreateRequestContext()
-  async getItemRequest(id: FilterQuery<ItemRequest>) {
-    return this.em.findOneOrFail(ItemRequest, id);
+  async getItemRequest(query: FilterQuery<ItemRequest>) {
+    return this.em.findOneOrFail(ItemRequest, query);
   }
 
   @CreateRequestContext()

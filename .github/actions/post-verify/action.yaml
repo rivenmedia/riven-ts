@@ -1,0 +1,15 @@
+name: Post verify
+
+description: Runs post-verification steps after a task is completed
+
+inputs:
+  task:
+    description: The task that was run
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Merge coverage reports
+      if: ${{ inputs.task == 'test' }}
+      uses: ./.github/actions/generate-coverage-report

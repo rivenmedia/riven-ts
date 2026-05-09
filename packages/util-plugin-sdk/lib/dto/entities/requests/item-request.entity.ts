@@ -100,4 +100,16 @@ export class ItemRequest {
     },
   })
   requestedItems = new Collection<MediaItem>(this);
+
+  /**
+   * Whether the item request is a partial request, i.e. a request for specific seasons of a show instead of the entire show.
+   *
+   * Defaults to `false` until indexer data is available, at which point it will be set to `true` for requests that specify a subset of seasons.
+   *
+   * Will **always** be `false` for movies, and special seasons are not included in the calculation.
+   *
+   * @default false
+   */
+  @Property({ default: false })
+  isPartialRequest!: Opt<boolean>;
 }

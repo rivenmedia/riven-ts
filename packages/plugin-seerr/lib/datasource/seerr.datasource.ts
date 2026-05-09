@@ -100,6 +100,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
         ]);
 
         showMap.set(request.media.tvdbId, {
+          tmdbId: request.media.tmdbId?.toString(),
           tvdbId: request.media.tvdbId.toString(),
           externalRequestId:
             request.media.id?.toString() ?? request.id.toString(),

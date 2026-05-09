@@ -59,9 +59,11 @@ export const postProcessItemProcessor =
             break;
           }
           case "validate-post-process": {
-            const childFailures = await job.getIgnoredChildrenFailures();
+            const { ignored = 0 } = await job.getDependenciesCount({
+              ignored: true,
+            });
 
-            if (Object.keys(childFailures).length) {
+            if (ignored > 0) {
               logger.warn(
                 `Post-processing failed for ${chalk.bold(job.data.mediaItem.fullTitle)}`,
               );

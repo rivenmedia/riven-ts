@@ -70,9 +70,9 @@ export abstract class MediaItem {
   @Property({ onUpdate: () => DateTime.utc().toJSDate() })
   updatedAt?: Opt<Date> | null;
 
-  @Field(() => Date, { nullable: true })
+  @Field(() => Date)
   @Property()
-  indexedAt?: Date | null;
+  indexedAt!: Date;
 
   @Field(() => Date, { nullable: true })
   @Property()

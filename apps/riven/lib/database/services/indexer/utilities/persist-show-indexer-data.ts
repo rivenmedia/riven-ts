@@ -29,6 +29,7 @@ export async function persistShowIndexerData(
 
   const processableStates = ItemRequestState.extract([
     "requested",
+    "requested_additional_seasons",
     "ongoing",
     "unreleased",
   ]);
@@ -47,10 +48,16 @@ export async function persistShowIndexerData(
     { populate: ["$infer"] },
   );
 
-  if (existingShow?.status === "ended") {
+  if (itemRequest.state === "requested_additional_seasons") {
+    itemRequest.state = "completed";
+
+    return existingShow;
+  }
+
+  if (existingShow?.status === "ended" && itemRequest.state === "completed") {
     throw new MediaItemIndexError({
       item: itemRequest,
-      error: `${existingShow.fullTitle} has already ended and will not be re-indexed.`,
+      error: `${existingShow.fullTitle} has already been ingested and will not be re-indexed.`,
     });
   }
 
@@ -64,6 +71,7 @@ export async function persistShowIndexerData(
   }
 
   try {
+    const indexedAt = DateTime.utc().toJSDate();
     const show = em.create(Show, {
       title: item.title,
       fullTitle: item.title,
@@ -81,9 +89,10 @@ export async function persistShowIndexerData(
       aliases: item.aliases,
       genres: item.genres.map((genre) => genre.toLowerCase()),
       nextAirDate: null, // Reset the next air date; it will be recalculated during episode processing
+      indexedAt,
     });
 
-    await em.upsert(show);
+    await em.upsert(Show, show, { onConflictExcludeFields: ["indexedAt"] });
 
     for (const season of Object.values(item.seasons)) {
       const seasonTitle = [
@@ -108,11 +117,14 @@ export async function persistShowIndexerData(
           ? itemRequest.seasons.includes(season.number)
           : season.number > 0,
         itemRequest,
+        indexedAt,
       });
 
       show.seasons.add(seasonEntry);
 
-      await em.upsert(seasonEntry);
+      await em.upsert(Season, seasonEntry, {
+        onConflictExcludeFields: ["indexedAt"],
+      });
 
       for (const episode of season.episodes) {
         const episodeEntry = em.create(Episode, {
@@ -129,6 +141,7 @@ export async function persistShowIndexerData(
           imdbId: seasonEntry.imdbId ?? null,
           isRequested: seasonEntry.isRequested,
           itemRequest,
+          indexedAt,
         });
 
         if (
@@ -139,23 +152,37 @@ export async function persistShowIndexerData(
         ) {
           show.nextAirDate = episodeEntry.releaseDate;
 
-          await em.upsert(show);
+          await em.upsert(Show, show, {
+            onConflictExcludeFields: ["indexedAt"],
+          });
         }
 
         seasonEntry.episodes.add(episodeEntry);
 
-        await em.upsert(episodeEntry);
+        await em.upsert(Episode, episodeEntry, {
+          onConflictExcludeFields: ["indexedAt"],
+        });
       }
     }
 
     await validateOrReject(show);
 
+    const isPartialRequest = itemRequest.seasons
+      ? itemRequest.seasons.length > 0 &&
+        itemRequest.seasons.length <
+          show.seasons.filter((season) => !season.isSpecial).length
+      : false;
+
     em.assign(itemRequest, {
-      state: !show.isReleased
-        ? "unreleased"
-        : item.status === "continuing"
-          ? "ongoing"
-          : "completed",
+      isPartialRequest,
+      ...(!isPartialRequest && {
+        // If the request is not a partial request, clear the seasons filter.
+        // This allows future re-indexing to attempt downloads without user input.
+        seasons: null,
+      }),
+      // Fill in any missing external IDs to prevent re-requests of the same item
+      ...(!itemRequest.imdbId && show.imdbId && { imdbId: show.imdbId }),
+      ...(!itemRequest.tvdbId && show.tvdbId && { tvdbId: show.tvdbId }),
     });
 
     return show;

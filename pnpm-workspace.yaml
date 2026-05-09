@@ -35,12 +35,14 @@ catalog:
   discord-api-types: 0.38.42
   es-toolkit: ^1.44.0
   eslint: ^9.39.2
+  glob: ^13.0.6
   graphql: 16.12.0
   graphql-scalars: ^1.25.0
   graphql-tag: ^2.12.6
   jiti: 2.6.1
   luxon: ^3.7.2
   msw: 2.13.2
+  nyc: ^18.0.0
   redis-memory-server: ^0.16.0
   reflect-metadata: 0.2.2
   type-graphql: 2.0.0-rc.2

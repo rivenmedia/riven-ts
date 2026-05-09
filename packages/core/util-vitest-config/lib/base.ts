@@ -22,6 +22,7 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
       test: {
         restoreMocks: true,
         coverage: {
+          enabled: true,
           exclude: ["**/__generated__/**", "**/__tests__/**"],
         },
         setupFiles: [

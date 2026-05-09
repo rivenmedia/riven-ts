@@ -63,7 +63,8 @@
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
         "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**",
         "!*.md"
-      ]
+      ],
+      "outputs": ["coverage"]
     },
     "test:watch": {
       "persistent": true,
