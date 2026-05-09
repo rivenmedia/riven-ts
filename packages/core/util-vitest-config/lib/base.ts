@@ -3,7 +3,7 @@ import { loadEnvFile } from "node:process";
 import swc from "unplugin-swc";
 import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
 
-// trigger ci 2
+// trigger ci 3
 
 export const baseVitestConfig = defineConfig(({ mode }) => {
   try {

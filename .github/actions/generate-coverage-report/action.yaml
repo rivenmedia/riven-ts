@@ -20,9 +20,8 @@ runs:
       uses: davelosert/vitest-coverage-report-action@v2
       with:
         name: Riven
-        working-directory: packages/core/util-vitest-config/coverage
-        json-final-path: merged/merged-coverage.json
-        json-summary-path: summary/coverage-summary.json
-        json-summary-compare-path: ${{ steps.get-coverage-baseline.outputs.cache-hit == 'true' && 'compare/coverage-summary.json' || '' }}
+        json-final-path: packages/core/util-vitest-config/coverage/merged/merged-coverage.json
+        json-summary-path: packages/core/util-vitest-config/coverage/summary/coverage-summary.json
+        json-summary-compare-path: ${{ steps.get-coverage-baseline.outputs.cache-hit == 'true' && 'packages/core/util-vitest-config/coverage/compare/coverage-summary.json' || '' }}
         threshold-icons: "{0: '🔴', 80: '🟠', 90: '🟢'}"
         file-coverage-mode: changes-affected
