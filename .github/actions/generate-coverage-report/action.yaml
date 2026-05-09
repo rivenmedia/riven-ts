@@ -7,7 +7,7 @@ runs:
   steps:
     - name: Merge reports
       shell: bash
-      run: turbo report
+      run: pnpm turbo report
 
     - name: Generate coverage report
       uses: davelosert/vitest-coverage-report-action@v2
