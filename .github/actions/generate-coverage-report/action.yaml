@@ -19,6 +19,7 @@ runs:
     - name: Generate coverage report
       uses: davelosert/vitest-coverage-report-action@v2
       with:
+        name: Riven
         working-directory: packages/core/util-vitest-config/coverage
         json-final-path: merged/merged-coverage.json
         json-summary-path: summary/coverage-summary.json
