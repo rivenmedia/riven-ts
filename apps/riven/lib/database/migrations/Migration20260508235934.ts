@@ -13,6 +13,10 @@ export class Migration20260508235934 extends Migration {
     );
 
     this.addSql(
+      "update media_item set indexed_at = created_at where indexed_at is null",
+    );
+
+    this.addSql(
       `alter table "media_item" alter column "indexed_at" set not null;`,
     );
   }

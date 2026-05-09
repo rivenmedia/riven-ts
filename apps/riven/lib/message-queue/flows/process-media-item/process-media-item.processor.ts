@@ -12,7 +12,7 @@ import { createJobParentConfig } from "../../utilities/create-job-parent-config.
 import { enqueuePostProcessMediaItem } from "../post-process-media-item/enqueue-post-process-media-item.ts";
 import { processMediaItemProcessorSchema } from "./process-media-item.schema.ts";
 import { enqueueDownloadItem } from "./steps/download/enqueue-download-item.ts";
-import { enqueueScrapeItems } from "./steps/scrape/enqueue-scrape-items.ts";
+import { enqueueScrapeItem } from "./steps/scrape/enqueue-scrape-item.ts";
 
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
@@ -43,8 +43,8 @@ export const processMediaItemProcessor =
               job.data.mediaItem.type,
             );
 
-            await enqueueScrapeItems({
-              items: [itemToScrape],
+            const scrapeItemJobNode = await enqueueScrapeItem({
+              item: itemToScrape,
               subscribers: getPluginEventSubscribers(
                 "riven.media-item.scrape.requested",
                 plugins,
@@ -52,6 +52,12 @@ export const processMediaItemProcessor =
               parent,
               isRootItem: job.data.isRootItem,
             });
+
+            if (scrapeItemJobNode === null) {
+              throw new UnrecoverableError(
+                `${chalk.bold(itemToScrape.fullTitle)} has exhausted all scrape attempts and cannot be scraped again`,
+              );
+            }
 
             await job.updateData({
               ...job.data,
@@ -80,7 +86,7 @@ export const processMediaItemProcessor =
               // For child items, we only try once, as they are enqueued as part of a fan-out process.
               // If they fail, the parent will retry in the future and recreate the child attempts.
               throw new UnrecoverableError(
-                `${chalk.bold(job.data.mediaItem.fullTitle)} failed to download`,
+                `${chalk.bold(job.data.mediaItem.fullTitle)} failed to scrape`,
               );
             }
 

@@ -174,14 +174,15 @@ export async function persistShowIndexerData(
       : false;
 
     em.assign(itemRequest, {
-      // Fill in any missing external IDs
-      imdbId: itemRequest.imdbId ?? show.imdbId ?? null,
-      tvdbId: itemRequest.tvdbId ?? show.tvdbId,
+      isPartialRequest,
       ...(!isPartialRequest && {
         // If the request is not a partial request, clear the seasons filter.
         // This allows future re-indexing to attempt downloads without user input.
         seasons: null,
       }),
+      // Fill in any missing external IDs to prevent re-requests of the same item
+      ...(!itemRequest.imdbId && show.imdbId && { imdbId: show.imdbId }),
+      ...(!itemRequest.tvdbId && show.tvdbId && { tvdbId: show.tvdbId }),
     });
 
     return show;

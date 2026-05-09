@@ -29,7 +29,7 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
         );
 
         for (const episode of collectionEpisodes) {
-          trackedEpisodes.set(episode, null);
+          trackedEpisodes.set(episode, trackedEpisodes.get(episode) ?? null);
         }
       }
     }
