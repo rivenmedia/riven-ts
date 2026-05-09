@@ -1,6 +1,6 @@
-name: Generate coverage report
+name: Post verify
 
-description: Generates a coverage report from a test run
+description: Runs post-verification steps after a task is completed
 
 inputs:
   task:
