@@ -3,6 +3,8 @@ import { loadEnvFile } from "node:process";
 import swc from "unplugin-swc";
 import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
 
+// trigger ci
+
 export const baseVitestConfig = defineConfig(({ mode }) => {
   try {
     loadEnvFile(path.join(process.cwd(), ".env." + mode));
