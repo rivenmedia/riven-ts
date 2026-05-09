@@ -33,9 +33,12 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
       expect(flowAddBulkSpy).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
-            queueName: "scrape-item",
+            queueName: "process-media-item",
             data: expect.objectContaining({
-              id: season.id,
+              mediaItem: expect.objectContaining({
+                id: season.id,
+              }),
+              isRootItem: false,
             }),
           }),
         ]),
@@ -69,9 +72,12 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
       expect(flowAddBulkSpy).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
-            queueName: "scrape-item",
+            queueName: "process-media-item",
             data: expect.objectContaining({
-              id: episode.id,
+              mediaItem: expect.objectContaining({
+                id: episode.id,
+              }),
+              isRootItem: false,
             }),
           }),
         ]),

@@ -34,7 +34,7 @@ export const ContentServiceRequestedResponse = z.object({
   movies: z.array(BaseItemRequestData.safeExtend(ExternalIdsSchema.shape)),
   shows: z.array(
     BaseItemRequestData.extend(
-      ItemRequest.pick({ seasons: true }).required({ seasons: true }).shape,
+      ItemRequest.pick({ seasons: true }).shape,
     ).safeExtend(ExternalIdsSchema.shape),
   ),
   updateIntervalSeconds: z.int().nonnegative().nullable(),
