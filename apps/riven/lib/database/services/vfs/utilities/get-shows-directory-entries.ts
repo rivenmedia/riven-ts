@@ -1,49 +1,53 @@
-import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
+import { FileSystemEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import path from "node:path";
 
 import type { PathInfo } from "../schemas/path-info.schema.ts";
 import type { EntityManager } from "@mikro-orm/core";
 
+const extractPart = (
+  entry: FileSystemEntry,
+  tvdbId?: string,
+  season?: number,
+) => {
+  if (!entry.path) {
+    return;
+  }
+
+  const { dir, base } = path.parse(entry.path);
+  const [showName, seasonName] = dir.split(path.sep);
+
+  return tvdbId ? (season ? base : seasonName) : showName;
+};
+
 export const getShowsDirectoryEntries = async (
   em: EntityManager,
   { tvdbId, season }: PathInfo,
 ): Promise<string[]> => {
-  const entries = await em.find(
-    MediaEntry,
-    {
-      mediaItem: {
-        type: "episode",
-        ...(tvdbId && { tvdbId }),
-        ...(season && {
-          season: {
-            number: season,
-          },
-        }),
-      },
+  const entries = await em.find(FileSystemEntry, {
+    type: {
+      $in: ["media", "subtitle"],
     },
-    {
-      // TODO: Is there a better way to do this?
-      // @ts-expect-error - MikroORM doesn't like `mediaItem.season.show` in the type definition
-      populate: ["mediaItem.season.show"],
+    mediaItem: {
+      type: "episode",
+      ...(tvdbId && { tvdbId }),
+      ...(season && {
+        season: {
+          number: season,
+        },
+      }),
     },
-  );
+  });
 
-  return Array.from(
-    entries.reduce<Set<string>>((acc, entry) => {
-      if (!entry.path) {
-        return acc;
-      }
+  const names = new Set<string>();
 
-      const { dir, base } = path.parse(entry.path);
-      const [showName, seasonName] = dir.split(path.sep);
-      const part = tvdbId ? (season ? base : seasonName) : showName;
+  for (const entry of entries) {
+    const part = extractPart(entry, tvdbId, season);
 
-      if (!part) {
-        return acc;
-      }
+    if (part) {
+      names.add(part);
+    }
+  }
 
-      return acc.add(part);
-    }, new Set<string>()),
-  );
+  return Array.from(names);
 };

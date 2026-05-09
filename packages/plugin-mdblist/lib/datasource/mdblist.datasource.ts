@@ -1,8 +1,4 @@
-import {
-  BaseDataSource,
-  type BasePluginContext,
-  type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
 
 import { getListItemsByName200Schema } from "../__generated__/zod/getListItemsByNameSchema.ts";
 import { MdbListName } from "../schemas/mdblist-name.schema.ts";
@@ -51,7 +47,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
 
   async getListItems(
     contentLists: Set<string>,
-  ): Promise<ContentServiceRequestedResponse> {
+  ): Promise<Pick<ContentServiceRequestedResponse, "movies" | "shows">> {
     if (!contentLists.size) {
       return {
         movies: [],
@@ -109,7 +105,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
 
               if (!this.#seenShowIds.has(item.id)) {
                 showIdsMap.set(item.id, {
-                  imdbId: item.imdb_id,
+                  imdbId: item.imdb_id ?? undefined,
                   tvdbId: item.tvdb_id?.toString(),
                 });
               }
@@ -135,5 +131,3 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
     };
   }
 }
-
-export type MdblistContextSlice = BasePluginContext;

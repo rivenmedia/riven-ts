@@ -1,3 +1,6 @@
+import { Duration } from "@repo/util-plugin-sdk/helpers/dates";
+import { json } from "@repo/util-plugin-sdk/validation";
+
 import z from "zod";
 
 import { getRequestQueryParamsFilterEnum } from "./__generated__/types/GetRequest.ts";
@@ -16,6 +19,12 @@ export const SeerrSettings = z.object({
     .default("approved")
     .describe(
       "Request status filter (all, approved, available, pending, processing, ...)",
+    ),
+  updateIntervalSeconds: json(z.int().nonnegative().nullable())
+    .nullable()
+    .default(Duration.fromObject({ minutes: 1 }).as("seconds"))
+    .describe(
+      "Interval in seconds to update content. If using the webhook, set to `null` to disable automatic updates (an initial request will still be made on startup)",
     ),
 });
 

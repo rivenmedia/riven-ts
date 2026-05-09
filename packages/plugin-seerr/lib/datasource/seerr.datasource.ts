@@ -1,8 +1,4 @@
-import {
-  BaseDataSource,
-  type BasePluginContext,
-  type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
 
 import { MetadataSettingsResponse } from "../schemas/metadata-settings-response.schema.ts";
 import { RequestResponse } from "../schemas/request-response.schema.ts";
@@ -35,7 +31,10 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     try {
       try {
         await this.get<GetAuthMeQueryResponse>("auth/me");
-      } catch {
+      } catch (error: unknown) {
+        this.logger.error("Failed to authenticate with Seerr API", {
+          err: error,
+        });
         throw new SeerrAPIError(
           "Failed to authenticate with Seerr API. Please check the API key is correct and the Seerr instance is reachable.",
         );
@@ -51,7 +50,9 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     }
   }
 
-  async getContent(filter: string): Promise<ContentServiceRequestedResponse> {
+  async getContent(
+    filter: string,
+  ): Promise<Pick<ContentServiceRequestedResponse, "movies" | "shows">> {
     const requests = await this.#getAllRequests(filter);
     const movieMap = new Map<
       number,
@@ -92,6 +93,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
         ]);
 
         showMap.set(request.media.tvdbId, {
+          tmdbId: request.media.tmdbId?.toString(),
           tvdbId: request.media.tvdbId.toString(),
           externalRequestId:
             request.media.id?.toString() ?? request.id.toString(),
@@ -156,5 +158,3 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     }
   }
 }
-
-export type SeerrContextSlice = BasePluginContext;

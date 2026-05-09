@@ -1,4 +1,4 @@
-import { Entity, Index, Property } from "@mikro-orm/decorators/legacy";
+import { Entity, Index, Property, Unique } from "@mikro-orm/decorators/legacy";
 import { Field, Int, ObjectType } from "type-graphql";
 
 import { FileSystemEntry } from "./filesystem-entry.entity.ts";
@@ -9,6 +9,7 @@ import type { Opt } from "@mikro-orm/core";
 @Entity({
   discriminatorValue: "subtitle",
 })
+@Unique({ properties: ["mediaItem", "language"] })
 export class SubtitleEntry extends FileSystemEntry {
   override type: Opt<"subtitle"> = "subtitle" as const;
 
@@ -16,10 +17,6 @@ export class SubtitleEntry extends FileSystemEntry {
   @Index()
   @Property()
   language!: string;
-
-  @Field(() => String, { nullable: true })
-  @Property()
-  parentOriginalFilename?: string;
 
   @Field(() => String)
   @Property()
@@ -31,13 +28,22 @@ export class SubtitleEntry extends FileSystemEntry {
 
   @Field(() => Int)
   @Property()
-  videoFileSize!: number;
+  sourceProvider!: string;
 
   @Field(() => String, { nullable: true })
   @Property()
-  openSubtitlesId?: string; // TODO: Separate entity for external providers?
+  sourceId?: string | null;
 
-  getVfsFileName(): string {
-    throw new Error("SubtitleEntry vfsFileName not implemented yet");
+  @Property({ persist: false, hidden: true })
+  async getVfsFileName(): Promise<string> {
+    const prettyName = await this.mediaItem.getEntity().getPrettyName();
+
+    if (!prettyName) {
+      throw new TypeError(
+        "Unable to determine VFS file name without associated MediaItem",
+      );
+    }
+
+    return `${prettyName}.${this.language}.srt`;
   }
 }

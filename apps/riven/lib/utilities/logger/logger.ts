@@ -45,6 +45,7 @@ if (settings.loggingEnabled) {
       maxFiles: 5,
       format: ecsFileFormat,
       zippedArchive: true,
+      level: "silly", // Send ALL logs to ECS, regardless of log level config
     }),
   );
 

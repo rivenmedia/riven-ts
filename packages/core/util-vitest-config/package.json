@@ -8,10 +8,14 @@
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
+    "collect-json-reports": "node lib/scripts/collect-json-outputs.ts",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
-    "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest"
+    "merge-json-reports": "nyc merge coverage/raw coverage/merged/merged-coverage.json",
+    "report": "pnpm report:html && pnpm report:summary",
+    "report:html": "nyc report -t coverage/merged --report-dir coverage/report --reporter=html --exclude-after-remap false",
+    "report:summary": "nyc report -t coverage/merged --report-dir coverage/summary --reporter=json-summary --exclude-after-remap false",
+    "view-report": "open coverage/report/index.html"
   },
   "dependencies": {
     "@swc/core": "^1.15.7",
@@ -24,7 +28,9 @@
     "@typescript-eslint/parser": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
+    "glob": "catalog:",
     "msw": "catalog:",
+    "nyc": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },

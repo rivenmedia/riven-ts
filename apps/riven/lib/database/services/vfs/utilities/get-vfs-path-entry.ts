@@ -5,11 +5,22 @@ import {
   Show,
 } from "@repo/util-plugin-sdk/dto/entities";
 
+import { getVfsSubtitleEntry } from "./get-vfs-subtitle-entry.ts";
+
 import type { PathInfo } from "../schemas/path-info.schema.ts";
 import type { EntityManager } from "@mikro-orm/core";
 
-export function getEntry(em: EntityManager, pathInfo: PathInfo) {
+export async function getEntry(em: EntityManager, pathInfo: PathInfo) {
   switch (pathInfo.pathType) {
+    case "subtitle-file": {
+      const entry = await getVfsSubtitleEntry(em, pathInfo);
+
+      if (!entry) {
+        throw new TypeError("Unable to find subtitle file");
+      }
+
+      return entry;
+    }
     case "single-movie": {
       if (!pathInfo.tmdbId) {
         throw new TypeError("Missing tmdbId for movie path");

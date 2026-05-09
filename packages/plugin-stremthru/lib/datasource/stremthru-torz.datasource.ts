@@ -1,4 +1,4 @@
-import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
 import { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
@@ -184,5 +184,3 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     return data;
   }
 }
-
-export type StremThruContextSlice = BasePluginContext;

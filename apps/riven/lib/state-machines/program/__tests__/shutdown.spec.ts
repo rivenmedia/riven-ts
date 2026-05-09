@@ -3,7 +3,7 @@ import { createActor, fromPromise } from "xstate";
 
 import { it } from "./helpers/test-context.ts";
 
-it('transitions to "Shutdown" then "Exited" when the "riven.shutdown" event is sent', async ({
+it('transitions to "Shutdown" then "Exited" when the "riven.core.shutdown" event is sent', async ({
   actor,
 }) => {
   actor.start().send({ type: "riven.core.shutdown" });

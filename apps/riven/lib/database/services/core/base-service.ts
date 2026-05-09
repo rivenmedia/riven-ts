@@ -1,9 +1,9 @@
 import type { MikroORM } from "@mikro-orm/core";
 
 export abstract class BaseService {
-  protected readonly orm!: MikroORM;
+  private readonly orm!: MikroORM;
 
-  get em() {
+  protected get em() {
     return this.orm.em;
   }
 

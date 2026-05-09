@@ -1,8 +1,4 @@
-import {
-  BaseDataSource,
-  type BasePluginContext,
-  type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
 
 import { DateTime } from "luxon";
 import z from "zod";
@@ -190,5 +186,3 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
     }
   }
 }
-
-export type TvdbContextSlice = BasePluginContext;

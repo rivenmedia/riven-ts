@@ -1,8 +1,12 @@
 /* eslint-disable no-empty-pattern */
+import {
+  type ApolloServerContext,
+  CoreKey,
+} from "@repo/core-util-graphql-schema";
+
 import assert from "node:assert";
 import { test as testBase, vi } from "vitest";
 
-import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 import type { JobsOptions } from "bullmq";
 
 export const it = testBase
@@ -205,7 +209,7 @@ export const it = testBase
       await import("@repo/core-util-mock-graphql-server");
     const { resolvers } = await import("../graphql/resolvers/index.ts");
 
-    return buildMockServer(resolvers);
+    return buildMockServer<ApolloServerContext>(resolvers);
   })
   .extend(
     "gqlServer",
@@ -220,7 +224,12 @@ export const it = testBase
         {
           context: () =>
             Promise.resolve({
-              em: orm.em.fork(),
+              [CoreKey]: {
+                em: orm.em.fork(),
+              },
+              logger: {} as never,
+              sendEvent: vi.fn(),
+              plugins: {},
             }),
           listen: { port: 0 },
         },

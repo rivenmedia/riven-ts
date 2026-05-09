@@ -27,6 +27,9 @@ concurrency:
 jobs:
   verify:
     name: Verify - ${{ matrix.task.name }}
+    permissions:
+      contents: read
+      pull-requests: write
     strategy:
       fail-fast: false
       matrix:

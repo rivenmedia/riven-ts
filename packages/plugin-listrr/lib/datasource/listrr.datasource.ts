@@ -1,8 +1,4 @@
-import {
-  BaseDataSource,
-  type BasePluginContext,
-  type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
 
 import { getApiListMyPageQueryResponseSchema } from "../__generated__/zod/getApiListMyPageSchema.ts";
 import { listrrContractsModelsAPIPagedResponse1listrrContractsModelsAPIMovieDtoSchema as getMoviesResponseSchema } from "../__generated__/zod/listrr/contracts/models/API/pagedResponse1listrr/contracts/models/API/movieDtoSchema.ts";
@@ -81,6 +77,7 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
               idsMap.set(item.id, {
                 imdbId: item.imDbId ?? undefined,
                 tvdbId: item.tvDbId?.toString(),
+                tmdbId: item.tmDbId?.toString(),
               });
             }
           }
@@ -148,5 +145,3 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
     return [...idsMap.values()];
   }
 }
-
-export type ListrrContextSlice = BasePluginContext;

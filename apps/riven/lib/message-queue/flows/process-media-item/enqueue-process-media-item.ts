@@ -11,13 +11,14 @@ import type { FlowJob } from "bullmq";
 import type { UUID } from "node:crypto";
 import type { PartialDeep } from "type-fest";
 
-export interface EnqueueProcessMediaItemInput {
+export interface EnqueueProcessMediaItemInput extends Partial<
+  Pick<ProcessMediaItemFlow["input"], "step" | "isRootItem">
+> {
   id: UUID;
-  step?: ProcessMediaItemFlow["input"]["step"];
 }
 
 export async function enqueueProcessMediaItem(
-  { id, step = "scrape" }: EnqueueProcessMediaItemInput,
+  { id, step = "scrape", isRootItem = true }: EnqueueProcessMediaItemInput,
   opts: FlowJob["opts"] = {},
 ) {
   const mediaItemsToProcess =
@@ -29,6 +30,7 @@ export async function enqueueProcessMediaItem(
       {
         step,
         mediaItem,
+        isRootItem,
       },
       {
         opts: toMerged<typeof opts, PartialDeep<NonNullable<FlowJob["opts"]>>>(

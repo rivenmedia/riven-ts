@@ -17,6 +17,7 @@
     "PGID",
     "promisable",
     "PUID",
+    "seerr",
     "serialiser",
     "serialisers",
     "strem",
@@ -31,6 +32,7 @@
     "tvsearch",
     "USERGROUP",
     "vars",
+    "vitest",
     "zkochan"
   ],
   "js/ts.preferences.autoImportSpecifierExcludeRegexes": ["node:test"],

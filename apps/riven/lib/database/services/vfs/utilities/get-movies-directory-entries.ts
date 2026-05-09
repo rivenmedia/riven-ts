@@ -1,4 +1,4 @@
-import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaEntry, SubtitleEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import { reduceAsync } from "es-toolkit";
 import path from "node:path";
@@ -34,11 +34,21 @@ export const getMoviesDirectoryEntries = async (
       async (acc, entry) => {
         const vfsFileName = await entry.getVfsFileName();
 
-        return acc.add(
-          pathType === "single-movie"
-            ? vfsFileName
-            : path.parse(vfsFileName).name,
-        );
+        if (pathType === "single-movie") {
+          acc.add(vfsFileName);
+
+          const subtitles = await em.find(SubtitleEntry, {
+            mediaItem: entry.mediaItem.id,
+          });
+
+          for (const subtitle of subtitles) {
+            acc.add(await subtitle.getVfsFileName());
+          }
+
+          return acc;
+        }
+
+        return acc.add(path.parse(vfsFileName).name);
       },
       new Set<string>(),
     ),

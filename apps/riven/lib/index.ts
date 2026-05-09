@@ -1,65 +1,106 @@
 import { randomUUID } from "node:crypto";
 import { setEnvironmentData } from "node:worker_threads";
 
-import { SessionID, withLogContext } from "./utilities/logger/log-context.ts";
+import {
+  type LogContext,
+  SessionID,
+  withLogContext,
+} from "./utilities/logger/log-context.ts";
+
+import type { rivenMachine } from "./state-machines/program/index.ts";
+import type { ActorRefFromLogic } from "xstate";
 
 const sessionId = SessionID.parse(randomUUID());
 
 setEnvironmentData("riven.session.id", sessionId);
 
-await withLogContext(
-  {
-    "riven.log.source": "core",
-    "riven.session.id": sessionId,
-  },
-  async () => {
-    await import("./sentry.ts");
+const baseLogContext: LogContext = {
+  "riven.log.source": "core",
+  "riven.session.id": sessionId,
+};
 
-    const { createActor, waitFor } = await import("xstate");
+/**
+ * Conditionally sends a shutdown event to the program state machine if it's in a state that can be shutdown.
+ *
+ * @param actor The program state machine
+ * @returns true if a shutdown event was sent, otherwise false
+ */
+function maybeSendShutdownEvent(actor: ActorRefFromLogic<typeof rivenMachine>) {
+  const { value } = actor.getSnapshot();
+  const stoppableStates: (typeof value)[] = ["Running", "Bootstrapping"];
 
-    const { rivenMachine } = await import("./state-machines/program/index.ts");
-    const { logger } = await import("./utilities/logger/logger.ts");
+  if (stoppableStates.includes(value)) {
+    actor.send({ type: "riven.core.shutdown" });
 
-    process.on("uncaughtException", (error) => {
+    return true;
+  }
+
+  return false;
+}
+
+await withLogContext(baseLogContext, async () => {
+  await import("./sentry.ts");
+
+  const { createActor, waitFor } = await import("xstate");
+
+  const { rivenMachine } = await import("./state-machines/program/index.ts");
+  const { logger } = await import("./utilities/logger/logger.ts");
+
+  const actor = createActor(rivenMachine, {
+    input: {
+      sessionId,
+    },
+  });
+
+  process.on("uncaughtException", (error) => {
+    process.exitCode = 1;
+
+    withLogContext(baseLogContext, () => {
       logger.error("Uncaught exception", { err: error });
 
-      process.exit(1);
-    });
+      if (maybeSendShutdownEvent(actor)) {
+        const signal = AbortSignal.timeout(10_000);
 
-    process.on("unhandledRejection", (error) => {
-      logger.error("Uncaught rejection", { err: error });
-    });
+        signal.addEventListener("abort", () => {
+          logger.error("Timeout whilst waiting for shutdown; forcing exit");
 
-    const actor = createActor(rivenMachine, {
-      input: {
-        sessionId,
-      },
-    });
+          process.exit();
+        });
 
-    actor.start();
+        waitFor(
+          actor,
+          (state) => state.matches("Exited") || state.matches("Errored"),
+        ).catch((error: unknown) => {
+          logger.error("Error while waiting for shutdown", { err: error });
 
-    process.on("SIGINT", () => {
-      const { value } = actor.getSnapshot();
-      const stoppableStates: (typeof value)[] = ["Running", "Bootstrapping"];
-
-      if (stoppableStates.includes(value)) {
-        actor.send({ type: "riven.core.shutdown" });
+          process.exit();
+        });
       }
     });
+  });
 
-    await waitFor(
-      actor,
-      (state) => state.matches("Exited") || state.matches("Errored"),
-    );
+  process.on("unhandledRejection", (error) => {
+    withLogContext(baseLogContext, () => {
+      logger.error("Uncaught rejection", { err: error });
+    });
+  });
 
-    const { value } = actor.getSnapshot();
+  actor.start();
 
-    if (value === "Errored") {
-      process.exit(1);
-    }
+  process.on("SIGINT", () => {
+    maybeSendShutdownEvent(actor);
+  });
 
-    logger.info("Riven has shut down");
+  await waitFor(
+    actor,
+    (state) => state.matches("Exited") || state.matches("Errored"),
+  );
 
-    process.exit(0);
-  },
-);
+  const { value } = actor.getSnapshot();
+
+  if (value === "Errored") {
+    process.exitCode = 1;
+  }
+
+  process.exit();
+});

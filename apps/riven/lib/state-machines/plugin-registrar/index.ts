@@ -374,8 +374,8 @@ export const pluginRegistrarMachine = setup({
       Validating: {
         entry: "spawnValidators",
         always: {
-          guard: "allPluginsValidated",
           target: "Validated",
+          guard: "allPluginsValidated",
           actions: [
             {
               type: "assignPluginHooks",

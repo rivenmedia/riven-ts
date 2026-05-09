@@ -24,7 +24,7 @@ export class MdblistResolver {
   mdbListItems(
     @Args() { listNames }: ListNamesArguments,
     @PluginDataSource(pluginConfig.name, MdblistAPI) api: MdblistAPI,
-  ): Promise<ContentServiceRequestedResponse> {
+  ): Promise<Pick<ContentServiceRequestedResponse, "movies" | "shows">> {
     return api.getListItems(new Set<string>(listNames));
   }
 }

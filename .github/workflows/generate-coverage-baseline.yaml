@@ -1,0 +1,44 @@
+name: Generate Coverage Baseline
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  generate-coverage-baseline:
+    name: Generate Coverage Baseline
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up runner
+        uses: ./.github/actions/set-up-verification-runner
+        with:
+          install-fuse: true
+          install-redis-server: true
+
+      - name: Set up project environment
+        uses: ./.github/actions/set-up-project-environment
+
+      - name: Generate coverage baseline
+        run: pnpm turbo test --continue --concurrency "100%" && pnpm turbo report
+        env:
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+
+      - name: Move coverage baseline
+        working-directory: packages/core/util-vitest-config/coverage
+        run: |
+          mkdir -p compare
+          mv summary/coverage-summary.json compare/coverage-summary.json
+
+      - name: Save coverage baseline to cache
+        uses: actions/cache/save@v5
+        with:
+          key: coverage-baseline
+          path: packages/core/util-vitest-config/coverage/compare/coverage-summary.json

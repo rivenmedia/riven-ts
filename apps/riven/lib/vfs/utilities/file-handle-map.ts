@@ -1,13 +1,26 @@
 import type { FileChunkCalculations } from "../schemas/file-chunk-calculations.schema.ts";
 import type { Dispatcher } from "undici";
 
-export interface FileHandleMetadata {
+interface FileHandleMetadataBase {
   fileSize: number;
   filePath: string;
   fileBaseName: string;
+}
+
+export interface MediaFileHandleMetadata extends FileHandleMetadataBase {
+  type: "media";
   originalFileName: string;
   url: string;
 }
+
+export interface SubtitleFileHandleMetadata extends FileHandleMetadataBase {
+  type: "subtitle";
+  contentBuffer: Buffer;
+}
+
+export type FileHandleMetadata =
+  | MediaFileHandleMetadata
+  | SubtitleFileHandleMetadata;
 
 /**
  * Maps file descriptor (fd) to the corresponding `FileHandleMetadata`.

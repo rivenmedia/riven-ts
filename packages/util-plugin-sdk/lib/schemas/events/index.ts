@@ -29,6 +29,10 @@ import {
   ItemRequestUpdateSuccessEventHandler,
 } from "./item-request.update.success.event.ts";
 import {
+  ItemRequestedEvent,
+  ItemRequestedEventHandler,
+} from "./item-requested.event.ts";
+import {
   MediaItemDownloadRequestedEvent,
   MediaItemDownloadRequestedEventHandler,
 } from "./media-item.download-requested.event.ts";
@@ -98,6 +102,10 @@ import {
   MediaItemStreamLinkRequestedEvent,
   MediaItemStreamLinkRequestedEventHandler,
 } from "./media-item.stream-link-requested.event.ts";
+import {
+  MediaItemSubtitleRequestedEvent,
+  MediaItemSubtitleRequestedEventHandler,
+} from "./media-item.subtitle-requested.event.ts";
 
 export const RivenEvent = z.discriminatedUnion("type", [
   CoreStartedEvent,
@@ -125,9 +133,16 @@ export const RivenEvent = z.discriminatedUnion("type", [
   MediaItemDownloadProviderListRequestedEvent,
   MediaItemDownloadSuccessEvent,
   MediaItemStreamLinkRequestedEvent,
+  MediaItemSubtitleRequestedEvent,
 ]);
 
 export type RivenEvent = z.infer<typeof RivenEvent>;
+
+export const RivenExternalEvent = z.discriminatedUnion("type", [
+  ItemRequestedEvent,
+]);
+
+export type RivenExternalEvent = z.infer<typeof RivenExternalEvent>;
 
 export const RivenEventSchemaMap = new Map<RivenEvent["type"], ZodObject>(
   RivenEvent.options.map((option) => [
@@ -186,4 +201,11 @@ export const RivenEventHandler = {
   // Item streaming
   "riven.media-item.stream-link.requested":
     MediaItemStreamLinkRequestedEventHandler,
+
+  // Subtitles
+  "riven.media-item.subtitle.requested": MediaItemSubtitleRequestedEventHandler,
 } as const satisfies Record<RivenEvent["type"], z.ZodFunction>;
+
+export const RivenExternalEventHandler = {
+  "riven-external.item-requested": ItemRequestedEventHandler,
+} as const satisfies Record<RivenExternalEvent["type"], z.ZodFunction>;

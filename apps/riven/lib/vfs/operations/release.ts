@@ -1,4 +1,5 @@
 import Fuse from "@zkochan/fuse-native";
+import Undici from "undici";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { isFuseError } from "../errors/fuse-error.ts";
@@ -15,11 +16,22 @@ import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
 import type { OPERATIONS } from "@zkochan/fuse-native";
 
-async function release(_path: string, fd: number) {
+async function release(fd: number) {
   const response = await fdToResponsePromiseMap.get(fd);
 
   if (response) {
-    response.body.destroy();
+    try {
+      await response.body.dump();
+    } catch (error) {
+      if (error instanceof Undici.errors.RequestAbortedError) {
+        /*
+         * Intentionally squash AbortError exceptions as they are
+         * expected to occur when aborting an in-flight request.
+         */
+      } else {
+        throw error;
+      }
+    }
   }
 
   const fileHandleMeta = fdToFileHandleMeta.get(fd);
@@ -44,21 +56,24 @@ async function release(_path: string, fd: number) {
     return;
   }
 
-  const nextFdCount =
-    (fileNameToFdCountMap.get(fileHandleMeta.originalFileName) ?? 1) - 1;
+  // Subtitle file handles don't use the file-name based maps
+  if (fileHandleMeta.type === "media") {
+    const nextFdCount =
+      (fileNameToFdCountMap.get(fileHandleMeta.originalFileName) ?? 1) - 1;
 
-  if (nextFdCount > 0) {
-    fileNameToFdCountMap.set(fileHandleMeta.originalFileName, nextFdCount);
-  } else {
-    fileNameToFdCountMap.delete(fileHandleMeta.originalFileName);
+    if (nextFdCount > 0) {
+      fileNameToFdCountMap.set(fileHandleMeta.originalFileName, nextFdCount);
+    } else {
+      fileNameToFdCountMap.delete(fileHandleMeta.originalFileName);
 
-    // If there are no more file descriptors referencing this file,
-    // we can clean up the file-name based mappings as well to free up memory.
-    [fileNameToFileChunkCalculationsMap, fileNameIsFetchingLinkMap].forEach(
-      (map) => {
-        map.delete(fileHandleMeta.originalFileName);
-      },
-    );
+      // If there are no more file descriptors referencing this file,
+      // we can clean up the file-name based mappings as well to free up memory.
+      [fileNameToFileChunkCalculationsMap, fileNameIsFetchingLinkMap].forEach(
+        (map) => {
+          map.delete(fileHandleMeta.originalFileName);
+        },
+      );
+    }
   }
 
   logger.verbose(
@@ -69,7 +84,7 @@ async function release(_path: string, fd: number) {
 export const releaseSync = function (_path, fd, callback) {
   void withVfsScope(async () => {
     try {
-      await release(_path, fd);
+      await release(fd);
 
       process.nextTick(callback, 0);
     } catch (error) {

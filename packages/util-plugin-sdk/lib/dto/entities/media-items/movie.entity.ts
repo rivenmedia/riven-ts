@@ -26,7 +26,7 @@ export class Movie extends MediaItem {
   override type: Opt<"movie"> = "movie" as const;
 
   @Field(() => String)
-  @Property()
+  @Property({ type: "varchar", length: 10 })
   @IsNumberString()
   tmdbId!: string;
 
