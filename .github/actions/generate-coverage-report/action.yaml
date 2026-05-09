@@ -1,0 +1,15 @@
+name: Generate coverage report
+
+description: Generates a coverage report from a test run
+
+runs:
+  using: composite
+  steps:
+    - name: Merge reports
+      shell: bash
+      run: turbo report
+
+    - name: Generate coverage report
+      uses: davelosert/vitest-coverage-report-action@v2
+      with:
+        json-final-path: packages/core/util-vitest-config/coverage/merged/merged-coverage.json

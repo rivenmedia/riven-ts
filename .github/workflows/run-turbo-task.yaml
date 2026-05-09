@@ -128,11 +128,12 @@ jobs:
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
 
-      - name: Generate coverage report
-        if: inputs.task == 'test'
-        uses: davelosert/vitest-coverage-report-action@v2
+      - name: Post-verification steps
+        if: always()
+        uses: ./.github/actions/post-verify
         with:
-          json-final-path: packages/core/util-vitest-config/coverage/merged/merged-coverage.json
+          task: ${{ inputs.task }}
+
       - uses: charpeni/turborepo-summary-action@v1
         if: always()
 
