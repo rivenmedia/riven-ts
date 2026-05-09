@@ -1,12 +1,10 @@
 import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
 
-import { userPlexAccountSchema } from "../__generated__/index.ts";
+import { userPlexAccountSchema } from "../__generated__/zod/userPlexAccountSchema.ts";
 import { PlexSettings } from "../plex-settings.schema.ts";
 
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource.js";
-
-export class PlexTvAPIError extends Error {}
 
 export class PlexTvAPI extends BaseDataSource<PlexSettings> {
   override baseURL = "https://plex.tv/api/v2/";
@@ -31,7 +29,7 @@ export class PlexTvAPI extends BaseDataSource<PlexSettings> {
     const res = await this.get<unknown>("user");
     const data = userPlexAccountSchema.parse(res);
     this.userUuid = data.uuid;
-    return this.userUuid;
+    return data.uuid;
   }
 
   override async validate() {

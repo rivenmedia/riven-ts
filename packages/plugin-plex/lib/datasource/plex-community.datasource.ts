@@ -14,9 +14,6 @@ export class PlexCommunityAPI extends BaseDataSource<PlexSettings> {
 
   override serviceName = "Plex Community";
 
-  readonly #seenMovieIds = new Set<string>();
-  readonly #seenShowIds = new Set<string>();
-
   protected override willSendRequest(
     _path: string,
     requestOpts: AugmentedRequest,
@@ -26,13 +23,13 @@ export class PlexCommunityAPI extends BaseDataSource<PlexSettings> {
   }
 
   async getListItemIds(
-    _contentLists: Set<string>,
-    _userUuid: string,
+    contentLists: Set<string>,
+    userUuid: string,
   ): Promise<{
     movies: Set<string>;
     shows: Set<string>;
   }> {
-    if (_contentLists.size === 0) {
+    if (contentLists.size === 0) {
       return {
         movies: new Set(),
         shows: new Set(),
@@ -49,7 +46,7 @@ export class PlexCommunityAPI extends BaseDataSource<PlexSettings> {
         const res = await this.post<unknown>(``, {
           body: JSON.stringify({
             query: `{
-              user(id: "${_userUuid}") {
+              user(id: "${userUuid}") {
                 customLists(first: 10 ${endCursor ? `, after: "${endCursor}"` : ""}) {
                   pageInfo { hasNextPage endCursor }
                   nodes {
@@ -74,7 +71,7 @@ export class PlexCommunityAPI extends BaseDataSource<PlexSettings> {
       const movieIdsMap = new Set<string>();
       const showIdsMap = new Set<string>();
 
-      const contentListSlugs = _contentLists
+      const contentListSlugs = contentLists
         .values()
         .map((list) => list.split("/").pop() ?? "")
         .filter((slug) => slug !== "")
@@ -94,7 +91,7 @@ export class PlexCommunityAPI extends BaseDataSource<PlexSettings> {
         const res = await this.post<unknown>(``, {
           body: JSON.stringify({
             query: `{
-              user(id: "${_userUuid}") {
+              user(id: "${userUuid}") {
                 customLists(first: 10${listsCursor ? `, after: "${listsCursor}"` : ""}) {
                   pageInfo { hasNextPage endCursor }
                   nodes {
@@ -127,8 +124,8 @@ export class PlexCommunityAPI extends BaseDataSource<PlexSettings> {
             const itemsRes = await this.post<unknown>(``, {
               body: JSON.stringify({
                 query: `{
-                  user(id: "${_userUuid}") {
-                    customLists(first: 10${listsCursor ? `, after: "${listsCursor}"` : ""}) {
+                  user(id: "${userUuid}") {
+                    customLists(first: 1, after: "${node.id}") {
                       nodes {
                         id
                         metadataItems(first: 100, after: "${itemsCursor}") {
@@ -181,15 +178,9 @@ export class PlexCommunityAPI extends BaseDataSource<PlexSettings> {
   ): void {
     for (const item of items) {
       if (item.type.toLowerCase() === "movie") {
-        if (!this.#seenMovieIds.has(item.id)) {
-          movieIdsMap.add(item.id);
-          this.#seenMovieIds.add(item.id);
-        }
+        movieIdsMap.add(item.id);
       } else if (item.type.toLowerCase() === "show") {
-        if (!this.#seenShowIds.has(item.id)) {
-          showIdsMap.add(item.id);
-          this.#seenShowIds.add(item.id);
-        }
+        showIdsMap.add(item.id);
       }
     }
   }

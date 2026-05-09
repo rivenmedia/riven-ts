@@ -7,8 +7,6 @@ import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource.js";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
-export class PlexMetadataAPIError extends Error {}
-
 export class PlexMetadataAPI extends BaseDataSource<PlexSettings> {
   override baseURL = "https://metadata.provider.plex.tv";
 
