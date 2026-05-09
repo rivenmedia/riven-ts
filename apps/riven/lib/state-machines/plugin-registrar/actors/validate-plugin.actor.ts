@@ -55,9 +55,9 @@ export const validatePlugin = fromCallback<
           dataSources,
         });
 
-        const duration = (performance.now() - start).toFixed(2);
+        const duration = performance.now() - start;
         logger.debug(
-          `Plugin "${pluginName}" validation attempt ${attempt} took ${duration}ms (result: ${isValid})`,
+          `Plugin "${pluginName}" validation attempt ${attempt.toString()} took ${duration.toFixed(2)}ms (result: ${isValid.toString()})`,
         );
 
         if (!isValid) {
@@ -81,7 +81,7 @@ export const validatePlugin = fromCallback<
             );
           } else {
             logger.error(
-              `Plugin "${pluginName}" validation failed after ${attempt} attempts`,
+              `Plugin "${pluginName}" validation failed after ${attempt.toString()} attempts`,
               { err: error },
             );
           }
