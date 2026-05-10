@@ -70,7 +70,7 @@ jobs:
           esac
 
           DRY_RUN_OUTPUT=$(pnpx "turbo@${TURBO_VERSION}" --dry=json --affected "$TASK")
-          REQUIRED_TASKS=$(jq -c --arg task "$TASK" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and .task == $task) | .taskId]' <<< "$DRY_RUN_OUTPUT")
+          REQUIRED_TASKS=$(jq -c --arg task "$TASK" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and .task == $task or .taskId == $task) | .taskId]' <<< "$DRY_RUN_OUTPUT")
 
           echo "required-tasks=$REQUIRED_TASKS" >> $GITHUB_OUTPUT
         env:
