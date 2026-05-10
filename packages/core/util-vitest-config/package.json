@@ -14,8 +14,7 @@
     "merge-json-reports": "nyc merge coverage/raw coverage/merged/merged-coverage.json",
     "report": "pnpm report:html && pnpm report:summary",
     "report:html": "nyc report -t coverage/merged --report-dir coverage/report --reporter=html --exclude-after-remap false",
-    "report:summary": "nyc report -t coverage/merged --report-dir coverage/summary --reporter=json-summary --exclude-after-remap false",
-    "view-report": "open coverage/report/index.html"
+    "report:summary": "nyc report -t coverage/merged --report-dir coverage/summary --reporter=json-summary --exclude-after-remap false"
   },
   "dependencies": {
     "@swc/core": "catalog:",
