@@ -7,14 +7,6 @@
     ".": {
       "production": "./dist/index.js",
       "default": "./lib/index.ts"
-    },
-    "./context": {
-      "production": "./dist/context.js",
-      "default": "./lib/context.ts"
-    },
-    "./cache-control-directive": {
-      "production": "./dist/cache-control.directive.js",
-      "default": "./lib/cache-control.directive.ts"
     }
   },
   "files": [
