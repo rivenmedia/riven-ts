@@ -78,6 +78,9 @@ jobs:
       pull-requests: write
       checks: write
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
       - name: Post the knip results
         uses: codex-/knip-reporter@v3
         with:
