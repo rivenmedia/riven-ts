@@ -11,9 +11,10 @@
     "format:check:ci": "pnpm format:check --log-level warn",
     "format:fix": "prettier --write . '!**/docker-data'",
     "postinstall": "pnpm node .husky/install.mjs || true",
-    "knip": "knip",
+    "knip": "pnpm knip:prepare && knip",
     "knip:ci": "pnpm knip --cache --no-exit-code --reporter github-actions",
-    "knip:ci:production": "pnpm knip:ci --strict"
+    "knip:ci:production": "pnpm knip:ci --strict",
+    "knip:prepare": "turbo codegen:api-schemas"
   },
   "devDependencies": {
     "@repo/core-util-eslint-config": "workspace:^",

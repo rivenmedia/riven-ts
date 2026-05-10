@@ -58,9 +58,9 @@ jobs:
             env:
               RIVEN_SETTING__databaseUrl: postgres+psycopg2://runner:runner@127.0.0.1:5432/riven
           - name: Knip (development)
-            command: knip:ci
+            command: //#knip:ci
           - name: Knip (production)
-            command: knip:ci:production
+            command: //#knip:ci:production
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
       task: ${{ matrix.task.command }}

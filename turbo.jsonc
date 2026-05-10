@@ -84,15 +84,16 @@
         "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
       ]
     },
-    "knip:ci": {
-      "dependsOn": ["^codegen:api-schemas", "transit"],
+    "//#knip": {
+      "cache": false
+    },
+    "//#knip:ci": {
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql}",
         "!**/{logs,node_modules,temp,.turbo,.next,coverage,docker-data,dist}/**"
       ]
     },
-    "knip:ci:production": {
-      "dependsOn": ["^codegen:api-schemas", "transit"],
+    "//#knip:ci:production": {
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql}",
         "!**/{logs,node_modules,temp,.turbo,.next,coverage,docker-data,dist}/**"
