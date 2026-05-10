@@ -44,10 +44,6 @@
       "production": "./dist/helpers/*.js",
       "default": "./lib/helpers/*.ts"
     },
-    "./testing/*": {
-      "production": "./dist/testing/*.js",
-      "default": "./lib/testing/*.ts"
-    },
     "./utilities/*": {
       "production": "./dist/utilities/*.js",
       "default": "./lib/utilities/*.ts"
