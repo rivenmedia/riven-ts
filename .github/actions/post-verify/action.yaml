@@ -19,3 +19,4 @@ runs:
       uses: codex-/knip-reporter@v3
       with:
         command_script_name: knip:ci:production
+        verbose: true
