@@ -21,7 +21,6 @@
     "@trivago/prettier-plugin-sort-imports": "catalog:",
     "@turbo/gen": "catalog:",
     "@types/node": "catalog:",
-    "dedent": "catalog:",
     "es-toolkit": "catalog:",
     "eslint": "catalog:",
     "husky": "catalog:",

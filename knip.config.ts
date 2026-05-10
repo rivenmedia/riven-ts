@@ -2,7 +2,6 @@ import type { KnipConfiguration } from "knip";
 
 const filePatterns = {
   sourceFiles: "**/*.ts!",
-  // generatedFiles: "**/__generated__/**/*.ts!",
   scriptFiles: "**/scripts/**/*.ts!",
   testFiles: ["!**/*.{spec,test}.ts!", "!**/{__tests__,__mocks__}/**!"],
 
@@ -22,7 +21,6 @@ const defaultEntry = [
 
 const defaultProject = [
   filePatterns.sourceFiles,
-  // filePatterns.generatedFiles,
   ...filePatterns.testFiles,
 ] as const;
 
@@ -41,7 +39,6 @@ export default {
   workspaces: {
     ".": {
       entry: [".husky/install.mjs", "turbo/generators/config.ts!"],
-      project: [...defaultProject],
     },
     "{packages,packages/core}/*": {
       entry: [...defaultEntry],
