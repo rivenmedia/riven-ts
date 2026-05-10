@@ -14,6 +14,7 @@ export default {
   vitest: true,
   eslint: true,
   husky: true,
+  treatConfigHintsAsErrors: true,
   workspaces: {
     ".": {
       entry: [".husky/install.mjs"],

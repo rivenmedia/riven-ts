@@ -10,11 +10,11 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Persist Knip cache
-      if: ${{ inputs.task == '//#knip:ci' }}
+    - name: Persist Knip development cache
+      if: ${{ inputs.task == '//#knip:ci:development' }}
       uses: actions/cache@v4
       with:
         path: node_modules/.cache/knip
-        key: ${{ runner.os }}-knip-${{ hashFiles('**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql}') }}
+        key: ${{ runner.os }}-knip-${{ inputs.task }}-${{ hashFiles('**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql}') }}
         restore-keys: |
-          ${{ runner.os }}-knip-
+          ${{ runner.os }}-knip-${{ inputs.task }}-
