@@ -1,6 +1,3 @@
-import {
-  type ExtendedFlowProducer,
-  createFlowProducer,
-} from "../utilities/create-flow-producer.ts";
+import { createFlowProducer } from "../utilities/create-flow-producer.ts";
 
-export const flow: ExtendedFlowProducer = createFlowProducer();
+export const flow = createFlowProducer();
