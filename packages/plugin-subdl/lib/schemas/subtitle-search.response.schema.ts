@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { SubtitleResponse } from "./subtitle-response.schema.ts";
 
-const subtitleSearchSuccessResponseSchema = z.object({
+const SubtitleSearchSuccessResponse = z.object({
   status: z.literal(true),
   results: z
     .array(
@@ -15,16 +15,14 @@ const subtitleSearchSuccessResponseSchema = z.object({
   subtitles: z.array(SubtitleResponse).optional(),
 });
 
-const subtitleSearchErrorResponseSchema = z.object({
+const SubtitleSearchErrorResponse = z.object({
   status: z.literal(false),
   error: z.string(),
 });
 
-export const subtitleSearchResponseSchema = z.discriminatedUnion("status", [
-  subtitleSearchSuccessResponseSchema,
-  subtitleSearchErrorResponseSchema,
+export const SubtitleSearchResponse = z.discriminatedUnion("status", [
+  SubtitleSearchSuccessResponse,
+  SubtitleSearchErrorResponse,
 ]);
 
-export type SubtitleSearchResponse = z.infer<
-  typeof subtitleSearchResponseSchema
->;
+export type SubtitleSearchResponse = z.infer<typeof SubtitleSearchResponse>;
