@@ -27,7 +27,7 @@ const defaultProject = [
 export default {
   tags: ["-lintignore"],
   treatConfigHintsAsErrors: true,
-
+  ignoreDependencies: ["@typescript-eslint/parser", "@kubb/cli"],
   workspaces: {
     ".": {
       entry: [".husky/install.mjs", "turbo/generators/config.ts!"],

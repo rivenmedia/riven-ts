@@ -20,9 +20,7 @@
     "eslint-config-turbo": "catalog:",
     "eslint-import-resolver-typescript": "catalog:",
     "eslint-plugin-import-x": "catalog:",
-    "eslint-plugin-react": "catalog:",
     "globals": "catalog:",
-    "jiti": "catalog:",
     "typescript-eslint": "catalog:"
   },
   "devDependencies": {
