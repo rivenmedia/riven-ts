@@ -43,7 +43,7 @@ jobs:
             runner-requirements:
               - fuse
           - name: Formatting
-            command: format:check:ci
+            command: //#format:check:ci
           - name: Tests
             command: test
             concurrency: "100%"

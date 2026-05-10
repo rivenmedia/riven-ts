@@ -61,7 +61,7 @@ jobs:
           fi
 
           case "$TASK" in
-            (""|*[!A-Za-z0-9:_-]*)
+            (""|*[!A-Za-z0-9:_-#/]*)
               echo "::error::Invalid turbo task: $TASK"
               exit 1
               ;;
