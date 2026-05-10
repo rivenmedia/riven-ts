@@ -336,9 +336,6 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.0.0
-      dedent:
-        specifier: 'catalog:'
-        version: 1.7.1
       es-toolkit:
         specifier: 'catalog:'
         version: 1.44.0
