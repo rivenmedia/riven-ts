@@ -61,14 +61,16 @@ jobs:
           fi
 
           case "$TASK" in
-            (""|*[!A-Za-z0-9:_-#\\/]*)
+            (//#[A-Za-z0-9:_-]*)
+              ;;
+            (""|//#|*[!A-Za-z0-9:_-]*)
               echo "::error::Invalid turbo task: $TASK"
               exit 1
               ;;
           esac
 
           DRY_RUN_OUTPUT=$(pnpx "turbo@${TURBO_VERSION}" --dry=json --affected "$TASK")
-          REQUIRED_TASKS=$(jq -c --arg task "$TASK" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and .task == $task) | .taskId]' <<<"$DRY_RUN_OUTPUT")
+          REQUIRED_TASKS=$(jq -c --arg task "$TASK" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and .task == $task) | .taskId]' <<< "$DRY_RUN_OUTPUT")
 
           echo "required-tasks=$REQUIRED_TASKS" >> $GITHUB_OUTPUT
         env:
