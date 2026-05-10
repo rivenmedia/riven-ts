@@ -56,6 +56,7 @@ catalog:
   "@viren070/parse-torrent-title": ^0.6.5
   "@vitest/coverage-v8": ^4.1.1
   "@vitest/eslint-plugin": ^1.6.15
+  "@vitest/expect": ^4.1.5
   "@zkochan/fuse-native": ^0.1.0
   bullmq: ^5.71.0
   bullmq-otel: ^1.2.0

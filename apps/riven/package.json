@@ -114,6 +114,7 @@
     "@types/node": "catalog:",
     "@types/triple-beam": "catalog:",
     "@typescript-eslint/parser": "catalog:",
+    "@vitest/expect": "catalog:",
     "esbuild": "catalog:",
     "eslint": "catalog:",
     "logform": "catalog:",
