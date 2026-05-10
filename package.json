@@ -12,7 +12,7 @@
     "postinstall": "pnpm node .husky/install.mjs || true",
     "knip": "knip",
     "knip:ci": "pnpm knip:ci:base && pnpm knip:ci:production",
-    "knip:ci:base": "knip --reporter github-actions --no-exit-code --treat-config-hints-as-errors",
+    "knip:ci:base": "knip --reporter github-actions --no-exit-code --treat-config-hints-as-errors --cache",
     "knip:ci:production": "pnpm knip:ci:base --production"
   },
   "devDependencies": {
