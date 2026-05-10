@@ -70,22 +70,6 @@ jobs:
       env: ${{ matrix.task.env && toJson(matrix.task.env) || '{}' }}
     secrets: inherit
 
-  knip:
-    name: Knip
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-      checks: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Post the knip results
-        uses: codex-/knip-reporter@v3
-        with:
-          command_script_name: knip:ci:production
-
   build-docker-images:
     name: Build Docker Images
     needs: verify
