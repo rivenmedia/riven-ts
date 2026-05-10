@@ -25,13 +25,11 @@ describe("consoleFormat", () => {
 
     expect(result).not.toBe(false);
 
-    if (result !== false) {
-      const output = (result as Record<string, unknown>)[
-        Symbol.for("message")
-      ] as string;
-      expect(output).toContain("Hello world");
-      expect(output).toContain("info");
-    }
+    const output = (result as Record<string, unknown>)[
+      Symbol.for("message")
+    ] as string;
+    expect(output).toContain("Hello world");
+    expect(output).toContain("info");
   });
 
   it("formats an error level message in red", () => {
@@ -44,12 +42,10 @@ describe("consoleFormat", () => {
 
     expect(result).not.toBe(false);
 
-    if (result !== false) {
-      const output = (result as Record<string, unknown>)[
-        Symbol.for("message")
-      ] as string;
-      expect(output).toContain("Something failed");
-    }
+    const output = (result as Record<string, unknown>)[
+      Symbol.for("message")
+    ] as string;
+    expect(output).toContain("Something failed");
   });
 
   it("includes error message from meta.error", () => {
@@ -62,12 +58,10 @@ describe("consoleFormat", () => {
 
     expect(result).not.toBe(false);
 
-    if (result !== false) {
-      const output = (result as Record<string, unknown>)[
-        Symbol.for("message")
-      ] as string;
-      expect(output).toContain("test error message");
-    }
+    const output = (result as Record<string, unknown>)[
+      Symbol.for("message")
+    ] as string;
+    expect(output).toContain("test error message");
   });
 
   it("prettifies ZodError when stack traces are disabled", () => {
@@ -88,12 +82,10 @@ describe("consoleFormat", () => {
 
     expect(result).not.toBe(false);
 
-    if (result !== false) {
-      const output = (result as Record<string, unknown>)[
-        Symbol.for("message")
-      ] as string;
-      expect(output).toContain("Validation failed");
-    }
+    const output = (result as Record<string, unknown>)[
+      Symbol.for("message")
+    ] as string;
+    expect(output).toContain("Validation failed");
   });
 
   it("shows stack trace for ZodError when enabled", () => {
@@ -116,13 +108,12 @@ describe("consoleFormat", () => {
 
     expect(result).not.toBe(false);
 
-    if (result !== false) {
-      const output = (result as Record<string, unknown>)[
-        Symbol.for("message")
-      ] as string;
-      // Stack trace should contain the error class name
-      expect(output).toContain("Validation failed");
-    }
+    const output = (result as Record<string, unknown>)[
+      Symbol.for("message")
+    ] as string;
+
+    // Stack trace should contain the error class name
+    expect(output).toContain("Validation failed");
 
     (settings as Record<string, unknown>).logShowStackTraces = false;
   });
@@ -146,12 +137,11 @@ describe("consoleFormat", () => {
 
     expect(result).not.toBe(false);
 
-    if (result !== false) {
-      const output = (result as Record<string, unknown>)[
-        Symbol.for("message")
-      ] as string;
-      expect(output).toBeDefined();
-    }
+    const output = (result as Record<string, unknown>)[
+      Symbol.for("message")
+    ] as string;
+
+    expect(output).toBeDefined();
   });
 
   it("includes source tags in output", () => {
@@ -164,13 +154,12 @@ describe("consoleFormat", () => {
 
     expect(result).not.toBe(false);
 
-    if (result !== false) {
-      const output = (result as Record<string, unknown>)[
-        Symbol.for("message")
-      ] as string;
-      expect(output).toContain("test-source");
-      expect(output).toContain("my-plugin");
-    }
+    const output = (result as Record<string, unknown>)[
+      Symbol.for("message")
+    ] as string;
+
+    expect(output).toContain("test-source");
+    expect(output).toContain("my-plugin");
   });
 
   it("handles non-string messages with SPLAT fallback", () => {
@@ -195,12 +184,10 @@ describe("consoleFormat", () => {
 
     expect(result).not.toBe(false);
 
-    if (result !== false) {
-      const output = (result as Record<string, unknown>)[
-        Symbol.for("message")
-      ] as string;
-      expect(output).toContain("at line 1");
-    }
+    const output = (result as Record<string, unknown>)[
+      Symbol.for("message")
+    ] as string;
+    expect(output).toContain("at line 1");
 
     (settings as Record<string, unknown>).logShowStackTraces = false;
   });
@@ -215,11 +202,9 @@ describe("consoleFormat", () => {
 
     expect(result).not.toBe(false);
 
-    if (result !== false) {
-      const output = (result as Record<string, unknown>)[
-        Symbol.for("message")
-      ] as string;
-      expect(output).toContain("raw error msg");
-    }
+    const output = (result as Record<string, unknown>)[
+      Symbol.for("message")
+    ] as string;
+    expect(output).toContain("raw error msg");
   });
 });
