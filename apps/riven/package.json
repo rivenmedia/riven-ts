@@ -92,7 +92,6 @@
   },
   "devDependencies": {
     "@apollo/client-devtools-vscode": "catalog:",
-    "@apollo/utils.fetcher": "catalog:",
     "@faker-js/faker": "catalog:",
     "@graphql-codegen/cli": "catalog:",
     "@graphql-codegen/near-operation-file-preset": "catalog:",
@@ -108,7 +107,6 @@
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/plugin-test": "workspace:^",
-    "@repo/util-plugin-testing": "workspace:^",
     "@swc-node/register": "catalog:",
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",

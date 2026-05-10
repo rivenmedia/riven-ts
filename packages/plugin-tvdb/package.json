@@ -41,7 +41,6 @@
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
-    "es-toolkit": "catalog:",
     "eslint": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",

@@ -82,12 +82,9 @@
     "zod-validation-error": "catalog:"
   },
   "devDependencies": {
-    "@apollo/client": "catalog:",
     "@apollo/datasource-rest": "catalog:",
-    "@apollo/server": "catalog:",
     "@apollo/utils.keyvadapter": "catalog:",
     "@mikro-orm/core": "catalog:",
-    "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",
     "@mikro-orm/sqlite": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
@@ -99,22 +96,17 @@
     "bullmq": "catalog:",
     "class-validator": "catalog:",
     "eslint": "catalog:",
-    "msw": "catalog:",
     "type-graphql": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
-    "winston": "catalog:",
-    "xstate": "catalog:"
+    "winston": "catalog:"
   },
   "peerDependencies": {
-    "@apollo/client": "^4.0.11",
     "@apollo/datasource-rest": "catalog:",
     "@apollo/utils.keyvadapter": "catalog:",
     "@mikro-orm/core": "catalog:",
-    "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",
     "bullmq": "catalog:",
-    "class-validator": "catalog:",
-    "xstate": "^5.25.0"
+    "class-validator": "catalog:"
   }
 }

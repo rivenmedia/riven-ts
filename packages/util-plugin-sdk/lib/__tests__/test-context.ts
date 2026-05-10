@@ -55,5 +55,3 @@ export const test = baseTest
 test.afterEach(async ({ orm }) => {
   await orm.schema.clear();
 });
-
-export const it = test;

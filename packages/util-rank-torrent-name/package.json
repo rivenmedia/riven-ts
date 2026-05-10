@@ -37,8 +37,6 @@
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
-    "msw": "catalog:",
-    "type-fest": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

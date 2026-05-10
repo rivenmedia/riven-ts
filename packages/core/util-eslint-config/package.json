@@ -25,7 +25,6 @@
   },
   "devDependencies": {
     "@eslint/json": "catalog:",
-    "@types/eslint": "catalog:",
     "@types/node": "catalog:",
     "@vitest/eslint-plugin": "catalog:",
     "eslint": "catalog:",

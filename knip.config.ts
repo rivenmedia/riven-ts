@@ -2,12 +2,13 @@ import type { KnipConfiguration } from "knip";
 
 const filePatterns = {
   sourceFiles: "**/*.ts!",
+  // generatedFiles: "**/__generated__/**/*.ts!",
   scriptFiles: "**/scripts/**/*.ts!",
   testFiles: ["!**/*.{spec,test}.ts!", "!**/{__tests__,__mocks__}/**!"],
 
   // Tooling configs
-  configFiles: "**/*.config.ts",
-  setupFiles: "**/*.setup.ts",
+  configFiles: "**/*.config.ts!",
+  setupFiles: "**/*.setup.ts!",
   graphqlCodegenConfig: "graphql-codegen.ts!",
 } as const;
 
@@ -21,13 +22,22 @@ const defaultEntry = [
 
 const defaultProject = [
   filePatterns.sourceFiles,
+  // filePatterns.generatedFiles,
   ...filePatterns.testFiles,
 ] as const;
 
 export default {
   tags: ["-lintignore"],
   treatConfigHintsAsErrors: true,
-  ignoreDependencies: ["@typescript-eslint/parser", "@kubb/cli"],
+  ignoreDependencies: [
+    "@typescript-eslint/parser",
+    "@kubb/cli",
+    "@graphql-codegen/*",
+    "@graphql-typed-document-node/*",
+    "@swc-node/register",
+    "@vitest/coverage-v8",
+    "(?!-)vscode(?!-)", // Ignore VSCode packages - these tend to be used by editors and not the program
+  ],
   workspaces: {
     ".": {
       entry: [".husky/install.mjs", "turbo/generators/config.ts!"],

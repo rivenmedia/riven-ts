@@ -41,7 +41,6 @@
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
-    "graphql-tag": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",

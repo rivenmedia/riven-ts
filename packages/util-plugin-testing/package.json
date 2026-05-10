@@ -22,7 +22,6 @@
     "winston": "catalog:"
   },
   "devDependencies": {
-    "@apollo/server": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-mock-graphql-server": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",

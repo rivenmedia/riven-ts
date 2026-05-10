@@ -12,10 +12,6 @@
     "@tsconfig/recommended": "catalog:",
     "@tsconfig/strictest": "catalog:"
   },
-  "devDependencies": {
-    "eslint": "catalog:",
-    "vitest": "catalog:"
-  },
   "peerDependencies": {
     "@types/node": "^24.0.0"
   }
