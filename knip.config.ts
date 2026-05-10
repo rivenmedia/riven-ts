@@ -7,6 +7,7 @@ const filePatterns = {
 
   // Tooling configs
   configFiles: "**/*.config.ts",
+  setupFiles: "**/*.setup.ts",
   graphqlCodegenConfig: "graphql-codegen.ts!",
 } as const;
 
@@ -14,6 +15,7 @@ const defaultEntry = [
   "**/lib/index.ts!",
   filePatterns.scriptFiles,
   filePatterns.configFiles,
+  filePatterns.setupFiles,
   filePatterns.graphqlCodegenConfig,
 ] as const;
 
@@ -28,7 +30,8 @@ export default {
 
   workspaces: {
     ".": {
-      entry: [".husky/install.mjs", "turbo/generators/config.ts"],
+      entry: [".husky/install.mjs", "turbo/generators/config.ts!"],
+      project: [...defaultProject],
     },
     "{packages,packages/core}/*": {
       entry: [...defaultEntry],
