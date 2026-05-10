@@ -144,7 +144,8 @@ it("transforms episodes with aired dates and timezone", () => {
     "America/New_York",
   );
 
-  expect(result.seasons[1]).toBeDefined();
+  expect.assert(result.seasons[1]);
+
   expect(result.seasons[1].episodes).toHaveLength(1);
   expect(result.seasons[1].episodes[0]).toEqual(
     expect.objectContaining({
@@ -154,6 +155,7 @@ it("transforms episodes with aired dates and timezone", () => {
       runtime: 42,
     }),
   );
+
   // airedAt should be set (UTC conversion of 2020-01-15 20:00 EST)
-  expect(result.seasons[1].episodes[0].airedAt).toBeTruthy();
+  expect(result.seasons[1].episodes[0]?.airedAt).toBeTruthy();
 });

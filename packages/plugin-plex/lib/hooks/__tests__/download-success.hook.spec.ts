@@ -2,7 +2,6 @@ import { HttpResponse, http } from "msw";
 import { expect, vi } from "vitest";
 
 import { it } from "../../__tests__/plex.test-context.ts";
-import { PlexAPI } from "../../datasource/plex.datasource.ts";
 import plugin from "../../index.ts";
 
 const hook = plugin.hooks["riven.media-item.download.success"]!;

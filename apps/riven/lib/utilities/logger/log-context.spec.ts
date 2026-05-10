@@ -14,8 +14,7 @@ vi.mock("node:worker_threads", async (importOriginal) => {
   };
 });
 
-const { logContext, getLogContext, withLogContext } =
-  await import("./log-context.ts");
+const { getLogContext, withLogContext } = await import("./log-context.ts");
 
 describe("log-context", () => {
   it("withLogContext runs callback with context", () => {

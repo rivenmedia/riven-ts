@@ -1,7 +1,7 @@
 import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import { HttpResponse, http } from "msw";
-import { describe, expect, vi } from "vitest";
+import { describe, expect } from "vitest";
 
 import { it } from "../../__tests__/torrentio.test-context.ts";
 import plugin from "../../index.ts";

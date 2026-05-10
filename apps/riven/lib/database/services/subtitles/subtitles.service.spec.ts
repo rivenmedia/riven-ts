@@ -1,4 +1,3 @@
-import assert from "node:assert";
 import { expect } from "vitest";
 
 import { it } from "../../../__tests__/test-context.ts";
@@ -11,7 +10,7 @@ it("returns the movie itself for subtitle processing", async ({
 
   const items = await subtitlesService.getItemsForSubtitlesProcessing(movie.id);
 
-  assert(items[0]);
+  expect.assert(items[0]);
 
   expect(items).toHaveLength(1);
   expect(items[0].id).toBe(movie.id);
@@ -25,7 +24,7 @@ it("returns episodes for a show for subtitle processing", async ({
 
   const items = await subtitlesService.getItemsForSubtitlesProcessing(show.id);
 
-  assert(episodes);
+  expect.assert(episodes);
 
   expect(items.length).toBe(episodes.length);
 });

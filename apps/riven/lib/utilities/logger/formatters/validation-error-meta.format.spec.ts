@@ -10,7 +10,7 @@ describe("validationErrorMetaFormat", () => {
       {
         code: "invalid_type",
         expected: "string",
-        received: "number",
+        input: "number",
         path: ["field"],
         message: "Expected string, received number",
       },

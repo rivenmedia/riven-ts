@@ -6,7 +6,6 @@ import { expect, vi } from "vitest";
 import { it } from "../../__tests__/subdl.test-context.ts";
 import { SubdlAPI } from "../../datasource/subdl.datasource.ts";
 import plugin from "../../index.ts";
-import { SubdlSettings } from "../../subdl-settings.schema.ts";
 
 const hook = plugin.hooks["riven.media-item.subtitle.requested"]!;
 

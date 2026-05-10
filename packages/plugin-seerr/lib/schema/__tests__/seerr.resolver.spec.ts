@@ -1,5 +1,4 @@
 import { HttpResponse, http } from "msw";
-import assert from "node:assert";
 import { expect, vi } from "vitest";
 
 import { it } from "../../__tests__/seerr.test-context.ts";
@@ -29,7 +28,7 @@ it('returns validation status for "seerrIsValid" query', async ({
     { contextValue: gqlContext },
   );
 
-  assert(body.kind === "single");
+  expect.assert(body.kind === "single");
   expect(body.singleResult.errors).toBeUndefined();
   expect(body.singleResult.data?.["seerrIsValid"]).toBe(true);
 });
@@ -62,7 +61,7 @@ it('handles "seerrHandleWebhook" mutation for test notification', async ({
     { contextValue: ctx },
   );
 
-  assert(body.kind === "single");
+  expect.assert(body.kind === "single");
   expect(body.singleResult.errors).toBeUndefined();
   expect(body.singleResult.data?.["seerrHandleWebhook"]).toBe(true);
 });
@@ -107,7 +106,7 @@ it('handles "seerrHandleWebhook" mutation for movie request', async ({
     { contextValue: ctx },
   );
 
-  assert(body.kind === "single");
+  expect.assert(body.kind === "single");
   expect(body.singleResult.errors).toBeUndefined();
   expect(body.singleResult.data?.["seerrHandleWebhook"]).toBe(true);
   expect(sendEvent).toHaveBeenCalledWith(
@@ -162,7 +161,7 @@ it('handles "seerrHandleWebhook" mutation for TV request with seasons', async ({
     { contextValue: ctx },
   );
 
-  assert(body.kind === "single");
+  expect.assert(body.kind === "single");
   expect(body.singleResult.errors).toBeUndefined();
   expect(sendEvent).toHaveBeenCalledWith(
     expect.objectContaining({

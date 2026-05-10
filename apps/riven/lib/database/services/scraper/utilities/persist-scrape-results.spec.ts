@@ -55,7 +55,6 @@ it("throws a MediaItemScrapeError error if a validation error occurs whilst pers
 
   // Mock validateOrReject to throw a ValidationError array
   const classValidator = await import("class-validator");
-  const originalValidateOrReject = classValidator.validateOrReject;
 
   vi.spyOn(classValidator, "validateOrReject").mockRejectedValueOnce([
     Object.assign(new classValidator.ValidationError(), {

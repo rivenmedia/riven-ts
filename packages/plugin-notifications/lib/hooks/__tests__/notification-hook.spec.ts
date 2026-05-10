@@ -1,4 +1,4 @@
-import { expect, vi } from "vitest";
+import { vi } from "vitest";
 
 import { it } from "../../__tests__/notifications.test-context.ts";
 import { NotificationsAPI } from "../../datasource/notifications.datasource.ts";

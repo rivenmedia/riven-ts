@@ -1,8 +1,7 @@
 import { HttpResponse, http } from "msw";
-import { expect, vi } from "vitest";
+import { expect } from "vitest";
 
 import { it } from "../../__tests__/tmdb.test-context.ts";
-import { TmdbAPI } from "../../datasource/tmdb.datasource.ts";
 import { indexTMDBMediaItem } from "../index-tmdb-media-item.ts";
 
 it("returns movie details with tmdbId", async ({ server, dataSourceMap }) => {

@@ -1,5 +1,3 @@
-import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
-
 import { describe, expect } from "vitest";
 
 import { it } from "../../../__tests__/test-context.ts";

@@ -75,7 +75,6 @@ describe("consoleFormat", () => {
       {
         code: "invalid_type",
         expected: "string",
-        received: "number",
         path: ["field"],
         message: "Expected string, received number",
       },
@@ -104,7 +103,6 @@ describe("consoleFormat", () => {
       {
         code: "invalid_type",
         expected: "string",
-        received: "number",
         path: ["field"],
         message: "Expected string, received number",
       },
@@ -186,7 +184,7 @@ describe("consoleFormat", () => {
   });
 
   it("handles raw error objects with stack_trace property", () => {
-    (settings as Record<string, unknown>).logShowStackTraces = true;
+    (settings as Record<string, unknown>)["logShowStackTraces"] = true;
 
     const rawError = { message: "raw error", stack_trace: "at line 1" };
     const result = consoleFormat.transform({

@@ -1,3 +1,5 @@
+import { Movie } from "@repo/util-plugin-sdk/dto/entities";
+
 import { describe, expect } from "vitest";
 
 import { it } from "../../../../__tests__/test-context.ts";
@@ -19,7 +21,12 @@ describe("getVfsMediaEntry", () => {
     const result = await getVfsMediaEntry(em, pathInfo);
 
     expect(result).not.toBeNull();
-    expect(result?.mediaItem.getEntity().tmdbId).toBe(movie.tmdbId);
+
+    const mediaItem = result?.mediaItem.getEntity();
+
+    expect.assert(mediaItem instanceof Movie);
+
+    expect(mediaItem.tmdbId).toBe(movie.tmdbId);
   });
 
   it("returns a media entry for an episode path with tvdbId", async ({
@@ -28,7 +35,7 @@ describe("getVfsMediaEntry", () => {
   }) => {
     const { show, episodes } = await seedCompletedShow();
 
-    expect.assert(episodes[0]);
+    expect.assert(episodes?.[0]);
 
     const episode = episodes[0];
     const season = await episode.season.loadOrFail();
@@ -114,7 +121,7 @@ describe("getEntry", () => {
   }) => {
     const { show, seasons } = await seedCompletedShow();
 
-    expect.assert(seasons[0]);
+    expect.assert(seasons?.[0]);
 
     const pathInfo = PathInfo.parse(
       `/shows/${show.title} {tvdb-${show.tvdbId}}/Season ${seasons[0].number.toString().padStart(2, "0")}`,
@@ -131,7 +138,7 @@ describe("getEntry", () => {
   }) => {
     const { show, episodes } = await seedCompletedShow();
 
-    expect.assert(episodes[0]);
+    expect.assert(episodes?.[0]);
 
     const episode = episodes[0];
     const season = await episode.season.loadOrFail();

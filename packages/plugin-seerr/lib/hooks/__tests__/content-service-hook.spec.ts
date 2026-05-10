@@ -1,8 +1,7 @@
 import { HttpResponse, http } from "msw";
-import { describe, expect, vi } from "vitest";
+import { describe, expect } from "vitest";
 
 import { it } from "../../__tests__/seerr.test-context.ts";
-import { SeerrAPI } from "../../datasource/seerr.datasource.ts";
 import plugin from "../../index.ts";
 
 describe("seerr plugin hooks", () => {

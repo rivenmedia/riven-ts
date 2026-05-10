@@ -90,7 +90,6 @@ it("throws a MediaItemIndexError if the item request is missing tmdbId", async (
 it("sets state to unreleased for a movie with a future release date", async ({
   factories: { movieItemRequestFactory },
   services: { indexerService },
-  em,
 }) => {
   const itemRequest = await movieItemRequestFactory.createOne({
     state: "requested",

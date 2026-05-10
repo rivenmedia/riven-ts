@@ -1,4 +1,3 @@
-import Fuse from "@zkochan/fuse-native";
 import { expect, vi } from "vitest";
 
 import { it } from "../../__tests__/test-context.ts";

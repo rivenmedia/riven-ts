@@ -1,7 +1,7 @@
-import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import { HttpResponse, http } from "msw";
-import { expect, vi } from "vitest";
+import { expect } from "vitest";
 
 import { it } from "../../__tests__/torrentio.test-context.ts";
 import { TorrentioAPI } from "../torrentio.datasource.ts";
@@ -11,15 +11,6 @@ function createMovie(overrides = {}) {
     imdbId: "tt1234567",
     title: "Test Movie",
     fullTitle: "Test Movie (2024)",
-    ...overrides,
-  });
-}
-
-function createShow(overrides = {}) {
-  return Object.assign(Object.create(Show.prototype), {
-    imdbId: "tt7654321",
-    title: "Test Show",
-    fullTitle: "Test Show",
     ...overrides,
   });
 }

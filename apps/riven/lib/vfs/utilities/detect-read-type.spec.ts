@@ -1,7 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { config } from "../config.ts";
-import { chunkCache } from "./chunk-cache.ts";
 import { detectReadType } from "./detect-read-type.ts";
 
 import type { ChunkMetadata } from "../schemas/chunk.schema.ts";

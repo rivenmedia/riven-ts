@@ -390,11 +390,8 @@ it("saves a copy of each chunk to the cache when reading during playback within 
   expect(firstCachedChunk.equals(secondCachedChunk)).toBe(false);
 });
 
-it("returns FuseError code when read throws FuseError", async ({
-  services,
-}) => {
+it("returns FuseError code when read throws FuseError", async () => {
   const { readSync } = await import("./read.ts");
-  const { FuseError } = await import("../errors/fuse-error.ts");
   const Fuse = (await import("@zkochan/fuse-native")).default;
 
   const callback = vi.fn();

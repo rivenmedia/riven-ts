@@ -1,5 +1,4 @@
 import { Movie } from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
 import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 import { parse } from "@repo/util-rank-torrent-name/parser";
@@ -48,6 +47,7 @@ it("throws UnrecoverableError when scrape returns MediaItemScrapeErrorIncorrectS
   vi.spyOn(services.scraperService, "scrapeItem").mockResolvedValue({
     item: movie,
     error: new MediaItemScrapeErrorIncorrectState({ item: movie }),
+    newStreamsCount: 0,
   });
 
   const sendEvent = vi.fn();
@@ -77,6 +77,7 @@ it("re-throws MediaItemScrapeErrorNoNewStreams without making it unrecoverable",
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
   vi.spyOn(services.scraperService, "scrapeItem").mockResolvedValue({
+    newStreamsCount: 0,
     item: movie,
     error: new MediaItemScrapeErrorNoNewStreams({
       item: movie,

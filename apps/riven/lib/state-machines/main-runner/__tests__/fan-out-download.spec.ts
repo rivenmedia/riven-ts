@@ -1,7 +1,6 @@
 import { getEventTypeFromSchema } from "@repo/util-plugin-sdk";
 import { MediaItemDownloadErrorEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 
-import assert from "node:assert";
 import { expect, vi } from "vitest";
 import { waitFor } from "xstate";
 
@@ -53,7 +52,7 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
 }) => {
   const [, , failedSeason] = await scrapedShow.seasons.load();
 
-  assert(failedSeason);
+  expect.assert(failedSeason);
 
   const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
 
