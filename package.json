@@ -12,9 +12,8 @@
     "format:fix": "prettier --write . '!**/docker-data'",
     "postinstall": "pnpm node .husky/install.mjs || true",
     "knip": "knip",
-    "knip:ci:base": "pnpm knip --cache --no-exit-code --reporter github-actions",
-    "knip:ci:development": "pnpm knip:ci:base",
-    "knip:ci:production": "pnpm knip:ci:base --strict"
+    "knip:ci": "pnpm knip --cache --no-exit-code --reporter github-actions",
+    "knip:ci:production": "pnpm knip:ci --strict"
   },
   "devDependencies": {
     "@repo/core-util-eslint-config": "workspace:^",
