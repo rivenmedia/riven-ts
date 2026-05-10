@@ -1,10 +1,10 @@
 import { DateTime } from "luxon";
 import { expect } from "vitest";
 
-import { it as baseIt } from "../../../__tests__/test-context.ts";
+import { it as baseTest } from "../../../__tests__/test-context.ts";
 import { ItemRequest, Season, Show } from "../index.ts";
 
-const test = baseIt
+const test = baseTest
   .extend("itemRequest", ({ em }) => {
     return em.create(ItemRequest, {
       requestedBy: "@repo/plugin-test",
