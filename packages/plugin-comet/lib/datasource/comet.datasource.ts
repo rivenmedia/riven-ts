@@ -22,7 +22,7 @@ interface CometScrapeConfig {
   imdbId: string;
 }
 
-export class CometAPIError extends Error {}
+class CometAPIError extends Error {}
 
 export class CometAPI extends BaseDataSource<CometSettings> {
   override baseURL = this.settings.url;
@@ -51,7 +51,7 @@ export class CometAPI extends BaseDataSource<CometSettings> {
   > {
     try {
       if (!item.imdbId) {
-        throw new Error("IMDB ID is required for Comet scraping");
+        throw new CometAPIError("IMDB ID is required for Comet scraping");
       }
 
       const { identifier, imdbId, scrapeType } =
@@ -126,7 +126,7 @@ export class CometAPI extends BaseDataSource<CometSettings> {
    */
   async #getCometScrapeConfig(item: MediaItem): Promise<CometScrapeConfig> {
     if (!item.imdbId) {
-      throw new Error("IMDB ID is required for Comet scrape config");
+      throw new CometAPIError("IMDB ID is required for Comet scrape config");
     }
 
     if (item instanceof Show) {
@@ -163,6 +163,6 @@ export class CometAPI extends BaseDataSource<CometSettings> {
       };
     }
 
-    throw new Error("Unsupported media item type for Comet identifier");
+    throw new CometAPIError("Unsupported media item type for Comet identifier");
   }
 }

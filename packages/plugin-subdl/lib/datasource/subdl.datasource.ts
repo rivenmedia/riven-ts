@@ -9,7 +9,7 @@ import { extractSrtFromZip } from "../utilities/extract-srt-from-zip.ts";
 import type { SubdlSettings } from "../subdl-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 
-export class SubdlAPIError extends Error {}
+class SubdlAPIError extends Error {}
 
 export interface SubtitleSearchOptions {
   tmdbId?: string | undefined;

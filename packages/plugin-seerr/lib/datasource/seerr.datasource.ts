@@ -9,7 +9,7 @@ import type { SeerrSettings } from "../seerr-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
-export class SeerrAPIError extends Error {}
+class SeerrAPIError extends Error {}
 
 export class SeerrAPI extends BaseDataSource<SeerrSettings> {
   override baseURL = new URL("/api/v1/", this.settings.url).toString();
