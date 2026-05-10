@@ -389,3 +389,83 @@ it("saves a copy of each chunk to the cache when reading during playback within 
 
   expect(firstCachedChunk.equals(secondCachedChunk)).toBe(false);
 });
+
+it("returns FuseError code when read throws FuseError", async ({
+  services,
+}) => {
+  const { readSync } = await import("./read.ts");
+  const { FuseError } = await import("../errors/fuse-error.ts");
+  const Fuse = (await import("@zkochan/fuse-native")).default;
+
+  const callback = vi.fn();
+  const buffer = Buffer.alloc(1024);
+
+  // fd 999999 is not in fdToFileHandleMeta, so read() throws FuseError(EBADF)
+  readSync("/test/path", 999999, buffer, 1024, 0, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(Fuse.EBADF);
+  });
+});
+
+it("reads subtitle content from buffer", async () => {
+  const { readSync } = await import("./read.ts");
+  const { fdToFileHandleMeta } =
+    await import("../utilities/file-handle-map.ts");
+
+  const subtitleContent = "1\n00:00:01,000 --> 00:00:02,000\nHello\n";
+  const contentBuffer = Buffer.from(subtitleContent);
+  const fd = 55555;
+
+  fdToFileHandleMeta.set(fd, {
+    type: "subtitle",
+    fileSize: contentBuffer.length,
+    filePath: "/shows/Test/Test.srt",
+    fileBaseName: "Test.srt",
+    contentBuffer,
+  });
+
+  const callback = vi.fn();
+  const buffer = Buffer.alloc(1024);
+
+  readSync("/shows/Test/Test.srt", fd, buffer, 1024, 0, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(contentBuffer.length);
+    expect(buffer.subarray(0, contentBuffer.length).toString()).toBe(
+      subtitleContent,
+    );
+  });
+
+  // Clean up
+  fdToFileHandleMeta.delete(fd);
+});
+
+it("returns 0 bytes when reading past end of subtitle", async () => {
+  const { readSync } = await import("./read.ts");
+  const { fdToFileHandleMeta } =
+    await import("../utilities/file-handle-map.ts");
+
+  const contentBuffer = Buffer.from("short");
+  const fd = 55556;
+
+  fdToFileHandleMeta.set(fd, {
+    type: "subtitle",
+    fileSize: contentBuffer.length,
+    filePath: "/shows/Test/Test.srt",
+    fileBaseName: "Test.srt",
+    contentBuffer,
+  });
+
+  const callback = vi.fn();
+  const buffer = Buffer.alloc(1024);
+
+  // Position past end of content
+  readSync("/shows/Test/Test.srt", fd, buffer, 1024, 100, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(0);
+  });
+
+  fdToFileHandleMeta.delete(fd);
+});

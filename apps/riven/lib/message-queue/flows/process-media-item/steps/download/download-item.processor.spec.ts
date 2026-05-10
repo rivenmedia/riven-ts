@@ -1,4 +1,6 @@
 import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
+import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
 import { Settings } from "luxon";
 import { expect, vi } from "vitest";
@@ -162,4 +164,109 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
     item: expect.any(Movie),
     error: expect.any(Error),
   });
+});
+
+it("throws UnrecoverableError when downloadItem fails with MediaItemDownloadError", async ({
+  scrapedMovieContext: { scrapedMovie },
+  createMockJob,
+  mockSentryScope,
+  services,
+}) => {
+  const [{ infoHash: streamInfoHash } = {}] = await scrapedMovie.streams.load();
+
+  expect.assert(streamInfoHash);
+
+  const job = await createMockJob({ id: scrapedMovie.id });
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+    "find-valid-torrent": {
+      result: {
+        torrentId: "1234",
+        infoHash: streamInfoHash,
+        provider: null,
+        files: [
+          {
+            name: "Test Movie 2024 1080p.mkv",
+            path: "/Test Movie 2024 1080p.mkv",
+            size: 1024,
+            link: "http://example.com/download",
+            matchedMediaItemId: scrapedMovie.id,
+            isCachedFile: false,
+          },
+        ],
+      },
+      plugin: "@repo/plugin-test",
+    },
+  });
+
+  vi.spyOn(services.downloaderService, "downloadItem").mockRejectedValue(
+    new MediaItemDownloadError({
+      item: scrapedMovie,
+      error: new Error("Download failed"),
+    }),
+  );
+
+  const sendEvent = vi.fn();
+
+  await expect(
+    downloadItemProcessor(
+      { job, scope: mockSentryScope },
+      { sendEvent, services, plugins: new Map() },
+    ),
+  ).rejects.toThrow("Failed to persist download results");
+
+  expect(sendEvent).toHaveBeenCalledWith(
+    expect.objectContaining({
+      type: "riven.media-item.download.error",
+    }),
+  );
+});
+
+it("throws UnrecoverableError when downloadItem fails with MediaItemDownloadErrorIncorrectState", async ({
+  scrapedMovieContext: { scrapedMovie },
+  createMockJob,
+  mockSentryScope,
+  services,
+}) => {
+  const [{ infoHash: streamInfoHash } = {}] = await scrapedMovie.streams.load();
+
+  expect.assert(streamInfoHash);
+
+  const job = await createMockJob({ id: scrapedMovie.id });
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+    "find-valid-torrent": {
+      result: {
+        torrentId: "1234",
+        infoHash: streamInfoHash,
+        provider: null,
+        files: [
+          {
+            name: "Test Movie 2024 1080p.mkv",
+            path: "/Test Movie 2024 1080p.mkv",
+            size: 1024,
+            link: "http://example.com/download",
+            matchedMediaItemId: scrapedMovie.id,
+            isCachedFile: false,
+          },
+        ],
+      },
+      plugin: "@repo/plugin-test",
+    },
+  });
+
+  vi.spyOn(services.downloaderService, "downloadItem").mockRejectedValue(
+    new MediaItemDownloadErrorIncorrectState({
+      item: scrapedMovie,
+    }),
+  );
+
+  const sendEvent = vi.fn();
+
+  await expect(
+    downloadItemProcessor(
+      { job, scope: mockSentryScope },
+      { sendEvent, services, plugins: new Map() },
+    ),
+  ).rejects.toThrow("Failed to persist download results");
 });

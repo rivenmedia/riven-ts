@@ -131,3 +131,12 @@ it("deduplicates shows that appear in multiple lists", async ({
 
   expect(shows).toHaveLength(8);
 });
+
+it("skips lists with invalid IDs (not 24 characters)", async ({
+  dataSourceMap,
+}) => {
+  const listrrApi = dataSourceMap.get(ListrrAPI);
+  const shows = await listrrApi.getShows(new Set(["short-id", "also-invalid"]));
+
+  expect(shows).toEqual([]);
+});

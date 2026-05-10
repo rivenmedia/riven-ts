@@ -1,4 +1,5 @@
 import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
 import { parse } from "@repo/util-rank-torrent-name";
 
@@ -46,9 +47,29 @@ it('throws a MediaItemScrapeErrorIncorrectState error if the item is not in the 
   ).rejects.toThrow(MediaItemScrapeErrorIncorrectState);
 });
 
-it.todo(
-  "throws a MediaItemScrapeError error if a validation error occurs whilst persisting the scrape results",
-);
+it("throws a MediaItemScrapeError error if a validation error occurs whilst persisting the scrape results", async ({
+  seeders: { seedIndexedMovie },
+  services: { scraperService },
+}) => {
+  const indexedMovie = await seedIndexedMovie();
+
+  // Mock validateOrReject to throw a ValidationError array
+  const classValidator = await import("class-validator");
+  const originalValidateOrReject = classValidator.validateOrReject;
+
+  vi.spyOn(classValidator, "validateOrReject").mockRejectedValueOnce([
+    Object.assign(new classValidator.ValidationError(), {
+      property: "imdbId",
+      constraints: { matches: "imdbId must match /^tt\\d+$/" },
+    }),
+  ]);
+
+  await expect(() =>
+    scraperService.scrapeItem(indexedMovie.movie.id, {
+      [faker.git.commitSha()]: parse("Some.Movie.2024.1080p.WEBRip.x264-GROUP"),
+    }),
+  ).rejects.toThrow(MediaItemScrapeError);
+});
 
 it("updates the scrape metadata when re-scraping a failed item", async ({
   seeders: { seedScrapedMovie },

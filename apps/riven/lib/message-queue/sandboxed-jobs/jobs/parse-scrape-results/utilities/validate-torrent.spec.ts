@@ -7,6 +7,8 @@ import { it as baseIt } from "../../../../../__tests__/test-context.ts";
 import * as settingsModule from "../../../../../utilities/settings.ts";
 import { SkippedTorrentError, validateTorrent } from "./validate-torrent.ts";
 
+import type { UUID } from "node:crypto";
+
 const it = baseIt
   .extend("scrapeResults", {
     "1234567890123456789012345678901234567890": "Test Movie 2024 1080p WEB-DL",
@@ -597,4 +599,44 @@ it('does not throw for torrents that are not dubbed if the media item is anime a
   await expect(
     validateTorrent(indexedMovie.id, parsedData, infoHash),
   ).resolves.not.toThrow();
+});
+
+it("throws when media item is not found", async ({ infoHash }) => {
+  const rawTitle = "Test Movie 2024 1080p";
+  const parsedData = parse(rawTitle);
+  const fakeId = "00000000-0000-0000-0000-000000000000" as UUID;
+
+  await expect(validateTorrent(fakeId, parsedData, infoHash)).rejects.toThrow(
+    "not found",
+  );
+});
+
+it("throws for torrents with incorrect year for season items", async ({
+  em,
+  season,
+  infoHash,
+}) => {
+  em.persist(season);
+
+  const show = season.show.getEntity();
+
+  if (show) {
+    em.assign(show, { year: 2020 });
+  }
+
+  await em.flush();
+
+  const rawTitle = `${season.title} 2015 1080p WEB-DL S01`;
+  const parsedData = parse(rawTitle);
+
+  await expect(
+    validateTorrent(season.id, parsedData, infoHash),
+  ).rejects.toThrow(
+    new SkippedTorrentError(
+      "Skipping torrent with incorrect year",
+      season.fullTitle,
+      parsedData.rawTitle,
+      infoHash,
+    ),
+  );
 });

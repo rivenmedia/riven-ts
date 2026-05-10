@@ -1,4 +1,7 @@
 import { Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
+import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
+import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 import { parse } from "@repo/util-rank-torrent-name/parser";
 
 import { faker } from "@faker-js/faker";
@@ -32,7 +35,70 @@ it("throws an unrecoverable error if the item cannot be scraped", async ({
   ).rejects.toThrow();
 });
 
-it.todo("throws an unrecoverable if no new streams were found");
+it("throws UnrecoverableError when scrape returns MediaItemScrapeErrorIncorrectState", async ({
+  seeders: { seedIndexedMovie },
+  createMockJob,
+  mockSentryScope,
+  services,
+}) => {
+  const { movie } = await seedIndexedMovie();
+  const job = await createMockJob({ id: movie.id });
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
+  vi.spyOn(services.scraperService, "scrapeItem").mockResolvedValue({
+    item: movie,
+    error: new MediaItemScrapeErrorIncorrectState({ item: movie }),
+  });
+
+  const sendEvent = vi.fn();
+
+  await expect(
+    scrapeItemProcessor(
+      { job, scope: mockSentryScope },
+      { sendEvent, services, plugins: new Map() },
+    ),
+  ).rejects.toThrow();
+
+  expect(sendEvent).toHaveBeenCalledWith(
+    expect.objectContaining({
+      type: "riven.media-item.scrape.error.incorrect-state",
+    }),
+  );
+});
+
+it("re-throws MediaItemScrapeErrorNoNewStreams without making it unrecoverable", async ({
+  seeders: { seedIndexedMovie },
+  createMockJob,
+  mockSentryScope,
+  services,
+}) => {
+  const { movie } = await seedIndexedMovie();
+  const job = await createMockJob({ id: movie.id });
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
+  vi.spyOn(services.scraperService, "scrapeItem").mockResolvedValue({
+    item: movie,
+    error: new MediaItemScrapeErrorNoNewStreams({
+      item: movie,
+      error: "No new streams",
+    }),
+  });
+
+  const sendEvent = vi.fn();
+
+  await expect(
+    scrapeItemProcessor(
+      { job, scope: mockSentryScope },
+      { sendEvent, services, plugins: new Map() },
+    ),
+  ).rejects.toThrow(MediaItemScrapeErrorNoNewStreams);
+
+  expect(sendEvent).toHaveBeenCalledWith(
+    expect.objectContaining({
+      type: "riven.media-item.scrape.error.no-new-streams",
+    }),
+  );
+});
 
 it('sends a "riven.media-item.scrape.success" event with the updated item if the scrape is successful', async ({
   seeders: { seedIndexedMovie },

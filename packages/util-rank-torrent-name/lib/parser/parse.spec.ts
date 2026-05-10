@@ -74,4 +74,45 @@ describe("parse", () => {
     const data = parse("Movie.2024.CONVERT.720p.WEB-DL-GROUP");
     expect(data.converted).toBe(true);
   });
+
+  it("should parse anime episodes", () => {
+    const data = parse("One Piece 1080 1080p WEB-DL");
+    expect(data.episodes).toContain(1080);
+  });
+
+  it("should throw on non-string input", () => {
+    expect(() => parse(null as unknown as string)).toThrow(TypeError);
+  });
+
+  it("should parse complete series packs", () => {
+    const data = parse(
+      "Breaking Bad The Complete Series 1080p BluRay x264-GROUP",
+    );
+    expect(data.complete).toBe(true);
+  });
+
+  it("should parse 2.0 channels", () => {
+    const data = parse("Movie.2024.1080p.BluRay.2.0.x264-GROUP");
+    expect(data.channels).toContain("2.0");
+  });
+
+  it("should detect known site names", () => {
+    const data = parse("Movie.2024.1080p.BluRay.x264-GROUP-RARBG");
+    expect(data.site).toBe("RARBG");
+  });
+
+  it("should parse bitrate", () => {
+    const data = parse("Movie.2024.1080p.BluRay.10mbps-GROUP");
+    expect(data.bitrate).toBe("10mbps");
+  });
+
+  it("should parse anime episode numbers for known anime titles", () => {
+    const data = parse("One Piece 1080 1080p WEB-DL");
+    expect(data.episodes).toContain(1080);
+  });
+
+  it("should skip anime episode parsing if episodes already detected", () => {
+    const data = parse("One Piece S01E15 1080p WEB-DL");
+    expect(data.episodes).toContain(15);
+  });
 });

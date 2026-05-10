@@ -216,3 +216,167 @@ describe("fetch codec", () => {
     expect(result.failedChecks).toContain("quality_av1");
   });
 });
+
+describe("adult content", () => {
+  it("rejects adult content when removeAdultContent is true", () => {
+    const settings = createSettings({
+      options: { removeAdultContent: true },
+    });
+    // Use a title that the adult handler detects
+    const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
+    data.adult = true;
+    const result = checkFetch(data, settings);
+
+    expect(result.fetch).toBe(false);
+    expect(result.failedChecks).toContain("trash_adult");
+  });
+
+  it("allows adult content when removeAdultContent is false", () => {
+    const settings = createSettings({
+      options: { removeAdultContent: false },
+    });
+    const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
+    data.adult = true;
+    const result = checkFetch(data, settings);
+
+    expect(result.failedChecks).not.toContain("trash_adult");
+  });
+});
+
+describe("trash flags", () => {
+  it("rejects trash-flagged content", ({ settings }) => {
+    const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
+    data.trash = true;
+    const result = checkFetch(data, settings);
+
+    expect(result.fetch).toBe(false);
+    expect(result.failedChecks).toContain("trash_flag");
+  });
+
+  it("rejects HQ clean audio as trash", ({ settings }) => {
+    const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
+    data.audio = ["HQ Clean Audio"];
+    const result = checkFetch(data, settings);
+
+    expect(result.fetch).toBe(false);
+    expect(result.failedChecks).toContain("trash_audio");
+  });
+});
+
+describe("language edge cases", () => {
+  it("allows English when allowEnglishInLanguages is true", () => {
+    const settings = createSettings({
+      options: { allowEnglishInLanguages: true },
+      languages: { exclude: ["en"] },
+    });
+    const data = parse("Movie.2024.ENGLISH.1080p.BluRay.x264-GROUP");
+    const result = checkFetch(data, settings);
+
+    expect(result.failedChecks).not.toContain("lang_en");
+  });
+
+  it("accepts language group expansion with required languages", () => {
+    const settings = createSettings({
+      languages: { required: ["en"] },
+    });
+    const data = parse("Movie.2024.ENGLISH.1080p.BluRay.x264-GROUP");
+    const result = checkFetch(data, settings);
+
+    expect(result.failedChecks).not.toContain("missing_required_language");
+  });
+});
+
+describe("fetch flags", () => {
+  it("rejects 3D content by default", ({ settings }) => {
+    const data = parse("Movie.2024.3D.1080p.BluRay-GROUP");
+    const result = checkFetch(data, settings);
+
+    expect(result.fetch).toBe(false);
+    expect(result.failedChecks).toContain("extras_threeD");
+  });
+
+  it("rejects content when flag has fetch disabled", () => {
+    const settings = createSettings({
+      customRanks: { extras: { dubbed: { fetch: false } } },
+    });
+    const data = parse("Movie.2024.DUBBED.1080p.WEB-DL-GROUP");
+    const result = checkFetch(data, settings);
+
+    expect(result.fetch).toBe(false);
+    expect(result.failedChecks).toContain("extras_dubbed");
+  });
+});
+
+describe("fetch HDR", () => {
+  it("accepts HDR content when enabled", () => {
+    const settings = createSettings({
+      customRanks: { hdr: { hdr: { fetch: true } } },
+    });
+    const data = parse("Movie.2024.2160p.WEB-DL.HDR.HEVC-GROUP");
+    const result = checkFetch(data, settings);
+
+    expect(result.failedChecks).not.toContain("hdr_hdr");
+  });
+});
+
+describe("fetch audio", () => {
+  it("rejects specific audio format when fetch is disabled", () => {
+    const settings = createSettings({
+      customRanks: { audio: { truehd: { fetch: false } } },
+    });
+    const data = parse("Movie.2024.1080p.BluRay.TrueHD-GROUP");
+    const result = checkFetch(data, settings);
+
+    expect(result.failedChecks).toContain("audio_truehd");
+  });
+
+  it("skips audio values not in the audio map", () => {
+    const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
+    data.audio = ["UnknownAudioFormat", "TrueHD"];
+    const settings = createSettings({
+      customRanks: { audio: { truehd: { fetch: true } } },
+    });
+    const result = checkFetch(data, settings);
+
+    // UnknownAudioFormat should be skipped (continue branch), TrueHD is allowed
+    expect(result.failedChecks).not.toContain("audio_truehd");
+  });
+});
+
+describe("fetch flags edge cases", () => {
+  it("skips falsy flag values in checkFetchFlags", ({ settings }) => {
+    const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
+    // Ensure flag fields are explicitly falsy - threeD, dubbed etc. should be undefined/false
+    data.threeD = false;
+    data.dubbed = false;
+    const result = checkFetch(data, settings);
+
+    expect(result.failedChecks).not.toContain("extras_threeD");
+    expect(result.failedChecks).not.toContain("extras_dubbed");
+  });
+});
+
+describe("language group expansion", () => {
+  it("expands anime language group in required languages", () => {
+    const settings = createSettings({
+      languages: { required: ["anime"] },
+    });
+    // "ja" is part of the "anime" group
+    const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
+    data.languages = ["ja"];
+    const result = checkFetch(data, settings);
+
+    expect(result.failedChecks).not.toContain("missing_required_language");
+  });
+
+  it("rejects when no language matches expanded group", () => {
+    const settings = createSettings({
+      languages: { required: ["anime"] },
+    });
+    const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
+    data.languages = ["fr"];
+    const result = checkFetch(data, settings);
+
+    expect(result.failedChecks).toContain("missing_required_language");
+  });
+});
