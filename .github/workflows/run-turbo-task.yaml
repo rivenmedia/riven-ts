@@ -91,6 +91,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      checks: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
