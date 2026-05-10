@@ -12,24 +12,24 @@
     "lint:fix": "pnpm lint --fix"
   },
   "dependencies": {
-    "@eslint/compat": "^2.0.3",
-    "@eslint/js": "^9.39.2",
+    "@eslint/compat": "catalog:",
+    "@eslint/js": "catalog:",
     "@repo/core-util-typescript-config": "workspace:^",
     "@typescript-eslint/parser": "catalog:",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-config-turbo": "^2.8.21",
-    "eslint-import-resolver-typescript": "^4.4.4",
-    "eslint-plugin-import-x": "^4.16.1",
-    "eslint-plugin-react": "^7.37.5",
-    "globals": "^16.5.0",
+    "eslint-config-prettier": "catalog:",
+    "eslint-config-turbo": "catalog:",
+    "eslint-import-resolver-typescript": "catalog:",
+    "eslint-plugin-import-x": "catalog:",
+    "eslint-plugin-react": "catalog:",
+    "globals": "catalog:",
     "jiti": "catalog:",
-    "typescript-eslint": "^8.49.0"
+    "typescript-eslint": "catalog:"
   },
   "devDependencies": {
-    "@eslint/json": "^0.14.0",
-    "@types/eslint": "^9.6.1",
+    "@eslint/json": "catalog:",
+    "@types/eslint": "catalog:",
     "@types/node": "catalog:",
-    "@vitest/eslint-plugin": "^1.6.15",
+    "@vitest/eslint-plugin": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:"
   },

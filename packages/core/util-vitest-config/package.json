@@ -18,8 +18,8 @@
     "view-report": "open coverage/report/index.html"
   },
   "dependencies": {
-    "@swc/core": "^1.15.7",
-    "unplugin-swc": "^1.5.9"
+    "@swc/core": "catalog:",
+    "unplugin-swc": "catalog:"
   },
   "devDependencies": {
     "@repo/core-util-eslint-config": "workspace:^",

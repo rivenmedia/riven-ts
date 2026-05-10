@@ -82,9 +82,9 @@
     "zod-validation-error": "catalog:"
   },
   "devDependencies": {
-    "@apollo/client": "^4.0.11",
+    "@apollo/client": "catalog:",
     "@apollo/datasource-rest": "catalog:",
-    "@apollo/server": "^5.2.0",
+    "@apollo/server": "catalog:",
     "@apollo/utils.keyvadapter": "catalog:",
     "@mikro-orm/core": "catalog:",
     "@mikro-orm/postgresql": "catalog:",
