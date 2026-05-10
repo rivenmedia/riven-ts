@@ -2,9 +2,13 @@ import type { KnipConfiguration } from "knip";
 
 const defaultEntry = ["lib/index.ts"];
 const defaultProject = ["lib/**/*.ts"];
+const configFileNames = {
+  esbuild: "esbuild.config.ts",
+  graphqlCodegen: "graphql-codegen.ts",
+  mikroOrm: "mikro-orm.config.ts",
+};
 
 export default {
-  $schema: "https://unpkg.com/knip@6/schema.json",
   tags: ["-lintignore"],
   node: true,
   vitest: true,
@@ -22,9 +26,9 @@ export default {
     "apps/riven": {
       entry: [
         ...defaultEntry,
-        "lib/mikro-orm.config.ts",
-        "esbuild.config.ts",
-        "graphql-codegen.ts",
+        configFileNames.mikroOrm,
+        configFileNames.esbuild,
+        configFileNames.graphqlCodegen,
       ],
       project: [...defaultProject, "!lib/**/Migration*.ts"],
     },
