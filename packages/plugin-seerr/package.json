@@ -45,8 +45,5 @@
     "typescript": "catalog:",
     "vitest": "catalog:",
     "zod2md": "catalog:"
-  },
-  "peerDependencies": {
-    "graphql-tag": "catalog:"
   }
 }

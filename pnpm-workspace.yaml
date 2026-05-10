@@ -76,7 +76,6 @@ catalog:
   globals: ^16.5.0
   graphql: 16.12.0
   graphql-scalars: ^1.25.0
-  graphql-tag: ^2.12.6
   husky: ^9.1.7
   keyv: ^5.5.5
   knip: ^6.12.2

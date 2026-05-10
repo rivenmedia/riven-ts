@@ -14,8 +14,10 @@
   "dependencies": {
     "@eslint/compat": "catalog:",
     "@eslint/js": "catalog:",
+    "@eslint/json": "catalog:",
     "@repo/core-util-typescript-config": "workspace:^",
     "@typescript-eslint/parser": "catalog:",
+    "@vitest/eslint-plugin": "catalog:",
     "eslint-config-prettier": "catalog:",
     "eslint-config-turbo": "catalog:",
     "eslint-import-resolver-typescript": "catalog:",
@@ -24,9 +26,7 @@
     "typescript-eslint": "catalog:"
   },
   "devDependencies": {
-    "@eslint/json": "catalog:",
     "@types/node": "catalog:",
-    "@vitest/eslint-plugin": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:"
   },

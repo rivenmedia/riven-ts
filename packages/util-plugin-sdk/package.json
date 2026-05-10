@@ -74,6 +74,7 @@
     "es-toolkit": "catalog:",
     "graphql-scalars": "catalog:",
     "luxon": "catalog:",
+    "type-graphql": "catalog:",
     "zod": "catalog:",
     "zod-validation-error": "catalog:"
   },
@@ -92,16 +93,13 @@
     "bullmq": "catalog:",
     "class-validator": "catalog:",
     "eslint": "catalog:",
-    "type-graphql": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "winston": "catalog:"
   },
   "peerDependencies": {
     "@apollo/datasource-rest": "catalog:",
-    "@apollo/utils.keyvadapter": "catalog:",
     "@mikro-orm/core": "catalog:",
-    "@mikro-orm/reflection": "catalog:",
     "bullmq": "catalog:",
     "class-validator": "catalog:"
   }

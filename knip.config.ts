@@ -2,17 +2,21 @@ import type { KnipConfiguration } from "knip";
 
 const filePatterns = {
   sourceFiles: "**/*.ts!",
-  scriptFiles: "**/scripts/**/*.ts!",
+  generatedProdFiles: "**/__generated__/zod/*.ts!",
+  generatedDevFiles: "**/__generated__/{handlers,mocks}/*.ts",
+  scriptFiles: "**/scripts/**/*.ts",
   testFiles: ["!**/*.{spec,test}.ts!", "!**/{__tests__,__mocks__}/**!"],
 
   // Tooling configs
-  configFiles: "**/*.config.ts!",
-  setupFiles: "**/*.setup.ts!",
-  graphqlCodegenConfig: "graphql-codegen.ts!",
+  configFiles: "**/*.config.ts",
+  setupFiles: "**/*.setup.ts",
+  graphqlCodegenConfig: "graphql-codegen.ts",
 } as const;
 
 const defaultEntry = [
   "**/lib/index.ts!",
+  filePatterns.generatedProdFiles,
+  filePatterns.generatedDevFiles,
   filePatterns.scriptFiles,
   filePatterns.configFiles,
   filePatterns.setupFiles,
@@ -21,6 +25,8 @@ const defaultEntry = [
 
 const defaultProject = [
   filePatterns.sourceFiles,
+  filePatterns.generatedDevFiles,
+  filePatterns.generatedProdFiles,
   ...filePatterns.testFiles,
 ] as const;
 
@@ -39,10 +45,7 @@ export default {
   workspaces: {
     ".": {
       entry: [".husky/install.mjs", "turbo/generators/config.ts!"],
-    },
-    "{packages,packages/core}/*": {
-      entry: [...defaultEntry],
-      project: [...defaultProject],
+      project: ["turbo/**/*.ts"],
     },
     "apps/riven": {
       entry: [...defaultEntry],
@@ -53,5 +56,12 @@ export default {
       ],
       ignoreDependencies: [/@repo\/plugin(.*)/],
     },
+    "{packages,packages/core}/*": {
+      entry: [...defaultEntry],
+      project: [...defaultProject],
+    },
+    // "packages/util-plugin-testing": {
+    //   project: [...defaultProject, "**/*.ts"],
+    // },
   },
 } satisfies KnipConfiguration;
