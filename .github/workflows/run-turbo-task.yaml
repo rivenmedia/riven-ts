@@ -115,6 +115,11 @@ jobs:
       - name: Set Turborepo --affected SHAs
         uses: ./.github/actions/set-turborepo-affected-shas
 
+      - name: Pre-verification steps
+        uses: ./.github/actions/pre-verify
+        with:
+          task: ${{ inputs.task }}
+
       - name: Run ${{ inputs.task }}
         run: |
           [[ "$CONCURRENCY" =~ ^[0-9]+%?$ ]] || {

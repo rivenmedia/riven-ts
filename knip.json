@@ -1,7 +1,27 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "tags": ["-lintignore"],
+  "node": true,
+  "vitest": true,
+  "eslint": true,
+  "husky": true,
   "workspaces": {
-    ".": {}
+    ".": {
+      "entry": [".husky/install.mjs"],
+      "project": ["turbo/generators/config.ts"]
+    },
+    "{packages,packages/core}/*": {
+      "entry": ["lib/index.{js,ts,tsx}"],
+      "project": ["lib/**/*.ts"]
+    },
+    "apps/riven": {
+      "entry": [
+        "lib/index.ts",
+        "lib/mikro-orm.config.ts",
+        "esbuild.config.ts",
+        "graphql-codegen.ts"
+      ],
+      "project": ["lib/**/*.ts", "!lib/**/Migration*.ts"]
+    }
   }
 }

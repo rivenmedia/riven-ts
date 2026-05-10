@@ -1,17 +1,19 @@
 {
   "name": "riven-ts",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "keywords": [],
-  "license": "ISC",
-  "author": "",
-  "main": "index.js",
+  "license": "MIT",
+  "author": "Riven Media",
   "scripts": {
     "format:check": "prettier --check . '!**/docker-data'",
     "format:check:ci": "pnpm format:check --log-level warn",
     "format:fix": "prettier --write . '!**/docker-data'",
     "postinstall": "pnpm node .husky/install.mjs || true",
-    "knip": "knip"
+    "knip": "knip",
+    "knip:ci": "pnpm knip:ci:base && pnpm knip:ci:production",
+    "knip:ci:base": "knip --reporter github-actions --no-exit-code --treat-config-hints-as-errors",
+    "knip:ci:production": "pnpm knip:ci:base --production"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "catalog:",
