@@ -14,8 +14,16 @@ runs:
       if: ${{ inputs.task == 'test' }}
       uses: ./.github/actions/generate-coverage-report
 
+    # codex-/knip-reporter calls GitHub's create-check API, which requires
+    # `checks: write` on the GITHUB_TOKEN. PRs from forks always get a
+    # read-only token regardless of what the workflow declares, so the
+    # action errors with "Failed to create check" and that propagates up
+    # to fail the verify workflow (and gates build-docker-images). Skip
+    # the reporter on fork PRs; same-repo PRs and pushes to main retain
+    # the full reporting behavior.
     - name: Report Knip results in PR
-      if: ${{ inputs.task == '//#knip:ci:production' }}
+      if: ${{ inputs.task == '//#knip:ci:production' &&
+        !github.event.pull_request.head.repo.fork }}
       uses: codex-/knip-reporter@v3
       with:
         command_script_name: knip:ci:production
