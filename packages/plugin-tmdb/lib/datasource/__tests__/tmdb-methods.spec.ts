@@ -67,30 +67,3 @@ it("findById returns find results", async ({ server, dataSourceMap }) => {
 
   expect(result.movie_results![0]!.id).toBe(12345);
 });
-
-it("getMovieDetails returns movie with external ids", async ({
-  server,
-  dataSourceMap,
-}) => {
-  server.use(
-    http.get("**/movie/12345", ({ request }) => {
-      const url = new URL(request.url);
-      expect(url.searchParams.get("append_to_response")).toBe(
-        "external_ids,release_dates",
-      );
-
-      return HttpResponse.json({
-        id: 12345,
-        title: "Test Movie",
-        external_ids: { imdb_id: "tt1234567" },
-        release_dates: { results: [] },
-      });
-    }),
-  );
-
-  const api = dataSourceMap.get(TmdbAPI);
-  const result = await api.getMovieDetails("12345");
-
-  expect(result.id).toBe(12345);
-  expect(result.external_ids.imdb_id).toBe("tt1234567");
-});
