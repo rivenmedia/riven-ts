@@ -73,7 +73,7 @@ catalog:
   eslint-plugin-import-x: ^4.16.1
   fastest-levenshtein: ^1.0.16
   glob: ^13.0.6
-  globals: ^16.5.0
+  globals: ^17.6.0
   graphql: 16.12.0
   graphql-scalars: ^1.25.0
   husky: ^9.1.7
