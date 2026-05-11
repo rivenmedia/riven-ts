@@ -1,4 +1,4 @@
-import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { PlexSettings } from "../plex-settings.schema.ts";
 import { MetadataResponse } from "../schemas/metadata-response.schema.ts";
@@ -55,5 +55,3 @@ export class PlexMetadataAPI extends BaseDataSource<PlexSettings> {
     return true;
   }
 }
-
-export type PlexContextSlice = BasePluginContext;

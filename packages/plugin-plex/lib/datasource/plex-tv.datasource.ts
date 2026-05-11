@@ -1,4 +1,4 @@
-import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { userPlexAccountSchema } from "../__generated__/zod/userPlexAccountSchema.ts";
 import { PlexSettings } from "../plex-settings.schema.ts";
@@ -43,5 +43,3 @@ export class PlexTvAPI extends BaseDataSource<PlexSettings> {
     }
   }
 }
-
-export type PlexContextSlice = BasePluginContext;
