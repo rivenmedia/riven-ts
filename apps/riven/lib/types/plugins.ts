@@ -22,11 +22,6 @@ export type RegisteredPlugin = {
 );
 export type RegisteredPluginMap = Map<symbol, RegisteredPlugin>;
 
-export type ValidatingPlugin = Extract<
-  RegisteredPlugin,
-  { status: "validating" }
->;
-
 export type PendingPlugin = Extract<RegisteredPlugin, { status: "registered" }>;
 export type PendingPluginMap = Map<symbol, PendingPlugin>;
 

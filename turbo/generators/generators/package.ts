@@ -1,5 +1,5 @@
-import { formatOutputCode } from "./actions/format-output";
-import { installDependenciesAction } from "./actions/install-dependencies";
+import { formatOutputCode } from "./actions/format-output.ts";
+import { installDependenciesAction } from "./actions/install-dependencies.ts";
 
 import type { PlopTypes } from "@turbo/gen";
 

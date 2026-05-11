@@ -3,13 +3,13 @@ import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
 import { URL } from "node:url";
 
 import { SubtitleResponse } from "../schemas/subtitle-response.schema.ts";
-import { subtitleSearchResponseSchema } from "../schemas/subtitle-search.response.schema.ts";
+import { SubtitleSearchResponse } from "../schemas/subtitle-search.response.schema.ts";
 import { extractSrtFromZip } from "../utilities/extract-srt-from-zip.ts";
 
 import type { SubdlSettings } from "../subdl-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 
-export class SubdlAPIError extends Error {}
+class SubdlAPIError extends Error {}
 
 export interface SubtitleSearchOptions {
   tmdbId?: string | undefined;
@@ -46,7 +46,7 @@ export class SubdlAPI extends BaseDataSource<SubdlSettings> {
         },
       });
 
-      return Boolean(subtitleSearchResponseSchema.parse(response));
+      return Boolean(SubtitleSearchResponse.parse(response));
     } catch {
       return false;
     }
@@ -83,7 +83,7 @@ export class SubdlAPI extends BaseDataSource<SubdlSettings> {
       cacheOptions: { ttl: 1000 * 60 * 30 },
     });
 
-    const parsed = subtitleSearchResponseSchema.safeParse(response);
+    const parsed = SubtitleSearchResponse.safeParse(response);
 
     if (!parsed.success) {
       this.logger.error("Failed to parse subtitle search response from SubDL", {

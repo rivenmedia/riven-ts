@@ -14,8 +14,6 @@ import { TorznabResponse } from "../schemas/torznab-response.schema.ts";
 import type { StremThruSettings } from "../stremthru-settings.schema.ts";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
-export class StremThruAPIError extends Error {}
-
 export class StremThruTorznabAPI extends BaseDataSource<StremThruSettings> {
   override baseURL = this.settings.stremThruUrl;
   override serviceName = "StremThru [Torznab]";

@@ -44,10 +44,6 @@
       "production": "./dist/helpers/*.js",
       "default": "./lib/helpers/*.ts"
     },
-    "./testing/*": {
-      "production": "./dist/testing/*.js",
-      "default": "./lib/testing/*.ts"
-    },
     "./utilities/*": {
       "production": "./dist/utilities/*.js",
       "default": "./lib/utilities/*.ts"
@@ -78,16 +74,14 @@
     "es-toolkit": "catalog:",
     "graphql-scalars": "catalog:",
     "luxon": "catalog:",
+    "type-graphql": "catalog:",
     "zod": "catalog:",
     "zod-validation-error": "catalog:"
   },
   "devDependencies": {
-    "@apollo/client": "^4.0.11",
     "@apollo/datasource-rest": "catalog:",
-    "@apollo/server": "^5.2.0",
     "@apollo/utils.keyvadapter": "catalog:",
     "@mikro-orm/core": "catalog:",
-    "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",
     "@mikro-orm/sqlite": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
@@ -99,22 +93,14 @@
     "bullmq": "catalog:",
     "class-validator": "catalog:",
     "eslint": "catalog:",
-    "msw": "catalog:",
-    "type-graphql": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
-    "winston": "catalog:",
-    "xstate": "catalog:"
+    "winston": "catalog:"
   },
   "peerDependencies": {
-    "@apollo/client": "^4.0.11",
     "@apollo/datasource-rest": "catalog:",
-    "@apollo/utils.keyvadapter": "catalog:",
     "@mikro-orm/core": "catalog:",
-    "@mikro-orm/postgresql": "catalog:",
-    "@mikro-orm/reflection": "catalog:",
     "bullmq": "catalog:",
-    "class-validator": "catalog:",
-    "xstate": "^5.25.0"
+    "class-validator": "catalog:"
   }
 }

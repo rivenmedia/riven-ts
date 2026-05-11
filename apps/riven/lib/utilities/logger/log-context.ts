@@ -19,7 +19,7 @@ export interface LogContext {
   "bullmq.job.id"?: string;
 }
 
-export const logContext = new AsyncLocalStorage<LogContext>();
+const logContext = new AsyncLocalStorage<LogContext>();
 
 export function withLogContext<T>(
   context: LogContext,

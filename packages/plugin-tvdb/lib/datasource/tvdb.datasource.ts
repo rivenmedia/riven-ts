@@ -15,7 +15,7 @@ import { TvdbSettings } from "../tvdb-settings.schema.ts";
 
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 
-export class TvdbAPIError extends Error {}
+class TvdbAPIError extends Error {}
 
 interface TvdbToken {
   value: string;

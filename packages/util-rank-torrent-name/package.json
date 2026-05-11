@@ -25,9 +25,9 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@viren070/parse-torrent-title": "^0.6.5",
+    "@viren070/parse-torrent-title": "catalog:",
     "es-toolkit": "catalog:",
-    "fastest-levenshtein": "^1.0.16",
+    "fastest-levenshtein": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -37,8 +37,6 @@
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
-    "msw": "catalog:",
-    "type-fest": "^5.3.1",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
