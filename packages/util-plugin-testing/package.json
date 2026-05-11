@@ -17,25 +17,25 @@
   },
   "dependencies": {
     "@apollo/utils.keyvaluecache": "catalog:",
+    "@repo/core-util-mock-graphql-server": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
+    "bullmq": "catalog:",
     "redis-memory-server": "catalog:",
     "winston": "catalog:"
   },
   "devDependencies": {
-    "@apollo/server": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
-    "@repo/core-util-mock-graphql-server": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
-    "bullmq": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "zod": "catalog:"
   },
   "peerDependencies": {
-    "msw": "catalog:"
+    "msw": "catalog:",
+    "vitest": "catalog:"
   }
 }

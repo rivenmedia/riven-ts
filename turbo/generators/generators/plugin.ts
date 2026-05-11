@@ -1,7 +1,4 @@
-import dedent from "dedent";
-
-import { formatOutputCode } from "./actions/format-output";
-import { installDependenciesToPackages } from "./actions/install-dependencies-to-package";
+import { installDependenciesToPackages } from "./actions/install-dependencies-to-package.ts";
 
 import type { PlopTypes } from "@turbo/gen";
 

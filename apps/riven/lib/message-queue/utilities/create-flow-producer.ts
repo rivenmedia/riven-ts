@@ -59,7 +59,7 @@ export class ExtendedFlowProducer extends FlowProducer {
 
 export function createFlowProducer(
   options?: Omit<QueueBaseOptions, "connection" | "telemetry">,
-) {
+): ExtendedFlowProducer {
   const flowProducer = new ExtendedFlowProducer({
     ...options,
     connection: {

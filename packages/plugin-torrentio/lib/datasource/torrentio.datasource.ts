@@ -18,7 +18,7 @@ const TorrentioScrapeResponse = z.object({
   ),
 });
 
-export class TorrentioAPIError extends Error {}
+class TorrentioAPIError extends Error {}
 
 export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
   override baseURL = "http://torrentio.strem.fun/";
@@ -51,7 +51,9 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
   > {
     try {
       if (!item.imdbId) {
-        throw new Error("IMDB ID is required for Torrentio scraping");
+        throw new TorrentioAPIError(
+          "IMDB ID is required for Torrentio scraping",
+        );
       }
 
       const { identifier, imdbId, scrapeType } =

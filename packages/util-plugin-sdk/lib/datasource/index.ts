@@ -20,7 +20,6 @@ import {
 } from "bullmq";
 import { DateTime } from "luxon";
 import { URL } from "node:url";
-import { Logger } from "winston";
 import z from "zod";
 
 import { benchmark } from "../helpers/benchmark.ts";
@@ -31,6 +30,7 @@ import { dataSourceContext } from "./context.ts";
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import type EventEmitter from "events";
 import type { Promisable } from "type-fest";
+import type { Logger } from "winston";
 
 interface FetchJobInput {
   path: string;

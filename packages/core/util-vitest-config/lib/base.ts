@@ -1,5 +1,6 @@
 import path from "node:path";
 import { loadEnvFile } from "node:process";
+import { fileURLToPath } from "node:url";
 import swc from "unplugin-swc";
 import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
 
@@ -26,9 +27,8 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
           exclude: ["**/__generated__/**", "**/__tests__/**"],
         },
         setupFiles: [
-          path.resolve(
-            import.meta.dirname,
-            "./setup-files/restore-environment.ts",
+          fileURLToPath(
+            import.meta.resolve("./setup-files/restore-environment.ts"),
           ),
         ],
         retry: process.env["CI"] ? 2 : 0,

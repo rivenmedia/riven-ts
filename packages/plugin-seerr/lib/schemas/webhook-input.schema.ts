@@ -1,10 +1,10 @@
 import z from "zod";
 
-export const TestNotification = z.object({
+const TestNotification = z.object({
   notification_type: z.literal("TEST_NOTIFICATION"),
 });
 
-export const WebhookNotification = z
+const WebhookNotification = z
   .object({
     notification_type: z.enum([
       "NONE",

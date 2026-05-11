@@ -7,14 +7,6 @@
     ".": {
       "production": "./dist/index.js",
       "default": "./lib/index.ts"
-    },
-    "./context": {
-      "production": "./dist/context.js",
-      "default": "./lib/context.ts"
-    },
-    "./cache-control-directive": {
-      "production": "./dist/cache-control.directive.js",
-      "default": "./lib/cache-control.directive.ts"
     }
   },
   "files": [
@@ -35,7 +27,6 @@
     "type-graphql": "catalog:"
   },
   "devDependencies": {
-    "@apollo/cache-control-types": "^1.0.3",
     "@mikro-orm/core": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
