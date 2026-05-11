@@ -1,0 +1,61 @@
+name: Filter cached Turbo tasks
+
+description: Filters out Turbo tasks that are already remotely cached
+
+inputs:
+  tasks:
+    description: A JSON array of Turbo tasks to check
+    required: true
+  turbo-version:
+    description: The version of Turbo to use; will use the locally installed version if not provided
+    required: false
+    default: ""
+
+outputs:
+  required-tasks:
+    description: A JSON array of tasks that are not found in the remote cache and therefore need to be run
+    value: ${{ steps.filter-cached-tasks.outputs.required-tasks }}
+
+runs:
+  using: composite
+  steps:
+    - name: Filter cached tasks
+      shell: bash
+      id: filter-cached-tasks
+      env:
+        TASKS: ${{ inputs.tasks }}
+        TURBO_VERSION: ${{ inputs.turbo-version }}
+      run: |
+        if ! jq -e 'type == "array" and all(.[]; type == "string")' <<< "$TASKS" > /dev/null; then
+          echo '::error::Invalid turbo tasks JSON: expected an array of strings'
+          exit 1
+        fi
+
+        mapfile -t TASK_LIST < <(jq -r '.[]' <<< "$TASKS")
+
+        for TASK in "${TASK_LIST[@]}"; do
+          case "$TASK" in
+          (//#[A-Za-z0-9:_-]*)
+            ;;
+          (""|//#|*[!A-Za-z0-9:_-]*)
+            echo "::error::Invalid turbo task: $TASK"
+            exit 1
+            ;;
+          esac
+        done
+
+        if [ -z "$TURBO_VERSION" ]; then
+          TURBO_COMMAND="pnpm turbo"
+        else
+          TURBO_COMMAND="pnpx turbo@${TURBO_VERSION}"
+        fi
+
+        if [ ${#TASK_LIST[@]} -eq 0 ]; then
+          echo 'required-tasks=[]' >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        DRY_RUN_OUTPUT=$($TURBO_COMMAND --dry=json --affected "${TASK_LIST[@]}")
+        REQUIRED_TASKS=$(jq -c --argjson tasks "$TASKS" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and (.task as $task | ($tasks | index($task)) or (.taskId as $taskId | ($tasks | index($taskId))))) | .taskId]' <<< "$DRY_RUN_OUTPUT")
+
+        echo "required-tasks=$REQUIRED_TASKS" >> "$GITHUB_OUTPUT"

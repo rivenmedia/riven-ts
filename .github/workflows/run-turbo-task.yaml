@@ -54,28 +54,10 @@ jobs:
 
       - name: Get required tasks
         id: get-required-tasks
-        run: |
-          if [ "$TURBO_VERSION" = "null" ]; then
-            echo "::error::Failed to detect turbo version"
-            exit 1
-          fi
-
-          case "$TASK" in
-            (""|*[!A-Za-z0-9:_-]*)
-              echo "::error::Invalid turbo task: $TASK"
-              exit 1
-              ;;
-          esac
-
-          DRY_RUN_OUTPUT=$(pnpx "turbo@${TURBO_VERSION}" --dry=json --affected "$TASK")
-          REQUIRED_TASKS=$(jq -c --arg task "$TASK" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and .task == $task) | .taskId]' <<<"$DRY_RUN_OUTPUT")
-
-          echo "required-tasks=$REQUIRED_TASKS" >> $GITHUB_OUTPUT
-        env:
-          TASK: ${{ inputs.task }}
-          TURBO_VERSION: ${{ steps.get-turbo-version.outputs.result }}
-          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
-          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+        uses: ./.github/actions/filter-cached-turbo-tasks
+        with:
+          tasks: '[ "${{ inputs.task }}" ]'
+          turbo-version: ${{ steps.get-turbo-version.outputs.result }}
 
       - name: Output required tasks
         run: |
@@ -89,6 +71,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      checks: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -114,6 +97,11 @@ jobs:
 
       - name: Set Turborepo --affected SHAs
         uses: ./.github/actions/set-turborepo-affected-shas
+
+      - name: Pre-verification steps
+        uses: ./.github/actions/pre-verify
+        with:
+          task: ${{ inputs.task }}
 
       - name: Run ${{ inputs.task }}
         run: |

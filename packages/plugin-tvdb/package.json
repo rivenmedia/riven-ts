@@ -25,7 +25,7 @@
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@repo/util-plugin-sdk": "workspace:^",
-    "countries-and-timezones": "^3.8.0",
+    "countries-and-timezones": "catalog:",
     "luxon": "catalog:",
     "type-graphql": "catalog:",
     "zod": "catalog:"
@@ -41,7 +41,6 @@
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
-    "es-toolkit": "catalog:",
     "eslint": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",

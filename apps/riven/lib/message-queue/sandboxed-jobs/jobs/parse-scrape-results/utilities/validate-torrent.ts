@@ -40,7 +40,7 @@ const EPISODE_FIELDS_FRAGMENT: TypedDocumentNode<EpisodeFieldsFragment> = gql`
   }
 `;
 
-export const GET_VALIDATE_TORRENT_ITEM_QUERY: TypedDocumentNode<
+const GET_VALIDATE_TORRENT_ITEM_QUERY: TypedDocumentNode<
   GetValidateTorrentItemQuery,
   GetValidateTorrentItemQueryVariables
 > = gql`

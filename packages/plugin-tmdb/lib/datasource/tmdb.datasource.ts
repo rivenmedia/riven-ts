@@ -1,15 +1,13 @@
 import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
 
-import type {
-  FindById200,
-  FindByIdQueryParams,
-} from "../__generated__/types/FindById.ts";
-import type { MovieDetails200 } from "../__generated__/types/MovieDetails.ts";
-import type { MovieExternalIds200 } from "../__generated__/types/MovieExternalIds.ts";
+import { findById200Schema } from "../__generated__/zod/findByIdSchema.ts";
+import { GetMovieDetails } from "../schemas/get-movie-details.schema.ts";
+
+import type { FindByIdQueryParams } from "../__generated__/types/FindById.ts";
 import type { TmdbSettings } from "../tmdb-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 
-export class TmdbAPIError extends Error {}
+class TmdbAPIError extends Error {}
 
 export class TmdbAPI extends BaseDataSource<TmdbSettings> {
   override baseURL = "https://api.themoviedb.org/3/";
@@ -38,7 +36,7 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
       });
 
       if (!movieResults?.[0]) {
-        throw new Error(`IMDB ID ${imdbId} is not a movie`);
+        throw new TmdbAPIError(`IMDB ID ${imdbId} is not a movie`);
       }
 
       return movieResults[0].id;
@@ -53,21 +51,21 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     }
   }
 
-  findById(externalId: string, params: FindByIdQueryParams) {
-    return this.get<FindById200>(`find/${externalId}`, {
+  async findById(externalId: string, params: FindByIdQueryParams) {
+    const response = await this.get<unknown>(`find/${externalId}`, {
       params,
     });
+
+    return findById200Schema.parse(response);
   }
 
-  getMovieDetails(movieId: string) {
-    return this.get<
-      MovieDetails200 & {
-        external_ids: MovieExternalIds200;
-      }
-    >(`movie/${movieId}`, {
+  async getMovieDetails(movieId: string) {
+    const response = await this.get<unknown>(`movie/${movieId}`, {
       params: {
         append_to_response: "external_ids,release_dates",
       },
     });
+
+    return GetMovieDetails.parse(response);
   }
 }

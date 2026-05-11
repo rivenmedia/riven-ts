@@ -1,0 +1,20 @@
+name: Pre-verify
+
+description: Runs pre-verification steps before a task is executed
+
+inputs:
+  task:
+    description: The task that will be run
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Persist Knip cache
+      if: ${{ contains(fromJSON('["//#knip:ci", "//#knip:ci:production"]'), inputs.task) }}
+      uses: actions/cache@v4
+      with:
+        path: node_modules/.cache/knip
+        key: ${{ runner.os }}-knip-cache-${{ inputs.task }}-${{ hashFiles('**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql}') }}
+        restore-keys: |
+          ${{ runner.os }}-knip-cache-${{ inputs.task }}-

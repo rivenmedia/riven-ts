@@ -15,6 +15,9 @@ import type { ParsedData } from "../schemas.ts";
 import type { FetchResult } from "../types.ts";
 import type { CustomRanksConfig, RankingModel, Settings } from "./settings.ts";
 
+/**
+ * @internal
+ */
 export function trashHandler(
   data: ParsedData,
   settings: Settings,
@@ -50,6 +53,9 @@ function checkRequired(data: ParsedData, settings: Settings): boolean {
   return settings.compiledRequire.some((p) => p.test(data.rawTitle));
 }
 
+/**
+ * @internal
+ */
 export function adultHandler(
   data: ParsedData,
   settings: Settings,
@@ -94,6 +100,9 @@ function populateLangs(langs: string[]): Set<string> {
   return expanded;
 }
 
+/**
+ * @internal
+ */
 export function languageHandler(
   data: ParsedData,
   settings: Settings,

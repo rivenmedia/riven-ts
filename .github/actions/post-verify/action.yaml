@@ -13,3 +13,10 @@ runs:
     - name: Merge coverage reports
       if: ${{ inputs.task == 'test' }}
       uses: ./.github/actions/generate-coverage-report
+
+    - name: Report Knip results in PR
+      if: ${{ inputs.task == '//#knip:ci:production' }}
+      uses: codex-/knip-reporter@v3
+      with:
+        command_script_name: knip:ci:production
+        verbose: true

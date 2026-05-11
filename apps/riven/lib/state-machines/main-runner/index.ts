@@ -107,7 +107,7 @@ export interface MainRunnerMachineInput {
   parentRef: ActorRef<Snapshot<unknown>, RivenMachineEvent>;
 }
 
-export interface StartEvent {
+interface StartEvent {
   type: "START";
   input: {
     plugins: ValidPluginMap;

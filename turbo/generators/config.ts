@@ -1,8 +1,8 @@
-import { createPackageGenerator } from "./generators/package";
-import { createPluginGenerator } from "./generators/plugin";
-import { registerArrayHelper } from "./handlebars-helpers/array";
-import { registerEqualsHelper } from "./handlebars-helpers/equals";
-import { registerPackageJsonFieldsHelper } from "./handlebars-helpers/package-json-fields";
+import { createPackageGenerator } from "./generators/package.ts";
+import { createPluginGenerator } from "./generators/plugin.ts";
+import { registerArrayHelper } from "./handlebars-helpers/array.ts";
+import { registerEqualsHelper } from "./handlebars-helpers/equals.ts";
+import { registerPackageJsonFieldsHelper } from "./handlebars-helpers/package-json-fields.ts";
 
 import type { PlopTypes } from "@turbo/gen";
 
