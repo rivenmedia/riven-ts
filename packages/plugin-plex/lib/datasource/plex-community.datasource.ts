@@ -1,4 +1,4 @@
-import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { PlexSettings } from "../plex-settings.schema.ts";
 import { ListItemsResponse } from "../schemas/list-items-response.schema.ts";
@@ -7,7 +7,7 @@ import { ListResponse } from "../schemas/list-response.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource.js";
 
-export class PlexCommunityAPIError extends Error {}
+class PlexCommunityAPIError extends Error {}
 
 export class PlexCommunityAPI extends BaseDataSource<PlexSettings> {
   override baseURL = "https://community.plex.tv/api";
@@ -189,5 +189,3 @@ export class PlexCommunityAPI extends BaseDataSource<PlexSettings> {
     return true;
   }
 }
-
-export type PlexContextSlice = BasePluginContext;
