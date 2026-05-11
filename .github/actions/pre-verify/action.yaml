@@ -10,8 +10,8 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Persist Knip development cache
-      if: ${{ inputs.task == '//#knip:ci' }}
+    - name: Persist Knip cache
+      if: ${{ contains(fromJSON('["//#knip:ci", "//#knip:ci:production"]'), inputs.task) }}
       uses: actions/cache@v4
       with:
         path: node_modules/.cache/knip
