@@ -59,8 +59,5 @@ export default {
       entry: [...defaultEntry],
       project: [...defaultProject],
     },
-    // "packages/util-plugin-testing": {
-    //   project: [...defaultProject, "**/*.ts"],
-    // },
   },
 } satisfies KnipConfiguration;
