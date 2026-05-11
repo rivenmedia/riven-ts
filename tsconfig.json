@@ -1,0 +1,8 @@
+{
+  "$schema": "https://www.schemastore.org/tsconfig",
+  "extends": "@repo/core-util-typescript-config/base.json",
+  "compilerOptions": {},
+  "files": ["eslint.config.ts", "knip.config.ts"],
+  "include": ["turbo/**/*.ts"],
+  "exclude": []
+}

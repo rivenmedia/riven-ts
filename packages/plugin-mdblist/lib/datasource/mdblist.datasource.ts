@@ -8,7 +8,7 @@ import type { MdbListExternalIds } from "../schema/types/mdblist-external-ids.ty
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
-export class MdblistAPIError extends Error {}
+class MdblistAPIError extends Error {}
 
 export class MdblistAPI extends BaseDataSource<MdbListSettings> {
   override baseURL = "https://api.mdblist.com/";

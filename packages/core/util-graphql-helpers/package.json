@@ -24,14 +24,14 @@
     "type-graphql": "catalog:"
   },
   "devDependencies": {
-    "@apollo/cache-control-types": "^1.0.3",
+    "@apollo/cache-control-types": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
-    "type-fest": "^5.3.1",
+    "type-fest": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

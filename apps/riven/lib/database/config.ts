@@ -26,7 +26,7 @@ import { ShowLikeMediaItemReleaseDateSubscriber } from "./subscribers/show-like-
 
 import type { Logger } from "winston";
 
-export const entities = [
+const entities = [
   SubtitleEntry,
   FileSystemEntry,
   MediaEntry,
