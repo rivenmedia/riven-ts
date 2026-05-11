@@ -7,9 +7,13 @@ import type { MapItemsToFilesSandboxedJob } from "../../map-items-to-files/map-i
 
 type MappedFiles = MapItemsToFilesSandboxedJob["output"];
 
+// Warm gqlServer (Apollo server + standalone listener + Apollo client init)
+// once per file. The default 10s hookTimeout is too tight under cold CI
+// caches; the fixture chain (apolloServerInstance + gqlServer + orm) can
+// take 15-20s when nothing is cached. Bump to 30s to absorb that.
 it.beforeAll(({ gqlServer: _gqlServer }) => {
   return;
-});
+}, 30_000);
 
 it("throws an error if season-like torrent has fewer files than expected", async ({
   season,
