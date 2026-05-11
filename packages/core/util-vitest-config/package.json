@@ -14,12 +14,11 @@
     "merge-json-reports": "nyc merge coverage/raw coverage/merged/merged-coverage.json",
     "report": "pnpm report:html && pnpm report:summary",
     "report:html": "nyc report -t coverage/merged --report-dir coverage/report --reporter=html --exclude-after-remap false",
-    "report:summary": "nyc report -t coverage/merged --report-dir coverage/summary --reporter=json-summary --exclude-after-remap false",
-    "view-report": "open coverage/report/index.html"
+    "report:summary": "nyc report -t coverage/merged --report-dir coverage/summary --reporter=json-summary --exclude-after-remap false"
   },
   "dependencies": {
-    "@swc/core": "^1.15.7",
-    "unplugin-swc": "^1.5.9"
+    "@swc/core": "catalog:",
+    "unplugin-swc": "catalog:"
   },
   "devDependencies": {
     "@repo/core-util-eslint-config": "workspace:^",
@@ -29,19 +28,11 @@
     "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
     "glob": "catalog:",
-    "msw": "catalog:",
     "nyc": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "@vitest/coverage-v8": "^4.0.0",
-    "msw": "^2.0.0",
     "vitest": "^4.0.0"
-  },
-  "peerDependenciesMeta": {
-    "msw": {
-      "optional": true
-    }
   }
 }

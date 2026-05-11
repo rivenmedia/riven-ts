@@ -1,8 +1,8 @@
 import { MikroORM } from "@mikro-orm/core";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
-import { test as baseTest } from "vitest";
+import { it as baseIt } from "vitest";
 
-export const test = baseTest
+export const it = baseIt
   .extend(
     "orm",
     { scope: "worker" },
@@ -52,8 +52,6 @@ export const test = baseTest
   )
   .extend("em", ({ orm }) => orm.em.fork());
 
-test.afterEach(async ({ orm }) => {
+it.afterEach(async ({ orm }) => {
   await orm.schema.clear();
 });
-
-export const it = test;

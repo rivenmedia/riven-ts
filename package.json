@@ -1,28 +1,37 @@
 {
   "name": "riven-ts",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "keywords": [],
-  "license": "ISC",
-  "author": "",
-  "main": "index.js",
+  "license": "MIT",
+  "author": "Riven Media",
+  "type": "module",
   "scripts": {
     "format:check": "prettier --check . '!**/docker-data'",
     "format:check:ci": "pnpm format:check --log-level warn",
     "format:fix": "prettier --write . '!**/docker-data'",
-    "postinstall": "pnpm node .husky/install.mjs || true"
+    "postinstall": "pnpm node .husky/install.mjs || true",
+    "knip": "pnpm knip:prepare && knip",
+    "knip:ci": "pnpm knip --cache --no-exit-code --reporter github-actions",
+    "knip:ci:production": "pnpm knip:ci --strict",
+    "knip:prepare": "turbo codegen:api-schemas"
   },
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
-    "@turbo/gen": "^2.8.21",
-    "dedent": "catalog:",
+    "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-typescript-config": "workspace:^",
+    "@trivago/prettier-plugin-sort-imports": "catalog:",
+    "@turbo/gen": "catalog:",
+    "@types/node": "catalog:",
     "es-toolkit": "catalog:",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "prettier": "^3.7.4",
-    "sort-package-json": "^3.6.0",
-    "turbo": "^2.9.5",
-    "type-fest": "^5.3.1"
+    "eslint": "catalog:",
+    "husky": "catalog:",
+    "knip": "catalog:",
+    "lint-staged": "catalog:",
+    "prettier": "catalog:",
+    "sort-package-json": "catalog:",
+    "turbo": "catalog:",
+    "type-fest": "catalog:",
+    "typescript": "catalog:"
   },
   "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8"
 }

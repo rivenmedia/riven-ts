@@ -7,14 +7,10 @@
   },
   "scripts": {},
   "dependencies": {
-    "@tsconfig/node-ts": "^23.6.2",
-    "@tsconfig/node24": "^24.0.3",
-    "@tsconfig/recommended": "^1.0.13",
-    "@tsconfig/strictest": "^2.0.8"
-  },
-  "devDependencies": {
-    "eslint": "catalog:",
-    "vitest": "catalog:"
+    "@tsconfig/node-ts": "catalog:",
+    "@tsconfig/node24": "catalog:",
+    "@tsconfig/recommended": "catalog:",
+    "@tsconfig/strictest": "catalog:"
   },
   "peerDependencies": {
     "@types/node": "^24.0.0"

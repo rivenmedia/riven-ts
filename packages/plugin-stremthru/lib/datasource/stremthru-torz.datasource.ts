@@ -18,7 +18,7 @@ import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-f
 
 const storeNameHeader = "x-stremthru-store-name";
 
-export class StremThruAPIError extends Error {}
+class StremThruTorzAPIError extends Error {}
 
 export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
   override baseURL = this.settings.stremThruUrl;
@@ -41,14 +41,14 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     );
 
     if (!store) {
-      throw new Error("Store is required");
+      throw new StremThruTorzAPIError("Store is required");
     }
 
     const apiKeySettingKey = `${store}ApiKey` as const;
     const apiKey = this.settings[apiKeySettingKey];
 
     if (!apiKey) {
-      throw new Error(`Missing API key for ${store}`);
+      throw new StremThruTorzAPIError(`Missing API key for ${store}`);
     }
 
     requestOpts.headers["x-stremthru-store-authorization"] = `Bearer ${apiKey}`;
@@ -90,7 +90,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     const { data } = AddTorrentResponse.parse(response);
 
     if (!data) {
-      throw new StremThruAPIError(
+      throw new StremThruTorzAPIError(
         `No data returned from ${store} for ${infoHash}`,
       );
     }
@@ -104,7 +104,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
         );
       }
 
-      throw new StremThruAPIError(
+      throw new StremThruTorzAPIError(
         `${infoHash} was in the ${data.status} state on ${store}; the torrent will not be downloaded.`,
       );
     }

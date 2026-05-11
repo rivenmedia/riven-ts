@@ -31,10 +31,6 @@
     "msw": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
-    "xstate": "catalog:",
     "zod2md": "catalog:"
-  },
-  "peerDependencies": {
-    "xstate": "^5"
   }
 }

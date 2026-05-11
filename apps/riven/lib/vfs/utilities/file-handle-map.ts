@@ -13,7 +13,7 @@ export interface MediaFileHandleMetadata extends FileHandleMetadataBase {
   url: string;
 }
 
-export interface SubtitleFileHandleMetadata extends FileHandleMetadataBase {
+interface SubtitleFileHandleMetadata extends FileHandleMetadataBase {
   type: "subtitle";
   contentBuffer: Buffer;
 }
