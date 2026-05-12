@@ -28,8 +28,8 @@ declare module "bullmq" {
     job: Job<D, R, N>;
   }
 
-  interface TypedJobNode<R = unknown> extends JobNode {
-    job: Job<unknown, R>;
+  interface TypedJobNode<D = unknown, R = unknown> extends JobNode {
+    job: Job<D, R>;
   }
 }
 

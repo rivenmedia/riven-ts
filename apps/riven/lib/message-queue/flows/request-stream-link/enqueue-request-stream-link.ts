@@ -14,13 +14,13 @@ export interface EnqueueRequestStreamLinkParams {
 export async function enqueueRequestStreamLink({
   mediaEntry,
 }: EnqueueRequestStreamLinkParams): Promise<
-  TypedJobNode<RequestStreamLinkFlow["output"]>
+  TypedJobNode<RequestStreamLinkFlow["input"], RequestStreamLinkFlow["output"]>
 > {
   const { fullTitle } = mediaEntry.mediaItem.unwrap();
 
   const job = createRequestStreamLinkJob(
     `Request stream link: ${fullTitle}`,
-    { step: "validate-response", mediaEntry },
+    { mediaEntry },
     {
       opts: {
         deduplication: {

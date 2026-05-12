@@ -17,7 +17,7 @@ export const requestStreamLinkProcessor =
   requestStreamLinkProcessorSchema.implementAsync(
     async (
       { job, token },
-      { services: { streamService, mediaItemService } },
+      { services: { streamService, mediaEntryService, mediaItemService } },
     ) => {
       assert(token, "Token is required to create child jobs");
 
@@ -26,19 +26,21 @@ export const requestStreamLinkProcessor =
       while (job.data.step !== "complete") {
         switch (job.data.step) {
           case "request-stream-link": {
+            const mediaEntryEntity = await mediaEntryService.getMediaEntry(
+              mediaEntry.id,
+            );
+
             await flow.addPluginJob(
               MediaItemStreamLinkRequestedEvent,
               MediaItemStreamLinkRequestedResponse,
               `Request stream link: ${mediaEntry.id}`,
               mediaEntry.plugin,
-              { item: mediaEntry },
+              { item: mediaEntryEntity },
               {
                 parent: createJobParentConfig(job),
                 ignoreDependencyOnFailure: true,
               },
             );
-
-            console.log("added");
 
             await job.updateData({
               ...job.data,

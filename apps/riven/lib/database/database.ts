@@ -1,6 +1,7 @@
 import { DownloaderService } from "./services/downloader/downloader.service.ts";
 import { IndexerService } from "./services/indexer/indexer.service.ts";
 import { ItemRequestService } from "./services/item-request/item-request.service.ts";
+import { MediaEntryService } from "./services/media-entry/media-entry.service.js";
 import { MediaItemService } from "./services/media-item/media-item.service.ts";
 import { PostProcessingService } from "./services/post-processing/post-processing.service.ts";
 import { RetryLibraryService } from "./services/retry-library/retry-library.service.ts";
@@ -20,6 +21,7 @@ export interface Services {
   downloaderService: DownloaderService;
   indexerService: IndexerService;
   itemRequestService: ItemRequestService;
+  mediaEntryService: MediaEntryService;
   mediaItemService: MediaItemService;
   postProcessingService: PostProcessingService;
   retryLibraryService: RetryLibraryService;
@@ -56,6 +58,7 @@ export async function initORM(options: Partial<Options>) {
     downloaderService: new DownloaderService(orm),
     indexerService: new IndexerService(orm),
     itemRequestService: new ItemRequestService(orm),
+    mediaEntryService: new MediaEntryService(orm),
     mediaItemService: new MediaItemService(orm),
     postProcessingService: new PostProcessingService(orm),
     retryLibraryService: new RetryLibraryService(orm),
