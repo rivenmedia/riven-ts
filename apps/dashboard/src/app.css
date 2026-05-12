@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Theme tokens live in src/lib/theme/tokens.css (owned by Agent C).
+ * Components reference these tokens via Tailwind utilities like `bg-background`.
+ */
+@import "./lib/theme/tokens.css";

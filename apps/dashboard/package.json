@@ -1,0 +1,49 @@
+{
+  "name": "@repo/dashboard",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "check-types": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --threshold error",
+    "check-types:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "codegen:gql": "graphql-codegen --config graphql-codegen.ts",
+    "codegen:schema": "tsx ./scripts/fetch-schema.ts",
+    "dev": "vite dev",
+    "lint": "eslint",
+    "lint:fix": "pnpm lint --fix",
+    "prepare": "svelte-kit sync || echo ''",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@apollo/client": "catalog:",
+    "@graphql-typed-document-node/core": "catalog:",
+    "bits-ui": "^2.15.4",
+    "clsx": "^2.1.1",
+    "graphql": "catalog:",
+    "lucide-svelte": "^0.460.0",
+    "tailwind-merge": "^2.5.4",
+    "tailwind-variants": "^0.3.0"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "catalog:",
+    "@graphql-codegen/near-operation-file-preset": "catalog:",
+    "@graphql-codegen/typescript": "catalog:",
+    "@graphql-codegen/typescript-operations": "catalog:",
+    "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-typescript-config": "workspace:^",
+    "@sveltejs/adapter-node": "^5.5.1",
+    "@sveltejs/kit": "^2.49.5",
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "eslint-plugin-svelte": "^3.14.0",
+    "svelte": "^5.46.4",
+    "svelte-check": "^4.3.5",
+    "tailwindcss": "^4.1.18",
+    "tsx": "^4.21.0",
+    "typescript": "catalog:",
+    "vite": "^7.3.1"
+  }
+}

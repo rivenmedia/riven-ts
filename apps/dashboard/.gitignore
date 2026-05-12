@@ -1,0 +1,10 @@
+node_modules
+.svelte-kit
+build
+dist
+.env
+.env.*
+!.env.example
+.turbo
+schema.graphql
+src/lib/graphql/__generated__/

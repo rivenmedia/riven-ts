@@ -1,0 +1,39 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build", "codegen:gql"],
+      "outputs": ["build/**", ".svelte-kit/output/**"]
+    },
+    "codegen:gql": {
+      "dependsOn": ["codegen:schema"],
+      "inputs": [
+        "schema.graphql",
+        "graphql-codegen.ts",
+        "src/**/*.{graphql,gql,svelte,ts}"
+      ],
+      "outputs": ["src/lib/graphql/__generated__/**", "src/**/*.typegen.ts"]
+    },
+    "codegen:schema": {
+      "cache": false,
+      "inputs": ["scripts/fetch-schema.ts"],
+      "outputs": ["schema.graphql"]
+    },
+    "dev": {
+      "persistent": true,
+      "cache": false
+    },
+    "check-types": {
+      "dependsOn": ["codegen:gql"],
+      "inputs": [
+        "src/**/*.{ts,svelte}",
+        "tsconfig.json",
+        "svelte.config.js"
+      ]
+    },
+    "lint": {
+      "inputs": ["src/**/*.{ts,svelte,js}", "eslint.config.ts"]
+    }
+  }
+}
