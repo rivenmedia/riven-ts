@@ -56,11 +56,10 @@ export const requestStreamLinkProcessor =
           case "validate-response": {
             const [response] = Object.values(await job.getChildrenValues());
 
-            if (!response) {
-              throw new UnrecoverableError(
-                "Failed to get response from stream link request job",
-              );
-            }
+            assert(
+              response,
+              new UnrecoverableError("Failed to get response from plugin job"),
+            );
 
             const isDeadLink = streamService.isFatalStatusCode(
               response.statusCode,
@@ -75,18 +74,12 @@ export const requestStreamLinkProcessor =
               break;
             }
 
-            if (response.link === null) {
-              logger.warn(
-                `Received invalid stream link response for ${mediaEntry.originalFilename}, retrying request...`,
-              );
-
-              await job.updateData({
-                ...job.data,
-                step: "request-stream-link",
-              });
-
-              break;
-            }
+            assert(
+              response.link,
+              new UnrecoverableError(
+                "Stream link is missing from plugin response",
+              ),
+            );
 
             await job.updateData({
               ...job.data,
@@ -99,7 +92,9 @@ export const requestStreamLinkProcessor =
           case "save-stream-link": {
             assert(
               job.data.link,
-              "Stream link is required to save to media entry",
+              new UnrecoverableError(
+                "Stream link is required to save to media entry",
+              ),
             );
 
             await streamService.saveStreamUrl(mediaEntry.id, job.data.link);
@@ -117,7 +112,8 @@ export const requestStreamLinkProcessor =
             );
 
             const mediaItem = await mediaItemService.getMediaItem(
-              mediaEntry.mediaItem,
+              mediaEntry.mediaItem.id,
+              { populate: ["filesystemEntries:ref"] },
             );
 
             await streamService.blacklistActiveStream({

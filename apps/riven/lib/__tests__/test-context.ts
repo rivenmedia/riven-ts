@@ -10,7 +10,7 @@ import { test as testBase, vi } from "vitest";
 import type { JobsOptions } from "bullmq";
 
 export const it = testBase
-  .extend("server", { auto: false }, async ({}, { onCleanup }) => {
+  .extend("server", async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
     const server = setupServer();
@@ -261,7 +261,22 @@ export const it = testBase
     "apolloClient",
     { scope: "file" },
     await import("../graphql/apollo-client.ts"),
-  );
+  )
+  .extend("createFlowWorker", { scope: "file" }, async () => {
+    const { createFlowWorker } =
+      await import("../message-queue/utilities/create-flow-worker.ts");
+
+    return (
+      flow: Parameters<typeof createFlowWorker>[0],
+      processor: Parameters<typeof createFlowWorker>[1],
+    ) => createFlowWorker(flow, processor, vi.fn(), new Map());
+  })
+  .extend("createPluginWorker", { scope: "file" }, async () => {
+    const { createPluginWorker } =
+      await import("../message-queue/utilities/create-plugin-worker.ts");
+
+    return createPluginWorker;
+  });
 
 it.afterEach(async ({ mockSentryScope, apolloClient }) => {
   mockSentryScope.clear();
