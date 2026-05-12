@@ -68,6 +68,10 @@ jobs:
     needs: get-required-tasks
     if: needs.get-required-tasks.outputs.required-tasks != '[]'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
