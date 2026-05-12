@@ -6,12 +6,13 @@ on:
   push:
     branches:
       - main
-  workflow_call:
-    inputs:
-      push:
-        description: Whether to push the built images to the registry
-        type: boolean
-        default: false
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 permissions:
   contents: read
@@ -60,7 +61,7 @@ jobs:
         with:
           file: apps/riven/Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name == 'push' || inputs.push }}
+          push: ${{ github.event_name == 'push' || (env.IS_FORK == 'false' && contains(github.event.pull_request.labels.*.name, 'build-docker')) }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
@@ -72,3 +73,4 @@ jobs:
           target: runner
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          IS_FORK: ${{ github.event.pull_request != null && github.event.pull_request.head.repo.full_name != github.repository }}

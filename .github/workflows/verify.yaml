@@ -69,14 +69,3 @@ jobs:
         toJson(matrix.task.runner-requirements) || '[]' }}
       env: ${{ matrix.task.env && toJson(matrix.task.env) || '{}' }}
     secrets: inherit
-
-  build-docker-images:
-    name: Build Docker Images
-    needs: verify
-    uses: ./.github/workflows/build-docker-images.yaml
-    permissions:
-      contents: read
-      packages: write
-    with:
-      push: ${{ contains(github.event.pull_request.labels.*.name, 'build-docker') }}
-    secrets: inherit
