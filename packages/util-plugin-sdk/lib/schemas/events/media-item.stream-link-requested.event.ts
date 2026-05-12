@@ -19,7 +19,8 @@ export type MediaItemStreamLinkRequestedEvent = z.infer<
 >;
 
 export const MediaItemStreamLinkRequestedResponse = z.object({
-  link: z.url(),
+  link: z.url().nullable(),
+  statusCode: z.int().positive(),
 });
 
 export type MediaItemStreamLinkRequestedResponse = z.infer<

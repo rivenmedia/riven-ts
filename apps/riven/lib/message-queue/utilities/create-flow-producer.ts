@@ -27,6 +27,10 @@ declare module "bullmq" {
   > extends Pick<JobNode, "children"> {
     job: Job<D, R, N>;
   }
+
+  interface TypedJobNode<R = unknown> extends JobNode {
+    job: Job<unknown, R>;
+  }
 }
 
 export class ExtendedFlowProducer extends FlowProducer {

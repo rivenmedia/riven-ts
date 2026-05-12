@@ -52,9 +52,27 @@ type FetchResponse<T = unknown> = Pick<
     statusText: string;
     headers: Record<string, string>;
   };
-  responseTime: number;
-  responseFromCache: boolean | undefined;
-};
+} & (
+    | {
+        success: true;
+        responseTime: number;
+        responseFromCache: boolean | undefined;
+      }
+    | { success: false }
+  );
+
+export class DataSourceHTTPError extends UnrecoverableError {
+  response: DataSourceFetchResult<unknown>["response"];
+
+  constructor(
+    message: string,
+    response: DataSourceFetchResult<unknown>["response"],
+  ) {
+    super(message);
+
+    this.response = response;
+  }
+}
 
 export interface BaseDataSourceConfig<
   T extends Record<string, unknown>,
@@ -141,43 +159,62 @@ export abstract class BaseDataSource<
       async (job, _token, signal) => {
         await job.log(`Processing request for ${job.data.path}`);
 
-        const {
-          timeTaken,
-          result: { parsedBody, response, responseFromCache },
-        } = await benchmark(async () => {
-          this.logger.silly(
-            [
-              `[${this.serviceName}] Initiating request to ${new URL(job.data.path, this.baseURL).toString()}`,
-              ...(job.data.params ? [`?${job.data.params}`] : []),
-            ].join(""),
+        try {
+          const {
+            timeTaken,
+            result: { parsedBody, response, responseFromCache },
+          } = await benchmark(async () => {
+            this.logger.silly(
+              [
+                `[${this.serviceName}] Initiating request to ${new URL(job.data.path, this.baseURL).toString()}`,
+                ...(job.data.params ? [`?${job.data.params}`] : []),
+              ].join(""),
+            );
+
+            this.#decodeRequestBody(job);
+
+            job.data.incomingRequest ??= {};
+            job.data.incomingRequest.signal = signal;
+            job.data.incomingRequest.params = urlSearchParamsCodec.decode(
+              job.data.params,
+            );
+
+            return super.fetch(job.data.path, job.data.incomingRequest);
+          });
+
+          await job.log(
+            `Request completed in ${(timeTaken / 1000).toFixed(2)} seconds`,
           );
 
-          this.#decodeRequestBody(job);
+          return {
+            success: true,
+            parsedBody,
+            response: {
+              ok: response.ok,
+              status: response.status,
+              statusText: response.statusText,
+              headers: Object.fromEntries(response.headers),
+            },
+            responseTime: timeTaken,
+            responseFromCache,
+          };
+        } catch (error) {
+          if (error instanceof DataSourceHTTPError) {
+            return {
+              success: false,
+              parsedBody: undefined,
+              response: {
+                ok: error.response.ok,
+                headers: Object.fromEntries(error.response.headers),
+                status: error.response.status,
+                statusText: error.response.statusText,
+              },
+              responseTime: 0,
+            };
+          }
 
-          job.data.incomingRequest ??= {};
-          job.data.incomingRequest.signal = signal;
-          job.data.incomingRequest.params = urlSearchParamsCodec.decode(
-            job.data.params,
-          );
-
-          return super.fetch(job.data.path, job.data.incomingRequest);
-        });
-
-        await job.log(
-          `Request completed in ${(timeTaken / 1000).toFixed(2)} seconds`,
-        );
-
-        return {
-          parsedBody,
-          response: {
-            ok: response.ok,
-            status: response.status,
-            statusText: response.statusText,
-            headers: Object.fromEntries(response.headers),
-          },
-          responseTime: timeTaken,
-          responseFromCache,
-        };
+          throw error;
+        }
       },
       {
         connection,
@@ -209,7 +246,7 @@ export abstract class BaseDataSource<
     }
 
     if (typeof job.data.incomingRequest.body !== "string") {
-      throw new Error("Unable to decode non-string request body.");
+      throw new UnrecoverableError("Unable to decode non-string request body.");
     }
 
     if (bodyType === "url-search-params") {
@@ -339,7 +376,7 @@ export abstract class BaseDataSource<
       try {
         JSON.parse(body);
       } catch {
-        throw new Error(
+        throw new UnrecoverableError(
           "Unable to determine the request body type: invalid JSON string.",
         );
       }
@@ -347,7 +384,7 @@ export abstract class BaseDataSource<
       return "json";
     }
 
-    throw new Error("Unable to determine the request body type.");
+    throw new UnrecoverableError("Unable to determine the request body type.");
   }
 
   async #getOrCreateRequestJob(
@@ -434,6 +471,23 @@ export abstract class BaseDataSource<
 
     const result = await job.waitUntilFinished(this.#queueEvents);
 
+    if (!result.success) {
+      const { success, ...errorResult } = result;
+
+      return {
+        parsedBody: result.parsedBody as T,
+        response: new Response(null, errorResult.response),
+
+        // The following fields aren't used by our application,
+        // but must be included to satisfy the return type.
+        responseFromCache: false,
+        requestDeduplication: undefined as never,
+        httpCache: {
+          cacheWritePromise: Promise.resolve(),
+        },
+      };
+    }
+
     const logMessage = result.responseFromCache
       ? `[${this.serviceName}] Returned cached response for ${augmentedRequest.method ?? "GET"} ${url.toString()}`
       : `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url.toString()} in ${(result.responseTime / 1000).toFixed(2)} seconds`;
@@ -492,8 +546,9 @@ export abstract class BaseDataSource<
     }
 
     if (String(response.status).startsWith("4")) {
-      throw new UnrecoverableError(
+      throw new DataSourceHTTPError(
         `${response.status.toString()} ${response.statusText} for ${url.toString()}`,
+        response,
       );
     }
   }

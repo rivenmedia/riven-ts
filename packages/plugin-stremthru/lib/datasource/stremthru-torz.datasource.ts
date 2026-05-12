@@ -14,6 +14,7 @@ import type {
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
 import type { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
+import type { MediaItemStreamLinkRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 
 const storeNameHeader = "x-stremthru-store-name";
@@ -168,19 +169,39 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
 
     const results = await Promise.all(requests);
 
-    return results.reduce<Record<string, DebridFile[]>>((acc, result) => {
-      return Object.assign(acc, result);
-    }, {});
+    return results.reduce<Record<string, DebridFile[]>>(
+      (acc, result) => Object.assign(acc, result),
+      {},
+    );
   }
 
-  async generateLink(link: string, store: Store) {
-    const response = await this.post<unknown>("v0/store/torz/link/generate", {
-      body: JSON.stringify({ link }),
-      headers: this.#buildCommonHeaders(store),
-    });
+  async generateLink(
+    link: string,
+    store: Store,
+  ): Promise<MediaItemStreamLinkRequestedResponse> {
+    const { response, parsedBody } = await this.fetch<unknown>(
+      "v0/store/torz/link/generate",
+      {
+        body: JSON.stringify({ link }),
+        headers: this.#buildCommonHeaders(store),
+        method: "POST",
+      },
+    );
 
-    const { data } = GenerateLinkResponse.parse(response);
+    const parseResult = GenerateLinkResponse.safeParse(parsedBody);
 
-    return data;
+    if (!parseResult.success) {
+      return {
+        link: null,
+        statusCode: response.status,
+      };
+    }
+
+    const { data } = parseResult.data;
+
+    return {
+      link: data.link,
+      statusCode: response.status,
+    };
   }
 }

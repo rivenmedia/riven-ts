@@ -47,7 +47,7 @@ export default {
       project: ["turbo/**/*.ts"],
     },
     "apps/riven": {
-      entry: [...defaultEntry],
+      entry: [...defaultEntry, "!**/Migration*.ts!"],
       project: [
         ...defaultProject,
         "!**/Migration*.ts",

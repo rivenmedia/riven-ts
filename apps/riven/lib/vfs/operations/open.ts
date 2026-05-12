@@ -1,10 +1,11 @@
 import Fuse from "@zkochan/fuse-native";
+import { type Queue, UnrecoverableError } from "bullmq";
 import { setTimeout } from "node:timers/promises";
 
 import { services } from "../../database/database.ts";
+import { enqueueRequestStreamLink } from "../../message-queue/flows/request-stream-link/enqueue-request-stream-link.ts";
 import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
 import { logger } from "../../utilities/logger/logger.ts";
-import { serialiseEventData } from "../../utilities/serialisers/serialise-event-data.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { attrCache } from "../utilities/attr-cache.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
@@ -22,7 +23,6 @@ import type {
   MediaItemStreamLinkRequestedEvent,
   MediaItemStreamLinkRequestedResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
-import type { Queue } from "bullmq";
 
 type LinkRequestQueues = Map<
   string,
@@ -119,19 +119,19 @@ async function serveMediaFile(
     try {
       fileNameIsFetchingLinkMap.set(entry.originalFilename, true);
 
-      const job = await requestQueue.add(
-        entry.id,
-        serialiseEventData("riven.media-item.stream-link.requested", {
-          item: entry,
-        }) as ParamsFor<MediaItemStreamLinkRequestedEvent>,
-      );
+      const { job } = await enqueueRequestStreamLink({
+        mediaEntry: entry,
+      });
 
-      const { link: streamUrl } = await runSingleJob(job);
-
-      await services.vfsService.saveStreamUrl(entry.id, streamUrl);
+      await runSingleJob(job);
 
       attrCache.delete(pathInfo.rawPath);
     } catch (error: unknown) {
+      if (error instanceof UnrecoverableError) {
+        logger.info("Deleting cache due to error");
+        attrCache.delete(pathInfo.rawPath);
+      }
+
       throw new FuseError(
         Fuse.ENOENT,
         `Unable to get stream url for ${entry.originalFilename}: ${String(error)}`,
