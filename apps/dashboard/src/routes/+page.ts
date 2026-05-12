@@ -4,15 +4,19 @@ import type { PageLoad } from "./$types.js";
 
 const LIBRARY_COUNTS = gql`
   query LibraryCounts {
-    movieCount
-    showCount
-    episodeCount
+    libraryCounts {
+      movies
+      shows
+      seasons
+      episodes
+      total
+    }
   }
 `;
 
 const RECENT_MEDIA_ITEMS = gql`
   query RecentMediaItems($limit: Int = 10) {
-    recentMediaItems(limit: $limit) {
+    mediaItems(limit: $limit) {
       __typename
       id
       title
@@ -24,6 +28,14 @@ const RECENT_MEDIA_ITEMS = gql`
     }
   }
 `;
+
+export type LibraryCounts = {
+  movies: number;
+  shows: number;
+  seasons: number;
+  episodes: number;
+  total: number;
+};
 
 export type OverviewRecentItem = {
   __typename?: string;
@@ -37,11 +49,7 @@ export type OverviewRecentItem = {
 };
 
 export type OverviewData = {
-  counts: {
-    movieCount: number | null;
-    showCount: number | null;
-    episodeCount: number | null;
-  };
+  counts: LibraryCounts | null;
   recent: OverviewRecentItem[];
   error: string | null;
 };
@@ -49,15 +57,11 @@ export type OverviewData = {
 export const load: PageLoad = async (): Promise<OverviewData> => {
   try {
     const [countsResult, recentResult] = await Promise.allSettled([
-      client.query<{
-        movieCount: number;
-        showCount: number;
-        episodeCount: number;
-      }>({
+      client.query<{ libraryCounts: LibraryCounts }>({
         query: LIBRARY_COUNTS,
         fetchPolicy: "network-only",
       }),
-      client.query<{ recentMediaItems: OverviewRecentItem[] }>({
+      client.query<{ mediaItems: OverviewRecentItem[] }>({
         query: RECENT_MEDIA_ITEMS,
         variables: { limit: 10 },
         fetchPolicy: "network-only",
@@ -66,12 +70,12 @@ export const load: PageLoad = async (): Promise<OverviewData> => {
 
     const counts: OverviewData["counts"] =
       countsResult.status === "fulfilled" && countsResult.value.data
-        ? countsResult.value.data
-        : { movieCount: null, showCount: null, episodeCount: null };
+        ? countsResult.value.data.libraryCounts
+        : null;
 
     const recent =
       recentResult.status === "fulfilled"
-        ? (recentResult.value.data?.recentMediaItems ?? [])
+        ? (recentResult.value.data?.mediaItems ?? [])
         : [];
 
     const failures = [countsResult, recentResult].filter(
@@ -90,7 +94,7 @@ export const load: PageLoad = async (): Promise<OverviewData> => {
     };
   } catch (err) {
     return {
-      counts: { movieCount: null, showCount: null, episodeCount: null },
+      counts: null,
       recent: [],
       error: err instanceof Error ? err.message : String(err),
     };

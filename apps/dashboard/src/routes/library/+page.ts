@@ -7,7 +7,7 @@ const LIBRARY_ITEMS = gql`
     $limit: Int = 50
     $offset: Int = 0
     $search: String
-    $type: String
+    $type: MediaItemType
   ) {
     mediaItems(limit: $limit, offset: $offset, search: $search, type: $type) {
       __typename

@@ -1,13 +1,12 @@
 <script lang="ts">
   import { Badge } from "$lib/components/ui/badge";
   import * as Card from "$lib/components/ui/card";
-  import { Skeleton } from "$lib/components/ui/skeleton";
   import * as Table from "$lib/components/ui/table";
   import {
     AlertTriangle,
     Clapperboard,
     Film,
-    ListChecks,
+    LayoutGrid,
     Tv,
   } from "lucide-svelte";
 
@@ -17,30 +16,30 @@
 
   const stats = $derived([
     {
-      label: "Total Movies",
-      value: data.counts.movieCount,
+      label: "Movies",
+      value: data.counts?.movies ?? null,
       icon: Film,
-      hint: null as string | null,
     },
     {
-      label: "Total Shows",
-      value: data.counts.showCount,
+      label: "Shows",
+      value: data.counts?.shows ?? null,
       icon: Tv,
-      hint: null,
     },
     {
-      label: "Total Episodes",
-      value: data.counts.episodeCount,
+      label: "Seasons",
+      value: data.counts?.seasons ?? null,
+      icon: LayoutGrid,
+    },
+    {
+      label: "Episodes",
+      value: data.counts?.episodes ?? null,
       icon: Clapperboard,
-      hint: null,
-    },
-    {
-      label: "Queue Depth",
-      value: null,
-      icon: ListChecks,
-      hint: "Agent E owns this query",
     },
   ]);
+
+  const totalLabel = $derived(
+    data.counts ? new Intl.NumberFormat().format(data.counts.total) : "—",
+  );
 
   function fmtCount(n: number | null): string {
     if (n === null || n === undefined) return "—";
@@ -64,11 +63,19 @@
 </svelte:head>
 
 <section class="space-y-6 p-8">
-  <header>
-    <h1 class="text-3xl font-semibold tracking-tight">Overview</h1>
-    <p class="text-muted-foreground mt-1">
-      Library counts and the most recent activity across riven-ts.
-    </p>
+  <header class="flex items-end justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-semibold tracking-tight">Overview</h1>
+      <p class="text-muted-foreground mt-1">
+        Library counts and recent activity from riven-ts.
+      </p>
+    </div>
+    <div class="text-right">
+      <div class="text-muted-foreground text-xs uppercase tracking-wider">
+        Items total
+      </div>
+      <div class="text-2xl font-semibold tabular-nums">{totalLabel}</div>
+    </div>
   </header>
 
   {#if data.error}
@@ -96,10 +103,9 @@
           <Icon class="text-muted-foreground size-4" />
         </Card.Header>
         <Card.Content>
-          <div class="text-2xl font-semibold">{fmtCount(stat.value)}</div>
-          {#if stat.hint}
-            <p class="text-muted-foreground mt-1 text-xs">{stat.hint}</p>
-          {/if}
+          <div class="text-2xl font-semibold tabular-nums">
+            {fmtCount(stat.value)}
+          </div>
         </Card.Content>
       </Card.Root>
     {/each}
@@ -108,12 +114,16 @@
   <Card.Root>
     <Card.Header>
       <Card.Title>Recently added</Card.Title>
-      <Card.Description>Last 10 items indexed by riven.</Card.Description>
+      <Card.Description>
+        Last 10 items returned by the library — strict "recent" ordering lands
+        when an <code class="text-foreground">orderBy</code> arg is added to
+        <code class="text-foreground">mediaItems</code>.
+      </Card.Description>
     </Card.Header>
     <Card.Content>
       {#if data.recent.length === 0}
         <div class="text-muted-foreground py-6 text-center text-sm">
-          No recent items yet — once riven indexes content it will appear here.
+          No items yet — once riven indexes content it will appear here.
         </div>
       {:else}
         <Table.Root>
@@ -130,10 +140,7 @@
             {#each data.recent as item (item.id)}
               <Table.Row>
                 <Table.Cell class="font-medium">
-                  <a
-                    class="hover:underline"
-                    href={`/library/${item.id}`}
-                  >
+                  <a class="hover:underline" href={`/library/${item.id}`}>
                     {item.title}
                   </a>
                 </Table.Cell>
@@ -155,7 +162,3 @@
     </Card.Content>
   </Card.Root>
 </section>
-
-{#snippet skeletonRow()}
-  <Skeleton class="h-10 w-full" />
-{/snippet}
