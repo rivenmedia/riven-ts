@@ -29,15 +29,15 @@ const RECENT_MEDIA_ITEMS = gql`
   }
 `;
 
-export type LibraryCounts = {
+export interface LibraryCounts {
   movies: number;
   shows: number;
   seasons: number;
   episodes: number;
   total: number;
-};
+}
 
-export type OverviewRecentItem = {
+export interface OverviewRecentItem {
   __typename?: string;
   id: string;
   title: string;
@@ -46,13 +46,13 @@ export type OverviewRecentItem = {
   state?: string | null;
   posterPath?: string | null;
   createdAt?: string | null;
-};
+}
 
-export type OverviewData = {
+export interface OverviewData {
   counts: LibraryCounts | null;
   recent: OverviewRecentItem[];
   error: string | null;
-};
+}
 
 export const load: PageLoad = async (): Promise<OverviewData> => {
   try {
@@ -78,9 +78,10 @@ export const load: PageLoad = async (): Promise<OverviewData> => {
         ? (recentResult.value.data?.mediaItems ?? [])
         : [];
 
-    const failures = [countsResult, recentResult].filter(
-      (r) => r.status === "rejected",
-    ) as PromiseRejectedResult[];
+    const failures: PromiseRejectedResult[] = [];
+    for (const r of [countsResult, recentResult]) {
+      if (r.status === "rejected") failures.push(r);
+    }
 
     return {
       counts,
@@ -88,7 +89,11 @@ export const load: PageLoad = async (): Promise<OverviewData> => {
       error:
         failures.length > 0
           ? failures
-              .map((f) => String(f.reason?.message ?? f.reason))
+              .map((f) => {
+                const reason: unknown = f.reason;
+                if (reason instanceof Error) return reason.message;
+                return String(reason);
+              })
               .join("; ")
           : null,
     };

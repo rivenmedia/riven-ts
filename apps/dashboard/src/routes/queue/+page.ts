@@ -45,21 +45,21 @@ const QUEUE_JOBS = gql`
 
 export type JobStatus = "waiting" | "active" | "completed" | "failed";
 
-export type QueueCounts = {
+export interface QueueCounts {
   waiting: number;
   active: number;
   completed: number;
   failed: number;
   delayed: number;
   paused: number;
-};
+}
 
-export type QueueOverview = {
+export interface QueueOverview {
   name: string;
   counts: QueueCounts;
-};
+}
 
-export type QueueJob = {
+export interface QueueJob {
   id: string;
   name: string;
   data: unknown;
@@ -68,21 +68,21 @@ export type QueueJob = {
   processedOn: number | null;
   finishedOn: number | null;
   timestamp: number;
-};
+}
 
-export type QueueJobsPage = {
-  edges: Array<{ node: QueueJob }>;
+export interface QueueJobsPage {
+  edges: { node: QueueJob }[];
   total: number;
-};
+}
 
-export type QueueLoadResult = {
+export interface QueueLoadResult {
   queues: QueueOverview[];
   jobs: QueueJobsPage | null;
   selectedQueue: string | null;
   selectedStatus: JobStatus;
   resolverMissing: boolean;
   errorMessage: string | null;
-};
+}
 
 const STATUSES: readonly JobStatus[] = [
   "waiting",

@@ -18,27 +18,30 @@ const PLUGINS = gql`
   }
 `;
 
-export type PluginStatus = "healthy" | "degraded" | "error" | string;
+// Server returns one of the known statuses, but unknown future values are
+// possible; the `(string & {})` trick keeps the literal autocomplete while
+// allowing arbitrary strings without tripping the redundant-type rule.
+export type PluginStatus = "healthy" | "degraded" | "error" | (string & {});
 
-export type PluginLastError = {
+export interface PluginLastError {
   message: string;
   timestamp: number;
-};
+}
 
-export type Plugin = {
+export interface Plugin {
   name: string;
   version: string;
   status: PluginStatus;
   lastError: PluginLastError | null;
   capabilities: string[];
   settings: Record<string, unknown> | null;
-};
+}
 
-export type PluginsLoadResult = {
+export interface PluginsLoadResult {
   plugins: Plugin[];
   resolverMissing: boolean;
   errorMessage: string | null;
-};
+}
 
 function isSchemaMissing(err: unknown): boolean {
   const msg = err instanceof Error ? err.message : String(err);

@@ -24,7 +24,7 @@ const DEFAULT_GRAPHQL_URL = "http://localhost:3000/";
  * be set at build time — useful for the bare `pnpm dev` happy path.
  */
 const resolvedUri: string =
-  publicEnv["PUBLIC_RIVEN_GRAPHQL_URL"] ?? DEFAULT_GRAPHQL_URL;
+  publicEnv.PUBLIC_RIVEN_GRAPHQL_URL ?? DEFAULT_GRAPHQL_URL;
 
 function buildClient(uri: string): ApolloClient {
   return new ApolloClient({

@@ -98,35 +98,35 @@ const MEDIA_ITEM_DETAIL = gql`
   }
 `;
 
-export type FilesystemEntryRef = {
+export interface FilesystemEntryRef {
   id: string;
   path?: string | null;
   size?: number | null;
   quality?: string | null;
-};
+}
 
-export type StreamRef = {
+export interface StreamRef {
   id: string;
   infoHash?: string | null;
   title?: string | null;
   size?: number | null;
   seeders?: number | null;
   leechers?: number | null;
-};
+}
 
-export type EpisodeRef = {
+export interface EpisodeRef {
   id: string;
   number?: number | null;
   title?: string | null;
-};
+}
 
-export type SeasonRef = {
+export interface SeasonRef {
   id: string;
   number?: number | null;
   episodes?: EpisodeRef[] | null;
-};
+}
 
-export type MediaItemDetail = {
+export interface MediaItemDetail {
   __typename?: string;
   id: string;
   title: string;
@@ -151,15 +151,20 @@ export type MediaItemDetail = {
   filesystemEntries?: FilesystemEntryRef[] | null;
   streams?: StreamRef[] | null;
   seasons?: SeasonRef[] | null;
-};
+}
 
-export type DetailPageData = {
+export interface DetailPageData {
   item: MediaItemDetail | null;
   error: string | null;
-};
+}
 
 export const load: PageLoad = async ({ params }): Promise<DetailPageData> => {
-  if (!params.id) throw error(404, "Missing id");
+  if (!params.id) {
+    // SvelteKit's `error()` returns an HttpError that must be thrown;
+    // ESLint's only-throw-error rule cannot see that through the helper.
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
+    throw error(404, "Missing id");
+  }
 
   try {
     const { data } = await client.query<{ mediaItemById: MediaItemDetail }>({

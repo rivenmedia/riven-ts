@@ -23,7 +23,7 @@ const LIBRARY_ITEMS = gql`
   }
 `;
 
-export type LibraryItem = {
+export interface LibraryItem {
   __typename?: string;
   id: string;
   title: string;
@@ -33,16 +33,16 @@ export type LibraryItem = {
   posterPath?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
-};
+}
 
-export type LibraryPageData = {
+export interface LibraryPageData {
   items: LibraryItem[];
   search: string;
   page: number;
   pageSize: number;
   hasMore: boolean;
   error: string | null;
-};
+}
 
 // SvelteKit only permits a fixed set of exports from `+page.ts`; underscore
 // prefix is the convention for re-using a module-local symbol elsewhere.

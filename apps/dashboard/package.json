@@ -41,9 +41,11 @@
     "eslint-plugin-svelte": "^3.14.0",
     "svelte": "^5.46.4",
     "svelte-check": "^4.3.5",
+    "svelte-eslint-parser": "^1.6.1",
     "tailwindcss": "^4.1.18",
     "tsx": "^4.21.0",
     "typescript": "catalog:",
+    "typescript-eslint": "catalog:",
     "vite": "^7.3.1"
   }
 }
