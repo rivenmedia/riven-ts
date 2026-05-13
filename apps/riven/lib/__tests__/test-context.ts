@@ -7,7 +7,8 @@ import {
 import assert from "node:assert";
 import { test as testBase, vi } from "vitest";
 
-import type { JobsOptions } from "bullmq";
+import type { JobsOptions, Worker } from "bullmq";
+import type { ArraySlice } from "type-fest";
 
 export const it = testBase
   .extend("server", async ({}, { onCleanup }) => {
@@ -262,21 +263,50 @@ export const it = testBase
     { scope: "file" },
     await import("../graphql/apollo-client.ts"),
   )
-  .extend("createFlowWorker", { scope: "file" }, async () => {
+  .extend("createFlowWorker", { scope: "file" }, async ({}, { onCleanup }) => {
     const { createFlowWorker } =
       await import("../message-queue/utilities/create-flow-worker.ts");
 
-    return (
-      flow: Parameters<typeof createFlowWorker>[0],
-      processor: Parameters<typeof createFlowWorker>[1],
-    ) => createFlowWorker(flow, processor, vi.fn(), new Map());
-  })
-  .extend("createPluginWorker", { scope: "file" }, async () => {
-    const { createPluginWorker } =
-      await import("../message-queue/utilities/create-plugin-worker.ts");
+    const workers = new Set<Worker>();
 
-    return createPluginWorker;
-  });
+    onCleanup(async () => {
+      for (const worker of workers) {
+        await worker.close(true);
+      }
+    });
+
+    return (...args: ArraySlice<Parameters<typeof createFlowWorker>, 0, 2>) => {
+      const { queue, worker } = createFlowWorker(...args, vi.fn(), new Map());
+
+      workers.add(worker);
+
+      return { queue, worker };
+    };
+  })
+  .extend(
+    "createPluginWorker",
+    { scope: "file" },
+    async ({}, { onCleanup }) => {
+      const { createPluginWorker } =
+        await import("../message-queue/utilities/create-plugin-worker.ts");
+
+      const workers = new Set<Worker>();
+
+      onCleanup(async () => {
+        for (const worker of workers) {
+          await worker.close(true);
+        }
+      });
+
+      return (...args: Parameters<typeof createPluginWorker>) => {
+        const { queue, worker } = createPluginWorker(...args);
+
+        workers.add(worker);
+
+        return { queue, worker };
+      };
+    },
+  );
 
 it.afterEach(async ({ mockSentryScope, apolloClient }) => {
   mockSentryScope.clear();
