@@ -7,8 +7,12 @@ import {
 import assert from "node:assert";
 import { test as testBase, vi } from "vitest";
 
-import type { JobsOptions, Worker } from "bullmq";
-import type { ArraySlice } from "type-fest";
+import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { JobsOptions, Processor, Worker } from "bullmq";
+import type { ZodObject } from "zod";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFunction = (...args: any[]) => any;
 
 export const it = testBase
   .extend("server", async ({}, { onCleanup }) => {
@@ -238,20 +242,7 @@ export const it = testBase
 
       initApolloClient(new URL(url));
 
-      vi.doMock(import("node:worker_threads"), async (importOriginal) => {
-        const originalModule = await importOriginal();
-        const { toMerged } = await import("es-toolkit");
-
-        return toMerged(originalModule, {
-          workerData: {
-            gqlUrl: url,
-          },
-        });
-      });
-
       onCleanup(async () => {
-        vi.doUnmock(import("node:worker_threads"));
-
         await apolloServerInstance.stop();
       });
 
@@ -275,8 +266,13 @@ export const it = testBase
       }
     });
 
-    return (...args: ArraySlice<Parameters<typeof createFlowWorker>, 0, 2>) => {
-      const { queue, worker } = createFlowWorker(...args, vi.fn(), new Map());
+    return (flowSchema: ZodObject, processor: AnyFunction) => {
+      const { queue, worker } = createFlowWorker(
+        flowSchema as never,
+        processor as never,
+        vi.fn(),
+        new Map(),
+      );
 
       workers.add(worker);
 
@@ -298,8 +294,16 @@ export const it = testBase
         }
       });
 
-      return (...args: Parameters<typeof createPluginWorker>) => {
-        const { queue, worker } = createPluginWorker(...args);
+      return (
+        eventType: RivenEvent["type"],
+        pluginName: string,
+        processor: Processor,
+      ) => {
+        const { queue, worker } = createPluginWorker(
+          eventType,
+          pluginName,
+          processor,
+        );
 
         workers.add(worker);
 
