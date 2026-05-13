@@ -118,7 +118,7 @@ export const requestStreamLinkProcessor =
 
             await streamService.blacklistActiveStream({
               mediaItem,
-              provider: mediaEntry.plugin,
+              provider: mediaEntry.provider,
               plugin: mediaEntry.plugin,
             });
 

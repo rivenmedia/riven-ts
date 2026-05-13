@@ -59,6 +59,7 @@ it.concurrent(
     em,
     completedMovieContext: { completedMovie },
     createPluginWorker,
+    services: { mediaItemService },
   }) => {
     const [mediaEntry] = await completedMovie.getMediaEntries();
 
@@ -88,11 +89,21 @@ it.concurrent(
       expect(await job.getState()).toBe("failed");
     });
 
-    const blacklistedStream = await em.findOneOrFail(BlacklistedStream, {
-      stream: activeStream.infoHash,
-    });
+    expect(() =>
+      em.findOneOrFail(BlacklistedStream, {
+        stream: activeStream.infoHash,
+        mediaItem: completedMovie,
+        provider: mediaEntry.provider,
+        plugin: mediaEntry.plugin,
+      }),
+    ).not.toThrow();
 
-    expect(blacklistedStream.stream.infoHash).toBe(activeStream.infoHash);
+    const updatedMediaItem = await mediaItemService.getMediaItem(
+      completedMovie.id,
+      { populate: ["blacklistedStreams"] },
+    );
+
+    expect(updatedMediaItem.blacklistedStreams).toHaveLength(1);
   },
 );
 
