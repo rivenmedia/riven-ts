@@ -20,14 +20,7 @@ export async function blacklistStream(
   });
 
   mediaItem.activeStream = null;
-
-  const mediaEntries = await mediaItem.getMediaEntries();
-
-  mediaItem.filesystemEntries.remove(mediaEntries);
-
-  for (const entry of mediaEntries) {
-    em.remove(entry);
-  }
+  mediaItem.filesystemEntries.remove((entry) => entry.type === "media");
 
   await em.flush();
 }
