@@ -40,5 +40,5 @@ jobs:
       - name: Save coverage baseline to cache
         uses: actions/cache/save@v5
         with:
-          key: coverage-baseline
+          key: coverage-baseline-${{ github.sha }}
           path: packages/core/util-vitest-config/coverage/compare/coverage-summary.json
