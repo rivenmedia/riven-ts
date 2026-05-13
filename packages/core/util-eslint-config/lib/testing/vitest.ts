@@ -20,6 +20,7 @@ export const vitestConfig = [
     settings: {
       vitest: {
         typecheck: true,
+        vitestImports: [/test-context.ts$/],
       },
     },
     languageOptions: {
