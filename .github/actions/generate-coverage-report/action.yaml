@@ -9,7 +9,10 @@ runs:
       id: get-coverage-baseline
       uses: actions/cache/restore@v5
       with:
-        key: coverage-baseline
+        key: coverage-baseline-${{ github.event.pull_request.base.sha }}
+        restore-keys: |
+          coverage-baseline-${{ github.event.pull_request.base.sha }}-
+          coverage-baseline-
         path: packages/core/util-vitest-config/coverage/compare/coverage-summary.json
 
     - name: Merge reports
