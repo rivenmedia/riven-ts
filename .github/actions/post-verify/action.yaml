@@ -16,7 +16,7 @@ runs:
 
     - name: Report Knip results in PR
       if: ${{ inputs.task == '//#knip:ci:production' && github.event.pull_request != null && github.event.pull_request.head.repo.full_name == github.repository }}
-      uses: codex-/knip-reporter@v3
+      uses: joemckie/knip-reporter@feat/run-from-existing-report
       with:
-        command_script_name: knip:ci:production
+        json_report_path: knip-report.json
         verbose: true
