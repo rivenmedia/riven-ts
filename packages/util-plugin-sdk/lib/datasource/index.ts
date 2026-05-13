@@ -61,19 +61,6 @@ type FetchResponse<T = unknown> = Pick<
     | { success: false }
   );
 
-export class DataSourceHTTPError extends UnrecoverableError {
-  response: DataSourceFetchResult<unknown>["response"];
-
-  constructor(
-    message: string,
-    response: DataSourceFetchResult<unknown>["response"],
-  ) {
-    super(message);
-
-    this.response = response;
-  }
-}
-
 export interface BaseDataSourceConfig<
   T extends Record<string, unknown>,
 > extends Omit<DataSourceConfig, "logger"> {
@@ -159,62 +146,44 @@ export abstract class BaseDataSource<
       async (job, _token, signal) => {
         await job.log(`Processing request for ${job.data.path}`);
 
-        try {
-          const {
-            timeTaken,
-            result: { parsedBody, response, responseFromCache },
-          } = await benchmark(async () => {
-            this.logger.silly(
-              [
-                `[${this.serviceName}] Initiating request to ${new URL(job.data.path, this.baseURL).toString()}`,
-                ...(job.data.params ? [`?${job.data.params}`] : []),
-              ].join(""),
-            );
-
-            this.#decodeRequestBody(job);
-
-            job.data.incomingRequest ??= {};
-            job.data.incomingRequest.signal = signal;
-            job.data.incomingRequest.params = urlSearchParamsCodec.decode(
-              job.data.params,
-            );
-
-            return super.fetch(job.data.path, job.data.incomingRequest);
-          });
-
-          await job.log(
-            `Request completed in ${(timeTaken / 1000).toFixed(2)} seconds`,
+        const {
+          timeTaken,
+          result: { parsedBody, response, responseFromCache },
+        } = await benchmark(async () => {
+          this.logger.silly(
+            [
+              `[${this.serviceName}] Initiating request to ${new URL(job.data.path, this.baseURL).toString()}`,
+              ...(job.data.params ? [`?${job.data.params}`] : []),
+            ].join(""),
           );
 
-          return {
-            success: true,
-            parsedBody,
-            response: {
-              ok: response.ok,
-              status: response.status,
-              statusText: response.statusText,
-              headers: Object.fromEntries(response.headers),
-            },
-            responseTime: timeTaken,
-            responseFromCache,
-          };
-        } catch (error) {
-          if (error instanceof DataSourceHTTPError) {
-            return {
-              success: false,
-              parsedBody: undefined,
-              response: {
-                ok: error.response.ok,
-                headers: Object.fromEntries(error.response.headers),
-                status: error.response.status,
-                statusText: error.response.statusText,
-              },
-              responseTime: 0,
-            };
-          }
+          this.#decodeRequestBody(job);
 
-          throw error;
-        }
+          job.data.incomingRequest ??= {};
+          job.data.incomingRequest.signal = signal;
+          job.data.incomingRequest.params = urlSearchParamsCodec.decode(
+            job.data.params,
+          );
+
+          return super.fetch(job.data.path, job.data.incomingRequest);
+        });
+
+        await job.log(
+          `Request completed in ${(timeTaken / 1000).toFixed(2)} seconds`,
+        );
+
+        return {
+          success: true,
+          parsedBody,
+          response: {
+            ok: response.ok,
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers),
+          },
+          responseTime: timeTaken,
+          responseFromCache,
+        };
       },
       {
         connection,
@@ -546,9 +515,8 @@ export abstract class BaseDataSource<
     }
 
     if (String(response.status).startsWith("4")) {
-      throw new DataSourceHTTPError(
+      throw new Error(
         `${response.status.toString()} ${response.statusText} for ${url.toString()}`,
-        response,
       );
     }
   }
