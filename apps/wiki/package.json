@@ -1,0 +1,38 @@
+{
+  "name": "@repo/wiki",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --turbopack",
+    "postinstall": "fumadocs-mdx",
+    "lint": "next lint",
+    "start": "next start",
+    "sync-plugin-docs": "node scripts/sync-plugin-docs.mjs"
+  },
+  "dependencies": {
+    "@orama/orama": "^3.1.18",
+    "fumadocs-core": "^16.4.2",
+    "fumadocs-mdx": "^14.2.4",
+    "fumadocs-ui": "^16.4.2",
+    "lucide-react": "^0.562.0",
+    "next": "^16.1.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "schema-dts": "^1.1.5",
+    "shiki": "^3.20.0",
+    "tailwind-merge": "^3.4.0",
+    "yaml": "^2.8.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/mdx": "^2.0.13",
+    "@types/node": "catalog:",
+    "@types/react": "^19.2.3",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.4",
+    "tailwindcss": "^4.1.18",
+    "typescript": "catalog:"
+  }
+}
