@@ -1,0 +1,62 @@
+---
+title: Introduction
+description: What is Riven and how does it work?
+---
+
+Riven is a self-hosted media automation system. It discovers content you want, finds streams through debrid services, and serves them through a virtual file system (VFS) to your media server (Plex, Jellyfin, or Emby).
+
+## How It Works
+
+1. **Content Discovery** - Plugins like Seerr, MDBList, or Listrr tell Riven what media you want
+2. **Indexing** - TMDB/TVDB plugins fetch metadata for requested items
+3. **Scraping** - Torrentio, Comet, or StremThru plugins find available torrents
+4. **Downloading** - StremThru caches torrents on your debrid service (Real-Debrid, AllDebrid, etc.)
+5. **VFS** - A FUSE virtual file system mounts the debrid content as local files
+6. **Library Update** - Your media server (Plex/Jellyfin/Emby) picks up the new files
+
+All of this happens automatically. You request a movie or show, and it appears in your media server.
+
+## Key Features
+
+- **Plugin Architecture** - Modular and extensible. Every integration is a plugin.
+- **Virtual File System** - No symlinks or file copies. Clean FUSE mount.
+- **GraphQL API** - Powerful API for querying and managing your library.
+- **State Machines** - XState-powered workflows for reliable media processing.
+- **Job Queue** - BullMQ with Redis for async, resilient processing.
+
+## Quick Links
+
+import { Card, Cards } from "fumadocs-ui/components/card";
+
+<Cards>
+  <Card
+    title="Getting Started"
+    href="/docs/getting-started"
+    description="Install and configure Riven"
+  />
+  <Card
+    title="Architecture"
+    href="/docs/architecture"
+    description="How the system works under the hood"
+  />
+  <Card
+    title="Configuration"
+    href="/docs/configuration"
+    description="All settings and environment variables"
+  />
+  <Card
+    title="Plugins"
+    href="/docs/plugins"
+    description="Available plugins and their settings"
+  />
+  <Card
+    title="Plugin SDK"
+    href="/docs/plugin-sdk"
+    description="Build your own plugins"
+  />
+  <Card
+    title="Versions"
+    href="/docs/versions"
+    description="Understanding the different Riven versions"
+  />
+</Cards>

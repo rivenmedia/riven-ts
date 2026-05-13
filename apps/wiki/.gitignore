@@ -1,0 +1,7 @@
+.next/
+out/
+node_modules/
+.source/
+
+# Synced plugin docs (auto-generated)
+content/docs/plugins/*/index.mdx

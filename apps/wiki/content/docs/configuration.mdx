@@ -1,0 +1,135 @@
+---
+title: Configuration
+description: All Riven TS settings and environment variables.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+Riven TS is configured entirely through environment variables. All core settings use the prefix `RIVEN_SETTING__` and plugin settings use `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_<NAME>__`.
+
+## Core Settings
+
+These are the main application settings.
+
+### Required
+
+| Variable                      | Description                          | Example                                               |
+| ----------------------------- | ------------------------------------ | ----------------------------------------------------- |
+| `RIVEN_SETTING__databaseUrl`  | PostgreSQL connection URL            | `postgres+psycopg2://riven:riven@postgres:5432/riven` |
+| `RIVEN_SETTING__redisUrl`     | Redis connection URL                 | `redis://redis:6379`                                  |
+| `RIVEN_SETTING__vfsMountPath` | FUSE mount path inside the container | `/mnt/riven`                                          |
+
+### Logging
+
+| Variable                              | Description                                 | Default               |
+| ------------------------------------- | ------------------------------------------- | --------------------- |
+| `RIVEN_SETTING__logLevel`             | Log level: `error`, `warn`, `info`, `debug` | `info`                |
+| `RIVEN_SETTING__logDirectory`         | Directory for log files                     | `./logs`              |
+| `RIVEN_SETTING__enabledLogTransports` | JSON array of transports: `console`, `file` | `["console", "file"]` |
+| `RIVEN_SETTING__loggingEnabled`       | Enable/disable logging entirely             | `true`                |
+| `RIVEN_SETTING__logShowStackTraces`   | Show stack traces in error logs             | `true`                |
+
+### GraphQL Server
+
+| Variable                 | Description              | Default     |
+| ------------------------ | ------------------------ | ----------- |
+| `RIVEN_SETTING__gqlHost` | GraphQL server bind host | `localhost` |
+| `RIVEN_SETTING__gqlPort` | GraphQL server port      | `3000`      |
+
+### VFS
+
+| Variable                         | Description                             | Default      |
+| -------------------------------- | --------------------------------------- | ------------ |
+| `RIVEN_SETTING__vfsMountPath`    | Mount point for the virtual file system | _(required)_ |
+| `RIVEN_SETTING__vfsForceMount`   | Unmount before remounting               | `true`       |
+| `RIVEN_SETTING__vfsDebugLogging` | Enable VFS debug logs                   | `false`      |
+
+### Scraping & Downloads
+
+| Variable                                       | Description                                       | Default       |
+| ---------------------------------------------- | ------------------------------------------------- | ------------- |
+| `RIVEN_SETTING__preferSeasonPacks`             | Prefer season packs over show packs               | `false`       |
+| `RIVEN_SETTING__maximumScrapeAttempts`         | Max scrape attempts before giving up              | `(unlimited)` |
+| `RIVEN_SETTING__scrapeCooldownHours`           | Cooldown after failures: `[>2, >5, >10 attempts]` | `[2, 6, 24]`  |
+| `RIVEN_SETTING__dubbedAnimeOnly`               | Only scrape dubbed anime                          | `false`       |
+| `RIVEN_SETTING__attemptUnknownDownloads`       | Try downloading unverifiable torrents             | `false`       |
+| `RIVEN_SETTING__minimumAverageBitrateMovies`   | Min bitrate for movies                            | _(none)_      |
+| `RIVEN_SETTING__minimumAverageBitrateEpisodes` | Min bitrate for episodes                          | _(none)_      |
+
+### Scheduling
+
+| Variable                                  | Description                                       | Default |
+| ----------------------------------------- | ------------------------------------------------- | ------- |
+| `RIVEN_SETTING__scheduleOffsetMinutes`    | Minutes to wait after air date before re-indexing | `30`    |
+| `RIVEN_SETTING__unknownAirDateOffsetDays` | Days to add when air date is unknown              | `7`     |
+
+### Database SSL
+
+| Variable                              | Description                       |
+| ------------------------------------- | --------------------------------- |
+| `RIVEN_SETTING__databaseSslRootCert`  | File path to SSL root certificate |
+| `RIVEN_SETTING__databaseSslCert`      | File path to SSL certificate      |
+| `RIVEN_SETTING__databaseSslKey`       | File path to SSL key              |
+| `RIVEN_SETTING__databaseDebugLogging` | Enable database debug logging     |
+
+### Danger Zone
+
+<Callout type="error">
+  These settings will destroy data. Only use them if you know what you're doing.
+</Callout>
+
+| Variable                                     | Description                     | Default |
+| -------------------------------------------- | ------------------------------- | ------- |
+| `RIVEN_SETTING__unsafeWipeRedisOnStartup`    | Wipe all Redis data on startup  | `false` |
+| `RIVEN_SETTING__unsafeWipeDatabaseOnStartup` | Wipe entire database on startup | `false` |
+
+## Plugin Settings
+
+Plugin settings follow the pattern:
+
+```
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_<NAME>__<settingName>="value"
+```
+
+For example:
+
+```bash
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_TMDB__apiKey="your-key"
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__lists=["user/list"]
+```
+
+<Callout>
+  Array values are passed as JSON strings: `["value1", "value2"]`
+</Callout>
+
+See the [Plugins](/docs/plugins) section for each plugin's available settings.
+
+## Example .env File
+
+```bash title=".env"
+# Core
+RIVEN_SETTING__databaseUrl="postgres+psycopg2://riven:riven@postgres:5432/riven"
+RIVEN_SETTING__redisUrl="redis://redis:6379"
+RIVEN_SETTING__vfsMountPath="/mnt/riven"
+RIVEN_SETTING__logLevel="info"
+RIVEN_SETTING__enabledLogTransports=["console"]
+RIVEN_SETTING__preferSeasonPacks=true
+
+# TMDB (required)
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_TMDB__apiKey="eyXXXX"
+
+# Debrid (via StremThru - pick your provider)
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_STREMTHRU__realdebridApiKey="xxxx"
+
+# Content sources (pick at least one)
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__apiKey="xxxx"
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__lists=["user/list-name"]
+
+# Seerr (optional - for request management)
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__url="http://seerr:5055"
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__apiKey="xxxx"
+
+# Plex (optional - for library updates)
+# RIVEN_PLUGIN_SETTING__REPO_PLUGIN_PLEX__plexToken="xxxx"
+# RIVEN_PLUGIN_SETTING__REPO_PLUGIN_PLEX__plexServerUrl="http://plex:32400"
+```

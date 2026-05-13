@@ -1,0 +1,150 @@
+---
+title: Architecture
+description: How Riven TS works under the hood - system design, data flow, and key technologies.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+Riven TS is built as a TypeScript monorepo with a plugin-based architecture. This page explains how the system works.
+
+## High-Level Overview
+
+```
+Content Sources (Seerr, MDBList, Listrr)
+        |
+        v
+   [Item Request]
+        |
+        v
+   Indexing (TMDB/TVDB metadata)
+        |
+        v
+   Scraping (Torrentio, Comet, StremThru)
+        |
+        v
+   Downloading (Debrid cache check + download)
+        |
+        v
+   VFS Mount (FUSE virtual file system)
+        |
+        v
+   Media Server (Plex / Jellyfin / Emby)
+```
+
+## Core Components
+
+### State Machines (XState v5)
+
+The entire application lifecycle is driven by XState state machines:
+
+- **Program Machine** - Top-level orchestrator. States: `Bootstrapping` → `Running` → `Shutdown`
+- **Bootstrap Machine** - Initializes plugins, starts GraphQL server, mounts VFS
+- **Main Runner Machine** - Processes media items through the indexing → scraping → downloading pipeline
+- **Plugin Registrar** - Discovers and validates plugins on startup
+
+### Job Queue (BullMQ + Redis)
+
+Media processing is handled through BullMQ job flows:
+
+- Each plugin gets its own queue and worker
+- Jobs flow through stages: content request → index → scrape → download → stream link
+- Failed jobs are retried with configurable cooldown periods
+- Redis provides persistence so jobs survive restarts
+
+### GraphQL API (Apollo Server)
+
+Riven exposes a GraphQL API on port 3000 (configurable):
+
+- **Queries** for media items, episodes, seasons, shows, and plugin status
+- **Mutations** for saving stream URLs and triggering actions
+- Plugins register their own resolvers, extending the schema
+- Built with `type-graphql` for type-safe resolver definitions
+
+### Database (MikroORM + PostgreSQL)
+
+Entities include:
+
+- **Media Items** - Movies, Shows, Seasons, Episodes
+- **Item Requests** - Tracks what was requested and its processing state
+- **Streams** - Available stream information from scrapers
+- **Filesystem Entries** - VFS file mappings
+
+### Virtual File System (FUSE)
+
+The VFS uses `fuse-native` to mount a virtual directory:
+
+- Maps media items to a file/folder structure
+- Streams data on-demand from your debrid service
+- Includes chunk caching for performance
+- Requires `/dev/fuse` device and `SYS_ADMIN` capability
+
+## Plugin System
+
+Plugins are self-contained packages that integrate with external services. Each plugin can provide:
+
+| Component           | Purpose                                         |
+| ------------------- | ----------------------------------------------- |
+| **DataSources**     | HTTP API clients with rate limiting and caching |
+| **Resolvers**       | GraphQL queries and mutations                   |
+| **Hooks**           | Event handlers for system events                |
+| **Settings Schema** | Zod schema for configuration validation         |
+| **Validator**       | Function to check if the plugin can start       |
+
+### Plugin Lifecycle
+
+1. On startup, the Bootstrap Machine discovers all installed plugins
+2. Each plugin's `validator()` is called to check if it should be enabled
+3. Enabled plugins register their GraphQL resolvers and DataSources
+4. BullMQ queues and workers are created for each plugin
+5. Event hooks are registered for the plugin's subscribed events
+
+### Event System
+
+Plugins communicate through 27+ typed events:
+
+- **Lifecycle**: `riven.core.started`, `riven.core.shutdown`
+- **Content**: `riven.content-service.requested`
+- **Indexing**: `media-item.index.requested`, `.success`, `.error`
+- **Scraping**: `media-item.scrape.requested`, `.success`, `.error`
+- **Downloading**: `media-item.download.requested`, `.success`, `.error`
+
+## Monorepo Structure
+
+```
+riven-ts/
+├── apps/
+│   ├── riven/          # Main application
+│   └── wiki/           # This documentation site
+├── packages/
+│   ├── core/           # Shared infrastructure
+│   │   ├── util-database/
+│   │   ├── util-graphql-*/
+│   │   ├── util-logger/
+│   │   └── ...
+│   ├── plugin-*/       # Plugins (12+)
+│   ├── util-plugin-sdk/    # Plugin SDK
+│   ├── util-plugin-testing/# Plugin test utilities
+│   ├── util-rank-torrent-name/ # Torrent ranking
+│   └── feature-settings/   # Settings management
+```
+
+## Technology Stack
+
+| Technology        | Purpose                      |
+| ----------------- | ---------------------------- |
+| **TypeScript**    | Language                     |
+| **pnpm**          | Package manager              |
+| **Turborepo**     | Monorepo build orchestration |
+| **XState v5**     | State machines               |
+| **BullMQ**        | Job queues                   |
+| **Redis**         | Queue backend + caching      |
+| **PostgreSQL**    | Primary database             |
+| **MikroORM**      | Database ORM                 |
+| **Apollo Server** | GraphQL server               |
+| **type-graphql**  | Type-safe GraphQL resolvers  |
+| **FUSE**          | Virtual file system          |
+| **Zod**           | Runtime validation           |
+| **Winston**       | Logging                      |
+| **OpenTelemetry** | Tracing and metrics          |
+| **Vitest**        | Testing                      |
+| **MSW**           | HTTP mocking for tests       |
