@@ -56,26 +56,20 @@ export class MediaItemStateSubscriber implements EventSubscriber {
         // em.upsert (see resetUntouchedCollections); iterate staged items
         // directly via getItems(false) to bypass the init check that
         // Collection.reduce performs.
-        const episodesToUpdate = collection
-          .getItems(false)
-          .reduce((acc, episode) => {
-            if (!(episode instanceof Episode)) {
-              return acc;
-            }
+        for (const item of collection.getItems(false)) {
+          if (!(item instanceof Episode)) {
+            continue;
+          }
 
-            if (episode.state === "unreleased" && !episode.isReleased) {
-              return acc;
-            }
+          if (item.state === "unreleased" && !item.isReleased) {
+            continue;
+          }
 
-            if (episode.state !== "unreleased" && episode.isReleased) {
-              return acc;
-            }
+          if (item.state !== "unreleased" && item.isReleased) {
+            continue;
+          }
 
-            return acc.add(episode);
-          }, new Set<Episode>());
-
-        for (const episode of episodesToUpdate) {
-          episodesAwaitingUpdate.add(episode);
+          episodesAwaitingUpdate.add(item);
         }
       }
     }
