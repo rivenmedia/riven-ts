@@ -407,9 +407,9 @@ export abstract class BaseDataSource<
 
     const cacheKey = this.cacheKeyFor(url, augmentedRequest as never);
 
-    const isCached = Boolean(
-      await this.#keyv.get(`${this.#keyvPrefix}${cacheKey}`),
-    );
+    const isCached =
+      !incomingRequest?.skipCache &&
+      Boolean(await this.#keyv.get(`${this.#keyvPrefix}${cacheKey}`));
 
     if (isCached) {
       // If we have a cached response, bypass the message queue and fetch directly
