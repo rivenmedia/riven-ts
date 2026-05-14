@@ -1,33 +1,66 @@
 /**
- * Introspects a running riven dev server and writes the SDL to ./schema.graphql.
+ * Produces ./schema.graphql for the dashboard's codegen pipeline.
+ *
+ * Two modes:
+ *   - Static (default): invokes apps/riven#codegen:gql-schema, which builds
+ *     SDL directly from type-graphql resolvers. No live server required —
+ *     works on CI and in clean checkouts.
+ *   - Live (opt-in): set RIVEN_SCHEMA_URL to introspect a running riven dev
+ *     server. Useful when iterating on resolver changes that haven't landed
+ *     in apps/riven yet.
  *
  * Usage:
  *   pnpm --filter @repo/dashboard codegen:schema
  *   RIVEN_SCHEMA_URL=http://localhost:3000 pnpm ... codegen:schema
- *
- * Pair this with `codegen:gql` to refresh generated TypeScript operation types.
  */
+import { spawn } from "node:child_process";
+import { copyFile, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   type IntrospectionQuery,
   buildClientSchema,
   getIntrospectionQuery,
   printSchema,
 } from "graphql";
-import { writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 
-const DEFAULT_URL = "http://localhost:3000";
 const ENV_VAR = "RIVEN_SCHEMA_URL";
 
-const endpoint = process.env[ENV_VAR] ?? DEFAULT_URL;
-
-// schema.graphql lives at the dashboard package root, one level up from /scripts.
-const outputPath = resolve(
+const dashboardSchemaPath = resolve(
   fileURLToPath(new URL("../schema.graphql", import.meta.url)),
 );
+const rivenSchemaPath = resolve(
+  fileURLToPath(new URL("../../riven/schema.graphql", import.meta.url)),
+);
 
-async function fetchSchema(): Promise<void> {
+async function buildStatically(): Promise<void> {
+  await new Promise<void>((resolvePromise, rejectPromise) => {
+    const child = spawn(
+      "pnpm",
+      ["--filter", "@repo/riven", "codegen:gql-schema"],
+      { stdio: "inherit" },
+    );
+    child.on("error", rejectPromise);
+    child.on("exit", (code) => {
+      if (code === 0) {
+        resolvePromise();
+      } else {
+        rejectPromise(
+          new Error(
+            `apps/riven codegen:gql-schema exited with status ${code ?? "(killed)"}`,
+          ),
+        );
+      }
+    });
+  });
+
+  await copyFile(rivenSchemaPath, dashboardSchemaPath);
+  console.log(
+    `Wrote ${dashboardSchemaPath} (built statically from apps/riven resolvers).`,
+  );
+}
+
+async function fetchFromLiveServer(endpoint: string): Promise<void> {
   let response: Response;
 
   try {
@@ -44,8 +77,7 @@ async function fetchSchema(): Promise<void> {
     throw new Error(
       [
         `Could not reach riven GraphQL endpoint at ${endpoint}.`,
-        `Start the riven dev server (\`pnpm --filter @repo/riven dev\`) or set ${ENV_VAR} to a reachable URL.`,
-        `Default is ${DEFAULT_URL} — matches riven's settings.gqlHost/settings.gqlPort.`,
+        `Either start the riven dev server (\`pnpm --filter @repo/riven dev\`) or unset ${ENV_VAR} to fall back to the static generator.`,
         `Underlying error: ${reason}`,
       ].join("\n  "),
     );
@@ -53,10 +85,7 @@ async function fetchSchema(): Promise<void> {
 
   if (!response.ok) {
     throw new Error(
-      [
-        `Introspection request to ${endpoint} failed with HTTP ${response.status} ${response.statusText}.`,
-        `If the server is up, confirm introspection is enabled (NODE_ENV !== "production") and that ${ENV_VAR} points at the GraphQL path.`,
-      ].join("\n  "),
+      `Introspection request to ${endpoint} failed with HTTP ${response.status} ${response.statusText}.`,
     );
   }
 
@@ -80,13 +109,18 @@ async function fetchSchema(): Promise<void> {
   }
 
   const sdl = printSchema(buildClientSchema(payload.data));
-  await writeFile(outputPath, `${sdl}\n`, "utf8");
-
-  console.log(`Wrote schema (${sdl.length} chars) -> ${outputPath}`);
+  await writeFile(dashboardSchemaPath, `${sdl}\n`, "utf8");
+  console.log(`Wrote ${dashboardSchemaPath} (introspected ${endpoint}).`);
 }
 
-fetchSchema().catch((error: unknown) => {
+const liveEndpoint = process.env[ENV_VAR];
+
+const task = liveEndpoint
+  ? fetchFromLiveServer(liveEndpoint)
+  : buildStatically();
+
+task.catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);
-  console.error(`\n[fetch-schema] ${message}\n`);
+  console.error(`\n[codegen:schema] ${message}\n`);
   process.exitCode = 1;
 });

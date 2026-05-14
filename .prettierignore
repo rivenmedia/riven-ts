@@ -1,3 +1,5 @@
 pnpm-lock.yaml
 *.hbs
 **/docker-data
+**/.svelte-kit
+**/schema.graphql
