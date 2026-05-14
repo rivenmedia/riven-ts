@@ -87,7 +87,7 @@
     "//#knip": {
       "cache": false
     },
-    "//#knip:ci": {
+    "//#knip:ci:development": {
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql}",
         "!**/{logs,node_modules,temp,.turbo,.next,coverage,docker-data,dist}/**"
@@ -97,7 +97,8 @@
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql}",
         "!**/{logs,node_modules,temp,.turbo,.next,coverage,docker-data,dist}/**"
-      ]
+      ],
+      "outputs": ["knip-report.json"]
     }
   }
 }

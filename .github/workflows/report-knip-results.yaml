@@ -1,0 +1,30 @@
+name: Report coverage results
+
+on:
+  workflow_run:
+    workflows:
+      - Verify
+    types:
+      - completed
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      pull-requests: write
+      checks: write
+    steps:
+      - name: Download knip report
+        uses: actions/download-artifact@v7
+        with:
+          name: knip-report
+          path: knip-report.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Report Knip results
+        uses: joemckie/knip-reporter@feat/allow-other-workflow-types
+        with:
+          json_report_path: knip-report.json
+          verbose: true

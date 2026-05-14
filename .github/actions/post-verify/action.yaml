@@ -14,9 +14,11 @@ runs:
       if: ${{ inputs.task == 'test' }}
       uses: ./.github/actions/generate-coverage-report
 
-    - name: Report Knip results in PR
-      if: ${{ inputs.task == '//#knip:ci:production' && github.event.pull_request != null && github.event.pull_request.head.repo.full_name == github.repository }}
-      uses: codex-/knip-reporter@v3
+    - name: Upload Knip report
+      if: ${{ inputs.task == '//#knip:ci:production' }}
+      uses: actions/upload-artifact@v7
       with:
-        command_script_name: knip:ci:production
-        verbose: true
+        name: knip-report
+        path: knip-report.json
+        retention-days: 1
+        if-no-files-found: error
