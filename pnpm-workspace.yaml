@@ -8,7 +8,7 @@ catalog:
   "@apollo/client": ^4.0.11
   "@apollo/client-devtools-vscode": ^4.23.2
   "@apollo/datasource-rest": 6.4.1
-  "@apollo/server": ^5.2.0
+  "@apollo/server": ^5.5.0
   "@apollo/utils.keyvadapter": ^4.0.1
   "@apollo/utils.keyvaluecache": ^4.0.0
   "@elastic/ecs-winston-format": ^1.5.3
@@ -22,21 +22,21 @@ catalog:
   "@graphql-codegen/typescript-operations": ^5.0.7
   "@graphql-typed-document-node/core": ^3.2.0
   "@keyv/redis": ^5.1.5
-  "@kubb/cli": 4.20.1
-  "@kubb/core": 4.20.1
-  "@kubb/plugin-faker": 4.20.1
-  "@kubb/plugin-msw": 4.20.1
-  "@kubb/plugin-oas": 4.20.1
-  "@kubb/plugin-ts": 4.20.1
-  "@kubb/plugin-zod": 4.20.1
-  "@mikro-orm/cli": ^7.0.12
-  "@mikro-orm/core": ^7.0.12
-  "@mikro-orm/decorators": ^7.0.12
-  "@mikro-orm/migrations": ^7.0.12
-  "@mikro-orm/postgresql": ^7.0.12
-  "@mikro-orm/reflection": ^7.0.12
-  "@mikro-orm/seeder": ^7.0.12
-  "@mikro-orm/sqlite": ^7.0.12
+  "@kubb/cli": 4.37.5
+  "@kubb/core": 4.37.5
+  "@kubb/plugin-faker": 4.37.5
+  "@kubb/plugin-msw": 4.37.5
+  "@kubb/plugin-oas": 4.37.5
+  "@kubb/plugin-ts": 4.37.5
+  "@kubb/plugin-zod": 4.37.5
+  "@mikro-orm/cli": ^7.0.14
+  "@mikro-orm/core": ^7.0.14
+  "@mikro-orm/decorators": ^7.0.14
+  "@mikro-orm/migrations": ^7.0.14
+  "@mikro-orm/postgresql": ^7.0.14
+  "@mikro-orm/reflection": ^7.0.14
+  "@mikro-orm/seeder": ^7.0.14
+  "@mikro-orm/sqlite": ^7.0.14
   "@parcel/watcher": ^2.5.1
   "@sentry/node": ^10.38.0
   "@swc-node/register": ^1.11.1
@@ -52,11 +52,11 @@ catalog:
   "@types/triple-beam": ^1.3.5
   "@typescript-eslint/parser": ^8.49.0
   "@viren070/parse-torrent-title": ^0.6.5
-  "@vitest/coverage-v8": ^4.1.1
-  "@vitest/eslint-plugin": ^1.6.15
-  "@vitest/expect": ^4.1.5
+  "@vitest/coverage-v8": ^4.1.6
+  "@vitest/eslint-plugin": ^1.6.17
+  "@vitest/expect": ^4.1.6
   "@zkochan/fuse-native": ^0.1.0
-  bullmq: ^5.71.0
+  bullmq: ^5.76.8
   bullmq-otel: ^1.2.0
   chalk: ^5.6.2
   class-validator: 0.14.3
@@ -78,8 +78,8 @@ catalog:
   graphql-scalars: ^1.25.0
   husky: ^9.1.7
   keyv: ^5.5.5
-  knip: ^6.12.2
-  lint-staged: ^16.2.7
+  knip: ^6.13.1
+  lint-staged: ^17.0.4
   logform: ^2.7.0
   lru-cache: ^11.2.4
   luxon: ^3.7.2
@@ -96,9 +96,9 @@ catalog:
   type-graphql: 2.0.0-rc.2
   typescript: ^5.9.3
   typescript-eslint: ^8.49.0
-  undici: ^7.18.2
+  undici: ^7.24.0
   unplugin-swc: ^1.5.9
-  vitest: ^4.1.1
+  vitest: ^4.1.6
   winston: ^3.19.0
   xstate: ^5.25.0
   zod: ^4.3.6
