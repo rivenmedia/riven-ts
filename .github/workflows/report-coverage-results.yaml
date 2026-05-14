@@ -1,0 +1,33 @@
+name: Report coverage results
+
+on:
+  workflow_run:
+    workflows:
+      - Verify
+    types:
+      - completed
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      pull-requests: write
+    steps:
+      - name: Download coverage report
+        uses: actions/download-artifact@v7
+        with:
+          name: coverage-report
+          path: coverage
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Generate coverage report
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          name: Riven
+          json-final-path: coverage/merged/merged-coverage.json
+          json-summary-path: coverage/summary/coverage-summary.json
+          json-summary-compare-path: coverage/compare/coverage-summary.json
+          threshold-icons: "{0: '🔴', 80: '🟠', 90: '🟢'}"
+          file-coverage-mode: changes-affected

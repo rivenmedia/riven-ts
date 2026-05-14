@@ -52,6 +52,13 @@ jobs:
         with:
           cmd: yq '.importers["."].devDependencies.turbo.version' 'pnpm-lock.yaml'
 
+      # Set environment variables for the turbo task, as these may be included in the cache key
+      - name: Set environment variables
+        if: inputs.env != '"{}"'
+        run:
+          echo '${{ inputs.env }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' >>
+          $GITHUB_ENV
+
       - name: Get required tasks
         id: get-required-tasks
         uses: ./.github/actions/filter-cached-turbo-tasks
