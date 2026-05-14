@@ -13,16 +13,16 @@
  *   pnpm --filter @repo/dashboard codegen:schema
  *   RIVEN_SCHEMA_URL=http://localhost:3000 pnpm ... codegen:schema
  */
-import { spawn } from "node:child_process";
-import { copyFile, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import {
   type IntrospectionQuery,
   buildClientSchema,
   getIntrospectionQuery,
   printSchema,
 } from "graphql";
+import { spawn } from "node:child_process";
+import { copyFile, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const ENV_VAR = "RIVEN_SCHEMA_URL";
 

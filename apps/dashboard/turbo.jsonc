@@ -26,11 +26,7 @@
     },
     "check-types": {
       "dependsOn": ["codegen:gql"],
-      "inputs": [
-        "src/**/*.{ts,svelte}",
-        "tsconfig.json",
-        "svelte.config.js"
-      ]
+      "inputs": ["src/**/*.{ts,svelte}", "tsconfig.json", "svelte.config.js"]
     },
     "lint": {
       "inputs": ["src/**/*.{ts,svelte,js}", "eslint.config.ts"]
