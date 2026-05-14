@@ -19,7 +19,6 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: knip-report
-          path: knip-report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
 
