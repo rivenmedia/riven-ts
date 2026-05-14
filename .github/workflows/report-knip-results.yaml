@@ -1,4 +1,4 @@
-name: Report coverage results
+name: Report Knip results
 
 on:
   workflow_run:
@@ -26,5 +26,6 @@ jobs:
       - name: Report Knip results
         uses: joemckie/knip-reporter@feat/allow-other-workflow-types
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           json_report_path: knip-report.json
           verbose: true
