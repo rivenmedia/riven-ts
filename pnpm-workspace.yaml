@@ -22,13 +22,13 @@ catalog:
   "@graphql-codegen/typescript-operations": ^5.0.7
   "@graphql-typed-document-node/core": ^3.2.0
   "@keyv/redis": ^5.1.5
-  "@kubb/cli": 4.37.5
-  "@kubb/core": 4.37.5
-  "@kubb/plugin-faker": 4.37.5
-  "@kubb/plugin-msw": 4.37.5
-  "@kubb/plugin-oas": 4.37.5
-  "@kubb/plugin-ts": 4.37.5
-  "@kubb/plugin-zod": 4.37.5
+  "@kubb/cli": 4.20.1
+  "@kubb/core": 4.20.1
+  "@kubb/plugin-faker": 4.20.1
+  "@kubb/plugin-msw": 4.20.1
+  "@kubb/plugin-oas": 4.20.1
+  "@kubb/plugin-ts": 4.20.1
+  "@kubb/plugin-zod": 4.20.1
   "@mikro-orm/cli": ^7.0.14
   "@mikro-orm/core": ^7.0.14
   "@mikro-orm/decorators": ^7.0.14
