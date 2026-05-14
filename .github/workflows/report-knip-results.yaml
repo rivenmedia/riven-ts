@@ -13,6 +13,7 @@ jobs:
     permissions:
       actions: read
       pull-requests: write
+      checks: write
     steps:
       - name: Download knip report
         uses: actions/download-artifact@v7
