@@ -23,10 +23,17 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
 
     for (const collectionUpdate of uow.getCollectionUpdates()) {
       if (collectionUpdate.owner instanceof Season) {
-        const collectionEpisodes = collectionUpdate.filter(
-          (episode): episode is Partial<Episode> =>
-            episode instanceof Episode && episode.releaseDate != null,
-        );
+        // mikro-orm 7.0.16's `resetUntouchedCollections` resets OneToMany
+        // collections on em.upsert-ed entities back to uninitialized, even when
+        // the collection has been staged with `.add()`. `Collection.filter`
+        // calls `checkInitialized()` and throws; `getItems(false)` skips that
+        // check and returns the staged items directly.
+        const collectionEpisodes = collectionUpdate
+          .getItems(false)
+          .filter(
+            (episode): episode is Partial<Episode> =>
+              episode instanceof Episode && episode.releaseDate != null,
+          );
 
         for (const episode of collectionEpisodes) {
           trackedEpisodes.set(episode, trackedEpisodes.get(episode) ?? null);

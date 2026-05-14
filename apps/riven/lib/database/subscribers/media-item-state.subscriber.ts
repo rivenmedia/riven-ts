@@ -52,21 +52,27 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       }
 
       if (collection.owner instanceof Season) {
-        const episodesToUpdate = collection.reduce((acc, episode) => {
-          if (!(episode instanceof Episode)) {
-            return acc;
-          }
+        // mikro-orm 7.0.16 may leave OneToMany collections uninitialized after
+        // em.upsert (see resetUntouchedCollections); iterate staged items
+        // directly via getItems(false) to bypass the init check that
+        // Collection.reduce performs.
+        const episodesToUpdate = collection
+          .getItems(false)
+          .reduce((acc, episode) => {
+            if (!(episode instanceof Episode)) {
+              return acc;
+            }
 
-          if (episode.state === "unreleased" && !episode.isReleased) {
-            return acc;
-          }
+            if (episode.state === "unreleased" && !episode.isReleased) {
+              return acc;
+            }
 
-          if (episode.state !== "unreleased" && episode.isReleased) {
-            return acc;
-          }
+            if (episode.state !== "unreleased" && episode.isReleased) {
+              return acc;
+            }
 
-          return acc.add(episode);
-        }, new Set<Episode>());
+            return acc.add(episode);
+          }, new Set<Episode>());
 
         for (const episode of episodesToUpdate) {
           episodesAwaitingUpdate.add(episode);
