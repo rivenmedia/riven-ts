@@ -72,6 +72,12 @@ export abstract class FileSystemEntry {
   @IsPositive()
   fileSize!: number;
 
+  /** GraphQL alias for {@link fileSize}; the dashboard surface uses `size`. */
+  @Field(() => BigIntResolver, { name: "size" })
+  get size(): number {
+    return this.fileSize;
+  }
+
   @Field(() => Date)
   @Property()
   createdAt: Opt<Date> = DateTime.utc().toJSDate();
@@ -107,6 +113,7 @@ export abstract class FileSystemEntry {
    *
    * @example "Inception (2010) {tmdb-27205}/Inception (2010) {tmdb-27205}.mkv"
    */
+  @Field(() => String)
   @Property()
   path!: Opt<string>;
 

@@ -21,8 +21,26 @@ export class Stream {
   @PrimaryKey()
   infoHash!: string;
 
+  /** GraphQL alias for {@link infoHash} so clients can use a stable `id`. */
+  @Field(() => ID)
+  get id(): string {
+    return this.infoHash;
+  }
+
   @Property({ type: "json" })
   parsedData!: ParsedData;
+
+  /** Human-readable title extracted from the torrent name during ranking. */
+  @Field(() => String, { nullable: true })
+  get title(): string | null {
+    return this.parsedData.title;
+  }
+
+  /** Quality marker (e.g. "1080p") from the parsed torrent name. */
+  @Field(() => String, { nullable: true })
+  get quality(): string | null {
+    return this.parsedData.quality ?? null;
+  }
 
   @Field(() => [MediaItem])
   @ManyToMany(() => MediaItem, (mediaItem) => mediaItem.streams)
