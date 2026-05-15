@@ -117,6 +117,18 @@ linkWorkspacePackages: true
 
 nodeVersion: 24.15.0
 
+overrides:
+  "@protobufjs/utf8@<1.1.1": ">=1.1.1"
+  "ajv@>=8 <8.20.0": ">=8.20.0"
+  "brace-expansion@>=2 <2.1.0": ">=2.1.0"
+  "cookie@<0.7.0": ">=0.7.0"
+  "flatted@<3.4.2": ">=3.4.2"
+  "lodash@<4.18.1": ">=4.18.1"
+  "lodash-es@<4.18.1": ">=4.18.1"
+  "minimatch@>=9 <9.0.9": ">=9.0.9"
+  "qs@>=6 <6.15.1": ">=6.15.1"
+  "tar@>=7 <7.5.15": ">=7.5.15"
+
 packageExtensions:
   "@opentelemetry/sdk-node":
     dependencies:
