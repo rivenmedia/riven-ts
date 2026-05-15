@@ -1,3 +1,4 @@
+import { HiddenProps, OptionalProps } from "@mikro-orm/core";
 import {
   BeforeCreate,
   Entity,
@@ -63,6 +64,14 @@ async function getMediaItemPathParts(mediaItem: MediaItem) {
   discriminatorColumn: "type",
 })
 export abstract class FileSystemEntry {
+  /**
+   * Derived/getter-only fields. `OptionalProps` keeps them out of
+   * `RequiredEntityData<>` so `em.create()` callers don't have to mention
+   * them; `HiddenProps` keeps them out of serialized `EntityData<>`.
+   */
+  [OptionalProps]?: "size" | "quality";
+  [HiddenProps]?: "size" | "quality";
+
   @Field(() => ID)
   @PrimaryKey({ type: "uuid" })
   id = randomUUID();
@@ -72,8 +81,12 @@ export abstract class FileSystemEntry {
   @IsPositive()
   fileSize!: number;
 
-  /** GraphQL alias for {@link fileSize}; the dashboard surface uses `size`. */
+  /**
+   * GraphQL alias for {@link fileSize}; the dashboard surface uses `size`.
+   * Listed in {@link [HiddenProps]} so it stays out of `EntityData<>`.
+   */
   @Field(() => BigIntResolver, { name: "size" })
+  @Property({ persist: false, hidden: true })
   get size(): number {
     return this.fileSize;
   }
@@ -123,10 +136,11 @@ export abstract class FileSystemEntry {
    * Base returns `null`; subclasses override with a real derivation
    * (see {@link MediaEntry}). Declared as a getter so the override chain
    * works through the GraphQL polymorphic resolution path — switching to
-   * a readonly field would break that.
+   * a readonly field would break that. Listed in {@link [HiddenProps]}
+   * so it stays out of `EntityData<>`.
    */
   @Field(() => String, { nullable: true })
-  @Property({ persist: false })
+  @Property({ persist: false, hidden: true })
   // eslint-disable-next-line @typescript-eslint/class-literal-property-style
   get quality(): string | null {
     return null;

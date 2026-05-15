@@ -67,9 +67,12 @@ export class MediaEntry extends FileSystemEntry {
    * Quality marker derived from the original torrent filename via the
    * shared parser (`@repo/util-rank-torrent-name`). Returns `null` when
    * the parser can't extract a quality tag (e.g. malformed name).
+   *
+   * Parent already lists `quality` in `[HiddenProps]`, so this override
+   * inherits the EntityData exclusion automatically.
    */
   @Field(() => String, { nullable: true })
-  @Property({ persist: false })
+  @Property({ persist: false, hidden: true })
   override get quality(): string | null {
     if (!this.originalFilename) {
       return null;
