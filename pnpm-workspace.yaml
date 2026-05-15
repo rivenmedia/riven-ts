@@ -139,7 +139,6 @@ publicHoistPattern:
   - vite-node
 
 allowBuilds:
-  "0": "riven-ts"
   "@apollo/protobufjs": true
   "@parcel/watcher": true
   "@swc/core": true
