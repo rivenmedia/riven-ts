@@ -113,29 +113,9 @@ engineStrict: true
 
 forceLegacyDeploy: true
 
-ignoredBuiltDependencies:
-  - redis-memory-server
-
 linkWorkspacePackages: true
 
 nodeVersion: 24.15.0
-
-onlyBuiltDependencies:
-  - "@apollo/protobufjs"
-  - "@parcel/watcher"
-  - "@swc/core"
-  - "@zkochan/fuse-native"
-  - better-sqlite3
-  - core-js-pure
-  - cpu-features
-  - es5-ext
-  - esbuild
-  - msgpackr-extract
-  - msw
-  - protobufjs
-  - sqlite3
-  - ssh2
-  - unrs-resolver
 
 packageExtensions:
   "@opentelemetry/sdk-node":
@@ -158,4 +138,21 @@ publicHoistPattern:
   - "*vitest*"
   - vite-node
 
-useNodeVersion: 24.15.0
+allowBuilds:
+  "0": "riven-ts"
+  "@apollo/protobufjs": true
+  "@parcel/watcher": true
+  "@swc/core": true
+  "@zkochan/fuse-native": true
+  better-sqlite3: true
+  core-js-pure: true
+  cpu-features: true
+  es5-ext: true
+  esbuild: true
+  msgpackr-extract: true
+  msw: true
+  protobufjs: true
+  sqlite3: true
+  ssh2: true
+  unrs-resolver: true
+  redis-memory-server: false
