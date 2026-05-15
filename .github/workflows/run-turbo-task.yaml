@@ -44,7 +44,7 @@ jobs:
         uses: ./.github/actions/set-turborepo-affected-shas
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v6
 
       - name: Get turbo version
         id: get-turbo-version
