@@ -6,6 +6,8 @@ import {
 } from "@repo/util-plugin-sdk";
 import { z } from "@repo/util-plugin-sdk/validation";
 
+import { parseTorrentioStreamStats } from "./parse-torrentio-stream-stats.ts";
+
 import type { TorrentioSettings } from "../torrentio-settings.schema.ts";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
@@ -17,6 +19,19 @@ const TorrentioScrapeResponse = z.object({
     }),
   ),
 });
+
+/**
+ * Richer per-stream representation captured directly from the Torrentio
+ * response. Surfaces the indexer-reported size / seeder counts so they can
+ * be persisted on the `Stream` entity by downstream consumers.
+ */
+export interface TorrentioScrapedStream {
+  rawTitle: string;
+  /** Size in bytes, when Torrentio surfaces a parseable `💾 <value>` token. */
+  size: number | null;
+  /** Seeder count, when Torrentio surfaces a `👤 <value>` token. */
+  seeders: number | null;
+}
 
 class TorrentioAPIError extends Error {}
 
@@ -44,10 +59,19 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
     }
   }
 
+  /**
+   * Scrape Torrentio for streams matching the given media item.
+   *
+   * Returns a richer per-infoHash record that includes the indexer-reported
+   * size / seeder counts (when present in the response). Leechers are
+   * intentionally NOT captured: Torrentio's Stremio addon response embeds
+   * stats as `👤 <seeders> 💾 <size> ⚙️ <tracker>` and does not surface
+   * leecher counts in any documented form.
+   */
   async scrape({
     item,
   }: ParamsFor<MediaItemScrapeRequestedEvent>): Promise<
-    Record<string, string>
+    Record<string, TorrentioScrapedStream>
   > {
     try {
       if (!item.imdbId) {
@@ -73,7 +97,7 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
         return {};
       }
 
-      const torrents: Record<string, string> = {};
+      const torrents: Record<string, TorrentioScrapedStream> = {};
 
       for (const stream of parsed.streams) {
         if (!stream.infoHash) {
@@ -87,7 +111,13 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
           continue;
         }
 
-        torrents[stream.infoHash] = rawTitle;
+        const { size, seeders } = parseTorrentioStreamStats(stream.title);
+
+        torrents[stream.infoHash] = {
+          rawTitle,
+          size,
+          seeders,
+        };
       }
 
       const torrentsCount = Object.keys(torrents).length;

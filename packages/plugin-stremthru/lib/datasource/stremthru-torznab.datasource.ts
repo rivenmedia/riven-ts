@@ -14,6 +14,23 @@ import { TorznabResponse } from "../schemas/torznab-response.schema.ts";
 import type { StremThruSettings } from "../stremthru-settings.schema.ts";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
+/**
+ * Richer per-stream representation captured directly from the Torznab
+ * response. Surfaces the indexer-reported size / seeder / leecher counts so
+ * they can be persisted on the `Stream` entity by downstream consumers.
+ *
+ * Unlike Torrentio / Comet (which surface a single `seeders` token), the
+ * Torznab spec carries `size`, `seeders`, AND `peers` (total swarm) per
+ * stream. Leecher count is derived as `max(peers - seeders, 0)` when both
+ * are present; otherwise it is left `null`.
+ */
+export interface StremThruScrapedStream {
+  rawTitle: string;
+  size: number | null;
+  seeders: number | null;
+  leechers: number | null;
+}
+
 export class StremThruTorznabAPI extends BaseDataSource<StremThruSettings> {
   override baseURL = this.settings.stremThruUrl;
   override serviceName = "StremThru [Torznab]";
@@ -34,10 +51,19 @@ export class StremThruTorznabAPI extends BaseDataSource<StremThruSettings> {
     }
   }
 
+  /**
+   * Scrape a configured Torznab indexer (via StremThru) for streams matching
+   * the given media item.
+   *
+   * Returns a richer per-infoHash record that includes the indexer-reported
+   * size / seeder / leecher counts. Leechers are derived as
+   * `max(peers - seeders, 0)` when both fields are present, mirroring the
+   * Torznab spec definition of `peers` as total swarm size.
+   */
   async scrape({
     item,
   }: ParamsFor<MediaItemScrapeRequestedEvent>): Promise<
-    Record<string, string>
+    Record<string, StremThruScrapedStream>
   > {
     try {
       const params = new URLSearchParams({
@@ -81,20 +107,35 @@ export class StremThruTorznabAPI extends BaseDataSource<StremThruSettings> {
         return {};
       }
 
-      const torrents: Record<string, string> = {};
+      const torrents: Record<string, StremThruScrapedStream> = {};
 
       for (const torznabItem of parsed.data.channel.items) {
-        const infoHashAttr = torznabItem.attr.find(
-          (a) => a["@attributes"].name === "infohash",
-        );
-
-        const infoHash = infoHashAttr?.["@attributes"].value;
+        const attrs = this.#buildAttrLookup(torznabItem.attr);
+        const infoHash = attrs.get("infohash");
 
         if (!infoHash || !torznabItem.title) {
           continue;
         }
 
-        torrents[infoHash] = torznabItem.title;
+        const size =
+          this.#parseNonNegativeInt(attrs.get("size")) ??
+          torznabItem.size ??
+          null;
+
+        const seeders = this.#parseNonNegativeInt(attrs.get("seeders"));
+        const peers = this.#parseNonNegativeInt(attrs.get("peers"));
+
+        const leechers =
+          peers !== null && seeders !== null
+            ? Math.max(peers - seeders, 0)
+            : null;
+
+        torrents[infoHash] = {
+          rawTitle: torznabItem.title,
+          size,
+          seeders,
+          leechers,
+        };
       }
 
       this.logger.info(
@@ -110,5 +151,40 @@ export class StremThruTorznabAPI extends BaseDataSource<StremThruSettings> {
 
       return {};
     }
+  }
+
+  /**
+   * Flatten the Torznab `<attr>` array into a case-insensitive map. The first
+   * occurrence of each attribute name wins, matching how most consumers
+   * (Sonarr / Radarr / Prowlarr) treat duplicates.
+   */
+  #buildAttrLookup(
+    attrs: readonly { "@attributes": { name: string; value: string } }[],
+  ): Map<string, string> {
+    const lookup = new Map<string, string>();
+
+    for (const attr of attrs) {
+      const key = attr["@attributes"].name.toLowerCase();
+
+      if (!lookup.has(key)) {
+        lookup.set(key, attr["@attributes"].value);
+      }
+    }
+
+    return lookup;
+  }
+
+  #parseNonNegativeInt(value: string | undefined): number | null {
+    if (value === undefined) {
+      return null;
+    }
+
+    const parsed = Number.parseInt(value, 10);
+
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      return null;
+    }
+
+    return parsed;
   }
 }

@@ -13,13 +13,31 @@ import {
 
 import { CometSettings } from "../comet-settings.schema.ts";
 import { CometScrapeResponse } from "../schemas/scrape-response.schema.ts";
+import { parseCometStreamStats } from "./parse-comet-stream-stats.ts";
 
+import type { CometRegularSearchResult } from "../schemas/scrape-response.schema.ts";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 interface CometScrapeConfig {
   identifier: string | null;
   scrapeType: "series" | "movie";
   imdbId: string;
+}
+
+/**
+ * Richer per-stream representation captured directly from the Comet
+ * response. Surfaces the indexer-reported size / seeder counts so they can
+ * be persisted on the `Stream` entity by downstream consumers.
+ */
+export interface CometScrapedStream {
+  rawTitle: string;
+  /**
+   * Size in bytes, prefer `behaviorHints.videoSize` (when Comet emits it) and
+   * fall back to a parsed `💾 <value>` token in the description.
+   */
+  size: number | null;
+  /** Seeder count, parsed from `👤 <value>` in the description if present. */
+  seeders: number | null;
 }
 
 class CometAPIError extends Error {}
@@ -44,10 +62,18 @@ export class CometAPI extends BaseDataSource<CometSettings> {
     duration: 60 * 1000,
   };
 
+  /**
+   * Scrape Comet for streams matching the given media item.
+   *
+   * Returns a richer per-infoHash record that includes the indexer-reported
+   * size and seeder counts (when parseable from Comet's `description`).
+   * Leechers are intentionally NOT captured: Comet's Stremio addon response
+   * does not surface leecher counts in any documented form.
+   */
   async scrape({
     item,
   }: ParamsFor<MediaItemScrapeRequestedEvent>): Promise<
-    Record<string, string>
+    Record<string, CometScrapedStream>
   > {
     try {
       if (!item.imdbId) {
@@ -71,7 +97,7 @@ export class CometAPI extends BaseDataSource<CometSettings> {
         return {};
       }
 
-      const torrents: Record<string, string> = {};
+      const torrents: Record<string, CometScrapedStream> = {};
 
       for (const stream of parsed.streams) {
         if ("url" in stream) {
@@ -92,7 +118,10 @@ export class CometAPI extends BaseDataSource<CometSettings> {
           continue;
         }
 
-        torrents[stream.infoHash] = title;
+        torrents[stream.infoHash] = {
+          rawTitle: title,
+          ...this.#captureStreamStats(stream),
+        };
       }
 
       const torrentsCount = Object.keys(torrents).length;
@@ -116,6 +145,25 @@ export class CometAPI extends BaseDataSource<CometSettings> {
 
       return {};
     }
+  }
+
+  /**
+   * Extract size / seeder counts for a single Comet stream.
+   *
+   * Prefers the structured `behaviorHints.videoSize` field (when Comet emits
+   * it) for `size`; falls back to parsing emoji-prefixed tokens out of the
+   * free-form description for both `size` and `seeders`.
+   */
+  #captureStreamStats(stream: CometRegularSearchResult): {
+    size: number | null;
+    seeders: number | null;
+  } {
+    const fromDescription = parseCometStreamStats(stream.description);
+
+    return {
+      size: stream.behaviorHints.videoSize ?? fromDescription.size,
+      seeders: fromDescription.seeders,
+    };
   }
 
   /**
