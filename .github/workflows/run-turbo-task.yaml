@@ -44,7 +44,7 @@ jobs:
         uses: ./.github/actions/set-turborepo-affected-shas
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v6
 
       - name: Get turbo version
         id: get-turbo-version
@@ -111,6 +111,7 @@ jobs:
           task: ${{ inputs.task }}
 
       - name: Run ${{ inputs.task }}
+        id: run-task
         run: |
           [[ "$CONCURRENCY" =~ ^[0-9]+%?$ ]] || {
             echo "::error::Invalid concurrency: $CONCURRENCY"
@@ -128,6 +129,7 @@ jobs:
         uses: ./.github/actions/post-verify
         with:
           task: ${{ inputs.task }}
+          success: ${{ steps.run-task.outcome == 'success' }}
 
       - uses: charpeni/turborepo-summary-action@v1
         if: always()
