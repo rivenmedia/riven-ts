@@ -1,5 +1,6 @@
 /* eslint-disable no-empty-pattern */
 import {
+  AdminKey,
   type ApolloServerContext,
   CoreKey,
 } from "@repo/core-util-graphql-schema";
@@ -226,6 +227,13 @@ export const it = testBase
             Promise.resolve({
               [CoreKey]: {
                 em: orm.em.fork(),
+              },
+              [AdminKey]: {
+                // Empty registries for unit tests — the admin resolver paths
+                // (plugins / queues / jobs) tolerate empty maps the same way
+                // they do at runtime before the main-runner has started.
+                plugins: new Map(),
+                queues: new Map(),
               },
               logger: {} as never,
               sendEvent: vi.fn(),
