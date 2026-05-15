@@ -118,6 +118,21 @@ export abstract class FileSystemEntry {
   path!: Opt<string>;
 
   /**
+   * Quality marker (e.g. "1080p", "2160p HDR") for this entry.
+   *
+   * Base returns `null`; subclasses override with a real derivation
+   * (see {@link MediaEntry}). Declared as a getter so the override chain
+   * works through the GraphQL polymorphic resolution path — switching to
+   * a readonly field would break that.
+   */
+  @Field(() => String, { nullable: true })
+  @Property({ persist: false })
+  // eslint-disable-next-line @typescript-eslint/class-literal-property-style
+  get quality(): string | null {
+    return null;
+  }
+
+  /**
    * The VFS file name for this entry
    *
    * @example "movie.mkv", "episode.srt"

@@ -1,3 +1,5 @@
+import { parse } from "@repo/util-rank-torrent-name";
+
 import { EntityRepositoryType, type Opt } from "@mikro-orm/core";
 import { Entity, Index, Property } from "@mikro-orm/decorators/legacy";
 import { IsOptional, IsUrl } from "class-validator";
@@ -60,6 +62,25 @@ export class MediaEntry extends FileSystemEntry {
   @Field(() => Object, { nullable: true })
   @Property({ type: "json" })
   mediaMetadata?: object;
+
+  /**
+   * Quality marker derived from the original torrent filename via the
+   * shared parser (`@repo/util-rank-torrent-name`). Returns `null` when
+   * the parser can't extract a quality tag (e.g. malformed name).
+   */
+  @Field(() => String, { nullable: true })
+  @Property({ persist: false })
+  override get quality(): string | null {
+    if (!this.originalFilename) {
+      return null;
+    }
+
+    try {
+      return parse(this.originalFilename).quality ?? null;
+    } catch {
+      return null;
+    }
+  }
 
   async getVfsFileName(): Promise<string> {
     const prettyName = await this.mediaItem.getEntity().getPrettyName();
