@@ -1,3 +1,4 @@
+import { AdminResolver } from "./admin.resolver.ts";
 import { EpisodeResolver } from "./episode.resolver.ts";
 import { MediaEntryResolver } from "./media-entry.resolver.ts";
 import { MediaItemResolver } from "./media-item.resolver.ts";
@@ -14,4 +15,5 @@ export const resolvers = [
   SeasonResolver,
   ShowResolver,
   VfsResolver,
+  AdminResolver,
 ] as const;
