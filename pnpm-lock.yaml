@@ -827,6 +827,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.49.0(eslint@9.39.2(jiti@2.7.0))(typescript@5.9.3)
+      bullmq:
+        specifier: 'catalog:'
+        version: 5.76.8
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.7.0)

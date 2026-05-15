@@ -81,7 +81,18 @@ export const startGqlServer = fromPromise<
       host: settings.gqlHost,
       port: settings.gqlPort,
     },
-    context: buildContextFunction(sendEvent),
+    context: buildContextFunction({
+      sendEvent,
+      // `validPlugins` is the broadest plugin map the bootstrap context
+      // retains at GQL start time; it satisfies the structural
+      // `AdminPluginRecord` superset declared in
+      // `@repo/core-util-graphql-schema`. Pending / invalid plugins are
+      // intentionally omitted here — surfacing them would require
+      // extending bootstrap context to retain `validatingPlugins` after
+      // validation completes, which is a follow-up.
+      plugins: validPlugins,
+      mainRunnerRef,
+    }),
   });
 
   initApolloClient(new URL(url));

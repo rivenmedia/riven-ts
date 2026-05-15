@@ -34,6 +34,7 @@
     "@repo/util-plugin-sdk": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
+    "bullmq": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
