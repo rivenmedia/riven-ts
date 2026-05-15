@@ -22,32 +22,44 @@ function attemptGracefulShutdown(worker: Worker) {
 
     const signal = AbortSignal.timeout(10_000);
 
-    signal.addEventListener("abort", () => {
+    const removeAbortListener = () => {
+      signal.removeEventListener("abort", onAbort);
+    };
+
+    const forceClose = () => {
+      void forceCloseWorker(worker).finally(() => {
+        resolve();
+      });
+    };
+
+    const onAbort = () => {
       logger.warn(
         `Worker ${worker.name} did not shut down within 10 seconds, forcing shutdown...`,
       );
 
-      void forceCloseWorker(worker).finally(() => {
-        resolve();
-      });
-    });
+      forceClose();
+    };
+
+    signal.addEventListener("abort", onAbort, { once: true });
 
     worker
       .close()
       .then(() => {
+        removeAbortListener();
+
         logger.debug(`Worker ${worker.name} closed gracefully.`);
 
         resolve();
       })
       .catch((error: unknown) => {
+        removeAbortListener();
+
         logger.error(
           `Error during graceful shutdown of worker ${worker.name}, forcing shutdown...`,
           { err: error },
         );
 
-        void forceCloseWorker(worker).finally(() => {
-          resolve();
-        });
+        forceClose();
       });
   });
 }
