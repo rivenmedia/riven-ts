@@ -27,11 +27,8 @@
   },
   "devDependencies": {
     "@graphql-codegen/cli": "catalog:",
-    "@graphql-codegen/near-operation-file-preset": "catalog:",
     "@graphql-codegen/typescript": "catalog:",
-    "@graphql-codegen/typescript-operations": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
-    "@repo/core-util-typescript-config": "workspace:^",
     "@sveltejs/adapter-node": "^5.5.1",
     "@sveltejs/kit": "^2.60.1",
     "@sveltejs/vite-plugin-svelte": "^6.2.4",

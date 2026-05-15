@@ -406,21 +406,12 @@ importers:
       '@graphql-codegen/cli':
         specifier: 'catalog:'
         version: 6.1.0(@parcel/watcher@2.5.1)(@types/node@24.0.0)(encoding@0.1.13)(graphql@16.12.0)(typescript@5.9.3)
-      '@graphql-codegen/near-operation-file-preset':
-        specifier: 'catalog:'
-        version: 4.0.0(encoding@0.1.13)(graphql@16.12.0)
       '@graphql-codegen/typescript':
-        specifier: 'catalog:'
-        version: 5.0.7(encoding@0.1.13)(graphql@16.12.0)
-      '@graphql-codegen/typescript-operations':
         specifier: 'catalog:'
         version: 5.0.7(encoding@0.1.13)(graphql@16.12.0)
       '@repo/core-util-eslint-config':
         specifier: workspace:^
         version: link:../../packages/core/util-eslint-config
-      '@repo/core-util-typescript-config':
-        specifier: workspace:^
-        version: link:../../packages/core/util-typescript-config
       '@sveltejs/adapter-node':
         specifier: ^5.5.1
         version: 5.5.4(@sveltejs/kit@2.60.1(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@6.2.4(svelte@5.55.7(@typescript-eslint/types@8.58.1))(vite@7.3.3(@types/node@24.0.0)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.9.0)))(svelte@5.55.7(@typescript-eslint/types@8.58.1))(typescript@5.9.3)(vite@7.3.3(@types/node@24.0.0)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.9.0)))

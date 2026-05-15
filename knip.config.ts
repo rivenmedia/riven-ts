@@ -55,6 +55,37 @@ export default {
       ],
       ignoreDependencies: [/@repo\/plugin(.*)/],
     },
+    "apps/dashboard": {
+      // SvelteKit's `+page.*` / `+layout.*` / `+server.*` / `+error.*`
+      // entry points are picked up by knip's bundled `@sveltejs/kit`
+      // plugin. The additions below cover surfaces the plugin can't
+      // infer:
+      //
+      //   - shadcn-svelte barrel indexes that re-export each component
+      //     under both a short and a prefixed name (`Root` + `Card`,
+      //     etc.); consumers pick one, so every export needs to be
+      //     considered public.
+      //   - the GraphQL barrel (`$lib/graphql`) which is the canonical
+      //     import path for `client`, `createClient`, `gql`, and the
+      //     `TypedDocumentNode` type — pages import from it, but knip
+      //     doesn't otherwise see `createClient` getting used.
+      //   - generic config / setup files, consistent with the other
+      //     workspaces.
+      entry: [
+        "src/lib/components/ui/*/index.ts!",
+        "src/lib/graphql/index.ts!",
+        filePatterns.configFiles,
+        filePatterns.setupFiles,
+        filePatterns.graphqlCodegenConfig,
+      ],
+      project: ["src/**/*.{ts,svelte}!", "!src/lib/graphql/__generated__/**/*"],
+      // `@sveltejs/kit` lives in devDependencies per the official
+      // SvelteKit convention (the framework code is bundled at build
+      // time). Knip's `--strict` mode flags any production import of a
+      // devDependency as "unlisted"; suppressing here keeps the strict
+      // check meaningful for everything else.
+      ignoreDependencies: ["@sveltejs/kit"],
+    },
     "{packages,packages/core}/*": {
       entry: [...defaultEntry],
       project: [...defaultProject],
