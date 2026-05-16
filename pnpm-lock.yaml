@@ -310,7 +310,9 @@ catalogs:
 packageExtensionsChecksum: sha256-lmqPczCHsZjEudlMldfSNaZq7e+eaddMNumuy/0Y5Ys=
 
 patchedDependencies:
-  '@zkochan/fuse-shared-library': ac6e4b6d0a20a5d63d3786bee9f7baad2c39442a6e3e0ad09c1304452e220113
+  '@zkochan/fuse-shared-library':
+    hash: ac6e4b6d0a20a5d63d3786bee9f7baad2c39442a6e3e0ad09c1304452e220113
+    path: patches/@zkochan__fuse-shared-library.patch
 
 importers:
 
