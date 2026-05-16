@@ -63,7 +63,6 @@ FROM core-os AS builder
 
     COPY --from=prepare ${HOME}/out/json/ .
 
-
     RUN pnpm fetch
 
     ARG CI
