@@ -64,8 +64,9 @@ FROM core-os AS builder
     COPY --from=prepare \
         ${HOME}/out/pnpm-lock.yaml \
         ${HOME}/out/pnpm-workspace.yaml \
-        ${HOME}/out/full/patches \
         ./
+
+    COPY --from=prepare ${HOME}/out/full/patches patches
 
     RUN pnpm fetch
 
