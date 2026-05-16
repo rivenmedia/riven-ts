@@ -252,14 +252,6 @@ export const rivenMachine = setup({
       },
       Exited: {
         type: "final",
-        entry: [
-          {
-            type: "log",
-            params: {
-              message: "Riven has exited.",
-            },
-          },
-        ],
       },
     },
   });
