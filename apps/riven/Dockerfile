@@ -19,7 +19,7 @@ FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS core-os
     ARG HOME
 
     ENV PNPM_HOME=${PNPM_HOME}
-    ENV PATH=$PNPM_HOME/bin:$PATH
+    ENV PATH=${PNPM_HOME}/bin:$PATH
 
     # Install build dependencies
     RUN apt-get update && apt-get install -y \
