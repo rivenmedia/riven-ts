@@ -15,6 +15,6 @@ export const sentryMetaFormat = format((info) => {
 
   return {
     ...info,
-    ...getLogContext(),
+    ...getLogContext(info.message),
   };
 });

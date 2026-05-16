@@ -45,11 +45,11 @@ export function withLogContext<T>(
   });
 }
 
-export function getLogContext(): LogContext {
+export function getLogContext(message: unknown): LogContext {
   const context = logContext.getStore();
 
   if (!context) {
-    throw new Error("No log context available");
+    throw new Error(`No context available for log: ${JSON.stringify(message)}`);
   }
 
   return context;
