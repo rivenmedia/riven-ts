@@ -1283,7 +1283,7 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "number"
+                            "type": "boolean"
                           },
                           "title": {
                             "type": "string"
@@ -1907,7 +1907,7 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "number"
+                            "type": "boolean"
                           },
                           "title": {
                             "type": "string"
@@ -1982,7 +1982,7 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "number"
+                            "type": "boolean"
                           },
                           "title": {
                             "type": "string"
@@ -4911,7 +4911,7 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "number"
+                            "type": "boolean"
                           },
                           "title": {
                             "type": "string"
@@ -10226,7 +10226,7 @@
                             "type": "number"
                           },
                           "adult": {
-                            "type": "number"
+                            "type": "boolean"
                           },
                           "title": {
                             "type": "string"
@@ -10287,7 +10287,7 @@
                             "type": "number"
                           },
                           "adult": {
-                            "type": "number"
+                            "type": "boolean"
                           },
                           "title": {
                             "type": "string"

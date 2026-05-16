@@ -21,6 +21,7 @@ it("assigns the Apollo Server instance to context when bootstrapping is complete
   bootstrapMachineOutput,
 }) => {
   actor.start();
+  actor.send({ type: "BOOTSTRAP" });
 
   sendBootstrapDoneEvent(actor, bootstrapMachineOutput);
 
@@ -34,6 +35,7 @@ it("starts the main runner when bootstrapping is complete", ({
   bootstrapMachineOutput,
 }) => {
   actor.start();
+  actor.send({ type: "BOOTSTRAP" });
 
   sendBootstrapDoneEvent(actor, bootstrapMachineOutput);
 
