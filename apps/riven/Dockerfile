@@ -3,7 +3,6 @@ ARG NODE_VERSION=24.15.0
 ARG TURBO_VERSION=2.9.5
 ARG PNPM_VERSION=11.1.2
 ARG PNPM_HOME=${HOME}/.local/share/pnpm
-ARG PNPM_GLOBAL_BIN_DIR=${PNPM_HOME}/bin
 ARG USER=riven
 ARG PUID=1000
 ARG PGID=1000
@@ -17,12 +16,10 @@ FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS core-os
     ARG BUILDPLATFORM
     ARG USER
     ARG PNPM_VERSION
-    ARG PNPM_HOME
-    ARG PNPM_GLOBAL_BIN_DIR
     ARG HOME
 
     ENV PNPM_HOME=${PNPM_HOME}
-    ENV PATH=$PNPM_HOME:$PNPM_GLOBAL_BIN_DIR:$PATH
+    ENV PATH=$PNPM_HOME/bin:$PATH
 
     # Install build dependencies
     RUN apt-get update && apt-get install -y \
@@ -48,8 +45,6 @@ FROM core-os AS prepare
 
     WORKDIR ${HOME}
 
-    RUN echo "Path: $PATH"
-
     RUN pnpm add turbo@${TURBO_VERSION} --global
     RUN turbo telemetry disable
 
@@ -65,7 +60,11 @@ FROM core-os AS builder
 
     WORKDIR ${HOME}
 
-    COPY --from=prepare ${HOME}/out/json/ .
+    COPY --from=prepare \
+        ${HOME}/out/pnpm-lock.yaml \
+        ${HOME}/out/pnpm-workspace.yaml \
+        ${HOME}/out/full/patches \
+        ./
 
     RUN pnpm fetch
 
