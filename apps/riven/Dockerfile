@@ -138,8 +138,6 @@ FROM node:${NODE_VERSION}-alpine AS runner
 
     COPY --from=production-deploy ${HOME}/pruned .
 
-    STOPSIGNAL SIGTERM
-
     ENV NODE_ENV=production
 
     CMD ["node", "--conditions=production", "--enable-source-maps", "dist/lib/index.js"]
