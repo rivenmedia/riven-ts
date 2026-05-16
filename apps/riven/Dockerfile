@@ -36,7 +36,6 @@ FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS core-os
 
     # Install pnpm
     RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
-    RUN pnpm runtime set node ${NODE_VERSION} --global
 
 FROM core-os AS prepare
 
@@ -68,13 +67,12 @@ FROM core-os AS builder
         ${HOME}/out/full/patches \
         ./
 
-    # RUN pnpm fetch
+    RUN pnpm fetch
 
     ARG CI
     ENV CI=${CI}
 
-    RUN pnpm install -r
-    # RUN pnpm install -r --offline
+    RUN pnpm install -r --offline
 
     COPY --from=prepare ${HOME}/out/full/ .
 
