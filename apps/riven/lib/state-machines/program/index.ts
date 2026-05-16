@@ -1,4 +1,9 @@
-import { type ActorRefFromLogic, enqueueActions, setup } from "xstate";
+import {
+  type ActorRefFromLogic,
+  createActor,
+  enqueueActions,
+  setup,
+} from "xstate";
 
 import {
   type BootstrapMachineOutput,
@@ -28,7 +33,7 @@ export interface RivenMachineInput {
   sessionId: SessionID;
 }
 
-export type RivenMachineEvent = CoreShutdownEvent;
+export type RivenMachineEvent = CoreShutdownEvent | { type: "BOOTSTRAP" };
 
 export const rivenMachine = setup({
   types: {
@@ -80,7 +85,7 @@ export const rivenMachine = setup({
   .extend(withLogAction)
   .createMachine({
     id: "Riven",
-    initial: "Bootstrapping",
+    initial: "Idle",
     context: ({ self, spawn }) => ({
       mainRunnerRef: spawn("mainRunnerMachine", {
         id: "mainRunnerMachine",
@@ -93,6 +98,11 @@ export const rivenMachine = setup({
       "riven.core.shutdown": ".Shutdown",
     },
     states: {
+      Idle: {
+        on: {
+          BOOTSTRAP: "Bootstrapping",
+        },
+      },
       Bootstrapping: {
         invoke: {
           id: "bootstrapMachine",
@@ -255,3 +265,7 @@ export const rivenMachine = setup({
       },
     },
   });
+
+export function createRivenMachine(input: RivenMachineInput) {
+  return createActor(rivenMachine, { input });
+}
