@@ -28,6 +28,12 @@ export class CometAPI extends BaseDataSource<CometSettings> {
   override baseURL = this.settings.url;
   override serviceName = "Comet";
 
+  override concurrency = 1;
+  override rateLimiterOptions: RateLimiterOptions = {
+    max: 1,
+    duration: 1000,
+  };
+
   override async validate() {
     try {
       // Implement your own validation logic here
@@ -38,11 +44,6 @@ export class CometAPI extends BaseDataSource<CometSettings> {
       return false;
     }
   }
-
-  protected override rateLimiterOptions: RateLimiterOptions = {
-    max: 150,
-    duration: 60 * 1000,
-  };
 
   async scrape({
     item,
