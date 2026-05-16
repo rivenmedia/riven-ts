@@ -164,8 +164,6 @@ export abstract class BaseDataSource<
           job.data.incomingRequest.headers ??= {};
           job.data.incomingRequest.headers["user-agent"] = userAgent;
 
-          console.log({ userAgent });
-
           return super.fetch(job.data.path, job.data.incomingRequest);
         });
 
