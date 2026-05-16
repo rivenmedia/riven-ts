@@ -47,6 +47,10 @@ if (settings.loggingEnabled) {
       format: ecsFileFormat,
       zippedArchive: true,
       level: "silly", // Send ALL logs to ECS, regardless of log level config
+    }).on("error", (error) => {
+      withLogContext(defaultLogContext, () => {
+        console.error("Error in ECS file transport:", { err: error });
+      });
     }),
   );
 
@@ -59,6 +63,10 @@ if (settings.loggingEnabled) {
           }),
           consoleFormat,
         ),
+      }).on("error", (error) => {
+        withLogContext(defaultLogContext, () => {
+          console.error("Error in console transport:", { err: error });
+        });
       }),
     );
   }
@@ -73,6 +81,10 @@ if (settings.loggingEnabled) {
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
         format: fileFormat,
+      }).on("error", (error) => {
+        withLogContext(defaultLogContext, () => {
+          console.error("Error in error file transport:", { err: error });
+        });
       }),
     );
 
@@ -84,6 +96,10 @@ if (settings.loggingEnabled) {
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
         format: fileFormat,
+      }).on("error", (error) => {
+        withLogContext(defaultLogContext, () => {
+          console.error("Error in combined file transport:", { err: error });
+        });
       }),
     );
 
@@ -95,6 +111,10 @@ if (settings.loggingEnabled) {
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
         format: fileFormat,
+      }).on("error", (error) => {
+        withLogContext(defaultLogContext, () => {
+          console.error("Error in exceptions file transport:", { err: error });
+        });
       }),
     );
   }
@@ -102,6 +122,6 @@ if (settings.loggingEnabled) {
 
 logger.on("error", (error) => {
   withLogContext(defaultLogContext, () => {
-    logger.error("Logger encountered an error:", { err: error });
+    console.error("Logger encountered an error:", { err: error });
   });
 });
