@@ -89,9 +89,13 @@ await withLogContext(baseLogContext, async () => {
 
   const terminationSignals: NodeJS.Signals[] = ["SIGINT", "SIGTERM"];
 
-  for (const signal of terminationSignals) {
-    process.on(signal, () => {
+  for (const terminationSignal of terminationSignals) {
+    process.on(terminationSignal, (signal) => {
       maybeSendShutdownEvent(actor);
+
+      withLogContext(baseLogContext, () => {
+        logger.debug(`Received ${signal}`);
+      });
     });
   }
 
@@ -102,7 +106,9 @@ await withLogContext(baseLogContext, async () => {
 
   const { value } = actor.getSnapshot();
 
-  if (value === "Errored") {
-    process.exitCode = 1;
-  }
+  process.exitCode = Number(value === "Errored");
+
+  logger.debug(
+    `Riven completed with exit code: ${process.exitCode.toString()}`,
+  );
 });
