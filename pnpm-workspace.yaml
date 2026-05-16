@@ -156,5 +156,6 @@ allowBuilds:
   ssh2: true
   unrs-resolver: true
   redis-memory-server: false
+  node: true
 
 blockExoticSubdeps: false
