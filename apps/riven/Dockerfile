@@ -67,12 +67,13 @@ FROM core-os AS builder
         ${HOME}/out/full/patches \
         ./
 
-    RUN pnpm fetch
+    # RUN pnpm fetch
 
     ARG CI
     ENV CI=${CI}
 
-    RUN pnpm install -r --offline
+    RUN pnpm install -r
+    # RUN pnpm install -r --offline
 
     COPY --from=prepare ${HOME}/out/full/ .
 
