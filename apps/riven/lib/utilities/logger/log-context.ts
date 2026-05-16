@@ -21,6 +21,10 @@ export interface LogContext {
 
 const logContext = new AsyncLocalStorage<LogContext>();
 
+export const defaultLogContext = {
+  "riven.log.source": "core",
+} as const satisfies LogContext;
+
 export function withLogContext<T>(
   context: LogContext,
   callback: (scope: Sentry.Scope) => T,

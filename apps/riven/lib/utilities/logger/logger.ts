@@ -10,6 +10,7 @@ import { ecsFileFormat } from "./formatters/ecs-file.format.ts";
 import { fileFormat } from "./formatters/file.format.ts";
 import { sentryMetaFormat } from "./formatters/sentry-meta.format.ts";
 import { validationErrorMetaFormat } from "./formatters/validation-error-meta.format.ts";
+import { defaultLogContext, withLogContext } from "./log-context.ts";
 
 const logDir = path.resolve(process.cwd(), settings.logDirectory);
 
@@ -98,3 +99,9 @@ if (settings.loggingEnabled) {
     );
   }
 }
+
+logger.on("error", (error) => {
+  withLogContext(defaultLogContext, () => {
+    logger.error("Logger encountered an error:", { err: error });
+  });
+});

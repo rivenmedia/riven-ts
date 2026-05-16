@@ -4,6 +4,7 @@ import { setEnvironmentData } from "node:worker_threads";
 import {
   type LogContext,
   SessionID,
+  defaultLogContext,
   withLogContext,
 } from "./utilities/logger/log-context.ts";
 
@@ -37,10 +38,10 @@ export async function riven() {
 
   setEnvironmentData("riven.session.id", sessionId);
 
-  const baseLogContext: LogContext = {
-    "riven.log.source": "core",
+  const baseLogContext = {
+    ...defaultLogContext,
     "riven.session.id": sessionId,
-  };
+  } satisfies LogContext;
 
   await withLogContext(baseLogContext, async () => {
     await import("./sentry.ts");
