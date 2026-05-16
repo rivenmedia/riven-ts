@@ -61,7 +61,7 @@ jobs:
         with:
           file: apps/riven/Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name == 'push' || (env.IS_FORK == 'false' && contains(github.event.pull_request.labels.*.name, 'build-docker')) }}
+          push: ${{ env.IS_FORK == 'false' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
