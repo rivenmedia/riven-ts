@@ -108,7 +108,5 @@ await withLogContext(baseLogContext, async () => {
 
   process.exitCode = Number(value === "Errored");
 
-  logger.debug(
-    `Riven completed with exit code: ${process.exitCode.toString()}`,
-  );
+  logger.info(`Riven exited with code ${process.exitCode.toString()}`);
 });
