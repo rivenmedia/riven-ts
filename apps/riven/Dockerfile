@@ -36,6 +36,7 @@ FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS core-os
 
     # Install pnpm
     RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
+    RUN pnpm runtime set node ${NODE_VERSION} --global
 
 FROM core-os AS prepare
 
