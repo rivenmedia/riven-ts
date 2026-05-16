@@ -87,9 +87,13 @@ await withLogContext(baseLogContext, async () => {
 
   actor.start();
 
-  process.on("SIGINT", () => {
-    maybeSendShutdownEvent(actor);
-  });
+  const terminationSignals: NodeJS.Signals[] = ["SIGINT", "SIGTERM"];
+
+  for (const signal of terminationSignals) {
+    process.on(signal, () => {
+      maybeSendShutdownEvent(actor);
+    });
+  }
 
   await waitFor(
     actor,
@@ -101,6 +105,4 @@ await withLogContext(baseLogContext, async () => {
   if (value === "Errored") {
     process.exitCode = 1;
   }
-
-  process.exit();
 });
