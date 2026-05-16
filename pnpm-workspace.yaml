@@ -84,7 +84,6 @@ catalog:
   lru-cache: ^11.2.4
   luxon: ^3.7.2
   msw: 2.13.2
-  node: runtime:^24.15.0
   nyc: ^18.0.0
   prettier: ^3.7.4
   redis-memory-server: ^0.16.0
@@ -156,6 +155,5 @@ allowBuilds:
   ssh2: true
   unrs-resolver: true
   redis-memory-server: false
-  node: true
 
 blockExoticSubdeps: false

@@ -17,9 +17,6 @@
     "knip:ci:production": "pnpm knip:ci:base --strict --reporter json | tail -1 > knip-report.json",
     "knip:prepare": "turbo codegen:api-schemas"
   },
-  "dependencies": {
-    "node": "catalog:"
-  },
   "devDependencies": {
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
