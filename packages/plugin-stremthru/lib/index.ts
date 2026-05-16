@@ -112,7 +112,11 @@ export default {
     },
   },
   settingsSchema: StremThruSettings,
-  validator() {
-    return Promise.resolve(true);
+  async validator({ dataSources }) {
+    const results = await Promise.all([
+      dataSources.get(StremThruTorzAPI).validate(),
+      dataSources.get(StremThruTorznabAPI).validate(),
+    ]);
+    return results.every((isValid) => isValid);
   },
 } satisfies RivenPlugin as RivenPlugin;
