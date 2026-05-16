@@ -12,8 +12,9 @@
     "format:fix": "prettier --write . '!**/docker-data'",
     "postinstall": "pnpm node .husky/install.mjs || true",
     "knip": "pnpm knip:prepare && knip",
-    "knip:ci": "pnpm knip --cache --no-exit-code --reporter github-actions",
-    "knip:ci:production": "pnpm knip:ci --strict",
+    "knip:ci:base": "pnpm knip --cache --no-exit-code",
+    "knip:ci:development": "pnpm knip:ci:base --reporter github-actions",
+    "knip:ci:production": "pnpm knip:ci:base --strict --reporter json | tail -1 > knip-report.json",
     "knip:prepare": "turbo codegen:api-schemas"
   },
   "devDependencies": {
@@ -33,5 +34,11 @@
     "type-fest": "catalog:",
     "typescript": "catalog:"
   },
-  "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8"
+  "packageManager": "pnpm@11.1.2+sha512.415a1cc25974731e75455c1468371be74c5aa5fb7621b50d4056d222451609f11412f23fd602e6169f1e060466641f798597e1be961a10688836a67b16569499",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "24.15.0"
+    }
+  }
 }
