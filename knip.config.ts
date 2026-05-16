@@ -45,6 +45,8 @@ export default {
     ".": {
       entry: [".husky/install.mjs", "turbo/generators/config.ts!"],
       project: ["turbo/**/*.ts"],
+      ignoreDependencies: ["node"],
+      ignoreBinaries: ["tail"],
     },
     "apps/riven": {
       entry: [...defaultEntry],
