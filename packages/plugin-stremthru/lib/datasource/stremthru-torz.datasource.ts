@@ -27,6 +27,12 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
 
   protected override concurrency = 1; // Lower the concurrency to prevent queue build-ups, as this API aggressively rate-limits itself
 
+  #validStores: Store[] = [];
+
+  get validStores(): readonly Store[] {
+    return this.#validStores;
+  }
+
   #buildCommonHeaders(store: Store) {
     return {
       [storeNameHeader]: store,
@@ -121,7 +127,14 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
       }),
     );
 
-    return results.every(Boolean);
+    this.#validStores = configuredStores.filter((_, index) => results[index]);
+
+    if (this.#validStores.length === 0) {
+      this.logger.warn("No valid stores found for StremThru Torz.");
+      return false;
+    }
+
+    return true;
   }
 
   async addTorrent(
