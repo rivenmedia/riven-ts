@@ -9,6 +9,7 @@ import { settings } from "../settings.ts";
 import { consoleFormat } from "./formatters/console.format.ts";
 import { ecsFileFormat } from "./formatters/ecs-file.format.ts";
 import { fileFormat } from "./formatters/file.format.ts";
+import { maskFormat } from "./formatters/mask.format.ts";
 import { sentryMetaFormat } from "./formatters/sentry-meta.format.ts";
 import { validationErrorMetaFormat } from "./formatters/validation-error-meta.format.ts";
 
@@ -46,7 +47,7 @@ if (settings.loggingEnabled) {
       frequency: "24h",
       dirname: ecsLogDir,
       maxFiles: "5d",
-      format: ecsFileFormat,
+      format: format.combine(maskFormat(), ecsFileFormat),
       zippedArchive: true,
       level: "silly", // Send ALL logs to ECS, regardless of log level config
       json: true,
@@ -79,7 +80,7 @@ if (settings.loggingEnabled) {
         tailable: true,
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
-        format: fileFormat,
+        format: format.combine(maskFormat(), fileFormat),
       }),
     );
 
@@ -90,7 +91,7 @@ if (settings.loggingEnabled) {
         tailable: true,
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
-        format: fileFormat,
+        format: format.combine(maskFormat(), fileFormat),
       }),
     );
 
@@ -101,7 +102,7 @@ if (settings.loggingEnabled) {
         tailable: true,
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
-        format: fileFormat,
+        format: format.combine(maskFormat(), fileFormat),
       }),
     );
   }
