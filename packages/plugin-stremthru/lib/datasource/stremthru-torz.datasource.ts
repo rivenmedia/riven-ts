@@ -112,11 +112,6 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
             case "trial":
               this.logger.info(`Trial subscription for store: ${store}`);
               return true;
-            default:
-              this.logger.warn(
-                `Unknown subscription status "${data.subscription_status}" for store: ${store}`,
-              );
-              return false;
           }
         } catch {
           this.logger.warn(
