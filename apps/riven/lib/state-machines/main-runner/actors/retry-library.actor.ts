@@ -61,8 +61,6 @@ export const retryLibrary = fromPromise(async () => {
         id: item.id,
         step,
       });
-
-      break;
     }
   } catch (error) {
     logger.error("Error retrying library", { err: error });
