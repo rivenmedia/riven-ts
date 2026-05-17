@@ -93,6 +93,8 @@
     "bullmq": "catalog:",
     "class-validator": "catalog:",
     "eslint": "catalog:",
+    "msw": "catalog:",
+    "redis-memory-server": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "winston": "catalog:"
