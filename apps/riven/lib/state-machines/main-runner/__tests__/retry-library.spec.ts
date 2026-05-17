@@ -1,58 +1,103 @@
-import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
-
 import { expect, vi } from "vitest";
 import { waitFor } from "xstate";
 
+import { flow } from "../../../message-queue/flows/producer.ts";
 import { it } from "./helpers/test-context.ts";
 
-it.skip('sends a "riven.media-item.index.requested" event for each incomplete item request in the database', async ({
+it("enqueues every pending media item, not just the first", async ({
   actor,
+  factories: { movieFactory },
   em,
-  factories: { showItemRequestFactory, movieItemRequestFactory },
 }) => {
-  const items = [
-    movieItemRequestFactory.makeEntity({
-      imdbId: "tt1234567",
-      state: "requested",
-    }),
-    showItemRequestFactory.makeEntity({
-      imdbId: "tt2345678",
-      state: "requested",
-    }),
-    showItemRequestFactory.makeEntity({
-      imdbId: "tt3456789",
-      state: "failed",
-    }),
-  ];
+  // Three indexed movies — pre-fix this loop bailed after the first one.
+  const movies = await Promise.all([
+    movieFactory.makeOne({ state: "indexed" }),
+    movieFactory.makeOne({ state: "indexed" }),
+    movieFactory.makeOne({ state: "indexed" }),
+  ]);
+  await em.persistAndFlush(movies);
 
-  await em.getRepository(ItemRequest).insertMany(items);
+  const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
 
   actor.start();
+  await waitFor(actor, (state) => state.matches("Running"));
 
+  // `riven-internal.retry-library` is also raised by the machine on entry to
+  // Running, but sending it explicitly avoids depending on event ordering.
+  actor.send({ type: "riven-internal.retry-library" });
+
+  await vi.waitFor(() => {
+    for (const movie of movies) {
+      expect(flowAddBulkSpy).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            queueName: "process-media-item",
+            data: expect.objectContaining({
+              mediaItem: expect.objectContaining({ id: movie.id }),
+            }),
+          }),
+        ]),
+      );
+    }
+  });
+});
+
+it("requests a scrape for media items in the indexed state", async ({
+  actor,
+  factories: { movieFactory },
+  em,
+}) => {
+  const movie = await movieFactory.makeOne({ state: "indexed" });
+  await em.persistAndFlush(movie);
+
+  const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
+
+  actor.start();
   await waitFor(actor, (state) => state.matches("Running"));
 
   actor.send({ type: "riven-internal.retry-library" });
 
-  for (const item of items) {
-    await vi.waitFor(() => {
-      expect(actor).toHaveReceivedEvent({
-        type: `riven.media-item.index.requested.${item.type}`,
-        item: expect.objectContaining({
-          id: item.id,
-          imdbId: item.imdbId,
-          requestedBy: item.requestedBy,
+  await vi.waitFor(() => {
+    expect(flowAddBulkSpy).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          queueName: "process-media-item",
+          data: expect.objectContaining({
+            step: "scrape",
+            mediaItem: expect.objectContaining({ id: movie.id }),
+          }),
         }),
-      });
-    });
-  }
+      ]),
+    );
+  });
 });
 
-it.todo(
-  'does not send a "riven.media-item.index.requested" event for completed item requests',
-);
+it("requests a download for media items in the scraped state", async ({
+  actor,
+  factories: { movieFactory },
+  em,
+}) => {
+  const movie = await movieFactory.makeOne({ state: "scraped" });
+  await em.persistAndFlush(movie);
 
-it.todo('requests a scrape for each media item in the "Indexed" state');
+  const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
 
-it.todo('requests a download for each media item in the "Scraped" state');
+  actor.start();
+  await waitFor(actor, (state) => state.matches("Running"));
 
-it.todo("does not send events for media items in other states");
+  actor.send({ type: "riven-internal.retry-library" });
+
+  await vi.waitFor(() => {
+    expect(flowAddBulkSpy).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          queueName: "process-media-item",
+          data: expect.objectContaining({
+            step: "download",
+            mediaItem: expect.objectContaining({ id: movie.id }),
+          }),
+        }),
+      ]),
+    );
+  });
+});
