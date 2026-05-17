@@ -1,11 +1,12 @@
 import { DateTime } from "luxon";
 import { createReadStream } from "node:fs";
-import path from "node:path";
 import { createInterface } from "node:readline";
-import { getEnvironmentData } from "node:worker_threads";
 import { Mutation, Resolver } from "type-graphql";
 
-import { SessionID } from "../../utilities/logger/log-context.ts";
+import {
+  type SessionID,
+  getSessionId,
+} from "../../utilities/logger/session-id.ts";
 
 import type { TransformableInfo } from "logform";
 
@@ -22,16 +23,19 @@ export class ShareLogsResolver {
   async shareLogs(): Promise<SessionID> {
     const { settings } = await import("../../utilities/settings.ts");
 
-    const sessionId = SessionID.parse(getEnvironmentData("riven.session.id"));
-    const logDir = path.resolve(process.cwd(), settings.logDirectory);
-    const ecsLogPath = path.join(logDir, "ecs.json");
+    if (!settings.loggingEnabled) {
+      throw new Error("Logging is disabled; cannot share logs.");
+    }
+
+    const { ecsSymlinkPath } = await import("../../utilities/logger/logger.ts");
+
     const cutoff = DateTime.now().minus({ days: 1 }).toMillis();
-    const recentLogs = this.#readRecentLogs(ecsLogPath, cutoff);
+    const recentLogs = this.#readRecentLogs(ecsSymlinkPath, cutoff);
     const action = JSON.stringify({ index: { _index: INDEX_NAME } });
 
     await this.#bulkIndex(action, recentLogs);
 
-    return sessionId;
+    return getSessionId();
   }
 
   async *#readRecentLogs(
