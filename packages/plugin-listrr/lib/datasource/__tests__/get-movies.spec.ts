@@ -131,3 +131,14 @@ it("dedupes movies that appear in multiple lists", async ({
 
   expect(movies).toHaveLength(8);
 });
+
+it("skips lists with invalid IDs (not 24 characters)", async ({
+  dataSourceMap,
+}) => {
+  const listrrApi = dataSourceMap.get(ListrrAPI);
+  const movies = await listrrApi.getMovies(
+    new Set(["short-id", "also-invalid"]),
+  );
+
+  expect(movies).toEqual([]);
+});

@@ -1,8 +1,10 @@
 import Fuse from "@zkochan/fuse-native";
 import fs from "node:fs";
 import { expect, vi } from "vitest";
+import { ZodError } from "zod";
 
 import { it } from "../../__tests__/test-context.ts";
+import { FuseError } from "../errors/fuse-error.ts";
 import { getattrSync } from "./getattr.ts";
 
 const dirMode = fs.constants.S_IFDIR | 0o755;
@@ -199,5 +201,51 @@ it("returns file stats for episodes", async ({
       size: mediaEntry.fileSize,
       nlink: 1,
     });
+  });
+});
+
+it("returns FuseError code when vfsService throws FuseError", async ({
+  services,
+}) => {
+  vi.spyOn(services.vfsService, "getEntryStat").mockRejectedValue(
+    new FuseError(Fuse.ENOENT, "Not found"),
+  );
+
+  const callback = vi.fn();
+
+  getattrSync("/nonexistent/path", callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(Fuse.ENOENT);
+  });
+});
+
+it("returns ENOENT when vfsService throws ZodError", async ({ services }) => {
+  vi.spyOn(services.vfsService, "getEntryStat").mockRejectedValue(
+    new ZodError([]),
+  );
+
+  const callback = vi.fn();
+
+  getattrSync("/invalid/path", callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(Fuse.ENOENT);
+  });
+});
+
+it("returns EIO when vfsService throws unexpected error", async ({
+  services,
+}) => {
+  vi.spyOn(services.vfsService, "getEntryStat").mockRejectedValue(
+    new Error("Unexpected"),
+  );
+
+  const callback = vi.fn();
+
+  getattrSync("/broken/path", callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(Fuse.EIO);
   });
 });

@@ -1,8 +1,10 @@
 import { MediaEntry, Movie } from "@repo/util-plugin-sdk/dto/entities";
 
+import Fuse from "@zkochan/fuse-native";
 import { expect, vi } from "vitest";
 
 import { it } from "../../__tests__/test-context.ts";
+import { FuseError } from "../errors/fuse-error.ts";
 import { readDirSync } from "./readdir.ts";
 
 it("returns persistent directory entries for the root path", async () => {
@@ -213,5 +215,37 @@ it("does not include periods in movie titles", async ({
     expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
       "Mr Robot (2016) {tmdb-1234}",
     ]);
+  });
+});
+
+it("returns FuseError code when vfsService throws FuseError", async ({
+  services,
+}) => {
+  vi.spyOn(services.vfsService, "getDirectoryEntryPaths").mockRejectedValue(
+    new FuseError(Fuse.ENOENT, "Not found"),
+  );
+
+  const callback = vi.fn();
+
+  readDirSync("/nonexistent", callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(Fuse.ENOENT);
+  });
+});
+
+it("returns EIO when vfsService throws unexpected error", async ({
+  services,
+}) => {
+  vi.spyOn(services.vfsService, "getDirectoryEntryPaths").mockRejectedValue(
+    new Error("Unexpected error"),
+  );
+
+  const callback = vi.fn();
+
+  readDirSync("/broken", callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(Fuse.EIO);
   });
 });

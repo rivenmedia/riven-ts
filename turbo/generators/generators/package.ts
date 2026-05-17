@@ -22,7 +22,7 @@ export const createPackageGenerator = (plop: PlopTypes.NodePlopAPI) =>
         type: "list",
         name: "packageType",
         message: "Select the package type:",
-        choices: ["feature", "util"],
+        choices: ["feature", "data-access", "util"],
       },
       {
         type: "confirm",
