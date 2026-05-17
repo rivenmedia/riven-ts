@@ -1,4 +1,3 @@
-import { DateTime } from "luxon";
 import { createReadStream } from "node:fs";
 import { createInterface } from "node:readline";
 import { Mutation, Resolver } from "type-graphql";
@@ -29,18 +28,16 @@ export class ShareLogsResolver {
 
     const { ecsSymlinkPath } = await import("../../utilities/logger/logger.ts");
 
-    const cutoff = DateTime.now().minus({ days: 1 }).toMillis();
-    const recentLogs = this.#readRecentLogs(ecsSymlinkPath, cutoff);
+    const logFileLines = this.#readLogFileLines(ecsSymlinkPath);
     const action = JSON.stringify({ index: { _index: INDEX_NAME } });
 
-    await this.#bulkIndex(action, recentLogs);
+    await this.#bulkIndex(action, logFileLines);
 
     return getSessionId();
   }
 
-  async *#readRecentLogs(
+  async *#readLogFileLines(
     filePath: string,
-    cutoffMs: number,
   ): AsyncGenerator<TransformableInfo> {
     const rl = createInterface({
       input: createReadStream(filePath, { encoding: "utf-8" }),
@@ -53,12 +50,7 @@ export class ShareLogsResolver {
       }
 
       try {
-        const entry = JSON.parse(line) as TransformableInfo;
-        const timestamp = entry["@timestamp"];
-
-        if (DateTime.fromISO(timestamp).toMillis() >= cutoffMs) {
-          yield entry;
-        }
+        yield JSON.parse(line);
       } catch {
         // Skip malformed lines
       }
