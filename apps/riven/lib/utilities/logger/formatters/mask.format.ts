@@ -8,13 +8,6 @@ function maskMessage(message: unknown) {
     return message;
   }
 
-  const hasSensitiveData =
-    apiKeyPattern.test(message) || userDirectoryPattern.test(message);
-
-  if (!hasSensitiveData) {
-    return message;
-  }
-
   return message
     .replaceAll(apiKeyPattern, "$1$2=[REDACTED]")
     .replaceAll(userDirectoryPattern, "/$1/[REDACTED]/");
