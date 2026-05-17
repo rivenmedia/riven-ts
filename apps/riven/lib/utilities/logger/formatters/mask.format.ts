@@ -1,6 +1,6 @@
 import { format } from "winston";
 
-const apiKeyPattern = /(api_?)?(token|key)[=:](\w|-)+/gi;
+const apiKeyPattern = /(api|access_?)?(token|key)[=:](\w|-)+/gi;
 const userDirectoryPattern = /\/(home|Users)\/\w+\//g;
 
 function maskMessage(message: unknown) {

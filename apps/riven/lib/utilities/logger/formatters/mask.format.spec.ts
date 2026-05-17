@@ -6,8 +6,10 @@ import type { TransformableInfo } from "logform";
 
 it("masks api keys in log messages", () => {
   const messages = [
+    "api_key=1234g0qoij",
     "apikey=1234g0qoij",
     "apitoken=1234g0qoij",
+    "accesstoken=1234g0qoij",
     "token=1234g0qoij",
     "key=1234g0qoij",
   ];
@@ -20,7 +22,7 @@ it("masks api keys in log messages", () => {
     expect.assert(typeof maskedMessage === "object");
 
     expect(maskedMessage.message).toMatch(
-      /(apikey|apitoken|token|key)=\[REDACTED\]/,
+      /(api_key|apikey|apitoken|accesstoken|token|key)=\[REDACTED\]/,
     );
   }
 });
