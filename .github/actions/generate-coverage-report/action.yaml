@@ -9,19 +9,20 @@ runs:
       id: get-coverage-baseline
       uses: actions/cache/restore@v5
       with:
-        key: coverage-baseline
+        key: coverage-baseline-${{ github.event.pull_request.base.sha }}
+        restore-keys: |
+          coverage-baseline-${{ github.event.pull_request.base.sha }}-
+          coverage-baseline-
         path: packages/core/util-vitest-config/coverage/compare/coverage-summary.json
 
     - name: Merge reports
       shell: bash
       run: pnpm turbo report
 
-    - name: Generate coverage report
-      uses: davelosert/vitest-coverage-report-action@v2
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v7
       with:
-        name: Riven
-        json-final-path: packages/core/util-vitest-config/coverage/merged/merged-coverage.json
-        json-summary-path: packages/core/util-vitest-config/coverage/summary/coverage-summary.json
-        json-summary-compare-path: ${{ steps.get-coverage-baseline.outputs.cache-hit == 'true' && 'packages/core/util-vitest-config/coverage/compare/coverage-summary.json' || '' }}
-        threshold-icons: "{0: '🔴', 80: '🟠', 90: '🟢'}"
-        file-coverage-mode: changes-affected
+        name: coverage-report
+        path: packages/core/util-vitest-config/coverage
+        retention-days: 1
+        if-no-files-found: error

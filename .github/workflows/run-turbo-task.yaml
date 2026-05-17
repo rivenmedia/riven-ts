@@ -44,7 +44,7 @@ jobs:
         uses: ./.github/actions/set-turborepo-affected-shas
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v6
 
       - name: Get turbo version
         id: get-turbo-version
@@ -52,30 +52,19 @@ jobs:
         with:
           cmd: yq '.importers["."].devDependencies.turbo.version' 'pnpm-lock.yaml'
 
+      # Set environment variables for the turbo task, as these may be included in the cache key
+      - name: Set environment variables
+        if: inputs.env != '"{}"'
+        run:
+          echo '${{ inputs.env }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' >>
+          $GITHUB_ENV
+
       - name: Get required tasks
         id: get-required-tasks
-        run: |
-          if [ "$TURBO_VERSION" = "null" ]; then
-            echo "::error::Failed to detect turbo version"
-            exit 1
-          fi
-
-          case "$TASK" in
-            (""|*[!A-Za-z0-9:_-]*)
-              echo "::error::Invalid turbo task: $TASK"
-              exit 1
-              ;;
-          esac
-
-          DRY_RUN_OUTPUT=$(pnpx "turbo@${TURBO_VERSION}" --dry=json --affected "$TASK")
-          REQUIRED_TASKS=$(jq -c --arg task "$TASK" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and .task == $task) | .taskId]' <<<"$DRY_RUN_OUTPUT")
-
-          echo "required-tasks=$REQUIRED_TASKS" >> $GITHUB_OUTPUT
-        env:
-          TASK: ${{ inputs.task }}
-          TURBO_VERSION: ${{ steps.get-turbo-version.outputs.result }}
-          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
-          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+        uses: ./.github/actions/filter-cached-turbo-tasks
+        with:
+          tasks: '[ "${{ inputs.task }}" ]'
+          turbo-version: ${{ steps.get-turbo-version.outputs.result }}
 
       - name: Output required tasks
         run: |
@@ -89,6 +78,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      checks: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -115,7 +105,13 @@ jobs:
       - name: Set Turborepo --affected SHAs
         uses: ./.github/actions/set-turborepo-affected-shas
 
+      - name: Pre-verification steps
+        uses: ./.github/actions/pre-verify
+        with:
+          task: ${{ inputs.task }}
+
       - name: Run ${{ inputs.task }}
+        id: run-task
         run: |
           [[ "$CONCURRENCY" =~ ^[0-9]+%?$ ]] || {
             echo "::error::Invalid concurrency: $CONCURRENCY"
@@ -133,6 +129,7 @@ jobs:
         uses: ./.github/actions/post-verify
         with:
           task: ${{ inputs.task }}
+          success: ${{ steps.run-task.outcome == 'success' }}
 
       - uses: charpeni/turborepo-summary-action@v1
         if: always()

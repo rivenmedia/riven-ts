@@ -11,8 +11,6 @@ const bitDepthEnum = z.preprocess(
   z.enum(["8bit", "10bit", "12bit"]),
 );
 
-export type BitDepth = z.infer<typeof bitDepthEnum>;
-
 export const ParsedDataSchema = z
   .object({
     rawTitle: nonEmptyString,

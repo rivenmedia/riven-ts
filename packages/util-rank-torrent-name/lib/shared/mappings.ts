@@ -1,4 +1,5 @@
 import {
+  allLanguages,
   animeLanguages,
   commonLanguages,
   nonAnimeLanguages,
@@ -165,9 +166,5 @@ export const LANG_GROUPS = {
   anime: animeLanguages,
   nonAnime: nonAnimeLanguages,
   common: commonLanguages,
-  all: new Set<string>([
-    ...animeLanguages,
-    ...nonAnimeLanguages,
-    ...commonLanguages,
-  ]),
+  all: allLanguages,
 } as const satisfies Record<string, Set<string>>;

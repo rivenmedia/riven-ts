@@ -8,7 +8,7 @@ import { LibrarySectionsResponse } from "../schemas/library-sections-response.sc
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource.js";
 
-export class PlexAPIError extends Error {}
+class PlexAPIError extends Error {}
 
 export class PlexAPI extends BaseDataSource<PlexSettings> {
   override baseURL = this.settings.plexServerUrl;

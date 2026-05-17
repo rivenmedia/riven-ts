@@ -1,11 +1,11 @@
 import { DateTime } from "luxon";
 import { expect } from "vitest";
 
-import { test } from "../../../../__tests__/test-context.ts";
+import { it } from "../../../../__tests__/test-context.ts";
 import { Episode, ItemRequest, MediaEntry, Season, Show } from "../../index.ts";
 import { Movie } from "../movie.entity.ts";
 
-test("getMediaEntries() returns the associated media entry for a Movie media item", async ({
+it("getMediaEntries() returns the associated media entry for a Movie media item", async ({
   em,
 }) => {
   const itemRequest = em.create(ItemRequest, {
@@ -38,7 +38,7 @@ test("getMediaEntries() returns the associated media entry for a Movie media ite
   expect(await movie.getMediaEntries()).toEqual([mediaEntry]);
 });
 
-test("getMediaEntries() returns the associated media entries for a Show media item", async ({
+it("getMediaEntries() returns the associated media entries for a Show media item", async ({
   em,
 }) => {
   const tvdbId = "1";
@@ -126,7 +126,7 @@ test("getMediaEntries() returns the associated media entries for a Show media it
   expect(await show.getMediaEntries()).toEqual([mediaEntry1, mediaEntry2]);
 });
 
-test("getMediaEntries() returns the associated media entries for a Season media item", async ({
+it("getMediaEntries() returns the associated media entries for a Season media item", async ({
   em,
 }) => {
   const tvdbId = "1";
@@ -227,7 +227,7 @@ test("getMediaEntries() returns the associated media entries for a Season media 
   expect(await season2.getMediaEntries()).toEqual([season2Episode1MediaEntry]);
 });
 
-test("getMediaEntries() returns the associated media entry for an Episode media item", async ({
+it("getMediaEntries() returns the associated media entry for an Episode media item", async ({
   em,
 }) => {
   const tvdbId = "1";

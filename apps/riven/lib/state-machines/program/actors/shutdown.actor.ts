@@ -4,6 +4,65 @@ import { logger } from "../../../utilities/logger/logger.ts";
 import { keyvInstance } from "../../../utilities/redis-cache.ts";
 
 import type { mainRunnerMachine } from "../../main-runner/index.ts";
+import type { Worker } from "bullmq";
+
+async function forceCloseWorker(worker: Worker) {
+  try {
+    await worker.close(true);
+
+    logger.debug(`Worker ${worker.name} force-closed successfully.`);
+  } catch (error) {
+    logger.error(`Error force-closing worker ${worker.name}`, { err: error });
+  }
+}
+
+function attemptGracefulShutdown(worker: Worker) {
+  return new Promise<void>((resolve) => {
+    logger.debug(`Attempting graceful shutdown of worker ${worker.name}...`);
+
+    const signal = AbortSignal.timeout(10_000);
+
+    const removeAbortListener = () => {
+      signal.removeEventListener("abort", onAbort);
+    };
+
+    const forceClose = () => {
+      void forceCloseWorker(worker).finally(() => {
+        resolve();
+      });
+    };
+
+    const onAbort = () => {
+      logger.warn(
+        `Worker ${worker.name} did not shut down within 10 seconds, forcing shutdown...`,
+      );
+
+      forceClose();
+    };
+
+    signal.addEventListener("abort", onAbort, { once: true });
+
+    worker
+      .close()
+      .then(() => {
+        removeAbortListener();
+
+        logger.debug(`Worker ${worker.name} closed gracefully.`);
+
+        resolve();
+      })
+      .catch((error: unknown) => {
+        removeAbortListener();
+
+        logger.error(
+          `Error during graceful shutdown of worker ${worker.name}, forcing shutdown...`,
+          { err: error },
+        );
+
+        forceClose();
+      });
+  });
+}
 
 export interface ShutdownInput {
   mainRunnerRef: ActorRefFrom<typeof mainRunnerMachine> | undefined;
@@ -19,8 +78,6 @@ export const shutdown = fromPromise<undefined, ShutdownInput>(
       context: {
         flowWorkers: flowWorkerMap,
         sandboxedWorkers: sandboxedWorkerMap,
-        pluginWorkers: pluginWorkerMap,
-        pluginQueues: pluginQueueMap,
         plugins,
       },
     } = mainRunnerRef.getSnapshot();
@@ -28,72 +85,28 @@ export const shutdown = fromPromise<undefined, ShutdownInput>(
     const flowWorkers = Object.values(flowWorkerMap ?? {});
     const sandboxedWorkers = Object.values(sandboxedWorkerMap ?? {});
 
-    // Pause queues first to prevent them from picking up more jobs whilst we are shutting down
-    await Promise.all(flowWorkers.map(({ queue }) => queue.pause()));
-    await Promise.all(sandboxedWorkers.map(({ queue }) => queue.pause()));
+    // Close workers
     await Promise.all(
-      pluginQueueMap
-        .values()
-        .flatMap((eventMap) => eventMap.values().map((queue) => queue.pause())),
+      flowWorkers.map(({ worker }) => attemptGracefulShutdown(worker)),
     );
+
+    logger.debug("Flow workers closed");
+
+    await Promise.all(
+      sandboxedWorkers.map(({ worker }) => attemptGracefulShutdown(worker)),
+    );
+
+    logger.debug("Sandboxed workers closed");
+
     await Promise.all(
       plugins
         .values()
-        .flatMap((plugin) =>
-          plugin.dataSources
-            .values()
-            .map((dataSource) => dataSource.queue.pause()),
+        .flatMap(({ dataSources }) =>
+          dataSources.values().map(({ worker }) => forceCloseWorker(worker)),
         ),
     );
 
-    logger.debug("All queues paused, cancelling jobs and closing workers...");
-
-    // Cancel all jobs currently being processed. This aborts the signal on each job.
-    for (const { worker } of sandboxedWorkers) {
-      worker.cancelAllJobs();
-    }
-
-    for (const { worker } of flowWorkers) {
-      worker.cancelAllJobs();
-    }
-
-    for (const eventMap of pluginWorkerMap.values()) {
-      for (const worker of eventMap.values()) {
-        worker.cancelAllJobs();
-      }
-    }
-
-    for (const plugin of plugins.values()) {
-      for (const [, dataSource] of plugin.dataSources) {
-        dataSource.worker.cancelAllJobs();
-      }
-    }
-
-    logger.debug("All jobs cancelled, closing workers and queues...");
-
-    // Close workers and queues
-    for (const { queue, worker } of flowWorkers) {
-      await worker.close();
-      await queue.close();
-    }
-
-    logger.debug("Flow workers and queues closed");
-
-    for (const { queue, worker } of sandboxedWorkers) {
-      await worker.close();
-      await queue.close();
-    }
-
-    logger.debug("Sandboxed workers and queues closed");
-
-    for (const plugin of plugins.values()) {
-      for (const [, dataSource] of plugin.dataSources) {
-        await dataSource.worker.close(true); // Force close datasource workers to prevent waits when rate-limited
-        await dataSource.queue.close();
-      }
-    }
-
-    logger.debug("Plugin workers and queues closed");
+    logger.debug("Plugin workers closed");
 
     // Close the Redis instance
     try {

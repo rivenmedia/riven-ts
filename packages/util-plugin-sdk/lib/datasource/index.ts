@@ -20,7 +20,6 @@ import {
 } from "bullmq";
 import { DateTime } from "luxon";
 import { URL } from "node:url";
-import { Logger } from "winston";
 import z from "zod";
 
 import { benchmark } from "../helpers/benchmark.ts";
@@ -31,6 +30,7 @@ import { dataSourceContext } from "./context.ts";
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import type EventEmitter from "events";
 import type { Promisable } from "type-fest";
+import type { Logger } from "winston";
 
 interface FetchJobInput {
   path: string;
@@ -350,21 +350,12 @@ export abstract class BaseDataSource<
     throw new Error("Unable to determine the request body type.");
   }
 
-  async #getOrCreateRequestJob(
+  async #createRequestJob(
     path: string,
     request: AugmentedRequest,
     cacheKey: string,
     parentOptions?: ParentOptions,
   ) {
-    const jobId =
-      request.method === "GET" ? cacheKey.replaceAll(/[: ]/g, "_") : undefined;
-
-    const pendingJob = jobId ? await this.queue.getJob(jobId) : undefined;
-
-    if (pendingJob) {
-      return pendingJob;
-    }
-
     const bodyType = this.#determineRequestBodyType(request.body);
 
     if (bodyType === "url-search-params") {
@@ -382,8 +373,6 @@ export abstract class BaseDataSource<
         params: urlSearchParamsCodec.encode(request.params),
       },
       {
-        // Use a stable job ID to enable deduplication of idempotent GET requests
-        ...(jobId && { jobId }),
         ...(parentOptions && { parent: parentOptions }),
         attempts: this.#requestAttempts,
         backoff: {
@@ -425,7 +414,7 @@ export abstract class BaseDataSource<
         } satisfies ParentOptions)
       : undefined;
 
-    const job = await this.#getOrCreateRequestJob(
+    const job = await this.#createRequestJob(
       path,
       augmentedRequest,
       cacheKey,

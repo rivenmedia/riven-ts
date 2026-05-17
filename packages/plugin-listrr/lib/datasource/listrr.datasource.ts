@@ -8,8 +8,6 @@ import type { ListrrSettings } from "../listrr-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
 
-export class ListrrAPIError extends Error {}
-
 export class ListrrAPI extends BaseDataSource<ListrrSettings> {
   override baseURL = "https://listrr.pro/api/";
   override serviceName = "Listrr";

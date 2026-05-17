@@ -6,10 +6,22 @@ inputs:
   task:
     description: The task that was run
     required: true
+  success:
+    description: Whether the task was successful
+    required: true
 
 runs:
   using: composite
   steps:
     - name: Merge coverage reports
-      if: ${{ inputs.task == 'test' }}
+      if: ${{ inputs.task == 'test' && inputs.success == 'true' }}
       uses: ./.github/actions/generate-coverage-report
+
+    - name: Upload Knip report
+      if: ${{ inputs.task == '//#knip:ci:production' && inputs.success == 'true' }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: knip-report
+        path: knip-report.json
+        retention-days: 1
+        if-no-files-found: error

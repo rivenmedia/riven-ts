@@ -107,7 +107,7 @@ export interface MainRunnerMachineInput {
   parentRef: ActorRef<Snapshot<unknown>, RivenMachineEvent>;
 }
 
-export interface StartEvent {
+interface StartEvent {
   type: "START";
   input: {
     plugins: ValidPluginMap;
@@ -740,11 +740,11 @@ export const mainRunnerMachine = setup({
             actions: { type: "requestContentServices" },
           },
 
-          // "riven-internal.retry-library": {
-          //   description:
-          //     "Retries any incomplete media items and item requests.",
-          //   actions: { type: "retryLibrary" },
-          // },
+          "riven-internal.retry-library": {
+            description:
+              "Retries any incomplete media items and item requests.",
+            actions: { type: "retryLibrary" },
+          },
 
           /**
            * External events

@@ -1,11 +1,8 @@
 import * as Sentry from "@sentry/node";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { getEnvironmentData } from "node:worker_threads";
-import z from "zod";
 
-export const SessionID = z.uuidv4().brand<"SessionID">();
-
-export type SessionID = z.infer<typeof SessionID>;
+import { SessionID } from "./session-id.ts";
 
 export interface LogContext {
   "riven.log.source"?: string;
@@ -19,7 +16,7 @@ export interface LogContext {
   "bullmq.job.id"?: string;
 }
 
-export const logContext = new AsyncLocalStorage<LogContext>();
+const logContext = new AsyncLocalStorage<LogContext>();
 
 export function withLogContext<T>(
   context: LogContext,

@@ -364,7 +364,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/se5Hxz7PArQZOG3Nx2bpfOhLhtV.jpg"
+                            "example": "/se5Hxz7PArQZOG3Nx2bpfOhLhtV.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -508,7 +509,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/bsNm9z2TJfe0WO3RedPGWQ8mG1X.jpg"
+                            "example": "/bsNm9z2TJfe0WO3RedPGWQ8mG1X.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -738,7 +740,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/dUVbWINfRMGojGZRcO6GF1Z2nV8.jpg"
+                            "example": "/dUVbWINfRMGojGZRcO6GF1Z2nV8.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -887,7 +890,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/2yZXtM2Kky1Sy0kachbDlwybl3y.jpg"
+                            "example": "/2yZXtM2Kky1Sy0kachbDlwybl3y.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -1170,7 +1174,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/rgNzvSagnlc32TuMEBa529QFIig.jpg"
+                            "example": "/rgNzvSagnlc32TuMEBa529QFIig.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -1311,7 +1316,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/7phlGHRupo38EnuwmkAHdNUqov3.jpg"
+                            "example": "/7phlGHRupo38EnuwmkAHdNUqov3.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -3781,7 +3787,8 @@
                     },
                     "backdrop_path": {
                       "type": "string",
-                      "example": "/4z9ijhgEthfRHShoOvMaBlpciXS.jpg"
+                      "example": "/4z9ijhgEthfRHShoOvMaBlpciXS.jpg",
+                      "nullable": true
                     },
                     "parts": {
                       "type": "array",
@@ -3795,7 +3802,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/2w4xG178RpB4MDAIfTkqAuSJzec.jpg"
+                            "example": "/2w4xG178RpB4MDAIfTkqAuSJzec.jpg",
+                            "nullable": true
                           },
                           "id": {
                             "type": "integer",
@@ -4511,7 +4519,8 @@
                         },
                         "backdrop_path": {
                           "type": "string",
-                          "example": "/uDgy6hyPd82kOHh6I95FLtLnj6p.jpg"
+                          "example": "/uDgy6hyPd82kOHh6I95FLtLnj6p.jpg",
+                          "nullable": true
                         },
                         "id": {
                           "type": "integer",
@@ -4926,7 +4935,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/8YFL5QQVPy3AgrEQxNYVSgiPEbe.jpg"
+                            "example": "/8YFL5QQVPy3AgrEQxNYVSgiPEbe.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -5221,7 +5231,8 @@
                         "properties": {
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/mAJ84W6I8I272Da87qplS2Dp9ST.jpg"
+                            "example": "/mAJ84W6I8I272Da87qplS2Dp9ST.jpg",
+                            "nullable": true
                           },
                           "first_air_date": {
                             "type": "string",
@@ -5362,7 +5373,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/44immBwzhDVyjn87b3x3l9mlhAD.jpg"
+                            "example": "/44immBwzhDVyjn87b3x3l9mlhAD.jpg",
+                            "nullable": true
                           },
                           "id": {
                             "type": "integer",
@@ -5595,7 +5607,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/ikR2qy9xJCHX7M8i5rcvuNfdYXs.jpg"
+                            "example": "/ikR2qy9xJCHX7M8i5rcvuNfdYXs.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -5739,7 +5752,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/2OMB0ynKlyIenMJWI2Dy9IWT4c.jpg"
+                            "example": "/2OMB0ynKlyIenMJWI2Dy9IWT4c.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -6047,7 +6061,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/3CxUndGhUcZdt1Zggjdb2HkLLQX.jpg"
+                            "example": "/3CxUndGhUcZdt1Zggjdb2HkLLQX.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -6479,7 +6494,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg"
+                            "example": "/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -6691,7 +6707,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/iJQIbOPm81fPEGKt5BPuZmfnA54.jpg"
+                            "example": "/iJQIbOPm81fPEGKt5BPuZmfnA54.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -6821,7 +6838,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/gMJngTNfaqCSCqGD4y8lVMZXKDn.jpg"
+                            "example": "/gMJngTNfaqCSCqGD4y8lVMZXKDn.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -6951,7 +6969,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/tmU7GeKVybMWFButWEGl2M4GeiP.jpg"
+                            "example": "/tmU7GeKVybMWFButWEGl2M4GeiP.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -7091,7 +7110,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/7bWxAsNPv9CXHOhZbJVlj2KxgfP.jpg"
+                            "example": "/7bWxAsNPv9CXHOhZbJVlj2KxgfP.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -7216,7 +7236,8 @@
                     },
                     "backdrop_path": {
                       "type": "string",
-                      "example": "/hZkgoQYus5vegHoetLkCJzb17zJ.jpg"
+                      "example": "/hZkgoQYus5vegHoetLkCJzb17zJ.jpg",
+                      "nullable": true
                     },
                     "belongs_to_collection": {},
                     "budget": {
@@ -7274,6 +7295,7 @@
                           },
                           "logo_path": {
                             "type": "string",
+                            "nullable": true,
                             "example": "/7cxRWzi4LsVm4Utfpr1hfARNurT.png"
                           },
                           "name": {
@@ -8014,7 +8036,9 @@
                       "example": false,
                       "default": true
                     },
-                    "backdrop_path": {},
+                    "backdrop_path": {
+                      "nullable": true
+                    },
                     "belongs_to_collection": {},
                     "budget": { "type": "integer", "example": 0, "default": 0 },
                     "genres": { "type": "array" },
@@ -8428,7 +8452,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/3YAldML4EDyoC6RBpzceALigrAZ.jpg"
+                            "example": "/3YAldML4EDyoC6RBpzceALigrAZ.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -15071,7 +15096,8 @@
                                 },
                                 "backdrop_path": {
                                   "type": "string",
-                                  "example": "/ilRyazdMJwN05exqhwK4tMKBYZs.jpg"
+                                  "example": "/ilRyazdMJwN05exqhwK4tMKBYZs.jpg",
+                                  "nullable": true
                                 },
                                 "genre_ids": {
                                   "type": "array",
@@ -15391,7 +15417,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/3h1JZGDhZ8nzxdgvkxha0qBqi05.jpg"
+                            "example": "/3h1JZGDhZ8nzxdgvkxha0qBqi05.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -15479,7 +15506,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/tx3uj8GPWf5pzb0gWATJ4bokNHI.jpg"
+                            "example": "/tx3uj8GPWf5pzb0gWATJ4bokNHI.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -15781,7 +15809,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/3h1JZGDhZ8nzxdgvkxha0qBqi05.jpg"
+                            "example": "/3h1JZGDhZ8nzxdgvkxha0qBqi05.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -15868,7 +15897,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/tx3uj8GPWf5pzb0gWATJ4bokNHI.jpg"
+                            "example": "/tx3uj8GPWf5pzb0gWATJ4bokNHI.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -15989,7 +16019,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/ttvojTMgaIN7U8gqB5LlNqO4vPN.jpg"
+                            "example": "/ttvojTMgaIN7U8gqB5LlNqO4vPN.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -16072,7 +16103,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/6uMA6EAiwcsCqQJwWgYwtORvE0v.jpg"
+                            "example": "/6uMA6EAiwcsCqQJwWgYwtORvE0v.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -16243,7 +16275,8 @@
                               },
                               "backdrop_path": {
                                 "type": "string",
-                                "example": "/bdD39MpSVhKjxarTxLSfX6baoMP.jpg"
+                                "example": "/bdD39MpSVhKjxarTxLSfX6baoMP.jpg",
+                                "nullable": true
                               },
                               "id": {
                                 "type": "integer",
@@ -16542,7 +16575,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/zuW6fOiusv4X9nnW3paHGfXcSll.jpg"
+                            "example": "/zuW6fOiusv4X9nnW3paHGfXcSll.jpg",
+                            "nullable": true
                           },
                           "id": {
                             "type": "integer",
@@ -16790,7 +16824,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/hZkgoQYus5vegHoetLkCJzb17zJ.jpg"
+                            "example": "/hZkgoQYus5vegHoetLkCJzb17zJ.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -16925,7 +16960,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/aDYSnJAK0BTVeE8osOy22Kz3SXY.jpg"
+                            "example": "/aDYSnJAK0BTVeE8osOy22Kz3SXY.jpg",
+                            "nullable": true
                           },
                           "id": {
                             "type": "integer",
@@ -17099,7 +17135,8 @@
                                 },
                                 "backdrop_path": {
                                   "type": "string",
-                                  "example": "/3h1JZGDhZ8nzxdgvkxha0qBqi05.jpg"
+                                  "example": "/3h1JZGDhZ8nzxdgvkxha0qBqi05.jpg",
+                                  "nullable": true
                                 },
                                 "id": {
                                   "type": "integer",
@@ -17253,7 +17290,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/bsNm9z2TJfe0WO3RedPGWQ8mG1X.jpg"
+                            "example": "/bsNm9z2TJfe0WO3RedPGWQ8mG1X.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
@@ -17382,7 +17420,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/44immBwzhDVyjn87b3x3l9mlhAD.jpg"
+                            "example": "/44immBwzhDVyjn87b3x3l9mlhAD.jpg",
+                            "nullable": true
                           },
                           "id": {
                             "type": "integer",
@@ -17513,7 +17552,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/44immBwzhDVyjn87b3x3l9mlhAD.jpg"
+                            "example": "/44immBwzhDVyjn87b3x3l9mlhAD.jpg",
+                            "nullable": true
                           },
                           "id": {
                             "type": "integer",
@@ -17689,7 +17729,8 @@
                                 },
                                 "backdrop_path": {
                                   "type": "string",
-                                  "example": "/ilRyazdMJwN05exqhwK4tMKBYZs.jpg"
+                                  "example": "/ilRyazdMJwN05exqhwK4tMKBYZs.jpg",
+                                  "nullable": true
                                 },
                                 "id": {
                                   "type": "integer",
@@ -17826,7 +17867,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/8P15FsYcTwQZ4G5rRMd1TKD14Aq.jpg"
+                            "example": "/8P15FsYcTwQZ4G5rRMd1TKD14Aq.jpg",
+                            "nullable": true
                           },
                           "id": {
                             "type": "integer",
@@ -17946,7 +17988,8 @@
                         "properties": {
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/mAJ84W6I8I272Da87qplS2Dp9ST.jpg"
+                            "example": "/mAJ84W6I8I272Da87qplS2Dp9ST.jpg",
+                            "nullable": true
                           },
                           "first_air_date": {
                             "type": "string",
@@ -18065,7 +18108,8 @@
                         "properties": {
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/mAJ84W6I8I272Da87qplS2Dp9ST.jpg"
+                            "example": "/mAJ84W6I8I272Da87qplS2Dp9ST.jpg",
+                            "nullable": true
                           },
                           "first_air_date": {
                             "type": "string",
@@ -18183,7 +18227,8 @@
                         "properties": {
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/mAJ84W6I8I272Da87qplS2Dp9ST.jpg"
+                            "example": "/mAJ84W6I8I272Da87qplS2Dp9ST.jpg",
+                            "nullable": true
                           },
                           "first_air_date": {
                             "type": "string",
@@ -18301,7 +18346,8 @@
                         "properties": {
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/99vBORZixICa32Pwdwj0lWcr8K.jpg"
+                            "example": "/99vBORZixICa32Pwdwj0lWcr8K.jpg",
+                            "nullable": true
                           },
                           "first_air_date": {
                             "type": "string",
@@ -18425,7 +18471,8 @@
                     },
                     "backdrop_path": {
                       "type": "string",
-                      "example": "/6LWy0jvMpmjoS9fojNgHIKoWL05.jpg"
+                      "example": "/6LWy0jvMpmjoS9fojNgHIKoWL05.jpg",
+                      "nullable": true
                     },
                     "created_by": {
                       "type": "array",
@@ -19743,7 +19790,9 @@
                       "example": false,
                       "default": true
                     },
-                    "backdrop_path": {},
+                    "backdrop_path": {
+                      "nullable": true
+                    },
                     "created_by": { "type": "array" },
                     "episode_run_time": { "type": "array" },
                     "first_air_date": { "type": "string", "example": "" },
@@ -20023,7 +20072,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/bsNm9z2TJfe0WO3RedPGWQ8mG1X.jpg"
+                            "example": "/bsNm9z2TJfe0WO3RedPGWQ8mG1X.jpg",
+                            "nullable": true
                           },
                           "id": {
                             "type": "integer",
@@ -20317,7 +20367,8 @@
                           },
                           "backdrop_path": {
                             "type": "string",
-                            "example": "/zcFSvWa34nDn2NcqOPuthyOIBWT.jpg"
+                            "example": "/zcFSvWa34nDn2NcqOPuthyOIBWT.jpg",
+                            "nullable": true
                           },
                           "genre_ids": {
                             "type": "array",
