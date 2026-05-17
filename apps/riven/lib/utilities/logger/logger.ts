@@ -10,6 +10,7 @@ import { ecsFileFormat } from "./formatters/ecs-file.format.ts";
 import { fileFormat } from "./formatters/file.format.ts";
 import { sentryMetaFormat } from "./formatters/sentry-meta.format.ts";
 import { validationErrorMetaFormat } from "./formatters/validation-error-meta.format.ts";
+import { defaultLogContext, withLogContext } from "./log-context.ts";
 
 const logDir = path.resolve(process.cwd(), settings.logDirectory);
 
@@ -46,6 +47,12 @@ if (settings.loggingEnabled) {
       format: ecsFileFormat,
       zippedArchive: true,
       level: "silly", // Send ALL logs to ECS, regardless of log level config
+      handleExceptions: true,
+      handleRejections: true,
+    }).on("error", (error) => {
+      withLogContext(defaultLogContext, () => {
+        console.error("Error in ECS file transport:", { err: error });
+      });
     }),
   );
 
@@ -58,6 +65,12 @@ if (settings.loggingEnabled) {
           }),
           consoleFormat,
         ),
+        handleExceptions: true,
+        handleRejections: true,
+      }).on("error", (error) => {
+        withLogContext(defaultLogContext, () => {
+          console.error("Error in console transport:", { err: error });
+        });
       }),
     );
   }
@@ -72,6 +85,11 @@ if (settings.loggingEnabled) {
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
         format: fileFormat,
+        handleRejections: true,
+      }).on("error", (error) => {
+        withLogContext(defaultLogContext, () => {
+          console.error("Error in error file transport:", { err: error });
+        });
       }),
     );
 
@@ -83,10 +101,16 @@ if (settings.loggingEnabled) {
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
         format: fileFormat,
+        handleRejections: true,
+        handleExceptions: true,
+      }).on("error", (error) => {
+        withLogContext(defaultLogContext, () => {
+          console.error("Error in combined file transport:", { err: error });
+        });
       }),
     );
 
-    logger.exceptions.handle(
+    logger.add(
       new transports.File({
         filename: "exceptions.log",
         dirname: logDir,
@@ -94,7 +118,18 @@ if (settings.loggingEnabled) {
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
         format: fileFormat,
+        handleExceptions: true,
+      }).on("error", (error) => {
+        withLogContext(defaultLogContext, () => {
+          console.error("Error in exceptions file transport:", { err: error });
+        });
       }),
     );
   }
 }
+
+logger.on("error", (error) => {
+  withLogContext(defaultLogContext, () => {
+    console.error("Logger encountered an error:", { err: error });
+  });
+});
