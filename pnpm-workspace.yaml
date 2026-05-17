@@ -100,6 +100,7 @@ catalog:
   unplugin-swc: ^1.5.9
   vitest: ^4.1.1
   winston: ^3.19.0
+  winston-daily-rotate-file: ^5.0.0
   xstate: ^5.25.0
   zod: ^4.3.6
   zod-validation-error: ^5.0.0
