@@ -36,7 +36,7 @@ export const SeerrSettings = z.object({
     .stringbool()
     .default(false)
     .describe(
-      "Automatically fix webhook body settings in Seerr if they are incorrect (required for request approval events to work)",
+      "Automatically fix webhook payload body and enable required notification types in Seerr if they are incorrect (required for request approval events to work)",
     ),
 });
 

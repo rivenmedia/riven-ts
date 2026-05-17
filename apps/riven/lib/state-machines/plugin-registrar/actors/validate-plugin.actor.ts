@@ -1,4 +1,5 @@
-import { NonRetriableValidationError } from "@repo/util-plugin-sdk/errors/non-retriable-validation-error";
+import { FatalValidationError } from "@repo/util-plugin-sdk/errors/fatal-validation-error";
+import { benchmark } from "@repo/util-plugin-sdk/helpers/benchmark";
 
 import { setTimeout } from "node:timers/promises";
 import { fromCallback } from "xstate";
@@ -48,16 +49,16 @@ export const validatePlugin = fromCallback<
       try {
         const pluginName =
           plugin.config.name.description ?? String(plugin.config.name);
-        const start = performance.now();
 
-        const isValid = await plugin.config.validator({
-          settings,
-          dataSources,
-        });
+        const { result: isValid, timeTaken } = await benchmark(() =>
+          plugin.config.validator({
+            settings,
+            dataSources,
+          }),
+        );
 
-        const duration = performance.now() - start;
         logger.debug(
-          `Plugin "${pluginName}" validation attempt ${attempt.toString()} took ${duration.toFixed(2)}ms (result: ${isValid.toString()})`,
+          `Plugin "${pluginName}" validation attempt ${attempt.toString()} took ${timeTaken.toFixed(2)}ms (result: ${isValid.toString()})`,
         );
 
         if (!isValid) {
@@ -68,16 +69,14 @@ export const validatePlugin = fromCallback<
 
         return;
       } catch (error) {
-        if (
-          error instanceof NonRetriableValidationError ||
-          attempt >= maxAttempts
-        ) {
+        if (error instanceof FatalValidationError || attempt >= maxAttempts) {
           const pluginName =
             plugin.config.name.description ?? String(plugin.config.name);
 
-          if (error instanceof NonRetriableValidationError) {
+          if (error instanceof FatalValidationError) {
             logger.error(
-              `Plugin "${pluginName}" validation failed (non-retriable): ${error.message}`,
+              `Plugin "${pluginName}" validation failed (non-retriable)`,
+              { err: error },
             );
           } else {
             logger.error(

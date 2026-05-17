@@ -1,5 +1,5 @@
 import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
-import { NonRetriableValidationError } from "@repo/util-plugin-sdk/errors/non-retriable-validation-error";
+import { FatalValidationError } from "@repo/util-plugin-sdk/errors/fatal-validation-error";
 
 import { webhookSettingsSchema } from "../__generated__/zod/webhookSettingsSchema.ts";
 import { MetadataSettingsResponse } from "../schemas/metadata-settings-response.schema.ts";
@@ -47,7 +47,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
 
       return true;
     } catch (error: unknown) {
-      if (error instanceof NonRetriableValidationError) {
+      if (error instanceof FatalValidationError) {
         throw error;
       }
 
@@ -171,7 +171,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
         return;
       }
 
-      throw new NonRetriableValidationError(
+      throw new FatalValidationError(
         `Invalid Seerr metadata provider settings. TV provider: ${metadataSettings.tv}, Anime provider: ${metadataSettings.anime}. Ensure both are set to TVDB at ${this.settings.url}/settings/metadata or enable the "Automatically fix metadata provider settings" option in the plugin settings to have this automatically fixed by the plugin.`,
       );
     }
@@ -200,10 +200,20 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     const currentTypes = webhookSettings.types ?? 0;
     const hasRequiredTypes = (currentTypes & REQUIRED_TYPES) === REQUIRED_TYPES;
     const hasExtraTypes = (currentTypes & ~REQUIRED_TYPES) !== 0;
+    const rawPayload = webhookSettings.options?.jsonPayload;
+    let normalizedPayload: unknown = rawPayload;
+
+    if (typeof rawPayload === "string") {
+      try {
+        normalizedPayload = JSON.parse(rawPayload);
+      } catch {
+        normalizedPayload = undefined;
+      }
+    }
+
     const hasValidPayload =
-      webhookSettings.options?.jsonPayload &&
-      JSON.stringify(webhookSettings.options.jsonPayload) ===
-        JSON.stringify(webhookBodyContent);
+      normalizedPayload != null &&
+      JSON.stringify(normalizedPayload) === JSON.stringify(webhookBodyContent);
 
     if (hasExtraTypes) {
       this.logger.warn(
@@ -244,7 +254,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
         issues.push("webhook JSON payload does not match the expected body");
       }
 
-      throw new NonRetriableValidationError(
+      throw new FatalValidationError(
         `Invalid Seerr webhook settings: ${issues.join("; ")}. Fix these in the webhook settings at ${this.settings.url}/settings/webhooks or enable the "Automatically fix webhook body settings" option in the plugin settings to have this automatically fixed by the plugin.`,
       );
     }
