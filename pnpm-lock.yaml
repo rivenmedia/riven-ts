@@ -1630,6 +1630,9 @@ importers:
       '@apollo/utils.keyvadapter':
         specifier: 'catalog:'
         version: 4.0.1
+      '@keyv/redis':
+        specifier: 'catalog:'
+        version: 5.1.5(keyv@5.5.5)
       '@mikro-orm/core':
         specifier: 'catalog:'
         version: 7.0.12(dataloader@2.2.3)

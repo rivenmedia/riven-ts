@@ -1,6 +1,7 @@
 import { MikroORM } from "@mikro-orm/core";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 import { RedisConnection } from "bullmq";
+import { URL } from "node:url";
 import { it as baseIt } from "vitest";
 
 export const it = baseIt
@@ -114,7 +115,10 @@ export const it = baseIt
         await redisServer.stop();
       });
 
-      return client;
+      return {
+        client,
+        url: new URL(`redis://${host}:${port.toString()}`),
+      };
     } catch (error) {
       throw new Error(`Failed to get Redis URL.\n${String(error)}`);
     }
