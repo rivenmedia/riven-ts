@@ -405,6 +405,17 @@ export abstract class BaseDataSource<
       incomingRequest,
     );
 
+    // `skipCache: true` on the caller side is meant to force a fresh fetch
+    // (e.g. periodic polls of "what's new in Jellyseerr"). The HTTP-layer
+    // cache is bypassed by Apollo, but the BullMQ queue used below dedupes
+    // GET requests by a stable jobId derived from the URL — so a second
+    // call with the same URL would otherwise return whatever the FIRST
+    // call cached, defeating skipCache entirely. Short-circuit to a direct
+    // fetch so each skipCache caller actually hits the upstream.
+    if (incomingRequest?.skipCache) {
+      return super.fetch(path, augmentedRequest);
+    }
+
     const cacheKey = this.cacheKeyFor(url, augmentedRequest as never);
 
     const isCached = Boolean(
