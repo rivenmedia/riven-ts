@@ -22,13 +22,15 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
     /* empty */
   }
 
+  const isWatch = process.argv.includes("--watch");
+
   return mergeConfig(
     { test: configDefaults },
     defineConfig({
       test: {
         restoreMocks: true,
         coverage: {
-          enabled: true,
+          enabled: !isWatch,
           exclude: ["**/__generated__/**", "**/__tests__/**"],
         },
         setupFiles: [
