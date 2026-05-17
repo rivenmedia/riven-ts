@@ -114,4 +114,6 @@ export async function riven() {
 
     logger.info(`Riven exited with code ${process.exitCode.toString()}`);
   });
+
+  process.exit();
 }
