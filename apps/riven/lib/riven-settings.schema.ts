@@ -7,6 +7,8 @@ import z from "zod";
 import { CorePlugins } from "./schemas/core-plugins.schema.ts";
 import { LogLevel } from "./utilities/logger/log-levels.ts";
 
+export const unused = true;
+
 export const RivenSettings = z.object({
   attemptUnknownDownloads: z
     .stringbool()
