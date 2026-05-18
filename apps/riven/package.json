@@ -87,6 +87,7 @@
     "type-graphql": "catalog:",
     "undici": "catalog:",
     "winston": "catalog:",
+    "winston-daily-rotate-file": "catalog:",
     "xstate": "catalog:",
     "zod": "catalog:",
     "zod-validation-error": "catalog:"
@@ -115,6 +116,7 @@
     "@typescript-eslint/parser": "catalog:",
     "@vitest/expect": "catalog:",
     "esbuild": "catalog:",
+    "esbuild-node-externals": "catalog:",
     "eslint": "catalog:",
     "logform": "catalog:",
     "msw": "catalog:",

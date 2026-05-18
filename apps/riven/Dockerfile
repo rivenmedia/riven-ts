@@ -1,7 +1,7 @@
 ARG HOME=/app
 ARG NODE_VERSION=24.15.0
-ARG TURBO_VERSION=2.9.5
-ARG PNPM_VERSION=10.28.2
+ARG TURBO_VERSION=2.9.14
+ARG PNPM_VERSION=11.1.2
 ARG PNPM_HOME=${HOME}/.local/share/pnpm
 ARG USER=riven
 ARG PUID=1000
@@ -15,12 +15,12 @@ FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS core-os
     ARG TARGETPLATFORM
     ARG BUILDPLATFORM
     ARG USER
-    ARG PNPM_VERSION
     ARG PNPM_HOME
+    ARG PNPM_VERSION
     ARG HOME
 
     ENV PNPM_HOME=${PNPM_HOME}
-    ENV PATH=$PNPM_HOME:$PATH
+    ENV PATH=${PNPM_HOME}/bin:$PATH
 
     # Install build dependencies
     RUN apt-get update && apt-get install -y \
@@ -61,8 +61,12 @@ FROM core-os AS builder
 
     WORKDIR ${HOME}
 
-    COPY --from=prepare ${HOME}/out/json/ .
+    COPY --from=prepare \
+        ${HOME}/out/pnpm-lock.yaml \
+        ${HOME}/out/pnpm-workspace.yaml \
+        ./
 
+    COPY --from=prepare ${HOME}/out/full/patches patches
 
     RUN pnpm fetch
 
@@ -133,8 +137,6 @@ FROM node:${NODE_VERSION}-alpine AS runner
     USER ${PUID}:${PGID}
 
     COPY --from=production-deploy ${HOME}/pruned .
-
-    STOPSIGNAL SIGTERM
 
     ENV NODE_ENV=production
 
