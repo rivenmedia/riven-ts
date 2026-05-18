@@ -73,11 +73,9 @@ FROM core-os AS builder
 
     RUN pnpm fetch
 
-    ADD . ./
+    COPY --from=prepare ${HOME}/out/full/ ./
 
     RUN pnpm install -r --offline
-
-    COPY --from=prepare ${HOME}/out/full/ .
 
     ARG TURBO_TEAM
     ENV TURBO_TEAM=${TURBO_TEAM}
