@@ -4,7 +4,7 @@
 //
 // Run: node scripts/sync-core-docs.mjs
 // Requires: pnpm turbo codegen:config-docs to have run first (generates settings.md)
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
@@ -48,10 +48,14 @@ function getFieldSections() {
 
   writeFileSync(tmpScript, script);
   try {
-    const output = execSync(`node --experimental-strip-types ${tmpScript}`, {
-      cwd: RIVEN_APP,
-      encoding: "utf-8",
-    });
+    const output = execFileSync(
+      "node",
+      ["--experimental-strip-types", tmpScript],
+      {
+        cwd: RIVEN_APP,
+        encoding: "utf-8",
+      },
+    );
     return JSON.parse(output);
   } finally {
     try {
