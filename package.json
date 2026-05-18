@@ -14,7 +14,7 @@
     "knip": "pnpm knip:prepare && knip",
     "knip:ci:base": "pnpm knip --cache --no-exit-code",
     "knip:ci:development": "pnpm knip:ci:base --reporter github-actions",
-    "knip:ci:production": "pnpm knip:ci:base --strict --reporter json | tail -1 > knip-report.json",
+    "knip:ci:production": "pnpm knip:ci:base --strict --reporter json | tail -1 > knip-report.json && jq -e '.issues | length > 0' knip-report.json > /dev/null && exit 1 || exit 0",
     "knip:prepare": "turbo codegen:api-schemas"
   },
   "devDependencies": {
