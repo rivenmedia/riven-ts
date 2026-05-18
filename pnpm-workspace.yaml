@@ -66,6 +66,7 @@ catalog:
   discord-api-types: 0.38.42
   es-toolkit: ^1.44.0
   esbuild: ^0.28.0
+  esbuild-node-externals: ^1.22.0
   eslint: ^9.39.2
   eslint-config-prettier: ^10.1.8
   eslint-config-turbo: ^2.8.21
