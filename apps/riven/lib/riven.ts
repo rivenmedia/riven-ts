@@ -3,9 +3,9 @@ import { setEnvironmentData } from "node:worker_threads";
 
 import {
   type LogContext,
-  SessionID,
   withLogContext,
 } from "./utilities/logger/log-context.ts";
+import { SessionID } from "./utilities/logger/session-id.ts";
 
 import type { rivenMachine } from "./state-machines/program/index.ts";
 import type { ActorRefFromLogic } from "xstate";
@@ -114,4 +114,6 @@ export async function riven() {
 
     logger.info(`Riven exited with code ${process.exitCode.toString()}`);
   });
+
+  process.exit();
 }

@@ -14,7 +14,7 @@ import { riven } from "./riven.ts";
 import { type BootstrapMachineOutput } from "./state-machines/bootstrap/index.ts";
 import * as rivenMachineModule from "./state-machines/program/index.ts";
 import { rivenMachine } from "./state-machines/program/index.ts";
-import { SessionID } from "./utilities/logger/log-context.ts";
+import { SessionID } from "./utilities/logger/session-id.ts";
 
 const it = baseIt.extend("rivenMachineActor", () => {
   const mockRivenMachine = rivenMachine.provide({
