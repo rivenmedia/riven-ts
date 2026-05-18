@@ -52,9 +52,14 @@ type FetchResponse<T = unknown> = Pick<
     statusText: string;
     headers: Record<string, string>;
   };
-  responseTime: number;
-  responseFromCache: boolean | undefined;
-};
+} & (
+    | {
+        success: true;
+        responseTime: number;
+        responseFromCache: boolean | undefined;
+      }
+    | { success: false }
+  );
 
 export interface BaseDataSourceConfig<
   T extends Record<string, unknown>,
@@ -168,6 +173,7 @@ export abstract class BaseDataSource<
         );
 
         return {
+          success: true,
           parsedBody,
           response: {
             ok: response.ok,
@@ -209,7 +215,7 @@ export abstract class BaseDataSource<
     }
 
     if (typeof job.data.incomingRequest.body !== "string") {
-      throw new Error("Unable to decode non-string request body.");
+      throw new UnrecoverableError("Unable to decode non-string request body.");
     }
 
     if (bodyType === "url-search-params") {
@@ -339,7 +345,7 @@ export abstract class BaseDataSource<
       try {
         JSON.parse(body);
       } catch {
-        throw new Error(
+        throw new UnrecoverableError(
           "Unable to determine the request body type: invalid JSON string.",
         );
       }
@@ -347,7 +353,7 @@ export abstract class BaseDataSource<
       return "json";
     }
 
-    throw new Error("Unable to determine the request body type.");
+    throw new UnrecoverableError("Unable to determine the request body type.");
   }
 
   async #createRequestJob(
@@ -423,6 +429,23 @@ export abstract class BaseDataSource<
 
     const result = await job.waitUntilFinished(this.#queueEvents);
 
+    if (!result.success) {
+      const { success, ...errorResult } = result;
+
+      return {
+        parsedBody: result.parsedBody as T,
+        response: new Response(null, errorResult.response),
+
+        // The following fields aren't used by our application,
+        // but must be included to satisfy the return type.
+        responseFromCache: false,
+        requestDeduplication: undefined as never,
+        httpCache: {
+          cacheWritePromise: Promise.resolve(),
+        },
+      };
+    }
+
     const logMessage = result.responseFromCache
       ? `[${this.serviceName}] Returned cached response for ${augmentedRequest.method ?? "GET"} ${url.toString()}`
       : `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url.toString()} in ${(result.responseTime / 1000).toFixed(2)} seconds`;
@@ -481,7 +504,7 @@ export abstract class BaseDataSource<
     }
 
     if (String(response.status).startsWith("4")) {
-      throw new UnrecoverableError(
+      throw new Error(
         `${response.status.toString()} ${response.statusText} for ${url.toString()}`,
       );
     }

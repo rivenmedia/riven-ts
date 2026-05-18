@@ -17,3 +17,5 @@ it.todo(
 it.todo(
   "throws UnrecoverableError if no valid torrent found after trying all plugins",
 );
+
+it.todo("does not attempt to download blacklisted infohashes");

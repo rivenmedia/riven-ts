@@ -1,4 +1,5 @@
 import {
+  BlacklistedStream,
   Episode,
   FileSystemEntry,
   ItemRequest,
@@ -37,6 +38,7 @@ const entities = [
   Show,
   ItemRequest,
   Stream,
+  BlacklistedStream,
 ];
 
 async function getMetadataCacheConfig(): Promise<Options> {

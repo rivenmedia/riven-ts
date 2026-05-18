@@ -127,6 +127,7 @@ jobs:
       - name: Post-verification steps
         if: always()
         uses: ./.github/actions/post-verify
+        timeout-minutes: 5
         with:
           task: ${{ inputs.task }}
           success: ${{ steps.run-task.outcome == 'success' }}

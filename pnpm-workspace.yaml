@@ -53,7 +53,7 @@ catalog:
   "@typescript-eslint/parser": ^8.49.0
   "@viren070/parse-torrent-title": ^0.6.5
   "@vitest/coverage-v8": ^4.1.1
-  "@vitest/eslint-plugin": ^1.6.15
+  "@vitest/eslint-plugin": ^1.6.17
   "@vitest/expect": ^4.1.5
   "@zkochan/fuse-native": ^0.1.0
   bullmq: ^5.71.0
@@ -77,6 +77,7 @@ catalog:
   globals: ^16.5.0
   graphql: 16.12.0
   graphql-scalars: ^1.25.0
+  http-status-codes: ^2.3.0
   husky: ^9.1.7
   keyv: ^5.5.5
   knip: ^6.12.2

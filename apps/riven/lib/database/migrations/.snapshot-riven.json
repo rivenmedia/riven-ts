@@ -1457,76 +1457,6 @@
       "nativeEnums": {}
     },
     {
-      "name": "media_item_filesystem_entries",
-      "schema": "public",
-      "columns": {
-        "media_item_id": {
-          "name": "media_item_id",
-          "type": "uuid",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "unique": false,
-          "length": null,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "enumItems": [],
-          "mappedType": "uuid"
-        },
-        "file_system_entry_id": {
-          "name": "file_system_entry_id",
-          "type": "uuid",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "unique": false,
-          "length": null,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "enumItems": [],
-          "mappedType": "uuid"
-        }
-      },
-      "indexes": [
-        {
-          "keyName": "media_item_filesystem_entries_pkey",
-          "columnNames": ["media_item_id", "file_system_entry_id"],
-          "composite": true,
-          "constraint": true,
-          "primary": true,
-          "unique": true
-        }
-      ],
-      "checks": [],
-      "foreignKeys": {
-        "media_item_filesystem_entries_media_item_id_foreign": {
-          "constraintName": "media_item_filesystem_entries_media_item_id_foreign",
-          "columnNames": ["media_item_id"],
-          "localTableName": "public.media_item_filesystem_entries",
-          "referencedColumnNames": ["id"],
-          "referencedTableName": "public.media_item",
-          "deleteRule": "cascade",
-          "updateRule": "cascade"
-        },
-        "media_item_filesystem_entries_file_system_entry_id_foreign": {
-          "constraintName": "media_item_filesystem_entries_file_system_entry_id_foreign",
-          "columnNames": ["file_system_entry_id"],
-          "localTableName": "public.media_item_filesystem_entries",
-          "referencedColumnNames": ["id"],
-          "referencedTableName": "public.file_system_entry",
-          "deleteRule": "cascade",
-          "updateRule": "cascade"
-        }
-      },
-      "nativeEnums": {}
-    },
-    {
       "name": "media_item_streams",
       "schema": "public",
       "columns": {
@@ -1597,9 +1527,25 @@
       "nativeEnums": {}
     },
     {
-      "name": "media_item_blacklisted_streams",
+      "name": "blacklisted_stream",
       "schema": "public",
       "columns": {
+        "stream_info_hash": {
+          "name": "stream_info_hash",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "media_item_id": {
           "name": "media_item_id",
           "type": "uuid",
@@ -1616,8 +1562,24 @@
           "enumItems": [],
           "mappedType": "uuid"
         },
-        "stream_info_hash": {
-          "name": "stream_info_hash",
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "plugin": {
+          "name": "plugin",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,
@@ -1635,8 +1597,13 @@
       },
       "indexes": [
         {
-          "keyName": "media_item_blacklisted_streams_pkey",
-          "columnNames": ["media_item_id", "stream_info_hash"],
+          "keyName": "blacklisted_stream_pkey",
+          "columnNames": [
+            "stream_info_hash",
+            "media_item_id",
+            "provider",
+            "plugin"
+          ],
           "composite": true,
           "constraint": true,
           "primary": true,
@@ -1645,23 +1612,19 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "media_item_blacklisted_streams_media_item_id_foreign": {
-          "constraintName": "media_item_blacklisted_streams_media_item_id_foreign",
-          "columnNames": ["media_item_id"],
-          "localTableName": "public.media_item_blacklisted_streams",
-          "referencedColumnNames": ["id"],
-          "referencedTableName": "public.media_item",
-          "deleteRule": "cascade",
-          "updateRule": "cascade"
-        },
-        "media_item_blacklisted_streams_stream_info_hash_foreign": {
-          "constraintName": "media_item_blacklisted_streams_stream_info_hash_foreign",
+        "blacklisted_stream_stream_info_hash_foreign": {
+          "constraintName": "blacklisted_stream_stream_info_hash_foreign",
           "columnNames": ["stream_info_hash"],
-          "localTableName": "public.media_item_blacklisted_streams",
+          "localTableName": "public.blacklisted_stream",
           "referencedColumnNames": ["info_hash"],
-          "referencedTableName": "public.stream",
-          "deleteRule": "cascade",
-          "updateRule": "cascade"
+          "referencedTableName": "public.stream"
+        },
+        "blacklisted_stream_media_item_id_foreign": {
+          "constraintName": "blacklisted_stream_media_item_id_foreign",
+          "columnNames": ["media_item_id"],
+          "localTableName": "public.blacklisted_stream",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.media_item"
         }
       },
       "nativeEnums": {}

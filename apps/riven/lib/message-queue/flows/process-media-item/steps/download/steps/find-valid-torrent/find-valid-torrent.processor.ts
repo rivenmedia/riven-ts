@@ -1,5 +1,6 @@
 import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
+import { merge } from "es-toolkit";
 import assert from "node:assert";
 import z, { ZodError } from "zod";
 
@@ -77,6 +78,25 @@ export const findValidTorrentProcessor =
           const providerList = hasProviderListHook ? providers : [null];
 
           for (const provider of providerList) {
+            const isBlacklisted = Boolean(
+              await mediaItem.blacklistedStreams.loadCount({
+                where: {
+                  mediaItem,
+                  stream: infoHash,
+                  plugin: pluginName,
+                  provider,
+                },
+              }),
+            );
+
+            if (isBlacklisted) {
+              logger.debug(
+                `Skipping blacklisted stream ${infoHash} on ${pluginName}${provider ? ` via ${provider}` : ""} for ${chalk.bold(mediaItem.fullTitle)}`,
+              );
+
+              continue;
+            }
+
             scope.setTag("riven.downloader-provider", provider);
 
             await job.log(
@@ -191,10 +211,11 @@ export const findValidTorrentProcessor =
 
       await job.log(`${infoHash} failed validation for all plugins`);
 
-      await job.updateData({
-        ...job.data,
-        failedInfoHashes: [...failedInfoHashes, infoHash],
-      });
+      await job.updateData(
+        merge(job.data, {
+          failedInfoHashes: [infoHash],
+        }),
+      );
     }
 
     return null;

@@ -5,7 +5,7 @@ const filePatterns = {
   generatedProdFiles: "**/__generated__/zod/*.ts!",
   generatedDevFiles: "**/__generated__/{handlers,mocks}/*.ts",
   scriptFiles: "**/scripts/**/*.ts",
-  testFiles: ["!**/*.{spec,test}.ts!", "!**/{__tests__,__mocks__}/**!"],
+  testFiles: ["!**/*.{spec,test}.ts!", "!**/__{tests,mocks}__/**!"],
 
   // Tooling configs
   configFiles: "**/*.config.ts",
@@ -48,7 +48,7 @@ export default {
       ignoreBinaries: ["tail", "jq"],
     },
     "apps/riven": {
-      entry: [...defaultEntry],
+      entry: [...defaultEntry, "!**/Migration*.ts!"],
       project: [
         ...defaultProject,
         "!**/Migration*.ts",
