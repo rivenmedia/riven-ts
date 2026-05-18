@@ -54,10 +54,6 @@ for (const pluginDir of pluginDirs) {
     description = pkg.description || "";
   }
 
-  // Create output directory for the plugin
-  const pluginOutputDir = join(OUTPUT_DIR, slug);
-  mkdirSync(pluginOutputDir, { recursive: true });
-
   // Transform the markdown settings table into MDX
   const mdxContent = `---
 title: ${displayName}
@@ -78,7 +74,7 @@ For example: \`${envPrefix}__apiKey="your-key"\`
 ${content}
 `;
 
-  writeFileSync(join(pluginOutputDir, "index.mdx"), mdxContent);
+  writeFileSync(join(OUTPUT_DIR, `${slug}.mdx`), mdxContent);
   metaPages.push(slug);
 }
 
