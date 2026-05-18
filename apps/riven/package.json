@@ -115,6 +115,7 @@
     "@typescript-eslint/parser": "catalog:",
     "@vitest/expect": "catalog:",
     "esbuild": "catalog:",
+    "esbuild-node-externals": "catalog:",
     "eslint": "catalog:",
     "logform": "catalog:",
     "msw": "catalog:",
