@@ -68,6 +68,14 @@ services:
       - all
       - services
 
+  jellyfin:
+    extends:
+      file: ./packages/plugin-jellyfin/docker-compose.yaml
+      service: jellyfin
+    profiles:
+      - all
+      - services
+
   spotlight:
     container_name: spotlight
     image: ghcr.io/getsentry/spotlight:latest
