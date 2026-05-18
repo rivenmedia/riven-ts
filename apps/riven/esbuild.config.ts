@@ -1,8 +1,13 @@
 import dedent from "dedent";
 import * as esbuild from "esbuild";
 
+/**
+ * Polyfills for Node.js ESM modules to allow using `require` in bundled code.
+ *
+ * @see https://github.com/evanw/esbuild/issues/1921#issuecomment-3453406735
+ */
 const requirePolyfill = dedent`
-  import { createRequire } from "module";
+  import { createRequire } from "node:module";
   const require = createRequire(import.meta.url);
 `;
 
@@ -15,7 +20,6 @@ await esbuild.build({
   format: "esm",
   sourcemap: true,
   treeShaking: true,
-  external: ["bullmq", "winston"],
   banner: {
     js: requirePolyfill,
   },
