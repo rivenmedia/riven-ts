@@ -65,17 +65,15 @@ FROM core-os AS builder
     WORKDIR ${HOME}
 
     COPY --from=prepare \
-        ${HOME}/out/json/pnpm-lock.yaml \
-        ${HOME}/out/json/pnpm-workspace.yaml \
+        ${HOME}/out/pnpm-lock.yaml \
+        ${HOME}/out/pnpm-workspace.yaml \
         ./
 
     COPY --from=prepare ${HOME}/out/json/patches patches
 
-    RUN pnpm fetch
+    RUN --mount=type=cache,id=pnpm,target=${PNPM_STORE} pnpm install
 
     COPY --from=prepare ${HOME}/out/full/ ./
-
-    RUN pnpm install -r --offline
 
     ARG TURBO_TEAM
     ENV TURBO_TEAM=${TURBO_TEAM}
