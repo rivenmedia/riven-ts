@@ -87,11 +87,22 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
       }),
     });
 
-    const { data } = AddTorrentResponse.parse(response);
+    const parsed = AddTorrentResponse.parse(response);
+    const { data, cooldown_until } = parsed;
+
+    // Presence of `cooldown_until` from the store implies the account is
+    // currently rate-limited and won't accept new uncached torrents until
+    // the deadline. Surface it as a distinct error so retry-library /
+    // operators don't keep hammering and burning budget on it.
+    if (cooldown_until) {
+      throw new StremThruTorzAPIError(
+        `${store} is in cooldown until ${cooldown_until}; ${infoHash} will not be added.`,
+      );
+    }
 
     if (!data) {
       throw new StremThruTorzAPIError(
-        `No data returned from ${store} for ${infoHash}`,
+        `No data returned from ${store} for ${infoHash}. Response body: ${JSON.stringify(parsed)}`,
       );
     }
 
