@@ -11,5 +11,5 @@ await esbuild.build({
   sourcemap: true,
   treeShaking: true,
   minify: true,
-  plugins: [nodeExternalsPlugin()],
+  plugins: [nodeExternalsPlugin({ allowWorkspaces: true })],
 });
