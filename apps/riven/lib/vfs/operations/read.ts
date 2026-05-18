@@ -97,6 +97,26 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     ].join(" | "),
   );
 
+  // Copy a slice of `data` to `buffer` while staying within `data`'s
+  // bounds. If the fetched chunk is shorter than the requested range
+  // (e.g. the read crosses past where this chunk's bytes actually end,
+  // or near EOF), Buffer.copy throws `RangeError [ERR_OUT_OF_RANGE]`.
+  // Clamp both ends and return the number of bytes actually copied so
+  // FUSE can short-read instead of erroring out the whole operation.
+  const safeCopy = (data: Buffer, sourceStart: number) => {
+    const clampedStart = Math.max(0, Math.min(sourceStart, data.length));
+    const clampedEnd = Math.max(
+      clampedStart,
+      Math.min(clampedStart + length, data.length),
+    );
+
+    data.copy(buffer, 0, clampedStart, clampedEnd);
+
+    return clampedEnd - clampedStart;
+  };
+
+  let bytesRead = length;
+
   switch (readType) {
     case "header-scan": {
       const data = await fetchDiscreteByteRange(
@@ -105,11 +125,9 @@ async function read({ fd, length, position, buffer }: ReadInput) {
         fileChunkCalculations.headerChunk.range,
       );
 
-      data.copy(
-        buffer,
-        0,
+      bytesRead = safeCopy(
+        data,
         position - fileChunkCalculations.headerChunk.range[0],
-        position - fileChunkCalculations.headerChunk.range[0] + length,
       );
 
       break;
@@ -129,11 +147,9 @@ async function read({ fd, length, position, buffer }: ReadInput) {
         fileChunkCalculations.footerChunk.range,
       );
 
-      data.copy(
-        buffer,
-        0,
+      bytesRead = safeCopy(
+        data,
         position - fileChunkCalculations.footerChunk.range[0],
-        position - fileChunkCalculations.footerChunk.range[0] + length,
       );
 
       break;
@@ -147,7 +163,8 @@ async function read({ fd, length, position, buffer }: ReadInput) {
         false,
       );
 
-      scannedChunk.copy(buffer);
+      bytesRead = Math.min(scannedChunk.length, buffer.length);
+      scannedChunk.copy(buffer, 0, 0, bytesRead);
 
       break;
     }
@@ -155,12 +172,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     case "body-read": {
       const data = await performBodyRead(fd, chunks, fileHandle);
 
-      data.copy(
-        buffer,
-        0,
-        position - chunkStart,
-        position - chunkStart + length,
-      );
+      bytesRead = safeCopy(data, position - chunkStart);
 
       break;
     }
@@ -168,12 +180,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     case "cache-hit": {
       const data = performCacheHit(fd, chunks);
 
-      data.copy(
-        buffer,
-        0,
-        position - chunkStart,
-        position - chunkStart + length,
-      );
+      bytesRead = safeCopy(data, position - chunkStart);
 
       break;
     }
@@ -181,7 +188,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
 
   fdToPreviousReadPositionMap.set(fd, position);
 
-  return length;
+  return bytesRead;
 }
 
 export const readSync = function (
