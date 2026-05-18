@@ -132,7 +132,7 @@ export const requestStreamLinkProcessor =
             });
 
             throw new UnrecoverableError(
-              `Active stream for ${mediaEntry.originalFilename} has been blacklisted due to dead torrent; re-processing media item for download`,
+              `Dead torrent detected for ${mediaEntry.originalFilename}. Attempting to download another hash...`,
             );
           }
         }
