@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 import { source } from "@/lib/source";
 
 import type { MetadataRoute } from "next";
