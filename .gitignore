@@ -9,6 +9,7 @@ __generated__
 coverage
 .env*
 !.env*.example
+!.envrc
 *.typegen.ts
 dist
 out
@@ -17,6 +18,7 @@ plex
 *.bundled_*.mjs
 docker-data
 *.graphql
+.direnv
 
 # Local-only Compose overrides (auto-loaded by docker compose)
 docker-compose.override.yaml
