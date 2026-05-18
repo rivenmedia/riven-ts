@@ -3,5 +3,10 @@ out/
 node_modules/
 .source/
 
+# Synced core docs (auto-generated)
+content/docs/configuration.mdx
+
 # Synced plugin docs (auto-generated)
-content/docs/plugins/*/index.mdx
+content/docs/plugins/meta.json
+content/docs/plugins/*.mdx
+!content/docs/plugins/index.mdx

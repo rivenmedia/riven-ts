@@ -3,15 +3,17 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "dependsOn": ["$TURBO_EXTENDS$", "sync-plugin-docs"],
+      "dependsOn": ["$TURBO_EXTENDS$", "codegen:wiki-docs"],
       "outputs": ["$TURBO_EXTENDS", ".next/**", "out/**"]
     },
-    "sync-plugin-docs": {
+    "codegen:wiki-docs": {
       "inputs": [
         "$TURBO_ROOT$/packages/plugin-*/docs/settings.md",
-        "scripts/sync-plugin-docs.mjs"
+        "$TURBO_ROOT$/apps/riven/docs/settings.md",
+        "$TURBO_ROOT$/apps/riven/lib/riven-settings.schema.ts",
+        "scripts/sync-*.mjs"
       ],
-      "outputs": ["content/docs/plugins/**"]
+      "outputs": ["content/docs/configuration.mdx", "content/docs/plugins/*.mdx", "content/docs/plugins/meta.json"]
     }
   }
 }
