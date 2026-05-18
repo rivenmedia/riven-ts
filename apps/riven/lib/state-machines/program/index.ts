@@ -16,7 +16,7 @@ import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 import { unmountVfs } from "./actors/unmount-vfs.actor.ts";
 
 import type { ValidPluginMap } from "../../types/plugins.ts";
-import type { SessionID } from "../../utilities/logger/log-context.ts";
+import type { SessionID } from "../../utilities/logger/session-id.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";

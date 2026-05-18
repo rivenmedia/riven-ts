@@ -91,7 +91,7 @@ catalog:
   rxjs: ^7.8.2
   sort-package-json: ^3.6.0
   triple-beam: ^1.4.1
-  turbo: ^2.9.5
+  turbo: ^2.9.14
   type-fest: ^5.3.1
   type-graphql: 2.0.0-rc.2
   typescript: ^5.9.3
@@ -100,6 +100,7 @@ catalog:
   unplugin-swc: ^1.5.9
   vitest: ^4.1.1
   winston: ^3.19.0
+  winston-daily-rotate-file: ^5.0.0
   xstate: ^5.25.0
   zod: ^4.3.6
   zod-validation-error: ^5.0.0
