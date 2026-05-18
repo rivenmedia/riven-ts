@@ -59,19 +59,21 @@ FROM core-os AS builder
 
     ARG HOME
 
+    ARG CI
+    ENV CI=${CI}
+
     WORKDIR ${HOME}
 
     COPY --from=prepare \
-        ${HOME}/out/pnpm-lock.yaml \
-        ${HOME}/out/pnpm-workspace.yaml \
+        ${HOME}/out/json/pnpm-lock.yaml \
+        ${HOME}/out/json/pnpm-workspace.yaml \
         ./
 
-    COPY --from=prepare ${HOME}/out/full/patches patches
+    COPY --from=prepare ${HOME}/out/json/patches patches
 
     RUN pnpm fetch
 
-    ARG CI
-    ENV CI=${CI}
+    ADD . ./
 
     RUN pnpm install -r --offline
 
