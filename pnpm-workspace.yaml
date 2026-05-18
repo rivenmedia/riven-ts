@@ -8,7 +8,7 @@ catalog:
   "@apollo/client": ^4.0.11
   "@apollo/client-devtools-vscode": ^4.23.2
   "@apollo/datasource-rest": 6.4.1
-  "@apollo/server": ^5.2.0
+  "@apollo/server": ^5.5.0
   "@apollo/utils.keyvadapter": ^4.0.1
   "@apollo/utils.keyvaluecache": ^4.0.0
   "@elastic/ecs-winston-format": ^1.5.3
@@ -97,7 +97,7 @@ catalog:
   type-graphql: 2.0.0-rc.2
   typescript: ^5.9.3
   typescript-eslint: ^8.49.0
-  undici: ^7.18.2
+  undici: ^7.24.0
   unplugin-swc: ^1.5.9
   vitest: ^4.1.1
   winston: ^3.19.0
