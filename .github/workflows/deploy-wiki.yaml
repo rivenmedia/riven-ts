@@ -4,11 +4,13 @@ on:
   push:
     branches:
       - main
+      - feat/wiki # TODO: remove after testing
     paths:
       - "apps/wiki/**"
       - "packages/plugin-*/docs/**"
       - "apps/riven/docs/**"
       - "apps/riven/lib/riven-settings.schema.ts"
+      - ".github/workflows/deploy-wiki.yaml" # TODO: remove after testing
 
   workflow_dispatch:
 
