@@ -13,7 +13,11 @@
         "$TURBO_ROOT$/apps/riven/lib/riven-settings.schema.ts",
         "scripts/sync-*.mjs"
       ],
-      "outputs": ["content/docs/configuration.mdx", "content/docs/plugins/*.mdx", "content/docs/plugins/meta.json"]
+      "outputs": [
+        "content/docs/configuration.mdx",
+        "content/docs/plugins/*.mdx",
+        "content/docs/plugins/meta.json"
+      ]
     }
   }
 }

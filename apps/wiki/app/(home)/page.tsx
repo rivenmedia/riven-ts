@@ -90,8 +90,8 @@ async function getGitHubStars() {
       { next: { revalidate: 3600 } },
     );
     if (!res.ok) return null;
-    const data = await res.json();
-    return data.stargazers_count as number;
+    const data = (await res.json()) as { stargazers_count: number };
+    return data.stargazers_count;
   } catch {
     return null;
   }
@@ -178,7 +178,7 @@ export default async function HomePage() {
             {features.map((feature, i) => (
               <div
                 key={feature.title}
-                className={`group rounded-xl border border-fd-border bg-fd-card p-6 transition-all hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/5 animate-slide-up stagger-${i + 1}`}
+                className={`group rounded-xl border border-fd-border bg-fd-card p-6 transition-all hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/5 animate-slide-up stagger-${String(i + 1)}`}
               >
                 <div className="mb-4 inline-flex rounded-lg bg-purple-500/10 p-3 text-purple-400 transition-colors group-hover:bg-purple-500/20">
                   <feature.icon className="h-6 w-6" />
