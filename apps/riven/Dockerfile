@@ -69,7 +69,7 @@ FROM core-os AS builder
         ${HOME}/out/pnpm-workspace.yaml \
         ./
 
-    COPY --from=prepare ${HOME}/out/json/patches patches
+    COPY --from=prepare ${HOME}/out/json/ ./
 
     RUN --mount=type=cache,id=pnpm,target=${PNPM_STORE} pnpm install
 
