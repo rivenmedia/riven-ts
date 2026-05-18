@@ -28,9 +28,13 @@ const it = baseIt.extend("scrapeResults", {
     "Test Show 2024 1080p WEB-DL S01E03",
 });
 
+// Warm gqlServer (Apollo server + standalone listener + Apollo client init)
+// once per file. The default 10s hookTimeout is too tight under cold CI
+// caches; the fixture chain (apolloServerInstance + gqlServer + orm) can
+// take 15-20s when nothing is cached. Bump to 30s to absorb that.
 it.beforeAll(({ gqlServer: _gqlServer }) => {
   return;
-});
+}, 30_000);
 
 it("throws an UnrecoverableError if no results are found", async ({
   createMockJob,

@@ -35,9 +35,13 @@ const it = baseIt
   })
   .extend("infoHash", () => faker.git.commitSha());
 
+// Warm gqlServer (Apollo server + standalone listener + Apollo client init)
+// once per file. The default 10s hookTimeout is too tight under cold CI
+// caches; the fixture chain (apolloServerInstance + gqlServer + orm) can
+// take 15-20s when nothing is cached. Bump to 30s to absorb that.
 it.beforeAll(({ gqlServer: _gqlServer }) => {
   return;
-});
+}, 30_000);
 
 it("does not throw for movie torrents if the item is a movie", async ({
   indexedMovieContext: { indexedMovie },
