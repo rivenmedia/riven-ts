@@ -1,0 +1,17 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["$TURBO_EXTENDS$", "sync-plugin-docs"],
+      "outputs": ["$TURBO_EXTENDS", ".next/**", "out/**"]
+    },
+    "sync-plugin-docs": {
+      "inputs": [
+        "$TURBO_ROOT$/packages/plugin-*/docs/settings.md",
+        "scripts/sync-plugin-docs.mjs"
+      ],
+      "outputs": ["content/docs/plugins/**"]
+    }
+  }
+}

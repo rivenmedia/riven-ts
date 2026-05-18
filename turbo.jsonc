@@ -10,15 +10,8 @@
   },
   "tasks": {
     "build": {
-      "dependsOn": ["^build", "codegen:api-schemas", "transit:source-files", "sync-plugin-docs"],
-      "outputs": ["dist/**", "**/tsconfig.lib.tsbuildinfo", ".next/**", "out/**"]
-    },
-    "sync-plugin-docs": {
-      "inputs": [
-        "$TURBO_ROOT$/packages/plugin-*/docs/settings.md",
-        "scripts/sync-plugin-docs.mjs"
-      ],
-      "outputs": ["content/docs/plugins/**"]
+      "dependsOn": ["^build", "codegen:api-schemas", "transit:source-files"],
+      "outputs": ["dist/**", "**/tsconfig.lib.tsbuildinfo"]
     },
     "transit": {
       // "transit" links ALL files from ALL dependencies
