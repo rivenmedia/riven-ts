@@ -315,7 +315,7 @@ function addMediaServer(
   mountPath: string,
 ) {
   if (server === "plex") {
-    compose.services.plex = {
+    compose.services["plex"] = {
       image: "plexinc/pms-docker:latest",
       container_name: "plex",
       restart: "unless-stopped",
@@ -325,7 +325,7 @@ function addMediaServer(
     };
     compose.volumes["plex-config"] = null;
   } else if (server === "jellyfin") {
-    compose.services.jellyfin = {
+    compose.services["jellyfin"] = {
       image: "jellyfin/jellyfin:latest",
       container_name: "jellyfin",
       restart: "unless-stopped",
@@ -339,7 +339,7 @@ function addMediaServer(
     compose.volumes["jellyfin-config"] = null;
     compose.volumes["jellyfin-cache"] = null;
   } else {
-    compose.services.emby = {
+    compose.services["emby"] = {
       image: "emby/embyserver:latest",
       container_name: "emby",
       restart: "unless-stopped",

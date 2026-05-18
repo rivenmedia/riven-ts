@@ -3,9 +3,9 @@ import "@/app/global.css";
 import SearchDialog from "fumadocs-ui/components/dialog/search-default";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import { Inter } from "next/font/google";
-import { FAQPage, Project, WithContext } from "schema-dts";
 
 import type { ReactNode } from "react";
+import type { FAQPage, Project, WithContext } from "schema-dts";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -74,7 +74,9 @@ export const metadata = {
   },
   description:
     "Riven is a media automation system with a plugin architecture that uses debrid services and a virtual file system to manage your media library.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL ?? "https://riven.tv"),
+  metadataBase: new URL(
+    process.env["NEXT_PUBLIC_BASE_URL"] ?? "https://riven.tv",
+  ),
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

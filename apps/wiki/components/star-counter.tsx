@@ -14,7 +14,7 @@ export function StarCounter({ targetCount }: { targetCount: number }) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !animated.current) {
+        if (entry?.isIntersecting && !animated.current) {
           animated.current = true;
           const duration = 1500;
           const start = performance.now();
