@@ -338,7 +338,7 @@ function addMediaServer(
     };
     compose.volumes["jellyfin-config"] = null;
     compose.volumes["jellyfin-cache"] = null;
-  } else if (server === "emby") {
+  } else {
     compose.services.emby = {
       image: "emby/embyserver:latest",
       container_name: "emby",
@@ -406,7 +406,9 @@ function InputField({
       <input
         type={type}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          onChange(e.target.value);
+        }}
         placeholder={placeholder}
         className={`w-full rounded-lg border border-fd-border bg-fd-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 ${mono ? "font-mono text-xs" : ""}`}
       />
@@ -431,7 +433,9 @@ function SelectField({
       <label className="mb-2 block text-sm font-medium">{label}</label>
       <select
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          onChange(e.target.value);
+        }}
         className="w-full rounded-lg border border-fd-border bg-fd-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50"
       >
         {options.map((opt) => (
@@ -459,7 +463,7 @@ function CodePreview({
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    codeToHtml(code, { lang: language, theme: "github-dark" }).then(
+    void codeToHtml(code, { lang: language, theme: "github-dark" }).then(
       setHighlighted,
     );
   }, [code, language]);
@@ -467,7 +471,9 @@ function CodePreview({
   const handleCopy = async () => {
     await navigator.clipboard.writeText(code);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
   };
 
   const handleDownload = () => {
@@ -488,7 +494,7 @@ function CodePreview({
         <h4 className="text-sm font-semibold">{label}</h4>
         <div className="flex gap-2">
           <button
-            onClick={handleCopy}
+            onClick={() => void handleCopy()}
             className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-background px-3 py-1.5 text-xs font-medium transition-colors hover:bg-fd-muted/50"
           >
             {copied ? (
@@ -555,11 +561,13 @@ export default function DockerComposeGenerator() {
     dbPassword: "",
   });
 
-  const updateTS = <K extends keyof TSConfig>(key: K, value: TSConfig[K]) =>
+  const updateTS = <K extends keyof TSConfig>(key: K, value: TSConfig[K]) => {
     setTSConfig((prev) => ({ ...prev, [key]: value }));
+  };
 
-  const updateV1 = <K extends keyof V1Config>(key: K, value: V1Config[K]) =>
+  const updateV1 = <K extends keyof V1Config>(key: K, value: V1Config[K]) => {
     setV1Config((prev) => ({ ...prev, [key]: value }));
+  };
 
   const tsOutput = useCallback(() => buildTSCompose(tsConfig), [tsConfig]);
   const v1Output = useCallback(() => buildV1Compose(v1Config), [v1Config]);
@@ -569,7 +577,9 @@ export default function DockerComposeGenerator() {
       {/* Version Tabs */}
       <div className="flex gap-1 rounded-lg border border-fd-border bg-fd-muted/30 p-1">
         <button
-          onClick={() => setVersion("ts")}
+          onClick={() => {
+            setVersion("ts");
+          }}
           className={`flex-1 rounded-md px-4 py-2.5 text-sm font-medium transition-all ${
             version === "ts"
               ? "bg-purple-600 text-white shadow-sm"
@@ -579,7 +589,9 @@ export default function DockerComposeGenerator() {
           Riven TS (Recommended)
         </button>
         <button
-          onClick={() => setVersion("v1")}
+          onClick={() => {
+            setVersion("v1");
+          }}
           className={`flex-1 rounded-md px-4 py-2.5 text-sm font-medium transition-all ${
             version === "v1"
               ? "bg-fd-muted text-fd-foreground shadow-sm"
@@ -638,7 +650,9 @@ function TSConfigForm({
       <InputField
         label="VFS Mount Path"
         value={config.vfsMountPath}
-        onChange={(v) => update("vfsMountPath", v)}
+        onChange={(v) => {
+          update("vfsMountPath", v);
+        }}
         placeholder="/mnt/riven"
         hint="Absolute path on your host for the FUSE mount"
       />
@@ -647,26 +661,34 @@ function TSConfigForm({
         <InputField
           label="DB User"
           value={config.dbUser}
-          onChange={(v) => update("dbUser", v)}
+          onChange={(v) => {
+            update("dbUser", v);
+          }}
           placeholder="riven"
         />
         <InputField
           label="DB Password"
           value={config.dbPassword}
-          onChange={(v) => update("dbPassword", v)}
+          onChange={(v) => {
+            update("dbPassword", v);
+          }}
           placeholder="changeme"
           mono
         />
         <InputField
           label="DB Name"
           value={config.dbName}
-          onChange={(v) => update("dbName", v)}
+          onChange={(v) => {
+            update("dbName", v);
+          }}
           placeholder="riven"
         />
       </div>
 
       <button
-        onClick={() => update("dbPassword", generateSecret(24))}
+        onClick={() => {
+          update("dbPassword", generateSecret(24));
+        }}
         className="rounded-md bg-fd-muted px-3 py-1.5 text-xs font-medium transition-colors hover:bg-fd-muted/80"
       >
         Generate DB Password
@@ -675,7 +697,9 @@ function TSConfigForm({
       <SelectField
         label="Media Server"
         value={config.mediaServer}
-        onChange={(v) => update("mediaServer", v as MediaServer)}
+        onChange={(v) => {
+          update("mediaServer", v as MediaServer);
+        }}
         options={[
           { value: "none", label: "None (I'll add it later)" },
           { value: "plex", label: "Plex" },
@@ -690,7 +714,9 @@ function TSConfigForm({
       <InputField
         label="TMDB API Key (required)"
         value={config.tmdbApiKey}
-        onChange={(v) => update("tmdbApiKey", v)}
+        onChange={(v) => {
+          update("tmdbApiKey", v);
+        }}
         placeholder="Your TMDB API key"
         hint="Get one free at themoviedb.org/settings/api"
         mono
@@ -700,9 +726,9 @@ function TSConfigForm({
         <SelectField
           label="Debrid Provider"
           value={config.debridProvider}
-          onChange={(v) =>
-            update("debridProvider", v as TSConfig["debridProvider"])
-          }
+          onChange={(v) => {
+            update("debridProvider", v as TSConfig["debridProvider"]);
+          }}
           options={[
             { value: "realdebrid", label: "Real-Debrid" },
             { value: "alldebrid", label: "AllDebrid" },
@@ -714,7 +740,9 @@ function TSConfigForm({
           <InputField
             label="Debrid API Key"
             value={config.debridApiKey}
-            onChange={(v) => update("debridApiKey", v)}
+            onChange={(v) => {
+              update("debridApiKey", v);
+            }}
             placeholder="Your debrid API key"
             mono
           />
@@ -724,9 +752,9 @@ function TSConfigForm({
       <SelectField
         label="Content Source"
         value={config.contentSource}
-        onChange={(v) =>
-          update("contentSource", v as TSConfig["contentSource"])
-        }
+        onChange={(v) => {
+          update("contentSource", v as TSConfig["contentSource"]);
+        }}
         options={[
           { value: "mdblist", label: "MDBList" },
           { value: "seerr", label: "Seerr" },
@@ -740,7 +768,9 @@ function TSConfigForm({
           <InputField
             label={`${config.contentSource === "mdblist" ? "MDBList" : config.contentSource === "seerr" ? "Seerr" : "Listrr"} API Key`}
             value={config.contentApiKey}
-            onChange={(v) => update("contentApiKey", v)}
+            onChange={(v) => {
+              update("contentApiKey", v);
+            }}
             placeholder="API key"
             mono
           />
@@ -748,7 +778,9 @@ function TSConfigForm({
             <InputField
               label="Seerr URL"
               value={config.seerrUrl}
-              onChange={(v) => update("seerrUrl", v)}
+              onChange={(v) => {
+                update("seerrUrl", v);
+              }}
               placeholder="http://seerr:5055"
             />
           )}
@@ -757,7 +789,9 @@ function TSConfigForm({
             <InputField
               label="Lists (comma-separated)"
               value={config.contentLists}
-              onChange={(v) => update("contentLists", v)}
+              onChange={(v) => {
+                update("contentLists", v);
+              }}
               placeholder="user/list-name, user/another-list"
               hint={
                 config.contentSource === "mdblist"
@@ -784,7 +818,9 @@ function V1ConfigForm({
       <InputField
         label="Timezone"
         value={config.timezone}
-        onChange={(v) => update("timezone", v)}
+        onChange={(v) => {
+          update("timezone", v);
+        }}
         placeholder="Europe/UTC"
         hint="e.g., America/New_York, Europe/Zurich"
       />
@@ -793,13 +829,17 @@ function V1ConfigForm({
         <InputField
           label="PUID"
           value={config.puid}
-          onChange={(v) => update("puid", v)}
+          onChange={(v) => {
+            update("puid", v);
+          }}
           type="number"
         />
         <InputField
           label="PGID"
           value={config.pgid}
-          onChange={(v) => update("pgid", v)}
+          onChange={(v) => {
+            update("pgid", v);
+          }}
           type="number"
         />
       </div>
@@ -808,13 +848,17 @@ function V1ConfigForm({
         <InputField
           label="Frontend Port"
           value={config.frontendPort}
-          onChange={(v) => update("frontendPort", v)}
+          onChange={(v) => {
+            update("frontendPort", v);
+          }}
           type="number"
         />
         <InputField
           label="Backend Port"
           value={config.backendPort}
-          onChange={(v) => update("backendPort", v)}
+          onChange={(v) => {
+            update("backendPort", v);
+          }}
           type="number"
         />
       </div>
@@ -822,7 +866,9 @@ function V1ConfigForm({
       <InputField
         label="Origin URL"
         value={config.originUrl}
-        onChange={(v) => update("originUrl", v)}
+        onChange={(v) => {
+          update("originUrl", v);
+        }}
         placeholder="http://localhost:3000"
         hint="The URL where you'll access the frontend"
       />
@@ -830,14 +876,18 @@ function V1ConfigForm({
       <InputField
         label="Host Mount Path"
         value={config.hostMountPath}
-        onChange={(v) => update("hostMountPath", v)}
+        onChange={(v) => {
+          update("hostMountPath", v);
+        }}
         placeholder="/mnt/riven"
       />
 
       <SelectField
         label="Media Server"
         value={config.mediaServer}
-        onChange={(v) => update("mediaServer", v as MediaServer)}
+        onChange={(v) => {
+          update("mediaServer", v as MediaServer);
+        }}
         options={[
           { value: "none", label: "None (I'll add it later)" },
           { value: "plex", label: "Plex" },
@@ -863,21 +913,27 @@ function V1ConfigForm({
         <InputField
           label="Backend API Key"
           value={config.backendApiKey}
-          onChange={(v) => update("backendApiKey", v)}
+          onChange={(v) => {
+            update("backendApiKey", v);
+          }}
           placeholder="Click 'Generate All'"
           mono
         />
         <InputField
           label="Auth Secret"
           value={config.authSecret}
-          onChange={(v) => update("authSecret", v)}
+          onChange={(v) => {
+            update("authSecret", v);
+          }}
           placeholder="Click 'Generate All'"
           mono
         />
         <InputField
           label="Database Password"
           value={config.dbPassword}
-          onChange={(v) => update("dbPassword", v)}
+          onChange={(v) => {
+            update("dbPassword", v);
+          }}
           placeholder="Click 'Generate All'"
           mono
         />
@@ -905,7 +961,9 @@ function TSPreview({
         ).map((t) => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id)}
+            onClick={() => {
+              setTab(t.id);
+            }}
             className={`px-4 py-2 text-sm font-medium transition-colors ${
               tab === t.id
                 ? "border-b-2 border-purple-500 text-purple-400"
@@ -926,7 +984,7 @@ function TSPreview({
                 Create mount dir:{" "}
                 <code className="rounded bg-fd-muted px-1.5 py-0.5">
                   sudo mkdir -p{" "}
-                  {output.systemd.match(/--bind (\S+)/)?.[1] || "/mnt/riven"}
+                  {/--bind (\S+)/.exec(output.systemd)?.[1] ?? "/mnt/riven"}
                 </code>
               </li>
               <li>
@@ -983,7 +1041,9 @@ function V1Preview({
     <div className="space-y-4">
       <div className="flex gap-1 border-b border-fd-border">
         <button
-          onClick={() => setTab("systemd")}
+          onClick={() => {
+            setTab("systemd");
+          }}
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             tab === "systemd"
               ? "border-b-2 border-fd-primary text-fd-primary"
@@ -993,7 +1053,9 @@ function V1Preview({
           1. riven-mount.service
         </button>
         <button
-          onClick={() => setTab("compose")}
+          onClick={() => {
+            setTab("compose");
+          }}
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             tab === "compose"
               ? "border-b-2 border-fd-primary text-fd-primary"

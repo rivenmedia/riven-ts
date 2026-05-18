@@ -34,7 +34,9 @@ export function StarCounter({ targetCount }: { targetCount: number }) {
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, [targetCount]);
 
   return (

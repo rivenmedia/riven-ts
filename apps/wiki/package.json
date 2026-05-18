@@ -7,7 +7,7 @@
     "codegen:wiki-docs": "node scripts/sync-plugin-docs.mjs && node scripts/sync-core-docs.mjs",
     "dev": "next dev --turbopack",
     "postinstall": "fumadocs-mdx",
-    "lint": "next lint",
+    "lint": "eslint",
     "start": "next start",
     "sync-core-docs": "node scripts/sync-core-docs.mjs",
     "sync-plugin-docs": "node scripts/sync-plugin-docs.mjs"
@@ -27,6 +27,7 @@
     "yaml": "catalog:"
   },
   "devDependencies": {
+    "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@tailwindcss/postcss": "catalog:",
     "@types/mdx": "catalog:",
