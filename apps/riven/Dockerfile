@@ -3,6 +3,7 @@ ARG NODE_VERSION=24.15.0
 ARG TURBO_VERSION=2.9.14
 ARG PNPM_VERSION=11.1.2
 ARG PNPM_HOME=${HOME}/.local/share/pnpm
+ARG PNPM_STORE=${PNPM_HOME}/store
 ARG USER=riven
 ARG PUID=1000
 ARG PGID=1000
@@ -58,6 +59,10 @@ FROM core-os AS builder
     LABEL builder="true"
 
     ARG HOME
+    ARG PNPM_STORE
+
+    ARG CI
+    ENV CI=${CI}
 
     WORKDIR ${HOME}
 
@@ -66,16 +71,11 @@ FROM core-os AS builder
         ${HOME}/out/pnpm-workspace.yaml \
         ./
 
-    COPY --from=prepare ${HOME}/out/full/patches patches
+    COPY --from=prepare ${HOME}/out/json/ ./
 
-    RUN pnpm fetch
+    RUN --mount=type=cache,id=pnpm,target=${PNPM_STORE} pnpm install
 
-    ARG CI
-    ENV CI=${CI}
-
-    RUN pnpm install -r --offline
-
-    COPY --from=prepare ${HOME}/out/full/ .
+    COPY --from=prepare ${HOME}/out/full/ ./
 
     ARG TURBO_TEAM
     ENV TURBO_TEAM=${TURBO_TEAM}
