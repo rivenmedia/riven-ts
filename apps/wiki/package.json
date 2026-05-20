@@ -13,7 +13,6 @@
     "sync-plugin-docs": "node scripts/sync-plugin-docs.mjs"
   },
   "dependencies": {
-    "@orama/orama": "catalog:",
     "fumadocs-core": "catalog:",
     "fumadocs-mdx": "catalog:",
     "fumadocs-ui": "catalog:",
@@ -21,9 +20,7 @@
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "schema-dts": "catalog:",
     "shiki": "catalog:",
-    "tailwind-merge": "catalog:",
     "yaml": "catalog:"
   },
   "devDependencies": {
@@ -36,6 +33,7 @@
     "@types/react-dom": "catalog:",
     "autoprefixer": "catalog:",
     "postcss": "catalog:",
+    "schema-dts": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:"
   }

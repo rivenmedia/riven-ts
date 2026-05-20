@@ -47,6 +47,21 @@ export default {
       project: ["turbo/**/*.ts"],
       ignoreBinaries: ["tail", "jq"],
     },
+    "apps/wiki": {
+      entry: [
+        "app/**/{layout,page,template,loading,error,not-found,default,global-error}.tsx!",
+        "app/**/{manifest,sitemap,robots}.ts!",
+        "app/**/route.ts!",
+        "app/api/**/route.ts!",
+        "mdx-components.tsx!",
+        "source.config.ts!",
+        "scripts/*.mjs",
+        "next.config.mjs!",
+        "postcss.config.mjs!",
+      ],
+      project: ["**/*.{ts,tsx,mjs}!"],
+      ignoreDependencies: ["tailwindcss"],
+    },
     "apps/riven": {
       entry: [...defaultEntry],
       project: [
