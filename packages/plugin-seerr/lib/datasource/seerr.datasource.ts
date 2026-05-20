@@ -1,10 +1,17 @@
 import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
 import { FatalValidationError } from "@repo/util-plugin-sdk/errors/fatal-validation-error";
+import { json, z } from "@repo/util-plugin-sdk/validation";
 
-import { webhookSettingsSchema } from "../__generated__/zod/webhookSettingsSchema.ts";
+import { toMerged } from "es-toolkit";
+
+import {
+  type WebhookSettingsSchema,
+  webhookSettingsSchema,
+} from "../__generated__/zod/webhookSettingsSchema.ts";
 import { MetadataSettingsResponse } from "../schemas/metadata-settings-response.schema.ts";
 import { RequestResponse } from "../schemas/request-response.schema.ts";
-import webhookBodyContent from "./webhook-body.json" with { type: "json" };
+import { UpdateWebhookSettingsResponse } from "../schemas/update-webhook-settings-response.schema.ts";
+import { WebhookJsonPayload } from "../schemas/webhook-json-payload.schema.ts";
 
 import type { GetAuthMeQueryResponse } from "../__generated__/types/GetAuthMe.ts";
 import type { WebhookSettings } from "../__generated__/types/WebhookSettings.ts";
@@ -46,7 +53,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
       }
 
       await this.#validateOrFixMetadataProviderSettings();
-      await this.#validateWebhookBodySettings();
+      await this.#validateOrFixWebhookBodySettings();
 
       return true;
     } catch (error: unknown) {
@@ -149,9 +156,20 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
   }
 
   /**
+   * Validates the metadata provider settings from the Seerr instance settings.
+   *
+   * @param metadataSettings Metadata settings from the `/settings/metadatas` response
+   */
+  #validateMetadataProviderSettingsResponse(
+    metadataSettings: MetadataSettingsResponse,
+  ) {
+    return metadataSettings.tv === "tvdb" && metadataSettings.anime === "tvdb";
+  }
+
+  /**
    * Checks the Seerr instance settings to ensure the metadata providers have been set to TVDB.
    *
-   * If the `autofixMetadataProvider` plugin setting is enabled, it will attempt to fix the configuration automatically.
+   * If the `autofixMetadataProviders` plugin setting is enabled, it will attempt to fix the configuration automatically.
    *
    * @throws {SeerrAPIError} If the metadata providers are not set to TVDB.
    */
@@ -159,32 +177,60 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     const response = await this.get<unknown>("settings/metadatas");
 
     const metadataSettings = MetadataSettingsResponse.parse(response);
+    const isValid =
+      this.#validateMetadataProviderSettingsResponse(metadataSettings);
 
-    if (metadataSettings.tv !== "tvdb" || metadataSettings.anime !== "tvdb") {
-      if (this.settings.autofixMetadataProvider) {
-        const response = await this.put<unknown>("settings/metadatas", {
-          body: JSON.stringify({ tv: "tvdb", anime: "tvdb" }),
-        });
+    if (isValid) {
+      return;
+    }
 
-        const parsedResponse = MetadataSettingsResponse.parse(response);
+    if (this.settings.autofixMetadataProviders) {
+      const response = await this.put<unknown>("settings/metadatas", {
+        body: JSON.stringify({ tv: "tvdb", anime: "tvdb" }),
+      });
 
-        if (parsedResponse.tv !== "tvdb" || parsedResponse.anime !== "tvdb") {
-          throw new FatalValidationError(
-            "Failed to automatically fix Seerr metadata provider settings. After attempting to update the settings, the response did not reflect the expected metadata provider configuration. Please check the Seerr instance and fix the metadata provider settings manually at /settings/metadata.",
-          );
-        }
+      const parsedResponse = MetadataSettingsResponse.parse(response);
 
-        this.logger.info(
-          "Automatically fixed Seerr metadata provider settings to TVDB",
+      if (parsedResponse.tv !== "tvdb" || parsedResponse.anime !== "tvdb") {
+        throw new FatalValidationError(
+          `Failed to automatically fix Seerr metadata provider settings. After attempting to update the settings, the response did not reflect the expected metadata provider configuration. Please check the Seerr instance and fix the metadata provider settings manually at ${this.settings.url}/settings/metadata.`,
         );
-
-        return;
       }
 
-      throw new FatalValidationError(
-        `Invalid Seerr metadata provider settings. TV provider: ${metadataSettings.tv}, Anime provider: ${metadataSettings.anime}. Ensure both are set to TVDB at ${this.settings.url}/settings/metadata or enable "autofixMetadataProvider" option in the plugin settings to have this automatically fixed by the plugin.`,
+      this.logger.info(
+        "Automatically fixed Seerr metadata provider settings to TVDB",
       );
+
+      return;
     }
+
+    throw new FatalValidationError(
+      `Invalid Seerr metadata provider settings. TV provider: ${metadataSettings.tv}, Anime provider: ${metadataSettings.anime}. Ensure both are set to TVDB at ${this.settings.url}/settings/metadata or enable "autofixMetadataProviders" option in the plugin settings to have this automatically fixed by the plugin.`,
+    );
+  }
+
+  /**
+   * Validates the Seerr webhook settings.
+   *
+   * @param webhookSettings Webhook settings from the `/settings/notifications/webhook` response
+   */
+  #validateWebhookSettingsResponse(webhookSettings: WebhookSettingsSchema) {
+    const REQUIRED_TYPES = 4 | 128; // 132: Request Approved + Request Automatically Approved
+
+    const currentTypes = webhookSettings.types ?? 0;
+    const hasRequiredTypes = (currentTypes & REQUIRED_TYPES) === REQUIRED_TYPES;
+    const hasExtraTypes = (currentTypes & ~REQUIRED_TYPES) !== 0;
+    const validatedWebhookBody = json(WebhookJsonPayload).safeParse(
+      webhookSettings.options?.jsonPayload,
+    );
+
+    return {
+      currentTypes,
+      hasExtraTypes,
+      isValid:
+        hasRequiredTypes && !hasExtraTypes && validatedWebhookBody.success,
+      payloadValidationError: validatedWebhookBody.error,
+    };
   }
 
   /**
@@ -193,8 +239,10 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
    * - Request Automatically Approved (bit 128)
    *
    * These are checked via bitmask (4 | 128 = 132).
+   *
+   * If the `autofixWebhookBody` plugin setting is enabled, it will attempt to fix the configuration automatically.
    */
-  async #validateWebhookBodySettings() {
+  async #validateOrFixWebhookBodySettings() {
     const REQUIRED_TYPES = 4 | 128; // 132: Request Approved + Request Automatically Approved
 
     const response = await this.get<unknown>("settings/notifications/webhook");
@@ -205,66 +253,92 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
       return;
     }
 
-    const currentTypes = webhookSettings.types ?? 0;
-    const hasRequiredTypes = (currentTypes & REQUIRED_TYPES) === REQUIRED_TYPES;
-    const hasExtraTypes = (currentTypes & ~REQUIRED_TYPES) !== 0;
-    const rawPayload = webhookSettings.options?.jsonPayload;
-    let normalizedPayload: unknown = rawPayload;
+    const { currentTypes, hasExtraTypes, isValid, payloadValidationError } =
+      this.#validateWebhookSettingsResponse(webhookSettings);
 
-    if (typeof rawPayload === "string") {
-      try {
-        normalizedPayload = JSON.parse(rawPayload);
-      } catch {
-        normalizedPayload = undefined;
-      }
-    }
-
-    const hasValidPayload =
-      normalizedPayload != null &&
-      JSON.stringify(normalizedPayload) === JSON.stringify(webhookBodyContent);
-
-    if (hasExtraTypes) {
+    if (hasExtraTypes && !this.settings.autofixWebhookBody) {
       this.logger.warn(
-        "Seerr webhook has additional notification types enabled beyond the required ones. This is fine but may result in unnecessary webhook calls.",
+        "Seerr webhook has additional notification types enabled beyond the required ones. This is fine, but may result in unnecessary webhook calls.",
       );
     }
 
-    if (!hasRequiredTypes || !hasValidPayload) {
-      if (this.settings.autofixWebhookBody) {
-        const settings: WebhookSettings = {
-          types: currentTypes | REQUIRED_TYPES,
-          options: {
-            jsonPayload: JSON.stringify(webhookBodyContent),
+    if (isValid) {
+      return;
+    }
+
+    if (this.settings.autofixWebhookBody) {
+      const webhookBodyContent = {
+        query:
+          "mutation ($input: SeerrHandleWebhookInput!) { seerrHandleWebhook(input: $input) }",
+        variables: {
+          input: {
+            payload: {
+              notification_type: "{{notification_type}}",
+              "{{media}}": {
+                imdbId: "{{media_imdbid}}",
+                media_type: "{{media_type}}",
+                tmdbId: "{{media_tmdbid}}",
+                tvdbId: "{{media_tvdbid}}",
+              },
+              "{{request}}": {
+                request_id: "{{request_id}}",
+                requestedBy_email: "{{requestedBy_email}}",
+              },
+              "{{extra}}": [],
+            },
           },
-        };
-        await this.post("settings/notifications/webhook", {
-          body: JSON.stringify(settings),
-        });
+        },
+      } satisfies WebhookJsonPayload;
 
-        this.logger.info(
-          "Automatically fixed Seerr webhook settings to include required notification types and payload",
+      const settingsPayload = {
+        types: REQUIRED_TYPES,
+        options: {
+          jsonPayload: JSON.stringify(
+            JSON.stringify(webhookBodyContent, null, 2),
+          ),
+        },
+      } satisfies WebhookSettings;
+
+      const response = await this.post<unknown>(
+        "settings/notifications/webhook",
+        { body: JSON.stringify(toMerged(webhookSettings, settingsPayload)) },
+      );
+
+      const parsedResponse = UpdateWebhookSettingsResponse.parse(response);
+      const { isValid: isUpdatedSettingsValid } =
+        this.#validateWebhookSettingsResponse(parsedResponse);
+
+      if (!isUpdatedSettingsValid) {
+        throw new FatalValidationError(
+          `Failed to automatically fix Seerr webhook settings. After attempting to update the settings, the response did not reflect the expected configuration with required notification types and correct JSON payload. Please check the Seerr instance and fix the webhook settings manually at ${this.settings.url}/settings/webhooks.`,
         );
-
-        return;
       }
 
-      const issues: string[] = [];
+      this.logger.info(
+        "Automatically fixed Seerr webhook settings to include required notification types and payload",
+      );
 
-      if (!(currentTypes & 4)) {
-        issues.push('"Request Approved" notification type is not enabled');
-      }
-      if (!(currentTypes & 128)) {
-        issues.push(
-          '"Request Automatically Approved" notification type is not enabled',
-        );
-      }
-      if (!hasValidPayload) {
-        issues.push("webhook JSON payload does not match the expected body");
-      }
+      return;
+    }
 
-      throw new FatalValidationError(
-        `Invalid Seerr webhook settings: ${issues.join("; ")}. Fix these in the webhook settings at ${this.settings.url}/settings/webhooks or enable the "Automatically fix webhook body settings" option in the plugin settings to have this automatically fixed by the plugin.`,
+    const issues: string[] = [];
+
+    if (!(currentTypes & 4)) {
+      issues.push('"Request Approved" notification type is not enabled');
+    }
+
+    if (!(currentTypes & 128)) {
+      issues.push(
+        '"Request Automatically Approved" notification type is not enabled',
       );
     }
+
+    if (payloadValidationError) {
+      issues.push(z.prettifyError(payloadValidationError));
+    }
+
+    throw new FatalValidationError(
+      `Invalid Seerr webhook settings:\n${issues.map((issue) => `- ${issue}`).join("\n")}.\nFix these in the webhook settings at ${this.settings.url}/settings/webhooks or enable the "autofixWebhookBody" option in the plugin settings to have this automatically fixed by the plugin.`,
+    );
   }
 }

@@ -26,7 +26,7 @@ export const SeerrSettings = z.object({
     .describe(
       "Interval in seconds to update content. If using the webhook, set to `null` to disable automatic updates (an initial request will still be made on startup)",
     ),
-  autofixMetadataProvider: z
+  autofixMetadataProviders: z
     .stringbool()
     .default(false)
     .describe(
