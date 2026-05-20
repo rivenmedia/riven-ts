@@ -54,15 +54,15 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
   }
 
   override async validate() {
-    return await this.get<unknown>(`library/sections`)
-      .then((response) => {
-        LibrarySectionsResponse.parse(response);
-        return true;
-      })
-      .catch((error) => {
-        throw new PlexAPIError(
-          `Failed to connect to Plex API: ${error instanceof Error ? error.message : String(error)}`,
-        );
-      });
+    try {
+      const response = await this.get<unknown>(`library/sections`);
+      const { success } = LibrarySectionsResponse.safeParse(response);
+
+      return success;
+    } catch (error) {
+      throw new PlexAPIError(
+        `Failed to connect to Plex API: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 }
