@@ -1,4 +1,3 @@
-/* eslint-disable no-empty-pattern */
 import {
   type ApolloServerContext,
   CoreKey,
