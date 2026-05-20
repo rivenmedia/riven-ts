@@ -53,7 +53,15 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
     );
   }
 
-  override validate() {
-    return true;
+  override async validate() {
+    try {
+      const response = await this.get<unknown>(`library/sections`);
+
+      return LibrarySectionsResponse.safeParse(response).success;
+    } catch (error) {
+      this.logger.error("Plex validation error", { err: error });
+
+      return false;
+    }
   }
 }

@@ -47,7 +47,9 @@ export class SubdlAPI extends BaseDataSource<SubdlSettings> {
       });
 
       return Boolean(SubtitleSearchResponse.parse(response));
-    } catch {
+    } catch (error) {
+      this.logger.error("SubDL validation error", { err: error });
+
       return false;
     }
   }

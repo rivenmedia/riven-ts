@@ -5,6 +5,7 @@ import { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
 import { DeleteTorrentResponse } from "../schemas/delete-torrent-response.schema.ts";
 import { GenerateLinkResponse } from "../schemas/generate-link-response.schema.ts";
 import { ItemStatus } from "../schemas/item-status.schema.ts";
+import { StoreUserResponse } from "../schemas/store-user-response.schema.ts";
 import { Store } from "../schemas/store.schema.ts";
 
 import type { StremThruSettings } from "../stremthru-settings.schema.ts";
@@ -25,6 +26,12 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
   override serviceName = "StremThru [Torz]";
 
   protected override concurrency = 1; // Lower the concurrency to prevent queue build-ups, as this API aggressively rate-limits itself
+
+  #validStores: Store[] = [];
+
+  get validStores(): readonly Store[] {
+    return this.#validStores;
+  }
 
   #buildCommonHeaders(store: Store) {
     return {
@@ -65,15 +72,76 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     return `${baseKey}:${store}`;
   }
 
-  override async validate() {
-    try {
-      // Implement your own validation logic here
-      await this.get("v0/torznab/api");
+  override async validate(): Promise<boolean> {
+    const configuredStores = Store.options.filter(
+      (storeName) => this.settings[`${storeName}ApiKey`],
+    );
 
-      return true;
-    } catch {
+    if (configuredStores.length === 0) {
+      this.#validStores = [];
+
+      this.logger.warn("No store API keys configured for StremThru Torz.");
+
       return false;
     }
+
+    const results = await Promise.all(
+      configuredStores.map(async (store) => {
+        try {
+          const response = await this.get<unknown>("v0/store/user", {
+            headers: this.#buildCommonHeaders(store),
+          });
+
+          const parsed = StoreUserResponse.safeParse(response);
+
+          if (!parsed.success) {
+            this.logger.warn(
+              `StremThru Torz unexpected response for store: ${store}`,
+            );
+
+            return false;
+          }
+
+          const { data } = parsed.data;
+
+          switch (data.subscription_status) {
+            case "premium": {
+              this.logger.info(
+                `Valid premium subscription for store: ${store}`,
+              );
+
+              return true;
+            }
+            case "expired": {
+              this.logger.warn(`Subscription expired for store: ${store}`);
+
+              return false;
+            }
+            case "trial": {
+              this.logger.info(`Trial subscription for store: ${store}`);
+
+              return true;
+            }
+          }
+        } catch {
+          this.logger.warn(
+            `StremThru Torz validation failed for store: ${store}`,
+          );
+
+          return false;
+        }
+      }),
+    );
+
+    this.#validStores = configuredStores.filter((_, index) => results[index]);
+
+    if (this.#validStores.length === 0) {
+      this.logger.warn("No valid stores found for StremThru Torz.");
+
+      return false;
+    }
+
+    return true;
   }
 
   async addTorrent(
