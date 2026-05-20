@@ -73,6 +73,8 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
   }
 
   override async validate(): Promise<boolean> {
+    this.#validStores = [];
+
     const configuredStores = Store.options.filter(
       (storeName) => this.settings[`${storeName}ApiKey`],
     );
