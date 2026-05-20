@@ -56,13 +56,12 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
   override async validate() {
     try {
       const response = await this.get<unknown>(`library/sections`);
-      const { success } = LibrarySectionsResponse.safeParse(response);
 
-      return success;
+      return LibrarySectionsResponse.safeParse(response).success;
     } catch (error) {
-      throw new PlexAPIError(
-        `Failed to connect to Plex API: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      this.logger.error("Plex validation error", { err: error });
+
+      return false;
     }
   }
 }
