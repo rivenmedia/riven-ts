@@ -1353,6 +1353,9 @@ importers:
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
+      es-toolkit:
+        specifier: 'catalog:'
+        version: 1.44.0
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.12.0))(graphql@16.12.0)
