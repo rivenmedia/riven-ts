@@ -28,8 +28,6 @@ export default {
   },
   settingsSchema: SeerrSettings,
   validator({ dataSources }) {
-    const api = dataSources.get(SeerrAPI);
-
-    return api.validate();
+    return dataSources.get(SeerrAPI).validate();
   },
 } satisfies RivenPlugin as RivenPlugin;

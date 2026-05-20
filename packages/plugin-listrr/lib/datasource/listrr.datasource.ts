@@ -29,7 +29,9 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
       const response = await this.get<unknown>("List/My/1");
 
       return getApiListMyPageQueryResponseSchema.safeParse(response).success;
-    } catch {
+    } catch (error) {
+      this.logger.error("Listrr validation error", { err: error });
+
       return false;
     }
   }
