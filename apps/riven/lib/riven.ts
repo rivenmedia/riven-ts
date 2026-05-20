@@ -15,36 +15,14 @@ import type { ActorRefFromLogic } from "xstate";
  * Conditionally sends a shutdown event to the program state machine if it's in a state that can be shutdown.
  *
  * @param actor The program state machine
- * @returns true if a shutdown event was sent, otherwise false
  */
-async function maybeSendShutdownEvent(
-  actor: ActorRefFromLogic<typeof rivenMachine>,
-) {
+function maybeSendShutdownEvent(actor: ActorRefFromLogic<typeof rivenMachine>) {
   const { value } = actor.getSnapshot();
-  const stoppableStates: (typeof value)[] = ["Running", "Bootstrapping"];
+  const runningStates: (typeof value)[] = ["Running", "Bootstrapping"];
 
-  if (stoppableStates.includes(value)) {
+  if (runningStates.includes(value)) {
     actor.send({ type: "riven.core.shutdown" });
-
-    const { logger } = await import("./utilities/logger/logger.ts");
-    const { settings } = await import("./utilities/settings.ts");
-
-    const timeoutMs = Duration.fromObject({
-      seconds: settings.shutdownTimeoutSeconds,
-    }).as("milliseconds");
-
-    const signal = AbortSignal.timeout(timeoutMs);
-
-    signal.addEventListener("abort", () => {
-      logger.error("Timeout whilst waiting for shutdown; forcing exit");
-
-      process.exit();
-    });
-
-    return true;
   }
-
-  return false;
 }
 
 /**
@@ -68,29 +46,47 @@ export async function riven() {
     const { createRivenMachine } =
       await import("./state-machines/program/index.ts");
     const { logger } = await import("./utilities/logger/logger.ts");
+    const { settings } = await import("./utilities/settings.ts");
+
+    const shutdownTimeoutMs = Duration.fromObject({
+      seconds: settings.shutdownTimeoutSeconds,
+    }).as("milliseconds");
 
     const actor = createRivenMachine({
       sessionId,
     });
 
+    async function shutdown() {
+      process.exitCode ??= 0;
+
+      try {
+        const { value } = await waitFor(
+          actor,
+          (state) => state.matches("Exited") || state.matches("Errored"),
+          { timeout: shutdownTimeoutMs },
+        );
+
+        process.exitCode ??= Number(value === "Errored");
+      } catch (error) {
+        if (process.exitCode === 0) {
+          process.exitCode = 1;
+        }
+
+        logger.error("Error whilst waiting for shutdown", { err: error });
+      } finally {
+        logger.info(`Riven exited with code ${process.exitCode.toString()}`);
+
+        process.exit();
+      }
+    }
+
     process.on("uncaughtException", (error) => {
       process.exitCode = 1;
 
-      withLogContext(baseLogContext, async () => {
+      withLogContext(baseLogContext, () => {
         logger.error("Uncaught exception", { err: error });
 
-        if (await maybeSendShutdownEvent(actor)) {
-          waitFor(
-            actor,
-            (state) => state.matches("Exited") || state.matches("Errored"),
-          ).catch((error: unknown) => {
-            logger.error("Error whilst waiting for shutdown", { err: error });
-
-            process.exit();
-          });
-        }
-      }).catch((error: unknown) => {
-        logger.error("Error in uncaughtException handler", { err: error });
+        maybeSendShutdownEvent(actor);
       });
     });
 
@@ -107,9 +103,7 @@ export async function riven() {
 
     for (const signal of terminationSignals) {
       process.on(signal, () => {
-        maybeSendShutdownEvent(actor).catch((error: unknown) => {
-          logger.error("Error whilst sending shutdown event", { err: error });
-        });
+        maybeSendShutdownEvent(actor);
 
         withLogContext(baseLogContext, () => {
           logger.debug(`Received ${signal}`);
@@ -117,17 +111,8 @@ export async function riven() {
       });
     }
 
-    await waitFor(
-      actor,
-      (state) => state.matches("Exited") || state.matches("Errored"),
-    );
+    await waitFor(actor, (state) => state.matches("Shutdown"));
 
-    const { value } = actor.getSnapshot();
-
-    process.exitCode = Number(value === "Errored");
-
-    logger.info(`Riven exited with code ${process.exitCode.toString()}`);
+    await shutdown();
   });
-
-  process.exit();
 }
