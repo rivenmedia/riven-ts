@@ -36,13 +36,16 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
       try {
         await this.get<GetAuthMeQueryResponse>("auth/me");
       } catch (error: unknown) {
+        this.logger.error("Failed to authenticate with Seerr API", {
+          err: error,
+        });
+
         throw new SeerrAPIError(
-          "Failed to authenticate with Seerr API. Please check the API key is correct and the Seerr instance is reachable" +
-            `. Error: ${(error as Error).message}`,
+          `Failed to authenticate with Seerr API. Please check the API key is correct and the Seerr instance is reachable. Error: ${(error as Error).message}`,
         );
       }
 
-      await this.#validateMetadataProviderSettings();
+      await this.#validateOrFixMetadataProviderSettings();
       await this.#validateWebhookBodySettings();
 
       return true;
@@ -130,7 +133,6 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
           filter,
           sort: "added",
         },
-        skipCache: true,
       });
 
       const { results, pageInfo } = RequestResponse.parse(response);
@@ -149,20 +151,28 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
   /**
    * Checks the Seerr instance settings to ensure the metadata providers have been set to TVDB.
    *
+   * If the `autofixMetadataProvider` plugin setting is enabled, it will attempt to fix the configuration automatically.
+   *
    * @throws {SeerrAPIError} If the metadata providers are not set to TVDB.
    */
-  async #validateMetadataProviderSettings() {
-    const response = await this.get<unknown>("settings/metadatas", {
-      skipCache: true,
-    });
+  async #validateOrFixMetadataProviderSettings() {
+    const response = await this.get<unknown>("settings/metadatas");
 
     const metadataSettings = MetadataSettingsResponse.parse(response);
 
     if (metadataSettings.tv !== "tvdb" || metadataSettings.anime !== "tvdb") {
       if (this.settings.autofixMetadataProvider) {
-        await this.put<MetadataSettingsResponse>("settings/metadatas", {
+        const response = await this.put<unknown>("settings/metadatas", {
           body: JSON.stringify({ tv: "tvdb", anime: "tvdb" }),
         });
+
+        const parsedResponse = MetadataSettingsResponse.parse(response);
+
+        if (parsedResponse.tv !== "tvdb" || parsedResponse.anime !== "tvdb") {
+          throw new FatalValidationError(
+            "Failed to automatically fix Seerr metadata provider settings. After attempting to update the settings, the response did not reflect the expected metadata provider configuration. Please check the Seerr instance and fix the metadata provider settings manually at /settings/metadata.",
+          );
+        }
 
         this.logger.info(
           "Automatically fixed Seerr metadata provider settings to TVDB",
@@ -172,7 +182,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
       }
 
       throw new FatalValidationError(
-        `Invalid Seerr metadata provider settings. TV provider: ${metadataSettings.tv}, Anime provider: ${metadataSettings.anime}. Ensure both are set to TVDB at ${this.settings.url}/settings/metadata or enable the "Automatically fix metadata provider settings" option in the plugin settings to have this automatically fixed by the plugin.`,
+        `Invalid Seerr metadata provider settings. TV provider: ${metadataSettings.tv}, Anime provider: ${metadataSettings.anime}. Ensure both are set to TVDB at ${this.settings.url}/settings/metadata or enable "autofixMetadataProvider" option in the plugin settings to have this automatically fixed by the plugin.`,
       );
     }
   }
@@ -187,9 +197,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
   async #validateWebhookBodySettings() {
     const REQUIRED_TYPES = 4 | 128; // 132: Request Approved + Request Automatically Approved
 
-    const response = await this.get<unknown>("settings/notifications/webhook", {
-      skipCache: true,
-    });
+    const response = await this.get<unknown>("settings/notifications/webhook");
 
     const webhookSettings = webhookSettingsSchema.parse(response);
 

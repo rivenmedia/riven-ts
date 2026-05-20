@@ -21,7 +21,7 @@ if (spotlightEnabled) {
   }
 
   Sentry.init({
-    dsn: "https://spotlight@local/0",
+    dsn: "https://spotlight@127.0.0.1/0",
     enableLogs: true,
     sampleRate: 1,
     tracesSampleRate: 1,

@@ -73,17 +73,12 @@ export const validatePlugin = fromCallback<
           const pluginName =
             plugin.config.name.description ?? String(plugin.config.name);
 
-          if (error instanceof FatalValidationError) {
-            logger.error(
-              `Plugin "${pluginName}" validation failed (non-retriable)`,
-              { err: error },
-            );
-          } else {
-            logger.error(
-              `Plugin "${pluginName}" validation failed after ${attempt.toString()} attempts`,
-              { err: error },
-            );
-          }
+          logger.error(
+            error instanceof FatalValidationError
+              ? `Plugin "${pluginName}" validation failed and cannot be retried`
+              : `Plugin "${pluginName}" validation failed after ${attempt.toString()} attempts`,
+            { err: error },
+          );
 
           sendInvalidPluginEvent(error);
 
