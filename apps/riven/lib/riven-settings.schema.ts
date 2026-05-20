@@ -147,6 +147,9 @@ export const RivenSettings = z.object({
   enabledPlugins: json(z.array(CorePlugins))
     .default([])
     .describe("A list of core plugins to enable."),
+  shutdownTimeoutSeconds: json(z.int())
+    .default(30)
+    .describe("The timeout in seconds for shutting down the application."),
 });
 
 export type RivenSettings = z.infer<typeof RivenSettings>;
