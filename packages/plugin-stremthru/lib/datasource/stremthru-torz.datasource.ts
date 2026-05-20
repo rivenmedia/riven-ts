@@ -79,6 +79,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
 
     if (configuredStores.length === 0) {
       this.logger.warn("No store API keys configured for StremThru Torz.");
+
       return false;
     }
 
@@ -95,28 +96,36 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
             this.logger.warn(
               `StremThru Torz unexpected response for store: ${store}`,
             );
+
             return false;
           }
 
           const { data } = parsed.data;
 
           switch (data.subscription_status) {
-            case "premium":
+            case "premium": {
               this.logger.info(
                 `Valid premium subscription for store: ${store}`,
               );
+
               return true;
-            case "expired":
+            }
+            case "expired": {
               this.logger.warn(`Subscription expired for store: ${store}`);
+
               return false;
-            case "trial":
+            }
+            case "trial": {
               this.logger.info(`Trial subscription for store: ${store}`);
+
               return true;
+            }
           }
         } catch {
           this.logger.warn(
             `StremThru Torz validation failed for store: ${store}`,
           );
+
           return false;
         }
       }),
@@ -126,6 +135,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
 
     if (this.#validStores.length === 0) {
       this.logger.warn("No valid stores found for StremThru Torz.");
+
       return false;
     }
 

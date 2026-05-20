@@ -102,6 +102,7 @@ export default {
       dataSources.get(StremThruTorzAPI).validate(),
       dataSources.get(StremThruTorznabAPI).validate(),
     ]);
+
     return results.every((isValid) => isValid);
   },
 } satisfies RivenPlugin as RivenPlugin;
