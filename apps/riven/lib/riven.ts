@@ -73,11 +73,11 @@ export async function riven() {
         }
 
         logger.error("Error whilst waiting for shutdown", { err: error });
-      } finally {
-        logger.info(`Riven exited with code ${process.exitCode.toString()}`);
-
-        process.exit();
       }
+
+      logger.info(`Riven exited with code ${process.exitCode.toString()}`);
+
+      process.exit();
     }
 
     process.on("uncaughtException", (error) => {
