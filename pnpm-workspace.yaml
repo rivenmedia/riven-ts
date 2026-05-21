@@ -5,23 +5,23 @@ packages:
 
 catalog:
   "@apollo/cache-control-types": ^1.0.3
-  "@apollo/client": ^4.0.11
-  "@apollo/client-devtools-vscode": ^4.23.2
+  "@apollo/client": ^4.1.9
+  "@apollo/client-devtools-vscode": ^4.25.6
   "@apollo/datasource-rest": 6.4.1
-  "@apollo/server": ^5.2.0
+  "@apollo/server": ^5.5.1
   "@apollo/utils.keyvadapter": ^4.0.1
   "@apollo/utils.keyvaluecache": ^4.0.0
   "@elastic/ecs-winston-format": ^1.5.3
-  "@eslint/compat": ^2.0.3
-  "@eslint/js": ^9.39.2
+  "@eslint/compat": ^2.1.0
+  "@eslint/js": ^9.39.4
   "@eslint/json": ^0.14.0
   "@faker-js/faker": 10.1.0
-  "@graphql-codegen/cli": ^6.1.0
+  "@graphql-codegen/cli": ^6.3.1
   "@graphql-codegen/near-operation-file-preset": ^4.0.0
-  "@graphql-codegen/typescript": ^5.0.7
-  "@graphql-codegen/typescript-operations": ^5.0.7
+  "@graphql-codegen/typescript": ^5.0.10
+  "@graphql-codegen/typescript-operations": ^5.1.0
   "@graphql-typed-document-node/core": ^3.2.0
-  "@keyv/redis": ^5.1.5
+  "@keyv/redis": ^5.1.6
   "@kubb/cli": 4.20.1
   "@kubb/core": 4.20.1
   "@kubb/plugin-faker": 4.20.1
@@ -29,98 +29,98 @@ catalog:
   "@kubb/plugin-oas": 4.20.1
   "@kubb/plugin-ts": 4.20.1
   "@kubb/plugin-zod": 4.20.1
-  "@mikro-orm/cli": ^7.0.12
-  "@mikro-orm/core": ^7.0.12
-  "@mikro-orm/decorators": ^7.0.12
-  "@mikro-orm/migrations": ^7.0.12
-  "@mikro-orm/postgresql": ^7.0.12
-  "@mikro-orm/reflection": ^7.0.12
-  "@mikro-orm/seeder": ^7.0.12
-  "@mikro-orm/sqlite": ^7.0.12
-  "@parcel/watcher": ^2.5.1
-  "@sentry/node": ^10.38.0
+  "@mikro-orm/cli": ^7.1.0
+  "@mikro-orm/core": ^7.1.0
+  "@mikro-orm/decorators": ^7.1.0
+  "@mikro-orm/migrations": ^7.1.0
+  "@mikro-orm/postgresql": ^7.1.0
+  "@mikro-orm/reflection": ^7.1.0
+  "@mikro-orm/seeder": ^7.1.0
+  "@mikro-orm/sqlite": ^7.1.0
+  "@parcel/watcher": ^2.5.6
+  "@sentry/node": ^10.53.1
   "@swc-node/register": ^1.11.1
-  "@swc/core": ^1.15.7
-  "@tailwindcss/postcss": ^4.1.18
-  "@trivago/prettier-plugin-sort-imports": ^6.0.0
-  "@tsconfig/node-ts": ^23.6.2
-  "@tsconfig/node24": ^24.0.3
+  "@swc/core": ^1.15.33
+  "@tailwindcss/postcss": ^4.3.0
+  "@trivago/prettier-plugin-sort-imports": ^6.0.2
+  "@tsconfig/node-ts": ^23.6.4
+  "@tsconfig/node24": ^24.0.4
   "@tsconfig/recommended": ^1.0.13
   "@tsconfig/strictest": ^2.0.8
-  "@turbo/gen": ^2.8.21
+  "@turbo/gen": ^2.9.14
   "@types/luxon": ^3.7.1
   "@types/mdx": ^2.0.13
-  "@types/node": ^24.0.0
-  "@types/react": ^19.2.3
+  "@types/node": ^24.12.4
+  "@types/react": ^19.2.15
   "@types/react-dom": ^19.2.3
   "@types/triple-beam": ^1.3.5
-  "@typescript-eslint/parser": ^8.49.0
-  "@viren070/parse-torrent-title": ^0.6.5
-  "@vitest/coverage-v8": ^4.1.1
-  "@vitest/eslint-plugin": ^1.6.15
-  "@vitest/expect": ^4.1.5
+  "@typescript-eslint/parser": ^8.59.4
+  "@viren070/parse-torrent-title": ^0.7.6
+  "@vitest/coverage-v8": ^4.1.7
+  "@vitest/eslint-plugin": ^1.6.17
+  "@vitest/expect": ^4.1.7
   "@zkochan/fuse-native": ^0.1.0
-  autoprefixer: ^10.4.20
-  bullmq: ^5.71.0
-  bullmq-otel: ^1.2.0
+  autoprefixer: ^10.5.0
+  bullmq: ^5.76.10
+  bullmq-otel: ^1.3.1
   chalk: ^5.6.2
   class-validator: 0.14.3
-  countries-and-timezones: ^3.8.0
+  countries-and-timezones: ^3.9.0
   dataloader: ^2.2.3
-  dedent: ^1.7.1
+  dedent: ^1.7.2
   discord-api-types: 0.38.42
-  es-toolkit: ^1.44.0
+  es-toolkit: ^1.46.1
   esbuild: ^0.28.0
   esbuild-node-externals: ^1.22.0
-  eslint: ^9.39.2
+  eslint: ^9.39.4
   eslint-config-prettier: ^10.1.8
-  eslint-config-turbo: ^2.8.21
+  eslint-config-turbo: ^2.9.14
   eslint-import-resolver-typescript: ^4.4.4
-  eslint-plugin-import-x: ^4.16.1
+  eslint-plugin-import-x: ^4.16.2
   fastest-levenshtein: ^1.0.16
-  fumadocs-core: ^16.4.2
-  fumadocs-mdx: ^14.2.4
-  fumadocs-ui: ^16.4.2
+  fumadocs-core: ^16.8.12
+  fumadocs-mdx: ^14.3.2
+  fumadocs-ui: ^16.8.12
   glob: ^13.0.6
   globals: ^17.6.0
   graphql: 16.14.0
   graphql-scalars: ^1.25.0
   husky: ^9.1.7
-  keyv: ^5.5.5
-  knip: ^6.12.2
-  lint-staged: ^16.2.7
+  keyv: ^5.6.0
+  knip: ^6.14.1
+  lint-staged: ^16.4.0
   logform: ^2.7.0
-  lru-cache: ^11.2.4
+  lru-cache: ^11.5.0
   lucide-react: ^0.562.0
   luxon: ^3.7.2
   msw: 2.13.2
-  next: ^16.1.1
+  next: ^16.2.6
   nyc: ^18.0.0
-  postcss: ^8.5.4
-  prettier: ^3.7.4
-  react: ^19.2.3
-  react-dom: ^19.2.3
-  redis-memory-server: ^0.16.0
+  postcss: ^8.5.15
+  prettier: ^3.8.3
+  react: ^19.2.6
+  react-dom: ^19.2.6
+  redis-memory-server: ^0.16.1
   reflect-metadata: 0.2.2
   rxjs: ^7.8.2
   schema-dts: ^1.1.5
-  shiki: ^3.20.0
-  sort-package-json: ^3.6.0
-  tailwindcss: ^4.1.18
+  shiki: ^3.23.0
+  sort-package-json: ^3.6.1
+  tailwindcss: ^4.3.0
   triple-beam: ^1.4.1
   turbo: ^2.9.14
-  type-fest: ^5.3.1
+  type-fest: ^5.6.0
   type-graphql: 2.0.0-rc.2
   typescript: ^5.9.3
-  typescript-eslint: ^8.49.0
-  undici: ^7.18.2
+  typescript-eslint: ^8.59.4
+  undici: ^7.25.0
   unplugin-swc: ^1.5.9
-  vitest: ^4.1.1
+  vitest: ^4.1.7
   winston: ^3.19.0
   winston-daily-rotate-file: ^5.0.0
-  xstate: ^5.25.0
-  yaml: ^2.8.2
-  zod: ^4.3.6
+  xstate: ^5.31.1
+  yaml: ^2.9.0
+  zod: ^4.4.3
   zod-validation-error: ^5.0.0
   zod2md: ^0.2.5
 
