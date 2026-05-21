@@ -12,6 +12,7 @@
     "lint:fix": "pnpm lint --fix"
   },
   "dependencies": {
+    "@eslint/config-helpers": "catalog:",
     "@eslint/js": "catalog:",
     "@eslint/json": "catalog:",
     "@repo/core-util-typescript-config": "workspace:^",
@@ -25,7 +26,6 @@
     "typescript-eslint": "catalog:"
   },
   "devDependencies": {
-    "@eslint/config-helpers": "catalog:",
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:"
