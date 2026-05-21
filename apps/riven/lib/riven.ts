@@ -40,6 +40,7 @@ export async function riven() {
 
   await withLogContext(baseLogContext, async () => {
     await import("./sentry.ts");
+    await import("./ranking-config/ranking-config.ts");
 
     const { waitFor } = await import("xstate");
 
