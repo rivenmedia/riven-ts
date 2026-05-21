@@ -12,7 +12,7 @@
     "lint:fix": "pnpm lint --fix"
   },
   "dependencies": {
-    "@eslint/compat": "catalog:",
+    "@eslint/config-helpers": "catalog:",
     "@eslint/js": "catalog:",
     "@eslint/json": "catalog:",
     "@repo/core-util-typescript-config": "workspace:^",

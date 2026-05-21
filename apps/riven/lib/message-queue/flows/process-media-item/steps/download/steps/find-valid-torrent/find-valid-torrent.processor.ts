@@ -31,7 +31,7 @@ export const findValidTorrentProcessor =
       data: { id: mediaItemId, failedInfoHashes },
     } = job;
 
-    const mediaItem = await mediaItemService.getMediaItem(mediaItemId);
+    const mediaItem = await mediaItemService.getMediaItemById(mediaItemId);
 
     const infoHashes = rankedStreams.map((stream) => stream.hash);
     const uncheckedInfoHashes = new Set(infoHashes)
