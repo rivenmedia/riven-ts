@@ -278,127 +278,138 @@ export const mainRunnerMachine = setup({
       START: {
         target: ".Running",
         actions: assign(
-          ({ context: { availableParallelism }, event: { input }, self }) => ({
-            plugins: input.plugins,
-            publishableEvents: input.publishableEvents,
-            pluginQueues: input.pluginQueues,
-            pluginWorkers: input.pluginWorkers,
-            flowWorkers: {
-              "process-item-request": createFlowWorker(
-                ProcessItemRequestFlow,
-                processItemRequestProcessor,
-                self.send,
-                input.plugins,
-              ),
-              "process-media-item": createFlowWorker(
-                ProcessMediaItemFlow,
-                processMediaItemProcessor,
-                self.send,
-                input.plugins,
-              ),
-              "request-content-services": createFlowWorker(
-                RequestContentServiceFlow,
-                requestContentServiceProcessor,
-                self.send,
-                input.plugins,
-              ),
-              "scrape-item": createFlowWorker(
-                ScrapeItemFlow,
-                scrapeItemProcessor,
-                self.send,
-                input.plugins,
-                {},
-                {
-                  settings: {
-                    backoffStrategy: (attemptsMade) => {
-                      const [after2, after5, after10] =
-                        settings.scrapeCooldownHours;
+          ({ context: { availableParallelism }, event: { input }, self }) => {
+            const calculateConcurrency = (concurrencyFraction: number) =>
+              Math.max(
+                1,
+                Math.floor(availableParallelism * concurrencyFraction),
+              );
 
-                      if (attemptsMade >= 10) {
-                        return Duration.fromObject({ hours: after10 }).as(
+            return {
+              plugins: input.plugins,
+              publishableEvents: input.publishableEvents,
+              pluginQueues: input.pluginQueues,
+              pluginWorkers: input.pluginWorkers,
+
+              flowWorkers: {
+                "process-item-request": createFlowWorker(
+                  ProcessItemRequestFlow,
+                  processItemRequestProcessor,
+                  self.send,
+                  input.plugins,
+                ),
+                "process-media-item": createFlowWorker(
+                  ProcessMediaItemFlow,
+                  processMediaItemProcessor,
+                  self.send,
+                  input.plugins,
+                ),
+                "request-content-services": createFlowWorker(
+                  RequestContentServiceFlow,
+                  requestContentServiceProcessor,
+                  self.send,
+                  input.plugins,
+                ),
+                "scrape-item": createFlowWorker(
+                  ScrapeItemFlow,
+                  scrapeItemProcessor,
+                  self.send,
+                  input.plugins,
+                  {},
+                  {
+                    settings: {
+                      backoffStrategy: (attemptsMade) => {
+                        const [after2, after5, after10] =
+                          settings.scrapeCooldownHours;
+
+                        if (attemptsMade >= 10) {
+                          return Duration.fromObject({ hours: after10 }).as(
+                            "milliseconds",
+                          );
+                        }
+
+                        if (attemptsMade >= 5) {
+                          return Duration.fromObject({ hours: after5 }).as(
+                            "milliseconds",
+                          );
+                        }
+
+                        if (attemptsMade >= 2) {
+                          return Duration.fromObject({ hours: after2 }).as(
+                            "milliseconds",
+                          );
+                        }
+
+                        return Duration.fromObject({ minutes: 30 }).as(
                           "milliseconds",
                         );
-                      }
-
-                      if (attemptsMade >= 5) {
-                        return Duration.fromObject({ hours: after5 }).as(
-                          "milliseconds",
-                        );
-                      }
-
-                      if (attemptsMade >= 2) {
-                        return Duration.fromObject({ hours: after2 }).as(
-                          "milliseconds",
-                        );
-                      }
-
-                      return Duration.fromObject({ minutes: 30 }).as(
-                        "milliseconds",
-                      );
+                      },
                     },
                   },
-                },
-              ),
-              "download-item": createFlowWorker(
-                DownloadItemFlow,
-                downloadItemProcessor,
-                self.send,
-                input.plugins,
-              ),
-              "download-item.find-valid-torrent": createFlowWorker(
-                FindValidTorrentFlow,
-                findValidTorrentProcessor,
-                self.send,
-                input.plugins,
-              ),
-              "download-item.rank-streams": createFlowWorker(
-                RankStreamsFlow,
-                rankStreamsProcessor,
-                self.send,
-                input.plugins,
-              ),
-              "request-subtitles": createFlowWorker(
-                RequestSubtitlesFlow,
-                requestSubtitlesProcessor,
-                self.send,
-                input.plugins,
-              ),
-              "post-process-media-item": createFlowWorker(
-                PostProcessMediaItemFlow,
-                postProcessItemProcessor,
-                self.send,
-                input.plugins,
-              ),
-            },
-            sandboxedWorkers: {
-              "scrape-item.parse-scrape-results": createSandboxedWorker(
-                ParseScrapeResultsSandboxedJob,
-                new URL(
-                  import.meta
-                    .resolve("@repo/riven/workers/parse-scrape-results"),
                 ),
-                {},
-                { concurrency: availableParallelism * 0.25 },
-              ),
-              "download-item.map-items-to-files": createSandboxedWorker(
-                MapItemsToFilesSandboxedJob,
-                new URL(
-                  import.meta.resolve("@repo/riven/workers/map-items-to-files"),
+                "download-item": createFlowWorker(
+                  DownloadItemFlow,
+                  downloadItemProcessor,
+                  self.send,
+                  input.plugins,
                 ),
-                {},
-                { concurrency: availableParallelism * 0.75 },
-              ),
-              "download-item.validate-torrent-files": createSandboxedWorker(
-                ValidateTorrentFilesSandboxedJob,
-                new URL(
-                  import.meta
-                    .resolve("@repo/riven/workers/validate-torrent-files"),
+                "download-item.find-valid-torrent": createFlowWorker(
+                  FindValidTorrentFlow,
+                  findValidTorrentProcessor,
+                  self.send,
+                  input.plugins,
                 ),
-                {},
-                { concurrency: availableParallelism * 0.25 },
-              ),
-            },
-          }),
+                "download-item.rank-streams": createFlowWorker(
+                  RankStreamsFlow,
+                  rankStreamsProcessor,
+                  self.send,
+                  input.plugins,
+                ),
+                "request-subtitles": createFlowWorker(
+                  RequestSubtitlesFlow,
+                  requestSubtitlesProcessor,
+                  self.send,
+                  input.plugins,
+                ),
+                "post-process-media-item": createFlowWorker(
+                  PostProcessMediaItemFlow,
+                  postProcessItemProcessor,
+                  self.send,
+                  input.plugins,
+                ),
+              },
+
+              sandboxedWorkers: {
+                "scrape-item.parse-scrape-results": createSandboxedWorker(
+                  ParseScrapeResultsSandboxedJob,
+                  new URL(
+                    import.meta
+                      .resolve("@repo/riven/workers/parse-scrape-results"),
+                  ),
+                  {},
+                  { concurrency: calculateConcurrency(0.25) },
+                ),
+                "download-item.map-items-to-files": createSandboxedWorker(
+                  MapItemsToFilesSandboxedJob,
+                  new URL(
+                    import.meta
+                      .resolve("@repo/riven/workers/map-items-to-files"),
+                  ),
+                  {},
+                  { concurrency: calculateConcurrency(0.75) },
+                ),
+                "download-item.validate-torrent-files": createSandboxedWorker(
+                  ValidateTorrentFilesSandboxedJob,
+                  new URL(
+                    import.meta
+                      .resolve("@repo/riven/workers/validate-torrent-files"),
+                  ),
+                  {},
+                  { concurrency: calculateConcurrency(0.25) },
+                ),
+              },
+            };
+          },
         ),
       },
     },
