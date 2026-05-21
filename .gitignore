@@ -17,6 +17,7 @@ plex
 *.bundled_*.mjs
 docker-data
 *.graphql
+.git
 knip-report.json
 
 # Local-only Compose overrides (auto-loaded by docker compose)

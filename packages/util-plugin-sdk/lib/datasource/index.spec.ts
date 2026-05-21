@@ -39,6 +39,7 @@ const it = baseIt
       logger,
       pluginSymbol: Symbol.for(`@repo/plugin-test-${randomUUID()}`),
       telemetry: undefined as never, // Telemetry isn't needed here; force disable
+      userAgent: "mock-user-agent",
     } satisfies BaseDataSourceConfig<Record<string, unknown>>;
 
     onCleanup(async () => {

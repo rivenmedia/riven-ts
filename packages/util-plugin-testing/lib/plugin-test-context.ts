@@ -125,6 +125,7 @@ export const it = baseIt
           telemetry: undefined as unknown as Telemetry,
           requestAttempts: 1,
           settings: settings.get(plugin.settingsSchema),
+          userAgent: "mock-user-agent",
         } satisfies BaseDataSourceConfig<Record<string, unknown>>;
 
         for (const DataSourceClass of plugin.dataSources) {
