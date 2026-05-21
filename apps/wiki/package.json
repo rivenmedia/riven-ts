@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "codegen:wiki-docs": "node scripts/sync-plugin-docs.mjs && node scripts/sync-core-docs.mjs",
+    "codegen:wiki-docs": "node scripts/sync-plugin-docs.mjs && node scripts/sync-core-docs.mjs && node scripts/sync-ranking-docs.mjs",
     "dev": "next dev --turbopack",
     "postinstall": "fumadocs-mdx",
     "lint": "eslint",
     "start": "next start",
     "sync-core-docs": "node scripts/sync-core-docs.mjs",
-    "sync-plugin-docs": "node scripts/sync-plugin-docs.mjs"
+    "sync-plugin-docs": "node scripts/sync-plugin-docs.mjs",
+    "sync-ranking-docs": "node scripts/sync-ranking-docs.mjs"
   },
   "dependencies": {
     "fumadocs-core": "catalog:",

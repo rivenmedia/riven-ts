@@ -13,7 +13,7 @@ const RIVEN_APP = join(ROOT, "apps/riven");
 const SETTINGS_MD = join(RIVEN_APP, "docs/settings.md");
 const OUTPUT_FILE = join(
   import.meta.dirname,
-  "../content/docs/configuration.mdx",
+  "../content/docs/configuration/index.mdx",
 );
 
 // Section metadata: slug → display config
@@ -24,6 +24,7 @@ const SECTIONS = [
   { slug: "graphql", title: "GraphQL Server" },
   { slug: "vfs", title: "VFS" },
   { slug: "scraping", title: "Scraping & Downloads" },
+  { slug: "ranking", title: "Ranking", link: "/docs/configuration/ranking" },
   { slug: "scheduling", title: "Scheduling" },
   { slug: "database-ssl", title: "Database SSL" },
   { slug: "plugins", title: "Plugins" },
@@ -120,7 +121,7 @@ function generateMdx(fieldSections, table) {
   // Build MDX content
   const parts = [
     `---
-title: Configuration
+title: Configuration Overview
 description: All Riven TS settings and environment variables.
 ---
 
@@ -137,7 +138,10 @@ Riven TS is configured entirely through environment variables. All core settings
     const sectionRows = grouped.get(section.slug);
     if (!sectionRows || sectionRows.length === 0) continue;
 
-    parts.push(`\n### ${section.title}`);
+    const headingTitle = section.link
+      ? `[${section.title}](${section.link})`
+      : section.title;
+    parts.push(`\n### ${headingTitle}`);
 
     if (section.slug === "danger-zone") {
       parts.push(`

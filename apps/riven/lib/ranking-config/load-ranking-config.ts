@@ -23,7 +23,7 @@ interface RankingConfigFile {
   rankingModel?: z.input<typeof RankingModelSchema>;
 }
 
-const DEFAULT_SETTINGS_INPUT: SettingsInput = {
+export const DEFAULT_SETTINGS_INPUT: SettingsInput = {
   require: [],
   exclude: ["\\bmatte\\b"],
   preferred: ["\\b4[Kk]|2160p?\\b", "HDR|HDR10"],
@@ -129,7 +129,7 @@ const DEFAULT_SETTINGS_INPUT: SettingsInput = {
   },
 };
 
-const DEFAULT_RANKING_MODEL_INPUT: z.input<typeof RankingModelSchema> = {
+export const DEFAULT_RANKING_MODEL_INPUT: z.input<typeof RankingModelSchema> = {
   // Quality
   av1: 0,
   avc: 0,

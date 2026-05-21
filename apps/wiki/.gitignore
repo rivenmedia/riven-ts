@@ -4,7 +4,9 @@ node_modules/
 .source/
 
 # Synced core docs (auto-generated)
-content/docs/configuration.mdx
+content/docs/configuration/meta.json
+content/docs/configuration/*.mdx
+!content/docs/configuration/index.mdx
 
 # Synced plugin docs (auto-generated)
 content/docs/plugins/meta.json
