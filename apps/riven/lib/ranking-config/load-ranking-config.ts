@@ -211,10 +211,7 @@ const DEFAULT_CONFIG: RankingConfigFile = {
 function getInnerObjectShape(schema: unknown): Record<string, unknown> | null {
   if (typeof schema !== "object" || schema === null) return null;
 
-  if (
-    "shape" in schema &&
-    typeof (schema as { shape: unknown }).shape === "object"
-  ) {
+  if ("shape" in schema && typeof schema.shape === "object") {
     return (schema as { shape: Record<string, unknown> }).shape;
   }
 
