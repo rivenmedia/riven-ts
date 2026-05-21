@@ -157,7 +157,9 @@ export const processMediaItemProcessor =
         }
       }
 
-      const item = await mediaItemService.getMediaItem(job.data.mediaItem.id);
+      const item = await mediaItemService.getMediaItemById(
+        job.data.mediaItem.id,
+      );
 
       const successfulStates: MediaItemState[] = [
         "completed",

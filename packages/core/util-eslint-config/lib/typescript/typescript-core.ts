@@ -23,7 +23,7 @@ export const typescriptCore = defineConfig(
       noUnusedVariables,
       banDateConstructor,
       preferMikroOrmCore,
-      importX.typescript as never,
+      importX.typescript,
     ],
     languageOptions: {
       sourceType: "module",

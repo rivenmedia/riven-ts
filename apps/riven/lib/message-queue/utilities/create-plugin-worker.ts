@@ -48,7 +48,7 @@ export function createPluginWorker<
           {
             "bullmq.queue.name": queueName,
             "riven.log.source": "plugin",
-            "riven.event.name": name as string,
+            "riven.event.name": name,
             "riven.plugin.name": pluginName,
             ...(job.id && { "bullmq.job.id": job.id }),
           },

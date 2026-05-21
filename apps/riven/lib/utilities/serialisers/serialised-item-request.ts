@@ -13,7 +13,7 @@ export const SerialisedItemRequest = z.codec(
   UUID,
   z.xor([z.instanceof(ItemRequest), createApolloInstanceSchema(ItemRequest)]),
   {
-    decode: (id) => services.itemRequestService.getItemRequest(id),
+    decode: (id) => services.itemRequestService.getItemRequestById(id),
     encode: (data) => UUID.parse(data.id),
   },
 );

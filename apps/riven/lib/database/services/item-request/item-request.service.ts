@@ -9,7 +9,6 @@ import { BaseService } from "../core/base-service.ts";
 import { persistRequestedMovie } from "./utilities/persist-requested-movie.ts";
 import { persistRequestedShow } from "./utilities/persist-requested-show.ts";
 
-import type { FilterQuery } from "@mikro-orm/core";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 import type { UUID } from "node:crypto";
 
@@ -45,13 +44,13 @@ export class ItemRequestService extends BaseService {
   }
 
   @CreateRequestContext()
-  async getItemRequest(query: FilterQuery<ItemRequest>) {
-    return this.em.findOneOrFail(ItemRequest, query);
+  async getItemRequestById(id: UUID) {
+    return this.em.findOneOrFail(ItemRequest, id);
   }
 
   @CreateRequestContext()
   async markAsFailed(id: UUID) {
-    const itemRequest = await this.getItemRequest(id);
+    const itemRequest = await this.getItemRequestById(id);
 
     this.em.persist(itemRequest);
     this.em.assign(itemRequest, {

@@ -92,7 +92,9 @@ export async function persistShowIndexerData(
       indexedAt,
     });
 
-    await em.upsert(Show, show, { onConflictExcludeFields: ["indexedAt"] });
+    await em.upsert(Show, show, {
+      onConflictExcludeFields: ["indexedAt"],
+    });
 
     for (const season of Object.values(item.seasons)) {
       const seasonTitle = [

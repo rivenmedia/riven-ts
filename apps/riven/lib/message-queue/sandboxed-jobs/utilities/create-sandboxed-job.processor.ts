@@ -75,7 +75,7 @@ export function createSandboxedJobProcessor<
               job,
               scope,
               client,
-            } as never)) as z.infer<T["shape"]["output"]>;
+            })) as z.infer<T["shape"]["output"]>;
 
             await client.clearStore();
 

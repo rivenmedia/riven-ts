@@ -29,7 +29,7 @@ export const processItemRequestProcessor =
 
         const parent = createJobParentConfig(job);
 
-        const itemRequest = await itemRequestService.getItemRequest(
+        const itemRequest = await itemRequestService.getItemRequestById(
           job.data.itemRequestId,
         );
 
