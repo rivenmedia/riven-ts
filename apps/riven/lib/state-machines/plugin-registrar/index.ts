@@ -11,6 +11,7 @@ import {
 } from "xstate";
 import { ZodError } from "zod";
 
+import packageJson from "../../../package.json" with { type: "json" };
 import { logger } from "../../utilities/logger/logger.ts";
 import { redisCache } from "../../utilities/redis-cache.ts";
 import { settings } from "../../utilities/settings.ts";
@@ -128,6 +129,7 @@ export const pluginRegistrarMachine = setup({
                   },
                   settings: pluginSettings.get(plugin.settingsSchema),
                   telemetry,
+                  userAgent: `Riven/${packageJson.version} (${pluginName})`,
                 });
 
                 dataSources.set(DataSource, instance);

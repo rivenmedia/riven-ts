@@ -66,11 +66,6 @@ FROM core-os AS builder
 
     WORKDIR ${HOME}
 
-    COPY --from=prepare \
-        ${HOME}/out/pnpm-lock.yaml \
-        ${HOME}/out/pnpm-workspace.yaml \
-        ./
-
     COPY --from=prepare ${HOME}/out/json/ ./
 
     RUN --mount=type=cache,id=pnpm,target=${PNPM_STORE} pnpm install
