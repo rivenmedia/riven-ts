@@ -5,7 +5,7 @@ import { StremThruSettingsResolver } from "./schema/stremthru-settings.resolver.
 import { StremThruResolver } from "./schema/stremthru.resolver.ts";
 import { Store } from "./schemas/store.schema.ts";
 import { pluginConfig } from "./stremthru-plugin.config.ts";
-import { StoreKeys, StremThruSettings } from "./stremthru-settings.schema.ts";
+import { StremThruSettings } from "./stremthru-settings.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
@@ -51,27 +51,12 @@ export default {
     },
     // eslint-disable-next-line @typescript-eslint/require-await
     "riven.media-item.download.provider-list-requested": async ({
-      settings,
+      dataSources,
     }) => {
-      const stremthruSettings = settings.get(StremThruSettings);
-
-      const enabledProviders = Object.keys(StoreKeys.shape).reduce<Store[]>(
-        (acc, val) => {
-          const apiKey = stremthruSettings[val as keyof StoreKeys];
-
-          if (!apiKey) {
-            return acc;
-          }
-
-          acc.push(Store.parse(val.replace("ApiKey", "")));
-
-          return acc;
-        },
-        [],
-      );
+      const api = dataSources.get(StremThruTorzAPI);
 
       return {
-        providers: enabledProviders,
+        providers: [...api.validStores],
       };
     },
     "riven.media-item.scrape.requested": async ({ dataSources, event }) => {
@@ -112,7 +97,12 @@ export default {
     },
   },
   settingsSchema: StremThruSettings,
-  validator() {
-    return Promise.resolve(true);
+  async validator({ dataSources }) {
+    const results = await Promise.all([
+      dataSources.get(StremThruTorzAPI).validate(),
+      dataSources.get(StremThruTorznabAPI).validate(),
+    ]);
+
+    return results.every((isValid) => isValid);
   },
 } satisfies RivenPlugin as RivenPlugin;

@@ -1,0 +1,314 @@
+---
+title: Plugin SDK
+description: Build custom plugins for Riven TS using the Plugin SDK.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+The Plugin SDK (`@repo/util-plugin-sdk`) provides everything you need to build plugins for Riven. Every integration in Riven is a plugin - from TMDB metadata lookup to Torrentio scraping.
+
+<Callout>
+  The SDK is not yet published to npm. Currently, plugins live within the
+  monorepo as workspace packages. Community plugin distribution (via npm
+  install) is planned.
+</Callout>
+
+## Plugin Interface
+
+Every plugin must implement the `RivenPlugin` interface:
+
+```typescript
+interface RivenPlugin {
+  name: Symbol; // Unique identifier
+  version: string; // Semver version
+  dataSources?: BaseDataSource[]; // HTTP API clients (optional)
+  resolvers: Function[]; // GraphQL resolvers (required, min 1)
+  hooks?: EventHandlers; // Event handlers (optional)
+  context?: Function; // Custom context (optional)
+  settingsSchema: ZodObject; // Settings validation schema
+  validator: Function; // Check if plugin can start
+}
+```
+
+## Creating a Plugin
+
+<Steps>
+<Step>
+
+### Scaffold with Turbo Generator
+
+```bash
+turbo gen plugin --args my-service
+```
+
+This creates a complete plugin at `packages/plugin-my-service/` and adds it as a dependency to the main app.
+
+</Step>
+<Step>
+
+### Define the Plugin Config
+
+```typescript title="lib/my-service-plugin.config.ts"
+import type { RivenPluginConfig } from "@repo/util-plugin-sdk";
+
+export const pluginConfig = {
+  name: Symbol("@repo/plugin-my-service"),
+} satisfies RivenPluginConfig;
+```
+
+The Symbol is used for plugin identification, queue naming, and dependency injection.
+
+</Step>
+<Step>
+
+### Implement the DataSource
+
+DataSources are HTTP API clients that extend `BaseDataSource`. They include built-in rate limiting, caching, retry logic, and telemetry.
+
+```typescript title="lib/datasource/my-service.datasource.ts"
+import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
+
+export class MyServiceAPI extends BaseDataSource<MyServiceSettings> {
+  override baseURL = "https://api.myservice.com/v1/";
+  override serviceName = "MyService";
+
+  protected override readonly rateLimiterOptions: RateLimiterOptions = {
+    max: 50,
+    duration: 1000,
+  };
+
+  // Authentication
+  static override getApiToken() {
+    return process.env["MY_SERVICE_API_KEY"];
+  }
+
+  protected override willSendRequest(
+    _path: string,
+    requestOpts: AugmentedRequest,
+  ) {
+    if (!this.token) throw new Error("API token is not set");
+    requestOpts.headers["x-api-key"] = this.token;
+  }
+
+  // Validation (called on startup)
+  override async validate() {
+    try {
+      await this.get("health");
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // Business methods
+  async getItems(listId: string): Promise<ExternalIds[]> {
+    const response = await this.get(`lists/${listId}/items`, {
+      cacheOptions: { ttl: 1000 * 60 * 5 },
+    });
+    return response.items.map((item) => ({
+      imdbId: item.imdb_id,
+      tmdbId: item.tmdb_id,
+    }));
+  }
+}
+```
+
+</Step>
+<Step>
+
+### Create GraphQL Resolvers
+
+```typescript title="lib/schema/my-service.resolver.ts"
+import { PluginDataSource } from "@repo/util-plugin-sdk";
+
+import { Query, Resolver } from "type-graphql";
+
+import { MyServiceAPI } from "../datasource/my-service.datasource.ts";
+import { pluginConfig } from "../my-service-plugin.config.ts";
+
+@Resolver()
+export class MyServiceResolver {
+  @Query((_returns) => Boolean)
+  async myServiceIsValid(
+    @PluginDataSource(pluginConfig.name, MyServiceAPI) api: MyServiceAPI,
+  ): Promise<boolean> {
+    return await api.validate();
+  }
+}
+```
+
+Also create a settings resolver to expose plugin config via GraphQL:
+
+```typescript title="lib/schema/my-service-settings.resolver.ts"
+import { Settings } from "@repo/util-plugin-sdk";
+
+import { FieldResolver, Resolver } from "type-graphql";
+
+@Resolver((_of) => Settings)
+export class MyServiceSettingsResolver {
+  @FieldResolver((_returns) => MyServiceSettings)
+  myService(): MyServiceSettings {
+    return { apiKey: "my-service-api-key" };
+  }
+}
+```
+
+</Step>
+<Step>
+
+### Export the Plugin
+
+```typescript title="lib/index.ts"
+import { type RivenPlugin } from "@repo/util-plugin-sdk";
+
+import packageJson from "../package.json";
+import { MyServiceAPI } from "./datasource/my-service.datasource.ts";
+import { pluginConfig } from "./my-service-plugin.config.ts";
+import { MyServiceSettingsResolver } from "./schema/my-service-settings.resolver.ts";
+import { MyServiceResolver } from "./schema/my-service.resolver.ts";
+
+export default {
+  name: pluginConfig.name,
+  version: packageJson.version,
+  dataSources: [MyServiceAPI],
+  resolvers: [MyServiceResolver, MyServiceSettingsResolver],
+
+  hooks: {
+    "riven.content-service.requested": async ({ dataSources }) => {
+      const api = dataSources.get(MyServiceAPI);
+      if (!api) return { movies: [], shows: [] };
+
+      const items = await api.getItems("default-list");
+      return {
+        movies: items.filter((i) => i.type === "movie"),
+        shows: items.filter((i) => i.type === "show"),
+      };
+    },
+  },
+
+  validator() {
+    return Promise.resolve(Boolean(process.env["MY_SERVICE_API_KEY"]));
+  },
+} satisfies RivenPlugin as RivenPlugin;
+```
+
+</Step>
+<Step>
+
+### Write Tests
+
+```typescript title="lib/datasource/__tests__/validate.spec.ts"
+import { it } from "@repo/util-plugin-testing/plugin-test-context";
+
+import { HttpResponse } from "msw";
+import { expect } from "vitest";
+
+import { pluginConfig } from "../../my-service-plugin.config.ts";
+import { MyServiceAPI } from "../my-service.datasource.ts";
+
+it("returns true if the request succeeds", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  server.use(getHealthCheckHandler());
+
+  const api = new MyServiceAPI({
+    ...dataSourceConfig,
+    pluginSymbol: pluginConfig.name,
+    settings: { apiKey: "test-key" },
+  });
+
+  expect(await api.validate()).toBe(true);
+});
+```
+
+Run tests with:
+
+```bash
+pnpm turbo test --filter=@repo/plugin-my-service
+```
+
+</Step>
+</Steps>
+
+## Available Hooks
+
+Plugins can subscribe to system events through hooks:
+
+| Event                              | Description                    | Return Type         |
+| ---------------------------------- | ------------------------------ | ------------------- |
+| `riven.core.started`               | System has started             | `void`              |
+| `riven.core.shutdown`              | System is shutting down        | `void`              |
+| `riven.content-service.requested`  | Fetch requested media items    | `{ movies, shows }` |
+| `media-item.index.requested.movie` | Movie needs metadata indexing  | -                   |
+| `media-item.index.requested.show`  | Show needs metadata indexing   | -                   |
+| `media-item.scrape.requested`      | Item needs torrent scraping    | -                   |
+| `media-item.download.requested`    | Item needs downloading/caching | -                   |
+| `media-item.stream-link.requested` | Item needs stream URL          | -                   |
+| `media-item.subtitle.requested`    | Item needs subtitles           | -                   |
+
+## DataSource Features
+
+`BaseDataSource` extends Apollo's `RESTDataSource` with:
+
+- **Rate Limiting** - BullMQ-based request queue with configurable limits
+- **HTTP Caching** - Automatic TTL-based caching
+- **Retry Logic** - Default 3 attempts with exponential backoff
+- **Telemetry** - OpenTelemetry tracing for all requests
+- **Logging** - Winston logger integration
+
+## Plugin Structure
+
+```
+packages/plugin-my-service/
+├── lib/
+│   ├── index.ts                    # Plugin export
+│   ├── my-service-plugin.config.ts # Plugin identifier
+│   ├── datasource/
+│   │   ├── my-service.datasource.ts
+│   │   └── __tests__/
+│   │       └── validate.spec.ts
+│   └── schema/
+│       ├── my-service.resolver.ts
+│       ├── my-service-settings.resolver.ts
+│       ├── types/
+│       │   └── my-service-settings.type.ts
+│       └── arguments/
+│           └── list-id.arguments.ts
+├── docs/
+│   └── settings.md                 # Auto-generated settings doc
+├── package.json
+└── tsconfig.json
+```
+
+## OpenAPI Code Generation (Optional)
+
+If the target API has an OpenAPI spec, use Kubb for type generation:
+
+```typescript title="kubb.config.ts"
+import { buildKubbConfig } from "@repo/core-util-kubb-config";
+
+import { defineConfig } from "@kubb/core";
+
+export default buildKubbConfig({
+  input: { path: "https://api.myservice.com/swagger.json" },
+  name: "MyService",
+  baseURL: "https://api.myservice.com",
+});
+```
+
+```bash
+pnpm turbo codegen --filter=@repo/plugin-my-service
+```
+
+This generates TypeScript types, Zod schemas, and MSW mock handlers in `lib/__generated__/`.
+
+## Best Practices
+
+- Keep DataSources thin - they're API wrappers, not business logic
+- Use Zod for all response validation
+- Transform API responses to common types (`ExternalIds[]`)
+- Test both success and failure cases
+- Follow the naming convention: `{pluginName}{Action}` for GraphQL queries
+- Never redefine `@ObjectType()` classes that exist in the SDK (GraphQL requires unique names)

@@ -740,11 +740,11 @@ export const mainRunnerMachine = setup({
             actions: { type: "requestContentServices" },
           },
 
-          // "riven-internal.retry-library": {
-          //   description:
-          //     "Retries any incomplete media items and item requests.",
-          //   actions: { type: "retryLibrary" },
-          // },
+          "riven-internal.retry-library": {
+            description:
+              "Retries any incomplete media items and item requests.",
+            actions: { type: "retryLibrary" },
+          },
 
           /**
            * External events

@@ -107,8 +107,12 @@ export default {
     },
   },
   settingsSchema: PlexSettings,
-  validator({ dataSources }) {
-    const plexTvApi = dataSources.get(PlexTvAPI);
-    return plexTvApi.validate();
+  async validator({ dataSources }) {
+    const results = await Promise.all([
+      dataSources.get(PlexAPI).validate(),
+      dataSources.get(PlexTvAPI).validate(),
+    ]);
+    
+    return results.every((isValid) => isValid);
   },
 } satisfies RivenPlugin as RivenPlugin;

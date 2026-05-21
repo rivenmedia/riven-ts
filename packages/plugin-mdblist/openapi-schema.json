@@ -1283,7 +1283,7 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "number"
+                            "type": "boolean"
                           },
                           "title": {
                             "type": "string"
@@ -1313,20 +1313,23 @@
                             }
                           },
                           "language": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "mediatype": {
                             "type": "string"
                           },
                           "release_year": {
-                            "type": "number"
+                            "type": "number",
+                            "nullable": true
                           },
                           "spoken_language": {
                             "type": "string",
                             "nullable": true
                           },
                           "country": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "ratings": {
                             "type": "array",
@@ -1907,7 +1910,7 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "number"
+                            "type": "boolean"
                           },
                           "title": {
                             "type": "string"
@@ -1937,20 +1940,23 @@
                             }
                           },
                           "language": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "mediatype": {
                             "type": "string"
                           },
                           "release_year": {
-                            "type": "number"
+                            "type": "number",
+                            "nullable": true
                           },
                           "spoken_language": {
                             "type": "string",
                             "nullable": true
                           },
                           "country": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -1982,7 +1988,7 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "number"
+                            "type": "boolean"
                           },
                           "title": {
                             "type": "string"
@@ -1996,20 +2002,23 @@
                             "nullable": true
                           },
                           "language": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "mediatype": {
                             "type": "string"
                           },
                           "release_year": {
-                            "type": "number"
+                            "type": "number",
+                            "nullable": true
                           },
                           "spoken_language": {
                             "type": "string",
                             "nullable": true
                           },
                           "country": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -2757,14 +2766,16 @@
                       }
                     },
                     "language": {
-                      "type": "string"
+                      "type": "string",
+                      "nullable": true
                     },
                     "spoken_language": {
                       "type": "string",
                       "nullable": true
                     },
                     "country": {
-                      "type": "string"
+                      "type": "string",
+                      "nullable": true
                     },
                     "certification": {
                       "type": "string"
@@ -4911,7 +4922,7 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "number"
+                            "type": "boolean"
                           },
                           "title": {
                             "type": "string"
@@ -4941,20 +4952,23 @@
                             }
                           },
                           "language": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "mediatype": {
                             "type": "string"
                           },
                           "release_year": {
-                            "type": "number"
+                            "type": "number",
+                            "nullable": true
                           },
                           "spoken_language": {
                             "type": "string",
                             "nullable": true
                           },
                           "country": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -10226,7 +10240,7 @@
                             "type": "number"
                           },
                           "adult": {
-                            "type": "number"
+                            "type": "boolean"
                           },
                           "title": {
                             "type": "string"
@@ -10239,13 +10253,15 @@
                             "nullable": true
                           },
                           "language": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "mediatype": {
                             "type": "string"
                           },
                           "release_year": {
-                            "type": "number"
+                            "type": "number",
+                            "nullable": true
                           },
                           "watchlist_at": {
                             "type": "string"
@@ -10255,7 +10271,8 @@
                             "nullable": true
                           },
                           "country": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "rank": {
                             "type": "number",
@@ -10287,7 +10304,7 @@
                             "type": "number"
                           },
                           "adult": {
-                            "type": "number"
+                            "type": "boolean"
                           },
                           "title": {
                             "type": "string"
@@ -10301,13 +10318,15 @@
                             "nullable": true
                           },
                           "language": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "mediatype": {
                             "type": "string"
                           },
                           "release_year": {
-                            "type": "number"
+                            "type": "number",
+                            "nullable": true
                           },
                           "watchlist_at": {
                             "type": "string"
@@ -10317,7 +10336,8 @@
                             "nullable": true
                           },
                           "country": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "rank": {
                             "type": "number",

@@ -1,4 +1,9 @@
-import { type ActorRefFromLogic, enqueueActions, setup } from "xstate";
+import {
+  type ActorRefFromLogic,
+  createActor,
+  enqueueActions,
+  setup,
+} from "xstate";
 
 import {
   type BootstrapMachineOutput,
@@ -11,7 +16,7 @@ import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 import { unmountVfs } from "./actors/unmount-vfs.actor.ts";
 
 import type { ValidPluginMap } from "../../types/plugins.ts";
-import type { SessionID } from "../../utilities/logger/log-context.ts";
+import type { SessionID } from "../../utilities/logger/session-id.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";
@@ -28,7 +33,7 @@ export interface RivenMachineInput {
   sessionId: SessionID;
 }
 
-export type RivenMachineEvent = CoreShutdownEvent;
+export type RivenMachineEvent = CoreShutdownEvent | { type: "BOOTSTRAP" };
 
 export const rivenMachine = setup({
   types: {
@@ -80,7 +85,7 @@ export const rivenMachine = setup({
   .extend(withLogAction)
   .createMachine({
     id: "Riven",
-    initial: "Bootstrapping",
+    initial: "Idle",
     context: ({ self, spawn }) => ({
       mainRunnerRef: spawn("mainRunnerMachine", {
         id: "mainRunnerMachine",
@@ -93,6 +98,11 @@ export const rivenMachine = setup({
       "riven.core.shutdown": ".Shutdown",
     },
     states: {
+      Idle: {
+        on: {
+          BOOTSTRAP: "Bootstrapping",
+        },
+      },
       Bootstrapping: {
         invoke: {
           id: "bootstrapMachine",
@@ -252,14 +262,10 @@ export const rivenMachine = setup({
       },
       Exited: {
         type: "final",
-        entry: [
-          {
-            type: "log",
-            params: {
-              message: "Riven has exited.",
-            },
-          },
-        ],
       },
     },
   });
+
+export function createRivenMachine(input: RivenMachineInput) {
+  return createActor(rivenMachine, { input });
+}
