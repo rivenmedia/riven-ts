@@ -40,6 +40,7 @@ import { ParseScrapeResultsSandboxedJob } from "../../message-queue/sandboxed-jo
 import { ValidateTorrentFilesSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.schema.ts";
 import { createSandboxedWorker } from "../../message-queue/sandboxed-jobs/utilities/create-sandboxed-worker.ts";
 import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
+import { normaliseConcurrency } from "../../message-queue/utilities/normalise-concurrency.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
@@ -279,12 +280,6 @@ export const mainRunnerMachine = setup({
         target: ".Running",
         actions: assign(
           ({ context: { availableParallelism }, event: { input }, self }) => {
-            const calculateConcurrency = (concurrencyFraction: number) =>
-              Math.max(
-                1,
-                Math.floor(availableParallelism * concurrencyFraction),
-              );
-
             return {
               plugins: input.plugins,
               publishableEvents: input.publishableEvents,
@@ -387,7 +382,11 @@ export const mainRunnerMachine = setup({
                       .resolve("@repo/riven/workers/parse-scrape-results"),
                   ),
                   {},
-                  { concurrency: calculateConcurrency(0.25) },
+                  {
+                    concurrency: normaliseConcurrency(
+                      availableParallelism * 0.25,
+                    ),
+                  },
                 ),
                 "download-item.map-items-to-files": createSandboxedWorker(
                   MapItemsToFilesSandboxedJob,
@@ -396,7 +395,11 @@ export const mainRunnerMachine = setup({
                       .resolve("@repo/riven/workers/map-items-to-files"),
                   ),
                   {},
-                  { concurrency: calculateConcurrency(0.75) },
+                  {
+                    concurrency: normaliseConcurrency(
+                      availableParallelism * 0.75,
+                    ),
+                  },
                 ),
                 "download-item.validate-torrent-files": createSandboxedWorker(
                   ValidateTorrentFilesSandboxedJob,
@@ -405,7 +408,11 @@ export const mainRunnerMachine = setup({
                       .resolve("@repo/riven/workers/validate-torrent-files"),
                   ),
                   {},
-                  { concurrency: calculateConcurrency(0.25) },
+                  {
+                    concurrency: normaliseConcurrency(
+                      availableParallelism * 0.25,
+                    ),
+                  },
                 ),
               },
             };
