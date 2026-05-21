@@ -82,7 +82,7 @@ catalog:
   fumadocs-mdx: ^14.2.4
   fumadocs-ui: ^16.4.2
   glob: ^13.0.6
-  globals: ^16.5.0
+  globals: ^17.6.0
   graphql: 16.14.0
   graphql-scalars: ^1.25.0
   husky: ^9.1.7
