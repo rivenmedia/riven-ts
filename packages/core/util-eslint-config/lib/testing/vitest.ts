@@ -6,7 +6,7 @@ import type { ConfigArray } from "typescript-eslint";
 
 export const vitestConfig = [
   {
-    files: [testFiles],
+    files: [...testFiles],
     plugins: {
       vitest,
     },

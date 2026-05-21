@@ -81,6 +81,7 @@
   "devDependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@apollo/utils.keyvadapter": "catalog:",
+    "@keyv/redis": "catalog:",
     "@mikro-orm/core": "catalog:",
     "@mikro-orm/reflection": "catalog:",
     "@mikro-orm/sqlite": "catalog:",
@@ -93,6 +94,8 @@
     "bullmq": "catalog:",
     "class-validator": "catalog:",
     "eslint": "catalog:",
+    "msw": "catalog:",
+    "redis-memory-server": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "winston": "catalog:"

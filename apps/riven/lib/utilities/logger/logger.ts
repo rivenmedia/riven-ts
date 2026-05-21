@@ -3,16 +3,22 @@ import "./types/logform.ts";
 import { ecsFormat as baseEcsFormat } from "@elastic/ecs-winston-format";
 import path from "node:path";
 import { createLogger, format, transports } from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
 
 import { settings } from "../settings.ts";
 import { consoleFormat } from "./formatters/console.format.ts";
 import { ecsFileFormat } from "./formatters/ecs-file.format.ts";
 import { fileFormat } from "./formatters/file.format.ts";
+import { maskFormat } from "./formatters/mask.format.ts";
 import { sentryMetaFormat } from "./formatters/sentry-meta.format.ts";
 import { validationErrorMetaFormat } from "./formatters/validation-error-meta.format.ts";
 import { defaultLogContext, withLogContext } from "./log-context.ts";
 
 const logDir = path.resolve(process.cwd(), settings.logDirectory);
+const ecsLogDir = path.join(logDir, "ecs");
+const ecsFileName = "ecs.json";
+
+export const ecsSymlinkPath = path.join(ecsLogDir, ecsFileName);
 
 export const logger = createLogger({
   level: settings.logLevel,
@@ -38,21 +44,20 @@ export const logger = createLogger({
 if (settings.loggingEnabled) {
   // ECS logs will always be created for debugging purposes
   logger.add(
-    new transports.File({
-      filename: "ecs.json",
-      dirname: logDir,
-      tailable: true,
-      maxsize: 10 * 1024 * 1024, // 10MB
-      maxFiles: 5,
-      format: ecsFileFormat,
+    new DailyRotateFile({
+      frequency: "24h",
+      dirname: ecsLogDir,
+      maxFiles: "5d",
+      format: format.combine(maskFormat(), ecsFileFormat),
       zippedArchive: true,
       level: "silly", // Send ALL logs to ECS, regardless of log level config
+      json: true,
+      utc: true,
+      createSymlink: true,
+      symlinkName: ecsFileName,
+      auditFile: path.join(ecsLogDir, ".audit.json"),
       handleExceptions: true,
       handleRejections: true,
-    }).on("error", (error) => {
-      withLogContext(defaultLogContext, () => {
-        console.error("Error in ECS file transport:", { err: error });
-      });
     }),
   );
 
@@ -84,7 +89,7 @@ if (settings.loggingEnabled) {
         tailable: true,
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
-        format: fileFormat,
+        format: format.combine(maskFormat(), fileFormat),
         handleRejections: true,
       }).on("error", (error) => {
         withLogContext(defaultLogContext, () => {
@@ -100,7 +105,7 @@ if (settings.loggingEnabled) {
         tailable: true,
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
-        format: fileFormat,
+        format: format.combine(maskFormat(), fileFormat),
         handleRejections: true,
         handleExceptions: true,
       }).on("error", (error) => {
@@ -117,7 +122,7 @@ if (settings.loggingEnabled) {
         tailable: true,
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
-        format: fileFormat,
+        format: format.combine(maskFormat(), fileFormat),
         handleExceptions: true,
       }).on("error", (error) => {
         withLogContext(defaultLogContext, () => {
