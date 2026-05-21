@@ -9,7 +9,7 @@ import {
 
 import type { TransformableInfo } from "logform";
 
-const ELASTICSEARCH_URL = "http://dev.riven.tv:9200";
+const ELASTICSEARCH_URL = "https://elastic.dev.riven.tv";
 const ELASTICSEARCH_AUTH = `Basic ${Buffer.from("riven_log_uploader:riven-shared-logs-upload-only").toString("base64")}`;
 const INDEX_NAME = "riven-shared-logs";
 

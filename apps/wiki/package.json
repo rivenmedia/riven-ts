@@ -1,0 +1,40 @@
+{
+  "name": "@repo/wiki",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "codegen:wiki-docs": "node scripts/sync-plugin-docs.mjs && node scripts/sync-core-docs.mjs",
+    "dev": "next dev --turbopack",
+    "postinstall": "fumadocs-mdx",
+    "lint": "eslint",
+    "start": "next start",
+    "sync-core-docs": "node scripts/sync-core-docs.mjs",
+    "sync-plugin-docs": "node scripts/sync-plugin-docs.mjs"
+  },
+  "dependencies": {
+    "fumadocs-core": "catalog:",
+    "fumadocs-mdx": "catalog:",
+    "fumadocs-ui": "catalog:",
+    "lucide-react": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "shiki": "catalog:",
+    "yaml": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-typescript-config": "workspace:^",
+    "@tailwindcss/postcss": "catalog:",
+    "@types/mdx": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "autoprefixer": "catalog:",
+    "postcss": "catalog:",
+    "schema-dts": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -52,6 +52,17 @@ export class SeerrResolver {
       return true;
     }
 
+    if (
+      parsedInput.notification_type !== "MEDIA_APPROVED" &&
+      parsedInput.notification_type !== "MEDIA_AUTO_APPROVED"
+    ) {
+      logger.warn(
+        `Received unsupported Seerr notification type: ${parsedInput.notification_type}`,
+      );
+
+      return false;
+    }
+
     const commonFields = {
       externalRequestId: parsedInput.request.request_id,
       requestedBy: parsedInput.request.requestedBy_email,

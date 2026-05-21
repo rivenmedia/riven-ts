@@ -1,0 +1,188 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for Riven TS.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+## VFS / Mount Issues
+
+### Mount point not visible on host
+
+**Symptom**: Files appear inside the container but `/mnt/riven` is empty on the host.
+
+**Fix**: Ensure mount propagation is set up correctly:
+
+1. Check the systemd service is running:
+
+```bash
+sudo systemctl status riven-mount.service
+```
+
+2. Verify propagation:
+
+```bash
+findmnt -o TARGET,PROPAGATION /mnt/riven
+# Must show "shared"
+```
+
+3. Ensure the Docker volume mount uses `rshared`:
+
+```yaml
+volumes:
+  - /mnt/riven:/mnt/riven:rshared,z
+```
+
+### "Transport endpoint is not connected"
+
+**Symptom**: Accessing `/mnt/riven` gives a "Transport endpoint is not connected" error.
+
+**Fix**: The FUSE mount was interrupted. Restart the container:
+
+```bash
+docker compose restart riven
+```
+
+If that doesn't work, manually unmount and restart:
+
+```bash
+sudo fusermount -uz /mnt/riven
+docker compose restart riven
+```
+
+### Permission denied on /dev/fuse
+
+Ensure the container has the required capabilities:
+
+```yaml
+cap_add:
+  - SYS_ADMIN
+security_opt:
+  - apparmor:unconfined
+devices:
+  - /dev/fuse
+```
+
+## Database Issues
+
+### Connection refused to PostgreSQL
+
+Check that PostgreSQL is healthy before Riven starts:
+
+```yaml
+depends_on:
+  postgres:
+    condition: service_healthy
+```
+
+Verify the connection URL matches your PostgreSQL credentials:
+
+```bash
+RIVEN_SETTING__databaseUrl="postgres+psycopg2://user:password@postgres:5432/riven"
+```
+
+### Migration errors
+
+Riven runs migrations automatically on startup. If a migration fails:
+
+1. Check the logs: `docker compose logs riven`
+2. Ensure you're running the latest version: `docker compose pull`
+3. If the database is corrupted, you may need to reset it (data loss):
+
+```bash
+docker compose down -v  # Removes volumes!
+docker compose up -d
+```
+
+## Plugin Issues
+
+### Plugin not starting
+
+Check the logs for validation errors:
+
+```bash
+docker compose logs riven | grep -i plugin
+```
+
+Common causes:
+
+- Missing API key environment variable
+- Invalid API key (expired or wrong permissions)
+- Target service is unreachable from the container
+
+### "API token is not set"
+
+The plugin's environment variable is not set or empty. Check your `.env` file:
+
+```bash
+# Correct format
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_TMDB__apiKey="your-key"
+
+# Common mistakes:
+# Missing quotes around values with special characters
+# Extra spaces around the = sign
+# Wrong plugin name (case-sensitive)
+```
+
+## Redis Issues
+
+### Redis connection refused
+
+Ensure Redis is running and healthy:
+
+```bash
+docker compose ps redis
+docker compose logs redis
+```
+
+Check the Redis URL:
+
+```bash
+RIVEN_SETTING__redisUrl="redis://redis:6379"
+```
+
+## Media Server Issues
+
+### Plex/Jellyfin doesn't see new files
+
+1. Verify VFS is mounted: `ls /mnt/riven` should show files
+2. Check the media server volume mount uses `rslave`:
+
+```yaml
+volumes:
+  - /mnt/riven:/mnt/riven:rslave,z
+```
+
+3. Trigger a library scan in your media server
+4. If using Plex plugin, ensure the `plexLibraryPath` setting matches
+
+## Docker Issues
+
+### Container keeps restarting
+
+Check the logs:
+
+```bash
+docker compose logs --tail=50 riven
+```
+
+Common causes:
+
+- Missing required environment variables
+- Database not reachable
+- Redis not reachable
+- Invalid VFS mount path
+
+### Out of memory
+
+Riven's memory usage depends on library size. If you're running out of memory:
+
+- Increase Docker's memory limit
+- Reduce the number of concurrent workers
+- Ensure Redis has enough memory for the job queue
+
+## Getting Help
+
+- Check the [GitHub Issues](https://github.com/rivenmedia/riven-ts/issues)
+- Join the [Discord Server](https://discord.riven.tv)
+- Email [contact@riven.tv](mailto:contact@riven.tv)

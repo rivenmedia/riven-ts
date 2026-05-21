@@ -27,6 +27,7 @@
     "@repo/core-util-graphql-helpers": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "class-validator": "catalog:",
+    "es-toolkit": "catalog:",
     "type-graphql": "catalog:",
     "zod": "catalog:"
   },

@@ -1,0 +1,14 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "index",
+    "versions",
+    "getting-started",
+    "architecture",
+    "configuration",
+    "deployment",
+    "plugins",
+    "plugin-sdk",
+    "troubleshooting"
+  ]
+}

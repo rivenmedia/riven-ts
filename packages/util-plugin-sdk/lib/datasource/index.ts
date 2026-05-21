@@ -70,6 +70,7 @@ export interface BaseDataSourceConfig<
   logger: Logger;
   connection: ConnectionOptions;
   telemetry: Telemetry;
+  userAgent: string;
 }
 
 export abstract class BaseDataSource<
@@ -115,6 +116,7 @@ export abstract class BaseDataSource<
     requestAttempts = 3,
     connection,
     telemetry,
+    userAgent,
     ...apolloDataSourceOptions
   }: BaseDataSourceConfig<T>) {
     super(apolloDataSourceOptions);
@@ -164,6 +166,8 @@ export abstract class BaseDataSource<
           job.data.incomingRequest.params = urlSearchParamsCodec.decode(
             job.data.params,
           );
+          job.data.incomingRequest.headers ??= {};
+          job.data.incomingRequest.headers["user-agent"] = userAgent;
 
           return super.fetch(job.data.path, job.data.incomingRequest);
         });
