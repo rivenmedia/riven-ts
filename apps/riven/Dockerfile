@@ -18,6 +18,7 @@ FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS core-os
     ARG USER
     ARG PNPM_HOME
     ARG PNPM_VERSION
+    ARG TURBO_VERSION
     ARG HOME
 
     ENV PNPM_HOME=${PNPM_HOME}
@@ -38,6 +39,9 @@ FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS core-os
     # Install pnpm
     RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
+    RUN pnpm add turbo@${TURBO_VERSION} --global
+    RUN turbo telemetry disable
+
 FROM core-os AS prepare
 
     LABEL builder="true"
@@ -46,9 +50,6 @@ FROM core-os AS prepare
     ARG HOME
 
     WORKDIR ${HOME}
-
-    RUN pnpm add turbo@${TURBO_VERSION} --global
-    RUN turbo telemetry disable
 
     COPY . .
 
