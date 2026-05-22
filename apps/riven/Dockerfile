@@ -68,7 +68,7 @@ FROM core-os AS builder
 
     COPY --from=prepare ${HOME}/out/json/ ./
 
-    RUN --mount=type=cache,id=pnpm,target=${PNPM_STORE} pnpm install
+    RUN --mount=type=cache,id=pnpm-${BUILDPLATFORM},target=${PNPM_STORE} pnpm install
 
     COPY --from=prepare ${HOME}/out/full/ ./
 
