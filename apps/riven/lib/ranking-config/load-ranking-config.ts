@@ -3,7 +3,7 @@ import {
   SettingsSchema,
 } from "@repo/util-rank-torrent-name";
 
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 import type {
@@ -278,11 +278,18 @@ export function loadRankingConfig(
   const resolvedPath = path.resolve(configPath);
 
   if (!existsSync(resolvedPath)) {
-    writeFileSync(
-      resolvedPath,
-      JSON.stringify(DEFAULT_CONFIG, null, 2),
-      "utf8",
-    );
+    try {
+      mkdirSync(path.dirname(resolvedPath), { recursive: true });
+      writeFileSync(
+        resolvedPath,
+        JSON.stringify(DEFAULT_CONFIG, null, 2),
+        "utf8",
+      );
+    } catch (cause) {
+      throw new Error(
+        `Failed to create ranking config file at "${resolvedPath}": ${String(cause)}`,
+      );
+    }
 
     return {
       settings: SettingsSchema.parse(DEFAULT_SETTINGS_INPUT),
@@ -308,6 +315,16 @@ export function loadRankingConfig(
     throw new Error(
       `Ranking config file at "${resolvedPath}" contains invalid JSON. Fix the syntax errors or delete the file to regenerate it with defaults.`,
     );
+  }
+
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    warn(
+      `Invalid ranking config root value: expected an object with \`settings\` and/or \`rankingModel\` - using defaults`,
+    );
+    return {
+      settings: SettingsSchema.parse(DEFAULT_SETTINGS_INPUT),
+      rankingModel: RankingModelSchema.parse(DEFAULT_RANKING_MODEL_INPUT),
+    };
   }
 
   for (const unknownKey of collectUnknownKeys(

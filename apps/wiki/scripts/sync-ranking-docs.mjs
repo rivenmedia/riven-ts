@@ -394,20 +394,30 @@ function customRanksCategorySection(cat, keys, defaults, isTrash = false) {
 }
 
 // Generates a ### table for a single rankingModel group.
+function validateRankingModelCoverage(rankingModelKeys) {
+  const groupedKeys = Object.values(RANKING_MODEL_GROUPS).flat();
+  const groupedSet = new Set(groupedKeys);
+  const schemaSet = new Set(rankingModelKeys);
+
+  const unknownGrouped = groupedKeys.filter((k) => !schemaSet.has(k));
+  const ungroupedSchema = rankingModelKeys.filter((k) => !groupedSet.has(k));
+
+  if (unknownGrouped.length || ungroupedSchema.length) {
+    throw new Error(
+      `Ranking docs group mismatch. Unknown grouped keys: [${unknownGrouped.join(", ")}]. ` +
+        `Ungrouped schema keys: [${ungroupedSchema.join(", ")}].`,
+    );
+  }
+}
+
 function rankingModelGroupSection(groupName, keys, defaults) {
   return [
     `### ${groupName}`,
     ``,
     tableHeader("Key", "Default", "Description"),
-    ...keys
-      .filter((k) => k in defaults || true) // include all schema keys
-      .map((k) =>
-        tableRow(
-          `\`${k}\``,
-          `\`${defaults[k] ?? 0}\``,
-          ITEM_DESCRIPTIONS[k] ?? "",
-        ),
-      ),
+    ...keys.map((k) =>
+      tableRow(`\`${k}\``, `\`${defaults[k]}\``, ITEM_DESCRIPTIONS[k] ?? ""),
+    ),
   ].join("\n");
 }
 
@@ -419,8 +429,11 @@ function generateMdx(data) {
     languages,
     customRanksKeys,
     customRanksDefaults,
+    rankingModelKeys,
     rankingModelDefaults,
   } = data;
+
+  validateRankingModelCoverage(rankingModelKeys);
 
   const parts = [
     `---`,
