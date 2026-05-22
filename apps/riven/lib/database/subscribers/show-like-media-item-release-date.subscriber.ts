@@ -23,10 +23,6 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
 
     for (const collectionUpdate of uow.getCollectionUpdates()) {
       if (collectionUpdate.owner instanceof Season) {
-        if (!collectionUpdate.isInitialized()) {
-          await collectionUpdate.init();
-        }
-
         const collectionEpisodes = collectionUpdate.filter(
           (episode): episode is Partial<Episode> =>
             episode instanceof Episode && episode.releaseDate != null,
