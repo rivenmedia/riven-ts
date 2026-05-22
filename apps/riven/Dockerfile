@@ -46,7 +46,6 @@ FROM core-os AS prepare
 
     LABEL builder="true"
 
-    ARG TURBO_VERSION
     ARG HOME
 
     WORKDIR ${HOME}
