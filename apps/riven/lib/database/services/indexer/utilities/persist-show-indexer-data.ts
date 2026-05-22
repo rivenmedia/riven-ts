@@ -90,6 +90,7 @@ export async function persistShowIndexerData(
       genres: item.genres.map((genre) => genre.toLowerCase()),
       nextAirDate: null, // Reset the next air date; it will be recalculated during episode processing
       indexedAt,
+      seasons: [],
     });
 
     await em.upsert(Show, show, {
@@ -120,6 +121,7 @@ export async function persistShowIndexerData(
           : season.number > 0,
         itemRequest,
         indexedAt,
+        episodes: [],
       });
 
       show.seasons.add(seasonEntry);
