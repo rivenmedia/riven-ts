@@ -68,7 +68,7 @@ FROM core-os AS builder
 
     COPY --from=prepare ${HOME}/out/json/ ./
 
-    RUN --mount=type=cache,id=pnpm,target=${PNPM_STORE} pnpm install --frozen-lockfile
+    RUN --mount=type=cache,id=pnpm,target=${PNPM_STORE} pnpm -r install --frozen-lockfile
 
     COPY --from=prepare --exclude=pnpm-*.yaml ${HOME}/out/full/ ./
 
