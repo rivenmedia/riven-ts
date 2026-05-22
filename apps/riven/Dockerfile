@@ -75,7 +75,7 @@ FROM core-os AS builder
     ARG TURBO_TEAM
     ENV TURBO_TEAM=${TURBO_TEAM}
 
-    RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN pnpm turbo @repo/riven#build
+    RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN turbo @repo/riven#build
 
 FROM builder AS production-deploy
 
