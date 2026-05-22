@@ -70,7 +70,10 @@ FROM core-os AS builder
 
     RUN --mount=type=cache,id=pnpm,target=${PNPM_STORE} pnpm -r install --frozen-lockfile
 
-    COPY --from=prepare --exclude=pnpm-*.yaml ${HOME}/out/full/ ./
+    COPY --from=prepare ${HOME}/out/full/ ./
+
+    # Replace the previous workspace file to avoid `build` from triggering an installation that fails the Docker process
+    COPY --from=prepare ${HOME}/out/json/pnpm-workspace.yaml pnpm-workspace.yaml
 
     ARG TURBO_TEAM
     ENV TURBO_TEAM=${TURBO_TEAM}
