@@ -63,7 +63,7 @@ export const findValidTorrentProcessor =
 
         try {
           const providers = hasProviderListHook
-            ? await getPluginProviderList(pluginName, parent)
+            ? await getPluginProviderList(pluginName)
             : [];
 
           if (hasProviderListHook && !providers.length) {

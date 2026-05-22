@@ -68,9 +68,9 @@ FROM core-os AS builder
 
     COPY --from=prepare ${HOME}/out/json/ ./
 
-    RUN --mount=type=cache,id=pnpm-${BUILDPLATFORM},target=${PNPM_STORE} pnpm install
+    RUN --mount=type=cache,id=pnpm,target=${PNPM_STORE} pnpm install --frozen-lockfile
 
-    COPY --from=prepare ${HOME}/out/full/ ./
+    COPY --from=prepare --exclude=pnpm-*.yaml ${HOME}/out/full/ ./
 
     ARG TURBO_TEAM
     ENV TURBO_TEAM=${TURBO_TEAM}
