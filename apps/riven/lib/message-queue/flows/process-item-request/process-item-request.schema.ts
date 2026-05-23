@@ -17,6 +17,7 @@ export const ProcessItemRequestFlow = createFlowSchema("process-item-request", {
   input: z.object({
     itemRequestId: UUID,
     step: z.enum(["request", "process"]),
+    source: z.enum(["request", "reindex"]).default("request"),
   }),
 });
 

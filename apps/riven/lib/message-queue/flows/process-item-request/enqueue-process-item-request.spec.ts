@@ -1,5 +1,19 @@
-import { it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-it.todo("creates a child job with the correct data for each indexer plugin");
+import { ProcessItemRequestFlow } from "./process-item-request.schema.ts";
 
-it.todo("creates a root job with the correct data");
+describe("ProcessItemRequestFlow input", () => {
+  const sourceField = ProcessItemRequestFlow.shape.input.shape.source;
+
+  it("defaults `source` to 'request' when undefined", () => {
+    expect(sourceField.parse(undefined)).toBe("request");
+  });
+
+  it("accepts `source: 'reindex'`", () => {
+    expect(sourceField.parse("reindex")).toBe("reindex");
+  });
+
+  it("rejects unknown source values", () => {
+    expect(() => sourceField.parse("nonsense")).toThrow();
+  });
+});
