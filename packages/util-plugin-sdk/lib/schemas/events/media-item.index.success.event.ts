@@ -12,6 +12,7 @@ export const MediaItemIndexSuccessEvent = createProgramEventSchema(
   "media-item.index.success",
   z.object({
     item: z.xor([MovieInstance, ShowInstance]),
+    source: z.enum(["request", "reindex"]).default("request"),
   }),
 );
 
