@@ -38,14 +38,23 @@ export class PluginSettings {
   #logger: Logger;
 
   /**
+   * A flag to determine whether to print the effective configuration on startup.
+   *
+   * This is useful for debugging configuration issues.
+   */
+  #printConfig: boolean;
+
+  /**
    * Initialises the PluginSettings instance and builds a map of plugin-related environment variables
    */
   constructor(
     environment: NodeJS.ProcessEnv,
     pluginConfigPrefixes: string[],
     logger: Logger,
+    printConfig: boolean,
   ) {
     this.#logger = logger;
+    this.#printConfig = printConfig;
 
     this.#environmentSettingGroups = new Map(
       pluginConfigPrefixes.map((prefix) => [prefix, new Map<string, string>()]),
@@ -159,6 +168,13 @@ export class PluginSettings {
 
     for (const key of Object.keys(parsedSettings)) {
       rawPluginSettings.delete(key);
+    }
+
+    if (this.#printConfig) {
+      console.log("#################");
+      console.log(`Effective ${configPrefix} configuration:`);
+      console.log(parsedSettings);
+      console.log("#################");
     }
   }
 
