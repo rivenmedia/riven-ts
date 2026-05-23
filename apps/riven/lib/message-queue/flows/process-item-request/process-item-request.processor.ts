@@ -99,6 +99,7 @@ export const processItemRequestProcessor =
           sendEvent({
             type: "riven.media-item.index.success",
             item: updatedItem,
+            source: job.data.source,
           });
         } catch (error) {
           if (
