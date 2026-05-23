@@ -44,10 +44,9 @@ export const enqueueReindexEpisodes = fromPromise<
     try {
       await enqueueProcessMediaItem({ id: episode.id });
     } catch (error) {
-      logger.error(
-        `Failed to enqueue episode ${episode.id} during re-index`,
-        { err: error },
-      );
+      logger.error(`Failed to enqueue episode ${episode.id} during re-index`, {
+        err: error,
+      });
     }
   }
 });

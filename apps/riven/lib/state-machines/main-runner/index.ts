@@ -44,6 +44,10 @@ import { normaliseConcurrency } from "../../message-queue/utilities/normalise-co
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
+import {
+  type EnqueueReindexEpisodesInput,
+  enqueueReindexEpisodes,
+} from "./actors/enqueue-reindex-episodes.actor.ts";
 import { createEventScheduler } from "./actors/event-scheduler.actor.ts";
 import {
   type FanOutDownloadInput,
@@ -179,6 +183,16 @@ export const mainRunnerMachine = setup({
         });
       },
     ),
+    enqueueReindexEpisodes: enqueueActions(
+      ({ enqueue }, params: EnqueueReindexEpisodesInput) => {
+        enqueue.spawnChild("enqueueReindexEpisodes", {
+          id: "enqueueReindexEpisodes",
+          input: {
+            showId: params.showId,
+          },
+        });
+      },
+    ),
     retryLibrary: enqueueActions(({ enqueue, self }) => {
       enqueue.spawnChild("retryLibrary", {
         id: "retryLibrary",
@@ -217,6 +231,7 @@ export const mainRunnerMachine = setup({
     retryLibrary,
     requestContentServices,
     scheduleReindex,
+    enqueueReindexEpisodes,
     fanOutDownload,
     requestItem,
   },
@@ -259,6 +274,19 @@ export const mainRunnerMachine = setup({
       }
 
       return item.isReleased;
+    },
+    isReindexedOngoingShow: (
+      _,
+      event: {
+        item: Movie | Show;
+        source?: "request" | "reindex";
+      },
+    ) => {
+      return (
+        event.source === "reindex" &&
+        event.item instanceof Show &&
+        event.item.state === "ongoing"
+      );
     },
   },
 })
@@ -551,6 +579,31 @@ export const mainRunnerMachine = setup({
                   type: "log",
                   params: ({ event: { item } }) => ({
                     message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}. This item is not yet released and will be scheduled for re-indexing at a later date.`,
+                    level: "info",
+                  }),
+                },
+              ],
+            },
+            {
+              description:
+                "A re-index of an ongoing show: enqueue any missing episodes directly so they dodge the season-level dedup wall (#160).",
+              guard: {
+                type: "isReindexedOngoingShow",
+                params: ({ event }) => event,
+              },
+              actions: [
+                {
+                  type: "scheduleReindex",
+                  params: ({ event: { item } }) => ({ item }),
+                },
+                {
+                  type: "enqueueReindexEpisodes",
+                  params: ({ event: { item } }) => ({ showId: item.id }),
+                },
+                {
+                  type: "log",
+                  params: ({ event: { item } }) => ({
+                    message: `Re-indexed ${item.type}: ${chalk.bold(item.fullTitle)}. Enqueueing any missing episodes directly.`,
                     level: "info",
                   }),
                 },
