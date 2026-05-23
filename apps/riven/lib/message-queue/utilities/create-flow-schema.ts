@@ -1,5 +1,4 @@
 import * as Sentry from "@sentry/node";
-import EventEmitter from "node:events";
 import z, {
   type ZodNever,
   type ZodObject,
@@ -49,15 +48,7 @@ export const createFlowSchema = <
               >;
             }
           >(),
-          signal: z
-            .custom<AbortSignal>(
-              (data) =>
-                typeof data === "object" &&
-                data != null &&
-                "eventEmitter" in data &&
-                data.eventEmitter instanceof EventEmitter,
-            )
-            .optional(),
+          signal: z.instanceof(AbortSignal).optional(),
           scope: z.custom<Sentry.Scope>(),
           token: z.string().optional(),
         }),

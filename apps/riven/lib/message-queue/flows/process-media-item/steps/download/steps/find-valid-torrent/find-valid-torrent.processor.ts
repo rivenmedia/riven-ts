@@ -32,7 +32,7 @@ export const findValidTorrentProcessor =
       data: { id: mediaItemId, failedInfoHashes },
     } = job;
 
-    const mediaItem = await mediaItemService.getMediaItem(mediaItemId);
+    const mediaItem = await mediaItemService.getMediaItemById(mediaItemId);
 
     const infoHashes = rankedStreams.map((stream) => stream.hash);
     const uncheckedInfoHashes = new Set(infoHashes)
@@ -64,7 +64,7 @@ export const findValidTorrentProcessor =
 
         try {
           const providers = hasProviderListHook
-            ? await getPluginProviderList(pluginName, parent)
+            ? await getPluginProviderList(pluginName)
             : [];
 
           if (hasProviderListHook && !providers.length) {

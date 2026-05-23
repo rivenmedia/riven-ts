@@ -50,7 +50,7 @@ export const ParsedDataSchema = z
     ppv: z.boolean().optional(),
     date: nonEmptyString.optional(),
     group: nonEmptyString.optional(),
-    edition: nonEmptyString.optional(),
+    editions: z.array(nonEmptyString).optional(),
     network: nonEmptyString.optional(),
     region: nonEmptyString.optional(),
     site: nonEmptyString.optional(),
