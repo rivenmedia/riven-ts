@@ -148,8 +148,8 @@ export class FuseError extends Error {
       fd,
       path: context.path,
     })
-      .filter((entry): entry is [string, string] => entry[1] != null)
-      .map(([key, val]) => `[${key}=${val}]`)
+      .filter((entry): entry is [string, string | number] => entry[1] != null)
+      .map(([key, val]) => `[${key}=${val.toString()}]`)
       .join("");
 
     super([message, tags].filter(Boolean).join(" "));
