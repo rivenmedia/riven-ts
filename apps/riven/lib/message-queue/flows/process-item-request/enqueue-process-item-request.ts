@@ -9,10 +9,11 @@ import type { PartialDeep } from "type-fest";
 
 export interface ProcessItemRequestInput {
   item: ItemRequest;
+  source?: "request" | "reindex";
 }
 
 export async function enqueueProcessItemRequest(
-  { item }: ProcessItemRequestInput,
+  { item, source = "request" }: ProcessItemRequestInput,
   opts: FlowJob["opts"] = {},
 ) {
   const indexType = opts.delay ? "Reindexing" : "Indexing";
@@ -22,6 +23,7 @@ export async function enqueueProcessItemRequest(
     {
       itemRequestId: item.id,
       step: "request",
+      source,
     },
     {
       opts: toMerged<
