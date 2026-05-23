@@ -80,6 +80,8 @@ it("scopes results to the given show (does not bleed across shows)", async ({
 
   expect(result).toHaveLength(60);
   expect(
-    result.every((episode) => episode.itemRequest !== otherShow.show.itemRequest),
+    result.every(
+      (episode) => episode.itemRequest !== otherShow.show.itemRequest,
+    ),
   ).toBe(true);
 });
