@@ -28,7 +28,7 @@ export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
     const itemRequest = await item.itemRequest.loadOrFail();
 
     await enqueueProcessItemRequest(
-      { item: itemRequest },
+      { item: itemRequest, source: "reindex" },
       {
         delay: jobDelay,
         deduplication: {
