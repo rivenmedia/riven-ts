@@ -4,55 +4,82 @@ import { expect } from "vitest";
 
 import { it } from "../../../__tests__/test-context.ts";
 
-it("returns indexed + requested + non-special-season episodes for a show", async ({
-  em,
-  services,
-  indexedShowContext: { indexedShow, seasons, episodes },
-}) => {
-  episodes[0].state = "completed";
-  episodes[1].state = "failed";
-  seasons[0].number = 0;
-  await em.flush();
+// The IndexedShowSeeder produces 6 non-special seasons of 10 episodes each,
+// all requested + all in state "indexed" (no streams, no media files). The
+// MediaItemStateSubscriber re-derives `state` on every flush from
+// streams/filesystem entries, so tests must drive the helper's filters via
+// fields the subscriber doesn't touch (season.isRequested, season.number)
+// rather than by force-setting `state`.
 
+it("returns all indexed+requested+non-special-season episodes of a fresh indexed show", async ({
+  services,
+  indexedShowContext: { indexedShow },
+}) => {
   const result = await services.mediaItemService.getReindexEpisodesToProcess(
     indexedShow.id,
   );
 
-  // 60 total - 2 mutated to non-qualifying states - 10 from special season = 48
-  expect(result).toHaveLength(48);
+  expect(result).toHaveLength(60);
   expect(result.every((item) => item instanceof Episode)).toBe(true);
-  expect(result.find((e) => e.id === episodes[0].id)).toBeUndefined();
-  expect(result.find((e) => e.id === episodes[1].id)).toBeUndefined();
 });
 
-it("includes scraped-state episodes (not just indexed)", async ({
+it("excludes episodes whose season is a 'specials' season (number === 0)", async ({
   em,
   services,
-  indexedShowContext: { indexedShow, episodes },
+  indexedShowContext: { indexedShow, seasons },
 }) => {
-  episodes[0].state = "scraped";
-  await em.flush();
+  const targetSeason = seasons[0];
 
-  const result = await services.mediaItemService.getReindexEpisodesToProcess(
-    indexedShow.id,
-  );
-
-  expect(result.find((e) => e.id === episodes[0].id)).toBeDefined();
-});
-
-it("returns an empty array when the show has no missing episodes", async ({
-  em,
-  services,
-  indexedShowContext: { indexedShow, episodes },
-}) => {
-  for (const ep of episodes) {
-    ep.state = "completed";
+  if (!targetSeason) {
+    throw new Error("seeded show has no seasons");
   }
+
+  targetSeason.number = 0;
   await em.flush();
 
   const result = await services.mediaItemService.getReindexEpisodesToProcess(
     indexedShow.id,
   );
 
-  expect(result).toEqual([]);
+  // 60 total - 10 episodes from the now-special season = 50
+  expect(result).toHaveLength(50);
+});
+
+it("excludes episodes whose parent season is not requested", async ({
+  em,
+  services,
+  indexedShowContext: { indexedShow, seasons },
+}) => {
+  const targetSeason = seasons[0];
+
+  if (!targetSeason) {
+    throw new Error("seeded show has no seasons");
+  }
+
+  targetSeason.isRequested = false;
+  await em.flush();
+
+  const result = await services.mediaItemService.getReindexEpisodesToProcess(
+    indexedShow.id,
+  );
+
+  // 60 total - 10 episodes from the unrequested season = 50
+  expect(result).toHaveLength(50);
+});
+
+it("scopes results to the given show (does not bleed across shows)", async ({
+  services,
+  seeders: { seedIndexedShow },
+  indexedShowContext: { indexedShow },
+}) => {
+  const otherShow = await seedIndexedShow();
+
+  const result = await services.mediaItemService.getReindexEpisodesToProcess(
+    indexedShow.id,
+  );
+
+  expect(result).toHaveLength(60);
+  expect(
+    result.every((episode) => episode.itemRequest !== otherShow.show.itemRequest),
+  ).toBe(true);
 });

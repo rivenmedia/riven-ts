@@ -87,6 +87,7 @@ it("on request-sourced success of an ongoing show, still falls through to existi
   actor.send({
     type: "riven.media-item.index.success",
     item: indexedShow,
+    source: "request",
   });
 
   await vi.waitFor(() => {
