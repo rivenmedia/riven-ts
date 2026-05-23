@@ -40,7 +40,7 @@ export const getattrSync = function (path, callback) {
       process.nextTick(callback, null, attrs);
     }).catch((error: unknown) => {
       if (isFuseError(error)) {
-        logger.error(`VFS getattr FuseError`, { err: error });
+        logger.error("VFS getattr FuseError", { err: error });
 
         process.nextTick(callback, error.errorCode);
 
