@@ -58,7 +58,9 @@ export const requestStreamLinkProcessor =
 
             assert(
               response,
-              new UnrecoverableError("Failed to get response from plugin job"),
+              new UnrecoverableError(
+                `Failed to get response from plugin job for ${mediaEntry.path}`,
+              ),
             );
 
             const isDeadLink = streamService.isFatalStatusCode(

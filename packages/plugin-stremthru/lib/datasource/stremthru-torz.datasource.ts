@@ -1,4 +1,4 @@
-import { BaseDataSource } from "@repo/util-plugin-sdk";
+import { BaseDataSource, DataSourceHTTPError } from "@repo/util-plugin-sdk";
 
 import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
 import { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
@@ -17,6 +17,7 @@ import type {
 import type { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
 import type { MediaItemStreamLinkRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+import type { URL } from "url";
 
 const storeNameHeader = "x-stremthru-store-name";
 
@@ -247,29 +248,31 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     link: string,
     store: Store,
   ): Promise<MediaItemStreamLinkRequestedResponse> {
-    const { response, parsedBody } = await this.fetch<unknown>(
-      "v0/store/torz/link/generate",
-      {
-        body: JSON.stringify({ link }),
-        headers: this.#buildCommonHeaders(store),
-        method: "POST",
-      },
-    );
+    try {
+      const { response, parsedBody } = await this.fetch<unknown>(
+        "v0/store/torz/link/generate",
+        {
+          body: JSON.stringify({ link }),
+          headers: this.#buildCommonHeaders(store),
+          method: "POST",
+        },
+      );
 
-    const parseResult = GenerateLinkResponse.safeParse(parsedBody);
+      const { data } = GenerateLinkResponse.parse(parsedBody);
 
-    if (!parseResult.success) {
       return {
-        link: null,
+        link: data.link,
         statusCode: response.status,
       };
+    } catch (error) {
+      if (error instanceof DataSourceHTTPError) {
+        return {
+          link: null,
+          statusCode: error.response.status,
+        };
+      }
+
+      throw error;
     }
-
-    const { data } = parseResult.data;
-
-    return {
-      link: data.link,
-      statusCode: response.status,
-    };
   }
 }
