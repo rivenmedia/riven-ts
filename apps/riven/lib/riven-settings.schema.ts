@@ -188,7 +188,7 @@ export const RivenSettings = z.object({
     .describe("The timeout in seconds for shutting down the application."),
   printConfigurationOnStartup: z
     .stringbool()
-    .default(true)
+    .default(false)
     .describe(
       "Whether to print the effective configuration on application startup. Useful for debugging configuration issues.",
     )
