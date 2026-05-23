@@ -7,11 +7,12 @@ import { isFuseError } from "../errors/fuse-error.ts";
 import { attrCache } from "../utilities/attr-cache.ts";
 import { isHiddenPath } from "../utilities/is-hidden-path.ts";
 import { isIgnoredPath } from "../utilities/is-ignored-path.ts";
+import { withVfsOperationContext } from "../utilities/vfs-operation-context.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
 export const getattrSync = function (path, callback) {
-  void withVfsScope(async () => {
-    try {
+  void withVfsScope(() =>
+    withVfsOperationContext({ operationName: "getattr", path }, async () => {
       const cachedAttr = attrCache.get(path);
 
       if (cachedAttr) {
@@ -37,9 +38,9 @@ export const getattrSync = function (path, callback) {
       logger.silly(`VFS getattr: Cache miss for path ${path}`);
 
       process.nextTick(callback, null, attrs);
-    } catch (error) {
+    }).catch((error: unknown) => {
       if (isFuseError(error)) {
-        logger.error("VFS getattr FuseError", { err: error });
+        logger.error(`VFS getattr FuseError`, { err: error });
 
         process.nextTick(callback, error.errorCode);
 
@@ -47,16 +48,20 @@ export const getattrSync = function (path, callback) {
       }
 
       if (isZodErrorLike(error)) {
-        logger.error("VFS getattr validation error", { err: error });
+        logger.error(`VFS getattr validation error for path ${path}`, {
+          err: error,
+        });
 
         process.nextTick(callback, Fuse.ENOENT);
 
         return;
       }
 
-      logger.error("Unexpected VFS getattr error", { err: error });
+      logger.error(`Unexpected VFS getattr error for path ${path}`, {
+        err: error,
+      });
 
       process.nextTick(callback, Fuse.EIO);
-    }
-  });
+    }),
+  );
 } satisfies OPERATIONS["getattr"];

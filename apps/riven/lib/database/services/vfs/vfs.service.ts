@@ -12,6 +12,7 @@ import { getVfsEntryStat } from "./utilities/get-vfs-entry-stat.ts";
 import { getVfsMediaEntry } from "./utilities/get-vfs-media-entry.ts";
 import { getVfsSubtitleEntry } from "./utilities/get-vfs-subtitle-entry.ts";
 
+import type { FindOneOptions } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";
 
 export class VfsService extends BaseService {
@@ -20,8 +21,15 @@ export class VfsService extends BaseService {
   }
 
   @EnsureRequestContext()
-  async getMediaEntry(pathInfo: PathInfo) {
-    return getVfsMediaEntry(this.em, pathInfo);
+  async getMediaEntry<
+    Hint extends string = never,
+    Fields extends string = never,
+    Excludes extends string = never,
+  >(
+    pathInfo: PathInfo,
+    options?: FindOneOptions<MediaEntry, Hint, Fields, Excludes>,
+  ) {
+    return getVfsMediaEntry(this.em, pathInfo, options);
   }
 
   @EnsureRequestContext()
