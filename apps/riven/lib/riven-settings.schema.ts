@@ -186,6 +186,13 @@ export const RivenSettings = z.object({
   shutdownTimeoutSeconds: json(z.int().positive())
     .default(30)
     .describe("The timeout in seconds for shutting down the application."),
+  printConfigurationOnStartup: z
+    .stringbool()
+    .default(true)
+    .describe(
+      "Whether to print the effective configuration on application startup. Useful for debugging configuration issues.",
+    )
+    .meta({ "wiki.section": "debugging" }),
 });
 
 export type RivenSettings = z.infer<typeof RivenSettings>;

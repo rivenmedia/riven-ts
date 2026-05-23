@@ -41,6 +41,7 @@ export const collectPluginsForRegistration = fromPromise(async () => {
     process.env,
     pluginNames.map(constantCase),
     logger,
+    settings.printConfigurationOnStartup,
   );
 
   const parsedPlugins: ParsedPlugins = {
