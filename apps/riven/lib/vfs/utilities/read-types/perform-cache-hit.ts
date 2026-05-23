@@ -15,7 +15,7 @@ import type { ChunkMetadata } from "../../schemas/chunk.schema.ts";
  * @param chunks The chunks to load from the cache
  * @returns The cached chunk data
  */
-export function performCacheHit(fd: number, chunks: readonly ChunkMetadata[]) {
+export function performCacheHit(chunks: readonly ChunkMetadata[]) {
   const cachedChunks: Buffer[] = [];
 
   for (const chunk of chunks) {
@@ -24,7 +24,7 @@ export function performCacheHit(fd: number, chunks: readonly ChunkMetadata[]) {
     if (!maybeCachedChunk) {
       throw new FuseError(
         Fuse.EIO,
-        `Expected chunk to be cached for cache-hit read type for fd ${fd.toString()}`,
+        "Expected chunk to be cached for cache-hit read type",
       );
     }
 

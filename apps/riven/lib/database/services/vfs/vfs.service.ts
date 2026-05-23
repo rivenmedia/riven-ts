@@ -10,14 +10,24 @@ import { getVfsEntryStat } from "./utilities/get-vfs-entry-stat.ts";
 import { getVfsMediaEntry } from "./utilities/get-vfs-media-entry.ts";
 import { getVfsSubtitleEntry } from "./utilities/get-vfs-subtitle-entry.ts";
 
+import type { FindOneOptions } from "@mikro-orm/core";
+import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
+
 export class VfsService extends BaseService {
   parsePath(path: string) {
     return PathInfo.parse(path);
   }
 
   @EnsureRequestContext()
-  async getMediaEntry(pathInfo: PathInfo) {
-    return getVfsMediaEntry(this.em, pathInfo);
+  async getMediaEntry<
+    Hint extends string = never,
+    Fields extends string = never,
+    Excludes extends string = never,
+  >(
+    pathInfo: PathInfo,
+    options?: FindOneOptions<MediaEntry, Hint, Fields, Excludes>,
+  ) {
+    return getVfsMediaEntry(this.em, pathInfo, options);
   }
 
   @EnsureRequestContext()

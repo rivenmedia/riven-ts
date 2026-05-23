@@ -6,6 +6,7 @@ import { config } from "../../config.ts";
 import { FuseError } from "../../errors/fuse-error.ts";
 import { chunkCache } from "../chunk-cache.ts";
 import { fdToCurrentStreamPositionMap } from "../file-handle-map.ts";
+import { getVfsOperationContext } from "../vfs-operation-context.ts";
 
 import type { ChunkMetadata } from "../../schemas/chunk.schema.ts";
 import type BodyReadable from "undici/types/readable.ts";
@@ -16,10 +17,11 @@ interface WaitForChunkResponse {
 }
 
 export const waitForChunk = async (
-  fd: number,
   reader: BodyReadable.default,
   targetChunk: ChunkMetadata,
 ): Promise<WaitForChunkResponse> => {
+  const { fd } = getVfsOperationContext("read");
+
   let chunk: Buffer | null = null;
   let fetchedFromCache = false;
 
@@ -29,7 +31,7 @@ export const waitForChunk = async (
     if (timeoutSignal.aborted) {
       throw new FuseError(
         Fuse.ETIMEDOUT,
-        `Timed out waiting for chunk ${targetChunk.rangeLabel} for fd ${fd.toString()}`,
+        `Timed out waiting for chunk ${targetChunk.rangeLabel}`,
       );
     }
 
