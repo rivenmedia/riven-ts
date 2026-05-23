@@ -89,7 +89,7 @@ function buildTSCompose(cfg: TSConfig): {
     },
     services: {
       riven: {
-        image: "ghcr.io/rivenmedia/riven-ts:latest",
+        image: "ghcr.io/rivenmedia/riven-ts:main",
         container_name: "riven",
         restart: "unless-stopped",
         tty: true,
