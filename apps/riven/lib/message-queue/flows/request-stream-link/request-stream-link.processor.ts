@@ -26,7 +26,7 @@ export const requestStreamLinkProcessor =
       while (job.data.step !== "complete") {
         switch (job.data.step) {
           case "request-stream-link": {
-            const mediaEntryEntity = await mediaEntryService.getMediaEntry(
+            const mediaEntryEntity = await mediaEntryService.getMediaEntryById(
               mediaEntry.id,
             );
 
@@ -111,7 +111,7 @@ export const requestStreamLinkProcessor =
               `Blacklisting stream for ${chalk.bold(mediaEntry.originalFilename)}; dead torrent detected`,
             );
 
-            const mediaItem = await mediaItemService.getMediaItem(
+            const mediaItem = await mediaItemService.getMediaItemById(
               mediaEntry.mediaItem.id,
               { populate: ["filesystemEntries:ref"] },
             );

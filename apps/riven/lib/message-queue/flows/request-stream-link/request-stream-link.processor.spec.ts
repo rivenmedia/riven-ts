@@ -45,9 +45,10 @@ it.concurrent(
       expect(await job.getState()).toBe("completed");
     });
 
-    const { streamUrl } = await mediaEntryService.getMediaEntry(mediaEntry.id, {
-      fields: ["streamUrl"],
-    });
+    const { streamUrl } = await mediaEntryService.getMediaEntryById(
+      mediaEntry.id,
+      { fields: ["streamUrl"] },
+    );
 
     expect(streamUrl).toBe("https://example.com/stream-link");
   },
@@ -98,7 +99,7 @@ it.concurrent(
       }),
     ).not.toThrow();
 
-    const updatedMediaItem = await mediaItemService.getMediaItem(
+    const updatedMediaItem = await mediaItemService.getMediaItemById(
       completedMovie.id,
       { populate: ["blacklistedStreams"] },
     );
@@ -143,7 +144,7 @@ it.concurrent(
     });
 
     await expect(() =>
-      mediaEntryService.getMediaEntry(mediaEntry.id, {
+      mediaEntryService.getMediaEntryById(mediaEntry.id, {
         fields: ["streamUrl"],
       }),
     ).rejects.toThrow(NotFoundError);

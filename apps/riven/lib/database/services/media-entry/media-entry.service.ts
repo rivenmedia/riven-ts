@@ -4,18 +4,19 @@ import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
 
 import { BaseService } from "../core/base-service.ts";
 
-import type { FilterQuery, FindOneOrFailOptions } from "@mikro-orm/core";
+import type { FindOneOrFailOptions } from "@mikro-orm/core";
+import type { UUID } from "node:crypto";
 
 export class MediaEntryService extends BaseService {
   @CreateRequestContext()
-  async getMediaEntry<
+  async getMediaEntryById<
     Hint extends string = never,
     Fields extends string = never,
     Excludes extends string = never,
   >(
-    where: FilterQuery<MediaEntry>,
+    id: UUID,
     options?: FindOneOrFailOptions<MediaEntry, Hint, Fields, Excludes>,
   ) {
-    return this.em.getRepository(MediaEntry).findOneOrFail(where, options);
+    return this.em.getRepository(MediaEntry).findOneOrFail(id, options);
   }
 }
