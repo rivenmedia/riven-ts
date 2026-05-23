@@ -1,4 +1,4 @@
-import { MediaItem, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { Episode, MediaItem, Show } from "@repo/util-plugin-sdk/dto/entities";
 
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
 
@@ -54,5 +54,30 @@ export class MediaItemService extends BaseService {
 
       return [];
     }
+  }
+
+  /**
+   * Returns episodes belonging to the given show that should be processed as
+   * part of a re-index follow-up. An episode qualifies if:
+   *
+   * - its parent season is requested and is not a "specials" season (number > 0)
+   * - the episode itself is in state "indexed" or "scraped"
+   *
+   * Used by the main runner's reindex reaction branch (#160) to enqueue
+   * per-episode jobs that dodge the season-level deduplication.
+   */
+  @CreateRequestContext()
+  async getReindexEpisodesToProcess(showId: UUID) {
+    return this.em.getRepository(Episode).find(
+      {
+        state: { $in: ["indexed", "scraped"] },
+        season: {
+          show: showId,
+          isRequested: true,
+          number: { $gt: 0 },
+        },
+      },
+      { populate: ["season"] },
+    );
   }
 }
