@@ -66,9 +66,7 @@ export class ExtendedFlowProducer extends FlowProducer {
   override getFlow<T extends Flow>(
     opts: NodeOpts,
   ): Promise<TypedJobNode<T["input"], T["output"]>> {
-    return super.getFlow(opts) as Promise<
-      TypedJobNode<T["input"], T["output"]>
-    >;
+    return super.getFlow(opts);
   }
 }
 
