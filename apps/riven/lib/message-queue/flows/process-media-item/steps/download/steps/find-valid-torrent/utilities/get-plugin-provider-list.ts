@@ -18,7 +18,9 @@ export async function getPluginProviderList(pluginName: string) {
         id: `get-${pluginName}-provider-list`,
       },
       removeDependencyOnFailure: true,
-      removeOnComplete: 1,
+      removeOnComplete: {
+        age: 60,
+      },
     },
   );
 

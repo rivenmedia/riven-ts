@@ -1,5 +1,5 @@
 import { MediaItemStreamLinkRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
-import { MediaEntryInstance } from "@repo/util-plugin-sdk/schemas/media/media-entry-instance";
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 
@@ -9,7 +9,7 @@ import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
 export const RequestStreamLinkFlow = createFlowSchema("request-stream-link", {
   children: MediaItemStreamLinkRequestedResponse,
   input: z.object({
-    mediaEntry: MediaEntryInstance,
+    mediaEntryId: UUID,
     step: z
       .enum([
         "request-stream-link",

@@ -34,6 +34,7 @@ it("blacklists a stream for a media item", async ({
 });
 
 it("clears the active stream for the media item", async ({
+  em,
   services: { streamService },
   completedMovieContext: {
     completedMovie,
@@ -48,9 +49,9 @@ it("clears the active stream for the media item", async ({
     plugin: "test-plugin",
   });
 
-  const activeStream = await completedMovie.activeStream?.loadOrFail();
+  await em.refreshOrFail(completedMovie, { populate: ["activeStream"] });
 
-  expect(activeStream).toBeUndefined();
+  expect(completedMovie.activeStream).toBeNull();
 });
 
 it("rejects duplicate blacklisted streams for the same media item", async ({
@@ -69,9 +70,13 @@ it("rejects duplicate blacklisted streams for the same media item", async ({
     plugin: "test-plugin",
   });
 
-  em.assign(completedMovie, {
+  await em.refresh(completedMovie);
+
+  em.persist(completedMovie).assign(completedMovie, {
     activeStream: stream,
   });
+
+  await em.flush();
 
   await expect(
     streamService.blacklistActiveStream({

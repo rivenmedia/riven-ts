@@ -21,7 +21,9 @@ export const requestStreamLinkProcessor =
     ) => {
       assert(token, "Token is required to create child jobs");
 
-      const { mediaEntry } = job.data;
+      const mediaEntry = await mediaEntryService.getMediaEntryById(
+        job.data.mediaEntryId,
+      );
 
       while (job.data.step !== "complete") {
         switch (job.data.step) {
@@ -118,25 +120,35 @@ export const requestStreamLinkProcessor =
               { populate: ["filesystemEntries:ref"] },
             );
 
-            const blacklistedInfoHash =
-              await streamService.blacklistActiveStream({
-                mediaItem,
-                provider: mediaEntry.provider,
-                plugin: mediaEntry.plugin,
-              });
+            try {
+              const { blacklistedItems, infoHash: blacklistedInfoHash } =
+                await streamService.blacklistActiveStream({
+                  mediaItem,
+                  provider: mediaEntry.provider,
+                  plugin: mediaEntry.plugin,
+                });
 
-            logger.info(
-              `Stream ${blacklistedInfoHash} for ${chalk.bold(mediaEntry.originalFilename)} has been blacklisted`,
-            );
+              logger.info(
+                `Stream ${blacklistedInfoHash} for ${chalk.bold(mediaEntry.originalFilename)} has been blacklisted`,
+              );
 
-            await enqueueProcessMediaItem({
-              id: mediaItem.id,
-              step: "download",
-            });
+              const itemsToReprocess =
+                await streamService.calculateItemsToReprocess(
+                  new Set(blacklistedItems),
+                );
 
-            throw new UnrecoverableError(
-              `Dead torrent detected for ${mediaEntry.originalFilename}. Attempting to download another hash...`,
-            );
+              for (const item of itemsToReprocess) {
+                await enqueueProcessMediaItem({ id: item.id });
+              }
+
+              throw new UnrecoverableError(
+                `Dead torrent detected for ${mediaEntry.originalFilename} (${blacklistedInfoHash}). Attempting to download another hash...`,
+              );
+            } catch (error) {
+              throw new UnrecoverableError(
+                `Failed to blacklist stream for ${mediaEntry.originalFilename}: ${String(error)}`,
+              );
+            }
           }
         }
       }

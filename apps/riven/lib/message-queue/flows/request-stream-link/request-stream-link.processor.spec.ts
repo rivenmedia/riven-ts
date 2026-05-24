@@ -6,233 +6,277 @@ import { expect, vi } from "vitest";
 
 import { it } from "../../../__tests__/test-context.ts";
 import { ProcessMediaItemFlow } from "../process-media-item/process-media-item.schema.ts";
+import { flow } from "../producer.ts";
 import { enqueueRequestStreamLink } from "./enqueue-request-stream-link.ts";
 import { requestStreamLinkProcessor } from "./request-stream-link.processor.ts";
 import { RequestStreamLinkFlow } from "./request-stream-link.schema.ts";
 
-it.beforeAll(({ createFlowWorker }) => {
+it.beforeEach(({ createFlowWorker }) => {
   createFlowWorker(RequestStreamLinkFlow, requestStreamLinkProcessor);
 });
 
-it.concurrent(
-  "saves the stream link to the media entry after receiving a valid response",
-  async ({
-    completedMovieContext: { completedMovie },
-    createPluginWorker,
-    services: { mediaEntryService },
-  }) => {
-    const [mediaEntry] = await completedMovie.getMediaEntries();
+it("saves the stream link to the media entry after receiving a valid response", async ({
+  completedMovieContext: { completedMovie },
+  createPluginWorker,
+  services: { mediaEntryService },
+}) => {
+  const [mediaEntry] = await completedMovie.getMediaEntries();
 
-    expect.assert(mediaEntry);
+  expect.assert(mediaEntry);
 
-    createPluginWorker(
-      "riven.media-item.stream-link.requested",
-      mediaEntry.plugin,
-      () =>
-        Promise.resolve({
-          link: "https://example.com/stream-link",
-          statusCode: StatusCodes.OK,
-        }),
-    );
-
-    const { job } = await enqueueRequestStreamLink({
-      mediaEntry,
-    });
-
-    await vi.waitFor(async () => {
-      expect.assert(job.id);
-
-      expect(await job.getState()).toBe("completed");
-    });
-
-    const { streamUrl } = await mediaEntryService.getMediaEntryById(
-      mediaEntry.id,
-      { fields: ["streamUrl"] },
-    );
-
-    expect(streamUrl).toBe("https://example.com/stream-link");
-  },
-);
-
-it.concurrent(
-  "blacklists the stream if the response indicates a dead link",
-  async ({
-    em,
-    completedMovieContext: { completedMovie },
-    createPluginWorker,
-    services: { mediaItemService },
-  }) => {
-    const [mediaEntry] = await completedMovie.getMediaEntries();
-
-    expect.assert(mediaEntry);
-
-    createPluginWorker(
-      "riven.media-item.stream-link.requested",
-      mediaEntry.plugin,
-      () =>
-        Promise.resolve({
-          link: null,
-          statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
-        }),
-    );
-
-    const activeStream = completedMovie.activeStream;
-
-    expect.assert(activeStream);
-
-    const { job } = await enqueueRequestStreamLink({
-      mediaEntry,
-    });
-
-    await vi.waitFor(async () => {
-      expect.assert(job.id);
-
-      expect(await job.getState()).toBe("failed");
-    });
-
-    expect(() =>
-      em.findOneOrFail(BlacklistedStream, {
-        stream: activeStream.infoHash,
-        mediaItem: completedMovie,
-        provider: mediaEntry.provider,
-        plugin: mediaEntry.plugin,
+  createPluginWorker(
+    "riven.media-item.stream-link.requested",
+    mediaEntry.plugin,
+    () =>
+      Promise.resolve({
+        link: "https://example.com/stream-link",
+        statusCode: StatusCodes.OK,
       }),
-    ).not.toThrow();
+  );
 
-    const updatedMediaItem = await mediaItemService.getMediaItemById(
-      completedMovie.id,
-      { populate: ["blacklistedStreams"] },
-    );
+  const { job } = await enqueueRequestStreamLink({
+    mediaEntryId: mediaEntry.id,
+    mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
+  });
 
-    expect(updatedMediaItem.blacklistedStreams).toHaveLength(1);
-  },
-);
+  await vi.waitFor(async () => {
+    expect.assert(job.id);
 
-it.concurrent(
-  "deletes the media entry if the response indicates a dead link",
-  async ({
-    completedMovieContext: { completedMovie },
-    createPluginWorker,
-    services: { mediaEntryService },
-  }) => {
-    const [mediaEntry] = await completedMovie.getMediaEntries();
+    expect(await job.getState()).toBe("completed");
+  });
 
-    expect.assert(mediaEntry);
+  const { streamUrl } = await mediaEntryService.getMediaEntryById(
+    mediaEntry.id,
+    { fields: ["streamUrl"] },
+  );
 
-    createPluginWorker(
-      "riven.media-item.stream-link.requested",
-      mediaEntry.plugin,
-      () =>
-        Promise.resolve({
-          link: null,
-          statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
-        }),
-    );
+  expect(streamUrl).toBe("https://example.com/stream-link");
+});
 
-    const activeStream = completedMovie.activeStream;
+it("blacklists the stream if the response indicates a dead link", async ({
+  em,
+  completedMovieContext: { completedMovie },
+  createPluginWorker,
+  services: { mediaItemService },
+}) => {
+  const [mediaEntry] = await completedMovie.getMediaEntries();
 
-    expect.assert(activeStream);
+  expect.assert(mediaEntry);
 
-    const { job } = await enqueueRequestStreamLink({
-      mediaEntry,
-    });
-
-    await vi.waitFor(async () => {
-      expect.assert(job.id);
-
-      expect(await job.getState()).toBe("failed");
-    });
-
-    await expect(() =>
-      mediaEntryService.getMediaEntryById(mediaEntry.id, {
-        fields: ["streamUrl"],
+  createPluginWorker(
+    "riven.media-item.stream-link.requested",
+    mediaEntry.plugin,
+    () =>
+      Promise.resolve({
+        link: null,
+        statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
       }),
-    ).rejects.toThrow(NotFoundError);
-  },
-);
+  );
 
-it.concurrent(
-  "does not blacklist the stream if the response indicates a non-fatal error",
-  async ({
-    em,
-    completedMovieContext: { completedMovie },
-    createPluginWorker,
-  }) => {
-    const [mediaEntry] = await completedMovie.getMediaEntries();
+  const { activeStream } = completedMovie;
 
-    expect.assert(mediaEntry);
+  expect.assert(activeStream);
 
-    createPluginWorker(
-      "riven.media-item.stream-link.requested",
-      mediaEntry.plugin,
-      () =>
-        Promise.resolve({
-          link: null,
-          statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-        }),
-    );
+  const { job } = await enqueueRequestStreamLink({
+    mediaEntryId: mediaEntry.id,
+    mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
+  });
 
-    const activeStream = completedMovie.activeStream;
+  await vi.waitFor(async () => {
+    expect.assert(job.id);
 
-    expect.assert(activeStream);
+    expect(await job.getState()).toBe("failed");
+  });
 
-    const { job } = await enqueueRequestStreamLink({
-      mediaEntry,
-    });
-
-    await vi.waitFor(async () => {
-      expect.assert(job.id);
-
-      expect(await job.getState()).toBe("failed");
-    });
-
-    const blacklistedStream = await em.findOne(BlacklistedStream, {
+  expect(() =>
+    em.findOneOrFail(BlacklistedStream, {
       stream: activeStream.infoHash,
-    });
+      mediaItem: completedMovie,
+      provider: mediaEntry.provider,
+      plugin: mediaEntry.plugin,
+    }),
+  ).not.toThrow();
 
-    expect(blacklistedStream).toBeNull();
-  },
-);
+  const updatedMediaItem = await mediaItemService.getMediaItemById(
+    completedMovie.id,
+    { populate: ["blacklistedStreams"] },
+  );
 
-it.concurrent(
-  "adds a job to reprocess the media item if the stream was blacklisted",
-  async ({
-    completedMovieContext: { completedMovie },
-    createPluginWorker,
-    createFlowWorker,
-  }) => {
-    const [mediaEntry] = await completedMovie.getMediaEntries();
+  expect(updatedMediaItem.blacklistedStreams).toHaveLength(1);
+});
 
-    expect.assert(mediaEntry);
+it("deletes the media entry if the response indicates a dead link", async ({
+  completedMovieContext: { completedMovie },
+  createPluginWorker,
+  services: { mediaEntryService },
+}) => {
+  const [mediaEntry] = await completedMovie.getMediaEntries();
 
-    const mockProcessMediaItemProcessor = vi.fn();
+  expect.assert(mediaEntry);
 
-    createFlowWorker(ProcessMediaItemFlow, mockProcessMediaItemProcessor);
+  createPluginWorker(
+    "riven.media-item.stream-link.requested",
+    mediaEntry.plugin,
+    () =>
+      Promise.resolve({
+        link: null,
+        statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
+      }),
+  );
 
-    createPluginWorker(
-      "riven.media-item.stream-link.requested",
-      mediaEntry.plugin,
-      () =>
-        Promise.resolve({
-          link: null,
-          statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
+  const { activeStream } = completedMovie;
+
+  expect.assert(activeStream);
+
+  const { job } = await enqueueRequestStreamLink({
+    mediaEntryId: mediaEntry.id,
+    mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
+  });
+
+  await vi.waitFor(async () => {
+    expect.assert(job.id);
+
+    expect(await job.getState()).toBe("failed");
+  });
+
+  await expect(() =>
+    mediaEntryService.getMediaEntryById(mediaEntry.id, {
+      fields: ["streamUrl"],
+    }),
+  ).rejects.toThrow(NotFoundError);
+});
+
+it("does not blacklist the stream if the response indicates a non-fatal error", async ({
+  em,
+  completedMovieContext: { completedMovie },
+  createPluginWorker,
+}) => {
+  const [mediaEntry] = await completedMovie.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  createPluginWorker(
+    "riven.media-item.stream-link.requested",
+    mediaEntry.plugin,
+    () =>
+      Promise.resolve({
+        link: null,
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      }),
+  );
+
+  const { activeStream } = completedMovie;
+
+  expect.assert(activeStream);
+
+  const { job } = await enqueueRequestStreamLink({
+    mediaEntryId: mediaEntry.id,
+    mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
+  });
+
+  await vi.waitFor(async () => {
+    expect.assert(job.id);
+
+    expect(await job.getState()).toBe("failed");
+  });
+
+  const blacklistedStream = await em.findOne(BlacklistedStream, {
+    stream: activeStream.infoHash,
+  });
+
+  expect(blacklistedStream).toBeNull();
+});
+
+it("adds a job to reprocess the movie if the item is a movie", async ({
+  completedMovieContext: { completedMovie },
+  createPluginWorker,
+  createFlowWorker,
+}) => {
+  const [mediaEntry] = await completedMovie.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  const mockProcessMediaItemProcessor = vi.fn();
+
+  createFlowWorker(ProcessMediaItemFlow, mockProcessMediaItemProcessor);
+
+  createPluginWorker(
+    "riven.media-item.stream-link.requested",
+    mediaEntry.plugin,
+    () =>
+      Promise.resolve({
+        link: null,
+        statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
+      }),
+  );
+
+  const { activeStream } = completedMovie;
+
+  expect.assert(activeStream);
+
+  const { job } = await enqueueRequestStreamLink({
+    mediaEntryId: mediaEntry.id,
+    mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
+  });
+
+  await vi.waitFor(async () => {
+    expect.assert(job.id);
+
+    expect(await job.getState()).toBe("failed");
+
+    expect(mockProcessMediaItemProcessor).toHaveBeenCalled();
+  });
+});
+
+it("adds a job to reprocess the lowest common denominator in the item's hierarchy if the item is show-like", async ({
+  completedShowContext: { completedShow },
+  createPluginWorker,
+  createFlowWorker,
+}) => {
+  const [mediaEntry] = await completedShow.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  const mockProcessMediaItemProcessor = vi.fn();
+  const flowAddSpy = vi.spyOn(flow, "addBulk");
+
+  createFlowWorker(ProcessMediaItemFlow, mockProcessMediaItemProcessor);
+
+  createPluginWorker(
+    "riven.media-item.stream-link.requested",
+    mediaEntry.plugin,
+    () =>
+      Promise.resolve({
+        link: null,
+        statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
+      }),
+  );
+
+  const { activeStream } = completedShow;
+
+  expect.assert(activeStream);
+
+  const { job } = await enqueueRequestStreamLink({
+    mediaEntryId: mediaEntry.id,
+    mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
+  });
+
+  await vi.waitFor(async () => {
+    expect.assert(job.id);
+
+    expect(await job.getState()).toBe("failed");
+
+    expect(flowAddSpy).toHaveBeenCalledWith([
+      expect.objectContaining({
+        data: expect.objectContaining({
+          isRootItem: true,
+          mediaItem: expect.objectContaining({
+            id: completedShow.id,
+          }),
+          step: "scrape",
         }),
-    );
-
-    const activeStream = completedMovie.activeStream;
-
-    expect.assert(activeStream);
-
-    const { job } = await enqueueRequestStreamLink({
-      mediaEntry,
-    });
-
-    await vi.waitFor(async () => {
-      expect.assert(job.id);
-
-      expect(await job.getState()).toBe("failed");
-
-      expect(mockProcessMediaItemProcessor).toHaveBeenCalled();
-    });
-  },
-);
+        queueName: "process-media-item",
+      }),
+    ]);
+  });
+});

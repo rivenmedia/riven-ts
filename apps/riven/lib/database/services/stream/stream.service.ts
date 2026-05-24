@@ -1,10 +1,14 @@
 import { MediaEntry, type MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
-import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
+import {
+  CreateRequestContext,
+  Transactional,
+} from "@mikro-orm/decorators/legacy";
 import assert from "node:assert";
 
 import { BaseService } from "../core/base-service.ts";
 import { blacklistStream } from "./utilities/blacklist-stream.ts";
+import { calculateItemsToReprocess } from "./utilities/calculate-items-to-reprocess.ts";
 import { isFatalStatusCode } from "./utilities/is-fatal-status-code.ts";
 
 import type { UUID } from "node:crypto";
@@ -20,6 +24,7 @@ export class StreamService extends BaseService {
   }
 
   @CreateRequestContext()
+  @Transactional()
   async blacklistActiveStream({
     mediaItem,
     provider,
@@ -43,5 +48,9 @@ export class StreamService extends BaseService {
       plugin,
       provider,
     );
+  }
+
+  async calculateItemsToReprocess(mediaItems: Set<MediaItem>) {
+    return calculateItemsToReprocess(mediaItems);
   }
 }

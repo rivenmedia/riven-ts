@@ -260,7 +260,7 @@ export const it = testBase
     { scope: "file" },
     await import("../graphql/apollo-client.ts"),
   )
-  .extend("createFlowWorker", { scope: "file" }, async ({}, { onCleanup }) => {
+  .extend("createFlowWorker", async ({}, { onCleanup }) => {
     const { createFlowWorker } =
       await import("../message-queue/utilities/create-flow-worker.ts");
 
@@ -268,7 +268,7 @@ export const it = testBase
 
     onCleanup(async () => {
       for (const worker of workers) {
-        await worker.close(true);
+        await worker.close();
       }
     });
 

@@ -3,6 +3,8 @@ import {
   MediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
 
+import { findCommonBlacklistItems } from "./find-common-blacklist-items.ts";
+
 import type { EntityManager } from "@mikro-orm/core";
 
 export async function blacklistStream(
@@ -12,17 +14,25 @@ export async function blacklistStream(
   plugin: string,
   provider: string | null,
 ) {
-  em.create(BlacklistedStream, {
-    mediaItem,
-    stream: infoHash,
-    plugin,
-    provider,
-  });
+  const itemsToBlacklist = await findCommonBlacklistItems(em, mediaItem);
 
-  mediaItem.activeStream = null;
-  mediaItem.filesystemEntries.remove((entry) => entry.type === "media");
+  for (const item of itemsToBlacklist) {
+    item.reset();
+  }
 
-  await em.flush();
+  for (const item of itemsToBlacklist) {
+    em.create(BlacklistedStream, {
+      mediaItem: item,
+      stream: infoHash,
+      plugin,
+      provider,
+    });
 
-  return infoHash;
+    await em.flush();
+  }
+
+  return {
+    blacklistedItems: itemsToBlacklist,
+    infoHash,
+  };
 }

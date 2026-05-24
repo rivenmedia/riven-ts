@@ -187,6 +187,21 @@ export abstract class MediaItem {
   }
 
   /**
+   * Resets a media item back to its original state.
+   *
+   * Used after blacklisting a stream to indicate a fresh processing attempt can be started.
+   */
+  reset() {
+    this.activeStream = null;
+    this.failedScrapeAttempts = 0;
+    this.scrapedTimes = 0;
+    this.scrapedAt = null;
+    this.filesystemEntries.removeAll();
+    this.streams.removeAll();
+    this.subtitles.removeAll();
+  }
+
+  /**
    * A pretty name for the media item to be used in VFS paths.
    *
    * @example "Inception (2010) {tmdb-27205}"

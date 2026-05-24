@@ -4,27 +4,27 @@ import {
   createRequestStreamLinkJob,
 } from "./request-stream-link.schema.ts";
 
-import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 import type { TypedJobNode } from "bullmq";
+import type { UUID } from "node:crypto";
 
 export interface EnqueueRequestStreamLinkParams {
-  mediaEntry: MediaEntry;
+  mediaEntryId: UUID;
+  mediaItemTitle: string;
 }
 
 export async function enqueueRequestStreamLink({
-  mediaEntry,
+  mediaEntryId,
+  mediaItemTitle,
 }: EnqueueRequestStreamLinkParams): Promise<
   TypedJobNode<RequestStreamLinkFlow["input"], RequestStreamLinkFlow["output"]>
 > {
-  const { fullTitle } = mediaEntry.mediaItem.unwrap();
-
   const job = createRequestStreamLinkJob(
-    `Request stream link: ${fullTitle}`,
-    { mediaEntry },
+    `Request stream link: ${mediaItemTitle}`,
+    { mediaEntryId },
     {
       opts: {
         deduplication: {
-          id: `request-stream-link-${mediaEntry.id}`,
+          id: `request-stream-link-${mediaEntryId}`,
         },
       },
     },
