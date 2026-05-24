@@ -14,6 +14,10 @@ import {
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
 import { createStreamRequest } from "../utilities/requests/create-stream-request.ts";
+import {
+  type VfsOperationContext,
+  withVfsOperationContext,
+} from "../utilities/vfs-operation-context.ts";
 
 import type { MockAgent } from "undici";
 
@@ -301,8 +305,9 @@ it("saves a copy of each chunk to the cache when reading during playback within 
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
+  const fd = 0;
 
-  fdToPreviousReadPositionMap.set(0, config.chunkSize * 100); // 10MB
+  fdToPreviousReadPositionMap.set(fd, config.chunkSize * 100); // 10MB
 
   const length = 131072;
   const position = 104988672;
@@ -346,17 +351,25 @@ it("saves a copy of each chunk to the cache when reading during playback within 
 
   expect.assert(fileHandle?.type === "media");
 
-  fdToResponsePromiseMap.set(
-    0,
-    createStreamRequest(0, fileHandle.url, [firstChunkRange[0], undefined]),
+  withVfsOperationContext(
+    {
+      operationName: "read",
+      fd,
+    } as Extract<VfsOperationContext, { operationName: "read" }>,
+    () => {
+      fdToResponsePromiseMap.set(
+        fd,
+        createStreamRequest(fileHandle.url, [firstChunkRange[0], undefined]),
+      );
+    },
   );
 
   const callback = vi.fn();
 
-  readSync(fileName, 0, Buffer.alloc(length), length, position, callback);
+  readSync(fileName, fd, Buffer.alloc(length), length, position, callback);
   readSync(
     fileName,
-    0,
+    fd,
     Buffer.alloc(length),
     length,
     position + length,

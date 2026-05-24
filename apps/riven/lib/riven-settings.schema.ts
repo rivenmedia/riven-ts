@@ -193,6 +193,13 @@ export const RivenSettings = z.object({
       "Path to the JSON file containing the torrent ranking configuration. Auto-generated with defaults on first startup.",
     )
     .meta({ "wiki.section": "ranking" }),
+  printConfigurationOnStartup: z
+    .stringbool()
+    .default(false)
+    .describe(
+      "Whether to print the effective configuration on application startup. Useful for debugging configuration issues.",
+    )
+    .meta({ "wiki.section": "debugging" }),
 });
 
 export type RivenSettings = z.infer<typeof RivenSettings>;

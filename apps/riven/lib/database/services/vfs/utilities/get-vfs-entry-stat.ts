@@ -227,13 +227,13 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
   const pathInfo = PathInfo.safeParse(path);
 
   if (!pathInfo.success) {
-    throw new FuseError(Fuse.ENOENT, "Invalid path");
+    throw new FuseError(Fuse.ENOENT, "Unable to parse path info");
   }
 
   const entry = await getEntry(em, pathInfo.data);
 
   if (!entry) {
-    throw new FuseError(Fuse.ENOENT, "Entry not found");
+    throw new FuseError(Fuse.ENOENT, "No VFS entry found");
   }
 
   const subDirectoryCount =
