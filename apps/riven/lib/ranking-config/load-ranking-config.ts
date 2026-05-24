@@ -3,7 +3,7 @@ import {
   SettingsSchema,
 } from "@repo/util-rank-torrent-name";
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 import type {
@@ -277,24 +277,29 @@ export function loadRankingConfig(
 ): RankingConfig {
   const resolvedPath = path.resolve(configPath);
 
-  if (!existsSync(resolvedPath)) {
-    try {
-      mkdirSync(path.dirname(resolvedPath), { recursive: true });
-      writeFileSync(
-        resolvedPath,
-        JSON.stringify(DEFAULT_CONFIG, null, 2),
-        "utf8",
-      );
-    } catch (cause) {
-      throw new Error(
-        `Failed to create ranking config file at "${resolvedPath}": ${String(cause)}`,
-      );
-    }
+  mkdirSync(path.dirname(resolvedPath), { recursive: true });
+
+  try {
+    writeFileSync(resolvedPath, JSON.stringify(DEFAULT_CONFIG, null, 2), {
+      encoding: "utf8",
+      flag: "wx",
+    });
 
     return {
       settings: SettingsSchema.parse(DEFAULT_SETTINGS_INPUT),
       rankingModel: RankingModelSchema.parse(DEFAULT_RANKING_MODEL_INPUT),
     };
+  } catch (cause) {
+    if (
+      cause === null ||
+      typeof cause !== "object" ||
+      (cause as NodeJS.ErrnoException).code !== "EEXIST"
+    ) {
+      throw new Error(
+        `Failed to create ranking config file at "${resolvedPath}": ${String(cause)}`,
+      );
+    }
+    // File already exists (concurrent creation). Fall through to read/parse.
   }
 
   let raw: string;
