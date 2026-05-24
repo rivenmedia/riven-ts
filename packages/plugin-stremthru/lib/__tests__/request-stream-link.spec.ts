@@ -39,7 +39,7 @@ it("returns the status code from the downstream response for errors", async ({
   });
 });
 
-it("returns the returned stream link when the response is successful", async ({
+it("returns the stream link when the response is successful", async ({
   dataSourceMap,
   server,
   plugin,

@@ -23,4 +23,6 @@ export async function blacklistStream(
   mediaItem.filesystemEntries.remove((entry) => entry.type === "media");
 
   await em.flush();
+
+  return infoHash;
 }

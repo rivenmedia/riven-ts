@@ -26,7 +26,7 @@ export default {
         return await api.addTorrent(infoHash, store);
       } catch (error) {
         throw new Error(
-          `Failed to get instant availability from ${store}: ${
+          `Failed to get instant availability for ${infoHash} from ${store}: ${
             error instanceof Error ? error.message : String(error)
           }`,
         );

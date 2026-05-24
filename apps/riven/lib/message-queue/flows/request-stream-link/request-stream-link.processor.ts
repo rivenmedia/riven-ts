@@ -118,14 +118,15 @@ export const requestStreamLinkProcessor =
               { populate: ["filesystemEntries:ref"] },
             );
 
-            await streamService.blacklistActiveStream({
-              mediaItem,
-              provider: mediaEntry.provider,
-              plugin: mediaEntry.plugin,
-            });
+            const blacklistedInfoHash =
+              await streamService.blacklistActiveStream({
+                mediaItem,
+                provider: mediaEntry.provider,
+                plugin: mediaEntry.plugin,
+              });
 
             logger.info(
-              `Stream for ${chalk.bold(mediaEntry.originalFilename)} has been blacklisted`,
+              `Stream ${blacklistedInfoHash} for ${chalk.bold(mediaEntry.originalFilename)} has been blacklisted`,
             );
 
             await enqueueProcessMediaItem({
