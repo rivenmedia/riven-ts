@@ -19,8 +19,6 @@ import {
 } from "@mikro-orm/core";
 import chalk from "chalk";
 
-import { logger } from "../../utilities/logger/logger.ts";
-
 import type { Promisable } from "type-fest";
 
 type NextStatesMap = Map<MediaItem, MediaItemState>;
@@ -32,7 +30,9 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     }
   }
 
-  afterFlush({ uow }: FlushEventArgs): void | Promise<void> {
+  async afterFlush({ uow }: FlushEventArgs): Promise<void> {
+    const { logger } = await import("../../utilities/logger/logger.ts");
+
     for (const changeSet of uow.getChangeSets()) {
       if (
         changeSet.entity instanceof MediaItem &&
