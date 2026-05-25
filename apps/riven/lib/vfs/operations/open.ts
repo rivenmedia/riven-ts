@@ -127,7 +127,9 @@ async function serveMediaFile(
       attrCache.delete(pathInfo.rawPath);
     } catch (error) {
       if (error instanceof UnrecoverableError) {
-        logger.info("Deleting cache due to error");
+        logger.silly(
+          `Deleting FUSE attr cache for ${pathInfo.rawPath} due to error whilst fetching stream link`,
+        );
 
         attrCache.delete(pathInfo.rawPath);
       }
