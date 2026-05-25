@@ -88,14 +88,14 @@ it("blacklists the stream if the response indicates a dead link", async ({
     expect(await job.getState()).toBe("failed");
   });
 
-  expect(() =>
+  await expect(
     em.findOneOrFail(BlacklistedStream, {
       stream: activeStream.infoHash,
       mediaItem: completedMovie,
       provider: mediaEntry.provider,
       plugin: mediaEntry.plugin,
     }),
-  ).not.toThrow();
+  ).resolves.not.toThrow(NotFoundError);
 
   const updatedMediaItem = await mediaItemService.getMediaItemById(
     completedMovie.id,
