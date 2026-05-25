@@ -17,6 +17,9 @@ import {
   type UnitOfWork,
   wrap,
 } from "@mikro-orm/core";
+import chalk from "chalk";
+
+import { logger } from "../../utilities/logger/logger.ts";
 
 import type { Promisable } from "type-fest";
 
@@ -26,6 +29,23 @@ export class MediaItemStateSubscriber implements EventSubscriber {
   afterUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
     if (entity.state === "unreleased" && entity.isReleased) {
       entity.state = "indexed";
+    }
+  }
+
+  afterFlush({ uow }: FlushEventArgs): void | Promise<void> {
+    for (const changeSet of uow.getChangeSets()) {
+      if (
+        changeSet.entity instanceof MediaItem &&
+        changeSet.originalEntity &&
+        changeSet.payload["state"]
+      ) {
+        const previousState = changeSet.originalEntity["state"] as string;
+        const nextState = changeSet.payload["state"] as string;
+
+        logger.debug(
+          `${chalk.bold(changeSet.originalEntity["fullTitle"] as string)} state change: ${chalk.red(previousState)} -> ${chalk.green(nextState)}`,
+        );
+      }
     }
   }
 
