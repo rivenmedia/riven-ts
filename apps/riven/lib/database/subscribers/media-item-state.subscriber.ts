@@ -43,7 +43,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
         const nextState = changeSet.payload["state"] as string;
 
         logger.debug(
-          `${chalk.bold(changeSet.originalEntity["fullTitle"] as string)} state change: ${chalk.red(previousState)} -> ${chalk.green(nextState)}`,
+          `${chalk.bold(changeSet.originalEntity["fullTitle"] as string)} state change: ${chalk.red(previousState)} ${chalk.dim("->")} ${chalk.green(nextState)}`,
         );
       }
     }
