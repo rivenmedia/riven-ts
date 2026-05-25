@@ -118,7 +118,8 @@ async function serveMediaFile(
       fileNameIsFetchingLinkMap.set(entry.originalFilename, true);
 
       const { job } = await enqueueRequestStreamLink({
-        mediaEntry: entry,
+        mediaEntryId: entry.id,
+        mediaItemTitle: entry.mediaItem.$.fullTitle,
       });
 
       await runSingleJob(job);

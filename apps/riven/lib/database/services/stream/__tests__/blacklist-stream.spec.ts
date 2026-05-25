@@ -1,5 +1,3 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities";
-
 import { UniqueConstraintViolationException } from "@mikro-orm/core";
 import { expect } from "vitest";
 
@@ -175,7 +173,7 @@ it("does not reject different info hashes for the same plugin", async ({
   ).resolves.not.toThrow();
 });
 
-it('resets the media item state to "scraped" when blacklisting an active stream', async ({
+it('resets the media item state to "indexed" when blacklisting an active stream', async ({
   em,
   services: { streamService },
   completedMovieContext: {
@@ -191,11 +189,7 @@ it('resets the media item state to "scraped" when blacklisting an active stream'
     plugin: "test-plugin",
   });
 
-  const updatedCompletedMovie = await em.findOneOrFail(
-    Movie,
-    completedMovie.id,
-    { populate: ["activeStream"], refresh: true },
-  );
+  await em.refreshOrFail(completedMovie);
 
-  expect(updatedCompletedMovie.state).toBe("scraped");
+  expect(completedMovie.state).toBe("indexed");
 });

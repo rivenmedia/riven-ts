@@ -278,5 +278,5 @@ it("adds a job to reprocess the lowest common denominator in the item's hierarch
         queueName: "process-media-item",
       }),
     ]);
-  });
+  }, 2000);
 });
