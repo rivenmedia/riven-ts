@@ -1,15 +1,20 @@
 import z from "zod";
 
 import { mediaRequestSchema } from "../__generated__/zod/mediaRequestSchema.ts";
+import { userSchema } from "../__generated__/zod/userSchema.ts";
+
+const seerrMediaRequestSchema = mediaRequestSchema.extend({
+  modifiedBy: z.union([userSchema, z.string()]).nullish(),
+});
 
 /**
  * Extends the base `MediaRequest` to include season information and the `tv` type
  */
-const TvMediaRequest = mediaRequestSchema.extend({
+const TvMediaRequest = seerrMediaRequestSchema.extend({
   type: z.literal("tv"),
   seasons: z
     .array(
-      mediaRequestSchema.extend({
+      seerrMediaRequestSchema.extend({
         seasonNumber: z.int().nonnegative(),
       }),
     )
@@ -19,7 +24,7 @@ const TvMediaRequest = mediaRequestSchema.extend({
 /**
  * Extends the base `MediaRequest` to include the `movie` type
  */
-const MovieMediaRequest = mediaRequestSchema.extend({
+const MovieMediaRequest = seerrMediaRequestSchema.extend({
   type: z.literal("movie"),
 });
 
