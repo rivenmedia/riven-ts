@@ -17,7 +17,7 @@ import { getValidTorrentFiles } from "./utilities/get-valid-torrent-files.ts";
 export const findValidTorrentProcessor =
   findValidTorrentProcessorSchema.implementAsync(async function (
     { job, scope },
-    { services: { mediaItemService }, plugins },
+    { services: { mediaItemService, streamService }, plugins },
   ) {
     const [rankedStreams] = Object.values(await job.getChildrenValues());
 
@@ -77,16 +77,12 @@ export const findValidTorrentProcessor =
           const providerList = hasProviderListHook ? providers : [null];
 
           for (const provider of providerList) {
-            const isBlacklisted = Boolean(
-              await mediaItem.blacklistedStreams.loadCount({
-                where: {
-                  mediaItem,
-                  stream: infoHash,
-                  plugin: pluginName,
-                  provider,
-                },
-              }),
-            );
+            const isBlacklisted = await streamService.isStreamBlacklisted({
+              mediaItem,
+              stream: infoHash,
+              plugin: pluginName,
+              provider,
+            });
 
             if (isBlacklisted) {
               logger.debug(

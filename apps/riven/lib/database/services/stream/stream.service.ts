@@ -1,4 +1,8 @@
-import { MediaEntry, type MediaItem } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  BlacklistedStream,
+  MediaEntry,
+  type MediaItem,
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   CreateRequestContext,
@@ -11,6 +15,7 @@ import { blacklistStream } from "./utilities/blacklist-stream.ts";
 import { calculateItemsToReprocess } from "./utilities/calculate-items-to-reprocess.ts";
 import { isFatalStatusCode } from "./utilities/is-fatal-status-code.ts";
 
+import type { FilterObject } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";
 
 export class StreamService extends BaseService {
@@ -52,5 +57,12 @@ export class StreamService extends BaseService {
 
   async calculateItemsToReprocess(mediaItems: Set<MediaItem>) {
     return calculateItemsToReprocess(mediaItems);
+  }
+
+  @CreateRequestContext()
+  async isStreamBlacklisted(query: FilterObject<BlacklistedStream>) {
+    const count = await this.em.count(BlacklistedStream, query);
+
+    return count > 0;
   }
 }
