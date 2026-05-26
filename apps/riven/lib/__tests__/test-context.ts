@@ -176,11 +176,18 @@ export const it = testBase
       return season;
     },
   )
-  .extend("episode", ({ indexedShowContext: { episodes: [episode] = [] } }) => {
-    assert(episode);
+  .extend(
+    "episode",
+    ({
+      indexedShowContext: {
+        episodes: [episode],
+      },
+    }) => {
+      assert(episode);
 
-    return episode;
-  })
+      return episode;
+    },
+  )
   .extend("mockQueue", async ({}, { onCleanup }) => {
     const { createQueue } =
       await import("../message-queue/utilities/create-queue.ts");

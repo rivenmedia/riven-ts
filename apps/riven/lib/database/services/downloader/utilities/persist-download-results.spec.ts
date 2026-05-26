@@ -166,7 +166,7 @@ it("adds one media entry per episode for shows", async ({
         name: `${episode.title}.mp4`,
         matchedMediaItemId: episode.id,
         isCachedFile: false,
-      })) as [MatchedFile, ...MatchedFile[]],
+      })),
     },
     "@repo/plugin-test",
   );

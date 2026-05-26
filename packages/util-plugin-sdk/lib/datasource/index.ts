@@ -187,7 +187,7 @@ export abstract class BaseDataSource<
         connection,
         ...(this.rateLimiterOptions && { limiter: this.rateLimiterOptions }),
         telemetry,
-        concurrency: this.concurrency,
+        concurrency: Math.max(1, Math.floor(this.concurrency)),
       },
     );
 
