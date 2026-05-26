@@ -1,4 +1,4 @@
-import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
 import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
@@ -89,19 +89,29 @@ export class ScraperService extends BaseService {
       );
 
       if (newStreamsCount === 0) {
-        // Explicitly populate infoHash (the PK) on blacklisted Stream targets.
-        // m2m loadItems() may not hydrate scalar fields in all contexts without a hint;
-        // using the same "field" populate pattern as the initial streams populate ensures
-        // the Set comparison in hasAvailableStreams works reliably (including in tests).
-        await existingItem.blacklistedStreams.load({ populate: ["infoHash"] });
-        const blacklistedInfoHashes = new Set(
-          existingItem.blacklistedStreams.getItems().map(
-            (stream) => stream.infoHash,
-          ),
-        );
-        const hasAvailableStreams = existingItem.streams
+        // Robust check for "any usable (non-blacklisted) streams already exist":
+        // Start from the already-populated streams on the item (from the initial find with infoHash).
+        // Then query only which of *those* are blacklisted for this item via the inverse relation.
+        // This avoids fragile m2m collection hydration / populate quirks across EM contexts
+        // and works reliably in both production and the blacklisted test.
+        const streamInfoHashes = existingItem.streams
           .getItems()
-          .some((stream) => !blacklistedInfoHashes.has(stream.infoHash));
+          .map((s) => s.infoHash);
+
+        const blacklistedAmongThem = await this.em
+          .getRepository(Stream)
+          .find(
+            {
+              infoHash: { $in: streamInfoHashes },
+              blacklistedParents: { id: existingItem.id },
+            },
+            { fields: ["infoHash"] },
+          );
+
+        const blacklistedSet = new Set(blacklistedAmongThem.map((s) => s.infoHash));
+        const hasAvailableStreams = streamInfoHashes.some(
+          (h) => !blacklistedSet.has(h),
+        );
 
         if (hasAvailableStreams) {
           this.#updateScrapeMetadata(existingItem, 0);
