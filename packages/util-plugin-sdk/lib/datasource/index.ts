@@ -499,7 +499,7 @@ export abstract class BaseDataSource<
       response: clonedResponse,
       // The following fields aren't used by our application,
       // but must be included to satisfy the return type.
-      responseFromCache: false,
+      responseFromCache: result.responseFromCache ?? false,
       requestDeduplication: undefined as never,
       httpCache: {
         cacheWritePromise: Promise.resolve(),
