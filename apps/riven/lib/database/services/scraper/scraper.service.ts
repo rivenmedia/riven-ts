@@ -89,8 +89,13 @@ export class ScraperService extends BaseService {
       );
 
       if (newStreamsCount === 0) {
+        // Explicitly populate infoHash (the PK) on blacklisted Stream targets.
+        // m2m loadItems() may not hydrate scalar fields in all contexts without a hint;
+        // using the same "field" populate pattern as the initial streams populate ensures
+        // the Set comparison in hasAvailableStreams works reliably (including in tests).
+        await existingItem.blacklistedStreams.load({ populate: ["infoHash"] });
         const blacklistedInfoHashes = new Set(
-          (await existingItem.blacklistedStreams.loadItems()).map(
+          existingItem.blacklistedStreams.getItems().map(
             (stream) => stream.infoHash,
           ),
         );
