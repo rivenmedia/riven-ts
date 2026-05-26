@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/node";
+import { NotFoundError } from "@mikro-orm/core";
 import {
   type QueueOptions,
   UnrecoverableError,
@@ -89,6 +90,10 @@ export function createFlowWorker<
               );
             } catch (error) {
               Sentry.captureException(error);
+
+              if (error instanceof NotFoundError) {
+                throw new UnrecoverableError(error.message);
+              }
 
               if (error instanceof Error) {
                 throw error;
