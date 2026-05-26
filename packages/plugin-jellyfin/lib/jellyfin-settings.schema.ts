@@ -6,7 +6,7 @@ export const JellyfinSettings = z.object({
     .min(1, "Jellyfin Token is required")
     .describe("Jellyfin Token for accessing the Jellyfin API."),
   jellyfinServerUrl: z
-    .url("Jellyfin Server URL must be a valid URL")
+    .url({ error: "Jellyfin Server URL must be a valid URL" })
     .describe("The URL of your Jellyfin server, e.g., http://localhost:8096/"),
   jellyfinLibraryPath: z
     .string()
