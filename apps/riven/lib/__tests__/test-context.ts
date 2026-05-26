@@ -7,7 +7,7 @@ import assert from "node:assert";
 import { test as testBase, vi } from "vitest";
 
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
-import type { JobsOptions, Processor, Worker } from "bullmq";
+import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
 import type { ZodObject } from "zod";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -265,10 +265,15 @@ export const it = testBase
       await import("../message-queue/utilities/create-flow-worker.ts");
 
     const workers = new Set<Worker>();
+    const queues = new Set<Queue>();
 
     onCleanup(async () => {
       for (const worker of workers) {
         await worker.close();
+      }
+
+      for (const queue of queues) {
+        await queue.close();
       }
     });
 
@@ -281,42 +286,45 @@ export const it = testBase
       );
 
       workers.add(worker);
+      queues.add(queue);
 
       return { queue, worker };
     };
   })
-  .extend(
-    "createPluginWorker",
-    { scope: "file" },
-    async ({}, { onCleanup }) => {
-      const { createPluginWorker } =
-        await import("../message-queue/utilities/create-plugin-worker.ts");
+  .extend("createPluginWorker", async ({}, { onCleanup }) => {
+    const { createPluginWorker } =
+      await import("../message-queue/utilities/create-plugin-worker.ts");
 
-      const workers = new Set<Worker>();
+    const workers = new Set<Worker>();
+    const queues = new Set<Queue>();
 
-      onCleanup(async () => {
-        for (const worker of workers) {
-          await worker.close(true);
-        }
-      });
+    onCleanup(async () => {
+      for (const worker of workers) {
+        await worker.close(true);
+      }
 
-      return (
-        eventType: RivenEvent["type"],
-        pluginName: string,
-        processor: Processor,
-      ) => {
-        const { queue, worker } = createPluginWorker(
-          eventType,
-          pluginName,
-          processor,
-        );
+      for (const queue of queues) {
+        await queue.close();
+      }
+    });
 
-        workers.add(worker);
+    return (
+      eventType: RivenEvent["type"],
+      pluginName: string,
+      processor: Processor,
+    ) => {
+      const { queue, worker } = createPluginWorker(
+        eventType,
+        pluginName,
+        processor,
+      );
 
-        return { queue, worker };
-      };
-    },
-  );
+      workers.add(worker);
+      queues.add(queue);
+
+      return { queue, worker };
+    };
+  });
 
 it.afterEach(async ({ mockSentryScope, apolloClient }) => {
   mockSentryScope.clear();

@@ -145,6 +145,10 @@ export const requestStreamLinkProcessor =
                 `Dead torrent detected for ${mediaEntry.originalFilename} (${blacklistedInfoHash}). Attempting to download another hash...`,
               );
             } catch (error) {
+              if (error instanceof UnrecoverableError) {
+                throw error;
+              }
+
               throw new UnrecoverableError(
                 `Failed to blacklist stream for ${mediaEntry.originalFilename}: ${String(error)}`,
               );

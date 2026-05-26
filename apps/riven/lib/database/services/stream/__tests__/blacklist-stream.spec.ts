@@ -31,6 +31,34 @@ it("blacklists a stream for a media item", async ({
   expect(updatedBlacklistedStreams[0].provider).toBe("test-provider");
 });
 
+it("blacklists a stream with no provider for a media item", async ({
+  services: { streamService },
+  completedMovieContext: {
+    completedMovie,
+    streams: [stream],
+  },
+}) => {
+  expect.assert(stream);
+
+  await streamService.blacklistActiveStream({
+    mediaItem: completedMovie,
+    provider: null,
+    plugin: "test-plugin",
+  });
+
+  const updatedBlacklistedStreams =
+    await completedMovie.blacklistedStreams.loadItems({ refresh: true });
+
+  expect(updatedBlacklistedStreams).toHaveLength(1);
+
+  expect.assert(updatedBlacklistedStreams[0]);
+
+  expect(updatedBlacklistedStreams[0].stream.infoHash).toBe(stream.infoHash);
+
+  expect(updatedBlacklistedStreams[0].plugin).toBe("test-plugin");
+  expect(updatedBlacklistedStreams[0].provider).toBe(null);
+});
+
 it("clears the active stream for the media item", async ({
   em,
   services: { streamService },

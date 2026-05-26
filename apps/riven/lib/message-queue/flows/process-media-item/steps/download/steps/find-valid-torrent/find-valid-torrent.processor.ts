@@ -1,6 +1,5 @@
 import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
-import { merge } from "es-toolkit";
 import assert from "node:assert";
 import z, { ZodError } from "zod";
 
@@ -211,11 +210,10 @@ export const findValidTorrentProcessor =
 
       await job.log(`${infoHash} failed validation for all plugins`);
 
-      await job.updateData(
-        merge(job.data, {
-          failedInfoHashes: [infoHash],
-        }),
-      );
+      await job.updateData({
+        ...job.data,
+        failedInfoHashes: [...job.data.failedInfoHashes, infoHash],
+      });
     }
 
     return null;

@@ -42,7 +42,7 @@ export class MediaItemFullTitleSubscriber implements EventSubscriber {
   }
 
   async #setSeasonFullTitle(item: Season, payload: EntityDictionary<Season>) {
-    if (payload.number) {
+    if (payload.number != null) {
       item.fullTitle = `${await item.show.loadProperty("fullTitle")} - S${item.number.toString().padStart(2, "0")}`;
     }
   }
@@ -51,7 +51,7 @@ export class MediaItemFullTitleSubscriber implements EventSubscriber {
     item: Episode,
     payload: EntityDictionary<Episode>,
   ) {
-    if (payload.number || payload.title) {
+    if (payload.number != null || payload.title) {
       item.fullTitle = `${await item.season.loadProperty("fullTitle")}E${item.number.toString().padStart(2, "0")} - ${item.title}`;
     }
   }
