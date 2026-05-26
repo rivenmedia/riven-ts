@@ -1,5 +1,7 @@
 import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
 
+import path from "node:path";
+
 import { JellyfinSettings } from "../jellyfin-settings.schema.ts";
 
 import type { AugmentedRequest } from "@apollo/datasource-rest";
@@ -15,15 +17,22 @@ export class JellyfinAPI extends BaseDataSource<JellyfinSettings> {
     requestOpts: AugmentedRequest,
   ): void {
     requestOpts.headers["Authorization"] =
-      `MediaBrowser Client=Riven Token=${this.settings.jellyfinToken}`;
+      `MediaBrowser Client=Riven, Token=${this.settings.jellyfinToken}`;
   }
 
-  async updateSection(path: string) {
+  async updateSections(paths: string[]) {
     try {
-      await this.post(`Library/Refresh?path=${encodeURIComponent(path)}`);
+      await this.post(`Library/Media/Updated`, {
+        body: JSON.stringify({
+          Updates: paths.map((subPath) => ({
+            Path: path.join(this.settings.jellyfinLibraryPath, subPath),
+            UpdateType: "Created",
+          })),
+        }),
+      });
     } catch (error) {
       throw new JellyfinAPIError(
-        `Failed to refresh library section for path: ${path}. Error: ${(error as Error).message}`,
+        `Failed to refresh library section for paths: ${paths.join(", ")}. Error: ${(error as Error).message}`,
       );
     }
   }
@@ -33,7 +42,10 @@ export class JellyfinAPI extends BaseDataSource<JellyfinSettings> {
       await this.get("System/Configuration");
 
       return true;
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        `Failed to connect to Jellyfin server at ${this.settings.jellyfinServerUrl}. Please check your settings. Error: ${(error as Error).message}`,
+      );
       return false;
     }
   }

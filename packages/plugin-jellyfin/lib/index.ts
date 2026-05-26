@@ -38,32 +38,10 @@ export default {
         .values()
         .toArray();
 
-      const results = await Promise.allSettled(
-        sectionPaths.map((sectionPath) =>
-          jellyfinAPI.updateSection(sectionPath),
-        ),
-      );
-
-      const errors = results
-        .filter(
-          (result): result is PromiseRejectedResult =>
-            result.status === "rejected",
-        )
-        .map((result) =>
-          result.reason instanceof Error
-            ? result.reason
-            : new Error(String(result.reason)),
-        );
-
-      if (errors.length > 0) {
-        throw new Error(
-          `Failed to update library sections for ${event.item.fullTitle}. ${errors.map((error) => error.message).join(", ")}`,
-          { cause: errors },
-        );
-      }
+      await jellyfinAPI.updateSections(sectionPaths);
 
       logger.info(
-        `Updated ${results.length.toString()} paths for ${event.item.fullTitle}`,
+        `Updated ${sectionPaths.length.toString()} path${sectionPaths.length !== 1 ? "s" : ""} for ${event.item.fullTitle}`,
       );
     },
   },
