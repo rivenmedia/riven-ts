@@ -98,6 +98,13 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
           continue;
         }
 
+        if (!request.seasons?.length) {
+          this.logger.warn(
+            `Skipping TV request ${request.id} (media tvdb:${request.media.tvdbId}) because it has no seasons. This usually indicates missing season_request rows in the Seerr DB (see plugin-seerr request-rows memory note).`,
+          );
+          continue;
+        }
+
         /**
          * Seerr creates multiple requests within the same show,
          * e.g. one request for seasons 1-3, then another request for season 4.
