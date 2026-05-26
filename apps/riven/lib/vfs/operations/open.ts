@@ -93,12 +93,23 @@ async function serveMediaFile(
     throw new FuseError(Fuse.ENOENT, "No media entry found");
   }
 
+  // Stale streamUrl detection: signed CDN links (TorBox, RD, etc.) expire after a few hours.
+  // Without this, an "old but present" streamUrl is blindly reused, causing the exact
+  // "VFS open FuseError: Timed out waiting for stream URL" that currently requires
+  // manual mass-NULL runbooks in production (see project_riven_stream_url_mass_refresh).
+  // We use the entry's updatedAt (bumped by saveStreamUrl) as the freshness signal.
+  const STREAM_URL_MAX_AGE_HOURS = 6; // conservative default matching observed CDN lifetimes
+  const streamUrlAgeHours = entry.streamUrl && entry.updatedAt
+    ? (Date.now() - new Date(entry.updatedAt).getTime()) / (1000 * 60 * 60)
+    : Infinity;
+  const isStreamUrlStale = streamUrlAgeHours > STREAM_URL_MAX_AGE_HOURS;
+
   if (
-    !entry.streamUrl &&
+    (!entry.streamUrl || isStreamUrlStale) &&
     !fileNameIsFetchingLinkMap.get(entry.originalFilename)
   ) {
     logger.silly(
-      `No stream URL for media entry ${entry.id}, requesting from ${entry.plugin}...`,
+      `No (or stale) stream URL for media entry ${entry.id}, requesting from ${entry.plugin}...`,
     );
 
     const requestQueue = linkRequestQueues.get(entry.plugin);
