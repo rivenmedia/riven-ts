@@ -98,17 +98,17 @@ export class ScraperService extends BaseService {
           .getItems()
           .map((s) => s.infoHash);
 
-        const blacklistedAmongThem = await this.em
-          .getRepository(Stream)
-          .find(
-            {
-              infoHash: { $in: streamInfoHashes },
-              blacklistedParents: { id: existingItem.id },
-            },
-            { fields: ["infoHash"] },
-          );
+        const blacklistedAmongThem = await this.em.getRepository(Stream).find(
+          {
+            infoHash: { $in: streamInfoHashes },
+            blacklistedParents: { id: existingItem.id },
+          },
+          { fields: ["infoHash"] },
+        );
 
-        const blacklistedSet = new Set(blacklistedAmongThem.map((s) => s.infoHash));
+        const blacklistedSet = new Set(
+          blacklistedAmongThem.map((s) => s.infoHash),
+        );
         const hasAvailableStreams = streamInfoHashes.some(
           (h) => !blacklistedSet.has(h),
         );

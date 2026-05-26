@@ -99,9 +99,10 @@ async function serveMediaFile(
   // manual mass-NULL runbooks in production (see project_riven_stream_url_mass_refresh).
   // We use the entry's updatedAt (bumped by saveStreamUrl) as the freshness signal.
   const STREAM_URL_MAX_AGE_HOURS = 6; // conservative default matching observed CDN lifetimes
-  const streamUrlAgeHours = entry.streamUrl && entry.updatedAt
-    ? (Date.now() - new Date(entry.updatedAt).getTime()) / (1000 * 60 * 60)
-    : Infinity;
+  const streamUrlAgeHours =
+    entry.streamUrl && entry.updatedAt
+      ? (Date.now() - new Date(entry.updatedAt).getTime()) / (1000 * 60 * 60)
+      : Infinity;
   const isStreamUrlStale = streamUrlAgeHours > STREAM_URL_MAX_AGE_HOURS;
 
   if (
