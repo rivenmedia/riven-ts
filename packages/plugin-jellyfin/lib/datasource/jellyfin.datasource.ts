@@ -15,7 +15,7 @@ export class JellyfinAPI extends BaseDataSource<JellyfinSettings> {
     requestOpts: AugmentedRequest,
   ): void {
     requestOpts.headers["Authorization"] =
-      `MediaBrowser Token=${this.settings.jellyfinToken}`;
+      `MediaBrowser Client=Riven Token=${this.settings.jellyfinToken}`;
   }
 
   async updateSection(path: string) {
