@@ -163,8 +163,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
         false,
       );
 
-      bytesRead = Math.min(scannedChunk.length, buffer.length);
-      scannedChunk.copy(buffer, 0, 0, bytesRead);
+      bytesRead = safeCopy(scannedChunk, 0);
 
       break;
     }
