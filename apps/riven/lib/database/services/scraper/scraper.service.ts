@@ -89,6 +89,24 @@ export class ScraperService extends BaseService {
       );
 
       if (newStreamsCount === 0) {
+        const blacklistedInfoHashes = new Set(
+          (await existingItem.blacklistedStreams.loadItems()).map(
+            (stream) => stream.infoHash,
+          ),
+        );
+        const hasAvailableStreams = existingItem.streams
+          .getItems()
+          .some((stream) => !blacklistedInfoHashes.has(stream.infoHash));
+
+        if (hasAvailableStreams) {
+          this.#updateScrapeMetadata(existingItem, 0);
+
+          return {
+            item: existingItem,
+            newStreamsCount,
+          };
+        }
+
         throw new MediaItemScrapeErrorNoNewStreams({
           item: existingItem,
           error: new Error(
