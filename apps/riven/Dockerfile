@@ -1,8 +1,9 @@
 ARG HOME=/app
 ARG NODE_VERSION=24.15.0
-ARG TURBO_VERSION=2.9.5
-ARG PNPM_VERSION=10.28.2
+ARG TURBO_VERSION=2.9.14
+ARG PNPM_VERSION=11.2.1
 ARG PNPM_HOME=${HOME}/.local/share/pnpm
+ARG PNPM_STORE=${PNPM_HOME}/store
 ARG USER=riven
 ARG PUID=1000
 ARG PGID=1000
@@ -14,13 +15,6 @@ FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS core-os
 
     ARG TARGETPLATFORM
     ARG BUILDPLATFORM
-    ARG USER
-    ARG PNPM_VERSION
-    ARG PNPM_HOME
-    ARG HOME
-
-    ENV PNPM_HOME=${PNPM_HOME}
-    ENV PATH=$PNPM_HOME:$PATH
 
     # Install build dependencies
     RUN apt-get update && apt-get install -y \
@@ -34,49 +28,69 @@ FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS core-os
         build-essential \
         git
 
-    # Install pnpm
-    RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
-
-FROM core-os AS prepare
+FROM core-os AS base
 
     LABEL builder="true"
 
+    ARG HOME
+    ARG PNPM_HOME
+    ARG PNPM_STORE
+    ARG PNPM_VERSION
     ARG TURBO_VERSION
+
+    ENV PNPM_HOME=${PNPM_HOME}
+    ENV PATH=${PNPM_HOME}/bin:$PATH
+
+    # Install pnpm
+    RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
+
+    RUN pnpm add turbo@${TURBO_VERSION} --global
+
+    RUN --mount=type=cache,id=pnpm,target=${PNPM_STORE} pnpm config set store-dir ${PNPM_STORE}
+
+    RUN turbo telemetry disable
+
+FROM base AS prepare
+
+    LABEL builder="true"
+
     ARG HOME
 
     WORKDIR ${HOME}
-
-    RUN pnpm add turbo@${TURBO_VERSION} --global
-    RUN turbo telemetry disable
 
     COPY . .
 
     RUN turbo prune @repo/riven --docker
 
-FROM core-os AS builder
+FROM base AS builder
 
     LABEL builder="true"
 
     ARG HOME
-
-    WORKDIR ${HOME}
-
-    COPY --from=prepare ${HOME}/out/json/ .
-
-
-    RUN pnpm fetch
+    ARG PNPM_STORE
 
     ARG CI
     ENV CI=${CI}
 
-    RUN pnpm install -r --offline
+    WORKDIR ${HOME}
 
-    COPY --from=prepare ${HOME}/out/full/ .
+    COPY --from=prepare ${HOME}/out/pnpm-lock.yaml ./
+    COPY --from=prepare ${HOME}/out/pnpm-workspace.yaml ./
+    COPY --from=prepare ${HOME}/out/json/patches ./patches
+
+    RUN pnpm fetch
+
+    COPY --from=prepare ${HOME}/out/full/ ./
+
+    RUN --mount=type=cache,id=pnpm,target=${PNPM_STORE} pnpm install -r --offline
+
+    # Replace the previous workspace file to avoid `build` from triggering an installation that fails the Docker process
+    COPY --from=prepare ${HOME}/out/pnpm-workspace.yaml ./
 
     ARG TURBO_TEAM
     ENV TURBO_TEAM=${TURBO_TEAM}
 
-    RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN pnpm turbo @repo/riven#build
+    RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN turbo @repo/riven#build
 
 FROM builder AS production-deploy
 
@@ -133,8 +147,6 @@ FROM node:${NODE_VERSION}-alpine AS runner
     USER ${PUID}:${PGID}
 
     COPY --from=production-deploy ${HOME}/pruned .
-
-    STOPSIGNAL SIGTERM
 
     ENV NODE_ENV=production
 

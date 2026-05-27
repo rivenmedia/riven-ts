@@ -1,0 +1,136 @@
+---
+title: Plugins Overview
+description: Available plugins for Riven TS and how to configure them.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Card, Cards } from "fumadocs-ui/components/card";
+
+Riven uses a plugin architecture. Every integration is a plugin that can be enabled by providing its required environment variables. If the required settings aren't provided, the plugin is simply skipped.
+
+## Plugin Categories
+
+### Content Sources
+
+These plugins tell Riven what media you want:
+
+<Cards>
+  <Card
+    title="Seerr"
+    href="/docs/plugins/seerr"
+    description="Request management via Seerr/Overseerr"
+  />
+  <Card
+    title="MDBList"
+    href="/docs/plugins/mdblist"
+    description="Curated media lists from MDBList"
+  />
+  <Card
+    title="Listrr"
+    href="/docs/plugins/listrr"
+    description="Movie and show lists from Listrr"
+  />
+</Cards>
+
+### Metadata
+
+These plugins fetch information about your media:
+
+<Cards>
+  <Card
+    title="TMDB"
+    href="/docs/plugins/tmdb"
+    description="The Movie Database - primary metadata source"
+  />
+  <Card
+    title="TVDB"
+    href="/docs/plugins/tvdb"
+    description="TheTVDB - TV show metadata"
+  />
+</Cards>
+
+### Scraping & Downloads
+
+These plugins find and cache torrents:
+
+<Cards>
+  <Card
+    title="StremThru"
+    href="/docs/plugins/stremthru"
+    description="Debrid provider integration (Real-Debrid, AllDebrid, etc.)"
+  />
+  <Card
+    title="Torrentio"
+    href="/docs/plugins/torrentio"
+    description="Torrentio torrent provider"
+  />
+  <Card
+    title="Comet"
+    href="/docs/plugins/comet"
+    description="Comet torrent service"
+  />
+</Cards>
+
+### Media Servers
+
+<Cards>
+  <Card
+    title="Plex"
+    href="/docs/plugins/plex"
+    description="Plex server integration and library updates"
+  />
+</Cards>
+
+### Other
+
+<Cards>
+  <Card
+    title="Subdl"
+    href="/docs/plugins/subdl"
+    description="Automatic subtitle downloading"
+  />
+  <Card
+    title="Notifications"
+    href="/docs/plugins/notifications"
+    description="Discord, webhook, and Apprise notifications"
+  />
+</Cards>
+
+## Configuration Pattern
+
+All plugin settings use environment variables with this pattern:
+
+```
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_<NAME>__<settingName>="value"
+```
+
+<Callout>
+  The plugin name is uppercase with underscores. For example, `plugin-mdblist`
+  becomes `REPO_PLUGIN_MDBLIST`.
+</Callout>
+
+### Examples
+
+```bash
+# TMDB
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_TMDB__apiKey="your-tmdb-key"
+
+# MDBList with lists
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__apiKey="your-key"
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__lists=["username/list-name"]
+
+# StremThru with Real-Debrid
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_STREMTHRU__realdebridApiKey="your-rd-key"
+
+# Seerr
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__url="http://seerr:5055"
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__apiKey="your-seerr-key"
+```
+
+## Minimum Plugin Setup
+
+At minimum, you need:
+
+1. **TMDB** - For metadata lookup (required)
+2. **One content source** - Seerr, MDBList, or Listrr
+3. **One scraper/downloader** - StremThru (recommended), Torrentio, or Comet

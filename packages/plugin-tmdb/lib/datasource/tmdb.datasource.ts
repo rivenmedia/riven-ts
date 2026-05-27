@@ -1,7 +1,7 @@
 import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
 
 import { findById200Schema } from "../__generated__/zod/findByIdSchema.ts";
-import { GetMovieDetails } from "../schemas/get-movie-details.schema.ts";
+import { movieDetails200Schema } from "../__generated__/zod/movieDetailsSchema.ts";
 
 import type { FindByIdQueryParams } from "../__generated__/types/FindById.ts";
 import type { TmdbSettings } from "../tmdb-settings.schema.ts";
@@ -60,12 +60,8 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
   }
 
   async getMovieDetails(movieId: string) {
-    const response = await this.get<unknown>(`movie/${movieId}`, {
-      params: {
-        append_to_response: "external_ids,release_dates",
-      },
-    });
+    const response = await this.get<unknown>(`movie/${movieId}`);
 
-    return GetMovieDetails.parse(response);
+    return movieDetails200Schema.parse(response);
   }
 }

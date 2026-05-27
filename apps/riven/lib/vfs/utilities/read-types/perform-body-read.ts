@@ -13,6 +13,7 @@ import {
   fdToResponsePromiseMap,
 } from "../file-handle-map.ts";
 import { createStreamRequest } from "../requests/create-stream-request.ts";
+import { getVfsOperationContext } from "../vfs-operation-context.ts";
 
 import type { ChunkMetadata } from "../../schemas/chunk.schema.ts";
 
@@ -21,24 +22,20 @@ import type { ChunkMetadata } from "../../schemas/chunk.schema.ts";
  * This is used when there are missing chunks that need to be fetched
  * from the stream, which are then stitched together with any cached chunks.
  *
- * @param fd The file descriptor for the current read request
  * @param chunks The chunks that form the request
  * @param fileHandle The file handle metadata for the file descriptor
  * @returns The requests chunk data
  */
 export async function performBodyRead(
-  fd: number,
   chunks: readonly ChunkMetadata[],
   fileHandle: MediaFileHandleMetadata,
 ) {
+  const { fd } = getVfsOperationContext("read");
   const cachedChunksMetadata = chunks.filter((chunk) => chunk.isCached);
   const missingChunksMetadata = chunks.filter((chunk) => !chunk.isCached);
 
   if (!missingChunksMetadata[0]) {
-    throw new FuseError(
-      Fuse.EIO,
-      `No missing chunks calculated for fd ${fd.toString()}`,
-    );
+    throw new FuseError(Fuse.EIO, "No missing chunks calculated");
   }
 
   logger.silly(
@@ -50,7 +47,7 @@ export async function performBodyRead(
 
   const streamReader =
     (await fdToResponsePromiseMap.get(fd)) ??
-    (await createStreamRequest(fd, fileHandle.url, [
+    (await createStreamRequest(fileHandle.url, [
       missingChunksMetadata[0].range[0],
       undefined,
     ]));
@@ -62,10 +59,7 @@ export async function performBodyRead(
   const currentStreamPosition = fdToCurrentStreamPositionMap.get(fd);
 
   if (currentStreamPosition === undefined) {
-    throw new FuseError(
-      Fuse.EIO,
-      `Missing current stream position for fd ${fd.toString()}`,
-    );
+    throw new FuseError(Fuse.EIO, "Missing current stream position");
   }
 
   const {
@@ -79,15 +73,12 @@ export async function performBodyRead(
 
     for (const targetChunk of missingChunksMetadata) {
       const { chunk, fetchedFromCache } = await waitForChunk(
-        fd,
         streamReader.body,
         targetChunk,
       );
 
       if (!fetchedFromCache) {
-        logger.silly(
-          `Fetched chunk ${targetChunk.rangeLabel} for fd ${fd.toString()}`,
-        );
+        logger.silly(`Fetched chunk ${targetChunk.rangeLabel}`);
 
         bytesFetched += chunk.byteLength;
 
@@ -112,7 +103,7 @@ export async function performBodyRead(
       .join(", ");
 
     logger.verbose(
-      `Fetched ${bytesFetched.toString()} bytes from stream[fd=${fd.toString()}] for chunks ${chunkLabels} in ${timeTaken.toFixed(2)}ms.`,
+      `Fetched ${bytesFetched.toString()} bytes from stream for chunks ${chunkLabels} in ${timeTaken.toFixed(2)}ms.`,
     );
   } else {
     const chunkLabels = chunks.map((chunk) => chunk.rangeLabel).join(", ");
@@ -128,10 +119,7 @@ export async function performBodyRead(
     const maybeCachedChunk = chunkCache.get(chunk.cacheKey);
 
     if (!maybeCachedChunk) {
-      throw new FuseError(
-        Fuse.EIO,
-        `Expected chunk to be cached after fetch for fd ${fd.toString()}`,
-      );
+      throw new FuseError(Fuse.EIO, "Expected chunk to be cached after fetch");
     }
 
     cachedChunks.push(maybeCachedChunk);

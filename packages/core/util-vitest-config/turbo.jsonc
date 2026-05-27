@@ -14,7 +14,7 @@
     "report": {
       "dependsOn": ["merge-json-reports"],
       "inputs": ["coverage/merged/**"],
-      "outputs": ["coverage/report/**"]
+      "outputs": ["coverage/report/**", "coverage/summary/**"]
     }
   }
 }

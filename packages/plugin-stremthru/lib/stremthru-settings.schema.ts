@@ -2,9 +2,7 @@ import z, { type ZodOptional, type ZodString } from "zod";
 
 import { Store } from "./schemas/store.schema.ts";
 
-export const StoreKeys = z.object<
-  Record<`${Store}ApiKey`, ZodOptional<ZodString>>
->({
+const StoreKeys = z.object<Record<`${Store}ApiKey`, ZodOptional<ZodString>>>({
   realdebridApiKey: z.string().optional(),
   alldebridApiKey: z.string().optional(),
   debriderApiKey: z.string().optional(),
@@ -15,8 +13,6 @@ export const StoreKeys = z.object<
   premiumizeApiKey: z.string().optional(),
   torboxApiKey: z.string().optional(),
 });
-
-export type StoreKeys = z.infer<typeof StoreKeys>;
 
 export const StremThruSettings = z
   .object({

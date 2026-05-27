@@ -58,7 +58,7 @@ jobs:
             env:
               RIVEN_SETTING__databaseUrl: postgres+psycopg2://runner:runner@127.0.0.1:5432/riven
           - name: Knip (development)
-            command: //#knip:ci
+            command: //#knip:ci:development
           - name: Knip (production)
             command: //#knip:ci:production
     uses: ./.github/workflows/run-turbo-task.yaml
@@ -68,15 +68,4 @@ jobs:
       runner-requirements: ${{ matrix.task.runner-requirements &&
         toJson(matrix.task.runner-requirements) || '[]' }}
       env: ${{ matrix.task.env && toJson(matrix.task.env) || '{}' }}
-    secrets: inherit
-
-  build-docker-images:
-    name: Build Docker Images
-    needs: verify
-    uses: ./.github/workflows/build-docker-images.yaml
-    permissions:
-      contents: read
-      packages: write
-    with:
-      push: ${{ contains(github.event.pull_request.labels.*.name, 'build-docker') }}
     secrets: inherit

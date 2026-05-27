@@ -1,11 +1,10 @@
-/* eslint-disable no-empty-pattern */
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
 import { vi } from "vitest";
 import { createActor, fromPromise } from "xstate";
 
 import { it as baseIt } from "../../../../__tests__/test-context.ts";
-import { SessionID } from "../../../../utilities/logger/log-context.ts";
+import { SessionID } from "../../../../utilities/logger/session-id.ts";
 import {
   type BootstrapMachineOutput,
   bootstrapMachine,

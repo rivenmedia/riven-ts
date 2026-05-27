@@ -90,9 +90,12 @@ export async function persistShowIndexerData(
       genres: item.genres.map((genre) => genre.toLowerCase()),
       nextAirDate: null, // Reset the next air date; it will be recalculated during episode processing
       indexedAt,
+      seasons: [],
     });
 
-    await em.upsert(Show, show, { onConflictExcludeFields: ["indexedAt"] });
+    await em.upsert(Show, show, {
+      onConflictExcludeFields: ["indexedAt"],
+    });
 
     for (const season of Object.values(item.seasons)) {
       const seasonTitle = [
@@ -118,6 +121,7 @@ export async function persistShowIndexerData(
           : season.number > 0,
         itemRequest,
         indexedAt,
+        episodes: [],
       });
 
       show.seasons.add(seasonEntry);

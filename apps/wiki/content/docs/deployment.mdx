@@ -1,0 +1,173 @@
+---
+title: Deployment
+description: Production deployment guide for Riven TS.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+## Docker Compose (Recommended)
+
+The recommended way to run Riven is with Docker Compose. Use the [Compose Generator](/generator) for an interactive setup, or follow the manual guide below.
+
+### Minimum Requirements
+
+- Linux host with FUSE support
+- Docker Engine 24+ with Compose V2
+- 1GB RAM minimum (2GB+ recommended)
+- PostgreSQL 15+ (included in compose)
+- Redis 7+ (included in compose)
+
+### Mount Propagation
+
+<Callout type="warn">
+  This step is critical. Without shared mount propagation, the VFS will not be
+  visible outside the container.
+</Callout>
+
+Create a systemd service to make the mount point shared:
+
+```ini title="/etc/systemd/system/riven-mount.service"
+[Unit]
+Description=Make Riven data bind mount shared
+After=local-fs.target
+Before=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/mount --bind /mnt/riven /mnt/riven
+ExecStart=/usr/bin/mount --make-rshared /mnt/riven
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo mkdir -p /mnt/riven
+sudo systemctl daemon-reload
+sudo systemctl enable --now riven-mount.service
+```
+
+Verify it's working:
+
+```bash
+findmnt -o TARGET,PROPAGATION /mnt/riven
+# Should show "shared"
+```
+
+### Docker Compose File
+
+```yaml title="docker-compose.yml"
+services:
+  riven:
+    image: ghcr.io/rivenmedia/riven-ts:latest
+    container_name: riven
+    restart: unless-stopped
+    tty: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    devices:
+      - /dev/fuse
+    env_file: .env
+    volumes:
+      - riven_data:/riven/data
+      - /mnt/riven:/mnt/riven:rshared,z
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: riven
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: riven
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U riven"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  riven_data:
+  postgres_data:
+  redis_data:
+```
+
+### Media Server Integration
+
+Add your media server to the same compose file. The key is mounting the VFS path with `rslave` propagation:
+
+```yaml title="Jellyfin example"
+jellyfin:
+  image: jellyfin/jellyfin:latest
+  ports:
+    - 8096:8096
+  volumes:
+    - jellyfin_config:/config
+    - /mnt/riven:/mnt/riven:rslave,z
+  depends_on:
+    riven:
+      condition: service_started
+```
+
+<Callout>
+  The Riven container uses `rshared` (read-shared) propagation so it can share
+  its FUSE mount. Media servers use `rslave` (read-slave) to receive mount
+  events from the host.
+</Callout>
+
+## Reverse Proxy
+
+### Traefik
+
+```yaml
+labels:
+  - traefik.enable=true
+  - traefik.http.routers.riven.rule=Host(`riven.example.com`)
+  - traefik.http.routers.riven.entrypoints=websecure
+  - traefik.http.routers.riven.tls=true
+  - traefik.http.routers.riven.tls.certresolver=leresolver
+  - traefik.http.services.riven.loadbalancer.server.port=3000
+```
+
+### Nginx
+
+```nginx
+server {
+    server_name riven.example.com;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+## Updating
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+Riven TS handles database migrations automatically on startup.

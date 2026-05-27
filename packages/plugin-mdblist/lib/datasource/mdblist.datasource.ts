@@ -40,7 +40,9 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
       await this.get("user");
 
       return true;
-    } catch {
+    } catch (error) {
+      this.logger.error("MDBList validation error", { err: error });
+
       return false;
     }
   }

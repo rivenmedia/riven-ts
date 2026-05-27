@@ -14,6 +14,10 @@ import {
   fileNameToFdCountMap,
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
+import {
+  getVfsOperationContext,
+  withVfsOperationContext,
+} from "../utilities/vfs-operation-context.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
 import type { PathInfo } from "../../database/services/vfs/schemas/path-info.schema.ts";
@@ -34,7 +38,8 @@ type LinkRequestQueues = Map<
 
 let fd = 0;
 
-async function waitForStreamUrl(path: string) {
+async function waitForStreamUrl() {
+  const { path } = getVfsOperationContext("open");
   const timeoutController = AbortSignal.timeout(10_000);
   const pathInfo = services.vfsService.parsePath(path);
 
@@ -48,20 +53,14 @@ async function waitForStreamUrl(path: string) {
     await setTimeout(100);
   }
 
-  throw new FuseError(
-    Fuse.ETIMEDOUT,
-    `Timed out waiting for stream URL for path ${path}`,
-  );
+  throw new FuseError(Fuse.ETIMEDOUT, "Timed out waiting for stream URL");
 }
 
 async function serveSubtitleFile(pathInfo: PathInfo) {
   const subtitleEntry = await services.vfsService.getSubtitleEntry(pathInfo);
 
   if (!subtitleEntry) {
-    throw new FuseError(
-      Fuse.ENOENT,
-      `Subtitle not found for path: ${pathInfo.rawPath}`,
-    );
+    throw new FuseError(Fuse.ENOENT, "Subtitle not found");
   }
 
   const contentBuffer = Buffer.from(subtitleEntry.content, "utf8");
@@ -86,13 +85,12 @@ async function serveMediaFile(
   pathInfo: PathInfo,
   linkRequestQueues: LinkRequestQueues,
 ) {
-  const entry = await services.vfsService.getMediaEntry(pathInfo);
+  const entry = await services.vfsService.getMediaEntry(pathInfo, {
+    populate: ["mediaItem.fullTitle"],
+  });
 
   if (!entry) {
-    throw new FuseError(
-      Fuse.ENOENT,
-      `No media entry found for path ${pathInfo.rawPath}`,
-    );
+    throw new FuseError(Fuse.ENOENT, "No media entry found");
   }
 
   if (
@@ -112,7 +110,7 @@ async function serveMediaFile(
 
       throw new FuseError(
         Fuse.ENOENT,
-        `Media entry ${entry.id} has no stream URL and no link request queue is available`,
+        "Media entry has no stream URL and no link request queue is available",
       );
     }
 
@@ -131,24 +129,20 @@ async function serveMediaFile(
       await services.vfsService.saveStreamUrl(entry.id, streamUrl);
 
       attrCache.delete(pathInfo.rawPath);
-    } catch (error: unknown) {
+    } catch (error) {
       throw new FuseError(
         Fuse.ENOENT,
-        `Unable to get stream url for ${entry.originalFilename}: ${String(error)}`,
+        `Unable to get stream url: ${String(error)}`,
       );
     } finally {
       fileNameIsFetchingLinkMap.delete(entry.originalFilename);
     }
   }
 
-  const streamUrl =
-    entry.streamUrl ?? (await waitForStreamUrl(pathInfo.rawPath));
+  const streamUrl = entry.streamUrl ?? (await waitForStreamUrl());
 
   if (!streamUrl) {
-    throw new FuseError(
-      Fuse.ENOENT,
-      `Media entry ${entry.id} has no stream URL`,
-    );
+    throw new FuseError(Fuse.ENOENT, "Media entry has no stream URL");
   }
 
   const nextFd = fd++;
@@ -199,12 +193,15 @@ export const openSync = function (
   linkRequestQueues: LinkRequestQueues,
   callback: (err: number, fd?: number) => void,
 ) {
-  void withVfsScope(async () => {
-    try {
-      const fd = await open(path, flags, linkRequestQueues);
+  void withVfsScope(() =>
+    withVfsOperationContext(
+      { operationName: "open", path, flags },
+      async () => {
+        const fd = await open(path, flags, linkRequestQueues);
 
-      process.nextTick(callback, 0, fd);
-    } catch (error) {
+        process.nextTick(callback, 0, fd);
+      },
+    ).catch((error: unknown) => {
       if (isFuseError(error)) {
         logger.error("VFS open FuseError", { err: error });
 
@@ -213,9 +210,9 @@ export const openSync = function (
         return;
       }
 
-      logger.error("VFS open error", { err: error });
+      logger.error(`VFS open error for path: ${path}`, { err: error });
 
       process.nextTick(callback, Fuse.EIO);
-    }
-  });
+    }),
+  );
 };

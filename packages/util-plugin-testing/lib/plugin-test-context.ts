@@ -1,4 +1,3 @@
-/* eslint-disable no-empty-pattern */
 import {
   type BaseDataSourceConfig,
   DataSourceMap,
@@ -55,10 +54,7 @@ export const it = baseIt
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");
 
-    const mockServer = await buildMockServer<GraphQLContext>(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-      plugin.resolvers as [Function, ...Function[]],
-    );
+    const mockServer = await buildMockServer<GraphQLContext>(plugin.resolvers);
 
     await mockServer.start();
 
@@ -126,6 +122,7 @@ export const it = baseIt
           telemetry: undefined as unknown as Telemetry,
           requestAttempts: 1,
           settings: settings.get(plugin.settingsSchema),
+          userAgent: "mock-user-agent",
         } satisfies BaseDataSourceConfig<Record<string, unknown>>;
 
         for (const DataSourceClass of plugin.dataSources) {

@@ -1,4 +1,4 @@
-import { includeIgnoreFile } from "@eslint/compat";
+import { includeIgnoreFile } from "@eslint/config-helpers";
 import turboConfig from "eslint-config-turbo/flat";
 import { fileURLToPath } from "node:url";
 

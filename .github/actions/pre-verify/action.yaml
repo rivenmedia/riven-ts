@@ -11,7 +11,7 @@ runs:
   using: composite
   steps:
     - name: Persist Knip cache
-      if: ${{ contains(fromJSON('["//#knip:ci", "//#knip:ci:production"]'), inputs.task) }}
+      if: ${{ contains(fromJSON('["//#knip:ci:development", "//#knip:ci:production"]'), inputs.task) }}
       uses: actions/cache@v4
       with:
         path: node_modules/.cache/knip

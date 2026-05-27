@@ -27,7 +27,7 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
       return [];
     }
 
-    const item = await mediaItemService.getMediaItem(job.data.id);
+    const item = await mediaItemService.getMediaItemById(job.data.id);
 
     const { title: itemTitle, aliases } =
       item instanceof ShowLikeMediaItem ? await item.getShow() : item;
