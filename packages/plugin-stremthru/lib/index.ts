@@ -1,3 +1,5 @@
+import { DataSourceHTTPError, type RivenPlugin } from "@repo/util-plugin-sdk";
+
 import packageJson from "../package.json" with { type: "json" };
 import { StremThruTorzAPI } from "./datasource/stremthru-torz.datasource.ts";
 import { StremThruTorznabAPI } from "./datasource/stremthru-torznab.datasource.ts";
@@ -6,8 +8,6 @@ import { StremThruResolver } from "./schema/stremthru.resolver.ts";
 import { Store } from "./schemas/store.schema.ts";
 import { pluginConfig } from "./stremthru-plugin.config.ts";
 import { StremThruSettings } from "./stremthru-settings.schema.ts";
-
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
 export default {
   name: pluginConfig.name,
@@ -23,8 +23,23 @@ export default {
       const store = Store.parse(rawStore);
 
       try {
-        return await api.addTorrent(infoHash, store);
+        const { files, id } = await api.addTorrent(infoHash, store);
+
+        return {
+          success: true,
+          data: {
+            torrentId: id,
+            files,
+          },
+        };
       } catch (error) {
+        if (error instanceof DataSourceHTTPError) {
+          return {
+            success: false,
+            statusCode: error.response.status,
+          };
+        }
+
         throw new Error(
           `Failed to get instant availability for ${infoHash} from ${store}: ${
             error instanceof Error ? error.message : String(error)
@@ -86,8 +101,22 @@ export default {
       const { data: store } = parsedStore;
 
       try {
-        return await api.generateLink(event.item.downloadUrl, store);
+        const link = await api.generateLink(event.item.downloadUrl, store);
+
+        return {
+          success: true,
+          data: {
+            link,
+          },
+        };
       } catch (error) {
+        if (error instanceof DataSourceHTTPError) {
+          return {
+            success: false,
+            statusCode: error.response.status,
+          };
+        }
+
         throw new Error(
           `Failed to generate link from ${store}: ${
             error instanceof Error ? error.message : String(error)

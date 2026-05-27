@@ -65,30 +65,29 @@ export const requestStreamLinkProcessor =
               ),
             );
 
-            const isDeadLink = streamService.isFatalStatusCode(
-              response.statusCode,
-            );
+            if (!response.success) {
+              const isDeadLink = streamService.isFatalStatusCode(
+                response.statusCode,
+              );
 
-            if (isDeadLink) {
-              await job.updateData({
-                ...job.data,
-                step: "blacklist-stream",
-              });
+              if (isDeadLink) {
+                await job.updateData({
+                  ...job.data,
+                  step: "blacklist-stream",
+                });
 
-              break;
+                break;
+              }
+
+              throw new UnrecoverableError(
+                `Plugin failed to generate stream link for ${mediaEntry.path} with status code ${response.statusCode.toString()}`,
+              );
             }
-
-            assert(
-              response.link,
-              new UnrecoverableError(
-                "Stream link is missing from plugin response",
-              ),
-            );
 
             await job.updateData({
               ...job.data,
               step: "save-stream-link",
-              link: response.link,
+              link: response.data.link,
             });
 
             break;

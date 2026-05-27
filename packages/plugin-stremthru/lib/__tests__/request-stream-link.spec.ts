@@ -34,7 +34,7 @@ it("returns the status code from the downstream response for errors", async ({
       settings,
     }),
   ).resolves.toEqual({
-    link: null,
+    success: false,
     statusCode: 451,
   });
 });
@@ -74,8 +74,10 @@ it("returns the stream link when the response is successful", async ({
       settings,
     }),
   ).resolves.toEqual({
-    link: streamLink,
-    statusCode: 200,
+    success: true,
+    data: {
+      link: streamLink,
+    },
   });
 });
 

@@ -29,8 +29,10 @@ it("saves the stream link to the media entry after receiving a valid response", 
     mediaEntry.plugin,
     () =>
       Promise.resolve({
-        link: "https://example.com/stream-link",
-        statusCode: StatusCodes.OK,
+        success: true,
+        data: {
+          link: "https://example.com/stream-link",
+        },
       }),
   );
 
@@ -68,7 +70,7 @@ it("blacklists the stream if the response indicates a dead link", async ({
     mediaEntry.plugin,
     () =>
       Promise.resolve({
-        link: null,
+        success: false,
         statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
       }),
   );
@@ -119,7 +121,7 @@ it("deletes the media entry if the response indicates a dead link", async ({
     mediaEntry.plugin,
     () =>
       Promise.resolve({
-        link: null,
+        success: false,
         statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
       }),
   );
@@ -160,7 +162,7 @@ it("does not blacklist the stream if the response indicates a non-fatal error", 
     mediaEntry.plugin,
     () =>
       Promise.resolve({
-        link: null,
+        success: false,
         statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
       }),
   );
@@ -205,7 +207,7 @@ it("adds a job to reprocess the movie if the item is a movie", async ({
     mediaEntry.plugin,
     () =>
       Promise.resolve({
-        link: null,
+        success: false,
         statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
       }),
   );
@@ -247,7 +249,7 @@ it("adds a job to reprocess the lowest common denominator in the item's hierarch
     mediaEntry.plugin,
     () =>
       Promise.resolve({
-        link: null,
+        success: false,
         statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
       }),
   );

@@ -3,20 +3,21 @@ import { expect } from "vitest";
 
 import { it } from "../../../../__tests__/test-context.ts";
 
-it("blacklists a stream for a media item", async ({
+it("creates a BlacklistedStream for the given infohash/provider/plugin combination", async ({
   services: { streamService },
   completedMovieContext: {
-    completedMovie,
-    streams: [stream],
+    completedMovie: completedMovie,
+    streams: [, stream],
   },
 }) => {
   expect.assert(stream);
 
-  await streamService.blacklistActiveStream({
-    mediaItem: completedMovie,
-    provider: "test-provider",
-    plugin: "test-plugin",
-  });
+  await streamService.blacklistStreamByInfoHash(
+    completedMovie.id,
+    stream.infoHash,
+    "test-plugin",
+    "test-provider",
+  );
 
   const updatedBlacklistedStreams =
     await completedMovie.blacklistedStreams.loadItems({ refresh: true });
@@ -31,7 +32,7 @@ it("blacklists a stream for a media item", async ({
   expect(updatedBlacklistedStreams[0].provider).toBe("test-provider");
 });
 
-it("blacklists a stream with no provider for a media item", async ({
+it("allows provider to be null when creating the BlacklistedStream record", async ({
   services: { streamService },
   completedMovieContext: {
     completedMovie,
@@ -40,11 +41,12 @@ it("blacklists a stream with no provider for a media item", async ({
 }) => {
   expect.assert(stream);
 
-  await streamService.blacklistActiveStream({
-    mediaItem: completedMovie,
-    provider: null,
-    plugin: "test-plugin",
-  });
+  await streamService.blacklistStreamByInfoHash(
+    completedMovie.id,
+    stream.infoHash,
+    "test-plugin",
+    null,
+  );
 
   const updatedBlacklistedStreams =
     await completedMovie.blacklistedStreams.loadItems({ refresh: true });
@@ -59,27 +61,6 @@ it("blacklists a stream with no provider for a media item", async ({
   expect(updatedBlacklistedStreams[0].provider).toBe(null);
 });
 
-it("clears the active stream for the media item", async ({
-  em,
-  services: { streamService },
-  completedMovieContext: {
-    completedMovie,
-    streams: [stream],
-  },
-}) => {
-  expect.assert(stream);
-
-  await streamService.blacklistActiveStream({
-    mediaItem: completedMovie,
-    provider: "test-provider",
-    plugin: "test-plugin",
-  });
-
-  await em.refreshOrFail(completedMovie, { populate: ["activeStream"] });
-
-  expect(completedMovie.activeStream).toBeNull();
-});
-
 it("rejects duplicate blacklisted streams for the same media item", async ({
   em,
   services: { streamService },
@@ -90,11 +71,12 @@ it("rejects duplicate blacklisted streams for the same media item", async ({
 }) => {
   expect.assert(stream);
 
-  await streamService.blacklistActiveStream({
-    mediaItem: completedMovie,
-    provider: "test-provider",
-    plugin: "test-plugin",
-  });
+  await streamService.blacklistStreamByInfoHash(
+    completedMovie.id,
+    stream.infoHash,
+    "test-plugin",
+    "test-provider",
+  );
 
   await em.refresh(completedMovie);
 
@@ -105,11 +87,12 @@ it("rejects duplicate blacklisted streams for the same media item", async ({
   await em.flush();
 
   await expect(
-    streamService.blacklistActiveStream({
-      mediaItem: completedMovie,
-      provider: "test-provider",
-      plugin: "test-plugin",
-    }),
+    streamService.blacklistStreamByInfoHash(
+      completedMovie.id,
+      stream.infoHash,
+      "test-plugin",
+      "test-provider",
+    ),
   ).rejects.toThrow(UniqueConstraintViolationException);
 });
 
@@ -123,22 +106,24 @@ it("does not reject duplicate info hashes for different plugins", async ({
 }) => {
   expect.assert(stream);
 
-  await streamService.blacklistActiveStream({
-    mediaItem: completedMovie,
-    provider: "test-provider",
-    plugin: "test-plugin",
-  });
+  await streamService.blacklistStreamByInfoHash(
+    completedMovie.id,
+    stream.infoHash,
+    "test-plugin",
+    "test-provider",
+  );
 
   em.assign(completedMovie, {
     activeStream: stream,
   });
 
   await expect(
-    streamService.blacklistActiveStream({
-      mediaItem: completedMovie,
-      provider: "test-provider",
-      plugin: "different-plugin",
-    }),
+    streamService.blacklistStreamByInfoHash(
+      completedMovie.id,
+      stream.infoHash,
+      "different-plugin",
+      "test-provider",
+    ),
   ).resolves.not.toThrow();
 });
 
@@ -199,25 +184,4 @@ it("does not reject different info hashes for the same plugin", async ({
       plugin: "test-plugin",
     }),
   ).resolves.not.toThrow();
-});
-
-it('resets the media item state to "indexed" when blacklisting an active stream', async ({
-  em,
-  services: { streamService },
-  completedMovieContext: {
-    completedMovie,
-    streams: [stream],
-  },
-}) => {
-  expect.assert(stream);
-
-  await streamService.blacklistActiveStream({
-    mediaItem: completedMovie,
-    provider: "test-provider",
-    plugin: "test-plugin",
-  });
-
-  await em.refreshOrFail(completedMovie);
-
-  expect(completedMovie.state).toBe("indexed");
 });

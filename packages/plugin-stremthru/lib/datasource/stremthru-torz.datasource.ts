@@ -1,4 +1,4 @@
-import { BaseDataSource, DataSourceHTTPError } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
 import { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
@@ -14,8 +14,6 @@ import type {
   RequestOptions,
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
-import type { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
-import type { MediaItemStreamLinkRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 import type { URL } from "url";
 
@@ -146,10 +144,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     return true;
   }
 
-  async addTorrent(
-    infoHash: string,
-    store: Store,
-  ): Promise<MediaItemDownloadRequestedResponse> {
+  async addTorrent(infoHash: string, store: Store) {
     const response = await this.post<unknown>("v0/store/torz", {
       headers: this.#buildCommonHeaders(store),
       body: JSON.stringify({
@@ -179,10 +174,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
       );
     }
 
-    return {
-      torrentId: data.id,
-      files: data.files,
-    };
+    return data;
   }
 
   async removeTorrent(id: string, store: Store) {
@@ -244,35 +236,14 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     );
   }
 
-  async generateLink(
-    link: string,
-    store: Store,
-  ): Promise<MediaItemStreamLinkRequestedResponse> {
-    try {
-      const { response, parsedBody } = await this.fetch<unknown>(
-        "v0/store/torz/link/generate",
-        {
-          body: JSON.stringify({ link }),
-          headers: this.#buildCommonHeaders(store),
-          method: "POST",
-        },
-      );
+  async generateLink(link: string, store: Store) {
+    const response = await this.post<unknown>("v0/store/torz/link/generate", {
+      body: JSON.stringify({ link }),
+      headers: this.#buildCommonHeaders(store),
+    });
 
-      const { data } = GenerateLinkResponse.parse(parsedBody);
+    const { data } = GenerateLinkResponse.parse(response);
 
-      return {
-        link: data.link,
-        statusCode: response.status,
-      };
-    } catch (error) {
-      if (error instanceof DataSourceHTTPError) {
-        return {
-          link: null,
-          statusCode: error.response.status,
-        };
-      }
-
-      throw error;
-    }
+    return data.link;
   }
 }

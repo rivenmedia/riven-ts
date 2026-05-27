@@ -1,91 +1,77 @@
-import { ref } from "@mikro-orm/core";
-import { describe, expect } from "vitest";
+import { expect } from "vitest";
 
 import { it } from "../../../../__tests__/test-context.ts";
 import { findCommonBlacklistItems } from "./find-common-blacklist-items.ts";
 
-it("throws an error if the item has no active stream", async ({
+it("returns an array of all media items that share the same active stream info hash, plugin, and provider", async ({
   em,
-  completedMovieContext: { completedMovie },
+  seeders: { seedCompletedShow },
 }) => {
-  completedMovie.activeStream = null;
+  const mediaItems = await seedCompletedShow(2);
+  const [{ show, episodes, seasons }] = mediaItems;
 
-  await expect(findCommonBlacklistItems(em, completedMovie)).rejects.toThrow();
-});
+  expect.assert(seasons);
+  expect.assert(show.activeStream);
+  expect.assert(episodes?.[0]);
 
-describe("when the item is a movie", () => {
-  it("only returns the input item", async ({
-    em,
-    completedMovieContext: { completedMovie },
-  }) => {
-    const items = await findCommonBlacklistItems(em, completedMovie);
-    const itemIds = items.map((item) => item.id);
+  const [mediaEntry] = await episodes[0].getMediaEntries();
 
-    expect(itemIds).toEqual(expect.arrayContaining([completedMovie.id]));
-  });
-});
+  expect.assert(mediaEntry);
 
-describe("when the item is show-like", () => {
-  it("returns the input item", async ({
-    em,
-    completedShowContext: { completedShow },
-  }) => {
-    const items = await findCommonBlacklistItems(em, completedShow);
-    const itemIds = items.map((item) => item.id);
-
-    expect(itemIds).toEqual(expect.arrayContaining([completedShow.id]));
+  em.persist(show).assign(show, {
+    activeStream: show.activeStream,
   });
 
-  it("returns child items that match the item's active stream", async ({
-    em,
-    completedShowContext: { completedShow },
-  }) => {
-    const items = await findCommonBlacklistItems(em, completedShow);
-    const itemIds = items.map((item) => item.id);
+  for (const season of seasons) {
+    em.persist(season).assign(season, {
+      activeStream: show.activeStream,
+    });
 
-    const episodes = await completedShow.getEpisodes();
-    const seasons = await completedShow.seasons.loadItems();
-
-    expect(itemIds).toEqual(
-      expect.arrayContaining([
-        completedShow.id,
-        ...seasons.map((s) => s.id),
-        ...episodes.map((e) => e.id),
-      ]),
-    );
-  });
-
-  it("does not return child items that do not match the item's active stream", async ({
-    em,
-    completedShowContext: {
-      completedShow,
-      seasons: [, nonMatchingSeason],
-      streams: [, alternateStream],
-    },
-  }) => {
-    expect.assert(nonMatchingSeason);
-    expect.assert(alternateStream);
-
-    nonMatchingSeason.activeStream = ref(alternateStream);
-
-    const episodes = await nonMatchingSeason.episodes.loadItems();
-
-    for (const episode of episodes) {
+    for (const episode of season.episodes) {
       em.persist(episode).assign(episode, {
-        activeStream: ref(alternateStream),
+        activeStream: show.activeStream,
+      });
+
+      em.persist(mediaEntry).assign(mediaEntry, {
+        plugin: mediaEntry.plugin,
+        provider: mediaEntry.provider,
       });
     }
+  }
 
-    await em.flush();
+  await em.flush();
 
-    const items = await findCommonBlacklistItems(em, completedShow);
-    const itemIds = items.map((item) => item.id);
+  const items = await findCommonBlacklistItems(
+    em,
+    show.id,
+    show.activeStream.infoHash,
+    mediaEntry.plugin,
+    mediaEntry.provider,
+  );
 
-    expect(itemIds).not.toEqual(
-      expect.arrayContaining([
-        nonMatchingSeason.id,
-        ...episodes.map((e) => e.id),
-      ]),
-    );
-  });
+  expect(items).toHaveLength(1 + seasons.length + episodes.length);
+  expect(items).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ id: show.id }),
+      ...seasons.map((season) => expect.objectContaining({ id: season.id })),
+      ...episodes.map((episode) => expect.objectContaining({ id: episode.id })),
+    ]),
+  );
+});
+
+it("does not return items with a different active stream info hash, plugin, or provider", async ({
+  em,
+  completedMovieContext: { completedMovie: completedMovie },
+}) => {
+  expect.assert(completedMovie.activeStream);
+
+  const items = await findCommonBlacklistItems(
+    em,
+    completedMovie.id,
+    completedMovie.activeStream.infoHash,
+    "different-plugin",
+    "different-provider",
+  );
+
+  expect(items).toEqual([expect.objectContaining({ id: completedMovie.id })]);
 });

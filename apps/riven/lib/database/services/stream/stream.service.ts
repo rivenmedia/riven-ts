@@ -6,6 +6,7 @@ import {
 
 import {
   CreateRequestContext,
+  EnsureRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
 import assert from "node:assert";
@@ -28,6 +29,17 @@ export class StreamService extends BaseService {
     return this.em.getRepository(MediaEntry).saveStreamUrl(entryId, streamUrl);
   }
 
+  @EnsureRequestContext()
+  @Transactional()
+  async blacklistStreamByInfoHash(
+    mediaItemId: UUID,
+    infoHash: string,
+    plugin: string,
+    provider: string | null,
+  ) {
+    return blacklistStream(this.em, mediaItemId, infoHash, plugin, provider);
+  }
+
   @CreateRequestContext()
   @Transactional()
   async blacklistActiveStream({
@@ -46,13 +58,18 @@ export class StreamService extends BaseService {
       `${mediaItem.fullTitle} does not have an active stream to blacklist`,
     );
 
-    return blacklistStream(
-      this.em,
-      mediaItem,
+    const result = await this.blacklistStreamByInfoHash(
+      mediaItem.id,
       activeStream.infoHash,
       plugin,
       provider,
     );
+
+    for (const item of result.blacklistedItems) {
+      item.reset();
+    }
+
+    return result;
   }
 
   async calculateItemsToReprocess(mediaItems: Set<MediaItem>) {

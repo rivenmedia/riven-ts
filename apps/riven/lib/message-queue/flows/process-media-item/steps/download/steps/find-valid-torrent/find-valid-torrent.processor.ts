@@ -145,12 +145,37 @@ export const findValidTorrentProcessor =
                 parent,
               );
 
+              if (!pluginDownloadResult.success) {
+                const isDeadTorrent = streamService.isFatalStatusCode(
+                  pluginDownloadResult.statusCode,
+                );
+
+                if (isDeadTorrent) {
+                  await streamService.blacklistStreamByInfoHash(
+                    mediaItem.id,
+                    infoHash,
+                    pluginName,
+                    provider,
+                  );
+
+                  logger.info(
+                    `Blacklisted ${infoHash} on ${pluginName}${provider ? ` via ${provider}` : ""} for ${mediaItem.fullTitle} due to failed download attempt`,
+                  );
+
+                  await job.log(
+                    `${infoHash}:${pluginName}${provider ? ` via ${provider}` : ""} Download attempt failed; stream blacklisted`,
+                  );
+                }
+
+                continue;
+              }
+
               await job.log(`${infoHash}: Downloaded torrent metadata`);
 
               const validatedFiles = await getValidTorrentFiles(
                 mediaItem,
                 infoHash,
-                pluginDownloadResult.files,
+                pluginDownloadResult.data.files,
                 false,
                 parent,
               );
@@ -160,7 +185,7 @@ export const findValidTorrentProcessor =
               return {
                 plugin: pluginName,
                 result: {
-                  torrentId: pluginDownloadResult.torrentId,
+                  torrentId: pluginDownloadResult.data.torrentId,
                   infoHash,
                   files: validatedFiles,
                   provider,

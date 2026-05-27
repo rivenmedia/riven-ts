@@ -32,6 +32,9 @@ export class CompletedShowSeeder extends BaseSeeder<CompletedShowSeederContext> 
 
     const episodes = await context.show.getEpisodes();
 
+    const plugin = "test-plugin";
+    const provider = "test-provider";
+
     for (const episode of episodes) {
       em.persist(episode);
 
@@ -39,6 +42,8 @@ export class CompletedShowSeeder extends BaseSeeder<CompletedShowSeederContext> 
       episode.filesystemEntries.set([
         new MediaEntryFactory(em).makeEntity({
           mediaItem: episode,
+          plugin,
+          provider,
         }),
       ]);
     }
