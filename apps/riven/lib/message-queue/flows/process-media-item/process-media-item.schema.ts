@@ -1,4 +1,8 @@
 import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
+import {
+  NzbCandidate,
+  NzbScrapeMediaItemPayload,
+} from "@repo/util-plugin-sdk/schemas/events/media-item.nzb-scrape-requested.event";
 import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
@@ -13,6 +17,10 @@ export const ProcessMediaItemFlow = createFlowSchema("process-media-item", {
       "validate-scrape",
       "download",
       "validate-download",
+      "nzb-scrape",
+      "validate-nzb-scrape",
+      "nzb-download",
+      "validate-nzb-download",
       "complete",
     ]),
     mediaItem: z.object({
@@ -21,6 +29,16 @@ export const ProcessMediaItemFlow = createFlowSchema("process-media-item", {
       fullTitle: z.string(),
     }),
     isRootItem: z.boolean().default(true),
+    /**
+     * Persisted after a successful nzb-scrape step so the nzb-download step
+     * can pick up the chosen candidate without re-reading BullMQ children.
+     */
+    nzbScrapeResult: z
+      .object({
+        chosen: NzbCandidate,
+        item: NzbScrapeMediaItemPayload,
+      })
+      .optional(),
   }),
 });
 

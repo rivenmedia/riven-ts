@@ -31,6 +31,8 @@ import { findValidTorrentProcessor } from "../../message-queue/flows/process-med
 import { FindValidTorrentFlow } from "../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { rankStreamsProcessor } from "../../message-queue/flows/process-media-item/steps/download/steps/rank-streams/rank-streams.processor.ts";
 import { RankStreamsFlow } from "../../message-queue/flows/process-media-item/steps/download/steps/rank-streams/rank-streams.schema.ts";
+import { nzbScrapeItemProcessor } from "../../message-queue/flows/process-media-item/steps/nzb-scrape/nzb-scrape-item.processor.ts";
+import { NzbScrapeItemFlow } from "../../message-queue/flows/process-media-item/steps/nzb-scrape/nzb-scrape-item.schema.ts";
 import { scrapeItemProcessor } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.processor.ts";
 import { ScrapeItemFlow } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.schema.ts";
 import { requestContentServiceProcessor } from "../../message-queue/flows/request-content-service/request-content-service.processor.ts";
@@ -342,6 +344,12 @@ export const mainRunnerMachine = setup({
                     },
                   },
                 },
+              ),
+              "nzb-scrape-item": createFlowWorker(
+                NzbScrapeItemFlow,
+                nzbScrapeItemProcessor,
+                self.send,
+                input.plugins,
               ),
               "download-item": createFlowWorker(
                 DownloadItemFlow,
@@ -676,6 +684,37 @@ export const mainRunnerMachine = setup({
                 params: ({ event: { item } }) => ({
                   message: `Successfully scraped ${item.type}: ${chalk.bold(item.fullTitle)}`,
                   level: "info",
+                }),
+              },
+            ],
+          },
+
+          /**
+           * NZB scrape lifecycle events
+           */
+
+          "riven.media-item.nzb-scrape.success": {
+            description:
+              "Indicates that an NZB scrape completed and at least one candidate was found.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { itemId, candidateCount } }) => ({
+                  message: `NZB scrape succeeded for item ${itemId}: ${candidateCount.toString()} candidate(s) found`,
+                  level: "info",
+                }),
+              },
+            ],
+          },
+
+          "riven.media-item.nzb-scrape.error": {
+            description: "Indicates that an NZB scrape attempt failed.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { itemId, reason, detail } }) => ({
+                  message: `NZB scrape failed for item ${itemId} (${reason})${detail ? `: ${detail}` : ""}`,
+                  level: "warn",
                 }),
               },
             ],

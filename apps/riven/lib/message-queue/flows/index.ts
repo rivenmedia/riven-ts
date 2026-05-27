@@ -29,6 +29,10 @@ import {
   rankStreamsProcessorSchema,
 } from "./process-media-item/steps/download/steps/rank-streams/rank-streams.schema.ts";
 import {
+  NzbScrapeItemFlow,
+  nzbScrapeItemProcessorSchema,
+} from "./process-media-item/steps/nzb-scrape/nzb-scrape-item.schema.ts";
+import {
   ScrapeItemFlow,
   scrapeItemProcessorSchema,
 } from "./process-media-item/steps/scrape/scrape-item.schema.ts";
@@ -45,6 +49,7 @@ export const Flow = z.discriminatedUnion("name", [
   ProcessItemRequestFlow,
   RequestContentServiceFlow,
   ScrapeItemFlow,
+  NzbScrapeItemFlow,
   DownloadItemFlow,
   FindValidTorrentFlow,
   RankStreamsFlow,
@@ -61,6 +66,7 @@ export const FlowHandlers = {
   "process-item-request": processItemRequestProcessorSchema,
   "process-media-item": processMediaItemProcessorSchema,
   "scrape-item": scrapeItemProcessorSchema,
+  "nzb-scrape-item": nzbScrapeItemProcessorSchema,
   "download-item": downloadItemProcessorSchema,
   "download-item.find-valid-torrent": findValidTorrentProcessorSchema,
   "download-item.rank-streams": rankStreamsProcessorSchema,

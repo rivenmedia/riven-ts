@@ -12,6 +12,8 @@ import { createJobParentConfig } from "../../utilities/create-job-parent-config.
 import { enqueuePostProcessMediaItem } from "../post-process-media-item/enqueue-post-process-media-item.ts";
 import { processMediaItemProcessorSchema } from "./process-media-item.schema.ts";
 import { enqueueDownloadItem } from "./steps/download/enqueue-download-item.ts";
+import { enqueueNzbScrapeItem } from "./steps/nzb-scrape/enqueue-nzb-scrape-item.ts";
+import { NzbScrapeItemOutput } from "./steps/nzb-scrape/nzb-scrape-item.schema.ts";
 import { enqueueScrapeItem } from "./steps/scrape/enqueue-scrape-item.ts";
 
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
@@ -153,6 +155,97 @@ export const processMediaItemProcessor =
             }
 
             break;
+          }
+
+          case "nzb-scrape": {
+            const itemToScrape = await scraperService.getItemToScrape(
+              job.data.mediaItem.id,
+              job.data.mediaItem.type,
+            );
+
+            await enqueueNzbScrapeItem({
+              item: {
+                id: itemToScrape.id,
+                title: itemToScrape.title,
+                imdbId: itemToScrape.imdbId,
+                type: itemToScrape.type,
+              },
+              subscribers: getPluginEventSubscribers(
+                "riven.media-item.nzb-scrape.requested",
+                plugins,
+              ),
+              parent,
+            });
+
+            await job.updateData({
+              ...job.data,
+              step: "validate-nzb-scrape",
+            });
+
+            if (await job.moveToWaitingChildren(token)) {
+              throw new WaitingChildrenError();
+            }
+
+            break;
+          }
+
+          case "validate-nzb-scrape": {
+            const { ignored = 0 } = await job.getDependenciesCount({
+              ignored: true,
+            });
+
+            if (ignored > 0) {
+              // nzb-scrape-item emits the error event internally; we just
+              // park the item here. No retry loop in v1 — the item stays
+              // in its current state for manual retry.
+              throw new UnrecoverableError(
+                `${chalk.bold(job.data.mediaItem.fullTitle)} failed NZB scrape`,
+              );
+            }
+
+            // Retrieve the chosen candidate from the nzb-scrape-item child output
+            // so the nzb-download step has it without re-querying.
+            const rawChildValues = await job.getChildrenValues();
+            const rawScrapeOutput = Object.values(
+              rawChildValues as Record<string, unknown>,
+            )[0];
+
+            if (rawScrapeOutput === undefined) {
+              // Defensive: getChildrenValues should always include the
+              // nzb-scrape-item child here (the ignored>0 guard above
+              // already caught the failure case). If it doesn't, park
+              // rather than retry — a ZodError from .parse(undefined)
+              // would otherwise trigger BullMQ's default retry behavior.
+              throw new UnrecoverableError(
+                `nzb-scrape child produced no output for ${chalk.bold(job.data.mediaItem.fullTitle)}`,
+              );
+            }
+
+            const scrapeOutput = NzbScrapeItemOutput.parse(rawScrapeOutput);
+
+            await job.updateData({
+              ...job.data,
+              step: "nzb-download",
+              nzbScrapeResult: scrapeOutput,
+            });
+
+            break;
+          }
+
+          case "nzb-download": {
+            // Task 2.4 will implement enqueueNzbDownloadItem.
+            // This stub ensures the step is reachable and the schema is valid.
+            // When 2.4 lands, replace this throw with the real enqueue call.
+            throw new UnrecoverableError(
+              `nzb-download step not yet implemented for ${chalk.bold(job.data.mediaItem.fullTitle)}`,
+            );
+          }
+
+          case "validate-nzb-download": {
+            // Task 2.4 will implement this validate step.
+            throw new UnrecoverableError(
+              `validate-nzb-download step not yet implemented for ${chalk.bold(job.data.mediaItem.fullTitle)}`,
+            );
           }
         }
       }
