@@ -472,6 +472,9 @@ importers:
       '@repo/plugin-mdblist':
         specifier: workspace:^
         version: link:../../packages/plugin-mdblist
+      '@repo/plugin-newznab':
+        specifier: workspace:^
+        version: link:../../packages/plugin-newznab
       '@repo/plugin-notifications':
         specifier: workspace:^
         version: link:../../packages/plugin-notifications
@@ -1238,6 +1241,58 @@ importers:
       '@repo/core-util-kubb-config':
         specifier: workspace:^
         version: link:../core/util-kubb-config
+      '@repo/core-util-typescript-config':
+        specifier: workspace:^
+        version: link:../core/util-typescript-config
+      '@repo/core-util-vitest-config':
+        specifier: workspace:^
+        version: link:../core/util-vitest-config
+      '@repo/util-plugin-testing':
+        specifier: workspace:^
+        version: link:../util-plugin-testing
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.12.4
+      '@typescript-eslint/parser':
+        specifier: 'catalog:'
+        version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.4(jiti@2.7.0)
+      msw:
+        specifier: 'catalog:'
+        version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
+      zod2md:
+        specifier: 'catalog:'
+        version: 0.2.5(zod@4.4.3)
+
+  packages/plugin-newznab:
+    dependencies:
+      '@apollo/datasource-rest':
+        specifier: 'catalog:'
+        version: 6.4.1(encoding@0.1.13)(graphql@16.14.0)
+      '@repo/util-plugin-sdk':
+        specifier: workspace:^
+        version: link:../util-plugin-sdk
+      graphql-scalars:
+        specifier: 'catalog:'
+        version: 1.25.0(graphql@16.14.0)
+      type-graphql:
+        specifier: 'catalog:'
+        version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+    devDependencies:
+      '@repo/core-util-eslint-config':
+        specifier: workspace:^
+        version: link:../core/util-eslint-config
       '@repo/core-util-typescript-config':
         specifier: workspace:^
         version: link:../core/util-typescript-config

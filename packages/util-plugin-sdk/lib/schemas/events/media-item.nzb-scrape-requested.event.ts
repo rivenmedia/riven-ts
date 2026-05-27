@@ -19,6 +19,17 @@ export const NzbScrapeMediaItemPayload = z.object({
     .nullable()
     .optional(),
   type: MediaItemType,
+  /**
+   * Season number for show/season/episode-level scrapes.
+   * Undefined for movies; required at the indexer layer so tvsearch returns
+   * the correct season instead of the full series feed.
+   */
+  seasonNumber: z.number().int().nonnegative().nullable().optional(),
+  /**
+   * Episode number for episode-level scrapes.
+   * Undefined for movies, shows, and season-level scrapes.
+   */
+  episodeNumber: z.number().int().nonnegative().nullable().optional(),
 });
 
 export type NzbScrapeMediaItemPayload = z.infer<

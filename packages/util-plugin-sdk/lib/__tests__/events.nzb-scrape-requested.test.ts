@@ -46,6 +46,113 @@ describe("MediaItemNzbScrapeRequestedEvent", () => {
       }),
     ).toThrow();
   });
+
+  it("validates an episode payload with seasonNumber and episodeNumber", () => {
+    expect(() =>
+      MediaItemNzbScrapeRequestedEvent.parse({
+        type: "riven.media-item.nzb-scrape.requested",
+        item: {
+          id: "550e8400-e29b-41d4-a716-446655440000",
+          title: "Breaking Bad S01E02",
+          imdbId: "tt0903747",
+          type: "episode",
+          seasonNumber: 1,
+          episodeNumber: 2,
+        },
+      }),
+    ).not.toThrow();
+  });
+
+  it("validates a season-level payload with just seasonNumber", () => {
+    expect(() =>
+      MediaItemNzbScrapeRequestedEvent.parse({
+        type: "riven.media-item.nzb-scrape.requested",
+        item: {
+          id: "550e8400-e29b-41d4-a716-446655440000",
+          title: "Breaking Bad Season 1",
+          imdbId: "tt0903747",
+          type: "season",
+          seasonNumber: 1,
+        },
+      }),
+    ).not.toThrow();
+  });
+
+  it("validates a movie payload with neither season nor episode (existing shape)", () => {
+    expect(() =>
+      MediaItemNzbScrapeRequestedEvent.parse({
+        type: "riven.media-item.nzb-scrape.requested",
+        item: {
+          id: "550e8400-e29b-41d4-a716-446655440000",
+          title: "Inception",
+          imdbId: "tt1375666",
+          type: "movie",
+        },
+      }),
+    ).not.toThrow();
+  });
+
+  it("accepts seasonNumber of 0 (specials)", () => {
+    expect(() =>
+      MediaItemNzbScrapeRequestedEvent.parse({
+        type: "riven.media-item.nzb-scrape.requested",
+        item: {
+          id: "550e8400-e29b-41d4-a716-446655440000",
+          title: "Breaking Bad Specials",
+          imdbId: "tt0903747",
+          type: "season",
+          seasonNumber: 0,
+        },
+      }),
+    ).not.toThrow();
+  });
+
+  it("rejects a negative seasonNumber", () => {
+    expect(() =>
+      MediaItemNzbScrapeRequestedEvent.parse({
+        type: "riven.media-item.nzb-scrape.requested",
+        item: {
+          id: "550e8400-e29b-41d4-a716-446655440000",
+          title: "Breaking Bad",
+          imdbId: "tt0903747",
+          type: "season",
+          seasonNumber: -1,
+        },
+      }),
+    ).toThrow();
+  });
+
+  it("rejects a non-integer episodeNumber", () => {
+    expect(() =>
+      MediaItemNzbScrapeRequestedEvent.parse({
+        type: "riven.media-item.nzb-scrape.requested",
+        item: {
+          id: "550e8400-e29b-41d4-a716-446655440000",
+          title: "Breaking Bad S01E02",
+          imdbId: "tt0903747",
+          type: "episode",
+          seasonNumber: 1,
+          episodeNumber: 2.5,
+        },
+      }),
+    ).toThrow();
+  });
+
+  it("rejects a string for episodeNumber", () => {
+    expect(() =>
+      MediaItemNzbScrapeRequestedEvent.parse({
+        type: "riven.media-item.nzb-scrape.requested",
+        item: {
+          id: "550e8400-e29b-41d4-a716-446655440000",
+          title: "Breaking Bad S01E02",
+          imdbId: "tt0903747",
+          type: "episode",
+          seasonNumber: 1,
+          episodeNumber: "2",
+        },
+      }),
+    ).toThrow();
+  });
 });
 
 describe("MediaItemNzbScrapeRequestedResponse", () => {

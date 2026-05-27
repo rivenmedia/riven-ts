@@ -165,12 +165,27 @@ export const processMediaItemProcessor =
               job.data.mediaItem.type,
             );
 
+            // Derive season/episode numbers from the entity discriminator so
+            // the indexer can issue a precise tvsearch query. Movies and shows
+            // have neither; seasons have only seasonNumber; episodes have both.
+            let seasonNumber: number | null = null;
+            let episodeNumber: number | null = null;
+
+            if (itemToScrape instanceof Episode) {
+              seasonNumber = await itemToScrape.season.loadProperty("number");
+              episodeNumber = itemToScrape.number;
+            } else if (itemToScrape instanceof Season) {
+              seasonNumber = itemToScrape.number;
+            }
+
             await enqueueNzbScrapeItem({
               item: {
                 id: itemToScrape.id,
                 title: itemToScrape.title,
                 imdbId: itemToScrape.imdbId,
                 type: itemToScrape.type,
+                seasonNumber,
+                episodeNumber,
               },
               subscribers: getPluginEventSubscribers(
                 "riven.media-item.nzb-scrape.requested",

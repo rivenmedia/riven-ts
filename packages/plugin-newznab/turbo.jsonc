@@ -1,0 +1,6 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tags": ["group:newznab", "type:plugin"],
+  "tasks": {}
+}
