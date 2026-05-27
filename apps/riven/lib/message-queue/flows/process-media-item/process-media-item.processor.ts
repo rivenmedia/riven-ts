@@ -12,6 +12,8 @@ import { createJobParentConfig } from "../../utilities/create-job-parent-config.
 import { enqueuePostProcessMediaItem } from "../post-process-media-item/enqueue-post-process-media-item.ts";
 import { processMediaItemProcessorSchema } from "./process-media-item.schema.ts";
 import { enqueueDownloadItem } from "./steps/download/enqueue-download-item.ts";
+import { enqueueNzbDownloadItem } from "./steps/nzb-download/enqueue-nzb-download-item.ts";
+import { NzbDownloadItemFlow } from "./steps/nzb-download/nzb-download-item.schema.ts";
 import { enqueueNzbScrapeItem } from "./steps/nzb-scrape/enqueue-nzb-scrape-item.ts";
 import { NzbScrapeItemOutput } from "./steps/nzb-scrape/nzb-scrape-item.schema.ts";
 import { enqueueScrapeItem } from "./steps/scrape/enqueue-scrape-item.ts";
@@ -233,19 +235,89 @@ export const processMediaItemProcessor =
           }
 
           case "nzb-download": {
-            // Task 2.4 will implement enqueueNzbDownloadItem.
-            // This stub ensures the step is reachable and the schema is valid.
-            // When 2.4 lands, replace this throw with the real enqueue call.
-            throw new UnrecoverableError(
-              `nzb-download step not yet implemented for ${chalk.bold(job.data.mediaItem.fullTitle)}`,
-            );
+            const scrapeResult = job.data.nzbScrapeResult;
+
+            if (scrapeResult === undefined) {
+              throw new UnrecoverableError(
+                `nzb-scrape result is missing for ${chalk.bold(job.data.mediaItem.fullTitle)} — cannot enqueue nzb-download`,
+              );
+            }
+
+            await enqueueNzbDownloadItem({
+              item: scrapeResult.item,
+              nzbUrl: scrapeResult.chosen.url,
+              expectedTitle: scrapeResult.chosen.title,
+              subscribers: getPluginEventSubscribers(
+                "riven.media-item.nzb-download.requested",
+                plugins,
+              ),
+              parent,
+            });
+
+            await job.updateData({
+              ...job.data,
+              step: "validate-nzb-download",
+            });
+
+            if (await job.moveToWaitingChildren(token)) {
+              throw new WaitingChildrenError();
+            }
+
+            break;
           }
 
           case "validate-nzb-download": {
-            // Task 2.4 will implement this validate step.
-            throw new UnrecoverableError(
-              `validate-nzb-download step not yet implemented for ${chalk.bold(job.data.mediaItem.fullTitle)}`,
+            const { ignored = 0 } = await job.getDependenciesCount({
+              ignored: true,
+            });
+
+            if (ignored > 0) {
+              // nzb-download-item emits the error event internally; park the
+              // item here. No retry loop in v1 — the item stays in its current
+              // state for manual retry.
+              throw new UnrecoverableError(
+                `${chalk.bold(job.data.mediaItem.fullTitle)} failed NZB download`,
+              );
+            }
+
+            // Retrieve the nzb-download-item child output so we can persist
+            // the altmountId without re-querying BullMQ children.
+            //
+            // By this point in the flow, `getChildrenValues()` returns ALL
+            // processed children from prior validate steps (nzb-scrape-item
+            // is also present here). Filter by the nzb-download-item queue
+            // name so we deterministically pick the right child's output —
+            // otherwise V8 iteration order could hand back the scrape result
+            // and `.parse()` would throw a ZodError that BullMQ retries
+            // instead of parking the item.
+            const rawChildValues = await job.getChildrenValues();
+            const nzbDownloadEntry = Object.entries(
+              rawChildValues as Record<string, unknown>,
+            ).find(([key]) => key.includes("nzb-download-item"));
+
+            if (!nzbDownloadEntry) {
+              throw new UnrecoverableError(
+                `nzb-download child output not found for ${chalk.bold(job.data.mediaItem.fullTitle)}`,
+              );
+            }
+
+            const [, rawDownloadOutput] = nzbDownloadEntry;
+            const downloadOutput =
+              NzbDownloadItemFlow.shape.output.parse(rawDownloadOutput);
+
+            // Persist the altmountId and mark the item as downloaded via the
+            // downloader service (handles @CreateRequestContext + @Transactional).
+            await downloaderService.persistNzbDownloadResult(
+              job.data.mediaItem.id,
+              downloadOutput.altmountId,
             );
+
+            await job.updateData({
+              ...job.data,
+              step: "complete",
+            });
+
+            break;
           }
         }
       }

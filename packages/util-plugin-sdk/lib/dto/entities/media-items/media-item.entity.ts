@@ -149,6 +149,16 @@ export abstract class MediaItem {
   })
   downloadKind?: DownloadKind | null;
 
+  /**
+   * Opaque identifier returned by the download plugin (e.g. the altmount NZB
+   * job ID for the NZB pipeline). Stored alongside `downloadKind` so the
+   * validate step can correlate the queued download without re-querying the
+   * plugin.
+   */
+  @Field(() => String, { nullable: true })
+  @Property({ type: "text", nullable: true })
+  downloadId?: string | null;
+
   @Field(() => [FileSystemEntry])
   @OneToMany({
     entity: () => FileSystemEntry,

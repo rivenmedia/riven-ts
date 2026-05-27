@@ -4,6 +4,7 @@ import {
   Show,
   Stream,
 } from "@repo/util-plugin-sdk/dto/entities";
+import { DownloadKind } from "@repo/util-plugin-sdk/dto/enums/download-kind.enum";
 
 import { ValidationError } from "@mikro-orm/core";
 import {
@@ -72,5 +73,34 @@ export class DownloaderService extends BaseService {
         $in: infoHashes,
       },
     });
+  }
+
+  /**
+   * Marks a media item as having been dispatched to an NZB download client.
+   *
+   * Sets:
+   *   - `state`        → "downloaded"
+   *   - `downloadKind` → "nzb"
+   *   - `downloadId`   → `altmountId` returned by the plugin
+   *
+   * Called from the `validate-nzb-download` step of the process-media-item
+   * processor once the nzb-download-item flow step has confirmed that the
+   * altmount plugin accepted the NZB.
+   *
+   * Note: no explicit `em.flush()` here. `@Transactional()` commits the
+   * UnitOfWork on successful return — same pattern as the torrent-side
+   * `downloadItem` (which delegates to `persistDownloadResults` and also
+   * never calls `em.flush()` directly). A thrown error rolls back.
+   */
+  @CreateRequestContext()
+  @Transactional()
+  async persistNzbDownloadResult(id: UUID, altmountId: string) {
+    const item = await this.em.getRepository(MediaItem).findOneOrFail(id);
+
+    item.state = "downloaded";
+    item.downloadKind = DownloadKind.enum.nzb;
+    item.downloadId = altmountId;
+
+    return item;
   }
 }

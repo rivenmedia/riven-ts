@@ -31,6 +31,8 @@ import { findValidTorrentProcessor } from "../../message-queue/flows/process-med
 import { FindValidTorrentFlow } from "../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { rankStreamsProcessor } from "../../message-queue/flows/process-media-item/steps/download/steps/rank-streams/rank-streams.processor.ts";
 import { RankStreamsFlow } from "../../message-queue/flows/process-media-item/steps/download/steps/rank-streams/rank-streams.schema.ts";
+import { nzbDownloadItemProcessor } from "../../message-queue/flows/process-media-item/steps/nzb-download/nzb-download-item.processor.ts";
+import { NzbDownloadItemFlow } from "../../message-queue/flows/process-media-item/steps/nzb-download/nzb-download-item.schema.ts";
 import { nzbScrapeItemProcessor } from "../../message-queue/flows/process-media-item/steps/nzb-scrape/nzb-scrape-item.processor.ts";
 import { NzbScrapeItemFlow } from "../../message-queue/flows/process-media-item/steps/nzb-scrape/nzb-scrape-item.schema.ts";
 import { scrapeItemProcessor } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.processor.ts";
@@ -348,6 +350,12 @@ export const mainRunnerMachine = setup({
               "nzb-scrape-item": createFlowWorker(
                 NzbScrapeItemFlow,
                 nzbScrapeItemProcessor,
+                self.send,
+                input.plugins,
+              ),
+              "nzb-download-item": createFlowWorker(
+                NzbDownloadItemFlow,
+                nzbDownloadItemProcessor,
                 self.send,
                 input.plugins,
               ),
@@ -714,6 +722,37 @@ export const mainRunnerMachine = setup({
                 type: "log",
                 params: ({ event: { itemId, reason, detail } }) => ({
                   message: `NZB scrape failed for item ${itemId} (${reason})${detail ? `: ${detail}` : ""}`,
+                  level: "warn",
+                }),
+              },
+            ],
+          },
+
+          /**
+           * NZB download lifecycle events
+           */
+
+          "riven.media-item.nzb-download.success": {
+            description:
+              "Indicates that an NZB download was accepted by the download plugin and an altmount ID was returned.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { itemId, altmountId } }) => ({
+                  message: `NZB download queued for item ${itemId} (altmountId: ${altmountId})`,
+                  level: "info",
+                }),
+              },
+            ],
+          },
+
+          "riven.media-item.nzb-download.error": {
+            description: "Indicates that an NZB download attempt failed.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { itemId, reason, detail } }) => ({
+                  message: `NZB download failed for item ${itemId} (${reason})${detail ? `: ${detail}` : ""}`,
                   level: "warn",
                 }),
               },
