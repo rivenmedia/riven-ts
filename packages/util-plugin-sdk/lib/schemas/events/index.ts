@@ -83,6 +83,14 @@ import {
   MediaItemNzbScrapeRequestedEventHandler,
 } from "./media-item.nzb-scrape-requested.event.ts";
 import {
+  MediaItemNzbScrapeErrorEvent,
+  MediaItemNzbScrapeErrorEventHandler,
+} from "./media-item.nzb-scrape.error.event.ts";
+import {
+  MediaItemNzbScrapeSuccessEvent,
+  MediaItemNzbScrapeSuccessEventHandler,
+} from "./media-item.nzb-scrape.success.event.ts";
+import {
   MediaItemScrapeRequestedEvent,
   MediaItemScrapeRequestedEventHandler,
 } from "./media-item.scrape-requested.event.ts";
@@ -139,6 +147,8 @@ export const RivenEvent = z.discriminatedUnion("type", [
   MediaItemStreamLinkRequestedEvent,
   MediaItemSubtitleRequestedEvent,
   MediaItemNzbScrapeRequestedEvent,
+  MediaItemNzbScrapeSuccessEvent,
+  MediaItemNzbScrapeErrorEvent,
 ]);
 
 export type RivenEvent = z.infer<typeof RivenEvent>;
@@ -213,6 +223,8 @@ export const RivenEventHandler = {
   // NZB scraping
   "riven.media-item.nzb-scrape.requested":
     MediaItemNzbScrapeRequestedEventHandler,
+  "riven.media-item.nzb-scrape.success": MediaItemNzbScrapeSuccessEventHandler,
+  "riven.media-item.nzb-scrape.error": MediaItemNzbScrapeErrorEventHandler,
 } as const satisfies Record<RivenEvent["type"], z.ZodFunction>;
 
 export const RivenExternalEventHandler = {
