@@ -1,7 +1,9 @@
 import { toMerged } from "es-toolkit";
 
 import { services } from "../../../database/database.ts";
+import { settings } from "../../../utilities/settings.ts";
 import { flow } from "../producer.ts";
+import { pickInitialStepByStrategy } from "./pick-initial-step-by-strategy.ts";
 import {
   ProcessMediaItemFlow,
   createProcessMediaItemJob,
@@ -18,7 +20,11 @@ export interface EnqueueProcessMediaItemInput extends Partial<
 }
 
 export async function enqueueProcessMediaItem(
-  { id, step = "scrape", isRootItem = true }: EnqueueProcessMediaItemInput,
+  {
+    id,
+    step = pickInitialStepByStrategy(settings.downloadStrategy),
+    isRootItem = true,
+  }: EnqueueProcessMediaItemInput,
   opts: FlowJob["opts"] = {},
 ) {
   const mediaItemsToProcess =
