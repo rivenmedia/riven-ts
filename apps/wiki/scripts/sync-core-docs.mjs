@@ -27,6 +27,7 @@ const SECTIONS = [
   { slug: "scheduling", title: "Scheduling" },
   { slug: "database-ssl", title: "Database SSL" },
   { slug: "plugins", title: "Plugins" },
+  { slug: "downloading", title: "Downloading" },
   { slug: "danger-zone", title: "Danger Zone" },
 ];
 

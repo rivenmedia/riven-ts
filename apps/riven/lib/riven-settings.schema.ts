@@ -1,3 +1,4 @@
+import { DownloadKind } from "@repo/util-plugin-sdk/dto/enums/download-kind.enum";
 import { json } from "@repo/util-plugin-sdk/validation";
 
 import dedent from "dedent";
@@ -179,6 +180,16 @@ export const RivenSettings = z.object({
       "When an episode has no air date, this number of days will be added to the current date to estimate a release date for scheduling purposes.",
     )
     .meta({ "wiki.section": "scheduling" }),
+  downloadStrategy: DownloadKind.default("torrent")
+    .describe(
+      dedent`
+        The download strategy to use for media acquisition.
+
+        - \`torrent\`: Use the existing torrent-based download pipeline (default).
+        - \`nzb\`: Use the NZB/Usenet-based download pipeline.
+      `,
+    )
+    .meta({ "wiki.section": "downloading" }),
   enabledPlugins: json(z.array(CorePlugins))
     .default([])
     .describe("A list of core plugins to enable.")

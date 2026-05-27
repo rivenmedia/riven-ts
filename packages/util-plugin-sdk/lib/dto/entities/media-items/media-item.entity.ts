@@ -22,6 +22,7 @@ import { type UUID, randomUUID } from "node:crypto";
 import { Field, ID, InterfaceType } from "type-graphql";
 
 import { MediaItemContentRating } from "../../enums/content-ratings.enum.ts";
+import { DownloadKind } from "../../enums/download-kind.enum.ts";
 import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { MediaItemType } from "../../enums/media-item-type.enum.ts";
 import { FileSystemEntry, SubtitleEntry } from "../filesystem/index.ts";
@@ -146,7 +147,7 @@ export abstract class MediaItem {
     nullable: true,
     check: `"download_kind" in ('torrent', 'nzb')`,
   })
-  downloadKind?: "torrent" | "nzb" | null;
+  downloadKind?: DownloadKind | null;
 
   @Field(() => [FileSystemEntry])
   @OneToMany({
