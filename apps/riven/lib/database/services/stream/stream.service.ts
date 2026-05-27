@@ -29,6 +29,11 @@ export class StreamService extends BaseService {
     return this.em.getRepository(MediaEntry).saveStreamUrl(entryId, streamUrl);
   }
 
+  @CreateRequestContext()
+  async clearStreamUrl(entryId: UUID) {
+    return this.em.getRepository(MediaEntry).clearStreamUrl(entryId);
+  }
+
   @EnsureRequestContext()
   @Transactional()
   async blacklistStreamByInfoHash(
