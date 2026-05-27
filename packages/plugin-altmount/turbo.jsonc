@@ -1,0 +1,6 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tags": ["group:altmount", "type:plugin"],
+  "tasks": {}
+}

@@ -53,6 +53,7 @@
     "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",
     "@repo/core-util-graphql-schema": "workspace:^",
+    "@repo/plugin-altmount": "workspace:^",
     "@repo/plugin-comet": "workspace:^",
     "@repo/plugin-jellyfin": "workspace:^",
     "@repo/plugin-listrr": "workspace:^",
