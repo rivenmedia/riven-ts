@@ -14,7 +14,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
   ) {
     const [finalResult] = Object.values(await job.getChildrenValues());
 
-    const item = await mediaItemService.getMediaItem(job.data.id);
+    const item = await mediaItemService.getMediaItemById(job.data.id);
 
     if (!finalResult) {
       const error = new Error(

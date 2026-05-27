@@ -181,7 +181,9 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
       await this.#getAuthToken();
 
       return true;
-    } catch {
+    } catch (error) {
+      this.logger.error("TVDB validation error", { err: error });
+
       return false;
     }
   }

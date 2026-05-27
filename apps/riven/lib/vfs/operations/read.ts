@@ -1,5 +1,4 @@
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
-import { Buffer } from "node:buffer";
 import Undici from "undici";
 
 import { logger } from "../../utilities/logger/logger.ts";
@@ -16,24 +15,18 @@ import {
 } from "../utilities/file-handle-map.ts";
 import { performBodyRead } from "../utilities/read-types/perform-body-read.ts";
 import { performCacheHit } from "../utilities/read-types/perform-cache-hit.ts";
+import {
+  getVfsOperationContext,
+  withVfsOperationContext,
+} from "../utilities/vfs-operation-context.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
-export interface ReadInput {
-  buffer: Buffer;
-  path: string;
-  fd: number;
-  length: number;
-  position: number;
-}
-
-async function read({ fd, length, position, buffer }: ReadInput) {
+async function read() {
+  const { buffer, fd, length, position } = getVfsOperationContext("read");
   const fileHandle = fdToFileHandleMeta.get(fd);
 
   if (!fileHandle) {
-    throw new FuseError(
-      Fuse.EBADF,
-      `Invalid file handle for read: ${fd.toString()}`,
-    );
+    throw new FuseError(Fuse.EBADF, "Invalid file handle");
   }
 
   // Subtitle files are served directly from an in-memory buffer
@@ -55,10 +48,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
   );
 
   if (!fileChunkCalculations) {
-    throw new FuseError(
-      Fuse.EBADF,
-      `Missing chunk calculations for file handle: ${fd.toString()}`,
-    );
+    throw new FuseError(Fuse.EBADF, "Missing chunk calculations");
   }
 
   const {
@@ -120,7 +110,6 @@ async function read({ fd, length, position, buffer }: ReadInput) {
   switch (readType) {
     case "header-scan": {
       const data = await fetchDiscreteByteRange(
-        fd,
         fileHandle,
         fileChunkCalculations.headerChunk.range,
       );
@@ -142,7 +131,6 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     case "footer-read":
     case "footer-scan": {
       const data = await fetchDiscreteByteRange(
-        fd,
         fileHandle,
         fileChunkCalculations.footerChunk.range,
       );
@@ -157,7 +145,6 @@ async function read({ fd, length, position, buffer }: ReadInput) {
 
     case "general-scan": {
       const scannedChunk = await fetchDiscreteByteRange(
-        fd,
         fileHandle,
         [position, position + length - 1],
         false,
@@ -169,7 +156,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     }
 
     case "body-read": {
-      const data = await performBodyRead(fd, chunks, fileHandle);
+      const data = await performBodyRead(chunks, fileHandle);
 
       bytesRead = safeCopy(data, position - chunkStart);
 
@@ -177,7 +164,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     }
 
     case "cache-hit": {
-      const data = performCacheHit(fd, chunks);
+      const data = performCacheHit(chunks);
 
       bytesRead = safeCopy(data, position - chunkStart);
 
@@ -198,18 +185,23 @@ export const readSync = function (
   position,
   callback,
 ) {
-  void withVfsScope(async () => {
-    try {
-      const bytesRead = await read({
-        buffer,
+  void withVfsScope(() =>
+    withVfsOperationContext(
+      {
+        operationName: "read",
         path,
         fd,
+        buffer,
         length,
         position,
-      });
+      },
+      async () => {
+        const bytesRead = await read();
 
-      process.nextTick(callback, bytesRead);
-    } catch (error) {
+        process.nextTick(callback, bytesRead);
+      },
+    ).catch((error: unknown) => {
+      console.log({ error });
       // This is triggered when a file handle is released
       if (error instanceof Undici.errors.RequestAbortedError) {
         logger.silly(`Read operation aborted for fd ${fd.toString()}`);
@@ -220,16 +212,18 @@ export const readSync = function (
       }
 
       if (isFuseError(error)) {
-        logger.error(`VFS read FuseError for ${path}`, { err: error });
+        logger.error("VFS read FuseError", { err: error });
 
         process.nextTick(callback, error.errorCode);
 
         return;
       }
 
-      logger.error(`Unexpected VFS read error for ${path}`, { err: error });
+      logger.error(`Unexpected VFS read error for path: ${path}`, {
+        err: error,
+      });
 
       process.nextTick(callback, Fuse.EIO);
-    }
-  });
+    }),
+  );
 } satisfies OPERATIONS["read"];

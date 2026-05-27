@@ -14,6 +14,7 @@ import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
 import { createQueue } from "./create-queue.ts";
+import { normaliseConcurrency } from "./normalise-concurrency.ts";
 
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
 import type { ValidPluginMap } from "../../types/plugins.ts";
@@ -103,7 +104,7 @@ export function createFlowWorker<
     },
     toMerged<WorkerOptions, typeof workerOptions>(
       {
-        concurrency: os.availableParallelism() * 1.5,
+        concurrency: normaliseConcurrency(os.availableParallelism() * 1.5),
         removeOnComplete: { count: 5000 },
         removeOnFail: {
           age: 60 * 60 * 24,

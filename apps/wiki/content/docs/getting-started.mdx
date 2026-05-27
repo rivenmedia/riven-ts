@@ -1,0 +1,188 @@
+---
+title: Getting Started
+description: Install and run Riven TS with Docker.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+## Prerequisites
+
+- **Docker** and **Docker Compose** installed
+- A **debrid service** account (Real-Debrid, AllDebrid, etc.)
+- A **media server** (Plex, Jellyfin, or Emby)
+- A **TMDB API key** (free at [themoviedb.org](https://www.themoviedb.org/settings/api))
+- Linux host with **FUSE support** (required for VFS)
+
+<Callout type="warn">
+  Riven requires FUSE and the `SYS_ADMIN` capability to mount its virtual file
+  system. This means it needs to run on Linux with `/dev/fuse` available.
+</Callout>
+
+## Quick Start
+
+<Steps>
+<Step>
+
+### Set up the host mount
+
+Riven mounts a FUSE filesystem inside the container and shares it with the host. You need to create a shared mount point.
+
+Create a systemd service to make the mount point shared:
+
+```ini title="/etc/systemd/system/riven-mount.service"
+[Unit]
+Description=Make Riven data bind mount shared
+After=local-fs.target
+Before=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/mount --bind /mnt/riven /mnt/riven
+ExecStart=/usr/bin/mount --make-rshared /mnt/riven
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Then enable it:
+
+```bash
+sudo mkdir -p /mnt/riven
+sudo systemctl daemon-reload
+sudo systemctl enable --now riven-mount.service
+```
+
+</Step>
+<Step>
+
+### Create your docker-compose.yml
+
+You can use the [Compose Generator](/generator) or create one manually:
+
+```yaml title="docker-compose.yml"
+services:
+  riven:
+    image: ghcr.io/rivenmedia/riven-ts:latest
+    container_name: riven
+    restart: unless-stopped
+    tty: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    devices:
+      - /dev/fuse
+    env_file: .env
+    volumes:
+      - riven_data:/riven/data
+      - /mnt/riven:/mnt/riven:rshared,z
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: riven
+      POSTGRES_PASSWORD: riven
+      POSTGRES_DB: riven
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U riven"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  riven_data:
+  postgres_data:
+  redis_data:
+```
+
+</Step>
+<Step>
+
+### Create your .env file
+
+```bash title=".env"
+# Database
+RIVEN_SETTING__databaseUrl="postgres+psycopg2://riven:riven@postgres:5432/riven"
+
+# Redis
+RIVEN_SETTING__redisUrl="redis://redis:6379"
+
+# VFS mount path (must match the volume mount)
+RIVEN_SETTING__vfsMountPath="/mnt/riven"
+
+# Logging
+RIVEN_SETTING__logLevel="info"
+
+# TMDB (required for metadata)
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_TMDB__apiKey="your-tmdb-api-key"
+
+# Debrid provider (via StremThru)
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_STREMTHRU__realdebridApiKey="your-rd-key"
+
+# Content source (pick at least one)
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__apiKey="your-mdblist-key"
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__lists=["user/list-name"]
+```
+
+See the [Configuration](/docs/configuration) page for all available settings.
+
+</Step>
+<Step>
+
+### Start Riven
+
+```bash
+docker compose up -d
+```
+
+Check the logs to verify everything started correctly:
+
+```bash
+docker compose logs -f riven
+```
+
+You should see Riven bootstrap, connect to PostgreSQL and Redis, mount the VFS, and start its GraphQL API on port 3000.
+
+</Step>
+<Step>
+
+### Point your media server at the VFS
+
+Add `/mnt/riven` (or your chosen mount path) as a media library in your media server:
+
+- **Plex**: Add Library > Movies/TV Shows > Browse for media folder > select `/mnt/riven`
+- **Jellyfin**: Dashboard > Libraries > Add Media Library > select `/mnt/riven`
+- **Emby**: Server > Library > Add Media Library > select `/mnt/riven`
+
+<Callout>
+  If running the media server in Docker, mount the same path with `rslave`
+  propagation: `/mnt/riven:/mnt/riven:rslave,z`
+</Callout>
+
+</Step>
+</Steps>
+
+## What's Next?
+
+- [Configure plugins](/docs/plugins) for your content sources and services
+- [Understand the architecture](/docs/architecture) to know how everything connects
+- [Build a custom plugin](/docs/plugin-sdk) if you need a custom integration

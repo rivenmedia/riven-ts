@@ -66,7 +66,7 @@ export default {
     },
   },
   settingsSchema: PlexSettings,
-  validator() {
-    return Promise.resolve(true);
+  validator({ dataSources }) {
+    return dataSources.get(PlexAPI).validate();
   },
 } satisfies RivenPlugin as RivenPlugin;

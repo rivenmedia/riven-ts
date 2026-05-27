@@ -53,7 +53,7 @@ vi.mock(import("@repo/plugin-test"), () => {
       validator() {
         return Promise.resolve(true);
       },
-    } satisfies RivenPlugin as RivenPlugin,
+    } satisfies RivenPlugin,
   };
 });
 
@@ -67,7 +67,7 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
   const { database, services } = await initORM({
     ...databaseConfig,
     dbName: ":memory:",
-    driver: SqliteDriver as never,
+    driver: SqliteDriver,
     migrations: {
       migrationsList: [],
     },
