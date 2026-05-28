@@ -6,7 +6,7 @@ const fatalStatuses = new Set([
   StatusCodes.NOT_FOUND,
   StatusCodes.GONE,
   StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
-  StatusCodes.SERVICE_UNAVAILABLE,
+  // StatusCodes.SERVICE_UNAVAILABLE, // TODO: Validate this is correct before merging
 ]);
 
 /**
