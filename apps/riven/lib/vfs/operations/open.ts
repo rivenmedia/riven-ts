@@ -188,7 +188,6 @@ async function serveMediaFile(
 
           break;
         }
-        case StatusCodes.SERVICE_UNAVAILABLE.valueOf():
         case StatusCodes.FORBIDDEN.valueOf():
         case StatusCodes.GONE.valueOf():
         case StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS.valueOf(): {
