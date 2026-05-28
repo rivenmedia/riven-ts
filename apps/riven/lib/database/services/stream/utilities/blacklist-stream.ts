@@ -27,8 +27,6 @@ export async function blacklistStream(
       plugin,
       provider,
     });
-
-    await em.flush();
   }
 
   return {

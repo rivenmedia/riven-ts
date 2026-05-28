@@ -97,7 +97,7 @@ it("blacklists the stream if the response indicates a dead link", async ({
       provider: mediaEntry.provider,
       plugin: mediaEntry.plugin,
     }),
-  ).resolves.not.toThrow(NotFoundError);
+  ).resolves.toBeInstanceOf(BlacklistedStream);
 
   const updatedMediaItem = await mediaItemService.getMediaItemById(
     completedMovie.id,
