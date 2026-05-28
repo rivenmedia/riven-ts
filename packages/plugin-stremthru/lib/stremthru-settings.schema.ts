@@ -1,3 +1,5 @@
+import { json } from "@repo/util-plugin-sdk/validation";
+
 import z, { type ZodOptional, type ZodString } from "zod";
 
 import { Store } from "./schemas/store.schema.ts";
@@ -20,6 +22,12 @@ export const StremThruSettings = z
       .url()
       .default("https://stremthru.13377001.xyz/")
       .describe("The URL of the StremThru instance to request"),
+    storePriority: json(z.array(Store).min(1).prefault(Store.options))
+      .default(Store.options)
+      .transform((arr) => new Set(arr))
+      .describe(
+        "The priority order of stores to use when requesting instant availability",
+      ),
   })
   .extend(StoreKeys.shape);
 
