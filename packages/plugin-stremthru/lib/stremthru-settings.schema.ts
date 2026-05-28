@@ -22,11 +22,15 @@ export const StremThruSettings = z
       .url()
       .default("https://stremthru.13377001.xyz/")
       .describe("The URL of the StremThru instance to request"),
-    storePriority: json(z.array(Store).min(1).prefault(Store.options))
+    storePriority: json(
+      z
+        .array(Store)
+        .min(1)
+        .transform((stores) => Array.from(new Set(stores))),
+    )
       .default(Store.options)
-      .transform((arr) => new Set(arr))
       .describe(
-        "The priority order of stores to use when requesting instant availability",
+        "The priority order of stores to use.\n\nIf unset, stores will attempt to download in alphabetical order.",
       ),
   })
   .extend(StoreKeys.shape);
