@@ -147,10 +147,10 @@ function buildTSCompose(cfg: TSConfig): {
           ports: ["4000:4000"],
           environment: {
             PORT: "4000",
-            REDIS_HOST: "riven-cache",
+            REDIS_HOST: "redis",
           },
           depends_on: {
-            "riven-cache": {
+            redis: {
               condition: "service_healthy",
             },
           },
@@ -160,7 +160,7 @@ function buildTSCompose(cfg: TSConfig): {
           image: "redislabs/redisinsight:latest",
           restart: "unless-stopped",
           environment: {
-            RI_REDIS_HOST: "riven-cache",
+            RI_REDIS_HOST: "redis",
           },
           ports: ["5540:5540"],
           healthcheck: {
@@ -174,7 +174,7 @@ function buildTSCompose(cfg: TSConfig): {
             retries: 3,
           },
           depends_on: {
-            "riven-cache": { condition: "service_healthy" },
+            redis: { condition: "service_healthy" },
           },
         },
       }),
