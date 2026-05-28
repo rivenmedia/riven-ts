@@ -22,6 +22,8 @@ interface TSConfig {
   contentApiKey: string;
   contentLists: string;
   seerrUrl: string;
+  addAnalyticsServices: boolean;
+  logsPath: string;
 }
 
 interface V1Config {
@@ -41,6 +43,7 @@ interface V1Config {
 interface DockerService {
   image: string;
   container_name: string;
+  command?: string;
   restart?: string;
   shm_size?: string;
   ports?: string[];
@@ -63,6 +66,7 @@ interface DockerService {
   )[];
   healthcheck?: {
     test: string | string[];
+    start_period?: string;
     interval: string;
     timeout?: string;
     retries?: number;
@@ -83,7 +87,6 @@ function buildTSCompose(cfg: TSConfig): {
 } {
   const compose: DockerCompose = {
     volumes: {
-      riven_data: null,
       postgres_data: null,
       redis_data: null,
     },
@@ -98,8 +101,8 @@ function buildTSCompose(cfg: TSConfig): {
         devices: ["/dev/fuse"],
         env_file: ".env",
         volumes: [
-          "riven_data:/riven/data",
-          `${cfg.vfsMountPath}:${cfg.vfsMountPath}:rshared,z`,
+          `${cfg.logsPath}:/app/logs`,
+          `${cfg.vfsMountPath}:/mount:rshared,z`,
         ],
         depends_on: {
           postgres: { condition: "service_healthy" },
@@ -127,14 +130,54 @@ function buildTSCompose(cfg: TSConfig): {
         image: "redis:8-alpine",
         container_name: "riven-redis",
         restart: "unless-stopped",
+        command: "redis-server --maxmemory-policy noeviction --appendonly yes",
         volumes: ["redis_data:/data"],
         healthcheck: {
-          test: ["CMD", "redis-cli", "ping"],
+          test: ["CMD-SHELL", "redis-cli ping | grep PONG"],
           interval: "5s",
           timeout: "5s",
           retries: 5,
         },
       },
+      ...(cfg.addAnalyticsServices && {
+        bullboard: {
+          container_name: "bullboard",
+          image: "venatum/bull-board:latest",
+          restart: "unless-stopped",
+          ports: ["4000:4000"],
+          environment: {
+            PORT: "4000",
+            REDIS_HOST: "riven-cache",
+          },
+          depends_on: {
+            "riven-cache": {
+              condition: "service_healthy",
+            },
+          },
+        },
+        "redis-insight": {
+          container_name: "redis-insight",
+          image: "redislabs/redisinsight:latest",
+          restart: "unless-stopped",
+          environment: {
+            RI_REDIS_HOST: "riven-cache",
+          },
+          ports: ["5540:5540"],
+          healthcheck: {
+            test: [
+              "CMD-SHELL",
+              "wget --no-verbose --tries=1 --spider http://localhost:5540/api/health || exit 1",
+            ],
+            start_period: "20s",
+            timeout: "3s",
+            interval: "15s",
+            retries: 3,
+          },
+          depends_on: {
+            "riven-cache": { condition: "service_healthy" },
+          },
+        },
+      }),
     },
   };
 
@@ -150,7 +193,7 @@ function buildTSCompose(cfg: TSConfig): {
     "# Core Settings",
     `RIVEN_SETTING__databaseUrl="postgres+psycopg2://${cfg.dbUser || "riven"}:${cfg.dbPassword || "changeme"}@postgres:5432/${cfg.dbName || "riven"}"`,
     `RIVEN_SETTING__redisUrl="redis://redis:6379"`,
-    `RIVEN_SETTING__vfsMountPath="${cfg.vfsMountPath}"`,
+    `RIVEN_SETTING__vfsMountPath="/mount"`,
     `RIVEN_SETTING__logLevel="info"`,
     `RIVEN_SETTING__enabledLogTransports=["console"]`,
     "",
@@ -177,35 +220,41 @@ function buildTSCompose(cfg: TSConfig): {
     envLines.push(
       `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__apiKey="${cfg.contentApiKey}"`,
     );
+
     if (cfg.contentLists) {
       const lists = cfg.contentLists.split(",").map((l) => `"${l.trim()}"`);
       envLines.push(
         `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__lists=[${lists.join(",")}]`,
       );
     }
+
     envLines.push("");
   } else if (cfg.contentSource === "seerr" && cfg.contentApiKey) {
     envLines.push("# Seerr");
     envLines.push(
       `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__apiKey="${cfg.contentApiKey}"`,
     );
+
     if (cfg.seerrUrl) {
       envLines.push(
         `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__url="${cfg.seerrUrl}"`,
       );
     }
+
     envLines.push("");
   } else if (cfg.contentSource === "listrr" && cfg.contentApiKey) {
     envLines.push("# Listrr");
     envLines.push(
       `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_LISTRR__apiKey="${cfg.contentApiKey}"`,
     );
+
     if (cfg.contentLists) {
       const lists = cfg.contentLists.split(",").map((l) => `"${l.trim()}"`);
       envLines.push(
         `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_LISTRR__movieLists=[${lists.join(",")}]`,
       );
     }
+
     envLines.push("");
   }
 
@@ -417,6 +466,36 @@ function InputField({
   );
 }
 
+function CheckboxField({
+  label,
+  value,
+  onChange,
+  hint,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  onChange: (v: string) => void;
+  mono?: boolean;
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-medium inline-block">
+        <input
+          className="accent-purple-500"
+          type="checkbox"
+          checked={value === "true"}
+          onChange={(e) => {
+            onChange(e.target.checked ? "true" : "false");
+          }}
+        />
+        <span className="ml-2">{label}</span>
+      </label>
+      {hint && <p className="mt-1 text-xs text-fd-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
 function SelectField({
   label,
   value,
@@ -516,7 +595,7 @@ function CodePreview({
         </div>
       </div>
       <div
-        className="max-h-96 overflow-auto rounded-lg border border-fd-border text-xs [&_pre]:m-0! [&_pre]:bg-transparent! [&_pre]:py-3"
+        className="max-h-[75vh] overflow-auto rounded-lg border border-fd-border text-xs [&_pre]:m-0! [&_pre]:bg-transparent! [&_pre]:py-3"
         dangerouslySetInnerHTML={{
           __html: highlighted || "<pre><code>Loading...</code></pre>",
         }}
@@ -533,6 +612,7 @@ export default function DockerComposeGenerator() {
   // TS config
   const [tsConfig, setTSConfig] = useState<TSConfig>({
     vfsMountPath: "/mnt/riven",
+    logsPath: "./logs",
     dbUser: "riven",
     dbPassword: "",
     dbName: "riven",
@@ -544,6 +624,7 @@ export default function DockerComposeGenerator() {
     contentApiKey: "",
     contentLists: "",
     seerrUrl: "http://seerr:5055",
+    addAnalyticsServices: false,
   });
 
   // V1 config
@@ -655,6 +736,16 @@ function TSConfigForm({
         }}
         placeholder="/mnt/riven"
         hint="Absolute path on your host for the FUSE mount"
+      />
+
+      <InputField
+        label="Logs Path"
+        value={config.logsPath}
+        onChange={(v) => {
+          update("logsPath", v);
+        }}
+        placeholder="logs"
+        hint="Absolute path on your host for the logs"
       />
 
       <div className="grid grid-cols-3 gap-4">
@@ -802,6 +893,15 @@ function TSConfigForm({
           )}
         </>
       )}
+
+      <CheckboxField
+        label="Add analytics services?"
+        hint="Adds analytics services for monitoring Riven's internal queues and cache. Recommended for advanced users. No data is sent to third parties - these are self-hosted services that connect directly to your Riven instance."
+        value={config.addAnalyticsServices ? "true" : "false"}
+        onChange={(v) => {
+          update("addAnalyticsServices", v === "true");
+        }}
+      />
     </div>
   );
 }
