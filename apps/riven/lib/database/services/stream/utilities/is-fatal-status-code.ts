@@ -1,9 +1,12 @@
 import { StatusCodes } from "http-status-codes";
 
+// TODO: This should be handled on a per-plugin, per-provider basis
+
 const fatalStatuses = new Set([
   StatusCodes.NOT_FOUND,
   StatusCodes.GONE,
   StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
+  StatusCodes.SERVICE_UNAVAILABLE,
 ]);
 
 /**
