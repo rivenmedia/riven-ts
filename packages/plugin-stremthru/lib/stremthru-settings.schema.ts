@@ -30,7 +30,7 @@ export const StremThruSettings = z
     )
       .default(Store.options)
       .describe(
-        "The priority order of stores to use.\n\nIf unset, stores will attempt to download in alphabetical order.",
+        "The priority order of stores to use.<br /><br />If unset, stores will attempt to download in alphabetical order.",
       ),
   })
   .extend(StoreKeys.shape);
