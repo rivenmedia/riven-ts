@@ -62,4 +62,21 @@ export class VfsService extends BaseService {
   async saveStreamUrl(entryId: UUID, streamUrl: string) {
     return this.em.getRepository(MediaEntry).saveStreamUrl(entryId, streamUrl);
   }
+
+  /**
+   * Marks a streamUrl as invalid/stale (sets it to null).
+   * Used as a defensive measure when a read on a previously "valid" CDN link
+   * fails with an expiration/4xx/timeout error — the next open() will then
+   * trigger a fresh link request.
+   */
+  @CreateRequestContext()
+  async invalidateStreamUrl(entryId: UUID) {
+    const repo = this.em.getRepository(MediaEntry);
+    const entry = await repo.findOne(entryId);
+    if (entry?.streamUrl) {
+      this.assign(entry, { streamUrl: null });
+      await this.em.flush();
+    }
+    return entry;
+  }
 }

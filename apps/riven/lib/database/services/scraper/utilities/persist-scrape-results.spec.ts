@@ -65,13 +65,19 @@ it("updates the scrape metadata when re-scraping a failed item", async ({
   expect(item.scrapedAt).toEqual(now);
 });
 
-it("increases the failed attempts count when no new streams are added", async ({
+it("continues with existing available streams when no new streams are added", async ({
   seeders: { seedScrapedMovie },
   services: { scraperService },
+  em,
 }) => {
   const scrapedMovie = await seedScrapedMovie();
 
-  const { item } = await scraperService.scrapeItem(
+  em.assign(scrapedMovie.movie, {
+    failedScrapeAttempts: 2,
+  });
+  await em.flush();
+
+  const { error, item, newStreamsCount } = await scraperService.scrapeItem(
     scrapedMovie.movie.id,
     Object.fromEntries(
       scrapedMovie.streams.map((stream) => [
@@ -81,9 +87,35 @@ it("increases the failed attempts count when no new streams are added", async ({
     ),
   );
 
-  expect(item.failedScrapeAttempts).toEqual(
-    scrapedMovie.movie.failedScrapeAttempts + 1,
+  expect(error).toBeUndefined();
+  expect(newStreamsCount).toEqual(0);
+  expect(item.failedScrapeAttempts).toEqual(0);
+});
+
+it("increases the failed attempts count when no streams are available", async ({
+  seeders: { seedScrapedMovie },
+  services: { scraperService },
+  em,
+}) => {
+  const scrapedMovie = await seedScrapedMovie();
+
+  scrapedMovie.movie.blacklistedStreams.set(scrapedMovie.streams);
+  await em.flush();
+
+  const failedScrapeAttempts = scrapedMovie.movie.failedScrapeAttempts;
+
+  const { error, item } = await scraperService.scrapeItem(
+    scrapedMovie.movie.id,
+    Object.fromEntries(
+      scrapedMovie.streams.map((stream) => [
+        stream.infoHash,
+        stream.parsedData,
+      ]),
+    ),
   );
+
+  expect(error).toBeDefined();
+  expect(item.failedScrapeAttempts).toEqual(failedScrapeAttempts + 1);
 });
 
 it("resets the failed attempts count when new streams are added", async ({
