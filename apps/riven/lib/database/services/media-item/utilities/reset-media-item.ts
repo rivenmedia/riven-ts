@@ -8,11 +8,11 @@ import type { EntityManager } from "@mikro-orm/core";
 
 function getChildren(item: MediaItem) {
   if (item instanceof Show) {
-    return item.seasons.loadItems({ ref: true });
+    return item.seasons.loadItems();
   }
 
   if (item instanceof Season) {
-    return item.episodes.loadItems({ ref: true });
+    return item.episodes.loadItems();
   }
 
   return null;

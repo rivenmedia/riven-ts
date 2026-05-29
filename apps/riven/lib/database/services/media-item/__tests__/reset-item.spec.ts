@@ -19,7 +19,7 @@ it("resets a movie item", async ({
   const resetItems =
     await services.mediaItemService.resetMediaItem(completedMovie);
 
-  expect(resetItems).toHaveLength(1);
+  expect(resetItems.size).toBe(1);
 
   const serialisedItems = serialiseItems(resetItems);
 
@@ -43,7 +43,7 @@ it("resets a show item and all nested seasons and episodes", async ({
   const resetItems =
     await services.mediaItemService.resetMediaItem(completedShow);
 
-  expect(resetItems).toHaveLength(1 + allSeasons.length + allEpisodes.length);
+  expect(resetItems.size).toBe(1 + allSeasons.length + allEpisodes.length);
 
   const serialisedItems = serialiseItems(resetItems);
 
@@ -81,7 +81,7 @@ it("resets a season item and all nested episodes", async ({
 
   const resetItems = await services.mediaItemService.resetMediaItem(season);
 
-  expect(resetItems).toHaveLength(1 + allEpisodes.length);
+  expect(resetItems.size).toBe(1 + allEpisodes.length);
 
   const serialisedItems = serialiseItems(resetItems);
 
@@ -111,7 +111,7 @@ it("resets an episode item", async ({
 
   const resetItems = await services.mediaItemService.resetMediaItem(episode);
 
-  expect(resetItems).toHaveLength(1);
+  expect(resetItems.size).toBe(1);
 
   const serialisedItems = serialiseItems(resetItems);
 
