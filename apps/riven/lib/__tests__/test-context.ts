@@ -1,10 +1,7 @@
-import {
-  type ApolloServerContext,
-  CoreKey,
-} from "@repo/core-util-graphql-schema";
-
 import assert from "node:assert";
 import { test as testBase, vi } from "vitest";
+
+import { type ApolloServerContext, CoreKey } from "../graphql/context.ts";
 
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
@@ -225,7 +222,7 @@ export const it = testBase
   .extend(
     "gqlServer",
     { scope: "file" },
-    async ({ apolloServerInstance, orm }, { onCleanup }) => {
+    async ({ apolloServerInstance, orm, services }, { onCleanup }) => {
       const { initApolloClient } = await import("../graphql/apollo-client.ts");
       const { startStandaloneServer } =
         await import("@apollo/server/standalone");
@@ -237,6 +234,7 @@ export const it = testBase
             Promise.resolve({
               [CoreKey]: {
                 em: orm.em.fork(),
+                services,
               },
               logger: {} as never,
               sendEvent: vi.fn(),

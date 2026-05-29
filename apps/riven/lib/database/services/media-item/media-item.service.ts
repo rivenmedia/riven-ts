@@ -1,6 +1,9 @@
 import { MediaItem, Show } from "@repo/util-plugin-sdk/dto/entities";
 
-import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
+import {
+  CreateRequestContext,
+  Transactional,
+} from "@mikro-orm/decorators/legacy";
 
 import { services } from "../../database.ts";
 import { BaseService } from "../core/base-service.ts";
@@ -58,6 +61,7 @@ export class MediaItemService extends BaseService {
   }
 
   @CreateRequestContext()
+  @Transactional()
   async resetMediaItem(target: MediaItem) {
     return resetMediaItem(this.em, target);
   }

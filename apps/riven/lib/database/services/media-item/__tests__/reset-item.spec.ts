@@ -3,6 +3,15 @@ import { expect } from "vitest";
 
 import { it } from "../../../../__tests__/test-context.ts";
 
+import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
+
+function serialiseItems(items: Set<MediaItem>) {
+  return items
+    .values()
+    .map((item) => wrap(item).serialize({ fields: ["id", "state"] }))
+    .toArray();
+}
+
 it("resets a movie item", async ({
   services,
   completedMovieContext: { completedMovie },
@@ -11,7 +20,17 @@ it("resets a movie item", async ({
     await services.mediaItemService.resetMediaItem(completedMovie);
 
   expect(resetItems).toHaveLength(1);
-  expect(resetItems).toEqual(new Set([completedMovie]));
+
+  const serialisedItems = serialiseItems(resetItems);
+
+  expect(serialisedItems).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: completedMovie.id,
+        state: "indexed",
+      }),
+    ]),
+  );
 });
 
 it("resets a show item and all nested seasons and episodes", async ({
@@ -24,18 +43,39 @@ it("resets a show item and all nested seasons and episodes", async ({
   const resetItems =
     await services.mediaItemService.resetMediaItem(completedShow);
 
-  const serialisedItems = resetItems
-    .values()
-    .map((item) => wrap(item).serialize())
-    .toArray();
-
   expect(resetItems).toHaveLength(1 + allSeasons.length + allEpisodes.length);
+
+  const serialisedItems = serialiseItems(resetItems);
+
   expect(serialisedItems).toEqual(
     expect.arrayContaining([
-      wrap(completedShow).serialize(),
-      ...allSeasons.map((season) => wrap(season).serialize()),
-      ...allEpisodes.map((episode) => wrap(episode).serialize()),
+      expect.objectContaining({
+        id: completedShow.id,
+        state: "indexed",
+      }),
     ]),
+  );
+
+  expect(serialisedItems).toEqual(
+    expect.arrayContaining(
+      allSeasons.map((season) =>
+        expect.objectContaining({
+          id: season.id,
+          state: "indexed",
+        }),
+      ),
+    ),
+  );
+
+  expect(serialisedItems).toEqual(
+    expect.arrayContaining(
+      allEpisodes.map((episode) =>
+        expect.objectContaining({
+          id: episode.id,
+          state: "indexed",
+        }),
+      ),
+    ),
   );
 });
 
@@ -50,17 +90,29 @@ it("resets a season item and all nested episodes", async ({
   const allEpisodes = await season.episodes.loadItems();
 
   const resetItems = await services.mediaItemService.resetMediaItem(season);
-  const serialisedItems = resetItems
-    .values()
-    .map((item) => wrap(item).serialize())
-    .toArray();
 
   expect(resetItems).toHaveLength(1 + allEpisodes.length);
+
+  const serialisedItems = serialiseItems(resetItems);
+
   expect(serialisedItems).toEqual(
     expect.arrayContaining([
-      wrap(season).serialize(),
-      ...allEpisodes.map((episode) => wrap(episode).serialize()),
+      expect.objectContaining({
+        id: season.id,
+        state: "indexed",
+      }),
     ]),
+  );
+
+  expect(serialisedItems).toEqual(
+    expect.arrayContaining(
+      allEpisodes.map((episode) =>
+        expect.objectContaining({
+          id: episode.id,
+          state: "indexed",
+        }),
+      ),
+    ),
   );
 });
 
@@ -75,5 +127,15 @@ it("resets an episode item", async ({
   const resetItems = await services.mediaItemService.resetMediaItem(episode);
 
   expect(resetItems).toHaveLength(1);
-  expect(resetItems).toEqual(new Set([episode]));
+
+  const serialisedItems = serialiseItems(resetItems);
+
+  expect(serialisedItems).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: episode.id,
+        state: "indexed",
+      }),
+    ]),
+  );
 });

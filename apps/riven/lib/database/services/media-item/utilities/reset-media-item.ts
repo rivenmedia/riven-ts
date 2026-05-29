@@ -32,7 +32,10 @@ export async function resetMediaItem(
   }
 
   target.reset();
+
   resetItems.add(target);
+
+  em.persist(target);
 
   return resetItems;
 }
