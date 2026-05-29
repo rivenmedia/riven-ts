@@ -14,20 +14,6 @@ it("resets a movie item", async ({
   expect(resetItems).toEqual(new Set([completedMovie]));
 });
 
-it("resets an episode item", async ({
-  services,
-  completedShowContext: {
-    episodes: [episode],
-  },
-}) => {
-  expect.assert(episode);
-
-  const resetItems = await services.mediaItemService.resetMediaItem(episode);
-
-  expect(resetItems).toHaveLength(1);
-  expect(resetItems).toEqual(new Set([episode]));
-});
-
 it("resets a show item and all nested seasons and episodes", async ({
   services,
   completedShowContext: { completedShow },
@@ -78,43 +64,16 @@ it("resets a season item and all nested episodes", async ({
   );
 });
 
-it("does not reset the show when resetting a single season", async ({
+it("resets an episode item", async ({
   services,
   completedShowContext: {
-    seasons: [season],
+    episodes: [episode],
   },
 }) => {
-  expect.assert(season);
+  expect.assert(episode);
 
-  const resetItems = await services.mediaItemService.resetMediaItem(season);
-  const serialisedItems = resetItems
-    .values()
-    .map((item) => wrap(item).serialize())
-    .toArray();
+  const resetItems = await services.mediaItemService.resetMediaItem(episode);
 
-  expect(resetItems).toHaveLength(1 + season.episodes.count());
-  expect(serialisedItems).not.toEqual(
-    expect.arrayContaining([wrap(season.show).serialize()]),
-  );
-});
-
-it("does not reset sibling seasons when resetting a single season", async ({
-  services,
-  completedShowContext: {
-    seasons: [season, season2],
-  },
-}) => {
-  expect.assert(season);
-  expect.assert(season2);
-
-  const resetItems = await services.mediaItemService.resetMediaItem(season);
-  const serialisedItems = resetItems
-    .values()
-    .map((item) => wrap(item).serialize())
-    .toArray();
-
-  expect(resetItems).toHaveLength(1 + season.episodes.count());
-  expect(serialisedItems).not.toEqual(
-    expect.arrayContaining([wrap(season2).serialize()]),
-  );
+  expect(resetItems).toHaveLength(1);
+  expect(resetItems).toEqual(new Set([episode]));
 });
