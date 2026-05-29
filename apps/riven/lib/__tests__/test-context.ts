@@ -1,3 +1,4 @@
+import { graphql, passthrough } from "msw";
 import assert from "node:assert";
 import { test as testBase, vi } from "vitest";
 
@@ -11,10 +12,15 @@ import type { ZodObject } from "zod";
 type AnyFunction = (...args: any[]) => any;
 
 export const it = testBase
-  .extend("server", async ({}, { onCleanup }) => {
+  .extend("server", { auto: true }, async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
-    const server = setupServer();
+    const server = setupServer(
+      graphql.query(
+        ({ request: { url } }) => url.includes("localhost"),
+        passthrough,
+      ),
+    );
 
     if (/^(\*|msw)/.test(process.env["DEBUG"] ?? "")) {
       server.events.on("response:mocked", ({ request, response }) => {
