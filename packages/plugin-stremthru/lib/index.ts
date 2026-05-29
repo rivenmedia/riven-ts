@@ -77,7 +77,10 @@ export default {
         .intersection(validStores)
         .difference(rateLimitedStores);
 
-      return { providers: Array.from(providers) };
+      return {
+        providers: Array.from(providers),
+        rateLimitedProviders: Array.from(rateLimitedStores),
+      };
     },
     "riven.media-item.scrape.requested": async ({ dataSources, event }) => {
       const api = dataSources.get(StremThruTorznabAPI);

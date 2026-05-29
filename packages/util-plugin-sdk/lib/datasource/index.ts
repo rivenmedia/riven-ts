@@ -589,6 +589,7 @@ export abstract class BaseDataSource<
     response: DataSourceFetchResult<unknown>["response"],
     waitMs: number,
   ): Promisable<void>;
+
   protected async didEncounterRateLimit(
     _request: RequestOptions,
     response: DataSourceFetchResult<unknown>["response"],

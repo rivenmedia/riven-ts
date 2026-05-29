@@ -52,7 +52,10 @@ it("returns providers in the order specified by settings", async ({
     logger: {} as never,
   });
 
-  expect(response.providers).toEqual(["debridlink", "alldebrid", "realdebrid"]);
+  expect(response).toEqual({
+    providers: ["debridlink", "alldebrid", "realdebrid"],
+    rateLimitedProviders: [],
+  });
 });
 
 it("does not return invalid providers", async ({
@@ -104,10 +107,13 @@ it("does not return invalid providers", async ({
     logger: {} as never,
   });
 
-  expect(response.providers).toEqual(["debridlink", "realdebrid"]);
+  expect(response).toEqual({
+    providers: ["debridlink", "realdebrid"],
+    rateLimitedProviders: [],
+  });
 });
 
-it("does not return rate-limited providers", async ({
+it("returns rate-limited providers in the rateLimitedProviders list", async ({
   server,
   plugin,
   settings,
@@ -154,10 +160,13 @@ it("does not return rate-limited providers", async ({
     logger: {} as never,
   });
 
-  expect(response.providers).toEqual(["debridlink", "alldebrid"]);
+  expect(response).toEqual({
+    providers: ["debridlink", "alldebrid"],
+    rateLimitedProviders: ["realdebrid"],
+  });
 });
 
-it("returns rate-limited providers after the rate limit has passed", async ({
+it("moves rate-limited providers back to the providers list after the rate limit has passed", async ({
   server,
   plugin,
   settings,
@@ -199,6 +208,18 @@ it("returns rate-limited providers after the rate limit has passed", async ({
     /* empty */
   }
 
+  const response = await providerListRequestedHook({
+    dataSources: dataSourceMap,
+    settings,
+    event: {},
+    logger: {} as never,
+  });
+
+  expect(response).toEqual({
+    providers: ["debridlink", "alldebrid"],
+    rateLimitedProviders: ["realdebrid"],
+  });
+
   await vi.waitFor(
     async () => {
       const response = await providerListRequestedHook({
@@ -208,11 +229,10 @@ it("returns rate-limited providers after the rate limit has passed", async ({
         logger: {} as never,
       });
 
-      expect(response.providers).toEqual([
-        "debridlink",
-        "alldebrid",
-        "realdebrid",
-      ]);
+      expect(response).toEqual({
+        providers: ["debridlink", "alldebrid", "realdebrid"],
+        rateLimitedProviders: [],
+      });
     },
     { timeout: 2000 },
   );
