@@ -53,29 +53,19 @@ it("resets a show item and all nested seasons and episodes", async ({
         id: completedShow.id,
         state: "indexed",
       }),
-    ]),
-  );
-
-  expect(serialisedItems).toEqual(
-    expect.arrayContaining(
-      allSeasons.map((season) =>
+      ...allSeasons.map((season) =>
         expect.objectContaining({
           id: season.id,
           state: "indexed",
         }),
       ),
-    ),
-  );
-
-  expect(serialisedItems).toEqual(
-    expect.arrayContaining(
-      allEpisodes.map((episode) =>
+      ...allEpisodes.map((episode) =>
         expect.objectContaining({
           id: episode.id,
           state: "indexed",
         }),
       ),
-    ),
+    ]),
   );
 });
 
@@ -101,18 +91,13 @@ it("resets a season item and all nested episodes", async ({
         id: season.id,
         state: "indexed",
       }),
-    ]),
-  );
-
-  expect(serialisedItems).toEqual(
-    expect.arrayContaining(
-      allEpisodes.map((episode) =>
+      ...allEpisodes.map((episode) =>
         expect.objectContaining({
           id: episode.id,
           state: "indexed",
         }),
       ),
-    ),
+    ]),
   );
 });
 
