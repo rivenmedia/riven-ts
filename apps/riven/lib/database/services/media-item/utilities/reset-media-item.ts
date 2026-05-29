@@ -8,14 +8,14 @@ import type { EntityManager } from "@mikro-orm/core";
 
 function getChildren(item: MediaItem) {
   if (item instanceof Show) {
-    return item.seasons.loadItems();
+    return item.seasons.loadItems({ ref: true });
   }
 
   if (item instanceof Season) {
-    return item.episodes.loadItems();
+    return item.episodes.loadItems({ ref: true });
   }
 
-  return [];
+  return null;
 }
 
 export async function resetMediaItem(
@@ -25,9 +25,11 @@ export async function resetMediaItem(
 ) {
   const children = await getChildren(target);
 
-  await Promise.all(
-    children.map((child) => resetMediaItem(em, child, resetItems)),
-  );
+  if (children) {
+    await Promise.all(
+      children.map((child) => resetMediaItem(em, child, resetItems)),
+    );
+  }
 
   target.reset();
   resetItems.add(target);
