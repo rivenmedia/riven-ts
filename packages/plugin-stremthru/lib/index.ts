@@ -75,11 +75,11 @@ export default {
 
       const providers = new Set(storePriority)
         .intersection(validStores)
-        .difference(rateLimitedStores);
+        .difference(new Set(rateLimitedStores.keys()));
 
       return {
         providers: Array.from(providers),
-        rateLimitedProviders: Array.from(rateLimitedStores),
+        rateLimitedProviders: Object.fromEntries(rateLimitedStores),
       };
     },
     "riven.media-item.scrape.requested": async ({ dataSources, event }) => {

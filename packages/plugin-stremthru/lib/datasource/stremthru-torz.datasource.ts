@@ -40,7 +40,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
   #rateLimitedStores = new TTLCache<Store, true>();
 
   get rateLimitedStores() {
-    return new Set(this.#rateLimitedStores.keys());
+    return this.#rateLimitedStores.expirationMap;
   }
 
   #buildCommonHeaders(store: Store) {
