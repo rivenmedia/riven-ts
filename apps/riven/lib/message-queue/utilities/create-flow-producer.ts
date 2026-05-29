@@ -4,8 +4,10 @@ import {
   type Job,
   type JobNode,
   type JobsOptions,
+  type NodeOpts,
   type PluginJobNode,
   type QueueBaseOptions,
+  type TypedJobNode,
 } from "bullmq";
 
 import { logger } from "../../utilities/logger/logger.ts";
@@ -13,6 +15,7 @@ import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
 import { createPluginFlowJob } from "./create-flow-plugin-job.ts";
 
+import type { Flow } from "../flows/index.ts";
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { ZodLiteral, ZodObject, ZodType, z } from "zod";
@@ -26,6 +29,10 @@ declare module "bullmq" {
     N extends string = string,
   > extends Pick<JobNode, "children"> {
     job: Job<D, R, N>;
+  }
+
+  interface TypedJobNode<D = unknown, R = unknown> extends JobNode {
+    job: Job<D, R>;
   }
 }
 
@@ -54,6 +61,12 @@ export class ExtendedFlowProducer extends FlowProducer {
     );
 
     return this.add(job);
+  }
+
+  override getFlow<T extends Flow>(
+    opts: NodeOpts,
+  ): Promise<TypedJobNode<T["input"], T["output"]>> {
+    return super.getFlow(opts);
   }
 }
 

@@ -1283,7 +1283,8 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "boolean"
+                            "type": "integer",
+                            "enum": [0, 1]
                           },
                           "title": {
                             "type": "string"
@@ -1910,7 +1911,8 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "boolean"
+                            "type": "integer",
+                            "enum": [0, 1]
                           },
                           "title": {
                             "type": "string"
@@ -1988,7 +1990,8 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "boolean"
+                            "type": "integer",
+                            "enum": [0, 1]
                           },
                           "title": {
                             "type": "string"
@@ -4922,7 +4925,8 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "boolean"
+                            "type": "integer",
+                            "enum": [0, 1]
                           },
                           "title": {
                             "type": "string"
@@ -10240,7 +10244,8 @@
                             "type": "number"
                           },
                           "adult": {
-                            "type": "boolean"
+                            "type": "integer",
+                            "enum": [0, 1]
                           },
                           "title": {
                             "type": "string"
@@ -10304,7 +10309,8 @@
                             "type": "number"
                           },
                           "adult": {
-                            "type": "boolean"
+                            "type": "integer",
+                            "enum": [0, 1]
                           },
                           "title": {
                             "type": "string"

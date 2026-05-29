@@ -5,6 +5,7 @@ import { defineConfig } from "eslint/config";
 import globals from "globals";
 import * as tseslint from "typescript-eslint";
 
+import { allowConstantLoopConditions } from "../best-practices/allow-constant-loop-conditions.ts";
 import { banDateConstructor } from "../best-practices/ban-date-constructor.ts";
 import { noUnusedVariables } from "../best-practices/no-unused-variables.ts";
 import { preferMikroOrmCore } from "../best-practices/prefer-mikro-orm-core.ts";
@@ -23,6 +24,7 @@ export const typescriptCore = defineConfig(
       noUnusedVariables,
       banDateConstructor,
       preferMikroOrmCore,
+      allowConstantLoopConditions,
       importX.typescript,
     ],
     languageOptions: {

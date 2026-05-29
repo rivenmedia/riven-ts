@@ -7,7 +7,7 @@ import { StremThruTorznabAPI } from "../stremthru-torznab.datasource.ts";
 it("returns false if the request fails", async ({ server, dataSourceMap }) => {
   server.use(
     http.get("**/v0/torznab/api", () =>
-      HttpResponse.json({ success: false }, { status: 401 }),
+      HttpResponse.json(null, { status: 401 }),
     ),
   );
 

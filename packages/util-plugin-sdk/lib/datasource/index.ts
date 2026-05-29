@@ -52,9 +52,26 @@ type FetchResponse<T = unknown> = Pick<
     statusText: string;
     headers: Record<string, string>;
   };
-  responseTime: number;
-  responseFromCache: boolean | undefined;
-};
+} & (
+    | {
+        success: true;
+        responseTime: number;
+        responseFromCache: boolean | undefined;
+      }
+    | { success: false }
+  );
+
+export class DataSourceHTTPError extends Error {
+  response!: DataSourceFetchResult<never>["response"];
+
+  constructor(response: DataSourceFetchResult<never>["response"]) {
+    super(
+      `${response.status.toString()} ${response.statusText} for ${response.url}`,
+    );
+
+    this.response = response;
+  }
+}
 
 export interface BaseDataSourceConfig<
   T extends Record<string, unknown>,
@@ -62,6 +79,7 @@ export interface BaseDataSourceConfig<
   settings: T;
   pluginSymbol: symbol;
   requestAttempts?: number;
+  requestBackoffDelay?: number;
   logger: Logger;
   connection: ConnectionOptions;
   telemetry: Telemetry;
@@ -96,6 +114,7 @@ export abstract class BaseDataSource<
   protected readonly concurrency: number = 200;
 
   #requestAttempts: number;
+  #requestBackoffDelay: number;
 
   #queueId: string;
   #queueEvents: QueueEvents;
@@ -105,10 +124,21 @@ export abstract class BaseDataSource<
   #keyv: KeyvAdapter;
   #keyvPrefix = "httpcache:";
 
+  /**
+   * A set of HTTP status codes that should not be treated as fatal errors.
+   *
+   * When a response with one of these status codes is received, the datasource
+   * will attempt to re-request the data after a delay, rather than immediately throwing an error.
+   *
+   * For all other 4xx and 5xx status codes, no retries will be made.
+   */
+  #nonFatalStatusCodes = new Set([408, 425, 429, 500, 502, 503, 504]);
+
   constructor({
     pluginSymbol,
     settings,
     requestAttempts = 3,
+    requestBackoffDelay = 10_000,
     connection,
     telemetry,
     userAgent,
@@ -120,6 +150,7 @@ export abstract class BaseDataSource<
 
     this.serviceName = this.constructor.name;
     this.#requestAttempts = requestAttempts;
+    this.#requestBackoffDelay = requestBackoffDelay;
     this.#queueId = `${pluginSymbol.description ?? "unknown"}-${this.serviceName}-fetch-queue`;
     this.queue = new Queue(this.#queueId, {
       connection,
@@ -143,45 +174,76 @@ export abstract class BaseDataSource<
       async (job, _token, signal) => {
         await job.log(`Processing request for ${job.data.path}`);
 
-        const {
-          timeTaken,
-          result: { parsedBody, response, responseFromCache },
-        } = await benchmark(async () => {
-          this.logger.silly(
-            [
-              `[${this.serviceName}] Initiating request to ${new URL(job.data.path, this.baseURL).toString()}`,
-              ...(job.data.params ? [`?${job.data.params}`] : []),
-            ].join(""),
+        try {
+          const {
+            timeTaken,
+            result: { parsedBody, response, responseFromCache },
+          } = await benchmark(async () => {
+            this.logger.silly(
+              [
+                `[${this.serviceName}] Initiating request to ${new URL(job.data.path, this.baseURL).toString()}`,
+                ...(job.data.params ? [`?${job.data.params}`] : []),
+              ].join(""),
+            );
+
+            this.#decodeRequestBody(job);
+
+            job.data.incomingRequest ??= {};
+            job.data.incomingRequest.signal = signal;
+            job.data.incomingRequest.params = urlSearchParamsCodec.decode(
+              job.data.params,
+            );
+            job.data.incomingRequest.headers ??= {};
+            job.data.incomingRequest.headers["user-agent"] = userAgent;
+
+            return super.fetch(job.data.path, job.data.incomingRequest);
+          });
+
+          await job.log(
+            `Request completed in ${(timeTaken / 1000).toFixed(2)} seconds`,
           );
 
-          this.#decodeRequestBody(job);
+          return {
+            success: true,
+            parsedBody,
+            response: {
+              ok: response.ok,
+              status: response.status,
+              statusText: response.statusText,
+              headers: Object.fromEntries(response.headers),
+            },
+            responseTime: timeTaken,
+            responseFromCache,
+          };
+        } catch (error) {
+          const hasRemainingAttempts =
+            job.attemptsStarted !== this.#requestAttempts;
 
-          job.data.incomingRequest ??= {};
-          job.data.incomingRequest.signal = signal;
-          job.data.incomingRequest.params = urlSearchParamsCodec.decode(
-            job.data.params,
-          );
-          job.data.incomingRequest.headers ??= {};
-          job.data.incomingRequest.headers["user-agent"] = userAgent;
+          const isFatalHttpStatusCode =
+            error instanceof DataSourceHTTPError &&
+            !this.#nonFatalStatusCodes.has(error.response.status);
 
-          return super.fetch(job.data.path, job.data.incomingRequest);
-        });
+          const shouldRetry = hasRemainingAttempts && !isFatalHttpStatusCode;
 
-        await job.log(
-          `Request completed in ${(timeTaken / 1000).toFixed(2)} seconds`,
-        );
+          if (shouldRetry) {
+            throw error;
+          }
 
-        return {
-          parsedBody,
-          response: {
-            ok: response.ok,
-            status: response.status,
-            statusText: response.statusText,
-            headers: Object.fromEntries(response.headers),
-          },
-          responseTime: timeTaken,
-          responseFromCache,
-        };
+          if (error instanceof DataSourceHTTPError) {
+            return {
+              success: false,
+              parsedBody: null,
+              response: {
+                headers: Object.fromEntries(error.response.headers),
+                ok: error.response.ok,
+                status: error.response.status,
+                statusText: error.response.statusText,
+              },
+            };
+          }
+
+          throw error;
+        }
       },
       {
         connection,
@@ -213,7 +275,7 @@ export abstract class BaseDataSource<
     }
 
     if (typeof job.data.incomingRequest.body !== "string") {
-      throw new Error("Unable to decode non-string request body.");
+      throw new UnrecoverableError("Unable to decode non-string request body.");
     }
 
     if (bodyType === "url-search-params") {
@@ -343,7 +405,7 @@ export abstract class BaseDataSource<
       try {
         JSON.parse(body);
       } catch {
-        throw new Error(
+        throw new UnrecoverableError(
           "Unable to determine the request body type: invalid JSON string.",
         );
       }
@@ -351,7 +413,7 @@ export abstract class BaseDataSource<
       return "json";
     }
 
-    throw new Error("Unable to determine the request body type.");
+    throw new UnrecoverableError("Unable to determine the request body type.");
   }
 
   async #createRequestJob(
@@ -381,7 +443,7 @@ export abstract class BaseDataSource<
         attempts: this.#requestAttempts,
         backoff: {
           type: "exponential",
-          delay: 10_000,
+          delay: this.#requestBackoffDelay,
           jitter: 0.5,
         },
         removeDependencyOnFailure: true,
@@ -427,29 +489,39 @@ export abstract class BaseDataSource<
 
     const result = await job.waitUntilFinished(this.#queueEvents);
 
+    const clonedResponse = new Response(null, result.response);
+
+    if (!result.success) {
+      throw new DataSourceHTTPError(clonedResponse);
+    }
+
+    const commonResponseFields = {
+      response: clonedResponse,
+      // The following fields aren't used by our application,
+      // but must be included to satisfy the return type.
+      responseFromCache: result.responseFromCache ?? false,
+      requestDeduplication: undefined as never,
+      httpCache: {
+        cacheWritePromise: Promise.resolve(),
+      },
+    } as const satisfies Pick<
+      DataSourceFetchResult<T>,
+      "responseFromCache" | "requestDeduplication" | "httpCache" | "response"
+    >;
+
     const logMessage = result.responseFromCache
       ? `[${this.serviceName}] Returned cached response for ${augmentedRequest.method ?? "GET"} ${url.toString()}`
       : `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url.toString()} in ${(result.responseTime / 1000).toFixed(2)} seconds`;
 
     if (!result.response.ok) {
-      throw new Error(logMessage);
+      throw new DataSourceHTTPError(clonedResponse);
     }
 
     this.logger.http(logMessage);
 
-    const { ok, ...responseInit } = result.response;
-
     return {
       parsedBody: result.parsedBody as T,
-      response: new Response(null, responseInit),
-
-      // The following fields aren't used by our application,
-      // but must be included to satisfy the return type.
-      responseFromCache: false,
-      requestDeduplication: undefined as never,
-      httpCache: {
-        cacheWritePromise: Promise.resolve(),
-      },
+      ...commonResponseFields,
     };
   }
 
@@ -484,11 +556,7 @@ export abstract class BaseDataSource<
       throw Worker.RateLimitError();
     }
 
-    if (String(response.status).startsWith("4")) {
-      throw new UnrecoverableError(
-        `${response.status.toString()} ${response.statusText} for ${url.toString()}`,
-      );
-    }
+    throw new DataSourceHTTPError(response);
   }
 
   protected override didEncounterError(

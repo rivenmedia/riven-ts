@@ -6,9 +6,7 @@ import { TorrentioAPI } from "../torrentio.datasource.ts";
 
 it("returns false if the request fails", async ({ server, dataSourceMap }) => {
   server.use(
-    http.get("**/validate", () =>
-      HttpResponse.json({ success: false }, { status: 401 }),
-    ),
+    http.get("**/validate", () => HttpResponse.json(null, { status: 401 })),
   );
 
   const torrentioApi = dataSourceMap.get(TorrentioAPI);

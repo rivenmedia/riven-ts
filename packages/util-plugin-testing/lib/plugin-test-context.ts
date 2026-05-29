@@ -120,7 +120,7 @@ export const it = baseIt
           logger,
           pluginSymbol: plugin.name,
           telemetry: undefined as unknown as Telemetry,
-          requestAttempts: 1,
+          requestBackoffDelay: 0,
           settings: settings.get(plugin.settingsSchema),
           userAgent: "mock-user-agent",
         } satisfies BaseDataSourceConfig<Record<string, unknown>>;

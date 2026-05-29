@@ -11,6 +11,7 @@ import {
   Index,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryKey,
   Property,
 } from "@mikro-orm/decorators/legacy";
@@ -24,7 +25,7 @@ import { MediaItemContentRating } from "../../enums/content-ratings.enum.ts";
 import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { MediaItemType } from "../../enums/media-item-type.enum.ts";
 import { FileSystemEntry, SubtitleEntry } from "../filesystem/index.ts";
-import { ItemRequest, MediaEntry } from "../index.ts";
+import { BlacklistedStream, ItemRequest, MediaEntry } from "../index.ts";
 import { Stream } from "../streams/stream.entity.ts";
 
 import type { Promisable } from "type-fest";
@@ -140,25 +141,28 @@ export abstract class MediaItem {
   failedScrapeAttempts: Opt<number> = 0;
 
   @Field(() => [FileSystemEntry])
-  @ManyToMany()
-  filesystemEntries: Collection<FileSystemEntry> =
-    new Collection<FileSystemEntry>(this);
+  @OneToMany({
+    entity: () => FileSystemEntry,
+    mappedBy: "mediaItem",
+    orphanRemoval: true,
+  })
+  filesystemEntries = new Collection<FileSystemEntry>(this);
 
   @Field(() => [SubtitleEntry])
   @ManyToMany()
-  subtitles: Collection<SubtitleEntry> = new Collection<SubtitleEntry>(this);
+  subtitles = new Collection<SubtitleEntry>(this);
 
   @Field(() => Stream, { nullable: true })
   @ManyToOne()
   activeStream?: Ref<Stream> | null;
 
   @Field(() => [Stream])
-  @ManyToMany()
-  streams: Collection<Stream> = new Collection<Stream>(this);
+  @ManyToMany(() => Stream)
+  streams = new Collection<Stream>(this);
 
-  @Field(() => [Stream])
-  @ManyToMany()
-  blacklistedStreams: Collection<Stream> = new Collection<Stream>(this);
+  @Field(() => [BlacklistedStream])
+  @OneToMany(() => BlacklistedStream, "mediaItem")
+  blacklistedStreams = new Collection<BlacklistedStream>(this);
 
   @Field(() => String)
   @Enum(() => MediaItemType.enum)
@@ -180,6 +184,21 @@ export abstract class MediaItem {
     return this.releaseDate
       ? DateTime.fromJSDate(this.releaseDate) <= DateTime.utc()
       : false;
+  }
+
+  /**
+   * Resets a media item back to its original state.
+   *
+   * Used after blacklisting a stream to indicate a fresh processing attempt can be started.
+   */
+  reset() {
+    this.activeStream = null;
+    this.failedScrapeAttempts = 0;
+    this.scrapedTimes = 0;
+    this.scrapedAt = null;
+    this.filesystemEntries.removeAll();
+    this.streams.removeAll();
+    this.subtitles.removeAll();
   }
 
   /**

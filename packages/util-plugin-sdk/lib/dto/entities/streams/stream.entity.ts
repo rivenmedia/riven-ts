@@ -1,4 +1,8 @@
-import { Collection, EntityRepositoryType } from "@mikro-orm/core";
+import {
+  Collection,
+  EntityRepositoryType,
+  PrimaryKeyProp,
+} from "@mikro-orm/core";
 import {
   Entity,
   ManyToMany,
@@ -15,6 +19,8 @@ import type { ParsedData } from "@repo/util-rank-torrent-name";
 @ObjectType()
 @Entity({ repository: () => StreamRepository })
 export class Stream {
+  [PrimaryKeyProp]!: "infoHash";
+
   [EntityRepositoryType]?: StreamRepository;
 
   @Field(() => ID)
@@ -25,10 +31,6 @@ export class Stream {
   parsedData!: ParsedData;
 
   @Field(() => [MediaItem])
-  @ManyToMany(() => MediaItem, (mediaItem) => mediaItem.streams)
+  @ManyToMany(() => MediaItem, "streams")
   parents = new Collection<MediaItem>(this);
-
-  @Field(() => [MediaItem])
-  @ManyToMany(() => MediaItem, (mediaItem) => mediaItem.blacklistedStreams)
-  blacklistedParents = new Collection<MediaItem>(this);
 }

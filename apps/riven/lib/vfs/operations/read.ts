@@ -195,7 +195,6 @@ export const readSync = function (
         process.nextTick(callback, bytesRead);
       },
     ).catch((error: unknown) => {
-      console.log({ error });
       // This is triggered when a file handle is released
       if (error instanceof Undici.errors.RequestAbortedError) {
         logger.silly(`Read operation aborted for fd ${fd.toString()}`);

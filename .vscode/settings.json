@@ -68,6 +68,8 @@
     "**/node_modules": true,
     "**/bower_components": true,
     "**/*.code-search": true,
-    "**/dist": true
+    "**/dist": true,
+    "**/.snapshot-riven.json": true,
+    "**/Migration*.ts": true
   }
 }

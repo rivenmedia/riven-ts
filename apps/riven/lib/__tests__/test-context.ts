@@ -1,15 +1,17 @@
-import {
-  type ApolloServerContext,
-  CoreKey,
-} from "@repo/core-util-graphql-schema";
-
 import assert from "node:assert";
 import { test as testBase, vi } from "vitest";
 
-import type { JobsOptions } from "bullmq";
+import { type ApolloServerContext, CoreKey } from "../graphql/context.ts";
+
+import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
+import type { ZodObject } from "zod";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFunction = (...args: any[]) => any;
 
 export const it = testBase
-  .extend("server", { auto: false }, async ({}, { onCleanup }) => {
+  .extend("server", async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
     const server = setupServer();
@@ -220,7 +222,7 @@ export const it = testBase
   .extend(
     "gqlServer",
     { scope: "file" },
-    async ({ apolloServerInstance, orm }, { onCleanup }) => {
+    async ({ apolloServerInstance, orm, services }, { onCleanup }) => {
       const { initApolloClient } = await import("../graphql/apollo-client.ts");
       const { startStandaloneServer } =
         await import("@apollo/server/standalone");
@@ -232,6 +234,7 @@ export const it = testBase
             Promise.resolve({
               [CoreKey]: {
                 em: orm.em.fork(),
+                services,
               },
               logger: {} as never,
               sendEvent: vi.fn(),
@@ -243,20 +246,7 @@ export const it = testBase
 
       initApolloClient(new URL(url));
 
-      vi.doMock(import("node:worker_threads"), async (importOriginal) => {
-        const originalModule = await importOriginal();
-        const { toMerged } = await import("es-toolkit");
-
-        return toMerged(originalModule, {
-          workerData: {
-            gqlUrl: url,
-          },
-        });
-      });
-
       onCleanup(async () => {
-        vi.doUnmock(import("node:worker_threads"));
-
         await apolloServerInstance.stop();
       });
 
@@ -267,7 +257,72 @@ export const it = testBase
     "apolloClient",
     { scope: "file" },
     await import("../graphql/apollo-client.ts"),
-  );
+  )
+  .extend("createFlowWorker", async ({}, { onCleanup }) => {
+    const { createFlowWorker } =
+      await import("../message-queue/utilities/create-flow-worker.ts");
+
+    const workers = new Set<Worker>();
+    const queues = new Set<Queue>();
+
+    onCleanup(async () => {
+      for (const worker of workers) {
+        await worker.close();
+      }
+
+      for (const queue of queues) {
+        await queue.close();
+      }
+    });
+
+    return (flowSchema: ZodObject, processor: AnyFunction) => {
+      const { queue, worker } = createFlowWorker(
+        flowSchema as never,
+        processor as never,
+        vi.fn(),
+        new Map(),
+      );
+
+      workers.add(worker);
+      queues.add(queue);
+
+      return { queue, worker };
+    };
+  })
+  .extend("createPluginWorker", async ({}, { onCleanup }) => {
+    const { createPluginWorker } =
+      await import("../message-queue/utilities/create-plugin-worker.ts");
+
+    const workers = new Set<Worker>();
+    const queues = new Set<Queue>();
+
+    onCleanup(async () => {
+      for (const worker of workers) {
+        await worker.close(true);
+      }
+
+      for (const queue of queues) {
+        await queue.close();
+      }
+    });
+
+    return (
+      eventType: RivenEvent["type"],
+      pluginName: string,
+      processor: Processor,
+    ) => {
+      const { queue, worker } = createPluginWorker(
+        eventType,
+        pluginName,
+        processor,
+      );
+
+      workers.add(worker);
+      queues.add(queue);
+
+      return { queue, worker };
+    };
+  });
 
 it.afterEach(async ({ mockSentryScope, apolloClient }) => {
   mockSentryScope.clear();

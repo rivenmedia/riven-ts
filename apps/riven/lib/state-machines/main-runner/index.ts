@@ -35,6 +35,8 @@ import { scrapeItemProcessor } from "../../message-queue/flows/process-media-ite
 import { ScrapeItemFlow } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.schema.ts";
 import { requestContentServiceProcessor } from "../../message-queue/flows/request-content-service/request-content-service.processor.ts";
 import { RequestContentServiceFlow } from "../../message-queue/flows/request-content-service/request-content-service.schema.ts";
+import { requestStreamLinkProcessor } from "../../message-queue/flows/request-stream-link/request-stream-link.processor.ts";
+import { RequestStreamLinkFlow } from "../../message-queue/flows/request-stream-link/request-stream-link.schema.ts";
 import { MapItemsToFilesSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
 import { ParseScrapeResultsSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.schema.ts";
 import { ValidateTorrentFilesSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.schema.ts";
@@ -368,6 +370,12 @@ export const mainRunnerMachine = setup({
               "post-process-media-item": createFlowWorker(
                 PostProcessMediaItemFlow,
                 postProcessItemProcessor,
+                self.send,
+                input.plugins,
+              ),
+              "request-stream-link": createFlowWorker(
+                RequestStreamLinkFlow,
+                requestStreamLinkProcessor,
                 self.send,
                 input.plugins,
               ),

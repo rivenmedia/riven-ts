@@ -47,7 +47,7 @@ services:
 
   bullboard:
     container_name: bullboard
-    image: venatum/bull-board
+    image: venatum/bull-board:latest
     restart: unless-stopped
     ports:
       - 4000:4000

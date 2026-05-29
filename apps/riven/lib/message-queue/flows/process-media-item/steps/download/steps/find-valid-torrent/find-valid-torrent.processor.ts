@@ -17,7 +17,7 @@ import { getValidTorrentFiles } from "./utilities/get-valid-torrent-files.ts";
 export const findValidTorrentProcessor =
   findValidTorrentProcessorSchema.implementAsync(async function (
     { job, scope },
-    { services: { mediaItemService }, plugins },
+    { services: { mediaItemService, streamService }, plugins },
   ) {
     const [rankedStreams] = Object.values(await job.getChildrenValues());
 
@@ -77,6 +77,21 @@ export const findValidTorrentProcessor =
           const providerList = hasProviderListHook ? providers : [null];
 
           for (const provider of providerList) {
+            const isBlacklisted = await streamService.isStreamBlacklisted({
+              mediaItem,
+              stream: infoHash,
+              plugin: pluginName,
+              provider,
+            });
+
+            if (isBlacklisted) {
+              logger.debug(
+                `Skipping blacklisted stream ${infoHash} on ${pluginName}${provider ? ` via ${provider}` : ""} for ${chalk.bold(mediaItem.fullTitle)}`,
+              );
+
+              continue;
+            }
+
             scope.setTag("riven.downloader-provider", provider);
 
             await job.log(
@@ -130,12 +145,37 @@ export const findValidTorrentProcessor =
                 parent,
               );
 
+              if (!pluginDownloadResult.success) {
+                const isDeadTorrent = streamService.isFatalStatusCode(
+                  pluginDownloadResult.statusCode,
+                );
+
+                if (isDeadTorrent) {
+                  await streamService.blacklistStreamByInfoHash(
+                    mediaItem.id,
+                    infoHash,
+                    pluginName,
+                    provider,
+                  );
+
+                  logger.info(
+                    `Blacklisted ${infoHash} on ${pluginName}${provider ? ` via ${provider}` : ""} for ${mediaItem.fullTitle} due to failed download attempt`,
+                  );
+
+                  await job.log(
+                    `${infoHash}:${pluginName}${provider ? ` via ${provider}` : ""} Download attempt failed; stream blacklisted`,
+                  );
+                }
+
+                continue;
+              }
+
               await job.log(`${infoHash}: Downloaded torrent metadata`);
 
               const validatedFiles = await getValidTorrentFiles(
                 mediaItem,
                 infoHash,
-                pluginDownloadResult.files,
+                pluginDownloadResult.data.files,
                 false,
                 parent,
               );
@@ -145,7 +185,7 @@ export const findValidTorrentProcessor =
               return {
                 plugin: pluginName,
                 result: {
-                  torrentId: pluginDownloadResult.torrentId,
+                  torrentId: pluginDownloadResult.data.torrentId,
                   infoHash,
                   files: validatedFiles,
                   provider,
@@ -193,7 +233,7 @@ export const findValidTorrentProcessor =
 
       await job.updateData({
         ...job.data,
-        failedInfoHashes: [...failedInfoHashes, infoHash],
+        failedInfoHashes: [...job.data.failedInfoHashes, infoHash],
       });
     }
 

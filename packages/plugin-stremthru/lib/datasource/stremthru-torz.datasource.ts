@@ -14,8 +14,8 @@ import type {
   RequestOptions,
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
-import type { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+import type { URL } from "url";
 
 const storeNameHeader = "x-stremthru-store-name";
 
@@ -144,10 +144,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     return true;
   }
 
-  async addTorrent(
-    infoHash: string,
-    store: Store,
-  ): Promise<MediaItemDownloadRequestedResponse> {
+  async addTorrent(infoHash: string, store: Store) {
     const response = await this.post<unknown>("v0/store/torz", {
       headers: this.#buildCommonHeaders(store),
       body: JSON.stringify({
@@ -177,10 +174,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
       );
     }
 
-    return {
-      torrentId: data.id,
-      files: data.files,
-    };
+    return data;
   }
 
   async removeTorrent(id: string, store: Store) {
@@ -236,9 +230,10 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
 
     const results = await Promise.all(requests);
 
-    return results.reduce<Record<string, DebridFile[]>>((acc, result) => {
-      return Object.assign(acc, result);
-    }, {});
+    return results.reduce<Record<string, DebridFile[]>>(
+      (acc, result) => Object.assign(acc, result),
+      {},
+    );
   }
 
   async generateLink(link: string, store: Store) {
@@ -249,6 +244,6 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
 
     const { data } = GenerateLinkResponse.parse(response);
 
-    return data;
+    return data.link;
   }
 }

@@ -60,9 +60,11 @@ export const processItemRequestProcessor =
           step: "process",
         });
 
-        await job.moveToWaitingChildren(token);
+        if (await job.moveToWaitingChildren(token)) {
+          throw new WaitingChildrenError();
+        }
 
-        throw new WaitingChildrenError();
+        break;
       }
       case "process": {
         const data = await job.getChildrenValues();

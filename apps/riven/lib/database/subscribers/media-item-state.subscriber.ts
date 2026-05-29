@@ -17,6 +17,7 @@ import {
   type UnitOfWork,
   wrap,
 } from "@mikro-orm/core";
+import chalk from "chalk";
 
 import type { Promisable } from "type-fest";
 
@@ -29,6 +30,25 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     }
   }
 
+  async afterFlush({ uow }: FlushEventArgs): Promise<void> {
+    const { logger } = await import("../../utilities/logger/logger.ts");
+
+    for (const changeSet of uow.getChangeSets()) {
+      if (
+        changeSet.entity instanceof MediaItem &&
+        changeSet.originalEntity &&
+        changeSet.payload["state"]
+      ) {
+        const previousState = changeSet.originalEntity["state"] as string;
+        const nextState = changeSet.payload["state"] as string;
+
+        logger.debug(
+          `${chalk.bold(changeSet.originalEntity["fullTitle"] as string)} state change: ${chalk.red(previousState)} ${chalk.dim("->")} ${chalk.green(nextState)}`,
+        );
+      }
+    }
+  }
+
   async onFlush({ uow }: FlushEventArgs): Promise<void> {
     const trackedItems = new Map<
       MediaItem,
@@ -37,7 +57,14 @@ export class MediaItemStateSubscriber implements EventSubscriber {
 
     for (const changeSet of uow.getChangeSets()) {
       if (changeSet.entity instanceof MediaItem) {
-        trackedItems.set(changeSet.entity, changeSet);
+        const wrappedEntity = wrap(changeSet.entity);
+        const entity = wrappedEntity.isInitialized()
+          ? changeSet.entity
+          : await wrappedEntity.init();
+
+        if (entity) {
+          trackedItems.set(entity, changeSet);
+        }
       }
     }
 
@@ -142,13 +169,13 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     entity: MediaItem,
     nextStatesMap: NextStatesMap,
   ): Promise<MediaItemState> {
+    const wrappedEntity = wrap(entity);
+
+    if (!wrappedEntity.isInitialized()) {
+      await wrappedEntity.init();
+    }
+
     if (entity instanceof Season) {
-      const wrappedEntity = wrap(entity);
-
-      if (!wrappedEntity.isInitialized()) {
-        await wrappedEntity.init();
-      }
-
       return this.#computeStateWithChildren(
         entity,
         await entity.episodes.loadItems(),
@@ -157,12 +184,6 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     }
 
     if (entity instanceof Show) {
-      const wrappedEntity = wrap(entity);
-
-      if (!wrappedEntity.isInitialized()) {
-        await wrappedEntity.init();
-      }
-
       return this.#computeStateWithChildren(
         entity,
         await entity.requestedSeasons.loadItems(),
@@ -317,14 +338,18 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       }
     }
 
-    const blacklistedStreams = new Set(
-      await item.blacklistedStreams.loadItems(),
+    const blacklistedStreams = await item.blacklistedStreams.loadItems({
+      populate: ["stream.infoHash"],
+    });
+
+    const blacklistedInfoHashes = new Set(
+      blacklistedStreams.map((entry) => entry.stream.infoHash),
     );
 
     const streams = await item.streams.loadItems();
 
     const hasAvailableStreams = streams.some(
-      (stream) => !blacklistedStreams.has(stream),
+      (stream) => !blacklistedInfoHashes.has(stream.infoHash),
     );
 
     if (hasAvailableStreams) {

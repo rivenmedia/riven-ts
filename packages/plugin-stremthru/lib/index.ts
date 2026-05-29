@@ -1,3 +1,5 @@
+import { DataSourceHTTPError, type RivenPlugin } from "@repo/util-plugin-sdk";
+
 import packageJson from "../package.json" with { type: "json" };
 import { StremThruTorzAPI } from "./datasource/stremthru-torz.datasource.ts";
 import { StremThruTorznabAPI } from "./datasource/stremthru-torznab.datasource.ts";
@@ -6,8 +8,6 @@ import { StremThruResolver } from "./schema/stremthru.resolver.ts";
 import { Store } from "./schemas/store.schema.ts";
 import { pluginConfig } from "./stremthru-plugin.config.ts";
 import { StremThruSettings } from "./stremthru-settings.schema.ts";
-
-import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
 export default {
   name: pluginConfig.name,
@@ -23,10 +23,25 @@ export default {
       const store = Store.parse(rawStore);
 
       try {
-        return await api.addTorrent(infoHash, store);
+        const { files, id } = await api.addTorrent(infoHash, store);
+
+        return {
+          success: true,
+          data: {
+            torrentId: id,
+            files,
+          },
+        };
       } catch (error) {
+        if (error instanceof DataSourceHTTPError) {
+          return {
+            success: false,
+            statusCode: error.response.status,
+          };
+        }
+
         throw new Error(
-          `Failed to get instant availability from ${store}: ${
+          `Failed to get instant availability for ${infoHash} from ${store}: ${
             error instanceof Error ? error.message : String(error)
           }`,
         );
@@ -52,11 +67,15 @@ export default {
     // eslint-disable-next-line @typescript-eslint/require-await
     "riven.media-item.download.provider-list-requested": async ({
       dataSources,
+      settings,
     }) => {
-      const api = dataSources.get(StremThruTorzAPI);
+      const { validStores } = dataSources.get(StremThruTorzAPI);
+      const { storePriority } = settings.get(StremThruSettings);
 
       return {
-        providers: [...api.validStores],
+        providers: [...storePriority].filter((store) =>
+          validStores.includes(store),
+        ),
       };
     },
     "riven.media-item.scrape.requested": async ({ dataSources, event }) => {
@@ -86,8 +105,22 @@ export default {
       const { data: store } = parsedStore;
 
       try {
-        return await api.generateLink(event.item.downloadUrl, store);
+        const link = await api.generateLink(event.item.downloadUrl, store);
+
+        return {
+          success: true,
+          data: {
+            link,
+          },
+        };
       } catch (error) {
+        if (error instanceof DataSourceHTTPError) {
+          return {
+            success: false,
+            statusCode: error.response.status,
+          };
+        }
+
         throw new Error(
           `Failed to generate link from ${store}: ${
             error instanceof Error ? error.message : String(error)
