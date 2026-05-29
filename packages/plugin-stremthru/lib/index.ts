@@ -67,11 +67,15 @@ export default {
     // eslint-disable-next-line @typescript-eslint/require-await
     "riven.media-item.download.provider-list-requested": async ({
       dataSources,
+      settings,
     }) => {
-      const api = dataSources.get(StremThruTorzAPI);
+      const { validStores } = dataSources.get(StremThruTorzAPI);
+      const { storePriority } = settings.get(StremThruSettings);
 
       return {
-        providers: [...api.validStores],
+        providers: [...storePriority].filter((store) =>
+          validStores.includes(store),
+        ),
       };
     },
     "riven.media-item.scrape.requested": async ({ dataSources, event }) => {
