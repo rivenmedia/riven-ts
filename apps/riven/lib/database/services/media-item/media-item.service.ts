@@ -4,6 +4,7 @@ import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
 
 import { services } from "../../database.ts";
 import { BaseService } from "../core/base-service.ts";
+import { resetMediaItem } from "./utilities/reset-media-item.ts";
 
 import type { FindOneOrFailOptions } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";
@@ -54,5 +55,10 @@ export class MediaItemService extends BaseService {
 
       return [];
     }
+  }
+
+  @CreateRequestContext()
+  async resetMediaItem(target: MediaItem) {
+    return resetMediaItem(this.em, target);
   }
 }
