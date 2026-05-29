@@ -69,12 +69,15 @@ export default {
       dataSources,
       settings,
     }) => {
-      const { validStores } = dataSources.get(StremThruTorzAPI);
+      const { validStores, rateLimitedStores } =
+        dataSources.get(StremThruTorzAPI);
       const { storePriority } = settings.get(StremThruSettings);
 
-      return {
-        providers: [...storePriority].filter((store) => validStores.has(store)),
-      };
+      const providers = new Set(storePriority)
+        .intersection(validStores)
+        .difference(rateLimitedStores);
+
+      return { providers: Array.from(providers) };
     },
     "riven.media-item.scrape.requested": async ({ dataSources, event }) => {
       const api = dataSources.get(StremThruTorznabAPI);

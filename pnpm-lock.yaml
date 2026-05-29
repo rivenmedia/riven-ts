@@ -57,6 +57,9 @@ catalogs:
     '@graphql-typed-document-node/core':
       specifier: ^3.2.0
       version: 3.2.0
+    '@isaacs/ttlcache':
+      specifier: ^2.1.5
+      version: 2.1.5
     '@keyv/redis':
       specifier: ^5.1.6
       version: 5.1.6
@@ -1417,6 +1420,9 @@ importers:
       '@apollo/datasource-rest':
         specifier: 'catalog:'
         version: 6.4.1(encoding@0.1.13)(graphql@16.14.0)
+      '@isaacs/ttlcache':
+        specifier: 'catalog:'
+        version: 2.1.5
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
@@ -3320,6 +3326,10 @@ packages:
   '@isaacs/fs-minipass@4.0.1':
     resolution: {integrity: sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==}
     engines: {node: '>=18.0.0'}
+
+  '@isaacs/ttlcache@2.1.5':
+    resolution: {integrity: sha512-VwGZqqjAWPICTmxUZnbpEfO60LhPWzquik+bmyXGY7pYRn6diEvCI5i6Ca+J6o2y4vS73HrpuMTo2dOvUevH8w==}
+    engines: {node: '>=12'}
 
   '@istanbuljs/load-nyc-config@1.1.0':
     resolution: {integrity: sha512-VjeHSlIzpv/NyD3N0YuHfXOPDIixcA1q2ZV98wsMqcYlPmv2n3Yb2lYP9XMElnaFVXg5A7YLTeLu6V84uQDjmQ==}
@@ -10827,6 +10837,8 @@ snapshots:
   '@isaacs/fs-minipass@4.0.1':
     dependencies:
       minipass: 7.1.3
+
+  '@isaacs/ttlcache@2.1.5': {}
 
   '@istanbuljs/load-nyc-config@1.1.0':
     dependencies:

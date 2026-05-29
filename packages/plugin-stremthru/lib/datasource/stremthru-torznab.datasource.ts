@@ -23,8 +23,14 @@ export class StremThruTorznabAPI extends BaseDataSource<StremThruSettings> {
     duration: 60 * 1000,
   };
 
-  override validate() {
-    return true;
+  override async validate(): Promise<boolean> {
+    try {
+      await this.get("v0/torznab/api");
+
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async scrape({

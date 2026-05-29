@@ -21,6 +21,7 @@ catalog:
   "@graphql-codegen/typescript": ^5.0.10
   "@graphql-codegen/typescript-operations": ^5.1.0
   "@graphql-typed-document-node/core": ^3.2.0
+  "@isaacs/ttlcache": ^2.1.5
   "@keyv/redis": ^5.1.6
   "@kubb/cli": 4.20.1
   "@kubb/core": 4.20.1

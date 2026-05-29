@@ -1,4 +1,7 @@
 import { BaseDataSource } from "@repo/util-plugin-sdk";
+import { Duration } from "@repo/util-plugin-sdk/helpers/dates";
+
+import { TTLCache } from "@isaacs/ttlcache";
 
 import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
 import { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
@@ -11,6 +14,7 @@ import { Store } from "../schemas/store.schema.ts";
 import type { StremThruSettings } from "../stremthru-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type {
+  DataSourceFetchResult,
   RequestOptions,
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
@@ -31,6 +35,12 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
 
   get validStores() {
     return new Set(this.#validStores);
+  }
+
+  #rateLimitedStores = new TTLCache<Store, true>();
+
+  get rateLimitedStores() {
+    return new Set(this.#rateLimitedStores.keys());
   }
 
   #buildCommonHeaders(store: Store) {
@@ -70,6 +80,28 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     }
 
     return `${baseKey}:${store}`;
+  }
+
+  /**
+   * As this datasource is designed to interact with multiple stores
+   * that share the same API but have different rate limits,
+   * we need to track rate limits on a per-store basis.
+   *
+   * When a rate limit is hit, we add the store to the `rateLimitedStores` set
+   * and prevent any requests to that store until the TTL expires.
+   */
+  protected override didEncounterRateLimit(
+    request: RequestOptions,
+    _response: DataSourceFetchResult<unknown>["response"],
+    waitMs: number,
+  ): void {
+    const store = Store.parse(request.headers?.[storeNameHeader]);
+
+    this.#rateLimitedStores.set(store, true, { ttl: waitMs });
+
+    this.logger.warn(
+      `[${this.serviceName}] Store ${store} hit rate limit. Added to rateLimitedStores set. Will be removed after ${Duration.fromMillis(waitMs).toHuman()}.`,
+    );
   }
 
   override async validate(): Promise<boolean> {
