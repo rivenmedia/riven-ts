@@ -73,9 +73,7 @@ export default {
       const { storePriority } = settings.get(StremThruSettings);
 
       return {
-        providers: [...storePriority].filter((store) =>
-          validStores.includes(store),
-        ),
+        providers: [...storePriority].filter((store) => validStores.has(store)),
       };
     },
     "riven.media-item.scrape.requested": async ({ dataSources, event }) => {

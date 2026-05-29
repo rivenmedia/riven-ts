@@ -1,4 +1,5 @@
 import {
+  type BaseDataSource,
   type BaseDataSourceConfig,
   DataSourceMap,
   type RivenPlugin,
@@ -14,7 +15,7 @@ import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context
 import type { Telemetry } from "bullmq";
 
 export const it = baseIt
-  .extend("server", async ({}, { onCleanup }) => {
+  .extend("server", { auto: true }, async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
     const server = setupServer();
@@ -47,7 +48,7 @@ export const it = baseIt
       'Plugin config must be provided before using the plugin test context. Use `it.override("plugin", <pluginConfig>)` to set the plugin config for your tests.',
     );
   })
-  .extend("settings", { scope: "file" }, ({ plugin }) =>
+  .extend("settings", ({ plugin }) =>
     createMockPluginSettings(plugin.settingsSchema, {}),
   )
   .extend("gqlServer", { scope: "file" }, async ({ plugin }, { onCleanup }) => {
@@ -109,9 +110,9 @@ export const it = baseIt
   })
   .extend(
     "dataSourceMap",
-    { scope: "file" },
-    ({ plugin, logger, settings, httpCache, redisClient }) => {
+    ({ plugin, logger, settings, httpCache, redisClient }, { onCleanup }) => {
       const dataSourceMap = new DataSourceMap();
+      const instances = new Set<BaseDataSource<Record<string, unknown>>>();
 
       if (plugin.dataSources) {
         const dataSourceConfig = {
@@ -126,12 +127,19 @@ export const it = baseIt
         } satisfies BaseDataSourceConfig<Record<string, unknown>>;
 
         for (const DataSourceClass of plugin.dataSources) {
-          dataSourceMap.set(
-            DataSourceClass,
-            new DataSourceClass(dataSourceConfig),
-          );
+          const dataSourceInstance = new DataSourceClass(dataSourceConfig);
+
+          dataSourceMap.set(DataSourceClass, dataSourceInstance);
+          instances.add(dataSourceInstance);
         }
       }
+
+      onCleanup(async () => {
+        for (const instance of instances) {
+          await instance.worker.close();
+          await instance.queue.close();
+        }
+      });
 
       return dataSourceMap;
     },
