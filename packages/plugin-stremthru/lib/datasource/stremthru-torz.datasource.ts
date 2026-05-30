@@ -104,14 +104,15 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     waitMs: number,
   ): void {
     const store = Store.parse(request.headers?.[storeNameHeader]);
+    const hasExistingRateLimitForStore = this.#rateLimitedStores.has(store);
 
-    if (!this.#rateLimitedStores.has(store)) {
-      this.#rateLimitedStores.set(store, true, { ttl: waitMs });
+    this.#rateLimitedStores.set(store, true, { ttl: waitMs });
 
+    if (!hasExistingRateLimitForStore) {
       const formattedWaitTime = Duration.fromMillis(waitMs).rescale().toHuman();
 
       this.logger.warn(
-        `[${this.serviceName}] Store ${store} is being rate limited. Requests may resume after ${formattedWaitTime}.`,
+        `[${this.serviceName}] Store ${store} is being rate limited. Requests will resume after ${formattedWaitTime}.`,
       );
     }
   }

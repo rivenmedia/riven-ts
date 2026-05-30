@@ -105,9 +105,14 @@ export const findValidTorrentProcessor =
                   )
                 : closestRateLimitReattempt;
 
-              if (!providers.length) {
+              if (!providers.length && availableDownloaders.length === 1) {
+                const formattedReattemptTime = rateLimitReattemptDatetime
+                  .diffNow(["hours", "minutes", "seconds"])
+                  .rescale()
+                  .toHuman();
+
                 logger.info(
-                  `All providers for ${pluginName} are currently rate limited for ${mediaItem.fullTitle}; delaying attempts until ${rateLimitReattemptDatetime.toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)}...`,
+                  `All plugins are currently rate limited for ${mediaItem.fullTitle}; delaying attempts for ${formattedReattemptTime}...`,
                 );
 
                 await job.moveToDelayed(

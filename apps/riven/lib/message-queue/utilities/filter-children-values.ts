@@ -50,9 +50,9 @@ export function filterChildrenValues(
   childrenValues: Record<string, unknown>,
   queueName: Flow["name"] | SandboxedJobDefinition["name"],
 ): Record<string, unknown> {
+  const pattern = new RegExp(`^bull:${queueNameFor(queueName)}:`);
+
   return Object.fromEntries(
-    Object.entries(childrenValues).filter(([key]) =>
-      key.includes(queueNameFor(queueName)),
-    ),
+    Object.entries(childrenValues).filter(([key]) => pattern.test(key)),
   );
 }
