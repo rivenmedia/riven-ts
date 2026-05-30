@@ -13,6 +13,7 @@ import { expect, vi } from "vitest";
 import { it } from "../../../../../../../__tests__/test-context.ts";
 import { MapItemsToFilesSandboxedJob } from "../../../../../../sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
 import { ValidateTorrentFilesSandboxedJob } from "../../../../../../sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.schema.ts";
+import { queueNameFor } from "../../../../../../utilities/queue-name-for.ts";
 import { findValidTorrentProcessor } from "./find-valid-torrent.processor.ts";
 import { FindValidTorrentFlow } from "./find-valid-torrent.schema.ts";
 
@@ -92,7 +93,7 @@ it("does not attempt previously failed info hashes", async ({
   });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "ranked-streams-result": [
+    [queueNameFor("download-item.rank-streams")]: [
       rankTorrent(
         "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
         stream1.infoHash,
@@ -213,7 +214,7 @@ it("returns the plugin and validated result on successful validation", async ({
   });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "ranked-streams-result": [
+    [queueNameFor("download-item.rank-streams")]: [
       rankTorrent(
         "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
         stream.infoHash,
@@ -291,7 +292,7 @@ it("updates job data with the failed info hash when an invalid torrent is return
   });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "ranked-streams-result": [
+    [queueNameFor("download-item.rank-streams")]: [
       rankTorrent(
         "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
         stream.infoHash,
@@ -355,7 +356,7 @@ it("returns null if no valid torrent is found after trying all plugins", async (
   });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "ranked-streams-result": [
+    [queueNameFor("download-item.rank-streams")]: [
       rankTorrent(
         "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
         stream.infoHash,
@@ -432,7 +433,7 @@ it("does not attempt to re-download blacklisted streams", async ({
   });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "ranked-streams-result": [
+    [queueNameFor("download-item.rank-streams")]: [
       rankTorrent(
         "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
         stream1.infoHash,

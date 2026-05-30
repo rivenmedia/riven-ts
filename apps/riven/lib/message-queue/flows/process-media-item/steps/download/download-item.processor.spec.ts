@@ -4,6 +4,7 @@ import { Settings } from "luxon";
 import { expect, vi } from "vitest";
 
 import { it } from "../../../../../__tests__/test-context.ts";
+import { queueNameFor } from "../../../../utilities/queue-name-for.ts";
 import { downloadItemProcessor } from "./download-item.processor.ts";
 
 it('sends a "riven.media-item.download.success" event with the updated item and duration from request to download if the download result is valid', async ({
@@ -21,7 +22,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   expect.assert(streamInfoHash);
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "find-valid-torrent": {
+    [queueNameFor("download-item.find-valid-torrent")]: {
       result: {
         torrentId: "1234",
         infoHash: streamInfoHash,
@@ -82,7 +83,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
   const job = await createMockJob({ id: scrapedShow.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "find-valid-torrent": {
+    [queueNameFor("download-item.find-valid-torrent")]: {
       result: {
         torrentId: "1234",
         infoHash: streamInfoHash,
