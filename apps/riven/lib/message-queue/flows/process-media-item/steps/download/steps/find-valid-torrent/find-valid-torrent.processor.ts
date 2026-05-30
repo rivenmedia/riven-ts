@@ -1,5 +1,7 @@
-import { UnrecoverableError } from "bullmq";
+import { DelayedError, UnrecoverableError } from "bullmq";
 import chalk from "chalk";
+import { isEmptyObject } from "es-toolkit";
+import { DateTime } from "luxon";
 import assert from "node:assert";
 import z, { ZodError } from "zod";
 
@@ -8,6 +10,7 @@ import { logger } from "../../../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../../../utilities/settings.ts";
 import { InvalidTorrentError } from "../../../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
 import { createJobParentConfig } from "../../../../../../utilities/create-job-parent-config.ts";
+import { filterChildrenValues } from "../../../../../../utilities/filter-children-values.ts";
 import { findValidTorrentProcessorSchema } from "./find-valid-torrent.schema.ts";
 import { getCachedTorrentFiles } from "./utilities/get-cached-torrent-files.ts";
 import { getPluginDownloadResult } from "./utilities/get-plugin-download-result.ts";
@@ -16,10 +19,17 @@ import { getValidTorrentFiles } from "./utilities/get-valid-torrent-files.ts";
 
 export const findValidTorrentProcessor =
   findValidTorrentProcessorSchema.implementAsync(async function (
-    { job, scope },
+    { job, scope, token },
     { services: { mediaItemService, streamService }, plugins },
   ) {
-    const [rankedStreams] = Object.values(await job.getChildrenValues());
+    assert(token);
+
+    const childrenValues = filterChildrenValues(
+      await job.getChildrenValues(),
+      "download-item.rank-streams",
+    );
+
+    const [rankedStreams] = Object.values(childrenValues);
 
     if (!rankedStreams?.length) {
       throw new UnrecoverableError(
@@ -34,9 +44,9 @@ export const findValidTorrentProcessor =
     const mediaItem = await mediaItemService.getMediaItemById(mediaItemId);
 
     const infoHashes = rankedStreams.map((stream) => stream.hash);
-    const uncheckedInfoHashes = new Set(infoHashes)
-      .difference(new Set(failedInfoHashes))
-      .values();
+    const uncheckedInfoHashes = new Set(infoHashes).difference(
+      new Set(failedInfoHashes),
+    );
 
     const parent = createJobParentConfig(job);
 
@@ -45,8 +55,16 @@ export const findValidTorrentProcessor =
       plugins,
     );
 
+    /**
+     * When a plugin indicates that a provider is rate limited,
+     * we use this to delay the job until the rate limit is expected to be lifted, to avoid unnecessary attempts that are likely to fail.
+     */
+    let rateLimitReattemptDatetime: DateTime | undefined;
+
     for (const infoHash of uncheckedInfoHashes) {
       scope.setTag("riven.info-hash", infoHash);
+
+      let didEncounterRateLimitForInfoHash = false;
 
       for (const plugin of availableDownloaders) {
         const pluginName = plugin.name.description;
@@ -62,21 +80,62 @@ export const findValidTorrentProcessor =
           !!plugin.hooks["riven.media-item.download.provider-list-requested"];
 
         try {
-          const providers = hasProviderListHook
+          const { providers, rateLimitedProviders } = hasProviderListHook
             ? await getPluginProviderList(pluginName)
-            : [];
+            : {
+                providers: [null],
+                rateLimitedProviders: {},
+              };
 
-          if (hasProviderListHook && !providers.length) {
-            logger.debug(
-              `Skipping ${pluginName} for ${infoHash}; no providers are configured.`,
-            );
+          if (hasProviderListHook) {
+            const hasRateLimitedProviders =
+              !isEmptyObject(rateLimitedProviders);
 
-            continue;
+            didEncounterRateLimitForInfoHash ||= hasRateLimitedProviders;
+
+            if (hasRateLimitedProviders) {
+              const closestRateLimitReattempt = DateTime.utc().plus({
+                milliseconds: Math.min(...Object.values(rateLimitedProviders)),
+              });
+
+              rateLimitReattemptDatetime = rateLimitReattemptDatetime
+                ? DateTime.min(
+                    rateLimitReattemptDatetime,
+                    closestRateLimitReattempt,
+                  )
+                : closestRateLimitReattempt;
+
+              if (!providers.length && availableDownloaders.length === 1) {
+                const formattedReattemptTime = rateLimitReattemptDatetime
+                  .diffNow(["hours", "minutes", "seconds"])
+                  .rescale()
+                  .toHuman();
+
+                logger.info(
+                  `All plugins are currently rate limited for ${mediaItem.fullTitle}; delaying attempts for ${formattedReattemptTime}...`,
+                );
+
+                await job.moveToDelayed(
+                  rateLimitReattemptDatetime.toMillis(),
+                  token,
+                );
+
+                throw new DelayedError();
+              }
+            }
+
+            if (!providers.length) {
+              logger.debug(
+                hasRateLimitedProviders
+                  ? `Skipping ${pluginName} for ${infoHash}; all providers are currently rate limited.`
+                  : `Skipping ${pluginName} for ${infoHash}; no providers are configured.`,
+              );
+
+              continue;
+            }
           }
 
-          const providerList = hasProviderListHook ? providers : [null];
-
-          for (const provider of providerList) {
+          for (const provider of providers) {
             const isBlacklisted = await streamService.isStreamBlacklisted({
               mediaItem,
               stream: infoHash,
@@ -225,16 +284,37 @@ export const findValidTorrentProcessor =
         }
       }
 
-      logger.debug(
-        `Info hash ${chalk.bold(infoHash)} failed validation for all plugins for ${mediaItem.type} ${chalk.bold(mediaItem.fullTitle)}`,
+      if (!didEncounterRateLimitForInfoHash) {
+        logger.debug(
+          `Info hash ${chalk.bold(infoHash)} failed validation for all plugins for ${mediaItem.type} ${chalk.bold(mediaItem.fullTitle)}`,
+        );
+
+        await job.log(`${infoHash} failed validation for all plugins`);
+
+        await job.updateData({
+          ...job.data,
+          failedInfoHashes: [...job.data.failedInfoHashes, infoHash],
+        });
+      }
+    }
+
+    if (job.data.failedInfoHashes.length === infoHashes.length) {
+      logger.info(
+        `All info hashes failed validation for ${mediaItem.type} ${chalk.bold(mediaItem.fullTitle)}; all plugins have been exhausted.`,
+      );
+    } else if (rateLimitReattemptDatetime) {
+      const formattedReattemptTime = rateLimitReattemptDatetime
+        .diffNow(["hours", "minutes", "seconds"])
+        .rescale()
+        .toHuman();
+
+      logger.info(
+        `Some hashes for ${chalk.bold(mediaItem.fullTitle)} were unable to download due to rate limits. Retrying in ${formattedReattemptTime}.`,
       );
 
-      await job.log(`${infoHash} failed validation for all plugins`);
+      await job.moveToDelayed(rateLimitReattemptDatetime.toMillis(), token);
 
-      await job.updateData({
-        ...job.data,
-        failedInfoHashes: [...job.data.failedInfoHashes, infoHash],
-      });
+      throw new DelayedError();
     }
 
     return null;

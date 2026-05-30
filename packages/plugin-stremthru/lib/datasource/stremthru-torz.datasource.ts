@@ -1,4 +1,7 @@
 import { BaseDataSource } from "@repo/util-plugin-sdk";
+import { Duration } from "@repo/util-plugin-sdk/helpers/dates";
+
+import { TTLCache } from "@isaacs/ttlcache";
 
 import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
 import { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
@@ -11,6 +14,7 @@ import { Store } from "../schemas/store.schema.ts";
 import type { StremThruSettings } from "../stremthru-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type {
+  DataSourceFetchResult,
   RequestOptions,
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
@@ -29,8 +33,22 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
 
   #validStores: Store[] = [];
 
-  get validStores(): readonly Store[] {
-    return this.#validStores;
+  get validStores() {
+    return new Set(this.#validStores);
+  }
+
+  #rateLimitedStores = new TTLCache<Store, true>();
+
+  get rateLimitedStores() {
+    return new Map(
+      this.#rateLimitedStores
+        .keys()
+        .map(
+          (store) =>
+            [store, this.#rateLimitedStores.getRemainingTTL(store)] as const,
+        )
+        .toArray(),
+    );
   }
 
   #buildCommonHeaders(store: Store) {
@@ -72,14 +90,41 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     return `${baseKey}:${store}`;
   }
 
+  /**
+   * As this datasource is designed to interact with multiple stores
+   * that share the same API but have different rate limits,
+   * we need to track rate limits on a per-store basis.
+   *
+   * When a rate limit is hit, we add the store to the `rateLimitedStores` set
+   * and prevent any requests to that store until the TTL expires.
+   */
+  protected override didEncounterRateLimit(
+    request: RequestOptions,
+    _response: DataSourceFetchResult<unknown>["response"],
+    waitMs: number,
+  ): void {
+    const store = Store.parse(request.headers?.[storeNameHeader]);
+    const hasExistingRateLimitForStore = this.#rateLimitedStores.has(store);
+
+    this.#rateLimitedStores.set(store, true, { ttl: waitMs });
+
+    if (!hasExistingRateLimitForStore) {
+      const formattedWaitTime = Duration.fromMillis(waitMs).rescale().toHuman();
+
+      this.logger.warn(
+        `[${this.serviceName}] Store ${store} is being rate limited. Requests will resume after ${formattedWaitTime}.`,
+      );
+    }
+  }
+
   override async validate(): Promise<boolean> {
+    this.#validStores = [];
+
     const configuredStores = Store.options.filter(
       (storeName) => this.settings[`${storeName}ApiKey`],
     );
 
     if (configuredStores.length === 0) {
-      this.#validStores = [];
-
       this.logger.warn("No store API keys configured for StremThru Torz.");
 
       return false;

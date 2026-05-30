@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
+    "@isaacs/ttlcache": "catalog:",
     "@repo/util-plugin-sdk": "workspace:^",
     "type-graphql": "catalog:",
     "zod": "catalog:"

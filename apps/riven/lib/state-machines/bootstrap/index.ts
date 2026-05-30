@@ -12,6 +12,7 @@ import { initialiseDatabaseConnection } from "./actors/initialise-database-conne
 import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
+import type { ApolloServerContext } from "../../graphql/context.ts";
 import type {
   InvalidPluginMap,
   PluginQueueMap,
@@ -21,7 +22,6 @@ import type {
   ValidPluginMap,
 } from "../../types/plugins.ts";
 import type { ApolloServer } from "@apollo/server";
-import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";

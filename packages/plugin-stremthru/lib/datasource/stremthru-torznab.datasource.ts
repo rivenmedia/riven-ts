@@ -25,7 +25,6 @@ export class StremThruTorznabAPI extends BaseDataSource<StremThruSettings> {
 
   override async validate(): Promise<boolean> {
     try {
-      // Implement your own validation logic here
       await this.get("v0/torznab/api");
 
       return true;

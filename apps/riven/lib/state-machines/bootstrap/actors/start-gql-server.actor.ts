@@ -1,7 +1,4 @@
-import {
-  type ApolloServerContext,
-  buildSchema,
-} from "@repo/core-util-graphql-schema";
+import { buildSchema } from "@repo/core-util-graphql-schema";
 
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
@@ -16,6 +13,7 @@ import { redisCache } from "../../../utilities/redis-cache.ts";
 import { settings } from "../../../utilities/settings.ts";
 import { mainRunnerMachine } from "../../main-runner/index.js";
 
+import type { ApolloServerContext } from "../../../graphql/context.ts";
 import type { ValidPluginMap } from "../../../types/plugins.ts";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";

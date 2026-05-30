@@ -18,7 +18,7 @@ import {
   UnrecoverableError,
   Worker,
 } from "bullmq";
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
 import { URL } from "node:url";
 import z from "zod";
 
@@ -525,35 +525,30 @@ export abstract class BaseDataSource<
     };
   }
 
-  override async throwIfResponseIsError(options: {
+  override async throwIfResponseIsError({
+    request,
+    response,
+  }: {
     url: URL;
     request: RequestOptions;
     response: DataSourceFetchResult<unknown>["response"];
     parsedBody: unknown;
   }) {
-    if (options.response.ok) {
+    if (response.ok) {
       return;
     }
 
-    const { response, url } = options;
-
     if (response.status === 429) {
+      const defaultWaitMs = 10000;
       const waitMs = this.#parseRetryAfterHeader(
         response.headers.get("Retry-After") ?? "",
       );
-      const defaultWaitMs = 10000;
 
-      await this.queue.rateLimit(
+      await this.didEncounterRateLimit(
+        request,
+        response,
         waitMs === null || waitMs <= 0 ? defaultWaitMs : waitMs,
       );
-
-      this.logger.warn(
-        waitMs
-          ? `[${this.serviceName}] Received 429 Too Many Requests response for ${url.toString()}; retrying after ${Math.round(waitMs / 1000).toFixed(0)} seconds`
-          : `[${this.serviceName}] Received 429 response without valid Retry-After header for ${url.toString()}. Using default wait time of ${(defaultWaitMs / 1000).toFixed(0)} seconds.`,
-      );
-
-      throw Worker.RateLimitError();
     }
 
     throw new DataSourceHTTPError(response);
@@ -587,6 +582,28 @@ export abstract class BaseDataSource<
     this.logger.error(`[${this.serviceName}] API Error for ${url.toString()}`, {
       err: error,
     });
+  }
+
+  protected didEncounterRateLimit(
+    _request: RequestOptions,
+    response: DataSourceFetchResult<unknown>["response"],
+    waitMs: number,
+  ): Promisable<void>;
+
+  protected async didEncounterRateLimit(
+    _request: RequestOptions,
+    response: DataSourceFetchResult<unknown>["response"],
+    waitMs: number,
+  ): Promise<void> {
+    await this.queue.rateLimit(waitMs);
+
+    const formattedWaitTime = Duration.fromMillis(waitMs).rescale().toHuman();
+
+    this.logger.warn(
+      `[${this.serviceName}] Received 429 Too Many Requests response for ${response.url}; retrying after ${formattedWaitTime}`,
+    );
+
+    throw Worker.RateLimitError();
   }
 
   abstract validate(): Promisable<boolean>;

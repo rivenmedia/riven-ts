@@ -5,7 +5,7 @@ import { URL } from "node:url";
 import { it as baseIt } from "vitest";
 
 export const it = baseIt
-  .extend("server", async ({}, { onCleanup }) => {
+  .extend("server", { auto: true }, async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
     const server = setupServer();
