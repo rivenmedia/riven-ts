@@ -77,7 +77,7 @@ export const findValidTorrentProcessor =
           const { providers, rateLimitedProviders } = hasProviderListHook
             ? await getPluginProviderList(pluginName)
             : {
-                providers: [],
+                providers: [null],
                 rateLimitedProviders: {},
               };
 

@@ -1,9 +1,14 @@
+import { DataSourceMap } from "@repo/util-plugin-sdk";
+
+import { faker } from "@faker-js/faker";
 import { graphql, passthrough } from "msw";
 import assert from "node:assert";
 import { test as testBase, vi } from "vitest";
 
 import { type ApolloServerContext, CoreKey } from "../graphql/context.ts";
 
+import type { FlowProcessorContext } from "../message-queue/utilities/create-flow-schema.ts";
+import type { ValidPlugin } from "../types/plugins.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
 import type { ZodObject } from "zod";
@@ -196,11 +201,11 @@ export const it = testBase
       return episode;
     },
   )
-  .extend("mockQueue", async ({}, { onCleanup }) => {
+  .extend("mockQueue", async ({ task }, { onCleanup }) => {
     const { createQueue } =
       await import("../message-queue/utilities/create-queue.ts");
 
-    const queue = createQueue("mock-queue");
+    const queue = createQueue(`mock-queue-${task.id}`);
 
     onCleanup(() => queue.close());
 
@@ -210,9 +215,35 @@ export const it = testBase
     const { randomUUID } = await import("node:crypto");
     const { Job } = await import("bullmq");
 
-    return <T>(data: T, opts?: JobsOptions) =>
-      Job.create(mockQueue, randomUUID(), data, opts);
+    return async <T>(data: T, opts?: JobsOptions) => {
+      const job = await Job.create(mockQueue, randomUUID(), data, opts);
+
+      vi.spyOn(job, "log").mockResolvedValue(1);
+
+      return job;
+    };
   })
+  .extend(
+    "mockFlowProcessorContext",
+    async ({ services }): Promise<FlowProcessorContext> => {
+      const { default: testPlugin } = await import("@repo/plugin-test");
+
+      return {
+        services,
+        sendEvent: vi.fn(),
+        plugins: new Map<symbol, ValidPlugin>([
+          [
+            testPlugin.name,
+            {
+              config: testPlugin,
+              dataSources: new DataSourceMap(),
+              status: "valid",
+            },
+          ],
+        ]),
+      };
+    },
+  )
   .extend("mockSentryScope", async () => {
     const Sentry = await import("@sentry/node");
 
@@ -304,7 +335,7 @@ export const it = testBase
 
     onCleanup(async () => {
       for (const worker of workers) {
-        await worker.close(true);
+        await worker.close();
       }
 
       for (const queue of queues) {
