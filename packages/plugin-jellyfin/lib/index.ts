@@ -48,6 +48,7 @@ export default {
   settingsSchema: JellyfinSettings,
   validator({ dataSources }) {
     const jellyfinAPI = dataSources.get(JellyfinAPI);
+
     return jellyfinAPI.validate();
   },
 } satisfies RivenPlugin as RivenPlugin;

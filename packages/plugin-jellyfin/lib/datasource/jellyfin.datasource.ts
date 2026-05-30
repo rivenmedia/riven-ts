@@ -1,4 +1,4 @@
-import { BaseDataSource, type BasePluginContext } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import path from "node:path";
 
@@ -6,7 +6,7 @@ import { JellyfinSettings } from "../jellyfin-settings.schema.ts";
 
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 
-export class JellyfinAPIError extends Error {}
+class JellyfinAPIError extends Error {}
 
 export class JellyfinAPI extends BaseDataSource<JellyfinSettings> {
   override baseURL = this.settings.jellyfinServerUrl;
@@ -22,7 +22,7 @@ export class JellyfinAPI extends BaseDataSource<JellyfinSettings> {
 
   async updateSections(paths: string[]) {
     try {
-      await this.post(`Library/Media/Updated`, {
+      await this.post("Library/Media/Updated", {
         body: JSON.stringify({
           Updates: paths.map((subPath) => ({
             Path: path.join(this.settings.jellyfinLibraryPath, subPath),
@@ -46,9 +46,8 @@ export class JellyfinAPI extends BaseDataSource<JellyfinSettings> {
       this.logger.error(
         `Failed to connect to Jellyfin server at ${this.settings.jellyfinServerUrl}. Please check your settings. Error: ${(error as Error).message}`,
       );
+
       return false;
     }
   }
 }
-
-export type JellyfinContextSlice = BasePluginContext;
