@@ -6,7 +6,6 @@ import { randomUUID } from "node:crypto";
 import { expect, vi } from "vitest";
 
 import { it } from "../../../../../__tests__/test-context.ts";
-import { queueNameFor } from "../../../../utilities/queue-name-for.ts";
 import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 
 it("throws an unrecoverable error if the item cannot be scraped", async ({
@@ -40,6 +39,7 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
   createMockJob,
   mockSentryScope,
   services,
+  createMockJobChildKey,
 }) => {
   const indexedMovie = await seedIndexedMovie();
 
@@ -48,7 +48,7 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
   const streamInfoHash = faker.git.commitSha();
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    [queueNameFor("scrape-item.parse-scrape-results")]: {
+    [createMockJobChildKey("scrape-item.parse-scrape-results")]: {
       id: indexedMovie.movie.id,
       results: {
         [streamInfoHash]: parse("Test Movie 2024 1080p WEB-DL"),
