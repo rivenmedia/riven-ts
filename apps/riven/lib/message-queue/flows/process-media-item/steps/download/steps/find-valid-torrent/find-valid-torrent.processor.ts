@@ -10,6 +10,7 @@ import { logger } from "../../../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../../../utilities/settings.ts";
 import { InvalidTorrentError } from "../../../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
 import { createJobParentConfig } from "../../../../../../utilities/create-job-parent-config.ts";
+import { filterChildrenValues } from "../../../../../../utilities/filter-children-values.ts";
 import { findValidTorrentProcessorSchema } from "./find-valid-torrent.schema.ts";
 import { getCachedTorrentFiles } from "./utilities/get-cached-torrent-files.ts";
 import { getPluginDownloadResult } from "./utilities/get-plugin-download-result.ts";
@@ -23,7 +24,12 @@ export const findValidTorrentProcessor =
   ) {
     assert(token);
 
-    const [rankedStreams] = Object.values(await job.getChildrenValues());
+    const childrenValues = filterChildrenValues(
+      await job.getChildrenValues(),
+      "download-item.rank-streams",
+    );
+
+    const [rankedStreams] = Object.values(childrenValues);
 
     if (!rankedStreams?.length) {
       throw new UnrecoverableError(
@@ -98,6 +104,19 @@ export const findValidTorrentProcessor =
                     closestRateLimitReattempt,
                   )
                 : closestRateLimitReattempt;
+
+              if (!providers.length) {
+                logger.info(
+                  `All providers for ${pluginName} are currently rate limited for ${mediaItem.fullTitle}; delaying attempts until ${rateLimitReattemptDatetime.toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)}...`,
+                );
+
+                await job.moveToDelayed(
+                  rateLimitReattemptDatetime.toMillis(),
+                  token,
+                );
+
+                throw new DelayedError();
+              }
             }
 
             if (!providers.length) {

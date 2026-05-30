@@ -40,7 +40,15 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
   #rateLimitedStores = new TTLCache<Store, true>();
 
   get rateLimitedStores() {
-    return this.#rateLimitedStores.expirationMap;
+    return new Map(
+      this.#rateLimitedStores
+        .keys()
+        .map(
+          (store) =>
+            [store, this.#rateLimitedStores.getRemainingTTL(store)] as const,
+        )
+        .toArray(),
+    );
   }
 
   #buildCommonHeaders(store: Store) {
@@ -97,11 +105,13 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
   ): void {
     const store = Store.parse(request.headers?.[storeNameHeader]);
 
-    this.#rateLimitedStores.set(store, true, { ttl: waitMs });
+    if (!this.#rateLimitedStores.has(store)) {
+      this.#rateLimitedStores.set(store, true, { ttl: waitMs });
 
-    this.logger.warn(
-      `[${this.serviceName}] Store ${store} hit rate limit. Added to rateLimitedStores set. Will be removed after ${Duration.fromMillis(waitMs).toHuman()}.`,
-    );
+      this.logger.warn(
+        `[${this.serviceName}] Store ${store} hit rate limit. Added to rateLimitedStores set. Will be removed after ${Duration.fromMillis(waitMs).toHuman()}.`,
+      );
+    }
   }
 
   override async validate(): Promise<boolean> {
