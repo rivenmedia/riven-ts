@@ -28,5 +28,5 @@ export async function getPluginProviderList(pluginName: string) {
     pluginProviderListNode.job,
   );
 
-  return pluginProviderListResult.providers;
+  return pluginProviderListResult;
 }

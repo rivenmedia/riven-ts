@@ -1,5 +1,5 @@
 {
-  "name": "@repo/core-util-graphql-schema",
+  "name": "@repo/plugin-jellyfin",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,25 +15,29 @@
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
+    "codegen:config-docs": "zod2md",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@repo/feature-settings": "workspace:^",
-    "graphql": "catalog:",
-    "graphql-scalars": "catalog:",
-    "type-graphql": "catalog:"
+    "@apollo/datasource-rest": "catalog:",
+    "@repo/util-plugin-sdk": "workspace:^",
+    "type-graphql": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
+    "@repo/util-plugin-testing": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
+    "msw": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "zod2md": "catalog:"
   }
 }

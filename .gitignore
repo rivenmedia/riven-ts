@@ -19,6 +19,7 @@ docker-data
 *.graphql
 .git
 knip-report.json
+.direnv
 
 # Local-only Compose overrides (auto-loaded by docker compose)
 docker-compose.override.yaml

@@ -6,7 +6,7 @@ import {
 } from "./validate-torrent-files.schema.ts";
 
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
-import type { ParentOptions, PluginJobNode } from "bullmq";
+import type { ParentOptions, TypedJobNode } from "bullmq";
 import type { UUID } from "node:crypto";
 
 export interface EnqueueValidateTorrentFilesInput {
@@ -24,7 +24,7 @@ export function enqueueValidateTorrentFiles({
   mediaItemId,
   isCacheCheck,
 }: EnqueueValidateTorrentFilesInput): Promise<
-  PluginJobNode<
+  TypedJobNode<
     ValidateTorrentFilesSandboxedJob["input"],
     ValidateTorrentFilesSandboxedJob["output"]
   >

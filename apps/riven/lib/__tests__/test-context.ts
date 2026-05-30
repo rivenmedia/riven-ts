@@ -1,8 +1,17 @@
+import { DataSourceMap } from "@repo/util-plugin-sdk";
+
+import { graphql, passthrough } from "msw";
 import assert from "node:assert";
-import { test as testBase, vi } from "vitest";
+import { randomUUID } from "node:crypto";
+import { type Mock, test as testBase, vi } from "vitest";
 
 import { type ApolloServerContext, CoreKey } from "../graphql/context.ts";
+import { queueNameFor } from "../message-queue/utilities/queue-name-for.ts";
 
+import type { Services } from "../database/database.ts";
+import type { Flow } from "../message-queue/flows/index.ts";
+import type { SandboxedJobDefinition } from "../message-queue/sandboxed-jobs/index.ts";
+import type { ValidPlugin, ValidPluginMap } from "../types/plugins.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
 import type { ZodObject } from "zod";
@@ -11,10 +20,15 @@ import type { ZodObject } from "zod";
 type AnyFunction = (...args: any[]) => any;
 
 export const it = testBase
-  .extend("server", async ({}, { onCleanup }) => {
+  .extend("server", { auto: true }, async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
-    const server = setupServer();
+    const server = setupServer(
+      graphql.query(
+        ({ request: { url } }) => url.includes("localhost"),
+        passthrough,
+      ),
+    );
 
     if (/^(\*|msw)/.test(process.env["DEBUG"] ?? "")) {
       server.events.on("response:mocked", ({ request, response }) => {
@@ -190,11 +204,11 @@ export const it = testBase
       return episode;
     },
   )
-  .extend("mockQueue", async ({}, { onCleanup }) => {
+  .extend("mockQueue", async ({ task }, { onCleanup }) => {
     const { createQueue } =
       await import("../message-queue/utilities/create-queue.ts");
 
-    const queue = createQueue("mock-queue");
+    const queue = createQueue(`mock-queue-${task.id}`);
 
     onCleanup(() => queue.close());
 
@@ -204,9 +218,41 @@ export const it = testBase
     const { randomUUID } = await import("node:crypto");
     const { Job } = await import("bullmq");
 
-    return <T>(data: T, opts?: JobsOptions) =>
-      Job.create(mockQueue, randomUUID(), data, opts);
+    return async <T>(data: T, opts?: JobsOptions) => {
+      const job = await Job.create(mockQueue, randomUUID(), data, opts);
+
+      vi.spyOn(job, "log").mockResolvedValue(1);
+
+      return job;
+    };
   })
+  .extend(
+    "mockFlowProcessorContext",
+    async ({
+      services,
+    }): Promise<{
+      services: Services;
+      sendEvent: Mock;
+      plugins: ValidPluginMap;
+    }> => {
+      const { default: testPlugin } = await import("@repo/plugin-test");
+
+      return {
+        services,
+        sendEvent: vi.fn(),
+        plugins: new Map<symbol, ValidPlugin>([
+          [
+            testPlugin.name,
+            {
+              config: testPlugin,
+              dataSources: new DataSourceMap(),
+              status: "valid",
+            },
+          ],
+        ]),
+      };
+    },
+  )
   .extend("mockSentryScope", async () => {
     const Sentry = await import("@sentry/node");
 
@@ -298,7 +344,7 @@ export const it = testBase
 
     onCleanup(async () => {
       for (const worker of workers) {
-        await worker.close(true);
+        await worker.close();
       }
 
       for (const queue of queues) {
@@ -322,7 +368,16 @@ export const it = testBase
 
       return { queue, worker };
     };
-  });
+  })
+  .extend(
+    "createMockJobChildKey",
+    () =>
+      (
+        eventName: Flow["name"] | SandboxedJobDefinition["name"],
+        pluginName?: string,
+      ) =>
+        `bull:${queueNameFor(eventName, pluginName)}:${randomUUID()}` as const,
+  );
 
 it.afterEach(async ({ mockSentryScope, apolloClient }) => {
   mockSentryScope.clear();

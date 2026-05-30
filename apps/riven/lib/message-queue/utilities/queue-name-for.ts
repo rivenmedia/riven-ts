@@ -1,8 +1,13 @@
 import { Flow } from "../flows/index.ts";
 
+import type { SandboxedJobDefinition } from "../sandboxed-jobs/index.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 export function queueNameFor<T extends Flow["name"]>(eventName: T): T;
+
+export function queueNameFor<T extends SandboxedJobDefinition["name"]>(
+  eventName: T,
+): T;
 
 export function queueNameFor<T extends RivenEvent["type"], P extends string>(
   eventName: T,
@@ -10,7 +15,12 @@ export function queueNameFor<T extends RivenEvent["type"], P extends string>(
 ): `${T}.plugin[${P}]`;
 
 export function queueNameFor(
-  eventName: RivenEvent["type"] | Flow["name"],
+  eventName: RivenEvent["type"] | Flow["name"] | SandboxedJobDefinition["name"],
+  pluginName?: string,
+): string;
+
+export function queueNameFor(
+  eventName: RivenEvent["type"] | Flow["name"] | SandboxedJobDefinition["name"],
   pluginName?: string,
 ): string {
   if (pluginName === undefined) {
