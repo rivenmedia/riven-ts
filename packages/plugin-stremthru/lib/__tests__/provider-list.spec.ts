@@ -54,7 +54,7 @@ it("returns providers in the order specified by settings", async ({
 
   expect(response).toEqual({
     providers: ["debridlink", "alldebrid", "realdebrid"],
-    rateLimitedProviders: [],
+    rateLimitedProviders: {},
   });
 });
 
@@ -109,7 +109,7 @@ it("does not return invalid providers", async ({
 
   expect(response).toEqual({
     providers: ["debridlink", "realdebrid"],
-    rateLimitedProviders: [],
+    rateLimitedProviders: {},
   });
 });
 
@@ -162,7 +162,9 @@ it("returns rate-limited providers in the rateLimitedProviders list", async ({
 
   expect(response).toEqual({
     providers: ["debridlink", "alldebrid"],
-    rateLimitedProviders: ["realdebrid"],
+    rateLimitedProviders: {
+      realdebrid: expect.any(Number),
+    },
   });
 });
 
@@ -217,7 +219,9 @@ it("moves rate-limited providers back to the providers list after the rate limit
 
   expect(response).toEqual({
     providers: ["debridlink", "alldebrid"],
-    rateLimitedProviders: ["realdebrid"],
+    rateLimitedProviders: {
+      realdebrid: expect.any(Number),
+    },
   });
 
   await vi.waitFor(
@@ -231,7 +235,7 @@ it("moves rate-limited providers back to the providers list after the rate limit
 
       expect(response).toEqual({
         providers: ["debridlink", "alldebrid", "realdebrid"],
-        rateLimitedProviders: [],
+        rateLimitedProviders: {},
       });
     },
     { timeout: 2000 },
