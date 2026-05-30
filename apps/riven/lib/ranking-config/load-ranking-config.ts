@@ -6,6 +6,8 @@ import {
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
+import { logger } from "../utilities/logger/logger.ts";
+
 import type {
   RankingModel,
   Settings,
@@ -209,7 +211,9 @@ const DEFAULT_CONFIG: RankingConfigFile = {
 };
 
 function getInnerObjectShape(schema: unknown): Record<string, unknown> | null {
-  if (typeof schema !== "object" || schema === null) return null;
+  if (typeof schema !== "object" || schema === null) {
+    return null;
+  }
 
   if ("shape" in schema && typeof schema.shape === "object") {
     return (schema as { shape: Record<string, unknown> }).shape;
@@ -271,10 +275,7 @@ const TOP_LEVEL_SHAPE: Record<string, unknown> = {
   rankingModel: RankingModelSchema,
 };
 
-export function loadRankingConfig(
-  configPath: string,
-  warn: (message: string) => void = console.warn,
-): RankingConfig {
+export function loadRankingConfig(configPath: string): RankingConfig {
   const resolvedPath = path.resolve(configPath);
 
   mkdirSync(path.dirname(resolvedPath), { recursive: true });
@@ -323,7 +324,7 @@ export function loadRankingConfig(
   }
 
   if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-    warn(
+    logger.warn(
       `Invalid ranking config root value: expected an object with \`settings\` and/or \`rankingModel\` - using defaults`,
     );
     return {
@@ -337,7 +338,7 @@ export function loadRankingConfig(
     parsed,
     "rankingConfig",
   )) {
-    warn(`Unknown key in ranking config: "${unknownKey}" - ignoring`);
+    logger.warn(`Unknown key in ranking config: "${unknownKey}" - ignoring`);
   }
 
   const rawFile = parsed as RankingConfigFile;
@@ -347,7 +348,7 @@ export function loadRankingConfig(
 
   if (!settingsResult.success) {
     for (const error of settingsResult.error.issues) {
-      warn(
+      logger.warn(
         `Invalid value in ranking config settings${error.path.length > 0 ? `.${error.path.join(".")}` : ""}: ${error.message} - using defaults`,
       );
     }
@@ -360,11 +361,12 @@ export function loadRankingConfig(
   const rankingModelResult = RankingModelSchema.safeParse(
     rawFile.rankingModel ?? {},
   );
+
   let rankingModel: RankingModel;
 
   if (!rankingModelResult.success) {
     for (const error of rankingModelResult.error.issues) {
-      warn(
+      logger.warn(
         `Invalid value in ranking config rankingModel${error.path.length > 0 ? `.${error.path.join(".")}` : ""}: ${error.message} - using defaults`,
       );
     }
