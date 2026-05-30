@@ -1125,6 +1125,9 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.4(jiti@2.7.0)
+      msw:
+        specifier: 'catalog:'
+        version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
