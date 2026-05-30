@@ -19,8 +19,22 @@ import { FindValidTorrentFlow } from "./find-valid-torrent.schema.ts";
 
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 
-it.beforeEach(({ createFlowWorker }) => {
+it.beforeEach(async ({ createFlowWorker, mockFlowProcessorContext }) => {
   createFlowWorker(FindValidTorrentFlow, findValidTorrentProcessor);
+
+  const { default: testPlugin } = await import("@repo/plugin-test");
+
+  // Disable cache check and provider hooks to simplify tests
+  testPlugin.hooks["riven.media-item.download.provider-list-requested"] =
+    undefined;
+  testPlugin.hooks["riven.media-item.download.cache-check-requested"] =
+    undefined;
+
+  mockFlowProcessorContext.plugins.set(testPlugin.name, {
+    config: testPlugin,
+    dataSources: new DataSourceMap(),
+    status: "valid",
+  });
 });
 
 it("throws an UnrecoverableError if no ranked streams are available", async ({
@@ -58,19 +72,6 @@ it("does not attempt previously failed info hashes", async ({
   expect.assert(stream1);
   expect.assert(stream2);
   expect.assert(stream3);
-
-  const { default: testPlugin } = await import("@repo/plugin-test");
-
-  testPlugin.hooks["riven.media-item.download.provider-list-requested"] =
-    undefined;
-  testPlugin.hooks["riven.media-item.download.cache-check-requested"] =
-    undefined;
-
-  mockFlowProcessorContext.plugins.set(testPlugin.name, {
-    config: testPlugin,
-    dataSources: new DataSourceMap(),
-    status: "valid",
-  });
 
   const downloadRequestedSpy = vi.fn().mockResolvedValue({
     success: true,
@@ -121,13 +122,12 @@ it("does not attempt previously failed info hashes", async ({
     ] satisfies RankedResult[],
   });
 
-  const result = await findValidTorrentProcessor(
+  await findValidTorrentProcessor(
     { job, scope: mockSentryScope, token: "test-token" },
     mockFlowProcessorContext,
   );
 
-  expect(result).toBeNull();
-  // expect(downloadRequestedSpy).toHaveBeenCalledTimes(2);
+  expect(downloadRequestedSpy).toHaveBeenCalledTimes(2);
 
   for (const [jobArg] of downloadRequestedSpy.mock.calls) {
     expect(
@@ -152,19 +152,6 @@ it("returns the plugin and validated result on successful validation", async ({
   createPluginWorker,
 }) => {
   expect.assert(stream);
-
-  const { default: testPlugin } = await import("@repo/plugin-test");
-
-  testPlugin.hooks["riven.media-item.download.provider-list-requested"] =
-    undefined;
-  testPlugin.hooks["riven.media-item.download.cache-check-requested"] =
-    undefined;
-
-  mockFlowProcessorContext.plugins.set(testPlugin.name, {
-    config: testPlugin,
-    dataSources: new DataSourceMap(),
-    status: "valid",
-  });
 
   const expectedFile = {
     name: "Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
@@ -260,19 +247,6 @@ it("updates job data with the failed info hash when an invalid torrent is return
 }) => {
   expect.assert(stream);
 
-  const { default: testPlugin } = await import("@repo/plugin-test");
-
-  testPlugin.hooks["riven.media-item.download.provider-list-requested"] =
-    undefined;
-  testPlugin.hooks["riven.media-item.download.cache-check-requested"] =
-    undefined;
-
-  mockFlowProcessorContext.plugins.set(testPlugin.name, {
-    config: testPlugin,
-    dataSources: new DataSourceMap(),
-    status: "valid",
-  });
-
   createPluginWorker(
     "riven.media-item.download.requested",
     "@repo/plugin-test",
@@ -323,19 +297,6 @@ it("returns null if no valid torrent is found after trying all plugins", async (
   },
 }) => {
   expect.assert(stream);
-
-  const { default: testPlugin } = await import("@repo/plugin-test");
-
-  testPlugin.hooks["riven.media-item.download.provider-list-requested"] =
-    undefined;
-  testPlugin.hooks["riven.media-item.download.cache-check-requested"] =
-    undefined;
-
-  mockFlowProcessorContext.plugins.set(testPlugin.name, {
-    config: testPlugin,
-    dataSources: new DataSourceMap(),
-    status: "valid",
-  });
 
   createPluginWorker(
     "riven.media-item.download.requested",
@@ -390,19 +351,6 @@ it("does not attempt to re-download blacklisted streams", async ({
   expect.assert(stream1);
   expect.assert(stream2);
   expect.assert(blacklistedStream);
-
-  const { default: testPlugin } = await import("@repo/plugin-test");
-
-  testPlugin.hooks["riven.media-item.download.provider-list-requested"] =
-    undefined;
-  testPlugin.hooks["riven.media-item.download.cache-check-requested"] =
-    undefined;
-
-  mockFlowProcessorContext.plugins.set(testPlugin.name, {
-    config: testPlugin,
-    dataSources: new DataSourceMap(),
-    status: "valid",
-  });
 
   const downloadRequestedSpy = vi.fn().mockResolvedValue({
     success: true,

@@ -27,11 +27,9 @@
     "type-graphql": "catalog:"
   },
   "devDependencies": {
-    "@mikro-orm/core": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
-    "@repo/util-plugin-sdk": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
