@@ -298,8 +298,13 @@ export const findValidTorrentProcessor =
         `All info hashes failed validation for ${mediaItem.type} ${chalk.bold(mediaItem.fullTitle)}; all plugins have been exhausted.`,
       );
     } else if (rateLimitReattemptDatetime) {
+      const formattedReattemptTime = rateLimitReattemptDatetime
+        .diffNow(["hours", "minutes", "seconds"])
+        .rescale()
+        .toHuman();
+
       logger.info(
-        `Some hashes for ${chalk.bold(mediaItem.fullTitle)} were unable to download due to rate limits; they will be retried in ${rateLimitReattemptDatetime.diffNow().toHuman()}.`,
+        `Some hashes for ${chalk.bold(mediaItem.fullTitle)} were unable to download due to rate limits. Retrying in ${formattedReattemptTime}.`,
       );
 
       await job.moveToDelayed(rateLimitReattemptDatetime.toMillis(), token);

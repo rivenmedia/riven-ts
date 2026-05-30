@@ -597,8 +597,10 @@ export abstract class BaseDataSource<
   ): Promise<void> {
     await this.queue.rateLimit(waitMs);
 
+    const formattedWaitTime = Duration.fromMillis(waitMs).rescale().toHuman();
+
     this.logger.warn(
-      `[${this.serviceName}] Received 429 Too Many Requests response for ${response.url}; retrying after ${Duration.fromMillis(waitMs).toHuman()}`,
+      `[${this.serviceName}] Received 429 Too Many Requests response for ${response.url}; retrying after ${formattedWaitTime}`,
     );
 
     throw Worker.RateLimitError();
