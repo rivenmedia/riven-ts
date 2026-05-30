@@ -1,6 +1,5 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
-import { faker } from "@faker-js/faker";
 import { graphql, passthrough } from "msw";
 import assert from "node:assert";
 import { test as testBase, vi } from "vitest";
