@@ -2,12 +2,12 @@ import { DataSourceMap } from "@repo/util-plugin-sdk";
 
 import { graphql, passthrough } from "msw";
 import assert from "node:assert";
-import { test as testBase, vi } from "vitest";
+import { type Mock, test as testBase, vi } from "vitest";
 
 import { type ApolloServerContext, CoreKey } from "../graphql/context.ts";
 
-import type { FlowProcessorContext } from "../message-queue/utilities/create-flow-schema.ts";
-import type { ValidPlugin } from "../types/plugins.ts";
+import type { Services } from "../database/database.ts";
+import type { ValidPlugin, ValidPluginMap } from "../types/plugins.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
 import type { ZodObject } from "zod";
@@ -224,7 +224,13 @@ export const it = testBase
   })
   .extend(
     "mockFlowProcessorContext",
-    async ({ services }): Promise<FlowProcessorContext> => {
+    async ({
+      services,
+    }): Promise<{
+      services: Services;
+      sendEvent: Mock;
+      plugins: ValidPluginMap;
+    }> => {
       const { default: testPlugin } = await import("@repo/plugin-test");
 
       return {

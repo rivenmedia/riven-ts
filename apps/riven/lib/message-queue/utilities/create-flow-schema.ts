@@ -11,14 +11,6 @@ import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/i
 import type { ValidPlugin } from "../../types/plugins.ts";
 import type { Job } from "bullmq";
 
-export const FlowProcessorContext = z.object({
-  services: z.custom<typeof services>(),
-  sendEvent: z.custom<MainRunnerMachineIntake>(),
-  plugins: z.map(z.symbol(), z.custom<ValidPlugin>()),
-});
-
-export type FlowProcessorContext = z.infer<typeof FlowProcessorContext>;
-
 export const createFlowSchema = <
   Type extends string,
   Children extends ZodType,
@@ -60,7 +52,11 @@ export const createFlowSchema = <
           scope: z.custom<Sentry.Scope>(),
           token: z.string().optional(),
         }),
-        FlowProcessorContext,
+        z.object({
+          services: z.custom<typeof services>(),
+          sendEvent: z.custom<MainRunnerMachineIntake>(),
+          plugins: z.map(z.symbol(), z.custom<ValidPlugin>()),
+        }),
       ],
       output: z.promise(outputSchema),
     }),
