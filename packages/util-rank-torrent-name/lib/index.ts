@@ -1,7 +1,12 @@
 export { parse, parseFilePath } from "./parser/parse.ts";
 export { rank, rankTorrent } from "./ranker/rank.ts";
 export { checkFetch } from "./ranker/fetch.ts";
-export { createSettings, createRankingModel } from "./ranker/settings.ts";
+export {
+  createSettings,
+  createRankingModel,
+  SettingsSchema,
+  RankingModelSchema,
+} from "./ranker/settings.ts";
 export { normaliseTitle } from "./shared/normalise.ts";
 export { getLevRatio, titleMatch } from "./ranker/lev.ts";
 export { sortTorrents } from "./ranker/sort.ts";
@@ -17,11 +22,5 @@ export type {
   SettingsInput,
 } from "./ranker/settings.ts";
 export type { Aliases } from "./ranker/lev.ts";
-
-export {
-  defaultRankingModel,
-  SettingsSchema,
-  RankingModelSchema,
-} from "./ranker/settings.ts";
 
 export { RTN } from "./rtn.ts";

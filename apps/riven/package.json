@@ -29,6 +29,7 @@
     "codegen:config-docs": "zod2md",
     "codegen:gql": "graphql-codegen --config graphql-codegen.ts",
     "codegen:gql-schema": "node --import=@swc-node/register/esm-register scripts/generate-gql-schema.ts",
+    "codegen:ranking-config-json-schema": "pnpm node scripts/generate-ranking-config-json-schema.ts",
     "database:cache:generate": "mikro-orm cache:generate --combined --contextName slim",
     "dev": "pnpm node --watch --env-file-if-exists=.env.riven --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
     "lint": "eslint",

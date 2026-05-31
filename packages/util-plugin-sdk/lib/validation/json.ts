@@ -16,7 +16,7 @@ export const json = <T extends z.core.$ZodType>(schema: T) =>
             code: "invalid_format",
             format: "json",
             input: jsonString,
-            message: err.message,
+            message: "Invalid JSON: " + err.message,
           });
         }
 
