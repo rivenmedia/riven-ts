@@ -348,12 +348,12 @@ const TrashRanksSchema = z.object({
 });
 
 const CustomRanksConfigSchema = z.object({
-  quality: QualityRanksSchema.prefault({}).catch(QualityRanksSchema.parse({})),
-  rips: RipsRanksSchema.prefault({}).catch(RipsRanksSchema.parse({})),
-  hdr: HdrRanksSchema.prefault({}).catch(HdrRanksSchema.parse({})),
-  audio: AudioRanksSchema.prefault({}).catch(AudioRanksSchema.parse({})),
-  extras: ExtrasRanksSchema.prefault({}).catch(ExtrasRanksSchema.parse({})),
-  trash: TrashRanksSchema.prefault({}).catch(TrashRanksSchema.parse({})),
+  quality: QualityRanksSchema.prefault({}),
+  rips: RipsRanksSchema.prefault({}),
+  hdr: HdrRanksSchema.prefault({}),
+  audio: AudioRanksSchema.prefault({}),
+  extras: ExtrasRanksSchema.prefault({}),
+  trash: TrashRanksSchema.prefault({}),
 });
 
 export type CustomRanksConfig = z.infer<typeof CustomRanksConfigSchema>;
@@ -462,21 +462,13 @@ function compilePatterns(patterns: string[]): RegExp[] {
 
 export const SettingsSchema = z
   .object({
-    require: z.array(z.string()).default([]).catch([]),
-    exclude: z.array(z.string()).default([]).catch([]),
-    preferred: z.array(z.string()).default([]).catch([]),
-    resolutions: ResolutionConfigSchema.prefault({}).catch(
-      ResolutionConfigSchema.parse({}),
-    ),
-    options: OptionsConfigSchema.prefault({}).catch(
-      OptionsConfigSchema.parse({}),
-    ),
-    languages: LanguagesConfigSchema.prefault({}).catch(
-      LanguagesConfigSchema.parse({}),
-    ),
-    customRanks: CustomRanksConfigSchema.prefault({}).catch(
-      CustomRanksConfigSchema.parse({}),
-    ),
+    require: z.array(z.string()).default([]),
+    exclude: z.array(z.string()).default([]),
+    preferred: z.array(z.string()).default([]),
+    resolutions: ResolutionConfigSchema.prefault({}),
+    options: OptionsConfigSchema.prefault({}),
+    languages: LanguagesConfigSchema.prefault({}),
+    customRanks: CustomRanksConfigSchema.prefault({}),
   })
   .transform((raw) => ({
     ...raw,
@@ -585,5 +577,6 @@ export const RankingModelSchema = z.strictObject({
 
 export type RankingModel = z.infer<typeof RankingModelSchema>;
 
-export const createRankingModel = (input: z.input<typeof RankingModelSchema>) =>
-  RankingModelSchema.decode(input);
+export const createRankingModel = (
+  input: z.input<typeof RankingModelSchema> = {},
+) => RankingModelSchema.decode(input);

@@ -1,105 +1,267 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "properties": {
-    "settings": {
+  "oneOf": [
+    {
       "type": "object",
       "properties": {
-        "require": {
-          "default": [],
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "$schema": {
+          "type": "string"
         },
-        "exclude": {
-          "default": [],
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "preset": {
+          "type": "string",
+          "const": "default"
+        }
+      },
+      "required": ["preset"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string"
         },
-        "preferred": {
-          "default": [],
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "preset": {
+          "type": "string",
+          "const": "custom"
         },
-        "resolutions": {
-          "default": {},
-          "type": "object",
-          "properties": {
-            "r2160p": {
-              "default": false,
-              "type": "boolean"
+        "settings": {
+          "default": {
+            "require": [],
+            "exclude": [],
+            "preferred": [],
+            "resolutions": {
+              "r2160p": false,
+              "r1080p": true,
+              "r720p": true,
+              "r480p": false,
+              "r360p": false,
+              "unknown": true
             },
-            "r1080p": {
-              "default": true,
-              "type": "boolean"
+            "options": {
+              "removeAllTrash": true,
+              "removeRanksUnder": -10000,
+              "removeUnknownLanguages": false,
+              "allowEnglishInLanguages": true,
+              "removeAdultContent": true,
+              "titleSimilarity": 0.85
             },
-            "r720p": {
-              "default": true,
-              "type": "boolean"
+            "languages": {
+              "required": [],
+              "allowed": [],
+              "exclude": [],
+              "preferred": []
             },
-            "r480p": {
-              "default": false,
-              "type": "boolean"
-            },
-            "r360p": {
-              "default": false,
-              "type": "boolean"
-            },
-            "unknown": {
-              "default": true,
-              "type": "boolean"
-            }
-          }
-        },
-        "options": {
-          "default": {},
-          "type": "object",
-          "properties": {
-            "removeAllTrash": {
-              "default": true,
-              "type": "boolean"
-            },
-            "removeRanksUnder": {
-              "default": -10000,
-              "type": "number"
-            },
-            "removeUnknownLanguages": {
-              "default": false,
-              "type": "boolean"
-            },
-            "allowEnglishInLanguages": {
-              "default": true,
-              "type": "boolean"
-            },
-            "removeAdultContent": {
-              "default": true,
-              "type": "boolean"
-            },
-            "titleSimilarity": {
-              "default": 0.85,
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1
-            }
-          }
-        },
-        "languages": {
-          "default": {},
-          "type": "object",
-          "properties": {
-            "required": {
-              "default": [],
-              "type": "array",
-              "items": {
-                "type": "string"
+            "customRanks": {
+              "quality": {
+                "av1": {
+                  "fetch": false
+                },
+                "avc": {
+                  "fetch": true
+                },
+                "bluray": {
+                  "fetch": true
+                },
+                "dvd": {
+                  "fetch": false
+                },
+                "hdtv": {
+                  "fetch": true
+                },
+                "hevc": {
+                  "fetch": true
+                },
+                "mpeg": {
+                  "fetch": false
+                },
+                "remux": {
+                  "fetch": false
+                },
+                "vhs": {
+                  "fetch": false
+                },
+                "web": {
+                  "fetch": true
+                },
+                "webdl": {
+                  "fetch": true
+                },
+                "webmux": {
+                  "fetch": false
+                },
+                "xvid": {
+                  "fetch": false
+                }
+              },
+              "rips": {
+                "bdrip": {
+                  "fetch": false
+                },
+                "brrip": {
+                  "fetch": true
+                },
+                "dvdrip": {
+                  "fetch": false
+                },
+                "hdrip": {
+                  "fetch": true
+                },
+                "ppvrip": {
+                  "fetch": false
+                },
+                "satrip": {
+                  "fetch": false
+                },
+                "tvrip": {
+                  "fetch": false
+                },
+                "uhdrip": {
+                  "fetch": false
+                },
+                "vhsrip": {
+                  "fetch": false
+                },
+                "webdlrip": {
+                  "fetch": false
+                },
+                "webrip": {
+                  "fetch": true
+                }
+              },
+              "hdr": {
+                "bit10": {
+                  "fetch": true
+                },
+                "dolbyVision": {
+                  "fetch": false
+                },
+                "hdr": {
+                  "fetch": true
+                },
+                "hdr10plus": {
+                  "fetch": true
+                },
+                "sdr": {
+                  "fetch": true
+                }
+              },
+              "audio": {
+                "aac": {
+                  "fetch": true
+                },
+                "atmos": {
+                  "fetch": true
+                },
+                "dolbyDigital": {
+                  "fetch": true
+                },
+                "dolbyDigitalPlus": {
+                  "fetch": true
+                },
+                "dtsLossy": {
+                  "fetch": true
+                },
+                "dtsLossless": {
+                  "fetch": true
+                },
+                "flac": {
+                  "fetch": true
+                },
+                "mono": {
+                  "fetch": false
+                },
+                "mp3": {
+                  "fetch": false
+                },
+                "stereo": {
+                  "fetch": true
+                },
+                "surround": {
+                  "fetch": true
+                },
+                "truehd": {
+                  "fetch": true
+                }
+              },
+              "extras": {
+                "threeD": {
+                  "fetch": false
+                },
+                "converted": {
+                  "fetch": false
+                },
+                "documentary": {
+                  "fetch": false
+                },
+                "dubbed": {
+                  "fetch": true
+                },
+                "edition": {
+                  "fetch": true
+                },
+                "hardcoded": {
+                  "fetch": true
+                },
+                "network": {
+                  "fetch": true
+                },
+                "proper": {
+                  "fetch": true
+                },
+                "repack": {
+                  "fetch": true
+                },
+                "retail": {
+                  "fetch": true
+                },
+                "site": {
+                  "fetch": false
+                },
+                "subbed": {
+                  "fetch": true
+                },
+                "upscaled": {
+                  "fetch": false
+                },
+                "scene": {
+                  "fetch": true
+                },
+                "uncensored": {
+                  "fetch": true
+                }
+              },
+              "trash": {
+                "cam": {
+                  "fetch": false
+                },
+                "cleanAudio": {
+                  "fetch": false
+                },
+                "pdtv": {
+                  "fetch": false
+                },
+                "r5": {
+                  "fetch": false
+                },
+                "screener": {
+                  "fetch": false
+                },
+                "size": {
+                  "fetch": false
+                },
+                "telecine": {
+                  "fetch": false
+                },
+                "telesync": {
+                  "fetch": false
+                }
               }
-            },
-            "allowed": {
+            }
+          },
+          "type": "object",
+          "properties": {
+            "require": {
               "default": [],
               "type": "array",
               "items": {
@@ -119,846 +281,1995 @@
               "items": {
                 "type": "string"
               }
-            }
-          }
-        },
-        "customRanks": {
-          "default": {},
-          "type": "object",
-          "properties": {
-            "quality": {
-              "default": {},
+            },
+            "resolutions": {
+              "default": {
+                "r2160p": false,
+                "r1080p": true,
+                "r720p": true,
+                "r480p": false,
+                "r360p": false,
+                "unknown": true
+              },
               "type": "object",
               "properties": {
-                "av1": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
+                "r2160p": {
+                  "default": false,
+                  "type": "boolean"
                 },
-                "avc": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
+                "r1080p": {
+                  "default": true,
+                  "type": "boolean"
                 },
-                "bluray": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
+                "r720p": {
+                  "default": true,
+                  "type": "boolean"
                 },
-                "dvd": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
+                "r480p": {
+                  "default": false,
+                  "type": "boolean"
                 },
-                "hdtv": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
+                "r360p": {
+                  "default": false,
+                  "type": "boolean"
                 },
-                "hevc": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "mpeg": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "remux": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "vhs": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "web": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "webdl": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "webmux": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "xvid": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
+                "unknown": {
+                  "default": true,
+                  "type": "boolean"
                 }
               }
             },
-            "rips": {
-              "default": {},
+            "options": {
+              "default": {
+                "removeAllTrash": true,
+                "removeRanksUnder": -10000,
+                "removeUnknownLanguages": false,
+                "allowEnglishInLanguages": true,
+                "removeAdultContent": true,
+                "titleSimilarity": 0.85
+              },
               "type": "object",
               "properties": {
-                "bdrip": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
+                "removeAllTrash": {
+                  "default": true,
+                  "type": "boolean"
                 },
-                "brrip": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
+                "removeRanksUnder": {
+                  "default": -10000,
+                  "type": "number"
                 },
-                "dvdrip": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
+                "removeUnknownLanguages": {
+                  "default": false,
+                  "type": "boolean"
                 },
-                "hdrip": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
+                "allowEnglishInLanguages": {
+                  "default": true,
+                  "type": "boolean"
                 },
-                "ppvrip": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
+                "removeAdultContent": {
+                  "default": true,
+                  "type": "boolean"
                 },
-                "satrip": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "tvrip": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "uhdrip": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "vhsrip": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "webdlrip": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "webrip": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
+                "titleSimilarity": {
+                  "default": 0.85,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
                 }
               }
             },
-            "hdr": {
-              "default": {},
+            "languages": {
+              "default": {
+                "required": [],
+                "allowed": [],
+                "exclude": [],
+                "preferred": []
+              },
               "type": "object",
               "properties": {
-                "bit10": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
+                "required": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
-                "dolbyVision": {
-                  "default": {
+                "allowed": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "exclude": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "preferred": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "customRanks": {
+              "default": {
+                "quality": {
+                  "av1": {
                     "fetch": false
                   },
-                  "$ref": "#/$defs/__schema0"
+                  "avc": {
+                    "fetch": true
+                  },
+                  "bluray": {
+                    "fetch": true
+                  },
+                  "dvd": {
+                    "fetch": false
+                  },
+                  "hdtv": {
+                    "fetch": true
+                  },
+                  "hevc": {
+                    "fetch": true
+                  },
+                  "mpeg": {
+                    "fetch": false
+                  },
+                  "remux": {
+                    "fetch": false
+                  },
+                  "vhs": {
+                    "fetch": false
+                  },
+                  "web": {
+                    "fetch": true
+                  },
+                  "webdl": {
+                    "fetch": true
+                  },
+                  "webmux": {
+                    "fetch": false
+                  },
+                  "xvid": {
+                    "fetch": false
+                  }
+                },
+                "rips": {
+                  "bdrip": {
+                    "fetch": false
+                  },
+                  "brrip": {
+                    "fetch": true
+                  },
+                  "dvdrip": {
+                    "fetch": false
+                  },
+                  "hdrip": {
+                    "fetch": true
+                  },
+                  "ppvrip": {
+                    "fetch": false
+                  },
+                  "satrip": {
+                    "fetch": false
+                  },
+                  "tvrip": {
+                    "fetch": false
+                  },
+                  "uhdrip": {
+                    "fetch": false
+                  },
+                  "vhsrip": {
+                    "fetch": false
+                  },
+                  "webdlrip": {
+                    "fetch": false
+                  },
+                  "webrip": {
+                    "fetch": true
+                  }
+                },
+                "hdr": {
+                  "bit10": {
+                    "fetch": true
+                  },
+                  "dolbyVision": {
+                    "fetch": false
+                  },
+                  "hdr": {
+                    "fetch": true
+                  },
+                  "hdr10plus": {
+                    "fetch": true
+                  },
+                  "sdr": {
+                    "fetch": true
+                  }
+                },
+                "audio": {
+                  "aac": {
+                    "fetch": true
+                  },
+                  "atmos": {
+                    "fetch": true
+                  },
+                  "dolbyDigital": {
+                    "fetch": true
+                  },
+                  "dolbyDigitalPlus": {
+                    "fetch": true
+                  },
+                  "dtsLossy": {
+                    "fetch": true
+                  },
+                  "dtsLossless": {
+                    "fetch": true
+                  },
+                  "flac": {
+                    "fetch": true
+                  },
+                  "mono": {
+                    "fetch": false
+                  },
+                  "mp3": {
+                    "fetch": false
+                  },
+                  "stereo": {
+                    "fetch": true
+                  },
+                  "surround": {
+                    "fetch": true
+                  },
+                  "truehd": {
+                    "fetch": true
+                  }
+                },
+                "extras": {
+                  "threeD": {
+                    "fetch": false
+                  },
+                  "converted": {
+                    "fetch": false
+                  },
+                  "documentary": {
+                    "fetch": false
+                  },
+                  "dubbed": {
+                    "fetch": true
+                  },
+                  "edition": {
+                    "fetch": true
+                  },
+                  "hardcoded": {
+                    "fetch": true
+                  },
+                  "network": {
+                    "fetch": true
+                  },
+                  "proper": {
+                    "fetch": true
+                  },
+                  "repack": {
+                    "fetch": true
+                  },
+                  "retail": {
+                    "fetch": true
+                  },
+                  "site": {
+                    "fetch": false
+                  },
+                  "subbed": {
+                    "fetch": true
+                  },
+                  "upscaled": {
+                    "fetch": false
+                  },
+                  "scene": {
+                    "fetch": true
+                  },
+                  "uncensored": {
+                    "fetch": true
+                  }
+                },
+                "trash": {
+                  "cam": {
+                    "fetch": false
+                  },
+                  "cleanAudio": {
+                    "fetch": false
+                  },
+                  "pdtv": {
+                    "fetch": false
+                  },
+                  "r5": {
+                    "fetch": false
+                  },
+                  "screener": {
+                    "fetch": false
+                  },
+                  "size": {
+                    "fetch": false
+                  },
+                  "telecine": {
+                    "fetch": false
+                  },
+                  "telesync": {
+                    "fetch": false
+                  }
+                }
+              },
+              "type": "object",
+              "properties": {
+                "quality": {
+                  "default": {
+                    "av1": {
+                      "fetch": false
+                    },
+                    "avc": {
+                      "fetch": true
+                    },
+                    "bluray": {
+                      "fetch": true
+                    },
+                    "dvd": {
+                      "fetch": false
+                    },
+                    "hdtv": {
+                      "fetch": true
+                    },
+                    "hevc": {
+                      "fetch": true
+                    },
+                    "mpeg": {
+                      "fetch": false
+                    },
+                    "remux": {
+                      "fetch": false
+                    },
+                    "vhs": {
+                      "fetch": false
+                    },
+                    "web": {
+                      "fetch": true
+                    },
+                    "webdl": {
+                      "fetch": true
+                    },
+                    "webmux": {
+                      "fetch": false
+                    },
+                    "xvid": {
+                      "fetch": false
+                    }
+                  },
+                  "type": "object",
+                  "properties": {
+                    "av1": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "avc": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "bluray": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "dvd": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "hdtv": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "hevc": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "mpeg": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "remux": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "vhs": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "web": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "webdl": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "webmux": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "xvid": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                },
+                "rips": {
+                  "default": {
+                    "bdrip": {
+                      "fetch": false
+                    },
+                    "brrip": {
+                      "fetch": true
+                    },
+                    "dvdrip": {
+                      "fetch": false
+                    },
+                    "hdrip": {
+                      "fetch": true
+                    },
+                    "ppvrip": {
+                      "fetch": false
+                    },
+                    "satrip": {
+                      "fetch": false
+                    },
+                    "tvrip": {
+                      "fetch": false
+                    },
+                    "uhdrip": {
+                      "fetch": false
+                    },
+                    "vhsrip": {
+                      "fetch": false
+                    },
+                    "webdlrip": {
+                      "fetch": false
+                    },
+                    "webrip": {
+                      "fetch": true
+                    }
+                  },
+                  "type": "object",
+                  "properties": {
+                    "bdrip": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "brrip": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "dvdrip": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "hdrip": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "ppvrip": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "satrip": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "tvrip": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "uhdrip": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "vhsrip": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "webdlrip": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "webrip": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
                 },
                 "hdr": {
                   "default": {
-                    "fetch": true
+                    "bit10": {
+                      "fetch": true
+                    },
+                    "dolbyVision": {
+                      "fetch": false
+                    },
+                    "hdr": {
+                      "fetch": true
+                    },
+                    "hdr10plus": {
+                      "fetch": true
+                    },
+                    "sdr": {
+                      "fetch": true
+                    }
                   },
-                  "$ref": "#/$defs/__schema0"
+                  "type": "object",
+                  "properties": {
+                    "bit10": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "dolbyVision": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "hdr": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "hdr10plus": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "sdr": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
                 },
-                "hdr10plus": {
+                "audio": {
                   "default": {
-                    "fetch": true
+                    "aac": {
+                      "fetch": true
+                    },
+                    "atmos": {
+                      "fetch": true
+                    },
+                    "dolbyDigital": {
+                      "fetch": true
+                    },
+                    "dolbyDigitalPlus": {
+                      "fetch": true
+                    },
+                    "dtsLossy": {
+                      "fetch": true
+                    },
+                    "dtsLossless": {
+                      "fetch": true
+                    },
+                    "flac": {
+                      "fetch": true
+                    },
+                    "mono": {
+                      "fetch": false
+                    },
+                    "mp3": {
+                      "fetch": false
+                    },
+                    "stereo": {
+                      "fetch": true
+                    },
+                    "surround": {
+                      "fetch": true
+                    },
+                    "truehd": {
+                      "fetch": true
+                    }
                   },
-                  "$ref": "#/$defs/__schema0"
+                  "type": "object",
+                  "properties": {
+                    "aac": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "atmos": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "dolbyDigital": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "dolbyDigitalPlus": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "dtsLossy": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "dtsLossless": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "flac": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "mono": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "mp3": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "stereo": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "surround": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "truehd": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
                 },
-                "sdr": {
+                "extras": {
                   "default": {
-                    "fetch": true
+                    "threeD": {
+                      "fetch": false
+                    },
+                    "converted": {
+                      "fetch": false
+                    },
+                    "documentary": {
+                      "fetch": false
+                    },
+                    "dubbed": {
+                      "fetch": true
+                    },
+                    "edition": {
+                      "fetch": true
+                    },
+                    "hardcoded": {
+                      "fetch": true
+                    },
+                    "network": {
+                      "fetch": true
+                    },
+                    "proper": {
+                      "fetch": true
+                    },
+                    "repack": {
+                      "fetch": true
+                    },
+                    "retail": {
+                      "fetch": true
+                    },
+                    "site": {
+                      "fetch": false
+                    },
+                    "subbed": {
+                      "fetch": true
+                    },
+                    "upscaled": {
+                      "fetch": false
+                    },
+                    "scene": {
+                      "fetch": true
+                    },
+                    "uncensored": {
+                      "fetch": true
+                    }
                   },
-                  "$ref": "#/$defs/__schema0"
-                }
-              }
-            },
-            "audio": {
-              "default": {},
-              "type": "object",
-              "properties": {
-                "aac": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
+                  "type": "object",
+                  "properties": {
+                    "threeD": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "converted": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "documentary": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "dubbed": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "edition": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "hardcoded": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "network": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "proper": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "repack": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "retail": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "site": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "subbed": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "upscaled": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "scene": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "uncensored": {
+                      "default": {
+                        "fetch": true
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
                 },
-                "atmos": {
+                "trash": {
                   "default": {
-                    "fetch": true
+                    "cam": {
+                      "fetch": false
+                    },
+                    "cleanAudio": {
+                      "fetch": false
+                    },
+                    "pdtv": {
+                      "fetch": false
+                    },
+                    "r5": {
+                      "fetch": false
+                    },
+                    "screener": {
+                      "fetch": false
+                    },
+                    "size": {
+                      "fetch": false
+                    },
+                    "telecine": {
+                      "fetch": false
+                    },
+                    "telesync": {
+                      "fetch": false
+                    }
                   },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "dolbyDigital": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "dolbyDigitalPlus": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "dtsLossy": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "dtsLossless": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "flac": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "mono": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "mp3": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "stereo": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "surround": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "truehd": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                }
-              }
-            },
-            "extras": {
-              "default": {},
-              "type": "object",
-              "properties": {
-                "threeD": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "converted": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "documentary": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "dubbed": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "edition": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "hardcoded": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "network": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "proper": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "repack": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "retail": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "site": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "subbed": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "upscaled": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "scene": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "uncensored": {
-                  "default": {
-                    "fetch": true
-                  },
-                  "$ref": "#/$defs/__schema0"
-                }
-              }
-            },
-            "trash": {
-              "default": {},
-              "type": "object",
-              "properties": {
-                "cam": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "cleanAudio": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "pdtv": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "r5": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "screener": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "size": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "telecine": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
-                },
-                "telesync": {
-                  "default": {
-                    "fetch": false
-                  },
-                  "$ref": "#/$defs/__schema0"
+                  "type": "object",
+                  "properties": {
+                    "cam": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "cleanAudio": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "pdtv": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "r5": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "screener": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "size": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "telecine": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "telesync": {
+                      "default": {
+                        "fetch": false
+                      },
+                      "type": "object",
+                      "properties": {
+                        "fetch": {
+                          "default": true,
+                          "type": "boolean"
+                        },
+                        "rank": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
           }
+        },
+        "rankingModel": {
+          "default": {
+            "av1": 0,
+            "avc": 0,
+            "bluray": 0,
+            "dvd": 0,
+            "hdtv": 0,
+            "hevc": 0,
+            "mpeg": 0,
+            "remux": 0,
+            "vhs": 0,
+            "web": 0,
+            "webdl": 0,
+            "webmux": 0,
+            "xvid": 0,
+            "bdrip": 0,
+            "brrip": 0,
+            "dvdrip": 0,
+            "hdrip": 0,
+            "ppvrip": 0,
+            "tvrip": 0,
+            "uhdrip": 0,
+            "vhsrip": 0,
+            "webdlrip": 0,
+            "webrip": 0,
+            "bit10": 0,
+            "dolbyVision": 0,
+            "hdr": 0,
+            "hdr10plus": 0,
+            "sdr": 0,
+            "aac": 0,
+            "atmos": 0,
+            "dolbyDigital": 0,
+            "dolbyDigitalPlus": 0,
+            "dtsLossy": 0,
+            "dtsLossless": 0,
+            "flac": 0,
+            "mono": 0,
+            "mp3": 0,
+            "stereo": 0,
+            "surround": 0,
+            "truehd": 0,
+            "threeD": 0,
+            "converted": 0,
+            "documentary": 0,
+            "commentary": 0,
+            "uncensored": 0,
+            "dubbed": 0,
+            "edition": 0,
+            "hardcoded": 0,
+            "network": 0,
+            "proper": 0,
+            "repack": 0,
+            "retail": 0,
+            "subbed": 0,
+            "upscaled": 0,
+            "scene": 0,
+            "cam": 0,
+            "cleanAudio": 0,
+            "r5": 0,
+            "pdtv": 0,
+            "satrip": 0,
+            "screener": 0,
+            "site": 0,
+            "size": 0,
+            "telecine": 0,
+            "telesync": 0
+          },
+          "type": "object",
+          "properties": {
+            "av1": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "avc": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "bluray": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "dvd": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "hdtv": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "hevc": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "mpeg": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "remux": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "vhs": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "web": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "webdl": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "webmux": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "xvid": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "bdrip": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "brrip": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "dvdrip": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "hdrip": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "ppvrip": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "tvrip": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "uhdrip": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "vhsrip": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "webdlrip": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "webrip": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "bit10": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "dolbyVision": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "hdr": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "hdr10plus": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "sdr": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "aac": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "atmos": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "dolbyDigital": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "dolbyDigitalPlus": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "dtsLossy": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "dtsLossless": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "flac": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "mono": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "mp3": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "stereo": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "surround": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "truehd": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "threeD": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "converted": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "documentary": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "commentary": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "uncensored": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "dubbed": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "edition": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "hardcoded": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "network": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "proper": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "repack": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "retail": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "subbed": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "upscaled": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "scene": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "cam": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "cleanAudio": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "r5": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "pdtv": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "satrip": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "screener": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "site": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "size": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "telecine": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "telesync": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "additionalProperties": false
         }
-      }
-    },
-    "rankingModel": {
-      "type": "object",
-      "properties": {
-        "av1": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "avc": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "bluray": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "dvd": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "hdtv": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "hevc": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "mpeg": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "remux": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "vhs": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "web": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "webdl": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "webmux": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "xvid": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "bdrip": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "brrip": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "dvdrip": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "hdrip": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "ppvrip": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "tvrip": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "uhdrip": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "vhsrip": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "webdlrip": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "webrip": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "bit10": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "dolbyVision": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "hdr": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "hdr10plus": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "sdr": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "aac": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "atmos": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "dolbyDigital": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "dolbyDigitalPlus": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "dtsLossy": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "dtsLossless": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "flac": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "mono": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "mp3": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "stereo": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "surround": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "truehd": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "threeD": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "converted": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "documentary": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "commentary": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "uncensored": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "dubbed": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "edition": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "hardcoded": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "network": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "proper": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "repack": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "retail": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "subbed": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "upscaled": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "scene": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "cam": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "cleanAudio": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "r5": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "pdtv": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "satrip": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "screener": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "site": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "size": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "telecine": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        },
-        "telesync": {
-          "default": 0,
-          "type": "integer",
-          "minimum": -9007199254740991,
-          "maximum": 9007199254740991
-        }
-      }
+      },
+      "required": ["preset"],
+      "additionalProperties": false
     }
-  },
-  "required": ["settings", "rankingModel"],
-  "$defs": {
-    "__schema0": {
-      "type": "object",
-      "properties": {
-        "fetch": {
-          "default": true,
-          "type": "boolean"
-        },
-        "rank": {
-          "type": "number"
-        }
-      }
-    }
-  }
+  ]
 }

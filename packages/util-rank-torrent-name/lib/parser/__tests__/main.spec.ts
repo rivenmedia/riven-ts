@@ -2,7 +2,7 @@ import { expect, it } from "vitest";
 
 import { parse } from "../parse.ts";
 
-it.each([
+it.for([
   [
     "One Piece [ Episodes + Movies + OVAs + Specials ][Dual Audio][BD 720p & 1080p HEVC x265 10bit][Arabic & Multi-Subs]\nSpecials/One Piece - S00E03 - Adventure in the Ocean's Navel.mkv",
     {
@@ -2026,6 +2026,6 @@ it.each([
       editions: ["Anniversary Edition"],
     },
   ],
-])('should correctly parse "%s"', (rawTitle, expected) => {
+] as const)('should correctly parse "%s"', ([rawTitle, expected]) => {
   expect(parse(rawTitle)).toMatchObject(expected);
 });

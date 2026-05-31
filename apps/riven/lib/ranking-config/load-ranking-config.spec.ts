@@ -167,7 +167,7 @@ describe("when the config contains unknown keys", () => {
 });
 
 describe("when the config contains invalid values for valid keys", () => {
-  it("falls back to defaults when settings has invalid values", async ({
+  it("throws an error when settings has invalid values", async ({
     tempDir,
   }) => {
     const configPath = path.join(tempDir, "ranking-config.json");
@@ -180,10 +180,8 @@ describe("when the config contains invalid values for valid keys", () => {
       }),
     );
 
-    const { settings } = await loadRankingConfig(configPath);
-
-    expect(settings.resolutions.r1080p).toBe(
-      defaultPreset.settings.resolutions.r1080p,
+    await expect(loadRankingConfig(configPath)).rejects.toThrow(
+      "settings.resolutions.r1080p",
     );
   });
 

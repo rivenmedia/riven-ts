@@ -39,6 +39,11 @@
       ],
       "outputs": ["lib/types/__generated__/graphql.ts", "lib/**/*.typegen.ts"]
     },
+    "codegen:ranking-config-json-schema": {
+      "dependsOn": ["$TURBO_EXTENDS$", "transit:source-files"],
+      "inputs": ["lib/ranking-config/ranking-config.schema.ts"],
+      "outputs": ["ranking-config.schema.json"]
+    },
     "start": {
       "dependsOn": ["$TURBO_EXTENDS$", "build"],
       "passThroughEnv": [

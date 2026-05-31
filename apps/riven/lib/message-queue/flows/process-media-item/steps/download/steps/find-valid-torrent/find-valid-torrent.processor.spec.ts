@@ -2,8 +2,8 @@ import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { BlacklistedStream } from "@repo/util-plugin-sdk/dto/entities";
 import {
   type RankedResult,
+  createRankingModel,
   createSettings,
-  defaultRankingModel,
   rankTorrent,
 } from "@repo/util-rank-torrent-name";
 
@@ -101,7 +101,7 @@ it("does not attempt previously failed info hashes", async ({
         "Example Torrent",
         {},
         createSettings(),
-        defaultRankingModel,
+        createRankingModel(),
       ),
       rankTorrent(
         "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
@@ -109,7 +109,7 @@ it("does not attempt previously failed info hashes", async ({
         "Example Torrent",
         {},
         createSettings(),
-        defaultRankingModel,
+        createRankingModel(),
       ),
       rankTorrent(
         "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
@@ -117,7 +117,7 @@ it("does not attempt previously failed info hashes", async ({
         "Example Torrent",
         {},
         createSettings(),
-        defaultRankingModel,
+        createRankingModel(),
       ),
     ] satisfies RankedResult[],
   });
@@ -209,7 +209,7 @@ it("returns the plugin and validated result on successful validation", async ({
         "Example Torrent",
         {},
         createSettings(),
-        defaultRankingModel,
+        createRankingModel(),
       ),
     ] satisfies RankedResult[],
   });
@@ -275,7 +275,7 @@ it("updates job data with the failed info hash when an invalid torrent is return
         "Example Torrent",
         {},
         createSettings(),
-        defaultRankingModel,
+        createRankingModel(),
       ),
     ] satisfies RankedResult[],
   });
@@ -327,7 +327,7 @@ it("returns null if no valid torrent is found after trying all plugins", async (
         "Another Torrent Name",
         {},
         createSettings({ options: { titleSimilarity: 0 } }),
-        defaultRankingModel,
+        createRankingModel(),
       ),
     ] satisfies RankedResult[],
   });
@@ -392,7 +392,7 @@ it("does not attempt to re-download blacklisted streams", async ({
         "Example Torrent",
         {},
         createSettings(),
-        defaultRankingModel,
+        createRankingModel(),
       ),
       rankTorrent(
         "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
@@ -400,7 +400,7 @@ it("does not attempt to re-download blacklisted streams", async ({
         "Example Torrent",
         {},
         createSettings(),
-        defaultRankingModel,
+        createRankingModel(),
       ),
       rankTorrent(
         "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
@@ -408,7 +408,7 @@ it("does not attempt to re-download blacklisted streams", async ({
         "Example Torrent",
         {},
         createSettings(),
-        defaultRankingModel,
+        createRankingModel(),
       ),
     ] satisfies RankedResult[],
   });

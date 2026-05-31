@@ -7,7 +7,6 @@ import { RankingConfig } from "../lib/ranking-config/ranking-config.schema.ts";
 const filePath = `${process.cwd()}/ranking-config.schema.json`;
 const jsonSchema = z.toJSONSchema(RankingConfig, {
   io: "input",
-  reused: "ref",
 });
 
 writeFileSync(filePath, JSON.stringify(jsonSchema, null, 2));
