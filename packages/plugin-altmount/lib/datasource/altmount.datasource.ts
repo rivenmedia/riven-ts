@@ -52,10 +52,14 @@ export class AltmountAPI extends BaseDataSource<AltmountSettings> {
     nzbUrl: string;
     expectedTitle: string;
   }): Promise<string> {
+    // SABnzbd-standard `mode=addurl` takes the NZB URL in `name`, with the
+    // human-readable title in `nzbname`. AltMount follows this; passing the
+    // URL via a separate `url` param made AltMount treat the title as the URL
+    // and fast-fail with "Failed to download NZB from URL".
     const path = `api?mode=addurl&apikey=${encodeURIComponent(
       this.settings.altmountApiKey,
-    )}&name=${encodeURIComponent(params.expectedTitle)}&url=${encodeURIComponent(
-      params.nzbUrl,
+    )}&name=${encodeURIComponent(params.nzbUrl)}&nzbname=${encodeURIComponent(
+      params.expectedTitle,
     )}&output=json`;
 
     const raw = await this.get<unknown>(path);
