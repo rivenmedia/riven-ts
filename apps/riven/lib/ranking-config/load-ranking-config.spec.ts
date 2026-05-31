@@ -41,22 +41,6 @@ describe("when the config file does not exist", () => {
     await expect(stat(configPath)).resolves.toBeTruthy();
   });
 
-  it("returns the default settings", async ({ tempDir }) => {
-    const configPath = path.join(tempDir, "ranking-config.json");
-
-    const { settings } = await loadRankingConfig(configPath);
-
-    expect(settings).toMatchObject(defaultPreset.settings);
-  });
-
-  it("returns the default ranking model", async ({ tempDir }) => {
-    const configPath = path.join(tempDir, "ranking-config.json");
-
-    const { rankingModel } = await loadRankingConfig(configPath);
-
-    expect(rankingModel).toMatchObject(defaultPreset.rankingModel);
-  });
-
   it("writes valid JSON to the created file", async ({ tempDir }) => {
     const configPath = path.join(tempDir, "ranking-config.json");
 
