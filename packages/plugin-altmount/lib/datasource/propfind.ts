@@ -114,6 +114,22 @@ function isVideoFile(entry: PropfindEntry, name: string): boolean {
 }
 
 /**
+ * Return every video file in a directory listing (skipping collections and
+ * non-video files). Used for season packs, which land in their own subdir so
+ * every video file belongs to the pack.
+ */
+export function selectAllMediaFiles(
+  entries: PropfindEntry[],
+): { href: string; fileSize: number }[] {
+  return entries
+    .filter((entry) => !entry.isCollection)
+    .filter((entry) =>
+      isVideoFile(entry, entry.displayName ?? basename(entry.href)),
+    )
+    .map((entry) => ({ href: entry.href, fileSize: entry.contentLength ?? 0 }));
+}
+
+/**
  * Pick the media file for `releaseName` from a directory listing.
  *
  * A file matches when its name (sans extension) equals the release name, or

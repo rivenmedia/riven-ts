@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { parsePropfindEntries, selectCompletedMediaFile } from "../propfind.ts";
+import {
+  parsePropfindEntries,
+  selectAllMediaFiles,
+  selectCompletedMediaFile,
+} from "../propfind.ts";
 
 // Real AltMount PROPFIND Depth:1 response shape (captured from a live server).
 const REAL_XML = `<?xml version="1.0" encoding="UTF-8"?><D:multistatus xmlns:D="DAV:"><D:response><D:href>/webdav/complete/Default/</D:href><D:propstat><D:prop><D:resourcetype><D:collection xmlns:D="DAV:"/></D:resourcetype><D:displayname>Default</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>/webdav/complete/Default/Avengers.Infinity.War.2018.4K.HDR.2160p.BDRemux.Ita.Eng.x265-NAHOM.mkv</D:href><D:propstat><D:prop><D:resourcetype></D:resourcetype><D:displayname>Avengers.Infinity.War.2018.4K.HDR.2160p.BDRemux.Ita.Eng.x265-NAHOM.mkv</D:displayname><D:getcontenttype>video/x-matroska</D:getcontenttype><D:getcontentlength>54223683572</D:getcontentlength></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>/webdav/complete/Default/Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM.mkv</D:href><D:propstat><D:prop><D:resourcetype></D:resourcetype><D:displayname>Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM.mkv</D:displayname><D:getcontenttype>video/x-matroska</D:getcontenttype><D:getcontentlength>69347000342</D:getcontentlength></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>`;
@@ -77,5 +81,26 @@ describe("selectCompletedMediaFile", () => {
     expect(
       selectCompletedMediaFile(parsePropfindEntries(xml), "Inception"),
     ).toBeNull();
+  });
+});
+
+describe("selectAllMediaFiles", () => {
+  // A season pack lands in its own subdir; every video file in it belongs to
+  // the pack, so we return them all (no release-name filter).
+  const PACK_XML = `<D:multistatus xmlns:D="DAV:"><D:response><D:href>/webdav/complete/Default/The.Office.S01.1080p-GRP/</D:href><D:propstat><D:prop><D:resourcetype><D:collection/></D:resourcetype><D:displayname>The.Office.S01.1080p-GRP</D:displayname></D:prop></D:propstat></D:response><D:response><D:href>/webdav/complete/Default/The.Office.S01.1080p-GRP/The.Office.S01E01.1080p-GRP.mkv</D:href><D:propstat><D:prop><D:resourcetype></D:resourcetype><D:displayname>The.Office.S01E01.1080p-GRP.mkv</D:displayname><D:getcontenttype>video/x-matroska</D:getcontenttype><D:getcontentlength>1500000000</D:getcontentlength></D:prop></D:propstat></D:response><D:response><D:href>/webdav/complete/Default/The.Office.S01.1080p-GRP/The.Office.S01E02.1080p-GRP.mkv</D:href><D:propstat><D:prop><D:resourcetype></D:resourcetype><D:displayname>The.Office.S01E02.1080p-GRP.mkv</D:displayname><D:getcontentlength>1480000000</D:getcontentlength></D:prop></D:propstat></D:response><D:response><D:href>/webdav/complete/Default/The.Office.S01.1080p-GRP/poster.jpg</D:href><D:propstat><D:prop><D:resourcetype></D:resourcetype><D:displayname>poster.jpg</D:displayname><D:getcontentlength>50000</D:getcontentlength></D:prop></D:propstat></D:response></D:multistatus>`;
+
+  it("returns every video file (skipping the dir + non-video) for a pack", () => {
+    const files = selectAllMediaFiles(parsePropfindEntries(PACK_XML));
+    expect(files).toHaveLength(2);
+    expect(files.map((f) => f.href)).toEqual([
+      "/webdav/complete/Default/The.Office.S01.1080p-GRP/The.Office.S01E01.1080p-GRP.mkv",
+      "/webdav/complete/Default/The.Office.S01.1080p-GRP/The.Office.S01E02.1080p-GRP.mkv",
+    ]);
+    expect(files[0]!.fileSize).toBe(1500000000);
+  });
+
+  it("returns an empty array when there are no video files", () => {
+    const xml = `<D:multistatus xmlns:D="DAV:"><D:response><D:href>/webdav/complete/Default/x/</D:href><D:propstat><D:prop><D:resourcetype><D:collection/></D:resourcetype></D:prop></D:propstat></D:response></D:multistatus>`;
+    expect(selectAllMediaFiles(parsePropfindEntries(xml))).toEqual([]);
   });
 });

@@ -120,27 +120,56 @@ describe("MediaItemNzbDownloadRequestedResponse", () => {
     ).toThrow();
   });
 
-  it("carries the resolved WebDAV stream URL, file size and filename on completion", () => {
+  it("carries one resolved file for a movie/episode completion", () => {
     const parsed = MediaItemNzbDownloadRequestedResponse.parse({
       altmountId: "altmount-abc-123",
       status: "completed",
-      streamUrl:
-        "http://usenet:usenet@altmount:8081/webdav/complete/Default/Inception.2010.4K.x265-NAHOM.mkv",
-      fileSize: 69347000342,
-      originalFilename: "Inception.2010.4K.x265-NAHOM.mkv",
+      files: [
+        {
+          streamUrl:
+            "http://usenet:usenet@altmount:8081/webdav/complete/Default/Inception.2010.4K.x265-NAHOM.mkv",
+          fileSize: 69347000342,
+          originalFilename: "Inception.2010.4K.x265-NAHOM.mkv",
+        },
+      ],
     });
 
-    expect(parsed.streamUrl).toContain("/webdav/complete/Default/");
-    expect(parsed.fileSize).toBe(69347000342);
-    expect(parsed.originalFilename).toBe("Inception.2010.4K.x265-NAHOM.mkv");
+    expect(parsed.files).toHaveLength(1);
+    expect(parsed.files![0]!.streamUrl).toContain("/webdav/complete/Default/");
+    expect(parsed.files![0]!.fileSize).toBe(69347000342);
   });
 
-  it("rejects a non-URL streamUrl", () => {
+  it("carries one resolved file per episode for a season pack", () => {
+    const parsed = MediaItemNzbDownloadRequestedResponse.parse({
+      altmountId: "The.Office.S01.1080p.x265-GROUP",
+      status: "completed",
+      files: [
+        {
+          streamUrl:
+            "http://usenet:usenet@altmount:8081/webdav/complete/Default/The.Office.S01/The.Office.S01E01.mkv",
+          fileSize: 1500000000,
+          originalFilename: "The.Office.S01E01.mkv",
+        },
+        {
+          streamUrl:
+            "http://usenet:usenet@altmount:8081/webdav/complete/Default/The.Office.S01/The.Office.S01E02.mkv",
+          fileSize: 1480000000,
+          originalFilename: "The.Office.S01E02.mkv",
+        },
+      ],
+    });
+
+    expect(parsed.files).toHaveLength(2);
+  });
+
+  it("rejects a non-URL streamUrl in files", () => {
     expect(() =>
       MediaItemNzbDownloadRequestedResponse.parse({
         altmountId: "altmount-abc-123",
         status: "completed",
-        streamUrl: "not-a-url",
+        files: [
+          { streamUrl: "not-a-url", fileSize: 1, originalFilename: "x.mkv" },
+        ],
       }),
     ).toThrow();
   });

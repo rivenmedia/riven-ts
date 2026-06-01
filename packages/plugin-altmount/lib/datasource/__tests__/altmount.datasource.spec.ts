@@ -224,12 +224,14 @@ it("waitForCompletion() throws after pollTimeoutMs elapses", async ({
 }, 10_000);
 
 // ---------------------------------------------------------------------------
-// resolveCompletedFile()
+// resolveCompletedFiles()
 // ---------------------------------------------------------------------------
 
 const PROPFIND_XML = `<?xml version="1.0" encoding="UTF-8"?><D:multistatus xmlns:D="DAV:"><D:response><D:href>/webdav/complete/Default/</D:href><D:propstat><D:prop><D:resourcetype><D:collection/></D:resourcetype><D:displayname>Default</D:displayname></D:prop></D:propstat></D:response><D:response><D:href>/webdav/complete/Default/Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM.mkv</D:href><D:propstat><D:prop><D:resourcetype></D:resourcetype><D:displayname>Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM.mkv</D:displayname><D:getcontenttype>video/x-matroska</D:getcontenttype><D:getcontentlength>69347000342</D:getcontentlength></D:prop></D:propstat></D:response></D:multistatus>`;
 
-it("resolveCompletedFile() PROPFINDs the dir and builds an authed WebDAV stream URL", async ({
+const SEASON_PACK_XML = `<?xml version="1.0" encoding="UTF-8"?><D:multistatus xmlns:D="DAV:"><D:response><D:href>/webdav/complete/Default/The.Office.S01-GRP/</D:href><D:propstat><D:prop><D:resourcetype><D:collection/></D:resourcetype></D:prop></D:propstat></D:response><D:response><D:href>/webdav/complete/Default/The.Office.S01-GRP/The.Office.S01E01-GRP.mkv</D:href><D:propstat><D:prop><D:resourcetype></D:resourcetype><D:displayname>The.Office.S01E01-GRP.mkv</D:displayname><D:getcontentlength>1500000000</D:getcontentlength></D:prop></D:propstat></D:response><D:response><D:href>/webdav/complete/Default/The.Office.S01-GRP/The.Office.S01E02-GRP.mkv</D:href><D:propstat><D:prop><D:resourcetype></D:resourcetype><D:displayname>The.Office.S01E02-GRP.mkv</D:displayname><D:getcontentlength>1480000000</D:getcontentlength></D:prop></D:propstat></D:response></D:multistatus>`;
+
+it("resolveCompletedFiles() PROPFINDs the dir and builds an authed WebDAV stream URL (single)", async ({
   server,
   dataSourceMap,
 }) => {
@@ -251,11 +253,15 @@ it("resolveCompletedFile() PROPFINDs the dir and builds an authed WebDAV stream 
   );
 
   const api = dataSourceMap.get(AltmountAPI);
-  const file = await api.resolveCompletedFile({
-    storage: "/mnt/altmount/complete/Default",
-    name: "Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM",
-  });
+  const files = await api.resolveCompletedFiles(
+    {
+      storage: "/mnt/altmount/complete/Default",
+      name: "Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM",
+    },
+    { multiFile: false },
+  );
 
+  expect(files).toHaveLength(1);
   // PROPFIND targets the rebased WebDAV directory with Depth:1 + basic auth.
   expect(propfindUrl).toBe(
     "http://altmount.test:8081/webdav/complete/Default/",
@@ -267,16 +273,46 @@ it("resolveCompletedFile() PROPFINDs the dir and builds an authed WebDAV stream 
 
   // The stream URL embeds credentials as userinfo (riven's VFS converts these
   // to an Authorization header — undici ignores raw URL userinfo).
-  expect(file.streamUrl).toBe(
+  expect(files[0]!.streamUrl).toBe(
     "http://usenet:secret@altmount.test:8081/webdav/complete/Default/Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM.mkv",
   );
-  expect(file.fileSize).toBe(69347000342);
-  expect(file.originalFilename).toBe(
+  expect(files[0]!.fileSize).toBe(69347000342);
+  expect(files[0]!.originalFilename).toBe(
     "Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM.mkv",
   );
 });
 
-it("resolveCompletedFile() throws when no media file matches the release", async ({
+it("resolveCompletedFiles() returns every episode file for a season pack (multiFile)", async ({
+  server,
+  dataSourceMap,
+}) => {
+  server.use(
+    http.all(
+      "**/webdav/**",
+      () => new HttpResponse(SEASON_PACK_XML, { status: 207 }),
+    ),
+  );
+
+  const api = dataSourceMap.get(AltmountAPI);
+  const files = await api.resolveCompletedFiles(
+    {
+      storage: "/mnt/altmount/complete/Default/The.Office.S01-GRP",
+      name: "The.Office.S01-GRP",
+    },
+    { multiFile: true },
+  );
+
+  expect(files).toHaveLength(2);
+  expect(files.map((f) => f.originalFilename)).toEqual([
+    "The.Office.S01E01-GRP.mkv",
+    "The.Office.S01E02-GRP.mkv",
+  ]);
+  expect(files[0]!.streamUrl).toBe(
+    "http://usenet:secret@altmount.test:8081/webdav/complete/Default/The.Office.S01-GRP/The.Office.S01E01-GRP.mkv",
+  );
+});
+
+it("resolveCompletedFiles() throws when no media file matches the release", async ({
   server,
   dataSourceMap,
 }) => {
@@ -293,9 +329,12 @@ it("resolveCompletedFile() throws when no media file matches the release", async
 
   const api = dataSourceMap.get(AltmountAPI);
   await expect(
-    api.resolveCompletedFile({
-      storage: "/mnt/altmount/complete/Default",
-      name: "Missing.Movie.2099",
-    }),
+    api.resolveCompletedFiles(
+      {
+        storage: "/mnt/altmount/complete/Default",
+        name: "Missing.Movie.2099",
+      },
+      { multiFile: false },
+    ),
   ).rejects.toThrow(/no media file/i);
 });

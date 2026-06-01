@@ -21,19 +21,32 @@ export type MediaItemNzbDownloadRequestedEvent = z.infer<
   typeof MediaItemNzbDownloadRequestedEvent
 >;
 
+/**
+ * A single completed media file resolved over WebDAV. A movie or single
+ * episode yields one; a season pack yields one per episode file.
+ */
+export const NzbResolvedFile = z.object({
+  /**
+   * WebDAV URL the file is streamable from, with credentials embedded as
+   * userinfo. riven stores it as the MediaEntry's stream URL.
+   */
+  streamUrl: z.url(),
+  /** Size of the file in bytes. */
+  fileSize: z.number().int().nonnegative(),
+  /** Filename of the file (basename of the WebDAV path). */
+  originalFilename: z.string().min(1),
+});
+
+export type NzbResolvedFile = z.infer<typeof NzbResolvedFile>;
+
 export const MediaItemNzbDownloadRequestedResponse = z.object({
   altmountId: z.string().min(1),
   status: z.enum(["queued", "downloading", "completed", "failed"]),
   /**
-   * WebDAV URL the completed media file is streamable from, with credentials
-   * embedded as userinfo. Present once `status` is `"completed"`; riven stores
-   * it as the MediaEntry's stream URL.
+   * The completed media file(s). Present once `status` is `"completed"`: one
+   * entry for a movie/episode, one per episode file for a season pack.
    */
-  streamUrl: z.url().optional(),
-  /** Size of the completed media file in bytes. */
-  fileSize: z.number().int().nonnegative().optional(),
-  /** Filename of the completed media file (basename of the WebDAV path). */
-  originalFilename: z.string().min(1).optional(),
+  files: z.array(NzbResolvedFile).optional(),
 });
 
 export type MediaItemNzbDownloadRequestedResponse = z.infer<

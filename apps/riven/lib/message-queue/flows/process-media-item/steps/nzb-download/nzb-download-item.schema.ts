@@ -1,4 +1,7 @@
-import { MediaItemNzbDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.nzb-download-requested.event";
+import {
+  MediaItemNzbDownloadRequestedResponse,
+  NzbResolvedFile,
+} from "@repo/util-plugin-sdk/schemas/events/media-item.nzb-download-requested.event";
 import { NzbScrapeMediaItemPayload } from "@repo/util-plugin-sdk/schemas/events/media-item.nzb-scrape-requested.event";
 
 import z from "zod";
@@ -22,11 +25,10 @@ export const NzbDownloadItemFlow = createFlowSchema("nzb-download-item", {
   output: z.object({
     altmountId: z.string().min(1),
     item: NzbScrapeMediaItemPayload,
-    // The completed file resolved by the altmount plugin. Required here because
-    // the validate-nzb-download step needs them to create the MediaEntry.
-    streamUrl: z.url(),
-    fileSize: z.number().int().nonnegative(),
-    originalFilename: z.string().min(1),
+    // The completed file(s) resolved by the altmount plugin (one for a
+    // movie/episode, one per episode for a season pack). Required here because
+    // the validate-nzb-download step needs them to create the MediaEntries.
+    files: z.array(NzbResolvedFile).min(1),
   }),
 });
 

@@ -328,9 +328,7 @@ export const processMediaItemProcessor =
               job.data.mediaItem.id,
               {
                 altmountId: downloadOutput.altmountId,
-                streamUrl: downloadOutput.streamUrl,
-                fileSize: downloadOutput.fileSize,
-                originalFilename: downloadOutput.originalFilename,
+                files: downloadOutput.files,
               },
             );
 

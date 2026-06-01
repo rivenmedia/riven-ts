@@ -24,13 +24,16 @@ export default {
           expectedTitle: event.expectedTitle,
         });
         const completed = await api.waitForCompletion(altmountId);
-        const file = await api.resolveCompletedFile(completed);
+        // Seasons (and shows) download a multi-file pack; movies/episodes a
+        // single file. The pack lands in its own subdir so every video file in
+        // it belongs to the release.
+        const multiFile =
+          event.item.type === "season" || event.item.type === "show";
+        const files = await api.resolveCompletedFiles(completed, { multiFile });
         return {
           altmountId,
           status: completed.status,
-          streamUrl: file.streamUrl,
-          fileSize: file.fileSize,
-          originalFilename: file.originalFilename,
+          files,
         };
       } catch (error) {
         throw new Error(

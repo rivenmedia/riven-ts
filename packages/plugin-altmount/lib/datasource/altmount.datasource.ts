@@ -3,7 +3,11 @@ import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
 import { SabAddurlResponse } from "../schemas/sab-addurl-response.schema.ts";
 import { SabHistoryResponse } from "../schemas/sab-history-response.schema.ts";
 import { SabQueueResponse } from "../schemas/sab-queue-response.schema.ts";
-import { parsePropfindEntries, selectCompletedMediaFile } from "./propfind.ts";
+import {
+  parsePropfindEntries,
+  selectAllMediaFiles,
+  selectCompletedMediaFile,
+} from "./propfind.ts";
 
 import type { AltmountSettings } from "../altmount-settings.schema.ts";
 
@@ -163,17 +167,22 @@ export class AltmountAPI extends BaseDataSource<AltmountSettings> {
   }
 
   /**
-   * Resolve a completed download's media file to a streamable WebDAV URL.
+   * Resolve a completed download's media file(s) to streamable WebDAV URLs.
    *
-   * The SAB `storage` field is only the completed directory, so we rebase it
-   * from `webdavRootPath` onto `webdavUrl`, list that directory over WebDAV
-   * (PROPFIND Depth:1), pick the media file for the release, and build a URL
-   * with the WebDAV credentials embedded as userinfo. riven's VFS strips the
-   * userinfo into an `Authorization` header (undici ignores raw URL userinfo).
+   * The SAB `storage` field is the completed directory (AltMount places each
+   * job in its own per-release subdir), so we rebase it from `webdavRootPath`
+   * onto `webdavUrl`, list it over WebDAV (PROPFIND Depth:1), and build URLs
+   * with the WebDAV credentials embedded as userinfo (riven's VFS strips the
+   * userinfo into an `Authorization` header — undici ignores raw URL userinfo).
+   *
+   * `multiFile` distinguishes a season pack (return every video file in the
+   * pack's subdir) from a movie/episode (return the single file matching the
+   * release name).
    */
-  async resolveCompletedFile(
+  async resolveCompletedFiles(
     completed: Pick<CompletedDownload, "storage" | "name">,
-  ): Promise<ResolvedCompletedFile> {
+    opts: { multiFile: boolean },
+  ): Promise<ResolvedCompletedFile[]> {
     const { storage, name } = completed;
 
     if (!storage) {
@@ -205,29 +214,34 @@ export class AltmountAPI extends BaseDataSource<AltmountSettings> {
       );
     }
 
-    const xml = await response.text();
-    const chosen = selectCompletedMediaFile(parsePropfindEntries(xml), name);
+    const entries = parsePropfindEntries(await response.text());
 
-    if (!chosen) {
+    const picks = opts.multiFile
+      ? selectAllMediaFiles(entries)
+      : [selectCompletedMediaFile(entries, name)].filter(
+          (f): f is NonNullable<typeof f> => f !== null,
+        );
+
+    if (picks.length === 0) {
       throw new Error(
         `altmount: no media file found in ${dirUrl} for release "${name}"`,
       );
     }
 
-    // chosen.href is an absolute server path (e.g. /webdav/complete/Default/X.mkv).
-    const streamUrl = new URL(chosen.href, base);
-    streamUrl.username = webdavUser;
-    streamUrl.password = webdavPass;
+    return picks.map((pick) => {
+      // pick.href is an absolute server path (e.g. /webdav/complete/Default/X.mkv).
+      const streamUrl = new URL(pick.href, base);
+      streamUrl.username = webdavUser;
+      streamUrl.password = webdavPass;
 
-    const originalFilename = decodeURIComponent(
-      chosen.href.slice(chosen.href.lastIndexOf("/") + 1),
-    );
-
-    return {
-      streamUrl: streamUrl.href,
-      fileSize: chosen.fileSize,
-      originalFilename,
-    };
+      return {
+        streamUrl: streamUrl.href,
+        fileSize: pick.fileSize,
+        originalFilename: decodeURIComponent(
+          pick.href.slice(pick.href.lastIndexOf("/") + 1),
+        ),
+      };
+    });
   }
 
   /**
