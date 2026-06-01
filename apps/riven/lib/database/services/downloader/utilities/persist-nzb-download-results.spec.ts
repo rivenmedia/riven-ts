@@ -1,3 +1,5 @@
+import { Episode } from "@repo/util-plugin-sdk/dto/entities";
+
 import { expect } from "vitest";
 
 import { it } from "../../../../__tests__/test-context.ts";
@@ -60,13 +62,36 @@ it("is idempotent — does not create a duplicate media entry on re-run", async 
   expect(entries).toHaveLength(1);
 });
 
-// Episode / season-pack support is deferred (movies-first for v1). The util
-// already attaches a MediaEntry to a standalone Episode, but the
-// MediaItemStateSubscriber does not promote it to "completed" in the same
-// flush: an Episode MediaEntry's `_setPath` @BeforeCreate loads season.show,
-// which disturbs the collection so the subscriber's `loadItems()` re-queries
-// and misses the not-yet-committed entry. (The torrent path never exercises a
-// standalone episode — episodes are only handled via the show fan-out.)
-// Tracked as a follow-up; resolving it likely means seeding the parent state
-// recompute after the entry is flushed.
-it.todo("creates a media entry and reaches completed for an episode");
+it("creates a media entry and reaches completed for an episode", async ({
+  scrapedShowContext: {
+    episodes: [episode],
+  },
+  orm,
+  services: { downloaderService },
+}) => {
+  expect.assert(episode);
+
+  await downloaderService.persistNzbDownloadResult(episode.id, {
+    ...NZB_RESULT,
+    altmountId: "The.Office.S01E01.1080p.x265-GROUP",
+    originalFilename: "The.Office.S01E01.1080p.x265-GROUP.mkv",
+  });
+
+  // Re-fetch from a fresh fork — this is what the processor does via
+  // getMediaItemById. (The in-memory entity returned by the service can read
+  // back as `indexed`: when the parent Season recomputes, its
+  // `episodes.loadItems()` refreshes the episode's in-memory `.state` from the
+  // not-yet-committed row, even though the episode's own changeset already
+  // persisted `completed`. The committed DB row is correct.)
+  const fresh = await orm.em
+    .fork()
+    .findOneOrFail(
+      Episode,
+      { id: episode.id },
+      { populate: ["filesystemEntries"] },
+    );
+
+  expect(fresh.state).toBe("completed");
+  const entries = await fresh.getMediaEntries();
+  expect(entries).toHaveLength(1);
+});
