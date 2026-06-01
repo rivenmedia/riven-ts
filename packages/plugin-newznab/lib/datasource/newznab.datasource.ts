@@ -86,6 +86,7 @@ export class NewznabAPI extends BaseDataSource<NewznabSettings> {
       id: string;
       title: string;
       imdbId?: string | null | undefined;
+      tvdbId?: string | null | undefined;
       type: "movie" | "show" | "season" | "episode";
       seasonNumber?: number | null | undefined;
       episodeNumber?: number | null | undefined;
@@ -103,35 +104,46 @@ export class NewznabAPI extends BaseDataSource<NewznabSettings> {
     const isMovie = item.type === "movie";
     const categories = isMovie ? movieCategories : tvCategories;
     const catParam = categories.join(",");
+    const common = `apikey=${encodeURIComponent(apiKey)}&o=json&extended=1&cat=${catParam}`;
+    const titleSearch = `api?t=search&q=${encodeURIComponent(item.title)}&${common}`;
 
     let path: string;
 
-    if (item.imdbId) {
-      // Strip the "tt" prefix — Newznab expects a bare numeric ID
-      const numericImdb = item.imdbId.replace(/^tt/, "");
-
-      if (isMovie) {
-        path = `api?t=movie&imdbid=${numericImdb}&apikey=${encodeURIComponent(apiKey)}&o=json&extended=1&cat=${catParam}`;
+    if (isMovie) {
+      if (item.imdbId) {
+        // Movie search keys on imdbid. Strip the "tt" prefix — Newznab expects
+        // a bare numeric ID.
+        const numericImdb = item.imdbId.replace(/^tt/, "");
+        path = `api?t=movie&imdbid=${numericImdb}&${common}`;
       } else {
-        // Forward season/episode so tvsearch returns the correct slice of the
-        // series. Without these, Newznab returns the entire series feed and
-        // downstream candidate selection becomes a coin flip.
-        const seasonParam =
-          item.seasonNumber != null
-            ? `&season=${item.seasonNumber.toString()}`
-            : "";
-        const episodeParam =
-          item.episodeNumber != null
-            ? `&ep=${item.episodeNumber.toString()}`
-            : "";
-        path = `api?t=tvsearch&imdbid=${numericImdb}&apikey=${encodeURIComponent(apiKey)}&o=json&extended=1&cat=${catParam}${seasonParam}${episodeParam}`;
+        this.logger.warn(
+          `[${this.serviceName}] No IMDB ID for movie "${item.title}", falling back to title search`,
+        );
+        path = titleSearch;
       }
+    } else if (item.tvdbId) {
+      // TV search keys on tvdbid. Newznab tvsearch does NOT support imdbid
+      // (nzbgeek caps advertise supportedParams "q,rid,tvdbid,tvmazeid,
+      // season,ep") — an imdbid tvsearch silently returns zero results.
+      // Forward season/episode so tvsearch returns the correct slice of the
+      // series; without these, Newznab returns the entire series feed and
+      // downstream candidate selection becomes a coin flip.
+      const seasonParam =
+        item.seasonNumber != null
+          ? `&season=${item.seasonNumber.toString()}`
+          : "";
+      const episodeParam =
+        item.episodeNumber != null
+          ? `&ep=${item.episodeNumber.toString()}`
+          : "";
+      path = `api?t=tvsearch&tvdbid=${encodeURIComponent(item.tvdbId)}&${common}${seasonParam}${episodeParam}`;
     } else {
-      // No IMDB ID — fall back to title search
+      // No tvdbId — imdbid is useless for tvsearch, so the only viable query
+      // is a free-text title search.
       this.logger.warn(
-        `[${this.serviceName}] No IMDB ID for "${item.title}", falling back to title search`,
+        `[${this.serviceName}] No TVDB ID for ${item.type} "${item.title}", falling back to title search`,
       );
-      path = `api?t=search&q=${encodeURIComponent(item.title)}&apikey=${encodeURIComponent(apiKey)}&o=json&extended=1&cat=${catParam}`;
+      path = titleSearch;
     }
 
     try {

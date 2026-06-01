@@ -126,6 +126,7 @@ it("scrape() queries the tvsearch endpoint for a show-level item without season/
       id: "00000000-0000-0000-0000-000000000002",
       title: "Breaking Bad",
       imdbId: "tt0903747",
+      tvdbId: "81189",
       type: "show",
     },
   });
@@ -133,7 +134,11 @@ it("scrape() queries the tvsearch endpoint for a show-level item without season/
   expect(capturedUrl).toBeDefined();
   const url = new URL(capturedUrl!);
   expect(url.searchParams.get("t")).toBe("tvsearch");
-  expect(url.searchParams.get("imdbid")).toBe("0903747");
+  // nzbgeek (and Newznab tvsearch generally) does not support imdbid — its caps
+  // advertise supportedParams "q,rid,tvdbid,tvmazeid,season,ep". TV scrapes must
+  // key on tvdbid, never imdbid (which silently returns zero results).
+  expect(url.searchParams.get("tvdbid")).toBe("81189");
+  expect(url.searchParams.has("imdbid")).toBe(false);
   expect(url.searchParams.get("cat")).toBe("5040,5045");
   // Show-level scrape: neither season nor ep should be sent
   expect(url.searchParams.has("season")).toBe(false);
@@ -159,6 +164,7 @@ it("scrape() forwards season but NOT ep for a season-level tvsearch", async ({
       id: "00000000-0000-0000-0000-000000000007",
       title: "Breaking Bad Season 2",
       imdbId: "tt0903747",
+      tvdbId: "81189",
       type: "season",
       seasonNumber: 2,
     },
@@ -167,6 +173,8 @@ it("scrape() forwards season but NOT ep for a season-level tvsearch", async ({
   expect(capturedUrl).toBeDefined();
   const url = new URL(capturedUrl!);
   expect(url.searchParams.get("t")).toBe("tvsearch");
+  expect(url.searchParams.get("tvdbid")).toBe("81189");
+  expect(url.searchParams.has("imdbid")).toBe(false);
   expect(url.searchParams.get("season")).toBe("2");
   expect(url.searchParams.has("ep")).toBe(false);
 });
@@ -190,6 +198,7 @@ it("scrape() forwards BOTH season and ep for an episode-level tvsearch", async (
       id: "00000000-0000-0000-0000-000000000008",
       title: "Breaking Bad S01E02",
       imdbId: "tt0903747",
+      tvdbId: "81189",
       type: "episode",
       seasonNumber: 1,
       episodeNumber: 2,
@@ -199,6 +208,8 @@ it("scrape() forwards BOTH season and ep for an episode-level tvsearch", async (
   expect(capturedUrl).toBeDefined();
   const url = new URL(capturedUrl!);
   expect(url.searchParams.get("t")).toBe("tvsearch");
+  expect(url.searchParams.get("tvdbid")).toBe("81189");
+  expect(url.searchParams.has("imdbid")).toBe(false);
   expect(url.searchParams.get("season")).toBe("1");
   expect(url.searchParams.get("ep")).toBe("2");
 });
@@ -222,6 +233,7 @@ it("scrape() forwards season=0 for specials (boundary case)", async ({
       id: "00000000-0000-0000-0000-000000000009",
       title: "Breaking Bad Specials",
       imdbId: "tt0903747",
+      tvdbId: "81189",
       type: "season",
       seasonNumber: 0,
     },
@@ -231,6 +243,40 @@ it("scrape() forwards season=0 for specials (boundary case)", async ({
   const url = new URL(capturedUrl!);
   // Critical: season=0 (specials) must be forwarded, not treated as falsy
   expect(url.searchParams.get("season")).toBe("0");
+});
+
+it("scrape() falls back to title search for a TV item with no tvdbId", async ({
+  server,
+  dataSourceMap,
+}) => {
+  let capturedUrl: string | undefined;
+
+  server.use(
+    http.get("**/api", ({ request }) => {
+      capturedUrl = request.url;
+      return HttpResponse.json(makeResponse([makeItem({ category: "5040" })]));
+    }),
+  );
+
+  const api = dataSourceMap.get(NewznabAPI);
+  await api.scrape({
+    item: {
+      id: "00000000-0000-0000-0000-00000000000b",
+      title: "Obscure Show",
+      // imdbId is useless for nzbgeek tvsearch, and there is no tvdbId — the
+      // only viable query is a free-text title search.
+      imdbId: "tt0903747",
+      tvdbId: null,
+      type: "show",
+    },
+  });
+
+  expect(capturedUrl).toBeDefined();
+  const url = new URL(capturedUrl!);
+  expect(url.searchParams.get("t")).toBe("search");
+  expect(url.searchParams.get("q")).toBe("Obscure Show");
+  expect(url.searchParams.has("tvdbid")).toBe(false);
+  expect(url.searchParams.has("imdbid")).toBe(false);
 });
 
 it("scrape() never sends season/ep for a movie even if the payload carries them", async ({
