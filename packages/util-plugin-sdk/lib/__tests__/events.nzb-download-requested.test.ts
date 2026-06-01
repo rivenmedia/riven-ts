@@ -119,4 +119,29 @@ describe("MediaItemNzbDownloadRequestedResponse", () => {
       }),
     ).toThrow();
   });
+
+  it("carries the resolved WebDAV stream URL, file size and filename on completion", () => {
+    const parsed = MediaItemNzbDownloadRequestedResponse.parse({
+      altmountId: "altmount-abc-123",
+      status: "completed",
+      streamUrl:
+        "http://usenet:usenet@altmount:8081/webdav/complete/Default/Inception.2010.4K.x265-NAHOM.mkv",
+      fileSize: 69347000342,
+      originalFilename: "Inception.2010.4K.x265-NAHOM.mkv",
+    });
+
+    expect(parsed.streamUrl).toContain("/webdav/complete/Default/");
+    expect(parsed.fileSize).toBe(69347000342);
+    expect(parsed.originalFilename).toBe("Inception.2010.4K.x265-NAHOM.mkv");
+  });
+
+  it("rejects a non-URL streamUrl", () => {
+    expect(() =>
+      MediaItemNzbDownloadRequestedResponse.parse({
+        altmountId: "altmount-abc-123",
+        status: "completed",
+        streamUrl: "not-a-url",
+      }),
+    ).toThrow();
+  });
 });

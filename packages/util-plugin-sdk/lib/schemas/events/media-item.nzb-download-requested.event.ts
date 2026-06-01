@@ -24,6 +24,16 @@ export type MediaItemNzbDownloadRequestedEvent = z.infer<
 export const MediaItemNzbDownloadRequestedResponse = z.object({
   altmountId: z.string().min(1),
   status: z.enum(["queued", "downloading", "completed", "failed"]),
+  /**
+   * WebDAV URL the completed media file is streamable from, with credentials
+   * embedded as userinfo. Present once `status` is `"completed"`; riven stores
+   * it as the MediaEntry's stream URL.
+   */
+  streamUrl: z.url().optional(),
+  /** Size of the completed media file in bytes. */
+  fileSize: z.number().int().nonnegative().optional(),
+  /** Filename of the completed media file (basename of the WebDAV path). */
+  originalFilename: z.string().min(1).optional(),
 });
 
 export type MediaItemNzbDownloadRequestedResponse = z.infer<
