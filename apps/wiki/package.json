@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "codegen:wiki-docs": "node scripts/sync-plugin-docs.mjs && node scripts/sync-core-docs.mjs && node scripts/sync-ranking-docs.mjs",
+    "codegen:wiki-docs": "node scripts/sync-plugin-docs.mjs && node scripts/sync-core-docs.mjs",
     "dev": "next dev --turbopack",
     "postinstall": "fumadocs-mdx",
     "lint": "eslint",
