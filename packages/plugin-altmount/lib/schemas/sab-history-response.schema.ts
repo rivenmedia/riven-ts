@@ -11,6 +11,15 @@ export const SabHistorySlot = z.object({
   status: z.union([z.enum(["Completed", "Failed"]), z.string()]),
   name: z.string().optional(),
   fail_message: z.string().optional(),
+  // The on-disk directory the completed download was written to, e.g.
+  // "/mnt/altmount/complete/Default". This is the directory, not the file —
+  // the actual media file is discovered by listing it over WebDAV.
+  storage: z.string().optional(),
+  // SABnzbd category the job ran under (e.g. "Default").
+  category: z.string().optional(),
+  // Total downloaded size in bytes. Coerced because some SAB implementations
+  // report it as a string.
+  bytes: z.coerce.number().optional(),
 });
 
 export type SabHistorySlot = z.infer<typeof SabHistorySlot>;

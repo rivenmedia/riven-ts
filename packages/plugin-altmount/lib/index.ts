@@ -23,8 +23,15 @@ export default {
           nzbUrl: event.nzbUrl,
           expectedTitle: event.expectedTitle,
         });
-        const status = await api.waitForCompletion(altmountId);
-        return { altmountId, status };
+        const completed = await api.waitForCompletion(altmountId);
+        const file = await api.resolveCompletedFile(completed);
+        return {
+          altmountId,
+          status: completed.status,
+          streamUrl: file.streamUrl,
+          fileSize: file.fileSize,
+          originalFilename: file.originalFilename,
+        };
       } catch (error) {
         throw new Error(
           `altmount download failed for "${event.expectedTitle}": ${

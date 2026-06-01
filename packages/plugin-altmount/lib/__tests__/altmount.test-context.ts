@@ -13,5 +13,9 @@ export const it: typeof pluginTestContext = pluginTestContext
       altmountApiKey: "test-key",
       pollIntervalMs: 10, // fast for tests
       pollTimeoutMs: 5_000,
+      webdavUrl: "http://altmount.test:8081/webdav",
+      webdavUser: "usenet",
+      webdavPass: "secret",
+      webdavRootPath: "/mnt/altmount",
     }),
   );

@@ -42,10 +42,13 @@ it("addurl() returns the first nzo_id on success", async ({
       const url = new URL(request.url);
       expect(url.searchParams.get("mode")).toBe("addurl");
       expect(url.searchParams.get("apikey")).toBe("test-key");
-      expect(url.searchParams.get("name")).toBe("Inception 2010");
-      expect(url.searchParams.get("url")).toBe(
+      // SABnzbd-standard: the NZB URL goes in `name`, the human title in
+      // `nzbname` (see the bc755c6c fix). There is no separate `url` param.
+      expect(url.searchParams.get("name")).toBe(
         "https://indexer.example.com/nzb/abc.nzb",
       );
+      expect(url.searchParams.get("nzbname")).toBe("Inception 2010");
+      expect(url.searchParams.get("url")).toBeNull();
       return HttpResponse.json({
         status: true,
         nzo_ids: ["SABnzbd_nzo_xyz"],
@@ -125,7 +128,16 @@ it("waitForCompletion() polls queue, then sees Completed in history", async ({
       if (mode === "history") {
         return HttpResponse.json({
           history: {
-            slots: [{ nzo_id: "X", status: "Completed", name: "Foo" }],
+            slots: [
+              {
+                nzo_id: "X",
+                status: "Completed",
+                name: "Foo",
+                storage: "/mnt/altmount/complete/Default",
+                category: "Default",
+                bytes: 12345,
+              },
+            ],
           },
         });
       }
@@ -134,8 +146,11 @@ it("waitForCompletion() polls queue, then sees Completed in history", async ({
   );
 
   const api = dataSourceMap.get(AltmountAPI);
-  const status = await api.waitForCompletion("X");
-  expect(status).toBe("completed");
+  const result = await api.waitForCompletion("X");
+  expect(result.status).toBe("completed");
+  expect(result.storage).toBe("/mnt/altmount/complete/Default");
+  expect(result.name).toBe("Foo");
+  expect(result.bytes).toBe(12345);
   expect(pollCount).toBeGreaterThanOrEqual(3);
 });
 
@@ -207,3 +222,80 @@ it("waitForCompletion() throws after pollTimeoutMs elapses", async ({
   const api = dataSourceMap.get(AltmountAPI);
   await expect(api.waitForCompletion("X")).rejects.toThrow(/poll timeout/i);
 }, 10_000);
+
+// ---------------------------------------------------------------------------
+// resolveCompletedFile()
+// ---------------------------------------------------------------------------
+
+const PROPFIND_XML = `<?xml version="1.0" encoding="UTF-8"?><D:multistatus xmlns:D="DAV:"><D:response><D:href>/webdav/complete/Default/</D:href><D:propstat><D:prop><D:resourcetype><D:collection/></D:resourcetype><D:displayname>Default</D:displayname></D:prop></D:propstat></D:response><D:response><D:href>/webdav/complete/Default/Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM.mkv</D:href><D:propstat><D:prop><D:resourcetype></D:resourcetype><D:displayname>Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM.mkv</D:displayname><D:getcontenttype>video/x-matroska</D:getcontenttype><D:getcontentlength>69347000342</D:getcontentlength></D:prop></D:propstat></D:response></D:multistatus>`;
+
+it("resolveCompletedFile() PROPFINDs the dir and builds an authed WebDAV stream URL", async ({
+  server,
+  dataSourceMap,
+}) => {
+  let propfindUrl: string | undefined;
+  let depthHeader: string | null = null;
+  let authHeader: string | null = null;
+
+  server.use(
+    http.all("**/webdav/**", ({ request }) => {
+      expect(request.method).toBe("PROPFIND");
+      propfindUrl = request.url;
+      depthHeader = request.headers.get("depth");
+      authHeader = request.headers.get("authorization");
+      return new HttpResponse(PROPFIND_XML, {
+        status: 207,
+        headers: { "content-type": "application/xml" },
+      });
+    }),
+  );
+
+  const api = dataSourceMap.get(AltmountAPI);
+  const file = await api.resolveCompletedFile({
+    storage: "/mnt/altmount/complete/Default",
+    name: "Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM",
+  });
+
+  // PROPFIND targets the rebased WebDAV directory with Depth:1 + basic auth.
+  expect(propfindUrl).toBe(
+    "http://altmount.test:8081/webdav/complete/Default/",
+  );
+  expect(depthHeader).toBe("1");
+  expect(authHeader).toBe(
+    `Basic ${Buffer.from("usenet:secret").toString("base64")}`,
+  );
+
+  // The stream URL embeds credentials as userinfo (riven's VFS converts these
+  // to an Authorization header — undici ignores raw URL userinfo).
+  expect(file.streamUrl).toBe(
+    "http://usenet:secret@altmount.test:8081/webdav/complete/Default/Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM.mkv",
+  );
+  expect(file.fileSize).toBe(69347000342);
+  expect(file.originalFilename).toBe(
+    "Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM.mkv",
+  );
+});
+
+it("resolveCompletedFile() throws when no media file matches the release", async ({
+  server,
+  dataSourceMap,
+}) => {
+  server.use(
+    http.all(
+      "**/webdav/**",
+      () =>
+        new HttpResponse(
+          `<D:multistatus xmlns:D="DAV:"><D:response><D:href>/webdav/complete/Default/</D:href><D:propstat><D:prop><D:resourcetype><D:collection/></D:resourcetype></D:prop></D:propstat></D:response></D:multistatus>`,
+          { status: 207 },
+        ),
+    ),
+  );
+
+  const api = dataSourceMap.get(AltmountAPI);
+  await expect(
+    api.resolveCompletedFile({
+      storage: "/mnt/altmount/complete/Default",
+      name: "Missing.Movie.2099",
+    }),
+  ).rejects.toThrow(/no media file/i);
+});

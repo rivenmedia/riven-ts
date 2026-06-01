@@ -119,4 +119,28 @@ describe("SabHistoryResponse", () => {
     });
     expect(result.success).toBe(true);
   });
+
+  it("exposes storage, category and bytes from a real AltMount slot", () => {
+    const result = SabHistoryResponse.safeParse({
+      history: {
+        slots: [
+          {
+            nzo_id: "Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM",
+            name: "Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM",
+            status: "Completed",
+            storage: "/mnt/altmount/complete/Default",
+            category: "Default",
+            bytes: 69347000342,
+          },
+        ],
+      },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      const slot = result.data.history.slots[0]!;
+      expect(slot.storage).toBe("/mnt/altmount/complete/Default");
+      expect(slot.category).toBe("Default");
+      expect(slot.bytes).toBe(69347000342);
+    }
+  });
 });
