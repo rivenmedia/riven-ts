@@ -2,7 +2,12 @@
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
   "globalEnv": ["NODE_ENV"],
-  "globalPassThroughEnv": ["DEBUG", "CI"],
+  // RIVEN_SETTING__* is passed through (not hashed) so tasks whose import graph
+  // eagerly loads the settings module — e.g. codegen:gql-schema, which imports
+  // the resolver graph — can run under strict env mode. Build-time dummies are
+  // supplied by the Dockerfile; values do not affect task output, so they are
+  // passThrough (not env) to keep the cache stable.
+  "globalPassThroughEnv": ["DEBUG", "CI", "RIVEN_SETTING__*"],
   "globalDependencies": [".node-version"],
   "futureFlags": {
     "affectedUsingTaskInputs": true,

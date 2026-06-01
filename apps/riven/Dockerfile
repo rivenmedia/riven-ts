@@ -90,7 +90,18 @@ FROM base AS builder
     ARG TURBO_TEAM
     ENV TURBO_TEAM=${TURBO_TEAM}
 
-    RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN turbo @repo/riven#build
+    # codegen:gql-schema imports the resolver graph, which eagerly loads the
+    # settings module — that requires a handful of settings to be present. These
+    # are BUILD-TIME-ONLY dummies (set inline on the RUN, never persisted into
+    # the image; the generated GraphQL schema does not depend on their values)
+    # so a turbo cache MISS on the codegen step can still run instead of failing
+    # the build. Real settings come from the runtime env_file. Without this the
+    # build only succeeds on a turbo remote-cache hit.
+    RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN \
+        RIVEN_SETTING__databaseUrl="postgresql://build:build@localhost:5432/build" \
+        RIVEN_SETTING__redisUrl="redis://localhost:6379" \
+        RIVEN_SETTING__vfsMountPath="/mnt/riven" \
+        turbo @repo/riven#build
 
 FROM builder AS production-deploy
 
