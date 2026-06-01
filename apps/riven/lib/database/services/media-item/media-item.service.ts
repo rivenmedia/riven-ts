@@ -1,4 +1,4 @@
-import { MediaItem, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   CreateRequestContext,
@@ -8,6 +8,7 @@ import {
 import { services } from "../../database.ts";
 import { BaseService } from "../core/base-service.ts";
 import { resetMediaItem } from "./utilities/reset-media-item.ts";
+import { shouldFanOutForProcessing } from "./utilities/should-fan-out-for-processing.ts";
 
 import type { FindOneOrFailOptions } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";
@@ -41,9 +42,13 @@ export class MediaItemService extends BaseService {
       const { settings } = await import("../../../utilities/settings.ts");
 
       if (
-        item.itemRequest.getProperty("isPartialRequest") ||
-        (item instanceof Show &&
-          (item.status === "continuing" || settings.preferSeasonPacks))
+        shouldFanOutForProcessing({
+          item,
+          isPartialRequest:
+            item.itemRequest.getProperty("isPartialRequest") ?? false,
+          downloadStrategy: settings.downloadStrategy,
+          preferSeasonPacks: settings.preferSeasonPacks,
+        })
       ) {
         return await services.downloaderService.getFanOutDownloadItems(id);
       }

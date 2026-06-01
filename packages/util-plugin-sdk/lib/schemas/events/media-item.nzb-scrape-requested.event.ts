@@ -18,6 +18,13 @@ export const NzbScrapeMediaItemPayload = z.object({
     .regex(/^tt\d+$/)
     .nullable()
     .optional(),
+  /**
+   * TheTVDB series ID for show/season/episode scrapes. Newznab `tvsearch` keys
+   * on `tvdbid` (NOT `imdbid`, which silently returns zero results), so this is
+   * the primary identifier for TV. Always the parent SHOW's id (the series),
+   * paired with seasonNumber/episodeNumber. Undefined/null for movies.
+   */
+  tvdbId: z.string().min(1).nullable().optional(),
   type: MediaItemType,
   /**
    * Season number for show/season/episode-level scrapes.

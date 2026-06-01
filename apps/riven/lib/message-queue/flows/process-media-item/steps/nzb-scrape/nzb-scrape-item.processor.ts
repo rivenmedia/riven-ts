@@ -1,8 +1,13 @@
+import { Season } from "@repo/util-plugin-sdk/dto/entities";
+
 import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 
 import { nzbScrapeItemProcessorSchema } from "./nzb-scrape-item.schema.ts";
-import { pickNewestCandidate } from "./pick-nzb-candidate.ts";
+import {
+  pickNewestCandidate,
+  pickSeasonPackCandidate,
+} from "./pick-nzb-candidate.ts";
 
 /**
  * Aggregates NZB candidates from all nzb-scrape plugin child jobs, picks the
@@ -27,7 +32,14 @@ export const nzbScrapeItemProcessor =
 
     const item = await mediaItemService.getMediaItemById(job.data.id);
 
-    const chosen = pickNewestCandidate(allCandidates);
+    // A season-level scrape returns both season packs and individual episodes.
+    // Prefer a full-season pack (1 grab covers the whole season); if none, the
+    // undefined result below fans the season out to per-episode scrapes. Every
+    // other item type (movie/episode) keeps the newest-wins selection.
+    const chosen =
+      item instanceof Season
+        ? pickSeasonPackCandidate(allCandidates, item.number)
+        : pickNewestCandidate(allCandidates);
 
     if (chosen === undefined) {
       sendEvent({

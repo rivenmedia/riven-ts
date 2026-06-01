@@ -14,6 +14,7 @@ import { processMediaItemProcessorSchema } from "./process-media-item.schema.ts"
 import { enqueueDownloadItem } from "./steps/download/enqueue-download-item.ts";
 import { enqueueNzbDownloadItem } from "./steps/nzb-download/enqueue-nzb-download-item.ts";
 import { NzbDownloadItemFlow } from "./steps/nzb-download/nzb-download-item.schema.ts";
+import { deriveNzbScrapeTarget } from "./steps/nzb-scrape/derive-nzb-scrape-target.ts";
 import { enqueueNzbScrapeItem } from "./steps/nzb-scrape/enqueue-nzb-scrape-item.ts";
 import { NzbScrapeItemOutput } from "./steps/nzb-scrape/nzb-scrape-item.schema.ts";
 import { enqueueScrapeItem } from "./steps/scrape/enqueue-scrape-item.ts";
@@ -165,24 +166,18 @@ export const processMediaItemProcessor =
               job.data.mediaItem.type,
             );
 
-            // Derive season/episode numbers from the entity discriminator so
-            // the indexer can issue a precise tvsearch query. Movies and shows
-            // have neither; seasons have only seasonNumber; episodes have both.
-            let seasonNumber: number | null = null;
-            let episodeNumber: number | null = null;
-
-            if (itemToScrape instanceof Episode) {
-              seasonNumber = await itemToScrape.season.loadProperty("number");
-              episodeNumber = itemToScrape.number;
-            } else if (itemToScrape instanceof Season) {
-              seasonNumber = itemToScrape.number;
-            }
+            // Resolve the TV identifiers the indexer needs for a precise query:
+            // the parent show's tvdbId (Newznab tvsearch keys on tvdbid, NOT
+            // imdbid) plus season/episode numbers. Movies return all-null.
+            const { tvdbId, seasonNumber, episodeNumber } =
+              await deriveNzbScrapeTarget(itemToScrape);
 
             await enqueueNzbScrapeItem({
               item: {
                 id: itemToScrape.id,
                 title: itemToScrape.title,
                 imdbId: itemToScrape.imdbId,
+                tvdbId,
                 type: itemToScrape.type,
                 seasonNumber,
                 episodeNumber,

@@ -52,6 +52,10 @@ import { settings } from "../../utilities/settings.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { createEventScheduler } from "./actors/event-scheduler.actor.ts";
 import {
+  type FanOutDownloadByIdInput,
+  fanOutDownloadById,
+} from "./actors/fan-out-download-by-id.actor.ts";
+import {
   type FanOutDownloadInput,
   fanOutDownload,
 } from "./actors/fan-out-download.actor.ts";
@@ -203,6 +207,16 @@ export const mainRunnerMachine = setup({
         });
       },
     ),
+    fanOutDownloadById: enqueueActions(
+      ({ enqueue }, params: FanOutDownloadByIdInput) => {
+        enqueue.spawnChild("fanOutDownloadById", {
+          id: "fanOutDownloadById",
+          input: {
+            itemId: params.itemId,
+          },
+        });
+      },
+    ),
     requestItem: enqueueActions(
       ({ enqueue, self }, input: Omit<RequestItemInput, "parentRef">) => {
         enqueue.spawnChild("requestItem", {
@@ -224,6 +238,7 @@ export const mainRunnerMachine = setup({
     requestContentServices,
     scheduleReindex,
     fanOutDownload,
+    fanOutDownloadById,
     requestItem,
   },
   guards: {
@@ -724,6 +739,14 @@ export const mainRunnerMachine = setup({
                   message: `NZB scrape failed for item ${itemId} (${reason})${detail ? `: ${detail}` : ""}`,
                   level: "warn",
                 }),
+              },
+              {
+                // Descend Show→seasons and Season→episodes when an NZB scrape
+                // finds nothing for a container (e.g. a season with no pack):
+                // each child then scrapes/downloads on its own. A leaf
+                // (movie/episode) fans out to nothing, so this is a safe no-op.
+                type: "fanOutDownloadById",
+                params: ({ event: { itemId } }) => ({ itemId }),
               },
             ],
           },
