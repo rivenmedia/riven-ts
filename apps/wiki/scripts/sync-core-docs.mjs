@@ -24,7 +24,7 @@ const SECTIONS = [
   { slug: "graphql", title: "GraphQL Server" },
   { slug: "vfs", title: "VFS" },
   { slug: "scraping", title: "Scraping & Downloads" },
-  { slug: "ranking", title: "Ranking", link: "/docs/configuration/ranking" },
+  { slug: "ranking", title: "Ranking" },
   { slug: "scheduling", title: "Scheduling" },
   { slug: "database-ssl", title: "Database SSL" },
   { slug: "plugins", title: "Plugins" },
