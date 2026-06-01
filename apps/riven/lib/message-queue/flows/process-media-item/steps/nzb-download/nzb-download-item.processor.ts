@@ -30,10 +30,9 @@ export const nzbDownloadItemProcessor =
     const children = await job.getChildrenValues();
 
     // Aggregate plugin responses — support N subscribers even though only
-    // plugin-altmount is expected in production.
-    const allResults = Object.values(children).filter(
-      (result): result is NonNullable<typeof result> => result !== undefined,
-    );
+    // plugin-altmount is expected in production. getChildrenValues only returns
+    // completed children, so the values are never undefined.
+    const allResults = Object.values(children);
 
     const successResult = pickFirstSuccess(allResults);
 

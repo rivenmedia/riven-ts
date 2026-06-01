@@ -1,4 +1,5 @@
 import { HttpResponse, http } from "msw";
+import assert from "node:assert";
 import { expect } from "vitest";
 
 import { it } from "../../__tests__/altmount.test-context.ts";
@@ -273,11 +274,13 @@ it("resolveCompletedFiles() PROPFINDs the dir and builds an authed WebDAV stream
 
   // The stream URL embeds credentials as userinfo (riven's VFS converts these
   // to an Authorization header — undici ignores raw URL userinfo).
-  expect(files[0]!.streamUrl).toBe(
+  const [file] = files;
+  assert(file);
+  expect(file.streamUrl).toBe(
     "http://usenet:secret@altmount.test:8081/webdav/complete/Default/Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM.mkv",
   );
-  expect(files[0]!.fileSize).toBe(69347000342);
-  expect(files[0]!.originalFilename).toBe(
+  expect(file.fileSize).toBe(69347000342);
+  expect(file.originalFilename).toBe(
     "Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM.mkv",
   );
 });
@@ -307,7 +310,9 @@ it("resolveCompletedFiles() returns every episode file for a season pack (multiF
     "The.Office.S01E01-GRP.mkv",
     "The.Office.S01E02-GRP.mkv",
   ]);
-  expect(files[0]!.streamUrl).toBe(
+  const [first] = files;
+  assert(first);
+  expect(first.streamUrl).toBe(
     "http://usenet:secret@altmount.test:8081/webdav/complete/Default/The.Office.S01-GRP/The.Office.S01E01-GRP.mkv",
   );
 });

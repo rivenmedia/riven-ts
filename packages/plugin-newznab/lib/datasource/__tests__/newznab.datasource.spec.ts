@@ -1,4 +1,5 @@
 import { HttpResponse, http } from "msw";
+import assert from "node:assert";
 import { expect } from "vitest";
 
 import { it } from "../../__tests__/newznab.test-context.ts";
@@ -98,8 +99,8 @@ it("scrape() queries the movie endpoint with numeric IMDB ID for a movie item", 
     },
   });
 
-  expect(capturedUrl).toBeDefined();
-  const url = new URL(capturedUrl!);
+  assert(capturedUrl);
+  const url = new URL(capturedUrl);
   expect(url.searchParams.get("t")).toBe("movie");
   // IMDB ID must be stripped of "tt" prefix
   expect(url.searchParams.get("imdbid")).toBe("1375666");
@@ -131,8 +132,8 @@ it("scrape() queries the tvsearch endpoint for a show-level item without season/
     },
   });
 
-  expect(capturedUrl).toBeDefined();
-  const url = new URL(capturedUrl!);
+  assert(capturedUrl);
+  const url = new URL(capturedUrl);
   expect(url.searchParams.get("t")).toBe("tvsearch");
   // nzbgeek (and Newznab tvsearch generally) does not support imdbid — its caps
   // advertise supportedParams "q,rid,tvdbid,tvmazeid,season,ep". TV scrapes must
@@ -170,8 +171,8 @@ it("scrape() forwards season but NOT ep for a season-level tvsearch", async ({
     },
   });
 
-  expect(capturedUrl).toBeDefined();
-  const url = new URL(capturedUrl!);
+  assert(capturedUrl);
+  const url = new URL(capturedUrl);
   expect(url.searchParams.get("t")).toBe("tvsearch");
   expect(url.searchParams.get("tvdbid")).toBe("81189");
   expect(url.searchParams.has("imdbid")).toBe(false);
@@ -205,8 +206,8 @@ it("scrape() forwards BOTH season and ep for an episode-level tvsearch", async (
     },
   });
 
-  expect(capturedUrl).toBeDefined();
-  const url = new URL(capturedUrl!);
+  assert(capturedUrl);
+  const url = new URL(capturedUrl);
   expect(url.searchParams.get("t")).toBe("tvsearch");
   expect(url.searchParams.get("tvdbid")).toBe("81189");
   expect(url.searchParams.has("imdbid")).toBe(false);
@@ -239,8 +240,8 @@ it("scrape() forwards season=0 for specials (boundary case)", async ({
     },
   });
 
-  expect(capturedUrl).toBeDefined();
-  const url = new URL(capturedUrl!);
+  assert(capturedUrl);
+  const url = new URL(capturedUrl);
   // Critical: season=0 (specials) must be forwarded, not treated as falsy
   expect(url.searchParams.get("season")).toBe("0");
 });
@@ -271,8 +272,8 @@ it("scrape() falls back to title search for a TV item with no tvdbId", async ({
     },
   });
 
-  expect(capturedUrl).toBeDefined();
-  const url = new URL(capturedUrl!);
+  assert(capturedUrl);
+  const url = new URL(capturedUrl);
   expect(url.searchParams.get("t")).toBe("search");
   expect(url.searchParams.get("q")).toBe("Obscure Show");
   expect(url.searchParams.has("tvdbid")).toBe(false);
@@ -306,8 +307,8 @@ it("scrape() never sends season/ep for a movie even if the payload carries them"
     },
   });
 
-  expect(capturedUrl).toBeDefined();
-  const url = new URL(capturedUrl!);
+  assert(capturedUrl);
+  const url = new URL(capturedUrl);
   expect(url.searchParams.get("t")).toBe("movie");
   expect(url.searchParams.has("season")).toBe(false);
   expect(url.searchParams.has("ep")).toBe(false);
@@ -336,8 +337,8 @@ it("scrape() falls back to title search when no IMDB ID is provided", async ({
     },
   });
 
-  expect(capturedUrl).toBeDefined();
-  const url = new URL(capturedUrl!);
+  assert(capturedUrl);
+  const url = new URL(capturedUrl);
   expect(url.searchParams.get("t")).toBe("search");
   expect(url.searchParams.get("q")).toBe("Unknown Movie");
   expect(url.searchParams.has("imdbid")).toBe(false);

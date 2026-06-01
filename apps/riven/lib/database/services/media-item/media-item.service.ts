@@ -44,8 +44,7 @@ export class MediaItemService extends BaseService {
       if (
         shouldFanOutForProcessing({
           item,
-          isPartialRequest:
-            item.itemRequest.getProperty("isPartialRequest") ?? false,
+          isPartialRequest: item.itemRequest.getProperty("isPartialRequest"),
           downloadStrategy: settings.downloadStrategy,
           preferSeasonPacks: settings.preferSeasonPacks,
         })

@@ -89,15 +89,16 @@ export class AltmountAPI extends BaseDataSource<AltmountSettings> {
     const raw = await this.get<unknown>(path);
     const parsed = SabAddurlResponse.parse(raw);
 
-    if (parsed.status === false) {
+    if (!parsed.status) {
       throw new Error(`altmount addurl failed: ${parsed.error}`);
     }
-    if (parsed.nzo_ids.length === 0) {
+    const [firstId] = parsed.nzo_ids;
+    if (firstId === undefined) {
       throw new Error(
         "altmount addurl returned status=true but no nzo_ids — refusing to proceed",
       );
     }
-    return parsed.nzo_ids[0]!;
+    return firstId;
   }
 
   /**
@@ -110,8 +111,12 @@ export class AltmountAPI extends BaseDataSource<AltmountSettings> {
    * disappearing from both queue and history.
    */
   async waitForCompletion(nzoId: string): Promise<CompletedDownload> {
+    // Date.now() is the right primitive for an elapsed-time poll deadline —
+    // Luxon's DateTime would only wrap the same epoch millis with overhead.
+    // eslint-disable-next-line no-restricted-globals -- wall-clock millis for a poll deadline
     const deadline = Date.now() + this.settings.pollTimeoutMs;
 
+    // eslint-disable-next-line no-restricted-globals -- wall-clock millis for the poll loop
     while (Date.now() < deadline) {
       const queueRaw = await this.get<unknown>(
         `api?mode=queue&nzo_ids=${encodeURIComponent(nzoId)}&apikey=${encodeURIComponent(

@@ -108,7 +108,10 @@ export async function persistNzbDownloadResults(
 
     // Index episodes by "season:episode" so parsed filenames can find them.
     const byNumber = new Map<string, Episode>(
-      episodes.map((episode) => [`${item.number}:${episode.number}`, episode]),
+      episodes.map((episode) => [
+        `${item.number.toString()}:${episode.number.toString()}`,
+        episode,
+      ]),
     );
 
     for (const file of result.files) {
@@ -120,7 +123,9 @@ export async function persistNzbDownloadResults(
       }
 
       const seasonNumber = parsed.seasons[0] ?? item.number;
-      const episode = byNumber.get(`${seasonNumber}:${episodeNumber}`);
+      const episode = byNumber.get(
+        `${seasonNumber.toString()}:${episodeNumber.toString()}`,
+      );
 
       if (!episode) {
         logger.debug(

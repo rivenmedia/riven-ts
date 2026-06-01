@@ -1,9 +1,12 @@
 import { parseFilePath } from "@repo/util-rank-torrent-name";
 
+import { DateTime } from "luxon";
+
 import type { NzbCandidate } from "@repo/util-plugin-sdk/schemas/events/media-item.nzb-scrape-requested.event";
 
 const byPublishDateDesc = (a: NzbCandidate, b: NzbCandidate) =>
-  new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime();
+  DateTime.fromISO(b.publishDate).toMillis() -
+  DateTime.fromISO(a.publishDate).toMillis();
 
 /**
  * Pick the newest NZB candidate by publishDate (descending).

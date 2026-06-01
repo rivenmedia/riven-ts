@@ -1,3 +1,4 @@
+import assert from "node:assert";
 import { describe, expect, it } from "vitest";
 
 import { NewznabSettings } from "../newznab-settings.schema.ts";
@@ -9,14 +10,11 @@ describe("NewznabSettings", () => {
       apiKey: "my-key",
     });
 
-    expect(result.success).toBe(true);
-
-    if (result.success) {
-      expect(result.data.minSizeBytes).toBe(100 * 1024 * 1024);
-      expect(result.data.maxSizeBytes).toBe(100 * 1024 * 1024 * 1024);
-      expect(result.data.movieCategories).toEqual([2040, 2045]);
-      expect(result.data.tvCategories).toEqual([5040, 5045]);
-    }
+    assert(result.success);
+    expect(result.data.minSizeBytes).toBe(100 * 1024 * 1024);
+    expect(result.data.maxSizeBytes).toBe(100 * 1024 * 1024 * 1024);
+    expect(result.data.movieCategories).toEqual([2040, 2045]);
+    expect(result.data.tvCategories).toEqual([5040, 5045]);
   });
 
   it("accepts a fully specified configuration", () => {

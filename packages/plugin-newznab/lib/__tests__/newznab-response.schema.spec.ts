@@ -1,3 +1,4 @@
+import assert from "node:assert";
 import { describe, expect, it } from "vitest";
 
 import { filterAndSortCandidates as filterFn } from "../datasource/newznab.datasource.ts";
@@ -44,11 +45,9 @@ describe("NewznabItem", () => {
   it("parses a full item with an array of attrs", () => {
     const raw = makeItem({ sizeBytes: 2_000_000_000 });
     const result = NewznabItem.safeParse(raw);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.attr).toHaveLength(1);
-      expect(result.data.attr[0]?.["@attributes"].name).toBe("size");
-    }
+    assert(result.success);
+    expect(result.data.attr).toHaveLength(1);
+    expect(result.data.attr[0]?.["@attributes"].name).toBe("size");
   });
 
   it("normalises a single attr object (not array) to an array", () => {
@@ -61,11 +60,9 @@ describe("NewznabItem", () => {
     };
 
     const result = NewznabItem.safeParse(raw);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(Array.isArray(result.data.attr)).toBe(true);
-      expect(result.data.attr).toHaveLength(1);
-    }
+    assert(result.success);
+    expect(Array.isArray(result.data.attr)).toBe(true);
+    expect(result.data.attr).toHaveLength(1);
   });
 
   it("coerces a numeric attr.value to a string (SABnzbd-style indexer)", () => {
@@ -82,13 +79,11 @@ describe("NewznabItem", () => {
     };
 
     const result = NewznabItem.safeParse(raw);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      // Value must be coerced to its string form so getItemSizeBytes parseInt
-      // works as expected downstream.
-      expect(result.data.attr[0]?.["@attributes"].value).toBe("5368709120");
-      expect(getItemSizeBytes(result.data)).toBe(5_368_709_120);
-    }
+    assert(result.success);
+    // Value must be coerced to its string form so getItemSizeBytes parseInt
+    // works as expected downstream.
+    expect(result.data.attr[0]?.["@attributes"].value).toBe("5368709120");
+    expect(getItemSizeBytes(result.data)).toBe(5_368_709_120);
   });
 
   it("normalises missing attr to an empty array", () => {
@@ -100,10 +95,8 @@ describe("NewznabItem", () => {
     };
 
     const result = NewznabItem.safeParse(raw);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.attr).toEqual([]);
-    }
+    assert(result.success);
+    expect(result.data.attr).toEqual([]);
   });
 });
 
@@ -124,10 +117,8 @@ describe("NewznabResponse", () => {
     };
 
     const result = NewznabResponse.safeParse(raw);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.channel.item).toHaveLength(2);
-    }
+    assert(result.success);
+    expect(result.data.channel.item).toHaveLength(2);
   });
 
   it("normalises a single-item response (object) to an array", () => {
@@ -139,10 +130,8 @@ describe("NewznabResponse", () => {
     };
 
     const result = NewznabResponse.safeParse(raw);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.channel.item).toHaveLength(1);
-    }
+    assert(result.success);
+    expect(result.data.channel.item).toHaveLength(1);
   });
 
   it("normalises missing item field to an empty array", () => {
@@ -153,10 +142,8 @@ describe("NewznabResponse", () => {
     };
 
     const result = NewznabResponse.safeParse(raw);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.channel.item).toEqual([]);
-    }
+    assert(result.success);
+    expect(result.data.channel.item).toEqual([]);
   });
 
   it("rejects a response with no channel field", () => {

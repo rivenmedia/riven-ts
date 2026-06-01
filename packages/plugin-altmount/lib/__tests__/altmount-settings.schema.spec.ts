@@ -1,3 +1,4 @@
+import assert from "node:assert";
 import { describe, expect, it } from "vitest";
 
 import { AltmountSettings } from "../altmount-settings.schema.ts";
@@ -8,11 +9,9 @@ describe("AltmountSettings", () => {
       altmountUrl: "http://10.0.0.66:8081",
       altmountApiKey: "test-key",
     });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.pollIntervalMs).toBe(10_000);
-      expect(result.data.pollTimeoutMs).toBe(30 * 60 * 1000);
-    }
+    assert(result.success);
+    expect(result.data.pollIntervalMs).toBe(10_000);
+    expect(result.data.pollTimeoutMs).toBe(30 * 60 * 1000);
   });
 
   it("accepts a fully specified configuration", () => {

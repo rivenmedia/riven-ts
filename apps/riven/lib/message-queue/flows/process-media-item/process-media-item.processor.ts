@@ -218,9 +218,7 @@ export const processMediaItemProcessor =
             // Retrieve the chosen candidate from the nzb-scrape-item child output
             // so the nzb-download step has it without re-querying.
             const rawChildValues = await job.getChildrenValues();
-            const rawScrapeOutput = Object.values(
-              rawChildValues as Record<string, unknown>,
-            )[0];
+            const rawScrapeOutput = Object.values(rawChildValues)[0];
 
             if (rawScrapeOutput === undefined) {
               // Defensive: getChildrenValues should always include the
@@ -301,9 +299,9 @@ export const processMediaItemProcessor =
             // and `.parse()` would throw a ZodError that BullMQ retries
             // instead of parking the item.
             const rawChildValues = await job.getChildrenValues();
-            const nzbDownloadEntry = Object.entries(
-              rawChildValues as Record<string, unknown>,
-            ).find(([key]) => key.includes("nzb-download-item"));
+            const nzbDownloadEntry = Object.entries(rawChildValues).find(
+              ([key]) => key.includes("nzb-download-item"),
+            );
 
             if (!nzbDownloadEntry) {
               throw new UnrecoverableError(

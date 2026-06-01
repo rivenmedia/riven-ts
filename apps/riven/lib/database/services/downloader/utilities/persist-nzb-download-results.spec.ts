@@ -1,5 +1,6 @@
 import { Episode } from "@repo/util-plugin-sdk/dto/entities";
 
+import assert from "node:assert";
 import { expect } from "vitest";
 
 import { it } from "../../../../__tests__/test-context.ts";
@@ -34,11 +35,12 @@ it("creates an altmount media entry and reaches completed for a movie", async ({
   expect(entries).toHaveLength(1);
 
   const [entry] = entries;
-  expect(entry!.streamUrl).toBe(MOVIE_FILE.streamUrl);
-  expect(entry!.provider).toBe("altmount");
-  expect(entry!.providerDownloadId).toBe(NZB_RESULT.altmountId);
-  expect(Number(entry!.fileSize)).toBe(MOVIE_FILE.fileSize);
-  expect(entry!.originalFilename).toBe(MOVIE_FILE.originalFilename);
+  assert(entry);
+  expect(entry.streamUrl).toBe(MOVIE_FILE.streamUrl);
+  expect(entry.provider).toBe("altmount");
+  expect(entry.providerDownloadId).toBe(NZB_RESULT.altmountId);
+  expect(entry.fileSize).toBe(MOVIE_FILE.fileSize);
+  expect(entry.originalFilename).toBe(MOVIE_FILE.originalFilename);
 });
 
 it("records the nzb download kind and id on the item", async ({

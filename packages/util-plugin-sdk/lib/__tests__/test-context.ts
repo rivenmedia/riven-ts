@@ -32,53 +32,48 @@ export const it = baseIt
 
     return server;
   })
-  .extend(
-    "orm",
-    { scope: "worker" },
-    // eslint-disable-next-line no-empty-pattern
-    async ({}, { onCleanup }) => {
-      const { SqliteDriver } = await import("@mikro-orm/sqlite");
-      const {
-        Episode,
-        FileSystemEntry,
-        ItemRequest,
-        MediaEntry,
-        MediaItem,
-        Movie,
-        Season,
-        Show,
-        SubtitleEntry,
-        Stream,
-      } = await import("../dto/entities/index.ts");
+  .extend("orm", { scope: "worker" }, async ({}, { onCleanup }) => {
+    const { SqliteDriver } = await import("@mikro-orm/sqlite");
+    const {
+      Episode,
+      FileSystemEntry,
+      ItemRequest,
+      MediaEntry,
+      MediaItem,
+      Movie,
+      Season,
+      Show,
+      SubtitleEntry,
+      Stream,
+    } = await import("../dto/entities/index.ts");
 
-      const entities = [
-        FileSystemEntry,
-        MediaEntry,
-        SubtitleEntry,
-        MediaItem,
-        Movie,
-        Show,
-        Season,
-        Episode,
-        ItemRequest,
-        Stream,
-      ];
+    const entities = [
+      FileSystemEntry,
+      MediaEntry,
+      SubtitleEntry,
+      MediaItem,
+      Movie,
+      Show,
+      Season,
+      Episode,
+      ItemRequest,
+      Stream,
+    ];
 
-      const orm = await MikroORM.init({
-        driver: SqliteDriver,
-        metadataProvider: TsMorphMetadataProvider,
-        dbName: ":memory:",
-        debug: false,
-        entities,
-      });
+    const orm = await MikroORM.init({
+      driver: SqliteDriver,
+      metadataProvider: TsMorphMetadataProvider,
+      dbName: ":memory:",
+      debug: false,
+      entities,
+    });
 
-      await orm.schema.create();
+    await orm.schema.create();
 
-      onCleanup(() => orm.close(true));
+    onCleanup(() => orm.close(true));
 
-      return orm;
-    },
-  )
+    return orm;
+  })
   .extend("em", ({ orm }) => orm.em.fork())
   .extend("redisClient", { scope: "file" }, async ({}, { onCleanup }) => {
     const { RedisMemoryServer } = await import("redis-memory-server");

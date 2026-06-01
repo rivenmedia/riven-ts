@@ -35,12 +35,19 @@ export function filterAndSortCandidates(
     const categoryAttr = getAttrValue(item, "category");
     const category = categoryAttr ?? item.category ?? "";
 
-    // Parse the pubDate. Newznab indexers typically emit RFC 2822 dates like
-    // "Tue, 25 Feb 2025 12:34:56 +0000". Date.parse handles this well.
+    // Parse the pubDate. Newznab indexers emit a variety of date formats
+    // (RFC 2822 like "Tue, 25 Feb 2025 12:34:56 +0000", occasionally ISO 8601).
+    // Date.parse is intentionally lenient here — this is arbitrary external
+    // indexer data, not internal canonical data, so a stricter Luxon parser
+    // would reject otherwise-usable feeds. An unparseable date falls back to
+    // the epoch so it sorts last instead of throwing.
+    // eslint-disable-next-line no-restricted-globals -- lenient external date parsing
     const publishDateMs = Date.parse(item.pubDate);
     const publishDate = isNaN(publishDateMs)
-      ? new Date(0).toISOString()
-      : new Date(publishDateMs).toISOString();
+      ? // eslint-disable-next-line no-restricted-globals -- epoch fallback for unparseable feeds
+        new Date(0).toISOString()
+      : // eslint-disable-next-line no-restricted-globals -- format the parsed millis as ISO
+        new Date(publishDateMs).toISOString();
 
     candidates.push({
       url: item.link,
@@ -52,10 +59,12 @@ export function filterAndSortCandidates(
     });
   }
 
-  // Sort newest-first, take top N
+  // Sort newest-first, take top N. publishDate is a canonical ISO string we
+  // produced above, so Date parsing here is safe and exact.
   return candidates
     .sort(
       (a, b) =>
+        // eslint-disable-next-line no-restricted-globals -- compare canonical ISO strings
         new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime(),
     )
     .slice(0, limit);

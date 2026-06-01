@@ -1,3 +1,4 @@
+import assert from "node:assert";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -135,8 +136,10 @@ describe("MediaItemNzbDownloadRequestedResponse", () => {
     });
 
     expect(parsed.files).toHaveLength(1);
-    expect(parsed.files![0]!.streamUrl).toContain("/webdav/complete/Default/");
-    expect(parsed.files![0]!.fileSize).toBe(69347000342);
+    const [file] = parsed.files ?? [];
+    assert(file);
+    expect(file.streamUrl).toContain("/webdav/complete/Default/");
+    expect(file.fileSize).toBe(69347000342);
   });
 
   it("carries one resolved file per episode for a season pack", () => {

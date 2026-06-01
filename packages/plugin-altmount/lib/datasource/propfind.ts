@@ -58,14 +58,17 @@ const DISPLAYNAME_RE = tag("displayname");
 
 function extract(block: string, re: RegExp): string | null {
   const match = re.exec(block);
-  return match ? match[1]!.trim() : null;
+  return match?.[1]?.trim() ?? null;
 }
 
 export function parsePropfindEntries(xml: string): PropfindEntry[] {
   const entries: PropfindEntry[] = [];
 
   for (const match of xml.matchAll(RESPONSE_RE)) {
-    const block = match[1]!;
+    const block = match[1];
+    if (block === undefined) {
+      continue;
+    }
     const href = extract(block, HREF_RE);
 
     if (href === null) {

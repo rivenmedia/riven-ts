@@ -4,7 +4,7 @@ import { expect } from "vitest";
 import { it } from "../../../../__tests__/test-context.ts";
 import { shouldFanOutForProcessing } from "./should-fan-out-for-processing.ts";
 
-it("does not fan out a movie under either strategy", async ({
+it("does not fan out a movie under either strategy", ({
   indexedMovieContext: { indexedMovie },
 }) => {
   for (const downloadStrategy of ["torrent", "nzb"] as const) {
@@ -19,7 +19,7 @@ it("does not fan out a movie under either strategy", async ({
   }
 });
 
-it("does not fan out an ended show under the torrent strategy (existing behavior)", async ({
+it("does not fan out an ended show under the torrent strategy (existing behavior)", ({
   scrapedShowContext: { scrapedShow },
 }) => {
   scrapedShow.status = "ended";
@@ -34,7 +34,7 @@ it("does not fan out an ended show under the torrent strategy (existing behavior
   ).toBe(false);
 });
 
-it("fans out a continuing show under the torrent strategy (existing behavior)", async ({
+it("fans out a continuing show under the torrent strategy (existing behavior)", ({
   scrapedShowContext: { scrapedShow },
 }) => {
   scrapedShow.status = "continuing";
@@ -49,7 +49,7 @@ it("fans out a continuing show under the torrent strategy (existing behavior)", 
   ).toBe(true);
 });
 
-it("fans out an ended show under the torrent strategy when preferSeasonPacks is set (existing behavior)", async ({
+it("fans out an ended show under the torrent strategy when preferSeasonPacks is set (existing behavior)", ({
   scrapedShowContext: { scrapedShow },
 }) => {
   scrapedShow.status = "ended";
@@ -64,7 +64,7 @@ it("fans out an ended show under the torrent strategy when preferSeasonPacks is 
   ).toBe(true);
 });
 
-it("ALWAYS fans out a show under the nzb strategy, even when ended (season packs are required)", async ({
+it("ALWAYS fans out a show under the nzb strategy, even when ended (season packs are required)", ({
   scrapedShowContext: { scrapedShow },
 }) => {
   scrapedShow.status = "ended";
@@ -95,7 +95,7 @@ it("does not fan out a season under the nzb strategy (it is scraped for a pack, 
   ).toBe(false);
 });
 
-it("fans out any item flagged as a partial request", async ({
+it("fans out any item flagged as a partial request", ({
   indexedMovieContext: { indexedMovie },
 }) => {
   expect(

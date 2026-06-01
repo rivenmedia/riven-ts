@@ -1,3 +1,4 @@
+import assert from "node:assert";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -15,13 +16,15 @@ describe("parsePropfindEntries", () => {
 
     expect(entries).toHaveLength(3);
 
-    const dir = entries[0]!;
+    const dir = entries[0];
+    assert(dir);
     expect(dir.href).toBe("/webdav/complete/Default/");
     expect(dir.isCollection).toBe(true);
 
     const inception = entries.find((e) =>
       e.displayName?.startsWith("Inception"),
-    )!;
+    );
+    assert(inception);
     expect(inception.isCollection).toBe(false);
     expect(inception.contentLength).toBe(69347000342);
     expect(inception.href).toBe(
@@ -47,17 +50,18 @@ describe("selectCompletedMediaFile", () => {
       "Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM",
     );
 
-    expect(chosen).not.toBeNull();
-    expect(chosen!.href).toBe(
+    assert(chosen);
+    expect(chosen.href).toBe(
       "/webdav/complete/Default/Inception.2010.4K.HDR.DV.2160p.BDRemux.Ita.Eng.x265-NAHOM.mkv",
     );
-    expect(chosen!.fileSize).toBe(69347000342);
+    expect(chosen.fileSize).toBe(69347000342);
   });
 
   it("ignores the collection entry and non-matching files", () => {
     const entries = parsePropfindEntries(REAL_XML);
     const chosen = selectCompletedMediaFile(entries, "Avengers.Infinity.War");
-    expect(chosen!.href).toContain("Avengers.Infinity.War");
+    assert(chosen);
+    expect(chosen.href).toContain("Avengers.Infinity.War");
   });
 
   it("returns null when nothing matches the release name", () => {
@@ -73,7 +77,8 @@ describe("selectCompletedMediaFile", () => {
       parsePropfindEntries(xml),
       "Mortal.Kombat.II.2026.1080p.DCPRIP.Multi.x264-DKS",
     );
-    expect(chosen!.fileSize).toBe(16553826612);
+    assert(chosen);
+    expect(chosen.fileSize).toBe(16553826612);
   });
 
   it("ignores non-video files even if the name matches", () => {
@@ -96,7 +101,9 @@ describe("selectAllMediaFiles", () => {
       "/webdav/complete/Default/The.Office.S01.1080p-GRP/The.Office.S01E01.1080p-GRP.mkv",
       "/webdav/complete/Default/The.Office.S01.1080p-GRP/The.Office.S01E02.1080p-GRP.mkv",
     ]);
-    expect(files[0]!.fileSize).toBe(1500000000);
+    const [first] = files;
+    assert(first);
+    expect(first.fileSize).toBe(1500000000);
   });
 
   it("returns an empty array when there are no video files", () => {

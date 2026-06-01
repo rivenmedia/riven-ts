@@ -1,3 +1,4 @@
+import assert from "node:assert";
 import { describe, expect, it } from "vitest";
 
 import { SabAddurlResponse } from "../schemas/sab-addurl-response.schema.ts";
@@ -10,10 +11,8 @@ describe("SabAddurlResponse", () => {
       status: true,
       nzo_ids: ["SABnzbd_nzo_abc"],
     });
-    expect(result.success).toBe(true);
-    if (result.success && result.data.status === true) {
-      expect(result.data.nzo_ids).toEqual(["SABnzbd_nzo_abc"]);
-    }
+    assert(result.success && result.data.status);
+    expect(result.data.nzo_ids).toEqual(["SABnzbd_nzo_abc"]);
   });
 
   it("parses an error response", () => {
@@ -21,10 +20,8 @@ describe("SabAddurlResponse", () => {
       status: false,
       error: "API Key Incorrect",
     });
-    expect(result.success).toBe(true);
-    if (result.success && result.data.status === false) {
-      expect(result.data.error).toBe("API Key Incorrect");
-    }
+    assert(result.success && !result.data.status);
+    expect(result.data.error).toBe("API Key Incorrect");
   });
 
   it("coerces numeric nzo_ids defensively", () => {
@@ -32,10 +29,8 @@ describe("SabAddurlResponse", () => {
       status: true,
       nzo_ids: [12345, "SABnzbd_nzo_def"],
     });
-    expect(result.success).toBe(true);
-    if (result.success && result.data.status === true) {
-      expect(result.data.nzo_ids).toEqual(["12345", "SABnzbd_nzo_def"]);
-    }
+    assert(result.success && result.data.status);
+    expect(result.data.nzo_ids).toEqual(["12345", "SABnzbd_nzo_def"]);
   });
 
   it("rejects missing status discriminator", () => {
@@ -75,11 +70,11 @@ describe("SabQueueResponse", () => {
         ],
       },
     });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.queue.slots[0]!.percentage).toBe("45");
-      expect(result.data.queue.slots[0]!.mb).toBe("1024");
-    }
+    assert(result.success);
+    const slot = result.data.queue.slots[0];
+    assert(slot);
+    expect(slot.percentage).toBe("45");
+    expect(slot.mb).toBe("1024");
   });
 });
 
@@ -105,12 +100,10 @@ describe("SabHistoryResponse", () => {
         ],
       },
     });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.history.slots[0]!.fail_message).toBe(
-        "missing articles",
-      );
-    }
+    assert(result.success);
+    const slot = result.data.history.slots[0];
+    assert(slot);
+    expect(slot.fail_message).toBe("missing articles");
   });
 
   it("accepts non-standard status strings (extended implementations)", () => {
@@ -135,12 +128,11 @@ describe("SabHistoryResponse", () => {
         ],
       },
     });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      const slot = result.data.history.slots[0]!;
-      expect(slot.storage).toBe("/mnt/altmount/complete/Default");
-      expect(slot.category).toBe("Default");
-      expect(slot.bytes).toBe(69347000342);
-    }
+    assert(result.success);
+    const slot = result.data.history.slots[0];
+    assert(slot);
+    expect(slot.storage).toBe("/mnt/altmount/complete/Default");
+    expect(slot.category).toBe("Default");
+    expect(slot.bytes).toBe(69347000342);
   });
 });
