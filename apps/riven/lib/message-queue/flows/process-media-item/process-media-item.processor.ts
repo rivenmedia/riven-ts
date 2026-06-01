@@ -320,11 +320,18 @@ export const processMediaItemProcessor =
             const downloadOutput =
               NzbDownloadItemFlow.shape.output.parse(rawDownloadOutput);
 
-            // Persist the altmountId and mark the item as downloaded via the
-            // downloader service (handles @CreateRequestContext + @Transactional).
+            // Attach the altmount-backed MediaEntry via the downloader service
+            // (handles @CreateRequestContext + @Transactional). Creating the
+            // entry drives the item to "completed" through the
+            // MediaItemStateSubscriber — same as the torrent path.
             await downloaderService.persistNzbDownloadResult(
               job.data.mediaItem.id,
-              downloadOutput.altmountId,
+              {
+                altmountId: downloadOutput.altmountId,
+                streamUrl: downloadOutput.streamUrl,
+                fileSize: downloadOutput.fileSize,
+                originalFilename: downloadOutput.originalFilename,
+              },
             );
 
             await job.updateData({

@@ -19,6 +19,7 @@ import {
   fileNameToFdCountMap,
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
+import { deriveUrlAuth } from "../utilities/requests/derive-url-auth.ts";
 import {
   getVfsOperationContext,
   withVfsOperationContext,
@@ -164,11 +165,17 @@ async function serveMediaFile(
 
   if (entry.streamUrl) {
     try {
-      const response = await request(entry.streamUrl, {
+      // Stream URLs may embed Basic-auth credentials as userinfo (altmount
+      // WebDAV); undici ignores URL userinfo, so convert it to a header.
+      const { url: checkUrl, headers: authHeaders } = deriveUrlAuth(
+        entry.streamUrl,
+      );
+      const response = await request(checkUrl, {
         headers: {
           "accept-encoding": "identity",
           connection: "keep-alive",
           range: `bytes=0-0`,
+          ...authHeaders,
         },
       });
 

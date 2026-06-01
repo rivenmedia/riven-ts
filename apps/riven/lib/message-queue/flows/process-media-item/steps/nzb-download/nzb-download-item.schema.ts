@@ -22,6 +22,11 @@ export const NzbDownloadItemFlow = createFlowSchema("nzb-download-item", {
   output: z.object({
     altmountId: z.string().min(1),
     item: NzbScrapeMediaItemPayload,
+    // The completed file resolved by the altmount plugin. Required here because
+    // the validate-nzb-download step needs them to create the MediaEntry.
+    streamUrl: z.url(),
+    fileSize: z.number().int().nonnegative(),
+    originalFilename: z.string().min(1),
   }),
 });
 

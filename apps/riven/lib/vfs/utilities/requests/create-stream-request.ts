@@ -4,18 +4,23 @@ import { logger } from "../../../utilities/logger/logger.ts";
 import { config } from "../../config.ts";
 import { fdToResponsePromiseMap } from "../file-handle-map.ts";
 import { getVfsOperationContext } from "../vfs-operation-context.ts";
+import { deriveUrlAuth } from "./derive-url-auth.ts";
 
 export function createStreamRequest(
   url: string,
   [requestStart, requestEnd]: readonly [number, number | undefined],
 ) {
   const { fd } = getVfsOperationContext("read");
-  const streamReaderPromise = request(url, {
+  // Stream URLs may carry Basic-auth credentials as userinfo (altmount WebDAV);
+  // undici ignores URL userinfo, so convert it to an Authorization header.
+  const { url: requestUrl, headers: authHeaders } = deriveUrlAuth(url);
+  const streamReaderPromise = request(requestUrl, {
     highWaterMark: config.chunkSize,
     headers: {
       "accept-encoding": "identity",
       connection: "keep-alive",
       range: `bytes=${[requestStart, requestEnd].join("-")}`,
+      ...authHeaders,
     },
   });
 

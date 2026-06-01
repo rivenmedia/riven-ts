@@ -4,7 +4,6 @@ import {
   Show,
   Stream,
 } from "@repo/util-plugin-sdk/dto/entities";
-import { DownloadKind } from "@repo/util-plugin-sdk/dto/enums/download-kind.enum";
 
 import { ValidationError } from "@mikro-orm/core";
 import {
@@ -16,6 +15,10 @@ import chalk from "chalk";
 
 import { BaseService } from "../core/base-service.ts";
 import { persistDownloadResults } from "./utilities/persist-download-results.ts";
+import {
+  type NzbDownloadResult,
+  persistNzbDownloadResults,
+} from "./utilities/persist-nzb-download-results.ts";
 
 import type { ValidTorrent } from "../../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
@@ -76,31 +79,20 @@ export class DownloaderService extends BaseService {
   }
 
   /**
-   * Marks a media item as having been dispatched to an NZB download client.
-   *
-   * Sets:
-   *   - `state`        → "downloaded"
-   *   - `downloadKind` → "nzb"
-   *   - `downloadId`   → `altmountId` returned by the plugin
+   * Persists a completed altmount NZB download by attaching a WebDAV-backed
+   * `MediaEntry` to the item, which drives it to `completed` via the
+   * `MediaItemStateSubscriber` (mirroring the torrent-side `downloadItem`).
    *
    * Called from the `validate-nzb-download` step of the process-media-item
-   * processor once the nzb-download-item flow step has confirmed that the
-   * altmount plugin accepted the NZB.
+   * processor once the nzb-download-item flow step has confirmed the altmount
+   * plugin finished the download and resolved the streamable file.
    *
-   * Note: no explicit `em.flush()` here. `@Transactional()` commits the
-   * UnitOfWork on successful return — same pattern as the torrent-side
-   * `downloadItem` (which delegates to `persistDownloadResults` and also
-   * never calls `em.flush()` directly). A thrown error rolls back.
+   * No explicit `em.flush()`: `@Transactional()` commits the UnitOfWork on
+   * successful return — the same pattern as the torrent-side `downloadItem`.
    */
   @CreateRequestContext()
   @Transactional()
-  async persistNzbDownloadResult(id: UUID, altmountId: string) {
-    const item = await this.em.getRepository(MediaItem).findOneOrFail(id);
-
-    item.state = "downloaded";
-    item.downloadKind = DownloadKind.enum.nzb;
-    item.downloadId = altmountId;
-
-    return item;
+  async persistNzbDownloadResult(id: UUID, result: NzbDownloadResult) {
+    return persistNzbDownloadResults(this.em, id, result);
   }
 }

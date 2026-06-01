@@ -50,6 +50,27 @@ export const nzbDownloadItemProcessor =
       );
     }
 
+    // A success must carry a resolved file (the plugin only fills these once
+    // the download completes and the media file is located over WebDAV). Treat
+    // a "success" without them as a failure so the parent step parks the item
+    // rather than persisting an unusable entry.
+    if (
+      successResult.streamUrl === undefined ||
+      successResult.fileSize === undefined ||
+      successResult.originalFilename === undefined
+    ) {
+      sendEvent({
+        type: "riven.media-item.nzb-download.error",
+        itemId: job.data.item.id,
+        reason: "altmount-failed",
+        detail: `NZB download for ${chalk.bold(job.data.item.title)} reported success but did not resolve a media file`,
+      });
+
+      throw new UnrecoverableError(
+        `NZB download for ${chalk.bold(job.data.item.title)} did not resolve a media file`,
+      );
+    }
+
     sendEvent({
       type: "riven.media-item.nzb-download.success",
       itemId: job.data.item.id,
@@ -59,5 +80,8 @@ export const nzbDownloadItemProcessor =
     return {
       altmountId: successResult.altmountId,
       item: job.data.item,
+      streamUrl: successResult.streamUrl,
+      fileSize: successResult.fileSize,
+      originalFilename: successResult.originalFilename,
     };
   });
