@@ -1,0 +1,38 @@
+name: Build Wiki
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "apps/wiki/**"
+      - "packages/plugin-*/docs/**"
+      - "apps/riven/docs/**"
+      - "apps/riven/lib/riven-settings.schema.ts"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "build-wiki-${{ github.event.pull_request.number }}"
+  cancel-in-progress: true
+
+env:
+  DO_NOT_TRACK: true
+
+jobs:
+  build:
+    name: Build Wiki
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up project environment
+        uses: ./.github/actions/set-up-project-environment
+
+      - name: Build wiki
+        run: pnpm turbo build --filter=@repo/wiki
+        env:
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
