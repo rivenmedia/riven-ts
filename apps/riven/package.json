@@ -16,9 +16,11 @@
       "production": "./workers/validate-torrent-files/validate-torrent-files.processor.js",
       "default": "./lib/message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.ts"
     },
-    "./database-metadata-cache": "./temp/metadata.json"
+    "./database-metadata-cache": "./temp/metadata.json",
+    "./wiki.config": "./wiki.config.ts"
   },
   "files": [
+    "docs",
     "dist"
   ],
   "scripts": {
@@ -26,7 +28,7 @@
     "build:program": "tsc --build tsconfig.app.json",
     "build:workers": "rm -rf dist/workers && pnpm node esbuild.config.ts",
     "check-types": "tsc --noEmit --project tsconfig.app.json && tsc --noEmit --project tsconfig.spec.json",
-    "codegen:config-docs": "zod2md",
+    "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
     "codegen:gql": "graphql-codegen --config graphql-codegen.ts",
     "codegen:gql-schema": "node --import=@swc-node/register/esm-register scripts/generate-gql-schema.ts",
     "codegen:ranking-config-json-schema": "pnpm node scripts/generate-ranking-config-json-schema.ts",
@@ -111,6 +113,7 @@
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/plugin-test": "workspace:^",
+    "@repo/util-wiki-helpers": "workspace:^",
     "@swc-node/register": "catalog:",
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
@@ -124,8 +127,7 @@
     "msw": "catalog:",
     "redis-memory-server": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "zod2md": "catalog:"
+    "vitest": "catalog:"
   },
   "mikro-orm": {
     "configPaths": [

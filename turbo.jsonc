@@ -44,7 +44,7 @@
     },
     "codegen:config-docs": {
       "inputs": ["**/*-settings.schema.ts", "zod2md.config.ts"],
-      "outputs": ["docs/*.md"]
+      "outputs": ["docs/**/*.md"]
     },
     "codegen:api-schemas": {
       "dependsOn": ["^codegen:api-schemas"],

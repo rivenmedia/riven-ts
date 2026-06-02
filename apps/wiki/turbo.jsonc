@@ -6,7 +6,11 @@
       "dependsOn": ["$TURBO_EXTENDS$", "codegen:wiki-docs"],
       "outputs": ["$TURBO_EXTENDS", ".next/**", "out/**"]
     },
+    "sync-core-docs": {},
+    "sync-plugin-docs": {},
+    "sync-ranking-docs": {},
     "codegen:wiki-docs": {
+      "dependsOn": ["sync-core-docs", "sync-plugin-docs", "sync-ranking-docs"],
       "inputs": [
         "$TURBO_ROOT$/packages/plugin-*/docs/settings.md",
         "$TURBO_ROOT$/apps/riven/docs/settings.md",

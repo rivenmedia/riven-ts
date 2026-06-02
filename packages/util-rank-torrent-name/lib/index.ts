@@ -4,6 +4,7 @@ export { checkFetch } from "./ranker/fetch.ts";
 export {
   createSettings,
   createRankingModel,
+  Settings,
   SettingsSchema,
   RankingModelSchema,
 } from "./ranker/settings.ts";
@@ -16,7 +17,6 @@ export { Resolution, ResolutionRank, ParsedDataSchema } from "./schemas.ts";
 export type { FetchResult, RankedResult } from "./types.ts";
 export type { ParsedData } from "./schemas.ts";
 export type {
-  Settings,
   RankingModel,
   CustomRank,
   SettingsInput,

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const CustomRankSchema = z.object({
+export const CustomRankSchema = z.object({
   fetch: z.boolean().default(true),
 
   /**
@@ -15,7 +15,7 @@ function customRank(fetch: boolean): CustomRank {
   return { fetch };
 }
 
-const QualityRanksSchema = z.object({
+export const QualityRanksSchema = z.object({
   /**
    * @default { fetch: false }
    */
@@ -82,7 +82,7 @@ const QualityRanksSchema = z.object({
   xvid: CustomRankSchema.default(customRank(false)),
 });
 
-const RipsRanksSchema = z.object({
+export const RipsRanksSchema = z.object({
   /**
    * @default { fetch: false }
    */
@@ -139,7 +139,7 @@ const RipsRanksSchema = z.object({
   webrip: CustomRankSchema.default(customRank(true)),
 });
 
-const HdrRanksSchema = z.object({
+export const HdrRanksSchema = z.object({
   /**
    * @default { fetch: true }
    */
@@ -166,7 +166,7 @@ const HdrRanksSchema = z.object({
   sdr: CustomRankSchema.default(customRank(true)),
 });
 
-const AudioRanksSchema = z.object({
+export const AudioRanksSchema = z.object({
   /**
    * @default { fetch: true }
    */
@@ -228,7 +228,7 @@ const AudioRanksSchema = z.object({
   truehd: CustomRankSchema.default(customRank(true)),
 });
 
-const ExtrasRanksSchema = z.object({
+export const ExtrasRanksSchema = z.object({
   /**
    * @default { fetch: false }
    */
@@ -305,7 +305,7 @@ const ExtrasRanksSchema = z.object({
   uncensored: CustomRankSchema.default(customRank(true)),
 });
 
-const TrashRanksSchema = z.object({
+export const TrashRanksSchema = z.object({
   /**
    * @default { fetch: false }
    */
@@ -347,18 +347,18 @@ const TrashRanksSchema = z.object({
   telesync: CustomRankSchema.default(customRank(false)),
 });
 
-const CustomRanksConfigSchema = z.object({
-  quality: QualityRanksSchema.prefault({}),
-  rips: RipsRanksSchema.prefault({}),
-  hdr: HdrRanksSchema.prefault({}),
-  audio: AudioRanksSchema.prefault({}),
-  extras: ExtrasRanksSchema.prefault({}),
-  trash: TrashRanksSchema.prefault({}),
+export const CustomRanksConfigSchema = z.object({
+  quality: QualityRanksSchema.default(QualityRanksSchema.parse({})),
+  rips: RipsRanksSchema.default(RipsRanksSchema.parse({})),
+  hdr: HdrRanksSchema.default(HdrRanksSchema.parse({})),
+  audio: AudioRanksSchema.default(AudioRanksSchema.parse({})),
+  extras: ExtrasRanksSchema.default(ExtrasRanksSchema.parse({})),
+  trash: TrashRanksSchema.default(TrashRanksSchema.parse({})),
 });
 
 export type CustomRanksConfig = z.infer<typeof CustomRanksConfigSchema>;
 
-const ResolutionConfigSchema = z.object({
+export const ResolutionConfigSchema = z.object({
   /**
    * @default false
    */
@@ -392,7 +392,7 @@ const ResolutionConfigSchema = z.object({
 
 export type ResolutionConfig = z.infer<typeof ResolutionConfigSchema>;
 
-const OptionsConfigSchema = z.object({
+export const OptionsConfigSchema = z.object({
   /**
    * @default true
    */
@@ -424,26 +424,26 @@ const OptionsConfigSchema = z.object({
   titleSimilarity: z.number().min(0).max(1).default(0.85),
 });
 
-const LanguagesConfigSchema = z.object({
+export const LanguagesConfigSchema = z.object({
   /**
    * @default []
    */
-  required: z.array(z.string()).prefault([]),
+  required: z.array(z.string()).default([]),
 
   /**
    * @default []
    */
-  allowed: z.array(z.string()).prefault([]),
+  allowed: z.array(z.string()).default([]),
 
   /**
    * @default []
    */
-  exclude: z.array(z.string()).prefault([]),
+  exclude: z.array(z.string()).default([]),
 
   /**
    * @default []
    */
-  preferred: z.array(z.string()).prefault([]),
+  preferred: z.array(z.string()).default([]),
 });
 
 function compilePattern(pattern: string): RegExp {
@@ -460,29 +460,31 @@ function compilePatterns(patterns: string[]): RegExp[] {
   return patterns.map(compilePattern);
 }
 
-export const SettingsSchema = z
-  .object({
-    require: z.array(z.string()).default([]),
-    exclude: z.array(z.string()).default([]),
-    preferred: z.array(z.string()).default([]),
-    resolutions: ResolutionConfigSchema.prefault({}),
-    options: OptionsConfigSchema.prefault({}),
-    languages: LanguagesConfigSchema.prefault({}),
-    customRanks: CustomRanksConfigSchema.prefault({}),
-  })
-  .transform((raw) => ({
-    ...raw,
-    compiledRequire: compilePatterns(raw.require),
-    compiledExclude: compilePatterns(raw.exclude),
-    compiledPreferred: compilePatterns(raw.preferred),
-  }));
+export const SettingsSchema = z.object({
+  require: z.array(z.string()).default([]),
+  exclude: z.array(z.string()).default([]),
+  preferred: z.array(z.string()).default([]),
+  resolutions: ResolutionConfigSchema.default(ResolutionConfigSchema.parse({})),
+  options: OptionsConfigSchema.default(OptionsConfigSchema.parse({})),
+  languages: LanguagesConfigSchema.default(LanguagesConfigSchema.parse({})),
+  customRanks: CustomRanksConfigSchema.default(
+    CustomRanksConfigSchema.parse({}),
+  ),
+});
 
 export type SettingsInput = z.input<typeof SettingsSchema>;
 
-export type Settings = z.infer<typeof SettingsSchema>;
+export const Settings = SettingsSchema.transform((raw) => ({
+  ...raw,
+  compiledRequire: compilePatterns(raw.require),
+  compiledExclude: compilePatterns(raw.exclude),
+  compiledPreferred: compilePatterns(raw.preferred),
+}));
+
+export type Settings = z.infer<typeof Settings>;
 
 export function createSettings(input: SettingsInput = {}): Settings {
-  return SettingsSchema.parse(input);
+  return Settings.parse(input);
 }
 
 // Helper to look up custom rank from nested settings

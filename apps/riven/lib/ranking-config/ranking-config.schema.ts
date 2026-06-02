@@ -1,14 +1,11 @@
-import {
-  RankingModelSchema,
-  SettingsSchema,
-} from "@repo/util-rank-torrent-name";
+import { RankingModelSchema, Settings } from "@repo/util-rank-torrent-name";
 
 import z from "zod";
 
 import { defaultPreset } from "./presets/default-preset.ts";
 
 export const RankingConfigBase = z.strictObject({
-  settings: SettingsSchema.in.default(SettingsSchema.in.parse({})),
+  settings: Settings.default(Settings.parse({})),
   rankingModel: RankingModelSchema.default(RankingModelSchema.parse({})),
 });
 
@@ -28,7 +25,7 @@ export const RankingConfig = z.discriminatedUnion("preset", [
   JsonSchemaBase.safeExtend(
     z.strictObject({
       preset: z.literal("custom"),
-      settings: SettingsSchema.in.default(SettingsSchema.in.parse({})),
+      settings: Settings.default(Settings.parse({})),
       rankingModel: RankingModelSchema.default(RankingModelSchema.parse({})),
     }).shape,
   ),
