@@ -5,8 +5,8 @@
 // Run: node scripts/sync-core-docs.mjs
 // Requires: pnpm turbo codegen:config-docs to have run first (generates settings.md)
 import { execFileSync } from "node:child_process";
-import { readFileSync, unlinkSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 
 const ROOT = resolve(import.meta.dirname, "../../..");
 const RIVEN_APP = join(ROOT, "apps/riven");
@@ -194,6 +194,7 @@ const table = parseSettingsTable(mdContent);
 
 console.log("Generating configuration.mdx...");
 const mdx = generateMdx(fieldSections, table);
+mkdirSync(dirname(OUTPUT_FILE), { recursive: true });
 writeFileSync(OUTPUT_FILE, mdx);
 
 console.log(
