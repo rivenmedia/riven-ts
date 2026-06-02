@@ -25,9 +25,9 @@ jobs:
         uses: ./.github/actions/set-up-project-environment
 
       - name: Validate PR title
-        run: echo "${{ github.event.pull_request.title }}" | pnpm commitlint
+        run: echo "$PR_TITLE" | pnpm commitlint
         env:
-          NODE_ENV: production
+          PR_TITLE: ${{ github.event.pull_request.title }}
 
   anti-slop:
     runs-on: ubuntu-latest
