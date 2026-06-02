@@ -1,24 +1,36 @@
 import { readdirSync } from "node:fs";
 
+const prefixes = ["plugin-", "util-", "feature-"];
+
+function getDirNames(path) {
+  return readdirSync(path, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name);
+}
+
+function stripPrefix(name) {
+  for (const prefix of prefixes) {
+    if (name.startsWith(prefix)) {
+      return name.slice(prefix.length);
+    }
+  }
+  return name;
+}
+
 function getScopes() {
-  const prefixes = ["plugin-", "util-", "feature-"];
   const scopes = ["repo"];
 
   // Get scopes from apps directory
-  const apps = readdirSync("apps");
-  scopes.push(...apps);
+  scopes.push(...getDirNames("apps"));
 
   // Get scopes from packages directory
-  const packages = readdirSync("packages");
-  for (const pkg of packages) {
-    let scope = pkg;
-    for (const prefix of prefixes) {
-      if (scope.startsWith(prefix)) {
-        scope = scope.slice(prefix.length);
-        break;
-      }
+  for (const pkg of getDirNames("packages")) {
+    scopes.push(stripPrefix(pkg));
+
+    // Get scopes from packages/core/* subdirectories
+    if (pkg === "core") {
+      scopes.push(...getDirNames(`packages/${pkg}`).map(stripPrefix));
     }
-    scopes.push(scope);
   }
 
   return scopes.sort();
