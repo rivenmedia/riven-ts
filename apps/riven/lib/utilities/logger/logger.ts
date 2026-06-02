@@ -23,7 +23,6 @@ const ecsFileName = "ecs.json";
 const vfsEcsFileName = "vfs.json";
 
 export const ecsSymlinkPath = path.join(ecsLogDir, ecsFileName);
-export const vfsEcsSymlinkPath = path.join(ecsLogDir, vfsEcsFileName);
 
 export const logger = createLogger({
   level: settings.logLevel,
