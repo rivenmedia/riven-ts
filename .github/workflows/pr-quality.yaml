@@ -10,8 +10,25 @@ on:
     types:
       - opened
       - reopened
+      - synchronize
+      - edited
 
 jobs:
+  pr-title:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up project environment
+        uses: ./.github/actions/set-up-project-environment
+
+      - name: Validate PR title
+        run: echo "${{ github.event.pull_request.title }}" | pnpm commitlint
+        env:
+          NODE_ENV: production
+
   anti-slop:
     runs-on: ubuntu-latest
     steps:
