@@ -129,6 +129,18 @@ export const RivenSettings = z.object({
       "The maximum number of scrape attempts before giving up on an item.",
     )
     .meta({ "wiki.section": "scraping" }),
+  realdebridFilenameBlocklist: json(z.array(z.string()))
+    .default([])
+    .describe(
+      dedent`
+        Case-insensitive substrings that cause a release to be skipped **on Real-Debrid only**.
+
+        Real-Debrid legally filters certain release names and returns 451 for them; selecting such a
+        release on RD causes riven to blacklist and reset the item. Listing those substrings here
+        makes RD skip matching releases (they still download on other stores). Empty disables the filter.
+      `,
+    )
+    .meta({ "wiki.section": "scraping" }),
   minimumAverageBitrateMovies: z
     .int()
     .positive()
