@@ -12,10 +12,15 @@ import { fileFormat } from "./formatters/file.format.ts";
 import { maskFormat } from "./formatters/mask.format.ts";
 import { sentryMetaFormat } from "./formatters/sentry-meta.format.ts";
 import { validationErrorMetaFormat } from "./formatters/validation-error-meta.format.ts";
+import {
+  excludeVfsFormat,
+  onlyVfsFormat,
+} from "./formatters/vfs-filter.format.ts";
 
 const logDir = path.resolve(process.cwd(), settings.logDirectory);
 const ecsLogDir = path.join(logDir, "ecs");
 const ecsFileName = "ecs.json";
+const vfsEcsFileName = "vfs.json";
 
 export const ecsSymlinkPath = path.join(ecsLogDir, ecsFileName);
 
@@ -46,8 +51,9 @@ if (settings.loggingEnabled) {
     new DailyRotateFile({
       frequency: "24h",
       dirname: ecsLogDir,
+      filename: "ecs.log.%DATE%",
       maxFiles: "5d",
-      format: format.combine(maskFormat(), ecsFileFormat),
+      format: format.combine(excludeVfsFormat(), maskFormat(), ecsFileFormat),
       zippedArchive: true,
       level: "silly", // Send ALL logs to ECS, regardless of log level config
       json: true,
@@ -55,6 +61,25 @@ if (settings.loggingEnabled) {
       createSymlink: true,
       symlinkName: ecsFileName,
       auditFile: path.join(ecsLogDir, ".audit.json"),
+    }),
+  );
+
+  // VFS ECS logs are split into their own file to keep the main ECS file
+  // within reasonable size limits and easier to parse.
+  logger.add(
+    new DailyRotateFile({
+      frequency: "24h",
+      dirname: ecsLogDir,
+      filename: "vfs.log.%DATE%",
+      maxFiles: "5d",
+      format: format.combine(onlyVfsFormat(), maskFormat(), ecsFileFormat),
+      zippedArchive: true,
+      level: "silly",
+      json: true,
+      utc: true,
+      createSymlink: true,
+      symlinkName: vfsEcsFileName,
+      auditFile: path.join(ecsLogDir, ".vfs-audit.json"),
     }),
   );
 
@@ -80,7 +105,7 @@ if (settings.loggingEnabled) {
         tailable: true,
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
-        format: format.combine(maskFormat(), fileFormat),
+        format: format.combine(excludeVfsFormat(), maskFormat(), fileFormat),
       }),
     );
 
@@ -91,7 +116,18 @@ if (settings.loggingEnabled) {
         tailable: true,
         maxsize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5,
-        format: format.combine(maskFormat(), fileFormat),
+        format: format.combine(excludeVfsFormat(), maskFormat(), fileFormat),
+      }),
+    );
+
+    logger.add(
+      new transports.File({
+        filename: "vfs.log",
+        dirname: logDir,
+        tailable: true,
+        maxsize: 10 * 1024 * 1024, // 10MB
+        maxFiles: 5,
+        format: format.combine(onlyVfsFormat(), maskFormat(), fileFormat),
       }),
     );
 
