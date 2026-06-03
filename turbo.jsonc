@@ -43,6 +43,7 @@
       "dependsOn": ["codegen:api-schemas"]
     },
     "codegen:config-docs": {
+      "dependsOn": ["codegen:api-schemas"],
       "inputs": ["**/*-settings.schema.ts", "zod2md.config.ts"],
       "outputs": ["docs/**/*.mdx"]
     },
