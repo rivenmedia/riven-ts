@@ -61,6 +61,8 @@ jobs:
             command: //#knip:ci:development
           - name: Knip (production)
             command: //#knip:ci:production
+          - name: Build Wiki
+            command: "@repo/wiki#build"
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
       task: ${{ matrix.task.command }}
