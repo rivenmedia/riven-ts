@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createSettings } from "./settings.ts";
+import { createSettings } from "./ranking-settings.schema.ts";
 
 describe("createSettings", () => {
   it("creates default settings from empty input", () => {

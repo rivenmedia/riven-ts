@@ -5,7 +5,10 @@ import { RTN } from "../../rtn.ts";
 import { normaliseTitle } from "../../shared/normalise.ts";
 import { adultHandler, languageHandler, trashHandler } from "../fetch.ts";
 import { getLevRatio, titleMatch } from "../lev.ts";
-import { createRankingModel, createSettings } from "../settings.ts";
+import {
+  createRankingModel,
+  createSettings,
+} from "../ranking-settings.schema.ts";
 
 const it = baseIt.extend("rankingConfig", () =>
   createRankingModel({

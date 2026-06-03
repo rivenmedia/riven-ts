@@ -1,14 +1,13 @@
 {
-  "title": "Documentation",
   "pages": [
+    "--- General ---",
     "index",
-    "versions",
     "getting-started",
-    "architecture",
-    "configuration",
-    "deployment",
-    "plugins",
-    "plugin-sdk",
-    "troubleshooting"
+    "...",
+    "--- Configuration ---",
+    "core",
+    "ranking-configuration",
+    "--- Plugins ---",
+    "...plugins"
   ]
 }
