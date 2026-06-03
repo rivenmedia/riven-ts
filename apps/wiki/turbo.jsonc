@@ -4,7 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["$TURBO_EXTENDS$", "^codegen:config-docs"],
-      "outputs": ["$TURBO_EXTENDS", ".next/**", "out/**"],
+      "outputs": ["$TURBO_EXTENDS$", ".next/**", "out/**"],
       "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/**/*.{md,mdx}"]
     },
     "dev": {
