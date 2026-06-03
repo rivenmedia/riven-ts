@@ -372,12 +372,12 @@ export const TrashRanksSchema = z.object({
  * @public
  */
 export const CustomRanksConfigSchema = z.object({
-  quality: QualityRanksSchema.default(QualityRanksSchema.parse({})),
-  rips: RipsRanksSchema.default(RipsRanksSchema.parse({})),
-  hdr: HdrRanksSchema.default(HdrRanksSchema.parse({})),
-  audio: AudioRanksSchema.default(AudioRanksSchema.parse({})),
-  extras: ExtrasRanksSchema.default(ExtrasRanksSchema.parse({})),
-  trash: TrashRanksSchema.default(TrashRanksSchema.parse({})),
+  quality: QualityRanksSchema.default(() => QualityRanksSchema.parse({})),
+  rips: RipsRanksSchema.default(() => RipsRanksSchema.parse({})),
+  hdr: HdrRanksSchema.default(() => HdrRanksSchema.parse({})),
+  audio: AudioRanksSchema.default(() => AudioRanksSchema.parse({})),
+  extras: ExtrasRanksSchema.default(() => ExtrasRanksSchema.parse({})),
+  trash: TrashRanksSchema.default(() => TrashRanksSchema.parse({})),
 });
 
 export type CustomRanksConfig = z.infer<typeof CustomRanksConfigSchema>;
@@ -497,10 +497,14 @@ export const SettingsSchema = z.object({
   require: z.array(z.string()).default([]),
   exclude: z.array(z.string()).default([]),
   preferred: z.array(z.string()).default([]),
-  resolutions: ResolutionConfigSchema.default(ResolutionConfigSchema.parse({})),
-  options: OptionsConfigSchema.default(OptionsConfigSchema.parse({})),
-  languages: LanguagesConfigSchema.default(LanguagesConfigSchema.parse({})),
-  customRanks: CustomRanksConfigSchema.default(
+  resolutions: ResolutionConfigSchema.default(() =>
+    ResolutionConfigSchema.parse({}),
+  ),
+  options: OptionsConfigSchema.default(() => OptionsConfigSchema.parse({})),
+  languages: LanguagesConfigSchema.default(() =>
+    LanguagesConfigSchema.parse({}),
+  ),
+  customRanks: CustomRanksConfigSchema.default(() =>
     CustomRanksConfigSchema.parse({}),
   ),
 });
