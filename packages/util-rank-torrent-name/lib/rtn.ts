@@ -5,7 +5,7 @@ import {
   type Settings,
   type SettingsInput,
   createSettings,
-} from "./ranker/settings.ts";
+} from "./ranker/ranking-settings.schema.ts";
 import { sortTorrents } from "./ranker/sort.ts";
 import { Resolution } from "./schemas.ts";
 

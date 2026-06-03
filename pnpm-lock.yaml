@@ -502,6 +502,9 @@ importers:
       '@repo/util-rank-torrent-name':
         specifier: workspace:^
         version: link:../../packages/util-rank-torrent-name
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../../packages/util-docs-generation
       '@sentry/node':
         specifier: 'catalog:'
         version: 10.53.1
@@ -668,18 +671,12 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
-      zod2md:
-        specifier: 'catalog:'
-        version: 0.2.5(zod@4.4.3)
 
   apps/wiki:
     dependencies:
       fumadocs-core:
         specifier: 'catalog:'
         version: 16.8.12(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.15)(lucide-react@0.562.0(react@19.2.6))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3)
-      fumadocs-mdx:
-        specifier: 'catalog:'
-        version: 14.3.2(@types/mdast@4.0.4)(@types/mdx@2.0.13)(@types/react@19.2.15)(fumadocs-core@16.8.12(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.15)(lucide-react@0.562.0(react@19.2.6))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
       fumadocs-ui:
         specifier: 'catalog:'
         version: 16.8.12(@tailwindcss/oxide@4.3.0)(@types/mdx@2.0.13)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(fumadocs-core@16.8.12(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.15)(lucide-react@0.562.0(react@19.2.6))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tailwindcss@4.3.0)
@@ -708,6 +705,48 @@ importers:
       '@repo/core-util-typescript-config':
         specifier: workspace:^
         version: link:../../packages/core/util-typescript-config
+      '@repo/plugin-comet':
+        specifier: workspace:^
+        version: link:../../packages/plugin-comet
+      '@repo/plugin-jellyfin':
+        specifier: workspace:^
+        version: link:../../packages/plugin-jellyfin
+      '@repo/plugin-listrr':
+        specifier: workspace:^
+        version: link:../../packages/plugin-listrr
+      '@repo/plugin-mdblist':
+        specifier: workspace:^
+        version: link:../../packages/plugin-mdblist
+      '@repo/plugin-notifications':
+        specifier: workspace:^
+        version: link:../../packages/plugin-notifications
+      '@repo/plugin-plex':
+        specifier: workspace:^
+        version: link:../../packages/plugin-plex
+      '@repo/plugin-seerr':
+        specifier: workspace:^
+        version: link:../../packages/plugin-seerr
+      '@repo/plugin-stremthru':
+        specifier: workspace:^
+        version: link:../../packages/plugin-stremthru
+      '@repo/plugin-subdl':
+        specifier: workspace:^
+        version: link:../../packages/plugin-subdl
+      '@repo/plugin-tmdb':
+        specifier: workspace:^
+        version: link:../../packages/plugin-tmdb
+      '@repo/plugin-torrentio':
+        specifier: workspace:^
+        version: link:../../packages/plugin-torrentio
+      '@repo/plugin-tvdb':
+        specifier: workspace:^
+        version: link:../../packages/plugin-tvdb
+      '@repo/riven':
+        specifier: workspace:^
+        version: link:../riven
+      '@repo/util-rank-torrent-name':
+        specifier: workspace:^
+        version: link:../../packages/util-rank-torrent-name
       '@tailwindcss/postcss':
         specifier: 'catalog:'
         version: 4.3.0
@@ -723,6 +762,9 @@ importers:
       '@types/react-dom':
         specifier: 'catalog:'
         version: 19.2.3(@types/react@19.2.15)
+      fumadocs-mdx:
+        specifier: 'catalog:'
+        version: 14.3.2(@types/mdast@4.0.4)(@types/mdx@2.0.13)(@types/react@19.2.15)(fumadocs-core@16.8.12(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.15)(lucide-react@0.562.0(react@19.2.6))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
       postcss:
         specifier: 'catalog:'
         version: 8.5.15
@@ -1051,6 +1093,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1088,9 +1133,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
-      zod2md:
-        specifier: 'catalog:'
-        version: 0.2.5(zod@4.4.3)
 
   packages/plugin-jellyfin:
     dependencies:
@@ -1100,6 +1142,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1137,9 +1182,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
-      zod2md:
-        specifier: 'catalog:'
-        version: 0.2.5(zod@4.4.3)
 
   packages/plugin-listrr:
     dependencies:
@@ -1152,6 +1194,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
@@ -1201,9 +1246,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
-      zod2md:
-        specifier: 'catalog:'
-        version: 0.2.5(zod@4.4.3)
 
   packages/plugin-mdblist:
     dependencies:
@@ -1216,6 +1258,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
@@ -1265,9 +1310,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
-      zod2md:
-        specifier: 'catalog:'
-        version: 0.2.5(zod@4.4.3)
 
   packages/plugin-notifications:
     dependencies:
@@ -1277,6 +1319,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       luxon:
         specifier: 'catalog:'
         version: 3.7.2
@@ -1326,9 +1371,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
-      zod2md:
-        specifier: 'catalog:'
-        version: 0.2.5(zod@4.4.3)
 
   packages/plugin-plex:
     dependencies:
@@ -1338,6 +1380,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1384,9 +1429,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
-      zod2md:
-        specifier: 'catalog:'
-        version: 0.2.5(zod@4.4.3)
 
   packages/plugin-seerr:
     dependencies:
@@ -1399,6 +1441,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
@@ -1451,9 +1496,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
-      zod2md:
-        specifier: 'catalog:'
-        version: 0.2.5(zod@4.4.3)
 
   packages/plugin-stremthru:
     dependencies:
@@ -1466,6 +1508,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1503,9 +1548,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
-      zod2md:
-        specifier: 'catalog:'
-        version: 0.2.5(zod@4.4.3)
 
   packages/plugin-subdl:
     dependencies:
@@ -1518,6 +1560,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1555,9 +1600,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
-      zod2md:
-        specifier: 'catalog:'
-        version: 0.2.5(zod@4.4.3)
 
   packages/plugin-test:
     dependencies:
@@ -1604,9 +1646,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
-      zod2md:
-        specifier: 'catalog:'
-        version: 0.2.5(zod@4.4.3)
 
   packages/plugin-tmdb:
     dependencies:
@@ -1616,6 +1655,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1662,9 +1704,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
-      zod2md:
-        specifier: 'catalog:'
-        version: 0.2.5(zod@4.4.3)
 
   packages/plugin-torrentio:
     dependencies:
@@ -1674,6 +1713,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1711,9 +1753,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
-      zod2md:
-        specifier: 'catalog:'
-        version: 0.2.5(zod@4.4.3)
 
   packages/plugin-tvdb:
     dependencies:
@@ -1723,6 +1762,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       countries-and-timezones:
         specifier: 'catalog:'
         version: 3.9.0
@@ -1778,9 +1820,43 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
+
+  packages/util-docs-generation:
+    dependencies:
+      es-toolkit:
+        specifier: 'catalog:'
+        version: 1.46.1
+      fumadocs-mdx:
+        specifier: 'catalog:'
+        version: 14.3.2(@types/mdast@4.0.4)(@types/mdx@2.0.13)(@types/react@19.2.15)(fumadocs-core@16.8.12(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.15)(lucide-react@1.16.0(react@19.2.6))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
       zod2md:
         specifier: 'catalog:'
         version: 0.2.5(zod@4.4.3)
+    devDependencies:
+      '@repo/core-util-eslint-config':
+        specifier: workspace:^
+        version: link:../core/util-eslint-config
+      '@repo/core-util-typescript-config':
+        specifier: workspace:^
+        version: link:../core/util-typescript-config
+      '@repo/core-util-vitest-config':
+        specifier: workspace:^
+        version: link:../core/util-vitest-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.12.4
+      '@typescript-eslint/parser':
+        specifier: 'catalog:'
+        version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.4(jiti@2.7.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/coverage-v8@4.1.7)(msw@2.13.2(@types/node@24.12.4)(typescript@5.9.3))(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
 
   packages/util-plugin-sdk:
     dependencies:
@@ -1924,6 +2000,9 @@ importers:
 
   packages/util-rank-torrent-name:
     dependencies:
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       '@viren070/parse-torrent-title':
         specifier: 'catalog:'
         version: 0.7.6
@@ -14126,6 +14205,39 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  fumadocs-core@16.8.12(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.15)(lucide-react@1.16.0(react@19.2.6))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3):
+    dependencies:
+      '@orama/orama': 3.1.18
+      estree-util-value-to-estree: 3.5.0
+      github-slugger: 2.0.0
+      hast-util-to-estree: 3.1.3
+      hast-util-to-jsx-runtime: 2.3.6
+      js-yaml: 4.1.1
+      mdast-util-mdx: 3.0.0
+      mdast-util-to-markdown: 2.1.2
+      remark: 15.0.1
+      remark-gfm: 4.0.1
+      remark-rehype: 11.1.2
+      scroll-into-view-if-needed: 3.1.0
+      shiki: 4.0.2
+      tinyglobby: 0.2.16
+      unified: 11.0.5
+      unist-util-visit: 5.1.0
+      vfile: 6.0.3
+    optionalDependencies:
+      '@mdx-js/mdx': 3.1.1
+      '@types/estree-jsx': 1.0.5
+      '@types/hast': 3.0.4
+      '@types/mdast': 4.0.4
+      '@types/react': 19.2.15
+      lucide-react: 1.16.0(react@19.2.6)
+      next: 16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      react: 19.2.6
+      react-dom: 19.2.6(react@19.2.6)
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
   fumadocs-mdx@14.3.2(@types/mdast@4.0.4)(@types/mdx@2.0.13)(@types/react@19.2.15)(fumadocs-core@16.8.12(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.15)(lucide-react@0.562.0(react@19.2.6))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0)):
     dependencies:
       '@mdx-js/mdx': 3.1.1
@@ -14134,6 +14246,36 @@ snapshots:
       esbuild: 0.28.0
       estree-util-value-to-estree: 3.5.0
       fumadocs-core: 16.8.12(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.15)(lucide-react@0.562.0(react@19.2.6))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3)
+      js-yaml: 4.1.1
+      mdast-util-mdx: 3.0.0
+      mdast-util-to-markdown: 2.1.2
+      picocolors: 1.1.1
+      picomatch: 4.0.4
+      tinyexec: 1.1.2
+      tinyglobby: 0.2.16
+      unified: 11.0.5
+      unist-util-remove-position: 5.0.0
+      unist-util-visit: 5.1.0
+      vfile: 6.0.3
+      zod: 4.4.3
+    optionalDependencies:
+      '@types/mdast': 4.0.4
+      '@types/mdx': 2.0.13
+      '@types/react': 19.2.15
+      next: 16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      react: 19.2.6
+      vite: 7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0)
+    transitivePeerDependencies:
+      - supports-color
+
+  fumadocs-mdx@14.3.2(@types/mdast@4.0.4)(@types/mdx@2.0.13)(@types/react@19.2.15)(fumadocs-core@16.8.12(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.15)(lucide-react@1.16.0(react@19.2.6))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0)):
+    dependencies:
+      '@mdx-js/mdx': 3.1.1
+      '@standard-schema/spec': 1.1.0
+      chokidar: 5.0.0
+      esbuild: 0.28.0
+      estree-util-value-to-estree: 3.5.0
+      fumadocs-core: 16.8.12(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.15)(lucide-react@1.16.0(react@19.2.6))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3)
       js-yaml: 4.1.1
       mdast-util-mdx: 3.0.0
       mdast-util-to-markdown: 2.1.2

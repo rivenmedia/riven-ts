@@ -7,7 +7,8 @@
     ".": {
       "production": "./dist/index.js",
       "default": "./lib/index.ts"
-    }
+    },
+    "./wiki.config": "./wiki.config.ts"
   },
   "files": [
     "dist"
@@ -15,7 +16,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
-    "generate-config-docs": "zod2md",
+    "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run --passWithNoTests",
@@ -25,6 +26,7 @@
     "@apollo/datasource-rest": "catalog:",
     "@mikro-orm/core": "catalog:",
     "@repo/util-plugin-sdk": "workspace:^",
+    "@repo/util-wiki-helpers": "workspace:^",
     "type-graphql": "catalog:",
     "zod": "catalog:"
   },
@@ -38,7 +40,6 @@
     "eslint": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "zod2md": "catalog:"
+    "vitest": "catalog:"
   }
 }

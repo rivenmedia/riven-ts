@@ -1,12 +1,22 @@
 ---
-title: Plugins Overview
+title: Overview
 description: Available plugins for Riven TS and how to configure them.
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 
-Riven uses a plugin architecture. Every integration is a plugin that can be enabled by providing its required environment variables. If the required settings aren't provided, the plugin is simply skipped.
+Riven uses a plugin architecture. Every integration is a plugin that can be enabled by providing its required environment variables after adding it to the `RIVEN_SETTING__enabledPlugins` config. If the required settings aren't provided, the plugin is simply skipped.
+
+<Callout type="warn">
+To enable a plugin, you must first add it to the
+`RIVEN_SETTING__enabledPlugins` config. For example:
+
+```bash
+RIVEN_SETTING__enabledPlugins=["seerr"]
+```
+
+</Callout>
 
 ## Plugin Categories
 
@@ -17,17 +27,17 @@ These plugins tell Riven what media you want:
 <Cards>
   <Card
     title="Seerr"
-    href="/docs/plugins/seerr"
+    href="/docs/plugins/seerr/settings"
     description="Request management via Seerr/Overseerr"
   />
   <Card
     title="MDBList"
-    href="/docs/plugins/mdblist"
+    href="/docs/plugins/mdblist/settings"
     description="Curated media lists from MDBList"
   />
   <Card
     title="Listrr"
-    href="/docs/plugins/listrr"
+    href="/docs/plugins/listrr/settings"
     description="Movie and show lists from Listrr"
   />
 </Cards>
@@ -39,12 +49,12 @@ These plugins fetch information about your media:
 <Cards>
   <Card
     title="TMDB"
-    href="/docs/plugins/tmdb"
+    href="/docs/plugins/tmdb/settings"
     description="The Movie Database - primary metadata source"
   />
   <Card
     title="TVDB"
-    href="/docs/plugins/tvdb"
+    href="/docs/plugins/tvdb/settings"
     description="TheTVDB - TV show metadata"
   />
 </Cards>
@@ -56,17 +66,17 @@ These plugins find and cache torrents:
 <Cards>
   <Card
     title="StremThru"
-    href="/docs/plugins/stremthru"
+    href="/docs/plugins/stremthru/settings"
     description="Debrid provider integration (Real-Debrid, AllDebrid, etc.)"
   />
   <Card
     title="Torrentio"
-    href="/docs/plugins/torrentio"
+    href="/docs/plugins/torrentio/settings"
     description="Torrentio torrent provider"
   />
   <Card
     title="Comet"
-    href="/docs/plugins/comet"
+    href="/docs/plugins/comet/settings"
     description="Comet torrent service"
   />
 </Cards>
@@ -76,8 +86,13 @@ These plugins find and cache torrents:
 <Cards>
   <Card
     title="Plex"
-    href="/docs/plugins/plex"
+    href="/docs/plugins/plex/settings"
     description="Plex server integration and library updates"
+  />
+  <Card
+    title="Jellyfin"
+    href="/docs/plugins/jellyfin/settings"
+    description="Jellyfin server integration and library updates"
   />
 </Cards>
 
@@ -86,12 +101,12 @@ These plugins find and cache torrents:
 <Cards>
   <Card
     title="Subdl"
-    href="/docs/plugins/subdl"
+    href="/docs/plugins/subdl/settings"
     description="Automatic subtitle downloading"
   />
   <Card
     title="Notifications"
-    href="/docs/plugins/notifications"
+    href="/docs/plugins/notifications/settings"
     description="Discord, webhook, and Apprise notifications"
   />
 </Cards>

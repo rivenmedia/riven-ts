@@ -120,6 +120,9 @@ volumes:
 ### Create your .env file
 
 ```bash title=".env"
+# Enabled plugins
+RIVEN_SETTING__enabledPlugins=["..."]
+
 # Database
 RIVEN_SETTING__databaseUrl="postgres+psycopg2://riven:riven@postgres:5432/riven"
 
@@ -143,7 +146,7 @@ RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__apiKey="your-mdblist-key"
 RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__lists=["user/list-name"]
 ```
 
-See the [Configuration](/docs/configuration) page for all available settings.
+See the [Configuration](/docs/core/settings) page for all available settings and the [Plugins](/docs/plugins) page for plugin-specific settings.
 
 </Step>
 <Step>

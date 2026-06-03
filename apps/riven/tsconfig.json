@@ -8,13 +8,14 @@
   "files": [
     "scripts/generate-gql-schema.ts",
     "scripts/generate-ranking-config-json-schema.ts",
+    "scripts/generate-zod-docs.ts",
     "eslint.config.ts",
     "graphql-codegen.ts",
     "esbuild.config.ts",
     "vitest.d.ts",
     "vitest.config.ts",
     "vitest.setup.ts",
-    "zod2md.config.ts"
+    "wiki.config.ts"
   ],
   "include": [],
   "exclude": []
