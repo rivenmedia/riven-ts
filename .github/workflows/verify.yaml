@@ -63,6 +63,8 @@ jobs:
             command: //#knip:ci:production
           - name: Build Wiki
             command: "@repo/wiki#build"
+            runner-requirements:
+              - fuse
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
       task: ${{ matrix.task.command }}
