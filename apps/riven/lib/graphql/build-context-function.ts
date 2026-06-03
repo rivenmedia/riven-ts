@@ -1,3 +1,5 @@
+import { database, services } from "../database/database.ts";
+import { logger } from "../utilities/logger/logger.ts";
 import { type ApolloServerContext, CoreKey } from "./context.ts";
 
 import type { ContextFunction } from "@apollo/server";
@@ -9,11 +11,8 @@ export const buildContextFunction: (
 ) => ContextFunction<
   [StandaloneServerContextFunctionArgument],
   ApolloServerContext
-> = (sendEvent) => async () => {
-  const { logger } = await import("../utilities/logger/logger.ts");
-  const { database, services } = await import("../database/database.ts");
-
-  return {
+> = (sendEvent) => () =>
+  Promise.resolve({
     [CoreKey]: {
       em: database.em.fork(),
       services,
@@ -21,5 +20,4 @@ export const buildContextFunction: (
     logger,
     sendEvent,
     plugins: {},
-  };
-};
+  });
