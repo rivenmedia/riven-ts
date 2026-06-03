@@ -18,6 +18,9 @@
     "knip:prepare": "turbo codegen:api-schemas"
   },
   "devDependencies": {
+    "@commitlint/cli": "catalog:",
+    "@commitlint/config-conventional": "catalog:",
+    "@commitlint/types": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@trivago/prettier-plugin-sort-imports": "catalog:",

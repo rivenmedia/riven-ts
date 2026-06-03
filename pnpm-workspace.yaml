@@ -11,6 +11,9 @@ catalog:
   "@apollo/server": ^5.5.1
   "@apollo/utils.keyvadapter": ^4.0.1
   "@apollo/utils.keyvaluecache": ^4.0.0
+  "@commitlint/cli": ^21.0.2
+  "@commitlint/config-conventional": ^21.0.2
+  "@commitlint/types": ^21.0.1
   "@elastic/ecs-winston-format": ^1.5.3
   "@eslint/config-helpers": ^0.6.0
   "@eslint/js": ^9.39.4

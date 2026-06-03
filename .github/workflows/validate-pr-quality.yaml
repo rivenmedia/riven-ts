@@ -1,4 +1,4 @@
-name: PR Quality
+name: Validate PR Quality
 
 permissions:
   contents: read
@@ -12,7 +12,7 @@ on:
       - reopened
 
 jobs:
-  anti-slop:
+  validate-pr-quality:
     runs-on: ubuntu-latest
     steps:
       - uses: peakoss/anti-slop@v0.3.0
@@ -22,4 +22,4 @@ jobs:
           failure-pr-message: |
             Your PR has been flagged as potentially low-quality by our automated checks.
 
-            See the "PR Quality" check for more details. If you believe this is a mistake, please reach out to the maintainers.
+            See the "Validate PR Quality" check for more details. If you believe this is a mistake, please reach out to the maintainers.

@@ -45,6 +45,7 @@ export default {
     ".": {
       entry: [".husky/install.mjs", "turbo/generators/config.ts!"],
       project: ["turbo/**/*.ts"],
+      ignoreDependencies: ["@commitlint/cli"],
       ignoreBinaries: ["tail", "jq"],
     },
     "apps/wiki": {
