@@ -295,7 +295,7 @@ catalogs:
       specifier: ^18.0.0
       version: 18.0.0
     postcss:
-      specifier: ^8.5.15
+      specifier: ^8.5.10
       version: 8.5.15
     prettier:
       specifier: ^3.8.3
@@ -6906,7 +6906,7 @@ packages:
     resolution: {integrity: sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==}
 
   fuse-shared-library-linux-arm64@https://codeload.github.com/runkit-forks/fuse-shared-library-linux-arm64/tar.gz/11e96e0745fd800ea3e0a4c8cc3b57fceba461cb:
-    resolution: {gitHosted: true, tarball: https://codeload.github.com/runkit-forks/fuse-shared-library-linux-arm64/tar.gz/11e96e0745fd800ea3e0a4c8cc3b57fceba461cb}
+    resolution: {gitHosted: true, integrity: sha512-CqG49f56nhzQAAcWG8C77m7TZYpeI4+bq5hyKxb7c5zcEH6E4TER+lCbMJSfoEI+aDKFHvI0nz0VUe/K6rUHvw==, tarball: https://codeload.github.com/runkit-forks/fuse-shared-library-linux-arm64/tar.gz/11e96e0745fd800ea3e0a4c8cc3b57fceba461cb}
     version: 1.0.0
 
   fuse-shared-library-linux-arm@1.0.0:
@@ -6916,7 +6916,7 @@ packages:
     resolution: {integrity: sha512-07MQRSobrBKwW4D7oKm0gM2TwgvZWb+gC08JdiYDG4KBTncxk9ssqEDiDMKll8hpseZufsY2w1yc/feOu2DPmQ==}
 
   fuse-shared-library-win32@https://codeload.github.com/raymond-h/fuse-shared-library-win32/tar.gz/07f3432c82180e8fdbe2a43c89cac234ff268796:
-    resolution: {gitHosted: true, tarball: https://codeload.github.com/raymond-h/fuse-shared-library-win32/tar.gz/07f3432c82180e8fdbe2a43c89cac234ff268796}
+    resolution: {gitHosted: true, integrity: sha512-s+mOPxWfmCV+XAHT2OG7H/EsEL0nK1cAJenmIi8pP/wQhDgCHzDih+PMFKjVqso2ttOJukbAVNCuFPmAU1+iNQ==, tarball: https://codeload.github.com/raymond-h/fuse-shared-library-win32/tar.gz/07f3432c82180e8fdbe2a43c89cac234ff268796}
     version: 0.1.0
 
   gensync@1.0.0-beta.2:
