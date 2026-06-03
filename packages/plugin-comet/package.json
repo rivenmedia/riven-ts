@@ -11,8 +11,7 @@
     "./wiki.config": "./wiki.config.ts"
   },
   "files": [
-    "dist",
-    "docs"
+    "dist"
   ],
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",
