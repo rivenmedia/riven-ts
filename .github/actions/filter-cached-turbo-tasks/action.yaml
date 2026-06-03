@@ -35,7 +35,7 @@ runs:
 
         for TASK in "${TASK_LIST[@]}"; do
           case "$TASK" in
-          (//#[A-Za-z0-9:_-]*)
+          (//#[A-Za-z0-9:_-#]*)
             ;;
           (""|//#|*[!A-Za-z0-9:_-]*)
             echo "::error::Invalid turbo task: $TASK"
