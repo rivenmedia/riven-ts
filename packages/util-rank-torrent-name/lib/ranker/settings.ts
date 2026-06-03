@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+/**
+ * @public
+ */
 export const CustomRankSchema = z.object({
   fetch: z.boolean().default(true),
 
@@ -15,6 +18,9 @@ function customRank(fetch: boolean): CustomRank {
   return { fetch };
 }
 
+/**
+ * @public
+ */
 export const QualityRanksSchema = z.object({
   /**
    * @default { fetch: false }
@@ -82,6 +88,9 @@ export const QualityRanksSchema = z.object({
   xvid: CustomRankSchema.default(customRank(false)),
 });
 
+/**
+ * @public
+ */
 export const RipsRanksSchema = z.object({
   /**
    * @default { fetch: false }
@@ -139,6 +148,9 @@ export const RipsRanksSchema = z.object({
   webrip: CustomRankSchema.default(customRank(true)),
 });
 
+/**
+ * @public
+ */
 export const HdrRanksSchema = z.object({
   /**
    * @default { fetch: true }
@@ -166,6 +178,9 @@ export const HdrRanksSchema = z.object({
   sdr: CustomRankSchema.default(customRank(true)),
 });
 
+/**
+ * @public
+ */
 export const AudioRanksSchema = z.object({
   /**
    * @default { fetch: true }
@@ -228,6 +243,9 @@ export const AudioRanksSchema = z.object({
   truehd: CustomRankSchema.default(customRank(true)),
 });
 
+/**
+ * @public
+ */
 export const ExtrasRanksSchema = z.object({
   /**
    * @default { fetch: false }
@@ -305,6 +323,9 @@ export const ExtrasRanksSchema = z.object({
   uncensored: CustomRankSchema.default(customRank(true)),
 });
 
+/**
+ * @public
+ */
 export const TrashRanksSchema = z.object({
   /**
    * @default { fetch: false }
@@ -347,6 +368,9 @@ export const TrashRanksSchema = z.object({
   telesync: CustomRankSchema.default(customRank(false)),
 });
 
+/**
+ * @public
+ */
 export const CustomRanksConfigSchema = z.object({
   quality: QualityRanksSchema.default(QualityRanksSchema.parse({})),
   rips: RipsRanksSchema.default(RipsRanksSchema.parse({})),
@@ -358,6 +382,9 @@ export const CustomRanksConfigSchema = z.object({
 
 export type CustomRanksConfig = z.infer<typeof CustomRanksConfigSchema>;
 
+/**
+ * @public
+ */
 export const ResolutionConfigSchema = z.object({
   /**
    * @default false
@@ -392,6 +419,9 @@ export const ResolutionConfigSchema = z.object({
 
 export type ResolutionConfig = z.infer<typeof ResolutionConfigSchema>;
 
+/**
+ * @public
+ */
 export const OptionsConfigSchema = z.object({
   /**
    * @default true
@@ -424,6 +454,9 @@ export const OptionsConfigSchema = z.object({
   titleSimilarity: z.number().min(0).max(1).default(0.85),
 });
 
+/**
+ * @public
+ */
 export const LanguagesConfigSchema = z.object({
   /**
    * @default []

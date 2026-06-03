@@ -502,6 +502,9 @@ importers:
       '@repo/util-rank-torrent-name':
         specifier: workspace:^
         version: link:../../packages/util-rank-torrent-name
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../../packages/util-docs-generation
       '@sentry/node':
         specifier: 'catalog:'
         version: 10.53.1
@@ -626,9 +629,6 @@ importers:
       '@repo/plugin-test':
         specifier: workspace:^
         version: link:../../packages/plugin-test
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../../packages/util-docs-generation
       '@swc-node/register':
         specifier: 'catalog:'
         version: 1.11.1(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@swc/core@1.15.33)(@swc/types@0.1.26)(typescript@5.9.3)
@@ -1093,6 +1093,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1112,9 +1115,6 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -1142,6 +1142,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1161,9 +1164,6 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -1194,6 +1194,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
@@ -1225,9 +1228,6 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -1258,6 +1258,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
@@ -1289,9 +1292,6 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -1319,6 +1319,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       luxon:
         specifier: 'catalog:'
         version: 3.7.2
@@ -1344,9 +1347,6 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       '@types/luxon':
         specifier: 'catalog:'
         version: 3.7.1
@@ -1380,6 +1380,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1408,9 +1411,6 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -1441,6 +1441,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
@@ -1475,9 +1478,6 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -1508,6 +1508,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1527,9 +1530,6 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -1560,6 +1560,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1579,9 +1582,6 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -1628,9 +1628,6 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -1658,6 +1655,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1686,9 +1686,6 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -1716,6 +1713,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1735,9 +1735,6 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -1765,6 +1762,9 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       countries-and-timezones:
         specifier: 'catalog:'
         version: 3.9.0
@@ -1799,9 +1799,6 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       '@types/luxon':
         specifier: 'catalog:'
         version: 3.7.1
@@ -1826,6 +1823,9 @@ importers:
 
   packages/util-docs-generation:
     dependencies:
+      es-toolkit:
+        specifier: 'catalog:'
+        version: 1.46.1
       fumadocs-mdx:
         specifier: 'catalog:'
         version: 14.3.2(@types/mdast@4.0.4)(@types/mdx@2.0.13)(@types/react@19.2.15)(fumadocs-core@16.8.12(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.15)(lucide-react@1.16.0(react@19.2.6))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3))(next@16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(vite@7.3.0(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
@@ -1848,9 +1848,6 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      es-toolkit:
-        specifier: 'catalog:'
-        version: 1.46.1
       eslint:
         specifier: 'catalog:'
         version: 9.39.4(jiti@2.7.0)
@@ -2003,6 +2000,9 @@ importers:
 
   packages/util-rank-torrent-name:
     dependencies:
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       '@viren070/parse-torrent-title':
         specifier: 'catalog:'
         version: 0.7.6
@@ -2025,9 +2025,6 @@ importers:
       '@repo/core-util-vitest-config':
         specifier: workspace:^
         version: link:../core/util-vitest-config
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4

@@ -26,6 +26,7 @@
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@repo/util-plugin-sdk": "workspace:^",
+    "@repo/util-wiki-helpers": "workspace:^",
     "type-graphql": "catalog:",
     "zod": "catalog:"
   },
@@ -37,7 +38,6 @@
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/util-plugin-testing": "workspace:^",
-    "@repo/util-wiki-helpers": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",

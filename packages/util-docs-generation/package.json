@@ -15,6 +15,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "es-toolkit": "catalog:",
     "fumadocs-mdx": "catalog:",
     "zod2md": "catalog:"
   },
@@ -24,7 +25,6 @@
     "@repo/core-util-vitest-config": "workspace:^",
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
-    "es-toolkit": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
