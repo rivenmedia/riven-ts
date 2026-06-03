@@ -9,11 +9,15 @@ import {
   RESOLUTION_SETTINGS_MAP,
   TRASH_QUALITIES,
 } from "../shared/mappings.ts";
-import { getCustomRank } from "./settings.ts";
+import { getCustomRank } from "./ranking-settings.schema.ts";
 
 import type { ParsedData } from "../schemas.ts";
 import type { FetchResult } from "../types.ts";
-import type { CustomRanksConfig, RankingModel, Settings } from "./settings.ts";
+import type {
+  CustomRanksConfig,
+  RankingModel,
+  Settings,
+} from "./ranking-settings.schema.ts";
 
 /**
  * @internal

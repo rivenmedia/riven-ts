@@ -2,7 +2,10 @@ import { it as baseIt, expect } from "vitest";
 
 import { parse } from "../parser/parse.ts";
 import { rank } from "./rank.ts";
-import { createRankingModel, createSettings } from "./settings.ts";
+import {
+  createRankingModel,
+  createSettings,
+} from "./ranking-settings.schema.ts";
 
 const it = baseIt
   .extend("rankingConfig", () =>

@@ -7,7 +7,7 @@ export {
   Settings,
   SettingsSchema,
   RankingModelSchema,
-} from "./ranker/settings.ts";
+} from "./ranker/ranking-settings.schema.ts";
 export { normaliseTitle } from "./shared/normalise.ts";
 export { getLevRatio, titleMatch } from "./ranker/lev.ts";
 export { sortTorrents } from "./ranker/sort.ts";
@@ -20,7 +20,7 @@ export type {
   RankingModel,
   CustomRank,
   SettingsInput,
-} from "./ranker/settings.ts";
+} from "./ranker/ranking-settings.schema.ts";
 export type { Aliases } from "./ranker/lev.ts";
 
 export { RTN } from "./rtn.ts";
