@@ -33,6 +33,9 @@ catalogs:
     '@commitlint/config-conventional':
       specifier: ^21.0.2
       version: 21.0.2
+    '@commitlint/types':
+      specifier: ^21.0.1
+      version: 21.0.1
     '@elastic/ecs-winston-format':
       specifier: ^1.5.3
       version: 1.5.3
@@ -388,6 +391,9 @@ importers:
       '@commitlint/config-conventional':
         specifier: 'catalog:'
         version: 21.0.2
+      '@commitlint/types':
+        specifier: 'catalog:'
+        version: 21.0.1
       '@repo/core-util-eslint-config':
         specifier: workspace:^
         version: link:packages/core/util-eslint-config

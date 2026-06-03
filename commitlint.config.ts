@@ -1,45 +1,51 @@
 import { readdirSync } from "node:fs";
 
+import type { UserConfig } from "@commitlint/types";
+
 const prefixes = ["plugin-", "util-", "feature-"];
 
-function getDirNames(path) {
+function getDirNames(path: string) {
   return readdirSync(path, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name);
 }
 
-function stripPrefix(name) {
+function stripPrefix(name: string) {
   for (const prefix of prefixes) {
     if (name.startsWith(prefix)) {
       return name.slice(prefix.length);
     }
   }
+
   return name;
 }
 
 function getScopes() {
-  const scopes = ["repo"];
+  const scopes = new Set(["repo"]);
 
   // Get scopes from apps directory
-  scopes.push(...getDirNames("apps"));
+  for (const dir of getDirNames("apps")) {
+    scopes.add(dir);
+  }
 
   // Get scopes from packages directory
-  for (const pkg of getDirNames("packages")) {
-    scopes.push(stripPrefix(pkg));
+  for (const directory of getDirNames("packages")) {
+    scopes.add(stripPrefix(directory));
 
     // Get scopes from packages/core/* subdirectories
-    if (pkg === "core") {
-      scopes.push(...getDirNames(`packages/${pkg}`).map(stripPrefix));
+    if (directory === "core") {
+      for (const subDir of getDirNames(`packages/${directory}`)) {
+        scopes.add(stripPrefix(subDir));
+      }
     }
   }
 
-  return scopes.sort();
+  return Array.from(scopes).sort();
 }
 
-/** @type {import('@commitlint/types').UserConfig} */
 export default {
   extends: ["@commitlint/config-conventional"],
   rules: {
     "scope-enum": [2, "always", getScopes()],
   },
-};
+} satisfies UserConfig;

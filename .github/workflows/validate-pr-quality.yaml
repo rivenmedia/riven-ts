@@ -1,0 +1,25 @@
+name: Validate PR Quality
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: write
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+
+jobs:
+  validate-pr-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: peakoss/anti-slop@v0.3.0
+        with:
+          max-failures: 4
+          failure-add-pr-labels: slop
+          failure-pr-message: |
+            Your PR has been flagged as potentially low-quality by our automated checks.
+
+            See the "Validate PR Quality" check for more details. If you believe this is a mistake, please reach out to the maintainers.
