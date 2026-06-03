@@ -5,11 +5,7 @@
     { "path": "./tsconfig.lib.json" },
     { "path": "./tsconfig.spec.json" }
   ],
-  "files": [
-    "eslint.config.ts",
-    "vitest.config.ts",
-    "scripts/generate-zod-docs.ts"
-  ],
+  "files": ["eslint.config.ts", "vitest.config.ts"],
   "include": [],
   "exclude": []
 }
