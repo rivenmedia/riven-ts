@@ -21,7 +21,7 @@ function stripPrefix(name: string) {
 }
 
 function getScopes() {
-  const scopes = new Set(["repo"]);
+  const scopes = new Set(["repo", "deps"]);
 
   // Get scopes from apps directory
   for (const dir of getDirNames("apps")) {
