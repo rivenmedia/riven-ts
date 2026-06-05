@@ -49,6 +49,7 @@ const it = baseIt
         const actor = createActor(machineLogic, {
           input: {
             sessionId: SessionID.parse(randomUUID()),
+            mockScenario: undefined,
           },
         });
 
