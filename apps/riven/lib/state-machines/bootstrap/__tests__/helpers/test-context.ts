@@ -20,6 +20,7 @@ export const it = baseIt
     (): BootstrapMachineInput => ({
       rootRef: createEmptyActor(),
       mainRunnerRef: createEmptyActor(),
+      mockScenario: undefined,
     }),
   )
 

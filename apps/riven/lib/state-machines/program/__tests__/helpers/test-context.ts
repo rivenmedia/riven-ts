@@ -9,14 +9,18 @@ import {
   type BootstrapMachineOutput,
   bootstrapMachine,
 } from "../../../bootstrap/index.ts";
-import { rivenMachine } from "../../index.ts";
+import { type RivenMachineInput, rivenMachine } from "../../index.ts";
 
 import type { ValidPlugin } from "../../../../types/plugins.ts";
 
 export const it = baseIt
-  .extend("input", () => ({
-    sessionId: SessionID.parse(crypto.randomUUID()),
-  }))
+  .extend(
+    "input",
+    (): RivenMachineInput => ({
+      sessionId: SessionID.parse(crypto.randomUUID()),
+      mockScenario: undefined,
+    }),
+  )
   .extend("machine", () => rivenMachine)
   .extend(
     "bootstrapMachineOutput",

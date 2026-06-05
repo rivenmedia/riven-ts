@@ -1,4 +1,4 @@
-import { type EntityManager, ref } from "@mikro-orm/core";
+import { type EntityData, type EntityManager, ref } from "@mikro-orm/core";
 import assert from "node:assert";
 
 import { MediaEntryFactory } from "../../factories/media-entry.factory.ts";
@@ -8,7 +8,11 @@ import {
   type ScrapedMovieSeederContext,
 } from "./scraped-movie.seeder.ts";
 
-export type CompletedMovieSeederContext = ScrapedMovieSeederContext;
+import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
+
+export interface CompletedMovieSeederContext extends ScrapedMovieSeederContext {
+  mediaEntries?: EntityData<MediaEntry>[];
+}
 
 export class CompletedMovieSeeder extends BaseSeeder<CompletedMovieSeederContext> {
   async run(
@@ -25,9 +29,16 @@ export class CompletedMovieSeeder extends BaseSeeder<CompletedMovieSeederContext
     em.persist(context.movie);
 
     context.movie.activeStream = ref(context.streams[0]);
-    context.movie.filesystemEntries.set([
-      new MediaEntryFactory(em).makeEntity({ mediaItem: context.movie }),
-    ]);
+
+    context.mediaEntries ??= [{ mediaItem: context.movie }];
+    context.movie.filesystemEntries.set(
+      context.mediaEntries.map((entry) =>
+        new MediaEntryFactory(em).makeEntity({
+          ...entry,
+          mediaItem: ref(context.movie),
+        }),
+      ),
+    );
 
     await em.flush();
 

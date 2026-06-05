@@ -1,4 +1,5 @@
 import { Migrator } from "@mikro-orm/migrations";
+import { SeedManager } from "@mikro-orm/seeder";
 import { fromPromise } from "xstate";
 
 import { createDatabaseConfig } from "../../../database/config.ts";
@@ -7,9 +8,11 @@ import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
 
 function createDatabaseSslOptions() {
-  const ca = settings.databaseSslRootCert;
-  const cert = settings.databaseSslCert;
-  const key = settings.databaseSslKey;
+  const {
+    databaseSslRootCert: ca,
+    databaseSslCert: cert,
+    databaseSslKey: key,
+  } = settings;
 
   if (!ca && !cert && !key) {
     return undefined;
@@ -23,23 +26,21 @@ function createDatabaseSslOptions() {
 }
 
 export const initialiseDatabaseConnection = fromPromise(async () => {
-  const databaseConfig = await createDatabaseConfig({
-    logger,
-  });
-
   const sslOptions = createDatabaseSslOptions();
 
-  const { database } = await initORM({
-    ...databaseConfig,
+  const databaseConfig = await createDatabaseConfig({
     clientUrl: settings.databaseUrl,
     debug: settings.databaseDebugLogging,
+    logger,
     ...(sslOptions && {
       driverOptions: {
         ssl: sslOptions,
       },
     }),
-    extensions: [Migrator],
+    extensions: [Migrator, SeedManager],
   });
+
+  const { database } = await initORM(databaseConfig);
 
   const requiresMigration = await database.orm.migrator.checkSchema();
 
