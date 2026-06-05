@@ -24,7 +24,7 @@ export class ShowFactory extends Factory<Show> {
       contentRating: faker.helpers.arrayElement(ShowContentRating.options),
       isRequested: true,
       itemRequest,
-      tvdbId: faker.number.int({ min: 1 }).toString(),
+      tvdbId: faker.string.numeric({ length: { min: 1, max: 10 } }),
       status: "ended",
       releaseDate: faker.date.between({
         from: DateTime.utc().minus({ years: 1 }).toISO(),

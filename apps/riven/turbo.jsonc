@@ -16,6 +16,7 @@
     "dev": {
       "dependsOn": ["$TURBO_EXTENDS$", "build:workers"],
       "passThroughEnv": [
+        "MOCK_SCENARIO",
         "SENTRY_SPOTLIGHT",
         "SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"
       ]

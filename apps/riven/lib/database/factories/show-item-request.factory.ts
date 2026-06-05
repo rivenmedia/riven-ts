@@ -15,7 +15,7 @@ export class ShowItemRequestFactory extends Factory<ItemRequest> {
       requestedBy: faker.internet.email(),
       state: "completed",
       type: "show",
-      tvdbId: faker.number.int({ min: 1 }).toString(),
+      tvdbId: faker.string.numeric({ length: { min: 1, max: 10 } }),
       ...input,
     };
   }

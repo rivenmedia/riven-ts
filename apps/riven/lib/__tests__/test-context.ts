@@ -7,6 +7,7 @@ import { type Mock, test as testBase, vi } from "vitest";
 
 import { type ApolloServerContext, CoreKey } from "../graphql/context.ts";
 import { queueNameFor } from "../message-queue/utilities/queue-name-for.ts";
+import { mockAgent } from "../mocks/utilities/mock-agent.ts";
 
 import type { Services } from "../database/database.ts";
 import type { Flow } from "../message-queue/flows/index.ts";
@@ -56,10 +57,8 @@ export const it = testBase
     return server;
   })
   .extend("mockAgent", async ({}, { onCleanup }) => {
-    const { MockAgent, getGlobalDispatcher, setGlobalDispatcher } =
-      await import("undici");
+    const { getGlobalDispatcher, setGlobalDispatcher } = await import("undici");
 
-    const mockAgent = new MockAgent();
     const previousGlobalDispatcher = getGlobalDispatcher();
 
     mockAgent.disableNetConnect();
