@@ -15,7 +15,7 @@ if (!mockScenarioName.success) {
 
 export const mockScenario = scenarios[mockScenarioName.data];
 
-const scenarioHandlers = mockScenario.handlers ?? [];
+const scenarioHandlers = mockScenario.handlers;
 
 export const server = setupServer(...scenarioHandlers);
 
