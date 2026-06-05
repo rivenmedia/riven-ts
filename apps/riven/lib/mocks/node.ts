@@ -13,6 +13,12 @@ if (!mockScenarioName.success) {
   );
 }
 
+if (process.env["NODE_ENV"] !== "development") {
+  throw new Error(
+    "Mock scenarios should only be enabled in development environments.",
+  );
+}
+
 export const mockScenario = scenarios[mockScenarioName.data];
 
 const scenarioHandlers = mockScenario.handlers;

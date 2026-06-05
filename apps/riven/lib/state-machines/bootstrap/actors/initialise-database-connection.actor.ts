@@ -32,9 +32,6 @@ export const initialiseDatabaseConnection = fromPromise(async () => {
     clientUrl: settings.databaseUrl,
     debug: settings.databaseDebugLogging,
     logger,
-    seeder: {
-      pathTs: `${import.meta.dirname}/seeders`,
-    },
     ...(sslOptions && {
       driverOptions: {
         ssl: sslOptions,
