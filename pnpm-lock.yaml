@@ -475,6 +475,9 @@ importers:
       '@mikro-orm/reflection':
         specifier: 'catalog:'
         version: 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))
+      '@mikro-orm/seeder':
+        specifier: 'catalog:'
+        version: 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))
       '@repo/core-util-graphql-schema':
         specifier: workspace:^
         version: link:../../packages/core/util-graphql-schema
@@ -568,6 +571,9 @@ importers:
       luxon:
         specifier: 'catalog:'
         version: 3.7.2
+      msw:
+        specifier: 'catalog:'
+        version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
       reflect-metadata:
         specifier: 'catalog:'
         version: 0.2.2
@@ -623,9 +629,6 @@ importers:
       '@mikro-orm/cli':
         specifier: 'catalog:'
         version: 7.1.0(dataloader@2.2.3)
-      '@mikro-orm/seeder':
-        specifier: 'catalog:'
-        version: 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))
       '@mikro-orm/sqlite':
         specifier: 'catalog:'
         version: 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))
@@ -677,9 +680,6 @@ importers:
       logform:
         specifier: 'catalog:'
         version: 2.7.0
-      msw:
-        specifier: 'catalog:'
-        version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
       redis-memory-server:
         specifier: 'catalog:'
         version: 0.16.1
