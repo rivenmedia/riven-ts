@@ -2,6 +2,8 @@ import { execa } from "execa";
 import { readdirSync } from "node:fs";
 import { it as baseIt, expect } from "vitest";
 
+import type { PackageJson } from "type-fest";
+
 const it = baseIt
   .extend("startDiff", { auto: true, scope: "file" }, async () => {
     const { stdout } = await execa`git diff HEAD --name-only`;
@@ -57,8 +59,13 @@ it.concurrent("generates a plugin", ({ packageDir }) => {
 });
 
 it.concurrent("generates the wiki config", ({ packageDir }) => {
+  const packageJson: PackageJson = require(`${packageDir}/package.json`);
   const contents = readdirSync(packageDir);
 
+  expect(packageJson.exports).toHaveProperty(
+    "./wiki.config",
+    "./wiki.config.ts",
+  );
   expect(contents).toContain("wiki.config.ts");
 });
 

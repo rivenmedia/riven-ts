@@ -45,6 +45,9 @@ const commonFields: PackageJsonDefinition = {
 
 const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
   plugin: {
+    exports: {
+      "./wiki.config": "./wiki.config.ts",
+    },
     scripts: {
       "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
     },

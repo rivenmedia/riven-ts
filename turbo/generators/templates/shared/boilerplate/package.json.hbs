@@ -30,10 +30,7 @@
     {{#if exports}}
     {{#each exports}}
     {{#if this}}
-    "{{@key}}": {
-      "production": "{{this.production}}",
-      "default": "{{this.default}}"
-    }{{#unless @last}},{{/unless}}
+    "{{@key}}": {{{json this}}}{{#unless @last}},{{/unless}}
     {{/if}}
     {{/each}}
     {{/if}}
