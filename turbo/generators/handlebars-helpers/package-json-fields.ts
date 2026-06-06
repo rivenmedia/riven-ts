@@ -45,12 +45,12 @@ const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
     dependencies: {
       "@apollo/datasource-rest": "catalog:",
       "@repo/util-plugin-sdk": "workspace:^",
+      "@repo/util-wiki-helpers": "workspace:^",
       "type-graphql": "catalog:",
       zod: "catalog:",
     },
     devDependencies: {
       "@repo/util-plugin-testing": "workspace:^",
-      zod2md: "catalog:",
     },
   },
 };
