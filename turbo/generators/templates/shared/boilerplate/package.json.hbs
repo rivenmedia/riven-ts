@@ -10,7 +10,7 @@
     {{#with (packageJsonFields packageType 'scripts') as |scripts|}}
     {{#if scripts}}
     {{#each scripts}}
-    "{{@key}}": "{{this}}"{{#unless @last}},{{/unless}}
+    "{{@key}}": "{{{this}}}"{{#unless @last}},{{/unless}}
     {{/each}}
     {{/if}}
     {{/with}}
