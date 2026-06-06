@@ -37,13 +37,13 @@ it.beforeAll(async ({ startDiff, packageName, packageType }) => {
 }, 60_000);
 
 it.afterAll(async ({ startDiff, packageDir }) => {
+  await execa`rm -rf ${packageDir}`;
+
   const { stdout } = await execa`git diff HEAD --name-only`;
   const filesChanged = stdout
     .trim()
     .split("\n")
     .filter((file) => !file.startsWith("turbo/") && !startDiff.includes(file));
-
-  await execa`rm -rf ${packageDir}`;
 
   for (const changedFile of filesChanged) {
     await execa`git restore -- ${changedFile}`;
