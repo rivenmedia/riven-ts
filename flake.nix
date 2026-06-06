@@ -15,7 +15,7 @@
           default = pkgs.mkShell {
             packages = with pkgs; [
               pnpm
-              nodejs
+              nodejs_24
               valkey # for running tests with redis
               fuse
             ];
