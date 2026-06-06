@@ -34,6 +34,8 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
           if (!data.confirm) {
             return "Plugin creation cancelled.";
           }
+
+          return;
         },
         type: "addMany",
         base: "templates/shared/boilerplate",
@@ -48,6 +50,8 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
           if (!data.confirm) {
             return "Plugin creation cancelled.";
           }
+
+          return;
         },
         type: "addMany",
         base: "templates/plugin",

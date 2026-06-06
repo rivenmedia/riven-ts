@@ -16,7 +16,7 @@
     "knip:ci:development": "pnpm knip:ci:base --reporter github-actions",
     "knip:ci:production": "pnpm knip:ci:base --strict --reporter json | tail -1 > knip-report.json && jq -e '(.issues // []) | length == 0' knip-report.json > /dev/null",
     "knip:prepare": "turbo codegen:api-schemas",
-    "validate-generators": "vitest run -c @repo/core-util-vitest-config -r turbo/generators --no-file-parallelism"
+    "validate-generators": "vitest run -c @repo/core-util-vitest-config -r turbo/generators --no-file-parallelism --max-workers=1"
   },
   "devDependencies": {
     "@commitlint/cli": "catalog:",
