@@ -15,7 +15,9 @@ export default {
   dataSources: [{{pascalCase pluginName}}API],
   resolvers: [{{pascalCase pluginName}}Resolver, {{pascalCase pluginName}}SettingsResolver],
   hooks: {
-    "riven.core.started": async () => {},
+    "riven.core.started": async () => {
+      /* empty */
+    },
     // Add more hooks as needed
   },
   settingsSchema: {{pascalCase pluginName}}Settings,

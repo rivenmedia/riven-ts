@@ -49,7 +49,6 @@ const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
       "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
     },
     dependencies: {
-      "@apollo/datasource-rest": "catalog:",
       "@repo/util-plugin-sdk": "workspace:^",
       "@repo/util-wiki-helpers": "workspace:^",
       "type-graphql": "catalog:",

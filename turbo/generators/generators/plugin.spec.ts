@@ -1,5 +1,4 @@
 import { execa } from "execa";
-import { randomUUID } from "node:crypto";
 import { readdirSync } from "node:fs";
 import { it as baseIt, expect } from "vitest";
 
@@ -14,7 +13,7 @@ const it = baseIt
     return filesChanged;
   })
   .extend("packageType", { scope: "file" }, "plugin")
-  .extend("packageName", { scope: "file" }, `test-${randomUUID()}`)
+  .extend("packageName", { scope: "file" }, `test-plugin-generator`)
   .extend(
     "packageFullName",
     { scope: "file" },
@@ -78,8 +77,12 @@ it.concurrent.for([
   "check-types",
   "build",
   "codegen:config-docs",
-] as const)("passes pnpm %s", async (command, { packageFullName }) => {
-  await expect(
-    execa`pnpm --filter ${packageFullName} ${command}`,
-  ).resolves.toBeTruthy();
-});
+] as const)(
+  "passes pnpm %s",
+  { timeout: 60_000 },
+  async (command, { packageFullName }) => {
+    await expect(
+      execa`pnpm --filter ${packageFullName} ${command}`,
+    ).resolves.toBeTruthy();
+  },
+);

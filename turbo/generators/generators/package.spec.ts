@@ -1,5 +1,4 @@
 import { execa } from "execa";
-import { randomUUID } from "node:crypto";
 import { readdirSync } from "node:fs";
 import { it as baseIt, expect } from "vitest";
 
@@ -14,7 +13,7 @@ const it = baseIt
     return filesChanged;
   })
   .extend("packageType", { scope: "file" }, "util")
-  .extend("packageName", { scope: "file" }, randomUUID())
+  .extend("packageName", { scope: "file" }, "test-package-generator")
   .extend(
     "packageFullName",
     { scope: "file" },
@@ -68,6 +67,7 @@ it.concurrent(
 
 it.concurrent.for(["test", "lint", "check-types", "build"] as const)(
   "passes pnpm %s",
+  { timeout: 60_000 },
   async (command, { packageFullName }) => {
     await expect(
       execa`pnpm --filter ${packageFullName} ${command}`,

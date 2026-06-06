@@ -4,6 +4,7 @@ import type { PlopTypes } from "@turbo/gen";
 
 interface PluginAnswers {
   pluginName: string;
+  confirm: boolean;
 }
 
 export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
@@ -59,6 +60,10 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
         templateFiles: "templates/plugin/**",
       },
       (answers) => {
+        if (answers["confirm"] === false) {
+          return "Plugin creation cancelled.";
+        }
+
         const pluginName = plop.getHelper("kebabCase")(
           (answers as PluginAnswers).pluginName,
         );

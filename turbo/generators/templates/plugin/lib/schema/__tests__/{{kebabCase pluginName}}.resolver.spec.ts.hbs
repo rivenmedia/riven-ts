@@ -3,8 +3,6 @@ import assert from "node:assert";
 import { expect } from "vitest";
 
 import { it } from "../../__tests__/{{kebabCase pluginName}}.test-context.ts";
-import { {{pascalCase pluginName}}API } from "../../datasource/{{kebabCase pluginName}}.datasource.ts";
-import { pluginConfig } from "../../{{kebabCase pluginName}}-plugin.config.ts";
 
 it('returns the validation status when calling "{{camelCase pluginName}}IsValid" query', async ({
   gqlContext,
