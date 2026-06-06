@@ -41,6 +41,7 @@ it.beforeAll(async ({ startDiff, packageName }) => {
 it.afterAll(async ({ startDiff, packageDir }) => {
   const { stdout } = await execa`git diff HEAD --name-only`;
   const filesChanged = stdout
+    .trim()
     .split("\n")
     .filter((file) => !file.startsWith("turbo/") && !startDiff.includes(file));
 
