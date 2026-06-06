@@ -35,7 +35,8 @@ export const waitForChunk = async (
       );
     }
 
-    await sleep(50);
+    // Wait a tick before trying to read again to prevent event loop blockages
+    await sleep();
 
     // Check if the chunk got cached by another read whilst waiting
     // to prevent fetching the next chunk and returning it as the previous one
