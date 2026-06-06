@@ -65,6 +65,8 @@ jobs:
             command: "@repo/wiki#build"
             runner-requirements:
               - fuse
+          - name: Validate generators
+            command: //#validate-generators
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
       task: ${{ matrix.task.command }}

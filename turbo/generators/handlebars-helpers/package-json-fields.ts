@@ -34,13 +34,19 @@ const commonFields: PackageJsonDefinition = {
   },
   scripts: {
     build: "tsc --project tsconfig.lib.json",
+    "check-types":
+      "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
+    lint: "eslint",
+    "lint:fix": "pnpm lint --fix",
+    test: "vitest run --passWithNoTests",
+    "test:watch": "vitest",
   },
 };
 
 const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
   plugin: {
     scripts: {
-      "codegen:config-docs": "zod2md",
+      "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
     },
     dependencies: {
       "@apollo/datasource-rest": "catalog:",
