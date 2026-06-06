@@ -15,7 +15,8 @@
     "knip:ci:base": "pnpm knip --cache --no-exit-code",
     "knip:ci:development": "pnpm knip:ci:base --reporter github-actions",
     "knip:ci:production": "pnpm knip:ci:base --strict --reporter json | tail -1 > knip-report.json && jq -e '(.issues // []) | length == 0' knip-report.json > /dev/null",
-    "knip:prepare": "turbo codegen:api-schemas"
+    "knip:prepare": "turbo codegen:api-schemas",
+    "validate-generators": "vitest run -c @repo/core-util-vitest-config -r turbo/generators --no-file-parallelism"
   },
   "devDependencies": {
     "@commitlint/cli": "catalog:",
@@ -23,11 +24,13 @@
     "@commitlint/types": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
+    "@repo/core-util-vitest-config": "workspace:^",
     "@trivago/prettier-plugin-sort-imports": "catalog:",
     "@turbo/gen": "catalog:",
     "@types/node": "catalog:",
     "es-toolkit": "catalog:",
     "eslint": "catalog:",
+    "execa": "catalog:",
     "husky": "catalog:",
     "knip": "catalog:",
     "lint-staged": "catalog:",
@@ -35,7 +38,8 @@
     "sort-package-json": "catalog:",
     "turbo": "catalog:",
     "type-fest": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "packageManager": "pnpm@11.5.1+sha512.93f7b57422ea7068257235b4c16eb60762eb68e1dc23723199cc739043ea9be2c4143274a399d8c6defa2b1176226d9ca1c4b63482d6200c1a8fbaa78c1d1485",
   "devEngines": {

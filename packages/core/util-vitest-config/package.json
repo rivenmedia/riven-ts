@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    ".": "./lib/index.ts",
     "./base": "./lib/base.ts"
   },
   "scripts": {
