@@ -1,4 +1,5 @@
-import { StatusCodes } from "http-status-codes";
+import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
+
 import { expect } from "vitest";
 
 import { it } from "../../../../__tests__/test-context.ts";

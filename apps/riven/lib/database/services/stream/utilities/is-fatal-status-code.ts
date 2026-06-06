@@ -1,4 +1,4 @@
-import { StatusCodes } from "http-status-codes";
+import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
 
 // TODO: This should be handled on a per-plugin, per-provider basis
 

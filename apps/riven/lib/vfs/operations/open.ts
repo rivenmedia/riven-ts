@@ -2,11 +2,11 @@ import {
   MediaItemStreamLinkHealthCheckRequestedEvent,
   MediaItemStreamLinkHealthCheckRequestedResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-health-check-requested.event";
+import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
 
 import Fuse from "@zkochan/fuse-native";
 import { type Queue, UnrecoverableError } from "bullmq";
 import chalk from "chalk";
-import { StatusCodes } from "http-status-codes";
 import { setTimeout } from "node:timers/promises";
 import { request } from "undici";
 

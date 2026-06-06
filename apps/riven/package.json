@@ -82,7 +82,6 @@
     "es-toolkit": "catalog:",
     "graphql": "catalog:",
     "graphql-scalars": "catalog:",
-    "http-status-codes": "catalog:",
     "keyv": "catalog:",
     "lru-cache": "catalog:",
     "luxon": "catalog:",
