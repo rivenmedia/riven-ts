@@ -5,11 +5,10 @@ import { it as baseIt, expect } from "vitest";
 const it = baseIt
   .extend("startDiff", { auto: true, scope: "file" }, async () => {
     const { stdout } = await execa`git diff HEAD --name-only`;
-    console.log(stdout);
     const filesChanged = stdout
       .trim()
       .split("\n")
-      .filter((file) => !file.startsWith("turbo/"));
+      .filter((file) => file && !file.startsWith("turbo/"));
 
     return filesChanged;
   })
