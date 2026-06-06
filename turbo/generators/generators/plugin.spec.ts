@@ -45,7 +45,9 @@ it.afterAll(async ({ startDiff, packageDir }) => {
   const filesChanged = stdout
     .trim()
     .split("\n")
-    .filter((file) => !file.startsWith("turbo/") && !startDiff.includes(file));
+    .filter(
+      (file) => file && !file.startsWith("turbo/") && !startDiff.includes(file),
+    );
 
   for (const changedFile of filesChanged) {
     await execa`git restore -- ${changedFile}`;
