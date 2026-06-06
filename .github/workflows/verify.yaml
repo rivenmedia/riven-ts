@@ -67,6 +67,8 @@ jobs:
               - fuse
           - name: Validate generators
             command: //#validate-generators
+            runner-requirements:
+              - redis-server
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
       task: ${{ matrix.task.command }}
