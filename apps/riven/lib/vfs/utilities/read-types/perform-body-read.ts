@@ -51,10 +51,11 @@ export async function performBodyRead(
 
   if (
     existingStreamPromise !== undefined &&
+    existingStreamPosition !== undefined &&
     existingStreamPosition !== requiredStart
   ) {
     logger.debug(
-      `fd=${fd.toString()} stream misaligned (at ${existingStreamPosition?.toString() ?? "unknown"}, need ${requiredStart.toString()}) — reconnecting`,
+      `fd=${fd.toString()} stream misaligned (at ${existingStreamPosition.toString()}, need ${requiredStart.toString()}) — reconnecting`,
     );
 
     fdToResponsePromiseMap.delete(fd);
