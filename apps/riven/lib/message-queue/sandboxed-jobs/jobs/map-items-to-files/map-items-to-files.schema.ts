@@ -1,4 +1,3 @@
-import { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
 import { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 
 import z from "zod";
@@ -9,8 +8,8 @@ import { createSandboxedJobSchema } from "../../utilities/create-sandboxed-job-s
 export const MapItemsToFilesSandboxedJob = createSandboxedJobSchema(
   "download-item.map-items-to-files",
   {
-    input: MediaItemDownloadRequestedResponse.pick({
-      files: true,
+    input: z.object({
+      files: z.array(DebridFile).min(1),
     }),
     output: z.object({
       episodes: z.record(z.string(), DebridFile),

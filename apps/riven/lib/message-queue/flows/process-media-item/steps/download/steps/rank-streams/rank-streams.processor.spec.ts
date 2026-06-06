@@ -1,6 +1,6 @@
 import {
+  createRankingModel,
   createSettings,
-  defaultRankingModel,
 } from "@repo/util-rank-torrent-name";
 
 import { expect, vi } from "vitest";
@@ -31,7 +31,7 @@ it("does not include trashed streams", async ({
       [streams[2].infoHash]: indexedMovie.title,
     },
     rtnSettings: createSettings(),
-    rtnRankingModel: defaultRankingModel,
+    rtnRankingModel: createRankingModel(),
   });
 
   const result = await rankStreamsProcessor(
@@ -99,7 +99,7 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
         },
       },
     }),
-    rtnRankingModel: defaultRankingModel,
+    rtnRankingModel: createRankingModel(),
   });
 
   const result = await rankStreamsProcessor(
@@ -169,7 +169,7 @@ it("handles foreign language movies with aliases correctly", async ({
       [streams[2].infoHash]: "Foreign Movie 1080p",
     },
     rtnSettings: createSettings(),
-    rtnRankingModel: defaultRankingModel,
+    rtnRankingModel: createRankingModel(),
   });
 
   const result = await rankStreamsProcessor(
@@ -224,7 +224,7 @@ it("handles foreign language shows with aliases correctly", async ({
       [streams[2].infoHash]: "Foreign Show 1080p",
     },
     rtnSettings: createSettings(),
-    rtnRankingModel: defaultRankingModel,
+    rtnRankingModel: createRankingModel(),
   });
 
   const result = await rankStreamsProcessor(

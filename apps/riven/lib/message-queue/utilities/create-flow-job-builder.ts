@@ -34,10 +34,10 @@ export const createFlowJobBuilder = <
 
   return <O extends PartialJobOptions["opts"]>(
     name: string,
-    ...args: z.infer<T>["input"] extends Record<string, never>
+    ...args: z.input<T>["input"] extends Record<string, never>
       ? [jobOptions?: PartialJobOptions & { opts?: O }]
       : [
-          data: z.infer<T>["input"],
+          data: z.input<T>["input"],
           jobOptions?: PartialJobOptions & { opts?: O },
         ]
   ): O extends { parent: ParentOptions } ? FlowChildJob : FlowJob => {

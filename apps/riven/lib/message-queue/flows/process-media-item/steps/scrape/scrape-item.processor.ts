@@ -4,13 +4,17 @@ import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/
 
 import { UnrecoverableError } from "bullmq";
 
+import { filterChildrenValues } from "../../../../utilities/filter-children-values.ts";
 import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
 
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
   async function ({ job }, { sendEvent, services: { scraperService } }) {
-    const children = await job.getChildrenValues();
+    const children = filterChildrenValues(
+      await job.getChildrenValues(),
+      "scrape-item.parse-scrape-results",
+    );
 
     const parsedResults = Object.values(children).reduce<
       Record<string, ParsedData>

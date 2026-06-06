@@ -15,4 +15,16 @@ export class MediaEntryRepository extends EntityRepository<MediaEntry> {
 
     return entry;
   }
+
+  async clearStreamUrl(id: UUID) {
+    const entry = await this.findOneOrFail(id);
+
+    this.assign(entry, {
+      streamUrl: null,
+    });
+
+    await this.em.flush();
+
+    return entry;
+  }
 }

@@ -14,7 +14,10 @@ export type MediaItemDownloadProviderListRequestedEvent = z.infer<
 >;
 
 export const MediaItemDownloadProviderListRequestedResponse = z.object({
-  providers: z.array(z.string().min(1)).min(1),
+  providers: z.array(z.string().min(1)),
+  rateLimitedProviders: z
+    .record(z.string().min(1), z.int().positive())
+    .default({}),
 });
 
 export type MediaItemDownloadProviderListRequestedResponse = z.infer<

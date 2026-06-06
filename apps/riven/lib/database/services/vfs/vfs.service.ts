@@ -1,5 +1,3 @@
-import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
-
 import {
   CreateRequestContext,
   EnsureRequestContext,
@@ -13,7 +11,7 @@ import { getVfsMediaEntry } from "./utilities/get-vfs-media-entry.ts";
 import { getVfsSubtitleEntry } from "./utilities/get-vfs-subtitle-entry.ts";
 
 import type { FindOneOptions } from "@mikro-orm/core";
-import type { UUID } from "node:crypto";
+import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 export class VfsService extends BaseService {
   parsePath(path: string) {
@@ -56,10 +54,5 @@ export class VfsService extends BaseService {
   @CreateRequestContext()
   async getDirectoryEntryPaths(path: string) {
     return getVfsDirectoryEntryPaths(this.em, path);
-  }
-
-  @CreateRequestContext()
-  async saveStreamUrl(entryId: UUID, streamUrl: string) {
-    return this.em.getRepository(MediaEntry).saveStreamUrl(entryId, streamUrl);
   }
 }

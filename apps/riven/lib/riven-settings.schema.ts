@@ -186,6 +186,13 @@ export const RivenSettings = z.object({
   shutdownTimeoutSeconds: json(z.int().positive())
     .default(30)
     .describe("The timeout in seconds for shutting down the application."),
+  rankingConfigPath: z
+    .string()
+    .default("./riven-ranking-config.json")
+    .describe(
+      "Path to the JSON file containing the torrent ranking configuration. Auto-generated with defaults on first startup.",
+    )
+    .meta({ "wiki.section": "ranking" }),
   printConfigurationOnStartup: z
     .stringbool()
     .default(false)

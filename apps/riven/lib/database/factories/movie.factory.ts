@@ -22,7 +22,7 @@ export class MovieFactory extends Factory<Movie> {
       posterPath: faker.image.url(),
       contentRating: faker.helpers.arrayElement(MovieContentRating.options),
       itemRequest,
-      tmdbId: faker.number.int({ min: 1 }).toString(),
+      tmdbId: faker.string.numeric({ length: { min: 1, max: 10 } }),
       ...input,
       isRequested: true, // Movies are always requested
     };

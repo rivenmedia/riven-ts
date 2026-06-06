@@ -7,7 +7,8 @@
     ".": {
       "production": "./dist/index.js",
       "default": "./lib/index.ts"
-    }
+    },
+    "./wiki.config": "./wiki.config.ts"
   },
   "files": [
     "dist"
@@ -16,7 +17,7 @@
     "build": "tsc --project tsconfig.lib.json",
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
     "codegen:api-schemas": "kubb generate",
-    "codegen:config-docs": "zod2md",
+    "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run --passWithNoTests",
@@ -25,6 +26,7 @@
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@repo/util-plugin-sdk": "workspace:^",
+    "@repo/util-wiki-helpers": "workspace:^",
     "countries-and-timezones": "catalog:",
     "luxon": "catalog:",
     "type-graphql": "catalog:",
@@ -44,7 +46,6 @@
     "eslint": "catalog:",
     "msw": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "zod2md": "catalog:"
+    "vitest": "catalog:"
   }
 }

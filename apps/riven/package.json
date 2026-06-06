@@ -16,7 +16,8 @@
       "production": "./workers/validate-torrent-files/validate-torrent-files.processor.js",
       "default": "./lib/message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.ts"
     },
-    "./database-metadata-cache": "./temp/metadata.json"
+    "./database-metadata-cache": "./temp/metadata.json",
+    "./wiki.config": "./wiki.config.ts"
   },
   "files": [
     "dist"
@@ -26,17 +27,18 @@
     "build:program": "tsc --build tsconfig.app.json",
     "build:workers": "rm -rf dist/workers && pnpm node esbuild.config.ts",
     "check-types": "tsc --noEmit --project tsconfig.app.json && tsc --noEmit --project tsconfig.spec.json",
-    "codegen:config-docs": "zod2md",
+    "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
     "codegen:gql": "graphql-codegen --config graphql-codegen.ts",
     "codegen:gql-schema": "node --import=@swc-node/register/esm-register scripts/generate-gql-schema.ts",
+    "codegen:ranking-config-json-schema": "pnpm node scripts/generate-ranking-config-json-schema.ts",
     "database:cache:generate": "mikro-orm cache:generate --combined --contextName slim",
-    "dev": "pnpm node --watch --env-file-if-exists=.env.riven --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
+    "dev": "NODE_ENV=development pnpm node --watch --env-file-if-exists=.env.riven --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
     "migration:check": "mikro-orm migration:check",
     "migration:create": "mikro-orm migration:create",
     "mikro-orm": "mikro-orm",
-    "start": "pnpm node --conditions=production --env-file-if-exists=.env.riven --enable-source-maps dist/lib/index.js",
+    "start": "NODE_ENV=production pnpm node --conditions=production --env-file-if-exists=.env.riven --enable-source-maps dist/lib/index.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -52,8 +54,10 @@
     "@mikro-orm/migrations": "catalog:",
     "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",
+    "@mikro-orm/seeder": "catalog:",
     "@repo/core-util-graphql-schema": "workspace:^",
     "@repo/plugin-comet": "workspace:^",
+    "@repo/plugin-jellyfin": "workspace:^",
     "@repo/plugin-listrr": "workspace:^",
     "@repo/plugin-mdblist": "workspace:^",
     "@repo/plugin-notifications": "workspace:^",
@@ -66,6 +70,7 @@
     "@repo/plugin-tvdb": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "@repo/util-rank-torrent-name": "workspace:^",
+    "@repo/util-wiki-helpers": "workspace:^",
     "@sentry/node": "catalog:",
     "@zkochan/fuse-native": "catalog:",
     "bullmq": "catalog:",
@@ -77,9 +82,11 @@
     "es-toolkit": "catalog:",
     "graphql": "catalog:",
     "graphql-scalars": "catalog:",
+    "http-status-codes": "catalog:",
     "keyv": "catalog:",
     "lru-cache": "catalog:",
     "luxon": "catalog:",
+    "msw": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",
     "triple-beam": "catalog:",
@@ -100,7 +107,6 @@
     "@graphql-codegen/typescript-operations": "catalog:",
     "@graphql-typed-document-node/core": "catalog:",
     "@mikro-orm/cli": "catalog:",
-    "@mikro-orm/seeder": "catalog:",
     "@mikro-orm/sqlite": "catalog:",
     "@parcel/watcher": "catalog:",
     "@repo/core-util-eslint-config": "workspace:^",
@@ -118,11 +124,9 @@
     "esbuild-node-externals": "catalog:",
     "eslint": "catalog:",
     "logform": "catalog:",
-    "msw": "catalog:",
     "redis-memory-server": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "zod2md": "catalog:"
+    "vitest": "catalog:"
   },
   "mikro-orm": {
     "configPaths": [

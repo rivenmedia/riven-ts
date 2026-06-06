@@ -18,9 +18,21 @@ export type MediaItemStreamLinkRequestedEvent = z.infer<
   typeof MediaItemStreamLinkRequestedEvent
 >;
 
-export const MediaItemStreamLinkRequestedResponse = z.object({
-  link: z.url(),
-});
+export const MediaItemStreamLinkRequestedResponse = z.discriminatedUnion(
+  "success",
+  [
+    z.object({
+      success: z.literal(true),
+      data: z.object({
+        link: z.url(),
+      }),
+    }),
+    z.object({
+      success: z.literal(false),
+      statusCode: z.int().positive(),
+    }),
+  ],
+);
 
 export type MediaItemStreamLinkRequestedResponse = z.infer<
   typeof MediaItemStreamLinkRequestedResponse

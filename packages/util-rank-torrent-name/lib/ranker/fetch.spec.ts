@@ -2,7 +2,7 @@ import { it as baseIt, describe, expect } from "vitest";
 
 import { parse } from "../parser/parse.ts";
 import { checkFetch } from "./fetch.ts";
-import { createSettings } from "./settings.ts";
+import { createSettings } from "./ranking-settings.schema.ts";
 
 const it = baseIt.extend("settings", () => createSettings());
 

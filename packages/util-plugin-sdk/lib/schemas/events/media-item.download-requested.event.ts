@@ -19,10 +19,22 @@ export type MediaItemDownloadRequestedEvent = z.infer<
   typeof MediaItemDownloadRequestedEvent
 >;
 
-export const MediaItemDownloadRequestedResponse = z.object({
-  torrentId: z.string().min(1),
-  files: z.array(DebridFile).min(1),
-});
+export const MediaItemDownloadRequestedResponse = z.discriminatedUnion(
+  "success",
+  [
+    z.object({
+      success: z.literal(true),
+      data: z.object({
+        torrentId: z.string().min(1),
+        files: z.array(DebridFile).min(1),
+      }),
+    }),
+    z.object({
+      success: z.literal(false),
+      statusCode: z.int().positive(),
+    }),
+  ],
+);
 
 export type MediaItemDownloadRequestedResponse = z.infer<
   typeof MediaItemDownloadRequestedResponse

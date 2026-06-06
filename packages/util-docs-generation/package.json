@@ -1,0 +1,32 @@
+{
+  "name": "@repo/util-wiki-helpers",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./build-wiki-config": "./lib/build-wiki-config.ts",
+    "./generate-zod-docs": "./lib/generate-zod-docs.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
+    "lint": "eslint",
+    "lint:fix": "pnpm lint --fix",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "es-toolkit": "catalog:",
+    "fumadocs-mdx": "catalog:",
+    "zod2md": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-typescript-config": "workspace:^",
+    "@repo/core-util-vitest-config": "workspace:^",
+    "@types/node": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

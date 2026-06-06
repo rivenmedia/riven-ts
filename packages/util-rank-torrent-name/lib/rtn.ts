@@ -5,8 +5,7 @@ import {
   type Settings,
   type SettingsInput,
   createSettings,
-  defaultRankingModel,
-} from "./ranker/settings.ts";
+} from "./ranker/ranking-settings.schema.ts";
 import { sortTorrents } from "./ranker/sort.ts";
 import { Resolution } from "./schemas.ts";
 
@@ -18,10 +17,7 @@ export class RTN {
   #rankingModel: RankingModel;
   #enabledResolutions: Set<Resolution>;
 
-  constructor(
-    settings: SettingsInput = {},
-    rankingModel: RankingModel = defaultRankingModel,
-  ) {
+  constructor(settings: SettingsInput = {}, rankingModel: RankingModel) {
     this.#settings = createSettings(settings);
 
     this.#rankingModel = Object.values(this.#settings.customRanks).reduce(

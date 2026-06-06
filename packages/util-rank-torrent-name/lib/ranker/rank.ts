@@ -17,11 +17,15 @@ import {
 } from "./exceptions.ts";
 import { checkFetch } from "./fetch.ts";
 import { type Aliases, getLevRatio } from "./lev.ts";
-import { defaultRankingModel, getCustomRank } from "./settings.ts";
+import { getCustomRank } from "./ranking-settings.schema.ts";
 
 import type { ParsedData } from "../schemas.ts";
 import type { RankResult, RankedResult } from "../types.ts";
-import type { CustomRanksConfig, RankingModel, Settings } from "./settings.ts";
+import type {
+  CustomRanksConfig,
+  RankingModel,
+  Settings,
+} from "./ranking-settings.schema.ts";
 
 function resolveRank(
   category: keyof CustomRanksConfig,
@@ -192,7 +196,7 @@ export function rankTorrent(
   correctTitle: string,
   aliases: Aliases,
   settings: Settings,
-  rankingModel: RankingModel = defaultRankingModel,
+  rankingModel: RankingModel,
 ) {
   const hashValidation = hashSchema.safeParse(hash);
 

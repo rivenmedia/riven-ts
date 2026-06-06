@@ -11,6 +11,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   createMockJob,
   mockSentryScope,
   services,
+  createMockJobChildKey,
 }) => {
   vi.spyOn(Settings, "now").mockReturnValue(10000);
 
@@ -21,7 +22,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   expect.assert(streamInfoHash);
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "find-valid-torrent": {
+    [createMockJobChildKey("download-item.find-valid-torrent")]: {
       result: {
         torrentId: "1234",
         infoHash: streamInfoHash,
@@ -69,6 +70,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
   scrapedShowContext: { scrapedShow },
   mockSentryScope,
   services,
+  createMockJobChildKey,
 }) => {
   const episodes = await scrapedShow.getEpisodes();
 
@@ -82,7 +84,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
   const job = await createMockJob({ id: scrapedShow.id });
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "find-valid-torrent": {
+    [createMockJobChildKey("download-item.find-valid-torrent")]: {
       result: {
         torrentId: "1234",
         infoHash: streamInfoHash,

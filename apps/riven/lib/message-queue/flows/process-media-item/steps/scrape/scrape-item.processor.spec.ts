@@ -39,6 +39,7 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
   createMockJob,
   mockSentryScope,
   services,
+  createMockJobChildKey,
 }) => {
   const indexedMovie = await seedIndexedMovie();
 
@@ -47,7 +48,7 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
   const streamInfoHash = faker.git.commitSha();
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-    "plugin[@repo/plugin-test]": {
+    [createMockJobChildKey("scrape-item.parse-scrape-results")]: {
       id: indexedMovie.movie.id,
       results: {
         [streamInfoHash]: parse("Test Movie 2024 1080p WEB-DL"),

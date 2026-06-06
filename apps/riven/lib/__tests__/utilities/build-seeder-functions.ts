@@ -39,6 +39,8 @@ const buildSeederFunction =
       await seeder.run(em, seeder.context);
       await em.flush();
 
+      em.clear();
+
       results.push(seeder.context);
     }
 

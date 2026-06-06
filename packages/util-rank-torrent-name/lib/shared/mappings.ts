@@ -9,7 +9,7 @@ import type {
   CustomRanksConfig,
   RankingModel,
   ResolutionConfig,
-} from "../ranker/settings.ts";
+} from "../ranker/ranking-settings.schema.ts";
 import type { Resolution } from "../schemas.ts";
 
 export const QUALITY_MAP = new Map<

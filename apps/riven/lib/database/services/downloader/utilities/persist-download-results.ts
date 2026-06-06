@@ -70,6 +70,12 @@ export async function persistDownloadResults(
 
     existingItem.activeStream = ref(matchedStream);
 
+    if (existingItem instanceof Show) {
+      for (const season of await existingItem.seasons.load()) {
+        season.activeStream = ref(matchedStream);
+      }
+    }
+
     if (existingItem instanceof Movie || existingItem instanceof Episode) {
       const [file] = torrent.files;
 
@@ -126,6 +132,8 @@ export async function persistDownloadResults(
 
           continue;
         }
+
+        episode.activeStream = ref(matchedStream);
 
         episode.filesystemEntries.add(
           em.create(MediaEntry, {
