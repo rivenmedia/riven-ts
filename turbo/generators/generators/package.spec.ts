@@ -1,4 +1,5 @@
 import { execa } from "execa";
+import { randomUUID } from "node:crypto";
 import { readdirSync } from "node:fs";
 import { it as baseIt, expect } from "vitest";
 
@@ -13,7 +14,7 @@ const it = baseIt
     return filesChanged;
   })
   .extend("packageType", { scope: "file" }, "util")
-  .extend("packageName", { scope: "file" }, "vitest-test-package")
+  .extend("packageName", { scope: "file" }, randomUUID())
   .extend(
     "packageFullName",
     { scope: "file" },
@@ -44,8 +45,8 @@ it.afterAll(async ({ startDiff, packageDir }) => {
 
   await execa`rm -rf ${packageDir}`;
 
-  if (filesChanged.length) {
-    await execa`git restore -- ${filesChanged.join(" ")}`;
+  for (const changedFile of filesChanged) {
+    await execa`git restore -- ${changedFile}`;
   }
 });
 

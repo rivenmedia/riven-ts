@@ -45,8 +45,8 @@ it.afterAll(async ({ startDiff, packageDir }) => {
 
   await execa`rm -rf ${packageDir}`;
 
-  if (filesChanged.length) {
-    await execa`git restore -- ${filesChanged.join(" ")}`;
+  for (const changedFile of filesChanged) {
+    await execa`git restore -- ${changedFile}`;
   }
 });
 
