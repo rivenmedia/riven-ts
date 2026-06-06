@@ -28,7 +28,6 @@ const commonFields: PackageJsonDefinition = {
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     eslint: "catalog:",
-    msw: "catalog:",
     typescript: "catalog:",
     vitest: "catalog:",
   },
@@ -59,6 +58,7 @@ const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
     },
     devDependencies: {
       "@repo/util-plugin-testing": "workspace:^",
+      msw: "catalog:",
     },
   },
 };

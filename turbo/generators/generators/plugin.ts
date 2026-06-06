@@ -1,3 +1,4 @@
+import { formatOutputCode } from "./actions/format-output.ts";
 import { installDependenciesToPackages } from "./actions/install-dependencies-to-package.ts";
 
 import type { PlopTypes } from "@turbo/gen";
@@ -59,7 +60,7 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
         destination: "packages/plugin-{{kebabCase pluginName}}",
         templateFiles: "templates/plugin/**",
       },
-      (answers) => {
+      async (answers) => {
         if (answers["confirm"] === false) {
           return "Plugin creation cancelled.";
         }
@@ -68,9 +69,15 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
           (answers as PluginAnswers).pluginName,
         );
 
-        return installDependenciesToPackages(["@repo/riven"], "dependencies", {
-          [`@repo/plugin-${pluginName}`]: "workspace:^",
-        });
+        await installDependenciesToPackages(
+          ["@repo/riven", "@repo/wiki"],
+          "dependencies",
+          {
+            [`@repo/plugin-${pluginName}`]: "workspace:^",
+          },
+        );
+
+        return formatOutputCode([`packages/plugin-${pluginName}/**/*`]);
       },
     ],
   });

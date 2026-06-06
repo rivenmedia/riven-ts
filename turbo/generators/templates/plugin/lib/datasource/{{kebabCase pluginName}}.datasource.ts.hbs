@@ -2,7 +2,7 @@ import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { {{pascalCase pluginName}}Settings } from "../{{kebabCase pluginName}}-settings.schema.ts";
 
-export class {{pascalCase pluginName}}APIError extends Error {}
+class {{pascalCase pluginName}}APIError extends Error {}
 
 export class {{pascalCase pluginName}}API extends BaseDataSource<{{pascalCase pluginName}}Settings> {
   override baseURL = "https://{{kebabCase pluginName}}.com/api/";
@@ -16,6 +16,16 @@ export class {{pascalCase pluginName}}API extends BaseDataSource<{{pascalCase pl
       return true;
     } catch {
       return false;
+    }
+  }
+
+  async fetchData() {
+    try {
+      const response = await this.get<unknown>("data");
+
+      console.log(response);
+    } catch (error) {
+      throw new {{pascalCase pluginName}}APIError("Failed to fetch data");
     }
   }
 }
