@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { $ } from "execa";
 
 import type { PackageJson } from "type-fest";
 
@@ -16,44 +16,24 @@ export const installDependenciesToPackages = async (
     peerDependencies: ["--save-peer"],
   } satisfies Record<typeof dependencyType, string[]>;
 
-  await new Promise<void>((resolve, reject) => {
-    const child = spawn(
-      "pnpm",
-      [
-        ...targetPackages.map((targetPackage) => `--filter=${targetPackage}`),
-        "add",
-        ...args[dependencyType],
-        ...Object.entries(dependencies).map(
-          ([name, version]) => `${name}@${version}`,
-        ),
-      ],
-      {
-        stdio: "inherit",
-      },
-    );
+  const { code: pnpmAddCode } = await $("pnpm", [
+    ...targetPackages.map((targetPackage) => `--filter=${targetPackage}`),
+    "add",
+    ...args[dependencyType],
+    ...Object.entries(dependencies).map(
+      ([name, version]) => `${name}@${version}`,
+    ),
+  ]);
 
-    child.on("close", (code) =>
-      code === 0
-        ? resolve()
-        : reject(new Error(`Installation process exited with code ${code}`)),
-    );
+  if (pnpmAddCode && pnpmAddCode !== 0) {
+    throw new Error(`Failed to add dependencies: ${pnpmAddCode}`);
+  }
 
-    child.on("error", (err) =>
-      reject(new Error(`Installation encountered an error: ${err.message}`)),
-    );
-  });
+  const { code: pnpmInstallCode } = await $`pnpm install`;
 
-  return new Promise<string>((resolve, reject) => {
-    const child = spawn("pnpm", ["install"], { stdio: "inherit" });
+  if (pnpmInstallCode && pnpmInstallCode !== 0) {
+    throw new Error(`Failed to install dependencies: ${pnpmInstallCode}`);
+  }
 
-    child.on("close", (code) =>
-      code === 0
-        ? resolve("Dependencies installation complete.")
-        : reject(new Error(`Installation process exited with code ${code}`)),
-    );
-
-    child.on("error", (err) =>
-      reject(new Error(`Installation encountered an error: ${err.message}`)),
-    );
-  });
+  return "Dependencies installation complete.";
 };
