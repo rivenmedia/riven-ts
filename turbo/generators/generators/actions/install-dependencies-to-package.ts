@@ -1,5 +1,7 @@
 import { $ } from "execa";
 
+import { installDependenciesAction } from "./install-dependencies.ts";
+
 import type { PackageJson } from "type-fest";
 
 export const installDependenciesToPackages = async (
@@ -16,7 +18,7 @@ export const installDependenciesToPackages = async (
     peerDependencies: ["--save-peer"],
   } satisfies Record<typeof dependencyType, string[]>;
 
-  const { code: pnpmAddCode } = await $("pnpm", [
+  const { exitCode } = await $("pnpm", [
     ...targetPackages.map((targetPackage) => `--filter=${targetPackage}`),
     "add",
     ...args[dependencyType],
@@ -25,15 +27,9 @@ export const installDependenciesToPackages = async (
     ),
   ]);
 
-  if (pnpmAddCode && pnpmAddCode !== 0) {
-    throw new Error(`Failed to add dependencies: ${pnpmAddCode}`);
+  if (exitCode && exitCode !== 0) {
+    throw new Error(`Failed to add dependencies: ${exitCode}`);
   }
 
-  const { code: pnpmInstallCode } = await $`pnpm install`;
-
-  if (pnpmInstallCode && pnpmInstallCode !== 0) {
-    throw new Error(`Failed to install dependencies: ${pnpmInstallCode}`);
-  }
-
-  return "Dependencies installation complete.";
+  return installDependenciesAction();
 };

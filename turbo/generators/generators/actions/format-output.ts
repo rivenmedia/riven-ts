@@ -1,19 +1,11 @@
-import { spawn } from "node:child_process";
+import { $ } from "execa";
 
-export const formatOutputCode = (files: string[]) => {
-  return new Promise<string>((resolve, reject) => {
-    const child = spawn("pnpm", ["prettier", "--write", ...files], {
-      stdio: "inherit",
-    });
+export const formatOutputCode = async (files: string[]) => {
+  const { exitCode } = await $`pnpm prettier --write ${files.join(" ")}`;
 
-    child.on("close", (code) =>
-      code === 0
-        ? resolve("Prettier formatting complete.")
-        : reject(new Error(`Prettier process exited with code ${code}`)),
-    );
+  if (exitCode && exitCode !== 0) {
+    throw new Error(`Prettier process exited with code ${exitCode}`);
+  }
 
-    child.on("error", (err) =>
-      reject(new Error(`Prettier encountered an error: ${err.message}`)),
-    );
-  });
+  return "Prettier formatting complete.";
 };
