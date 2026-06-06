@@ -9,7 +9,7 @@ import { MeteorScrapeResponse } from "../schemas/scrape-response.schema.ts";
 
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
-export class MeteorAPIError extends Error {}
+class MeteorAPIError extends Error {}
 
 export class MeteorAPI extends BaseDataSource<MeteorSettings> {
   override baseURL = this.settings.url;
