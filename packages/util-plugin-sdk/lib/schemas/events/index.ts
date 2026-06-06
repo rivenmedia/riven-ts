@@ -99,6 +99,10 @@ import {
   MediaItemScrapeSuccessEventHandler,
 } from "./media-item.scrape.success.event.ts";
 import {
+  MediaItemStreamLinkHealthCheckRequestedEvent,
+  MediaItemStreamLinkHealthCheckRequestedEventHandler,
+} from "./media-item.stream-link-health-check-requested.event.ts";
+import {
   MediaItemStreamLinkRequestedEvent,
   MediaItemStreamLinkRequestedEventHandler,
 } from "./media-item.stream-link-requested.event.ts";
@@ -133,6 +137,7 @@ export const RivenEvent = z.discriminatedUnion("type", [
   MediaItemDownloadProviderListRequestedEvent,
   MediaItemDownloadSuccessEvent,
   MediaItemStreamLinkRequestedEvent,
+  MediaItemStreamLinkHealthCheckRequestedEvent,
   MediaItemSubtitleRequestedEvent,
 ]);
 
@@ -201,6 +206,9 @@ export const RivenEventHandler = {
   // Item streaming
   "riven.media-item.stream-link.requested":
     MediaItemStreamLinkRequestedEventHandler,
+
+  "riven.media-item.stream-link.health-check.requested":
+    MediaItemStreamLinkHealthCheckRequestedEventHandler,
 
   // Subtitles
   "riven.media-item.subtitle.requested": MediaItemSubtitleRequestedEventHandler,

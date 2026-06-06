@@ -73,6 +73,7 @@
     "@repo/util-rank-torrent-name": "workspace:^",
     "es-toolkit": "catalog:",
     "graphql-scalars": "catalog:",
+    "http-status-codes": "catalog:",
     "luxon": "catalog:",
     "type-graphql": "catalog:",
     "zod": "catalog:",

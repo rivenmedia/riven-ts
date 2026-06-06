@@ -2,7 +2,6 @@ import { HttpResponse, http } from "msw";
 import { URL } from "node:url";
 
 import { CompletedMovieSeeder } from "../../database/seeders/movies/completed-movie.seeder.ts";
-import { mockAgent } from "../utilities/mock-agent.ts";
 import { MockScenario } from "../utilities/mock-scenario.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
@@ -18,6 +17,12 @@ class DeadStreamLinkScenario extends MockScenario {
   };
 
   override handlers = [
+    http.head(deadStreamUrl.toString(), () =>
+      HttpResponse.json(undefined, { status: 400 }),
+    ),
+    http.head(aliveStreamUrl.toString(), () =>
+      HttpResponse.json(undefined, { status: 200 }),
+    ),
     http.post("**/v0/store/torz/link/generate", () =>
       HttpResponse.json({
         data: {
@@ -25,23 +30,6 @@ class DeadStreamLinkScenario extends MockScenario {
         },
       }),
     ),
-  ] as const;
-
-  override mockScopes = [
-    mockAgent
-      .get(deadStreamUrl.origin)
-      .intercept({ path: deadStreamUrl.pathname })
-      .reply(() => ({
-        statusCode: 400,
-      }))
-      .persist(),
-    mockAgent
-      .get(aliveStreamUrl.origin)
-      .intercept({ path: aliveStreamUrl.pathname })
-      .reply(() => ({
-        statusCode: 200,
-      }))
-      .persist(),
   ] as const;
 
   override readonly seeder = CompletedMovieSeeder;
@@ -60,6 +48,13 @@ class DeadStreamLinkScenario extends MockScenario {
     ];
 
     await seederInstance.run(em);
+
+    em.assign(seederInstance.context.movie, {
+      title: "Dead Stream Movie",
+      tmdbId: "1234567890",
+    });
+
+    await em.flush();
   }
 }
 

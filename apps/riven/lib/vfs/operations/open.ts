@@ -1,3 +1,8 @@
+import {
+  MediaItemStreamLinkHealthCheckRequestedEvent,
+  MediaItemStreamLinkHealthCheckRequestedResponse,
+} from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-health-check-requested.event";
+
 import Fuse from "@zkochan/fuse-native";
 import { type Queue, UnrecoverableError } from "bullmq";
 import chalk from "chalk";
@@ -7,6 +12,7 @@ import { request } from "undici";
 
 import { services } from "../../database/database.ts";
 import { enqueueProcessMediaItem } from "../../message-queue/flows/process-media-item/enqueue-process-media-item.ts";
+import { flow } from "../../message-queue/flows/producer.ts";
 import { enqueueRequestStreamLink } from "../../message-queue/flows/request-stream-link/enqueue-request-stream-link.ts";
 import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
 import { logger } from "../../utilities/logger/logger.ts";
@@ -163,6 +169,38 @@ async function serveMediaFile(
   }
 
   if (entry.streamUrl) {
+    const healthCheckJobNode = await flow.addPluginJob(
+      MediaItemStreamLinkHealthCheckRequestedEvent,
+      MediaItemStreamLinkHealthCheckRequestedResponse,
+      `Stream URL health check for ${entry.mediaItem.$.fullTitle}`,
+      entry.plugin,
+      { item: entry },
+      {
+        deduplication: {
+          id: `get-${entry.id}-stream-link-health`,
+        },
+      },
+    );
+
+    const { healthy: isStreamUrlHealthy } = await runSingleJob(
+      healthCheckJobNode.job,
+      10_000,
+    );
+
+    if (!isStreamUrlHealthy) {
+      logger.warn(
+        `Stream URL for ${chalk.bold(entry.mediaItem.$.fullTitle)} is unhealthy, attempting to fetch a new stream URL...`,
+      );
+
+      await services.streamService.clearStreamUrl(entry.id);
+
+      entry.streamUrl = await fetchStreamLink(
+        entry,
+        entry.mediaItem.$.fullTitle,
+        pathInfo,
+      );
+    }
+
     try {
       const response = await request(entry.streamUrl, {
         headers: {
@@ -174,18 +212,6 @@ async function serveMediaFile(
 
       switch (response.statusCode) {
         case StatusCodes.NOT_FOUND.valueOf(): {
-          logger.warn(
-            `Received status code ${response.statusCode.toString()} when checking stream URL for media entry ${entry.id}`,
-          );
-
-          await services.streamService.clearStreamUrl(entry.id);
-
-          entry.streamUrl = await fetchStreamLink(
-            entry,
-            entry.mediaItem.$.fullTitle,
-            pathInfo,
-          );
-
           break;
         }
         case StatusCodes.FORBIDDEN.valueOf():

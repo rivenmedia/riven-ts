@@ -1890,6 +1890,9 @@ importers:
       graphql-scalars:
         specifier: 'catalog:'
         version: 1.25.0(graphql@16.14.0)
+      http-status-codes:
+        specifier: 'catalog:'
+        version: 2.3.0
       luxon:
         specifier: 'catalog:'
         version: 3.7.2

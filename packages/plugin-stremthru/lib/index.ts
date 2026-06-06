@@ -1,4 +1,7 @@
 import { DataSourceHTTPError, type RivenPlugin } from "@repo/util-plugin-sdk";
+import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
+
+import assert from "node:assert";
 
 import packageJson from "../package.json" with { type: "json" };
 import { StremThruTorzAPI } from "./datasource/stremthru-torz.datasource.ts";
@@ -131,6 +134,41 @@ export default {
           }`,
         );
       }
+    },
+    "riven.media-item.stream-link.health-check.requested": async ({
+      event: { item },
+    }) => {
+      assert(item.streamUrl, "Stream URL is required for health check");
+
+      const response = await fetch(item.streamUrl, {
+        method: "HEAD",
+      });
+
+      const unhealthyStatusCodes = new Set([
+        StatusCodes.NOT_FOUND,
+        StatusCodes.GONE,
+        StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
+      ]);
+
+      if (item.provider === "torbox") {
+        unhealthyStatusCodes.add(StatusCodes.BAD_REQUEST);
+      }
+
+      if (unhealthyStatusCodes.has(response.status)) {
+        return {
+          healthy: false,
+        };
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to check stream link health: Received status code ${response.status.toString()} for URL ${item.streamUrl}`,
+        );
+      }
+
+      return {
+        healthy: true,
+      };
     },
   },
   settingsSchema: StremThruSettings,

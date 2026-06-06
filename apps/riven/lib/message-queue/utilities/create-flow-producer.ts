@@ -48,7 +48,7 @@ export class ExtendedFlowProducer extends FlowProducer {
     jobName: string,
     pluginName: string,
     data: ParamsFor<z.input<I>>,
-    opts: Partial<Omit<JobsOptions, "name" | "queueName" | "data">>,
+    opts: Partial<Omit<JobsOptions, "name" | "queueName" | "data">> = {},
     children?: FlowChildJob[],
   ): Promise<PluginJobNode<ParamsFor<z.input<I>>, z.infer<O>>> {
     const job = createPluginFlowJob(
