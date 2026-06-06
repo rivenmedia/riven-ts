@@ -45,15 +45,33 @@ export async function performBodyRead(
     ].join(" | "),
   );
 
+  const requiredStart = missingChunksMetadata[0].range[0];
+  const existingStreamPromise = fdToResponsePromiseMap.get(fd);
+  const existingStreamPosition = fdToCurrentStreamPositionMap.get(fd);
+
+  if (
+    existingStreamPromise !== undefined &&
+    existingStreamPosition !== requiredStart
+  ) {
+    logger.debug(
+      `fd=${fd.toString()} stream misaligned (at ${existingStreamPosition?.toString() ?? "unknown"}, need ${requiredStart.toString()}) — reconnecting`,
+    );
+
+    fdToResponsePromiseMap.delete(fd);
+    fdToCurrentStreamPositionMap.delete(fd);
+
+    // Drain without blocking. We don't want a slow or large stream to delay the reconnect.
+    void existingStreamPromise
+      .then((r) => r.body.dump())
+      .catch(() => undefined);
+  }
+
   const streamReader =
     (await fdToResponsePromiseMap.get(fd)) ??
-    (await createStreamRequest(fileHandle.url, [
-      missingChunksMetadata[0].range[0],
-      undefined,
-    ]));
+    (await createStreamRequest(fileHandle.url, [requiredStart, undefined]));
 
   if (!fdToCurrentStreamPositionMap.has(fd)) {
-    fdToCurrentStreamPositionMap.set(fd, missingChunksMetadata[0].range[0]);
+    fdToCurrentStreamPositionMap.set(fd, requiredStart);
   }
 
   const currentStreamPosition = fdToCurrentStreamPositionMap.get(fd);
