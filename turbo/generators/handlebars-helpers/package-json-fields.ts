@@ -13,36 +13,37 @@ type PackageJsonDefinition = {
   files?: string[];
 };
 
-const commonFields: PackageJsonDefinition = {
-  exports: {
-    ".": {
-      production: "./dist/index.js",
-      default: "./lib/index.ts",
+const packageTypeFields: Partial<
+  Record<PackageType | "*", PackageJsonDefinition>
+> = {
+  "*": {
+    exports: {
+      ".": {
+        production: "./dist/index.js",
+        default: "./lib/index.ts",
+      },
+    },
+    files: ["dist"],
+    devDependencies: {
+      "@repo/core-util-eslint-config": "workspace:^",
+      "@repo/core-util-typescript-config": "workspace:^",
+      "@repo/core-util-vitest-config": "workspace:^",
+      "@types/node": "catalog:",
+      "@typescript-eslint/parser": "catalog:",
+      eslint: "catalog:",
+      typescript: "catalog:",
+      vitest: "catalog:",
+    },
+    scripts: {
+      build: "tsc --project tsconfig.lib.json",
+      "check-types":
+        "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
+      lint: "eslint",
+      "lint:fix": "pnpm lint --fix",
+      test: "vitest run --passWithNoTests",
+      "test:watch": "vitest",
     },
   },
-  files: ["dist"],
-  devDependencies: {
-    "@repo/core-util-eslint-config": "workspace:^",
-    "@repo/core-util-typescript-config": "workspace:^",
-    "@repo/core-util-vitest-config": "workspace:^",
-    "@types/node": "catalog:",
-    "@typescript-eslint/parser": "catalog:",
-    eslint: "catalog:",
-    typescript: "catalog:",
-    vitest: "catalog:",
-  },
-  scripts: {
-    build: "tsc --project tsconfig.lib.json",
-    "check-types":
-      "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
-    lint: "eslint",
-    "lint:fix": "pnpm lint --fix",
-    test: "vitest run --passWithNoTests",
-    "test:watch": "vitest",
-  },
-};
-
-const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
   plugin: {
     exports: {
       "./wiki.config": "./wiki.config.ts",
@@ -72,7 +73,7 @@ export function registerPackageJsonFieldsHelper(plop: PlopTypes.NodePlopAPI) {
       packageJsonFieldType: keyof PackageJsonDefinition,
     ) {
       const fields = toMerged(
-        commonFields[packageJsonFieldType] ?? {},
+        packageTypeFields["*"]?.[packageJsonFieldType] ?? {},
         packageTypeFields[packageType]?.[packageJsonFieldType] ?? {},
       );
 

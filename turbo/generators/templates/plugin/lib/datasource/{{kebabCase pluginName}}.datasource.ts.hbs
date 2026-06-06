@@ -24,7 +24,7 @@ export class {{pascalCase pluginName}}API extends BaseDataSource<{{pascalCase pl
       const response = await this.get<unknown>("data");
 
       console.log(response);
-    } catch (error) {
+    } catch {
       throw new {{pascalCase pluginName}}APIError("Failed to fetch data");
     }
   }

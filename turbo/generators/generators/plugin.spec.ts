@@ -70,6 +70,34 @@ it.concurrent("generates the wiki config", ({ packageDir }) => {
 });
 
 it.concurrent(
+  "adds the plugin as a dependency to @repo/wiki",
+  ({ packageFullName }) => {
+    const packageJson: PackageJson = require(
+      `${process.cwd()}/apps/wiki/package.json`,
+    );
+
+    expect(packageJson.dependencies).toHaveProperty(
+      packageFullName,
+      "workspace:^",
+    );
+  },
+);
+
+it.concurrent(
+  "adds the plugin as a dependency to @repo/riven",
+  ({ packageFullName }) => {
+    const packageJson: PackageJson = require(
+      `${process.cwd()}/apps/riven/package.json`,
+    );
+
+    expect(packageJson.dependencies).toHaveProperty(
+      packageFullName,
+      "workspace:^",
+    );
+  },
+);
+
+it.concurrent(
   "generates a plugin with the correct name in package.json",
   ({ packageFullName, packageDir }) => {
     const packageJson = require(`${packageDir}/package.json`);
