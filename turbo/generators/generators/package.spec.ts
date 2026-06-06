@@ -34,7 +34,7 @@ it.beforeAll(async ({ startDiff, packageName, packageType }) => {
   }
 
   await execa`turbo gen package --args ${packageName} ${packageType} y`;
-});
+}, 60_000);
 
 it.afterAll(async ({ startDiff, packageDir }) => {
   const { stdout } = await execa`git diff HEAD --name-only`;

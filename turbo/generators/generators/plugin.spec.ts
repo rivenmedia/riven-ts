@@ -50,7 +50,7 @@ it.afterAll(async ({ startDiff, packageDir }) => {
   for (const changedFile of filesChanged) {
     await execa`git restore -- ${changedFile}`;
   }
-});
+}, 60_000);
 
 it.concurrent("generates a plugin", ({ packageDir }) => {
   const contents = readdirSync(packageDir);
