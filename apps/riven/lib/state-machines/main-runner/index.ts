@@ -536,6 +536,10 @@ export const mainRunnerMachine = setup({
                   level: "silly",
                 }),
               },
+              {
+                type: "processItemRequest",
+                params: ({ event: { item } }) => ({ item }),
+              },
             ],
           },
 
