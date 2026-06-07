@@ -35,7 +35,7 @@ catalog:
   "@kubb/plugin-zod": 4.20.1
   "@mikro-orm/cli": ^7.1.0
   "@mikro-orm/core": ^7.1.0
-  "@mikro-orm/decorators": ^7.1.0
+  "@mikro-orm/decorators": ^7.1.4
   "@mikro-orm/migrations": ^7.1.0
   "@mikro-orm/postgresql": ^7.1.0
   "@mikro-orm/reflection": ^7.1.0
