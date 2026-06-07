@@ -1,17 +1,14 @@
 import { benchmark } from "@repo/util-plugin-sdk/helpers/benchmark";
 
 import Fuse from "@zkochan/fuse-native";
+import assert from "node:assert";
 import { Buffer } from "node:buffer";
 
 import { logger } from "../../../utilities/logger/logger.ts";
 import { FuseError } from "../../errors/fuse-error.ts";
 import { chunkCache } from "../chunk-cache.ts";
 import { waitForChunk } from "../chunks/wait-for-chunk.ts";
-import {
-  type MediaFileHandleMetadata,
-  fdToCurrentStreamPositionMap,
-  fdToResponsePromiseMap,
-} from "../file-handle-map.ts";
+import { fdToCurrentStreamPositionMap } from "../file-handle-map.ts";
 import { createStreamRequest } from "../requests/create-stream-request.ts";
 import { seek } from "../seek.ts";
 import { getVfsOperationContext } from "../vfs-operation-context.ts";
@@ -24,14 +21,22 @@ import type { ChunkMetadata } from "../../schemas/chunk.schema.ts";
  * from the stream, which are then stitched together with any cached chunks.
  *
  * @param chunks The chunks that form the request
- * @param fileHandle The file handle metadata for the file descriptor
  * @returns The requests chunk data
  */
-export async function performBodyRead(
-  chunks: readonly ChunkMetadata[],
-  fileHandle: MediaFileHandleMetadata,
-) {
-  const { fd } = getVfsOperationContext("read");
+export async function performBodyRead(chunks: readonly ChunkMetadata[]) {
+  const {
+    fd,
+    context: { fileHandleMetadata, currentStreamPosition, responsePromise },
+  } = getVfsOperationContext("read");
+
+  assert(
+    fileHandleMetadata.type !== "subtitle",
+    new FuseError(
+      Fuse.EIO,
+      "Body read should not be performed for subtitle files",
+    ),
+  );
+
   const cachedChunksMetadata = chunks.filter((chunk) => chunk.isCached);
   const missingChunksMetadata = chunks.filter((chunk) => !chunk.isCached);
 
@@ -47,15 +52,17 @@ export async function performBodyRead(
   );
 
   const [chunkAlignedStart] = missingChunksMetadata[0].range;
-  const currentStreamPosition = fdToCurrentStreamPositionMap.get(fd);
 
   if (currentStreamPosition && currentStreamPosition !== chunkAlignedStart) {
     seek(currentStreamPosition, chunkAlignedStart);
   }
 
   const streamReader =
-    (await fdToResponsePromiseMap.get(fd)) ??
-    (await createStreamRequest(fileHandle.url, [chunkAlignedStart, undefined]));
+    (await responsePromise) ??
+    (await createStreamRequest(fileHandleMetadata.url, [
+      chunkAlignedStart,
+      undefined,
+    ]));
 
   if (!fdToCurrentStreamPositionMap.has(fd)) {
     fdToCurrentStreamPositionMap.set(fd, chunkAlignedStart);

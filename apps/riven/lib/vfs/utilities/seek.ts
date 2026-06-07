@@ -14,13 +14,14 @@ import { getVfsOperationContext } from "./vfs-operation-context.ts";
  * @param to The new stream position
  */
 export function seek(from: number, to: number) {
-  const { fd } = getVfsOperationContext("read");
+  const {
+    fd,
+    context: { responsePromise },
+  } = getVfsOperationContext("read");
 
   logger.debug(
     `Seeking to new start position for fd ${fd.toString()} (${from.toString()} -> ${to.toString()})`,
   );
-
-  const responsePromise = fdToResponsePromiseMap.get(fd);
 
   // Drain without blocking. We don't want a slow or large stream to delay the reconnect.
   void responsePromise?.then(({ body }) => body.dump());
