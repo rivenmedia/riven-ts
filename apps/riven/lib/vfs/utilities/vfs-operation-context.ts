@@ -2,7 +2,9 @@ import assert from "node:assert";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { Buffer } from "node:buffer";
 
+import type { FileHandleMetadata } from "./file-handle-map.ts";
 import type { Promisable } from "type-fest";
+import type { Dispatcher } from "undici";
 
 export type VfsOperationContext = (
   | {
@@ -19,6 +21,12 @@ export type VfsOperationContext = (
       position: number;
       length: number;
       buffer: Buffer;
+      context: {
+        fileHandleMetadata: FileHandleMetadata;
+        previousReadPosition: number | undefined;
+        currentStreamPosition: number | undefined;
+        responsePromise: Promise<Dispatcher.ResponseData> | undefined;
+      };
     }
   | {
       operationName: "getattr" | "readdir";

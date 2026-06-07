@@ -8,6 +8,7 @@ import { chunkCache } from "../utilities/chunk-cache.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
 import { createChunkCacheKey } from "../utilities/chunks/create-chunk-cache-key.ts";
 import {
+  fdToCurrentStreamPositionMap,
   fdToFileHandleMeta,
   fdToPreviousReadPositionMap,
   fdToResponsePromiseMap,
@@ -59,6 +60,7 @@ function setupRangeInterceptor(
 it.beforeEach(() => {
   fdToFileHandleMeta.clear();
   fdToResponsePromiseMap.clear();
+  fdToCurrentStreamPositionMap.clear();
   fileNameToFileChunkCalculationsMap.clear();
   fdToPreviousReadPositionMap.clear();
 

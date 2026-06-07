@@ -20,7 +20,10 @@ export const waitForChunk = async (
   reader: BodyReadable.default,
   targetChunk: ChunkMetadata,
 ): Promise<WaitForChunkResponse> => {
-  const { fd } = getVfsOperationContext("read");
+  const {
+    fd,
+    context: { currentStreamPosition = 0 },
+  } = getVfsOperationContext("read");
 
   let chunk: Buffer | null = null;
   let fetchedFromCache = false;
@@ -28,6 +31,13 @@ export const waitForChunk = async (
   const timeoutSignal = AbortSignal.timeout(config.chunkTimeoutSeconds * 1000);
 
   while ((chunk = reader.read(targetChunk.size) as Buffer | null) === null) {
+    if (reader.readableAborted) {
+      throw new FuseError(
+        Fuse.EIO,
+        `Stream was aborted before chunk could be read ${targetChunk.rangeLabel}`,
+      );
+    }
+
     if (timeoutSignal.aborted) {
       throw new FuseError(
         Fuse.ETIMEDOUT,
@@ -51,8 +61,6 @@ export const waitForChunk = async (
   }
 
   if (!fetchedFromCache) {
-    const currentStreamPosition = fdToCurrentStreamPositionMap.get(fd) ?? 0;
-
     fdToCurrentStreamPositionMap.set(
       fd,
       currentStreamPosition + chunk.byteLength,
