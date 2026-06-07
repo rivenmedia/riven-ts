@@ -28,6 +28,13 @@ export const waitForChunk = async (
   const timeoutSignal = AbortSignal.timeout(config.chunkTimeoutSeconds * 1000);
 
   while ((chunk = reader.read(targetChunk.size) as Buffer | null) === null) {
+    if (reader.readableAborted) {
+      throw new FuseError(
+        Fuse.EIO,
+        `Stream was aborted while waiting for chunk ${targetChunk.rangeLabel}`,
+      );
+    }
+
     if (timeoutSignal.aborted) {
       throw new FuseError(
         Fuse.ETIMEDOUT,

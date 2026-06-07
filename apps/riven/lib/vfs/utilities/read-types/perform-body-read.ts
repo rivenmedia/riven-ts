@@ -13,6 +13,7 @@ import {
   fdToResponsePromiseMap,
 } from "../file-handle-map.ts";
 import { createStreamRequest } from "../requests/create-stream-request.ts";
+import { seek } from "../seek.ts";
 import { getVfsOperationContext } from "../vfs-operation-context.ts";
 
 import type { ChunkMetadata } from "../../schemas/chunk.schema.ts";
@@ -45,40 +46,19 @@ export async function performBodyRead(
     ].join(" | "),
   );
 
-  const requiredStart = missingChunksMetadata[0].range[0];
-  const existingStreamPromise = fdToResponsePromiseMap.get(fd);
-  const existingStreamPosition = fdToCurrentStreamPositionMap.get(fd);
+  const [chunkAlignedStart] = missingChunksMetadata[0].range;
+  const currentStreamPosition = fdToCurrentStreamPositionMap.get(fd);
 
-  if (
-    existingStreamPromise !== undefined &&
-    existingStreamPosition !== undefined &&
-    existingStreamPosition !== requiredStart
-  ) {
-    logger.debug(
-      `fd=${fd.toString()} stream misaligned (at ${existingStreamPosition.toString()}, need ${requiredStart.toString()}) — reconnecting`,
-    );
-
-    fdToResponsePromiseMap.delete(fd);
-    fdToCurrentStreamPositionMap.delete(fd);
-
-    // Drain without blocking. We don't want a slow or large stream to delay the reconnect.
-    void existingStreamPromise
-      .then((r) => r.body.dump())
-      .catch(() => undefined);
+  if (currentStreamPosition && currentStreamPosition !== chunkAlignedStart) {
+    seek(currentStreamPosition, chunkAlignedStart);
   }
 
   const streamReader =
     (await fdToResponsePromiseMap.get(fd)) ??
-    (await createStreamRequest(fileHandle.url, [requiredStart, undefined]));
+    (await createStreamRequest(fileHandle.url, [chunkAlignedStart, undefined]));
 
   if (!fdToCurrentStreamPositionMap.has(fd)) {
-    fdToCurrentStreamPositionMap.set(fd, requiredStart);
-  }
-
-  const currentStreamPosition = fdToCurrentStreamPositionMap.get(fd);
-
-  if (currentStreamPosition === undefined) {
-    throw new FuseError(Fuse.EIO, "Missing current stream position");
+    fdToCurrentStreamPositionMap.set(fd, chunkAlignedStart);
   }
 
   const {
