@@ -3212,7 +3212,8 @@
                             "type": "object",
                             "properties": {
                               "imdbid": {
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                               },
                               "tmdbid": {
                                 "type": "number"
@@ -8946,7 +8947,8 @@
                           "type": "object",
                           "properties": {
                             "imdbid": {
-                              "type": "string"
+                              "type": "string",
+                              "nullable": true
                             },
                             "tmdbid": {
                               "type": "number"
@@ -9993,7 +9995,8 @@
                             "type": "object",
                             "properties": {
                               "imdbid": {
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                               },
                               "tmdbid": {
                                 "type": "number"
@@ -10023,7 +10026,8 @@
                             "type": "object",
                             "properties": {
                               "imdbid": {
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                               },
                               "tmdbid": {
                                 "type": "number"
@@ -10051,7 +10055,8 @@
                             "type": "object",
                             "properties": {
                               "imdbid": {
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                               },
                               "tmdbid": {
                                 "type": "number"
@@ -11125,7 +11130,8 @@
                             "type": "object",
                             "properties": {
                               "imdbid": {
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                               },
                               "tmdbid": {
                                 "type": "number"
@@ -11552,7 +11558,8 @@
                             "type": "object",
                             "properties": {
                               "imdbid": {
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                               },
                               "tmdbid": {
                                 "type": "number"
