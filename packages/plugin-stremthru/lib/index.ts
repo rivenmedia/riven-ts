@@ -1,7 +1,6 @@
 import { DataSourceHTTPError, type RivenPlugin } from "@repo/util-plugin-sdk";
+import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
-
-import assert from "node:assert";
 
 import packageJson from "../package.json" with { type: "json" };
 import { StremThruTorzAPI } from "./datasource/stremthru-torz.datasource.ts";
@@ -118,6 +117,8 @@ export default {
           success: true,
           data: {
             link,
+            isPermalink: false,
+            expiresAt: DateTime.utc().plus({ hours: 3 }).toISO(),
           },
         };
       } catch (error) {
@@ -136,38 +137,42 @@ export default {
       }
     },
     "riven.media-item.stream-link.health-check.requested": async ({
-      event: { item },
+      event: { link, item },
     }) => {
-      assert(item.streamUrl, "Stream URL is required for health check");
-
-      const response = await fetch(item.streamUrl, {
+      const response = await fetch(link, {
         method: "HEAD",
+        headers: {
+          "user-agent": `Riven StremThru/${packageJson.version}`,
+          range: "bytes=0-0",
+        },
       });
 
-      const unhealthyStatusCodes = new Set([
+      const deadStatusCodes = new Set<StatusCodes>([
         StatusCodes.NOT_FOUND,
         StatusCodes.GONE,
         StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
       ]);
 
+      const expiredStatusCodes = new Set<StatusCodes>([]);
+
       if (item.provider === "torbox") {
-        unhealthyStatusCodes.add(StatusCodes.BAD_REQUEST);
+        expiredStatusCodes.add(StatusCodes.BAD_REQUEST);
       }
 
-      if (unhealthyStatusCodes.has(response.status)) {
-        return {
-          healthy: false,
-        };
-      }
+      const state =
+        (deadStatusCodes.has(response.status) ? "dead" : null) ??
+        (expiredStatusCodes.has(response.status) ? "expired" : null) ??
+        (!response.ok ? "failed" : "healthy");
 
-      if (!response.ok) {
+      if (state === "failed") {
         throw new Error(
-          `Failed to check stream link health: Received status code ${response.status.toString()} for URL ${item.streamUrl}`,
+          `Failed to check stream link health: Received status code ${response.status.toString()} for URL ${link}`,
         );
       }
 
       return {
-        healthy: true,
+        state,
+        statusCode: response.status,
       };
     },
   },

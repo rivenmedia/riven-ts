@@ -14,6 +14,6 @@ export class MediaEntryResolver {
     @Arg("id", () => ID) id: UUID,
     @Arg("url", () => String) url: string,
   ): Promise<MediaEntry> {
-    return em.getRepository(MediaEntry).saveStreamUrl(id, url);
+    return em.getRepository(MediaEntry).saveStreamPermalink(id, url);
   }
 }

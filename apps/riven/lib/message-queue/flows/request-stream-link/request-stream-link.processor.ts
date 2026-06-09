@@ -87,20 +87,25 @@ export const requestStreamLinkProcessor =
             await job.updateData({
               ...job.data,
               step: "save-stream-link",
-              link: response.data.link,
+              linkData: response.data,
             });
 
             break;
           }
           case "save-stream-link": {
             assert(
-              job.data.link,
+              job.data.linkData,
               new UnrecoverableError(
-                "Stream link is required to save to media entry",
+                "Stream link data is required to save to media entry",
               ),
             );
 
-            await streamService.saveStreamUrl(mediaEntry.id, job.data.link);
+            if (job.data.linkData.isPermalink) {
+              await streamService.saveStreamPermalink(
+                mediaEntry.id,
+                job.data.linkData.link,
+              );
+            }
 
             await job.updateData({
               ...job.data,
@@ -157,12 +162,10 @@ export const requestStreamLinkProcessor =
       }
 
       assert(
-        job.data.link,
+        job.data.linkData,
         "No stream URL found after processing stream link request",
       );
 
-      return {
-        link: job.data.link,
-      };
+      return job.data.linkData;
     },
   );

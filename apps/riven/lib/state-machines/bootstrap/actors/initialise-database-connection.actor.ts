@@ -42,15 +42,17 @@ export const initialiseDatabaseConnection = fromPromise(async () => {
 
   const { database } = await initORM(databaseConfig);
 
-  const requiresMigration = await database.orm.migrator.checkSchema();
+  if (process.env["NODE_ENV"] === "production") {
+    const requiresMigration = await database.orm.migrator.checkSchema();
 
-  if (!requiresMigration) {
-    logger.info("Database is up to date, no migrations needed");
+    if (!requiresMigration) {
+      logger.info("Database is up to date, no migrations needed");
 
-    return;
+      return;
+    }
+
+    logger.info("Running database migrations");
+
+    await database.orm.migrator.up();
   }
-
-  logger.info("Running database migrations");
-
-  await database.orm.migrator.up();
 });

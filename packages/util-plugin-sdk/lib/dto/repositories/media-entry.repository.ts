@@ -4,11 +4,11 @@ import type { MediaEntry } from "../entities/index.ts";
 import type { UUID } from "node:crypto";
 
 export class MediaEntryRepository extends EntityRepository<MediaEntry> {
-  async saveStreamUrl(id: UUID, url: string) {
+  async saveStreamPermalink(id: UUID, url: string) {
     const entry = await this.findOneOrFail(id);
 
     this.assign(entry, {
-      streamUrl: url,
+      streamPermalink: url,
     });
 
     await this.em.flush();
@@ -16,11 +16,11 @@ export class MediaEntryRepository extends EntityRepository<MediaEntry> {
     return entry;
   }
 
-  async clearStreamUrl(id: UUID) {
+  async clearStreamPermalink(id: UUID) {
     const entry = await this.findOneOrFail(id);
 
     this.assign(entry, {
-      streamUrl: null,
+      streamPermalink: null,
     });
 
     await this.em.flush();

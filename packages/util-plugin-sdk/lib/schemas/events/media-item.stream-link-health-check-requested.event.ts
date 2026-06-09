@@ -12,6 +12,7 @@ export const MediaItemStreamLinkHealthCheckRequestedEvent =
     "media-item.stream-link.health-check.requested",
     z.object({
       item: MediaEntryInstance,
+      link: z.url(),
     }),
   );
 
@@ -20,7 +21,8 @@ export type MediaItemStreamLinkHealthCheckRequestedEvent = z.infer<
 >;
 
 export const MediaItemStreamLinkHealthCheckRequestedResponse = z.object({
-  healthy: z.boolean(),
+  state: z.enum(["healthy", "expired", "dead"]),
+  statusCode: z.int(),
 });
 
 export type MediaItemStreamLinkHealthCheckRequestedResponse = z.infer<

@@ -6,6 +6,9 @@ import z from "zod";
 import { createFlowJobBuilder } from "../../utilities/create-flow-job-builder.ts";
 import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
 
+const StreamLinkRequestedSuccessResponse =
+  MediaItemStreamLinkRequestedResponse.options[0].shape.data;
+
 export const RequestStreamLinkFlow = createFlowSchema("request-stream-link", {
   children: MediaItemStreamLinkRequestedResponse,
   input: z.object({
@@ -19,11 +22,9 @@ export const RequestStreamLinkFlow = createFlowSchema("request-stream-link", {
         "complete",
       ])
       .default("request-stream-link"),
-    link: z.url().optional(),
+    linkData: StreamLinkRequestedSuccessResponse.optional(),
   }),
-  output: z.object({
-    link: z.url(),
-  }),
+  output: StreamLinkRequestedSuccessResponse,
 });
 
 export type RequestStreamLinkFlow = z.infer<typeof RequestStreamLinkFlow>;

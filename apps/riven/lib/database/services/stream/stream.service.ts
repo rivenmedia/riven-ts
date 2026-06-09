@@ -25,13 +25,15 @@ export class StreamService extends BaseService {
   }
 
   @CreateRequestContext()
-  async saveStreamUrl(entryId: UUID, streamUrl: string) {
-    return this.em.getRepository(MediaEntry).saveStreamUrl(entryId, streamUrl);
+  async saveStreamPermalink(entryId: UUID, streamUrl: string) {
+    return this.em
+      .getRepository(MediaEntry)
+      .saveStreamPermalink(entryId, streamUrl);
   }
 
   @CreateRequestContext()
-  async clearStreamUrl(entryId: UUID) {
-    return this.em.getRepository(MediaEntry).clearStreamUrl(entryId);
+  async clearStreamPermalink(entryId: UUID) {
+    return this.em.getRepository(MediaEntry).clearStreamPermalink(entryId);
   }
 
   @EnsureRequestContext()
