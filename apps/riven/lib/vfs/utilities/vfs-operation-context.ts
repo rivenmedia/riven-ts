@@ -24,8 +24,9 @@ export type VfsOperationContext = (
       context: {
         fileHandleMetadata: FileHandleMetadata;
         previousReadPosition: number | undefined;
-        currentStreamPosition: number | undefined;
+        readonly currentStreamPosition: number | undefined;
         responsePromise: Promise<Dispatcher.ResponseData> | undefined;
+        seekController: AbortController;
       };
     }
   | {

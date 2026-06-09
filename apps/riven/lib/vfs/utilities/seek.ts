@@ -16,7 +16,7 @@ import { getVfsOperationContext } from "./vfs-operation-context.ts";
 export function seek(from: number, to: number) {
   const {
     fd,
-    context: { responsePromise },
+    context: { responsePromise, seekController },
   } = getVfsOperationContext("read");
 
   logger.debug(
@@ -28,4 +28,6 @@ export function seek(from: number, to: number) {
 
   fdToResponsePromiseMap.delete(fd);
   fdToCurrentStreamPositionMap.delete(fd);
+
+  seekController.abort();
 }

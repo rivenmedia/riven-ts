@@ -8,7 +8,6 @@ import { logger } from "../../../utilities/logger/logger.ts";
 import { FuseError } from "../../errors/fuse-error.ts";
 import { chunkCache } from "../chunk-cache.ts";
 import { waitForChunk } from "../chunks/wait-for-chunk.ts";
-import { fdToCurrentStreamPositionMap } from "../file-handle-map.ts";
 import { createStreamRequest } from "../requests/create-stream-request.ts";
 import { seek } from "../seek.ts";
 import { getVfsOperationContext } from "../vfs-operation-context.ts";
@@ -63,10 +62,6 @@ export async function performBodyRead(chunks: readonly ChunkMetadata[]) {
       chunkAlignedStart,
       undefined,
     ]));
-
-  if (!fdToCurrentStreamPositionMap.has(fd)) {
-    fdToCurrentStreamPositionMap.set(fd, chunkAlignedStart);
-  }
 
   const {
     timeTaken,

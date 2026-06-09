@@ -4,6 +4,7 @@ import Undici from "undici";
 import { logger } from "../../utilities/logger/logger.ts";
 import { config } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
+import { SeekError } from "../errors/seek-error.ts";
 import { calculateChunkRange } from "../utilities/chunks/calculate-chunk-range.ts";
 import { fetchDiscreteByteRange } from "../utilities/chunks/fetch-discrete-byte-range.ts";
 import { detectReadType } from "../utilities/detect-read-type.ts";
@@ -202,8 +203,11 @@ export const readSync = function (
         context: {
           fileHandleMetadata,
           previousReadPosition: fdToPreviousReadPositionMap.get(fd),
-          currentStreamPosition: fdToCurrentStreamPositionMap.get(fd),
+          get currentStreamPosition() {
+            return fdToCurrentStreamPositionMap.get(fd);
+          },
           responsePromise: fdToResponsePromiseMap.get(fd),
+          seekController: new AbortController(),
         },
       },
       async () => {
@@ -222,7 +226,9 @@ export const readSync = function (
       }
 
       if (isFuseError(error)) {
-        logger.error("VFS read FuseError", { err: error });
+        if (!(error instanceof SeekError)) {
+          logger.error("VFS read FuseError", { err: error });
+        }
 
         process.nextTick(callback, error.errorCode);
 
