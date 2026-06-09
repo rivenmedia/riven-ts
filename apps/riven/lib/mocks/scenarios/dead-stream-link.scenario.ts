@@ -41,7 +41,7 @@ class DeadStreamLinkScenario extends MockScenario {
       {
         originalFilename: "dead-stream.mkv",
         downloadUrl: "https://example.com/download-url",
-        streamUrl: deadStreamUrl.toString(),
+        streamPermalink: deadStreamUrl.toString(),
         plugin: "@repo/plugin-stremthru",
         provider: "torbox",
       },
