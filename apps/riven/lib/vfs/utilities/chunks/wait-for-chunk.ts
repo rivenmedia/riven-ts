@@ -22,7 +22,7 @@ export const waitForChunk = async (
 ): Promise<WaitForChunkResponse> => {
   const {
     fd,
-    context: { currentStreamPosition = 0 },
+    context: { currentStreamPosition = targetChunk.range[0] },
   } = getVfsOperationContext("read");
 
   let chunk: Buffer | null = null;
