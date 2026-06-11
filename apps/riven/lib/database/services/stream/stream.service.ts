@@ -11,6 +11,7 @@ import {
 } from "@mikro-orm/decorators/legacy";
 import assert from "node:assert";
 
+import { redisCache } from "../../../utilities/redis-cache.ts";
 import { BaseService } from "../core/base-service.ts";
 import { blacklistStream } from "./utilities/blacklist-stream.ts";
 import { calculateItemsToReprocess } from "./utilities/calculate-items-to-reprocess.ts";
@@ -22,6 +23,18 @@ import type { UUID } from "node:crypto";
 export class StreamService extends BaseService {
   isFatalStatusCode(statusCode: number) {
     return isFatalStatusCode(statusCode);
+  }
+
+  async saveStreamLink(entryId: UUID, streamUrl: string, ttl: number) {
+    await redisCache.set(`stream-link:${entryId}`, streamUrl, { ttl });
+  }
+
+  async getStreamLink(entryId: UUID) {
+    return redisCache.get(`stream-link:${entryId}`);
+  }
+
+  async clearStreamLink(entryId: UUID) {
+    await redisCache.delete(`stream-link:${entryId}`);
   }
 
   @CreateRequestContext()

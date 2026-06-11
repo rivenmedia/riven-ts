@@ -16,7 +16,5 @@ export const runSingleJob = async <
     qe.close(),
   );
 
-  await queueEvents.waitUntilReady();
-
   return await job.waitUntilFinished(queueEvents, timeout);
 };

@@ -2,6 +2,7 @@ import { queueNameFor } from "./queue-name-for.ts";
 
 import type { Flow } from "../flows/index.ts";
 import type { SandboxedJobDefinition } from "../sandboxed-jobs/index.ts";
+import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 /**
  * BullMQ returns children values in a flat object with keys in the format of `${queueName}:${childJobId}`.
@@ -36,23 +37,37 @@ export function filterChildrenValues<
 >(
   childrenValues: Record<string, unknown>,
   queueName: T,
+  pluginName?: string,
+  id?: string,
 ): Record<
   string,
   Extract<SandboxedJobDefinition | Flow, { name: T }>["output"]
 >;
 
-export function filterChildrenValues(
+export function filterChildrenValues<T extends string | undefined = undefined>(
   childrenValues: Record<string, unknown>,
-  queueName: Flow["name"] | SandboxedJobDefinition["name"],
-): Record<string, unknown>;
+  queueName: Flow["name"] | SandboxedJobDefinition["name"] | RivenEvent["type"],
+  pluginName?: string,
+  id?: T,
+): T extends undefined ? Record<string, unknown> : unknown;
 
-export function filterChildrenValues(
+export function filterChildrenValues<T extends string | undefined>(
   childrenValues: Record<string, unknown>,
-  queueName: Flow["name"] | SandboxedJobDefinition["name"],
-): Record<string, unknown> {
-  const pattern = new RegExp(`bull:${queueNameFor(queueName)}:[\\w-$]+$`);
+  queueName: Flow["name"] | SandboxedJobDefinition["name"] | RivenEvent["type"],
+  pluginName?: string,
+  id?: T,
+) {
+  type ExpectedValue = T extends undefined ? Record<string, unknown> : unknown;
+  const keyPattern = `bull:${queueNameFor(queueName, pluginName)}:${id ? `${id}` : "[\\w-$]+"}`;
 
-  return Object.fromEntries(
+  if (id) {
+    return childrenValues[keyPattern] as ExpectedValue;
+  }
+
+  const pattern = new RegExp(keyPattern);
+  const entries = Object.fromEntries(
     Object.entries(childrenValues).filter(([key]) => pattern.test(key)),
   );
+
+  return entries as ExpectedValue;
 }
