@@ -49,12 +49,24 @@ export function trashHandler(
   return false;
 }
 
-function checkRequired(data: ParsedData, settings: Settings): boolean {
+function checkRequired(
+  data: ParsedData,
+  settings: Settings,
+  failed: Set<string>,
+): boolean {
   if (settings.compiledRequire.length === 0) {
     return false;
   }
 
-  return settings.compiledRequire.some((p) => p.test(data.rawTitle));
+  const hasRequired = settings.compiledRequire.some((p) =>
+    p.test(data.rawTitle),
+  );
+
+  if (!hasRequired) {
+    failed.add("missing_required");
+  }
+
+  return hasRequired;
 }
 
 /**
@@ -269,6 +281,7 @@ export function checkFetch(data: ParsedData, settings: Settings) {
   adultHandler(data, settings, failed);
 
   checkExclude(data, settings, failed);
+  checkRequired(data, settings, failed);
 
   languageHandler(data, settings, failed);
   fetchResolution(data, settings, failed);
@@ -279,7 +292,7 @@ export function checkFetch(data: ParsedData, settings: Settings) {
   checkFetchFlags(data, FLAG_MAP, settings, failed);
 
   return {
-    fetch: failed.size === 0 || checkRequired(data, settings),
+    fetch: failed.size === 0,
     failedChecks: failed,
   } satisfies FetchResult;
 }
