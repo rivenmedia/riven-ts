@@ -6,7 +6,6 @@ const fatalStatuses = new Set([
   StatusCodes.NOT_FOUND,
   StatusCodes.GONE,
   StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
-  // StatusCodes.SERVICE_UNAVAILABLE, // TODO: This may not be correct for StremThru; needs validation hence disabled for now
 ]);
 
 /**

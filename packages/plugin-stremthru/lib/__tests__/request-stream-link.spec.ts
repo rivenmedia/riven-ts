@@ -1,4 +1,5 @@
 import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
+import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
 
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
@@ -80,6 +81,46 @@ it("returns the stream link when the response is successful", async ({
       isPermalink: false,
       expiresAt: expect.any(String),
     },
+  });
+});
+
+it(`returns a ${StatusCodes.GONE.toString()} status code when the entry's provider is no longer present in the config`, async ({
+  server,
+  plugin,
+  settings,
+  dataSourceMap,
+}) => {
+  const streamLink = "http://example.com/stream-link";
+
+  server.use(
+    http.post("**/v0/store/torz/link/generate", () =>
+      HttpResponse.json({
+        data: {
+          link: streamLink,
+        },
+      }),
+    ),
+  );
+
+  expect.assert(plugin.hooks["riven.media-item.stream-link.requested"]);
+
+  const item = new MediaEntry();
+
+  item.downloadUrl = "https://example.com/download-link";
+  item.provider = "torbox";
+
+  await expect(
+    plugin.hooks["riven.media-item.stream-link.requested"]({
+      dataSources: dataSourceMap,
+      event: {
+        item,
+      },
+      logger: {} as never,
+      settings,
+    }),
+  ).resolves.toEqual({
+    success: false,
+    statusCode: StatusCodes.GONE,
   });
 });
 

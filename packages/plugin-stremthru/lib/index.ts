@@ -96,19 +96,31 @@ export default {
     "riven.media-item.stream-link.requested": async ({
       dataSources,
       event,
+      settings,
     }) => {
-      const api = dataSources.get(StremThruTorzAPI);
-      const parsedStore = Store.safeParse(event.item.provider);
-
       if (!event.item.downloadUrl) {
         throw new Error("No download URL available for this media item.");
       }
+
+      const parsedStore = Store.safeParse(event.item.provider);
 
       if (!parsedStore.success) {
         throw new Error(parsedStore.error.message);
       }
 
+      const api = dataSources.get(StremThruTorzAPI);
+      const pluginSettings = settings.get(StremThruSettings);
+
       const { data: store } = parsedStore;
+
+      if (!pluginSettings[`${store}ApiKey`]) {
+        // If an item is requested with a since-removed provider,
+        // return a fatal status code so the core can re-process the item.
+        return {
+          success: false,
+          statusCode: StatusCodes.GONE,
+        };
+      }
 
       try {
         const link = await api.generateLink(event.item.downloadUrl, store);
