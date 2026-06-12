@@ -77,6 +77,8 @@ it("returns the stream link when the response is successful", async ({
     success: true,
     data: {
       link: streamLink,
+      isPermalink: false,
+      expiresAt: expect.any(String),
     },
   });
 });

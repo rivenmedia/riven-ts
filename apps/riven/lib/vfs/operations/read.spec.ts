@@ -231,7 +231,8 @@ it("reads data across multiple chunks, utilising the chunk cache where possible"
 }) => {
   const { readSync } = await import("./read.ts");
 
-  const cachedChunk = Buffer.alloc(config.headerSize).fill(
+  const cachedChunk = Buffer.alloc(
+    config.headerSize,
     randomBytes(config.headerSize),
   );
 
@@ -314,11 +315,13 @@ it("saves a copy of each chunk to the cache when reading during playback within 
   const length = 131072;
   const position = 104988672;
 
-  const firstChunkResponseBuffer = Buffer.alloc(config.chunkSize).fill(
+  const firstChunkResponseBuffer = Buffer.alloc(
+    config.chunkSize,
     randomBytes(config.chunkSize),
   );
 
-  const secondChunkResponseBuffer = Buffer.alloc(config.chunkSize).fill(
+  const secondChunkResponseBuffer = Buffer.alloc(
+    config.chunkSize,
     randomBytes(config.chunkSize),
   );
 
@@ -366,22 +369,24 @@ it("saves a copy of each chunk to the cache when reading during playback within 
     },
   );
 
-  const callback = vi.fn();
-
-  readSync(fileName, fd, Buffer.alloc(length), length, position, callback);
-  readSync(
-    fileName,
-    fd,
-    Buffer.alloc(length),
-    length,
-    position + length,
-    callback,
-  );
-
-  await vi.waitFor(() => {
-    expect(callback).nthCalledWith(1, length);
-    expect(callback).nthCalledWith(2, length);
+  const bytesRead1 = await new Promise<number | undefined>((resolve) => {
+    readSync(fileName, fd, Buffer.alloc(length), length, position, resolve);
   });
+
+  expect(bytesRead1).toBe(length);
+
+  const bytesRead2 = await new Promise<number | undefined>((resolve) => {
+    readSync(
+      fileName,
+      fd,
+      Buffer.alloc(length),
+      length,
+      position + length,
+      resolve,
+    );
+  });
+
+  expect(bytesRead2).toBe(length);
 
   const firstCachedChunk = chunkCache.get(
     createChunkCacheKey(fileName, firstChunkRange[0], firstChunkRange[1]),
