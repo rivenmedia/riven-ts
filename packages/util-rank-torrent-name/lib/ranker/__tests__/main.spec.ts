@@ -12,7 +12,6 @@ import {
 
 const it = baseIt.extend("rankingConfig", () =>
   createRankingModel({
-    // Quality
     av1: 500,
     avc: 500,
     bluray: 100,
@@ -27,8 +26,6 @@ const it = baseIt.extend("rankingConfig", () =>
     webmux: -10000,
     xvid: -10000,
     pdtv: -10000,
-
-    // Rips
     bdrip: -5000,
     brrip: -10000,
     dvdrip: -5000,
@@ -39,14 +36,10 @@ const it = baseIt.extend("rankingConfig", () =>
     vhsrip: -10000,
     webdlrip: -10000,
     webrip: -1000,
-
-    // HDR
     bit10: 100,
     dolbyVision: 3000,
     hdr: 2000,
     hdr10plus: 2100,
-
-    // Audio
     aac: 100,
     atmos: 1000,
     dolbyDigital: 50,
@@ -55,8 +48,6 @@ const it = baseIt.extend("rankingConfig", () =>
     dtsLossless: 2000,
     mp3: -1000,
     truehd: 2000,
-
-    // Extras
     threeD: -10000,
     converted: -1000,
     documentary: -250,
@@ -66,8 +57,6 @@ const it = baseIt.extend("rankingConfig", () =>
     repack: 20,
     site: -10000,
     upscaled: -10000,
-
-    // Trash
     cam: -10000,
     cleanAudio: -10000,
     r5: -10000,
@@ -76,6 +65,7 @@ const it = baseIt.extend("rankingConfig", () =>
     size: -10000,
     telecine: -10000,
     telesync: -10000,
+    scene: 0,
   }),
 );
 
@@ -151,16 +141,11 @@ it("sorts torrents correctly", ({ rankingConfig }) => {
     "1234567890123456789012345678901234567894", // ww.Tamilblasters.sbs - 8 Bit Christmas (2021) HQ HDRip - x264 - Telugu (Fan Dub) - 400MB
   ];
 
-  const settings = createSettings({
-    customRanks: {
-      hdr: {
-        dolbyVision: {
-          fetch: true,
-        },
-      },
-    },
+  const settings = createSettings();
+  const rtnInstance = new RTN(settings, {
+    ...rankingConfig,
+    dolbyVision: 3000,
   });
-  const rtnInstance = new RTN(settings, rankingConfig);
   const rankedTorrents = Object.entries(torrents).map(
     ([hash, [correctTitle, rawTitle]]) =>
       rtnInstance.rankTorrent(rawTitle, hash, correctTitle, {}),
@@ -201,13 +186,6 @@ it("sorts torrents with a resolution filter correctly", ({ rankingConfig }) => {
   const settings = createSettings({
     resolutions: {
       r2160p: true,
-    },
-    customRanks: {
-      hdr: {
-        dolbyVision: {
-          fetch: true,
-        },
-      },
     },
   });
   const rtnInstance = new RTN(settings, rankingConfig);

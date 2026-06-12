@@ -13,7 +13,7 @@ async function writeDefaultConfigFile(resolvedPath: string) {
   const contents = {
     $schema:
       "https://raw.githubusercontent.com/rivenmedia/riven-ts/main/apps/riven/ranking-config.schema.json",
-    preset: "default",
+    rankingModel: "default",
   } as const satisfies RankingConfigFileContents;
 
   await writeFile(resolvedPath, JSON.stringify(contents, null, 2), {

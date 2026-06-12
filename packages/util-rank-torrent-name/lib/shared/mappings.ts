@@ -6,126 +6,107 @@ import {
 } from "./languages.ts";
 
 import type {
-  CustomRanksConfig,
   RankingModel,
   ResolutionConfig,
 } from "../ranker/ranking-settings.schema.ts";
 import type { Resolution } from "../schemas.ts";
 
-export const QUALITY_MAP = new Map<
-  string,
-  [keyof CustomRanksConfig, keyof RankingModel]
->([
+export const QUALITY_MAP = new Map<string, keyof RankingModel>([
   // Quality
-  ["web", ["quality", "web"]],
-  ["web-dl", ["quality", "webdl"]],
-  ["bluray", ["quality", "bluray"]],
-  ["hdtv", ["quality", "hdtv"]],
-  ["vhs", ["quality", "vhs"]],
-  ["webmux", ["quality", "webmux"]],
-  ["bluray remux", ["quality", "remux"]],
-  ["remux", ["quality", "remux"]],
-  ["dvd", ["quality", "dvd"]],
+  ["web", "web"],
+  ["web-dl", "webdl"],
+  ["bluray", "bluray"],
+  ["hdtv", "hdtv"],
+  ["vhs", "vhs"],
+  ["webmux", "webmux"],
+  ["bluray remux", "remux"],
+  ["remux", "remux"],
+  ["dvd", "dvd"],
 
   // Rips
-  ["webrip", ["rips", "webrip"]],
-  ["web-dlrip", ["rips", "webdlrip"]],
-  ["uhdrip", ["rips", "uhdrip"]],
-  ["hdrip", ["rips", "hdrip"]],
-  ["dvdrip", ["rips", "dvdrip"]],
-  ["bdrip", ["rips", "bdrip"]],
-  ["brrip", ["rips", "brrip"]],
-  ["vhsrip", ["rips", "vhsrip"]],
-  ["ppvrip", ["rips", "ppvrip"]],
-  ["satrip", ["rips", "satrip"]],
-  ["tvrip", ["rips", "tvrip"]],
+  ["webrip", "webrip"],
+  ["web-dlrip", "webdlrip"],
+  ["uhdrip", "uhdrip"],
+  ["hdrip", "hdrip"],
+  ["dvdrip", "dvdrip"],
+  ["bdrip", "bdrip"],
+  ["brrip", "brrip"],
+  ["vhsrip", "vhsrip"],
+  ["ppvrip", "ppvrip"],
+  ["satrip", "satrip"],
+  ["tvrip", "tvrip"],
 
   // Trash
-  ["telecine", ["trash", "telecine"]],
-  ["telesync", ["trash", "telesync"]],
-  ["screener", ["trash", "screener"]],
-  ["r5", ["trash", "r5"]],
-  ["cam", ["trash", "cam"]],
-  ["pdtv", ["trash", "pdtv"]],
+  ["telecine", "telecine"],
+  ["telesync", "telesync"],
+  ["screener", "screener"],
+  ["r5", "r5"],
+  ["cam", "cam"],
+  ["pdtv", "pdtv"],
 ]);
 
-export const CODEC_MAP = new Map<
-  string,
-  [keyof CustomRanksConfig, keyof RankingModel]
->([
-  ["avc", ["quality", "avc"]],
-  ["h264", ["quality", "avc"]],
-  ["x264", ["quality", "avc"]],
-  ["hevc", ["quality", "hevc"]],
-  ["h265", ["quality", "hevc"]],
-  ["x265", ["quality", "hevc"]],
-  ["av1", ["quality", "av1"]],
-  ["xvid", ["quality", "xvid"]],
-  ["mpeg", ["quality", "mpeg"]],
+export const CODEC_MAP = new Map<string, keyof RankingModel>([
+  ["avc", "avc"],
+  ["h264", "avc"],
+  ["x264", "avc"],
+  ["hevc", "hevc"],
+  ["h265", "hevc"],
+  ["x265", "hevc"],
+  ["av1", "av1"],
+  ["xvid", "xvid"],
+  ["mpeg", "mpeg"],
 ]);
 
-export const HDR_MAP = new Map<
-  string,
-  [keyof CustomRanksConfig, keyof RankingModel]
->([
-  ["dv", ["hdr", "dolbyVision"]],
-  ["hdr", ["hdr", "hdr"]],
-  ["hdr10+", ["hdr", "hdr10plus"]],
-  ["sdr", ["hdr", "sdr"]],
+export const HDR_MAP = new Map<string, keyof RankingModel>([
+  ["dv", "dolbyVision"],
+  ["hdr", "hdr"],
+  ["hdr10+", "hdr10plus"],
+  ["sdr", "sdr"],
 ]);
 
-export const AUDIO_MAP = new Map<
-  string,
-  [keyof CustomRanksConfig, keyof RankingModel]
->([
-  ["aac", ["audio", "aac"]],
-  ["atmos", ["audio", "atmos"]],
-  ["dd", ["audio", "dolbyDigital"]],
-  ["dolby digital", ["audio", "dolbyDigital"]],
-  ["ddp", ["audio", "dolbyDigitalPlus"]],
-  ["dolby digital plus", ["audio", "dolbyDigitalPlus"]],
-  ["ac3", ["audio", "dolbyDigital"]],
-  ["eac3", ["audio", "dolbyDigitalPlus"]],
-  ["dts lossy", ["audio", "dtsLossy"]],
-  ["dts lossless", ["audio", "dtsLossless"]],
-  ["flac", ["audio", "flac"]],
-  ["mp3", ["audio", "mp3"]],
-  ["truehd", ["audio", "truehd"]],
-  ["hq clean audio", ["trash", "cleanAudio"]],
+export const AUDIO_MAP = new Map<string, keyof RankingModel>([
+  ["aac", "aac"],
+  ["atmos", "atmos"],
+  ["dd", "dolbyDigital"],
+  ["dolby digital", "dolbyDigital"],
+  ["ddp", "dolbyDigitalPlus"],
+  ["dolby digital plus", "dolbyDigitalPlus"],
+  ["ac3", "dolbyDigital"],
+  ["eac3", "dolbyDigitalPlus"],
+  ["dts lossy", "dtsLossy"],
+  ["dts lossless", "dtsLossless"],
+  ["flac", "flac"],
+  ["mp3", "mp3"],
+  ["truehd", "truehd"],
+  ["hq clean audio", "cleanAudio"],
 ]);
 
-export const CHANNEL_MAP = new Map<
-  string,
-  [keyof CustomRanksConfig, keyof RankingModel]
->([
-  ["5.1", ["audio", "surround"]],
-  ["7.1", ["audio", "surround"]],
-  ["stereo", ["audio", "stereo"]],
-  ["2.0", ["audio", "stereo"]],
-  ["mono", ["audio", "mono"]],
+export const CHANNEL_MAP = new Map<string, keyof RankingModel>([
+  ["5.1", "surround"],
+  ["7.1", "surround"],
+  ["stereo", "stereo"],
+  ["2.0", "stereo"],
+  ["mono", "mono"],
 ]);
 
-export const FLAG_MAP = new Map<
-  string,
-  [keyof CustomRanksConfig, keyof RankingModel]
->([
-  ["threeD", ["extras", "threeD"]],
-  ["converted", ["extras", "converted"]],
-  ["documentary", ["extras", "documentary"]],
-  ["dubbed", ["extras", "dubbed"]],
-  ["edition", ["extras", "edition"]],
-  ["hardcoded", ["extras", "hardcoded"]],
-  ["network", ["extras", "network"]],
-  ["proper", ["extras", "proper"]],
-  ["repack", ["extras", "repack"]],
-  ["retail", ["extras", "retail"]],
-  ["subbed", ["extras", "subbed"]],
-  ["upscaled", ["extras", "upscaled"]],
-  ["site", ["extras", "site"]],
-  ["size", ["trash", "size"]],
-  ["bitDepth", ["hdr", "bit10"]],
-  ["scene", ["extras", "scene"]],
-  ["uncensored", ["extras", "uncensored"]],
+export const FLAG_MAP = new Map<string, keyof RankingModel>([
+  ["threeD", "threeD"],
+  ["converted", "converted"],
+  ["documentary", "documentary"],
+  ["dubbed", "dubbed"],
+  ["edition", "edition"],
+  ["hardcoded", "hardcoded"],
+  ["network", "network"],
+  ["proper", "proper"],
+  ["repack", "repack"],
+  ["retail", "retail"],
+  ["subbed", "subbed"],
+  ["upscaled", "upscaled"],
+  ["site", "site"],
+  ["size", "size"],
+  ["bitDepth", "bit10"],
+  ["scene", "scene"],
+  ["uncensored", "uncensored"],
 ]);
 
 // Trash quality values for quick lookup

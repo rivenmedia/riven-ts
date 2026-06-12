@@ -61,7 +61,7 @@ describe("when the config file does not exist", () => {
     const content = JSON.parse(await readFile(configPath, "utf8"));
 
     expect(content).toMatchObject({
-      preset: "default",
+      rankingModel: "default",
     });
   });
 });
@@ -71,7 +71,6 @@ describe("when the config file exists and is valid", () => {
     const configPath = path.join(tempDir, "ranking-config.json");
 
     await writeValidConfigFile(configPath, {
-      preset: "custom",
       settings: {
         exclude: ["\\btest\\b"],
         resolutions: { r1080p: false, r720p: false },
@@ -89,7 +88,6 @@ describe("when the config file exists and is valid", () => {
     const configPath = path.join(tempDir, "ranking-config.json");
 
     await writeValidConfigFile(configPath, {
-      preset: "custom",
       rankingModel: { webdl: 9999, remux: 5000 },
     });
 
@@ -104,12 +102,16 @@ describe("when the config file exists and is valid", () => {
   }) => {
     const configPath = path.join(tempDir, "ranking-config.json");
 
-    await writeValidConfigFile(configPath, { preset: "custom" });
+    await writeValidConfigFile(configPath, {
+      rankingModel: {
+        aac: 0,
+      },
+    });
 
     const { settings, rankingModel } = await loadRankingConfig(configPath);
 
     expect(settings.resolutions.r1080p).toBe(true);
-    expect(rankingModel.av1).toBe(0);
+    expect(rankingModel.av1).toBe(null);
   });
 });
 
@@ -141,7 +143,7 @@ describe("when the config contains unknown keys", () => {
 
     await writeInvalidConfigFile(
       configPath,
-      JSON.stringify({ preset: "custom", unknownTopLevelKey: true }),
+      JSON.stringify({ rankingModel: {}, unknownTopLevelKey: true }),
     );
 
     await expect(loadRankingConfig(configPath)).rejects.toThrow(
@@ -176,12 +178,10 @@ describe("when the config contains invalid values for valid keys", () => {
 
     await writeInvalidConfigFile(
       configPath,
-      JSON.stringify({ preset: "custom", rankingModel: { webdl: "high" } }),
+      JSON.stringify({ rankingModel: { webdl: "high" } }),
     );
 
-    await expect(loadRankingConfig(configPath)).rejects.toThrow(
-      "rankingModel.webdl",
-    );
+    await expect(loadRankingConfig(configPath)).rejects.toThrow("rankingModel");
   });
 });
 
@@ -190,7 +190,7 @@ describe('when the preset is "default"', () => {
     const configPath = path.join(tempDir, "ranking-config.json");
 
     await writeValidConfigFile(configPath, {
-      preset: "default",
+      rankingModel: "default",
     });
 
     const rankingConfig = await loadRankingConfig(configPath);

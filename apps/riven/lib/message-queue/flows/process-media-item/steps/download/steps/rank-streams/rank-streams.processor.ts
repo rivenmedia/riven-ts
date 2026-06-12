@@ -1,13 +1,13 @@
 import { ShowLikeMediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
 import {
   GarbageTorrentError,
-  RTN,
   type RankedResult,
 } from "@repo/util-rank-torrent-name";
 
 import { NotFoundError } from "@mikro-orm/core";
 import chalk from "chalk";
 
+import { rtnInstance } from "../../../../../../../ranking-config/ranking-config.ts";
 import { logger } from "../../../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../../../utilities/settings.ts";
 import { SkippedTorrentError } from "../../../../../../sandboxed-jobs/jobs/parse-scrape-results/utilities/validate-torrent.ts";
@@ -31,8 +31,6 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
 
     const { title: itemTitle, aliases } =
       item instanceof ShowLikeMediaItem ? await item.getShow() : item;
-
-    const rtnInstance = new RTN(job.data.rtnSettings, job.data.rtnRankingModel);
 
     const rankedResults = Object.entries(job.data.streams).reduce<
       RankedResult[]
