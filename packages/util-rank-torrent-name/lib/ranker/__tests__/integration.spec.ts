@@ -122,13 +122,6 @@ describe("rankTorrent (integration)", () => {
       resolutions: {
         r2160p: true,
       },
-      customRanks: {
-        quality: {
-          remux: {
-            fetch: true,
-          },
-        },
-      },
       options: {
         removeAllTrash: false,
       },

@@ -1,6 +1,7 @@
 import { buildSchema } from "@repo/core-util-graphql-schema";
 
 import { ApolloServer } from "@apollo/server";
+import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin/landingPage/default";
 import { startStandaloneServer } from "@apollo/server/standalone";
 import { URL } from "node:url";
 import { type ActorRefFromLogic, fromPromise } from "xstate";
@@ -43,8 +44,9 @@ export const startGqlServer = fromPromise<
     schema: await buildSchema({
       resolvers: [...resolvers, ...pluginResolvers],
     }),
-    introspection: process.env["NODE_ENV"] !== "production",
+    introspection: true,
     plugins: [
+      ApolloServerPluginLandingPageLocalDefault(),
       {
         requestDidStart({ request: { operationName } }) {
           if (operationName) {

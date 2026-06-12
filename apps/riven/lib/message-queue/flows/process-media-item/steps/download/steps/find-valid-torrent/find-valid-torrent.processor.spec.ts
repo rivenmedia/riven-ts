@@ -10,13 +10,20 @@ import {
 import { type TypedJobNode, UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
-import { it } from "../../../../../../../__tests__/test-context.ts";
+import { it as baseIt } from "../../../../../../../__tests__/test-context.ts";
 import { MapItemsToFilesSandboxedJob } from "../../../../../../sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
 import { ValidateTorrentFilesSandboxedJob } from "../../../../../../sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.schema.ts";
 import { findValidTorrentProcessor } from "./find-valid-torrent.processor.ts";
 import { FindValidTorrentFlow } from "./find-valid-torrent.schema.ts";
 
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+
+const it = baseIt.extend("mockRankingModel", () =>
+  createRankingModel({
+    webrip: 0,
+    avc: 0,
+  }),
+);
 
 it.beforeEach(async ({ createFlowWorker, mockFlowProcessorContext }) => {
   createFlowWorker(FindValidTorrentFlow, findValidTorrentProcessor);
@@ -68,6 +75,7 @@ it("does not attempt previously failed info hashes", async ({
     streams: [stream1, stream2, stream3],
   },
   createMockJobChildKey,
+  mockRankingModel,
 }) => {
   expect.assert(stream1);
   expect.assert(stream2);
@@ -101,7 +109,7 @@ it("does not attempt previously failed info hashes", async ({
         "Example Torrent",
         {},
         createSettings(),
-        createRankingModel(),
+        mockRankingModel,
       ),
       rankTorrent(
         "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
@@ -109,7 +117,7 @@ it("does not attempt previously failed info hashes", async ({
         "Example Torrent",
         {},
         createSettings(),
-        createRankingModel(),
+        mockRankingModel,
       ),
       rankTorrent(
         "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
@@ -117,7 +125,7 @@ it("does not attempt previously failed info hashes", async ({
         "Example Torrent",
         {},
         createSettings(),
-        createRankingModel(),
+        mockRankingModel,
       ),
     ] satisfies RankedResult[],
   });
@@ -151,6 +159,7 @@ it("returns the plugin and validated result on successful validation", async ({
   },
   createPluginWorker,
   createMockJobChildKey,
+  mockRankingModel,
 }) => {
   expect.assert(stream);
 
@@ -209,7 +218,7 @@ it("returns the plugin and validated result on successful validation", async ({
         "Example Torrent",
         {},
         createSettings(),
-        createRankingModel(),
+        mockRankingModel,
       ),
     ] satisfies RankedResult[],
   });
@@ -246,6 +255,7 @@ it("updates job data with the failed info hash when an invalid torrent is return
     streams: [stream],
   },
   createMockJobChildKey,
+  mockRankingModel,
 }) => {
   expect.assert(stream);
 
@@ -275,7 +285,7 @@ it("updates job data with the failed info hash when an invalid torrent is return
         "Example Torrent",
         {},
         createSettings(),
-        createRankingModel(),
+        mockRankingModel,
       ),
     ] satisfies RankedResult[],
   });
@@ -298,6 +308,7 @@ it("returns null if no valid torrent is found after trying all plugins", async (
     streams: [stream],
   },
   createMockJobChildKey,
+  mockRankingModel,
 }) => {
   expect.assert(stream);
 
@@ -327,7 +338,7 @@ it("returns null if no valid torrent is found after trying all plugins", async (
         "Another Torrent Name",
         {},
         createSettings({ options: { titleSimilarity: 0 } }),
-        createRankingModel(),
+        mockRankingModel,
       ),
     ] satisfies RankedResult[],
   });
@@ -351,6 +362,7 @@ it("does not attempt to re-download blacklisted streams", async ({
     streams: [stream1, stream2, blacklistedStream],
   },
   createMockJobChildKey,
+  mockRankingModel,
 }) => {
   expect.assert(stream1);
   expect.assert(stream2);
@@ -392,7 +404,7 @@ it("does not attempt to re-download blacklisted streams", async ({
         "Example Torrent",
         {},
         createSettings(),
-        createRankingModel(),
+        mockRankingModel,
       ),
       rankTorrent(
         "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
@@ -400,7 +412,7 @@ it("does not attempt to re-download blacklisted streams", async ({
         "Example Torrent",
         {},
         createSettings(),
-        createRankingModel(),
+        mockRankingModel,
       ),
       rankTorrent(
         "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
@@ -408,7 +420,7 @@ it("does not attempt to re-download blacklisted streams", async ({
         "Example Torrent",
         {},
         createSettings(),
-        createRankingModel(),
+        mockRankingModel,
       ),
     ] satisfies RankedResult[],
   });

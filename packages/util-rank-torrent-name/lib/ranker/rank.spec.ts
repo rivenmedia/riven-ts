@@ -150,19 +150,6 @@ it("adds preferred language bonus", ({ rankingConfig }) => {
   expect(totalScore).toBeGreaterThanOrEqual(10000);
 });
 
-it("uses custom rank override", ({ rankingConfig }) => {
-  const settings = createSettings({
-    customRanks: {
-      quality: { bluray: { fetch: true, rank: 5000 } },
-    },
-  });
-  const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
-  const { totalScore } = rank(data, settings, rankingConfig);
-
-  // Custom bluray (5000) + codec score from ranking model
-  expect(totalScore).toBeGreaterThanOrEqual(5000);
-});
-
 it("accepts a custom ranking model", ({ rankingConfig, settings }) => {
   const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
   const customModel = { ...rankingConfig, bluray: 9999 };

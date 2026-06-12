@@ -1,35 +1,43 @@
-import { RankingModelSchema, Settings } from "@repo/util-rank-torrent-name";
+import {
+  RankingModelSchema,
+  Settings,
+  createRankingModel,
+  createSettings,
+} from "@repo/util-rank-torrent-name";
 
 import z from "zod";
 
-import { defaultPreset } from "./presets/default-preset.ts";
+import { presets } from "./presets/index.ts";
 
-export const RankingConfigBase = z.strictObject({
-  settings: Settings.default(Settings.parse({})),
-  rankingModel: RankingModelSchema.default(RankingModelSchema.parse({})),
-});
+const RankingModelPreset = z.enum(["default"]);
+const RankingModel = z.union([RankingModelSchema, RankingModelPreset]);
 
-export type RankingConfigBase = z.infer<typeof RankingConfigBase>;
-
-const JsonSchemaBase = z.strictObject({
+export const RawRankingConfig = z.strictObject({
   $schema: z.string().optional(),
+  settings: Settings.optional(),
+  rankingModel: RankingModel.default("default"),
 });
 
-export const RankingConfig = z.discriminatedUnion("preset", [
-  JsonSchemaBase.extend({
-    preset: z.literal("default"),
-  }).transform((data) => ({
-    ...data,
-    ...defaultPreset,
-  })),
-  JsonSchemaBase.safeExtend(
-    z.strictObject({
-      preset: z.literal("custom"),
-      settings: Settings.default(Settings.parse({})),
-      rankingModel: RankingModelSchema.default(RankingModelSchema.parse({})),
-    }).shape,
-  ),
-]);
+export type RawRankingConfig = z.infer<typeof RawRankingConfig>;
+
+export const RankingConfig = RawRankingConfig.transform((data) => {
+  if (typeof data.rankingModel === "string") {
+    const preset = presets[data.rankingModel];
+
+    return {
+      rankingModel: createRankingModel(preset.rankingModel),
+      settings: createSettings({
+        ...preset.settings,
+        ...data.settings,
+      }),
+    };
+  }
+
+  return {
+    rankingModel: createRankingModel(data.rankingModel),
+    settings: createSettings(data.settings),
+  };
+});
 
 export type RankingConfig = z.infer<typeof RankingConfig>;
 export type RankingConfigFileContents = z.input<typeof RankingConfig>;
