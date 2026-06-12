@@ -469,9 +469,6 @@ importers:
       '@elastic/ecs-winston-format':
         specifier: 'catalog:'
         version: 1.5.3
-      '@isaacs/ttlcache':
-        specifier: 'catalog:'
-        version: 2.1.5
       '@keyv/redis':
         specifier: 'catalog:'
         version: 5.1.6(keyv@5.6.0)

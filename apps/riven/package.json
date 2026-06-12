@@ -48,7 +48,6 @@
     "@apollo/utils.keyvadapter": "catalog:",
     "@apollo/utils.keyvaluecache": "catalog:",
     "@elastic/ecs-winston-format": "catalog:",
-    "@isaacs/ttlcache": "catalog:",
     "@keyv/redis": "catalog:",
     "@mikro-orm/core": "catalog:",
     "@mikro-orm/decorators": "catalog:",
