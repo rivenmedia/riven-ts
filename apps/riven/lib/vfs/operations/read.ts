@@ -185,14 +185,14 @@ export const readSync = function (
   position,
   callback,
 ) {
-  void withVfsScope(() => {
+  void withVfsScope(async () => {
     const fileHandleMetadata = fdToFileHandleMeta.get(fd);
 
     if (!fileHandleMetadata) {
       throw new FuseError(Fuse.EBADF, "Invalid file handle");
     }
 
-    return withVfsOperationContext(
+    await withVfsOperationContext(
       {
         operationName: "read",
         path,
@@ -215,31 +215,31 @@ export const readSync = function (
 
         process.nextTick(callback, bytesRead);
       },
-    ).catch((error: unknown) => {
-      // This is triggered when a file handle is released
-      if (error instanceof Undici.errors.RequestAbortedError) {
-        logger.silly(`Read operation aborted for fd ${fd.toString()}`);
+    );
+  }).catch((error: unknown) => {
+    // This is triggered when a file handle is released
+    if (error instanceof Undici.errors.RequestAbortedError) {
+      logger.silly(`Read operation aborted for fd ${fd.toString()}`);
 
-        process.nextTick(callback, 0);
+      process.nextTick(callback, 0);
 
-        return;
+      return;
+    }
+
+    if (isFuseError(error)) {
+      if (!(error instanceof SeekError)) {
+        logger.error("VFS read FuseError", { err: error });
       }
 
-      if (isFuseError(error)) {
-        if (!(error instanceof SeekError)) {
-          logger.error("VFS read FuseError", { err: error });
-        }
+      process.nextTick(callback, error.errorCode);
 
-        process.nextTick(callback, error.errorCode);
+      return;
+    }
 
-        return;
-      }
-
-      logger.error(`Unexpected VFS read error for path: ${path}`, {
-        err: error,
-      });
-
-      process.nextTick(callback, Fuse.EIO);
+    logger.error(`Unexpected VFS read error for path: ${path}`, {
+      err: error,
     });
+
+    process.nextTick(callback, Fuse.EIO);
   });
 } satisfies OPERATIONS["read"];
