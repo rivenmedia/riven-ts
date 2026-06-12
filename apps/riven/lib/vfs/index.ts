@@ -8,11 +8,10 @@ import { releaseSync } from "./operations/release.ts";
 
 import type { OPERATIONS } from "@zkochan/fuse-native";
 
-export const fuseOperations = () =>
-  ({
-    getattr: getattrSync,
-    open: openSync,
-    read: readSync,
-    readdir: readDirSync,
-    release: releaseSync,
-  }) satisfies OPERATIONS;
+export const fuseOperations = {
+  getattr: getattrSync,
+  open: openSync,
+  read: readSync,
+  readdir: readDirSync,
+  release: releaseSync,
+} satisfies OPERATIONS;

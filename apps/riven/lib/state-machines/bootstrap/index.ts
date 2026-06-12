@@ -465,10 +465,9 @@ export const bootstrapMachine = setup({
             invoke: {
               id: "initialiseVfs",
               src: "initialiseVfs",
-              input: ({ context: { pluginQueues } }) => ({
+              input: {
                 mountPath: settings.vfsMountPath,
-                pluginQueues,
-              }),
+              },
               onDone: {
                 target: "Complete",
                 actions: {
