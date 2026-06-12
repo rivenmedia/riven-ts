@@ -206,7 +206,6 @@ function fetchResolution(
 function checkFetchMap(
   value: string | undefined,
   map: Map<string, keyof RankingModel>,
-  settings: Settings,
   rankingModel: RankingModel,
   failed: Set<string>,
 ): boolean {
@@ -234,7 +233,6 @@ function checkFetchMap(
 function checkFetchList(
   values: string[],
   map: Map<string, keyof RankingModel>,
-  settings: Settings,
   rankingModel: RankingModel,
   failed: Set<string>,
 ): boolean {
@@ -261,7 +259,6 @@ function checkFetchList(
 function checkFetchFlags(
   data: ParsedData,
   flagMap: Map<string, keyof RankingModel>,
-  settings: Settings,
   rankingModel: RankingModel,
   failed: Set<string>,
 ): boolean {
@@ -299,11 +296,11 @@ export function checkFetch(
 
   languageHandler(data, settings, failed);
   fetchResolution(data, settings, failed);
-  checkFetchMap(data.quality, QUALITY_MAP, settings, rankingModel, failed);
-  checkFetchList(data.audio ?? [], AUDIO_MAP, settings, rankingModel, failed);
-  checkFetchList(data.hdr ?? [], HDR_MAP, settings, rankingModel, failed);
-  checkFetchMap(data.codec, CODEC_MAP, settings, rankingModel, failed);
-  checkFetchFlags(data, FLAG_MAP, settings, rankingModel, failed);
+  checkFetchMap(data.quality, QUALITY_MAP, rankingModel, failed);
+  checkFetchList(data.audio ?? [], AUDIO_MAP, rankingModel, failed);
+  checkFetchList(data.hdr ?? [], HDR_MAP, rankingModel, failed);
+  checkFetchMap(data.codec, CODEC_MAP, rankingModel, failed);
+  checkFetchFlags(data, FLAG_MAP, rankingModel, failed);
 
   return {
     fetch: failed.size === 0,

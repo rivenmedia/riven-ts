@@ -13,36 +13,31 @@ const RankingModelPreset = z.enum(["default"]);
 const RankingModel = z.union([RankingModelSchema, RankingModelPreset]);
 
 export const RawRankingConfig = z.strictObject({
-  settings: Settings.default(Settings.parse({})),
-  rankingModel: RankingModel,
+  $schema: z.string().optional(),
+  settings: Settings.optional(),
+  rankingModel: RankingModel.default("default"),
 });
 
 export type RawRankingConfig = z.infer<typeof RawRankingConfig>;
 
-export const RankingConfig = z
-  .object({
-    $schema: z.string().optional(),
-    settings: Settings.default(Settings.parse({})),
-    rankingModel: RankingModel,
-  })
-  .transform((data) => {
-    if (typeof data.rankingModel === "string") {
-      const preset = presets[data.rankingModel];
-
-      return {
-        rankingModel: createRankingModel(preset.rankingModel),
-        settings: createSettings({
-          ...preset.settings,
-          ...data.settings,
-        }),
-      };
-    }
+export const RankingConfig = RawRankingConfig.transform((data) => {
+  if (typeof data.rankingModel === "string") {
+    const preset = presets[data.rankingModel];
 
     return {
-      rankingModel: createRankingModel(data.rankingModel),
-      settings: createSettings(data.settings),
+      rankingModel: createRankingModel(preset.rankingModel),
+      settings: createSettings({
+        ...preset.settings,
+        ...data.settings,
+      }),
     };
-  });
+  }
+
+  return {
+    rankingModel: createRankingModel(data.rankingModel),
+    settings: createSettings(data.settings),
+  };
+});
 
 export type RankingConfig = z.infer<typeof RankingConfig>;
 export type RankingConfigFileContents = z.input<typeof RankingConfig>;

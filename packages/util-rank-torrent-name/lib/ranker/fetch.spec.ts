@@ -77,7 +77,7 @@ it("accepts CAM when removeAllTrash is false", ({ rankingModel }) => {
   const settings = createSettings({ options: { removeAllTrash: false } });
   const data = parse("Movie.2024.CAM-GROUP");
   const result = checkFetch(data, settings, rankingModel);
-  // CAM is fetch: false by default in customRanks.trash.cam
+
   expect(result.fetch).toBe(false);
   expect(result.failedChecks).toContain("cam");
 });

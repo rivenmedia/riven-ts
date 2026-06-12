@@ -1,4 +1,5 @@
 import {
+  RTN,
   createRankingModel,
   createSettings,
 } from "@repo/util-rank-torrent-name";
@@ -6,11 +7,32 @@ import {
 import { expect, vi } from "vitest";
 
 import { it as baseIt } from "../../../../../../../__tests__/test-context.ts";
+import * as rankingConfigModule from "../../../../../../../ranking-config/ranking-config.ts";
 import { rankStreamsProcessor } from "./rank-streams.processor.ts";
 
 const it = baseIt.extend("streams", ({ factories: { streamFactory } }) =>
   streamFactory.create(6),
 );
+
+it.beforeEach(() => {
+  vi.spyOn(rankingConfigModule, "rtnInstance", "get").mockReturnValue(
+    new RTN(
+      createSettings({
+        resolutions: {
+          r2160p: true,
+        },
+      }),
+      createRankingModel({
+        bluray: 0,
+        webrip: 0,
+        avc: 0,
+        mp3: 10000,
+        atmos: 20000,
+        dolbyDigitalPlus: 100000,
+      }),
+    ),
+  );
+});
 
 it("does not include trashed streams", async ({
   createMockJob,
@@ -30,8 +52,6 @@ it("does not include trashed streams", async ({
       [streams[1].infoHash]: `${indexedMovie.title} 1080p`,
       [streams[2].infoHash]: indexedMovie.title,
     },
-    rtnSettings: createSettings(),
-    rtnRankingModel: createRankingModel(),
   });
 
   const result = await rankStreamsProcessor(
@@ -81,25 +101,6 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
       [streams[4].infoHash]: indexedMovie.title,
       [streams[5].infoHash]: `${indexedMovie.title} mp3`,
     },
-    rtnSettings: createSettings({
-      customRanks: {
-        audio: {
-          mp3: {
-            fetch: true,
-            rank: 10000,
-          },
-          atmos: {
-            fetch: true,
-            rank: 20000,
-          },
-          dolbyDigitalPlus: {
-            fetch: true,
-            rank: 100000,
-          },
-        },
-      },
-    }),
-    rtnRankingModel: createRankingModel(),
   });
 
   const result = await rankStreamsProcessor(
@@ -168,8 +169,6 @@ it("handles foreign language movies with aliases correctly", async ({
       [streams[1].infoHash]: "Film Étranger 720p",
       [streams[2].infoHash]: "Foreign Movie 1080p",
     },
-    rtnSettings: createSettings(),
-    rtnRankingModel: createRankingModel(),
   });
 
   const result = await rankStreamsProcessor(
@@ -223,8 +222,6 @@ it("handles foreign language shows with aliases correctly", async ({
       [streams[1].infoHash]: "Spectacle Étranger 720p",
       [streams[2].infoHash]: "Foreign Show 1080p",
     },
-    rtnSettings: createSettings(),
-    rtnRankingModel: createRankingModel(),
   });
 
   const result = await rankStreamsProcessor(

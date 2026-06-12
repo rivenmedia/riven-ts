@@ -18,7 +18,6 @@ export type { FetchResult, RankedResult } from "./types.ts";
 export type { ParsedData } from "./schemas.ts";
 export type {
   RankingModel,
-  CustomRank,
   SettingsInput,
 } from "./ranker/ranking-settings.schema.ts";
 export type { Aliases } from "./ranker/lev.ts";
