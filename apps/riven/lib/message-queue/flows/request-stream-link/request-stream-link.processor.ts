@@ -238,7 +238,7 @@ export const requestStreamLinkProcessor =
             await streamService.saveStreamLink(
               mediaEntry.id,
               job.data.linkData.link,
-              ttl.as("seconds"),
+              Math.min(ttl.as("seconds"), 60),
             );
 
             logger.debug(
