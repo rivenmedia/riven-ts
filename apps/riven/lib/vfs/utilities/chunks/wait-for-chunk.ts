@@ -5,7 +5,7 @@ import { setTimeout as sleep } from "node:timers/promises";
 
 import { config } from "../../config.ts";
 import { FuseError } from "../../errors/fuse-error.ts";
-import { SeekError } from "../../errors/seek-error.ts";
+import { SeekDetected } from "../../errors/seek-detected.ts";
 import { chunkCache } from "../chunk-cache.ts";
 import { fdToCurrentStreamPositionMap } from "../file-handle-map.ts";
 import { getVfsOperationContext } from "../vfs-operation-context.ts";
@@ -31,7 +31,7 @@ export const waitForChunk = async (
 
   while ((chunk = reader.read(targetChunk.size) as Buffer | null) === null) {
     if (context.seekController.signal.aborted) {
-      throw new SeekError(
+      throw new SeekDetected(
         `Seek detected; aborting chunk request for chunk ${targetChunk.rangeLabel}`,
       );
     }
@@ -67,7 +67,7 @@ export const waitForChunk = async (
 
   // Check for seek again after reading as the current stream position will be undefined
   if (context.seekController.signal.aborted) {
-    throw new SeekError(
+    throw new SeekDetected(
       `Seek detected; aborting chunk request for chunk ${targetChunk.rangeLabel}`,
     );
   }
