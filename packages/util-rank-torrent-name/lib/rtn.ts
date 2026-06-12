@@ -1,9 +1,9 @@
 import { rankTorrent } from "./ranker/rank.ts";
 import {
-  type CustomRank,
   type RankingModel,
   type Settings,
   type SettingsInput,
+  createRankingModel,
   createSettings,
 } from "./ranker/ranking-settings.schema.ts";
 import { sortTorrents } from "./ranker/sort.ts";
@@ -19,21 +19,7 @@ export class RTN {
 
   constructor(settings: SettingsInput = {}, rankingModel: RankingModel) {
     this.#settings = createSettings(settings);
-
-    this.#rankingModel = Object.values(this.#settings.customRanks).reduce(
-      (acc, category) => {
-        for (const [key, rank] of Object.entries(category) as [
-          keyof RankingModel,
-          CustomRank,
-        ][]) {
-          acc[key] = rank.rank ?? rankingModel[key];
-        }
-
-        return acc;
-      },
-      { ...rankingModel },
-    );
-
+    this.#rankingModel = createRankingModel(rankingModel);
     this.#enabledResolutions = new Set(
       Object.entries(this.#settings.resolutions)
         .filter(([_, enabled]) => enabled)

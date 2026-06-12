@@ -9,15 +9,11 @@ import {
   RESOLUTION_SETTINGS_MAP,
   TRASH_QUALITIES,
 } from "../shared/mappings.ts";
-import { getCustomRank } from "./ranking-settings.schema.ts";
+import { isFetchEnabled } from "./ranking-settings.schema.ts";
 
 import type { ParsedData } from "../schemas.ts";
 import type { FetchResult } from "../types.ts";
-import type {
-  CustomRanksConfig,
-  RankingModel,
-  Settings,
-} from "./ranking-settings.schema.ts";
+import type { RankingModel, Settings } from "./ranking-settings.schema.ts";
 
 /**
  * @internal
@@ -33,16 +29,19 @@ export function trashHandler(
 
   if (data.quality && TRASH_QUALITIES.has(data.quality.toLowerCase())) {
     failed.add("trash_quality");
+
     return true;
   }
 
   if (data.audio?.some((a) => /hq clean audio/i.exec(a))) {
     failed.add("trash_audio");
+
     return true;
   }
 
   if (data.trash) {
     failed.add("trash_flag");
+
     return true;
   }
 
@@ -79,6 +78,7 @@ export function adultHandler(
 ): boolean {
   if (data.adult && settings.options.removeAdultContent) {
     failed.add("trash_adult");
+
     return true;
   }
 
@@ -95,6 +95,7 @@ function checkExclude(
 
     if (pattern?.test(data.rawTitle)) {
       failed.add(`exclude_regex '${settings.exclude[i] ?? ""}'`);
+
       return true;
     }
   }
@@ -131,11 +132,13 @@ export function languageHandler(
   if (data.languages.length === 0) {
     if (settings.options.removeUnknownLanguages) {
       failed.add("unknown_language");
+
       return true;
     }
 
     if (required.size > 0) {
       failed.add("missing_required_language");
+
       return true;
     }
 
@@ -144,6 +147,7 @@ export function languageHandler(
 
   if (required.size > 0 && !data.languages.some((lang) => required.has(lang))) {
     failed.add("missing_required_language");
+
     return true;
   }
 
@@ -192,6 +196,7 @@ function fetchResolution(
 
   if (!enabled) {
     failed.add("resolution");
+
     return true;
   }
 
@@ -200,25 +205,26 @@ function fetchResolution(
 
 function checkFetchMap(
   value: string | undefined,
-  map: Map<string, [keyof CustomRanksConfig, keyof RankingModel]>,
+  map: Map<string, keyof RankingModel>,
   settings: Settings,
+  rankingModel: RankingModel,
   failed: Set<string>,
 ): boolean {
   if (!value) {
     return false;
   }
 
-  const entry = map.get(value.toLowerCase());
+  const key = map.get(value.toLowerCase());
 
-  if (!entry) {
+  if (!key) {
     return false;
   }
 
-  const [category, key] = entry;
-  const custom = getCustomRank(settings, category, key);
+  const shouldFetch = isFetchEnabled(rankingModel, key);
 
-  if (!custom.fetch) {
-    failed.add(`${category}_${key}`);
+  if (!shouldFetch) {
+    failed.add(key);
+
     return true;
   }
 
@@ -227,8 +233,9 @@ function checkFetchMap(
 
 function checkFetchList(
   values: string[],
-  map: Map<string, [keyof CustomRanksConfig, keyof RankingModel]>,
+  map: Map<string, keyof RankingModel>,
   settings: Settings,
+  rankingModel: RankingModel,
   failed: Set<string>,
 ): boolean {
   for (const value of values) {
@@ -238,11 +245,12 @@ function checkFetchList(
       continue;
     }
 
-    const [category, key] = entry;
-    const custom = getCustomRank(settings, category, key);
+    const key = entry;
+    const shouldFetch = isFetchEnabled(rankingModel, key);
 
-    if (!custom.fetch) {
-      failed.add(`${category}_${key}`);
+    if (!shouldFetch) {
+      failed.add(key);
+
       return true;
     }
   }
@@ -252,21 +260,23 @@ function checkFetchList(
 
 function checkFetchFlags(
   data: ParsedData,
-  flagMap: Map<string, [keyof CustomRanksConfig, keyof RankingModel]>,
+  flagMap: Map<string, keyof RankingModel>,
   settings: Settings,
+  rankingModel: RankingModel,
   failed: Set<string>,
 ): boolean {
-  for (const [field, [category, key]] of flagMap.entries()) {
+  for (const [field, key] of flagMap.entries()) {
     const value = (data as unknown as Record<string, unknown>)[field];
 
     if (!value) {
       continue;
     }
 
-    const custom = getCustomRank(settings, category, key);
+    const shouldFetch = isFetchEnabled(rankingModel, key);
 
-    if (!custom.fetch) {
-      failed.add(`${category}_${key}`);
+    if (!shouldFetch) {
+      failed.add(key);
+
       return true;
     }
   }
@@ -274,7 +284,11 @@ function checkFetchFlags(
   return false;
 }
 
-export function checkFetch(data: ParsedData, settings: Settings) {
+export function checkFetch(
+  data: ParsedData,
+  settings: Settings,
+  rankingModel: RankingModel,
+): FetchResult {
   const failed = new Set<string>();
 
   trashHandler(data, settings, failed);
@@ -285,11 +299,11 @@ export function checkFetch(data: ParsedData, settings: Settings) {
 
   languageHandler(data, settings, failed);
   fetchResolution(data, settings, failed);
-  checkFetchMap(data.quality, QUALITY_MAP, settings, failed);
-  checkFetchList(data.audio ?? [], AUDIO_MAP, settings, failed);
-  checkFetchList(data.hdr ?? [], HDR_MAP, settings, failed);
-  checkFetchMap(data.codec, CODEC_MAP, settings, failed);
-  checkFetchFlags(data, FLAG_MAP, settings, failed);
+  checkFetchMap(data.quality, QUALITY_MAP, settings, rankingModel, failed);
+  checkFetchList(data.audio ?? [], AUDIO_MAP, settings, rankingModel, failed);
+  checkFetchList(data.hdr ?? [], HDR_MAP, settings, rankingModel, failed);
+  checkFetchMap(data.codec, CODEC_MAP, settings, rankingModel, failed);
+  checkFetchFlags(data, FLAG_MAP, settings, rankingModel, failed);
 
   return {
     fetch: failed.size === 0,

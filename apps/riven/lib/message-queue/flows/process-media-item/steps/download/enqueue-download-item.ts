@@ -1,9 +1,5 @@
 import { toMerged } from "es-toolkit";
 
-import {
-  rtnRankingModel,
-  rtnSettings,
-} from "../../../../../ranking-config/ranking-config.ts";
 import { flow } from "../../../producer.ts";
 import { createDownloadItemJob } from "./download-item.schema.ts";
 import { createFindValidTorrentJob } from "./steps/find-valid-torrent/find-valid-torrent.schema.ts";
@@ -31,8 +27,6 @@ export async function enqueueDownloadItem({
       streams: Object.fromEntries(
         streams.map((stream) => [stream.infoHash, stream.parsedData.rawTitle]),
       ),
-      rtnSettings,
-      rtnRankingModel,
     },
   );
 

@@ -64,50 +64,6 @@ describe("createSettings", () => {
     expect(settings.resolutions.unknown).toBe(true);
   });
 
-  it("has correct default custom ranks", () => {
-    const settings = createSettings();
-
-    // Quality
-    expect(settings.customRanks.quality.bluray.fetch).toBe(true);
-    expect(settings.customRanks.quality.remux.fetch).toBe(false);
-    expect(settings.customRanks.quality.av1.fetch).toBe(false);
-    expect(settings.customRanks.quality.web.fetch).toBe(true);
-
-    // Rips
-    expect(settings.customRanks.rips.webrip.fetch).toBe(true);
-    expect(settings.customRanks.rips.dvdrip.fetch).toBe(false);
-
-    // HDR
-    expect(settings.customRanks.hdr.dolbyVision.fetch).toBe(false);
-    expect(settings.customRanks.hdr.hdr.fetch).toBe(true);
-
-    // Audio
-    expect(settings.customRanks.audio.atmos.fetch).toBe(true);
-    expect(settings.customRanks.audio.mp3.fetch).toBe(false);
-
-    // Extras
-    expect(settings.customRanks.extras.threeD.fetch).toBe(false);
-    expect(settings.customRanks.extras.proper.fetch).toBe(true);
-
-    // Trash
-    expect(settings.customRanks.trash.cam.fetch).toBe(false);
-    expect(settings.customRanks.trash.telesync.fetch).toBe(false);
-  });
-
-  it("allows custom rank overrides", () => {
-    const settings = createSettings({
-      customRanks: {
-        quality: { remux: { fetch: true, rank: 5000 } },
-      },
-    });
-
-    expect(settings.customRanks.quality.remux.fetch).toBe(true);
-    expect(settings.customRanks.quality.remux.rank).toBe(5000);
-
-    // Other quality ranks should still have defaults
-    expect(settings.customRanks.quality.bluray.fetch).toBe(true);
-  });
-
   it("throws on invalid input types", () => {
     // @ts-expect-error - invalid type for resolutions
     expect(() => createSettings({ resolutions: { r1080p: "yes" } })).toThrow();
