@@ -13,6 +13,7 @@ import { createJobParentConfig } from "../../../../../../utilities/create-job-pa
 import { filterChildrenValues } from "../../../../../../utilities/filter-children-values.ts";
 import { findValidTorrentProcessorSchema } from "./find-valid-torrent.schema.ts";
 import { getCachedTorrentFiles } from "./utilities/get-cached-torrent-files.ts";
+import { matchesRealdebridFilter } from "./utilities/matches-realdebrid-filter.ts";
 import { getPluginDownloadResult } from "./utilities/get-plugin-download-result.ts";
 import { getPluginProviderList } from "./utilities/get-plugin-provider-list.ts";
 import { getValidTorrentFiles } from "./utilities/get-valid-torrent-files.ts";
@@ -46,6 +47,11 @@ export const findValidTorrentProcessor =
     const infoHashes = rankedStreams.map((stream) => stream.hash);
     const uncheckedInfoHashes = new Set(infoHashes).difference(
       new Set(failedInfoHashes),
+    );
+
+    // Release name per info hash, used to skip Real-Debrid legal-filter matches below.
+    const rawTitleByHash = new Map(
+      rankedStreams.map((stream) => [stream.hash, stream.data.rawTitle]),
     );
 
     const parent = createJobParentConfig(job);
@@ -149,6 +155,30 @@ export const findValidTorrentProcessor =
               );
 
               continue;
+            }
+
+            // Real-Debrid legally filters certain release-name patterns and serves
+            // 451 for them, which would blacklist + reset the item. Skip RD for any
+            // matching release; it still gets tried on the other stores.
+            if (
+              provider === "realdebrid" &&
+              settings.realdebridFilenameBlocklist.length > 0
+            ) {
+              const rawTitle = rawTitleByHash.get(infoHash);
+
+              if (
+                rawTitle &&
+                matchesRealdebridFilter(
+                  rawTitle,
+                  settings.realdebridFilenameBlocklist,
+                )
+              ) {
+                logger.debug(
+                  `Skipping ${infoHash} on realdebrid; release name matches RD legal filter`,
+                );
+
+                continue;
+              }
             }
 
             scope.setTag("riven.downloader-provider", provider);
