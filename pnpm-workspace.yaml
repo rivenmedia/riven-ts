@@ -83,7 +83,7 @@ catalog:
   execa: ^9.6.1
   fastest-levenshtein: ^1.0.16
   fumadocs-core: ^16.8.12
-  fumadocs-mdx: ^14.3.2
+  fumadocs-mdx: ^15.0.11
   fumadocs-ui: ^16.8.12
   glob: ^13.0.6
   globals: ^17.6.0
