@@ -1,6 +1,10 @@
 import z from "zod";
 
 import {
+  ManualScrapeFlow,
+  manualScrapeProcessorSchema,
+} from "./manual-scrape/manual-scrape.schema.ts";
+import {
   PostProcessMediaItemFlow,
   postProcessMediaItemProcessorSchema,
 } from "./post-process-media-item/post-process-media-item.schema.ts";
@@ -52,6 +56,7 @@ export const Flow = z.discriminatedUnion("name", [
   ProcessMediaItemFlow,
   PostProcessMediaItemFlow,
   RequestStreamLinkFlow,
+  ManualScrapeFlow,
 ]);
 
 export type Flow = z.infer<typeof Flow>;
@@ -67,4 +72,5 @@ export const FlowHandlers = {
   "request-stream-link": requestStreamLinkProcessorSchema,
   "request-subtitles": requestSubtitlesProcessorSchema,
   "post-process-media-item": postProcessMediaItemProcessorSchema,
+  "manual-scrape": manualScrapeProcessorSchema,
 } satisfies Record<Flow["name"], z.ZodFunction>;

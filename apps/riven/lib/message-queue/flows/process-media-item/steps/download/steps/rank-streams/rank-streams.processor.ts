@@ -1,18 +1,37 @@
 import { ShowLikeMediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
 import {
   GarbageTorrentError,
+  RTN,
   type RankedResult,
 } from "@repo/util-rank-torrent-name";
 
 import { NotFoundError } from "@mikro-orm/core";
 import chalk from "chalk";
 
-import { rtnInstance } from "../../../../../../../ranking-config/ranking-config.ts";
 import { logger } from "../../../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../../../utilities/settings.ts";
 import { SkippedTorrentError } from "../../../../../../sandboxed-jobs/jobs/parse-scrape-results/utilities/validate-torrent.ts";
-import { rankStreamsProcessorSchema } from "./rank-streams.schema.ts";
+import {
+  type RankStreamsFlow,
+  rankStreamsProcessorSchema,
+} from "./rank-streams.schema.ts";
 import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution.ts";
+
+async function getEffectiveRankingConfig(
+  scrapeSource: RankStreamsFlow["input"]["scrapeSource"],
+) {
+  if (scrapeSource === "manual") {
+    const { manualScrapeConfig } =
+      await import("../../../../../../../ranking-config/manual-scrape-config.ts");
+
+    return manualScrapeConfig;
+  }
+
+  const { rankingConfig } =
+    await import("../../../../../../../ranking-config/ranking-config.ts");
+
+  return rankingConfig;
+}
 
 export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
   async function (
@@ -31,6 +50,15 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
 
     const { title: itemTitle, aliases } =
       item instanceof ShowLikeMediaItem ? await item.getShow() : item;
+
+    const effectiveRankingConfig = await getEffectiveRankingConfig(
+      job.data.scrapeSource,
+    );
+
+    const rtnInstance = new RTN(
+      effectiveRankingConfig.settings,
+      effectiveRankingConfig.rankingModel,
+    );
 
     const rankedResults = Object.entries(job.data.streams).reduce<
       RankedResult[]

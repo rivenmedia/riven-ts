@@ -5,21 +5,21 @@ import { createDownloadItemJob } from "./download-item.schema.ts";
 import { createFindValidTorrentJob } from "./steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { createRankStreamsJob } from "./steps/rank-streams/rank-streams.schema.ts";
 
-import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
+import type { MediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
 import type { FlowJob } from "bullmq";
-import type { PartialDeep, SetRequired } from "type-fest";
+import type { PartialDeep } from "type-fest";
 
 export interface EnqueueDownloadItemInput {
+  streams: Stream[];
   item: MediaItem;
-  opts: SetRequired<NonNullable<FlowJob["opts"]>, "parent">;
+  opts: NonNullable<FlowJob["opts"]>;
 }
 
-export async function enqueueDownloadItem({
+export function enqueueDownloadItem({
   item,
   opts,
+  streams,
 }: EnqueueDownloadItemInput) {
-  const streams = await item.streams.loadItems();
-
   const rankStreamsNode = createRankStreamsJob(
     `Ranking streams for ${item.fullTitle}`,
     {
@@ -59,5 +59,8 @@ export async function enqueueDownloadItem({
     },
   );
 
-  return flow.add(rootNode);
+  return {
+    rootNode,
+    enqueue: () => flow.add(rootNode),
+  };
 }

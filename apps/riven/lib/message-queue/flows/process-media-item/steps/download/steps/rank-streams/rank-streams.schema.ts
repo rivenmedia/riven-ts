@@ -13,6 +13,7 @@ export const RankStreamsFlow = createFlowSchema("download-item.rank-streams", {
   children: Torrent,
   input: z.object({
     id: UUID,
+    scrapeSource: z.enum(["manual", "auto"]).default("auto"),
     streams: z
       .record(z.hash("sha1"), z.string())
       .refine((val) => atLeastOnePropertyRequired(val), {

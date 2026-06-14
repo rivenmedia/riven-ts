@@ -102,10 +102,13 @@ export const processMediaItemProcessor =
               job.data.mediaItem.id,
             );
 
+            const streams = await item.streams.loadItems();
+
             await enqueueDownloadItem({
               item,
+              streams,
               opts: { parent: parent },
-            });
+            }).enqueue();
 
             await job.updateData({
               ...job.data,

@@ -14,7 +14,7 @@ const RankingModel = z.union([RankingModelSchema, RankingModelPreset]);
 
 export const RawRankingConfig = z.strictObject({
   $schema: z.string().optional(),
-  settings: Settings.optional(),
+  settings: Settings.in.optional(),
   rankingModel: RankingModel.default("default"),
 });
 

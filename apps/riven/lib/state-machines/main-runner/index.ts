@@ -17,6 +17,8 @@ import {
   setup,
 } from "xstate";
 
+import { manualScrapeProcessor } from "../../message-queue/flows/manual-scrape/manual-scrape.processor.ts";
+import { ManualScrapeFlow } from "../../message-queue/flows/manual-scrape/manual-scrape.schema.ts";
 import { postProcessItemProcessor } from "../../message-queue/flows/post-process-media-item/post-process-media-item.processor.ts";
 import { PostProcessMediaItemFlow } from "../../message-queue/flows/post-process-media-item/post-process-media-item.schema.ts";
 import { requestSubtitlesProcessor } from "../../message-queue/flows/post-process-media-item/steps/request-subtitles/request-subtitles.processor.ts";
@@ -286,7 +288,6 @@ export const mainRunnerMachine = setup({
             publishableEvents: input.publishableEvents,
             pluginQueues: input.pluginQueues,
             pluginWorkers: input.pluginWorkers,
-
             flowWorkers: {
               "process-item-request": createFlowWorker(
                 ProcessItemRequestFlow,
@@ -376,6 +377,12 @@ export const mainRunnerMachine = setup({
               "request-stream-link": createFlowWorker(
                 RequestStreamLinkFlow,
                 requestStreamLinkProcessor,
+                self.send,
+                input.plugins,
+              ),
+              "manual-scrape": createFlowWorker(
+                ManualScrapeFlow,
+                manualScrapeProcessor,
                 self.send,
                 input.plugins,
               ),
