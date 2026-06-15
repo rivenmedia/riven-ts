@@ -19,6 +19,14 @@ services:
     profiles:
       - all
 
+  riven-frontend:
+    extends:
+      file: ./apps/riven/docker-compose.yaml
+      service: riven-frontend
+    profiles:
+      - all
+      - frontend
+
   riven-db:
     extends:
       file: ./apps/riven/docker-compose.yaml

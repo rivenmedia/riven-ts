@@ -59,6 +59,14 @@ services:
     volumes:
       - ./docker-data/riven-cache:/data
 
+  riven-frontend:
+    image: ghcr.io/rivenmedia/riven-frontend:graphql
+    container_name: riven-frontend
+    restart: unless-stopped
+    ports:
+      - 9000:9000
+    env_file: .env.riven-frontend
+
   redis-insight:
     container_name: redis-insight
     image: redislabs/redisinsight:latest
