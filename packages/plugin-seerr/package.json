@@ -25,7 +25,6 @@
   },
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
-    "@repo/core-util-graphql-helpers": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "@repo/util-wiki-helpers": "workspace:^",
     "class-validator": "catalog:",

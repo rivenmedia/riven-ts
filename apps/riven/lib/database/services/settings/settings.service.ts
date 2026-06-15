@@ -6,7 +6,9 @@ import { BaseService } from "../core/base-service.ts";
 export class SettingsService extends BaseService {
   @CreateRequestContext()
   async getSettingsByNamespace(namespace: string) {
-    return this.em.find(Setting, { namespace });
+    const settings = await this.em.find(Setting, { namespace });
+
+    return Object.fromEntries(settings.map((s) => [s.key, s.value]));
   }
 
   @CreateRequestContext()
