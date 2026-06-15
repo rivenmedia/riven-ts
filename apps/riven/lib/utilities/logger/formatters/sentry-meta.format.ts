@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/node";
 import { format } from "winston";
 
-import { getOptionalLogContext } from "../log-context.ts";
+import { getLogContext } from "../log-context.ts";
 
 export const sentryMetaFormat = format((info) => {
   const activeSpan = Sentry.getActiveSpan();
@@ -15,6 +15,6 @@ export const sentryMetaFormat = format((info) => {
 
   return {
     ...info,
-    ...getOptionalLogContext(),
+    ...getLogContext(),
   };
 });

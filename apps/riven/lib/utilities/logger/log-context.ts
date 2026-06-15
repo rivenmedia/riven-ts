@@ -39,15 +39,5 @@ export function withLogContext<T>(
 }
 
 export function getLogContext(): LogContext {
-  const context = logContext.getStore();
-
-  if (!context) {
-    throw new Error("No log context available");
-  }
-
-  return context;
-}
-
-export function getOptionalLogContext(): LogContext {
   return logContext.getStore() ?? {};
 }
