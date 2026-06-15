@@ -10,6 +10,7 @@ export const DownloadItemFlow = createFlowSchema("download-item", {
   children: FindValidTorrentFlow.shape.output,
   input: z.object({
     id: UUID,
+    scrapeSource: z.enum(["auto", "manual"]).default("auto"),
   }),
 });
 

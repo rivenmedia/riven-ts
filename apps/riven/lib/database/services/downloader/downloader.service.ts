@@ -43,8 +43,19 @@ export class DownloaderService extends BaseService {
 
   @CreateRequestContext()
   @Transactional()
-  async downloadItem(id: UUID, torrent: ValidTorrent, processedBy: string) {
-    return persistDownloadResults(this.em, id, torrent, processedBy);
+  async downloadItem(
+    id: UUID,
+    torrent: ValidTorrent,
+    processedBy: string,
+    isManualScrape = false,
+  ) {
+    return persistDownloadResults(
+      this.em,
+      id,
+      torrent,
+      processedBy,
+      isManualScrape,
+    );
   }
 
   @EnsureRequestContext()

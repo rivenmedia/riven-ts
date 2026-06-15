@@ -43,6 +43,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
         job.data.id,
         finalResult.result,
         finalResult.plugin,
+        job.data.scrapeSource === "manual",
       );
 
       const incompleteItems = await updatedItem.getIncompleteItems();

@@ -27,6 +27,7 @@ export class Stream {
   @PrimaryKey()
   infoHash!: string;
 
+  @Field(() => Object)
   @Property({ type: "json" })
   parsedData!: ParsedData;
 

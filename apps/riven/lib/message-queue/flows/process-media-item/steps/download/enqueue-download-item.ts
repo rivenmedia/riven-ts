@@ -1,5 +1,3 @@
-import { toMerged } from "es-toolkit";
-
 import { flow } from "../../../producer.ts";
 import { createDownloadItemJob } from "./download-item.schema.ts";
 import { createFindValidTorrentJob } from "./steps/find-valid-torrent/find-valid-torrent.schema.ts";
@@ -7,18 +5,19 @@ import { createRankStreamsJob } from "./steps/rank-streams/rank-streams.schema.t
 
 import type { MediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
 import type { FlowJob } from "bullmq";
-import type { PartialDeep } from "type-fest";
 
 export interface EnqueueDownloadItemInput {
   streams: Stream[];
   item: MediaItem;
   opts: NonNullable<FlowJob["opts"]>;
+  scrapeSource?: "auto" | "manual";
 }
 
 export function enqueueDownloadItem({
   item,
   opts,
   streams,
+  scrapeSource = "auto",
 }: EnqueueDownloadItemInput) {
   const rankStreamsNode = createRankStreamsJob(
     `Ranking streams for ${item.fullTitle}`,
@@ -27,6 +26,7 @@ export function enqueueDownloadItem({
       streams: Object.fromEntries(
         streams.map((stream) => [stream.infoHash, stream.parsedData.rawTitle]),
       ),
+      scrapeSource,
     },
   );
 
@@ -47,15 +47,16 @@ export function enqueueDownloadItem({
 
   const rootNode = createDownloadItemJob(
     `Downloading ${item.fullTitle}`,
-    { id: item.id },
+    {
+      id: item.id,
+      scrapeSource,
+    },
     {
       children: [findValidTorrentNode],
-      opts: toMerged<
-        NonNullable<FlowJob["opts"]>,
-        PartialDeep<NonNullable<FlowJob["opts"]>>
-      >(opts, {
+      opts: {
         continueParentOnFailure: true,
-      }),
+        ...opts,
+      },
     },
   );
 

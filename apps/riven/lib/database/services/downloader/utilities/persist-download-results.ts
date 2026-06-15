@@ -23,6 +23,7 @@ export async function persistDownloadResults(
   id: UUID,
   torrent: ValidTorrent,
   processedBy: string,
+  isManualScrape: boolean,
 ) {
   const existingItem = await em.getRepository(MediaItem).findOne(
     {
@@ -47,6 +48,9 @@ export async function persistDownloadResults(
     "scraped",
     "ongoing",
     "partially_completed",
+    ...(isManualScrape
+      ? (["completed"] as const satisfies MediaItemState[])
+      : []),
   ]);
 
   assert(
@@ -80,6 +84,9 @@ export async function persistDownloadResults(
       const [file] = torrent.files;
 
       assert(file?.link, "Download URL is missing for the matched file");
+
+      // Clear any existing media entries before adding new ones
+      existingItem.filesystemEntries.remove(({ type }) => type === "media");
 
       existingItem.filesystemEntries.add(
         em.create(MediaEntry, {

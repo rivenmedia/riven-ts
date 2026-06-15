@@ -10,7 +10,7 @@ import type { FlowJob } from "bullmq";
 import type { UUID } from "node:crypto";
 import type { PartialDeep } from "type-fest";
 
-export interface EnqueueManualScrapeInput {
+interface EnqueueManualScrapeInput {
   id: UUID;
   stream: Stream;
 }
@@ -23,8 +23,12 @@ export async function enqueueManualScrape(
 
   const { rootNode: downloadItemNode } = enqueueDownloadItem({
     item: mediaItem,
-    opts: {},
     streams: [stream],
+    scrapeSource: "manual",
+    opts: {
+      failParentOnFailure: true,
+      continueParentOnFailure: false,
+    },
   });
 
   const rootNode = createManualScrapeJob(
