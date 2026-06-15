@@ -47,3 +47,7 @@ export function getLogContext(): LogContext {
 
   return context;
 }
+
+export function getOptionalLogContext(): LogContext {
+  return logContext.getStore() ?? {};
+}
