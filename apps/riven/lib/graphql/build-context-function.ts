@@ -6,13 +6,11 @@ import type { ValidPluginMap } from "../types/plugins.ts";
 import type { ContextFunction } from "@apollo/server";
 import type { StandaloneServerContextFunctionArgument } from "@apollo/server/standalone";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
-import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 export const buildContextFunction =
   (
     sendEvent: GraphQLContext["sendEvent"],
     plugins: ValidPluginMap,
-    pluginSettings: PluginSettings,
   ): ContextFunction<
     [StandaloneServerContextFunctionArgument],
     ApolloServerContext
@@ -28,5 +26,4 @@ export const buildContextFunction =
       logger,
       sendEvent,
       plugins,
-      pluginSettings,
     });
