@@ -43,6 +43,8 @@ class Settings {
   }
 }
 
+export type ParsedSettings = ReadonlyDeep<RivenSettings>;
+
 function getWorkerSettings() {
   const rawEnvironmentData = getEnvironmentData("settings");
   const parsedEnvironmentData = RivenSettings.parse(rawEnvironmentData);
@@ -50,6 +52,6 @@ function getWorkerSettings() {
   return deepFreeze(parsedEnvironmentData);
 }
 
-export const settings: ReadonlyDeep<RivenSettings> = isMainThread
+export const settings: ParsedSettings = isMainThread
   ? new Settings(process.env).settings
   : getWorkerSettings();

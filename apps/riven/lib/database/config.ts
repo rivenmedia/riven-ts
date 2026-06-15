@@ -21,6 +21,7 @@ import {
 } from "@mikro-orm/postgresql";
 
 import { withLogContext } from "../utilities/logger/log-context.ts";
+import { coreEntities } from "./entities/index.ts";
 import { MediaItemFullTitleSubscriber } from "./subscribers/media-item-full-title.subscriber.ts";
 import { MediaItemStateSubscriber } from "./subscribers/media-item-state.subscriber.ts";
 import { ShowLikeMediaItemReleaseDateSubscriber } from "./subscribers/show-like-media-item-release-date.subscriber.ts";
@@ -39,6 +40,7 @@ const entities = [
   ItemRequest,
   Stream,
   BlacklistedStream,
+  ...coreEntities,
 ];
 
 async function getMetadataCacheConfig(): Promise<Options> {

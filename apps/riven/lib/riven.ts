@@ -2,6 +2,8 @@ import { Duration } from "luxon";
 import { randomUUID } from "node:crypto";
 import { setEnvironmentData } from "node:worker_threads";
 
+import "reflect-metadata";
+
 import {
   type LogContext,
   withLogContext,

@@ -13,6 +13,7 @@ import { clearPreviousInstanceState } from "./actors/clear-previous-instance-sta
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
+import { synchroniseConfiguration } from "./actors/synchronise-configuration.actor.ts";
 
 import type { ApolloServerContext } from "../../graphql/context.ts";
 import type { MockScenario } from "../../mocks/utilities/mock-scenario.ts";
@@ -68,6 +69,7 @@ export const bootstrapMachine = setup({
     children: {} as {
       startGqlServer: "startGqlServer";
       initialiseDatabaseConnection: "initialiseDatabaseConnection";
+      synchroniseConfiguration: "synchroniseConfiguration";
       pluginRegistrarMachine: "pluginRegistrarMachine";
       initialiseVfs: "initialiseVfs";
     },
@@ -112,6 +114,7 @@ export const bootstrapMachine = setup({
     applyMockScenario,
     clearPreviousInstanceState,
     initialiseDatabaseConnection,
+    synchroniseConfiguration,
     initialiseVfs,
     pluginRegistrarMachine,
     startGqlServer,
@@ -453,7 +456,7 @@ export const bootstrapMachine = setup({
       },
       "Bootstrapping VFS": {
         initial: "Starting",
-        onDone: "Success",
+        onDone: "Synchronising configuration",
         states: {
           Starting: {
             entry: {
@@ -496,6 +499,53 @@ export const bootstrapMachine = setup({
               },
             },
             type: "final",
+          },
+        },
+      },
+      "Synchronising configuration": {
+        entry: {
+          type: "log",
+          params: {
+            message: "Synchronising configuration...",
+          },
+        },
+        invoke: {
+          id: "synchroniseConfiguration",
+          src: "synchroniseConfiguration",
+          input: ({ context: { pluginSettings, validPlugins } }) => {
+            assert(
+              pluginSettings,
+              "Plugin settings must be available to synchronise configuration",
+            );
+
+            return {
+              coreSettings: settings,
+              pluginSettings,
+              validPlugins,
+            };
+          },
+          onDone: {
+            target: "Success",
+            actions: {
+              type: "log",
+              params: {
+                message: "Configuration synchronisation complete.",
+              },
+            },
+          },
+          onError: {
+            target: "#Bootstrap.Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message:
+                    "Failed to synchronise configuration during bootstrap.",
+                  level: "error",
+                  error,
+                }),
+              },
+            ],
           },
         },
       },

@@ -40,7 +40,7 @@ export const clearPreviousInstanceState = fromPromise<
         "This may lead to data loss if there are pending items in the database.",
     );
 
-    await database.orm.schema.refresh();
+    await database.orm.schema.refresh({ dropDb: true });
 
     logger.info("Database cleared.");
   }
