@@ -29,6 +29,7 @@
     "@repo/util-wiki-helpers": "workspace:^",
     "class-validator": "catalog:",
     "es-toolkit": "catalog:",
+    "graphql-scalars": "catalog:",
     "type-graphql": "catalog:",
     "zod": "catalog:"
   },

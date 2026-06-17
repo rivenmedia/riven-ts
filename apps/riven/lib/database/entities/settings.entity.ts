@@ -1,5 +1,6 @@
 import { PrimaryKeyProp } from "@mikro-orm/core";
 import { Entity, Property } from "@mikro-orm/decorators/legacy";
+import { JSONResolver } from "graphql-scalars";
 import { Field, ObjectType } from "type-graphql";
 
 @Entity()
@@ -11,7 +12,7 @@ export class Setting {
   @Property({ primary: true })
   key!: string;
 
-  @Field(() => Object, { nullable: true })
+  @Field(() => JSONResolver, { nullable: true })
   @Property({ type: "jsonb" })
   value?: unknown;
 

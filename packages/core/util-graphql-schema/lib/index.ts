@@ -1,4 +1,4 @@
-import { BigIntResolver, JSONObjectResolver } from "graphql-scalars";
+import { BigIntResolver } from "graphql-scalars";
 import {
   type BuildSchemaOptions,
   type NonEmptyArray,
@@ -13,9 +13,6 @@ export const buildSchema = async (
 ) =>
   baseBuildSchema({
     ...options,
-    scalarsMap: [
-      { type: BigInt, scalar: BigIntResolver },
-      { type: Object, scalar: JSONObjectResolver },
-    ],
+    scalarsMap: [{ type: BigInt, scalar: BigIntResolver }],
     validate: true,
   });

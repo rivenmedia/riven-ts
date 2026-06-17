@@ -1,6 +1,7 @@
 import { EntityRepositoryType, type Opt } from "@mikro-orm/core";
 import { Entity, Index, Property } from "@mikro-orm/decorators/legacy";
 import { IsOptional, IsUrl } from "class-validator";
+import { JSONObjectResolver } from "graphql-scalars";
 import path from "node:path";
 import { Field, ObjectType } from "type-graphql";
 
@@ -57,7 +58,7 @@ export class MediaEntry extends FileSystemEntry {
   @Property({ type: "json" })
   libraryProfiles?: string[];
 
-  @Field(() => Object, { nullable: true })
+  @Field(() => JSONObjectResolver, { nullable: true })
   @Property({ type: "json" })
   mediaMetadata?: object;
 

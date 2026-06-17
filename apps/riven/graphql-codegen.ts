@@ -30,6 +30,7 @@ export default {
           ID: "`${string}-${string}-${string}-${string}-${string}`",
           BigInt: "number",
           DateTimeISO: "string",
+          JSON: "unknown",
           JSONObject: "Record<string, unknown>",
         },
         strictScalars: true,

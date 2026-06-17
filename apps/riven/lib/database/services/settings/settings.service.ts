@@ -1,4 +1,7 @@
-import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
+import {
+  CreateRequestContext,
+  Transactional,
+} from "@mikro-orm/decorators/legacy";
 
 import { Setting } from "../../entities/settings.entity.ts";
 import { BaseService } from "../core/base-service.ts";
@@ -37,10 +40,33 @@ export class SettingsService extends BaseService {
     return this.#buildSettingsObject(settings);
   }
 
+  /**
+   * Saves settings in bulk, creating new settings if they don't exist and updating existing ones.
+   */
   @CreateRequestContext()
   async saveBulkSettings(settings: Setting[]) {
     await this.em.upsertMany(Setting, settings, {
-      onConflictExcludeFields: ["value"],
+      onConflictMergeFields: ["value"],
     });
+  }
+
+  /**
+   * Bulk updates settings, ignoring any non-existent settings.
+   */
+  @CreateRequestContext()
+  @Transactional()
+  async updateBulkSettings(settings: Setting[]) {
+    for (const setting of settings) {
+      const existingSetting = await this.em.findOne(Setting, {
+        key: setting.key,
+        namespace: setting.namespace,
+      });
+
+      if (!existingSetting) {
+        continue;
+      }
+
+      existingSetting.value = setting.value;
+    }
   }
 }
