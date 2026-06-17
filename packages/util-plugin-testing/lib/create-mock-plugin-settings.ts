@@ -18,6 +18,7 @@ export const createMockPluginSettings = <T extends ZodObject>(
   const pluginSettings = new PluginSettings(
     env,
     [mockPluginKey],
+    new Map(),
     mockLogger,
     false,
   );

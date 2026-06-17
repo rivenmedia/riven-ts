@@ -9,9 +9,9 @@ import { AbortError, toMerged } from "es-toolkit";
 import assert from "node:assert";
 import os from "node:os";
 
+import { instanceSettings } from "../../utilities/instance-settings.ts";
 import { withLogContext } from "../../utilities/logger/log-context.ts";
 import { logger } from "../../utilities/logger/logger.ts";
-import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
 import { createQueue } from "./create-queue.ts";
 import { normaliseConcurrency } from "./normalise-concurrency.ts";
@@ -111,7 +111,7 @@ export function createFlowWorker<
           count: 5000,
         },
         connection: {
-          url: settings.redisUrl,
+          url: instanceSettings.instanceSettings.redisUrl,
         },
         telemetry,
       },

@@ -1,7 +1,7 @@
 import { expect, vi } from "vitest";
 
 import { it as baseIt } from "../../../../__tests__/test-context.ts";
-import * as settingsModule from "../../../../utilities/settings.ts";
+import { settings } from "../../../../utilities/settings.ts";
 import parseScrapeResultsProcessor from "./parse-scrape-results.processor.ts";
 
 const it = baseIt.extend("scrapeResults", {
@@ -696,8 +696,8 @@ it.skip('filters out torrents that are not dubbed if the media item is anime and
     },
   });
 
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
+  vi.spyOn(settings, "settings", "get").mockReturnValue({
+    ...settings.settings,
     dubbedAnimeOnly: true,
   });
 
@@ -741,8 +741,8 @@ it.skip('does not filter out torrents that are not dubbed if the media item is a
     },
   });
 
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
+  vi.spyOn(settings, "settings", "get").mockReturnValue({
+    ...settings.settings,
     dubbedAnimeOnly: false,
   });
 

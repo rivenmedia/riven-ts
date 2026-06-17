@@ -1,8 +1,8 @@
 import { fromPromise } from "xstate";
 
 import { database } from "../../../database/database.ts";
+import { instanceSettings } from "../../../utilities/instance-settings.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
-import { settings } from "../../../utilities/settings.ts";
 
 export interface ClearPreviousInstanceStateInput {
   wipeRedis: boolean;
@@ -16,7 +16,7 @@ export const clearPreviousInstanceState = fromPromise<
   if (wipeRedis) {
     const { RedisConnection } = await import("bullmq");
     const connection = new RedisConnection({
-      url: settings.redisUrl,
+      url: instanceSettings.instanceSettings.redisUrl,
     });
     const client = await connection.client;
 
@@ -40,7 +40,7 @@ export const clearPreviousInstanceState = fromPromise<
         "This may lead to data loss if there are pending items in the database.",
     );
 
-    await database.orm.schema.refresh({ dropDb: true });
+    await database.orm.schema.refresh();
 
     logger.info("Database cleared.");
   }

@@ -1,8 +1,8 @@
 import { Queue, type QueueOptions } from "bullmq";
 import { toMerged } from "es-toolkit";
 
+import { instanceSettings } from "../../utilities/instance-settings.ts";
 import { logger } from "../../utilities/logger/logger.ts";
-import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
 
 Queue.setMaxListeners(200);
@@ -27,7 +27,7 @@ export function createQueue(
         },
         connection: {
           enableOfflineQueue: false,
-          url: settings.redisUrl,
+          url: instanceSettings.instanceSettings.redisUrl,
         },
         telemetry,
       },

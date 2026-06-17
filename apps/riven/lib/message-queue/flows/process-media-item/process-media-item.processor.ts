@@ -202,8 +202,7 @@ export const processMediaItemProcessor =
           const hasUnrequestedItems = showUnrequestedItems.length > 0;
 
           if (show.state === "ongoing") {
-            const { reindexTime } =
-              await indexerService.calculateReindexTime(show);
+            const { reindexTime } = indexerService.calculateReindexTime(show);
 
             const nextAirDateMessage = show.nextAirDate
               ? `New episodes will ${hasUnrequestedItems ? "be indexed" : "attempt to be downloaded"} at ${chalk.bold(reindexTime.toLocaleString(DateTime.DATETIME_SHORT))}.`

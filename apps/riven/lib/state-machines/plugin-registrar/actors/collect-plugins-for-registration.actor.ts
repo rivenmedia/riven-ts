@@ -6,10 +6,12 @@ import { constantCase } from "es-toolkit";
 import { fromPromise } from "xstate";
 import z from "zod";
 
+import { services } from "../../../database/database.ts";
 import {
   type CorePluginName,
   CorePlugins,
 } from "../../../schemas/core-plugins.schema.ts";
+import { instanceSettings } from "../../../utilities/instance-settings.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
 
@@ -35,13 +37,17 @@ export const collectPluginsForRegistration = fromPromise(async () => {
     (pluginName) => PLUGIN_NAME_PATTERN.test(pluginName),
   );
 
+  const persistedPluginSettings =
+    await services.settingsService.getAllPluginSettings();
+
   // Initialise PluginSettings BEFORE importing plugins, to ensure `process.env` has been parsed.
   // Otherwise, plugins will be able to read the whole environment, including other plugins' settings.
   const pluginSettings = new PluginSettings(
     process.env,
-    pluginNames.map(constantCase),
+    pluginNames,
+    persistedPluginSettings,
     logger,
-    settings.printConfigurationOnStartup,
+    instanceSettings.instanceSettings.printConfigurationOnStartup,
   );
 
   const parsedPlugins: ParsedPlugins = {
@@ -70,7 +76,7 @@ export const collectPluginsForRegistration = fromPromise(async () => {
 
     if (
       !permanentlyEnabledPlugins.includes(validatedPluginName.data) &&
-      !settings.enabledPlugins.includes(validatedPluginName.data)
+      !settings.settings.enabledPlugins.includes(validatedPluginName.data)
     ) {
       logger.info(
         `Plugin ${chalk.bold(pluginName)} is not enabled, skipping registration.`,
