@@ -4,8 +4,8 @@ import assert from "node:assert";
 import { existsSync } from "node:fs";
 import { URL } from "node:url";
 
-import { instanceSettings } from "../../../utilities/instance-settings.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
+import { settings } from "../../../utilities/settings.ts";
 import { telemetry } from "../../../utilities/telemetry.ts";
 import { createQueue } from "../../utilities/create-queue.ts";
 
@@ -58,7 +58,7 @@ export function createSandboxedWorker(
           name: `${sandboxedJobName}-worker`,
         },
         connection: {
-          url: instanceSettings.instanceSettings.redisUrl,
+          url: settings.instanceSettings.redisUrl,
         },
         telemetry,
       },

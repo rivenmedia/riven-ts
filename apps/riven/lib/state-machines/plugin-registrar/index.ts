@@ -12,9 +12,9 @@ import {
 import { ZodError } from "zod";
 
 import packageJson from "../../../package.json" with { type: "json" };
-import { instanceSettings } from "../../utilities/instance-settings.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { redisCache } from "../../utilities/redis-cache.ts";
+import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import {
@@ -125,7 +125,7 @@ export const pluginRegistrarMachine = setup({
                   cache: redisCache,
                   logger,
                   connection: {
-                    url: instanceSettings.instanceSettings.redisUrl,
+                    url: settings.instanceSettings.redisUrl,
                   },
                   settings: pluginSettings.get(plugin.settingsSchema),
                   telemetry,

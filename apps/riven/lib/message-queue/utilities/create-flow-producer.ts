@@ -10,8 +10,8 @@ import {
   type TypedJobNode,
 } from "bullmq";
 
-import { instanceSettings } from "../../utilities/instance-settings.ts";
 import { logger } from "../../utilities/logger/logger.ts";
+import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
 import { createPluginFlowJob } from "./create-flow-plugin-job.ts";
 
@@ -76,7 +76,7 @@ export function createFlowProducer(
   const flowProducer = new ExtendedFlowProducer({
     ...options,
     connection: {
-      url: instanceSettings.instanceSettings.redisUrl,
+      url: settings.instanceSettings.redisUrl,
     },
     telemetry,
   });

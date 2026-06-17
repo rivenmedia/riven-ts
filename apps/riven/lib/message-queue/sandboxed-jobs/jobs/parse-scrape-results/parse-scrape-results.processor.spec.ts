@@ -696,8 +696,8 @@ it.skip('filters out torrents that are not dubbed if the media item is anime and
     },
   });
 
-  vi.spyOn(settings, "settings", "get").mockReturnValue({
-    ...settings.settings,
+  vi.spyOn(settings, "coreSettings", "get").mockReturnValue({
+    ...settings.coreSettings,
     dubbedAnimeOnly: true,
   });
 
@@ -741,8 +741,8 @@ it.skip('does not filter out torrents that are not dubbed if the media item is a
     },
   });
 
-  vi.spyOn(settings, "settings", "get").mockReturnValue({
-    ...settings.settings,
+  vi.spyOn(settings, "coreSettings", "get").mockReturnValue({
+    ...settings.coreSettings,
     dubbedAnimeOnly: false,
   });
 

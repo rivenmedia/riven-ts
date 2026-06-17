@@ -23,7 +23,7 @@ export function enqueueScrapeItem({
   isRootItem,
 }: EnqueueScrapeItemInput) {
   const attempts = isRootItem
-    ? settings.settings.maximumScrapeAttempts - item.failedScrapeAttempts
+    ? settings.coreSettings.maximumScrapeAttempts - item.failedScrapeAttempts
     : 1;
 
   if (attempts <= 0) {

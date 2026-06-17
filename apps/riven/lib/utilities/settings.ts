@@ -4,6 +4,7 @@ import {
   setEnvironmentData,
 } from "node:worker_threads";
 
+import { InstanceSettings } from "../instance-settings.schema.ts";
 import { RivenSettings } from "../riven-settings.schema.ts";
 import { deepFreeze } from "./deep-freeze.ts";
 
@@ -11,31 +12,31 @@ import type { ReadonlyDeep } from "type-fest";
 
 type ParsedSettings = ReadonlyDeep<RivenSettings>;
 
-/**
- * A class that manages the settings for Riven.
- *
- * Settings that reside here are persistable to the database.
- */
-class Settings {
-  #settings: ParsedSettings;
+type ParsedInstanceSettings = ReadonlyDeep<InstanceSettings>;
 
-  get settings(): ParsedSettings {
-    return this.#settings;
-  }
+class Settings {
+  #coreSettings: ParsedSettings;
+
+  readonly #instanceSettings: ParsedInstanceSettings;
 
   constructor(environment: NodeJS.ProcessEnv) {
-    this.#settings = isMainThread
-      ? this.#extractProcessEnvironment(environment)
-      : this.#extractWorkerEnvironment();
+    this.#coreSettings = this.#extractCoreSettings(environment);
+    this.#instanceSettings = this.#extractInstanceSettings(environment);
   }
 
-  #extractProcessEnvironment(environment: NodeJS.ProcessEnv) {
-    const settingPattern = /^RIVEN_SETTING__(?<setting>.+)$/;
+  get coreSettings(): ParsedSettings {
+    return this.#coreSettings;
+  }
 
+  get instanceSettings(): ParsedInstanceSettings {
+    return this.#instanceSettings;
+  }
+
+  #extractSettingsByPattern(pattern: RegExp, environment: NodeJS.ProcessEnv) {
     const rawSettings: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(environment)) {
-      const match = settingPattern.exec(key);
+      const match = pattern.exec(key);
 
       if (!match?.groups?.["setting"] || !value) {
         continue;
@@ -47,6 +48,22 @@ class Settings {
       delete environment[key];
     }
 
+    return rawSettings;
+  }
+
+  #extractCoreSettings(environment: NodeJS.ProcessEnv) {
+    if (!isMainThread) {
+      const rawEnvironmentData = getEnvironmentData("settings");
+
+      return deepFreeze(RivenSettings.parse(rawEnvironmentData));
+    }
+
+    const settingPattern = /^RIVEN_SETTING__(?<setting>.+)$/;
+    const rawSettings = this.#extractSettingsByPattern(
+      settingPattern,
+      environment,
+    );
+
     const parsedSettings = deepFreeze(RivenSettings.parse(rawSettings));
 
     setEnvironmentData("settings", parsedSettings);
@@ -54,39 +71,26 @@ class Settings {
     return parsedSettings;
   }
 
-  #extractWorkerEnvironment() {
-    const rawEnvironmentData = getEnvironmentData("settings");
-    const parsedEnvironmentData = RivenSettings.parse(rawEnvironmentData);
+  #extractInstanceSettings(environment: NodeJS.ProcessEnv) {
+    if (!isMainThread) {
+      const rawInstanceEnvironmentData = getEnvironmentData("instanceSettings");
 
-    return deepFreeze(parsedEnvironmentData);
-  }
-
-  /**
-   * Returns a single setting.
-   *
-   * @param key The setting key to return.
-   * @returns The value of the requested setting.
-   */
-  get<T extends keyof ParsedSettings>(key: T): ParsedSettings[T];
-
-  /**
-   * Picks a subset of settings based on the keys provided.
-   *
-   * @param keys A list of setting keys to return.
-   * @returns An object containing the requested settings.
-   */
-  get<T extends keyof ParsedSettings>(keys: T[]): Pick<ParsedSettings, T>;
-
-  get<T extends keyof ParsedSettings>(
-    keys: T[] | T,
-  ): Pick<ParsedSettings, T> | ParsedSettings[T] {
-    if (!Array.isArray(keys)) {
-      return this.#settings[keys];
+      return deepFreeze(InstanceSettings.parse(rawInstanceEnvironmentData));
     }
 
-    return Object.fromEntries(
-      keys.map((key) => [key, this.#settings[key]]),
-    ) as Pick<ParsedSettings, T>;
+    const instanceSettingPattern = /^RIVEN_INSTANCE_SETTING__(?<setting>.+)$/;
+    const rawInstanceSettings = this.#extractSettingsByPattern(
+      instanceSettingPattern,
+      environment,
+    );
+
+    const parsedSettings = deepFreeze(
+      InstanceSettings.parse(rawInstanceSettings),
+    );
+
+    setEnvironmentData("instanceSettings", parsedSettings);
+
+    return parsedSettings;
   }
 
   /**
@@ -94,19 +98,19 @@ class Settings {
    *
    * @returns The merged environment and database settings
    */
-  async sync(): Promise<ParsedSettings> {
+  async syncCoreSettings(): Promise<ParsedSettings> {
     const { services } = await import("../database/database.ts");
     const persistedSettings =
       await services.settingsService.getSettingsByNamespace("@repo/riven");
 
     const parsedSettings = deepFreeze(
       RivenSettings.parse({
-        ...this.#settings,
+        ...this.#coreSettings,
         ...persistedSettings,
       }),
     );
 
-    this.#settings = parsedSettings;
+    this.#coreSettings = parsedSettings;
 
     setEnvironmentData("settings", parsedSettings);
 

@@ -4,15 +4,15 @@ import { fromPromise } from "xstate";
 
 import { createDatabaseConfig } from "../../../database/config.ts";
 import { initORM } from "../../../database/database.ts";
-import { instanceSettings } from "../../../utilities/instance-settings.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
+import { settings } from "../../../utilities/settings.ts";
 
 function createDatabaseSslOptions() {
   const {
     databaseSslCert: cert,
     databaseSslKey: key,
     databaseSslRootCert: ca,
-  } = instanceSettings.instanceSettings;
+  } = settings.instanceSettings;
 
   if (!ca && !cert && !key) {
     return undefined;
@@ -27,8 +27,7 @@ function createDatabaseSslOptions() {
 
 export const initialiseDatabaseConnection = fromPromise(async () => {
   const sslOptions = createDatabaseSslOptions();
-  const { databaseUrl, databaseDebugLogging } =
-    instanceSettings.instanceSettings;
+  const { databaseUrl, databaseDebugLogging } = settings.instanceSettings;
 
   const databaseConfig = await createDatabaseConfig({
     clientUrl: databaseUrl,

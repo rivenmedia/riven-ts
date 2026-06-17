@@ -316,7 +316,7 @@ export const mainRunnerMachine = setup({
                   settings: {
                     backoffStrategy: (attemptsMade) => {
                       const [after2, after5, after10] =
-                        settings.settings.scrapeCooldownHours;
+                        settings.coreSettings.scrapeCooldownHours;
 
                       if (attemptsMade >= 10) {
                         return Duration.fromObject({ hours: after10 }).as(

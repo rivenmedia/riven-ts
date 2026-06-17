@@ -6,8 +6,8 @@ import { threadId } from "node:worker_threads";
 import { type ZodLiteral, type ZodObject, type ZodType, z } from "zod";
 
 import { initApolloClient } from "../../../graphql/apollo-client.ts";
-import { instanceSettings } from "../../../utilities/instance-settings.ts";
 import { withLogContext } from "../../../utilities/logger/log-context.ts";
+import { settings } from "../../../utilities/settings.ts";
 
 import type { SandboxedJobDefinition, SandboxedJobHandlers } from "../index.ts";
 
@@ -68,7 +68,7 @@ export function createSandboxedJobProcessor<
           try {
             const client = initApolloClient(
               new URL(
-                `http://localhost:${instanceSettings.instanceSettings.gqlPort.toString()}`,
+                `http://localhost:${settings.instanceSettings.gqlPort.toString()}`,
               ),
               signal,
             );

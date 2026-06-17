@@ -66,11 +66,10 @@ export async function riven() {
     const { createRivenMachine } =
       await import("./state-machines/program/index.ts");
     const { logger } = await import("./utilities/logger/logger.ts");
-    const { instanceSettings } =
-      await import("./utilities/instance-settings.ts");
+    const { settings } = await import("./utilities/settings.ts");
 
     const shutdownTimeoutMs = Duration.fromObject({
-      seconds: instanceSettings.instanceSettings.shutdownTimeoutSeconds,
+      seconds: settings.instanceSettings.shutdownTimeoutSeconds,
     }).as("milliseconds");
 
     if (mockScenario) {

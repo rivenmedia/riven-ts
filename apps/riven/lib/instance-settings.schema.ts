@@ -11,8 +11,7 @@ export const InstanceSettings = z
       .url()
       .describe("The database connection URL.")
       .meta({ "wiki.section": "database" }),
-    databaseDebugLogging: z
-      .stringbool()
+    databaseDebugLogging: json(z.union([z.stringbool(), z.boolean()]))
       .default(false)
       .describe("Enable debug logging for the database.")
       .meta({ "wiki.section": "database" }),
@@ -42,8 +41,7 @@ export const InstanceSettings = z
       .url()
       .describe("The Redis server URL.")
       .meta({ "wiki.section": "database" }),
-    vfsDebugLogging: z
-      .stringbool()
+    vfsDebugLogging: json(z.union([z.stringbool(), z.boolean()]))
       .default(false)
       .describe("Enable debug logging for the virtual file system.")
       .meta({ "wiki.section": "vfs" }),
@@ -51,22 +49,19 @@ export const InstanceSettings = z
       .string()
       .describe("The mount point for the virtual file system.")
       .meta({ "wiki.section": "vfs" }),
-    vfsForceMount: z
-      .stringbool()
+    vfsForceMount: json(z.union([z.stringbool(), z.boolean()]))
       .default(true)
       .describe(
         "If true, attempts to unmount the mount-point before remounting.",
       )
       .meta({ "wiki.section": "vfs" }),
-    unsafeWipeRedisOnStartup: z
-      .stringbool()
+    unsafeWipeRedisOnStartup: json(z.union([z.stringbool(), z.boolean()]))
       .default(false)
       .describe(
         "**UNSAFE**.\n \nIf true, all Redis data will be removed on application startup.",
       )
       .meta({ "wiki.section": "danger-zone" }),
-    unsafeWipeDatabaseOnStartup: z
-      .stringbool()
+    unsafeWipeDatabaseOnStartup: json(z.union([z.stringbool(), z.boolean()]))
       .default(false)
       .describe(
         "**UNSAFE**.\n \nIf true, the database will be wiped on application startup.",
@@ -76,8 +71,7 @@ export const InstanceSettings = z
       .default(["console", "file"])
       .describe("The enabled logging transports.")
       .meta({ "wiki.section": "logging" }),
-    loggingEnabled: z
-      .stringbool()
+    loggingEnabled: json(z.union([z.stringbool(), z.boolean()]))
       .default(true)
       .describe("Enable or disable logging for the application.")
       .meta({ "wiki.section": "logging" }),
@@ -89,8 +83,7 @@ export const InstanceSettings = z
     logLevel: LogLevel.default("info")
       .describe("The logging level for the application.")
       .meta({ "wiki.section": "logging" }),
-    logShowStackTraces: z
-      .stringbool()
+    logShowStackTraces: json(z.union([z.stringbool(), z.boolean()]))
       .default(true)
       .describe("Whether to show detailed stack traces when logging errors")
       .meta({ "wiki.section": "logging" }),
@@ -112,8 +105,7 @@ export const InstanceSettings = z
         "Path to the JSON file containing the torrent ranking configuration. Auto-generated with defaults on first startup.",
       )
       .meta({ "wiki.section": "ranking" }),
-    printConfigurationOnStartup: z
-      .stringbool()
+    printConfigurationOnStartup: json(z.union([z.stringbool(), z.boolean()]))
       .default(false)
       .describe(
         "Whether to print the effective configuration on application startup. Useful for debugging configuration issues.",

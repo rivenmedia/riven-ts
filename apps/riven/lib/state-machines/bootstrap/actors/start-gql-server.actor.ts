@@ -9,9 +9,9 @@ import { type ActorRefFromLogic, fromPromise } from "xstate";
 import { initApolloClient } from "../../../graphql/apollo-client.ts";
 import { buildContextFunction } from "../../../graphql/build-context-function.ts";
 import { resolvers } from "../../../graphql/resolvers/index.ts";
-import { instanceSettings } from "../../../utilities/instance-settings.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { redisCache } from "../../../utilities/redis-cache.ts";
+import { settings } from "../../../utilities/settings.ts";
 import { mainRunnerMachine } from "../../main-runner/index.js";
 
 import type { ApolloServerContext } from "../../../graphql/context.ts";
@@ -74,7 +74,7 @@ export const startGqlServer = fromPromise<
     mainRunnerRef.send(event);
   };
 
-  const { gqlHost, gqlPort } = instanceSettings.instanceSettings;
+  const { gqlHost, gqlPort } = settings.instanceSettings;
 
   const { url } = await startStandaloneServer(server, {
     listen: {

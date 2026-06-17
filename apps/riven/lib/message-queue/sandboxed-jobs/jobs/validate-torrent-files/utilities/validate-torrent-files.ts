@@ -131,7 +131,7 @@ export const validateTorrentFiles = async (
     );
 
     const { minimumAverageBitrateEpisodes, minimumAverageBitrateMovies } =
-      settings.settings;
+      settings.coreSettings;
 
     const validFiles: MatchedFile[] = [];
 

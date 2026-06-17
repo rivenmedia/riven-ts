@@ -20,7 +20,7 @@ export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
 
     if (isFallback) {
       logger.verbose(
-        `No known release date for ${item.type} "${chalk(item.fullTitle)}". Using fallback of ${settings.settings.unknownAirDateOffsetDays.toString()} days.`,
+        `No known release date for ${item.type} "${chalk(item.fullTitle)}". Using fallback of ${settings.coreSettings.unknownAirDateOffsetDays.toString()} days.`,
       );
     }
 

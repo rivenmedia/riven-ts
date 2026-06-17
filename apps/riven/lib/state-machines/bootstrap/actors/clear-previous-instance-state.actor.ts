@@ -1,8 +1,8 @@
 import { fromPromise } from "xstate";
 
 import { database } from "../../../database/database.ts";
-import { instanceSettings } from "../../../utilities/instance-settings.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
+import { settings } from "../../../utilities/settings.ts";
 
 export interface ClearPreviousInstanceStateInput {
   wipeRedis: boolean;
@@ -16,7 +16,7 @@ export const clearPreviousInstanceState = fromPromise<
   if (wipeRedis) {
     const { RedisConnection } = await import("bullmq");
     const connection = new RedisConnection({
-      url: instanceSettings.instanceSettings.redisUrl,
+      url: settings.instanceSettings.redisUrl,
     });
     const client = await connection.client;
 

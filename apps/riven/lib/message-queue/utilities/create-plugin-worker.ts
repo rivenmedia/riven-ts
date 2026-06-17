@@ -10,9 +10,9 @@ import { AbortError } from "es-toolkit";
 import assert from "node:assert";
 import z from "zod";
 
-import { instanceSettings } from "../../utilities/instance-settings.ts";
 import { withLogContext } from "../../utilities/logger/log-context.ts";
 import { logger } from "../../utilities/logger/logger.ts";
+import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
 import { createQueue } from "./create-queue.ts";
 
@@ -74,7 +74,7 @@ export function createPluginWorker<
     {
       ...workerOptions,
       connection: {
-        url: instanceSettings.instanceSettings.redisUrl,
+        url: settings.instanceSettings.redisUrl,
       },
       telemetry,
     },

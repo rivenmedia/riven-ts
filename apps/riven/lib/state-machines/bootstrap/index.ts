@@ -2,7 +2,7 @@ import chalk from "chalk";
 import assert from "node:assert";
 import { type AnyActorRef, assign, setup } from "xstate";
 
-import { instanceSettings } from "../../utilities/instance-settings.ts";
+import { settings } from "../../utilities/settings.ts";
 import {
   type PluginRegistrarMachineOutput,
   pluginRegistrarMachine,
@@ -216,7 +216,7 @@ export const bootstrapMachine = setup({
           src: "clearPreviousInstanceState",
           input: () => {
             const { unsafeWipeDatabaseOnStartup, unsafeWipeRedisOnStartup } =
-              instanceSettings.instanceSettings;
+              settings.instanceSettings;
 
             return {
               wipeDatabase: unsafeWipeDatabaseOnStartup,
@@ -474,7 +474,7 @@ export const bootstrapMachine = setup({
               id: "initialiseVfs",
               src: "initialiseVfs",
               input: {
-                mountPath: instanceSettings.instanceSettings.vfsMountPath,
+                mountPath: settings.instanceSettings.vfsMountPath,
               },
               onDone: {
                 target: "Complete",

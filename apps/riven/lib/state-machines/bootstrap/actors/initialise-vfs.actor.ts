@@ -3,7 +3,7 @@ import dedent from "dedent";
 import { stat } from "node:fs/promises";
 import { fromPromise } from "xstate";
 
-import { instanceSettings } from "../../../utilities/instance-settings.ts";
+import { settings } from "../../../utilities/settings.ts";
 import { fuseOperations } from "../../../vfs/index.ts";
 
 export interface InitialiseVfsOutput {
@@ -55,7 +55,7 @@ export const initialiseVfs = fromPromise<
     if (error instanceof Error && "code" in error) {
       switch (error.code) {
         case "ENOTCONN": {
-          if (!instanceSettings.instanceSettings.vfsForceMount) {
+          if (!settings.instanceSettings.vfsForceMount) {
             throw new Error(
               dedent`
                 The VFS mount path "${mountPath}" is not accessible. This typically occurs when the mount has become stale due to an unclean shutdown or crash.
@@ -83,7 +83,7 @@ export const initialiseVfs = fromPromise<
     }
   }
 
-  const { vfsDebugLogging, vfsForceMount } = instanceSettings.instanceSettings;
+  const { vfsDebugLogging, vfsForceMount } = settings.instanceSettings;
 
   const vfs = new Fuse(mountPath, fuseOperations, {
     debug: vfsDebugLogging,

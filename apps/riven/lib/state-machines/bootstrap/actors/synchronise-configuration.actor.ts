@@ -32,7 +32,7 @@ export const synchroniseConfiguration = fromPromise<
     });
   }
 
-  const coreSettings = await settings.sync();
+  const coreSettings = await settings.syncCoreSettings();
 
   const settingsMap = new Map<string, Setting[]>([
     ["@repo/riven", formatSettings("@repo/riven", coreSettings)],

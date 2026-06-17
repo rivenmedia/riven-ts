@@ -20,10 +20,9 @@ export class ShareLogsResolver {
       "Uploads the last 24 hours of ECS logs to Elasticsearch and returns the session ID for lookup.",
   })
   async shareLogs(): Promise<SessionID> {
-    const { instanceSettings } =
-      await import("../../utilities/instance-settings.ts");
+    const { settings } = await import("../../utilities/settings.ts");
 
-    if (!instanceSettings.instanceSettings.loggingEnabled) {
+    if (!settings.instanceSettings.loggingEnabled) {
       throw new Error("Logging is disabled; cannot share logs.");
     }
 

@@ -49,7 +49,7 @@ export class IndexerService extends BaseService {
     isFallback: boolean;
   } {
     const { scheduleOffsetMinutes, unknownAirDateOffsetDays } =
-      settings.settings;
+      settings.coreSettings;
 
     const baseDate =
       item instanceof Movie ? item.releaseDate : item.nextAirDate;

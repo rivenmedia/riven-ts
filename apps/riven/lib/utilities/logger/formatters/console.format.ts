@@ -4,7 +4,7 @@ import { SPLAT } from "triple-beam";
 import { format } from "winston";
 import z, { ZodError } from "zod";
 
-import { instanceSettings } from "../../instance-settings.ts";
+import { settings } from "../../settings.ts";
 import { ErrorSplat } from "../schemas/error-splat.schema.ts";
 
 import type { TransformableInfo } from "logform";
@@ -14,8 +14,7 @@ function getErrorOutput(error: Error | TransformableInfo["error"] | null) {
     return;
   }
 
-  const logShowStackTraces =
-    instanceSettings.instanceSettings.logShowStackTraces;
+  const logShowStackTraces = settings.instanceSettings.logShowStackTraces;
 
   if (error instanceof ZodError) {
     // If we have a validation error, prettify the output if stack traces are disabled

@@ -43,7 +43,8 @@ export class MediaItemService extends BaseService {
       if (
         item.itemRequest.getProperty("isPartialRequest") ||
         (item instanceof Show &&
-          (item.status === "continuing" || settings.settings.preferSeasonPacks))
+          (item.status === "continuing" ||
+            settings.coreSettings.preferSeasonPacks))
       ) {
         return await services.downloaderService.getFanOutDownloadItems(id);
       }

@@ -186,7 +186,7 @@ export const findValidTorrentProcessor =
                   );
 
                   await job.log(`${infoHash}: Cached files are valid`);
-                } else if (!settings.settings.attemptUnknownDownloads) {
+                } else if (!settings.coreSettings.attemptUnknownDownloads) {
                   await job.log(`${infoHash}: No cached files found`);
 
                   logger.verbose(

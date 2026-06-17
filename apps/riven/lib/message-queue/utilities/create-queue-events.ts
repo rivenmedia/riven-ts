@@ -1,7 +1,7 @@
 import { QueueEvents, type QueueOptions } from "bullmq";
 
-import { instanceSettings } from "../../utilities/instance-settings.ts";
 import { logger } from "../../utilities/logger/logger.ts";
+import { settings } from "../../utilities/settings.ts";
 
 QueueEvents.setMaxListeners(200);
 
@@ -12,7 +12,7 @@ export function createQueueEvents(
   const queueEvents = new QueueEvents(name, {
     ...options,
     connection: {
-      url: instanceSettings.instanceSettings.redisUrl,
+      url: settings.instanceSettings.redisUrl,
     },
   });
 

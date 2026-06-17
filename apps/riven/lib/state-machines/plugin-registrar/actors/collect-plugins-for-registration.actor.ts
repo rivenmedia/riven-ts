@@ -11,7 +11,6 @@ import {
   type CorePluginName,
   CorePlugins,
 } from "../../../schemas/core-plugins.schema.ts";
-import { instanceSettings } from "../../../utilities/instance-settings.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
 
@@ -47,7 +46,7 @@ export const collectPluginsForRegistration = fromPromise(async () => {
     pluginNames,
     persistedPluginSettings,
     logger,
-    instanceSettings.instanceSettings.printConfigurationOnStartup,
+    settings.instanceSettings.printConfigurationOnStartup,
   );
 
   const parsedPlugins: ParsedPlugins = {
@@ -76,7 +75,7 @@ export const collectPluginsForRegistration = fromPromise(async () => {
 
     if (
       !permanentlyEnabledPlugins.includes(validatedPluginName.data) &&
-      !settings.settings.enabledPlugins.includes(validatedPluginName.data)
+      !settings.coreSettings.enabledPlugins.includes(validatedPluginName.data)
     ) {
       logger.info(
         `Plugin ${chalk.bold(pluginName)} is not enabled, skipping registration.`,
