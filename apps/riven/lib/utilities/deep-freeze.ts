@@ -1,7 +1,7 @@
-import type { Jsonifiable, ReadonlyDeep } from "type-fest";
+import type { ReadonlyDeep } from "type-fest";
 
-export function deepFreeze<T extends Jsonifiable>(obj: T) {
-  Object.values(obj as Record<string, Jsonifiable>).forEach(
+export function deepFreeze<T>(obj: T) {
+  Object.values(obj as Record<string, unknown>).forEach(
     (value) => Object.isFrozen(value) || deepFreeze(value),
   );
 

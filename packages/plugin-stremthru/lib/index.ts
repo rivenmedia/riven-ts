@@ -73,7 +73,7 @@ export default {
     }) => {
       const { validStores, rateLimitedStores } =
         dataSources.get(StremThruTorzAPI);
-      const { storePriority } = settings.get(StremThruSettings);
+      const { storePriority } = StremThruSettings.parse(settings);
 
       const providers = new Set(storePriority)
         .intersection(validStores)
@@ -109,7 +109,7 @@ export default {
       }
 
       const api = dataSources.get(StremThruTorzAPI);
-      const pluginSettings = settings.get(StremThruSettings);
+      const pluginSettings = StremThruSettings.parse(settings);
 
       const { data: store } = parsedStore;
 

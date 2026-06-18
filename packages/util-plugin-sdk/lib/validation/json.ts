@@ -6,16 +6,20 @@ import z from "zod";
  * @param schema The Zod schema to validate the JSON object against.
  */
 export const json = <T extends z.core.$ZodType>(schema: T) =>
-  z.codec(z.string(), schema, {
+  z.codec(z.json(), schema, {
     decode: (jsonString, ctx) => {
       try {
+        if (typeof jsonString !== "string") {
+          return JSON.parse(JSON.stringify(jsonString)) as z.input<T>;
+        }
+
         return JSON.parse(jsonString) as z.input<T>;
       } catch (err: unknown) {
         if (err instanceof Error) {
           ctx.issues.push({
             code: "invalid_format",
             format: "json",
-            input: jsonString,
+            input: JSON.stringify(jsonString),
             message: "Invalid JSON: " + err.message,
           });
         }
@@ -23,5 +27,6 @@ export const json = <T extends z.core.$ZodType>(schema: T) =>
         return z.NEVER;
       }
     },
-    encode: (value) => JSON.stringify(value),
+    encode: (value) =>
+      typeof value === "string" ? value : JSON.stringify(value),
   });

@@ -11,8 +11,8 @@ import type {
   PublishableEventSet,
   ValidPluginMap,
 } from "../../../types/plugins.ts";
+import type { PluginSettings } from "../../../utilities/plugin-settings.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
-import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 export interface RegisterPluginHookWorkersOutput {
   pluginQueues: PluginQueueMap;
@@ -67,7 +67,7 @@ export const registerPluginHookWorkers = (
             return hook({
               event: event as never,
               dataSources,
-              settings,
+              settings: settings.get(config.settingsSchema),
               logger,
             });
           },

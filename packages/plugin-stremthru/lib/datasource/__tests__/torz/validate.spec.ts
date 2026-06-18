@@ -1,5 +1,3 @@
-import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
-
 import { HttpResponse, http } from "msw";
 import { describe, expect } from "vitest";
 
@@ -11,7 +9,7 @@ import { StremThruTorzAPI } from "../../stremthru-torz.datasource.ts";
 import type { StoreUserResponse } from "../../../schemas/store-user-response.schema.ts";
 
 describe("when no stores are configured", () => {
-  it.override("settings", createMockPluginSettings(StremThruSettings, {}));
+  it.override("settings", StremThruSettings.parse({}));
 
   it("returns false", async ({ dataSourceMap }) => {
     const api = dataSourceMap.get(StremThruTorzAPI);

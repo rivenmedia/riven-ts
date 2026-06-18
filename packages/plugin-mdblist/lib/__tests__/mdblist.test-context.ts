@@ -1,4 +1,3 @@
-import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
 import { it as pluginTestContext } from "@repo/util-plugin-testing/plugin-test-context";
 
 import plugin from "../index.ts";
@@ -6,9 +5,4 @@ import { MdbListSettings } from "../mdblist-settings.schema.ts";
 
 export const it: typeof pluginTestContext = pluginTestContext
   .override("plugin", plugin)
-  .override(
-    "settings",
-    createMockPluginSettings(MdbListSettings, {
-      apiKey: "mock-api-key",
-    }),
-  );
+  .override("settings", MdbListSettings.parse({ apiKey: "mock-api-key" }));

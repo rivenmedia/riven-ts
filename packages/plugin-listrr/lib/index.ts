@@ -15,7 +15,7 @@ export default {
   hooks: {
     "riven.content-service.requested": async ({ dataSources, settings }) => {
       const { movieLists, showLists, updateIntervalSeconds } =
-        settings.get(ListrrSettings);
+        ListrrSettings.parse(settings);
       const api = dataSources.get(ListrrAPI);
 
       return {

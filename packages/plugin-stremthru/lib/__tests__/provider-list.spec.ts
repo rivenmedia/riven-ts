@@ -1,5 +1,3 @@
-import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
-
 import { HttpResponse, http } from "msw";
 import { expect, vi } from "vitest";
 
@@ -11,7 +9,7 @@ import type { StoreUserResponse } from "../schemas/store-user-response.schema.ts
 
 it.override(
   "settings",
-  createMockPluginSettings(StremThruSettings, {
+  StremThruSettings.parse({
     realdebridApiKey: "test-realdebrid-api-key",
     alldebridApiKey: "test-alldebrid-api-key",
     debridlinkApiKey: "test-debridlink-api-key",

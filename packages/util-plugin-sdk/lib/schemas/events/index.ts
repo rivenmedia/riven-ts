@@ -5,6 +5,10 @@ import {
   ContentServiceRequestedEventHandler,
 } from "./content-service-requested.event.ts";
 import {
+  CoreRestartEvent,
+  CoreRestartEventHandler,
+} from "./core.restart.event.ts";
+import {
   CoreShutdownEvent,
   CoreShutdownEventHandler,
 } from "./core.shutdown.event.ts";
@@ -113,6 +117,7 @@ import {
 
 export const RivenEvent = z.discriminatedUnion("type", [
   CoreStartedEvent,
+  CoreRestartEvent,
   ItemRequestCreateSuccessEvent,
   ItemRequestCreateErrorEvent,
   ItemRequestCreateErrorConflictEvent,
@@ -160,6 +165,7 @@ export const RivenEventHandler = {
   // Program lifecycle
   "riven.core.started": CoreStartedEventHandler,
   "riven.core.shutdown": CoreShutdownEventHandler,
+  "riven.core.restart": CoreRestartEventHandler,
 
   // Content services
   "riven.content-service.requested": ContentServiceRequestedEventHandler,

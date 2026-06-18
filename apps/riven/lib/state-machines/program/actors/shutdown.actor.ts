@@ -76,6 +76,7 @@ export const shutdown = fromPromise<undefined, ShutdownInput>(
 
     const {
       context: {
+        pluginWorkers,
         flowWorkers: flowWorkerMap,
         sandboxedWorkers: sandboxedWorkerMap,
         plugins,
@@ -103,6 +104,16 @@ export const shutdown = fromPromise<undefined, ShutdownInput>(
         .values()
         .flatMap(({ dataSources }) =>
           dataSources.values().map(({ worker }) => forceCloseWorker(worker)),
+        ),
+    );
+
+    await Promise.all(
+      pluginWorkers
+        .values()
+        .flatMap((workerMap) =>
+          Array.from(workerMap.values()).map((worker) =>
+            attemptGracefulShutdown(worker),
+          ),
         ),
     );
 

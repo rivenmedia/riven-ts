@@ -1,15 +1,8 @@
 import { type ZodObject, z } from "zod";
 
-import type { Jsonifiable, ReadonlyDeep } from "type-fest";
+import { deepFreeze } from "./deep-freeze.ts";
+
 import type { Logger } from "winston";
-
-function deepFreeze<T>(obj: T) {
-  Object.values(obj as Record<string, Jsonifiable>).forEach(
-    (value) => Object.isFrozen(value) || deepFreeze(value),
-  );
-
-  return Object.freeze(obj) as ReadonlyDeep<T>;
-}
 
 /**
  * A class to manage and retrieve plugin settings based on provided Zod schemas.
@@ -24,6 +17,11 @@ export class PluginSettings {
    * A map to hold parsed settings for each schema.
    */
   #settingsMap = new Map<ZodObject, Record<string, unknown>>();
+
+  /**
+   * A map to hold the association between plugin config prefixes and their corresponding Zod schemas.
+   */
+  #pluginPrefixToSchemaMap = new Map<string, ZodObject>();
 
   /**
    * A flag to indicate if the settings are locked. The settings are locked once all plugins have been registered.
@@ -164,6 +162,7 @@ export class PluginSettings {
       ),
     );
 
+    this.#pluginPrefixToSchemaMap.set(configPrefix, schema);
     this.#settingsMap.set(schema, parsedSettings);
 
     for (const key of Object.keys(parsedSettings)) {
@@ -190,5 +189,21 @@ export class PluginSettings {
     }
 
     return this.#settingsMap.get(schema) as z.infer<T>;
+  }
+
+  restoreEnvironment() {
+    for (const [prefix, schema] of this.#pluginPrefixToSchemaMap) {
+      const settings = this.#settingsMap.get(schema);
+
+      if (settings) {
+        for (const [key, value] of Object.entries(settings)) {
+          process.env[`RIVEN_PLUGIN_SETTING__${prefix}__${key}`] =
+            typeof value === "string" ? value : JSON.stringify(value);
+        }
+      }
+    }
+
+    this.#environmentSettingGroups.clear();
+    this.#settingsMap.clear();
   }
 }
