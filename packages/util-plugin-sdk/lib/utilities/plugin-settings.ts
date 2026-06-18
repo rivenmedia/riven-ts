@@ -207,4 +207,17 @@ export class PluginSettings {
 
     return this.#settingsMap.get(schema) as z.infer<T>;
   }
+
+  /**
+   * Retrieves the evaluated plugin settings object.
+   *
+   * @param schema The Zod schema used to parse the settings.
+   * @returns The parsed settings for the provided schema.
+   */
+  async fetch<T extends ZodObject>(
+    fetchSettings: () => Promise<z.infer<T>>,
+    schema: T,
+  ): Promise<z.infer<T>> {
+    return schema.parse(await fetchSettings());
+  }
 }

@@ -20,11 +20,11 @@ export default {
     "riven.media-item.subtitle.requested": async ({
       dataSources,
       event: { item },
-      settings,
+      getSettings,
       logger,
     }) => {
       const api = dataSources.get(SubdlAPI);
-      const { languages } = settings.get(SubdlSettings);
+      const { languages } = await getSettings(SubdlSettings);
 
       const meta = await getItemMetadata(item);
 

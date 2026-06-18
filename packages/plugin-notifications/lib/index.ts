@@ -17,10 +17,10 @@ export default {
     "riven.media-item.download.success": async ({
       event,
       dataSources,
-      settings,
+      getSettings,
       logger,
     }) => {
-      const { urls } = settings.get(NotificationsSettings);
+      const { urls } = await getSettings(NotificationsSettings);
 
       const api = dataSources.get(NotificationsAPI);
       const payload = buildNotificationPayload(

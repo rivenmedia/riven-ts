@@ -12,8 +12,9 @@ export default {
   dataSources: [SeerrAPI],
   resolvers: [SeerrResolver],
   hooks: {
-    "riven.content-service.requested": async ({ dataSources, settings }) => {
-      const { filter, updateIntervalSeconds } = settings.get(SeerrSettings);
+    "riven.content-service.requested": async ({ dataSources, getSettings }) => {
+      const { filter, updateIntervalSeconds } =
+        await getSettings(SeerrSettings);
       const api = dataSources.get(SeerrAPI);
 
       const { movies, shows } = await api.getContent(filter);

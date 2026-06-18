@@ -65,14 +65,13 @@ export default {
         );
       }
     },
-    // eslint-disable-next-line @typescript-eslint/require-await
     "riven.media-item.download.provider-list-requested": async ({
       dataSources,
-      settings,
+      getSettings,
     }) => {
       const { validStores, rateLimitedStores } =
         dataSources.get(StremThruTorzAPI);
-      const { storePriority } = settings.get(StremThruSettings);
+      const { storePriority } = await getSettings(StremThruSettings);
 
       const providers = new Set(storePriority)
         .intersection(validStores)
@@ -95,7 +94,7 @@ export default {
     "riven.media-item.stream-link.requested": async ({
       dataSources,
       event,
-      settings,
+      getSettings,
     }) => {
       if (!event.item.downloadUrl) {
         throw new Error("No download URL available for this media item.");
@@ -108,7 +107,7 @@ export default {
       }
 
       const api = dataSources.get(StremThruTorzAPI);
-      const pluginSettings = settings.get(StremThruSettings);
+      const pluginSettings = await getSettings(StremThruSettings);
 
       const { data: store } = parsedStore;
 

@@ -1,6 +1,7 @@
 import { type Queue, Worker } from "bullmq";
 import chalk from "chalk";
 
+import { services } from "../../../database/database.ts";
 import { createPluginWorker } from "../../../message-queue/utilities/create-plugin-worker.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { eventSerialiserSchemaMap } from "../../../utilities/serialisers/event-serialiser-schemas.ts";
@@ -47,6 +48,10 @@ export const registerPluginHookWorkers = (
         const typedEventName = eventName as RivenEvent["type"];
         const pluginName = pluginSymbol.description ?? "unknown";
 
+        const getSettings = settings.fetch.bind(null, async () =>
+          services.settingsService.getPluginSettings(pluginName),
+        );
+
         const { queue, worker } = createPluginWorker(
           typedEventName,
           pluginName,
@@ -67,7 +72,7 @@ export const registerPluginHookWorkers = (
             return hook({
               event: event as never,
               dataSources,
-              settings,
+              getSettings: getSettings as never,
               logger,
             });
           },

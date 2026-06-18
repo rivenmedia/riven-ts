@@ -12,6 +12,17 @@ export class SettingsService extends BaseService {
   }
 
   @CreateRequestContext()
+  async getPluginSettings(namespace: string) {
+    const settings = await this.em.find(
+      Setting,
+      { namespace },
+      { cache: true },
+    );
+
+    return this.#buildSettingsObject(settings);
+  }
+
+  @CreateRequestContext()
   async getAllPluginSettings() {
     const settings = await this.em.find(Setting, {
       namespace: {
