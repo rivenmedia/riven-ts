@@ -46,9 +46,12 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
         }
 
         const { parsedData } = stream;
-        const dubbedAnimeOnly = settings.coreSettings.dubbedAnimeOnly;
 
-        if (item.isAnime && dubbedAnimeOnly && !parsedData.dubbed) {
+        if (
+          item.isAnime &&
+          settings.coreSettings.dubbedAnimeOnly &&
+          !parsedData.dubbed
+        ) {
           throw new SkippedTorrentError(
             "Skipping non-dubbed anime torrent",
             itemTitle,
