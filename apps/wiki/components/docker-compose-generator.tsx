@@ -373,7 +373,7 @@ function addMediaServer(
       volumes: ["plex-config:/config", `${mountPath}:/mount:rslave,z`],
     };
     compose.volumes["plex-config"] = null;
-  } else if (server === "jellyfin") {
+  } else {
     compose.services["jellyfin"] = {
       image: "jellyfin/jellyfin:latest",
       container_name: "jellyfin",

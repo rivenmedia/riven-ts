@@ -86,7 +86,7 @@ const pluginCount = Object.keys(packageJson.devDependencies).filter((dep) =>
 ).length;
 
 const stats = [
-  { value: `${pluginCount}+`, label: "Plugins" },
+  { value: `${String(pluginCount)}+`, label: "Plugins" },
   { value: "100%", label: "Open Source" },
   { value: "24/7", label: "Automated" },
 ];
