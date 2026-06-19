@@ -3,16 +3,16 @@ title: Introduction
 description: What is Riven and how does it work?
 ---
 
-Riven is a self-hosted media automation system. It discovers content you want, finds streams through debrid services, and serves them through a virtual file system (VFS) to your media server (Plex, Jellyfin, or Emby).
+Riven is a self-hosted media automation system. It discovers content you want, finds streams through debrid services, and serves them through a virtual file system (VFS) to your media server (Plex or Jellyfin).
 
 ## How It Works
 
 1. **Content Discovery** - Plugins like Seerr, MDBList, or Listrr tell Riven what media you want
 2. **Indexing** - TMDB/TVDB plugins fetch metadata for requested items
 3. **Scraping** - Torrentio, Comet, or StremThru plugins find available torrents
-4. **Downloading** - StremThru caches torrents on your debrid service (Real-Debrid, AllDebrid, etc.)
+4. **Downloading** - StremThru caches torrents on your debrid service ([Real-Debrid](https://real-debrid.com), [AllDebrid](https://alldebrid.com), [TorBox](https://torbox.app/subscription?referral=7db23db7-e438-49fd-8d6f-629642a23858), etc.)
 5. **VFS** - A FUSE virtual file system mounts the debrid content as local files
-6. **Library Update** - Your media server (Plex/Jellyfin/Emby) picks up the new files
+6. **Library Update** - Your media server (Plex or Jellyfin) picks up the new files
 
 All of this happens automatically. You request a movie or show, and it appears in your media server.
 
@@ -30,6 +30,11 @@ import { Card, Cards } from "fumadocs-ui/components/card";
 
 <Cards>
   <Card
+    title="Versions"
+    href="/docs/versions"
+    description="Understanding the different Riven versions"
+  />
+  <Card
     title="Getting Started"
     href="/docs/getting-started"
     description="Install and configure Riven"
@@ -41,7 +46,7 @@ import { Card, Cards } from "fumadocs-ui/components/card";
   />
   <Card
     title="Configuration"
-    href="/docs/configuration"
+    href="/docs/core/settings"
     description="All settings and environment variables"
   />
   <Card
@@ -53,10 +58,5 @@ import { Card, Cards } from "fumadocs-ui/components/card";
     title="Plugin SDK"
     href="/docs/plugin-sdk"
     description="Build your own plugins"
-  />
-  <Card
-    title="Versions"
-    href="/docs/versions"
-    description="Understanding the different Riven versions"
   />
 </Cards>

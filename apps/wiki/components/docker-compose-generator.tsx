@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { codeToHtml } from "shiki";
 import { stringify } from "yaml";
 
-type MediaServer = "none" | "plex" | "jellyfin" | "emby";
+type MediaServer = "none" | "plex" | "jellyfin";
 type RivenVersion = "ts" | "v1";
 
 interface TSConfig {
@@ -387,15 +387,6 @@ function addMediaServer(
     };
     compose.volumes["jellyfin-config"] = null;
     compose.volumes["jellyfin-cache"] = null;
-  } else {
-    compose.services["emby"] = {
-      image: "emby/embyserver:latest",
-      container_name: "emby",
-      restart: "unless-stopped",
-      ports: ["8096:8096"],
-      volumes: ["emby-config:/config", `${mountPath}:/mount:rslave,z`],
-    };
-    compose.volumes["emby-config"] = null;
   }
 }
 
@@ -795,7 +786,6 @@ function TSConfigForm({
           { value: "none", label: "None (I'll add it later)" },
           { value: "plex", label: "Plex" },
           { value: "jellyfin", label: "Jellyfin" },
-          { value: "emby", label: "Emby" },
         ]}
       />
 
@@ -992,7 +982,6 @@ function V1ConfigForm({
           { value: "none", label: "None (I'll add it later)" },
           { value: "plex", label: "Plex" },
           { value: "jellyfin", label: "Jellyfin" },
-          { value: "emby", label: "Emby" },
         ]}
       />
 

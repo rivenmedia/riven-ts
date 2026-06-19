@@ -18,7 +18,7 @@ const jsonLd: WithContext<FAQPage> = {
       name: "What is Riven?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Riven is a media automation system that uses a virtual file system and debrid services to find, organize, and stream your media. It integrates with Plex, Jellyfin, Emby, and many other services.",
+        text: "Riven is a media automation system that uses a virtual file system and debrid services to find, organize, and stream your media. It integrates with Plex, Jellyfin, and many other services.",
       },
     },
     {

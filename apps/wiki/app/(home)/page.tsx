@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+import packageJson from "../../package.json" with { type: "json" };
+
 const features: { icon: LucideIcon; title: string; description: string }[] = [
   {
     icon: Shield,
@@ -37,7 +39,7 @@ const features: { icon: LucideIcon; title: string; description: string }[] = [
     icon: Bell,
     title: "Notifications",
     description:
-      "Stay updated with Discord, Apprise, and webhook notifications for media events.",
+      "Stay updated with Discord, webhook, and custom notification URLs for media events.",
   },
   {
     icon: BarChart3,
@@ -56,8 +58,11 @@ const features: { icon: LucideIcon; title: string; description: string }[] = [
 const integrations = [
   { name: "Plex", url: "https://plex.tv" },
   { name: "Jellyfin", url: "https://jellyfin.org" },
-  { name: "Emby", url: "https://emby.media" },
   { name: "Real-Debrid", url: "https://real-debrid.com" },
+  {
+    name: "Torbox",
+    url: "https://torbox.app/subscription?referral=7db23db7-e438-49fd-8d6f-629642a23858",
+  },
   { name: "All-Debrid", url: "https://alldebrid.com" },
   { name: "Torrentio", url: "https://torrentio.strem.fun" },
   { name: "Comet", url: "https://github.com/g0ldyy/comet" },
@@ -68,7 +73,6 @@ const integrations = [
   { name: "TMDB", url: "https://www.themoviedb.org" },
   { name: "TVDB", url: "https://thetvdb.com" },
   { name: "Subdl", url: "https://subdl.com" },
-  { name: "Apprise", url: "https://github.com/caronc/apprise" },
 ];
 
 const statusIndicators = [
@@ -77,8 +81,12 @@ const statusIndicators = [
   { label: "Docker Ready", color: "bg-purple-500" },
 ];
 
+const pluginCount = Object.keys(packageJson.devDependencies).filter((dep) =>
+  dep.startsWith("@repo/plugin-"),
+).length;
+
 const stats = [
-  { value: "12+", label: "Plugins" },
+  { value: `${pluginCount}+`, label: "Plugins" },
   { value: "100%", label: "Open Source" },
   { value: "24/7", label: "Automated" },
 ];

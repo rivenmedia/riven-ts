@@ -2,6 +2,7 @@
   "pages": [
     "--- General ---",
     "index",
+    "versions",
     "getting-started",
     "...",
     "--- Configuration ---",

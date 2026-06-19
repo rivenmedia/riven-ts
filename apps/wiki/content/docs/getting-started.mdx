@@ -10,7 +10,7 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 
 - **Docker** and **Docker Compose** installed
 - A **debrid service** account (Real-Debrid, AllDebrid, etc.)
-- A **media server** (Plex, Jellyfin, or Emby)
+- A **media server** (Plex or Jellyfin)
 - A **TMDB API key** (free at [themoviedb.org](https://www.themoviedb.org/settings/api))
 - Linux host with **FUSE support** (required for VFS)
 
@@ -88,7 +88,7 @@ services:
     image: postgres:17-alpine
     environment:
       POSTGRES_USER: riven
-      POSTGRES_PASSWORD: riven
+      POSTGRES_PASSWORD: CHANGEME
       POSTGRES_DB: riven
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -140,6 +140,7 @@ RIVEN_PLUGIN_SETTING__REPO_PLUGIN_TMDB__apiKey="your-tmdb-api-key"
 
 # Debrid provider (via StremThru)
 RIVEN_PLUGIN_SETTING__REPO_PLUGIN_STREMTHRU__realdebridApiKey="your-rd-key"
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_STREMTHRU__torboxApiKey="your-tb-key"
 
 # Content source (pick at least one)
 RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__apiKey="your-mdblist-key"
@@ -174,7 +175,6 @@ Add `/mnt/riven` (or your chosen mount path) as a media library in your media se
 
 - **Plex**: Add Library > Movies/TV Shows > Browse for media folder > select `/mnt/riven`
 - **Jellyfin**: Dashboard > Libraries > Add Media Library > select `/mnt/riven`
-- **Emby**: Server > Library > Add Media Library > select `/mnt/riven`
 
 <Callout>
   If running the media server in Docker, mount the same path with `rslave`

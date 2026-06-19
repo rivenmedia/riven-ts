@@ -236,17 +236,17 @@ pnpm turbo test --filter=@repo/plugin-my-service
 
 Plugins can subscribe to system events through hooks:
 
-| Event                              | Description                    | Return Type         |
-| ---------------------------------- | ------------------------------ | ------------------- |
-| `riven.core.started`               | System has started             | `void`              |
-| `riven.core.shutdown`              | System is shutting down        | `void`              |
-| `riven.content-service.requested`  | Fetch requested media items    | `{ movies, shows }` |
-| `media-item.index.requested.movie` | Movie needs metadata indexing  | -                   |
-| `media-item.index.requested.show`  | Show needs metadata indexing   | -                   |
-| `media-item.scrape.requested`      | Item needs torrent scraping    | -                   |
-| `media-item.download.requested`    | Item needs downloading/caching | -                   |
-| `media-item.stream-link.requested` | Item needs stream URL          | -                   |
-| `media-item.subtitle.requested`    | Item needs subtitles           | -                   |
+| Event                                    | Description                    | Return Type         |
+| ---------------------------------------- | ------------------------------ | ------------------- |
+| `riven.core.started`                     | System has started             | `void`              |
+| `riven.core.shutdown`                    | System is shutting down        | `void`              |
+| `riven.content-service.requested`        | Fetch requested media items    | `{ movies, shows }` |
+| `riven.media-item.index.requested.movie` | Movie needs metadata indexing  | -                   |
+| `riven.media-item.index.requested.show`  | Show needs metadata indexing   | -                   |
+| `riven.media-item.scrape.requested`      | Item needs torrent scraping    | -                   |
+| `riven.media-item.download.requested`    | Item needs downloading/caching | -                   |
+| `riven.media-item.stream-link.requested` | Item needs stream URL          | -                   |
+| `riven.media-item.subtitle.requested`    | Item needs subtitles           | -                   |
 
 ## DataSource Features
 
@@ -277,7 +277,7 @@ packages/plugin-my-service/
 │       └── arguments/
 │           └── list-id.arguments.ts
 ├── docs/
-│   └── settings.md                 # Auto-generated settings doc
+│   └── settings.mdx                 # Auto-generated settings doc
 ├── package.json
 └── tsconfig.json
 ```
