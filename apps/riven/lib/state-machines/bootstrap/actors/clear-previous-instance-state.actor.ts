@@ -16,7 +16,7 @@ export const clearPreviousInstanceState = fromPromise<
   if (wipeRedis) {
     const { RedisConnection } = await import("bullmq");
     const connection = new RedisConnection({
-      url: settings.redisUrl,
+      url: settings.instanceSettings.redisUrl,
     });
     const client = await connection.client;
 

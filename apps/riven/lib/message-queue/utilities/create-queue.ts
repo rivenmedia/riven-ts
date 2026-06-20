@@ -27,7 +27,7 @@ export function createQueue(
         },
         connection: {
           enableOfflineQueue: false,
-          url: settings.redisUrl,
+          url: settings.instanceSettings.redisUrl,
         },
         telemetry,
       },

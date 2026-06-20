@@ -322,8 +322,9 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     }
 
     const { settings } = await import("../../utilities/settings.ts");
+    const maximumScrapeAttempts = settings.coreSettings.maximumScrapeAttempts;
 
-    if (item.failedScrapeAttempts >= settings.maximumScrapeAttempts) {
+    if (item.failedScrapeAttempts >= maximumScrapeAttempts) {
       return "failed";
     }
 

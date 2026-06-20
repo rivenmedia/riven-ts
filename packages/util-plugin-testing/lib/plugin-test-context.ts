@@ -151,7 +151,7 @@ export const it = baseIt
         dataSources: dataSourceMap,
       },
       logger: {} as never,
-      plugins: {},
+      plugins: new Map(),
       sendEvent: vi.fn(),
     }),
   );

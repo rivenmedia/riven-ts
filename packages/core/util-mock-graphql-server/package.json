@@ -26,6 +26,7 @@
     "@types/node": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
+    "type-graphql": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

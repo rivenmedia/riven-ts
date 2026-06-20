@@ -76,7 +76,7 @@ export function createFlowProducer(
   const flowProducer = new ExtendedFlowProducer({
     ...options,
     connection: {
-      url: settings.redisUrl,
+      url: settings.instanceSettings.redisUrl,
     },
     telemetry,
   });

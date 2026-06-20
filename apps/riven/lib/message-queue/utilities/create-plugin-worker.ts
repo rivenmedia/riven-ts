@@ -74,7 +74,7 @@ export function createPluginWorker<
     {
       ...workerOptions,
       connection: {
-        url: settings.redisUrl,
+        url: settings.instanceSettings.redisUrl,
       },
       telemetry,
     },

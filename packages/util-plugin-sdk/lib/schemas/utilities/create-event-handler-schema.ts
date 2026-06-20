@@ -1,12 +1,6 @@
-import z, {
-  type ZodLiteral,
-  type ZodObject,
-  type ZodType,
-  type ZodVoid,
-} from "zod";
+import z, { type ZodLiteral, ZodObject, type ZodType, type ZodVoid } from "zod";
 
 import { DataSourceMap } from "../../utilities/datasource-map.ts";
-import { PluginSettings } from "../../utilities/plugin-settings.ts";
 
 import type { RivenEvent, RivenExternalEvent } from "../events/index.ts";
 import type { Logger } from "winston";
@@ -27,7 +21,9 @@ export const createEventHandlerSchema = <
       z.object({
         event: inputSchema.omit({ type: true }),
         dataSources: z.instanceof(DataSourceMap),
-        settings: z.instanceof(PluginSettings),
+        getSettings: z.custom<
+          <T extends ZodObject>(schema: T) => Promise<z.infer<T>>
+        >((val) => typeof val === "function"),
         logger: z.custom<Logger>(
           (val) =>
             val && typeof val === "object" && "info" in val && "error" in val,

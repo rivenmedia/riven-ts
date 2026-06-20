@@ -22,7 +22,7 @@ export class ShareLogsResolver {
   async shareLogs(): Promise<SessionID> {
     const { settings } = await import("../../utilities/settings.ts");
 
-    if (!settings.loggingEnabled) {
+    if (!settings.instanceSettings.loggingEnabled) {
       throw new Error("Logging is disabled; cannot share logs.");
     }
 

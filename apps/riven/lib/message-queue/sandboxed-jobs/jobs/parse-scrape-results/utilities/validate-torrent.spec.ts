@@ -4,7 +4,7 @@ import { faker } from "@faker-js/faker";
 import { expect, vi } from "vitest";
 
 import { it as baseIt } from "../../../../../__tests__/test-context.ts";
-import * as settingsModule from "../../../../../utilities/settings.ts";
+import { settings } from "../../../../../utilities/settings.ts";
 import { SkippedTorrentError, validateTorrent } from "./validate-torrent.ts";
 
 const it = baseIt
@@ -527,8 +527,8 @@ it.skip('throws for torrents that are not dubbed if the media item is anime and 
 }) => {
   const rawTitle = `${indexedMovie.title} ${indexedMovie.year?.toString() ?? ""} 1080p`;
 
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
+  vi.spyOn(settings, "coreSettings", "get").mockReturnValue({
+    ...settings.coreSettings,
     dubbedAnimeOnly: true,
   });
 
@@ -558,8 +558,8 @@ it.skip('does not throw for torrents that are not dubbed if the media item is an
 }) => {
   const rawTitle = `${indexedMovie.title} ${indexedMovie.year?.toString() ?? ""} 1080p`;
 
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
+  vi.spyOn(settings, "coreSettings", "get").mockReturnValue({
+    ...settings.coreSettings,
     dubbedAnimeOnly: false,
   });
 
@@ -582,8 +582,8 @@ it('does not throw for torrents that are not dubbed if the media item is anime a
 }) => {
   const rawTitle = `${indexedMovie.title} ${indexedMovie.year?.toString() ?? ""} 1080p [Dubbed]`;
 
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
+  vi.spyOn(settings, "coreSettings", "get").mockReturnValue({
+    ...settings.coreSettings,
     dubbedAnimeOnly: true,
   });
 

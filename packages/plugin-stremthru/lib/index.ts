@@ -5,7 +5,6 @@ import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
 import packageJson from "../package.json" with { type: "json" };
 import { StremThruTorzAPI } from "./datasource/stremthru-torz.datasource.ts";
 import { StremThruTorznabAPI } from "./datasource/stremthru-torznab.datasource.ts";
-import { StremThruSettingsResolver } from "./schema/stremthru-settings.resolver.ts";
 import { StremThruResolver } from "./schema/stremthru.resolver.ts";
 import { Store } from "./schemas/store.schema.ts";
 import { pluginConfig } from "./stremthru-plugin.config.ts";
@@ -15,7 +14,7 @@ export default {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [StremThruTorzAPI, StremThruTorznabAPI],
-  resolvers: [StremThruResolver, StremThruSettingsResolver],
+  resolvers: [StremThruResolver],
   hooks: {
     "riven.media-item.download.requested": async ({
       dataSources,
@@ -66,14 +65,13 @@ export default {
         );
       }
     },
-    // eslint-disable-next-line @typescript-eslint/require-await
     "riven.media-item.download.provider-list-requested": async ({
       dataSources,
-      settings,
+      getSettings,
     }) => {
       const { validStores, rateLimitedStores } =
         dataSources.get(StremThruTorzAPI);
-      const { storePriority } = settings.get(StremThruSettings);
+      const { storePriority } = await getSettings(StremThruSettings);
 
       const providers = new Set(storePriority)
         .intersection(validStores)
@@ -96,7 +94,7 @@ export default {
     "riven.media-item.stream-link.requested": async ({
       dataSources,
       event,
-      settings,
+      getSettings,
     }) => {
       if (!event.item.downloadUrl) {
         throw new Error("No download URL available for this media item.");
@@ -109,7 +107,7 @@ export default {
       }
 
       const api = dataSources.get(StremThruTorzAPI);
-      const pluginSettings = settings.get(StremThruSettings);
+      const pluginSettings = await getSettings(StremThruSettings);
 
       const { data: store } = parsedStore;
 

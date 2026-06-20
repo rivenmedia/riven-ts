@@ -92,7 +92,11 @@ export abstract class BaseDataSource<
   abstract override readonly baseURL: string;
 
   readonly serviceName: string;
-  readonly settings: T;
+  readonly #settings: T;
+
+  get settings() {
+    return this.#settings;
+  }
 
   override readonly logger: Logger;
 
@@ -264,7 +268,7 @@ export abstract class BaseDataSource<
       });
     });
 
-    this.settings = settings;
+    this.#settings = settings;
   }
 
   #decodeRequestBody(job: Job<FetchJobInput, FetchResponse>) {

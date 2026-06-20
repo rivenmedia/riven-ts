@@ -111,7 +111,7 @@ export function createFlowWorker<
           count: 5000,
         },
         connection: {
-          url: settings.redisUrl,
+          url: settings.instanceSettings.redisUrl,
         },
         telemetry,
       },

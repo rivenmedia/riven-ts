@@ -7,6 +7,7 @@ import {
 } from "@mikro-orm/decorators/legacy";
 import { DateTime } from "luxon";
 
+import { settings } from "../../../utilities/settings.ts";
 import { BaseService } from "../core/base-service.ts";
 import {
   type MovieIndexData,
@@ -43,18 +44,21 @@ export class IndexerService extends BaseService {
     }
   }
 
-  async calculateReindexTime(
-    item: Movie | Show,
-  ): Promise<{ reindexTime: DateTime; isFallback: boolean }> {
-    const { settings } = await import("../../../utilities/settings.ts");
+  calculateReindexTime(item: Movie | Show): {
+    reindexTime: DateTime;
+    isFallback: boolean;
+  } {
+    const { scheduleOffsetMinutes, unknownAirDateOffsetDays } =
+      settings.coreSettings;
+
     const baseDate =
       item instanceof Movie ? item.releaseDate : item.nextAirDate;
 
     const reindexTime = baseDate
       ? DateTime.fromJSDate(baseDate).plus({
-          minutes: settings.scheduleOffsetMinutes,
+          minutes: scheduleOffsetMinutes,
         })
-      : DateTime.utc().plus({ days: settings.unknownAirDateOffsetDays });
+      : DateTime.utc().plus({ days: unknownAirDateOffsetDays });
 
     return {
       reindexTime,

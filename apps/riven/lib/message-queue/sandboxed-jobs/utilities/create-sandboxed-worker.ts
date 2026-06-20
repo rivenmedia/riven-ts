@@ -58,7 +58,7 @@ export function createSandboxedWorker(
           name: `${sandboxedJobName}-worker`,
         },
         connection: {
-          url: settings.redisUrl,
+          url: settings.instanceSettings.redisUrl,
         },
         telemetry,
       },

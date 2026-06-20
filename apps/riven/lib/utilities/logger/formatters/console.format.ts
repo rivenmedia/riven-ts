@@ -14,7 +14,7 @@ function getErrorOutput(error: Error | TransformableInfo["error"] | null) {
     return;
   }
 
-  const { logShowStackTraces } = settings;
+  const logShowStackTraces = settings.instanceSettings.logShowStackTraces;
 
   if (error instanceof ZodError) {
     // If we have a validation error, prettify the output if stack traces are disabled

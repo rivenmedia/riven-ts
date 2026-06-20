@@ -284,7 +284,7 @@ export const it = testBase
               },
               logger: {} as never,
               sendEvent: vi.fn(),
-              plugins: {},
+              plugins: new Map(),
             }),
           listen: { port: 0 },
         },

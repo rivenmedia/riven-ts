@@ -89,7 +89,6 @@ export const pluginRegistrarMachine = setup({
         const pluginMap = new Map<symbol, PendingPlugin>();
 
         for (const plugin of validPlugins) {
-          const dataSources = new DataSourceMap();
           const pluginName = plugin.name.description ?? "unknown";
 
           try {
@@ -117,6 +116,8 @@ export const pluginRegistrarMachine = setup({
             continue;
           }
 
+          const dataSources = new DataSourceMap();
+
           if (plugin.dataSources) {
             for (const DataSource of plugin.dataSources) {
               try {
@@ -125,11 +126,11 @@ export const pluginRegistrarMachine = setup({
                   cache: redisCache,
                   logger,
                   connection: {
-                    url: settings.redisUrl,
+                    url: settings.instanceSettings.redisUrl,
                   },
                   settings: pluginSettings.get(plugin.settingsSchema),
                   telemetry,
-                  userAgent: `Riven/${packageJson.version} (${pluginName})`,
+                  userAgent: `Riven@${packageJson.version} (${pluginName}@${plugin.version})`,
                 });
 
                 dataSources.set(DataSource, instance);

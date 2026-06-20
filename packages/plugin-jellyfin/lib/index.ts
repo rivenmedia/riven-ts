@@ -4,7 +4,6 @@ import packageJson from "../package.json" with { type: "json" };
 import { JellyfinAPI } from "./datasource/jellyfin.datasource.ts";
 import { pluginConfig } from "./jellyfin-plugin.config.ts";
 import { JellyfinSettings } from "./jellyfin-settings.schema.ts";
-import { JellyfinSettingsResolver } from "./schema/jellyfin-settings.resolver.ts";
 import { JellyfinResolver } from "./schema/jellyfin.resolver.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
@@ -13,7 +12,7 @@ export default {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [JellyfinAPI],
-  resolvers: [JellyfinResolver, JellyfinSettingsResolver],
+  resolvers: [JellyfinResolver],
   hooks: {
     "riven.media-item.download.success": async ({
       dataSources,

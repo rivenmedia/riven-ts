@@ -4,7 +4,7 @@ import { settings } from "../utilities/settings.ts";
 import { loadRankingConfig } from "./load-ranking-config.ts";
 
 export const rankingConfig = await loadRankingConfig(
-  settings.rankingConfigPath,
+  settings.instanceSettings.rankingConfigPath,
 );
 
 export const rtnInstance = new RTN(

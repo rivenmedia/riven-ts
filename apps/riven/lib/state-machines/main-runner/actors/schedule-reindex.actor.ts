@@ -16,11 +16,11 @@ export interface ScheduleReindexInput {
 export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
   async ({ input: { item } }) => {
     const { isFallback, reindexTime } =
-      await services.indexerService.calculateReindexTime(item);
+      services.indexerService.calculateReindexTime(item);
 
     if (isFallback) {
       logger.verbose(
-        `No known release date for ${item.type} "${chalk(item.fullTitle)}". Using fallback of ${settings.unknownAirDateOffsetDays.toString()} days.`,
+        `No known release date for ${item.type} "${chalk(item.fullTitle)}". Using fallback of ${settings.coreSettings.unknownAirDateOffsetDays.toString()} days.`,
       );
     }
 

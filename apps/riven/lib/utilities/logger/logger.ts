@@ -17,7 +17,10 @@ import {
   onlyVfsFormat,
 } from "./formatters/vfs-filter.format.ts";
 
-const logDir = path.resolve(process.cwd(), settings.logDirectory);
+const { logDirectory, logLevel, loggingEnabled, enabledLogTransports } =
+  settings.instanceSettings;
+
+const logDir = path.resolve(process.cwd(), logDirectory);
 const ecsLogDir = path.join(logDir, "ecs");
 const ecsFileName = "ecs.json";
 const vfsEcsFileName = "vfs.json";
@@ -25,7 +28,7 @@ const vfsEcsFileName = "vfs.json";
 export const ecsSymlinkPath = path.join(ecsLogDir, ecsFileName);
 
 export const logger = createLogger({
-  level: settings.logLevel,
+  level: logLevel,
   levels: {
     data: 0, // Log level used for low-level debug logging (e.g. database debugging) - we always want this to log even with the log level set to a lower value
     error: 0,
@@ -42,10 +45,10 @@ export const logger = createLogger({
     baseEcsFormat(),
   ),
   exitOnError: false,
-  silent: !settings.loggingEnabled,
+  silent: !loggingEnabled,
 });
 
-if (settings.loggingEnabled) {
+if (loggingEnabled) {
   // ECS logs will always be created for debugging purposes
   logger.add(
     new DailyRotateFile({
@@ -83,7 +86,7 @@ if (settings.loggingEnabled) {
     }),
   );
 
-  if (settings.enabledLogTransports.includes("console")) {
+  if (enabledLogTransports.includes("console")) {
     logger.add(
       new transports.Console({
         format: format.combine(
@@ -96,7 +99,7 @@ if (settings.loggingEnabled) {
     );
   }
 
-  if (settings.enabledLogTransports.includes("file")) {
+  if (enabledLogTransports.includes("file")) {
     logger.add(
       new transports.File({
         filename: "error.log",

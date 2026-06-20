@@ -9,10 +9,10 @@ import { settings } from "../../../utilities/settings.ts";
 
 function createDatabaseSslOptions() {
   const {
-    databaseSslRootCert: ca,
     databaseSslCert: cert,
     databaseSslKey: key,
-  } = settings;
+    databaseSslRootCert: ca,
+  } = settings.instanceSettings;
 
   if (!ca && !cert && !key) {
     return undefined;
@@ -27,10 +27,11 @@ function createDatabaseSslOptions() {
 
 export const initialiseDatabaseConnection = fromPromise(async () => {
   const sslOptions = createDatabaseSslOptions();
+  const { databaseUrl, databaseDebugLogging } = settings.instanceSettings;
 
   const databaseConfig = await createDatabaseConfig({
-    clientUrl: settings.databaseUrl,
-    debug: settings.databaseDebugLogging,
+    clientUrl: databaseUrl,
+    debug: databaseDebugLogging,
     logger,
     ...(sslOptions && {
       driverOptions: {

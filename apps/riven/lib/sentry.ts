@@ -13,7 +13,8 @@ if (spotlightEnabled) {
 
   const { data: spotlightClearOnStartup } = z
     .stringbool()
-    .safeParse(process.env["SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"] ?? "0");
+    .default(false)
+    .safeParse(process.env["SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"]);
 
   // Clear any existing Sentry events from the local server before starting the application.
   if (spotlightClearOnStartup) {

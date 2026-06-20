@@ -1,3 +1,4 @@
+import { constantCase } from "es-toolkit";
 import { type ZodObject, z } from "zod";
 
 import type { Jsonifiable, ReadonlyDeep } from "type-fest";
@@ -45,16 +46,31 @@ export class PluginSettings {
   #printConfig: boolean;
 
   /**
+   * Saves previously persisted settings to be merged with environment settings
+   */
+  #persistedSettings: Map<string, Map<string, unknown>>;
+
+  /**
    * Initialises the PluginSettings instance and builds a map of plugin-related environment variables
    */
   constructor(
     environment: NodeJS.ProcessEnv,
-    pluginConfigPrefixes: string[],
+    pluginNames: string[],
+    persistedSettings: Map<string, Map<string, unknown>>,
     logger: Logger,
     printConfig: boolean,
   ) {
     this.#logger = logger;
     this.#printConfig = printConfig;
+
+    this.#persistedSettings = new Map(
+      Array.from(persistedSettings.entries()).map(([namespace, settings]) => [
+        constantCase(namespace),
+        settings,
+      ]),
+    );
+
+    const pluginConfigPrefixes = pluginNames.map(constantCase);
 
     this.#environmentSettingGroups = new Map(
       pluginConfigPrefixes.map((prefix) => [prefix, new Map<string, string>()]),
@@ -150,24 +166,24 @@ export class PluginSettings {
       throw new Error("Settings are locked and cannot be modified.");
     }
 
-    const rawPluginSettings = this.#environmentSettingGroups.get(configPrefix);
-
-    if (!rawPluginSettings) {
-      throw new Error(
-        `No environment settings found for plugin with config prefix: ${configPrefix}`,
-      );
-    }
+    const rawEnvironmentSettings =
+      this.#environmentSettingGroups.get(configPrefix);
+    const rawPersistedSettings = this.#persistedSettings.get(configPrefix);
+    const mergedPluginSettings = new Map([
+      ...(rawPersistedSettings ?? []),
+      ...(rawEnvironmentSettings ?? []),
+    ]);
 
     const parsedSettings = schema.parse(
       Object.fromEntries(
-        [...rawPluginSettings].map(([key, value]) => [key, value]),
+        [...mergedPluginSettings].map(([key, value]) => [key, value]),
       ),
     );
 
     this.#settingsMap.set(schema, parsedSettings);
 
     for (const key of Object.keys(parsedSettings)) {
-      rawPluginSettings.delete(key);
+      rawEnvironmentSettings?.delete(key);
     }
 
     if (this.#printConfig) {
@@ -190,5 +206,18 @@ export class PluginSettings {
     }
 
     return this.#settingsMap.get(schema) as z.infer<T>;
+  }
+
+  /**
+   * Retrieves the evaluated plugin settings object.
+   *
+   * @param schema The Zod schema used to parse the settings.
+   * @returns The parsed settings for the provided schema.
+   */
+  async fetch<T extends ZodObject>(
+    fetchSettings: () => Promise<z.infer<T>>,
+    schema: T,
+  ): Promise<z.infer<T>> {
+    return schema.parse(await fetchSettings());
   }
 }

@@ -130,6 +130,9 @@ export const validateTorrentFiles = async (
       `${item.type.substring(0, 1).toUpperCase() + item.type.substring(1)} torrent must have at least ${item.expectedFileCount.toString()} ${item.__typename === "Movie" ? "movies" : "episodes"}, but has ${groupMap.size.toString()}`,
     );
 
+    const { minimumAverageBitrateEpisodes, minimumAverageBitrateMovies } =
+      settings.coreSettings;
+
     const validFiles: MatchedFile[] = [];
 
     if (item.__typename === "Movie") {
@@ -144,14 +147,14 @@ export const validateTorrentFiles = async (
 
           assert(parseData.type === "movie", "File must be a movie");
 
-          if (item.runtime && settings.minimumAverageBitrateMovies) {
+          if (item.runtime && minimumAverageBitrateMovies) {
             const bitrate = calculateAverageBitrate(file.size, item.runtime);
 
             // TODO: If this assertion fails, we can probably skip checking all other files.
             // Average bitrate is proportional to the file size, and the files are ordered by size.
             assert(
-              bitrate >= settings.minimumAverageBitrateMovies,
-              `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateMovies.toString()} for movies`,
+              bitrate >= minimumAverageBitrateMovies,
+              `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${minimumAverageBitrateMovies.toString()} for movies`,
             );
           }
 
@@ -242,12 +245,12 @@ export const validateTorrentFiles = async (
               `Incorrect episode for ${item.fullTitle}`,
             );
 
-            if (item.runtime && settings.minimumAverageBitrateEpisodes) {
+            if (item.runtime && minimumAverageBitrateEpisodes) {
               const bitrate = calculateAverageBitrate(file.size, item.runtime);
 
               assert(
-                bitrate >= settings.minimumAverageBitrateEpisodes,
-                `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateEpisodes.toString()} for episodes`,
+                bitrate >= minimumAverageBitrateEpisodes,
+                `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${minimumAverageBitrateEpisodes.toString()} for episodes`,
               );
             }
           }

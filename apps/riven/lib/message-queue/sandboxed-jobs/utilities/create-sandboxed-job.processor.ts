@@ -67,7 +67,9 @@ export function createSandboxedJobProcessor<
         async (scope) => {
           try {
             const client = initApolloClient(
-              new URL(`http://localhost:${settings.gqlPort.toString()}`),
+              new URL(
+                `http://localhost:${settings.instanceSettings.gqlPort.toString()}`,
+              ),
               signal,
             );
 

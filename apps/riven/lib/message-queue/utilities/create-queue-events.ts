@@ -12,7 +12,7 @@ export function createQueueEvents(
   const queueEvents = new QueueEvents(name, {
     ...options,
     connection: {
-      url: settings.redisUrl,
+      url: settings.instanceSettings.redisUrl,
     },
   });
 
