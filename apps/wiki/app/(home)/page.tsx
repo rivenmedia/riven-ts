@@ -110,21 +110,21 @@ export default async function HomePage() {
   return (
     <main className="flex flex-1 flex-col">
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-fd-border px-4 py-20 md:py-32">
+      <section className="border-fd-border relative overflow-hidden border-b px-4 py-20 md:py-32">
         {/* Gradient background */}
-        <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-fd-background via-fd-background to-fd-muted/30" />
-        <div className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-purple-500/5 blur-3xl animate-glow-pulse" />
+        <div className="from-fd-background via-fd-background to-fd-muted/30 pointer-events-none absolute inset-0 bg-linear-to-b" />
+        <div className="animate-glow-pulse pointer-events-none absolute top-0 left-1/2 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-purple-500/5 blur-3xl" />
 
         <div className="relative mx-auto max-w-6xl">
           <div className="flex flex-col items-center text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-muted/50 px-4 py-2 text-sm animate-fade-in">
+            <div className="border-fd-border bg-fd-muted/50 animate-fade-in mb-6 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm">
               <Zap className="h-4 w-4 text-purple-400" />
               <span className="text-fd-muted-foreground">
                 TypeScript rewrite &mdash; plugin-powered media automation
               </span>
             </div>
 
-            <h1 className="mb-6 text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl animate-fade-in stagger-1">
+            <h1 className="animate-fade-in stagger-1 mb-6 text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl">
               Automate Your
               <br />
               <span className="bg-linear-to-r from-purple-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent">
@@ -132,13 +132,13 @@ export default async function HomePage() {
               </span>
             </h1>
 
-            <p className="mb-8 max-w-2xl text-lg text-fd-muted-foreground md:text-xl animate-fade-in stagger-2">
+            <p className="text-fd-muted-foreground animate-fade-in stagger-2 mb-8 max-w-2xl text-lg md:text-xl">
               Riven is a self-hosted media automation system. It discovers
               content, finds streams via debrid services, and serves them
               through a virtual file system to your media server.
             </p>
 
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center animate-fade-in stagger-3">
+            <div className="animate-fade-in stagger-3 flex flex-col gap-4 sm:flex-row sm:items-center">
               <Link
                 href="/docs"
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-purple-600 px-6 py-3 font-semibold text-white transition-all hover:bg-purple-500 hover:shadow-lg hover:shadow-purple-500/25"
@@ -150,7 +150,7 @@ export default async function HomePage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 href="https://github.com/rivenmedia/riven-ts"
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-fd-border bg-fd-background px-6 py-3 font-semibold transition-colors hover:bg-fd-muted/50"
+                className="border-fd-border bg-fd-background hover:bg-fd-muted/50 inline-flex items-center justify-center gap-2 rounded-lg border px-6 py-3 font-semibold transition-colors"
               >
                 <Download className="h-4 w-4" />
                 View on GitHub
@@ -158,7 +158,7 @@ export default async function HomePage() {
               {stars && <StarCounter targetCount={stars} />}
             </div>
 
-            <div className="mt-8 flex items-center gap-6 text-sm text-fd-muted-foreground animate-fade-in stagger-4">
+            <div className="text-fd-muted-foreground animate-fade-in stagger-4 mt-8 flex items-center gap-6 text-sm">
               {statusIndicators.map((status) => (
                 <div key={status.label} className="flex items-center gap-2">
                   <div className={`h-2 w-2 rounded-full ${status.color}`} />
@@ -171,13 +171,13 @@ export default async function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="border-b border-fd-border px-4 py-20">
+      <section className="border-fd-border border-b px-4 py-20">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center">
             <h2 className="mb-4 text-3xl font-bold md:text-4xl">
               Built for Power Users
             </h2>
-            <p className="text-lg text-fd-muted-foreground">
+            <p className="text-fd-muted-foreground text-lg">
               A modern architecture designed for reliability and extensibility
             </p>
           </div>
@@ -186,13 +186,13 @@ export default async function HomePage() {
             {features.map((feature, i) => (
               <div
                 key={feature.title}
-                className={`group rounded-xl border border-fd-border bg-fd-card p-6 transition-all hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/5 animate-slide-up stagger-${String(i + 1)}`}
+                className={`group border-fd-border bg-fd-card animate-slide-up rounded-xl border p-6 transition-all hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/5 stagger-${String(i + 1)}`}
               >
                 <div className="mb-4 inline-flex rounded-lg bg-purple-500/10 p-3 text-purple-400 transition-colors group-hover:bg-purple-500/20">
                   <feature.icon className="h-6 w-6" />
                 </div>
                 <h3 className="mb-2 text-lg font-semibold">{feature.title}</h3>
-                <p className="text-sm text-fd-muted-foreground leading-relaxed">
+                <p className="text-fd-muted-foreground text-sm leading-relaxed">
                   {feature.description}
                 </p>
               </div>
@@ -202,13 +202,13 @@ export default async function HomePage() {
       </section>
 
       {/* Integrations */}
-      <section className="border-b border-fd-border px-4 py-20">
+      <section className="border-fd-border border-b px-4 py-20">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center">
             <h2 className="mb-4 text-3xl font-bold md:text-4xl">
               Seamless Integrations
             </h2>
-            <p className="text-lg text-fd-muted-foreground">
+            <p className="text-fd-muted-foreground text-lg">
               Connect with your favorite services through plugins
             </p>
           </div>
@@ -220,7 +220,7 @@ export default async function HomePage() {
                 href={integration.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center rounded-lg border border-fd-border bg-fd-card px-4 py-3 text-sm font-medium transition-all hover:border-purple-500/30 hover:bg-fd-muted/50"
+                className="border-fd-border bg-fd-card hover:bg-fd-muted/50 flex items-center justify-center rounded-lg border px-4 py-3 text-sm font-medium transition-all hover:border-purple-500/30"
               >
                 {integration.name}
               </a>
@@ -232,13 +232,13 @@ export default async function HomePage() {
       {/* Quick Start */}
       <section className="px-4 py-20">
         <div className="mx-auto max-w-6xl">
-          <div className="rounded-2xl border border-fd-border bg-linear-to-br from-purple-500/5 via-violet-500/5 to-indigo-500/5 p-6 md:p-12">
+          <div className="border-fd-border rounded-2xl border bg-linear-to-br from-purple-500/5 via-violet-500/5 to-indigo-500/5 p-6 md:p-12">
             <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
               <div className="min-w-0">
                 <h2 className="mb-4 text-3xl font-bold md:text-4xl">
                   Ready to get started?
                 </h2>
-                <p className="mb-6 text-lg text-fd-muted-foreground">
+                <p className="text-fd-muted-foreground mb-6 text-lg">
                   Deploy Riven in minutes with Docker. Use our interactive
                   generator or follow the documentation.
                 </p>
@@ -252,7 +252,7 @@ export default async function HomePage() {
                   </Link>
                   <Link
                     href="/generator"
-                    className="inline-flex w-full items-center gap-2 rounded-lg border border-fd-border bg-fd-background px-6 py-3 font-semibold transition-colors hover:bg-fd-muted/50 sm:w-auto"
+                    className="border-fd-border bg-fd-background hover:bg-fd-muted/50 inline-flex w-full items-center gap-2 rounded-lg border px-6 py-3 font-semibold transition-colors sm:w-auto"
                   >
                     <Settings className="h-4 w-4" />
                     Compose Generator
@@ -261,14 +261,14 @@ export default async function HomePage() {
               </div>
 
               <div className="min-w-0 space-y-4">
-                <div className="rounded-lg border border-fd-border bg-fd-background/50 p-6">
+                <div className="border-fd-border bg-fd-background/50 rounded-lg border p-6">
                   <h3 className="mb-4 font-semibold">Quick Start</h3>
-                  <pre className="max-w-full overflow-x-auto rounded-lg bg-fd-muted/50 p-4 text-sm">
+                  <pre className="bg-fd-muted/50 max-w-full overflow-x-auto rounded-lg p-4 text-sm">
                     <code className="text-fd-muted-foreground">
                       {`docker compose up -d`}
                     </code>
                   </pre>
-                  <p className="mt-3 text-xs text-fd-muted-foreground">
+                  <p className="text-fd-muted-foreground mt-3 text-xs">
                     Use the{" "}
                     <Link
                       href="/generator"
@@ -287,7 +287,7 @@ export default async function HomePage() {
                       Extensible by Design
                     </h4>
                   </div>
-                  <p className="text-sm text-fd-muted-foreground">
+                  <p className="text-fd-muted-foreground text-sm">
                     Build your own plugins with the Plugin SDK. Add custom
                     content sources, scrapers, or integrations.
                   </p>
@@ -299,13 +299,13 @@ export default async function HomePage() {
       </section>
 
       {/* Stats */}
-      <section className="border-t border-fd-border px-4 py-12">
+      <section className="border-fd-border border-t px-4 py-12">
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-8 text-center md:grid-cols-3">
             {stats.map((stat) => (
               <div key={stat.label}>
                 <div className="mb-2 text-3xl font-bold">{stat.value}</div>
-                <div className="text-sm text-fd-muted-foreground">
+                <div className="text-fd-muted-foreground text-sm">
                   {stat.label}
                 </div>
               </div>

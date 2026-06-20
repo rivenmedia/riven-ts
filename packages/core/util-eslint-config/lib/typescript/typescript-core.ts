@@ -9,14 +9,29 @@ import { allowConstantLoopConditions } from "../best-practices/allow-constant-lo
 import { banDateConstructor } from "../best-practices/ban-date-constructor.ts";
 import { noUnusedVariables } from "../best-practices/no-unused-variables.ts";
 import { preferMikroOrmCore } from "../best-practices/prefer-mikro-orm-core.ts";
-import { jsFiles, tsFiles } from "../internal/file-types.ts";
+import { jsFiles, svelteFiles, tsFiles } from "../internal/file-types.ts";
 
 export const typescriptCore = defineConfig(
   {
+    name: "riven:apply-eslint-recommended-config",
     files: [tsFiles, jsFiles],
     extends: [eslint.configs.recommended],
   },
   {
+    name: "riven:apply-ts-js-language-options",
+    files: [tsFiles, jsFiles],
+    ignores: [svelteFiles],
+    languageOptions: {
+      ecmaVersion: "latest",
+      globals: {
+        ...globals.node,
+        ...globals.es2024,
+      },
+      sourceType: "module",
+    },
+  },
+  {
+    name: "riven:typescript-core",
     files: [tsFiles],
     extends: [
       tseslint.configs.strictTypeChecked,
@@ -27,19 +42,6 @@ export const typescriptCore = defineConfig(
       allowConstantLoopConditions,
       importX.typescript,
     ],
-    languageOptions: {
-      sourceType: "module",
-      ecmaVersion: "latest",
-      globals: {
-        ...globals.node,
-        ...globals.es2024,
-      },
-      parser: tseslint.parser,
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
     settings: {
       "import-x/resolver-next": [
         createTypeScriptImportResolver({

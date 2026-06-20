@@ -10,3 +10,5 @@ export const testFiles = [
 export const entityFiles = "**/*.entity.ts";
 
 export const jsonFiles = "**/*.{json,jsonc,json5}";
+
+export const svelteFiles = "**/*.{svelte,svelte.ts,svelte.js}";

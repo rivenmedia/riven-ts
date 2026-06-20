@@ -20,6 +20,13 @@ docker-data
 knip-report.json
 .direnv
 
+# IDE-specific paths
+.idea
+
+# OS-specific paths
+.DS_Store
+Thumbs.db
+
 # Local-only Compose overrides (auto-loaded by docker compose)
 docker-compose.override.yaml
 docker-compose.override.yml

@@ -1,0 +1,20 @@
+import type { Config } from "prettier";
+
+export default {
+  semi: true,
+  singleQuote: false,
+  overrides: [
+    {
+      files: ["*.json", "*.jsonc", "*.json5"],
+      options: {
+        trailingComma: "none",
+      },
+    },
+  ],
+  plugins: ["@trivago/prettier-plugin-sort-imports"],
+  importOrder: ["^@repo/(.*)$", "<THIRD_PARTY_MODULES>", "^[./]", "<TS_TYPES>"],
+  importOrderParserPlugins: ["typescript", "jsx", "decorators-legacy"],
+  importOrderSeparation: true,
+  importOrderSortSpecifiers: true,
+  importOrderSideEffects: false,
+} satisfies Config;

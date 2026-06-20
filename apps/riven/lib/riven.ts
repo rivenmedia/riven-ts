@@ -82,7 +82,7 @@ export async function riven() {
     });
 
     async function shutdown() {
-      process.exitCode ??= 0;
+      process.exitCode ||= 0;
 
       try {
         const { value } = await waitFor(

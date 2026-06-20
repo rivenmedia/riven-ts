@@ -1,21 +1,26 @@
-import { entityFiles, testFiles } from "../internal/file-types.ts";
+import { defineConfig } from "eslint/config";
 
-import type { ConfigArray } from "typescript-eslint";
+import {
+  entityFiles,
+  jsFiles,
+  testFiles,
+  tsFiles,
+} from "../internal/file-types.ts";
 
-export const banDateConstructor = [
-  {
-    ignores: [
-      ...testFiles,
-      entityFiles, // Database entities use the Date constructor to provide runtime type reflect metadata
+export const banDateConstructor = defineConfig({
+  name: "riven:ban-date-constructor",
+  files: [jsFiles, tsFiles],
+  ignores: [
+    ...testFiles,
+    entityFiles, // Database entities use the Date constructor to provide runtime type reflect metadata
+  ],
+  rules: {
+    "no-restricted-globals": [
+      "error",
+      {
+        name: "Date",
+        message: "Prefer to use Luxon's DateTime instead.",
+      },
     ],
-    rules: {
-      "no-restricted-globals": [
-        "error",
-        {
-          name: "Date",
-          message: "Prefer to use Luxon's DateTime instead.",
-        },
-      ],
-    },
   },
-] satisfies ConfigArray;
+});

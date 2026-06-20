@@ -450,9 +450,9 @@ function InputField({
           onChange(e.target.value);
         }}
         placeholder={placeholder}
-        className={`w-full rounded-lg border border-fd-border bg-fd-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 ${mono ? "font-mono text-xs" : ""}`}
+        className={`border-fd-border bg-fd-background w-full rounded-lg border px-4 py-2 text-sm focus:ring-2 focus:ring-purple-500/50 focus:outline-none ${mono ? "font-mono text-xs" : ""}`}
       />
-      {hint && <p className="mt-1 text-xs text-fd-muted-foreground">{hint}</p>}
+      {hint && <p className="text-fd-muted-foreground mt-1 text-xs">{hint}</p>}
     </div>
   );
 }
@@ -471,7 +471,7 @@ function CheckboxField({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium inline-block">
+      <label className="mb-2 block inline-block text-sm font-medium">
         <input
           className="accent-purple-500"
           type="checkbox"
@@ -482,7 +482,7 @@ function CheckboxField({
         />
         <span className="ml-2">{label}</span>
       </label>
-      {hint && <p className="mt-1 text-xs text-fd-muted-foreground">{hint}</p>}
+      {hint && <p className="text-fd-muted-foreground mt-1 text-xs">{hint}</p>}
     </div>
   );
 }
@@ -506,7 +506,7 @@ function SelectField({
         onChange={(e) => {
           onChange(e.target.value);
         }}
-        className="w-full rounded-lg border border-fd-border bg-fd-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+        className="border-fd-border bg-fd-background w-full rounded-lg border px-4 py-2 text-sm focus:ring-2 focus:ring-purple-500/50 focus:outline-none"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -565,7 +565,7 @@ function CodePreview({
         <div className="flex gap-2">
           <button
             onClick={() => void handleCopy()}
-            className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-background px-3 py-1.5 text-xs font-medium transition-colors hover:bg-fd-muted/50"
+            className="border-fd-border bg-fd-background hover:bg-fd-muted/50 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
           >
             {copied ? (
               <>
@@ -586,7 +586,7 @@ function CodePreview({
         </div>
       </div>
       <div
-        className="max-h-[75vh] overflow-auto rounded-lg border border-fd-border text-xs [&_pre]:m-0! [&_pre]:bg-transparent! [&_pre]:py-3"
+        className="border-fd-border max-h-[75vh] overflow-auto rounded-lg border text-xs [&_pre]:m-0! [&_pre]:bg-transparent! [&_pre]:py-3"
         dangerouslySetInnerHTML={{
           __html: highlighted || "<pre><code>Loading...</code></pre>",
         }}
@@ -647,7 +647,7 @@ export default function DockerComposeGenerator() {
   return (
     <div className="space-y-6">
       {/* Version Tabs */}
-      <div className="flex gap-1 rounded-lg border border-fd-border bg-fd-muted/30 p-1">
+      <div className="border-fd-border bg-fd-muted/30 flex gap-1 rounded-lg border p-1">
         <button
           onClick={() => {
             setVersion("ts");
@@ -771,7 +771,7 @@ function TSConfigForm({
         onClick={() => {
           update("dbPassword", generateSecret(24));
         }}
-        className="rounded-md bg-fd-muted px-3 py-1.5 text-xs font-medium transition-colors hover:bg-fd-muted/80"
+        className="bg-fd-muted hover:bg-fd-muted/80 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
       >
         Generate DB Password
       </button>
@@ -847,7 +847,13 @@ function TSConfigForm({
       {config.contentSource !== "none" && (
         <>
           <InputField
-            label={`${config.contentSource === "mdblist" ? "MDBList" : config.contentSource === "seerr" ? "Seerr" : "Listrr"} API Key`}
+            label={`${
+              config.contentSource === "mdblist"
+                ? "MDBList"
+                : config.contentSource === "seerr"
+                  ? "Seerr"
+                  : "Listrr"
+            } API Key`}
             value={config.contentApiKey}
             onChange={(v) => {
               update("contentApiKey", v);
@@ -985,7 +991,7 @@ function V1ConfigForm({
         ]}
       />
 
-      <div className="rounded-lg border border-fd-border bg-fd-muted/30 p-4 space-y-3">
+      <div className="border-fd-border bg-fd-muted/30 space-y-3 rounded-lg border p-4">
         <div className="flex items-center justify-between">
           <label className="text-sm font-medium">Secrets</label>
           <button
@@ -1040,7 +1046,7 @@ function TSPreview({
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-1 border-b border-fd-border">
+      <div className="border-fd-border flex gap-1 border-b">
         {(
           [
             { id: "systemd", label: "1. riven-mount.service" },
@@ -1066,25 +1072,25 @@ function TSPreview({
 
       {tab === "systemd" && (
         <>
-          <div className="rounded-lg border border-fd-border bg-fd-muted/30 p-4 text-sm space-y-2">
+          <div className="border-fd-border bg-fd-muted/30 space-y-2 rounded-lg border p-4 text-sm">
             <p className="font-medium">Installation:</p>
-            <ol className="list-decimal list-inside space-y-1 text-fd-muted-foreground text-xs">
+            <ol className="text-fd-muted-foreground list-inside list-decimal space-y-1 text-xs">
               <li>
                 Create mount dir:{" "}
-                <code className="rounded bg-fd-muted px-1.5 py-0.5">
+                <code className="bg-fd-muted rounded px-1.5 py-0.5">
                   sudo mkdir -p{" "}
                   {/--bind (\S+)/.exec(output.systemd)?.[1] ?? "/mnt/riven"}
                 </code>
               </li>
               <li>
                 Save to{" "}
-                <code className="rounded bg-fd-muted px-1.5 py-0.5">
+                <code className="bg-fd-muted rounded px-1.5 py-0.5">
                   /etc/systemd/system/riven-mount.service
                 </code>
               </li>
               <li>
                 Run:{" "}
-                <code className="rounded bg-fd-muted px-1.5 py-0.5">
+                <code className="bg-fd-muted rounded px-1.5 py-0.5">
                   sudo systemctl daemon-reload && sudo systemctl enable --now
                   riven-mount.service
                 </code>
@@ -1128,14 +1134,14 @@ function V1Preview({
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-1 border-b border-fd-border">
+      <div className="border-fd-border flex gap-1 border-b">
         <button
           onClick={() => {
             setTab("systemd");
           }}
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             tab === "systemd"
-              ? "border-b-2 border-fd-primary text-fd-primary"
+              ? "border-fd-primary text-fd-primary border-b-2"
               : "text-fd-muted-foreground hover:text-fd-foreground"
           }`}
         >
@@ -1147,7 +1153,7 @@ function V1Preview({
           }}
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             tab === "compose"
-              ? "border-b-2 border-fd-primary text-fd-primary"
+              ? "border-fd-primary text-fd-primary border-b-2"
               : "text-fd-muted-foreground hover:text-fd-foreground"
           }`}
         >

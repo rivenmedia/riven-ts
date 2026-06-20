@@ -20,7 +20,6 @@ const defaultEntry = [
   filePatterns.scriptFiles,
   filePatterns.configFiles,
   filePatterns.setupFiles,
-  filePatterns.graphqlCodegenConfig,
 ] as const;
 
 const defaultProject = [
@@ -63,13 +62,22 @@ export default {
       ignoreDependencies: ["tailwindcss", /@repo\/(.*)/],
     },
     "apps/riven": {
-      entry: [...defaultEntry, "!**/Migration*.ts!"],
+      entry: [
+        ...defaultEntry,
+        filePatterns.graphqlCodegenConfig,
+        "!**/Migration*.ts!",
+      ],
       project: [
         ...defaultProject,
         "!**/Migration*.ts",
         "!**/{factories,seeders}!",
       ],
       ignoreDependencies: [/@repo\/plugin(.*)/],
+    },
+    "apps/frontend": {
+      svelte: { config: "svelte.config.ts" },
+      sveltekit: { config: "svelte.config.ts" },
+      typescript: { config: ["tsconfig.json", "./.svelte-kit/tsconfig.json"] },
     },
     "{packages,packages/core}/*": {
       entry: [...defaultEntry],

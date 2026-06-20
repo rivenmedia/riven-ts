@@ -1,0 +1,23 @@
+{
+  "extends": "./.svelte-kit/tsconfig.json",
+  "compilerOptions": {
+    "sourceMap": true,
+    "moduleResolution": "bundler"
+  },
+  "files": [
+    "eslint.config.ts",
+    "vite.config.ts",
+    "svelte.config.ts",
+    "prettier.config.ts",
+    "better-auth.config.ts",
+    "drizzle.config.ts",
+    "scripts/drizzle_pull.ts",
+    "src/service-worker.ts",
+    "server.ts"
+  ]
+  // Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
+  // except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
+  //
+  // If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes
+  // from the referenced tsconfig.json - TypeScript does not merge them in
+}

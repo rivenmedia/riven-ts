@@ -27,7 +27,7 @@ export default function GeneratorPage() {
           <h1 className="text-3xl font-bold md:text-4xl">
             Docker Compose Generator
           </h1>
-          <p className="mt-2 text-fd-muted-foreground">
+          <p className="text-fd-muted-foreground mt-2">
             Generate a complete Docker Compose configuration for your Riven
             setup.
           </p>

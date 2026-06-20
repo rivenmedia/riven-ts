@@ -1,27 +1,21 @@
-import { includeIgnoreFile } from "@eslint/config-helpers";
 import turboConfig from "eslint-config-turbo/flat";
+import { defineConfig, includeIgnoreFile } from "eslint/config";
 import { fileURLToPath } from "node:url";
 
 import { prettier } from "./formatting/prettier.ts";
 import { jsonConfig } from "./json/json.ts";
 import { vitestConfig } from "./testing/vitest.ts";
-import { typescriptCore } from "./typescript/typescript-core.ts";
-
-import type { ConfigArray } from "typescript-eslint";
-
-export type { ConfigArray } from "typescript-eslint";
 
 const gitignorePath = fileURLToPath(
   new URL("../../../../.gitignore", import.meta.url),
 );
 
-export const baseEslintConfig: ConfigArray = [
+export const baseEslintConfig = defineConfig(
   includeIgnoreFile(gitignorePath),
-  ...typescriptCore,
-  ...turboConfig,
-  ...prettier,
-  ...jsonConfig,
-  ...vitestConfig,
+  turboConfig,
+  prettier,
+  vitestConfig,
+  jsonConfig,
   {
     ignores: [
       "**/__generated__/**",
@@ -30,4 +24,4 @@ export const baseEslintConfig: ConfigArray = [
       "**/logs/**",
     ],
   },
-];
+);

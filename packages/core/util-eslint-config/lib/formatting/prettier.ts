@@ -1,5 +1,7 @@
 import prettierConfig from "eslint-config-prettier/flat";
+import { defineConfig } from "eslint/config";
 
-import type { ConfigArray } from "typescript-eslint";
-
-export const prettier = [prettierConfig] as const satisfies ConfigArray;
+export const prettier = defineConfig({
+  name: "riven:prettier",
+  extends: [prettierConfig],
+});

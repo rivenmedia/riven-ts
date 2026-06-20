@@ -42,7 +42,7 @@ export function StarCounter({ targetCount }: { targetCount: number }) {
   return (
     <div
       ref={ref}
-      className="inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-muted/50 px-4 py-2 text-sm font-medium"
+      className="border-fd-border bg-fd-muted/50 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium"
     >
       <svg
         className="h-4 w-4 text-yellow-500"

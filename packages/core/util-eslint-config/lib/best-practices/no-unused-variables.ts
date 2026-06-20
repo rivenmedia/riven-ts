@@ -1,15 +1,17 @@
-import type { ConfigArray } from "typescript-eslint";
+import { defineConfig } from "eslint/config";
 
-export const noUnusedVariables = [
-  {
-    rules: {
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          argsIgnorePattern: "^_",
-          ignoreRestSiblings: true,
-        },
-      ],
-    },
+import { tsFiles } from "../internal/file-types.ts";
+
+export const noUnusedVariables = defineConfig({
+  name: "riven:no-unused-variables",
+  files: [tsFiles],
+  rules: {
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        argsIgnorePattern: "^_",
+        ignoreRestSiblings: true,
+      },
+    ],
   },
-] satisfies ConfigArray;
+});

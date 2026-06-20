@@ -1,18 +1,10 @@
-import {
-  type ConfigArray,
-  baseEslintConfig,
-} from "@repo/core-util-eslint-config";
+import { baseEslintConfig } from "@repo/core-util-eslint-config";
+import { createTypescriptEslintConfig } from "@repo/core-util-eslint-config/typescript";
 
-export default [
-  ...baseEslintConfig,
-  {
-    ignores: [".source/", "scripts/"],
-  },
-  {
-    languageOptions: {
-      parserOptions: {
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-  },
-] satisfies ConfigArray;
+import { defineConfig } from "eslint/config";
+
+export default defineConfig(
+  createTypescriptEslintConfig(import.meta.dirname),
+  baseEslintConfig,
+  { ignores: [".source/", "scripts/"] },
+);

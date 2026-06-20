@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./lib/base.ts"
+    ".": "./lib/base.ts",
+    "./svelte": "./lib/svelte.ts",
+    "./typescript": "./lib/typescript.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
@@ -12,7 +14,6 @@
     "lint:fix": "pnpm lint --fix"
   },
   "dependencies": {
-    "@eslint/config-helpers": "catalog:",
     "@eslint/js": "catalog:",
     "@eslint/json": "catalog:",
     "@repo/core-util-typescript-config": "workspace:^",
@@ -22,10 +23,12 @@
     "eslint-config-turbo": "catalog:",
     "eslint-import-resolver-typescript": "catalog:",
     "eslint-plugin-import-x": "catalog:",
+    "eslint-plugin-svelte": "catalog:",
     "globals": "catalog:",
     "typescript-eslint": "catalog:"
   },
   "devDependencies": {
+    "@sveltejs/kit": "catalog:",
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:"

@@ -1,0 +1,12 @@
+# Output
+/.svelte-kit
+/build
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# SQLite
+*.db
+
+config/server.json
