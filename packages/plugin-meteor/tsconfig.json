@@ -1,0 +1,16 @@
+{
+  "$schema": "https://www.schemastore.org/tsconfig",
+  "extends": "@repo/core-util-typescript-config/base.json",
+  "references": [
+    { "path": "./tsconfig.lib.json" },
+    { "path": "./tsconfig.spec.json" }
+  ],
+  "files": [
+    "scripts/generate-zod-docs.ts",
+    "eslint.config.ts",
+    "vitest.config.ts",
+    "wiki.config.ts"
+  ],
+  "include": [],
+  "exclude": []
+}

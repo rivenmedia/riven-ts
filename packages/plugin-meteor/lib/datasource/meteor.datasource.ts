@@ -1,36 +1,29 @@
 import {
   BaseDataSource,
   type ParamsFor,
-  type RateLimiterOptions,
   getMinimalStremioScrapeConfig,
 } from "@repo/util-plugin-sdk";
 
-import { CometSettings } from "../comet-settings.schema.ts";
-import { CometScrapeResponse } from "../schemas/scrape-response.schema.ts";
+import { MeteorSettings } from "../meteor-settings.schema.ts";
+import { MeteorScrapeResponse } from "../schemas/scrape-response.schema.ts";
 
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
-class CometAPIError extends Error {}
+class MeteorAPIError extends Error {}
 
-export class CometAPI extends BaseDataSource<CometSettings> {
+export class MeteorAPI extends BaseDataSource<MeteorSettings> {
   override baseURL = this.settings.url;
-  override serviceName = "Comet";
+  override serviceName = "Meteor";
 
   override async validate() {
     try {
-      // Implement your own validation logic here
-      await this.get("validate");
+      await this.get("manifest.json");
 
       return true;
     } catch {
       return false;
     }
   }
-
-  protected override rateLimiterOptions: RateLimiterOptions = {
-    max: 150,
-    duration: 60 * 1000,
-  };
 
   async scrape({
     item,
@@ -39,7 +32,7 @@ export class CometAPI extends BaseDataSource<CometSettings> {
   > {
     try {
       if (!item.imdbId) {
-        throw new CometAPIError("IMDB ID is required for Comet scraping");
+        throw new MeteorAPIError("IMDB ID is required for Meteor scraping");
       }
 
       const { identifier, imdbId, scrapeType } =
@@ -49,32 +42,19 @@ export class CometAPI extends BaseDataSource<CometSettings> {
         `/stream/${scrapeType}/${imdbId}${identifier ?? ""}.json`,
       );
 
-      const parsed = CometScrapeResponse.parse(response);
-
-      if (!parsed.streams.length) {
-        this.logger.info(
-          `No streams found for item ${item.fullTitle} (IMDB: ${item.imdbId})`,
-        );
-
-        return {};
-      }
+      const parsed = MeteorScrapeResponse.parse(response);
 
       const torrents: Record<string, string> = {};
 
       for (const stream of parsed.streams) {
-        if ("url" in stream) {
-          // Skip the "[🔄] Comet" stream which is not an actual torrent result
-          continue;
-        }
-
         if (!stream.infoHash) {
           continue;
         }
 
-        const title =
-          stream.behaviorHints.filename ??
-          // Comet prefixes description lines with emoji (e.g., "<emoji> Title"), strip it
-          stream.description.split("\n")[0]?.substring(1).trim();
+        const title = this.#extractTitle(
+          stream.description,
+          stream.behaviorHints.filename,
+        );
 
         if (!title) {
           continue;
@@ -104,5 +84,31 @@ export class CometAPI extends BaseDataSource<CometSettings> {
 
       return {};
     }
+  }
+
+  /**
+   * Extracts the torrent title from the description field.
+   * Both stable and testing versions prefix the first line with an emoji (📁 or 📄).
+   * Falls back to `behaviorHints.filename` if the description title is truncated.
+   */
+  #extractTitle(description: string, filename?: string): string | undefined {
+    const firstLine = description.split("\n")[0];
+    if (!firstLine) {
+      return filename;
+    }
+
+    // Strip the leading emoji + space (e.g. "📁 " or "📄 ")
+    const title = firstLine.replace(/^\p{Emoji_Presentation}\s*/u, "").trim();
+
+    if (!title) {
+      return filename;
+    }
+
+    // Stable version truncates with "...", fall back to filename
+    if (title.endsWith("...") && filename) {
+      return filename;
+    }
+
+    return title;
   }
 }

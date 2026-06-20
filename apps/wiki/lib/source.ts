@@ -1,3 +1,4 @@
+import { workspaceImports } from "@/lib/workspace-imports";
 import { docs } from "collections/server";
 import { type PageData, loader } from "fumadocs-core/source";
 import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
@@ -8,23 +9,6 @@ type WorkspaceEntry = DocsCollectionEntry<
   string,
   PageData & { full?: boolean }
 >;
-
-const workspaceImports = [
-  "@repo/riven",
-  "@repo/plugin-comet",
-  "@repo/plugin-jellyfin",
-  "@repo/plugin-listrr",
-  "@repo/plugin-mdblist",
-  "@repo/plugin-notifications",
-  "@repo/plugin-plex",
-  "@repo/plugin-seerr",
-  "@repo/plugin-stremthru",
-  "@repo/plugin-subdl",
-  "@repo/plugin-tmdb",
-  "@repo/plugin-torrentio",
-  "@repo/plugin-tvdb",
-  "@repo/util-rank-torrent-name",
-] as const;
 
 const workspaces = await Promise.all(
   workspaceImports.map(async (workspace) => {
@@ -40,7 +24,7 @@ export const source = loader(
   {
     root: docs.toFumadocsSource(),
     ...(Object.fromEntries(workspaces) as Record<
-      (typeof workspaceImports)[number],
+      string,
       ReturnType<WorkspaceEntry["toFumadocsSource"]>
     >),
   },

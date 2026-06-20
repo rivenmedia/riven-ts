@@ -27,6 +27,7 @@
     "@repo/plugin-jellyfin": "workspace:^",
     "@repo/plugin-listrr": "workspace:^",
     "@repo/plugin-mdblist": "workspace:^",
+    "@repo/plugin-meteor": "workspace:^",
     "@repo/plugin-notifications": "workspace:^",
     "@repo/plugin-plex": "workspace:^",
     "@repo/plugin-seerr": "workspace:^",
