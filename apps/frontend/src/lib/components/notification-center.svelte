@@ -242,7 +242,9 @@
                           variant="ghost"
                           size="icon"
                           class="text-muted-foreground hover:text-primary size-6"
-                          onclick={() => handleMarkAsRead(notification.id)}
+                          onclick={() => {
+                            handleMarkAsRead(notification.id);
+                          }}
                         >
                           <Check class="size-3" />
                         </Button>
@@ -258,7 +260,9 @@
                         variant="ghost"
                         size="icon"
                         class="text-muted-foreground hover:text-destructive size-6"
-                        onclick={() => handleRemove(notification.id)}
+                        onclick={() => {
+                          handleRemove(notification.id);
+                        }}
                       >
                         <Trash2 class="size-3" />
                       </Button>
@@ -283,7 +287,9 @@
             variant="outline"
             size="sm"
             class="mt-2 h-6 text-xs"
-            onclick={() => notificationStore.reconnect()}
+            onclick={() => {
+              notificationStore.reconnect();
+            }}
           >
             Reconnect
           </Button>

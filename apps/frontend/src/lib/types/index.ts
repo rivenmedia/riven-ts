@@ -102,24 +102,27 @@ export interface BatchSession {
 /**
  * Container body for file selection API calls
  */
-export interface ContainerBody {
-  [fileId: string]: {
+export type ContainerBody = Record<
+  string,
+  {
     file_id: number;
     filename: string;
     filesize: number;
-  };
-}
+  }
+>;
 
 /**
  * Update body for TV shows - maps seasons to episodes to file data
  */
-export interface ShowUpdateBody {
-  [seasonKey: string]: {
-    [episodeKey: string]: {
+export type ShowUpdateBody = Record<
+  string,
+  Record<
+    string,
+    {
       file_id: number;
       filename: string;
       filesize: number;
       download_url?: string;
-    };
-  };
-}
+    }
+  >
+>;

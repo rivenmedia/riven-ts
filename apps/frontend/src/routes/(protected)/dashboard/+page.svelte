@@ -192,7 +192,7 @@
         }
     `;
 
-  type GqlDashboardStats = {
+  interface GqlDashboardStats {
     stats: {
       totalMovies: number;
       totalShows: number;
@@ -212,7 +212,7 @@
     };
     activity: Record<string, number>;
     yearReleases: { year: number; count: number }[];
-  };
+  }
 
   function mapDashboardStats(result: GqlDashboardStats): DashboardStatistics {
     const s = result.stats;

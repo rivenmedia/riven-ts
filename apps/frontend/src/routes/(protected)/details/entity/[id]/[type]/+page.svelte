@@ -116,7 +116,7 @@
   const carouselItems: TMDBNowPlayingItem[] = $derived(
     backdropCandidates.map((c: (typeof backdropCandidates)[number]) => ({
       id: c.id,
-      media_type: c.media_type as "movie" | "tv",
+      media_type: c.media_type,
       title: c.title,
       backdrop_path: c.backdrop_path,
       release_date: c.release_date ?? undefined,

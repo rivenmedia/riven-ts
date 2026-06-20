@@ -1,7 +1,7 @@
 import * as dateUtils from "$lib/utils/date";
 import { CalendarDate } from "@internationalized/date";
 
-export function generateSecret(length: number = 32): string {
+export function generateSecret(length = 32): string {
   const chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
@@ -18,7 +18,7 @@ export function getSeasonAndYear(dateString: string): string {
 export function flattenObject<T>(data: T): Record<string, unknown> {
   const flattened: Record<string, unknown> = {};
 
-  function _flatten(obj: unknown, parentKey: string = ""): void {
+  function _flatten(obj: unknown, parentKey = ""): void {
     // Case 1: The object is an array
     if (Array.isArray(obj)) {
       // If the array is empty, represent it with the parent key
@@ -35,7 +35,7 @@ export function flattenObject<T>(data: T): Record<string, unknown> {
     }
     // Case 2: The object is a non-null object
     else if (typeof obj === "object" && obj !== null) {
-      const keys = Object.keys(obj as object);
+      const keys = Object.keys(obj);
       // If the object is empty, represent it with the parent key
       if (keys.length === 0 && parentKey) {
         flattened[parentKey] = {};
@@ -115,6 +115,6 @@ export const getColor = (colors: string[], max: number, value: number) => {
   return colors[Math.ceil(p)];
 };
 
-export const getCalendar = (data: { [key: string]: number }, year: number) => {
+export const getCalendar = (data: Record<string, number>, year: number) => {
   return dateUtils.getCalendar(data, year);
 };

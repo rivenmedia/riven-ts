@@ -452,7 +452,9 @@
           <Button
             variant="outline"
             size="sm"
-            onclick={() => searchStore.clear()}
+            onclick={() => {
+              searchStore.clear();
+            }}
             class="text-muted-foreground hover:text-foreground border-border/50 mt-2 bg-transparent"
           >
             Clear Search

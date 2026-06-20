@@ -49,7 +49,7 @@
             results { id title posterPath mediaType year }
         }
     }`;
-  type TrendingResult = {
+  interface TrendingResult {
     id: number;
     title?: string;
     name?: string;
@@ -57,8 +57,10 @@
     mediaType?: string;
     year?: number;
     popularity?: number;
-  };
-  type TrendingResponse = { trendingTmdb: { results: TrendingResult[] } };
+  }
+  interface TrendingResponse {
+    trendingTmdb: { results: TrendingResult[] };
+  }
   const mapTrending = (d: TrendingResponse) =>
     d.trendingTmdb.results.map((r) => ({
       ...r,
@@ -91,13 +93,13 @@
     loader: (page) =>
       gqlClient<{
         trendingAnilist: {
-          results: Array<{
+          results: {
             id: number;
             title: string;
             posterPath: string | null;
             mediaType: string;
             year: string;
-          }>;
+          }[];
         };
       }>(ANILIST_TRENDING_QUERY, { page, perPage: 20 }).then((data) =>
         data.trendingAnilist.results.map((item) => ({

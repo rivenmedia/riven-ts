@@ -1,12 +1,12 @@
 import { gqlClient } from "$lib/graphql-client";
 
 export interface RatingsData {
-  scores: Array<{
+  scores: {
     name: string;
     image?: string;
     score: string;
     url: `https://${string}` | `http://${string}`;
-  }>;
+  }[];
 }
 
 const ratingsCache = new Map<string, Promise<RatingsData>>();

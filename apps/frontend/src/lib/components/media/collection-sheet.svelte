@@ -26,7 +26,7 @@
     overview: string | null;
     poster_path: string | null;
     backdrop_path: string | null;
-    parts: Array<{
+    parts: {
       id: number;
       title: string;
       overview?: string | null;
@@ -35,7 +35,7 @@
       release_date?: string | null;
       media_type: "movie";
       year: string;
-    }>;
+    }[];
   }
 
   interface GqlCollectionDetails {
@@ -44,7 +44,7 @@
     overview: string | null;
     posterPath: string | null;
     backdropPath: string | null;
-    parts: Array<{
+    parts: {
       id: number;
       title: string;
       overview?: string | null;
@@ -53,7 +53,7 @@
       releaseDate?: string | null;
       mediaType: "movie";
       year: string;
-    }>;
+    }[];
   }
 
   let {

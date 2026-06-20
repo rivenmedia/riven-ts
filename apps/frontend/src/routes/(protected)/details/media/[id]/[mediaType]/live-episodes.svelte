@@ -447,7 +447,9 @@
       <Drawer.Root
         direction="bottom"
         open={openEpisodeNumber === episode.number}
-        onOpenChange={(open) => setEpisodeOpen(episode.number, open)}
+        onOpenChange={(open) => {
+          setEpisodeOpen(episode.number, open);
+        }}
       >
         <Drawer.Trigger class="group w-full text-left">
           {@render episodeTrigger(episode, rivenEpisode)}
@@ -469,7 +471,9 @@
     {:else}
       <Sheet.Root
         open={openEpisodeNumber === episode.number}
-        onOpenChange={(open: boolean) => setEpisodeOpen(episode.number, open)}
+        onOpenChange={(open: boolean) => {
+          setEpisodeOpen(episode.number, open);
+        }}
       >
         <Sheet.Trigger class="group w-full text-left">
           {@render episodeTrigger(episode, rivenEpisode)}

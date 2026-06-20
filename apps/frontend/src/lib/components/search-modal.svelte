@@ -40,14 +40,14 @@
   let hasMorePages = true;
   let currentQuery = "";
 
-  type SearchTmdbResponse = {
+  interface SearchTmdbResponse {
     searchTmdb: {
       results: GqlTmdbListItem[];
       page: number;
       totalPages: number;
       totalResults: number;
     };
-  };
+  }
 
   onDestroy(() => {
     if (debounceTimer) clearTimeout(debounceTimer);
@@ -304,7 +304,9 @@
           {#each results as item (`${item.media_type}-${item.id}`)}
             <button
               type="button"
-              onclick={() => handleResultClick(item)}
+              onclick={() => {
+                handleResultClick(item);
+              }}
               class="block w-full rounded-xl text-left transition-transform duration-150 outline-none focus-visible:ring-2 focus-visible:ring-white/50 active:scale-[0.97]"
             >
               <PortraitCard

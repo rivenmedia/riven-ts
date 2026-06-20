@@ -3,7 +3,7 @@
   import ListItem from "./list-item.svelte";
   import PortraitCardSkeleton from "$lib/components/media/portrait-card-skeleton.svelte";
 
-  let { data = $bindable(), indexer = undefined, type = "" } = $props();
+  let { data = $bindable(), indexer, type = "" } = $props();
 </script>
 
 {#if Array.isArray(data) && data.length > 0}

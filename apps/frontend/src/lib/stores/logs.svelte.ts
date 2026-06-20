@@ -4,12 +4,12 @@ import { createScopedLogger } from "$lib/logger";
 
 const logger = createScopedLogger("logs");
 
-export type LogEntry = {
+export interface LogEntry {
   timestamp?: string | null;
   level?: string | null;
   message?: string | null;
   target?: string | null;
-};
+}
 
 export type LiveLogLine = string;
 
@@ -150,7 +150,12 @@ export class LogStore {
 
           this.#connectionStatus = "connecting";
           this.disconnect();
-          setTimeout(() => this.connect(), streamEnded ? 500 : 1000);
+          setTimeout(
+            () => {
+              this.connect();
+            },
+            streamEnded ? 500 : 1000,
+          );
         },
       },
     );

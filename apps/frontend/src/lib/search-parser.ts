@@ -1,7 +1,7 @@
 /**
  * Type for TMDB search/discover parameters
  */
-export type TMDBParams = {
+export interface TMDBParams {
   query?: string;
   year?: number;
   primary_release_year?: number;
@@ -20,12 +20,12 @@ export type TMDBParams = {
   with_keywords?: string;
   with_networks?: string;
   [key: string]: string | number | boolean | undefined;
-};
+}
 
 /**
  * Type for TVDB search parameters
  */
-export type TVDBParams = {
+export interface TVDBParams {
   query?: string;
   year?: number;
   language?: string;
@@ -36,7 +36,7 @@ export type TVDBParams = {
   remote_id?: string;
   with_genres?: string;
   without_genres?: string;
-};
+}
 
 type TVDBAssignableKey = keyof TVDBParams;
 
@@ -255,8 +255,7 @@ export function parseSearchQuery(query: string): ParsedSearchQuery {
           }
           // All other TVDB params are strings
           else {
-            tvdbParams[paramName as Exclude<TVDBAssignableKey, "year">] =
-              processedValue;
+            tvdbParams[paramName] = processedValue;
           }
         }
 

@@ -114,7 +114,7 @@ export function getSeasonAndYear(
  */
 export function formatDate(
   dateString: string | null | undefined,
-  locale: string = "en-US",
+  locale = "en-US",
   options: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "long",
@@ -136,7 +136,7 @@ export function formatDate(
  */
 export function formatDateTime(
   dateString: string | null | undefined,
-  locale: string = "en-US",
+  locale = "en-US",
   options: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "long",
@@ -256,7 +256,7 @@ export function addDays(date: CalendarDate, days: number): CalendarDate {
 /**
  * Generate calendar data for a year (for heatmap visualization)
  */
-export function getCalendar(data: { [key: string]: number }, year: number) {
+export function getCalendar(data: Record<string, number>, year: number) {
   const base = getLastMonday(new CalendarDate(year, 1, 1));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

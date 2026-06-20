@@ -54,12 +54,12 @@
     Record<
       number,
       {
-        scores?: Array<{
+        scores?: {
           name: string;
           image?: string;
           score: string;
           url: string;
-        }>;
+        }[];
       }
     >
   >({});
@@ -166,7 +166,9 @@
       });
     }, 1000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+    };
   });
 
   function getAlignmentClasses(

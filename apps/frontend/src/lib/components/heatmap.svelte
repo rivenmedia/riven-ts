@@ -9,8 +9,8 @@
   import { getCalendar, getColor } from "$lib/helpers";
   import type { MouseEventHandler, FocusEventHandler } from "svelte/elements";
 
-  type Props = {
-    data: { [key: string]: number };
+  interface Props {
+    data: Record<string, number>;
     year?: number;
     lday?: boolean;
     lmonth?: boolean;
@@ -22,7 +22,7 @@
     onmouseover?: MouseEventHandler<HTMLTableCellElement>;
     onfocus?: FocusEventHandler<HTMLTableCellElement>;
     onblur?: FocusEventHandler<HTMLTableCellElement>;
-  };
+  }
 
   let {
     data,

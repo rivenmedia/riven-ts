@@ -9,7 +9,7 @@
     profiles,
     toggleProfileEnabled,
     generalSections,
-    general = $bindable(),
+    general,
     saveGeneralSettings,
   }: {
     profiles: SetupProfileView[];
@@ -46,7 +46,9 @@
               type="button"
               variant="outline"
               class="w-full"
-              onclick={() => toggleProfileEnabled(profile.id, !profile.enabled)}
+              onclick={() => {
+                toggleProfileEnabled(profile.id, !profile.enabled);
+              }}
             >
               {profile.enabled ? "Selected" : "Enable"}
             </Button>

@@ -4,7 +4,7 @@ import { SvelteMap, SvelteSet } from "svelte/reactivity";
 
 const logger = createScopedLogger("notifications");
 
-export type Notification = {
+export interface Notification {
   id: string;
   title: string;
   message: string;
@@ -17,10 +17,10 @@ export type Notification = {
   read: boolean;
   count: number;
   dedupeKey: string | null;
-};
+}
 
 // Shape of a RivenNotification as returned by the GraphQL `notifications` subscription.
-export type RivenNotificationPayload = {
+export interface RivenNotificationPayload {
   eventType: string;
   title?: string | null;
   fullTitle?: string | null;
@@ -35,7 +35,7 @@ export type RivenNotificationPayload = {
   count?: number | null;
   newItems?: number | null;
   error?: string | null;
-};
+}
 
 const NOTIFICATIONS_SUBSCRIPTION = `subscription {
     notifications {
@@ -167,8 +167,12 @@ const scheduleFlush =
 
 const cancelFlush =
   typeof cancelAnimationFrame !== "undefined"
-    ? (h: number) => cancelAnimationFrame(h)
-    : (h: number) => clearTimeout(h);
+    ? (h: number) => {
+        cancelAnimationFrame(h);
+      }
+    : (h: number) => {
+        clearTimeout(h);
+      };
 
 export class NotificationStore {
   #notifications = $state<Notification[]>([]);
@@ -182,7 +186,7 @@ export class NotificationStore {
   #reconnectAttempts = 0;
   #maxReconnectAttempts = 3;
 
-  #pending: Array<Omit<Notification, "id" | "read" | "count">> = [];
+  #pending: Omit<Notification, "id" | "read" | "count">[] = [];
   #flushHandle: number | null = null;
   // dedupeKey → notification id (fast merge lookup)
   #dedupeIndex = new SvelteMap<string, string>();
@@ -333,7 +337,9 @@ export class NotificationStore {
         this.#connectionStatus = "connected";
         this.#reconnectAttempts = 0;
         const event = payload.notifications;
-        this.#eventListeners.forEach((cb) => cb(event));
+        this.#eventListeners.forEach((cb) => {
+          cb(event);
+        });
         const mapped = rivenNotificationToNotification(event);
         if (mapped) {
           this.add(mapped);

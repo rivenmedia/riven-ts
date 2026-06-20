@@ -11,13 +11,13 @@
   import type { CustomProfile, QualityProfile, SettingFieldDef } from "./types";
 
   let {
-    rank = $bindable(),
+    rank,
     rankSchema,
     qualityProfiles,
-    customProfiles = $bindable(),
-    activeProfileName = $bindable(),
-    newProfileName = $bindable(),
-    savingProfile = $bindable(),
+    customProfiles,
+    activeProfileName,
+    newProfileName,
+    savingProfile,
     saveAsProfile,
     toggleProfileEnabled,
     applyProfile,
@@ -133,7 +133,9 @@
                   type="button"
                   class="w-full text-left"
                   aria-pressed={selected}
-                  onclick={() => selectProfile(profile.settings, profile.id)}
+                  onclick={() => {
+                    selectProfile(profile.settings, profile.id);
+                  }}
                 >
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
@@ -182,7 +184,9 @@
                   type="button"
                   class="w-full p-3 pb-0 text-left"
                   aria-pressed={selected}
-                  onclick={() => selectProfile(profile.settings, profile.name)}
+                  onclick={() => {
+                    selectProfile(profile.settings, profile.name);
+                  }}
                 >
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">

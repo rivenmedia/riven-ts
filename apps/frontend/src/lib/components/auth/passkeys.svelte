@@ -165,7 +165,9 @@
                 <Button
                   size="icon"
                   variant="ghost"
-                  onclick={() => startEditingPasskey(passkey)}
+                  onclick={() => {
+                    startEditingPasskey(passkey);
+                  }}
                   class="h-8 w-8"
                 >
                   <Pencil class="h-4 w-4" />

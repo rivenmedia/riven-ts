@@ -418,7 +418,7 @@ export interface TVDBSeasonItem {
   lastUpdated: string | null;
 }
 
-export type TVDBAirsDays = {
+export interface TVDBAirsDays {
   sunday: boolean;
   monday: boolean;
   tuesday: boolean;
@@ -426,9 +426,9 @@ export type TVDBAirsDays = {
   thursday: boolean;
   friday: boolean;
   saturday: boolean;
-};
+}
 
-type TVDBNetworkItem = {
+interface TVDBNetworkItem {
   id: number | null;
   name: string | null;
   slug: string | null;
@@ -449,7 +449,7 @@ type TVDBNetworkItem = {
     relation: { id: number | null; typeName: string | null } | null;
   } | null;
   tagOptions: unknown[] | null;
-};
+}
 
 export interface TVDBBaseItem {
   id: number;

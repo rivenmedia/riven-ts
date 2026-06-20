@@ -68,7 +68,9 @@
             bind:value={$formData[name]}
           />
           <Button
-            onclick={() => togglePasswordVisibility(name)}
+            onclick={() => {
+              togglePasswordVisibility(name);
+            }}
             variant="outline"
             size="icon"
             aria-label="toggle password visibility"

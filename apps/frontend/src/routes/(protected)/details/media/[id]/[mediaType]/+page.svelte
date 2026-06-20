@@ -105,7 +105,7 @@
   const episodeCountBySeasonNumber = $derived.by(() => {
     if (data.mediaDetails?.type !== "tv") return undefined;
 
-    const details = data.mediaDetails.details as ParsedShowDetails;
+    const details = data.mediaDetails.details;
     const counts = new SvelteMap<number, number>();
 
     for (const episode of details.episodes ?? []) {
@@ -140,7 +140,7 @@
       return 1;
     }
 
-    const details = data.mediaDetails?.details as ParsedShowDetails | undefined;
+    const details = data.mediaDetails?.details;
     return details?.episode_count ?? 0;
   });
 
@@ -150,7 +150,7 @@
     if (requestedSeason && !Number.isNaN(Number(requestedSeason))) {
       return requestedSeason;
     }
-    const details = data.mediaDetails?.details as ParsedShowDetails;
+    const details = data.mediaDetails?.details;
     if (!details?.seasons?.length) return "1";
 
     const hasSeason1 = details.seasons.some((s) => s.number === 1);
@@ -276,7 +276,7 @@
   let mediaType = $derived(data.mediaDetails?.type);
 
   let ratingsData = $state<{
-    scores: Array<{ name: string; image?: string; score: string; url: string }>;
+    scores: { name: string; image?: string; score: string; url: string }[];
   } | null>(null);
   let ratingsLoading = $state(false);
 
@@ -292,12 +292,12 @@
 
     gqlClient<{
       ratings: {
-        scores: Array<{
+        scores: {
           name: string;
           image?: string;
           score: string;
           url: string;
-        }>;
+        }[];
       };
     }>(
       `query Ratings($id: String!, $mediaType: String!) {
@@ -319,7 +319,9 @@
         }
       });
 
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+    };
   });
 
   const seasonData = $derived.by(() => {
@@ -328,7 +330,7 @@
       !data.mediaDetails?.details?.seasons
     )
       return [];
-    const details = data.mediaDetails.details as ParsedShowDetails;
+    const details = data.mediaDetails.details;
     const episodeCountBySeason = new SvelteMap<number, number>();
     const seasonsByNumber = new SvelteMap(
       (liveRiven?.seasons ?? []).map((season) => [
@@ -735,13 +737,13 @@
 {/snippet}
 
 {#snippet mediaCarousel(
-  items: Array<{
+  items: {
     id: number;
     title: string;
     poster_path: string | null;
     media_type: string;
     year?: number | string | null;
-  }>,
+  }[],
   title: string,
   delay: number = 600,
 )}
@@ -1750,7 +1752,7 @@
                         class="text-destructive/70 hover:text-destructive border-destructive/30 hover:border-destructive/70 mt-2 rounded-md border px-3 py-1.5 text-xs transition-colors"
                         onclick={() =>
                           deleteFilesystemEntry(
-                            fs!.id!,
+                            fs.id!,
                             getFilesystemEntryLabel(
                               fs,
                               `Version ${selectedMovieVersionIdx + 1}`,

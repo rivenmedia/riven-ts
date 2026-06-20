@@ -78,7 +78,7 @@ export const GET: RequestHandler = async ({ params, fetch, locals }) => {
           {
             from: "tmdb",
             to: "tvdb",
-            id: id!,
+            id: id,
             mediaType: "tv",
             ...backendOpts,
           },
@@ -103,7 +103,7 @@ export const GET: RequestHandler = async ({ params, fetch, locals }) => {
           {
             from: "anilist",
             to: "tmdb",
-            id: id!,
+            id: id,
             mediaType: "tv",
             ...backendOpts,
           },
@@ -115,7 +115,7 @@ export const GET: RequestHandler = async ({ params, fetch, locals }) => {
           {
             from: "anilist",
             to: "tmdb",
-            id: id!,
+            id: id,
             mediaType: "movie",
             ...backendOpts,
           },
@@ -132,7 +132,7 @@ export const GET: RequestHandler = async ({ params, fetch, locals }) => {
           {
             from: "riven",
             to: "tvdb",
-            id: id!,
+            id: id,
             mediaType: "tv",
             ...backendOpts,
           },
@@ -144,7 +144,7 @@ export const GET: RequestHandler = async ({ params, fetch, locals }) => {
           {
             from: "riven",
             to: "tmdb",
-            id: id!,
+            id: id,
             mediaType: "movie",
             ...backendOpts,
           },

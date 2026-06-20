@@ -21,7 +21,7 @@ declare global {
   interface NavigatorUAData {
     readonly platform: string;
     readonly mobile: boolean;
-    readonly brands: ReadonlyArray<NavigatorUABrandVersion>;
+    readonly brands: readonly NavigatorUABrandVersion[];
   }
 
   interface Navigator {

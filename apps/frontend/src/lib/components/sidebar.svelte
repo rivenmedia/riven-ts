@@ -25,7 +25,7 @@
   import type { createSidebarStore } from "$lib/stores/global.svelte";
   import { getPermissionFlags } from "$lib/permissions";
 
-  const navItems: Array<{
+  const navItems: {
     href:
       | "/"
       | "/dashboard"
@@ -38,7 +38,7 @@
     icon: typeof Home;
     label: string;
     adminOnly?: boolean;
-  }> = [
+  }[] = [
     { href: "/", icon: Home, label: "Home" },
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { href: "/library", icon: Library, label: "Library" },
@@ -164,7 +164,9 @@
 {#if SidebarStore.isOpen}
   <!-- Backdrop -->
   <div
-    onclick={() => SidebarStore.toggle()}
+    onclick={() => {
+      SidebarStore.toggle();
+    }}
     role="button"
     tabindex="0"
     onkeydown={(e) => {
@@ -186,7 +188,9 @@
           <a
             href={resolve("/auth")}
             class="flex items-center gap-3"
-            onclick={() => SidebarStore.toggle()}
+            onclick={() => {
+              SidebarStore.toggle();
+            }}
           >
             <Avatar.Root class="size-8">
               {#if user.image}
@@ -239,7 +243,9 @@
         {#each visibleNavItems as item (item.href)}
           <a
             href={resolve(item.href)}
-            onclick={() => SidebarStore.toggle()}
+            onclick={() => {
+              SidebarStore.toggle();
+            }}
             class="hover:text-foreground flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors hover:bg-white/10
 						{page.url.pathname === item.href
               ? 'text-primary bg-white/10'

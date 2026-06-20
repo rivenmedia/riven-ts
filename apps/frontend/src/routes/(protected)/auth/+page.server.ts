@@ -18,7 +18,7 @@ import type { Actions, PageServerLoad } from "./$types";
 
 const logger = createScopedLogger("auth-settings");
 
-type ManagedUser = {
+interface ManagedUser {
   id: string;
   name: string;
   email: string;
@@ -26,7 +26,7 @@ type ManagedUser = {
   role?: string | null;
   banned?: boolean | null;
   createdAt?: Date | string | number | null;
-};
+}
 
 function toIsoDateString(date: Date | string | number): string {
   if (date instanceof Date) return date.toISOString();

@@ -1,5 +1,4 @@
 <script lang="ts">
-  /* eslint-disable svelte/no-navigation-without-resolve */
   import PortraitCard from "$lib/components/media/portrait-card.svelte";
   import { Badge } from "$lib/components/ui/badge/index.js";
   import { cn } from "$lib/utils";
@@ -16,7 +15,7 @@
     indexer = $bindable<string | undefined>(),
     type = $bindable<string | undefined>(),
     isSelectable = false,
-    selectStore = undefined,
+    selectStore,
     class: className = "",
   } = $props();
 

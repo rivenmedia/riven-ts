@@ -64,7 +64,9 @@
             <Button
               type="button"
               variant="ghost"
-              onclick={() => goToStep(index)}
+              onclick={() => {
+                goToStep(index);
+              }}
               class="group relative h-auto min-w-28 justify-start gap-2 rounded-none border px-3 py-3 text-left first:rounded-l-xl first:border-r-0 last:rounded-r-xl sm:min-w-33 {index ===
               stepIndex
                 ? 'border-white/14 bg-white/6 hover:bg-white/6'

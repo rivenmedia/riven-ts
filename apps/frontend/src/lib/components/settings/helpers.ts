@@ -49,17 +49,17 @@ const setupStepMeta = {
   },
 } satisfies Record<"welcome" | "quality" | "finish", Omit<Step, "id">>;
 
-type SetupState = {
+interface SetupState {
   general: SettingsSection | null;
   plugins: SettingsSection[];
   customProfiles: CustomProfile[];
-};
+}
 
 /** Split the backend sections into the general section + plugin sections, deep-copying values for local editing. */
 export function createSetupState(data: SetupData): SetupState {
   const sections = (data.sections ?? []).map((section) => ({
     ...section,
-    values: { ...(section.values as Record<string, unknown>) },
+    values: { ...section.values },
   }));
   return {
     general: sections.find((section) => section.kind === "general") ?? null,

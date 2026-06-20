@@ -37,7 +37,9 @@
         : 'cursor-pointer'} {selected && !locked
         ? 'text-primary font-bold'
         : 'text-foreground font-medium'}"
-      onclick={() => onToggle(season.season_number)}
+      onclick={() => {
+        onToggle(season.season_number);
+      }}
       disabled={locked}
       title={season.name}
     >

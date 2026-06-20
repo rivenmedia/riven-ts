@@ -193,8 +193,8 @@ export class SearchStore {
   private async fetchMissingMedia(
     needMovies: boolean,
     needTV: boolean,
-    needPerson: boolean = false,
-    needCompany: boolean = false,
+    needPerson = false,
+    needCompany = false,
   ) {
     this.cancelPendingRequests();
     this.abortController = new AbortController();
@@ -341,12 +341,7 @@ export class SearchStore {
     const uniqueItems: TMDBTransformedListItem[] = [];
 
     for (const item of newItems) {
-      if (
-        item &&
-        item.id !== undefined &&
-        item.id !== null &&
-        !seenIds.has(item.id)
-      ) {
+      if (item?.id !== undefined && item.id !== null && !seenIds.has(item.id)) {
         uniqueItems.push(item);
         seenIds.add(item.id);
       }
@@ -449,7 +444,7 @@ export class SearchStore {
 
     if (signal?.aborted) return;
 
-    const items = (result.results || []) as TMDBTransformedListItem[];
+    const items = result.results || [];
 
     if (page === 1) {
       const uniqueItems = this.deduplicateItems(items);
@@ -549,7 +544,7 @@ export class SearchStore {
 
       if (signal?.aborted) return;
 
-      const newItems = (result.results || []) as TMDBTransformedListItem[];
+      const newItems = result.results || [];
 
       if (newItems.length > 0) {
         const currentResults =

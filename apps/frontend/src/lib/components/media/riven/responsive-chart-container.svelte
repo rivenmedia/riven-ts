@@ -42,7 +42,9 @@
       }
     });
     ro.observe(ref);
-    return () => ro.disconnect();
+    return () => {
+      ro.disconnect();
+    };
   });
 </script>
 

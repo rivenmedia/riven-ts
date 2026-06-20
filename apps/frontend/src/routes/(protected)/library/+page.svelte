@@ -1,5 +1,4 @@
 <script lang="ts">
-  /* eslint-disable svelte/no-navigation-without-resolve */
   import { tick, onDestroy } from "svelte";
   import { page } from "$app/state";
   import type { PageProps } from "./$types";
@@ -34,7 +33,7 @@
 
   type PageDataPayload = NonNullable<Awaited<PageProps["data"]["pageData"]>>;
   type LibraryItem = PageDataPayload["items"][number];
-  type GqlMediaItem = {
+  interface GqlMediaItem {
     id: number;
     itemType: string;
     title: string;
@@ -50,14 +49,14 @@
     showTmdbId?: string | null;
     showTvdbId?: string | null;
     showPosterPath?: string | null;
-  };
-  type GqlItemsPage = {
+  }
+  interface GqlItemsPage {
     items: GqlMediaItem[];
     page: number;
     limit: number;
     totalItems: number;
     totalPages: number;
-  };
+  }
 
   let { data }: PageProps = $props();
   let liveItems = $state<LibraryItem[]>([]);
@@ -128,12 +127,16 @@
 
     url.searchParams.delete("type");
     if ($formData.type?.length) {
-      $formData.type.forEach((t) => url.searchParams.append("type", t));
+      $formData.type.forEach((t) => {
+        url.searchParams.append("type", t);
+      });
     }
 
     url.searchParams.delete("states");
     if ($formData.states?.length) {
-      $formData.states.forEach((s) => url.searchParams.append("states", s));
+      $formData.states.forEach((s) => {
+        url.searchParams.append("states", s);
+      });
     }
 
     // Reset to page 1 on search/filter change
@@ -623,7 +626,9 @@
             variant="ghost"
             size="icon"
             class="h-9 w-9 rounded-xl hover:bg-white/10"
-            onclick={() => itemsStore.clear()}
+            onclick={() => {
+              itemsStore.clear();
+            }}
           >
             <X class="h-4 w-4" />
           </Button>

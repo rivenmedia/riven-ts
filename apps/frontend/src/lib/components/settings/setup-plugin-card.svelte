@@ -4,7 +4,7 @@
   import type { SettingsSection } from "./types";
 
   let {
-    section = $bindable(),
+    section,
     saving,
     savePlugin,
   }: {
@@ -26,7 +26,9 @@
       type="button"
       variant="outline"
       disabled={saving}
-      onclick={() => savePlugin(section)}
+      onclick={() => {
+        savePlugin(section);
+      }}
     >
       {saving ? "Saving…" : "Save plugin"}
     </Button>

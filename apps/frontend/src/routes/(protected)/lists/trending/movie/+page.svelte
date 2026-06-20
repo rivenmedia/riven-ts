@@ -46,7 +46,9 @@
       const timer = setTimeout(() => {
         searchStore.loadMore();
       }, 500);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+      };
     }
   });
 

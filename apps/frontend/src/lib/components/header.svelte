@@ -1,5 +1,4 @@
 <script lang="ts">
-  /* eslint-disable svelte/no-navigation-without-resolve */
   import Menu from "@lucide/svelte/icons/menu";
   import { Button } from "$lib/components/ui/button/index.js";
   import NotificationCenter from "$lib/components/notification-center.svelte";
@@ -37,7 +36,9 @@
     };
 
     window.addEventListener("riven:search", handleSearch);
-    return () => window.removeEventListener("riven:search", handleSearch);
+    return () => {
+      window.removeEventListener("riven:search", handleSearch);
+    };
   });
 
   // Local input value state to decouple from URL updates while typing
@@ -87,7 +88,9 @@
   }
 
   $effect(() => {
-    return () => clearTimeout(debounceTimer);
+    return () => {
+      clearTimeout(debounceTimer);
+    };
   });
 
   function onKeydown(e: KeyboardEvent) {
@@ -150,7 +153,9 @@
       <Button
         variant="ghost"
         class="bg-background/60 size-10 rounded-xl backdrop-blur-md md:hidden"
-        onclick={() => SidebarStore.toggle()}
+        onclick={() => {
+          SidebarStore.toggle();
+        }}
       >
         <Menu class="size-5" />
       </Button>

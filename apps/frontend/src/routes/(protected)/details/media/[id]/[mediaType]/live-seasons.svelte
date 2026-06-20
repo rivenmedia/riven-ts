@@ -35,7 +35,9 @@
         0}
       <Carousel.Item class="basis-auto">
         <button
-          onclick={() => onSelectSeason(season.number?.toString())}
+          onclick={() => {
+            onSelectSeason(season.number?.toString());
+          }}
           class={cn(
             "group relative block transition-all",
             selectedSeason === season.number?.toString()

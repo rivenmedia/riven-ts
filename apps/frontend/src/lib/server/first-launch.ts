@@ -22,5 +22,5 @@ export async function isFirstLaunchSetupComplete(
     fetchFn,
   ).catch(() => ({ instanceStatus: { setupCompleted: false } }));
 
-  return result.instanceStatus.setupCompleted === true;
+  return result.instanceStatus.setupCompleted;
 }

@@ -151,7 +151,7 @@ const DEBRID_ACCOUNT_INFO_QUERY = `
     }
 `;
 
-type GqlStatsResult = {
+interface GqlStatsResult {
   stats: {
     totalMovies: number;
     totalShows: number;
@@ -171,9 +171,9 @@ type GqlStatsResult = {
   };
   activity: Record<string, number>;
   yearReleases: { year: number; count: number }[];
-};
+}
 
-type GqlDebridAccountInfo = {
+interface GqlDebridAccountInfo {
   store: string;
   email: string | null;
   username: string | null;
@@ -182,7 +182,7 @@ type GqlDebridAccountInfo = {
   cooldownUntil: string | null;
   totalDownloadedBytes: number | null;
   points: number | null;
-};
+}
 
 function mapDebridService(info: GqlDebridAccountInfo): DownloaderService {
   const now = Date.now();

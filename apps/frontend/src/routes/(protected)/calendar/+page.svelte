@@ -370,7 +370,9 @@
         variant="outline"
         size="icon-sm"
         aria-label="Previous month"
-        onclick={() => navigateMonth("prev")}
+        onclick={() => {
+          navigateMonth("prev");
+        }}
       >
         <ChevronLeft class="h-4 w-4" />
       </Button>
@@ -378,7 +380,9 @@
         variant="outline"
         size="icon-sm"
         aria-label="Next month"
-        onclick={() => navigateMonth("next")}
+        onclick={() => {
+          navigateMonth("next");
+        }}
       >
         <ChevronRight class="h-4 w-4" />
       </Button>

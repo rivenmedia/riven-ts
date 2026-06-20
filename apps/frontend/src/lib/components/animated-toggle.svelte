@@ -3,10 +3,10 @@
   import { Spring } from "svelte/motion";
   import { onMount } from "svelte";
 
-  type Option = {
+  interface Option {
     label: string;
     value: string;
-  };
+  }
 
   let { options, value, onchange } = $props<{
     options: Option[];
@@ -47,9 +47,13 @@
     updatePosition(value, true);
 
     // Add resize listener for responsiveness
-    const handleResize = () => updatePosition(value);
+    const handleResize = () => {
+      updatePosition(value);
+    };
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   });
 
   $effect(() => {

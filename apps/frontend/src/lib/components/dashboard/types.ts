@@ -1,4 +1,4 @@
-export type DashboardStatistics = {
+export interface DashboardStatistics {
   total_movies: number;
   total_shows: number;
   total_seasons: number;
@@ -9,9 +9,9 @@ export type DashboardStatistics = {
   states: Record<string, number>;
   activity: Record<string, number>;
   media_year_releases: { year: number; count: number }[];
-};
+}
 
-export type DownloaderService = {
+export interface DownloaderService {
   service: string;
   email: string | null;
   username: string | null;
@@ -21,9 +21,9 @@ export type DownloaderService = {
   points: number | null;
   total_downloaded_bytes: number | null;
   cooldown_until: string | null;
-};
+}
 
-export type ActivePlaybackSession = {
+export interface ActivePlaybackSession {
   server: string;
   userName: string | null;
   parentTitle: string | null;
@@ -38,9 +38,9 @@ export type ActivePlaybackSession = {
   deviceName: string | null;
   clientName: string | null;
   imageUrl: string | null;
-};
+}
 
-export type NntpProviderHealth = {
+export interface NntpProviderHealth {
   host: string;
   port: number;
   priority: number;
@@ -52,9 +52,9 @@ export type NntpProviderHealth = {
   breakerTripped: boolean;
   cooldownSecondsRemaining: number;
   consecutiveFailures: number;
-};
+}
 
-export type UsenetStreamingHealth = {
+export interface UsenetStreamingHealth {
   cacheBytesUsed: number;
   cacheBytesMax: number;
   cacheEntries: number;
@@ -68,9 +68,9 @@ export type UsenetStreamingHealth = {
   inFlight: number;
   deadSegments: number;
   activeStreams: number;
-};
+}
 
-export type UsenetTitleHealth = {
+export interface UsenetTitleHealth {
   infoHash: string;
   fileIndex: number;
   mediaItemId: number | null;
@@ -87,32 +87,32 @@ export type UsenetTitleHealth = {
   subtitle: string | null;
   posterPath: string | null;
   mediaType: string | null;
-};
+}
 
-export type UsenetTitleHealthSummary = {
+export interface UsenetTitleHealthSummary {
   healthy: number;
   unhealthy: number;
   notIngested: number;
   unknown: number;
   total: number;
-};
+}
 
-export type UsenetProviderTraffic = {
+export interface UsenetProviderTraffic {
   host: string;
   bytesDownloaded: number;
   articlesDownloaded: number;
-};
+}
 
-export type UsenetDailyTraffic = {
+export interface UsenetDailyTraffic {
   day: string;
   host: string;
   bytesDownloaded: number;
   articlesDownloaded: number;
-};
+}
 
-export type UsenetTraffic = {
+export interface UsenetTraffic {
   providers: UsenetProviderTraffic[];
   daily: UsenetDailyTraffic[];
   totalBytesDownloaded: number;
   totalArticlesDownloaded: number;
-};
+}

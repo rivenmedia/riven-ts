@@ -16,7 +16,7 @@
   import * as dateUtils from "$lib/utils/date";
   import FormBase from "./form-base.svelte";
 
-  type ManagedUser = {
+  interface ManagedUser {
     id: string;
     name: string;
     email: string;
@@ -24,7 +24,7 @@
     role?: string | null;
     banned?: boolean | null;
     createdAt?: Date | string | number | null;
-  };
+  }
 
   let {
     formData: initialForm,

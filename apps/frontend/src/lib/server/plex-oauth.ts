@@ -54,13 +54,13 @@ export interface PlexProfile {
   experimentalFeatures: boolean;
   twoFactorEnabled: boolean;
   backupCodesCreated: boolean;
-  services: Array<{
+  services: {
     identifier: string;
     endpoint: string;
     token: string;
     status: string;
     secret: string | null;
-  }>;
+  }[];
 }
 
 export interface PlexOAuthOptions {

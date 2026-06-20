@@ -25,12 +25,12 @@
 
   const logger = createScopedLogger("login");
 
-  type AuthProvider = {
+  interface AuthProvider {
     enabled: boolean;
     disableSignup: boolean;
     name?: string;
     icon?: string;
-  };
+  }
 
   let {
     data,

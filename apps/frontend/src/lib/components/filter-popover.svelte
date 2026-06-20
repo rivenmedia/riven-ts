@@ -158,7 +158,9 @@
               variant="outline"
               class="h-7 px-2 text-xs"
               pressed={filterStore.withGenres.includes(genre.id)}
-              onPressedChange={() => filterStore.toggleGenre(genre.id)}
+              onPressedChange={() => {
+                filterStore.toggleGenre(genre.id);
+              }}
             >
               {genre.name}
             </Toggle>
@@ -210,7 +212,9 @@
                 variant="outline"
                 class="h-7 px-2 text-xs"
                 pressed={filterStore.certifications.includes(rating)}
-                onPressedChange={() => filterStore.toggleCertification(rating)}
+                onPressedChange={() => {
+                  filterStore.toggleCertification(rating);
+                }}
               >
                 {rating}
               </Toggle>

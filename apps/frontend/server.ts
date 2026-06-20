@@ -39,7 +39,7 @@ proxy.on("error", (err, _req, resOrSocket) => {
 const server = http.createServer((req, res) => handler(req, res));
 
 server.on("upgrade", async (req, socket, head) => {
-  if (!req.url || !req.url.startsWith("/graphql")) {
+  if (!req.url?.startsWith("/graphql")) {
     socket.destroy();
     return;
   }
@@ -58,7 +58,7 @@ server.on("upgrade", async (req, socket, head) => {
       return;
     }
     const body = await check.json().catch(() => null);
-    if (!body || !body.user) {
+    if (!body?.user) {
       socket.destroy();
       return;
     }

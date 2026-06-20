@@ -2,10 +2,10 @@
 	Installed from @ieedan/shadcn-svelte-extras
 */
 
-type Options = {
+interface Options {
   /** The time before the copied status is reset. */
   delay: number;
-};
+}
 
 /** Use this hook to copy text to the clipboard and show a copied state.
  *

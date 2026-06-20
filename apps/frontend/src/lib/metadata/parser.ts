@@ -113,11 +113,11 @@ const TVDB_GENRE_MAP: Record<string, number> = {
 export function transformTMDBList(
   items: unknown[] | null,
   type: "movie" | "tv" | "person" | "company" = "movie",
-  backdropSize: string = "w1280",
+  backdropSize = "w1280",
 ) {
   const seen = new Set<number>();
   return (
-    (items as Array<Record<string, unknown>>)?.reduce(
+    (items as Record<string, unknown>[])?.reduce<TMDBTransformedListItem[]>(
       (acc: TMDBTransformedListItem[], rawItem: Record<string, unknown>) => {
         const item = rawItem as {
           id?: number;
@@ -181,7 +181,7 @@ export function transformTMDBList(
         });
         return acc;
       },
-      [] as TMDBTransformedListItem[],
+      [],
     ) || ([] as TMDBTransformedListItem[])
   );
 }
@@ -228,7 +228,7 @@ export function transformTVDBList(
 
 function transformTraktRecommendations(
   items: unknown[] | null,
-  isMovie: boolean = false,
+  isMovie = false,
 ): TMDBTransformedListItem[] {
   if (!items?.length) return [];
 
@@ -302,7 +302,7 @@ function findTMDBBestTrailer(videos: TMDBVideoItem[] | null) {
   if (!videos) return null;
 
   const officialTrailers = videos.filter(
-    (video) => video.type === "Trailer" && video.official === true,
+    (video) => video.type === "Trailer" && video.official,
   );
 
   const sorted = officialTrailers.sort((a, b) => {
@@ -548,8 +548,7 @@ export function parseTVDBShowDetails(
     data.contentRatings?.find(
       (rating) =>
         rating.country &&
-        data.originalCountry &&
-        rating.country.toLowerCase() === data.originalCountry.toLowerCase(),
+        rating.country.toLowerCase() === data.originalCountry?.toLowerCase(),
     )?.name ??
     data.contentRatings?.[0]?.name ??
     "N/A";
@@ -636,7 +635,7 @@ export function parseTVDBShowDetails(
   }
   if (
     data.latestNetwork &&
-    (!data.originalNetwork || data.latestNetwork.id !== data.originalNetwork.id)
+    data.latestNetwork.id !== data.originalNetwork?.id
   ) {
     networks.push({
       id: data.latestNetwork.id,
@@ -799,8 +798,8 @@ function asRecord(value: unknown): Record<string, unknown> | null {
 function tvdbAliases(data: Record<string, unknown>) {
   const d = data as {
     aliases?: unknown[];
-    translations?: { nameTranslations?: Array<{ name?: string }> };
-    nameTranslations?: Array<{ name?: string }>;
+    translations?: { nameTranslations?: { name?: string }[] };
+    nameTranslations?: { name?: string }[];
     name?: string;
   };
   const aliases = new Set<string>();
@@ -855,7 +854,7 @@ function transformPersonCredit(credit: Record<string, unknown>) {
     backdrop_path: buildTMDBImage(c.backdrop_path ?? null, "w1920"),
     release_date: releaseDate,
     year: dateUtils.getYearFromISO(releaseDate),
-    media_type: (c.media_type === "tv" ? "tv" : "movie") as "movie" | "tv",
+    media_type: c.media_type === "tv" ? "tv" : "movie",
     vote_average: c.vote_average ?? null,
     vote_count: c.vote_count ?? null,
     popularity: c.popularity ?? null,
@@ -1004,10 +1003,10 @@ export function parseTVDBPersonDetails(
     biography?: string;
     overview?: string;
     bio?: string;
-    biographies?: Array<{ language?: string; biography?: string }>;
+    biographies?: { language?: string; biography?: string }[];
     translations?: {
-      overviewTranslations?: Array<{ language?: string; overview?: string }>;
-      biographies?: Array<{ language?: string; biography?: string }>;
+      overviewTranslations?: { language?: string; overview?: string }[];
+      biographies?: { language?: string; biography?: string }[];
     };
     image?: string;
     personImgURL?: string;

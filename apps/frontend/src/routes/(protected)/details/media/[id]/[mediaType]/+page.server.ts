@@ -73,14 +73,14 @@ export type MediaDetails =
   | { type: "movie"; details: ParsedMovieDetails }
   | { type: "tv"; details: ParsedShowDetails };
 
-type GqlTraktRecommendation = {
+interface GqlTraktRecommendation {
   id: number;
   title: string;
   posterPath: string | null;
   mediaType: "movie" | "tv";
   year: string;
   indexer: "tmdb" | "tvdb";
-};
+}
 
 type TVDBTranslations = NonNullable<TVDBBaseItem["translations"]>;
 
@@ -98,7 +98,7 @@ const TRAKT_RECOMMENDATIONS_QUERY = `query($id: String!, $idType: String!, $medi
 function mapTraktRecommendations(items: GqlTraktRecommendation[]) {
   const seen = new Set<string>();
   return items.reduce<
-    Array<{
+    {
       id: number;
       title: string;
       poster_path: string | null;
@@ -107,7 +107,7 @@ function mapTraktRecommendations(items: GqlTraktRecommendation[]) {
       indexer: "tmdb" | "tvdb";
       vote_average: null;
       vote_count: null;
-    }>
+    }[]
   >((acc, item) => {
     const key = `${item.mediaType}-${item.id}`;
     if (seen.has(key)) return acc;
@@ -186,10 +186,7 @@ export const load = (async ({ fetch, params, locals, url }) => {
         error(503, "Unable to connect to TMDB. Please try again later.");
       }
 
-      const parsedDetails = parseTMDBMovieDetails(
-        details as TMDBMovieDetailsExtended,
-        null,
-      );
+      const parsedDetails = parseTMDBMovieDetails(details, null);
       if (!parsedDetails) {
         error(500, "Failed to parse movie details");
       }
@@ -202,7 +199,7 @@ export const load = (async ({ fetch, params, locals, url }) => {
         mediaDetails: {
           type: "movie" as const,
           details: parsedDetails as ParsedMovieDetails,
-        } as MediaDetails,
+        },
       };
     } else if (mediaType === "tv") {
       // Check if the ID is already a TVDB ID (passed via query param from library)
@@ -353,7 +350,7 @@ export const load = (async ({ fetch, params, locals, url }) => {
           }
 
           if (!engEpisodesError && engEpisodesData && engEpisodesData.data) {
-            const rawData = engEpisodesData as unknown as EngEpisodesResponse;
+            const rawData = engEpisodesData;
             if (rawData.data?.episodes) {
               // Cast to unknown first to avoid direct overlap error, then to expected structure
               (
@@ -381,7 +378,7 @@ export const load = (async ({ fetch, params, locals, url }) => {
         mediaDetails: {
           type: "tv" as const,
           details: parsedDetails as ParsedShowDetails,
-        } as MediaDetails,
+        },
       };
     }
   } catch (err) {

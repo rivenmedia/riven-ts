@@ -165,7 +165,7 @@ export class MediaListStore<T = unknown> {
     return tw ? `${this.#key}_${tw}_cache` : `${this.#key}_cache`;
   }
 
-  #getApiUrl(page: number = 1): string {
+  #getApiUrl(page = 1): string {
     if (!this.#apiPath) {
       throw new Error(
         `MediaListStore "${this.#key}" requires either an apiPath or loader`,
@@ -226,7 +226,9 @@ export class MediaListStore<T = unknown> {
         keysToRemove.push(key);
       }
     }
-    keysToRemove.forEach((key) => sessionStorage.removeItem(key));
+    keysToRemove.forEach((key) => {
+      sessionStorage.removeItem(key);
+    });
   }
 
   async changeTimeWindow(window: TimeWindow): Promise<void> {
@@ -298,7 +300,7 @@ export class MediaListStore<T = unknown> {
         const combined = [...this.#items, ...newItems] as (T & {
           id?: unknown;
         })[];
-        this.#items = deduplicateById(combined) as T[];
+        this.#items = deduplicateById(combined);
         // Update cache with all items
         this.#setCachedData(this.#items);
       }

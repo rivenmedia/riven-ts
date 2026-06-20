@@ -86,7 +86,9 @@
         variant="ghost"
         size="icon"
         class="flex h-9 w-9 items-center justify-center rounded-full text-white/50 transition-all hover:bg-white/10 hover:text-white"
-        onclick={() => SidebarStore.toggle()}
+        onclick={() => {
+          SidebarStore.toggle();
+        }}
       >
         <div class="relative flex size-5 items-center justify-center">
           <div

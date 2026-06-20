@@ -21,7 +21,7 @@ import { type Client as GraphQLWSClient, createClient } from "graphql-ws";
 
 interface GraphQLResponse<T> {
   data?: T;
-  errors?: Array<{ message: string; locations?: unknown; path?: unknown }>;
+  errors?: { message: string; locations?: unknown; path?: unknown }[];
 }
 
 interface GraphQLSubscribeHandlers<T> {
@@ -168,7 +168,7 @@ export function gqlSubscribeClient<T>(
           return;
         }
         if (result.data !== undefined && result.data !== null) {
-          handlers.onData(result.data as T);
+          handlers.onData(result.data);
         }
       },
       error: (err) => {

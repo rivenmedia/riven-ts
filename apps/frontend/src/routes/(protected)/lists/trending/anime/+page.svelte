@@ -20,13 +20,13 @@
     loader: (page) =>
       gqlClient<{
         trendingAnilist: {
-          results: Array<{
+          results: {
             id: number;
             title: string;
             posterPath: string | null;
             mediaType: string;
             year: string;
-          }>;
+          }[];
         };
       }>(ANILIST_TRENDING_QUERY, { page, perPage: 20 }).then((data) =>
         data.trendingAnilist.results.map((item) => ({
@@ -58,7 +58,9 @@
       observer.observe(loadMoreTrigger);
     }
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   });
 </script>
 

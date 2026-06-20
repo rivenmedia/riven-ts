@@ -41,7 +41,7 @@
 
   // Setup readiness is owned by the backend (`instanceStatus`); refreshed after edits.
   let status = $state<InstanceStatus>(
-    untrack(() => ({ ...(data.instanceStatus as InstanceStatus) })),
+    untrack(() => ({ ...data.instanceStatus })),
   );
 
   const pluginSections = $derived(

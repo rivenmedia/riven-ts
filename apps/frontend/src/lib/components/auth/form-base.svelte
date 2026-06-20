@@ -12,7 +12,7 @@
 
   let {
     title,
-    description = undefined,
+    description,
     class: className = "",
     content,
     footer,

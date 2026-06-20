@@ -92,27 +92,23 @@
     input: unknown,
     fields: SettingFieldDef[] = [],
   ): Record<string, unknown> {
-    return isRecord(input)
-      ? (input as Record<string, unknown>)
-      : createDefaultObject(fields);
+    return isRecord(input) ? input : createDefaultObject(fields);
   }
 
   function ensureObject(
     fields: SettingFieldDef[] = [],
   ): Record<string, unknown> {
-    return isRecord(value)
-      ? (value as Record<string, unknown>)
-      : createDefaultObject(fields);
+    return isRecord(value) ? value : createDefaultObject(fields);
   }
 
   function ensureDictionary(): Record<string, unknown> {
-    return isRecord(value) ? (value as Record<string, unknown>) : {};
+    return isRecord(value) ? value : {};
   }
 
   function ensureStringArray(): string[] {
     return Array.isArray(value) &&
       value.every((entry) => typeof entry === "string")
-      ? (value as string[])
+      ? value
       : [];
   }
 
@@ -273,11 +269,12 @@
                 field={subfield}
                 bind:value={
                   () => tabValue[subfield.key],
-                  (nextValue) =>
+                  (nextValue) => {
                     updateObjectField(field.fields ?? [], tab.key, {
                       ...tabValue,
                       [subfield.key]: nextValue,
-                    })
+                    });
+                  }
                 }
                 path={`${path}.${tab.key}.${subfield.key}`}
                 nested={true}
@@ -307,8 +304,9 @@
           field={subfield}
           bind:value={
             () => objectValue[subfield.key],
-            (nextValue) =>
-              updateObjectField(field.fields ?? [], subfield.key, nextValue)
+            (nextValue) => {
+              updateObjectField(field.fields ?? [], subfield.key, nextValue);
+            }
           }
           path={`${path}.${subfield.key}`}
           nested={true}
@@ -340,17 +338,20 @@
                 id={idFor(`${path}.${entryKey}.__key`)}
                 value={entryKey}
                 placeholder={field.key_placeholder ?? "entry_key"}
-                onchange={(event) =>
+                onchange={(event) => {
                   renameDictionaryEntry(
                     entryKey,
                     (event.currentTarget as HTMLInputElement).value,
-                  )}
+                  );
+                }}
               />
             </div>
             <button
               type="button"
               class="text-destructive text-sm"
-              onclick={() => removeDictionaryEntry(entryKey)}
+              onclick={() => {
+                removeDictionaryEntry(entryKey);
+              }}
             >
               Remove
             </button>
@@ -362,8 +363,9 @@
                 field={itemField}
                 bind:value={
                   () => entryValue[itemField.key],
-                  (nextValue) =>
-                    updateDictionaryField(entryKey, itemField.key, nextValue)
+                  (nextValue) => {
+                    updateDictionaryField(entryKey, itemField.key, nextValue);
+                  }
                 }
                 path={`${path}.${entryKey}.${itemField.key}`}
                 nested={true}
@@ -395,7 +397,9 @@
             <button
               type="button"
               class={`rounded-full border px-3 py-1 text-xs ${items.includes(option) ? "bg-accent text-accent-foreground" : ""}`}
-              onclick={() => toggleOption(option)}
+              onclick={() => {
+                toggleOption(option);
+              }}
             >
               {option}
             </button>
@@ -414,7 +418,9 @@
                 <button
                   type="button"
                   class="leading-none"
-                  onclick={() => removeArrayValue(index)}
+                  onclick={() => {
+                    removeArrayValue(index);
+                  }}
                 >
                   ×
                 </button>
