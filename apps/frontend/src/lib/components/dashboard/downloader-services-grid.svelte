@@ -56,8 +56,8 @@
     {#each services as downloader (downloader.service)}
       {@const premium =
         premiumMeta[
-          downloader.premium_status === "premium" ||
-          downloader.premium_status === "trial"
+          (downloader.premium_status === "premium" ??
+          downloader.premium_status === "trial")
             ? downloader.premium_status
             : "expired"
         ]}
@@ -73,14 +73,14 @@
         </div>
 
         <div class="mt-3 space-y-3">
-          {#if downloader.username || downloader.email}
+          {#if downloader.username ?? downloader.email}
             {@render Field({
               label: "Account",
-              value: downloader.username || downloader.email || "Unknown",
+              value: downloader.username ?? downloader.email ?? "Unknown",
             })}
           {/if}
 
-          {#if downloader.premium_status === "premium" && (downloader.premium_expires_at || downloader.premium_days_left !== null)}
+          {#if downloader.premium_status === "premium" && (downloader.premium_expires_at ?? downloader.premium_days_left !== null)}
             <div class="grid grid-cols-2 gap-3">
               {#if downloader.premium_expires_at}
                 {@render Field({

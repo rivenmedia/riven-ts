@@ -24,7 +24,7 @@
     data
       .filter(
         (_, index) =>
-          index === 0 || index === data.length - 1 || index % tickStep === 0,
+          index === 0 ?? index === data.length - 1 ?? index % tickStep === 0,
       )
       .map((item) => item.year),
   );

@@ -124,11 +124,11 @@ export function getPlexHeaders(
   includeToken?: string,
 ): Record<string, string> {
   const headers: Record<string, string> = {
-    "X-Plex-Product": options.product || "Riven Media",
-    "X-Plex-Version": options.version || "1.0",
+    "X-Plex-Product": options.product ?? "Riven Media",
+    "X-Plex-Version": options.version ?? "1.0",
     "X-Plex-Client-Identifier": options.clientId,
-    "X-Plex-Platform": options.platform || "Web",
-    "X-Plex-Device": options.device || "Browser",
+    "X-Plex-Platform": options.platform ?? "Web",
+    "X-Plex-Device": options.device ?? "Browser",
     "Content-Type": "application/json",
     Accept: "application/json",
   };
@@ -156,7 +156,7 @@ export async function generatePlexPin(
     throw new Error("Failed to generate Plex PIN");
   }
 
-  return response.json();
+  return response.json() as Promise<PlexPinResponse>;
 }
 
 /**
@@ -167,10 +167,10 @@ export function buildPlexAuthUrl(
   pinCode: string,
   forwardUrl?: string,
 ): URL {
-  const product = options.product || "Riven Media";
-  const version = options.version || "1.0";
-  const platform = options.platform || "Web";
-  const device = options.device || "Browser";
+  const product = options.product ?? "Riven Media";
+  const version = options.version ?? "1.0";
+  const platform = options.platform ?? "Web";
+  const device = options.device ?? "Browser";
 
   const authURL = new URL("https://app.plex.tv/auth");
   authURL.hash = `?clientID=${encodeURIComponent(options.clientId)}&code=${encodeURIComponent(pinCode)}&context[device][product]=${encodeURIComponent(product)}&context[device][version]=${encodeURIComponent(version)}&context[device][platform]=${encodeURIComponent(platform)}&context[device][device]=${encodeURIComponent(device)}`;
@@ -199,7 +199,7 @@ export async function checkPlexPin(
     throw new Error("Failed to check PIN status");
   }
 
-  return response.json();
+  return response.json() as Promise<PlexPinResponse>;
 }
 
 /**
@@ -215,10 +215,12 @@ export async function getPlexUserProfile(
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch user info from Plex: ${response.status}`);
+    throw new Error(
+      `Failed to fetch user info from Plex: ${response.status.toString()}`,
+    );
   }
 
-  return response.json();
+  return response.json() as Promise<PlexProfile>;
 }
 
 /**
@@ -255,7 +257,7 @@ export function plexOAuth(
   }
 
   // Use custom authorization endpoint that handles Plex PIN flow
-  const baseURL = options.baseURL || "";
+  const baseURL = options.baseURL ?? "";
 
   return {
     providerId: "plex",
@@ -282,6 +284,10 @@ export function plexOAuth(
 
       const pinId = parts[0];
       const pinCode = parts[1];
+
+      if (!pinId || !pinCode) {
+        throw new Error("Missing PIN ID or PIN code for Plex token exchange");
+      }
 
       const pinStatus = await checkPlexPin(options, pinId, pinCode);
 
@@ -332,11 +338,11 @@ export function getDefaultPlexOptions(
   env: Record<string, string | undefined>,
 ): PlexOAuthOptions {
   return {
-    clientId: env.PLEX_CLIENT_ID || "riven",
+    clientId: env["PLEX_CLIENT_ID"] ?? "riven",
     product: "Riven Media",
     version: "1.0",
     platform: "Web",
     device: "Browser",
-    disableSignUp: env.ENABLE_PLEX_SIGNUP !== "true",
+    disableSignUp: env["ENABLE_PLEX_SIGNUP"] !== "true",
   };
 }

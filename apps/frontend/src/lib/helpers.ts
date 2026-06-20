@@ -71,7 +71,7 @@ export function calculateAge(
 }
 
 export const formatBytes = (bytes: number | null | undefined): string => {
-  if (bytes === null || bytes === undefined) return "N/A";
+  if (bytes === null ?? bytes === undefined) return "N/A";
   if (bytes === 0) return "0 B";
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB", "TB"];

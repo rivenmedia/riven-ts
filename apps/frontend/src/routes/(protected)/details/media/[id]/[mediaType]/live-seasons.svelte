@@ -46,7 +46,9 @@
           )}
         >
           <PortraitCard
-            title={season.number === 0 ? "Specials" : `Season ${season.number}`}
+            title={season.number === 0
+              ? "Specials"
+              : `Season ${season.number?.toString() ?? "unknown"}`}
             image={season.image}
             isSelected={selectedSeason === season.number?.toString()}
             class="w-28 md:w-32 lg:w-36"

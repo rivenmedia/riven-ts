@@ -23,7 +23,7 @@ export const load: PageServerLoad = async (event) => {
   }
 
   const isFirstUser = await noUserExists();
-  const canRegister = isSignupEnabled || isFirstUser;
+  const canRegister = isSignupEnabled ?? isFirstUser;
 
   const loginForm = await superValidate(zod4(loginSchema), {
     id: "loginForm",
@@ -103,7 +103,7 @@ export const actions: Actions = {
             role: "admin",
             data: {
               username: registerForm.data.username,
-              image: registerForm.data.image || undefined,
+              image: registerForm.data.image ?? undefined,
             },
           },
         });
@@ -125,7 +125,7 @@ export const actions: Actions = {
             username: registerForm.data.username,
             email: registerForm.data.email,
             password: registerForm.data.password,
-            image: registerForm.data.image || undefined,
+            image: registerForm.data.image ?? undefined,
           },
         });
       }

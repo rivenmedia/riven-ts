@@ -18,7 +18,7 @@ import type { PageServerLoad } from "./$types";
 const logger = createScopedLogger("home");
 
 export const load: PageServerLoad = async ({ locals, fetch }) => {
-  if (!locals.user || !locals.session) redirect(302, "/auth/login");
+  if (!locals.user ?? !locals.session) redirect(302, "/auth/login");
 
   try {
     const trendingResults = await fetchTmdbTrending(
@@ -44,7 +44,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
     const tmdbResults = mapGqlTmdbList(trendingResults);
     const filtered = tmdbResults.filter(
       (item) =>
-        (item.media_type === "movie" || item.media_type === "tv") &&
+        (item.media_type === "movie" ?? item.media_type === "tv") &&
         item.backdrop_path,
     );
 

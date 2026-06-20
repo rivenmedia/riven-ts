@@ -23,8 +23,8 @@ import { ac, admin, manager, user } from "./permissions";
 import { plexOAuth } from "./plex-oauth";
 
 export const auth = betterAuth({
-  secret: env.AUTH_SECRET || generateSecret(),
-  baseURL: env.ORIGIN || "http://localhost:5173",
+  secret: env.AUTH_SECRET ?? generateSecret(),
+  baseURL: env.ORIGIN ?? "http://localhost:5173",
   database: drizzleAdapter(db, {
     provider: "sqlite",
   }),
@@ -71,9 +71,9 @@ export const auth = betterAuth({
     }),
     openAPI(),
     passkey({
-      rpID: env.PASSKEY_RP_ID || "riven",
-      rpName: env.PASSKEY_RP_NAME || "Riven Media",
-      origin: env.ORIGIN || "http://localhost:5173",
+      rpID: env.PASSKEY_RP_ID ?? "riven",
+      rpName: env.PASSKEY_RP_NAME ?? "Riven Media",
+      origin: env.ORIGIN ?? "http://localhost:5173",
     }),
     lastLoginMethod({
       storeInDatabase: true,
@@ -83,13 +83,13 @@ export const auth = betterAuth({
         ...(env.DISABLE_PLEX !== "true"
           ? [
               plexOAuth({
-                clientId: env.PLEX_CLIENT_ID || "riven",
+                clientId: env.PLEX_CLIENT_ID ?? "riven",
                 product: "Riven Media",
                 version: "1.0",
                 platform: "Web",
                 device: "Browser",
                 disableSignUp: env.ENABLE_PLEX_SIGNUP !== "true",
-                baseURL: env.ORIGIN || "http://localhost:5173",
+                baseURL: env.ORIGIN ?? "http://localhost:5173",
               }),
             ]
           : []),
@@ -141,7 +141,7 @@ export function getAuthProviders() {
     providers[provider.providerId] = {
       enabled: true,
       disableSignup: !!provider.disableSignUp,
-      name: provider.name || provider.providerId,
+      name: provider.name ?? provider.providerId,
       icon: provider.icon,
     };
   }

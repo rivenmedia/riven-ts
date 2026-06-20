@@ -62,7 +62,7 @@
       class="size-full overflow-x-hidden overflow-y-auto"
       style="scrollbar-gutter: stable;"
     >
-      {@render children?.()}
+      {@render children()}
     </div>
   </main>
 {:else}
@@ -77,7 +77,7 @@
         style="scrollbar-gutter: stable;"
       >
         <Header />
-        {@render children?.()}
+        {@render children()}
       </div>
     </main>
     <MobileNav />

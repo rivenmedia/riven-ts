@@ -40,7 +40,7 @@
         class="[&>svg]:text-muted-foreground flex h-8 select-none items-center gap-1 rounded-md pl-2 pr-1 text-sm font-medium [&>svg]:size-3.5"
         aria-hidden="true"
       >
-        {monthItems.find((item) => item.value === value)?.label ||
+        {monthItems.find((item) => item.value === value)?.label ??
           selectedMonthItem.label}
         <ChevronDownIcon class="size-4" />
       </span>

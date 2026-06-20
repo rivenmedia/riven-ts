@@ -47,8 +47,8 @@
     ...restProps
   }: Props = $props();
 
-  let open = $state(false);
-  let loading = $state(false);
+  let open = $state<boolean>(false);
+  let loading = $state<boolean>(false);
   let selectedSeasonNums = $state<number[]>([]);
 
   // Re-initialize selection each time the dialog opens.
@@ -73,7 +73,7 @@
   );
 
   const confirmDisabled = $derived(
-    loading ||
+    loading ??
       (mediaType === "tv" &&
         seasons.length > 0 &&
         requestableSeasons.length > 0 &&

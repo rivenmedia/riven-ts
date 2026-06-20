@@ -44,18 +44,24 @@ export function getRatings(
   type: string,
   signal?: AbortSignal,
 ): Promise<RatingsData> {
-  const key = `${type}-${id}`;
+  const key = `${type}-${id.toString()}`;
+
   if (ratingsCache.has(key)) {
     // LRU: Remove and re-add to mark as recently used
-    const promise = ratingsCache.get(key)!;
+    const promise = ratingsCache.get(key);
+
     ratingsCache.delete(key);
-    ratingsCache.set(key, promise);
-    return promise;
+
+    if (promise) {
+      ratingsCache.set(key, promise);
+
+      return promise;
+    }
   }
 
   pruneCache();
 
-  const promise = fetchRatings(id, type, signal).catch((err) => {
+  const promise = fetchRatings(id, type, signal).catch((err: unknown) => {
     // Remove from cache on failure (including abort) so it can be retried
     if (ratingsCache.get(key) === promise) {
       ratingsCache.delete(key);

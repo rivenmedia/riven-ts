@@ -59,13 +59,17 @@ function assertTVDBShowData(data: unknown): TVDBBaseItem {
   if (!data || typeof data !== "object") {
     throw new Error("Invalid TVDB response: data is not an object");
   }
+
   const obj = data as Record<string, unknown>;
-  if (typeof obj.id !== "number") {
+
+  if (typeof obj["id"] !== "number") {
     throw new Error("Invalid TVDB response: missing or invalid 'id' field");
   }
-  if (typeof obj.name !== "string") {
+
+  if (typeof obj["name"] !== "string") {
     throw new Error("Invalid TVDB response: missing or invalid 'name' field");
   }
+
   return data as TVDBBaseItem;
 }
 
@@ -109,7 +113,7 @@ function mapTraktRecommendations(items: GqlTraktRecommendation[]) {
       vote_count: null;
     }[]
   >((acc, item) => {
-    const key = `${item.mediaType}-${item.id}`;
+    const key = `${item.mediaType}-${item.id.toString()}`;
     if (seen.has(key)) return acc;
     seen.add(key);
     acc.push({
@@ -161,7 +165,7 @@ export const load = (async ({ fetch, params, locals, url }) => {
           fetch,
         )
           .then((data) => mapTraktRecommendations(data.traktRecommendations))
-          .catch((err) => {
+          .catch((err: unknown) => {
             logger.error(`Trakt fetch failed for movie id=${id}:`, err);
             return null;
           }),
@@ -201,7 +205,7 @@ export const load = (async ({ fetch, params, locals, url }) => {
           details: parsedDetails as ParsedMovieDetails,
         },
       };
-    } else if (mediaType === "tv") {
+    } else {
       // Check if the ID is already a TVDB ID (passed via query param from library)
       const indexerParam = url.searchParams.get("indexer");
       const isAlreadyTvdbId = indexerParam === "tvdb";
@@ -225,7 +229,7 @@ export const load = (async ({ fetch, params, locals, url }) => {
           ),
         );
 
-        if (!resolved || !("resolved" in resolved) || !resolved.resolved) {
+        if (!("resolved" in resolved) || !resolved.resolved) {
           logger.error(`Failed to resolve TMDB ID ${id} to TVDB ID`);
           error(502, "Unable to resolve TV show ID. Please try again later.");
         }
@@ -269,7 +273,7 @@ export const load = (async ({ fetch, params, locals, url }) => {
           fetch,
         )
           .then((data) => mapTraktRecommendations(data.traktRecommendations))
-          .catch((err) => {
+          .catch((err: unknown) => {
             logger.error(`Trakt fetch failed for show id=${id}:`, err);
             return null;
           }),
@@ -298,19 +302,19 @@ export const load = (async ({ fetch, params, locals, url }) => {
       // Log translation error if present, but don't fail the request
       if (translationsError) {
         logger.error(
-          `TVDB translations fetch failed for ID ${tvdbId} (Original: ${id}):`,
+          `TVDB translations fetch failed for ID ${tvdbId.toString()} (Original: ${id}):`,
           translationsError,
         );
       }
 
       // Merge translations into the details if both requests succeeded
-      if (details?.data && translationsData?.data?.translations) {
+      if (details?.data && translationsData?.data.translations) {
         details.data.translations = translationsData.data.translations;
       }
 
       if (detailsError) {
         logger.error(
-          `TVDB show details fetch failed for ID ${tvdbId} (Original: ${id}):`,
+          `TVDB show details fetch failed for ID ${tvdbId.toString()} (Original: ${id}):`,
           detailsError,
         );
         error(503, "Unable to connect to TVDB. Please try again later.");
@@ -324,8 +328,7 @@ export const load = (async ({ fetch, params, locals, url }) => {
       const languagesToCheck = ["jpn", "kor", "chi", "zho"];
 
       if (
-        details?.data &&
-        details?.data.originalLanguage &&
+        details.data.originalLanguage &&
         languagesToCheck.includes(details.data.originalLanguage)
       ) {
         try {
@@ -343,19 +346,11 @@ export const load = (async ({ fetch, params, locals, url }) => {
               ).then((data) => ({ data, error: null })),
             );
 
-          interface EngEpisodesResponse {
-            data: {
-              episodes: EpisodeType[];
-            };
-          }
-
-          if (!engEpisodesError && engEpisodesData && engEpisodesData.data) {
+          if (!engEpisodesError) {
             const rawData = engEpisodesData;
-            if (rawData.data?.episodes) {
-              // Cast to unknown first to avoid direct overlap error, then to expected structure
-              (
-                details.data as unknown as { episodes: EpisodeType[] }
-              ).episodes = rawData.data.episodes;
+
+            if (rawData.data.episodes.length) {
+              details.data.episodes = rawData.data.episodes;
             }
           }
         } catch (err) {
@@ -387,6 +382,6 @@ export const load = (async ({ fetch, params, locals, url }) => {
       throw err;
     }
     logger.error("Unexpected error loading media details:", err);
-    throw error(500, "Internal Server Error loading media details");
+    error(500, "Internal Server Error loading media details");
   }
 }) satisfies PageServerLoad;

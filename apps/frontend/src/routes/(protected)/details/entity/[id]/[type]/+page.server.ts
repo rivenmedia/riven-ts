@@ -87,7 +87,7 @@ export const load: PageServerLoad = async ({ fetch, params, locals, url }) => {
           { backendUrl: locals.backendUrl, apiKey: locals.apiKey, fetch },
           {
             type: "movie",
-            params: { with_companies: String(id), sort_by: "popularity.desc" },
+            params: { with_companies: id, sort_by: "popularity.desc" },
             searchMode: "discover",
           },
         ),
@@ -95,7 +95,7 @@ export const load: PageServerLoad = async ({ fetch, params, locals, url }) => {
           { backendUrl: locals.backendUrl, apiKey: locals.apiKey, fetch },
           {
             type: "tv",
-            params: { with_companies: String(id), sort_by: "popularity.desc" },
+            params: { with_companies: id, sort_by: "popularity.desc" },
             searchMode: "discover",
           },
         ),

@@ -42,7 +42,7 @@
   } = $props();
 
   let savedRankJson = $state("");
-  let savingRanking = $state(false);
+  let savingRanking = $state<boolean>(false);
 
   const customProfileCount = $derived(
     customProfiles.filter((profile) => !profile.is_builtin).length,
@@ -234,7 +234,7 @@
             onkeydown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
-                saveAsProfile();
+                void saveAsProfile();
               }
             }}
             class="w-full sm:w-56"
@@ -284,7 +284,9 @@
           <Button
             type="button"
             disabled={!hasUnsavedChanges || savingRanking}
-            onclick={saveRankingSettings}
+            onclick={() => {
+              void saveRankingSettings();
+            }}
           >
             {savingRanking ? "Saving..." : saveLabel}
           </Button>

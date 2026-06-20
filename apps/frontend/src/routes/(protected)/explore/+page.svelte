@@ -64,10 +64,14 @@
       data.feelingLuckyItems[
         Math.floor(Math.random() * data.feelingLuckyItems.length)
       ];
+
+    if (!randomItem) return;
+
     const route = resolve(
-      `/details/media/${randomItem.id}/${randomItem.media_type}`,
+      `/details/media/${randomItem.id.toString()}/${randomItem.media_type}`,
     );
-    goto(route);
+
+    void goto(route);
   }
 
   onMount(() => {
@@ -106,11 +110,11 @@
     const observer = new IntersectionObserver(
       (entries) => {
         if (
-          entries[0].isIntersecting &&
+          entries[0]?.isIntersecting &&
           !searchStore.loading &&
           searchStore.hasMore
         ) {
-          searchStore.loadMore();
+          void searchStore.loadMore();
         }
       },
       { threshold: 0.1 },
@@ -246,7 +250,7 @@
       </div>
 
       <!-- Warnings -->
-      {#if searchStore.warnings?.length > 0}
+      {#if searchStore.warnings.length > 0}
         <div
           class="rounded-lg border border-yellow-500 bg-yellow-500/10 p-4 text-yellow-600 dark:text-yellow-500"
         >
@@ -286,9 +290,9 @@
                         class="h-6 w-24 animate-pulse rounded-full bg-white/10"
                       ></div>
                     {:then ratings}
-                      {#if ratings?.scores?.length}
+                      {#if ratings?.scores.length}
                         <div class="flex items-center gap-3">
-                          {#each ratings.scores as score (`${score.name}-${score.score}-${score.url ?? ""}`)}
+                          {#each ratings.scores as score (`${score.name}-${score.score}-${score.url}`)}
                             <div
                               title={score.name}
                               class="bg-background/50 flex items-center gap-1.5 rounded-xl border border-white/10 px-2.5 py-1 backdrop-blur-md transition-transform hover:scale-105"

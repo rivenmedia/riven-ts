@@ -34,7 +34,7 @@ function isImageRequest(request: Request, url: URL): boolean {
   const hasImageAccept = acceptHeader?.includes("image/");
   const hasImageExtension = IMAGE_EXTENSIONS.test(url.pathname);
 
-  return Boolean(hasImageAccept || hasImageExtension);
+  return hasImageAccept ?? hasImageExtension;
 }
 
 function isExternalImageDomain(url: URL): boolean {

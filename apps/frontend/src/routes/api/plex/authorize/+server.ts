@@ -54,7 +54,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
     });
 
     // Build the Plex auth URL with forwardUrl pointing to our callback
-    const origin = env.ORIGIN || url.origin;
+    const origin = env.ORIGIN ?? url.origin;
     const callbackUrl = `${origin}/api/plex/callback`;
     const plexAuthUrl = buildPlexAuthUrl(options, pin.code, callbackUrl);
 

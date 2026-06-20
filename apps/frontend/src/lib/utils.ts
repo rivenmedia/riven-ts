@@ -10,10 +10,24 @@ export function getInitials(value: string | null | undefined) {
 
   const parts = value.trim().split(/\s+/).filter(Boolean);
 
-  if (parts.length === 0) return "";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  if (parts.length === 0) {
+    return "";
+  }
 
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  if (parts.length === 1) {
+    return parts[0]?.slice(0, 2).toUpperCase();
+  }
+
+  const [[firstInitial] = "", [lastInitial] = ""] = [
+    parts[0],
+    parts[parts.length - 1],
+  ];
+
+  if (!firstInitial || !lastInitial) {
+    return "";
+  }
+
+  return (firstInitial + lastInitial).toUpperCase();
 }
 
 export function deduplicateById<T extends { id?: unknown }>(items: T[]): T[] {

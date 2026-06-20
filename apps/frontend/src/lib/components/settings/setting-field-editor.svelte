@@ -14,7 +14,7 @@
   /** Per-instance state for masking password inputs. Sub-fields each
    *  get their own SettingFieldEditor instance, so this is naturally
    *  scoped to one input. */
-  let passwordRevealed = $state(false);
+  let passwordRevealed = $state<boolean>(false);
 
   let {
     field,
@@ -47,7 +47,7 @@
     const obj = isRecord(tabValue) ? tabValue : {};
     const fetched = rankFields.filter((f) => {
       const entry = obj[f.key];
-      return isRecord(entry) && entry.fetch === true;
+      return isRecord(entry) && entry["fetch"] === true;
     }).length;
     return `${fetched}/${rankFields.length} fetch`;
   }
@@ -166,6 +166,7 @@
 
   function removeDictionaryEntry(entryKey: string) {
     const dictionary = ensureDictionary();
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete dictionary[entryKey];
     value = { ...dictionary };
   }
@@ -501,12 +502,12 @@
       <div class="flex items-center gap-3">
         <Switch
           class={settingsSwitchClass}
-          checked={!!cr.fetch}
+          checked={!!cr["fetch"]}
           onCheckedChange={(next) => (value = { ...cr, fetch: next })}
         />
         <Input
           type="number"
-          value={(cr.rank ?? cr.default ?? 0) as number}
+          value={(cr["rank"] ?? cr["default"] ?? 0) as number}
           oninput={(event) => {
             const raw = (event.currentTarget as HTMLInputElement).value;
             value = { ...cr, rank: raw === "" ? null : Number(raw) };

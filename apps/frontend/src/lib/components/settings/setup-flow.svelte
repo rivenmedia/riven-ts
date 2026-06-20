@@ -45,7 +45,7 @@
   );
 
   const pluginSections = $derived(
-    buildPluginSections(plugins, savingMap, data.setupGroups ?? []),
+    buildPluginSections(plugins, savingMap, data.setupGroups),
   );
   const generalSections = $derived(
     buildGeneralSections(generalSection?.schema ?? []),
@@ -56,7 +56,7 @@
     pluginSections.find((section) => section.id === currentStep?.id) ?? null,
   );
   const qualityProfiles = $derived(
-    (data.qualityProfiles ?? []).map((profile) => ({
+    data.qualityProfiles.map((profile) => ({
       ...profile,
       enabled: customProfiles.some(
         (entry) => entry.name === profile.id && entry.enabled,

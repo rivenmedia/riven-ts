@@ -26,11 +26,11 @@ export function buildBackendRoleHeaders(
   const userId = user?.id?.trim();
 
   if (!userId) {
-    throw error(401, "Missing authenticated user");
+    error(401, "Missing authenticated user");
   }
 
   if (!signingSecret) {
-    throw error(500, "Backend auth signing secret is not configured");
+    error(500, "Backend auth signing secret is not configured");
   }
 
   const timestamp = Math.floor(Date.now() / 1000);

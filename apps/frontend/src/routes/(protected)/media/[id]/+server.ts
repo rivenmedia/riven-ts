@@ -28,7 +28,7 @@ const FORWARDED_RESPONSE_HEADERS = [
 export const GET: RequestHandler = async ({ locals, params, request }) => {
   const id = params.id;
   if (!id || !/^\d+$/.test(id)) {
-    throw error(400, "Invalid media id");
+    error(400, "Invalid media id");
   }
 
   const headers = new Headers({ "x-api-key": locals.apiKey });
@@ -50,7 +50,7 @@ export const GET: RequestHandler = async ({ locals, params, request }) => {
       headers,
     });
   } catch {
-    throw error(502, "Failed to reach media backend");
+    error(502, "Failed to reach media backend");
   }
 
   const responseHeaders = new Headers();

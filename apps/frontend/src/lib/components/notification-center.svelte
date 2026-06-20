@@ -17,7 +17,7 @@
   import { toast } from "svelte-sonner";
   import { cn } from "$lib/utils";
 
-  let open = $state(false);
+  let open = $state<boolean>(false);
 
   // Deduplicated notifications carry a stable dedupeKey. Passing that as the
   // toast `id` makes svelte-sonner update the existing toast in-place rather

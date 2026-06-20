@@ -113,59 +113,57 @@ function extractYear(airedAt: string | null | undefined): number | string {
 }
 
 function transformItems(items: GqlMediaItem[]) {
-  return items
-    .map((item) => {
-      const rawType = item.itemType.toLowerCase();
-      let id: string | number | null = null;
-      let indexer: "tmdb" | "tvdb" = "tmdb";
-      let mediaPageType = rawType === "show" ? "tv" : rawType;
-      let posterPath = item.posterPath;
-      const detailParams = new URLSearchParams();
+  return items.map((item) => {
+    const rawType = item.itemType.toLowerCase();
+    let id: string | number | null = null;
+    let indexer: "tmdb" | "tvdb" = "tmdb";
+    let mediaPageType = rawType === "show" ? "tv" : rawType;
+    let posterPath = item.posterPath;
+    const detailParams = new URLSearchParams();
 
-      if (rawType === "movie") {
-        id = item.tmdbId ?? null;
-        indexer = "tmdb";
-      } else if (rawType === "show") {
-        id = item.tvdbId ?? null;
-        indexer = "tvdb";
-      } else if (rawType === "season" || rawType === "episode") {
-        id = item.showTvdbId ?? item.showTmdbId ?? null;
-        indexer = item.showTvdbId ? "tvdb" : "tmdb";
-        mediaPageType = "tv";
-        posterPath = item.showPosterPath ?? item.posterPath;
-        if (item.seasonNumber != null) {
-          detailParams.set("season", item.seasonNumber.toString());
-        }
-        if (item.episodeNumber != null) {
-          detailParams.set("episode", item.episodeNumber.toString());
-        }
+    if (rawType === "movie") {
+      id = item.tmdbId ?? null;
+      indexer = "tmdb";
+    } else if (rawType === "show") {
+      id = item.tvdbId ?? null;
+      indexer = "tvdb";
+    } else if (rawType === "season" || rawType === "episode") {
+      id = item.showTvdbId ?? item.showTmdbId ?? null;
+      indexer = item.showTvdbId ? "tvdb" : "tmdb";
+      mediaPageType = "tv";
+      posterPath = item.showPosterPath ?? item.posterPath;
+      if (item.seasonNumber != null) {
+        detailParams.set("season", item.seasonNumber.toString());
       }
-
-      if (!id || id === "") {
-        logger.warn(
-          `Rendering item "${item.title}" (id: ${item.id}, type: ${item.itemType}) without a details link: missing external ID`,
-        );
+      if (item.episodeNumber != null) {
+        detailParams.set("episode", item.episodeNumber.toString());
       }
+    }
 
-      return {
-        id,
-        title: item.title,
-        poster_path: posterPath,
-        media_type: mediaPageType,
-        year: extractYear(item.airedAt),
-        indexer,
-        type: mediaPageType,
-        details_query: detailParams.toString(),
-        badge:
-          rawType === "season"
-            ? { text: "Season", variant: "default" }
-            : rawType === "episode"
-              ? { text: "Episode", variant: "default" }
-              : undefined,
-        riven_id: item.id,
-      };
-    })
-    .filter((item): item is NonNullable<typeof item> => item !== null);
+    if (!id) {
+      logger.warn(
+        `Rendering item "${item.title}" (id: ${item.id.toString()}, type: ${item.itemType}) without a details link: missing external ID`,
+      );
+    }
+
+    return {
+      id,
+      title: item.title,
+      poster_path: posterPath,
+      media_type: mediaPageType,
+      year: extractYear(item.airedAt),
+      indexer,
+      type: mediaPageType,
+      details_query: detailParams.toString(),
+      badge:
+        rawType === "season"
+          ? { text: "Season", variant: "default" }
+          : rawType === "episode"
+            ? { text: "Episode", variant: "default" }
+            : undefined,
+      riven_id: item.id,
+    };
+  });
 }
 
 export const load: PageServerLoad = async (event) => {
@@ -189,8 +187,8 @@ export const load: PageServerLoad = async (event) => {
 
   // Apply defaults optimistically without waiting for schema introspection.
   // The Select only ever emits valid values so this is safe.
-  const effectiveTypes = types?.length ? types : ["movie", "show"];
-  const effectiveStates = states?.filter((s) => s !== "All") ?? [];
+  const effectiveTypes = types.length ? types : ["movie", "show"];
+  const effectiveStates = states.filter((s) => s !== "All");
   itemsSearchForm.data.type = effectiveTypes;
   itemsSearchForm.data.states =
     effectiveStates.length > 0 ? effectiveStates : ["All"];
@@ -213,8 +211,8 @@ export const load: PageServerLoad = async (event) => {
     event.locals.apiKey,
     ITEMS_QUERY,
     {
-      page: page ?? 1,
-      limit: limit ?? 20,
+      page: page || 1,
+      limit: limit || 20,
       sort: (Array.isArray(sort) ? sort[0] : sort) ?? "date_desc",
       types: effectiveTypes.map((t) => t.toUpperCase()),
       search: search ?? undefined,
@@ -249,7 +247,7 @@ export const load: PageServerLoad = async (event) => {
         stateOptions,
       };
     })
-    .catch((err) => {
+    .catch((err: unknown) => {
       logger.error("Failed to fetch library data:", err);
       return null;
     });

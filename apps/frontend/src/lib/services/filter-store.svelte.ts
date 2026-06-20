@@ -141,7 +141,7 @@ export class FilterStore {
   sortBy = $state("popularity.desc");
 
   // UI state
-  isOpen = $state(false);
+  isOpen = $state<boolean>(false);
 
   get hasActiveFilters(): boolean {
     return (

@@ -52,7 +52,7 @@
   let { user } = $props();
   const permissions = $derived(getPermissionFlags(user?.role));
   const visibleNavItems = $derived(
-    navItems.filter((item) => !item.adminOnly || permissions.canManageSettings),
+    navItems.filter((item) => !item.adminOnly ?? permissions.canManageSettings),
   );
 
   const SidebarStore = getContext<createSidebarStore>("sidebarStore");

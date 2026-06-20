@@ -99,7 +99,7 @@ export function mapRecentItemsPage(data: RecentItemsResponse): RecentItemsPage {
           ? "tv"
           : item.itemType.toLowerCase(),
       year:
-        item.year ||
+        item.year ??
         (item.airedAt ? new Date(item.airedAt).getFullYear() : "N/A"),
       riven_id: item.id,
     } satisfies RecentListItem;

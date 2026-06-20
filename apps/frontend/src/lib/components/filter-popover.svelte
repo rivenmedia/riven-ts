@@ -175,14 +175,14 @@
         <span class="text-sm font-medium">Language</span>
         <Select.Root
           type="single"
-          value={filterStore.withOriginalLanguage || undefined}
+          value={filterStore.withOriginalLanguage ?? undefined}
           onValueChange={(v: string) =>
-            (filterStore.withOriginalLanguage = v || "")}
+            (filterStore.withOriginalLanguage = v ?? "")}
         >
           <Select.Trigger class="h-8 text-xs">
             {LANGUAGE_OPTIONS.find(
               (l) => l.value === filterStore.withOriginalLanguage,
-            )?.label || "All Languages"}
+            )?.label ?? "All Languages"}
           </Select.Trigger>
           <Select.Content
             class="bg-popover rounded-2xl border-none shadow-2xl shadow-black/50"

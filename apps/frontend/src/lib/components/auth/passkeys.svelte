@@ -18,12 +18,12 @@
     createdAt: string | Date;
   }
 
-  let isRegisteringPasskey = $state(false);
+  let isRegisteringPasskey = $state<boolean>(false);
   let userPasskeys = $state<Passkey[]>([]);
-  let isLoadingPasskeys = $state(true);
+  let isLoadingPasskeys = $state<boolean>(true);
   let editingPasskeyId = $state<string | null>(null);
   let editingPasskeyName = $state<string>("");
-  let isUpdatingPasskey = $state(false);
+  let isUpdatingPasskey = $state<boolean>(false);
 
   onMount(async () => {
     await loadPasskeys();
@@ -33,7 +33,7 @@
     isLoadingPasskeys = true;
     try {
       const response = await authClient.passkey.listUserPasskeys();
-      userPasskeys = (response.data || []) as Passkey[];
+      userPasskeys = (response.data ?? []) as Passkey[];
     } catch (error) {
       logger.error("Failed to load passkeys:", error);
       userPasskeys = [];
@@ -48,8 +48,14 @@
       await authClient.passkey.addPasskey({
         fetchOptions: {
           onSuccess() {
-            toast.success("Passkey registered successfully!");
-            loadPasskeys();
+            loadPasskeys()
+              .then(() => {
+                toast.success("Passkey registered successfully!");
+              })
+              .catch((error: unknown) => {
+                logger.error("Failed to reload passkeys:", error);
+                toast.error("Failed to reload passkeys");
+              });
           },
           onError(context) {
             toast.error(context.error.message || "Failed to register passkey");
@@ -87,7 +93,7 @@
       });
 
       if (error) {
-        toast.error(error.message || "Failed to update passkey name");
+        toast.error(error.message ?? "Failed to update passkey name");
       } else {
         toast.success("Passkey name updated successfully!");
         editingPasskeyId = null;
@@ -181,8 +187,18 @@
                         id: passkey.id,
                         fetchOptions: {
                           onSuccess() {
-                            toast.success("Passkey deleted successfully");
-                            loadPasskeys();
+                            loadPasskeys()
+                              .then(() => {
+                                toast.success("Passkey deleted successfully");
+                              })
+                              .catch((error: unknown) => {
+                                logger.error(
+                                  "Failed to reload passkeys:",
+                                  error,
+                                );
+
+                                toast.error("Failed to reload passkeys");
+                              });
                           },
                           onError(context) {
                             toast.error(

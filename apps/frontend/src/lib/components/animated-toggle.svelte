@@ -24,7 +24,7 @@
 
   function updatePosition(val: string | undefined, immediate = false) {
     requestAnimationFrame(() => {
-      if (!val || elements.length === 0 || !container) return;
+      if (!val ?? elements.length === 0 ?? !container) return;
       const index = options.findIndex((o: Option) => o.value === val);
       if (index === -1) return;
 

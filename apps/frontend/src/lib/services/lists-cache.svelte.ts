@@ -53,16 +53,16 @@ function extractItems<T>(data: unknown): T[] {
     items = data;
   } else if (data && typeof data === "object") {
     const obj = data as Record<string, unknown>;
-    if (Array.isArray(obj.results)) {
-      items = obj.results;
-    } else if (Array.isArray(obj.items)) {
-      items = obj.items;
-    } else if (obj.data && typeof obj.data === "object") {
-      const pageData = obj.data as Record<string, unknown>;
-      if (pageData.Page && typeof pageData.Page === "object") {
-        const page = pageData.Page as Record<string, unknown>;
-        if (Array.isArray(page.media)) {
-          items = page.media;
+    if (Array.isArray(obj["results"])) {
+      items = obj["results"];
+    } else if (Array.isArray(obj["items"])) {
+      items = obj["items"];
+    } else if (obj["data"] && typeof obj["data"] === "object") {
+      const pageData = obj["data"] as Record<string, unknown>;
+      if (pageData["Page"] && typeof pageData["Page"] === "object") {
+        const page = pageData["Page"] as Record<string, unknown>;
+        if (Array.isArray(page["media"])) {
+          items = page["media"];
         }
       }
     }
@@ -76,11 +76,14 @@ function extractItems<T>(data: unknown): T[] {
  */
 function deduplicateById<T extends { id?: unknown }>(items: T[]): T[] {
   const seenIds: unknown[] = [];
+
   return items.filter((item) => {
     if (item.id === undefined || seenIds.includes(item.id)) {
       return false;
     }
+
     seenIds.push(item.id);
+
     return true;
   });
 }
@@ -98,19 +101,26 @@ export class MediaListStore<T = unknown> {
 
   // Runtime state (non-persisted)
   #items = $state<T[]>([]);
-  #loading = $state(false);
+  #loading = $state<boolean>(false);
   #error = $state<string | null>(null);
   #page = $state(1);
-  #hasMore = $state(true);
-  #initialized = $state(false);
+  #hasMore = $state<boolean>(true);
+  #initialized = $state<boolean>(false);
 
   constructor(options: MediaListStoreOptions<T>) {
     this.#key = options.key;
-    this.#apiPath = options.apiPath;
+
+    if (options.apiPath) {
+      this.#apiPath = options.apiPath;
+    }
+
     this.#supportsTimeWindow = options.initialTimeWindow !== undefined;
     this.#defaultTimeWindow = options.initialTimeWindow ?? "day";
     this.#noCache = options.noCache ?? false;
-    this.#loader = options.loader;
+
+    if (options.loader) {
+      this.#loader = options.loader;
+    }
 
     if (browser && this.#supportsTimeWindow) {
       this.#timeWindowState = new PersistedState<MediaListState>(
@@ -131,7 +141,7 @@ export class MediaListStore<T = unknown> {
       }
     } else if (browser) {
       // Only auto-load if no initial data
-      this.load();
+      void this.load();
     }
   }
 
@@ -174,7 +184,7 @@ export class MediaListStore<T = unknown> {
 
     const tw = this.timeWindow;
     const baseUrl = tw ? `${this.#apiPath}/${tw}/trending` : this.#apiPath;
-    return `${baseUrl}?page=${page}`;
+    return `${baseUrl}?page=${page.toString()}`;
   }
 
   #getCachedData(): CachedData<T> | null {
@@ -331,7 +341,7 @@ export class MediaListStore<T = unknown> {
     const response = await fetch(this.#getApiUrl(page));
     if (!response.ok) {
       throw new Error(
-        `Failed to fetch data: ${response.status} ${response.statusText}`,
+        `Failed to fetch data: ${response.status.toString()} ${response.statusText}`,
       );
     }
 

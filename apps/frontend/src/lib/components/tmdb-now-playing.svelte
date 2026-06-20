@@ -139,17 +139,27 @@
   }
 
   $effect(() => {
-    if (!data || data.length === 0) return;
+    if (!data.length) {
+      return;
+    }
 
     // 1. Load current item immediately
     const currentItem = data[currentIndex];
-    if (currentItem) loadItemData(currentItem);
+    if (currentItem) {
+      void loadItemData(currentItem);
+    }
 
     // 2. Load next/prev items (priority)
     const nextIndex = (currentIndex + 1) % data.length;
     const prevIndex = (currentIndex - 1 + data.length) % data.length;
-    if (data[nextIndex]) loadItemData(data[nextIndex]);
-    if (data[prevIndex]) loadItemData(data[prevIndex]);
+
+    if (data[nextIndex]) {
+      void loadItemData(data[nextIndex]);
+    }
+
+    if (data[prevIndex]) {
+      void loadItemData(data[prevIndex]);
+    }
 
     // 3. Load the rest in background with a slight delay/idle check
     // Using a simple timeout to defer non-critical fetches
@@ -161,7 +171,7 @@
           index !== prevIndex &&
           logos[item.id] === undefined
         ) {
-          loadItemData(item);
+          void loadItemData(item);
         }
       });
     }, 1000);
@@ -303,18 +313,18 @@
                     >
                       {isTV ? "Series" : "Movie"}
                     </span>
-                    {#if certifications[item.id] || (item.certification && item.certification !== "N/A")}
+                    {#if certifications[item.id] ?? (item.certification && item.certification !== "N/A")}
                       <span class="text-white/40">|</span>
                       <span
                         class="flex items-center justify-center rounded-sm border border-white/40 px-1.5 py-1 text-[10px] leading-none font-bold tracking-wider uppercase md:text-xs"
                       >
-                        {certifications[item.id] || item.certification}
+                        {certifications[item.id] ?? item.certification}
                       </span>
                     {/if}
                     <span class="text-white/40">|</span>
                     <span class="text-white drop-shadow-md"
                       >{getSeasonAndYear(
-                        item.release_date || item.first_air_date || "",
+                        item.release_date ?? item.first_air_date ?? "",
                       )}</span
                     >
                     {#if item.original_language}
@@ -325,7 +335,7 @@
                     {/if}
                     {#if ratings[item.id]?.scores?.length}
                       <div class="ml-2 flex items-center gap-4">
-                        {#each ratings[item.id].scores as score (score.name)}
+                        {#each ratings[item.id]?.scores as score (score.name)}
                           <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
                           <a
                             href={score.url}

@@ -20,7 +20,7 @@
   setContext("searchStore", searchStore);
   setContext("filterStore", filterStore);
 
-  let isTriggerVisible = $state(false);
+  let isTriggerVisible = $state<boolean>(false);
 
   onMount(() => {
     // Initialize as a discovery page for TV shows
@@ -116,7 +116,7 @@
               <ArrowUpDownIcon class="text-muted-foreground size-4" />
               <span class="truncate">
                 {SORT_OPTIONS.find((s) => s.value === filterStore.sortBy)
-                  ?.label || "Most Popular"}
+                  ?.label ?? "Most Popular"}
               </span>
             </Select.Trigger>
             <Select.Content

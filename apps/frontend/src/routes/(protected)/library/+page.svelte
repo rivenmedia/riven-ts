@@ -75,7 +75,7 @@
 
   const itemsStore = new ItemStore();
 
-  let actionInProgress = $state(false);
+  let actionInProgress = $state<boolean>(false);
   let formElement: HTMLFormElement;
 
   const ITEMS_QUERY = `
@@ -126,14 +126,14 @@
     }
 
     url.searchParams.delete("type");
-    if ($formData.type?.length) {
+    if ($formData.type.length) {
       $formData.type.forEach((t) => {
         url.searchParams.append("type", t);
       });
     }
 
     url.searchParams.delete("states");
-    if ($formData.states?.length) {
+    if ($formData.states.length) {
       $formData.states.forEach((s) => {
         url.searchParams.append("states", s);
       });
@@ -144,7 +144,9 @@
     $formData.page = 1;
 
     const libraryPath = resolve("/library");
-    goto(url.search ? `${libraryPath}${url.search}` : libraryPath, {
+
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    void goto(url.search ? `${libraryPath}${url.search}` : libraryPath, {
       keepFocus: true,
       noScroll: true,
     });
@@ -231,19 +233,19 @@
   }
 
   async function refreshLiveLibrary() {
-    const types = $formData.type?.length
+    const types = $formData.type.length
       ? $formData.type.map((type) => type.toUpperCase())
       : undefined;
-    const states = $formData.states?.filter((state) => state !== "All");
+    const states = $formData.states.filter((state) => state !== "All");
     const result = await gqlClient<{ items: GqlItemsPage }>(ITEMS_QUERY, {
-      page: $formData.page ?? 1,
-      limit: $formData.limit ?? liveLimit,
+      page: $formData.page || 1,
+      limit: $formData.limit || liveLimit,
       sort:
         (Array.isArray($formData.sort) ? $formData.sort[0] : $formData.sort) ??
         "date_desc",
       types,
-      search: $formData.search || undefined,
-      states: states && states.length > 0 ? states : undefined,
+      search: $formData.search ?? undefined,
+      states: states.length > 0 ? states : undefined,
     });
 
     liveItems = transformItems(result.items.items);
@@ -255,7 +257,7 @@
   $effect(() => {
     let cancelled = false;
 
-    data.pageData?.then((d) => {
+    void data.pageData.then((d) => {
       if (cancelled || !d) return;
       liveItems = d.items;
       liveLimit = d.limit;
@@ -558,7 +560,7 @@
                   ids: itemsStore.items.map((id) => id.toString()),
                 });
                 if (result.count > 0) {
-                  toast.success(`Reset ${result.count} items`);
+                  toast.success(`Reset ${result.count.toString()} items`);
                 } else {
                   toast.info("No matching items were reset");
                 }
@@ -583,7 +585,9 @@
                   ids: itemsStore.items.map((id) => id.toString()),
                 });
                 if (result.count > 0) {
-                  toast.success(`Marked ${result.count} items for retry`);
+                  toast.success(
+                    `Marked ${result.count.toString()} items for retry`,
+                  );
                 } else {
                   toast.info("No matching items were marked for retry");
                 }
@@ -607,7 +611,7 @@
                 await remove_items({
                   ids: itemsStore.items.map((id) => id.toString()),
                 });
-                toast.success(`Removed ${itemsStore.count} items`);
+                toast.success(`Removed ${itemsStore.count.toString()} items`);
                 itemsStore.clear();
                 await refreshLiveLibrary();
               } catch (e) {

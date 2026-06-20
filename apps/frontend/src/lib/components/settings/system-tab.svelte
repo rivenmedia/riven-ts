@@ -8,8 +8,8 @@
 
   const RESET_LIBRARY = `mutation { resetLibrary }`;
 
-  let open = $state(false);
-  let loading = $state(false);
+  let open = $state<boolean>(false);
+  let loading = $state<boolean>(false);
 
   async function resetLibrary() {
     try {

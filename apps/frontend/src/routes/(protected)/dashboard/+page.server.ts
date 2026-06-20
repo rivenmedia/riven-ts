@@ -207,7 +207,7 @@ function mapDebridService(info: GqlDebridAccountInfo): DownloaderService {
   };
 }
 
-export const load = (async ({ depends, fetch, locals }) => {
+export const load = (({ depends, fetch, locals }) => {
   depends(DASHBOARD_STATS_DEPENDENCY);
 
   // All three queries start in parallel. Returning Promises (not awaited values)
@@ -239,11 +239,11 @@ export const load = (async ({ depends, fetch, locals }) => {
           PartiallyCompleted: s.partiallyCompleted,
           Unreleased: s.unreleased,
         },
-        activity: data.activity ?? {},
-        media_year_releases: data.yearReleases ?? [],
+        activity: data.activity,
+        media_year_releases: data.yearReleases,
       };
     })
-    .catch((err) => {
+    .catch((err: unknown) => {
       logger.error("Failed to fetch stats:", err);
       return null;
     });
@@ -251,7 +251,7 @@ export const load = (async ({ depends, fetch, locals }) => {
   const activePlaybackSessions = gql<{
     activePlaybackSessions: ActivePlaybackSession[];
   }>(locals.backendUrl, locals.apiKey, ACTIVE_PLAYBACK_QUERY, {}, fetch)
-    .then((data) => data.activePlaybackSessions ?? [])
+    .then((data) => data.activePlaybackSessions)
     .catch((): ActivePlaybackSession[] => []);
 
   const downloaderServices = gql<{ debridAccountInfo: GqlDebridAccountInfo[] }>(
@@ -261,7 +261,7 @@ export const load = (async ({ depends, fetch, locals }) => {
     {},
     fetch,
   )
-    .then((data) => (data.debridAccountInfo ?? []).map(mapDebridService))
+    .then((data) => data.debridAccountInfo.map(mapDebridService))
     .catch((): DownloaderService[] => []);
 
   const EMPTY_TITLE_SUMMARY: UsenetTitleHealthSummary = {
@@ -279,11 +279,11 @@ export const load = (async ({ depends, fetch, locals }) => {
     usenetTraffic: UsenetTraffic;
   }>(locals.backendUrl, locals.apiKey, USENET_HEALTH_QUERY, {}, fetch)
     .then((data) => ({
-      providers: data.nntpProviders ?? [],
-      streaming: data.usenetStreamingHealth ?? null,
-      titles: data.usenetTitleHealth ?? [],
-      titleSummary: data.usenetTitleHealthSummary ?? EMPTY_TITLE_SUMMARY,
-      traffic: data.usenetTraffic ?? null,
+      providers: data.nntpProviders,
+      streaming: data.usenetStreamingHealth,
+      titles: data.usenetTitleHealth,
+      titleSummary: data.usenetTitleHealthSummary,
+      traffic: data.usenetTraffic,
     }))
     .catch(
       (): {

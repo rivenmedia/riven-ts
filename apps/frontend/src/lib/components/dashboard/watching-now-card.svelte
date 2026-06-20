@@ -19,7 +19,7 @@
   } as const;
 
   function formatTime(seconds: number | null | undefined) {
-    if (seconds === null || seconds === undefined || seconds < 0) return null;
+    if (seconds === null ?? seconds === undefined ?? seconds < 0) return null;
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const remainder = Math.floor(seconds % 60);

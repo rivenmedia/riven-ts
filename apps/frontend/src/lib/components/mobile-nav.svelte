@@ -29,7 +29,7 @@
 
   const isMainPage = $derived(MAIN_PAGES.includes(page.url.pathname));
 
-  let searchModalOpen = $state(false);
+  let searchModalOpen = $state<boolean>(false);
 </script>
 
 {#if !isMainPage}

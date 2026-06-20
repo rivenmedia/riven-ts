@@ -61,7 +61,7 @@ export const load: PageServerLoad = async (event) => {
           headers: event.request.headers,
         })
         .then((result) => result.users as ManagedUser[])
-        .catch((error) => {
+        .catch((error: unknown) => {
           logger.error("Error loading managed users:", error);
           return [] satisfies ManagedUser[];
         })
@@ -214,7 +214,7 @@ export const actions: Actions = {
           },
         });
 
-        if (!usernameCheckResponse?.available) {
+        if (!usernameCheckResponse.available) {
           return setError(
             changeUserDataForm,
             "newUsername",
@@ -226,15 +226,15 @@ export const actions: Actions = {
       const updatePayload: Record<string, string> = {};
 
       if (formData.newUsername && formData.newUsername.trim() !== "") {
-        updatePayload.username = formData.newUsername;
+        updatePayload["username"] = formData.newUsername;
       }
 
       if (formData.newName && formData.newName.trim() !== "") {
-        updatePayload.name = formData.newName;
+        updatePayload["name"] = formData.newName;
       }
 
       if (formData.newAvatar && formData.newAvatar.trim() !== "") {
-        updatePayload.image = formData.newAvatar;
+        updatePayload["image"] = formData.newAvatar;
       }
 
       if (Object.keys(updatePayload).length > 0) {

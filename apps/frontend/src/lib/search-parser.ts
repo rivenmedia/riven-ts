@@ -38,8 +38,6 @@ export interface TVDBParams {
   without_genres?: string;
 }
 
-type TVDBAssignableKey = keyof TVDBParams;
-
 /**
  * Search mode type
  */
@@ -184,7 +182,7 @@ export function parseSearchQuery(query: string): ParsedSearchQuery {
   const warnings: string[] = [];
 
   // Split by whitespace but keep quoted strings together
-  const tokens = query.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
+  const tokens = query.match(/(?:[^\s"]+|"[^"]*")+/g) ?? [];
 
   for (const token of tokens) {
     const colonIndex = token.indexOf(":");

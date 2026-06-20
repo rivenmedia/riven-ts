@@ -17,7 +17,7 @@
   } = $props();
 
   let selectedId = $state<string | null>(null);
-  let saving = $state(false);
+  let saving = $state<boolean>(false);
   const selected = $derived(
     sections.find((s) => s.id === selectedId) ?? sections[0] ?? null,
   );
@@ -38,7 +38,7 @@
       .filter((group) => group.sections.length > 0);
 
     const other = sections
-      .filter((s) => !s.category || !knownIds.has(s.category))
+      .filter((s) => !s.category ?? !knownIds.has(s.category))
       .sort(byName);
     if (other.length > 0) result.push({ title: "Other", sections: other });
 

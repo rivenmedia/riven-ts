@@ -111,13 +111,13 @@
   });
 
   const itemsByDate = $derived.by(() => {
-    const items = data.calendar?.data
-      ? (Object.values(data.calendar.data) as unknown as EntertainmentItem[])
-      : [];
+    const items = Object.values(
+      data.calendar.data,
+    ) as unknown as EntertainmentItem[];
 
     const result: Record<string, EntertainmentItem[]> = {};
     for (const item of items) {
-      if (!item?.aired_at) continue;
+      if (!item.aired_at) continue;
       const date = dateUtils.parseISODate(item.aired_at);
       if (!date) continue;
       const dateKey = dateUtils.toISODate(date);
@@ -197,8 +197,8 @@
 </svelte:head>
 
 {#snippet itemIcon(item: EntertainmentItem, size = 4)}
-  {@const s = typeStyles[item.item_type] ?? typeStyles.movie}
-  {@const cls = `h-${size} w-${size} shrink-0 ${s.icon}`}
+  {@const s = typeStyles[item.item_type] ?? typeStyles["movie"]}
+  {@const cls = `h-${size} w-${size} shrink-0 ${s?.icon}`}
   {#if item.item_type === "movie"}
     <Film class={cls} />
   {:else}
@@ -232,11 +232,11 @@
 
 {#snippet entertainmentItem(item: EntertainmentItem, compact = false)}
   {@const href = itemUrl(item)}
-  {@const s = typeStyles[item.item_type] ?? typeStyles.movie}
+  {@const s = typeStyles[item.item_type] ?? typeStyles["movie"]}
   {@const classes = cn(
     "group/item flex items-center rounded-md border transition-colors",
     compact ? "gap-1.5 truncate px-2 py-1" : "gap-3 p-2.5",
-    s.item,
+    s?.item,
     item.last_state === "Completed" && "line-through opacity-60",
     href && "no-underline",
   )}
@@ -247,14 +247,14 @@
     <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
     <a {href} class={classes} {title}>
       {#if compact}
-        <span class={cn("size-1.5 shrink-0 rounded-full", s.dot)}></span>
+        <span class={cn("size-1.5 shrink-0 rounded-full", s?.dot)}></span>
       {/if}
       {@render itemContent(item, compact)}
     </a>
   {:else}
     <div class={classes} {title}>
       {#if compact}
-        <span class={cn("size-1.5 shrink-0 rounded-full", s.dot)}></span>
+        <span class={cn("size-1.5 shrink-0 rounded-full", s?.dot)}></span>
       {/if}
       {@render itemContent(item, compact)}
     </div>
@@ -393,7 +393,7 @@
     {#each filterOptions as opt (opt.id)}
       {@const Icon = opt.icon}
       {@const selected = filters[opt.type] !== false}
-      {@const s = typeStyles[opt.type] ?? typeStyles.movie}
+      {@const s = typeStyles[opt.type] ?? typeStyles["movie"]}
       <label
         for={opt.id}
         class={cn(
@@ -404,12 +404,11 @@
       >
         <Checkbox
           id={opt.id}
-          checked={filters[opt.type]}
+          checked={filters[opt.type] ?? false}
           class="size-4"
-          onCheckedChange={(checked: boolean) =>
-            (filters[opt.type] = !!checked)}
+          onCheckedChange={(checked: boolean) => (filters[opt.type] = checked)}
         />
-        <Icon class={cn("h-4 w-4", s.icon)} />
+        <Icon class={cn("h-4 w-4", s?.icon)} />
         <span>{opt.label}</span>
       </label>
     {/each}

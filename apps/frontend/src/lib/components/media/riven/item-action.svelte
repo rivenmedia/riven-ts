@@ -85,8 +85,8 @@
       `You will be notified when it's ${presentation.done}.`,
   );
 
-  let open = $state(false);
-  let loading = $state(false);
+  let open = $state<boolean>(false);
+  let loading = $state<boolean>(false);
 
   async function run(): Promise<void> {
     const validIds = toNumericIds(ids);

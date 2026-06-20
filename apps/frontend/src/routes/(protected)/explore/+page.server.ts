@@ -15,7 +15,7 @@ import type { PageServerLoad } from "./$types";
 export const load: PageServerLoad = async ({ url, fetch, locals }) => {
   // Parse and validate search params from the URL
   const form = await superValidate(url.searchParams, zod4(searchSchema));
-  const parsed = parseSearchQuery(form.data.query || "");
+  const parsed = parseSearchQuery(form.data.query ?? "");
 
   // Fetch trending content for search examples and hero
   let heroItems: TMDBTransformedListItem[] = [];
@@ -90,7 +90,7 @@ export const load: PageServerLoad = async ({ url, fetch, locals }) => {
     // Extract titles for search examples from hero items
     searchExamples = heroItems
       .slice(0, 6)
-      .map((item) => item.title?.toLowerCase() || "");
+      .map((item) => item.title.toLowerCase() || "");
   } catch (err) {
     logger.error("Failed to fetch trending content", err);
   }
@@ -106,9 +106,16 @@ export const load: PageServerLoad = async ({ url, fetch, locals }) => {
 
 function shuffleArray<T>(array: T[]): T[] {
   const newArray = [...array];
+
   for (let i = newArray.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+
+    const left = newArray[i];
+    const right = newArray[j];
+
+    if (left && right) {
+      [newArray[i], newArray[j]] = [right, left];
+    }
   }
   return newArray;
 }

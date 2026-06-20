@@ -43,7 +43,7 @@ export interface SettingFieldDef {
 export interface SettingsSection {
   id: string;
   title: string;
-  kind: "general" | "plugin" | string;
+  kind: string;
   schema: SettingFieldDef[];
   values: Record<string, unknown>;
   category?: string | null;

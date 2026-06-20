@@ -63,9 +63,9 @@
     onRequested,
   }: Props = $props();
 
-  let open = $state(false);
-  let loading = $state(false);
-  let requestLoading = $state(false);
+  let open = $state<boolean>(false);
+  let loading = $state<boolean>(false);
+  let requestLoading = $state<boolean>(false);
   let collectionData = $state<CollectionDetails | null>(null);
   let error = $state<string | null>(null);
 
@@ -286,7 +286,7 @@
       >
         <Button
           onclick={requestAll}
-          disabled={requestLoading || !page.data.permissions?.canRequestItems}
+          disabled={requestLoading ?? !page.data.permissions?.canRequestItems}
           variant="secondary"
           class="border-primary/50 bg-primary/20 text-primary hover:bg-primary/30 w-full border shadow-lg backdrop-blur-md transition-all hover:scale-[1.02]"
         >

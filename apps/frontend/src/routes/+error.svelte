@@ -12,13 +12,25 @@
   import { cubicOut } from "svelte/easing";
 
   const status = $derived(page.status);
-  const message = $derived(page.error?.message || "Something went wrong");
+  const message = $derived(page.error?.message ?? "Something went wrong");
 
   const title = $derived.by(() => {
-    if (status === 404) return "Page not found";
-    if (status === 400) return "Bad request";
-    if (status === 401 || status === 403) return "Access denied";
-    if (status >= 500) return "The backend hit turbulence";
+    if (status === 404) {
+      return "Page not found";
+    }
+
+    if (status === 400) {
+      return "Bad request";
+    }
+
+    if (status === 401 || status === 403) {
+      return "Access denied";
+    }
+
+    if (status >= 500) {
+      return "The backend hit turbulence";
+    }
+
     return "Unable to load page";
   });
 
@@ -26,15 +38,19 @@
     if (status === 404) {
       return "The page or metadata record could not be found.";
     }
+
     if (status === 400) {
       return "The URL contains a value Riven cannot use.";
     }
+
     if (status === 401 || status === 403) {
       return "Your account does not have permission to view this page.";
     }
+
     if (status >= 500) {
       return "Riven could not finish this request. Try again, or check the backend logs if it keeps happening.";
     }
+
     return "Riven could not finish this request.";
   });
 

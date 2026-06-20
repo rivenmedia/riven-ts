@@ -17,7 +17,7 @@
     tmdbId?: number;
     mediaType?: "movie" | "tv";
     initialRating?: number;
-    episodeNumber?: number;
+    episodeNumber?: number | undefined;
   }
 
   let {
@@ -123,7 +123,6 @@
               {:then ratingsData}
                 {#if ratingsData?.scores?.length}
                   {#each ratingsData.scores as score (score.name)}
-                    <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
                     <a
                       href={score.url}
                       target="_blank"

@@ -6,12 +6,16 @@ import { svelteCore } from "./svelte/svelte-core.ts";
 
 import type { Config } from "@sveltejs/kit";
 
-export const createSvelteEslintConfig = (svelteConfig: Config) =>
+export const createSvelteEslintConfig = (
+  dirname: string,
+  svelteConfig: Config,
+) =>
   defineConfig(svelteCore, {
-    name: "riven:apply-parser-options-svelte-config",
+    name: "riven:apply-parser-options-svelte",
     files: [svelteFiles],
     languageOptions: {
       parserOptions: {
+        tsconfigRootDir: dirname,
         parser: tseslint.parser,
         projectService: true,
         extraFileExtensions: [".svelte"],

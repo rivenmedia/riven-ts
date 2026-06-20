@@ -66,7 +66,7 @@ function unflattenObject(
       if (i === parts.length - 1) {
         current[part] = value;
       } else {
-        current[part] = current[part] || {};
+        current[part] = current[part] ?? {};
         current = current[part] as NestedObject;
       }
     }
@@ -140,7 +140,7 @@ export function getGenericOAuthProviders(
             "URL"
           ] as string | undefined),
         name:
-          (config["NAME"] as string) ||
+          (config["NAME"] as string) ??
           providerId.charAt(0).toUpperCase() + providerId.slice(1),
         icon: config["ICON"] as string,
       });

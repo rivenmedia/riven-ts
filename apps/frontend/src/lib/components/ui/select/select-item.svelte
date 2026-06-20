@@ -32,7 +32,7 @@
     {#if childrenProp}
       {@render childrenProp({ selected, highlighted })}
     {:else}
-      {label || value}
+      {label ?? value}
     {/if}
   {/snippet}
 </SelectPrimitive.Item>

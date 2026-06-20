@@ -93,12 +93,12 @@
     ...restProps
   }: Props = $props();
 
-  let open = $state(false);
-  let loading = $state(false);
+  let open = $state<boolean>(false);
+  let loading = $state<boolean>(false);
   let error = $state<string | null>(null);
   let selectedSeasons = $state<number[]>([]);
-  let cachedOnly = $state(true);
-  let advancedOpen = $state(false);
+  let cachedOnly = $state<boolean>(true);
+  let advancedOpen = $state<boolean>(false);
   let customTmdbId = $state("");
   let customTvdbId = $state("");
   let explicitHash = $state("");
@@ -121,7 +121,9 @@
       if (!trimmed) return null;
       // Extract hash from a full magnet URI
       const btih = /urn:btih:([a-fA-F0-9]{40}|[a-zA-Z0-9]{32})/i.exec(trimmed);
-      if (btih) return btih[1].toLowerCase();
+      if (btih?.[1]) {
+        return btih[1].toLowerCase();
+      }
       // Accept a bare 40- or 64-char hex hash
       if (
         /^[0-9a-fA-F]{40}$/.test(trimmed) ||
@@ -238,7 +240,7 @@
         },
       );
 
-      streams = data.discoverStreams ?? [];
+      streams = data.discoverStreams;
       toast.success(streams.length ? "Streams found" : "No streams found");
     } catch (e) {
       error = e instanceof Error ? e.message : "Failed to discover streams";
@@ -259,7 +261,7 @@
       infoHash: stream.infoHash,
       magnet: stream.magnet,
       parsedData: stream.parsedData,
-      rank: stream.rank,
+      rank: stream.rank ?? null,
     });
   }
 
@@ -277,7 +279,10 @@
 
     return submitDownload(`manual:${cleanedHash}`, {
       itemType: mediaType === "movie" ? "MOVIE" : "SEASON",
-      seasonNumber: mediaType === "tv" ? selectedSeasons[0] : null,
+      seasonNumber:
+        mediaType === "tv" && selectedSeasons[0] != null
+          ? selectedSeasons[0]
+          : null,
       seasons: mediaType === "tv" ? selectedSeasons : null,
       infoHash: cleanedHash,
       magnet: `magnet:?xt=urn:btih:${cleanedHash}`,
@@ -292,7 +297,7 @@
   });
 </script>
 
-{#if page.data.permissions?.canManageLibrary}
+{#if page.data["permissions"].canManageLibrary}
   <Dialog.Root bind:open>
     <Dialog.Trigger>
       {#snippet child({ props })}

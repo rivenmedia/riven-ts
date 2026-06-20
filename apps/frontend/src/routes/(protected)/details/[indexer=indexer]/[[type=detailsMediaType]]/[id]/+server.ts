@@ -42,10 +42,8 @@ async function resolveAndRedirect(
       options.to === "tvdb" && options.mediaType === "tv"
         ? "?indexer=tvdb"
         : "";
-    throw redirect(
-      307,
-      `/details/media/${result.id}/${options.mediaType}${query}`,
-    );
+
+    redirect(307, `/details/media/${result.id}/${options.mediaType}${query}`);
   }
 
   // For anilist, return JSON error; for others, throw HTTP error
@@ -57,7 +55,7 @@ async function resolveAndRedirect(
       id: options.id,
     });
   }
-  throw error(404, errorMessage);
+  error(404, errorMessage);
 }
 
 export const GET: RequestHandler = async ({ params, fetch, locals }) => {
@@ -70,9 +68,15 @@ export const GET: RequestHandler = async ({ params, fetch, locals }) => {
   };
 
   switch (indexer) {
-    case "tmdb":
-      if (!type) throw error(400, "Media type is required for tmdb");
-      if (type === "movie") throw redirect(307, `/details/media/${id}/movie`);
+    case "tmdb": {
+      if (!type) {
+        return error(400, "Media type is required for tmdb");
+      }
+
+      if (type === "movie") {
+        return redirect(307, `/details/media/${id}/movie`);
+      }
+
       if (type === "tv") {
         return resolveAndRedirect(
           {
@@ -85,16 +89,25 @@ export const GET: RequestHandler = async ({ params, fetch, locals }) => {
           "TVDB ID not found for this show",
         );
       }
-      throw error(400, "Invalid media type for tmdb");
 
-    case "tvdb":
-      if (!type) throw error(400, "Media type is required for tvdb");
-      if (type === "tv")
-        throw redirect(307, `/details/media/${id}/tv?indexer=tvdb`);
-      throw error(400, "Invalid media type for tvdb");
+      return error(400, "Invalid media type for tmdb");
+    }
+    case "tvdb": {
+      if (!type) {
+        return error(400, "Media type is required for tvdb");
+      }
 
+      if (type === "tv") {
+        return redirect(307, `/details/media/${id}/tv?indexer=tvdb`);
+      }
+
+      return error(400, "Invalid media type for tvdb");
+    }
     case "anilist": {
-      if (!type) throw error(400, "Media type is required for anilist");
+      if (!type) {
+        return error(400, "Media type is required for anilist");
+      }
+
       const isTV = ["TV", "TV_SHORT", "ONA"].includes(type);
       const isMovie = type === "MOVIE";
 
@@ -110,6 +123,7 @@ export const GET: RequestHandler = async ({ params, fetch, locals }) => {
           "No TMDB ID found for this anime",
         );
       }
+
       if (isMovie) {
         return resolveAndRedirect(
           {
@@ -122,11 +136,15 @@ export const GET: RequestHandler = async ({ params, fetch, locals }) => {
           "No TMDB ID found for this anime movie",
         );
       }
-      throw error(400, "Invalid media type for anilist");
+
+      return error(400, "Invalid media type for anilist");
     }
 
-    case "riven":
-      if (!type) throw error(400, "Media type is required for riven");
+    case "riven": {
+      if (!type) {
+        return error(400, "Media type is required for riven");
+      }
+
       if (type === "tv") {
         return resolveAndRedirect(
           {
@@ -139,6 +157,7 @@ export const GET: RequestHandler = async ({ params, fetch, locals }) => {
           "TV item not found",
         );
       }
+
       if (type === "movie") {
         return resolveAndRedirect(
           {
@@ -151,8 +170,8 @@ export const GET: RequestHandler = async ({ params, fetch, locals }) => {
           "Movie item not found",
         );
       }
-      throw error(400, "Invalid media type for riven");
-  }
 
-  throw error(400, `Unsupported indexer: ${indexer}`);
+      return error(400, "Invalid media type for riven");
+    }
+  }
 };

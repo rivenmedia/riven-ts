@@ -4,11 +4,11 @@ import http from "node:http";
 // @ts-expect-error - handler is a build file and doesn't exist in the source code
 import { handler } from "./build/handler.js";
 
-const PORT = Number(process.env.PORT || 3000);
-const HOST = process.env.HOST || "0.0.0.0";
+const PORT = Number(process.env.PORT ?? 3000);
+const HOST = process.env.HOST ?? "0.0.0.0";
 const BACKEND_URL = process.env.BACKEND_URL;
 const API_KEY =
-  process.env.BACKEND_API_KEY || process.env.RIVEN_SETTING__API_KEY;
+  process.env.BACKEND_API_KEY ?? process.env.RIVEN_SETTING__API_KEY;
 
 if (!BACKEND_URL) {
   throw new Error("BACKEND_URL environment variable is required");

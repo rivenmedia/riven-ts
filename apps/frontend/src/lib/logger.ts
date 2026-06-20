@@ -19,7 +19,7 @@ import { createConsola } from "consola";
  * Set LOG_LEVEL environment variable to adjust log level.
  */
 export const logger = createConsola({
-  level: parseInt(String(env.PUBLIC_LOG_LEVEL), 10) || 3,
+  level: parseInt(String(env.PUBLIC_LOG_LEVEL), 10) ?? 3,
   formatOptions: {
     date: env.PUBLIC_LOG_DATE !== "false",
     colors: env.PUBLIC_LOG_COLORS !== "false",

@@ -25,8 +25,8 @@ import { plexOAuth } from "./src/lib/server/plex-oauth";
 import "dotenv/config";
 
 export const auth = betterAuth({
-  secret: process.env.AUTH_SECRET || generateSecret(),
-  baseURL: process.env.ORIGIN || "http://localhost:5173",
+  secret: process.env.AUTH_SECRET ?? generateSecret(),
+  baseURL: process.env.ORIGIN ?? "http://localhost:5173",
   database: drizzleAdapter(db, {
     provider: "sqlite",
   }),
@@ -75,9 +75,9 @@ export const auth = betterAuth({
     }),
     openAPI(),
     passkey({
-      rpID: process.env.PASSKEY_RP_ID || "riven",
-      rpName: process.env.PASSKEY_RP_NAME || "Riven Media",
-      origin: process.env.ORIGIN || "http://localhost:5173",
+      rpID: process.env.PASSKEY_RP_ID ?? "riven",
+      rpName: process.env.PASSKEY_RP_NAME ?? "Riven Media",
+      origin: process.env.ORIGIN ?? "http://localhost:5173",
     }),
     lastLoginMethod({
       storeInDatabase: true,
@@ -87,13 +87,13 @@ export const auth = betterAuth({
         ...(process.env.DISABLE_PLEX !== "true"
           ? [
               plexOAuth({
-                clientId: process.env.PLEX_CLIENT_ID || "riven",
+                clientId: process.env.PLEX_CLIENT_ID ?? "riven",
                 product: "Riven Media",
                 version: "1.0",
                 platform: "Web",
                 device: "Browser",
                 disableSignUp: process.env.ENABLE_PLEX_SIGNUP !== "true",
-                baseURL: process.env.ORIGIN || "http://localhost:5173",
+                baseURL: process.env.ORIGIN ?? "http://localhost:5173",
               }),
             ]
           : []),

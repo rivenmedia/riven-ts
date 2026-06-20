@@ -58,7 +58,7 @@
     },
     {
       title: "Completed",
-      value: statistics?.states.Completed?.toLocaleString(),
+      value: statistics?.states["Completed"]?.toLocaleString(),
     },
     {
       title: "Incomplete",
@@ -235,8 +235,8 @@
         PartiallyCompleted: s.partiallyCompleted,
         Unreleased: s.unreleased,
       },
-      activity: result.activity ?? {},
-      media_year_releases: result.yearReleases ?? [],
+      activity: result.activity,
+      media_year_releases: result.yearReleases,
     };
   }
 
@@ -252,24 +252,40 @@
   $effect(() => {
     let cancelled = false;
 
-    Promise.resolve(data.statistics).then((s) => {
-      if (!cancelled && s != null) statistics = s;
-    });
-    Promise.resolve(data.activePlaybackSessions).then((sessions) => {
-      if (!cancelled) activePlaybackSessions = sessions ?? [];
-    });
-    Promise.resolve(data.downloaderServices).then((services) => {
-      if (!cancelled) downloaderServices = services ?? [];
-    });
-    Promise.resolve(data.usenetHealth).then((health) => {
-      if (!cancelled && health) {
-        usenetProviders = health.providers ?? [];
-        usenetStreaming = health.streaming ?? null;
-        usenetTitles = health.titles ?? [];
-        usenetTitleSummary = health.titleSummary ?? EMPTY_HEALTH_SUMMARY;
-        usenetTraffic = health.traffic ?? null;
-      }
-    });
+    Promise.resolve(data.statistics)
+      .then((s) => {
+        if (!cancelled && s != null) statistics = s;
+      })
+      .catch(() => {
+        /* empty */
+      });
+    Promise.resolve(data.activePlaybackSessions)
+      .then((sessions) => {
+        if (!cancelled) activePlaybackSessions = sessions;
+      })
+      .catch(() => {
+        /* empty */
+      });
+    Promise.resolve(data.downloaderServices)
+      .then((services) => {
+        if (!cancelled) downloaderServices = services;
+      })
+      .catch(() => {
+        /* empty */
+      });
+    Promise.resolve(data.usenetHealth)
+      .then((health) => {
+        if (!cancelled) {
+          usenetProviders = health.providers;
+          usenetStreaming = health.streaming;
+          usenetTitles = health.titles;
+          usenetTitleSummary = health.titleSummary;
+          usenetTraffic = health.traffic;
+        }
+      })
+      .catch(() => {
+        /* empty */
+      });
 
     return () => {
       cancelled = true;
@@ -288,12 +304,14 @@
         const result = await gqlClient<{
           activePlaybackSessions: ActivePlaybackSession[];
         }>(ACTIVE_PLAYBACK_QUERY);
+
         if (!cancelled) {
-          activePlaybackSessions = result.activePlaybackSessions ?? [];
+          activePlaybackSessions = result.activePlaybackSessions;
         }
       } catch {
         // Keep the last successful snapshot on transient dashboard polling failures.
       }
+
       try {
         const health = await gqlClient<{
           nntpProviders: NntpProviderHealth[];
@@ -302,20 +320,22 @@
           usenetTitleHealthSummary: UsenetTitleHealthSummary;
           usenetTraffic: UsenetTraffic;
         }>(USENET_HEALTH_QUERY);
+
         if (!cancelled) {
-          usenetProviders = health.nntpProviders ?? [];
-          usenetStreaming = health.usenetStreamingHealth ?? null;
-          usenetTitles = health.usenetTitleHealth ?? [];
-          usenetTitleSummary =
-            health.usenetTitleHealthSummary ?? EMPTY_HEALTH_SUMMARY;
-          usenetTraffic = health.usenetTraffic ?? null;
+          usenetProviders = health.nntpProviders;
+          usenetStreaming = health.usenetStreamingHealth;
+          usenetTitles = health.usenetTitleHealth;
+          usenetTitleSummary = health.usenetTitleHealthSummary;
+          usenetTraffic = health.usenetTraffic;
         }
       } catch {
         // Keep the last successful usenet-health snapshot on transient failures.
       }
     };
 
-    const interval = window.setInterval(refresh, 15000);
+    const interval = window.setInterval(() => {
+      void refresh();
+    }, 15000);
     return () => {
       cancelled = true;
       window.clearInterval(interval);

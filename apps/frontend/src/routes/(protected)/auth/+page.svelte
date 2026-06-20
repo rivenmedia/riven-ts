@@ -86,7 +86,7 @@
           await authClient.signOut({
             fetchOptions: {
               onSuccess: () => {
-                goto(resolve("/auth/login"));
+                void goto(resolve("/auth/login"));
               },
             },
           });
@@ -102,7 +102,7 @@
           await authClient.deleteUser({
             fetchOptions: {
               onSuccess: () => {
-                goto(resolve("/auth/login"));
+                void goto(resolve("/auth/login"));
               },
             },
           });

@@ -14,13 +14,12 @@ import { jsFiles, svelteFiles, tsFiles } from "../internal/file-types.ts";
 export const typescriptCore = defineConfig(
   {
     name: "riven:apply-eslint-recommended-config",
-    files: [tsFiles, jsFiles],
+    files: [tsFiles, jsFiles, svelteFiles],
     extends: [eslint.configs.recommended],
   },
   {
     name: "riven:apply-ts-js-language-options",
-    files: [tsFiles, jsFiles],
-    ignores: [svelteFiles],
+    files: [tsFiles, jsFiles, svelteFiles],
     languageOptions: {
       ecmaVersion: "latest",
       globals: {
@@ -32,7 +31,7 @@ export const typescriptCore = defineConfig(
   },
   {
     name: "riven:typescript-core",
-    files: [tsFiles],
+    files: [tsFiles, jsFiles, svelteFiles],
     extends: [
       tseslint.configs.strictTypeChecked,
       tseslint.configs.stylisticTypeChecked,

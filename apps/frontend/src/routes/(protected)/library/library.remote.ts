@@ -19,7 +19,7 @@ const itemIdsSchema = z.object({
 
 export const reset_items = command(itemIdsSchema, async ({ ids }) => {
   const event = getRequestEvent();
-  if (!event) throw new Error("No event found");
+
   requireLibraryAccess(event.locals.user);
 
   const { backendUrl, apiKey } = event.locals;
@@ -43,7 +43,7 @@ export const reset_items = command(itemIdsSchema, async ({ ids }) => {
 
 export const retry_items = command(itemIdsSchema, async ({ ids }) => {
   const event = getRequestEvent();
-  if (!event) throw new Error("No event found");
+
   requireLibraryAccess(event.locals.user);
 
   const { backendUrl, apiKey } = event.locals;
@@ -67,7 +67,7 @@ export const retry_items = command(itemIdsSchema, async ({ ids }) => {
 
 export const remove_items = command(itemIdsSchema, async ({ ids }) => {
   const event = getRequestEvent();
-  if (!event) throw new Error("No event found");
+
   requireLibraryAccess(event.locals.user);
 
   const { backendUrl, apiKey } = event.locals;

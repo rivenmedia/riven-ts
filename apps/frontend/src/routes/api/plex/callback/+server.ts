@@ -60,7 +60,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
 
     // Forward to Better Auth's generic OAuth callback
     // The "code" is our PIN in format "pinId:pinCode" which getToken will process
-    const origin = env.ORIGIN || "http://localhost:5173";
+    const origin = env.ORIGIN ?? "http://localhost:5173";
     const oauthCallbackUrl = new URL("/api/auth/oauth2/callback/plex", origin);
     oauthCallbackUrl.searchParams.set(
       "code",

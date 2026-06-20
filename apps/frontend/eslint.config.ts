@@ -12,8 +12,8 @@ const gitignorePath = fileURLToPath(new URL("./.gitignore", import.meta.url));
 
 export default defineConfig(
   includeIgnoreFile(gitignorePath),
-  createSvelteEslintConfig(svelteConfig),
-  baseEslintConfig,
   createTypescriptEslintConfig(import.meta.dirname),
+  createSvelteEslintConfig(import.meta.dirname, svelteConfig),
+  baseEslintConfig,
   { ignores: ["src/lib/components/ui/**"] },
 );

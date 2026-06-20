@@ -128,7 +128,9 @@ export class LogStore {
           this.#error = null;
 
           const raw = payload.logLines;
-          if (!raw?.trim()) return;
+          if (!raw.trim()) {
+            return;
+          }
           this.#logs.push(raw);
         },
         onError: (error) => {
@@ -178,7 +180,7 @@ export class LogStore {
   setActiveTab(tab: "live" | "historical") {
     this.#activeTab = tab;
     if (tab === "historical" && this.#historicalLogs.length === 0) {
-      this.fetchHistoricalLogs();
+      void this.fetchHistoricalLogs();
     }
   }
 }

@@ -25,6 +25,11 @@ export function parseISODate(
     // Extract just the date part - handle both "T" separator and space separator
     // Also handle formats like "2011-10-28 00:00:00" from backend
     const datePart = dateString.split(/[T\s]/)[0];
+
+    if (!datePart) {
+      return null;
+    }
+
     return parseDate(datePart);
   } catch {
     return null;

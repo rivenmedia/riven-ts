@@ -17,10 +17,11 @@ export const load = (async ({ locals, route, fetch }) => {
   const isSetupRoute = route.id === "/(protected)/setup";
 
   if (needsSetup && !isSetupRoute) {
-    redirect(302, "/setup");
+    return redirect(302, "/setup");
   }
+
   if (!needsSetup && isSetupRoute) {
-    redirect(302, "/");
+    return redirect(302, "/");
   }
 
   return {

@@ -52,7 +52,7 @@
     {#each Object.entries(providers) as [providerId, config] (providerId)}
       {#if config.enabled && providerId !== "credential"}
         {@const providerName =
-          config.name ||
+          config.name ??
           providerId.charAt(0).toUpperCase() + providerId.slice(1)}
         <div
           class="border-border/60 flex items-center justify-between border-t py-3"

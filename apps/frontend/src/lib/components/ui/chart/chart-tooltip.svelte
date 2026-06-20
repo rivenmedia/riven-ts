@@ -64,7 +64,7 @@
   );
 
   const formattedLabel = $derived.by(() => {
-    if (hideLabel || !visibleSeries?.length) return null;
+    if (hideLabel ?? !visibleSeries?.length) return null;
 
     const [item] = visibleSeries;
     const tooltipData = chartCtx.tooltip.data;
@@ -123,14 +123,14 @@
     {/if}
     <div class="grid gap-1.5">
       {#each visibleSeries as item, i (item.key + i)}
-        {@const key = `${nameKey || item.key || item.label || "value"}`}
+        {@const key = `${nameKey ?? item.key ?? item.label ?? "value"}`}
         {@const itemConfig = getPayloadConfigFromPayload(
           chart.config,
           item,
           key,
           chartCtx.tooltip.data,
         )}
-        {@const indicatorColor = color || item.config?.color || item.color}
+        {@const indicatorColor = color ?? item.config?.color ?? item.color}
         <div
           class={cn(
             "[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch gap-2 [&>svg]:size-2.5",
@@ -174,7 +174,7 @@
                   {@render TooltipLabel()}
                 {/if}
                 <span class="text-muted-foreground">
-                  {itemConfig?.label || item.label}
+                  {itemConfig?.label ?? item.label}
                 </span>
               </div>
               {#if item.value !== undefined}

@@ -11,12 +11,12 @@ import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 const logger = createScopedLogger("hooks");
 
 function getBackendApiKey() {
-  return env.BACKEND_API_KEY || env.RIVEN_SETTING__API_KEY;
+  return env.BACKEND_API_KEY ?? env.RIVEN_SETTING__API_KEY;
 }
 
 function getBackendAuthSigningSecret() {
   return (
-    env.BACKEND_AUTH_SIGNING_SECRET ||
+    env.BACKEND_AUTH_SIGNING_SECRET ??
     env.RIVEN_SETTING__FRONTEND_AUTH_SIGNING_SECRET
   );
 }

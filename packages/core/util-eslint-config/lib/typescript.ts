@@ -6,7 +6,7 @@ import { typescriptCore } from "./typescript/typescript-core.ts";
 
 export const createTypescriptEslintConfig = (dirname: string) =>
   defineConfig(typescriptCore, {
-    name: "riven:apply-parser-options-typescript-config",
+    name: "riven:apply-parser-options-typescript",
     files: [tsFiles, jsFiles],
     languageOptions: {
       parser: tseslint.parser,

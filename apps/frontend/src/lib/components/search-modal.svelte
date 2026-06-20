@@ -32,8 +32,8 @@
   let scrollContainer = $state<HTMLElement | null>(null);
   let query = $state("");
   let results = $state<TMDBTransformedListItem[]>([]);
-  let loading = $state(false);
-  let loadingMore = $state(false);
+  let loading = $state<boolean>(false);
+  let loadingMore = $state<boolean>(false);
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
   let abortController: AbortController | null = null;
   let currentPage = 1;
@@ -59,7 +59,7 @@
   let savedResults: TMDBTransformedListItem[] = [];
   let navigatedFromModal = false;
   // When true, skip transitions (instant hide/show for navigation)
-  let skipTransition = $state(false);
+  let skipTransition = $state<boolean>(false);
 
   $effect(() => {
     if (open && inputRef) {
@@ -168,7 +168,7 @@
 
   function handleScroll(e: Event) {
     const el = e.target as HTMLElement;
-    if (loadingMore || loading || !hasMorePages || !currentQuery) return;
+    if (loadingMore ?? loading ?? !hasMorePages ?? !currentQuery) return;
     // Load more when within 300px of bottom
     if (el.scrollHeight - el.scrollTop - el.clientHeight < 300) {
       void search(false);

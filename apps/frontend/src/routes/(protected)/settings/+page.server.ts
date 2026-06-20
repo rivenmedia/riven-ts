@@ -137,8 +137,8 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
       rankSettings: defaultProfileData.defaultRankProfile.settings,
       rankSettingsSchema: rankSchemaData.rankSettingsSchema,
       initialProfileName: defaultProfileData.defaultRankProfile.name,
-      qualityProfiles: rankProfilesData.qualityProfiles ?? [],
-      customProfiles: rankProfilesData.customProfiles ?? [],
+      qualityProfiles: rankProfilesData.qualityProfiles,
+      customProfiles: rankProfilesData.customProfiles,
       setupGroups: setupGroupsData.setupGroups,
       instanceStatus: instanceStatusData.instanceStatus,
     };

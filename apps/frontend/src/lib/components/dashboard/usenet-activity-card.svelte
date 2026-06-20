@@ -53,9 +53,9 @@
   });
 
   const hasActivity = $derived(
-    !!health ||
+    !!health ??
       (!!traffic &&
-        (traffic.totalBytesDownloaded > 0 || traffic.daily.length > 0)),
+        (traffic.totalBytesDownloaded > 0 ?? traffic.daily.length > 0)),
   );
 
   const tiles = $derived.by(() => {
@@ -141,7 +141,7 @@
     for (const r of rows) {
       const row = data[dayIndex.get(r.day)!];
       const key = keyFor.get(r.host)!;
-      row[key] = (Number(row[key]) || 0) + r.bytesDownloaded / divisor;
+      row[key] = (Number(row[key]) ?? 0) + r.bytesDownloaded / divisor;
     }
 
     const series = hosts.map((h, i) => ({
@@ -156,7 +156,7 @@
       Math.ceil(days.length / Math.max(4, Math.floor(width / 72))),
     );
     const ticks = data
-      .filter((_, i) => i === 0 || i === data.length - 1 || i % step === 0)
+      .filter((_, i) => i === 0 ?? i === data.length - 1 ?? i % step === 0)
       .map((r) => r.idx as number);
 
     return { data, series, ticks, unit };

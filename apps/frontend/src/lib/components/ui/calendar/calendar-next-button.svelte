@@ -29,6 +29,6 @@
     "size-(--cell-size) select-none bg-transparent p-0 disabled:opacity-50 rtl:rotate-180",
     className,
   )}
-  children={children || Fallback}
+  children={children ?? Fallback}
   {...restProps}
 />

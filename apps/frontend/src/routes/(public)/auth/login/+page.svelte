@@ -88,8 +88,8 @@
 
   // Check if signup is enabled (or first user setup)
   const isSignupEnabled = $derived(
-    (data.authProviders.credential?.enabled &&
-      !data.authProviders.credential?.disableSignup) ||
+    (data.authProviders["credential"]?.enabled &&
+      !data.authProviders["credential"].disableSignup) ??
       data.isFirstUser,
   );
 
@@ -100,8 +100,8 @@
     });
   }
 
-  let isPasskeyLoading = $state(false);
-  let supportsPasskeyAutofill = $state(false);
+  let isPasskeyLoading = $state<boolean>(false);
+  let supportsPasskeyAutofill = $state<boolean>(false);
   let supportsPasskey = $state<boolean | undefined>(
     doesBrowserSupportPasskeys(),
   );
@@ -191,7 +191,7 @@
               >
             </Card.Header>
             <Card.Content>
-              {#if data.authProviders.credential?.enabled}
+              {#if data.authProviders["credential"]?.enabled}
                 <form method="POST" use:loginEnhance action="?/login">
                   <Form.Field form={loginForm} name="username">
                     <Form.Control>
@@ -297,7 +297,7 @@
                           /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg
                         >
                       {/if}
-                      Login with {provider.name ||
+                      Login with {provider.name ??
                         key.charAt(0).toUpperCase() + key.slice(1)}
                       {#if lastLoginMethod === key}
                         {@render star()}

@@ -27,7 +27,7 @@
   let { data }: { data: PageData } = $props();
 
   const canManageSettings = $derived(
-    page.data.permissions?.canManageSettings ?? false,
+    page.data["permissions"]?.canManageSettings ?? false,
   );
 
   let activeTab = $state("general");
@@ -35,7 +35,7 @@
   // Settings sections (general + plugins) — the unified, typed surface.
   let sections = $state<SettingsSection[]>(
     untrack(() =>
-      (data.sections ?? []).map((s) => ({ ...s, values: { ...s.values } })),
+      data.sections.map((s) => ({ ...s, values: { ...s.values } })),
     ),
   );
   const generalSection = $derived(
@@ -68,19 +68,17 @@
 
   // Ranking is a distinct domain (presets + custom profiles), kept separate.
   let rank = $state<Record<string, unknown>>(
-    untrack(() => JSON.parse(JSON.stringify(data.rankSettings ?? {}))),
+    untrack(() => JSON.parse(JSON.stringify(data.rankSettings))),
   );
-  const qualityProfiles: QualityProfile[] = untrack(
-    () => data.qualityProfiles ?? [],
-  );
+  const qualityProfiles: QualityProfile[] = untrack(() => data.qualityProfiles);
   let customProfiles = $state<CustomProfile[]>(
-    untrack(() => data.customProfiles ?? []),
+    untrack(() => data.customProfiles),
   );
   let activeProfileName = $state<string | null>(
     untrack(() => data.initialProfileName ?? null),
   );
   let newProfileName = $state("");
-  let savingProfile = $state(false);
+  let savingProfile = $state<boolean>(false);
 
   function applyProfile(
     settings: Record<string, unknown>,
@@ -149,7 +147,7 @@
       const data = await gqlClient<{ customProfiles: CustomProfile[] }>(
         CUSTOM_PROFILES,
       );
-      customProfiles = data.customProfiles ?? customProfiles;
+      customProfiles = data.customProfiles;
       toast.success(`Profile "${name}" ${enabled ? "enabled" : "disabled"}`);
     } catch {
       toast.error("Failed to update profile");

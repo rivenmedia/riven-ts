@@ -83,7 +83,7 @@
     if (height >= 1080) return "1080p";
     if (height >= 720) return "720p";
     if (height >= 480) return "480p";
-    return `${height}p`;
+    return `${height.toString()}p`;
   }
 
   function getFsLabel(
@@ -92,7 +92,9 @@
   ) {
     const resolutionLabel = getMetadataResolutionLabel(entry?.media_metadata);
     const profileLabel = humanizeProfileName(entry?.ranking_profile_name);
-    const fallback = episodeNumber ? `Episode ${episodeNumber}` : "Episode";
+    const fallback = episodeNumber
+      ? `Episode ${episodeNumber.toString()}`
+      : "Episode";
 
     if (resolutionLabel && profileLabel) {
       return `${resolutionLabel} (${profileLabel})`;
@@ -171,7 +173,7 @@
       </h2>
     </div>
     <div class="flex flex-col gap-4 text-sm">
-      {#if meta?.filename || fs?.original_filename}
+      {#if meta?.filename ?? fs?.original_filename}
         <div>
           <p
             class="text-primary font-mono text-xs font-semibold tracking-wider uppercase"
@@ -236,7 +238,7 @@
                     ? " 7.1"
                     : track.channels === 6
                       ? " 5.1"
-                      : ` ${track.channels}ch`
+                      : ` ${track.channels.toString()}ch`
                   : ""}{track.language
                   ? ` (${track.language.toUpperCase()})`
                   : ""}
@@ -263,7 +265,7 @@
         </div>
       {/if}
 
-      {#if meta?.quality_source || meta?.is_remux || meta?.is_proper || meta?.is_repack}
+      {#if meta?.quality_source ?? meta?.is_remux ?? meta?.is_proper ?? meta?.is_repack}
         <div class="flex flex-col gap-2">
           <span
             class="text-primary font-mono text-xs font-semibold tracking-wider uppercase"
@@ -271,25 +273,25 @@
             Source
           </span>
           <div class="flex flex-wrap gap-2">
-            {#if meta?.quality_source}
+            {#if meta.quality_source}
               <Badge variant="outline" class="font-mono text-xs"
                 >{meta.quality_source}</Badge
               >
             {/if}
-            {#if meta?.is_remux}
+            {#if meta.is_remux}
               <Badge variant="outline" class="font-mono text-xs">REMUX</Badge>
             {/if}
-            {#if meta?.is_proper}
+            {#if meta.is_proper}
               <Badge variant="outline" class="font-mono text-xs">PROPER</Badge>
             {/if}
-            {#if meta?.is_repack}
+            {#if meta.is_repack}
               <Badge variant="outline" class="font-mono text-xs">REPACK</Badge>
             {/if}
           </div>
         </div>
       {/if}
 
-      {#if fs?.file_size || meta?.bitrate || meta?.duration}
+      {#if fs?.file_size ?? meta?.bitrate ?? meta?.duration}
         <div class="flex flex-col gap-2">
           <span
             class="text-primary font-mono text-xs font-semibold tracking-wider uppercase"
@@ -339,7 +341,7 @@
         </div>
       {/if}
 
-      {#if fs?.provider || fs?.plugin}
+      {#if fs?.provider ?? fs?.plugin}
         <div class="flex flex-col gap-2">
           <span
             class="text-primary font-mono text-xs font-semibold tracking-wider uppercase"
@@ -347,12 +349,12 @@
             Provider
           </span>
           <div class="flex flex-wrap gap-2">
-            {#if fs?.provider}
+            {#if fs.provider}
               <Badge variant="outline" class="font-mono text-xs"
                 >{fs.provider}</Badge
               >
             {/if}
-            {#if fs?.plugin}
+            {#if fs.plugin}
               <Badge variant="outline" class="font-mono text-xs"
                 >{fs.plugin}</Badge
               >
@@ -365,7 +367,7 @@
         <div class="flex flex-wrap gap-2">
           <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
           <a
-            href={`/media/${fs.id}`}
+            href={`/media/${fs.id.toString()}`}
             download={fs.original_filename ?? ""}
             rel="external"
             class="rounded-md border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-white/10"
@@ -426,10 +428,10 @@
       </div>
     {/if}
 
-    {#if rivenEpisode?.filesystem_entry || rivenEpisode?.media_metadata}
+    {#if rivenEpisode?.filesystem_entry ?? rivenEpisode?.media_metadata}
       {@render fileDetails(
-        rivenEpisode?.media_metadata,
-        rivenEpisode?.filesystem_entry,
+        rivenEpisode.media_metadata,
+        rivenEpisode.filesystem_entry,
         episode.number,
       )}
     {/if}

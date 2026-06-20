@@ -1,7 +1,7 @@
 import { IsMobile } from "$lib/hooks/is-mobile.svelte";
 
 export class createSidebarStore {
-  #isOpen = $state(false);
+  #isOpen = $state<boolean>(false);
 
   get isOpen() {
     return this.#isOpen;

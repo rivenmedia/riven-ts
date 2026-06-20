@@ -46,6 +46,6 @@ export const proxyGraphql: RequestHandler = async ({ locals, request }) => {
       headers: responseHeaders,
     });
   } catch {
-    throw error(500, "Failed to reach GraphQL backend");
+    error(500, "Failed to reach GraphQL backend");
   }
 };

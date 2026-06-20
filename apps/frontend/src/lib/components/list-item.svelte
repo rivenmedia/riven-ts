@@ -3,6 +3,7 @@
   import { Badge } from "$lib/components/ui/badge/index.js";
   import { cn } from "$lib/utils";
   import { resolve } from "$app/paths";
+  import logger from "$lib/logger";
 
   const badgeVariantClasses: Record<string, string> = {
     success: "bg-green-600/90 text-white border-0",
@@ -80,8 +81,15 @@
   function getMediaHref(mediaURL: string) {
     const [pathname, search = ""] = mediaURL.split("?");
 
-    if (pathname.startsWith("/details/media/")) {
+    if (pathname?.startsWith("/details/media/")) {
       const [, , , id, mediaType] = pathname.split("/");
+
+      if (!id || !mediaType) {
+        logger.error("Invalid media URL:", mediaURL);
+
+        return mediaURL;
+      }
+
       const basePath = resolve("/(protected)/details/media/[id]/[mediaType]", {
         id,
         mediaType,
@@ -89,8 +97,14 @@
       return search ? `${basePath}?${search}` : basePath;
     }
 
-    if (pathname.startsWith("/details/entity/")) {
+    if (pathname?.startsWith("/details/entity/")) {
       const [, , , id, type] = pathname.split("/");
+
+      if (!id || !type) {
+        logger.error("Invalid entity URL:", mediaURL);
+        return mediaURL;
+      }
+
       return resolve("/(protected)/details/entity/[id]/[type]", { id, type });
     }
 
@@ -114,8 +128,8 @@
         <Badge
           class={cn(
             "border-white/10 px-2 py-0.5 text-[10px] shadow-sm backdrop-blur-md",
-            badgeVariantClasses[data.badge.variant] ||
-              badgeVariantClasses.default,
+            badgeVariantClasses[data.badge.variant] ??
+              badgeVariantClasses["default"],
           )}>{data.badge.text}</Badge
         >
       {/if}
@@ -124,6 +138,7 @@
 {/snippet}
 
 {#if mediaURL}
+  <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
   <a href={getMediaHref(mediaURL)} class={containerClasses}>
     {@render cardContent()}
   </a>

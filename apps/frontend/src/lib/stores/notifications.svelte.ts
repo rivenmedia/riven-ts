@@ -83,22 +83,22 @@ function rivenNotificationToNotification(
     case "riven.media-item.download.success":
       return {
         title: event.fullTitle ?? event.title ?? "Unknown",
-        message: `Download complete${event.year ? ` (${event.year})` : ""}`,
+        message: `Download complete${event.year ? ` (${event.year.toString()})` : ""}`,
         severity: "success",
         timestamp: ts,
         type: mapItemType(event.itemType),
-        year: event.year ?? undefined,
-        duration: event.durationSeconds
-          ? Math.round(event.durationSeconds / 60)
-          : undefined,
-        imdb_id: event.imdbId ?? undefined,
+        ...(event.year ? { year: event.year } : {}),
+        ...(event.durationSeconds
+          ? { duration: Math.round(event.durationSeconds / 60) }
+          : {}),
+        ...(event.imdbId ? { imdb_id: event.imdbId } : {}),
         dedupeKey,
       };
 
     case "riven.media-item.scrape.success":
       return {
         title: event.title ?? "Unknown",
-        message: `Found ${event.streamCount ?? 0} stream(s)`,
+        message: `Found ${(event.streamCount ?? 0).toString()} stream(s)`,
         severity: "success",
         timestamp: ts,
         type: mapItemType(event.itemType),
@@ -118,7 +118,7 @@ function rivenNotificationToNotification(
     case "riven.item-request.create.success":
       return {
         title: "Content request processed",
-        message: `${event.newItems ?? 0} new item(s) added`,
+        message: `${(event.newItems ?? 0).toString()} new item(s) added`,
         severity: "success",
         timestamp: ts,
         type: "movie",
@@ -266,8 +266,18 @@ export class NotificationStore {
       const next = new Array<Notification>(newItems.length + current.length);
       let idx = 0;
       // Iterate batch in reverse so the last-arrived item lands at index 0.
-      for (let i = newItems.length - 1; i >= 0; i--) next[idx++] = newItems[i];
-      for (let i = 0; i < current.length; i++) next[idx++] = current[i];
+      for (let i = newItems.length - 1; i >= 0; i--) {
+        const item = newItems[i];
+
+        if (item) {
+          next[idx++] = item;
+        }
+      }
+
+      for (const item of current) {
+        next[idx++] = item;
+      }
+
       this.#notifications = next;
       this.#unreadCount += newItems.length;
     }
@@ -299,8 +309,18 @@ export class NotificationStore {
 
   remove(id: string) {
     const idx = this.#notifications.findIndex((n) => n.id === id);
-    if (idx === -1) return;
-    const wasUnread = !this.#notifications[idx].read;
+
+    if (idx === -1) {
+      return;
+    }
+
+    const notification = this.#notifications[idx];
+
+    if (!notification) {
+      return;
+    }
+
+    const wasUnread = !notification.read;
     this.#notifications.splice(idx, 1);
     const key = this.#idToDedupeKey.get(id);
     if (key) {

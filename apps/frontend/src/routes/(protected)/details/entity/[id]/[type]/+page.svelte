@@ -119,19 +119,19 @@
       media_type: c.media_type,
       title: c.title,
       backdrop_path: c.backdrop_path,
-      release_date: c.release_date ?? undefined,
       vote_average: c.vote_average ?? 0,
       overview: c.character ? `as ${c.character}` : c.role,
       genre_ids: [],
+      ...(c.release_date && { release_date: c.release_date }),
     })),
   );
 
   const currentBackdrop = $derived(carouselItems[0]);
   const hasExternalLinks = $derived(
     !!(
-      data.entity.tvdb_url ||
-      data.entity.imdb_id ||
-      data.entity.external_ids?.tmdb ||
+      data.entity.tvdb_url ??
+      data.entity.imdb_id ??
+      data.entity.external_ids?.["tmdb"] ??
       data.entity.homepage
     ),
   );
@@ -467,9 +467,9 @@
                 <Badge variant="outline" class={badgeClass}>IMDb</Badge>
               </a>
             {/if}
-            {#if data.entity.external_ids?.tmdb}
+            {#if data.entity.external_ids?.["tmdb"]}
               <a
-                href={`https://www.themoviedb.org/person/${data.entity.external_ids.tmdb}`}
+                href={`https://www.themoviedb.org/person/${data.entity.external_ids["tmdb"]}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >

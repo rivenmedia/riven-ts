@@ -21,7 +21,8 @@
 
   onMount(() => {
     const platform = (
-      (navigator.userAgentData?.platform ?? navigator.platform) ||
+      navigator.userAgentData?.platform ??
+      navigator.platform ??
       ""
     ).toUpperCase();
     modifierKey = platform.includes("MAC") ? "⌘" : "^";
@@ -42,14 +43,14 @@
   });
 
   // Local input value state to decouple from URL updates while typing
-  let inputValue = $state(page.url.searchParams.get("query") || "");
+  let inputValue = $state(page.url.searchParams.get("query") ?? "");
   let inputRef = $state<HTMLInputElement | null>(null);
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
   // Sync external URL changes to input, but avoid overwriting while typing
   // We use afterNavigate instead of $effect to avoid state loops
   afterNavigate(() => {
-    const urlQuery = page.url.searchParams.get("query") || "";
+    const urlQuery = page.url.searchParams.get("query") ?? "";
     // Only update if the value is different and we aren't focused
     // Or if we just navigated to a completely different page/query via link
     if (urlQuery !== inputValue && inputRef !== document.activeElement) {
@@ -94,7 +95,7 @@
   });
 
   function onKeydown(e: KeyboardEvent) {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+    if ((e.ctrlKey ?? e.metaKey) && e.key.toLowerCase() === "k") {
       e.preventDefault();
       inputRef?.focus();
     }
