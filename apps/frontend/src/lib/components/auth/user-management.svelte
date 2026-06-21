@@ -47,10 +47,14 @@
   let lastActionMessage = $state<string | undefined>();
 
   function formatCreatedAt(value: ManagedUser["createdAt"]) {
-    if (!value) return "Unknown";
+    if (!value) {
+      return "Unknown";
+    }
 
     const dateString =
+      // eslint-disable-next-line no-restricted-globals
       value instanceof Date ? value.toISOString() : String(value);
+
     return dateUtils.formatDate(dateString) ?? "Unknown";
   }
 

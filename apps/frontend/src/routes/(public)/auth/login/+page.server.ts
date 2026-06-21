@@ -19,7 +19,7 @@ const isSignupEnabled =
 const isCredentialEnabled = authProviders["credential"]?.enabled;
 
 export const load: PageServerLoad = async (event) => {
-  if (event.locals.user) {
+  if (event.locals.user as typeof event.locals.user | null) {
     return redirect(302, "/auth");
   }
 

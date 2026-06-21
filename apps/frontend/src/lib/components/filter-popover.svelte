@@ -30,15 +30,13 @@
   const filterStore = getContext<FilterStore>("filterStore");
   const searchStore = getContext<SearchStore>("searchStore");
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (!filterStore) {
+  if (!(filterStore as FilterStore | undefined)) {
     throw new Error(
       "FilterPopover must be used within a context that provides 'filterStore'.",
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (!searchStore) {
+  if (!(searchStore as SearchStore | undefined)) {
     throw new Error(
       "FilterPopover must be used within a context that provides 'searchStore'.",
     );

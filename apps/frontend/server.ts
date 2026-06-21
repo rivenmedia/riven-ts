@@ -38,6 +38,7 @@ proxy.on("error", (err, _req, resOrSocket) => {
 });
 
 const server = http.createServer((req, res) => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   handler(req, res);
 });
 
@@ -57,7 +58,7 @@ server.on("upgrade", (req, socket, head) => {
       }
 
       const check = await fetch(
-        `http://127.0.0.1:${PORT}/api/auth/get-session`,
+        `http://127.0.0.1:${PORT.toString()}/api/auth/get-session`,
         {
           headers: { cookie: cookieHeader },
         },
@@ -68,7 +69,9 @@ server.on("upgrade", (req, socket, head) => {
         return;
       }
 
-      const body = await check.json().catch(() => null);
+      const body = (await check.json().catch(() => null)) as {
+        user?: unknown;
+      } | null;
 
       if (!body?.user) {
         socket.destroy();

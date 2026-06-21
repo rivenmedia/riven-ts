@@ -18,7 +18,12 @@ import type { PageServerLoad } from "./$types";
 const logger = createScopedLogger("home");
 
 export const load: PageServerLoad = async ({ locals, fetch }) => {
-  if (!locals.user || !locals.session) redirect(302, "/auth/login");
+  if (
+    !(locals.user as typeof locals.user | null) ||
+    !(locals.session as typeof locals.session | null)
+  ) {
+    return redirect(302, "/auth/login");
+  }
 
   try {
     const trendingResults = await fetchTmdbTrending(

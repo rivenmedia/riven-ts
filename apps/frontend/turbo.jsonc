@@ -1,0 +1,27 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "dev": {
+      "passThroughEnv": [
+        "AUTH_SECRET",
+        "ORIGIN",
+        "DATABASE_URL",
+        "DRIZZLE_SCHEMA_PATH",
+        "DRIZZLE_MIGRATIONS_PATH",
+        "DISABLE_PLEX",
+        "DISABLE_EMAIL_PASSWORD",
+        "ENABLE_EMAIL_PASSWORD_SIGNUP",
+        "ENABLE_PLEX_SIGNUP",
+        "PASSKEY_RP_ID",
+        "PASSKEY_RP_NAME",
+        "PLEX_CLIENT_ID",
+        "PORT",
+        "HOST",
+        "BACKEND_URL",
+        "BACKEND_API_KEY",
+        "RIVEN_SETTING__API_KEY"
+      ]
+    }
+  }
+}

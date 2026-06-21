@@ -1,5 +1,6 @@
 import { getPermissionFlags, normalizeUserRole } from "$lib/permissions";
 import { error } from "@sveltejs/kit";
+import { DateTime } from "luxon";
 import { createHmac } from "node:crypto";
 
 type AuthenticatedUser =
@@ -33,7 +34,7 @@ export function buildBackendRoleHeaders(
     error(500, "Backend auth signing secret is not configured");
   }
 
-  const timestamp = Math.floor(Date.now() / 1000);
+  const timestamp = Math.floor(DateTime.now().toSeconds());
   const signature = createHmac("sha256", signingSecret)
     .update(signingPayload(userId, role, timestamp))
     .digest("hex");

@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
 
 export const RECENT_ITEMS_QUERY = `
@@ -100,7 +102,7 @@ export function mapRecentItemsPage(data: RecentItemsResponse): RecentItemsPage {
           : item.itemType.toLowerCase(),
       year:
         item.year ??
-        (item.airedAt ? new Date(item.airedAt).getFullYear() : "N/A"),
+        (item.airedAt ? DateTime.fromISO(item.airedAt).year : "N/A"),
       riven_id: item.id,
     } satisfies RecentListItem;
   });

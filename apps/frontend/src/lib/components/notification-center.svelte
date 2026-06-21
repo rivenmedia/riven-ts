@@ -16,6 +16,7 @@
   import Tooltip from "./tooltip.svelte";
   import { toast } from "svelte-sonner";
   import { cn } from "$lib/utils";
+  import { DateTime } from "luxon";
 
   let open = $state<boolean>(false);
 
@@ -47,18 +48,31 @@
   });
 
   function formatTimestamp(timestamp: string): string {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
+    const date = DateTime.fromISO(timestamp);
+    const now = DateTime.now();
+    const {
+      minutes: diffMins,
+      hours: diffHours,
+      days: diffDays,
+    } = now.diff(date, ["milliseconds", "minutes", "hours", "days"]);
 
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
+    if (diffMins < 1) {
+      return "Just now";
+    }
+
+    if (diffMins < 60) {
+      return `${diffMins}m ago`;
+    }
+
+    if (diffHours < 24) {
+      return `${diffHours}h ago`;
+    }
+
+    if (diffDays < 7) {
+      return `${diffDays}d ago`;
+    }
+
+    return date.toLocaleString();
   }
 
   function getTypeColor(type: string): string {

@@ -25,8 +25,8 @@ import { plexOAuth } from "./src/lib/server/plex-oauth";
 import "dotenv/config";
 
 export const auth = betterAuth({
-  secret: process.env.AUTH_SECRET ?? generateSecret(),
-  baseURL: process.env.ORIGIN ?? "http://localhost:5173",
+  secret: process.env["AUTH_SECRET"] ?? generateSecret(),
+  baseURL: process.env["ORIGIN"] ?? "http://localhost:5173",
   database: drizzleAdapter(db, {
     provider: "sqlite",
   }),
@@ -43,7 +43,7 @@ export const auth = betterAuth({
       enabled: true,
       allowDifferentEmails: true,
       trustedProviders: [
-        ...(process.env.DISABLE_PLEX !== "true" ? ["plex"] : []),
+        ...(process.env["DISABLE_PLEX"] !== "true" ? ["plex"] : []),
         ...getGenericOAuthProviders(process.env as Record<string, string>).map(
           (p) => p.providerId,
         ),
@@ -52,15 +52,15 @@ export const auth = betterAuth({
     encryptOAuthTokens: true,
   },
   emailAndPassword: {
-    enabled: process.env.DISABLE_EMAIL_PASSWORD !== "true",
-    disableSignUp: process.env.ENABLE_EMAIL_PASSWORD_SIGNUP !== "true",
+    enabled: process.env["DISABLE_EMAIL_PASSWORD"] !== "true",
+    disableSignUp: process.env["ENABLE_EMAIL_PASSWORD_SIGNUP"] !== "true",
   },
   socialProviders: {},
   trustedOrigins: [
     "http://localhost:5173",
     "http://192.168.1.*:5173",
-    process.env.ORIGIN,
-  ].filter(Boolean) as string[],
+    process.env["ORIGIN"],
+  ].filter((origin) => origin != null),
   plugins: [
     username(),
     adminPlugin({
@@ -75,25 +75,25 @@ export const auth = betterAuth({
     }),
     openAPI(),
     passkey({
-      rpID: process.env.PASSKEY_RP_ID ?? "riven",
-      rpName: process.env.PASSKEY_RP_NAME ?? "Riven Media",
-      origin: process.env.ORIGIN ?? "http://localhost:5173",
+      rpID: process.env["PASSKEY_RP_ID"] ?? "riven",
+      rpName: process.env["PASSKEY_RP_NAME"] ?? "Riven Media",
+      origin: process.env["ORIGIN"] ?? "http://localhost:5173",
     }),
     lastLoginMethod({
       storeInDatabase: true,
     }),
     genericOAuth({
       config: [
-        ...(process.env.DISABLE_PLEX !== "true"
+        ...(process.env["DISABLE_PLEX"] !== "true"
           ? [
               plexOAuth({
-                clientId: process.env.PLEX_CLIENT_ID ?? "riven",
+                clientId: process.env["PLEX_CLIENT_ID"] ?? "riven",
                 product: "Riven Media",
                 version: "1.0",
                 platform: "Web",
                 device: "Browser",
-                disableSignUp: process.env.ENABLE_PLEX_SIGNUP !== "true",
-                baseURL: process.env.ORIGIN ?? "http://localhost:5173",
+                disableSignUp: process.env["ENABLE_PLEX_SIGNUP"] !== "true",
+                baseURL: process.env["ORIGIN"] ?? "http://localhost:5173",
               }),
             ]
           : []),

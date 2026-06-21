@@ -3,10 +3,11 @@
     Adapted from: svelte5-heatmap
     Source: https://github.com/FelipeIzolan/svelte5-heatmap
     License: MIT
-    Author: Felipe Izolan 
+    Author: Felipe Izolan
     */
 
   import { getCalendar, getColor } from "$lib/helpers";
+  import { DateTime } from "luxon";
   import type { MouseEventHandler, FocusEventHandler } from "svelte/elements";
 
   interface Props {
@@ -33,7 +34,7 @@
     onblur,
     colors = ["#eff2f5", "#aceebb", "#4ac26b", "#2da44e", "#116329"],
     class: className = "Heatmap",
-    year = new Date().getFullYear(),
+    year = DateTime.now().year,
     lday = true,
     lmonth = true,
   }: Props = $props();

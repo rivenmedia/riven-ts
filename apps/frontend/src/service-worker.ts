@@ -8,6 +8,7 @@
 // Only necessary if you have an import from `$env/static/public`
 /// <reference types="../.svelte-kit/ambient.d.ts" />
 import { build, files, version } from "$service-worker";
+import { DateTime } from "luxon";
 
 const self = globalThis.self as unknown as ServiceWorkerGlobalScope;
 
@@ -47,8 +48,10 @@ async function handleExternalImageRequest(request: Request): Promise<Response> {
 
   if (cachedResponse) {
     const cacheDate = cachedResponse.headers.get("sw-cache-date");
+
     if (cacheDate) {
-      const age = Date.now() - parseInt(cacheDate, 10);
+      const age = DateTime.now().toMillis() - parseInt(cacheDate, 10);
+
       if (age < CACHE_CONFIG.maxAge) {
         return cachedResponse;
       }
@@ -70,7 +73,7 @@ async function handleExternalImageRequest(request: Request): Promise<Response> {
       } else {
         const responseToCache = response.clone();
         const headers = new Headers(responseToCache.headers);
-        headers.set("sw-cache-date", Date.now().toString());
+        headers.set("sw-cache-date", DateTime.now().toMillis().toString());
 
         const cachedResponse = new Response(responseToCache.body, {
           status: responseToCache.status,

@@ -26,6 +26,8 @@ export const load = (async ({ locals, route, fetch }) => {
 
   return {
     user: locals.user,
-    permissions: getPermissionFlags(locals.user?.role),
+    permissions: getPermissionFlags(
+      (locals.user as typeof locals.user | null)?.role,
+    ),
   };
 }) satisfies LayoutServerLoad;

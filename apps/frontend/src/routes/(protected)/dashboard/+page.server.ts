@@ -1,5 +1,7 @@
 import { gql } from "$lib/graphql-client";
 import { createScopedLogger } from "$lib/logger";
+import { getTimestamp } from "$lib/utils/date";
+import { DateTime } from "luxon";
 
 import type {
   ActivePlaybackSession,
@@ -185,9 +187,9 @@ interface GqlDebridAccountInfo {
 }
 
 function mapDebridService(info: GqlDebridAccountInfo): DownloaderService {
-  const now = Date.now();
+  const now = getTimestamp();
   const expiresMs = info.premiumUntil
-    ? new Date(info.premiumUntil).getTime()
+    ? DateTime.fromISO(info.premiumUntil).toMillis()
     : null;
   const daysLeft =
     expiresMs !== null && !isNaN(expiresMs)

@@ -800,13 +800,21 @@ function tvdbRemoteIds(data: Record<string, unknown>) {
   const normalized: Record<string, string> = {};
 
   for (const remote of ids) {
-    if (!remote["id"]) continue;
+    if (!remote["id"]) {
+      continue;
+    }
+
     const source = pickString(
       remote["sourceName"],
       remote["sourceType"],
       remote["type"],
     );
-    if (!source) continue;
+
+    if (!source) {
+      continue;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     normalized[source.toLowerCase().replace(".com", "")] = String(remote["id"]);
   }
 

@@ -4,6 +4,7 @@
   import ResponsiveChartContainer from "$lib/components/media/riven/responsive-chart-container.svelte";
   import { LineChart } from "layerchart";
   import { curveCatmullRom } from "d3-shape";
+  import { DateTime } from "luxon";
   import type { UsenetStreamingHealth, UsenetTraffic } from "./types";
 
   let {
@@ -43,7 +44,7 @@
     const current = health;
     untrack(() => {
       if (!current) return;
-      const now = Date.now();
+      const now = DateTime.now().toMillis();
       if (prev && now > prev.t && current.bytesDecoded >= prev.bytes) {
         throughputBytesPerSec =
           (current.bytesDecoded - prev.bytes) / ((now - prev.t) / 1000);

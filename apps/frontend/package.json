@@ -30,6 +30,7 @@
     "embla-carousel-autoplay": "catalog:",
     "graphql-ws": "catalog:",
     "http-proxy": "catalog:",
+    "luxon": "catalog:",
     "mode-watcher": "catalog:",
     "nprogress": "catalog:",
     "zod": "catalog:"
@@ -46,6 +47,7 @@
     "@types/better-sqlite3": "catalog:",
     "@types/d3-shape": "catalog:",
     "@types/http-proxy": "catalog:",
+    "@types/luxon": "catalog:",
     "@types/node": "catalog:",
     "@types/nprogress": "catalog:",
     "bits-ui": "catalog:",

@@ -1,5 +1,6 @@
 import { gqlSubscribeClient } from "$lib/graphql-client";
 import { createScopedLogger } from "$lib/logger";
+import { DateTime } from "luxon";
 import { SvelteMap, SvelteSet } from "svelte/reactivity";
 
 const logger = createScopedLogger("notifications");
@@ -76,7 +77,7 @@ function buildDedupeKey(
 function rivenNotificationToNotification(
   event: RivenNotificationPayload,
 ): Omit<Notification, "id" | "read" | "count"> | null {
-  const ts = new Date().toISOString();
+  const ts = DateTime.now().toISO();
   const dedupeKey = buildDedupeKey(event.eventType, event);
 
   switch (event.eventType) {

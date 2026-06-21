@@ -2,6 +2,7 @@
   import { Badge } from "$lib/components/ui/badge/index.js";
   import { gqlClient } from "$lib/graphql-client";
   import { TMDB_IMAGE_BASE_URL } from "$lib/indexer-constants";
+  import { DateTime } from "luxon";
   import type { UsenetTitleHealth, UsenetTitleHealthSummary } from "./types";
 
   let {
@@ -44,7 +45,10 @@
 
   function relativeTime(unixSeconds: number | null) {
     if (!unixSeconds) return "never checked";
-    const secs = Math.max(0, Math.floor(Date.now() / 1000 - unixSeconds));
+    const secs = Math.max(
+      0,
+      Math.floor(DateTime.now().toSeconds() - unixSeconds),
+    );
     if (secs < 90) return "just now";
     const mins = Math.floor(secs / 60);
     if (mins < 60) return `${mins}m ago`;
@@ -55,7 +59,7 @@
 
   function untilTime(unixSeconds: number | null) {
     if (!unixSeconds) return null;
-    const secs = Math.floor(unixSeconds - Date.now() / 1000);
+    const secs = Math.floor(unixSeconds - DateTime.now().toSeconds());
     if (secs <= 0) return "now";
     const mins = Math.ceil(secs / 60);
     if (mins < 60) return `${mins}m`;

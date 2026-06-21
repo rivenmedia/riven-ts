@@ -9,13 +9,14 @@
   import { Input } from "$lib/components/ui/input/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { createScopedLogger } from "$lib/logger";
+  import { DateTime } from "luxon";
 
   const logger = createScopedLogger("passkeys");
 
   interface Passkey {
     id: string;
     name: string;
-    createdAt: string | Date;
+    createdAt: Date;
   }
 
   let isRegisteringPasskey = $state<boolean>(false);
@@ -124,6 +125,8 @@
     {:else if userPasskeys.length > 0}
       <div class="border-border/60 mb-4 border-t">
         {#each userPasskeys as passkey (passkey.id)}
+          {@const createdAt = DateTime.fromJSDate(passkey.createdAt)}
+
           <div
             class="border-border/60 flex items-center justify-between border-b py-3"
           >
@@ -143,7 +146,7 @@
                   </p>
                 {/if}
                 <p class="text-muted-foreground text-xs">
-                  Created {new Date(passkey.createdAt).toLocaleDateString()}
+                  Created {createdAt.toLocaleString()}
                 </p>
               </div>
             </div>

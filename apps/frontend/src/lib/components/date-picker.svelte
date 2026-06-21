@@ -10,6 +10,7 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
   import { cn } from "$lib/utils.js";
+  import { DateTime } from "luxon";
 
   let { value = $bindable(""), placeholder = "YYYY-MM-DD" } = $props();
 
@@ -38,7 +39,7 @@
   });
 
   function getDaysInMonth(year: number, month: number) {
-    return new Date(year, month, 0).getDate();
+    return DateTime.fromObject({ year, month }).daysInMonth;
   }
 
   function handleInput(e: Event) {
@@ -48,8 +49,12 @@
     // Enforce month/day validity on each keystroke
     if (raw.length >= 5) {
       const m = parseInt(raw.slice(4, 6));
-      if (raw.length === 5 && parseInt(raw[4]) > 1) raw = raw.slice(0, 4);
-      else if (m === 0 || m > 12) raw = raw.slice(0, 5);
+
+      if (raw.length === 5 && raw[4] && parseInt(raw[4]) > 1) {
+        raw = raw.slice(0, 4);
+      } else if (m === 0 || m > 12) {
+        raw = raw.slice(0, 5);
+      }
     }
 
     if (raw.length >= 7) {
@@ -58,9 +63,15 @@
       const d = parseInt(raw.slice(6, 8));
       const maxD = getDaysInMonth(y, m);
 
-      if (raw.length === 7 && parseInt(raw[6]) > Math.floor(maxD / 10))
+      if (
+        raw.length === 7 &&
+        raw[6] &&
+        parseInt(raw[6]) > Math.floor(maxD / 10)
+      ) {
         raw = raw.slice(0, 6);
-      else if (d === 0 || d > maxD) raw = raw.slice(0, 7);
+      } else if (d === 0 || d > maxD) {
+        raw = raw.slice(0, 7);
+      }
     }
 
     // Format to YYYY-MM-DD

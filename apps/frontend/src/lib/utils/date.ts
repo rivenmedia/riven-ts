@@ -11,6 +11,15 @@ import {
   parseZonedDateTime,
   today,
 } from "@internationalized/date";
+import { DateTime, Settings } from "luxon";
+
+declare module "luxon" {
+  export interface TSSettings {
+    throwOnInvalid: true;
+  }
+}
+
+Settings.throwOnInvalid = true;
 
 /**
  * Parse an ISO date string to CalendarDate
@@ -20,7 +29,10 @@ import {
 export function parseISODate(
   dateString: string | null | undefined,
 ): CalendarDate | null {
-  if (!dateString) return null;
+  if (!dateString) {
+    return null;
+  }
+
   try {
     // Extract just the date part - handle both "T" separator and space separator
     // Also handle formats like "2011-10-28 00:00:00" from backend
@@ -132,8 +144,13 @@ export function formatDate(
   if (!date) return null;
 
   // Convert CalendarDate to a native Date for formatting
-  const nativeDate = new Date(date.year, date.month - 1, date.day);
-  return nativeDate.toLocaleDateString(locale, options);
+  const nativeDate = DateTime.fromObject({
+    year: date.year,
+    month: date.month,
+    day: date.day,
+  });
+
+  return nativeDate.toLocaleString(options, { locale });
 }
 
 /**
@@ -150,13 +167,19 @@ export function formatDateTime(
     minute: "numeric",
   },
 ): string | null {
-  if (!dateString) return null;
+  if (!dateString) {
+    return null;
+  }
 
   const date = parseISODateTime(dateString);
-  if (!date) return null;
+
+  if (!date) {
+    return null;
+  }
 
   // Convert ZonedDateTime to a native Date for formatting
   const nativeDate = date.toDate();
+
   return nativeDate.toLocaleDateString(locale, options);
 }
 
@@ -229,18 +252,21 @@ export function isSameDayAndMonth(
  */
 export function getLastMonday(date: CalendarDate): CalendarDate {
   // Convert to native Date for day-of-week calculation
-  const nativeDate = new Date(date.year, date.month - 1, date.day);
-  const dayOfWeek = nativeDate.getDay();
+  const nativeDate = DateTime.fromObject({
+    year: date.year,
+    month: date.month,
+    day: date.day,
+  });
+  const dayOfWeek = nativeDate.weekday % 7; // Convert Luxon's format (1 = Monday, 7 = Sunday) to JS' format (0 = Sunday, 6 = Saturday)
   const diff = (dayOfWeek + 6) % 7; // Days since Monday
 
   // Subtract days to get to Monday
-  const mondayNative = new Date(nativeDate);
-  mondayNative.setDate(mondayNative.getDate() - diff);
+  const mondayNative = nativeDate.minus({ days: diff });
 
   return new CalendarDate(
-    mondayNative.getFullYear(),
-    mondayNative.getMonth() + 1,
-    mondayNative.getDate(),
+    mondayNative.year,
+    mondayNative.month,
+    mondayNative.day,
   );
 }
 
@@ -248,14 +274,13 @@ export function getLastMonday(date: CalendarDate): CalendarDate {
  * Add days to a date
  */
 export function addDays(date: CalendarDate, days: number): CalendarDate {
-  const nativeDate = new Date(date.year, date.month - 1, date.day);
-  nativeDate.setDate(nativeDate.getDate() + days);
+  const nativeDate = DateTime.fromObject({
+    year: date.year,
+    month: date.month,
+    day: date.day,
+  }).plus({ days });
 
-  return new CalendarDate(
-    nativeDate.getFullYear(),
-    nativeDate.getMonth() + 1,
-    nativeDate.getDate(),
-  );
+  return new CalendarDate(nativeDate.year, nativeDate.month, nativeDate.day);
 }
 
 interface CalendarData {
@@ -314,26 +339,27 @@ export function getLastDayOfMonth(year: number, month: number): CalendarDate {
   const nextYear = month === 12 ? year + 1 : year;
   const firstOfNext = new CalendarDate(nextYear, nextMonth, 1);
 
-  const nativeDate = new Date(
-    firstOfNext.year,
-    firstOfNext.month - 1,
-    firstOfNext.day,
-  );
-  nativeDate.setDate(nativeDate.getDate() - 1);
+  const nativeDate = DateTime.fromObject({
+    year: firstOfNext.year,
+    month: firstOfNext.month,
+    day: firstOfNext.day,
+  }).minus({ days: 1 });
 
-  return new CalendarDate(
-    nativeDate.getFullYear(),
-    nativeDate.getMonth() + 1,
-    nativeDate.getDate(),
-  );
+  return new CalendarDate(nativeDate.year, nativeDate.month, nativeDate.day);
 }
 
 /**
  * Get the day of week (0 = Sunday, 6 = Saturday)
  */
 export function getDayOfWeek(date: CalendarDate): number {
-  const nativeDate = new Date(date.year, date.month - 1, date.day);
-  return nativeDate.getDay();
+  const nativeDate = DateTime.fromObject({
+    year: date.year,
+    month: date.month,
+    day: date.day,
+  });
+
+  // Convert Luxon's format (1 = Monday, 7 = Sunday) to JS' format (0 = Sunday, 6 = Saturday)
+  return nativeDate.weekday % 7;
 }
 
 /**
@@ -366,13 +392,18 @@ export function compareDateStrings(
  * This returns the current time as milliseconds since epoch
  */
 export function getTimestamp(): number {
-  return Date.now();
+  return DateTime.now().toMillis();
 }
 
 /**
  * Convert DateValue to milliseconds since epoch
  */
 export function dateToTimestamp(date: DateValue): number {
-  const nativeDate = new Date(date.year, date.month - 1, date.day);
-  return nativeDate.getTime();
+  const nativeDate = DateTime.fromObject({
+    year: date.year,
+    month: date.month,
+    day: date.day,
+  });
+
+  return nativeDate.toMillis();
 }

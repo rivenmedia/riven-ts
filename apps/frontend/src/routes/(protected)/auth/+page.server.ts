@@ -11,6 +11,7 @@ import { getAuthProviders } from "$lib/server/auth";
 import { auth } from "$lib/server/auth";
 import { redirect } from "@sveltejs/kit";
 import { APIError } from "better-auth/api";
+import { DateTime } from "luxon";
 import { fail, message, setError, superValidate } from "sveltekit-superforms";
 import { zod4 } from "sveltekit-superforms/adapters";
 
@@ -28,15 +29,11 @@ interface ManagedUser {
   createdAt?: Date | string | number | null;
 }
 
-function toIsoDateString(date: Date | string | number): string {
-  if (date instanceof Date) return date.toISOString();
-  if (typeof date === "number") return new Date(date).toISOString();
-  return date;
-}
-
 export const load: PageServerLoad = async (event) => {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (!event.locals.user || !event.locals.session) {
+  if (
+    !(event.locals.user as typeof event.locals.user | null) ||
+    !(event.locals.session as typeof event.locals.session | null)
+  ) {
     return redirect(302, "/auth/login");
   }
 
@@ -72,14 +69,14 @@ export const load: PageServerLoad = async (event) => {
     user: {
       ...event.locals.user,
       role: normalizeUserRole(event.locals.user.role),
-      createdAt: toIsoDateString(event.locals.user.createdAt),
-      updatedAt: toIsoDateString(event.locals.user.updatedAt),
+      createdAt: DateTime.fromJSDate(event.locals.user.createdAt).toISO(),
+      updatedAt: DateTime.fromJSDate(event.locals.user.updatedAt).toISO(),
     },
     session: {
       ...event.locals.session,
-      createdAt: toIsoDateString(event.locals.session.createdAt),
-      updatedAt: toIsoDateString(event.locals.session.updatedAt),
-      expiresAt: toIsoDateString(event.locals.session.expiresAt),
+      createdAt: DateTime.fromJSDate(event.locals.session.createdAt).toISO(),
+      updatedAt: DateTime.fromJSDate(event.locals.session.updatedAt).toISO(),
+      expiresAt: DateTime.fromJSDate(event.locals.session.expiresAt).toISO(),
     },
     permissions,
     authProviders: getAuthProviders(),

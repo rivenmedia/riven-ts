@@ -153,6 +153,7 @@
     const daysToShow = Math.ceil(totalDays / 7) * 7;
 
     const days: CalendarDay[] = [];
+
     for (let i = 0; i < daysToShow; i++) {
       const currentDay = dateUtils.addDays(firstDay, i - startOffset);
       const dateKey = dateUtils.toISODate(currentDay);

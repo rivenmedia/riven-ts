@@ -166,10 +166,9 @@
   }
 
   function removeDictionaryEntry(entryKey: string) {
-    const dictionary = ensureDictionary();
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete dictionary[entryKey];
-    value = { ...dictionary };
+    const { [entryKey]: _, ...dictionary } = ensureDictionary();
+
+    value = dictionary;
   }
 
   function renameDictionaryEntry(previousKey: string, nextKeyRaw: string) {

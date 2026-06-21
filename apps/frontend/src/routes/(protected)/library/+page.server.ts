@@ -167,7 +167,10 @@ function transformItems(items: GqlMediaItem[]) {
 }
 
 export const load: PageServerLoad = async (event) => {
-  if (!event.locals.user || !event.locals.session) {
+  if (
+    !(event.locals.user as typeof event.locals.user | null) ||
+    !(event.locals.session as typeof event.locals.session | null)
+  ) {
     return redirect(302, "/auth/login");
   }
   event.depends(LIBRARY_ITEMS_DEPENDENCY);

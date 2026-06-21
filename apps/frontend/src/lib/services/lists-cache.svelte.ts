@@ -1,5 +1,6 @@
 import { browser } from "$app/environment";
 import { createScopedLogger } from "$lib/logger";
+import { DateTime } from "luxon";
 import { PersistedState } from "runed";
 
 const logger = createScopedLogger("lists-cache");
@@ -197,7 +198,7 @@ export class MediaListStore<T = unknown> {
       if (!stored) return null;
 
       const cached = JSON.parse(stored) as CachedData<T>;
-      const now = Date.now();
+      const now = DateTime.now().toMillis();
 
       // Check if cache is still valid
       if (now - cached.timestamp > CACHE_DURATION) {
@@ -217,7 +218,7 @@ export class MediaListStore<T = unknown> {
     try {
       const cached: CachedData<T> = {
         items,
-        timestamp: Date.now(),
+        timestamp: DateTime.now().toMillis(),
       };
       sessionStorage.setItem(this.#getStorageKey(), JSON.stringify(cached));
     } catch (e) {
