@@ -40,6 +40,9 @@ export default {
     "@vitest/coverage-v8",
     "(?!-)vscode(?!-)", // Ignore VSCode packages - these tend to be used by editors and not the program
   ],
+  ignoreIssues: {
+    "apps/frontend/src/lib/components/ui/*/index.ts": ["exports"],
+  },
   workspaces: {
     ".": {
       entry: [".husky/install.mjs", "turbo/generators/config.ts!"],
