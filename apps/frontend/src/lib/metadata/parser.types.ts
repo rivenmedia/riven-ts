@@ -41,7 +41,7 @@ export interface ParsedCastMember {
   external_source?: "tmdb" | "tvdb";
 }
 
-export interface ParsedCrewMember {
+interface ParsedCrewMember {
   id: number;
   name: string;
   job: string | null;
@@ -63,7 +63,7 @@ export interface ParsedTrailer {
   url?: string | null;
 }
 
-export interface ParsedMediaDetailsBase {
+interface ParsedMediaDetailsBase {
   id: number | null;
   type: "movie" | "show";
   title: string | null;
@@ -100,7 +100,7 @@ export interface ParsedMediaDetailsBase {
 // TMDB types
 // ---------------------------------------------------------------------------------
 
-export interface TMDBListItem {
+interface TMDBListItem {
   adult: boolean;
   backdrop_path: string | null;
   id: number;
@@ -124,14 +124,14 @@ export interface TMDBListItem {
   logo_path?: string | null;
 }
 
-export interface TMDBCollectionItem {
+interface TMDBCollectionItem {
   backdrop_path: string | null;
   id: number;
   name: string;
   poster_path: string | null;
 }
 
-export interface TMDBMovieDetailsBase {
+interface TMDBMovieDetailsBase {
   adult: boolean;
   backdrop_path: string | null;
   belongs_to_collection: TMDBCollectionItem | null;
@@ -165,7 +165,7 @@ export interface TMDBMovieDetailsBase {
   vote_count: number | null;
 }
 
-export interface TMDBImageItem {
+interface TMDBImageItem {
   aspect_ratio: number;
   file_path: string;
   height: number;
@@ -189,7 +189,7 @@ export interface TMDBVideoItem {
   id: string;
 }
 
-export interface TMDBCastItem {
+interface TMDBCastItem {
   adult: boolean;
   gender: number | null;
   id: number;
@@ -204,7 +204,7 @@ export interface TMDBCastItem {
   order: number;
 }
 
-export interface TMDBCrewItem {
+interface TMDBCrewItem {
   adult: boolean;
   gender: number | null;
   id: number;
@@ -218,7 +218,7 @@ export interface TMDBCrewItem {
   job: string;
 }
 
-export interface TMDBReleaseDateItem {
+interface TMDBReleaseDateItem {
   certification: string;
   descriptors: string[];
   iso_639_1: string | null;
@@ -332,7 +332,7 @@ export interface TVDBArtworkItem {
   tagOptions: unknown[] | null;
 }
 
-export interface TVDBCompanyItem {
+interface TVDBCompanyItem {
   id: number;
   name: string;
   slug: string;
@@ -355,7 +355,7 @@ export interface TVDBCompanyItem {
   tagOptions: unknown[] | null;
 }
 
-export interface TVDBCollectionItem {
+interface TVDBCollectionItem {
   id: number;
   name: string;
   overview: string | null;
@@ -371,7 +371,7 @@ export interface TVDBCollectionItem {
   tags: unknown[] | null;
 }
 
-export interface TVDBCharacterItem {
+interface TVDBCharacterItem {
   id: number;
   name: string;
   peopleId: number;
@@ -394,7 +394,7 @@ export interface TVDBCharacterItem {
   personImgURL: string | null;
 }
 
-export interface TVDBSeasonItem {
+interface TVDBSeasonItem {
   id: number;
   seriesId: number;
   type: {

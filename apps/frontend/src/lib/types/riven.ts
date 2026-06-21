@@ -1,4 +1,4 @@
-export interface VideoMetadata {
+interface VideoMetadata {
   resolution_width?: number;
   resolution_height?: number;
   codec?: string;
@@ -7,13 +7,13 @@ export interface VideoMetadata {
   frame_rate?: number;
 }
 
-export interface AudioTrack {
+interface AudioTrack {
   codec?: string;
   channels?: number;
   language?: string;
 }
 
-export interface SubtitleTrack {
+interface SubtitleTrack {
   codec?: string;
   language?: string;
 }

@@ -1,7 +1,7 @@
 /**
  * Type for TMDB search/discover parameters
  */
-export interface TMDBParams {
+interface TMDBParams {
   query?: string;
   year?: number;
   primary_release_year?: number;
@@ -25,7 +25,7 @@ export interface TMDBParams {
 /**
  * Type for TVDB search parameters
  */
-export interface TVDBParams {
+interface TVDBParams {
   query?: string;
   year?: number;
   language?: string;
@@ -41,7 +41,7 @@ export interface TVDBParams {
 /**
  * Search mode type
  */
-export type SearchMode = "search" | "discover" | "hybrid";
+type SearchMode = "search" | "discover" | "hybrid";
 
 /**
  * Parsed search result with metadata for both providers
@@ -302,7 +302,7 @@ export function parseSearchQuery(query: string): ParsedSearchQuery {
 /**
  * Helper to get available shortcuts
  */
-export function getAvailableShortcuts(): Record<
+function getAvailableShortcuts(): Record<
   string,
   { tmdb?: string; tvdb?: string }
 > {
@@ -312,6 +312,6 @@ export function getAvailableShortcuts(): Record<
 /**
  * Helper to get genre mappings
  */
-export function getGenreMap(): Record<string, number> {
+function getGenreMap(): Record<string, number> {
   return { ...GENRE_MAP };
 }

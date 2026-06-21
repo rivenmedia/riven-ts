@@ -48,6 +48,8 @@
     "sveltekit-superforms": "catalog:",
     "tailwind-merge": "catalog:",
     "tailwind-variants": "catalog:",
+    "tailwindcss": "catalog:",
+    "tw-animate-css": "catalog:",
     "vaul-svelte": "catalog:",
     "zod": "catalog:"
   },
@@ -69,9 +71,7 @@
     "prettier-plugin-svelte": "catalog:",
     "prettier-plugin-tailwindcss": "catalog:",
     "svelte-check": "catalog:",
-    "tailwindcss": "catalog:",
     "tsx": "catalog:",
-    "tw-animate-css": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:"
   }

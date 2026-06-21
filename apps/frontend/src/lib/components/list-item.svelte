@@ -3,7 +3,7 @@
   import { Badge } from "$lib/components/ui/badge/index.js";
   import { cn } from "$lib/utils";
   import { resolve } from "$app/paths";
-  import logger from "$lib/logger";
+  import { logger } from "$lib/logger";
 
   const badgeVariantClasses: Record<string, string> = {
     success: "bg-green-600/90 text-white border-0",

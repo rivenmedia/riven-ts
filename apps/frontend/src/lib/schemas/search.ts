@@ -12,4 +12,4 @@ export const searchSchema = z.object({
   type: z.enum(["movie", "tv", "both"]).default("both"),
 });
 
-export type SearchFormData = z.infer<typeof searchSchema>;
+type SearchFormData = z.infer<typeof searchSchema>;

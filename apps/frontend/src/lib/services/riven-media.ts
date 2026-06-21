@@ -10,7 +10,7 @@
  */
 import type { RivenMediaItem } from "$lib/types/riven";
 
-export interface GqlFilesystemEntry {
+interface GqlFilesystemEntry {
   id?: number | null;
   fileSize?: number | null;
   originalFilename?: string | null;
@@ -23,14 +23,14 @@ export interface GqlFilesystemEntry {
   mediaMetadata?: unknown;
 }
 
-export interface GqlEpisodeFull {
+interface GqlEpisodeFull {
   episodeNumber: number;
   state: string;
   filesystemEntry?: GqlFilesystemEntry | null;
   filesystemEntries?: GqlFilesystemEntry[];
 }
 
-export interface GqlSeasonFull {
+interface GqlSeasonFull {
   seasonNumber: number;
   state: string;
   isRequested: boolean;
@@ -48,13 +48,13 @@ export interface GqlMediaItemFull {
   seasons?: GqlSeasonFull[];
 }
 
-export interface GqlEpisodeState {
+interface GqlEpisodeState {
   id: number;
   episodeNumber?: number | null;
   state: string;
 }
 
-export interface GqlSeasonState {
+interface GqlSeasonState {
   id: number;
   seasonNumber?: number | null;
   state: string;

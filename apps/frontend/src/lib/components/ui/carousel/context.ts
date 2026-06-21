@@ -18,8 +18,8 @@ type EmblaCarouselConfig = NonNullable<
   Parameters<typeof emblaCarouselSvelte>[1]
 >;
 
-export type CarouselOptions = EmblaCarouselConfig["options"];
-export type CarouselPlugins = EmblaCarouselConfig["plugins"];
+type CarouselOptions = EmblaCarouselConfig["options"];
+type CarouselPlugins = EmblaCarouselConfig["plugins"];
 
 ////
 

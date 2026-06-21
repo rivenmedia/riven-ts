@@ -8,7 +8,7 @@ export const loginSchema = z.object({
     .max(15, "Username must be at most 15 characters long"),
   password: z.string().min(4, "Password must be at least 4 characters long"),
 });
-export type LoginSchema = z.infer<typeof loginSchema>;
+type LoginSchema = z.infer<typeof loginSchema>;
 
 export const registerSchema = z
   .object({
@@ -27,7 +27,7 @@ export const registerSchema = z
     message: "Password and confirmation do not match.",
     path: ["confirmPassword"],
   });
-export type RegisterSchema = z.infer<typeof registerSchema>;
+type RegisterSchema = z.infer<typeof registerSchema>;
 
 export const passwordChangeSchema = z
   .object({

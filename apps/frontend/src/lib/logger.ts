@@ -38,5 +38,3 @@ export const logger = createConsola({
 export function createScopedLogger(tag: string) {
   return logger.withTag(tag);
 }
-
-export default logger;

@@ -86,7 +86,7 @@ export interface Step {
   description: string;
 }
 
-export interface PluginGroup {
+interface PluginGroup {
   id: string;
   title: string;
   description: string;

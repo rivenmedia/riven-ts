@@ -1,7 +1,7 @@
 import type { KnipConfiguration } from "knip";
 
 const filePatterns = {
-  sourceFiles: "**/*.{ts,svelte}!",
+  sourceFiles: "**/*.ts!",
   generatedProdFiles: "**/__generated__/zod/*.ts!",
   generatedDevFiles: "**/__generated__/{handlers,mocks}/*.ts",
   scriptFiles: "**/scripts/**/*.ts",
@@ -81,8 +81,12 @@ export default {
       svelte: { config: "svelte.config.ts" },
       sveltekit: { config: "svelte.config.ts" },
       typescript: { config: ["tsconfig.json", "./.svelte-kit/tsconfig.json"] },
-      entry: ["scripts/*.ts", "server.ts!"],
-      project: [...defaultProject, "!prettier.config.ts!"],
+      entry: [filePatterns.scriptFiles, "server.ts!", filePatterns.configFiles],
+      project: [
+        ...defaultProject,
+        "**/*.{svelte,css}!",
+        "!prettier.config.ts!",
+      ],
     },
     "{packages,packages/core}/*": {
       entry: [...defaultEntry],

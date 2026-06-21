@@ -31,7 +31,7 @@ export interface RecentItemsResponse {
   };
 }
 
-export interface GqlRecentItem {
+interface GqlRecentItem {
   id: number;
   itemType: string;
   title: string;

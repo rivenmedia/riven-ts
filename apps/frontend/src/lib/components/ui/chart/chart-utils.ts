@@ -14,7 +14,7 @@ export type ChartConfig = {
   );
 };
 
-export type ExtractSnippetParams<T> = T extends Snippet<[infer P]> ? P : never;
+type ExtractSnippetParams<T> = T extends Snippet<[infer P]> ? P : never;
 
 export type TooltipPayload = Tooltip.TooltipSeries;
 

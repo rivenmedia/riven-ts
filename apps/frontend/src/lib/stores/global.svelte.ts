@@ -26,7 +26,7 @@ export class createSidebarStore {
 
 export const SidebarStore = new createSidebarStore();
 
-export class createMobileStore {
+class createMobileStore {
   #isMobile = $state(new IsMobile());
 
   get isMobile() {

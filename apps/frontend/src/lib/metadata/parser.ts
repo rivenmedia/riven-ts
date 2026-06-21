@@ -27,10 +27,7 @@ import type {
 export type {
   ParsedMovieDetails,
   ParsedShowDetails,
-  PersonCreditCast,
-  PersonCreditCrew,
   PersonDetails,
-  TMDBListItem,
   TMDBMovieDetailsExtended,
   TMDBTransformedListItem,
   TVDBBaseItem,
@@ -112,7 +109,7 @@ const TVDB_GENRE_MAP: Record<string, number> = {
   "War & Politics": 10768,
 };
 
-export function transformTMDBList(
+function transformTMDBList(
   items: unknown[] | null,
   type: "movie" | "tv" | "person" | "company" = "movie",
   backdropSize = "w1280",
@@ -202,7 +199,7 @@ export function transformTMDBList(
   );
 }
 
-export function transformTVDBList(
+function transformTVDBList(
   items: TVDBSearchItem[] | null,
 ): TMDBTransformedListItem[] {
   return (

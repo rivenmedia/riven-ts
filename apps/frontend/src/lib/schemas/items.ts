@@ -31,5 +31,5 @@ export const itemsSearchSchema = z.object({
     .optional(),
 });
 
-export type ItemsSearchSchema = z.infer<typeof itemsSearchSchema>;
-export const sortOptions = sortEnum.enum;
+type ItemsSearchSchema = z.infer<typeof itemsSearchSchema>;
+const sortOptions = sortEnum.enum;

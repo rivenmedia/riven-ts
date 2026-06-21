@@ -98,9 +98,7 @@ const TVDB_EPISODES_QUERY = `query($id: Int!, $seasonType: String!, $lang: Strin
     tvdbEpisodes(id: $id, seasonType: $seasonType, lang: $lang, page: $page)
 }`;
 
-export function mapGqlTmdbListItem(
-  item: GqlTmdbListItem,
-): TMDBTransformedListItem {
+function mapGqlTmdbListItem(item: GqlTmdbListItem): TMDBTransformedListItem {
   return {
     id: item.id,
     title: item.title,

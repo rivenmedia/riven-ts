@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const USER_ROLES = ["user", "manager", "admin"] as const;
+const USER_ROLES = ["user", "manager", "admin"] as const;
 
 export type UserRole = (typeof USER_ROLES)[number];
 

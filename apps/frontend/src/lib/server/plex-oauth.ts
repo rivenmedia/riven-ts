@@ -20,7 +20,7 @@ import type { GenericOAuthConfig } from "better-auth/plugins";
 
 const logger = createScopedLogger("plex-oauth");
 
-export interface PlexProfile {
+interface PlexProfile {
   id: number;
   uuid: string;
   username: string;
@@ -119,7 +119,7 @@ interface PlexPinResponse {
 /**
  * Gets the standard Plex API headers
  */
-export function getPlexHeaders(
+function getPlexHeaders(
   options: PlexOAuthOptions,
   includeToken?: string,
 ): Record<string, string> {
@@ -205,7 +205,7 @@ export async function checkPlexPin(
 /**
  * Fetches user profile from Plex API
  */
-export async function getPlexUserProfile(
+async function getPlexUserProfile(
   options: PlexOAuthOptions,
   authToken: string,
 ): Promise<PlexProfile> {

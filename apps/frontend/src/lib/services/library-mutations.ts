@@ -14,8 +14,8 @@ import { gqlClient } from "$lib/graphql-client";
 export const RESET_ITEMS_MUTATION = `mutation ResetItems($ids: [Int!]!) { resetItems(ids: $ids) }`;
 export const RETRY_ITEMS_MUTATION = `mutation RetryItems($ids: [Int!]!) { retryItems(ids: $ids) }`;
 export const REMOVE_ITEMS_MUTATION = `mutation RemoveItems($ids: [Int!]!) { removeItems(ids: $ids) }`;
-export const PAUSE_ITEMS_MUTATION = `mutation PauseItems($ids: [Int!]!) { pauseItems(ids: $ids) }`;
-export const UNPAUSE_ITEMS_MUTATION = `mutation UnpauseItems($ids: [Int!]!) { unpauseItems(ids: $ids) }`;
+const PAUSE_ITEMS_MUTATION = `mutation PauseItems($ids: [Int!]!) { pauseItems(ids: $ids) }`;
+const UNPAUSE_ITEMS_MUTATION = `mutation UnpauseItems($ids: [Int!]!) { unpauseItems(ids: $ids) }`;
 
 /** Coerce mixed/nullable id inputs into a clean numeric id array. */
 export function toNumericIds(
@@ -53,7 +53,7 @@ export async function removeItems(ids: number[]): Promise<number> {
 }
 
 /** Pause the given items via the client-side `/graphql` proxy. Returns the affected count. */
-export async function pauseItems(ids: number[]): Promise<number> {
+async function pauseItems(ids: number[]): Promise<number> {
   const result = await gqlClient<{ pauseItems: number }>(PAUSE_ITEMS_MUTATION, {
     ids,
   });
@@ -61,7 +61,7 @@ export async function pauseItems(ids: number[]): Promise<number> {
 }
 
 /** Unpause the given items via the client-side `/graphql` proxy. Returns the affected count. */
-export async function unpauseItems(ids: number[]): Promise<number> {
+async function unpauseItems(ids: number[]): Promise<number> {
   const result = await gqlClient<{ unpauseItems: number }>(
     UNPAUSE_ITEMS_MUTATION,
     { ids },

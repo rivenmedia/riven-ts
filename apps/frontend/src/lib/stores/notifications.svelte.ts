@@ -21,7 +21,7 @@ export interface Notification {
 }
 
 // Shape of a RivenNotification as returned by the GraphQL `notifications` subscription.
-export interface RivenNotificationPayload {
+interface RivenNotificationPayload {
   eventType: string;
   title?: string | null;
   fullTitle?: string | null;
@@ -175,7 +175,7 @@ const cancelFlush =
         clearTimeout(h);
       };
 
-export class NotificationStore {
+class NotificationStore {
   #notifications = $state<Notification[]>([]);
   #unreadCount = $state(0);
   #connectionStatus = $state<
