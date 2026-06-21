@@ -24,7 +24,7 @@ export const waitForChunk = async (
 ): Promise<WaitForChunkResponse> => {
   const { fd, context } = getVfsOperationContext("read");
 
-  let chunk: Buffer | null = null;
+  let chunk: Buffer | null;
   let fetchedFromCache = false;
 
   const timeoutSignal = AbortSignal.timeout(config.chunkTimeoutSeconds * 1000);

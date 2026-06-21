@@ -130,7 +130,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     const allResults: ExtendedMediaRequest[] = [];
     const take = 20;
     let skip = 0;
-    let totalResults = 0;
+    let totalResults: number;
 
     do {
       const response = await this.get<unknown>("request", {

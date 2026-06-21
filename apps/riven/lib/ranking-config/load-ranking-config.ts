@@ -36,14 +36,15 @@ export async function loadRankingConfig(
 
     try {
       await writeDefaultConfigFile(resolvedPath);
-    } catch (cause) {
+    } catch (error) {
       if (
-        cause === null ||
-        typeof cause !== "object" ||
-        (cause as NodeJS.ErrnoException).code !== "EEXIST"
+        error === null ||
+        typeof error !== "object" ||
+        (error as NodeJS.ErrnoException).code !== "EEXIST"
       ) {
         throw new Error(
-          `Failed to create ranking config file at "${resolvedPath}": ${String(cause)}`,
+          `Failed to create ranking config file at "${resolvedPath}": ${String(error)}`,
+          { cause: error },
         );
       }
     }
