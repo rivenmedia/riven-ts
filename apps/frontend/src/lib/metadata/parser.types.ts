@@ -83,7 +83,7 @@ export interface ParsedMediaDetailsBase {
   poster_path: string | null;
   logo: string | null;
   trailer: ParsedTrailer | null;
-  certification: string | "N/A";
+  certification: string;
   genres: ParsedGenre[];
   cast: ParsedCastMember[];
   crew: ParsedCrewMember[];

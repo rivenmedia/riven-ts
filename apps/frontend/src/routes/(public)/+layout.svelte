@@ -18,8 +18,6 @@
   let { children }: LayoutProps = $props();
 
   onNavigate((navigation) => {
-    if (!document.startViewTransition) return;
-
     return new Promise((resolve) => {
       document.startViewTransition(async () => {
         resolve();
@@ -54,5 +52,5 @@
 <Toaster richColors closeButton />
 
 <div class="bg-background h-screen overflow-hidden">
-  {@render children?.()}
+  {@render children()}
 </div>

@@ -15,7 +15,7 @@ function signingPayload(
   role: string,
   timestamp: number,
 ): string {
-  return `v1\n${userId}\n${role}\n${timestamp}`;
+  return `v1\n${userId}\n${role}\n${timestamp.toString()}`;
 }
 
 export function buildBackendRoleHeaders(

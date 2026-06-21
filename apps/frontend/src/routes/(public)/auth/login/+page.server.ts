@@ -14,8 +14,9 @@ const logger = createScopedLogger("auth");
 
 const authProviders = getAuthProviders();
 const isSignupEnabled =
-  authProviders.credential?.enabled && !authProviders.credential?.disableSignup;
-const isCredentialEnabled = authProviders.credential?.enabled;
+  authProviders["credential"]?.enabled &&
+  !authProviders["credential"].disableSignup;
+const isCredentialEnabled = authProviders["credential"]?.enabled;
 
 export const load: PageServerLoad = async (event) => {
   if (event.locals.user) {

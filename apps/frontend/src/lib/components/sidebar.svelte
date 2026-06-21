@@ -52,7 +52,7 @@
   let { user } = $props();
   const permissions = $derived(getPermissionFlags(user?.role));
   const visibleNavItems = $derived(
-    navItems.filter((item) => !item.adminOnly ?? permissions.canManageSettings),
+    navItems.filter((item) => !item.adminOnly || permissions.canManageSettings),
   );
 
   const SidebarStore = getContext<createSidebarStore>("sidebarStore");
@@ -133,7 +133,7 @@
           await authClient.signOut({
             fetchOptions: {
               onSuccess: () => {
-                goto(resolve("/auth/login"));
+                void goto(resolve("/auth/login"));
               },
             },
           });
@@ -214,7 +214,7 @@
                 await authClient.signOut({
                   fetchOptions: {
                     onSuccess: () => {
-                      goto(resolve("/auth/login"));
+                      void goto(resolve("/auth/login"));
                     },
                   },
                 });

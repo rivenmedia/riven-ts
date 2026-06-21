@@ -56,8 +56,8 @@
     {#each services as downloader (downloader.service)}
       {@const premium =
         premiumMeta[
-          (downloader.premium_status === "premium" ??
-          downloader.premium_status === "trial")
+          downloader.premium_status === "premium" ||
+          downloader.premium_status === "trial"
             ? downloader.premium_status
             : "expired"
         ]}

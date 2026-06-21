@@ -53,9 +53,9 @@
   });
 
   const hasActivity = $derived(
-    !!health ??
+    !!health ||
       (!!traffic &&
-        (traffic.totalBytesDownloaded > 0 ?? traffic.daily.length > 0)),
+        (traffic.totalBytesDownloaded > 0 || traffic.daily.length > 0)),
   );
 
   const tiles = $derived.by(() => {
@@ -135,13 +135,22 @@
         idx,
         label: shortDay(day),
       };
-      for (const h of hosts) row[keyFor.get(h)!] = 0;
+
+      for (const h of hosts) {
+        row[keyFor.get(h)!] = 0;
+      }
+
       return row;
     });
+
     for (const r of rows) {
       const row = data[dayIndex.get(r.day)!];
-      const key = keyFor.get(r.host)!;
-      row[key] = (Number(row[key]) ?? 0) + r.bytesDownloaded / divisor;
+
+      if (row) {
+        const key = keyFor.get(r.host)!;
+
+        row[key] = (Number(row[key]) || 0) + r.bytesDownloaded / divisor;
+      }
     }
 
     const series = hosts.map((h, i) => ({
@@ -156,8 +165,8 @@
       Math.ceil(days.length / Math.max(4, Math.floor(width / 72))),
     );
     const ticks = data
-      .filter((_, i) => i === 0 ?? i === data.length - 1 ?? i % step === 0)
-      .map((r) => r.idx as number);
+      .filter((_, i) => i === 0 || i === data.length - 1 || i % step === 0)
+      .map((r) => r["idx"] as number);
 
     return { data, series, ticks, unit };
   });
@@ -234,7 +243,8 @@
                 xAxis: {
                   ticks: daily.ticks,
                   tickSpacing: 44,
-                  format: (i: number) => (daily.data[i]?.label as string) ?? "",
+                  format: (i: number) =>
+                    (daily.data[i]?.["label"] as string) || "",
                 },
               }}
             >

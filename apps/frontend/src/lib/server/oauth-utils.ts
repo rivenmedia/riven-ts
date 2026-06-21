@@ -63,6 +63,11 @@ function unflattenObject(
     let current = result;
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
+
+      if (!part) {
+        continue;
+      }
+
       if (i === parts.length - 1) {
         current[part] = value;
       } else {
@@ -105,42 +110,47 @@ export function getGenericOAuthProviders(
     const clientSecret = clientObj?.["SECRET"] as string | undefined;
 
     if (clientId && clientSecret) {
+      const discoveryUrl =
+        ((config["DISCOVERY"] as NestedObject)["URL"] as string | undefined) ??
+        ((config["ISSUER"] as string)
+          ? `${config["ISSUER"]}/.well-known/openid-configuration`
+          : undefined);
+
+      const redirectURI = (config["REDIRECT"] as NestedObject)["URI"] as
+        | string
+        | undefined;
+
+      const authorizationUrl =
+        ((config["AUTHORIZATION"] as NestedObject)["URL"] as
+          | string
+          | undefined) ??
+        ((config["AUTH"] as NestedObject)["URL"] as string | undefined);
+
+      const tokenUrl = (config["TOKEN"] as NestedObject)["URL"] as
+        | string
+        | undefined;
+
+      const userInfoUrl =
+        ((config["USERINFO"] as NestedObject)["URL"] as string | undefined) ??
+        (((config["USER"] as NestedObject)["INFO"] as NestedObject)["URL"] as
+          | string
+          | undefined);
+
       providers.push({
         providerId,
         clientId,
         clientSecret,
-        discoveryUrl:
-          ((config["DISCOVERY"] as NestedObject)?.["URL"] as
-            | string
-            | undefined) ??
-          ((config["ISSUER"] as string)
-            ? `${config["ISSUER"]}/.well-known/openid-configuration`
-            : undefined),
-        scopes: (config["SCOPES"] as string)?.split(",").map((s) => s.trim()),
+        ...(discoveryUrl && { discoveryUrl }),
+        scopes: (config["SCOPES"] as string).split(",").map((s) => s.trim()),
         pkce: (config["PKCE"] as string) === "true",
         disableSignUp:
-          ((config["DISABLE"] as NestedObject)?.["SIGNUP"] as string) ===
-          "true",
-        redirectURI: (config["REDIRECT"] as NestedObject)?.["URI"] as
-          | string
-          | undefined,
-        authorizationUrl:
-          ((config["AUTHORIZATION"] as NestedObject)?.["URL"] as
-            | string
-            | undefined) ??
-          ((config["AUTH"] as NestedObject)?.["URL"] as string | undefined),
-        tokenUrl: (config["TOKEN"] as NestedObject)?.["URL"] as
-          | string
-          | undefined,
-        userInfoUrl:
-          ((config["USERINFO"] as NestedObject)?.["URL"] as
-            | string
-            | undefined) ??
-          (((config["USER"] as NestedObject)?.["INFO"] as NestedObject)?.[
-            "URL"
-          ] as string | undefined),
+          ((config["DISABLE"] as NestedObject)["SIGNUP"] as string) === "true",
+        ...(redirectURI && { redirectURI }),
+        ...(authorizationUrl && { authorizationUrl }),
+        ...(tokenUrl && { tokenUrl }),
+        ...(userInfoUrl && { userInfoUrl }),
         name:
-          (config["NAME"] as string) ??
+          (config["NAME"] as string) ||
           providerId.charAt(0).toUpperCase() + providerId.slice(1),
         icon: config["ICON"] as string,
       });

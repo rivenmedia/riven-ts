@@ -246,20 +246,19 @@ export class SearchStore {
    * Syncs the store with a new parsed search query.
    * Handles diffing and triggering search/clear automatically.
    */
-  syncQuery(parsed: ParsedSearchQuery | null) {
-    const newQuery = parsed?.query ?? "";
-
-    if (!newQuery) {
+  syncQuery(parsed: ParsedSearchQuery) {
+    if (!parsed.query) {
       this.clear();
+
       return;
     }
 
     // Avoid re-searching if the query hasn't changed
-    if (this.searchQuery === newQuery) {
+    if (this.searchQuery === parsed.query) {
       return;
     }
 
-    this.setSearch(newQuery, parsed!);
+    this.setSearch(parsed.query, parsed);
 
     void this.search();
   }

@@ -21,8 +21,7 @@
 
   onMount(() => {
     const platform = (
-      navigator.userAgentData?.platform ??
-      navigator.platform ??
+      (navigator.userAgentData?.platform ?? navigator.platform) ||
       ""
     ).toUpperCase();
     modifierKey = platform.includes("MAC") ? "⌘" : "^";
@@ -32,7 +31,7 @@
       if (evt.detail.query) {
         inputValue = evt.detail.query;
         inputRef?.focus();
-        navigateToSearch();
+        void navigateToSearch();
       }
     };
 
@@ -76,6 +75,8 @@
     const searchPath = query
       ? `${explorePath}?query=${encodeURIComponent(query)}`
       : explorePath;
+
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
     await goto(searchPath, {
       keepFocus: true,
       noScroll: true,
@@ -85,7 +86,9 @@
 
   function handleInput() {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(navigateToSearch, 300);
+    debounceTimer = setTimeout(() => {
+      void navigateToSearch();
+    }, 300);
   }
 
   $effect(() => {
@@ -95,7 +98,7 @@
   });
 
   function onKeydown(e: KeyboardEvent) {
-    if ((e.ctrlKey ?? e.metaKey) && e.key.toLowerCase() === "k") {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
       e.preventDefault();
       inputRef?.focus();
     }
@@ -128,7 +131,8 @@
           onkeydown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              navigateToSearch();
+
+              void navigateToSearch();
             }
           }}
           autocomplete="off"

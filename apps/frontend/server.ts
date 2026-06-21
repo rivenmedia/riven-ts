@@ -4,11 +4,11 @@ import http from "node:http";
 // @ts-expect-error - handler is a build file and doesn't exist in the source code
 import { handler } from "./build/handler.js";
 
-const PORT = Number(process.env.PORT ?? 3000);
-const HOST = process.env.HOST ?? "0.0.0.0";
-const BACKEND_URL = process.env.BACKEND_URL;
+const PORT = Number(process.env["PORT"] ?? 3000);
+const HOST = process.env["HOST"] ?? "0.0.0.0";
+const BACKEND_URL = process.env["BACKEND_URL"];
 const API_KEY =
-  process.env.BACKEND_API_KEY ?? process.env.RIVEN_SETTING__API_KEY;
+  process.env["BACKEND_API_KEY"] ?? process.env["RIVEN_SETTING__API_KEY"];
 
 if (!BACKEND_URL) {
   throw new Error("BACKEND_URL environment variable is required");
@@ -33,46 +33,61 @@ proxy.on("proxyReqWs", (proxyReq) => {
 
 proxy.on("error", (err, _req, resOrSocket) => {
   console.error("[ws-proxy] error:", err);
-  if (resOrSocket && "destroy" in resOrSocket) resOrSocket.destroy();
+
+  resOrSocket.destroy();
 });
 
-const server = http.createServer((req, res) => handler(req, res));
+const server = http.createServer((req, res) => {
+  handler(req, res);
+});
 
-server.on("upgrade", async (req, socket, head) => {
-  if (!req.url?.startsWith("/graphql")) {
-    socket.destroy();
-    return;
+server.on("upgrade", (req, socket, head) => {
+  async function checkSession() {
+    if (!req.url?.startsWith("/graphql")) {
+      socket.destroy();
+      return;
+    }
+
+    try {
+      const cookieHeader = req.headers.cookie ?? "";
+
+      if (!cookieHeader) {
+        socket.destroy();
+        return;
+      }
+
+      const check = await fetch(
+        `http://127.0.0.1:${PORT}/api/auth/get-session`,
+        {
+          headers: { cookie: cookieHeader },
+        },
+      );
+
+      if (!check.ok) {
+        socket.destroy();
+        return;
+      }
+
+      const body = await check.json().catch(() => null);
+
+      if (!body?.user) {
+        socket.destroy();
+        return;
+      }
+    } catch (err) {
+      console.error("[ws-proxy] session check failed:", err);
+      socket.destroy();
+      return;
+    }
+
+    proxy.ws(req, socket, head);
   }
 
-  try {
-    const cookieHeader = req.headers.cookie ?? "";
-    if (!cookieHeader) {
-      socket.destroy();
-      return;
-    }
-    const check = await fetch(`http://127.0.0.1:${PORT}/api/auth/get-session`, {
-      headers: { cookie: cookieHeader },
-    });
-    if (!check.ok) {
-      socket.destroy();
-      return;
-    }
-    const body = await check.json().catch(() => null);
-    if (!body?.user) {
-      socket.destroy();
-      return;
-    }
-  } catch (err) {
-    console.error("[ws-proxy] session check failed:", err);
-    socket.destroy();
-    return;
-  }
-
-  proxy.ws(req, socket, head);
+  void checkSession();
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`riven-frontend listening on http://${HOST}:${PORT}`);
+  console.log(`riven-frontend listening on http://${HOST}:${PORT.toString()}`);
   console.log(
     `proxying /graphql (HTTP via SvelteKit, WS via http-proxy) -> ${BACKEND_URL}`,
   );

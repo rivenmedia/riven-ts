@@ -1,5 +1,4 @@
 import * as dateUtils from "$lib/utils/date";
-import { CalendarDate } from "@internationalized/date";
 
 export function generateSecret(length = 32): string {
   const chars =
@@ -15,54 +14,6 @@ export function getSeasonAndYear(dateString: string): string {
   return dateUtils.getSeasonAndYear(dateString);
 }
 
-export function flattenObject<T>(data: T): Record<string, unknown> {
-  const flattened: Record<string, unknown> = {};
-
-  function _flatten(obj: unknown, parentKey = ""): void {
-    // Case 1: The object is an array
-    if (Array.isArray(obj)) {
-      // If the array is empty, represent it with the parent key
-      if (obj.length === 0 && parentKey) {
-        flattened[parentKey] = [];
-        return;
-      }
-      obj.forEach((item, i: number) => {
-        // Construct the new key with the index
-        const newKey = `${parentKey}[${i}]`;
-        // Recurse into the array item
-        _flatten(item, newKey);
-      });
-    }
-    // Case 2: The object is a non-null object
-    else if (typeof obj === "object" && obj !== null) {
-      const keys = Object.keys(obj);
-      // If the object is empty, represent it with the parent key
-      if (keys.length === 0 && parentKey) {
-        flattened[parentKey] = {};
-        return;
-      }
-      keys.forEach((key) => {
-        // Construct the new key. If there's no parent, the key is just the current key.
-        const newKey = parentKey ? `${parentKey}.${key}` : key;
-        // Recurse into the value
-        _flatten((obj as Record<string, unknown>)[key], newKey);
-      });
-    }
-    // Case 3: The object is a primitive type (or we treat it as one)
-    else {
-      // This is the base case for the recursion
-      if (parentKey) {
-        flattened[parentKey] = obj;
-      }
-    }
-  }
-
-  // Start the recursion with the initial data
-  _flatten(data);
-
-  return flattened;
-}
-
 export function calculateAge(
   birthday: string | null,
   deathday: string | null = null,
@@ -71,12 +22,20 @@ export function calculateAge(
 }
 
 export const formatBytes = (bytes: number | null | undefined): string => {
-  if (bytes === null ?? bytes === undefined) return "N/A";
+  if (bytes === null || bytes === undefined) return "N/A";
   if (bytes === 0) return "0 B";
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  const size = sizes[i];
+
+  if (!size) {
+    return "";
+  }
+
+  return (
+    parseFloat((bytes / Math.pow(k, i)).toFixed(2)).toString() + " " + size
+  );
 };
 
 export function formatDate(dateStr: string | null): string | null {
@@ -98,15 +57,6 @@ export const getServiceDisplayName = (service: string): string => {
     default:
       return service;
   }
-};
-
-export const getLastMonday = (date: {
-  year: number;
-  month: number;
-  day: number;
-}) => {
-  const calendarDate = new CalendarDate(date.year, date.month, date.day);
-  return dateUtils.getLastMonday(calendarDate);
 };
 
 export const getColor = (colors: string[], max: number, value: number) => {

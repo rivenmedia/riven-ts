@@ -24,11 +24,18 @@
 
   function updatePosition(val: string | undefined, immediate = false) {
     requestAnimationFrame(() => {
-      if (!val ?? elements.length === 0 ?? !container) return;
+      if (!val || elements.length === 0 || !container) {
+        return;
+      }
+
       const index = options.findIndex((o: Option) => o.value === val);
-      if (index === -1) return;
+
+      if (index === -1) {
+        return;
+      }
 
       const el = elements[index];
+
       if (el) {
         const containerRect = container.getBoundingClientRect();
         const itemRect = el.getBoundingClientRect();
@@ -37,7 +44,10 @@
         // Cache container width to avoid reflows in template
         containerWidth = containerRect.width;
 
-        styles.set({ x: leftOffset, w: itemRect.width }, { hard: immediate });
+        void styles.set(
+          { x: leftOffset, w: itemRect.width },
+          { hard: immediate },
+        );
       }
     });
   }

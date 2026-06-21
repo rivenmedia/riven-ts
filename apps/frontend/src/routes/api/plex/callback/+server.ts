@@ -64,7 +64,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
     const oauthCallbackUrl = new URL("/api/auth/oauth2/callback/plex", origin);
     oauthCallbackUrl.searchParams.set(
       "code",
-      `${storedData.pinId}:${storedData.pinCode}`,
+      `${storedData.pinId.toString()}:${storedData.pinCode}`,
     );
     oauthCallbackUrl.searchParams.set("state", storedData.state);
 

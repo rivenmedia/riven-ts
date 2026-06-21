@@ -23,8 +23,8 @@ import { ac, admin, manager, user } from "./permissions";
 import { plexOAuth } from "./plex-oauth";
 
 export const auth = betterAuth({
-  secret: env.AUTH_SECRET ?? generateSecret(),
-  baseURL: env.ORIGIN ?? "http://localhost:5173",
+  secret: env["AUTH_SECRET"] ?? generateSecret(),
+  baseURL: env["ORIGIN"] ?? "http://localhost:5173",
   database: drizzleAdapter(db, {
     provider: "sqlite",
   }),
@@ -41,21 +41,21 @@ export const auth = betterAuth({
       enabled: true,
       allowDifferentEmails: true,
       trustedProviders: [
-        ...(env.DISABLE_PLEX !== "true" ? ["plex"] : []),
+        ...(env["DISABLE_PLEX"] !== "true" ? ["plex"] : []),
         ...getGenericOAuthProviders(env).map((p) => p.providerId),
       ],
     },
     encryptOAuthTokens: true,
   },
   emailAndPassword: {
-    enabled: env.DISABLE_EMAIL_PASSWORD !== "true",
-    disableSignUp: env.ENABLE_EMAIL_PASSWORD_SIGNUP !== "true",
+    enabled: env["DISABLE_EMAIL_PASSWORD"] !== "true",
+    disableSignUp: env["ENABLE_EMAIL_PASSWORD_SIGNUP"] !== "true",
   },
   socialProviders: {},
   trustedOrigins: [
     "http://localhost:5173",
     "http://192.168.1.*:5173",
-    env.ORIGIN,
+    env["ORIGIN"],
   ].filter(Boolean) as string[],
   plugins: [
     username(),
@@ -71,25 +71,25 @@ export const auth = betterAuth({
     }),
     openAPI(),
     passkey({
-      rpID: env.PASSKEY_RP_ID ?? "riven",
-      rpName: env.PASSKEY_RP_NAME ?? "Riven Media",
-      origin: env.ORIGIN ?? "http://localhost:5173",
+      rpID: env["PASSKEY_RP_ID"] ?? "riven",
+      rpName: env["PASSKEY_RP_NAME"] ?? "Riven Media",
+      origin: env["ORIGIN"] ?? "http://localhost:5173",
     }),
     lastLoginMethod({
       storeInDatabase: true,
     }),
     genericOAuth({
       config: [
-        ...(env.DISABLE_PLEX !== "true"
+        ...(env["DISABLE_PLEX"] !== "true"
           ? [
               plexOAuth({
-                clientId: env.PLEX_CLIENT_ID ?? "riven",
+                clientId: env["PLEX_CLIENT_ID"] ?? "riven",
                 product: "Riven Media",
                 version: "1.0",
                 platform: "Web",
                 device: "Browser",
-                disableSignUp: env.ENABLE_PLEX_SIGNUP !== "true",
-                baseURL: env.ORIGIN ?? "http://localhost:5173",
+                disableSignUp: env["ENABLE_PLEX_SIGNUP"] !== "true",
+                baseURL: env["ORIGIN"] ?? "http://localhost:5173",
               }),
             ]
           : []),
@@ -120,30 +120,30 @@ export function getAuthProviders() {
     { enabled: boolean; disableSignup: boolean; name?: string; icon?: string }
   > = {};
 
-  if (auth.options.emailAndPassword) {
-    providers.credential = {
-      enabled: auth.options.emailAndPassword.enabled,
-      disableSignup: auth.options.emailAndPassword.disableSignUp,
-    };
-  }
+  providers["credential"] = {
+    enabled: auth.options.emailAndPassword.enabled,
+    disableSignup: auth.options.emailAndPassword.disableSignUp,
+  };
 
-  if (env.DISABLE_PLEX !== "true") {
-    providers.plex = {
+  if (env["DISABLE_PLEX"] !== "true") {
+    providers["plex"] = {
       enabled: true,
-      disableSignup: env.ENABLE_PLEX_SIGNUP !== "true",
+      disableSignup: env["ENABLE_PLEX_SIGNUP"] !== "true",
       name: "Plex",
       icon: "https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/plex.svg",
     };
   }
 
   const genericProviders = getGenericOAuthProviders(env);
+
   for (const provider of genericProviders) {
     providers[provider.providerId] = {
       enabled: true,
       disableSignup: !!provider.disableSignUp,
       name: provider.name ?? provider.providerId,
-      icon: provider.icon,
+      ...(provider.icon && { icon: provider.icon }),
     };
   }
+
   return providers;
 }

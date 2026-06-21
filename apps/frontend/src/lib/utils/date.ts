@@ -108,7 +108,7 @@ export function getSeasonAndYear(
     season = "Winter";
   }
 
-  return `${season} ${year}`;
+  return `${season} ${year.toString()}`;
 }
 
 /**
@@ -258,16 +258,25 @@ export function addDays(date: CalendarDate, days: number): CalendarDate {
   );
 }
 
+interface CalendarData {
+  max: number;
+  calendar: ({ date: string; value: number } | undefined)[][];
+}
+
 /**
  * Generate calendar data for a year (for heatmap visualization)
  */
-export function getCalendar(data: Record<string, number>, year: number) {
+export function getCalendar(
+  data: Record<string, number>,
+  year: number,
+): CalendarData {
   const base = getLastMonday(new CalendarDate(year, 1, 1));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const out: any = {};
+  const out: CalendarData = {
+    max: 0,
+    calendar: [],
+  };
 
-  out.max = 0;
   out.calendar = Array.from({ length: 7 }, (_, i) => {
     const start = addDays(base, i);
     return Array.from({ length: 53 }, (_, j) => {
@@ -275,9 +284,11 @@ export function getCalendar(data: Record<string, number>, year: number) {
       if (day.year === year) {
         const date = toISODate(day);
         const value = data[date] ?? 0;
+
         if (value > out.max) {
           out.max = value;
         }
+
         return { date, value };
       }
       return undefined;

@@ -26,7 +26,7 @@
     // Initialize as a discovery page for TV shows
     searchStore.mediaType = "tv";
     searchStore.allowEmptySearch = true; // Enable discovery mode
-    searchStore.search(); // Initial fetch
+    void searchStore.search(); // Initial fetch
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -48,12 +48,15 @@
   $effect(() => {
     if (isTriggerVisible && !searchStore.loading && searchStore.hasMore) {
       const timer = setTimeout(() => {
-        searchStore.loadMore();
+        void searchStore.loadMore();
       }, 500);
+
       return () => {
         clearTimeout(timer);
       };
     }
+
+    return;
   });
 
   function applyFilters() {
@@ -64,7 +67,7 @@
   function clearFilters() {
     filterStore.reset();
     searchStore.clearFilters();
-    searchStore.search();
+    void searchStore.search();
   }
 
   function handleSortChange(value: string) {

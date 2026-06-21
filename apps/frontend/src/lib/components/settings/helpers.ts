@@ -57,14 +57,14 @@ interface SetupState {
 
 /** Split the backend sections into the general section + plugin sections, deep-copying values for local editing. */
 export function createSetupState(data: SetupData): SetupState {
-  const sections = (data.sections ?? []).map((section) => ({
+  const sections = data.sections.map((section) => ({
     ...section,
     values: { ...section.values },
   }));
   return {
     general: sections.find((section) => section.kind === "general") ?? null,
     plugins: sections.filter((section) => section.kind === "plugin"),
-    customProfiles: (data.customProfiles ?? []).map((profile) => ({
+    customProfiles: data.customProfiles.map((profile) => ({
       ...profile,
     })),
   };

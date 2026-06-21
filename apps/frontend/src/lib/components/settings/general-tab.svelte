@@ -13,7 +13,7 @@
   } = $props();
 
   let saving = $state<boolean>(false);
-  const groupedSchema = $derived(buildGeneralSections(section.schema ?? []));
+  const groupedSchema = $derived(buildGeneralSections(section.schema));
 
   async function onSave() {
     saving = true;
@@ -23,7 +23,7 @@
 </script>
 
 <div class="space-y-8">
-  {#each groupedSchema as group, i (group.title ?? `__default-${i}`)}
+  {#each groupedSchema as group, i (group.title || `__default-${i}`)}
     <section class="space-y-4">
       {#if group.title}
         <h2 class="text-lg font-semibold tracking-tight">{group.title}</h2>

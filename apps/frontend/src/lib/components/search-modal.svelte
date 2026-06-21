@@ -78,7 +78,9 @@
     abortController = null;
     currentPage = 1;
     hasMorePages = true;
-    debounceTimer = setTimeout(() => search(true), 300);
+    debounceTimer = setTimeout(() => {
+      void search(true);
+    }, 300);
   }
 
   async function search(reset: boolean) {
@@ -168,7 +170,7 @@
 
   function handleScroll(e: Event) {
     const el = e.target as HTMLElement;
-    if (loadingMore ?? loading ?? !hasMorePages ?? !currentQuery) return;
+    if (loadingMore || loading || !hasMorePages || !currentQuery) return;
     // Load more when within 300px of bottom
     if (el.scrollHeight - el.scrollTop - el.clientHeight < 300) {
       void search(false);
@@ -182,8 +184,9 @@
     savedResults = results;
     navigatedFromModal = true;
     pendingNavigation = true;
+
     // Keep modal open — it will be hidden after the new page loads
-    goto(resolve(`/details/media/${item.id}/${item.media_type}`));
+    void goto(resolve(`/details/media/${item.id}/${item.media_type}`));
   }
 
   afterNavigate((navigation) => {

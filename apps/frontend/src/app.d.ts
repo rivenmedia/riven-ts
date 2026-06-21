@@ -1,7 +1,6 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-declare const __APP_VERSION__: string;
-
 declare global {
+  declare const __APP_VERSION__: string;
+
   namespace App {
     interface Locals {
       user: import("$lib/server/auth").SessionValidationResult["user"];

@@ -33,11 +33,11 @@
   </div>
 
   <div class="min-w-0">
-    {@render content?.()}
+    {@render content()}
 
     {#if footer}
       <div class="mt-4">
-        {@render footer?.()}
+        {@render footer()}
       </div>
     {/if}
   </div>

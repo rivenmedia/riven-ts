@@ -119,7 +119,7 @@
   }
 
   async function requestAll() {
-    if (!collectionData?.parts?.length) return;
+    if (!collectionData?.parts.length) return;
     requestLoading = true;
 
     try {
@@ -139,7 +139,7 @@
                 }`,
         {
           movies: collectionData.parts.map((p) => ({
-            title: p.title ?? "Unknown",
+            title: p.title || "Unknown",
             tmdbId: String(p.id),
           })),
         },
@@ -171,7 +171,7 @@
 
   $effect(() => {
     if (open) {
-      fetchCollection();
+      void fetchCollection();
     }
   });
 </script>
@@ -245,12 +245,12 @@
           <h3
             class="text-foreground text-xl font-bold tracking-tight drop-shadow-md"
           >
-            {collectionData.parts?.length ?? 0} Movies
+            {collectionData.parts.length || 0} Movies
           </h3>
         </div>
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {#each collectionData.parts ?? [] as part (part.id)}
+          {#each collectionData.parts as part (part.id)}
             <a
               href={resolve(`/details/media/${part.id}/movie`)}
               class="group block transition-all duration-300 hover:scale-[1.02]"
@@ -280,13 +280,14 @@
       {/if}
     </div>
 
-    {#if collectionData?.parts?.length}
+    {#if collectionData?.parts.length}
       <Sheet.Footer
         class="border-t border-white/5 bg-black/20 p-6 backdrop-blur-md"
       >
         <Button
           onclick={requestAll}
-          disabled={requestLoading ?? !page.data.permissions?.canRequestItems}
+          disabled={requestLoading ||
+            !page.data["permissions"]?.canRequestItems}
           variant="secondary"
           class="border-primary/50 bg-primary/20 text-primary hover:bg-primary/30 w-full border shadow-lg backdrop-blur-md transition-all hover:scale-[1.02]"
         >

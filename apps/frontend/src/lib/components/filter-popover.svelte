@@ -30,12 +30,14 @@
   const filterStore = getContext<FilterStore>("filterStore");
   const searchStore = getContext<SearchStore>("searchStore");
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!filterStore) {
     throw new Error(
       "FilterPopover must be used within a context that provides 'filterStore'.",
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!searchStore) {
     throw new Error(
       "FilterPopover must be used within a context that provides 'searchStore'.",
@@ -67,17 +69,34 @@
   ]);
 
   // Handlers to update store when sliders change
-  function onRuntimeChange(value: number[]) {
-    filterStore.runtimeMin = value[0];
-    filterStore.runtimeMax = value[1];
+  function onRuntimeChange([runtimeMin, runtimeMax]: number[]) {
+    if (runtimeMin) {
+      filterStore.runtimeMin = runtimeMin;
+    }
+
+    if (runtimeMax) {
+      filterStore.runtimeMax = runtimeMax;
+    }
   }
-  function onVoteAverageChange(value: number[]) {
-    filterStore.voteAverageMin = value[0];
-    filterStore.voteAverageMax = value[1];
+
+  function onVoteAverageChange([voteAverageMin, voteAverageMax]: number[]) {
+    if (voteAverageMin) {
+      filterStore.voteAverageMin = voteAverageMin;
+    }
+
+    if (voteAverageMax) {
+      filterStore.voteAverageMax = voteAverageMax;
+    }
   }
-  function onVoteCountChange(value: number[]) {
-    filterStore.voteCountMin = value[0];
-    filterStore.voteCountMax = value[1];
+
+  function onVoteCountChange([voteCountMin, voteCountMax]: number[]) {
+    if (voteCountMin) {
+      filterStore.voteCountMin = voteCountMin;
+    }
+
+    if (voteCountMax) {
+      filterStore.voteCountMax = voteCountMax;
+    }
   }
 
   function handleApply() {
@@ -175,9 +194,9 @@
         <span class="text-sm font-medium">Language</span>
         <Select.Root
           type="single"
-          value={filterStore.withOriginalLanguage ?? undefined}
+          value={filterStore.withOriginalLanguage}
           onValueChange={(v: string) =>
-            (filterStore.withOriginalLanguage = v ?? "")}
+            (filterStore.withOriginalLanguage = v || "")}
         >
           <Select.Trigger class="h-8 text-xs">
             {LANGUAGE_OPTIONS.find(
