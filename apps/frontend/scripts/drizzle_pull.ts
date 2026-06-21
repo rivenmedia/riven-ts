@@ -13,8 +13,9 @@ try {
   console.log("drizzle-kit pull completed successfully.");
 
   // Define source and destination paths
-  const SOURCE_DIR = process.env.DRIZZLE_MIGRATIONS_PATH ?? "./drizzle";
-  const DEST_DIR = process.env.DRIZZLE_SCHEMA_PATH ?? "./src/lib/server/schema";
+  const SOURCE_DIR = process.env["DRIZZLE_MIGRATIONS_PATH"] ?? "./drizzle";
+  const DEST_DIR =
+    process.env["DRIZZLE_SCHEMA_PATH"] ?? "./src/lib/server/schema";
 
   // Move files
   const schemaSource = join(SOURCE_DIR, "schema.ts");

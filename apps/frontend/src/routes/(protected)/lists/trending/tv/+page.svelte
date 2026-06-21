@@ -29,8 +29,10 @@
     void searchStore.search(); // Initial fetch
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        isTriggerVisible = entries[0].isIntersecting;
+      ([entry]) => {
+        if (entry) {
+          isTriggerVisible = entry.isIntersecting;
+        }
       },
       { threshold: 0.1 },
     );

@@ -4,8 +4,8 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 
 import * as schema from "./schema";
 
-const sqlite = new Database(env.DATABASE_URL);
+const sqlite = new Database(env["DATABASE_URL"]);
 export const db = drizzle(sqlite, {
   schema,
-  logger: env.DATABASE_LOGGING === "true",
+  logger: env["DATABASE_LOGGING"] === "true",
 });

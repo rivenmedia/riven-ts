@@ -11,13 +11,13 @@
   import type { CustomProfile, QualityProfile, SettingFieldDef } from "./types";
 
   let {
-    rank,
+    rank = $bindable(),
     rankSchema,
     qualityProfiles,
-    customProfiles,
-    activeProfileName,
-    newProfileName,
-    savingProfile,
+    customProfiles = $bindable([]),
+    activeProfileName = $bindable(null),
+    newProfileName = $bindable(""),
+    savingProfile = $bindable(false),
     saveAsProfile,
     toggleProfileEnabled,
     applyProfile,

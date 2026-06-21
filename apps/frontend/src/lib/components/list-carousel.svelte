@@ -3,7 +3,14 @@
   import ListItem from "./list-item.svelte";
   import PortraitCardSkeleton from "$lib/components/media/portrait-card-skeleton.svelte";
 
-  let { data = $bindable(), indexer, type = "" } = $props();
+  interface Props {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any[];
+    indexer?: string;
+    type?: string;
+  }
+
+  let { data = $bindable(), indexer, type = "" }: Props = $props();
 </script>
 
 {#if Array.isArray(data) && data.length > 0}
@@ -23,7 +30,7 @@
           <ListItem
             data={item}
             indexer={indexer ?? item.indexer}
-            type={type ?? item.media_type ?? item.type}
+            type={(type || item.media_type) ?? item.type}
             class="w-36 md:w-44 lg:w-48"
           />
         </Carousel.Item>

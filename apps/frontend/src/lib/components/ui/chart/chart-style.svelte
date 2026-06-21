@@ -12,7 +12,7 @@
   );
 
   const themeContents = $derived.by(() => {
-    if (!colorConfig ?? !colorConfig.length) return;
+    if (!colorConfig || !colorConfig.length) return;
 
     const themeContents = [];
     for (const [_theme, prefix] of Object.entries(THEMES)) {

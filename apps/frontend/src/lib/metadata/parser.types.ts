@@ -59,7 +59,7 @@ export interface ParsedTrailer {
   id?: string | number;
   name: string;
   site: string | null;
-  key?: string;
+  key?: string | null;
   url?: string | null;
 }
 

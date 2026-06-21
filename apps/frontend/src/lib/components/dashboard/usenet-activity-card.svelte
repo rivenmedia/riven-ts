@@ -157,7 +157,7 @@
     const series = hosts.map((h, i) => ({
       key: keyFor.get(h)!,
       label: h,
-      color: PALETTE[i % PALETTE.length],
+      color: PALETTE[i % PALETTE.length] ?? "",
     }));
 
     // Sparse x ticks, like the Release Year chart.

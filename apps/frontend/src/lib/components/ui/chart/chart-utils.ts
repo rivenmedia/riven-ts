@@ -1,4 +1,4 @@
-import { type Component, type Snippet, getContext, setContext } from "svelte";
+import { type Component, getContext, setContext } from "svelte";
 
 import type { Tooltip } from "layerchart";
 
@@ -14,19 +14,19 @@ export type ChartConfig = {
   );
 };
 
-type ExtractSnippetParams<T> = T extends Snippet<[infer P]> ? P : never;
-
 export type TooltipPayload = Tooltip.TooltipSeries;
 
 // Helper to extract item config from a payload.
 export function getPayloadConfigFromPayload(
   config: ChartConfig,
-  payload: TooltipPayload,
+  payload: TooltipPayload | undefined,
   key: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: Record<string, any> | null,
 ) {
-  if (typeof payload !== "object" ?? payload === null) return undefined;
+  if (typeof payload !== "object" || payload === null) {
+    return undefined;
+  }
 
   const payloadConfig =
     "config" in payload &&

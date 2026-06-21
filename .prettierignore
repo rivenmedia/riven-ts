@@ -3,3 +3,4 @@ pnpm-lock.yaml
 **/docker-data
 **/.source
 **/.svelte-kit
+**/build

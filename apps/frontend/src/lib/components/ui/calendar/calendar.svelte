@@ -30,6 +30,7 @@
     monthFormat?: CalendarPrimitive.MonthSelectProps["monthFormat"];
     yearFormat?: CalendarPrimitive.YearSelectProps["yearFormat"];
     day?: Snippet<[{ day: DateValue; outsideMonth: boolean }]>;
+    value: DateValue | undefined;
   } = $props();
 
   const monthFormat = $derived.by(() => {
@@ -46,7 +47,7 @@ get along, so we shut typescript up by casting `value` to `never`.
 <CalendarPrimitive.Root
   bind:value={value as never}
   bind:ref
-  bind:placeholder
+  bind:placeholder={placeholder as DateValue}
   {weekdayFormat}
   {disableDaysOutsideMonth}
   class={cn(

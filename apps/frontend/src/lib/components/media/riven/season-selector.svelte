@@ -3,9 +3,9 @@
     id: number;
     season_number: number;
     episode_count: number;
-    completed_count?: number;
+    completed_count: number | undefined;
     name: string;
-    status?: string;
+    status: string | undefined;
   }
 
   interface Props {

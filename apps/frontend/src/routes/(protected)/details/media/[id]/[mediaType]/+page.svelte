@@ -337,8 +337,10 @@
     if (
       data.mediaDetails.type !== "tv" ||
       !data.mediaDetails.details.seasons.length
-    )
+    ) {
       return [];
+    }
+
     const details = data.mediaDetails.details;
     const episodeCountBySeason = new SvelteMap<number, number>();
     const seasonsByNumber = new SvelteMap(

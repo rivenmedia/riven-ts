@@ -98,10 +98,10 @@
           <Card.Header class="px-5 py-5 sm:px-6 md:px-10 md:py-6">
             <div class="max-w-3xl">
               <h2 class="text-3xl font-semibold tracking-tight md:text-4xl">
-                {currentStep.label}
+                {currentStep?.label}
               </h2>
               <p class="text-muted-foreground mt-2 text-sm md:text-base">
-                {currentStep.description}
+                {currentStep?.description}
               </p>
             </div>
           </Card.Header>

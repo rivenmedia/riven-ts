@@ -259,7 +259,7 @@
               <LandscapeCard
                 title={part.title}
                 image={part.backdrop_path}
-                overview={part.overview}
+                overview={part.overview ?? null}
                 tmdbId={part.id}
                 mediaType="movie"
                 class="transition-shadow group-hover:shadow-lg"

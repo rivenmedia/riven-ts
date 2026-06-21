@@ -8,9 +8,9 @@
 
   interface Props {
     seasons: ParsedShowDetails["seasons"];
-    selectedSeason?: string;
+    selectedSeason: string | undefined;
     stateBySeasonNumber: Map<number, RivenSeason>;
-    episodeCountBySeasonNumber?: Map<number, number>;
+    episodeCountBySeasonNumber: Map<number, number> | undefined;
     onSelectSeason: (season: string | undefined) => void;
   }
 

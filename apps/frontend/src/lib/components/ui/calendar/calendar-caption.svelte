@@ -48,7 +48,7 @@
 
 {#snippet MonthSelect()}
   <CalendarMonthSelect
-    {months}
+    months={months as number[]}
     {monthFormat}
     value={month.month}
     onchange={(e) => {
@@ -61,7 +61,7 @@
 {/snippet}
 
 {#snippet YearSelect()}
-  <CalendarYearSelect {years} {yearFormat} value={month.year} />
+  <CalendarYearSelect years={years ?? []} {yearFormat} value={month.year} />
 {/snippet}
 
 {#if captionLayout === "dropdown"}

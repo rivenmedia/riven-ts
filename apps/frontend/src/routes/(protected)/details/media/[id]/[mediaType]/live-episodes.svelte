@@ -15,8 +15,8 @@
 
   interface Props {
     episodes: ParsedShowDetails["episodes"];
-    selectedSeason?: string;
-    selectedEpisode?: string;
+    selectedSeason: string | undefined;
+    selectedEpisode: string | undefined;
     showTitle?: string | null;
     stateByEpisodeNumber: Map<
       number,

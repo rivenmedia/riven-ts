@@ -487,7 +487,7 @@ export function parseTVDBShowDetails(
         name: trailerEntry.name,
         site: resolveTrailerSite(trailerEntry.url),
         url: trailerEntry.url,
-        key: extractYoutubeKey(trailerEntry.url),
+        key: extractYoutubeKey(trailerEntry.url) ?? null,
       }
     : null;
 

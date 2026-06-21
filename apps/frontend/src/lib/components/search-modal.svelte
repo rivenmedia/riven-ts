@@ -29,7 +29,6 @@
   }
 
   let inputRef = $state<HTMLInputElement | null>(null);
-  let scrollContainer = $state<HTMLElement | null>(null);
   let query = $state("");
   let results = $state<TMDBTransformedListItem[]>([]);
   let loading = $state<boolean>(false);
@@ -291,11 +290,7 @@
     </div>
 
     <!-- Results -->
-    <div
-      bind:this={scrollContainer}
-      onscroll={handleScroll}
-      class="flex-1 overflow-y-auto"
-    >
+    <div onscroll={handleScroll} class="flex-1 overflow-y-auto">
       {#if loading}
         <div class="grid grid-cols-2 gap-3 px-4 pt-4 pb-24">
           {#each Array.from({ length: 8 }, (_, i) => i) as i (i)}

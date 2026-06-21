@@ -8,7 +8,11 @@
  * and `gqlSubscribeClient` (WebSocket). Do not "consolidate" these into fetch
  * wrappers; a single wrapper cannot serve all three transports.
  */
-import type { RivenMediaItem } from "$lib/types/riven";
+import type {
+  FilesystemEntry,
+  MediaMetadata,
+  RivenMediaItem,
+} from "$lib/types/riven";
 
 interface GqlFilesystemEntry {
   id?: number | null;
@@ -228,25 +232,24 @@ export const MEDIA_ITEM_STATE_BY_TVDB_QUERY = `query($tvdbId: String!) {
     }
 }`;
 
-function mapFsEntry(
-  entry: GqlFilesystemEntry,
-): RivenMediaItem["filesystem_entry"] & {
-  id?: number;
-  ranking_profile_name?: string;
-} {
+function mapFsEntry(entry: GqlFilesystemEntry): FilesystemEntry {
   return {
-    id: entry.id ?? undefined,
-    file_size: entry.fileSize ?? undefined,
-    original_filename: entry.originalFilename ?? undefined,
-    download_url: entry.downloadUrl ?? undefined,
-    provider: entry.provider ?? undefined,
-    provider_download_id: entry.providerDownloadId ?? undefined,
-    path: entry.path ?? undefined,
-    plugin: entry.plugin ?? undefined,
-    ranking_profile_name: entry.rankingProfileName ?? undefined,
-    media_metadata: entry.mediaMetadata as
-      | import("$lib/types/riven").MediaMetadata
-      | undefined,
+    ...(entry.id && { id: entry.id }),
+    ...(entry.fileSize && { file_size: entry.fileSize }),
+    ...(entry.originalFilename && {
+      original_filename: entry.originalFilename,
+    }),
+    ...(entry.downloadUrl && { download_url: entry.downloadUrl }),
+    ...(entry.provider && { provider: entry.provider }),
+    ...(entry.providerDownloadId && {
+      provider_download_id: entry.providerDownloadId,
+    }),
+    ...(entry.path && { path: entry.path }),
+    ...(entry.plugin && { plugin: entry.plugin }),
+    ...(entry.rankingProfileName && {
+      ranking_profile_name: entry.rankingProfileName,
+    }),
+    ...(entry.mediaMetadata ? { media_metadata: entry.mediaMetadata } : {}),
   };
 }
 
@@ -257,33 +260,46 @@ export function mapMediaItemFull(
     return null;
   }
 
+  const seasons =
+    raw.seasons?.map((season) => {
+      const episodes =
+        season.episodes?.map((episode) => ({
+          episode_number: episode.episodeNumber,
+          state: episode.state,
+          ...(episode.filesystemEntry && {
+            media_metadata: episode.filesystemEntry
+              .mediaMetadata as MediaMetadata,
+          }),
+          ...(episode.filesystemEntry && {
+            filesystem_entry: mapFsEntry(episode.filesystemEntry),
+          }),
+          filesystem_entries: episode.filesystemEntries?.map(mapFsEntry) ?? [],
+        })) ?? [];
+
+      return {
+        season_number: season.seasonNumber,
+        state: season.state,
+        is_requested: season.isRequested,
+        episodes,
+      };
+    }) ?? [];
+
   return {
     id: raw.id,
     state: raw.state,
-    imdb_id: raw.imdbId ?? undefined,
-    tmdb_id: raw.tmdbId ?? undefined,
-    tvdb_id: raw.tvdbId ?? undefined,
-    media_metadata: raw.filesystemEntry
-      ?.mediaMetadata as RivenMediaItem["media_metadata"],
-    filesystem_entry: raw.filesystemEntry
-      ? mapFsEntry(raw.filesystemEntry)
-      : undefined,
-    filesystem_entries: raw.filesystemEntries?.map(mapFsEntry) ?? [],
-    seasons: raw.seasons?.map((season) => ({
-      season_number: season.seasonNumber,
-      state: season.state,
-      is_requested: season.isRequested,
-      episodes: season.episodes?.map((episode) => ({
-        episode_number: episode.episodeNumber,
-        state: episode.state,
-        media_metadata: episode.filesystemEntry
-          ?.mediaMetadata as RivenMediaItem["media_metadata"],
-        filesystem_entry: episode.filesystemEntry
-          ? mapFsEntry(episode.filesystemEntry)
-          : undefined,
-        filesystem_entries: episode.filesystemEntries?.map(mapFsEntry) ?? [],
-      })),
-    })),
+    ...(raw.imdbId && { imdb_id: raw.imdbId }),
+    ...(raw.tmdbId && { tmdb_id: raw.tmdbId }),
+    ...(raw.tvdbId && { tvdb_id: raw.tvdbId }),
+    ...(raw.filesystemEntry && {
+      media_metadata: raw.filesystemEntry.mediaMetadata as MediaMetadata,
+    }),
+    ...(raw.filesystemEntry && {
+      filesystem_entry: mapFsEntry(raw.filesystemEntry),
+    }),
+    ...(raw.filesystemEntries && {
+      filesystem_entries: raw.filesystemEntries.map(mapFsEntry),
+    }),
+    seasons,
   };
 }
 
@@ -294,20 +310,28 @@ export function mapMediaItemStateTree(
     return null;
   }
 
+  const seasons =
+    raw.seasons?.map((season) => {
+      const episodes =
+        season.episodes?.map((episode) => ({
+          episode_number: episode.episodeNumber ?? 0,
+          state: episode.state,
+        })) ?? [];
+
+      return {
+        season_number: season.seasonNumber ?? 0,
+        state: season.state,
+        is_requested: season.isRequested,
+        episodes,
+      };
+    }) ?? [];
+
   return {
     id: raw.id,
     state: raw.state,
-    imdb_id: raw.imdbId ?? undefined,
-    tmdb_id: raw.tmdbId ?? undefined,
-    tvdb_id: raw.tvdbId ?? undefined,
-    seasons: raw.seasons?.map((season) => ({
-      season_number: season.seasonNumber ?? 0,
-      state: season.state,
-      is_requested: season.isRequested,
-      episodes: season.episodes?.map((episode) => ({
-        episode_number: episode.episodeNumber ?? 0,
-        state: episode.state,
-      })),
-    })),
+    seasons,
+    ...(raw.imdbId && { imdb_id: raw.imdbId }),
+    ...(raw.tmdbId && { tmdb_id: raw.tmdbId }),
+    ...(raw.tvdbId && { tvdb_id: raw.tvdbId }),
   };
 }
