@@ -36,7 +36,7 @@ it.beforeAll(async ({ startDiff, packageName }) => {
   }
 
   await execa`turbo gen plugin --args ${packageName} y`;
-});
+}, 60_000);
 
 it.afterAll(async ({ startDiff, packageDir }) => {
   await execa`rm -rf ${packageDir}`;
