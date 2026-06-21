@@ -37,6 +37,7 @@ export const svelteCore = defineConfig(
       "@typescript-eslint/no-unsafe-return": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/restrict-template-expressions": "off",
+      "@typescript-eslint/no-useless-default-assignment": "off",
     },
   },
 );
