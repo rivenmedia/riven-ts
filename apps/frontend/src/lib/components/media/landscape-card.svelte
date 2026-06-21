@@ -121,7 +121,7 @@
                   ></div>
                 {/if}
               {:then ratingsData}
-                {#if ratingsData?.scores?.length}
+                {#if ratingsData?.scores.length}
                   {#each ratingsData.scores as score (score.name)}
                     <a
                       href={score.url}

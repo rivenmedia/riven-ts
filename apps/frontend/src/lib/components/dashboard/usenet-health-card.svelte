@@ -32,7 +32,7 @@
 
   // Items needing a re-grab (re-scrape): confirmed-broken or never-ingested.
   const needsRegrab = (status: string) =>
-    status === "unhealthy" ?? status === "not_ingested";
+    status === "unhealthy" || status === "not_ingested";
 
   // Surface the actionable rows (anything not confirmed healthy), worst-first
   // (the backend already orders them).
@@ -74,7 +74,7 @@
 
   async function regrab(t: UsenetTitleHealth) {
     const key = rowKey(t);
-    if (t.mediaItemId === null ?? action[key] === "working") return;
+    if (t.mediaItemId === null || action[key] === "working") return;
     action = { ...action, [key]: "working" };
     try {
       await gqlClient<{ regrabUsenetTitle: string }>(REGRAB_MUTATION, {
@@ -132,9 +132,9 @@
     </p>
   {:else}
     <div class="flex flex-col">
-      {#each problems as t (t.infoHash + ":" + t.fileIndex)}
+      {#each problems as t (t.infoHash + ":" + t.fileIndex.toString())}
         {@const badge = statusBadge(t.status)}
-        {@const state = action[t.infoHash + ":" + t.fileIndex]}
+        {@const state = action[t.infoHash + ":" + t.fileIndex.toString()]}
         <div class="border-border/60 flex items-center gap-3 border-b py-2.5">
           <div
             class="h-14 w-10 shrink-0 overflow-hidden rounded border border-white/8 bg-white/[0.04]"

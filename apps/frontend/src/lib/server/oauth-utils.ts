@@ -110,11 +110,11 @@ export function getGenericOAuthProviders(
     const clientSecret = clientObj?.["SECRET"] as string | undefined;
 
     if (clientId && clientSecret) {
+      const issuer = config["ISSUER"] as string | undefined;
+
       const discoveryUrl =
         ((config["DISCOVERY"] as NestedObject)["URL"] as string | undefined) ??
-        ((config["ISSUER"] as string)
-          ? `${config["ISSUER"]}/.well-known/openid-configuration`
-          : undefined);
+        (issuer ? `${issuer}/.well-known/openid-configuration` : undefined);
 
       const redirectURI = (config["REDIRECT"] as NestedObject)["URI"] as
         | string
@@ -140,19 +140,18 @@ export function getGenericOAuthProviders(
         providerId,
         clientId,
         clientSecret,
-        ...(discoveryUrl && { discoveryUrl }),
         scopes: (config["SCOPES"] as string).split(",").map((s) => s.trim()),
-        pkce: (config["PKCE"] as string) === "true",
-        disableSignUp:
-          ((config["DISABLE"] as NestedObject)["SIGNUP"] as string) === "true",
-        ...(redirectURI && { redirectURI }),
-        ...(authorizationUrl && { authorizationUrl }),
-        ...(tokenUrl && { tokenUrl }),
-        ...(userInfoUrl && { userInfoUrl }),
+        pkce: config["PKCE"] === "true",
+        disableSignUp: (config["DISABLE"] as NestedObject)["SIGNUP"] === "true",
         name:
           (config["NAME"] as string) ||
           providerId.charAt(0).toUpperCase() + providerId.slice(1),
         icon: config["ICON"] as string,
+        ...(discoveryUrl && { discoveryUrl }),
+        ...(redirectURI && { redirectURI }),
+        ...(authorizationUrl && { authorizationUrl }),
+        ...(tokenUrl && { tokenUrl }),
+        ...(userInfoUrl && { userInfoUrl }),
       });
     }
   }

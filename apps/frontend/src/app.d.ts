@@ -1,10 +1,14 @@
 declare global {
   declare const __APP_VERSION__: string;
 
+  type SessionValidationResult = NonNullable<
+    Awaited<
+      ReturnType<(typeof import("$lib/server/auth").auth)["api"]["getSession"]>
+    >
+  >;
+
   namespace App {
-    interface Locals {
-      user: import("$lib/server/auth").SessionValidationResult["user"];
-      session: import("$lib/server/auth").SessionValidationResult["session"];
+    interface Locals extends SessionValidationResult {
       backendUrl: string;
       apiKey: string;
       backendAuthSigningSecret: string;

@@ -50,19 +50,21 @@ function extractItems<T>(data: unknown): T[] {
   let items: T[] = [];
 
   if (Array.isArray(data)) {
-    items = data;
+    items = data as T[];
   } else if (data && typeof data === "object") {
     const obj = data as Record<string, unknown>;
+
     if (Array.isArray(obj["results"])) {
-      items = obj["results"];
+      items = obj["results"] as T[];
     } else if (Array.isArray(obj["items"])) {
-      items = obj["items"];
+      items = obj["items"] as T[];
     } else if (obj["data"] && typeof obj["data"] === "object") {
       const pageData = obj["data"] as Record<string, unknown>;
+
       if (pageData["Page"] && typeof pageData["Page"] === "object") {
         const page = pageData["Page"] as Record<string, unknown>;
         if (Array.isArray(page["media"])) {
-          items = page["media"];
+          items = page["media"] as T[];
         }
       }
     }

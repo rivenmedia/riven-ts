@@ -306,7 +306,7 @@ export interface TVDBEpisodeItem {
   image: string | null;
   imageType: number;
   isMovie: number;
-  seasons: unknown | null;
+  seasons: unknown;
   number: number | null;
   absoluteNumber: number | null;
   seasonNumber: number | null;
@@ -367,7 +367,7 @@ export interface TVDBCollectionItem {
   score: number | null;
   image: string | null;
   imageIsFallback: boolean | null;
-  remoteIds: unknown | null;
+  remoteIds: unknown;
   tags: unknown[] | null;
 }
 
@@ -376,8 +376,8 @@ export interface TVDBCharacterItem {
   name: string;
   peopleId: number;
   seriesId: number;
-  series: unknown | null;
-  movie: unknown | null;
+  series: unknown;
+  movie: unknown;
   movieId: number | null;
   episodeId: number | null;
   type: number;
@@ -515,7 +515,7 @@ export interface TVDBBaseItem {
         description: string;
         contentType: string;
         order: number;
-        fullName: unknown | null;
+        fullName: unknown;
       }[]
     | null;
   seasonTypes:

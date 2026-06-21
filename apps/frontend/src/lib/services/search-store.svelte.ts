@@ -423,7 +423,7 @@ export class SearchStore {
       ? "discover"
       : (this.parsedSearch?.searchMode ?? "discover");
 
-    const params: Record<string, unknown> = {
+    const params: Record<string, string | number | boolean | undefined> = {
       ...(this.parsedSearch?.tmdbParams ?? {}),
       ...this.filterParams,
       page,
@@ -436,7 +436,7 @@ export class SearchStore {
     // Strip undefined/null/empty values
     const cleaned: Record<string, string> = {};
     for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined && value !== null && value !== "") {
+      if (value !== undefined && value !== "") {
         cleaned[key] = String(value);
       }
     }

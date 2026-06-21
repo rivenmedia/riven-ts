@@ -35,7 +35,8 @@ export const GET: RequestHandler = async ({ cookies }) => {
   };
 
   try {
-    storedData = JSON.parse(storedDataStr);
+    // TODO: validate this instead of type assertion
+    storedData = JSON.parse(storedDataStr) as typeof storedData;
   } catch {
     logger.error("Plex callback: Failed to parse auth state cookie");
     redirect(302, "/auth/login?error=invalid_state");
@@ -55,26 +56,30 @@ export const GET: RequestHandler = async ({ cookies }) => {
 
     if (!pinStatus.authToken) {
       logger.error("Plex callback: PIN not authorized yet");
-      redirect(302, "/auth/login?error=not_authorized");
+      return redirect(302, "/auth/login?error=not_authorized");
     }
 
     // Forward to Better Auth's generic OAuth callback
     // The "code" is our PIN in format "pinId:pinCode" which getToken will process
-    const origin = env.ORIGIN ?? "http://localhost:5173";
+    const origin = env["ORIGIN"] ?? "http://localhost:5173";
     const oauthCallbackUrl = new URL("/api/auth/oauth2/callback/plex", origin);
+
     oauthCallbackUrl.searchParams.set(
       "code",
       `${storedData.pinId.toString()}:${storedData.pinCode}`,
     );
+
     oauthCallbackUrl.searchParams.set("state", storedData.state);
 
-    redirect(302, oauthCallbackUrl.toString());
+    return redirect(302, oauthCallbackUrl.toString());
   } catch (error) {
     // Re-throw redirect errors (they throw in SvelteKit, this is not necessarily an error, required for auth to work)
     if (error && typeof error === "object" && "status" in error) {
       throw error;
     }
+
     logger.error("Plex callback error:", error);
-    redirect(302, "/auth/login?error=callback_failed");
+
+    return redirect(302, "/auth/login?error=callback_failed");
   }
 };

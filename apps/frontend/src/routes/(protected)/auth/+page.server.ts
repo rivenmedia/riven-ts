@@ -35,6 +35,7 @@ function toIsoDateString(date: Date | string | number): string {
 }
 
 export const load: PageServerLoad = async (event) => {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!event.locals.user || !event.locals.session) {
     return redirect(302, "/auth/login");
   }
@@ -299,7 +300,8 @@ export const actions: Actions = {
     }
 
     const formData = await request.formData();
-    const userId = String(formData.get("userId") ?? "");
+    const formDataUserId = formData.get("userId");
+    const userId = typeof formDataUserId === "string" ? formDataUserId : "";
 
     if (!userId) {
       return fail(400, { message: "User id is required." });

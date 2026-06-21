@@ -11,23 +11,24 @@
   import SettingFieldEditor from "./setting-field-editor.svelte";
   import type { SettingFieldDef } from "./types";
 
-  /** Per-instance state for masking password inputs. Sub-fields each
-   *  get their own SettingFieldEditor instance, so this is naturally
-   *  scoped to one input. */
-  let passwordRevealed = $state<boolean>(false);
+  interface Props {
+    field: SettingFieldDef;
+    value: unknown;
+    path?: string;
+    nested?: boolean;
+  }
 
   let {
     field,
     value = $bindable(),
     path = field.key,
     nested = false,
-  }: {
-    field: SettingFieldDef;
-    value: unknown;
-    path?: string;
-    nested?: boolean;
-  } = $props();
+  }: Props = $props();
 
+  /** Per-instance state for masking password inputs. Sub-fields each
+   *  get their own SettingFieldEditor instance, so this is naturally
+   *  scoped to one input. */
+  let passwordRevealed = $state<boolean>(false);
   let arrayDraft = $state("");
   let activeTab = $state<string | null>(null);
 
@@ -524,11 +525,17 @@
       {/if}
       <Select.Root
         type="single"
-        value={value != null ? String(value) : (field.default_value ?? "")}
+        value={value != null
+          ? // eslint-disable-next-line @typescript-eslint/no-base-to-string
+            String(value)
+          : (field.default_value ?? "")}
         onValueChange={(next: string) => (value = next)}
       >
         <Select.Trigger class="max-w-xs">
-          {value != null ? String(value) : (field.default_value ?? field.label)}
+          {value != null
+            ? // eslint-disable-next-line @typescript-eslint/no-base-to-string
+              String(value)
+            : (field.default_value ?? field.label)}
         </Select.Trigger>
         <Select.Content>
           {#each field.options as option (option)}
@@ -548,7 +555,10 @@
           id={idFor(path)}
           type={passwordRevealed ? "text" : "password"}
           placeholder={field.placeholder ?? ""}
-          value={value != null ? String(value) : ""}
+          value={value != null
+            ? // eslint-disable-next-line @typescript-eslint/no-base-to-string
+              String(value)
+            : ""}
           autocomplete="new-password"
           oninput={(event) =>
             (value = (event.currentTarget as HTMLInputElement).value)}
@@ -582,7 +592,10 @@
         type={field.type === "number" ? "number" : "text"}
         min={field.type === "number" ? "0" : undefined}
         placeholder={field.placeholder ?? field.default_value ?? ""}
-        value={value != null ? String(value) : ""}
+        value={value != null
+          ? // eslint-disable-next-line @typescript-eslint/no-base-to-string
+            String(value)
+          : ""}
         oninput={(event) => {
           const raw = (event.currentTarget as HTMLInputElement).value;
           value =

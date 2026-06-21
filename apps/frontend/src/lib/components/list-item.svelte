@@ -11,29 +11,45 @@
     default: "bg-yellow-600/90 text-white border-0",
   };
 
+  interface Props {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: Record<string, any>;
+    indexer: string | undefined;
+    type: string | undefined;
+    isSelectable?: boolean;
+    selectStore?: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      has: (id: any) => boolean;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      toggle: (id: any) => void;
+    };
+    class?: string;
+  }
+
   let {
+    // eslint-disable-next-line @typescript-eslint/no-useless-default-assignment
     data = $bindable(),
     indexer = $bindable<string | undefined>(),
     type = $bindable<string | undefined>(),
     isSelectable = false,
     selectStore,
     class: className = "",
-  } = $props();
+  }: Props = $props();
 
   // Normalize type for different indexers
   let normalizedType = $derived.by(() => {
     let t = type;
-    if (indexer === "anilist" && !t) t = data.media_type;
+    if (indexer === "anilist" && !t) t = data["media_type"];
     if ((indexer === "tvdb" || indexer === "tmdb") && t === "show") t = "tv";
     // Ensure type is set if only in data
-    if (!t && data.media_type) t = data.media_type;
+    if (!t && data["media_type"]) t = data["media_type"];
     return t;
   });
 
   let mediaURL = $derived.by(() => {
-    if (!data.id) return null;
+    if (!data["id"]) return null;
     if (normalizedType === "person" || normalizedType === "company") {
-      return `/details/entity/${data.id}/${normalizedType}`;
+      return `/details/entity/${data["id"]}/${normalizedType}`;
     }
 
     if (
@@ -42,8 +58,8 @@
     ) {
       const params: string[] = [];
       if (indexer === "tvdb") params.push("indexer=tvdb");
-      if (data.details_query) {
-        for (const [key, value] of Object.entries(data.details_query)) {
+      if (data["details_query"]) {
+        for (const [key, value] of Object.entries(data["details_query"])) {
           params.push(
             `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
           );
@@ -51,21 +67,25 @@
       }
       const queryParam = params.length > 0 ? `?${params.join("&")}` : "";
       // If indexer is undefined, assume tmdb behavior for now as default
-      return `/details/media/${data.id}/${normalizedType}${queryParam}`;
+      return `/details/media/${data["id"]}/${normalizedType}${queryParam}`;
     }
-    return `/details/${indexer}${normalizedType ? `/${normalizedType}` : ""}/${data.id}`;
+    return `/details/${indexer}${normalizedType ? `/${normalizedType}` : ""}/${data["id"]}`;
   });
+
   let subtitle = $derived.by(() => {
     const parts = [];
-    if (data.media_type === "tv" || normalizedType === "tv") parts.push("TV");
-    else if (data.media_type === "movie" || normalizedType === "movie")
+
+    if (data["media_type"] === "tv" || normalizedType === "tv")
+      parts.push("TV");
+    else if (data["media_type"] === "movie" || normalizedType === "movie")
       parts.push("Movie");
-    else if (data.media_type === "person" || normalizedType === "person")
+    else if (data["media_type"] === "person" || normalizedType === "person")
       parts.push("Person");
-    else if (data.media_type === "company" || normalizedType === "company")
+    else if (data["media_type"] === "company" || normalizedType === "company")
       parts.push("Studio");
 
-    if (data.year && data.year !== "N/A") parts.push(data.year);
+    if (data["year"] && data["year"] !== "N/A") parts.push(data["year"]);
+
     return parts.join(" • ") || null;
   });
 
@@ -114,23 +134,23 @@
 
 {#snippet cardContent()}
   <PortraitCard
-    title={data.title}
+    title={data["title"] ?? ""}
     {subtitle}
-    image={data.poster_path}
+    image={data["poster_path"]}
     {isSelectable}
-    isSelected={isSelectable &&
-      !!data.riven_id &&
-      selectStore?.has(data.riven_id)}
-    onSelectToggle={() => selectStore?.toggle(data.riven_id)}
+    isSelected={Boolean(
+      isSelectable && !!data["riven_id"] && selectStore?.has(data["riven_id"]),
+    )}
+    onSelectToggle={() => selectStore?.toggle(data["riven_id"])}
   >
     {#snippet topRight()}
-      {#if data.badge}
+      {#if data["badge"]}
         <Badge
           class={cn(
             "border-white/10 px-2 py-0.5 text-[10px] shadow-sm backdrop-blur-md",
-            badgeVariantClasses[data.badge.variant] ??
+            badgeVariantClasses[data["badge"].variant] ??
               badgeVariantClasses["default"],
-          )}>{data.badge.text}</Badge
+          )}>{data["badge"].text}</Badge
         >
       {/if}
     {/snippet}

@@ -73,7 +73,7 @@
   );
 
   const confirmDisabled = $derived(
-    loading ??
+    loading ||
       (mediaType === "tv" &&
         seasons.length > 0 &&
         requestableSeasons.length > 0 &&
@@ -151,7 +151,7 @@
   }
 </script>
 
-{#if page.data.permissions?.canRequestItems}
+{#if page.data["permissions"]?.canRequestItems}
   <AlertDialog.Root bind:open>
     <AlertDialog.Trigger>
       {#snippet child({ props })}

@@ -121,7 +121,7 @@
         }
         case "delete": {
           await removeItems(validIds);
-          invalidateAll();
+          void invalidateAll();
           toast.success("Media item deleted successfully!");
           return;
         }
@@ -151,7 +151,7 @@
   }
 </script>
 
-{#if page.data.permissions?.canManageLibrary}
+{#if page.data["permissions"]?.canManageLibrary}
   <AlertDialog.Root bind:open>
     <AlertDialog.Trigger>
       {#snippet child({ props })}

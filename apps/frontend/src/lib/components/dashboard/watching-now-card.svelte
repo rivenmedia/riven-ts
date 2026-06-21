@@ -19,7 +19,7 @@
   } as const;
 
   function formatTime(seconds: number | null | undefined) {
-    if (seconds === null ?? seconds === undefined ?? seconds < 0) return null;
+    if (seconds === null || seconds === undefined || seconds < 0) return null;
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const remainder = Math.floor(seconds % 60);
@@ -49,6 +49,9 @@
           ? formatTime(session.durationSeconds - session.positionSeconds)
           : null;
 
+      const playbackStateLower = session.playbackState.toLowerCase();
+      const playbackMethodLower = session.playbackMethod.toLowerCase();
+
       return {
         ...session,
         key: `${session.server}:${session.userName ?? "unknown"}:${session.itemTitle}`,
@@ -61,13 +64,13 @@
           session.playbackState.charAt(0).toUpperCase() +
           session.playbackState.slice(1).toLowerCase(),
         playbackVariant:
-          playbackTone[
-            session.playbackState.toLowerCase() as keyof typeof playbackTone
-          ] ?? "secondary",
+          playbackStateLower in playbackTone
+            ? playbackTone[playbackStateLower as keyof typeof playbackTone]
+            : "secondary",
         methodLabel:
-          playbackMethod[
-            session.playbackMethod.toLowerCase() as keyof typeof playbackMethod
-          ] ?? "Unknown",
+          playbackMethodLower in playbackMethod
+            ? playbackMethod[playbackMethodLower as keyof typeof playbackMethod]
+            : "Unknown",
         deviceLabel: session.deviceName ? "Device" : "Client",
         deviceValue: session.deviceName ?? session.clientName ?? "Unknown",
         showClient:

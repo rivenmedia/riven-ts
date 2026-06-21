@@ -38,17 +38,18 @@
         })),
       ),
   });
-  let loadMoreTrigger: HTMLDivElement;
+
+  let loadMoreTrigger: HTMLDivElement | undefined;
 
   onMount(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (
-          entries[0].isIntersecting &&
+          entries[0]?.isIntersecting &&
           anilistTrendingStore.hasMore &&
           !anilistTrendingStore.loading
         ) {
-          anilistTrendingStore.loadMore();
+          void anilistTrendingStore.loadMore();
         }
       },
       { threshold: 0.1 },

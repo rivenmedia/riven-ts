@@ -96,18 +96,22 @@ export async function gql<T>(
     headers: {
       "Content-Type": "application/json",
       "x-api-key": apiKey,
-      ...(extraHeaders ?? {}),
+      ...(extraHeaders
+        ? Object.fromEntries(new Headers(extraHeaders).entries())
+        : {}),
     },
     body: JSON.stringify({ query, variables: variables ?? {} }),
   });
 
   if (!response.ok) {
     throw new Error(
-      `GraphQL request failed: ${response.status} ${response.statusText}`,
+      `GraphQL request failed: ${response.status.toString()} ${response.statusText}`,
     );
   }
 
-  const result: GraphQLResponse<T> = await response.json();
+  // TODO: Validate instead of type assertion
+  const result: GraphQLResponse<T> =
+    (await response.json()) as GraphQLResponse<T>;
 
   return getGraphQLData(result);
 }
@@ -125,16 +129,18 @@ export async function gqlClient<T>(
     method: "POST",
     headers: { "Content-Type": JSON_CONTENT_TYPE },
     body: JSON.stringify({ query, variables: variables ?? {} }),
-    signal,
+    ...(signal && { signal }),
   });
 
   if (!response.ok) {
     throw new Error(
-      `GraphQL request failed: ${response.status} ${response.statusText}`,
+      `GraphQL request failed: ${response.status.toString()} ${response.statusText}`,
     );
   }
 
-  const result: GraphQLResponse<T> = await response.json();
+  // TODO: Validate instead of type assertion
+  const result: GraphQLResponse<T> =
+    (await response.json()) as GraphQLResponse<T>;
 
   return getGraphQLData(result);
 }

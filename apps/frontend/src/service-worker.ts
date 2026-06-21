@@ -129,7 +129,9 @@ async function handleGeneralRequest(
     }
 
     if (response.status === 200 && shouldCacheResponse(url, response)) {
-      cache.put(request, response.clone());
+      cache.put(request, response.clone()).catch((err: unknown) => {
+        console.error(`Failed to cache response for ${request.url}:`, err);
+      });
     }
 
     return response;

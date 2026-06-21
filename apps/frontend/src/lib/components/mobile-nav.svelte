@@ -39,7 +39,7 @@
       if (history.length > 1) {
         history.back();
       } else {
-        goto(resolve("/"));
+        void goto(resolve("/"));
       }
     }}
     aria-label="Go back"
