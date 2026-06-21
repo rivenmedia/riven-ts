@@ -5,8 +5,8 @@ import { createHmac } from "node:crypto";
 
 type AuthenticatedUser =
   | {
-      id?: string | null;
-      role?: string | null;
+      id?: string | null | undefined;
+      role?: string | null | undefined;
     }
   | null
   | undefined;

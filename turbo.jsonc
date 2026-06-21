@@ -10,6 +10,7 @@
   },
   "tasks": {
     "build": {
+      "outputLogs": "new-only",
       "dependsOn": ["^build", "codegen:api-schemas", "transit:source-files"],
       "outputs": ["dist/**", "**/tsconfig.lib.tsbuildinfo"]
     },

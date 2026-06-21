@@ -1,7 +1,7 @@
 import type { KnipConfiguration } from "knip";
 
 const filePatterns = {
-  sourceFiles: "**/*.ts!",
+  sourceFiles: "**/*.{ts,svelte}!",
   generatedProdFiles: "**/__generated__/zod/*.ts!",
   generatedDevFiles: "**/__generated__/{handlers,mocks}/*.ts",
   scriptFiles: "**/scripts/**/*.ts",
@@ -41,7 +41,7 @@ export default {
     "(?!-)vscode(?!-)", // Ignore VSCode packages - these tend to be used by editors and not the program
   ],
   ignoreIssues: {
-    "apps/frontend/src/lib/components/ui/*/index.ts": ["exports"],
+    "apps/frontend/src/lib/components/ui/*/index.ts": ["exports", "types"],
   },
   workspaces: {
     ".": {
@@ -81,6 +81,8 @@ export default {
       svelte: { config: "svelte.config.ts" },
       sveltekit: { config: "svelte.config.ts" },
       typescript: { config: ["tsconfig.json", "./.svelte-kit/tsconfig.json"] },
+      entry: ["scripts/*.ts", "server.ts!"],
+      project: [...defaultProject, "!prettier.config.ts!"],
     },
     "{packages,packages/core}/*": {
       entry: [...defaultEntry],

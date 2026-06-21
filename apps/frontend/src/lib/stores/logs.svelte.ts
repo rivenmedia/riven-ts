@@ -28,7 +28,7 @@ const LOG_LINES_SUBSCRIPTION = `subscription {
     logLines
 }`;
 
-export class LogStore {
+class LogStore {
   #logs = $state<LiveLogLine[]>([]);
   #historicalLogs = $state<LogEntry[]>([]);
   #isLoadingHistorical = $state<boolean>(false);
