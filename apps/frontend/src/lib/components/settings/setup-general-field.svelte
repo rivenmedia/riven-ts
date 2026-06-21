@@ -4,7 +4,7 @@
 
   let {
     field,
-    general,
+    general = $bindable(),
   }: {
     field: SettingFieldDef;
     general: Record<string, unknown>;
