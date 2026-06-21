@@ -9,7 +9,15 @@
   import type { PageData } from "./$types";
   import { cn } from "$lib/utils";
   import { IsMobile } from "$lib/hooks/is-mobile.svelte";
-  import * as dateUtils from "$lib/utils/date";
+  import {
+    getToday,
+    toISODate,
+    parseISODate,
+    addDays,
+    getFirstDayOfMonth,
+    getLastDayOfMonth,
+    getDayOfWeek,
+  } from "$lib/utils/date";
   import { CalendarDate } from "@internationalized/date";
   import PageShell from "$lib/components/page-shell.svelte";
   import { resolve } from "$app/paths";
@@ -100,8 +108,8 @@
   ];
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  const today = dateUtils.getToday();
-  const todayKey = dateUtils.toISODate(today);
+  const today = getToday();
+  const todayKey = toISODate(today);
   let currentDate = $state<CalendarDate>(today);
   let filters = $state<Record<string, boolean>>({
     movie: true,
@@ -118,9 +126,9 @@
     const result: Record<string, EntertainmentItem[]> = {};
     for (const item of items) {
       if (!item.aired_at) continue;
-      const date = dateUtils.parseISODate(item.aired_at);
+      const date = parseISODate(item.aired_at);
       if (!date) continue;
-      const dateKey = dateUtils.toISODate(date);
+      const dateKey = toISODate(date);
       (result[dateKey] ??= []).push(item);
     }
     return result;
@@ -145,18 +153,17 @@
 
   const calendarDays: CalendarDay[] = $derived.by(() => {
     const { year, month } = currentDate;
-    const firstDay = dateUtils.getFirstDayOfMonth(year, month);
-    const lastDay = dateUtils.getLastDayOfMonth(year, month);
-    const startOffset = dateUtils.getDayOfWeek(firstDay);
-    const totalDays =
-      startOffset + lastDay.day + (6 - dateUtils.getDayOfWeek(lastDay));
+    const firstDay = getFirstDayOfMonth(year, month);
+    const lastDay = getLastDayOfMonth(year, month);
+    const startOffset = getDayOfWeek(firstDay);
+    const totalDays = startOffset + lastDay.day + (6 - getDayOfWeek(lastDay));
     const daysToShow = Math.ceil(totalDays / 7) * 7;
 
     const days: CalendarDay[] = [];
 
     for (let i = 0; i < daysToShow; i++) {
-      const currentDay = dateUtils.addDays(firstDay, i - startOffset);
-      const dateKey = dateUtils.toISODate(currentDay);
+      const currentDay = addDays(firstDay, i - startOffset);
+      const dateKey = toISODate(currentDay);
       days.push({
         date: currentDay,
         dateKey,
@@ -189,7 +196,7 @@
   }
 
   function formatDayTitle(date: CalendarDate) {
-    return `${dayNames[dateUtils.getDayOfWeek(date)]}, ${monthNames[date.month - 1]} ${date.day}`;
+    return `${dayNames[getDayOfWeek(date)]}, ${monthNames[date.month - 1]} ${date.day}`;
   }
 </script>
 

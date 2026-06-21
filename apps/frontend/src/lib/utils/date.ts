@@ -4,11 +4,8 @@
 import {
   CalendarDate,
   type DateValue,
-  ZonedDateTime,
   getLocalTimeZone,
-  now,
   parseDate,
-  parseZonedDateTime,
   today,
 } from "@internationalized/date";
 import { DateTime, Settings } from "luxon";
@@ -49,33 +46,10 @@ export function parseISODate(
 }
 
 /**
- * Parse an ISO datetime string to ZonedDateTime
- * @param dateString ISO datetime string
- * @returns ZonedDateTime or null if invalid
- */
-export function parseISODateTime(
-  dateString: string | null | undefined,
-): ZonedDateTime | null {
-  if (!dateString) return null;
-  try {
-    return parseZonedDateTime(dateString);
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Get the current date in the local timezone
  */
 export function getToday(): CalendarDate {
   return today(getLocalTimeZone());
-}
-
-/**
- * Get the current date and time in the local timezone
- */
-export function getNow(): ZonedDateTime {
-  return now(getLocalTimeZone());
 }
 
 /**
@@ -138,10 +112,15 @@ export function formatDate(
     day: "numeric",
   },
 ): string | null {
-  if (!dateString) return null;
+  if (!dateString) {
+    return null;
+  }
 
   const date = parseISODate(dateString);
-  if (!date) return null;
+
+  if (!date) {
+    return null;
+  }
 
   // Convert CalendarDate to a native Date for formatting
   const nativeDate = DateTime.fromObject({
@@ -151,36 +130,6 @@ export function formatDate(
   });
 
   return nativeDate.toLocaleString(options, { locale });
-}
-
-/**
- * Format a datetime to a localized string
- */
-export function formatDateTime(
-  dateString: string | null | undefined,
-  locale = "en-US",
-  options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-  },
-): string | null {
-  if (!dateString) {
-    return null;
-  }
-
-  const date = parseISODateTime(dateString);
-
-  if (!date) {
-    return null;
-  }
-
-  // Convert ZonedDateTime to a native Date for formatting
-  const nativeDate = date.toDate();
-
-  return nativeDate.toLocaleDateString(locale, options);
 }
 
 /**
@@ -217,40 +166,38 @@ export function calculateAge(
 export function isDayAndMonthToday(
   dateString: string | null | undefined,
 ): boolean {
-  if (!dateString) return false;
+  if (!dateString) {
+    return false;
+  }
 
   const date = parseISODate(dateString);
-  if (!date) return false;
+
+  if (!date) {
+    return false;
+  }
 
   const todayDate = getToday();
+
   return date.month === todayDate.month && date.day === todayDate.day;
 }
 
 /**
- * Check if two dates are the same day
+ * Add days to a date
  */
-export function isSameDay(date1: CalendarDate, date2: CalendarDate): boolean {
-  return (
-    date1.year === date2.year &&
-    date1.month === date2.month &&
-    date1.day === date2.day
-  );
-}
+export function addDays(date: CalendarDate, days: number): CalendarDate {
+  const nativeDate = DateTime.fromObject({
+    year: date.year,
+    month: date.month,
+    day: date.day,
+  }).plus({ days });
 
-/**
- * Check if two dates have the same month and day
- */
-export function isSameDayAndMonth(
-  date1: CalendarDate,
-  date2: CalendarDate,
-): boolean {
-  return date1.month === date2.month && date1.day === date2.day;
+  return new CalendarDate(nativeDate.year, nativeDate.month, nativeDate.day);
 }
 
 /**
  * Get the last Monday before or on a given date
  */
-export function getLastMonday(date: CalendarDate): CalendarDate {
+function getLastMonday(date: CalendarDate): CalendarDate {
   // Convert to native Date for day-of-week calculation
   const nativeDate = DateTime.fromObject({
     year: date.year,
@@ -268,19 +215,6 @@ export function getLastMonday(date: CalendarDate): CalendarDate {
     mondayNative.month,
     mondayNative.day,
   );
-}
-
-/**
- * Add days to a date
- */
-export function addDays(date: CalendarDate, days: number): CalendarDate {
-  const nativeDate = DateTime.fromObject({
-    year: date.year,
-    month: date.month,
-    day: date.day,
-  }).plus({ days });
-
-  return new CalendarDate(nativeDate.year, nativeDate.month, nativeDate.day);
 }
 
 interface CalendarData {
@@ -393,17 +327,4 @@ export function compareDateStrings(
  */
 export function getTimestamp(): number {
   return DateTime.now().toMillis();
-}
-
-/**
- * Convert DateValue to milliseconds since epoch
- */
-export function dateToTimestamp(date: DateValue): number {
-  const nativeDate = DateTime.fromObject({
-    year: date.year,
-    month: date.month,
-    day: date.day,
-  });
-
-  return nativeDate.toMillis();
 }

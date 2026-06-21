@@ -252,9 +252,6 @@ catalogs:
     consola:
       specifier: ^3.4.2
       version: 3.4.2
-    cookie:
-      specifier: ^1.1.1
-      version: 1.1.1
     countries-and-timezones:
       specifier: ^3.9.0
       version: 3.9.0
@@ -607,9 +604,6 @@ importers:
       consola:
         specifier: 'catalog:'
         version: 3.4.2
-      cookie:
-        specifier: 'catalog:'
-        version: 1.1.1
       d3-shape:
         specifier: 'catalog:'
         version: 3.2.0
@@ -710,9 +704,6 @@ importers:
       mdsvex:
         specifier: 'catalog:'
         version: 0.12.7(svelte@5.56.3(@typescript-eslint/types@8.61.1))
-      prettier:
-        specifier: 'catalog:'
-        version: 3.8.4
       prettier-plugin-svelte:
         specifier: 'catalog:'
         version: 4.1.1(prettier@3.8.4)(svelte@5.56.3(@typescript-eslint/types@8.61.1))

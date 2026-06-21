@@ -97,13 +97,13 @@ export interface UsenetTitleHealthSummary {
   total: number;
 }
 
-export interface UsenetProviderTraffic {
+interface UsenetProviderTraffic {
   host: string;
   bytesDownloaded: number;
   articlesDownloaded: number;
 }
 
-export interface UsenetDailyTraffic {
+interface UsenetDailyTraffic {
   day: string;
   host: string;
   bytesDownloaded: number;
