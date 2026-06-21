@@ -20,7 +20,7 @@
       "collections/*": ["./.source/*"]
     }
   },
-  "files": ["next-env.d.ts"],
+  "files": ["next-env.d.ts", "postcss.config.mjs"],
   "include": [
     "**/*.ts",
     "**/*.tsx",
