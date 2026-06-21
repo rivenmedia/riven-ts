@@ -25,13 +25,6 @@ export function pluginStatus(section: {
 export const settingsSwitchClass =
   "data-[state=checked]:bg-primary data-[state=unchecked]:bg-input dark:data-[state=unchecked]:bg-input/80 [&_[data-slot=switch-thumb]]:translate-x-0 [&_[data-state=checked][data-slot=switch-thumb]]:translate-x-[calc(100%-2px)] rtl:[&_[data-state=checked][data-slot=switch-thumb]]:-translate-x-[calc(100%-2px)] dark:[&_[data-state=unchecked][data-slot=switch-thumb]]:bg-foreground dark:[&_[data-state=checked][data-slot=switch-thumb]]:bg-primary-foreground";
 
-function toLabel(key: string): string {
-  return key
-    .replace(/^r(\d+p)$/, "$1")
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
 // Presentational chrome for the non-plugin setup steps; the plugin-group steps
 // are driven entirely by the backend `setupGroups` query.
 const setupStepMeta = {

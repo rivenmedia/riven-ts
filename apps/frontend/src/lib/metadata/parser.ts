@@ -21,7 +21,6 @@ import type {
   TVDBArtworkItem,
   TVDBBaseItem,
   TVDBEpisodeItem,
-  TVDBSearchItem,
 } from "./parser.types";
 
 export type {
@@ -76,38 +75,6 @@ function resolveTrailerSite(url: string | null) {
 // ---------------------------------------------------------------------------------
 // TMDB functions
 // ---------------------------------------------------------------------------------
-
-// Map TVDB genre strings to TMDB integer IDs
-const TVDB_GENRE_MAP: Record<string, number> = {
-  Action: 28,
-  Adventure: 12,
-  Animation: 16,
-  Comedy: 35,
-  Crime: 80,
-  Documentary: 99,
-  Drama: 18,
-  Family: 10751,
-  Fantasy: 14,
-  History: 36,
-  Horror: 27,
-  Music: 10402,
-  Mystery: 9648,
-  Romance: 10749,
-  "Science Fiction": 878,
-  "TV Movie": 10770,
-  Thriller: 53,
-  War: 10752,
-  Western: 37,
-  // TV Specific
-  "Action & Adventure": 10759,
-  "Sci-Fi & Fantasy": 10765,
-  Reality: 10764,
-  News: 10763,
-  Kids: 10762,
-  Talk: 10767,
-  Soap: 10766,
-  "War & Politics": 10768,
-};
 
 function transformTMDBList(
   items: unknown[] | null,
@@ -196,46 +163,6 @@ function transformTMDBList(
       return acc;
     },
     [],
-  );
-}
-
-function transformTVDBList(
-  items: TVDBSearchItem[] | null,
-): TMDBTransformedListItem[] {
-  return (
-    items?.reduce((acc, item) => {
-      if (item.type !== "series") return acc;
-
-      const id = item.tvdb_id ?? item.id;
-      if (!id || id <= 0) return acc;
-
-      // Map genres to IDs (handle both string[] from search and object[] from filter)
-      const genreIds: number[] = [];
-      if (item.genres) {
-        for (const g of item.genres) {
-          const name = typeof g === "string" ? g : g.name;
-          const genreId = TVDB_GENRE_MAP[name];
-          if (typeof genreId === "number" && genreId > 0)
-            genreIds.push(genreId);
-        }
-      }
-
-      acc.push({
-        id,
-        title: item.translations?.eng ?? item.name ?? "Unknown",
-        poster_path: buildTVDBImage(item.image_url ?? null),
-        media_type: "tv",
-        year:
-          item.year ?? dateUtils.getYearFromISO(item.first_air_time) ?? "N/A",
-        vote_average: null,
-        vote_count: null,
-        genre_ids: genreIds,
-        indexer: "tvdb",
-        ...(item.overview && { overview: item.overview }),
-        ...(item.first_air_time && { first_air_date: item.first_air_time }),
-      });
-      return acc;
-    }, [] as TMDBTransformedListItem[]) ?? ([] as TMDBTransformedListItem[])
   );
 }
 

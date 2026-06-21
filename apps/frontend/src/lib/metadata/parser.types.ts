@@ -281,19 +281,6 @@ export interface ParsedMovieDetails extends ParsedMediaDetailsBase {
 // TVDB types
 // ---------------------------------------------------------------------------------
 
-export interface TVDBSearchItem {
-  tvdb_id?: number;
-  id?: number;
-  type?: string;
-  name?: string;
-  translations?: { eng?: string };
-  image_url?: string;
-  year?: string | number;
-  first_air_time?: string;
-  overview?: string;
-  genres?: (string | { name: string })[];
-}
-
 export interface TVDBEpisodeItem {
   id: number;
   seriesId: number;

@@ -298,20 +298,3 @@ export function parseSearchQuery(query: string): ParsedSearchQuery {
     warnings,
   };
 }
-
-/**
- * Helper to get available shortcuts
- */
-function getAvailableShortcuts(): Record<
-  string,
-  { tmdb?: string; tvdb?: string }
-> {
-  return { ...SHORTCUTS };
-}
-
-/**
- * Helper to get genre mappings
- */
-function getGenreMap(): Record<string, number> {
-  return { ...GENRE_MAP };
-}

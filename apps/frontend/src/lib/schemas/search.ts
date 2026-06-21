@@ -11,5 +11,3 @@ export const searchSchema = z.object({
   // Media type filter
   type: z.enum(["movie", "tv", "both"]).default("both"),
 });
-
-type SearchFormData = z.infer<typeof searchSchema>;

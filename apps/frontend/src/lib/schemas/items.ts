@@ -30,6 +30,3 @@ export const itemsSearchSchema = z.object({
     .min(1, "Search term must be at least 1 character")
     .optional(),
 });
-
-type ItemsSearchSchema = z.infer<typeof itemsSearchSchema>;
-const sortOptions = sortEnum.enum;
