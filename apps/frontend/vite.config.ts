@@ -1,5 +1,6 @@
 import { sveltekit } from "@sveltejs/kit/vite";
 import tailwindcss from "@tailwindcss/vite";
+import houdini from "houdini/vite";
 import { defineConfig, loadEnv } from "vite";
 
 import packageJson from "./package.json" with { type: "json" };
@@ -11,7 +12,7 @@ export default defineConfig(({ mode }) => {
   const apiKey = env["BACKEND_API_KEY"] ?? env["RIVEN_SETTING__API_KEY"] ?? "";
 
   return {
-    plugins: [tailwindcss(), sveltekit(svelteConfig.kit)],
+    plugins: [houdini(), tailwindcss(), sveltekit(svelteConfig.kit)],
     define: {
       __APP_VERSION__: JSON.stringify(packageJson.version),
     },

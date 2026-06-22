@@ -2,7 +2,8 @@
   "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions": {
     "sourceMap": true,
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "rootDirs": [".", "./.svelte-kit/types", "./.$houdini/types"]
   },
   "files": [
     "eslint.config.ts",
@@ -13,11 +14,7 @@
     "drizzle.config.ts",
     "scripts/drizzle_pull.ts",
     "src/service-worker.ts",
-    "server.ts"
+    "server.ts",
+    "houdini.config.js"
   ]
-  // Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
-  // except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
-  //
-  // If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes
-  // from the referenced tsconfig.json - TypeScript does not merge them in
 }

@@ -45,6 +45,8 @@ allowBuilds:
   redis-memory-server: false
   sharp: true
   "@tailwindcss/oxide": set this to true or false
+  houdini-core: true
+  houdini-svelte: true
 blockExoticSubdeps: false
 catalog:
   "@apollo/cache-control-types": ^1.0.3

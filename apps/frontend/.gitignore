@@ -11,3 +11,5 @@ vite.config.ts.timestamp-*
 
 config/server.json
 !src/routes/**/logs
+
+.houdini

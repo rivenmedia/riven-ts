@@ -9,6 +9,9 @@ export default {
   preprocess: [vitePreprocess(), mdsvex()],
   kit: {
     adapter: adapter(),
+    alias: {
+      $houdini: ".houdini/",
+    },
     experimental: {
       remoteFunctions: true,
     },
