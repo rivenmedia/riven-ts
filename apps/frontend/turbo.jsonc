@@ -3,6 +3,7 @@
   "extends": ["//"],
   "tasks": {
     "dev": {
+      "with": ["@repo/riven#dev"],
       "passThroughEnv": [
         "AUTH_SECRET",
         "ORIGIN",
