@@ -3,4 +3,5 @@ pnpm-lock.yaml
 **/docker-data
 **/.source
 **/.svelte-kit
+**/.houdini
 **/build

@@ -9,6 +9,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "check-types": "pnpm check",
+    "codegen:gql": "houdini generate",
     "db:generate": "drizzle-kit generate",
     "db:pull": "tsx ./scripts/drizzle_pull.ts",
     "db:studio": "drizzle-kit studio",

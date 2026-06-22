@@ -2,6 +2,21 @@
   "$schema": "https://turborepo.dev/schema.json",
   "extends": ["//"],
   "tasks": {
+    "codegen:gql": {
+      "dependsOn": [
+        "$TURBO_EXTENDS$",
+        "@repo/riven#codegen:gql-schema",
+        "transit:source-files"
+      ],
+      "inputs": [
+        "$TURBO_ROOT$/apps/riven/schema.graphql",
+        "src/**/*.gql",
+        "houdini.config.ts",
+        "svelte.config.ts",
+        ".graphqlrc.yaml"
+      ],
+      "outputs": [".houdini/**"]
+    },
     "dev": {
       "with": ["@repo/riven#dev"],
       "passThroughEnv": [
