@@ -1,4 +1,3 @@
-/// <references types="houdini-svelte">
 import { DateTime } from "luxon";
 
 import type { ConfigFile } from "houdini";

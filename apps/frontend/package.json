@@ -9,7 +9,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "check-types": "pnpm check",
-    "codegen:gql": "houdini generate",
+    "codegen:gql": "rm -rf .houdini && houdini generate",
     "db:generate": "drizzle-kit generate",
     "db:pull": "tsx ./scripts/drizzle_pull.ts",
     "db:studio": "drizzle-kit studio",
@@ -20,8 +20,7 @@
     "preview": "vite preview",
     "start": "node server.js",
     "test": "vitest run --passWithNoTests",
-    "test:ui": "vitest --ui",
-    "test:watch": "vitest watch"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@better-auth/passkey": "catalog:",
@@ -71,7 +70,6 @@
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
     "@types/nprogress": "catalog:",
-    "@vitest/ui": "catalog:",
     "dotenv": "catalog:",
     "drizzle-kit": "catalog:",
     "es-toolkit": "catalog:",

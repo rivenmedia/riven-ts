@@ -13,7 +13,8 @@
         "src/**/*.{gql,graphql,svelte}",
         "houdini.config.ts",
         "svelte.config.ts",
-        ".graphqlrc.yaml"
+        ".graphqlrc.yaml",
+        "vite.config.ts"
       ],
       "outputs": [".houdini/**"]
     },
