@@ -68,6 +68,10 @@
       ],
       "outputs": ["coverage"]
     },
+    "test:ui": {
+      "cache": false,
+      "persistent": true
+    },
     "test:watch": {
       "persistent": true,
       "dependsOn": ["codegen:api-schemas", "transit:source-files"]

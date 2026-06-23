@@ -36,6 +36,7 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
         retry: process.env["CI"] ? 2 : 0,
         hookTimeout: 30_000,
       },
+      oxc: false,
       plugins: [swc.vite()],
     }),
   );

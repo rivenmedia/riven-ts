@@ -18,7 +18,10 @@
     "lint:fix": "pnpm lint --fix",
     "prepare": "svelte-kit sync || echo ''",
     "preview": "vite preview",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:watch": "vitest watch"
   },
   "dependencies": {
     "@better-auth/passkey": "catalog:",
@@ -56,21 +59,26 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@repo/core-util-vitest-config": "workspace:^",
     "@sveltejs/adapter-node": "catalog:",
     "@sveltejs/vite-plugin-svelte": "catalog:",
     "@tailwindcss/vite": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/svelte": "catalog:",
     "@types/better-sqlite3": "catalog:",
     "@types/d3-shape": "catalog:",
     "@types/http-proxy": "catalog:",
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
     "@types/nprogress": "catalog:",
+    "@vitest/ui": "catalog:",
     "dotenv": "catalog:",
     "drizzle-kit": "catalog:",
     "es-toolkit": "catalog:",
     "eslint": "catalog:",
     "houdini": "^2.0.0-next.41",
     "houdini-svelte": "^3.0.0-next.35",
+    "jsdom": "catalog:",
     "mdsvex": "catalog:",
     "prettier-plugin-svelte": "catalog:",
     "prettier-plugin-tailwindcss": "catalog:",

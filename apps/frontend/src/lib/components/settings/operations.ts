@@ -22,18 +22,6 @@ export const UPDATE_SETTINGS = `
     }
 `;
 
-export const INSTANCE_STATUS = `
-    query {
-        instanceStatus {
-            setupCompleted
-            readyToComplete
-            enabledValidPluginCount
-            enabledProfileCount
-            blockers
-        }
-    }
-`;
-
 export const COMPLETE_INITIAL_SETUP = `mutation { completeInitialSetup }`;
 
 export const SAVE_CUSTOM_PROFILE = `mutation SaveCustomProfile($id: Int, $name: String!, $settings: JSON!, $enabled: Boolean) { saveCustomProfile(id: $id, name: $name, settings: $settings, enabled: $enabled) }`;

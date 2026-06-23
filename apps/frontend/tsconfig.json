@@ -15,6 +15,7 @@
     "scripts/drizzle_pull.ts",
     "src/service-worker.ts",
     "server.ts",
-    "houdini.config.ts"
+    "houdini.config.ts",
+    "vitest.setup.ts"
   ]
 }

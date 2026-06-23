@@ -1,20 +1,34 @@
+import { baseVitestConfig } from "@repo/core-util-vitest-config/base";
+
 import { sveltekit } from "@sveltejs/kit/vite";
 import tailwindcss from "@tailwindcss/vite";
+import { svelteTesting } from "@testing-library/svelte/vite";
 import houdini from "houdini/vite";
-import { defineConfig, loadEnv } from "vite";
+import { type UserConfig, defineConfig, loadEnv, mergeConfig } from "vite";
 
 import packageJson from "./package.json" with { type: "json" };
 import svelteConfig from "./svelte.config.ts";
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
+export default defineConfig((config) => {
+  const env = loadEnv(config.mode, process.cwd(), "");
   const backendUrl = env["BACKEND_URL"] ?? "http://localhost:8080";
   const apiKey = env["BACKEND_API_KEY"] ?? env["RIVEN_SETTING__API_KEY"] ?? "";
 
-  return {
-    plugins: [houdini(), tailwindcss(), sveltekit(svelteConfig.kit)],
+  const baseConfig = baseVitestConfig(config);
+
+  return mergeConfig<UserConfig, UserConfig>(baseConfig, {
+    plugins: [
+      houdini(),
+      tailwindcss(),
+      sveltekit(svelteConfig.kit),
+      svelteTesting(),
+    ],
     define: {
       __APP_VERSION__: JSON.stringify(packageJson.version),
+    },
+    test: {
+      environment: "jsdom",
+      setupFiles: ["./vitest.setup.ts"],
     },
     server: {
       proxy: {
@@ -37,5 +51,5 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-  };
+  });
 });
