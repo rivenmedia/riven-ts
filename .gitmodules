@@ -1,0 +1,4 @@
+[submodule "apps/svelte-frontend"]
+	path = apps/svelte-frontend
+	url = https://github.com/rivenmedia/riven-frontend
+	branch = graphql
