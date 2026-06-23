@@ -10,7 +10,7 @@
       ],
       "inputs": [
         "$TURBO_ROOT$/apps/riven/schema.graphql",
-        "src/**/*.gql",
+        "src/**/*.{gql,graphql,svelte}",
         "houdini.config.ts",
         "svelte.config.ts",
         ".graphqlrc.yaml"

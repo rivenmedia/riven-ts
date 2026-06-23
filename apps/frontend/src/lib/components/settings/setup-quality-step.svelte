@@ -25,7 +25,7 @@
     <div>
       <h3 class="text-lg font-semibold">Pre-configured presets</h3>
       <p class="text-muted-foreground mt-1 text-sm">
-        Start with the built-in <code>riven-rs</code> defaults.
+        Start with the built-in defaults.
       </p>
     </div>
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 import { buildSchema } from "@repo/core-util-graphql-schema";
 
 import { resolvers } from "../lib/graphql/resolvers/index.ts";
