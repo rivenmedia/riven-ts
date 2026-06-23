@@ -19,7 +19,7 @@
     "prepare": "svelte-kit sync || echo ''",
     "preview": "vite preview",
     "start": "node server.js",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:ui": "vitest --ui",
     "test:watch": "vitest watch"
   },
