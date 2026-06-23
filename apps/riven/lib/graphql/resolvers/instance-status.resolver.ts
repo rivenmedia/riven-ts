@@ -23,7 +23,7 @@ export class InstanceStatusResolver {
   @Query(() => InstanceStatus)
   instanceStatus(): InstanceStatus {
     return {
-      setupCompleted: false,
+      setupCompleted: true,
       readyToComplete: true,
       enabledValidPluginCount: 0,
       enabledProfileCount: 0,

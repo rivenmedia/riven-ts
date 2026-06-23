@@ -9,6 +9,8 @@ import {
   buildSchema as baseBuildSchema,
 } from "type-graphql";
 
+import "./register-enums.ts";
+
 export const buildSchema = async (
   options: Omit<BuildSchemaOptions, "resolvers"> & {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type

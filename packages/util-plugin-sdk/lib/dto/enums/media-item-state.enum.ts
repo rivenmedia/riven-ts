@@ -1,4 +1,3 @@
-import { registerEnumType } from "type-graphql";
 import z from "zod";
 
 export const MediaItemState = z.enum([
@@ -15,8 +14,3 @@ export const MediaItemState = z.enum([
 ]);
 
 export type MediaItemState = z.infer<typeof MediaItemState>;
-
-registerEnumType(MediaItemState.enum, {
-  name: "MediaItemState",
-  description: "The state of a media item in the processing pipeline",
-});

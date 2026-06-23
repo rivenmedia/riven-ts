@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@repo/feature-settings": "workspace:^",
+    "@repo/util-plugin-sdk": "workspace:^",
     "graphql": "catalog:",
     "graphql-scalars": "catalog:",
     "type-graphql": "catalog:"
