@@ -2,3 +2,6 @@ pnpm-lock.yaml
 *.hbs
 **/docker-data
 **/.source
+svelte-frontend
+out
+dist
