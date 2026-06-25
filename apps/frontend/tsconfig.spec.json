@@ -6,7 +6,11 @@
     "rootDir": ".",
     "noEmit": false
   },
-  "files": ["vitest.d.ts"],
-  "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],
+  "files": [],
+  "include": [
+    "{app,components,environment,lib}/**/*.ts",
+    "{app,components,environment,lib}/**/*.mts",
+    "{app,components,environment,lib}/**/*.cts"
+  ],
   "exclude": []
 }

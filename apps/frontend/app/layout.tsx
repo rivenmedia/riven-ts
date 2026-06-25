@@ -1,5 +1,6 @@
+import { fontMono, fontSansSerif, fontSerif } from "./fonts.ts";
+
 import "@/lib/styles/themes/all.css";
-import "./fonts.ts";
 import "./globals.css";
 
 import { Providers } from "./providers.tsx";
@@ -19,7 +20,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="h-full antialiased font-sans"
+      className={`h-full antialiased ${fontSansSerif.variable} ${fontMono.variable} ${fontSerif.variable}`}
       suppressHydrationWarning
     >
       <head />

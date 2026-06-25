@@ -8,6 +8,8 @@ import nextTs from "eslint-config-next/typescript";
 import { globalIgnores } from "eslint/config";
 
 export default [
+  ...nextVitals,
+  ...nextTs,
   ...baseEslintConfig,
   {
     languageOptions: {
@@ -16,8 +18,6 @@ export default [
       },
     },
   },
-  ...nextVitals,
-  ...nextTs,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

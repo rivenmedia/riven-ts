@@ -3,11 +3,18 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "rootDirs": ["lib", "temp"],
+    "rootDirs": ["lib", "app", "components", "environment"],
     "outDir": "dist",
     "noEmit": false
   },
   "files": ["temp/metadata.json", "package.json"],
-  "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],
-  "exclude": ["lib/**/*.spec.ts", "**/__tests__/**/*.ts"]
+  "include": [
+    "{app,components,environment,lib}/**/*.ts",
+    "{app,components,environment,lib}/**/*.mts",
+    "{app,components,environment,lib}/**/*.cts"
+  ],
+  "exclude": [
+    "{app,components,environment,lib}/**/*.spec.ts",
+    "**/__tests__/**/*.ts"
+  ]
 }

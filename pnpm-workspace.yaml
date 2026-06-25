@@ -11,7 +11,9 @@ catalog:
   "@apollo/server": ^5.5.1
   "@apollo/utils.keyvadapter": ^4.0.1
   "@apollo/utils.keyvaluecache": ^4.0.0
-  '@bprogress/next': ^3.2.12
+  "@better-auth/drizzle-adapter": ^1.6.20
+  "@better-auth/passkey": ^1.6.20
+  "@bprogress/next": ^3.2.12
   "@commitlint/cli": ^21.0.2
   "@commitlint/config-conventional": ^21.0.2
   "@commitlint/types": ^21.0.1
@@ -25,7 +27,7 @@ catalog:
   "@graphql-codegen/typescript": ^5.0.10
   "@graphql-codegen/typescript-operations": ^5.1.0
   "@graphql-typed-document-node/core": ^3.2.0
-  '@hookform/resolvers': ^5.4.0
+  "@hookform/resolvers": ^5.4.0
   "@isaacs/ttlcache": ^2.1.5
   "@keyv/redis": ^5.1.6
   "@kubb/cli": 4.20.1
@@ -43,6 +45,7 @@ catalog:
   "@mikro-orm/reflection": ^7.1.0
   "@mikro-orm/seeder": ^7.1.0
   "@mikro-orm/sqlite": ^7.1.0
+  "@next-safe-action/adapter-react-hook-form": ^2.0.6
   "@parcel/watcher": ^2.5.6
   "@sentry/node": ^10.53.1
   "@swc-node/register": ^1.11.1
@@ -75,11 +78,15 @@ catalog:
   class-validator: 0.14.3
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
+  consola: ^3.4.2
   countries-and-timezones: ^3.9.0
   dataloader: ^2.2.3
   date-fns: ^4.4.0
   dedent: ^1.7.2
   discord-api-types: 0.38.42
+  dotenv: ^17.4.2
+  drizzle-kit: ^0.31.10
+  drizzle-orm: ^0.45.2
   embla-carousel-react: ^8.6.0
   es-toolkit: ^1.46.1
   esbuild: ^0.28.0
@@ -110,6 +117,7 @@ catalog:
   luxon: ^3.7.2
   msw: 2.13.2
   next: ^16.2.6
+  next-safe-action: ^8.5.5
   next-themes: ^0.4.6
   nyc: ^18.0.0
   postcss: ^8.5.10
@@ -202,3 +210,6 @@ allowBuilds:
   sharp: true
 
 blockExoticSubdeps: false
+
+overrides:
+  zod: "catalog:"

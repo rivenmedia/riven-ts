@@ -20,6 +20,10 @@
     },
     "dev": {
       //   "with": ["@repo/riven#dev"]
+    },
+    "auth:generate": {
+      "inputs": ["lib/auth.ts"],
+      "outputs": ["lib/database/schema/ba-auth.ts"]
     }
   }
 }
