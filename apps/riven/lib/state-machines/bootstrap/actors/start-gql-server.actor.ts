@@ -1,8 +1,12 @@
 import { buildSchema } from "@repo/core-util-graphql-schema";
 
 import { ApolloServer } from "@apollo/server";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin/landingPage/default";
-import { startStandaloneServer } from "@apollo/server/standalone";
+import { expressMiddleware } from "@as-integrations/express5";
+import cors from "cors";
+import express from "express";
+import { createServer } from "node:http";
 import { URL } from "node:url";
 import { type ActorRefFromLogic, fromPromise } from "xstate";
 
@@ -39,6 +43,9 @@ export const startGqlServer = fromPromise<
     .flatMap((p) => p.config.resolvers)
     .toArray();
 
+  const app = express();
+  const httpServer = createServer(app);
+
   const server = new ApolloServer<ApolloServerContext>({
     cache: redisCache,
     schema: await buildSchema({
@@ -58,6 +65,7 @@ export const startGqlServer = fromPromise<
           return Promise.resolve();
         },
       },
+      ApolloServerPluginDrainHttpServer({ httpServer }),
     ],
     formatError(formattedError, error) {
       logger.error("GraphQL Error:", { err: error });
@@ -65,6 +73,8 @@ export const startGqlServer = fromPromise<
       return formattedError;
     },
   });
+
+  await server.start();
 
   const sendEvent: GraphQLContext["sendEvent"] = (event) => {
     if (!event.type.startsWith("riven-external.")) {
@@ -76,18 +86,33 @@ export const startGqlServer = fromPromise<
     mainRunnerRef.send(event);
   };
 
-  const { url } = await startStandaloneServer(server, {
-    listen: {
-      host: settings.gqlHost,
-      port: settings.gqlPort,
-    },
-    context: buildContextFunction(sendEvent),
+  app.use(
+    "/",
+    cors(),
+    express.json(),
+    expressMiddleware(server, {
+      context: buildContextFunction(sendEvent),
+    }),
+  );
+
+  const url = new URL(
+    `http://${settings.gqlHost}:${settings.gqlPort.toString()}/`,
+  );
+
+  await new Promise<void>((resolve) => {
+    httpServer.listen(
+      {
+        host: url.hostname,
+        port: url.port,
+      },
+      resolve,
+    );
   });
 
-  initApolloClient(new URL(url));
+  initApolloClient(url);
 
   return {
     server,
-    url,
+    url: url.toString(),
   };
 });
