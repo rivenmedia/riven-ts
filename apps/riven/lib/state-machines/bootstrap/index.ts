@@ -25,11 +25,13 @@ import type {
   ValidPluginMap,
 } from "../../types/plugins.ts";
 import type { ApolloServer } from "@apollo/server";
+import type { MikroORM } from "@mikro-orm/core";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";
 
 export interface BootstrapMachineContext {
+  orm: MikroORM | null;
   error?: Error;
   mainRunnerRef: AnyActorRef;
   rootRef: AnyActorRef;
@@ -127,6 +129,7 @@ export const bootstrapMachine = setup({
     id: "Bootstrap",
     initial: "Bootstrapping database connection",
     context: ({ input }) => ({
+      orm: null,
       mainRunnerRef: input.mainRunnerRef,
       rootRef: input.rootRef,
       validatingPlugins: new Map(),
@@ -180,12 +183,21 @@ export const bootstrapMachine = setup({
           src: "initialiseDatabaseConnection",
           onDone: {
             target: "Clearing previous instance state",
-            actions: {
-              type: "log",
-              params: {
-                message: "Database connection bootstrap complete.",
+            actions: [
+              {
+                type: "log",
+                params: {
+                  message: "Database connection bootstrap complete.",
+                },
               },
-            },
+              assign(
+                ({
+                  event: {
+                    output: { orm },
+                  },
+                }) => ({ orm }),
+              ),
+            ],
           },
           onError: {
             target: "#Bootstrap.Errored",
@@ -381,15 +393,25 @@ export const bootstrapMachine = setup({
                   id: "startGqlServer",
                   src: "startGqlServer",
                   input: ({
-                    context: { mainRunnerRef, validPlugins, pluginSettings },
+                    context: {
+                      orm,
+                      mainRunnerRef,
+                      validPlugins,
+                      pluginSettings,
+                    },
                   }) => {
-                    if (!pluginSettings) {
-                      throw new Error(
-                        "Plugin settings not available when starting GraphQL server. Ensure the plugin registrar has been run first.",
-                      );
-                    }
+                    assert(
+                      pluginSettings,
+                      "Plugin settings not available when starting GraphQL server. Ensure the plugin registrar has been run first.",
+                    );
+
+                    assert(
+                      orm,
+                      "ORM not available when starting GraphQL server. Ensure the database connection has been initialised first.",
+                    );
 
                     return {
+                      orm,
                       mainRunnerRef,
                       pluginSettings,
                       validPlugins,

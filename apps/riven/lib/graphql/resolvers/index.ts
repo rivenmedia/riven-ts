@@ -1,3 +1,4 @@
+import { AuthResolver } from "./auth/auth.resolver.ts";
 import { EpisodeResolver } from "./episode.resolver.ts";
 import { MediaEntryResolver } from "./media-entry.resolver.ts";
 import { MediaItemResolver } from "./media-item.resolver.ts";
@@ -8,6 +9,7 @@ import { ShowResolver } from "./show.resolver.ts";
 import { VfsResolver } from "./vfs/vfs.resolver.ts";
 
 export const resolvers = [
+  AuthResolver,
   MediaItemResolver,
   MediaEntryResolver,
   EpisodeResolver,

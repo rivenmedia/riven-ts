@@ -26,6 +26,7 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
         restoreMocks: true,
         coverage: {
           enabled: !isWatch,
+          include: ["**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx}"],
           exclude: ["**/__generated__/**", "**/__tests__/**"],
         },
         setupFiles: [

@@ -1,13 +1,14 @@
 import { DownloaderService } from "./services/downloader/downloader.service.ts";
 import { IndexerService } from "./services/indexer/indexer.service.ts";
 import { ItemRequestService } from "./services/item-request/item-request.service.ts";
-import { MediaEntryService } from "./services/media-entry/media-entry.service.js";
+import { MediaEntryService } from "./services/media-entry/media-entry.service.ts";
 import { MediaItemService } from "./services/media-item/media-item.service.ts";
 import { PostProcessingService } from "./services/post-processing/post-processing.service.ts";
 import { RetryLibraryService } from "./services/retry-library/retry-library.service.ts";
 import { ScraperService } from "./services/scraper/scraper.service.ts";
-import { StreamService } from "./services/stream/stream.service.js";
+import { StreamService } from "./services/stream/stream.service.ts";
 import { SubtitlesService } from "./services/subtitles/subtitles.service.ts";
+import { UserService } from "./services/user/user.service.ts";
 import { VfsService } from "./services/vfs/vfs.service.ts";
 
 import type { EntityManager, MikroORM, Options } from "@mikro-orm/core";
@@ -28,6 +29,7 @@ export interface Services {
   scraperService: ScraperService;
   streamService: StreamService;
   subtitlesService: SubtitlesService;
+  userService: UserService;
   vfsService: VfsService;
 }
 
@@ -65,6 +67,7 @@ export async function initORM(options: Partial<Options>) {
     scraperService: new ScraperService(orm),
     streamService: new StreamService(orm),
     subtitlesService: new SubtitlesService(orm),
+    userService: new UserService(orm),
     vfsService: new VfsService(orm),
   };
 
