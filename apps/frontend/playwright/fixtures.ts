@@ -1,4 +1,5 @@
-import { type Session, type User, betterAuth } from "better-auth";
+import { type Session, betterAuth } from "better-auth";
+import { getSessionCookie } from "better-auth/cookies";
 import { type TestHelpers, testUtils } from "better-auth/plugins";
 import { DateTime } from "luxon";
 import {
@@ -16,25 +17,12 @@ export * from "next/experimental/testmode/playwright/msw";
 
 interface Fixtures {
   session: Session;
-  userWithRole: UserWithRole;
+  adminUser: UserWithRole & { role: "admin" };
+  standardUser: UserWithRole & { role: "user" };
   authHelpers: TestHelpers;
 }
 
 export const test = baseTest.extend<Fixtures>({
-  userWithRole: async ({}, use) => {
-    const user: UserWithRole = {
-      id: "1",
-      email: "email@example.com",
-      createdAt: DateTime.now().toJSDate(),
-      emailVerified: false,
-      name: "Test User",
-      updatedAt: DateTime.now().toJSDate(),
-      banned: false,
-      role: "admin",
-    };
-
-    await use(user);
-  },
   session: async ({}, use) => {
     const session: Session = {
       createdAt: DateTime.now().toJSDate(),
@@ -74,27 +62,46 @@ export const test = baseTest.extend<Fixtures>({
 
     await use(test);
   },
+  standardUser: async ({ authHelpers }, use) => {
+    const user = {
+      ...authHelpers.createUser(),
+      banned: false,
+      role: "user",
+    } as const;
+
+    await use(user);
+  },
+  adminUser: async ({ standardUser }, use) => {
+    await use({
+      ...standardUser,
+      role: "admin",
+    });
+  },
 });
 
 test.use({
-  mswHandlers: ({ userWithRole, session }, use) =>
+  mswHandlers: ({ standardUser, session }, use) =>
     use([
       http.get<
         PathParams,
         DefaultBodyType,
-        { session: Session; user: User } | null
-      >("**/api/auth/get-session", ({ cookies }) => {
-        const sessionCookie =
-          cookies["__Secure-riven.session_token"] ??
-          cookies["riven.session_token"];
+        { session: Session; user: UserWithRole } | null
+      >("**/api/auth/get-session", ({ request, cookies }) => {
+        const sessionCookie = getSessionCookie(request, {
+          cookiePrefix: "riven",
+        });
+        const userRole = cookies["user_role"];
 
-        if (!sessionCookie) {
+        if (!sessionCookie || !userRole) {
           return HttpResponse.json(null);
         }
 
         return HttpResponse.json({
           session,
-          user: userWithRole,
+          user: {
+            ...standardUser,
+            role: userRole,
+          },
         });
       }),
     ]),

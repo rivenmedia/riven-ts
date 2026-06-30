@@ -7,12 +7,14 @@ import {
   test,
 } from "@/playwright/fixtures";
 
+import assert from "node:assert";
+
 import type { UserWithRole } from "better-auth/client/plugins";
 
 test("navigates to the dashboard after registration", async ({
   page,
   msw,
-  userWithRole,
+  standardUser,
   authHelpers,
   context,
 }) => {
@@ -33,13 +35,29 @@ test("navigates to the dashboard after registration", async ({
       }),
     ),
     http.post("**/api/auth/sign-up/email", async () => {
-      const cookies = await authHelpers.getCookies({
-        userId: userWithRole.id,
+      const [cookie] = await authHelpers.getCookies({
+        userId: standardUser.id,
       });
 
-      await context.addCookies(cookies);
+      assert(cookie);
 
-      return HttpResponse.json<{ user: UserWithRole }>({ user: userWithRole });
+      await context.addCookies([
+        {
+          name: "user_role",
+          path: "/",
+          value: standardUser.role,
+          domain: "localhost",
+        },
+      ]);
+
+      return HttpResponse.json<{ user: UserWithRole }>(
+        { user: standardUser },
+        {
+          headers: {
+            "set-cookie": `${cookie.name}=${cookie.value}; Path=${cookie.path}; HttpOnly; Secure; SameSite=${cookie.sameSite ?? "Lax"};`,
+          },
+        },
+      );
     }),
   );
 
