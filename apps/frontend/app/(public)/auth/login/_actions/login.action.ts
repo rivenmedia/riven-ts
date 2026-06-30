@@ -1,46 +1,50 @@
 "use server";
 
+import { authClient } from "@/lib/auth-client";
 import { actionClient } from "@/lib/safe-action";
 
-import { registerSchema } from "$lib/schemas/auth";
-import { auth } from "$lib/server/auth";
-import { noUserExists } from "$lib/server/first-launch";
-import { fail, setError, superValidate } from "sveltekit-superforms";
-import { zod4 } from "sveltekit-superforms/adapters";
+import { isAPIError } from "better-auth/api";
+import { redirect } from "next/navigation";
+import z from "zod";
 
-import { isSignupEnabled } from "../+page.server";
 import { loginSchema } from "../_form-schemas/login.schema";
+import { loginLogger } from "../_utils/logger";
 
 export const loginUser = actionClient
   .inputSchema(loginSchema)
-  .action(async ({ parsedInput: { username, password } }) => {
-    if (!isCredentialEnabled) {
-      return fail(403, { message: "Email/password login is disabled" });
-    }
+  .bindArgsSchemas([
+    z.object({
+      isCredentialEnabled: z.boolean(),
+    }),
+  ])
+  .action(
+    async ({
+      parsedInput: { username, password },
+      bindArgsParsedInputs: [{ isCredentialEnabled }],
+    }) => {
+      if (!isCredentialEnabled) {
+        throw new Error("Email/password login is disabled");
+      }
 
-    const loginForm = await superValidate(event.request, zod4(loginSchema));
-    if (!loginForm.valid) return fail(400, { loginForm });
+      try {
+        const { data } = await authClient.signIn.username({
+          username: username,
+          password: password,
+        });
 
-    try {
-      await auth.api.signInUsername({
-        body: {
-          username: loginForm.data.username,
-          password: loginForm.data.password,
-          callbackURL: "/",
-        },
-        headers: event.request.headers,
-      });
-    } catch (error) {
-      if (error instanceof APIError) {
-        return message(loginForm, error.message, {
-          status: 400,
+        console.log(data);
+      } catch (error) {
+        if (isAPIError(error)) {
+          throw error;
+        }
+
+        loginLogger.error("Error during login:", error);
+
+        throw new Error("An unexpected error occurred during login", {
+          cause: error,
         });
       }
-      logger.error("Error during login:", error);
-      return message(loginForm, "An unexpected error occurred", {
-        status: 500,
-      });
-    }
 
-    return redirect(303, "/");
-  });
+      return redirect("/");
+    },
+  );

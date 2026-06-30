@@ -2,28 +2,15 @@
   "$schema": "https://turborepo.dev/schema.json",
   "extends": ["//"],
   "tasks": {
-    "codegen:gql": {
-      "dependsOn": [
-        "$TURBO_EXTENDS$",
-        "@repo/riven#codegen:gql-schema",
-        "transit:source-files"
-      ],
-      "inputs": [
-        "$TURBO_ROOT$/apps/riven/schema.graphql",
-        "src/**/*.{gql,graphql,svelte}",
-        "houdini.config.ts",
-        "svelte.config.ts",
-        ".graphqlrc.yaml",
-        "vite.config.ts"
-      ],
-      "outputs": [".houdini/**"]
-    },
     "dev": {
-      //   "with": ["@repo/riven#dev"]
+      "with": ["@repo/riven#dev"]
     },
-    "auth:generate": {
-      "inputs": ["lib/auth.ts"],
-      "outputs": ["lib/database/schema/ba-auth.ts"]
-    }
+    "codegen:gql": {
+      "dependsOn": ["@repo/riven#codegen:gql-schema"]
+    },
+    "e2e": {
+      "passThroughEnv": ["DATABASE_FILE_NAME"]
+    },
+    "e2e:headless": {}
   }
 }

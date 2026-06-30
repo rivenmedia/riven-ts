@@ -1,6 +1,7 @@
 import { buildSchema } from "@repo/core-util-graphql-schema";
 
 import { ApolloServer } from "@apollo/server";
+import { ApolloServerPluginCacheControl } from "@apollo/server/plugin/cacheControl";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin/landingPage/default";
 import { expressMiddleware } from "@as-integrations/express5";
@@ -70,6 +71,7 @@ export const startGqlServer = fromPromise<
         },
       },
       ApolloServerPluginDrainHttpServer({ httpServer }),
+      ApolloServerPluginCacheControl(),
     ],
     formatError(formattedError, error) {
       logger.error("GraphQL Error:", { err: error });
@@ -108,7 +110,7 @@ export const startGqlServer = fromPromise<
   );
 
   const url = new URL(
-    `http://${settings.gqlHost}:${settings.gqlPort.toString()}/graphql`,
+    `http://${settings.host}:${settings.port.toString()}/graphql`,
   );
 
   await new Promise<void>((resolve) => {

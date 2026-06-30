@@ -11,40 +11,54 @@ import {
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
-import { doesBrowserSupportPasskeys } from "@/lib/auth/passkeys";
 import { createScopedLogger } from "@/lib/logger";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Fingerprint, StarIcon } from "lucide-react";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
+import { StarIcon } from "lucide-react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { toast } from "react-toastify";
 
+import { loginUser } from "../_actions/login.action";
 import { loginSchema } from "../_form-schemas/login.schema";
 
-import type { AuthProvider } from "@/lib/auth";
+import type { AuthProvider } from "@/app/_types/__generated__/graphql";
 
 const logger = createScopedLogger("login");
 
+const PasskeySigninButton = dynamic(
+  () =>
+    import("../_components/passkey-signin-button").then(
+      (mod) => mod.PasskeySigninButton,
+    ),
+  { ssr: false },
+);
+
 interface LoginFormProps {
-  authProviders: Record<string, AuthProvider>;
-  supportsPasskey: boolean;
+  authProviders: AuthProvider[];
+  isCredentialProviderEnabled: boolean;
   lastLoginMethod: string | null;
 }
 
 export const LoginForm = ({
   authProviders,
-  supportsPasskey,
+  isCredentialProviderEnabled,
   lastLoginMethod,
 }: LoginFormProps) => {
   const [isPasskeyLoading, setIsPasskeyLoading] = useState(false);
 
+  function handleSuccessfulSignin() {
+    window.history.replaceState(null, "", "/");
+  }
+
   useEffect(() => {
     async function maybeAutoPasskeySignIn() {
       if (
-        doesBrowserSupportPasskeys() &&
         typeof window.PublicKeyCredential.isConditionalMediationAvailable ===
-          "function"
+        "function"
       ) {
         const supportsPasskeyAutofill =
           await window.PublicKeyCredential.isConditionalMediationAvailable();
@@ -65,10 +79,6 @@ export const LoginForm = ({
 
     void maybeAutoPasskeySignIn();
   }, []);
-
-  function handleSuccessfulSignin() {
-    window.history.replaceState(null, "", "/");
-  }
 
   async function handlePasskeySignIn() {
     setIsPasskeyLoading(true);
@@ -91,7 +101,21 @@ export const LoginForm = ({
     }
   }
 
-  function renderAuthProviderIcon(key: string, authProvider: AuthProvider) {
+  async function handleOAuthSignIn(providerId: string) {
+    try {
+      await authClient.signIn.oauth2({
+        providerId,
+        callbackURL: "/",
+      });
+    } catch {
+      toast.error("Login failed");
+    }
+  }
+
+  function renderAuthProviderIcon(
+    key: string,
+    authProvider: Omit<AuthProvider, "key">,
+  ) {
     if (key === "plex") {
       return (
         <svg
@@ -109,9 +133,9 @@ export const LoginForm = ({
 
     if (authProvider.icon) {
       return (
-        <img
+        <Image
           src={authProvider.icon}
-          alt={`${authProvider.name} icon`}
+          alt={`${authProvider.name ?? key} icon`}
           className="mr-2 h-4 w-4"
         />
       );
@@ -125,9 +149,9 @@ export const LoginForm = ({
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         className="mr-2 h-4 w-4"
       >
         <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
@@ -137,13 +161,22 @@ export const LoginForm = ({
     );
   }
 
-  const { control } = useForm({
-    defaultValues: {
-      password: "",
-      username: "",
+  const { form, handleSubmitWithAction } = useHookFormAction(
+    loginUser.bind(null, {
+      isCredentialEnabled: isCredentialProviderEnabled,
+    }),
+    zodResolver(loginSchema),
+    {
+      formProps: {
+        defaultValues: {
+          password: "",
+          username: "",
+        },
+      },
     },
-    resolver: zodResolver(loginSchema),
-  });
+  );
+
+  const { control } = form;
 
   return (
     <Card className="mx-auto w-full">
@@ -154,13 +187,9 @@ export const LoginForm = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {authProviders["credential"]?.enabled && (
+        {isCredentialProviderEnabled && (
           <>
-            <form
-              method="POST"
-              // use:loginEnhance
-              action="?/login"
-            >
+            <form onSubmit={(e) => void handleSubmitWithAction(e)}>
               <Controller
                 control={control}
                 name="username"
@@ -214,43 +243,29 @@ export const LoginForm = ({
         )}
 
         <div className="flex flex-col gap-2">
-          {Object.entries(authProviders).map(([key, provider]) => (
+          {authProviders.map(({ key, ...provider }) => (
             <React.Fragment key={key}>
               {key !== "credential" && provider.enabled && (
                 <Button
-                  onClick={async () => {
-                    await authClient.signIn.oauth2({
-                      providerId: key,
-                      callbackURL: "/",
-                    });
-                  }}
+                  onClick={() => void handleOAuthSignIn(key)}
                   variant={lastLoginMethod === key ? "secondary" : "outline"}
                   className="relative w-full"
                   type="button"
                 >
                   {renderAuthProviderIcon(key, provider)}
                   Login with{" "}
-                  {provider.name || key.charAt(0).toUpperCase() + key.slice(1)}
+                  {provider.name ?? key.charAt(0).toUpperCase() + key.slice(1)}
                   {lastLoginMethod === key && <StarIcon />}
                 </Button>
               )}
             </React.Fragment>
           ))}
 
-          {supportsPasskey && (
-            <Button
-              variant={lastLoginMethod === "passkey" ? "secondary" : "outline"}
-              className="relative w-full"
-              disabled={isPasskeyLoading}
-              onClick={handlePasskeySignIn}
-              type="button"
-            >
-              <Fingerprint className="mr-2 h-4 w-4" />
-              {isPasskeyLoading ? "Authenticating..." : "Sign in with Passkey"}
-
-              {lastLoginMethod === "passkey" && <StarIcon />}
-            </Button>
-          )}
+          <PasskeySigninButton
+            lastLoginMethod={lastLoginMethod}
+            isPasskeyLoading={isPasskeyLoading}
+            handlePasskeySignIn={handlePasskeySignIn}
+          />
         </div>
       </CardContent>
     </Card>

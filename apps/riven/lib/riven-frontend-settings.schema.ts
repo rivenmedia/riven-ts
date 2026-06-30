@@ -15,7 +15,7 @@ function generateSecret(length = 32) {
 
 export const RivenFrontendSettings = z.object({
   authSecret: z.string().default(generateSecret),
-  origin: z.url().default("http://localhost:9000"),
+  origin: z.url().default("https://localhost:9000"),
   passkeyRpId: z.string().optional(),
   passkeyRpName: z.string().optional(),
   plexClientId: z.string().default("riven"),

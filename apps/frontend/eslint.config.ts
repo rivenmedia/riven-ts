@@ -2,15 +2,13 @@ import {
   type ConfigArray,
   baseEslintConfig,
 } from "@repo/core-util-eslint-config";
+import { nextJsEslintConfig } from "@repo/core-util-eslint-config/nextjs";
 
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
 import { globalIgnores } from "eslint/config";
 
 export default [
-  ...nextVitals,
-  ...nextTs,
   ...baseEslintConfig,
+  ...nextJsEslintConfig,
   {
     languageOptions: {
       parserOptions: {

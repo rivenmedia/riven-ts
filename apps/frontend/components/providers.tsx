@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 
 import { ProgressProvider } from "@bprogress/next/app";
 import { ToastContainer } from "react-toastify";
@@ -36,8 +36,8 @@ export const Providers = ({ children }: Required<PropsWithChildren>) => {
         options={{ showSpinner: false }}
         shallowRouting
       >
-        {children}
         <ToastContainer />
+        {children}
       </ProgressProvider>
     </ThemeProvider>
   );

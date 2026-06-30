@@ -105,17 +105,17 @@ export const RivenSettings = z.object({
     .default(true)
     .describe("Whether to show detailed stack traces when logging errors")
     .meta({ "wiki.section": "logging" }),
-  gqlHost: z
+  host: z
     .string()
     .default("localhost")
-    .describe("The GraphQL server host.")
-    .meta({ "wiki.section": "graphql" }),
-  gqlPort: z.coerce
+    .describe("The API server host.")
+    .meta({ "wiki.section": "server" }),
+  port: z.coerce
     .number()
     .int()
     .default(3000)
-    .describe("The GraphQL server port.")
-    .meta({ "wiki.section": "graphql" }),
+    .describe("The API server port.")
+    .meta({ "wiki.section": "server" }),
   dubbedAnimeOnly: z
     .stringbool()
     .default(false)
@@ -200,6 +200,20 @@ export const RivenSettings = z.object({
       "Whether to print the effective configuration on application startup. Useful for debugging configuration issues.",
     )
     .meta({ "wiki.section": "debugging" }),
+  adminUserCredentials: z
+    .templateLiteral([z.string().min(1), z.literal(":"), z.string().min(1)])
+    .describe("The admin user credentials - in the format username:password")
+    .transform((val) => {
+      const [username, password] = val.split(":");
+
+      if (!username || !password) {
+        throw new Error(
+          "Invalid admin user credentials format. Expected 'username:password'",
+        );
+      }
+
+      return { username, password };
+    }),
 });
 
 export type RivenSettings = z.infer<typeof RivenSettings>;

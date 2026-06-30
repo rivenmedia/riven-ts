@@ -7,6 +7,8 @@ export const testFiles = [
   "**/*test-context.ts",
 ] as const;
 
+export const playwrightTestFiles = ["playwright/**", "tests/**"] as const;
+
 export const entityFiles = "**/*.entity.ts";
 
 export const jsonFiles = "**/*.{json,jsonc,json5}";

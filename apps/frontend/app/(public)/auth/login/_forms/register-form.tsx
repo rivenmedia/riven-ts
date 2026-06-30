@@ -20,9 +20,15 @@ import { registerUser } from "../_actions/register.action";
 import { registerSchema } from "../_form-schemas/register.schema";
 import { loginLogger } from "../_utils/logger";
 
-export const RegisterForm = () => {
+interface RegisterFormProps {
+  isSignupEnabled: boolean;
+}
+
+export const RegisterForm = ({ isSignupEnabled }: RegisterFormProps) => {
   const { form, handleSubmitWithAction } = useHookFormAction(
-    registerUser,
+    registerUser.bind(null, {
+      isSignupEnabled,
+    }),
     zodResolver(registerSchema),
     {
       formProps: {
@@ -35,13 +41,17 @@ export const RegisterForm = () => {
         },
       },
       actionProps: {
-        onSuccess() {
-          toast.success("Registered!");
+        onNavigation({ navigationKind }) {
+          if (navigationKind === "redirect") {
+            toast.success("Registration successful");
+          }
         },
         onError(args) {
-          loginLogger.error("Registration error:", args.error.thrownError);
+          loginLogger.error("Registration error:", args.error.serverError);
 
-          toast.error("Unable to register user");
+          toast.error(
+            args.error.serverError ?? "An error occurred during registration",
+          );
         },
       },
     },
@@ -56,7 +66,7 @@ export const RegisterForm = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmitWithAction}>
+        <form onSubmit={(e) => void handleSubmitWithAction(e)}>
           <Controller
             control={form.control}
             name="username"

@@ -57,6 +57,7 @@
     "@mikro-orm/postgresql": "catalog:",
     "@mikro-orm/reflection": "catalog:",
     "@mikro-orm/seeder": "catalog:",
+    "@repo/core-util-graphql-helpers": "workspace:^",
     "@repo/core-util-graphql-schema": "workspace:^",
     "@repo/plugin-comet": "workspace:^",
     "@repo/plugin-jellyfin": "workspace:^",

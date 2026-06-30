@@ -1,58 +1,37 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getAuthProviders } from "@/lib/auth";
 import { authClient } from "@/lib/auth-client";
+import { query } from "@/lib/graphql/client";
 
 import { Mountain } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { LoginForm } from "./_forms/login-form";
 import { RegisterForm } from "./_forms/register-form";
-
-//
-
-//     $effect(() => {
-//         if ($loginMessage) {
-//             if (page.status >= 200 && page.status < 300) {
-//                 toast.success($loginMessage);
-//             } else {
-//                 toast.error($loginMessage);
-//             }
-//         }
-
-//         if ($registerMessage) {
-//             if (page.status >= 200 && page.status < 300) {
-//                 toast.success($registerMessage);
-//             } else {
-//                 toast.error($registerMessage);
-//             }
-//         }
-//     });
-
-//     // Check if signup is enabled (or first user setup)
-//     const isSignupEnabled = $derived(
-//         (data.authProviders.credential?.enabled && !data.authProviders.credential?.disableSignup) ||
-//             data.isFirstUser
-//     );
-
-//
-
-// </script>
+import { GET_AUTH_PROVIDERS } from "./_queries/get-auth-providers.query";
 
 interface TabData {
   label: string;
   component: React.ReactNode;
 }
 
-export default async function Page({}: PageProps<"/auth/login">) {
-  const authProviders = await getAuthProviders();
+export default async function Page() {
+  const { data } = await query({
+    query: GET_AUTH_PROVIDERS,
+  });
 
-  const isFirstUser = true;
-  const isSignupEnabled =
-    (authProviders["credential"]?.enabled &&
-      !authProviders["credential"]?.disableSignup) ||
-    isFirstUser;
+  if (!data) {
+    throw new Error("Failed to fetch auth providers");
+  }
 
-  const shouldRenderRegisterForm = isSignupEnabled;
+  const { authProviders } = data;
+
+  const credentialProvider = authProviders.find(
+    ({ key }) => key === "credential",
+  );
+
+  const isCredentialProviderEnabled =
+    (credentialProvider?.enabled && !credentialProvider.disableSignup) ?? false;
 
   const lastLoginMethod = authClient.getLastUsedLoginMethod();
 
@@ -63,12 +42,17 @@ export default async function Page({}: PageProps<"/auth/login">) {
         <LoginForm
           authProviders={authProviders}
           lastLoginMethod={lastLoginMethod}
-          supportsPasskey={false}
+          isCredentialProviderEnabled={isCredentialProviderEnabled}
         />
       ),
     },
-    ...(shouldRenderRegisterForm
-      ? [{ label: "Register", component: <RegisterForm /> }]
+    ...(isCredentialProviderEnabled
+      ? [
+          {
+            label: "Register",
+            component: <RegisterForm isSignupEnabled />,
+          },
+        ]
       : []),
   ] as const satisfies readonly TabData[];
 
@@ -106,10 +90,13 @@ export default async function Page({}: PageProps<"/auth/login">) {
         </div>
       </div>
       <div className="bg-muted relative hidden lg:block">
-        <img
+        <Image
+          loading="eager"
           src="https://images.pexels.com/photos/114820/pexels-photo-114820.jpeg"
           alt="placeholder"
           className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          height="3376"
+          width="6000"
         />
       </div>
     </div>

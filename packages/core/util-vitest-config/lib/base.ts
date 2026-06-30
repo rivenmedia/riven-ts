@@ -23,11 +23,17 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
     { test: configDefaults },
     defineConfig({
       test: {
+        globals: true, // Enables testing-library auto cleanup
         restoreMocks: true,
         coverage: {
           enabled: !isWatch,
           include: ["**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx}"],
-          exclude: ["**/__generated__/**", "**/__tests__/**"],
+          exclude: [
+            "**/__generated__/**",
+            "**/__tests__/**",
+            "*/*.config.ts",
+            "*/*.setup.ts",
+          ],
         },
         setupFiles: [
           fileURLToPath(

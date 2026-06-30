@@ -3,6 +3,7 @@ import { auth } from "./auth.ts";
 import { getGenericOAuthProviders } from "./oauth-utils.ts";
 
 export interface AuthProvider {
+  key: string;
   enabled: boolean;
   disableSignup: boolean;
   name?: string;
@@ -14,6 +15,7 @@ export function getAuthProviders() {
 
   if (auth.options.emailAndPassword.enabled) {
     providers["credential"] = {
+      key: "credential",
       enabled: auth.options.emailAndPassword.enabled,
       disableSignup: auth.options.emailAndPassword.disableSignUp,
     };
@@ -21,6 +23,7 @@ export function getAuthProviders() {
 
   if (!frontendSettings.disablePlex) {
     providers["plex"] = {
+      key: "plex",
       enabled: true,
       disableSignup: !frontendSettings.enablePlexSignup,
       name: "Plex",
@@ -32,6 +35,7 @@ export function getAuthProviders() {
 
   for (const provider of genericProviders) {
     providers[provider.providerId] = {
+      key: provider.providerId,
       enabled: true,
       disableSignup: !!provider.disableSignUp,
       name: provider.name ?? provider.providerId,

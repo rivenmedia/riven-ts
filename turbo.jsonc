@@ -107,6 +107,9 @@
         "!turbo/generators/coverage/**",
         "transit:source-files"
       ]
+    },
+    "e2e": {
+      "cache": false
     }
   }
 }

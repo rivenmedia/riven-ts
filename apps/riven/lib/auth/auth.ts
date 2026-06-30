@@ -42,7 +42,7 @@ const transformLogLevel = (): Exclude<LogLevel, "success"> => {
 
 export const authConfig = {
   secret: frontendSettings.authSecret,
-  baseURL: frontendSettings.origin,
+  baseURL: `http://${settings.host}:${settings.port.toString()}`,
   logger: {
     disabled: !settings.loggingEnabled,
     level: transformLogLevel(),
@@ -115,8 +115,8 @@ export const authConfig = {
   },
   socialProviders: {},
   trustedOrigins: [
-    "http://localhost:9000",
-    "http://192.168.1.*:9000",
+    "https://localhost:9000",
+    "https://192.168.1.*:9000",
     frontendSettings.origin,
   ],
   advanced: {

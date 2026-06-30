@@ -1,9 +1,9 @@
 import { fontMono, fontSansSerif, fontSerif } from "./fonts.ts";
 
 import "@/lib/styles/themes/all.css";
-import "./globals.css";
+import "@/lib/styles/globals.css";
 
-import { Providers } from "./providers.tsx";
+import { Providers } from "../components/providers.tsx";
 
 import type { Metadata } from "next";
 

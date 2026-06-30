@@ -1,20 +1,20 @@
-node_modules
-.turbo
+node_modules/
+.turbo/
 *.tsbuildinfo
 *.log
-logs
-.pnpm-store
-__generated__
-coverage
+logs/
+.pnpm-store/
+__generated__/
+coverage/
 .env*
 !.env*.example
 *.typegen.ts
-dist
-temp
+dist/
+temp/
 *.bundled_*.mjs
-docker-data
+docker-data/
 *.graphql
-.git
+.git/
 knip-report.json
 .direnv
 
@@ -30,6 +30,6 @@ docker-compose.override.yml
 *.pem
 
 # NextJS
-.next
+.next/
 next-env.d.ts
-/out/
+out/
