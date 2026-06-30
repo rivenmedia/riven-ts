@@ -7,14 +7,26 @@
     "outDir": "dist",
     "noEmit": false
   },
-  "files": ["temp/metadata.json", "package.json"],
+  "files": ["next-env.d.ts"],
   "include": [
-    "{app,components,environment,lib}/**/*.ts",
-    "{app,components,environment,lib}/**/*.mts",
-    "{app,components,environment,lib}/**/*.cts"
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "app/**/*.mts",
+    "components/**/*.ts",
+    "components/**/*.tsx",
+    "components/**/*.mts",
+    "environment/**/*.ts",
+    "environment/**/*.tsx",
+    "environment/**/*.mts",
+    "lib/**/*.ts",
+    "lib/**/*.tsx",
+    "lib/**/*.mts"
   ],
   "exclude": [
-    "{app,components,environment,lib}/**/*.spec.ts",
+    "app/**/*.spec.ts",
+    "components/**/*.spec.ts",
+    "environment/**/*.spec.ts",
+    "lib/**/*.spec.ts",
     "**/__tests__/**/*.ts"
   ]
 }

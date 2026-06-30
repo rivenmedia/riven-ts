@@ -1,19 +1,35 @@
 import { privateEnvironment } from "@/environment/private-environment.schema";
+import { authClient } from "@/lib/auth/client";
 
 import { NextResponse } from "next/server";
 
+import type { AppRoutes } from "./.next/dev/types/routes";
 import type { NextRequest, ProxyConfig } from "next/server";
 
-export function proxy(request: NextRequest) {
+const paths = {
+  login: "/login",
+  home: "/",
+} as const satisfies Record<string, AppRoutes>;
+
+export async function proxy(request: NextRequest) {
   if (
     request.nextUrl.pathname === "/graphql" ||
     request.nextUrl.pathname.startsWith("/api/auth")
   ) {
-    const rewriteUrl = new URL(privateEnvironment.BACKEND_URL);
-
-    rewriteUrl.pathname = request.nextUrl.pathname;
+    const rewriteUrl = new URL(
+      request.nextUrl.pathname,
+      privateEnvironment.BACKEND_URL,
+    );
 
     return NextResponse.rewrite(rewriteUrl);
+  }
+
+  const { data: session } = await authClient.getSession();
+
+  if (!session && request.nextUrl.pathname !== paths.login) {
+    return NextResponse.redirect(new URL(paths.login, request.url));
+  } else if (session && request.nextUrl.pathname === paths.login) {
+    return NextResponse.redirect(new URL(paths.home, request.url));
   }
 
   return NextResponse.next();

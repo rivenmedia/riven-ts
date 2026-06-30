@@ -4,7 +4,11 @@ import eslintPluginReact from "eslint-plugin-react";
 import eslintPluginReactHooks from "eslint-plugin-react-hooks";
 import { defineConfig } from "eslint/config";
 
-import { jsFiles, tsFiles } from "./internal/file-types.ts";
+import {
+  jsFiles,
+  playwrightTestFiles,
+  tsFiles,
+} from "./internal/file-types.ts";
 
 import type { ConfigArray } from "typescript-eslint";
 
@@ -12,6 +16,7 @@ export const nextJsEslintConfig: ConfigArray = defineConfig([
   {
     name: "riven:nextjs",
     files: [jsFiles, tsFiles],
+    ignores: [...playwrightTestFiles],
     extends: [
       eslintPluginNext.configs.recommended,
       eslintPluginReact.configs.flat["recommended"] ?? {},

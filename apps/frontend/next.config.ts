@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 export default {
   experimental: {
+    authInterrupts: true,
     testProxy: true,
   },
   images: {

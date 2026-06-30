@@ -7,6 +7,8 @@ import {
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
+import { nextCookiesClientPlugin } from "./plugins/next-cookies";
+
 export const authClient = createAuthClient({
   baseURL: "https://localhost:9000",
   plugins: [
@@ -15,5 +17,6 @@ export const authClient = createAuthClient({
     lastLoginMethodClient(),
     genericOAuthClient(),
     passkeyClient(),
+    nextCookiesClientPlugin,
   ],
 });

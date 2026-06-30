@@ -1,4 +1,4 @@
-import { GET_AUTH_PROVIDERS } from "@/app/(public)/auth/login/_queries/get-auth-providers.query";
+import { GET_AUTH_PROVIDERS } from "@/app/(public)/login/_queries/get-auth-providers.query";
 import {
   HttpResponse,
   expect,
@@ -7,7 +7,15 @@ import {
   test,
 } from "@/playwright/fixtures";
 
-test("navigates to the dashboard after registration", async ({ page, msw }) => {
+import type { UserWithRole } from "better-auth/client/plugins";
+
+test("navigates to the dashboard after registration", async ({
+  page,
+  msw,
+  userWithRole,
+  authHelpers,
+  context,
+}) => {
   msw.use(
     graphql.query(GET_AUTH_PROVIDERS, () =>
       HttpResponse.json({
@@ -24,17 +32,18 @@ test("navigates to the dashboard after registration", async ({ page, msw }) => {
         },
       }),
     ),
-    http.post("**/api/auth/sign-up/email", () =>
-      HttpResponse.json({
-        user: {
-          id: "1",
-          email: "email@example.com",
-        },
-      }),
-    ),
+    http.post("**/api/auth/sign-up/email", async () => {
+      const cookies = await authHelpers.getCookies({
+        userId: userWithRole.id,
+      });
+
+      await context.addCookies(cookies);
+
+      return HttpResponse.json<{ user: UserWithRole }>({ user: userWithRole });
+    }),
   );
 
-  await page.goto("/auth/login");
+  await page.goto("/login");
 
   await page.getByRole("tab", { name: /register/i }).click();
 
