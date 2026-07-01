@@ -5,14 +5,14 @@ import { getClient } from "@/lib/graphql/client";
 
 import { NextResponse } from "next/server";
 
-import type { AppRoutes } from "./.next/dev/types/routes";
+import type { AppRoutes, RedirectRoutes } from "./.next/dev/types/routes";
 import type { NextRequest, ProxyConfig } from "next/server";
 
 const paths = {
   login: "/login",
   home: "/",
   instanceSetup: "/setup",
-} as const satisfies Record<string, AppRoutes>;
+} as const satisfies Record<string, AppRoutes | RedirectRoutes>;
 
 const client = getClient();
 
@@ -36,7 +36,7 @@ export async function proxy(request: NextRequest) {
   } else if (session && request.nextUrl.pathname === paths.login) {
     return NextResponse.redirect(new URL(paths.home, request.url));
   } else if (
-    request.nextUrl.pathname !== paths.instanceSetup &&
+    !request.nextUrl.pathname.startsWith(paths.instanceSetup) &&
     session?.user.role === "admin"
   ) {
     const { data } = await client.query({ query: GET_INSTANCE_SETUP_REQUIRED });
