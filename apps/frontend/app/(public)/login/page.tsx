@@ -15,7 +15,7 @@ interface TabData {
   component: React.ReactNode;
 }
 
-export default async function Page() {
+export default async function LoginPage() {
   const { data } = await query({
     query: GET_AUTH_PROVIDERS,
   });

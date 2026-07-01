@@ -1,11 +1,8 @@
-import { Button } from "@/components/ui/button";
-
 interface SetupReviewStepProps {
   validPluginCount: number;
   enabledProfileCount: number;
   readyToComplete: boolean;
   blockers: string[];
-  finishSetup: () => void;
 }
 
 export function SetupReviewStep({
@@ -13,7 +10,6 @@ export function SetupReviewStep({
   enabledProfileCount,
   readyToComplete,
   blockers,
-  finishSetup,
 }: SetupReviewStepProps) {
   return (
     <div className="space-y-8">
@@ -68,12 +64,6 @@ export function SetupReviewStep({
             </ul>
           </>
         )}
-      </div>
-
-      <div className="flex justify-end">
-        <Button type="button" disabled={!readyToComplete} onClick={finishSetup}>
-          Finish setup
-        </Button>
       </div>
     </div>
   );

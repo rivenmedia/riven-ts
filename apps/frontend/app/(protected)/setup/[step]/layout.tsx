@@ -1,12 +1,6 @@
 import { Mountain } from "lucide-react";
 
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Riven - Initial Setup",
-};
-
-export default function SetupLayout({
+export default function SetupStepLayout({
   children,
 }: LayoutProps<"/setup/[step]">) {
   return (

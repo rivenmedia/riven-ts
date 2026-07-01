@@ -11,7 +11,7 @@ export class InstanceStatusResolver {
   @Query(() => InstanceStatus)
   instanceStatus(): InstanceStatus {
     return {
-      setupRequired: true,
+      setupRequired: false,
     };
   }
 }

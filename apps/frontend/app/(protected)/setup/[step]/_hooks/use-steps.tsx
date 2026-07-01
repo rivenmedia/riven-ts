@@ -45,13 +45,13 @@ export function useSteps(steps: readonly Step[], currentStepId: string) {
   const renderNextButton = () => {
     const nextStep = steps[activeStepIndex + 1];
 
+    if (!nextStep) {
+      return <Button type="submit">Finish setup</Button>;
+    }
+
     return (
-      <Button asChild type="button" variant="outline" disabled={!nextStep}>
-        {nextStep ? (
-          <Link href={`/setup/${nextStep.id}`}>Next</Link>
-        ) : (
-          <span>Next</span>
-        )}
+      <Button asChild type="button" variant="outline">
+        <Link href={`/setup/${nextStep.id}`}>Next</Link>
       </Button>
     );
   };

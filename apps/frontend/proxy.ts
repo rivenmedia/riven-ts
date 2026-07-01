@@ -35,14 +35,19 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(paths.login, request.url));
   } else if (session && request.nextUrl.pathname === paths.login) {
     return NextResponse.redirect(new URL(paths.home, request.url));
-  } else if (
-    !request.nextUrl.pathname.startsWith(paths.instanceSetup) &&
-    session?.user.role === "admin"
-  ) {
+  } else if (session?.user.role === "admin") {
     const { data } = await client.query({ query: GET_INSTANCE_SETUP_REQUIRED });
 
-    if (data?.instanceStatus.setupRequired) {
+    if (
+      !request.nextUrl.pathname.startsWith(paths.instanceSetup) &&
+      data?.instanceStatus.setupRequired
+    ) {
       return NextResponse.redirect(new URL(paths.instanceSetup, request.url));
+    } else if (
+      request.nextUrl.pathname.startsWith(paths.instanceSetup) &&
+      !data?.instanceStatus.setupRequired
+    ) {
+      return NextResponse.redirect(new URL(paths.home, request.url));
     }
   }
 

@@ -18,45 +18,44 @@ import { SetupQualityStep } from "./_steps/quality";
 import { SetupReviewStep } from "./_steps/review";
 import { SetupWelcomeStep } from "./_steps/welcome";
 
-export default function Page({ params }: PageProps<"/setup/[step]">) {
-  const { step } = use(params);
+const steps = [
+  {
+    id: "welcome",
+    component: SetupWelcomeStep,
+    label: "Welcome",
+    description: "Quick overview before you connect providers.",
+  },
+  {
+    id: "quality",
+    component: () => (
+      <SetupQualityStep
+        general={{}}
+        generalSections={[]}
+        profiles={[]}
+        toggleProfileEnabled={() => {}}
+        saveGeneralSettings={() => {}}
+      />
+    ),
+    label: "Quality",
+    description: "Choose profiles and instance defaults.",
+  },
+  {
+    id: "review",
+    component: () => (
+      <SetupReviewStep
+        blockers={[]}
+        enabledProfileCount={0}
+        readyToComplete={false}
+        validPluginCount={0}
+      />
+    ),
+    label: "Review",
+    description: "Check readiness and finish setup.",
+  },
+] as const satisfies readonly Step[];
 
-  const steps = [
-    {
-      id: "welcome",
-      component: SetupWelcomeStep,
-      label: "Welcome",
-      description: "Quick overview before you connect providers.",
-    },
-    {
-      id: "quality",
-      component: () => (
-        <SetupQualityStep
-          general={{}}
-          generalSections={[]}
-          profiles={[]}
-          toggleProfileEnabled={() => {}}
-          saveGeneralSettings={() => {}}
-        />
-      ),
-      label: "Quality",
-      description: "Choose profiles and instance defaults.",
-    },
-    {
-      id: "review",
-      component: () => (
-        <SetupReviewStep
-          blockers={[]}
-          enabledProfileCount={0}
-          finishSetup={() => {}}
-          readyToComplete={false}
-          validPluginCount={0}
-        />
-      ),
-      label: "Review",
-      description: "Check readiness and finish setup.",
-    },
-  ] as const satisfies readonly Step[];
+export default function SetupStepPage({ params }: PageProps<"/setup/[step]">) {
+  const { step } = use(params);
 
   const {
     activeStep,
