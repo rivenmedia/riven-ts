@@ -1,3 +1,5 @@
+import { ac } from "@repo/util-auth/access-control";
+
 import { passkeyClient } from "@better-auth/passkey/client";
 import {
   adminClient,
@@ -13,7 +15,7 @@ export const authClient = createAuthClient({
   baseURL: "https://localhost:9000",
   plugins: [
     usernameClient(),
-    adminClient(),
+    adminClient({ ac }),
     lastLoginMethodClient(),
     genericOAuthClient(),
     passkeyClient(),

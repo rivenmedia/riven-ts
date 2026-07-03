@@ -1,6 +1,8 @@
 // Provides types needed to squash portability errors from @better-auth/passkey
 import "@simplewebauthn/server";
 
+import { ac, admin, manager, user } from "@repo/util-auth/access-control";
+
 import { passkey } from "@better-auth/passkey";
 import {
   type Auth,
@@ -22,7 +24,6 @@ import { withLogContext } from "../utilities/logger/log-context.ts";
 import { logger } from "../utilities/logger/logger.ts";
 import { settings } from "../utilities/settings.ts";
 import { getGenericOAuthProviders } from "./oauth-utils.ts";
-import { ac, admin, manager, user } from "./permissions.ts";
 import { plexOAuth } from "./plex-oauth.ts";
 
 import type { MikroORM } from "@mikro-orm/core";

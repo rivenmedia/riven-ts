@@ -1,3 +1,4 @@
+import { registerEnums } from "../register-enums.ts";
 import { AuthResolver } from "./auth/auth.resolver.ts";
 import { EpisodeResolver } from "./episode.resolver.ts";
 import { InstanceStatusResolver } from "./instance-status/instance-status.resolver.ts";
@@ -21,3 +22,5 @@ export const resolvers = [
   ShowResolver,
   VfsResolver,
 ] as const;
+
+registerEnums();

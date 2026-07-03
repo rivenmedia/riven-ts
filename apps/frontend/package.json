@@ -21,6 +21,8 @@
     "@bprogress/next": "catalog:",
     "@hookform/resolvers": "catalog:",
     "@next-safe-action/adapter-react-hook-form": "catalog:",
+    "@repo/util-auth": "workspace:^",
+    "@repo/util-plugin-sdk": "workspace:^",
     "better-auth": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",

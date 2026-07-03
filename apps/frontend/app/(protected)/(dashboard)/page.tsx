@@ -51,7 +51,7 @@ export default async function DashboardPage() {
                             value={trendingMoviesStore.timeWindow ?? "day"}
                             onChange={(v) =>
                                 trendingMoviesStore.changeTimeWindow(v as "day" | "week")} /> */}
-                <Button className={viewAllButtonClass} variant="ghost">
+                <Button asChild className={viewAllButtonClass} variant="ghost">
                   <Link href="/lists/trending/movie">View All</Link>
                 </Button>
               </div>
@@ -74,7 +74,7 @@ export default async function DashboardPage() {
                             value={trendingShowsStore.timeWindow ?? "day"}
                             onChange={(v) =>
                                 trendingShowsStore.changeTimeWindow(v as "day" | "week")} /> */}
-                <Button className={viewAllButtonClass} variant="ghost">
+                <Button asChild className={viewAllButtonClass} variant="ghost">
                   <Link href="/lists/trending/tv">View All</Link>
                 </Button>
               </div>
@@ -88,7 +88,7 @@ export default async function DashboardPage() {
           >
             <div className="mb-1 flex items-center justify-between">
               {/* {@render listHeading("Trending Anime")} */}
-              <Button className={viewAllButtonClass} variant="ghost">
+              <Button asChild className={viewAllButtonClass} variant="ghost">
                 <Link href="/lists/trending/anime">View All</Link>
               </Button>
             </div>

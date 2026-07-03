@@ -1,27 +1,19 @@
 {
-  "name": "@repo/feature-settings",
+  "name": "@repo/util-auth",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "exports": {
-    "./resolver": {
-      "production": "./dist/schema/settings.resolver.js",
-      "default": "./lib/schema/settings.resolver.ts"
-    },
-    "./settings.type": {
-      "production": "./dist/schema/types/settings.type.js",
-      "default": "./lib/schema/types/settings.type.ts"
-    },
-    "./enums/log-level.enum": {
-      "production": "./dist/schema/enums/log-level.enum.js",
-      "default": "./lib/schema/enums/log-level.enum.ts"
+    "./access-control": {
+      "production": "./dist/access-control.js",
+      "default": "./lib/access-control.ts"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc --build tsconfig.lib.json",
+    "build": "tsc --project tsconfig.lib.json",
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
@@ -29,8 +21,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@repo/util-plugin-sdk": "workspace:^",
-    "type-graphql": "catalog:"
+    "better-auth": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@repo/core-util-eslint-config": "workspace:^",
