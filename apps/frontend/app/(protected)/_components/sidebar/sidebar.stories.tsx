@@ -24,7 +24,7 @@ const meta: Meta<typeof Sidebar> = {
       { href: "/library", icon: Library, label: "Library" },
       { href: "/explore", icon: Search, label: "Explore" },
       { href: "/calendar", icon: CalendarDays, label: "Calendar" },
-      { href: "/auth", icon: User, label: "Profile" },
+      { href: "/profile", icon: User, label: "Profile" },
       { href: "/settings", icon: Settings, label: "Settings" },
       { href: "/logs", icon: FileClock, label: "Logs" },
     ],

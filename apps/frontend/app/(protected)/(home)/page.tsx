@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 
 import Link from "next/link";
 
-export default async function DashboardPage() {
+export default async function HomePage() {
   const recentlyAddedItems = [];
   const viewAllButtonClass =
     "text-muted-foreground border-white/10 bg-black/20 hover:bg-black/40 hover:text-foreground h-9 w-24 rounded-xl border text-xs font-bold backdrop-blur-md shadow-inner transition-all";

@@ -56,6 +56,7 @@ export function Header({ modifierKey }: HeaderProps) {
   useEffect(() => {
     // Sync external URL changes to input, but avoid overwriting while typing
     const urlQuery = searchParams.get("query") ?? "";
+    const inputValue = form.getValues("query");
 
     // Only update if the value is different and we aren't focused
     // Or if we just navigated to a completely different page/query via link
@@ -65,7 +66,7 @@ export function Header({ modifierKey }: HeaderProps) {
     ) {
       form.setValue("query", urlQuery);
     }
-  }, [inputValue, searchParams, form]);
+  }, [searchParams, form]);
 
   function navigateToSearch(query: string) {
     // Read directly from local state
@@ -91,7 +92,15 @@ export function Header({ modifierKey }: HeaderProps) {
     navigateToSearch(query);
   });
 
-  const [, cancelNavigateToSearch] = useDebounce(onSubmit, 300, [inputValue]);
+  const [, cancelNavigateToSearch] = useDebounce(
+    () => {
+      if (form.getFieldState("query").isDirty) {
+        void onSubmit();
+      }
+    },
+    300,
+    [inputValue],
+  );
 
   useEvent(
     "riven:search",
