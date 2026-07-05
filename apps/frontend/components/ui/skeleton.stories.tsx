@@ -1,0 +1,35 @@
+import { Skeleton } from "@/components/ui/skeleton";
+
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+
+/**
+ * Use to show a placeholder while content is loading.
+ */
+const meta: Meta<typeof Skeleton> = {
+  title: "ui/Skeleton",
+  component: Skeleton,
+  tags: ["autodocs"],
+  argTypes: {},
+  parameters: {
+    layout: "centered",
+  },
+} satisfies Meta<typeof Skeleton>;
+
+export default meta;
+
+type Story = StoryObj<typeof Skeleton>;
+
+/**
+ * The default form of the skeleton.
+ */
+export const Default: Story = {
+  render: (args) => (
+    <div className="flex items-center space-x-4">
+      <Skeleton {...args} className="h-12 w-12 rounded-full" />
+      <div className="space-y-2">
+        <Skeleton {...args} className="h-4 w-62.5" />
+        <Skeleton {...args} className="h-4 w-50" />
+      </div>
+    </div>
+  ),
+};

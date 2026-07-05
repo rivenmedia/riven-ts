@@ -14,10 +14,11 @@ import { Sidebar } from "./sidebar";
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-const meta: Meta<typeof Sidebar> = {
+const meta = {
   title: "Components / Media / Sidebar",
   component: Sidebar,
   args: {
+    currentPath: "/",
     items: [
       { href: "/", icon: Home, label: "Home" },
       { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -32,11 +33,11 @@ const meta: Meta<typeof Sidebar> = {
   parameters: {
     layout: "fullscreen",
   },
-};
+} satisfies Meta<typeof Sidebar>;
 
 export default meta;
 
-type Story = StoryObj<typeof Sidebar>;
+type Story = StoryObj<typeof meta>;
 
 export const LoggedIn: Story = {
   args: {
@@ -52,4 +53,8 @@ export const LoggedIn: Story = {
   },
 };
 
-export const LoggedOut: Story = {};
+export const LoggedOut: Story = {
+  args: {
+    user: undefined,
+  },
+};

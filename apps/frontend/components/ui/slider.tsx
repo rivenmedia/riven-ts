@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 
 import { Slider as SliderPrimitive } from "radix-ui";
+import { useMemo } from "react";
 
 function Slider({
   className,
@@ -12,7 +13,7 @@ function Slider({
   max = 100,
   ...props
 }: React.ComponentProps<typeof SliderPrimitive.Root>) {
-  const _values = React.useMemo(
+  const _values = useMemo(
     () =>
       Array.isArray(value)
         ? value
@@ -25,14 +26,14 @@ function Slider({
   return (
     <SliderPrimitive.Root
       data-slot="slider"
-      defaultValue={defaultValue}
-      value={value}
       min={min}
       max={max}
       className={cn(
         "relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-vertical:h-full data-vertical:min-h-40 data-vertical:w-auto data-vertical:flex-col",
         className,
       )}
+      {...(value !== undefined ? { value } : {})}
+      {...(defaultValue !== undefined ? { defaultValue } : {})}
       {...props}
     >
       <SliderPrimitive.Track

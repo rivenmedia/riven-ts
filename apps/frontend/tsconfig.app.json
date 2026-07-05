@@ -30,6 +30,7 @@
     "components/**/*.spec.ts",
     "environment/**/*.spec.ts",
     "lib/**/*.spec.ts",
-    "**/__tests__/**/*.ts"
+    "**/__tests__/**/*.ts",
+    "**/*.stories.tsx"
   ]
 }

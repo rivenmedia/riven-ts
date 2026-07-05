@@ -136,7 +136,6 @@ catalog:
   prettier: ^3.8.3
   radix-ui: ^1.6.0
   react: ^19.2.6
-  react-day-picker: ^10.0.1
   react-dom: ^19.2.6
   react-hook-form: ^7.80.0
   react-toastify: ^11.1.0
@@ -173,6 +172,8 @@ catalog:
   "@apollo/client-integration-nextjs": ^0.14.5
   eslint-plugin-storybook: ^10.4.6
   react-use: ^17.6.1
+  react-day-picker: ^10.0.1
+  "@storybook/addon-vitest": ^10.4.6
 
 catalogMode: strict
 

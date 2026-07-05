@@ -4,7 +4,7 @@ import { PortraitCard } from "./portrait-card";
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-const meta: Meta<typeof PortraitCard> = {
+const meta = {
   title: "Components / Media / PortraitCard",
   component: PortraitCard,
   args: {
@@ -18,13 +18,17 @@ const meta: Meta<typeof PortraitCard> = {
       </div>
     ),
   ],
-};
+} satisfies Meta<typeof PortraitCard>;
 
 export default meta;
 
-type Story = StoryObj<typeof PortraitCard>;
+type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  args: {
+    image: null,
+  },
+};
 
 export const WithImage: Story = {
   args: {
@@ -34,6 +38,7 @@ export const WithImage: Story = {
 
 export const Selected: Story = {
   args: {
+    image: null,
     isSelectable: true,
     isSelected: true,
   },
