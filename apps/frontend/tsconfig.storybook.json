@@ -8,6 +8,22 @@
     "isolatedDeclarations": false
   },
   "files": [],
-  "include": ["**/*.tsx"],
+  "include": [
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "app/**/*.mts",
+    "components/**/*.ts",
+    "components/**/*.tsx",
+    "components/**/*.mts",
+    "environment/**/*.ts",
+    "environment/**/*.tsx",
+    "environment/**/*.mts",
+    "lib/**/*.ts",
+    "lib/**/*.tsx",
+    "lib/**/*.mts",
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx",
+    ".storybook/**/*.mts"
+  ],
   "exclude": []
 }

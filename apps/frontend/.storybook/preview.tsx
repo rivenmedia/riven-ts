@@ -7,6 +7,8 @@ import "@/lib/styles/app.css";
 import { Providers } from "@/components/providers";
 import { cn } from "@/lib/utils";
 
+import { themes } from "storybook/theming";
+
 import type { Preview } from "@storybook/nextjs-vite";
 
 export const preview: Preview = {
@@ -18,18 +20,18 @@ export const preview: Preview = {
         date: /Date$/i,
       },
     },
-
     layout: "centered",
-
     nextjs: {
       appDirectory: true,
     },
-
     a11y: {
       // 'todo' - show a11y violations in the test UI only
       // 'error' - fail CI on a11y violations
       // 'off' - skip a11y checks entirely
       test: "todo",
+    },
+    docs: {
+      theme: themes.normal,
     },
   },
   decorators: [
