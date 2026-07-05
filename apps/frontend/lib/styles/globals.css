@@ -79,7 +79,7 @@
 
   --radius-3xl: calc(var(--radius) * 2.2);
 
-  --radius-4xl: calc(var(--radius) * 2.6)
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 @layer base {
@@ -98,10 +98,11 @@
   ::-webkit-scrollbar {
     display: none;
   }
+
   body {
-    @apply bg-background text-foreground;}
-  html {
-    @apply font-sans;}
+    @apply bg-background text-foreground;
+    @apply font-sans;
+  }
 }
 
 /* Make clicks pass-through */

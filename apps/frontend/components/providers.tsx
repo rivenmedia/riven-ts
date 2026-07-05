@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ProgressProvider } from "@bprogress/next/app";
 import { ToastContainer } from "react-toastify";
 
+import { TooltipProvider } from "./ui/tooltip";
+
 import type { PropsWithChildren } from "react";
 
 export const Providers = ({ children }: Required<PropsWithChildren>) => {
@@ -37,7 +39,7 @@ export const Providers = ({ children }: Required<PropsWithChildren>) => {
         shallowRouting
       >
         <ToastContainer />
-        {children}
+        <TooltipProvider>{children}</TooltipProvider>
       </ProgressProvider>
     </ThemeProvider>
   );

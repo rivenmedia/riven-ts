@@ -11,6 +11,15 @@
     "e2e": {
       "passThroughEnv": ["DATABASE_FILE_NAME"]
     },
-    "e2e:headless": {}
+    "e2e:headless": {},
+    "storybook": {
+      "cache": false,
+      "persistent": true
+    },
+    "build-storybook": {
+      "dependsOn": ["codegen:gql"],
+      "inputs": [".storybook/**", "{app,components,lib}/**/*.tsx?"],
+      "outputs": ["storybook-static"]
+    }
   }
 }

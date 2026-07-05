@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./lib/base.ts",
-    "./nextjs": "./lib/nextjs.ts"
+    "./nextjs": "./lib/nextjs.ts",
+    "./storybook": "./lib/storybook.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
@@ -27,6 +28,7 @@
     "eslint-plugin-jsx-a11y": "catalog:",
     "eslint-plugin-react": "catalog:",
     "eslint-plugin-react-hooks": "catalog:",
+    "eslint-plugin-storybook": "catalog:",
     "globals": "catalog:",
     "typescript-eslint": "catalog:"
   },

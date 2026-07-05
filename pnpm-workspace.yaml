@@ -171,6 +171,7 @@ catalog:
   zod2md: ^0.2.5
   "@simplewebauthn/server": ^13.3.2
   "@apollo/client-integration-nextjs": ^0.14.5
+  eslint-plugin-storybook: ^10.4.6
 
 catalogMode: strict
 
