@@ -15,6 +15,9 @@ export default defineConfig((config) => {
       tsconfigPaths: true,
     },
     test: {
+      coverage: {
+        exclude: [".next/**", "playwright/**", "playwright-report/**"],
+      },
       projects: [
         {
           extends: true,
