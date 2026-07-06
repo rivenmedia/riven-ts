@@ -1,9 +1,7 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import { Loader2 } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { type ComponentProps, useState } from "react";
 
 interface ActionButtonProps extends Pick<
@@ -49,7 +47,7 @@ export function ActionButton({
       )}
     >
       {actionInProgress ? (
-        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
       ) : (
         <Icon className="h-3.5 w-3.5" />
       )}

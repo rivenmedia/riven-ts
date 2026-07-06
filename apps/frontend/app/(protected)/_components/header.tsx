@@ -17,7 +17,7 @@ import { useDebounce, useEvent, useLifecycles, useUnmount } from "react-use";
 import type { RedirectType } from "next/dist/client/components/redirect-error";
 
 interface HeaderProps {
-  modifierKey: "⌘" | "⌃" | null;
+  modifierKey: "⌘" | "⌃";
 }
 
 export function Header({ modifierKey }: HeaderProps) {
@@ -148,13 +148,11 @@ export function Header({ modifierKey }: HeaderProps) {
                 />
               )}
             />
-            {modifierKey && (
-              <InputGroupAddon align="inline-end" className="pr-4">
-                <Kbd className="h-5 min-h-0 border-white/10 bg-white/5 px-1.5 text-[10px] text-white/50">
-                  {modifierKey} K
-                </Kbd>
-              </InputGroupAddon>
-            )}
+            <InputGroupAddon align="inline-end" className="pr-4">
+              <Kbd className="h-5 min-h-0 border-white/10 bg-white/5 px-1.5 text-[10px] text-white/50">
+                {modifierKey} K
+              </Kbd>
+            </InputGroupAddon>
           </InputGroup>
         </form>
 

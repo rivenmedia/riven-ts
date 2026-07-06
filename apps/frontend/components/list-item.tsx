@@ -7,40 +7,6 @@ import { Badge } from "./ui/badge";
 
 import type { MediaItem } from "./_types/__generated__/graphql";
 
-function CardContent() {
-  const badgeVariantClasses: Record<string, string> = {
-    success: "bg-green-600/90 text-white border-0",
-    error: "bg-red-600/90 text-white border-0",
-    default: "bg-yellow-600/90 text-white border-0",
-  };
-
-  return (
-    <PortraitCard
-      title={data.title}
-      subtitle={subtitle}
-      image={data.poster_path}
-      isSelectable={isSelectable}
-      isSelected={
-        isSelectable && !!data.riven_id && selectStore?.has(data.riven_id)
-      }
-      onSelectToggle={() => selectStore?.toggle(data.riven_id)}
-      topRight={
-        data.badge && (
-          <Badge
-            className={cn(
-              "border-white/10 px-2 py-0.5 text-[10px] shadow-sm backdrop-blur-md",
-              badgeVariantClasses[data.badge.variant] ||
-                badgeVariantClasses["default"],
-            )}
-          >
-            {data.badge.text}
-          </Badge>
-        )
-      }
-    />
-  );
-}
-
 interface ListItemProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,
   "className"
@@ -48,11 +14,18 @@ interface ListItemProps extends Pick<
   data: MediaItem;
   indexer?: string;
   type?: string;
+  isSelectable?: boolean;
 }
 
-export function ListItem({ className, indexer, type, data }: ListItemProps) {
+export function ListItem({
+  className,
+  indexer,
+  type,
+  data,
+  isSelectable = true,
+}: ListItemProps) {
   // Normalize type for different indexers
-  const normalizedType = useMemo(() => {
+  const normalisedType = useMemo(() => {
     let t = type;
 
     if (indexer === "anilist" && !t) {
@@ -76,13 +49,13 @@ export function ListItem({ className, indexer, type, data }: ListItemProps) {
       return null;
     }
 
-    if (normalizedType === "person" || normalizedType === "company") {
-      return `/details/entity/${data.id}/${normalizedType}`;
+    if (normalisedType === "person" || normalisedType === "company") {
+      return `/details/entity/${data.id}/${normalisedType}`;
     }
 
     if (
       (indexer === "tmdb" || indexer === "tvdb" || indexer === undefined) &&
-      (normalizedType === "movie" || normalizedType === "tv")
+      (normalisedType === "movie" || normalisedType === "tv")
     ) {
       const params: string[] = [];
 
@@ -100,27 +73,31 @@ export function ListItem({ className, indexer, type, data }: ListItemProps) {
       const queryParam = params.length > 0 ? `?${params.join("&")}` : "";
 
       // If indexer is undefined, assume tmdb behavior for now as default
-      return `/details/media/${data.id}/${normalizedType}${queryParam}`;
+      return `/details/media/${data.id}/${normalisedType}${queryParam}`;
     }
 
-    return `/details/${indexer}${normalizedType ? `/${normalizedType}` : ""}/${data.id}`;
-  }, []);
+    return `/details/${indexer}${normalisedType ? `/${normalisedType}` : ""}/${data.id}`;
+  }, [data.id, data.details_query, indexer, normalisedType]);
 
   let subtitle = useMemo(() => {
     const parts = [];
-    if (data.media_type === "tv" || normalizedType === "tv") parts.push("TV");
-    else if (data.media_type === "movie" || normalizedType === "movie")
-      parts.push("Movie");
-    else if (data.media_type === "person" || normalizedType === "person")
-      parts.push("Person");
-    else if (data.media_type === "company" || normalizedType === "company")
-      parts.push("Studio");
 
-    if (data.year && data.year !== "N/A") {
+    if (data.type === "tv" || normalisedType === "tv") {
+      parts.push("TV");
+    } else if (data.type === "movie" || normalisedType === "movie") {
+      parts.push("Movie");
+    } else if (data.type === "person" || normalisedType === "person") {
+      parts.push("Person");
+    } else if (data.type === "company" || normalisedType === "company") {
+      parts.push("Studio");
+    }
+
+    if (data.year) {
       parts.push(data.year);
     }
+
     return parts.join(" • ") || null;
-  }, []);
+  }, [data.type, data.year, normalisedType]);
 
   function getMediaHref(mediaURL: string) {
     const [pathname, search = ""] = mediaURL.split("?");
@@ -145,10 +122,39 @@ export function ListItem({ className, indexer, type, data }: ListItemProps) {
     className,
   );
 
+  function renderCardContent() {
+    console.log(data);
+    return (
+      <PortraitCard
+        title={data.title}
+        subtitle={subtitle}
+        image={data.posterPath ?? null}
+        isSelectable={isSelectable}
+        // isSelected={
+        //   isSelectable && !!data.riven_id && selectStore?.has(data.riven_id)
+        // }
+        // onSelectToggle={() => selectStore?.toggle(data.riven_id)}
+        // topRight={
+        //   data.badge && (
+        //     <Badge
+        //       className={cn(
+        //         "border-white/10 px-2 py-0.5 text-[10px] shadow-sm backdrop-blur-md",
+        //         badgeVariantClasses[data.badge.variant] ||
+        //           badgeVariantClasses["default"],
+        //       )}
+        //     >
+        //       {data.badge.text}
+        //     </Badge>
+        //   )
+        // }
+      />
+    );
+  }
+
   if (mediaURL) {
     return (
       <a href={getMediaHref(mediaURL)} className={containerClasses}>
-        <CardContent />
+        {renderCardContent()}
       </a>
     );
   }
@@ -160,7 +166,7 @@ export function ListItem({ className, indexer, type, data }: ListItemProps) {
       tabIndex={-1}
       className={containerClasses}
     >
-      <CardContent />
+      {renderCardContent()}
     </div>
   );
 }

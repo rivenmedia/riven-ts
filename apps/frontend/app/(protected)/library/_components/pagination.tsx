@@ -1,22 +1,14 @@
-"use client";
-
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
-  PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-export function LiveItemsPagination() {
+export function LibraryPagination() {
   return (
-    <Pagination
-    // count={liveTotalItems}
-    // perPage={liveLimit}
-    // bind:page={$formData.page}
-    >
+    <Pagination>
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious

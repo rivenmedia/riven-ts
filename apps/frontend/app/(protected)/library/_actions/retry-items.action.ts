@@ -13,4 +13,8 @@ export const retryItems = permissionActionClient
       ids: z.array(z.string()),
     }),
   )
-  .action(async ({ parsedInput }) => {});
+  .action(async ({ parsedInput }) => {
+    return {
+      count: 0,
+    };
+  });
