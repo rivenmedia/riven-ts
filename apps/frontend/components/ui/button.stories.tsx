@@ -1,7 +1,7 @@
 import { preview } from "@/.storybook/preview";
 import { Button } from "@/components/ui/button";
 
-import { Loader2, Mail } from "lucide-react";
+import { LoaderCircle, Mail } from "lucide-react";
 
 /**
  * Displays a button or a component that looks like a button.
@@ -112,7 +112,7 @@ export const Link = meta.story({
 export const Loading = meta.story({
   render: (args) => (
     <Button {...args}>
-      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
       Button
     </Button>
   ),

@@ -3,7 +3,6 @@ import { authClient } from "@/lib/auth/client";
 import { ItemPermission } from "@repo/util-auth/access-control";
 
 import { createMiddleware } from "next-safe-action";
-import { unauthorized } from "next/navigation";
 import z from "zod";
 
 export const PermissionMetadata = z.object({
@@ -20,7 +19,7 @@ export const checkPermissionMiddleware = createMiddleware<{
   });
 
   if (!data?.success) {
-    return unauthorized();
+    throw new Error("User does not have the required permissions");
   }
 
   return next();
