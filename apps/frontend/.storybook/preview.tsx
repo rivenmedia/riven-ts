@@ -7,12 +7,15 @@ import "@/lib/styles/app.css";
 import { Providers } from "@/components/providers";
 import { cn } from "@/lib/utils";
 
+import addonA11y from "@storybook/addon-a11y";
+import addonDocs from "@storybook/addon-docs";
+import addonVitest from "@storybook/addon-vitest";
+import { definePreview } from "@storybook/nextjs-vite";
 import { themes } from "storybook/theming";
 
-import type { Preview } from "@storybook/nextjs-vite";
-
-export const preview: Preview = {
+export const preview = definePreview({
   tags: ["autodocs"],
+  addons: [addonA11y(), addonDocs(), addonVitest()],
   parameters: {
     controls: {
       matchers: {
@@ -33,6 +36,23 @@ export const preview: Preview = {
     docs: {
       theme: themes.normal,
     },
+    backgrounds: {
+      options: {
+        dark: {
+          name: "Dark",
+          value: "oklch(0.145 0 0)",
+        },
+        light: {
+          name: "Light",
+          value: "oklch(1 0 0)",
+        },
+      },
+    },
+  },
+  initialGlobals: {
+    backgrounds: {
+      value: "dark",
+    },
   },
   decorators: [
     (Story) => {
@@ -52,6 +72,6 @@ export const preview: Preview = {
       );
     },
   ],
-};
+});
 
 export default preview;

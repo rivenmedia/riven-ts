@@ -1,3 +1,4 @@
+import { preview } from "@/.storybook/preview";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,13 +13,11 @@ import {
 
 import { userEvent, within } from "storybook/test";
 
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * A modal dialog that interrupts the user with important content and expects
  * a response.
  */
-const meta: Meta<typeof AlertDialog> = {
+const meta = preview.meta({
   title: "ui/AlertDialog",
   component: AlertDialog,
   tags: ["autodocs"],
@@ -44,21 +43,16 @@ const meta: Meta<typeof AlertDialog> = {
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof AlertDialog>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default form of the alert dialog.
  */
-export const Default: Story = {};
+export const Default = meta.story({});
 
-export const ShouldOpenClose: Story = {
-  name: "when alert dialog trigger is pressed, should open the dialog and be able to close it",
-  tags: ["!dev", "!autodocs"],
-  play: async ({ canvasElement, canvas, step }) => {
+Default.test(
+  "When the trigger is pressed, it opens the dialog and allows it to be closed",
+  async ({ canvasElement, canvas, step }) => {
     const canvasBody = within(canvasElement.ownerDocument.body);
 
     await step("open the alert dialog", async () => {
@@ -78,4 +72,4 @@ export const ShouldOpenClose: Story = {
       );
     });
   },
-};
+);

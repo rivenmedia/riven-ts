@@ -1,13 +1,12 @@
+import { preview } from "@/.storybook/preview";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * Displays a form textarea or a component that looks like a textarea.
  */
-const meta: Meta<typeof Textarea> = {
+const meta = preview.meta({
   title: "ui/Textarea",
   component: Textarea,
   tags: ["autodocs"],
@@ -16,44 +15,40 @@ const meta: Meta<typeof Textarea> = {
     placeholder: "Type your message here.",
     disabled: false,
   },
-} satisfies Meta<typeof Textarea>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default form of the textarea.
  */
-export const Default: Story = {};
+export const Default = meta.story({});
 
 /**
  * Use the `disabled` prop to disable the textarea.
  */
-export const Disabled: Story = {
+export const Disabled = meta.story({
   args: {
     disabled: true,
   },
-};
+});
 
 /**
  * Use the `Label` component to includes a clear, descriptive label above or
  * alongside the text area to guide users.
  */
-export const WithLabel: Story = {
+export const WithLabel = meta.story({
   render: (args) => (
     <div className="grid w-full gap-1.5">
       <Label htmlFor="message">Your message</Label>
       <Textarea {...args} id="message" />
     </div>
   ),
-};
+});
 
 /**
  * Use a text element below the text area to provide additional instructions
  * or information to users.
  */
-export const WithText: Story = {
+export const WithText = meta.story({
   render: (args) => (
     <div className="grid w-full gap-1.5">
       <Label htmlFor="message-2">Your Message</Label>
@@ -63,17 +58,17 @@ export const WithText: Story = {
       </p>
     </div>
   ),
-};
+});
 
 /**
  * Use the `Button` component to indicate that the text area can be submitted
  * or used to trigger an action.
  */
-export const WithButton: Story = {
+export const WithButton = meta.story({
   render: (args) => (
     <div className="grid w-full gap-2">
       <Textarea {...args} />
       <Button type="submit">Send Message</Button>
     </div>
   ),
-};
+});

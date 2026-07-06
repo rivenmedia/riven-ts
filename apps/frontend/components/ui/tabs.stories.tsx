@@ -1,15 +1,13 @@
+import { preview } from "@/.storybook/preview";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { expect, userEvent, waitFor } from "storybook/test";
-
-// Replace nextjs-vite with the name of your framework
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 /**
  * A set of layered sections of content—known as tab panels—that are displayed
  * one at a time.
  */
-const meta: Meta<typeof Tabs> = {
+const meta = preview.meta({
   title: "ui/Tabs",
   component: Tabs,
   tags: ["autodocs"],
@@ -33,21 +31,16 @@ const meta: Meta<typeof Tabs> = {
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof Tabs>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default form of the tabs.
  */
-export const Default: Story = {};
+export const Default = meta.story({});
 
-export const ShouldChangeTabs: Story = {
-  name: "when clicking a tab, should change the content",
-  tags: ["!dev", "!autodocs"],
-  play: async ({ canvas, step }) => {
+Default.test(
+  "When clicking a tab, it changes the content",
+  async ({ canvas, step }) => {
     const tabs = await canvas.findAllByRole("tab");
 
     for (const tab of tabs) {
@@ -75,4 +68,4 @@ export const ShouldChangeTabs: Story = {
       });
     }
   },
-};
+);

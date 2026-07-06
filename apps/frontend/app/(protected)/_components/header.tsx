@@ -14,6 +14,8 @@ import { useEffect, useRef } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDebounce, useEvent, useLifecycles, useUnmount } from "react-use";
 
+import type { RedirectType } from "next/dist/client/components/redirect-error";
+
 interface HeaderProps {
   modifierKey: "⌘" | "⌃" | null;
 }
@@ -81,11 +83,11 @@ export function Header({ modifierKey }: HeaderProps) {
     //   searchStore.syncQuery(parsed);
     // }
 
-    const navigationType = isExplorePage ? "replace" : "push";
+    const navigationType: RedirectType = isExplorePage ? "replace" : "push";
+    const navigationUrl =
+      `/explore?query=${encodeURIComponent(query)}` as const;
 
-    router[navigationType](`/explore?query=${encodeURIComponent(query)}`, {
-      scroll: false,
-    });
+    router[navigationType](navigationUrl, { scroll: false });
   }
 
   const onSubmit = form.handleSubmit(({ query }) => {

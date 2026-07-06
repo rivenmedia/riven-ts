@@ -1,3 +1,4 @@
+import { preview } from "@/.storybook/preview";
 import {
   Table,
   TableBody,
@@ -7,8 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 const invoices = [
   {
@@ -40,7 +39,7 @@ const invoices = [
 /**
  * Powerful table and datagrids built using TanStack Table.
  */
-const meta: Meta<typeof Table> = {
+const meta = preview.meta({
   title: "ui/Table",
   component: Table,
   tags: ["autodocs"],
@@ -68,13 +67,9 @@ const meta: Meta<typeof Table> = {
       </TableBody>
     </Table>
   ),
-} satisfies Meta<typeof Table>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default form of the table.
  */
-export const Default: Story = {};
+export const Default = meta.story({});

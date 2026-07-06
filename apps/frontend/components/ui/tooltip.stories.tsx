@@ -1,3 +1,4 @@
+import { preview } from "@/.storybook/preview";
 import {
   Tooltip,
   TooltipContent,
@@ -8,13 +9,11 @@ import {
 import { Plus } from "lucide-react";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * A popup that displays information related to an element when the element
  * receives keyboard focus or the mouse hovers over it.
  */
-const meta: Meta<typeof TooltipContent> = {
+const meta = preview.meta({
   title: "ui/Tooltip",
   component: TooltipContent,
   tags: ["autodocs"],
@@ -47,48 +46,43 @@ const meta: Meta<typeof TooltipContent> = {
       </Tooltip>
     </TooltipProvider>
   ),
-} satisfies Meta<typeof TooltipContent>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default form of the tooltip.
  */
-export const Default: Story = {};
+export const Default = meta.story({});
 
 /**
  * Use the `bottom` side to display the tooltip below the element.
  */
-export const Bottom: Story = {
+export const Bottom = meta.story({
   args: {
     side: "bottom",
   },
-};
+});
 
 /**
  * Use the `left` side to display the tooltip to the left of the element.
  */
-export const Left: Story = {
+export const Left = meta.story({
   args: {
     side: "left",
   },
-};
+});
 
 /**
  * Use the `right` side to display the tooltip to the right of the element.
  */
-export const Right: Story = {
+export const Right = meta.story({
   args: {
     side: "right",
   },
-};
+});
 
-export const ShouldShowOnHover: Story = {
-  name: "when hovering over trigger, should show hover tooltip content",
-  tags: ["!dev", "!autodocs"],
-  play: async ({ canvasElement, step }) => {
+Default.test(
+  "When hovering over the trigger, it shows the tooltip content",
+  async ({ canvasElement, step }) => {
     const canvasBody = within(canvasElement.ownerDocument.body);
     const triggerBtn = await canvasBody.findByRole("button", { name: /add/i });
 
@@ -114,4 +108,4 @@ export const ShouldShowOnHover: Story = {
       });
     });
   },
-};
+);

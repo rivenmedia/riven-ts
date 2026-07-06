@@ -1,10 +1,10 @@
+import { preview } from "@/.storybook/preview";
+
 import { fn } from "storybook/test";
 
 import { PortraitCard } from "./portrait-card";
 
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
-const meta = {
+const meta = preview.meta({
   title: "Components / Media / PortraitCard",
   component: PortraitCard,
   args: {
@@ -18,28 +18,24 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof PortraitCard>;
+});
 
-export default meta;
-
-type Story = StoryObj<typeof meta>;
-
-export const Default: Story = {
+export const Default = meta.story({
   args: {
     image: null,
   },
-};
+});
 
-export const WithImage: Story = {
+export const WithImage = meta.story({
   args: {
     image: "https://picsum.photos/200/300",
   },
-};
+});
 
-export const Selected: Story = {
+export const Selected = meta.story({
   args: {
     image: null,
     isSelectable: true,
     isSelected: true,
   },
-};
+});

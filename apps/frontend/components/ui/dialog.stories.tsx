@@ -1,3 +1,4 @@
+import preview from "@/.storybook/preview";
 import {
   Dialog,
   DialogClose,
@@ -11,14 +12,11 @@ import {
 
 import { expect, userEvent, within } from "storybook/test";
 
-// Replace nextjs-vite with the name of your framework
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * A window overlaid on either the primary window or another dialog window,
  * rendering the content underneath inert.
  */
-const meta: Meta<typeof Dialog> = {
+const meta = preview.meta({
   title: "ui/Dialog",
   component: Dialog,
   tags: ["autodocs"],
@@ -46,21 +44,16 @@ const meta: Meta<typeof Dialog> = {
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof Dialog>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default form of the dialog.
  */
-export const Default: Story = {};
+export const Default = meta.story({});
 
-export const ShouldOpenCloseWithContinue: Story = {
-  name: "when clicking Continue button, should close the dialog",
-  tags: ["!dev", "!autodocs"],
-  play: async ({ canvasElement, step }) => {
+Default.test(
+  "When clicking the Continue button, it closes the dialog",
+  async ({ canvasElement, step }) => {
     const canvasBody = within(canvasElement.ownerDocument.body);
 
     await step("Open the dialog", async () => {
@@ -84,12 +77,11 @@ export const ShouldOpenCloseWithContinue: Story = {
       );
     });
   },
-};
+);
 
-export const ShouldOpenCloseWithCancel: Story = {
-  name: "when clicking Cancel button, should close the dialog",
-  tags: ["!dev", "!autodocs"],
-  play: async ({ canvasElement, step }) => {
+Default.test(
+  "When clicking the Cancel button, it closes the dialog",
+  async ({ canvasElement, step }) => {
     const canvasBody = within(canvasElement.ownerDocument.body);
 
     await step("Open the dialog", async () => {
@@ -114,12 +106,11 @@ export const ShouldOpenCloseWithCancel: Story = {
       );
     });
   },
-};
+);
 
-export const ShouldOpenCloseCross: Story = {
-  name: "when clicking Close icon, should close the dialog",
-  tags: ["!dev", "!autodocs"],
-  play: async ({ canvasElement, step }) => {
+Default.test(
+  "When clicking the Close icon, it closes the dialog",
+  async ({ canvasElement, step }) => {
     const canvasBody = within(canvasElement.ownerDocument.body);
 
     await step("Open the dialog", async () => {
@@ -144,4 +135,4 @@ export const ShouldOpenCloseCross: Story = {
       );
     });
   },
-};
+);

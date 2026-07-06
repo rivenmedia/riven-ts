@@ -1,15 +1,14 @@
+import { preview } from "@/.storybook/preview";
 import { Calendar } from "@/components/ui/calendar";
 
 import { DateTime } from "luxon";
 import { action } from "storybook/actions";
 import { expect, userEvent } from "storybook/test";
 
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * A date field component that allows users to enter and edit date.
  */
-const meta: Meta<typeof Calendar> = {
+const meta = preview.meta({
   title: "ui/Calendar",
   component: Calendar,
   tags: ["autodocs"],
@@ -43,21 +42,17 @@ const meta: Meta<typeof Calendar> = {
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof Calendar>;
-
-export default meta;
-
-type Story = StoryObj<typeof Calendar>;
+});
 
 /**
  * The default form of the calendar.
  */
-export const Default: Story = {};
+export const Default = meta.story({});
 
 /**
  * Use the `multiple` mode to select multiple dates.
  */
-export const Multiple: Story = {
+export const Multiple = meta.story({
   args: {
     min: 1,
     selected: [
@@ -67,12 +62,12 @@ export const Multiple: Story = {
     ],
     mode: "multiple",
   },
-};
+});
 
 /**
  * Use the `range` mode to select a range of dates.
  */
-export const Range: Story = {
+export const Range = meta.story({
   args: {
     selected: {
       from: DateTime.now().toJSDate(),
@@ -80,12 +75,12 @@ export const Range: Story = {
     },
     mode: "range",
   },
-};
+});
 
 /**
  * Use the `disabled` prop to disable specific dates.
  */
-export const Disabled: Story = {
+export const Disabled = meta.story({
   args: {
     disabled: [
       DateTime.now().plus({ days: 1 }).toJSDate(),
@@ -94,25 +89,26 @@ export const Disabled: Story = {
       DateTime.now().plus({ days: 5 }).toJSDate(),
     ],
   },
-};
+});
 
 /**
  * Use the `numberOfMonths` prop to display multiple months.
  */
-export const MultipleMonths: Story = {
+export const MultipleMonths = meta.story({
   args: {
     numberOfMonths: 2,
     showOutsideDays: false,
   },
-};
+});
 
-export const ShouldNavigateMonthsWhenClicked: Story = {
-  name: "when using the calendar navigation, should change months",
-  tags: ["!dev", "!autodocs"],
-  args: {
-    defaultMonth: DateTime.fromObject({ year: 2000, month: 9 }).toJSDate(),
+Default.test(
+  "When using the calendar navigation, it changes months",
+  {
+    args: {
+      defaultMonth: DateTime.fromObject({ year: 2000, month: 9 }).toJSDate(),
+    },
   },
-  play: async ({ canvas }) => {
+  async ({ canvas }) => {
     const title = await canvas.findByText(/2000/i);
     const startTitle = title.textContent || "";
 
@@ -142,4 +138,4 @@ export const ShouldNavigateMonthsWhenClicked: Story = {
       await expect(title).not.toHaveTextContent(startTitle);
     }
   },
-};
+);

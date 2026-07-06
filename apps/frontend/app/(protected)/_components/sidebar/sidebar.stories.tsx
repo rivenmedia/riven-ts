@@ -1,3 +1,5 @@
+import { preview } from "@/.storybook/preview";
+
 import {
   CalendarDays,
   FileClock,
@@ -12,9 +14,7 @@ import { DateTime } from "luxon";
 
 import { Sidebar } from "./sidebar";
 
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
-const meta = {
+const meta = preview.meta({
   title: "Components / Media / Sidebar",
   component: Sidebar,
   args: {
@@ -33,13 +33,9 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
-} satisfies Meta<typeof Sidebar>;
+});
 
-export default meta;
-
-type Story = StoryObj<typeof meta>;
-
-export const LoggedIn: Story = {
+export const LoggedIn = meta.story({
   args: {
     user: {
       id: "1",
@@ -51,10 +47,10 @@ export const LoggedIn: Story = {
       emailVerified: false,
     },
   },
-};
+});
 
-export const LoggedOut: Story = {
+export const LoggedOut = meta.story({
   args: {
     user: undefined,
   },
-};
+});

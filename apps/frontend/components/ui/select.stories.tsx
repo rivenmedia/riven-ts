@@ -1,3 +1,4 @@
+import { preview } from "@/.storybook/preview";
 import {
   Select,
   SelectContent,
@@ -11,12 +12,10 @@ import {
 
 import { expect, fn, userEvent, within } from "storybook/test";
 
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * Displays a list of options for the user to pick from—triggered by a button.
  */
-const meta: Meta<typeof Select> = {
+const meta = preview.meta({
   title: "ui/Select",
   component: Select,
   tags: ["autodocs"],
@@ -63,21 +62,16 @@ const meta: Meta<typeof Select> = {
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof Select>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default form of the select.
  */
-export const Default: Story = {};
+export const Default = meta.story({});
 
-export const ShouldSelectOption: Story = {
-  name: "when an option is selected, should be checked",
-  tags: ["!dev", "!autodocs"],
-  play: async ({ canvasElement, step }) => {
+Default.test(
+  "When an option is selected, it is checked",
+  async ({ canvasElement, step }) => {
     const canvasBody = within(canvasElement.ownerDocument.body);
     const select = await canvasBody.findByRole("combobox");
 
@@ -96,4 +90,4 @@ export const ShouldSelectOption: Story = {
       ).toHaveAttribute("data-state", "checked");
     });
   },
-};
+);

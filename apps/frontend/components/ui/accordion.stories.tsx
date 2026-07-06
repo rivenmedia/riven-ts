@@ -1,3 +1,4 @@
+import { preview } from "@/.storybook/preview";
 import {
   Accordion,
   AccordionContent,
@@ -7,13 +8,11 @@ import {
 
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * A vertically stacked set of interactive headings that each reveal a section
  * of content.
  */
-const meta: Meta<typeof Accordion> = {
+const meta = preview.meta({
   title: "ui/Accordion",
   component: Accordion,
   tags: ["autodocs"],
@@ -33,7 +32,6 @@ const meta: Meta<typeof Accordion> = {
     },
   },
   args: {
-    type: "single",
     collapsible: true,
     disabled: false,
   },
@@ -63,24 +61,20 @@ const meta: Meta<typeof Accordion> = {
       </AccordionItem>
     </Accordion>
   ),
-} satisfies Meta<typeof Accordion>;
-
-export default meta;
-
-type Story = StoryObj<typeof Accordion>;
+});
 
 /**
  * The default behavior of the accordion allows only one item to be open.
  */
-export const Default: Story = {};
-
-export const ShouldOnlyOpenOneWhenSingleType: Story = {
-  name: "when accordions are clicked, should open only one item at a time",
+export const Single = meta.story({
   args: {
-    type: "single" as const,
+    type: "single",
   },
-  tags: ["!dev", "!autodocs"],
-  play: async ({ canvasElement }) => {
+});
+
+Single.test(
+  "When accordions are clicked, it allows only one item to be open at a time",
+  async ({ canvasElement }) => {
     const canvas = within(
       canvasElement.querySelector('[data-slot="accordion"]') ?? canvasElement,
     );
@@ -109,15 +103,17 @@ export const ShouldOnlyOpenOneWhenSingleType: Story = {
       return expect(content).toBeFalsy();
     });
   },
-};
+);
 
-export const ShouldOpenAllWhenMultipleType: Story = {
-  name: "when accordions are clicked, should open all items one at a time",
+export const Multiple = meta.story({
   args: {
     type: "multiple",
   },
-  tags: ["!dev", "!autodocs"],
-  play: async ({ canvasElement }) => {
+});
+
+Multiple.test(
+  "When accordions are clicked, it allows multiple items to be open",
+  async ({ canvasElement }) => {
     const canvas = within(
       canvasElement.querySelector('[data-slot="accordion"]') ?? canvasElement,
     );
@@ -168,4 +164,4 @@ export const ShouldOpenAllWhenMultipleType: Story = {
       return expect(content).toBeFalsy();
     });
   },
-};
+);

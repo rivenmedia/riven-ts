@@ -1,3 +1,4 @@
+import { preview } from "@/.storybook/preview";
 import {
   Carousel,
   CarouselContent,
@@ -8,13 +9,10 @@ import {
 
 import { expect, userEvent } from "storybook/test";
 
-// Replace nextjs-vite with the name of your framework
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * A carousel with motion and swipe built using Embla.
  */
-const meta: Meta<typeof Carousel> = {
+const meta = preview.meta({
   title: "ui/Carousel",
   component: Carousel,
   tags: ["autodocs"],
@@ -40,21 +38,17 @@ const meta: Meta<typeof Carousel> = {
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof Carousel>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default form of the carousel.
  */
-export const Default: Story = {};
+export const Default = meta.story({});
 
 /**
  * Use the `basis` utility class to change the size of the carousel.
  */
-export const Size: Story = {
+export const Size = meta.story({
   render: (args) => (
     <Carousel {...args} className="mx-12 w-full max-w-xs">
       <CarouselContent>
@@ -73,12 +67,11 @@ export const Size: Story = {
   args: {
     className: "mx-12 w-full max-w-xs",
   },
-};
+});
 
-export const ShouldNavigate: Story = {
-  name: "when clicking next/previous buttons, should navigate through slides",
-  tags: ["!dev", "!autodocs"],
-  play: async ({ canvas, step }) => {
+Default.test(
+  "When clicking the next/previous buttons, it navigates through the slides",
+  async ({ canvas, step }) => {
     const slides = await canvas.findAllByRole("group");
 
     await expect(slides).toHaveLength(5);
@@ -100,5 +93,4 @@ export const ShouldNavigate: Story = {
       }
     });
   },
-};
-//
+);

@@ -1,3 +1,4 @@
+import preview from "@/.storybook/preview";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -19,14 +20,11 @@ import {
 import { Mail, Plus, PlusCircle, Search, UserPlus } from "lucide-react";
 import { expect, userEvent, within } from "storybook/test";
 
-// Replace nextjs-vite with the name of your framework
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * Displays a menu to the user — such as a set of actions or functions —
  * triggered by a button.
  */
-const meta: Meta<typeof DropdownMenu> = {
+const meta = preview.meta({
   title: "ui/DropdownMenu",
   component: DropdownMenu,
   tags: ["autodocs"],
@@ -47,21 +45,17 @@ const meta: Meta<typeof DropdownMenu> = {
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof DropdownMenu>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default form of the dropdown menu.
  */
-export const Default: Story = {};
+export const Default = meta.story({});
 
 /**
  * A dropdown menu with shortcuts.
  */
-export const WithShortcuts: Story = {
+export const WithShortcuts = meta.story({
   render: (args) => (
     <DropdownMenu {...args}>
       <DropdownMenuTrigger>Open</DropdownMenuTrigger>
@@ -78,12 +72,12 @@ export const WithShortcuts: Story = {
       </DropdownMenuContent>
     </DropdownMenu>
   ),
-};
+});
 
 /**
  * A dropdown menu with submenus.
  */
-export const WithSubmenus: Story = {
+export const WithSubmenus = meta.story({
   render: (args) => (
     <DropdownMenu {...args}>
       <DropdownMenuTrigger>Open</DropdownMenuTrigger>
@@ -122,12 +116,12 @@ export const WithSubmenus: Story = {
       </DropdownMenuContent>
     </DropdownMenu>
   ),
-};
+});
 
 /**
  * A dropdown menu with radio items.
  */
-export const WithRadioItems: Story = {
+export const WithRadioItems = meta.story({
   render: (args) => (
     <DropdownMenu {...args}>
       <DropdownMenuTrigger>Open</DropdownMenuTrigger>
@@ -141,12 +135,12 @@ export const WithRadioItems: Story = {
       </DropdownMenuContent>
     </DropdownMenu>
   ),
-};
+});
 
 /**
  * A dropdown menu with checkboxes.
  */
-export const WithCheckboxes: Story = {
+export const WithCheckboxes = meta.story({
   render: (args) => (
     <DropdownMenu {...args}>
       <DropdownMenuTrigger>Open</DropdownMenuTrigger>
@@ -159,12 +153,11 @@ export const WithCheckboxes: Story = {
       </DropdownMenuContent>
     </DropdownMenu>
   ),
-};
+});
 
-export const ShouldOpenClose: Story = {
-  name: "when clicking an item, should close the dropdown menu",
-  tags: ["!dev", "!autodocs"],
-  play: async ({ canvasElement, step }) => {
+Default.test(
+  "When clicking an item, it closes the dropdown menu",
+  async ({ canvasElement, step }) => {
     const body = within(canvasElement.ownerDocument.body);
 
     await step("Open the dropdown menu", async () => {
@@ -184,4 +177,4 @@ export const ShouldOpenClose: Story = {
       await userEvent.click(items[0], { delay: 100 });
     });
   },
-};
+);

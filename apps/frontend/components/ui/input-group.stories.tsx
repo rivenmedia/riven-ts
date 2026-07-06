@@ -1,3 +1,4 @@
+import preview from "@/.storybook/preview";
 import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import {
   DropdownMenu,
@@ -49,28 +50,22 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * Display additional information or actions to an input or textarea.
  */
-const meta: Meta<typeof InputGroup> = {
+const meta = preview.meta({
   title: "ui/InputGroup",
   component: InputGroup,
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof InputGroup>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * Input groups with icon addons for visual enhancement.
  */
-export const WithIcons: Story = {
+export const WithIcons = meta.story({
   render: (args) => (
     <div className="grid w-full max-w-sm gap-6">
       <InputGroup {...args}>
@@ -103,12 +98,12 @@ export const WithIcons: Story = {
       </InputGroup>
     </div>
   ),
-};
+});
 
 /**
  * Display additional text information alongside inputs.
  */
-export const WithText: Story = {
+export const WithText = meta.story({
   render: (args) => (
     <div className="grid w-full max-w-sm gap-6">
       <InputGroup {...args}>
@@ -145,12 +140,12 @@ export const WithText: Story = {
       </InputGroup>
     </div>
   ),
-};
+});
 
 /**
  * Add buttons to perform actions within the input group.
  */
-export const WithButtons: Story = {
+export const WithButtons = meta.story({
   render: (args) => {
     const [isCopied, setIsCopied] = useState(false);
     const [isFavorite, setIsFavorite] = useState(false);
@@ -227,12 +222,12 @@ export const WithButtons: Story = {
       </div>
     );
   },
-};
+});
 
 /**
  * Add tooltips to provide additional context or help.
  */
-export const WithTooltips: Story = {
+export const WithTooltips = meta.story({
   render: (args) => (
     <div className="grid w-full max-w-sm gap-4">
       <TooltipProvider>
@@ -296,12 +291,12 @@ export const WithTooltips: Story = {
       </TooltipProvider>
     </div>
   ),
-};
+});
 
 /**
  * Input groups also work with textarea components.
  */
-export const WithTextarea: Story = {
+export const WithTextarea = meta.story({
   render: (args) => {
     return (
       <div className="grid w-full max-w-md gap-4">
@@ -333,12 +328,12 @@ export const WithTextarea: Story = {
       </div>
     );
   },
-};
+});
 
 /**
  * Show loading indicators while processing input.
  */
-export const WithSpinner: Story = {
+export const WithSpinner = meta.story({
   render: (args) => (
     <div className="grid w-full max-w-sm gap-4">
       <InputGroup {...args} data-disabled>
@@ -373,12 +368,12 @@ export const WithSpinner: Story = {
       </InputGroup>
     </div>
   ),
-};
+});
 
 /**
  * Add labels within input groups to improve accessibility.
  */
-export const WithLabels: Story = {
+export const WithLabels = meta.story({
   render: (args) => (
     <div className="grid w-full max-w-sm gap-4">
       <TooltipProvider>
@@ -414,12 +409,12 @@ export const WithLabels: Story = {
       </TooltipProvider>
     </div>
   ),
-};
+});
 
 /**
  * Pair input groups with dropdown menus for complex interactions.
  */
-export const WithDropdowns: Story = {
+export const WithDropdowns = meta.story({
   render: (args) => (
     <div className="grid w-full max-w-sm gap-4">
       <InputGroup {...args}>
@@ -462,12 +457,12 @@ export const WithDropdowns: Story = {
       </InputGroup>
     </div>
   ),
-};
+});
 
 /**
  * Wrap input groups with button groups to create prefixes and suffixes.
  */
-export const WithButtonGroup: Story = {
+export const WithButtonGroup = meta.story({
   render: (args) => (
     <div className="grid w-full max-w-sm gap-6">
       <ButtonGroup>
@@ -484,4 +479,4 @@ export const WithButtonGroup: Story = {
       </ButtonGroup>
     </div>
   ),
-};
+});

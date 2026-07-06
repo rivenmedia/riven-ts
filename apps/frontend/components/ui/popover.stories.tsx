@@ -1,3 +1,4 @@
+import { preview } from "@/.storybook/preview";
 import {
   Popover,
   PopoverContent,
@@ -6,12 +7,10 @@ import {
 
 import { expect, userEvent, within } from "storybook/test";
 
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * Displays rich content in a portal, triggered by a button.
  */
-const meta: Meta<typeof Popover> = {
+const meta = preview.meta({
   title: "ui/Popover",
   component: Popover,
   tags: ["autodocs"],
@@ -26,21 +25,16 @@ const meta: Meta<typeof Popover> = {
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof Popover>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default form of the popover.
  */
-export const Default: Story = {};
+export const Default = meta.story({});
 
-export const ShouldOpenClose: Story = {
-  name: "when clicking the trigger, should open and close the popover",
-  tags: ["!dev", "!autodocs"],
-  play: async ({ canvasElement, step }) => {
+Default.test(
+  "When clicking the trigger, it opens and closes the popover",
+  async ({ canvasElement, step }) => {
     const canvasBody = within(canvasElement.ownerDocument.body);
 
     await step("click the trigger to open the popover", async () => {
@@ -62,4 +56,4 @@ export const ShouldOpenClose: Story = {
       );
     });
   },
-};
+);

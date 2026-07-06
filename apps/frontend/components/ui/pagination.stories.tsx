@@ -1,3 +1,4 @@
+import { preview } from "@/.storybook/preview";
 import {
   Pagination,
   PaginationContent,
@@ -8,12 +9,10 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * Pagination with page navigation, next and previous links.
  */
-const meta: Meta<typeof Pagination> = {
+const meta = preview.meta({
   title: "ui/Pagination",
   component: Pagination,
   tags: ["autodocs"],
@@ -45,13 +44,9 @@ const meta: Meta<typeof Pagination> = {
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof Pagination>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default form of the pagination.
  */
-export const Default: Story = {};
+export const Default = meta.story({});

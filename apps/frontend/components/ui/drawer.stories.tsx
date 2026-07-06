@@ -1,3 +1,4 @@
+import preview from "@/.storybook/preview";
 import {
   Drawer,
   DrawerClose,
@@ -11,12 +12,10 @@ import {
 
 import { expect, fn, userEvent, within } from "storybook/test";
 
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * A drawer component for React.
  */
-const meta = {
+const meta = preview.meta({
   title: "ui/Drawer",
   component: Drawer,
   tags: ["autodocs"],
@@ -45,21 +44,16 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof Drawer>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default form of the drawer.
  */
-export const Default: Story = {};
+export const Default = meta.story({});
 
-export const ShouldOpenCloseWithSubmit: Story = {
-  name: "when clicking Submit button, should close the drawer",
-  tags: ["!dev", "!autodocs"],
-  play: async ({ args, canvasElement, step }) => {
+Default.test(
+  "When clicking the Submit button, it closes the drawer",
+  async ({ args, canvasElement, step }) => {
     const canvasBody = within(canvasElement.ownerDocument.body);
 
     await step("Open the drawer", async () => {
@@ -89,12 +83,11 @@ export const ShouldOpenCloseWithSubmit: Story = {
       );
     });
   },
-};
+);
 
-export const ShouldOpenCloseWithCancel: Story = {
-  name: "when clicking Cancel button, should close the drawer",
-  tags: ["!dev", "!autodocs"],
-  play: async ({ args, canvasElement, step }) => {
+Default.test(
+  "When clicking the Cancel button, it closes the drawer",
+  async ({ args, canvasElement, step }) => {
     const canvasBody = within(canvasElement.ownerDocument.body);
 
     await step("Open the drawer", async () => {
@@ -124,4 +117,4 @@ export const ShouldOpenCloseWithCancel: Story = {
       );
     });
   },
-};
+);

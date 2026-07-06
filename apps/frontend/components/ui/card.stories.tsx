@@ -1,3 +1,4 @@
+import { preview } from "@/.storybook/preview";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,8 +11,6 @@ import {
 } from "@/components/ui/card";
 
 import { BellRing } from "lucide-react";
-
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 const notifications = [
   {
@@ -31,7 +30,7 @@ const notifications = [
 /**
  * Displays a card with header, content, and footer.
  */
-const meta: Meta<typeof Card> = {
+const meta = preview.meta({
   title: "ui/Card",
   component: Card,
   tags: ["autodocs"],
@@ -42,16 +41,12 @@ const meta: Meta<typeof Card> = {
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof Card>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default form of the card.
  */
-export const Default: Story = {
+export const Default = meta.story({
   render: (args) => (
     <Card {...args}>
       <CardHeader>
@@ -74,12 +69,12 @@ export const Default: Story = {
       </CardFooter>
     </Card>
   ),
-};
+});
 
 /**
  * Use the `CardAction` component to add interactive elements in the header.
  */
-export const WithCardAction: Story = {
+export const WithCardAction = meta.story({
   render: (args) => (
     <Card {...args}>
       <CardHeader>
@@ -100,12 +95,12 @@ export const WithCardAction: Story = {
       </CardFooter>
     </Card>
   ),
-};
+});
 
 /**
  * A minimal card with only content, no header or footer.
  */
-export const MinimalCard: Story = {
+export const MinimalCard = meta.story({
   render: (args) => (
     <Card {...args}>
       <CardContent>
@@ -116,12 +111,12 @@ export const MinimalCard: Story = {
       </CardContent>
     </Card>
   ),
-};
+});
 
 /**
  * A card with only a header section, no content or footer.
  */
-export const HeaderOnly: Story = {
+export const HeaderOnly = meta.story({
   render: (args) => (
     <Card {...args}>
       <CardHeader>
@@ -132,4 +127,4 @@ export const HeaderOnly: Story = {
       </CardHeader>
     </Card>
   ),
-};
+});

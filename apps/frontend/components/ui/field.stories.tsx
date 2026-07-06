@@ -1,3 +1,4 @@
+import preview from "@/.storybook/preview";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
@@ -25,12 +26,10 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { useState } from "react";
 
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * Combine labels, controls, and help text to compose accessible form fields and grouped inputs.
  */
-const meta: Meta<typeof Field> = {
+const meta = preview.meta({
   title: "ui/Field",
   component: Field,
   tags: ["autodocs"],
@@ -51,16 +50,12 @@ const meta: Meta<typeof Field> = {
       <Story />
     </div>
   ),
-} satisfies Meta<typeof Field>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * Field with Input component for text input.
  */
-export const WithInput: Story = {
+export const WithInput = meta.story({
   render: (args) => (
     <FieldSet>
       <FieldGroup>
@@ -74,12 +69,12 @@ export const WithInput: Story = {
       </FieldGroup>
     </FieldSet>
   ),
-};
+});
 
 /**
  * Field with textarea for longer text input.
  */
-export const WithTextarea: Story = {
+export const WithTextarea = meta.story({
   render: (args) => (
     <FieldSet>
       <FieldGroup>
@@ -97,12 +92,12 @@ export const WithTextarea: Story = {
       </FieldGroup>
     </FieldSet>
   ),
-};
+});
 
 /**
  * Field with Select component for dropdown selections.
  */
-export const WithSelect: Story = {
+export const WithSelect = meta.story({
   render: (args) => (
     <Field {...args}>
       <FieldLabel>Department</FieldLabel>
@@ -126,12 +121,12 @@ export const WithSelect: Story = {
       </FieldDescription>
     </Field>
   ),
-};
+});
 
 /**
  * Field with Slider component and dynamic value display.
  */
-export const WithSlider: Story = {
+export const WithSlider = meta.story({
   render: () => {
     const [value, setValue] = useState([200, 800]);
     return (
@@ -154,12 +149,12 @@ export const WithSlider: Story = {
       </Field>
     );
   },
-};
+});
 
 /**
  * FieldSet with multiple related fields in a grid layout.
  */
-export const WithFieldset: Story = {
+export const WithFieldset = meta.story({
   render: () => (
     <div className="w-full max-w-md space-y-6">
       <FieldSet>
@@ -186,12 +181,12 @@ export const WithFieldset: Story = {
       </FieldSet>
     </div>
   ),
-};
+});
 
 /**
  * Field with checkbox inputs using FieldSet structure.
  */
-export const WithCheckbox: Story = {
+export const WithCheckbox = meta.story({
   render: () => (
     <FieldGroup>
       <FieldSet>
@@ -256,12 +251,12 @@ export const WithCheckbox: Story = {
       </Field>
     </FieldGroup>
   ),
-};
+});
 
 /**
  * Field with RadioGroup for single selection.
  */
-export const WithRadio: Story = {
+export const WithRadio = meta.story({
   render: () => (
     <FieldSet>
       <FieldLabel>Subscription Plan</FieldLabel>
@@ -290,12 +285,12 @@ export const WithRadio: Story = {
       </RadioGroup>
     </FieldSet>
   ),
-};
+});
 
 /**
  * Field with Switch in horizontal orientation.
  */
-export const WithSwitch: Story = {
+export const WithSwitch = meta.story({
   render: () => (
     <Field orientation="horizontal">
       <FieldContent>
@@ -308,12 +303,12 @@ export const WithSwitch: Story = {
       <Switch id="2fa" />
     </Field>
   ),
-};
+});
 
 /**
  * Selectable field groups with RadioItem for choice cards.
  */
-export const ChoiceCard: Story = {
+export const ChoiceCard = meta.story({
   render: () => (
     <FieldGroup>
       <FieldSet>
@@ -350,4 +345,4 @@ export const ChoiceCard: Story = {
       </FieldSet>
     </FieldGroup>
   ),
-};
+});

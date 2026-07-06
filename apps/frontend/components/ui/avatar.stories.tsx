@@ -1,11 +1,10 @@
+import { preview } from "@/.storybook/preview";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 /**
  * An image element with a fallback for representing the user.
  */
-const meta: Meta<typeof Avatar> = {
+const meta = preview.meta({
   title: "ui/Avatar",
   component: Avatar,
   tags: ["autodocs"],
@@ -19,13 +18,9 @@ const meta: Meta<typeof Avatar> = {
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof Avatar>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default form of the avatar.
  */
-export const Default: Story = {};
+export const Default = meta.story({});

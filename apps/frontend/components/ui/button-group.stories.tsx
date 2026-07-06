@@ -1,3 +1,4 @@
+import { preview } from "@/.storybook/preview";
 import { Button } from "@/components/ui/button";
 import {
   ButtonGroup,
@@ -48,12 +49,10 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * A container that groups related buttons together with consistent styling.
  */
-const meta: Meta<typeof ButtonGroup> = {
+const meta = preview.meta({
   title: "ui/ButtonGroup",
   component: ButtonGroup,
   tags: ["autodocs"],
@@ -69,16 +68,12 @@ const meta: Meta<typeof ButtonGroup> = {
   args: {
     orientation: "horizontal",
   },
-} satisfies Meta<typeof ButtonGroup>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default horizontal button group with related action buttons.
  */
-export const Default: Story = {
+export const Default = meta.story({
   render: (args) => (
     <ButtonGroup {...args}>
       <Button variant="outline">Copy</Button>
@@ -86,12 +81,12 @@ export const Default: Story = {
       <Button variant="outline">Cut</Button>
     </ButtonGroup>
   ),
-};
+});
 
 /**
  * Vertical orientation stacks buttons in a column layout.
  */
-export const Orientation: Story = {
+export const Orientation = meta.story({
   render: (args) => (
     <ButtonGroup {...args}>
       <Button variant="outline" size="icon">
@@ -105,12 +100,12 @@ export const Orientation: Story = {
   args: {
     orientation: "vertical",
   },
-};
+});
 
 /**
  * Nest ButtonGroup components to create button groups with spacing.
  */
-export const Nested: Story = {
+export const Nested = meta.story({
   render: () => (
     <ButtonGroup>
       <ButtonGroup>
@@ -140,12 +135,12 @@ export const Nested: Story = {
       </ButtonGroup>
     </ButtonGroup>
   ),
-};
+});
 
 /**
  * Button group with separators to visually divide related button sections.
  */
-export const WithSeparator: Story = {
+export const WithSeparator = meta.story({
   render: () => (
     <ButtonGroup>
       <Button variant="secondary" size="sm">
@@ -157,12 +152,12 @@ export const WithSeparator: Story = {
       </Button>
     </ButtonGroup>
   ),
-};
+});
 
 /**
  * Create a split button group by adding two buttons separated by a separator.
  */
-export const Split: Story = {
+export const Split = meta.story({
   render: () => (
     <ButtonGroup>
       <Button variant="secondary">Button</Button>
@@ -172,12 +167,12 @@ export const Split: Story = {
       </Button>
     </ButtonGroup>
   ),
-};
+});
 
 /**
  * Wrap an Input component with buttons.
  */
-export const WithInput: Story = {
+export const WithInput = meta.story({
   render: () => (
     <ButtonGroup>
       <Input placeholder="Search..." />
@@ -186,12 +181,12 @@ export const WithInput: Story = {
       </Button>
     </ButtonGroup>
   ),
-};
+});
 
 /**
  * Wrap an InputGroup component to create complex input layouts.
  */
-export const WithInputGroup: Story = {
+export const WithInputGroup = meta.story({
   render: () => {
     const [voiceEnabled, setVoiceEnabled] = useState(false);
 
@@ -237,12 +232,12 @@ export const WithInputGroup: Story = {
       </TooltipProvider>
     );
   },
-};
+});
 
 /**
  * Create a split button group with a DropdownMenu component.
  */
-export const WithDropdownMenu: Story = {
+export const WithDropdownMenu = meta.story({
   render: () => (
     <ButtonGroup>
       <Button variant="outline">Follow</Button>
@@ -266,12 +261,12 @@ export const WithDropdownMenu: Story = {
       </DropdownMenu>
     </ButtonGroup>
   ),
-};
+});
 
 /**
  * Pair with a Select component.
  */
-export const WithSelect: Story = {
+export const WithSelect = meta.story({
   render: () => {
     const [currency, setCurrency] = useState("$");
 
@@ -307,12 +302,12 @@ export const WithSelect: Story = {
       </ButtonGroup>
     );
   },
-};
+});
 
 /**
  * Use with a Popover component.
  */
-export const WithPopover: Story = {
+export const WithPopover = meta.story({
   render: () => (
     <ButtonGroup>
       <Button variant="outline">
@@ -344,4 +339,4 @@ export const WithPopover: Story = {
       </Popover>
     </ButtonGroup>
   ),
-};
+});

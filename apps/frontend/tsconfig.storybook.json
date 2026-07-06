@@ -2,10 +2,8 @@
   "$schema": "https://www.schemastore.org/tsconfig",
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "composite": true,
     "rootDir": ".",
-    "noEmit": false,
-    "isolatedDeclarations": false
+    "noEmit": true
   },
   "files": [],
   "include": [
@@ -25,5 +23,5 @@
     ".storybook/**/*.tsx",
     ".storybook/**/*.mts"
   ],
-  "exclude": []
+  "exclude": ["**/*.spec.ts", "**/*.spec.tsx"]
 }

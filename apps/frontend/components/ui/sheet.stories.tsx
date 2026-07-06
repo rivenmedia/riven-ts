@@ -1,3 +1,4 @@
+import { preview } from "@/.storybook/preview";
 import {
   Sheet,
   SheetClose,
@@ -11,15 +12,13 @@ import {
 
 import { expect, userEvent, within } from "storybook/test";
 
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 /**
  * Extends the Dialog component to display content that complements the main
  * content of the screen.
  */
-const meta: Meta<typeof SheetContent> = {
+const meta = preview.meta({
   title: "ui/Sheet",
-  component: Sheet,
+  component: SheetContent,
   tags: ["autodocs"],
   argTypes: {
     side: {
@@ -55,21 +54,16 @@ const meta: Meta<typeof SheetContent> = {
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof SheetContent>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+});
 
 /**
  * The default form of the sheet.
  */
-export const Default: Story = {};
+export const Default = meta.story({});
 
-export const ShouldOpenCloseWithSubmit: Story = {
-  name: "when clicking Submit button, should close the sheet",
-  tags: ["!dev", "!autodocs"],
-  play: async ({ canvasElement, step }) => {
+Default.test(
+  "When clicking the Submit button, it closes the sheet",
+  async ({ canvasElement, step }) => {
     const canvasBody = within(canvasElement.ownerDocument.body);
 
     await step("open the sheet", async () => {
@@ -94,12 +88,11 @@ export const ShouldOpenCloseWithSubmit: Story = {
       );
     });
   },
-};
+);
 
-export const ShouldOpenCloseWithCancel: Story = {
-  name: "when clicking Cancel button, should close the sheet",
-  tags: ["!dev", "!autodocs"],
-  play: async ({ canvasElement, step }) => {
+Default.test(
+  "When clicking the Cancel button, it closes the sheet",
+  async ({ canvasElement, step }) => {
     const canvasBody = within(canvasElement.ownerDocument.body);
 
     await step("open the sheet", async () => {
@@ -123,12 +116,11 @@ export const ShouldOpenCloseWithCancel: Story = {
       );
     });
   },
-};
+);
 
-export const ShouldOpenCloseWithClose: Story = {
-  name: "when clicking Close icon, should close the sheet",
-  tags: ["!dev", "!autodocs"],
-  play: async ({ canvasElement, step }) => {
+Default.test(
+  "When clicking the Close icon, it closes the sheet",
+  async ({ canvasElement, step }) => {
     const canvasBody = within(canvasElement.ownerDocument.body);
 
     await step("open the sheet", async () => {
@@ -152,4 +144,4 @@ export const ShouldOpenCloseWithClose: Story = {
       );
     });
   },
-};
+);
