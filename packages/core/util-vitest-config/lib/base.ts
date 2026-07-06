@@ -26,7 +26,13 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
       coverage: {
         enabled: !isWatch,
         include: ["**/*.?(c|m)[jt]s?(x)"],
-        exclude: ["**/__{tests,generated}__/**", "*/*.{config,setup}.ts"],
+        exclude: [
+          "**/__{tests,generated}__/**",
+          "*/*.{config,setup}.?(c|m)[jt]s?(x)",
+          "graphql-codegen.ts",
+          "*.typegen.ts",
+          "*.d.ts",
+        ],
       },
       setupFiles: [
         fileURLToPath(
