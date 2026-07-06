@@ -32,11 +32,11 @@ interface LoginFormProps {
   lastLoginMethod: string | null;
 }
 
-export const LoginForm = ({
+export function LoginForm({
   authProviders,
   isCredentialProviderEnabled,
   lastLoginMethod,
-}: LoginFormProps) => {
+}: LoginFormProps) {
   function handleSuccessfulSignin() {
     window.history.replaceState(null, "", "/");
   }
@@ -153,4 +153,4 @@ export const LoginForm = ({
       </CardContent>
     </Card>
   );
-};
+}

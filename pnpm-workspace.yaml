@@ -159,7 +159,6 @@ catalog:
   undici: ^7.25.0
   unplugin-swc: ^1.5.9
   vaul: ^1.1.2
-  vite-tsconfig-paths: ^6.1.1
   vitest: ^4.1.7
   winston: ^3.19.0
   winston-daily-rotate-file: ^5.0.0
@@ -174,6 +173,7 @@ catalog:
   react-use: ^17.6.1
   react-day-picker: ^10.0.1
   "@storybook/addon-vitest": ^10.4.6
+  msw-storybook-addon: ^2.0.7
 
 catalogMode: strict
 

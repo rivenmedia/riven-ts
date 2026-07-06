@@ -24,7 +24,7 @@ interface RegisterFormProps {
   isSignupEnabled: boolean;
 }
 
-export const RegisterForm = ({ isSignupEnabled }: RegisterFormProps) => {
+export function RegisterForm({ isSignupEnabled }: RegisterFormProps) {
   const { form, handleSubmitWithAction } = useHookFormAction(
     registerUser.bind(null, {
       isSignupEnabled,
@@ -162,4 +162,4 @@ export const RegisterForm = ({ isSignupEnabled }: RegisterFormProps) => {
       </CardContent>
     </Card>
   );
-};
+}

@@ -13,9 +13,11 @@ import addonVitest from "@storybook/addon-vitest";
 import { definePreview } from "@storybook/nextjs-vite";
 import { themes } from "storybook/theming";
 
+import { mswAddon } from "./addons/msw";
+
 export const preview = definePreview({
   tags: ["autodocs"],
-  addons: [addonA11y(), addonDocs(), addonVitest()],
+  addons: [addonA11y(), addonDocs(), addonVitest(), mswAddon],
   parameters: {
     controls: {
       matchers: {

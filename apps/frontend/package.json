@@ -10,6 +10,7 @@
     "dev": "next dev -p 9000 --experimental-https",
     "e2e": "playwright test --ui",
     "e2e:headless": "playwright test",
+    "postinstall": "msw init",
     "lint": "eslint",
     "start": "next start",
     "storybook": "storybook dev -p 6006",
@@ -78,11 +79,14 @@
     "@vitest/browser-playwright": "4.1.7",
     "jsdom": "catalog:",
     "msw": "catalog:",
+    "msw-storybook-addon": "catalog:",
     "playwright": "^1.61.1",
     "storybook": "^10.4.6",
     "tailwindcss": "catalog:",
     "vite": "^8.1.3",
-    "vite-tsconfig-paths": "catalog:",
     "vitest": "catalog:"
+  },
+  "msw": {
+    "workerDirectory": "public"
   }
 }
