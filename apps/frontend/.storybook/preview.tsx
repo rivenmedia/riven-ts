@@ -1,5 +1,3 @@
-import { fontMono, fontSansSerif, fontSerif } from "@/app/fonts";
-
 import "@/lib/styles/themes/all.css";
 import "@/lib/styles/globals.css";
 import "@/lib/styles/app.css";
@@ -11,7 +9,6 @@ import { definePreview } from "@storybook/nextjs-vite";
 import { themes } from "storybook/theming";
 
 import { Providers } from "@/components/providers";
-import { cn } from "@/lib/utils";
 
 import { mswAddon } from "./addons/msw";
 
@@ -39,40 +36,15 @@ export const preview = definePreview({
       theme: themes.normal,
     },
     backgrounds: {
-      options: {
-        dark: {
-          name: "Dark",
-          value: "oklch(0.145 0 0)",
-        },
-        light: {
-          name: "Light",
-          value: "oklch(1 0 0)",
-        },
-      },
-    },
-  },
-  initialGlobals: {
-    backgrounds: {
-      value: "dark",
+      disable: true,
     },
   },
   decorators: [
-    (Story) => {
-      return (
-        <div
-          className={cn(
-            "h-full antialiased",
-            fontSansSerif.variable,
-            fontMono.variable,
-            fontSerif.variable,
-          )}
-        >
-          <Providers>
-            <Story />
-          </Providers>
-        </div>
-      );
-    },
+    (Story) => (
+      <Providers>
+        <Story />
+      </Providers>
+    ),
   ],
 });
 

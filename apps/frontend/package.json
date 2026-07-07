@@ -43,6 +43,7 @@
     "react": "catalog:",
     "react-day-picker": "catalog:",
     "react-dom": "catalog:",
+    "react-error-boundary": "catalog:",
     "react-hook-form": "catalog:",
     "react-toastify": "catalog:",
     "react-use": "catalog:",

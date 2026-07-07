@@ -17,7 +17,7 @@ interface ListItemProps extends Pick<
     text: string;
     variant: string;
   };
-  indexer?: string;
+  indexer: string | undefined;
   isSelectable?: boolean;
 }
 
