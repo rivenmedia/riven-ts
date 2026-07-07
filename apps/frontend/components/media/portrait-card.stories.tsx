@@ -1,6 +1,6 @@
-import { preview } from "@/.storybook/preview";
-
 import { fn } from "storybook/test";
+
+import { preview } from "@/.storybook/preview";
 
 import { PortraitCard } from "./portrait-card";
 

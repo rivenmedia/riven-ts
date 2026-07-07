@@ -12,9 +12,9 @@
   ],
   "plugins": ["@trivago/prettier-plugin-sort-imports"],
   "importOrder": [
-    "^@/(.*)$",
     "^@repo/(.*)$",
     "<THIRD_PARTY_MODULES>",
+    "^@/(.*)$",
     "^[./]",
     "<TS_TYPES>"
   ],

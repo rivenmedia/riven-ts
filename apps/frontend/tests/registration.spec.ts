@@ -1,3 +1,5 @@
+import assert from "node:assert";
+
 import { GET_AUTH_PROVIDERS } from "@/app/(public)/login/_queries/get-auth-providers.query";
 import {
   HttpResponse,
@@ -6,8 +8,6 @@ import {
   http,
   test,
 } from "@/playwright/fixtures";
-
-import assert from "node:assert";
 
 import type { UserWithRole } from "better-auth/client/plugins";
 

@@ -4,14 +4,14 @@ import "@/lib/styles/themes/all.css";
 import "@/lib/styles/globals.css";
 import "@/lib/styles/app.css";
 
-import { Providers } from "@/components/providers";
-import { cn } from "@/lib/utils";
-
 import addonA11y from "@storybook/addon-a11y";
 import addonDocs from "@storybook/addon-docs";
 import addonVitest from "@storybook/addon-vitest";
 import { definePreview } from "@storybook/nextjs-vite";
 import { themes } from "storybook/theming";
+
+import { Providers } from "@/components/providers";
+import { cn } from "@/lib/utils";
 
 import { mswAddon } from "./addons/msw";
 

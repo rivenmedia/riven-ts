@@ -1,6 +1,6 @@
-import DockerComposeGenerator from "@/components/docker-compose-generator";
-
 import { HomeLayout } from "fumadocs-ui/layouts/home";
+
+import DockerComposeGenerator from "@/components/docker-compose-generator";
 
 export const metadata = {
   title: "Docker Compose Generator",

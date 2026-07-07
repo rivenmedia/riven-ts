@@ -1,9 +1,9 @@
+import { NextResponse } from "next/server";
+
 import { GET_INSTANCE_SETUP_REQUIRED } from "@/app/_queries/get-instance-setup-required.query";
 import { privateEnvironment } from "@/environment/private-environment.schema";
 import { authClient } from "@/lib/auth/client";
 import { getClient } from "@/lib/graphql/client";
-
-import { NextResponse } from "next/server";
 
 import type { AppRoutes, RedirectRoutes } from "./.next/dev/types/routes";
 import type { NextRequest, ProxyConfig } from "next/server";

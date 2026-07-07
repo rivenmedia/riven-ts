@@ -1,7 +1,7 @@
-import { preview } from "@/.storybook/preview";
-
 import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { expect, userEvent, waitFor, within } from "storybook/test";
+
+import { preview } from "@/.storybook/preview";
 
 import { Header } from "./header";
 

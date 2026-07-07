@@ -1,6 +1,6 @@
-import { Providers } from "@/components/providers";
-
 import { type RenderOptions, render } from "@testing-library/react";
+
+import { Providers } from "@/components/providers";
 
 const customRender: (
   ui: React.ReactNode,

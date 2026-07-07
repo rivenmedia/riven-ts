@@ -1,3 +1,5 @@
+import { userEvent, within } from "storybook/test";
+
 import { preview } from "@/.storybook/preview";
 import {
   AlertDialog,
@@ -10,8 +12,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-import { userEvent, within } from "storybook/test";
 
 /**
  * A modal dialog that interrupts the user with important content and expects

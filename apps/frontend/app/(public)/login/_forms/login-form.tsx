@@ -1,5 +1,10 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
+import { useEffect } from "react";
+import { Controller } from "react-hook-form";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,11 +17,6 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth/client";
 import { createScopedLogger } from "@/lib/logger";
-
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
-import { useEffect } from "react";
-import { Controller } from "react-hook-form";
 
 import { loginUser } from "../_actions/login.action";
 import { OAuthProviders } from "../_components/oauth-providers";

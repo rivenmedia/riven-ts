@@ -1,7 +1,7 @@
-import { cn } from "@/lib/utils";
-
 import { Check, Mountain } from "lucide-react";
 import Image from "next/image";
+
+import { cn } from "@/lib/utils";
 
 interface PortraitCardProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,

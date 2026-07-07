@@ -1,3 +1,5 @@
+import { expect, fn, userEvent, within } from "storybook/test";
+
 import { preview } from "@/.storybook/preview";
 import {
   Select,
@@ -9,8 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { expect, fn, userEvent, within } from "storybook/test";
 
 /**
  * Displays a list of options for the user to pick from—triggered by a button.

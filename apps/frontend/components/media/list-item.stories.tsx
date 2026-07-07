@@ -1,6 +1,6 @@
-import preview from "@/.storybook/preview";
-
 import { faker } from "@faker-js/faker";
+
+import preview from "@/.storybook/preview";
 
 import { ListItem } from "./list-item";
 

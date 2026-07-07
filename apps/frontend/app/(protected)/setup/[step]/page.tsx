@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { use } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,9 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-
-import Link from "next/link";
-import { use } from "react";
 
 import { type Step, useSteps } from "./_hooks/use-steps";
 import { SetupQualityStep } from "./_steps/quality";

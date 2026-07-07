@@ -1,5 +1,3 @@
-import { StarCounter } from "@/components/star-counter";
-
 import {
   ArrowRight,
   BarChart3,
@@ -14,6 +12,8 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+
+import { StarCounter } from "@/components/star-counter";
 
 import packageJson from "../../package.json" with { type: "json" };
 

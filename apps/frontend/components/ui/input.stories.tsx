@@ -1,9 +1,9 @@
+import { expect, userEvent } from "storybook/test";
+
 import preview from "@/.storybook/preview";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-import { expect, userEvent } from "storybook/test";
 
 /**
  * Displays a form input field or a component that looks like an input field.

@@ -1,3 +1,5 @@
+import { expect, fn, userEvent, within } from "storybook/test";
+
 import preview from "@/.storybook/preview";
 import {
   Drawer,
@@ -9,8 +11,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-
-import { expect, fn, userEvent, within } from "storybook/test";
 
 /**
  * A drawer component for React.

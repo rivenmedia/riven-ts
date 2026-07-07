@@ -1,7 +1,7 @@
-import { render, screen } from "@/lib/test-utils/testing-library";
-
 import { userEvent } from "@testing-library/user-event";
 import { expect, it } from "vitest";
+
+import { render, screen } from "@/lib/test-utils/testing-library";
 
 import Page from "./page";
 

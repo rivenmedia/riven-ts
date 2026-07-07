@@ -105,9 +105,8 @@
   }
 }
 
-/* Make clicks pass-through */
-#nprogress {
-  pointer-events: none;
+.bprogress .bar {
+  background: var(--color-primary);
 }
 
 #nprogress .bar {

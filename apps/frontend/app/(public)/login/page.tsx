@@ -1,10 +1,10 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { authClient } from "@/lib/auth/client";
-import { query } from "@/lib/graphql/client";
-
 import { Mountain } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { authClient } from "@/lib/auth/client";
+import { query } from "@/lib/graphql/client";
 
 import { LoginForm } from "./_forms/login-form";
 import { RegisterForm } from "./_forms/register-form";

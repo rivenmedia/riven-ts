@@ -1,3 +1,5 @@
+import { expect, userEvent, within } from "storybook/test";
+
 import preview from "@/.storybook/preview";
 import {
   Dialog,
@@ -9,8 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-import { expect, userEvent, within } from "storybook/test";
 
 /**
  * A window overlaid on either the primary window or another dialog window,

@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth/client";
-
 import { StarIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
+
+import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth/client";
 
 import type { AuthProvider } from "@/app/_types/__generated__/graphql";
 

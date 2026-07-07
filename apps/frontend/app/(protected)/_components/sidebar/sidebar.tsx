@@ -1,3 +1,7 @@
+import { Mountain } from "lucide-react";
+import Link from "next/link";
+
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Tooltip,
@@ -5,9 +9,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn, getInitials } from "@/lib/utils";
-
-import { Mountain } from "lucide-react";
-import Link from "next/link";
 
 import { LogOutButton } from "./_components/log-out-button";
 
@@ -58,7 +59,7 @@ export function Sidebar({ currentPath, items, user }: SidebarProps) {
                     <IconComponent className="size-5" />
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side="right">
                   <p>{item.label}</p>
                 </TooltipContent>
               </Tooltip>
@@ -72,8 +73,8 @@ export function Sidebar({ currentPath, items, user }: SidebarProps) {
             side="right"
             align="end"
             className="hover:bg-accent/80 group rounded-md transition-colors"
-          />
-          <ThemeSwitcher /> */}
+          /> */}
+          <ThemeSwitcher />
           {user ? (
             <>
               <Tooltip>
@@ -93,7 +94,7 @@ export function Sidebar({ currentPath, items, user }: SidebarProps) {
                     </Avatar>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side="right">
                   <p className="font-medium">{user.name}</p>
                 </TooltipContent>
               </Tooltip>

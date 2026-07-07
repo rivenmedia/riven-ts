@@ -1,8 +1,8 @@
 "use server";
 
-import { authorisedActionClient } from "@/lib/server-actions/action-client";
-
 import { redirect } from "next/navigation";
+
+import { authorisedActionClient } from "@/lib/server-actions/action-client";
 
 import { SetupForm } from "../_form-schemas/setup.schema";
 

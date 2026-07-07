@@ -1,8 +1,5 @@
 "use client";
 
-import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -16,6 +13,9 @@ import {
   type Locale,
   getDefaultClassNames,
 } from "react-day-picker";
+
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 function Calendar({
   className,

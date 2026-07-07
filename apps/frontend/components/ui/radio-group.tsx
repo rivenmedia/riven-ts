@@ -1,8 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-
 import { RadioGroup as RadioGroupPrimitive } from "radix-ui";
+
+import { cn } from "@/lib/utils";
 
 function RadioGroup({
   className,

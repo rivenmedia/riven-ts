@@ -1,10 +1,10 @@
 "use server";
 
-import { authClient } from "@/lib/auth/client";
-import { actionClient } from "@/lib/server-actions/action-client";
-
 import { redirect } from "next/navigation";
 import z from "zod";
+
+import { authClient } from "@/lib/auth/client";
+import { actionClient } from "@/lib/server-actions/action-client";
 
 import { registerSchema } from "../_form-schemas/register.schema";
 import { loginLogger } from "../_utils/logger";

@@ -1,5 +1,10 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
+import { Controller } from "react-hook-form";
+import { toast } from "react-toastify";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,11 +15,6 @@ import {
 } from "@/components/ui/card";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
-import { Controller } from "react-hook-form";
-import { toast } from "react-toastify";
 
 import { registerUser } from "../_actions/register.action";
 import { registerSchema } from "../_form-schemas/register.schema";

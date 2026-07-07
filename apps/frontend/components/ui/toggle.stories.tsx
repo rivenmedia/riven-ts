@@ -1,7 +1,7 @@
+import { Bold, Italic } from "lucide-react";
+
 import { preview } from "@/.storybook/preview";
 import { Toggle } from "@/components/ui/toggle";
-
-import { Bold, Italic } from "lucide-react";
 
 /**
  * A two-state button that can be either on or off.

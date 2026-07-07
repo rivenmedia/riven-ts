@@ -1,7 +1,7 @@
+import { LoaderCircle, Mail } from "lucide-react";
+
 import { preview } from "@/.storybook/preview";
 import { Button } from "@/components/ui/button";
-
-import { LoaderCircle, Mail } from "lucide-react";
 
 /**
  * Displays a button or a component that looks like a button.

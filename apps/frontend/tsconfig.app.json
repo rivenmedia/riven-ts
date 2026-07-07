@@ -3,7 +3,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "rootDirs": ["lib", "app", "components", "environment"],
+    "rootDir": ".",
     "outDir": "dist",
     "noEmit": false
   },

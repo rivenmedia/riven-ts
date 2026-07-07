@@ -1,3 +1,15 @@
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  AudioLinesIcon,
+  BotIcon,
+  ChevronDownIcon,
+  MoreHorizontalIcon,
+  PlusIcon,
+  SearchIcon,
+} from "lucide-react";
+import { useState } from "react";
+
 import { preview } from "@/.storybook/preview";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,18 +48,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  AudioLinesIcon,
-  BotIcon,
-  ChevronDownIcon,
-  MoreHorizontalIcon,
-  PlusIcon,
-  SearchIcon,
-} from "lucide-react";
-import { useState } from "react";
 
 /**
  * A container that groups related buttons together with consistent styling.

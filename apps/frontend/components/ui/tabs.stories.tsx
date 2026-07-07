@@ -1,7 +1,7 @@
+import { expect, userEvent, waitFor } from "storybook/test";
+
 import { preview } from "@/.storybook/preview";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-import { expect, userEvent, waitFor } from "storybook/test";
 
 /**
  * A set of layered sections of content—known as tab panels—that are displayed

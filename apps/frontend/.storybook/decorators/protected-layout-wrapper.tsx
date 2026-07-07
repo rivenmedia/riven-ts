@@ -1,5 +1,3 @@
-import { PageWrapper } from "@/app/(protected)/_components/page-wrapper";
-
 import {
   CalendarDays,
   FileClock,
@@ -13,6 +11,8 @@ import {
 import { DateTime } from "luxon";
 import { HttpResponse, http } from "msw";
 import { useParameter } from "storybook/internal/preview-api";
+
+import { PageWrapper } from "@/app/(protected)/_components/page-wrapper";
 
 import type { MswAddonParameters } from "../addons/msw";
 import type { User } from "@/lib/auth/types";
