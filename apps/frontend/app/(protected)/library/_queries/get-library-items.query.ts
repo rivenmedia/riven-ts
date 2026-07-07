@@ -3,7 +3,7 @@ import { type TypedDocumentNode, gql } from "@apollo/client";
 import type {
   GetLibraryItemsQuery,
   GetLibraryItemsQueryVariables,
-} from "../page.client.typegen";
+} from "./get-library-items.query.typegen";
 
 export const GET_LIBRARY_ITEMS_QUERY: TypedDocumentNode<
   GetLibraryItemsQuery,

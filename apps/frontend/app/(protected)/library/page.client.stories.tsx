@@ -3,6 +3,8 @@ import preview from "@/.storybook/preview";
 
 import { LibraryPage } from "./page.client";
 
+import type { UUID } from "node:crypto";
+
 const meta = preview.meta({
   title: "Pages / Library",
   component: LibraryPage,
@@ -20,6 +22,11 @@ const meta = preview.meta({
   },
   parameters: {
     layout: "fullscreen",
+    nextjs: {
+      navigation: {
+        pathname: "/library",
+      },
+    },
   },
   decorators: [ProtectedLayoutWrapper],
 });
@@ -28,32 +35,38 @@ export const Default = meta.story({
   args: {
     items: [
       {
-        id: self.crypto.randomUUID(),
+        __typename: "Movie",
+        id: self.crypto.randomUUID() as UUID,
         title: "The Matrix",
         posterPath: "https://picsum.photos/200/300?cache=1",
       },
       {
-        id: self.crypto.randomUUID(),
+        __typename: "Movie",
+        id: self.crypto.randomUUID() as UUID,
         title: "The Matrix Reloaded",
         posterPath: "https://picsum.photos/200/300?cache=2",
       },
       {
-        id: self.crypto.randomUUID(),
+        __typename: "Movie",
+        id: self.crypto.randomUUID() as UUID,
         title: "The Matrix Revolutions",
         posterPath: "https://picsum.photos/200/300?cache=3",
       },
       {
-        id: self.crypto.randomUUID(),
+        __typename: "Movie",
+        id: self.crypto.randomUUID() as UUID,
         title: "The Matrix Resurrections",
         posterPath: "https://picsum.photos/200/300?cache=4",
       },
       {
-        id: self.crypto.randomUUID(),
+        __typename: "Movie",
+        id: self.crypto.randomUUID() as UUID,
         title: "The Matrix Revisited",
         posterPath: "https://picsum.photos/200/300?cache=5",
       },
       {
-        id: self.crypto.randomUUID(),
+        __typename: "Movie",
+        id: self.crypto.randomUUID() as UUID,
         title: "The Matrix Revisited",
         posterPath: "https://picsum.photos/200/300?cache=6",
       },
