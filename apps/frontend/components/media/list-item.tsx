@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { type ComponentProps, useMemo } from "react";
 
-import { PortraitCard } from "./media/portrait-card";
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge";
+import { PortraitCard } from "./portrait-card";
 
-import type { MediaItem } from "./_types/__generated__/graphql";
+import type { MediaItem } from "@/app/_types/__generated__/graphql";
 
 interface ListItemProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,

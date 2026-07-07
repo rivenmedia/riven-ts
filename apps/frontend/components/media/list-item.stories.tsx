@@ -5,7 +5,7 @@ import { faker } from "@faker-js/faker";
 import { ListItem } from "./list-item";
 
 const meta = preview.meta({
-  title: "Components / List Item",
+  title: "Components / Media / List Item",
   component: ListItem,
   render: (args) => (
     <div className="w-96">
