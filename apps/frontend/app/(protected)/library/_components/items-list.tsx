@@ -19,10 +19,8 @@ export function ItemsList({ items }: ItemsListProps) {
             style={{ animationDelay: `${(i * 30).toString()}ms` }}
           >
             <ListItem
-              data={item}
-              indexer="tmdb"
-              // indexer={item.indexer}
-              type={item.type}
+              mediaItem={item}
+              indexer={item.__typename === "Movie" ? "tmdb" : "tvdb"}
               isSelectable
               // selectStore={itemsStore}
               className="aspect-2/3 w-full"

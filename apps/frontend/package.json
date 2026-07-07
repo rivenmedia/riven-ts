@@ -55,6 +55,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@faker-js/faker": "catalog:",
     "@graphql-codegen/cli": "catalog:",
     "@graphql-codegen/typescript": "catalog:",
     "@graphql-codegen/typescript-operations": "catalog:",

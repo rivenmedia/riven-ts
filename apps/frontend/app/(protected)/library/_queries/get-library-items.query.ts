@@ -14,6 +14,7 @@ export const GET_LIBRARY_ITEMS_QUERY: TypedDocumentNode<
       id
       title
       posterPath
+      type
     }
   }
 `;

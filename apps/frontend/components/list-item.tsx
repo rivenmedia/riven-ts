@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 
-import { useMemo } from "react";
+import Link from "next/link";
+import { type ComponentProps, useMemo } from "react";
 
 import { PortraitCard } from "./media/portrait-card";
 import { Badge } from "./ui/badge";
@@ -11,46 +12,41 @@ interface ListItemProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,
   "className"
 > {
-  data: MediaItem;
+  mediaItem: Pick<MediaItem, "id" | "title" | "posterPath" | "type" | "year">;
+  badge?: {
+    text: string;
+    variant: string;
+  };
   indexer?: string;
-  type?: string;
   isSelectable?: boolean;
 }
 
 export function ListItem({
   className,
+  badge,
   indexer,
-  type,
-  data,
-  isSelectable = true,
+  mediaItem,
+  isSelectable = false,
 }: ListItemProps) {
   // Normalize type for different indexers
   const normalisedType = useMemo(() => {
-    let t = type;
-
-    if (indexer === "anilist" && !t) {
-      t = data.type;
+    if (
+      (indexer === "tvdb" || indexer === "tmdb") &&
+      mediaItem.type === "show"
+    ) {
+      return "tv";
     }
 
-    if ((indexer === "tvdb" || indexer === "tmdb") && t === "show") {
-      t = "tv";
-    }
+    return mediaItem.type;
+  }, [mediaItem.type, indexer]);
 
-    // Ensure type is set if only in data
-    if (!t && data.type) {
-      t = data.type;
-    }
-
-    return t;
-  }, [data.type, indexer, type]);
-
-  const mediaURL = useMemo(() => {
-    if (!data.id) {
+  const mediaURL: ComponentProps<typeof Link>["href"] | null = useMemo(() => {
+    if (!mediaItem.id) {
       return null;
     }
 
     if (normalisedType === "person" || normalisedType === "company") {
-      return `/details/entity/${data.id}/${normalisedType}`;
+      return `/details/entity/${mediaItem.id}/${normalisedType}`;
     }
 
     if (
@@ -63,8 +59,8 @@ export function ListItem({
         params.push("indexer=tvdb");
       }
 
-      if (data.details_query) {
-        for (const [key, value] of Object.entries(data.details_query)) {
+      if (mediaItem.details_query) {
+        for (const [key, value] of Object.entries(mediaItem.details_query)) {
           params.push(
             `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
           );
@@ -73,49 +69,31 @@ export function ListItem({
       const queryParam = params.length > 0 ? `?${params.join("&")}` : "";
 
       // If indexer is undefined, assume tmdb behavior for now as default
-      return `/details/media/${data.id}/${normalisedType}${queryParam}`;
+      return `/details/media/${mediaItem.id}/${normalisedType}${queryParam}`;
     }
 
-    return `/details/${indexer}${normalisedType ? `/${normalisedType}` : ""}/${data.id}`;
-  }, [data.id, data.details_query, indexer, normalisedType]);
+    return `/details/${indexer}${normalisedType ? `/${normalisedType}` : ""}/${mediaItem.id}`;
+  }, [mediaItem.id, mediaItem.details_query, indexer, normalisedType]);
 
-  let subtitle = useMemo(() => {
+  const subtitle = useMemo(() => {
     const parts = [];
 
-    if (data.type === "tv" || normalisedType === "tv") {
+    if ([mediaItem.type, normalisedType].includes("tv")) {
       parts.push("TV");
-    } else if (data.type === "movie" || normalisedType === "movie") {
+    } else if ([mediaItem.type, normalisedType].includes("movie")) {
       parts.push("Movie");
-    } else if (data.type === "person" || normalisedType === "person") {
+    } else if ([mediaItem.type, normalisedType].includes("person")) {
       parts.push("Person");
-    } else if (data.type === "company" || normalisedType === "company") {
+    } else if ([mediaItem.type, normalisedType].includes("company")) {
       parts.push("Studio");
     }
 
-    if (data.year) {
-      parts.push(data.year);
+    if (mediaItem.year) {
+      parts.push(mediaItem.year);
     }
 
     return parts.join(" • ") || null;
-  }, [data.type, data.year, normalisedType]);
-
-  function getMediaHref(mediaURL: string) {
-    const [pathname, search = ""] = mediaURL.split("?");
-
-    if (pathname?.startsWith("/details/media/")) {
-      const [, , , id, mediaType] = pathname.split("/");
-      const basePath = `/details/media/${id}/${mediaType}`;
-
-      return search ? `${basePath}?${search}` : basePath;
-    }
-
-    if (pathname?.startsWith("/details/entity/")) {
-      const [, , , id, type] = pathname.split("/");
-      return `/details/entity/${id}/${type}`;
-    }
-
-    return mediaURL;
-  }
+  }, [mediaItem.type, mediaItem.year, normalisedType]);
 
   const containerClasses = cn(
     "group relative block w-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-primary rounded-xl",
@@ -123,39 +101,44 @@ export function ListItem({
   );
 
   function renderCardContent() {
-    console.log(data);
+    const badgeVariantClasses: Record<string, string> = {
+      success: "bg-green-600/90 text-white border-0",
+      error: "bg-red-600/90 text-white border-0",
+      default: "bg-yellow-600/90 text-white border-0",
+    };
+
     return (
       <PortraitCard
-        title={data.title}
+        title={mediaItem.title}
         subtitle={subtitle}
-        image={data.posterPath ?? null}
+        image={mediaItem.posterPath ?? null}
         isSelectable={isSelectable}
         // isSelected={
         //   isSelectable && !!data.riven_id && selectStore?.has(data.riven_id)
         // }
         // onSelectToggle={() => selectStore?.toggle(data.riven_id)}
-        // topRight={
-        //   data.badge && (
-        //     <Badge
-        //       className={cn(
-        //         "border-white/10 px-2 py-0.5 text-[10px] shadow-sm backdrop-blur-md",
-        //         badgeVariantClasses[data.badge.variant] ||
-        //           badgeVariantClasses["default"],
-        //       )}
-        //     >
-        //       {data.badge.text}
-        //     </Badge>
-        //   )
-        // }
+        topRight={
+          badge && (
+            <Badge
+              className={cn(
+                "border-white/10 px-2 py-0.5 text-[10px] shadow-sm backdrop-blur-md",
+                badgeVariantClasses[badge.variant] ??
+                  badgeVariantClasses["default"],
+              )}
+            >
+              {badge.text}
+            </Badge>
+          )
+        }
       />
     );
   }
 
   if (mediaURL) {
     return (
-      <a href={getMediaHref(mediaURL)} className={containerClasses}>
+      <Link href={mediaURL} className={containerClasses}>
         {renderCardContent()}
-      </a>
+      </Link>
     );
   }
 

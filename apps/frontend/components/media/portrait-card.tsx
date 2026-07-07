@@ -78,7 +78,7 @@ export function PortraitCard({
 
   function renderTopRightSlot() {
     return (
-      <div className="absolute top-3 right-3 z-20 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1">
+      <div className="absolute top-3 right-3 z-20 transition-transform duration-300">
         {topRight}
       </div>
     );
