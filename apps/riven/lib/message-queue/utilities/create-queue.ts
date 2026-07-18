@@ -15,16 +15,6 @@ export function createQueue(
     name,
     toMerged<QueueOptions, typeof options>(
       {
-        defaultJobOptions: {
-          removeOnComplete: {
-            age: 60 * 60 * 6,
-            count: 5000,
-          },
-          removeOnFail: {
-            age: 60 * 60 * 24,
-            count: 5000,
-          },
-        },
         connection: {
           enableOfflineQueue: false,
           url: settings.redisUrl,

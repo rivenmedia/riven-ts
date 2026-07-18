@@ -77,6 +77,14 @@ export function createPluginWorker<
         url: settings.redisUrl,
       },
       telemetry,
+      removeOnComplete: {
+        age: 60 * 60 * 6,
+        count: 5000,
+      },
+      removeOnFail: {
+        age: 60 * 60 * 24,
+        count: 5000,
+      },
     },
   );
 

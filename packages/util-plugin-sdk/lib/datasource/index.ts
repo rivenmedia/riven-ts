@@ -154,16 +154,6 @@ export abstract class BaseDataSource<
     this.#queueId = `${pluginSymbol.description ?? "unknown"}-${this.serviceName}-fetch-queue`;
     this.queue = new Queue(this.#queueId, {
       connection,
-      defaultJobOptions: {
-        removeOnComplete: {
-          age: 60,
-          count: 5000,
-        },
-        removeOnFail: {
-          age: 60 * 60 * 24,
-          count: 5000,
-        },
-      },
       telemetry,
     });
 
@@ -250,6 +240,14 @@ export abstract class BaseDataSource<
         ...(this.rateLimiterOptions && { limiter: this.rateLimiterOptions }),
         telemetry,
         concurrency: Math.max(1, Math.floor(this.concurrency)),
+        removeOnComplete: {
+          age: 60,
+          count: 5000,
+        },
+        removeOnFail: {
+          age: 60 * 60 * 24,
+          count: 5000,
+        },
       },
     );
 
