@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "format:check": "oxfmt --check . '!**/docker-data'",
-    "format:check:ci": "pnpm format:check --log-level warn",
+    "format:check:ci": "pnpm format:check",
     "format:fix": "oxfmt --write . '!**/docker-data'",
     "postinstall": "pnpm node .husky/install.mjs || true",
     "knip": "pnpm knip:prepare && knip",
