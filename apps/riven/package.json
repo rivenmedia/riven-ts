@@ -2,6 +2,9 @@
   "name": "@repo/riven",
   "version": "0.0.0",
   "private": true,
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": {
     "./workers/map-items-to-files": {
@@ -19,9 +22,6 @@
     "./database-metadata-cache": "./temp/metadata.json",
     "./wiki.config": "./wiki.config.ts"
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "pnpm build:program",
     "build:program": "tsc --build tsconfig.app.json",

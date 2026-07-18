@@ -24,6 +24,5 @@
     }
   ],
   "printWidth": 80,
-  "sortPackageJson": false,
   "ignorePatterns": ["pnpm-lock.yaml", "*.hbs", "**/docker-data", "**/.source"]
 }
