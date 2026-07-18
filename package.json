@@ -7,9 +7,9 @@
   "author": "Riven Media",
   "type": "module",
   "scripts": {
-    "format:check": "oxfmt --check . '!**/docker-data'",
+    "format:check": "oxfmt --check .",
     "format:check:ci": "pnpm format:check",
-    "format:fix": "oxfmt --write . '!**/docker-data'",
+    "format:fix": "oxfmt --write .",
     "postinstall": "pnpm node .husky/install.mjs || true",
     "knip": "pnpm knip:prepare && knip",
     "knip:ci:base": "pnpm knip --cache --no-exit-code",
