@@ -1,5 +1,4 @@
 import "./types/logform.ts";
-
 import { ecsFormat as baseEcsFormat } from "@elastic/ecs-winston-format";
 import path from "node:path";
 import { createLogger, format, transports } from "winston";

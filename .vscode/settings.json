@@ -91,5 +91,8 @@
     "**/dist": true,
     "**/.snapshot-riven.json": true,
     "**/Migration*.ts": true
-  }
+  },
+  "oxc.fmt.configPath": ".oxfmtrc.json",
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": true
 }

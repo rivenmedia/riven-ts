@@ -2,6 +2,9 @@
   "name": "@repo/plugin-plex",
   "version": "0.0.0",
   "private": true,
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -10,9 +13,6 @@
     },
     "./wiki.config": "./wiki.config.ts"
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",

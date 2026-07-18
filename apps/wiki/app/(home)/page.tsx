@@ -1,4 +1,5 @@
 import { StarCounter } from "@/components/star-counter";
+
 import {
   ArrowRight,
   BarChart3,

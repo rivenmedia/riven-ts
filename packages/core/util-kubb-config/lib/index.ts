@@ -26,10 +26,10 @@ export const buildKubbConfig = ({
       barrelType: false,
       path: outputPath,
       clean: true,
-      format: false, // Disable formatting to allow Prettier to handle it in the hooks.
+      format: false, // Disable formatting to allow Oxfmt to handle it in the hooks.
     },
     hooks: {
-      done: [`prettier --log-level silent --write ${outputPath}/**/*.ts`],
+      done: [`oxfmt --write ${outputPath}/**/*.ts`],
     },
     plugins: [
       pluginOas({
