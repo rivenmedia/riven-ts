@@ -2,12 +2,13 @@ import {
   type ConfigArray,
   baseEslintConfig,
 } from "@repo/core-util-eslint-config";
+import { nextJsEslintConfig } from "@repo/core-util-eslint-config/nextjs";
+
+import { globalIgnores } from "eslint/config";
 
 export default [
   ...baseEslintConfig,
-  {
-    ignores: [".source/", "scripts/"],
-  },
+  ...nextJsEslintConfig,
   {
     languageOptions: {
       parserOptions: {
@@ -15,4 +16,5 @@ export default [
       },
     },
   },
+  globalIgnores([".source/", "scripts/"]),
 ] satisfies ConfigArray;

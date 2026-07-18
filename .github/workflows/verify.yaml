@@ -51,6 +51,9 @@ jobs:
             runner-requirements:
               - redis-server
               - fuse
+          - name: Component tests
+            command: test:component
+            concurrency: "100%"
           - name: Check for missing migrations
             command: migration:check
             runner-requirements:

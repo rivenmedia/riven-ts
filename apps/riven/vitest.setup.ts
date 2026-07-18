@@ -4,8 +4,18 @@ import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
 import { type RedisClient, RedisConnection } from "bullmq";
 import { randomUUID } from "node:crypto";
 import { setEnvironmentData } from "node:worker_threads";
-import { type Mock, afterAll, beforeAll, beforeEach, expect, vi } from "vitest";
+import {
+  type Mock,
+  afterAll,
+  aroundEach,
+  beforeAll,
+  beforeEach,
+  expect,
+  vi,
+} from "vitest";
 import z from "zod";
+
+import { withLogContext } from "./lib/utilities/logger/log-context.ts";
 
 import type { RedisMemoryServer } from "redis-memory-server";
 
@@ -62,6 +72,8 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
   const { createDatabaseConfig } = await import("./lib/database/config.ts");
   const { SeedManager } = await import("@mikro-orm/seeder");
   const { SqliteDriver } = await import("@mikro-orm/sqlite");
+  const { initAuth } = await import("./lib/auth/auth.ts");
+
   const databaseConfig = await createDatabaseConfig();
 
   const { database, services } = await initORM({
@@ -79,6 +91,11 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
   });
 
   await database.orm.schema.create();
+
+  // Fork the entity manager to avoid global context errors
+  database.orm.em = database.orm.em.fork();
+
+  initAuth(database.orm);
 
   return {
     database,
@@ -172,4 +189,8 @@ beforeEach(async () => {
 afterAll(async () => {
   await redisConnection?.close();
   await redisServer?.stop();
+});
+
+aroundEach(async (runTest) => {
+  await withLogContext({ "riven.log.source": "core" }, runTest);
 });

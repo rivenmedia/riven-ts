@@ -14,6 +14,7 @@
   "importOrder": [
     "^@repo/(.*)$",
     "<THIRD_PARTY_MODULES>",
+    "^@/(.*)$",
     "^[./]",
     "<TS_TYPES>"
   ],

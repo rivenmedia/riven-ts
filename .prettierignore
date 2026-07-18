@@ -2,3 +2,9 @@ pnpm-lock.yaml
 *.hbs
 **/docker-data
 **/.source
+svelte-frontend
+out
+dist
+playwright-report
+storybook-static
+test-results

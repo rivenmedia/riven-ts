@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./lib/base.ts"
+    ".": "./lib/base.ts",
+    "./nextjs": "./lib/nextjs.ts",
+    "./storybook": "./lib/storybook.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
@@ -15,6 +17,7 @@
     "@eslint/config-helpers": "catalog:",
     "@eslint/js": "catalog:",
     "@eslint/json": "catalog:",
+    "@next/eslint-plugin-next": "catalog:",
     "@repo/core-util-typescript-config": "workspace:^",
     "@typescript-eslint/parser": "catalog:",
     "@vitest/eslint-plugin": "catalog:",
@@ -22,12 +25,18 @@
     "eslint-config-turbo": "catalog:",
     "eslint-import-resolver-typescript": "catalog:",
     "eslint-plugin-import-x": "catalog:",
+    "eslint-plugin-jsx-a11y": "catalog:",
+    "eslint-plugin-react": "catalog:",
+    "eslint-plugin-react-hooks": "catalog:",
+    "eslint-plugin-storybook": "catalog:",
     "globals": "catalog:",
     "typescript-eslint": "catalog:"
   },
   "devDependencies": {
+    "@types/eslint-plugin-jsx-a11y": "catalog:",
     "@types/node": "catalog:",
     "eslint": "catalog:",
+    "eslint-plugin-playwright": "catalog:",
     "typescript": "catalog:"
   },
   "peerDependencies": {

@@ -1,9 +1,11 @@
 import { includeIgnoreFile } from "@eslint/config-helpers";
 import turboConfig from "eslint-config-turbo/flat";
+import { globalIgnores } from "eslint/config";
 import { fileURLToPath } from "node:url";
 
 import { prettier } from "./formatting/prettier.ts";
 import { jsonConfig } from "./json/json.ts";
+import { playwrightConfig } from "./testing/playwright.ts";
 import { vitestConfig } from "./testing/vitest.ts";
 import { typescriptCore } from "./typescript/typescript-core.ts";
 
@@ -22,12 +24,11 @@ export const baseEslintConfig: ConfigArray = [
   ...prettier,
   ...jsonConfig,
   ...vitestConfig,
-  {
-    ignores: [
-      "**/__generated__/**",
-      "**/*.typegen.ts",
-      "**/.next/**",
-      "**/logs/**",
-    ],
-  },
+  ...playwrightConfig,
+  globalIgnores([
+    "**/__generated__/**",
+    "**/*.typegen.ts",
+    "**/.next/**",
+    "**/logs/**",
+  ]),
 ];

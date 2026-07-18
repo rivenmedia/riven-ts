@@ -2,7 +2,7 @@ import path from "node:path";
 import { loadEnvFile } from "node:process";
 import { fileURLToPath } from "node:url";
 import swc from "unplugin-swc";
-import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
+import { defineConfig } from "vitest/config";
 
 export const baseVitestConfig = defineConfig(({ mode }) => {
   try {
@@ -19,24 +19,29 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
 
   const isWatch = process.argv.includes("--watch");
 
-  return mergeConfig(
-    { test: configDefaults },
-    defineConfig({
-      test: {
-        restoreMocks: true,
-        coverage: {
-          enabled: !isWatch,
-          exclude: ["**/__generated__/**", "**/__tests__/**"],
-        },
-        setupFiles: [
-          fileURLToPath(
-            import.meta.resolve("./setup-files/restore-environment.ts"),
-          ),
+  return defineConfig({
+    test: {
+      globals: true, // Enables testing-library auto cleanup
+      restoreMocks: true,
+      coverage: {
+        enabled: !isWatch,
+        include: ["**/*.?(c|m)[jt]s?(x)"],
+        exclude: [
+          "**/__{tests,generated}__/**",
+          "*/*.{config,setup}.?(c|m)[jt]s?(x)",
+          "graphql-codegen.ts",
+          "*.typegen.ts",
+          "*.d.ts",
         ],
-        retry: process.env["CI"] ? 2 : 0,
-        hookTimeout: 30_000,
       },
-      plugins: [swc.vite()],
-    }),
-  );
+      setupFiles: [
+        fileURLToPath(
+          import.meta.resolve("./setup-files/restore-environment.ts"),
+        ),
+      ],
+      retry: process.env["CI"] ? 2 : 0,
+      hookTimeout: 30_000,
+    },
+    plugins: [swc.vite()],
+  });
 });

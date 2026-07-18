@@ -11,6 +11,10 @@
     "./settings.type": {
       "production": "./dist/schema/types/settings.type.js",
       "default": "./lib/schema/types/settings.type.ts"
+    },
+    "./enums/log-level.enum": {
+      "production": "./dist/schema/enums/log-level.enum.js",
+      "default": "./lib/schema/enums/log-level.enum.ts"
     }
   },
   "files": [

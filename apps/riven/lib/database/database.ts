@@ -1,12 +1,13 @@
+import { AuthService } from "./services/auth/auth.service.ts";
 import { DownloaderService } from "./services/downloader/downloader.service.ts";
 import { IndexerService } from "./services/indexer/indexer.service.ts";
 import { ItemRequestService } from "./services/item-request/item-request.service.ts";
-import { MediaEntryService } from "./services/media-entry/media-entry.service.js";
+import { MediaEntryService } from "./services/media-entry/media-entry.service.ts";
 import { MediaItemService } from "./services/media-item/media-item.service.ts";
 import { PostProcessingService } from "./services/post-processing/post-processing.service.ts";
 import { RetryLibraryService } from "./services/retry-library/retry-library.service.ts";
 import { ScraperService } from "./services/scraper/scraper.service.ts";
-import { StreamService } from "./services/stream/stream.service.js";
+import { StreamService } from "./services/stream/stream.service.ts";
 import { SubtitlesService } from "./services/subtitles/subtitles.service.ts";
 import { VfsService } from "./services/vfs/vfs.service.ts";
 
@@ -18,6 +19,7 @@ export interface Database {
 }
 
 export interface Services {
+  authService: AuthService;
   downloaderService: DownloaderService;
   indexerService: IndexerService;
   itemRequestService: ItemRequestService;
@@ -55,6 +57,7 @@ export async function initORM(options: Partial<Options>) {
   };
 
   services = {
+    authService: new AuthService(orm),
     downloaderService: new DownloaderService(orm),
     indexerService: new IndexerService(orm),
     itemRequestService: new ItemRequestService(orm),
