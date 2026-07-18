@@ -1,5 +1,6 @@
 import Fuse from "@zkochan/fuse-native";
 import fs from "node:fs";
+import path from "node:path";
 import { expect, vi } from "vitest";
 
 import { it } from "../../__tests__/test-context.ts";
@@ -199,5 +200,53 @@ it("returns file stats for episodes", async ({
       size: mediaEntry.fileSize,
       nlink: 1,
     });
+  });
+});
+
+it("does not return file stats for movie files with non-matching extensions", async ({
+  seeders: { seedCompletedMovie },
+}) => {
+  const { movie } = await seedCompletedMovie();
+
+  const [mediaEntry] = await movie.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  const callback = vi.fn();
+
+  const unknownFilePath = mediaEntry.path.replace(
+    path.extname(mediaEntry.path),
+    ".unknown-extension",
+  );
+
+  getattrSync(`/${mediaEntry.baseDirectory}/${unknownFilePath}`, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(Fuse.ENOENT);
+  });
+});
+
+it("does not return file stats for episode files with non-matching extensions", async ({
+  seeders: { seedCompletedShow },
+}) => {
+  const { episodes: [episode] = [] } = await seedCompletedShow();
+
+  expect.assert(episode);
+
+  const [mediaEntry] = await episode.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  const callback = vi.fn();
+
+  const unknownFilePath = mediaEntry.path.replace(
+    path.extname(mediaEntry.path),
+    ".unknown-extension",
+  );
+
+  getattrSync(`/${mediaEntry.baseDirectory}/${unknownFilePath}`, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(Fuse.ENOENT);
   });
 });

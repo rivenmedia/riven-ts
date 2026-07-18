@@ -1,3 +1,4 @@
+import { NotFoundError } from "@mikro-orm/core";
 import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
 import { isZodErrorLike } from "zod-validation-error";
 
@@ -49,6 +50,16 @@ export const getattrSync = function (path, callback) {
 
       if (isZodErrorLike(error)) {
         logger.error(`VFS getattr validation error for path ${path}`, {
+          err: error,
+        });
+
+        process.nextTick(callback, Fuse.ENOENT);
+
+        return;
+      }
+
+      if (error instanceof NotFoundError) {
+        logger.error(`VFS getattr NotFoundError for path ${path}`, {
           err: error,
         });
 
