@@ -4,6 +4,7 @@ import path from "node:path";
 import { expect, vi } from "vitest";
 
 import { it } from "../../__tests__/test-context.ts";
+import { PathInfo } from "../../database/services/vfs/schemas/path-info.schema.ts";
 import { getattrSync } from "./getattr.ts";
 
 const dirMode = fs.constants.S_IFDIR | 0o755;
@@ -55,6 +56,36 @@ it("returns ENOENT for unknown paths", async () => {
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith(Fuse.ENOENT);
+  });
+});
+
+it("returns file stats for movie directories", async ({
+  seeders: { seedCompletedMovie },
+}) => {
+  const { movie } = await seedCompletedMovie();
+  const [mediaEntry] = await movie.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  const callback = vi.fn();
+
+  const pathInfo = PathInfo.parse(
+    `/${mediaEntry.baseDirectory}/${mediaEntry.path}`,
+  );
+
+  getattrSync(pathInfo.dir, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(null, {
+      atime: expect.any(Date),
+      ctime: expect.any(Date),
+      mtime: expect.any(Date),
+      mode: dirMode,
+      gid: expect.any(Number),
+      uid: expect.any(Number),
+      size: 0,
+      nlink: 2,
+    });
   });
 });
 

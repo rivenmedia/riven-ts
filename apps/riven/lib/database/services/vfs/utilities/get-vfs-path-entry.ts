@@ -30,11 +30,13 @@ export async function getEntry(em: EntityManager, pathInfo: PathInfo) {
         Movie,
         {
           tmdbId: pathInfo.tmdbId,
-          filesystemEntries: {
-            path: {
-              $like: `%${pathInfo.base}`,
+          ...(pathInfo.ext && {
+            filesystemEntries: {
+              path: {
+                $like: `%${pathInfo.base}`,
+              },
             },
-          },
+          }),
         },
         { fields: ["createdAt", "updatedAt", "filesystemEntries.fileSize"] },
       );
