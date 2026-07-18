@@ -1,11 +1,11 @@
 import { $ } from "execa";
 
 export const formatOutputCode = async (files: string[]) => {
-  const { exitCode } = await $`pnpm prettier --write ${files.join(" ")}`;
+  const { exitCode } = await $`pnpm oxfmt --write ${files.join(" ")}`;
 
   if (exitCode && exitCode !== 0) {
-    throw new Error(`Prettier process exited with code ${exitCode}`);
+    throw new Error(`Oxfmt process exited with code ${exitCode}`);
   }
 
-  return "Prettier formatting complete.";
+  return "Oxfmt formatting complete.";
 };

@@ -1,5 +1,4 @@
 import "@/app/global.css";
-
 import SearchDialog from "fumadocs-ui/components/dialog/search-default";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import { Inter } from "next/font/google";

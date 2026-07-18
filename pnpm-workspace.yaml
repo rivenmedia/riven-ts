@@ -47,7 +47,6 @@ catalog:
   "@swc-node/register": ^1.11.1
   "@swc/core": ^1.15.40
   "@tailwindcss/postcss": ^4.3.0
-  "@trivago/prettier-plugin-sort-imports": ^6.0.2
   "@tsconfig/node-ts": ^23.6.4
   "@tsconfig/node24": ^24.0.4
   "@tsconfig/recommended": ^1.0.13
@@ -106,8 +105,8 @@ catalog:
   msw: 2.13.2
   next: ^16.2.6
   nyc: ^18.0.0
+  oxfmt: ^0.59.0
   postcss: ^8.5.10
-  prettier: ^3.8.3
   react: ^19.2.6
   react-dom: ^19.2.6
   redis-memory-server: ^0.16.1

@@ -59,14 +59,14 @@ it.concurrent("generates a package", ({ packageDir }) => {
   expect(contents).toContain("package.json");
 });
 
-it.concurrent(
-  "generates a package with the correct name in package.json",
-  ({ packageFullName, packageDir }) => {
-    const packageJson = require(`${packageDir}/package.json`);
+it.concurrent("generates a package with the correct name in package.json some readlly long string string string string string string string string string string", ({
+  packageFullName,
+  packageDir,
+}) => {
+  const packageJson = require(`${packageDir}/package.json`);
 
-    expect(packageJson.name).toBe(packageFullName);
-  },
-);
+  expect(packageJson.name).toBe(packageFullName);
+});
 
 it.concurrent.for(["test", "lint", "check-types", "build"] as const)(
   "passes pnpm %s",

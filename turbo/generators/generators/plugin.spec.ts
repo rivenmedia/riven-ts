@@ -72,42 +72,40 @@ it.concurrent("generates the wiki config", ({ packageDir }) => {
   expect(contents).toContain("wiki.config.ts");
 });
 
-it.concurrent(
-  "adds the plugin as a dependency to @repo/wiki",
-  ({ packageFullName }) => {
-    const packageJson: PackageJson = require(
-      `${process.cwd()}/apps/wiki/package.json`,
-    );
+it.concurrent("adds the plugin as a dependency to @repo/wiki", ({
+  packageFullName,
+}) => {
+  const packageJson: PackageJson = require(
+    `${process.cwd()}/apps/wiki/package.json`,
+  );
 
-    expect(packageJson.dependencies).toHaveProperty(
-      packageFullName,
-      "workspace:^",
-    );
-  },
-);
+  expect(packageJson.dependencies).toHaveProperty(
+    packageFullName,
+    "workspace:^",
+  );
+});
 
-it.concurrent(
-  "adds the plugin as a dependency to @repo/riven",
-  ({ packageFullName }) => {
-    const packageJson: PackageJson = require(
-      `${process.cwd()}/apps/riven/package.json`,
-    );
+it.concurrent("adds the plugin as a dependency to @repo/riven", ({
+  packageFullName,
+}) => {
+  const packageJson: PackageJson = require(
+    `${process.cwd()}/apps/riven/package.json`,
+  );
 
-    expect(packageJson.dependencies).toHaveProperty(
-      packageFullName,
-      "workspace:^",
-    );
-  },
-);
+  expect(packageJson.dependencies).toHaveProperty(
+    packageFullName,
+    "workspace:^",
+  );
+});
 
-it.concurrent(
-  "generates a plugin with the correct name in package.json",
-  ({ packageFullName, packageDir }) => {
-    const packageJson = require(`${packageDir}/package.json`);
+it.concurrent("generates a plugin with the correct name in package.json", ({
+  packageFullName,
+  packageDir,
+}) => {
+  const packageJson = require(`${packageDir}/package.json`);
 
-    expect(packageJson.name).toBe(packageFullName);
-  },
-);
+  expect(packageJson.name).toBe(packageFullName);
+});
 
 it.concurrent.for([
   "test",

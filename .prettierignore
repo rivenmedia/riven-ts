@@ -1,4 +1,0 @@
-pnpm-lock.yaml
-*.hbs
-**/docker-data
-**/.source

@@ -68,7 +68,8 @@ export function registerPackageJsonFieldsHelper(plop: PlopTypes.NodePlopAPI) {
   plop.setHelper(
     "packageJsonFields",
     function (
-      this: Record<string, unknown>, // Handlebars context
+      // Handlebars context
+      this: Record<string, unknown>,
       packageType: PackageType,
       packageJsonFieldType: keyof PackageJsonDefinition,
     ) {

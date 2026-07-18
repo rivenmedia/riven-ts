@@ -1,0 +1,29 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "semi": true,
+  "singleQuote": false,
+  "sortImports": {
+    "internalPattern": ["~/", "@/", "@repo/", "#"],
+    "sortSideEffects": false,
+    "groups": [
+      "internal",
+      ["builtin", "external"],
+      "subpath",
+      ["parent", "sibling", "index"],
+      "style",
+      "unknown",
+      "type"
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["*.json", "*.jsonc", "*.json5"],
+      "options": {
+        "trailingComma": "none"
+      }
+    }
+  ],
+  "printWidth": 80,
+  "sortPackageJson": false,
+  "ignorePatterns": ["pnpm-lock.yaml", "*.hbs", "**/docker-data", "**/.source"]
+}

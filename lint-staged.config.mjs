@@ -3,7 +3,7 @@
  */
 export default {
   "*.{js,jsx,cjs,mjs,ts,tsx,cts,mts,json,md,mdx,html,yml,yaml}":
-    "prettier --write",
+    "oxfmt --write",
   "package.json": "sort-package-json",
   "*-settings.schema.ts": async () => "turbo codegen:config-docs",
 };
