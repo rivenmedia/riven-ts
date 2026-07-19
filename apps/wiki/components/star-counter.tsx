@@ -28,7 +28,7 @@ export function StarCounter({ targetCount }: { targetCount: number }) {
           function tick(now: number) {
             const elapsed = now - start;
             const progress = Math.min(elapsed / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
+            const eased = 1 - (1 - progress) ** 3;
             setCount(Math.floor(eased * targetCount));
 
             if (progress < 1) {

@@ -57,7 +57,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-use-before-define": "off",
         "id-length": "off",
         "max-classes-per-file": "off",
-        "prefer-exponentiation-operator": "off",
         "no-warning-comments": "off",
         "no-duplicate-imports": "off",
         "no-underscore-dangle": "off",
