@@ -11,6 +11,10 @@ export const oxlintPluginTypescriptConfig = defineConfig({
       rules: {
         "typescript/ban-types": "off",
         "typescript/prefer-optional-chain": "deny",
+        "typescript/no-extraneous-class": [
+          "deny",
+          { allowWithDecorator: true },
+        ],
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "typescript/explicit-function-return-type": "off",
@@ -29,7 +33,6 @@ export const oxlintPluginTypescriptConfig = defineConfig({
         "typescript/consistent-return": "off",
         "typescript/require-array-sort-compare": "off",
         "typescript/consistent-type-exports": "off",
-        "typescript/no-extraneous-class": "off",
       },
       env: {
         ...globals.node,
