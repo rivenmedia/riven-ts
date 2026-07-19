@@ -36,7 +36,7 @@ const packageTypeFields: Partial<
     },
     scripts: {
       build: "tsc --project tsconfig.lib.json",
-      lint: "oxlint",
+      lint: "oxlint --type-aware --type-check",
       "lint:fix": "pnpm lint --fix",
       test: "vitest run --passWithNoTests",
       "test:watch": "vitest",
