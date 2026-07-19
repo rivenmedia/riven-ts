@@ -37,7 +37,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/no-useless-promise-resolve-reject": "off",
         "unicorn/prefer-at": "off",
         "unicorn/throw-new-error": "off",
-        "unicorn/prefer-string-slice": "off",
         "unicorn/new-for-builtins": "off",
         "unicorn/catch-error-name": "off",
         "unicorn/no-process-exit": "off",

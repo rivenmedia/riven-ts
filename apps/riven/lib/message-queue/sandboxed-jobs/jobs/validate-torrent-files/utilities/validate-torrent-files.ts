@@ -128,7 +128,7 @@ export const validateTorrentFiles = async (
 
     assert(
       groupMap.size >= item.expectedFileCount,
-      `${item.type.substring(0, 1).toUpperCase() + item.type.substring(1)} torrent must have at least ${item.expectedFileCount.toString()} ${item.__typename === "Movie" ? "movies" : "episodes"}, but has ${groupMap.size.toString()}`,
+      `${item.type.slice(0, 1).toUpperCase() + item.type.slice(1)} torrent must have at least ${item.expectedFileCount.toString()} ${item.__typename === "Movie" ? "movies" : "episodes"}, but has ${groupMap.size.toString()}`,
     );
 
     const validFiles: MatchedFile[] = [];
