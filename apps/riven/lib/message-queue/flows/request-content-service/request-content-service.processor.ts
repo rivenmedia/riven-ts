@@ -142,9 +142,9 @@ export const requestContentServiceProcessor =
                     : await itemRequestService.requestMovie(item);
 
                 if (result.requestType === "create") {
-                  newItemsCount++;
+                  newItemsCount += 1;
                 } else {
-                  updatedItemsCount++;
+                  updatedItemsCount += 1;
                 }
 
                 sendEvent({

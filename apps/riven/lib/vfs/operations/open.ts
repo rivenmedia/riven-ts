@@ -51,7 +51,7 @@ async function serveSubtitleFile(pathInfo: PathInfo) {
   assert(subtitleEntry, new FuseError(Fuse.ENOENT, "Subtitle not found"));
 
   const contentBuffer = Buffer.from(subtitleEntry.content, "utf8");
-  const nextFd = fd++;
+  const nextFd = (fd += 1);
 
   fdToFileHandleMeta.set(nextFd, {
     type: "subtitle",
@@ -77,7 +77,7 @@ async function serveMediaFile(pathInfo: PathInfo) {
 
   const streamLink = await getStreamLinkFromCacheOrQueue(entry);
 
-  const nextFd = fd++;
+  const nextFd = (fd += 1);
 
   fileNameToFileChunkCalculationsMap.set(
     entry.originalFilename,

@@ -36,7 +36,7 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
     for (
       let seasonNumber = 1;
       seasonNumber <= this.#seasonCount;
-      seasonNumber++
+      seasonNumber += 1
     ) {
       const season = await new SeasonFactory(em).createOne({
         tvdbId: context.show.tvdbId,
@@ -53,13 +53,13 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
       for (
         let episodeNumber = 1;
         episodeNumber <= this.#episodesPerSeason;
-        episodeNumber++
+        episodeNumber += 1
       ) {
         season.episodes.add(
           new EpisodeFactory(em).makeEntity({
             tvdbId: context.show.tvdbId,
             number: episodeNumber,
-            absoluteNumber: absoluteEpisodeNumber++,
+            absoluteNumber: (absoluteEpisodeNumber += 1),
             releaseDate,
             itemRequest: context.show.itemRequest,
             indexedAt,

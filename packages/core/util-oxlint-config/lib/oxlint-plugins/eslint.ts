@@ -33,6 +33,7 @@ export const oxlintPluginEslintConfig = defineConfig({
         // "no-underscore-dangle": ["warn", { allow: ["__typename"] }],
         "no-nested-ternary": "allow", // Handled by unicorn/no-nested-ternary
         "no-console": ["error", { allow: ["debug"] }],
+        "no-plusplus": ["deny", { allowForLoopAfterthoughts: true }],
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "no-magic-numbers": "off",
@@ -53,7 +54,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-shadow": "off",
         "no-useless-return": "off",
         "arrow-body-style": "off",
-        "no-plusplus": "off",
         "no-bitwise": "off",
         "prefer-arrow-callback": "off",
         "no-implicit-coercion": "off",

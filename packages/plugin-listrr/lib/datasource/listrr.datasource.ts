@@ -84,7 +84,7 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
           }
         }
 
-        page++;
+        page += 1;
       }
     }
 
@@ -139,7 +139,7 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
           }
         }
 
-        page++;
+        page += 1;
       }
     }
 

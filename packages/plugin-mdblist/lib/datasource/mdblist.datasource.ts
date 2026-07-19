@@ -87,7 +87,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
         if (parsed.movies) {
           for (const item of parsed.movies) {
             if (item.id) {
-              pageItemCount++;
+              pageItemCount += 1;
 
               if (!this.#seenMovieIds.has(item.id)) {
                 movieIdsMap.set(item.id, {
@@ -104,7 +104,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
         if (parsed.shows) {
           for (const item of parsed.shows) {
             if (item.id) {
-              pageItemCount++;
+              pageItemCount += 1;
 
               if (!this.#seenShowIds.has(item.id)) {
                 showIdsMap.set(item.id, {
