@@ -18,7 +18,7 @@ export const baseOxlintConfig = defineConfig({
   categories: {
     correctness: "error",
     suspicious: "error",
-    pedantic: "warn",
+    pedantic: "error",
     perf: "error",
     style: "error",
     restriction: "error",
