@@ -9,4 +9,4 @@ if (
 
 const husky = (await import("husky")).default;
 
-console.log(husky());
+console.debug(husky());

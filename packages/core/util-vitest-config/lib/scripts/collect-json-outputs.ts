@@ -73,7 +73,7 @@ try {
   };
 
   if (directoriesWithCoverage.length > 0) {
-    console.log(
+    console.debug(
       `Found coverage.json in: ${directoriesWithCoverage
         .map(replaceDotPatterns)
         .join(", ")}`,
@@ -82,8 +82,9 @@ try {
     throw new Error("No coverage files found");
   }
 
-  console.log(`Coverage collected into: ${path.join(process.cwd())}`);
+  console.debug(`Coverage collected into: ${path.join(process.cwd())}`);
 } catch (error) {
+  // oxlint-disable-next-line no-console
   console.error("Error collecting coverage files:", error);
 
   process.exitCode = 1;

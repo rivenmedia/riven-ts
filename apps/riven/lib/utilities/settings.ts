@@ -33,10 +33,10 @@ class Settings {
     this.settings = deepFreeze(RivenSettings.parse(rawSettings));
 
     if (this.settings.printConfigurationOnStartup) {
-      console.log("#################");
-      console.log("Effective core configuration:");
-      console.log(this.settings);
-      console.log("#################");
+      console.debug("#################");
+      console.debug("Effective core configuration:");
+      console.debug(this.settings);
+      console.debug("#################");
     }
 
     setEnvironmentData("settings", rawSettings);

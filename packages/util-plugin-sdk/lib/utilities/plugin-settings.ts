@@ -170,10 +170,10 @@ export class PluginSettings {
     }
 
     if (this.#printConfig) {
-      console.log("#################");
-      console.log(`Effective ${configPrefix} configuration:`);
-      console.log(parsedSettings);
-      console.log("#################");
+      console.debug("#################");
+      console.debug(`Effective ${configPrefix} configuration:`);
+      console.debug(parsedSettings);
+      console.debug("#################");
     }
   }
 

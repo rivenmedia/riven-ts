@@ -34,7 +34,7 @@ export const it = testBase
 
     if (/^(\*|msw)/.test(process.env["DEBUG"] ?? "")) {
       server.events.on("response:mocked", ({ request, response }) => {
-        console.log(
+        console.debug(
           "%s %s received %s %s",
           request.method,
           request.url,

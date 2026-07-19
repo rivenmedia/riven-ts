@@ -32,6 +32,7 @@ export const oxlintPluginEslintConfig = defineConfig({
         "require-await": "off", // Handled by typescript/require-await
         // "no-underscore-dangle": ["warn", { allow: ["__typename"] }],
         "no-nested-ternary": "allow", // Handled by unicorn/no-nested-ternary
+        "no-console": ["error", { allow: ["debug"] }],
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "no-magic-numbers": "off",
@@ -59,7 +60,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-negated-condition": "off",
         "no-lonely-if": "off",
         "prefer-named-capture-group": "off",
-        "no-console": "off",
         "no-use-before-define": "off",
         "id-length": "off",
         "capitalized-comments": "off",

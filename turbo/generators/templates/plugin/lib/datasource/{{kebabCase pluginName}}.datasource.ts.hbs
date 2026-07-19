@@ -23,7 +23,7 @@ export class {{pascalCase pluginName}}API extends BaseDataSource<{{pascalCase pl
     try {
       const response = await this.get<unknown>("data");
 
-      console.log(response);
+      console.log(response); // oxlint-disable-line no-console
     } catch {
       throw new {{pascalCase pluginName}}APIError("Failed to fetch data");
     }
