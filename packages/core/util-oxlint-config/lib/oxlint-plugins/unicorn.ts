@@ -36,7 +36,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/no-anonymous-default-export": "off",
         "unicorn/no-negated-condition": "off",
         "unicorn/no-useless-promise-resolve-reject": "off",
-        "unicorn/prefer-array-flat": "off",
         "unicorn/prefer-at": "off",
         "unicorn/throw-new-error": "off",
         "unicorn/prefer-string-slice": "off",
