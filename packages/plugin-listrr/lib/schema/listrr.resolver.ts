@@ -12,7 +12,7 @@ import type { ListIdsArguments } from "./arguments/list-ids.arguments.ts";
 @Resolver()
 export class ListrrResolver {
   @Query(() => Boolean)
-  listrrIsValid(
+  async listrrIsValid(
     @PluginDataSource(pluginConfig.name, ListrrAPI) api: ListrrAPI,
   ): Promise<boolean> {
     return api.validate();
@@ -20,7 +20,7 @@ export class ListrrResolver {
 
   @CacheControl({ maxAge: 300 })
   @Query(() => [ExternalIds])
-  listrrMovies(
+  async listrrMovies(
     @Args() { listIds }: ListIdsArguments,
     @PluginDataSource(pluginConfig.name, ListrrAPI) api: ListrrAPI,
   ): Promise<ExternalIds[]> {
@@ -29,7 +29,7 @@ export class ListrrResolver {
 
   @CacheControl({ maxAge: 300 })
   @Query(() => [ExternalIds])
-  listrrShows(
+  async listrrShows(
     @Args() { listIds }: ListIdsArguments,
     @PluginDataSource(pluginConfig.name, ListrrAPI) api: ListrrAPI,
   ): Promise<ExternalIds[]> {

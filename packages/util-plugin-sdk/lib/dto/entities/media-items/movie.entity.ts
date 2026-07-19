@@ -30,7 +30,7 @@ export class Movie extends MediaItem {
   @IsNumberString()
   tmdbId!: string;
 
-  getMediaEntries() {
+  async getMediaEntries() {
     return this.filesystemEntries.matching<MediaEntry>({
       where: {
         type: "media",

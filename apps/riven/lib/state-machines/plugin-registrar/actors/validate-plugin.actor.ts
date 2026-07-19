@@ -50,7 +50,7 @@ export const validatePlugin = fromCallback<
         const pluginName =
           plugin.config.name.description ?? String(plugin.config.name);
 
-        const { result: isValid, timeTaken } = await benchmark(() =>
+        const { result: isValid, timeTaken } = await benchmark(async () =>
           plugin.config.validator({
             settings,
             dataSources,

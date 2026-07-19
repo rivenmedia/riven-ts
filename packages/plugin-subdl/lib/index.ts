@@ -121,7 +121,7 @@ export default {
     },
   },
   settingsSchema: SubdlSettings,
-  validator() {
+  async validator() {
     return Promise.resolve(true);
   },
 } satisfies RivenPlugin as RivenPlugin;

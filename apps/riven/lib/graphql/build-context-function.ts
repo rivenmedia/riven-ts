@@ -10,7 +10,7 @@ import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context
 export const buildContextFunction: (
   sendEvent: GraphQLContext["sendEvent"],
 ) => ContextFunction<[ExpressContextFunctionArgument], ApolloServerContext> =
-  (sendEvent) => () =>
+  (sendEvent) => async () =>
     Promise.resolve({
       [CoreKey]: {
         em: database.em.fork(),

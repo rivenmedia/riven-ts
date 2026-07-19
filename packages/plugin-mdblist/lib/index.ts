@@ -27,7 +27,7 @@ export default {
     },
   },
   settingsSchema: MdbListSettings,
-  validator() {
+  async validator() {
     return Promise.resolve(true);
   },
 } satisfies RivenPlugin as RivenPlugin;

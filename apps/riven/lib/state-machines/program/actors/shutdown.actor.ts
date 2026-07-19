@@ -17,7 +17,7 @@ async function forceCloseWorker(worker: Worker) {
   }
 }
 
-function attemptGracefulShutdown(worker: Worker) {
+async function attemptGracefulShutdown(worker: Worker) {
   return new Promise<void>((resolve) => {
     logger.debug(`Attempting graceful shutdown of worker ${worker.name}...`);
 
@@ -88,13 +88,15 @@ export const shutdown = fromPromise<undefined, ShutdownInput>(
 
     // Close workers
     await Promise.all(
-      flowWorkers.map(({ worker }) => attemptGracefulShutdown(worker)),
+      flowWorkers.map(async ({ worker }) => attemptGracefulShutdown(worker)),
     );
 
     logger.debug("Flow workers closed");
 
     await Promise.all(
-      sandboxedWorkers.map(({ worker }) => attemptGracefulShutdown(worker)),
+      sandboxedWorkers.map(async ({ worker }) =>
+        attemptGracefulShutdown(worker),
+      ),
     );
 
     logger.debug("Sandboxed workers closed");
@@ -103,7 +105,9 @@ export const shutdown = fromPromise<undefined, ShutdownInput>(
       plugins
         .values()
         .flatMap(({ dataSources }) =>
-          dataSources.values().map(({ worker }) => forceCloseWorker(worker)),
+          dataSources
+            .values()
+            .map(async ({ worker }) => forceCloseWorker(worker)),
         ),
     );
 

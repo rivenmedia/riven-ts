@@ -37,7 +37,7 @@ declare module "bullmq" {
 }
 
 export class ExtendedFlowProducer extends FlowProducer {
-  addPluginJob<
+  async addPluginJob<
     I extends ZodObject<{
       type: ZodLiteral<RivenEvent["type"]>;
     }>,
@@ -63,7 +63,7 @@ export class ExtendedFlowProducer extends FlowProducer {
     return this.add(job);
   }
 
-  override getFlow<T extends Flow>(
+  override async getFlow<T extends Flow>(
     opts: NodeOpts,
   ): Promise<TypedJobNode<T["input"], T["output"]>> {
     return super.getFlow(opts);

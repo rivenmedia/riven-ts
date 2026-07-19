@@ -14,7 +14,7 @@ import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 import type { OPERATIONS } from "@zkochan/fuse-native";
 
 export const getattrSync = function (path, callback) {
-  void withVfsScope(() =>
+  void withVfsScope(async () =>
     withVfsOperationContext({ operationName: "getattr", path }, async () => {
       const cachedAttr = attrCache.get(path);
 

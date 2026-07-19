@@ -120,7 +120,7 @@ export const openSync = function (
   flags: number,
   callback: (err: number, fd?: number) => void,
 ) {
-  void withVfsScope(() =>
+  void withVfsScope(async () =>
     withVfsOperationContext(
       { operationName: "open", path, flags },
       async () => {

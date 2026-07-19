@@ -74,7 +74,7 @@ export const it = baseIt
 
       await orm.schema.create();
 
-      onCleanup(() => orm.close(true));
+      onCleanup(async () => orm.close(true));
 
       return orm;
     },

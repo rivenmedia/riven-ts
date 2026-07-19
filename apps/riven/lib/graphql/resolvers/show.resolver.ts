@@ -5,7 +5,7 @@ import { Arg, FieldResolver, Int, Resolver, Root } from "type-graphql";
 @Resolver(() => Show)
 export class ShowResolver {
   @FieldResolver(() => [Season])
-  seasons(
+  async seasons(
     @Root() show: Show,
     @Arg("includeSpecials", () => Boolean, { defaultValue: false })
     includeSpecials: boolean,

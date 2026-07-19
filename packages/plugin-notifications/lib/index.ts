@@ -46,7 +46,7 @@ export default {
     },
   },
   settingsSchema: NotificationsSettings,
-  validator() {
+  async validator() {
     return Promise.resolve(true);
   },
 } satisfies RivenPlugin as RivenPlugin;

@@ -46,7 +46,7 @@ export default {
     },
   },
   settingsSchema: JellyfinSettings,
-  validator({ dataSources }) {
+  async validator({ dataSources }) {
     const jellyfinAPI = dataSources.get(JellyfinAPI);
 
     return jellyfinAPI.validate();

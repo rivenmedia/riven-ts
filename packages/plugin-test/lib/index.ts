@@ -20,7 +20,7 @@ export default {
     "riven.item-request.create.success": async () => {},
   },
   settingsSchema: TestSettings,
-  validator() {
+  async validator() {
     return Promise.resolve(true);
   },
 } satisfies RivenPlugin as RivenPlugin;

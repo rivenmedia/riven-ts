@@ -53,7 +53,7 @@ export function createFlowWorker<
 
   const worker = new Worker(
     flowName,
-    (job, token, signal) => {
+    async (job, token, signal) => {
       return new Promise((resolve, reject) => {
         signal?.addEventListener("abort", () => {
           reject(new AbortError(`${job.name} aborted`));

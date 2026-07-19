@@ -53,7 +53,7 @@ vi.mock(import("@repo/plugin-test"), () => {
         Object.keys(RivenEventHandler).map((key) => [key, vi.fn()]),
       ),
       settingsSchema: z.object({}),
-      validator() {
+      async validator() {
         return Promise.resolve(true);
       },
     } satisfies RivenPlugin,

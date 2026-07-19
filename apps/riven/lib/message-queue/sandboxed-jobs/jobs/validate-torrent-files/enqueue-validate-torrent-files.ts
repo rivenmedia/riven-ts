@@ -15,7 +15,7 @@ export interface EnqueueValidateTorrentFilesInput {
   isCacheCheck: boolean;
 }
 
-export function enqueueValidateTorrentFiles({
+export async function enqueueValidateTorrentFiles({
   parent,
   infoHash,
   files,

@@ -76,7 +76,7 @@ it("does not request a new stream link if the media entry has a pre-existing per
   createPluginWorker(
     "riven.media-item.stream-link.health-check.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         state: "healthy",
         statusCode: 200,
@@ -171,7 +171,7 @@ it("saves the stream link to the cache after receiving a healthy link", async ({
   createPluginWorker(
     "riven.media-item.stream-link.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         success: true,
         data: {
@@ -184,7 +184,7 @@ it("saves the stream link to the cache after receiving a healthy link", async ({
   createPluginWorker(
     "riven.media-item.stream-link.health-check.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         state: "healthy",
         statusCode: 200,
@@ -215,7 +215,7 @@ it("does not save the stream link to the media entry after receiving a healthy n
   createPluginWorker(
     "riven.media-item.stream-link.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         success: true,
         data: {
@@ -229,7 +229,7 @@ it("does not save the stream link to the media entry after receiving a healthy n
   createPluginWorker(
     "riven.media-item.stream-link.health-check.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         state: "healthy",
         statusCode: 200,
@@ -433,7 +433,7 @@ it("deletes the media entry if the stream link response indicates a dead link", 
   createPluginWorker(
     "riven.media-item.stream-link.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         success: false,
         statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
@@ -451,7 +451,7 @@ it("deletes the media entry if the stream link response indicates a dead link", 
 
   await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/i);
 
-  await expect(() =>
+  await expect(async () =>
     mediaEntryService.getMediaEntryById(mediaEntry.id, {
       fields: ["streamPermalink"],
     }),
@@ -470,7 +470,7 @@ it("does not blacklist the stream if the stream link response indicates a non-fa
   createPluginWorker(
     "riven.media-item.stream-link.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         success: false,
         statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
@@ -513,7 +513,7 @@ it("adds a job to reprocess the movie if the item is a movie and its torrent is 
   createPluginWorker(
     "riven.media-item.stream-link.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         success: false,
         statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
@@ -551,7 +551,7 @@ it("adds a job to reprocess the lowest common denominator in the item's hierarch
   createPluginWorker(
     "riven.media-item.stream-link.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         success: false,
         statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,

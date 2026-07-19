@@ -165,7 +165,7 @@ it("force quits the process if shutdown takes longer than the configured timeout
     mockRivenMachine.provide({
       actors: {
         shutdown: fromPromise(
-          () =>
+          async () =>
             new Promise(() => {
               /* never resolves, simulating a shutdown that hangs indefinitely */
             }),

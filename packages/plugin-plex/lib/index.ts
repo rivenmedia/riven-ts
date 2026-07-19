@@ -39,7 +39,9 @@ export default {
         .toArray();
 
       const results = await Promise.allSettled(
-        sectionPaths.map((sectionPath) => plexAPI.updateSection(sectionPath)),
+        sectionPaths.map(async (sectionPath) =>
+          plexAPI.updateSection(sectionPath),
+        ),
       );
 
       const errors = results
@@ -66,7 +68,7 @@ export default {
     },
   },
   settingsSchema: PlexSettings,
-  validator({ dataSources }) {
+  async validator({ dataSources }) {
     return dataSources.get(PlexAPI).validate();
   },
 } satisfies RivenPlugin as RivenPlugin;

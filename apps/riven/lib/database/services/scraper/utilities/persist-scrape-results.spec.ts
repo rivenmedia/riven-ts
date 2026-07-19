@@ -39,7 +39,7 @@ it('throws a MediaItemScrapeErrorIncorrectState error if the item is not in the 
 }) => {
   const completedMovie = await seedCompletedMovie();
 
-  await expect(() =>
+  await expect(async () =>
     scraperService.scrapeItem(completedMovie.movie.id, {
       [faker.git.commitSha()]: parse("Some.Movie.2024.1080p.WEBRip.x264-GROUP"),
     }),

@@ -15,7 +15,7 @@ import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context
 @Resolver()
 export class SeerrResolver {
   @Query(() => Boolean)
-  seerrIsValid(
+  async seerrIsValid(
     @PluginDataSource(pluginConfig.name, SeerrAPI) api: SeerrAPI,
   ): Promise<boolean> {
     return api.validate();

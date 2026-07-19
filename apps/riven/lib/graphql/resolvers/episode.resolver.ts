@@ -11,7 +11,7 @@ export class EpisodeResolver {
       "Fetches an episode by its TVDB ID, season number, and episode number. If season number is not provided, it will lookup using absolute episode numbering.",
     nullable: true,
   })
-  episode(
+  async episode(
     @CoreContext() { em }: CoreContext,
     @Arg("tvdbId", () => String) tvdbId: string,
     @Arg("episodeNumber", () => Int) episodeNumber: number,
@@ -24,7 +24,7 @@ export class EpisodeResolver {
   }
 
   @FieldResolver(() => Season)
-  season(@Root() episode: Episode) {
+  async season(@Root() episode: Episode) {
     return episode.season.loadOrFail();
   }
 

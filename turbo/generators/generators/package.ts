@@ -66,7 +66,7 @@ export const createPackageGenerator = (plop: PlopTypes.NodePlopAPI) =>
         templateFiles: "templates/package/**",
       },
       installDependenciesAction,
-      (answers) => {
+      async (answers) => {
         const { packageType, packageName } = answers as PackageAnswers;
 
         return formatOutputCode([

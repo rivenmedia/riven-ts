@@ -59,7 +59,7 @@ export const it = baseIt
 
     await mockServer.start();
 
-    onCleanup(() => mockServer.stop());
+    onCleanup(async () => mockServer.stop());
 
     return mockServer;
   })

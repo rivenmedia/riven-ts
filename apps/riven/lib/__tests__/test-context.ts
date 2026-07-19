@@ -116,7 +116,9 @@ export const it = testBase
       mediaEntryFactory: new MediaEntryFactory(em),
     };
   })
-  .extend("stream", ({ factories }) => factories.streamFactory.createOne())
+  .extend("stream", async ({ factories }) =>
+    factories.streamFactory.createOne(),
+  )
   .extend("mediaEntry", ({ factories }) =>
     factories.mediaEntryFactory.makeOne({
       downloadUrl: "http://example.com/file.mp4",
@@ -212,7 +214,7 @@ export const it = testBase
 
     const queue = createQueue(`mock-queue-${task.id}`);
 
-    onCleanup(() => queue.close());
+    onCleanup(async () => queue.close());
 
     return queue;
   })
@@ -278,7 +280,7 @@ export const it = testBase
       const { url } = await startStandaloneServer<ApolloServerContext>(
         apolloServerInstance,
         {
-          context: () =>
+          context: async () =>
             Promise.resolve({
               [CoreKey]: {
                 em: orm.em.fork(),

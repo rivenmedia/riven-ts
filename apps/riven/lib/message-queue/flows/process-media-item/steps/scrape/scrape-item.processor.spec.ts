@@ -17,7 +17,7 @@ it("throws an unrecoverable error if the item cannot be scraped", async ({
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
-  await expect(() =>
+  await expect(async () =>
     scrapeItemProcessor(
       {
         job,

@@ -8,7 +8,7 @@ export abstract class BaseSeeder<
 > extends Seeder<T> {
   context: T = {} as T;
 
-  protected override call(
+  protected override async call(
     em: EntityManager,
     seeders: Constructor<BaseSeeder>[],
     context: T,

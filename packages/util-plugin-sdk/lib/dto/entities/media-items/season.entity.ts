@@ -46,7 +46,7 @@ export class Season extends ShowLikeMediaItem {
   declare tvdbId: Opt<string>;
   declare contentRating: Opt<never>;
 
-  getShow() {
+  async getShow() {
     return this.show.loadOrFail();
   }
 

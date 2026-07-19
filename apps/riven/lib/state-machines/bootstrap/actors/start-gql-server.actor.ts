@@ -56,7 +56,7 @@ export const startGqlServer = fromPromise<
     plugins: [
       ApolloServerPluginLandingPageLocalDefault(),
       {
-        requestDidStart({ request: { operationName } }) {
+        async requestDidStart({ request: { operationName } }) {
           if (operationName) {
             logger.silly(`Received ${operationName}`, {
               "riven.gql.operation-name": operationName,

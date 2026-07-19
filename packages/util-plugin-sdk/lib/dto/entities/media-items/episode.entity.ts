@@ -67,7 +67,7 @@ export class Episode extends ShowLikeMediaItem {
 
   declare tvdbId: Opt<string>;
 
-  getMediaEntries() {
+  async getMediaEntries() {
     return this.filesystemEntries.matching<MediaEntry>({
       where: { type: "media" },
       refresh: true,

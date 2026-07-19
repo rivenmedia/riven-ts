@@ -10,7 +10,7 @@ import { it as baseIt } from "../../../../../../../__tests__/test-context.ts";
 import * as rankingConfigModule from "../../../../../../../ranking-config/ranking-config.ts";
 import { rankStreamsProcessor } from "./rank-streams.processor.ts";
 
-const it = baseIt.extend("streams", ({ factories: { streamFactory } }) =>
+const it = baseIt.extend("streams", async ({ factories: { streamFactory } }) =>
   streamFactory.create(6),
 );
 

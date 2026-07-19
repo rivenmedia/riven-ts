@@ -75,7 +75,7 @@ export class Show extends ShowLikeMediaItem {
     return seasons.flatMap((season) => season.episodes.getItems());
   }
 
-  getStandardSeasons(stateFilter?: MediaItemState[]) {
+  async getStandardSeasons(stateFilter?: MediaItemState[]) {
     return this.seasons.matching({
       orderBy: { number: "asc" },
       where: {

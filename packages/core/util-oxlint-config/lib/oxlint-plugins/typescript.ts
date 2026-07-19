@@ -27,7 +27,6 @@ export const oxlintPluginTypescriptConfig = defineConfig({
         // Type-aware rules that are disabled for now, but will be enabled in the future
         "typescript/prefer-readonly-parameter-types": "off",
         "typescript/strict-void-return": "off",
-        "typescript/promise-function-async": "off",
         "typescript/no-unsafe-type-assertion": "off",
         "typescript/prefer-readonly": "off",
         "typescript/return-await": "off",

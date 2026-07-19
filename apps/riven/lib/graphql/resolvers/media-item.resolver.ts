@@ -21,7 +21,7 @@ export class MediaItemResolver {
     description:
       "Fetches a media item by its ID. The returned type will be one of the specific media item types (e.g., Movie, Episode) based on the underlying data.",
   })
-  mediaItemById(
+  async mediaItemById(
     @CoreContext() { services }: CoreContext,
     @Arg("id", () => ID) id: UUID,
   ) {
@@ -29,7 +29,7 @@ export class MediaItemResolver {
   }
 
   @Query(() => [MediaItem])
-  mediaItems(@CoreContext() { em }: CoreContext): Promise<MediaItem[]> {
+  async mediaItems(@CoreContext() { em }: CoreContext): Promise<MediaItem[]> {
     return em.find(
       MediaItem,
       {},

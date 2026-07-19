@@ -8,7 +8,7 @@ import { VfsEntryStat } from "./types/vfs-entry-stat.type.ts";
 @Resolver()
 export class VfsResolver {
   @Query(() => VfsEntryStat)
-  vfsEntryStat(
+  async vfsEntryStat(
     @CoreContext() { services }: CoreContext,
     @Arg("path") path: string,
   ): Promise<VfsEntryStat> {
@@ -16,7 +16,7 @@ export class VfsResolver {
   }
 
   @Query(() => FileSystemEntryUnion, { nullable: true })
-  vfsEntry(
+  async vfsEntry(
     @CoreContext() { services }: CoreContext,
     @Arg("path") path: string,
   ): Promise<typeof FileSystemEntryUnion | null> {
@@ -24,7 +24,7 @@ export class VfsResolver {
   }
 
   @Query(() => [String])
-  vfsDirectoryEntryPaths(
+  async vfsDirectoryEntryPaths(
     @CoreContext() { services }: CoreContext,
     @Arg("path") path: string,
   ): Promise<string[]> {

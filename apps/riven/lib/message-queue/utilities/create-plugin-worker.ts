@@ -39,7 +39,7 @@ export function createPluginWorker<
 
   const worker = new Worker(
     queueName,
-    (job, token, signal) => {
+    async (job, token, signal) => {
       return new Promise((resolve, reject) => {
         signal?.addEventListener("abort", () => {
           reject(new AbortError(`${job.name} aborted`));
@@ -59,7 +59,7 @@ export function createPluginWorker<
 
               return await dataSourceContext.run(
                 { job, token: job.token },
-                () => processor(job as never, token, signal),
+                async () => processor(job as never, token, signal),
               );
             } catch (error) {
               Sentry.captureException(error);

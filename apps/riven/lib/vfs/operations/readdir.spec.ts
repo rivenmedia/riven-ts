@@ -121,7 +121,9 @@ it("returns all episodes for a single season path", async ({
   await vi.waitFor(async () => {
     expect(callback).toHaveBeenCalledWith<[number, string[]]>(
       0,
-      await Promise.all(mediaEntries.map((entry) => entry.getVfsFileName())),
+      await Promise.all(
+        mediaEntries.map(async (entry) => entry.getVfsFileName()),
+      ),
     );
   });
 });

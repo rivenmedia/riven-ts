@@ -9,7 +9,7 @@ import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 import type { OPERATIONS } from "@zkochan/fuse-native";
 
 export const readDirSync = function (path, callback) {
-  void withVfsScope(() =>
+  void withVfsScope(async () =>
     withVfsOperationContext({ operationName: "readdir", path }, async () => {
       const data = await services.vfsService.getDirectoryEntryPaths(path);
 

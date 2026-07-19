@@ -21,7 +21,6 @@ export default defineConfig({
         "typescript/no-unsafe-type-assertion": "off",
         "typescript/no-unsafe-assignment": "off",
         "typescript/consistent-return": "off",
-        "typescript/promise-function-async": "off",
         "unicorn/no-await-expression-member": "off",
         "import/unambiguous": "off",
         "unicorn/prefer-module": "off",

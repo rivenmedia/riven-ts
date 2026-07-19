@@ -316,7 +316,7 @@ it("throws for torrents with incorrect season number for season items", async ({
 
   const parsedData = parse(rawTitle);
 
-  await expect(() =>
+  await expect(async () =>
     validateTorrent(season.id, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(
