@@ -17,11 +17,11 @@ import { oxlintPluginVitestConfig } from "./oxlint-plugins/vitest.ts";
 export const baseOxlintConfig = defineConfig({
   categories: {
     correctness: "error",
-    suspicious: "warn",
+    suspicious: "error",
     pedantic: "warn",
-    perf: "warn",
-    style: "warn",
-    restriction: "warn",
+    perf: "error",
+    style: "error",
+    restriction: "error",
   },
   extends: [
     eslintPluginEslintJsonConfig,
