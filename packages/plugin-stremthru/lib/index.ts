@@ -46,6 +46,7 @@ export default {
           `Failed to get instant availability for ${infoHash} from ${store}: ${
             error instanceof Error ? error.message : String(error)
           }`,
+          { cause: error },
         );
       }
     },
@@ -63,6 +64,7 @@ export default {
           `Failed to get cache torrent status: ${
             error instanceof Error ? error.message : String(error)
           }`,
+          { cause: error },
         );
       }
     },
@@ -145,6 +147,7 @@ export default {
           `Failed to generate link from ${store}: ${
             error instanceof Error ? error.message : String(error)
           }`,
+          { cause: error },
         );
       }
     },

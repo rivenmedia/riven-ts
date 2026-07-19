@@ -44,7 +44,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "init-declarations": "off",
         "object-shorthand": "off",
         "class-methods-use-this": "off",
-        "preserve-caught-error": "off",
         "no-useless-rename": "off",
         "default-case": "off",
         complexity: "off",

@@ -44,6 +44,7 @@ export async function loadRankingConfig(
       ) {
         throw new Error(
           `Failed to create ranking config file at "${resolvedPath}": ${String(cause)}`,
+          { cause: cause },
         );
       }
     }

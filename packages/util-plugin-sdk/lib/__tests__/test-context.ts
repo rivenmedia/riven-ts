@@ -94,6 +94,7 @@ export const it = baseIt
       } catch (error) {
         throw new Error(
           `Failed to find "redis-server" binary. Is Redis installed and available in your PATH?\n${String(error)}`,
+          { cause: error },
         );
       }
     }
@@ -120,7 +121,9 @@ export const it = baseIt
         url: new URL(`redis://${host}:${port.toString()}`),
       };
     } catch (error) {
-      throw new Error(`Failed to get Redis URL.\n${String(error)}`);
+      throw new Error(`Failed to get Redis URL.\n${String(error)}`, {
+        cause: error,
+      });
     }
   });
 
