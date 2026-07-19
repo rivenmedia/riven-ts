@@ -58,7 +58,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "prefer-arrow-callback": "off",
         "no-implicit-coercion": "off",
         "no-negated-condition": "off",
-        "prefer-destructuring": "off",
         "no-lonely-if": "off",
         "prefer-named-capture-group": "off",
         "no-console": "off",
