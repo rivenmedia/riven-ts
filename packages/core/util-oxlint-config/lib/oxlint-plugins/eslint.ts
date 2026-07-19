@@ -16,6 +16,7 @@ export const oxlintPluginEslintConfig = defineConfig({
         //   },
         // ],
         "sort-imports": "off", // Handled by oxfmt
+        "sort-keys": "off", // This can cause issues in TS and isn't completely auto-fixable
         "no-inline-comments": "off",
         "new-cap": "off", // Incompatible with class decorators styling
         "no-ternary": "off",
@@ -34,7 +35,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "no-magic-numbers": "off",
         "max-lines-per-function": "off",
-        "sort-keys": "off",
         "max-lines": "off",
         "max-depth": "off",
         "max-statements": "off",
