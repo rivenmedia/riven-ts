@@ -18,7 +18,7 @@ import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-
 
 export const processMediaItemProcessor =
   processMediaItemProcessorSchema.implementAsync(
-    async function processMediaItemProcessor(
+    async (
       { job, token },
       {
         services: {
@@ -30,7 +30,7 @@ export const processMediaItemProcessor =
         },
         plugins,
       },
-    ) {
+    ) => {
       assert(token, "Job token is required");
 
       const parent = createJobParentConfig(job);

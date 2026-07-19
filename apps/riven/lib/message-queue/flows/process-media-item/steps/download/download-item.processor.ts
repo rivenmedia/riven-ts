@@ -9,10 +9,10 @@ import { filterChildrenValues } from "../../../../utilities/filter-children-valu
 import { downloadItemProcessorSchema } from "./download-item.schema.ts";
 
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
-  async function downloadItemProcessor(
+  async (
     { job },
     { sendEvent, services: { mediaItemService, downloaderService } },
-  ) {
+  ) => {
     const childrenValues = filterChildrenValues(
       await job.getChildrenValues(),
       "download-item.find-valid-torrent",

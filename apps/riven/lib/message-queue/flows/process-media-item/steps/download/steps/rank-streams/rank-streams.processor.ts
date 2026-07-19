@@ -14,10 +14,7 @@ import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution
 import type { RankedResult } from "@repo/util-rank-torrent-name";
 
 export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
-  async function rankStreamsProcessor(
-    { job },
-    { services: { mediaItemService, downloaderService } },
-  ) {
+  async ({ job }, { services: { mediaItemService, downloaderService } }) => {
     const streams = await downloaderService.findMatchingStreams(
       Object.keys(job.data.streams),
     );

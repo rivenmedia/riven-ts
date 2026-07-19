@@ -19,10 +19,10 @@ import { getValidTorrentFiles } from "./utilities/get-valid-torrent-files.ts";
 
 export const findValidTorrentProcessor =
   findValidTorrentProcessorSchema.implementAsync(
-    async function findValidTorrentProcessor(
+    async (
       { job, scope, token },
       { services: { mediaItemService, streamService }, plugins },
-    ) {
+    ) => {
       assert(token);
 
       const childrenValues = filterChildrenValues(

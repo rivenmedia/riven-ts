@@ -12,10 +12,7 @@ import { enqueueRequestSubtitles } from "./steps/request-subtitles/enqueue-reque
 
 export const postProcessItemProcessor =
   postProcessMediaItemProcessorSchema.implementAsync(
-    async function postProcessItemProcessor(
-      { job, token },
-      { services: { subtitlesService }, plugins },
-    ) {
+    async ({ job, token }, { services: { subtitlesService }, plugins }) => {
       assert(token, "Job token is required");
 
       const parent = createJobParentConfig(job);

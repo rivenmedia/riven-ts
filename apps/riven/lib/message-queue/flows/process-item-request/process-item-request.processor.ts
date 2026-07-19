@@ -23,10 +23,10 @@ import type {
 
 export const processItemRequestProcessor =
   processItemRequestProcessorSchema.implementAsync(
-    async function processItemRequestProcessor(
+    async (
       { job, token },
       { sendEvent, services: { itemRequestService, indexerService }, plugins },
-    ) {
+    ) => {
       switch (job.data.step) {
         case "request": {
           assert(token, "Token is required to create child jobs");

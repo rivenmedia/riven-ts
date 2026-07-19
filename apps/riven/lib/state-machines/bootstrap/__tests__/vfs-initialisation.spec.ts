@@ -85,13 +85,14 @@ it("does not throw an error if the mount path is present and owned by the curren
     gid,
   } as never);
 
-  vi.mocked(Fuse).mockImplementation(function MockFuseConstructor() {
-    return {
-      mount: vi.fn((cb: (err?: Error | null) => void) => {
-        cb(null);
-      }),
-    } as never;
-  });
+  vi.mocked(Fuse).mockImplementation(
+    () =>
+      ({
+        mount: vi.fn((cb: (err?: Error | null) => void) => {
+          cb(null);
+        }),
+      }) as never,
+  );
 
   await expect(toPromise(actor.start())).resolves.not.toThrow();
 });
