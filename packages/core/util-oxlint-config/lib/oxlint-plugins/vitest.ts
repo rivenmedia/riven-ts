@@ -1,4 +1,3 @@
-import vitest from "@vitest/eslint-plugin";
 import { defineConfig } from "oxlint";
 
 import { testFiles } from "../internal/file-types.ts";
@@ -46,9 +45,6 @@ export const oxlintPluginVitestConfig = defineConfig({
         "vitest/prefer-describe-function-title": "off",
         "vitest/prefer-lowercase-title": "off",
         "vitest/prefer-expect-type-of": "off",
-      },
-      env: {
-        ...vitest.environments.env.globals,
       },
     },
   ],
