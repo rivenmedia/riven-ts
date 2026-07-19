@@ -9,7 +9,8 @@
     ]
   },
   "exports": {
-    ".": "./lib/base.ts"
+    ".": "./lib/base.ts",
+    "./nextjs": "./lib/nextjs.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
