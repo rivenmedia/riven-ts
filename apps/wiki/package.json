@@ -7,7 +7,7 @@
     "build": "next build",
     "dev": "next dev --turbopack",
     "postinstall": "fumadocs-mdx",
-    "lint": "oxlint .",
+    "lint": "oxlint",
     "lint:fix": "pnpm lint --fix",
     "start": "next start"
   },
