@@ -72,6 +72,14 @@
       ]
     },
     "lint:fix": {},
+    "//#lint": {
+      "inputs": [
+        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
+        "!apps/**",
+        "!packages/**",
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
+      ]
+    },
     "//#format:check:ci": {
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql,.md,.markdown,.mdx}",

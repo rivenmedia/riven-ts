@@ -4,14 +4,14 @@ import type { PlopTypes } from "@turbo/gen";
 
 type PackageType = "plugin" | "util" | "domain";
 
-type PackageJsonDefinition = {
+interface PackageJsonDefinition {
   scripts?: Record<string, string | null>;
   exports?: Record<string, string | Record<string, string | null> | null>;
   devDependencies?: Record<string, string | null>;
   dependencies?: Record<string, string | null>;
   peerDependencies?: Record<string, string | null>;
   files?: string[];
-};
+}
 
 const packageTypeFields: Partial<
   Record<PackageType | "*", PackageJsonDefinition>

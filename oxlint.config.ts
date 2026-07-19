@@ -30,7 +30,6 @@ export default defineConfig({
         "import/no-dynamic-require": "off",
         "unicorn/prefer-ternary": "off",
         "unicorn/prefer-string-replace-all": "off",
-        "typescript/consistent-type-definitions": "off",
         "import/no-default-export": "off",
         "turbo/no-undeclared-env-vars": "off",
       },
