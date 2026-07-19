@@ -20,7 +20,6 @@ export const oxlintPluginTypescriptConfig = defineConfig({
         "typescript/explicit-function-return-type": "off",
         "typescript/explicit-module-boundary-types": "off",
         "typescript/method-signature-style": "off",
-        "typescript/no-import-type-side-effects": "off",
         "typescript/no-empty-interface": "off",
         "typescript/strict-boolean-expressions": "off",
 
