@@ -120,7 +120,7 @@ export class PluginSettings {
 
     for (const [prefix, settings] of this.#environmentSettingGroups) {
       if (settings.size > 0) {
-        const unusedSettings = Array.from(settings.keys()).map(
+        const unusedSettings = [...settings.keys()].map(
           (key) => `${prefix}_${key}`,
         );
 

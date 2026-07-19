@@ -48,7 +48,7 @@ export class MediaItemResolver {
     const item = await mediaItemService.getMediaItemById(id);
     const resetItems = await mediaItemService.resetMediaItem(item);
 
-    return Array.from(resetItems);
+    return [...resetItems];
   }
 
   @FieldResolver(() => Int)

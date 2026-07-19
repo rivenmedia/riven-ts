@@ -1056,10 +1056,7 @@ const keywords = new Set([
   "young pussy",
 ]);
 
-const adultPattern = new RegExp(
-  `\\b(${Array.from(keywords).join("|")})\\b`,
-  "i",
-);
+const adultPattern = new RegExp(`\\b(${[...keywords].join("|")})\\b`, "i");
 
 export const adultHandlers: Handler[] = [
   {

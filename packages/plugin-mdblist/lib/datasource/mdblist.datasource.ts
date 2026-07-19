@@ -129,8 +129,8 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
     }
 
     return {
-      movies: Array.from(movieIdsMap.values()),
-      shows: Array.from(showIdsMap.values()),
+      movies: [...movieIdsMap.values()],
+      shows: [...showIdsMap.values()],
     };
   }
 }

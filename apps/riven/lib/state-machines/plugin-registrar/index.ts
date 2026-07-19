@@ -340,11 +340,11 @@ export const pluginRegistrarMachine = setup({
                       params: {
                         message: [
                           `Found ${chalk.bold(parsedPlugins.invalidPlugins.size.toString())} invalid plugins:`,
-                          Array.from(
-                            parsedPlugins.invalidPlugins
-                              .keys()
-                              .map((pluginName) => chalk.bold(pluginName)),
-                          ).join(", "),
+                          parsedPlugins.invalidPlugins
+                            .keys()
+                            .map((pluginName) => chalk.bold(pluginName))
+                            .toArray()
+                            .join(", "),
                         ].join(" "),
                         level: "warn",
                       },

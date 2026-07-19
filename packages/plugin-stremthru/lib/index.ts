@@ -84,7 +84,7 @@ export default {
         .difference(new Set(rateLimitedStores.keys()));
 
       return {
-        providers: Array.from(providers),
+        providers: [...providers],
         rateLimitedProviders: Object.fromEntries(rateLimitedStores),
       };
     },

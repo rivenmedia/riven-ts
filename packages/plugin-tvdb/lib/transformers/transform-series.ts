@@ -158,10 +158,7 @@ export const transformSeries = (
     network,
     country: series.originalCountry,
     aliases: Object.fromEntries(
-      Array.from(aliases.entries()).map(([key, value]) => [
-        key,
-        Array.from(value),
-      ]),
+      [...aliases.entries()].map(([key, value]) => [key, [...value]]),
     ),
     contentRating,
     posterUrl: posterPath,

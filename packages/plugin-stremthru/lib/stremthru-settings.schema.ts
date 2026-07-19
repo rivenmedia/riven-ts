@@ -28,7 +28,7 @@ export const StremThruSettings = z
       z
         .array(Store)
         .min(1)
-        .transform((stores) => Array.from(new Set(stores))),
+        .transform((stores) => [...new Set(stores)]),
     )
       .default(Store.options)
       .describe(

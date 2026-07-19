@@ -40,7 +40,7 @@ function getScopes() {
     }
   }
 
-  return Array.from(scopes).sort();
+  return [...scopes].sort();
 }
 
 export default {
