@@ -25,7 +25,7 @@ const packageTypeFields: Partial<
     },
     files: ["dist"],
     devDependencies: {
-      "@repo/core-util-eslint-config": "workspace:^",
+      "@repo/core-util-oxlint-config": "workspace:^",
       "@repo/core-util-typescript-config": "workspace:^",
       "@repo/core-util-vitest-config": "workspace:^",
       "@types/node": "catalog:",

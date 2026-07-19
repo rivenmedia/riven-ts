@@ -86,7 +86,7 @@
     "@mikro-orm/core": "catalog:",
     "@mikro-orm/reflection": "catalog:",
     "@mikro-orm/sqlite": "catalog:",
-    "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@types/luxon": "catalog:",

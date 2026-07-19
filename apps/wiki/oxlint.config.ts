@@ -1,5 +1,5 @@
-import { baseOxlintConfig } from "@repo/core-util-eslint-config";
-import { nextJsOxlintConfig } from "@repo/core-util-eslint-config/nextjs";
+import { baseOxlintConfig } from "@repo/core-util-oxlint-config";
+import { nextJsOxlintConfig } from "@repo/core-util-oxlint-config/nextjs";
 
 import { defineConfig } from "oxlint";
 

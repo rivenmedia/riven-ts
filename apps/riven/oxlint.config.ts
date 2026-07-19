@@ -1,4 +1,4 @@
-import { baseOxlintConfig } from "@repo/core-util-eslint-config";
+import { baseOxlintConfig } from "@repo/core-util-oxlint-config";
 
 import { defineConfig } from "oxlint";
 

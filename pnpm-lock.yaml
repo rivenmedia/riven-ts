@@ -391,7 +391,7 @@ importers:
       '@commitlint/types':
         specifier: 'catalog:'
         version: 21.0.1
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:packages/core/util-eslint-config
       '@repo/core-util-typescript-config':
@@ -641,7 +641,7 @@ importers:
       '@parcel/watcher':
         specifier: 'catalog:'
         version: 2.5.6
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../../packages/core/util-eslint-config
       '@repo/core-util-mock-graphql-server':
@@ -732,7 +732,7 @@ importers:
         specifier: 'catalog:'
         version: 2.9.0
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../../packages/core/util-eslint-config
       '@repo/core-util-typescript-config':
@@ -857,7 +857,7 @@ importers:
       '@apollo/cache-control-types':
         specifier: 'catalog:'
         version: 1.0.3(graphql@16.14.0)
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../util-eslint-config
       '@repo/core-util-typescript-config':
@@ -900,7 +900,7 @@ importers:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../util-eslint-config
       '@repo/core-util-typescript-config':
@@ -949,7 +949,7 @@ importers:
         specifier: 'catalog:'
         version: 4.20.1(encoding@0.1.13)(typescript@5.9.3)
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../util-eslint-config
       '@repo/core-util-typescript-config':
@@ -989,7 +989,7 @@ importers:
         specifier: 'catalog:'
         version: 0.2.2
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../util-eslint-config
       '@repo/core-util-typescript-config':
@@ -1041,7 +1041,7 @@ importers:
         specifier: 'catalog:'
         version: 1.5.9(@swc/core@1.15.40)(rollup@4.60.4)
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../util-eslint-config
       '@repo/core-util-typescript-config':
@@ -1081,7 +1081,7 @@ importers:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-typescript-config':
@@ -1124,7 +1124,7 @@ importers:
         specifier: 'catalog:'
         version: 4.4.3
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-typescript-config':
@@ -1173,7 +1173,7 @@ importers:
         specifier: 'catalog:'
         version: 4.4.3
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-typescript-config':
@@ -1234,7 +1234,7 @@ importers:
       '@kubb/cli':
         specifier: 'catalog:'
         version: 4.20.1(@kubb/react-fabric@0.12.7)(typescript@5.9.3)
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-kubb-config':
@@ -1298,7 +1298,7 @@ importers:
       '@kubb/cli':
         specifier: 'catalog:'
         version: 4.20.1(@kubb/react-fabric@0.12.7)(typescript@5.9.3)
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-kubb-config':
@@ -1356,7 +1356,7 @@ importers:
         specifier: 'catalog:'
         version: 5.0.0(zod@4.4.3)
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-typescript-config':
@@ -1417,7 +1417,7 @@ importers:
       '@kubb/cli':
         specifier: 'catalog:'
         version: 4.20.1(@kubb/react-fabric@0.12.7)(typescript@5.9.3)
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-kubb-config':
@@ -1484,7 +1484,7 @@ importers:
       '@kubb/cli':
         specifier: 'catalog:'
         version: 4.20.1(@kubb/react-fabric@0.12.7)(typescript@5.9.3)
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-kubb-config':
@@ -1539,7 +1539,7 @@ importers:
         specifier: 'catalog:'
         version: 4.4.3
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-typescript-config':
@@ -1591,7 +1591,7 @@ importers:
         specifier: 'catalog:'
         version: 4.4.3
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-typescript-config':
@@ -1637,7 +1637,7 @@ importers:
         specifier: 'catalog:'
         version: 4.4.3
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-typescript-config':
@@ -1692,7 +1692,7 @@ importers:
       '@kubb/cli':
         specifier: 'catalog:'
         version: 4.20.1(@kubb/react-fabric@0.12.7)(typescript@5.9.3)
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-kubb-config':
@@ -1744,7 +1744,7 @@ importers:
         specifier: 'catalog:'
         version: 4.4.3
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-typescript-config':
@@ -1805,7 +1805,7 @@ importers:
       '@kubb/cli':
         specifier: 'catalog:'
         version: 4.20.1(@kubb/react-fabric@0.12.7)(typescript@5.9.3)
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-kubb-config':
@@ -1854,7 +1854,7 @@ importers:
         specifier: 'catalog:'
         version: 0.2.5(zod@4.4.3)
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-typescript-config':
@@ -1927,7 +1927,7 @@ importers:
       '@mikro-orm/sqlite':
         specifier: 'catalog:'
         version: 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-typescript-config':
@@ -1994,7 +1994,7 @@ importers:
         specifier: 'catalog:'
         version: 3.19.0
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-typescript-config':
@@ -2040,7 +2040,7 @@ importers:
         specifier: 'catalog:'
         version: 4.4.3
     devDependencies:
-      '@repo/core-util-eslint-config':
+      '@repo/core-util-oxlint-config':
         specifier: workspace:^
         version: link:../core/util-eslint-config
       '@repo/core-util-typescript-config':

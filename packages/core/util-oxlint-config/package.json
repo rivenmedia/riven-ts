@@ -1,5 +1,5 @@
 {
-  "name": "@repo/core-util-eslint-config",
+  "name": "@repo/core-util-oxlint-config",
   "version": "0.0.0",
   "private": true,
   "type": "module",

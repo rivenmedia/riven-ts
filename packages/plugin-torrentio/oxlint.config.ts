@@ -1,1 +1,1 @@
-export { baseOxlintConfig as default } from "@repo/core-util-eslint-config";
+export { baseOxlintConfig as default } from "@repo/core-util-oxlint-config";

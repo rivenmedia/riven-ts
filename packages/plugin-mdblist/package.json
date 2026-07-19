@@ -35,8 +35,8 @@
   "devDependencies": {
     "@faker-js/faker": "catalog:",
     "@kubb/cli": "catalog:",
-    "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-kubb-config": "workspace:^",
+    "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/util-plugin-testing": "workspace:^",
