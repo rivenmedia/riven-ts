@@ -3,11 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "imports": {
-    "#/*": [
-      "./lib/*.ts"
-    ]
-  },
   "exports": {
     ".": "./lib/base.ts",
     "./nextjs": "./lib/nextjs.ts"
