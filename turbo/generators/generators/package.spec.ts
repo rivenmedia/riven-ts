@@ -68,7 +68,7 @@ it.concurrent("generates a package with the correct name in package.json some re
   expect(packageJson.name).toBe(packageFullName);
 });
 
-it.concurrent.for(["test", "lint", "check-types", "build"] as const)(
+it.concurrent.for(["test", "lint", "build"] as const)(
   "passes pnpm %s",
   { timeout: 60_000 },
   async (command, { packageFullName }) => {

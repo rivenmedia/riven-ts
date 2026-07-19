@@ -30,13 +30,6 @@
         "!**/{logs,node_modules,temp,.turbo,.next,coverage,docker-data,dist}/**"
       ]
     },
-    "check-types": {
-      "dependsOn": ["codegen:api-schemas", "transit:source-files"],
-      "inputs": [
-        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
-        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
-      ]
-    },
     "dev": {
       "persistent": true,
       "cache": false,
@@ -72,7 +65,7 @@
       "dependsOn": ["codegen:api-schemas", "transit:source-files"]
     },
     "lint": {
-      "dependsOn": ["codegen:api-schemas"],
+      "dependsOn": ["codegen:api-schemas", "transit:source-files"],
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
         "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"

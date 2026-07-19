@@ -33,7 +33,6 @@ const defaultProject = [
 export default {
   tags: ["-lintignore"],
   ignoreDependencies: [
-    "@typescript-eslint/parser",
     "@kubb/cli",
     "@graphql-codegen/*",
     "@graphql-typed-document-node/*",

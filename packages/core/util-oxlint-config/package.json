@@ -1,0 +1,28 @@
+{
+  "name": "@repo/core-util-oxlint-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./lib/base.ts",
+    "./nextjs": "./lib/nextjs.ts"
+  },
+  "scripts": {
+    "lint": "oxlint --type-aware --type-check",
+    "lint:fix": "pnpm lint --fix"
+  },
+  "dependencies": {
+    "@eslint/json": "catalog:",
+    "@repo/core-util-typescript-config": "workspace:^",
+    "eslint-plugin-turbo": "catalog:",
+    "globals": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "oxlint": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "oxlint": "^1"
+  }
+}

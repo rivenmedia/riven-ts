@@ -432,7 +432,7 @@ export abstract class BaseDataSource<
       cacheKey,
       {
         path,
-        incomingRequest: request,
+        incomingRequest: request as DataSourceRequest,
         bodyType,
         params: urlSearchParamsCodec.encode(request.params),
       },
@@ -466,7 +466,7 @@ export abstract class BaseDataSource<
 
     if (isCached) {
       // If we have a cached response, bypass the message queue and fetch directly
-      return super.fetch(path, augmentedRequest);
+      return super.fetch(path, augmentedRequest as DataSourceRequest);
     }
 
     const context = dataSourceContext.getStore();

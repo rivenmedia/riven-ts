@@ -20,6 +20,8 @@
     "listrr",
     "mikro",
     "millis",
+    "oxfmt",
+    "oxlint",
     "pdtv",
     "PGID",
     "ppvrip",
@@ -94,5 +96,6 @@
   },
   "oxc.fmt.configPath": ".oxfmtrc.json",
   "editor.defaultFormatter": "oxc.oxc-vscode",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "oxc.typeAware": true
 }
