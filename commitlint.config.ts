@@ -42,7 +42,7 @@ function getScopes() {
     }
   }
 
-  return [...scopes].sort();
+  return [...scopes].toSorted();
 }
 
 export default {

@@ -72,7 +72,7 @@ it("returns subtitles for a movie search", async ({
       }
 
       if (
-        url.searchParams.get("languages")?.split(",").sort().join(",") !==
+        url.searchParams.get("languages")?.split(",").toSorted().join(",") !==
         "de,en"
       ) {
         return HttpResponse.json(

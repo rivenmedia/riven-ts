@@ -75,7 +75,7 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
     }, []);
 
     const bucketedTorrents = rtnInstance.sortTorrents(rankedResults);
-    const sortedTorrentsByResolution = bucketedTorrents.sort(
+    const sortedTorrentsByResolution = bucketedTorrents.toSorted(
       sortByRankAndResolution,
     );
 

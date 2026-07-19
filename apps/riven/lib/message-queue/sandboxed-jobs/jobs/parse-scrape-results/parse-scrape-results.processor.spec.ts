@@ -28,9 +28,7 @@ const it = baseIt.extend("scrapeResults", {
     "Test Show 2024 1080p WEB-DL S01E03",
 });
 
-it.beforeAll(({ gqlServer: _gqlServer }) => {
-  /* empty */
-});
+it.beforeAll(({ gqlServer: _gqlServer }) => undefined);
 
 it("throws an UnrecoverableError if no results are found", async ({
   createMockJob,

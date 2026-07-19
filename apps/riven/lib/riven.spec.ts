@@ -34,9 +34,7 @@ const it = baseIt
             vfs: {} as never,
           });
         }) as never,
-        mainRunnerMachine: fromCallback(() => {
-          /* empty */
-        }) as never,
+        mainRunnerMachine: fromCallback(() => undefined) as never,
         shutdown: createEmptyActor() as never,
         stopGqlServer: createEmptyActor() as never,
         unmountVfs: createEmptyActor() as never,

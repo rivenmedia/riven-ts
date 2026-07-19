@@ -137,7 +137,7 @@ export const validateTorrentFiles = async (
       const files = groupMap
         .values()
         .toArray()
-        .sort((a, b) => b.size - a.size);
+        .toSorted((a, b) => b.size - a.size);
 
       for (const file of files) {
         try {

@@ -155,9 +155,7 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
       services,
       plugins: new Map(),
     },
-  ).catch(() => {
-    /* empty */
-  });
+  ).catch(() => undefined);
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.error",

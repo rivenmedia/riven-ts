@@ -93,7 +93,5 @@ export const validatePlugin = fromCallback<
   // Run the plugin validator
   void validate();
 
-  return () => {
-    /* empty */
-  };
+  return () => undefined;
 });

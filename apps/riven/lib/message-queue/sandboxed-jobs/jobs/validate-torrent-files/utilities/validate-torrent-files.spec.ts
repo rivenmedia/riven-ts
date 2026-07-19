@@ -7,9 +7,7 @@ import type { MapItemsToFilesSandboxedJob } from "../../map-items-to-files/map-i
 
 type MappedFiles = MapItemsToFilesSandboxedJob["output"];
 
-it.beforeAll(({ gqlServer: _gqlServer }) => {
-  /* empty */
-});
+it.beforeAll(({ gqlServer: _gqlServer }) => undefined);
 
 it("throws an error if season-like torrent has fewer files than expected", async ({
   season,
