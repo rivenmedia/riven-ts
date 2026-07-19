@@ -63,7 +63,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-inner-declarations": "off",
 
         // Type-aware rules that are disabled for now, but will be enabled in the future
-        "prefer-template": "off",
         "prefer-regex-literals": "off",
         "default-param-last": "off",
       },

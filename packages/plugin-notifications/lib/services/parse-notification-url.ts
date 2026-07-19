@@ -49,7 +49,7 @@ export function parseNotificationUrl(raw: string): NotificationService {
       case "json":
       case "jsons": {
         const httpScheme = scheme === "jsons" ? "https" : "http";
-        const targetUrl = new URL(raw.replace(/^jsons?:/, httpScheme + ":"));
+        const targetUrl = new URL(raw.replace(/^jsons?:/, `${httpScheme}:`));
 
         return {
           type: "json",
