@@ -42,6 +42,7 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/prefer-string-slice": "off",
         "unicorn/new-for-builtins": "off",
         "unicorn/catch-error-name": "off",
+        "unicorn/no-process-exit": "off",
       },
     },
   ],

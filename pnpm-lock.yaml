@@ -412,9 +412,6 @@ importers:
       es-toolkit:
         specifier: 'catalog:'
         version: 1.46.1
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       execa:
         specifier: 'catalog:'
         version: 9.6.1
@@ -430,6 +427,9 @@ importers:
       oxfmt:
         specifier: 'catalog:'
         version: 0.59.0
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       turbo:
         specifier: 'catalog:'
         version: 2.9.14

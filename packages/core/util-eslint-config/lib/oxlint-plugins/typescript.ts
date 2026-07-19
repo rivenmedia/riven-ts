@@ -23,6 +23,7 @@ export const oxlintPluginTypescriptConfig = defineConfig({
         "typescript/method-signature-style": "off",
         "typescript/no-import-type-side-effects": "off",
         "typescript/no-empty-interface": "off",
+        "typescript/strict-boolean-expressions": "off",
       },
       env: {
         ...globals.node,
