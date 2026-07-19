@@ -10,6 +10,7 @@ export const oxlintPluginTypescriptConfig = defineConfig({
       plugins: ["typescript"],
       rules: {
         "typescript/ban-types": "off",
+        "typescript/prefer-optional-chain": "deny",
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "typescript/explicit-function-return-type": "off",
