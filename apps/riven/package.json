@@ -128,7 +128,6 @@
     "esbuild-node-externals": "catalog:",
     "logform": "catalog:",
     "oxlint": "catalog:",
-    "oxlint-tsgolint": "catalog:",
     "redis-memory-server": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

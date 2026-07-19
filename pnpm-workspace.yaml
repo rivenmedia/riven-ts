@@ -101,7 +101,6 @@ catalog:
   nyc: ^18.0.0
   oxfmt: ^0.59.0
   oxlint: ^1.74.0
-  oxlint-tsgolint: ^0.25.0
   postcss: ^8.5.10
   react: ^19.2.6
   react-dom: ^19.2.6
@@ -160,7 +159,6 @@ publicHoistPattern:
   - "*vitest*"
   - vite-node
   - oxlint
-  - oxlint-tsgolint
 
 allowBuilds:
   "@apollo/protobufjs": true
