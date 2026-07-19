@@ -19,8 +19,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/numeric-separators-style": "off",
         "unicorn/no-useless-undefined": "off",
         "unicorn/no-array-sort": "off",
-        // "unicorn/prefer-spread": "off",
-        "unicorn/prefer-set-has": "off",
         "unicorn/no-array-callback-reference": "off",
         "unicorn/custom-error-definition": "off",
         "unicorn/filename-case": "off",

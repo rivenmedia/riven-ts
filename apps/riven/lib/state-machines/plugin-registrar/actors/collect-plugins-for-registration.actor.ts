@@ -51,7 +51,7 @@ export const collectPluginsForRegistration = fromPromise(async () => {
     validPlugins: [],
   };
 
-  const permanentlyEnabledPlugins: CorePluginName[] = ["tmdb", "tvdb"];
+  const permanentlyEnabledPlugins = new Set<CorePluginName>(["tmdb", "tvdb"]);
 
   for (const pluginName of pluginNames) {
     const match = PLUGIN_NAME_PATTERN.exec(pluginName);
@@ -68,7 +68,7 @@ export const collectPluginsForRegistration = fromPromise(async () => {
     }
 
     if (
-      !permanentlyEnabledPlugins.includes(validatedPluginName.data) &&
+      !permanentlyEnabledPlugins.has(validatedPluginName.data) &&
       !settings.enabledPlugins.includes(validatedPluginName.data)
     ) {
       logger.info(
