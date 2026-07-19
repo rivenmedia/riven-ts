@@ -36,8 +36,6 @@ const packageTypeFields: Partial<
     },
     scripts: {
       build: "tsc --project tsconfig.lib.json",
-      "check-types":
-        "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
       lint: "oxlint",
       "lint:fix": "pnpm lint --fix",
       test: "vitest run --passWithNoTests",
