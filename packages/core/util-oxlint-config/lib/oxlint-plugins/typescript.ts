@@ -9,7 +9,6 @@ export const oxlintPluginTypescriptConfig = defineConfig({
       files: [tsFiles, jsFiles],
       plugins: ["typescript"],
       rules: {
-        "typescript/prefer-readonly-parameter-types": "off", // Creates a lot of noise
         "typescript/ban-types": "off",
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
@@ -24,6 +23,19 @@ export const oxlintPluginTypescriptConfig = defineConfig({
         "typescript/no-import-type-side-effects": "off",
         "typescript/no-empty-interface": "off",
         "typescript/strict-boolean-expressions": "off",
+
+        // Type-aware rules that are disabled for now, but will be enabled in the future
+        "typescript/prefer-readonly-parameter-types": "off",
+        "typescript/strict-void-return": "off",
+        "typescript/promise-function-async": "off",
+        "typescript/no-unsafe-type-assertion": "off",
+        "typescript/prefer-readonly": "off",
+        "typescript/return-await": "off",
+        "typescript/consistent-return": "off",
+        "typescript/switch-exhaustiveness-check": "off",
+        "typescript/require-array-sort-compare": "off",
+        "typescript/consistent-type-exports": "off",
+        "typescript/no-extraneous-class": "off",
       },
       env: {
         ...globals.node,

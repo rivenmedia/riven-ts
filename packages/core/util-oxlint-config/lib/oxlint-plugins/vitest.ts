@@ -38,6 +38,10 @@ export const oxlintPluginVitestConfig = defineConfig({
         "vitest/max-expects": "off",
         "vitest/prefer-expect-assertions": "off",
         "vitest/prefer-strict-boolean-matchers": "off",
+
+        // Type-aware rules that are disabled for now, but will be enabled in the future
+        "vitest/prefer-called-once": "off",
+        "vitest/prefer-expect-resolves": "off",
       },
       env: {
         ...vitest.environments.env.globals,

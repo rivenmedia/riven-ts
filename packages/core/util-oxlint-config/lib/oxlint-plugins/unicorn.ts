@@ -48,6 +48,16 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/prefer-dom-node-append": "off",
         "unicorn/prefer-code-point": "off",
         "unicorn/prefer-string-replace-all": "off",
+
+        // Type-aware rules that are disabled for now, but will be enabled in the future
+        "unicorn/prefer-number-coercion": "off",
+        "unicorn/prefer-number-properties": "off",
+      },
+    },
+    {
+      files: ["vitest.config.ts"],
+      rules: {
+        "unicorn/prefer-export-from": "off", // Interferes with Knip resolution
       },
     },
   ],

@@ -38,8 +38,4 @@ export const baseOxlintConfig = defineConfig({
     preferMikroOrmCore,
     allowConstantLoopConditions,
   ],
-  options: {
-    typeAware: true,
-    typeCheck: true,
-  },
 });

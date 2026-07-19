@@ -74,6 +74,9 @@ export const oxlintPluginEslintConfig = defineConfig({
         curly: "off",
         "no-inner-declarations": "off",
         eqeqeq: "off",
+
+        // Type-aware rules that are disabled for now, but will be enabled in the future
+        "prefer-template": "off",
       },
     },
   ],

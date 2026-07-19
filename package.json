@@ -36,6 +36,7 @@
     "lint-staged": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
     "turbo": "catalog:",
     "type-fest": "catalog:",
     "typescript": "catalog:",

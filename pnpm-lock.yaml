@@ -297,6 +297,9 @@ catalogs:
     oxlint:
       specifier: ^1.74.0
       version: 1.74.0
+    oxlint-tsgolint:
+      specifier: ^0.25.0
+      version: 0.25.0
     postcss:
       specifier: ^8.5.10
       version: 8.5.15
@@ -424,6 +427,9 @@ importers:
       oxlint:
         specifier: 'catalog:'
         version: 1.74.0(oxlint-tsgolint@0.25.0)
+      oxlint-tsgolint:
+        specifier: 'catalog:'
+        version: 0.25.0
       turbo:
         specifier: 'catalog:'
         version: 2.9.14
@@ -994,9 +1000,6 @@ importers:
       globals:
         specifier: 'catalog:'
         version: 17.6.0
-      oxlint-tsgolint:
-        specifier: ^0.25.0
-        version: 0.25.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
