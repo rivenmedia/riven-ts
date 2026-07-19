@@ -3,13 +3,11 @@ import { Entity, ManyToOne, Property } from "@mikro-orm/decorators/legacy";
 import { Min } from "class-validator";
 import { Field, Int, ObjectType } from "type-graphql";
 
-import {
-  ShowContentRating,
-  ShowContentRatingEnum,
-} from "../../enums/content-ratings.enum.ts";
+import { ShowContentRatingEnum } from "../../enums/content-ratings.enum.ts";
 import { EpisodeRepository } from "../../repositories/episode.repository.ts";
 import { Season, ShowLikeMediaItem } from "./index.ts";
 
+import type { ShowContentRating } from "../../enums/content-ratings.enum.ts";
 import type { MediaEntry } from "../filesystem/media-entry.entity.ts";
 import type { Opt, Ref } from "@mikro-orm/core";
 

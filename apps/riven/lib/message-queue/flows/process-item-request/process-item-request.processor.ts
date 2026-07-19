@@ -2,9 +2,7 @@ import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 import {
   MediaItemIndexRequestedMovieEvent,
-  MediaItemIndexRequestedMovieResponse,
   MediaItemIndexRequestedShowEvent,
-  MediaItemIndexRequestedShowResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
 import { DelayedError, UnrecoverableError, WaitingChildrenError } from "bullmq";
@@ -17,6 +15,11 @@ import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
 import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
 import { flow } from "../producer.ts";
 import { processItemRequestProcessorSchema } from "./process-item-request.schema.ts";
+
+import type {
+  MediaItemIndexRequestedMovieResponse,
+  MediaItemIndexRequestedShowResponse,
+} from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
 export const processItemRequestProcessor =
   processItemRequestProcessorSchema.implementAsync(async function (

@@ -1,5 +1,3 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities";
-
 import chalk from "chalk";
 import { DateTime } from "luxon";
 import { fromPromise } from "xstate";
@@ -9,7 +7,7 @@ import { enqueueProcessItemRequest } from "../../../message-queue/flows/process-
 import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
 
-import type { Show } from "@repo/util-plugin-sdk/dto/entities";
+import type { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 
 export interface ScheduleReindexInput {
   item: Movie | Show;

@@ -3,7 +3,8 @@ import assert from "node:assert";
 import { expect } from "vitest";
 
 import { it } from "../../__tests__/plex.test-context.ts";
-import { LibrarySectionsResponse } from "../../schemas/library-sections-response.schema.ts";
+
+import type { LibrarySectionsResponse } from "../../schemas/library-sections-response.schema.ts";
 
 it('returns the validation status when calling "plexIsValid" query', async ({
   server,

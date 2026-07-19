@@ -6,9 +6,9 @@ import {
   Show,
 } from "@repo/util-plugin-sdk/dto/entities";
 
-import { CometSettings } from "../comet-settings.schema.ts";
 import { CometScrapeResponse } from "../schemas/scrape-response.schema.ts";
 
+import type { CometSettings } from "../comet-settings.schema.ts";
 import type { ParamsFor, RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";

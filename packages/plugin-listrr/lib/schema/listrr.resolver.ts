@@ -6,7 +6,8 @@ import { Args, Query, Resolver } from "type-graphql";
 
 import { ListrrAPI } from "../datasource/listrr.datasource.ts";
 import { pluginConfig } from "../listrr-plugin.config.ts";
-import { ListIdsArguments } from "./arguments/list-ids.arguments.ts";
+
+import type { ListIdsArguments } from "./arguments/list-ids.arguments.ts";
 
 @Resolver()
 export class ListrrResolver {

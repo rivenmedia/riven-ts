@@ -1,9 +1,8 @@
-import { MediaItemIndexRequestedShowEventHandler } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
-
 import { TvdbAPI } from "../datasource/tvdb.datasource.ts";
 import { TvMazeAPI } from "../datasource/tvmaze.datasource.ts";
 import { transformSeries } from "../transformers/transform-series.ts";
 
+import type { MediaItemIndexRequestedShowEventHandler } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 import type z from "zod";
 
 export const indexTVDBMediaItem: z.infer<

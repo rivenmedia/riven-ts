@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import { AsyncLocalStorage } from "node:async_hooks";
-import { Buffer } from "node:buffer";
 
 import type { FileHandleMetadata } from "./file-handle-map.ts";
+import type { Buffer } from "node:buffer";
 import type { Promisable } from "type-fest";
 import type { Dispatcher } from "undici";
 

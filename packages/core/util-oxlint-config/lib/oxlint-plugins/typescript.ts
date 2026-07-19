@@ -18,7 +18,7 @@ export const oxlintPluginTypescriptConfig = defineConfig({
           { accessibility: "no-public" },
         ],
         "typescript/explicit-module-boundary-types": "off",
-        "typescript/consistent-type-imports": "off",
+        // "typescript/consistent-type-imports": "off",
         "typescript/method-signature-style": "off",
         "typescript/no-import-type-side-effects": "off",
         "typescript/no-empty-interface": "off",

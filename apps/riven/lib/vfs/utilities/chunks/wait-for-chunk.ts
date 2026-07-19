@@ -1,6 +1,5 @@
 import Fuse from "@zkochan/fuse-native";
 import assert from "node:assert";
-import { Buffer } from "node:buffer";
 import { setTimeout as sleep } from "node:timers/promises";
 
 import { config } from "../../config.ts";
@@ -11,6 +10,7 @@ import { fdToCurrentStreamPositionMap } from "../file-handle-map.ts";
 import { getVfsOperationContext } from "../vfs-operation-context.ts";
 
 import type { ChunkMetadata } from "../../schemas/chunk.schema.ts";
+import type { Buffer } from "node:buffer";
 import type BodyReadable from "undici/types/readable.ts";
 
 interface WaitForChunkResponse {

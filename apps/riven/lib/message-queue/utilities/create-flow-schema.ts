@@ -1,9 +1,9 @@
-import * as Sentry from "@sentry/node";
 import z from "zod";
 
 import type { services } from "../../database/database.ts";
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
 import type { ValidPlugin } from "../../types/plugins.ts";
+import type * as Sentry from "@sentry/node";
 import type { Job } from "bullmq";
 import type { ZodNever, ZodObject, ZodOptional, ZodType } from "zod";
 

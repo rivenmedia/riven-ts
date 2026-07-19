@@ -1,7 +1,7 @@
 import { ApolloClient } from "@apollo/client";
-import * as Sentry from "@sentry/node";
 import z from "zod";
 
+import type * as Sentry from "@sentry/node";
 import type { SandboxedJob } from "bullmq";
 import type { ZodNever, ZodObject, ZodOptional, ZodType } from "zod";
 

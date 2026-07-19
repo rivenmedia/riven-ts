@@ -1,10 +1,11 @@
-import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
 import { expect } from "vitest";
 
 import { it } from "../../../../__tests__/test-context.ts";
+
+import type { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 
 it("returns the item request if processed successfully", async ({
   services: { itemRequestService },

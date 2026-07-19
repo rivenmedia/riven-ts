@@ -1,7 +1,8 @@
 import { LRUCache } from "lru-cache";
-import { Buffer } from "node:buffer";
 
 import { logger } from "../../utilities/logger/logger.ts";
+
+import type { Buffer } from "node:buffer";
 
 export const chunkCache = new LRUCache<string, Buffer>({
   maxSize: Math.pow(1024, 2) * 50, // 50 MB

@@ -1,5 +1,4 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
-import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import chalk from "chalk";
 import { assign, enqueueActions, setup } from "xstate";
@@ -28,6 +27,7 @@ import type {
 } from "../../types/plugins.ts";
 import type { ParsedPlugins } from "./actors/collect-plugins-for-registration.actor.ts";
 import type { RegisterPluginHookWorkersOutput } from "./utilities/register-plugin-hook-workers.ts";
+import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type { AnyActorRef, MachineContext } from "xstate";
 
 export interface PluginRegistrarMachineContext extends MachineContext {

@@ -2,11 +2,9 @@ import { toMerged } from "es-toolkit";
 
 import { services } from "../../../database/database.ts";
 import { flow } from "../producer.ts";
-import {
-  ProcessMediaItemFlow,
-  createProcessMediaItemJob,
-} from "./process-media-item.schema.ts";
+import { createProcessMediaItemJob } from "./process-media-item.schema.ts";
 
+import type { ProcessMediaItemFlow } from "./process-media-item.schema.ts";
 import type { FlowJob } from "bullmq";
 import type { UUID } from "node:crypto";
 import type { PartialDeep } from "type-fest";

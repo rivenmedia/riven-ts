@@ -1,6 +1,5 @@
 import {
   Episode,
-  MediaItem,
   Movie,
   Season,
   Show,
@@ -12,6 +11,7 @@ import type {
   EventArgs,
   EventSubscriber,
 } from "@mikro-orm/core";
+import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 export class MediaItemFullTitleSubscriber implements EventSubscriber {
   getSubscribedEntities(): EntityName<MediaItem>[] {

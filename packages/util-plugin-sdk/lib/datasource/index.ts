@@ -1,6 +1,5 @@
 import { RESTDataSource } from "@apollo/datasource-rest";
 import {
-  Job,
   Queue,
   QueueEvents,
   RateLimitError,
@@ -29,6 +28,7 @@ import type {
   ParentOptions,
   RateLimiterOptions,
   Telemetry,
+  Job,
 } from "bullmq";
 import type EventEmitter from "events";
 import type { Promisable } from "type-fest";

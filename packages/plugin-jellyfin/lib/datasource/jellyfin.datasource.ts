@@ -2,8 +2,7 @@ import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import path from "node:path";
 
-import { JellyfinSettings } from "../jellyfin-settings.schema.ts";
-
+import type { JellyfinSettings } from "../jellyfin-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 
 class JellyfinAPIError extends Error {}

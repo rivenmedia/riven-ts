@@ -19,9 +19,10 @@ import { MediaItemContentRating } from "../../enums/content-ratings.enum.ts";
 import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { MediaItemType } from "../../enums/media-item-type.enum.ts";
 import { FileSystemEntry, SubtitleEntry } from "../filesystem/index.ts";
-import { BlacklistedStream, ItemRequest, MediaEntry } from "../index.ts";
+import { BlacklistedStream, ItemRequest } from "../index.ts";
 import { Stream } from "../streams/stream.entity.ts";
 
+import type { MediaEntry } from "../index.ts";
 import type { Hidden, Opt, Ref } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";
 import type { Promisable } from "type-fest";

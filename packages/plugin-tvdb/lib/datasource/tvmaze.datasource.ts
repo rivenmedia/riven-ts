@@ -1,8 +1,8 @@
 import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { LookupByTvdbIdResponse } from "../schemas/lookup-by-tvdb-id-response.schema.ts";
-import { TvdbSettings } from "../tvdb-settings.schema.ts";
 
+import type { TvdbSettings } from "../tvdb-settings.schema.ts";
 import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { TimezoneName } from "countries-and-timezones";
 

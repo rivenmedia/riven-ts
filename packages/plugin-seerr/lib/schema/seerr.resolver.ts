@@ -7,9 +7,9 @@ import { Arg, Args, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { SeerrAPI } from "../datasource/seerr.datasource.ts";
 import { WebhookInput } from "../schemas/webhook-input.schema.ts";
 import { pluginConfig } from "../seerr-plugin.config.ts";
-import { FilterArguments } from "./arguments/filter.arguments.ts";
 import { SeerrHandleWebhookInput } from "./types/seerr-handle-webhook.input.ts";
 
+import type { FilterArguments } from "./arguments/filter.arguments.ts";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 
 @Resolver()

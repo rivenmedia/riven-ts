@@ -1,11 +1,9 @@
 import { dataSourceContext } from "@repo/util-plugin-sdk/datasource-context";
-import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
 
 import * as Sentry from "@sentry/node";
 import { Worker } from "bullmq";
 import { AbortError } from "es-toolkit";
 import assert from "node:assert";
-import z from "zod";
 
 import { withLogContext } from "../../utilities/logger/log-context.ts";
 import { logger } from "../../utilities/logger/logger.ts";
@@ -14,8 +12,12 @@ import { telemetry } from "../../utilities/telemetry.ts";
 import { createQueue } from "./create-queue.ts";
 
 import type { ParamsFor } from "@repo/util-plugin-sdk";
-import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type {
+  RivenEventHandler,
+  RivenEvent,
+} from "@repo/util-plugin-sdk/events";
 import type { Processor, WorkerOptions } from "bullmq";
+import type z from "zod";
 
 Worker.setMaxListeners(200);
 

@@ -2,7 +2,6 @@ import { Worker } from "bullmq";
 import { toMerged } from "es-toolkit";
 import assert from "node:assert";
 import { existsSync } from "node:fs";
-import { URL } from "node:url";
 
 import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
@@ -11,6 +10,7 @@ import { createQueue } from "../../utilities/create-queue.ts";
 
 import type { SandboxedJobDefinition } from "../index.ts";
 import type { QueueOptions, WorkerOptions } from "bullmq";
+import type { URL } from "node:url";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 Worker.setMaxListeners(200);

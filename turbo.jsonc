@@ -71,7 +71,11 @@
         "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
       ]
     },
-    "lint:fix": {},
+    "lint:fix": {
+      "cache": false,
+      "dependsOn": ["codegen:api-schemas", "transit:source-files"],
+      "outputLogs": "errors-only"
+    },
     "//#lint": {
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
@@ -80,7 +84,9 @@
         "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
       ]
     },
-    "//#lint:fix": {},
+    "//#lint:fix": {
+      "cache": false
+    },
     "//#format:check:ci": {
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql,.md,.markdown,.mdx}",

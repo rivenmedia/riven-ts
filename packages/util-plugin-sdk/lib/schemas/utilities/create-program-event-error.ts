@@ -1,8 +1,8 @@
 import assert from "node:assert";
-import z from "zod";
 
 import type { ParamsFor } from "../../types/events.ts";
 import type { RivenEvent } from "../events/index.ts";
+import type z from "zod";
 import type { ZodLiteral, ZodObject, ZodUnknown } from "zod";
 
 type BaseErrorSchema = ZodObject<{
