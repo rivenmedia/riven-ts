@@ -17,7 +17,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/switch-case-braces": "off",
         "unicorn/numeric-separators-style": "off",
         "unicorn/no-useless-undefined": "off",
-        "unicorn/explicit-length-check": "off",
         "unicorn/no-array-sort": "off",
         "unicorn/prefer-spread": "off",
         "unicorn/prefer-set-has": "off",

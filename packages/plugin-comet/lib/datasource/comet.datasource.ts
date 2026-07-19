@@ -60,7 +60,7 @@ export class CometAPI extends BaseDataSource<CometSettings> {
 
       const parsed = CometScrapeResponse.parse(response);
 
-      if (!parsed.streams.length) {
+      if (parsed.streams.length === 0) {
         this.logger.info(
           `No streams found for item ${item.fullTitle} (IMDB: ${item.imdbId})`,
         );

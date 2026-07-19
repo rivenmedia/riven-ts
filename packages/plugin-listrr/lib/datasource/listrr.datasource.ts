@@ -42,7 +42,7 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
    * @param contentLists
    */
   async getShows(contentLists: Set<string>): Promise<ExternalIds[]> {
-    if (!contentLists.size) {
+    if (contentLists.size === 0) {
       return [];
     }
 
@@ -96,7 +96,7 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
    * @param contentLists
    */
   async getMovies(contentLists: Set<string>): Promise<ExternalIds[]> {
-    if (!contentLists.size) {
+    if (contentLists.size === 0) {
       return [];
     }
 

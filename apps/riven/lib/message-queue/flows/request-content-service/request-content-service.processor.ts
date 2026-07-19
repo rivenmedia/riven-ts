@@ -79,7 +79,7 @@ export const requestContentServiceProcessor =
               (acc, childData) => {
                 acc.updateIntervalSeconds ??= childData.updateIntervalSeconds;
 
-                if (childData.movies.length) {
+                if (childData.movies.length > 0) {
                   for (const movie of childData.movies) {
                     const key = buildExternalIdKey(movie.tmdbId, movie.imdbId);
 
@@ -95,7 +95,7 @@ export const requestContentServiceProcessor =
                   }
                 }
 
-                if (childData.shows.length) {
+                if (childData.shows.length > 0) {
                   for (const show of childData.shows) {
                     const key = buildExternalIdKey(show.tvdbId, show.imdbId);
 

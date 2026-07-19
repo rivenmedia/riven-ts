@@ -22,7 +22,7 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
       Object.keys(job.data.streams),
     );
 
-    if (!streams.length) {
+    if (streams.length === 0) {
       return [];
     }
 

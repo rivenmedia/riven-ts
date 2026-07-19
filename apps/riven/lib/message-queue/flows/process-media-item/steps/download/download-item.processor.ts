@@ -47,7 +47,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
 
       const incompleteItems = await updatedItem.getIncompleteItems();
 
-      if (incompleteItems.length) {
+      if (incompleteItems.length > 0) {
         sendEvent({
           type: "riven.media-item.download.partial-success",
           item: updatedItem,

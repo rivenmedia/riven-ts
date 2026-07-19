@@ -26,7 +26,7 @@ export default createSandboxedJobProcessor(
       {},
     );
 
-    if (!Object.keys(aggregatedResults).length) {
+    if (Object.keys(aggregatedResults).length === 0) {
       return {
         id: job.data.id,
         results: {},

@@ -72,7 +72,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
       const response = await this.get<unknown>(nextUrl);
       const { data, links } = responseSchema.parse(response);
 
-      if (!data.episodes.length) {
+      if (data.episodes.length === 0) {
         throw new TvdbAPIError(
           `Failed to retrieve episodes for series with id ${id}: No episodes in response`,
         );

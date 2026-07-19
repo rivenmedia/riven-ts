@@ -105,7 +105,7 @@ export const findValidTorrentProcessor =
                   )
                 : closestRateLimitReattempt;
 
-              if (!providers.length && availableDownloaders.length === 1) {
+              if (providers.length === 0 && availableDownloaders.length === 1) {
                 const formattedReattemptTime = rateLimitReattemptDatetime
                   .diffNow(["hours", "minutes", "seconds"])
                   .rescale()
@@ -124,7 +124,7 @@ export const findValidTorrentProcessor =
               }
             }
 
-            if (!providers.length) {
+            if (providers.length === 0) {
               logger.debug(
                 hasRateLimitedProviders
                   ? `Skipping ${pluginName} for ${infoHash}; all providers are currently rate limited.`

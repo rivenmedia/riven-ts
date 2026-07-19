@@ -61,7 +61,7 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
 
       const parsed = TorrentioScrapeResponse.parse(response);
 
-      if (!parsed.streams.length) {
+      if (parsed.streams.length === 0) {
         this.logger.info(
           `No streams found for item ${item.fullTitle} (IMDB: ${item.imdbId})`,
         );

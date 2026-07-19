@@ -98,7 +98,7 @@ export async function performBodyRead(chunks: readonly ChunkMetadata[]) {
     };
   });
 
-  if (fetchedChunksMetadata.length) {
+  if (fetchedChunksMetadata.length > 0) {
     const chunkLabels = fetchedChunksMetadata
       .map((chunk) => chunk.rangeLabel)
       .join(", ");

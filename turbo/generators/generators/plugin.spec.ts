@@ -29,7 +29,7 @@ const it = baseIt
   );
 
 it.beforeAll(async ({ startDiff, packageName }) => {
-  if (startDiff.length) {
+  if (startDiff.length > 0) {
     expect.fail(
       "Uncommitted changes detected. Please clean your working directory before running this test.",
     );

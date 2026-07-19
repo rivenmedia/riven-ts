@@ -65,7 +65,7 @@ export class ShareLogsResolver {
       body += `${action}\n${JSON.stringify(log)}\n`;
     }
 
-    if (!body.length) {
+    if (body.length === 0) {
       throw new Error("No log entries found within the last 24 hours.");
     }
 

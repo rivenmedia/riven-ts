@@ -70,7 +70,7 @@ export const ParsedDataSchema = z
   .transform((data) => ({
     ...data,
     type:
-      data.seasons.length || data.episodes.length
+      data.seasons.length > 0 || data.episodes.length > 0
         ? ("show" as const)
         : ("movie" as const),
     normalisedTitle: normaliseTitle(data.title),

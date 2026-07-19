@@ -72,7 +72,7 @@ export const processItemRequestProcessor =
       case "process": {
         const data = await job.getChildrenValues();
 
-        if (!Object.values(data).filter(Boolean).length) {
+        if (Object.values(data).filter(Boolean).length === 0) {
           const itemRequest = await itemRequestService.markAsFailed(
             job.data.itemRequestId,
           );
