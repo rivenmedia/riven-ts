@@ -12,38 +12,40 @@ import {
 
 export default createSandboxedJobProcessor(
   ValidateTorrentFilesSandboxedJob,
-  validateTorrentFilesProcessorSchema.implementAsync(async function ({ job }) {
-    const [mapItemsToFilesResult] = Object.values(
-      await job.getChildrenValues(),
-    );
-
-    if (!mapItemsToFilesResult) {
-      throw new UnrecoverableError(
-        `Missing mapped items to files result for job ${job.id}`,
-      );
-    }
-
-    try {
-      const result = await validateTorrentFiles(
-        job.data.id,
-        job.data.infoHash,
-        mapItemsToFilesResult,
-        job.data.isCacheCheck,
+  validateTorrentFilesProcessorSchema.implementAsync(
+    async function validateTorrentFilesProcessor({ job }) {
+      const [mapItemsToFilesResult] = Object.values(
+        await job.getChildrenValues(),
       );
 
-      return {
-        success: true,
-        files: result,
-      };
-    } catch (error) {
-      if (error instanceof InvalidTorrentError) {
-        return {
-          success: false,
-          reason: error.message,
-        };
+      if (!mapItemsToFilesResult) {
+        throw new UnrecoverableError(
+          `Missing mapped items to files result for job ${job.id}`,
+        );
       }
 
-      throw error;
-    }
-  }),
+      try {
+        const result = await validateTorrentFiles(
+          job.data.id,
+          job.data.infoHash,
+          mapItemsToFilesResult,
+          job.data.isCacheCheck,
+        );
+
+        return {
+          success: true,
+          files: result,
+        };
+      } catch (error) {
+        if (error instanceof InvalidTorrentError) {
+          return {
+            success: false,
+            reason: error.message,
+          };
+        }
+
+        throw error;
+      }
+    },
+  ),
 );

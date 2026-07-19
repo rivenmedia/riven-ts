@@ -7,7 +7,9 @@ import { mapItemsToFiles } from "./utilities/map-items-to-files.ts";
 
 export default createSandboxedJobProcessor(
   MapItemsToFilesSandboxedJob,
-  mapItemsToFilesProcessorSchema.implementAsync(function ({ job }) {
-    return mapItemsToFiles(job.data.files);
-  }),
+  mapItemsToFilesProcessorSchema.implementAsync(
+    function mapItemsToFilesProcessor({ job }) {
+      return mapItemsToFiles(job.data.files);
+    },
+  ),
 );

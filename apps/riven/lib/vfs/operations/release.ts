@@ -86,7 +86,7 @@ async function release() {
   );
 }
 
-export const releaseSync = function (path, fd, callback) {
+export const releaseSync = function releaseSync(path, fd, callback) {
   void withVfsScope(async () =>
     withVfsOperationContext(
       { operationName: "release", path, fd },

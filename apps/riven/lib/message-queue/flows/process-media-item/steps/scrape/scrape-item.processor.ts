@@ -10,7 +10,10 @@ import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
-  async function ({ job }, { sendEvent, services: { scraperService } }) {
+  async function scrapeItemProcessor(
+    { job },
+    { sendEvent, services: { scraperService } },
+  ) {
     const children = filterChildrenValues(
       await job.getChildrenValues(),
       "scrape-item.parse-scrape-results",

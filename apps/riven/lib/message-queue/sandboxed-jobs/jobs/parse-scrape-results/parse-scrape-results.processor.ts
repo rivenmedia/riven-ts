@@ -15,48 +15,50 @@ import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export default createSandboxedJobProcessor(
   ParseScrapeResultsSandboxedJob,
-  parseScrapeResultsProcessorSchema.implementAsync(async function ({ job }) {
-    const children = await job.getChildrenValues();
+  parseScrapeResultsProcessorSchema.implementAsync(
+    async function parseScrapeResultsProcessor({ job }) {
+      const children = await job.getChildrenValues();
 
-    const childResults = Object.values(children);
+      const childResults = Object.values(children);
 
-    // Aggregate results from all scrapers, deduping by hash (which should be consistent across scrapers)
-    const aggregatedResults = childResults.reduce<Record<string, string>>(
-      (acc, scrapeResult) => Object.assign(acc, scrapeResult.results),
-      {},
-    );
+      // Aggregate results from all scrapers, deduping by hash (which should be consistent across scrapers)
+      const aggregatedResults = childResults.reduce<Record<string, string>>(
+        (acc, scrapeResult) => Object.assign(acc, scrapeResult.results),
+        {},
+      );
 
-    if (Object.keys(aggregatedResults).length === 0) {
-      return {
-        id: job.data.id,
-        results: {},
-      };
-    }
+      if (Object.keys(aggregatedResults).length === 0) {
+        return {
+          id: job.data.id,
+          results: {},
+        };
+      }
 
-    const validResults = new Map<string, ParsedData>();
+      const validResults = new Map<string, ParsedData>();
 
-    for (const [hash, rawTitle] of Object.entries(aggregatedResults)) {
-      try {
-        const parsedData = parse(rawTitle);
+      for (const [hash, rawTitle] of Object.entries(aggregatedResults)) {
+        try {
+          const parsedData = parse(rawTitle);
 
-        await validateTorrent(job.data.id, parsedData, hash);
+          await validateTorrent(job.data.id, parsedData, hash);
 
-        validResults.set(hash, parsedData);
-      } catch (error) {
-        if (error instanceof SkippedTorrentError) {
-          logger.silly(error.message);
-        } else {
-          logger.debug(
-            `Failed to parse torrent ${rawTitle} (${hash}) for ${job.name}`,
-            { err: error },
-          );
+          validResults.set(hash, parsedData);
+        } catch (error) {
+          if (error instanceof SkippedTorrentError) {
+            logger.silly(error.message);
+          } else {
+            logger.debug(
+              `Failed to parse torrent ${rawTitle} (${hash}) for ${job.name}`,
+              { err: error },
+            );
+          }
         }
       }
-    }
 
-    return {
-      id: job.data.id,
-      results: Object.fromEntries(validResults),
-    };
-  }),
+      return {
+        id: job.data.id,
+        results: Object.fromEntries(validResults),
+      };
+    },
+  ),
 );

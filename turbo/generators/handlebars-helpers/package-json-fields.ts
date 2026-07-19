@@ -64,7 +64,7 @@ const packageTypeFields: Partial<
 export function registerPackageJsonFieldsHelper(plop: PlopTypes.NodePlopAPI) {
   plop.setHelper(
     "packageJsonFields",
-    function (
+    function packageJsonFieldsHelper(
       // Handlebars context
       this: Record<string, unknown>,
       packageType: PackageType,

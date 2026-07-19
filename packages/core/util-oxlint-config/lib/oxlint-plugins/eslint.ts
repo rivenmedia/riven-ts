@@ -54,7 +54,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "arrow-body-style": "off",
         "no-plusplus": "off",
         "no-bitwise": "off",
-        "func-names": "off",
         "prefer-arrow-callback": "off",
         "no-implicit-coercion": "off",
         "no-negated-condition": "off",

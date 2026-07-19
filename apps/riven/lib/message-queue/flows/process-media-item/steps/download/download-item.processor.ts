@@ -9,7 +9,7 @@ import { filterChildrenValues } from "../../../../utilities/filter-children-valu
 import { downloadItemProcessorSchema } from "./download-item.schema.ts";
 
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
-  async function (
+  async function downloadItemProcessor(
     { job },
     { sendEvent, services: { mediaItemService, downloaderService } },
   ) {

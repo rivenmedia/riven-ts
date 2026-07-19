@@ -179,7 +179,7 @@ async function read() {
   return length;
 }
 
-export const readSync = function (
+export const readSync = function readSync(
   path,
   fd,
   buffer,
