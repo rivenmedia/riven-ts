@@ -9,7 +9,7 @@ import type {
 } from "@mikro-orm/core";
 
 export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
-  async onFlush({ uow }: FlushEventArgs): Promise<void> {
+  public async onFlush({ uow }: FlushEventArgs): Promise<void> {
     const trackedEpisodes = new Map<
       Partial<Episode>,
       ChangeSet<Partial<Episode>> | null

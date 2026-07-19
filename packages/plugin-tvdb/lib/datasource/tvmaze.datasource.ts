@@ -7,8 +7,8 @@ import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { TimezoneName } from "countries-and-timezones";
 
 export class TvMazeAPI extends BaseDataSource<TvdbSettings> {
-  override baseURL = "https://api.tvmaze.com";
-  override serviceName = "Tvdb - TvMaze";
+  public override baseURL = "https://api.tvmaze.com";
+  public override serviceName = "Tvdb - TvMaze";
 
   protected override rateLimiterOptions: RateLimiterOptions = {
     duration: 10000,
@@ -22,7 +22,9 @@ export class TvMazeAPI extends BaseDataSource<TvdbSettings> {
    * @param tvdbId The TVDB ID to retrieve timezone for
    * @returns The IANA-compliant timezone of the show's original network, if present
    */
-  async getShowTimezone(tvdbId: string): Promise<TimezoneName | undefined> {
+  public async getShowTimezone(
+    tvdbId: string,
+  ): Promise<TimezoneName | undefined> {
     try {
       const showResponse = await this.get<unknown>("lookup/shows", {
         params: {
@@ -47,7 +49,7 @@ export class TvMazeAPI extends BaseDataSource<TvdbSettings> {
     }
   }
 
-  override validate() {
+  public override validate() {
     return true;
   }
 }

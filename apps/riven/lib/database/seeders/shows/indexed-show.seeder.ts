@@ -19,7 +19,7 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
   #episodesPerSeason = 10;
   #seasonCount = 6;
 
-  async run(
+  public async run(
     em: EntityManager,
     context: IndexedShowSeederContext = this.context,
   ) {

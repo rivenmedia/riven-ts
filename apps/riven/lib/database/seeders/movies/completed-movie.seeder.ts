@@ -14,7 +14,7 @@ export interface CompletedMovieSeederContext extends ScrapedMovieSeederContext {
 }
 
 export class CompletedMovieSeeder extends BaseSeeder<CompletedMovieSeederContext> {
-  async run(
+  public async run(
     em: EntityManager,
     context: CompletedMovieSeederContext = this.context,
   ) {

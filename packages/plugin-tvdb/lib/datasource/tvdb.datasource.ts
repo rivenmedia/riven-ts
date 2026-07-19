@@ -22,8 +22,8 @@ interface TvdbToken {
 }
 
 export class TvdbAPI extends BaseDataSource<TvdbSettings> {
-  override baseURL = "https://api4.thetvdb.com/v4/";
-  override serviceName = "Tvdb";
+  public override baseURL = "https://api4.thetvdb.com/v4/";
+  public override serviceName = "Tvdb";
 
   #token: TvdbToken | null = null;
 
@@ -57,7 +57,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
    * @param id The TVDB id of the series to retrieve episodes for
    * @param language The language code of the episodes to retrieve (default: "eng")
    */
-  async getAllEpisodesInOfficialOrder(id: string, language = "eng") {
+  public async getAllEpisodesInOfficialOrder(id: string, language = "eng") {
     let nextUrl = `series/${id}/episodes/official/${language}`;
 
     const responseSchema = getAllSeries200Schema.extend({
@@ -93,7 +93,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
    *
    * @param id The TVDB id of the series to retrieve
    */
-  async getSeries(id: string) {
+  public async getSeries(id: string) {
     const response = await this.get<unknown>(`series/${id}/extended`, {
       params: {
         short: "true",
@@ -119,7 +119,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
    * @param id The TVDB id of the series to retrieve translations for
    * @param language The language code of the translation to retrieve (default: "eng")
    */
-  async getSeriesTranslations(id: string, language = "eng") {
+  public async getSeriesTranslations(id: string, language = "eng") {
     const response = await this.get<unknown>(
       `series/${id}/translations/${language}`,
     );
@@ -175,7 +175,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
     return this.#token;
   }
 
-  override async validate() {
+  public override async validate() {
     try {
       await this.#getAuthToken();
 

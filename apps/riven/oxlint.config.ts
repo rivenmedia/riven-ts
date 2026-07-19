@@ -18,5 +18,12 @@ export default defineConfig({
         "no-template-curly-in-string": "off",
       },
     },
+    {
+      files: ["**/migrations/Migration*.ts"],
+      plugins: ["typescript"],
+      rules: {
+        "typescript/explicit-member-accessibility": "allow",
+      },
+    },
   ],
 });

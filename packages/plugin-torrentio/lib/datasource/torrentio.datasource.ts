@@ -17,8 +17,8 @@ const TorrentioScrapeResponse = z.object({
 class TorrentioAPIError extends Error {}
 
 export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
-  override baseURL = "http://torrentio.strem.fun/";
-  override serviceName = "Torrent.io";
+  public override baseURL = "http://torrentio.strem.fun/";
+  public override serviceName = "Torrent.io";
 
   get #filter() {
     return this.settings.filter;
@@ -29,7 +29,7 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
     duration: 60 * 1000,
   };
 
-  override async validate() {
+  public override async validate() {
     try {
       // Implement your own validation logic here
       await this.get("validate");
@@ -40,7 +40,7 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
     }
   }
 
-  async scrape({
+  public async scrape({
     item,
   }: ParamsFor<MediaItemScrapeRequestedEvent>): Promise<
     Record<string, string>

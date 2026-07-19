@@ -10,7 +10,7 @@ import type { EntityManager } from "@mikro-orm/core";
 export type PartiallyCompletedShowSeederContext = ScrapedShowSeederContext;
 
 export class PartiallyCompletedShowSeeder extends BaseSeeder<PartiallyCompletedShowSeederContext> {
-  async run(
+  public async run(
     em: EntityManager,
     context: PartiallyCompletedShowSeederContext = this.context,
   ) {

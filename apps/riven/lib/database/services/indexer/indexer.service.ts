@@ -28,11 +28,13 @@ export class IndexerService extends BaseService {
     return persistShowIndexerData(this.em, item);
   }
 
-  async indexItem(item: MovieIndexData): Promise<Movie>;
-  async indexItem(item: ShowIndexData): Promise<Show>;
-  async indexItem(item: MovieIndexData | ShowIndexData): Promise<Movie | Show>;
+  public async indexItem(item: MovieIndexData): Promise<Movie>;
+  public async indexItem(item: ShowIndexData): Promise<Show>;
+  public async indexItem(
+    item: MovieIndexData | ShowIndexData,
+  ): Promise<Movie | Show>;
   @CreateRequestContext()
-  async indexItem(item: MovieIndexData | ShowIndexData) {
+  public async indexItem(item: MovieIndexData | ShowIndexData) {
     switch (item.type) {
       case "movie":
         return this.indexMovie(item);
@@ -41,7 +43,7 @@ export class IndexerService extends BaseService {
     }
   }
 
-  async calculateReindexTime(
+  public async calculateReindexTime(
     item: Movie | Show,
   ): Promise<{ reindexTime: DateTime; isFallback: boolean }> {
     const { settings } = await import("../../../utilities/settings.ts");

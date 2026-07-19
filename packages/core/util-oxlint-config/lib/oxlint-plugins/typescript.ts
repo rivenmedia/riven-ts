@@ -13,12 +13,7 @@ export const oxlintPluginTypescriptConfig = defineConfig({
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "typescript/explicit-function-return-type": "off",
-        "typescript/explicit-member-accessibility": [
-          "error",
-          { accessibility: "no-public" },
-        ],
         "typescript/explicit-module-boundary-types": "off",
-        // "typescript/consistent-type-imports": "off",
         "typescript/method-signature-style": "off",
         "typescript/no-import-type-side-effects": "off",
         "typescript/no-empty-interface": "off",

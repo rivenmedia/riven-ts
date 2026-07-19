@@ -12,7 +12,7 @@ export interface ScrapedShowSeederContext
   extends IndexedShowSeederContext, StreamsSeederContext {}
 
 export class ScrapedShowSeeder extends BaseSeeder<ScrapedShowSeederContext> {
-  async run(
+  public async run(
     em: EntityManager,
     context: ScrapedShowSeederContext = this.context,
   ) {

@@ -26,11 +26,11 @@ export class ProgramEventError<
   Schema extends BaseErrorSchema,
   Data extends ParamsFor<z.infer<Schema>>,
 > extends Error {
-  payload: {
+  public payload: {
     type: z.infer<Schema>["type"];
   } & Data;
 
-  constructor(type: z.infer<Schema>["type"], data: Data) {
+  public constructor(type: z.infer<Schema>["type"], data: Data) {
     super(buildErrorMessage(type, data.error));
 
     this.payload = { type, ...data };
@@ -44,7 +44,7 @@ export const createProgramEventError = <
   payloadSchema: Schema,
 ) =>
   class extends ProgramEventError<Schema, Data> {
-    constructor(data: Data) {
+    public constructor(data: Data) {
       const [type] = payloadSchema.shape.type.def.values;
 
       assert(type, "Invalid event type");

@@ -22,8 +22,8 @@ import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/sche
 class SeerrAPIError extends Error {}
 
 export class SeerrAPI extends BaseDataSource<SeerrSettings> {
-  override baseURL = new URL("/api/v1/", this.settings.url).toString();
-  override serviceName = "Seerr";
+  public override baseURL = new URL("/api/v1/", this.settings.url).toString();
+  public override serviceName = "Seerr";
 
   protected override readonly rateLimiterOptions: RateLimiterOptions = {
     max: 20,
@@ -37,7 +37,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     requestOpts.headers["x-api-key"] = this.settings.apiKey;
   }
 
-  override async validate() {
+  public override async validate() {
     try {
       try {
         await this.get<GetAuthMeQueryResponse>("auth/me");
@@ -66,7 +66,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     }
   }
 
-  async getContent(
+  public async getContent(
     filter: string,
   ): Promise<Pick<ContentServiceRequestedResponse, "movies" | "shows">> {
     const requests = await this.#getAllRequests(filter);

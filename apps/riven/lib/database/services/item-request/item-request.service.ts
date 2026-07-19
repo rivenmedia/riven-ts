@@ -15,7 +15,9 @@ import type { UUID } from "node:crypto";
 export class ItemRequestService extends BaseService {
   @CreateRequestContext()
   @Transactional()
-  async requestMovie(item: ContentServiceRequestedResponse["movies"][number]) {
+  public async requestMovie(
+    item: ContentServiceRequestedResponse["movies"][number],
+  ) {
     const { logger } = await import("../../../utilities/logger/logger.ts");
 
     const externalIds = [
@@ -30,7 +32,9 @@ export class ItemRequestService extends BaseService {
 
   @CreateRequestContext()
   @Transactional()
-  async requestShow(item: ContentServiceRequestedResponse["shows"][number]) {
+  public async requestShow(
+    item: ContentServiceRequestedResponse["shows"][number],
+  ) {
     const { logger } = await import("../../../utilities/logger/logger.ts");
 
     const externalIds = [
@@ -44,12 +48,12 @@ export class ItemRequestService extends BaseService {
   }
 
   @CreateRequestContext()
-  async getItemRequestById(id: UUID) {
+  public async getItemRequestById(id: UUID) {
     return this.em.findOneOrFail(ItemRequest, id);
   }
 
   @CreateRequestContext()
-  async markAsFailed(id: UUID) {
+  public async markAsFailed(id: UUID) {
     const itemRequest = await this.getItemRequestById(id);
 
     this.em.persist(itemRequest);

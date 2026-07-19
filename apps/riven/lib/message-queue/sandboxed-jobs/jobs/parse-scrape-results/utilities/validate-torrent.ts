@@ -12,7 +12,7 @@ import type { ParsedData } from "@repo/util-rank-torrent-name";
 import type { UUID } from "node:crypto";
 
 export class SkippedTorrentError extends Error {
-  constructor(
+  public constructor(
     message: string,
     itemTitle: string,
     torrentTitle: string,

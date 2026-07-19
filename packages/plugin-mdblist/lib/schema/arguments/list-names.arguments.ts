@@ -9,5 +9,5 @@ export class ListNamesArguments {
     message: "Each list name must be in the format {username}/{listname}",
   })
   @ArrayUnique()
-  listNames!: string[];
+  public listNames!: string[];
 }

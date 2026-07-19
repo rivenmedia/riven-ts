@@ -28,15 +28,15 @@ vi.mock<{ default: Record<string, unknown> }>(
 
 vi.mock(import("@repo/plugin-test"), () => {
   class TestAPI extends BaseDataSource<Record<string, unknown>> {
-    override baseURL = "https://api.test.com";
+    public override baseURL = "https://api.test.com";
 
-    override validate() {
+    public override validate() {
       return true;
     }
   }
 
   class TestResolver {
-    testIsValid() {
+    public testIsValid() {
       return true;
     }
   }

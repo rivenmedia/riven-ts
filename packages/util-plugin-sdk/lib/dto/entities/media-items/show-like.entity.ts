@@ -18,10 +18,10 @@ export abstract class ShowLikeMediaItem extends MediaItem {
   @Field(() => String)
   @Property({ type: "varchar", length: 10 })
   @IsNumberString()
-  tvdbId!: string;
+  public tvdbId!: string;
 
   @Field(() => ShowContentRatingEnum)
-  declare contentRating: ShowContentRating;
+  declare public contentRating: ShowContentRating;
 
   /**
    * Helper method to get the parent show of this media item. For shows, this will return the show itself.
@@ -29,5 +29,5 @@ export abstract class ShowLikeMediaItem extends MediaItem {
    *
    * @returns The parent {@link Show} of this media item.
    */
-  abstract getShow(): Promisable<Show>;
+  public abstract getShow(): Promisable<Show>;
 }

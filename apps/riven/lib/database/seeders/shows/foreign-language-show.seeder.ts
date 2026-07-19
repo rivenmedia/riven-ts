@@ -5,7 +5,7 @@ import type { IndexedShowSeederContext } from "./indexed-show.seeder.ts";
 import type { EntityManager } from "@mikro-orm/core";
 
 export class ForeignLanguageShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
-  async run(
+  public async run(
     em: EntityManager,
     context: IndexedShowSeederContext = this.context,
   ) {

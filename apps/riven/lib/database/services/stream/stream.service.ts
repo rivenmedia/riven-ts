@@ -21,37 +21,37 @@ import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type { UUID } from "node:crypto";
 
 export class StreamService extends BaseService {
-  isFatalStatusCode(statusCode: number) {
+  public isFatalStatusCode(statusCode: number) {
     return isFatalStatusCode(statusCode);
   }
 
-  async saveStreamLink(entryId: UUID, streamUrl: string, ttl: number) {
+  public async saveStreamLink(entryId: UUID, streamUrl: string, ttl: number) {
     await redisCache.set(`stream-link:${entryId}`, streamUrl, { ttl });
   }
 
-  async getStreamLink(entryId: UUID) {
+  public async getStreamLink(entryId: UUID) {
     return redisCache.get(`stream-link:${entryId}`);
   }
 
-  async clearStreamLink(entryId: UUID) {
+  public async clearStreamLink(entryId: UUID) {
     await redisCache.delete(`stream-link:${entryId}`);
   }
 
   @CreateRequestContext()
-  async saveStreamPermalink(entryId: UUID, streamUrl: string) {
+  public async saveStreamPermalink(entryId: UUID, streamUrl: string) {
     return this.em
       .getRepository(MediaEntry)
       .saveStreamPermalink(entryId, streamUrl);
   }
 
   @CreateRequestContext()
-  async clearStreamPermalink(entryId: UUID) {
+  public async clearStreamPermalink(entryId: UUID) {
     return this.em.getRepository(MediaEntry).clearStreamPermalink(entryId);
   }
 
   @EnsureRequestContext()
   @Transactional()
-  async blacklistStreamByInfoHash(
+  public async blacklistStreamByInfoHash(
     mediaItemId: UUID,
     infoHash: string,
     plugin: string,
@@ -62,7 +62,7 @@ export class StreamService extends BaseService {
 
   @CreateRequestContext()
   @Transactional()
-  async blacklistActiveStream({
+  public async blacklistActiveStream({
     mediaItem,
     provider,
     plugin,
@@ -92,12 +92,12 @@ export class StreamService extends BaseService {
     return result;
   }
 
-  async calculateItemsToReprocess(mediaItems: Set<MediaItem>) {
+  public async calculateItemsToReprocess(mediaItems: Set<MediaItem>) {
     return calculateItemsToReprocess(mediaItems);
   }
 
   @CreateRequestContext()
-  async isStreamBlacklisted(query: FilterObject<BlacklistedStream>) {
+  public async isStreamBlacklisted(query: FilterObject<BlacklistedStream>) {
     const count = await this.em.count(BlacklistedStream, query);
 
     return count > 0;

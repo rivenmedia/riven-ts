@@ -10,7 +10,7 @@ import { ShowItemRequestFactory } from "./show-item-request.factory.ts";
 import type { EntityData } from "@mikro-orm/core";
 
 export class ShowFactory extends Factory<Show> {
-  model = Show;
+  public model = Show;
 
   protected override definition(
     input: EntityData<Show> = {},

@@ -12,7 +12,7 @@ export interface IndexedMovieSeederContext {
 }
 
 export class IndexedMovieSeeder extends BaseSeeder<IndexedMovieSeederContext> {
-  async run(
+  public async run(
     em: EntityManager,
     context: IndexedMovieSeederContext = this.context,
   ) {

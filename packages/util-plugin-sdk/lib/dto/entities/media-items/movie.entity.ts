@@ -14,23 +14,23 @@ import type { Opt } from "@mikro-orm/core";
 @ObjectType({ implements: MediaItem })
 @Entity({ repository: () => MovieRepository })
 export class Movie extends MediaItem {
-  [EntityRepositoryType]?: MovieRepository;
+  public [EntityRepositoryType]?: MovieRepository;
 
   @Field(() => Int, { nullable: true })
   @Property()
-  runtime!: number | null;
+  public runtime!: number | null;
 
   @Field(() => MovieContentRatingEnum)
-  declare contentRating: MovieContentRating;
+  declare public contentRating: MovieContentRating;
 
-  override type: Opt<"movie"> = "movie" as const;
+  public override type: Opt<"movie"> = "movie" as const;
 
   @Field(() => String)
   @Property({ type: "varchar", length: 10 })
   @IsNumberString()
-  tmdbId!: string;
+  public tmdbId!: string;
 
-  async getMediaEntries() {
+  public async getMediaEntries() {
     return this.filesystemEntries.matching<MediaEntry>({
       where: {
         type: "media",
@@ -38,15 +38,15 @@ export class Movie extends MediaItem {
     });
   }
 
-  getPrettyName(): string {
+  public getPrettyName(): string {
     return `${this.title.replaceAll(".", "")} (${this.year?.toString() ?? "Unknown"}) {tmdb-${this.tmdbId}}`;
   }
 
-  getExpectedFileCount(): number {
+  public getExpectedFileCount(): number {
     return 1;
   }
 
-  getIncompleteItems() {
+  public getIncompleteItems() {
     return [];
   }
 }

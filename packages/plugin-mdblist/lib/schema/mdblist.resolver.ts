@@ -13,7 +13,7 @@ import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/sche
 @Resolver()
 export class MdblistResolver {
   @Query(() => Boolean)
-  async mdblistIsValid(
+  public async mdblistIsValid(
     @PluginDataSource(pluginConfig.name, MdblistAPI) api: MdblistAPI,
   ): Promise<boolean> {
     return api.validate();
@@ -21,7 +21,7 @@ export class MdblistResolver {
 
   @CacheControl({ maxAge: 300 })
   @Query(() => MdblistContentServiceResponse)
-  async mdbListItems(
+  public async mdbListItems(
     @Args(() => ListNamesArguments) { listNames }: ListNamesArguments,
     @PluginDataSource(pluginConfig.name, MdblistAPI) api: MdblistAPI,
   ): Promise<Pick<ContentServiceRequestedResponse, "movies" | "shows">> {

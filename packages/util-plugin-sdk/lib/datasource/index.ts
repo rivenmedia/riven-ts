@@ -64,9 +64,9 @@ type FetchResponse<T = unknown> = Pick<
   );
 
 export class DataSourceHTTPError extends Error {
-  response!: DataSourceFetchResult<never>["response"];
+  public response!: DataSourceFetchResult<never>["response"];
 
-  constructor(response: DataSourceFetchResult<never>["response"]) {
+  public constructor(response: DataSourceFetchResult<never>["response"]) {
     super(
       `${response.status.toString()} ${response.statusText} for ${response.url}`,
     );
@@ -91,12 +91,12 @@ export interface BaseDataSourceConfig<
 export abstract class BaseDataSource<
   T extends Record<string, unknown>,
 > extends RESTDataSource {
-  abstract override readonly baseURL: string;
+  public abstract override readonly baseURL: string;
 
-  readonly serviceName: string;
-  readonly settings: T;
+  public readonly serviceName: string;
+  public readonly settings: T;
 
-  override readonly logger: Logger;
+  public override readonly logger: Logger;
 
   protected readonly rateLimiterOptions?: RateLimiterOptions | undefined;
 
@@ -120,8 +120,8 @@ export abstract class BaseDataSource<
 
   #queueId: string;
   #queueEvents: QueueEvents;
-  queue: Queue<FetchJobInput, FetchResponse>;
-  worker: Worker<FetchJobInput, FetchResponse>;
+  public queue: Queue<FetchJobInput, FetchResponse>;
+  public worker: Worker<FetchJobInput, FetchResponse>;
 
   #keyv: KeyvAdapter;
   #keyvPrefix = "httpcache:";
@@ -136,7 +136,7 @@ export abstract class BaseDataSource<
    */
   #nonFatalStatusCodes = new Set([408, 425, 429, 500, 502, 503, 504]);
 
-  constructor({
+  public constructor({
     pluginSymbol,
     settings,
     requestAttempts = 3,
@@ -451,7 +451,7 @@ export abstract class BaseDataSource<
     );
   }
 
-  override async fetch<T>(
+  public override async fetch<T>(
     path: string,
     incomingRequest?: DataSourceRequest,
   ): Promise<DataSourceFetchResult<T>> {
@@ -525,7 +525,7 @@ export abstract class BaseDataSource<
     };
   }
 
-  override async throwIfResponseIsError({
+  public override async throwIfResponseIsError({
     request,
     response,
   }: {
@@ -606,7 +606,7 @@ export abstract class BaseDataSource<
     throw Worker.RateLimitError();
   }
 
-  abstract validate(): Promisable<boolean>;
+  public abstract validate(): Promisable<boolean>;
 }
 
 export type { RateLimiterOptions } from "bullmq";

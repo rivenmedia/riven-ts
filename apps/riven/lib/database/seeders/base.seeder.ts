@@ -6,7 +6,7 @@ import type { Constructor } from "type-fest";
 export abstract class BaseSeeder<
   T extends Dictionary = Dictionary,
 > extends Seeder<T> {
-  context: T = {} as T;
+  public context: T = {} as T;
 
   protected override async call(
     em: EntityManager,

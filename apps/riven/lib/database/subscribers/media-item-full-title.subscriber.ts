@@ -14,18 +14,18 @@ import type {
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 export class MediaItemFullTitleSubscriber implements EventSubscriber {
-  getSubscribedEntities(): EntityName<MediaItem>[] {
+  public getSubscribedEntities(): EntityName<MediaItem>[] {
     return [Movie, Show, Season, Episode];
   }
 
-  async beforeCreate({
+  public async beforeCreate({
     entity,
     changeSet,
   }: EventArgs<MediaItem>): Promise<void> {
     await this.#setFullTitle(entity, changeSet?.payload);
   }
 
-  async beforeUpdate({
+  public async beforeUpdate({
     entity,
     changeSet,
   }: EventArgs<MediaItem>): Promise<void> {

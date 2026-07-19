@@ -7,7 +7,7 @@ import { ListrrSettings } from "./types/listrr-settings.type.ts";
 @Resolver(() => Settings)
 export class ListrrSettingsResolver {
   @FieldResolver(() => ListrrSettings)
-  listrr(): ListrrSettings {
+  public listrr(): ListrrSettings {
     return {
       apiKey: "listrr-api-key",
     };

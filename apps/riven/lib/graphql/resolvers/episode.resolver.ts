@@ -11,7 +11,7 @@ export class EpisodeResolver {
       "Fetches an episode by its TVDB ID, season number, and episode number. If season number is not provided, it will lookup using absolute episode numbering.",
     nullable: true,
   })
-  async episode(
+  public async episode(
     @CoreContext() { em }: CoreContext,
     @Arg("tvdbId", () => String) tvdbId: string,
     @Arg("episodeNumber", () => Int) episodeNumber: number,
@@ -24,12 +24,12 @@ export class EpisodeResolver {
   }
 
   @FieldResolver(() => Season)
-  async season(@Root() episode: Episode) {
+  public async season(@Root() episode: Episode) {
     return episode.season.loadOrFail();
   }
 
   @FieldResolver(() => [String])
-  async lookupKeys(@Root() episode: Episode) {
+  public async lookupKeys(@Root() episode: Episode) {
     const seasonNumber = await episode.season.loadProperty("number");
 
     return [
@@ -39,7 +39,7 @@ export class EpisodeResolver {
   }
 
   @FieldResolver(() => Int)
-  expectedFileCount(@Root() episode: Episode) {
+  public expectedFileCount(@Root() episode: Episode) {
     return episode.getExpectedFileCount();
   }
 }

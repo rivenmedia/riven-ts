@@ -10,8 +10,8 @@ import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
 
 export class ListrrAPI extends BaseDataSource<ListrrSettings> {
-  override baseURL = "https://listrr.pro/api/";
-  override serviceName = "Listrr";
+  public override baseURL = "https://listrr.pro/api/";
+  public override serviceName = "Listrr";
 
   protected override readonly rateLimiterOptions: RateLimiterOptions = {
     max: 50,
@@ -25,7 +25,7 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
     requestOpts.headers["x-api-key"] = this.settings.apiKey;
   }
 
-  override async validate() {
+  public override async validate() {
     try {
       const response = await this.get<unknown>("List/My/1");
 
@@ -41,7 +41,7 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
    * Fetch unique show IDs from Listrr for a given list of content
    * @param contentLists
    */
-  async getShows(contentLists: Set<string>): Promise<ExternalIds[]> {
+  public async getShows(contentLists: Set<string>): Promise<ExternalIds[]> {
     if (contentLists.size === 0) {
       return [];
     }
@@ -95,7 +95,7 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
    * Fetch unique movie IDs from Listrr for a given list of content
    * @param contentLists
    */
-  async getMovies(contentLists: Set<string>): Promise<ExternalIds[]> {
+  public async getMovies(contentLists: Set<string>): Promise<ExternalIds[]> {
     if (contentLists.size === 0) {
       return [];
     }

@@ -13,7 +13,7 @@ export interface ScrapedMovieSeederContext
   extends IndexedMovieSeederContext, StreamsSeederContext {}
 
 export class ScrapedMovieSeeder extends BaseSeeder<ScrapedMovieSeederContext> {
-  async run(
+  public async run(
     em: EntityManager,
     context: ScrapedMovieSeederContext = this.context,
   ) {

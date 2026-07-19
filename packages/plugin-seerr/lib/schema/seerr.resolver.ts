@@ -15,7 +15,7 @@ import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context
 @Resolver()
 export class SeerrResolver {
   @Query(() => Boolean)
-  async seerrIsValid(
+  public async seerrIsValid(
     @PluginDataSource(pluginConfig.name, SeerrAPI) api: SeerrAPI,
   ): Promise<boolean> {
     return api.validate();
@@ -23,7 +23,7 @@ export class SeerrResolver {
 
   @CacheControl({ maxAge: 300 })
   @Query(() => [ExternalIds])
-  async seerrMovies(
+  public async seerrMovies(
     @Args(() => FilterArguments) { filter }: FilterArguments,
     @PluginDataSource(pluginConfig.name, SeerrAPI) api: SeerrAPI,
   ): Promise<ExternalIds[]> {
@@ -32,7 +32,7 @@ export class SeerrResolver {
 
   @CacheControl({ maxAge: 300 })
   @Query(() => [ExternalIds])
-  async seerrShows(
+  public async seerrShows(
     @Args(() => FilterArguments) { filter }: FilterArguments,
     @PluginDataSource(pluginConfig.name, SeerrAPI) api: SeerrAPI,
   ): Promise<ExternalIds[]> {
@@ -40,7 +40,7 @@ export class SeerrResolver {
   }
 
   @Mutation(() => Boolean)
-  seerrHandleWebhook(
+  public seerrHandleWebhook(
     @Arg("input", () => SeerrHandleWebhookInput) input: SeerrHandleWebhookInput,
     @Ctx() { logger, sendEvent }: GraphQLContext,
   ) {

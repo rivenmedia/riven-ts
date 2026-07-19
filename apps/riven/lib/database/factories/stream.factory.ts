@@ -7,7 +7,7 @@ import { Factory } from "@mikro-orm/seeder";
 import type { EntityData } from "@mikro-orm/core";
 
 export class StreamFactory extends Factory<Stream> {
-  model = Stream;
+  public model = Stream;
 
   protected override definition(
     input: EntityData<Stream> = {},

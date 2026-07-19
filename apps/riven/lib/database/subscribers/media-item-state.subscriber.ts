@@ -24,13 +24,13 @@ import type { Promisable } from "type-fest";
 type NextStatesMap = Map<MediaItem, MediaItemState>;
 
 export class MediaItemStateSubscriber implements EventSubscriber {
-  afterUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
+  public afterUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
     if (entity.state === "unreleased" && entity.isReleased) {
       entity.state = "indexed";
     }
   }
 
-  async afterFlush({ uow }: FlushEventArgs): Promise<void> {
+  public async afterFlush({ uow }: FlushEventArgs): Promise<void> {
     const { logger } = await import("../../utilities/logger/logger.ts");
 
     for (const changeSet of uow.getChangeSets()) {
@@ -49,7 +49,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     }
   }
 
-  async onFlush({ uow }: FlushEventArgs): Promise<void> {
+  public async onFlush({ uow }: FlushEventArgs): Promise<void> {
     const trackedItems = new Map<
       MediaItem,
       ChangeSet<Partial<MediaItem>> | null

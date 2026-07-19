@@ -4,15 +4,15 @@ import type { AnyHandler } from "msw";
 import type { Constructor } from "type-fest";
 
 export abstract class MockScenario {
-  abstract readonly scenarioName: string;
+  public abstract readonly scenarioName: string;
 
-  environmentData?: Record<string, unknown>;
+  public environmentData?: Record<string, unknown>;
 
-  readonly handlers?: readonly [AnyHandler, ...AnyHandler[]];
+  public readonly handlers?: readonly [AnyHandler, ...AnyHandler[]];
 
   protected readonly seeder: Constructor<BaseSeeder> | null = null;
 
-  async seed(_em: EntityManager): Promise<void> {
+  public async seed(_em: EntityManager): Promise<void> {
     if (this.seeder) {
       throw Error("`seed` must be implemented when a seeder is provided");
     }

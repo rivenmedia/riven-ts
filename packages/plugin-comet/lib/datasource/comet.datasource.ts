@@ -22,10 +22,10 @@ interface CometScrapeConfig {
 class CometAPIError extends Error {}
 
 export class CometAPI extends BaseDataSource<CometSettings> {
-  override baseURL = this.settings.url;
-  override serviceName = "Comet";
+  public override baseURL = this.settings.url;
+  public override serviceName = "Comet";
 
-  override async validate() {
+  public override async validate() {
     try {
       // Implement your own validation logic here
       await this.get("validate");
@@ -41,7 +41,7 @@ export class CometAPI extends BaseDataSource<CometSettings> {
     duration: 60 * 1000,
   };
 
-  async scrape({
+  public async scrape({
     item,
   }: ParamsFor<MediaItemScrapeRequestedEvent>): Promise<
     Record<string, string>

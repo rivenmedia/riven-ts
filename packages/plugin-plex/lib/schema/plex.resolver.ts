@@ -8,7 +8,7 @@ import { pluginConfig } from "../plex-plugin.config.ts";
 @Resolver()
 export class PlexResolver {
   @Query(() => Boolean)
-  async plexIsValid(
+  public async plexIsValid(
     @PluginDataSource(pluginConfig.name, PlexAPI) api: PlexAPI,
   ) {
     return api.validate();

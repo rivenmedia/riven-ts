@@ -46,7 +46,7 @@ export class PluginSettings {
   /**
    * Initialises the PluginSettings instance and builds a map of plugin-related environment variables
    */
-  constructor(
+  public constructor(
     environment: NodeJS.ProcessEnv,
     pluginConfigPrefixes: string[],
     logger: Logger,
@@ -102,7 +102,7 @@ export class PluginSettings {
    *
    * @internal
    */
-  _lock() {
+  public _lock() {
     if (this.#isLocked) {
       this.#logger.warn(
         "PluginSettings._lock() called multiple times. This is a no-op.",
@@ -144,7 +144,7 @@ export class PluginSettings {
    * @param schema The schema that should be used to parse the settings.
    * @throws {Error} if settings are locked
    */
-  _set(configPrefix: string, schema: ZodObject): void {
+  public _set(configPrefix: string, schema: ZodObject): void {
     if (this.#isLocked) {
       throw new Error("Settings are locked and cannot be modified.");
     }
@@ -183,7 +183,7 @@ export class PluginSettings {
    * @param schema The Zod schema used to parse the settings.
    * @returns The parsed settings for the provided schema.
    */
-  get<T extends ZodObject>(schema: T): z.infer<T> {
+  public get<T extends ZodObject>(schema: T): z.infer<T> {
     if (!this.#settingsMap.has(schema)) {
       throw new Error("Schema not found in settings map.");
     }

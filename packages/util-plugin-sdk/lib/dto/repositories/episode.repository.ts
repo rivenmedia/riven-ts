@@ -4,7 +4,7 @@ import type { Episode } from "../entities/index.ts";
 import type { FilterQuery } from "@mikro-orm/core";
 
 export class EpisodeRepository extends MediaItemRepository<Episode> {
-  async findAbsoluteEpisode(
+  public async findAbsoluteEpisode(
     tvdbId: string,
     episodeNumber: number,
     seasonNumber: number | null,

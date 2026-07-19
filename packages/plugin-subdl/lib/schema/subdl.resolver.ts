@@ -8,7 +8,7 @@ import { pluginConfig } from "../subdl-plugin.config.ts";
 @Resolver()
 export class SubdlResolver {
   @Query((_returns) => Boolean)
-  async subdlIsValid(
+  public async subdlIsValid(
     @PluginDataSource(pluginConfig.name, SubdlAPI) api: SubdlAPI,
   ): Promise<boolean> {
     return await api.validate();

@@ -12,8 +12,8 @@ import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/sche
 class MdblistAPIError extends Error {}
 
 export class MdblistAPI extends BaseDataSource<MdbListSettings> {
-  override baseURL = "https://api.mdblist.com/";
-  override serviceName = "MDBList";
+  public override baseURL = "https://api.mdblist.com/";
+  public override serviceName = "MDBList";
 
   protected override readonly rateLimiterOptions: RateLimiterOptions = {
     max: 50,
@@ -36,7 +36,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
     requestOpts.params.append("apikey", this.settings.apiKey);
   }
 
-  override async validate() {
+  public override async validate() {
     try {
       await this.get("user");
 
@@ -48,7 +48,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
     }
   }
 
-  async getListItems(
+  public async getListItems(
     contentLists: Set<string>,
   ): Promise<Pick<ContentServiceRequestedResponse, "movies" | "shows">> {
     if (contentLists.size === 0) {

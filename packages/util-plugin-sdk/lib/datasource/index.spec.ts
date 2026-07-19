@@ -11,9 +11,9 @@ import type { BaseDataSourceConfig } from "./index.ts";
 import type { Promisable } from "type-fest";
 
 class TestDataSource extends BaseDataSource<Record<string, unknown>> {
-  override baseURL = "https://example.com/api";
+  public override baseURL = "https://example.com/api";
 
-  override validate(): Promisable<boolean> {
+  public override validate(): Promisable<boolean> {
     return true;
   }
 }

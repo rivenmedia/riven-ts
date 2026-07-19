@@ -10,7 +10,7 @@ export class PostProcessingService extends BaseService {
     "riven.media-item.subtitle.requested",
   ]);
 
-  itemRequiresPostProcessing(_item: MediaItem, plugins: ValidPluginMap) {
+  public itemRequiresPostProcessing(_item: MediaItem, plugins: ValidPluginMap) {
     for (const event of this.#postProcessingEvents) {
       const eventSubscribers = getPluginEventSubscribers(event, plugins);
 

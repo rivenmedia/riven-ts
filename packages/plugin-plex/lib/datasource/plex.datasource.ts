@@ -11,9 +11,9 @@ import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource
 class PlexAPIError extends Error {}
 
 export class PlexAPI extends BaseDataSource<PlexSettings> {
-  override baseURL = this.settings.plexServerUrl;
+  public override baseURL = this.settings.plexServerUrl;
 
-  override serviceName = "Plex";
+  public override serviceName = "Plex";
 
   protected override willSendRequest(
     _path: string,
@@ -23,7 +23,7 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
     requestOpts.headers["accept"] = "application/json";
   }
 
-  async updateSection(path: string) {
+  public async updateSection(path: string) {
     const response = await this.get<unknown>(`library/sections`);
     const sections = LibrarySectionsResponse.parse(response);
 
@@ -53,7 +53,7 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
     );
   }
 
-  override async validate() {
+  public override async validate() {
     try {
       const response = await this.get<unknown>(`library/sections`);
 

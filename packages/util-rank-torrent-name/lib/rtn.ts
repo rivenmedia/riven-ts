@@ -19,7 +19,7 @@ export class RTN {
   #rankingModel: RankingModel;
   #enabledResolutions: Set<Resolution>;
 
-  constructor(settings: SettingsInput = {}, rankingModel: RankingModel) {
+  public constructor(settings: SettingsInput = {}, rankingModel: RankingModel) {
     this.#settings = createSettings(settings);
     this.#rankingModel = createRankingModel(rankingModel);
     this.#enabledResolutions = new Set(
@@ -29,7 +29,7 @@ export class RTN {
     );
   }
 
-  rankTorrent(
+  public rankTorrent(
     rawTitle: string,
     hash: string,
     correctTitle: string,
@@ -45,7 +45,7 @@ export class RTN {
     );
   }
 
-  sortTorrents(
+  public sortTorrents(
     torrents: RankedResult[],
     bucketLimit = Infinity,
     resolutions = this.#enabledResolutions,

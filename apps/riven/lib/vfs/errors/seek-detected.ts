@@ -8,7 +8,7 @@ import { FuseError } from "./fuse-error.ts";
  * Throwing a FUSE error prompts the mount to retry the operation, which will point to the new stream position.
  */
 export class SeekDetected extends FuseError {
-  constructor(message: string) {
+  public constructor(message: string) {
     super(Fuse.EIO, message);
   }
 }

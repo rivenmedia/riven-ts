@@ -26,20 +26,20 @@ const storeNameHeader = "x-stremthru-store-name";
 class StremThruTorzAPIError extends Error {}
 
 export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
-  override baseURL = this.settings.stremThruUrl;
-  override serviceName = "StremThru [Torz]";
+  public override baseURL = this.settings.stremThruUrl;
+  public override serviceName = "StremThru [Torz]";
 
   protected override concurrency = 1; // Lower the concurrency to prevent queue build-ups, as this API aggressively rate-limits itself
 
   #validStores: Store[] = [];
 
-  get validStores() {
+  public get validStores() {
     return new Set(this.#validStores);
   }
 
   #rateLimitedStores = new TTLCache<Store, true>();
 
-  get rateLimitedStores() {
+  public get rateLimitedStores() {
     return new Map(
       this.#rateLimitedStores
         .keys()
@@ -117,7 +117,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     }
   }
 
-  override async validate(): Promise<boolean> {
+  public override async validate(): Promise<boolean> {
     this.#validStores = [];
 
     const configuredStores = Store.options.filter(
@@ -189,7 +189,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     return true;
   }
 
-  async addTorrent(infoHash: string, store: Store) {
+  public async addTorrent(infoHash: string, store: Store) {
     const response = await this.post<unknown>("v0/store/torz", {
       headers: this.#buildCommonHeaders(store),
       body: JSON.stringify({
@@ -222,7 +222,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     return data;
   }
 
-  async removeTorrent(id: string, store: Store) {
+  public async removeTorrent(id: string, store: Store) {
     const response = await this.delete<unknown>(`v0/store/torz/${id}`, {
       headers: this.#buildCommonHeaders(store),
     });
@@ -262,7 +262,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     }, {});
   }
 
-  async getCachedTorrents(infoHashes: string[], store: Store) {
+  public async getCachedTorrents(infoHashes: string[], store: Store) {
     const chunkSize = 500;
     const infoHashSet = new Set(infoHashes);
     const requests: Promise<Record<string, DebridFile[]>>[] = [];
@@ -281,7 +281,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     );
   }
 
-  async generateLink(link: string, store: Store) {
+  public async generateLink(link: string, store: Store) {
     const response = await this.post<unknown>("v0/store/torz/link/generate", {
       body: JSON.stringify({ link }),
       headers: this.#buildCommonHeaders(store),
