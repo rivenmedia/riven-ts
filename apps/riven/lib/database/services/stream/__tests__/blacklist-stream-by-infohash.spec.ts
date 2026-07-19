@@ -6,7 +6,7 @@ import { it } from "../../../../__tests__/test-context.ts";
 it("creates a BlacklistedStream for the given infohash/provider/plugin combination", async ({
   services: { streamService },
   completedMovieContext: {
-    completedMovie: completedMovie,
+    completedMovie,
     streams: [, stream],
   },
 }) => {

@@ -61,7 +61,7 @@ it("returns an array of all media items that share the same active stream info h
 
 it("does not return items with a different active stream info hash, plugin, or provider", async ({
   em,
-  completedMovieContext: { completedMovie: completedMovie },
+  completedMovieContext: { completedMovie },
 }) => {
   expect.assert(completedMovie.activeStream);
 
