@@ -14,7 +14,6 @@
   "dependencies": {
     "@eslint/json": "catalog:",
     "@repo/core-util-typescript-config": "workspace:^",
-    "@typescript-eslint/parser": "catalog:",
     "@vitest/eslint-plugin": "catalog:",
     "eslint-plugin-turbo": "catalog:",
     "globals": "catalog:"
@@ -25,7 +24,6 @@
     "typescript": "catalog:"
   },
   "peerDependencies": {
-    "@typescript-eslint/parser": "^8",
     "oxlint": "^1"
   }
 }

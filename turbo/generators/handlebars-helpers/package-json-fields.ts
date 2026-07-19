@@ -29,7 +29,6 @@ const packageTypeFields: Partial<
       "@repo/core-util-typescript-config": "workspace:^",
       "@repo/core-util-vitest-config": "workspace:^",
       "@types/node": "catalog:",
-      "@typescript-eslint/parser": "catalog:",
       oxlint: "catalog:",
       typescript: "catalog:",
       vitest: "catalog:",

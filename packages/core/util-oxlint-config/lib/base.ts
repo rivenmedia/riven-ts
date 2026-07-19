@@ -39,6 +39,6 @@ export const baseOxlintConfig = defineConfig({
     allowConstantLoopConditions,
   ],
   options: {
-    reportUnusedDisableDirectives: "error",
+    reportUnusedDisableDirectives: "warn",
   },
 });

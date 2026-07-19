@@ -41,7 +41,6 @@
     "@repo/util-plugin-testing": "workspace:^",
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
-    "@typescript-eslint/parser": "catalog:",
     "msw": "catalog:",
     "oxlint": "catalog:",
     "typescript": "catalog:",

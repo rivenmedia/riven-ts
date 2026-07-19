@@ -35,7 +35,6 @@
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/util-plugin-testing": "workspace:^",
     "@types/node": "catalog:",
-    "@typescript-eslint/parser": "catalog:",
     "msw": "catalog:",
     "oxlint": "catalog:",
     "typescript": "catalog:",

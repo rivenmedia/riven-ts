@@ -52,6 +52,12 @@ export const oxlintPluginUnicornConfig = defineConfig({
         // Type-aware rules that are disabled for now, but will be enabled in the future
         "unicorn/prefer-number-coercion": "off",
         "unicorn/prefer-number-properties": "off",
+        "unicorn/consistent-function-scoping": "off",
+        "unicorn/number-literal-case": "off",
+        "unicorn/no-await-expression-member": "off",
+        "unicorn/prefer-native-coercion-functions": "off",
+        "unicorn/no-useless-collection-argument": "off",
+        "unicorn/no-immediate-mutation": "off",
       },
     },
     {

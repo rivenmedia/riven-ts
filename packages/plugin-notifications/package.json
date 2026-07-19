@@ -37,7 +37,6 @@
     "@repo/util-plugin-testing": "workspace:^",
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
-    "@typescript-eslint/parser": "catalog:",
     "discord-api-types": "catalog:",
     "msw": "catalog:",
     "oxlint": "catalog:",

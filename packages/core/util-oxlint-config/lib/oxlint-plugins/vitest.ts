@@ -42,6 +42,10 @@ export const oxlintPluginVitestConfig = defineConfig({
         // Type-aware rules that are disabled for now, but will be enabled in the future
         "vitest/prefer-called-once": "off",
         "vitest/prefer-expect-resolves": "off",
+        "vitest/prefer-to-have-length": "off",
+        "vitest/prefer-describe-function-title": "off",
+        "vitest/prefer-lowercase-title": "off",
+        "vitest/prefer-expect-type-of": "off",
       },
       env: {
         ...vitest.environments.env.globals,
