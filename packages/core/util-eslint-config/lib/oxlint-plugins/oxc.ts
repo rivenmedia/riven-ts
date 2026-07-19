@@ -2,18 +2,14 @@ import { defineConfig } from "oxlint";
 
 import { jsFiles, tsFiles } from "../internal/file-types.ts";
 
-export const coreConfig = defineConfig({
+export const oxlintPluginOxcConfig = defineConfig({
   overrides: [
     {
       files: [tsFiles, jsFiles],
+      plugins: ["oxc"],
       rules: {
-        eqeqeq: ["error", "smart"],
-        "id-length": [
-          "warn",
-          {
-            exceptions: ["z"],
-          },
-        ],
+        "oxc/no-rest-spread-properties": "off",
+        "oxc/no-optional-chaining": "off",
       },
     },
   ],

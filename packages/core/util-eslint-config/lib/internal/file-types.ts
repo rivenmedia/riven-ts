@@ -10,3 +10,6 @@ export const testFiles = [
 export const entityFiles = "**/*.entity.ts";
 
 export const jsonFiles = "**/*.{json,jsonc,json5}";
+
+export const configFiles =
+  "**/*.config.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,cjs,mjsx,cjsx}";

@@ -19,4 +19,9 @@ export const oxlintPluginVitestConfig = defineConfig({
       },
     },
   ],
+  settings: {
+    vitest: {
+      typecheck: true,
+    },
+  },
 });
