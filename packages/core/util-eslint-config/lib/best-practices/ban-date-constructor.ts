@@ -1,21 +1,30 @@
-import { entityFiles, testFiles } from "../internal/file-types.ts";
+import { defineConfig } from "oxlint";
 
-import type { ConfigArray } from "typescript-eslint";
+import {
+  entityFiles,
+  jsFiles,
+  testFiles,
+  tsFiles,
+} from "../internal/file-types.ts";
 
-export const banDateConstructor = [
-  {
-    ignores: [
-      ...testFiles,
-      entityFiles, // Database entities use the Date constructor to provide runtime type reflect metadata
-    ],
-    rules: {
-      "no-restricted-globals": [
-        "error",
-        {
-          name: "Date",
-          message: "Prefer to use Luxon's DateTime instead.",
-        },
+export const banDateConstructor = defineConfig({
+  overrides: [
+    {
+      files: [tsFiles, jsFiles],
+      excludeFiles: [
+        ...testFiles,
+        entityFiles, // Database entities use the Date constructor to provide runtime type reflect metadata
       ],
+      plugins: ["eslint"],
+      rules: {
+        "no-restricted-globals": [
+          "error",
+          {
+            name: "Date",
+            message: "Prefer to use Luxon's DateTime instead.",
+          },
+        ],
+      },
     },
-  },
-] satisfies ConfigArray;
+  ],
+});

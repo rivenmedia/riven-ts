@@ -1,55 +1,24 @@
-import eslint from "@eslint/js";
-import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript";
-import { flatConfigs as importX } from "eslint-plugin-import-x";
-import { defineConfig } from "eslint/config";
 import globals from "globals";
-import * as tseslint from "typescript-eslint";
+import { defineConfig } from "oxlint";
 
 import { allowConstantLoopConditions } from "../best-practices/allow-constant-loop-conditions.ts";
 import { banDateConstructor } from "../best-practices/ban-date-constructor.ts";
 import { noUnusedVariables } from "../best-practices/no-unused-variables.ts";
 import { preferMikroOrmCore } from "../best-practices/prefer-mikro-orm-core.ts";
-import { jsFiles, tsFiles } from "../internal/file-types.ts";
 
-export const typescriptCore = defineConfig(
-  {
-    files: [tsFiles, jsFiles],
-    extends: [eslint.configs.recommended],
+export const typescriptCore = defineConfig({
+  extends: [
+    noUnusedVariables,
+    banDateConstructor,
+    preferMikroOrmCore,
+    allowConstantLoopConditions,
+  ],
+  env: {
+    ...globals.node,
+    ...globals.es2024,
   },
-  {
-    files: [tsFiles],
-    extends: [
-      tseslint.configs.strictTypeChecked,
-      tseslint.configs.stylisticTypeChecked,
-      noUnusedVariables,
-      banDateConstructor,
-      preferMikroOrmCore,
-      allowConstantLoopConditions,
-      importX.typescript,
-    ],
-    languageOptions: {
-      sourceType: "module",
-      ecmaVersion: "latest",
-      globals: {
-        ...globals.node,
-        ...globals.es2024,
-      },
-      parser: tseslint.parser,
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-    settings: {
-      "import-x/resolver-next": [
-        createTypeScriptImportResolver({
-          alwaysTryTypes: true,
-          tsconfig: {
-            references: "auto",
-            configFile: "tsconfig.json",
-          },
-        }),
-      ],
-    },
+  plugins: ["typescript", "import"],
+  rules: {
+    "typescript/prefer-readonly-parameter-types": "off", // Creates a lot of noise
   },
-);
+});

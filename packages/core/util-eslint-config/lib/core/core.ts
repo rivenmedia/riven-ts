@@ -2,17 +2,16 @@ import { defineConfig } from "oxlint";
 
 import { jsFiles, tsFiles } from "../internal/file-types.ts";
 
-export const noUnusedVariables = defineConfig({
+export const coreConfig = defineConfig({
   overrides: [
     {
       files: [tsFiles, jsFiles],
-      plugins: ["eslint"],
       rules: {
-        "no-unused-vars": [
-          "error",
+        eqeqeq: ["error", "smart"],
+        "id-length": [
+          "warn",
           {
-            argsIgnorePattern: "^_",
-            ignoreRestSiblings: true,
+            exceptions: ["z"],
           },
         ],
       },

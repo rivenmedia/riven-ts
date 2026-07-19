@@ -1,21 +1,27 @@
-import type { ConfigArray } from "typescript-eslint";
+import { defineConfig } from "oxlint";
 
-export const preferMikroOrmCore = [
-  {
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            {
-              regex:
-                "@mikro-orm/(?!(core|reflection|decorators|seeder|migrations)(?:$|/))",
-              message:
-                "Prefer to use @mikro-orm/core over other @mikro-orm packages.",
-            },
-          ],
-        },
-      ],
+import { jsFiles, tsFiles } from "../internal/file-types.ts";
+
+export const preferMikroOrmCore = defineConfig({
+  overrides: [
+    {
+      files: [tsFiles, jsFiles],
+      plugins: ["eslint"],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          {
+            patterns: [
+              {
+                regex:
+                  "@mikro-orm/(?!(core|reflection|decorators|seeder|migrations)(?:$|/))",
+                message:
+                  "Prefer to use @mikro-orm/core over other @mikro-orm packages.",
+              },
+            ],
+          },
+        ],
+      },
     },
-  },
-] satisfies ConfigArray;
+  ],
+});

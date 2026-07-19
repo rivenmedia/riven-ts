@@ -1,33 +1,33 @@
-import { includeIgnoreFile } from "@eslint/config-helpers";
-import turboConfig from "eslint-config-turbo/flat";
-import { fileURLToPath } from "node:url";
+import { defineConfig } from "oxlint";
 
-import { prettier } from "./formatting/prettier.ts";
-import { jsonConfig } from "./json/json.ts";
-import { vitestConfig } from "./testing/vitest.ts";
+import { coreConfig } from "./core/core.ts";
+import { eslintPluginEslintJsonConfig } from "./eslint-plugins/@eslint/json.ts";
+import { eslintPluginEslintConfigTurboConfig } from "./eslint-plugins/eslint-plugin-turbo.ts";
+import { oxlintPluginImportConfig } from "./oxlint-plugins/import.ts";
+import { oxlintPluginVitestConfig } from "./oxlint-plugins/vitest.ts";
 import { typescriptCore } from "./typescript/typescript-core.ts";
 
-import type { ConfigArray } from "typescript-eslint";
+console.log(("1" as string) == "2");
 
-export type { ConfigArray } from "typescript-eslint";
-
-const gitignorePath = fileURLToPath(
-  new URL("../../../../.gitignore", import.meta.url),
-);
-
-export const baseEslintConfig: ConfigArray = [
-  includeIgnoreFile(gitignorePath),
-  ...typescriptCore,
-  ...turboConfig,
-  ...prettier,
-  ...jsonConfig,
-  ...vitestConfig,
-  {
-    ignores: [
-      "**/__generated__/**",
-      "**/*.typegen.ts",
-      "**/.next/**",
-      "**/logs/**",
-    ],
+export const baseOxlintConfig = defineConfig({
+  categories: {
+    correctness: "error",
+    suspicious: "warn",
+    pedantic: "warn",
+    perf: "warn",
+    style: "warn",
+    restriction: "warn",
   },
-];
+  extends: [
+    typescriptCore,
+    eslintPluginEslintJsonConfig,
+    oxlintPluginVitestConfig,
+    oxlintPluginImportConfig,
+    eslintPluginEslintConfigTurboConfig,
+    coreConfig,
+  ],
+  // options: {
+  //   typeAware: true,
+  //   typeCheck: true,
+  // },
+});

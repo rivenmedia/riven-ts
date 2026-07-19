@@ -1,17 +1,18 @@
-import { tsFiles } from "../internal/file-types.ts";
+import { defineConfig } from "oxlint";
 
-import type { ConfigArray } from "typescript-eslint";
+import { jsFiles, tsFiles } from "../internal/file-types.ts";
 
-export const allowConstantLoopConditions = [
-  {
-    files: [tsFiles],
-    rules: {
-      "@typescript-eslint/no-unnecessary-condition": [
-        "error",
-        {
-          allowConstantLoopConditions: "only-allowed-literals",
-        },
-      ],
+export const allowConstantLoopConditions = defineConfig({
+  overrides: [
+    {
+      files: [tsFiles, jsFiles],
+      plugins: ["typescript"],
+      rules: {
+        "typescript/no-unnecessary-condition": [
+          "error",
+          { allowConstantLoopConditions: "only-allowed-literals" },
+        ],
+      },
     },
-  },
-] satisfies ConfigArray;
+  ],
+});

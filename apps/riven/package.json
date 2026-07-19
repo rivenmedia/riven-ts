@@ -33,7 +33,7 @@
     "codegen:ranking-config-json-schema": "pnpm node scripts/generate-ranking-config-json-schema.ts",
     "database:cache:generate": "mikro-orm cache:generate --combined --contextName slim",
     "dev": "NODE_ENV=development pnpm node --watch --env-file-if-exists=.env.riven --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
-    "lint": "eslint",
+    "lint": "oxlint",
     "lint:fix": "pnpm lint --fix",
     "migration:check": "mikro-orm migration:check",
     "migration:create": "mikro-orm migration:create",
@@ -128,6 +128,8 @@
     "esbuild-node-externals": "catalog:",
     "eslint": "catalog:",
     "logform": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
     "redis-memory-server": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
