@@ -26,7 +26,6 @@ export const oxlintPluginTypescriptConfig = defineConfig({
         "typescript/prefer-readonly": "off",
         "typescript/return-await": "off",
         "typescript/consistent-return": "off",
-        "typescript/switch-exhaustiveness-check": "off",
         "typescript/require-array-sort-compare": "off",
         "typescript/consistent-type-exports": "off",
         "typescript/no-extraneous-class": "off",

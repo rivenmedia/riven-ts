@@ -207,6 +207,9 @@ export const requestStreamLinkProcessor =
 
                 break;
               }
+              case "dead": {
+                /* empty */
+              }
             }
 
             await job.updateData({
