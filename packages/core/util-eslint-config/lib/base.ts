@@ -10,6 +10,7 @@ import { oxlintPluginEslintConfig } from "./oxlint-plugins/eslint.ts";
 import { oxlintPluginImportConfig } from "./oxlint-plugins/import.ts";
 import { oxlintPluginOxcConfig } from "./oxlint-plugins/oxc.ts";
 import { oxlintPluginTypescriptConfig } from "./oxlint-plugins/typescript.ts";
+import { oxlintPluginUnicornConfig } from "./oxlint-plugins/unicorn.ts";
 import { oxlintPluginVitestConfig } from "./oxlint-plugins/vitest.ts";
 
 export const baseOxlintConfig = defineConfig({
@@ -29,6 +30,7 @@ export const baseOxlintConfig = defineConfig({
     oxlintPluginEslintConfig,
     oxlintPluginTypescriptConfig,
     oxlintPluginOxcConfig,
+    oxlintPluginUnicornConfig,
     noUnusedVariables,
     banDateConstructor,
     preferMikroOrmCore,

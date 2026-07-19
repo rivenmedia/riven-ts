@@ -14,6 +14,14 @@ export const oxlintPluginImportConfig = defineConfig({
         "import/no-relative-parent-imports": "off",
         "import/group-exports": "off",
         "import/consistent-type-specifier-style": "off",
+        "import/no-nodejs-modules": "off",
+
+        // Rules that will be enabled in the future, but are currently disabled to avoid noise
+        "import/no-mutable-exports": "off",
+        "import/exports-last": "off",
+        "import/no-namespace": "off",
+        "import/no-unassigned-import": "off",
+        "import/no-anonymous-default-export": "off",
       },
     },
     {

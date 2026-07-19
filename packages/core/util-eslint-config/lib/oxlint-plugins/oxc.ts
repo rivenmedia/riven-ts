@@ -10,6 +10,7 @@ export const oxlintPluginOxcConfig = defineConfig({
       rules: {
         "oxc/no-rest-spread-properties": "off",
         "oxc/no-optional-chaining": "off",
+        "oxc/no-async-await": "off",
       },
     },
   ],
