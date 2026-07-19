@@ -29,7 +29,6 @@ export const oxlintPluginTypescriptConfig = defineConfig({
         "typescript/require-array-sort-compare": "off",
         "typescript/consistent-type-exports": "off",
         "typescript/no-extraneous-class": "off",
-        "typescript/require-await": "off",
       },
       env: {
         ...globals.node,

@@ -70,7 +70,6 @@ export default {
         );
       }
     },
-    // eslint-disable-next-line @typescript-eslint/require-await
     "riven.media-item.download.provider-list-requested": async ({
       dataSources,
       settings,
@@ -83,10 +82,10 @@ export default {
         .intersection(validStores)
         .difference(new Set(rateLimitedStores.keys()));
 
-      return {
+      return Promise.resolve({
         providers: [...providers],
         rateLimitedProviders: Object.fromEntries(rateLimitedStores),
-      };
+      });
     },
     "riven.media-item.scrape.requested": async ({ dataSources, event }) => {
       const api = dataSources.get(StremThruTorznabAPI);
