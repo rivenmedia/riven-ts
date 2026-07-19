@@ -45,7 +45,7 @@ export class TvMazeAPI extends BaseDataSource<TvdbSettings> {
         { err: error },
       );
 
-      return;
+      return undefined;
     }
   }
 

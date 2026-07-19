@@ -52,7 +52,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         complexity: "off",
         "require-unicode-regexp": "off",
         "no-shadow": "off",
-        "no-useless-return": "off",
         "no-bitwise": "off",
         "prefer-arrow-callback": "off",
         "no-lonely-if": "off",

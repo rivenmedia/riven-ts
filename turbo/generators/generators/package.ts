@@ -45,7 +45,7 @@ export const createPackageGenerator = (plop: PlopTypes.NodePlopAPI) =>
             return "Package creation cancelled.";
           }
 
-          return;
+          return undefined;
         },
         type: "addMany",
         base: "templates/shared/boilerplate",
@@ -58,7 +58,7 @@ export const createPackageGenerator = (plop: PlopTypes.NodePlopAPI) =>
             return "Package creation cancelled.";
           }
 
-          return;
+          return undefined;
         },
         type: "addMany",
         base: "templates/package",

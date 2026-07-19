@@ -24,7 +24,7 @@ export const attrCache = new LRUCache<PathLike, Partial<Stats>>({
         match = /^.*(?=\/)/.exec(nextPart);
       }
 
-      return;
+      return undefined;
     }
   },
 });
