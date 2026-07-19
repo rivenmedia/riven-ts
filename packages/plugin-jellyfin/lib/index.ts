@@ -41,7 +41,7 @@ export default {
       await jellyfinAPI.updateSections(sectionPaths);
 
       logger.info(
-        `Updated ${sectionPaths.length.toString()} path${sectionPaths.length !== 1 ? "s" : ""} for ${event.item.fullTitle}`,
+        `Updated ${sectionPaths.length.toString()} path${sectionPaths.length === 1 ? "" : "s"} for ${event.item.fullTitle}`,
       );
     },
   },

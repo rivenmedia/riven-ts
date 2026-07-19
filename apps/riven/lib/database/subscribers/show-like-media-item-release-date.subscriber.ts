@@ -73,11 +73,11 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
 
           const itemRequest = await show.itemRequest.loadOrFail();
 
-          itemRequest.state = !show.isReleased
-            ? "unreleased"
-            : show.status === "continuing"
+          itemRequest.state = show.isReleased
+            ? show.status === "continuing"
               ? "ongoing"
-              : "completed";
+              : "completed"
+            : "unreleased";
 
           uow.computeChangeSet(itemRequest);
           uow.computeChangeSet(show);

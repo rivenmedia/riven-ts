@@ -10,15 +10,15 @@ export class EpisodeRepository extends MediaItemRepository<Episode> {
     seasonNumber: number | null,
   ) {
     const query = (
-      seasonNumber !== null
+      seasonNumber === null
         ? {
             tvdbId,
-            season: { number: seasonNumber },
-            number: episodeNumber,
+            absoluteNumber: episodeNumber,
           }
         : {
             tvdbId,
-            absoluteNumber: episodeNumber,
+            season: { number: seasonNumber },
+            number: episodeNumber,
           }
     ) satisfies FilterQuery<Episode>;
 

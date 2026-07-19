@@ -178,7 +178,7 @@ export default {
       const state =
         (deadStatusCodes.has(response.status) ? "dead" : null) ??
         (expiredStatusCodes.has(response.status) ? "expired" : null) ??
-        (!response.ok ? "failed" : "healthy");
+        (response.ok ? "healthy" : "failed");
 
       if (state === "failed") {
         throw new Error(

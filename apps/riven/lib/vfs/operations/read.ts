@@ -90,7 +90,7 @@ async function read() {
       `length=${length.toString()}`,
       `position=${position.toString()}`,
       `previous=${previousReadPosition?.toString() ?? "N/A"}`,
-      `diff=${previousReadPosition !== undefined ? (position - previousReadPosition).toString() : "N/A"}`,
+      `diff=${previousReadPosition === undefined ? "N/A" : (position - previousReadPosition).toString()}`,
       `current-stream-position=${currentStreamPosition?.toString() ?? "N/A"}`,
     ].join(" | "),
   );

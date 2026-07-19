@@ -34,6 +34,7 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-nested-ternary": "allow", // Handled by unicorn/no-nested-ternary
         "no-console": ["error", { allow: ["debug"] }],
         "no-plusplus": ["deny", { allowForLoopAfterthoughts: true }],
+        "no-negated-condition": "off", // Handled by unicorn/no-negated-condition
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "no-magic-numbers": "off",
@@ -55,7 +56,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-useless-return": "off",
         "no-bitwise": "off",
         "prefer-arrow-callback": "off",
-        "no-negated-condition": "off",
         "no-lonely-if": "off",
         "prefer-named-capture-group": "off",
         "no-use-before-define": "off",

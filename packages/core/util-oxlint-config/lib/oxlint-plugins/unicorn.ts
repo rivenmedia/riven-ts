@@ -31,7 +31,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/no-unreadable-array-destructuring": "off",
         "unicorn/prefer-string-raw": "off",
         "unicorn/no-anonymous-default-export": "off",
-        "unicorn/no-negated-condition": "off",
         "unicorn/no-useless-promise-resolve-reject": "off",
         "unicorn/throw-new-error": "off",
         "unicorn/new-for-builtins": "off",

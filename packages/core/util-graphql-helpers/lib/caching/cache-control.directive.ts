@@ -10,7 +10,7 @@ export function CacheControl({ maxAge, scope }: RequireAtLeastOne<CacheHint>) {
 
   const sdl = String.raw(
     { raw: ["@cacheControl(", " ", ")"] },
-    maxAge !== undefined ? `maxAge: ${maxAge.toString()}` : "",
+    maxAge === undefined ? "" : `maxAge: ${maxAge.toString()}`,
     scope ? `scope: ${scope}` : "",
   );
 

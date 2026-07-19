@@ -28,7 +28,7 @@ function setupRangeInterceptor(
 ) {
   const mockPool = agent.get("http://example.com");
 
-  const size = range[1] !== undefined ? range[1] - range[0] + 1 : undefined;
+  const size = range[1] === undefined ? undefined : range[1] - range[0] + 1;
   const responseBuffer = Buffer.alloc(size ?? config.chunkSize);
 
   responseBuffer.set(randomBytes(responseBuffer.byteLength));

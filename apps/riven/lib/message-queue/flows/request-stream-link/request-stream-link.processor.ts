@@ -234,9 +234,9 @@ export const requestStreamLinkProcessor =
               );
             }
 
-            const ttl = !job.data.linkData.isPermalink
-              ? DateTime.fromISO(job.data.linkData.expiresAt).diffNow()
-              : Duration.fromObject({ hours: 3 });
+            const ttl = job.data.linkData.isPermalink
+              ? Duration.fromObject({ hours: 3 })
+              : DateTime.fromISO(job.data.linkData.expiresAt).diffNow();
 
             await streamService.saveStreamLink(
               mediaEntry.id,
