@@ -10,6 +10,7 @@ export const oxlintPluginUnicornConfig = defineConfig({
       rules: {
         "unicorn/max-nested-calls": "off",
         "unicorn/no-null": "off",
+        "unicorn/no-nested-ternary": "allow", // This just suggests to wrap in parentheses which oxfmt strips away
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "unicorn/consistent-assert": "off",
@@ -27,7 +28,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/text-encoding-identifier-case": "off",
         "unicorn/no-array-for-each": "off",
         "unicorn/import-style": "off",
-        "unicorn/no-nested-ternary": "off",
         "unicorn/no-useless-fallback-in-spread": "off",
         "unicorn/prefer-node-protocol": "off",
         "unicorn/no-unreadable-array-destructuring": "off",

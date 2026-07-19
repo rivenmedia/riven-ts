@@ -31,6 +31,7 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-await-in-loop": "off",
         "require-await": "off", // Handled by typescript/require-await
         // "no-underscore-dangle": ["warn", { allow: ["__typename"] }],
+        "no-nested-ternary": "allow", // Handled by unicorn/no-nested-ternary
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "no-magic-numbers": "off",
@@ -67,7 +68,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "prefer-exponentiation-operator": "off",
         "no-warning-comments": "off",
         "no-duplicate-imports": "off",
-        "no-nested-ternary": "off",
         "no-underscore-dangle": "off",
         curly: "off",
         "no-inner-declarations": "off",
