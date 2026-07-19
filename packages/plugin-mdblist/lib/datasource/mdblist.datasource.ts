@@ -116,7 +116,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
         }
 
         offset += pageItemCount;
-        hasMoreItems = response.response.headers.get("X-Has-More") == "true";
+        hasMoreItems = response.response.headers.get("X-Has-More") === "true";
       }
     }
 

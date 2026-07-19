@@ -7,7 +7,7 @@ export const oxlintPluginEslintConfig = defineConfig({
     {
       files: [tsFiles, jsFiles],
       rules: {
-        // eqeqeq: ["error", "smart"],
+        eqeqeq: ["error", "smart"],
         // "id-length": [
         //   "warn",
         //   {
@@ -73,7 +73,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-underscore-dangle": "off",
         curly: "off",
         "no-inner-declarations": "off",
-        eqeqeq: "off",
 
         // Type-aware rules that are disabled for now, but will be enabled in the future
         "prefer-template": "off",
