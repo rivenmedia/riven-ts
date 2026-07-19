@@ -71,6 +71,8 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-duplicate-imports": "off",
         "no-nested-ternary": "off",
         "no-underscore-dangle": "off",
+        curly: "off",
+        "no-inner-declarations": "off",
       },
     },
   ],

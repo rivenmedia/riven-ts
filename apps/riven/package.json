@@ -126,7 +126,6 @@
     "@vitest/expect": "catalog:",
     "esbuild": "catalog:",
     "esbuild-node-externals": "catalog:",
-    "eslint": "catalog:",
     "logform": "catalog:",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",
