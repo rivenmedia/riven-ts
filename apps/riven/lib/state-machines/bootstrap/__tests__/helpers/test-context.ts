@@ -27,7 +27,9 @@ export const it = baseIt
 
   .extend(
     "initialiseDatabaseConnectionActorLogic",
-    fromPromise(async () => undefined),
+    fromPromise(async () => {
+      /* empty */
+    }),
   )
   .extend("startGqlServerActorLogic", ({ apolloServerInstance }) =>
     fromPromise<StartGQLServerOutput, StartGQLServerInput>(async () => ({
