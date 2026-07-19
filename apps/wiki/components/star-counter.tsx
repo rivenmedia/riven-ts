@@ -8,9 +8,15 @@ export function StarCounter({ targetCount }: { targetCount: number }) {
   const animated = useRef(false);
 
   useEffect(() => {
-    if (animated.current) return;
+    if (animated.current) {
+      return;
+    }
+
     const el = ref.current;
-    if (!el) return;
+
+    if (!el) {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -24,7 +30,10 @@ export function StarCounter({ targetCount }: { targetCount: number }) {
             const progress = Math.min(elapsed / duration, 1);
             const eased = 1 - Math.pow(1 - progress, 3);
             setCount(Math.floor(eased * targetCount));
-            if (progress < 1) requestAnimationFrame(tick);
+
+            if (progress < 1) {
+              requestAnimationFrame(tick);
+            }
           }
 
           requestAnimationFrame(tick);

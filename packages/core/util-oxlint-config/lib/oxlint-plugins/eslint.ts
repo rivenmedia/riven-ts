@@ -66,7 +66,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-warning-comments": "off",
         "no-duplicate-imports": "off",
         "no-underscore-dangle": "off",
-        curly: "off",
         "no-inner-declarations": "off",
 
         // Type-aware rules that are disabled for now, but will be enabled in the future

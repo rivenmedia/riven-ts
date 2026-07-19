@@ -99,8 +99,13 @@ async function getGitHubStars() {
       "https://api.github.com/repos/rivenmedia/riven-ts",
       { next: { revalidate: 3600 } },
     );
-    if (!res.ok) return null;
+
+    if (!res.ok) {
+      return null;
+    }
+
     const data = (await res.json()) as { stargazers_count: number };
+
     return data.stargazers_count;
   } catch {
     return null;
