@@ -25,7 +25,7 @@ export const oxlintPluginEslintConfig = defineConfig({
         //   "always",
         //   { ignoreConsecutiveComments: true, ignorePattern: "^empty$" },
         // ],
-        "no-eq-null": "off",
+        "no-eq-null": "allow", // Allows null checks to also check undefined
         "no-continue": "off",
         "no-void": ["warn", { allowAsStatement: true }],
         "no-await-in-loop": "off",
