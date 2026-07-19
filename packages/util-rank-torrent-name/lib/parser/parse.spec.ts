@@ -33,7 +33,7 @@ describe("parse", () => {
       "Movie.2023.2160p.UHD.BluRay.REMUX.HDR.DV.HEVC.DTS-HD.MA.5.1-GROUP",
     );
 
-    // ptt-viren may return "4k" or "2160p" for UHD content
+    // `ptt-viren` may return "4k" or "2160p" for UHD content
     expect(["2160p", "4k"]).toContain(data.resolution);
     expect(data.hdr?.length).toBeGreaterThan(0);
   });

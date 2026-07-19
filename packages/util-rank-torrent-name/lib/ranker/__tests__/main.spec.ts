@@ -138,7 +138,7 @@ it("sorts torrents correctly", ({ rankingConfig }) => {
     "1234567890123456789012345678901234567892", // Guardians of the Galaxy Vol. 2 (2017) 720p HDTC x264 MKVTV
     "1234567890123456789012345678901234567895", // [SubsPlease] Fairy Tail - 100 Years Quest - 05 (1080p) [1107F3A9].mkv
     "1234567890123456789012345678901234567891", // Madame Web 2024 1080p WEBRip 1400MB DD 5.1 x264-GalaxyRG[TGx]
-    "1234567890123456789012345678901234567894", // ww.Tamilblasters.sbs - 8 Bit Christmas (2021) HQ HDRip - x264 - Telugu (Fan Dub) - 400MB
+    "1234567890123456789012345678901234567894", // Ww.Tamilblasters.sbs - 8 Bit Christmas (2021) HQ HDRip - x264 - Telugu (Fan Dub) - 400MB
   ];
 
   const settings = createSettings();

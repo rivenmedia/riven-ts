@@ -167,7 +167,7 @@ it("force quits the process if shutdown takes longer than the configured timeout
         shutdown: fromPromise(
           async () =>
             new Promise(() => {
-              /* never resolves, simulating a shutdown that hangs indefinitely */
+              /* Never resolves, simulating a shutdown that hangs indefinitely */
             }),
         ) as never,
       },

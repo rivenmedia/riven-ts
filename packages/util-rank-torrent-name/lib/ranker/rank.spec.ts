@@ -90,7 +90,7 @@ it("ranks a REMUX very highly", ({ rankingConfig, settings }) => {
   const data = parse("Movie.2024.1080p.BluRay.REMUX.AVC.DTS-HD.MA.5.1-GROUP");
   const { totalScore } = rank(data, settings, rankingConfig);
 
-  // remux (10000) should dominate
+  // Remux (10000) should dominate
   expect(totalScore).toBeGreaterThan(5000);
 });
 
@@ -163,7 +163,7 @@ it("ranks 3D content negatively", ({ rankingConfig, settings }) => {
   const data = parse("Movie.2024.3D.1080p.BluRay-GROUP");
   const { totalScore } = rank(data, settings, rankingConfig);
 
-  // threeD (-10000), should be very negative
+  // ThreeD (-10000), should be very negative
   expect(totalScore).toBeLessThan(0);
 });
 
@@ -179,7 +179,7 @@ it("ranks dubbed content negatively", ({ rankingConfig, settings }) => {
   const data = parse("Movie.2024.DUBBED.720p.WEB-DL-GROUP");
   const { totalScore } = rank(data, settings, rankingConfig);
 
-  // dubbed (-1000), WEB-DL (200)
+  // Dubbed (-1000), WEB-DL (200)
   // Total should be negative
   expect(totalScore).toBeLessThan(0);
 });

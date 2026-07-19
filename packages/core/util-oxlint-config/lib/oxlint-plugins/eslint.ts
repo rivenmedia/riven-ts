@@ -20,11 +20,11 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-inline-comments": "off",
         "new-cap": "off", // Incompatible with class decorators styling
         "no-ternary": "off",
-        // "capitalized-comments": [
-        //   "warn",
-        //   "always",
-        //   { ignoreConsecutiveComments: true, ignorePattern: "^empty$" },
-        // ],
+        "capitalized-comments": [
+          "warn",
+          "always",
+          { ignoreConsecutiveComments: true, ignorePattern: "empty" },
+        ],
         "no-eq-null": "allow", // Allows null checks to also check undefined
         "no-continue": "off",
         "no-void": ["warn", { allowAsStatement: true }],
@@ -61,7 +61,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "prefer-named-capture-group": "off",
         "no-use-before-define": "off",
         "id-length": "off",
-        "capitalized-comments": "off",
         "max-classes-per-file": "off",
         "prefer-exponentiation-operator": "off",
         "no-warning-comments": "off",

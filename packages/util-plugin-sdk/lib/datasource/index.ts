@@ -361,7 +361,7 @@ export abstract class BaseDataSource<
 
     const downcasedHeaders: Record<string, string> = {};
 
-    // map incoming headers to lower-case headers
+    // Map incoming headers to lower-case headers
     for (const [key, value] of Object.entries(augmentedRequest.headers)) {
       downcasedHeaders[key.toLowerCase()] = value;
     }

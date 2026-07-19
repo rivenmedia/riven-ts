@@ -138,7 +138,7 @@ describe("rankTorrent (integration)", () => {
     );
 
     expect(result.fetch).toBe(true);
-    expect(result.rank).toBeGreaterThan(10000); // preferred bonus
+    expect(result.rank).toBeGreaterThan(10000); // Preferred bonus
   });
 
   it("rejects excluded content", ({ rankingConfig }) => {

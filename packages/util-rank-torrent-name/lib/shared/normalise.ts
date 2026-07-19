@@ -116,7 +116,7 @@ export function normaliseTitle(rawTitle: string, lower = true): string {
         translated += replacement;
       }
 
-      // null means remove
+      // Null means remove
     } else {
       translated += ch;
     }
