@@ -118,7 +118,7 @@ export const bootstrapMachine = setup({
   guards: {
     hasInvalidPlugins: ({ context: { invalidPlugins } }) =>
       invalidPlugins.size > 0,
-    hasMockScenario: ({ context: { mockScenario } }) => !!mockScenario,
+    hasMockScenario: ({ context: { mockScenario } }) => Boolean(mockScenario),
   },
 })
   .extend(withLogAction)

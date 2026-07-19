@@ -74,11 +74,13 @@ export const findValidTorrentProcessor =
 
           scope.setTag("riven.downloader-plugin", pluginName);
 
-          const hasCacheCheckHook =
-            !!plugin.hooks["riven.media-item.download.cache-check-requested"];
+          const hasCacheCheckHook = Boolean(
+            plugin.hooks["riven.media-item.download.cache-check-requested"],
+          );
 
-          const hasProviderListHook =
-            !!plugin.hooks["riven.media-item.download.provider-list-requested"];
+          const hasProviderListHook = Boolean(
+            plugin.hooks["riven.media-item.download.provider-list-requested"],
+          );
 
           try {
             const { providers, rateLimitedProviders } = hasProviderListHook
