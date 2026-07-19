@@ -11,6 +11,7 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/max-nested-calls": "off",
         "unicorn/no-null": "off",
         "unicorn/no-nested-ternary": "allow", // This just suggests to wrap in parentheses which oxfmt strips away
+        "unicorn/no-useless-promise-resolve-reject": "allow", // Conflicts with typescript/require-await
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "unicorn/consistent-assert": "off",
@@ -31,7 +32,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/no-unreadable-array-destructuring": "off",
         "unicorn/prefer-string-raw": "off",
         "unicorn/no-anonymous-default-export": "off",
-        "unicorn/no-useless-promise-resolve-reject": "off",
         "unicorn/throw-new-error": "off",
         "unicorn/new-for-builtins": "off",
         "unicorn/catch-error-name": "off",
