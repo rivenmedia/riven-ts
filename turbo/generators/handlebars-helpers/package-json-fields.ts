@@ -30,7 +30,7 @@ const packageTypeFields: Partial<
       "@repo/core-util-vitest-config": "workspace:^",
       "@types/node": "catalog:",
       "@typescript-eslint/parser": "catalog:",
-      eslint: "catalog:",
+      oxlint: "catalog:",
       typescript: "catalog:",
       vitest: "catalog:",
     },
@@ -38,7 +38,7 @@ const packageTypeFields: Partial<
       build: "tsc --project tsconfig.lib.json",
       "check-types":
         "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
-      lint: "eslint",
+      lint: "oxlint",
       "lint:fix": "pnpm lint --fix",
       test: "vitest run --passWithNoTests",
       "test:watch": "vitest",

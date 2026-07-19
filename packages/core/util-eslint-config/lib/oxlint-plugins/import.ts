@@ -23,6 +23,7 @@ export const oxlintPluginImportConfig = defineConfig({
         "import/no-namespace": "off",
         "import/no-unassigned-import": "off",
         "import/no-anonymous-default-export": "off",
+        "import/no-default-export": "off",
       },
     },
     {

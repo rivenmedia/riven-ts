@@ -76,7 +76,6 @@ catalog:
   es-toolkit: ^1.46.1
   esbuild: ^0.28.0
   esbuild-node-externals: ^1.22.0
-  eslint: ^9.39.4
   eslint-plugin-turbo: ^2.10.5
   execa: ^9.6.1
   express: ^5.2.1

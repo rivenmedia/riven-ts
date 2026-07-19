@@ -63,7 +63,7 @@
   "scripts": {
     "build": "tsc --build tsconfig.lib.json",
     "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
-    "lint": "eslint",
+    "lint": "oxlint",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -94,8 +94,8 @@
     "@typescript-eslint/parser": "catalog:",
     "bullmq": "catalog:",
     "class-validator": "catalog:",
-    "eslint": "catalog:",
     "msw": "catalog:",
+    "oxlint": "catalog:",
     "redis-memory-server": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",

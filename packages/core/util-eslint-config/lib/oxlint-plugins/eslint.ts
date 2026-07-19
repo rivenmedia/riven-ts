@@ -7,7 +7,7 @@ export const oxlintPluginEslintConfig = defineConfig({
     {
       files: [tsFiles, jsFiles],
       rules: {
-        eqeqeq: ["error", "smart"],
+        // eqeqeq: ["error", "smart"],
         // "id-length": [
         //   "warn",
         //   {
@@ -73,6 +73,7 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-underscore-dangle": "off",
         curly: "off",
         "no-inner-declarations": "off",
+        eqeqeq: "off",
       },
     },
   ],

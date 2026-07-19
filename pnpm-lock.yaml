@@ -222,9 +222,6 @@ catalogs:
     esbuild-node-externals:
       specifier: ^1.22.0
       version: 1.22.0
-    eslint:
-      specifier: ^9.39.4
-      version: 9.39.4
     eslint-plugin-turbo:
       specifier: ^2.10.5
       version: 2.10.5
@@ -1007,9 +1004,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
+      oxlint:
         specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1059,15 +1056,15 @@ importers:
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 4.1.7(vitest@4.1.7)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       glob:
         specifier: 'catalog:'
         version: 13.0.6
       nyc:
         specifier: 'catalog:'
         version: 18.0.0
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1099,9 +1096,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
+      oxlint:
         specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1145,12 +1142,12 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1194,12 +1191,12 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1258,12 +1255,12 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1322,12 +1319,12 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1383,12 +1380,12 @@ importers:
       discord-api-types:
         specifier: 'catalog:'
         version: 0.38.42
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1441,12 +1438,12 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1508,12 +1505,12 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1560,12 +1557,12 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1612,12 +1609,12 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1658,12 +1655,12 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1716,12 +1713,12 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1765,12 +1762,12 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1832,12 +1829,12 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1872,9 +1869,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
+      oxlint:
         specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1954,12 +1951,12 @@ importers:
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.12.4)(typescript@5.9.3)
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       redis-memory-server:
         specifier: 'catalog:'
         version: 0.16.1
@@ -2012,9 +2009,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
+      oxlint:
         specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -2058,9 +2055,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
+      oxlint:
         specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3

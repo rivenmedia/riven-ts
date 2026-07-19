@@ -6,7 +6,7 @@
     { "path": "./tsconfig.spec.json" }
   ],
   "files": [
-    "eslint.config.ts",
+    "oxlint.config.ts",
     "vitest.config.ts",
     "scripts/generate-zod-docs.ts",
     "wiki.config.ts"
