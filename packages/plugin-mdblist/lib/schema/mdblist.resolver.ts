@@ -5,9 +5,9 @@ import { Args, Query, Resolver } from "type-graphql";
 
 import { MdblistAPI } from "../datasource/mdblist.datasource.ts";
 import { pluginConfig } from "../mdblist-plugin.config.ts";
+import { ListNamesArguments } from "./arguments/list-names.arguments.ts";
 import { MdblistContentServiceResponse } from "./types/mdblist-response.type.ts";
 
-import type { ListNamesArguments } from "./arguments/list-names.arguments.ts";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
 @Resolver()
@@ -22,7 +22,7 @@ export class MdblistResolver {
   @CacheControl({ maxAge: 300 })
   @Query(() => MdblistContentServiceResponse)
   async mdbListItems(
-    @Args() { listNames }: ListNamesArguments,
+    @Args(() => ListNamesArguments) { listNames }: ListNamesArguments,
     @PluginDataSource(pluginConfig.name, MdblistAPI) api: MdblistAPI,
   ): Promise<Pick<ContentServiceRequestedResponse, "movies" | "shows">> {
     return api.getListItems(new Set<string>(listNames));

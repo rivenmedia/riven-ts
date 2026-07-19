@@ -6,8 +6,7 @@ import { Args, Query, Resolver } from "type-graphql";
 
 import { ListrrAPI } from "../datasource/listrr.datasource.ts";
 import { pluginConfig } from "../listrr-plugin.config.ts";
-
-import type { ListIdsArguments } from "./arguments/list-ids.arguments.ts";
+import { ListIdsArguments } from "./arguments/list-ids.arguments.ts";
 
 @Resolver()
 export class ListrrResolver {
@@ -21,7 +20,7 @@ export class ListrrResolver {
   @CacheControl({ maxAge: 300 })
   @Query(() => [ExternalIds])
   async listrrMovies(
-    @Args() { listIds }: ListIdsArguments,
+    @Args(() => ListIdsArguments) { listIds }: ListIdsArguments,
     @PluginDataSource(pluginConfig.name, ListrrAPI) api: ListrrAPI,
   ): Promise<ExternalIds[]> {
     return api.getMovies(new Set<string>(listIds));
@@ -30,7 +29,7 @@ export class ListrrResolver {
   @CacheControl({ maxAge: 300 })
   @Query(() => [ExternalIds])
   async listrrShows(
-    @Args() { listIds }: ListIdsArguments,
+    @Args(() => ListIdsArguments) { listIds }: ListIdsArguments,
     @PluginDataSource(pluginConfig.name, ListrrAPI) api: ListrrAPI,
   ): Promise<ExternalIds[]> {
     return api.getShows(new Set<string>(listIds));
