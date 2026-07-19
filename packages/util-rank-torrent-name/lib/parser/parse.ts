@@ -47,7 +47,7 @@ const parser = new Parser()
           const matches = episodePattern.exec(title);
 
           if (matches) {
-            meta.value = [parseInt(matches[0], 10)];
+            meta.value = [Number.parseInt(matches[0], 10)];
             meta.mIndex = matches.index;
             meta.remove = true;
           }

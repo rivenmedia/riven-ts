@@ -41,7 +41,7 @@ const WebhookNotification = z
     const requestedSeasons = val.extra
       .find((extra) => extra.name.toLowerCase() === "requested seasons")
       ?.value.split(",")
-      .map((s) => parseInt(s.trim(), 10));
+      .map((s) => Number.parseInt(s.trim(), 10));
 
     return {
       ...val,
