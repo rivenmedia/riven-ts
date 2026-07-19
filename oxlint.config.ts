@@ -4,6 +4,7 @@ import { defineConfig } from "oxlint";
 
 export default defineConfig({
   extends: [baseOxlintConfig],
+  ignorePatterns: ["apps/**", "packages/**"],
   overrides: [
     {
       files: ["**/**"],

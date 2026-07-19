@@ -875,9 +875,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
+      oxlint:
         specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       type-fest:
         specifier: 'catalog:'
         version: 5.6.0
@@ -918,9 +918,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
+      oxlint:
         specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -967,9 +967,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
-      eslint:
+      oxlint:
         specifier: 'catalog:'
-        version: 9.39.4(jiti@2.7.0)
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3

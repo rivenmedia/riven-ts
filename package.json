@@ -12,7 +12,7 @@
     "format:fix": "oxfmt --write .",
     "postinstall": "pnpm node .husky/install.mjs || true",
     "knip": "pnpm knip:prepare && knip",
-    "lint": "oxlint --ignore-pattern {apps,packages}/**",
+    "lint": "oxlint --ignore-pattern '{apps,packages}/**'",
     "lint:fix": "pnpm lint --fix",
     "knip:ci:base": "pnpm knip --cache --no-exit-code",
     "knip:ci:development": "pnpm knip:ci:base --reporter github-actions",
