@@ -1,11 +1,11 @@
 import { RivenPluginPackage } from "@repo/util-plugin-sdk";
-import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import { expect, it, vi } from "vitest";
 import { createActor, toPromise } from "xstate";
 import z from "zod";
 
 import { logger } from "../../../utilities/logger/logger.ts";
+import { PluginSettings } from "../../../utilities/plugin-settings.ts";
 import {
   type ParsedPlugins,
   collectPluginsForRegistration,

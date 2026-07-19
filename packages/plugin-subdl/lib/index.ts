@@ -25,7 +25,7 @@ export default {
       logger,
     }) => {
       const api = dataSources.get(SubdlAPI);
-      const { languages } = settings.get(SubdlSettings);
+      const { languages } = SubdlSettings.parse(settings);
 
       const meta = await getItemMetadata(item);
 

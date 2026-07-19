@@ -20,8 +20,8 @@ import { mainRunnerMachine } from "../../main-runner/index.js";
 
 import type { ApolloServerContext } from "../../../graphql/context.ts";
 import type { ValidPluginMap } from "../../../types/plugins.ts";
+import type { PluginSettings } from "../../../utilities/plugin-settings.ts";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
-import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 export interface StartGQLServerInput {
   mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine>;

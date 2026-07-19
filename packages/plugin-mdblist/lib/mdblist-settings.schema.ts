@@ -11,9 +11,7 @@ export const MdbListSettings = z.object({
   lists: json(z.array(z.string().min(1)))
     .default([])
     .describe("List of MdbList lists to request"),
-  updateIntervalSeconds: z
-    .int()
-    .nonnegative()
+  updateIntervalSeconds: json(z.int().nonnegative())
     .default(Duration.fromObject({ days: 1 }).as("seconds"))
     .describe("Interval in seconds to update content"),
 });

@@ -7,9 +7,9 @@ import { fromCallback } from "xstate";
 import { logger } from "../../../utilities/logger/logger.ts";
 
 import type { RegisteredPlugin } from "../../../types/plugins.ts";
+import type { PluginSettings } from "../../../utilities/plugin-settings.ts";
 import type { PluginRegistrarMachineEvent } from "../index.ts";
 import type { DataSourceMap } from "@repo/util-plugin-sdk";
-import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 export interface ValidatePluginInput {
   plugin: RegisteredPlugin;
@@ -52,7 +52,7 @@ export const validatePlugin = fromCallback<
 
         const { result: isValid, timeTaken } = await benchmark(() =>
           plugin.config.validator({
-            settings,
+            settings: settings.get(plugin.config.settingsSchema),
             dataSources,
           }),
         );

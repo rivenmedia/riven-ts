@@ -1,5 +1,7 @@
+import assert from "node:assert";
 import {
   type ActorRefFromLogic,
+  assign,
   createActor,
   enqueueActions,
   setup,
@@ -19,15 +21,19 @@ import type { ApolloServerContext } from "../../graphql/context.ts";
 import type { MockScenario } from "../../mocks/utilities/mock-scenario.ts";
 import type { ValidPluginMap } from "../../types/plugins.ts";
 import type { SessionID } from "../../utilities/logger/session-id.ts";
+import type { PluginSettings } from "../../utilities/plugin-settings.ts";
 import type { ApolloServer } from "@apollo/server";
+import type { CoreRestartEvent } from "@repo/util-plugin-sdk/schemas/events/core.restart.event";
 import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";
 import type Fuse from "@zkochan/fuse-native";
 
 export interface RivenMachineContext {
-  mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine>;
+  mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine> | null;
   mockScenario: MockScenario | undefined;
   plugins?: ValidPluginMap;
+  pluginSettings: PluginSettings | null;
   server?: ApolloServer<ApolloServerContext>;
+  shutdownType: "restart" | "shutdown" | null;
   vfs?: Fuse;
 }
 
@@ -36,7 +42,10 @@ export interface RivenMachineInput {
   mockScenario: MockScenario | undefined;
 }
 
-export type RivenMachineEvent = CoreShutdownEvent | { type: "BOOTSTRAP" };
+export type RivenMachineEvent =
+  | CoreShutdownEvent
+  | CoreRestartEvent
+  | { type: "BOOTSTRAP" };
 
 export const rivenMachine = setup({
   types: {
@@ -46,7 +55,6 @@ export const rivenMachine = setup({
     children: {} as {
       bootstrapMachine: "bootstrapMachine";
       stopGqlServer: "stopGqlServer";
-      mainRunnerMachine: "mainRunnerMachine";
       shutdown: "shutdown";
       unmountVfs: "unmountVfs";
     },
@@ -66,12 +74,18 @@ export const rivenMachine = setup({
           pluginQueues,
           pluginWorkers,
           plugins,
+          pluginSettings,
           publishableEvents,
           server,
           vfs,
         }: BootstrapMachineOutput,
       ) => {
-        enqueue.assign({ vfs, server });
+        assert(
+          mainRunnerRef,
+          "mainRunnerRef is not defined in RivenMachineContext",
+        );
+
+        enqueue.assign({ vfs, server, pluginSettings });
         enqueue.sendTo(mainRunnerRef, {
           type: "START",
           input: {
@@ -83,23 +97,53 @@ export const rivenMachine = setup({
         });
       },
     ),
+    handleRestart: enqueueActions(
+      ({ context: { pluginSettings }, enqueue }) => {
+        pluginSettings?.restoreEnvironment();
+        enqueue.assign({ shutdownType: "restart" });
+      },
+    ),
+    stopMainRunner: enqueueActions(
+      ({ context: { mainRunnerRef }, enqueue }) => {
+        assert(
+          mainRunnerRef,
+          "mainRunnerRef is not defined in RivenMachineContext",
+        );
+
+        enqueue.stopChild(mainRunnerRef);
+      },
+    ),
   },
 })
   .extend(withLogAction)
   .createMachine({
     id: "Riven",
     initial: "Idle",
-    context: ({ self, spawn, input }) => ({
-      mainRunnerRef: spawn("mainRunnerMachine", {
-        id: "mainRunnerMachine",
-        input: {
-          parentRef: self,
-        },
-      }),
+    context: ({ input }) => ({
+      mainRunnerRef: null,
       mockScenario: input.mockScenario,
+      pluginSettings: null,
+      shutdownType: null,
     }),
     on: {
-      "riven.core.shutdown": ".Shutdown",
+      "riven.core.shutdown": {
+        target: ".Shutdown",
+        actions: assign({
+          shutdownType: "shutdown",
+        }),
+      },
+      "riven.core.restart": {
+        target: ".Shutdown",
+        actions: [
+          {
+            type: "log",
+            params: {
+              message: "Riven is restarting.",
+            },
+          },
+          "handleRestart",
+        ],
+      },
     },
     states: {
       Idle: {
@@ -108,14 +152,29 @@ export const rivenMachine = setup({
         },
       },
       Bootstrapping: {
+        entry: assign(({ self, spawn }) => ({
+          shutdownType: null,
+          mainRunnerRef: spawn("mainRunnerMachine", {
+            input: {
+              parentRef: self,
+            },
+          }),
+        })),
         invoke: {
           id: "bootstrapMachine",
           src: "bootstrapMachine",
-          input: ({ context: { mainRunnerRef, mockScenario }, self }) => ({
-            mainRunnerRef,
-            rootRef: self,
-            mockScenario,
-          }),
+          input: ({ context: { mainRunnerRef, mockScenario }, self }) => {
+            assert(
+              mainRunnerRef,
+              "mainRunnerRef is not defined in RivenMachineContext",
+            );
+
+            return {
+              mainRunnerRef,
+              rootRef: self,
+              mockScenario,
+            };
+          },
           onDone: {
             target: "Running",
             actions: {
@@ -137,19 +196,15 @@ export const rivenMachine = setup({
         },
       },
       Running: {},
-      Errored: {
-        type: "final",
-        entry: {
-          type: "log",
-          params: {
-            message: "A fatal error occurred.",
-            level: "error",
-          },
-        },
-      },
       Shutdown: {
         initial: "Shutting down main runner",
-        onDone: "Exited",
+        onDone: [
+          {
+            target: "Bootstrapping",
+            guard: ({ context }) => context.shutdownType === "restart",
+          },
+          { target: "Exited" },
+        ],
         entry: [
           {
             type: "log",
@@ -163,9 +218,14 @@ export const rivenMachine = setup({
             invoke: {
               id: "shutdown",
               src: "shutdown",
-              input: ({ context: { mainRunnerRef } }) => ({
-                mainRunnerRef: mainRunnerRef,
-              }),
+              input: ({ context: { mainRunnerRef } }) => {
+                assert(
+                  mainRunnerRef,
+                  "mainRunnerRef is not defined in RivenMachineContext",
+                );
+
+                return { mainRunnerRef: mainRunnerRef };
+              },
               onError: {
                 target: "Unmounting VFS",
                 actions: {
@@ -179,12 +239,15 @@ export const rivenMachine = setup({
               },
               onDone: {
                 target: "Unmounting VFS",
-                actions: {
-                  type: "log",
-                  params: {
-                    message: "Main runner has been shut down successfully.",
+                actions: [
+                  {
+                    type: "log",
+                    params: {
+                      message: "Main runner has been shut down successfully.",
+                    },
                   },
-                },
+                  "stopMainRunner",
+                ],
               },
             },
           },
@@ -262,6 +325,16 @@ export const rivenMachine = setup({
                 message: "All services have been shut down successfully.",
               },
             },
+          },
+        },
+      },
+      Errored: {
+        type: "final",
+        entry: {
+          type: "log",
+          params: {
+            message: "A fatal error occurred.",
+            level: "error",
           },
         },
       },

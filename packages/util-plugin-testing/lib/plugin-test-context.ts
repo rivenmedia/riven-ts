@@ -9,7 +9,6 @@ import { RedisConnection } from "bullmq";
 import { it as baseIt, vi } from "vitest";
 
 import { mockLogger } from "./create-mock-logger.ts";
-import { createMockPluginSettings } from "./create-mock-plugin-settings.ts";
 
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { Telemetry } from "bullmq";
@@ -48,9 +47,7 @@ export const it = baseIt
       'Plugin config must be provided before using the plugin test context. Use `it.override("plugin", <pluginConfig>)` to set the plugin config for your tests.',
     );
   })
-  .extend("settings", ({ plugin }) =>
-    createMockPluginSettings(plugin.settingsSchema, {}),
-  )
+  .extend("settings", ({ plugin }) => plugin.settingsSchema.parse({}))
   .extend("gqlServer", { scope: "file" }, async ({ plugin }, { onCleanup }) => {
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");
@@ -122,7 +119,7 @@ export const it = baseIt
           pluginSymbol: plugin.name,
           telemetry: undefined as unknown as Telemetry,
           requestBackoffDelay: 0,
-          settings: settings.get(plugin.settingsSchema),
+          settings,
           userAgent: "mock-user-agent",
         } satisfies BaseDataSourceConfig<Record<string, unknown>>;
 

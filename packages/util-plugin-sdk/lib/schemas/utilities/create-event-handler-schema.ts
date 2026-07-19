@@ -6,7 +6,6 @@ import z, {
 } from "zod";
 
 import { DataSourceMap } from "../../utilities/datasource-map.ts";
-import { PluginSettings } from "../../utilities/plugin-settings.ts";
 
 import type { RivenEvent, RivenExternalEvent } from "../events/index.ts";
 import type { Logger } from "winston";
@@ -27,7 +26,7 @@ export const createEventHandlerSchema = <
       z.object({
         event: inputSchema.omit({ type: true }),
         dataSources: z.instanceof(DataSourceMap),
-        settings: z.instanceof(PluginSettings),
+        settings: z.record(z.string(), z.unknown()),
         logger: z.custom<Logger>(
           (val) =>
             val && typeof val === "object" && "info" in val && "error" in val,

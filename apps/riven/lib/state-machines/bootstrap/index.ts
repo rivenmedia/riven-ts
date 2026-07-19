@@ -24,9 +24,9 @@ import type {
   ValidPlugin,
   ValidPluginMap,
 } from "../../types/plugins.ts";
+import type { PluginSettings } from "../../utilities/plugin-settings.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
-import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";
 
 export interface BootstrapMachineContext {
@@ -54,6 +54,7 @@ export interface BootstrapMachineInput {
 export interface BootstrapMachineOutput {
   server: ApolloServer<ApolloServerContext>;
   plugins: ValidPluginMap;
+  pluginSettings: PluginSettings;
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: Set<RivenEvent["type"]>;
@@ -146,17 +147,20 @@ export const bootstrapMachine = setup({
         pluginQueues,
         pluginWorkers,
         publishableEvents,
+        pluginSettings,
       },
     }) => {
-      if (!server) {
-        throw new Error(
-          "Bootstrap machine completed without a GraphQL server instance",
-        );
-      }
+      assert(
+        server,
+        "Bootstrap machine completed without a GraphQL server instance",
+      );
 
-      if (!vfs) {
-        throw new Error("Bootstrap machine completed without a VFS instance");
-      }
+      assert(vfs, "Bootstrap machine completed without a VFS instance");
+
+      assert(
+        pluginSettings,
+        "Bootstrap machine completed without plugin settings",
+      );
 
       return {
         plugins: validPlugins,
@@ -165,6 +169,7 @@ export const bootstrapMachine = setup({
         pluginQueues,
         pluginWorkers,
         publishableEvents,
+        pluginSettings,
       };
     },
     states: {

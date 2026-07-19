@@ -1,5 +1,4 @@
 import { type RivenPlugin, RivenPluginPackage } from "@repo/util-plugin-sdk";
-import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import chalk from "chalk";
 import { constantCase } from "es-toolkit";
@@ -11,6 +10,7 @@ import {
   CorePlugins,
 } from "../../../schemas/core-plugins.schema.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
+import { PluginSettings } from "../../../utilities/plugin-settings.ts";
 import { settings } from "../../../utilities/settings.ts";
 
 import type { PackageJson } from "type-fest";

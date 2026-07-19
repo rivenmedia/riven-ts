@@ -21,7 +21,7 @@ export default {
       settings,
       logger,
     }) => {
-      const { urls } = settings.get(NotificationsSettings);
+      const { urls } = NotificationsSettings.parse(settings);
 
       const api = dataSources.get(NotificationsAPI);
       const payload = buildNotificationPayload(

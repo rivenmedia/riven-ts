@@ -14,7 +14,7 @@ export default {
   resolvers: [MdblistResolver, MdblistSettingsResolver],
   hooks: {
     "riven.content-service.requested": async ({ dataSources, settings }) => {
-      const { lists, updateIntervalSeconds } = settings.get(MdbListSettings);
+      const { lists, updateIntervalSeconds } = MdbListSettings.parse(settings);
       const api = dataSources.get(MdblistAPI);
 
       const { movies, shows } = await api.getListItems(new Set(lists));
