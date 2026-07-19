@@ -10,13 +10,13 @@ export const json = <T extends z.core.$ZodType>(schema: T) =>
     decode: (jsonString, ctx) => {
       try {
         return JSON.parse(jsonString) as z.input<T>;
-      } catch (err: unknown) {
-        if (err instanceof Error) {
+      } catch (error: unknown) {
+        if (error instanceof Error) {
           ctx.issues.push({
             code: "invalid_format",
             format: "json",
             input: jsonString,
-            message: `Invalid JSON: ${err.message}`,
+            message: `Invalid JSON: ${error.message}`,
           });
         }
 

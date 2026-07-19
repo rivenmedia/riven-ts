@@ -34,7 +34,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/no-anonymous-default-export": "off",
         "unicorn/throw-new-error": "off",
         "unicorn/new-for-builtins": "off",
-        "unicorn/catch-error-name": "off",
         "unicorn/no-process-exit": "off",
         "unicorn/prefer-single-call": "off",
         "unicorn/prefer-dom-node-remove": "off",

@@ -9,8 +9,10 @@ export const UpdateWebhookSettingsResponse = webhookSettingsSchema.extend({
 
       try {
         return JSON.parse(decoded) as Record<string, never>;
-      } catch (e) {
-        throw new Error("Failed to parse jsonPayload as JSON", { cause: e });
+      } catch (error) {
+        throw new Error("Failed to parse jsonPayload as JSON", {
+          cause: error,
+        });
       }
     }),
   }),

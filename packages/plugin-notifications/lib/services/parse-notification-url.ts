@@ -57,7 +57,7 @@ export function parseNotificationUrl(raw: string): NotificationService {
         };
       }
     }
-  } catch (err) {
-    throw fromError(err);
+  } catch (error) {
+    throw fromError(error);
   }
 }

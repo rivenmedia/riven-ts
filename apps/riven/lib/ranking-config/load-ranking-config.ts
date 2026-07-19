@@ -35,23 +35,23 @@ export async function loadRankingConfig(
 
     try {
       await writeDefaultConfigFile(resolvedPath);
-    } catch (cause) {
+    } catch (error) {
       if (
-        cause === null ||
-        typeof cause !== "object" ||
-        (cause as NodeJS.ErrnoException).code !== "EEXIST"
+        error === null ||
+        typeof error !== "object" ||
+        (error as NodeJS.ErrnoException).code !== "EEXIST"
       ) {
         throw new Error(
-          `Failed to create ranking config file at "${resolvedPath}": ${String(cause)}`,
-          { cause },
+          `Failed to create ranking config file at "${resolvedPath}": ${String(error)}`,
+          { cause: error },
         );
       }
     }
   }
 
-  const raw = await readFile(resolvedPath, "utf8").catch((cause: unknown) => {
+  const raw = await readFile(resolvedPath, "utf8").catch((error: unknown) => {
     throw new Error(
-      `Failed to read ranking config file at "${resolvedPath}": ${String(cause)}`,
+      `Failed to read ranking config file at "${resolvedPath}": ${String(error)}`,
     );
   });
 

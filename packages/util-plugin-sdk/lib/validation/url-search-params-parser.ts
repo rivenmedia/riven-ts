@@ -10,13 +10,13 @@ export const urlSearchParamsCodec = z.codec(
     decode: (jsonString, ctx) => {
       try {
         return new URLSearchParams(jsonString);
-      } catch (err: unknown) {
-        if (err instanceof Error) {
+      } catch (error: unknown) {
+        if (error instanceof Error) {
           ctx.issues.push({
             code: "invalid_format",
             format: "json",
             input: JSON.stringify(jsonString),
-            message: err.message,
+            message: error.message,
           });
         }
 
