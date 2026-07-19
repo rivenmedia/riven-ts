@@ -46,7 +46,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "max-params": "off",
         "no-undefined": "off",
         "init-declarations": "off",
-        "object-shorthand": "off",
         "class-methods-use-this": "off",
         "default-case": "off",
         complexity: "off",

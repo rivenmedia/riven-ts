@@ -158,7 +158,7 @@ export const rivenMachine = setup({
               id: "shutdown",
               src: "shutdown",
               input: ({ context: { mainRunnerRef } }) => ({
-                mainRunnerRef: mainRunnerRef,
+                mainRunnerRef,
               }),
               onError: {
                 target: "Unmounting VFS",

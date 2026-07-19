@@ -217,7 +217,7 @@ it("filters show torrents if the item is a movie", async ({
   expect(Object.values(results)).not.toEqual(
     expect.arrayContaining([
       expect.objectContaining({
-        rawTitle: rawTitle,
+        rawTitle,
       }),
     ]),
   );

@@ -105,7 +105,7 @@ export const processMediaItemProcessor =
 
               await enqueueDownloadItem({
                 item,
-                opts: { parent: parent },
+                opts: { parent },
               });
 
               await job.updateData({
