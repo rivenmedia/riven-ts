@@ -32,20 +32,16 @@ export const it = baseIt
     }),
   )
   .extend("startGqlServerActorLogic", ({ apolloServerInstance }) =>
-    fromPromise<StartGQLServerOutput, StartGQLServerInput>(async () => {
-      return {
-        server: apolloServerInstance,
-        url: "http://localhost:3000",
-      };
-    }),
+    fromPromise<StartGQLServerOutput, StartGQLServerInput>(async () => ({
+      server: apolloServerInstance,
+      url: "http://localhost:3000",
+    })),
   )
   .extend(
     "initialiseVfsActorLogic",
-    fromPromise<InitialiseVfsOutput, InitialiseVfsInput>(async () => {
-      return {
-        vfs: new Fuse("/mnt/fake-path", {}),
-      };
-    }),
+    fromPromise<InitialiseVfsOutput, InitialiseVfsInput>(async () => ({
+      vfs: new Fuse("/mnt/fake-path", {}),
+    })),
   )
   .extend(
     "machine",

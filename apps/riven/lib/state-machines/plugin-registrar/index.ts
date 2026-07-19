@@ -239,13 +239,11 @@ export const pluginRegistrarMachine = setup({
           pluginWorkers,
           publishableEvents,
         }: RegisterPluginHookWorkersOutput,
-      ) => {
-        return {
-          pluginQueues,
-          pluginWorkers,
-          publishableEvents,
-        };
-      },
+      ) => ({
+        pluginQueues,
+        pluginWorkers,
+        publishableEvents,
+      }),
     ),
   },
   actors: {

@@ -31,9 +31,8 @@ export type BasePluginContext = z.infer<typeof basePluginContextSchema>;
 
 export const isBasePluginContext = (
   value: unknown,
-): value is BasePluginContext => {
-  return basePluginContextSchema.safeParse(value).success;
-};
+): value is BasePluginContext =>
+  basePluginContextSchema.safeParse(value).success;
 
 /**
  * Represents a constructor for a class that extends BaseDataSource.

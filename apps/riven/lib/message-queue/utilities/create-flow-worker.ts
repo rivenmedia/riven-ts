@@ -53,8 +53,8 @@ export function createFlowWorker<
 
   const worker = new Worker(
     flowName,
-    async (job, token, signal) => {
-      return new Promise((resolve, reject) => {
+    async (job, token, signal) =>
+      new Promise((resolve, reject) => {
         signal?.addEventListener("abort", () => {
           reject(new AbortError(`${job.name} aborted`));
         });
@@ -96,8 +96,7 @@ export function createFlowWorker<
         )
           .then(resolve)
           .catch(reject);
-      });
-    },
+      }),
     toMerged<WorkerOptions, typeof workerOptions>(
       {
         concurrency: normaliseConcurrency(os.availableParallelism() * 1.5),

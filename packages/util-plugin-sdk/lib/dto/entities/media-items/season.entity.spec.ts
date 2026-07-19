@@ -5,13 +5,13 @@ import { it as baseIt } from "../../../__tests__/test-context.ts";
 import { ItemRequest, Season, Show } from "../index.ts";
 
 const test = baseIt
-  .extend("itemRequest", ({ em }) => {
-    return em.create(ItemRequest, {
+  .extend("itemRequest", ({ em }) =>
+    em.create(ItemRequest, {
       requestedBy: "@repo/plugin-test",
       state: "completed",
       type: "show",
-    });
-  })
+    }),
+  )
   .extend("show", async ({ em, itemRequest }) => {
     const show = em.create(Show, {
       title: "Test Show",

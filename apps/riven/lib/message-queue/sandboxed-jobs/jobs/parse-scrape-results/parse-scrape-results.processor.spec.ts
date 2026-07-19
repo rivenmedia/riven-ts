@@ -29,7 +29,7 @@ const it = baseIt.extend("scrapeResults", {
 });
 
 it.beforeAll(({ gqlServer: _gqlServer }) => {
-  return;
+  /* empty */
 });
 
 it("throws an UnrecoverableError if no results are found", async ({

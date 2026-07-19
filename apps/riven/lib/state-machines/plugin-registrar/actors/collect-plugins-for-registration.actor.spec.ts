@@ -30,13 +30,15 @@ it("returns any invalid plugins from the package.json file along with their vali
 
   const actor = createActor(collectPluginsForRegistration);
 
-  vi.doMock(import("@repo/plugin-test"), () => {
-    return {
-      default: {
-        name: "Test",
-      },
-    } as never;
-  });
+  vi.doMock(
+    import("@repo/plugin-test"),
+    () =>
+      ({
+        default: {
+          name: "Test",
+        },
+      }) as never,
+  );
 
   const validationResult = RivenPluginPackage.safeParse(
     await import("@repo/plugin-test"),

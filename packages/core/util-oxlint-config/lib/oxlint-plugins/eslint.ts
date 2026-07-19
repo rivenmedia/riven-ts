@@ -53,7 +53,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "require-unicode-regexp": "off",
         "no-shadow": "off",
         "no-useless-return": "off",
-        "arrow-body-style": "off",
         "no-bitwise": "off",
         "prefer-arrow-callback": "off",
         "no-implicit-coercion": "off",
