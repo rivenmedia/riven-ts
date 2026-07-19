@@ -1,3 +1,5 @@
+// oxlint-disable node/no-sync
+
 import chalk from "chalk";
 import { writeFileSync } from "node:fs";
 import z from "zod";

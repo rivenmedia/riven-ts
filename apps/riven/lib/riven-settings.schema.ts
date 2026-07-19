@@ -1,3 +1,5 @@
+// oxlint-disable node/no-sync
+
 import { json } from "@repo/util-plugin-sdk/validation";
 
 import dedent from "dedent";

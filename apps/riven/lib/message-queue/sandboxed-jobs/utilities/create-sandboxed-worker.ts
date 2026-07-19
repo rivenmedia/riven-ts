@@ -40,6 +40,7 @@ export function createSandboxedWorker(
   );
 
   assert(
+    // oxlint-disable-next-line node/no-sync
     existsSync(processorURL),
     `Processor file not found at path: ${processorURL.toString()}`,
   );

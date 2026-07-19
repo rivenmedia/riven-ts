@@ -1,3 +1,5 @@
+// oxlint-disable node/global-require
+
 import { execa } from "execa";
 import { readdirSync } from "node:fs";
 import { it as baseIt, expect } from "vitest";

@@ -8,6 +8,7 @@ import { eslintPluginEslintJsonConfig } from "./eslint-plugins/@eslint/json.ts";
 import { eslintPluginEslintConfigTurboConfig } from "./eslint-plugins/eslint-plugin-turbo.ts";
 import { oxlintPluginEslintConfig } from "./oxlint-plugins/eslint.ts";
 import { oxlintPluginImportConfig } from "./oxlint-plugins/import.ts";
+import { oxlintPluginNodeConfig } from "./oxlint-plugins/node.ts";
 import { oxlintPluginOxcConfig } from "./oxlint-plugins/oxc.ts";
 import { oxlintPluginReactConfig } from "./oxlint-plugins/react.ts";
 import { oxlintPluginTypescriptConfig } from "./oxlint-plugins/typescript.ts";
@@ -33,6 +34,7 @@ export const baseOxlintConfig = defineConfig({
     oxlintPluginOxcConfig,
     oxlintPluginUnicornConfig,
     oxlintPluginReactConfig,
+    oxlintPluginNodeConfig,
     noUnusedVariables,
     banDateConstructor,
     preferMikroOrmCore,
