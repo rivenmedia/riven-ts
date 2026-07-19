@@ -38,4 +38,7 @@ export const baseOxlintConfig = defineConfig({
     preferMikroOrmCore,
     allowConstantLoopConditions,
   ],
+  options: {
+    reportUnusedDisableDirectives: "error",
+  },
 });
