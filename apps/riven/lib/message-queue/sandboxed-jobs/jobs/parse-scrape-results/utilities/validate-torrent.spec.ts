@@ -270,7 +270,7 @@ it("does not throw for torrents that have no seasons, but the correct absolute e
   indexedShowContext: { indexedShow },
   infoHash,
 }) => {
-  const season = indexedShow.seasons[2];
+  const [, , season] = indexedShow.seasons;
 
   expect.assert(season);
 
@@ -287,7 +287,7 @@ it("throws for torrents that have no seasons and do not have the correct absolut
   indexedShowContext: { indexedShow },
   infoHash,
 }) => {
-  const season = indexedShow.seasons[2];
+  const [, , season] = indexedShow.seasons;
 
   expect.assert(season);
 

@@ -215,7 +215,7 @@ export const validateTorrent = async (
       item.seasons.length === 1 &&
       item.seasons[0]?.episodes.length
     ) {
-      const { episodes } = item.seasons[0];
+      const [{ episodes }] = item.seasons;
 
       const episodesIntersection = new Set(parsedData.episodes).intersection(
         new Set(
