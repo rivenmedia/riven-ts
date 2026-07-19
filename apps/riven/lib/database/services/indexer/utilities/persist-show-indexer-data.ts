@@ -34,7 +34,7 @@ export async function persistShowIndexerData(
     "unreleased",
   ]);
 
-  assert(
+  assert.ok(
     processableStates.safeParse(itemRequest.state).success,
     new MediaItemIndexErrorIncorrectState({
       item: itemRequest,

@@ -14,7 +14,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/no-useless-promise-resolve-reject": "allow", // Conflicts with typescript/require-await
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
-        "unicorn/consistent-assert": "off",
         "unicorn/no-array-reduce": "off",
         "unicorn/switch-case-braces": "off",
         "unicorn/numeric-separators-style": "off",

@@ -24,7 +24,7 @@ export class ScrapedShowSeeder extends BaseSeeder<ScrapedShowSeederContext> {
 
     await em.flush();
 
-    assert(
+    assert.ok(
       context.show.state === "scraped",
       `Expected show state to be "scraped", got "${context.show.state}"`,
     );

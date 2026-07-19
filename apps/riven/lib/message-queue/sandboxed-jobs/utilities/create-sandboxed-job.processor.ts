@@ -42,7 +42,7 @@ export function createSandboxedJobProcessor<
 ) {
   const [sandboxedJobName] = sandboxedJobSchema.shape.name.def.values;
 
-  assert(
+  assert.ok(
     sandboxedJobName,
     `No queue name found for sandboxed job: ${sandboxedJobSchema.shape.name.value}`,
   );

@@ -37,7 +37,7 @@ export async function persistDownloadResults(
     },
   );
 
-  assert(
+  assert.ok(
     existingItem,
     new NotFoundError(
       `No media item found with ID ${id} and stream info hash ${torrent.infoHash}`,
@@ -50,7 +50,7 @@ export async function persistDownloadResults(
     "partially_completed",
   ]);
 
-  assert(
+  assert.ok(
     processableStates.safeParse(existingItem.state).success,
     new MediaItemDownloadErrorIncorrectState({
       item: existingItem,
@@ -62,7 +62,7 @@ export async function persistDownloadResults(
       ({ infoHash }) => infoHash === torrent.infoHash,
     );
 
-    assert(
+    assert.ok(
       matchedStream,
       new NotFoundError(
         `Media item with ID ${id} does not have a stream matching the torrent's info hash ${torrent.infoHash}`,
@@ -80,7 +80,7 @@ export async function persistDownloadResults(
     if (existingItem instanceof Movie || existingItem instanceof Episode) {
       const [file] = torrent.files;
 
-      assert(file?.link, "Download URL is missing for the matched file");
+      assert.ok(file?.link, "Download URL is missing for the matched file");
 
       existingItem.filesystemEntries.add(
         em.create(MediaEntry, {
@@ -112,11 +112,11 @@ export async function persistDownloadResults(
       ]);
 
       for (const file of torrent.files) {
-        assert(file.link, "Download URL is missing for the matched file");
+        assert.ok(file.link, "Download URL is missing for the matched file");
 
         const episode = episodeMap.get(file.matchedMediaItemId);
 
-        assert(
+        assert.ok(
           episode,
           new NotFoundError(
             `File ${file.name} does not correspond to a valid episode`,

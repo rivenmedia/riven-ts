@@ -44,7 +44,7 @@ export function createFlowWorker<
 ) {
   const [flowName] = flowSchema.shape.name.def.values;
 
-  assert(
+  assert.ok(
     flowName,
     `No queue name found for flow: ${flowSchema.shape.name.value}`,
   );

@@ -43,7 +43,7 @@ export const transformSeries = (
 
   const title = findEnglishShowTitle(series);
 
-  assert(title, "Series must have a name");
+  assert.ok(title, "Series must have a name");
 
   const network =
     series.latestNetwork?.name ?? series.originalNetwork?.name ?? null;

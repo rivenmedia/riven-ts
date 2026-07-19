@@ -29,7 +29,7 @@ export class ScrapedMovieSeeder extends BaseSeeder<ScrapedMovieSeederContext> {
 
     await em.flush();
 
-    assert(
+    assert.ok(
       context.movie.state === "scraped",
       `Expected movie state to be "scraped", got "${context.movie.state}"`,
     );

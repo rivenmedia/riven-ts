@@ -191,7 +191,7 @@ export const it = testBase
         seasons: [season],
       },
     }) => {
-      assert(season);
+      assert.ok(season);
 
       return season;
     },
@@ -203,7 +203,7 @@ export const it = testBase
         episodes: [episode],
       },
     }) => {
-      assert(episode);
+      assert.ok(episode);
 
       return episode;
     },

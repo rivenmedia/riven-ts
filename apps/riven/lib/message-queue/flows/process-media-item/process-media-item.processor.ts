@@ -31,7 +31,7 @@ export const processMediaItemProcessor =
         plugins,
       },
     ) => {
-      assert(token, "Job token is required");
+      assert.ok(token, "Job token is required");
 
       const parent = createJobParentConfig(job);
 

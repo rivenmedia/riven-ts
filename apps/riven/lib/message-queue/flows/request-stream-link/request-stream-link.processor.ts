@@ -27,7 +27,7 @@ export const requestStreamLinkProcessor =
       { job, token },
       { services: { streamService, mediaEntryService } },
     ) => {
-      assert(token, "Token is required to create child jobs");
+      assert.ok(token, "Token is required to create child jobs");
 
       const mediaEntry = await mediaEntryService.getMediaEntryById(
         job.data.mediaEntryId,
@@ -135,7 +135,7 @@ export const requestStreamLinkProcessor =
             break;
           }
           case "check-link-health": {
-            assert(
+            assert.ok(
               job.data.linkData,
               new UnrecoverableError(
                 "Stream link data is required to check link health",
@@ -220,7 +220,7 @@ export const requestStreamLinkProcessor =
             break;
           }
           case "save-healthy-link": {
-            assert(
+            assert.ok(
               job.data.linkData,
               new UnrecoverableError(
                 "Stream link data is required to save to media entry",
@@ -301,7 +301,7 @@ export const requestStreamLinkProcessor =
         }
       }
 
-      assert(
+      assert.ok(
         job.data.linkData,
         "No stream URL found after processing stream link request",
       );

@@ -73,7 +73,7 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
 
     await em.flush();
 
-    assert(
+    assert.ok(
       context.show.state === "indexed",
       `Expected show state to be "indexed", got "${context.show.state}"`,
     );

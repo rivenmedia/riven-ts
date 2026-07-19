@@ -17,7 +17,7 @@ export class CompletedShowSeeder extends BaseSeeder<CompletedShowSeederContext> 
   ) {
     await this.call(em, [ScrapedShowSeeder], context);
 
-    assert(
+    assert.ok(
       context.streams[0],
       "Expected at least one stream to be present in context.streams",
     );
@@ -50,7 +50,7 @@ export class CompletedShowSeeder extends BaseSeeder<CompletedShowSeederContext> 
 
     await em.flush();
 
-    assert(
+    assert.ok(
       context.show.state === "completed",
       `Expected show state to be "completed", got "${context.show.state}"`,
     );

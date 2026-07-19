@@ -55,7 +55,7 @@ export function getVfsOperationContext<
   }
 
   if (operationName) {
-    assert(
+    assert.ok(
       context.operationName === operationName,
       `VFS operation context mismatch: expected ${operationName} but got ${context.operationName}`,
     );

@@ -21,7 +21,7 @@ export class IndexedMovieSeeder extends BaseSeeder<IndexedMovieSeederContext> {
       releaseDate: DateTime.utc().minus({ years: 1 }).toISO(),
     });
 
-    assert(
+    assert.ok(
       context.movie.state === "indexed",
       `Expected movie state to be "indexed", got "${context.movie.state}"`,
     );

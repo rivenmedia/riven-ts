@@ -20,7 +20,7 @@ export class CompletedMovieSeeder extends BaseSeeder<CompletedMovieSeederContext
   ) {
     await this.call(em, [ScrapedMovieSeeder], context);
 
-    assert(
+    assert.ok(
       context.streams[0],
       "Expected at least one stream to be present in context.streams",
     );
@@ -41,7 +41,7 @@ export class CompletedMovieSeeder extends BaseSeeder<CompletedMovieSeederContext
 
     await em.flush();
 
-    assert(
+    assert.ok(
       context.movie.state === "completed",
       `Expected movie state to be "completed", got "${context.movie.state}"`,
     );

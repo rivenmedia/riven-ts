@@ -73,7 +73,7 @@ export class StreamService extends BaseService {
   }) {
     const activeStream = await mediaItem.activeStream?.loadOrFail();
 
-    assert(
+    assert.ok(
       activeStream,
       `${mediaItem.fullTitle} does not have an active stream to blacklist`,
     );

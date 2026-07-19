@@ -25,7 +25,7 @@ export function mapItemsToFiles(items: DebridFile[]) {
       try {
         const fileExtension = extname(file.name);
 
-        assert(
+        assert.ok(
           VALID_FILE_EXTENSIONS.safeParse(fileExtension).success,
           `Invalid file extension: ${fileExtension}`,
         );
@@ -41,7 +41,7 @@ export function mapItemsToFiles(items: DebridFile[]) {
         const seasonNumber = parseData.seasons[0] ?? "abs";
         const [episodeNumber] = parseData.episodes;
 
-        assert(episodeNumber, "Episode number is required for show files");
+        assert.ok(episodeNumber, "Episode number is required for show files");
 
         const key = `${seasonNumber.toString()}:${episodeNumber.toString()}`;
 

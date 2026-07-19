@@ -75,7 +75,7 @@ export class ScraperService extends BaseService {
         "partially_completed",
       ]);
 
-      assert(
+      assert.ok(
         processableStates.safeParse(existingItem.state).success,
         new MediaItemScrapeErrorIncorrectState({
           item: existingItem,

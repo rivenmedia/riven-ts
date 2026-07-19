@@ -48,7 +48,7 @@ async function getStreamLinkFromCacheOrQueue(
 async function serveSubtitleFile(pathInfo: PathInfo) {
   const subtitleEntry = await services.vfsService.getSubtitleEntry(pathInfo);
 
-  assert(subtitleEntry, new FuseError(Fuse.ENOENT, "Subtitle not found"));
+  assert.ok(subtitleEntry, new FuseError(Fuse.ENOENT, "Subtitle not found"));
 
   const contentBuffer = Buffer.from(subtitleEntry.content, "utf8");
   const nextFd = (fd += 1);
@@ -73,7 +73,7 @@ async function serveMediaFile(pathInfo: PathInfo) {
     populate: ["mediaItem.fullTitle"],
   });
 
-  assert(entry, new FuseError(Fuse.ENOENT, "No media entry found"));
+  assert.ok(entry, new FuseError(Fuse.ENOENT, "No media entry found"));
 
   const streamLink = await getStreamLinkFromCacheOrQueue(entry);
 

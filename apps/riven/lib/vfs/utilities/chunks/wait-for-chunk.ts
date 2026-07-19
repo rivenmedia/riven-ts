@@ -72,7 +72,7 @@ export const waitForChunk = async (
     );
   }
 
-  assert(
+  assert.ok(
     context.currentStreamPosition !== undefined,
     "Current stream position should be defined when waiting for chunk",
   );

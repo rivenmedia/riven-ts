@@ -23,7 +23,7 @@ export const findValidTorrentProcessor =
       { job, scope, token },
       { services: { mediaItemService, streamService }, plugins },
     ) => {
-      assert(token);
+      assert.ok(token);
 
       const childrenValues = filterChildrenValues(
         await job.getChildrenValues(),
@@ -70,7 +70,7 @@ export const findValidTorrentProcessor =
         for (const plugin of availableDownloaders) {
           const pluginName = plugin.name.description;
 
-          assert(pluginName);
+          assert.ok(pluginName);
 
           scope.setTag("riven.downloader-plugin", pluginName);
 

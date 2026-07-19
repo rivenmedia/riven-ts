@@ -47,7 +47,7 @@ export const createProgramEventError = <
     public constructor(data: Data) {
       const [type] = payloadSchema.shape.type.def.values;
 
-      assert(type, "Invalid event type");
+      assert.ok(type, "Invalid event type");
 
       super(type, data);
     }

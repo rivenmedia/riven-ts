@@ -28,7 +28,7 @@ export async function performBodyRead(chunks: readonly ChunkMetadata[]) {
     context: { fileHandleMetadata, currentStreamPosition, responsePromise },
   } = getVfsOperationContext("read");
 
-  assert(
+  assert.ok(
     fileHandleMetadata.type !== "subtitle",
     new FuseError(
       Fuse.EIO,

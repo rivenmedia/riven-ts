@@ -21,7 +21,7 @@ export async function persistMovieIndexerData(
     id: item.id,
   });
 
-  assert(
+  assert.ok(
     itemRequest.state === "requested",
     new MediaItemIndexErrorIncorrectState({
       item: itemRequest,

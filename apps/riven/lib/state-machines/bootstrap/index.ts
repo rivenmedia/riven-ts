@@ -221,7 +221,7 @@ export const bootstrapMachine = setup({
               actions: {
                 type: "log",
                 params: ({ context: { mockScenario } }) => {
-                  assert(mockScenario);
+                  assert.ok(mockScenario);
 
                   return {
                     message: `Database connection initialised. Mock scenario "${mockScenario.scenarioName}" will be applied.`,
@@ -257,7 +257,7 @@ export const bootstrapMachine = setup({
         entry: {
           type: "log",
           params: ({ context: { mockScenario } }) => {
-            assert(mockScenario);
+            assert.ok(mockScenario);
 
             return {
               message: `Applying mock scenario "${mockScenario.scenarioName}"...`,
@@ -268,7 +268,7 @@ export const bootstrapMachine = setup({
           id: "applyMockScenario",
           src: "applyMockScenario",
           input: ({ context: { mockScenario } }) => {
-            assert(mockScenario);
+            assert.ok(mockScenario);
 
             return { mockScenario };
           },
@@ -277,7 +277,7 @@ export const bootstrapMachine = setup({
             actions: {
               type: "log",
               params: ({ context: { mockScenario } }) => {
-                assert(mockScenario);
+                assert.ok(mockScenario);
 
                 return {
                   message: `Mock scenario "${mockScenario.scenarioName}" applied successfully.`,

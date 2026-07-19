@@ -29,7 +29,7 @@ export const processItemRequestProcessor =
     ) => {
       switch (job.data.step) {
         case "request": {
-          assert(token, "Token is required to create child jobs");
+          assert.ok(token, "Token is required to create child jobs");
 
           const parent = createJobParentConfig(job);
 

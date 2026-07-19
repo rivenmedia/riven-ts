@@ -34,12 +34,12 @@ export function createSandboxedWorker(
 ) {
   const [sandboxedJobName] = sandboxedJobSchema.shape.name.def.values;
 
-  assert(
+  assert.ok(
     sandboxedJobName,
     `No queue name found for flow: ${sandboxedJobSchema.shape.name.value}`,
   );
 
-  assert(
+  assert.ok(
     // oxlint-disable-next-line node/no-sync
     existsSync(processorURL),
     `Processor file not found at path: ${processorURL.toString()}`,

@@ -25,7 +25,7 @@ export const createFlowJobBuilder = <
 
   const [queueName] = schema.shape.name.def.values;
 
-  assert(queueName, `No queue found for flow: ${schema.shape.name.value}`);
+  assert.ok(queueName, `No queue found for flow: ${schema.shape.name.value}`);
 
   return <O extends PartialJobOptions["opts"]>(
     name: string,
