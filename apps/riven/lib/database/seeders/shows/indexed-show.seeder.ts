@@ -59,12 +59,14 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
           new EpisodeFactory(em).makeEntity({
             tvdbId: context.show.tvdbId,
             number: episodeNumber,
-            absoluteNumber: (absoluteEpisodeNumber += 1),
+            absoluteNumber: absoluteEpisodeNumber,
             releaseDate,
             itemRequest: context.show.itemRequest,
             indexedAt,
           }),
         );
+
+        absoluteEpisodeNumber += 1;
       }
 
       context.episodes ??= [];
