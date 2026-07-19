@@ -51,7 +51,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/prefer-number-properties": "off",
         "unicorn/consistent-function-scoping": "off",
         "unicorn/number-literal-case": "off",
-        "unicorn/no-await-expression-member": "off",
         "unicorn/prefer-native-coercion-functions": "off",
         "unicorn/no-useless-collection-argument": "off",
         "unicorn/no-immediate-mutation": "off",
