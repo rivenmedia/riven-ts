@@ -1,12 +1,13 @@
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
-import { type ActorRef, type Snapshot, fromPromise } from "xstate";
+import { fromPromise } from "xstate";
 
 import { services } from "../../../database/database.ts";
 
 import type { MainRunnerMachineEvent } from "../index.ts";
 import type { ItemRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/item-requested.event";
+import type { ActorRef, Snapshot } from "xstate";
 
 export interface RequestItemInput {
   parentRef: ActorRef<Snapshot<unknown>, MainRunnerMachineEvent>;

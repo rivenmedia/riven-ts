@@ -4,21 +4,21 @@ import {
   Movie,
   Season,
   Show,
-  type ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
-import {
-  type ChangeSet,
-  type EntityData,
-  type EventArgs,
-  type EventSubscriber,
-  type FlushEventArgs,
-  type UnitOfWork,
-  wrap,
-} from "@mikro-orm/core";
+import { wrap } from "@mikro-orm/core";
 import chalk from "chalk";
 
+import type {
+  ChangeSet,
+  EntityData,
+  EventArgs,
+  EventSubscriber,
+  FlushEventArgs,
+  UnitOfWork,
+} from "@mikro-orm/core";
+import type { ShowLikeMediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type { Promisable } from "type-fest";
 
 type NextStatesMap = Map<MediaItem, MediaItemState>;

@@ -4,10 +4,9 @@ import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import z from "zod";
 
-import {
-  RankingConfig,
-  type RankingConfigFileContents,
-} from "./ranking-config.schema.ts";
+import { RankingConfig } from "./ranking-config.schema.ts";
+
+import type { RankingConfigFileContents } from "./ranking-config.schema.ts";
 
 async function writeDefaultConfigFile(resolvedPath: string) {
   const contents = {

@@ -1,10 +1,6 @@
-import {
-  ApolloClient,
-  HttpLink,
-  InMemoryCache,
-  type StoreObject,
-} from "@apollo/client";
+import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 
+import type { StoreObject } from "@apollo/client";
 import type { URL } from "node:url";
 
 declare module "@apollo/client" {

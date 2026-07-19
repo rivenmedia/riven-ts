@@ -1,4 +1,4 @@
-import { Collection, type Hidden, type Opt } from "@mikro-orm/core";
+import { Collection } from "@mikro-orm/core";
 import {
   Entity,
   Enum,
@@ -16,6 +16,8 @@ import { ItemRequestState } from "../../enums/item-request-state.enum.ts";
 import { ItemRequestType } from "../../enums/item-request-type.enum.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
 import { Season } from "../media-items/season.entity.ts";
+
+import type { Hidden, Opt } from "@mikro-orm/core";
 
 @ObjectType()
 @Entity()

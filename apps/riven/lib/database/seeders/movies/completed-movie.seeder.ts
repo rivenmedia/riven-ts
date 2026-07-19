@@ -1,13 +1,12 @@
-import { type EntityData, type EntityManager, ref } from "@mikro-orm/core";
+import { ref } from "@mikro-orm/core";
 import assert from "node:assert";
 
 import { MediaEntryFactory } from "../../factories/media-entry.factory.ts";
 import { BaseSeeder } from "../base.seeder.ts";
-import {
-  ScrapedMovieSeeder,
-  type ScrapedMovieSeederContext,
-} from "./scraped-movie.seeder.ts";
+import { ScrapedMovieSeeder } from "./scraped-movie.seeder.ts";
 
+import type { ScrapedMovieSeederContext } from "./scraped-movie.seeder.ts";
+import type { EntityData, EntityManager } from "@mikro-orm/core";
 import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 export interface CompletedMovieSeederContext extends ScrapedMovieSeederContext {

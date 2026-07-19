@@ -12,19 +12,17 @@ import {
   SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
 
-import { type Platform, TextType, Type } from "@mikro-orm/core";
+import { TextType, Type } from "@mikro-orm/core";
 // eslint-disable-next-line no-restricted-imports -- Core database config requires direct driver access
-import {
-  GeneratedCacheAdapter,
-  type Options,
-  PostgreSqlDriver,
-} from "@mikro-orm/postgresql";
+import { GeneratedCacheAdapter, PostgreSqlDriver } from "@mikro-orm/postgresql";
 
 import { withLogContext } from "../utilities/logger/log-context.ts";
 import { MediaItemFullTitleSubscriber } from "./subscribers/media-item-full-title.subscriber.ts";
 import { MediaItemStateSubscriber } from "./subscribers/media-item-state.subscriber.ts";
 import { ShowLikeMediaItemReleaseDateSubscriber } from "./subscribers/show-like-media-item-release-date.subscriber.ts";
 
+import type { Platform } from "@mikro-orm/core";
+import type { Options } from "@mikro-orm/postgresql";
 import type { Logger } from "winston";
 
 const entities = [

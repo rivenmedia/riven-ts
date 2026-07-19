@@ -15,11 +15,9 @@ import {
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
 import { createStreamRequest } from "../utilities/requests/create-stream-request.ts";
-import {
-  type VfsOperationContext,
-  withVfsOperationContext,
-} from "../utilities/vfs-operation-context.ts";
+import { withVfsOperationContext } from "../utilities/vfs-operation-context.ts";
 
+import type { VfsOperationContext } from "../utilities/vfs-operation-context.ts";
 import type { MockAgent } from "undici";
 
 const fileName = "movie.mkv";

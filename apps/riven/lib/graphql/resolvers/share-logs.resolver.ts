@@ -2,11 +2,9 @@ import { createReadStream } from "node:fs";
 import { createInterface } from "node:readline";
 import { Mutation, Resolver } from "type-graphql";
 
-import {
-  type SessionID,
-  getSessionId,
-} from "../../utilities/logger/session-id.ts";
+import { getSessionId } from "../../utilities/logger/session-id.ts";
 
+import type { SessionID } from "../../utilities/logger/session-id.ts";
 import type { TransformableInfo } from "logform";
 
 const ELASTICSEARCH_URL = "https://elastic.dev.riven.tv";

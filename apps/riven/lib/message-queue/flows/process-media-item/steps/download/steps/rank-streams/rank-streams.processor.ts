@@ -1,8 +1,5 @@
 import { ShowLikeMediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
-import {
-  GarbageTorrentError,
-  type RankedResult,
-} from "@repo/util-rank-torrent-name";
+import { GarbageTorrentError } from "@repo/util-rank-torrent-name";
 
 import { NotFoundError } from "@mikro-orm/core";
 import chalk from "chalk";
@@ -13,6 +10,8 @@ import { settings } from "../../../../../../../utilities/settings.ts";
 import { SkippedTorrentError } from "../../../../../../sandboxed-jobs/jobs/parse-scrape-results/utilities/validate-torrent.ts";
 import { rankStreamsProcessorSchema } from "./rank-streams.schema.ts";
 import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution.ts";
+
+import type { RankedResult } from "@repo/util-rank-torrent-name";
 
 export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
   async function (

@@ -1,9 +1,4 @@
-import {
-  Collection,
-  EntityRepositoryType,
-  type Opt,
-  type Ref,
-} from "@mikro-orm/core";
+import { Collection, EntityRepositoryType } from "@mikro-orm/core";
 import {
   Entity,
   Enum,
@@ -24,6 +19,7 @@ import { MediaEntry } from "../filesystem/index.ts";
 import { Season, ShowLikeMediaItem } from "./index.ts";
 
 import type { ItemRequest } from "../requests/item-request.entity.ts";
+import type { Opt, Ref } from "@mikro-orm/core";
 
 @ObjectType({ implements: ShowLikeMediaItem })
 @Entity({ repository: () => ShowRepository })

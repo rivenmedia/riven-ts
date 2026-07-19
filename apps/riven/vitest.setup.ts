@@ -1,13 +1,16 @@
-import { BaseDataSource, type RivenPlugin } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
 
-import { type RedisClient, RedisConnection } from "bullmq";
+import { RedisConnection } from "bullmq";
 import { randomUUID } from "node:crypto";
 import { setEnvironmentData } from "node:worker_threads";
-import { type Mock, afterAll, beforeAll, beforeEach, expect, vi } from "vitest";
+import { afterAll, beforeAll, beforeEach, expect, vi } from "vitest";
 import z from "zod";
 
+import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { RedisClient } from "bullmq";
 import type { RedisMemoryServer } from "redis-memory-server";
+import type { Mock } from "vitest";
 
 vi.mock<{ default: Record<string, unknown> }>(
   import("./package.json"),

@@ -1,9 +1,11 @@
-import { type InputData, type InputPath, defineConfig } from "@kubb/core";
+import { defineConfig } from "@kubb/core";
 import { pluginFaker } from "@kubb/plugin-faker";
 import { pluginMsw } from "@kubb/plugin-msw";
 import { pluginOas } from "@kubb/plugin-oas";
 import { pluginTs } from "@kubb/plugin-ts";
 import { pluginZod } from "@kubb/plugin-zod";
+
+import type { InputData, InputPath } from "@kubb/core";
 
 const outputPath = "./lib/__generated__";
 

@@ -13,7 +13,6 @@ export const oxlintPluginImportConfig = defineConfig({
         "import/max-dependencies": "off",
         "import/no-relative-parent-imports": "off",
         "import/group-exports": "off",
-        "import/consistent-type-specifier-style": "off",
         "import/no-nodejs-modules": "off",
         "import/no-cycle": ["error", { maxDepth: 3 }],
 

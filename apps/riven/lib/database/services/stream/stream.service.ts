@@ -1,7 +1,6 @@
 import {
   BlacklistedStream,
   MediaEntry,
-  type MediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
 
 import {
@@ -18,6 +17,7 @@ import { calculateItemsToReprocess } from "./utilities/calculate-items-to-reproc
 import { isFatalStatusCode } from "./utilities/is-fatal-status-code.ts";
 
 import type { FilterObject } from "@mikro-orm/core";
+import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type { UUID } from "node:crypto";
 
 export class StreamService extends BaseService {

@@ -1,8 +1,5 @@
 import { rankTorrent } from "./ranker/rank.ts";
 import {
-  type RankingModel,
-  type Settings,
-  type SettingsInput,
   createRankingModel,
   createSettings,
 } from "./ranker/ranking-settings.schema.ts";
@@ -10,6 +7,11 @@ import { sortTorrents } from "./ranker/sort.ts";
 import { Resolution } from "./schemas.ts";
 
 import type { Aliases } from "./ranker/lev.ts";
+import type {
+  RankingModel,
+  Settings,
+  SettingsInput,
+} from "./ranker/ranking-settings.schema.ts";
 import type { RankedResult } from "./types.ts";
 
 export class RTN {

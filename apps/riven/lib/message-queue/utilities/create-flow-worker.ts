@@ -1,10 +1,5 @@
 import * as Sentry from "@sentry/node";
-import {
-  type QueueOptions,
-  UnrecoverableError,
-  Worker,
-  type WorkerOptions,
-} from "bullmq";
+import { UnrecoverableError, Worker } from "bullmq";
 import { AbortError, toMerged } from "es-toolkit";
 import assert from "node:assert";
 import os from "node:os";
@@ -19,6 +14,7 @@ import { normaliseConcurrency } from "./normalise-concurrency.ts";
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
 import type { ValidPluginMap } from "../../types/plugins.ts";
 import type { Flow, FlowHandlers } from "../flows/index.ts";
+import type { QueueOptions, WorkerOptions } from "bullmq";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 Worker.setMaxListeners(200);

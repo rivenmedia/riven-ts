@@ -1,4 +1,4 @@
-import { type QueueOptions, Worker, type WorkerOptions } from "bullmq";
+import { Worker } from "bullmq";
 import { toMerged } from "es-toolkit";
 import assert from "node:assert";
 import { existsSync } from "node:fs";
@@ -10,6 +10,7 @@ import { telemetry } from "../../../utilities/telemetry.ts";
 import { createQueue } from "../../utilities/create-queue.ts";
 
 import type { SandboxedJobDefinition } from "../index.ts";
+import type { QueueOptions, WorkerOptions } from "bullmq";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 Worker.setMaxListeners(200);

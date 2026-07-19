@@ -2,13 +2,7 @@ import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import chalk from "chalk";
-import {
-  type AnyActorRef,
-  type MachineContext,
-  assign,
-  enqueueActions,
-  setup,
-} from "xstate";
+import { assign, enqueueActions, setup } from "xstate";
 import { ZodError } from "zod";
 
 import packageJson from "../../../package.json" with { type: "json" };
@@ -17,15 +11,9 @@ import { redisCache } from "../../utilities/redis-cache.ts";
 import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
-import {
-  type ParsedPlugins,
-  collectPluginsForRegistration,
-} from "./actors/collect-plugins-for-registration.actor.ts";
+import { collectPluginsForRegistration } from "./actors/collect-plugins-for-registration.actor.ts";
 import { validatePlugin } from "./actors/validate-plugin.actor.ts";
-import {
-  type RegisterPluginHookWorkersOutput,
-  registerPluginHookWorkers,
-} from "./utilities/register-plugin-hook-workers.ts";
+import { registerPluginHookWorkers } from "./utilities/register-plugin-hook-workers.ts";
 
 import type {
   InvalidPlugin,
@@ -38,6 +26,9 @@ import type {
   ValidPlugin,
   ValidPluginMap,
 } from "../../types/plugins.ts";
+import type { ParsedPlugins } from "./actors/collect-plugins-for-registration.actor.ts";
+import type { RegisterPluginHookWorkersOutput } from "./utilities/register-plugin-hook-workers.ts";
+import type { AnyActorRef, MachineContext } from "xstate";
 
 export interface PluginRegistrarMachineContext extends MachineContext {
   rootRef: AnyActorRef;

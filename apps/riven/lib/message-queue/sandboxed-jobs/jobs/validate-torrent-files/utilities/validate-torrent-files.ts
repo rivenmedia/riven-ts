@@ -1,6 +1,6 @@
 import { parseFilePath } from "@repo/util-rank-torrent-name";
 
-import { type TypedDocumentNode, gql } from "@apollo/client";
+import { gql } from "@apollo/client";
 import chalk from "chalk";
 import assert, { AssertionError } from "node:assert";
 
@@ -16,6 +16,7 @@ import type {
   GetValidateTorrentFilesItemQuery,
   GetValidateTorrentFilesItemQueryVariables,
 } from "./validate-torrent-files.typegen.ts";
+import type { TypedDocumentNode } from "@apollo/client";
 import type { UUID } from "node:crypto";
 
 export class InvalidTorrentError extends Error {}

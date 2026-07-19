@@ -1,9 +1,4 @@
-import {
-  type BaseDataSource,
-  type BaseDataSourceConfig,
-  DataSourceMap,
-  type RivenPlugin,
-} from "@repo/util-plugin-sdk";
+import { DataSourceMap } from "@repo/util-plugin-sdk";
 
 import { RedisConnection } from "bullmq";
 import { it as baseIt, vi } from "vitest";
@@ -11,6 +6,11 @@ import { it as baseIt, vi } from "vitest";
 import { mockLogger } from "./create-mock-logger.ts";
 import { createMockPluginSettings } from "./create-mock-plugin-settings.ts";
 
+import type {
+  BaseDataSource,
+  BaseDataSourceConfig,
+  RivenPlugin,
+} from "@repo/util-plugin-sdk";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { Telemetry } from "bullmq";
 

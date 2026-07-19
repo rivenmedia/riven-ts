@@ -2,11 +2,9 @@ import assert from "node:assert";
 
 import { MediaEntryFactory } from "../../factories/media-entry.factory.ts";
 import { BaseSeeder } from "../base.seeder.ts";
-import {
-  ScrapedShowSeeder,
-  type ScrapedShowSeederContext,
-} from "./scraped-show.seeder.ts";
+import { ScrapedShowSeeder } from "./scraped-show.seeder.ts";
 
+import type { ScrapedShowSeederContext } from "./scraped-show.seeder.ts";
 import type { EntityManager } from "@mikro-orm/core";
 
 export type PartiallyCompletedShowSeederContext = ScrapedShowSeederContext;

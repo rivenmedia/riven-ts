@@ -1,4 +1,4 @@
-import { type TypedDocumentNode, gql } from "@apollo/client";
+import { gql } from "@apollo/client";
 
 import { client } from "../../../../../graphql/apollo-client.ts";
 
@@ -7,6 +7,7 @@ import type {
   GetValidateTorrentItemQuery,
   GetValidateTorrentItemQueryVariables,
 } from "./validate-torrent.typegen.ts";
+import type { TypedDocumentNode } from "@apollo/client";
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 import type { UUID } from "node:crypto";
 

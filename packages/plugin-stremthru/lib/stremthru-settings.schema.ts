@@ -1,8 +1,10 @@
 import { json } from "@repo/util-plugin-sdk/validation";
 
-import z, { type ZodOptional, type ZodString } from "zod";
+import z from "zod";
 
 import { Store } from "./schemas/store.schema.ts";
+
+import type { ZodOptional, ZodString } from "zod";
 
 const StoreKeys = z.object<Record<`${Store}ApiKey`, ZodOptional<ZodString>>>({
   realdebridApiKey: z.string().optional(),

@@ -1,9 +1,7 @@
 import { BaseSeeder } from "../base.seeder.ts";
-import {
-  IndexedMovieSeeder,
-  type IndexedMovieSeederContext,
-} from "./indexed-movie.seeder.ts";
+import { IndexedMovieSeeder } from "./indexed-movie.seeder.ts";
 
+import type { IndexedMovieSeederContext } from "./indexed-movie.seeder.ts";
 import type { EntityManager } from "@mikro-orm/core";
 
 export class ForeignLanguageMovieSeeder extends BaseSeeder<IndexedMovieSeederContext> {

@@ -1,15 +1,17 @@
 import * as Sentry from "@sentry/node";
-import { type SandboxedJob, UnrecoverableError } from "bullmq";
+import { UnrecoverableError } from "bullmq";
 import { AbortError } from "es-toolkit";
 import assert from "node:assert";
 import { threadId } from "node:worker_threads";
-import { type ZodLiteral, type ZodObject, type ZodType, z } from "zod";
+import { z } from "zod";
 
 import { initApolloClient } from "../../../graphql/apollo-client.ts";
 import { withLogContext } from "../../../utilities/logger/log-context.ts";
 import { settings } from "../../../utilities/settings.ts";
 
 import type { SandboxedJobDefinition, SandboxedJobHandlers } from "../index.ts";
+import type { SandboxedJob } from "bullmq";
+import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 const timeoutDuration = 5_000;
 

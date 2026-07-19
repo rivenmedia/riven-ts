@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 import { setTimeout } from "node:timers/promises";
 import { expect, vi } from "vitest";
 import {
-  type SnapshotFrom,
   createActor,
   createEmptyActor,
   fromCallback,
@@ -11,11 +10,13 @@ import {
 
 import { it as baseIt } from "./__tests__/test-context.ts";
 import { riven } from "./riven.ts";
-import { type BootstrapMachineOutput } from "./state-machines/bootstrap/index.ts";
 import * as rivenMachineModule from "./state-machines/program/index.ts";
 import { rivenMachine } from "./state-machines/program/index.ts";
 import { SessionID } from "./utilities/logger/session-id.ts";
 import * as settingsModule from "./utilities/settings.ts";
+
+import type { BootstrapMachineOutput } from "./state-machines/bootstrap/index.ts";
+import type { SnapshotFrom } from "xstate";
 
 const it = baseIt
   .extend("mockRivenMachine", () =>

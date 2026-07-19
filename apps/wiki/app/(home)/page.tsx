@@ -7,7 +7,6 @@ import {
   Cog,
   Download,
   GitBranch,
-  type LucideIcon,
   Puzzle,
   Settings,
   Shield,
@@ -16,6 +15,8 @@ import {
 import Link from "next/link";
 
 import packageJson from "../../package.json" with { type: "json" };
+
+import type { LucideIcon } from "lucide-react";
 
 const features: { icon: LucideIcon; title: string; description: string }[] = [
   {

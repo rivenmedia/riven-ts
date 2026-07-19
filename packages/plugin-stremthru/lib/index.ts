@@ -1,4 +1,4 @@
-import { DataSourceHTTPError, type RivenPlugin } from "@repo/util-plugin-sdk";
+import { DataSourceHTTPError } from "@repo/util-plugin-sdk";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
 
@@ -10,6 +10,8 @@ import { StremThruResolver } from "./schema/stremthru.resolver.ts";
 import { Store } from "./schemas/store.schema.ts";
 import { pluginConfig } from "./stremthru-plugin.config.ts";
 import { StremThruSettings } from "./stremthru-settings.schema.ts";
+
+import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
 export default {
   name: pluginConfig.name,

@@ -1,9 +1,4 @@
-import {
-  Collection,
-  EntityRepositoryType,
-  type Opt,
-  type Ref,
-} from "@mikro-orm/core";
+import { Collection, EntityRepositoryType } from "@mikro-orm/core";
 import {
   Entity,
   ManyToOne,
@@ -16,6 +11,8 @@ import { Field, Int, ObjectType } from "type-graphql";
 import { SeasonRepository } from "../../repositories/season.repository.ts";
 import { MediaEntry } from "../filesystem/index.ts";
 import { Episode, Show, ShowLikeMediaItem } from "./index.ts";
+
+import type { Opt, Ref } from "@mikro-orm/core";
 
 @ObjectType({ implements: ShowLikeMediaItem })
 @Entity({ repository: () => SeasonRepository })

@@ -1,15 +1,11 @@
 import assert from "node:assert";
 
 import { BaseSeeder } from "../base.seeder.ts";
-import {
-  StreamsSeeder,
-  type StreamsSeederContext,
-} from "../streams/streams.seeder.ts";
-import {
-  IndexedShowSeeder,
-  type IndexedShowSeederContext,
-} from "./indexed-show.seeder.ts";
+import { StreamsSeeder } from "../streams/streams.seeder.ts";
+import { IndexedShowSeeder } from "./indexed-show.seeder.ts";
 
+import type { StreamsSeederContext } from "../streams/streams.seeder.ts";
+import type { IndexedShowSeederContext } from "./indexed-show.seeder.ts";
 import type { EntityManager } from "@mikro-orm/core";
 
 export interface ScrapedShowSeederContext

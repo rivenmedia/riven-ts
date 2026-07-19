@@ -1,4 +1,4 @@
-import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
+import Fuse from "@zkochan/fuse-native";
 import Undici from "undici";
 
 import { logger } from "../../utilities/logger/logger.ts";
@@ -22,6 +22,8 @@ import {
   withVfsOperationContext,
 } from "../utilities/vfs-operation-context.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
+
+import type { OPERATIONS } from "@zkochan/fuse-native";
 
 async function read() {
   const {

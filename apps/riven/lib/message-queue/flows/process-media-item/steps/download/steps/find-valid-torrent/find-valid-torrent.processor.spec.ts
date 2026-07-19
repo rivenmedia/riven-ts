@@ -1,13 +1,12 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { BlacklistedStream } from "@repo/util-plugin-sdk/dto/entities";
 import {
-  type RankedResult,
   createRankingModel,
   createSettings,
   rankTorrent,
 } from "@repo/util-rank-torrent-name";
 
-import { type TypedJobNode, UnrecoverableError } from "bullmq";
+import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
 import { it as baseIt } from "../../../../../../../__tests__/test-context.ts";
@@ -17,6 +16,8 @@ import { findValidTorrentProcessor } from "./find-valid-torrent.processor.ts";
 import { FindValidTorrentFlow } from "./find-valid-torrent.schema.ts";
 
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+import type { RankedResult } from "@repo/util-rank-torrent-name";
+import type { TypedJobNode } from "bullmq";
 
 const it = baseIt.extend("mockRankingModel", () =>
   createRankingModel({

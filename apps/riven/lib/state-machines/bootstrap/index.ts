@@ -1,12 +1,9 @@
 import chalk from "chalk";
 import assert from "node:assert";
-import { type AnyActorRef, assign, setup } from "xstate";
+import { assign, setup } from "xstate";
 
 import { settings } from "../../utilities/settings.ts";
-import {
-  type PluginRegistrarMachineOutput,
-  pluginRegistrarMachine,
-} from "../plugin-registrar/index.ts";
+import { pluginRegistrarMachine } from "../plugin-registrar/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { applyMockScenario } from "./actors/apply-mock-scenario.ts";
 import { clearPreviousInstanceState } from "./actors/clear-previous-instance-state.actor.ts";
@@ -24,10 +21,12 @@ import type {
   ValidPlugin,
   ValidPluginMap,
 } from "../../types/plugins.ts";
+import type { PluginRegistrarMachineOutput } from "../plugin-registrar/index.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";
+import type { AnyActorRef } from "xstate";
 
 export interface BootstrapMachineContext {
   error?: Error;

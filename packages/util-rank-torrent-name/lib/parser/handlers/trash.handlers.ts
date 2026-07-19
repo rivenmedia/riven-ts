@@ -1,4 +1,6 @@
-import { type Handler, transforms } from "@viren070/parse-torrent-title";
+import { transforms } from "@viren070/parse-torrent-title";
+
+import type { Handler } from "@viren070/parse-torrent-title";
 
 export const trashHandlers: Handler[] = [
   {

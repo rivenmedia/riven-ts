@@ -1,7 +1,4 @@
-import {
-  ContentServiceRequestedEvent,
-  type ContentServiceRequestedResponse,
-} from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
+import { ContentServiceRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
@@ -14,6 +11,8 @@ import { createJobParentConfig } from "../../utilities/create-job-parent-config.
 import { flow } from "../producer.ts";
 import { enqueueRequestContentService } from "./enqueue-request-content-service.ts";
 import { requestContentServiceProcessorSchema } from "./request-content-service.schema.ts";
+
+import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
 function buildExternalIdKey(
   /**

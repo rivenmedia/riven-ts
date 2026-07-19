@@ -4,8 +4,10 @@ import z from "zod";
 
 import { sceneHandlers } from "../parser/handlers/scene.handlers.ts";
 import { trashHandlers } from "../parser/handlers/trash.handlers.ts";
-import { type ParsedData, ParsedDataSchema } from "../schemas.ts";
+import { ParsedDataSchema } from "../schemas.ts";
 import { adultHandlers } from "./handlers/adult.handlers.ts";
+
+import type { ParsedData } from "../schemas.ts";
 
 const parser = new Parser()
   .addHandlers(adultHandlers)

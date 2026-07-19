@@ -1,20 +1,9 @@
+import { RESTDataSource } from "@apollo/datasource-rest";
 import {
-  type AugmentedRequest,
-  type DataSourceConfig,
-  type DataSourceFetchResult,
-  type DataSourceRequest,
-  RESTDataSource,
-  type RequestOptions,
-} from "@apollo/datasource-rest";
-import {
-  type ConnectionOptions,
   Job,
-  type ParentOptions,
   Queue,
   QueueEvents,
   RateLimitError,
-  type RateLimiterOptions,
-  type Telemetry,
   UnrecoverableError,
   Worker,
 } from "bullmq";
@@ -27,7 +16,20 @@ import { json } from "../validation/json.ts";
 import { urlSearchParamsCodec } from "../validation/url-search-params-parser.ts";
 import { dataSourceContext } from "./context.ts";
 
+import type {
+  AugmentedRequest,
+  DataSourceConfig,
+  DataSourceFetchResult,
+  DataSourceRequest,
+  RequestOptions,
+} from "@apollo/datasource-rest";
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
+import type {
+  ConnectionOptions,
+  ParentOptions,
+  RateLimiterOptions,
+  Telemetry,
+} from "bullmq";
 import type EventEmitter from "events";
 import type { Promisable } from "type-fest";
 import type { Logger } from "winston";

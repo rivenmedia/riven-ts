@@ -1,4 +1,4 @@
-import { Movie, type Show } from "@repo/util-plugin-sdk/dto/entities";
+import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import chalk from "chalk";
 import { DateTime } from "luxon";
@@ -8,6 +8,8 @@ import { services } from "../../../database/database.ts";
 import { enqueueProcessItemRequest } from "../../../message-queue/flows/process-item-request/enqueue-process-item-request.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
+
+import type { Show } from "@repo/util-plugin-sdk/dto/entities";
 
 export interface ScheduleReindexInput {
   item: Movie | Show;

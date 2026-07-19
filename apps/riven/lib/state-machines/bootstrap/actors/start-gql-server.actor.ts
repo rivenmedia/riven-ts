@@ -8,7 +8,7 @@ import cors from "cors";
 import express from "express";
 import { createServer } from "node:http";
 import { URL } from "node:url";
-import { type ActorRefFromLogic, fromPromise } from "xstate";
+import { fromPromise } from "xstate";
 
 import { initApolloClient } from "../../../graphql/apollo-client.ts";
 import { buildContextFunction } from "../../../graphql/build-context-function.ts";
@@ -22,6 +22,7 @@ import type { ApolloServerContext } from "../../../graphql/context.ts";
 import type { ValidPluginMap } from "../../../types/plugins.ts";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+import type { ActorRefFromLogic } from "xstate";
 
 export interface StartGQLServerInput {
   mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine>;

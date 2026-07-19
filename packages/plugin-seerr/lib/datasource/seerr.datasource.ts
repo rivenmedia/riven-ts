@@ -1,13 +1,10 @@
-import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 import { FatalValidationError } from "@repo/util-plugin-sdk/errors/fatal-validation-error";
 import { json, z } from "@repo/util-plugin-sdk/validation";
 
 import { toMerged } from "es-toolkit";
 
-import {
-  type WebhookSettingsSchema,
-  webhookSettingsSchema,
-} from "../__generated__/zod/webhookSettingsSchema.ts";
+import { webhookSettingsSchema } from "../__generated__/zod/webhookSettingsSchema.ts";
 import { MetadataSettingsResponse } from "../schemas/metadata-settings-response.schema.ts";
 import { RequestResponse } from "../schemas/request-response.schema.ts";
 import { UpdateWebhookSettingsResponse } from "../schemas/update-webhook-settings-response.schema.ts";
@@ -15,9 +12,11 @@ import { WebhookJsonPayload } from "../schemas/webhook-json-payload.schema.ts";
 
 import type { GetAuthMeQueryResponse } from "../__generated__/types/GetAuthMe.ts";
 import type { WebhookSettings } from "../__generated__/types/WebhookSettings.ts";
+import type { WebhookSettingsSchema } from "../__generated__/zod/webhookSettingsSchema.ts";
 import type { ExtendedMediaRequest } from "../schemas/extended-media-request.schema.ts";
 import type { SeerrSettings } from "../seerr-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
 class SeerrAPIError extends Error {}

@@ -2,15 +2,11 @@ import { DateTime } from "luxon";
 import assert from "node:assert";
 
 import { BaseSeeder } from "../base.seeder.ts";
-import {
-  StreamsSeeder,
-  type StreamsSeederContext,
-} from "../streams/streams.seeder.ts";
-import {
-  IndexedMovieSeeder,
-  type IndexedMovieSeederContext,
-} from "./indexed-movie.seeder.ts";
+import { StreamsSeeder } from "../streams/streams.seeder.ts";
+import { IndexedMovieSeeder } from "./indexed-movie.seeder.ts";
 
+import type { StreamsSeederContext } from "../streams/streams.seeder.ts";
+import type { IndexedMovieSeederContext } from "./indexed-movie.seeder.ts";
 import type { EntityManager } from "@mikro-orm/core";
 
 export interface ScrapedMovieSeederContext

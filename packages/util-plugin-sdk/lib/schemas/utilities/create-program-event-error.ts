@@ -1,8 +1,9 @@
 import assert from "node:assert";
-import z, { type ZodLiteral, type ZodObject, type ZodUnknown } from "zod";
+import z from "zod";
 
 import type { ParamsFor } from "../../types/events.ts";
 import type { RivenEvent } from "../events/index.ts";
+import type { ZodLiteral, ZodObject, ZodUnknown } from "zod";
 
 type BaseErrorSchema = ZodObject<{
   type: ZodLiteral<RivenEvent["type"]>;

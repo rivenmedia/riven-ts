@@ -1,4 +1,4 @@
-import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { findById200Schema } from "../__generated__/zod/findByIdSchema.ts";
 import { movieDetails200Schema } from "../__generated__/zod/movieDetailsSchema.ts";
@@ -6,6 +6,7 @@ import { movieDetails200Schema } from "../__generated__/zod/movieDetailsSchema.t
 import type { FindByIdQueryParams } from "../__generated__/types/FindById.ts";
 import type { TmdbSettings } from "../tmdb-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 
 class TmdbAPIError extends Error {}
 

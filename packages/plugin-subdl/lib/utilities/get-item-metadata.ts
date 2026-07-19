@@ -1,8 +1,6 @@
-import {
-  Episode,
-  type MediaItem,
-  Movie,
-} from "@repo/util-plugin-sdk/dto/entities";
+import { Episode, Movie } from "@repo/util-plugin-sdk/dto/entities";
+
+import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 interface ItemMetadata {
   type: "movie" | "tv";

@@ -1,8 +1,4 @@
-import {
-  BaseDataSource,
-  type ParamsFor,
-  type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 import {
   Episode,
   Season,
@@ -12,6 +8,7 @@ import {
 import { TorznabResponse } from "../schemas/torznab-response.schema.ts";
 
 import type { StremThruSettings } from "../stremthru-settings.schema.ts";
+import type { ParamsFor, RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 export class StremThruTorznabAPI extends BaseDataSource<StremThruSettings> {

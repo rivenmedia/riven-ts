@@ -1,10 +1,4 @@
-import {
-  Collection,
-  type Hidden,
-  type Opt,
-  OptionalProps,
-  type Ref,
-} from "@mikro-orm/core";
+import { Collection, OptionalProps } from "@mikro-orm/core";
 import {
   Entity,
   Enum,
@@ -18,7 +12,7 @@ import {
 import { IsOptional, Matches } from "class-validator";
 import { JSONObjectResolver } from "graphql-scalars";
 import { DateTime } from "luxon";
-import { type UUID, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { Field, ID, InterfaceType } from "type-graphql";
 
 import { MediaItemContentRating } from "../../enums/content-ratings.enum.ts";
@@ -28,6 +22,8 @@ import { FileSystemEntry, SubtitleEntry } from "../filesystem/index.ts";
 import { BlacklistedStream, ItemRequest, MediaEntry } from "../index.ts";
 import { Stream } from "../streams/stream.entity.ts";
 
+import type { Hidden, Opt, Ref } from "@mikro-orm/core";
+import type { UUID } from "node:crypto";
 import type { Promisable } from "type-fest";
 
 @InterfaceType()

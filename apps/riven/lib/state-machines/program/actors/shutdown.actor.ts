@@ -1,10 +1,11 @@
-import { type ActorRefFrom, fromPromise } from "xstate";
+import { fromPromise } from "xstate";
 
 import { logger } from "../../../utilities/logger/logger.ts";
 import { keyvInstance } from "../../../utilities/redis-cache.ts";
 
 import type { mainRunnerMachine } from "../../main-runner/index.ts";
 import type { Worker } from "bullmq";
+import type { ActorRefFrom } from "xstate";
 
 async function forceCloseWorker(worker: Worker) {
   try {

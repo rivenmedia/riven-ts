@@ -1,4 +1,6 @@
-import { type ZodError, prettifyError } from "zod";
+import { prettifyError } from "zod";
+
+import type { ZodError } from "zod";
 
 export class GarbageTorrentError extends Error {
   constructor(title: string, message: string) {

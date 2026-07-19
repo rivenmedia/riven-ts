@@ -1,4 +1,4 @@
-import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { URL } from "node:url";
 
@@ -8,6 +8,7 @@ import { extractSrtFromZip } from "../utilities/extract-srt-from-zip.ts";
 
 import type { SubdlSettings } from "../subdl-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 
 class SubdlAPIError extends Error {}
 

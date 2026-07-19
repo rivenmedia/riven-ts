@@ -5,8 +5,9 @@ import { expect, vi } from "vitest";
 import { createLogger } from "winston";
 
 import { it as baseIt } from "../__tests__/test-context.ts";
-import { BaseDataSource, type BaseDataSourceConfig } from "./index.ts";
+import { BaseDataSource } from "./index.ts";
 
+import type { BaseDataSourceConfig } from "./index.ts";
 import type { Promisable } from "type-fest";
 
 class TestDataSource extends BaseDataSource<Record<string, unknown>> {

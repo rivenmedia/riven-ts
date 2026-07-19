@@ -1,7 +1,8 @@
-import { type ZodObject, z } from "zod";
+import { z } from "zod";
 
 import type { Jsonifiable, ReadonlyDeep } from "type-fest";
 import type { Logger } from "winston";
+import type { ZodObject } from "zod";
 
 function deepFreeze<T>(obj: T) {
   Object.values(obj as Record<string, Jsonifiable>).forEach(

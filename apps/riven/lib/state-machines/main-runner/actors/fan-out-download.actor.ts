@@ -1,13 +1,11 @@
-import {
-  Episode,
-  type MediaItem,
-  Movie,
-} from "@repo/util-plugin-sdk/dto/entities";
+import { Episode, Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import { fromPromise } from "xstate";
 
 import { services } from "../../../database/database.ts";
 import { enqueueProcessMediaItem } from "../../../message-queue/flows/process-media-item/enqueue-process-media-item.ts";
+
+import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 export interface FanOutDownloadInput {
   item: MediaItem;

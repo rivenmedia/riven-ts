@@ -1,4 +1,4 @@
-import { type RivenPlugin, RivenPluginPackage } from "@repo/util-plugin-sdk";
+import { RivenPluginPackage } from "@repo/util-plugin-sdk";
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import chalk from "chalk";
@@ -6,13 +6,12 @@ import { constantCase } from "es-toolkit";
 import { fromPromise } from "xstate";
 import z from "zod";
 
-import {
-  type CorePluginName,
-  CorePlugins,
-} from "../../../schemas/core-plugins.schema.ts";
+import { CorePlugins } from "../../../schemas/core-plugins.schema.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
 
+import type { CorePluginName } from "../../../schemas/core-plugins.schema.ts";
+import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { PackageJson } from "type-fest";
 
 export interface ParsedPlugins {

@@ -16,10 +16,11 @@ import {
   TitleSimilarityError,
 } from "./exceptions.ts";
 import { checkFetch } from "./fetch.ts";
-import { type Aliases, getLevRatio } from "./lev.ts";
+import { getLevRatio } from "./lev.ts";
 
 import type { ParsedData } from "../schemas.ts";
 import type { RankResult, RankedResult } from "../types.ts";
+import type { Aliases } from "./lev.ts";
 import type { RankingModel, Settings } from "./ranking-settings.schema.ts";
 
 function resolveRank(

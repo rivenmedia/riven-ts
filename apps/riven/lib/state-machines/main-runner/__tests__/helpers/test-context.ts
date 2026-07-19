@@ -4,12 +4,10 @@ import { vi } from "vitest";
 import { createActor, createEmptyActor } from "xstate";
 
 import { it as baseIt } from "../../../../__tests__/test-context.ts";
-import {
-  type MainRunnerMachineInput,
-  mainRunnerMachine,
-} from "../../../main-runner/index.ts";
+import { mainRunnerMachine } from "../../../main-runner/index.ts";
 
 import type { ValidPlugin } from "../../../../types/plugins.ts";
+import type { MainRunnerMachineInput } from "../../../main-runner/index.ts";
 
 export const it = baseIt
 

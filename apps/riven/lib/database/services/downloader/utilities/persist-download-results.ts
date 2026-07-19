@@ -10,12 +10,13 @@ import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state
 import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
-import { type EntityManager, NotFoundError, ref } from "@mikro-orm/core";
+import { NotFoundError, ref } from "@mikro-orm/core";
 import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
 import z from "zod";
 
 import type { ValidTorrent } from "../../../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import type { EntityManager } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";
 
 export async function persistDownloadResults(

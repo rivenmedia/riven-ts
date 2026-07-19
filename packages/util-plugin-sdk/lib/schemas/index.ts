@@ -1,13 +1,11 @@
 import { z } from "zod";
 
-import {
-  BaseDataSource,
-  type BaseDataSourceConfig,
-} from "../datasource/index.ts";
+import { BaseDataSource } from "../datasource/index.ts";
 import { DataSourceMap } from "../utilities/datasource-map.ts";
 import { PluginSettings } from "../utilities/plugin-settings.ts";
 import { RivenEventHandler } from "./events/index.ts";
 
+import type { BaseDataSourceConfig } from "../datasource/index.ts";
 import type { RateLimiterOptions } from "bullmq";
 import type { Constructor } from "type-fest";
 

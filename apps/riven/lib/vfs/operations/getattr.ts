@@ -1,5 +1,5 @@
 import { NotFoundError } from "@mikro-orm/core";
-import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
+import Fuse from "@zkochan/fuse-native";
 import { isZodErrorLike } from "zod-validation-error";
 
 import { services } from "../../database/database.ts";
@@ -10,6 +10,8 @@ import { isHiddenPath } from "../utilities/is-hidden-path.ts";
 import { isIgnoredPath } from "../utilities/is-ignored-path.ts";
 import { withVfsOperationContext } from "../utilities/vfs-operation-context.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
+
+import type { OPERATIONS } from "@zkochan/fuse-native";
 
 export const getattrSync = function (path, callback) {
   void withVfsScope(() =>

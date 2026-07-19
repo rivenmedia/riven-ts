@@ -6,10 +6,9 @@ import { createActor, toPromise } from "xstate";
 import z from "zod";
 
 import { logger } from "../../../utilities/logger/logger.ts";
-import {
-  type ParsedPlugins,
-  collectPluginsForRegistration,
-} from "./collect-plugins-for-registration.actor.ts";
+import { collectPluginsForRegistration } from "./collect-plugins-for-registration.actor.ts";
+
+import type { ParsedPlugins } from "./collect-plugins-for-registration.actor.ts";
 
 it("returns the installed plugins from the package.json file", async () => {
   const actor = createActor(collectPluginsForRegistration);
