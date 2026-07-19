@@ -107,7 +107,13 @@ it.concurrent("generates a plugin with the correct name in package.json", ({
   expect(packageJson.name).toBe(packageFullName);
 });
 
-it.concurrent.for(["test", "lint", "build", "codegen:config-docs"] as const)(
+it.concurrent.for([
+  "test",
+  "lint",
+  "check-types",
+  "build",
+  "codegen:config-docs",
+] as const)(
   "passes pnpm %s",
   { timeout: 60_000 },
   async (command, { packageFullName }) => {
