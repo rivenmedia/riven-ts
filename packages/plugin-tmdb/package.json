@@ -17,7 +17,7 @@
     "build": "tsc --project tsconfig.lib.json",
     "codegen:api-schemas": "kubb generate",
     "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
-    "lint": "oxlint --type-aware --type-check",
+    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"

@@ -35,7 +35,7 @@ const packageTypeFields: Partial<
     },
     scripts: {
       build: "tsc --project tsconfig.lib.json",
-      lint: "oxlint --type-aware --type-check",
+      lint: "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
       "lint:fix": "pnpm lint --fix",
       test: "vitest run --passWithNoTests",
       "test:watch": "vitest",

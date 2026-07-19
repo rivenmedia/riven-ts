@@ -9,7 +9,7 @@
   },
   "scripts": {
     "collect-json-reports": "pnpm node lib/scripts/collect-json-outputs.ts",
-    "lint": "oxlint --type-aware --type-check",
+    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
     "lint:fix": "pnpm lint --fix",
     "merge-json-reports": "nyc merge coverage/raw coverage/merged/merged-coverage.json",
     "report": "pnpm report:html && pnpm report:summary",
