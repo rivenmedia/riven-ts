@@ -74,7 +74,7 @@ describe("getLevRatio with aliases", () => {
   });
 });
 
-describe("Integration with parse", () => {
+describe("integration with parse", () => {
   it.for([
     ["The Walking Dead S05E03 720p HDTV x264-ASAP", "The Walking Dead", true],
     [
