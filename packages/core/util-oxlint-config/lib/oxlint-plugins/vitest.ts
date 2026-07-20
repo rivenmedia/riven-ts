@@ -25,7 +25,6 @@ export const oxlintPluginVitestConfig = defineConfig({
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "vitest/max-expects": "off",
-        "vitest/prefer-called-times": "off",
         "vitest/no-conditional-in-test": "off",
         "vitest/prefer-strict-equal": "off",
         "vitest/prefer-called-with": "off",
