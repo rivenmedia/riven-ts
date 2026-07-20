@@ -115,7 +115,7 @@ async function open(path: string, _flags: number) {
   return serveMediaFile(pathInfo);
 }
 
-export const openSync = function openSync(
+export function openSync(
   path: string,
   flags: number,
   callback: (err: number, fd?: number) => void,
@@ -142,4 +142,4 @@ export const openSync = function openSync(
       process.nextTick(callback, Fuse.EIO);
     }),
   );
-};
+}
