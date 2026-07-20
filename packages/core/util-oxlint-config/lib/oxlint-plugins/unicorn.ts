@@ -24,7 +24,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/no-array-method-this-argument": "off",
         "unicorn/no-array-for-each": "off",
         "unicorn/import-style": "off",
-        "unicorn/no-useless-fallback-in-spread": "off",
         "unicorn/no-unreadable-array-destructuring": "off",
         "unicorn/no-anonymous-default-export": "off",
         "unicorn/new-for-builtins": "off",

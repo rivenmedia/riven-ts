@@ -23,7 +23,7 @@ export function withLogContext<T>(
   callback: (scope: Sentry.Scope) => T,
 ): T {
   const mergedContext = {
-    ...(logContext.getStore() ?? {}),
+    ...logContext.getStore(),
     ...context,
   };
 
