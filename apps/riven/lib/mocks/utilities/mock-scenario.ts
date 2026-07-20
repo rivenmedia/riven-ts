@@ -14,7 +14,7 @@ export abstract class MockScenario {
 
   public async seed(_em: EntityManager): Promise<void> {
     if (this.seeder) {
-      throw Error("`seed` must be implemented when a seeder is provided");
+      throw new Error("`seed` must be implemented when a seeder is provided");
     }
 
     return Promise.resolve();

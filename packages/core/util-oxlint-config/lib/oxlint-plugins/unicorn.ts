@@ -14,6 +14,7 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/no-useless-promise-resolve-reject": "allow", // Conflicts with typescript/require-await
         "unicorn/no-useless-undefined": "allow", // Conflicts with eslint/no-useless-return
         "unicorn/number-literal-case": "allow", // Conflicts with oxfmt which lowercases hex literals
+        "unicorn/throw-new-error": "off", // Conflicts with BullMQ's RateLimitError
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "unicorn/no-array-reduce": "off",
@@ -27,7 +28,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/no-useless-fallback-in-spread": "off",
         "unicorn/no-unreadable-array-destructuring": "off",
         "unicorn/no-anonymous-default-export": "off",
-        "unicorn/throw-new-error": "off",
         "unicorn/new-for-builtins": "off",
         "unicorn/no-process-exit": "off",
 
