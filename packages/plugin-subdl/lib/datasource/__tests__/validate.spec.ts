@@ -13,7 +13,7 @@ it("returns false if the request fails", async ({ server, dataSourceMap }) => {
 
   const api = dataSourceMap.get(SubdlAPI);
 
-  expect(await api.validate()).toBe(false);
+  await expect(api.validate()).resolves.toBe(false);
 });
 
 it("returns true if the request succeeds", async ({
@@ -46,7 +46,7 @@ it("returns true if the request succeeds", async ({
 
   const api = dataSourceMap.get(SubdlAPI);
 
-  expect(await api.validate()).toBe(true);
+  await expect(api.validate()).resolves.toBe(true);
 });
 
 it("returns subtitles for a movie search", async ({

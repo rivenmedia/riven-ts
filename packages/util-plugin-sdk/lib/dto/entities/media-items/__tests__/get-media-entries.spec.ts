@@ -35,7 +35,7 @@ it("getMediaEntries() returns the associated media entry for a Movie media item"
 
   await em.flush();
 
-  expect(await movie.getMediaEntries()).toStrictEqual([mediaEntry]);
+  await expect(movie.getMediaEntries()).resolves.toStrictEqual([mediaEntry]);
 });
 
 it("getMediaEntries() returns the associated media entries for a Show media item", async ({
@@ -123,7 +123,7 @@ it("getMediaEntries() returns the associated media entries for a Show media item
 
   await em.flush();
 
-  expect(await show.getMediaEntries()).toStrictEqual([
+  await expect(show.getMediaEntries()).resolves.toStrictEqual([
     mediaEntry1,
     mediaEntry2,
   ]);
@@ -226,10 +226,10 @@ it("getMediaEntries() returns the associated media entries for a Season media it
 
   await em.flush();
 
-  expect(await season1.getMediaEntries()).toStrictEqual([
+  await expect(season1.getMediaEntries()).resolves.toStrictEqual([
     season1Episode1MediaEntry,
   ]);
-  expect(await season2.getMediaEntries()).toStrictEqual([
+  await expect(season2.getMediaEntries()).resolves.toStrictEqual([
     season2Episode1MediaEntry,
   ]);
 });
@@ -299,5 +299,5 @@ it("getMediaEntries() returns the associated media entry for an Episode media it
 
   await em.flush();
 
-  expect(await episode.getMediaEntries()).toStrictEqual([mediaEntry]);
+  await expect(episode.getMediaEntries()).resolves.toStrictEqual([mediaEntry]);
 });
