@@ -30,7 +30,6 @@ export const oxlintPluginVitestConfig = defineConfig({
         "vitest/prefer-expect-assertions": "off",
         "vitest/prefer-strict-equal": "off",
         "vitest/prefer-strict-boolean-matchers": "off",
-        "vitest/prefer-to-be": "off",
         "vitest/require-mock-type-parameters": "off",
         "vitest/require-to-throw-message": "off",
         "vitest/require-top-level-describe": "off",

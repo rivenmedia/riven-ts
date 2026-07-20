@@ -58,7 +58,7 @@ it("allows provider to be null when creating the BlacklistedStream record", asyn
   expect(updatedBlacklistedStreams[0].stream.infoHash).toBe(stream.infoHash);
 
   expect(updatedBlacklistedStreams[0].plugin).toBe("test-plugin");
-  expect(updatedBlacklistedStreams[0].provider).toBe(null);
+  expect(updatedBlacklistedStreams[0].provider).toBeNull();
 });
 
 it("rejects duplicate blacklisted streams for the same media item", async ({

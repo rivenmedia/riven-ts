@@ -21,7 +21,7 @@ it("returns the updated item if persisting the scrape results is successful", as
     },
   );
 
-  expect(newStreamsCount).toEqual(1);
+  expect(newStreamsCount).toBe(1);
 
   expect(item).toBeInstanceOf(MediaItem);
   expect(item).toEqual(
@@ -105,6 +105,6 @@ it("resets the failed attempts count when new streams are added", async ({
     },
   );
 
-  expect(newStreamsCount).toEqual(1);
-  expect(item.failedScrapeAttempts).toEqual(0);
+  expect(newStreamsCount).toBe(1);
+  expect(item.failedScrapeAttempts).toBe(0);
 });

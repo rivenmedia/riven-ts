@@ -111,7 +111,7 @@ describe("when the config file exists and is valid", () => {
     const { settings, rankingModel } = await loadRankingConfig(configPath);
 
     expect(settings.resolutions.r1080p).toBe(true);
-    expect(rankingModel.av1).toBe(null);
+    expect(rankingModel.av1).toBeNull();
   });
 });
 
