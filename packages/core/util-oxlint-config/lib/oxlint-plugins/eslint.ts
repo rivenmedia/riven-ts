@@ -47,6 +47,7 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-duplicate-imports": ["deny", { allowSeparateTypeImports: true }],
         "func-style": ["deny", "declaration", { allowArrowFunctions: true }],
         "class-methods-use-this": "allow",
+        "no-magic-numbers": "allow",
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         complexity: "off",
@@ -56,7 +57,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "max-lines-per-function": "off",
         "max-params": "off",
         "max-statements": "off",
-        "no-magic-numbers": "off",
         "prefer-named-capture-group": "off",
       },
     },
