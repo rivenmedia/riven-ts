@@ -17,22 +17,22 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/throw-new-error": "off", // Conflicts with BullMQ's RateLimitError
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
-        "unicorn/no-array-reduce": "off",
-        "unicorn/no-array-callback-reference": "off",
         "unicorn/custom-error-definition": "off",
         "unicorn/filename-case": "off",
-        "unicorn/no-array-method-this-argument": "off",
-        "unicorn/no-array-for-each": "off",
         "unicorn/import-style": "off",
-        "unicorn/no-unreadable-array-destructuring": "off",
-        "unicorn/no-anonymous-default-export": "off",
         "unicorn/new-for-builtins": "off",
+        "unicorn/no-anonymous-default-export": "off",
+        "unicorn/no-array-callback-reference": "off",
+        "unicorn/no-array-for-each": "off",
+        "unicorn/no-array-method-this-argument": "off",
+        "unicorn/no-array-reduce": "off",
         "unicorn/no-process-exit": "off",
+        "unicorn/no-unreadable-array-destructuring": "off",
 
         // Type-aware rules that are disabled for now, but will be enabled in the future
         "unicorn/consistent-function-scoping": "off",
-        "unicorn/prefer-native-coercion-functions": "off",
         "unicorn/no-immediate-mutation": "off",
+        "unicorn/prefer-native-coercion-functions": "off",
       },
     },
     {
