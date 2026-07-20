@@ -31,8 +31,10 @@ export interface Services {
   vfsService: VfsService;
 }
 
+// oxlint-disable-next-line init-declarations
 export let database: Database;
 
+// oxlint-disable-next-line init-declarations
 export let services: Services;
 
 export async function initORM(options: Partial<Options>) {

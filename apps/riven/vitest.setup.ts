@@ -110,9 +110,9 @@ expect.extend({
   },
 });
 
-let redisServer: RedisMemoryServer | undefined;
-let redisConnection: RedisConnection | undefined;
-let redisClient: RedisClient | undefined;
+let redisServer: RedisMemoryServer | null = null;
+let redisConnection: RedisConnection | null = null;
+let redisClient: RedisClient | null = null;
 
 vi.doMock(import("./lib/utilities/settings.ts"), async (importOriginal) => {
   const { RedisMemoryServer } = await import("redis-memory-server");

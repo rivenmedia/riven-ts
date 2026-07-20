@@ -60,7 +60,7 @@ export const findValidTorrentProcessor =
        * When a plugin indicates that a provider is rate limited,
        * we use this to delay the job until the rate limit is expected to be lifted, to avoid unnecessary attempts that are likely to fail.
        */
-      let rateLimitReattemptDatetime: DateTime | undefined;
+      let rateLimitReattemptDatetime: DateTime | null = null;
 
       for (const infoHash of uncheckedInfoHashes) {
         scope.setTag("riven.info-hash", infoHash);

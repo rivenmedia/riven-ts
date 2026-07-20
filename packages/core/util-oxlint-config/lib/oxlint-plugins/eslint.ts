@@ -42,7 +42,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         complexity: "off",
         "default-case": "off",
         "func-style": "off",
-        "init-declarations": "off",
         "id-length": "off",
         "max-classes-per-file": "off",
         "max-depth": "off",
