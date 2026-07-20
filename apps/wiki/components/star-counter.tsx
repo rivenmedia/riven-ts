@@ -25,6 +25,7 @@ export function StarCounter({ targetCount }: { targetCount: number }) {
           const duration = 1500;
           const start = performance.now();
 
+          // oxlint-disable-next-line no-inner-declarations
           function tick(now: number) {
             const elapsed = now - start;
             const progress = Math.min(elapsed / duration, 1);

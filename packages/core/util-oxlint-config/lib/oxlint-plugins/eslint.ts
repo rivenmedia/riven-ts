@@ -54,7 +54,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-magic-numbers": "off",
         "no-shadow": "off",
         "no-use-before-define": "off",
-        "no-inner-declarations": "off",
         "prefer-named-capture-group": "off",
         "require-unicode-regexp": "off",
 
