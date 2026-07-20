@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { parse } from "./parse.ts";
 
-describe("parse", () => {
+describe(parse, () => {
   it("should throw on empty input", () => {
     expect(() => parse("")).toThrow(TypeError);
   });

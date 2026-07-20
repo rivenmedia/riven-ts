@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { parse } from "../parser/parse.ts";
 import { getLevRatio, titleMatch } from "./lev.ts";
 
-describe("titleMatch", () => {
+describe(titleMatch, () => {
   it.for([
     ["The Simpsons", "The Simpsons", true],
     ["The Simpsons", "The Simpsons Movie", false],
@@ -17,7 +17,7 @@ describe("titleMatch", () => {
   });
 });
 
-describe("getLevRatio", () => {
+describe(getLevRatio, () => {
   it.for([
     ["The Simpsons", "The Simpsons", 1],
     ["The Simpsons", "The Simpsons Movie", 0],

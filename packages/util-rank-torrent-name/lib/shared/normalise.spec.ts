@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { normaliseTitle } from "./normalise.ts";
 
-describe("normaliseTitle", () => {
+describe(normaliseTitle, () => {
   it("lowercases by default", () => {
     expect(normaliseTitle("The Matrix")).toBe("the matrix");
   });

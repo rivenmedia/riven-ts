@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { createSettings } from "./ranking-settings.schema.ts";
 
-describe("createSettings", () => {
+describe(createSettings, () => {
   it("creates default settings from empty input", () => {
     const settings = createSettings();
 
