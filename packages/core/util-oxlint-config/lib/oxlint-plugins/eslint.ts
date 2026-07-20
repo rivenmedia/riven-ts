@@ -36,6 +36,7 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-plusplus": ["deny", { allowForLoopAfterthoughts: true }],
         "no-negated-condition": "off", // Handled by unicorn/no-negated-condition
         "no-warning-comments": "off",
+        "no-undefined": "allow",
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "class-methods-use-this": "off",
@@ -51,7 +52,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "max-statements": "off",
         "no-magic-numbers": "off",
         "no-shadow": "off",
-        "no-undefined": "off",
         "no-use-before-define": "off",
         "no-duplicate-imports": "off",
         "no-inner-declarations": "off",
