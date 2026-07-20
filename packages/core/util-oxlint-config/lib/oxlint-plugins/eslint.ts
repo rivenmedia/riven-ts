@@ -38,6 +38,7 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-warning-comments": "off",
         "no-undefined": "allow",
         "default-case": "allow", // Conflicts with typescript/switch-exhaustiveness-check
+        "no-duplicate-imports": ["deny", { allowSeparateTypeImports: true }],
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "class-methods-use-this": "off",
@@ -53,7 +54,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-magic-numbers": "off",
         "no-shadow": "off",
         "no-use-before-define": "off",
-        "no-duplicate-imports": "off",
         "no-inner-declarations": "off",
         "prefer-named-capture-group": "off",
         "require-unicode-regexp": "off",
