@@ -17,11 +17,6 @@ const it = baseIt.extend("streams", async ({ factories: { streamFactory } }) =>
 it.beforeEach(() => {
   vi.spyOn(rankingConfigModule, "rtnInstance", "get").mockReturnValue(
     new RTN(
-      createSettings({
-        resolutions: {
-          r2160p: true,
-        },
-      }),
       createRankingModel({
         bluray: 0,
         webrip: 0,
@@ -29,6 +24,11 @@ it.beforeEach(() => {
         mp3: 10_000,
         atmos: 20_000,
         dolbyDigitalPlus: 100_000,
+      }),
+      createSettings({
+        resolutions: {
+          r2160p: true,
+        },
       }),
     ),
   );

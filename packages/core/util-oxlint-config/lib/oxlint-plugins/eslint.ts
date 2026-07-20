@@ -59,7 +59,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "require-unicode-regexp": "off",
 
         // Type-aware rules that are disabled for now, but will be enabled in the future
-        "default-param-last": "off",
         "prefer-regex-literals": "off",
       },
     },

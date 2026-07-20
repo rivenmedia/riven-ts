@@ -142,10 +142,13 @@ it("sorts torrents correctly", ({ rankingConfig }) => {
   ];
 
   const settings = createSettings();
-  const rtnInstance = new RTN(settings, {
-    ...rankingConfig,
-    dolbyVision: 3000,
-  });
+  const rtnInstance = new RTN(
+    {
+      ...rankingConfig,
+      dolbyVision: 3000,
+    },
+    settings,
+  );
   const rankedTorrents = Object.entries(torrents).map(
     ([hash, [correctTitle, rawTitle]]) =>
       rtnInstance.rankTorrent(rawTitle, hash, correctTitle, {}),
@@ -188,7 +191,7 @@ it("sorts torrents with a resolution filter correctly", ({ rankingConfig }) => {
       r2160p: true,
     },
   });
-  const rtnInstance = new RTN(settings, rankingConfig);
+  const rtnInstance = new RTN(rankingConfig, settings);
   const rankedTorrents = Object.entries(torrents).map(
     ([hash, [correctTitle, rawTitle]]) =>
       rtnInstance.rankTorrent(rawTitle, hash, correctTitle, {}),
@@ -314,7 +317,7 @@ it("handles bucket limits correctly", ({ rankingConfig }) => {
     "38b640c9b942b95565fb69eb17470b1b8d0e23bc": "Movie.2024.720p.WEBDL.mkv",
   };
 
-  const rtnInstance = new RTN(createSettings(), rankingConfig);
+  const rtnInstance = new RTN(rankingConfig, createSettings());
   const rankedTorrents = Object.entries({
     ...unknownResTorrents,
     ...hdTorrents,

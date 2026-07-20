@@ -19,7 +19,7 @@ export class RTN {
   #rankingModel: RankingModel;
   #enabledResolutions: Set<Resolution>;
 
-  public constructor(settings: SettingsInput = {}, rankingModel: RankingModel) {
+  public constructor(rankingModel: RankingModel, settings: SettingsInput = {}) {
     this.#settings = createSettings(settings);
     this.#rankingModel = createRankingModel(rankingModel);
     this.#enabledResolutions = new Set(
