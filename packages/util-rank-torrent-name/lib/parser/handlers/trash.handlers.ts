@@ -5,76 +5,68 @@ import type { Handler } from "@viren070/parse-torrent-title";
 export const trashHandlers: Handler[] = [
   {
     field: "trash",
-    pattern: new RegExp(
-      String.raw`\b(?:H[DQ][ .-]*)?CAM(?!.?(S|E|\()\d+)(?:H[DQ])?(?:[ .-]*Rip|Rp)?\b`,
-      "iu",
-    ),
+    pattern:
+      /\b(?:H[DQ][ .-]*)?CAM(?!.?(S|E|\()\d+)(?:H[DQ])?(?:[ .-]*Rip|Rp)?\b/iu,
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp(String.raw`\b(?:H[DQ][ .-]*)?S[ .-]print\b`, "iu"),
+    pattern: /\b(?:H[DQ][ .-]*)?S[ .-]print\b/iu,
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp(
-      String.raw`\b(?:HD[ .-]*)?T(?:ELE)?(C|S)(?:INE|YNC)?(?:Rip)?\b`,
-      "iu",
-    ),
+    pattern: /\b(?:HD[ .-]*)?T(?:ELE)?(C|S)(?:INE|YNC)?(?:Rip)?\b/iu,
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp(String.raw`\bPre.?DVD(?:Rip)?\b`, "iu"),
+    pattern: /\bPre.?DVD(?:Rip)?\b/iu,
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp(
-      String.raw`\b(?:DVD?|BD|BR|HD)?[ .-]*Scr(?:eener)?\b`,
-      "iu",
-    ),
+    pattern: /\b(?:DVD?|BD|BR|HD)?[ .-]*Scr(?:eener)?\b/iu,
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp(String.raw`\bDVB[ .-]*(?:Rip)?\b`, "iu"),
+    pattern: /\bDVB[ .-]*(?:Rip)?\b/iu,
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp(String.raw`\bSAT[ .-]*Rips?\b`, "iu"),
+    pattern: /\bSAT[ .-]*Rips?\b/iu,
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp(String.raw`\bLeaked\b`, "iu"),
+    pattern: /\bLeaked\b/iu,
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp("threesixtyp", "iu"),
+    pattern: /threesixtyp/iu,
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp(String.raw`\bR5|R6\b`, "iu"),
+    pattern: /\bR5|R6\b/iu,
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp(String.raw`\bDeleted.*Scenes?\b`, "iu"),
+    pattern: /\bDeleted.*Scenes?\b/iu,
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp(String.raw`\bHQ.?(Clean)?.?(Aud(io)?)?\b`, "iu"),
+    pattern: /\bHQ.?(Clean)?.?(Aud(io)?)?\b/iu,
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp("acesse o original", "iu"),
+    pattern: /acesse o original/iu,
     transform: transforms.toBoolean(),
     remove: true,
   },

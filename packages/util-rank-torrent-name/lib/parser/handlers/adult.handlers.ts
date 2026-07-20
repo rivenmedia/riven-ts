@@ -1061,7 +1061,7 @@ const adultPattern = new RegExp(`\\b(${[...keywords].join("|")})\\b`, "iu");
 export const adultHandlers: Handler[] = [
   {
     field: "adult",
-    pattern: new RegExp(String.raw`\b(XXX|xxx|Xxx)\b`, "u"),
+    pattern: /\b(XXX|xxx|Xxx)\b/u,
     transform: transforms.toBoolean(),
     remove: true,
   },

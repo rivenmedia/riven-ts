@@ -16,17 +16,15 @@ const parser = new Parser()
   .addHandlers([
     {
       field: "channels",
-      pattern: new RegExp(String.raw`\+?2[\.\s]0(?:x[2-4])?\b`, "iu"),
+      pattern: /\+?2[.\s]0(?:x[2-4])?\b/iu,
       transform: transforms.toValueSet("2.0"),
       remove: true,
       keepMatching: true,
     },
     {
       field: "complete",
-      pattern: new RegExp(
-        String.raw`(?:\bthe\W)?(?:\bcomplete\b|\bfull\b|\ball\b)\b.*\b(?:series|seasons|collection|episodes|set|pack|movies)\b`,
-        "iu",
-      ),
+      pattern:
+        /(?:\bthe\W)?(?:\bcomplete\b|\bfull\b|\ball\b)\b.*\b(?:series|seasons|collection|episodes|set|pack|movies)\b/iu,
       transform: transforms.toBoolean(),
       remove: true,
     },
@@ -36,14 +34,14 @@ const parser = new Parser()
     {
       field: "episodes",
       process: (title, meta, result) => {
-        const animePattern = new RegExp("One.*?Piece|Bleach|Naruto", "u");
+        const animePattern = /One.*?Piece|Bleach|Naruto/u;
 
         if (animePattern.test(title)) {
           if (result.has("episodes")) {
             return meta;
           }
 
-          const episodePattern = new RegExp(String.raw`\b\d{1,4}\b`, "u");
+          const episodePattern = /\b\d{1,4}\b/u;
           const matches = episodePattern.exec(title);
 
           if (matches) {
@@ -60,14 +58,14 @@ const parser = new Parser()
   .addHandlers([
     {
       field: "bitrate",
-      pattern: new RegExp(String.raw`\b\d+[kmg]bps\b`, "iu"),
+      pattern: /\b\d+[kmg]bps\b/iu,
       matchGroup: 1,
       remove: true,
       transform: transforms.toLowercase(),
     },
     {
       field: "site",
-      pattern: new RegExp("rarbg|torrentleech|(?:the)?piratebay", "iu"),
+      pattern: /rarbg|torrentleech|(?:the)?piratebay/iu,
       remove: true,
     },
   ]);
