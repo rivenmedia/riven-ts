@@ -27,15 +27,14 @@ export const oxlintPluginVitestConfig = defineConfig({
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "vitest/max-expects": "off",
         "vitest/no-conditional-in-test": "off",
-        "vitest/prefer-strict-equal": "off",
-        "vitest/prefer-called-with": "off",
-        "vitest/prefer-to-be": "off",
-        "vitest/prefer-mock-return-shorthand": "off",
         "vitest/prefer-expect-assertions": "off",
+        "vitest/prefer-mock-return-shorthand": "off",
+        "vitest/prefer-strict-equal": "off",
         "vitest/prefer-strict-boolean-matchers": "off",
+        "vitest/prefer-to-be": "off",
         "vitest/require-mock-type-parameters": "off",
-        "vitest/require-top-level-describe": "off",
         "vitest/require-to-throw-message": "off",
+        "vitest/require-top-level-describe": "off",
         "vitest/warn-todo": "off",
 
         // Type-aware rules that are disabled for now, but will be enabled in the future

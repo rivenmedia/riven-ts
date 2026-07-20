@@ -531,7 +531,7 @@ it("adds a job to reprocess the movie if the item is a movie and its torrent is 
 
   await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/i);
 
-  expect(mockProcessMediaItemProcessor).toHaveBeenCalled();
+  expect(mockProcessMediaItemProcessor).toHaveBeenCalledOnce();
 });
 
 it("adds a job to reprocess the lowest common denominator in the item's hierarchy if the item is show-like and its torrent is dead", async ({

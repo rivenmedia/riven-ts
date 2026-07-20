@@ -118,7 +118,7 @@ it("exits with code 1 on uncaught exceptions", async ({
 
   await vi.waitFor(() => {
     expect(process.exitCode).toBe(1);
-    expect(exitSpy).toHaveBeenCalled();
+    expect(exitSpy).toHaveBeenCalledOnce();
   });
 });
 
@@ -143,7 +143,7 @@ it("does not force quit the process if shutdown succeeds within the configured t
 
   await vi.waitFor(() => {
     expect(process.exitCode).toBe(0);
-    expect(exitSpy).toHaveBeenCalled();
+    expect(exitSpy).toHaveBeenCalledWith();
   });
 });
 
@@ -183,5 +183,5 @@ it("force quits the process if shutdown takes longer than the configured timeout
   await vi.runOnlyPendingTimersAsync();
 
   expect(process.exitCode).toBe(1);
-  expect(exitSpy).toHaveBeenCalled();
+  expect(exitSpy).toHaveBeenCalledWith();
 });

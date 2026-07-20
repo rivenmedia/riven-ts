@@ -14,5 +14,5 @@ it("stops the server if provided", () => {
 
   actor.start();
 
-  expect(stopSpy).toHaveBeenCalled();
+  expect(stopSpy).toHaveBeenCalledOnce();
 });
