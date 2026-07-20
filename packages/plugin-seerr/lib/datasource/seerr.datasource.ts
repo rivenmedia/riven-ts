@@ -214,10 +214,15 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
    * @param webhookSettings Webhook settings from the `/settings/notifications/webhook` response
    */
   #validateWebhookSettingsResponse(webhookSettings: WebhookSettingsSchema) {
+    // oxlint-disable-next-line no-bitwise
     const REQUIRED_TYPES = 4 | 128; // 132: Request Approved + Request Automatically Approved
 
     const currentTypes = webhookSettings.types ?? 0;
+
+    // oxlint-disable-next-line no-bitwise
     const hasRequiredTypes = (currentTypes & REQUIRED_TYPES) === REQUIRED_TYPES;
+
+    // oxlint-disable-next-line no-bitwise
     const hasExtraTypes = (currentTypes & ~REQUIRED_TYPES) !== 0;
     const validatedWebhookBody = json(WebhookJsonPayload).safeParse(
       webhookSettings.options?.jsonPayload,
@@ -242,6 +247,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
    * If the `autofixWebhookBody` plugin setting is enabled, it will attempt to fix the configuration automatically.
    */
   async #validateOrFixWebhookBodySettings() {
+    // oxlint-disable-next-line no-bitwise
     const REQUIRED_TYPES = 4 | 128; // 132: Request Approved + Request Automatically Approved
 
     const response = await this.get<unknown>("settings/notifications/webhook");
@@ -322,10 +328,12 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
 
     const issues: string[] = [];
 
+    // oxlint-disable-next-line no-bitwise
     if (!(currentTypes & 4)) {
       issues.push('"Request Approved" notification type is not enabled');
     }
 
+    // oxlint-disable-next-line no-bitwise
     if (!(currentTypes & 128)) {
       issues.push(
         '"Request Automatically Approved" notification type is not enabled',

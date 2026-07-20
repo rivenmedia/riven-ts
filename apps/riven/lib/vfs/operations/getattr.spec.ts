@@ -7,7 +7,10 @@ import { it } from "../../__tests__/test-context.ts";
 import { PathInfo } from "../../database/services/vfs/schemas/path-info.schema.ts";
 import { getattrSync } from "./getattr.ts";
 
+// oxlint-disable-next-line no-bitwise
 const dirMode = fs.constants.S_IFDIR | 0o755;
+
+// oxlint-disable-next-line no-bitwise
 const fileMode = fs.constants.S_IFREG | 0o644;
 
 it("returns directory stats for the root directory", async () => {
