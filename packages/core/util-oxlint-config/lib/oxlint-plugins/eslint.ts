@@ -37,11 +37,11 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-negated-condition": "off", // Handled by unicorn/no-negated-condition
         "no-warning-comments": "off",
         "no-undefined": "allow",
+        "default-case": "allow", // Conflicts with typescript/switch-exhaustiveness-check
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "class-methods-use-this": "off",
         complexity: "off",
-        "default-case": "off",
         "func-style": "off",
         "id-length": "off",
         "max-classes-per-file": "off",
