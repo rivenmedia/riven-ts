@@ -181,15 +181,16 @@ export const validateTorrent = async (
         infoHash,
       );
     }
-  } else {
-    if (parsedData.seasons.length === 0 && parsedData.episodes.length === 0) {
-      throw new SkippedTorrentError(
-        `Skipping torrent with no seasons or episodes for ${item.type} item`,
-        item.fullTitle,
-        parsedData.rawTitle,
-        infoHash,
-      );
-    }
+  } else if (
+    parsedData.seasons.length === 0 &&
+    parsedData.episodes.length === 0
+  ) {
+    throw new SkippedTorrentError(
+      `Skipping torrent with no seasons or episodes for ${item.type} item`,
+      item.fullTitle,
+      parsedData.rawTitle,
+      infoHash,
+    );
   }
 
   if (item.__typename === "Show") {

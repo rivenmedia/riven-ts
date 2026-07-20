@@ -49,7 +49,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "max-lines-per-function": "off",
         "max-params": "off",
         "max-statements": "off",
-        "no-lonely-if": "off",
         "no-magic-numbers": "off",
         "no-shadow": "off",
         "no-undefined": "off",
