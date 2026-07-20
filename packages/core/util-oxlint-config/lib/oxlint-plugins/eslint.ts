@@ -46,9 +46,9 @@ export const oxlintPluginEslintConfig = defineConfig({
         "default-case": "allow", // Conflicts with typescript/switch-exhaustiveness-check
         "no-duplicate-imports": ["deny", { allowSeparateTypeImports: true }],
         "func-style": ["deny", "declaration", { allowArrowFunctions: true }],
+        "class-methods-use-this": "allow",
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
-        "class-methods-use-this": "off",
         complexity: "off",
         "max-classes-per-file": "off",
         "max-depth": "off",
