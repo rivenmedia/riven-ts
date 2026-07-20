@@ -414,7 +414,7 @@ function generateSecret(
   const array = new Uint8Array(bytes);
   crypto.getRandomValues(array);
   if (format === "base64") {
-    return btoa(String.fromCharCode(...array));
+    return btoa(String.fromCodePoint(...array));
   }
   return Array.from(array, (byte) => byte.toString(16).padStart(2, "0"))
     .join("")

@@ -36,7 +36,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/prefer-single-call": "off",
         "unicorn/prefer-dom-node-remove": "off",
         "unicorn/prefer-dom-node-append": "off",
-        "unicorn/prefer-code-point": "off",
         "unicorn/prefer-string-replace-all": "off",
 
         // Type-aware rules that are disabled for now, but will be enabled in the future
