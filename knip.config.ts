@@ -59,7 +59,7 @@ export default {
         "postcss.config.mjs!",
       ],
       project: ["**/*.{ts,tsx,mjs}!", "!source.config.ts"],
-      ignoreDependencies: ["tailwindcss", /@repo\/(.*)/u],
+      ignoreDependencies: ["tailwindcss", /@repo\/(?<pluginName>.*)/u],
     },
     "apps/riven": {
       entry: [...defaultEntry, "!**/Migration*.ts!"],
@@ -68,7 +68,7 @@ export default {
         "!**/Migration*.ts",
         "!**/{factories,seeders}!",
       ],
-      ignoreDependencies: [/@repo\/plugin(.*)/u],
+      ignoreDependencies: [/@repo\/plugin(?<pluginName>.*)/u],
     },
     "{packages,packages/core}/*": {
       entry: [...defaultEntry],

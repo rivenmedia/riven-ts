@@ -6,7 +6,7 @@ export const trashHandlers: Handler[] = [
   {
     field: "trash",
     pattern:
-      /\b(?:H[DQ][ .-]*)?CAM(?!.?(S|E|\()\d+)(?:H[DQ])?(?:[ .-]*Rip|Rp)?\b/iu,
+      /\b(?:H[DQ][ .-]*)?CAM(?!.?[SE(]\d+)(?:H[DQ])?(?:[ .-]*Rip|Rp)?\b/iu,
     transform: transforms.toBoolean(),
   },
   {
@@ -16,7 +16,7 @@ export const trashHandlers: Handler[] = [
   },
   {
     field: "trash",
-    pattern: /\b(?:HD[ .-]*)?T(?:ELE)?(C|S)(?:INE|YNC)?(?:Rip)?\b/iu,
+    pattern: /\b(?:HD[ .-]*)?T(?:ELE)?[CS](?:INE|YNC)?(?:Rip)?\b/iu,
     transform: transforms.toBoolean(),
   },
   {
@@ -61,7 +61,7 @@ export const trashHandlers: Handler[] = [
   },
   {
     field: "trash",
-    pattern: /\bHQ.?(Clean)?.?(Aud(io)?)?\b/iu,
+    pattern: /\bHQ.?(?<Clean>Clean)?.?(?<Aud>Aud(?<io>io)?)?\b/iu,
     transform: transforms.toBoolean(),
   },
   {

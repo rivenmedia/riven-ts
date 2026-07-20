@@ -1,6 +1,11 @@
 import { defineConfig } from "oxlint";
 
-import { jsFiles, tsFiles } from "../internal/file-types.ts";
+import {
+  jsFiles,
+  jsxFiles,
+  testFiles,
+  tsFiles,
+} from "../internal/file-types.ts";
 
 export const oxlintPluginEslintConfig = defineConfig({
   overrides: [
@@ -57,7 +62,13 @@ export const oxlintPluginEslintConfig = defineConfig({
         "max-lines-per-function": "off",
         "max-params": "off",
         "max-statements": "off",
-        "prefer-named-capture-group": "off",
+      },
+    },
+    {
+      files: [...testFiles, jsxFiles],
+      plugins: ["eslint"],
+      rules: {
+        "prefer-named-capture-group": "allow", // Allow looser regex in test assertions and JSX files
       },
     },
   ],

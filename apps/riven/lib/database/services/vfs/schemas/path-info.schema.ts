@@ -2,7 +2,7 @@ import path from "node:path";
 import z from "zod";
 
 const PATH_PATTERN =
-  /^\/(?<type>movies|shows)(\/(?<title>[^/]+)(\/Season (?<season>\d{2})?)?)?/u;
+  /^\/(?<type>movies|shows)(?<titlePath>\/(?<title>[^/]+)(?<seasonPath>\/Season (?<season>\d{2})?)?)?/u;
 
 const TMDB_ID_PATTERN = /\{tmdb-(?<tmdbId>\d+)\}/u;
 const TVDB_ID_PATTERN = /\{tvdb-(?<tvdbId>\d+)\}/u;
