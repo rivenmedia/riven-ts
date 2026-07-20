@@ -226,14 +226,14 @@ it("moves rate-limited providers back to the providers list after the rate limit
 
   await vi.waitFor(
     async () => {
-      const response = await providerListRequestedHook({
+      const check = await providerListRequestedHook({
         dataSources: dataSourceMap,
         settings,
         event: {},
         logger: {} as never,
       });
 
-      expect(response).toStrictEqual({
+      expect(check).toStrictEqual({
         providers: ["debridlink", "alldebrid", "realdebrid"],
         rateLimitedProviders: {},
       });

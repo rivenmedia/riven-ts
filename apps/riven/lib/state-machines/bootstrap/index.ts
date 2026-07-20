@@ -104,7 +104,7 @@ export const bootstrapMachine = setup({
       pluginQueues: (_, { pluginQueues }) => pluginQueues,
       pluginWorkers: (_, { pluginWorkers }) => pluginWorkers,
       publishableEvents: (_, { publishableEvents }) => publishableEvents,
-      pluginSettings: (_, { settings }) => settings,
+      pluginSettings: (_, { pluginSettings }) => pluginSettings,
     }),
   },
   actors: {

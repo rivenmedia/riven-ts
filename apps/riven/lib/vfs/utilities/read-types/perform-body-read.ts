@@ -63,10 +63,7 @@ export async function performBodyRead(chunks: readonly ChunkMetadata[]) {
       undefined,
     ]));
 
-  const {
-    timeTaken,
-    result: { bytesFetched, fetchedChunks, fetchedChunksMetadata },
-  } = await benchmark(async () => {
+  const { timeTaken, result } = await benchmark(async () => {
     const fetchedChunks: Buffer[] = [];
     const fetchedChunksMetadata: ChunkMetadata[] = [];
 
@@ -97,6 +94,8 @@ export async function performBodyRead(chunks: readonly ChunkMetadata[]) {
       fetchedChunksMetadata,
     };
   });
+
+  const { bytesFetched, fetchedChunks, fetchedChunksMetadata } = result;
 
   if (fetchedChunksMetadata.length > 0) {
     const chunkLabels = fetchedChunksMetadata

@@ -89,12 +89,12 @@ export interface BaseDataSourceConfig<
 }
 
 export abstract class BaseDataSource<
-  T extends Record<string, unknown>,
+  DataSourceSettings extends Record<string, unknown>,
 > extends RESTDataSource {
   public abstract override readonly baseURL: string;
 
   public readonly serviceName: string;
-  public readonly settings: T;
+  public readonly settings: DataSourceSettings;
 
   public override readonly logger: Logger;
 
@@ -145,7 +145,7 @@ export abstract class BaseDataSource<
     telemetry,
     userAgent,
     ...apolloDataSourceOptions
-  }: BaseDataSourceConfig<T>) {
+  }: BaseDataSourceConfig<DataSourceSettings>) {
     super(apolloDataSourceOptions);
 
     this.#keyv = apolloDataSourceOptions.cache as KeyvAdapter;

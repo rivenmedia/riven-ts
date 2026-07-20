@@ -44,14 +44,14 @@ export async function persistDownloadResults(
     ),
   );
 
-  const processableStates = MediaItemState.extract([
+  const processableMediaItemStates = MediaItemState.extract([
     "scraped",
     "ongoing",
     "partially_completed",
   ]);
 
   assert.ok(
-    processableStates.safeParse(existingItem.state).success,
+    processableMediaItemStates.safeParse(existingItem.state).success,
     new MediaItemDownloadErrorIncorrectState({
       item: existingItem,
     }),
@@ -106,7 +106,7 @@ export async function persistDownloadResults(
         episodes.map((episode) => [episode.id, episode]),
       );
 
-      const processableStates = MediaItemState.exclude([
+      const processableItemStates = MediaItemState.exclude([
         "completed",
         "downloaded",
       ]);
@@ -123,7 +123,7 @@ export async function persistDownloadResults(
           ),
         );
 
-        if (!processableStates.safeParse(episode.state).success) {
+        if (!processableItemStates.safeParse(episode.state).success) {
           const { logger } =
             await import("../../../../utilities/logger/logger.ts");
 
@@ -156,16 +156,16 @@ export async function persistDownloadResults(
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((error) => {
-        if (Array.isArray(error)) {
-          return error
+      .transform((rawError) => {
+        if (Array.isArray(rawError)) {
+          return rawError
             .map((err) =>
               err.constraints ? Object.values(err.constraints).join("; ") : "",
             )
             .join("; ");
         }
 
-        return error.message;
+        return rawError.message;
       })
       .parse(error);
 

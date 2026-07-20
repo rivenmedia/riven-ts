@@ -29,11 +29,13 @@ const workspaceImports = [
 
 const workspaces = await Promise.all(
   workspaceImports.map(async (workspace) => {
-    const { docs } = (await import(`../.source/${workspace}/server`)) as {
+    const { docs: workspaceDocs } = (await import(
+      `../.source/${workspace}/server`
+    )) as {
       docs: WorkspaceEntry;
     };
 
-    return [workspace, docs.toFumadocsSource()];
+    return [workspace, workspaceDocs.toFumadocsSource()];
   }),
 );
 

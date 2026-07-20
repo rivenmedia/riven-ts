@@ -20,7 +20,7 @@ import type { PathInfo } from "../../database/services/vfs/schemas/path-info.sch
 import type { Loaded } from "@mikro-orm/core";
 import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
-let fd = 0;
+let fdCounter = 0;
 
 async function getStreamLinkFromCacheOrQueue(
   mediaEntry: Loaded<MediaEntry, "mediaItem.fullTitle">,
@@ -51,7 +51,7 @@ async function serveSubtitleFile(pathInfo: PathInfo) {
   assert.ok(subtitleEntry, new FuseError(Fuse.ENOENT, "Subtitle not found"));
 
   const contentBuffer = Buffer.from(subtitleEntry.content, "utf8");
-  const nextFd = (fd += 1);
+  const nextFd = (fdCounter += 1);
 
   fdToFileHandleMeta.set(nextFd, {
     type: "subtitle",
@@ -77,7 +77,7 @@ async function serveMediaFile(pathInfo: PathInfo) {
 
   const streamLink = await getStreamLinkFromCacheOrQueue(entry);
 
-  const nextFd = (fd += 1);
+  const nextFd = (fdCounter += 1);
 
   fileNameToFileChunkCalculationsMap.set(
     entry.originalFilename,

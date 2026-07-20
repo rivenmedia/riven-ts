@@ -22,10 +22,10 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
     const itemsToProcess =
       await services.downloaderService.getFanOutDownloadItems(item.id);
 
-    for (const item of itemsToProcess) {
+    for (const { id } of itemsToProcess) {
       await enqueueProcessMediaItem(
         {
-          id: item.id,
+          id,
           isRootItem: false,
         },
         {

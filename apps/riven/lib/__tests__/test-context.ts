@@ -219,7 +219,6 @@ export const it = testBase
     return queue;
   })
   .extend("createMockJob", async ({ mockQueue }) => {
-    const { randomUUID } = await import("node:crypto");
     const { Job } = await import("bullmq");
 
     return async <T>(data: T, opts?: JobsOptions) => {

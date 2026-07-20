@@ -40,7 +40,7 @@ export interface PluginRegistrarMachineContext extends MachineContext {
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: PublishableEventSet;
-  settings: PluginSettings | null;
+  pluginSettings: PluginSettings | null;
 }
 
 export interface PluginRegistrarMachineInput {
@@ -53,7 +53,7 @@ export interface PluginRegistrarMachineOutput {
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: PublishableEventSet;
-  settings: PluginSettings;
+  pluginSettings: PluginSettings;
 }
 
 export type PluginRegistrarMachineEvent =
@@ -144,7 +144,7 @@ export const pluginRegistrarMachine = setup({
 
         return pluginMap;
       },
-      settings: (_, { pluginSettings }) => pluginSettings,
+      pluginSettings: (_, { pluginSettings }) => pluginSettings,
     }),
     handleValidPlugin: assign(
       (
@@ -204,10 +204,10 @@ export const pluginRegistrarMachine = setup({
       },
     ),
     spawnValidators: assign(
-      ({ spawn, context: { pendingPlugins, settings } }) => {
+      ({ spawn, context: { pendingPlugins, pluginSettings } }) => {
         const validatorRefs = new Map<symbol, AnyActorRef>();
 
-        if (!settings) {
+        if (!pluginSettings) {
           throw new Error(
             "PluginSettings is not initialised. Have the plugins been registered?",
           );
@@ -218,7 +218,7 @@ export const pluginRegistrarMachine = setup({
             id: "validatePlugin",
             input: {
               plugin,
-              settings,
+              pluginSettings,
               dataSources: plugin.dataSources,
             },
           });
@@ -267,7 +267,7 @@ export const pluginRegistrarMachine = setup({
       pluginQueues: new Map(),
       pluginWorkers: new Map(),
       publishableEvents: new Set(),
-      settings: null,
+      pluginSettings: null,
       parsedPlugins: null,
     }),
     id: "Plugin registrar",
@@ -279,10 +279,10 @@ export const pluginRegistrarMachine = setup({
         pluginQueues,
         pluginWorkers,
         publishableEvents,
-        settings,
+        pluginSettings,
       },
     }) => {
-      if (!settings) {
+      if (!pluginSettings) {
         throw new Error(
           "PluginSettings is not available in the output context.",
         );
@@ -294,7 +294,7 @@ export const pluginRegistrarMachine = setup({
         pluginQueues,
         pluginWorkers,
         publishableEvents,
-        settings,
+        pluginSettings,
       };
     },
     states: {
@@ -370,14 +370,14 @@ export const pluginRegistrarMachine = setup({
           actions: [
             {
               type: "assignPluginHooks",
-              params: ({ context: { validPlugins, settings } }) => {
-                if (!settings) {
+              params: ({ context: { validPlugins, pluginSettings } }) => {
+                if (!pluginSettings) {
                   throw new Error(
                     "PluginSettings is not initialised. Have the plugins been registered?",
                   );
                 }
 
-                return registerPluginHookWorkers(validPlugins, settings);
+                return registerPluginHookWorkers(validPlugins, pluginSettings);
               },
             },
             {

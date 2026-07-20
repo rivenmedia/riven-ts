@@ -173,9 +173,10 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
    * @throws {SeerrAPIError} If the metadata providers are not set to TVDB.
    */
   async #validateOrFixMetadataProviderSettings() {
-    const response = await this.get<unknown>("settings/metadatas");
+    const getMetadatasResponse = await this.get<unknown>("settings/metadatas");
 
-    const metadataSettings = MetadataSettingsResponse.parse(response);
+    const metadataSettings =
+      MetadataSettingsResponse.parse(getMetadatasResponse);
     const isValid =
       this.#validateMetadataProviderSettingsResponse(metadataSettings);
 
@@ -184,11 +185,16 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     }
 
     if (this.settings.autofixMetadataProviders) {
-      const response = await this.put<unknown>("settings/metadatas", {
-        body: JSON.stringify({ tv: "tvdb", anime: "tvdb" }),
-      });
+      const updateMetadatasResponse = await this.put<unknown>(
+        "settings/metadatas",
+        {
+          body: JSON.stringify({ tv: "tvdb", anime: "tvdb" }),
+        },
+      );
 
-      const parsedResponse = MetadataSettingsResponse.parse(response);
+      const parsedResponse = MetadataSettingsResponse.parse(
+        updateMetadatasResponse,
+      );
 
       if (parsedResponse.tv !== "tvdb" || parsedResponse.anime !== "tvdb") {
         throw new FatalValidationError(
@@ -250,9 +256,13 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     // oxlint-disable-next-line no-bitwise
     const REQUIRED_TYPES = 4 | 128; // 132: Request Approved + Request Automatically Approved
 
-    const response = await this.get<unknown>("settings/notifications/webhook");
+    const getWebhookSettingsResponse = await this.get<unknown>(
+      "settings/notifications/webhook",
+    );
 
-    const webhookSettings = webhookSettingsSchema.parse(response);
+    const webhookSettings = webhookSettingsSchema.parse(
+      getWebhookSettingsResponse,
+    );
 
     if (!webhookSettings.enabled) {
       return;
@@ -304,12 +314,14 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
         },
       } satisfies WebhookSettings;
 
-      const response = await this.post<unknown>(
+      const updateWebhookSettingsResponse = await this.post<unknown>(
         "settings/notifications/webhook",
         { body: JSON.stringify(toMerged(webhookSettings, settingsPayload)) },
       );
 
-      const parsedResponse = UpdateWebhookSettingsResponse.parse(response);
+      const parsedResponse = UpdateWebhookSettingsResponse.parse(
+        updateWebhookSettingsResponse,
+      );
       const { isValid: isUpdatedSettingsValid } =
         this.#validateWebhookSettingsResponse(parsedResponse);
 

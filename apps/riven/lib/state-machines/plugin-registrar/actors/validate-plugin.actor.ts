@@ -13,14 +13,14 @@ import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-sett
 
 export interface ValidatePluginInput {
   plugin: RegisteredPlugin;
-  settings: PluginSettings;
+  pluginSettings: PluginSettings;
   dataSources: DataSourceMap;
 }
 
 export const validatePlugin = fromCallback<
   PluginRegistrarMachineEvent,
   ValidatePluginInput
->(({ input: { plugin, settings, dataSources }, sendBack }) => {
+>(({ input: { plugin, pluginSettings, dataSources }, sendBack }) => {
   function sendValidPluginEvent() {
     sendBack({
       type: "riven.plugin-valid",
@@ -52,7 +52,7 @@ export const validatePlugin = fromCallback<
 
         const { result: isValid, timeTaken } = await benchmark(async () =>
           plugin.config.validator({
-            settings,
+            settings: pluginSettings,
             dataSources,
           }),
         );

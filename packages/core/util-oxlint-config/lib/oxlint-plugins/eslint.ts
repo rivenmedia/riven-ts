@@ -57,7 +57,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "max-params": "off",
         "max-statements": "off",
         "no-magic-numbers": "off",
-        "no-shadow": "off",
         "prefer-named-capture-group": "off",
       },
     },
