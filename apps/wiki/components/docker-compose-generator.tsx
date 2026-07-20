@@ -222,7 +222,9 @@ function buildTSCompose(cfg: TSConfig): {
     );
 
     if (cfg.contentLists) {
-      const lists = cfg.contentLists.split(",").map((l) => `"${l.trim()}"`);
+      const lists = cfg.contentLists
+        .split(",")
+        .map((list) => `"${list.trim()}"`);
       envLines.push(
         `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__lists=[${lists.join(",")}]`,
       );
@@ -249,7 +251,9 @@ function buildTSCompose(cfg: TSConfig): {
     );
 
     if (cfg.contentLists) {
-      const lists = cfg.contentLists.split(",").map((l) => `"${l.trim()}"`);
+      const lists = cfg.contentLists
+        .split(",")
+        .map((list) => `"${list.trim()}"`);
       envLines.push(
         `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_LISTRR__movieLists=[${lists.join(",")}]`,
       );
@@ -434,7 +438,7 @@ function InputField({
 }: {
   label: string;
   value: string;
-  onChange: (v: string) => void;
+  onChange: (value: string) => void;
   placeholder?: string;
   hint?: string;
   type?: string;
@@ -446,8 +450,8 @@ function InputField({
       <input
         type={type}
         value={value}
-        onChange={(e) => {
-          onChange(e.target.value);
+        onChange={(event) => {
+          onChange(event.target.value);
         }}
         placeholder={placeholder}
         className={`w-full rounded-lg border border-fd-border bg-fd-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 ${mono ? "font-mono text-xs" : ""}`}
@@ -466,7 +470,7 @@ function CheckboxField({
   label: string;
   value: string;
   hint?: string;
-  onChange: (v: string) => void;
+  onChange: (value: string) => void;
   mono?: boolean;
 }) {
   return (
@@ -476,8 +480,8 @@ function CheckboxField({
           className="accent-purple-500"
           type="checkbox"
           checked={value === "true"}
-          onChange={(e) => {
-            onChange(e.target.checked ? "true" : "false");
+          onChange={(event) => {
+            onChange(event.target.checked ? "true" : "false");
           }}
         />
         <span className="ml-2">{label}</span>
@@ -495,7 +499,7 @@ function SelectField({
 }: {
   label: string;
   value: string;
-  onChange: (v: string) => void;
+  onChange: (value: string) => void;
   options: { value: string; label: string }[];
 }) {
   return (
@@ -503,8 +507,8 @@ function SelectField({
       <label className="mb-2 block text-sm font-medium">{label}</label>
       <select
         value={value}
-        onChange={(e) => {
-          onChange(e.target.value);
+        onChange={(event) => {
+          onChange(event.target.value);
         }}
         className="w-full rounded-lg border border-fd-border bg-fd-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50"
       >
@@ -724,8 +728,8 @@ function TSConfigForm({
       <InputField
         label="VFS Mount Path"
         value={config.vfsMountPath}
-        onChange={(v) => {
-          update("vfsMountPath", v);
+        onChange={(value) => {
+          update("vfsMountPath", value);
         }}
         placeholder="/mnt/riven"
         hint="Absolute path on your host for the FUSE mount"
@@ -734,8 +738,8 @@ function TSConfigForm({
       <InputField
         label="Logs Path"
         value={config.logsPath}
-        onChange={(v) => {
-          update("logsPath", v);
+        onChange={(value) => {
+          update("logsPath", value);
         }}
         placeholder="logs"
         hint="Absolute path on your host for the logs"
@@ -745,16 +749,16 @@ function TSConfigForm({
         <InputField
           label="DB User"
           value={config.dbUser}
-          onChange={(v) => {
-            update("dbUser", v);
+          onChange={(value) => {
+            update("dbUser", value);
           }}
           placeholder="riven"
         />
         <InputField
           label="DB Password"
           value={config.dbPassword}
-          onChange={(v) => {
-            update("dbPassword", v);
+          onChange={(value) => {
+            update("dbPassword", value);
           }}
           placeholder="changeme"
           mono
@@ -762,8 +766,8 @@ function TSConfigForm({
         <InputField
           label="DB Name"
           value={config.dbName}
-          onChange={(v) => {
-            update("dbName", v);
+          onChange={(value) => {
+            update("dbName", value);
           }}
           placeholder="riven"
         />
@@ -781,8 +785,8 @@ function TSConfigForm({
       <SelectField
         label="Media Server"
         value={config.mediaServer}
-        onChange={(v) => {
-          update("mediaServer", v as MediaServer);
+        onChange={(value) => {
+          update("mediaServer", value as MediaServer);
         }}
         options={[
           { value: "none", label: "None (I'll add it later)" },
@@ -797,8 +801,8 @@ function TSConfigForm({
       <InputField
         label="TMDB API Key (required)"
         value={config.tmdbApiKey}
-        onChange={(v) => {
-          update("tmdbApiKey", v);
+        onChange={(value) => {
+          update("tmdbApiKey", value);
         }}
         placeholder="Your TMDB API key"
         hint="Get one free at themoviedb.org/settings/api"
@@ -809,8 +813,8 @@ function TSConfigForm({
         <SelectField
           label="Debrid Provider"
           value={config.debridProvider}
-          onChange={(v) => {
-            update("debridProvider", v as TSConfig["debridProvider"]);
+          onChange={(value) => {
+            update("debridProvider", value as TSConfig["debridProvider"]);
           }}
           options={[
             { value: "realdebrid", label: "Real-Debrid" },
@@ -823,8 +827,8 @@ function TSConfigForm({
           <InputField
             label="Debrid API Key"
             value={config.debridApiKey}
-            onChange={(v) => {
-              update("debridApiKey", v);
+            onChange={(value) => {
+              update("debridApiKey", value);
             }}
             placeholder="Your debrid API key"
             mono
@@ -835,8 +839,8 @@ function TSConfigForm({
       <SelectField
         label="Content Source"
         value={config.contentSource}
-        onChange={(v) => {
-          update("contentSource", v as TSConfig["contentSource"]);
+        onChange={(value) => {
+          update("contentSource", value as TSConfig["contentSource"]);
         }}
         options={[
           { value: "mdblist", label: "MDBList" },
@@ -851,8 +855,8 @@ function TSConfigForm({
           <InputField
             label={`${config.contentSource === "mdblist" ? "MDBList" : config.contentSource === "seerr" ? "Seerr" : "Listrr"} API Key`}
             value={config.contentApiKey}
-            onChange={(v) => {
-              update("contentApiKey", v);
+            onChange={(value) => {
+              update("contentApiKey", value);
             }}
             placeholder="API key"
             mono
@@ -861,8 +865,8 @@ function TSConfigForm({
             <InputField
               label="Seerr URL"
               value={config.seerrUrl}
-              onChange={(v) => {
-                update("seerrUrl", v);
+              onChange={(value) => {
+                update("seerrUrl", value);
               }}
               placeholder="http://seerr:5055"
             />
@@ -872,8 +876,8 @@ function TSConfigForm({
             <InputField
               label="Lists (comma-separated)"
               value={config.contentLists}
-              onChange={(v) => {
-                update("contentLists", v);
+              onChange={(value) => {
+                update("contentLists", value);
               }}
               placeholder="user/list-name, user/another-list"
               hint={
@@ -890,8 +894,8 @@ function TSConfigForm({
         label="Add analytics services?"
         hint="Adds analytics services for monitoring Riven's internal queues and cache. Recommended for advanced users. No data is sent to third parties - these are self-hosted services that connect directly to your Riven instance."
         value={config.addAnalyticsServices ? "true" : "false"}
-        onChange={(v) => {
-          update("addAnalyticsServices", v === "true");
+        onChange={(value) => {
+          update("addAnalyticsServices", value === "true");
         }}
       />
     </div>
@@ -910,8 +914,8 @@ function V1ConfigForm({
       <InputField
         label="Timezone"
         value={config.timezone}
-        onChange={(v) => {
-          update("timezone", v);
+        onChange={(value) => {
+          update("timezone", value);
         }}
         placeholder="Europe/UTC"
         hint="e.g., America/New_York, Europe/Zurich"
@@ -921,16 +925,16 @@ function V1ConfigForm({
         <InputField
           label="PUID"
           value={config.puid}
-          onChange={(v) => {
-            update("puid", v);
+          onChange={(value) => {
+            update("puid", value);
           }}
           type="number"
         />
         <InputField
           label="PGID"
           value={config.pgid}
-          onChange={(v) => {
-            update("pgid", v);
+          onChange={(value) => {
+            update("pgid", value);
           }}
           type="number"
         />
@@ -940,16 +944,16 @@ function V1ConfigForm({
         <InputField
           label="Frontend Port"
           value={config.frontendPort}
-          onChange={(v) => {
-            update("frontendPort", v);
+          onChange={(value) => {
+            update("frontendPort", value);
           }}
           type="number"
         />
         <InputField
           label="Backend Port"
           value={config.backendPort}
-          onChange={(v) => {
-            update("backendPort", v);
+          onChange={(value) => {
+            update("backendPort", value);
           }}
           type="number"
         />
@@ -958,8 +962,8 @@ function V1ConfigForm({
       <InputField
         label="Origin URL"
         value={config.originUrl}
-        onChange={(v) => {
-          update("originUrl", v);
+        onChange={(value) => {
+          update("originUrl", value);
         }}
         placeholder="http://localhost:3000"
         hint="The URL where you'll access the frontend"
@@ -968,8 +972,8 @@ function V1ConfigForm({
       <InputField
         label="Host Mount Path"
         value={config.hostMountPath}
-        onChange={(v) => {
-          update("hostMountPath", v);
+        onChange={(value) => {
+          update("hostMountPath", value);
         }}
         placeholder="/mnt/riven"
       />
@@ -977,8 +981,8 @@ function V1ConfigForm({
       <SelectField
         label="Media Server"
         value={config.mediaServer}
-        onChange={(v) => {
-          update("mediaServer", v as MediaServer);
+        onChange={(value) => {
+          update("mediaServer", value as MediaServer);
         }}
         options={[
           { value: "none", label: "None (I'll add it later)" },
@@ -1004,8 +1008,8 @@ function V1ConfigForm({
         <InputField
           label="Backend API Key"
           value={config.backendApiKey}
-          onChange={(v) => {
-            update("backendApiKey", v);
+          onChange={(value) => {
+            update("backendApiKey", value);
           }}
           placeholder="Click 'Generate All'"
           mono
@@ -1013,8 +1017,8 @@ function V1ConfigForm({
         <InputField
           label="Auth Secret"
           value={config.authSecret}
-          onChange={(v) => {
-            update("authSecret", v);
+          onChange={(value) => {
+            update("authSecret", value);
           }}
           placeholder="Click 'Generate All'"
           mono
@@ -1022,8 +1026,8 @@ function V1ConfigForm({
         <InputField
           label="Database Password"
           value={config.dbPassword}
-          onChange={(v) => {
-            update("dbPassword", v);
+          onChange={(value) => {
+            update("dbPassword", value);
           }}
           placeholder="Click 'Generate All'"
           mono
@@ -1049,19 +1053,19 @@ function TSPreview({
             { id: "compose", label: "2. docker-compose.yml" },
             { id: "env", label: "3. .env" },
           ] as const
-        ).map((t) => (
+        ).map(({ id, label }) => (
           <button
-            key={t.id}
+            key={id}
             onClick={() => {
-              setTab(t.id);
+              setTab(id);
             }}
             className={`px-4 py-2 text-sm font-medium transition-colors ${
-              tab === t.id
+              tab === id
                 ? "border-b-2 border-purple-500 text-purple-400"
                 : "text-fd-muted-foreground hover:text-fd-foreground"
             }`}
           >
-            {t.label}
+            {label}
           </button>
         ))}
       </div>

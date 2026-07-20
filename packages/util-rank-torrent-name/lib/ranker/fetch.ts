@@ -57,8 +57,8 @@ function checkRequired(
     return false;
   }
 
-  const hasRequired = settings.compiledRequire.some((p) =>
-    p.test(data.rawTitle),
+  const hasRequired = settings.compiledRequire.some((requirePattern) =>
+    requirePattern.test(data.rawTitle),
   );
 
   if (!hasRequired) {

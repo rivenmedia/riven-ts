@@ -1,3 +1,4 @@
+// oxlint-disable id-length
 const translationTable: Record<string, string | null> = {
   ā: "a",
   ă: "a",
@@ -98,6 +99,7 @@ const translationTable: Record<string, string | null> = {
   "&": "and",
   _: " ",
 };
+// oxlint-enable id-length
 
 export function normaliseTitle(rawTitle: string, lower = true): string {
   let text = lower ? rawTitle.toLowerCase() : rawTitle;

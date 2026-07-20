@@ -322,8 +322,8 @@ export const pluginRegistrarMachine = setup({
                         message: [
                           `Collected ${chalk.bold(parsedPlugins.validPlugins.length.toString())} plugins for validation:`,
                           parsedPlugins.validPlugins
-                            .map((p) =>
-                              chalk.bold(p.name.description?.toString()),
+                            .map(({ name }) =>
+                              chalk.bold(name.description?.toString()),
                             )
                             .join(", "),
                         ].join(" "),

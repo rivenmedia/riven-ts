@@ -349,7 +349,7 @@ export const bootstrapMachine = setup({
                     message: `Plugins registered successfully. ${[
                       ...validPlugins.keys(),
                     ]
-                      .map((k) => chalk.bold(k.description))
+                      .map(({ description }) => chalk.bold(description))
                       .join(", ")}.`,
                   }),
                 },

@@ -41,7 +41,7 @@ export const startGqlServer = fromPromise<
 >(async ({ input: { mainRunnerRef, validPlugins } }) => {
   const pluginResolvers = validPlugins
     .values()
-    .flatMap((p) => p.config.resolvers)
+    .flatMap(({ config }) => config.resolvers)
     .toArray();
 
   const app = express();

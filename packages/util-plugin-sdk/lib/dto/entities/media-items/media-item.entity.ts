@@ -90,7 +90,9 @@ export abstract class MediaItem {
     return (
       this.language !== "en" &&
       ["animation", "anime"].every((genre) =>
-        this.genres?.map((g) => g.toLowerCase()).includes(genre),
+        this.genres
+          ?.map((genreName) => genreName.toLowerCase())
+          .includes(genre),
       )
     );
   }

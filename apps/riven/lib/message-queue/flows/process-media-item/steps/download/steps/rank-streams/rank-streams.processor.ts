@@ -32,7 +32,7 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
       RankedResult[]
     >((acc, [hash, rawTitle]) => {
       try {
-        const stream = streams.find((s) => s.infoHash === hash);
+        const stream = streams.find(({ infoHash }) => infoHash === hash);
 
         if (!stream) {
           throw new NotFoundError(

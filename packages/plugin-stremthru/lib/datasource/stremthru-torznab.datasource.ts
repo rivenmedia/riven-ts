@@ -37,6 +37,7 @@ export class StremThruTorznabAPI extends BaseDataSource<StremThruSettings> {
   > {
     try {
       const params = new URLSearchParams({
+        // oxlint-disable-next-line id-length
         o: "json",
       });
 

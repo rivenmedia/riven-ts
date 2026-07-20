@@ -8,13 +8,19 @@ export const oxlintPluginEslintConfig = defineConfig({
       files: [tsFiles, jsFiles],
       rules: {
         eqeqeq: ["error", "smart"],
-        // "id-length": [
-        //   "warn",
-        //   {
-        //     exceptions: ["a", "b", "z", "_"],
-        //     checkGeneric: false,
-        //   },
-        // ],
+        "id-length": [
+          "error",
+          {
+            exceptions: [
+              "a", // Used in sort callbacks
+              "b", // Used in sort callbacks
+              "i", // Used in loops
+              "z", // Allow zod import
+              "_", // Used to denote an unused variable
+            ],
+            checkGeneric: false,
+          },
+        ],
         "sort-imports": "off", // Handled by oxfmt
         "sort-keys": "off", // This can cause issues in TS and isn't completely auto-fixable
         "no-inline-comments": "off",
@@ -44,7 +50,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "class-methods-use-this": "off",
         complexity: "off",
         "func-style": "off",
-        "id-length": "off",
         "max-classes-per-file": "off",
         "max-depth": "off",
         "max-lines": "off",
