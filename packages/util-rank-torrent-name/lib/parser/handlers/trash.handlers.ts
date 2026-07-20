@@ -6,47 +6,50 @@ export const trashHandlers: Handler[] = [
   {
     field: "trash",
     pattern: new RegExp(
-      "\\b(?:H[DQ][ .-]*)?CAM(?!.?(S|E|\\()\\d+)(?:H[DQ])?(?:[ .-]*Rip|Rp)?\\b",
+      String.raw`\b(?:H[DQ][ .-]*)?CAM(?!.?(S|E|\()\d+)(?:H[DQ])?(?:[ .-]*Rip|Rp)?\b`,
       "i",
     ),
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp("\\b(?:H[DQ][ .-]*)?S[ .-]print\\b", "i"),
+    pattern: new RegExp(String.raw`\b(?:H[DQ][ .-]*)?S[ .-]print\b`, "i"),
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
     pattern: new RegExp(
-      "\\b(?:HD[ .-]*)?T(?:ELE)?(C|S)(?:INE|YNC)?(?:Rip)?\\b",
+      String.raw`\b(?:HD[ .-]*)?T(?:ELE)?(C|S)(?:INE|YNC)?(?:Rip)?\b`,
       "i",
     ),
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp("\\bPre.?DVD(?:Rip)?\\b", "i"),
+    pattern: new RegExp(String.raw`\bPre.?DVD(?:Rip)?\b`, "i"),
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp("\\b(?:DVD?|BD|BR|HD)?[ .-]*Scr(?:eener)?\\b", "i"),
+    pattern: new RegExp(
+      String.raw`\b(?:DVD?|BD|BR|HD)?[ .-]*Scr(?:eener)?\b`,
+      "i",
+    ),
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp("\\bDVB[ .-]*(?:Rip)?\\b", "i"),
+    pattern: new RegExp(String.raw`\bDVB[ .-]*(?:Rip)?\b`, "i"),
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp("\\bSAT[ .-]*Rips?\\b", "i"),
+    pattern: new RegExp(String.raw`\bSAT[ .-]*Rips?\b`, "i"),
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp("\\bLeaked\\b", "i"),
+    pattern: new RegExp(String.raw`\bLeaked\b`, "i"),
     transform: transforms.toBoolean(),
   },
   {
@@ -56,17 +59,17 @@ export const trashHandlers: Handler[] = [
   },
   {
     field: "trash",
-    pattern: new RegExp("\\bR5|R6\\b", "i"),
+    pattern: new RegExp(String.raw`\bR5|R6\b`, "i"),
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp("\\bDeleted.*Scenes?\\b", "i"),
+    pattern: new RegExp(String.raw`\bDeleted.*Scenes?\b`, "i"),
     transform: transforms.toBoolean(),
   },
   {
     field: "trash",
-    pattern: new RegExp("\\bHQ.?(Clean)?.?(Aud(io)?)?\\b", "i"),
+    pattern: new RegExp(String.raw`\bHQ.?(Clean)?.?(Aud(io)?)?\b`, "i"),
     transform: transforms.toBoolean(),
   },
   {

@@ -16,7 +16,7 @@ const parser = new Parser()
   .addHandlers([
     {
       field: "channels",
-      pattern: new RegExp("\\+?2[\\.\\s]0(?:x[2-4])?\\b", "i"),
+      pattern: new RegExp(String.raw`\+?2[\.\s]0(?:x[2-4])?\b`, "i"),
       transform: transforms.toValueSet("2.0"),
       remove: true,
       keepMatching: true,
@@ -24,7 +24,7 @@ const parser = new Parser()
     {
       field: "complete",
       pattern: new RegExp(
-        "(?:\\bthe\\W)?(?:\\bcomplete\\b|\\bfull\\b|\\ball\\b)\\b.*\\b(?:series|seasons|collection|episodes|set|pack|movies)\\b",
+        String.raw`(?:\bthe\W)?(?:\bcomplete\b|\bfull\b|\ball\b)\b.*\b(?:series|seasons|collection|episodes|set|pack|movies)\b`,
         "i",
       ),
       transform: transforms.toBoolean(),
@@ -43,7 +43,7 @@ const parser = new Parser()
             return meta;
           }
 
-          const episodePattern = new RegExp("\\b\\d{1,4}\\b");
+          const episodePattern = new RegExp(String.raw`\b\d{1,4}\b`);
           const matches = episodePattern.exec(title);
 
           if (matches) {
@@ -60,7 +60,7 @@ const parser = new Parser()
   .addHandlers([
     {
       field: "bitrate",
-      pattern: new RegExp("\\b\\d+[kmg]bps\\b", "i"),
+      pattern: new RegExp(String.raw`\b\d+[kmg]bps\b`, "i"),
       matchGroup: 1,
       remove: true,
       transform: transforms.toLowercase(),

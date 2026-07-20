@@ -72,14 +72,14 @@ describe("when the config file exists and is valid", () => {
 
     await writeValidConfigFile(configPath, {
       settings: {
-        exclude: ["\\btest\\b"],
+        exclude: [String.raw`\btest\b`],
         resolutions: { r1080p: false, r720p: false },
       },
     });
 
     const { settings } = await loadRankingConfig(configPath);
 
-    expect(settings.exclude).toEqual(["\\btest\\b"]);
+    expect(settings.exclude).toEqual([String.raw`\btest\b`]);
     expect(settings.resolutions.r1080p).toBe(false);
     expect(settings.resolutions.r720p).toBe(false);
   });
@@ -132,7 +132,7 @@ describe("when the config file contains invalid JSON", () => {
     await writeInvalidConfigFile(configPath, "{bad}");
 
     await expect(loadRankingConfig(configPath)).rejects.toThrow(
-      new RegExp(path.basename(configPath).replace(".", "\\.")),
+      new RegExp(path.basename(configPath).replace(".", String.raw`\.`)),
     );
   });
 });

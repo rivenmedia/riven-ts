@@ -85,13 +85,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+            __html: JSON.stringify(jsonLd).replace(/</g, String.raw`\u003c`),
           }}
         />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(jsonLdProject).replace(/</g, "\\u003c"),
+            __html: JSON.stringify(jsonLdProject).replace(
+              /</g,
+              String.raw`\u003c`,
+            ),
           }}
         />
       </head>

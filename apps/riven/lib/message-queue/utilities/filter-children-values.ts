@@ -58,7 +58,7 @@ export function filterChildrenValues<T extends string | undefined>(
   id?: T,
 ) {
   type ExpectedValue = T extends undefined ? Record<string, unknown> : unknown;
-  const keyPattern = `bull:${queueNameFor(queueName, pluginName)}:${id ? `${id}` : "[\\w-$]+"}`;
+  const keyPattern = `bull:${queueNameFor(queueName, pluginName)}:${id ? `${id}` : String.raw`[\w-$]+`}`;
 
   if (id) {
     return childrenValues[keyPattern] as ExpectedValue;
