@@ -124,7 +124,7 @@ export abstract class FileSystemEntry {
 
     // Remove periods from path parts to avoid directories being parsed as files
     const sanitisedPathParts = pathParts.map((part) =>
-      part.replaceAll(/\./g, ""),
+      part.replaceAll(".", ""),
     );
 
     this.path = path.join(...sanitisedPathParts, await this.getVfsFileName());

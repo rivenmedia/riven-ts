@@ -97,7 +97,8 @@ export async function getEntry(em: EntityManager, pathInfo: PathInfo) {
       );
     }
     case "all-movies":
-    case "all-shows":
+    case "all-shows": {
       return null;
+    }
   }
 }

@@ -13,18 +13,21 @@ function getMediaItemStep(
 ): ProcessMediaItemFlow["input"]["step"] {
   switch (item.state) {
     case "partially_completed":
-    case "indexed":
+    case "indexed": {
       return "scrape";
-    case "scraped":
+    }
+    case "scraped": {
       return "download";
+    }
     case "downloaded":
     case "failed":
     case "completed":
     case "ongoing":
     case "paused":
     case "unknown":
-    case "unreleased":
+    case "unreleased": {
       throw new Error(`Unexpected media item state: ${item.state}`);
+    }
   }
 }
 

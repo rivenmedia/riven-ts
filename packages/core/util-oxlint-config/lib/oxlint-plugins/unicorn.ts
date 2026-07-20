@@ -17,7 +17,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "unicorn/no-array-reduce": "off",
-        "unicorn/switch-case-braces": "off",
         "unicorn/no-array-callback-reference": "off",
         "unicorn/custom-error-definition": "off",
         "unicorn/filename-case": "off",

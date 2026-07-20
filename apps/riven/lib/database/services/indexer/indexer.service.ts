@@ -36,10 +36,12 @@ export class IndexerService extends BaseService {
   @CreateRequestContext()
   public async indexItem(item: MovieIndexData | ShowIndexData) {
     switch (item.type) {
-      case "movie":
+      case "movie": {
         return this.indexMovie(item);
-      case "show":
+      }
+      case "show": {
         return this.indexShow(item);
+      }
     }
   }
 

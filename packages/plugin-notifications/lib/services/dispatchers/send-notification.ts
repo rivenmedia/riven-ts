@@ -13,9 +13,11 @@ export async function sendNotification(
   const service = parseNotificationUrl(rawUrl);
 
   switch (service.type) {
-    case "discord":
+    case "discord": {
       return discordDispatcher.send(service, payload, api);
-    case "json":
+    }
+    case "json": {
       return jsonWebhookDispatcher.send(service, payload, api);
+    }
   }
 }
