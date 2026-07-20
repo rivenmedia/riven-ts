@@ -32,7 +32,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         // Type-aware rules that are disabled for now, but will be enabled in the future
         "unicorn/consistent-function-scoping": "off",
         "unicorn/prefer-native-coercion-functions": "off",
-        "unicorn/no-useless-collection-argument": "off",
         "unicorn/no-immediate-mutation": "off",
       },
     },

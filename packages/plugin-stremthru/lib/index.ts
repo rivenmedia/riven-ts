@@ -169,7 +169,7 @@ export default {
         StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
       ]);
 
-      const expiredStatusCodes = new Set<StatusCodes>([]);
+      const expiredStatusCodes = new Set<StatusCodes>();
 
       if (item.provider === "torbox") {
         expiredStatusCodes.add(StatusCodes.BAD_REQUEST);
