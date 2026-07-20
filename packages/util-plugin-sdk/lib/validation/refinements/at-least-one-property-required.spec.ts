@@ -21,7 +21,7 @@ it("fails the refinement if all properties are nullish", () => {
   });
 
   expect(success).toBe(false);
-  expect(error).toEqual(
+  expect(error).toStrictEqual(
     expect.objectContaining({
       issues: [
         expect.objectContaining({
@@ -98,7 +98,7 @@ it('only checks specified fields when "fields" parameter is provided', () => {
   });
 
   expect(success).toBe(false);
-  expect(error).toEqual(
+  expect(error).toStrictEqual(
     expect.objectContaining({
       issues: [
         expect.objectContaining({
@@ -128,7 +128,7 @@ it('checks all properties when "fields" parameter is not provided', () => {
   });
 
   expect(success).toBe(false);
-  expect(error).toEqual(
+  expect(error).toStrictEqual(
     expect.objectContaining({
       issues: [
         expect.objectContaining({
@@ -150,7 +150,7 @@ it("fails the refinement if an empty object is provided against a record schema"
   const { success, error } = schema.safeParse({});
 
   expect(success).toBe(false);
-  expect(error).toEqual(
+  expect(error).toStrictEqual(
     expect.objectContaining({
       issues: [
         expect.objectContaining({

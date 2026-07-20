@@ -8,7 +8,7 @@ import { buildEmbed } from "./build-embed.ts";
 it("includes the thumbnail when posterPath is provided", () => {
   const embed = buildEmbed(notificationPayloadFixture);
 
-  expect(embed.thumbnail).toEqual({
+  expect(embed.thumbnail).toStrictEqual({
     url: notificationPayloadFixture.posterPath,
   });
 });

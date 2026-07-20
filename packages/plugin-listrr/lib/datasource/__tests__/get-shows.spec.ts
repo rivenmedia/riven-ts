@@ -16,7 +16,7 @@ it("returns an empty array if no content lists are provided", async ({
   const listrrApi = dataSourceMap.get(ListrrAPI);
   const shows = await listrrApi.getShows(new Set());
 
-  expect(shows).toEqual([]);
+  expect(shows).toStrictEqual([]);
 });
 
 it("retrieves shows from each provided list", async ({

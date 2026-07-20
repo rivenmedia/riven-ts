@@ -79,7 +79,7 @@ describe("when the config file exists and is valid", () => {
 
     const { settings } = await loadRankingConfig(configPath);
 
-    expect(settings.exclude).toEqual([String.raw`\btest\b`]);
+    expect(settings.exclude).toStrictEqual([String.raw`\btest\b`]);
     expect(settings.resolutions.r1080p).toBe(false);
     expect(settings.resolutions.r720p).toBe(false);
   });

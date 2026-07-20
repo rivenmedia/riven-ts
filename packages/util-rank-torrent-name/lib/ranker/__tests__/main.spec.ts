@@ -152,7 +152,7 @@ it("sorts torrents correctly", ({ rankingConfig }) => {
   );
   const sortedTorrents = rtnInstance.sortTorrents(rankedTorrents);
 
-  expect(sortedTorrents.map(({ hash }) => hash)).toEqual(expectedOrder);
+  expect(sortedTorrents.map(({ hash }) => hash)).toStrictEqual(expectedOrder);
 });
 
 it("sorts torrents with a resolution filter correctly", ({ rankingConfig }) => {
@@ -203,7 +203,7 @@ it("sorts torrents with a resolution filter correctly", ({ rankingConfig }) => {
     "1234567890123456789012345678901234567890", // Sprint.2024.S01.COMPLETE.4k.WEBDL.h264-EDITH[TGx]
   ];
 
-  expect(sortedTorrents.map(({ hash }) => hash)).toEqual(expectedOrder);
+  expect(sortedTorrents.map(({ hash }) => hash)).toStrictEqual(expectedOrder);
 });
 
 it.for([
@@ -268,8 +268,8 @@ it.for([
     const data = parse(rawTitle);
 
     expect(data.type).toBe(expectedType);
-    expect(data.seasons).toEqual(expectedSeasons);
-    expect(data.episodes).toEqual(expectedEpisodes);
+    expect(data.seasons).toStrictEqual(expectedSeasons);
+    expect(data.episodes).toStrictEqual(expectedEpisodes);
   },
 );
 

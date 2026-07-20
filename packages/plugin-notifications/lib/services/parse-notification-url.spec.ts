@@ -9,7 +9,7 @@ describe("discord", () => {
       "discord://1234567890/abcdefghijklmnop",
     );
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       type: "discord",
       webhookId: "1234567890",
       webhookToken: "abcdefghijklmnop",
@@ -27,7 +27,7 @@ describe("json", () => {
   it("parses a json:// URL as HTTP", () => {
     const result = parseNotificationUrl("json://example.com/webhook");
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       type: "json",
       url: "http://example.com/webhook",
     });
@@ -36,7 +36,7 @@ describe("json", () => {
   it("parses a jsons:// URL as HTTPS", () => {
     const result = parseNotificationUrl("jsons://example.com/webhook");
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       type: "json",
       url: "https://example.com/webhook",
     });
@@ -45,7 +45,7 @@ describe("json", () => {
   it("preserves port in json URL", () => {
     const result = parseNotificationUrl("json://example.com:8080/webhook");
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       type: "json",
       url: "http://example.com:8080/webhook",
     });
@@ -54,7 +54,7 @@ describe("json", () => {
   it("preserves query parameters", () => {
     const result = parseNotificationUrl("json://example.com/webhook?key=value");
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       type: "json",
       url: "http://example.com/webhook?key=value",
     });

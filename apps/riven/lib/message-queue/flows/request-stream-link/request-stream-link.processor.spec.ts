@@ -97,7 +97,7 @@ it("does not request a new stream link if the media entry has a pre-existing per
     queueName: job.queueName,
   });
 
-  expect(children).not.toEqual(
+  expect(children).not.toStrictEqual(
     expect.arrayContaining([
       {
         job: expect.objectContaining({

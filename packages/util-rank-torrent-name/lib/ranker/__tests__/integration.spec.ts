@@ -110,8 +110,8 @@ describe("rankTorrent (integration)", () => {
     );
 
     expect(result.data.type).toBe("show");
-    expect(result.data.seasons).toEqual([1]);
-    expect(result.data.episodes).toEqual([1]);
+    expect(result.data.seasons).toStrictEqual([1]);
+    expect(result.data.episodes).toStrictEqual([1]);
   });
 
   it("works with custom settings", ({ rankingConfig }) => {

@@ -66,7 +66,7 @@ it("does not include trashed streams", async ({
     },
   );
 
-  expect(result).toEqual(
+  expect(result).toStrictEqual(
     expect.not.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -115,7 +115,7 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
     },
   );
 
-  expect(result).toEqual([
+  expect(result).toStrictEqual([
     expect.objectContaining({
       data: expect.objectContaining({
         rawTitle: `${indexedMovie.title} 720p DDP`,
@@ -183,7 +183,7 @@ it("handles foreign language movies with aliases correctly", async ({
     },
   );
 
-  expect(result).toEqual([
+  expect(result).toStrictEqual([
     expect.objectContaining({
       data: expect.objectContaining({
         rawTitle: "Película Extranjera 1080p BluRay",
@@ -236,7 +236,7 @@ it("handles foreign language shows with aliases correctly", async ({
     },
   );
 
-  expect(result).toEqual([
+  expect(result).toStrictEqual([
     expect.objectContaining({
       data: expect.objectContaining({
         rawTitle: "Espectáculo Extranjero 1080p BluRay",

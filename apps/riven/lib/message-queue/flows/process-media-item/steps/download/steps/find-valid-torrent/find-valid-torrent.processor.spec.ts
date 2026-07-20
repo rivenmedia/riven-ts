@@ -229,7 +229,7 @@ it("returns the plugin and validated result on successful validation", async ({
     mockFlowProcessorContext,
   );
 
-  expect(result).toEqual({
+  expect(result).toStrictEqual({
     plugin: "@repo/plugin-test",
     result: {
       torrentId: "mock-torrent-id",
@@ -296,7 +296,7 @@ it("updates job data with the failed info hash when an invalid torrent is return
     mockFlowProcessorContext,
   );
 
-  expect(job.data.failedInfoHashes).toEqual([stream.infoHash]);
+  expect(job.data.failedInfoHashes).toStrictEqual([stream.infoHash]);
 });
 
 it("returns null if no valid torrent is found after trying all plugins", async ({

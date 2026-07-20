@@ -6,12 +6,12 @@ describe("createSettings", () => {
   it("creates default settings from empty input", () => {
     const settings = createSettings();
 
-    expect(settings.require).toEqual([]);
-    expect(settings.exclude).toEqual([]);
-    expect(settings.preferred).toEqual([]);
-    expect(settings.compiledRequire).toEqual([]);
-    expect(settings.compiledExclude).toEqual([]);
-    expect(settings.compiledPreferred).toEqual([]);
+    expect(settings.require).toStrictEqual([]);
+    expect(settings.exclude).toStrictEqual([]);
+    expect(settings.preferred).toStrictEqual([]);
+    expect(settings.compiledRequire).toStrictEqual([]);
+    expect(settings.compiledExclude).toStrictEqual([]);
+    expect(settings.compiledPreferred).toStrictEqual([]);
   });
 
   it("creates settings from partial input", () => {
@@ -20,7 +20,7 @@ describe("createSettings", () => {
       resolutions: { r2160p: true },
     });
 
-    expect(settings.require).toEqual(["1080p"]);
+    expect(settings.require).toStrictEqual(["1080p"]);
     expect(settings.compiledRequire).toHaveLength(1);
     expect(settings.resolutions.r2160p).toBe(true);
 
@@ -72,9 +72,9 @@ describe("createSettings", () => {
   it("accepts empty language config", () => {
     const settings = createSettings();
 
-    expect(settings.languages.required).toEqual([]);
-    expect(settings.languages.allowed).toEqual([]);
-    expect(settings.languages.exclude).toEqual([]);
-    expect(settings.languages.preferred).toEqual([]);
+    expect(settings.languages.required).toStrictEqual([]);
+    expect(settings.languages.allowed).toStrictEqual([]);
+    expect(settings.languages.exclude).toStrictEqual([]);
+    expect(settings.languages.preferred).toStrictEqual([]);
   });
 });

@@ -31,7 +31,7 @@ it("returns the media item if processed successfully", async ({
   });
 
   expect(result).instanceOf(Show);
-  expect(result).toEqual(
+  expect(result).toStrictEqual(
     expect.objectContaining({
       title: "Test Show",
       type: "show",
@@ -126,7 +126,7 @@ it("updates the media item with the latest data if it already exists", async ({
     status: "upcoming",
   });
 
-  expect(wrap(initialShow).toJSON()).toEqual(
+  expect(wrap(initialShow).toJSON()).toStrictEqual(
     expect.objectContaining({
       aliases: {
         en: ["en-alias"],
@@ -143,7 +143,7 @@ it("updates the media item with the latest data if it already exists", async ({
 
   expect.assert(initialEpisodes[0]);
 
-  expect(wrap(initialEpisodes[0]).toJSON()).toEqual(
+  expect(wrap(initialEpisodes[0]).toJSON()).toStrictEqual(
     expect.objectContaining({
       title: "TBA",
       state: "unreleased",
@@ -204,7 +204,7 @@ it("updates the media item with the latest data if it already exists", async ({
     status: "upcoming",
   });
 
-  expect(wrap(updatedUpcomingShow).toJSON()).toEqual(
+  expect(wrap(updatedUpcomingShow).toJSON()).toStrictEqual(
     expect.objectContaining({
       aliases: {
         fr: ["fr-alias"],
@@ -221,7 +221,7 @@ it("updates the media item with the latest data if it already exists", async ({
 
   expect.assert(updatedUpcomingEpisodes[0]);
 
-  expect(wrap(updatedUpcomingEpisodes[0]).toJSON()).toEqual(
+  expect(wrap(updatedUpcomingEpisodes[0]).toJSON()).toStrictEqual(
     expect.objectContaining({
       title: "Episode 1",
       state: "unreleased",
@@ -283,7 +283,7 @@ it("updates the media item with the latest data if it already exists", async ({
     status: "continuing",
   });
 
-  expect(wrap(updatedOngoingShow).toJSON()).toEqual(
+  expect(wrap(updatedOngoingShow).toJSON()).toStrictEqual(
     expect.objectContaining({
       state: "ongoing",
       nextAirDate: firstEpisodeAirDate.plus({ weeks: 1 }).toJSDate(),
@@ -296,7 +296,7 @@ it("updates the media item with the latest data if it already exists", async ({
 
   expect.assert(updatedOngoingEpisodes[0]);
 
-  expect(wrap(updatedOngoingEpisodes[0]).toJSON()).toEqual(
+  expect(wrap(updatedOngoingEpisodes[0]).toJSON()).toStrictEqual(
     expect.objectContaining({
       title: "Episode 1",
       state: "indexed",
@@ -315,7 +315,7 @@ it("updates the media item with the latest data if it already exists", async ({
 
   expect.assert(seasons[0]);
 
-  expect(wrap(seasons[0]).toJSON()).toEqual(
+  expect(wrap(seasons[0]).toJSON()).toStrictEqual(
     expect.objectContaining({
       releaseDate: firstEpisodeAirDate.toJSDate(),
       year: firstEpisodeAirDate.year,
@@ -367,7 +367,7 @@ it("updates the media item with the latest data if it already exists", async ({
     status: "continuing",
   });
 
-  expect(wrap(updatedOngoingShowWeekTwo).toJSON()).toEqual(
+  expect(wrap(updatedOngoingShowWeekTwo).toJSON()).toStrictEqual(
     expect.objectContaining({
       state: "ongoing",
       nextAirDate: firstEpisodeAirDate.plus({ weeks: 2 }).toJSDate(),

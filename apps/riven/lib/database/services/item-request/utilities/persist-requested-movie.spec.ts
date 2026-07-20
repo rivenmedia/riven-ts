@@ -16,7 +16,7 @@ it("returns the item request if processed successfully", async ({
     imdbId: requestedId,
   });
 
-  expect(result.item).toEqual(
+  expect(result.item).toStrictEqual(
     expect.objectContaining({
       imdbId: requestedId,
     }),
@@ -46,7 +46,7 @@ it("saves the external request ID if provided", async ({
     externalRequestId,
   });
 
-  expect(result.item).toEqual(
+  expect(result.item).toStrictEqual(
     expect.objectContaining<Partial<ItemRequest>>({
       externalRequestId,
     }),

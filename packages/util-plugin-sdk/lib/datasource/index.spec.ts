@@ -67,11 +67,11 @@ it("enqueues subsequent jobs to the same URL separately", async ({
 
   const firstRequest = await dataSource.fetch("endpoint");
 
-  expect(firstRequest.parsedBody).toEqual({ success: false });
+  expect(firstRequest.parsedBody).toStrictEqual({ success: false });
 
   const secondRequest = await dataSource.fetch("endpoint");
 
-  expect(secondRequest.parsedBody).toEqual({ success: true });
+  expect(secondRequest.parsedBody).toStrictEqual({ success: true });
 });
 
 it("bypasses the queue if a valid response is available in the cache", async ({
@@ -143,5 +143,5 @@ it("returns a cached response if available in the cache", async ({
 
   const secondRequest = await dataSource.fetch("endpoint");
 
-  expect(secondRequest.parsedBody).toEqual({ value: "cached-value" });
+  expect(secondRequest.parsedBody).toStrictEqual({ value: "cached-value" });
 });

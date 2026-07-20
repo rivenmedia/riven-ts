@@ -18,7 +18,9 @@ it("returns the installed plugins from the package.json file", async () => {
 
   const plugins = await toPromise(actor.start());
 
-  expect(plugins.validPlugins[0]?.name).toEqual(validatedPlugin.default.name);
+  expect(plugins.validPlugins[0]?.name).toStrictEqual(
+    validatedPlugin.default.name,
+  );
 });
 
 it("returns any invalid plugins from the package.json file along with their validation result", async ({
@@ -48,7 +50,7 @@ it("returns any invalid plugins from the package.json file along with their vali
 
   expect.assert(validationResult.error);
 
-  expect(plugins).toEqual<ParsedPlugins>({
+  expect(plugins).toStrictEqual<ParsedPlugins>({
     invalidPlugins: new Map([
       ["@repo/plugin-test", z.prettifyError(validationResult.error)],
     ]),

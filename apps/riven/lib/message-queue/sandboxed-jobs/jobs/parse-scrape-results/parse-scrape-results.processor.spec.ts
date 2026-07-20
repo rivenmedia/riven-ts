@@ -40,7 +40,7 @@ it("throws an UnrecoverableError if no results are found", async ({
 
   const result = await parseScrapeResultsProcessor(job as never);
 
-  expect(result).toEqual({
+  expect(result).toStrictEqual({
     id: indexedMovie.id,
     results: {},
   });
@@ -72,7 +72,7 @@ it("returns valid movie torrents if the item is a movie", async ({
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(3);
-  expect(Object.values(results)).toEqual(
+  expect(Object.values(results)).toStrictEqual(
     expect.arrayContaining(
       rawTitles.map((title) =>
         expect.objectContaining({
@@ -107,7 +107,7 @@ it("returns valid show torrents if the item is a show", async ({
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(2);
-  expect(Object.values(results)).toEqual(
+  expect(Object.values(results)).toStrictEqual(
     expect.arrayContaining(
       rawTitles.map((title) =>
         expect.objectContaining({
@@ -144,7 +144,7 @@ it("returns valid season torrents if the item is a season", async ({
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(3);
-  expect(Object.values(results)).toEqual(
+  expect(Object.values(results)).toStrictEqual(
     expect.arrayContaining(
       rawTitles.map((title) =>
         expect.objectContaining({
@@ -181,7 +181,7 @@ it("returns valid episode torrents if the item is an episode", async ({
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(3);
-  expect(Object.values(results)).toEqual(
+  expect(Object.values(results)).toStrictEqual(
     expect.arrayContaining(
       rawTitles.map((title) =>
         expect.objectContaining({
@@ -212,7 +212,7 @@ it("filters show torrents if the item is a movie", async ({
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
-  expect(Object.values(results)).not.toEqual(
+  expect(Object.values(results)).not.toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         rawTitle,
@@ -241,7 +241,7 @@ it("filters out torrents with 2 or fewer episodes for shows", async ({
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
-  expect(Object.values(results)).not.toEqual(
+  expect(Object.values(results)).not.toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -272,7 +272,7 @@ it("filters out torrents with an incorrect number of seasons for shows", async (
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
-  expect(results).not.toEqual(
+  expect(results).not.toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -310,7 +310,7 @@ it("filters out torrents with incorrect number of episodes for single-season sho
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
-  expect(results).not.toEqual(
+  expect(results).not.toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -347,7 +347,7 @@ it("filters out duplicate torrents from different plugins", async ({
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(1);
-  expect(Object.values(results)).toEqual([
+  expect(Object.values(results)).toStrictEqual([
     expect.objectContaining({
       rawTitle,
     }),
@@ -374,7 +374,7 @@ it("filters out torrents with the incorrect season number for season items", asy
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
-  expect(results).not.toEqual(
+  expect(results).not.toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -405,7 +405,7 @@ it("filters out torrents with 2 or fewer episodes for season items", async ({
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
-  expect(results).not.toEqual(
+  expect(results).not.toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -436,7 +436,7 @@ it("filters out torrents with incorrect episodes for season items", async ({
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
-  expect(results).not.toEqual(
+  expect(results).not.toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -467,7 +467,7 @@ it("filters out torrents with incorrect episode numbers for episode items", asyn
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
-  expect(results).not.toEqual(
+  expect(results).not.toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -498,7 +498,7 @@ it("filters out torrents with the incorrect season number for episode items", as
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
-  expect(results).not.toEqual(
+  expect(results).not.toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -528,7 +528,7 @@ it("filters out torrents with no episodes for episode items", async ({
 
   const { results } = await parseScrapeResultsProcessor(job as never);
 
-  expect(results).not.toEqual(
+  expect(results).not.toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -565,7 +565,7 @@ it("filters out torrents that do not match the media item's country", async ({
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(0);
-  expect(results).not.toEqual(
+  expect(results).not.toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -606,7 +606,7 @@ it("does not filter out torrents that do not match the media item's country if t
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(1);
-  expect(Object.values(results)).toEqual(
+  expect(Object.values(results)).toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         rawTitle,
@@ -653,7 +653,7 @@ it("filters out torrents that do not match the media item's year ± 1 year", asy
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(3);
-  expect(Object.values(results)).toEqual(
+  expect(Object.values(results)).toStrictEqual(
     expect.arrayContaining(
       rawTitles.slice(1, 4).map((rawTitle) =>
         expect.objectContaining({
@@ -702,7 +702,7 @@ it.skip('filters out torrents that are not dubbed if the media item is anime and
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(1);
-  expect(Object.values(results)).toEqual([
+  expect(Object.values(results)).toStrictEqual([
     expect.objectContaining({
       rawTitle: rawTitles[0],
     }),
@@ -747,7 +747,7 @@ it.skip('does not filter out torrents that are not dubbed if the media item is a
   const { results } = await parseScrapeResultsProcessor(job as never);
 
   expect(Object.keys(results)).toHaveLength(2);
-  expect(results).toEqual(
+  expect(results).toStrictEqual(
     expect.arrayContaining(
       rawTitles.map((rawTitle) =>
         expect.objectContaining({
@@ -788,7 +788,7 @@ it.skip("returns sorted results", async ({
   const expectedOrder = [rawTitles[2], rawTitles[0], rawTitles[1]] as const;
 
   expect(Object.keys(results)).toHaveLength(3);
-  expect(results).toEqual(
+  expect(results).toStrictEqual(
     expectedOrder.map((rawTitle) =>
       expect.objectContaining({
         data: expect.objectContaining({
