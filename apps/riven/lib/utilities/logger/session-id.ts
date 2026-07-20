@@ -1,4 +1,4 @@
-import { getEnvironmentData } from "worker_threads";
+import { getEnvironmentData } from "node:worker_threads";
 import z from "zod";
 
 export const SessionID = z.uuidv4().brand<"SessionID">();

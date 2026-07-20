@@ -30,7 +30,7 @@ import type {
   Telemetry,
   Job,
 } from "bullmq";
-import type EventEmitter from "events";
+import type EventEmitter from "node:events";
 import type { Promisable } from "type-fest";
 import type { Logger } from "winston";
 

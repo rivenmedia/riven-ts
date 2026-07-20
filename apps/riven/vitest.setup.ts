@@ -116,8 +116,8 @@ let redisClient: RedisClient | undefined;
 
 vi.doMock(import("./lib/utilities/settings.ts"), async (importOriginal) => {
   const { RedisMemoryServer } = await import("redis-memory-server");
-  const { exec } = await import("child_process");
-  const { promisify } = await import("util");
+  const { exec } = await import("node:child_process");
+  const { promisify } = await import("node:util");
 
   async function getRedisServerBinary() {
     try {

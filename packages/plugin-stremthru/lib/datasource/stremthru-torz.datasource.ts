@@ -19,7 +19,7 @@ import type {
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
-import type { URL } from "url";
+import type { URL } from "node:url";
 
 const storeNameHeader = "x-stremthru-store-name";
 

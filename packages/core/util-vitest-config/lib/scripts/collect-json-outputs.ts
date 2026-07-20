@@ -1,9 +1,9 @@
 /**
  * See https://github.com/vercel/turborepo/blob/main/examples/with-vitest/packages/vitest-config/src/scripts/collect-json-outputs.ts
  */
-import fs from "fs/promises";
 import { glob } from "glob";
-import path from "path";
+import fs from "node:fs/promises";
+import path from "node:path";
 
 try {
   // Define the patterns to search
