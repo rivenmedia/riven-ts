@@ -200,24 +200,24 @@ function buildTSCompose(cfg: TSConfig): {
   ];
 
   if (cfg.tmdbApiKey) {
-    envLines.push("# TMDB (required)");
     envLines.push(
+      "# TMDB (required)",
       `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_TMDB__apiKey="${cfg.tmdbApiKey}"`,
+      "",
     );
-    envLines.push("");
   }
 
   if (cfg.debridProvider !== "none" && cfg.debridApiKey) {
-    envLines.push("# Debrid Provider (via StremThru)");
     envLines.push(
+      "# Debrid Provider (via StremThru)",
       `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_STREMTHRU__${cfg.debridProvider}ApiKey="${cfg.debridApiKey}"`,
+      "",
     );
-    envLines.push("");
   }
 
   if (cfg.contentSource === "mdblist" && cfg.contentApiKey) {
-    envLines.push("# MDBList");
     envLines.push(
+      "# MDBList",
       `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__apiKey="${cfg.contentApiKey}"`,
     );
 
@@ -230,8 +230,8 @@ function buildTSCompose(cfg: TSConfig): {
 
     envLines.push("");
   } else if (cfg.contentSource === "seerr" && cfg.contentApiKey) {
-    envLines.push("# Seerr");
     envLines.push(
+      "# Seerr",
       `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__apiKey="${cfg.contentApiKey}"`,
     );
 
@@ -243,8 +243,8 @@ function buildTSCompose(cfg: TSConfig): {
 
     envLines.push("");
   } else if (cfg.contentSource === "listrr" && cfg.contentApiKey) {
-    envLines.push("# Listrr");
     envLines.push(
+      "# Listrr",
       `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_LISTRR__apiKey="${cfg.contentApiKey}"`,
     );
 
