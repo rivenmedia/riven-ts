@@ -85,7 +85,7 @@ it("does not throw an error if the mount path is present and owned by the curren
     gid,
   } as never);
 
-  // oxlint-disable-next-line prefer-arrow-callback
+  // oxlint-disable-next-line prefer-arrow-callback vitest/prefer-mock-return-shorthand
   vi.mocked(Fuse).mockImplementation(function MockFuseConstructor() {
     return {
       mount: vi.fn((cb: (err?: Error | null) => void) => {
