@@ -91,7 +91,7 @@ export function registerPackageJsonFieldsHelper(plop: PlopTypes.NodePlopAPI) {
         if (typeof value === "string" && value.includes("{{")) {
           // Replace {{kebabCase pluginName}} with actual value
           processed[key] = value.replaceAll(
-            /\{\{kebabCase (\w+)\}\}/g,
+            /\{\{kebabCase (\w+)\}\}/gu,
             (_, varName) => kebabCase(String(this[varName] ?? "")),
           );
         } else {

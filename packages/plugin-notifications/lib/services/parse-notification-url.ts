@@ -26,11 +26,11 @@ export function parseNotificationUrl(raw: string): NotificationService {
   const url = new URL(raw);
 
   try {
-    const scheme = NotificationScheme.parse(url.protocol.replace(/:$/, ""));
+    const scheme = NotificationScheme.parse(url.protocol.replace(/:$/u, ""));
 
     switch (scheme) {
       case "discord": {
-        const [webhookToken] = url.pathname.replace(/^\//, "").split("/");
+        const [webhookToken] = url.pathname.replace(/^\//u, "").split("/");
         const webhookId = url.hostname;
 
         if (!webhookId || !webhookToken) {
@@ -49,7 +49,7 @@ export function parseNotificationUrl(raw: string): NotificationService {
       case "json":
       case "jsons": {
         const httpScheme = scheme === "jsons" ? "https" : "http";
-        const targetUrl = new URL(raw.replace(/^jsons?:/, `${httpScheme}:`));
+        const targetUrl = new URL(raw.replace(/^jsons?:/u, `${httpScheme}:`));
 
         return {
           type: "json",

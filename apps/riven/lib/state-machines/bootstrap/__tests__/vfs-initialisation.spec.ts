@@ -34,7 +34,7 @@ it("throws an error if the mount path does not exist", async ({ actor }) => {
   vi.spyOn(fs, "stat").mockRejectedValue(error);
 
   await expect(toPromise(actor.start())).rejects.toThrow(
-    /VFS mount path "(.*)" does not exist. Please create this directory./,
+    /VFS mount path "(.*)" does not exist. Please create this directory./u,
   );
 });
 
@@ -46,7 +46,7 @@ it("throws an error if the mount path is not a directory", async ({
   } as never);
 
   await expect(toPromise(actor.start())).rejects.toThrow(
-    /VFS mount path "(.*)" exists, but is not a directory./,
+    /VFS mount path "(.*)" exists, but is not a directory./u,
   );
 });
 
@@ -66,7 +66,7 @@ it("throws an error if the mount path is not owned by the current user", async (
   } as never);
 
   await expect(toPromise(actor.start())).rejects.toThrow(
-    /VFS mount path "(.*)" is not owned by the current user./,
+    /VFS mount path "(.*)" is not owned by the current user./u,
   );
 });
 

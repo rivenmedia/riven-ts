@@ -28,7 +28,7 @@ export class ItemRequest {
 
   @Field(() => String, { nullable: true })
   @Property({ type: "varchar", length: 10 })
-  @Matches(/^tt\d+$/)
+  @Matches(/^tt\d+$/u)
   @IsOptional()
   @Unique()
   public imdbId?: string | null;

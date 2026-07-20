@@ -22,7 +22,7 @@ it("masks api keys in log messages", () => {
     expect.assert(typeof maskedMessage === "object");
 
     expect(maskedMessage.message).toMatch(
-      /(api_key|apikey|apitoken|accesstoken|token|key)=\[REDACTED\]/,
+      /(api_key|apikey|apitoken|accesstoken|token|key)=\[REDACTED\]/u,
     );
   }
 });
@@ -40,7 +40,7 @@ it("masks usernames in directories", () => {
 
     expect.assert(typeof maskedMessage === "object");
 
-    expect(maskedMessage.message).toMatch(/\/(home|Users)\/\[REDACTED\]/);
+    expect(maskedMessage.message).toMatch(/\/(home|Users)\/\[REDACTED\]/u);
   }
 });
 

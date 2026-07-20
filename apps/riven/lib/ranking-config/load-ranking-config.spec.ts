@@ -126,7 +126,7 @@ describe("when the config file contains invalid JSON", () => {
     await writeInvalidConfigFile(configPath, "{ this is not valid json }");
 
     await expect(loadRankingConfig(configPath)).rejects.toThrow(
-      /invalid JSON/i,
+      /invalid JSON/iu,
     );
   });
 
@@ -136,7 +136,7 @@ describe("when the config file contains invalid JSON", () => {
     await writeInvalidConfigFile(configPath, "{bad}");
 
     await expect(loadRankingConfig(configPath)).rejects.toThrow(
-      new RegExp(path.basename(configPath).replace(".", String.raw`\.`)),
+      new RegExp(path.basename(configPath).replace(".", String.raw`\.`), "u"),
     );
   });
 });

@@ -61,6 +61,7 @@ export class PluginSettings {
 
     const settingPattern = new RegExp(
       `^RIVEN_PLUGIN_SETTING__(?<prefix>${pluginConfigPrefixes.join("|")})__(?<settingName>.+)$`,
+      "u",
     );
 
     for (const [key, value] of Object.entries(environment)) {

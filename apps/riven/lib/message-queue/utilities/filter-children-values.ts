@@ -64,7 +64,7 @@ export function filterChildrenValues<T extends string | undefined>(
     return childrenValues[keyPattern] as ExpectedValue;
   }
 
-  const pattern = new RegExp(keyPattern);
+  const pattern = new RegExp(keyPattern, "u");
   const entries = Object.fromEntries(
     Object.entries(childrenValues).filter(([key]) => pattern.test(key)),
   );

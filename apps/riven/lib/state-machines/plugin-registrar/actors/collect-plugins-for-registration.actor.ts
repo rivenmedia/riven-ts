@@ -22,7 +22,7 @@ export interface ParsedPlugins {
   pluginSettings: PluginSettings;
 }
 
-const PLUGIN_NAME_PATTERN = /^@repo\/plugin-(?<pluginName>[a-z0-9-]+)$/;
+const PLUGIN_NAME_PATTERN = /^@repo\/plugin-(?<pluginName>[a-z0-9-]+)$/u;
 
 export const collectPluginsForRegistration = fromPromise(async () => {
   const { default: packageJson } = (await import(

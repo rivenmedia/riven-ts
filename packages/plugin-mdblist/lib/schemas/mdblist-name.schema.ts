@@ -3,7 +3,7 @@ import z from "zod";
 const MdbListNameSegment = z
   .string()
   .min(1)
-  .regex(/^[^/]+$/);
+  .regex(/^[^/]+$/u);
 
 export const MdbListName = z.templateLiteral([
   MdbListNameSegment,

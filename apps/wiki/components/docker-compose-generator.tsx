@@ -1075,7 +1075,7 @@ function TSPreview({
                 Create mount dir:{" "}
                 <code className="rounded bg-fd-muted px-1.5 py-0.5">
                   sudo mkdir -p{" "}
-                  {/--bind (\S+)/.exec(output.systemd)?.[1] ?? "/mnt/riven"}
+                  {/--bind (\S+)/u.exec(output.systemd)?.[1] ?? "/mnt/riven"}
                 </code>
               </li>
               <li>

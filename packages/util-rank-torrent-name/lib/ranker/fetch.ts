@@ -33,7 +33,7 @@ export function trashHandler(
     return true;
   }
 
-  if (data.audio?.some((a) => /hq clean audio/i.exec(a))) {
+  if (data.audio?.some((a) => /hq clean audio/iu.exec(a))) {
     failed.add("trash_audio");
 
     return true;

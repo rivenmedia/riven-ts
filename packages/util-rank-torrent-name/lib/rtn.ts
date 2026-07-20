@@ -25,7 +25,7 @@ export class RTN {
     this.#enabledResolutions = new Set(
       Object.entries(this.#settings.resolutions)
         .filter(([_, enabled]) => enabled)
-        .map(([res]) => Resolution.parse(res.replace(/^r/, ""))),
+        .map(([res]) => Resolution.parse(res.replace(/^r/u, ""))),
     );
   }
 

@@ -51,7 +51,7 @@ export abstract class MediaItem {
 
   @Field(() => String, { nullable: true })
   @Property({ type: "varchar", length: 10 })
-  @Matches(/^tt\d+$/)
+  @Matches(/^tt\d+$/u)
   @IsOptional()
   public imdbId?: string | null;
 

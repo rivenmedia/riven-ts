@@ -55,7 +55,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-shadow": "off",
         "no-use-before-define": "off",
         "prefer-named-capture-group": "off",
-        "require-unicode-regexp": "off",
 
         // Type-aware rules that are disabled for now, but will be enabled in the future
         "prefer-regex-literals": "off",

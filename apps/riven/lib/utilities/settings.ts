@@ -13,7 +13,7 @@ class Settings {
   public readonly settings: ReadonlyDeep<RivenSettings>;
 
   public constructor(environment: NodeJS.ProcessEnv) {
-    const settingPattern = /^RIVEN_SETTING__(?<setting>.+)$/;
+    const settingPattern = /^RIVEN_SETTING__(?<setting>.+)$/u;
 
     const rawSettings: Record<string, unknown> = {};
 

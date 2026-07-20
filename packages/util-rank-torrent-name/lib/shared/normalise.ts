@@ -125,6 +125,6 @@ export function normaliseTitle(rawTitle: string, lower = true): string {
   // Remove non-alphanumeric, non-space characters
   return translated
     .replaceAll(/[^\p{L}\p{N}\s]/gu, "")
-    .replaceAll(/\s+/g, " ")
+    .replaceAll(/\s+/gu, " ")
     .trim();
 }

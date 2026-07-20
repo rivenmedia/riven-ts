@@ -86,7 +86,7 @@ export const transformSeries = (
       }, [])
     : [];
 
-  const sanitisedTitle = title.replaceAll(/\s*\(.*\)\s*$/g, "");
+  const sanitisedTitle = title.replaceAll(/\s*\(.*\)\s*$/gu, "");
 
   const contentRating = z
     .string()

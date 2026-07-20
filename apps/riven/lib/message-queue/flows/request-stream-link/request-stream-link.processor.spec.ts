@@ -279,7 +279,7 @@ it("blacklists the stream if the stream link response indicates a dead link", as
     mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
   });
 
-  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/i);
+  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/iu);
 
   await expect(
     em.findOneOrFail(BlacklistedStream, {
@@ -338,7 +338,7 @@ it("blacklists the stream if the health check response indicates a dead link", a
     mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
   });
 
-  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/i);
+  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/iu);
 
   await expect(
     em.findOneOrFail(BlacklistedStream, {
@@ -449,7 +449,7 @@ it("deletes the media entry if the stream link response indicates a dead link", 
     mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
   });
 
-  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/i);
+  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/iu);
 
   await expect(async () =>
     mediaEntryService.getMediaEntryById(mediaEntry.id, {
@@ -487,7 +487,7 @@ it("does not blacklist the stream if the stream link response indicates a non-fa
   });
 
   await expect(runSingleJob(job)).rejects.toThrow(
-    /plugin failed to generate stream link/i,
+    /plugin failed to generate stream link/iu,
   );
 
   const blacklistedStream = await em.findOne(BlacklistedStream, {
@@ -529,7 +529,7 @@ it("adds a job to reprocess the movie if the item is a movie and its torrent is 
     mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
   });
 
-  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/i);
+  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/iu);
 
   expect(mockProcessMediaItemProcessor).toHaveBeenCalledOnce();
 });
@@ -567,7 +567,7 @@ it("adds a job to reprocess the lowest common denominator in the item's hierarch
     mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
   });
 
-  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/i);
+  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/iu);
 
   expect(flowAddSpy).toHaveBeenCalledWith([
     expect.objectContaining({
