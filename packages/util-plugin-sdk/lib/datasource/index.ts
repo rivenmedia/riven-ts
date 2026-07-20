@@ -310,7 +310,7 @@ export abstract class BaseDataSource<
       return httpDate;
     }
 
-    const retryAfterSeconds = Number.parseInt(retryAfterHeader, 10);
+    const retryAfterSeconds = Math.trunc(Number(retryAfterHeader));
 
     if (Number.isNaN(retryAfterSeconds)) {
       return null;

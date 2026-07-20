@@ -30,7 +30,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/no-process-exit": "off",
 
         // Type-aware rules that are disabled for now, but will be enabled in the future
-        "unicorn/prefer-number-coercion": "off",
         "unicorn/consistent-function-scoping": "off",
         "unicorn/prefer-native-coercion-functions": "off",
         "unicorn/no-useless-collection-argument": "off",

@@ -16,7 +16,7 @@ export const ParsedDataSchema = z
     rawTitle: nonEmptyString,
     title: nonEmptyString,
     year: z.preprocess(
-      (val) => (typeof val === "string" ? Number.parseInt(val, 10) : val),
+      (val) => (typeof val === "string" ? Math.trunc(Number(val)) : val),
       positiveIntSchema.optional(),
     ),
     resolution: nonEmptyString.default("unknown"),

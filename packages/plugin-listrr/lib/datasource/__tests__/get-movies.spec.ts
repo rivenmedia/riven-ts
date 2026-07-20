@@ -71,7 +71,7 @@ it("paginates through all pages of the list", async ({
         return HttpResponse.error();
       }
 
-      const page = Number.parseInt(info.params["page"].toString(), 10);
+      const page = Math.trunc(Number(info.params["page"].toString()));
 
       if (page > totalPages) {
         return HttpResponse.error();
