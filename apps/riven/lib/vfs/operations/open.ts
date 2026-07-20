@@ -42,7 +42,7 @@ async function getStreamLinkFromCacheOrQueue(
     mediaItemTitle: mediaEntry.mediaItem.$.fullTitle,
   });
 
-  return await runSingleJob(job, 10_000);
+  return runSingleJob(job, 10_000);
 }
 
 async function serveSubtitleFile(pathInfo: PathInfo) {

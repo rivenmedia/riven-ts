@@ -11,6 +11,6 @@ export class SubdlResolver {
   public async subdlIsValid(
     @PluginDataSource(pluginConfig.name, SubdlAPI) api: SubdlAPI,
   ): Promise<boolean> {
-    return await api.validate();
+    return api.validate();
   }
 }

@@ -29,7 +29,6 @@ export const oxlintPluginTypescriptConfig = defineConfig({
         "typescript/no-unsafe-type-assertion": "off",
         "typescript/prefer-readonly-parameter-types": "off",
         "typescript/prefer-readonly": "off",
-        "typescript/return-await": "off",
         "typescript/require-array-sort-compare": "off",
         "typescript/strict-void-return": "off",
       },
