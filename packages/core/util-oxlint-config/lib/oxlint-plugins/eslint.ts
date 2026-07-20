@@ -30,7 +30,7 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-void": ["warn", { allowAsStatement: true }],
         "no-await-in-loop": "off",
         "require-await": "off", // Handled by typescript/require-await
-        // "no-underscore-dangle": ["warn", { allow: ["__typename"] }],
+        "no-underscore-dangle": ["warn", { allow: ["__typename"] }],
         "no-nested-ternary": "allow", // Handled by unicorn/no-nested-ternary
         "no-console": ["error", { allow: ["debug"] }],
         "no-plusplus": ["deny", { allowForLoopAfterthoughts: true }],
@@ -56,7 +56,6 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-use-before-define": "off",
         "no-warning-comments": "off",
         "no-duplicate-imports": "off",
-        "no-underscore-dangle": "off",
         "no-inner-declarations": "off",
         "prefer-named-capture-group": "off",
         "require-unicode-regexp": "off",

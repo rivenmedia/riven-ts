@@ -102,10 +102,10 @@ export class PluginSettings {
    *
    * @internal
    */
-  public _lock() {
+  public lock() {
     if (this.#isLocked) {
       this.#logger.warn(
-        "PluginSettings._lock() called multiple times. This is a no-op.",
+        "PluginSettings.lock() called multiple times. This is a no-op.",
       );
 
       return;
@@ -144,7 +144,7 @@ export class PluginSettings {
    * @param schema The schema that should be used to parse the settings.
    * @throws {Error} if settings are locked
    */
-  public _set(configPrefix: string, schema: ZodObject): void {
+  public set(configPrefix: string, schema: ZodObject): void {
     if (this.#isLocked) {
       throw new Error("Settings are locked and cannot be modified.");
     }

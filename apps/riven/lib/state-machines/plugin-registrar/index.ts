@@ -92,7 +92,7 @@ export const pluginRegistrarMachine = setup({
               );
             }
 
-            pluginSettings._set(pluginConfigPrefix, plugin.settingsSchema);
+            pluginSettings.set(pluginConfigPrefix, plugin.settingsSchema);
           } catch (error) {
             if (error instanceof ZodError) {
               logger.error(
@@ -140,7 +140,7 @@ export const pluginRegistrarMachine = setup({
           });
         }
 
-        pluginSettings._lock();
+        pluginSettings.lock();
 
         return pluginMap;
       },
