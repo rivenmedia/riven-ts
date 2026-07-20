@@ -35,7 +35,6 @@ export const oxlintPluginVitestConfig = defineConfig({
         "vitest/warn-todo": "off",
 
         // Type-aware rules that are disabled for now, but will be enabled in the future
-        "vitest/prefer-expect-type-of": "off",
         "vitest/prefer-lowercase-title": "off",
         "vitest/prefer-to-have-length": "off",
       },

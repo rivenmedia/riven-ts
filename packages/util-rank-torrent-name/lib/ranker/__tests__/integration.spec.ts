@@ -164,10 +164,10 @@ describe("rankTorrent (integration)", () => {
 
 describe("public API exports", () => {
   it("exports all expected functions", () => {
-    expect(typeof parse).toBe("function");
-    expect(typeof rank).toBe("function");
-    expect(typeof checkFetch).toBe("function");
-    expect(typeof rankTorrent).toBe("function");
-    expect(typeof createSettings).toBe("function");
+    expect(parse).toBeTypeOf("function");
+    expect(rank).toBeTypeOf("function");
+    expect(checkFetch).toBeTypeOf("function");
+    expect(rankTorrent).toBeTypeOf("function");
+    expect(createSettings).toBeTypeOf("function");
   });
 });
