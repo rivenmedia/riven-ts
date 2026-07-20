@@ -340,5 +340,5 @@ it("handles bucket limits correctly", ({ rankingConfig }) => {
 
   const expectedTotal = 6; // 2 from for resolution bucket
 
-  expect(sortedTorrents.length).toBe(expectedTotal);
+  expect(sortedTorrents).toHaveLength(expectedTotal);
 });

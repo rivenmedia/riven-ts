@@ -33,9 +33,6 @@ export const oxlintPluginVitestConfig = defineConfig({
         "vitest/require-to-throw-message": "off",
         "vitest/require-top-level-describe": "off",
         "vitest/warn-todo": "off",
-
-        // Type-aware rules that are disabled for now, but will be enabled in the future
-        "vitest/prefer-to-have-length": "off",
       },
     },
   ],

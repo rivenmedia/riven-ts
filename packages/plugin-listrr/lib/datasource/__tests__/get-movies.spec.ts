@@ -54,7 +54,7 @@ it("retrieves movies from each provided list", async ({
   const listrrApi = dataSourceMap.get(ListrrAPI);
   const movies = await listrrApi.getMovies(contentLists);
 
-  expect(movies.length).toBe(2);
+  expect(movies).toHaveLength(2);
 });
 
 it("paginates through all pages of the list", async ({
@@ -94,7 +94,7 @@ it("paginates through all pages of the list", async ({
   const listrrApi = dataSourceMap.get(ListrrAPI);
   const movies = await listrrApi.getMovies(contentLists);
 
-  expect(movies.length).toBe(totalPages * itemsPerPage);
+  expect(movies).toHaveLength(totalPages * itemsPerPage);
 });
 
 it("dedupes movies that appear in multiple lists", async ({
