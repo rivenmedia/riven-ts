@@ -78,6 +78,71 @@ interface DockerCompose {
   services: Record<string, DockerService>;
 }
 
+// --- Shared ---
+
+function addMediaServer(
+  compose: DockerCompose,
+  server: Exclude<MediaServer, "none">,
+  mountPath: string,
+) {
+  if (server === "plex") {
+    compose.services["plex"] = {
+      image: "plexinc/pms-docker:latest",
+      container_name: "plex",
+      restart: "unless-stopped",
+      ports: ["32400:32400"],
+      environment: ["TZ=UTC", "VERSION=docker"],
+      volumes: ["plex-config:/config", `${mountPath}:/mount:rslave,z`],
+    };
+    compose.volumes["plex-config"] = null;
+  } else {
+    compose.services["jellyfin"] = {
+      image: "jellyfin/jellyfin:latest",
+      container_name: "jellyfin",
+      restart: "unless-stopped",
+      ports: ["8096:8096"],
+      volumes: [
+        "jellyfin-config:/config",
+        "jellyfin-cache:/cache",
+        `${mountPath}:/mount:rslave,z`,
+      ],
+    };
+    compose.volumes["jellyfin-config"] = null;
+    compose.volumes["jellyfin-cache"] = null;
+  }
+}
+
+function buildSystemdService(mountPath: string) {
+  return `[Unit]
+Description=Make Riven data bind mount shared
+After=local-fs.target
+Before=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/mount --bind ${mountPath} ${mountPath}
+ExecStart=/usr/bin/mount --make-rshared ${mountPath}
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target`;
+}
+
+function generateSecret(
+  length: number,
+  format: "hex" | "base64" = "hex",
+): string {
+  const bytes = format === "base64" ? length : Math.ceil(length / 2);
+  const array = new Uint8Array(bytes);
+  crypto.getRandomValues(array);
+  if (format === "base64") {
+    return btoa(String.fromCodePoint(...array));
+  }
+  return Array.from(array, (byte) => byte.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, length);
+}
+
 // --- Riven TS Service Builders ---
 
 function buildTSCompose(cfg: TSConfig): {
@@ -360,71 +425,6 @@ function buildV1Compose(cfg: V1Config): { compose: string; systemd: string } {
   };
 }
 
-// --- Shared ---
-
-function addMediaServer(
-  compose: DockerCompose,
-  server: Exclude<MediaServer, "none">,
-  mountPath: string,
-) {
-  if (server === "plex") {
-    compose.services["plex"] = {
-      image: "plexinc/pms-docker:latest",
-      container_name: "plex",
-      restart: "unless-stopped",
-      ports: ["32400:32400"],
-      environment: ["TZ=UTC", "VERSION=docker"],
-      volumes: ["plex-config:/config", `${mountPath}:/mount:rslave,z`],
-    };
-    compose.volumes["plex-config"] = null;
-  } else {
-    compose.services["jellyfin"] = {
-      image: "jellyfin/jellyfin:latest",
-      container_name: "jellyfin",
-      restart: "unless-stopped",
-      ports: ["8096:8096"],
-      volumes: [
-        "jellyfin-config:/config",
-        "jellyfin-cache:/cache",
-        `${mountPath}:/mount:rslave,z`,
-      ],
-    };
-    compose.volumes["jellyfin-config"] = null;
-    compose.volumes["jellyfin-cache"] = null;
-  }
-}
-
-function buildSystemdService(mountPath: string) {
-  return `[Unit]
-Description=Make Riven data bind mount shared
-After=local-fs.target
-Before=docker.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/mount --bind ${mountPath} ${mountPath}
-ExecStart=/usr/bin/mount --make-rshared ${mountPath}
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target`;
-}
-
-function generateSecret(
-  length: number,
-  format: "hex" | "base64" = "hex",
-): string {
-  const bytes = format === "base64" ? length : Math.ceil(length / 2);
-  const array = new Uint8Array(bytes);
-  crypto.getRandomValues(array);
-  if (format === "base64") {
-    return btoa(String.fromCodePoint(...array));
-  }
-  return Array.from(array, (byte) => byte.toString(16).padStart(2, "0"))
-    .join("")
-    .slice(0, length);
-}
-
 // --- Components ---
 
 function InputField({
@@ -597,121 +597,6 @@ function CodePreview({
           __html: highlighted || "<pre><code>Loading...</code></pre>",
         }}
       />
-    </div>
-  );
-}
-
-// --- Main Component ---
-
-export default function DockerComposeGenerator() {
-  const [version, setVersion] = useState<RivenVersion>("ts");
-
-  // TS config
-  const [tsConfig, setTSConfig] = useState<TSConfig>({
-    vfsMountPath: "/mnt/riven",
-    logsPath: "./logs",
-    dbUser: "riven",
-    dbPassword: "",
-    dbName: "riven",
-    mediaServer: "none",
-    tmdbApiKey: "",
-    debridProvider: "realdebrid",
-    debridApiKey: "",
-    contentSource: "mdblist",
-    contentApiKey: "",
-    contentLists: "",
-    seerrUrl: "http://seerr:5055",
-    addAnalyticsServices: false,
-  });
-
-  // V1 config
-  const [v1Config, setV1Config] = useState<V1Config>({
-    timezone: "UTC",
-    puid: "1000",
-    pgid: "1000",
-    frontendPort: "3000",
-    backendPort: "8080",
-    originUrl: "http://localhost:3000",
-    hostMountPath: "/mnt/riven",
-    mediaServer: "none",
-    backendApiKey: "",
-    authSecret: "",
-    dbPassword: "",
-  });
-
-  const updateTS = <K extends keyof TSConfig>(key: K, value: TSConfig[K]) => {
-    setTSConfig((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const updateV1 = <K extends keyof V1Config>(key: K, value: V1Config[K]) => {
-    setV1Config((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const tsOutput = useCallback(() => buildTSCompose(tsConfig), [tsConfig]);
-  const v1Output = useCallback(() => buildV1Compose(v1Config), [v1Config]);
-
-  return (
-    <div className="space-y-6">
-      {/* Version Tabs */}
-      <div className="flex gap-1 rounded-lg border border-fd-border bg-fd-muted/30 p-1">
-        <button
-          onClick={() => {
-            setVersion("ts");
-          }}
-          className={`flex-1 rounded-md px-4 py-2.5 text-sm font-medium transition-all ${
-            version === "ts"
-              ? "bg-purple-600 text-white shadow-sm"
-              : "text-fd-muted-foreground hover:text-fd-foreground"
-          }`}
-        >
-          Riven TS (Recommended)
-        </button>
-        <button
-          onClick={() => {
-            setVersion("v1");
-          }}
-          className={`flex-1 rounded-md px-4 py-2.5 text-sm font-medium transition-all ${
-            version === "v1"
-              ? "bg-fd-muted text-fd-foreground shadow-sm"
-              : "text-fd-muted-foreground hover:text-fd-foreground"
-          }`}
-        >
-          Legacy v1
-        </button>
-      </div>
-
-      {version === "v1" && (
-        <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/5 p-4">
-          <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
-            Riven v1 is in maintenance mode and will not receive new features.
-            Consider using Riven TS instead.
-          </p>
-        </div>
-      )}
-
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Config Form */}
-        <div className="space-y-6">
-          <h3 className="text-xl font-semibold">Configuration</h3>
-
-          {version === "ts" ? (
-            <TSConfigForm config={tsConfig} update={updateTS} />
-          ) : (
-            <V1ConfigForm config={v1Config} update={updateV1} />
-          )}
-        </div>
-
-        {/* Preview */}
-        <div className="space-y-6">
-          <h3 className="text-xl font-semibold">Generated Files</h3>
-
-          {version === "ts" ? (
-            <TSPreview output={tsOutput()} />
-          ) : (
-            <V1Preview output={v1Output()} />
-          )}
-        </div>
-      </div>
     </div>
   );
 }
@@ -1177,6 +1062,121 @@ function V1Preview({
           filename="docker-compose.yml"
         />
       )}
+    </div>
+  );
+}
+
+// --- Main Component ---
+
+export default function DockerComposeGenerator() {
+  const [version, setVersion] = useState<RivenVersion>("ts");
+
+  // TS config
+  const [tsConfig, setTSConfig] = useState<TSConfig>({
+    vfsMountPath: "/mnt/riven",
+    logsPath: "./logs",
+    dbUser: "riven",
+    dbPassword: "",
+    dbName: "riven",
+    mediaServer: "none",
+    tmdbApiKey: "",
+    debridProvider: "realdebrid",
+    debridApiKey: "",
+    contentSource: "mdblist",
+    contentApiKey: "",
+    contentLists: "",
+    seerrUrl: "http://seerr:5055",
+    addAnalyticsServices: false,
+  });
+
+  // V1 config
+  const [v1Config, setV1Config] = useState<V1Config>({
+    timezone: "UTC",
+    puid: "1000",
+    pgid: "1000",
+    frontendPort: "3000",
+    backendPort: "8080",
+    originUrl: "http://localhost:3000",
+    hostMountPath: "/mnt/riven",
+    mediaServer: "none",
+    backendApiKey: "",
+    authSecret: "",
+    dbPassword: "",
+  });
+
+  const updateTS = <K extends keyof TSConfig>(key: K, value: TSConfig[K]) => {
+    setTSConfig((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const updateV1 = <K extends keyof V1Config>(key: K, value: V1Config[K]) => {
+    setV1Config((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const tsOutput = useCallback(() => buildTSCompose(tsConfig), [tsConfig]);
+  const v1Output = useCallback(() => buildV1Compose(v1Config), [v1Config]);
+
+  return (
+    <div className="space-y-6">
+      {/* Version Tabs */}
+      <div className="flex gap-1 rounded-lg border border-fd-border bg-fd-muted/30 p-1">
+        <button
+          onClick={() => {
+            setVersion("ts");
+          }}
+          className={`flex-1 rounded-md px-4 py-2.5 text-sm font-medium transition-all ${
+            version === "ts"
+              ? "bg-purple-600 text-white shadow-sm"
+              : "text-fd-muted-foreground hover:text-fd-foreground"
+          }`}
+        >
+          Riven TS (Recommended)
+        </button>
+        <button
+          onClick={() => {
+            setVersion("v1");
+          }}
+          className={`flex-1 rounded-md px-4 py-2.5 text-sm font-medium transition-all ${
+            version === "v1"
+              ? "bg-fd-muted text-fd-foreground shadow-sm"
+              : "text-fd-muted-foreground hover:text-fd-foreground"
+          }`}
+        >
+          Legacy v1
+        </button>
+      </div>
+
+      {version === "v1" && (
+        <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/5 p-4">
+          <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+            Riven v1 is in maintenance mode and will not receive new features.
+            Consider using Riven TS instead.
+          </p>
+        </div>
+      )}
+
+      <div className="grid gap-8 lg:grid-cols-2">
+        {/* Config Form */}
+        <div className="space-y-6">
+          <h3 className="text-xl font-semibold">Configuration</h3>
+
+          {version === "ts" ? (
+            <TSConfigForm config={tsConfig} update={updateTS} />
+          ) : (
+            <V1ConfigForm config={v1Config} update={updateV1} />
+          )}
+        </div>
+
+        {/* Preview */}
+        <div className="space-y-6">
+          <h3 className="text-xl font-semibold">Generated Files</h3>
+
+          {version === "ts" ? (
+            <TSPreview output={tsOutput()} />
+          ) : (
+            <V1Preview output={v1Output()} />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

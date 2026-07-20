@@ -23,10 +23,6 @@ async function attemptGracefulShutdown(worker: Worker) {
 
     const signal = AbortSignal.timeout(10_000);
 
-    const removeAbortListener = () => {
-      signal.removeEventListener("abort", onAbort);
-    };
-
     const forceClose = () => {
       void forceCloseWorker(worker).finally(() => {
         resolve();
@@ -42,6 +38,10 @@ async function attemptGracefulShutdown(worker: Worker) {
     };
 
     signal.addEventListener("abort", onAbort, { once: true });
+
+    const removeAbortListener = () => {
+      signal.removeEventListener("abort", onAbort);
+    };
 
     worker
       .close()
