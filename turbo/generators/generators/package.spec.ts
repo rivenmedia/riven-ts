@@ -76,6 +76,7 @@ it.concurrent.for(["test", "lint", "build"] as const)(
   async (command, { packageFullName }) => {
     await expect(
       execa`pnpm --filter ${packageFullName} ${command}`,
+      // oxlint-disable-next-line vitest/prefer-strict-boolean-matchers
     ).resolves.toBeTruthy();
   },
 );

@@ -38,7 +38,11 @@ describe("when the config file does not exist", () => {
 
     await loadRankingConfig(configPath);
 
-    await expect(stat(configPath)).resolves.toBeTruthy();
+    await expect(stat(configPath)).resolves.toMatchObject(
+      expect.objectContaining({
+        atimeMs: expect.any(Number),
+      }),
+    );
   });
 
   it("writes valid JSON to the created file", async ({ tempDir }) => {

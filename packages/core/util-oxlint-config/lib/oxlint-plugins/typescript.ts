@@ -1,7 +1,7 @@
 import globals from "globals";
 import { defineConfig } from "oxlint";
 
-import { jsFiles, tsFiles } from "../internal/file-types.ts";
+import { jsFiles, testFiles, tsFiles } from "../internal/file-types.ts";
 
 export const oxlintPluginTypescriptConfig = defineConfig({
   overrides: [
@@ -35,6 +35,13 @@ export const oxlintPluginTypescriptConfig = defineConfig({
       env: {
         ...globals.node,
         ...globals.es2024,
+      },
+    },
+    {
+      files: [...testFiles],
+      plugins: ["typescript"],
+      rules: {
+        "typescript/no-unsafe-argument": "allow", // Allow the use of helpers such as expect.objectContaining() which return `any`
       },
     },
   ],
