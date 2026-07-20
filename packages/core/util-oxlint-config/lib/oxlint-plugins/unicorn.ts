@@ -31,7 +31,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/throw-new-error": "off",
         "unicorn/new-for-builtins": "off",
         "unicorn/no-process-exit": "off",
-        "unicorn/prefer-string-replace-all": "off",
 
         // Type-aware rules that are disabled for now, but will be enabled in the future
         "unicorn/prefer-number-coercion": "off",
