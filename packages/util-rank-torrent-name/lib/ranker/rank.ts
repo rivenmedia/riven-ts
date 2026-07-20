@@ -89,7 +89,7 @@ function calculatePreferred(rawTitle: string, patterns: RegExp[]): number {
     return 0;
   }
 
-  return patterns.some((p) => p.test(rawTitle)) ? 10000 : 0;
+  return patterns.some((p) => p.test(rawTitle)) ? 10_000 : 0;
 }
 
 function calculatePreferredLangs(
@@ -100,7 +100,7 @@ function calculatePreferredLangs(
     return 0;
   }
 
-  return languages.some((lang) => preferred.includes(lang)) ? 10000 : 0;
+  return languages.some((lang) => preferred.includes(lang)) ? 10_000 : 0;
 }
 
 export function rank(

@@ -239,11 +239,11 @@ it("reads data across multiple chunks, utilising the chunk cache where possible"
     cachedChunk,
   );
 
-  const responseBuffer = setupRangeInterceptor(mockAgent, [262144, undefined]);
+  const responseBuffer = setupRangeInterceptor(mockAgent, [262_144, undefined]);
 
-  const length = 131072; // 128 KB
+  const length = 131_072; // 128 KB
 
-  const position = 196608;
+  const position = 196_608;
   const buffer = Buffer.alloc(length);
   const callback = vi.fn();
 
@@ -280,7 +280,7 @@ it("performs a one-off scan when receiving a read outside the scan tolerance lim
 
   fdToPreviousReadPositionMap.set(0, config.chunkSize * 10); // 10MB
 
-  const length = 32768; // 32 KB
+  const length = 32_768; // 32 KB
   const position = config.chunkSize * 100; // 100MB
 
   const responseBuffer = setupRangeInterceptor(mockAgent, [
@@ -310,8 +310,8 @@ it("saves a copy of each chunk to the cache when reading during playback within 
 
   fdToPreviousReadPositionMap.set(fd, config.chunkSize * 100); // 10MB
 
-  const length = 131072;
-  const position = 104988672;
+  const length = 131_072;
+  const position = 104_988_672;
 
   const firstChunkResponseBuffer = Buffer.alloc(
     config.chunkSize,
@@ -346,8 +346,8 @@ it("saves a copy of each chunk to the cache when reading during playback within 
     });
 
   const firstChunkRange = [
-    104071168,
-    104071168 + config.chunkSize - 1,
+    104_071_168,
+    104_071_168 + config.chunkSize - 1,
   ] as const;
 
   const fileHandle = fdToFileHandleMeta.get(0);
@@ -391,8 +391,8 @@ it("saves a copy of each chunk to the cache when reading during playback within 
   );
 
   const secondChunkRange = [
-    105119744,
-    105119744 + config.chunkSize - 1,
+    105_119_744,
+    105_119_744 + config.chunkSize - 1,
   ] as const;
 
   const secondCachedChunk = chunkCache.get(

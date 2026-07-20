@@ -13,7 +13,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   services,
   createMockJobChildKey,
 }) => {
-  vi.spyOn(Settings, "now").mockReturnValue(10000);
+  vi.spyOn(Settings, "now").mockReturnValue(10_000);
 
   const [{ infoHash: streamInfoHash } = {}] = await scrapedMovie.streams.load();
 

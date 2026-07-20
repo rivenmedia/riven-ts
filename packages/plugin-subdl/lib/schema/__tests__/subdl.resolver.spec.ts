@@ -13,7 +13,7 @@ it('returns the validation status when calling "subdlIsValid" query', async ({
     http.get("https://api.subdl.com/api/v1/subtitles", () =>
       HttpResponse.json({
         status: true,
-        results: [{ sd_id: 123456, name: "Inception" }],
+        results: [{ sd_id: 123_456, name: "Inception" }],
         subtitles: [],
       }),
     ),

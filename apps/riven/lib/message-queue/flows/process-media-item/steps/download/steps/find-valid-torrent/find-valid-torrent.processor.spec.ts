@@ -166,7 +166,7 @@ it("returns the plugin and validated result on successful validation", async ({
 
   const expectedFile = {
     name: "Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
-    size: 123456789,
+    size: 123_456_789,
     path: "/Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
     link: "https://example.com/Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
   } satisfies DebridFile;

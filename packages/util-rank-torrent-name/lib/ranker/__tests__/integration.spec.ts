@@ -19,24 +19,24 @@ const it = baseIt.extend("rankingConfig", () =>
     hdtv: -5000,
     hevc: 500,
     mpeg: -1000,
-    remux: 10000,
-    vhs: -10000,
+    remux: 10_000,
+    vhs: -10_000,
     web: 100,
     webdl: 200,
-    webmux: -10000,
-    xvid: -10000,
-    pdtv: -10000,
+    webmux: -10_000,
+    xvid: -10_000,
+    pdtv: -10_000,
 
     // Rips
     bdrip: -5000,
-    brrip: -10000,
+    brrip: -10_000,
     dvdrip: -5000,
-    hdrip: -10000,
-    ppvrip: -10000,
-    tvrip: -10000,
+    hdrip: -10_000,
+    ppvrip: -10_000,
+    tvrip: -10_000,
     uhdrip: -5000,
-    vhsrip: -10000,
-    webdlrip: -10000,
+    vhsrip: -10_000,
+    webdlrip: -10_000,
     webrip: -1000,
 
     // HDR
@@ -56,25 +56,25 @@ const it = baseIt.extend("rankingConfig", () =>
     truehd: 2000,
 
     // Extras
-    threeD: -10000,
+    threeD: -10_000,
     converted: -1000,
     documentary: -250,
     dubbed: -1000,
     edition: 100,
     proper: 20,
     repack: 20,
-    site: -10000,
-    upscaled: -10000,
+    site: -10_000,
+    upscaled: -10_000,
 
     // Trash
-    cam: -10000,
-    cleanAudio: -10000,
-    r5: -10000,
-    satrip: -10000,
-    screener: -10000,
-    size: -10000,
-    telecine: -10000,
-    telesync: -10000,
+    cam: -10_000,
+    cleanAudio: -10_000,
+    r5: -10_000,
+    satrip: -10_000,
+    screener: -10_000,
+    size: -10_000,
+    telecine: -10_000,
+    telesync: -10_000,
   }),
 );
 
@@ -138,7 +138,7 @@ describe("rankTorrent (integration)", () => {
     );
 
     expect(result.fetch).toBe(true);
-    expect(result.rank).toBeGreaterThan(10000); // Preferred bonus
+    expect(result.rank).toBeGreaterThan(10_000); // Preferred bonus
   });
 
   it("rejects excluded content", ({ rankingConfig }) => {

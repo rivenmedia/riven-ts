@@ -42,7 +42,7 @@ export async function extractSrtFromZip(
   while (offset < buffer.length - 4) {
     const signature = buffer.readUInt32LE(offset);
 
-    if (signature !== 0x04034b50) {
+    if (signature !== 0x04_03_4b_50) {
       break;
     }
 

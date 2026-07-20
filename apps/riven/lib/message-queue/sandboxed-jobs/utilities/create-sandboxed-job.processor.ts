@@ -12,7 +12,7 @@ import type { SandboxedJobDefinition, SandboxedJobHandlers } from "../index.ts";
 import type { SandboxedJob } from "bullmq";
 import type { z, ZodLiteral, ZodObject, ZodType } from "zod";
 
-const timeoutDuration = 5_000;
+const timeoutDuration = 5000;
 
 function startIdleTimer(duration: number) {
   return setTimeout(() => {

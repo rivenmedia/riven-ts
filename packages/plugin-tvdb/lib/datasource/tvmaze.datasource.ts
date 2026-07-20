@@ -11,7 +11,7 @@ export class TvMazeAPI extends BaseDataSource<TvdbSettings> {
   public override serviceName = "Tvdb - TvMaze";
 
   protected override rateLimiterOptions: RateLimiterOptions = {
-    duration: 10000,
+    duration: 10_000,
     max: 20,
   };
 

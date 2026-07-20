@@ -49,7 +49,7 @@ export const OptionsConfigSchema = z.object({
   /**
    * @default -10000
    */
-  removeRanksUnder: z.number().default(-10000),
+  removeRanksUnder: z.number().default(-10_000),
 
   /**
    * @default false

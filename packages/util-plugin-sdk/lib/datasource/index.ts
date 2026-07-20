@@ -539,7 +539,7 @@ export abstract class BaseDataSource<
     }
 
     if (response.status === 429) {
-      const defaultWaitMs = 10000;
+      const defaultWaitMs = 10_000;
       const waitMs = this.#parseRetryAfterHeader(
         response.headers.get("Retry-After") ?? "",
       );

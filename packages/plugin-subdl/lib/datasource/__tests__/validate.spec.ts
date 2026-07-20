@@ -26,7 +26,7 @@ it("returns true if the request succeeds", async ({
         status: true,
         results: [
           {
-            sd_id: 123456,
+            sd_id: 123_456,
             name: "Inception",
           },
         ],

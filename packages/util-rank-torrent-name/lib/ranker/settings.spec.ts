@@ -47,7 +47,7 @@ describe("createSettings", () => {
     const settings = createSettings();
 
     expect(settings.options.removeAllTrash).toBe(true);
-    expect(settings.options.removeRanksUnder).toBe(-10000);
+    expect(settings.options.removeRanksUnder).toBe(-10_000);
     expect(settings.options.removeUnknownLanguages).toBe(false);
     expect(settings.options.allowEnglishInLanguages).toBe(true);
     expect(settings.options.removeAdultContent).toBe(true);

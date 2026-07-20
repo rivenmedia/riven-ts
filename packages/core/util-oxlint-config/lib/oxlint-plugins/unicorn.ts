@@ -13,11 +13,11 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/no-nested-ternary": "allow", // This just suggests to wrap in parentheses which oxfmt strips away
         "unicorn/no-useless-promise-resolve-reject": "allow", // Conflicts with typescript/require-await
         "unicorn/no-useless-undefined": "allow", // Conflicts with eslint/no-useless-return
+        "unicorn/number-literal-case": "allow", // Conflicts with oxfmt which lowercases hex literals
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "unicorn/no-array-reduce": "off",
         "unicorn/switch-case-braces": "off",
-        "unicorn/numeric-separators-style": "off",
         "unicorn/no-array-callback-reference": "off",
         "unicorn/custom-error-definition": "off",
         "unicorn/filename-case": "off",
