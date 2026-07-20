@@ -96,7 +96,7 @@ it("bypasses the queue if a valid response is available in the cache", async ({
   await dataSource.fetch("endpoint");
   await dataSource.fetch("endpoint");
 
-  expect(queueAddSpy).toHaveBeenCalledTimes(1);
+  expect(queueAddSpy).toHaveBeenCalledOnce();
 });
 
 it("does not bypass the queue if no valid response is available in the cache", async ({

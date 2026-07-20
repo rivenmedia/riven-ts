@@ -38,7 +38,7 @@ it("stops the GraphQL server when shutting down", async ({
     expect(actor.getSnapshot().value).toBe("Exited");
   });
 
-  expect(stopGqlServerMock).toHaveBeenCalledTimes(1);
+  expect(stopGqlServerMock).toHaveBeenCalledOnce();
 });
 
 it("unmounts the VFS when shutting down", async ({ machine, input }) => {
@@ -58,7 +58,7 @@ it("unmounts the VFS when shutting down", async ({ machine, input }) => {
     expect(actor.getSnapshot().value).toBe("Exited");
   });
 
-  expect(unmountVfsMock).toHaveBeenCalledTimes(1);
+  expect(unmountVfsMock).toHaveBeenCalledOnce();
 });
 
 it.todo("stops the main runner when shutting down");

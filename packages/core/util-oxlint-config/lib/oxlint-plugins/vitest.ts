@@ -22,6 +22,7 @@ export const oxlintPluginVitestConfig = defineConfig({
         "vitest/consistent-test-it": ["error", { fn: "it" }],
         "vitest/require-test-timeout": "off",
         "vitest/prefer-importing-vitest-globals": "off", // Currently has issues with importing `it` from custom test context files
+        "vitest/prefer-called-times": "off", // Prefer toHaveBeenCalledOnce() over toHaveBeenCalledTimes(1)
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "vitest/max-expects": "off",
@@ -38,7 +39,6 @@ export const oxlintPluginVitestConfig = defineConfig({
         "vitest/warn-todo": "off",
 
         // Type-aware rules that are disabled for now, but will be enabled in the future
-        "vitest/prefer-called-once": "off",
         "vitest/prefer-describe-function-title": "off",
         "vitest/prefer-expect-resolves": "off",
         "vitest/prefer-expect-type-of": "off",
