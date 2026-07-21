@@ -153,13 +153,15 @@ export const validateTorrent = async (
     const candidateYears = new Set<number>();
 
     if (item.year) {
-      getYearCandidates(item.year).forEach((year) => candidateYears.add(year));
+      for (const year of getYearCandidates(item.year)) {
+        candidateYears.add(year);
+      }
     }
 
     if (topLevelItem.year) {
-      getYearCandidates(topLevelItem.year).forEach((year) =>
-        candidateYears.add(year),
-      );
+      for (const year of getYearCandidates(topLevelItem.year)) {
+        candidateYears.add(year);
+      }
     }
 
     if (candidateYears.size > 0 && !candidateYears.has(parsedData.year)) {

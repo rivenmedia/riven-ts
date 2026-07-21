@@ -45,7 +45,9 @@ export const startGqlServer = fromPromise<
     .toArray();
 
   const app = express();
-  const httpServer = createServer(app);
+  const httpServer = createServer((...args) => {
+    app(...args);
+  });
 
   const server = new ApolloServer<ApolloServerContext>({
     cache: redisCache,

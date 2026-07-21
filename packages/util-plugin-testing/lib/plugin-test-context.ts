@@ -76,6 +76,7 @@ export const it = baseIt
     async function getRedisServerBinary() {
       try {
         const { stdout: redisServerBinary } =
+          // oxlint-disable-next-line typescript/strict-void-return
           await promisify(exec)("which redis-server");
 
         return redisServerBinary.trim();

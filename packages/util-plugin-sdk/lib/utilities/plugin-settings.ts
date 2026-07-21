@@ -3,9 +3,11 @@ import type { Logger } from "winston";
 import type { z, ZodObject } from "zod";
 
 function deepFreeze<T>(obj: T) {
-  Object.values(obj as Record<string, Jsonifiable>).forEach(
-    (value) => Object.isFrozen(value) || deepFreeze(value),
-  );
+  Object.values(obj as Record<string, Jsonifiable>).forEach((value) => {
+    if (!Object.isFrozen(value)) {
+      deepFreeze(value);
+    }
+  });
 
   return Object.freeze(obj) as ReadonlyDeep<T>;
 }

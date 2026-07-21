@@ -289,7 +289,7 @@ it("performs a one-off scan when receiving a read outside the scan tolerance lim
   ]);
 
   const buffer = Buffer.alloc(length);
-  const callback = vi.fn();
+  const callback = vi.fn<() => void>().mockReturnValue();
 
   readSync(fileName, 0, buffer, length, position, callback);
 

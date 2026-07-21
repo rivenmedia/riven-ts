@@ -15,6 +15,7 @@ export const oxlintPluginTypescriptConfig = defineConfig({
           "deny",
           { allowWithDecorator: true },
         ],
+        "typescript/strict-void-return": ["deny", { allowReturnAny: true }],
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "typescript/explicit-function-return-type": "off",
@@ -30,7 +31,6 @@ export const oxlintPluginTypescriptConfig = defineConfig({
         "typescript/prefer-readonly-parameter-types": "off",
         "typescript/prefer-readonly": "off",
         "typescript/require-array-sort-compare": "off",
-        "typescript/strict-void-return": "off",
       },
       env: {
         ...globals.node,
