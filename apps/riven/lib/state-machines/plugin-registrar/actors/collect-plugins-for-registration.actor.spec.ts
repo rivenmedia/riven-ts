@@ -34,7 +34,7 @@ it("returns any invalid plugins from the package.json file along with their vali
     import("@repo/plugin-test"),
     () =>
       ({
-        default: {
+        plugin: {
           name: "Test",
         },
       }) as never,
