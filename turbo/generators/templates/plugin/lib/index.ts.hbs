@@ -22,6 +22,6 @@ export const plugin: RivenPlugin = {
   },
   settingsSchema: {{pascalCase pluginName}}Settings,
   async validator() {
-    return true;
+    return Promise.resolve(true);
   },
 };
