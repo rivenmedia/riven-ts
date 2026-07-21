@@ -61,7 +61,7 @@ it.concurrent("generates a package", ({ packageDir }) => {
   expect(contents).toContain("package.json");
 });
 
-it.concurrent("generates a package with the correct name in package.json some readlly long string string string string string string string string string string", ({
+it.concurrent("generates a package with the correct name in package.json", ({
   packageFullName,
   packageDir,
 }) => {
