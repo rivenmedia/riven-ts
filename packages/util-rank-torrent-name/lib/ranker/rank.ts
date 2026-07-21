@@ -114,50 +114,25 @@ export function rank(
     throw new Error("Parsed data cannot have an empty rawTitle.");
   }
 
-  const scoreParts: Record<string, number> = {};
-
-  // Quality (includes rips and trash quality)
-  scoreParts["quality"] = rankFromMap(data.quality, QUALITY_MAP, rankingModel);
-
-  // Codec
-  scoreParts["codec"] = data.codec
-    ? rankFromMap(data.codec, CODEC_MAP, rankingModel)
-    : 0;
-
-  // HDR
-  scoreParts["hdr"] = data.hdr
-    ? rankFromList(data.hdr, HDR_MAP, rankingModel)
-    : 0;
-
-  // Bit depth
-  if (data.bitDepth) {
-    scoreParts["bitDepth"] = resolveRank("bit10", rankingModel);
-  }
-
-  // Audio
-  scoreParts["audio"] = data.audio
-    ? rankFromList(data.audio, AUDIO_MAP, rankingModel)
-    : 0;
-
-  // Channels
-  scoreParts["channels"] = data.channels
-    ? rankFromList(data.channels, CHANNEL_MAP, rankingModel)
-    : 0;
-
-  // Boolean flags (extras, trash.size, etc.)
-  scoreParts["flags"] = rankFromFlags(data, FLAG_MAP, rankingModel);
-
-  // Preferred patterns (+10000)
-  scoreParts["preferredPatterns"] = calculatePreferred(
-    data.rawTitle,
-    settings.compiledPreferred,
-  );
-
-  // Preferred languages (+10000)
-  scoreParts["preferredLanguages"] = calculatePreferredLangs(
-    data.languages,
-    settings.languages.preferred,
-  );
+  const scoreParts = {
+    quality: rankFromMap(data.quality, QUALITY_MAP, rankingModel),
+    codec: data.codec ? rankFromMap(data.codec, CODEC_MAP, rankingModel) : 0,
+    hdr: data.hdr ? rankFromList(data.hdr, HDR_MAP, rankingModel) : 0,
+    bitDepth: data.bitDepth ? resolveRank("bit10", rankingModel) : 0,
+    audio: data.audio ? rankFromList(data.audio, AUDIO_MAP, rankingModel) : 0,
+    channels: data.channels
+      ? rankFromList(data.channels, CHANNEL_MAP, rankingModel)
+      : 0,
+    flags: rankFromFlags(data, FLAG_MAP, rankingModel),
+    preferredPatterns: calculatePreferred(
+      data.rawTitle,
+      settings.compiledPreferred,
+    ),
+    preferredLanguages: calculatePreferredLangs(
+      data.languages,
+      settings.languages.preferred,
+    ),
+  } as const;
 
   return {
     totalScore: Object.values(scoreParts).reduce((a, b) => a + b, 0),
