@@ -21,10 +21,13 @@ export const oxlintPluginImportConfig = defineConfig({
         "import/no-nodejs-modules": "off",
         "import/no-cycle": ["error", { maxDepth: 3 }],
         "import/no-default-export": "deny",
+        "import/no-unassigned-import": [
+          "deny",
+          { allow: ["reflect-metadata", "**/*.css", "**/*.d.ts"] },
+        ],
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "import/exports-last": "off",
-        "import/no-unassigned-import": "off",
       },
     },
     {

@@ -1,5 +1,3 @@
-import "@vitest/expect";
-import "vitest";
 import type { EventFrom } from "xstate";
 
 interface CustomMatchers<R = unknown> {

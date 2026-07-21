@@ -69,6 +69,7 @@ export default {
         "!**/{factories,seeders}!",
       ],
       ignoreDependencies: [/@repo\/plugin(?<pluginName>.*)/u],
+      ignoreFiles: ["**/*.d.ts"],
     },
     "{packages,packages/core}/*": {
       entry: [...defaultEntry],

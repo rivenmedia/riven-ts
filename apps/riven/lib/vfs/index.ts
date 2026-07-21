@@ -1,3 +1,4 @@
+// oxlint-disable-next-line import/no-unassigned-import
 import "./utilities/requests/request-agent.ts";
 import { getattrSync } from "./operations/getattr.ts";
 import { openSync } from "./operations/open.ts";

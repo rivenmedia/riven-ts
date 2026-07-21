@@ -174,9 +174,6 @@ catalogs:
     '@vitest/coverage-v8':
       specifier: ^4.1.7
       version: 4.1.7
-    '@vitest/expect':
-      specifier: ^4.1.7
-      version: 4.1.7
     '@zkochan/fuse-native':
       specifier: ^0.1.0
       version: 0.1.0
@@ -671,9 +668,6 @@ importers:
       '@types/triple-beam':
         specifier: 'catalog:'
         version: 1.3.5
-      '@vitest/expect':
-        specifier: 'catalog:'
-        version: 4.1.7
       esbuild:
         specifier: 'catalog:'
         version: 0.28.0
