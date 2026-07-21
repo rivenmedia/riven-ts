@@ -1,7 +1,12 @@
 import globals from "globals";
 import { defineConfig } from "oxlint";
 
-import { jsFiles, testFiles, tsFiles } from "../internal/file-types.ts";
+import {
+  jsFiles,
+  testFiles,
+  tsFiles,
+  tsDefinitionFiles,
+} from "../internal/file-types.ts";
 
 export const oxlintPluginTypescriptConfig = defineConfig({
   overrides: [
@@ -19,7 +24,6 @@ export const oxlintPluginTypescriptConfig = defineConfig({
         "typescript/explicit-function-return-type": "allow", // This enforces every function to have a return type, which is incompatible with inferred types
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
-        "typescript/no-empty-interface": "off",
         "typescript/strict-boolean-expressions": "off",
 
         // Type-aware rules that are disabled for now, but will be enabled in the future
@@ -32,6 +36,17 @@ export const oxlintPluginTypescriptConfig = defineConfig({
       env: {
         ...globals.node,
         ...globals.es2024,
+      },
+    },
+    {
+      files: [tsDefinitionFiles],
+      plugins: ["typescript"],
+      rules: {
+        "typescript/no-empty-interface": ["deny", { allowSingleExtends: true }], // Allow empty interfaces in definition files, as they are often used for type augmentation
+        "typescript/no-empty-object-type": [
+          "deny",
+          { allowInterfaces: "always" },
+        ],
       },
     },
     {
