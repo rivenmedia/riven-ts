@@ -108,9 +108,7 @@ export function parseFilePath(filePath: string) {
 
   for (const part of parts) {
     try {
-      const parsedPart = parse(part);
-
-      merge(parseData, parsedPart);
+      merge(parseData, parse(part));
     } catch {
       // Continue to next part
     }
