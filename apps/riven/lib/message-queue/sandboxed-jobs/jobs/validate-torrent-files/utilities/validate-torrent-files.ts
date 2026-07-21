@@ -19,7 +19,9 @@ import type {
 import type { TypedDocumentNode } from "@apollo/client";
 import type { UUID } from "node:crypto";
 
-export class InvalidTorrentError extends Error {}
+export class InvalidTorrentError extends Error {
+  public override name = "InvalidTorrentError";
+}
 
 function calculateAverageBitrate(fileSize: number, runtime: number) {
   return fileSize / runtime / (1024 * 1024);

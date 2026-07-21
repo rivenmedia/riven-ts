@@ -64,6 +64,8 @@ type FetchResponse<T = unknown> = Pick<
   );
 
 export class DataSourceHTTPError extends Error {
+  public override name = "DataSourceHTTPError";
+
   public response!: DataSourceFetchResult<never>["response"];
 
   public constructor(response: DataSourceFetchResult<never>["response"]) {

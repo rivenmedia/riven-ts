@@ -14,7 +14,9 @@ import type { TvdbSettings } from "../tvdb-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 
-class TvdbAPIError extends Error {}
+class TvdbAPIError extends Error {
+  public override name = "TvdbAPIError";
+}
 
 interface TvdbToken {
   value: string;

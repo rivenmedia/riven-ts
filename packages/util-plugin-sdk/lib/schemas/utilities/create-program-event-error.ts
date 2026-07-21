@@ -26,6 +26,8 @@ export class ProgramEventError<
   Schema extends BaseErrorSchema,
   Data extends ParamsFor<z.infer<Schema>>,
 > extends Error {
+  public override name = "ProgramEventError";
+
   public payload: {
     type: z.infer<Schema>["type"];
   } & Data;

@@ -5,7 +5,9 @@ import path from "node:path";
 import type { JellyfinSettings } from "../jellyfin-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 
-class JellyfinAPIError extends Error {}
+class JellyfinAPIError extends Error {
+  public override name = "JellyfinAPIError";
+}
 
 export class JellyfinAPI extends BaseDataSource<JellyfinSettings> {
   public override baseURL = this.settings.jellyfinServerUrl;

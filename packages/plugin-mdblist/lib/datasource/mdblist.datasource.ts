@@ -9,7 +9,9 @@ import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
-class MdblistAPIError extends Error {}
+class MdblistAPIError extends Error {
+  public override name = "MdblistAPIError";
+}
 
 export class MdblistAPI extends BaseDataSource<MdbListSettings> {
   public override baseURL = "https://api.mdblist.com/";

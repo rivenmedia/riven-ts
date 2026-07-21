@@ -8,7 +8,9 @@ import type { PlexSettings } from "../plex-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource.js";
 
-class PlexAPIError extends Error {}
+class PlexAPIError extends Error {
+  public override name = "PlexAPIError";
+}
 
 export class PlexAPI extends BaseDataSource<PlexSettings> {
   public override baseURL = this.settings.plexServerUrl;

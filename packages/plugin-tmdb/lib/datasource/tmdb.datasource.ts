@@ -8,7 +8,9 @@ import type { TmdbSettings } from "../tmdb-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 
-class TmdbAPIError extends Error {}
+class TmdbAPIError extends Error {
+  public override name = "TmdbAPIError";
+}
 
 export class TmdbAPI extends BaseDataSource<TmdbSettings> {
   public override baseURL = "https://api.themoviedb.org/3/";

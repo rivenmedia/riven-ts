@@ -19,7 +19,9 @@ interface CometScrapeConfig {
   imdbId: string;
 }
 
-class CometAPIError extends Error {}
+class CometAPIError extends Error {
+  public override name = "CometAPIError";
+}
 
 export class CometAPI extends BaseDataSource<CometSettings> {
   public override baseURL = this.settings.url;

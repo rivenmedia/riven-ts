@@ -23,7 +23,9 @@ import type { URL } from "node:url";
 
 const storeNameHeader = "x-stremthru-store-name";
 
-class StremThruTorzAPIError extends Error {}
+class StremThruTorzAPIError extends Error {
+  public override name = "StremThruTorzAPIError";
+}
 
 export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
   public override baseURL = this.settings.stremThruUrl;

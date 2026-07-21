@@ -10,7 +10,9 @@ import type { SubdlSettings } from "../subdl-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 
-class SubdlAPIError extends Error {}
+class SubdlAPIError extends Error {
+  public override name = "SubdlAPIError";
+}
 
 export interface SubtitleSearchOptions {
   tmdbId?: string | undefined;

@@ -4,7 +4,7 @@ import Undici from "undici";
 import { logger } from "../../utilities/logger/logger.ts";
 import { config } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
-import { SeekDetected } from "../errors/seek-detected.ts";
+import { SeekDetectedError } from "../errors/seek-detected.ts";
 import { calculateChunkRange } from "../utilities/chunks/calculate-chunk-range.ts";
 import { fetchDiscreteByteRange } from "../utilities/chunks/fetch-discrete-byte-range.ts";
 import { detectReadType } from "../utilities/detect-read-type.ts";
@@ -229,7 +229,7 @@ export const readSync = function readSync(
     }
 
     if (isFuseError(error)) {
-      if (!(error instanceof SeekDetected)) {
+      if (!(error instanceof SeekDetectedError)) {
         logger.error("VFS read FuseError", { err: error });
       }
 

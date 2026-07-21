@@ -14,7 +14,9 @@ const TorrentioScrapeResponse = z.object({
   ),
 });
 
-class TorrentioAPIError extends Error {}
+class TorrentioAPIError extends Error {
+  public override name = "TorrentioAPIError";
+}
 
 export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
   public override baseURL = "http://torrentio.strem.fun/";

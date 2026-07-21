@@ -133,6 +133,8 @@ export const FuseErrorCode = z.literal([
 type FuseErrorCode = z.infer<typeof FuseErrorCode>;
 
 export class FuseError extends Error {
+  public override name = "FuseError";
+
   public errorCode: FuseErrorCode;
 
   public constructor(errorCode: FuseErrorCode, message: string) {
