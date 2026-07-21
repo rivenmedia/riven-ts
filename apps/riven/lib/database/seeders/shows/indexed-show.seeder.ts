@@ -16,8 +16,8 @@ export interface IndexedShowSeederContext {
 }
 
 export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
-  #episodesPerSeason = 10;
-  #seasonCount = 6;
+  readonly #episodesPerSeason = 10;
+  readonly #seasonCount = 6;
 
   public async run(
     em: EntityManager,

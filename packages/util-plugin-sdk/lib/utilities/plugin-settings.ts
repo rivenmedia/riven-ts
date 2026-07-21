@@ -19,12 +19,12 @@ export class PluginSettings {
   /**
    * A map to hold environment settings extracted from process.env
    */
-  #environmentSettingGroups: Map<string, Map<string, string>>;
+  readonly #environmentSettingGroups: Map<string, Map<string, string>>;
 
   /**
    * A map to hold parsed settings for each schema.
    */
-  #settingsMap = new Map<ZodObject, Record<string, unknown>>();
+  readonly #settingsMap = new Map<ZodObject, Record<string, unknown>>();
 
   /**
    * A flag to indicate if the settings are locked. The settings are locked once all plugins have been registered.
@@ -36,14 +36,14 @@ export class PluginSettings {
   /**
    * Logger instance for logging warnings and errors.
    */
-  #logger: Logger;
+  readonly #logger: Logger;
 
   /**
    * A flag to determine whether to print the effective configuration on startup.
    *
    * This is useful for debugging configuration issues.
    */
-  #printConfig: boolean;
+  readonly #printConfig: boolean;
 
   /**
    * Initialises the PluginSettings instance and builds a map of plugin-related environment variables

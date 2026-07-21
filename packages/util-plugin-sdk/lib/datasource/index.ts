@@ -117,16 +117,16 @@ export abstract class BaseDataSource<
    */
   protected readonly concurrency: number = 200;
 
-  #requestAttempts: number;
-  #requestBackoffDelay: number;
+  readonly #requestAttempts: number;
+  readonly #requestBackoffDelay: number;
 
-  #queueId: string;
-  #queueEvents: QueueEvents;
+  readonly #queueId: string;
+  readonly #queueEvents: QueueEvents;
   public queue: Queue<FetchJobInput, FetchResponse>;
   public worker: Worker<FetchJobInput, FetchResponse>;
 
-  #keyv: KeyvAdapter;
-  #keyvPrefix = "httpcache:";
+  readonly #keyv: KeyvAdapter;
+  readonly #keyvPrefix = "httpcache:";
 
   /**
    * A set of HTTP status codes that should not be treated as fatal errors.
@@ -136,7 +136,7 @@ export abstract class BaseDataSource<
    *
    * For all other 4xx and 5xx status codes, no retries will be made.
    */
-  #nonFatalStatusCodes = new Set([408, 425, 429, 500, 502, 503, 504]);
+  readonly #nonFatalStatusCodes = new Set([408, 425, 429, 500, 502, 503, 504]);
 
   public constructor({
     pluginSymbol,
