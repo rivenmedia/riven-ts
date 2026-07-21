@@ -1,4 +1,4 @@
-import { extname } from "node:path";
+import path from "node:path";
 import { promisify } from "node:util";
 import { inflateRaw } from "node:zlib";
 
@@ -64,7 +64,7 @@ export async function extractSrtFromZip(
       dataStart + compressedSize,
     );
 
-    if (extname(filename) === SUBTITLE_FILE_EXTENSION) {
+    if (path.extname(filename) === SUBTITLE_FILE_EXTENSION) {
       if (compressionMethod === 0) {
         return compressedData.toString("utf8");
       }

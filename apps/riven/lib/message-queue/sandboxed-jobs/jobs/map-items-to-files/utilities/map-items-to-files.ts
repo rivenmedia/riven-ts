@@ -1,7 +1,7 @@
 import { parseFilePath } from "@repo/util-rank-torrent-name";
 
 import assert from "node:assert";
-import { extname } from "node:path";
+import path from "node:path";
 import z from "zod";
 
 import { logger } from "../../../../../utilities/logger/logger.ts";
@@ -23,7 +23,7 @@ export function mapItemsToFiles(items: DebridFile[]) {
   return items.reduce<MapItemsToFilesSandboxedJob["output"]>(
     (acc, file) => {
       try {
-        const fileExtension = extname(file.name);
+        const fileExtension = path.extname(file.name);
 
         assert.ok(
           VALID_FILE_EXTENSIONS.safeParse(fileExtension).success,

@@ -17,7 +17,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/throw-new-error": "off", // Conflicts with BullMQ's RateLimitError
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
-        "unicorn/import-style": "off",
         "unicorn/no-anonymous-default-export": "off",
         "unicorn/no-array-callback-reference": "off",
         "unicorn/no-array-for-each": "off",
