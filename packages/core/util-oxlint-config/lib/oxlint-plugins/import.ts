@@ -24,7 +24,6 @@ export const oxlintPluginImportConfig = defineConfig({
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "import/exports-last": "off",
-        "import/no-mutable-exports": "off",
         "import/no-unassigned-import": "off",
       },
     },

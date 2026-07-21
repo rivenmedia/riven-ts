@@ -26,7 +26,7 @@ declare module "@apollo/client" {
   }
 }
 
-// oxlint-disable-next-line init-declarations
+// oxlint-disable-next-line init-declarations import/no-mutable-exports
 export let client: ApolloClient;
 
 export function initApolloClient(uri: URL, signal?: AbortSignal) {
