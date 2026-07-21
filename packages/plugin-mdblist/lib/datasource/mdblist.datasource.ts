@@ -60,13 +60,13 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
       };
     }
 
-    contentLists.forEach((name) => {
+    for (const name of contentLists) {
       if (!MdbListName.safeParse(name).success) {
         throw new MdblistAPIError(
           `${name} is not a valid MDBList name, format has to be "<string>/<string>"`,
         );
       }
-    });
+    }
 
     const movieIdsMap = new Map<number, MdbListExternalIds>();
     const showIdsMap = new Map<number, MdbListExternalIds>();

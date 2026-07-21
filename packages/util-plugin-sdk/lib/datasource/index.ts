@@ -257,14 +257,14 @@ export abstract class BaseDataSource<
 
     this.logger = apolloDataSourceOptions.logger;
 
-    [this.queue, this.#queueEvents, this.worker].forEach((resource) => {
+    for (const resource of [this.queue, this.#queueEvents, this.worker]) {
       (resource as EventEmitter).on("error", (error: unknown) => {
         this.logger.error(
           `${this.#queueId} ${resource.constructor.name} error`,
           { err: error },
         );
       });
-    });
+    }
 
     this.settings = settings;
   }
