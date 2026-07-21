@@ -25,9 +25,6 @@ export const oxlintPluginImportConfig = defineConfig({
           "deny",
           { allow: ["reflect-metadata", "**/*.css", "**/*.d.ts"] },
         ],
-
-        // Rules that will be enabled in the future, but are currently disabled to avoid noise
-        "import/exports-last": "off",
       },
     },
     {
