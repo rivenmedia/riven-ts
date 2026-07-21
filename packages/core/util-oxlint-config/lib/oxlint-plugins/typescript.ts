@@ -19,7 +19,6 @@ export const oxlintPluginTypescriptConfig = defineConfig({
         "typescript/explicit-function-return-type": "allow", // This enforces every function to have a return type, which is incompatible with inferred types
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
-        "typescript/method-signature-style": "off",
         "typescript/no-empty-interface": "off",
         "typescript/strict-boolean-expressions": "off",
 

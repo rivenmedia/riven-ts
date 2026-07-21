@@ -1,7 +1,7 @@
 import type { EventFrom } from "xstate";
 
 interface CustomMatchers<R = unknown> {
-  toHaveReceivedEvent(expected: EventFrom<R>): void;
+  toHaveReceivedEvent: (expected: EventFrom<R>) => void;
 }
 
 declare module "vitest" {
