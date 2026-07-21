@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/node";
+import { captureException } from "@sentry/node";
 import { UnrecoverableError, Worker } from "bullmq";
 import { AbortError, toMerged } from "es-toolkit";
 import assert from "node:assert";
@@ -84,7 +84,7 @@ export function createFlowWorker<
                 },
               );
             } catch (error) {
-              Sentry.captureException(error);
+              captureException(error);
 
               if (error instanceof Error) {
                 throw error;

@@ -1,6 +1,6 @@
 import { dataSourceContext } from "@repo/util-plugin-sdk/datasource-context";
 
-import * as Sentry from "@sentry/node";
+import { captureException } from "@sentry/node";
 import { Worker } from "bullmq";
 import { AbortError } from "es-toolkit";
 import assert from "node:assert";
@@ -62,7 +62,7 @@ export function createPluginWorker<
                 async () => processor(job as never, token, signal),
               );
             } catch (error) {
-              Sentry.captureException(error);
+              captureException(error);
 
               throw error;
             }

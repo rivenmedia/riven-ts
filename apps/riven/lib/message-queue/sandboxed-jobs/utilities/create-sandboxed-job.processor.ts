@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import * as Sentry from "@sentry/node";
+import { captureException } from "@sentry/node";
 import { UnrecoverableError } from "bullmq";
 import { AbortError } from "es-toolkit";
 import assert from "node:assert";
@@ -84,7 +84,7 @@ export function createSandboxedJobProcessor<
 
             return result;
           } catch (error) {
-            Sentry.captureException(error);
+            captureException(error);
 
             if (error instanceof Error) {
               throw error;

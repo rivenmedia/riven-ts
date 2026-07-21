@@ -3,7 +3,7 @@ import z from "zod";
 import type { services } from "../../database/database.ts";
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
 import type { ValidPlugin } from "../../types/plugins.ts";
-import type * as Sentry from "@sentry/node";
+import type { Scope } from "@sentry/node";
 import type { Job } from "bullmq";
 import type { ZodNever, ZodObject, ZodOptional, ZodType } from "zod";
 
@@ -45,7 +45,7 @@ export const createFlowSchema = <
             }
           >(),
           signal: z.instanceof(AbortSignal).optional(),
-          scope: z.custom<Sentry.Scope>(),
+          scope: z.custom<Scope>(),
           token: z.string().optional(),
         }),
         z.object({

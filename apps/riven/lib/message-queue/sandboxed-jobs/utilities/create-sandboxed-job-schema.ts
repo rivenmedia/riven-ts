@@ -1,7 +1,7 @@
 import { ApolloClient } from "@apollo/client";
 import z from "zod";
 
-import type * as Sentry from "@sentry/node";
+import type { Scope } from "@sentry/node";
 import type { SandboxedJob } from "bullmq";
 import type { ZodNever, ZodObject, ZodOptional, ZodType } from "zod";
 
@@ -45,7 +45,7 @@ export const createSandboxedJobSchema = <
               >;
             }
           >(),
-          scope: z.custom<Sentry.Scope>(),
+          scope: z.custom<Scope>(),
           client: z.instanceof(ApolloClient),
         }),
       ],
