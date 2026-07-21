@@ -15,9 +15,9 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/no-useless-undefined": "allow", // Conflicts with eslint/no-useless-return
         "unicorn/number-literal-case": "allow", // Conflicts with oxfmt which lowercases hex literals
         "unicorn/throw-new-error": "off", // Conflicts with BullMQ's RateLimitError
+        "unicorn/no-array-callback-reference": "allow", // This naively looks at method names (e.g. .find() and .map()) and returns a lot of false positives
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
-        "unicorn/no-array-callback-reference": "off",
         "unicorn/no-array-for-each": "off",
         "unicorn/no-array-method-this-argument": "off",
         "unicorn/no-array-reduce": "off",
