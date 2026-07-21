@@ -18,7 +18,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "unicorn/import-style": "off",
-        "unicorn/new-for-builtins": "off",
         "unicorn/no-anonymous-default-export": "off",
         "unicorn/no-array-callback-reference": "off",
         "unicorn/no-array-for-each": "off",
