@@ -24,6 +24,7 @@ export const oxlintPluginVitestConfig = defineConfig({
         "vitest/prefer-importing-vitest-globals": "off", // Currently has issues with importing `it` from custom test context files
         "vitest/prefer-called-times": "off", // Prefer toHaveBeenCalledOnce() over toHaveBeenCalledTimes(1)
         "vitest/valid-title": "allow", // Conflicts with vitest/prefer-describe-function-title
+        "vitest/warn-todo": "warn",
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "vitest/max-expects": "off",
@@ -32,7 +33,6 @@ export const oxlintPluginVitestConfig = defineConfig({
         "vitest/require-mock-type-parameters": "off",
         "vitest/require-to-throw-message": "off",
         "vitest/require-top-level-describe": "off",
-        "vitest/warn-todo": "off",
       },
     },
   ],
