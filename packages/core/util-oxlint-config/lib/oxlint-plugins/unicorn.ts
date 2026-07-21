@@ -20,7 +20,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "unicorn/no-array-reduce": "off",
-        "unicorn/no-unreadable-array-destructuring": "off",
       },
     },
     {
@@ -34,6 +33,7 @@ export const oxlintPluginUnicornConfig = defineConfig({
       plugins: ["unicorn"],
       rules: {
         "unicorn/consistent-function-scoping": "off",
+        "unicorn/no-unreadable-array-destructuring": "allow",
       },
     },
   ],
