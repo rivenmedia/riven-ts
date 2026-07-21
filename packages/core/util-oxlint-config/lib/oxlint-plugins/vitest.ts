@@ -25,10 +25,10 @@ export const oxlintPluginVitestConfig = defineConfig({
         "vitest/prefer-called-times": "off", // Prefer toHaveBeenCalledOnce() over toHaveBeenCalledTimes(1)
         "vitest/valid-title": "allow", // Conflicts with vitest/prefer-describe-function-title
         "vitest/warn-todo": "warn",
+        "vitest/no-conditional-in-test": "allow", // Flags a lot of MSW handlers that conditionally route requests
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "vitest/max-expects": "off",
-        "vitest/no-conditional-in-test": "off",
         "vitest/prefer-expect-assertions": "off",
         "vitest/require-top-level-describe": "off",
       },
