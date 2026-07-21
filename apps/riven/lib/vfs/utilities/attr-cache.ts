@@ -23,8 +23,6 @@ export const attrCache = new LRUCache<PathLike, Partial<Stats>>({
 
         match = /^.*(?=\/)/u.exec(nextPart);
       }
-
-      return undefined;
     }
   },
 });
