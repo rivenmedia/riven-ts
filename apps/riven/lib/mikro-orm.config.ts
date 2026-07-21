@@ -5,7 +5,7 @@ const { createDatabaseConfig } = await import("./database/config.ts");
 
 const cliContexts = z.enum(["default", "slim"]);
 
-export default async (contextName: string) => {
+export default async function createMikroOrmConfig(contextName: string) {
   const context = cliContexts.safeParse(contextName);
 
   if (!context.success) {
@@ -48,4 +48,4 @@ export default async (contextName: string) => {
       });
     }
   }
-};
+}
