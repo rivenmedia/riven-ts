@@ -21,7 +21,9 @@ it("stops the GraphQL server when shutting down", async ({
   machine,
   input,
 }) => {
-  const stopGqlServerMock = vi.fn().mockResolvedValue(undefined);
+  const stopGqlServerMock = vi
+    .fn<() => Promise<undefined>>()
+    .mockResolvedValue(undefined);
 
   const actor = createActor(
     machine.provide({
@@ -42,7 +44,10 @@ it("stops the GraphQL server when shutting down", async ({
 });
 
 it("unmounts the VFS when shutting down", async ({ machine, input }) => {
-  const unmountVfsMock = vi.fn().mockResolvedValue(undefined);
+  const unmountVfsMock = vi
+    .fn<() => Promise<undefined>>()
+    .mockResolvedValue(undefined);
+
   const actor = createActor(
     machine.provide({
       actors: {

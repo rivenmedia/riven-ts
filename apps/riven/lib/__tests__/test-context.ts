@@ -12,6 +12,7 @@ import type { Services } from "../database/database.ts";
 import type { ApolloServerContext } from "../graphql/context.ts";
 import type { Flow } from "../message-queue/flows/index.ts";
 import type { SandboxedJobDefinition } from "../message-queue/sandboxed-jobs/index.ts";
+import type { MainRunnerMachineIntake } from "../state-machines/main-runner/index.ts";
 import type { ValidPlugin, ValidPluginMap } from "../types/plugins.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
@@ -235,14 +236,14 @@ export const it = testBase
       services,
     }): Promise<{
       services: Services;
-      sendEvent: Mock;
+      sendEvent: Mock<MainRunnerMachineIntake>;
       plugins: ValidPluginMap;
     }> => {
       const { plugin: testPlugin } = await import("@repo/plugin-test");
 
       return {
         services,
-        sendEvent: vi.fn(),
+        sendEvent: vi.fn<MainRunnerMachineIntake>(),
         plugins: new Map<symbol, ValidPlugin>([
           [
             testPlugin.name,
@@ -286,7 +287,7 @@ export const it = testBase
                 services,
               },
               logger: {} as never,
-              sendEvent: vi.fn(),
+              sendEvent: vi.fn<MainRunnerMachineIntake>(),
               plugins: {},
             }),
           listen: { port: 0 },

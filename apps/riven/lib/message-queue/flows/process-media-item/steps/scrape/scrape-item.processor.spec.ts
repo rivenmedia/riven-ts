@@ -9,6 +9,8 @@ import { expect, vi } from "vitest";
 import { it } from "../../../../../__tests__/test-context.ts";
 import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 
+import type { MainRunnerMachineIntake } from "../../../../../state-machines/main-runner/index.ts";
+
 it("throws an UnrecoverableError if the item cannot be scraped", async ({
   createMockJob,
   mockSentryScope,
@@ -25,7 +27,7 @@ it("throws an UnrecoverableError if the item cannot be scraped", async ({
         scope: mockSentryScope,
       },
       {
-        sendEvent: vi.fn(),
+        sendEvent: vi.fn<MainRunnerMachineIntake>(),
         services,
         plugins: new Map(),
       },
@@ -57,7 +59,7 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
     },
   });
 
-  const sendEvent = vi.fn();
+  const sendEvent = vi.fn<MainRunnerMachineIntake>();
 
   await scrapeItemProcessor(
     {

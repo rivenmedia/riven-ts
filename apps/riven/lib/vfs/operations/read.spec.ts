@@ -98,7 +98,7 @@ it("fetches the header chunk if the requested range is entirely within the heade
 
   const length = 64;
   const buffer = Buffer.alloc(length);
-  const callback = vi.fn();
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
 
   readSync(fileName, 0, buffer, length, 0, callback);
 
@@ -129,7 +129,7 @@ it("fetches the footer chunk if the requested range is entirely within the foote
   const length = 64;
 
   const buffer = Buffer.alloc(length);
-  const callback = vi.fn();
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
 
   readSync(
     fileName,
@@ -168,7 +168,7 @@ it("correctly calculates offsets when copying chunk data into the buffer", async
   );
 
   const buffer = Buffer.alloc(length);
-  const callback = vi.fn();
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
 
   readSync(
     fileName,
@@ -206,7 +206,7 @@ it("offsets the first chunk by the size of the header chunk", async ({
   ]);
 
   const buffer = Buffer.alloc(length);
-  const callback = vi.fn();
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
 
   readSync(
     fileName,
@@ -245,7 +245,7 @@ it("reads data across multiple chunks, utilising the chunk cache where possible"
 
   const position = 196_608;
   const buffer = Buffer.alloc(length);
-  const callback = vi.fn();
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
 
   readSync(fileName, 0, buffer, length, position, callback);
 

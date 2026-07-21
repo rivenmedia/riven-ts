@@ -5,8 +5,10 @@ import { expect, vi } from "vitest";
 import { it } from "../../__tests__/test-context.ts";
 import { readDirSync } from "./readdir.ts";
 
+type ReadDirCallback = Parameters<typeof readDirSync>[1];
+
 it("returns persistent directory entries for the root path", async () => {
-  const callback = vi.fn();
+  const callback = vi.fn<ReadDirCallback>();
 
   readDirSync("/", callback);
 
@@ -21,7 +23,7 @@ it("returns persistent directory entries for the root path", async () => {
 it("returns all shows for the /shows path", async ({
   completedShowContext: { completedShow },
 }) => {
-  const callback = vi.fn();
+  const callback = vi.fn<ReadDirCallback>();
 
   readDirSync("/shows", callback);
 
@@ -37,7 +39,7 @@ it('does not return entries for the "all shows" path for shows that do not have 
 }) => {
   await seedScrapedShow();
 
-  const callback = vi.fn();
+  const callback = vi.fn<ReadDirCallback>();
 
   readDirSync("/shows", callback);
 
@@ -52,7 +54,7 @@ it("returns all movies for the /movies path", async ({
 }) => {
   await seedCompletedMovie(3);
 
-  const callback = vi.fn();
+  const callback = vi.fn<ReadDirCallback>();
 
   readDirSync("/movies", callback);
 
@@ -71,7 +73,7 @@ it("returns all seasons for a single show path", async ({
 }) => {
   const seasons = await completedShow.seasons.load();
 
-  const callback = vi.fn();
+  const callback = vi.fn<ReadDirCallback>();
 
   readDirSync(`/shows/${completedShow.getPrettyName()}`, callback);
 
@@ -98,7 +100,7 @@ it("does not return entries for a season that does not have any episodes with a 
     },
   });
 
-  const callback = vi.fn();
+  const callback = vi.fn<ReadDirCallback>();
 
   readDirSync(`/shows/${completedShow.getPrettyName()}`, callback);
 
@@ -114,7 +116,7 @@ it("returns all episodes for a single season path", async ({
 
   expect.assert(mediaEntries);
 
-  const callback = vi.fn();
+  const callback = vi.fn<ReadDirCallback>();
 
   readDirSync(`/shows/${completedShow.getPrettyName()}/Season 01`, callback);
 
@@ -145,7 +147,7 @@ it("does not return entries for episodes that does not have a media entry when v
 
   expect.assert(mediaEntry);
 
-  const callback = vi.fn();
+  const callback = vi.fn<ReadDirCallback>();
 
   readDirSync(`/shows/${completedShow.getPrettyName()}/Season 01`, callback);
 
@@ -159,7 +161,7 @@ it("does not return entries for episodes that does not have a media entry when v
 it("returns the media entry's filename when viewing a single movie's directory", async ({
   completedMovieContext: { completedMovie },
 }) => {
-  const callback = vi.fn();
+  const callback = vi.fn<ReadDirCallback>();
 
   const mediaEntries = await completedMovie.getMediaEntries();
 
@@ -180,7 +182,7 @@ it('does not return entries for the "all movies" path when a movie does not have
 }) => {
   await seedScrapedMovie(2);
 
-  const callback = vi.fn();
+  const callback = vi.fn<ReadDirCallback>();
 
   readDirSync("/movies", callback);
 
@@ -195,7 +197,7 @@ it("does not include periods in movie titles", async ({
   em,
   completedMovieContext: { completedMovie },
 }) => {
-  const callback = vi.fn();
+  const callback = vi.fn<ReadDirCallback>();
 
   em.assign(completedMovie, {
     title: "Mr. Robot",

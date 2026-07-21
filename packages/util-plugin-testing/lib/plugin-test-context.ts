@@ -156,7 +156,7 @@ export const it = baseIt
       },
       logger: {} as never,
       plugins: {},
-      sendEvent: vi.fn(),
+      sendEvent: vi.fn<GraphQLContext["sendEvent"]>(),
     }),
   );
 

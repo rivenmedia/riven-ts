@@ -13,6 +13,9 @@ import { enqueueRequestStreamLink } from "./enqueue-request-stream-link.ts";
 import { requestStreamLinkProcessor } from "./request-stream-link.processor.ts";
 import { RequestStreamLinkFlow } from "./request-stream-link.schema.ts";
 
+import type { MediaItemStreamLinkRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
+import type { Processor } from "bullmq";
+
 it.beforeEach(({ createFlowWorker }) => {
   createFlowWorker(RequestStreamLinkFlow, requestStreamLinkProcessor);
 });
@@ -59,13 +62,15 @@ it("does not request a new stream link if the media entry has a pre-existing per
 
   await em.persist(mediaEntry).flush();
 
-  const streamLinkRequestedMock = vi.fn().mockResolvedValue({
-    success: true,
-    data: {
-      link: "https://example.com/stream-link",
-      isPermalink: true,
-    },
-  });
+  const streamLinkRequestedMock = vi
+    .fn<() => Promise<MediaItemStreamLinkRequestedResponse>>()
+    .mockResolvedValue({
+      success: true,
+      data: {
+        link: "https://example.com/stream-link",
+        isPermalink: true,
+      },
+    });
 
   createPluginWorker(
     "riven.media-item.stream-link.requested",
@@ -506,7 +511,7 @@ it("adds a job to reprocess the movie if the item is a movie and its torrent is 
 
   expect.assert(mediaEntry);
 
-  const mockProcessMediaItemProcessor = vi.fn();
+  const mockProcessMediaItemProcessor = vi.fn<Processor>();
 
   createFlowWorker(ProcessMediaItemFlow, mockProcessMediaItemProcessor);
 
@@ -543,7 +548,7 @@ it("adds a job to reprocess the lowest common denominator in the item's hierarch
 
   expect.assert(mediaEntry);
 
-  const mockProcessMediaItemProcessor = vi.fn();
+  const mockProcessMediaItemProcessor = vi.fn<Processor>();
   const flowAddSpy = vi.spyOn(flow, "addBulk");
 
   createFlowWorker(ProcessMediaItemFlow, mockProcessMediaItemProcessor);

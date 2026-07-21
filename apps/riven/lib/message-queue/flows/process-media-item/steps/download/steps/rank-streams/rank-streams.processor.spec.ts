@@ -10,6 +10,8 @@ import { it as baseIt } from "../../../../../../../__tests__/test-context.ts";
 import * as rankingConfigModule from "../../../../../../../ranking-config/ranking-config.ts";
 import { rankStreamsProcessor } from "./rank-streams.processor.ts";
 
+import type { MainRunnerMachineIntake } from "../../../../../../../state-machines/main-runner/index.ts";
+
 const it = baseIt.extend("streams", async ({ factories: { streamFactory } }) =>
   streamFactory.create(6),
 );
@@ -60,7 +62,7 @@ it("does not include trashed streams", async ({
       scope: mockSentryScope,
     },
     {
-      sendEvent: vi.fn(),
+      sendEvent: vi.fn<MainRunnerMachineIntake>(),
       services,
       plugins: new Map(),
     },
@@ -109,7 +111,7 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
       scope: mockSentryScope,
     },
     {
-      sendEvent: vi.fn(),
+      sendEvent: vi.fn<MainRunnerMachineIntake>(),
       services,
       plugins: new Map(),
     },
@@ -177,7 +179,7 @@ it("handles foreign language movies with aliases correctly", async ({
       scope: mockSentryScope,
     },
     {
-      sendEvent: vi.fn(),
+      sendEvent: vi.fn<MainRunnerMachineIntake>(),
       services,
       plugins: new Map(),
     },
@@ -230,7 +232,7 @@ it("handles foreign language shows with aliases correctly", async ({
       scope: mockSentryScope,
     },
     {
-      sendEvent: vi.fn(),
+      sendEvent: vi.fn<MainRunnerMachineIntake>(),
       services,
       plugins: new Map(),
     },

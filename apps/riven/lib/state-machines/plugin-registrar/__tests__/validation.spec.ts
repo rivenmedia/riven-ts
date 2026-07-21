@@ -10,7 +10,7 @@ vi.mock(import("node:timers/promises"), async (importOriginal) => {
 
   return {
     ...originalModule,
-    setTimeout: vi.fn(),
+    setTimeout: vi.fn<() => Promise<never>>(),
   };
 });
 

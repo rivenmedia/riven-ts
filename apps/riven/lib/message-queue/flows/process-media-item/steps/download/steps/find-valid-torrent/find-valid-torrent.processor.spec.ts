@@ -15,6 +15,11 @@ import { ValidateTorrentFilesSandboxedJob } from "../../../../../../sandboxed-jo
 import { findValidTorrentProcessor } from "./find-valid-torrent.processor.ts";
 import { FindValidTorrentFlow } from "./find-valid-torrent.schema.ts";
 
+import type { ParamsFor } from "@repo/util-plugin-sdk";
+import type {
+  MediaItemDownloadRequestedEvent,
+  MediaItemDownloadRequestedResponse,
+} from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 import type { RankedResult } from "@repo/util-rank-torrent-name";
 import type { TypedJobNode } from "bullmq";
@@ -82,13 +87,19 @@ it("does not attempt previously failed info hashes", async ({
   expect.assert(stream2);
   expect.assert(stream3);
 
-  const downloadRequestedSpy = vi.fn().mockResolvedValue({
-    success: true,
-    data: {
-      torrentId: "mock-torrent-id",
-      files: [],
-    },
-  });
+  const downloadRequestedSpy = vi
+    .fn<
+      (
+        job: TypedJobNode<ParamsFor<MediaItemDownloadRequestedEvent>>["job"],
+      ) => Promise<MediaItemDownloadRequestedResponse>
+    >()
+    .mockResolvedValue({
+      success: true,
+      data: {
+        torrentId: "mock-torrent-id",
+        files: [],
+      },
+    });
 
   createPluginWorker(
     "riven.media-item.download.requested",
@@ -369,13 +380,19 @@ it("does not attempt to re-download blacklisted streams", async ({
   expect.assert(stream2);
   expect.assert(blacklistedStream);
 
-  const downloadRequestedSpy = vi.fn().mockResolvedValue({
-    success: true,
-    data: {
-      torrentId: "mock-torrent-id",
-      files: [],
-    },
-  });
+  const downloadRequestedSpy = vi
+    .fn<
+      (
+        job: TypedJobNode<ParamsFor<MediaItemDownloadRequestedEvent>>["job"],
+      ) => Promise<MediaItemDownloadRequestedResponse>
+    >()
+    .mockResolvedValue({
+      success: true,
+      data: {
+        torrentId: "mock-torrent-id",
+        files: [],
+      },
+    });
 
   createPluginWorker(
     "riven.media-item.download.requested",
@@ -434,8 +451,6 @@ it("does not attempt to re-download blacklisted streams", async ({
   expect(downloadRequestedSpy).toHaveBeenCalledTimes(2);
 
   for (const [jobArg] of downloadRequestedSpy.mock.calls) {
-    expect(
-      (jobArg as TypedJobNode<{ infoHash: string }>["job"]).data.infoHash,
-    ).not.toBe(blacklistedStream.infoHash);
+    expect(jobArg.data.infoHash).not.toBe(blacklistedStream.infoHash);
   }
 });
