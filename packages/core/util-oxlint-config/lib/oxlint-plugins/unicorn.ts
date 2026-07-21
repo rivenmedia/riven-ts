@@ -1,6 +1,6 @@
 import { defineConfig } from "oxlint";
 
-import { jsFiles, tsFiles } from "../internal/file-types.ts";
+import { jsFiles, testFiles, tsFiles } from "../internal/file-types.ts";
 
 export const oxlintPluginUnicornConfig = defineConfig({
   overrides: [
@@ -29,7 +29,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/no-unreadable-array-destructuring": "off",
 
         // Type-aware rules that are disabled for now, but will be enabled in the future
-        "unicorn/consistent-function-scoping": "off",
         "unicorn/prefer-native-coercion-functions": "off",
       },
     },
@@ -37,6 +36,13 @@ export const oxlintPluginUnicornConfig = defineConfig({
       files: ["vitest.config.ts"],
       rules: {
         "unicorn/prefer-export-from": "off", // Interferes with Knip resolution
+      },
+    },
+    {
+      files: [...testFiles],
+      plugins: ["unicorn"],
+      rules: {
+        "unicorn/consistent-function-scoping": "off",
       },
     },
   ],

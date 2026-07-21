@@ -5,6 +5,16 @@ import { glob } from "glob";
 import fs from "node:fs/promises";
 import path from "node:path";
 
+// Create clean patterns for display (without any "../" prefixes)
+const replaceDotPatterns = (str: string) => {
+  // Normalize and remove any ".." or "." path segments for safe display
+  const normalized = path.normalize(str);
+  const parts = normalized.split(path.sep);
+  const filteredParts = parts.filter((part) => part !== ".." && part !== ".");
+
+  return filteredParts.join(path.sep);
+};
+
 try {
   // Define the patterns to search
   const patterns = [
@@ -62,15 +72,6 @@ try {
       }
     }
   }
-
-  // Create clean patterns for display (without any "../" prefixes)
-  const replaceDotPatterns = (str: string) => {
-    // Normalize and remove any ".." or "." path segments for safe display
-    const normalized = path.normalize(str);
-    const parts = normalized.split(path.sep);
-    const filteredParts = parts.filter((part) => part !== ".." && part !== ".");
-    return filteredParts.join(path.sep);
-  };
 
   if (directoriesWithCoverage.length > 0) {
     console.debug(
