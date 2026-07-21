@@ -104,15 +104,17 @@ export function parseFilePath(filePath: string) {
     );
   }
 
-  const parseData = parts.reduce<ParsedData | null>((acc, part) => {
+  const parseData = {} as ParsedData;
+
+  for (const part of parts) {
     try {
       const parsedPart = parse(part);
 
-      return merge(acc ?? {}, parsedPart);
+      merge(parseData, parsedPart);
     } catch {
-      return acc;
+      // Continue to next part
     }
-  }, null);
+  }
 
   const parsedData = ParsedDataSchema.safeParse({
     ...parseData,

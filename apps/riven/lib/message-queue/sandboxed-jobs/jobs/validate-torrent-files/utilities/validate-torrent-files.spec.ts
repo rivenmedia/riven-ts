@@ -43,20 +43,20 @@ it("considers torrents for continuing shows as valid if missing a maximum of one
 
   const episodes = await indexedShow.getEpisodes();
 
-  const files = episodes.reduce<MappedFiles["episodes"]>((acc, episode) => {
+  const files: MappedFiles["episodes"] = {};
+
+  for (const episode of episodes) {
     if (episode.season.getProperty("number") === indexedShow.seasons.length) {
-      return acc;
+      continue;
     }
 
-    acc[`abs:${episode.absoluteNumber.toString()}`] = {
+    files[`abs:${episode.absoluteNumber.toString()}`] = {
       name: `${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
       path: `/${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
       size: 5_000_000_000,
       link: "http://example.com/file.mkv",
     };
-
-    return acc;
-  }, {});
+  }
 
   const mappedFiles = {
     movies: {},
@@ -74,20 +74,20 @@ it("considers torrents for completed shows as invalid if missing any season", as
 }) => {
   const episodes = await indexedShow.getEpisodes();
 
-  const files = episodes.reduce<MappedFiles["episodes"]>((acc, episode) => {
+  const files: MappedFiles["episodes"] = {};
+
+  for (const episode of episodes) {
     if (episode.season.getProperty("number") === indexedShow.seasons.length) {
-      return acc;
+      continue;
     }
 
-    acc[`abs:${episode.absoluteNumber.toString()}`] = {
+    files[`abs:${episode.absoluteNumber.toString()}`] = {
       name: `${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
       path: `/${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
       size: 5_000_000_000,
       link: "http://example.com/file.mkv",
     };
-
-    return acc;
-  }, {});
+  }
 
   const mappedFiles = {
     movies: {},

@@ -253,15 +253,17 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
       "unknown",
     ]);
 
-    return items.reduce<Record<string, DebridFile[]>>((acc, item) => {
+    const result: Record<string, DebridFile[]> = {};
+
+    for (const item of items) {
       if (!allowedStatuses.safeParse(item.status).success) {
-        return acc;
+        continue;
       }
 
-      acc[item.hash] = item.files;
+      result[item.hash] = item.files;
+    }
 
-      return acc;
-    }, {});
+    return result;
   }
 
   public async getCachedTorrents(infoHashes: string[], store: Store) {
@@ -277,10 +279,13 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
 
     const results = await Promise.all(requests);
 
-    return results.reduce<Record<string, DebridFile[]>>(
-      (acc, result) => Object.assign(acc, result),
-      {},
-    );
+    const combined: Record<string, DebridFile[]> = {};
+
+    for (const result of results) {
+      Object.assign(combined, result);
+    }
+
+    return combined;
   }
 
   public async generateLink(link: string, store: Store) {

@@ -18,7 +18,9 @@ export interface JobEnqueuerInput {
 export const jobEnqueuer = fromCallback<RivenEvent, JobEnqueuerInput>(
   ({ receive, input: { plugins, pluginQueues } }) => {
     receive(({ type, ...event }) => {
-      const jobs = plugins.values().reduce<FlowJob[]>((acc, plugin) => {
+      const jobs: FlowJob[] = [];
+
+      for (const plugin of plugins.values()) {
         const queue = pluginQueues.get(plugin.config.name)?.get(type);
 
         if (!queue) {
@@ -26,17 +28,15 @@ export const jobEnqueuer = fromCallback<RivenEvent, JobEnqueuerInput>(
             `No queue found for event "${type}" and plugin "${plugin.config.name.description ?? "unknown"}". Event will not be broadcast to this plugin.`,
           );
 
-          return acc;
+          continue;
         }
 
-        acc.push({
+        jobs.push({
           name: type,
           queueName: queue.name,
           data: serialiseEventData(type, event),
         });
-
-        return acc;
-      }, []);
+      }
 
       if (jobs.length === 0) {
         logger.silly(

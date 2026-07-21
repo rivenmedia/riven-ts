@@ -87,19 +87,18 @@ export const processItemRequestProcessor =
             );
           }
 
-          const item = Object.values(data).reduce(
-            (acc, value) => {
-              if (!value?.item) {
-                return acc;
-              }
+          const item = {} as NonNullable<
+            | MediaItemIndexRequestedMovieResponse
+            | MediaItemIndexRequestedShowResponse
+          >["item"];
 
-              return Object.assign(acc, value.item);
-            },
-            {} as NonNullable<
-              | MediaItemIndexRequestedMovieResponse
-              | MediaItemIndexRequestedShowResponse
-            >["item"],
-          );
+          for (const value of Object.values(data)) {
+            if (!value?.item) {
+              continue;
+            }
+
+            Object.assign(item, value.item);
+          }
 
           try {
             const updatedItem = await indexerService.indexItem(item);

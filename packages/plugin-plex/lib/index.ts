@@ -29,14 +29,15 @@ export const plugin: RivenPlugin = {
         );
       }
 
-      const sectionPaths = mediaEntries
-        .reduce<Set<string>>(
-          (acc, entry) =>
-            acc.add(path.join(entry.baseDirectory, path.dirname(entry.path))),
-          new Set<string>(),
-        )
-        .values()
-        .toArray();
+      const sectionPathsSet = new Set<string>();
+
+      for (const entry of mediaEntries) {
+        sectionPathsSet.add(
+          path.join(entry.baseDirectory, path.dirname(entry.path)),
+        );
+      }
+
+      const sectionPaths = [...sectionPathsSet];
 
       const results = await Promise.allSettled(
         sectionPaths.map(async (sectionPath) =>

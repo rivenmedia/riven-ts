@@ -79,21 +79,23 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       }
 
       if (collection.owner instanceof Season) {
-        const episodesToUpdate = collection.reduce((acc, episode) => {
+        const episodesToUpdate = new Set<Episode>();
+
+        for (const episode of collection) {
           if (!(episode instanceof Episode)) {
-            return acc;
+            continue;
           }
 
           if (episode.state === "unreleased" && !episode.isReleased) {
-            return acc;
+            continue;
           }
 
           if (episode.state !== "unreleased" && episode.isReleased) {
-            return acc;
+            continue;
           }
 
-          return acc.add(episode);
-        }, new Set<Episode>());
+          episodesToUpdate.add(episode);
+        }
 
         for (const episode of episodesToUpdate) {
           episodesAwaitingUpdate.add(episode);
@@ -198,16 +200,15 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     children: MediaItem[],
     nextStatesMap: NextStatesMap,
   ) {
-    return children.reduce<Partial<Record<MediaItemState, number>>>(
-      (acc, child) => {
-        const childState = nextStatesMap.get(child) ?? child.state;
+    const acc: Partial<Record<MediaItemState, number>> = {};
 
-        acc[childState] = (acc[childState] ?? 0) + 1;
+    for (const child of children) {
+      const childState = nextStatesMap.get(child) ?? child.state;
 
-        return acc;
-      },
-      {},
-    );
+      acc[childState] = (acc[childState] ?? 0) + 1;
+    }
+
+    return acc;
   }
 
   #determineFixedState(item: MediaItem) {

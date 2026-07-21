@@ -17,9 +17,11 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
       "scrape-item.parse-scrape-results",
     );
 
-    const parsedResults = Object.values(children).reduce<
-      Record<string, ParsedData>
-    >((acc, scrapeResult) => Object.assign(acc, scrapeResult.results), {});
+    const parsedResults: Record<string, ParsedData> = {};
+
+    for (const scrapeResult of Object.values(children)) {
+      Object.assign(parsedResults, scrapeResult.results);
+    }
 
     try {
       const { item, error } = await scraperService.scrapeItem(

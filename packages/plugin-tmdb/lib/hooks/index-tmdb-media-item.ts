@@ -32,21 +32,20 @@ export const indexTMDBMediaItem: z.infer<
   }
 
   const result = await api.getMovieDetails(resolvedTmdbId.toString());
+  const genres: string[] = [];
+
+  for (const genre of result.genres ?? []) {
+    if (genre.name) {
+      genres.push(genre.name);
+    }
+  }
 
   return {
     item: {
       id: event.item.id,
       type: "movie",
       imdbId: imdbId ?? result.imdb_id ?? null,
-      genres: (result.genres ?? []).reduce<string[]>((acc, genre) => {
-        if (!genre.name) {
-          return acc;
-        }
-
-        acc.push(genre.name);
-
-        return acc;
-      }, []),
+      genres,
       title: result.title ?? "Unknown title",
       aliases: {},
       country: result.production_countries?.[0]?.iso_3166_1,

@@ -17,9 +17,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/throw-new-error": "off", // Conflicts with BullMQ's RateLimitError
         "unicorn/no-array-callback-reference": "allow", // This naively looks at method names (e.g. .find() and .map()) and returns a lot of false positives
         "unicorn/no-array-method-this-argument": "allow", // This conflicts with MikroORM's methods that are passed entity classes which contain `this`
-
-        // Rules that will be enabled in the future, but are currently disabled to avoid noise
-        "unicorn/no-array-reduce": "off",
       },
     },
     {

@@ -28,9 +28,9 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
     const { title: itemTitle, aliases } =
       item instanceof ShowLikeMediaItem ? await item.getShow() : item;
 
-    const rankedResults = Object.entries(job.data.streams).reduce<
-      RankedResult[]
-    >((acc, [hash, rawTitle]) => {
+    const rankedResults: RankedResult[] = [];
+
+    for (const [hash, rawTitle] of Object.entries(job.data.streams)) {
       try {
         const stream = streams.find(({ infoHash }) => infoHash === hash);
 
@@ -52,11 +52,9 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
           );
         }
 
-        acc.push(
+        rankedResults.push(
           rtnInstance.rankTorrent(rawTitle, hash, itemTitle, aliases ?? {}),
         );
-
-        return acc;
       } catch (error) {
         if (
           error instanceof GarbageTorrentError ||
@@ -69,10 +67,8 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
             { err: error },
           );
         }
-
-        return acc;
       }
-    }, []);
+    }
 
     const bucketedTorrents = rtnInstance.sortTorrents(rankedResults);
     const sortedTorrentsByResolution = bucketedTorrents.toSorted(

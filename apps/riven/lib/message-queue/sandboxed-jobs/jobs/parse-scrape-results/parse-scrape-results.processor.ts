@@ -21,10 +21,11 @@ export default createSandboxedJobProcessor(
     const childResults = Object.values(children);
 
     // Aggregate results from all scrapers, deduping by hash (which should be consistent across scrapers)
-    const aggregatedResults = childResults.reduce<Record<string, string>>(
-      (acc, scrapeResult) => Object.assign(acc, scrapeResult.results),
-      {},
-    );
+    const aggregatedResults: Record<string, string> = {};
+
+    for (const scrapeResult of childResults) {
+      Object.assign(aggregatedResults, scrapeResult.results);
+    }
 
     if (Object.keys(aggregatedResults).length === 0) {
       return {

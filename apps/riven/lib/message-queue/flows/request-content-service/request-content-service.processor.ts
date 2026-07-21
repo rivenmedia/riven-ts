@@ -75,59 +75,55 @@ export const requestContentServiceProcessor =
           case "process": {
             const data = await job.getChildrenValues();
 
-            const { items, updateIntervalSeconds } = Object.values(data).reduce(
-              (acc, childData) => {
-                acc.updateIntervalSeconds ??= childData.updateIntervalSeconds;
+            let updateIntervalSeconds: number | null = null;
 
-                if (childData.movies.length > 0) {
-                  for (const movie of childData.movies) {
-                    const key = buildExternalIdKey(movie.tmdbId, movie.imdbId);
-
-                    if (!key) {
-                      logger.warn(
-                        `Skipping requested movie with no valid external ID: ${JSON.stringify(movie)}`,
-                      );
-
-                      continue;
-                    }
-
-                    acc.items.set(key, { item: movie, type: "movie" });
-                  }
+            const items = new Map<
+              string,
+              | {
+                  item: ContentServiceRequestedResponse["movies"][number];
+                  type: "movie";
                 }
-
-                if (childData.shows.length > 0) {
-                  for (const show of childData.shows) {
-                    const key = buildExternalIdKey(show.tvdbId, show.imdbId);
-
-                    if (!key) {
-                      logger.warn(
-                        `Skipping requested show with no valid external ID: ${JSON.stringify(show)}`,
-                      );
-
-                      continue;
-                    }
-
-                    acc.items.set(key, { item: show, type: "show" });
-                  }
+              | {
+                  type: "show";
+                  item: ContentServiceRequestedResponse["shows"][number];
                 }
+            >();
 
-                return acc;
-              },
-              {
-                updateIntervalSeconds: null as number | null,
-                items: new Map<
-                  string,
-                  | {
-                      item: ContentServiceRequestedResponse["movies"][number];
-                      type: "movie";
-                    }
-                  | {
-                      type: "show";
-                      item: ContentServiceRequestedResponse["shows"][number];
-                    }
-                >(),
-              },
-            );
+            for (const childData of Object.values(data)) {
+              updateIntervalSeconds ??= childData.updateIntervalSeconds;
+
+              if (childData.movies.length > 0) {
+                for (const movie of childData.movies) {
+                  const key = buildExternalIdKey(movie.tmdbId, movie.imdbId);
+
+                  if (!key) {
+                    logger.warn(
+                      `Skipping requested movie with no valid external ID: ${JSON.stringify(movie)}`,
+                    );
+
+                    continue;
+                  }
+
+                  items.set(key, { item: movie, type: "movie" });
+                }
+              }
+
+              if (childData.shows.length > 0) {
+                for (const show of childData.shows) {
+                  const key = buildExternalIdKey(show.tvdbId, show.imdbId);
+
+                  if (!key) {
+                    logger.warn(
+                      `Skipping requested show with no valid external ID: ${JSON.stringify(show)}`,
+                    );
+
+                    continue;
+                  }
+
+                  items.set(key, { item: show, type: "show" });
+                }
+              }
+            }
 
             let newItemsCount = 0;
             let updatedItemsCount = 0;

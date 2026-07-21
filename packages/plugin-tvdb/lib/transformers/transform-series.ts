@@ -48,43 +48,38 @@ export const transformSeries = (
   const network =
     series.latestNetwork?.name ?? series.originalNetwork?.name ?? null;
 
-  const aliases = (series.translations?.nameTranslations ?? []).reduce<
-    Map<string, Set<string>>
-  >(
-    (acc, { language, name }) => {
-      if (!name || !language) {
-        return acc;
+  const aliases = new Map<string, Set<string>>([["eng", new Set([slug])]]);
+
+  for (const { language, name } of series.translations?.nameTranslations ??
+    []) {
+    if (!name || !language) {
+      continue;
+    }
+
+    // Ignore english translations, we already have the English show title
+    if (language === "eng") {
+      continue;
+    }
+
+    // Ignore translations that are identical to the main show title;
+    // these add no value to the list.
+    if (name === title) {
+      continue;
+    }
+
+    const existing = aliases.get(language) ?? new Set<string>();
+    aliases.set(language, existing.add(name));
+  }
+
+  const genres: string[] = [];
+
+  if (series.genres) {
+    for (const genre of series.genres) {
+      if (genre.name) {
+        genres.push(genre.name);
       }
-
-      // Ignore english translations, we already have the English show title
-      if (language === "eng") {
-        return acc;
-      }
-
-      // Ignore translations that are identical to the main show title;
-      // these add no value to the list.
-      if (name === title) {
-        return acc;
-      }
-
-      const existing = acc.get(language) ?? new Set<string>();
-
-      return acc.set(language, existing.add(name));
-    },
-    new Map<string, Set<string>>([["eng", new Set([slug])]]),
-  );
-
-  const genres = series.genres
-    ? series.genres.reduce<string[]>((acc, genre) => {
-        if (!genre.name) {
-          return acc;
-        }
-
-        acc.push(genre.name);
-
-        return acc;
-      }, [])
-    : [];
+    }
+  }
 
   const sanitisedTitle = title.replaceAll(/\s*\(.*\)\s*$/gu, "");
 
@@ -99,16 +94,16 @@ export const transformSeries = (
 
   const airsDateTime = DateTime.fromFormat(airsTime ?? "00:00", "HH:mm");
 
-  const seasons = allEpisodes.reduce<
-    Extract<
-      NonNullable<MediaItemIndexRequestedShowResponse>["item"],
-      { type: "show" }
-    >["seasons"]
-  >((acc, episode) => {
+  const seasons: Extract<
+    NonNullable<MediaItemIndexRequestedShowResponse>["item"],
+    { type: "show" }
+  >["seasons"] = {};
+
+  for (const episode of allEpisodes) {
     const { seasonNumber, number } = episode;
 
     if (seasonNumber === undefined || number === undefined) {
-      return acc;
+      continue;
     }
 
     const episodeAiredDate = episode.aired
@@ -128,13 +123,13 @@ export const transformSeries = (
         ).toUTC()
       : null;
 
-    acc[seasonNumber] ??= {
+    seasons[seasonNumber] ??= {
       number: seasonNumber,
       title: null,
       episodes: [],
     };
 
-    acc[seasonNumber].episodes.push({
+    seasons[seasonNumber].episodes.push({
       contentRating, // TODO: Get episode-specific content rating
       number,
       absoluteNumber: episode.absoluteNumber ?? 0,
@@ -145,9 +140,7 @@ export const transformSeries = (
       airedAt: episodeAiredAtUtc?.toISO({ precision: "minute" }) ?? null,
       runtime: episode.runtime ?? null,
     });
-
-    return acc;
-  }, {});
+  }
 
   return {
     id: itemRequest.id,
