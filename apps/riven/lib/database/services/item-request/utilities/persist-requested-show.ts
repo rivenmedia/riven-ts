@@ -50,7 +50,7 @@ export async function persistRequestedShow(
       ? new Set([...existingItem.seasons, ...item.seasons])
           .values()
           .toArray()
-          .toSorted()
+          .toSorted((a, b) => a - b)
       : (item.seasons ?? existingItem?.seasons ?? null);
 
   if (existingItem && itemRequest.seasons) {

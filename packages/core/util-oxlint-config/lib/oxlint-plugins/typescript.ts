@@ -28,9 +28,6 @@ export const oxlintPluginTypescriptConfig = defineConfig({
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "typescript/strict-boolean-expressions": "off",
-
-        // Type-aware rules that are disabled for now, but will be enabled in the future
-        "typescript/require-array-sort-compare": "off",
       },
       env: {
         ...globals.node,
