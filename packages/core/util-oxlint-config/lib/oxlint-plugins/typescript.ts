@@ -15,10 +15,10 @@ export const oxlintPluginTypescriptConfig = defineConfig({
           "deny",
           { allowWithDecorator: true },
         ],
-        "typescript/explicit-module-boundary-types": "off", // This enforces every function to have a return type, which is incompatible with inferred types
+        "typescript/explicit-module-boundary-types": "allow", // This enforces every *exported* function to have a return type, which is incompatible with inferred types
+        "typescript/explicit-function-return-type": "allow", // This enforces every function to have a return type, which is incompatible with inferred types
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
-        "typescript/explicit-function-return-type": "off",
         "typescript/method-signature-style": "off",
         "typescript/no-empty-interface": "off",
         "typescript/strict-boolean-expressions": "off",
