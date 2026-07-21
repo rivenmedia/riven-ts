@@ -2,6 +2,7 @@ import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
 import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 
+import { NotFoundError } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
 
 import { filterChildrenValues } from "../../../../utilities/filter-children-values.ts";
@@ -46,6 +47,12 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
 
       if (error instanceof MediaItemScrapeErrorNoNewStreams) {
         sendEvent(error.payload);
+      }
+
+      if (error instanceof NotFoundError) {
+        throw new UnrecoverableError(
+          `MediaItem with id ${job.data.id} not found`,
+        );
       }
 
       throw error;

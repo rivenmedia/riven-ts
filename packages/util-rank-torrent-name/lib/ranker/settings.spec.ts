@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ZodError } from "zod";
 
 import { createSettings } from "./ranking-settings.schema.ts";
 
@@ -66,7 +67,9 @@ describe(createSettings, () => {
 
   it("throws on invalid input types", () => {
     // @ts-expect-error - invalid type for resolutions
-    expect(() => createSettings({ resolutions: { r1080p: "yes" } })).toThrow();
+    expect(() => createSettings({ resolutions: { r1080p: "yes" } })).toThrow(
+      ZodError,
+    );
   });
 
   it("accepts empty language config", () => {

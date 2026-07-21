@@ -34,7 +34,7 @@ describe("when the config file does not exist", () => {
   it("creates the file", async ({ tempDir }) => {
     const configPath = path.join(tempDir, "ranking-config.json");
 
-    await expect(stat(configPath)).rejects.toThrow();
+    await expect(stat(configPath)).rejects.toThrow(/ENOENT/iu);
 
     await loadRankingConfig(configPath);
 

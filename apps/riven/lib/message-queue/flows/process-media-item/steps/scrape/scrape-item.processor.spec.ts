@@ -2,13 +2,14 @@ import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { parse } from "@repo/util-rank-torrent-name/parser";
 
 import { faker } from "@faker-js/faker";
+import { UnrecoverableError } from "bullmq";
 import { randomUUID } from "node:crypto";
 import { expect, vi } from "vitest";
 
 import { it } from "../../../../../__tests__/test-context.ts";
 import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 
-it("throws an unrecoverable error if the item cannot be scraped", async ({
+it("throws an UnrecoverableError if the item cannot be scraped", async ({
   createMockJob,
   mockSentryScope,
   services,
@@ -29,7 +30,7 @@ it("throws an unrecoverable error if the item cannot be scraped", async ({
         plugins: new Map(),
       },
     ),
-  ).rejects.toThrow();
+  ).rejects.toThrow(UnrecoverableError);
 });
 
 it.todo("throws an unrecoverable if no new streams were found");

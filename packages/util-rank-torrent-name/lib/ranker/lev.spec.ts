@@ -31,13 +31,23 @@ describe(getLevRatio, () => {
   });
 
   it("throws on empty titles", () => {
-    expect(() => getLevRatio("", "foo", 0.85, {})).toThrow();
-    expect(() => getLevRatio("foo", "", 0.85, {})).toThrow();
+    expect(() => getLevRatio("", "foo", 0.85, {})).toThrow(
+      /both titles must be provided/iu,
+    );
+
+    expect(() => getLevRatio("foo", "", 0.85, {})).toThrow(
+      /both titles must be provided/iu,
+    );
   });
 
   it("throws on invalid threshold", () => {
-    expect(() => getLevRatio("a", "b", -1, {})).toThrow();
-    expect(() => getLevRatio("a", "b", 2, {})).toThrow();
+    expect(() => getLevRatio("a", "b", -1, {})).toThrow(
+      /the threshold must be a number between 0 and 1/iu,
+    );
+
+    expect(() => getLevRatio("a", "b", 2, {})).toThrow(
+      /the threshold must be a number between 0 and 1/iu,
+    );
   });
 });
 

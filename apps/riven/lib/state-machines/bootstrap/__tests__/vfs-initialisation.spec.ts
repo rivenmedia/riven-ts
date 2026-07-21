@@ -22,7 +22,9 @@ it("throws an error if process UID or GID cannot be determined", async ({
   // @ts-expect-error - We are intentionally mocking these functions to return undefined to simulate the error condition
   vi.spyOn(process, "getgid", "get").mockReturnValue(undefined);
 
-  await expect(toPromise(actor.start())).rejects.toThrow();
+  await expect(toPromise(actor.start())).rejects.toThrow(
+    /unable to determine process uid or gid/iu,
+  );
 });
 
 it("throws an error if the mount path does not exist", async ({ actor }) => {
