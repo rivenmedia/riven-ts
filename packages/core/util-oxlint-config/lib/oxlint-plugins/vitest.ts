@@ -26,11 +26,11 @@ export const oxlintPluginVitestConfig = defineConfig({
         "vitest/valid-title": "allow", // Conflicts with vitest/prefer-describe-function-title
         "vitest/warn-todo": "warn",
         "vitest/no-conditional-in-test": "allow", // Flags a lot of MSW handlers that conditionally route requests
+        "vitest/require-top-level-describe": "allow", // Flat test files are preferred; split into multiple files if needed for readability
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "vitest/max-expects": "off",
         "vitest/prefer-expect-assertions": "off",
-        "vitest/require-top-level-describe": "off",
       },
     },
   ],
