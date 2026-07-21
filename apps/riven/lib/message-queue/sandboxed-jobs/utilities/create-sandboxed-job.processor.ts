@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import * as Sentry from "@sentry/node";
 import { UnrecoverableError } from "bullmq";
 import { AbortError } from "es-toolkit";

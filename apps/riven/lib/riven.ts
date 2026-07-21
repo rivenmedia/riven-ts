@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Duration } from "luxon";
 import { randomUUID } from "node:crypto";
 import { setEnvironmentData } from "node:worker_threads";

@@ -24,7 +24,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/no-array-for-each": "off",
         "unicorn/no-array-method-this-argument": "off",
         "unicorn/no-array-reduce": "off",
-        "unicorn/no-process-exit": "off",
         "unicorn/no-unreadable-array-destructuring": "off",
       },
     },
