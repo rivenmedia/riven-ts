@@ -15,7 +15,6 @@ export const oxlintPluginTypescriptConfig = defineConfig({
           "deny",
           { allowWithDecorator: true },
         ],
-        "typescript/strict-void-return": ["deny", { allowReturnAny: true }],
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "typescript/explicit-function-return-type": "off",
@@ -42,6 +41,12 @@ export const oxlintPluginTypescriptConfig = defineConfig({
       plugins: ["typescript"],
       rules: {
         "typescript/no-unsafe-argument": "allow", // Allow the use of helpers such as expect.objectContaining() which return `any`
+        "typescript/strict-void-return": [
+          "deny",
+          {
+            allowReturnAny: true, // Allow mocks to return `any` in test files
+          },
+        ],
       },
     },
   ],
