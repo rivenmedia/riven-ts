@@ -8,7 +8,7 @@ import { TestSettings } from "./test-settings.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export default {
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [TestAPI],
@@ -23,4 +23,4 @@ export default {
   async validator() {
     return Promise.resolve(true);
   },
-} satisfies RivenPlugin as RivenPlugin;
+};

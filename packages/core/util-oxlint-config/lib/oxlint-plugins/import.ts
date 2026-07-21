@@ -15,10 +15,10 @@ export const oxlintPluginImportConfig = defineConfig({
         "import/group-exports": "off",
         "import/no-nodejs-modules": "off",
         "import/no-cycle": ["error", { maxDepth: 3 }],
+        "import/no-default-export": "deny",
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "import/exports-last": "off",
-        "import/no-default-export": "off",
         "import/no-mutable-exports": "off",
         "import/no-namespace": "off",
         "import/no-unassigned-import": "off",

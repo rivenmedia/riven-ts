@@ -42,7 +42,7 @@ vi.mock(import("@repo/plugin-test"), () => {
   }
 
   return {
-    default: {
+    plugin: {
       version: "1.0.0-mock",
       name: Symbol.for("@repo/plugin-test"),
       dataSources: [TestAPI],

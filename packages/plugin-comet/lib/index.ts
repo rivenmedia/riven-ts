@@ -7,7 +7,7 @@ import { CometResolver } from "./schema/comet.resolver.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export default {
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [CometAPI],
@@ -27,4 +27,4 @@ export default {
   async validator() {
     return Promise.resolve(true);
   },
-} satisfies RivenPlugin as RivenPlugin;
+};

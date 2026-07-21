@@ -29,7 +29,7 @@ const it = baseIt.extend("mockRankingModel", () =>
 it.beforeEach(async ({ createFlowWorker, mockFlowProcessorContext }) => {
   createFlowWorker(FindValidTorrentFlow, findValidTorrentProcessor);
 
-  const { default: testPlugin } = await import("@repo/plugin-test");
+  const { plugin: testPlugin } = await import("@repo/plugin-test");
 
   // Disable cache check and provider hooks to simplify tests
   testPlugin.hooks["riven.media-item.download.provider-list-requested"] =

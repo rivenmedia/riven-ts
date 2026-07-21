@@ -9,7 +9,7 @@ import { TvdbSettings } from "./tvdb-settings.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export default {
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [TvdbAPI, TvMazeAPI],
@@ -21,4 +21,4 @@ export default {
   async validator({ dataSources }) {
     return dataSources.get(TvdbAPI).validate();
   },
-} satisfies RivenPlugin as RivenPlugin;
+};

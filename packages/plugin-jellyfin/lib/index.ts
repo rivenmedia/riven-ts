@@ -9,7 +9,7 @@ import { JellyfinResolver } from "./schema/jellyfin.resolver.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export default {
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [JellyfinAPI],
@@ -51,4 +51,4 @@ export default {
 
     return jellyfinAPI.validate();
   },
-} satisfies RivenPlugin as RivenPlugin;
+};

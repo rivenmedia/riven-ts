@@ -7,7 +7,7 @@ import { MdblistResolver } from "./schema/mdblist.resolver.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export default {
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [MdblistAPI],
@@ -30,4 +30,4 @@ export default {
   async validator() {
     return Promise.resolve(true);
   },
-} satisfies RivenPlugin as RivenPlugin;
+};

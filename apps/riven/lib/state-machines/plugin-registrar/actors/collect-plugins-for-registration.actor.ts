@@ -92,13 +92,13 @@ export const collectPluginsForRegistration = fromPromise(async () => {
         continue;
       }
 
-      const { name: pluginSymbol } = validationResult.data.default;
+      const { name: pluginSymbol } = validationResult.data.plugin;
 
       parsedPlugins.pluginConfigPrefixMap.set(
         pluginSymbol,
         constantCase(pluginName),
       );
-      parsedPlugins.validPlugins.push(validationResult.data.default);
+      parsedPlugins.validPlugins.push(validationResult.data.plugin);
     } catch (error) {
       logger.error(`Unable to resolve plugin ${pluginName}:`, { err: error });
 

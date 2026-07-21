@@ -238,7 +238,7 @@ export const it = testBase
       sendEvent: Mock;
       plugins: ValidPluginMap;
     }> => {
-      const { default: testPlugin } = await import("@repo/plugin-test");
+      const { plugin: testPlugin } = await import("@repo/plugin-test");
 
       return {
         services,

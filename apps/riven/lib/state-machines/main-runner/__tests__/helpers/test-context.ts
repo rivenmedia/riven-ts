@@ -19,7 +19,7 @@ export const it = baseIt
   )
   .extend("machine", mainRunnerMachine)
   .extend("actor", async ({ input, machine }, { onCleanup }) => {
-    const { default: testPlugin } = await import("@repo/plugin-test");
+    const { plugin: testPlugin } = await import("@repo/plugin-test");
     const actor = createActor(machine, { id: "Main runner", input });
 
     actor.send({

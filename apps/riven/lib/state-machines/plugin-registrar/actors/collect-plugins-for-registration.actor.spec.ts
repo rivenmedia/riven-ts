@@ -14,13 +14,11 @@ it("returns the installed plugins from the package.json file", async () => {
   const actor = createActor(collectPluginsForRegistration);
   const testPlugin = await import("@repo/plugin-test");
 
-  const validatedPlugin = RivenPluginPackage.parse(testPlugin);
+  const { plugin: validatedPlugin } = RivenPluginPackage.parse(testPlugin);
 
   const plugins = await toPromise(actor.start());
 
-  expect(plugins.validPlugins[0]?.name).toStrictEqual(
-    validatedPlugin.default.name,
-  );
+  expect(plugins.validPlugins[0]?.name).toStrictEqual(validatedPlugin.name);
 });
 
 it("returns any invalid plugins from the package.json file along with their validation result", async ({

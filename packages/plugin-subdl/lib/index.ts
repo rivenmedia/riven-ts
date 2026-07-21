@@ -12,7 +12,7 @@ import type { SubtitleResponse } from "./schemas/subtitle-response.schema.ts";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { SubtitleData } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";
 
-export default {
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [SubdlAPI],
@@ -124,4 +124,4 @@ export default {
   async validator() {
     return Promise.resolve(true);
   },
-} satisfies RivenPlugin as RivenPlugin;
+};

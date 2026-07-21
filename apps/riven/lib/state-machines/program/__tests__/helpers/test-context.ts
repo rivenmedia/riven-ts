@@ -24,15 +24,15 @@ export const it = baseIt
   .extend(
     "bootstrapMachineOutput",
     async ({}): Promise<BootstrapMachineOutput> => {
-      const testPlugin = await import("@repo/plugin-test");
+      const { plugin: testPlugin } = await import("@repo/plugin-test");
 
       return {
         server: {} as never,
         plugins: new Map<symbol, ValidPlugin>([
           [
-            testPlugin.default.name,
+            testPlugin.name,
             {
-              config: testPlugin.default,
+              config: testPlugin,
               dataSources: new DataSourceMap(),
               status: "valid",
             },

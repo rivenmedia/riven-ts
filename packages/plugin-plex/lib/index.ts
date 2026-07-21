@@ -9,7 +9,7 @@ import { PlexResolver } from "./schema/plex.resolver.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export default {
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [PlexAPI],
@@ -71,4 +71,4 @@ export default {
   async validator({ dataSources }) {
     return dataSources.get(PlexAPI).validate();
   },
-} satisfies RivenPlugin as RivenPlugin;
+};

@@ -13,7 +13,7 @@ import { StremThruSettings } from "./stremthru-settings.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export default {
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [StremThruTorzAPI, StremThruTorznabAPI],
@@ -201,4 +201,4 @@ export default {
 
     return results.every(Boolean);
   },
-} satisfies RivenPlugin as RivenPlugin;
+};
