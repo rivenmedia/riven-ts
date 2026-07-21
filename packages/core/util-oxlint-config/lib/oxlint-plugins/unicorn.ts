@@ -27,9 +27,6 @@ export const oxlintPluginUnicornConfig = defineConfig({
         "unicorn/no-array-reduce": "off",
         "unicorn/no-process-exit": "off",
         "unicorn/no-unreadable-array-destructuring": "off",
-
-        // Type-aware rules that are disabled for now, but will be enabled in the future
-        "unicorn/prefer-native-coercion-functions": "off",
       },
     },
     {
