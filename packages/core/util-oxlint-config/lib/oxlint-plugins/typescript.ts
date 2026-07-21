@@ -27,7 +27,6 @@ export const oxlintPluginTypescriptConfig = defineConfig({
         "typescript/strict-boolean-expressions": "off",
 
         // Type-aware rules that are disabled for now, but will be enabled in the future
-        "typescript/consistent-type-exports": "off",
         "typescript/consistent-return": "off",
         "typescript/no-unsafe-type-assertion": "off",
         "typescript/prefer-readonly-parameter-types": "off",
