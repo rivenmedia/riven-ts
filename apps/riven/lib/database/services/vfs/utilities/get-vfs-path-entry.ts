@@ -96,7 +96,9 @@ export async function getEntry(em: EntityManager, pathInfo: PathInfo) {
         { fields: ["createdAt", "updatedAt"] },
       );
     }
-    default:
+    case "all-movies":
+    case "all-shows": {
       return null;
+    }
   }
 }

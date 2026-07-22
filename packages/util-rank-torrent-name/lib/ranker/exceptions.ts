@@ -1,7 +1,9 @@
-import { type ZodError, prettifyError } from "zod";
+import { prettifyError } from "zod";
+
+import type { ZodError } from "zod";
 
 export class GarbageTorrentError extends Error {
-  constructor(title: string, message: string) {
+  public constructor(title: string, message: string) {
     super(`Garbage torrent detected for "${title}": ${message}`);
 
     this.name = "GarbageTorrentError";
@@ -9,7 +11,11 @@ export class GarbageTorrentError extends Error {
 }
 
 export class TitleSimilarityError extends GarbageTorrentError {
-  constructor(title: string, parsedTitle: string, expectedTitle: string) {
+  public constructor(
+    title: string,
+    parsedTitle: string,
+    expectedTitle: string,
+  ) {
     super(
       title,
       `${parsedTitle} does not match the correct title: ${expectedTitle}`,
@@ -20,7 +26,7 @@ export class TitleSimilarityError extends GarbageTorrentError {
 }
 
 export class InvalidHashError extends GarbageTorrentError {
-  constructor(title: string, error: ZodError) {
+  public constructor(title: string, error: ZodError) {
     super(title, prettifyError(error));
 
     this.name = "InvalidHashError";
@@ -28,7 +34,7 @@ export class InvalidHashError extends GarbageTorrentError {
 }
 
 export class FetchChecksFailedError extends GarbageTorrentError {
-  constructor(title: string, reasons: Set<string>) {
+  public constructor(title: string, reasons: Set<string>) {
     super(title, `Failed fetch checks: ${[...reasons].join(", ")}`);
 
     this.name = "FetchChecksFailedError";
@@ -36,7 +42,7 @@ export class FetchChecksFailedError extends GarbageTorrentError {
 }
 
 export class RankUnderThresholdError extends GarbageTorrentError {
-  constructor(title: string, rank: number, threshold: number) {
+  public constructor(title: string, rank: number, threshold: number) {
     super(
       title,
       `Rank ${rank.toString()} is below the threshold of ${threshold.toString()}`,

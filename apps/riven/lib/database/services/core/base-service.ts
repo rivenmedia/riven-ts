@@ -7,7 +7,7 @@ export abstract class BaseService {
     return this.orm.em;
   }
 
-  constructor(orm: MikroORM) {
+  public constructor(orm: MikroORM) {
     this.orm = orm;
   }
 }

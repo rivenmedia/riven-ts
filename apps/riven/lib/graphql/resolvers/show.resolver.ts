@@ -5,7 +5,7 @@ import { Arg, FieldResolver, Int, Resolver, Root } from "type-graphql";
 @Resolver(() => Show)
 export class ShowResolver {
   @FieldResolver(() => [Season])
-  seasons(
+  public async seasons(
     @Root() show: Show,
     @Arg("includeSpecials", () => Boolean, { defaultValue: false })
     includeSpecials: boolean,
@@ -18,7 +18,7 @@ export class ShowResolver {
   }
 
   @FieldResolver(() => Int)
-  async expectedFileCount(@Root() show: Show) {
+  public async expectedFileCount(@Root() show: Show) {
     return show.getExpectedFileCount();
   }
 }

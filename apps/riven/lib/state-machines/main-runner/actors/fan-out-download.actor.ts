@@ -1,13 +1,11 @@
-import {
-  Episode,
-  type MediaItem,
-  Movie,
-} from "@repo/util-plugin-sdk/dto/entities";
+import { Episode, Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import { fromPromise } from "xstate";
 
 import { services } from "../../../database/database.ts";
 import { enqueueProcessMediaItem } from "../../../message-queue/flows/process-media-item/enqueue-process-media-item.ts";
+
+import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 export interface FanOutDownloadInput {
   item: MediaItem;
@@ -24,10 +22,10 @@ export const fanOutDownload = fromPromise<undefined, FanOutDownloadInput>(
     const itemsToProcess =
       await services.downloaderService.getFanOutDownloadItems(item.id);
 
-    for (const item of itemsToProcess) {
+    for (const { id } of itemsToProcess) {
       await enqueueProcessMediaItem(
         {
-          id: item.id,
+          id,
           isRootItem: false,
         },
         {

@@ -9,7 +9,7 @@ import { PlexResolver } from "./schema/plex.resolver.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export default {
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [PlexAPI],
@@ -29,17 +29,20 @@ export default {
         );
       }
 
-      const sectionPaths = mediaEntries
-        .reduce<Set<string>>(
-          (acc, entry) =>
-            acc.add(path.join(entry.baseDirectory, path.dirname(entry.path))),
-          new Set<string>(),
-        )
-        .values()
-        .toArray();
+      const sectionPathsSet = new Set<string>();
+
+      for (const entry of mediaEntries) {
+        sectionPathsSet.add(
+          path.join(entry.baseDirectory, path.dirname(entry.path)),
+        );
+      }
+
+      const sectionPaths = [...sectionPathsSet];
 
       const results = await Promise.allSettled(
-        sectionPaths.map((sectionPath) => plexAPI.updateSection(sectionPath)),
+        sectionPaths.map(async (sectionPath) =>
+          plexAPI.updateSection(sectionPath),
+        ),
       );
 
       const errors = results
@@ -66,7 +69,7 @@ export default {
     },
   },
   settingsSchema: PlexSettings,
-  validator({ dataSources }) {
+  async validator({ dataSources }) {
     return dataSources.get(PlexAPI).validate();
   },
-} satisfies RivenPlugin as RivenPlugin;
+};

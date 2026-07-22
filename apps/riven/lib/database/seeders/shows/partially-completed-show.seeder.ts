@@ -2,17 +2,15 @@ import assert from "node:assert";
 
 import { MediaEntryFactory } from "../../factories/media-entry.factory.ts";
 import { BaseSeeder } from "../base.seeder.ts";
-import {
-  ScrapedShowSeeder,
-  type ScrapedShowSeederContext,
-} from "./scraped-show.seeder.ts";
+import { ScrapedShowSeeder } from "./scraped-show.seeder.ts";
 
+import type { ScrapedShowSeederContext } from "./scraped-show.seeder.ts";
 import type { EntityManager } from "@mikro-orm/core";
 
 export type PartiallyCompletedShowSeederContext = ScrapedShowSeederContext;
 
 export class PartiallyCompletedShowSeeder extends BaseSeeder<PartiallyCompletedShowSeederContext> {
-  async run(
+  public async run(
     em: EntityManager,
     context: PartiallyCompletedShowSeederContext = this.context,
   ) {
@@ -34,7 +32,7 @@ export class PartiallyCompletedShowSeeder extends BaseSeeder<PartiallyCompletedS
 
     await em.flush();
 
-    assert(
+    assert.ok(
       context.show.state === "partially_completed",
       `Expected show state to be "partially_completed", got "${context.show.state}"`,
     );

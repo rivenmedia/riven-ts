@@ -2,6 +2,7 @@ import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
 import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
 
+import { NotFoundError } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
 
 import { filterChildrenValues } from "../../../../utilities/filter-children-values.ts";
@@ -10,15 +11,17 @@ import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
-  async function ({ job }, { sendEvent, services: { scraperService } }) {
+  async ({ job }, { sendEvent, services: { scraperService } }) => {
     const children = filterChildrenValues(
       await job.getChildrenValues(),
       "scrape-item.parse-scrape-results",
     );
 
-    const parsedResults = Object.values(children).reduce<
-      Record<string, ParsedData>
-    >((acc, scrapeResult) => Object.assign(acc, scrapeResult.results), {});
+    const parsedResults: Record<string, ParsedData> = {};
+
+    for (const scrapeResult of Object.values(children)) {
+      Object.assign(parsedResults, scrapeResult.results);
+    }
 
     try {
       const { item, error } = await scraperService.scrapeItem(
@@ -46,6 +49,12 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
 
       if (error instanceof MediaItemScrapeErrorNoNewStreams) {
         sendEvent(error.payload);
+      }
+
+      if (error instanceof NotFoundError) {
+        throw new UnrecoverableError(
+          `MediaItem with id ${job.data.id} not found`,
+        );
       }
 
       throw error;

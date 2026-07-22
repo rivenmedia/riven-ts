@@ -1,4 +1,4 @@
-import { Collection, type Hidden, type Opt } from "@mikro-orm/core";
+import { Collection } from "@mikro-orm/core";
 import {
   Entity,
   Enum,
@@ -17,64 +17,66 @@ import { ItemRequestType } from "../../enums/item-request-type.enum.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
 import { Season } from "../media-items/season.entity.ts";
 
+import type { Hidden, Opt } from "@mikro-orm/core";
+
 @ObjectType()
 @Entity()
 export class ItemRequest {
   @Field(() => ID)
   @PrimaryKey({ type: "uuid" })
-  id = randomUUID();
+  public id = randomUUID();
 
   @Field(() => String, { nullable: true })
   @Property({ type: "varchar", length: 10 })
-  @Matches(/^tt\d+$/)
+  @Matches(/^tt\d+$/u)
   @IsOptional()
   @Unique()
-  imdbId?: string | null;
-
-  @Field(() => String, { nullable: true })
-  @Property({ type: "varchar", length: 10 })
-  @IsNumberString()
-  @IsOptional()
-  @Unique()
-  tmdbId?: string | null;
+  public imdbId?: string | null;
 
   @Field(() => String, { nullable: true })
   @Property({ type: "varchar", length: 10 })
   @IsNumberString()
   @IsOptional()
   @Unique()
-  tvdbId?: string | null;
+  public tmdbId?: string | null;
+
+  @Field(() => String, { nullable: true })
+  @Property({ type: "varchar", length: 10 })
+  @IsNumberString()
+  @IsOptional()
+  @Unique()
+  public tvdbId?: string | null;
 
   @Field(() => ItemRequestType.enum)
   @Enum(() => ItemRequestType.enum)
-  type!: ItemRequestType;
+  public type!: ItemRequestType;
 
   @Field(() => String, { nullable: true })
   @Property()
-  requestedBy!: string | null;
+  public requestedBy!: string | null;
 
   @Field(() => String)
   @Property()
-  externalRequestId?: string;
+  public externalRequestId?: string;
 
   @Field(() => Date)
   @Property()
-  createdAt: Opt<Date> = DateTime.utc().toJSDate();
+  public createdAt: Opt<Date> = DateTime.utc().toJSDate();
 
   @Field(() => Date, { nullable: true })
   @Property()
-  completedAt?: Opt<Date> | null;
+  public completedAt?: Opt<Date> | null;
 
   @Field(() => ItemRequestState.enum)
   @Enum(() => ItemRequestState.enum)
-  state!: ItemRequestState;
+  public state!: ItemRequestState;
 
   @Field(() => [Number], { nullable: true })
   @Property({ type: "json" })
-  seasons!: number[] | null;
+  public seasons!: number[] | null;
 
   @Property({ persist: false, hidden: true, getter: true })
-  get externalIdsLabel(): Hidden<Opt<string[]>> {
+  public get externalIdsLabel(): Hidden<Opt<string[]>> {
     const externalIds = [
       this.imdbId ? `IMDB: ${this.imdbId}` : null,
       this.type === "movie" && this.tmdbId ? `TMDB: ${this.tmdbId}` : null,
@@ -85,21 +87,21 @@ export class ItemRequest {
   }
 
   @OneToMany(() => MediaItem, (mediaItem) => mediaItem.itemRequest)
-  mediaItems = new Collection<MediaItem>(this);
+  public mediaItems = new Collection<MediaItem>(this);
 
   @OneToMany(() => Season, (mediaItem) => mediaItem.itemRequest, {
     where: {
       type: "season",
     },
   })
-  seasonItems = new Collection<Season>(this);
+  public seasonItems = new Collection<Season>(this);
 
   @OneToMany(() => MediaItem, (mediaItem) => mediaItem.itemRequest, {
     where: {
       isRequested: true,
     },
   })
-  requestedItems = new Collection<MediaItem>(this);
+  public requestedItems = new Collection<MediaItem>(this);
 
   /**
    * Whether the item request is a partial request, i.e. a request for specific seasons of a show instead of the entire show.
@@ -111,5 +113,5 @@ export class ItemRequest {
    * @default false
    */
   @Property({ default: false })
-  isPartialRequest!: Opt<boolean>;
+  public isPartialRequest!: Opt<boolean>;
 }

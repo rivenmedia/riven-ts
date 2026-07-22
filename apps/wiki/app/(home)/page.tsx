@@ -7,7 +7,6 @@ import {
   Cog,
   Download,
   GitBranch,
-  type LucideIcon,
   Puzzle,
   Settings,
   Shield,
@@ -16,6 +15,8 @@ import {
 import Link from "next/link";
 
 import packageJson from "../../package.json" with { type: "json" };
+
+import type { LucideIcon } from "lucide-react";
 
 const features: { icon: LucideIcon; title: string; description: string }[] = [
   {
@@ -98,8 +99,13 @@ async function getGitHubStars() {
       "https://api.github.com/repos/rivenmedia/riven-ts",
       { next: { revalidate: 3600 } },
     );
-    if (!res.ok) return null;
+
+    if (!res.ok) {
+      return null;
+    }
+
     const data = (await res.json()) as { stargazers_count: number };
+
     return data.stargazers_count;
   } catch {
     return null;

@@ -21,7 +21,7 @@ export class MediaItemResolver {
     description:
       "Fetches a media item by its ID. The returned type will be one of the specific media item types (e.g., Movie, Episode) based on the underlying data.",
   })
-  mediaItemById(
+  public async mediaItemById(
     @CoreContext() { services }: CoreContext,
     @Arg("id", () => ID) id: UUID,
   ) {
@@ -29,7 +29,9 @@ export class MediaItemResolver {
   }
 
   @Query(() => [MediaItem])
-  mediaItems(@CoreContext() { em }: CoreContext): Promise<MediaItem[]> {
+  public async mediaItems(
+    @CoreContext() { em }: CoreContext,
+  ): Promise<MediaItem[]> {
     return em.find(
       MediaItem,
       {},
@@ -41,18 +43,18 @@ export class MediaItemResolver {
   }
 
   @Mutation(() => [MediaItemUnion])
-  async resetMediaItem(
+  public async resetMediaItem(
     @Arg("id", () => ID) id: UUID,
     @CoreContext() { services: { mediaItemService } }: CoreContext,
   ): Promise<MediaItem[]> {
     const item = await mediaItemService.getMediaItemById(id);
     const resetItems = await mediaItemService.resetMediaItem(item);
 
-    return Array.from(resetItems);
+    return [...resetItems];
   }
 
   @FieldResolver(() => Int)
-  expectedFileCount() {
+  public expectedFileCount() {
     throw new Error(
       "expectedFileCount field resolver must be implemented in child resolvers",
     );

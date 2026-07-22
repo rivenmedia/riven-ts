@@ -28,7 +28,7 @@ export async function performBodyRead(chunks: readonly ChunkMetadata[]) {
     context: { fileHandleMetadata, currentStreamPosition, responsePromise },
   } = getVfsOperationContext("read");
 
-  assert(
+  assert.ok(
     fileHandleMetadata.type !== "subtitle",
     new FuseError(
       Fuse.EIO,
@@ -63,10 +63,7 @@ export async function performBodyRead(chunks: readonly ChunkMetadata[]) {
       undefined,
     ]));
 
-  const {
-    timeTaken,
-    result: { bytesFetched, fetchedChunks, fetchedChunksMetadata },
-  } = await benchmark(async () => {
+  const { timeTaken, result } = await benchmark(async () => {
     const fetchedChunks: Buffer[] = [];
     const fetchedChunksMetadata: ChunkMetadata[] = [];
 
@@ -98,7 +95,9 @@ export async function performBodyRead(chunks: readonly ChunkMetadata[]) {
     };
   });
 
-  if (fetchedChunksMetadata.length) {
+  const { bytesFetched, fetchedChunks, fetchedChunksMetadata } = result;
+
+  if (fetchedChunksMetadata.length > 0) {
     const chunkLabels = fetchedChunksMetadata
       .map((chunk) => chunk.rangeLabel)
       .join(", ");

@@ -44,14 +44,14 @@ async function release() {
   // Clean up all fd-related mappings related to this file descriptor.
   // The chunk calculations map is intentionally omitted, as it can be reused by other
   // file descriptors opening the same file.
-  [
+  for (const map of [
     fdToFileHandleMeta,
     fdToResponsePromiseMap,
     fdToCurrentStreamPositionMap,
     fdToPreviousReadPositionMap,
-  ].forEach((map) => {
+  ]) {
     map.delete(fd);
-  });
+  }
 
   if (!fileHandleMeta) {
     logger.warn(
@@ -73,11 +73,12 @@ async function release() {
 
       // If there are no more file descriptors referencing this file,
       // we can clean up the file-name based mappings as well to free up memory.
-      [fileNameToFileChunkCalculationsMap, fileNameIsFetchingLinkMap].forEach(
-        (map) => {
-          map.delete(fileHandleMeta.originalFileName);
-        },
-      );
+      for (const map of [
+        fileNameToFileChunkCalculationsMap,
+        fileNameIsFetchingLinkMap,
+      ]) {
+        map.delete(fileHandleMeta.originalFileName);
+      }
     }
   }
 
@@ -86,8 +87,8 @@ async function release() {
   );
 }
 
-export const releaseSync = function (path, fd, callback) {
-  void withVfsScope(() =>
+export const releaseSync = function releaseSync(path, fd, callback) {
+  void withVfsScope(async () =>
     withVfsOperationContext(
       { operationName: "release", path, fd },
       async () => {

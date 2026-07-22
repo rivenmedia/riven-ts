@@ -7,11 +7,16 @@ import { it } from "../../__tests__/test-context.ts";
 import { PathInfo } from "../../database/services/vfs/schemas/path-info.schema.ts";
 import { getattrSync } from "./getattr.ts";
 
+// oxlint-disable-next-line no-bitwise
 const dirMode = fs.constants.S_IFDIR | 0o755;
+
+// oxlint-disable-next-line no-bitwise
 const fileMode = fs.constants.S_IFREG | 0o644;
 
+type GetAttrCallback = Parameters<typeof getattrSync>[1];
+
 it("returns directory stats for the root directory", async () => {
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync("/", callback);
 
@@ -30,7 +35,7 @@ it("returns directory stats for the root directory", async () => {
 });
 
 it("returns ENOENT for ignored paths", async () => {
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync("/.Trash", callback);
 
@@ -40,7 +45,7 @@ it("returns ENOENT for ignored paths", async () => {
 });
 
 it("returns ENOENT for hidden paths", async () => {
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync("/somefolder/.hidden", callback);
 
@@ -50,7 +55,7 @@ it("returns ENOENT for hidden paths", async () => {
 });
 
 it("returns ENOENT for unknown paths", async () => {
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync("/unknownpath", callback);
 
@@ -67,7 +72,7 @@ it("returns file stats for movie directories", async ({
 
   expect.assert(mediaEntry);
 
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   const pathInfo = PathInfo.parse(
     `/${mediaEntry.baseDirectory}/${mediaEntry.path}`,
@@ -97,7 +102,7 @@ it("returns file stats for movie files", async ({
 
   expect.assert(mediaEntry);
 
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync(`/${mediaEntry.baseDirectory}/${mediaEntry.path}`, callback);
 
@@ -120,7 +125,7 @@ it("returns directory stats for /movies", async ({
 }) => {
   await seedCompletedMovie(3);
 
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync("/movies", callback);
 
@@ -143,7 +148,7 @@ it("returns directory stats for /shows", async ({
 }) => {
   await seedCompletedShow(3);
 
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync("/shows", callback);
 
@@ -166,7 +171,7 @@ it("returns directory stats for single shows", async ({
 }) => {
   const seasonsCount = await completedShow.seasons.loadCount();
 
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync(`/shows/{tvdb-${completedShow.tvdbId}}`, callback);
 
@@ -187,7 +192,7 @@ it("returns directory stats for single shows", async ({
 it("returns directory stats for single seasons", async ({
   completedShowContext: { completedShow },
 }) => {
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync(`/shows/{tvdb-${completedShow.tvdbId}}/Season 01`, callback);
 
@@ -216,7 +221,7 @@ it("returns file stats for episodes", async ({
 
   expect.assert(mediaEntry);
 
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync(`/${mediaEntry.baseDirectory}/${mediaEntry.path}`, callback);
 
@@ -243,7 +248,7 @@ it("does not return file stats for movie files with non-matching extensions", as
 
   expect.assert(mediaEntry);
 
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   const unknownFilePath = mediaEntry.path.replace(
     path.extname(mediaEntry.path),
@@ -268,7 +273,7 @@ it("does not return file stats for episode files with non-matching extensions", 
 
   expect.assert(mediaEntry);
 
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   const unknownFilePath = mediaEntry.path.replace(
     path.extname(mediaEntry.path),

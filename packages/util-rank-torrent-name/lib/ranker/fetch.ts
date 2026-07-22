@@ -33,7 +33,7 @@ export function trashHandler(
     return true;
   }
 
-  if (data.audio?.some((a) => /hq clean audio/i.exec(a))) {
+  if (data.audio?.some((a) => /hq clean audio/iu.exec(a))) {
     failed.add("trash_audio");
 
     return true;
@@ -57,8 +57,8 @@ function checkRequired(
     return false;
   }
 
-  const hasRequired = settings.compiledRequire.some((p) =>
-    p.test(data.rawTitle),
+  const hasRequired = settings.compiledRequire.some((requirePattern) =>
+    requirePattern.test(data.rawTitle),
   );
 
   if (!hasRequired) {

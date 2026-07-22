@@ -1,43 +1,42 @@
-import { EntityRepositoryType, type Opt, type Ref } from "@mikro-orm/core";
+import { EntityRepositoryType } from "@mikro-orm/core";
 import { Entity, ManyToOne, Property } from "@mikro-orm/decorators/legacy";
 import { Min } from "class-validator";
 import { Field, Int, ObjectType } from "type-graphql";
 
-import {
-  ShowContentRating,
-  ShowContentRatingEnum,
-} from "../../enums/content-ratings.enum.ts";
+import { ShowContentRatingEnum } from "../../enums/content-ratings.enum.ts";
 import { EpisodeRepository } from "../../repositories/episode.repository.ts";
 import { Season, ShowLikeMediaItem } from "./index.ts";
 
+import type { ShowContentRating } from "../../enums/content-ratings.enum.ts";
 import type { MediaEntry } from "../filesystem/media-entry.entity.ts";
+import type { Opt, Ref } from "@mikro-orm/core";
 
 @ObjectType({ implements: ShowLikeMediaItem })
 @Entity({ repository: () => EpisodeRepository })
 export class Episode extends ShowLikeMediaItem {
-  [EntityRepositoryType]?: EpisodeRepository;
+  public [EntityRepositoryType]?: EpisodeRepository;
 
   @Field(() => Int)
   @Property()
   @Min(0)
-  number!: number;
+  public number!: number;
 
   @Field(() => Int)
   @Property()
-  absoluteNumber!: number;
+  public absoluteNumber!: number;
 
   @Field(() => Season)
   @ManyToOne()
-  season!: Opt<Ref<Season>>;
+  public season!: Opt<Ref<Season>>;
 
   @Field(() => Int, { nullable: true })
   @Property()
-  runtime!: number | null;
+  public runtime!: number | null;
 
   @Field(() => ShowContentRatingEnum)
-  declare contentRating: ShowContentRating;
+  declare public contentRating: ShowContentRating;
 
-  async getShow() {
+  public async getShow() {
     const season = await this.season.loadOrFail({
       populate: ["show"],
     });
@@ -45,7 +44,7 @@ export class Episode extends ShowLikeMediaItem {
     return season.show.loadOrFail();
   }
 
-  async getPrettyName(): Promise<string> {
+  public async getPrettyName(): Promise<string> {
     const show = await this.getShow();
     const baseName = show.getPrettyName();
 
@@ -64,22 +63,22 @@ export class Episode extends ShowLikeMediaItem {
     return `${baseName} - s${seasonNumber}e${episodeNumber}`;
   }
 
-  override type: Opt<"episode"> = "episode" as const;
+  public override type: Opt<"episode"> = "episode" as const;
 
-  declare tvdbId: Opt<string>;
+  declare public tvdbId: Opt<string>;
 
-  getMediaEntries() {
+  public async getMediaEntries() {
     return this.filesystemEntries.matching<MediaEntry>({
       where: { type: "media" },
       refresh: true,
     });
   }
 
-  getExpectedFileCount(): number {
+  public getExpectedFileCount(): number {
     return 1;
   }
 
-  getIncompleteItems() {
+  public getIncompleteItems() {
     return [];
   }
 }

@@ -50,7 +50,7 @@ import type { EntityClass } from "@mikro-orm/core";
 export function createApolloInstanceSchema(
   ...entities: [EntityClass, ...EntityClass[]]
 ) {
-  const literalSet = new Set(entities.map((e) => e.name));
+  const literalSet = new Set(entities.map(({ name }) => name));
 
   return z.object({
     __typename: z.literal([...literalSet]),

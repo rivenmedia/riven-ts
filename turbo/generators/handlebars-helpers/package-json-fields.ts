@@ -4,14 +4,14 @@ import type { PlopTypes } from "@turbo/gen";
 
 type PackageType = "plugin" | "util" | "domain";
 
-type PackageJsonDefinition = {
+interface PackageJsonDefinition {
   scripts?: Record<string, string | null>;
   exports?: Record<string, string | Record<string, string | null> | null>;
   devDependencies?: Record<string, string | null>;
   dependencies?: Record<string, string | null>;
   peerDependencies?: Record<string, string | null>;
   files?: string[];
-};
+}
 
 const packageTypeFields: Partial<
   Record<PackageType | "*", PackageJsonDefinition>
@@ -35,7 +35,7 @@ const packageTypeFields: Partial<
     },
     scripts: {
       build: "tsc --project tsconfig.lib.json",
-      lint: "oxlint --type-aware --type-check",
+      lint: "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
       "lint:fix": "pnpm lint --fix",
       test: "vitest run --passWithNoTests",
       "test:watch": "vitest",
@@ -64,7 +64,7 @@ const packageTypeFields: Partial<
 export function registerPackageJsonFieldsHelper(plop: PlopTypes.NodePlopAPI) {
   plop.setHelper(
     "packageJsonFields",
-    function (
+    function packageJsonFieldsHelper(
       // Handlebars context
       this: Record<string, unknown>,
       packageType: PackageType,
@@ -90,8 +90,8 @@ export function registerPackageJsonFieldsHelper(plop: PlopTypes.NodePlopAPI) {
       for (const [key, value] of Object.entries(fields)) {
         if (typeof value === "string" && value.includes("{{")) {
           // Replace {{kebabCase pluginName}} with actual value
-          processed[key] = value.replace(
-            /\{\{kebabCase (\w+)\}\}/g,
+          processed[key] = value.replaceAll(
+            /\{\{kebabCase (?<pluginName>\w+)\}\}/gu,
             (_, varName) => kebabCase(String(this[varName] ?? "")),
           );
         } else {

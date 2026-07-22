@@ -7,14 +7,21 @@ export type StatMode = "dir" | "file" | "link";
 
 function parseMode(mode: StatMode): number {
   switch (mode) {
-    case "dir":
+    case "dir": {
+      // oxlint-disable-next-line no-bitwise
       return fs.constants.S_IFDIR | 0o755;
-    case "file":
+    }
+    case "file": {
+      // oxlint-disable-next-line no-bitwise
       return fs.constants.S_IFREG | 0o644;
-    case "link":
+    }
+    case "link": {
+      // oxlint-disable-next-line no-bitwise
       return fs.constants.S_IFLNK | 0o755;
-    default:
+    }
+    default: {
       return 0;
+    }
   }
 }
 

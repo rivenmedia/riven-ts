@@ -1,9 +1,9 @@
 import { UnrecoverableError } from "@repo/util-plugin-sdk/errors/unrecoverable-error";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
-import { MediaItemIndexRequestedMovieEventHandler } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 
+import type { MediaItemIndexRequestedMovieEventHandler } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 import type z from "zod";
 
 export const indexTMDBMediaItem: z.infer<
@@ -32,21 +32,20 @@ export const indexTMDBMediaItem: z.infer<
   }
 
   const result = await api.getMovieDetails(resolvedTmdbId.toString());
+  const genres: string[] = [];
+
+  for (const genre of result.genres ?? []) {
+    if (genre.name) {
+      genres.push(genre.name);
+    }
+  }
 
   return {
     item: {
       id: event.item.id,
       type: "movie",
       imdbId: imdbId ?? result.imdb_id ?? null,
-      genres: (result.genres ?? []).reduce<string[]>((acc, genre) => {
-        if (!genre.name) {
-          return acc;
-        }
-
-        acc.push(genre.name);
-
-        return acc;
-      }, []),
+      genres,
       title: result.title ?? "Unknown title",
       aliases: {},
       country: result.production_countries?.[0]?.iso_3166_1,

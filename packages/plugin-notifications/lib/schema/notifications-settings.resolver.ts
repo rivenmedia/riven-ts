@@ -7,7 +7,7 @@ import { NotificationsSettings } from "./types/notifications-settings.type.ts";
 @Resolver(() => Settings)
 export class NotificationsSettingsResolver {
   @FieldResolver(() => NotificationsSettings)
-  notifications(): NotificationsSettings {
+  public notifications(): NotificationsSettings {
     return {
       urls: [],
     };

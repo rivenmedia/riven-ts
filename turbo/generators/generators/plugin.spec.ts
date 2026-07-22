@@ -1,3 +1,5 @@
+// oxlint-disable node/global-require
+
 import { execa } from "execa";
 import { readdirSync } from "node:fs";
 import { it as baseIt, expect } from "vitest";
@@ -29,7 +31,7 @@ const it = baseIt
   );
 
 it.beforeAll(async ({ startDiff, packageName }) => {
-  if (startDiff.length) {
+  if (startDiff.length > 0) {
     expect.fail(
       "Uncommitted changes detected. Please clean your working directory before running this test.",
     );
@@ -113,6 +115,7 @@ it.concurrent.for(["test", "lint", "build", "codegen:config-docs"] as const)(
   async (command, { packageFullName }) => {
     await expect(
       execa`pnpm --filter ${packageFullName} ${command}`,
+      // oxlint-disable-next-line vitest/prefer-strict-boolean-matchers
     ).resolves.toBeTruthy();
   },
 );

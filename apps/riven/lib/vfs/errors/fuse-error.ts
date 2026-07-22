@@ -133,9 +133,11 @@ export const FuseErrorCode = z.literal([
 type FuseErrorCode = z.infer<typeof FuseErrorCode>;
 
 export class FuseError extends Error {
-  errorCode: FuseErrorCode;
+  public override name = "FuseError";
 
-  constructor(errorCode: FuseErrorCode, message: string) {
+  public errorCode: FuseErrorCode;
+
+  public constructor(errorCode: FuseErrorCode, message: string) {
     const context = getVfsOperationContext();
 
     const fd =

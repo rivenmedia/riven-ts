@@ -22,7 +22,7 @@ export const createMockPluginSettings = <T extends ZodObject>(
     false,
   );
 
-  pluginSettings._set(mockPluginKey, schema);
+  pluginSettings.set(mockPluginKey, schema);
 
   return pluginSettings;
 };

@@ -1,6 +1,8 @@
 import { buildSchema } from "@repo/core-util-graphql-schema";
 
-import { ApolloServer, type BaseContext } from "@apollo/server";
+import { ApolloServer } from "@apollo/server";
+
+import type { BaseContext } from "@apollo/server";
 import "reflect-metadata";
 
 export const buildMockServer = async <Context extends BaseContext>(

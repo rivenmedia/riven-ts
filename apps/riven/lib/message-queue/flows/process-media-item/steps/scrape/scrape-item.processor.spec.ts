@@ -2,13 +2,16 @@ import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { parse } from "@repo/util-rank-torrent-name/parser";
 
 import { faker } from "@faker-js/faker";
+import { UnrecoverableError } from "bullmq";
 import { randomUUID } from "node:crypto";
 import { expect, vi } from "vitest";
 
 import { it } from "../../../../../__tests__/test-context.ts";
 import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 
-it("throws an unrecoverable error if the item cannot be scraped", async ({
+import type { MainRunnerMachineIntake } from "../../../../../state-machines/main-runner/index.ts";
+
+it("throws an UnrecoverableError if the item cannot be scraped", async ({
   createMockJob,
   mockSentryScope,
   services,
@@ -17,19 +20,19 @@ it("throws an unrecoverable error if the item cannot be scraped", async ({
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
-  await expect(() =>
+  await expect(async () =>
     scrapeItemProcessor(
       {
         job,
         scope: mockSentryScope,
       },
       {
-        sendEvent: vi.fn(),
+        sendEvent: vi.fn<MainRunnerMachineIntake>(),
         services,
         plugins: new Map(),
       },
     ),
-  ).rejects.toThrow();
+  ).rejects.toThrow(UnrecoverableError);
 });
 
 it.todo("throws an unrecoverable if no new streams were found");
@@ -56,7 +59,7 @@ it('sends a "riven.media-item.scrape.success" event with the updated item if the
     },
   });
 
-  const sendEvent = vi.fn();
+  const sendEvent = vi.fn<MainRunnerMachineIntake>();
 
   await scrapeItemProcessor(
     {

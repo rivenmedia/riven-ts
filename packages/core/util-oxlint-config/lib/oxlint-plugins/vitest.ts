@@ -21,30 +21,22 @@ export const oxlintPluginVitestConfig = defineConfig({
         "vitest/prefer-to-be-truthy": "off",
         "vitest/consistent-test-it": ["error", { fn: "it" }],
         "vitest/require-test-timeout": "off",
+        "vitest/prefer-importing-vitest-globals": "off", // Currently has issues with importing `it` from custom test context files
+        "vitest/prefer-called-times": "off", // Prefer toHaveBeenCalledOnce() over toHaveBeenCalledTimes(1)
+        "vitest/valid-title": "allow", // Conflicts with vitest/prefer-describe-function-title
+        "vitest/warn-todo": "warn",
+        "vitest/no-conditional-in-test": "allow", // Flags a lot of MSW handlers that conditionally route requests
+        "vitest/require-top-level-describe": "allow", // Flat test files are preferred; split into multiple files if needed for readability
+        "vitest/prefer-expect-assertions": [
+          "deny",
+          {
+            onlyFunctionsWithExpectInCallback: true,
+            onlyFunctionsWithExpectInLoop: true,
+          },
+        ],
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
-        "vitest/prefer-importing-vitest-globals": "off", // Currently has issues with importing `it` from custom test context files
-        "vitest/prefer-called-times": "off",
-        "vitest/require-mock-type-parameters": "off",
-        "vitest/prefer-strict-equal": "off",
-        "vitest/warn-todo": "off",
-        "vitest/prefer-called-with": "off",
-        "vitest/prefer-to-be": "off",
-        "vitest/require-top-level-describe": "off",
-        "vitest/require-to-throw-message": "off",
-        "vitest/no-conditional-in-test": "off",
-        "vitest/prefer-mock-return-shorthand": "off",
         "vitest/max-expects": "off",
-        "vitest/prefer-expect-assertions": "off",
-        "vitest/prefer-strict-boolean-matchers": "off",
-
-        // Type-aware rules that are disabled for now, but will be enabled in the future
-        "vitest/prefer-called-once": "off",
-        "vitest/prefer-expect-resolves": "off",
-        "vitest/prefer-to-have-length": "off",
-        "vitest/prefer-describe-function-title": "off",
-        "vitest/prefer-lowercase-title": "off",
-        "vitest/prefer-expect-type-of": "off",
       },
     },
   ],

@@ -16,7 +16,8 @@ export const ParsedDataSchema = z
     rawTitle: nonEmptyString,
     title: nonEmptyString,
     year: z.preprocess(
-      (val) => (typeof val === "string" ? parseInt(val, 10) : val),
+      (val) =>
+        typeof val === "string" ? Math.trunc(Number(val.split("-")[0])) : val,
       positiveIntSchema.optional(),
     ),
     resolution: nonEmptyString.default("unknown"),
@@ -70,7 +71,7 @@ export const ParsedDataSchema = z
   .transform((data) => ({
     ...data,
     type:
-      data.seasons.length || data.episodes.length
+      data.seasons.length > 0 || data.episodes.length > 0
         ? ("show" as const)
         : ("movie" as const),
     normalisedTitle: normaliseTitle(data.title),
@@ -96,13 +97,17 @@ export const Resolution = z.enum([
 
 export type Resolution = z.infer<typeof Resolution>;
 
-export const ResolutionRank = Resolution.options.reduce<
-  Record<Resolution, number>
->(
-  (acc, res, index) => {
-    acc[res] = Resolution.options.length - index;
+export const ResolutionRank = (() => {
+  const result: Record<Resolution, number> = {} as Record<Resolution, number>;
 
-    return acc;
-  },
-  {} as Record<Resolution, number>,
-);
+  for (let index = 0; index < Resolution.options.length; index++) {
+    const res = Resolution.options[index];
+
+    if (!res) {
+      continue;
+    }
+
+    result[res] = Resolution.options.length - index;
+  }
+  return result;
+})();

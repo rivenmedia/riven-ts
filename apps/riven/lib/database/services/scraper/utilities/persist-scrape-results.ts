@@ -1,10 +1,11 @@
-import { MediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
+import { Stream } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
 
 import { ValidationError, validateOrReject } from "class-validator";
 import z from "zod";
 
 import type { EntityManager } from "@mikro-orm/core";
+import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export async function persistScrapeResults(
@@ -30,16 +31,16 @@ export async function persistScrapeResults(
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((error) => {
-        if (Array.isArray(error)) {
-          return error
+      .transform((rawError) => {
+        if (Array.isArray(rawError)) {
+          return rawError
             .map((err) =>
               err.constraints ? Object.values(err.constraints).join("; ") : "",
             )
             .join("; ");
         }
 
-        return error.message;
+        return rawError.message;
       })
       .parse(error);
 

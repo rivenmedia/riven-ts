@@ -6,6 +6,8 @@ import { expect, vi } from "vitest";
 import { it } from "../../../../../__tests__/test-context.ts";
 import { downloadItemProcessor } from "./download-item.processor.ts";
 
+import type { MainRunnerMachineIntake } from "../../../../../state-machines/main-runner/index.ts";
+
 it('sends a "riven.media-item.download.success" event with the updated item and duration from request to download if the download result is valid', async ({
   scrapedMovieContext: { scrapedMovie },
   createMockJob,
@@ -13,7 +15,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
   services,
   createMockJobChildKey,
 }) => {
-  vi.spyOn(Settings, "now").mockReturnValue(10000);
+  vi.spyOn(Settings, "now").mockReturnValue(10_000);
 
   const [{ infoHash: streamInfoHash } = {}] = await scrapedMovie.streams.load();
 
@@ -42,7 +44,7 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     },
   });
 
-  const sendEvent = vi.fn();
+  const sendEvent = vi.fn<MainRunnerMachineIntake>();
 
   await downloadItemProcessor(
     {
@@ -112,7 +114,7 @@ it('sends a "riven.media-item.download.partial-success" event with the updated i
     },
   });
 
-  const sendEvent = vi.fn();
+  const sendEvent = vi.fn<MainRunnerMachineIntake>();
 
   await downloadItemProcessor(
     {
@@ -143,7 +145,7 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
 
   vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
 
-  const sendEvent = vi.fn();
+  const sendEvent = vi.fn<MainRunnerMachineIntake>();
 
   await downloadItemProcessor(
     {
@@ -155,9 +157,7 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
       services,
       plugins: new Map(),
     },
-  ).catch(() => {
-    /* empty */
-  });
+  ).catch(() => undefined);
 
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.media-item.download.error",

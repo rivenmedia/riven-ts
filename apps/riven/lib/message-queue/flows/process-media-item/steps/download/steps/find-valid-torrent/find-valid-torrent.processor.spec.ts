@@ -1,13 +1,12 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { BlacklistedStream } from "@repo/util-plugin-sdk/dto/entities";
 import {
-  type RankedResult,
   createRankingModel,
   createSettings,
   rankTorrent,
 } from "@repo/util-rank-torrent-name";
 
-import { type TypedJobNode, UnrecoverableError } from "bullmq";
+import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
 import { it as baseIt } from "../../../../../../../__tests__/test-context.ts";
@@ -16,7 +15,14 @@ import { ValidateTorrentFilesSandboxedJob } from "../../../../../../sandboxed-jo
 import { findValidTorrentProcessor } from "./find-valid-torrent.processor.ts";
 import { FindValidTorrentFlow } from "./find-valid-torrent.schema.ts";
 
+import type { ParamsFor } from "@repo/util-plugin-sdk";
+import type {
+  MediaItemDownloadRequestedEvent,
+  MediaItemDownloadRequestedResponse,
+} from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+import type { RankedResult } from "@repo/util-rank-torrent-name";
+import type { TypedJobNode } from "bullmq";
 
 const it = baseIt.extend("mockRankingModel", () =>
   createRankingModel({
@@ -28,7 +34,7 @@ const it = baseIt.extend("mockRankingModel", () =>
 it.beforeEach(async ({ createFlowWorker, mockFlowProcessorContext }) => {
   createFlowWorker(FindValidTorrentFlow, findValidTorrentProcessor);
 
-  const { default: testPlugin } = await import("@repo/plugin-test");
+  const { plugin: testPlugin } = await import("@repo/plugin-test");
 
   // Disable cache check and provider hooks to simplify tests
   testPlugin.hooks["riven.media-item.download.provider-list-requested"] =
@@ -81,13 +87,19 @@ it("does not attempt previously failed info hashes", async ({
   expect.assert(stream2);
   expect.assert(stream3);
 
-  const downloadRequestedSpy = vi.fn().mockResolvedValue({
-    success: true,
-    data: {
-      torrentId: "mock-torrent-id",
-      files: [],
-    },
-  });
+  const downloadRequestedSpy = vi
+    .fn<
+      (
+        job: TypedJobNode<ParamsFor<MediaItemDownloadRequestedEvent>>["job"],
+      ) => Promise<MediaItemDownloadRequestedResponse>
+    >()
+    .mockResolvedValue({
+      success: true,
+      data: {
+        torrentId: "mock-torrent-id",
+        files: [],
+      },
+    });
 
   createPluginWorker(
     "riven.media-item.download.requested",
@@ -165,7 +177,7 @@ it("returns the plugin and validated result on successful validation", async ({
 
   const expectedFile = {
     name: "Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
-    size: 123456789,
+    size: 123_456_789,
     path: "/Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
     link: "https://example.com/Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
   } satisfies DebridFile;
@@ -228,7 +240,7 @@ it("returns the plugin and validated result on successful validation", async ({
     mockFlowProcessorContext,
   );
 
-  expect(result).toEqual({
+  expect(result).toStrictEqual({
     plugin: "@repo/plugin-test",
     result: {
       torrentId: "mock-torrent-id",
@@ -295,7 +307,7 @@ it("updates job data with the failed info hash when an invalid torrent is return
     mockFlowProcessorContext,
   );
 
-  expect(job.data.failedInfoHashes).toEqual([stream.infoHash]);
+  expect(job.data.failedInfoHashes).toStrictEqual([stream.infoHash]);
 });
 
 it("returns null if no valid torrent is found after trying all plugins", async ({
@@ -368,13 +380,19 @@ it("does not attempt to re-download blacklisted streams", async ({
   expect.assert(stream2);
   expect.assert(blacklistedStream);
 
-  const downloadRequestedSpy = vi.fn().mockResolvedValue({
-    success: true,
-    data: {
-      torrentId: "mock-torrent-id",
-      files: [],
-    },
-  });
+  const downloadRequestedSpy = vi
+    .fn<
+      (
+        job: TypedJobNode<ParamsFor<MediaItemDownloadRequestedEvent>>["job"],
+      ) => Promise<MediaItemDownloadRequestedResponse>
+    >()
+    .mockResolvedValue({
+      success: true,
+      data: {
+        torrentId: "mock-torrent-id",
+        files: [],
+      },
+    });
 
   createPluginWorker(
     "riven.media-item.download.requested",
@@ -433,8 +451,6 @@ it("does not attempt to re-download blacklisted streams", async ({
   expect(downloadRequestedSpy).toHaveBeenCalledTimes(2);
 
   for (const [jobArg] of downloadRequestedSpy.mock.calls) {
-    expect(
-      (jobArg as TypedJobNode<{ infoHash: string }>["job"]).data.infoHash,
-    ).not.toBe(blacklistedStream.infoHash);
+    expect(jobArg.data.infoHash).not.toBe(blacklistedStream.infoHash);
   }
 });

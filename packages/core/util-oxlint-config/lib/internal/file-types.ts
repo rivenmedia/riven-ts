@@ -1,5 +1,7 @@
 export const tsFiles = "**/*.{ts,tsx,mts,mtsx,cts,ctsx}";
 
+export const tsDefinitionFiles = "**/*.{d.ts,d.mts,d.cts}";
+
 export const jsFiles = "**/*.{js,jsx,mjs,cjs,mjsx,cjsx}";
 
 export const jsxFiles = "**/*.{tsx,jsx,mtsx,mjsx,ctsx,cjsx}";

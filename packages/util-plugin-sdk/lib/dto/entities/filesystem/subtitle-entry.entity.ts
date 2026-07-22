@@ -11,31 +11,31 @@ import type { Opt } from "@mikro-orm/core";
 })
 @Unique({ properties: ["mediaItem", "language"] })
 export class SubtitleEntry extends FileSystemEntry {
-  override type: Opt<"subtitle"> = "subtitle" as const;
+  public override type: Opt<"subtitle"> = "subtitle" as const;
 
   @Field(() => String)
   @Index()
   @Property()
-  language!: string;
+  public language!: string;
 
   @Field(() => String)
   @Property()
-  content!: string;
+  public content!: string;
 
   @Field(() => String)
   @Property()
-  fileHash!: string;
+  public fileHash!: string;
 
   @Field(() => Int)
   @Property()
-  sourceProvider!: string;
+  public sourceProvider!: string;
 
   @Field(() => String, { nullable: true })
   @Property()
-  sourceId?: string | null;
+  public sourceId?: string | null;
 
   @Property({ persist: false, hidden: true })
-  async getVfsFileName(): Promise<string> {
+  public async getVfsFileName(): Promise<string> {
     const prettyName = await this.mediaItem.getEntity().getPrettyName();
 
     if (!prettyName) {

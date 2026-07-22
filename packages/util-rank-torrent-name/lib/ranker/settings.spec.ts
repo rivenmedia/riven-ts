@@ -1,17 +1,18 @@
 import { describe, expect, it } from "vitest";
+import { ZodError } from "zod";
 
 import { createSettings } from "./ranking-settings.schema.ts";
 
-describe("createSettings", () => {
+describe(createSettings, () => {
   it("creates default settings from empty input", () => {
     const settings = createSettings();
 
-    expect(settings.require).toEqual([]);
-    expect(settings.exclude).toEqual([]);
-    expect(settings.preferred).toEqual([]);
-    expect(settings.compiledRequire).toEqual([]);
-    expect(settings.compiledExclude).toEqual([]);
-    expect(settings.compiledPreferred).toEqual([]);
+    expect(settings.require).toStrictEqual([]);
+    expect(settings.exclude).toStrictEqual([]);
+    expect(settings.preferred).toStrictEqual([]);
+    expect(settings.compiledRequire).toStrictEqual([]);
+    expect(settings.compiledExclude).toStrictEqual([]);
+    expect(settings.compiledPreferred).toStrictEqual([]);
   });
 
   it("creates settings from partial input", () => {
@@ -20,7 +21,7 @@ describe("createSettings", () => {
       resolutions: { r2160p: true },
     });
 
-    expect(settings.require).toEqual(["1080p"]);
+    expect(settings.require).toStrictEqual(["1080p"]);
     expect(settings.compiledRequire).toHaveLength(1);
     expect(settings.resolutions.r2160p).toBe(true);
 
@@ -47,7 +48,7 @@ describe("createSettings", () => {
     const settings = createSettings();
 
     expect(settings.options.removeAllTrash).toBe(true);
-    expect(settings.options.removeRanksUnder).toBe(-10000);
+    expect(settings.options.removeRanksUnder).toBe(-10_000);
     expect(settings.options.removeUnknownLanguages).toBe(false);
     expect(settings.options.allowEnglishInLanguages).toBe(true);
     expect(settings.options.removeAdultContent).toBe(true);
@@ -66,15 +67,17 @@ describe("createSettings", () => {
 
   it("throws on invalid input types", () => {
     // @ts-expect-error - invalid type for resolutions
-    expect(() => createSettings({ resolutions: { r1080p: "yes" } })).toThrow();
+    expect(() => createSettings({ resolutions: { r1080p: "yes" } })).toThrow(
+      ZodError,
+    );
   });
 
   it("accepts empty language config", () => {
     const settings = createSettings();
 
-    expect(settings.languages.required).toEqual([]);
-    expect(settings.languages.allowed).toEqual([]);
-    expect(settings.languages.exclude).toEqual([]);
-    expect(settings.languages.preferred).toEqual([]);
+    expect(settings.languages.required).toStrictEqual([]);
+    expect(settings.languages.allowed).toStrictEqual([]);
+    expect(settings.languages.exclude).toStrictEqual([]);
+    expect(settings.languages.preferred).toStrictEqual([]);
   });
 });

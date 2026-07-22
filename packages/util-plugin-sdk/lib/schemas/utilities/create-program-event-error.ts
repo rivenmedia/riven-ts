@@ -1,8 +1,9 @@
 import assert from "node:assert";
-import z, { type ZodLiteral, type ZodObject, type ZodUnknown } from "zod";
 
 import type { ParamsFor } from "../../types/events.ts";
 import type { RivenEvent } from "../events/index.ts";
+import type z from "zod";
+import type { ZodLiteral, ZodObject, ZodUnknown } from "zod";
 
 type BaseErrorSchema = ZodObject<{
   type: ZodLiteral<RivenEvent["type"]>;
@@ -25,11 +26,13 @@ export class ProgramEventError<
   Schema extends BaseErrorSchema,
   Data extends ParamsFor<z.infer<Schema>>,
 > extends Error {
-  payload: {
+  public override name = "ProgramEventError";
+
+  public payload: {
     type: z.infer<Schema>["type"];
   } & Data;
 
-  constructor(type: z.infer<Schema>["type"], data: Data) {
+  public constructor(type: z.infer<Schema>["type"], data: Data) {
     super(buildErrorMessage(type, data.error));
 
     this.payload = { type, ...data };
@@ -43,10 +46,10 @@ export const createProgramEventError = <
   payloadSchema: Schema,
 ) =>
   class extends ProgramEventError<Schema, Data> {
-    constructor(data: Data) {
+    public constructor(data: Data) {
       const [type] = payloadSchema.shape.type.def.values;
 
-      assert(type, "Invalid event type");
+      assert.ok(type, "Invalid event type");
 
       super(type, data);
     }

@@ -49,7 +49,7 @@ export const OptionsConfigSchema = z.object({
   /**
    * @default -10000
    */
-  removeRanksUnder: z.number().default(-10000),
+  removeRanksUnder: z.number().default(-10_000),
 
   /**
    * @default false
@@ -100,11 +100,11 @@ export const LanguagesConfigSchema = z.object({
 function compilePattern(pattern: string): RegExp {
   // Case-sensitive
   if (pattern.startsWith("/") && pattern.endsWith("/") && pattern.length > 2) {
-    return new RegExp(pattern.slice(1, -1));
+    return new RegExp(pattern.slice(1, -1), "u");
   }
 
   // Case-insensitive
-  return new RegExp(pattern, "i");
+  return new RegExp(pattern, "iu");
 }
 
 function compilePatterns(patterns: string[]): RegExp[] {

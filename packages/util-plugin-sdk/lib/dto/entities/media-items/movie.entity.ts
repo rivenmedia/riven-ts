@@ -1,36 +1,36 @@
-import { EntityRepositoryType, type Opt } from "@mikro-orm/core";
+import { EntityRepositoryType } from "@mikro-orm/core";
 import { Entity, Property } from "@mikro-orm/decorators/legacy";
 import { IsNumberString } from "class-validator";
 import { Field, Int, ObjectType } from "type-graphql";
 
-import {
-  MovieContentRating,
-  MovieContentRatingEnum,
-} from "../../enums/content-ratings.enum.ts";
+import { MovieContentRatingEnum } from "../../enums/content-ratings.enum.ts";
 import { MovieRepository } from "../../repositories/movie.repository.ts";
-import { MediaEntry } from "../filesystem/index.ts";
 import { MediaItem } from "./index.ts";
+
+import type { MovieContentRating } from "../../enums/content-ratings.enum.ts";
+import type { MediaEntry } from "../filesystem/index.ts";
+import type { Opt } from "@mikro-orm/core";
 
 @ObjectType({ implements: MediaItem })
 @Entity({ repository: () => MovieRepository })
 export class Movie extends MediaItem {
-  [EntityRepositoryType]?: MovieRepository;
+  public [EntityRepositoryType]?: MovieRepository;
 
   @Field(() => Int, { nullable: true })
   @Property()
-  runtime!: number | null;
+  public runtime!: number | null;
 
   @Field(() => MovieContentRatingEnum)
-  declare contentRating: MovieContentRating;
+  declare public contentRating: MovieContentRating;
 
-  override type: Opt<"movie"> = "movie" as const;
+  public override type: Opt<"movie"> = "movie" as const;
 
   @Field(() => String)
   @Property({ type: "varchar", length: 10 })
   @IsNumberString()
-  tmdbId!: string;
+  public tmdbId!: string;
 
-  getMediaEntries() {
+  public async getMediaEntries() {
     return this.filesystemEntries.matching<MediaEntry>({
       where: {
         type: "media",
@@ -38,15 +38,15 @@ export class Movie extends MediaItem {
     });
   }
 
-  getPrettyName(): string {
+  public getPrettyName(): string {
     return `${this.title.replaceAll(".", "")} (${this.year?.toString() ?? "Unknown"}) {tmdb-${this.tmdbId}}`;
   }
 
-  getExpectedFileCount(): number {
+  public getExpectedFileCount(): number {
     return 1;
   }
 
-  getIncompleteItems() {
+  public getIncompleteItems() {
     return [];
   }
 }

@@ -20,7 +20,7 @@ import type { PathInfo } from "../../database/services/vfs/schemas/path-info.sch
 import type { Loaded } from "@mikro-orm/core";
 import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
-let fd = 0;
+let fdCounter = 0;
 
 async function getStreamLinkFromCacheOrQueue(
   mediaEntry: Loaded<MediaEntry, "mediaItem.fullTitle">,
@@ -42,16 +42,16 @@ async function getStreamLinkFromCacheOrQueue(
     mediaItemTitle: mediaEntry.mediaItem.$.fullTitle,
   });
 
-  return await runSingleJob(job, 10_000);
+  return runSingleJob(job, 10_000);
 }
 
 async function serveSubtitleFile(pathInfo: PathInfo) {
   const subtitleEntry = await services.vfsService.getSubtitleEntry(pathInfo);
 
-  assert(subtitleEntry, new FuseError(Fuse.ENOENT, "Subtitle not found"));
+  assert.ok(subtitleEntry, new FuseError(Fuse.ENOENT, "Subtitle not found"));
 
   const contentBuffer = Buffer.from(subtitleEntry.content, "utf8");
-  const nextFd = fd++;
+  const nextFd = (fdCounter += 1);
 
   fdToFileHandleMeta.set(nextFd, {
     type: "subtitle",
@@ -73,11 +73,11 @@ async function serveMediaFile(pathInfo: PathInfo) {
     populate: ["mediaItem.fullTitle"],
   });
 
-  assert(entry, new FuseError(Fuse.ENOENT, "No media entry found"));
+  assert.ok(entry, new FuseError(Fuse.ENOENT, "No media entry found"));
 
   const streamLink = await getStreamLinkFromCacheOrQueue(entry);
 
-  const nextFd = fd++;
+  const nextFd = (fdCounter += 1);
 
   fileNameToFileChunkCalculationsMap.set(
     entry.originalFilename,
@@ -115,12 +115,12 @@ async function open(path: string, _flags: number) {
   return serveMediaFile(pathInfo);
 }
 
-export const openSync = function (
+export function openSync(
   path: string,
   flags: number,
   callback: (err: number, fd?: number) => void,
 ) {
-  void withVfsScope(() =>
+  void withVfsScope(async () =>
     withVfsOperationContext(
       { operationName: "open", path, flags },
       async () => {
@@ -142,4 +142,4 @@ export const openSync = function (
       process.nextTick(callback, Fuse.EIO);
     }),
   );
-};
+}

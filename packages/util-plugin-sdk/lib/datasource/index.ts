@@ -1,20 +1,8 @@
+import { RESTDataSource } from "@apollo/datasource-rest";
 import {
-  type AugmentedRequest,
-  type DataSourceConfig,
-  type DataSourceFetchResult,
-  type DataSourceRequest,
-  RESTDataSource,
-  type RequestOptions,
-} from "@apollo/datasource-rest";
-import {
-  type ConnectionOptions,
-  Job,
-  type ParentOptions,
   Queue,
   QueueEvents,
   RateLimitError,
-  type RateLimiterOptions,
-  type Telemetry,
   UnrecoverableError,
   Worker,
 } from "bullmq";
@@ -27,8 +15,22 @@ import { json } from "../validation/json.ts";
 import { urlSearchParamsCodec } from "../validation/url-search-params-parser.ts";
 import { dataSourceContext } from "./context.ts";
 
+import type {
+  AugmentedRequest,
+  DataSourceConfig,
+  DataSourceFetchResult,
+  DataSourceRequest,
+  RequestOptions,
+} from "@apollo/datasource-rest";
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
-import type EventEmitter from "events";
+import type {
+  ConnectionOptions,
+  ParentOptions,
+  RateLimiterOptions,
+  Telemetry,
+  Job,
+} from "bullmq";
+import type EventEmitter from "node:events";
 import type { Promisable } from "type-fest";
 import type { Logger } from "winston";
 
@@ -62,9 +64,11 @@ type FetchResponse<T = unknown> = Pick<
   );
 
 export class DataSourceHTTPError extends Error {
-  response!: DataSourceFetchResult<never>["response"];
+  public override name = "DataSourceHTTPError";
 
-  constructor(response: DataSourceFetchResult<never>["response"]) {
+  public response!: DataSourceFetchResult<never>["response"];
+
+  public constructor(response: DataSourceFetchResult<never>["response"]) {
     super(
       `${response.status.toString()} ${response.statusText} for ${response.url}`,
     );
@@ -87,14 +91,14 @@ export interface BaseDataSourceConfig<
 }
 
 export abstract class BaseDataSource<
-  T extends Record<string, unknown>,
+  DataSourceSettings extends Record<string, unknown>,
 > extends RESTDataSource {
-  abstract override readonly baseURL: string;
+  public abstract override readonly baseURL: string;
 
-  readonly serviceName: string;
-  readonly settings: T;
+  public readonly serviceName: string;
+  public readonly settings: DataSourceSettings;
 
-  override readonly logger: Logger;
+  public override readonly logger: Logger;
 
   protected readonly rateLimiterOptions?: RateLimiterOptions | undefined;
 
@@ -113,16 +117,16 @@ export abstract class BaseDataSource<
    */
   protected readonly concurrency: number = 200;
 
-  #requestAttempts: number;
-  #requestBackoffDelay: number;
+  readonly #requestAttempts: number;
+  readonly #requestBackoffDelay: number;
 
-  #queueId: string;
-  #queueEvents: QueueEvents;
-  queue: Queue<FetchJobInput, FetchResponse>;
-  worker: Worker<FetchJobInput, FetchResponse>;
+  readonly #queueId: string;
+  readonly #queueEvents: QueueEvents;
+  public queue: Queue<FetchJobInput, FetchResponse>;
+  public worker: Worker<FetchJobInput, FetchResponse>;
 
-  #keyv: KeyvAdapter;
-  #keyvPrefix = "httpcache:";
+  readonly #keyv: KeyvAdapter;
+  readonly #keyvPrefix = "httpcache:";
 
   /**
    * A set of HTTP status codes that should not be treated as fatal errors.
@@ -132,9 +136,9 @@ export abstract class BaseDataSource<
    *
    * For all other 4xx and 5xx status codes, no retries will be made.
    */
-  #nonFatalStatusCodes = new Set([408, 425, 429, 500, 502, 503, 504]);
+  readonly #nonFatalStatusCodes = new Set([408, 425, 429, 500, 502, 503, 504]);
 
-  constructor({
+  public constructor({
     pluginSymbol,
     settings,
     requestAttempts = 3,
@@ -143,7 +147,7 @@ export abstract class BaseDataSource<
     telemetry,
     userAgent,
     ...apolloDataSourceOptions
-  }: BaseDataSourceConfig<T>) {
+  }: BaseDataSourceConfig<DataSourceSettings>) {
     super(apolloDataSourceOptions);
 
     this.#keyv = apolloDataSourceOptions.cache as KeyvAdapter;
@@ -253,14 +257,14 @@ export abstract class BaseDataSource<
 
     this.logger = apolloDataSourceOptions.logger;
 
-    [this.queue, this.#queueEvents, this.worker].forEach((resource) => {
+    for (const resource of [this.queue, this.#queueEvents, this.worker]) {
       (resource as EventEmitter).on("error", (error: unknown) => {
         this.logger.error(
           `${this.#queueId} ${resource.constructor.name} error`,
           { err: error },
         );
       });
-    });
+    }
 
     this.settings = settings;
   }
@@ -308,9 +312,9 @@ export abstract class BaseDataSource<
       return httpDate;
     }
 
-    const retryAfterSeconds = parseInt(retryAfterHeader, 10);
+    const retryAfterSeconds = Math.trunc(Number(retryAfterHeader));
 
-    if (isNaN(retryAfterSeconds)) {
+    if (Number.isNaN(retryAfterSeconds)) {
       return null;
     }
 
@@ -359,7 +363,7 @@ export abstract class BaseDataSource<
 
     const downcasedHeaders: Record<string, string> = {};
 
-    // map incoming headers to lower-case headers
+    // Map incoming headers to lower-case headers
     for (const [key, value] of Object.entries(augmentedRequest.headers)) {
       downcasedHeaders[key.toLowerCase()] = value;
     }
@@ -449,7 +453,7 @@ export abstract class BaseDataSource<
     );
   }
 
-  override async fetch<T>(
+  public override async fetch<T>(
     path: string,
     incomingRequest?: DataSourceRequest,
   ): Promise<DataSourceFetchResult<T>> {
@@ -523,7 +527,7 @@ export abstract class BaseDataSource<
     };
   }
 
-  override async throwIfResponseIsError({
+  public override async throwIfResponseIsError({
     request,
     response,
   }: {
@@ -537,7 +541,7 @@ export abstract class BaseDataSource<
     }
 
     if (response.status === 429) {
-      const defaultWaitMs = 10000;
+      const defaultWaitMs = 10_000;
       const waitMs = this.#parseRetryAfterHeader(
         response.headers.get("Retry-After") ?? "",
       );
@@ -604,7 +608,7 @@ export abstract class BaseDataSource<
     throw Worker.RateLimitError();
   }
 
-  abstract validate(): Promisable<boolean>;
+  public abstract validate(): Promisable<boolean>;
 }
 
 export type { RateLimiterOptions } from "bullmq";

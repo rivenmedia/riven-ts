@@ -1,7 +1,12 @@
 import globals from "globals";
 import { defineConfig } from "oxlint";
 
-import { jsFiles, tsFiles } from "../internal/file-types.ts";
+import {
+  jsFiles,
+  testFiles,
+  tsFiles,
+  tsDefinitionFiles,
+} from "../internal/file-types.ts";
 
 export const oxlintPluginTypescriptConfig = defineConfig({
   overrides: [
@@ -10,37 +15,70 @@ export const oxlintPluginTypescriptConfig = defineConfig({
       plugins: ["typescript"],
       rules: {
         "typescript/ban-types": "off",
+        "typescript/prefer-optional-chain": "deny",
+        "typescript/no-extraneous-class": [
+          "deny",
+          { allowWithDecorator: true },
+        ],
+        "typescript/explicit-module-boundary-types": "allow", // This enforces every *exported* function to have a return type, which is incompatible with inferred types
+        "typescript/explicit-function-return-type": "allow", // This enforces every function to have a return type, which is incompatible with inferred types
+        "typescript/consistent-return": "allow", // TypeScript's `noImplicitReturns` compiler option already enforces a better version of this rule
+        "typescript/no-unsafe-type-assertion": "allow", // This is incompatible with XState's method of inferring types (e.g. {} as Context)
+        "typescript/prefer-readonly-parameter-types": "off", // This rule just plays havoc everywhere and seems to expect all external dependencies to conform to it...
+        "typescript/return-await": ["deny", "error-handling-correctness-only"],
+        "typescript/restrict-plus-operands": [
+          "error",
+          {
+            allowAny: false,
+            allowBoolean: false,
+            allowNullish: false,
+            allowNumberAndString: false,
+            allowRegExp: false,
+          },
+        ],
+        "typescript/restrict-template-expressions": [
+          "deny",
+          {
+            allowAny: false,
+            allowBoolean: false,
+            allowNever: false,
+            allowNullish: false,
+            allowNumber: false,
+            allowRegExp: false,
+          },
+        ],
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
-        "typescript/explicit-function-return-type": "off",
-        "typescript/explicit-member-accessibility": [
-          "error",
-          { accessibility: "no-public" },
-        ],
-        "typescript/explicit-module-boundary-types": "off",
-        "typescript/consistent-type-imports": "off",
-        "typescript/method-signature-style": "off",
-        "typescript/no-import-type-side-effects": "off",
-        "typescript/no-empty-interface": "off",
         "typescript/strict-boolean-expressions": "off",
-
-        // Type-aware rules that are disabled for now, but will be enabled in the future
-        "typescript/prefer-readonly-parameter-types": "off",
-        "typescript/strict-void-return": "off",
-        "typescript/promise-function-async": "off",
-        "typescript/no-unsafe-type-assertion": "off",
-        "typescript/prefer-readonly": "off",
-        "typescript/return-await": "off",
-        "typescript/consistent-return": "off",
-        "typescript/switch-exhaustiveness-check": "off",
-        "typescript/require-array-sort-compare": "off",
-        "typescript/consistent-type-exports": "off",
-        "typescript/no-extraneous-class": "off",
-        "typescript/require-await": "off",
       },
       env: {
         ...globals.node,
         ...globals.es2024,
+      },
+    },
+    {
+      files: [tsDefinitionFiles],
+      plugins: ["typescript"],
+      rules: {
+        "typescript/no-empty-interface": ["deny", { allowSingleExtends: true }], // Allow empty interfaces in definition files, as they are often used for type augmentation
+        "typescript/no-empty-object-type": [
+          "deny",
+          { allowInterfaces: "always" },
+        ],
+      },
+    },
+    {
+      files: [...testFiles],
+      plugins: ["typescript"],
+      rules: {
+        "typescript/no-unsafe-argument": "allow", // Allow the use of helpers such as expect.objectContaining() which return `any`
+        "typescript/strict-void-return": [
+          "deny",
+          {
+            allowReturnAny: true, // Allow mocks to return `any` in test files
+          },
+        ],
+        "typescript/prefer-readonly-parameter-types": "allow",
       },
     },
   ],

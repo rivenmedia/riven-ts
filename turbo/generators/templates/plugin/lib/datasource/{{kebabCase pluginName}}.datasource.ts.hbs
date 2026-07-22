@@ -1,14 +1,16 @@
 import { BaseDataSource } from "@repo/util-plugin-sdk";
 
-import { {{pascalCase pluginName}}Settings } from "../{{kebabCase pluginName}}-settings.schema.ts";
+import type { {{pascalCase pluginName}}Settings } from "../{{kebabCase pluginName}}-settings.schema.ts";
 
-class {{pascalCase pluginName}}APIError extends Error {}
+class {{pascalCase pluginName}}APIError extends Error {
+  public override name = "{{pascalCase pluginName}}APIError";
+}
 
 export class {{pascalCase pluginName}}API extends BaseDataSource<{{pascalCase pluginName}}Settings> {
-  override baseURL = "https://{{kebabCase pluginName}}.com/api/";
-  override serviceName = "{{pascalCase pluginName}}";
+  public override baseURL = "https://{{kebabCase pluginName}}.com/api/";
+  public override serviceName = "{{pascalCase pluginName}}";
 
-  override async validate() {
+  public override async validate() {
     try {
       // Implement your own validation logic here
       await this.get('validate');
@@ -19,11 +21,11 @@ export class {{pascalCase pluginName}}API extends BaseDataSource<{{pascalCase pl
     }
   }
 
-  async fetchData() {
+  public async fetchData() {
     try {
       const response = await this.get<unknown>("data");
 
-      console.log(response);
+      console.log(response); // oxlint-disable-line no-console
     } catch {
       throw new {{pascalCase pluginName}}APIError("Failed to fetch data");
     }

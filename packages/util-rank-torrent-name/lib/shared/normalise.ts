@@ -1,3 +1,4 @@
+// oxlint-disable id-length
 const translationTable: Record<string, string | null> = {
   ā: "a",
   ă: "a",
@@ -98,6 +99,7 @@ const translationTable: Record<string, string | null> = {
   "&": "and",
   _: " ",
 };
+// oxlint-enable id-length
 
 export function normaliseTitle(rawTitle: string, lower = true): string {
   let text = lower ? rawTitle.toLowerCase() : rawTitle;
@@ -116,7 +118,7 @@ export function normaliseTitle(rawTitle: string, lower = true): string {
         translated += replacement;
       }
 
-      // null means remove
+      // Null means remove
     } else {
       translated += ch;
     }
@@ -124,7 +126,7 @@ export function normaliseTitle(rawTitle: string, lower = true): string {
 
   // Remove non-alphanumeric, non-space characters
   return translated
-    .replace(/[^\p{L}\p{N}\s]/gu, "")
-    .replace(/\s+/g, " ")
+    .replaceAll(/[^\p{L}\p{N}\s]/gu, "")
+    .replaceAll(/\s+/gu, " ")
     .trim();
 }

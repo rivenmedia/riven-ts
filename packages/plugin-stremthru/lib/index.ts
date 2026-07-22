@@ -1,4 +1,4 @@
-import { DataSourceHTTPError, type RivenPlugin } from "@repo/util-plugin-sdk";
+import { DataSourceHTTPError } from "@repo/util-plugin-sdk";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
 
@@ -11,7 +11,9 @@ import { Store } from "./schemas/store.schema.ts";
 import { pluginConfig } from "./stremthru-plugin.config.ts";
 import { StremThruSettings } from "./stremthru-settings.schema.ts";
 
-export default {
+import type { RivenPlugin } from "@repo/util-plugin-sdk";
+
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [StremThruTorzAPI, StremThruTorznabAPI],
@@ -46,6 +48,7 @@ export default {
           `Failed to get instant availability for ${infoHash} from ${store}: ${
             error instanceof Error ? error.message : String(error)
           }`,
+          { cause: error },
         );
       }
     },
@@ -63,10 +66,10 @@ export default {
           `Failed to get cache torrent status: ${
             error instanceof Error ? error.message : String(error)
           }`,
+          { cause: error },
         );
       }
     },
-    // eslint-disable-next-line @typescript-eslint/require-await
     "riven.media-item.download.provider-list-requested": async ({
       dataSources,
       settings,
@@ -79,10 +82,10 @@ export default {
         .intersection(validStores)
         .difference(new Set(rateLimitedStores.keys()));
 
-      return {
-        providers: Array.from(providers),
+      return Promise.resolve({
+        providers: [...providers],
         rateLimitedProviders: Object.fromEntries(rateLimitedStores),
-      };
+      });
     },
     "riven.media-item.scrape.requested": async ({ dataSources, event }) => {
       const api = dataSources.get(StremThruTorznabAPI);
@@ -145,6 +148,7 @@ export default {
           `Failed to generate link from ${store}: ${
             error instanceof Error ? error.message : String(error)
           }`,
+          { cause: error },
         );
       }
     },
@@ -165,7 +169,7 @@ export default {
         StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
       ]);
 
-      const expiredStatusCodes = new Set<StatusCodes>([]);
+      const expiredStatusCodes = new Set<StatusCodes>();
 
       if (item.provider === "torbox") {
         expiredStatusCodes.add(StatusCodes.BAD_REQUEST);
@@ -174,7 +178,7 @@ export default {
       const state =
         (deadStatusCodes.has(response.status) ? "dead" : null) ??
         (expiredStatusCodes.has(response.status) ? "expired" : null) ??
-        (!response.ok ? "failed" : "healthy");
+        (response.ok ? "healthy" : "failed");
 
       if (state === "failed") {
         throw new Error(
@@ -195,6 +199,6 @@ export default {
       dataSources.get(StremThruTorznabAPI).validate(),
     ]);
 
-    return results.every((isValid) => isValid);
+    return results.every(Boolean);
   },
-} satisfies RivenPlugin as RivenPlugin;
+};

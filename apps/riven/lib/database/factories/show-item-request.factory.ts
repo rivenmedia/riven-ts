@@ -6,7 +6,7 @@ import { Factory } from "@mikro-orm/seeder";
 import type { EntityData } from "@mikro-orm/core";
 
 export class ShowItemRequestFactory extends Factory<ItemRequest> {
-  model = ItemRequest;
+  public model = ItemRequest;
 
   protected override definition(
     input: EntityData<ItemRequest> = {},

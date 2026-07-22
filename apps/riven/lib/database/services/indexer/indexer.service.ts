@@ -1,4 +1,4 @@
-import { Movie, type Show } from "@repo/util-plugin-sdk/dto/entities";
+import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   CreateRequestContext,
@@ -8,14 +8,12 @@ import {
 import { DateTime } from "luxon";
 
 import { BaseService } from "../core/base-service.ts";
-import {
-  type MovieIndexData,
-  persistMovieIndexerData,
-} from "./utilities/persist-movie-indexer-data.ts";
-import {
-  type ShowIndexData,
-  persistShowIndexerData,
-} from "./utilities/persist-show-indexer-data.ts";
+import { persistMovieIndexerData } from "./utilities/persist-movie-indexer-data.ts";
+import { persistShowIndexerData } from "./utilities/persist-show-indexer-data.ts";
+
+import type { MovieIndexData } from "./utilities/persist-movie-indexer-data.ts";
+import type { ShowIndexData } from "./utilities/persist-show-indexer-data.ts";
+import type { Show } from "@repo/util-plugin-sdk/dto/entities";
 
 export class IndexerService extends BaseService {
   @EnsureRequestContext()
@@ -30,20 +28,24 @@ export class IndexerService extends BaseService {
     return persistShowIndexerData(this.em, item);
   }
 
-  async indexItem(item: MovieIndexData): Promise<Movie>;
-  async indexItem(item: ShowIndexData): Promise<Show>;
-  async indexItem(item: MovieIndexData | ShowIndexData): Promise<Movie | Show>;
+  public async indexItem(item: MovieIndexData): Promise<Movie>;
+  public async indexItem(item: ShowIndexData): Promise<Show>;
+  public async indexItem(
+    item: MovieIndexData | ShowIndexData,
+  ): Promise<Movie | Show>;
   @CreateRequestContext()
-  async indexItem(item: MovieIndexData | ShowIndexData) {
+  public async indexItem(item: MovieIndexData | ShowIndexData) {
     switch (item.type) {
-      case "movie":
+      case "movie": {
         return this.indexMovie(item);
-      case "show":
+      }
+      case "show": {
         return this.indexShow(item);
+      }
     }
   }
 
-  async calculateReindexTime(
+  public async calculateReindexTime(
     item: Movie | Show,
   ): Promise<{ reindexTime: DateTime; isFallback: boolean }> {
     const { settings } = await import("../../../utilities/settings.ts");

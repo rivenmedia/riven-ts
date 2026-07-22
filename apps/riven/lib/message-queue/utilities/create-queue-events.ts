@@ -1,7 +1,9 @@
-import { QueueEvents, type QueueOptions } from "bullmq";
+import { QueueEvents } from "bullmq";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
+
+import type { QueueOptions } from "bullmq";
 
 QueueEvents.setMaxListeners(200);
 

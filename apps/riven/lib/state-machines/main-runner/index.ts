@@ -1,21 +1,10 @@
-import { type Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
-import {
-  RivenEvent,
-  type RivenExternalEvent,
-} from "@repo/util-plugin-sdk/events";
+import { Show } from "@repo/util-plugin-sdk/dto/entities";
+import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 import chalk from "chalk";
 import { Duration } from "luxon";
 import os from "node:os";
-import {
-  type ActorRef,
-  type Snapshot,
-  assign,
-  enqueueActions,
-  forwardTo,
-  raise,
-  setup,
-} from "xstate";
+import { assign, enqueueActions, forwardTo, raise, setup } from "xstate";
 
 import { postProcessItemProcessor } from "../../message-queue/flows/post-process-media-item/post-process-media-item.processor.ts";
 import { PostProcessMediaItemFlow } from "../../message-queue/flows/post-process-media-item/post-process-media-item.schema.ts";
@@ -47,23 +36,14 @@ import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { createEventScheduler } from "./actors/event-scheduler.actor.ts";
-import {
-  type FanOutDownloadInput,
-  fanOutDownload,
-} from "./actors/fan-out-download.actor.ts";
+import { fanOutDownload } from "./actors/fan-out-download.actor.ts";
 import { jobEnqueuer } from "./actors/job-enqueuer.actor.ts";
 import { processItemRequest } from "./actors/process-item-request.actor.ts";
 import { processMediaItem } from "./actors/process-media-item.actor.ts";
 import { requestContentServices } from "./actors/request-content-services.actor.ts";
-import {
-  type RequestItemInput,
-  requestItem,
-} from "./actors/request-item.actor.ts";
+import { requestItem } from "./actors/request-item.actor.ts";
 import { retryLibrary } from "./actors/retry-library.actor.ts";
-import {
-  type ScheduleReindexInput,
-  scheduleReindex,
-} from "./actors/schedule-reindex.actor.ts";
+import { scheduleReindex } from "./actors/schedule-reindex.actor.ts";
 
 import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
 import type { Flow } from "../../message-queue/flows/index.ts";
@@ -77,7 +57,13 @@ import type {
   ValidPluginMap,
 } from "../../types/plugins.ts";
 import type { RivenMachineEvent } from "../program/index.ts";
+import type { FanOutDownloadInput } from "./actors/fan-out-download.actor.ts";
+import type { RequestItemInput } from "./actors/request-item.actor.ts";
+import type { ScheduleReindexInput } from "./actors/schedule-reindex.actor.ts";
+import type { Movie } from "@repo/util-plugin-sdk/dto/entities";
+import type { RivenExternalEvent } from "@repo/util-plugin-sdk/events";
 import type { Queue, Worker } from "bullmq";
+import type { ActorRef, Snapshot } from "xstate";
 
 export interface MainRunnerMachineContext {
   availableParallelism: number;

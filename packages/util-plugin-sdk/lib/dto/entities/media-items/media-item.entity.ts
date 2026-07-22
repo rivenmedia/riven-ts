@@ -1,10 +1,4 @@
-import {
-  Collection,
-  type Hidden,
-  type Opt,
-  OptionalProps,
-  type Ref,
-} from "@mikro-orm/core";
+import { Collection, OptionalProps } from "@mikro-orm/core";
 import {
   Entity,
   Enum,
@@ -18,16 +12,19 @@ import {
 import { IsOptional, Matches } from "class-validator";
 import { JSONObjectResolver } from "graphql-scalars";
 import { DateTime } from "luxon";
-import { type UUID, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { Field, ID, InterfaceType } from "type-graphql";
 
 import { MediaItemContentRating } from "../../enums/content-ratings.enum.ts";
 import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { MediaItemType } from "../../enums/media-item-type.enum.ts";
 import { FileSystemEntry, SubtitleEntry } from "../filesystem/index.ts";
-import { BlacklistedStream, ItemRequest, MediaEntry } from "../index.ts";
+import { BlacklistedStream, ItemRequest } from "../index.ts";
 import { Stream } from "../streams/stream.entity.ts";
 
+import type { MediaEntry } from "../index.ts";
+import type { Hidden, Opt, Ref } from "@mikro-orm/core";
+import type { UUID } from "node:crypto";
 import type { Promisable } from "type-fest";
 
 @InterfaceType()
@@ -37,108 +34,110 @@ import type { Promisable } from "type-fest";
 })
 @Index({ properties: ["type", "releaseDate"] })
 export abstract class MediaItem {
-  [OptionalProps]?: "state";
+  public [OptionalProps]?: "state";
 
   @Field(() => ID)
   @PrimaryKey({ type: "uuid" })
-  id: UUID = randomUUID();
+  public id: UUID = randomUUID();
 
   @Field(() => String)
   @Index()
   @Property()
-  title!: string;
+  public title!: string;
 
   @Field(() => String)
   @Property()
-  fullTitle!: Opt<string>;
+  public fullTitle!: Opt<string>;
 
   @Field(() => String, { nullable: true })
   @Property({ type: "varchar", length: 10 })
-  @Matches(/^tt\d+$/)
+  @Matches(/^tt\d+$/u)
   @IsOptional()
-  imdbId?: string | null;
+  public imdbId?: string | null;
 
   @Field(() => String, { nullable: true })
   @Property()
-  posterPath?: string | null;
+  public posterPath?: string | null;
 
   @Field(() => Date)
   @Index()
   @Property()
-  createdAt: Opt<Date> = DateTime.utc().toJSDate();
+  public createdAt: Opt<Date> = DateTime.utc().toJSDate();
 
   @Field(() => Date, { nullable: true })
   @Property({ onUpdate: () => DateTime.utc().toJSDate() })
-  updatedAt?: Opt<Date> | null;
+  public updatedAt?: Opt<Date> | null;
 
   @Field(() => Date)
   @Property()
-  indexedAt!: Date;
+  public indexedAt!: Date;
 
   @Field(() => Date, { nullable: true })
   @Property()
-  scrapedAt?: Date | null;
+  public scrapedAt?: Date | null;
 
   @Field(() => Number)
   @Property({ default: 0 })
-  scrapedTimes!: Opt<number>;
+  public scrapedTimes!: Opt<number>;
 
   @Field(() => JSONObjectResolver, { nullable: true })
   @Property({ nullable: true, type: "json" })
-  aliases?: Record<string, string[]> | null;
+  public aliases?: Record<string, string[]> | null;
 
   @Field(() => Boolean)
   @Property({ persist: false, hidden: true })
-  get isAnime(): Opt<Hidden<boolean>> {
+  public get isAnime(): Opt<Hidden<boolean>> {
     return (
       this.language !== "en" &&
       ["animation", "anime"].every((genre) =>
-        this.genres?.map((g) => g.toLowerCase()).includes(genre),
+        this.genres
+          ?.map((genreName) => genreName.toLowerCase())
+          .includes(genre),
       )
     );
   }
 
   @Field(() => String, { nullable: true })
   @Property()
-  network?: string | null;
+  public network?: string | null;
 
   @Field(() => String, { nullable: true })
   @Property()
-  country?: string | null;
+  public country?: string | null;
 
   @Field(() => String, { nullable: true })
   @Property()
-  language?: string | null;
+  public language?: string | null;
 
   @Field(() => Date, { nullable: true })
   @Property()
-  releaseDate!: Date | null;
+  public releaseDate!: Date | null;
 
   @Field(() => Number, { nullable: true })
   @Property()
-  year?: number | null;
+  public year?: number | null;
 
   @Field(() => [String], { nullable: true })
   @Property()
-  genres?: string[] | null;
+  public genres?: string[] | null;
 
   @Field(() => Number, { nullable: true })
   @Property()
-  rating?: number | null;
+  public rating?: number | null;
 
   @Enum(() => MediaItemContentRating.enum)
-  contentRating?: MediaItemContentRating | null;
+  public contentRating?: MediaItemContentRating | null;
 
   @Field(() => MediaItemState.enum)
   @Enum({
     default: MediaItemState.enum.indexed,
     items: () => MediaItemState.enum,
   })
-  state!: MediaItemState;
+  public state!: MediaItemState;
 
   @Field(() => Number)
   @Property()
-  failedScrapeAttempts: Opt<number> = 0;
+  public failedScrapeAttempts: Opt<number> = 0;
 
   @Field(() => [FileSystemEntry])
   @OneToMany({
@@ -146,33 +145,33 @@ export abstract class MediaItem {
     mappedBy: "mediaItem",
     orphanRemoval: true,
   })
-  filesystemEntries = new Collection<FileSystemEntry>(this);
+  public filesystemEntries = new Collection<FileSystemEntry>(this);
 
   @Field(() => [SubtitleEntry])
   @ManyToMany()
-  subtitles = new Collection<SubtitleEntry>(this);
+  public subtitles = new Collection<SubtitleEntry>(this);
 
   @Field(() => Stream, { nullable: true })
   @ManyToOne()
-  activeStream?: Ref<Stream> | null;
+  public activeStream?: Ref<Stream> | null;
 
   @Field(() => [Stream])
   @ManyToMany(() => Stream)
-  streams = new Collection<Stream>(this);
+  public streams = new Collection<Stream>(this);
 
   @Field(() => [BlacklistedStream])
   @OneToMany(() => BlacklistedStream, "mediaItem")
-  blacklistedStreams = new Collection<BlacklistedStream>(this);
+  public blacklistedStreams = new Collection<BlacklistedStream>(this);
 
   @Field(() => String)
   @Enum(() => MediaItemType.enum)
-  type!: MediaItemType;
+  public type!: MediaItemType;
 
   @ManyToOne(() => ItemRequest)
-  itemRequest!: Ref<ItemRequest>;
+  public itemRequest!: Ref<ItemRequest>;
 
   @Property()
-  isRequested!: boolean;
+  public isRequested!: boolean;
 
   /**
    * Determines if the media item is considered to be released based on its release date.
@@ -180,7 +179,7 @@ export abstract class MediaItem {
    * Returns true if the release date is in the past, false if it's in the future or not available.
    */
   @Property({ persist: false, getter: true })
-  get isReleased(): Opt<boolean> {
+  public get isReleased(): Opt<boolean> {
     return this.releaseDate
       ? DateTime.fromJSDate(this.releaseDate) <= DateTime.utc()
       : false;
@@ -191,7 +190,7 @@ export abstract class MediaItem {
    *
    * Used after blacklisting a stream to indicate a fresh processing attempt can be started.
    */
-  reset() {
+  public reset() {
     this.activeStream = null;
     this.failedScrapeAttempts = 0;
     this.scrapedTimes = 0;
@@ -206,7 +205,7 @@ export abstract class MediaItem {
    *
    * @example "Inception (2010) {tmdb-27205}"
    */
-  abstract getPrettyName(): Promisable<string>;
+  public abstract getPrettyName(): Promisable<string>;
 
   /**
    * Gets all media entries associated with this media item.
@@ -220,7 +219,7 @@ export abstract class MediaItem {
    * @see {@link MediaEntry}
    * @returns An array of associated MediaEntries, which may be empty if none exist.
    */
-  abstract getMediaEntries(): Promise<MediaEntry[]>;
+  public abstract getMediaEntries(): Promise<MediaEntry[]>;
 
   /**
    * Returns the minimum amount of files that must be returned from a torrent
@@ -228,10 +227,10 @@ export abstract class MediaItem {
    *
    * @returns A positive integer representing the expected file count for this media item.
    */
-  abstract getExpectedFileCount(): Promisable<number>;
+  public abstract getExpectedFileCount(): Promisable<number>;
 
   /**
    * @returns Any incomplete immediate children of this media item.
    */
-  abstract getIncompleteItems(): Promisable<MediaItem[]>;
+  public abstract getIncompleteItems(): Promisable<MediaItem[]>;
 }

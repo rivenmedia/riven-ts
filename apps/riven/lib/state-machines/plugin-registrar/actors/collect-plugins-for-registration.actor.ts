@@ -1,4 +1,4 @@
-import { type RivenPlugin, RivenPluginPackage } from "@repo/util-plugin-sdk";
+import { RivenPluginPackage } from "@repo/util-plugin-sdk";
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import chalk from "chalk";
@@ -6,13 +6,12 @@ import { constantCase } from "es-toolkit";
 import { fromPromise } from "xstate";
 import z from "zod";
 
-import {
-  type CorePluginName,
-  CorePlugins,
-} from "../../../schemas/core-plugins.schema.ts";
+import { CorePlugins } from "../../../schemas/core-plugins.schema.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
 
+import type { CorePluginName } from "../../../schemas/core-plugins.schema.ts";
+import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { PackageJson } from "type-fest";
 
 export interface ParsedPlugins {
@@ -23,7 +22,7 @@ export interface ParsedPlugins {
   pluginSettings: PluginSettings;
 }
 
-const PLUGIN_NAME_PATTERN = /^@repo\/plugin-(?<pluginName>[a-z0-9-]+)$/;
+const PLUGIN_NAME_PATTERN = /^@repo\/plugin-(?<pluginName>[a-z0-9-]+)$/u;
 
 export const collectPluginsForRegistration = fromPromise(async () => {
   const { default: packageJson } = (await import(
@@ -52,7 +51,7 @@ export const collectPluginsForRegistration = fromPromise(async () => {
     validPlugins: [],
   };
 
-  const permanentlyEnabledPlugins: CorePluginName[] = ["tmdb", "tvdb"];
+  const permanentlyEnabledPlugins = new Set<CorePluginName>(["tmdb", "tvdb"]);
 
   for (const pluginName of pluginNames) {
     const match = PLUGIN_NAME_PATTERN.exec(pluginName);
@@ -69,7 +68,7 @@ export const collectPluginsForRegistration = fromPromise(async () => {
     }
 
     if (
-      !permanentlyEnabledPlugins.includes(validatedPluginName.data) &&
+      !permanentlyEnabledPlugins.has(validatedPluginName.data) &&
       !settings.enabledPlugins.includes(validatedPluginName.data)
     ) {
       logger.info(
@@ -93,13 +92,13 @@ export const collectPluginsForRegistration = fromPromise(async () => {
         continue;
       }
 
-      const { name: pluginSymbol } = validationResult.data.default;
+      const { name: pluginSymbol } = validationResult.data.plugin;
 
       parsedPlugins.pluginConfigPrefixMap.set(
         pluginSymbol,
         constantCase(pluginName),
       );
-      parsedPlugins.validPlugins.push(validationResult.data.default);
+      parsedPlugins.validPlugins.push(validationResult.data.plugin);
     } catch (error) {
       logger.error(`Unable to resolve plugin ${pluginName}:`, { err: error });
 

@@ -10,13 +10,13 @@ const deadStreamUrl = new URL("https://example.com/dead-stream.mkv");
 const aliveStreamUrl = new URL("https://example.com/alive-stream.mkv");
 
 class DeadStreamLinkScenario extends MockScenario {
-  override scenarioName = "dead-stream-link" as const;
+  public override scenarioName = "dead-stream-link" as const;
 
-  override environmentData = {
+  public override environmentData = {
     RIVEN_SETTING__enabledPlugins: ["stremthru"],
   };
 
-  override handlers = [
+  public override handlers = [
     http.head(deadStreamUrl.toString(), () =>
       HttpResponse.json(undefined, { status: 400 }),
     ),
@@ -32,9 +32,9 @@ class DeadStreamLinkScenario extends MockScenario {
     ),
   ] as const;
 
-  override readonly seeder = CompletedMovieSeeder;
+  public override readonly seeder = CompletedMovieSeeder;
 
-  override async seed(em: EntityManager) {
+  public override async seed(em: EntityManager) {
     const seederInstance = new this.seeder();
 
     seederInstance.context.mediaEntries = [

@@ -1,7 +1,8 @@
 import { docs } from "collections/server";
-import { type PageData, loader } from "fumadocs-core/source";
+import { loader } from "fumadocs-core/source";
 import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
 
+import type { PageData } from "fumadocs-core/source";
 import type { DocsCollectionEntry } from "fumadocs-mdx/runtime/server";
 
 type WorkspaceEntry = DocsCollectionEntry<
@@ -28,11 +29,13 @@ const workspaceImports = [
 
 const workspaces = await Promise.all(
   workspaceImports.map(async (workspace) => {
-    const { docs } = (await import(`../.source/${workspace}/server`)) as {
+    const { docs: workspaceDocs } = (await import(
+      `../.source/${workspace}/server`
+    )) as {
       docs: WorkspaceEntry;
     };
 
-    return [workspace, docs.toFumadocsSource()];
+    return [workspace, workspaceDocs.toFumadocsSource()];
   }),
 );
 

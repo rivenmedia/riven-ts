@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { parse } from "../parser/parse.ts";
 import { getLevRatio, titleMatch } from "./lev.ts";
 
-describe("titleMatch", () => {
+describe(titleMatch, () => {
   it.for([
     ["The Simpsons", "The Simpsons", true],
     ["The Simpsons", "The Simpsons Movie", false],
@@ -17,7 +17,7 @@ describe("titleMatch", () => {
   });
 });
 
-describe("getLevRatio", () => {
+describe(getLevRatio, () => {
   it.for([
     ["The Simpsons", "The Simpsons", 1],
     ["The Simpsons", "The Simpsons Movie", 0],
@@ -31,13 +31,23 @@ describe("getLevRatio", () => {
   });
 
   it("throws on empty titles", () => {
-    expect(() => getLevRatio("", "foo", 0.85, {})).toThrow();
-    expect(() => getLevRatio("foo", "", 0.85, {})).toThrow();
+    expect(() => getLevRatio("", "foo", 0.85, {})).toThrow(
+      /both titles must be provided/iu,
+    );
+
+    expect(() => getLevRatio("foo", "", 0.85, {})).toThrow(
+      /both titles must be provided/iu,
+    );
   });
 
   it("throws on invalid threshold", () => {
-    expect(() => getLevRatio("a", "b", -1, {})).toThrow();
-    expect(() => getLevRatio("a", "b", 2, {})).toThrow();
+    expect(() => getLevRatio("a", "b", -1, {})).toThrow(
+      /the threshold must be a number between 0 and 1/iu,
+    );
+
+    expect(() => getLevRatio("a", "b", 2, {})).toThrow(
+      /the threshold must be a number between 0 and 1/iu,
+    );
   });
 });
 
@@ -74,7 +84,7 @@ describe("getLevRatio with aliases", () => {
   });
 });
 
-describe("Integration with parse", () => {
+describe("integration with parse", () => {
   it.for([
     ["The Walking Dead S05E03 720p HDTV x264-ASAP", "The Walking Dead", true],
     [

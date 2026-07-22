@@ -1,14 +1,9 @@
 import { dataSourceContext } from "@repo/util-plugin-sdk/datasource-context";
-import {
-  type RivenEvent,
-  RivenEventHandler,
-} from "@repo/util-plugin-sdk/events";
 
-import * as Sentry from "@sentry/node";
-import { type Processor, Worker, type WorkerOptions } from "bullmq";
+import { captureException } from "@sentry/node";
+import { Worker } from "bullmq";
 import { AbortError } from "es-toolkit";
 import assert from "node:assert";
-import z from "zod";
 
 import { withLogContext } from "../../utilities/logger/log-context.ts";
 import { logger } from "../../utilities/logger/logger.ts";
@@ -17,6 +12,12 @@ import { telemetry } from "../../utilities/telemetry.ts";
 import { createQueue } from "./create-queue.ts";
 
 import type { ParamsFor } from "@repo/util-plugin-sdk";
+import type {
+  RivenEventHandler,
+  RivenEvent,
+} from "@repo/util-plugin-sdk/events";
+import type { Processor, WorkerOptions } from "bullmq";
+import type z from "zod";
 
 Worker.setMaxListeners(200);
 
@@ -38,8 +39,8 @@ export function createPluginWorker<
 
   const worker = new Worker(
     queueName,
-    (job, token, signal) => {
-      return new Promise((resolve, reject) => {
+    async (job, token, signal) =>
+      new Promise((resolve, reject) => {
         signal?.addEventListener("abort", () => {
           reject(new AbortError(`${job.name} aborted`));
         });
@@ -54,14 +55,14 @@ export function createPluginWorker<
           },
           async () => {
             try {
-              assert(job.token, "Job token is not set");
+              assert.ok(job.token, "Job token is not set");
 
               return await dataSourceContext.run(
                 { job, token: job.token },
-                () => processor(job as never, token, signal),
+                async () => processor(job as never, token, signal),
               );
             } catch (error) {
-              Sentry.captureException(error);
+              captureException(error);
 
               throw error;
             }
@@ -69,8 +70,7 @@ export function createPluginWorker<
         )
           .then(resolve)
           .catch(reject);
-      });
-    },
+      }),
     {
       ...workerOptions,
       connection: {

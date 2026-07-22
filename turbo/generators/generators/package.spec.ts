@@ -1,3 +1,5 @@
+// oxlint-disable node/global-require
+
 import { execa } from "execa";
 import { readdirSync } from "node:fs";
 import { it as baseIt, expect } from "vitest";
@@ -27,7 +29,7 @@ const it = baseIt
   );
 
 it.beforeAll(async ({ startDiff, packageName, packageType }) => {
-  if (startDiff.length) {
+  if (startDiff.length > 0) {
     expect.fail(
       "Uncommitted changes detected. Please clean your working directory before running this test.",
     );
@@ -59,7 +61,7 @@ it.concurrent("generates a package", ({ packageDir }) => {
   expect(contents).toContain("package.json");
 });
 
-it.concurrent("generates a package with the correct name in package.json some readlly long string string string string string string string string string string", ({
+it.concurrent("generates a package with the correct name in package.json", ({
   packageFullName,
   packageDir,
 }) => {
@@ -74,6 +76,7 @@ it.concurrent.for(["test", "lint", "build"] as const)(
   async (command, { packageFullName }) => {
     await expect(
       execa`pnpm --filter ${packageFullName} ${command}`,
+      // oxlint-disable-next-line vitest/prefer-strict-boolean-matchers
     ).resolves.toBeTruthy();
   },
 );

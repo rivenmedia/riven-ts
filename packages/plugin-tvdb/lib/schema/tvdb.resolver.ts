@@ -8,7 +8,7 @@ import { pluginConfig } from "../tvdb-plugin.config.ts";
 @Resolver()
 export class TvdbResolver {
   @Query(() => Boolean)
-  tvdbIsValid(
+  public async tvdbIsValid(
     @PluginDataSource(pluginConfig.name, TvdbAPI) api: TvdbAPI,
   ): Promise<boolean> {
     return api.validate();

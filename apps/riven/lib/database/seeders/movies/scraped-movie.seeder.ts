@@ -2,22 +2,18 @@ import { DateTime } from "luxon";
 import assert from "node:assert";
 
 import { BaseSeeder } from "../base.seeder.ts";
-import {
-  StreamsSeeder,
-  type StreamsSeederContext,
-} from "../streams/streams.seeder.ts";
-import {
-  IndexedMovieSeeder,
-  type IndexedMovieSeederContext,
-} from "./indexed-movie.seeder.ts";
+import { StreamsSeeder } from "../streams/streams.seeder.ts";
+import { IndexedMovieSeeder } from "./indexed-movie.seeder.ts";
 
+import type { StreamsSeederContext } from "../streams/streams.seeder.ts";
+import type { IndexedMovieSeederContext } from "./indexed-movie.seeder.ts";
 import type { EntityManager } from "@mikro-orm/core";
 
 export interface ScrapedMovieSeederContext
   extends IndexedMovieSeederContext, StreamsSeederContext {}
 
 export class ScrapedMovieSeeder extends BaseSeeder<ScrapedMovieSeederContext> {
-  async run(
+  public async run(
     em: EntityManager,
     context: ScrapedMovieSeederContext = this.context,
   ) {
@@ -33,7 +29,7 @@ export class ScrapedMovieSeeder extends BaseSeeder<ScrapedMovieSeederContext> {
 
     await em.flush();
 
-    assert(
+    assert.ok(
       context.movie.state === "scraped",
       `Expected movie state to be "scraped", got "${context.movie.state}"`,
     );

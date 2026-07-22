@@ -8,6 +8,6 @@ export const rankingConfig = await loadRankingConfig(
 );
 
 export const rtnInstance = new RTN(
-  rankingConfig.settings,
   rankingConfig.rankingModel,
+  rankingConfig.settings,
 );

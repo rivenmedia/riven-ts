@@ -1,3 +1,5 @@
+// oxlint-disable node/no-sync
+
 import { readdirSync } from "node:fs";
 
 import type { UserConfig } from "@commitlint/types";
@@ -40,7 +42,7 @@ function getScopes() {
     }
   }
 
-  return Array.from(scopes).sort();
+  return [...scopes].toSorted();
 }
 
 export default {

@@ -8,7 +8,7 @@ import { CometAPI } from "../datasource/comet.datasource.ts";
 @Resolver()
 export class CometResolver {
   @Query(() => Boolean)
-  cometIsValid(
+  public async cometIsValid(
     @PluginDataSource(pluginConfig.name, CometAPI) api: CometAPI,
   ): Promise<boolean> {
     return api.validate();

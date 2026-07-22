@@ -1,4 +1,4 @@
-import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { getListItemsByName200Schema } from "../__generated__/zod/getListItemsByNameSchema.ts";
 import { MdbListName } from "../schemas/mdblist-name.schema.ts";
@@ -6,13 +6,16 @@ import { MdbListName } from "../schemas/mdblist-name.schema.ts";
 import type { MdbListSettings } from "../mdblist-settings.schema.ts";
 import type { MdbListExternalIds } from "../schema/types/mdblist-external-ids.type.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
-class MdblistAPIError extends Error {}
+class MdblistAPIError extends Error {
+  public override name = "MdblistAPIError";
+}
 
 export class MdblistAPI extends BaseDataSource<MdbListSettings> {
-  override baseURL = "https://api.mdblist.com/";
-  override serviceName = "MDBList";
+  public override baseURL = "https://api.mdblist.com/";
+  public override serviceName = "MDBList";
 
   protected override readonly rateLimiterOptions: RateLimiterOptions = {
     max: 50,
@@ -35,7 +38,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
     requestOpts.params.append("apikey", this.settings.apiKey);
   }
 
-  override async validate() {
+  public override async validate() {
     try {
       await this.get("user");
 
@@ -47,23 +50,23 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
     }
   }
 
-  async getListItems(
+  public async getListItems(
     contentLists: Set<string>,
   ): Promise<Pick<ContentServiceRequestedResponse, "movies" | "shows">> {
-    if (!contentLists.size) {
+    if (contentLists.size === 0) {
       return {
         movies: [],
         shows: [],
       };
     }
 
-    contentLists.forEach((name) => {
+    for (const name of contentLists) {
       if (!MdbListName.safeParse(name).success) {
         throw new MdblistAPIError(
           `${name} is not a valid MDBList name, format has to be "<string>/<string>"`,
         );
       }
-    });
+    }
 
     const movieIdsMap = new Map<number, MdbListExternalIds>();
     const showIdsMap = new Map<number, MdbListExternalIds>();
@@ -86,7 +89,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
         if (parsed.movies) {
           for (const item of parsed.movies) {
             if (item.id) {
-              pageItemCount++;
+              pageItemCount += 1;
 
               if (!this.#seenMovieIds.has(item.id)) {
                 movieIdsMap.set(item.id, {
@@ -103,7 +106,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
         if (parsed.shows) {
           for (const item of parsed.shows) {
             if (item.id) {
-              pageItemCount++;
+              pageItemCount += 1;
 
               if (!this.#seenShowIds.has(item.id)) {
                 showIdsMap.set(item.id, {
@@ -116,7 +119,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
         }
 
         offset += pageItemCount;
-        hasMoreItems = response.response.headers.get("X-Has-More") == "true";
+        hasMoreItems = response.response.headers.get("X-Has-More") === "true";
       }
     }
 
@@ -128,8 +131,8 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
     }
 
     return {
-      movies: Array.from(movieIdsMap.values()),
-      shows: Array.from(showIdsMap.values()),
+      movies: [...movieIdsMap.values()],
+      shows: [...showIdsMap.values()],
     };
   }
 }

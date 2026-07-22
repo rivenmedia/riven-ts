@@ -34,7 +34,7 @@ it("returns the status code from the downstream response for errors", async ({
       logger: {} as never,
       settings,
     }),
-  ).resolves.toEqual({
+  ).resolves.toStrictEqual({
     success: false,
     statusCode: 451,
   });
@@ -74,7 +74,7 @@ it("returns the stream link when the response is successful", async ({
       logger: {} as never,
       settings,
     }),
-  ).resolves.toEqual({
+  ).resolves.toStrictEqual({
     success: true,
     data: {
       link: streamLink,
@@ -118,7 +118,7 @@ it(`returns a ${StatusCodes.GONE.toString()} status code when the entry's provid
       logger: {} as never,
       settings,
     }),
-  ).resolves.toEqual({
+  ).resolves.toStrictEqual({
     success: false,
     statusCode: StatusCodes.GONE,
   });

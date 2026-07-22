@@ -1,84 +1,74 @@
 import { defineConfig } from "oxlint";
 
-import { jsFiles, tsFiles } from "../internal/file-types.ts";
+import {
+  jsFiles,
+  jsxFiles,
+  testFiles,
+  tsFiles,
+} from "../internal/file-types.ts";
 
 export const oxlintPluginEslintConfig = defineConfig({
   overrides: [
     {
       files: [tsFiles, jsFiles],
       rules: {
-        // eqeqeq: ["error", "smart"],
-        // "id-length": [
-        //   "warn",
-        //   {
-        //     exceptions: ["a", "b", "z", "_"],
-        //     checkGeneric: false,
-        //   },
-        // ],
+        eqeqeq: ["error", "smart"],
+        "id-length": [
+          "error",
+          {
+            exceptions: [
+              "a", // Used in sort callbacks
+              "b", // Used in sort callbacks
+              "i", // Used in loops
+              "z", // Allow zod import
+              "_", // Used to denote an unused variable
+            ],
+            checkGeneric: false,
+          },
+        ],
         "sort-imports": "off", // Handled by oxfmt
+        "sort-keys": "off", // This can cause issues in TS and isn't completely auto-fixable
         "no-inline-comments": "off",
         "new-cap": "off", // Incompatible with class decorators styling
         "no-ternary": "off",
-        // "capitalized-comments": [
-        //   "warn",
-        //   "always",
-        //   { ignoreConsecutiveComments: true, ignorePattern: "^empty$" },
-        // ],
-        "no-eq-null": "off",
+        "capitalized-comments": [
+          "warn",
+          "always",
+          { ignoreConsecutiveComments: true, ignorePattern: "empty" },
+        ],
+        "no-eq-null": "allow", // Allows null checks to also check undefined
         "no-continue": "off",
         "no-void": ["warn", { allowAsStatement: true }],
         "no-await-in-loop": "off",
         "require-await": "off", // Handled by typescript/require-await
-        // "no-underscore-dangle": ["warn", { allow: ["__typename"] }],
+        "no-underscore-dangle": ["warn", { allow: ["__typename"] }],
+        "no-nested-ternary": "allow", // Handled by unicorn/no-nested-ternary
+        "no-console": ["error", { allow: ["debug"] }],
+        "no-plusplus": ["deny", { allowForLoopAfterthoughts: true }],
+        "no-negated-condition": "off", // Handled by unicorn/no-negated-condition
+        "no-warning-comments": "off",
+        "no-undefined": "allow",
+        "default-case": "allow", // Conflicts with typescript/switch-exhaustiveness-check
+        "no-duplicate-imports": ["deny", { allowSeparateTypeImports: true }],
+        "func-style": ["deny", "declaration", { allowArrowFunctions: true }],
+        "class-methods-use-this": "allow",
+        "no-magic-numbers": "allow",
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
-        "no-magic-numbers": "off",
-        "max-lines-per-function": "off",
-        "sort-keys": "off",
-        "max-lines": "off",
-        "max-depth": "off",
-        "max-statements": "off",
-        "func-style": "off",
-        "max-params": "off",
-        "no-undefined": "off",
-        "init-declarations": "off",
-        "object-shorthand": "off",
-        "class-methods-use-this": "off",
-        "preserve-caught-error": "off",
-        "no-useless-rename": "off",
-        "default-case": "off",
         complexity: "off",
-        "require-unicode-regexp": "off",
-        "no-shadow": "off",
-        "no-useless-return": "off",
-        "arrow-body-style": "off",
-        "no-plusplus": "off",
-        "no-bitwise": "off",
-        "func-names": "off",
-        "prefer-arrow-callback": "off",
-        "no-implicit-coercion": "off",
-        "no-negated-condition": "off",
-        "prefer-destructuring": "off",
-        "no-lonely-if": "off",
-        "prefer-named-capture-group": "off",
-        "no-console": "off",
-        "no-use-before-define": "off",
-        "id-length": "off",
-        "capitalized-comments": "off",
         "max-classes-per-file": "off",
-        "prefer-exponentiation-operator": "off",
-        "no-warning-comments": "off",
-        "no-duplicate-imports": "off",
-        "no-nested-ternary": "off",
-        "no-underscore-dangle": "off",
-        curly: "off",
-        "no-inner-declarations": "off",
-        eqeqeq: "off",
-
-        // Type-aware rules that are disabled for now, but will be enabled in the future
-        "prefer-template": "off",
-        "prefer-regex-literals": "off",
-        "default-param-last": "off",
+        "max-depth": "off",
+        "max-lines": "off",
+        "max-lines-per-function": "off",
+        "max-params": "off",
+        "max-statements": "off",
+      },
+    },
+    {
+      files: [...testFiles, jsxFiles],
+      plugins: ["eslint"],
+      rules: {
+        "prefer-named-capture-group": "allow", // Allow looser regex in test assertions and JSX files
       },
     },
   ],

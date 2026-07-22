@@ -15,18 +15,19 @@ import type { ParsedData } from "@repo/util-rank-torrent-name";
 
 export default createSandboxedJobProcessor(
   ParseScrapeResultsSandboxedJob,
-  parseScrapeResultsProcessorSchema.implementAsync(async function ({ job }) {
+  parseScrapeResultsProcessorSchema.implementAsync(async ({ job }) => {
     const children = await job.getChildrenValues();
 
     const childResults = Object.values(children);
 
     // Aggregate results from all scrapers, deduping by hash (which should be consistent across scrapers)
-    const aggregatedResults = childResults.reduce<Record<string, string>>(
-      (acc, scrapeResult) => Object.assign(acc, scrapeResult.results),
-      {},
-    );
+    const aggregatedResults: Record<string, string> = {};
 
-    if (!Object.keys(aggregatedResults).length) {
+    for (const scrapeResult of childResults) {
+      Object.assign(aggregatedResults, scrapeResult.results);
+    }
+
+    if (Object.keys(aggregatedResults).length === 0) {
       return {
         id: job.data.id,
         results: {},

@@ -12,7 +12,7 @@ import {
 
 export default createSandboxedJobProcessor(
   ValidateTorrentFilesSandboxedJob,
-  validateTorrentFilesProcessorSchema.implementAsync(async function ({ job }) {
+  validateTorrentFilesProcessorSchema.implementAsync(async ({ job }) => {
     const [mapItemsToFilesResult] = Object.values(
       await job.getChildrenValues(),
     );

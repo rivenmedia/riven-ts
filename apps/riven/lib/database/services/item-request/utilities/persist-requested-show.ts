@@ -50,7 +50,7 @@ export async function persistRequestedShow(
       ? new Set([...existingItem.seasons, ...item.seasons])
           .values()
           .toArray()
-          .sort()
+          .toSorted((a, b) => a - b)
       : (item.seasons ?? existingItem?.seasons ?? null);
 
   if (existingItem && itemRequest.seasons) {
@@ -92,16 +92,16 @@ export async function persistRequestedShow(
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((error) => {
-        if (Array.isArray(error)) {
-          return error
+      .transform((rawError) => {
+        if (Array.isArray(rawError)) {
+          return rawError
             .map((err) =>
               err.constraints ? Object.values(err.constraints).join("; ") : "",
             )
             .join("; ");
         }
 
-        return error.message;
+        return rawError.message;
       })
       .parse(error);
 

@@ -34,11 +34,15 @@ describe("when the config file does not exist", () => {
   it("creates the file", async ({ tempDir }) => {
     const configPath = path.join(tempDir, "ranking-config.json");
 
-    await expect(stat(configPath)).rejects.toThrow();
+    await expect(stat(configPath)).rejects.toThrow(/ENOENT/iu);
 
     await loadRankingConfig(configPath);
 
-    await expect(stat(configPath)).resolves.toBeTruthy();
+    await expect(stat(configPath)).resolves.toMatchObject(
+      expect.objectContaining({
+        atimeMs: expect.any(Number),
+      }),
+    );
   });
 
   it("writes valid JSON to the created file", async ({ tempDir }) => {
@@ -72,14 +76,14 @@ describe("when the config file exists and is valid", () => {
 
     await writeValidConfigFile(configPath, {
       settings: {
-        exclude: ["\\btest\\b"],
+        exclude: [String.raw`\btest\b`],
         resolutions: { r1080p: false, r720p: false },
       },
     });
 
     const { settings } = await loadRankingConfig(configPath);
 
-    expect(settings.exclude).toEqual(["\\btest\\b"]);
+    expect(settings.exclude).toStrictEqual([String.raw`\btest\b`]);
     expect(settings.resolutions.r1080p).toBe(false);
     expect(settings.resolutions.r720p).toBe(false);
   });
@@ -111,7 +115,7 @@ describe("when the config file exists and is valid", () => {
     const { settings, rankingModel } = await loadRankingConfig(configPath);
 
     expect(settings.resolutions.r1080p).toBe(true);
-    expect(rankingModel.av1).toBe(null);
+    expect(rankingModel.av1).toBeNull();
   });
 });
 
@@ -122,7 +126,7 @@ describe("when the config file contains invalid JSON", () => {
     await writeInvalidConfigFile(configPath, "{ this is not valid json }");
 
     await expect(loadRankingConfig(configPath)).rejects.toThrow(
-      /invalid JSON/i,
+      /invalid JSON/iu,
     );
   });
 
@@ -132,7 +136,7 @@ describe("when the config file contains invalid JSON", () => {
     await writeInvalidConfigFile(configPath, "{bad}");
 
     await expect(loadRankingConfig(configPath)).rejects.toThrow(
-      new RegExp(path.basename(configPath).replace(".", "\\.")),
+      new RegExp(path.basename(configPath).replace(".", String.raw`\.`), "u"),
     );
   });
 });

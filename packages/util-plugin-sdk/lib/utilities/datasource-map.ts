@@ -14,7 +14,7 @@ export class DataSourceMap extends Map<
    *
    * @returns The instance of the requested datasource.
    */
-  override get<T extends DataSourceConstructor>(constructor: T) {
+  public override get<T extends DataSourceConstructor>(constructor: T) {
     const value = super.get(constructor);
 
     if (!value) {

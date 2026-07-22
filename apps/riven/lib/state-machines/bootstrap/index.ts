@@ -1,12 +1,9 @@
 import chalk from "chalk";
 import assert from "node:assert";
-import { type AnyActorRef, assign, setup } from "xstate";
+import { assign, setup } from "xstate";
 
 import { settings } from "../../utilities/settings.ts";
-import {
-  type PluginRegistrarMachineOutput,
-  pluginRegistrarMachine,
-} from "../plugin-registrar/index.ts";
+import { pluginRegistrarMachine } from "../plugin-registrar/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { applyMockScenario } from "./actors/apply-mock-scenario.ts";
 import { clearPreviousInstanceState } from "./actors/clear-previous-instance-state.actor.ts";
@@ -24,10 +21,12 @@ import type {
   ValidPlugin,
   ValidPluginMap,
 } from "../../types/plugins.ts";
+import type { PluginRegistrarMachineOutput } from "../plugin-registrar/index.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";
+import type { AnyActorRef } from "xstate";
 
 export interface BootstrapMachineContext {
   error?: Error;
@@ -105,7 +104,7 @@ export const bootstrapMachine = setup({
       pluginQueues: (_, { pluginQueues }) => pluginQueues,
       pluginWorkers: (_, { pluginWorkers }) => pluginWorkers,
       publishableEvents: (_, { publishableEvents }) => publishableEvents,
-      pluginSettings: (_, { settings }) => settings,
+      pluginSettings: (_, { pluginSettings }) => pluginSettings,
     }),
   },
   actors: {
@@ -119,7 +118,7 @@ export const bootstrapMachine = setup({
   guards: {
     hasInvalidPlugins: ({ context: { invalidPlugins } }) =>
       invalidPlugins.size > 0,
-    hasMockScenario: ({ context: { mockScenario } }) => !!mockScenario,
+    hasMockScenario: ({ context: { mockScenario } }) => Boolean(mockScenario),
   },
 })
   .extend(withLogAction)
@@ -222,7 +221,7 @@ export const bootstrapMachine = setup({
               actions: {
                 type: "log",
                 params: ({ context: { mockScenario } }) => {
-                  assert(mockScenario);
+                  assert.ok(mockScenario);
 
                   return {
                     message: `Database connection initialised. Mock scenario "${mockScenario.scenarioName}" will be applied.`,
@@ -258,7 +257,7 @@ export const bootstrapMachine = setup({
         entry: {
           type: "log",
           params: ({ context: { mockScenario } }) => {
-            assert(mockScenario);
+            assert.ok(mockScenario);
 
             return {
               message: `Applying mock scenario "${mockScenario.scenarioName}"...`,
@@ -269,7 +268,7 @@ export const bootstrapMachine = setup({
           id: "applyMockScenario",
           src: "applyMockScenario",
           input: ({ context: { mockScenario } }) => {
-            assert(mockScenario);
+            assert.ok(mockScenario);
 
             return { mockScenario };
           },
@@ -278,7 +277,7 @@ export const bootstrapMachine = setup({
             actions: {
               type: "log",
               params: ({ context: { mockScenario } }) => {
-                assert(mockScenario);
+                assert.ok(mockScenario);
 
                 return {
                   message: `Mock scenario "${mockScenario.scenarioName}" applied successfully.`,
@@ -350,7 +349,7 @@ export const bootstrapMachine = setup({
                     message: `Plugins registered successfully. ${[
                       ...validPlugins.keys(),
                     ]
-                      .map((k) => chalk.bold(k.description))
+                      .map(({ description }) => chalk.bold(description))
                       .join(", ")}.`,
                   }),
                 },

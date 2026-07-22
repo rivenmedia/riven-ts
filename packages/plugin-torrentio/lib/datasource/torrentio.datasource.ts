@@ -1,12 +1,8 @@
-import {
-  BaseDataSource,
-  type ParamsFor,
-  type RateLimiterOptions,
-  getStremioScrapeConfig,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource, getStremioScrapeConfig } from "@repo/util-plugin-sdk";
 import { z } from "@repo/util-plugin-sdk/validation";
 
 import type { TorrentioSettings } from "../torrentio-settings.schema.ts";
+import type { ParamsFor, RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 const TorrentioScrapeResponse = z.object({
@@ -18,11 +14,13 @@ const TorrentioScrapeResponse = z.object({
   ),
 });
 
-class TorrentioAPIError extends Error {}
+class TorrentioAPIError extends Error {
+  public override name = "TorrentioAPIError";
+}
 
 export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
-  override baseURL = "http://torrentio.strem.fun/";
-  override serviceName = "Torrent.io";
+  public override baseURL = "http://torrentio.strem.fun/";
+  public override serviceName = "Torrent.io";
 
   get #filter() {
     return this.settings.filter;
@@ -33,7 +31,7 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
     duration: 60 * 1000,
   };
 
-  override async validate() {
+  public override async validate() {
     try {
       // Implement your own validation logic here
       await this.get("validate");
@@ -44,7 +42,7 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
     }
   }
 
-  async scrape({
+  public async scrape({
     item,
   }: ParamsFor<MediaItemScrapeRequestedEvent>): Promise<
     Record<string, string>
@@ -65,7 +63,7 @@ export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
 
       const parsed = TorrentioScrapeResponse.parse(response);
 
-      if (!parsed.streams.length) {
+      if (parsed.streams.length === 0) {
         this.logger.info(
           `No streams found for item ${item.fullTitle} (IMDB: ${item.imdbId})`,
         );

@@ -35,9 +35,7 @@ const it = baseIt
   })
   .extend("infoHash", () => faker.git.commitSha());
 
-it.beforeAll(({ gqlServer: _gqlServer }) => {
-  return;
-});
+it.beforeAll(({ gqlServer: _gqlServer }) => undefined);
 
 it("does not throw for movie torrents if the item is a movie", async ({
   indexedMovieContext: { indexedMovie },
@@ -270,7 +268,7 @@ it("does not throw for torrents that have no seasons, but the correct absolute e
   indexedShowContext: { indexedShow },
   infoHash,
 }) => {
-  const season = indexedShow.seasons[2];
+  const [, , season] = indexedShow.seasons;
 
   expect.assert(season);
 
@@ -287,7 +285,7 @@ it("throws for torrents that have no seasons and do not have the correct absolut
   indexedShowContext: { indexedShow },
   infoHash,
 }) => {
-  const season = indexedShow.seasons[2];
+  const [, , season] = indexedShow.seasons;
 
   expect.assert(season);
 
@@ -316,7 +314,7 @@ it("throws for torrents with incorrect season number for season items", async ({
 
   const parsedData = parse(rawTitle);
 
-  await expect(() =>
+  await expect(async () =>
     validateTorrent(season.id, parsedData, infoHash),
   ).rejects.toThrow(
     new SkippedTorrentError(

@@ -39,15 +39,15 @@ export const getShowsDirectoryEntries = async (
     },
   });
 
-  const names = new Set<string>();
+  const pathNames = new Set<string>();
 
   for (const entry of entries) {
     const part = extractPart(entry, tvdbId, season);
 
     if (part) {
-      names.add(part);
+      pathNames.add(part);
     }
   }
 
-  return Array.from(names);
+  return [...pathNames];
 };

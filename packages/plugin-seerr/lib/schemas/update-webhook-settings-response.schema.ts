@@ -5,12 +5,14 @@ import { webhookSettingsSchema } from "../__generated__/zod/webhookSettingsSchem
 export const UpdateWebhookSettingsResponse = webhookSettingsSchema.extend({
   options: webhookSettingsSchema.shape.options.unwrap().extend({
     jsonPayload: z.base64().transform((val) => {
-      const decoded = Buffer.from(val, "base64").toString("utf-8");
+      const decoded = Buffer.from(val, "base64").toString("utf8");
 
       try {
         return JSON.parse(decoded) as Record<string, never>;
-      } catch (e) {
-        throw new Error("Failed to parse jsonPayload as JSON", { cause: e });
+      } catch (error) {
+        throw new Error("Failed to parse jsonPayload as JSON", {
+          cause: error,
+        });
       }
     }),
   }),

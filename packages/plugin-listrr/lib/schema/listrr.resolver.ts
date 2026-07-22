@@ -11,7 +11,7 @@ import { ListIdsArguments } from "./arguments/list-ids.arguments.ts";
 @Resolver()
 export class ListrrResolver {
   @Query(() => Boolean)
-  listrrIsValid(
+  public async listrrIsValid(
     @PluginDataSource(pluginConfig.name, ListrrAPI) api: ListrrAPI,
   ): Promise<boolean> {
     return api.validate();
@@ -19,8 +19,8 @@ export class ListrrResolver {
 
   @CacheControl({ maxAge: 300 })
   @Query(() => [ExternalIds])
-  listrrMovies(
-    @Args() { listIds }: ListIdsArguments,
+  public async listrrMovies(
+    @Args(() => ListIdsArguments) { listIds }: ListIdsArguments,
     @PluginDataSource(pluginConfig.name, ListrrAPI) api: ListrrAPI,
   ): Promise<ExternalIds[]> {
     return api.getMovies(new Set<string>(listIds));
@@ -28,8 +28,8 @@ export class ListrrResolver {
 
   @CacheControl({ maxAge: 300 })
   @Query(() => [ExternalIds])
-  listrrShows(
-    @Args() { listIds }: ListIdsArguments,
+  public async listrrShows(
+    @Args(() => ListIdsArguments) { listIds }: ListIdsArguments,
     @PluginDataSource(pluginConfig.name, ListrrAPI) api: ListrrAPI,
   ): Promise<ExternalIds[]> {
     return api.getShows(new Set<string>(listIds));
