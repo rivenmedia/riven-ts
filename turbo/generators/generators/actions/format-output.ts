@@ -4,7 +4,7 @@ export const formatOutputCode = async (files: string[]) => {
   const { exitCode } = await $`pnpm oxfmt --write ${files.join(" ")}`;
 
   if (exitCode && exitCode !== 0) {
-    throw new Error(`Oxfmt process exited with code ${exitCode}`);
+    throw new Error(`Oxfmt process exited with code ${exitCode.toString()}`);
   }
 
   return "Oxfmt formatting complete.";

@@ -25,6 +25,28 @@ export const oxlintPluginTypescriptConfig = defineConfig({
         "typescript/consistent-return": "allow", // TypeScript's `noImplicitReturns` compiler option already enforces a better version of this rule
         "typescript/no-unsafe-type-assertion": "allow", // This is incompatible with XState's method of inferring types (e.g. {} as Context)
         "typescript/prefer-readonly-parameter-types": "off", // This rule just plays havoc everywhere and seems to expect all external dependencies to conform to it...
+        "typescript/return-await": ["deny", "error-handling-correctness-only"],
+        "typescript/restrict-plus-operands": [
+          "error",
+          {
+            allowAny: false,
+            allowBoolean: false,
+            allowNullish: false,
+            allowNumberAndString: false,
+            allowRegExp: false,
+          },
+        ],
+        "typescript/restrict-template-expressions": [
+          "deny",
+          {
+            allowAny: false,
+            allowBoolean: false,
+            allowNever: false,
+            allowNullish: false,
+            allowNumber: false,
+            allowRegExp: false,
+          },
+        ],
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "typescript/strict-boolean-expressions": "off",

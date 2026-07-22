@@ -21,7 +21,9 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
         type: "confirm",
         name: "confirm",
         message: (data) => {
-          const pluginName = plop.getHelper("kebabCase")(data.pluginName);
+          const pluginName: string = plop.getHelper("kebabCase")(
+            data.pluginName,
+          );
           const packageIdentifier = `@repo/plugin-${pluginName}`;
           const packagePath = `packages/plugin-${pluginName}`;
 
@@ -65,7 +67,7 @@ export const createPluginGenerator = (plop: PlopTypes.NodePlopAPI) =>
           return "Plugin creation cancelled.";
         }
 
-        const pluginName = plop.getHelper("kebabCase")(
+        const pluginName: string = plop.getHelper("kebabCase")(
           (answers as PluginAnswers).pluginName,
         );
 

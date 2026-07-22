@@ -23,12 +23,12 @@ export const installDependenciesToPackages = async (
     "add",
     ...args[dependencyType],
     ...Object.entries(dependencies).map(
-      ([name, version]) => `${name}@${version}`,
+      ([name, version]) => `${name}@${version ?? ""}`,
     ),
   ]);
 
   if (exitCode && exitCode !== 0) {
-    throw new Error(`Failed to add dependencies: ${exitCode}`);
+    throw new Error(`Failed to add dependencies: ${exitCode.toString()}`);
   }
 
   return installDependenciesAction();
