@@ -269,10 +269,19 @@ export const it = testBase
 
     return buildMockServer<ApolloServerContext>(resolvers);
   })
+  .extend("gqlContext", { scope: "file" }, ({ services, orm }) => ({
+    [CoreKey]: {
+      em: orm.em.fork(),
+      services,
+    },
+    logger: {} as never,
+    sendEvent: vi.fn<MainRunnerMachineIntake>(),
+    plugins: {},
+  }))
   .extend(
     "gqlServer",
     { scope: "file" },
-    async ({ apolloServerInstance, orm, services }, { onCleanup }) => {
+    async ({ apolloServerInstance, gqlContext }, { onCleanup }) => {
       const { initApolloClient } = await import("../graphql/apollo-client.ts");
       const { startStandaloneServer } =
         await import("@apollo/server/standalone");
@@ -280,16 +289,7 @@ export const it = testBase
       const { url } = await startStandaloneServer<ApolloServerContext>(
         apolloServerInstance,
         {
-          context: async () =>
-            Promise.resolve({
-              [CoreKey]: {
-                em: orm.em.fork(),
-                services,
-              },
-              logger: {} as never,
-              sendEvent: vi.fn<MainRunnerMachineIntake>(),
-              plugins: {},
-            }),
+          context: async () => Promise.resolve(gqlContext),
           listen: { port: 0 },
         },
       );

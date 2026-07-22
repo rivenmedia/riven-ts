@@ -80,7 +80,9 @@ export class MediaItemService extends BaseService {
       );
     }
 
-    this.em.remove(target);
+    target.reset();
+
+    this.em.persist(target).remove(target);
 
     return Promise.resolve();
   }

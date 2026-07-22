@@ -1,4 +1,4 @@
-import { Collection, OptionalProps } from "@mikro-orm/core";
+import { Cascade, Collection, OptionalProps } from "@mikro-orm/core";
 import {
   Entity,
   Enum,
@@ -143,12 +143,17 @@ export abstract class MediaItem {
   @OneToMany({
     entity: () => FileSystemEntry,
     mappedBy: "mediaItem",
+    cascade: [Cascade.PERSIST, Cascade.REMOVE],
     orphanRemoval: true,
   })
   public filesystemEntries = new Collection<FileSystemEntry>(this);
 
   @Field(() => [SubtitleEntry])
-  @ManyToMany()
+  @OneToMany({
+    entity: () => SubtitleEntry,
+    mappedBy: "mediaItem",
+    where: { type: "subtitle" },
+  })
   public subtitles = new Collection<SubtitleEntry>(this);
 
   @Field(() => Stream, { nullable: true })
@@ -156,7 +161,11 @@ export abstract class MediaItem {
   public activeStream?: Ref<Stream> | null;
 
   @Field(() => [Stream])
-  @ManyToMany(() => Stream)
+  @ManyToMany({
+    entity: () => Stream,
+    inversedBy: "parents",
+    cascade: [Cascade.PERSIST, Cascade.REMOVE],
+  })
   public streams = new Collection<Stream>(this);
 
   @Field(() => [BlacklistedStream])
@@ -195,9 +204,8 @@ export abstract class MediaItem {
     this.failedScrapeAttempts = 0;
     this.scrapedTimes = 0;
     this.scrapedAt = null;
-    this.filesystemEntries.removeAll();
     this.streams.removeAll();
-    this.subtitles.removeAll();
+    this.filesystemEntries.removeAll();
   }
 
   /**
