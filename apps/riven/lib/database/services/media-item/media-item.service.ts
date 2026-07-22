@@ -1,4 +1,9 @@
-import { MediaItem, Show } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  Episode,
+  MediaItem,
+  Season,
+  Show,
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   CreateRequestContext,
@@ -64,5 +69,19 @@ export class MediaItemService extends BaseService {
   @Transactional()
   public async resetMediaItem(target: MediaItem) {
     return resetMediaItem(this.em, target);
+  }
+
+  @CreateRequestContext()
+  @Transactional()
+  public async removeMediaItem(target: MediaItem) {
+    if (target instanceof Season || target instanceof Episode) {
+      throw new TypeError(
+        'Only top-level media items (Movie, Show) can be removed. Use "resetMediaItem" for child items.',
+      );
+    }
+
+    this.em.remove(target);
+
+    return Promise.resolve();
   }
 }

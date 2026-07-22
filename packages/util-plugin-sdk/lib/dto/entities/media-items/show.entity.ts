@@ -38,7 +38,9 @@ export class Show extends ShowLikeMediaItem {
   public status!: ShowStatus;
 
   @Field(() => [Season])
-  @OneToMany(() => Season, (season) => season.show)
+  @OneToMany(() => Season, (season) => season.show, {
+    orphanRemoval: true,
+  })
   public seasons = new Collection<Season>(this);
 
   @Field(() => [Season])
