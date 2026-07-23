@@ -4,8 +4,17 @@ import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
 import { RedisConnection } from "bullmq";
 import { randomUUID } from "node:crypto";
 import { setEnvironmentData } from "node:worker_threads";
-import { afterAll, beforeAll, beforeEach, expect, vi } from "vitest";
+import {
+  afterAll,
+  aroundEach,
+  beforeAll,
+  beforeEach,
+  expect,
+  vi,
+} from "vitest";
 import z from "zod";
+
+import { withLogContext } from "./lib/utilities/logger/log-context.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { RedisClient } from "bullmq";
@@ -164,6 +173,15 @@ vi.doMock(import("./lib/utilities/settings.ts"), async (importOriginal) => {
 
   return importOriginal();
 });
+
+aroundEach(async (runTest) =>
+  withLogContext(
+    {
+      "riven.log.source": "vitest",
+    },
+    runTest,
+  ),
+);
 
 beforeAll(() => {
   setEnvironmentData("riven.session.id", randomUUID());

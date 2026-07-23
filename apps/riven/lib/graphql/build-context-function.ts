@@ -9,14 +9,16 @@ import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context
 
 export const buildContextFunction: (
   sendEvent: GraphQLContext["sendEvent"],
+  sendExternalEvent: GraphQLContext["sendEvent"],
 ) => ContextFunction<[ExpressContextFunctionArgument], ApolloServerContext> =
-  (sendEvent) => async () =>
+  (sendEvent, sendExternalEvent) => async () =>
     Promise.resolve({
       [CoreKey]: {
         em: database.em.fork(),
         services,
+        sendEvent,
       },
       logger,
-      sendEvent,
+      sendEvent: sendExternalEvent,
       plugins: {},
     });
