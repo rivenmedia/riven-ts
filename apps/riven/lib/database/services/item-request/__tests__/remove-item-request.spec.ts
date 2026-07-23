@@ -10,14 +10,33 @@ import { describe, expect } from "vitest";
 import { it } from "../../../../__tests__/test-context.ts";
 
 describe(`when the media item is a movie`, () => {
+  it("removes the item request", async ({
+    services,
+    completedMovieContext: { completedMovie },
+  }) => {
+    await services.itemRequestService.removeItemRequest(
+      completedMovie.itemRequest,
+    );
+
+    await expect(
+      services.itemRequestService.getItemRequestById(
+        completedMovie.itemRequest.id,
+      ),
+    ).rejects.toThrow(NotFoundError);
+  });
+
   it("removes the movie", async ({
     services,
     completedMovieContext: { completedMovie },
   }) => {
-    await services.mediaItemService.removeMediaItem(completedMovie);
+    await services.itemRequestService.removeItemRequest(
+      completedMovie.itemRequest,
+    );
 
     await expect(
-      services.mediaItemService.getMediaItemById(completedMovie.id),
+      services.itemRequestService.getItemRequestById(
+        completedMovie.itemRequest.id,
+      ),
     ).rejects.toThrow(NotFoundError);
   });
 
@@ -32,7 +51,9 @@ describe(`when the media item is a movie`, () => {
       }),
     ).resolves.toHaveLength(10);
 
-    await services.mediaItemService.removeMediaItem(completedMovie);
+    await services.itemRequestService.removeItemRequest(
+      completedMovie.itemRequest,
+    );
 
     await expect(
       em.find(Stream, {
@@ -52,7 +73,9 @@ describe(`when the media item is a movie`, () => {
       }),
     ).resolves.toHaveLength(1);
 
-    await services.mediaItemService.removeMediaItem(completedMovie);
+    await services.itemRequestService.removeItemRequest(
+      completedMovie.itemRequest,
+    );
 
     await expect(
       em.find(FileSystemEntry, {
@@ -63,6 +86,21 @@ describe(`when the media item is a movie`, () => {
 });
 
 describe(`when the media item is a show`, () => {
+  it("removes the item request", async ({
+    services,
+    completedShowContext: { completedShow },
+  }) => {
+    await services.itemRequestService.removeItemRequest(
+      completedShow.itemRequest,
+    );
+
+    await expect(
+      services.itemRequestService.getItemRequestById(
+        completedShow.itemRequest.id,
+      ),
+    ).rejects.toThrow(NotFoundError);
+  });
+
   it("removes the show and all seasons/episodes", async ({
     em,
     services,
@@ -74,7 +112,9 @@ describe(`when the media item is a show`, () => {
       }),
     ).resolves.toHaveLength(67);
 
-    await services.mediaItemService.removeMediaItem(completedShow);
+    await services.itemRequestService.removeItemRequest(
+      completedShow.itemRequest,
+    );
 
     await expect(
       em.find(ShowLikeMediaItem, {
@@ -94,7 +134,9 @@ describe(`when the media item is a show`, () => {
       }),
     ).resolves.toHaveLength(60);
 
-    await services.mediaItemService.removeMediaItem(completedShow);
+    await services.itemRequestService.removeItemRequest(
+      completedShow.itemRequest,
+    );
 
     await expect(
       em.find(FileSystemEntry, {
@@ -114,7 +156,9 @@ describe(`when the media item is a show`, () => {
       }),
     ).resolves.toHaveLength(10);
 
-    await services.mediaItemService.removeMediaItem(completedShow);
+    await services.itemRequestService.removeItemRequest(
+      completedShow.itemRequest,
+    );
 
     await expect(
       em.find(Stream, {
@@ -145,7 +189,9 @@ describe(`when the media item is a show`, () => {
       ).resolves.toHaveLength(10);
     }
 
-    await services.mediaItemService.removeMediaItem(completedShow);
+    await services.itemRequestService.removeItemRequest(
+      completedShow.itemRequest,
+    );
 
     for (const season of seasons) {
       await expect(
@@ -178,7 +224,9 @@ describe(`when the media item is a show`, () => {
       ).resolves.toHaveLength(10);
     }
 
-    await services.mediaItemService.removeMediaItem(completedShow);
+    await services.itemRequestService.removeItemRequest(
+      completedShow.itemRequest,
+    );
 
     for (const season of episodes) {
       await expect(
@@ -187,40 +235,6 @@ describe(`when the media item is a show`, () => {
         }),
       ).resolves.toHaveLength(0);
     }
-  });
-});
-
-describe(`when the media item is a season`, () => {
-  it("throws an error", async ({
-    services,
-    completedShowContext: {
-      seasons: [seasonToRemove],
-    },
-  }) => {
-    expect.assert(seasonToRemove);
-
-    await expect(
-      services.mediaItemService.removeMediaItem(seasonToRemove),
-    ).rejects.toThrow(
-      "Only top-level media items (Movie, Show) can be removed",
-    );
-  });
-});
-
-describe(`when the media item is an episode`, () => {
-  it("throws an error", async ({
-    services,
-    completedShowContext: {
-      episodes: [episodeToRemove],
-    },
-  }) => {
-    expect.assert(episodeToRemove);
-
-    await expect(
-      services.mediaItemService.removeMediaItem(episodeToRemove),
-    ).rejects.toThrow(
-      "Only top-level media items (Movie, Show) can be removed",
-    );
   });
 });
 

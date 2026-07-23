@@ -53,18 +53,6 @@ export class MediaItemResolver {
     return [...resetItems];
   }
 
-  @Mutation(() => Boolean)
-  public async removeMediaItem(
-    @Arg("id", () => ID) id: UUID,
-    @CoreContext() { services: { mediaItemService } }: CoreContext,
-  ): Promise<boolean> {
-    const item = await mediaItemService.getMediaItemById(id);
-
-    await mediaItemService.removeMediaItem(item);
-
-    return true;
-  }
-
   @FieldResolver(() => Int)
   public expectedFileCount() {
     throw new Error(

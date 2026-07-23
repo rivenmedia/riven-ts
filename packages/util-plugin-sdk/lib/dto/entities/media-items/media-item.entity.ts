@@ -175,7 +175,9 @@ export abstract class MediaItem {
   @Enum(() => MediaItemType.enum)
   public type!: MediaItemType;
 
-  @ManyToOne(() => ItemRequest)
+  @ManyToOne(() => ItemRequest, {
+    deleteRule: "cascade",
+  })
   public itemRequest!: Ref<ItemRequest>;
 
   @Property()

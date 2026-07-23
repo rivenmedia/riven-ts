@@ -25,6 +25,10 @@ import {
   ItemRequestCreateSuccessEventHandler,
 } from "./item-request.create.success.event.ts";
 import {
+  ItemRequestRemovedEvent,
+  ItemRequestRemovedEventHandler,
+} from "./item-request.removed.event.ts";
+import {
   ItemRequestUpdateSuccessEvent,
   ItemRequestUpdateSuccessEventHandler,
 } from "./item-request.update.success.event.ts";
@@ -118,6 +122,7 @@ export const RivenEvent = z.discriminatedUnion("type", [
   ItemRequestCreateSuccessEvent,
   ItemRequestCreateErrorEvent,
   ItemRequestCreateErrorConflictEvent,
+  ItemRequestRemovedEvent,
   ItemRequestUpdateSuccessEvent,
   MediaItemIndexRequestedMovieEvent,
   MediaItemIndexRequestedShowEvent,
@@ -171,6 +176,7 @@ export const RivenEventHandler = {
   "riven.item-request.create.error": ItemRequestCreateErrorEventHandler,
   "riven.item-request.create.error.conflict":
     ItemRequestCreateErrorConflictEventHandler,
+  "riven.item-request.removed": ItemRequestRemovedEventHandler,
   "riven.item-request.update.success": ItemRequestUpdateSuccessEventHandler,
 
   // Item indexing
