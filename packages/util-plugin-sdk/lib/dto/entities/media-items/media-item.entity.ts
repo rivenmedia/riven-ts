@@ -1,4 +1,4 @@
-import { Cascade, Collection, OptionalProps } from "@mikro-orm/core";
+import { Collection, OptionalProps } from "@mikro-orm/core";
 import {
   Entity,
   Enum,
@@ -143,7 +143,6 @@ export abstract class MediaItem {
   @OneToMany({
     entity: () => FileSystemEntry,
     mappedBy: "mediaItem",
-    cascade: [Cascade.PERSIST, Cascade.REMOVE],
     orphanRemoval: true,
   })
   public filesystemEntries = new Collection<FileSystemEntry>(this);
