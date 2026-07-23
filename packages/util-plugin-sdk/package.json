@@ -90,6 +90,7 @@
     "@repo/core-util-vitest-config": "workspace:^",
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
+    "@typescript/native": "catalog:",
     "bullmq": "catalog:",
     "class-validator": "catalog:",
     "msw": "catalog:",

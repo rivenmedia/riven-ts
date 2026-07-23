@@ -29,6 +29,7 @@
     "@repo/core-util-vitest-config": "workspace:^",
     "@turbo/gen": "catalog:",
     "@types/node": "catalog:",
+    "@typescript/native": "catalog:",
     "es-toolkit": "catalog:",
     "execa": "catalog:",
     "husky": "catalog:",
