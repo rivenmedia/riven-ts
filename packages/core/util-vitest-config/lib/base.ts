@@ -26,7 +26,7 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
         restoreMocks: true,
         coverage: {
           enabled: !isWatch,
-          exclude: ["**/__generated__/**", "**/__tests__/**"],
+          exclude: ["**/{__generated__,__tests__,docker-data,.next,.turbo}/**"],
         },
         setupFiles: [
           fileURLToPath(

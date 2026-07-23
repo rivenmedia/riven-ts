@@ -164,7 +164,6 @@ export abstract class MediaItem {
   @ManyToMany({
     entity: () => Stream,
     inversedBy: "parents",
-    cascade: [Cascade.PERSIST, Cascade.REMOVE],
   })
   public streams = new Collection<Stream>(this);
 

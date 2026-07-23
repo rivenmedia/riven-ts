@@ -83,7 +83,7 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
     migrations: {
       migrationsList: [],
     },
-    debug: true,
+    debug: false,
     extensions: [SeedManager],
     seeder: {
       pathTs: "./seeders",

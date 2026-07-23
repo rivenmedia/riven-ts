@@ -9,7 +9,7 @@ import type {
 } from "./media-item.resolver.spec.typegen.ts";
 import type { TypedDocumentNode } from "@apollo/client";
 
-it.describe.only("removeMediaItem", () => {
+it.describe("removeMediaItem", () => {
   const REMOVE_MEDIA_ITEM: TypedDocumentNode<
     RemoveMediaItemMutation,
     RemoveMediaItemMutationVariables
