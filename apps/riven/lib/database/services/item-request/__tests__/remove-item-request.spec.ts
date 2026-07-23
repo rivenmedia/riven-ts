@@ -208,18 +208,18 @@ describe(`when the media item is a show`, () => {
     completedShowContext: { completedShow, episodes },
     factories: { streamFactory },
   }) => {
-    for (const season of episodes) {
-      season.streams.add(streamFactory.make(10));
+    for (const episode of episodes) {
+      episode.streams.add(streamFactory.make(10));
 
-      em.persist(season);
+      em.persist(episode);
     }
 
     await em.flush();
 
-    for (const season of episodes) {
+    for (const episode of episodes) {
       await expect(
         em.find(Stream, {
-          parents: season,
+          parents: episode,
         }),
       ).resolves.toHaveLength(10);
     }
@@ -228,10 +228,10 @@ describe(`when the media item is a show`, () => {
       completedShow.itemRequest,
     );
 
-    for (const season of episodes) {
+    for (const episode of episodes) {
       await expect(
         em.find(Stream, {
-          parents: { id: season.id },
+          parents: { id: episode.id },
         }),
       ).resolves.toHaveLength(0);
     }
