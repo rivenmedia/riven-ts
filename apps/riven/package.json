@@ -121,6 +121,7 @@
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
     "@types/triple-beam": "catalog:",
+    "@typescript/native": "catalog:",
     "esbuild": "catalog:",
     "esbuild-node-externals": "catalog:",
     "logform": "catalog:",

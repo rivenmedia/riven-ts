@@ -41,6 +41,7 @@
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/util-plugin-testing": "workspace:^",
     "@types/node": "catalog:",
+    "@typescript/native": "catalog:",
     "msw": "catalog:",
     "oxlint": "catalog:",
     "typescript": "catalog:",

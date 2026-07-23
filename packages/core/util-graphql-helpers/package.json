@@ -28,6 +28,7 @@
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@types/node": "catalog:",
+    "@typescript/native": "catalog:",
     "oxlint": "catalog:",
     "type-fest": "catalog:",
     "typescript": "catalog:",

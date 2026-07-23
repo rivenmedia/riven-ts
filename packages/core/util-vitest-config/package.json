@@ -24,6 +24,7 @@
     "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@types/node": "catalog:",
+    "@typescript/native": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "glob": "catalog:",
     "nyc": "catalog:",

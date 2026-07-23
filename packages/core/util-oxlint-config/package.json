@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@typescript/native": "catalog:",
     "oxlint": "catalog:",
     "typescript": "catalog:"
   },
