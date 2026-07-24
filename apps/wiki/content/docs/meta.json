@@ -1,0 +1,14 @@
+{
+  "pages": [
+    "--- General ---",
+    "index",
+    "versions",
+    "getting-started",
+    "...",
+    "--- Configuration ---",
+    "core",
+    "ranking-configuration",
+    "--- Plugins ---",
+    "...plugins"
+  ]
+}

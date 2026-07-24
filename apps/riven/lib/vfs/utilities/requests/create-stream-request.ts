@@ -2,13 +2,17 @@ import { request } from "undici";
 
 import { logger } from "../../../utilities/logger/logger.ts";
 import { config } from "../../config.ts";
-import { fdToResponsePromiseMap } from "../file-handle-map.ts";
+import {
+  fdToCurrentStreamPositionMap,
+  fdToResponsePromiseMap,
+} from "../file-handle-map.ts";
+import { getVfsOperationContext } from "../vfs-operation-context.ts";
 
-export function createStreamRequest(
-  fd: number,
+export async function createStreamRequest(
   url: string,
   [requestStart, requestEnd]: readonly [number, number | undefined],
 ) {
+  const { fd } = getVfsOperationContext("read");
   const streamReaderPromise = request(url, {
     highWaterMark: config.chunkSize,
     headers: {
@@ -25,6 +29,7 @@ export function createStreamRequest(
       `Storing stream reader promise for fd ${fd.toString()} from position: ${requestStart.toString()}`,
     );
 
+    fdToCurrentStreamPositionMap.set(fd, requestStart);
     fdToResponsePromiseMap.set(fd, streamReaderPromise);
   }
 

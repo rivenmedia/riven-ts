@@ -1,36 +1,38 @@
-/* eslint-disable no-empty-pattern */
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
 import { vi } from "vitest";
 import { createActor, fromPromise } from "xstate";
 
 import { it as baseIt } from "../../../../__tests__/test-context.ts";
-import { SessionID } from "../../../../utilities/logger/log-context.ts";
-import {
-  type BootstrapMachineOutput,
-  bootstrapMachine,
-} from "../../../bootstrap/index.ts";
+import { SessionID } from "../../../../utilities/logger/session-id.ts";
+import { bootstrapMachine } from "../../../bootstrap/index.ts";
 import { rivenMachine } from "../../index.ts";
 
 import type { ValidPlugin } from "../../../../types/plugins.ts";
+import type { BootstrapMachineOutput } from "../../../bootstrap/index.ts";
+import type { RivenMachineInput } from "../../index.ts";
 
 export const it = baseIt
-  .extend("input", () => ({
-    sessionId: SessionID.parse(crypto.randomUUID()),
-  }))
+  .extend(
+    "input",
+    (): RivenMachineInput => ({
+      sessionId: SessionID.parse(crypto.randomUUID()),
+      mockScenario: undefined,
+    }),
+  )
   .extend("machine", () => rivenMachine)
   .extend(
     "bootstrapMachineOutput",
     async ({}): Promise<BootstrapMachineOutput> => {
-      const testPlugin = await import("@repo/plugin-test");
+      const { plugin: testPlugin } = await import("@repo/plugin-test");
 
       return {
         server: {} as never,
         plugins: new Map<symbol, ValidPlugin>([
           [
-            testPlugin.default.name,
+            testPlugin.name,
             {
-              config: testPlugin.default,
+              config: testPlugin,
               dataSources: new DataSourceMap(),
               status: "valid",
             },

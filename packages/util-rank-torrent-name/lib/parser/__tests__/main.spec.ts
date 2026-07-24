@@ -2,7 +2,7 @@ import { expect, it } from "vitest";
 
 import { parse } from "../parse.ts";
 
-it.each([
+it.for([
   [
     "One Piece [ Episodes + Movies + OVAs + Specials ][Dual Audio][BD 720p & 1080p HEVC x265 10bit][Arabic & Multi-Subs]\nSpecials/One Piece - S00E03 - Adventure in the Ocean's Navel.mkv",
     {
@@ -81,7 +81,7 @@ it.each([
     {
       title: "2019 After The Fall Of New York",
       quality: "BDRip",
-      edition: "Remastered",
+      editions: ["Remastered"],
       year: 1983,
       codec: "x264",
       group: "GHOULS",
@@ -200,7 +200,7 @@ it.each([
     "You.[Uncut].S01.SweSub.1080p.x264-Justiso",
     {
       title: "You",
-      edition: "Uncut",
+      editions: ["Uncut"],
       seasons: [1],
       languages: ["sv"],
       resolution: "1080p",
@@ -375,7 +375,7 @@ it.each([
     {
       title: "Anatomia De Grey",
       seasons: [19],
-      episodes: [],
+      episodes: [19], // TODO: Assert empty array once https://github.com/Viren070/parse-torrent-title/issues/41 is resolved
       container: "avi",
       extension: "avi",
       languages: ["es"],
@@ -513,7 +513,7 @@ it.each([
       seasons: [],
       episodes: [],
       languages: [],
-      edition: "Anniversary Edition",
+      editions: ["Anniversary Edition"],
       quality: "BluRay REMUX",
       resolution: "1080p",
       audio: ["DTS Lossless"],
@@ -528,7 +528,7 @@ it.each([
       title: "The Lord of the Rings The Fellowship of the Ring",
       year: 2001,
       resolution: "4k",
-      edition: "Extended Edition",
+      editions: ["Extended Edition"],
       languages: [],
       seasons: [],
       episodes: [],
@@ -551,7 +551,7 @@ it.each([
       episodes: [],
       quality: "BDRip",
       codec: "hevc",
-      resolution: "1048p", // this needs to be 1080p instead probably
+      resolution: "1048p", // This needs to be 1080p instead probably
       audio: ["TrueHD", "FLAC", "AC3"],
       channels: ["2.0", "5.1"],
       dubbed: true,
@@ -939,7 +939,7 @@ it.each([
       languages: [],
       resolution: "720p",
       quality: "WEB-DLRip",
-      complete: true, // this is not correct, but not a big deal either..
+      complete: true, // This is not correct, but not a big deal either..
     },
   ],
   [
@@ -985,7 +985,7 @@ it.each([
       extension: "mkv",
       site: "www.1Tamilblasters.co",
       bitrate: "192kbps",
-      edition: "IMAX",
+      editions: ["IMAX"],
       size: "8.3GB",
     },
   ],
@@ -1045,7 +1045,7 @@ it.each([
   [
     "The.Walking.Dead.S06E07.SUBFRENCH.HDTV.x264-AMB3R.mkv",
     {
-      // should detect french language and subbed
+      // Should detect french language and subbed
       title: "The Walking Dead",
       seasons: [6],
       episodes: [7],
@@ -1073,7 +1073,7 @@ it.each([
   [
     "www.TamilBlasters.vip - Shang-Chi (2021) [720p BDRip - [Tamil + Telugu + Hindi + Eng] - x264 - DDP5.1 (192 Kbps) - 1.4GB - ESubs].mkv",
     {
-      // should not find "Shang-Chi" as chinese language
+      // Should not find "Shang-Chi" as chinese language
       title: "Shang-Chi",
       year: 2021,
       seasons: [],
@@ -1460,7 +1460,7 @@ it.each([
   [
     "[JySzE] Naruto [v3] [R2J] [VFR] [Dual Audio] [Complete] [Extras] [x264]",
     {
-      // check to see if it handles `[v3]`
+      // Check to see if it handles `[v3]`
       title: "Naruto",
       seasons: [],
       episodes: [],
@@ -1501,7 +1501,7 @@ it.each([
   [
     "Naruto Complete [Ep 01 - 220][English][480p]",
     {
-      // was incorrectly parsing episodes before
+      // Was incorrectly parsing episodes before
       title: "Naruto",
       seasons: [],
       episodes: Array.from({ length: 220 }, (_, i) => i + 1),
@@ -1542,7 +1542,7 @@ it.each([
   [
     "Inherent.Vice.2014.1080p.BluRay.AVC.DTS-HD.MA.5.1-RARBG",
     {
-      // test "Vice"
+      // Test "Vice"
       title: "Inherent Vice",
       year: 2014,
       seasons: [],
@@ -1595,7 +1595,7 @@ it.each([
       title: "iCarly",
       seasons: [4],
       episodes: [],
-      languages: ["pl"], // check to see if it handles `PLDUB`
+      languages: ["pl"], // Check to see if it handles `PLDUB`
       channels: ["2.0"],
       quality: "WEB-DL",
       resolution: "1080p",
@@ -1615,7 +1615,7 @@ it.each([
       bitDepth: "10bit",
       codec: "hevc",
       channels: [
-        // make sure it handles multiple channels
+        // Make sure it handles multiple channels
         "5.1",
         "7.1",
       ],
@@ -1681,8 +1681,8 @@ it.each([
       resolution: "1080p",
       codec: "h264",
       languages: [],
-      episodes: [7], // check to see if it handles `7.Bölüm`
-      seasons: [2], // check to see if it handles `2.Sezon`
+      episodes: [7], // Check to see if it handles `7.Bölüm`
+      seasons: [2], // Check to see if it handles `2.Sezon`
       audio: ["AAC"],
       channels: ["2.0"],
       quality: "WEB-DL",
@@ -1699,7 +1699,7 @@ it.each([
       year: 1995,
       quality: "WEB-DL",
       codec: "x264",
-      audio: ["EAC3"], //check to see if it handles `E-AC3-S78`
+      audio: ["EAC3"], //Check to see if it handles `E-AC3-S78`
       seasons: [],
       languages: ["pl"],
       episodes: [],
@@ -1715,7 +1715,7 @@ it.each([
       codec: "h264",
       channels: ["5.1"],
       audio: ["DD"],
-      seasons: [], // make sure it doesnt pick up `S56`
+      seasons: [], // Make sure it doesnt pick up `S56`
       languages: ["pl"],
       episodes: [],
       title: "The Killer's Game",
@@ -1728,7 +1728,7 @@ it.each([
       resolution: "1080p",
       episodeCode: "4CB16872",
       quality: "BDRip",
-      seasons: [], // make sure it doesnt pick up `rs2`
+      seasons: [], // Make sure it doesnt pick up `rs2`
       episodes: [3],
       extension: "mkv",
       group: "a-s",
@@ -1939,7 +1939,7 @@ it.each([
       seasons: [],
       episodes: [],
       languages: [],
-      edition: "IMAX",
+      editions: ["IMAX"],
       quality: "BluRay",
       codec: "h265",
       channels: ["5.1"],
@@ -1968,7 +1968,7 @@ it.each([
   [
     "The Fairly OddParents Fairly Odder S01 720p PMTP WEBRip DDP5 1 x264 TEPES rartv ORARBG",
     {
-      title: "The Fairly OddParents Fairly Odder", // make sure `ddp` isn't parsed as DDP
+      title: "The Fairly OddParents Fairly Odder", // Make sure `ddp` isn't parsed as DDP
       resolution: "720p",
       seasons: [1],
       episodes: [],
@@ -1984,8 +1984,8 @@ it.each([
     "Formula1.S2025E86.Italy.Grand.Prix.1080i.HDTV.MPA2.0.H.264-playTV",
     {
       title: "Formula1",
-      resolution: "1080p", // should be 1080i
-      seasons: [2025], // parse 4-digit season
+      resolution: "1080p", // Should be 1080i
+      seasons: [2025], // Parse 4-digit season
       episodes: [86],
       languages: [],
       quality: "HDTV",
@@ -1997,7 +1997,7 @@ it.each([
   [
     "Georgie and Mandys First Marriage S01E18 TV Money 720p AMZN WEB DL DDP5 1 H 264 FLUX EZTV",
     {
-      title: "Georgie and Mandys First Marriage", // make sure it has full title
+      title: "Georgie and Mandys First Marriage", // Make sure it has full title
       resolution: "720p",
       seasons: [1],
       episodes: [18],
@@ -2012,7 +2012,7 @@ it.each([
   [
     "xXx.2002.15th.Anniversary.Edition.1080p.BluRay.Remux.AVC.DTS-HD.MA.5.1-FraMeSToR",
     {
-      title: "xXx", // make sure we don't parse as adult title
+      title: "xXx", // Make sure we don't parse as adult title
       year: 2002,
       resolution: "1080p",
       seasons: [],
@@ -2023,9 +2023,9 @@ it.each([
       channels: ["5.1"],
       audio: ["DTS Lossless"],
       group: "FraMeSToR",
-      edition: "Anniversary Edition",
+      editions: ["Anniversary Edition"],
     },
   ],
-])('should correctly parse "%s"', (rawTitle, expected) => {
+] as const)('should correctly parse "%s"', ([rawTitle, expected]) => {
   expect(parse(rawTitle)).toMatchObject(expected);
 });

@@ -1,7 +1,4 @@
-import {
-  ContentServiceRequestedEvent,
-  type ContentServiceRequestedResponse,
-} from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
+import { ContentServiceRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
@@ -14,6 +11,8 @@ import { createJobParentConfig } from "../../utilities/create-job-parent-config.
 import { flow } from "../producer.ts";
 import { enqueueRequestContentService } from "./enqueue-request-content-service.ts";
 import { requestContentServiceProcessorSchema } from "./request-content-service.schema.ts";
+
+import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
 function buildExternalIdKey(
   /**
@@ -38,46 +37,62 @@ export const requestContentServiceProcessor =
       { job, token, signal },
       { sendEvent, services: { itemRequestService } },
     ) => {
-      assert(token, "Token is required to create child jobs");
+      assert.ok(token, "Token is required to create child jobs");
 
       const parent = createJobParentConfig(job);
 
-      switch (job.data.step) {
-        case "request": {
-          const childJob = createPluginFlowJob(
-            ContentServiceRequestedEvent,
-            "Request content service",
-            job.data.contentServicePlugin,
-            {},
-            {
-              parent,
-              ignoreDependencyOnFailure: true,
-            },
-          );
+      while (true) {
+        switch (job.data.step) {
+          case "request": {
+            const childJob = createPluginFlowJob(
+              ContentServiceRequestedEvent,
+              "Request content service",
+              job.data.contentServicePlugin,
+              {},
+              {
+                parent,
+                ignoreDependencyOnFailure: true,
+              },
+            );
 
-          await flow.add(childJob);
+            await flow.add(childJob);
 
-          logger.silly(
-            `Requesting content from ${job.data.contentServicePlugin}`,
-          );
+            logger.silly(
+              `Requesting content from ${job.data.contentServicePlugin}`,
+            );
 
-          await job.updateData({
-            ...job.data,
-            step: "process",
-          });
+            await job.updateData({
+              ...job.data,
+              step: "process",
+            });
 
-          await job.moveToWaitingChildren(token);
+            if (await job.moveToWaitingChildren(token)) {
+              throw new WaitingChildrenError();
+            }
 
-          throw new WaitingChildrenError();
-        }
-        case "process": {
-          const data = await job.getChildrenValues();
+            break;
+          }
+          case "process": {
+            const data = await job.getChildrenValues();
 
-          const { items, updateIntervalSeconds } = Object.values(data).reduce(
-            (acc, childData) => {
-              acc.updateIntervalSeconds ??= childData.updateIntervalSeconds;
+            let updateIntervalSeconds: number | null = null;
 
-              if (childData.movies.length) {
+            const items = new Map<
+              string,
+              | {
+                  item: ContentServiceRequestedResponse["movies"][number];
+                  type: "movie";
+                }
+              | {
+                  type: "show";
+                  item: ContentServiceRequestedResponse["shows"][number];
+                }
+            >();
+
+            for (const childData of Object.values(data)) {
+              updateIntervalSeconds ??= childData.updateIntervalSeconds;
+
+              if (childData.movies.length > 0) {
                 for (const movie of childData.movies) {
                   const key = buildExternalIdKey(movie.tmdbId, movie.imdbId);
 
@@ -89,11 +104,11 @@ export const requestContentServiceProcessor =
                     continue;
                   }
 
-                  acc.items.set(key, { item: movie, type: "movie" });
+                  items.set(key, { item: movie, type: "movie" });
                 }
               }
 
-              if (childData.shows.length) {
+              if (childData.shows.length > 0) {
                 for (const show of childData.shows) {
                   const key = buildExternalIdKey(show.tvdbId, show.imdbId);
 
@@ -105,73 +120,57 @@ export const requestContentServiceProcessor =
                     continue;
                   }
 
-                  acc.items.set(key, { item: show, type: "show" });
+                  items.set(key, { item: show, type: "show" });
                 }
               }
+            }
 
-              return acc;
-            },
-            {
-              updateIntervalSeconds: null as number | null,
-              items: new Map<
-                string,
-                | {
-                    item: ContentServiceRequestedResponse["movies"][number];
-                    type: "movie";
-                  }
-                | {
-                    type: "show";
-                    item: ContentServiceRequestedResponse["shows"][number];
-                  }
-              >(),
-            },
-          );
+            let newItemsCount = 0;
+            let updatedItemsCount = 0;
 
-          let newItemsCount = 0;
-          let updatedItemsCount = 0;
+            for (const { item, type } of items.values()) {
+              signal?.throwIfAborted();
 
-          for (const { item, type } of items.values()) {
-            signal?.throwIfAborted();
+              try {
+                const result =
+                  type === "show"
+                    ? await itemRequestService.requestShow(item)
+                    : await itemRequestService.requestMovie(item);
 
-            try {
-              const result =
-                type === "show"
-                  ? await itemRequestService.requestShow(item)
-                  : await itemRequestService.requestMovie(item);
+                if (result.requestType === "create") {
+                  newItemsCount += 1;
+                } else {
+                  updatedItemsCount += 1;
+                }
 
-              if (result.requestType === "create") {
-                newItemsCount++;
-              } else {
-                updatedItemsCount++;
-              }
-
-              sendEvent({
-                type: `riven.item-request.${result.requestType}.success`,
-                item: result.item,
-              });
-            } catch (error) {
-              if (
-                error instanceof ItemRequestCreateError ||
-                error instanceof ItemRequestCreateErrorConflict
-              ) {
-                sendEvent(error.payload);
+                sendEvent({
+                  type: `riven.item-request.${result.requestType}.success`,
+                  item: result.item,
+                });
+              } catch (error) {
+                if (
+                  error instanceof ItemRequestCreateError ||
+                  error instanceof ItemRequestCreateErrorConflict
+                ) {
+                  sendEvent(error.payload);
+                }
               }
             }
-          }
 
-          if (updateIntervalSeconds) {
-            await job.removeDeduplicationKey();
-            await enqueueRequestContentService(
-              job.data.contentServicePlugin,
-              updateIntervalSeconds,
-            );
-          }
+            if (updateIntervalSeconds) {
+              await job.removeDeduplicationKey();
+              await enqueueRequestContentService(
+                job.data.contentServicePlugin,
+                updateIntervalSeconds,
+              );
+            }
 
-          return {
-            count: items.size,
-            newItems: newItemsCount,
-            updatedItems: updatedItemsCount,
-          };
+            return {
+              count: items.size,
+              newItems: newItemsCount,
+              updatedItems: updatedItemsCount,
+            };
+          }
         }
       }
     },

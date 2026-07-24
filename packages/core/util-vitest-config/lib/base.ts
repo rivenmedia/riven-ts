@@ -6,7 +6,7 @@ import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
 
 export const baseVitestConfig = defineConfig(({ mode }) => {
   try {
-    loadEnvFile(path.join(process.cwd(), ".env." + mode));
+    loadEnvFile(path.join(process.cwd(), `.env.${mode}`));
   } catch {
     /* empty */
   }
@@ -17,13 +17,15 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
     /* empty */
   }
 
+  const isWatch = process.argv.includes("--watch");
+
   return mergeConfig(
     { test: configDefaults },
     defineConfig({
       test: {
         restoreMocks: true,
         coverage: {
-          enabled: true,
+          enabled: !isWatch,
           exclude: ["**/__generated__/**", "**/__tests__/**"],
         },
         setupFiles: [
@@ -32,6 +34,7 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
           ),
         ],
         retry: process.env["CI"] ? 2 : 0,
+        hookTimeout: 30_000,
       },
       plugins: [swc.vite()],
     }),

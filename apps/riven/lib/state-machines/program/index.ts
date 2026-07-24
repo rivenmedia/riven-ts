@@ -1,24 +1,25 @@
-import { type ActorRefFromLogic, enqueueActions, setup } from "xstate";
+import { createActor, enqueueActions, setup } from "xstate";
 
-import {
-  type BootstrapMachineOutput,
-  bootstrapMachine,
-} from "../bootstrap/index.ts";
+import { bootstrapMachine } from "../bootstrap/index.ts";
 import { mainRunnerMachine } from "../main-runner/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { shutdown } from "./actors/shutdown.actor.ts";
 import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 import { unmountVfs } from "./actors/unmount-vfs.actor.ts";
 
+import type { ApolloServerContext } from "../../graphql/context.ts";
+import type { MockScenario } from "../../mocks/utilities/mock-scenario.ts";
 import type { ValidPluginMap } from "../../types/plugins.ts";
-import type { SessionID } from "../../utilities/logger/log-context.ts";
+import type { SessionID } from "../../utilities/logger/session-id.ts";
+import type { BootstrapMachineOutput } from "../bootstrap/index.ts";
 import type { ApolloServer } from "@apollo/server";
-import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";
 import type Fuse from "@zkochan/fuse-native";
+import type { ActorRefFromLogic } from "xstate";
 
 export interface RivenMachineContext {
   mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine>;
+  mockScenario: MockScenario | undefined;
   plugins?: ValidPluginMap;
   server?: ApolloServer<ApolloServerContext>;
   vfs?: Fuse;
@@ -26,9 +27,10 @@ export interface RivenMachineContext {
 
 export interface RivenMachineInput {
   sessionId: SessionID;
+  mockScenario: MockScenario | undefined;
 }
 
-export type RivenMachineEvent = CoreShutdownEvent;
+export type RivenMachineEvent = CoreShutdownEvent | { type: "BOOTSTRAP" };
 
 export const rivenMachine = setup({
   types: {
@@ -80,26 +82,33 @@ export const rivenMachine = setup({
   .extend(withLogAction)
   .createMachine({
     id: "Riven",
-    initial: "Bootstrapping",
-    context: ({ self, spawn }) => ({
+    initial: "Idle",
+    context: ({ self, spawn, input }) => ({
       mainRunnerRef: spawn("mainRunnerMachine", {
         id: "mainRunnerMachine",
         input: {
           parentRef: self,
         },
       }),
+      mockScenario: input.mockScenario,
     }),
     on: {
       "riven.core.shutdown": ".Shutdown",
     },
     states: {
+      Idle: {
+        on: {
+          BOOTSTRAP: "Bootstrapping",
+        },
+      },
       Bootstrapping: {
         invoke: {
           id: "bootstrapMachine",
           src: "bootstrapMachine",
-          input: ({ context: { mainRunnerRef }, self }) => ({
+          input: ({ context: { mainRunnerRef, mockScenario }, self }) => ({
             mainRunnerRef,
             rootRef: self,
+            mockScenario,
           }),
           onDone: {
             target: "Running",
@@ -149,7 +158,7 @@ export const rivenMachine = setup({
               id: "shutdown",
               src: "shutdown",
               input: ({ context: { mainRunnerRef } }) => ({
-                mainRunnerRef: mainRunnerRef,
+                mainRunnerRef,
               }),
               onError: {
                 target: "Unmounting VFS",
@@ -252,14 +261,10 @@ export const rivenMachine = setup({
       },
       Exited: {
         type: "final",
-        entry: [
-          {
-            type: "log",
-            params: {
-              message: "Riven has exited.",
-            },
-          },
-        ],
       },
     },
   });
+
+export function createRivenMachine(input: RivenMachineInput) {
+  return createActor(rivenMachine, { input });
+}

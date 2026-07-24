@@ -1,71 +1,57 @@
 import Fuse from "@zkochan/fuse-native";
-import { setTimeout } from "node:timers/promises";
+import chalk from "chalk";
+import assert from "node:assert";
 
 import { services } from "../../database/database.ts";
+import { enqueueRequestStreamLink } from "../../message-queue/flows/request-stream-link/enqueue-request-stream-link.ts";
 import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
 import { logger } from "../../utilities/logger/logger.ts";
-import { serialiseEventData } from "../../utilities/serialisers/serialise-event-data.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
-import { attrCache } from "../utilities/attr-cache.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
 import {
   fdToFileHandleMeta,
-  fileNameIsFetchingLinkMap,
   fileNameToFdCountMap,
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
+import { withVfsOperationContext } from "../utilities/vfs-operation-context.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
 import type { PathInfo } from "../../database/services/vfs/schemas/path-info.schema.ts";
-import type { ParamsFor } from "@repo/util-plugin-sdk";
-import type {
-  MediaItemStreamLinkRequestedEvent,
-  MediaItemStreamLinkRequestedResponse,
-} from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
-import type { Queue } from "bullmq";
+import type { Loaded } from "@mikro-orm/core";
+import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
-type LinkRequestQueues = Map<
-  string,
-  Queue<
-    ParamsFor<MediaItemStreamLinkRequestedEvent>,
-    MediaItemStreamLinkRequestedResponse
-  >
->;
+let fdCounter = 0;
 
-let fd = 0;
+async function getStreamLinkFromCacheOrQueue(
+  mediaEntry: Loaded<MediaEntry, "mediaItem.fullTitle">,
+) {
+  const cachedStreamLink = await services.streamService.getStreamLink(
+    mediaEntry.id,
+  );
 
-async function waitForStreamUrl(path: string) {
-  const timeoutController = AbortSignal.timeout(10_000);
-  const pathInfo = services.vfsService.parsePath(path);
+  if (cachedStreamLink) {
+    logger.debug(
+      `Returning cached stream link for ${chalk.bold(mediaEntry.mediaItem.$.fullTitle)}`,
+    );
 
-  while (!timeoutController.aborted) {
-    const refreshed = await services.vfsService.getMediaEntry(pathInfo);
-
-    if (refreshed?.streamUrl) {
-      return refreshed.streamUrl;
-    }
-
-    await setTimeout(100);
+    return cachedStreamLink;
   }
 
-  throw new FuseError(
-    Fuse.ETIMEDOUT,
-    `Timed out waiting for stream URL for path ${path}`,
-  );
+  const { job } = await enqueueRequestStreamLink({
+    mediaEntryId: mediaEntry.id,
+    mediaItemTitle: mediaEntry.mediaItem.$.fullTitle,
+  });
+
+  return runSingleJob(job, 10_000);
 }
 
 async function serveSubtitleFile(pathInfo: PathInfo) {
   const subtitleEntry = await services.vfsService.getSubtitleEntry(pathInfo);
 
-  if (!subtitleEntry) {
-    throw new FuseError(
-      Fuse.ENOENT,
-      `Subtitle not found for path: ${pathInfo.rawPath}`,
-    );
-  }
+  assert.ok(subtitleEntry, new FuseError(Fuse.ENOENT, "Subtitle not found"));
 
   const contentBuffer = Buffer.from(subtitleEntry.content, "utf8");
-  const nextFd = fd++;
+  const nextFd = (fdCounter += 1);
 
   fdToFileHandleMeta.set(nextFd, {
     type: "subtitle",
@@ -82,76 +68,16 @@ async function serveSubtitleFile(pathInfo: PathInfo) {
   return nextFd;
 }
 
-async function serveMediaFile(
-  pathInfo: PathInfo,
-  linkRequestQueues: LinkRequestQueues,
-) {
-  const entry = await services.vfsService.getMediaEntry(pathInfo);
+async function serveMediaFile(pathInfo: PathInfo) {
+  const entry = await services.vfsService.getMediaEntry(pathInfo, {
+    populate: ["mediaItem.fullTitle"],
+  });
 
-  if (!entry) {
-    throw new FuseError(
-      Fuse.ENOENT,
-      `No media entry found for path ${pathInfo.rawPath}`,
-    );
-  }
+  assert.ok(entry, new FuseError(Fuse.ENOENT, "No media entry found"));
 
-  if (
-    !entry.streamUrl &&
-    !fileNameIsFetchingLinkMap.get(entry.originalFilename)
-  ) {
-    logger.silly(
-      `No stream URL for media entry ${entry.id}, requesting from ${entry.plugin}...`,
-    );
+  const streamLink = await getStreamLinkFromCacheOrQueue(entry);
 
-    const requestQueue = linkRequestQueues.get(entry.plugin);
-
-    if (!requestQueue) {
-      logger.error(
-        `No link request queue found for ${entry.plugin} when opening file at path ${pathInfo.rawPath}`,
-      );
-
-      throw new FuseError(
-        Fuse.ENOENT,
-        `Media entry ${entry.id} has no stream URL and no link request queue is available`,
-      );
-    }
-
-    try {
-      fileNameIsFetchingLinkMap.set(entry.originalFilename, true);
-
-      const job = await requestQueue.add(
-        entry.id,
-        serialiseEventData("riven.media-item.stream-link.requested", {
-          item: entry,
-        }) as ParamsFor<MediaItemStreamLinkRequestedEvent>,
-      );
-
-      const { link: streamUrl } = await runSingleJob(job);
-
-      await services.vfsService.saveStreamUrl(entry.id, streamUrl);
-
-      attrCache.delete(pathInfo.rawPath);
-    } catch (error: unknown) {
-      throw new FuseError(
-        Fuse.ENOENT,
-        `Unable to get stream url for ${entry.originalFilename}: ${String(error)}`,
-      );
-    } finally {
-      fileNameIsFetchingLinkMap.delete(entry.originalFilename);
-    }
-  }
-
-  const streamUrl =
-    entry.streamUrl ?? (await waitForStreamUrl(pathInfo.rawPath));
-
-  if (!streamUrl) {
-    throw new FuseError(
-      Fuse.ENOENT,
-      `Media entry ${entry.id} has no stream URL`,
-    );
-  }
-
-  const nextFd = fd++;
+  const nextFd = (fdCounter += 1);
 
   fileNameToFileChunkCalculationsMap.set(
     entry.originalFilename,
@@ -164,7 +90,7 @@ async function serveMediaFile(
     filePath: pathInfo.rawPath,
     fileBaseName: pathInfo.base,
     originalFileName: entry.originalFilename,
-    url: streamUrl,
+    url: streamLink,
   });
 
   fileNameToFdCountMap.set(
@@ -179,32 +105,30 @@ async function serveMediaFile(
   return nextFd;
 }
 
-async function open(
-  path: string,
-  _flags: number,
-  linkRequestQueues: LinkRequestQueues,
-) {
+async function open(path: string, _flags: number) {
   const pathInfo = services.vfsService.parsePath(path);
 
   if (pathInfo.pathType === "subtitle-file") {
     return serveSubtitleFile(pathInfo);
   }
 
-  return serveMediaFile(pathInfo, linkRequestQueues);
+  return serveMediaFile(pathInfo);
 }
 
-export const openSync = function (
+export function openSync(
   path: string,
   flags: number,
-  linkRequestQueues: LinkRequestQueues,
   callback: (err: number, fd?: number) => void,
 ) {
-  void withVfsScope(async () => {
-    try {
-      const fd = await open(path, flags, linkRequestQueues);
+  void withVfsScope(async () =>
+    withVfsOperationContext(
+      { operationName: "open", path, flags },
+      async () => {
+        const fd = await open(path, flags);
 
-      process.nextTick(callback, 0, fd);
-    } catch (error) {
+        process.nextTick(callback, 0, fd);
+      },
+    ).catch((error: unknown) => {
       if (isFuseError(error)) {
         logger.error("VFS open FuseError", { err: error });
 
@@ -213,9 +137,9 @@ export const openSync = function (
         return;
       }
 
-      logger.error("VFS open error", { err: error });
+      logger.error(`VFS open error for path: ${path}`, { err: error });
 
       process.nextTick(callback, Fuse.EIO);
-    }
-  });
-};
+    }),
+  );
+}

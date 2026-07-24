@@ -2,6 +2,9 @@
   "name": "@repo/util-plugin-sdk",
   "version": "0.0.0",
   "private": true,
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -57,13 +60,9 @@
       "default": "./lib/datasource/context.ts"
     }
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "tsc --build tsconfig.lib.json",
-    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
-    "lint": "eslint",
+    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -73,6 +72,7 @@
     "@repo/util-rank-torrent-name": "workspace:^",
     "es-toolkit": "catalog:",
     "graphql-scalars": "catalog:",
+    "http-status-codes": "catalog:",
     "luxon": "catalog:",
     "type-graphql": "catalog:",
     "zod": "catalog:",
@@ -81,18 +81,21 @@
   "devDependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@apollo/utils.keyvadapter": "catalog:",
+    "@keyv/redis": "catalog:",
     "@mikro-orm/core": "catalog:",
     "@mikro-orm/reflection": "catalog:",
     "@mikro-orm/sqlite": "catalog:",
-    "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
-    "@typescript-eslint/parser": "catalog:",
+    "@typescript/native": "catalog:",
     "bullmq": "catalog:",
     "class-validator": "catalog:",
-    "eslint": "catalog:",
+    "msw": "catalog:",
+    "oxlint": "catalog:",
+    "redis-memory-server": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "winston": "catalog:"

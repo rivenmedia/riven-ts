@@ -3,8 +3,10 @@ import { createActor } from "xstate";
 
 import { stopGqlServer } from "./stop-gql-server.actor.ts";
 
+import type { ApolloServer } from "@apollo/server";
+
 it("stops the server if provided", () => {
-  const stopSpy = vi.fn();
+  const stopSpy = vi.fn<ApolloServer["stop"]>();
 
   const actor = createActor(stopGqlServer, {
     input: {
@@ -14,5 +16,5 @@ it("stops the server if provided", () => {
 
   actor.start();
 
-  expect(stopSpy).toHaveBeenCalled();
+  expect(stopSpy).toHaveBeenCalledOnce();
 });

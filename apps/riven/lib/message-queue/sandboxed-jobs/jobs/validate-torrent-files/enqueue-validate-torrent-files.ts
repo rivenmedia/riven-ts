@@ -1,12 +1,10 @@
 import { flow } from "../../../flows/producer.ts";
 import { createMapItemsToFilesJob } from "../map-items-to-files/map-items-to-files.schema.ts";
-import {
-  type ValidateTorrentFilesSandboxedJob,
-  createValidateTorrentFilesJob,
-} from "./validate-torrent-files.schema.ts";
+import { createValidateTorrentFilesJob } from "./validate-torrent-files.schema.ts";
 
+import type { ValidateTorrentFilesSandboxedJob } from "./validate-torrent-files.schema.ts";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
-import type { ParentOptions, PluginJobNode } from "bullmq";
+import type { ParentOptions, TypedJobNode } from "bullmq";
 import type { UUID } from "node:crypto";
 
 export interface EnqueueValidateTorrentFilesInput {
@@ -17,14 +15,14 @@ export interface EnqueueValidateTorrentFilesInput {
   isCacheCheck: boolean;
 }
 
-export function enqueueValidateTorrentFiles({
+export async function enqueueValidateTorrentFiles({
   parent,
   infoHash,
   files,
   mediaItemId,
   isCacheCheck,
 }: EnqueueValidateTorrentFilesInput): Promise<
-  PluginJobNode<
+  TypedJobNode<
     ValidateTorrentFilesSandboxedJob["input"],
     ValidateTorrentFilesSandboxedJob["output"]
   >

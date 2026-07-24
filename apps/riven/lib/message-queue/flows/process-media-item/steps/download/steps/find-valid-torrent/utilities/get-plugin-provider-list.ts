@@ -6,12 +6,7 @@ import {
 import { runSingleJob } from "../../../../../../../utilities/run-single-job.ts";
 import { flow } from "../../../../../../producer.ts";
 
-import type { ParentOptions } from "bullmq";
-
-export async function getPluginProviderList(
-  pluginName: string,
-  parent: ParentOptions,
-) {
+export async function getPluginProviderList(pluginName: string) {
   const pluginProviderListNode = await flow.addPluginJob(
     MediaItemDownloadProviderListRequestedEvent,
     MediaItemDownloadProviderListRequestedResponse,
@@ -19,9 +14,13 @@ export async function getPluginProviderList(
     pluginName,
     {},
     {
-      jobId: `get-${pluginName}-provider-list`,
+      deduplication: {
+        id: `get-${pluginName}-provider-list`,
+      },
       removeDependencyOnFailure: true,
-      parent,
+      removeOnComplete: {
+        age: 60,
+      },
     },
   );
 
@@ -29,5 +28,5 @@ export async function getPluginProviderList(
     pluginProviderListNode.job,
   );
 
-  return pluginProviderListResult.providers;
+  return pluginProviderListResult;
 }

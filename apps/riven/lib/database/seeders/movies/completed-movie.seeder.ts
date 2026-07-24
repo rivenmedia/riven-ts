@@ -1,23 +1,26 @@
-import { type EntityManager, ref } from "@mikro-orm/core";
+import { ref } from "@mikro-orm/core";
 import assert from "node:assert";
 
 import { MediaEntryFactory } from "../../factories/media-entry.factory.ts";
 import { BaseSeeder } from "../base.seeder.ts";
-import {
-  ScrapedMovieSeeder,
-  type ScrapedMovieSeederContext,
-} from "./scraped-movie.seeder.ts";
+import { ScrapedMovieSeeder } from "./scraped-movie.seeder.ts";
 
-export type CompletedMovieSeederContext = ScrapedMovieSeederContext;
+import type { ScrapedMovieSeederContext } from "./scraped-movie.seeder.ts";
+import type { EntityData, EntityManager } from "@mikro-orm/core";
+import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
+
+export interface CompletedMovieSeederContext extends ScrapedMovieSeederContext {
+  mediaEntries?: EntityData<MediaEntry>[];
+}
 
 export class CompletedMovieSeeder extends BaseSeeder<CompletedMovieSeederContext> {
-  async run(
+  public async run(
     em: EntityManager,
     context: CompletedMovieSeederContext = this.context,
   ) {
     await this.call(em, [ScrapedMovieSeeder], context);
 
-    assert(
+    assert.ok(
       context.streams[0],
       "Expected at least one stream to be present in context.streams",
     );
@@ -25,13 +28,20 @@ export class CompletedMovieSeeder extends BaseSeeder<CompletedMovieSeederContext
     em.persist(context.movie);
 
     context.movie.activeStream = ref(context.streams[0]);
-    context.movie.filesystemEntries.set([
-      new MediaEntryFactory(em).makeEntity({ mediaItem: context.movie }),
-    ]);
+
+    context.mediaEntries ??= [{ mediaItem: context.movie }];
+    context.movie.filesystemEntries.set(
+      context.mediaEntries.map((entry) =>
+        new MediaEntryFactory(em).makeEntity({
+          ...entry,
+          mediaItem: ref(context.movie),
+        }),
+      ),
+    );
 
     await em.flush();
 
-    assert(
+    assert.ok(
       context.movie.state === "completed",
       `Expected movie state to be "completed", got "${context.movie.state}"`,
     );

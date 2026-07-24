@@ -26,6 +26,18 @@ export const SeerrSettings = z.object({
     .describe(
       "Interval in seconds to update content. If using the webhook, set to `null` to disable automatic updates (an initial request will still be made on startup)",
     ),
+  autofixMetadataProviders: z
+    .stringbool()
+    .default(false)
+    .describe(
+      "Automatically fix metadata provider settings in Seerr if they are incorrect",
+    ),
+  autofixWebhookBody: z
+    .stringbool()
+    .default(false)
+    .describe(
+      "Automatically fix webhook payload body and enable required notification types in Seerr if they are incorrect (required for request approval events to work)",
+    ),
 });
 
 export type SeerrSettings = z.infer<typeof SeerrSettings>;

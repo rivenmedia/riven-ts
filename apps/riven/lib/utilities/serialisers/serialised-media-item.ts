@@ -13,7 +13,7 @@ export const SerialisedMediaItem = z.codec(
   UUID,
   z.xor([z.instanceof(MediaItem), createApolloInstanceSchema(MediaItem)]),
   {
-    decode: (id) => services.mediaItemService.getMediaItem(id),
+    decode: async (id) => services.mediaItemService.getMediaItemById(id),
     encode: (data) => UUID.parse(data.id),
   },
 );

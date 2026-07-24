@@ -4,53 +4,59 @@ import type { PlopTypes } from "@turbo/gen";
 
 type PackageType = "plugin" | "util" | "domain";
 
-type PackageJsonDefinition = {
+interface PackageJsonDefinition {
   scripts?: Record<string, string | null>;
   exports?: Record<string, string | Record<string, string | null> | null>;
   devDependencies?: Record<string, string | null>;
   dependencies?: Record<string, string | null>;
   peerDependencies?: Record<string, string | null>;
   files?: string[];
-};
+}
 
-const commonFields: PackageJsonDefinition = {
-  exports: {
-    ".": {
-      production: "./dist/index.js",
-      default: "./lib/index.ts",
+const packageTypeFields: Partial<
+  Record<PackageType | "*", PackageJsonDefinition>
+> = {
+  "*": {
+    exports: {
+      ".": {
+        production: "./dist/index.js",
+        default: "./lib/index.ts",
+      },
+    },
+    files: ["dist"],
+    devDependencies: {
+      "@repo/core-util-oxlint-config": "workspace:^",
+      "@repo/core-util-typescript-config": "workspace:^",
+      "@repo/core-util-vitest-config": "workspace:^",
+      "@types/node": "catalog:",
+      oxlint: "catalog:",
+      typescript: "catalog:",
+      vitest: "catalog:",
+    },
+    scripts: {
+      build: "tsc --project tsconfig.lib.json",
+      lint: "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
+      "lint:fix": "pnpm lint --fix",
+      test: "vitest run --passWithNoTests",
+      "test:watch": "vitest",
     },
   },
-  files: ["dist"],
-  devDependencies: {
-    "@repo/core-util-eslint-config": "workspace:^",
-    "@repo/core-util-typescript-config": "workspace:^",
-    "@repo/core-util-vitest-config": "workspace:^",
-    "@types/node": "catalog:",
-    "@typescript-eslint/parser": "catalog:",
-    eslint: "catalog:",
-    msw: "catalog:",
-    typescript: "catalog:",
-    vitest: "catalog:",
-  },
-  scripts: {
-    build: "tsc --project tsconfig.lib.json",
-  },
-};
-
-const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
   plugin: {
+    exports: {
+      "./wiki.config": "./wiki.config.ts",
+    },
     scripts: {
-      "codegen:config-docs": "zod2md",
+      "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
     },
     dependencies: {
-      "@apollo/datasource-rest": "catalog:",
       "@repo/util-plugin-sdk": "workspace:^",
+      "@repo/util-wiki-helpers": "workspace:^",
       "type-graphql": "catalog:",
       zod: "catalog:",
     },
     devDependencies: {
       "@repo/util-plugin-testing": "workspace:^",
-      zod2md: "catalog:",
+      msw: "catalog:",
     },
   },
 };
@@ -58,13 +64,14 @@ const packageTypeFields: Partial<Record<PackageType, PackageJsonDefinition>> = {
 export function registerPackageJsonFieldsHelper(plop: PlopTypes.NodePlopAPI) {
   plop.setHelper(
     "packageJsonFields",
-    function (
-      this: Record<string, unknown>, // Handlebars context
+    function packageJsonFieldsHelper(
+      // Handlebars context
+      this: Record<string, unknown>,
       packageType: PackageType,
       packageJsonFieldType: keyof PackageJsonDefinition,
     ) {
       const fields = toMerged(
-        commonFields[packageJsonFieldType] ?? {},
+        packageTypeFields["*"]?.[packageJsonFieldType] ?? {},
         packageTypeFields[packageType]?.[packageJsonFieldType] ?? {},
       );
 
@@ -83,8 +90,8 @@ export function registerPackageJsonFieldsHelper(plop: PlopTypes.NodePlopAPI) {
       for (const [key, value] of Object.entries(fields)) {
         if (typeof value === "string" && value.includes("{{")) {
           // Replace {{kebabCase pluginName}} with actual value
-          processed[key] = value.replace(
-            /\{\{kebabCase (\w+)\}\}/g,
+          processed[key] = value.replaceAll(
+            /\{\{kebabCase (?<pluginName>\w+)\}\}/gu,
             (_, varName) => kebabCase(String(this[varName] ?? "")),
           );
         } else {

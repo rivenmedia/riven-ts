@@ -1,15 +1,11 @@
-import z, {
-  type ZodLiteral,
-  type ZodObject,
-  type ZodType,
-  type ZodVoid,
-} from "zod";
+import z from "zod";
 
 import { DataSourceMap } from "../../utilities/datasource-map.ts";
 import { PluginSettings } from "../../utilities/plugin-settings.ts";
 
 import type { RivenEvent, RivenExternalEvent } from "../events/index.ts";
 import type { Logger } from "winston";
+import type { ZodLiteral, ZodObject, ZodType, ZodVoid } from "zod";
 
 export const createEventHandlerSchema = <
   I extends {

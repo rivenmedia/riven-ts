@@ -8,7 +8,7 @@ import { pluginConfig } from "../{{kebabCase pluginName}}-plugin.config.ts";
 @Resolver()
 export class {{pascalCase pluginName}}Resolver {
   @Query(() => Boolean)
-  {{camelCase pluginName}}IsValid(
+  public async {{camelCase pluginName}}IsValid(
     @PluginDataSource(pluginConfig.name, {{pascalCase pluginName}}API) api: {{pascalCase pluginName}}API,
   ): Promise<boolean> {
     return api.validate();

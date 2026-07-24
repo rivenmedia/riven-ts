@@ -34,7 +34,7 @@ export async function persistShowIndexerData(
     "unreleased",
   ]);
 
-  assert(
+  assert.ok(
     processableStates.safeParse(itemRequest.state).success,
     new MediaItemIndexErrorIncorrectState({
       item: itemRequest,
@@ -90,9 +90,12 @@ export async function persistShowIndexerData(
       genres: item.genres.map((genre) => genre.toLowerCase()),
       nextAirDate: null, // Reset the next air date; it will be recalculated during episode processing
       indexedAt,
+      seasons: [],
     });
 
-    await em.upsert(Show, show, { onConflictExcludeFields: ["indexedAt"] });
+    await em.upsert(Show, show, {
+      onConflictExcludeFields: ["indexedAt"],
+    });
 
     for (const season of Object.values(item.seasons)) {
       const seasonTitle = [
@@ -118,6 +121,7 @@ export async function persistShowIndexerData(
           : season.number > 0,
         itemRequest,
         indexedAt,
+        episodes: [],
       });
 
       show.seasons.add(seasonEntry);
@@ -189,16 +193,16 @@ export async function persistShowIndexerData(
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((error) => {
-        if (Array.isArray(error)) {
-          return error
+      .transform((rawError) => {
+        if (Array.isArray(rawError)) {
+          return rawError
             .map((err) =>
               err.constraints ? Object.values(err.constraints).join("; ") : "",
             )
             .join("; ");
         }
 
-        return error.message;
+        return rawError.message;
       })
       .parse(error);
 

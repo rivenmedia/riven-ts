@@ -1,5 +1,10 @@
+import { FatalValidationError } from "@repo/util-plugin-sdk/errors/fatal-validation-error";
+import { benchmark } from "@repo/util-plugin-sdk/helpers/benchmark";
+
 import { setTimeout } from "node:timers/promises";
 import { fromCallback } from "xstate";
+
+import { logger } from "../../../utilities/logger/logger.ts";
 
 import type { RegisteredPlugin } from "../../../types/plugins.ts";
 import type { PluginRegistrarMachineEvent } from "../index.ts";
@@ -8,14 +13,14 @@ import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-sett
 
 export interface ValidatePluginInput {
   plugin: RegisteredPlugin;
-  settings: PluginSettings;
+  pluginSettings: PluginSettings;
   dataSources: DataSourceMap;
 }
 
 export const validatePlugin = fromCallback<
   PluginRegistrarMachineEvent,
   ValidatePluginInput
->(({ input: { plugin, settings, dataSources }, sendBack }) => {
+>(({ input: { plugin, pluginSettings, dataSources }, sendBack }) => {
   function sendValidPluginEvent() {
     sendBack({
       type: "riven.plugin-valid",
@@ -42,10 +47,19 @@ export const validatePlugin = fromCallback<
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        const isValid = await plugin.config.validator({
-          settings,
-          dataSources,
-        });
+        const pluginName =
+          plugin.config.name.description ?? String(plugin.config.name);
+
+        const { result: isValid, timeTaken } = await benchmark(async () =>
+          plugin.config.validator({
+            settings: pluginSettings,
+            dataSources,
+          }),
+        );
+
+        logger.debug(
+          `Plugin "${pluginName}" validation attempt ${attempt.toString()} took ${timeTaken.toFixed(2)}ms (result: ${isValid.toString()})`,
+        );
 
         if (!isValid) {
           throw new Error("Plugin validation returned false");
@@ -55,7 +69,17 @@ export const validatePlugin = fromCallback<
 
         return;
       } catch (error) {
-        if (attempt >= maxAttempts) {
+        if (error instanceof FatalValidationError || attempt >= maxAttempts) {
+          const pluginName =
+            plugin.config.name.description ?? String(plugin.config.name);
+
+          logger.error(
+            error instanceof FatalValidationError
+              ? `Plugin "${pluginName}" validation failed and cannot be retried`
+              : `Plugin "${pluginName}" validation failed after ${attempt.toString()} attempts`,
+            { err: error },
+          );
+
           sendInvalidPluginEvent(error);
 
           return;
@@ -69,7 +93,5 @@ export const validatePlugin = fromCallback<
   // Run the plugin validator
   void validate();
 
-  return () => {
-    /* empty */
-  };
+  return () => undefined;
 });

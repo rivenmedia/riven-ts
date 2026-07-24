@@ -1,9 +1,8 @@
 import { createParameterDecorator } from "type-graphql";
 
-import {
-  type DataSourceConstructor,
-  isBasePluginContext,
-} from "../schemas/index.ts";
+import { isBasePluginContext } from "../schemas/index.ts";
+
+import type { DataSourceConstructor } from "../schemas/index.ts";
 
 /**
  * Parameter decorator used to inject the plugin context for the current plugin.

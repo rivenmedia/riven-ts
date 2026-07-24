@@ -1,21 +1,10 @@
-import { type Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
-import {
-  RivenEvent,
-  type RivenExternalEvent,
-} from "@repo/util-plugin-sdk/events";
+import { Show } from "@repo/util-plugin-sdk/dto/entities";
+import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 import chalk from "chalk";
 import { Duration } from "luxon";
 import os from "node:os";
-import {
-  type ActorRef,
-  type Snapshot,
-  assign,
-  enqueueActions,
-  forwardTo,
-  raise,
-  setup,
-} from "xstate";
+import { assign, enqueueActions, forwardTo, raise, setup } from "xstate";
 
 import { postProcessItemProcessor } from "../../message-queue/flows/post-process-media-item/post-process-media-item.processor.ts";
 import { PostProcessMediaItemFlow } from "../../message-queue/flows/post-process-media-item/post-process-media-item.schema.ts";
@@ -35,32 +24,26 @@ import { scrapeItemProcessor } from "../../message-queue/flows/process-media-ite
 import { ScrapeItemFlow } from "../../message-queue/flows/process-media-item/steps/scrape/scrape-item.schema.ts";
 import { requestContentServiceProcessor } from "../../message-queue/flows/request-content-service/request-content-service.processor.ts";
 import { RequestContentServiceFlow } from "../../message-queue/flows/request-content-service/request-content-service.schema.ts";
+import { requestStreamLinkProcessor } from "../../message-queue/flows/request-stream-link/request-stream-link.processor.ts";
+import { RequestStreamLinkFlow } from "../../message-queue/flows/request-stream-link/request-stream-link.schema.ts";
 import { MapItemsToFilesSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
 import { ParseScrapeResultsSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.schema.ts";
 import { ValidateTorrentFilesSandboxedJob } from "../../message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.schema.ts";
 import { createSandboxedWorker } from "../../message-queue/sandboxed-jobs/utilities/create-sandboxed-worker.ts";
 import { createFlowWorker } from "../../message-queue/utilities/create-flow-worker.ts";
+import { normaliseConcurrency } from "../../message-queue/utilities/normalise-concurrency.ts";
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { createEventScheduler } from "./actors/event-scheduler.actor.ts";
-import {
-  type FanOutDownloadInput,
-  fanOutDownload,
-} from "./actors/fan-out-download.actor.ts";
+import { fanOutDownload } from "./actors/fan-out-download.actor.ts";
 import { jobEnqueuer } from "./actors/job-enqueuer.actor.ts";
 import { processItemRequest } from "./actors/process-item-request.actor.ts";
 import { processMediaItem } from "./actors/process-media-item.actor.ts";
 import { requestContentServices } from "./actors/request-content-services.actor.ts";
-import {
-  type RequestItemInput,
-  requestItem,
-} from "./actors/request-item.actor.ts";
+import { requestItem } from "./actors/request-item.actor.ts";
 import { retryLibrary } from "./actors/retry-library.actor.ts";
-import {
-  type ScheduleReindexInput,
-  scheduleReindex,
-} from "./actors/schedule-reindex.actor.ts";
+import { scheduleReindex } from "./actors/schedule-reindex.actor.ts";
 
 import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
 import type { Flow } from "../../message-queue/flows/index.ts";
@@ -74,7 +57,13 @@ import type {
   ValidPluginMap,
 } from "../../types/plugins.ts";
 import type { RivenMachineEvent } from "../program/index.ts";
+import type { FanOutDownloadInput } from "./actors/fan-out-download.actor.ts";
+import type { RequestItemInput } from "./actors/request-item.actor.ts";
+import type { ScheduleReindexInput } from "./actors/schedule-reindex.actor.ts";
+import type { Movie } from "@repo/util-plugin-sdk/dto/entities";
+import type { RivenExternalEvent } from "@repo/util-plugin-sdk/events";
 import type { Queue, Worker } from "bullmq";
+import type { ActorRef, Snapshot } from "xstate";
 
 export interface MainRunnerMachineContext {
   availableParallelism: number;
@@ -283,6 +272,7 @@ export const mainRunnerMachine = setup({
             publishableEvents: input.publishableEvents,
             pluginQueues: input.pluginQueues,
             pluginWorkers: input.pluginWorkers,
+
             flowWorkers: {
               "process-item-request": createFlowWorker(
                 ProcessItemRequestFlow,
@@ -369,7 +359,14 @@ export const mainRunnerMachine = setup({
                 self.send,
                 input.plugins,
               ),
+              "request-stream-link": createFlowWorker(
+                RequestStreamLinkFlow,
+                requestStreamLinkProcessor,
+                self.send,
+                input.plugins,
+              ),
             },
+
             sandboxedWorkers: {
               "scrape-item.parse-scrape-results": createSandboxedWorker(
                 ParseScrapeResultsSandboxedJob,
@@ -378,7 +375,11 @@ export const mainRunnerMachine = setup({
                     .resolve("@repo/riven/workers/parse-scrape-results"),
                 ),
                 {},
-                { concurrency: availableParallelism * 0.25 },
+                {
+                  concurrency: normaliseConcurrency(
+                    availableParallelism * 0.25,
+                  ),
+                },
               ),
               "download-item.map-items-to-files": createSandboxedWorker(
                 MapItemsToFilesSandboxedJob,
@@ -386,7 +387,11 @@ export const mainRunnerMachine = setup({
                   import.meta.resolve("@repo/riven/workers/map-items-to-files"),
                 ),
                 {},
-                { concurrency: availableParallelism * 0.75 },
+                {
+                  concurrency: normaliseConcurrency(
+                    availableParallelism * 0.75,
+                  ),
+                },
               ),
               "download-item.validate-torrent-files": createSandboxedWorker(
                 ValidateTorrentFilesSandboxedJob,
@@ -395,7 +400,11 @@ export const mainRunnerMachine = setup({
                     .resolve("@repo/riven/workers/validate-torrent-files"),
                 ),
                 {},
-                { concurrency: availableParallelism * 0.25 },
+                {
+                  concurrency: normaliseConcurrency(
+                    availableParallelism * 0.25,
+                  ),
+                },
               ),
             },
           }),
@@ -512,6 +521,10 @@ export const mainRunnerMachine = setup({
                   message: `Successfully updated item request: [${chalk.bold(item.externalIdsLabel.join(" | "))}]`,
                   level: "silly",
                 }),
+              },
+              {
+                type: "processItemRequest",
+                params: ({ event: { item } }) => ({ item }),
               },
             ],
           },
@@ -740,11 +753,11 @@ export const mainRunnerMachine = setup({
             actions: { type: "requestContentServices" },
           },
 
-          // "riven-internal.retry-library": {
-          //   description:
-          //     "Retries any incomplete media items and item requests.",
-          //   actions: { type: "retryLibrary" },
-          // },
+          "riven-internal.retry-library": {
+            description:
+              "Retries any incomplete media items and item requests.",
+            actions: { type: "retryLibrary" },
+          },
 
           /**
            * External events

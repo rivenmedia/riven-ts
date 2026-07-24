@@ -1,16 +1,40 @@
 import {
+  RTN,
+  createRankingModel,
   createSettings,
-  defaultRankingModel,
 } from "@repo/util-rank-torrent-name";
 
 import { expect, vi } from "vitest";
 
 import { it as baseIt } from "../../../../../../../__tests__/test-context.ts";
+import * as rankingConfigModule from "../../../../../../../ranking-config/ranking-config.ts";
 import { rankStreamsProcessor } from "./rank-streams.processor.ts";
 
-const it = baseIt.extend("streams", ({ factories: { streamFactory } }) =>
+import type { MainRunnerMachineIntake } from "../../../../../../../state-machines/main-runner/index.ts";
+
+const it = baseIt.extend("streams", async ({ factories: { streamFactory } }) =>
   streamFactory.create(6),
 );
+
+it.beforeEach(() => {
+  vi.spyOn(rankingConfigModule, "rtnInstance", "get").mockReturnValue(
+    new RTN(
+      createRankingModel({
+        bluray: 0,
+        webrip: 0,
+        avc: 0,
+        mp3: 10_000,
+        atmos: 20_000,
+        dolbyDigitalPlus: 100_000,
+      }),
+      createSettings({
+        resolutions: {
+          r2160p: true,
+        },
+      }),
+    ),
+  );
+});
 
 it("does not include trashed streams", async ({
   createMockJob,
@@ -30,8 +54,6 @@ it("does not include trashed streams", async ({
       [streams[1].infoHash]: `${indexedMovie.title} 1080p`,
       [streams[2].infoHash]: indexedMovie.title,
     },
-    rtnSettings: createSettings(),
-    rtnRankingModel: defaultRankingModel,
   });
 
   const result = await rankStreamsProcessor(
@@ -40,13 +62,13 @@ it("does not include trashed streams", async ({
       scope: mockSentryScope,
     },
     {
-      sendEvent: vi.fn(),
+      sendEvent: vi.fn<MainRunnerMachineIntake>(),
       services,
       plugins: new Map(),
     },
   );
 
-  expect(result).toEqual(
+  expect(result).toStrictEqual(
     expect.not.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -81,25 +103,6 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
       [streams[4].infoHash]: indexedMovie.title,
       [streams[5].infoHash]: `${indexedMovie.title} mp3`,
     },
-    rtnSettings: createSettings({
-      customRanks: {
-        audio: {
-          mp3: {
-            fetch: true,
-            rank: 10000,
-          },
-          atmos: {
-            fetch: true,
-            rank: 20000,
-          },
-          dolbyDigitalPlus: {
-            fetch: true,
-            rank: 100000,
-          },
-        },
-      },
-    }),
-    rtnRankingModel: defaultRankingModel,
   });
 
   const result = await rankStreamsProcessor(
@@ -108,13 +111,13 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
       scope: mockSentryScope,
     },
     {
-      sendEvent: vi.fn(),
+      sendEvent: vi.fn<MainRunnerMachineIntake>(),
       services,
       plugins: new Map(),
     },
   );
 
-  expect(result).toEqual([
+  expect(result).toStrictEqual([
     expect.objectContaining({
       data: expect.objectContaining({
         rawTitle: `${indexedMovie.title} 720p DDP`,
@@ -168,8 +171,6 @@ it("handles foreign language movies with aliases correctly", async ({
       [streams[1].infoHash]: "Film Étranger 720p",
       [streams[2].infoHash]: "Foreign Movie 1080p",
     },
-    rtnSettings: createSettings(),
-    rtnRankingModel: defaultRankingModel,
   });
 
   const result = await rankStreamsProcessor(
@@ -178,13 +179,13 @@ it("handles foreign language movies with aliases correctly", async ({
       scope: mockSentryScope,
     },
     {
-      sendEvent: vi.fn(),
+      sendEvent: vi.fn<MainRunnerMachineIntake>(),
       services,
       plugins: new Map(),
     },
   );
 
-  expect(result).toEqual([
+  expect(result).toStrictEqual([
     expect.objectContaining({
       data: expect.objectContaining({
         rawTitle: "Película Extranjera 1080p BluRay",
@@ -223,8 +224,6 @@ it("handles foreign language shows with aliases correctly", async ({
       [streams[1].infoHash]: "Spectacle Étranger 720p",
       [streams[2].infoHash]: "Foreign Show 1080p",
     },
-    rtnSettings: createSettings(),
-    rtnRankingModel: defaultRankingModel,
   });
 
   const result = await rankStreamsProcessor(
@@ -233,13 +232,13 @@ it("handles foreign language shows with aliases correctly", async ({
       scope: mockSentryScope,
     },
     {
-      sendEvent: vi.fn(),
+      sendEvent: vi.fn<MainRunnerMachineIntake>(),
       services,
       plugins: new Map(),
     },
   );
 
-  expect(result).toEqual([
+  expect(result).toStrictEqual([
     expect.objectContaining({
       data: expect.objectContaining({
         rawTitle: "Espectáculo Extranjero 1080p BluRay",

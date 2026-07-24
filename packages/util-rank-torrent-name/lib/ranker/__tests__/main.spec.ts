@@ -1,13 +1,75 @@
-import { expect, it } from "vitest";
+import { it as baseIt, expect } from "vitest";
 
 import { parse } from "../../parser/parse.ts";
 import { RTN } from "../../rtn.ts";
 import { normaliseTitle } from "../../shared/normalise.ts";
 import { adultHandler, languageHandler, trashHandler } from "../fetch.ts";
 import { getLevRatio, titleMatch } from "../lev.ts";
-import { createSettings } from "../settings.ts";
+import {
+  createRankingModel,
+  createSettings,
+} from "../ranking-settings.schema.ts";
 
-it.each([
+const it = baseIt.extend("rankingConfig", () =>
+  createRankingModel({
+    av1: 500,
+    avc: 500,
+    bluray: 100,
+    dvd: -5000,
+    hdtv: -5000,
+    hevc: 500,
+    mpeg: -1000,
+    remux: 10_000,
+    vhs: -10_000,
+    web: 100,
+    webdl: 200,
+    webmux: -10_000,
+    xvid: -10_000,
+    pdtv: -10_000,
+    bdrip: -5000,
+    brrip: -10_000,
+    dvdrip: -5000,
+    hdrip: -10_000,
+    ppvrip: -10_000,
+    tvrip: -10_000,
+    uhdrip: -5000,
+    vhsrip: -10_000,
+    webdlrip: -10_000,
+    webrip: -1000,
+    bit10: 100,
+    dolbyVision: 3000,
+    hdr: 2000,
+    hdr10plus: 2100,
+    aac: 100,
+    atmos: 1000,
+    dolbyDigital: 50,
+    dolbyDigitalPlus: 150,
+    dtsLossy: 100,
+    dtsLossless: 2000,
+    mp3: -1000,
+    truehd: 2000,
+    threeD: -10_000,
+    converted: -1000,
+    documentary: -250,
+    dubbed: -1000,
+    edition: 100,
+    proper: 20,
+    repack: 20,
+    site: -10_000,
+    upscaled: -10_000,
+    cam: -10_000,
+    cleanAudio: -10_000,
+    r5: -10_000,
+    satrip: -10_000,
+    screener: -10_000,
+    size: -10_000,
+    telecine: -10_000,
+    telesync: -10_000,
+    scene: 0,
+  }),
+);
+
+it.for([
   ["The Walking Dead", "The Running Dead", true, 0.875],
   ["The Walking Dead S05E03 720p HDTV x264-ASAP", "The Walking Dead", true, 1],
   [
@@ -17,9 +79,9 @@ it.each([
     1,
   ],
   ["The Walking Dead", "Oppenheimer", false, 0],
-])(
+] as const)(
   "calculates the correct levenshtein ratio for %s",
-  (rawTitle, correctTitle, expectedMatch, expectedRatio) => {
+  ([rawTitle, correctTitle, expectedMatch, expectedRatio]) => {
     const data = parse(rawTitle);
     const match = titleMatch(correctTitle, data.title, 0.85);
     const ratio = getLevRatio(correctTitle, data.title, 0.85, {});
@@ -29,20 +91,20 @@ it.each([
   },
 );
 
-it.each([
+it.for([
   ["The Walking Dead", "the walking dead"],
   ["Marvel's Agents of S.H.I.E.L.D.", "marvels agents of s h i e l d"],
   ["The Walking Dead S05E03 720p HDTV x264-ASAP", "the walking dead"],
   ["фуриоса: хроники безумного макса", "фуриоса хроники безумного макса"],
   ["200% Wolf", "200 wolf"],
-])("normalises the title for %s", (rawTitle, correctTitle) => {
+] as const)("normalises the title for %s", ([rawTitle, correctTitle]) => {
   const data = parse(rawTitle);
   const normalisedTitle = normaliseTitle(data.title);
 
   expect(normalisedTitle).toBe(correctTitle);
 });
 
-it("sorts torrents correctly", () => {
+it("sorts torrents correctly", ({ rankingConfig }) => {
   const torrents = {
     "1234567890123456789012345678901234567890": [
       "Sprint",
@@ -76,29 +138,27 @@ it("sorts torrents correctly", () => {
     "1234567890123456789012345678901234567892", // Guardians of the Galaxy Vol. 2 (2017) 720p HDTC x264 MKVTV
     "1234567890123456789012345678901234567895", // [SubsPlease] Fairy Tail - 100 Years Quest - 05 (1080p) [1107F3A9].mkv
     "1234567890123456789012345678901234567891", // Madame Web 2024 1080p WEBRip 1400MB DD 5.1 x264-GalaxyRG[TGx]
-    "1234567890123456789012345678901234567894", // ww.Tamilblasters.sbs - 8 Bit Christmas (2021) HQ HDRip - x264 - Telugu (Fan Dub) - 400MB
+    "1234567890123456789012345678901234567894", // Ww.Tamilblasters.sbs - 8 Bit Christmas (2021) HQ HDRip - x264 - Telugu (Fan Dub) - 400MB
   ];
 
-  const settings = createSettings({
-    customRanks: {
-      hdr: {
-        dolbyVision: {
-          fetch: true,
-        },
-      },
+  const settings = createSettings();
+  const rtnInstance = new RTN(
+    {
+      ...rankingConfig,
+      dolbyVision: 3000,
     },
-  });
-  const rtnInstance = new RTN(settings);
+    settings,
+  );
   const rankedTorrents = Object.entries(torrents).map(
     ([hash, [correctTitle, rawTitle]]) =>
       rtnInstance.rankTorrent(rawTitle, hash, correctTitle, {}),
   );
   const sortedTorrents = rtnInstance.sortTorrents(rankedTorrents);
 
-  expect(sortedTorrents.map(({ hash }) => hash)).toEqual(expectedOrder);
+  expect(sortedTorrents.map(({ hash }) => hash)).toStrictEqual(expectedOrder);
 });
 
-it("sorts torrents with a resolution filter correctly", () => {
+it("sorts torrents with a resolution filter correctly", ({ rankingConfig }) => {
   const torrents = {
     "1234567890123456789012345678901234567890": [
       "Sprint",
@@ -130,15 +190,8 @@ it("sorts torrents with a resolution filter correctly", () => {
     resolutions: {
       r2160p: true,
     },
-    customRanks: {
-      hdr: {
-        dolbyVision: {
-          fetch: true,
-        },
-      },
-    },
   });
-  const rtnInstance = new RTN(settings);
+  const rtnInstance = new RTN(rankingConfig, settings);
   const rankedTorrents = Object.entries(torrents).map(
     ([hash, [correctTitle, rawTitle]]) =>
       rtnInstance.rankTorrent(rawTitle, hash, correctTitle, {}),
@@ -153,16 +206,16 @@ it("sorts torrents with a resolution filter correctly", () => {
     "1234567890123456789012345678901234567890", // Sprint.2024.S01.COMPLETE.4k.WEBDL.h264-EDITH[TGx]
   ];
 
-  expect(sortedTorrents.map(({ hash }) => hash)).toEqual(expectedOrder);
+  expect(sortedTorrents.map(({ hash }) => hash)).toStrictEqual(expectedOrder);
 });
 
-it.each([
+it.for([
   ["The Walking Dead S05E03", false],
   ["The Walking Dead S05E03 [English]", false],
   ["The Walking Dead S05E03 [English] [Spanish]", true],
-])(
+] as const)(
   "handles languages exclusions correctly for %s",
-  (rawTitle, expectedExclude) => {
+  ([rawTitle, expectedExclude]) => {
     const settings = createSettings({
       options: {
         allowEnglishInLanguages: false,
@@ -178,7 +231,7 @@ it.each([
   },
 );
 
-it.each([
+it.for([
   ["Deadpool & Wolverine (2024) Eng 1080p V3 HDTS AAC ESub mkv", true],
   ["Deadpool & Wolverine (2024) HDTS mkv", true],
   ["Deadpool&Wolverine 2024-TeleSync mkv", true],
@@ -191,14 +244,14 @@ it.each([
     true,
   ],
   ["The Walking Dead S05E03 720p x264-ASAP", false],
-])("handles trash detection for %s", (rawTitle, expectedTrash) => {
+] as const)("handles trash detection for %s", ([rawTitle, expectedTrash]) => {
   const data = parse(rawTitle);
   const trashResult = trashHandler(data, createSettings(), new Set());
 
   expect(trashResult).toBe(expectedTrash);
 });
 
-it.each([
+it.for([
   [
     "Mad.Max.Fury.Road.2015.1080p.BluRay.DDP5.1.x265.10bit-GalaxyRG265[TGx]",
     "movie",
@@ -212,34 +265,37 @@ it.each([
     [],
   ],
   ["The Walking Dead S05E03 720p x264-ASAP", "show", [5], [3]],
-])(
+] as const)(
   "handles type checking for %s",
-  (rawTitle, expectedType, expectedSeasons, expectedEpisodes) => {
+  ([rawTitle, expectedType, expectedSeasons, expectedEpisodes]) => {
     const data = parse(rawTitle);
 
     expect(data.type).toBe(expectedType);
-    expect(data.seasons).toEqual(expectedSeasons);
-    expect(data.episodes).toEqual(expectedEpisodes);
+    expect(data.seasons).toStrictEqual(expectedSeasons);
+    expect(data.episodes).toStrictEqual(expectedEpisodes);
   },
 );
 
-it.each([
+it.for([
   ["Deadpool & Wolverine (2024) Eng 1080p V3 HDTS AAC ESub xvideos mkv", true],
   ["The Walking Dead S05E03 720p x264-ASAP vrporn", true],
   ["The Walking Dead S05E03 720p x264-ASAP", false],
-])("handles adult content detection for %s", (rawTitle, expectedAdult) => {
-  const settings = createSettings({
-    options: {
-      removeAdultContent: true,
-    },
-  });
-  const data = parse(rawTitle);
-  const adultResult = adultHandler(data, settings, new Set());
+] as const)(
+  "handles adult content detection for %s",
+  ([rawTitle, expectedAdult]) => {
+    const settings = createSettings({
+      options: {
+        removeAdultContent: true,
+      },
+    });
+    const data = parse(rawTitle);
+    const adultResult = adultHandler(data, settings, new Set());
 
-  expect(adultResult).toBe(expectedAdult);
-});
+    expect(adultResult).toBe(expectedAdult);
+  },
+);
 
-it("handles bucket limits correctly", () => {
+it("handles bucket limits correctly", ({ rankingConfig }) => {
   // Unknown resolution torrents
   const unknownResTorrents = {
     efe476b52c7f5504042a036bd32adf2af9327e91: "Movie.2024.1.WEB-DL.mkv",
@@ -261,7 +317,7 @@ it("handles bucket limits correctly", () => {
     "38b640c9b942b95565fb69eb17470b1b8d0e23bc": "Movie.2024.720p.WEBDL.mkv",
   };
 
-  const rtnInstance = new RTN(createSettings());
+  const rtnInstance = new RTN(rankingConfig, createSettings());
   const rankedTorrents = Object.entries({
     ...unknownResTorrents,
     ...hdTorrents,
@@ -285,7 +341,7 @@ it("handles bucket limits correctly", () => {
   expect(hdResults.length).toBeLessThanOrEqual(2);
   expect(sdResults.length).toBeLessThanOrEqual(2);
 
-  const expectedTotal = 6; // 2 from each resolution bucket
+  const expectedTotal = 6; // 2 from for resolution bucket
 
-  expect(sortedTorrents.length).toBe(expectedTotal);
+  expect(sortedTorrents).toHaveLength(expectedTotal);
 });

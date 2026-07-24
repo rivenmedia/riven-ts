@@ -7,31 +7,47 @@
   "author": "Riven Media",
   "type": "module",
   "scripts": {
-    "format:check": "prettier --check . '!**/docker-data'",
-    "format:check:ci": "pnpm format:check --log-level warn",
-    "format:fix": "prettier --write . '!**/docker-data'",
+    "format:check": "oxfmt --check .",
+    "format:check:ci": "pnpm format:check",
+    "format:fix": "oxfmt --write .",
     "postinstall": "pnpm node .husky/install.mjs || true",
     "knip": "pnpm knip:prepare && knip",
-    "knip:ci": "pnpm knip --cache --no-exit-code --reporter github-actions",
-    "knip:ci:production": "pnpm knip:ci --strict",
-    "knip:prepare": "turbo codegen:api-schemas"
+    "lint": "oxlint --ignore-pattern '{apps,packages}/**'",
+    "lint:fix": "pnpm lint --fix",
+    "knip:ci:base": "pnpm knip --cache --no-exit-code",
+    "knip:ci:development": "pnpm knip:ci:base --reporter github-actions",
+    "knip:ci:production": "pnpm knip:ci:base --strict --reporter json | tail -1 > knip-report.json && jq -e '(.issues // []) | length == 0' knip-report.json > /dev/null",
+    "knip:prepare": "turbo codegen:api-schemas",
+    "validate-generators": "vitest run -c @repo/core-util-vitest-config -r turbo/generators --no-file-parallelism"
   },
   "devDependencies": {
-    "@repo/core-util-eslint-config": "workspace:^",
+    "@commitlint/cli": "catalog:",
+    "@commitlint/config-conventional": "catalog:",
+    "@commitlint/types": "catalog:",
+    "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
-    "@trivago/prettier-plugin-sort-imports": "catalog:",
+    "@repo/core-util-vitest-config": "workspace:^",
     "@turbo/gen": "catalog:",
     "@types/node": "catalog:",
+    "@typescript/native": "catalog:",
     "es-toolkit": "catalog:",
-    "eslint": "catalog:",
+    "execa": "catalog:",
     "husky": "catalog:",
     "knip": "catalog:",
     "lint-staged": "catalog:",
-    "prettier": "catalog:",
-    "sort-package-json": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
     "turbo": "catalog:",
     "type-fest": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
-  "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8"
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^24"
+    }
+  },
+  "packageManager": "pnpm@11.5.1+sha512.93f7b57422ea7068257235b4c16eb60762eb68e1dc23723199cc739043ea9be2c4143274a399d8c6defa2b1176226d9ca1c4b63482d6200c1a8fbaa78c1d1485"
 }

@@ -6,5 +6,5 @@ import { withLogContext } from "../../utilities/logger/log-context.ts";
  * @param callback The callback that handles the VFS operation
  * @returns A Sentry scope pre-loaded with VFS meta tags
  */
-export const withVfsScope = <T>(callback: () => Promise<T>) =>
+export const withVfsScope = async <T>(callback: () => Promise<T>) =>
   withLogContext({ "riven.log.source": "vfs" }, callback);

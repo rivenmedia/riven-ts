@@ -1,13 +1,8 @@
 import assert from "node:assert";
-import z, {
-  type ZodLiteral,
-  ZodNever,
-  type ZodObject,
-  ZodOptional,
-  type ZodType,
-} from "zod";
+import z, { ZodNever, ZodOptional } from "zod";
 
 import type { FlowChildJob, FlowJob, ParentOptions } from "bullmq";
+import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 type PartialJobOptions = Partial<Omit<FlowJob, "name" | "queueName" | "data">>;
 
@@ -30,14 +25,14 @@ export const createFlowJobBuilder = <
 
   const [queueName] = schema.shape.name.def.values;
 
-  assert(queueName, `No queue found for flow: ${schema.shape.name.value}`);
+  assert.ok(queueName, `No queue found for flow: ${schema.shape.name.value}`);
 
   return <O extends PartialJobOptions["opts"]>(
     name: string,
-    ...args: z.infer<T>["input"] extends Record<string, never>
+    ...args: z.input<T>["input"] extends Record<string, never>
       ? [jobOptions?: PartialJobOptions & { opts?: O }]
       : [
-          data: z.infer<T>["input"],
+          data: z.input<T>["input"],
           jobOptions?: PartialJobOptions & { opts?: O },
         ]
   ): O extends { parent: ParentOptions } ? FlowChildJob : FlowJob => {

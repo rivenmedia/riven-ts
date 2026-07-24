@@ -5,16 +5,22 @@ import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 import { DateTime } from "luxon";
 
+import { filterChildrenValues } from "../../../../utilities/filter-children-values.ts";
 import { downloadItemProcessorSchema } from "./download-item.schema.ts";
 
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
-  async function (
+  async (
     { job },
     { sendEvent, services: { mediaItemService, downloaderService } },
-  ) {
-    const [finalResult] = Object.values(await job.getChildrenValues());
+  ) => {
+    const childrenValues = filterChildrenValues(
+      await job.getChildrenValues(),
+      "download-item.find-valid-torrent",
+    );
 
-    const item = await mediaItemService.getMediaItem(job.data.id);
+    const [finalResult] = Object.values(childrenValues);
+
+    const item = await mediaItemService.getMediaItemById(job.data.id);
 
     if (!finalResult) {
       const error = new Error(
@@ -41,7 +47,7 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
 
       const incompleteItems = await updatedItem.getIncompleteItems();
 
-      if (incompleteItems.length) {
+      if (incompleteItems.length > 0) {
         sendEvent({
           type: "riven.media-item.download.partial-success",
           item: updatedItem,

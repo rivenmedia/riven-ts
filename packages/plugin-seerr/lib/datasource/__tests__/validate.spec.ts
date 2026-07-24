@@ -2,10 +2,12 @@ import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
 import { getAuthMeHandler } from "../../__generated__/handlers/getAuthMeHandler.ts";
+import { getSettingsNotificationsWebhookHandler } from "../../__generated__/handlers/getSettingsNotificationsWebhookHandler.ts";
 import { createGetAuthMeQueryResponse } from "../../__generated__/mocks/createGetAuthMe.ts";
 import { it } from "../../__tests__/seerr.test-context.ts";
-import { MetadataSettingsResponse } from "../../schemas/metadata-settings-response.schema.ts";
 import { SeerrAPI } from "../seerr.datasource.ts";
+
+import type { MetadataSettingsResponse } from "../../schemas/metadata-settings-response.schema.ts";
 
 it("returns false if the request fails", async ({ server, dataSourceMap }) => {
   server.use(
@@ -16,6 +18,7 @@ it("returns false if the request fails", async ({ server, dataSourceMap }) => {
         tv: "tvdb",
       }),
     ),
+    getSettingsNotificationsWebhookHandler({ enabled: false }),
   );
 
   const seerrApi = dataSourceMap.get(SeerrAPI);
@@ -36,6 +39,7 @@ it("returns true if the request succeeds", async ({
         tv: "tvdb",
       }),
     ),
+    getSettingsNotificationsWebhookHandler({ enabled: false }),
   );
 
   const seerrApi = dataSourceMap.get(SeerrAPI);

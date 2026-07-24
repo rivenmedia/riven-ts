@@ -9,7 +9,7 @@ import { ShowFactory } from "./show.factory.ts";
 import type { EntityData } from "@mikro-orm/core";
 
 export class SeasonFactory extends Factory<Season> {
-  model = Season;
+  public model = Season;
 
   protected override definition(
     input: EntityData<Season> = {},
@@ -21,7 +21,7 @@ export class SeasonFactory extends Factory<Season> {
       number: faker.number.int({ min: 1 }),
       posterPath: faker.image.url(),
       isRequested: true,
-      tvdbId: faker.number.int({ min: 1 }).toString(),
+      tvdbId: faker.string.numeric({ length: { min: 1, max: 10 } }),
       releaseDate: faker.date.between({
         from: DateTime.utc().minus({ years: 1 }).toISO(),
         to: DateTime.utc().plus({ years: 1 }).toISO(),

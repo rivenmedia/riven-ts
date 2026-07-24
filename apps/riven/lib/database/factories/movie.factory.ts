@@ -9,7 +9,7 @@ import { MovieItemRequestFactory } from "./movie-item-request.factory.ts";
 import type { EntityData } from "@mikro-orm/core";
 
 export class MovieFactory extends Factory<Movie> {
-  model = Movie;
+  public model = Movie;
 
   protected override definition(
     input: EntityData<Movie> = {},
@@ -22,7 +22,7 @@ export class MovieFactory extends Factory<Movie> {
       posterPath: faker.image.url(),
       contentRating: faker.helpers.arrayElement(MovieContentRating.options),
       itemRequest,
-      tmdbId: faker.number.int({ min: 1 }).toString(),
+      tmdbId: faker.string.numeric({ length: { min: 1, max: 10 } }),
       ...input,
       isRequested: true, // Movies are always requested
     };

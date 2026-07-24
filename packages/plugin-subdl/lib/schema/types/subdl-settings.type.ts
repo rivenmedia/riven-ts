@@ -3,8 +3,8 @@ import { Field, ObjectType } from "type-graphql";
 @ObjectType()
 export class SubdlSettings {
   @Field()
-  apiKey!: string;
+  public apiKey!: string;
 
   @Field(() => [String])
-  languages!: string[];
+  public languages!: string[];
 }

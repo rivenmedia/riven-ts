@@ -7,7 +7,7 @@ import { SeerrSettings } from "./seerr-settings.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export default {
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [SeerrAPI],
@@ -27,9 +27,7 @@ export default {
     },
   },
   settingsSchema: SeerrSettings,
-  validator({ dataSources }) {
-    const api = dataSources.get(SeerrAPI);
-
-    return api.validate();
+  async validator({ dataSources }) {
+    return dataSources.get(SeerrAPI).validate();
   },
-} satisfies RivenPlugin as RivenPlugin;
+};

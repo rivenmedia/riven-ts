@@ -7,7 +7,7 @@ import { TmdbSettings } from "./types/tmdb-settings.type.ts";
 @Resolver(() => Settings)
 export class TmdbSettingsResolver {
   @FieldResolver(() => TmdbSettings)
-  tmdb(): TmdbSettings {
+  public tmdb(): TmdbSettings {
     return {
       apiKey: "tmdb-api-key",
     };

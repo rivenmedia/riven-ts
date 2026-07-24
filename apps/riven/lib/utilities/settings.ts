@@ -10,10 +10,10 @@ import { deepFreeze } from "./deep-freeze.ts";
 import type { ReadonlyDeep } from "type-fest";
 
 class Settings {
-  readonly settings: ReadonlyDeep<RivenSettings>;
+  public readonly settings: ReadonlyDeep<RivenSettings>;
 
-  constructor(environment: NodeJS.ProcessEnv) {
-    const settingPattern = /^RIVEN_SETTING__(?<setting>.+)$/;
+  public constructor(environment: NodeJS.ProcessEnv) {
+    const settingPattern = /^RIVEN_SETTING__(?<setting>.+)$/u;
 
     const rawSettings: Record<string, unknown> = {};
 
@@ -31,6 +31,13 @@ class Settings {
     }
 
     this.settings = deepFreeze(RivenSettings.parse(rawSettings));
+
+    if (this.settings.printConfigurationOnStartup) {
+      console.debug("#################");
+      console.debug("Effective core configuration:");
+      console.debug(this.settings);
+      console.debug("#################");
+    }
 
     setEnvironmentData("settings", rawSettings);
   }

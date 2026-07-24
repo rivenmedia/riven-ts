@@ -30,21 +30,15 @@
         "!**/{logs,node_modules,temp,.turbo,.next,coverage,docker-data,dist}/**"
       ]
     },
-    "check-types": {
-      "dependsOn": ["codegen:api-schemas", "transit:source-files"],
-      "inputs": [
-        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
-        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
-      ]
-    },
     "dev": {
       "persistent": true,
       "cache": false,
       "dependsOn": ["codegen:api-schemas"]
     },
     "codegen:config-docs": {
-      "inputs": ["**/*-settings.schema.ts", "zod2md.config.ts"],
-      "outputs": ["docs/*.md"]
+      "dependsOn": ["codegen:api-schemas"],
+      "inputs": ["**/*-settings.schema.ts", "scripts/generate-zod-docs.ts"],
+      "outputs": ["docs/**/__generated__/**/*.mdx"]
     },
     "codegen:api-schemas": {
       "dependsOn": ["^codegen:api-schemas"],
@@ -71,13 +65,27 @@
       "dependsOn": ["codegen:api-schemas", "transit:source-files"]
     },
     "lint": {
-      "dependsOn": ["codegen:api-schemas"],
+      "dependsOn": ["codegen:api-schemas", "transit:source-files"],
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
         "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
       ]
     },
-    "lint:fix": {},
+    "lint:fix": {
+      "cache": false,
+      "dependsOn": ["codegen:api-schemas", "transit:source-files"]
+    },
+    "//#lint": {
+      "inputs": [
+        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
+        "!apps/**",
+        "!packages/**",
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
+      ]
+    },
+    "//#lint:fix": {
+      "cache": false
+    },
     "//#format:check:ci": {
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql,.md,.markdown,.mdx}",
@@ -87,7 +95,7 @@
     "//#knip": {
       "cache": false
     },
-    "//#knip:ci": {
+    "//#knip:ci:development": {
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql}",
         "!**/{logs,node_modules,temp,.turbo,.next,coverage,docker-data,dist}/**"
@@ -97,6 +105,14 @@
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql}",
         "!**/{logs,node_modules,temp,.turbo,.next,coverage,docker-data,dist}/**"
+      ],
+      "outputs": ["knip-report.json"]
+    },
+    "//#validate-generators": {
+      "inputs": [
+        "turbo/generators/**",
+        "!turbo/generators/coverage/**",
+        "transit:source-files"
       ]
     }
   }

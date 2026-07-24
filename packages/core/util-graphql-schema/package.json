@@ -2,6 +2,9 @@
   "name": "@repo/core-util-graphql-schema",
   "version": "0.0.0",
   "private": true,
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -9,13 +12,9 @@
       "default": "./lib/index.ts"
     }
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",
-    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
-    "lint": "eslint",
+    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
@@ -27,14 +26,12 @@
     "type-graphql": "catalog:"
   },
   "devDependencies": {
-    "@mikro-orm/core": "catalog:",
-    "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
-    "@repo/util-plugin-sdk": "workspace:^",
     "@types/node": "catalog:",
-    "@typescript-eslint/parser": "catalog:",
-    "eslint": "catalog:",
+    "@typescript/native": "catalog:",
+    "oxlint": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

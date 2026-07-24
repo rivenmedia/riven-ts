@@ -16,32 +16,23 @@ import {
   TitleSimilarityError,
 } from "./exceptions.ts";
 import { checkFetch } from "./fetch.ts";
-import { type Aliases, getLevRatio } from "./lev.ts";
-import { defaultRankingModel, getCustomRank } from "./settings.ts";
+import { getLevRatio } from "./lev.ts";
 
 import type { ParsedData } from "../schemas.ts";
 import type { RankResult, RankedResult } from "../types.ts";
-import type { CustomRanksConfig, RankingModel, Settings } from "./settings.ts";
+import type { Aliases } from "./lev.ts";
+import type { RankingModel, Settings } from "./ranking-settings.schema.ts";
 
 function resolveRank(
-  category: keyof CustomRanksConfig,
   key: keyof RankingModel,
-  settings: Settings,
   rankingModel: RankingModel,
 ): number {
-  const custom = getCustomRank(settings, category, key);
-
-  if (custom.rank !== undefined) {
-    return custom.rank;
-  }
-
-  return rankingModel[key];
+  return rankingModel[key] ?? 0;
 }
 
 function rankFromMap(
   value: string | undefined,
-  map: Map<string, [keyof CustomRanksConfig, keyof RankingModel]>,
-  settings: Settings,
+  map: Map<string, keyof RankingModel>,
   rankingModel: RankingModel,
 ): number {
   if (!value) {
@@ -54,13 +45,12 @@ function rankFromMap(
     return 0;
   }
 
-  return resolveRank(entry[0], entry[1], settings, rankingModel);
+  return resolveRank(entry, rankingModel);
 }
 
 function rankFromList(
   values: string[],
-  map: Map<string, [keyof CustomRanksConfig, keyof RankingModel]>,
-  settings: Settings,
+  map: Map<string, keyof RankingModel>,
   rankingModel: RankingModel,
 ): number {
   let total = 0;
@@ -69,7 +59,7 @@ function rankFromList(
     const entry = map.get(value.toLowerCase());
 
     if (entry) {
-      total += resolveRank(entry[0], entry[1], settings, rankingModel);
+      total += resolveRank(entry, rankingModel);
     }
   }
 
@@ -78,17 +68,16 @@ function rankFromList(
 
 function rankFromFlags(
   data: ParsedData,
-  flagMap: Map<string, [keyof CustomRanksConfig, keyof RankingModel]>,
-  settings: Settings,
+  flagMap: Map<string, keyof RankingModel>,
   rankingModel: RankingModel,
 ): number {
   let total = 0;
 
-  for (const [field, [category, key]] of flagMap.entries()) {
+  for (const [field, key] of flagMap.entries()) {
     const value = (data as unknown as Record<string, unknown>)[field];
 
     if (value) {
-      total += resolveRank(category, key, settings, rankingModel);
+      total += resolveRank(key, rankingModel);
     }
   }
 
@@ -100,7 +89,9 @@ function calculatePreferred(rawTitle: string, patterns: RegExp[]): number {
     return 0;
   }
 
-  return patterns.some((p) => p.test(rawTitle)) ? 10000 : 0;
+  return patterns.some((preferredPattern) => preferredPattern.test(rawTitle))
+    ? 10_000
+    : 0;
 }
 
 function calculatePreferredLangs(
@@ -111,7 +102,7 @@ function calculatePreferredLangs(
     return 0;
   }
 
-  return languages.some((lang) => preferred.includes(lang)) ? 10000 : 0;
+  return languages.some((lang) => preferred.includes(lang)) ? 10_000 : 0;
 }
 
 export function rank(
@@ -123,60 +114,25 @@ export function rank(
     throw new Error("Parsed data cannot have an empty rawTitle.");
   }
 
-  const scoreParts: Record<string, number> = {};
-
-  // Quality (includes rips and trash quality)
-  scoreParts["quality"] = rankFromMap(
-    data.quality,
-    QUALITY_MAP,
-    settings,
-    rankingModel,
-  );
-
-  // Codec
-  scoreParts["codec"] = data.codec
-    ? rankFromMap(data.codec, CODEC_MAP, settings, rankingModel)
-    : 0;
-
-  // HDR
-  scoreParts["hdr"] = data.hdr
-    ? rankFromList(data.hdr, HDR_MAP, settings, rankingModel)
-    : 0;
-
-  // Bit depth
-  if (data.bitDepth) {
-    scoreParts["bitDepth"] = resolveRank(
-      "hdr",
-      "bit10",
-      settings,
-      rankingModel,
-    );
-  }
-
-  // Audio
-  scoreParts["audio"] = data.audio
-    ? rankFromList(data.audio, AUDIO_MAP, settings, rankingModel)
-    : 0;
-
-  // Channels
-  scoreParts["channels"] = data.channels
-    ? rankFromList(data.channels, CHANNEL_MAP, settings, rankingModel)
-    : 0;
-
-  // Boolean flags (extras, trash.size, etc.)
-  scoreParts["flags"] = rankFromFlags(data, FLAG_MAP, settings, rankingModel);
-
-  // Preferred patterns (+10000)
-  scoreParts["preferredPatterns"] = calculatePreferred(
-    data.rawTitle,
-    settings.compiledPreferred,
-  );
-
-  // Preferred languages (+10000)
-  scoreParts["preferredLanguages"] = calculatePreferredLangs(
-    data.languages,
-    settings.languages.preferred,
-  );
+  const scoreParts = {
+    quality: rankFromMap(data.quality, QUALITY_MAP, rankingModel),
+    codec: data.codec ? rankFromMap(data.codec, CODEC_MAP, rankingModel) : 0,
+    hdr: data.hdr ? rankFromList(data.hdr, HDR_MAP, rankingModel) : 0,
+    bitDepth: data.bitDepth ? resolveRank("bit10", rankingModel) : 0,
+    audio: data.audio ? rankFromList(data.audio, AUDIO_MAP, rankingModel) : 0,
+    channels: data.channels
+      ? rankFromList(data.channels, CHANNEL_MAP, rankingModel)
+      : 0,
+    flags: rankFromFlags(data, FLAG_MAP, rankingModel),
+    preferredPatterns: calculatePreferred(
+      data.rawTitle,
+      settings.compiledPreferred,
+    ),
+    preferredLanguages: calculatePreferredLangs(
+      data.languages,
+      settings.languages.preferred,
+    ),
+  } as const;
 
   return {
     totalScore: Object.values(scoreParts).reduce((a, b) => a + b, 0),
@@ -192,7 +148,7 @@ export function rankTorrent(
   correctTitle: string,
   aliases: Aliases,
   settings: Settings,
-  rankingModel: RankingModel = defaultRankingModel,
+  rankingModel: RankingModel,
 ) {
   const hashValidation = hashSchema.safeParse(hash);
 
@@ -226,7 +182,7 @@ export function rankTorrent(
   }
 
   const { totalScore, scoreParts } = rank(data, settings, rankingModel);
-  const fetchResult = checkFetch(data, settings);
+  const fetchResult = checkFetch(data, settings, rankingModel);
 
   if (removeAllTrash && !fetchResult.fetch) {
     throw new FetchChecksFailedError(rawTitle, fetchResult.failedChecks);

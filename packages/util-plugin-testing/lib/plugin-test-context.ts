@@ -1,9 +1,4 @@
-/* eslint-disable no-empty-pattern */
-import {
-  type BaseDataSourceConfig,
-  DataSourceMap,
-  type RivenPlugin,
-} from "@repo/util-plugin-sdk";
+import { DataSourceMap } from "@repo/util-plugin-sdk";
 
 import { RedisConnection } from "bullmq";
 import { it as baseIt, vi } from "vitest";
@@ -11,18 +6,23 @@ import { it as baseIt, vi } from "vitest";
 import { mockLogger } from "./create-mock-logger.ts";
 import { createMockPluginSettings } from "./create-mock-plugin-settings.ts";
 
+import type {
+  BaseDataSource,
+  BaseDataSourceConfig,
+  RivenPlugin,
+} from "@repo/util-plugin-sdk";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { Telemetry } from "bullmq";
 
 export const it = baseIt
-  .extend("server", async ({}, { onCleanup }) => {
+  .extend("server", { auto: true }, async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
     const server = setupServer();
 
-    if (/^(\*|msw)/.test(process.env["DEBUG"] ?? "")) {
+    if (/^(\*|msw)/u.test(process.env["DEBUG"] ?? "")) {
       server.events.on("response:mocked", ({ request, response }) => {
-        console.log(
+        console.debug(
           "%s %s received %s %s",
           request.method,
           request.url,
@@ -48,21 +48,18 @@ export const it = baseIt
       'Plugin config must be provided before using the plugin test context. Use `it.override("plugin", <pluginConfig>)` to set the plugin config for your tests.',
     );
   })
-  .extend("settings", { scope: "file" }, ({ plugin }) =>
+  .extend("settings", ({ plugin }) =>
     createMockPluginSettings(plugin.settingsSchema, {}),
   )
   .extend("gqlServer", { scope: "file" }, async ({ plugin }, { onCleanup }) => {
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");
 
-    const mockServer = await buildMockServer<GraphQLContext>(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-      plugin.resolvers as [Function, ...Function[]],
-    );
+    const mockServer = await buildMockServer<GraphQLContext>(plugin.resolvers);
 
     await mockServer.start();
 
-    onCleanup(() => mockServer.stop());
+    onCleanup(async () => mockServer.stop());
 
     return mockServer;
   })
@@ -79,12 +76,14 @@ export const it = baseIt
     async function getRedisServerBinary() {
       try {
         const { stdout: redisServerBinary } =
+          // oxlint-disable-next-line typescript/strict-void-return
           await promisify(exec)("which redis-server");
 
         return redisServerBinary.trim();
       } catch (error) {
         throw new Error(
           `Failed to find "redis-server" binary. Is Redis installed and available in your PATH?\n${String(error)}`,
+          { cause: error },
         );
       }
     }
@@ -108,14 +107,16 @@ export const it = baseIt
 
       return client;
     } catch (error) {
-      throw new Error(`Failed to get Redis URL.\n${String(error)}`);
+      throw new Error(`Failed to get Redis URL.\n${String(error)}`, {
+        cause: error,
+      });
     }
   })
   .extend(
     "dataSourceMap",
-    { scope: "file" },
-    ({ plugin, logger, settings, httpCache, redisClient }) => {
+    ({ plugin, logger, settings, httpCache, redisClient }, { onCleanup }) => {
       const dataSourceMap = new DataSourceMap();
+      const instances = new Set<BaseDataSource<Record<string, unknown>>>();
 
       if (plugin.dataSources) {
         const dataSourceConfig = {
@@ -124,17 +125,25 @@ export const it = baseIt
           logger,
           pluginSymbol: plugin.name,
           telemetry: undefined as unknown as Telemetry,
-          requestAttempts: 1,
+          requestBackoffDelay: 0,
           settings: settings.get(plugin.settingsSchema),
+          userAgent: "mock-user-agent",
         } satisfies BaseDataSourceConfig<Record<string, unknown>>;
 
         for (const DataSourceClass of plugin.dataSources) {
-          dataSourceMap.set(
-            DataSourceClass,
-            new DataSourceClass(dataSourceConfig),
-          );
+          const dataSourceInstance = new DataSourceClass(dataSourceConfig);
+
+          dataSourceMap.set(DataSourceClass, dataSourceInstance);
+          instances.add(dataSourceInstance);
         }
       }
+
+      onCleanup(async () => {
+        for (const instance of instances) {
+          await instance.worker.close();
+          await instance.queue.close();
+        }
+      });
 
       return dataSourceMap;
     },
@@ -147,7 +156,7 @@ export const it = baseIt
       },
       logger: {} as never,
       plugins: {},
-      sendEvent: vi.fn(),
+      sendEvent: vi.fn<GraphQLContext["sendEvent"]>(),
     }),
   );
 

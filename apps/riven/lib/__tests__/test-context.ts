@@ -1,23 +1,41 @@
-/* eslint-disable no-empty-pattern */
-import {
-  type ApolloServerContext,
-  CoreKey,
-} from "@repo/core-util-graphql-schema";
+import { DataSourceMap } from "@repo/util-plugin-sdk";
 
+import { graphql, passthrough } from "msw";
 import assert from "node:assert";
+import { randomUUID } from "node:crypto";
 import { test as testBase, vi } from "vitest";
 
-import type { JobsOptions } from "bullmq";
+import { CoreKey } from "../graphql/context.ts";
+import { queueNameFor } from "../message-queue/utilities/queue-name-for.ts";
+
+import type { Services } from "../database/database.ts";
+import type { ApolloServerContext } from "../graphql/context.ts";
+import type { Flow } from "../message-queue/flows/index.ts";
+import type { SandboxedJobDefinition } from "../message-queue/sandboxed-jobs/index.ts";
+import type { MainRunnerMachineIntake } from "../state-machines/main-runner/index.ts";
+import type { ValidPlugin, ValidPluginMap } from "../types/plugins.ts";
+import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
+import type { Mock } from "vitest";
+import type { ZodObject } from "zod";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFunction = (...args: any[]) => any;
 
 export const it = testBase
-  .extend("server", { auto: false }, async ({}, { onCleanup }) => {
+  .extend("server", { auto: true }, async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
-    const server = setupServer();
+    const server = setupServer(
+      graphql.query(
+        ({ request: { url } }) => url.includes("localhost"),
+        passthrough,
+      ),
+    );
 
-    if (/^(\*|msw)/.test(process.env["DEBUG"] ?? "")) {
+    if (/^(\*|msw)/u.test(process.env["DEBUG"] ?? "")) {
       server.events.on("response:mocked", ({ request, response }) => {
-        console.log(
+        console.debug(
           "%s %s received %s %s",
           request.method,
           request.url,
@@ -99,7 +117,9 @@ export const it = testBase
       mediaEntryFactory: new MediaEntryFactory(em),
     };
   })
-  .extend("stream", ({ factories }) => factories.streamFactory.createOne())
+  .extend("stream", async ({ factories }) =>
+    factories.streamFactory.createOne(),
+  )
   .extend("mediaEntry", ({ factories }) =>
     factories.mediaEntryFactory.makeOne({
       downloadUrl: "http://example.com/file.mp4",
@@ -172,33 +192,71 @@ export const it = testBase
         seasons: [season],
       },
     }) => {
-      assert(season);
+      assert.ok(season);
 
       return season;
     },
   )
-  .extend("episode", ({ indexedShowContext: { episodes: [episode] = [] } }) => {
-    assert(episode);
+  .extend(
+    "episode",
+    ({
+      indexedShowContext: {
+        episodes: [episode],
+      },
+    }) => {
+      assert.ok(episode);
 
-    return episode;
-  })
-  .extend("mockQueue", async ({}, { onCleanup }) => {
+      return episode;
+    },
+  )
+  .extend("mockQueue", async ({ task }, { onCleanup }) => {
     const { createQueue } =
       await import("../message-queue/utilities/create-queue.ts");
 
-    const queue = createQueue("mock-queue");
+    const queue = createQueue(`mock-queue-${task.id}`);
 
-    onCleanup(() => queue.close());
+    onCleanup(async () => queue.close());
 
     return queue;
   })
   .extend("createMockJob", async ({ mockQueue }) => {
-    const { randomUUID } = await import("node:crypto");
     const { Job } = await import("bullmq");
 
-    return <T>(data: T, opts?: JobsOptions) =>
-      Job.create(mockQueue, randomUUID(), data, opts);
+    return async <T>(data: T, opts?: JobsOptions) => {
+      const job = await Job.create(mockQueue, randomUUID(), data, opts);
+
+      vi.spyOn(job, "log").mockResolvedValue(1);
+
+      return job;
+    };
   })
+  .extend(
+    "mockFlowProcessorContext",
+    async ({
+      services,
+    }): Promise<{
+      services: Services;
+      sendEvent: Mock<MainRunnerMachineIntake>;
+      plugins: ValidPluginMap;
+    }> => {
+      const { plugin: testPlugin } = await import("@repo/plugin-test");
+
+      return {
+        services,
+        sendEvent: vi.fn<MainRunnerMachineIntake>(),
+        plugins: new Map<symbol, ValidPlugin>([
+          [
+            testPlugin.name,
+            {
+              config: testPlugin,
+              dataSources: new DataSourceMap(),
+              status: "valid",
+            },
+          ],
+        ]),
+      };
+    },
+  )
   .extend("mockSentryScope", async () => {
     const Sentry = await import("@sentry/node");
 
@@ -214,7 +272,7 @@ export const it = testBase
   .extend(
     "gqlServer",
     { scope: "file" },
-    async ({ apolloServerInstance, orm }, { onCleanup }) => {
+    async ({ apolloServerInstance, orm, services }, { onCleanup }) => {
       const { initApolloClient } = await import("../graphql/apollo-client.ts");
       const { startStandaloneServer } =
         await import("@apollo/server/standalone");
@@ -222,13 +280,14 @@ export const it = testBase
       const { url } = await startStandaloneServer<ApolloServerContext>(
         apolloServerInstance,
         {
-          context: () =>
+          context: async () =>
             Promise.resolve({
               [CoreKey]: {
                 em: orm.em.fork(),
+                services,
               },
               logger: {} as never,
-              sendEvent: vi.fn(),
+              sendEvent: vi.fn<MainRunnerMachineIntake>(),
               plugins: {},
             }),
           listen: { port: 0 },
@@ -237,20 +296,7 @@ export const it = testBase
 
       initApolloClient(new URL(url));
 
-      vi.doMock(import("node:worker_threads"), async (importOriginal) => {
-        const originalModule = await importOriginal();
-        const { toMerged } = await import("es-toolkit");
-
-        return toMerged(originalModule, {
-          workerData: {
-            gqlUrl: url,
-          },
-        });
-      });
-
       onCleanup(async () => {
-        vi.doUnmock(import("node:worker_threads"));
-
         await apolloServerInstance.stop();
       });
 
@@ -261,6 +307,80 @@ export const it = testBase
     "apolloClient",
     { scope: "file" },
     await import("../graphql/apollo-client.ts"),
+  )
+  .extend("createFlowWorker", async ({}, { onCleanup }) => {
+    const { createFlowWorker } =
+      await import("../message-queue/utilities/create-flow-worker.ts");
+
+    const workers = new Set<Worker>();
+    const queues = new Set<Queue>();
+
+    onCleanup(async () => {
+      for (const worker of workers) {
+        await worker.close();
+      }
+
+      for (const queue of queues) {
+        await queue.close();
+      }
+    });
+
+    return (flowSchema: ZodObject, processor: AnyFunction) => {
+      const { queue, worker } = createFlowWorker(
+        flowSchema as never,
+        processor as never,
+        vi.fn(),
+        new Map(),
+      );
+
+      workers.add(worker);
+      queues.add(queue);
+
+      return { queue, worker };
+    };
+  })
+  .extend("createPluginWorker", async ({}, { onCleanup }) => {
+    const { createPluginWorker } =
+      await import("../message-queue/utilities/create-plugin-worker.ts");
+
+    const workers = new Set<Worker>();
+    const queues = new Set<Queue>();
+
+    onCleanup(async () => {
+      for (const worker of workers) {
+        await worker.close();
+      }
+
+      for (const queue of queues) {
+        await queue.close();
+      }
+    });
+
+    return (
+      eventType: RivenEvent["type"],
+      pluginName: string,
+      processor: Processor,
+    ) => {
+      const { queue, worker } = createPluginWorker(
+        eventType,
+        pluginName,
+        processor,
+      );
+
+      workers.add(worker);
+      queues.add(queue);
+
+      return { queue, worker };
+    };
+  })
+  .extend(
+    "createMockJobChildKey",
+    () =>
+      (
+        eventName: Flow["name"] | SandboxedJobDefinition["name"],
+        pluginName?: string,
+      ) =>
+        `bull:${queueNameFor(eventName, pluginName)}:${randomUUID()}` as const,
   );
 
 it.afterEach(async ({ mockSentryScope, apolloClient }) => {

@@ -1,10 +1,5 @@
-import * as Sentry from "@sentry/node";
-import {
-  type QueueOptions,
-  UnrecoverableError,
-  Worker,
-  type WorkerOptions,
-} from "bullmq";
+import { captureException } from "@sentry/node";
+import { UnrecoverableError, Worker } from "bullmq";
 import { AbortError, toMerged } from "es-toolkit";
 import assert from "node:assert";
 import os from "node:os";
@@ -14,10 +9,12 @@ import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
 import { createQueue } from "./create-queue.ts";
+import { normaliseConcurrency } from "./normalise-concurrency.ts";
 
 import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
 import type { ValidPluginMap } from "../../types/plugins.ts";
 import type { Flow, FlowHandlers } from "../flows/index.ts";
+import type { QueueOptions, WorkerOptions } from "bullmq";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 Worker.setMaxListeners(200);
@@ -47,7 +44,7 @@ export function createFlowWorker<
 ) {
   const [flowName] = flowSchema.shape.name.def.values;
 
-  assert(
+  assert.ok(
     flowName,
     `No queue name found for flow: ${flowSchema.shape.name.value}`,
   );
@@ -56,8 +53,8 @@ export function createFlowWorker<
 
   const worker = new Worker(
     flowName,
-    (job, token, signal) => {
-      return new Promise((resolve, reject) => {
+    async (job, token, signal) =>
+      new Promise((resolve, reject) => {
         signal?.addEventListener("abort", () => {
           reject(new AbortError(`${job.name} aborted`));
         });
@@ -87,7 +84,7 @@ export function createFlowWorker<
                 },
               );
             } catch (error) {
-              Sentry.captureException(error);
+              captureException(error);
 
               if (error instanceof Error) {
                 throw error;
@@ -99,11 +96,10 @@ export function createFlowWorker<
         )
           .then(resolve)
           .catch(reject);
-      });
-    },
+      }),
     toMerged<WorkerOptions, typeof workerOptions>(
       {
-        concurrency: os.availableParallelism() * 1.5,
+        concurrency: normaliseConcurrency(os.availableParallelism() * 1.5),
         removeOnComplete: { count: 5000 },
         removeOnFail: {
           age: 60 * 60 * 24,

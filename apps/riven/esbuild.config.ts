@@ -1,6 +1,7 @@
-import * as esbuild from "esbuild";
+import { build } from "esbuild";
+import { nodeExternalsPlugin } from "esbuild-node-externals";
 
-await esbuild.build({
+await build({
   entryPoints: ["lib/message-queue/sandboxed-jobs/jobs/**/*.processor.ts"],
   outdir: "dist/workers",
   bundle: true,
@@ -9,5 +10,6 @@ await esbuild.build({
   format: "esm",
   sourcemap: true,
   treeShaking: true,
-  external: ["bullmq", "winston"],
+  minify: true,
+  plugins: [nodeExternalsPlugin({ allowWorkspaces: true })],
 });

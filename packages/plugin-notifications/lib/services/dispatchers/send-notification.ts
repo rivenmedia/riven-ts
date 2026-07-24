@@ -5,7 +5,7 @@ import { jsonWebhookDispatcher } from "./json-webhook/json-webhook.dispatcher.ts
 import type { NotificationsAPI } from "../../datasource/notifications.datasource.ts";
 import type { NotificationPayload } from "../../schemas/notification-payload.schema.ts";
 
-export function sendNotification(
+export async function sendNotification(
   rawUrl: string,
   payload: NotificationPayload,
   api: NotificationsAPI,
@@ -13,9 +13,11 @@ export function sendNotification(
   const service = parseNotificationUrl(rawUrl);
 
   switch (service.type) {
-    case "discord":
+    case "discord": {
       return discordDispatcher.send(service, payload, api);
-    case "json":
+    }
+    case "json": {
       return jsonWebhookDispatcher.send(service, payload, api);
+    }
   }
 }

@@ -6,7 +6,7 @@ import { Factory } from "@mikro-orm/seeder";
 import type { EntityData } from "@mikro-orm/core";
 
 export class MediaEntryFactory extends Factory<MediaEntry> {
-  model = MediaEntry;
+  public model = MediaEntry;
 
   protected override definition(
     input: EntityData<MediaEntry> = {},

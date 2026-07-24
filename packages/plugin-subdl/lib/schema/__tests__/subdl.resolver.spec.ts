@@ -13,7 +13,7 @@ it('returns the validation status when calling "subdlIsValid" query', async ({
     http.get("https://api.subdl.com/api/v1/subtitles", () =>
       HttpResponse.json({
         status: true,
-        results: [{ sd_id: 123456, name: "Inception" }],
+        results: [{ sd_id: 123_456, name: "Inception" }],
         subtitles: [],
       }),
     ),
@@ -30,7 +30,7 @@ it('returns the validation status when calling "subdlIsValid" query', async ({
     { contextValue: gqlContext },
   );
 
-  assert(body.kind === "single");
+  assert.ok(body.kind === "single");
 
   expect(body.singleResult.errors).toBeUndefined();
   expect(body.singleResult.data?.["subdlIsValid"]).toBe(true);

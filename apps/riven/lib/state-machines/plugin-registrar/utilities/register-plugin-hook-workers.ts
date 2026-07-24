@@ -1,4 +1,3 @@
-import { type Queue, Worker } from "bullmq";
 import chalk from "chalk";
 
 import { createPluginWorker } from "../../../message-queue/utilities/create-plugin-worker.ts";
@@ -13,6 +12,7 @@ import type {
 } from "../../../types/plugins.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+import type { Worker, Queue } from "bullmq";
 
 export interface RegisterPluginHookWorkersOutput {
   pluginQueues: PluginQueueMap;

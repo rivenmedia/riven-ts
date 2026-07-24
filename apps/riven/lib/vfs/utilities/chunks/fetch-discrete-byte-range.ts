@@ -8,12 +8,11 @@ import { createChunkCacheKey } from "./create-chunk-cache-key.ts";
 import type { MediaFileHandleMetadata } from "../file-handle-map.ts";
 
 export const fetchDiscreteByteRange = async (
-  fd: number,
   fileHandle: MediaFileHandleMetadata,
   [start, end]: readonly [number, number],
   shouldCache = true,
 ) => {
-  const response = await createStreamRequest(fd, fileHandle.url, [start, end]);
+  const response = await createStreamRequest(fileHandle.url, [start, end]);
   const data = await response.body.arrayBuffer();
   const buffer = Buffer.from(data);
 

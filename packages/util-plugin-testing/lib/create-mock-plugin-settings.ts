@@ -15,9 +15,14 @@ export const createMockPluginSettings = <T extends ZodObject>(
     env[`RIVEN_PLUGIN_SETTING__${mockPluginKey}__${key}`] = String(value);
   }
 
-  const pluginSettings = new PluginSettings(env, [mockPluginKey], mockLogger);
+  const pluginSettings = new PluginSettings(
+    env,
+    [mockPluginKey],
+    mockLogger,
+    false,
+  );
 
-  pluginSettings._set(mockPluginKey, schema);
+  pluginSettings.set(mockPluginKey, schema);
 
   return pluginSettings;
 };

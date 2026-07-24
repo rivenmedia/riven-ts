@@ -47,7 +47,7 @@ services:
 
   bullboard:
     container_name: bullboard
-    image: venatum/bull-board
+    image: venatum/bull-board:latest
     restart: unless-stopped
     ports:
       - 4000:4000
@@ -64,6 +64,14 @@ services:
     extends:
       file: ./packages/plugin-plex/docker-compose.yaml
       service: plex
+    profiles:
+      - all
+      - services
+
+  jellyfin:
+    extends:
+      file: ./packages/plugin-jellyfin/docker-compose.yaml
+      service: jellyfin
     profiles:
       - all
       - services

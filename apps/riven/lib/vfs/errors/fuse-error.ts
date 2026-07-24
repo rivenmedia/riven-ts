@@ -1,6 +1,8 @@
 import Fuse from "@zkochan/fuse-native";
 import z from "zod";
 
+import { getVfsOperationContext } from "../utilities/vfs-operation-context.ts";
+
 export const FuseErrorCode = z.literal([
   Fuse.EPERM,
   Fuse.ENOENT,
@@ -131,10 +133,28 @@ export const FuseErrorCode = z.literal([
 type FuseErrorCode = z.infer<typeof FuseErrorCode>;
 
 export class FuseError extends Error {
-  errorCode: FuseErrorCode;
+  public override name = "FuseError";
 
-  constructor(errorCode: FuseErrorCode, message: string) {
-    super(message);
+  public errorCode: FuseErrorCode;
+
+  public constructor(errorCode: FuseErrorCode, message: string) {
+    const context = getVfsOperationContext();
+
+    const fd =
+      context.operationName === "read" || context.operationName === "release"
+        ? context.fd
+        : undefined;
+
+    const tags = Object.entries({
+      "operation-name": context.operationName,
+      fd,
+      path: context.path,
+    })
+      .filter((entry): entry is [string, string | number] => entry[1] != null)
+      .map(([key, val]) => `[${key}=${val.toString()}]`)
+      .join("");
+
+    super([message, tags].filter(Boolean).join(" "));
 
     this.errorCode = errorCode;
   }

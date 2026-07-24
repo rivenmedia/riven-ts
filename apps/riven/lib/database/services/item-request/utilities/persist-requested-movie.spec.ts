@@ -1,10 +1,11 @@
-import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
 import { expect } from "vitest";
 
 import { it } from "../../../../__tests__/test-context.ts";
+
+import type { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 
 it("returns the item request if processed successfully", async ({
   services: { itemRequestService },
@@ -15,7 +16,7 @@ it("returns the item request if processed successfully", async ({
     imdbId: requestedId,
   });
 
-  expect(result.item).toEqual(
+  expect(result.item).toStrictEqual(
     expect.objectContaining({
       imdbId: requestedId,
     }),
@@ -45,7 +46,7 @@ it("saves the external request ID if provided", async ({
     externalRequestId,
   });
 
-  expect(result.item).toEqual(
+  expect(result.item).toStrictEqual(
     expect.objectContaining<Partial<ItemRequest>>({
       externalRequestId,
     }),

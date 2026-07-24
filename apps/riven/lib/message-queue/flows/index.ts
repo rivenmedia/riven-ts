@@ -36,6 +36,10 @@ import {
   RequestContentServiceFlow,
   requestContentServiceProcessorSchema,
 } from "./request-content-service/request-content-service.schema.ts";
+import {
+  RequestStreamLinkFlow,
+  requestStreamLinkProcessorSchema,
+} from "./request-stream-link/request-stream-link.schema.ts";
 
 export const Flow = z.discriminatedUnion("name", [
   ProcessItemRequestFlow,
@@ -47,6 +51,7 @@ export const Flow = z.discriminatedUnion("name", [
   RequestSubtitlesFlow,
   ProcessMediaItemFlow,
   PostProcessMediaItemFlow,
+  RequestStreamLinkFlow,
 ]);
 
 export type Flow = z.infer<typeof Flow>;
@@ -59,6 +64,7 @@ export const FlowHandlers = {
   "download-item": downloadItemProcessorSchema,
   "download-item.find-valid-torrent": findValidTorrentProcessorSchema,
   "download-item.rank-streams": rankStreamsProcessorSchema,
+  "request-stream-link": requestStreamLinkProcessorSchema,
   "request-subtitles": requestSubtitlesProcessorSchema,
   "post-process-media-item": postProcessMediaItemProcessorSchema,
 } satisfies Record<Flow["name"], z.ZodFunction>;

@@ -1,0 +1,8 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tags": ["group:jellyfin", "type:plugin"],
+  "tasks": {
+    "build": {}
+  }
+}

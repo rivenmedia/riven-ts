@@ -5,7 +5,8 @@ import { NotFoundError, ref } from "@mikro-orm/core";
 import { expect, vi } from "vitest";
 
 import { it } from "../../../../__tests__/test-context.ts";
-import { MatchedFile } from "../../../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+
+import type { MatchedFile } from "../../../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 
 it("throws an error if the media item has no streams", async ({
   indexedMovieContext: { indexedMovie },
@@ -166,7 +167,7 @@ it("adds one media entry per episode for shows", async ({
         name: `${episode.title}.mp4`,
         matchedMediaItemId: episode.id,
         isCachedFile: false,
-      })) as [MatchedFile, ...MatchedFile[]],
+      })),
     },
     "@repo/plugin-test",
   );

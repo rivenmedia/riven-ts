@@ -12,11 +12,16 @@ import {
   fileNameToFdCountMap,
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
+import {
+  getVfsOperationContext,
+  withVfsOperationContext,
+} from "../utilities/vfs-operation-context.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
 import type { OPERATIONS } from "@zkochan/fuse-native";
 
-async function release(fd: number) {
+async function release() {
+  const { fd } = getVfsOperationContext("release");
   const response = await fdToResponsePromiseMap.get(fd);
 
   if (response) {
@@ -39,14 +44,14 @@ async function release(fd: number) {
   // Clean up all fd-related mappings related to this file descriptor.
   // The chunk calculations map is intentionally omitted, as it can be reused by other
   // file descriptors opening the same file.
-  [
+  for (const map of [
     fdToFileHandleMeta,
     fdToResponsePromiseMap,
     fdToCurrentStreamPositionMap,
     fdToPreviousReadPositionMap,
-  ].forEach((map) => {
+  ]) {
     map.delete(fd);
-  });
+  }
 
   if (!fileHandleMeta) {
     logger.warn(
@@ -68,11 +73,12 @@ async function release(fd: number) {
 
       // If there are no more file descriptors referencing this file,
       // we can clean up the file-name based mappings as well to free up memory.
-      [fileNameToFileChunkCalculationsMap, fileNameIsFetchingLinkMap].forEach(
-        (map) => {
-          map.delete(fileHandleMeta.originalFileName);
-        },
-      );
+      for (const map of [
+        fileNameToFileChunkCalculationsMap,
+        fileNameIsFetchingLinkMap,
+      ]) {
+        map.delete(fileHandleMeta.originalFileName);
+      }
     }
   }
 
@@ -81,13 +87,16 @@ async function release(fd: number) {
   );
 }
 
-export const releaseSync = function (_path, fd, callback) {
-  void withVfsScope(async () => {
-    try {
-      await release(fd);
+export const releaseSync = function releaseSync(path, fd, callback) {
+  void withVfsScope(async () =>
+    withVfsOperationContext(
+      { operationName: "release", path, fd },
+      async () => {
+        await release();
 
-      process.nextTick(callback, 0);
-    } catch (error) {
+        process.nextTick(callback, 0);
+      },
+    ).catch((error: unknown) => {
       if (isFuseError(error)) {
         logger.error("VFS release FuseError", { err: error });
 
@@ -96,9 +105,11 @@ export const releaseSync = function (_path, fd, callback) {
         return;
       }
 
-      logger.error("VFS release unknown error", { err: error });
+      logger.error(`Unexpected VFS release error for path: ${path}`, {
+        err: error,
+      });
 
       process.nextTick(callback, Fuse.EIO);
-    }
-  });
+    }),
+  );
 } satisfies OPERATIONS["release"];

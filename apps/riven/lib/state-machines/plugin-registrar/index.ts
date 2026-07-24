@@ -1,30 +1,18 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
-import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
 import chalk from "chalk";
-import {
-  type AnyActorRef,
-  type MachineContext,
-  assign,
-  enqueueActions,
-  setup,
-} from "xstate";
+import { assign, enqueueActions, setup } from "xstate";
 import { ZodError } from "zod";
 
+import packageJson from "../../../package.json" with { type: "json" };
 import { logger } from "../../utilities/logger/logger.ts";
 import { redisCache } from "../../utilities/redis-cache.ts";
 import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
-import {
-  type ParsedPlugins,
-  collectPluginsForRegistration,
-} from "./actors/collect-plugins-for-registration.actor.ts";
+import { collectPluginsForRegistration } from "./actors/collect-plugins-for-registration.actor.ts";
 import { validatePlugin } from "./actors/validate-plugin.actor.ts";
-import {
-  type RegisterPluginHookWorkersOutput,
-  registerPluginHookWorkers,
-} from "./utilities/register-plugin-hook-workers.ts";
+import { registerPluginHookWorkers } from "./utilities/register-plugin-hook-workers.ts";
 
 import type {
   InvalidPlugin,
@@ -37,6 +25,10 @@ import type {
   ValidPlugin,
   ValidPluginMap,
 } from "../../types/plugins.ts";
+import type { ParsedPlugins } from "./actors/collect-plugins-for-registration.actor.ts";
+import type { RegisterPluginHookWorkersOutput } from "./utilities/register-plugin-hook-workers.ts";
+import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+import type { AnyActorRef, MachineContext } from "xstate";
 
 export interface PluginRegistrarMachineContext extends MachineContext {
   rootRef: AnyActorRef;
@@ -48,7 +40,7 @@ export interface PluginRegistrarMachineContext extends MachineContext {
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: PublishableEventSet;
-  settings: PluginSettings | null;
+  pluginSettings: PluginSettings | null;
 }
 
 export interface PluginRegistrarMachineInput {
@@ -61,7 +53,7 @@ export interface PluginRegistrarMachineOutput {
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: PublishableEventSet;
-  settings: PluginSettings;
+  pluginSettings: PluginSettings;
 }
 
 export type PluginRegistrarMachineEvent =
@@ -100,7 +92,7 @@ export const pluginRegistrarMachine = setup({
               );
             }
 
-            pluginSettings._set(pluginConfigPrefix, plugin.settingsSchema);
+            pluginSettings.set(pluginConfigPrefix, plugin.settingsSchema);
           } catch (error) {
             if (error instanceof ZodError) {
               logger.error(
@@ -128,6 +120,7 @@ export const pluginRegistrarMachine = setup({
                   },
                   settings: pluginSettings.get(plugin.settingsSchema),
                   telemetry,
+                  userAgent: `Riven/${packageJson.version} (${pluginName})`,
                 });
 
                 dataSources.set(DataSource, instance);
@@ -147,11 +140,11 @@ export const pluginRegistrarMachine = setup({
           });
         }
 
-        pluginSettings._lock();
+        pluginSettings.lock();
 
         return pluginMap;
       },
-      settings: (_, { pluginSettings }) => pluginSettings,
+      pluginSettings: (_, { pluginSettings }) => pluginSettings,
     }),
     handleValidPlugin: assign(
       (
@@ -211,10 +204,10 @@ export const pluginRegistrarMachine = setup({
       },
     ),
     spawnValidators: assign(
-      ({ spawn, context: { pendingPlugins, settings } }) => {
+      ({ spawn, context: { pendingPlugins, pluginSettings } }) => {
         const validatorRefs = new Map<symbol, AnyActorRef>();
 
-        if (!settings) {
+        if (!pluginSettings) {
           throw new Error(
             "PluginSettings is not initialised. Have the plugins been registered?",
           );
@@ -225,7 +218,7 @@ export const pluginRegistrarMachine = setup({
             id: "validatePlugin",
             input: {
               plugin,
-              settings,
+              pluginSettings,
               dataSources: plugin.dataSources,
             },
           });
@@ -246,13 +239,11 @@ export const pluginRegistrarMachine = setup({
           pluginWorkers,
           publishableEvents,
         }: RegisterPluginHookWorkersOutput,
-      ) => {
-        return {
-          pluginQueues,
-          pluginWorkers,
-          publishableEvents,
-        };
-      },
+      ) => ({
+        pluginQueues,
+        pluginWorkers,
+        publishableEvents,
+      }),
     ),
   },
   actors: {
@@ -276,7 +267,7 @@ export const pluginRegistrarMachine = setup({
       pluginQueues: new Map(),
       pluginWorkers: new Map(),
       publishableEvents: new Set(),
-      settings: null,
+      pluginSettings: null,
       parsedPlugins: null,
     }),
     id: "Plugin registrar",
@@ -288,10 +279,10 @@ export const pluginRegistrarMachine = setup({
         pluginQueues,
         pluginWorkers,
         publishableEvents,
-        settings,
+        pluginSettings,
       },
     }) => {
-      if (!settings) {
+      if (!pluginSettings) {
         throw new Error(
           "PluginSettings is not available in the output context.",
         );
@@ -303,7 +294,7 @@ export const pluginRegistrarMachine = setup({
         pluginQueues,
         pluginWorkers,
         publishableEvents,
-        settings,
+        pluginSettings,
       };
     },
     states: {
@@ -331,8 +322,8 @@ export const pluginRegistrarMachine = setup({
                         message: [
                           `Collected ${chalk.bold(parsedPlugins.validPlugins.length.toString())} plugins for validation:`,
                           parsedPlugins.validPlugins
-                            .map((p) =>
-                              chalk.bold(p.name.description?.toString()),
+                            .map(({ name }) =>
+                              chalk.bold(name.description?.toString()),
                             )
                             .join(", "),
                         ].join(" "),
@@ -347,11 +338,11 @@ export const pluginRegistrarMachine = setup({
                       params: {
                         message: [
                           `Found ${chalk.bold(parsedPlugins.invalidPlugins.size.toString())} invalid plugins:`,
-                          Array.from(
-                            parsedPlugins.invalidPlugins
-                              .keys()
-                              .map((pluginName) => chalk.bold(pluginName)),
-                          ).join(", "),
+                          parsedPlugins.invalidPlugins
+                            .keys()
+                            .map((pluginName) => chalk.bold(pluginName))
+                            .toArray()
+                            .join(", "),
                         ].join(" "),
                         level: "warn",
                       },
@@ -379,14 +370,14 @@ export const pluginRegistrarMachine = setup({
           actions: [
             {
               type: "assignPluginHooks",
-              params: ({ context: { validPlugins, settings } }) => {
-                if (!settings) {
+              params: ({ context: { validPlugins, pluginSettings } }) => {
+                if (!pluginSettings) {
                   throw new Error(
                     "PluginSettings is not initialised. Have the plugins been registered?",
                   );
                 }
 
-                return registerPluginHookWorkers(validPlugins, settings);
+                return registerPluginHookWorkers(validPlugins, pluginSettings);
               },
             },
             {

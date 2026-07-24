@@ -7,6 +7,7 @@ import { ScrapedMovieSeeder } from "../../database/seeders/movies/scraped-movie.
 import { CompletedShowSeeder } from "../../database/seeders/shows/completed-show.seeder.ts";
 import { ForeignLanguageShowSeeder } from "../../database/seeders/shows/foreign-language-show.seeder.ts";
 import { IndexedShowSeeder } from "../../database/seeders/shows/indexed-show.seeder.ts";
+import { PartiallyCompletedShowSeeder } from "../../database/seeders/shows/partially-completed-show.seeder.ts";
 import { ScrapedShowSeeder } from "../../database/seeders/shows/scraped-show.seeder.ts";
 
 import type { BaseSeeder } from "../../database/seeders/base.seeder.ts";
@@ -38,6 +39,8 @@ const buildSeederFunction =
       await seeder.run(em, seeder.context);
       await em.flush();
 
+      em.clear();
+
       results.push(seeder.context);
     }
 
@@ -50,21 +53,20 @@ const buildSeederFunction =
     return results as SeederResult<S, C>;
   };
 
-export const buildSeederFunctions = (em: EntityManager) => {
-  return {
-    // Movies
-    seedIndexedMovie: buildSeederFunction(em, IndexedMovieSeeder),
-    seedScrapedMovie: buildSeederFunction(em, ScrapedMovieSeeder),
-    seedCompletedMovie: buildSeederFunction(em, CompletedMovieSeeder),
-    seedForeignLanguageMovie: buildSeederFunction(
-      em,
-      ForeignLanguageMovieSeeder,
-    ),
+export const buildSeederFunctions = (em: EntityManager) => ({
+  // Movies
+  seedIndexedMovie: buildSeederFunction(em, IndexedMovieSeeder),
+  seedScrapedMovie: buildSeederFunction(em, ScrapedMovieSeeder),
+  seedCompletedMovie: buildSeederFunction(em, CompletedMovieSeeder),
+  seedForeignLanguageMovie: buildSeederFunction(em, ForeignLanguageMovieSeeder),
 
-    // Shows
-    seedIndexedShow: buildSeederFunction(em, IndexedShowSeeder),
-    seedScrapedShow: buildSeederFunction(em, ScrapedShowSeeder),
-    seedCompletedShow: buildSeederFunction(em, CompletedShowSeeder),
-    seedForeignLanguageShow: buildSeederFunction(em, ForeignLanguageShowSeeder),
-  };
-};
+  // Shows
+  seedIndexedShow: buildSeederFunction(em, IndexedShowSeeder),
+  seedScrapedShow: buildSeederFunction(em, ScrapedShowSeeder),
+  seedPartiallyCompletedShow: buildSeederFunction(
+    em,
+    PartiallyCompletedShowSeeder,
+  ),
+  seedCompletedShow: buildSeederFunction(em, CompletedShowSeeder),
+  seedForeignLanguageShow: buildSeederFunction(em, ForeignLanguageShowSeeder),
+});

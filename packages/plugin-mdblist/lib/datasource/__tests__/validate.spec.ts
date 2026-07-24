@@ -6,9 +6,7 @@ import { MdblistAPI } from "../mdblist.datasource.ts";
 
 it("returns false if the request fails", async ({ server, dataSourceMap }) => {
   server.use(
-    http.get("**/user", () =>
-      HttpResponse.json({ success: false }, { status: 401 }),
-    ),
+    http.get("**/user", () => HttpResponse.json(null, { status: 401 })),
   );
 
   const mdblistApi = dataSourceMap.get(MdblistAPI);

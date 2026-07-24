@@ -8,7 +8,7 @@ import { pluginConfig } from "../test-plugin.config.ts";
 @Resolver()
 export class TestResolver {
   @Query(() => Boolean)
-  testIsValid(
+  public async testIsValid(
     @PluginDataSource(pluginConfig.name, TestAPI) api: TestAPI,
   ): Promise<boolean> {
     return api.validate();

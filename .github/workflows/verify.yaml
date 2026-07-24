@@ -39,10 +39,6 @@ jobs:
             command: lint
             runner-requirements:
               - fuse
-          - name: Types
-            command: check-types
-            runner-requirements:
-              - fuse
           - name: Formatting
             command: //#format:check:ci
           - name: Tests
@@ -58,9 +54,17 @@ jobs:
             env:
               RIVEN_SETTING__databaseUrl: postgres+psycopg2://runner:runner@127.0.0.1:5432/riven
           - name: Knip (development)
-            command: //#knip:ci
+            command: //#knip:ci:development
           - name: Knip (production)
             command: //#knip:ci:production
+          - name: Build Wiki
+            command: "@repo/wiki#build"
+            runner-requirements:
+              - fuse
+          - name: Validate generators
+            command: //#validate-generators
+            runner-requirements:
+              - redis-server
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
       task: ${{ matrix.task.command }}

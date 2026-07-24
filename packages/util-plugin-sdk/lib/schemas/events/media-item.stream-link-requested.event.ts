@@ -18,9 +18,36 @@ export type MediaItemStreamLinkRequestedEvent = z.infer<
   typeof MediaItemStreamLinkRequestedEvent
 >;
 
-export const MediaItemStreamLinkRequestedResponse = z.object({
-  link: z.url(),
-});
+export const MediaItemStreamLinkRequestedResponse = z.discriminatedUnion(
+  "success",
+  [
+    z.object({
+      success: z.literal(true),
+      data: z.intersection(
+        z.object({
+          link: z.url(),
+        }),
+        z.discriminatedUnion("isPermalink", [
+          z.object({
+            isPermalink: z.literal(true),
+          }),
+          z.object({
+            isPermalink: z.literal(false),
+            expiresAt: z.iso
+              .datetime()
+              .describe(
+                "The expiry date for this stream link; once expired, a new link will be requested.",
+              ),
+          }),
+        ]),
+      ),
+    }),
+    z.object({
+      success: z.literal(false),
+      statusCode: z.int().positive(),
+    }),
+  ],
+);
 
 export type MediaItemStreamLinkRequestedResponse = z.infer<
   typeof MediaItemStreamLinkRequestedResponse

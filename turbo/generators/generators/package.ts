@@ -44,6 +44,8 @@ export const createPackageGenerator = (plop: PlopTypes.NodePlopAPI) =>
           if (!data.confirm) {
             return "Package creation cancelled.";
           }
+
+          return undefined;
         },
         type: "addMany",
         base: "templates/shared/boilerplate",
@@ -55,6 +57,8 @@ export const createPackageGenerator = (plop: PlopTypes.NodePlopAPI) =>
           if (!data.confirm) {
             return "Package creation cancelled.";
           }
+
+          return undefined;
         },
         type: "addMany",
         base: "templates/package",
@@ -62,7 +66,7 @@ export const createPackageGenerator = (plop: PlopTypes.NodePlopAPI) =>
         templateFiles: "templates/package/**",
       },
       installDependenciesAction,
-      (answers) => {
+      async (answers) => {
         const { packageType, packageName } = answers as PackageAnswers;
 
         return formatOutputCode([

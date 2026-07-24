@@ -1,9 +1,4 @@
-import {
-  Collection,
-  EntityRepositoryType,
-  type Opt,
-  type Ref,
-} from "@mikro-orm/core";
+import { Collection, EntityRepositoryType } from "@mikro-orm/core";
 import {
   Entity,
   Enum,
@@ -13,45 +8,44 @@ import {
 import { reduceAsync } from "es-toolkit";
 import { Field, ObjectType } from "type-graphql";
 
-import {
-  ShowContentRating,
-  ShowContentRatingEnum,
-} from "../../enums/content-ratings.enum.ts";
+import { ShowContentRatingEnum } from "../../enums/content-ratings.enum.ts";
 import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { ShowStatus } from "../../enums/show-status.enum.ts";
 import { ShowRepository } from "../../repositories/show.repository.ts";
-import { MediaEntry } from "../filesystem/index.ts";
 import { Season, ShowLikeMediaItem } from "./index.ts";
 
+import type { ShowContentRating } from "../../enums/content-ratings.enum.ts";
+import type { MediaEntry } from "../filesystem/index.ts";
 import type { ItemRequest } from "../requests/item-request.entity.ts";
+import type { Opt, Ref } from "@mikro-orm/core";
 
 @ObjectType({ implements: ShowLikeMediaItem })
 @Entity({ repository: () => ShowRepository })
 export class Show extends ShowLikeMediaItem {
-  [EntityRepositoryType]?: ShowRepository;
+  public [EntityRepositoryType]?: ShowRepository;
 
   @Field(() => ShowContentRatingEnum)
-  declare contentRating: ShowContentRating;
+  declare public contentRating: ShowContentRating;
 
-  override type: Opt<"show"> = "show" as const;
+  public override type: Opt<"show"> = "show" as const;
 
-  declare itemRequest: Ref<ItemRequest>;
+  declare public itemRequest: Ref<ItemRequest>;
 
-  declare filesystemEntries: never;
+  declare public filesystemEntries: never;
 
   @Field(() => ShowStatus.enum, { nullable: true })
   @Enum(() => ShowStatus.enum)
-  status!: ShowStatus;
+  public status!: ShowStatus;
 
   @Field(() => [Season])
   @OneToMany(() => Season, (season) => season.show)
-  seasons = new Collection<Season>(this);
+  public seasons = new Collection<Season>(this);
 
   @Field(() => [Season])
   @OneToMany(() => Season, (season) => season.show, {
     where: { isRequested: true },
   })
-  requestedSeasons = new Collection<Season>(this);
+  public requestedSeasons = new Collection<Season>(this);
 
   /**
    * The date when the next episode of this show is expected to air.
@@ -59,17 +53,17 @@ export class Show extends ShowLikeMediaItem {
    * Primarily used internally for scheduling updates.
    */
   @Property()
-  nextAirDate!: Date | null;
+  public nextAirDate!: Date | null;
 
-  getPrettyName(): string {
+  public getPrettyName(): string {
     return `${this.title.replaceAll(".", "")} (${this.year?.toString() ?? "Unknown"}) {tvdb-${this.tvdbId}}`;
   }
 
-  getShow() {
+  public getShow() {
     return this;
   }
 
-  async getEpisodes(includeSpecials = false) {
+  public async getEpisodes(includeSpecials = false) {
     const seasons = await this.seasons.matching({
       orderBy: { number: "asc" },
       populate: ["episodes"],
@@ -81,7 +75,7 @@ export class Show extends ShowLikeMediaItem {
     return seasons.flatMap((season) => season.episodes.getItems());
   }
 
-  getStandardSeasons(stateFilter?: MediaItemState[]) {
+  public async getStandardSeasons(stateFilter?: MediaItemState[]) {
     return this.seasons.matching({
       orderBy: { number: "asc" },
       where: {
@@ -91,7 +85,7 @@ export class Show extends ShowLikeMediaItem {
     });
   }
 
-  async getSpecialSeason() {
+  public async getSpecialSeason() {
     const [season] = await this.seasons.matching({
       limit: 1,
       where: { isSpecial: true },
@@ -100,7 +94,7 @@ export class Show extends ShowLikeMediaItem {
     return season;
   }
 
-  async getMediaEntries() {
+  public async getMediaEntries() {
     const seasons = await this.seasons.matching({
       where: {
         episodes: {
@@ -125,7 +119,7 @@ export class Show extends ShowLikeMediaItem {
     );
   }
 
-  async getExpectedFileCount(): Promise<number> {
+  public async getExpectedFileCount(): Promise<number> {
     const processableStates = MediaItemState.exclude(["unreleased"]);
 
     const seasons = await this.getStandardSeasons(processableStates.options);
@@ -141,7 +135,7 @@ export class Show extends ShowLikeMediaItem {
     return count;
   }
 
-  async getIncompleteItems() {
+  public async getIncompleteItems() {
     return this.seasons.matching({
       where: {
         isRequested: true,
@@ -153,7 +147,7 @@ export class Show extends ShowLikeMediaItem {
     });
   }
 
-  async getUnrequestedItems() {
+  public async getUnrequestedItems() {
     return this.seasons.matching({
       where: {
         isRequested: false,

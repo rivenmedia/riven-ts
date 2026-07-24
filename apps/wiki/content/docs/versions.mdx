@@ -1,0 +1,77 @@
+---
+title: Riven Versions
+description: Understanding the different versions of Riven and which one to use.
+---
+
+There are multiple versions of Riven in the wild. People are sometimes confused about what is what, so here's the definitive guide.
+
+## Version Overview
+
+| Version      | Status             | Language   | Repo                                                                  |
+| ------------ | ------------------ | ---------- | --------------------------------------------------------------------- |
+| **Riven TS** | Active development | TypeScript | [rivenmedia/riven-ts](https://github.com/rivenmedia/riven-ts)         |
+| **Riven v1** | Maintenance only   | Python     | formerly rivenmedia/riven                                             |
+| **Riven v0** | Deprecated         | Python     | -                                                                     |
+| **Riven RS** | Community project  | Rust       | [olivertgwalton/riven-rs](https://github.com/olivertgwalton/riven-rs) |
+
+---
+
+## Riven TS (Recommended)
+
+**This is the official version and the one you should use going forward.**
+
+Riven TS is a complete rewrite of Riven in TypeScript. It features:
+
+- A modern **plugin architecture** with an SDK for building custom integrations
+- **GraphQL API** powered by Apollo Server and type-graphql
+- **XState state machines** for reliable workflow orchestration
+- **BullMQ job queues** with Redis for resilient async processing
+- **FUSE virtual file system** for clean media mounting
+- **MikroORM with PostgreSQL** for data storage
+
+Riven TS is what this documentation covers. It's the actively developed version and all new features and improvements go here.
+
+```
+docker pull ghcr.io/rivenmedia/riven-ts:latest
+```
+
+## Riven v1
+
+Riven v1 was the previous stable version, written in Python. It used a monolithic architecture with a REST API and SQLite/PostgreSQL for storage.
+
+**v1 will not receive new features.** It may receive critical bug fixes for a limited time, but users are encouraged to migrate to Riven TS.
+
+Key differences from Riven TS:
+
+- Monolithic Python application (no plugin system)
+- REST API instead of GraphQL
+- Different configuration format (settings.json vs environment variables)
+- Uses symlinks or rclone instead of the FUSE VFS
+
+If you're running v1, the [Docker Compose Generator](/generator) has a legacy v1 section to help you.
+
+## Riven v0
+
+Riven v0 is the original version. **Do not use it.** It used symlinks instead of a virtual file system and has fundamental limitations that were addressed in v1 and TS.
+
+If you're still running v0, you should migrate to Riven TS immediately.
+
+## Riven RS
+
+Riven RS is a **community implementation** of Riven written in Rust by [Oli](https://github.com/olivertgwalton). It's a separate project with its own design decisions.
+
+Key points about Riven RS:
+
+- It's a community project, not the official Riven
+- Written in Rust for performance
+- Has its own architecture and configuration
+- Maintained independently
+
+Riven RS is a valid choice if you prefer Rust, but for the official project with full plugin support and the largest community, use Riven TS.
+
+## Which Should I Use?
+
+- **New user?** Use **Riven TS**. It's the official, actively developed version.
+- **Running v1?** Consider migrating to **Riven TS** when ready. v1 is in maintenance mode.
+- **Running v0?** Migrate to **Riven TS** as soon as possible.
+- **Want to use Rust?** Check out **Riven RS** (community project).

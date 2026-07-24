@@ -6,9 +6,7 @@ import { PlexAPI } from "../plex.datasource.ts";
 
 it.skip("returns false if the request fails", ({ server, dataSourceMap }) => {
   server.use(
-    http.get("**/validate", () =>
-      HttpResponse.json({ success: false }, { status: 401 }),
-    ),
+    http.get("**/validate", () => HttpResponse.json(null, { status: 401 })),
   );
 
   const plexApi = dataSourceMap.get(PlexAPI);

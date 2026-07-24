@@ -1,10 +1,10 @@
-import Fuse, { type OPERATIONS } from "@zkochan/fuse-native";
-import { Buffer } from "node:buffer";
+import Fuse from "@zkochan/fuse-native";
 import Undici from "undici";
 
 import { logger } from "../../utilities/logger/logger.ts";
 import { config } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
+import { SeekDetectedError } from "../errors/seek-detected.ts";
 import { calculateChunkRange } from "../utilities/chunks/calculate-chunk-range.ts";
 import { fetchDiscreteByteRange } from "../utilities/chunks/fetch-discrete-byte-range.ts";
 import { detectReadType } from "../utilities/detect-read-type.ts";
@@ -12,53 +12,55 @@ import {
   fdToCurrentStreamPositionMap,
   fdToFileHandleMeta,
   fdToPreviousReadPositionMap,
+  fdToResponsePromiseMap,
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
 import { performBodyRead } from "../utilities/read-types/perform-body-read.ts";
 import { performCacheHit } from "../utilities/read-types/perform-cache-hit.ts";
+import {
+  getVfsOperationContext,
+  withVfsOperationContext,
+} from "../utilities/vfs-operation-context.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
-export interface ReadInput {
-  buffer: Buffer;
-  path: string;
-  fd: number;
-  length: number;
-  position: number;
-}
+import type { OPERATIONS } from "@zkochan/fuse-native";
 
-async function read({ fd, length, position, buffer }: ReadInput) {
-  const fileHandle = fdToFileHandleMeta.get(fd);
-
-  if (!fileHandle) {
-    throw new FuseError(
-      Fuse.EBADF,
-      `Invalid file handle for read: ${fd.toString()}`,
-    );
-  }
+async function read() {
+  const {
+    buffer,
+    fd,
+    length,
+    position,
+    context: {
+      fileHandleMetadata,
+      previousReadPosition,
+      currentStreamPosition,
+    },
+  } = getVfsOperationContext("read");
 
   // Subtitle files are served directly from an in-memory buffer
-  if (fileHandle.type === "subtitle") {
-    const end = Math.min(position + length, fileHandle.contentBuffer.length);
+  if (fileHandleMetadata.type === "subtitle") {
+    const end = Math.min(
+      position + length,
+      fileHandleMetadata.contentBuffer.length,
+    );
     const bytesRead = end - position;
 
     if (bytesRead <= 0) {
       return 0;
     }
 
-    fileHandle.contentBuffer.copy(buffer, 0, position, end);
+    fileHandleMetadata.contentBuffer.copy(buffer, 0, position, end);
 
     return bytesRead;
   }
 
   const fileChunkCalculations = fileNameToFileChunkCalculationsMap.get(
-    fileHandle.originalFileName,
+    fileHandleMetadata.originalFileName,
   );
 
   if (!fileChunkCalculations) {
-    throw new FuseError(
-      Fuse.EBADF,
-      `Missing chunk calculations for file handle: ${fd.toString()}`,
-    );
+    throw new FuseError(Fuse.EBADF, "Missing chunk calculations");
   }
 
   const {
@@ -68,12 +70,10 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     },
   } = calculateChunkRange({
     chunkSize: config.chunkSize,
-    fileSize: fileHandle.fileSize,
+    fileSize: fileHandleMetadata.fileSize,
     requestRange: [position, position + length - 1],
-    fileName: fileHandle.originalFileName,
+    fileName: fileHandleMetadata.originalFileName,
   });
-
-  const previousReadPosition = fdToPreviousReadPositionMap.get(fd);
 
   const readType = detectReadType(
     previousReadPosition,
@@ -81,8 +81,6 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     length,
     fileChunkCalculations,
   );
-
-  const currentStreamPosition = fdToCurrentStreamPositionMap.get(fd);
 
   logger.silly(
     [
@@ -92,7 +90,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
       `length=${length.toString()}`,
       `position=${position.toString()}`,
       `previous=${previousReadPosition?.toString() ?? "N/A"}`,
-      `diff=${previousReadPosition !== undefined ? (position - previousReadPosition).toString() : "N/A"}`,
+      `diff=${previousReadPosition === undefined ? "N/A" : (position - previousReadPosition).toString()}`,
       `current-stream-position=${currentStreamPosition?.toString() ?? "N/A"}`,
     ].join(" | "),
   );
@@ -100,8 +98,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
   switch (readType) {
     case "header-scan": {
       const data = await fetchDiscreteByteRange(
-        fd,
-        fileHandle,
+        fileHandleMetadata,
         fileChunkCalculations.headerChunk.range,
       );
 
@@ -124,8 +121,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     case "footer-read":
     case "footer-scan": {
       const data = await fetchDiscreteByteRange(
-        fd,
-        fileHandle,
+        fileHandleMetadata,
         fileChunkCalculations.footerChunk.range,
       );
 
@@ -141,8 +137,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
 
     case "general-scan": {
       const scannedChunk = await fetchDiscreteByteRange(
-        fd,
-        fileHandle,
+        fileHandleMetadata,
         [position, position + length - 1],
         false,
       );
@@ -153,7 +148,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     }
 
     case "body-read": {
-      const data = await performBodyRead(fd, chunks, fileHandle);
+      const data = await performBodyRead(chunks);
 
       data.copy(
         buffer,
@@ -166,7 +161,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
     }
 
     case "cache-hit": {
-      const data = performCacheHit(fd, chunks);
+      const data = performCacheHit(chunks);
 
       data.copy(
         buffer,
@@ -184,7 +179,7 @@ async function read({ fd, length, position, buffer }: ReadInput) {
   return length;
 }
 
-export const readSync = function (
+export const readSync = function readSync(
   path,
   fd,
   buffer,
@@ -193,37 +188,60 @@ export const readSync = function (
   callback,
 ) {
   void withVfsScope(async () => {
-    try {
-      const bytesRead = await read({
-        buffer,
+    const fileHandleMetadata = fdToFileHandleMeta.get(fd);
+
+    if (!fileHandleMetadata) {
+      throw new FuseError(Fuse.EBADF, "Invalid file handle");
+    }
+
+    await withVfsOperationContext(
+      {
+        operationName: "read",
         path,
         fd,
+        buffer,
         length,
         position,
-      });
+        context: {
+          fileHandleMetadata,
+          previousReadPosition: fdToPreviousReadPositionMap.get(fd),
+          get currentStreamPosition() {
+            return fdToCurrentStreamPositionMap.get(fd);
+          },
+          responsePromise: fdToResponsePromiseMap.get(fd),
+          seekController: new AbortController(),
+        },
+      },
+      async () => {
+        const bytesRead = await read();
 
-      process.nextTick(callback, bytesRead);
-    } catch (error) {
-      // This is triggered when a file handle is released
-      if (error instanceof Undici.errors.RequestAbortedError) {
-        logger.silly(`Read operation aborted for fd ${fd.toString()}`);
+        process.nextTick(callback, bytesRead);
+      },
+    );
+  }).catch((error: unknown) => {
+    // This is triggered when a file handle is released
+    if (error instanceof Undici.errors.RequestAbortedError) {
+      logger.silly(`Read operation aborted for fd ${fd.toString()}`);
 
-        process.nextTick(callback, 0);
+      process.nextTick(callback, 0);
 
-        return;
-      }
-
-      if (isFuseError(error)) {
-        logger.error(`VFS read FuseError for ${path}`, { err: error });
-
-        process.nextTick(callback, error.errorCode);
-
-        return;
-      }
-
-      logger.error(`Unexpected VFS read error for ${path}`, { err: error });
-
-      process.nextTick(callback, Fuse.EIO);
+      return;
     }
+
+    if (isFuseError(error)) {
+      if (!(error instanceof SeekDetectedError)) {
+        logger.error("VFS read FuseError", { err: error });
+      }
+
+      process.nextTick(callback, error.errorCode);
+
+      return;
+    }
+
+    logger.error(`Unexpected VFS read error for path: ${path}`, {
+      err: error,
+    });
+
+    process.nextTick(callback, Fuse.EIO);
   });
 } satisfies OPERATIONS["read"];

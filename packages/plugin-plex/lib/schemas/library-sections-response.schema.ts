@@ -6,7 +6,7 @@ export const LibrarySectionsResponse = z.object({
   MediaContainer: z
     .object({
       Directory: z
-        .array(librarySectionSchema.omit({ hidden: true }))
+        .array(librarySectionSchema.pick({ Location: true, key: true }))
         .optional(),
     })
     .optional(),

@@ -8,13 +8,16 @@ import { chunkCache } from "../utilities/chunk-cache.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
 import { createChunkCacheKey } from "../utilities/chunks/create-chunk-cache-key.ts";
 import {
+  fdToCurrentStreamPositionMap,
   fdToFileHandleMeta,
   fdToPreviousReadPositionMap,
   fdToResponsePromiseMap,
   fileNameToFileChunkCalculationsMap,
 } from "../utilities/file-handle-map.ts";
 import { createStreamRequest } from "../utilities/requests/create-stream-request.ts";
+import { withVfsOperationContext } from "../utilities/vfs-operation-context.ts";
 
+import type { VfsOperationContext } from "../utilities/vfs-operation-context.ts";
 import type { MockAgent } from "undici";
 
 const fileName = "movie.mkv";
@@ -25,7 +28,7 @@ function setupRangeInterceptor(
 ) {
   const mockPool = agent.get("http://example.com");
 
-  const size = range[1] !== undefined ? range[1] - range[0] + 1 : undefined;
+  const size = range[1] === undefined ? undefined : range[1] - range[0] + 1;
   const responseBuffer = Buffer.alloc(size ?? config.chunkSize);
 
   responseBuffer.set(randomBytes(responseBuffer.byteLength));
@@ -55,6 +58,7 @@ function setupRangeInterceptor(
 it.beforeEach(() => {
   fdToFileHandleMeta.clear();
   fdToResponsePromiseMap.clear();
+  fdToCurrentStreamPositionMap.clear();
   fileNameToFileChunkCalculationsMap.clear();
   fdToPreviousReadPositionMap.clear();
 
@@ -94,7 +98,7 @@ it("fetches the header chunk if the requested range is entirely within the heade
 
   const length = 64;
   const buffer = Buffer.alloc(length);
-  const callback = vi.fn();
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
 
   readSync(fileName, 0, buffer, length, 0, callback);
 
@@ -125,7 +129,7 @@ it("fetches the footer chunk if the requested range is entirely within the foote
   const length = 64;
 
   const buffer = Buffer.alloc(length);
-  const callback = vi.fn();
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
 
   readSync(
     fileName,
@@ -164,7 +168,7 @@ it("correctly calculates offsets when copying chunk data into the buffer", async
   );
 
   const buffer = Buffer.alloc(length);
-  const callback = vi.fn();
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
 
   readSync(
     fileName,
@@ -202,7 +206,7 @@ it("offsets the first chunk by the size of the header chunk", async ({
   ]);
 
   const buffer = Buffer.alloc(length);
-  const callback = vi.fn();
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
 
   readSync(
     fileName,
@@ -225,7 +229,8 @@ it("reads data across multiple chunks, utilising the chunk cache where possible"
 }) => {
   const { readSync } = await import("./read.ts");
 
-  const cachedChunk = Buffer.alloc(config.headerSize).fill(
+  const cachedChunk = Buffer.alloc(
+    config.headerSize,
     randomBytes(config.headerSize),
   );
 
@@ -234,13 +239,13 @@ it("reads data across multiple chunks, utilising the chunk cache where possible"
     cachedChunk,
   );
 
-  const responseBuffer = setupRangeInterceptor(mockAgent, [262144, undefined]);
+  const responseBuffer = setupRangeInterceptor(mockAgent, [262_144, undefined]);
 
-  const length = 131072; // 128 KB
+  const length = 131_072; // 128 KB
 
-  const position = 196608;
+  const position = 196_608;
   const buffer = Buffer.alloc(length);
-  const callback = vi.fn();
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
 
   readSync(fileName, 0, buffer, length, position, callback);
 
@@ -275,7 +280,7 @@ it("performs a one-off scan when receiving a read outside the scan tolerance lim
 
   fdToPreviousReadPositionMap.set(0, config.chunkSize * 10); // 10MB
 
-  const length = 32768; // 32 KB
+  const length = 32_768; // 32 KB
   const position = config.chunkSize * 100; // 100MB
 
   const responseBuffer = setupRangeInterceptor(mockAgent, [
@@ -284,7 +289,7 @@ it("performs a one-off scan when receiving a read outside the scan tolerance lim
   ]);
 
   const buffer = Buffer.alloc(length);
-  const callback = vi.fn();
+  const callback = vi.fn<() => void>().mockReturnValue();
 
   readSync(fileName, 0, buffer, length, position, callback);
 
@@ -301,17 +306,20 @@ it("saves a copy of each chunk to the cache when reading during playback within 
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
+  const fd = 0;
 
-  fdToPreviousReadPositionMap.set(0, config.chunkSize * 100); // 10MB
+  fdToPreviousReadPositionMap.set(fd, config.chunkSize * 100); // 10MB
 
-  const length = 131072;
-  const position = 104988672;
+  const length = 131_072;
+  const position = 104_988_672;
 
-  const firstChunkResponseBuffer = Buffer.alloc(config.chunkSize).fill(
+  const firstChunkResponseBuffer = Buffer.alloc(
+    config.chunkSize,
     randomBytes(config.chunkSize),
   );
 
-  const secondChunkResponseBuffer = Buffer.alloc(config.chunkSize).fill(
+  const secondChunkResponseBuffer = Buffer.alloc(
+    config.chunkSize,
     randomBytes(config.chunkSize),
   );
 
@@ -338,43 +346,53 @@ it("saves a copy of each chunk to the cache when reading during playback within 
     });
 
   const firstChunkRange = [
-    104071168,
-    104071168 + config.chunkSize - 1,
+    104_071_168,
+    104_071_168 + config.chunkSize - 1,
   ] as const;
 
   const fileHandle = fdToFileHandleMeta.get(0);
 
   expect.assert(fileHandle?.type === "media");
 
-  fdToResponsePromiseMap.set(
-    0,
-    createStreamRequest(0, fileHandle.url, [firstChunkRange[0], undefined]),
+  withVfsOperationContext(
+    {
+      operationName: "read",
+      fd,
+    } as Extract<VfsOperationContext, { operationName: "read" }>,
+    () => {
+      fdToResponsePromiseMap.set(
+        fd,
+        createStreamRequest(fileHandle.url, [firstChunkRange[0], undefined]),
+      );
+    },
   );
 
-  const callback = vi.fn();
-
-  readSync(fileName, 0, Buffer.alloc(length), length, position, callback);
-  readSync(
-    fileName,
-    0,
-    Buffer.alloc(length),
-    length,
-    position + length,
-    callback,
-  );
-
-  await vi.waitFor(() => {
-    expect(callback).nthCalledWith(1, length);
-    expect(callback).nthCalledWith(2, length);
+  const bytesRead1 = await new Promise<number | undefined>((resolve) => {
+    readSync(fileName, fd, Buffer.alloc(length), length, position, resolve);
   });
+
+  expect(bytesRead1).toBe(length);
+
+  const bytesRead2 = await new Promise<number | undefined>((resolve) => {
+    readSync(
+      fileName,
+      fd,
+      Buffer.alloc(length),
+      length,
+      position + length,
+      resolve,
+    );
+  });
+
+  expect(bytesRead2).toBe(length);
 
   const firstCachedChunk = chunkCache.get(
     createChunkCacheKey(fileName, firstChunkRange[0], firstChunkRange[1]),
   );
 
   const secondChunkRange = [
-    105119744,
-    105119744 + config.chunkSize - 1,
+    105_119_744,
+    105_119_744 + config.chunkSize - 1,
   ] as const;
 
   const secondCachedChunk = chunkCache.get(

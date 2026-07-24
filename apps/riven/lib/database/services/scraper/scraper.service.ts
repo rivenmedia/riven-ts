@@ -21,7 +21,7 @@ import type { UUID } from "node:crypto";
 
 export class ScraperService extends BaseService {
   @CreateRequestContext()
-  async getItemToScrape(id: UUID, type: MediaItemType) {
+  public async getItemToScrape(id: UUID, type: MediaItemType) {
     const item = await this.em.getRepository(MediaItem).findOneOrFail({
       id,
       type,
@@ -47,13 +47,13 @@ export class ScraperService extends BaseService {
 
   #updateScrapeMetadata(item: MediaItem, newFailedScrapeAttempts: number) {
     item.scrapedAt = DateTime.utc().toJSDate();
-    item.scrapedTimes++;
+    item.scrapedTimes += 1;
     item.failedScrapeAttempts = newFailedScrapeAttempts;
   }
 
   @CreateRequestContext()
   @Transactional()
-  async scrapeItem(id: UUID, results: Record<string, ParsedData>) {
+  public async scrapeItem(id: UUID, results: Record<string, ParsedData>) {
     const existingItem = await this.em
       .getRepository(MediaItem)
       .findOneOrFail(id, { populate: ["streams.infoHash"] });
@@ -75,7 +75,7 @@ export class ScraperService extends BaseService {
         "partially_completed",
       ]);
 
-      assert(
+      assert.ok(
         processableStates.safeParse(existingItem.state).success,
         new MediaItemScrapeErrorIncorrectState({
           item: existingItem,

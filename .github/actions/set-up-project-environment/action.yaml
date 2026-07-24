@@ -6,14 +6,13 @@ runs:
   using: composite
   steps:
     - name: Install pnpm
-      uses: pnpm/action-setup@v5
+      uses: pnpm/action-setup@v6
       with:
         cache: true
 
-    - uses: actions/setup-node@v5
+    - uses: actions/setup-node@v6
       with:
         node-version-file: .node-version
-        cache: pnpm
 
     - name: Install dependencies
       shell: bash

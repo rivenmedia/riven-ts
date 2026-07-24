@@ -1,10 +1,10 @@
 import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 export class TestAPI extends BaseDataSource<Record<string, unknown>> {
-  override baseURL = "https://test.com/api/";
-  override serviceName = "Test";
+  public override baseURL = "https://test.com/api/";
+  public override serviceName = "Test";
 
-  override async validate() {
+  public override async validate() {
     try {
       // Implement your own validation logic here
       await this.get("validate");

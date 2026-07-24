@@ -13,7 +13,7 @@ import type { UUID } from "node:crypto";
 
 export class SubtitlesService extends BaseService {
   @CreateRequestContext()
-  async getItemsForSubtitlesProcessing(id: UUID) {
+  public async getItemsForSubtitlesProcessing(id: UUID) {
     const item = await this.em.getRepository(MediaItem).findOneOrFail({
       id,
       state: {
@@ -34,7 +34,10 @@ export class SubtitlesService extends BaseService {
 
   @CreateRequestContext()
   @Transactional()
-  async saveSubtitles(mediaItemId: UUID, subtitles: Map<string, SubtitleData>) {
+  public async saveSubtitles(
+    mediaItemId: UUID,
+    subtitles: Map<string, SubtitleData>,
+  ) {
     return saveSubtitles(this.em, mediaItemId, subtitles);
   }
 }
