@@ -9,24 +9,46 @@ import { ErrorSplat } from "../schemas/error-splat.schema.ts";
 
 import type { TransformableInfo } from "logform";
 
-function getErrorOutput(error: Error | TransformableInfo["error"] | null) {
+/** An error after `ecsFormat` has serialised it onto the log entry. */
+type LoggedError = NonNullable<TransformableInfo["error"]>;
+
+/**
+ * Errors we throw deliberately to signal an expected, terminal outcome (e.g. a
+ * media item that cannot be downloaded). The message says everything useful, so
+ * their stack traces are noise in the console/file logs — the full trace is
+ * still written to the ECS logs.
+ *
+ */
+const EXPECTED_ERROR_NAMES = new Set([
+  "FatalValidationError",
+  "UnrecoverableError",
+]);
+
+function isExpectedError(error: Error | LoggedError) {
+  return EXPECTED_ERROR_NAMES.has(
+    error instanceof Error ? error.name : (error.name ?? error.type),
+  );
+}
+
+function getErrorOutput(error: Error | LoggedError | null) {
   if (!error) {
     return;
   }
 
   const { logShowStackTraces } = settings;
+  const showStackTrace = logShowStackTraces && !isExpectedError(error);
 
   if (error instanceof ZodError) {
     // If we have a validation error, prettify the output if stack traces are disabled
-    return logShowStackTraces ? error.stack : z.prettifyError(error);
+    return showStackTrace ? error.stack : z.prettifyError(error);
   }
 
   if (error instanceof Error) {
-    return logShowStackTraces ? error.stack : error.message;
+    return showStackTrace ? error.stack : error.message;
   }
 
   // For regular errors, always show the raw error output if stack traces are enabled, else show the message
-  return logShowStackTraces ? error.stack_trace : error.message;
+  return showStackTrace ? error.stack_trace : error.message;
 }
 
 export const consoleFormat = format.printf(({ level, message, ...meta }) => {

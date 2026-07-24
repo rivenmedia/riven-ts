@@ -105,7 +105,9 @@ export const RivenSettings = z.object({
   logShowStackTraces: z
     .stringbool()
     .default(true)
-    .describe("Whether to show detailed stack traces when logging errors")
+    .describe(
+      "Whether to show detailed stack traces when unexpected errors occur.",
+    )
     .meta({ "wiki.section": "logging" }),
   gqlHost: z
     .string()
