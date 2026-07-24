@@ -166,3 +166,17 @@ jobs:
           VERSION: ${{ steps.meta.outputs.version }}
         run: |
           docker buildx imagetools inspect "${IMAGE}:${VERSION}"
+
+  success:
+    name: Success
+    needs:
+      - build
+      - merge
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Build failed
+        if: >-
+          needs.build.result != 'success' ||
+          contains(fromJson('["failure", "cancelled"]'), needs.merge.result)
+        run: exit 1
