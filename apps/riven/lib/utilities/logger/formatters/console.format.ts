@@ -1,3 +1,6 @@
+import { FatalValidationError } from "@repo/util-plugin-sdk/errors/fatal-validation-error";
+
+import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 import { DateTime } from "luxon";
 import { SPLAT } from "triple-beam";
@@ -19,8 +22,8 @@ type LoggedError = NonNullable<TransformableInfo["error"]>;
  * still written to the ECS logs.
  */
 const EXPECTED_ERROR_NAMES = new Set([
-  "FatalValidationError",
-  "UnrecoverableError",
+  FatalValidationError.name,
+  UnrecoverableError.name,
 ]);
 
 function isUnexpectedError(error: Error | LoggedError) {
