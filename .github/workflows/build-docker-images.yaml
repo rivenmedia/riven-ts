@@ -47,8 +47,7 @@ jobs:
         id: platform
         env:
           PLATFORM: ${{ matrix.platform }}
-        run: |
-          echo "suffix=${PLATFORM//\//-}" >> "$GITHUB_OUTPUT"
+        run: echo "suffix=${PLATFORM//\//-}" >> $GITHUB_OUTPUT
 
       - name: Checkout code
         uses: actions/checkout@v6
@@ -101,7 +100,7 @@ jobs:
 
       - name: Upload digest
         if: env.SHOULD_PUSH == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: digests-${{ steps.platform.outputs.suffix }}
           path: ${{ runner.temp }}/digests/*
@@ -121,7 +120,7 @@ jobs:
       packages: write
     steps:
       - name: Download digests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: ${{ runner.temp }}/digests
           pattern: digests-*
