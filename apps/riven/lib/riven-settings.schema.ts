@@ -123,7 +123,8 @@ export const RivenSettings = z.object({
     .default(false)
     .describe("Only scrape dubbed anime.")
     .meta({ "wiki.section": "scraping" }),
-  maximumScrapeAttempts: z
+  maximumScrapeAttempts: z.coerce
+    .number()
     .int()
     .nonnegative()
     .default(Number.MAX_SAFE_INTEGER)
@@ -131,13 +132,15 @@ export const RivenSettings = z.object({
       "The maximum number of scrape attempts before giving up on an item.",
     )
     .meta({ "wiki.section": "scraping" }),
-  minimumAverageBitrateMovies: z
+  minimumAverageBitrateMovies: z.coerce
+    .number()
     .int()
     .positive()
     .optional()
     .describe("The minimum average bitrate for movies.")
     .meta({ "wiki.section": "scraping" }),
-  minimumAverageBitrateEpisodes: z
+  minimumAverageBitrateEpisodes: z.coerce
+    .number()
     .int()
     .positive()
     .optional()
@@ -150,7 +153,8 @@ export const RivenSettings = z.object({
       "If true, Riven will prefer to download season packs over show packs.",
     )
     .meta({ "wiki.section": "scraping" }),
-  scheduleOffsetMinutes: z
+  scheduleOffsetMinutes: z.coerce
+    .number()
     .int()
     .nonnegative()
     .default(30)
@@ -173,7 +177,8 @@ export const RivenSettings = z.object({
     `,
     )
     .meta({ "wiki.section": "scraping" }),
-  unknownAirDateOffsetDays: z
+  unknownAirDateOffsetDays: z.coerce
+    .number()
     .int()
     .nonnegative()
     .default(7)
