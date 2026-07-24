@@ -16,7 +16,11 @@ function render(info: Partial<TransformableInfo>) {
 
   expect.assert(typeof formatted === "object");
 
-  return formatted[Symbol.for("message")] as string;
+  const message = formatted[Symbol.for("message")];
+
+  expect.assert(typeof message === "string");
+
+  return message;
 }
 
 it("omits the stack trace for expected errors", () => {
@@ -39,6 +43,7 @@ it("omits the stack trace for expected errors", () => {
   expect(output).toContain(
     "download-item failed: Failed to download Big Buck Bunny: No valid torrent found after trying all downloaders",
   );
+
   expect(output).not.toContain("    at ");
 });
 
