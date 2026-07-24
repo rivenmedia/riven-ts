@@ -17,15 +17,14 @@ type LoggedError = NonNullable<TransformableInfo["error"]>;
  * media item that cannot be downloaded). The message says everything useful, so
  * their stack traces are noise in the console/file logs — the full trace is
  * still written to the ECS logs.
- *
  */
 const EXPECTED_ERROR_NAMES = new Set([
   "FatalValidationError",
   "UnrecoverableError",
 ]);
 
-function isExpectedError(error: Error | LoggedError) {
-  return EXPECTED_ERROR_NAMES.has(
+function isUnexpectedError(error: Error | LoggedError) {
+  return !EXPECTED_ERROR_NAMES.has(
     error instanceof Error ? error.name : (error.name ?? error.type),
   );
 }
@@ -36,7 +35,7 @@ function getErrorOutput(error: Error | LoggedError | null) {
   }
 
   const { logShowStackTraces } = settings;
-  const showStackTrace = logShowStackTraces && !isExpectedError(error);
+  const showStackTrace = logShowStackTraces && isUnexpectedError(error);
 
   if (error instanceof ZodError) {
     // If we have a validation error, prettify the output if stack traces are disabled
