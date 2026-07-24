@@ -3,7 +3,6 @@ import { http, HttpResponse } from "msw";
 import { expect } from "vitest";
 
 import { it } from "../../__tests__/{{kebabCase pluginName}}.test-context.ts";
-import { pluginConfig } from "../../{{kebabCase pluginName}}-plugin.config.ts";
 import { {{pascalCase pluginName}}API } from "../{{kebabCase pluginName}}.datasource.ts";
 
 it("returns false if the request fails", async ({
@@ -11,7 +10,7 @@ it("returns false if the request fails", async ({
   dataSourceMap,
 }) => {
   server.use(
-    http.get("**/validate", () => HttpResponse.json({ success: false }, { status: 401 })),
+    http.get("**/validate", () => HttpResponse.json(null, { status: 401 })),
   )
 
   const {{camelCase pluginName}}Api = dataSourceMap.get({{pascalCase pluginName}}API);

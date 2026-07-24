@@ -67,7 +67,7 @@ it("returns movies when calling listrrMovies query", async ({
     { contextValue: gqlContext },
   );
 
-  assert(body.kind === "single");
+  assert.ok(body.kind === "single");
 
   expect(body.singleResult.errors).toBeUndefined();
   expect(body.singleResult.data?.["listrrMovies"]).toHaveLength(2);
@@ -125,7 +125,7 @@ it("returns shows when calling listrrShows query", async ({
     { contextValue: gqlContext },
   );
 
-  assert(body.kind === "single");
+  assert.ok(body.kind === "single");
 
   expect(body.singleResult.errors).toBeUndefined();
   expect(body.singleResult.data?.["listrrShows"]).toHaveLength(2);
@@ -153,7 +153,7 @@ it('returns the user validation status when calling "listrrIsValid" query', asyn
     { contextValue: gqlContext },
   );
 
-  assert(body.kind === "single");
+  assert.ok(body.kind === "single");
 
   expect(body.singleResult.errors).toBeUndefined();
   expect(body.singleResult.data?.["listrrIsValid"]).toBe(true);

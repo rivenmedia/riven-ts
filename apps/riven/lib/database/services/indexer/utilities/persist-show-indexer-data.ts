@@ -34,7 +34,7 @@ export async function persistShowIndexerData(
     "unreleased",
   ]);
 
-  assert(
+  assert.ok(
     processableStates.safeParse(itemRequest.state).success,
     new MediaItemIndexErrorIncorrectState({
       item: itemRequest,
@@ -193,16 +193,16 @@ export async function persistShowIndexerData(
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((error) => {
-        if (Array.isArray(error)) {
-          return error
+      .transform((rawError) => {
+        if (Array.isArray(rawError)) {
+          return rawError
             .map((err) =>
               err.constraints ? Object.values(err.constraints).join("; ") : "",
             )
             .join("; ");
         }
 
-        return error.message;
+        return rawError.message;
       })
       .parse(error);
 

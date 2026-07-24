@@ -5,7 +5,14 @@
     { "path": "./tsconfig.lib.json" },
     { "path": "./tsconfig.spec.json" }
   ],
-  "files": ["eslint.config.ts", "vitest.config.ts", "zod2md.config.ts"],
+  "files": [
+    {{#if (equals packageType 'plugin')}}
+    "scripts/generate-zod-docs.ts",
+    "wiki.config.ts",
+    {{/if}}
+    "oxlint.config.ts",
+    "vitest.config.ts"
+  ],
   "include": [],
-  "exclude": [],
+  "exclude": []
 }

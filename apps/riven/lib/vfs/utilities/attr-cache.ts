@@ -8,7 +8,7 @@ export const attrCache = new LRUCache<PathLike, Partial<Stats>>({
   max: 1000,
   dispose: (_value, key, reason) => {
     if (reason === "delete" && key !== "/") {
-      let match = /^.*(?=\/)/.exec(key.toString());
+      let match = /^.*(?=\/)/u.exec(key.toString());
 
       if (!match) {
         return;
@@ -21,10 +21,8 @@ export const attrCache = new LRUCache<PathLike, Partial<Stats>>({
 
         const nextPart = matchPath.split("/").slice(0, -1).join("/");
 
-        match = /^.*(?=\/)/.exec(nextPart);
+        match = /^.*(?=\/)/u.exec(nextPart);
       }
-
-      return;
     }
   },
 });

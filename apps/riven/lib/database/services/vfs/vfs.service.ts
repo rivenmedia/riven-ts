@@ -1,5 +1,3 @@
-import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
-
 import {
   CreateRequestContext,
   EnsureRequestContext,
@@ -13,15 +11,15 @@ import { getVfsMediaEntry } from "./utilities/get-vfs-media-entry.ts";
 import { getVfsSubtitleEntry } from "./utilities/get-vfs-subtitle-entry.ts";
 
 import type { FindOneOptions } from "@mikro-orm/core";
-import type { UUID } from "node:crypto";
+import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 export class VfsService extends BaseService {
-  parsePath(path: string) {
+  public parsePath(path: string) {
     return PathInfo.parse(path);
   }
 
   @EnsureRequestContext()
-  async getMediaEntry<
+  public async getMediaEntry<
     Hint extends string = never,
     Fields extends string = never,
     Excludes extends string = never,
@@ -33,12 +31,12 @@ export class VfsService extends BaseService {
   }
 
   @EnsureRequestContext()
-  async getSubtitleEntry(pathInfo: PathInfo) {
+  public async getSubtitleEntry(pathInfo: PathInfo) {
     return getVfsSubtitleEntry(this.em, pathInfo);
   }
 
   @CreateRequestContext()
-  async getVfsEntry(path: string) {
+  public async getVfsEntry(path: string) {
     const pathInfo = this.parsePath(path);
 
     if (pathInfo.pathType === "subtitle-file") {
@@ -49,17 +47,12 @@ export class VfsService extends BaseService {
   }
 
   @CreateRequestContext()
-  async getEntryStat(path: string) {
+  public async getEntryStat(path: string) {
     return getVfsEntryStat(this.em, path);
   }
 
   @CreateRequestContext()
-  async getDirectoryEntryPaths(path: string) {
+  public async getDirectoryEntryPaths(path: string) {
     return getVfsDirectoryEntryPaths(this.em, path);
-  }
-
-  @CreateRequestContext()
-  async saveStreamUrl(entryId: UUID, streamUrl: string) {
-    return this.em.getRepository(MediaEntry).saveStreamUrl(entryId, streamUrl);
   }
 }

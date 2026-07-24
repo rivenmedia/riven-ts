@@ -1,8 +1,10 @@
-import { spawn } from "node:child_process";
+import { $ } from "execa";
+
+import { installDependenciesAction } from "./install-dependencies.ts";
 
 import type { PackageJson } from "type-fest";
 
-export const installDependenciesToPackages = (
+export const installDependenciesToPackages = async (
   targetPackages: string[],
   dependencyType: keyof Pick<
     PackageJson.PackageJsonStandard,
@@ -16,30 +18,18 @@ export const installDependenciesToPackages = (
     peerDependencies: ["--save-peer"],
   } satisfies Record<typeof dependencyType, string[]>;
 
-  return new Promise<string>((resolve, reject) => {
-    const child = spawn(
-      "pnpm",
-      [
-        ...targetPackages.map((targetPackage) => `--filter=${targetPackage}`),
-        "add",
-        ...args[dependencyType],
-        ...Object.entries(dependencies).map(
-          ([name, version]) => `${name}@${version}`,
-        ),
-      ],
-      {
-        stdio: "inherit",
-      },
-    );
+  const { exitCode } = await $("pnpm", [
+    ...targetPackages.map((targetPackage) => `--filter=${targetPackage}`),
+    "add",
+    ...args[dependencyType],
+    ...Object.entries(dependencies).map(
+      ([name, version]) => `${name}@${version ?? ""}`,
+    ),
+  ]);
 
-    child.on("close", (code) =>
-      code === 0
-        ? resolve("Dependencies installation complete.")
-        : reject(new Error(`Installation process exited with code ${code}`)),
-    );
+  if (exitCode && exitCode !== 0) {
+    throw new Error(`Failed to add dependencies: ${exitCode.toString()}`);
+  }
 
-    child.on("error", (err) =>
-      reject(new Error(`Installation encountered an error: ${err.message}`)),
-    );
-  });
+  return installDependenciesAction();
 };

@@ -1,17 +1,18 @@
 import chalk from "chalk";
-import { type AnyActorRef, assign, setup } from "xstate";
+import assert from "node:assert";
+import { assign, setup } from "xstate";
 
 import { settings } from "../../utilities/settings.ts";
-import {
-  type PluginRegistrarMachineOutput,
-  pluginRegistrarMachine,
-} from "../plugin-registrar/index.ts";
+import { pluginRegistrarMachine } from "../plugin-registrar/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
+import { applyMockScenario } from "./actors/apply-mock-scenario.ts";
 import { clearPreviousInstanceState } from "./actors/clear-previous-instance-state.actor.ts";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
+import type { ApolloServerContext } from "../../graphql/context.ts";
+import type { MockScenario } from "../../mocks/utilities/mock-scenario.ts";
 import type {
   InvalidPluginMap,
   PluginQueueMap,
@@ -20,11 +21,12 @@ import type {
   ValidPlugin,
   ValidPluginMap,
 } from "../../types/plugins.ts";
+import type { PluginRegistrarMachineOutput } from "../plugin-registrar/index.ts";
 import type { ApolloServer } from "@apollo/server";
-import type { ApolloServerContext } from "@repo/core-util-graphql-schema";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";
+import type { AnyActorRef } from "xstate";
 
 export interface BootstrapMachineContext {
   error?: Error;
@@ -39,11 +41,13 @@ export interface BootstrapMachineContext {
   pluginWorkers: PluginWorkerMap;
   publishableEvents: Set<RivenEvent["type"]>;
   pluginSettings: PluginSettings | null;
+  mockScenario: MockScenario | undefined;
 }
 
 export interface BootstrapMachineInput {
   mainRunnerRef: AnyActorRef;
   rootRef: AnyActorRef;
+  mockScenario: MockScenario | undefined;
 }
 
 export interface BootstrapMachineOutput {
@@ -100,10 +104,11 @@ export const bootstrapMachine = setup({
       pluginQueues: (_, { pluginQueues }) => pluginQueues,
       pluginWorkers: (_, { pluginWorkers }) => pluginWorkers,
       publishableEvents: (_, { publishableEvents }) => publishableEvents,
-      pluginSettings: (_, { settings }) => settings,
+      pluginSettings: (_, { pluginSettings }) => pluginSettings,
     }),
   },
   actors: {
+    applyMockScenario,
     clearPreviousInstanceState,
     initialiseDatabaseConnection,
     initialiseVfs,
@@ -113,6 +118,7 @@ export const bootstrapMachine = setup({
   guards: {
     hasInvalidPlugins: ({ context: { invalidPlugins } }) =>
       invalidPlugins.size > 0,
+    hasMockScenario: ({ context: { mockScenario } }) => Boolean(mockScenario),
   },
 })
   .extend(withLogAction)
@@ -129,6 +135,7 @@ export const bootstrapMachine = setup({
       pluginWorkers: new Map(),
       publishableEvents: new Set(),
       pluginSettings: null,
+      mockScenario: input.mockScenario,
     }),
     output: ({
       context: {
@@ -207,7 +214,25 @@ export const bootstrapMachine = setup({
             wipeDatabase: settings.unsafeWipeDatabaseOnStartup,
             wipeRedis: settings.unsafeWipeRedisOnStartup,
           }),
-          onDone: "Bootstrapping plugins",
+          onDone: [
+            {
+              target: "Applying mock scenario",
+              guard: "hasMockScenario",
+              actions: {
+                type: "log",
+                params: ({ context: { mockScenario } }) => {
+                  assert.ok(mockScenario);
+
+                  return {
+                    message: `Database connection initialised. Mock scenario "${mockScenario.scenarioName}" will be applied.`,
+                  };
+                },
+              },
+            },
+            {
+              target: "Bootstrapping plugins",
+            },
+          ],
           onError: {
             target: "Errored",
             actions: [
@@ -216,6 +241,57 @@ export const bootstrapMachine = setup({
                 params: ({ event: { error } }) => ({
                   message:
                     "Failed to clear previous instance state during bootstrap.",
+                  level: "error",
+                  error,
+                }),
+              },
+              {
+                type: "raiseError",
+                params: ({ event }) => event.error as Error,
+              },
+            ],
+          },
+        },
+      },
+      "Applying mock scenario": {
+        entry: {
+          type: "log",
+          params: ({ context: { mockScenario } }) => {
+            assert.ok(mockScenario);
+
+            return {
+              message: `Applying mock scenario "${mockScenario.scenarioName}"...`,
+            };
+          },
+        },
+        invoke: {
+          id: "applyMockScenario",
+          src: "applyMockScenario",
+          input: ({ context: { mockScenario } }) => {
+            assert.ok(mockScenario);
+
+            return { mockScenario };
+          },
+          onDone: {
+            target: "Bootstrapping plugins",
+            actions: {
+              type: "log",
+              params: ({ context: { mockScenario } }) => {
+                assert.ok(mockScenario);
+
+                return {
+                  message: `Mock scenario "${mockScenario.scenarioName}" applied successfully.`,
+                };
+              },
+            },
+          },
+          onError: {
+            target: "Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message: "Failed to apply mock scenario during bootstrap.",
                   level: "error",
                   error,
                 }),
@@ -273,7 +349,7 @@ export const bootstrapMachine = setup({
                     message: `Plugins registered successfully. ${[
                       ...validPlugins.keys(),
                     ]
-                      .map((k) => chalk.bold(k.description))
+                      .map(({ description }) => chalk.bold(description))
                       .join(", ")}.`,
                   }),
                 },
@@ -388,10 +464,9 @@ export const bootstrapMachine = setup({
             invoke: {
               id: "initialiseVfs",
               src: "initialiseVfs",
-              input: ({ context: { pluginQueues } }) => ({
+              input: {
                 mountPath: settings.vfsMountPath,
-                pluginQueues,
-              }),
+              },
               onDone: {
                 target: "Complete",
                 actions: {

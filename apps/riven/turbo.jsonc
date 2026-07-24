@@ -16,6 +16,7 @@
     "dev": {
       "dependsOn": ["$TURBO_EXTENDS$", "build:workers"],
       "passThroughEnv": [
+        "MOCK_SCENARIO",
         "SENTRY_SPOTLIGHT",
         "SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP"
       ]
@@ -39,6 +40,11 @@
       ],
       "outputs": ["lib/types/__generated__/graphql.ts", "lib/**/*.typegen.ts"]
     },
+    "codegen:ranking-config-json-schema": {
+      "dependsOn": ["$TURBO_EXTENDS$", "transit:source-files"],
+      "inputs": ["lib/ranking-config/ranking-config.schema.ts"],
+      "outputs": ["ranking-config.schema.json"]
+    },
     "start": {
       "dependsOn": ["$TURBO_EXTENDS$", "build"],
       "passThroughEnv": [
@@ -50,9 +56,6 @@
       "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
     },
     "lint": {
-      "dependsOn": ["$TURBO_EXTENDS$", "database:cache:generate", "codegen:gql"]
-    },
-    "check-types": {
       "dependsOn": ["$TURBO_EXTENDS$", "database:cache:generate", "codegen:gql"]
     },
     "migration:check": {

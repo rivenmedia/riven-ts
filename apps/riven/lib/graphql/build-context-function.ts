@@ -1,26 +1,22 @@
-import {
-  type ApolloServerContext,
-  CoreKey,
-} from "@repo/core-util-graphql-schema";
-
-import { database } from "../database/database.ts";
+import { database, services } from "../database/database.ts";
 import { logger } from "../utilities/logger/logger.ts";
+import { CoreKey } from "./context.ts";
 
+import type { ApolloServerContext } from "./context.ts";
 import type { ContextFunction } from "@apollo/server";
-import type { StandaloneServerContextFunctionArgument } from "@apollo/server/standalone";
+import type { ExpressContextFunctionArgument } from "@as-integrations/express5";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 
 export const buildContextFunction: (
   sendEvent: GraphQLContext["sendEvent"],
-) => ContextFunction<
-  [StandaloneServerContextFunctionArgument],
-  ApolloServerContext
-> = (sendEvent) => () =>
-  Promise.resolve({
-    [CoreKey]: {
-      em: database.em.fork(),
-    },
-    logger,
-    sendEvent,
-    plugins: {},
-  });
+) => ContextFunction<[ExpressContextFunctionArgument], ApolloServerContext> =
+  (sendEvent) => async () =>
+    Promise.resolve({
+      [CoreKey]: {
+        em: database.em.fork(),
+        services,
+      },
+      logger,
+      sendEvent,
+      plugins: {},
+    });

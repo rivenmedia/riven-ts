@@ -1,8 +1,10 @@
 import assert from "node:assert";
 import { AsyncLocalStorage } from "node:async_hooks";
-import { Buffer } from "node:buffer";
 
+import type { FileHandleMetadata } from "./file-handle-map.ts";
+import type { Buffer } from "node:buffer";
 import type { Promisable } from "type-fest";
+import type { Dispatcher } from "undici";
 
 export type VfsOperationContext = (
   | {
@@ -19,6 +21,13 @@ export type VfsOperationContext = (
       position: number;
       length: number;
       buffer: Buffer;
+      context: {
+        fileHandleMetadata: FileHandleMetadata;
+        previousReadPosition: number | undefined;
+        readonly currentStreamPosition: number | undefined;
+        responsePromise: Promise<Dispatcher.ResponseData> | undefined;
+        seekController: AbortController;
+      };
     }
   | {
       operationName: "getattr" | "readdir";
@@ -46,7 +55,7 @@ export function getVfsOperationContext<
   }
 
   if (operationName) {
-    assert(
+    assert.ok(
       context.operationName === operationName,
       `VFS operation context mismatch: expected ${operationName} but got ${context.operationName}`,
     );

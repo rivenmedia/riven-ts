@@ -10,15 +10,10 @@
     {{#with (packageJsonFields packageType 'scripts') as |scripts|}}
     {{#if scripts}}
     {{#each scripts}}
-    "{{@key}}": "{{this}}",
+    "{{@key}}": "{{{this}}}"{{#unless @last}},{{/unless}}
     {{/each}}
     {{/if}}
     {{/with}}
-    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
-    "lint": "eslint",
-    "lint:fix": "pnpm lint --fix",
-    "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest"
   },
   {{#with (packageJsonFields packageType 'files') as |files|}}
   {{#if files}}
@@ -35,10 +30,7 @@
     {{#if exports}}
     {{#each exports}}
     {{#if this}}
-    "{{@key}}": {
-      "production": "{{this.production}}",
-      "default": "{{this.default}}"
-    }{{#unless @last}},{{/unless}}
+    "{{@key}}": {{{json this}}}{{#unless @last}},{{/unless}}
     {{/if}}
     {{/each}}
     {{/if}}

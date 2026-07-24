@@ -3,7 +3,7 @@ import Fuse from "@zkochan/fuse-native";
 import { createActor, createEmptyActor, fromPromise } from "xstate";
 
 import { it as baseIt } from "../../../../__tests__/test-context.ts";
-import { type BootstrapMachineInput, bootstrapMachine } from "../../index.ts";
+import { bootstrapMachine } from "../../index.ts";
 
 import type {
   InitialiseVfsInput,
@@ -13,6 +13,7 @@ import type {
   StartGQLServerInput,
   StartGQLServerOutput,
 } from "../../actors/start-gql-server.actor.ts";
+import type { BootstrapMachineInput } from "../../index.ts";
 
 export const it = baseIt
   .extend(
@@ -20,6 +21,7 @@ export const it = baseIt
     (): BootstrapMachineInput => ({
       rootRef: createEmptyActor(),
       mainRunnerRef: createEmptyActor(),
+      mockScenario: undefined,
     }),
   )
 
@@ -30,20 +32,16 @@ export const it = baseIt
     }),
   )
   .extend("startGqlServerActorLogic", ({ apolloServerInstance }) =>
-    fromPromise<StartGQLServerOutput, StartGQLServerInput>(async () => {
-      return {
-        server: apolloServerInstance,
-        url: "http://localhost:3000",
-      };
-    }),
+    fromPromise<StartGQLServerOutput, StartGQLServerInput>(async () => ({
+      server: apolloServerInstance,
+      url: "http://localhost:3000",
+    })),
   )
   .extend(
     "initialiseVfsActorLogic",
-    fromPromise<InitialiseVfsOutput, InitialiseVfsInput>(async () => {
-      return {
-        vfs: new Fuse("/mnt/fake-path", {}),
-      };
-    }),
+    fromPromise<InitialiseVfsOutput, InitialiseVfsInput>(async () => ({
+      vfs: new Fuse("/mnt/fake-path", {}),
+    })),
   )
   .extend(
     "machine",

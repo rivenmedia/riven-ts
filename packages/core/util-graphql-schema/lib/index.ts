@@ -4,21 +4,9 @@ import {
 } from "@repo/feature-settings/resolver";
 
 import { BigIntResolver, JSONObjectResolver } from "graphql-scalars";
-import {
-  type BuildSchemaOptions,
-  buildSchema as baseBuildSchema,
-} from "type-graphql";
+import { buildSchema as baseBuildSchema } from "type-graphql";
 
-import type { EntityManager } from "@mikro-orm/core";
-import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
-
-export const CoreKey = Symbol("Riven Core");
-
-export interface ApolloServerContext extends GraphQLContext {
-  [CoreKey]: {
-    em: EntityManager;
-  };
-}
+import type { BuildSchemaOptions } from "type-graphql";
 
 export const buildSchema = async (
   options: Omit<BuildSchemaOptions, "resolvers"> & {

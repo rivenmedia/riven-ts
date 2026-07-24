@@ -1,9 +1,10 @@
 /**
  * @type {import('lint-staged').Configuration}
  */
-export default {
+const lintStagedConfig = {
   "*.{js,jsx,cjs,mjs,ts,tsx,cts,mts,json,md,mdx,html,yml,yaml}":
-    "prettier --write",
-  "package.json": "sort-package-json",
+    "oxfmt --write --no-error-on-unmatched-pattern",
   "*-settings.schema.ts": async () => "turbo codegen:config-docs",
 };
+
+export default lintStagedConfig;

@@ -1,4 +1,7 @@
 import { BaseDataSource } from "@repo/util-plugin-sdk";
+import { Duration } from "@repo/util-plugin-sdk/helpers/dates";
+
+import { TTLCache } from "@isaacs/ttlcache";
 
 import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
 import { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
@@ -11,26 +14,43 @@ import { Store } from "../schemas/store.schema.ts";
 import type { StremThruSettings } from "../stremthru-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type {
+  DataSourceFetchResult,
   RequestOptions,
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
-import type { MediaItemDownloadRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+import type { URL } from "node:url";
 
 const storeNameHeader = "x-stremthru-store-name";
 
-class StremThruTorzAPIError extends Error {}
+class StremThruTorzAPIError extends Error {
+  public override name = "StremThruTorzAPIError";
+}
 
 export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
-  override baseURL = this.settings.stremThruUrl;
-  override serviceName = "StremThru [Torz]";
+  public override baseURL = this.settings.stremThruUrl;
+  public override serviceName = "StremThru [Torz]";
 
   protected override concurrency = 1; // Lower the concurrency to prevent queue build-ups, as this API aggressively rate-limits itself
 
   #validStores: Store[] = [];
 
-  get validStores(): readonly Store[] {
-    return this.#validStores;
+  public get validStores() {
+    return new Set(this.#validStores);
+  }
+
+  readonly #rateLimitedStores = new TTLCache<Store, true>();
+
+  public get rateLimitedStores() {
+    return new Map(
+      this.#rateLimitedStores
+        .keys()
+        .map(
+          (store) =>
+            [store, this.#rateLimitedStores.getRemainingTTL(store)] as const,
+        )
+        .toArray(),
+    );
   }
 
   #buildCommonHeaders(store: Store) {
@@ -72,14 +92,41 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     return `${baseKey}:${store}`;
   }
 
-  override async validate(): Promise<boolean> {
+  /**
+   * As this datasource is designed to interact with multiple stores
+   * that share the same API but have different rate limits,
+   * we need to track rate limits on a per-store basis.
+   *
+   * When a rate limit is hit, we add the store to the `rateLimitedStores` set
+   * and prevent any requests to that store until the TTL expires.
+   */
+  protected override didEncounterRateLimit(
+    request: RequestOptions,
+    _response: DataSourceFetchResult<unknown>["response"],
+    waitMs: number,
+  ): void {
+    const store = Store.parse(request.headers?.[storeNameHeader]);
+    const hasExistingRateLimitForStore = this.#rateLimitedStores.has(store);
+
+    this.#rateLimitedStores.set(store, true, { ttl: waitMs });
+
+    if (!hasExistingRateLimitForStore) {
+      const formattedWaitTime = Duration.fromMillis(waitMs).rescale().toHuman();
+
+      this.logger.warn(
+        `[${this.serviceName}] Store ${store} is being rate limited. Requests will resume after ${formattedWaitTime}.`,
+      );
+    }
+  }
+
+  public override async validate(): Promise<boolean> {
+    this.#validStores = [];
+
     const configuredStores = Store.options.filter(
       (storeName) => this.settings[`${storeName}ApiKey`],
     );
 
     if (configuredStores.length === 0) {
-      this.#validStores = [];
-
       this.logger.warn("No store API keys configured for StremThru Torz.");
 
       return false;
@@ -144,10 +191,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     return true;
   }
 
-  async addTorrent(
-    infoHash: string,
-    store: Store,
-  ): Promise<MediaItemDownloadRequestedResponse> {
+  public async addTorrent(infoHash: string, store: Store) {
     const response = await this.post<unknown>("v0/store/torz", {
       headers: this.#buildCommonHeaders(store),
       body: JSON.stringify({
@@ -177,13 +221,10 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
       );
     }
 
-    return {
-      torrentId: data.id,
-      files: data.files,
-    };
+    return data;
   }
 
-  async removeTorrent(id: string, store: Store) {
+  public async removeTorrent(id: string, store: Store) {
     const response = await this.delete<unknown>(`v0/store/torz/${id}`, {
       headers: this.#buildCommonHeaders(store),
     });
@@ -212,18 +253,20 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
       "unknown",
     ]);
 
-    return items.reduce<Record<string, DebridFile[]>>((acc, item) => {
+    const result: Record<string, DebridFile[]> = {};
+
+    for (const item of items) {
       if (!allowedStatuses.safeParse(item.status).success) {
-        return acc;
+        continue;
       }
 
-      acc[item.hash] = item.files;
+      result[item.hash] = item.files;
+    }
 
-      return acc;
-    }, {});
+    return result;
   }
 
-  async getCachedTorrents(infoHashes: string[], store: Store) {
+  public async getCachedTorrents(infoHashes: string[], store: Store) {
     const chunkSize = 500;
     const infoHashSet = new Set(infoHashes);
     const requests: Promise<Record<string, DebridFile[]>>[] = [];
@@ -236,12 +279,16 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
 
     const results = await Promise.all(requests);
 
-    return results.reduce<Record<string, DebridFile[]>>((acc, result) => {
-      return Object.assign(acc, result);
-    }, {});
+    const combined: Record<string, DebridFile[]> = {};
+
+    for (const result of results) {
+      Object.assign(combined, result);
+    }
+
+    return combined;
   }
 
-  async generateLink(link: string, store: Store) {
+  public async generateLink(link: string, store: Store) {
     const response = await this.post<unknown>("v0/store/torz/link/generate", {
       body: JSON.stringify({ link }),
       headers: this.#buildCommonHeaders(store),
@@ -249,6 +296,6 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
 
     const { data } = GenerateLinkResponse.parse(response);
 
-    return data;
+    return data.link;
   }
 }

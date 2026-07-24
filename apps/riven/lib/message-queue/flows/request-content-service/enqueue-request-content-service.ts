@@ -1,7 +1,7 @@
 import { flow } from "../producer.ts";
 import { createRequestContentServiceJob } from "./request-content-service.schema.ts";
 
-export function enqueueRequestContentService(
+export async function enqueueRequestContentService(
   contentServicePlugin: string,
   delaySeconds?: number,
 ) {

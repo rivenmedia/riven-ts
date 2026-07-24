@@ -1,8 +1,9 @@
-import Fuse from "@zkochan/fuse-native";
 import { getGlobalDispatcher } from "undici";
 import { fromPromise } from "xstate";
 
 import { logger } from "../../../utilities/logger/logger.ts";
+
+import type Fuse from "@zkochan/fuse-native";
 
 export const unmountVfs = fromPromise<undefined, Fuse | undefined>(
   async ({ input: vfs }) => {

@@ -1,17 +1,20 @@
-import * as Sentry from "@sentry/node";
-import { type SandboxedJob, UnrecoverableError } from "bullmq";
+#!/usr/bin/env node
+
+import { captureException } from "@sentry/node";
+import { UnrecoverableError } from "bullmq";
 import { AbortError } from "es-toolkit";
 import assert from "node:assert";
 import { threadId } from "node:worker_threads";
-import { type ZodLiteral, type ZodObject, type ZodType, z } from "zod";
 
 import { initApolloClient } from "../../../graphql/apollo-client.ts";
 import { withLogContext } from "../../../utilities/logger/log-context.ts";
 import { settings } from "../../../utilities/settings.ts";
 
 import type { SandboxedJobDefinition, SandboxedJobHandlers } from "../index.ts";
+import type { SandboxedJob } from "bullmq";
+import type { z, ZodLiteral, ZodObject, ZodType } from "zod";
 
-const timeoutDuration = 5_000;
+const timeoutDuration = 5000;
 
 function startIdleTimer(duration: number) {
   return setTimeout(() => {
@@ -41,7 +44,7 @@ export function createSandboxedJobProcessor<
 ) {
   const [sandboxedJobName] = sandboxedJobSchema.shape.name.def.values;
 
-  assert(
+  assert.ok(
     sandboxedJobName,
     `No queue name found for sandboxed job: ${sandboxedJobSchema.shape.name.value}`,
   );
@@ -81,7 +84,7 @@ export function createSandboxedJobProcessor<
 
             return result;
           } catch (error) {
-            Sentry.captureException(error);
+            captureException(error);
 
             if (error instanceof Error) {
               throw error;

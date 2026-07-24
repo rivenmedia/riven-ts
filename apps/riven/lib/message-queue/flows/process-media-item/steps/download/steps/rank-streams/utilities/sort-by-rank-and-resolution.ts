@@ -1,8 +1,6 @@
-import {
-  type RankedResult,
-  Resolution,
-  ResolutionRank,
-} from "@repo/util-rank-torrent-name";
+import { Resolution, ResolutionRank } from "@repo/util-rank-torrent-name";
+
+import type { RankedResult } from "@repo/util-rank-torrent-name";
 
 export const sortByRankAndResolution = (a: RankedResult, b: RankedResult) => {
   if (a.rank !== b.rank) {

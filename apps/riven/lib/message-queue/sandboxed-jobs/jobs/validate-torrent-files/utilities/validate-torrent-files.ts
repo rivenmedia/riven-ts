@@ -1,6 +1,6 @@
 import { parseFilePath } from "@repo/util-rank-torrent-name";
 
-import { type TypedDocumentNode, gql } from "@apollo/client";
+import { gql } from "@apollo/client";
 import chalk from "chalk";
 import assert, { AssertionError } from "node:assert";
 
@@ -16,9 +16,12 @@ import type {
   GetValidateTorrentFilesItemQuery,
   GetValidateTorrentFilesItemQueryVariables,
 } from "./validate-torrent-files.typegen.ts";
+import type { TypedDocumentNode } from "@apollo/client";
 import type { UUID } from "node:crypto";
 
-export class InvalidTorrentError extends Error {}
+export class InvalidTorrentError extends Error {
+  public override name = "InvalidTorrentError";
+}
 
 function calculateAverageBitrate(fileSize: number, runtime: number) {
   return fileSize / runtime / (1024 * 1024);
@@ -125,9 +128,9 @@ export const validateTorrentFiles = async (
       Object.entries(item.__typename === "Movie" ? movies : episodes),
     );
 
-    assert(
+    assert.ok(
       groupMap.size >= item.expectedFileCount,
-      `${item.type.substring(0, 1).toUpperCase() + item.type.substring(1)} torrent must have at least ${item.expectedFileCount.toString()} ${item.__typename === "Movie" ? "movies" : "episodes"}, but has ${groupMap.size.toString()}`,
+      `${item.type.slice(0, 1).toUpperCase() + item.type.slice(1)} torrent must have at least ${item.expectedFileCount.toString()} ${item.__typename === "Movie" ? "movies" : "episodes"}, but has ${groupMap.size.toString()}`,
     );
 
     const validFiles: MatchedFile[] = [];
@@ -136,20 +139,20 @@ export const validateTorrentFiles = async (
       const files = groupMap
         .values()
         .toArray()
-        .sort((a, b) => b.size - a.size);
+        .toSorted((a, b) => b.size - a.size);
 
       for (const file of files) {
         try {
           const parseData = parseFilePath(file.path);
 
-          assert(parseData.type === "movie", "File must be a movie");
+          assert.ok(parseData.type === "movie", "File must be a movie");
 
           if (item.runtime && settings.minimumAverageBitrateMovies) {
             const bitrate = calculateAverageBitrate(file.size, item.runtime);
 
             // TODO: If this assertion fails, we can probably skip checking all other files.
             // Average bitrate is proportional to the file size, and the files are ordered by size.
-            assert(
+            assert.ok(
               bitrate >= settings.minimumAverageBitrateMovies,
               `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateMovies.toString()} for movies`,
             );
@@ -202,12 +205,12 @@ export const validateTorrentFiles = async (
         try {
           const parseData = parseFilePath(file.path);
 
-          assert(
+          assert.ok(
             parseData.type === "show",
             "Expected an episode, but found a movie",
           );
 
-          assert(
+          assert.ok(
             parseData.episodes[0] != null,
             "File must have at least one episode number",
           );
@@ -221,7 +224,7 @@ export const validateTorrentFiles = async (
             },
           });
 
-          assert(
+          assert.ok(
             episodeResult.data?.episode,
             `File must correspond to a valid episode in ${item.fullTitle}`,
           );
@@ -229,14 +232,14 @@ export const validateTorrentFiles = async (
           const { episode } = episodeResult.data;
 
           if (item.__typename === "Season") {
-            assert(
+            assert.ok(
               episode.season.number === item.number,
               `File must correspond to a valid episode in ${item.fullTitle}`,
             );
           }
 
           if (item.__typename === "Episode") {
-            assert(
+            assert.ok(
               episode.number === item.number &&
                 episode.season.number === item.season.number,
               `Incorrect episode for ${item.fullTitle}`,
@@ -245,7 +248,7 @@ export const validateTorrentFiles = async (
             if (item.runtime && settings.minimumAverageBitrateEpisodes) {
               const bitrate = calculateAverageBitrate(file.size, item.runtime);
 
-              assert(
+              assert.ok(
                 bitrate >= settings.minimumAverageBitrateEpisodes,
                 `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateEpisodes.toString()} for episodes`,
               );
@@ -269,7 +272,7 @@ export const validateTorrentFiles = async (
       }
     }
 
-    assert(
+    assert.ok(
       item.expectedFileCount <= validFiles.length,
       `Expected at least ${item.expectedFileCount.toString()} valid files, but found ${validFiles.length.toString()}`,
     );

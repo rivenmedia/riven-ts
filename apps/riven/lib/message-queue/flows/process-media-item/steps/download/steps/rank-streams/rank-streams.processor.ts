@@ -1,29 +1,25 @@
 import { ShowLikeMediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
-import {
-  GarbageTorrentError,
-  RTN,
-  type RankedResult,
-} from "@repo/util-rank-torrent-name";
+import { GarbageTorrentError } from "@repo/util-rank-torrent-name";
 
 import { NotFoundError } from "@mikro-orm/core";
 import chalk from "chalk";
 
+import { rtnInstance } from "../../../../../../../ranking-config/ranking-config.ts";
 import { logger } from "../../../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../../../utilities/settings.ts";
 import { SkippedTorrentError } from "../../../../../../sandboxed-jobs/jobs/parse-scrape-results/utilities/validate-torrent.ts";
 import { rankStreamsProcessorSchema } from "./rank-streams.schema.ts";
 import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution.ts";
 
+import type { RankedResult } from "@repo/util-rank-torrent-name";
+
 export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
-  async function (
-    { job },
-    { services: { mediaItemService, downloaderService } },
-  ) {
+  async ({ job }, { services: { mediaItemService, downloaderService } }) => {
     const streams = await downloaderService.findMatchingStreams(
       Object.keys(job.data.streams),
     );
 
-    if (!streams.length) {
+    if (streams.length === 0) {
       return [];
     }
 
@@ -32,13 +28,11 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
     const { title: itemTitle, aliases } =
       item instanceof ShowLikeMediaItem ? await item.getShow() : item;
 
-    const rtnInstance = new RTN(job.data.rtnSettings, job.data.rtnRankingModel);
+    const rankedResults: RankedResult[] = [];
 
-    const rankedResults = Object.entries(job.data.streams).reduce<
-      RankedResult[]
-    >((acc, [hash, rawTitle]) => {
+    for (const [hash, rawTitle] of Object.entries(job.data.streams)) {
       try {
-        const stream = streams.find((s) => s.infoHash === hash);
+        const stream = streams.find(({ infoHash }) => infoHash === hash);
 
         if (!stream) {
           throw new NotFoundError(
@@ -58,11 +52,9 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
           );
         }
 
-        acc.push(
+        rankedResults.push(
           rtnInstance.rankTorrent(rawTitle, hash, itemTitle, aliases ?? {}),
         );
-
-        return acc;
       } catch (error) {
         if (
           error instanceof GarbageTorrentError ||
@@ -75,13 +67,11 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
             { err: error },
           );
         }
-
-        return acc;
       }
-    }, []);
+    }
 
     const bucketedTorrents = rtnInstance.sortTorrents(rankedResults);
-    const sortedTorrentsByResolution = bucketedTorrents.sort(
+    const sortedTorrentsByResolution = bucketedTorrents.toSorted(
       sortByRankAndResolution,
     );
 

@@ -1,14 +1,14 @@
+#!/usr/bin/env node
+
 import { Duration } from "luxon";
 import { randomUUID } from "node:crypto";
 import { setEnvironmentData } from "node:worker_threads";
 
-import {
-  type LogContext,
-  withLogContext,
-} from "./utilities/logger/log-context.ts";
+import { withLogContext } from "./utilities/logger/log-context.ts";
 import { SessionID } from "./utilities/logger/session-id.ts";
 
 import type { rivenMachine } from "./state-machines/program/index.ts";
+import type { LogContext } from "./utilities/logger/log-context.ts";
 import type { ActorRefFromLogic } from "xstate";
 
 /**
@@ -39,7 +39,25 @@ export async function riven() {
   };
 
   await withLogContext(baseLogContext, async () => {
+    const isMockingEnabled = Boolean(process.env["MOCK_SCENARIO"]);
+    const { mockScenario, server } = isMockingEnabled
+      ? await import("./mocks/node.ts")
+      : {};
+
+    if (mockScenario) {
+      Object.assign(
+        process.env,
+        Object.fromEntries(
+          Object.entries(mockScenario.environmentData).map(([key, value]) => [
+            key,
+            JSON.stringify(value),
+          ]),
+        ),
+      );
+    }
+
     await import("./sentry.ts");
+    await import("./ranking-config/ranking-config.ts");
 
     const { waitFor } = await import("xstate");
 
@@ -52,8 +70,15 @@ export async function riven() {
       seconds: settings.shutdownTimeoutSeconds,
     }).as("milliseconds");
 
+    if (mockScenario) {
+      logger.warn(
+        `Mocks are enabled with the "${mockScenario.scenarioName}" scenario.`,
+      );
+    }
+
     const actor = createRivenMachine({
       sessionId,
+      mockScenario,
     });
 
     async function shutdown() {
@@ -76,6 +101,8 @@ export async function riven() {
       }
 
       logger.info(`Riven exited with code ${process.exitCode.toString()}`);
+
+      server?.close();
 
       process.exit();
     }

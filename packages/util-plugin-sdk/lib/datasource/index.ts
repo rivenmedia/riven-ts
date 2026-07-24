@@ -1,24 +1,12 @@
+import { RESTDataSource } from "@apollo/datasource-rest";
 import {
-  type AugmentedRequest,
-  type DataSourceConfig,
-  type DataSourceFetchResult,
-  type DataSourceRequest,
-  RESTDataSource,
-  type RequestOptions,
-} from "@apollo/datasource-rest";
-import {
-  type ConnectionOptions,
-  Job,
-  type ParentOptions,
   Queue,
   QueueEvents,
   RateLimitError,
-  type RateLimiterOptions,
-  type Telemetry,
   UnrecoverableError,
   Worker,
 } from "bullmq";
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
 import { URL } from "node:url";
 import z from "zod";
 
@@ -27,8 +15,22 @@ import { json } from "../validation/json.ts";
 import { urlSearchParamsCodec } from "../validation/url-search-params-parser.ts";
 import { dataSourceContext } from "./context.ts";
 
+import type {
+  AugmentedRequest,
+  DataSourceConfig,
+  DataSourceFetchResult,
+  DataSourceRequest,
+  RequestOptions,
+} from "@apollo/datasource-rest";
 import type { KeyvAdapter } from "@apollo/utils.keyvadapter";
-import type EventEmitter from "events";
+import type {
+  ConnectionOptions,
+  ParentOptions,
+  RateLimiterOptions,
+  Telemetry,
+  Job,
+} from "bullmq";
+import type EventEmitter from "node:events";
 import type { Promisable } from "type-fest";
 import type { Logger } from "winston";
 
@@ -52,9 +54,28 @@ type FetchResponse<T = unknown> = Pick<
     statusText: string;
     headers: Record<string, string>;
   };
-  responseTime: number;
-  responseFromCache: boolean | undefined;
-};
+} & (
+    | {
+        success: true;
+        responseTime: number;
+        responseFromCache: boolean | undefined;
+      }
+    | { success: false }
+  );
+
+export class DataSourceHTTPError extends Error {
+  public override name = "DataSourceHTTPError";
+
+  public response!: DataSourceFetchResult<never>["response"];
+
+  public constructor(response: DataSourceFetchResult<never>["response"]) {
+    super(
+      `${response.status.toString()} ${response.statusText} for ${response.url}`,
+    );
+
+    this.response = response;
+  }
+}
 
 export interface BaseDataSourceConfig<
   T extends Record<string, unknown>,
@@ -62,6 +83,7 @@ export interface BaseDataSourceConfig<
   settings: T;
   pluginSymbol: symbol;
   requestAttempts?: number;
+  requestBackoffDelay?: number;
   logger: Logger;
   connection: ConnectionOptions;
   telemetry: Telemetry;
@@ -69,14 +91,14 @@ export interface BaseDataSourceConfig<
 }
 
 export abstract class BaseDataSource<
-  T extends Record<string, unknown>,
+  DataSourceSettings extends Record<string, unknown>,
 > extends RESTDataSource {
-  abstract override readonly baseURL: string;
+  public abstract override readonly baseURL: string;
 
-  readonly serviceName: string;
-  readonly settings: T;
+  public readonly serviceName: string;
+  public readonly settings: DataSourceSettings;
 
-  override readonly logger: Logger;
+  public override readonly logger: Logger;
 
   protected readonly rateLimiterOptions?: RateLimiterOptions | undefined;
 
@@ -95,44 +117,47 @@ export abstract class BaseDataSource<
    */
   protected readonly concurrency: number = 200;
 
-  #requestAttempts: number;
+  readonly #requestAttempts: number;
+  readonly #requestBackoffDelay: number;
 
-  #queueId: string;
-  #queueEvents: QueueEvents;
-  queue: Queue<FetchJobInput, FetchResponse>;
-  worker: Worker<FetchJobInput, FetchResponse>;
+  readonly #queueId: string;
+  readonly #queueEvents: QueueEvents;
+  public queue: Queue<FetchJobInput, FetchResponse>;
+  public worker: Worker<FetchJobInput, FetchResponse>;
 
-  #keyv: KeyvAdapter;
-  #keyvPrefix = "httpcache:";
+  readonly #keyv: KeyvAdapter;
+  readonly #keyvPrefix = "httpcache:";
 
-  constructor({
+  /**
+   * A set of HTTP status codes that should not be treated as fatal errors.
+   *
+   * When a response with one of these status codes is received, the datasource
+   * will attempt to re-request the data after a delay, rather than immediately throwing an error.
+   *
+   * For all other 4xx and 5xx status codes, no retries will be made.
+   */
+  readonly #nonFatalStatusCodes = new Set([408, 425, 429, 500, 502, 503, 504]);
+
+  public constructor({
     pluginSymbol,
     settings,
     requestAttempts = 3,
+    requestBackoffDelay = 10_000,
     connection,
     telemetry,
     userAgent,
     ...apolloDataSourceOptions
-  }: BaseDataSourceConfig<T>) {
+  }: BaseDataSourceConfig<DataSourceSettings>) {
     super(apolloDataSourceOptions);
 
     this.#keyv = apolloDataSourceOptions.cache as KeyvAdapter;
 
     this.serviceName = this.constructor.name;
     this.#requestAttempts = requestAttempts;
+    this.#requestBackoffDelay = requestBackoffDelay;
     this.#queueId = `${pluginSymbol.description ?? "unknown"}-${this.serviceName}-fetch-queue`;
     this.queue = new Queue(this.#queueId, {
       connection,
-      defaultJobOptions: {
-        removeOnComplete: {
-          age: 60,
-          count: 5000,
-        },
-        removeOnFail: {
-          age: 60 * 60 * 24,
-          count: 5000,
-        },
-      },
       telemetry,
     });
 
@@ -143,64 +168,103 @@ export abstract class BaseDataSource<
       async (job, _token, signal) => {
         await job.log(`Processing request for ${job.data.path}`);
 
-        const {
-          timeTaken,
-          result: { parsedBody, response, responseFromCache },
-        } = await benchmark(async () => {
-          this.logger.silly(
-            [
-              `[${this.serviceName}] Initiating request to ${new URL(job.data.path, this.baseURL).toString()}`,
-              ...(job.data.params ? [`?${job.data.params}`] : []),
-            ].join(""),
+        try {
+          const {
+            timeTaken,
+            result: { parsedBody, response, responseFromCache },
+          } = await benchmark(async () => {
+            this.logger.silly(
+              [
+                `[${this.serviceName}] Initiating request to ${new URL(job.data.path, this.baseURL).toString()}`,
+                ...(job.data.params ? [`?${job.data.params}`] : []),
+              ].join(""),
+            );
+
+            this.#decodeRequestBody(job);
+
+            job.data.incomingRequest ??= {};
+            job.data.incomingRequest.signal = signal;
+            job.data.incomingRequest.params = urlSearchParamsCodec.decode(
+              job.data.params,
+            );
+            job.data.incomingRequest.headers ??= {};
+            job.data.incomingRequest.headers["user-agent"] = userAgent;
+
+            return super.fetch(job.data.path, job.data.incomingRequest);
+          });
+
+          await job.log(
+            `Request completed in ${(timeTaken / 1000).toFixed(2)} seconds`,
           );
 
-          this.#decodeRequestBody(job);
+          return {
+            success: true,
+            parsedBody,
+            response: {
+              ok: response.ok,
+              status: response.status,
+              statusText: response.statusText,
+              headers: Object.fromEntries(response.headers),
+            },
+            responseTime: timeTaken,
+            responseFromCache,
+          };
+        } catch (error) {
+          const hasRemainingAttempts =
+            job.attemptsStarted !== this.#requestAttempts;
 
-          job.data.incomingRequest ??= {};
-          job.data.incomingRequest.signal = signal;
-          job.data.incomingRequest.params = urlSearchParamsCodec.decode(
-            job.data.params,
-          );
-          job.data.incomingRequest.headers ??= {};
-          job.data.incomingRequest.headers["user-agent"] = userAgent;
+          const isFatalHttpStatusCode =
+            error instanceof DataSourceHTTPError &&
+            !this.#nonFatalStatusCodes.has(error.response.status);
 
-          return super.fetch(job.data.path, job.data.incomingRequest);
-        });
+          const shouldRetry = hasRemainingAttempts && !isFatalHttpStatusCode;
 
-        await job.log(
-          `Request completed in ${(timeTaken / 1000).toFixed(2)} seconds`,
-        );
+          if (shouldRetry) {
+            throw error;
+          }
 
-        return {
-          parsedBody,
-          response: {
-            ok: response.ok,
-            status: response.status,
-            statusText: response.statusText,
-            headers: Object.fromEntries(response.headers),
-          },
-          responseTime: timeTaken,
-          responseFromCache,
-        };
+          if (error instanceof DataSourceHTTPError) {
+            return {
+              success: false,
+              parsedBody: null,
+              response: {
+                headers: Object.fromEntries(error.response.headers),
+                ok: error.response.ok,
+                status: error.response.status,
+                statusText: error.response.statusText,
+              },
+            };
+          }
+
+          throw error;
+        }
       },
       {
         connection,
         ...(this.rateLimiterOptions && { limiter: this.rateLimiterOptions }),
         telemetry,
         concurrency: Math.max(1, Math.floor(this.concurrency)),
+        removeOnComplete: {
+          age: 60,
+          count: 5000,
+        },
+        removeOnFail: {
+          age: 60 * 60 * 24,
+          count: 5000,
+        },
       },
     );
 
     this.logger = apolloDataSourceOptions.logger;
 
-    [this.queue, this.#queueEvents, this.worker].forEach((resource) => {
+    for (const resource of [this.queue, this.#queueEvents, this.worker]) {
       (resource as EventEmitter).on("error", (error: unknown) => {
         this.logger.error(
           `${this.#queueId} ${resource.constructor.name} error`,
           { err: error },
         );
       });
-    });
+    }
 
     this.settings = settings;
   }
@@ -213,7 +277,7 @@ export abstract class BaseDataSource<
     }
 
     if (typeof job.data.incomingRequest.body !== "string") {
-      throw new Error("Unable to decode non-string request body.");
+      throw new UnrecoverableError("Unable to decode non-string request body.");
     }
 
     if (bodyType === "url-search-params") {
@@ -248,9 +312,9 @@ export abstract class BaseDataSource<
       return httpDate;
     }
 
-    const retryAfterSeconds = parseInt(retryAfterHeader, 10);
+    const retryAfterSeconds = Math.trunc(Number(retryAfterHeader));
 
-    if (isNaN(retryAfterSeconds)) {
+    if (Number.isNaN(retryAfterSeconds)) {
       return null;
     }
 
@@ -299,7 +363,7 @@ export abstract class BaseDataSource<
 
     const downcasedHeaders: Record<string, string> = {};
 
-    // map incoming headers to lower-case headers
+    // Map incoming headers to lower-case headers
     for (const [key, value] of Object.entries(augmentedRequest.headers)) {
       downcasedHeaders[key.toLowerCase()] = value;
     }
@@ -343,7 +407,7 @@ export abstract class BaseDataSource<
       try {
         JSON.parse(body);
       } catch {
-        throw new Error(
+        throw new UnrecoverableError(
           "Unable to determine the request body type: invalid JSON string.",
         );
       }
@@ -351,7 +415,7 @@ export abstract class BaseDataSource<
       return "json";
     }
 
-    throw new Error("Unable to determine the request body type.");
+    throw new UnrecoverableError("Unable to determine the request body type.");
   }
 
   async #createRequestJob(
@@ -372,7 +436,7 @@ export abstract class BaseDataSource<
       cacheKey,
       {
         path,
-        incomingRequest: request,
+        incomingRequest: request as DataSourceRequest,
         bodyType,
         params: urlSearchParamsCodec.encode(request.params),
       },
@@ -381,7 +445,7 @@ export abstract class BaseDataSource<
         attempts: this.#requestAttempts,
         backoff: {
           type: "exponential",
-          delay: 10_000,
+          delay: this.#requestBackoffDelay,
           jitter: 0.5,
         },
         removeDependencyOnFailure: true,
@@ -389,7 +453,7 @@ export abstract class BaseDataSource<
     );
   }
 
-  override async fetch<T>(
+  public override async fetch<T>(
     path: string,
     incomingRequest?: DataSourceRequest,
   ): Promise<DataSourceFetchResult<T>> {
@@ -406,7 +470,7 @@ export abstract class BaseDataSource<
 
     if (isCached) {
       // If we have a cached response, bypass the message queue and fetch directly
-      return super.fetch(path, augmentedRequest);
+      return super.fetch(path, augmentedRequest as DataSourceRequest);
     }
 
     const context = dataSourceContext.getStore();
@@ -427,68 +491,69 @@ export abstract class BaseDataSource<
 
     const result = await job.waitUntilFinished(this.#queueEvents);
 
+    const clonedResponse = new Response(null, result.response);
+
+    if (!result.success) {
+      throw new DataSourceHTTPError(clonedResponse);
+    }
+
+    const commonResponseFields = {
+      response: clonedResponse,
+      // The following fields aren't used by our application,
+      // but must be included to satisfy the return type.
+      responseFromCache: result.responseFromCache ?? false,
+      requestDeduplication: undefined as never,
+      httpCache: {
+        cacheWritePromise: Promise.resolve(),
+      },
+    } as const satisfies Pick<
+      DataSourceFetchResult<T>,
+      "responseFromCache" | "requestDeduplication" | "httpCache" | "response"
+    >;
+
     const logMessage = result.responseFromCache
       ? `[${this.serviceName}] Returned cached response for ${augmentedRequest.method ?? "GET"} ${url.toString()}`
       : `[${this.serviceName}] HTTP ${result.response.status.toString()} response for ${augmentedRequest.method ?? "GET"} ${url.toString()} in ${(result.responseTime / 1000).toFixed(2)} seconds`;
 
     if (!result.response.ok) {
-      throw new Error(logMessage);
+      throw new DataSourceHTTPError(clonedResponse);
     }
 
     this.logger.http(logMessage);
 
-    const { ok, ...responseInit } = result.response;
-
     return {
       parsedBody: result.parsedBody as T,
-      response: new Response(null, responseInit),
-
-      // The following fields aren't used by our application,
-      // but must be included to satisfy the return type.
-      responseFromCache: false,
-      requestDeduplication: undefined as never,
-      httpCache: {
-        cacheWritePromise: Promise.resolve(),
-      },
+      ...commonResponseFields,
     };
   }
 
-  override async throwIfResponseIsError(options: {
+  public override async throwIfResponseIsError({
+    request,
+    response,
+  }: {
     url: URL;
     request: RequestOptions;
     response: DataSourceFetchResult<unknown>["response"];
     parsedBody: unknown;
   }) {
-    if (options.response.ok) {
+    if (response.ok) {
       return;
     }
 
-    const { response, url } = options;
-
     if (response.status === 429) {
+      const defaultWaitMs = 10_000;
       const waitMs = this.#parseRetryAfterHeader(
         response.headers.get("Retry-After") ?? "",
       );
-      const defaultWaitMs = 10000;
 
-      await this.queue.rateLimit(
+      await this.didEncounterRateLimit(
+        request,
+        response,
         waitMs === null || waitMs <= 0 ? defaultWaitMs : waitMs,
       );
-
-      this.logger.warn(
-        waitMs
-          ? `[${this.serviceName}] Received 429 Too Many Requests response for ${url.toString()}; retrying after ${Math.round(waitMs / 1000).toFixed(0)} seconds`
-          : `[${this.serviceName}] Received 429 response without valid Retry-After header for ${url.toString()}. Using default wait time of ${(defaultWaitMs / 1000).toFixed(0)} seconds.`,
-      );
-
-      throw Worker.RateLimitError();
     }
 
-    if (String(response.status).startsWith("4")) {
-      throw new UnrecoverableError(
-        `${response.status.toString()} ${response.statusText} for ${url.toString()}`,
-      );
-    }
+    throw new DataSourceHTTPError(response);
   }
 
   protected override didEncounterError(
@@ -521,7 +586,29 @@ export abstract class BaseDataSource<
     });
   }
 
-  abstract validate(): Promisable<boolean>;
+  protected didEncounterRateLimit(
+    _request: RequestOptions,
+    response: DataSourceFetchResult<unknown>["response"],
+    waitMs: number,
+  ): Promisable<void>;
+
+  protected async didEncounterRateLimit(
+    _request: RequestOptions,
+    response: DataSourceFetchResult<unknown>["response"],
+    waitMs: number,
+  ): Promise<void> {
+    await this.queue.rateLimit(waitMs);
+
+    const formattedWaitTime = Duration.fromMillis(waitMs).rescale().toHuman();
+
+    this.logger.warn(
+      `[${this.serviceName}] Received 429 Too Many Requests response for ${response.url}; retrying after ${formattedWaitTime}`,
+    );
+
+    throw Worker.RateLimitError();
+  }
+
+  public abstract validate(): Promisable<boolean>;
 }
 
 export type { RateLimiterOptions } from "bullmq";

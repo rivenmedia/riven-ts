@@ -5,7 +5,7 @@ const filePatterns = {
   generatedProdFiles: "**/__generated__/zod/*.ts!",
   generatedDevFiles: "**/__generated__/{handlers,mocks}/*.ts",
   scriptFiles: "**/scripts/**/*.ts",
-  testFiles: ["!**/*.{spec,test}.ts!", "!**/{__tests__,__mocks__}/**!"],
+  testFiles: ["!**/*.{spec,test}.ts!", "!**/__{tests,mocks}__/**!"],
 
   // Tooling configs
   configFiles: "**/*.config.ts",
@@ -33,7 +33,6 @@ const defaultProject = [
 export default {
   tags: ["-lintignore"],
   ignoreDependencies: [
-    "@typescript-eslint/parser",
     "@kubb/cli",
     "@graphql-codegen/*",
     "@graphql-typed-document-node/*",
@@ -45,6 +44,7 @@ export default {
     ".": {
       entry: [".husky/install.mjs", "turbo/generators/config.ts!"],
       project: ["turbo/**/*.ts"],
+      ignoreDependencies: ["@commitlint/cli"],
       ignoreBinaries: ["tail", "jq"],
     },
     "apps/wiki": {
@@ -54,22 +54,22 @@ export default {
         "app/**/route.ts!",
         "app/api/**/route.ts!",
         "mdx-components.tsx!",
-        "source.config.ts!",
         "scripts/*.mjs",
-        "next.config.mjs!",
+        "next.config.ts!",
         "postcss.config.mjs!",
       ],
-      project: ["**/*.{ts,tsx,mjs}!"],
-      ignoreDependencies: ["tailwindcss"],
+      project: ["**/*.{ts,tsx,mjs}!", "!source.config.ts"],
+      ignoreDependencies: ["tailwindcss", /@repo\/(?<pluginName>.*)/u],
     },
     "apps/riven": {
-      entry: [...defaultEntry],
+      entry: [...defaultEntry, "!**/Migration*.ts!"],
       project: [
         ...defaultProject,
         "!**/Migration*.ts",
         "!**/{factories,seeders}!",
       ],
-      ignoreDependencies: [/@repo\/plugin(.*)/],
+      ignoreDependencies: [/@repo\/plugin(?<pluginName>.*)/u],
+      ignoreFiles: ["**/*.d.ts"],
     },
     "{packages,packages/core}/*": {
       entry: [...defaultEntry],

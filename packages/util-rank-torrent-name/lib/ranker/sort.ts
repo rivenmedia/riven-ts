@@ -17,7 +17,7 @@ export function sortTorrents(
         )
       : torrents;
 
-  const sortedTorrents = filteredTorrents.sort((a, b) => b.rank - a.rank);
+  const sortedTorrents = filteredTorrents.toSorted((a, b) => b.rank - a.rank);
 
   if (bucketLimit === Infinity) {
     return sortedTorrents;

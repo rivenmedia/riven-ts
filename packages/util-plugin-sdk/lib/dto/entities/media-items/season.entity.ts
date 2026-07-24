@@ -1,9 +1,4 @@
-import {
-  Collection,
-  EntityRepositoryType,
-  type Opt,
-  type Ref,
-} from "@mikro-orm/core";
+import { Collection, EntityRepositoryType } from "@mikro-orm/core";
 import {
   Entity,
   ManyToOne,
@@ -14,46 +9,48 @@ import { Min } from "class-validator";
 import { Field, Int, ObjectType } from "type-graphql";
 
 import { SeasonRepository } from "../../repositories/season.repository.ts";
-import { MediaEntry } from "../filesystem/index.ts";
 import { Episode, Show, ShowLikeMediaItem } from "./index.ts";
+
+import type { MediaEntry } from "../filesystem/index.ts";
+import type { Opt, Ref } from "@mikro-orm/core";
 
 @ObjectType({ implements: ShowLikeMediaItem })
 @Entity({ repository: () => SeasonRepository })
 export class Season extends ShowLikeMediaItem {
-  [EntityRepositoryType]?: SeasonRepository;
+  public [EntityRepositoryType]?: SeasonRepository;
 
   @Field(() => Int)
   @Property()
   @Min(0)
-  number!: number;
+  public number!: number;
 
   @Field(() => Show)
   @ManyToOne()
-  show!: Opt<Ref<Show>>;
+  public show!: Opt<Ref<Show>>;
 
   @Field(() => [Episode])
   @OneToMany(() => Episode, (episode) => episode.season)
-  episodes = new Collection<Episode>(this);
+  public episodes = new Collection<Episode>(this);
 
-  getPrettyName(): string {
+  public getPrettyName(): string {
     return `Season ${this.number.toString().padStart(2, "0")}`;
   }
 
   @Property({ persist: true, hydrate: false })
-  get isSpecial(): Opt<boolean> {
+  public get isSpecial(): Opt<boolean> {
     return this.number === 0;
   }
 
-  override type: Opt<"season"> = "season" as const;
+  public override type: Opt<"season"> = "season" as const;
 
-  declare tvdbId: Opt<string>;
-  declare contentRating: Opt<never>;
+  declare public tvdbId: Opt<string>;
+  declare public contentRating: Opt<never>;
 
-  getShow() {
+  public async getShow() {
     return this.show.loadOrFail();
   }
 
-  async getMediaEntries() {
+  public async getMediaEntries() {
     const episodes = await this.episodes.matching({
       where: {
         filesystemEntries: {
@@ -74,11 +71,11 @@ export class Season extends ShowLikeMediaItem {
     );
   }
 
-  async getExpectedFileCount(): Promise<number> {
+  public async getExpectedFileCount(): Promise<number> {
     return this.episodes.loadCount();
   }
 
-  async getIncompleteItems() {
+  public async getIncompleteItems() {
     return this.episodes.matching({
       where: {
         state: ["indexed", "scraped"],

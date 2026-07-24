@@ -2,22 +2,22 @@
   "name": "@repo/plugin-mdblist",
   "version": "0.0.0",
   "private": true,
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": {
     ".": {
       "production": "./dist/index.js",
       "default": "./lib/index.ts"
-    }
+    },
+    "./wiki.config": "./wiki.config.ts"
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",
-    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
     "codegen:api-schemas": "kubb generate",
-    "codegen:config-docs": "zod2md",
-    "lint": "eslint",
+    "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
+    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
@@ -26,6 +26,7 @@
     "@apollo/datasource-rest": "catalog:",
     "@repo/core-util-graphql-helpers": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
+    "@repo/util-wiki-helpers": "workspace:^",
     "class-validator": "catalog:",
     "type-graphql": "catalog:",
     "zod": "catalog:"
@@ -33,17 +34,16 @@
   "devDependencies": {
     "@faker-js/faker": "catalog:",
     "@kubb/cli": "catalog:",
-    "@repo/core-util-eslint-config": "workspace:^",
     "@repo/core-util-kubb-config": "workspace:^",
+    "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/util-plugin-testing": "workspace:^",
     "@types/node": "catalog:",
-    "@typescript-eslint/parser": "catalog:",
-    "eslint": "catalog:",
+    "@typescript/native": "catalog:",
     "msw": "catalog:",
+    "oxlint": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "zod2md": "catalog:"
+    "vitest": "catalog:"
   }
 }

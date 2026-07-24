@@ -7,38 +7,47 @@
   "author": "Riven Media",
   "type": "module",
   "scripts": {
-    "format:check": "prettier --check . '!**/docker-data'",
-    "format:check:ci": "pnpm format:check --log-level warn",
-    "format:fix": "prettier --write . '!**/docker-data'",
+    "format:check": "oxfmt --check .",
+    "format:check:ci": "pnpm format:check",
+    "format:fix": "oxfmt --write .",
     "postinstall": "pnpm node .husky/install.mjs || true",
     "knip": "pnpm knip:prepare && knip",
+    "lint": "oxlint --ignore-pattern '{apps,packages}/**'",
+    "lint:fix": "pnpm lint --fix",
     "knip:ci:base": "pnpm knip --cache --no-exit-code",
     "knip:ci:development": "pnpm knip:ci:base --reporter github-actions",
     "knip:ci:production": "pnpm knip:ci:base --strict --reporter json | tail -1 > knip-report.json && jq -e '(.issues // []) | length == 0' knip-report.json > /dev/null",
-    "knip:prepare": "turbo codegen:api-schemas"
+    "knip:prepare": "turbo codegen:api-schemas",
+    "validate-generators": "vitest run -c @repo/core-util-vitest-config -r turbo/generators --no-file-parallelism"
   },
   "devDependencies": {
-    "@repo/core-util-eslint-config": "workspace:^",
+    "@commitlint/cli": "catalog:",
+    "@commitlint/config-conventional": "catalog:",
+    "@commitlint/types": "catalog:",
+    "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
-    "@trivago/prettier-plugin-sort-imports": "catalog:",
+    "@repo/core-util-vitest-config": "workspace:^",
     "@turbo/gen": "catalog:",
     "@types/node": "catalog:",
+    "@typescript/native": "catalog:",
     "es-toolkit": "catalog:",
-    "eslint": "catalog:",
+    "execa": "catalog:",
     "husky": "catalog:",
     "knip": "catalog:",
     "lint-staged": "catalog:",
-    "prettier": "catalog:",
-    "sort-package-json": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
     "turbo": "catalog:",
     "type-fest": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
-  "packageManager": "pnpm@11.2.1+sha512.4c4c142b276348da01d39907cce2f40bf61281212a0e43295ee988055d50cce728ab7e9c181e252e4bce3a4f19ba1cff1a75b1e2e0fd6b17ba0be598a5e45446",
   "devEngines": {
     "runtime": {
       "name": "node",
       "version": "^24"
     }
-  }
+  },
+  "packageManager": "pnpm@11.5.1+sha512.93f7b57422ea7068257235b4c16eb60762eb68e1dc23723199cc739043ea9be2c4143274a399d8c6defa2b1176226d9ca1c4b63482d6200c1a8fbaa78c1d1485"
 }

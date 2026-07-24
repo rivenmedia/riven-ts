@@ -1283,7 +1283,8 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "boolean"
+                            "type": "integer",
+                            "enum": [0, 1]
                           },
                           "title": {
                             "type": "string"
@@ -1910,7 +1911,8 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "boolean"
+                            "type": "integer",
+                            "enum": [0, 1]
                           },
                           "title": {
                             "type": "string"
@@ -1988,7 +1990,8 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "boolean"
+                            "type": "integer",
+                            "enum": [0, 1]
                           },
                           "title": {
                             "type": "string"
@@ -3209,7 +3212,8 @@
                             "type": "object",
                             "properties": {
                               "imdbid": {
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                               },
                               "tmdbid": {
                                 "type": "number"
@@ -4922,7 +4926,8 @@
                             "nullable": true
                           },
                           "adult": {
-                            "type": "boolean"
+                            "type": "integer",
+                            "enum": [0, 1]
                           },
                           "title": {
                             "type": "string"
@@ -8942,7 +8947,8 @@
                           "type": "object",
                           "properties": {
                             "imdbid": {
-                              "type": "string"
+                              "type": "string",
+                              "nullable": true
                             },
                             "tmdbid": {
                               "type": "number"
@@ -9989,7 +9995,8 @@
                             "type": "object",
                             "properties": {
                               "imdbid": {
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                               },
                               "tmdbid": {
                                 "type": "number"
@@ -10019,7 +10026,8 @@
                             "type": "object",
                             "properties": {
                               "imdbid": {
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                               },
                               "tmdbid": {
                                 "type": "number"
@@ -10047,7 +10055,8 @@
                             "type": "object",
                             "properties": {
                               "imdbid": {
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                               },
                               "tmdbid": {
                                 "type": "number"
@@ -10240,7 +10249,8 @@
                             "type": "number"
                           },
                           "adult": {
-                            "type": "boolean"
+                            "type": "integer",
+                            "enum": [0, 1]
                           },
                           "title": {
                             "type": "string"
@@ -10304,7 +10314,8 @@
                             "type": "number"
                           },
                           "adult": {
-                            "type": "boolean"
+                            "type": "integer",
+                            "enum": [0, 1]
                           },
                           "title": {
                             "type": "string"
@@ -11119,7 +11130,8 @@
                             "type": "object",
                             "properties": {
                               "imdbid": {
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                               },
                               "tmdbid": {
                                 "type": "number"
@@ -11546,7 +11558,8 @@
                             "type": "object",
                             "properties": {
                               "imdbid": {
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                               },
                               "tmdbid": {
                                 "type": "number"

@@ -27,7 +27,7 @@ export const detectReadType = (
   }
 
   const start = chunks[0]?.range[0];
-  const end = chunks[chunks.length - 1]?.range[1];
+  const end = chunks.at(-1)?.range[1];
 
   if (start === undefined || end === undefined) {
     throw new Error("No start / end provided!");

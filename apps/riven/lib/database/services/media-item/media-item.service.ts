@@ -1,16 +1,20 @@
 import { Episode, MediaItem, Show } from "@repo/util-plugin-sdk/dto/entities";
 
-import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
+import {
+  CreateRequestContext,
+  Transactional,
+} from "@mikro-orm/decorators/legacy";
 
 import { services } from "../../database.ts";
 import { BaseService } from "../core/base-service.ts";
+import { resetMediaItem } from "./utilities/reset-media-item.ts";
 
 import type { FindOneOrFailOptions } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";
 
 export class MediaItemService extends BaseService {
   @CreateRequestContext()
-  async getMediaItemById<
+  public async getMediaItemById<
     Hint extends string = never,
     Fields extends string = never,
     Excludes extends string = never,
@@ -22,7 +26,7 @@ export class MediaItemService extends BaseService {
   }
 
   @CreateRequestContext()
-  async getItemsToProcess(id: UUID) {
+  public async getItemsToProcess(id: UUID) {
     try {
       const item = await this.em.getRepository(MediaItem).findOneOrFail(
         {
@@ -67,7 +71,7 @@ export class MediaItemService extends BaseService {
    * per-episode jobs that dodge the season-level deduplication.
    */
   @CreateRequestContext()
-  async getReindexEpisodesToProcess(showId: UUID) {
+  public async getReindexEpisodesToProcess(showId: UUID) {
     return this.em.getRepository(Episode).find(
       {
         state: { $in: ["indexed", "scraped"] },
@@ -79,5 +83,11 @@ export class MediaItemService extends BaseService {
       },
       { populate: ["season"] },
     );
+  }
+
+  @CreateRequestContext()
+  @Transactional()
+  public async resetMediaItem(target: MediaItem) {
+    return resetMediaItem(this.em, target);
   }
 }

@@ -28,7 +28,7 @@ Content Sources (Seerr, MDBList, Listrr)
    VFS Mount (FUSE virtual file system)
         |
         v
-   Media Server (Plex / Jellyfin / Emby)
+   Media Server (Plex / Jellyfin)
 ```
 
 ## Core Components
@@ -104,9 +104,9 @@ Plugins communicate through 27+ typed events:
 
 - **Lifecycle**: `riven.core.started`, `riven.core.shutdown`
 - **Content**: `riven.content-service.requested`
-- **Indexing**: `media-item.index.requested`, `.success`, `.error`
-- **Scraping**: `media-item.scrape.requested`, `.success`, `.error`
-- **Downloading**: `media-item.download.requested`, `.success`, `.error`
+- **Indexing**: `riven.media-item.index.requested.movie`, `riven.media-item.index.requested.show`, `.success`, `.error`
+- **Scraping**: `riven.media-item.scrape.requested`, `.success`, `.error`
+- **Downloading**: `riven.media-item.download.requested`, `.success`, `.error`
 
 ## Monorepo Structure
 
@@ -121,7 +121,7 @@ riven-ts/
 │   │   ├── util-graphql-*/
 │   │   ├── util-logger/
 │   │   └── ...
-│   ├── plugin-*/       # Plugins (12+)
+│   ├── plugin-*/       # Plugins
 │   ├── util-plugin-sdk/    # Plugin SDK
 │   ├── util-plugin-testing/# Plugin test utilities
 │   ├── util-rank-torrent-name/ # Torrent ranking

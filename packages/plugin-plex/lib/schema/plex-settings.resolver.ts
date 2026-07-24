@@ -7,7 +7,7 @@ import { PlexSettings } from "./types/plex-settings.type.ts";
 @Resolver(() => Settings)
 export class PlexSettingsResolver {
   @FieldResolver(() => PlexSettings)
-  plex(): PlexSettings {
+  public plex(): PlexSettings {
     return {
       apiKey: "plex-api-key",
     };

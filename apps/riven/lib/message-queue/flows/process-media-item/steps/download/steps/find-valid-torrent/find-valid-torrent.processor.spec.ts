@@ -1,19 +1,456 @@
-import { it } from "vitest";
+import { DataSourceMap } from "@repo/util-plugin-sdk";
+import { BlacklistedStream } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  createRankingModel,
+  createSettings,
+  rankTorrent,
+} from "@repo/util-rank-torrent-name";
 
-it.todo("throws an UnrecoverableError if no ranked streams are available");
+import { UnrecoverableError } from "bullmq";
+import { expect, vi } from "vitest";
 
-it.todo("filters out failed info hashes from unchecked hashes");
+import { it as baseIt } from "../../../../../../../__tests__/test-context.ts";
+import { MapItemsToFilesSandboxedJob } from "../../../../../../sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
+import { ValidateTorrentFilesSandboxedJob } from "../../../../../../sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.schema.ts";
+import { findValidTorrentProcessor } from "./find-valid-torrent.processor.ts";
+import { FindValidTorrentFlow } from "./find-valid-torrent.schema.ts";
+
+import type { ParamsFor } from "@repo/util-plugin-sdk";
+import type {
+  MediaItemDownloadRequestedEvent,
+  MediaItemDownloadRequestedResponse,
+} from "@repo/util-plugin-sdk/schemas/events/media-item.download-requested.event";
+import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
+import type { RankedResult } from "@repo/util-rank-torrent-name";
+import type { TypedJobNode } from "bullmq";
+
+const it = baseIt.extend("mockRankingModel", () =>
+  createRankingModel({
+    webrip: 0,
+    avc: 0,
+  }),
+);
+
+it.beforeEach(async ({ createFlowWorker, mockFlowProcessorContext }) => {
+  createFlowWorker(FindValidTorrentFlow, findValidTorrentProcessor);
+
+  const { plugin: testPlugin } = await import("@repo/plugin-test");
+
+  // Disable cache check and provider hooks to simplify tests
+  testPlugin.hooks["riven.media-item.download.provider-list-requested"] =
+    undefined;
+  testPlugin.hooks["riven.media-item.download.cache-check-requested"] =
+    undefined;
+
+  mockFlowProcessorContext.plugins.set(testPlugin.name, {
+    config: testPlugin,
+    dataSources: new DataSourceMap(),
+    status: "valid",
+  });
+});
+
+it("throws an UnrecoverableError if no ranked streams are available", async ({
+  createMockJob,
+  mockFlowProcessorContext,
+  mockSentryScope,
+  scrapedMovieContext: { scrapedMovie },
+}) => {
+  const job = await createMockJob({
+    failedInfoHashes: [],
+    id: scrapedMovie.id,
+    itemTitle: scrapedMovie.title,
+  });
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({});
+
+  await expect(
+    findValidTorrentProcessor(
+      { job, scope: mockSentryScope, token: "test-token" },
+      mockFlowProcessorContext,
+    ),
+  ).rejects.toThrow(UnrecoverableError);
+});
+
+it("does not attempt previously failed info hashes", async ({
+  createMockJob,
+  createPluginWorker,
+  mockFlowProcessorContext,
+  mockSentryScope,
+  scrapedMovieContext: {
+    scrapedMovie,
+    streams: [stream1, stream2, stream3],
+  },
+  createMockJobChildKey,
+  mockRankingModel,
+}) => {
+  expect.assert(stream1);
+  expect.assert(stream2);
+  expect.assert(stream3);
+
+  const downloadRequestedSpy = vi
+    .fn<
+      (
+        job: TypedJobNode<ParamsFor<MediaItemDownloadRequestedEvent>>["job"],
+      ) => Promise<MediaItemDownloadRequestedResponse>
+    >()
+    .mockResolvedValue({
+      success: true,
+      data: {
+        torrentId: "mock-torrent-id",
+        files: [],
+      },
+    });
+
+  createPluginWorker(
+    "riven.media-item.download.requested",
+    "@repo/plugin-test",
+    downloadRequestedSpy,
+  );
+
+  const job = await createMockJob({
+    failedInfoHashes: [stream3.infoHash],
+    id: scrapedMovie.id,
+    itemTitle: scrapedMovie.title,
+  });
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+    [createMockJobChildKey("download-item.rank-streams")]: [
+      rankTorrent(
+        "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
+        stream1.infoHash,
+        "Example Torrent",
+        {},
+        createSettings(),
+        mockRankingModel,
+      ),
+      rankTorrent(
+        "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
+        stream2.infoHash,
+        "Example Torrent",
+        {},
+        createSettings(),
+        mockRankingModel,
+      ),
+      rankTorrent(
+        "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
+        stream3.infoHash,
+        "Example Torrent",
+        {},
+        createSettings(),
+        mockRankingModel,
+      ),
+    ] satisfies RankedResult[],
+  });
+
+  await findValidTorrentProcessor(
+    { job, scope: mockSentryScope, token: "test-token" },
+    mockFlowProcessorContext,
+  );
+
+  expect(downloadRequestedSpy).toHaveBeenCalledTimes(2);
+
+  for (const [jobArg] of downloadRequestedSpy.mock.calls) {
+    expect(
+      (jobArg as TypedJobNode<{ infoHash: string }>["job"]).data.infoHash,
+    ).not.toBe(stream3.infoHash);
+  }
+});
 
 it.todo(
   "iterates through unchecked hashes and available downloaders sequentially",
 );
 
-it.todo("returns the plugin and validated result on successful validation");
+it("returns the plugin and validated result on successful validation", async ({
+  createMockJob,
+  createFlowWorker,
+  mockFlowProcessorContext,
+  mockSentryScope,
+  scrapedMovieContext: {
+    scrapedMovie,
+    streams: [stream],
+  },
+  createPluginWorker,
+  createMockJobChildKey,
+  mockRankingModel,
+}) => {
+  expect.assert(stream);
 
-it.todo(
-  "updates job data with the failed info hash when an invalid torrent is returned",
-);
+  const expectedFile = {
+    name: "Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
+    size: 123_456_789,
+    path: "/Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
+    link: "https://example.com/Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
+  } satisfies DebridFile;
 
-it.todo(
-  "throws UnrecoverableError if no valid torrent found after trying all plugins",
-);
+  createPluginWorker(
+    "riven.media-item.download.requested",
+    "@repo/plugin-test",
+    vi.fn().mockResolvedValue({
+      success: true,
+      data: {
+        torrentId: "mock-torrent-id",
+        files: [expectedFile],
+      },
+    }),
+  );
+
+  createFlowWorker(
+    ValidateTorrentFilesSandboxedJob,
+    vi.fn().mockResolvedValue({
+      success: true,
+      files: [
+        {
+          ...expectedFile,
+          matchedMediaItemId: scrapedMovie.id,
+          isCachedFile: false,
+        },
+      ],
+    }),
+  );
+
+  createFlowWorker(
+    MapItemsToFilesSandboxedJob,
+    vi.fn().mockResolvedValue({
+      movies: { "0": expectedFile },
+      episodes: {},
+    }),
+  );
+
+  const job = await createMockJob({
+    failedInfoHashes: [],
+    id: scrapedMovie.id,
+    itemTitle: scrapedMovie.title,
+  });
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+    [createMockJobChildKey("download-item.rank-streams")]: [
+      rankTorrent(
+        "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
+        stream.infoHash,
+        "Example Torrent",
+        {},
+        createSettings(),
+        mockRankingModel,
+      ),
+    ] satisfies RankedResult[],
+  });
+
+  const result = await findValidTorrentProcessor(
+    { job, scope: mockSentryScope, token: "test-token" },
+    mockFlowProcessorContext,
+  );
+
+  expect(result).toStrictEqual({
+    plugin: "@repo/plugin-test",
+    result: {
+      torrentId: "mock-torrent-id",
+      infoHash: stream.infoHash,
+      files: [
+        {
+          ...expectedFile,
+          matchedMediaItemId: scrapedMovie.id,
+          isCachedFile: false,
+        },
+      ],
+      provider: null,
+    },
+  });
+});
+
+it("updates job data with the failed info hash when an invalid torrent is returned", async ({
+  createPluginWorker,
+  createMockJob,
+  mockFlowProcessorContext,
+  mockSentryScope,
+  scrapedMovieContext: {
+    scrapedMovie,
+    streams: [stream],
+  },
+  createMockJobChildKey,
+  mockRankingModel,
+}) => {
+  expect.assert(stream);
+
+  createPluginWorker(
+    "riven.media-item.download.requested",
+    "@repo/plugin-test",
+    vi.fn().mockResolvedValue({
+      success: true,
+      data: {
+        torrentId: "mock-torrent-id",
+        files: [],
+      },
+    }),
+  );
+
+  const job = await createMockJob({
+    failedInfoHashes: [],
+    id: scrapedMovie.id,
+    itemTitle: scrapedMovie.title,
+  });
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+    [createMockJobChildKey("download-item.rank-streams")]: [
+      rankTorrent(
+        "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
+        stream.infoHash,
+        "Example Torrent",
+        {},
+        createSettings(),
+        mockRankingModel,
+      ),
+    ] satisfies RankedResult[],
+  });
+
+  await findValidTorrentProcessor(
+    { job, scope: mockSentryScope, token: "test-token" },
+    mockFlowProcessorContext,
+  );
+
+  expect(job.data.failedInfoHashes).toStrictEqual([stream.infoHash]);
+});
+
+it("returns null if no valid torrent is found after trying all plugins", async ({
+  createMockJob,
+  createPluginWorker,
+  mockFlowProcessorContext,
+  mockSentryScope,
+  scrapedMovieContext: {
+    scrapedMovie,
+    streams: [stream],
+  },
+  createMockJobChildKey,
+  mockRankingModel,
+}) => {
+  expect.assert(stream);
+
+  createPluginWorker(
+    "riven.media-item.download.requested",
+    "@repo/plugin-test",
+    vi.fn().mockResolvedValue({
+      success: true,
+      data: {
+        torrentId: "mock-torrent-id",
+        files: [],
+      },
+    }),
+  );
+
+  const job = await createMockJob({
+    failedInfoHashes: [],
+    id: scrapedMovie.id,
+    itemTitle: scrapedMovie.title,
+  });
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+    [createMockJobChildKey("download-item.rank-streams")]: [
+      rankTorrent(
+        "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
+        stream.infoHash,
+        "Another Torrent Name",
+        {},
+        createSettings({ options: { titleSimilarity: 0 } }),
+        mockRankingModel,
+      ),
+    ] satisfies RankedResult[],
+  });
+
+  const result = await findValidTorrentProcessor(
+    { job, scope: mockSentryScope, token: "test-token" },
+    mockFlowProcessorContext,
+  );
+
+  expect(result).toBeNull();
+});
+
+it("does not attempt to re-download blacklisted streams", async ({
+  em,
+  createMockJob,
+  createPluginWorker,
+  mockFlowProcessorContext,
+  mockSentryScope,
+  scrapedMovieContext: {
+    scrapedMovie,
+    streams: [stream1, stream2, blacklistedStream],
+  },
+  createMockJobChildKey,
+  mockRankingModel,
+}) => {
+  expect.assert(stream1);
+  expect.assert(stream2);
+  expect.assert(blacklistedStream);
+
+  const downloadRequestedSpy = vi
+    .fn<
+      (
+        job: TypedJobNode<ParamsFor<MediaItemDownloadRequestedEvent>>["job"],
+      ) => Promise<MediaItemDownloadRequestedResponse>
+    >()
+    .mockResolvedValue({
+      success: true,
+      data: {
+        torrentId: "mock-torrent-id",
+        files: [],
+      },
+    });
+
+  createPluginWorker(
+    "riven.media-item.download.requested",
+    "@repo/plugin-test",
+    downloadRequestedSpy,
+  );
+
+  em.create(BlacklistedStream, {
+    stream: blacklistedStream,
+    mediaItem: scrapedMovie,
+    plugin: "@repo/plugin-test",
+  });
+
+  await em.flush();
+
+  const job = await createMockJob({
+    failedInfoHashes: [],
+    id: scrapedMovie.id,
+    itemTitle: scrapedMovie.title,
+  });
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+    [createMockJobChildKey("download-item.rank-streams")]: [
+      rankTorrent(
+        "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
+        stream1.infoHash,
+        "Example Torrent",
+        {},
+        createSettings(),
+        mockRankingModel,
+      ),
+      rankTorrent(
+        "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
+        stream2.infoHash,
+        "Example Torrent",
+        {},
+        createSettings(),
+        mockRankingModel,
+      ),
+      rankTorrent(
+        "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
+        blacklistedStream.infoHash,
+        "Example Torrent",
+        {},
+        createSettings(),
+        mockRankingModel,
+      ),
+    ] satisfies RankedResult[],
+  });
+
+  await findValidTorrentProcessor(
+    { job, scope: mockSentryScope, token: "test-token" },
+    mockFlowProcessorContext,
+  );
+
+  expect(downloadRequestedSpy).toHaveBeenCalledTimes(2);
+
+  for (const [jobArg] of downloadRequestedSpy.mock.calls) {
+    expect(jobArg.data.infoHash).not.toBe(blacklistedStream.infoHash);
+  }
+});

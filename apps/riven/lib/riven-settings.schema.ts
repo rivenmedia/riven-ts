@@ -1,3 +1,5 @@
+// oxlint-disable node/no-sync
+
 import { json } from "@repo/util-plugin-sdk/validation";
 
 import dedent from "dedent";
@@ -103,7 +105,9 @@ export const RivenSettings = z.object({
   logShowStackTraces: z
     .stringbool()
     .default(true)
-    .describe("Whether to show detailed stack traces when logging errors")
+    .describe(
+      "Whether to show detailed stack traces when unexpected errors occur.",
+    )
     .meta({ "wiki.section": "logging" }),
   gqlHost: z
     .string()
@@ -121,7 +125,8 @@ export const RivenSettings = z.object({
     .default(false)
     .describe("Only scrape dubbed anime.")
     .meta({ "wiki.section": "scraping" }),
-  maximumScrapeAttempts: z
+  maximumScrapeAttempts: z.coerce
+    .number()
     .int()
     .nonnegative()
     .default(Number.MAX_SAFE_INTEGER)
@@ -129,13 +134,15 @@ export const RivenSettings = z.object({
       "The maximum number of scrape attempts before giving up on an item.",
     )
     .meta({ "wiki.section": "scraping" }),
-  minimumAverageBitrateMovies: z
+  minimumAverageBitrateMovies: z.coerce
+    .number()
     .int()
     .positive()
     .optional()
     .describe("The minimum average bitrate for movies.")
     .meta({ "wiki.section": "scraping" }),
-  minimumAverageBitrateEpisodes: z
+  minimumAverageBitrateEpisodes: z.coerce
+    .number()
     .int()
     .positive()
     .optional()
@@ -148,7 +155,8 @@ export const RivenSettings = z.object({
       "If true, Riven will prefer to download season packs over show packs.",
     )
     .meta({ "wiki.section": "scraping" }),
-  scheduleOffsetMinutes: z
+  scheduleOffsetMinutes: z.coerce
+    .number()
     .int()
     .nonnegative()
     .default(30)
@@ -171,7 +179,8 @@ export const RivenSettings = z.object({
     `,
     )
     .meta({ "wiki.section": "scraping" }),
-  unknownAirDateOffsetDays: z
+  unknownAirDateOffsetDays: z.coerce
+    .number()
     .int()
     .nonnegative()
     .default(7)
@@ -186,6 +195,13 @@ export const RivenSettings = z.object({
   shutdownTimeoutSeconds: json(z.int().positive())
     .default(30)
     .describe("The timeout in seconds for shutting down the application."),
+  rankingConfigPath: z
+    .string()
+    .default("./riven-ranking-config.json")
+    .describe(
+      "Path to the JSON file containing the torrent ranking configuration. Auto-generated with defaults on first startup.",
+    )
+    .meta({ "wiki.section": "ranking" }),
   printConfigurationOnStartup: z
     .stringbool()
     .default(false)

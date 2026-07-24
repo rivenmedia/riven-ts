@@ -1,8 +1,4 @@
-import {
-  BaseDataSource,
-  type ParamsFor,
-  type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 import {
   Episode,
   Season,
@@ -12,20 +8,20 @@ import {
 import { TorznabResponse } from "../schemas/torznab-response.schema.ts";
 
 import type { StremThruSettings } from "../stremthru-settings.schema.ts";
+import type { ParamsFor, RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 export class StremThruTorznabAPI extends BaseDataSource<StremThruSettings> {
-  override baseURL = this.settings.stremThruUrl;
-  override serviceName = "StremThru [Torznab]";
+  public override baseURL = this.settings.stremThruUrl;
+  public override serviceName = "StremThru [Torznab]";
 
   protected override rateLimiterOptions: RateLimiterOptions = {
     max: 150,
     duration: 60 * 1000,
   };
 
-  override async validate(): Promise<boolean> {
+  public override async validate(): Promise<boolean> {
     try {
-      // Implement your own validation logic here
       await this.get("v0/torznab/api");
 
       return true;
@@ -34,13 +30,14 @@ export class StremThruTorznabAPI extends BaseDataSource<StremThruSettings> {
     }
   }
 
-  async scrape({
+  public async scrape({
     item,
   }: ParamsFor<MediaItemScrapeRequestedEvent>): Promise<
     Record<string, string>
   > {
     try {
       const params = new URLSearchParams({
+        // oxlint-disable-next-line id-length
         o: "json",
       });
 

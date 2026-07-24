@@ -12,11 +12,10 @@ export const runSingleJob = async <
 ) => {
   await using disposer = new AsyncDisposableStack();
 
-  const queueEvents = disposer.adopt(createQueueEvents(job.queueName), (qe) =>
-    qe.close(),
+  const queueEvents = disposer.adopt(
+    createQueueEvents(job.queueName),
+    async (qe) => qe.close(),
   );
-
-  await queueEvents.waitUntilReady();
 
   return await job.waitUntilFinished(queueEvents, timeout);
 };

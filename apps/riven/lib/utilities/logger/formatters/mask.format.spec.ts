@@ -5,6 +5,8 @@ import { maskFormat } from "./mask.format.ts";
 import type { TransformableInfo } from "logform";
 
 it("masks api keys in log messages", () => {
+  expect.assertions(6);
+
   const messages = [
     "api_key=1234g0qoij",
     "apikey=1234g0qoij",
@@ -22,12 +24,14 @@ it("masks api keys in log messages", () => {
     expect.assert(typeof maskedMessage === "object");
 
     expect(maskedMessage.message).toMatch(
-      /(api_key|apikey|apitoken|accesstoken|token|key)=\[REDACTED\]/,
+      /(api_key|apikey|apitoken|accesstoken|token|key)=\[REDACTED\]/u,
     );
   }
 });
 
 it("masks usernames in directories", () => {
+  expect.assertions(2);
+
   const messages = [
     "/home/johndoe/somefile.txt",
     "/Users/johndoe/somefile.txt",
@@ -40,7 +44,7 @@ it("masks usernames in directories", () => {
 
     expect.assert(typeof maskedMessage === "object");
 
-    expect(maskedMessage.message).toMatch(/\/(home|Users)\/\[REDACTED\]/);
+    expect(maskedMessage.message).toMatch(/\/(home|Users)\/\[REDACTED\]/u);
   }
 });
 

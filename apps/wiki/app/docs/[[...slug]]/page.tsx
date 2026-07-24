@@ -1,4 +1,5 @@
 import { source } from "@/lib/source";
+
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import {
   DocsBody,
@@ -13,7 +14,10 @@ export default async function Page(props: {
 }) {
   const params = await props.params;
   const page = source.getPage(params.slug);
-  if (!page) notFound();
+
+  if (!page) {
+    notFound();
+  }
 
   const MDX = page.data.body;
 
@@ -37,7 +41,10 @@ export async function generateMetadata(props: {
 }) {
   const params = await props.params;
   const page = source.getPage(params.slug);
-  if (!page) notFound();
+
+  if (!page) {
+    notFound();
+  }
 
   return {
     title: page.data.title,

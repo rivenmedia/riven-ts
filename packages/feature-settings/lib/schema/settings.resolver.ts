@@ -7,7 +7,7 @@ import { RivenSettings } from "./types/settings.type.ts";
 @Resolver()
 export class CoreSettingsResolver {
   @Query(() => Settings)
-  settings(): Settings {
+  public settings(): Settings {
     return {};
   }
 }
@@ -15,7 +15,7 @@ export class CoreSettingsResolver {
 @Resolver(() => Settings)
 export class RivenSettingsResolver {
   @FieldResolver(() => RivenSettings)
-  riven(): RivenSettings {
+  public riven(): RivenSettings {
     return {
       version: "1.0.0",
       apiKey: "1234",

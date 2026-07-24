@@ -18,7 +18,9 @@ export async function getPluginProviderList(pluginName: string) {
         id: `get-${pluginName}-provider-list`,
       },
       removeDependencyOnFailure: true,
-      removeOnComplete: 1,
+      removeOnComplete: {
+        age: 60,
+      },
     },
   );
 
@@ -26,5 +28,5 @@ export async function getPluginProviderList(pluginName: string) {
     pluginProviderListNode.job,
   );
 
-  return pluginProviderListResult.providers;
+  return pluginProviderListResult;
 }

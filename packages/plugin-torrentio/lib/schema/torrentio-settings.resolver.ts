@@ -7,7 +7,7 @@ import { TorrentioSettings } from "./types/torrentio-settings.type.ts";
 @Resolver(() => Settings)
 export class TorrentioSettingsResolver {
   @FieldResolver(() => TorrentioSettings)
-  torrentio(): TorrentioSettings {
+  public torrentio(): TorrentioSettings {
     return {
       apiKey: "torrentio-api-key",
     };

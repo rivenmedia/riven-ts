@@ -1,3 +1,7 @@
+import { DataSourceHTTPError } from "@repo/util-plugin-sdk";
+import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
+import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
+
 import packageJson from "../package.json" with { type: "json" };
 import { StremThruTorzAPI } from "./datasource/stremthru-torz.datasource.ts";
 import { StremThruTorznabAPI } from "./datasource/stremthru-torznab.datasource.ts";
@@ -9,7 +13,7 @@ import { StremThruSettings } from "./stremthru-settings.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export default {
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [StremThruTorzAPI, StremThruTorznabAPI],
@@ -23,12 +27,28 @@ export default {
       const store = Store.parse(rawStore);
 
       try {
-        return await api.addTorrent(infoHash, store);
+        const { files, id } = await api.addTorrent(infoHash, store);
+
+        return {
+          success: true,
+          data: {
+            torrentId: id,
+            files,
+          },
+        };
       } catch (error) {
+        if (error instanceof DataSourceHTTPError) {
+          return {
+            success: false,
+            statusCode: error.response.status,
+          };
+        }
+
         throw new Error(
-          `Failed to get instant availability from ${store}: ${
+          `Failed to get instant availability for ${infoHash} from ${store}: ${
             error instanceof Error ? error.message : String(error)
           }`,
+          { cause: error },
         );
       }
     },
@@ -46,18 +66,26 @@ export default {
           `Failed to get cache torrent status: ${
             error instanceof Error ? error.message : String(error)
           }`,
+          { cause: error },
         );
       }
     },
-    // eslint-disable-next-line @typescript-eslint/require-await
     "riven.media-item.download.provider-list-requested": async ({
       dataSources,
+      settings,
     }) => {
-      const api = dataSources.get(StremThruTorzAPI);
+      const { validStores, rateLimitedStores } =
+        dataSources.get(StremThruTorzAPI);
+      const { storePriority } = settings.get(StremThruSettings);
 
-      return {
-        providers: [...api.validStores],
-      };
+      const providers = new Set(storePriority)
+        .intersection(validStores)
+        .difference(new Set(rateLimitedStores.keys()));
+
+      return Promise.resolve({
+        providers: [...providers],
+        rateLimitedProviders: Object.fromEntries(rateLimitedStores),
+      });
     },
     "riven.media-item.scrape.requested": async ({ dataSources, event }) => {
       const api = dataSources.get(StremThruTorznabAPI);
@@ -71,29 +99,97 @@ export default {
     "riven.media-item.stream-link.requested": async ({
       dataSources,
       event,
+      settings,
     }) => {
-      const api = dataSources.get(StremThruTorzAPI);
-      const parsedStore = Store.safeParse(event.item.provider);
-
       if (!event.item.downloadUrl) {
         throw new Error("No download URL available for this media item.");
       }
+
+      const parsedStore = Store.safeParse(event.item.provider);
 
       if (!parsedStore.success) {
         throw new Error(parsedStore.error.message);
       }
 
+      const api = dataSources.get(StremThruTorzAPI);
+      const pluginSettings = settings.get(StremThruSettings);
+
       const { data: store } = parsedStore;
 
+      if (!pluginSettings[`${store}ApiKey`]) {
+        // If an item is requested with a since-removed provider,
+        // return a fatal status code so the core can re-process the item.
+        return {
+          success: false,
+          statusCode: StatusCodes.GONE,
+        };
+      }
+
       try {
-        return await api.generateLink(event.item.downloadUrl, store);
+        const link = await api.generateLink(event.item.downloadUrl, store);
+
+        return {
+          success: true,
+          data: {
+            link,
+            isPermalink: false,
+            expiresAt: DateTime.utc().plus({ hours: 3 }).toISO(),
+          },
+        };
       } catch (error) {
+        if (error instanceof DataSourceHTTPError) {
+          return {
+            success: false,
+            statusCode: error.response.status,
+          };
+        }
+
         throw new Error(
           `Failed to generate link from ${store}: ${
             error instanceof Error ? error.message : String(error)
           }`,
+          { cause: error },
         );
       }
+    },
+    "riven.media-item.stream-link.health-check.requested": async ({
+      event: { link, item },
+    }) => {
+      const response = await fetch(link, {
+        method: "HEAD",
+        headers: {
+          "user-agent": `Riven StremThru/${packageJson.version}`,
+          range: "bytes=0-0",
+        },
+      });
+
+      const deadStatusCodes = new Set<StatusCodes>([
+        StatusCodes.NOT_FOUND,
+        StatusCodes.GONE,
+        StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
+      ]);
+
+      const expiredStatusCodes = new Set<StatusCodes>();
+
+      if (item.provider === "torbox") {
+        expiredStatusCodes.add(StatusCodes.BAD_REQUEST);
+      }
+
+      const state =
+        (deadStatusCodes.has(response.status) ? "dead" : null) ??
+        (expiredStatusCodes.has(response.status) ? "expired" : null) ??
+        (response.ok ? "healthy" : "failed");
+
+      if (state === "failed") {
+        throw new Error(
+          `Failed to check stream link health: Received status code ${response.status.toString()} for URL ${link}`,
+        );
+      }
+
+      return {
+        state,
+        statusCode: response.status,
+      };
     },
   },
   settingsSchema: StremThruSettings,
@@ -103,6 +199,6 @@ export default {
       dataSources.get(StremThruTorznabAPI).validate(),
     ]);
 
-    return results.every((isValid) => isValid);
+    return results.every(Boolean);
   },
-} satisfies RivenPlugin as RivenPlugin;
+};

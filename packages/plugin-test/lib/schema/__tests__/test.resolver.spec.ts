@@ -24,7 +24,7 @@ it('returns the validation status when calling "testIsValid" query', async ({
     { contextValue: gqlContext },
   );
 
-  assert(body.kind === "single");
+  assert.ok(body.kind === "single");
 
   expect(body.singleResult.errors).toBeUndefined();
   expect(body.singleResult.data?.["testIsValid"]).toBe(true);

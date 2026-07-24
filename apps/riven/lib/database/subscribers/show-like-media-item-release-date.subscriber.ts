@@ -9,7 +9,7 @@ import type {
 } from "@mikro-orm/core";
 
 export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
-  async onFlush({ uow }: FlushEventArgs): Promise<void> {
+  public async onFlush({ uow }: FlushEventArgs): Promise<void> {
     const trackedEpisodes = new Map<
       Partial<Episode>,
       ChangeSet<Partial<Episode>> | null
@@ -73,11 +73,11 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
 
           const itemRequest = await show.itemRequest.loadOrFail();
 
-          itemRequest.state = !show.isReleased
-            ? "unreleased"
-            : show.status === "continuing"
+          itemRequest.state = show.isReleased
+            ? show.status === "continuing"
               ? "ongoing"
-              : "completed";
+              : "completed"
+            : "unreleased";
 
           uow.computeChangeSet(itemRequest);
           uow.computeChangeSet(show);

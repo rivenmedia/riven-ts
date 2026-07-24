@@ -1,4 +1,5 @@
 import DockerComposeGenerator from "@/components/docker-compose-generator";
+
 import { HomeLayout } from "fumadocs-ui/layouts/home";
 
 export const metadata = {

@@ -6,10 +6,11 @@
     { "path": "./tsconfig.spec.json" }
   ],
   "files": [
-    "eslint.config.ts",
+    "scripts/generate-zod-docs.ts",
+    "oxlint.config.ts",
     "vitest.config.ts",
     "kubb.config.ts",
-    "zod2md.config.ts"
+    "wiki.config.ts"
   ],
   "include": [],
   "exclude": []

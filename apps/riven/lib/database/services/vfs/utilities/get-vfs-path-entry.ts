@@ -28,7 +28,16 @@ export async function getEntry(em: EntityManager, pathInfo: PathInfo) {
 
       return em.findOneOrFail(
         Movie,
-        { tmdbId: pathInfo.tmdbId },
+        {
+          tmdbId: pathInfo.tmdbId,
+          ...(pathInfo.ext && {
+            filesystemEntries: {
+              path: {
+                $like: `%${pathInfo.base}`,
+              },
+            },
+          }),
+        },
         { fields: ["createdAt", "updatedAt", "filesystemEntries.fileSize"] },
       );
     }
@@ -49,6 +58,11 @@ export async function getEntry(em: EntityManager, pathInfo: PathInfo) {
             },
           },
           number: pathInfo.episode,
+          filesystemEntries: {
+            path: {
+              $like: `%${pathInfo.base}`,
+            },
+          },
         },
         { fields: ["createdAt", "updatedAt", "filesystemEntries.fileSize"] },
       );
@@ -82,7 +96,9 @@ export async function getEntry(em: EntityManager, pathInfo: PathInfo) {
         { fields: ["createdAt", "updatedAt"] },
       );
     }
-    default:
+    case "all-movies":
+    case "all-shows": {
       return null;
+    }
   }
 }

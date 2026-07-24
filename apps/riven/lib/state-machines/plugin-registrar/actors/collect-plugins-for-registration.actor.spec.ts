@@ -6,20 +6,19 @@ import { createActor, toPromise } from "xstate";
 import z from "zod";
 
 import { logger } from "../../../utilities/logger/logger.ts";
-import {
-  type ParsedPlugins,
-  collectPluginsForRegistration,
-} from "./collect-plugins-for-registration.actor.ts";
+import { collectPluginsForRegistration } from "./collect-plugins-for-registration.actor.ts";
+
+import type { ParsedPlugins } from "./collect-plugins-for-registration.actor.ts";
 
 it("returns the installed plugins from the package.json file", async () => {
   const actor = createActor(collectPluginsForRegistration);
   const testPlugin = await import("@repo/plugin-test");
 
-  const validatedPlugin = RivenPluginPackage.parse(testPlugin);
+  const { plugin: validatedPlugin } = RivenPluginPackage.parse(testPlugin);
 
   const plugins = await toPromise(actor.start());
 
-  expect(plugins.validPlugins[0]?.name).toEqual(validatedPlugin.default.name);
+  expect(plugins.validPlugins[0]?.name).toStrictEqual(validatedPlugin.name);
 });
 
 it("returns any invalid plugins from the package.json file along with their validation result", async ({
@@ -31,13 +30,15 @@ it("returns any invalid plugins from the package.json file along with their vali
 
   const actor = createActor(collectPluginsForRegistration);
 
-  vi.doMock(import("@repo/plugin-test"), () => {
-    return {
-      default: {
-        name: "Test",
-      },
-    } as never;
-  });
+  vi.doMock(
+    import("@repo/plugin-test"),
+    () =>
+      ({
+        plugin: {
+          name: "Test",
+        },
+      }) as never,
+  );
 
   const validationResult = RivenPluginPackage.safeParse(
     await import("@repo/plugin-test"),
@@ -47,7 +48,7 @@ it("returns any invalid plugins from the package.json file along with their vali
 
   expect.assert(validationResult.error);
 
-  expect(plugins).toEqual<ParsedPlugins>({
+  expect(plugins).toStrictEqual<ParsedPlugins>({
     invalidPlugins: new Map([
       ["@repo/plugin-test", z.prettifyError(validationResult.error)],
     ]),

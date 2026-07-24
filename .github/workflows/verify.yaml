@@ -39,10 +39,6 @@ jobs:
             command: lint
             runner-requirements:
               - fuse
-          - name: Types
-            command: check-types
-            runner-requirements:
-              - fuse
           - name: Formatting
             command: //#format:check:ci
           - name: Tests
@@ -61,6 +57,14 @@ jobs:
             command: //#knip:ci:development
           - name: Knip (production)
             command: //#knip:ci:production
+          - name: Build Wiki
+            command: "@repo/wiki#build"
+            runner-requirements:
+              - fuse
+          - name: Validate generators
+            command: //#validate-generators
+            runner-requirements:
+              - redis-server
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
       task: ${{ matrix.task.command }}

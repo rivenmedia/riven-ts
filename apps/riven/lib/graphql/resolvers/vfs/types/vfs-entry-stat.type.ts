@@ -9,26 +9,26 @@ export class VfsEntryStat implements Omit<
   "blksize" | "dev" | "rdev" | "ino" | "blocks"
 > {
   @Field(() => GraphQLISODateTime)
-  mtime!: Date;
+  public mtime!: Date;
 
   @Field(() => GraphQLISODateTime)
-  ctime!: Date;
+  public ctime!: Date;
 
   @Field(() => GraphQLISODateTime)
-  atime!: Date;
+  public atime!: Date;
 
   @Field(() => Int)
-  mode!: number;
+  public mode!: number;
 
   @Field(() => Int)
-  nlink!: number;
+  public nlink!: number;
 
   @Field(() => BigIntResolver)
-  size!: number;
+  public size!: number;
 
   @Field(() => Int)
-  uid = process.getuid?.() ?? 0;
+  public uid = process.getuid?.() ?? 0;
 
   @Field(() => Int)
-  gid = process.getgid?.() ?? 0;
+  public gid = process.getgid?.() ?? 0;
 }

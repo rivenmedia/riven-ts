@@ -7,7 +7,7 @@ import { TestSettings } from "./types/test-settings.type.ts";
 @Resolver(() => Settings)
 export class TestSettingsResolver {
   @FieldResolver(() => TestSettings)
-  test(): TestSettings {
+  public test(): TestSettings {
     return {
       apiKey: "test-api-key",
     };
