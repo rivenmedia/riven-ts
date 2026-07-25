@@ -39,6 +39,71 @@ it("returns the media item if processed successfully", async ({
   );
 });
 
+it("sets the item request's state to 'completed' if processed successfully", async ({
+  factories: { showItemRequestFactory },
+  services: { indexerService },
+}) => {
+  const requestedId = "tt1234567";
+
+  const itemRequest = await showItemRequestFactory.createOne({
+    imdbId: requestedId,
+    state: "requested",
+  });
+
+  const result = await indexerService.indexItem({
+    id: itemRequest.id,
+    title: "Test Show",
+    imdbId: requestedId,
+    contentRating: "tv-14",
+    genres: [],
+    type: "show",
+    network: "Test Network",
+    seasons: {
+      1: {
+        number: 1,
+        title: "Season 1",
+        episodes: [
+          {
+            absoluteNumber: 1,
+            contentRating: "tv-14",
+            number: 1,
+            airedAt: DateTime.utc().minus({ years: 1 }).toISO(),
+            title: "Episode 1",
+            runtime: 60,
+          },
+          {
+            absoluteNumber: 2,
+            contentRating: "tv-14",
+            number: 2,
+            airedAt: DateTime.utc()
+              .minus({ years: 1 })
+              .plus({ weeks: 1 })
+              .toISO(),
+            title: "Episode 2",
+            runtime: 60,
+          },
+          {
+            absoluteNumber: 3,
+            contentRating: "tv-14",
+            number: 3,
+            airedAt: DateTime.utc()
+              .minus({ years: 1 })
+              .plus({ weeks: 2 })
+              .toISO(),
+            title: "Episode 3",
+            runtime: 60,
+          },
+        ],
+      },
+    },
+    status: "ended",
+  });
+
+  await expect(result.itemRequest.loadProperty("state")).resolves.toBe(
+    "completed",
+  );
+});
+
 it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorrect state", async ({
   services: { indexerService },
   factories: { showItemRequestFactory },
@@ -127,7 +192,7 @@ it("updates the media item with the latest data if it already exists", async ({
   });
 
   expect(wrap(initialShow).toJSON()).toStrictEqual(
-    expect.objectContaining({
+    expect.objectContaining<Partial<Show>>({
       aliases: {
         en: ["en-alias"],
       },
@@ -135,6 +200,10 @@ it("updates the media item with the latest data if it already exists", async ({
       state: "unreleased",
       nextAirDate: null,
     }),
+  );
+
+  await expect(initialShow.itemRequest.loadProperty("state")).resolves.toBe(
+    "unreleased",
   );
 
   const initialEpisodes = await initialShow.getEpisodes();
@@ -215,6 +284,10 @@ it("updates the media item with the latest data if it already exists", async ({
     }),
   );
 
+  await expect(initialShow.itemRequest.loadProperty("state")).resolves.toBe(
+    "unreleased",
+  );
+
   const updatedUpcomingEpisodes = await updatedUpcomingShow.getEpisodes();
 
   expect(updatedUpcomingEpisodes).toHaveLength(3);
@@ -289,6 +362,10 @@ it("updates the media item with the latest data if it already exists", async ({
       nextAirDate: firstEpisodeAirDate.plus({ weeks: 1 }).toJSDate(),
     }),
   );
+
+  await expect(
+    initialShow.itemRequest.loadProperty("state", { refresh: true }),
+  ).resolves.toBe("ongoing");
 
   const updatedOngoingEpisodes = await updatedOngoingShow.getEpisodes();
 

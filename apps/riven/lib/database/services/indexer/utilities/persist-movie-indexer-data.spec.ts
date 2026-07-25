@@ -38,6 +38,33 @@ it("returns the media item if processed successfully", async ({
   );
 });
 
+it("sets the item request's state to 'completed' if processed successfully", async ({
+  factories: { movieItemRequestFactory },
+  services: { indexerService },
+}) => {
+  const requestedId = "tt1234567";
+
+  const itemRequest = await movieItemRequestFactory.createOne({
+    imdbId: requestedId,
+    state: "requested",
+  });
+
+  const result = await indexerService.indexItem({
+    id: itemRequest.id,
+    title: "Test Movie",
+    imdbId: requestedId,
+    contentRating: "g",
+    genres: [],
+    type: "movie",
+    runtime: 40,
+    releaseDate: DateTime.utc().toISO(),
+  });
+
+  await expect(result.itemRequest.loadProperty("state")).resolves.toBe(
+    "completed",
+  );
+});
+
 it("throws a MediaItemIndexErrorIncorrectState error if the item request is in an incorrect state", async ({
   services: { indexerService },
   factories: { movieItemRequestFactory },
