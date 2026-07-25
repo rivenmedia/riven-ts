@@ -54,8 +54,6 @@ export async function persistRequestedShow(
       : (item.seasons ?? existingItem?.seasons ?? null);
 
   if (existingItem && itemRequest.seasons) {
-    existingItem.state = "requested_additional_seasons";
-
     const linkedItemsToProcess = await existingItem.seasonItems.matching({
       where: {
         isRequested: false,
