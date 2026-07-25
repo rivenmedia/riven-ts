@@ -1,3 +1,5 @@
+import { PluginCards } from "@/components/plugin-cards";
+
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { Step, Steps } from "fumadocs-ui/components/steps";
@@ -17,6 +19,7 @@ export const sharedMdxComponents = {
   Callout,
   Card,
   Cards,
+  PluginCards,
   Step,
   Steps,
 } satisfies MDXComponents;
