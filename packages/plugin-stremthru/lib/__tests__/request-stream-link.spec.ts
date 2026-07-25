@@ -164,9 +164,8 @@ it("regenerates the link from the durable provider download id", async ({
   settings,
 }) => {
   const freshLink = "https://example.com/fresh-file-link";
+  const generatedLinks: unknown[] = [];
 
-  // No handler for link/generate: because `onUnhandledRequest` is "error",
-  // the test fails if the legacy link-generation path is hit.
   server.use(
     http.get("**/v0/store/torz/:id", () =>
       HttpResponse.json({
@@ -184,6 +183,17 @@ it("regenerates the link from the durable provider download id", async ({
         },
       }),
     ),
+    http.post("**/v0/store/torz/link/generate", async ({ request }) => {
+      const body = (await request.json()) as { link: string };
+
+      generatedLinks.push(body.link);
+
+      return HttpResponse.json({
+        data: {
+          link: body.link,
+        },
+      });
+    }),
   );
 
   expect.assert(plugin.hooks["riven.media-item.stream-link.requested"]);
@@ -192,6 +202,7 @@ it("regenerates the link from the durable provider download id", async ({
 
   item.providerDownloadId = "realdebrid:cached:magnet:hash";
   item.originalFilename = "the-movie.mkv";
+  item.downloadUrl = "https://example.com/stale-download-link";
   item.provider = "realdebrid";
 
   await expect(
@@ -207,6 +218,74 @@ it("regenerates the link from the durable provider download id", async ({
     success: true,
     data: {
       link: freshLink,
+      isPermalink: false,
+      expiresAt: expect.any(String),
+    },
+  });
+
+  // The link fed to link/generate must be the fresh file link from the
+  // durable torrent, never the stale stored download URL.
+  expect(generatedLinks).toStrictEqual([freshLink]);
+});
+
+it("resolves stremthru:// locked-link placeholders through link generation", async ({
+  dataSourceMap,
+  server,
+  plugin,
+  settings,
+}) => {
+  // Some stores (e.g. torbox) return an unresolved locked-link placeholder
+  // from GET torz/{id}; only link/generate turns it into a real CDN URL.
+  const lockedLink = "stremthru://store/torbox/NjE2NDY2NTk6MA==";
+  const resolvedLink = "https://cdn.example.com/dld/some-file?token=abc";
+
+  server.use(
+    http.get("**/v0/store/torz/:id", () =>
+      HttpResponse.json({
+        data: {
+          id: "61646659",
+          status: "downloaded",
+          files: [
+            {
+              name: "the-movie.mkv",
+              path: "/the-movie.mkv",
+              link: lockedLink,
+              size: 1000,
+            },
+          ],
+        },
+      }),
+    ),
+    http.post("**/v0/store/torz/link/generate", () =>
+      HttpResponse.json({
+        data: {
+          link: resolvedLink,
+        },
+      }),
+    ),
+  );
+
+  expect.assert(plugin.hooks["riven.media-item.stream-link.requested"]);
+
+  const item = new MediaEntry();
+
+  item.providerDownloadId = "61646659";
+  item.originalFilename = "the-movie.mkv";
+  item.provider = "realdebrid";
+
+  await expect(
+    plugin.hooks["riven.media-item.stream-link.requested"]({
+      dataSources: dataSourceMap,
+      event: {
+        item,
+      },
+      logger: { warn: () => undefined, debug: () => undefined } as never,
+      settings,
+    }),
+  ).resolves.toStrictEqual({
+    success: true,
+    data: {
+      link: resolvedLink,
       isPermalink: false,
       expiresAt: expect.any(String),
     },

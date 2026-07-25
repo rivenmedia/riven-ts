@@ -146,10 +146,17 @@ export const plugin: RivenPlugin = {
             );
 
           if (file?.link) {
+            // Some stores (e.g. torbox) return an unresolved
+            // `stremthru://` locked-link placeholder here instead of a
+            // usable HTTP URL; link/generate resolves it into a fresh
+            // signed CDN URL (and simply echoes stores that already
+            // return direct links, e.g. premiumize).
+            const link = await api.generateLink(file.link, store);
+
             return {
               success: true,
               data: {
-                link: file.link,
+                link,
                 isPermalink: false,
                 // 3h is a heuristic: StremThru does not expose the real
                 // signature lifetime, so we re-check health periodically.
