@@ -49,8 +49,6 @@ export async function persistShowIndexerData(
   );
 
   if (itemRequest.state === "requested_additional_seasons") {
-    itemRequest.state = "completed";
-
     return existingShow;
   }
 
