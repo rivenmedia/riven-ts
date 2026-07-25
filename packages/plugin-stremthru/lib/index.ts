@@ -126,10 +126,8 @@ export const plugin: RivenPlugin = {
         };
       }
 
-      // Prefer regenerating the link from the durable provider download id.
-      // A stored `downloadUrl` is a signed, expiring CDN URL; once it ages out,
-      // POSTing it to link/generate just echoes the same dead URL back. The
-      // durable `providerDownloadId` lets us fetch a fresh file link instead.
+      // link/generate echoes an expired signed URL back unchanged, so only the
+      // durable providerDownloadId can mint a fresh link once downloadUrl ages out.
       if (event.item.providerDownloadId) {
         try {
           const torrent = await api.getTorrent(
@@ -148,11 +146,9 @@ export const plugin: RivenPlugin = {
             );
 
           if (file?.link) {
-            // Some stores (e.g. torbox) return an unresolved
-            // `stremthru://` locked-link placeholder here instead of a
-            // usable HTTP URL; link/generate resolves it into a fresh
-            // signed CDN URL (and simply echoes stores that already
-            // return direct links, e.g. premiumize).
+            // Stores like torbox return an unresolved `stremthru://`
+            // locked-link placeholder here; link/generate resolves it into a
+            // signed CDN URL (and echoes already-direct links, e.g. premiumize).
             const link = await api.generateLink(file.link, store);
 
             return {
@@ -231,9 +227,8 @@ export const plugin: RivenPlugin = {
         StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
       ]);
 
-      // A 403 on a debrid CDN link means the signed URL has expired (not that
-      // the torrent is gone), so treat it as expired for all providers and
-      // trigger a link refresh from the durable provider download id.
+      // Debrid CDNs answer 403 when the URL signature has expired; the torrent
+      // itself is still available, so this must never classify as dead.
       const expiredStatusCodes = new Set<StatusCodes>([StatusCodes.FORBIDDEN]);
 
       if (item.provider === "torbox") {

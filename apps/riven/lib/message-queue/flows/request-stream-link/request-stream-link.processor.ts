@@ -245,10 +245,9 @@ export const requestStreamLinkProcessor =
 
                 if (mediaEntry.streamPermalink) {
                   await streamService.clearStreamPermalink(mediaEntry.id);
-                  // The service clears the row in its own request context;
-                  // mirror it on this loaded entity so the loop's next
-                  // request-stream-link pass doesn't re-check the stale
-                  // permalink and waste a refresh attempt.
+                  // clearStreamPermalink runs in its own request context;
+                  // mirror it here or the next loop pass re-checks the stale
+                  // permalink.
                   delete mediaEntry.streamPermalink;
                 }
 
