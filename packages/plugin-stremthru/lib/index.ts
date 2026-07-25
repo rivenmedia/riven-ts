@@ -99,9 +99,10 @@ export const plugin: RivenPlugin = {
     "riven.media-item.stream-link.requested": async ({
       dataSources,
       event,
+      logger,
       settings,
     }) => {
-      if (!event.item.downloadUrl) {
+      if (!event.item.downloadUrl && !event.item.providerDownloadId) {
         throw new Error("No download URL available for this media item.");
       }
 
@@ -125,8 +126,60 @@ export const plugin: RivenPlugin = {
         };
       }
 
+      // Prefer regenerating the link from the durable provider download id.
+      // A stored `downloadUrl` is a signed, expiring CDN URL; once it ages out,
+      // POSTing it to link/generate just echoes the same dead URL back. The
+      // durable `providerDownloadId` lets us fetch a fresh file link instead.
+      if (event.item.providerDownloadId) {
+        try {
+          const torrent = await api.getTorrent(
+            event.item.providerDownloadId,
+            store,
+          );
+
+          const file =
+            torrent.files.find(
+              (candidate) => candidate.name === event.item.originalFilename,
+            ) ??
+            torrent.files.find((candidate) =>
+              candidate.path.endsWith(event.item.originalFilename),
+            );
+
+          if (file?.link) {
+            return {
+              success: true,
+              data: {
+                link: file.link,
+                isPermalink: false,
+                // 3h is a heuristic: StremThru does not expose the real
+                // signature lifetime, so we re-check health periodically.
+                expiresAt: DateTime.utc().plus({ hours: 3 }).toISO(),
+              },
+            };
+          }
+
+          logger.warn(
+            `No usable file link found on ${store} for torrent ${event.item.providerDownloadId} (file: ${event.item.originalFilename}); falling back to legacy link generation.`,
+          );
+        } catch (error) {
+          logger.warn(
+            `Failed to regenerate link from ${store} torrent ${event.item.providerDownloadId}; falling back to legacy link generation: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          );
+        }
+      }
+
+      const { downloadUrl } = event.item;
+
+      if (!downloadUrl) {
+        throw new Error(
+          `Unable to regenerate stream link from ${store} for torrent ${event.item.providerDownloadId ?? "unknown"} and no legacy download URL is available.`,
+        );
+      }
+
       try {
-        const link = await api.generateLink(event.item.downloadUrl, store);
+        const link = await api.generateLink(downloadUrl, store);
 
         return {
           success: true,
@@ -169,7 +222,10 @@ export const plugin: RivenPlugin = {
         StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
       ]);
 
-      const expiredStatusCodes = new Set<StatusCodes>();
+      // A 403 on a debrid CDN link means the signed URL has expired (not that
+      // the torrent is gone), so treat it as expired for all providers and
+      // trigger a link refresh from the durable provider download id.
+      const expiredStatusCodes = new Set<StatusCodes>([StatusCodes.FORBIDDEN]);
 
       if (item.provider === "torbox") {
         expiredStatusCodes.add(StatusCodes.BAD_REQUEST);
