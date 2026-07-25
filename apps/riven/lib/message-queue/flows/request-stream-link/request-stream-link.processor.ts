@@ -15,6 +15,7 @@ import z from "zod";
 
 import { logger } from "../../../utilities/logger/logger.ts";
 import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
+import { filterChildrenFailure } from "../../utilities/filter-children-failure.ts";
 import { filterChildrenValues } from "../../utilities/filter-children-values.ts";
 import { enqueueProcessMediaItem } from "../process-media-item/enqueue-process-media-item.ts";
 import { flow } from "../producer.ts";
@@ -100,6 +101,19 @@ export const requestStreamLinkProcessor =
               );
 
             if (!success) {
+              const failureReason = filterChildrenFailure(
+                await job.getIgnoredChildrenFailures(),
+                "riven.media-item.stream-link.requested",
+                mediaEntry.plugin,
+                job.data.streamLinkRequestedJobId,
+              );
+
+              if (failureReason) {
+                throw new UnrecoverableError(
+                  `Stream link plugin job failed for ${mediaEntry.path}: ${failureReason}`,
+                );
+              }
+
               throw new UnrecoverableError(
                 `Failed to get response from plugin job for ${mediaEntry.path}: ${z.prettifyError(error)}`,
               );
@@ -181,12 +195,28 @@ export const requestStreamLinkProcessor =
               );
 
             if (!success) {
+              const failureReason = filterChildrenFailure(
+                await job.getIgnoredChildrenFailures(),
+                "riven.media-item.stream-link.health-check.requested",
+                mediaEntry.plugin,
+                job.data.healthCheckJobId,
+              );
+
+              if (failureReason) {
+                throw new UnrecoverableError(
+                  `Health check plugin job failed for ${mediaEntry.path}: ${failureReason}`,
+                );
+              }
+
               throw new UnrecoverableError(
                 `Failed to get health check response from plugin job for ${mediaEntry.path}: ${z.prettifyError(error)}`,
               );
             }
 
-            const nextStep = getHealthCheckNextStep(data.state);
+            const maxHealthCheckAttempts = 2;
+            let nextStep: (typeof job.data)["step"] = getHealthCheckNextStep(
+              data.state,
+            );
 
             switch (data.state) {
               case "healthy": {
@@ -197,6 +227,18 @@ export const requestStreamLinkProcessor =
                 break;
               }
               case "expired": {
+                const healthCheckAttempts = job.data.healthCheckAttempts + 1;
+
+                if (healthCheckAttempts > maxHealthCheckAttempts) {
+                  logger.warn(
+                    `Stream URL for ${chalk.bold(mediaEntry.mediaItem.$.fullTitle)} failed to refresh after ${maxHealthCheckAttempts.toString()} attempts; blacklisting the stream.`,
+                  );
+
+                  nextStep = "blacklist-stream";
+
+                  break;
+                }
+
                 logger.warn(
                   `Stream URL for ${chalk.bold(mediaEntry.mediaItem.$.fullTitle)} has expired, attempting to fetch a new stream URL...`,
                 );
@@ -204,6 +246,11 @@ export const requestStreamLinkProcessor =
                 if (mediaEntry.streamPermalink) {
                   await streamService.clearStreamPermalink(mediaEntry.id);
                 }
+
+                await job.updateData({
+                  ...job.data,
+                  healthCheckAttempts,
+                });
 
                 break;
               }
