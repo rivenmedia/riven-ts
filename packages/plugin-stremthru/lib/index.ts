@@ -141,8 +141,10 @@ export const plugin: RivenPlugin = {
             torrent.files.find(
               (candidate) => candidate.name === event.item.originalFilename,
             ) ??
-            torrent.files.find((candidate) =>
-              candidate.path.endsWith(event.item.originalFilename),
+            torrent.files.find(
+              (candidate) =>
+                candidate.path === event.item.originalFilename ||
+                candidate.path.endsWith(`/${event.item.originalFilename}`),
             );
 
           if (file?.link) {

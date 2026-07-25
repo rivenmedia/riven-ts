@@ -228,6 +228,78 @@ it("regenerates the link from the durable provider download id", async ({
   expect(generatedLinks).toStrictEqual([freshLink]);
 });
 
+it("does not match a different file whose path merely ends with the filename", async ({
+  dataSourceMap,
+  server,
+  plugin,
+  settings,
+}) => {
+  const correctLink = "https://example.com/correct-file-link";
+
+  server.use(
+    http.get("**/v0/store/torz/:id", () =>
+      HttpResponse.json({
+        data: {
+          id: "realdebrid:cached:magnet:hash",
+          status: "cached",
+          files: [
+            {
+              // Decoy: path ends with "the-movie.mkv" but is a different file.
+              name: "big-the-movie.mkv",
+              path: "/release/big-the-movie.mkv",
+              link: "https://example.com/wrong-file-link",
+              size: 500,
+            },
+            {
+              // Store-renamed file: name no longer matches, but the path
+              // basename does.
+              name: "The Movie (Renamed).mkv",
+              path: "/release/the-movie.mkv",
+              link: correctLink,
+              size: 1000,
+            },
+          ],
+        },
+      }),
+    ),
+    http.post("**/v0/store/torz/link/generate", async ({ request }) => {
+      const body = (await request.json()) as { link: string };
+
+      return HttpResponse.json({
+        data: {
+          link: body.link,
+        },
+      });
+    }),
+  );
+
+  expect.assert(plugin.hooks["riven.media-item.stream-link.requested"]);
+
+  const item = new MediaEntry();
+
+  item.providerDownloadId = "realdebrid:cached:magnet:hash";
+  item.originalFilename = "the-movie.mkv";
+  item.provider = "realdebrid";
+
+  await expect(
+    plugin.hooks["riven.media-item.stream-link.requested"]({
+      dataSources: dataSourceMap,
+      event: {
+        item,
+      },
+      logger: { warn: () => undefined, debug: () => undefined } as never,
+      settings,
+    }),
+  ).resolves.toStrictEqual({
+    success: true,
+    data: {
+      link: correctLink,
+      isPermalink: false,
+      expiresAt: expect.any(String),
+    },
+  });
+});
+
 it("resolves stremthru:// locked-link placeholders through link generation", async ({
   dataSourceMap,
   server,
