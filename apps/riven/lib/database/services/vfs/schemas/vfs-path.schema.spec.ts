@@ -110,13 +110,19 @@ describe("split sections", () => {
 });
 
 describe("flat sections", () => {
-  it("treats the section root as the listing of its only media type", () => {
-    const resolved = resolveVfsPath("/anime-movies", sections);
-
-    expect(resolved).toMatchObject({
-      kind: "media",
+  it("resolves the section root to its own kind", () => {
+    // A flat section may hold both media types, so its root merges two
+    // listings and cannot be described by a single PathInfo.
+    expect(resolveVfsPath("/anime-movies", sections)).toStrictEqual({
+      kind: "section-flat-root",
       section: animeMovies,
-      pathInfo: { pathType: "all-movies" },
+    });
+  });
+
+  it("resolves a flat mixed section root to its own kind too", () => {
+    expect(resolveVfsPath("/flat", sections)).toStrictEqual({
+      kind: "section-flat-root",
+      section: flatMixed,
     });
   });
 

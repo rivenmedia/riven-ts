@@ -5,12 +5,12 @@ import {
   librarySectionRegistry,
   membershipIncludesEntryName,
 } from "../../library-section/section-registry.ts";
+import { PathInfo } from "../schemas/path-info.schema.ts";
 import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 import { resolveVfsPath } from "../schemas/vfs-path.schema.ts";
 import { getMoviesDirectoryEntries } from "./get-movies-directory-entries.ts";
 import { getShowsDirectoryEntries } from "./get-shows-directory-entries.ts";
 
-import type { PathInfo } from "../schemas/path-info.schema.ts";
 import type { EntityManager } from "@mikro-orm/core";
 
 /**
@@ -62,6 +62,34 @@ export async function getVfsDirectoryEntryPaths(
       return resolved.section.mediaTypes.map((mediaType) =>
         mediaType === "movie" ? "movies" : "shows",
       );
+    }
+
+    case "section-flat-root": {
+      // A flat section has no movies/shows level, so its root merges the
+      // listings of every media type it holds.
+      const { section } = resolved;
+      const membership = await librarySectionRegistry.membershipFor(
+        em,
+        section.id,
+      );
+
+      if (!membership) {
+        return [];
+      }
+
+      const listings = await Promise.all(
+        section.mediaTypes.map(async (mediaType) => {
+          const pathInfo = PathInfo.parse(
+            mediaType === "movie" ? "/movies" : "/shows",
+          );
+
+          return getNamespaceEntries(em, pathInfo);
+        }),
+      );
+
+      return listings
+        .flat()
+        .filter((entry) => membershipIncludesEntryName(membership, entry));
     }
 
     case "media": {

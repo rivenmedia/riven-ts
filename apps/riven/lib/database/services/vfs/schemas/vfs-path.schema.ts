@@ -16,6 +16,14 @@ export type ResolvedVfsPath =
   | { kind: "root" }
   /** A split section's own directory, listing its `movies` and `shows` children. */
   | { kind: "section-root"; section: SectionDescriptor }
+  /**
+   * A flat section's own directory, listing its items directly.
+   *
+   * Distinct from `media` because a flat section may hold both media types, in
+   * which case its root merges two namespace listings and so cannot be
+   * described by a single `PathInfo`.
+   */
+  | { kind: "section-flat-root"; section: SectionDescriptor }
   /** Anything addressable below a namespace, whether built-in or in a section. */
   | {
       kind: "media";
@@ -26,9 +34,6 @@ export type ResolvedVfsPath =
        */
       pathInfo: PathInfo;
     };
-
-const namespaceFor = (mediaType: LibrarySectionMediaType) =>
-  mediaType === "movie" ? "movies" : "shows";
 
 const mediaTypeFor = (namespace: string): LibrarySectionMediaType =>
   namespace === "movies" ? "movie" : "show";
@@ -91,25 +96,16 @@ export const resolveVfsPath = (
     return null;
   }
 
-  const [firstMediaType] = section.mediaTypes;
-
-  if (firstMediaType === undefined) {
+  if (section.mediaTypes.length === 0) {
     return null;
   }
 
   const isSplit = section.split && section.mediaTypes.length > 1;
 
   if (rest.length === 0) {
-    if (isSplit) {
-      return { kind: "section-root", section };
-    }
-
-    // A flat section's root is the "all items" listing of its only media type.
-    const parsed = PathInfo.safeParse(`/${namespaceFor(firstMediaType)}`);
-
-    return parsed.success
-      ? { kind: "media", section, pathInfo: parsed.data }
-      : null;
+    return isSplit
+      ? { kind: "section-root", section }
+      : { kind: "section-flat-root", section };
   }
 
   const namespace = isSplit ? rest[0] : inferNamespace(rest[0] ?? "");

@@ -147,6 +147,21 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
     return getDirectoryStat(em, { type: "media" }, section.mediaTypes.length);
   }
 
+  if (resolved.kind === "section-flat-root") {
+    const { section } = resolved;
+    const membership = await librarySectionRegistry.membershipFor(
+      em,
+      section.id,
+    );
+
+    return getDirectoryStat(
+      em,
+      { type: "media" },
+      (membership?.movieTmdbIds.size ?? 0) +
+        (membership?.showTvdbIds.size ?? 0),
+    );
+  }
+
   const { section, pathInfo: info } = resolved;
 
   // A section namespace is the built-in listing restricted to its members, so
