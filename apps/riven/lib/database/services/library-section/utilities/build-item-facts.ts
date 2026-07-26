@@ -1,4 +1,4 @@
-import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   normaliseCountry,
@@ -9,6 +9,7 @@ import {
 
 import type { ItemFacts, StreamFacts } from "./item-facts.ts";
 import type { EntityManager } from "@mikro-orm/core";
+import type { Show } from "@repo/util-plugin-sdk/dto/entities";
 import type { UUID } from "node:crypto";
 
 /**
@@ -70,7 +71,7 @@ const collectAggregates = (rows: AggregateRow[]): ItemAggregates => {
 export async function loadMovieAggregates(
   em: EntityManager,
 ): Promise<ItemAggregates> {
-  const rows = await em.getConnection("read").execute<AggregateRow[]>(
+  const rows = (await em.getConnection("read").execute(
     `select movie.id as id,
             sum(entry.file_size) as file_size,
             movie.runtime as runtime
@@ -79,7 +80,7 @@ export async function loadMovieAggregates(
        on entry.media_item_id = movie.id and entry.type = 'media'
      where movie.type = 'movie'
      group by movie.id, movie.runtime`,
-  );
+  )) as AggregateRow[];
 
   return collectAggregates(rows);
 }
@@ -93,7 +94,7 @@ export async function loadMovieAggregates(
 export async function loadShowAggregates(
   em: EntityManager,
 ): Promise<ItemAggregates> {
-  const rows = await em.getConnection("read").execute<AggregateRow[]>(
+  const rows = (await em.getConnection("read").execute(
     `select show.id as id,
             avg(entry.file_size) as file_size,
             avg(episode.runtime) as runtime
@@ -104,7 +105,7 @@ export async function loadShowAggregates(
        on entry.media_item_id = episode.id and entry.type = 'media'
      where show.type = 'show'
      group by show.id`,
-  );
+  )) as AggregateRow[];
 
   return collectAggregates(rows);
 }
@@ -163,8 +164,6 @@ export function buildItemFacts(
       aggregates.runtime.get(item.id) ??
       (item instanceof Movie ? (item.runtime ?? null) : null),
     fileSize: aggregates.fileSize.get(item.id) ?? null,
-    stream: buildStreamFacts(
-      activeStream?.parsedData as Record<string, unknown> | undefined,
-    ),
+    stream: buildStreamFacts(activeStream?.parsedData),
   };
 }
