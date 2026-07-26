@@ -47,6 +47,35 @@ export const LIBRARY_SECTION_SLUG_PATTERN =
 
 export const LIBRARY_SECTION_MAX_SLUG_LENGTH = 64;
 
+/** The layout of a section, as a pure function of its shape. */
+export interface LibrarySectionLayout {
+  slug: string;
+  split: boolean;
+  mediaTypes: LibrarySectionMediaType[];
+}
+
+/**
+ * The single source of truth for a section's on-disk layout.
+ *
+ * Shared by the entity, the VFS path resolver and the media-server refresh
+ * hooks so the three can never disagree about where an item lives.
+ */
+export function librarySectionDirectoryFor(
+  { slug, split, mediaTypes }: LibrarySectionLayout,
+  mediaType: LibrarySectionMediaType,
+): string | null {
+  if (!mediaTypes.includes(mediaType)) {
+    return null;
+  }
+
+  // A subdirectory would be the section root's only child, so it is collapsed.
+  if (!split || mediaTypes.length === 1) {
+    return slug;
+  }
+
+  return `${slug}/${mediaType === "movie" ? "movies" : "shows"}`;
+}
+
 @ObjectType()
 @Entity()
 export class LibrarySection {
@@ -122,22 +151,31 @@ export class LibrarySection {
   public updatedAt?: Opt<Date> | null;
 
   /**
-   * The directories this section exposes, relative to the VFS root.
+   * The directory a given media type lives in, or `null` if the section does
+   * not hold that type.
    *
-   * The single source of truth for the section's layout — used both to build
-   * the directory listing and to tell Plex and Jellyfin which paths to refresh.
+   * @example getVfsDirectoryFor("movie") === "horror/movies"
+   * @example getVfsDirectoryFor("movie") === "anime-movies"
+   */
+  public getVfsDirectoryFor(mediaType: LibrarySectionMediaType) {
+    return librarySectionDirectoryFor(this, mediaType);
+  }
+
+  /**
+   * Every directory this section exposes, relative to the VFS root.
    *
    * @example ["horror/movies", "horror/shows"]
    * @example ["anime-movies"]
    */
   public getVfsDirectories(): string[] {
-    if (!this.split || this.mediaTypes.length === 1) {
-      return [this.slug];
-    }
-
-    return this.mediaTypes.map(
-      (mediaType) =>
-        `${this.slug}/${mediaType === "movie" ? "movies" : "shows"}`,
-    );
+    // A flat section maps both media types onto the same directory, hence the
+    // de-duplication.
+    return [
+      ...new Set(
+        this.mediaTypes
+          .map((mediaType) => this.getVfsDirectoryFor(mediaType))
+          .filter((directory) => directory !== null),
+      ),
+    ];
   }
 }

@@ -179,9 +179,14 @@ beforeAll(() => {
 
 beforeEach(async () => {
   const { database } = await import("./lib/database/database.ts");
+  const { librarySectionRegistry } =
+    await import("./lib/database/services/library-section/section-registry.ts");
 
   await database.orm.schema.clear();
   await redisClient?.flushdb();
+
+  // Process-wide singleton, so it outlives the database it was built from.
+  librarySectionRegistry.invalidate();
 });
 
 afterAll(async () => {
