@@ -11,7 +11,7 @@ import cors from "cors";
 import express, { type RequestHandler } from "express";
 import { createServer } from "node:http";
 import { URL } from "node:url";
-import { type ActorRefFromLogic, fromPromise } from "xstate";
+import { fromPromise } from "xstate";
 
 import { initAuth } from "../../../auth/auth.ts";
 import { initApolloClient } from "../../../graphql/apollo-client.ts";
@@ -20,12 +20,13 @@ import { resolvers } from "../../../graphql/resolvers/index.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { redisCache } from "../../../utilities/redis-cache.ts";
 import { settings } from "../../../utilities/settings.ts";
-import { mainRunnerMachine } from "../../main-runner/index.ts";
 
 import type { ApolloServerContext } from "../../../graphql/context.ts";
 import type { ValidPluginMap } from "../../../types/plugins.ts";
+import type { mainRunnerMachine } from "../../main-runner/index.js";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+import type { ActorRefFromLogic } from "xstate";
 
 export interface StartGQLServerInput {
   orm: MikroORM;
@@ -45,11 +46,13 @@ export const startGqlServer = fromPromise<
 >(async ({ input: { orm, mainRunnerRef, validPlugins } }) => {
   const pluginResolvers = validPlugins
     .values()
-    .flatMap((p) => p.config.resolvers)
+    .flatMap(({ config }) => config.resolvers)
     .toArray();
 
   const app = express();
-  const httpServer = createServer(app);
+  const httpServer = createServer((...args) => {
+    app(...args);
+  });
 
   const server = new ApolloServer<ApolloServerContext>({
     cache: redisCache,
@@ -60,7 +63,7 @@ export const startGqlServer = fromPromise<
     plugins: [
       ApolloServerPluginLandingPageLocalDefault(),
       {
-        requestDidStart({ request: { operationName } }) {
+        async requestDidStart({ request: { operationName } }) {
           if (operationName) {
             logger.silly(`Received ${operationName}`, {
               "riven.gql.operation-name": operationName,

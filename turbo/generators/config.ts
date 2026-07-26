@@ -8,7 +8,7 @@ import { registerPackageJsonFieldsHelper } from "./handlebars-helpers/package-js
 import type { PlopTypes } from "@turbo/gen";
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
-  [
+  for (const fn of [
     // Helpers
     registerArrayHelper,
     registerEqualsHelper,
@@ -18,5 +18,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
     // Generators
     createPackageGenerator,
     createPluginGenerator,
-  ].forEach((fn) => fn(plop));
+  ]) {
+    fn(plop);
+  }
 }

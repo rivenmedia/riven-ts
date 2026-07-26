@@ -7,11 +7,13 @@
   "author": "Riven Media",
   "type": "module",
   "scripts": {
-    "format:check": "prettier --check . '!**/docker-data'",
-    "format:check:ci": "pnpm format:check --log-level warn",
-    "format:fix": "prettier --write . '!**/docker-data'",
+    "format:check": "oxfmt --check .",
+    "format:check:ci": "pnpm format:check",
+    "format:fix": "oxfmt --write .",
     "postinstall": "pnpm node .husky/install.mjs || true",
     "knip": "pnpm knip:prepare && knip",
+    "lint": "oxlint --ignore-pattern '{apps,packages}/**'",
+    "lint:fix": "pnpm lint --fix",
     "knip:ci:base": "pnpm knip --cache --no-exit-code",
     "knip:ci:development": "pnpm knip:ci:base --reporter github-actions",
     "knip:ci:production": "pnpm knip:ci:base --strict --reporter json | tail -1 > knip-report.json && jq -e '(.issues // []) | length == 0' knip-report.json > /dev/null",
@@ -22,30 +24,30 @@
     "@commitlint/cli": "catalog:",
     "@commitlint/config-conventional": "catalog:",
     "@commitlint/types": "catalog:",
-    "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
-    "@trivago/prettier-plugin-sort-imports": "catalog:",
     "@turbo/gen": "catalog:",
     "@types/node": "catalog:",
+    "@typescript/native": "catalog:",
     "es-toolkit": "catalog:",
-    "eslint": "catalog:",
     "execa": "catalog:",
     "husky": "catalog:",
     "knip": "catalog:",
     "lint-staged": "catalog:",
-    "prettier": "catalog:",
-    "sort-package-json": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
     "turbo": "catalog:",
     "type-fest": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
-  "packageManager": "pnpm@11.5.1+sha512.93f7b57422ea7068257235b4c16eb60762eb68e1dc23723199cc739043ea9be2c4143274a399d8c6defa2b1176226d9ca1c4b63482d6200c1a8fbaa78c1d1485",
   "devEngines": {
     "runtime": {
       "name": "node",
       "version": "^24"
     }
-  }
+  },
+  "packageManager": "pnpm@11.5.1+sha512.93f7b57422ea7068257235b4c16eb60762eb68e1dc23723199cc739043ea9be2c4143274a399d8c6defa2b1176226d9ca1c4b63482d6200c1a8fbaa78c1d1485"
 }

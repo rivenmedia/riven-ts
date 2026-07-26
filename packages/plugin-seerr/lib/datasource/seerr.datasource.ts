@@ -1,13 +1,10 @@
-import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 import { FatalValidationError } from "@repo/util-plugin-sdk/errors/fatal-validation-error";
 import { json, z } from "@repo/util-plugin-sdk/validation";
 
 import { toMerged } from "es-toolkit";
 
-import {
-  type WebhookSettingsSchema,
-  webhookSettingsSchema,
-} from "../__generated__/zod/webhookSettingsSchema.ts";
+import { webhookSettingsSchema } from "../__generated__/zod/webhookSettingsSchema.ts";
 import { MetadataSettingsResponse } from "../schemas/metadata-settings-response.schema.ts";
 import { RequestResponse } from "../schemas/request-response.schema.ts";
 import { UpdateWebhookSettingsResponse } from "../schemas/update-webhook-settings-response.schema.ts";
@@ -15,16 +12,20 @@ import { WebhookJsonPayload } from "../schemas/webhook-json-payload.schema.ts";
 
 import type { GetAuthMeQueryResponse } from "../__generated__/types/GetAuthMe.ts";
 import type { WebhookSettings } from "../__generated__/types/WebhookSettings.ts";
+import type { WebhookSettingsSchema } from "../__generated__/zod/webhookSettingsSchema.ts";
 import type { ExtendedMediaRequest } from "../schemas/extended-media-request.schema.ts";
 import type { SeerrSettings } from "../seerr-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
-class SeerrAPIError extends Error {}
+class SeerrAPIError extends Error {
+  public override name = "SeerrAPIError";
+}
 
 export class SeerrAPI extends BaseDataSource<SeerrSettings> {
-  override baseURL = new URL("/api/v1/", this.settings.url).toString();
-  override serviceName = "Seerr";
+  public override baseURL = new URL("/api/v1/", this.settings.url).toString();
+  public override serviceName = "Seerr";
 
   protected override readonly rateLimiterOptions: RateLimiterOptions = {
     max: 20,
@@ -38,7 +39,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     requestOpts.headers["x-api-key"] = this.settings.apiKey;
   }
 
-  override async validate() {
+  public override async validate() {
     try {
       try {
         await this.get<GetAuthMeQueryResponse>("auth/me");
@@ -67,7 +68,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     }
   }
 
-  async getContent(
+  public async getContent(
     filter: string,
   ): Promise<Pick<ContentServiceRequestedResponse, "movies" | "shows">> {
     const requests = await this.#getAllRequests(filter);
@@ -174,9 +175,10 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
    * @throws {SeerrAPIError} If the metadata providers are not set to TVDB.
    */
   async #validateOrFixMetadataProviderSettings() {
-    const response = await this.get<unknown>("settings/metadatas");
+    const getMetadatasResponse = await this.get<unknown>("settings/metadatas");
 
-    const metadataSettings = MetadataSettingsResponse.parse(response);
+    const metadataSettings =
+      MetadataSettingsResponse.parse(getMetadatasResponse);
     const isValid =
       this.#validateMetadataProviderSettingsResponse(metadataSettings);
 
@@ -185,11 +187,16 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
     }
 
     if (this.settings.autofixMetadataProviders) {
-      const response = await this.put<unknown>("settings/metadatas", {
-        body: JSON.stringify({ tv: "tvdb", anime: "tvdb" }),
-      });
+      const updateMetadatasResponse = await this.put<unknown>(
+        "settings/metadatas",
+        {
+          body: JSON.stringify({ tv: "tvdb", anime: "tvdb" }),
+        },
+      );
 
-      const parsedResponse = MetadataSettingsResponse.parse(response);
+      const parsedResponse = MetadataSettingsResponse.parse(
+        updateMetadatasResponse,
+      );
 
       if (parsedResponse.tv !== "tvdb" || parsedResponse.anime !== "tvdb") {
         throw new FatalValidationError(
@@ -215,10 +222,15 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
    * @param webhookSettings Webhook settings from the `/settings/notifications/webhook` response
    */
   #validateWebhookSettingsResponse(webhookSettings: WebhookSettingsSchema) {
+    // oxlint-disable-next-line no-bitwise
     const REQUIRED_TYPES = 4 | 128; // 132: Request Approved + Request Automatically Approved
 
     const currentTypes = webhookSettings.types ?? 0;
+
+    // oxlint-disable-next-line no-bitwise
     const hasRequiredTypes = (currentTypes & REQUIRED_TYPES) === REQUIRED_TYPES;
+
+    // oxlint-disable-next-line no-bitwise
     const hasExtraTypes = (currentTypes & ~REQUIRED_TYPES) !== 0;
     const validatedWebhookBody = json(WebhookJsonPayload).safeParse(
       webhookSettings.options?.jsonPayload,
@@ -243,11 +255,16 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
    * If the `autofixWebhookBody` plugin setting is enabled, it will attempt to fix the configuration automatically.
    */
   async #validateOrFixWebhookBodySettings() {
+    // oxlint-disable-next-line no-bitwise
     const REQUIRED_TYPES = 4 | 128; // 132: Request Approved + Request Automatically Approved
 
-    const response = await this.get<unknown>("settings/notifications/webhook");
+    const getWebhookSettingsResponse = await this.get<unknown>(
+      "settings/notifications/webhook",
+    );
 
-    const webhookSettings = webhookSettingsSchema.parse(response);
+    const webhookSettings = webhookSettingsSchema.parse(
+      getWebhookSettingsResponse,
+    );
 
     if (!webhookSettings.enabled) {
       return;
@@ -299,12 +316,14 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
         },
       } satisfies WebhookSettings;
 
-      const response = await this.post<unknown>(
+      const updateWebhookSettingsResponse = await this.post<unknown>(
         "settings/notifications/webhook",
         { body: JSON.stringify(toMerged(webhookSettings, settingsPayload)) },
       );
 
-      const parsedResponse = UpdateWebhookSettingsResponse.parse(response);
+      const parsedResponse = UpdateWebhookSettingsResponse.parse(
+        updateWebhookSettingsResponse,
+      );
       const { isValid: isUpdatedSettingsValid } =
         this.#validateWebhookSettingsResponse(parsedResponse);
 
@@ -323,10 +342,12 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
 
     const issues: string[] = [];
 
+    // oxlint-disable-next-line no-bitwise
     if (!(currentTypes & 4)) {
       issues.push('"Request Approved" notification type is not enabled');
     }
 
+    // oxlint-disable-next-line no-bitwise
     if (!(currentTypes & 128)) {
       issues.push(
         '"Request Automatically Approved" notification type is not enabled',

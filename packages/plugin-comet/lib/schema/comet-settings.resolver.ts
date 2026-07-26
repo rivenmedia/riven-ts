@@ -7,7 +7,7 @@ import { CometSettings } from "./types/comet-settings.type.ts";
 @Resolver(() => Settings)
 export class CometSettingsResolver {
   @FieldResolver(() => CometSettings)
-  comet(): CometSettings {
+  public comet(): CometSettings {
     return {
       apiKey: "comet-api-key",
     };

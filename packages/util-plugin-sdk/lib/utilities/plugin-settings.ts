@@ -1,12 +1,13 @@
-import { type ZodObject, z } from "zod";
-
 import type { Jsonifiable, ReadonlyDeep } from "type-fest";
 import type { Logger } from "winston";
+import type { z, ZodObject } from "zod";
 
 function deepFreeze<T>(obj: T) {
-  Object.values(obj as Record<string, Jsonifiable>).forEach(
-    (value) => Object.isFrozen(value) || deepFreeze(value),
-  );
+  for (const value of Object.values(obj as Record<string, Jsonifiable>)) {
+    if (!Object.isFrozen(value)) {
+      deepFreeze(value);
+    }
+  }
 
   return Object.freeze(obj) as ReadonlyDeep<T>;
 }
@@ -18,12 +19,12 @@ export class PluginSettings {
   /**
    * A map to hold environment settings extracted from process.env
    */
-  #environmentSettingGroups: Map<string, Map<string, string>>;
+  readonly #environmentSettingGroups: Map<string, Map<string, string>>;
 
   /**
    * A map to hold parsed settings for each schema.
    */
-  #settingsMap = new Map<ZodObject, Record<string, unknown>>();
+  readonly #settingsMap = new Map<ZodObject, Record<string, unknown>>();
 
   /**
    * A flag to indicate if the settings are locked. The settings are locked once all plugins have been registered.
@@ -35,19 +36,19 @@ export class PluginSettings {
   /**
    * Logger instance for logging warnings and errors.
    */
-  #logger: Logger;
+  readonly #logger: Logger;
 
   /**
    * A flag to determine whether to print the effective configuration on startup.
    *
    * This is useful for debugging configuration issues.
    */
-  #printConfig: boolean;
+  readonly #printConfig: boolean;
 
   /**
    * Initialises the PluginSettings instance and builds a map of plugin-related environment variables
    */
-  constructor(
+  public constructor(
     environment: NodeJS.ProcessEnv,
     pluginConfigPrefixes: string[],
     logger: Logger,
@@ -62,6 +63,7 @@ export class PluginSettings {
 
     const settingPattern = new RegExp(
       `^RIVEN_PLUGIN_SETTING__(?<prefix>${pluginConfigPrefixes.join("|")})__(?<settingName>.+)$`,
+      "u",
     );
 
     for (const [key, value] of Object.entries(environment)) {
@@ -103,10 +105,10 @@ export class PluginSettings {
    *
    * @internal
    */
-  _lock() {
+  public lock() {
     if (this.#isLocked) {
       this.#logger.warn(
-        "PluginSettings._lock() called multiple times. This is a no-op.",
+        "PluginSettings.lock() called multiple times. This is a no-op.",
       );
 
       return;
@@ -121,7 +123,7 @@ export class PluginSettings {
 
     for (const [prefix, settings] of this.#environmentSettingGroups) {
       if (settings.size > 0) {
-        const unusedSettings = Array.from(settings.keys()).map(
+        const unusedSettings = [...settings.keys()].map(
           (key) => `${prefix}_${key}`,
         );
 
@@ -145,7 +147,7 @@ export class PluginSettings {
    * @param schema The schema that should be used to parse the settings.
    * @throws {Error} if settings are locked
    */
-  _set(configPrefix: string, schema: ZodObject): void {
+  public set(configPrefix: string, schema: ZodObject): void {
     if (this.#isLocked) {
       throw new Error("Settings are locked and cannot be modified.");
     }
@@ -171,10 +173,10 @@ export class PluginSettings {
     }
 
     if (this.#printConfig) {
-      console.log("#################");
-      console.log(`Effective ${configPrefix} configuration:`);
-      console.log(parsedSettings);
-      console.log("#################");
+      console.debug("#################");
+      console.debug(`Effective ${configPrefix} configuration:`);
+      console.debug(parsedSettings);
+      console.debug("#################");
     }
   }
 
@@ -184,7 +186,7 @@ export class PluginSettings {
    * @param schema The Zod schema used to parse the settings.
    * @returns The parsed settings for the provided schema.
    */
-  get<T extends ZodObject>(schema: T): z.infer<T> {
+  public get<T extends ZodObject>(schema: T): z.infer<T> {
     if (!this.#settingsMap.has(schema)) {
       throw new Error("Schema not found in settings map.");
     }

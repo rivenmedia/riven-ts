@@ -65,34 +65,34 @@ async function getMediaItemPathParts(mediaItem: MediaItem) {
 export abstract class FileSystemEntry {
   @Field(() => ID)
   @PrimaryKey({ type: "uuid" })
-  id = randomUUID();
+  public id = randomUUID();
 
   @Field(() => BigIntResolver)
   @Property({ type: "bigint" })
   @IsPositive()
-  fileSize!: number;
+  public fileSize!: number;
 
   @Field(() => Date)
   @Property()
-  createdAt: Opt<Date> = DateTime.utc().toJSDate();
+  public createdAt: Opt<Date> = DateTime.utc().toJSDate();
 
   @Field(() => Date, { nullable: true })
   @Property({ onUpdate: () => DateTime.utc().toJSDate() })
-  updatedAt?: Opt<Date>;
+  public updatedAt?: Opt<Date>;
 
   @Field(() => MediaItem)
   @ManyToOne(() => MediaItem)
-  mediaItem!: Opt<Ref<Movie | Episode>>;
+  public mediaItem!: Opt<Ref<Movie | Episode>>;
 
   @Field(() => String)
   @Enum(() => FileSystemEntryType.enum)
-  type!: FileSystemEntryType;
+  public type!: FileSystemEntryType;
 
   /**
    * The base directory for this media item, e.g. "movies" or "shows"
    */
   @Property({ persist: false, hidden: true })
-  get baseDirectory(): Opt<Hidden<"movies" | "shows">> {
+  public get baseDirectory(): Opt<Hidden<"movies" | "shows">> {
     const { type: mediaItemType } = this.mediaItem.getEntity();
 
     if (mediaItemType === "movie") {
@@ -108,22 +108,24 @@ export abstract class FileSystemEntry {
    * @example "Inception (2010) {tmdb-27205}/Inception (2010) {tmdb-27205}.mkv"
    */
   @Property()
-  path!: Opt<string>;
+  public path!: Opt<string>;
 
   /**
    * The VFS file name for this entry
    *
    * @example "movie.mkv", "episode.srt"
    */
-  abstract getVfsFileName(): Promisable<string>;
+  public abstract getVfsFileName(): Promisable<string>;
 
   @BeforeCreate()
-  async _setPath() {
+  public async _setPath() {
     const mediaItem = this.mediaItem.getEntity();
     const pathParts = await getMediaItemPathParts(mediaItem);
 
     // Remove periods from path parts to avoid directories being parsed as files
-    const sanitisedPathParts = pathParts.map((part) => part.replace(/\./g, ""));
+    const sanitisedPathParts = pathParts.map((part) =>
+      part.replaceAll(".", ""),
+    );
 
     this.path = path.join(...sanitisedPathParts, await this.getVfsFileName());
   }

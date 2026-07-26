@@ -16,7 +16,7 @@ it("returns an empty array if no content lists are provided", async ({
   const listrrApi = dataSourceMap.get(ListrrAPI);
   const shows = await listrrApi.getShows(new Set());
 
-  expect(shows).toEqual([]);
+  expect(shows).toStrictEqual([]);
 });
 
 it("retrieves shows from each provided list", async ({
@@ -54,7 +54,7 @@ it("retrieves shows from each provided list", async ({
   const listrrApi = dataSourceMap.get(ListrrAPI);
   const shows = await listrrApi.getShows(contentLists);
 
-  expect(shows.length).toBe(2);
+  expect(shows).toHaveLength(2);
 });
 
 it("paginates through all pages of the list", async ({
@@ -71,7 +71,7 @@ it("paginates through all pages of the list", async ({
         return HttpResponse.error();
       }
 
-      const page = parseInt(info.params["page"].toString(), 10);
+      const page = Math.trunc(Number(info.params["page"].toString()));
 
       if (page > totalPages) {
         return HttpResponse.error();
@@ -94,7 +94,7 @@ it("paginates through all pages of the list", async ({
   const listrrApi = dataSourceMap.get(ListrrAPI);
   const shows = await listrrApi.getShows(contentLists);
 
-  expect(shows.length).toBe(totalPages * itemsPerPage);
+  expect(shows).toHaveLength(totalPages * itemsPerPage);
 });
 
 it("deduplicates shows that appear in multiple lists", async ({

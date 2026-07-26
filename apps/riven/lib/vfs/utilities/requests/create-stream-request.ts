@@ -8,7 +8,7 @@ import {
 } from "../file-handle-map.ts";
 import { getVfsOperationContext } from "../vfs-operation-context.ts";
 
-export function createStreamRequest(
+export async function createStreamRequest(
   url: string,
   [requestStart, requestEnd]: readonly [number, number | undefined],
 ) {

@@ -7,7 +7,7 @@ import { StremThruSettings } from "./types/stremthru-settings.type.ts";
 @Resolver(() => Settings)
 export class StremThruSettingsResolver {
   @FieldResolver(() => StremThruSettings)
-  stremthru(): StremThruSettings {
+  public stremthru(): StremThruSettings {
     return {
       apiKey: "stremthru-api-key",
     };

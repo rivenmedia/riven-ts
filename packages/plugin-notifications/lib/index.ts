@@ -9,7 +9,7 @@ import { buildNotificationPayload } from "./services/notification-payload.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export default {
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [NotificationsAPI],
@@ -46,7 +46,7 @@ export default {
     },
   },
   settingsSchema: NotificationsSettings,
-  validator() {
+  async validator() {
     return Promise.resolve(true);
   },
-} satisfies RivenPlugin as RivenPlugin;
+};

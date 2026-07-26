@@ -21,16 +21,18 @@ it("returns the updated item if persisting the scrape results is successful", as
     },
   );
 
-  expect(newStreamsCount).toEqual(1);
+  expect(newStreamsCount).toBe(1);
 
   expect(item).toBeInstanceOf(MediaItem);
-  expect(item).toEqual(
+  expect(item).toStrictEqual(
     expect.objectContaining({
       id: indexedMovie.movie.id,
     }),
   );
 
-  expect(item.streams.count()).toEqual(indexedMovie.movie.streams.count() + 1);
+  expect(item.streams.count()).toStrictEqual(
+    indexedMovie.movie.streams.count() + 1,
+  );
 });
 
 it('throws a MediaItemScrapeErrorIncorrectState error if the item is not in the "indexed" state', async ({
@@ -39,7 +41,7 @@ it('throws a MediaItemScrapeErrorIncorrectState error if the item is not in the 
 }) => {
   const completedMovie = await seedCompletedMovie();
 
-  await expect(() =>
+  await expect(async () =>
     scraperService.scrapeItem(completedMovie.movie.id, {
       [faker.git.commitSha()]: parse("Some.Movie.2024.1080p.WEBRip.x264-GROUP"),
     }),
@@ -61,8 +63,8 @@ it("updates the scrape metadata when re-scraping a failed item", async ({
 
   const { item } = await scraperService.scrapeItem(scrapedMovie.movie.id, {});
 
-  expect(item.scrapedTimes).toEqual(scrapedMovie.movie.scrapedTimes + 1);
-  expect(item.scrapedAt).toEqual(now);
+  expect(item.scrapedTimes).toStrictEqual(scrapedMovie.movie.scrapedTimes + 1);
+  expect(item.scrapedAt?.toISOString()).toBe(now.toISOString());
 });
 
 it("increases the failed attempts count when no new streams are added", async ({
@@ -81,7 +83,7 @@ it("increases the failed attempts count when no new streams are added", async ({
     ),
   );
 
-  expect(item.failedScrapeAttempts).toEqual(
+  expect(item.failedScrapeAttempts).toStrictEqual(
     scrapedMovie.movie.failedScrapeAttempts + 1,
   );
 });
@@ -105,6 +107,6 @@ it("resets the failed attempts count when new streams are added", async ({
     },
   );
 
-  expect(newStreamsCount).toEqual(1);
-  expect(item.failedScrapeAttempts).toEqual(0);
+  expect(newStreamsCount).toBe(1);
+  expect(item.failedScrapeAttempts).toBe(0);
 });

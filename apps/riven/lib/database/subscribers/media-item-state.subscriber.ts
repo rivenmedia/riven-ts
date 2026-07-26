@@ -4,33 +4,33 @@ import {
   Movie,
   Season,
   Show,
-  type ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
-import {
-  type ChangeSet,
-  type EntityData,
-  type EventArgs,
-  type EventSubscriber,
-  type FlushEventArgs,
-  type UnitOfWork,
-  wrap,
-} from "@mikro-orm/core";
+import { wrap } from "@mikro-orm/core";
 import chalk from "chalk";
 
+import type {
+  ChangeSet,
+  EntityData,
+  EventArgs,
+  EventSubscriber,
+  FlushEventArgs,
+  UnitOfWork,
+} from "@mikro-orm/core";
+import type { ShowLikeMediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type { Promisable } from "type-fest";
 
 type NextStatesMap = Map<MediaItem, MediaItemState>;
 
 export class MediaItemStateSubscriber implements EventSubscriber {
-  afterUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
+  public afterUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
     if (entity.state === "unreleased" && entity.isReleased) {
       entity.state = "indexed";
     }
   }
 
-  async afterFlush({ uow }: FlushEventArgs): Promise<void> {
+  public async afterFlush({ uow }: FlushEventArgs): Promise<void> {
     const { logger } = await import("../../utilities/logger/logger.ts");
 
     for (const changeSet of uow.getChangeSets()) {
@@ -49,7 +49,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     }
   }
 
-  async onFlush({ uow }: FlushEventArgs): Promise<void> {
+  public async onFlush({ uow }: FlushEventArgs): Promise<void> {
     const trackedItems = new Map<
       MediaItem,
       ChangeSet<Partial<MediaItem>> | null
@@ -79,21 +79,23 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       }
 
       if (collection.owner instanceof Season) {
-        const episodesToUpdate = collection.reduce((acc, episode) => {
+        const episodesToUpdate = new Set<Episode>();
+
+        for (const episode of collection) {
           if (!(episode instanceof Episode)) {
-            return acc;
+            continue;
           }
 
           if (episode.state === "unreleased" && !episode.isReleased) {
-            return acc;
+            continue;
           }
 
           if (episode.state !== "unreleased" && episode.isReleased) {
-            return acc;
+            continue;
           }
 
-          return acc.add(episode);
-        }, new Set<Episode>());
+          episodesToUpdate.add(episode);
+        }
 
         for (const episode of episodesToUpdate) {
           episodesAwaitingUpdate.add(episode);
@@ -198,16 +200,15 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     children: MediaItem[],
     nextStatesMap: NextStatesMap,
   ) {
-    return children.reduce<Partial<Record<MediaItemState, number>>>(
-      (acc, child) => {
-        const childState = nextStatesMap.get(child) ?? child.state;
+    const acc: Partial<Record<MediaItemState, number>> = {};
 
-        acc[childState] = (acc[childState] ?? 0) + 1;
+    for (const child of children) {
+      const childState = nextStatesMap.get(child) ?? child.state;
 
-        return acc;
-      },
-      {},
-    );
+      acc[childState] = (acc[childState] ?? 0) + 1;
+    }
+
+    return acc;
   }
 
   #determineFixedState(item: MediaItem) {

@@ -6,22 +6,23 @@ import { testUtils } from "better-auth/plugins";
 import { graphql, passthrough } from "msw";
 import assert from "node:assert";
 import { randomUUID } from "node:crypto";
-import { type Mock, test as testBase, vi } from "vitest";
+import { test as testBase, vi } from "vitest";
 
 import { authConfig } from "../auth/auth.ts";
 import { type ApolloServerContext, CoreKey } from "../graphql/context.ts";
+import { CoreKey } from "../graphql/context.ts";
 import { queueNameFor } from "../message-queue/utilities/queue-name-for.ts";
 
 import type { Services } from "../database/database.ts";
+import type { ApolloServerContext } from "../graphql/context.ts";
 import type { Flow } from "../message-queue/flows/index.ts";
 import type { SandboxedJobDefinition } from "../message-queue/sandboxed-jobs/index.ts";
+import type { MainRunnerMachineIntake } from "../state-machines/main-runner/index.ts";
 import type { ValidPlugin, ValidPluginMap } from "../types/plugins.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
 import type { SetReturnType } from "type-fest";
-import type { ZodObject } from "zod";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyFunction = (...args: any[]) => any;
 
 export const it = testBase
@@ -35,9 +36,9 @@ export const it = testBase
       ),
     );
 
-    if (/^(\*|msw)/.test(process.env["DEBUG"] ?? "")) {
+    if (/^(\*|msw)/u.test(process.env["DEBUG"] ?? "")) {
       server.events.on("response:mocked", ({ request, response }) => {
-        console.log(
+        console.debug(
           "%s %s received %s %s",
           request.method,
           request.url,
@@ -147,7 +148,9 @@ export const it = testBase
       mediaEntryFactory: new MediaEntryFactory(em),
     };
   })
-  .extend("stream", ({ factories }) => factories.streamFactory.createOne())
+  .extend("stream", async ({ factories }) =>
+    factories.streamFactory.createOne(),
+  )
   .extend("mediaEntry", ({ factories }) =>
     factories.mediaEntryFactory.makeOne({
       downloadUrl: "http://example.com/file.mp4",
@@ -220,7 +223,7 @@ export const it = testBase
         seasons: [season],
       },
     }) => {
-      assert(season);
+      assert.ok(season);
 
       return season;
     },
@@ -232,7 +235,7 @@ export const it = testBase
         episodes: [episode],
       },
     }) => {
-      assert(episode);
+      assert.ok(episode);
 
       return episode;
     },
@@ -243,12 +246,11 @@ export const it = testBase
 
     const queue = createQueue(`mock-queue-${task.id}`);
 
-    onCleanup(() => queue.close());
+    onCleanup(async () => queue.close());
 
     return queue;
   })
   .extend("createMockJob", async ({ mockQueue }) => {
-    const { randomUUID } = await import("node:crypto");
     const { Job } = await import("bullmq");
 
     return async <T>(data: T, opts?: JobsOptions) => {
@@ -265,14 +267,14 @@ export const it = testBase
       services,
     }): Promise<{
       services: Services;
-      sendEvent: Mock;
+      sendEvent: Mock<MainRunnerMachineIntake>;
       plugins: ValidPluginMap;
     }> => {
-      const { default: testPlugin } = await import("@repo/plugin-test");
+      const { plugin: testPlugin } = await import("@repo/plugin-test");
 
       return {
         services,
-        sendEvent: vi.fn(),
+        sendEvent: vi.fn<MainRunnerMachineIntake>(),
         plugins: new Map<symbol, ValidPlugin>([
           [
             testPlugin.name,
@@ -309,14 +311,14 @@ export const it = testBase
       const { url } = await startStandaloneServer<ApolloServerContext>(
         apolloServerInstance,
         {
-          context: () =>
+          context: async () =>
             Promise.resolve({
               [CoreKey]: {
                 em: orm.em.fork(),
                 services,
               },
               logger: {} as never,
-              sendEvent: vi.fn(),
+              sendEvent: vi.fn<MainRunnerMachineIntake>(),
               plugins: {},
             }),
           listen: {

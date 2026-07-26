@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import { AsyncLocalStorage } from "node:async_hooks";
-import { Buffer } from "node:buffer";
 
 import type { FileHandleMetadata } from "./file-handle-map.ts";
+import type { Buffer } from "node:buffer";
 import type { Promisable } from "type-fest";
 import type { Dispatcher } from "undici";
 
@@ -55,7 +55,7 @@ export function getVfsOperationContext<
   }
 
   if (operationName) {
-    assert(
+    assert.ok(
       context.operationName === operationName,
       `VFS operation context mismatch: expected ${operationName} but got ${context.operationName}`,
     );

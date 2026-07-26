@@ -22,7 +22,7 @@ export const createPluginFlowJob = <
 ): FlowChildJob => {
   const [eventType] = schema.shape.type.def.values;
 
-  assert(eventType);
+  assert.ok(eventType);
 
   return {
     name: `${pluginName} - ${jobName}`,

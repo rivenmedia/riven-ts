@@ -22,7 +22,7 @@ import type { UUID } from "node:crypto";
 
 export class DownloaderService extends BaseService {
   @CreateRequestContext()
-  async getItemToDownload(id: UUID) {
+  public async getItemToDownload(id: UUID) {
     const item = await this.em.getRepository(MediaItem).findOneOrFail(id);
 
     const processableStates: MediaItemState[] = [
@@ -43,12 +43,16 @@ export class DownloaderService extends BaseService {
 
   @CreateRequestContext()
   @Transactional()
-  async downloadItem(id: UUID, torrent: ValidTorrent, processedBy: string) {
+  public async downloadItem(
+    id: UUID,
+    torrent: ValidTorrent,
+    processedBy: string,
+  ) {
     return persistDownloadResults(this.em, id, torrent, processedBy);
   }
 
   @EnsureRequestContext()
-  async getFanOutDownloadItems(id: UUID) {
+  public async getFanOutDownloadItems(id: UUID) {
     const item = await this.em.getRepository(MediaItem).findOneOrFail(id);
 
     if (item instanceof Show) {
@@ -66,7 +70,7 @@ export class DownloaderService extends BaseService {
   }
 
   @CreateRequestContext()
-  async findMatchingStreams(infoHashes: string[]) {
+  public async findMatchingStreams(infoHashes: string[]) {
     return this.em.getRepository(Stream).find({
       infoHash: {
         $in: infoHashes,

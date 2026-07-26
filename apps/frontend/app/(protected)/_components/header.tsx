@@ -1,11 +1,5 @@
 "use client";
 
-import { Menu, Search } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { useDebounce, useEvent, useLifecycles, useUnmount } from "react-use";
-
 import { Button } from "@/components/ui/button";
 import {
   InputGroup,
@@ -13,6 +7,12 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Kbd } from "@/components/ui/kbd";
+
+import { Menu, Search } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { useDebounce, useEvent, useLifecycles, useUnmount } from "react-use";
 
 import type { RedirectType } from "next/dist/client/components/redirect-error";
 
@@ -120,7 +120,7 @@ export function Header({ modifierKey }: HeaderProps) {
   useUnmount(cancelNavigateToSearch);
 
   return (
-    <header className="pointer-events-none absolute top-0 left-0 z-50 hidden h-20 w-full items-center bg-linear-to-b from-black/50 to-transparent px-4 transition-all duration-500 md:flex md:px-16">
+    <header className="pointer-events-none absolute top-0 left-0 z-50 h-20 w-full items-center bg-linear-to-b from-black/50 to-transparent px-4 transition-all duration-500 md:flex md:px-16">
       <div className="pointer-events-auto flex w-full items-center justify-between gap-6">
         <form
           ref={formRef}

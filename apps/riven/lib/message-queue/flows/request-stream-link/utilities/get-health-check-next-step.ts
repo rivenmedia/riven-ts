@@ -4,11 +4,14 @@ export function getHealthCheckNextStep(
   state: MediaItemStreamLinkHealthCheckRequestedResponse["state"],
 ) {
   switch (state) {
-    case "healthy":
+    case "healthy": {
       return "save-healthy-link";
-    case "expired":
+    }
+    case "expired": {
       return "request-stream-link";
-    case "dead":
+    }
+    case "dead": {
       return "blacklist-stream";
+    }
   }
 }

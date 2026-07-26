@@ -1,8 +1,10 @@
 import { json } from "@repo/util-plugin-sdk/validation";
 
-import z, { type ZodOptional, type ZodString } from "zod";
+import z from "zod";
 
 import { Store } from "./schemas/store.schema.ts";
+
+import type { ZodOptional, ZodString } from "zod";
 
 const StoreKeys = z.object<Record<`${Store}ApiKey`, ZodOptional<ZodString>>>({
   realdebridApiKey: z.string().optional(),
@@ -26,7 +28,7 @@ export const StremThruSettings = z
       z
         .array(Store)
         .min(1)
-        .transform((stores) => Array.from(new Set(stores))),
+        .transform((stores) => [...new Set(stores)]),
     )
       .default(Store.options)
       .describe(

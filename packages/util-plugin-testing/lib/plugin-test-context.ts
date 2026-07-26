@@ -1,9 +1,4 @@
-import {
-  type BaseDataSource,
-  type BaseDataSourceConfig,
-  DataSourceMap,
-  type RivenPlugin,
-} from "@repo/util-plugin-sdk";
+import { DataSourceMap } from "@repo/util-plugin-sdk";
 
 import { RedisConnection } from "bullmq";
 import { it as baseIt, vi } from "vitest";
@@ -11,6 +6,11 @@ import { it as baseIt, vi } from "vitest";
 import { mockLogger } from "./create-mock-logger.ts";
 import { createMockPluginSettings } from "./create-mock-plugin-settings.ts";
 
+import type {
+  BaseDataSource,
+  BaseDataSourceConfig,
+  RivenPlugin,
+} from "@repo/util-plugin-sdk";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { Telemetry } from "bullmq";
 
@@ -20,9 +20,9 @@ export const it = baseIt
 
     const server = setupServer();
 
-    if (/^(\*|msw)/.test(process.env["DEBUG"] ?? "")) {
+    if (/^(\*|msw)/u.test(process.env["DEBUG"] ?? "")) {
       server.events.on("response:mocked", ({ request, response }) => {
-        console.log(
+        console.debug(
           "%s %s received %s %s",
           request.method,
           request.url,
@@ -59,7 +59,7 @@ export const it = baseIt
 
     await mockServer.start();
 
-    onCleanup(() => mockServer.stop());
+    onCleanup(async () => mockServer.stop());
 
     return mockServer;
   })
@@ -76,12 +76,14 @@ export const it = baseIt
     async function getRedisServerBinary() {
       try {
         const { stdout: redisServerBinary } =
+          // oxlint-disable-next-line typescript/strict-void-return
           await promisify(exec)("which redis-server");
 
         return redisServerBinary.trim();
       } catch (error) {
         throw new Error(
           `Failed to find "redis-server" binary. Is Redis installed and available in your PATH?\n${String(error)}`,
+          { cause: error },
         );
       }
     }
@@ -105,7 +107,9 @@ export const it = baseIt
 
       return client;
     } catch (error) {
-      throw new Error(`Failed to get Redis URL.\n${String(error)}`);
+      throw new Error(`Failed to get Redis URL.\n${String(error)}`, {
+        cause: error,
+      });
     }
   })
   .extend(
@@ -152,7 +156,7 @@ export const it = baseIt
       },
       logger: {} as never,
       plugins: {},
-      sendEvent: vi.fn(),
+      sendEvent: vi.fn<GraphQLContext["sendEvent"]>(),
     }),
   );
 

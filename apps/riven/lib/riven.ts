@@ -1,14 +1,14 @@
+#!/usr/bin/env node
+
 import { Duration } from "luxon";
 import { randomUUID } from "node:crypto";
 import { setEnvironmentData } from "node:worker_threads";
 
-import {
-  type LogContext,
-  withLogContext,
-} from "./utilities/logger/log-context.ts";
+import { withLogContext } from "./utilities/logger/log-context.ts";
 import { SessionID } from "./utilities/logger/session-id.ts";
 
 import type { rivenMachine } from "./state-machines/program/index.ts";
+import type { LogContext } from "./utilities/logger/log-context.ts";
 import type { ActorRefFromLogic } from "xstate";
 
 /**

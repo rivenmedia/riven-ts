@@ -33,7 +33,6 @@ const defaultProject = [
 export default {
   tags: ["-lintignore"],
   ignoreDependencies: [
-    "@typescript-eslint/parser",
     "@kubb/cli",
     "@graphql-codegen/*",
     "@graphql-typed-document-node/*",
@@ -60,7 +59,7 @@ export default {
         "postcss.config.mjs!",
       ],
       project: ["**/*.{ts,tsx,mjs}!", "!source.config.ts"],
-      ignoreDependencies: ["tailwindcss", /@repo\/(.*)/],
+      ignoreDependencies: ["tailwindcss", /@repo\/(?<pluginName>.*)/u],
     },
     "apps/riven": {
       entry: [...defaultEntry, "!**/Migration*.ts!"],
@@ -69,7 +68,8 @@ export default {
         "!**/Migration*.ts",
         "!**/{factories,seeders}!",
       ],
-      ignoreDependencies: [/@repo\/plugin(.*)/],
+      ignoreDependencies: [/@repo\/plugin(?<pluginName>.*)/u],
+      ignoreFiles: ["**/*.d.ts"],
     },
     "{packages,packages/core}/*": {
       entry: [...defaultEntry],

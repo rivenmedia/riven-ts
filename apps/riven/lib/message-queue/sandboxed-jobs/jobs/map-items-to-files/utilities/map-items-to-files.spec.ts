@@ -16,7 +16,7 @@ it("maps movie files correctly", () => {
     },
   ]);
 
-  expect(result).toEqual({
+  expect(result).toStrictEqual({
     movies: {
       "0": {
         name: "The Matrix 1999.mkv",
@@ -47,7 +47,7 @@ it("maps episode files correctly", () => {
     },
   ]);
 
-  expect(result).toEqual({
+  expect(result).toStrictEqual({
     movies: {},
     episodes: {
       "1:1": {
@@ -83,7 +83,7 @@ it("handles mixed movie and episode files", () => {
     },
   ]);
 
-  expect(result).toEqual({
+  expect(result).toStrictEqual({
     movies: {
       "0": {
         name: "The Matrix 1999.mkv",
@@ -125,7 +125,7 @@ it("skips files that fail to parse", () => {
     },
   ]);
 
-  expect(result).toEqual({
+  expect(result).toStrictEqual({
     movies: {
       "0": {
         name: "The Matrix 1999.mkv",
@@ -152,7 +152,7 @@ it("handles absolute season numbering", () => {
     },
   ]);
 
-  expect(result).toEqual({
+  expect(result).toStrictEqual({
     movies: {},
     episodes: {
       "abs:1025": {
@@ -167,7 +167,7 @@ it("handles absolute season numbering", () => {
 it("returns empty result for empty input", () => {
   const result = mapItemsToFiles([]);
 
-  expect(result).toEqual({
+  expect(result).toStrictEqual({
     movies: {},
     episodes: {},
   });

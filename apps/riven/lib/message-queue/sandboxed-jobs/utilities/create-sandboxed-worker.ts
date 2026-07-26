@@ -1,8 +1,7 @@
-import { type QueueOptions, Worker, type WorkerOptions } from "bullmq";
+import { Worker } from "bullmq";
 import { toMerged } from "es-toolkit";
 import assert from "node:assert";
 import { existsSync } from "node:fs";
-import { URL } from "node:url";
 
 import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
@@ -10,6 +9,8 @@ import { telemetry } from "../../../utilities/telemetry.ts";
 import { createQueue } from "../../utilities/create-queue.ts";
 
 import type { SandboxedJobDefinition } from "../index.ts";
+import type { QueueOptions, WorkerOptions } from "bullmq";
+import type { URL } from "node:url";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
 Worker.setMaxListeners(200);
@@ -33,12 +34,13 @@ export function createSandboxedWorker(
 ) {
   const [sandboxedJobName] = sandboxedJobSchema.shape.name.def.values;
 
-  assert(
+  assert.ok(
     sandboxedJobName,
     `No queue name found for flow: ${sandboxedJobSchema.shape.name.value}`,
   );
 
-  assert(
+  assert.ok(
+    // oxlint-disable-next-line node/no-sync
     existsSync(processorURL),
     `Processor file not found at path: ${processorURL.toString()}`,
   );

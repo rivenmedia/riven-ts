@@ -7,9 +7,7 @@ import type { MapItemsToFilesSandboxedJob } from "../../map-items-to-files/map-i
 
 type MappedFiles = MapItemsToFilesSandboxedJob["output"];
 
-it.beforeAll(({ gqlServer: _gqlServer }) => {
-  return;
-});
+it.beforeAll(({ gqlServer: _gqlServer }) => undefined);
 
 it("throws an error if season-like torrent has fewer files than expected", async ({
   season,
@@ -21,7 +19,7 @@ it("throws an error if season-like torrent has fewer files than expected", async
       "1": {
         name: `${season.show.getProperty("title")}.S01E01.1080p.WEB-DL.mkv`,
         path: `/${season.show.getProperty("title")}.S01E01.1080p.WEB-DL.mkv`,
-        size: 5000000000,
+        size: 5_000_000_000,
         link: "http://example.com/file.mkv",
       },
     },
@@ -45,20 +43,20 @@ it("considers torrents for continuing shows as valid if missing a maximum of one
 
   const episodes = await indexedShow.getEpisodes();
 
-  const files = episodes.reduce<MappedFiles["episodes"]>((acc, episode) => {
+  const files: MappedFiles["episodes"] = {};
+
+  for (const episode of episodes) {
     if (episode.season.getProperty("number") === indexedShow.seasons.length) {
-      return acc;
+      continue;
     }
 
-    acc[`abs:${episode.absoluteNumber.toString()}`] = {
+    files[`abs:${episode.absoluteNumber.toString()}`] = {
       name: `${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
       path: `/${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-      size: 5000000000,
+      size: 5_000_000_000,
       link: "http://example.com/file.mkv",
     };
-
-    return acc;
-  }, {});
+  }
 
   const mappedFiles = {
     movies: {},
@@ -76,20 +74,20 @@ it("considers torrents for completed shows as invalid if missing any season", as
 }) => {
   const episodes = await indexedShow.getEpisodes();
 
-  const files = episodes.reduce<MappedFiles["episodes"]>((acc, episode) => {
+  const files: MappedFiles["episodes"] = {};
+
+  for (const episode of episodes) {
     if (episode.season.getProperty("number") === indexedShow.seasons.length) {
-      return acc;
+      continue;
     }
 
-    acc[`abs:${episode.absoluteNumber.toString()}`] = {
+    files[`abs:${episode.absoluteNumber.toString()}`] = {
       name: `${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
       path: `/${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-      size: 5000000000,
+      size: 5_000_000_000,
       link: "http://example.com/file.mkv",
     };
-
-    return acc;
-  }, {});
+  }
 
   const mappedFiles = {
     movies: {},
@@ -110,7 +108,7 @@ it("throws an error if file has no download URL", async ({
       1: {
         name: `${indexedMovie.title}.2024.1080p.WEB-DL.mkv`,
         path: `/${indexedMovie.title}.2024.1080p.WEB-DL.mkv`,
-        size: 5000000000,
+        size: 5_000_000_000,
         link: "",
       },
     },
@@ -131,7 +129,7 @@ it("throws an error if movie file is parsed as a show", async ({
       1: {
         name: `${indexedMovie.title}.S01E01.1080p.WEB-DL.mkv`,
         path: `/${indexedMovie.title}.S01E01.1080p.WEB-DL.mkv`,
-        size: 5000000000,
+        size: 5_000_000_000,
         link: "http://example.com/file.mkv",
       },
     },
@@ -155,7 +153,7 @@ it("throws an error if show file has unknown episode number", async ({
       {
         name: `${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
         path: `/${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        size: 5000000000,
+        size: 5_000_000_000,
         link: "http://example.com/file.mkv",
       },
     ]),
@@ -167,7 +165,7 @@ it("throws an error if show file has unknown episode number", async ({
       "abs:1": {
         name: `${indexedShow.title}.S01E00.1080p.WEB-DL.mkv`,
         path: `/${indexedShow.title}.S01E00.1080p.WEB-DL.mkv`,
-        size: 5000000000,
+        size: 5_000_000_000,
         link: "http://example.com/file.mkv",
       },
     },
@@ -190,7 +188,7 @@ it("returns valid matched files for a movie", async ({
       0: {
         name: `${indexedMovie.title}.2024.1080p.WEB-DL.mkv`,
         path: `/${indexedMovie.title}.2024.1080p.WEB-DL.mkv`,
-        size: 5000000000,
+        size: 5_000_000_000,
         link: "http://example.com/file.mkv",
       },
     },
@@ -224,7 +222,7 @@ it("returns valid matched files for a show", async ({
       {
         name: `${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
         path: `/${indexedShow.title}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        size: 5000000000,
+        size: 5_000_000_000,
         link: "http://example.com/file.mkv",
       },
     ]),
@@ -261,7 +259,7 @@ it("does not match episodes from a different season", async ({
       {
         name: `${season.show.getProperty("title")}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
         path: `/${season.show.getProperty("title")}.E${episode.absoluteNumber.toString()}.1080p.WEB-DL.mkv`,
-        size: 5000000000,
+        size: 5_000_000_000,
         link: "http://example.com/file.mkv",
       },
     ]),
@@ -290,7 +288,7 @@ it("throws an error if episode file does not match the episode", async ({
       1: {
         name: `${show.title}.S02E01.1080p.WEB-DL.mkv`,
         path: `/${show.title}.S02E01.1080p.WEB-DL.mkv`,
-        size: 5000000000,
+        size: 5_000_000_000,
         link: "http://example.com/file.mkv",
       },
     },

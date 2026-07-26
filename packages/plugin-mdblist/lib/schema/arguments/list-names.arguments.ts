@@ -4,10 +4,10 @@ import { ArgsType, Field } from "type-graphql";
 @ArgsType()
 export class ListNamesArguments {
   @Field(() => [String])
-  @Matches(/^[^/]+\/[^/]+$/, {
+  @Matches(/^[^/]+\/[^/]+$/u, {
     each: true,
     message: "Each list name must be in the format {username}/{listname}",
   })
   @ArrayUnique()
-  listNames!: string[];
+  public listNames!: string[];
 }

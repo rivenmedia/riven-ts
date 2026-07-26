@@ -1,14 +1,6 @@
-import {
-  type ActorRefFromLogic,
-  createActor,
-  enqueueActions,
-  setup,
-} from "xstate";
+import { createActor, enqueueActions, setup } from "xstate";
 
-import {
-  type BootstrapMachineOutput,
-  bootstrapMachine,
-} from "../bootstrap/index.ts";
+import { bootstrapMachine } from "../bootstrap/index.ts";
 import { mainRunnerMachine } from "../main-runner/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { shutdown } from "./actors/shutdown.actor.ts";
@@ -19,9 +11,11 @@ import type { ApolloServerContext } from "../../graphql/context.ts";
 import type { MockScenario } from "../../mocks/utilities/mock-scenario.ts";
 import type { ValidPluginMap } from "../../types/plugins.ts";
 import type { SessionID } from "../../utilities/logger/session-id.ts";
+import type { BootstrapMachineOutput } from "../bootstrap/index.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";
 import type Fuse from "@zkochan/fuse-native";
+import type { ActorRefFromLogic } from "xstate";
 
 export interface RivenMachineContext {
   mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine>;
@@ -164,7 +158,7 @@ export const rivenMachine = setup({
               id: "shutdown",
               src: "shutdown",
               input: ({ context: { mainRunnerRef } }) => ({
-                mainRunnerRef: mainRunnerRef,
+                mainRunnerRef,
               }),
               onError: {
                 target: "Unmounting VFS",

@@ -7,7 +7,7 @@ import { ListrrResolver } from "./schema/listrr.resolver.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export default {
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   resolvers: [ListrrResolver, ListrrSettingsResolver],
@@ -26,7 +26,7 @@ export default {
     },
   },
   settingsSchema: ListrrSettings,
-  validator() {
+  async validator() {
     return Promise.resolve(true);
   },
-} satisfies RivenPlugin as RivenPlugin;
+};

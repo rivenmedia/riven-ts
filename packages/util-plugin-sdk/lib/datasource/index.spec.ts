@@ -5,14 +5,15 @@ import { expect, vi } from "vitest";
 import { createLogger } from "winston";
 
 import { it as baseIt } from "../__tests__/test-context.ts";
-import { BaseDataSource, type BaseDataSourceConfig } from "./index.ts";
+import { BaseDataSource } from "./index.ts";
 
+import type { BaseDataSourceConfig } from "./index.ts";
 import type { Promisable } from "type-fest";
 
 class TestDataSource extends BaseDataSource<Record<string, unknown>> {
-  override baseURL = "https://example.com/api";
+  public override baseURL = "https://example.com/api";
 
-  override validate(): Promisable<boolean> {
+  public override validate(): Promisable<boolean> {
     return true;
   }
 }
@@ -66,11 +67,11 @@ it("enqueues subsequent jobs to the same URL separately", async ({
 
   const firstRequest = await dataSource.fetch("endpoint");
 
-  expect(firstRequest.parsedBody).toEqual({ success: false });
+  expect(firstRequest.parsedBody).toStrictEqual({ success: false });
 
   const secondRequest = await dataSource.fetch("endpoint");
 
-  expect(secondRequest.parsedBody).toEqual({ success: true });
+  expect(secondRequest.parsedBody).toStrictEqual({ success: true });
 });
 
 it("bypasses the queue if a valid response is available in the cache", async ({
@@ -95,7 +96,7 @@ it("bypasses the queue if a valid response is available in the cache", async ({
   await dataSource.fetch("endpoint");
   await dataSource.fetch("endpoint");
 
-  expect(queueAddSpy).toHaveBeenCalledTimes(1);
+  expect(queueAddSpy).toHaveBeenCalledOnce();
 });
 
 it("does not bypass the queue if no valid response is available in the cache", async ({
@@ -142,5 +143,5 @@ it("returns a cached response if available in the cache", async ({
 
   const secondRequest = await dataSource.fetch("endpoint");
 
-  expect(secondRequest.parsedBody).toEqual({ value: "cached-value" });
+  expect(secondRequest.parsedBody).toStrictEqual({ value: "cached-value" });
 });

@@ -53,25 +53,20 @@ const buildSeederFunction =
     return results as SeederResult<S, C>;
   };
 
-export const buildSeederFunctions = (em: EntityManager) => {
-  return {
-    // Movies
-    seedIndexedMovie: buildSeederFunction(em, IndexedMovieSeeder),
-    seedScrapedMovie: buildSeederFunction(em, ScrapedMovieSeeder),
-    seedCompletedMovie: buildSeederFunction(em, CompletedMovieSeeder),
-    seedForeignLanguageMovie: buildSeederFunction(
-      em,
-      ForeignLanguageMovieSeeder,
-    ),
+export const buildSeederFunctions = (em: EntityManager) => ({
+  // Movies
+  seedIndexedMovie: buildSeederFunction(em, IndexedMovieSeeder),
+  seedScrapedMovie: buildSeederFunction(em, ScrapedMovieSeeder),
+  seedCompletedMovie: buildSeederFunction(em, CompletedMovieSeeder),
+  seedForeignLanguageMovie: buildSeederFunction(em, ForeignLanguageMovieSeeder),
 
-    // Shows
-    seedIndexedShow: buildSeederFunction(em, IndexedShowSeeder),
-    seedScrapedShow: buildSeederFunction(em, ScrapedShowSeeder),
-    seedPartiallyCompletedShow: buildSeederFunction(
-      em,
-      PartiallyCompletedShowSeeder,
-    ),
-    seedCompletedShow: buildSeederFunction(em, CompletedShowSeeder),
-    seedForeignLanguageShow: buildSeederFunction(em, ForeignLanguageShowSeeder),
-  };
-};
+  // Shows
+  seedIndexedShow: buildSeederFunction(em, IndexedShowSeeder),
+  seedScrapedShow: buildSeederFunction(em, ScrapedShowSeeder),
+  seedPartiallyCompletedShow: buildSeederFunction(
+    em,
+    PartiallyCompletedShowSeeder,
+  ),
+  seedCompletedShow: buildSeederFunction(em, CompletedShowSeeder),
+  seedForeignLanguageShow: buildSeederFunction(em, ForeignLanguageShowSeeder),
+});

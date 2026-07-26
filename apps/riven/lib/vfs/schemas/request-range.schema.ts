@@ -3,7 +3,8 @@ import z from "zod";
 import { createChunkRangeLabel } from "../utilities/chunks/create-chunk-range-label.ts";
 import { fileNameToFileChunkCalculationsMap } from "../utilities/file-handle-map.ts";
 import { ChunkMetadata } from "./chunk.schema.ts";
-import { FileChunkCalculations } from "./file-chunk-calculations.schema.ts";
+
+import type { FileChunkCalculations } from "./file-chunk-calculations.schema.ts";
 
 const calculateRequiredChunks = (
   start: number,
@@ -89,7 +90,7 @@ export const transformRequestRangeToBounds = z.transform(
     );
 
     const [firstChunk] = chunks;
-    const lastChunk = chunks.length > 1 ? chunks[chunks.length - 1] : undefined;
+    const lastChunk = chunks.length > 1 ? chunks.at(-1) : undefined;
 
     return {
       requestRange: [start, end] as const,

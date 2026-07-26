@@ -7,7 +7,8 @@
     "build": "next build",
     "dev": "next dev --turbopack",
     "postinstall": "fumadocs-mdx",
-    "lint": "eslint",
+    "lint": "oxlint",
+    "lint:fix": "pnpm lint --fix",
     "start": "next start"
   },
   "dependencies": {
@@ -21,7 +22,7 @@
     "yaml": "catalog:"
   },
   "devDependencies": {
-    "@repo/core-util-eslint-config": "workspace:^",
+    "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/plugin-comet": "workspace:^",
     "@repo/plugin-jellyfin": "workspace:^",
@@ -42,7 +43,9 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@typescript/native": "catalog:",
     "fumadocs-mdx": "catalog:",
+    "oxlint": "catalog:",
     "postcss": "catalog:",
     "schema-dts": "catalog:",
     "tailwindcss": "catalog:",

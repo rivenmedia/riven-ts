@@ -1,9 +1,9 @@
 export const extractPluginNameFromJobId = (jobId: string): string => {
-  const match = new RegExp(/plugin\[(.*)\]/i).exec(jobId);
+  const match = /plugin\[(?<pluginName>.*)\]/iu.exec(jobId);
 
-  if (!match?.[1]) {
+  if (!match?.groups?.["pluginName"]) {
     throw new Error(`Could not extract plugin name from job ID: ${jobId}`);
   }
 
-  return match[1];
+  return match.groups["pluginName"];
 };

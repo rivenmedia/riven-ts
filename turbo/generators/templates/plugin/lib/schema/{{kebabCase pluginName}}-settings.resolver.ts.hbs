@@ -7,7 +7,7 @@ import { {{pascalCase pluginName}}Settings } from "./types/{{kebabCase pluginNam
 @Resolver(() => Settings)
 export class {{pascalCase pluginName}}SettingsResolver {
   @FieldResolver(() => {{pascalCase pluginName}}Settings)
-  {{camelCase pluginName}}(): {{pascalCase pluginName}}Settings {
+  public {{camelCase pluginName}}(): {{pascalCase pluginName}}Settings {
     return {
       apiKey: "{{camelCase pluginName}}-api-key",
     };

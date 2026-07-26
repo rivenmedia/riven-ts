@@ -16,7 +16,7 @@ export interface EnqueueScrapeItemInput {
   isRootItem: boolean;
 }
 
-export function enqueueScrapeItem({
+export async function enqueueScrapeItem({
   item,
   subscribers,
   parent,

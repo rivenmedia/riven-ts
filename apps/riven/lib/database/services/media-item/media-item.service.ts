@@ -14,7 +14,7 @@ import type { UUID } from "node:crypto";
 
 export class MediaItemService extends BaseService {
   @CreateRequestContext()
-  async getMediaItemById<
+  public async getMediaItemById<
     Hint extends string = never,
     Fields extends string = never,
     Excludes extends string = never,
@@ -26,7 +26,7 @@ export class MediaItemService extends BaseService {
   }
 
   @CreateRequestContext()
-  async getItemsToProcess(id: UUID) {
+  public async getItemsToProcess(id: UUID) {
     try {
       const item = await this.em.getRepository(MediaItem).findOneOrFail(
         {
@@ -62,7 +62,7 @@ export class MediaItemService extends BaseService {
 
   @CreateRequestContext()
   @Transactional()
-  async resetMediaItem(target: MediaItem) {
+  public async resetMediaItem(target: MediaItem) {
     return resetMediaItem(this.em, target);
   }
 }

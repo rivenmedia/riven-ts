@@ -7,7 +7,7 @@ import { MdblistSettings } from "./types/mdblist-settings.type.ts";
 @Resolver(() => Settings)
 export class MdblistSettingsResolver {
   @FieldResolver(() => MdblistSettings)
-  mdblist(): MdblistSettings {
+  public mdblist(): MdblistSettings {
     return {
       apiKey: "mdblist-api-key",
       lists: ["list1", "list2", "list3"],

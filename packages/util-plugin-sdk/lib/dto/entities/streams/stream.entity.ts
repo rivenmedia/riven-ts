@@ -19,18 +19,18 @@ import type { ParsedData } from "@repo/util-rank-torrent-name";
 @ObjectType()
 @Entity({ repository: () => StreamRepository })
 export class Stream {
-  [PrimaryKeyProp]!: "infoHash";
+  public [PrimaryKeyProp]!: "infoHash";
 
-  [EntityRepositoryType]?: StreamRepository;
+  public [EntityRepositoryType]?: StreamRepository;
 
   @Field(() => ID)
   @PrimaryKey()
-  infoHash!: string;
+  public infoHash!: string;
 
   @Property({ type: "json" })
-  parsedData!: ParsedData;
+  public parsedData!: ParsedData;
 
   @Field(() => [MediaItem])
   @ManyToMany(() => MediaItem, "streams")
-  parents = new Collection<MediaItem>(this);
+  public parents = new Collection<MediaItem>(this);
 }

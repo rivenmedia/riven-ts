@@ -5,7 +5,7 @@ import { it } from "../../../../__tests__/test-context.ts";
 it("throws an error if no media items are provided", async ({
   services: { streamService },
 }) => {
-  await expect(() =>
+  await expect(async () =>
     streamService.calculateItemsToReprocess(new Set()),
   ).rejects.toThrow(
     "Cannot determine items to reprocess: no media items provided",

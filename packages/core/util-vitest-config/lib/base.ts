@@ -6,7 +6,7 @@ import { defineConfig } from "vitest/config";
 
 export const baseVitestConfig = defineConfig(({ mode }) => {
   try {
-    loadEnvFile(path.join(process.cwd(), ".env." + mode));
+    loadEnvFile(path.join(process.cwd(), `.env.${mode}`));
   } catch {
     /* empty */
   }

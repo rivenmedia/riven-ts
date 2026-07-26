@@ -9,7 +9,7 @@ import { ShowFactory } from "./show.factory.ts";
 import type { EntityData } from "@mikro-orm/core";
 
 export class SeasonFactory extends Factory<Season> {
-  model = Season;
+  public model = Season;
 
   protected override definition(
     input: EntityData<Season> = {},

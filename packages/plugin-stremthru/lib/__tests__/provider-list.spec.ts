@@ -52,7 +52,7 @@ it("returns providers in the order specified by settings", async ({
     logger: {} as never,
   });
 
-  expect(response).toEqual({
+  expect(response).toStrictEqual({
     providers: ["debridlink", "alldebrid", "realdebrid"],
     rateLimitedProviders: {},
   });
@@ -107,7 +107,7 @@ it("does not return invalid providers", async ({
     logger: {} as never,
   });
 
-  expect(response).toEqual({
+  expect(response).toStrictEqual({
     providers: ["debridlink", "realdebrid"],
     rateLimitedProviders: {},
   });
@@ -160,7 +160,7 @@ it("returns rate-limited providers in the rateLimitedProviders list", async ({
     logger: {} as never,
   });
 
-  expect(response).toEqual({
+  expect(response).toStrictEqual({
     providers: ["debridlink", "alldebrid"],
     rateLimitedProviders: {
       realdebrid: expect.any(Number),
@@ -217,7 +217,7 @@ it("moves rate-limited providers back to the providers list after the rate limit
     logger: {} as never,
   });
 
-  expect(response).toEqual({
+  expect(response).toStrictEqual({
     providers: ["debridlink", "alldebrid"],
     rateLimitedProviders: {
       realdebrid: expect.any(Number),
@@ -226,14 +226,14 @@ it("moves rate-limited providers back to the providers list after the rate limit
 
   await vi.waitFor(
     async () => {
-      const response = await providerListRequestedHook({
+      const check = await providerListRequestedHook({
         dataSources: dataSourceMap,
         settings,
         event: {},
         logger: {} as never,
       });
 
-      expect(response).toEqual({
+      expect(check).toStrictEqual({
         providers: ["debridlink", "alldebrid", "realdebrid"],
         rateLimitedProviders: {},
       });

@@ -1,4 +1,4 @@
-import z, { type ZodObject } from "zod";
+import z from "zod";
 
 import {
   ContentServiceRequestedEvent,
@@ -110,6 +110,8 @@ import {
   MediaItemSubtitleRequestedEvent,
   MediaItemSubtitleRequestedEventHandler,
 } from "./media-item.subtitle-requested.event.ts";
+
+import type { ZodObject } from "zod";
 
 export const RivenEvent = z.discriminatedUnion("type", [
   CoreStartedEvent,

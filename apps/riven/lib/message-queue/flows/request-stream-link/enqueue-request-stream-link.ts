@@ -1,9 +1,7 @@
 import { flow } from "../producer.ts";
-import {
-  type RequestStreamLinkFlow,
-  createRequestStreamLinkJob,
-} from "./request-stream-link.schema.ts";
+import { createRequestStreamLinkJob } from "./request-stream-link.schema.ts";
 
+import type { RequestStreamLinkFlow } from "./request-stream-link.schema.ts";
 import type { TypedJobNode } from "bullmq";
 import type { UUID } from "node:crypto";
 

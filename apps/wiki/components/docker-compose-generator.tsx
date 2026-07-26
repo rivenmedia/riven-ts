@@ -78,6 +78,71 @@ interface DockerCompose {
   services: Record<string, DockerService>;
 }
 
+// --- Shared ---
+
+function addMediaServer(
+  compose: DockerCompose,
+  server: Exclude<MediaServer, "none">,
+  mountPath: string,
+) {
+  if (server === "plex") {
+    compose.services["plex"] = {
+      image: "plexinc/pms-docker:latest",
+      container_name: "plex",
+      restart: "unless-stopped",
+      ports: ["32400:32400"],
+      environment: ["TZ=UTC", "VERSION=docker"],
+      volumes: ["plex-config:/config", `${mountPath}:/mount:rslave,z`],
+    };
+    compose.volumes["plex-config"] = null;
+  } else {
+    compose.services["jellyfin"] = {
+      image: "jellyfin/jellyfin:latest",
+      container_name: "jellyfin",
+      restart: "unless-stopped",
+      ports: ["8096:8096"],
+      volumes: [
+        "jellyfin-config:/config",
+        "jellyfin-cache:/cache",
+        `${mountPath}:/mount:rslave,z`,
+      ],
+    };
+    compose.volumes["jellyfin-config"] = null;
+    compose.volumes["jellyfin-cache"] = null;
+  }
+}
+
+function buildSystemdService(mountPath: string) {
+  return `[Unit]
+Description=Make Riven data bind mount shared
+After=local-fs.target
+Before=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/mount --bind ${mountPath} ${mountPath}
+ExecStart=/usr/bin/mount --make-rshared ${mountPath}
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target`;
+}
+
+function generateSecret(
+  length: number,
+  format: "hex" | "base64" = "hex",
+): string {
+  const bytes = format === "base64" ? length : Math.ceil(length / 2);
+  const array = new Uint8Array(bytes);
+  crypto.getRandomValues(array);
+  if (format === "base64") {
+    return btoa(String.fromCodePoint(...array));
+  }
+  return Array.from(array, (byte) => byte.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, length);
+}
+
 // --- Riven TS Service Builders ---
 
 function buildTSCompose(cfg: TSConfig): {
@@ -200,29 +265,31 @@ function buildTSCompose(cfg: TSConfig): {
   ];
 
   if (cfg.tmdbApiKey) {
-    envLines.push("# TMDB (required)");
     envLines.push(
+      "# TMDB (required)",
       `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_TMDB__apiKey="${cfg.tmdbApiKey}"`,
+      "",
     );
-    envLines.push("");
   }
 
   if (cfg.debridProvider !== "none" && cfg.debridApiKey) {
-    envLines.push("# Debrid Provider (via StremThru)");
     envLines.push(
+      "# Debrid Provider (via StremThru)",
       `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_STREMTHRU__${cfg.debridProvider}ApiKey="${cfg.debridApiKey}"`,
+      "",
     );
-    envLines.push("");
   }
 
   if (cfg.contentSource === "mdblist" && cfg.contentApiKey) {
-    envLines.push("# MDBList");
     envLines.push(
+      "# MDBList",
       `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__apiKey="${cfg.contentApiKey}"`,
     );
 
     if (cfg.contentLists) {
-      const lists = cfg.contentLists.split(",").map((l) => `"${l.trim()}"`);
+      const lists = cfg.contentLists
+        .split(",")
+        .map((list) => `"${list.trim()}"`);
       envLines.push(
         `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__lists=[${lists.join(",")}]`,
       );
@@ -230,8 +297,8 @@ function buildTSCompose(cfg: TSConfig): {
 
     envLines.push("");
   } else if (cfg.contentSource === "seerr" && cfg.contentApiKey) {
-    envLines.push("# Seerr");
     envLines.push(
+      "# Seerr",
       `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__apiKey="${cfg.contentApiKey}"`,
     );
 
@@ -243,13 +310,15 @@ function buildTSCompose(cfg: TSConfig): {
 
     envLines.push("");
   } else if (cfg.contentSource === "listrr" && cfg.contentApiKey) {
-    envLines.push("# Listrr");
     envLines.push(
+      "# Listrr",
       `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_LISTRR__apiKey="${cfg.contentApiKey}"`,
     );
 
     if (cfg.contentLists) {
-      const lists = cfg.contentLists.split(",").map((l) => `"${l.trim()}"`);
+      const lists = cfg.contentLists
+        .split(",")
+        .map((list) => `"${list.trim()}"`);
       envLines.push(
         `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_LISTRR__movieLists=[${lists.join(",")}]`,
       );
@@ -356,71 +425,6 @@ function buildV1Compose(cfg: V1Config): { compose: string; systemd: string } {
   };
 }
 
-// --- Shared ---
-
-function addMediaServer(
-  compose: DockerCompose,
-  server: Exclude<MediaServer, "none">,
-  mountPath: string,
-) {
-  if (server === "plex") {
-    compose.services["plex"] = {
-      image: "plexinc/pms-docker:latest",
-      container_name: "plex",
-      restart: "unless-stopped",
-      ports: ["32400:32400"],
-      environment: ["TZ=UTC", "VERSION=docker"],
-      volumes: ["plex-config:/config", `${mountPath}:/mount:rslave,z`],
-    };
-    compose.volumes["plex-config"] = null;
-  } else {
-    compose.services["jellyfin"] = {
-      image: "jellyfin/jellyfin:latest",
-      container_name: "jellyfin",
-      restart: "unless-stopped",
-      ports: ["8096:8096"],
-      volumes: [
-        "jellyfin-config:/config",
-        "jellyfin-cache:/cache",
-        `${mountPath}:/mount:rslave,z`,
-      ],
-    };
-    compose.volumes["jellyfin-config"] = null;
-    compose.volumes["jellyfin-cache"] = null;
-  }
-}
-
-function buildSystemdService(mountPath: string) {
-  return `[Unit]
-Description=Make Riven data bind mount shared
-After=local-fs.target
-Before=docker.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/mount --bind ${mountPath} ${mountPath}
-ExecStart=/usr/bin/mount --make-rshared ${mountPath}
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target`;
-}
-
-function generateSecret(
-  length: number,
-  format: "hex" | "base64" = "hex",
-): string {
-  const bytes = format === "base64" ? length : Math.ceil(length / 2);
-  const array = new Uint8Array(bytes);
-  crypto.getRandomValues(array);
-  if (format === "base64") {
-    return btoa(String.fromCharCode(...array));
-  }
-  return Array.from(array, (byte) => byte.toString(16).padStart(2, "0"))
-    .join("")
-    .slice(0, length);
-}
-
 // --- Components ---
 
 function InputField({
@@ -434,7 +438,7 @@ function InputField({
 }: {
   label: string;
   value: string;
-  onChange: (v: string) => void;
+  onChange: (value: string) => void;
   placeholder?: string;
   hint?: string;
   type?: string;
@@ -446,8 +450,8 @@ function InputField({
       <input
         type={type}
         value={value}
-        onChange={(e) => {
-          onChange(e.target.value);
+        onChange={(event) => {
+          onChange(event.target.value);
         }}
         placeholder={placeholder}
         className={`w-full rounded-lg border border-fd-border bg-fd-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 ${mono ? "font-mono text-xs" : ""}`}
@@ -466,7 +470,7 @@ function CheckboxField({
   label: string;
   value: string;
   hint?: string;
-  onChange: (v: string) => void;
+  onChange: (value: string) => void;
   mono?: boolean;
 }) {
   return (
@@ -476,8 +480,8 @@ function CheckboxField({
           className="accent-purple-500"
           type="checkbox"
           checked={value === "true"}
-          onChange={(e) => {
-            onChange(e.target.checked ? "true" : "false");
+          onChange={(event) => {
+            onChange(event.target.checked ? "true" : "false");
           }}
         />
         <span className="ml-2">{label}</span>
@@ -495,7 +499,7 @@ function SelectField({
 }: {
   label: string;
   value: string;
-  onChange: (v: string) => void;
+  onChange: (value: string) => void;
   options: { value: string; label: string }[];
 }) {
   return (
@@ -503,8 +507,8 @@ function SelectField({
       <label className="mb-2 block text-sm font-medium">{label}</label>
       <select
         value={value}
-        onChange={(e) => {
-          onChange(e.target.value);
+        onChange={(event) => {
+          onChange(event.target.value);
         }}
         className="w-full rounded-lg border border-fd-border bg-fd-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50"
       >
@@ -552,9 +556,11 @@ function CodePreview({
     const a = document.createElement("a");
     a.href = url;
     a.download = filename;
-    document.body.appendChild(a);
+    document.body.append(a);
+
     a.click();
-    document.body.removeChild(a);
+    a.remove();
+
     URL.revokeObjectURL(url);
   };
 
@@ -591,6 +597,471 @@ function CodePreview({
           __html: highlighted || "<pre><code>Loading...</code></pre>",
         }}
       />
+    </div>
+  );
+}
+
+function TSConfigForm({
+  config,
+  update,
+}: {
+  config: TSConfig;
+  update: <K extends keyof TSConfig>(key: K, value: TSConfig[K]) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <InputField
+        label="VFS Mount Path"
+        value={config.vfsMountPath}
+        onChange={(value) => {
+          update("vfsMountPath", value);
+        }}
+        placeholder="/mnt/riven"
+        hint="Absolute path on your host for the FUSE mount"
+      />
+
+      <InputField
+        label="Logs Path"
+        value={config.logsPath}
+        onChange={(value) => {
+          update("logsPath", value);
+        }}
+        placeholder="logs"
+        hint="Absolute path on your host for the logs"
+      />
+
+      <div className="grid grid-cols-3 gap-4">
+        <InputField
+          label="DB User"
+          value={config.dbUser}
+          onChange={(value) => {
+            update("dbUser", value);
+          }}
+          placeholder="riven"
+        />
+        <InputField
+          label="DB Password"
+          value={config.dbPassword}
+          onChange={(value) => {
+            update("dbPassword", value);
+          }}
+          placeholder="changeme"
+          mono
+        />
+        <InputField
+          label="DB Name"
+          value={config.dbName}
+          onChange={(value) => {
+            update("dbName", value);
+          }}
+          placeholder="riven"
+        />
+      </div>
+
+      <button
+        onClick={() => {
+          update("dbPassword", generateSecret(24));
+        }}
+        className="rounded-md bg-fd-muted px-3 py-1.5 text-xs font-medium transition-colors hover:bg-fd-muted/80"
+      >
+        Generate DB Password
+      </button>
+
+      <SelectField
+        label="Media Server"
+        value={config.mediaServer}
+        onChange={(value) => {
+          update("mediaServer", value as MediaServer);
+        }}
+        options={[
+          { value: "none", label: "None (I'll add it later)" },
+          { value: "plex", label: "Plex" },
+          { value: "jellyfin", label: "Jellyfin" },
+        ]}
+      />
+
+      <hr className="border-fd-border" />
+      <h4 className="font-semibold">Plugin Settings</h4>
+
+      <InputField
+        label="TMDB API Key (required)"
+        value={config.tmdbApiKey}
+        onChange={(value) => {
+          update("tmdbApiKey", value);
+        }}
+        placeholder="Your TMDB API key"
+        hint="Get one free at themoviedb.org/settings/api"
+        mono
+      />
+
+      <div className="grid grid-cols-2 gap-4">
+        <SelectField
+          label="Debrid Provider"
+          value={config.debridProvider}
+          onChange={(value) => {
+            update("debridProvider", value as TSConfig["debridProvider"]);
+          }}
+          options={[
+            { value: "realdebrid", label: "Real-Debrid" },
+            { value: "alldebrid", label: "AllDebrid" },
+            { value: "torbox", label: "TorBox" },
+            { value: "none", label: "None" },
+          ]}
+        />
+        {config.debridProvider !== "none" && (
+          <InputField
+            label="Debrid API Key"
+            value={config.debridApiKey}
+            onChange={(value) => {
+              update("debridApiKey", value);
+            }}
+            placeholder="Your debrid API key"
+            mono
+          />
+        )}
+      </div>
+
+      <SelectField
+        label="Content Source"
+        value={config.contentSource}
+        onChange={(value) => {
+          update("contentSource", value as TSConfig["contentSource"]);
+        }}
+        options={[
+          { value: "mdblist", label: "MDBList" },
+          { value: "seerr", label: "Seerr" },
+          { value: "listrr", label: "Listrr" },
+          { value: "none", label: "None" },
+        ]}
+      />
+
+      {config.contentSource !== "none" && (
+        <>
+          <InputField
+            label={`${config.contentSource === "mdblist" ? "MDBList" : config.contentSource === "seerr" ? "Seerr" : "Listrr"} API Key`}
+            value={config.contentApiKey}
+            onChange={(value) => {
+              update("contentApiKey", value);
+            }}
+            placeholder="API key"
+            mono
+          />
+          {config.contentSource === "seerr" && (
+            <InputField
+              label="Seerr URL"
+              value={config.seerrUrl}
+              onChange={(value) => {
+                update("seerrUrl", value);
+              }}
+              placeholder="http://seerr:5055"
+            />
+          )}
+          {(config.contentSource === "mdblist" ||
+            config.contentSource === "listrr") && (
+            <InputField
+              label="Lists (comma-separated)"
+              value={config.contentLists}
+              onChange={(value) => {
+                update("contentLists", value);
+              }}
+              placeholder="user/list-name, user/another-list"
+              hint={
+                config.contentSource === "mdblist"
+                  ? 'MDBList list slugs, e.g. "user/my-list"'
+                  : "Listrr list IDs"
+              }
+            />
+          )}
+        </>
+      )}
+
+      <CheckboxField
+        label="Add analytics services?"
+        hint="Adds analytics services for monitoring Riven's internal queues and cache. Recommended for advanced users. No data is sent to third parties - these are self-hosted services that connect directly to your Riven instance."
+        value={config.addAnalyticsServices ? "true" : "false"}
+        onChange={(value) => {
+          update("addAnalyticsServices", value === "true");
+        }}
+      />
+    </div>
+  );
+}
+
+function V1ConfigForm({
+  config,
+  update,
+}: {
+  config: V1Config;
+  update: <K extends keyof V1Config>(key: K, value: V1Config[K]) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <InputField
+        label="Timezone"
+        value={config.timezone}
+        onChange={(value) => {
+          update("timezone", value);
+        }}
+        placeholder="Europe/UTC"
+        hint="e.g., America/New_York, Europe/Zurich"
+      />
+
+      <div className="grid grid-cols-2 gap-4">
+        <InputField
+          label="PUID"
+          value={config.puid}
+          onChange={(value) => {
+            update("puid", value);
+          }}
+          type="number"
+        />
+        <InputField
+          label="PGID"
+          value={config.pgid}
+          onChange={(value) => {
+            update("pgid", value);
+          }}
+          type="number"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <InputField
+          label="Frontend Port"
+          value={config.frontendPort}
+          onChange={(value) => {
+            update("frontendPort", value);
+          }}
+          type="number"
+        />
+        <InputField
+          label="Backend Port"
+          value={config.backendPort}
+          onChange={(value) => {
+            update("backendPort", value);
+          }}
+          type="number"
+        />
+      </div>
+
+      <InputField
+        label="Origin URL"
+        value={config.originUrl}
+        onChange={(value) => {
+          update("originUrl", value);
+        }}
+        placeholder="http://localhost:3000"
+        hint="The URL where you'll access the frontend"
+      />
+
+      <InputField
+        label="Host Mount Path"
+        value={config.hostMountPath}
+        onChange={(value) => {
+          update("hostMountPath", value);
+        }}
+        placeholder="/mnt/riven"
+      />
+
+      <SelectField
+        label="Media Server"
+        value={config.mediaServer}
+        onChange={(value) => {
+          update("mediaServer", value as MediaServer);
+        }}
+        options={[
+          { value: "none", label: "None (I'll add it later)" },
+          { value: "plex", label: "Plex" },
+          { value: "jellyfin", label: "Jellyfin" },
+        ]}
+      />
+
+      <div className="rounded-lg border border-fd-border bg-fd-muted/30 p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium">Secrets</label>
+          <button
+            onClick={() => {
+              update("backendApiKey", generateSecret(32));
+              update("authSecret", generateSecret(32, "base64"));
+              update("dbPassword", generateSecret(24));
+            }}
+            className="rounded-md bg-purple-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-purple-500"
+          >
+            Generate All
+          </button>
+        </div>
+        <InputField
+          label="Backend API Key"
+          value={config.backendApiKey}
+          onChange={(value) => {
+            update("backendApiKey", value);
+          }}
+          placeholder="Click 'Generate All'"
+          mono
+        />
+        <InputField
+          label="Auth Secret"
+          value={config.authSecret}
+          onChange={(value) => {
+            update("authSecret", value);
+          }}
+          placeholder="Click 'Generate All'"
+          mono
+        />
+        <InputField
+          label="Database Password"
+          value={config.dbPassword}
+          onChange={(value) => {
+            update("dbPassword", value);
+          }}
+          placeholder="Click 'Generate All'"
+          mono
+        />
+      </div>
+    </div>
+  );
+}
+
+function TSPreview({
+  output,
+}: {
+  output: { compose: string; env: string; systemd: string };
+}) {
+  const [tab, setTab] = useState<"systemd" | "compose" | "env">("systemd");
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-1 border-b border-fd-border">
+        {(
+          [
+            { id: "systemd", label: "1. riven-mount.service" },
+            { id: "compose", label: "2. docker-compose.yml" },
+            { id: "env", label: "3. .env" },
+          ] as const
+        ).map(({ id, label }) => (
+          <button
+            key={id}
+            onClick={() => {
+              setTab(id);
+            }}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              tab === id
+                ? "border-b-2 border-purple-500 text-purple-400"
+                : "text-fd-muted-foreground hover:text-fd-foreground"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "systemd" && (
+        <>
+          <div className="rounded-lg border border-fd-border bg-fd-muted/30 p-4 text-sm space-y-2">
+            <p className="font-medium">Installation:</p>
+            <ol className="list-decimal list-inside space-y-1 text-fd-muted-foreground text-xs">
+              <li>
+                Create mount dir:{" "}
+                <code className="rounded bg-fd-muted px-1.5 py-0.5">
+                  sudo mkdir -p{" "}
+                  {/--bind (\S+)/u.exec(output.systemd)?.[1] ?? "/mnt/riven"}
+                </code>
+              </li>
+              <li>
+                Save to{" "}
+                <code className="rounded bg-fd-muted px-1.5 py-0.5">
+                  /etc/systemd/system/riven-mount.service
+                </code>
+              </li>
+              <li>
+                Run:{" "}
+                <code className="rounded bg-fd-muted px-1.5 py-0.5">
+                  sudo systemctl daemon-reload && sudo systemctl enable --now
+                  riven-mount.service
+                </code>
+              </li>
+            </ol>
+          </div>
+          <CodePreview
+            code={output.systemd}
+            language="ini"
+            label="Systemd Service"
+            filename="riven-mount.service"
+          />
+        </>
+      )}
+      {tab === "compose" && (
+        <CodePreview
+          code={output.compose}
+          language="yaml"
+          label="Docker Compose"
+          filename="docker-compose.yml"
+        />
+      )}
+      {tab === "env" && (
+        <CodePreview
+          code={output.env}
+          language="bash"
+          label="Environment File"
+          filename=".env"
+        />
+      )}
+    </div>
+  );
+}
+
+function V1Preview({
+  output,
+}: {
+  output: { compose: string; systemd: string };
+}) {
+  const [tab, setTab] = useState<"systemd" | "compose">("systemd");
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-1 border-b border-fd-border">
+        <button
+          onClick={() => {
+            setTab("systemd");
+          }}
+          className={`px-4 py-2 text-sm font-medium transition-colors ${
+            tab === "systemd"
+              ? "border-b-2 border-fd-primary text-fd-primary"
+              : "text-fd-muted-foreground hover:text-fd-foreground"
+          }`}
+        >
+          1. riven-mount.service
+        </button>
+        <button
+          onClick={() => {
+            setTab("compose");
+          }}
+          className={`px-4 py-2 text-sm font-medium transition-colors ${
+            tab === "compose"
+              ? "border-b-2 border-fd-primary text-fd-primary"
+              : "text-fd-muted-foreground hover:text-fd-foreground"
+          }`}
+        >
+          2. docker-compose.yml
+        </button>
+      </div>
+
+      {tab === "systemd" && (
+        <CodePreview
+          code={output.systemd}
+          language="ini"
+          label="Systemd Service"
+          filename="riven-mount.service"
+        />
+      )}
+      {tab === "compose" && (
+        <CodePreview
+          code={output.compose}
+          language="yaml"
+          label="Docker Compose"
+          filename="docker-compose.yml"
+        />
+      )}
     </div>
   );
 }
@@ -706,471 +1177,6 @@ export default function DockerComposeGenerator() {
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-function TSConfigForm({
-  config,
-  update,
-}: {
-  config: TSConfig;
-  update: <K extends keyof TSConfig>(key: K, value: TSConfig[K]) => void;
-}) {
-  return (
-    <div className="space-y-4">
-      <InputField
-        label="VFS Mount Path"
-        value={config.vfsMountPath}
-        onChange={(v) => {
-          update("vfsMountPath", v);
-        }}
-        placeholder="/mnt/riven"
-        hint="Absolute path on your host for the FUSE mount"
-      />
-
-      <InputField
-        label="Logs Path"
-        value={config.logsPath}
-        onChange={(v) => {
-          update("logsPath", v);
-        }}
-        placeholder="logs"
-        hint="Absolute path on your host for the logs"
-      />
-
-      <div className="grid grid-cols-3 gap-4">
-        <InputField
-          label="DB User"
-          value={config.dbUser}
-          onChange={(v) => {
-            update("dbUser", v);
-          }}
-          placeholder="riven"
-        />
-        <InputField
-          label="DB Password"
-          value={config.dbPassword}
-          onChange={(v) => {
-            update("dbPassword", v);
-          }}
-          placeholder="changeme"
-          mono
-        />
-        <InputField
-          label="DB Name"
-          value={config.dbName}
-          onChange={(v) => {
-            update("dbName", v);
-          }}
-          placeholder="riven"
-        />
-      </div>
-
-      <button
-        onClick={() => {
-          update("dbPassword", generateSecret(24));
-        }}
-        className="rounded-md bg-fd-muted px-3 py-1.5 text-xs font-medium transition-colors hover:bg-fd-muted/80"
-      >
-        Generate DB Password
-      </button>
-
-      <SelectField
-        label="Media Server"
-        value={config.mediaServer}
-        onChange={(v) => {
-          update("mediaServer", v as MediaServer);
-        }}
-        options={[
-          { value: "none", label: "None (I'll add it later)" },
-          { value: "plex", label: "Plex" },
-          { value: "jellyfin", label: "Jellyfin" },
-        ]}
-      />
-
-      <hr className="border-fd-border" />
-      <h4 className="font-semibold">Plugin Settings</h4>
-
-      <InputField
-        label="TMDB API Key (required)"
-        value={config.tmdbApiKey}
-        onChange={(v) => {
-          update("tmdbApiKey", v);
-        }}
-        placeholder="Your TMDB API key"
-        hint="Get one free at themoviedb.org/settings/api"
-        mono
-      />
-
-      <div className="grid grid-cols-2 gap-4">
-        <SelectField
-          label="Debrid Provider"
-          value={config.debridProvider}
-          onChange={(v) => {
-            update("debridProvider", v as TSConfig["debridProvider"]);
-          }}
-          options={[
-            { value: "realdebrid", label: "Real-Debrid" },
-            { value: "alldebrid", label: "AllDebrid" },
-            { value: "torbox", label: "TorBox" },
-            { value: "none", label: "None" },
-          ]}
-        />
-        {config.debridProvider !== "none" && (
-          <InputField
-            label="Debrid API Key"
-            value={config.debridApiKey}
-            onChange={(v) => {
-              update("debridApiKey", v);
-            }}
-            placeholder="Your debrid API key"
-            mono
-          />
-        )}
-      </div>
-
-      <SelectField
-        label="Content Source"
-        value={config.contentSource}
-        onChange={(v) => {
-          update("contentSource", v as TSConfig["contentSource"]);
-        }}
-        options={[
-          { value: "mdblist", label: "MDBList" },
-          { value: "seerr", label: "Seerr" },
-          { value: "listrr", label: "Listrr" },
-          { value: "none", label: "None" },
-        ]}
-      />
-
-      {config.contentSource !== "none" && (
-        <>
-          <InputField
-            label={`${config.contentSource === "mdblist" ? "MDBList" : config.contentSource === "seerr" ? "Seerr" : "Listrr"} API Key`}
-            value={config.contentApiKey}
-            onChange={(v) => {
-              update("contentApiKey", v);
-            }}
-            placeholder="API key"
-            mono
-          />
-          {config.contentSource === "seerr" && (
-            <InputField
-              label="Seerr URL"
-              value={config.seerrUrl}
-              onChange={(v) => {
-                update("seerrUrl", v);
-              }}
-              placeholder="http://seerr:5055"
-            />
-          )}
-          {(config.contentSource === "mdblist" ||
-            config.contentSource === "listrr") && (
-            <InputField
-              label="Lists (comma-separated)"
-              value={config.contentLists}
-              onChange={(v) => {
-                update("contentLists", v);
-              }}
-              placeholder="user/list-name, user/another-list"
-              hint={
-                config.contentSource === "mdblist"
-                  ? 'MDBList list slugs, e.g. "user/my-list"'
-                  : "Listrr list IDs"
-              }
-            />
-          )}
-        </>
-      )}
-
-      <CheckboxField
-        label="Add analytics services?"
-        hint="Adds analytics services for monitoring Riven's internal queues and cache. Recommended for advanced users. No data is sent to third parties - these are self-hosted services that connect directly to your Riven instance."
-        value={config.addAnalyticsServices ? "true" : "false"}
-        onChange={(v) => {
-          update("addAnalyticsServices", v === "true");
-        }}
-      />
-    </div>
-  );
-}
-
-function V1ConfigForm({
-  config,
-  update,
-}: {
-  config: V1Config;
-  update: <K extends keyof V1Config>(key: K, value: V1Config[K]) => void;
-}) {
-  return (
-    <div className="space-y-4">
-      <InputField
-        label="Timezone"
-        value={config.timezone}
-        onChange={(v) => {
-          update("timezone", v);
-        }}
-        placeholder="Europe/UTC"
-        hint="e.g., America/New_York, Europe/Zurich"
-      />
-
-      <div className="grid grid-cols-2 gap-4">
-        <InputField
-          label="PUID"
-          value={config.puid}
-          onChange={(v) => {
-            update("puid", v);
-          }}
-          type="number"
-        />
-        <InputField
-          label="PGID"
-          value={config.pgid}
-          onChange={(v) => {
-            update("pgid", v);
-          }}
-          type="number"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <InputField
-          label="Frontend Port"
-          value={config.frontendPort}
-          onChange={(v) => {
-            update("frontendPort", v);
-          }}
-          type="number"
-        />
-        <InputField
-          label="Backend Port"
-          value={config.backendPort}
-          onChange={(v) => {
-            update("backendPort", v);
-          }}
-          type="number"
-        />
-      </div>
-
-      <InputField
-        label="Origin URL"
-        value={config.originUrl}
-        onChange={(v) => {
-          update("originUrl", v);
-        }}
-        placeholder="http://localhost:3000"
-        hint="The URL where you'll access the frontend"
-      />
-
-      <InputField
-        label="Host Mount Path"
-        value={config.hostMountPath}
-        onChange={(v) => {
-          update("hostMountPath", v);
-        }}
-        placeholder="/mnt/riven"
-      />
-
-      <SelectField
-        label="Media Server"
-        value={config.mediaServer}
-        onChange={(v) => {
-          update("mediaServer", v as MediaServer);
-        }}
-        options={[
-          { value: "none", label: "None (I'll add it later)" },
-          { value: "plex", label: "Plex" },
-          { value: "jellyfin", label: "Jellyfin" },
-        ]}
-      />
-
-      <div className="rounded-lg border border-fd-border bg-fd-muted/30 p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">Secrets</label>
-          <button
-            onClick={() => {
-              update("backendApiKey", generateSecret(32));
-              update("authSecret", generateSecret(32, "base64"));
-              update("dbPassword", generateSecret(24));
-            }}
-            className="rounded-md bg-purple-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-purple-500"
-          >
-            Generate All
-          </button>
-        </div>
-        <InputField
-          label="Backend API Key"
-          value={config.backendApiKey}
-          onChange={(v) => {
-            update("backendApiKey", v);
-          }}
-          placeholder="Click 'Generate All'"
-          mono
-        />
-        <InputField
-          label="Auth Secret"
-          value={config.authSecret}
-          onChange={(v) => {
-            update("authSecret", v);
-          }}
-          placeholder="Click 'Generate All'"
-          mono
-        />
-        <InputField
-          label="Database Password"
-          value={config.dbPassword}
-          onChange={(v) => {
-            update("dbPassword", v);
-          }}
-          placeholder="Click 'Generate All'"
-          mono
-        />
-      </div>
-    </div>
-  );
-}
-
-function TSPreview({
-  output,
-}: {
-  output: { compose: string; env: string; systemd: string };
-}) {
-  const [tab, setTab] = useState<"systemd" | "compose" | "env">("systemd");
-
-  return (
-    <div className="space-y-4">
-      <div className="flex gap-1 border-b border-fd-border">
-        {(
-          [
-            { id: "systemd", label: "1. riven-mount.service" },
-            { id: "compose", label: "2. docker-compose.yml" },
-            { id: "env", label: "3. .env" },
-          ] as const
-        ).map((t) => (
-          <button
-            key={t.id}
-            onClick={() => {
-              setTab(t.id);
-            }}
-            className={`px-4 py-2 text-sm font-medium transition-colors ${
-              tab === t.id
-                ? "border-b-2 border-purple-500 text-purple-400"
-                : "text-fd-muted-foreground hover:text-fd-foreground"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {tab === "systemd" && (
-        <>
-          <div className="rounded-lg border border-fd-border bg-fd-muted/30 p-4 text-sm space-y-2">
-            <p className="font-medium">Installation:</p>
-            <ol className="list-decimal list-inside space-y-1 text-fd-muted-foreground text-xs">
-              <li>
-                Create mount dir:{" "}
-                <code className="rounded bg-fd-muted px-1.5 py-0.5">
-                  sudo mkdir -p{" "}
-                  {/--bind (\S+)/.exec(output.systemd)?.[1] ?? "/mnt/riven"}
-                </code>
-              </li>
-              <li>
-                Save to{" "}
-                <code className="rounded bg-fd-muted px-1.5 py-0.5">
-                  /etc/systemd/system/riven-mount.service
-                </code>
-              </li>
-              <li>
-                Run:{" "}
-                <code className="rounded bg-fd-muted px-1.5 py-0.5">
-                  sudo systemctl daemon-reload && sudo systemctl enable --now
-                  riven-mount.service
-                </code>
-              </li>
-            </ol>
-          </div>
-          <CodePreview
-            code={output.systemd}
-            language="ini"
-            label="Systemd Service"
-            filename="riven-mount.service"
-          />
-        </>
-      )}
-      {tab === "compose" && (
-        <CodePreview
-          code={output.compose}
-          language="yaml"
-          label="Docker Compose"
-          filename="docker-compose.yml"
-        />
-      )}
-      {tab === "env" && (
-        <CodePreview
-          code={output.env}
-          language="bash"
-          label="Environment File"
-          filename=".env"
-        />
-      )}
-    </div>
-  );
-}
-
-function V1Preview({
-  output,
-}: {
-  output: { compose: string; systemd: string };
-}) {
-  const [tab, setTab] = useState<"systemd" | "compose">("systemd");
-
-  return (
-    <div className="space-y-4">
-      <div className="flex gap-1 border-b border-fd-border">
-        <button
-          onClick={() => {
-            setTab("systemd");
-          }}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            tab === "systemd"
-              ? "border-b-2 border-fd-primary text-fd-primary"
-              : "text-fd-muted-foreground hover:text-fd-foreground"
-          }`}
-        >
-          1. riven-mount.service
-        </button>
-        <button
-          onClick={() => {
-            setTab("compose");
-          }}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            tab === "compose"
-              ? "border-b-2 border-fd-primary text-fd-primary"
-              : "text-fd-muted-foreground hover:text-fd-foreground"
-          }`}
-        >
-          2. docker-compose.yml
-        </button>
-      </div>
-
-      {tab === "systemd" && (
-        <CodePreview
-          code={output.systemd}
-          language="ini"
-          label="Systemd Service"
-          filename="riven-mount.service"
-        />
-      )}
-      {tab === "compose" && (
-        <CodePreview
-          code={output.compose}
-          language="yaml"
-          label="Docker Compose"
-          filename="docker-compose.yml"
-        />
-      )}
     </div>
   );
 }

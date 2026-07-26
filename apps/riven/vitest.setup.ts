@@ -1,11 +1,10 @@
-import { BaseDataSource, type RivenPlugin } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
 
-import { type RedisClient, RedisConnection } from "bullmq";
+import { RedisConnection } from "bullmq";
 import { randomUUID } from "node:crypto";
 import { setEnvironmentData } from "node:worker_threads";
 import {
-  type Mock,
   afterAll,
   aroundEach,
   beforeAll,
@@ -17,7 +16,10 @@ import z from "zod";
 
 import { withLogContext } from "./lib/utilities/logger/log-context.ts";
 
+import type { RivenPlugin } from "@repo/util-plugin-sdk";
+import type { RedisClient } from "bullmq";
 import type { RedisMemoryServer } from "redis-memory-server";
+import type { Mock } from "vitest";
 
 vi.mock<{ default: Record<string, unknown> }>(
   import("./package.json"),
@@ -35,21 +37,21 @@ vi.mock<{ default: Record<string, unknown> }>(
 
 vi.mock(import("@repo/plugin-test"), () => {
   class TestAPI extends BaseDataSource<Record<string, unknown>> {
-    override baseURL = "https://api.test.com";
+    public override baseURL = "https://api.test.com";
 
-    override validate() {
+    public override validate() {
       return true;
     }
   }
 
   class TestResolver {
-    testIsValid() {
+    public testIsValid() {
       return true;
     }
   }
 
   return {
-    default: {
+    plugin: {
       version: "1.0.0-mock",
       name: Symbol.for("@repo/plugin-test"),
       dataSources: [TestAPI],
@@ -60,7 +62,7 @@ vi.mock(import("@repo/plugin-test"), () => {
         Object.keys(RivenEventHandler).map((key) => [key, vi.fn()]),
       ),
       settingsSchema: z.object({}),
-      validator() {
+      async validator() {
         return Promise.resolve(true);
       },
     } satisfies RivenPlugin,
@@ -118,30 +120,32 @@ expect.extend({
       return {
         pass: false,
         message: () =>
-          `Actor "${actorRef.id}" did not receive event:\n${this.utils.printReceived(expected)}.\nReceived events:\n${this.utils.printExpected(actorRef.send.mock.calls.flatMap((x: unknown) => x))}`,
+          `Actor "${actorRef.id}" did not receive event:\n${this.utils.printReceived(expected)}.\nReceived events:\n${this.utils.printExpected(actorRef.send.mock.calls.flat())}`,
       };
     }
   },
 });
 
-let redisServer: RedisMemoryServer | undefined;
-let redisConnection: RedisConnection | undefined;
-let redisClient: RedisClient | undefined;
+let redisServer: RedisMemoryServer | null = null;
+let redisConnection: RedisConnection | null = null;
+let redisClient: RedisClient | null = null;
 
 vi.doMock(import("./lib/utilities/settings.ts"), async (importOriginal) => {
   const { RedisMemoryServer } = await import("redis-memory-server");
-  const { exec } = await import("child_process");
-  const { promisify } = await import("util");
+  const { exec } = await import("node:child_process");
+  const { promisify } = await import("node:util");
 
   async function getRedisServerBinary() {
     try {
       const { stdout: redisServerBinary } =
+        // oxlint-disable-next-line typescript/strict-void-return
         await promisify(exec)("which redis-server");
 
       return redisServerBinary.trim();
     } catch (error) {
       throw new Error(
         `Failed to find "redis-server" binary. Is Redis installed and available in your PATH?\n${String(error)}`,
+        { cause: error },
       );
     }
   }
@@ -162,7 +166,9 @@ vi.doMock(import("./lib/utilities/settings.ts"), async (importOriginal) => {
 
       return `redis://${host}:${port.toString()}`;
     } catch (error) {
-      throw new Error(`Failed to get Redis URL.\n${String(error)}`);
+      throw new Error(`Failed to get Redis URL.\n${String(error)}`, {
+        cause: error,
+      });
     }
   }
 

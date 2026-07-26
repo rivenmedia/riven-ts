@@ -10,25 +10,27 @@ import { it as baseIt } from "../../../../../../../__tests__/test-context.ts";
 import * as rankingConfigModule from "../../../../../../../ranking-config/ranking-config.ts";
 import { rankStreamsProcessor } from "./rank-streams.processor.ts";
 
-const it = baseIt.extend("streams", ({ factories: { streamFactory } }) =>
+import type { MainRunnerMachineIntake } from "../../../../../../../state-machines/main-runner/index.ts";
+
+const it = baseIt.extend("streams", async ({ factories: { streamFactory } }) =>
   streamFactory.create(6),
 );
 
 it.beforeEach(() => {
   vi.spyOn(rankingConfigModule, "rtnInstance", "get").mockReturnValue(
     new RTN(
-      createSettings({
-        resolutions: {
-          r2160p: true,
-        },
-      }),
       createRankingModel({
         bluray: 0,
         webrip: 0,
         avc: 0,
-        mp3: 10000,
-        atmos: 20000,
-        dolbyDigitalPlus: 100000,
+        mp3: 10_000,
+        atmos: 20_000,
+        dolbyDigitalPlus: 100_000,
+      }),
+      createSettings({
+        resolutions: {
+          r2160p: true,
+        },
       }),
     ),
   );
@@ -60,13 +62,13 @@ it("does not include trashed streams", async ({
       scope: mockSentryScope,
     },
     {
-      sendEvent: vi.fn(),
+      sendEvent: vi.fn<MainRunnerMachineIntake>(),
       services,
       plugins: new Map(),
     },
   );
 
-  expect(result).toEqual(
+  expect(result).toStrictEqual(
     expect.not.arrayContaining([
       expect.objectContaining({
         data: expect.objectContaining({
@@ -109,13 +111,13 @@ it("sorts torrents by resolution and rank within the same resolution", async ({
       scope: mockSentryScope,
     },
     {
-      sendEvent: vi.fn(),
+      sendEvent: vi.fn<MainRunnerMachineIntake>(),
       services,
       plugins: new Map(),
     },
   );
 
-  expect(result).toEqual([
+  expect(result).toStrictEqual([
     expect.objectContaining({
       data: expect.objectContaining({
         rawTitle: `${indexedMovie.title} 720p DDP`,
@@ -177,13 +179,13 @@ it("handles foreign language movies with aliases correctly", async ({
       scope: mockSentryScope,
     },
     {
-      sendEvent: vi.fn(),
+      sendEvent: vi.fn<MainRunnerMachineIntake>(),
       services,
       plugins: new Map(),
     },
   );
 
-  expect(result).toEqual([
+  expect(result).toStrictEqual([
     expect.objectContaining({
       data: expect.objectContaining({
         rawTitle: "Película Extranjera 1080p BluRay",
@@ -230,13 +232,13 @@ it("handles foreign language shows with aliases correctly", async ({
       scope: mockSentryScope,
     },
     {
-      sendEvent: vi.fn(),
+      sendEvent: vi.fn<MainRunnerMachineIntake>(),
       services,
       plugins: new Map(),
     },
   );
 
-  expect(result).toEqual([
+  expect(result).toStrictEqual([
     expect.objectContaining({
       data: expect.objectContaining({
         rawTitle: "Espectáculo Extranjero 1080p BluRay",

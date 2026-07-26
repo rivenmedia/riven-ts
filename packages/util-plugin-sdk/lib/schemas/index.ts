@@ -1,13 +1,13 @@
 import { z } from "zod";
 
-import {
-  BaseDataSource,
-  type BaseDataSourceConfig,
-} from "../datasource/index.ts";
 import { DataSourceMap } from "../utilities/datasource-map.ts";
 import { PluginSettings } from "../utilities/plugin-settings.ts";
 import { RivenEventHandler } from "./events/index.ts";
 
+import type {
+  BaseDataSource,
+  BaseDataSourceConfig,
+} from "../datasource/index.ts";
 import type { RateLimiterOptions } from "bullmq";
 import type { Constructor } from "type-fest";
 
@@ -31,9 +31,8 @@ export type BasePluginContext = z.infer<typeof basePluginContextSchema>;
 
 export const isBasePluginContext = (
   value: unknown,
-): value is BasePluginContext => {
-  return basePluginContextSchema.safeParse(value).success;
-};
+): value is BasePluginContext =>
+  basePluginContextSchema.safeParse(value).success;
 
 /**
  * Represents a constructor for a class that extends BaseDataSource.
@@ -62,7 +61,8 @@ const dataSourceSchema = z.custom<
 export const RivenPlugin = z.object({
   version: z.string().regex(
     // https://regex101.com/r/vkijKf/1/
-    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/,
+    // oxlint-disable-next-line prefer-named-capture-group
+    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/u,
     "Invalid version format",
   ),
   name: z.symbol(),
@@ -95,7 +95,7 @@ export const RivenPlugin = z.object({
 export type RivenPlugin = z.infer<typeof RivenPlugin>;
 
 export const RivenPluginPackage = z.object({
-  default: RivenPlugin,
+  plugin: RivenPlugin,
 });
 
 export type RivenPluginPackage = z.infer<typeof RivenPluginPackage>;

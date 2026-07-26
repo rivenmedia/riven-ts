@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 import { setTimeout } from "node:timers/promises";
 import { expect, vi } from "vitest";
 import {
-  type SnapshotFrom,
   createActor,
   createEmptyActor,
   fromCallback,
@@ -11,11 +10,13 @@ import {
 
 import { it as baseIt } from "./__tests__/test-context.ts";
 import { riven } from "./riven.ts";
-import { type BootstrapMachineOutput } from "./state-machines/bootstrap/index.ts";
 import * as rivenMachineModule from "./state-machines/program/index.ts";
 import { rivenMachine } from "./state-machines/program/index.ts";
 import { SessionID } from "./utilities/logger/session-id.ts";
 import * as settingsModule from "./utilities/settings.ts";
+
+import type { BootstrapMachineOutput } from "./state-machines/bootstrap/index.ts";
+import type { SnapshotFrom } from "xstate";
 
 const it = baseIt
   .extend("mockRivenMachine", () =>
@@ -33,9 +34,7 @@ const it = baseIt
             vfs: {} as never,
           });
         }) as never,
-        mainRunnerMachine: fromCallback(() => {
-          /* empty */
-        }) as never,
+        mainRunnerMachine: fromCallback(() => undefined) as never,
         shutdown: createEmptyActor() as never,
         stopGqlServer: createEmptyActor() as never,
         unmountVfs: createEmptyActor() as never,
@@ -119,7 +118,7 @@ it("exits with code 1 on uncaught exceptions", async ({
 
   await vi.waitFor(() => {
     expect(process.exitCode).toBe(1);
-    expect(exitSpy).toHaveBeenCalled();
+    expect(exitSpy).toHaveBeenCalledOnce();
   });
 });
 
@@ -144,7 +143,7 @@ it("does not force quit the process if shutdown succeeds within the configured t
 
   await vi.waitFor(() => {
     expect(process.exitCode).toBe(0);
-    expect(exitSpy).toHaveBeenCalled();
+    expect(exitSpy).toHaveBeenCalledWith();
   });
 });
 
@@ -164,9 +163,9 @@ it("force quits the process if shutdown takes longer than the configured timeout
     mockRivenMachine.provide({
       actors: {
         shutdown: fromPromise(
-          () =>
+          async () =>
             new Promise(() => {
-              /* never resolves, simulating a shutdown that hangs indefinitely */
+              /* Never resolves, simulating a shutdown that hangs indefinitely */
             }),
         ) as never,
       },
@@ -184,5 +183,5 @@ it("force quits the process if shutdown takes longer than the configured timeout
   await vi.runOnlyPendingTimersAsync();
 
   expect(process.exitCode).toBe(1);
-  expect(exitSpy).toHaveBeenCalled();
+  expect(exitSpy).toHaveBeenCalledWith();
 });

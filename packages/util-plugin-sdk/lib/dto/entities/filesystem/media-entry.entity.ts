@@ -1,4 +1,4 @@
-import { EntityRepositoryType, type Opt } from "@mikro-orm/core";
+import { EntityRepositoryType } from "@mikro-orm/core";
 import { Entity, Index, Property } from "@mikro-orm/decorators/legacy";
 import { IsOptional, IsUrl } from "class-validator";
 import path from "node:path";
@@ -7,20 +7,22 @@ import { Field, ObjectType } from "type-graphql";
 import { MediaEntryRepository } from "../../repositories/media-entry.repository.ts";
 import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 
+import type { Opt } from "@mikro-orm/core";
+
 @ObjectType()
 @Entity({
   discriminatorValue: "media",
   repository: () => MediaEntryRepository,
 })
 export class MediaEntry extends FileSystemEntry {
-  [EntityRepositoryType]?: MediaEntryRepository;
+  public [EntityRepositoryType]?: MediaEntryRepository;
 
-  override type: Opt<"media"> = "media" as const;
+  public override type: Opt<"media"> = "media" as const;
 
   @Field(() => String)
   @Index()
   @Property()
-  originalFilename!: string;
+  public originalFilename!: string;
 
   // ------------------------
   // Debrid service fields
@@ -31,37 +33,37 @@ export class MediaEntry extends FileSystemEntry {
   @Property()
   @IsUrl()
   @IsOptional()
-  downloadUrl?: string;
+  public downloadUrl?: string;
 
   @Field(() => String, { nullable: true })
   @Property()
   @IsUrl()
   @IsOptional()
-  streamPermalink?: string;
+  public streamPermalink?: string;
 
   @Field(() => String)
   @Property()
-  plugin!: string;
+  public plugin!: string;
 
   @Field(() => String, { nullable: true })
   @Property()
-  provider!: string | null;
+  public provider!: string | null;
 
   @Field(() => String, { nullable: true })
   @Property()
-  providerDownloadId?: string;
+  public providerDownloadId?: string;
 
   // ------------------------
 
   @Field(() => [String], { nullable: true })
   @Property({ type: "json" })
-  libraryProfiles?: string[];
+  public libraryProfiles?: string[];
 
   @Field(() => Object, { nullable: true })
   @Property({ type: "json" })
-  mediaMetadata?: object;
+  public mediaMetadata?: object;
 
-  async getVfsFileName(): Promise<string> {
+  public async getVfsFileName(): Promise<string> {
     const prettyName = await this.mediaItem.getEntity().getPrettyName();
 
     if (!prettyName) {

@@ -7,7 +7,7 @@
   ],
   "files": [
     "scripts/generate-zod-docs.ts",
-    "eslint.config.ts",
+    "oxlint.config.ts",
     "vitest.config.ts",
     "wiki.config.ts"
   ],

@@ -1,5 +1,4 @@
 import "@/app/global.css";
-
 import SearchDialog from "fumadocs-ui/components/dialog/search-default";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import { Inter } from "next/font/google";
@@ -86,13 +85,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+            __html: JSON.stringify(jsonLd).replaceAll("<", String.raw`\u003c`),
           }}
         />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(jsonLdProject).replace(/</g, "\\u003c"),
+            __html: JSON.stringify(jsonLdProject).replaceAll(
+              "<",
+              String.raw`\u003c`,
+            ),
           }}
         />
       </head>

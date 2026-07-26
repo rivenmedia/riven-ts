@@ -9,7 +9,7 @@ import type { UUID } from "node:crypto";
 @Resolver(() => MediaEntry)
 export class MediaEntryResolver {
   @Mutation(() => MediaEntry)
-  async saveStreamUrl(
+  public async saveStreamUrl(
     @CoreContext() { em }: CoreContext,
     @Arg("id", () => ID) id: UUID,
     @Arg("url", () => String) url: string,

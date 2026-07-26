@@ -10,12 +10,13 @@ import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state
 import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/media-item.download.error.event";
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
-import { type EntityManager, NotFoundError, ref } from "@mikro-orm/core";
+import { NotFoundError, ref } from "@mikro-orm/core";
 import { ValidationError, validateOrReject } from "class-validator";
 import assert from "node:assert";
 import z from "zod";
 
 import type { ValidTorrent } from "../../../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import type { EntityManager } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";
 
 export async function persistDownloadResults(
@@ -36,21 +37,21 @@ export async function persistDownloadResults(
     },
   );
 
-  assert(
+  assert.ok(
     existingItem,
     new NotFoundError(
       `No media item found with ID ${id} and stream info hash ${torrent.infoHash}`,
     ),
   );
 
-  const processableStates = MediaItemState.extract([
+  const processableMediaItemStates = MediaItemState.extract([
     "scraped",
     "ongoing",
     "partially_completed",
   ]);
 
-  assert(
-    processableStates.safeParse(existingItem.state).success,
+  assert.ok(
+    processableMediaItemStates.safeParse(existingItem.state).success,
     new MediaItemDownloadErrorIncorrectState({
       item: existingItem,
     }),
@@ -61,7 +62,7 @@ export async function persistDownloadResults(
       ({ infoHash }) => infoHash === torrent.infoHash,
     );
 
-    assert(
+    assert.ok(
       matchedStream,
       new NotFoundError(
         `Media item with ID ${id} does not have a stream matching the torrent's info hash ${torrent.infoHash}`,
@@ -79,7 +80,7 @@ export async function persistDownloadResults(
     if (existingItem instanceof Movie || existingItem instanceof Episode) {
       const [file] = torrent.files;
 
-      assert(file?.link, "Download URL is missing for the matched file");
+      assert.ok(file?.link, "Download URL is missing for the matched file");
 
       existingItem.filesystemEntries.add(
         em.create(MediaEntry, {
@@ -105,24 +106,24 @@ export async function persistDownloadResults(
         episodes.map((episode) => [episode.id, episode]),
       );
 
-      const processableStates = MediaItemState.exclude([
+      const processableItemStates = MediaItemState.exclude([
         "completed",
         "downloaded",
       ]);
 
       for (const file of torrent.files) {
-        assert(file.link, "Download URL is missing for the matched file");
+        assert.ok(file.link, "Download URL is missing for the matched file");
 
         const episode = episodeMap.get(file.matchedMediaItemId);
 
-        assert(
+        assert.ok(
           episode,
           new NotFoundError(
             `File ${file.name} does not correspond to a valid episode`,
           ),
         );
 
-        if (!processableStates.safeParse(episode.state).success) {
+        if (!processableItemStates.safeParse(episode.state).success) {
           const { logger } =
             await import("../../../../utilities/logger/logger.ts");
 
@@ -155,16 +156,16 @@ export async function persistDownloadResults(
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((error) => {
-        if (Array.isArray(error)) {
-          return error
+      .transform((rawError) => {
+        if (Array.isArray(rawError)) {
+          return rawError
             .map((err) =>
               err.constraints ? Object.values(err.constraints).join("; ") : "",
             )
             .join("; ");
         }
 
-        return error.message;
+        return rawError.message;
       })
       .parse(error);
 

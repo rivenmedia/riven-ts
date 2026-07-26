@@ -1,0 +1,30 @@
+{
+  "name": "@repo/core-util-oxlint-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./lib/base.ts"
+  },
+  "scripts": {
+    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
+    "lint:fix": "pnpm lint --fix"
+  },
+  "dependencies": {
+    "@eslint/json": "catalog:",
+    "@repo/core-util-typescript-config": "workspace:^",
+    "eslint-plugin-react-hooks": "catalog:",
+    "eslint-plugin-storybook": "catalog:",
+    "eslint-plugin-turbo": "catalog:",
+    "globals": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@typescript/native": "catalog:",
+    "oxlint": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "oxlint": "^1"
+  }
+}

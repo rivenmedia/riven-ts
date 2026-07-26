@@ -23,7 +23,7 @@ it("resets a movie item", async ({
 
   const serialisedItems = serialiseItems(resetItems);
 
-  expect(serialisedItems).toEqual(
+  expect(serialisedItems).toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         id: completedMovie.id,
@@ -47,7 +47,7 @@ it("resets a show item and all nested seasons and episodes", async ({
 
   const serialisedItems = serialiseItems(resetItems);
 
-  expect(serialisedItems).toEqual(
+  expect(serialisedItems).toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         id: completedShow.id,
@@ -85,7 +85,7 @@ it("resets a season item and all nested episodes", async ({
 
   const serialisedItems = serialiseItems(resetItems);
 
-  expect(serialisedItems).toEqual(
+  expect(serialisedItems).toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         id: season.id,
@@ -115,7 +115,7 @@ it("resets an episode item", async ({
 
   const serialisedItems = serialiseItems(resetItems);
 
-  expect(serialisedItems).toEqual(
+  expect(serialisedItems).toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         id: episode.id,

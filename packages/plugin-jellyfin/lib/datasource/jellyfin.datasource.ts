@@ -2,15 +2,16 @@ import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import path from "node:path";
 
-import { JellyfinSettings } from "../jellyfin-settings.schema.ts";
-
+import type { JellyfinSettings } from "../jellyfin-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 
-class JellyfinAPIError extends Error {}
+class JellyfinAPIError extends Error {
+  public override name = "JellyfinAPIError";
+}
 
 export class JellyfinAPI extends BaseDataSource<JellyfinSettings> {
-  override baseURL = this.settings.jellyfinServerUrl;
-  override serviceName = "Jellyfin";
+  public override baseURL = this.settings.jellyfinServerUrl;
+  public override serviceName = "Jellyfin";
 
   protected override willSendRequest(
     _path: string,
@@ -20,7 +21,7 @@ export class JellyfinAPI extends BaseDataSource<JellyfinSettings> {
       `MediaBrowser Client=Riven, Token=${this.settings.jellyfinToken}`;
   }
 
-  async updateSections(paths: string[]) {
+  public async updateSections(paths: string[]) {
     try {
       await this.post("Library/Media/Updated", {
         body: JSON.stringify({
@@ -37,7 +38,7 @@ export class JellyfinAPI extends BaseDataSource<JellyfinSettings> {
     }
   }
 
-  override async validate() {
+  public override async validate() {
     try {
       await this.get("System/Configuration");
 

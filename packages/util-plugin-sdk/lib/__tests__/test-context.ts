@@ -10,9 +10,9 @@ export const it = baseIt
 
     const server = setupServer();
 
-    if (/^(\*|msw)/.test(process.env["DEBUG"] ?? "")) {
+    if (/^(\*|msw)/u.test(process.env["DEBUG"] ?? "")) {
       server.events.on("response:mocked", ({ request, response }) => {
-        console.log(
+        console.debug(
           "%s %s received %s %s",
           request.method,
           request.url,
@@ -74,7 +74,7 @@ export const it = baseIt
 
       await orm.schema.create();
 
-      onCleanup(() => orm.close(true));
+      onCleanup(async () => orm.close(true));
 
       return orm;
     },
@@ -88,12 +88,14 @@ export const it = baseIt
     async function getRedisServerBinary() {
       try {
         const { stdout: redisServerBinary } =
+          // oxlint-disable-next-line typescript/strict-void-return
           await promisify(exec)("which redis-server");
 
         return redisServerBinary.trim();
       } catch (error) {
         throw new Error(
           `Failed to find "redis-server" binary. Is Redis installed and available in your PATH?\n${String(error)}`,
+          { cause: error },
         );
       }
     }
@@ -120,7 +122,9 @@ export const it = baseIt
         url: new URL(`redis://${host}:${port.toString()}`),
       };
     } catch (error) {
-      throw new Error(`Failed to get Redis URL.\n${String(error)}`);
+      throw new Error(`Failed to get Redis URL.\n${String(error)}`, {
+        cause: error,
+      });
     }
   });
 

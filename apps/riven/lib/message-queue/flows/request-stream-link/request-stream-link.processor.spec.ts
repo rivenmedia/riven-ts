@@ -13,6 +13,9 @@ import { enqueueRequestStreamLink } from "./enqueue-request-stream-link.ts";
 import { requestStreamLinkProcessor } from "./request-stream-link.processor.ts";
 import { RequestStreamLinkFlow } from "./request-stream-link.schema.ts";
 
+import type { MediaItemStreamLinkRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
+import type { Processor } from "bullmq";
+
 it.beforeEach(({ createFlowWorker }) => {
   createFlowWorker(RequestStreamLinkFlow, requestStreamLinkProcessor);
 });
@@ -59,13 +62,15 @@ it("does not request a new stream link if the media entry has a pre-existing per
 
   await em.persist(mediaEntry).flush();
 
-  const streamLinkRequestedMock = vi.fn().mockResolvedValue({
-    success: true,
-    data: {
-      link: "https://example.com/stream-link",
-      isPermalink: true,
-    },
-  });
+  const streamLinkRequestedMock = vi
+    .fn<() => Promise<MediaItemStreamLinkRequestedResponse>>()
+    .mockResolvedValue({
+      success: true,
+      data: {
+        link: "https://example.com/stream-link",
+        isPermalink: true,
+      },
+    });
 
   createPluginWorker(
     "riven.media-item.stream-link.requested",
@@ -76,7 +81,7 @@ it("does not request a new stream link if the media entry has a pre-existing per
   createPluginWorker(
     "riven.media-item.stream-link.health-check.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         state: "healthy",
         statusCode: 200,
@@ -97,7 +102,7 @@ it("does not request a new stream link if the media entry has a pre-existing per
     queueName: job.queueName,
   });
 
-  expect(children).not.toEqual(
+  expect(children).not.toStrictEqual(
     expect.arrayContaining([
       {
         job: expect.objectContaining({
@@ -171,7 +176,7 @@ it("saves the stream link to the cache after receiving a healthy link", async ({
   createPluginWorker(
     "riven.media-item.stream-link.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         success: true,
         data: {
@@ -184,7 +189,7 @@ it("saves the stream link to the cache after receiving a healthy link", async ({
   createPluginWorker(
     "riven.media-item.stream-link.health-check.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         state: "healthy",
         statusCode: 200,
@@ -215,7 +220,7 @@ it("does not save the stream link to the media entry after receiving a healthy n
   createPluginWorker(
     "riven.media-item.stream-link.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         success: true,
         data: {
@@ -229,7 +234,7 @@ it("does not save the stream link to the media entry after receiving a healthy n
   createPluginWorker(
     "riven.media-item.stream-link.health-check.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         state: "healthy",
         statusCode: 200,
@@ -279,7 +284,7 @@ it("blacklists the stream if the stream link response indicates a dead link", as
     mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
   });
 
-  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/i);
+  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/iu);
 
   await expect(
     em.findOneOrFail(BlacklistedStream, {
@@ -338,7 +343,7 @@ it("blacklists the stream if the health check response indicates a dead link", a
     mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
   });
 
-  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/i);
+  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/iu);
 
   await expect(
     em.findOneOrFail(BlacklistedStream, {
@@ -433,7 +438,7 @@ it("deletes the media entry if the stream link response indicates a dead link", 
   createPluginWorker(
     "riven.media-item.stream-link.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         success: false,
         statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
@@ -449,9 +454,9 @@ it("deletes the media entry if the stream link response indicates a dead link", 
     mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
   });
 
-  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/i);
+  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/iu);
 
-  await expect(() =>
+  await expect(async () =>
     mediaEntryService.getMediaEntryById(mediaEntry.id, {
       fields: ["streamPermalink"],
     }),
@@ -470,7 +475,7 @@ it("does not blacklist the stream if the stream link response indicates a non-fa
   createPluginWorker(
     "riven.media-item.stream-link.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         success: false,
         statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
@@ -487,7 +492,7 @@ it("does not blacklist the stream if the stream link response indicates a non-fa
   });
 
   await expect(runSingleJob(job)).rejects.toThrow(
-    /plugin failed to generate stream link/i,
+    /plugin failed to generate stream link/iu,
   );
 
   const blacklistedStream = await em.findOne(BlacklistedStream, {
@@ -506,14 +511,14 @@ it("adds a job to reprocess the movie if the item is a movie and its torrent is 
 
   expect.assert(mediaEntry);
 
-  const mockProcessMediaItemProcessor = vi.fn();
+  const mockProcessMediaItemProcessor = vi.fn<Processor>();
 
   createFlowWorker(ProcessMediaItemFlow, mockProcessMediaItemProcessor);
 
   createPluginWorker(
     "riven.media-item.stream-link.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         success: false,
         statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
@@ -529,9 +534,9 @@ it("adds a job to reprocess the movie if the item is a movie and its torrent is 
     mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
   });
 
-  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/i);
+  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/iu);
 
-  expect(mockProcessMediaItemProcessor).toHaveBeenCalled();
+  expect(mockProcessMediaItemProcessor).toHaveBeenCalledOnce();
 });
 
 it("adds a job to reprocess the lowest common denominator in the item's hierarchy if the item is show-like and its torrent is dead", async ({
@@ -543,7 +548,7 @@ it("adds a job to reprocess the lowest common denominator in the item's hierarch
 
   expect.assert(mediaEntry);
 
-  const mockProcessMediaItemProcessor = vi.fn();
+  const mockProcessMediaItemProcessor = vi.fn<Processor>();
   const flowAddSpy = vi.spyOn(flow, "addBulk");
 
   createFlowWorker(ProcessMediaItemFlow, mockProcessMediaItemProcessor);
@@ -551,7 +556,7 @@ it("adds a job to reprocess the lowest common denominator in the item's hierarch
   createPluginWorker(
     "riven.media-item.stream-link.requested",
     mediaEntry.plugin,
-    () =>
+    async () =>
       Promise.resolve({
         success: false,
         statusCode: StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
@@ -567,7 +572,7 @@ it("adds a job to reprocess the lowest common denominator in the item's hierarch
     mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
   });
 
-  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/i);
+  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/iu);
 
   expect(flowAddSpy).toHaveBeenCalledWith([
     expect.objectContaining({

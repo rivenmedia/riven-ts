@@ -13,7 +13,7 @@ it("returns false if the request fails", async ({ server, dataSourceMap }) => {
 
   const api = dataSourceMap.get(SubdlAPI);
 
-  expect(await api.validate()).toBe(false);
+  await expect(api.validate()).resolves.toBe(false);
 });
 
 it("returns true if the request succeeds", async ({
@@ -26,7 +26,7 @@ it("returns true if the request succeeds", async ({
         status: true,
         results: [
           {
-            sd_id: 123456,
+            sd_id: 123_456,
             name: "Inception",
           },
         ],
@@ -46,7 +46,7 @@ it("returns true if the request succeeds", async ({
 
   const api = dataSourceMap.get(SubdlAPI);
 
-  expect(await api.validate()).toBe(true);
+  await expect(api.validate()).resolves.toBe(true);
 });
 
 it("returns subtitles for a movie search", async ({
@@ -72,7 +72,7 @@ it("returns subtitles for a movie search", async ({
       }
 
       if (
-        url.searchParams.get("languages")?.split(",").sort().join(",") !==
+        url.searchParams.get("languages")?.split(",").toSorted().join(",") !==
         "de,en"
       ) {
         return HttpResponse.json(

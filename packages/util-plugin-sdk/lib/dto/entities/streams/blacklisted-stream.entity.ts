@@ -8,21 +8,21 @@ import { Stream } from "./stream.entity.ts";
 @ObjectType()
 @Entity()
 export class BlacklistedStream {
-  [PrimaryKeyProp]?: ["mediaItem", "stream", "plugin", "provider"];
+  public [PrimaryKeyProp]?: ["mediaItem", "stream", "plugin", "provider"];
 
   @Field(() => Stream)
   @ManyToOne({ primary: true })
-  stream!: Stream;
+  public stream!: Stream;
 
   @Field(() => MediaItem)
   @ManyToOne({ primary: true })
-  mediaItem!: MediaItem;
+  public mediaItem!: MediaItem;
 
   @Field(() => String, { nullable: true })
   @Property({ primary: true })
-  provider?: string;
+  public provider?: string;
 
   @Field(() => String)
   @Property({ primary: true })
-  plugin!: string;
+  public plugin!: string;
 }

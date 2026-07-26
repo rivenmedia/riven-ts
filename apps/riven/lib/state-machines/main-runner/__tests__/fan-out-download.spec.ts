@@ -53,7 +53,7 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
 }) => {
   const [, , failedSeason] = await scrapedShow.seasons.load();
 
-  assert(failedSeason);
+  assert.ok(failedSeason);
 
   const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
 

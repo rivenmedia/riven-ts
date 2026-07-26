@@ -9,7 +9,7 @@ import { JellyfinResolver } from "./schema/jellyfin.resolver.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export default {
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [JellyfinAPI],
@@ -29,26 +29,27 @@ export default {
         );
       }
 
-      const sectionPaths = mediaEntries
-        .reduce<Set<string>>(
-          (acc, entry) =>
-            acc.add(path.join(entry.baseDirectory, path.dirname(entry.path))),
-          new Set<string>(),
-        )
-        .values()
-        .toArray();
+      const sectionPathsSet = new Set<string>();
+
+      for (const entry of mediaEntries) {
+        sectionPathsSet.add(
+          path.join(entry.baseDirectory, path.dirname(entry.path)),
+        );
+      }
+
+      const sectionPaths = [...sectionPathsSet];
 
       await jellyfinAPI.updateSections(sectionPaths);
 
       logger.info(
-        `Updated ${sectionPaths.length.toString()} path${sectionPaths.length !== 1 ? "s" : ""} for ${event.item.fullTitle}`,
+        `Updated ${sectionPaths.length.toString()} path${sectionPaths.length === 1 ? "" : "s"} for ${event.item.fullTitle}`,
       );
     },
   },
   settingsSchema: JellyfinSettings,
-  validator({ dataSources }) {
+  async validator({ dataSources }) {
     const jellyfinAPI = dataSources.get(JellyfinAPI);
 
     return jellyfinAPI.validate();
   },
-} satisfies RivenPlugin as RivenPlugin;
+};

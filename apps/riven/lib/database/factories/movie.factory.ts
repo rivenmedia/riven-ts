@@ -9,7 +9,7 @@ import { MovieItemRequestFactory } from "./movie-item-request.factory.ts";
 import type { EntityData } from "@mikro-orm/core";
 
 export class MovieFactory extends Factory<Movie> {
-  model = Movie;
+  public model = Movie;
 
   protected override definition(
     input: EntityData<Movie> = {},

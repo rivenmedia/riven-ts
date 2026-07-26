@@ -1,7 +1,4 @@
-import {
-  ContentServiceRequestedEvent,
-  type ContentServiceRequestedResponse,
-} from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
+import { ContentServiceRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
@@ -14,6 +11,8 @@ import { createJobParentConfig } from "../../utilities/create-job-parent-config.
 import { flow } from "../producer.ts";
 import { enqueueRequestContentService } from "./enqueue-request-content-service.ts";
 import { requestContentServiceProcessorSchema } from "./request-content-service.schema.ts";
+
+import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
 function buildExternalIdKey(
   /**
@@ -38,7 +37,7 @@ export const requestContentServiceProcessor =
       { job, token, signal },
       { sendEvent, services: { itemRequestService } },
     ) => {
-      assert(token, "Token is required to create child jobs");
+      assert.ok(token, "Token is required to create child jobs");
 
       const parent = createJobParentConfig(job);
 
@@ -76,59 +75,55 @@ export const requestContentServiceProcessor =
           case "process": {
             const data = await job.getChildrenValues();
 
-            const { items, updateIntervalSeconds } = Object.values(data).reduce(
-              (acc, childData) => {
-                acc.updateIntervalSeconds ??= childData.updateIntervalSeconds;
+            let updateIntervalSeconds: number | null = null;
 
-                if (childData.movies.length) {
-                  for (const movie of childData.movies) {
-                    const key = buildExternalIdKey(movie.tmdbId, movie.imdbId);
-
-                    if (!key) {
-                      logger.warn(
-                        `Skipping requested movie with no valid external ID: ${JSON.stringify(movie)}`,
-                      );
-
-                      continue;
-                    }
-
-                    acc.items.set(key, { item: movie, type: "movie" });
-                  }
+            const items = new Map<
+              string,
+              | {
+                  item: ContentServiceRequestedResponse["movies"][number];
+                  type: "movie";
                 }
-
-                if (childData.shows.length) {
-                  for (const show of childData.shows) {
-                    const key = buildExternalIdKey(show.tvdbId, show.imdbId);
-
-                    if (!key) {
-                      logger.warn(
-                        `Skipping requested show with no valid external ID: ${JSON.stringify(show)}`,
-                      );
-
-                      continue;
-                    }
-
-                    acc.items.set(key, { item: show, type: "show" });
-                  }
+              | {
+                  type: "show";
+                  item: ContentServiceRequestedResponse["shows"][number];
                 }
+            >();
 
-                return acc;
-              },
-              {
-                updateIntervalSeconds: null as number | null,
-                items: new Map<
-                  string,
-                  | {
-                      item: ContentServiceRequestedResponse["movies"][number];
-                      type: "movie";
-                    }
-                  | {
-                      type: "show";
-                      item: ContentServiceRequestedResponse["shows"][number];
-                    }
-                >(),
-              },
-            );
+            for (const childData of Object.values(data)) {
+              updateIntervalSeconds ??= childData.updateIntervalSeconds;
+
+              if (childData.movies.length > 0) {
+                for (const movie of childData.movies) {
+                  const key = buildExternalIdKey(movie.tmdbId, movie.imdbId);
+
+                  if (!key) {
+                    logger.warn(
+                      `Skipping requested movie with no valid external ID: ${JSON.stringify(movie)}`,
+                    );
+
+                    continue;
+                  }
+
+                  items.set(key, { item: movie, type: "movie" });
+                }
+              }
+
+              if (childData.shows.length > 0) {
+                for (const show of childData.shows) {
+                  const key = buildExternalIdKey(show.tvdbId, show.imdbId);
+
+                  if (!key) {
+                    logger.warn(
+                      `Skipping requested show with no valid external ID: ${JSON.stringify(show)}`,
+                    );
+
+                    continue;
+                  }
+
+                  items.set(key, { item: show, type: "show" });
+                }
+              }
+            }
 
             let newItemsCount = 0;
             let updatedItemsCount = 0;
@@ -143,9 +138,9 @@ export const requestContentServiceProcessor =
                     : await itemRequestService.requestMovie(item);
 
                 if (result.requestType === "create") {
-                  newItemsCount++;
+                  newItemsCount += 1;
                 } else {
-                  updatedItemsCount++;
+                  updatedItemsCount += 1;
                 }
 
                 sendEvent({

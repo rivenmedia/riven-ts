@@ -1,13 +1,12 @@
-import { type EntityData, type EntityManager, ref } from "@mikro-orm/core";
+import { ref } from "@mikro-orm/core";
 import assert from "node:assert";
 
 import { MediaEntryFactory } from "../../factories/media-entry.factory.ts";
 import { BaseSeeder } from "../base.seeder.ts";
-import {
-  ScrapedMovieSeeder,
-  type ScrapedMovieSeederContext,
-} from "./scraped-movie.seeder.ts";
+import { ScrapedMovieSeeder } from "./scraped-movie.seeder.ts";
 
+import type { ScrapedMovieSeederContext } from "./scraped-movie.seeder.ts";
+import type { EntityData, EntityManager } from "@mikro-orm/core";
 import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 export interface CompletedMovieSeederContext extends ScrapedMovieSeederContext {
@@ -15,13 +14,13 @@ export interface CompletedMovieSeederContext extends ScrapedMovieSeederContext {
 }
 
 export class CompletedMovieSeeder extends BaseSeeder<CompletedMovieSeederContext> {
-  async run(
+  public async run(
     em: EntityManager,
     context: CompletedMovieSeederContext = this.context,
   ) {
     await this.call(em, [ScrapedMovieSeeder], context);
 
-    assert(
+    assert.ok(
       context.streams[0],
       "Expected at least one stream to be present in context.streams",
     );
@@ -42,7 +41,7 @@ export class CompletedMovieSeeder extends BaseSeeder<CompletedMovieSeederContext
 
     await em.flush();
 
-    assert(
+    assert.ok(
       context.movie.state === "completed",
       `Expected movie state to be "completed", got "${context.movie.state}"`,
     );

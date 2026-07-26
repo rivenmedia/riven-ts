@@ -1,3 +1,5 @@
+// oxlint-disable node/no-sync
+
 import chalk from "chalk";
 import { writeFileSync } from "node:fs";
 import z from "zod";
@@ -11,4 +13,4 @@ const jsonSchema = z.toJSONSchema(RankingConfig, {
 
 writeFileSync(filePath, JSON.stringify(jsonSchema, null, 2));
 
-console.log(chalk.green("Successfully generated JSON schema"));
+console.debug(chalk.green("Successfully generated JSON schema"));

@@ -4,10 +4,9 @@ import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import z from "zod";
 
-import {
-  RankingConfig,
-  type RankingConfigFileContents,
-} from "./ranking-config.schema.ts";
+import { RankingConfig } from "./ranking-config.schema.ts";
+
+import type { RankingConfigFileContents } from "./ranking-config.schema.ts";
 
 async function writeDefaultConfigFile(resolvedPath: string) {
   const contents = {
@@ -36,22 +35,23 @@ export async function loadRankingConfig(
 
     try {
       await writeDefaultConfigFile(resolvedPath);
-    } catch (cause) {
+    } catch (error) {
       if (
-        cause === null ||
-        typeof cause !== "object" ||
-        (cause as NodeJS.ErrnoException).code !== "EEXIST"
+        error === null ||
+        typeof error !== "object" ||
+        (error as NodeJS.ErrnoException).code !== "EEXIST"
       ) {
         throw new Error(
-          `Failed to create ranking config file at "${resolvedPath}": ${String(cause)}`,
+          `Failed to create ranking config file at "${resolvedPath}": ${String(error)}`,
+          { cause: error },
         );
       }
     }
   }
 
-  const raw = await readFile(resolvedPath, "utf8").catch((cause: unknown) => {
+  const raw = await readFile(resolvedPath, "utf8").catch((error: unknown) => {
     throw new Error(
-      `Failed to read ranking config file at "${resolvedPath}": ${String(cause)}`,
+      `Failed to read ranking config file at "${resolvedPath}": ${String(error)}`,
     );
   });
 
