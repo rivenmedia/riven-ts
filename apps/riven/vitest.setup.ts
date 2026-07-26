@@ -79,6 +79,14 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
     seeder: {
       pathTs: "./seeders",
     },
+    schemaGenerator: {
+      // `schema.clear()` truncates tables in reverse topological order, but
+      // that order is not stable: adding an unrelated entity can reorder a
+      // parent ahead of its children and trip a foreign key. Dropping the
+      // constraints for the duration of the clear makes the reset independent
+      // of entity discovery order.
+      disableForeignKeysForClear: true,
+    },
   });
 
   await database.orm.schema.create();

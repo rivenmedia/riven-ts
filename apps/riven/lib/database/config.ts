@@ -3,6 +3,8 @@ import {
   Episode,
   FileSystemEntry,
   ItemRequest,
+  LibrarySection,
+  LibrarySectionOverride,
   MediaEntry,
   MediaItem,
   Movie,
@@ -37,6 +39,8 @@ const entities = [
   ItemRequest,
   Stream,
   BlacklistedStream,
+  LibrarySection,
+  LibrarySectionOverride,
 ];
 
 async function getMetadataCacheConfig(): Promise<Options> {
