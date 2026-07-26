@@ -1,5 +1,6 @@
 import { defineMain } from "@storybook/nextjs-vite/node";
 
+// oxlint-disable-next-line import/no-default-export
 export default defineMain({
   addons: [
     "@storybook/addon-a11y",

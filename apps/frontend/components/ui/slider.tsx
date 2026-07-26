@@ -32,8 +32,8 @@ function Slider({
         "relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-vertical:h-full data-vertical:min-h-40 data-vertical:w-auto data-vertical:flex-col",
         className,
       )}
-      {...(value !== undefined ? { value } : {})}
-      {...(defaultValue !== undefined ? { defaultValue } : {})}
+      {...(value === undefined ? {} : { value })}
+      {...(defaultValue === undefined ? {} : { defaultValue })}
       {...props}
     >
       <SliderPrimitive.Track

@@ -1,12 +1,12 @@
 import { defineConfig } from "oxlint";
 
-import { jsFiles, jsxFiles, tsFiles } from "../internal/file-types.ts";
+import { jsFiles, tsFiles } from "../internal/file-types.ts";
 
 export const oxlintPluginNextJSConfig = defineConfig({
   plugins: ["nextjs"],
   overrides: [
     {
-      files: [tsFiles, jsFiles, jsxFiles],
+      files: [tsFiles, jsFiles],
       plugins: ["nextjs"],
     },
     {

@@ -15,7 +15,7 @@ export function PageHeader({ totalItems }: PageHeaderProps) {
           <span className="font-mono text-xs tracking-widest uppercase">
             Index
           </span>
-          <span className="h-px w-8 bg-zinc-800"></span>
+          <span className="h-px w-8 bg-zinc-800" />
           <span className="text-primary font-mono text-sm">
             {totalItems.toLocaleString()} items
           </span>

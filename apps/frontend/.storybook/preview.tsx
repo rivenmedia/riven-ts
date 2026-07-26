@@ -17,8 +17,8 @@ export const preview = definePreview({
   parameters: {
     controls: {
       matchers: {
-        color: /(background|color)$/i,
-        date: /Date$/i,
+        color: /(background|color)$/iu,
+        date: /Date$/iu,
       },
     },
     layout: "centered",
@@ -47,4 +47,5 @@ export const preview = definePreview({
   ],
 });
 
+// oxlint-disable-next-line import/no-default-export
 export default preview;

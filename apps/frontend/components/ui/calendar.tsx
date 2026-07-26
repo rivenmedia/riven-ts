@@ -8,14 +8,11 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react";
-import { type ComponentProps, useEffect, useRef } from "react";
-import {
-  type CustomComponents,
-  type DayButton,
-  DayPicker,
-  type Locale,
-  getDefaultClassNames,
-} from "react-day-picker";
+import { useEffect, useRef } from "react";
+import { DayPicker, getDefaultClassNames } from "react-day-picker";
+
+import type { ComponentProps } from "react";
+import type { CustomComponents, DayButton, Locale } from "react-day-picker";
 
 function Calendar({
   className,
@@ -143,16 +140,14 @@ function Calendar({
           className,
           rootRef,
           ...props
-        }: ComponentProps<CustomComponents["Root"]>) => {
-          return (
-            <div
-              data-slot="calendar"
-              ref={rootRef}
-              className={cn(className)}
-              {...props}
-            />
-          );
-        },
+        }: ComponentProps<CustomComponents["Root"]>) => (
+          <div
+            data-slot="calendar"
+            ref={rootRef}
+            className={cn(className)}
+            {...props}
+          />
+        ),
         Chevron: ({
           className,
           orientation,
@@ -183,15 +178,13 @@ function Calendar({
         WeekNumber: ({
           children,
           ...props
-        }: ComponentProps<CustomComponents["WeekNumber"]>) => {
-          return (
-            <td {...props}>
-              <div className="flex size-(--cell-size) items-center justify-center text-center">
-                {children}
-              </div>
-            </td>
-          );
-        },
+        }: ComponentProps<CustomComponents["WeekNumber"]>) => (
+          <td {...props}>
+            <div className="flex size-(--cell-size) items-center justify-center text-center">
+              {children}
+            </div>
+          </td>
+        ),
         ...components,
       }}
       {...props}

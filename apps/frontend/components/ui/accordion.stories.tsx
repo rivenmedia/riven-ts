@@ -89,7 +89,7 @@ Single.test(
       });
     }
 
-    const lastTab = accordions[accordions.length - 1];
+    const lastTab = accordions.at(-1);
 
     if (!lastTab) {
       throw new Error("Could not find the last accordion trigger");

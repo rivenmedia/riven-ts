@@ -3,18 +3,18 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import useEmblaCarousel, {
-  type UseEmblaCarouselType,
-} from "embla-carousel-react";
+import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import {
-  type ComponentProps,
   createContext,
   useCallback,
   useContext,
   useEffect,
   useState,
 } from "react";
+
+import type { UseEmblaCarouselType } from "embla-carousel-react";
+import type { ComponentProps } from "react";
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -99,7 +99,9 @@ function Carousel({
   );
 
   useEffect(() => {
-    if (!api || !setApi) return;
+    if (!api || !setApi) {
+      return;
+    }
     setApi(api);
   }, [api, setApi]);
 
@@ -122,7 +124,7 @@ function Carousel({
     <CarouselContext.Provider
       value={{
         carouselRef,
-        api: api,
+        api,
         opts,
         orientation,
         scrollPrev,

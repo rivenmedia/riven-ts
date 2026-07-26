@@ -6,8 +6,8 @@ export default function SetupStepLayout({
   return (
     <div className="bg-background min-h-screen w-full">
       <div className="relative min-h-screen overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,#31231c_0%,transparent_34%),radial-gradient(circle_at_right,#1b171d_0%,transparent_26%),linear-gradient(180deg,#0f0d10_0%,#151115_100%)]"></div>
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_18%,transparent_82%,rgba(255,255,255,0.02))]"></div>
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,#31231c_0%,transparent_34%),radial-gradient(circle_at_right,#1b171d_0%,transparent_26%),linear-gradient(180deg,#0f0d10_0%,#151115_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_18%,transparent_82%,rgba(255,255,255,0.02))]" />
         <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-8 md:px-10 lg:px-12">
           <div className="mb-6 flex items-start justify-between gap-4">
             <div>

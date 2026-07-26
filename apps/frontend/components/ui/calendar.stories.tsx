@@ -109,15 +109,15 @@ Default.test(
     },
   },
   async ({ canvas }) => {
-    const title = await canvas.findByText(/2000/i);
+    const title = await canvas.findByText(/2000/iu);
     const startTitle = title.textContent || "";
 
     const backBtn = await canvas.findByRole("button", {
-      name: /previous/i,
+      name: /previous/iu,
     });
 
     const nextBtn = await canvas.findByRole("button", {
-      name: /next/i,
+      name: /next/iu,
     });
 
     const steps = 6;

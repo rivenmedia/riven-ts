@@ -24,7 +24,7 @@ export function ItemActions({ selectedItemIds }: ItemActionsProps) {
         </div>
         <span className="text-sm font-medium text-zinc-300">Selected</span>
       </div>
-      <div className="mx-1 h-8 w-px bg-white/10"></div>
+      <div className="mx-1 h-8 w-px bg-white/10" />
       <div className="flex items-center gap-1">
         <ActionButton
           label="Reset"
@@ -42,10 +42,10 @@ export function ItemActions({ selectedItemIds }: ItemActionsProps) {
               // itemsStore.clear();
 
               // await refreshLiveLibrary();
-            } catch (e) {
+            } catch (error) {
               toast.error(
-                e instanceof Error
-                  ? `Error: ${e.message}`
+                error instanceof Error
+                  ? `Error: ${error.message}`
                   : "An unknown error occurred",
               );
             }
@@ -70,10 +70,10 @@ export function ItemActions({ selectedItemIds }: ItemActionsProps) {
               // itemsStore.clear();
 
               // await refreshLiveLibrary();
-            } catch (e) {
+            } catch (error) {
               toast.error(
-                e instanceof Error
-                  ? `Error: ${e.message}`
+                error instanceof Error
+                  ? `Error: ${error.message}`
                   : "An unknown error occurred",
               );
             }
@@ -94,10 +94,10 @@ export function ItemActions({ selectedItemIds }: ItemActionsProps) {
               // selectedItemIds = [];
 
               // await refreshLiveLibrary();
-            } catch (e) {
+            } catch (error) {
               toast.error(
-                e instanceof Error
-                  ? `Error: ${e.message}`
+                error instanceof Error
+                  ? `Error: ${error.message}`
                   : "An unknown error occurred",
               );
             }
@@ -105,7 +105,7 @@ export function ItemActions({ selectedItemIds }: ItemActionsProps) {
           variant="destructive"
         />
 
-        <div className="mx-1 h-8 w-px bg-white/10"></div>
+        <div className="mx-1 h-8 w-px bg-white/10" />
 
         <Button
           variant="ghost"

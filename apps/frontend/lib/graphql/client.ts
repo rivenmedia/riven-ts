@@ -7,11 +7,12 @@ import {
   registerApolloClient,
 } from "@apollo/client-integration-nextjs";
 
-export const { getClient, query, PreloadQuery } = registerApolloClient(() => {
-  return new ApolloClient({
-    cache: new InMemoryCache(),
-    link: new HttpLink({
-      uri: `${privateEnvironment.ORIGIN}/graphql`,
+export const { getClient, query, PreloadQuery } = registerApolloClient(
+  () =>
+    new ApolloClient({
+      cache: new InMemoryCache(),
+      link: new HttpLink({
+        uri: `${privateEnvironment.ORIGIN}/graphql`,
+      }),
     }),
-  });
-});
+);

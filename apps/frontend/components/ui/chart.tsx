@@ -58,7 +58,7 @@ function ChartContainer({
   };
 }) {
   const uniqueId = useId();
-  const chartId = `chart-${id ?? uniqueId.replace(/:/g, "")}`;
+  const chartId = `chart-${id ?? uniqueId.replaceAll(":", "")}`;
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -87,7 +87,7 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     ([, config]) => config.theme ?? config.color,
   );
 
-  if (!colorConfig.length) {
+  if (colorConfig.length === 0) {
     return null;
   }
 
@@ -155,9 +155,9 @@ function ChartTooltipContent({
     const [item] = payload;
     const key =
       labelKey ??
-      (typeof item?.dataKey !== "function"
-        ? item?.dataKey?.toString()
-        : undefined) ??
+      (typeof item?.dataKey === "function"
+        ? undefined
+        : item?.dataKey?.toString()) ??
       item?.name?.toString() ??
       "value";
     const itemConfig = getPayloadConfigFromPayload(config, item, key);
@@ -202,7 +202,7 @@ function ChartTooltipContent({
         className,
       )}
     >
-      {!nestLabel ? tooltipLabel : null}
+      {nestLabel ? null : tooltipLabel}
       <div className="grid gap-1.5">
         {payload
           .filter((item) => item.type !== "none")
@@ -210,9 +210,9 @@ function ChartTooltipContent({
             const key =
               nameKey ??
               item.name?.toString() ??
-              (typeof item.dataKey !== "function"
-                ? item.dataKey?.toString()
-                : undefined) ??
+              (typeof item.dataKey === "function"
+                ? undefined
+                : item.dataKey?.toString()) ??
               "value";
             const itemConfig = getPayloadConfigFromPayload(config, item, key);
             const indicatorColor =
@@ -323,9 +323,9 @@ function ChartLegendContent({
         .map((item, index) => {
           const key =
             nameKey ??
-            (typeof item.dataKey !== "function"
-              ? item.dataKey?.toString()
-              : undefined) ??
+            (typeof item.dataKey === "function"
+              ? undefined
+              : item.dataKey?.toString()) ??
             "value";
           const itemConfig = getPayloadConfigFromPayload(config, item, key);
 

@@ -1,6 +1,8 @@
-import { type ClassValue, clsx } from "clsx";
+import { clsx } from "clsx";
 import { words } from "es-toolkit";
 import { twMerge } from "tailwind-merge";
+
+import type { ClassValue } from "clsx";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -9,7 +11,7 @@ export function cn(...inputs: ClassValue[]) {
 export function getInitials(value: string | null | undefined) {
   const wordList = words(value ?? "");
 
-  if (!wordList.length) {
+  if (wordList.length === 0) {
     return "";
   }
 
@@ -19,7 +21,7 @@ export function getInitials(value: string | null | undefined) {
 
   const [[firstInitial = ""] = "", [lastInitial = ""] = ""] = [
     wordList[0],
-    wordList[wordList.length - 1],
+    wordList.at(-1),
   ];
 
   return (firstInitial + lastInitial).toUpperCase();

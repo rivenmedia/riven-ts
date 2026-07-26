@@ -13,10 +13,12 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { use } from "react";
 
-import { type Step, useSteps } from "./_hooks/use-steps";
+import { useSteps } from "./_hooks/use-steps";
 import { SetupQualityStep } from "./_steps/quality";
 import { SetupReviewStep } from "./_steps/review";
 import { SetupWelcomeStep } from "./_steps/welcome";
+
+import type { Step } from "./_hooks/use-steps";
 
 const steps = [
   {

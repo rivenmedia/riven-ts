@@ -88,7 +88,7 @@ Default.test(
 
     await step("hover over trigger", async () => {
       await userEvent.hover(triggerBtn);
-      await waitFor(() =>
+      await waitFor(async () =>
         expect(
           canvasElement.ownerDocument.body.querySelector(
             "[data-radix-popper-content-wrapper]",

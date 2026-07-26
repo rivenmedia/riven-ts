@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import type { AuthProvider } from "@/app/_types/__generated__/graphql";
 
 const PasskeySigninButton = dynamic(
-  () =>
+  async () =>
     import("../_components/passkey-signin-button").then(
       (mod) => mod.PasskeySigninButton,
     ),

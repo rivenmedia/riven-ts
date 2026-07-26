@@ -16,7 +16,7 @@ export function PasskeySigninButton({
   handlePasskeySignIn,
 }: PasskeySigninButtonProps) {
   const supportsPasskey =
-    typeof window !== "undefined" && !!window.PublicKeyCredential;
+    typeof window !== "undefined" && Boolean(window.PublicKeyCredential);
 
   if (!supportsPasskey) {
     return null;

@@ -61,9 +61,9 @@ export function SetupQualityStep({
                   type="button"
                   variant="outline"
                   className="w-full"
-                  onClick={() =>
-                    toggleProfileEnabled(profile.id, !profile.enabled)
-                  }
+                  onClick={() => {
+                    toggleProfileEnabled(profile.id, !profile.enabled);
+                  }}
                 >
                   {profile.enabled ? "Selected" : "Enable"}
                 </Button>

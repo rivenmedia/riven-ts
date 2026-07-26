@@ -1,3 +1,4 @@
+// oxlint-disable typescript/no-unsafe-return
 /**
  * Plex OAuth Provider for Better Auth Generic OAuth Plugin
  *

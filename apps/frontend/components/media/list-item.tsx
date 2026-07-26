@@ -1,12 +1,13 @@
 import { cn } from "@/lib/utils";
 
 import Link from "next/link";
-import { type ComponentProps, useMemo } from "react";
+import { useMemo } from "react";
 
 import { Badge } from "../ui/badge";
 import { PortraitCard } from "./portrait-card";
 
 import type { MediaItem } from "@/app/_types/__generated__/graphql";
+import type { ComponentProps } from "react";
 
 interface ListItemProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,

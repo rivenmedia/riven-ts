@@ -1,4 +1,4 @@
-import { type ComponentProps, Suspense, use } from "react";
+import { Suspense, use } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import {
@@ -10,6 +10,8 @@ import {
 } from "../ui/carousel";
 import { ListItem } from "./list-item";
 import { PortraitCardSkeleton } from "./portrait-card-skeleton";
+
+import type { ComponentProps } from "react";
 
 interface ListCarouselProps {
   itemsPromise: Promise<ComponentProps<typeof ListItem>["mediaItem"][]>;
@@ -60,11 +62,15 @@ function ListCarouselInner({ itemsPromise, indexer }: ListCarouselProps) {
   );
 }
 
-export function ListCarousel(props: ListCarouselProps) {
+function ListCarouselErrorFallback() {
+  return <div>Error loading items</div>;
+}
+
+export function ListCarousel({ indexer, itemsPromise }: ListCarouselProps) {
   return (
-    <ErrorBoundary FallbackComponent={() => <div>Error loading items</div>}>
+    <ErrorBoundary FallbackComponent={ListCarouselErrorFallback}>
       <Suspense fallback={<ListCarouselSkeleton />}>
-        <ListCarouselInner {...props} />
+        <ListCarouselInner indexer={indexer} itemsPromise={itemsPromise} />
       </Suspense>
     </ErrorBoundary>
   );

@@ -11,24 +11,26 @@ import type { ErrorInfo } from "next/error";
 export default function GlobalErrorPage({ unstable_retry, error }: ErrorInfo) {
   const isBrowser = typeof window !== "undefined";
   const message = error.message || "Something went wrong";
-  const statusCode = parseInt(
+  const statusCode = Number.parseInt(
     /status code (\d+)/i.exec(message)?.[1] ?? "500",
     10,
   );
 
   function getMetadata() {
     switch (statusCode) {
-      case 400:
+      case 400: {
         return {
           title: "Bad request",
           detail: "The URL contains a value Riven cannot use.",
         };
+      }
       case 401:
-      case 403:
+      case 403: {
         return {
           title: "Access denied",
           detail: "Your account does not have permission to view this page.",
         };
+      }
     }
 
     if (statusCode >= 500) {
@@ -50,10 +52,10 @@ export default function GlobalErrorPage({ unstable_retry, error }: ErrorInfo) {
   return (
     <div className="relative isolate flex min-h-[calc(100vh-4rem)] items-center overflow-hidden px-4 py-16 md:px-10">
       <div className="absolute inset-0 -z-10">
-        <div className="bg-background absolute inset-0"></div>
-        <div className="via-primary/50 absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent to-transparent"></div>
-        <div className="bg-primary/10 absolute top-1/4 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full blur-[110px]"></div>
-        <div className="bg-accent/10 absolute right-0 bottom-0 h-72 w-72 rounded-full blur-[120px]"></div>
+        <div className="bg-background absolute inset-0" />
+        <div className="via-primary/50 absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent to-transparent" />
+        <div className="bg-primary/10 absolute top-1/4 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full blur-[110px]" />
+        <div className="bg-accent/10 absolute right-0 bottom-0 h-72 w-72 rounded-full blur-[120px]" />
       </div>
       <section className="mx-auto flex w-full max-w-4xl flex-col gap-8">
         <div className="flex flex-col gap-5">
@@ -71,7 +73,7 @@ export default function GlobalErrorPage({ unstable_retry, error }: ErrorInfo) {
             <h1 className="font-heading text-foreground text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
               {title}
             </h1>
-            <div className="bg-primary mt-3 h-1 w-16 rounded-full"></div>
+            <div className="bg-primary mt-3 h-1 w-16 rounded-full" />
           </div>
           <div className="max-w-2xl space-y-3">
             <p className="text-muted-foreground text-base leading-7 md:text-lg">

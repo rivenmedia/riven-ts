@@ -1,10 +1,12 @@
-import { type AnyHandler, http, passthrough } from "msw";
+import { http, passthrough } from "msw";
 import {
   applyRequestHandlers,
   initialize,
   mswLoader,
 } from "msw-storybook-addon";
 import { definePreviewAddon } from "storybook/internal/csf";
+
+import type { AnyHandler } from "msw";
 
 initialize();
 

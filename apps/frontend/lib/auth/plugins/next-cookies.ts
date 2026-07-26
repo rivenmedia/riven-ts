@@ -20,15 +20,15 @@ export const nextCookiesClientPlugin = {
             const { cookies, headers } = await import("next/headers");
             const headersStore = await headers();
             const cookieStore = await cookies();
-            const excludedHeaders = [
+            const excludedHeaders = new Set([
               "content-length",
               "content-type",
               "cookie",
-            ];
+            ]);
 
             // Forward request headers to the Better Auth client request
             for (const [header, value] of headersStore) {
-              if (excludedHeaders.includes(header.toLowerCase())) {
+              if (excludedHeaders.has(header.toLowerCase())) {
                 continue;
               }
 

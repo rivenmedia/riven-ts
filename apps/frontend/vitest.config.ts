@@ -4,7 +4,9 @@ import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import react from "@vitejs/plugin-react";
 import { playwright } from "@vitest/browser-playwright";
 import path from "node:path";
-import { type ViteUserConfig, defineConfig, mergeConfig } from "vitest/config";
+import { defineConfig, mergeConfig } from "vitest/config";
+
+import type { ViteUserConfig } from "vitest/config";
 
 export default defineConfig((config) => {
   const baseConfig = baseVitestConfig(config);

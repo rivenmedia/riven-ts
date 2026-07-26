@@ -48,7 +48,7 @@ test("navigates to the dashboard after non-admin user login", async ({
         userId: standardUser.id,
       });
 
-      assert(cookie);
+      assert.ok(cookie);
 
       const userRoleCookie = {
         name: "user_role",
@@ -105,7 +105,7 @@ test("does not navigate to the setup page after non-admin user login if setup is
         userId: standardUser.id,
       });
 
-      assert(cookie);
+      assert.ok(cookie);
 
       await context.addCookies([
         {
@@ -162,7 +162,7 @@ test("navigates to the setup page after admin user login if setup is required", 
         userId: adminUser.id,
       });
 
-      assert(cookie);
+      assert.ok(cookie);
 
       await context.addCookies([
         {

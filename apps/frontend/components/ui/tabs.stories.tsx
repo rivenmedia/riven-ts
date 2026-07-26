@@ -44,15 +44,15 @@ Default.test(
     const tabs = await canvas.findAllByRole("tab");
 
     for (const tab of tabs) {
-      await step(`click the '${tab.innerText}' tab`, async () => {
+      await step(`click the '${tab.textContent}' tab`, async () => {
         await userEvent.click(tab);
 
-        await waitFor(() =>
+        await waitFor(async () =>
           expect(tab).toHaveAttribute("aria-selected", "true"),
         );
 
         await expect(
-          canvas.queryByRole("tabpanel", { name: tab.innerText }),
+          canvas.queryByRole("tabpanel", { name: tab.textContent }),
         ).toBeVisible();
       });
 
@@ -61,7 +61,7 @@ Default.test(
           if (otherTab !== tab) {
             await expect(otherTab).toHaveAttribute("aria-selected", "false");
             await expect(
-              canvas.queryByRole("tabpanel", { name: otherTab.innerText }),
+              canvas.queryByRole("tabpanel", { name: otherTab.textContent }),
             ).toBeNull();
           }
         }

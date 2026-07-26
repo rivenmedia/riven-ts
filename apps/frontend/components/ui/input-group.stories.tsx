@@ -297,37 +297,35 @@ export const WithTooltips = meta.story({
  * Input groups also work with textarea components.
  */
 export const WithTextarea = meta.story({
-  render: (args) => {
-    return (
-      <div className="grid w-full max-w-md gap-4">
-        <InputGroup {...args}>
-          <InputGroupTextarea
-            id="textarea-code-32"
-            placeholder="console.log('Hello, world!');"
-            className="min-h-50"
-          />
-          <InputGroupAddon align="block-end" className="border-t">
-            <InputGroupText>Line 1, Column 1</InputGroupText>
-            <InputGroupButton size="sm" className="ml-auto" variant="default">
-              Run <CornerDownLeft />
-            </InputGroupButton>
-          </InputGroupAddon>
-          <InputGroupAddon align="block-start" className="border-b">
-            <InputGroupText className="font-medium font-mono">
-              <Code />
-              script.js
-            </InputGroupText>
-            <InputGroupButton className="ml-auto" size="icon-xs">
-              <RefreshCcw />
-            </InputGroupButton>
-            <InputGroupButton variant="ghost" size="icon-xs">
-              <Copy />
-            </InputGroupButton>
-          </InputGroupAddon>
-        </InputGroup>
-      </div>
-    );
-  },
+  render: (args) => (
+    <div className="grid w-full max-w-md gap-4">
+      <InputGroup {...args}>
+        <InputGroupTextarea
+          id="textarea-code-32"
+          placeholder="console.log('Hello, world!');"
+          className="min-h-50"
+        />
+        <InputGroupAddon align="block-end" className="border-t">
+          <InputGroupText>Line 1, Column 1</InputGroupText>
+          <InputGroupButton size="sm" className="ml-auto" variant="default">
+            Run <CornerDownLeft />
+          </InputGroupButton>
+        </InputGroupAddon>
+        <InputGroupAddon align="block-start" className="border-b">
+          <InputGroupText className="font-medium font-mono">
+            <Code />
+            script.js
+          </InputGroupText>
+          <InputGroupButton className="ml-auto" size="icon-xs">
+            <RefreshCcw />
+          </InputGroupButton>
+          <InputGroupButton variant="ghost" size="icon-xs">
+            <Copy />
+          </InputGroupButton>
+        </InputGroupAddon>
+      </InputGroup>
+    </div>
+  ),
 });
 
 /**

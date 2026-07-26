@@ -39,7 +39,7 @@ Default.test(
 
     await step("click the trigger to open the popover", async () => {
       await userEvent.click(
-        await canvasBody.findByRole("button", { name: /open/i }),
+        await canvasBody.findByRole("button", { name: /open/iu }),
       );
 
       await expect(await canvasBody.findByRole("dialog")).toBeInTheDocument();
@@ -47,7 +47,7 @@ Default.test(
 
     await step("click the trigger to close the popover", async () => {
       await userEvent.click(
-        await canvasBody.findByRole("button", { name: /open/i }),
+        await canvasBody.findByRole("button", { name: /open/iu }),
       );
 
       await expect(await canvasBody.findByRole("dialog")).toHaveAttribute(

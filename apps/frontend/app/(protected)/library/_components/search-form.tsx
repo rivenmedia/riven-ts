@@ -69,7 +69,7 @@ export function LibrarySearchForm() {
         </Field>
       </div>
 
-      <div className="mx-1 hidden h-6 w-px bg-white/10 md:block"></div>
+      <div className="mx-1 hidden h-6 w-px bg-white/10 md:block" />
 
       <Field className="min-w-25 space-y-0">
         <Controller

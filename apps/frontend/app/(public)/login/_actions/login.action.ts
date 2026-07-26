@@ -22,8 +22,8 @@ export const loginUser = actionClient
       }
 
       const { error } = await authClient.signIn.username({
-        username: username,
-        password: password,
+        username,
+        password,
       });
 
       if (error) {
