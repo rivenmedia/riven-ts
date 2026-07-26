@@ -9,7 +9,6 @@ const buildSection = (
   overrides: Partial<SectionDescriptor> & Pick<SectionDescriptor, "slug">,
 ): SectionDescriptor => ({
   id: `00000000-0000-0000-0000-00000000000${String(overrides.slug.length % 10)}`,
-  name: overrides.slug,
   mediaTypes: ["movie", "show"],
   split: true,
   enabled: true,
@@ -17,9 +16,6 @@ const buildSection = (
   rule: null,
   include: new Set(),
   exclude: new Set(),
-  createdAt: new Date(0),
-  updatedAt: null,
-  directories: [],
   ...overrides,
 });
 

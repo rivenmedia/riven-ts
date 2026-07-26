@@ -1,4 +1,4 @@
-import path from "node:path";
+import { buildLibraryRefreshPaths } from "@repo/util-plugin-sdk/helpers/library-refresh-paths";
 
 import packageJson from "../package.json" with { type: "json" };
 import { JellyfinAPI } from "./datasource/jellyfin.datasource.ts";
@@ -29,24 +29,10 @@ export const plugin: RivenPlugin = {
         );
       }
 
-      const sectionPathsSet = new Set<string>();
-
-      for (const entry of mediaEntries) {
-        const relativeDirectory = path.dirname(entry.path);
-
-        // Library sections mean one item can be visible at several paths, all
-        // of which need refreshing. Older events carry no directories, so the
-        // built-in root derived from the entry remains the fallback.
-        const roots = event.libraryDirectories?.length
-          ? event.libraryDirectories
-          : [entry.baseDirectory];
-
-        for (const root of roots) {
-          sectionPathsSet.add(path.join(root, relativeDirectory));
-        }
-      }
-
-      const sectionPaths = [...sectionPathsSet];
+      const sectionPaths = buildLibraryRefreshPaths(
+        mediaEntries,
+        event.libraryDirectories,
+      );
 
       await jellyfinAPI.updateSections(sectionPaths);
 

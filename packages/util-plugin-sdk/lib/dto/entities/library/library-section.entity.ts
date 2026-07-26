@@ -19,7 +19,6 @@ import { LibrarySectionOverride } from "./library-section-override.entity.ts";
 import type { LibrarySectionRule } from "../../../schemas/library-section/index.ts";
 import type { Opt } from "@mikro-orm/core";
 
-/** The media item types a section may be built from. */
 export type LibrarySectionMediaType = Extract<MediaItemType, "movie" | "show">;
 
 /**
@@ -47,8 +46,7 @@ export const LIBRARY_SECTION_SLUG_PATTERN =
 
 export const LIBRARY_SECTION_MAX_SLUG_LENGTH = 64;
 
-/** The layout of a section, as a pure function of its shape. */
-export interface LibrarySectionLayout {
+interface LibrarySectionLayout {
   slug: string;
   split: boolean;
   mediaTypes: LibrarySectionMediaType[];
@@ -57,8 +55,7 @@ export interface LibrarySectionLayout {
 /**
  * The single source of truth for a section's on-disk layout.
  *
- * Shared by the entity, the VFS path resolver and the media-server refresh
- * hooks so the three can never disagree about where an item lives.
+ * A subdirectory is collapsed when it would be the section root's only child.
  */
 export function librarySectionDirectoryFor(
   { slug, split, mediaTypes }: LibrarySectionLayout,
@@ -68,7 +65,6 @@ export function librarySectionDirectoryFor(
     return null;
   }
 
-  // A subdirectory would be the section root's only child, so it is collapsed.
   if (!split || mediaTypes.length === 1) {
     return slug;
   }
@@ -98,7 +94,6 @@ export class LibrarySection {
   @Matches(LIBRARY_SECTION_SLUG_PATTERN)
   public slug!: string;
 
-  /** Which media item types this section may contain. */
   @Field(() => [MediaItemType.enum])
   @Property({ type: "json" })
   @ArrayNotEmpty()
@@ -150,23 +145,12 @@ export class LibrarySection {
   @Property({ onUpdate: () => DateTime.utc().toJSDate() })
   public updatedAt?: Opt<Date> | null;
 
-  /**
-   * The directory a given media type lives in, or `null` if the section does
-   * not hold that type.
-   *
-   * @example getVfsDirectoryFor("movie") === "horror/movies"
-   * @example getVfsDirectoryFor("movie") === "anime-movies"
-   */
+  /** The directory a media type lives in, or `null` if the section excludes it. */
   public getVfsDirectoryFor(mediaType: LibrarySectionMediaType) {
     return librarySectionDirectoryFor(this, mediaType);
   }
 
-  /**
-   * Every directory this section exposes, relative to the VFS root.
-   *
-   * @example ["horror/movies", "horror/shows"]
-   * @example ["anime-movies"]
-   */
+  /** Every directory this section exposes, relative to the VFS root. */
   public getVfsDirectories(): string[] {
     // A flat section maps both media types onto the same directory, hence the
     // de-duplication.

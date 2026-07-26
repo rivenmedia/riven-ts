@@ -1,10 +1,12 @@
 import path from "node:path";
 
-import { PathInfo } from "./path-info.schema.ts";
-import { PersistentDirectory } from "./persistent-directory.schema.ts";
+import { PathInfo, parseProviderToken } from "./path-info.schema.ts";
+import {
+  MEDIA_TYPE_BY_NAMESPACE,
+  PersistentDirectory,
+} from "./persistent-directory.schema.ts";
 
 import type { SectionDescriptor } from "../../library-section/section-registry.ts";
-import type { LibrarySectionMediaType } from "@repo/util-plugin-sdk/dto/entities";
 
 /**
  * A resolved VFS path.
@@ -17,10 +19,8 @@ export type ResolvedVfsPath =
   /** A split section's own directory, listing its `movies` and `shows` children. */
   | { kind: "section-root"; section: SectionDescriptor }
   /**
-   * A flat section's own directory, listing its items directly.
-   *
-   * Distinct from `media` because a flat section may hold both media types, in
-   * which case its root merges two namespace listings and so cannot be
+   * A flat section's own directory. Distinct from `media` because it may hold
+   * both media types, so it merges two namespace listings and cannot be
    * described by a single `PathInfo`.
    */
   | { kind: "section-flat-root"; section: SectionDescriptor }
@@ -35,28 +35,22 @@ export type ResolvedVfsPath =
       pathInfo: PathInfo;
     };
 
-const mediaTypeFor = (namespace: string): LibrarySectionMediaType =>
-  namespace === "movies" ? "movie" : "show";
-
 /**
- * Infers the namespace for an entry inside a flat section.
+ * Infers the namespace for an entry inside a flat section, which has no
+ * `movies`/`shows` segment to read it from.
  *
- * Flat sections have no `movies`/`shows` segment, but every entry name carries
- * a provider token, and `determinePathType` already discriminates on exactly
- * those tokens. Episode files carry `{tvdb-N}` too, so this stays unambiguous
- * at every depth — which is what makes a flat section holding both media types
- * safe.
+ * Episode files carry `{tvdb-N}` as well as show directories, so this stays
+ * unambiguous at every depth — which is what makes a flat section holding both
+ * media types safe.
  */
 const inferNamespace = (segment: string) => {
-  if (segment.includes("{tmdb-")) {
-    return "movies";
+  const { tmdbId, tvdbId } = parseProviderToken(segment);
+
+  if (tmdbId !== undefined) {
+    return PersistentDirectory.enum.movies;
   }
 
-  if (segment.includes("{tvdb-")) {
-    return "shows";
-  }
-
-  return undefined;
+  return tvdbId === undefined ? undefined : PersistentDirectory.enum.shows;
 };
 
 /**
@@ -96,10 +90,6 @@ export const resolveVfsPath = (
     return null;
   }
 
-  if (section.mediaTypes.length === 0) {
-    return null;
-  }
-
   const isSplit = section.split && section.mediaTypes.length > 1;
 
   if (rest.length === 0) {
@@ -113,7 +103,9 @@ export const resolveVfsPath = (
   if (
     namespace === undefined ||
     !PersistentDirectory.safeParse(namespace).success ||
-    !section.mediaTypes.includes(mediaTypeFor(namespace))
+    !section.mediaTypes.includes(
+      MEDIA_TYPE_BY_NAMESPACE[namespace as PersistentDirectory],
+    )
   ) {
     return null;
   }

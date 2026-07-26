@@ -134,9 +134,7 @@ const buildStreamFacts = (
 /**
  * Flattens a media item into the shape the rule evaluator consumes.
  *
- * Everything provider-specific is normalised here so that `evaluateRule` can
- * stay a pure comparison over plain values. `activeStream` must already be
- * populated; nothing in this function touches the database.
+ * `activeStream` must already be populated; this touches no database.
  */
 export function buildItemFacts(
   item: Movie | Show,

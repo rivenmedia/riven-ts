@@ -14,12 +14,8 @@ export interface StreamFacts {
 
 /**
  * Everything a rule can be evaluated against, flattened and normalised ahead of
- * time.
- *
- * Strings are lowercased, dates are epoch milliseconds, and provider format
- * differences between movies and shows are already folded away. Keeping this a
- * plain object with no entity references is what makes `evaluateRule` pure —
- * see the note on that function.
+ * time: strings lowercased, dates as epoch milliseconds, and provider format
+ * differences between movies and shows already folded away.
  */
 export interface ItemFacts {
   id: UUID;

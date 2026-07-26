@@ -14,8 +14,10 @@ import {
 import { kebabCase } from "es-toolkit";
 
 import { BaseService } from "../core/base-service.ts";
+import { NAMESPACE_BY_MEDIA_TYPE } from "../vfs/schemas/persistent-directory.schema.ts";
 import { librarySectionRegistry } from "./section-registry.ts";
 
+import type { EntityData } from "@mikro-orm/core";
 import type { LibrarySectionMediaType } from "@repo/util-plugin-sdk/dto/entities";
 import type { LibrarySectionOverrideMode } from "@repo/util-plugin-sdk/dto/enums/library-section-override-mode.enum";
 import type { LibrarySectionRule } from "@repo/util-plugin-sdk/schemas/library-section/index";
@@ -44,9 +46,6 @@ export class LibrarySectionError extends Error {
 }
 
 /**
- * Derives the VFS directory name from a display name, or validates one the
- * caller supplied.
- *
  * A value that is already a legal slug is taken verbatim. Running `kebabCase`
  * unconditionally would mangle it — it splits at digit/letter boundaries, so an
  * explicit "4k-remux" would come back as "4-k-remux" and the caller could never
@@ -124,15 +123,16 @@ export class LibrarySectionService extends BaseService {
       await this.#assertSlugAvailable(slug);
     }
 
-    this.em.assign(section, {
-      ...(data.name !== undefined && { name: data.name }),
-      ...(slug !== undefined && { slug }),
-      ...(data.mediaTypes !== undefined && { mediaTypes: data.mediaTypes }),
-      ...(data.split !== undefined && { split: data.split }),
-      ...(data.rule !== undefined && { rule: data.rule }),
-      ...(data.enabled !== undefined && { enabled: data.enabled }),
-      ...(data.sortOrder !== undefined && { sortOrder: data.sortOrder }),
-    });
+    // `ignoreUndefined` skips absent fields but still applies an explicit
+    // `rule: null`, which is how a rule is cleared.
+    this.em.assign<LibrarySection>(
+      section,
+      {
+        ...data,
+        ...(slug !== undefined && { slug }),
+      } as EntityData<LibrarySection>,
+      { ignoreUndefined: true },
+    );
 
     await this.em.flush();
 
@@ -158,7 +158,6 @@ export class LibrarySectionService extends BaseService {
     return true;
   }
 
-  /** Applies `sortOrder` from the position of each id in the given list. */
   @CreateRequestContext()
   @Transactional()
   public async reorder(ids: UUID[]) {
@@ -175,7 +174,6 @@ export class LibrarySectionService extends BaseService {
     return sections;
   }
 
-  /** Upserts the manual decision for one item, replacing any existing one. */
   @CreateRequestContext()
   @Transactional()
   public async setOverride(
@@ -234,9 +232,14 @@ export class LibrarySectionService extends BaseService {
    */
   @CreateRequestContext()
   public async getVfsDirectoriesFor(mediaItemId: UUID): Promise<string[]> {
-    const membership = await librarySectionRegistry.membership(this.em);
-    const sections = await librarySectionRegistry.enabledSections(this.em);
-    const item = await this.em.findOne(MediaItem, { id: mediaItemId });
+    // The library changed to produce this call, so cached membership predates it.
+    librarySectionRegistry.invalidateMembership();
+
+    const [membership, sections, item] = await Promise.all([
+      librarySectionRegistry.membership(this.em),
+      librarySectionRegistry.enabledSections(this.em),
+      this.em.findOne(MediaItem, { id: mediaItemId }),
+    ]);
 
     if (!item) {
       return [];
@@ -246,7 +249,8 @@ export class LibrarySectionService extends BaseService {
     // resolves to the same token its show is keyed on.
     const isMovie = item instanceof Movie;
     const token = isMovie ? item.tmdbId : (item as { tvdbId?: string }).tvdbId;
-    const directories = new Set<string>([isMovie ? "movies" : "shows"]);
+    const mediaType = isMovie ? "movie" : "show";
+    const directories = new Set<string>([NAMESPACE_BY_MEDIA_TYPE[mediaType]]);
 
     if (token === undefined) {
       return [...directories];
@@ -264,10 +268,7 @@ export class LibrarySectionService extends BaseService {
         : sectionMembership.showTvdbIds.has(token);
 
       if (belongs) {
-        const directory = librarySectionDirectoryFor(
-          section,
-          isMovie ? "movie" : "show",
-        );
+        const directory = librarySectionDirectoryFor(section, mediaType);
 
         if (directory !== null) {
           directories.add(directory);

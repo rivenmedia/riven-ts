@@ -11,7 +11,10 @@ import Fuse from "@zkochan/fuse-native";
 import { DateTime } from "luxon";
 
 import { FuseError } from "../../../../vfs/errors/fuse-error.ts";
-import { librarySectionRegistry } from "../../library-section/section-registry.ts";
+import {
+  librarySectionRegistry,
+  membershipIncludes,
+} from "../../library-section/section-registry.ts";
 import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
 import { resolveVfsPath } from "../schemas/vfs-path.schema.ts";
 import { getEntry } from "./get-vfs-path-entry.ts";
@@ -141,19 +144,19 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
     throw new FuseError(Fuse.ENOENT, "Unable to parse path info");
   }
 
-  if (resolved.kind === "section-root") {
-    const { section } = resolved;
+  const membership = resolved.section
+    ? await librarySectionRegistry.membershipFor(em, resolved.section.id)
+    : null;
 
-    return getDirectoryStat(em, { type: "media" }, section.mediaTypes.length);
+  if (resolved.kind === "section-root") {
+    return getDirectoryStat(
+      em,
+      { type: "media" },
+      resolved.section.mediaTypes.length,
+    );
   }
 
   if (resolved.kind === "section-flat-root") {
-    const { section } = resolved;
-    const membership = await librarySectionRegistry.membershipFor(
-      em,
-      section.id,
-    );
-
     return getDirectoryStat(
       em,
       { type: "media" },
@@ -162,62 +165,41 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
     );
   }
 
-  const { section, pathInfo: info } = resolved;
+  const { pathInfo } = resolved;
 
   // A section namespace is the built-in listing restricted to its members, so
   // it shares the built-in stat shape with a filtered count.
   if (
-    section &&
-    (info.pathType === "all-movies" || info.pathType === "all-shows")
+    membership &&
+    (pathInfo.pathType === "all-movies" || pathInfo.pathType === "all-shows")
   ) {
-    const membership = await librarySectionRegistry.membershipFor(
-      em,
-      section.id,
-    );
-    const isMovies = info.pathType === "all-movies";
+    const isMovies = pathInfo.pathType === "all-movies";
 
     return getDirectoryStat(
       em,
       { type: "media", mediaItem: { type: isMovies ? "movie" : "episode" } },
-      isMovies
-        ? (membership?.movieTmdbIds.size ?? 0)
-        : (membership?.showTvdbIds.size ?? 0),
+      isMovies ? membership.movieTmdbIds.size : membership.showTvdbIds.size,
     );
   }
 
-  // Membership is checked straight off the parsed path, using the provider
-  // token already extracted from the entry name, so no query is needed.
-  if (section) {
-    const membership = await librarySectionRegistry.membershipFor(
-      em,
-      section.id,
+  if (membership && !membershipIncludes(membership, pathInfo)) {
+    throw new FuseError(
+      Fuse.ENOENT,
+      "Item is not a member of this library section",
     );
-
-    const belongs =
-      info.tmdbId === undefined
-        ? info.tvdbId === undefined ||
-          (membership?.showTvdbIds.has(info.tvdbId) ?? false)
-        : (membership?.movieTmdbIds.has(info.tmdbId) ?? false);
-
-    if (!belongs) {
-      throw new FuseError(
-        Fuse.ENOENT,
-        "Item is not a member of this library section",
-      );
-    }
   }
 
-  const entry = await getEntry(em, info);
+  const entry = await getEntry(em, pathInfo);
 
   if (!entry) {
     throw new FuseError(Fuse.ENOENT, "No VFS entry found");
   }
 
   const subDirectoryCount =
-    info.pathType === "show-seasons"
+    pathInfo.pathType === "show-seasons"
       ? await em.count(Season, {
           show: {
-            tvdbId: String(info.tvdbId),
+            tvdbId: String(pathInfo.tvdbId),
           },
           episodes: {
             filesystemEntries: {
@@ -239,7 +221,7 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
       ctime: entry.createdAt,
       atime: entry.updatedAt ?? entry.createdAt,
       mtime: entry.updatedAt ?? entry.createdAt,
-      ...(isFileEntry && info.isFile
+      ...(isFileEntry && pathInfo.isFile
         ? {
             size: await getEntryFileSize(entry),
             mode: "file",

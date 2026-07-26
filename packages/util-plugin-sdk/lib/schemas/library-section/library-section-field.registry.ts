@@ -3,20 +3,6 @@ import { Resolution } from "@repo/util-rank-torrent-name";
 import { MediaItemContentRating } from "../../dto/enums/content-ratings.enum.ts";
 import { MediaItemState } from "../../dto/enums/media-item-state.enum.ts";
 
-/**
- * The value shape of a rule field, which determines the operators it accepts
- * and which branch of the evaluator handles it.
- */
-export const LibrarySectionFieldKind = [
-  "string",
-  "stringArray",
-  "number",
-  "date",
-  "boolean",
-] as const;
-
-export type LibrarySectionFieldKind = (typeof LibrarySectionFieldKind)[number];
-
 export const OPERATORS_BY_KIND = {
   string: ["eq", "neq", "in", "nin", "contains", "startsWith", "endsWith"],
   stringArray: [
@@ -29,7 +15,13 @@ export const OPERATORS_BY_KIND = {
   number: ["eq", "neq", "gt", "gte", "lt", "lte", "between"],
   date: ["before", "after", "between", "inLastDays"],
   boolean: ["is"],
-} as const satisfies Record<LibrarySectionFieldKind, readonly string[]>;
+} as const;
+
+/**
+ * The value shape of a rule field, which determines the operators it accepts
+ * and which branch of the evaluator handles it.
+ */
+export type LibrarySectionFieldKind = keyof typeof OPERATORS_BY_KIND;
 
 export interface LibrarySectionFieldDefinition {
   kind: LibrarySectionFieldKind;

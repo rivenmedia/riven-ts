@@ -147,7 +147,6 @@ const COUNTRY_ALPHA_3_TO_ALPHA_2 = new Map([
   ["zaf", "za"],
 ]);
 
-/** Lowercases and trims, mapping empty strings to null. */
 export const normaliseText = (value: string | null | undefined) => {
   const normalised = value?.trim().toLowerCase();
 
@@ -158,7 +157,6 @@ export const normaliseText = (value: string | null | undefined) => {
   return normalised;
 };
 
-/** Lowercases, trims and de-duplicates, preserving order. */
 export const normaliseTextList = (
   values: readonly string[] | null | undefined,
 ) => [

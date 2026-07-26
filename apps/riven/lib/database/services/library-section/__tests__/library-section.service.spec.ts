@@ -221,8 +221,8 @@ describe("membership", () => {
       section.id,
     );
 
-    expect(membership?.movieTmdbIds.has(matching.tmdbId)).toBe(true);
-    expect(membership?.movieTmdbIds.has(other.tmdbId)).toBe(false);
+    expect(membership.movieTmdbIds.has(matching.tmdbId)).toBe(true);
+    expect(membership.movieTmdbIds.has(other.tmdbId)).toBe(false);
   });
 
   it("matches movie genres despite their provider casing", async ({
@@ -251,7 +251,7 @@ describe("membership", () => {
       section.id,
     );
 
-    expect(membership?.movieTmdbIds.has(movie.tmdbId)).toBe(true);
+    expect(membership.movieTmdbIds.has(movie.tmdbId)).toBe(true);
   });
 
   it("accepts everything of its media types when it has no rule", async ({
@@ -272,7 +272,7 @@ describe("membership", () => {
       section.id,
     );
 
-    expect(membership?.movieTmdbIds.has(movie.tmdbId)).toBe(true);
+    expect(membership.movieTmdbIds.has(movie.tmdbId)).toBe(true);
   });
 
   it("ignores items that have no media file", async ({
@@ -293,7 +293,7 @@ describe("membership", () => {
       section.id,
     );
 
-    expect(membership?.movieTmdbIds.has(scraped.movie.tmdbId)).toBe(false);
+    expect(membership.movieTmdbIds.has(scraped.movie.tmdbId)).toBe(false);
   });
 
   it("keeps shows out of a movies-only section", async ({
@@ -313,7 +313,7 @@ describe("membership", () => {
     );
 
     expect(
-      membership?.showTvdbIds.has(completedShowContext.completedShow.tvdbId),
+      membership.showTvdbIds.has(completedShowContext.completedShow.tvdbId),
     ).toBe(false);
   });
 
@@ -334,7 +334,7 @@ describe("membership", () => {
     );
 
     expect(
-      membership?.showTvdbIds.has(completedShowContext.completedShow.tvdbId),
+      membership.showTvdbIds.has(completedShowContext.completedShow.tvdbId),
     ).toBe(true);
   });
 
@@ -393,7 +393,7 @@ describe("overrides", () => {
       section.id,
     );
 
-    expect(membership?.movieTmdbIds.has(movie.tmdbId)).toBe(true);
+    expect(membership.movieTmdbIds.has(movie.tmdbId)).toBe(true);
   });
 
   it("forces a matching item out of the section", async ({
@@ -422,7 +422,7 @@ describe("overrides", () => {
       section.id,
     );
 
-    expect(membership?.movieTmdbIds.has(movie.tmdbId)).toBe(false);
+    expect(membership.movieTmdbIds.has(movie.tmdbId)).toBe(false);
   });
 
   it("replaces an existing override rather than conflicting with it", async ({
@@ -456,7 +456,7 @@ describe("overrides", () => {
       section.id,
     );
 
-    expect(membership?.movieTmdbIds.has(movie.tmdbId)).toBe(true);
+    expect(membership.movieTmdbIds.has(movie.tmdbId)).toBe(true);
   });
 
   it("restores rule-driven membership when cleared", async ({
@@ -486,7 +486,7 @@ describe("overrides", () => {
       section.id,
     );
 
-    expect(membership?.movieTmdbIds.has(movie.tmdbId)).toBe(true);
+    expect(membership.movieTmdbIds.has(movie.tmdbId)).toBe(true);
   });
 });
 
@@ -511,7 +511,7 @@ describe("cache invalidation", () => {
       section.id,
     );
 
-    expect(before?.movieTmdbIds.has(movie.tmdbId)).toBe(false);
+    expect(before.movieTmdbIds.has(movie.tmdbId)).toBe(false);
 
     await services.librarySectionService.update(section.id, {
       rule: {
@@ -527,7 +527,7 @@ describe("cache invalidation", () => {
       section.id,
     );
 
-    expect(after?.movieTmdbIds.has(movie.tmdbId)).toBe(true);
+    expect(after.movieTmdbIds.has(movie.tmdbId)).toBe(true);
   });
 
   it("drops a disabled section from the enabled listing", async ({

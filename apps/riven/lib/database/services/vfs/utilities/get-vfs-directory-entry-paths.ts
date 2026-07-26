@@ -6,7 +6,10 @@ import {
   membershipIncludesEntryName,
 } from "../../library-section/section-registry.ts";
 import { PathInfo } from "../schemas/path-info.schema.ts";
-import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
+import {
+  NAMESPACE_BY_MEDIA_TYPE,
+  PersistentDirectory,
+} from "../schemas/persistent-directory.schema.ts";
 import { resolveVfsPath } from "../schemas/vfs-path.schema.ts";
 import { getMoviesDirectoryEntries } from "./get-movies-directory-entries.ts";
 import { getShowsDirectoryEntries } from "./get-shows-directory-entries.ts";
@@ -59,32 +62,25 @@ export async function getVfsDirectoryEntryPaths(
     }
 
     case "section-root": {
-      return resolved.section.mediaTypes.map((mediaType) =>
-        mediaType === "movie" ? "movies" : "shows",
+      return resolved.section.mediaTypes.map(
+        (mediaType) => NAMESPACE_BY_MEDIA_TYPE[mediaType],
       );
     }
 
     case "section-flat-root": {
-      // A flat section has no movies/shows level, so its root merges the
-      // listings of every media type it holds.
       const { section } = resolved;
       const membership = await librarySectionRegistry.membershipFor(
         em,
         section.id,
       );
 
-      if (!membership) {
-        return [];
-      }
-
       const listings = await Promise.all(
-        section.mediaTypes.map(async (mediaType) => {
-          const pathInfo = PathInfo.parse(
-            mediaType === "movie" ? "/movies" : "/shows",
-          );
-
-          return getNamespaceEntries(em, pathInfo);
-        }),
+        section.mediaTypes.map(async (mediaType) =>
+          getNamespaceEntries(
+            em,
+            PathInfo.parse(`/${NAMESPACE_BY_MEDIA_TYPE[mediaType]}`),
+          ),
+        ),
       );
 
       return listings
@@ -111,10 +107,6 @@ export async function getVfsDirectoryEntryPaths(
         em,
         section.id,
       );
-
-      if (!membership) {
-        return [];
-      }
 
       return entries.filter((entry) =>
         membershipIncludesEntryName(membership, entry),

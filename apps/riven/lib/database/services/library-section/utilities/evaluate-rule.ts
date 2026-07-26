@@ -6,28 +6,36 @@ import { normaliseText } from "./normalise.ts";
 
 import type { ItemFacts, StreamFacts } from "./item-facts.ts";
 import type {
+  FieldOfKind,
   LibrarySectionCondition,
+  LibrarySectionFieldKind,
   LibrarySectionRule,
 } from "@repo/util-plugin-sdk/schemas/library-section/index";
 
 const MILLISECONDS_PER_DAY = 86_400_000;
 
-type FactValue = string | string[] | number | boolean | null;
-
 const STREAM_FIELD_PREFIX = "stream.";
+
+/**
+ * The conditions naming a field of the given kind.
+ *
+ * The per-kind field sets are disjoint, so this narrows each evaluator to
+ * exactly the operators and value types its schema branch permits — which is
+ * what keeps the switches below exhaustive and free of value casts.
+ */
+type ConditionOfKind<Kind extends LibrarySectionFieldKind> = Extract<
+  LibrarySectionCondition,
+  { field: FieldOfKind<Kind> }
+>;
 
 const readField = (
   field: LibrarySectionCondition["field"],
   facts: ItemFacts,
-): FactValue => {
+) => {
   if (field.startsWith(STREAM_FIELD_PREFIX)) {
-    if (!facts.stream) {
-      return null;
-    }
-
     const key = field.slice(STREAM_FIELD_PREFIX.length) as keyof StreamFacts;
 
-    return facts.stream[key];
+    return facts.stream?.[key] ?? null;
   }
 
   return facts[field as Exclude<typeof field, `stream.${string}`>];
@@ -41,109 +49,95 @@ const readField = (
  */
 const evaluateString = (
   actual: string | null,
-  op: string,
-  value: string | string[],
+  condition: ConditionOfKind<"string">,
 ): boolean => {
   if (actual === null) {
-    return op === "neq" || op === "nin";
+    return condition.op === "neq" || condition.op === "nin";
   }
 
-  switch (op) {
+  switch (condition.op) {
     case "eq": {
-      return actual === normaliseText(value as string);
+      return actual === normaliseText(condition.value);
     }
     case "neq": {
-      return actual !== normaliseText(value as string);
+      return actual !== normaliseText(condition.value);
     }
     case "in": {
-      return (value as string[]).some((item) => normaliseText(item) === actual);
+      return condition.value.some((item) => normaliseText(item) === actual);
     }
     case "nin": {
-      return !(value as string[]).some(
-        (item) => normaliseText(item) === actual,
-      );
+      return !condition.value.some((item) => normaliseText(item) === actual);
     }
     case "contains": {
-      return actual.includes(normaliseText(value as string) ?? "");
+      return actual.includes(normaliseText(condition.value) ?? "");
     }
     case "startsWith": {
-      return actual.startsWith(normaliseText(value as string) ?? "");
+      return actual.startsWith(normaliseText(condition.value) ?? "");
     }
     case "endsWith": {
-      return actual.endsWith(normaliseText(value as string) ?? "");
-    }
-    default: {
-      return false;
+      return actual.endsWith(normaliseText(condition.value) ?? "");
     }
   }
 };
 
 const evaluateStringArray = (
   actual: string[] | null,
-  op: string,
-  value: string | string[] | boolean,
+  condition: ConditionOfKind<"stringArray">,
 ): boolean => {
   const values = actual ?? [];
   const has = (candidate: string) =>
     values.includes(normaliseText(candidate) ?? "");
 
-  switch (op) {
+  switch (condition.op) {
     case "includes": {
-      return has(value as string);
+      return has(condition.value);
     }
     case "excludes": {
-      return !has(value as string);
+      return !has(condition.value);
     }
     case "includesAll": {
-      return (value as string[]).every((item) => has(item));
+      return condition.value.every((item) => has(item));
     }
     case "includesAny": {
-      return (value as string[]).some((item) => has(item));
+      return condition.value.some((item) => has(item));
     }
     case "isEmpty": {
-      return (values.length === 0) === (value as boolean);
-    }
-    default: {
-      return false;
+      return (values.length === 0) === condition.value;
     }
   }
 };
 
 const evaluateNumber = (
   actual: number | null,
-  op: string,
-  value: number | [number, number],
+  condition: ConditionOfKind<"number">,
 ): boolean => {
   if (actual === null) {
-    return op === "neq";
+    return condition.op === "neq";
   }
 
-  switch (op) {
+  switch (condition.op) {
     case "eq": {
-      return actual === value;
+      return actual === condition.value;
     }
     case "neq": {
-      return actual !== value;
+      return actual !== condition.value;
     }
     case "gt": {
-      return actual > (value as number);
+      return actual > condition.value;
     }
     case "gte": {
-      return actual >= (value as number);
+      return actual >= condition.value;
     }
     case "lt": {
-      return actual < (value as number);
+      return actual < condition.value;
     }
     case "lte": {
-      return actual <= (value as number);
+      return actual <= condition.value;
     }
     case "between": {
-      const [minimum, maximum] = value as [number, number];
+      const [minimum, maximum] = condition.value;
 
       return actual >= minimum && actual <= maximum;
-    }
-    default: {
-      return false;
     }
   }
 };
@@ -158,31 +152,27 @@ const toEpoch = (value: string) =>
 
 const evaluateDate = (
   actual: number | null,
-  op: string,
-  value: string | [string, string] | number,
+  condition: ConditionOfKind<"date">,
   now: number,
 ): boolean => {
   if (actual === null) {
     return false;
   }
 
-  switch (op) {
+  switch (condition.op) {
     case "before": {
-      return actual < toEpoch(value as string);
+      return actual < toEpoch(condition.value);
     }
     case "after": {
-      return actual > toEpoch(value as string);
+      return actual > toEpoch(condition.value);
     }
     case "between": {
-      const [from, to] = value as [string, string];
+      const [from, to] = condition.value;
 
       return actual >= toEpoch(from) && actual <= toEpoch(to);
     }
     case "inLastDays": {
-      return actual >= now - (value as number) * MILLISECONDS_PER_DAY;
-    }
-    default: {
-      return false;
+      return actual >= now - condition.value * MILLISECONDS_PER_DAY;
     }
   }
 };
@@ -199,29 +189,25 @@ const evaluateCondition = (
     case "string": {
       return evaluateString(
         actual as string | null,
-        condition.op,
-        condition.value as string | string[],
+        condition as ConditionOfKind<"string">,
       );
     }
     case "stringArray": {
       return evaluateStringArray(
         actual as string[] | null,
-        condition.op,
-        condition.value as string | string[] | boolean,
+        condition as ConditionOfKind<"stringArray">,
       );
     }
     case "number": {
       return evaluateNumber(
         actual as number | null,
-        condition.op,
-        condition.value as number | [number, number],
+        condition as ConditionOfKind<"number">,
       );
     }
     case "date": {
       return evaluateDate(
         actual as number | null,
-        condition.op,
-        condition.value as string | [string, string] | number,
+        condition as ConditionOfKind<"date">,
         now,
       );
     }
@@ -234,10 +220,7 @@ const evaluateCondition = (
 /**
  * Evaluates a library section rule tree against a pre-built facts object.
  *
- * PURE AND SYNCHRONOUS BY CONTRACT. No I/O, no entity access, and no reading
- * the clock — `now` is injected. This is the seam that lets section membership
- * be materialised into a join table later without touching any rule semantics:
- * a materialiser is just this function in a loop over persisted facts.
+ * Pure and synchronous: no I/O, no entity access, and the clock is injected.
  *
  * @param rule The tree to evaluate. `null` matches everything.
  * @param now Epoch milliseconds, used by the `inLastDays` operator.

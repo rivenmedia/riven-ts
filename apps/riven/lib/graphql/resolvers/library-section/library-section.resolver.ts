@@ -64,6 +64,21 @@ async function withUserErrors<T>(operation: () => Promise<T>): Promise<T> {
   }
 }
 
+const RULE_JSON_SCHEMA = z.toJSONSchema(LibrarySectionRuleRoot, {
+  io: "input",
+});
+
+const FIELD_INFO: LibrarySectionFieldInfo[] = Object.entries(
+  LIBRARY_SECTION_FIELDS,
+).map(([name, definition]) => ({
+  name,
+  kind: definition.kind,
+  operators: [...OPERATORS_BY_KIND[definition.kind]],
+  values: "values" in definition ? [...definition.values] : undefined,
+  appliesTo: "appliesTo" in definition ? [...definition.appliesTo] : undefined,
+  description: definition.description,
+}));
+
 @Resolver(() => LibrarySection)
 export class LibrarySectionResolver {
   @Query(() => [LibrarySection], {
@@ -91,17 +106,7 @@ export class LibrarySectionResolver {
       "Every field a rule can filter on, with its operators and known values. Lets a rule editor be built without hardcoding the field set.",
   })
   public librarySectionFields(): LibrarySectionFieldInfo[] {
-    return Object.entries(LIBRARY_SECTION_FIELDS).map(
-      ([name, definition]): LibrarySectionFieldInfo => ({
-        name,
-        kind: definition.kind,
-        operators: [...OPERATORS_BY_KIND[definition.kind]],
-        values: "values" in definition ? [...definition.values] : undefined,
-        appliesTo:
-          "appliesTo" in definition ? [...definition.appliesTo] : undefined,
-        description: definition.description,
-      }),
-    );
+    return FIELD_INFO;
   }
 
   @Query(() => JSONObjectResolver, {
@@ -109,7 +114,7 @@ export class LibrarySectionResolver {
       "JSON Schema for the rule tree, for clients that prefer to validate locally.",
   })
   public librarySectionRuleSchema(): Record<string, unknown> {
-    return z.toJSONSchema(LibrarySectionRuleRoot, { io: "input" });
+    return RULE_JSON_SCHEMA;
   }
 
   @Query(() => LibrarySectionRuleValidation, {
@@ -143,16 +148,10 @@ export class LibrarySectionResolver {
     @Arg("input", () => CreateLibrarySectionInput)
     input: CreateLibrarySectionInput,
   ): Promise<LibrarySection> {
+    const { rule, ...rest } = input;
+
     return withUserErrors(async () =>
-      services.librarySectionService.create({
-        name: input.name,
-        mediaTypes: input.mediaTypes,
-        split: input.split,
-        enabled: input.enabled,
-        sortOrder: input.sortOrder,
-        rule: parseRule(input.rule),
-        ...(input.slug !== undefined && { slug: input.slug }),
-      }),
+      services.librarySectionService.create({ ...rest, rule: parseRule(rule) }),
     );
   }
 
@@ -162,21 +161,13 @@ export class LibrarySectionResolver {
     @Arg("input", () => UpdateLibrarySectionInput)
     input: UpdateLibrarySectionInput,
   ): Promise<LibrarySection> {
-    const { id, rule } = input;
+    const { id, rule, ...rest } = input;
 
-    // Only fields actually supplied are forwarded, so an omitted field is left
-    // untouched rather than being overwritten with undefined. For `rule`, this
-    // is also what distinguishes "not supplied" from "explicitly cleared".
+    // `rule` is spread only when supplied, which is what distinguishes "not
+    // supplied" from "explicitly cleared".
     return withUserErrors(async () =>
       services.librarySectionService.update(id, {
-        ...(input.name !== undefined && { name: input.name }),
-        ...(input.slug !== undefined && { slug: input.slug }),
-        ...(input.mediaTypes !== undefined && {
-          mediaTypes: input.mediaTypes,
-        }),
-        ...(input.split !== undefined && { split: input.split }),
-        ...(input.enabled !== undefined && { enabled: input.enabled }),
-        ...(input.sortOrder !== undefined && { sortOrder: input.sortOrder }),
+        ...rest,
         ...(rule !== undefined && { rule: parseRule(rule) }),
       }),
     );
