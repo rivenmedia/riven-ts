@@ -1,5 +1,3 @@
-import assert from "node:assert";
-
 import { GET_AUTH_PROVIDERS } from "@/app/(public)/login/_queries/get-auth-providers.query";
 import { GET_INSTANCE_SETUP_REQUIRED } from "@/app/_queries/get-instance-setup-required.query";
 import {
@@ -10,6 +8,8 @@ import {
   test,
 } from "@/playwright/fixtures";
 import { serialiseCookie } from "@/playwright/serialise-cookie";
+
+import assert from "node:assert";
 
 import type { UserWithRole } from "better-auth/client/plugins";
 import type { TestCookie } from "better-auth/plugins";

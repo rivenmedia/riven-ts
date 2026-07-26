@@ -1,8 +1,8 @@
 "use client";
 
-import { Fingerprint, StarIcon } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
+
+import { Fingerprint, StarIcon } from "lucide-react";
 
 interface PasskeySigninButtonProps {
   lastLoginMethod: string | null;

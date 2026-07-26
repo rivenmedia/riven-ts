@@ -1,5 +1,3 @@
-import { expect, userEvent, within } from "storybook/test";
-
 import { preview } from "@/.storybook/preview";
 import {
   Sheet,
@@ -11,6 +9,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+
+import { expect, userEvent, within } from "storybook/test";
 
 /**
  * Extends the Dialog component to display content that complements the main

@@ -288,8 +288,7 @@ export function plexOAuth(
         throw new Error("Invalid PIN code format, expected pinId:pinCode");
       }
 
-      const pinId = parts[0];
-      const pinCode = parts[1];
+      const [pinId, pinCode] = parts;
 
       if (!pinId || !pinCode) {
         throw new Error("PIN ID and PIN code are required for token exchange");

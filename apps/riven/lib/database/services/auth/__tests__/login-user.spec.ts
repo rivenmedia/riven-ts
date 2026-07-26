@@ -4,7 +4,7 @@ import { it } from "../../../../__tests__/test-context.ts";
 import { Session, User } from "../../../entities/index.ts";
 
 it("logs in a user with valid credentials", async ({ services, em }) => {
-  await services.userService.registerUser({
+  await services.authService.registerUser({
     username: "admin",
     email: "admin@example.com",
     password: "admin",
@@ -13,7 +13,7 @@ it("logs in a user with valid credentials", async ({ services, em }) => {
   const username = "testuser";
   const password = "password123";
 
-  await services.userService.registerUser({
+  await services.authService.registerUser({
     username,
     email: "testuser@example.com",
     password,
@@ -25,11 +25,11 @@ it("logs in a user with valid credentials", async ({ services, em }) => {
 
   await em.flush();
 
-  const getSessionCount = () => em.count(Session, { user: user.id });
+  const getSessionCount = async () => em.count(Session, { user: user.id });
 
   await expect(getSessionCount()).resolves.toBe(0);
 
-  await services.userService.loginUser({ username, password });
+  await services.authService.loginUser({ username, password });
 
   await expect(getSessionCount()).resolves.toBe(1);
 });
@@ -37,16 +37,16 @@ it("logs in a user with valid credentials", async ({ services, em }) => {
 it("throws an error when provided invalid credentials", async ({
   services,
 }) => {
-  await services.userService.registerUser({
+  await services.authService.registerUser({
     username: "admin",
     email: "admin@example.com",
     password: "admin",
   });
 
   await expect(
-    services.userService.loginUser({
+    services.authService.loginUser({
       username: "admin",
       password: "wrongpassword",
     }),
-  ).rejects.toThrow(/invalid username or password/i);
+  ).rejects.toThrow(/invalid username or password/iu);
 });

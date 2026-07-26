@@ -1,4 +1,4 @@
-import { Collection, type Opt } from "@mikro-orm/core";
+import { Collection } from "@mikro-orm/core";
 import {
   Entity,
   OneToMany,
@@ -6,81 +6,84 @@ import {
   Property,
   Unique,
 } from "@mikro-orm/decorators/legacy";
-import { type UUID, randomUUID } from "crypto";
 import { DateTime } from "luxon";
+import { randomUUID } from "node:crypto";
 import { Field, ID, ObjectType } from "type-graphql";
 
 import { Account, Passkey, Session } from "./index.ts";
+
+import type { Opt } from "@mikro-orm/core";
+import type { UUID } from "node:crypto";
 
 @Entity()
 @ObjectType()
 export class User {
   @Field(() => ID)
   @PrimaryKey({ type: "uuid" })
-  id: UUID = randomUUID();
+  public id: UUID = randomUUID();
 
   @Field()
   @Property()
-  name!: string;
+  public name!: string;
 
   @Field()
   @Property({ unique: true })
-  email!: string;
+  public email!: string;
 
   @Field()
   @Property({ default: false })
-  emailVerified!: boolean;
+  public emailVerified!: boolean;
 
   @Field()
   @Property()
-  image?: string;
+  public image?: string;
 
   @Field(() => Date)
   @Property()
-  createdAt: Opt<Date> = DateTime.utc().toJSDate();
+  public createdAt: Opt<Date> = DateTime.utc().toJSDate();
 
   @Field(() => Date)
   @Property({ onUpdate: () => DateTime.utc().toJSDate() })
-  updatedAt!: Opt<Date>;
+  public updatedAt!: Opt<Date>;
 
   @Field()
   @Property()
   @Unique()
-  username?: string;
+  public username?: string;
 
   @Field()
   @Property()
-  displayUsername?: string;
+  public displayUsername?: string;
 
   @Field()
   @Property()
-  role?: string;
+  public role?: string;
 
   @Field()
   @Property({ default: false })
-  banned!: boolean;
+  public banned!: boolean;
 
   @Field()
   @Property()
-  banReason?: string;
+  public banReason?: string;
 
   @Field(() => Date, { nullable: true })
   @Property()
-  banExpires?: Date | null;
+  public banExpires?: Date | null;
 
   @Field()
   @Property()
-  lastLoginMethod?: string;
+  public lastLoginMethod?: string;
 
   @Field(() => [Session])
   @OneToMany(() => Session, (session) => session.user, { orphanRemoval: true })
-  sessions = new Collection<Session>(this);
+  public sessions = new Collection<Session>(this);
 
   @Field(() => [Account])
   @OneToMany(() => Account, (account) => account.user, { orphanRemoval: true })
-  accounts = new Collection<Account>(this);
+  public accounts = new Collection<Account>(this);
 
   @Field(() => [Passkey])
   @OneToMany(() => Passkey, (passkey) => passkey.user, { orphanRemoval: true })
-  passkeys = new Collection<Passkey>(this);
+  public passkeys = new Collection<Passkey>(this);
 }

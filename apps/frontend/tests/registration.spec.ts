@@ -1,5 +1,3 @@
-import assert from "node:assert";
-
 import { GET_AUTH_PROVIDERS } from "@/app/(public)/login/_queries/get-auth-providers.query";
 import {
   HttpResponse,
@@ -8,6 +6,8 @@ import {
   http,
   test,
 } from "@/playwright/fixtures";
+
+import assert from "node:assert";
 
 import type { UserWithRole } from "better-auth/client/plugins";
 
@@ -39,7 +39,7 @@ test("navigates to the dashboard after registration", async ({
         userId: standardUser.id,
       });
 
-      assert(cookie);
+      assert.ok(cookie);
 
       await context.addCookies([
         {
@@ -63,18 +63,20 @@ test("navigates to the dashboard after registration", async ({
 
   await page.goto("/login");
 
-  await page.getByRole("tab", { name: /register/i }).click();
+  await page.getByRole("tab", { name: /register/iu }).click();
 
-  await page.getByRole("textbox", { name: /username/i }).fill("username");
-  await page.getByRole("textbox", { name: /email/i }).fill("email@example.com");
-  await page.getByRole("textbox", { name: /^password$/i }).fill("password");
+  await page.getByRole("textbox", { name: /username/iu }).fill("username");
   await page
-    .getByRole("textbox", { name: /confirm password/i })
+    .getByRole("textbox", { name: /email/iu })
+    .fill("email@example.com");
+  await page.getByRole("textbox", { name: /^password$/iu }).fill("password");
+  await page
+    .getByRole("textbox", { name: /confirm password/iu })
     .fill("password");
 
-  await page.getByRole("button", { name: /submit/i }).click();
+  await page.getByRole("button", { name: /submit/iu }).click();
 
-  await expect(page.getByText(/registration successful/i)).toBeVisible();
+  await expect(page.getByText(/registration successful/iu)).toBeVisible();
 
   await expect(page).toHaveURL("/");
 });

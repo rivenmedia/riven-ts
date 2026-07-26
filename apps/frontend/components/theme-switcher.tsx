@@ -1,6 +1,3 @@
-import { Check, Palette } from "lucide-react";
-import { useTheme } from "next-themes";
-
 import { themes } from "@/components/providers/theme-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +15,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+
+import { Check, Palette } from "lucide-react";
+import { useTheme } from "next-themes";
 
 export function ThemeSwitcher() {
   const { setTheme, theme } = useTheme();

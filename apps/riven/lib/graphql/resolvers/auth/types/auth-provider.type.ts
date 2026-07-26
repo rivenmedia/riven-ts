@@ -5,17 +5,17 @@ import type { AuthProvider as IAuthProvider } from "../../../../auth/get-auth-pr
 @ObjectType()
 export class AuthProvider implements IAuthProvider {
   @Field()
-  key!: string;
+  public key!: string;
 
   @Field()
-  enabled!: boolean;
+  public enabled!: boolean;
 
   @Field()
-  disableSignup!: boolean;
+  public disableSignup!: boolean;
 
   @Field({ nullable: true })
-  name?: string;
+  public name?: string;
 
   @Field(() => String, { nullable: true })
-  icon?: string | undefined;
+  public icon?: string | undefined;
 }

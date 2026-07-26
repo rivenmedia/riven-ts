@@ -1,6 +1,6 @@
-import { faker } from "@faker-js/faker";
-
 import preview from "@/.storybook/preview";
+
+import { faker } from "@faker-js/faker";
 
 import { ListCarousel } from "./list-carousel";
 

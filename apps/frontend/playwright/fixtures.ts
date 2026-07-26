@@ -1,16 +1,20 @@
-import { type Session, betterAuth } from "better-auth";
+import { betterAuth } from "better-auth";
 import { getSessionCookie } from "better-auth/cookies";
-import { type TestHelpers, testUtils } from "better-auth/plugins";
+import { testUtils } from "better-auth/plugins";
 import { DateTime } from "luxon";
 import {
-  type DefaultBodyType,
   HttpResponse,
-  type PathParams,
   test as baseTest,
   http,
 } from "next/experimental/testmode/playwright/msw";
 
+import type { Session } from "better-auth";
 import type { UserWithRole } from "better-auth/client/plugins";
+import type { TestHelpers } from "better-auth/plugins";
+import type {
+  DefaultBodyType,
+  PathParams,
+} from "next/experimental/testmode/playwright/msw";
 import type { SetReturnType } from "type-fest";
 
 export * from "next/experimental/testmode/playwright/msw";
@@ -58,9 +62,9 @@ export const test = baseTest.extend<Fixtures>({
       },
     });
 
-    const { test } = await instance.$context;
+    const { test: testHelpers } = await instance.$context;
 
-    await use(test);
+    await use(testHelpers);
   },
   standardUser: async ({ authHelpers }, use) => {
     const user = {
@@ -80,7 +84,7 @@ export const test = baseTest.extend<Fixtures>({
 });
 
 test.use({
-  mswHandlers: ({ standardUser, session }, use) =>
+  mswHandlers: async ({ standardUser, session }, use) =>
     use([
       http.get<
         PathParams,

@@ -3,10 +3,11 @@ import { SeedManager } from "@mikro-orm/seeder";
 import { fromPromise } from "xstate";
 
 import { createDatabaseConfig } from "../../../database/config.ts";
-import { type Services, initORM } from "../../../database/database.ts";
+import { initORM } from "../../../database/database.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
 
+import type { Services } from "../../../database/database.ts";
 import type { MikroORM } from "@mikro-orm/core";
 
 function createDatabaseSslOptions() {
@@ -55,12 +56,12 @@ export const initialiseDatabaseConnection =
       if (process.env["NODE_ENV"] === "production") {
         const requiresMigration = await database.orm.migrator.checkSchema();
 
-        if (!requiresMigration) {
-          logger.info("Database is up to date, no migrations needed");
-        } else {
+        if (requiresMigration) {
           logger.info("Running database migrations");
 
           await database.orm.migrator.up();
+        } else {
+          logger.info("Database is up to date, no migrations needed");
         }
       }
 

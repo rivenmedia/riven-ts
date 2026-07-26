@@ -1,5 +1,3 @@
-import { BellRing } from "lucide-react";
-
 import { preview } from "@/.storybook/preview";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+import { BellRing } from "lucide-react";
 
 const notifications = [
   {

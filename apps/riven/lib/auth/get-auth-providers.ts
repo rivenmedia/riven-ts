@@ -37,7 +37,7 @@ export function getAuthProviders() {
     providers[provider.providerId] = {
       key: provider.providerId,
       enabled: true,
-      disableSignup: !!provider.disableSignUp,
+      disableSignup: Boolean(provider.disableSignUp),
       name: provider.name ?? provider.providerId,
       icon: provider.icon,
     };

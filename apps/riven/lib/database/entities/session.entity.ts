@@ -6,13 +6,14 @@ import {
   Property,
   Unique,
 } from "@mikro-orm/decorators/legacy";
-import { type UUID, randomUUID } from "crypto";
 import { DateTime } from "luxon";
+import { randomUUID } from "node:crypto";
 import { Field, ID, ObjectType } from "type-graphql";
 
 import { User } from "./index.ts";
 
 import type { Opt, Ref } from "@mikro-orm/core";
+import type { UUID } from "node:crypto";
 
 @Entity()
 @ObjectType()
@@ -20,38 +21,38 @@ export class Session {
   @Field(() => ID)
   @PrimaryKey({ type: "uuid" })
   @Index()
-  id: UUID = randomUUID();
+  public id: UUID = randomUUID();
 
   @Field()
   @Property()
-  expiresAt!: Date;
+  public expiresAt!: Date;
 
   @Field()
   @Property()
   @Unique()
-  token!: string;
+  public token!: string;
 
   @Field(() => Date)
   @Property()
-  createdAt: Opt<Date> = DateTime.utc().toJSDate();
+  public createdAt: Opt<Date> = DateTime.utc().toJSDate();
 
   @Field(() => Date)
   @Property({ onUpdate: () => DateTime.utc().toJSDate() })
-  updatedAt!: Opt<Date>;
+  public updatedAt!: Opt<Date>;
 
   @Field()
   @Property()
-  ipAddress?: string;
+  public ipAddress?: string;
 
   @Field()
   @Property()
-  userAgent?: string;
+  public userAgent?: string;
 
   @Field()
   @Property()
-  impersonatedBy?: string;
+  public impersonatedBy?: string;
 
   @Field(() => User)
   @ManyToOne()
-  user!: Ref<User>;
+  public user!: Ref<User>;
 }

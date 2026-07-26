@@ -15,7 +15,8 @@
       "@/components/*": ["./components/*"],
       "@/environment/*": ["./environment/*"],
       "@/lib/*": ["./lib/*"],
-      "@/.storybook/*": ["./.storybook/*"]
+      "@/.storybook/*": ["./.storybook/*"],
+      "@/playwright/*": ["./playwright/*"]
     }
   },
   "include": [

@@ -1,5 +1,3 @@
-import { SearchIcon } from "lucide-react";
-
 import { preview } from "@/.storybook/preview";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
@@ -15,6 +13,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+import { SearchIcon } from "lucide-react";
 
 /**
  * Used to display textual user input from keyboard.

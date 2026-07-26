@@ -5,10 +5,10 @@ import { ApolloServerPluginCacheControl } from "@apollo/server/plugin/cacheContr
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin/landingPage/default";
 import { expressMiddleware } from "@as-integrations/express5";
-import { type MikroORM, RequestContext } from "@mikro-orm/core";
+import { RequestContext } from "@mikro-orm/core";
 import { toNodeHandler } from "better-auth/node";
 import cors from "cors";
-import express, { type RequestHandler } from "express";
+import express from "express";
 import { createServer } from "node:http";
 import { URL } from "node:url";
 import { fromPromise } from "xstate";
@@ -24,8 +24,10 @@ import { settings } from "../../../utilities/settings.ts";
 import type { ApolloServerContext } from "../../../graphql/context.ts";
 import type { ValidPluginMap } from "../../../types/plugins.ts";
 import type { mainRunnerMachine } from "../../main-runner/index.js";
+import type { MikroORM } from "@mikro-orm/core";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+import type { RequestHandler } from "express";
 import type { ActorRefFromLogic } from "xstate";
 
 export interface StartGQLServerInput {

@@ -1,15 +1,9 @@
 // Provides types needed to squash portability errors from @better-auth/passkey
-import "@simplewebauthn/server";
-
+// import "@simplewebauthn/server";
 import { ac, admin, manager, user } from "@repo/util-auth/access-control";
 
 import { passkey } from "@better-auth/passkey";
-import {
-  type Auth,
-  type BetterAuthOptions,
-  type LogLevel,
-  betterAuth,
-} from "better-auth";
+import { betterAuth } from "better-auth";
 import { mikroOrmAdapter } from "better-auth-mikro-orm";
 import {
   admin as adminPlugin,
@@ -27,17 +21,24 @@ import { getGenericOAuthProviders } from "./oauth-utils.ts";
 import { plexOAuth } from "./plex-oauth.ts";
 
 import type { MikroORM } from "@mikro-orm/core";
+import type { Auth, BetterAuthOptions, LogLevel } from "better-auth";
 import type { AdapterFactory } from "better-auth/adapters";
 
 const transformLogLevel = (): Exclude<LogLevel, "success"> => {
   switch (settings.logLevel) {
     case "silly":
-    case "verbose":
+    case "verbose": {
       return "debug";
-    case "http":
+    }
+    case "http": {
       return "info";
-    default:
+    }
+    case "debug":
+    case "info":
+    case "warn":
+    case "error": {
       return settings.logLevel;
+    }
   }
 };
 
@@ -105,7 +106,9 @@ export const authConfig = {
       allowDifferentEmails: true,
       trustedProviders: [
         ...(frontendSettings.disablePlex ? [] : ["plex"]),
-        ...getGenericOAuthProviders(process.env).map((p) => p.providerId),
+        ...getGenericOAuthProviders(process.env).map(
+          (provider) => provider.providerId,
+        ),
       ],
     },
     encryptOAuthTokens: true,
@@ -137,6 +140,7 @@ export const authConfig = {
   },
 } satisfies BetterAuthOptions;
 
+// oxlint-disable-next-line import/no-mutable-exports init-declarations
 export let auth: Auth<
   typeof authConfig & { database: AdapterFactory<BetterAuthOptions> }
 >;

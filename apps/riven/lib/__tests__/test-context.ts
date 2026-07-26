@@ -9,7 +9,6 @@ import { randomUUID } from "node:crypto";
 import { test as testBase, vi } from "vitest";
 
 import { authConfig } from "../auth/auth.ts";
-import { type ApolloServerContext, CoreKey } from "../graphql/context.ts";
 import { CoreKey } from "../graphql/context.ts";
 import { queueNameFor } from "../message-queue/utilities/queue-name-for.ts";
 
@@ -22,7 +21,10 @@ import type { ValidPlugin, ValidPluginMap } from "../types/plugins.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
 import type { SetReturnType } from "type-fest";
+import type { Mock } from "vitest";
+import type { ZodObject } from "zod";
 
+// oxlint-disable-next-line typescript/no-explicit-any
 type AnyFunction = (...args: any[]) => any;
 
 export const it = testBase

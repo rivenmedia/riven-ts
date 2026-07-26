@@ -1,45 +1,41 @@
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
 
-import {
-  type AuthProvider,
-  getAuthProviders,
-} from "../../../auth/get-auth-providers.ts";
+import { getAuthProviders } from "../../../auth/get-auth-providers.ts";
 import { User } from "../../entities/user.entity.ts";
 import { BaseService } from "../core/base-service.ts";
-import {
-  type CreateAdminUserInput,
-  createAdminUser,
-} from "./utilities/create-admin-user.ts";
-import { type LoginUserInput, loginUser } from "./utilities/login-user.ts";
-import {
-  type RegisterUserInput,
-  registerUser,
-} from "./utilities/register-user.ts";
+import { createAdminUser } from "./utilities/create-admin-user.ts";
+import { loginUser } from "./utilities/login-user.ts";
+import { registerUser } from "./utilities/register-user.ts";
+
+import type { AuthProvider } from "../../../auth/get-auth-providers.ts";
+import type { CreateAdminUserInput } from "./utilities/create-admin-user.ts";
+import type { LoginUserInput } from "./utilities/login-user.ts";
+import type { RegisterUserInput } from "./utilities/register-user.ts";
 
 export class AuthService extends BaseService {
   @CreateRequestContext()
-  async createAdminUser(input: CreateAdminUserInput) {
+  public async createAdminUser(input: CreateAdminUserInput) {
     return createAdminUser(input);
   }
 
-  getAvailableAuthProviders(): AuthProvider[] {
+  public getAvailableAuthProviders(): AuthProvider[] {
     return Object.values(getAuthProviders());
   }
 
   @CreateRequestContext()
-  async hasExistingAdminUser() {
+  public async hasExistingAdminUser() {
     const adminCount = await this.em.count(User, { role: "admin" });
 
     return adminCount > 0;
   }
 
   @CreateRequestContext()
-  async registerUser(input: RegisterUserInput) {
+  public async registerUser(input: RegisterUserInput) {
     return registerUser(this.em, input);
   }
 
   @CreateRequestContext()
-  async loginUser(input: LoginUserInput) {
+  public async loginUser(input: LoginUserInput) {
     return loginUser(this.em, input);
   }
 }

@@ -11,7 +11,7 @@ import { AuthProvider } from "./types/auth-provider.type.ts";
 @Resolver()
 export class AuthResolver {
   @Mutation(() => User)
-  async registerUser(
+  public async registerUser(
     @CoreContext() { services: { authService } }: CoreContext,
     @Arg("input", () => RegisterUserInput) input: RegisterUserInput,
   ): Promise<User> {
@@ -19,7 +19,7 @@ export class AuthResolver {
   }
 
   @Mutation(() => User)
-  async loginUser(
+  public async loginUser(
     @CoreContext() { services: { authService } }: CoreContext,
     @Arg("input", () => LoginUserInput) input: LoginUserInput,
   ): Promise<User> {
@@ -28,7 +28,7 @@ export class AuthResolver {
 
   @CacheControl({ maxAge: Infinity })
   @Query(() => [AuthProvider])
-  authProviders(
+  public authProviders(
     @CoreContext() { services: { authService } }: CoreContext,
   ): AuthProvider[] {
     return authService.getAvailableAuthProviders();

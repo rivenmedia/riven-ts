@@ -1,5 +1,3 @@
-import { expect, userEvent } from "storybook/test";
-
 import { preview } from "@/.storybook/preview";
 import {
   Carousel,
@@ -8,6 +6,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+
+import { expect, userEvent } from "storybook/test";
 
 /**
  * A carousel with motion and swipe built using Embla.

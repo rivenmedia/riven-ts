@@ -408,12 +408,12 @@ export const bootstrapMachine = setup({
                       pluginSettings,
                     },
                   }) => {
-                    assert(
+                    assert.ok(
                       pluginSettings,
                       "Plugin settings not available when starting GraphQL server. Ensure the plugin registrar has been run first.",
                     );
 
-                    assert(
+                    assert.ok(
                       orm,
                       "ORM not available when starting GraphQL server. Ensure the connection has been initialised first.",
                     );
@@ -549,7 +549,7 @@ export const bootstrapMachine = setup({
           id: "createAdminUser",
           src: "createAdminUser",
           input: ({ context: { services } }) => {
-            assert(
+            assert.ok(
               services,
               "Services not available when creating admin user. Ensure the database connection has been initialised first.",
             );

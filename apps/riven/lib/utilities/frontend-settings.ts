@@ -4,10 +4,10 @@ import { deepFreeze } from "./deep-freeze.ts";
 import type { ReadonlyDeep } from "type-fest";
 
 class FrontendSettings {
-  readonly settings: ReadonlyDeep<RivenFrontendSettings>;
+  public readonly settings: ReadonlyDeep<RivenFrontendSettings>;
 
-  constructor(environment: NodeJS.ProcessEnv) {
-    const settingPattern = /^RIVEN_FRONTEND_SETTING__(?<setting>.+)$/;
+  public constructor(environment: NodeJS.ProcessEnv) {
+    const settingPattern = /^RIVEN_FRONTEND_SETTING__(?<setting>.+)$/u;
 
     const rawSettings: Record<string, unknown> = {};
 

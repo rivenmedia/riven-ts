@@ -1,3 +1,5 @@
+import { preview } from "@/.storybook/preview";
+
 import {
   CalendarDays,
   FileClock,
@@ -9,8 +11,6 @@ import {
   User,
 } from "lucide-react";
 import { DateTime } from "luxon";
-
-import { preview } from "@/.storybook/preview";
 
 import { Sidebar } from "./sidebar";
 

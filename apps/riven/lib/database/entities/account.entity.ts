@@ -4,66 +4,67 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/decorators/legacy";
-import { type UUID, randomUUID } from "crypto";
 import { DateTime } from "luxon";
+import { randomUUID } from "node:crypto";
 import { Field, ID, ObjectType } from "type-graphql";
 
 import { User } from "./index.ts";
 
 import type { Opt, Ref } from "@mikro-orm/core";
+import type { UUID } from "node:crypto";
 
 @Entity()
 @ObjectType()
 export class Account {
   @Field(() => ID)
   @PrimaryKey({ type: "uuid" })
-  id: UUID = randomUUID();
+  public id: UUID = randomUUID();
 
   @Field()
   @Property()
-  accountId!: string;
+  public accountId!: string;
 
   @Field()
   @Property()
-  providerId!: string;
+  public providerId!: string;
 
   @Field()
   @Property()
-  accessToken?: string;
+  public accessToken?: string;
 
   @Field()
   @Property()
-  refreshToken?: string;
+  public refreshToken?: string;
 
   @Field()
   @Property()
-  idToken?: string;
+  public idToken?: string;
 
   @Field(() => Date)
   @Property()
-  accessTokenExpiresAt?: Opt<Date>;
+  public accessTokenExpiresAt?: Opt<Date>;
 
   @Field(() => Date)
   @Property()
-  refreshTokenExpiresAt?: Opt<Date>;
+  public refreshTokenExpiresAt?: Opt<Date>;
 
   @Field()
   @Property()
-  scope?: string;
+  public scope?: string;
 
   @Field()
   @Property()
-  password?: string;
+  public password?: string;
 
   @Field(() => Date)
   @Property()
-  createdAt: Opt<Date> = DateTime.utc().toJSDate();
+  public createdAt: Opt<Date> = DateTime.utc().toJSDate();
 
   @Field(() => Date)
   @Property({ onUpdate: () => DateTime.utc().toJSDate() })
-  updatedAt!: Opt<Date>;
+  public updatedAt!: Opt<Date>;
 
   @Field(() => User)
   @ManyToOne({ index: true })
-  user!: Ref<User>;
+  public user!: Ref<User>;
 }

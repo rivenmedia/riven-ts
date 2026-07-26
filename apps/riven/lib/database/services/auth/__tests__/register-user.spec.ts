@@ -10,7 +10,7 @@ it("allows signup for the first user even if sign-up is disabled", async ({
   vi.spyOn(getAuthProvidersModule, "getAuthProviders").mockReturnValue({});
 
   await expect(
-    services.userService.registerUser({
+    services.authService.registerUser({
       username: "firstuser",
       email: "firstuser@example.com",
       password: "password123",
@@ -27,12 +27,12 @@ it("does not allow signup if sign-up is disabled and another user already exists
   await authHelpers.saveUser(authHelpers.createUser());
 
   await expect(
-    services.userService.registerUser({
+    services.authService.registerUser({
       username: "firstuser",
       email: "firstuser@example.com",
       password: "password123",
     }),
-  ).rejects.toThrow(/registration is disabled/i);
+  ).rejects.toThrow(/registration is disabled/iu);
 });
 
 it("registers an admin account when the first user is registered", async ({
@@ -41,7 +41,7 @@ it("registers an admin account when the first user is registered", async ({
 }) => {
   const email = "firstuser@example.com";
 
-  await services.userService.registerUser({
+  await services.authService.registerUser({
     username: "firstuser",
     email,
     password: "password123",
@@ -61,7 +61,7 @@ it("registers a user with no elevated permissions after the first user has been 
 
   const email = "seconduser@example.com";
 
-  await services.userService.registerUser({
+  await services.authService.registerUser({
     username: "",
     email,
     password: "password123",
@@ -81,10 +81,10 @@ it("throws an error if the email is already registered", async ({
   await authHelpers.saveUser(authHelpers.createUser({ email }));
 
   await expect(
-    services.userService.registerUser({
+    services.authService.registerUser({
       username: "newuser",
       email,
       password: "password123",
     }),
-  ).rejects.toThrow(/use another email/i);
+  ).rejects.toThrow(/use another email/iu);
 });

@@ -1,6 +1,3 @@
-import { Mountain } from "lucide-react";
-import Link from "next/link";
-
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -9,6 +6,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn, getInitials } from "@/lib/utils";
+
+import { Mountain } from "lucide-react";
+import Link from "next/link";
 
 import { LogOutButton } from "./_components/log-out-button";
 

@@ -5,7 +5,6 @@ import { jsFiles, tsFiles } from "../internal/file-types.ts";
 
 import type { DummyRule } from "oxlint";
 
-// oxlint-disable-next-line typescript/no-unsafe-type-assertion
 const turboRecommendedConfig = turbo.configs?.["flat/recommended"] as {
   rules: Record<string, DummyRule>;
 };

@@ -1,5 +1,3 @@
-import { expect, userEvent, waitFor, within } from "storybook/test";
-
 import { preview } from "@/.storybook/preview";
 import {
   Accordion,
@@ -7,6 +5,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+
+import { expect, userEvent, waitFor, within } from "storybook/test";
 
 /**
  * A vertically stacked set of interactive headings that each reveal a section

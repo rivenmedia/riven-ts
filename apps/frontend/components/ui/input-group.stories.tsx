@@ -1,25 +1,3 @@
-import {
-  Check,
-  CheckIcon,
-  ChevronDownIcon,
-  Code,
-  Copy,
-  CornerDownLeft,
-  CreditCardIcon,
-  HelpCircle,
-  Info,
-  InfoIcon,
-  Link2Icon,
-  LoaderIcon,
-  MailIcon,
-  MoreHorizontal,
-  RefreshCcw,
-  SearchIcon,
-  Star,
-  StarIcon,
-} from "lucide-react";
-import { useState } from "react";
-
 import preview from "@/.storybook/preview";
 import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import {
@@ -49,6 +27,28 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+import {
+  Check,
+  CheckIcon,
+  ChevronDownIcon,
+  Code,
+  Copy,
+  CornerDownLeft,
+  CreditCardIcon,
+  HelpCircle,
+  Info,
+  InfoIcon,
+  Link2Icon,
+  LoaderIcon,
+  MailIcon,
+  MoreHorizontal,
+  RefreshCcw,
+  SearchIcon,
+  Star,
+  StarIcon,
+} from "lucide-react";
+import { useState } from "react";
 
 /**
  * Display additional information or actions to an input or textarea.

@@ -1,4 +1,4 @@
-import storybook from "eslint-plugin-storybook";
+// import storybook from "eslint-plugin-storybook";
 import { defineConfig } from "oxlint";
 
 import { jsxFiles } from "../internal/file-types.ts";
@@ -13,7 +13,7 @@ export const eslintPluginEslintPluginStorybookConfig = defineConfig({
           specifier: import.meta.resolve("eslint-plugin-storybook"),
         },
       ],
-      rules: storybook.configs?.["flat/recommended"]?.rules ?? {},
+      // rules: storybook.configs["flat/recommended"][0]?.rules,
     },
   ],
 });

@@ -6,7 +6,6 @@ import { noUnusedVariables } from "./best-practices/no-unused-variables.ts";
 import { preferMikroOrmCore } from "./best-practices/prefer-mikro-orm-core.ts";
 import { eslintPluginEslintJsonConfig } from "./eslint-plugins/@eslint/json.ts";
 import { eslintPluginEslintPluginPlaywrightConfig } from "./eslint-plugins/eslint-plugin-playwright.ts";
-import { eslintPluginEslintPluginReactHooksConfig } from "./eslint-plugins/eslint-plugin-react-hooks.ts";
 import { eslintPluginEslintPluginStorybookConfig } from "./eslint-plugins/eslint-plugin-storybook.ts";
 import { eslintPluginEslintPluginTurboConfig } from "./eslint-plugins/eslint-plugin-turbo.ts";
 import { oxlintPluginEslintConfig } from "./oxlint-plugins/eslint.ts";
@@ -33,7 +32,6 @@ export const baseOxlintConfig = defineConfig({
     eslintPluginEslintJsonConfig,
     eslintPluginEslintPluginTurboConfig,
     eslintPluginEslintPluginPlaywrightConfig,
-    eslintPluginEslintPluginReactHooksConfig,
     eslintPluginEslintPluginStorybookConfig,
     oxlintPluginVitestConfig,
     oxlintPluginImportConfig,

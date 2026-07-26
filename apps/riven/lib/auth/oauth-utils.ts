@@ -58,7 +58,7 @@ function unflattenObject(
       if (i === parts.length - 1) {
         current[part] = value;
       } else {
-        current[part] = current[part] ?? {};
+        current[part] ??= {};
         current = current[part] as NestedObject;
       }
     }
@@ -82,9 +82,7 @@ export function getGenericOAuthProviders(
 
   const providers: GenericOAuthProvider[] = [];
 
-  for (const providerNameUpper in providersObj) {
-    const config = providersObj[providerNameUpper] as NestedObject;
-
+  for (const [providerNameUpper, config] of Object.entries(providersObj)) {
     if (typeof config !== "object") {
       continue;
     }
@@ -112,7 +110,9 @@ export function getGenericOAuthProviders(
           ((config["ISSUER"] as string)
             ? `${config["ISSUER"] as string}/.well-known/openid-configuration`
             : undefined),
-        scopes: (config["SCOPES"] as string).split(",").map((s) => s.trim()),
+        scopes: (config["SCOPES"] as string)
+          .split(",")
+          .map((scope) => scope.trim()),
         pkce: (config["PKCE"] as string) === "true",
         disableSignUp:
           ((config["DISABLE"] as NestedObject)["SIGNUP"] as string) === "true",

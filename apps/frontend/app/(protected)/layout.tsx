@@ -1,3 +1,5 @@
+import { authClient } from "@/lib/auth/client";
+
 import {
   CalendarDays,
   FileClock,
@@ -9,8 +11,6 @@ import {
   User,
 } from "lucide-react";
 import { headers } from "next/headers";
-
-import { authClient } from "@/lib/auth/client";
 
 import { PageWrapper } from "./_components/page-wrapper";
 

@@ -61,19 +61,19 @@ export async function registerUser(
       });
 
       return await em.findOneOrFail(User, { email: user.email });
-    } else {
-      const { user } = await auth.api.signUpEmail({
-        body: {
-          name: username,
-          email,
-          password,
-          image,
-          username,
-        },
-      });
-
-      return await em.findOneOrFail(User, { email: user.email });
     }
+
+    const { user } = await auth.api.signUpEmail({
+      body: {
+        name: username,
+        email,
+        password,
+        image,
+        username,
+      },
+    });
+
+    return await em.findOneOrFail(User, { email: user.email });
   } catch (error) {
     if (isAPIError(error)) {
       throw error;
@@ -81,6 +81,8 @@ export async function registerUser(
 
     logger.error("Error during sign up", { err: error });
 
-    throw new Error("An unexpected error occurred during registration");
+    throw new Error("An unexpected error occurred during registration", {
+      cause: error,
+    });
   }
 }

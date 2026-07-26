@@ -1,9 +1,9 @@
 "use client";
 
+import { ThemeProvider, themes } from "@/components/providers/theme-provider";
+
 import { ProgressProvider } from "@bprogress/next/app";
 import { ToastContainer } from "react-toastify";
-
-import { ThemeProvider, themes } from "@/components/providers/theme-provider";
 
 import { TooltipProvider } from "./ui/tooltip";
 

@@ -92,7 +92,6 @@ catalog:
   esbuild: ^0.28.0
   esbuild-node-externals: ^1.22.0
   eslint-plugin-turbo: ^2.10.5
-  eslint-plugin-react-hooks: ^7.1.1
   execa: ^9.6.1
   express: ^5.2.1
   fastest-levenshtein: ^1.0.16
@@ -161,6 +160,7 @@ catalog:
   "@storybook/addon-vitest": ^10.4.6
   msw-storybook-addon: ^2.0.7
   react-error-boundary: ^6.1.2
+  eslint-plugin-playwright: ^2.10.5
 
 catalogMode: strict
 

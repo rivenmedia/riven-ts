@@ -1,6 +1,6 @@
-import { createMiddleware } from "next-safe-action";
-
 import { authClient } from "@/lib/auth/client";
+
+import { createMiddleware } from "next-safe-action";
 
 export const checkSessionMiddleware = createMiddleware().define(
   async ({ next }) => {

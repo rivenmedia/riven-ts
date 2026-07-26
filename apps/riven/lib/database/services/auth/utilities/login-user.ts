@@ -41,6 +41,8 @@ export async function loginUser(
 
     logger.error("Error during login:", { err: error });
 
-    throw new Error("An unexpected error occurred during login");
+    throw new Error("An unexpected error occurred during login", {
+      cause: error,
+    });
   }
 }
