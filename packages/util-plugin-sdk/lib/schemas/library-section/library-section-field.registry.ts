@@ -1,3 +1,5 @@
+import { Resolution } from "@repo/util-rank-torrent-name";
+
 import { MediaItemContentRating } from "../../dto/enums/content-ratings.enum.ts";
 import { MediaItemState } from "../../dto/enums/media-item-state.enum.ts";
 
@@ -132,7 +134,9 @@ export const LIBRARY_SECTION_FIELDS = {
   },
   "stream.resolution": {
     kind: "string",
-    description: 'Resolution of the active stream, e.g. "1080p", "4k".',
+    values: Resolution.options,
+    description:
+      'Resolution of the active stream, normalised to the same canonical set the ranker uses. A release named "4K" or "UHD" matches "2160p".',
   },
   "stream.quality": {
     kind: "string",

@@ -3,6 +3,7 @@ import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import {
   normaliseCountry,
   normaliseLanguage,
+  normaliseResolution,
   normaliseText,
   normaliseTextList,
 } from "./normalise.ts";
@@ -118,7 +119,9 @@ const buildStreamFacts = (
   }
 
   return {
-    resolution: normaliseText(parsedData["resolution"] as string | undefined),
+    resolution: normaliseResolution(
+      parsedData["resolution"] as string | undefined,
+    ),
     quality: normaliseText(parsedData["quality"] as string | undefined),
     codec: normaliseText(parsedData["codec"] as string | undefined),
     hdr: normaliseTextList(parsedData["hdr"] as string[] | undefined),

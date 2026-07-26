@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   normaliseCountry,
   normaliseLanguage,
+  normaliseResolution,
   normaliseText,
   normaliseTextList,
 } from "./normalise.ts";
@@ -68,5 +69,27 @@ describe(normaliseCountry, () => {
 
   it("makes a movie and a show from the same country match one rule", () => {
     expect(normaliseCountry("US")).toBe(normaliseCountry("usa"));
+  });
+});
+
+describe(normaliseResolution, () => {
+  it.each([
+    ["4k", "2160p"],
+    ["2160p", "2160p"],
+    ["1440p", "1080p"],
+    ["1080p", "1080p"],
+    ["576p", "480p"],
+  ])("folds the release spelling %o onto %o", (input, expected) => {
+    expect(normaliseResolution(input)).toBe(expected);
+  });
+
+  it("agrees however a release spelled the same resolution", () => {
+    // Observed live: Comet returned a 2160p remux whose parsed resolution was
+    // "4k", so a rule written against "2160p" has to match it.
+    expect(normaliseResolution("4k")).toBe(normaliseResolution("2160p"));
+  });
+
+  it("passes an unmapped value through lowercased", () => {
+    expect(normaliseResolution("8K")).toBe("8k");
   });
 });

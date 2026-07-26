@@ -21,6 +21,8 @@
  * plain lowercase, which is correct for values already in the target format.
  */
 
+import { RESOLUTION_MAP } from "@repo/util-rank-torrent-name";
+
 /** ISO 639-2/3 to ISO 639-1. */
 const LANGUAGE_ALPHA_3_TO_ALPHA_2 = new Map([
   ["ara", "ar"],
@@ -185,3 +187,22 @@ export const normaliseLanguage = (language: string | null | undefined) =>
 
 export const normaliseCountry = (country: string | null | undefined) =>
   foldAlpha3(country, COUNTRY_ALPHA_3_TO_ALPHA_2);
+
+/**
+ * Folds a parsed release resolution onto the canonical set.
+ *
+ * `Stream.parsedData.resolution` holds whatever the release name said — "4k",
+ * "UHD", "1440p" — while the ranker interprets all of those through
+ * `RESOLUTION_MAP` before acting on them. Sections use the same mapping so that
+ * a rule written against "2160p" means the same thing here as it does in the
+ * ranking config, regardless of how a particular release spelled it.
+ */
+export const normaliseResolution = (resolution: string | null | undefined) => {
+  const normalised = normaliseText(resolution);
+
+  if (normalised === null) {
+    return null;
+  }
+
+  return RESOLUTION_MAP.get(normalised) ?? normalised;
+};
