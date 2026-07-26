@@ -5,13 +5,17 @@ import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 import { DateTime } from "luxon";
 
+import { librarySectionRegistry } from "../../../../../database/services/library-section/section-registry.ts";
 import { filterChildrenValues } from "../../../../utilities/filter-children-values.ts";
 import { downloadItemProcessorSchema } from "./download-item.schema.ts";
 
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
   async (
     { job },
-    { sendEvent, services: { mediaItemService, downloaderService } },
+    {
+      sendEvent,
+      services: { mediaItemService, downloaderService, librarySectionService },
+    },
   ) => {
     const childrenValues = filterChildrenValues(
       await job.getChildrenValues(),
@@ -57,6 +61,10 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
         return;
       }
 
+      // The item's section membership has just changed, so drop the cached
+      // membership before asking which directories it now lives in.
+      librarySectionRegistry.invalidateMembership();
+
       sendEvent({
         type: "riven.media-item.download.success",
         item: updatedItem,
@@ -65,6 +73,9 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
           .diff(DateTime.fromMillis(job.timestamp))
           .as("milliseconds"),
         provider: finalResult.result.provider,
+        libraryDirectories: await librarySectionService.getVfsDirectoriesFor(
+          updatedItem.id,
+        ),
       });
     } catch (error) {
       if (
