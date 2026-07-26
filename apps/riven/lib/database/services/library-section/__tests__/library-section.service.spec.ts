@@ -60,6 +60,15 @@ describe(toSectionSlug, () => {
     expect(() => toSectionSlug("...")).toThrow(LibrarySectionError);
   });
 
+  it.each([["4k-remux"], ["horror"], ["sci-fi-classics"]])(
+    "takes an already-legal slug %o verbatim",
+    (input) => {
+      // kebabCase splits at digit/letter boundaries, so re-deriving would turn
+      // "4k-remux" into "4-k-remux" and the caller could never get what they asked for.
+      expect(toSectionSlug(input)).toBe(input);
+    },
+  );
+
   it("never produces a slug containing a period", () => {
     // A period would make `path.parse` read the directory as a file.
     expect(toSectionSlug("Sci. Fi.")).not.toContain(".");

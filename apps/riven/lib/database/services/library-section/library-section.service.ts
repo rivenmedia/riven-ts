@@ -44,13 +44,22 @@ export class LibrarySectionError extends Error {
 }
 
 /**
- * Derives the VFS directory name from a display name.
+ * Derives the VFS directory name from a display name, or validates one the
+ * caller supplied.
+ *
+ * A value that is already a legal slug is taken verbatim. Running `kebabCase`
+ * unconditionally would mangle it — it splits at digit/letter boundaries, so an
+ * explicit "4k-remux" would come back as "4-k-remux" and the caller could never
+ * get the directory name they asked for.
  *
  * Rejected here rather than left to the unique index or the entity's `@Matches`
  * so that the caller gets a message naming the actual problem.
  */
 export function toSectionSlug(value: string): string {
-  const slug = kebabCase(value.trim().toLowerCase());
+  const trimmed = value.trim().toLowerCase();
+  const slug = LIBRARY_SECTION_SLUG_PATTERN.test(trimmed)
+    ? trimmed
+    : kebabCase(trimmed);
 
   if (!LIBRARY_SECTION_SLUG_PATTERN.test(slug)) {
     throw new LibrarySectionError(
