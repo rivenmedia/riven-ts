@@ -1,9 +1,12 @@
 import { MediaEntry, Movie } from "@repo/util-plugin-sdk/dto/entities";
 
-import { expect, vi } from "vitest";
+import Fuse from "@zkochan/fuse-native";
+import { describe, expect, vi } from "vitest";
 
 import { it } from "../../__tests__/test-context.ts";
 import { readDirSync } from "./readdir.ts";
+
+import type { LibrarySectionRule } from "@repo/util-plugin-sdk/schemas/library-section/index";
 
 type ReadDirCallback = Parameters<typeof readDirSync>[1];
 
@@ -217,5 +220,158 @@ it("does not include periods in movie titles", async ({
     expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
       "Mr Robot (2016) {tmdb-1234}",
     ]);
+  });
+});
+
+describe("library sections", () => {
+  const horrorRule: LibrarySectionRule = {
+    type: "condition",
+    field: "genres",
+    op: "includesAny",
+    value: ["horror"],
+  };
+
+  it("leaves the root listing untouched when no sections exist", async () => {
+    const callback = vi.fn<ReadDirCallback>();
+
+    readDirSync("/", callback);
+
+    await vi.waitFor(() => {
+      expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
+        "movies",
+        "shows",
+      ]);
+    });
+  });
+
+  it("appends enabled sections to the root listing", async ({ services }) => {
+    await services.librarySectionService.create({
+      name: "Horror",
+      mediaTypes: ["movie", "show"],
+      rule: horrorRule,
+    });
+
+    const callback = vi.fn<ReadDirCallback>();
+
+    readDirSync("/", callback);
+
+    await vi.waitFor(() => {
+      expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
+        "movies",
+        "shows",
+        "horror",
+      ]);
+    });
+  });
+
+  it("hides a disabled section from the root listing", async ({ services }) => {
+    const section = await services.librarySectionService.create({
+      name: "Horror",
+      mediaTypes: ["movie"],
+    });
+
+    await services.librarySectionService.update(section.id, { enabled: false });
+
+    const callback = vi.fn<ReadDirCallback>();
+
+    readDirSync("/", callback);
+
+    await vi.waitFor(() => {
+      expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
+        "movies",
+        "shows",
+      ]);
+    });
+  });
+
+  it("lists movies and shows under a split section", async ({ services }) => {
+    await services.librarySectionService.create({
+      name: "Horror",
+      mediaTypes: ["movie", "show"],
+      rule: horrorRule,
+    });
+
+    const callback = vi.fn<ReadDirCallback>();
+
+    readDirSync("/horror", callback);
+
+    await vi.waitFor(() => {
+      expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
+        "movies",
+        "shows",
+      ]);
+    });
+  });
+
+  it("lists only the members of a section", async ({
+    em,
+    services,
+    seeders,
+  }) => {
+    const { movie: seeded } = await seeders.seedCompletedMovie();
+    const movie = await em.findOneOrFail(Movie, { id: seeded.id });
+
+    movie.genres = ["Horror"];
+    await em.flush();
+
+    const { movie: otherSeeded } = await seeders.seedCompletedMovie();
+    const other = await em.findOneOrFail(Movie, { id: otherSeeded.id });
+
+    other.genres = ["Comedy"];
+    await em.flush();
+
+    await services.librarySectionService.create({
+      name: "Horror",
+      mediaTypes: ["movie"],
+      rule: horrorRule,
+    });
+
+    const callback = vi.fn<ReadDirCallback>();
+
+    readDirSync("/horror", callback);
+
+    await vi.waitFor(() => {
+      expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
+        movie.getPrettyName(),
+      ]);
+    });
+  });
+
+  it("still lists every movie under the built-in root", async ({
+    em,
+    services,
+    seeders,
+  }) => {
+    const { movie: seeded } = await seeders.seedCompletedMovie();
+    const movie = await em.findOneOrFail(Movie, { id: seeded.id });
+
+    movie.genres = ["Comedy"];
+    await em.flush();
+
+    await services.librarySectionService.create({
+      name: "Horror",
+      mediaTypes: ["movie"],
+      rule: horrorRule,
+    });
+
+    const callback = vi.fn<ReadDirCallback>();
+
+    readDirSync("/movies", callback);
+
+    await vi.waitFor(() => {
+      expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
+        movie.getPrettyName(),
+      ]);
+    });
+  });
+
+  it("returns ENOENT for a section that does not exist", async () => {
+    const callback = vi.fn<ReadDirCallback>();
+
+    readDirSync("/nope", callback);
+
+    await vi.waitFor(() => {
+      expect(callback).toHaveBeenCalledWith(Fuse.ENOENT);
+    });
   });
 });

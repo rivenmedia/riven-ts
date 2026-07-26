@@ -1,8 +1,10 @@
 import path from "node:path";
 import z from "zod";
 
+// The lookahead anchors the type group so that `/moviesXYZ` is rejected rather
+// than parsed as `/movies`.
 const PATH_PATTERN =
-  /^\/(?<type>movies|shows)(?<titlePath>\/(?<title>[^/]+)(?<seasonPath>\/Season (?<season>\d{2})?)?)?/u;
+  /^\/(?<type>movies|shows)(?=\/|$)(?<titlePath>\/(?<title>[^/]+)(?<seasonPath>\/Season (?<season>\d{2})?)?)?/u;
 
 const TMDB_ID_PATTERN = /\{tmdb-(?<tmdbId>\d+)\}/u;
 const TVDB_ID_PATTERN = /\{tvdb-(?<tvdbId>\d+)\}/u;

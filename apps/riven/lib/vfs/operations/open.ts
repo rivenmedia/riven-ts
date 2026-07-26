@@ -106,7 +106,21 @@ async function serveMediaFile(pathInfo: PathInfo) {
 }
 
 async function open(path: string, _flags: number) {
-  const pathInfo = services.vfsService.parsePath(path);
+  const resolved = await services.vfsService.resolvePath(path);
+
+  assert.ok(
+    resolved.kind === "media",
+    new FuseError(Fuse.EISDIR, `Not a file: ${path}`),
+  );
+
+  // Re-checked here so a file cannot be opened through a section it is not a
+  // member of by guessing the path, without a preceding getattr.
+  assert.ok(
+    await services.vfsService.isVisibleInSection(resolved),
+    new FuseError(Fuse.ENOENT, "Item is not a member of this library section"),
+  );
+
+  const { pathInfo } = resolved;
 
   if (pathInfo.pathType === "subtitle-file") {
     return serveSubtitleFile(pathInfo);

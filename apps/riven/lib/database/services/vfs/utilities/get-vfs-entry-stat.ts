@@ -11,8 +11,9 @@ import Fuse from "@zkochan/fuse-native";
 import { DateTime } from "luxon";
 
 import { FuseError } from "../../../../vfs/errors/fuse-error.ts";
-import { PathInfo } from "../schemas/path-info.schema.ts";
+import { librarySectionRegistry } from "../../library-section/section-registry.ts";
 import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
+import { resolveVfsPath } from "../schemas/vfs-path.schema.ts";
 import { getEntry } from "./get-vfs-path-entry.ts";
 import { stat } from "./stat.ts";
 
@@ -87,10 +88,12 @@ async function getDirectoryStat(
 export async function getVfsEntryStat(em: EntityManager, path: string) {
   switch (path) {
     case "/": {
+      const enabled = await librarySectionRegistry.enabledSections(em);
+
       return getDirectoryStat(
         em,
         { type: "media" },
-        PersistentDirectory.options.length,
+        PersistentDirectory.options.length + enabled.length,
       );
     }
     case "/shows": {
@@ -131,23 +134,75 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
     }
   }
 
-  const pathInfo = PathInfo.safeParse(path);
+  const sections = await librarySectionRegistry.snapshot(em);
+  const resolved = resolveVfsPath(path, sections);
 
-  if (!pathInfo.success) {
+  if (!resolved || resolved.kind === "root") {
     throw new FuseError(Fuse.ENOENT, "Unable to parse path info");
   }
 
-  const entry = await getEntry(em, pathInfo.data);
+  if (resolved.kind === "section-root") {
+    const { section } = resolved;
+
+    return getDirectoryStat(em, { type: "media" }, section.mediaTypes.length);
+  }
+
+  const { section, pathInfo: info } = resolved;
+
+  // A section namespace is the built-in listing restricted to its members, so
+  // it shares the built-in stat shape with a filtered count.
+  if (
+    section &&
+    (info.pathType === "all-movies" || info.pathType === "all-shows")
+  ) {
+    const membership = await librarySectionRegistry.membershipFor(
+      em,
+      section.id,
+    );
+    const isMovies = info.pathType === "all-movies";
+
+    return getDirectoryStat(
+      em,
+      { type: "media", mediaItem: { type: isMovies ? "movie" : "episode" } },
+      isMovies
+        ? (membership?.movieTmdbIds.size ?? 0)
+        : (membership?.showTvdbIds.size ?? 0),
+    );
+  }
+
+  // Membership is checked straight off the parsed path, using the provider
+  // token already extracted from the entry name, so no query is needed.
+  if (section) {
+    const membership = await librarySectionRegistry.membershipFor(
+      em,
+      section.id,
+    );
+
+    const belongs =
+      info.tmdbId === undefined
+        ? info.tvdbId === undefined ||
+          (membership?.showTvdbIds.has(info.tvdbId) ?? false)
+        : (membership?.movieTmdbIds.has(info.tmdbId) ?? false);
+
+    if (!belongs) {
+      throw new FuseError(
+        Fuse.ENOENT,
+        "Item is not a member of this library section",
+      );
+    }
+  }
+
+  const entry = await getEntry(em, info);
 
   if (!entry) {
     throw new FuseError(Fuse.ENOENT, "No VFS entry found");
   }
 
   const subDirectoryCount =
-    pathInfo.data.pathType === "show-seasons"
+    info.pathType === "show-seasons"
       ? await em.count(Season, {
           show: {
-            tvdbId: String(pathInfo.data.tvdbId),
+            tvdbId: String(info.tvdbId),
           },
           episodes: {
             filesystemEntries: {
@@ -169,7 +224,7 @@ export async function getVfsEntryStat(em: EntityManager, path: string) {
       ctime: entry.createdAt,
       atime: entry.updatedAt ?? entry.createdAt,
       mtime: entry.updatedAt ?? entry.createdAt,
-      ...(isFileEntry && pathInfo.data.isFile
+      ...(isFileEntry && info.isFile
         ? {
             size: await getEntryFileSize(entry),
             mode: "file",
