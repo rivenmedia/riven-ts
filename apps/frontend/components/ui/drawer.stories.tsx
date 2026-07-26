@@ -58,7 +58,7 @@ Default.test(
 
     await step("Open the drawer", async () => {
       await userEvent.click(
-        await canvasBody.findByRole("button", { name: /open/i }),
+        await canvasBody.findByRole("button", { name: /open/iu }),
       );
 
       await expect(args.onOpenChange).toHaveBeenCalled();
@@ -71,7 +71,7 @@ Default.test(
 
     await step("Close the drawer", async () => {
       await userEvent.click(
-        await canvasBody.findByRole("button", { name: /submit/i }),
+        await canvasBody.findByRole("button", { name: /submit/iu }),
         { delay: 100 },
       );
 
@@ -92,7 +92,7 @@ Default.test(
 
     await step("Open the drawer", async () => {
       await userEvent.click(
-        await canvasBody.findByRole("button", { name: /open/i }),
+        await canvasBody.findByRole("button", { name: /open/iu }),
       );
 
       await expect(args.onOpenChange).toHaveBeenCalled();
@@ -105,7 +105,7 @@ Default.test(
 
     await step("Close the drawer", async () => {
       await userEvent.click(
-        await canvasBody.findByRole("button", { name: /cancel/i }),
+        await canvasBody.findByRole("button", { name: /cancel/iu }),
         { delay: 100 },
       );
 

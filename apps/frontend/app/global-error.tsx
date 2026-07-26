@@ -11,9 +11,8 @@ import type { ErrorInfo } from "next/error";
 export default function GlobalErrorPage({ unstable_retry, error }: ErrorInfo) {
   const isBrowser = typeof window !== "undefined";
   const message = error.message || "Something went wrong";
-  const statusCode = Number.parseInt(
-    /status code (\d+)/i.exec(message)?.[1] ?? "500",
-    10,
+  const statusCode = Math.trunc(
+    Number(/status code (\d+)/iu.exec(message)?.[1] ?? "500"),
   );
 
   function getMetadata() {
@@ -90,7 +89,7 @@ export default function GlobalErrorPage({ unstable_retry, error }: ErrorInfo) {
           <Button
             variant="outline"
             onClick={() => {
-              window.history.back();
+              globalThis.window.history.back();
             }}
             disabled={!isBrowser}
           >

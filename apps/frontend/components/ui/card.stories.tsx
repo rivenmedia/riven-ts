@@ -54,8 +54,8 @@ export const Default = meta.story({
         <CardDescription>You have 3 unread messages.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
-        {notifications.map((notification, index) => (
-          <div key={index} className="flex items-center gap-4">
+        {notifications.map((notification) => (
+          <div key={notification.title} className="flex items-center gap-4">
             <BellRing className="size-6" />
             <div>
               <p>{notification.title}</p>

@@ -80,7 +80,7 @@ export const WithButton = meta.story({
 Default.test(
   "When the user enters text, it is visible in the input field",
   async ({ canvas, step }) => {
-    const input = await canvas.findByPlaceholderText(/email/i);
+    const input = await canvas.findByPlaceholderText(/email/iu);
     const mockedInput = "mocked@shadcn.com";
 
     await step("focus and type into the input field", async () => {

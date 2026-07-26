@@ -22,6 +22,7 @@ export const oxlintPluginReactConfig = defineConfig({
         "react/no-danger": "off",
         "react/no-multi-comp": "off",
         "react/only-export-components": "off",
+        "react/jsx-props-no-spreading": "allow", // ShadCN mimics native HTML elements and allows props such as aria-*
       },
     },
   ],

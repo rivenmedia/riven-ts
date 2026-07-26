@@ -48,7 +48,7 @@ export default function NotFoundPage() {
           <Button
             variant="outline"
             onClick={() => {
-              window.history.back();
+              globalThis.window.history.back();
             }}
           >
             <ArrowLeft />

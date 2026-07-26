@@ -3,9 +3,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": ".",
-    "noEmit": true
+    "noEmit": false,
+    "composite": true
   },
   "files": [],
-  "include": ["**/*.tsx"],
+  "include": [".storybook/**/*.ts", ".storybook/**/*.tsx", "**/*.tsx"],
   "exclude": []
 }

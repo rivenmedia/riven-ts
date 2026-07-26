@@ -48,7 +48,7 @@ export default defineConfig({
     stdout: "pipe",
     stderr: "pipe",
     wait: {
-      stdout: new RegExp(`Local:[ \\t]+${baseURL}`, "i"),
+      stdout: new RegExp(`Local:[ \\t]+${baseURL}`, "iu"),
     },
   },
 });

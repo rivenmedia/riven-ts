@@ -14,7 +14,7 @@ export interface Step {
 
 export function useSteps(steps: readonly Step[], currentStepId: string) {
   const activeStepIndex = steps.findIndex(
-    (s) => kebabCase(s.label) === currentStepId,
+    (step) => kebabCase(step.label) === currentStepId,
   );
   const activeStep = steps[activeStepIndex];
 

@@ -72,12 +72,12 @@ test("navigates to the dashboard after non-admin user login", async ({
 
   await page.goto("/login");
 
-  await page.getByRole("tab", { name: /login/i }).click();
+  await page.getByRole("tab", { name: /login/iu }).click();
 
-  await page.getByRole("textbox", { name: /username/i }).fill("username");
-  await page.getByRole("textbox", { name: /^password$/i }).fill("password");
+  await page.getByRole("textbox", { name: /username/iu }).fill("username");
+  await page.getByRole("textbox", { name: /^password$/iu }).fill("password");
 
-  await page.getByRole("button", { name: /submit/i }).click();
+  await page.getByRole("button", { name: /submit/iu }).click();
 
   await expect(page).toHaveURL("/");
 });
@@ -129,12 +129,12 @@ test("does not navigate to the setup page after non-admin user login if setup is
 
   await page.goto("/login");
 
-  await page.getByRole("tab", { name: /login/i }).click();
+  await page.getByRole("tab", { name: /login/iu }).click();
 
-  await page.getByRole("textbox", { name: /username/i }).fill("username");
-  await page.getByRole("textbox", { name: /^password$/i }).fill("password");
+  await page.getByRole("textbox", { name: /username/iu }).fill("username");
+  await page.getByRole("textbox", { name: /^password$/iu }).fill("password");
 
-  await page.getByRole("button", { name: /submit/i }).click();
+  await page.getByRole("button", { name: /submit/iu }).click();
 
   await expect(page).toHaveURL("/");
 });
@@ -186,12 +186,12 @@ test("navigates to the setup page after admin user login if setup is required", 
 
   await page.goto("/login");
 
-  await page.getByRole("tab", { name: /login/i }).click();
+  await page.getByRole("tab", { name: /login/iu }).click();
 
-  await page.getByRole("textbox", { name: /username/i }).fill("username");
-  await page.getByRole("textbox", { name: /^password$/i }).fill("password");
+  await page.getByRole("textbox", { name: /username/iu }).fill("username");
+  await page.getByRole("textbox", { name: /^password$/iu }).fill("password");
 
-  await page.getByRole("button", { name: /submit/i }).click();
+  await page.getByRole("button", { name: /submit/iu }).click();
 
   await expect(page).toHaveURL("/setup");
 });

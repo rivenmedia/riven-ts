@@ -15,7 +15,7 @@ export const oxlintPluginVitestConfig = defineConfig({
         "vitest/no-importing-vitest-globals": "off",
         "vitest/consistent-test-filename": [
           "warn",
-          { pattern: ".*\\.spec\\.ts$" },
+          { pattern: ".*\\.spec\\.tsx?$" },
         ],
         "vitest/prefer-to-be-falsy": "off",
         "vitest/prefer-to-be-truthy": "off",

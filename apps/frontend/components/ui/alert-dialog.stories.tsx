@@ -58,7 +58,7 @@ Default.test(
     await step("open the alert dialog", async () => {
       await userEvent.click(
         canvas.getByRole("button", {
-          name: /open/i,
+          name: /open/iu,
         }),
       );
     });
@@ -66,7 +66,7 @@ Default.test(
     await step("close the alert dialog", async () => {
       await userEvent.click(
         canvasBody.getByRole("button", {
-          name: /cancel/i,
+          name: /cancel/iu,
         }),
         { delay: 100 },
       );

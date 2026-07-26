@@ -161,7 +161,9 @@ Default.test(
     const body = within(canvasElement.ownerDocument.body);
 
     await step("Open the dropdown menu", async () => {
-      await userEvent.click(await body.findByRole("button", { name: /open/i }));
+      await userEvent.click(
+        await body.findByRole("button", { name: /open/iu }),
+      );
       await expect(await body.findByRole("menu")).toBeInTheDocument();
     });
 

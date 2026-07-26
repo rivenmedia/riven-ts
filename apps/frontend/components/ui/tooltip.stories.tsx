@@ -84,7 +84,7 @@ Default.test(
   "When hovering over the trigger, it shows the tooltip content",
   async ({ canvasElement, step }) => {
     const canvasBody = within(canvasElement.ownerDocument.body);
-    const triggerBtn = await canvasBody.findByRole("button", { name: /add/i });
+    const triggerBtn = await canvasBody.findByRole("button", { name: /add/iu });
 
     await step("hover over trigger", async () => {
       await userEvent.hover(triggerBtn);

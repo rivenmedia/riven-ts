@@ -16,6 +16,7 @@ export const nextCookiesClientPlugin = {
       name: "next-cookies-request-plugin",
       hooks: {
         async onRequest(ctx) {
+          // oxlint-disable-next-line unicorn/prefer-global-this
           if (typeof window === "undefined") {
             const { cookies, headers } = await import("next/headers");
             const headersStore = await headers();
@@ -39,6 +40,7 @@ export const nextCookiesClientPlugin = {
           }
         },
         async onSuccess(ctx) {
+          // oxlint-disable-next-line unicorn/prefer-global-this
           if (typeof window === "undefined") {
             const setCookies = ctx.response.headers.get("set-cookie");
 
@@ -76,8 +78,6 @@ export const nextCookiesClientPlugin = {
 
               throw error;
             }
-
-            return;
           }
         },
       },

@@ -2,6 +2,7 @@ import type { CodegenConfig } from "@graphql-codegen/cli";
 import type { TypeScriptPluginConfig } from "@graphql-codegen/typescript";
 import type { TypeScriptDocumentsPluginConfig } from "@graphql-codegen/typescript-operations";
 
+// oxlint-disable-next-line import/no-default-export
 export default {
   schema: "../riven/schema.graphql",
   documents: ["app/**/*.ts", "app/**/*.tsx", "!app/**/__generated__/**/*"],
@@ -27,6 +28,7 @@ export default {
       // Note: these config options moved from the other generated file config
       config: {
         scalars: {
+          // oxlint-disable-next-line no-template-curly-in-string
           ID: "`${string}-${string}-${string}-${string}-${string}`",
           BigInt: "number",
           DateTimeISO: "string",

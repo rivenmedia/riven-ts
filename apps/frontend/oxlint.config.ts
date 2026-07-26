@@ -9,7 +9,6 @@ export default defineConfig({
       files: ["components/ui/**/*.tsx"],
       plugins: ["react", "typescript"],
       rules: {
-        "react/jsx-props-no-spreading": "allow",
         "typescript/promise-function-async": "allow",
       },
     },

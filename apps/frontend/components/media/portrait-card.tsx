@@ -28,20 +28,20 @@ export function PortraitCard({
   subtitle,
   topRight,
 }: PortraitCardProps) {
-  function renderDefaultImage() {
-    return (
-      <div className="bg-muted text-muted-foreground flex h-full w-full items-center justify-center">
-        <Mountain size={32} strokeWidth={1} />
-      </div>
-    );
-  }
+  function renderImage() {
+    if (!image) {
+      return (
+        <div className="bg-muted text-muted-foreground flex h-full w-full items-center justify-center">
+          <Mountain size={32} strokeWidth={1} />
+        </div>
+      );
+    }
 
-  function renderImage(src: string) {
     return (
       <>
         <Image
           alt={title}
-          src={src}
+          src={image}
           loading="lazy"
           className={cn(
             "h-full w-full object-cover transition-transform duration-700 ease-out will-change-transform group-hover:scale-110",
@@ -58,9 +58,10 @@ export function PortraitCard({
   function renderSelectButton() {
     return (
       <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+
           onSelectToggle?.();
         }}
         className={cn(
@@ -109,7 +110,7 @@ export function PortraitCard({
         className,
       )}
     >
-      {image ? renderImage(image) : renderDefaultImage()}
+      {renderImage()}
       {isSelectable && renderSelectButton()}
       {topRight && renderTopRightSlot()}
       {showContent && renderContent()}

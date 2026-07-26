@@ -38,9 +38,9 @@ export function Header({ modifierKey }: HeaderProps) {
     name: "query",
   });
 
-  function onKeyDown(e: KeyboardEvent) {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
-      e.preventDefault();
+  function onKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
 
       inputRef.current?.focus();
     }
@@ -58,12 +58,11 @@ export function Header({ modifierKey }: HeaderProps) {
   useEffect(() => {
     // Sync external URL changes to input, but avoid overwriting while typing
     const urlQuery = searchParams.get("query") ?? "";
-    const inputValue = form.getValues("query");
 
     // Only update if the value is different and we aren't focused
     // Or if we just navigated to a completely different page/query via link
     if (
-      urlQuery !== inputValue &&
+      urlQuery !== form.getValues("query") &&
       inputRef.current !== document.activeElement
     ) {
       form.setValue("query", urlQuery);
@@ -125,7 +124,7 @@ export function Header({ modifierKey }: HeaderProps) {
         <form
           ref={formRef}
           className="mx-auto w-full max-w-lg transition-all duration-300 focus-within:max-w-xl"
-          onSubmit={void onSubmit}
+          onSubmit={() => void onSubmit()}
         >
           <InputGroup className="h-11 w-full rounded-full border border-white/5 bg-white/5 shadow-lg backdrop-blur-xl transition-all duration-300 focus-within:border-white/10 focus-within:bg-black/40 focus-within:ring-1 focus-within:ring-white/20 hover:bg-white/10">
             <InputGroupAddon align="inline-start" className="pl-4">

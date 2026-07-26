@@ -58,7 +58,7 @@ Default.test(
 
     await step("Open the dialog", async () => {
       await userEvent.click(
-        await canvasBody.findByRole("button", { name: /open/i }),
+        await canvasBody.findByRole("button", { name: /open/iu }),
       );
 
       const dialog = await canvasBody.findByRole("dialog");
@@ -69,7 +69,7 @@ Default.test(
 
     await step("Close the dialog", async () => {
       await userEvent.click(
-        await canvasBody.findByRole("button", { name: /continue/i }),
+        await canvasBody.findByRole("button", { name: /continue/iu }),
       );
       await expect(await canvasBody.findByRole("dialog")).toHaveAttribute(
         "data-state",
@@ -86,7 +86,7 @@ Default.test(
 
     await step("Open the dialog", async () => {
       await userEvent.click(
-        await canvasBody.findByRole("button", { name: /open/i }),
+        await canvasBody.findByRole("button", { name: /open/iu }),
       );
 
       const dialog = await canvasBody.findByRole("dialog");
@@ -97,7 +97,7 @@ Default.test(
 
     await step("Close the dialog", async () => {
       await userEvent.click(
-        await canvasBody.findByRole("button", { name: /cancel/i }),
+        await canvasBody.findByRole("button", { name: /cancel/iu }),
       );
 
       await expect(await canvasBody.findByRole("dialog")).toHaveAttribute(
@@ -115,7 +115,7 @@ Default.test(
 
     await step("Open the dialog", async () => {
       await userEvent.click(
-        await canvasBody.findByRole("button", { name: /open/i }),
+        await canvasBody.findByRole("button", { name: /open/iu }),
       );
 
       const dialog = await canvasBody.findByRole("dialog");
@@ -126,7 +126,7 @@ Default.test(
 
     await step("Close the dialog", async () => {
       await userEvent.click(
-        await canvasBody.findByRole("button", { name: /close/i }),
+        await canvasBody.findByRole("button", { name: /close/iu }),
       );
 
       await expect(await canvasBody.findByRole("dialog")).toHaveAttribute(

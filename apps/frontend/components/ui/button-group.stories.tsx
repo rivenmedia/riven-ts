@@ -282,12 +282,9 @@ export const WithSelect = meta.story({
           <Select value={currency} onValueChange={setCurrency}>
             <SelectTrigger className="font-mono">{currency}</SelectTrigger>
             <SelectContent className="min-w-24">
-              {CURRENCIES.map((currency) => (
-                <SelectItem key={currency.value} value={currency.value}>
-                  {currency.value}{" "}
-                  <span className="text-muted-foreground">
-                    {currency.label}
-                  </span>
+              {CURRENCIES.map(({ value, label }) => (
+                <SelectItem key={value} value={value}>
+                  {value} <span className="text-muted-foreground">{label}</span>
                 </SelectItem>
               ))}
             </SelectContent>

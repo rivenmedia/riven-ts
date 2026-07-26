@@ -10,9 +10,14 @@ export const oxlintPluginNextJSConfig = defineConfig({
       plugins: ["nextjs"],
     },
     {
-      files: ["app/**/{page,layout,loading,error,skeleton}.tsx"],
+      files: [
+        "app/**/{page,layout,loading,error,skeleton,global-error,not-found}.tsx",
+      ],
+      plugins: ["typescript", "import"],
       rules: {
         "typescript/require-await": "allow",
+        "import/no-default-export": "allow",
+        "import/prefer-default-export": "deny",
       },
     },
   ],

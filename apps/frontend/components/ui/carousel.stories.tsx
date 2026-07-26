@@ -76,9 +76,9 @@ Default.test(
 
     await expect(slides).toHaveLength(5);
 
-    const nextBtn = await canvas.findByRole("button", { name: /next/i });
+    const nextBtn = await canvas.findByRole("button", { name: /next/iu });
     const prevBtn = await canvas.findByRole("button", {
-      name: /previous/i,
+      name: /previous/iu,
     });
 
     await step("navigate to the last slide", async () => {

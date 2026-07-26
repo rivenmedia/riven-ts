@@ -15,10 +15,10 @@ export const eslintPluginEslintPluginStorybookConfig = defineConfig({
         },
       ],
       rules: {
-        "react/jsx-props-no-spreading": "allow",
         "typescript/strict-void-return": ["allow", { allowReturnAny: true }],
+        "react/rules-of-hooks": "allow", // Allow hooks in anonymous render functions
+        "react/no-array-index-key": "allow",
       },
-      // rules: storybook.configs["flat/recommended"][0]?.rules,
     },
   ],
 });

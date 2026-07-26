@@ -26,6 +26,10 @@ import type { AuthProvider } from "@/app/_types/__generated__/graphql";
 
 const logger = createScopedLogger("login");
 
+function handleSuccessfulSignin() {
+  globalThis.window.history.replaceState(null, "", "/");
+}
+
 interface LoginFormProps {
   authProviders: AuthProvider[];
   isCredentialProviderEnabled: boolean;
@@ -37,18 +41,14 @@ export function LoginForm({
   isCredentialProviderEnabled,
   lastLoginMethod,
 }: LoginFormProps) {
-  function handleSuccessfulSignin() {
-    window.history.replaceState(null, "", "/");
-  }
-
   useEffect(() => {
     async function maybeAutoPasskeySignIn() {
       if (
-        typeof window.PublicKeyCredential.isConditionalMediationAvailable ===
-        "function"
+        typeof globalThis.window.PublicKeyCredential
+          .isConditionalMediationAvailable === "function"
       ) {
         const supportsPasskeyAutofill =
-          await window.PublicKeyCredential.isConditionalMediationAvailable();
+          await globalThis.window.PublicKeyCredential.isConditionalMediationAvailable();
 
         if (supportsPasskeyAutofill) {
           void authClient.signIn.passkey({
@@ -93,7 +93,7 @@ export function LoginForm({
       <CardContent>
         {isCredentialProviderEnabled && (
           <>
-            <form onSubmit={(e) => void handleSubmitWithAction(e)}>
+            <form onSubmit={(event) => void handleSubmitWithAction(event)}>
               <Controller
                 control={control}
                 name="username"

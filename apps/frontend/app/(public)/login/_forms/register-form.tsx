@@ -66,7 +66,7 @@ export function RegisterForm({ isSignupEnabled }: RegisterFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={(e) => void handleSubmitWithAction(e)}>
+        <form onSubmit={(event) => void handleSubmitWithAction(event)}>
           <Controller
             control={form.control}
             name="username"

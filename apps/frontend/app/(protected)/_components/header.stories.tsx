@@ -23,7 +23,7 @@ Default.test(
   async ({ canvasElement }) => {
     const router = getRouter();
     const canvas = within(canvasElement);
-    const input = canvas.getByRole("textbox", { name: /search/i });
+    const input = canvas.getByRole("textbox", { name: /search/iu });
 
     await userEvent.type(input, "test search query");
 
@@ -50,7 +50,7 @@ Default.test(
   async ({ canvasElement }) => {
     const router = getRouter();
     const canvas = within(canvasElement);
-    const input = canvas.getByRole("textbox", { name: /search/i });
+    const input = canvas.getByRole("textbox", { name: /search/iu });
 
     await userEvent.type(input, "test search query");
 

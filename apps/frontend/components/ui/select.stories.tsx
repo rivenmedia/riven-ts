@@ -78,7 +78,7 @@ Default.test(
     await step("open and select item", async () => {
       await userEvent.click(select);
       await userEvent.click(
-        await canvasBody.findByRole("option", { name: /banana/i }),
+        await canvasBody.findByRole("option", { name: /banana/iu }),
       );
       await expect(select).toHaveTextContent("Banana");
     });
@@ -86,7 +86,7 @@ Default.test(
     await step("verify the selected option", async () => {
       await userEvent.click(select);
       await expect(
-        await canvasBody.findByRole("option", { name: /banana/i }),
+        await canvasBody.findByRole("option", { name: /banana/iu }),
       ).toHaveAttribute("data-state", "checked");
     });
   },

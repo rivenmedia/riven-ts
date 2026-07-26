@@ -48,7 +48,7 @@ export function LibrarySearchForm() {
 
   return (
     <form
-      onSubmit={(e) => void handleSubmitWithAction(e)}
+      onSubmit={(event) => void handleSubmitWithAction(event)}
       className="flex flex-wrap items-center gap-2 rounded-2xl border border-white/5 bg-zinc-900/40 p-2 shadow-2xl backdrop-blur-md md:gap-3"
     >
       <div className="group relative">
@@ -76,7 +76,12 @@ export function LibrarySearchForm() {
           control={form.control}
           name="types"
           render={({ field }) => (
-            <Select {...field} onValueChange={field.onChange}>
+            <Select
+              {...field}
+              onValueChange={(value) => {
+                field.onChange(value);
+              }}
+            >
               <SelectTrigger className="h-9 border-0 bg-transparent text-zinc-400 hover:bg-white/5 data-value:text-white data-[state=open]:bg-white/10">
                 <SelectValue />
               </SelectTrigger>
@@ -100,7 +105,9 @@ export function LibrarySearchForm() {
             <Select
               {...field}
               // type="multiple"
-              onValueChange={field.onChange}
+              onValueChange={(value) => {
+                field.onChange(value);
+              }}
             >
               <SelectTrigger className="h-9 border-0 bg-transparent text-zinc-400 hover:bg-white/5 data-value:text-white data-[state=open]:bg-white/10">
                 <SelectValue />

@@ -10,16 +10,16 @@ it.skip("navigates to the dashboard after successful login", async () => {
 
   const user = userEvent.setup();
 
-  await user.click(screen.getByRole("tab", { name: /login/i }));
+  await user.click(screen.getByRole("tab", { name: /login/iu }));
 
   await Promise.all([
-    user.type(screen.getByLabelText(/username/i), "username"),
-    user.type(screen.getByLabelText(/email/i), "email@example.com"),
-    user.type(screen.getByLabelText(/password/i), "password"),
-    user.type(screen.getByLabelText(/confirm password/i), "password"),
+    user.type(screen.getByLabelText(/username/iu), "username"),
+    user.type(screen.getByLabelText(/email/iu), "email@example.com"),
+    user.type(screen.getByLabelText(/password/iu), "password"),
+    user.type(screen.getByLabelText(/confirm password/iu), "password"),
   ]);
 
-  expect(screen.getByRole("tab", { name: /login/i })).toBeInTheDocument();
+  expect(screen.getByRole("tab", { name: /login/iu })).toBeInTheDocument();
 });
 
 it.todo("shows a success message after successful login");
@@ -29,16 +29,16 @@ it("navigates to the setup page after registration when no other users exist", a
 
   const user = userEvent.setup();
 
-  await user.click(screen.getByRole("tab", { name: /register/i }));
+  await user.click(screen.getByRole("tab", { name: /register/iu }));
 
-  await user.type(screen.getByLabelText(/username/i), "username");
-  await user.type(screen.getByLabelText(/email/i), "email@example.com");
-  await user.type(screen.getByLabelText(/^password$/i), "password");
-  await user.type(screen.getByLabelText(/confirm password/i), "password");
+  await user.type(screen.getByLabelText(/username/iu), "username");
+  await user.type(screen.getByLabelText(/email/iu), "email@example.com");
+  await user.type(screen.getByLabelText(/^password$/iu), "password");
+  await user.type(screen.getByLabelText(/confirm password/iu), "password");
 
-  await user.click(screen.getByRole("button", { name: /submit/i }));
+  await user.click(screen.getByRole("button", { name: /submit/iu }));
 
-  expect(screen.getByRole("tab", { name: /login/i })).toBeInTheDocument();
+  expect(screen.getByRole("tab", { name: /login/iu })).toBeInTheDocument();
 });
 
 it.todo(
@@ -50,16 +50,16 @@ it("shows a success message on successful registration", async () => {
 
   const user = userEvent.setup();
 
-  await user.click(screen.getByRole("tab", { name: /register/i }));
+  await user.click(screen.getByRole("tab", { name: /register/iu }));
 
-  await user.type(screen.getByLabelText(/username/i), "username");
-  await user.type(screen.getByLabelText(/email/i), "email@example.com");
-  await user.type(screen.getByLabelText(/^password$/i), "password");
-  await user.type(screen.getByLabelText(/confirm password/i), "password");
+  await user.type(screen.getByLabelText(/username/iu), "username");
+  await user.type(screen.getByLabelText(/email/iu), "email@example.com");
+  await user.type(screen.getByLabelText(/^password$/iu), "password");
+  await user.type(screen.getByLabelText(/confirm password/iu), "password");
 
-  await user.click(screen.getByRole("button", { name: /submit/i }));
+  await user.click(screen.getByRole("button", { name: /submit/iu }));
 
-  expect(screen.getByRole("tab", { name: /login/i })).toBeInTheDocument();
+  expect(screen.getByRole("tab", { name: /login/iu })).toBeInTheDocument();
 });
 
 it.todo("shows an error message when login fails");
