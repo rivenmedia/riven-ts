@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 
 import { ItemActions } from "./_components/item-actions";

@@ -25,5 +25,5 @@
     "lib/**/*.tsx",
     "lib/**/*.mts"
   ],
-  "exclude": ["**/*.spec.ts", "**/__tests__/**/*.ts"]
+  "exclude": ["**/*.spec.ts", "**/__tests__/**/*.ts", "**/*.stories.tsx"]
 }

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 
-import Link from "next/link";
+// import Link from "next/link";
 
 export default async function HomePage() {
   const recentlyAddedItems = [];
@@ -52,7 +52,7 @@ export default async function HomePage() {
                             onChange={(v) =>
                                 trendingMoviesStore.changeTimeWindow(v as "day" | "week")} /> */}
                 <Button asChild className={viewAllButtonClass} variant="ghost">
-                  <Link href="/lists/trending/movie">View All</Link>
+                  {/* <Link href="/lists/trending/movie">View All</Link> */}
                 </Button>
               </div>
             </div>
@@ -75,7 +75,7 @@ export default async function HomePage() {
                             onChange={(v) =>
                                 trendingShowsStore.changeTimeWindow(v as "day" | "week")} /> */}
                 <Button asChild className={viewAllButtonClass} variant="ghost">
-                  <Link href="/lists/trending/tv">View All</Link>
+                  {/* <Link href="/lists/trending/tv">View All</Link> */}
                 </Button>
               </div>
             </div>
@@ -89,7 +89,7 @@ export default async function HomePage() {
             <div className="mb-1 flex items-center justify-between">
               {/* {@render listHeading("Trending Anime")} */}
               <Button asChild className={viewAllButtonClass} variant="ghost">
-                <Link href="/lists/trending/anime">View All</Link>
+                {/* <Link href="/lists/trending/anime">View All</Link> */}
               </Button>
             </div>
             {/* <ListCarousel data={anilistTrendingStore.items} indexer="anilist" /> */}

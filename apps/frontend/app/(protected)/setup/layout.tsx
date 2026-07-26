@@ -24,7 +24,9 @@ export default function SetupLayout({ children }: LayoutProps<"/setup">) {
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={(e) => void handleSubmitWithAction(e)}>{children}</form>
+      <form onSubmit={(event) => void handleSubmitWithAction(event)}>
+        {children}
+      </form>
     </FormProvider>
   );
 }

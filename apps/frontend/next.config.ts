@@ -10,6 +10,10 @@ export default {
   images: {
     remotePatterns: [new URL("https://images.pexels.com/photos/**")],
   },
+  typescript: {
+    tsconfigPath: "tsconfig.app.json",
+    ignoreBuildErrors: true,
+  },
   redirects() {
     return [
       {

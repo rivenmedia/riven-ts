@@ -13,4 +13,4 @@ export const removeItems = permissionActionClient
       ids: z.array(z.string()),
     }),
   )
-  .action(async ({ parsedInput }) => {});
+  .action(async ({}) => {});
