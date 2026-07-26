@@ -1,41 +1,18 @@
 /**
  * In-process cache of library section definitions and their membership.
  *
- * ## Why membership is computed in JS rather than SQL
+ * Membership is computed in JS rather than SQL because the rule field set
+ * includes `MediaItem.isAnime`, a non-persisted getter, and `Stream.parsedData`,
+ * a jsonb blob. Neither translates to a `WHERE` clause that behaves identically
+ * on Postgres (production, `text[]` genres) and SQLite (tests, JSON genres).
  *
- * The rule field set includes `MediaItem.isAnime`, a non-persisted getter, and
- * `Stream.parsedData`, a jsonb blob. Neither translates to a `WHERE` clause
- * that behaves identically on Postgres (production, `text[]` genres) and SQLite
- * (tests, JSON genres), so rules are evaluated in JS over pre-built facts.
+ * One sweep builds membership for every enabled section at once, so I/O is
+ * O(items) rather than O(items x sections), and what gets cached is two sets of
+ * ID tokens per section rather than the hydrated entities.
  *
- * ## Why this is affordable
- *
- * One `em.stream()` pass over the library builds membership for *every* enabled
- * section at once, so I/O is O(items) rather than O(items x sections), and
- * memory stays flat regardless of library size. The result is two sets of ID
- * tokens per section — a few tens of bytes per item — which is what gets
- * cached, not the hydrated entities. Readdir and getattr then answer from a set
- * lookup with no query at all.
- *
- * Freshness is driven by explicit invalidation (section writes, and
- * `riven.media-item.download.success`), not by the TTL. The TTL is only a
- * backstop against a missed invalidation point.
- *
- * ## If this stops being fast enough
- *
- * 1. Add a `library_section_item (section_id, media_item_id)` join table.
- * 2. Materialise it by calling the *unchanged* `evaluateRule` on the same
- *    triggers, plus a periodic job for rules using `inLastDays`.
- * 3. Replace `membership()` with a query against that table.
- *
- * `evaluateRule` is pure and synchronous over a pre-built `ItemFacts` precisely
- * so that step 2 needs no rule-logic changes.
- *
- * ## Single-process assumption
- *
- * This cache lives in the core process, which is also where the VFS and the
- * GraphQL server run, so an in-memory cache is coherent. If Riven ever runs
- * multiple API replicas, invalidation must move to Redis pub/sub.
+ * The cache is coherent only because the VFS, the GraphQL server and the job
+ * workers share one process. Running multiple API replicas would require moving
+ * invalidation to Redis pub/sub.
  */
 
 import {
@@ -44,9 +21,9 @@ import {
   Show,
 } from "@repo/util-plugin-sdk/dto/entities";
 
-import { LRUCache } from "lru-cache";
 import { DateTime } from "luxon";
 
+import { parseProviderToken } from "../vfs/schemas/path-info.schema.ts";
 import {
   buildItemFacts,
   loadMovieAggregates,
@@ -54,6 +31,7 @@ import {
 } from "./utilities/build-item-facts.ts";
 import { evaluateRule } from "./utilities/evaluate-rule.ts";
 
+import type { ItemAggregates } from "./utilities/build-item-facts.ts";
 import type { ItemFacts } from "./utilities/item-facts.ts";
 import type { EntityManager } from "@mikro-orm/core";
 import type { LibrarySectionMediaType } from "@repo/util-plugin-sdk/dto/entities";
@@ -67,7 +45,6 @@ const MEMBERSHIP_TTL_MS = 900_000;
 export interface SectionDescriptor {
   id: UUID;
   slug: string;
-  name: string;
   mediaTypes: LibrarySectionMediaType[];
   split: boolean;
   enabled: boolean;
@@ -75,66 +52,62 @@ export interface SectionDescriptor {
   rule: LibrarySectionRule | null;
   include: ReadonlySet<UUID>;
   exclude: ReadonlySet<UUID>;
-  createdAt: Date;
-  updatedAt: Date | null;
-
-  /** The directories this section exposes, relative to the VFS root. */
-  directories: string[];
 }
 
 /**
- * Which items belong to a section, keyed by the same ID tokens that appear in
- * VFS directory names, so a path can be tested without touching the database.
+ * Which items belong to a section, keyed by the same provider tokens that
+ * appear in VFS directory names, so a path can be tested without a query.
  */
 export interface SectionMembership {
   movieTmdbIds: ReadonlySet<string>;
   showTvdbIds: ReadonlySet<string>;
 }
 
-const TMDB_TOKEN_PATTERN = /\{tmdb-(?<tmdbId>\d+)\}/u;
-const TVDB_TOKEN_PATTERN = /\{tvdb-(?<tvdbId>\d+)\}/u;
+/** Returned instead of `undefined` so callers need no null handling. */
+export const EMPTY_MEMBERSHIP: SectionMembership = {
+  movieTmdbIds: new Set(),
+  showTvdbIds: new Set(),
+};
 
 /**
- * Whether a VFS entry name belongs to a section.
+ * Whether a provider token belongs to a section.
  *
- * Entry names embed the provider ID (`Alien (1979) {tmdb-348}`), which is
- * exactly what membership is keyed on. Names carrying neither token are kept:
- * they are not item directories, so a section has no opinion on them.
+ * A name carrying no token is kept: it is not an item directory, so a section
+ * has no opinion on it.
  */
-export const membershipIncludesEntryName = (
+export const membershipIncludes = (
   membership: SectionMembership,
-  name: string,
+  token: { tmdbId?: string | undefined; tvdbId?: string | undefined },
 ): boolean => {
-  const tmdbId = TMDB_TOKEN_PATTERN.exec(name)?.groups?.["tmdbId"];
-
-  if (tmdbId !== undefined) {
-    return membership.movieTmdbIds.has(tmdbId);
+  if (token.tmdbId !== undefined) {
+    return membership.movieTmdbIds.has(token.tmdbId);
   }
 
-  const tvdbId = TVDB_TOKEN_PATTERN.exec(name)?.groups?.["tvdbId"];
-
-  if (tvdbId !== undefined) {
-    return membership.showTvdbIds.has(tvdbId);
+  if (token.tvdbId !== undefined) {
+    return membership.showTvdbIds.has(token.tvdbId);
   }
 
   return true;
 };
+
+export const membershipIncludesEntryName = (
+  membership: SectionMembership,
+  name: string,
+) => membershipIncludes(membership, parseProviderToken(name));
 
 /** Overrides beat the rule. Exclusion wins, though the unique index prevents both. */
 const isMember = (
   section: SectionDescriptor,
   facts: ItemFacts,
   now: number,
-): boolean => {
+) => {
   if (section.exclude.has(facts.id)) {
     return false;
   }
 
-  if (section.include.has(facts.id)) {
-    return true;
-  }
-
-  return evaluateRule(section.rule, facts, now);
+  return (
+    section.include.has(facts.id) || evaluateRule(section.rule, facts, now)
+  );
 };
 
 const toDescriptor = (section: LibrarySection): SectionDescriptor => {
@@ -150,7 +123,6 @@ const toDescriptor = (section: LibrarySection): SectionDescriptor => {
   return {
     id: section.id,
     slug: section.slug,
-    name: section.name,
     mediaTypes: section.mediaTypes,
     split: section.split,
     enabled: section.enabled,
@@ -158,31 +130,34 @@ const toDescriptor = (section: LibrarySection): SectionDescriptor => {
     rule: section.rule ?? null,
     include,
     exclude,
-    createdAt: section.createdAt,
-    updatedAt: section.updatedAt ?? null,
-    directories: section.getVfsDirectories(),
   };
 };
 
+/** One media type's half of the sweep. */
+interface SweepPlan<Entity extends Movie | Show> {
+  stream: (em: EntityManager) => AsyncIterable<Entity>;
+  loadAggregates: (em: EntityManager) => Promise<ItemAggregates>;
+  tokenOf: (item: Entity) => string;
+  sections: SectionDescriptor[];
+}
+
+interface CachedMembership {
+  value: ReadonlyMap<UUID, SectionMembership>;
+  builtAt: number;
+}
+
 class SectionRegistry {
   #sections: ReadonlyMap<string, SectionDescriptor> | null = null;
+  #enabled: SectionDescriptor[] | null = null;
   #loadingSections: Promise<ReadonlyMap<string, SectionDescriptor>> | null =
     null;
 
-  readonly #membership = new LRUCache<
-    "all",
-    ReadonlyMap<UUID, SectionMembership>
-  >({
-    ttl: MEMBERSHIP_TTL_MS,
-    max: 1,
-  });
+  #membership: CachedMembership | null = null;
   #loadingMembership: Promise<ReadonlyMap<UUID, SectionMembership>> | null =
     null;
 
   /** All sections, enabled or not, keyed by slug. Concurrent callers share one query. */
-  public async snapshot(
-    em: EntityManager,
-  ): Promise<ReadonlyMap<string, SectionDescriptor>> {
+  public async snapshot(em: EntityManager) {
     if (this.#sections) {
       return this.#sections;
     }
@@ -194,27 +169,19 @@ class SectionRegistry {
     return this.#loadingSections;
   }
 
-  /** Enabled sections in listing order: by `sortOrder`, then slug. */
+  /** Enabled sections, in root listing order. */
   public async enabledSections(em: EntityManager) {
-    const sections = await this.snapshot(em);
+    await this.snapshot(em);
 
-    return [...sections.values()]
-      .filter((section) => section.enabled)
-      .toSorted(
-        (left, right) =>
-          left.sortOrder - right.sortOrder ||
-          left.slug.localeCompare(right.slug),
-      );
+    return this.#enabled ?? [];
   }
 
-  /** Membership for every enabled section, built in a single sweep. */
-  public async membership(
-    em: EntityManager,
-  ): Promise<ReadonlyMap<UUID, SectionMembership>> {
-    const cached = this.#membership.get("all");
-
-    if (cached) {
-      return cached;
+  public async membership(em: EntityManager) {
+    if (
+      this.#membership &&
+      DateTime.utc().toMillis() - this.#membership.builtAt < MEMBERSHIP_TTL_MS
+    ) {
+      return this.#membership.value;
     }
 
     this.#loadingMembership ??= this.#buildMembership(em).finally(() => {
@@ -227,24 +194,20 @@ class SectionRegistry {
   public async membershipFor(em: EntityManager, sectionId: UUID) {
     const all = await this.membership(em);
 
-    return all.get(sectionId);
+    return all.get(sectionId) ?? EMPTY_MEMBERSHIP;
   }
 
-  /** Drops everything. Call after any write to a section or its overrides. */
+  /** Call after any write to a section or its overrides. */
   public invalidate() {
     this.#sections = null;
+    this.#enabled = null;
     this.#loadingSections = null;
-    this.#membership.clear();
+    this.invalidateMembership();
   }
 
-  /**
-   * Drops only membership, leaving section definitions cached.
-   *
-   * For events that change the library rather than the sections, such as a
-   * download completing.
-   */
+  /** For events that change the library rather than the sections. */
   public invalidateMembership() {
-    this.#membership.clear();
+    this.#membership = null;
   }
 
   async #loadSections(em: EntityManager) {
@@ -254,96 +217,119 @@ class SectionRegistry {
       { populate: ["overrides"] },
     );
 
-    const bySlug = new Map<string, SectionDescriptor>(
-      sections.map((section) => [section.slug, toDescriptor(section)]),
+    const descriptors = sections.map((section) => toDescriptor(section));
+
+    this.#sections = new Map(
+      descriptors.map((descriptor) => [descriptor.slug, descriptor]),
     );
+    this.#enabled = descriptors
+      .filter((descriptor) => descriptor.enabled)
+      .toSorted(
+        (left, right) =>
+          left.sortOrder - right.sortOrder ||
+          left.slug.localeCompare(right.slug),
+      );
 
-    this.#sections = bySlug;
-
-    return bySlug;
+    return this.#sections;
   }
 
   async #buildMembership(em: EntityManager) {
     const sections = await this.enabledSections(em);
-    const result = new Map<UUID, { movies: Set<string>; shows: Set<string> }>(
+    const buckets = new Map<UUID, { movies: Set<string>; shows: Set<string> }>(
       sections.map((section) => [
         section.id,
         { movies: new Set<string>(), shows: new Set<string>() },
       ]),
     );
 
-    if (sections.length > 0) {
-      // Swept on a fork so the hydrated library does not land in the caller's
-      // identity map, and is discarded wholesale when the sweep finishes.
-      const sweepEm = em.fork();
-
-      try {
-        const now = DateTime.utc().toMillis();
-        const movieSections = sections.filter((section) =>
-          section.mediaTypes.includes("movie"),
-        );
-        const showSections = sections.filter((section) =>
-          section.mediaTypes.includes("show"),
-        );
-
-        if (movieSections.length > 0) {
-          const aggregates = await loadMovieAggregates(sweepEm);
-
-          // Items with no media file can never appear in the VFS, so they are
-          // excluded by the query rather than evaluated and discarded.
-          const movies = sweepEm.stream(Movie, {
+    await Promise.all([
+      this.#sweep(em, buckets, "movies", {
+        // Items with no media file can never appear in the VFS.
+        stream: (sweepEm) =>
+          sweepEm.stream(Movie, {
             where: { filesystemEntries: { $some: { type: "media" } } },
             populate: ["activeStream"],
-          });
-
-          for await (const movie of movies) {
-            const facts = buildItemFacts(movie, aggregates);
-
-            for (const section of movieSections) {
-              if (isMember(section, facts, now)) {
-                result.get(section.id)?.movies.add(movie.tmdbId);
-              }
-            }
-          }
-        }
-
-        if (showSections.length > 0) {
-          const aggregates = await loadShowAggregates(sweepEm);
-
-          const shows = sweepEm.stream(Show, {
+          }),
+        loadAggregates: loadMovieAggregates,
+        tokenOf: (movie) => movie.tmdbId,
+        sections: sections.filter((section) =>
+          section.mediaTypes.includes("movie"),
+        ),
+      }),
+      this.#sweep(em, buckets, "shows", {
+        // `$some` at every level so shows are matched by subquery rather than
+        // by a join that would yield one row per episode.
+        stream: (sweepEm) =>
+          sweepEm.stream(Show, {
             where: {
               seasons: {
-                episodes: { filesystemEntries: { $some: { type: "media" } } },
+                $some: {
+                  episodes: {
+                    $some: {
+                      filesystemEntries: { $some: { type: "media" } },
+                    },
+                  },
+                },
               },
             },
             populate: ["activeStream"],
-          });
-
-          for await (const show of shows) {
-            const facts = buildItemFacts(show, aggregates);
-
-            for (const section of showSections) {
-              if (isMember(section, facts, now)) {
-                result.get(section.id)?.shows.add(show.tvdbId);
-              }
-            }
-          }
-        }
-      } finally {
-        sweepEm.clear();
-      }
-    }
+          }),
+        loadAggregates: loadShowAggregates,
+        tokenOf: (show) => show.tvdbId,
+        sections: sections.filter((section) =>
+          section.mediaTypes.includes("show"),
+        ),
+      }),
+    ]);
 
     const membership = new Map<UUID, SectionMembership>(
-      [...result].map(([id, { movies, shows }]) => [
+      [...buckets].map(([id, { movies, shows }]) => [
         id,
         { movieTmdbIds: movies, showTvdbIds: shows },
       ]),
     );
 
-    this.#membership.set("all", membership);
+    this.#membership = {
+      value: membership,
+      builtAt: DateTime.utc().toMillis(),
+    };
 
     return membership;
+  }
+
+  async #sweep<Entity extends Movie | Show>(
+    parentEm: EntityManager,
+    buckets: Map<UUID, { movies: Set<string>; shows: Set<string> }>,
+    bucket: "movies" | "shows",
+    plan: SweepPlan<Entity>,
+  ) {
+    if (plan.sections.length === 0) {
+      return;
+    }
+
+    // A dedicated fork per sweep, so the hydrated library never reaches the
+    // caller's identity map and is discarded when the sweep finishes.
+    const em = parentEm.fork();
+    const aggregates = await plan.loadAggregates(em);
+    const now = DateTime.utc().toMillis();
+    const targets = plan.sections.map((section) => ({
+      section,
+      tokens: buckets.get(section.id)?.[bucket],
+    }));
+
+    try {
+      for await (const item of plan.stream(em)) {
+        const facts = buildItemFacts(item, aggregates);
+
+        for (const { section, tokens } of targets) {
+          if (isMember(section, facts, now)) {
+            tokens?.add(plan.tokenOf(item));
+          }
+        }
+      }
+    } finally {
+      em.clear();
+    }
   }
 }
 
