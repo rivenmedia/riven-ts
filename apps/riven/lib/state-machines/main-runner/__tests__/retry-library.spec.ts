@@ -23,15 +23,27 @@ it("enqueues an item processor job for each incomplete item request in the datab
   const incompleteItems = [
     movieItemRequestFactory.makeEntity({
       imdbId: "tt1234561",
-      state: "requested",
+      state: "unreleased",
     }),
-    showItemRequestFactory.makeEntity({
+    movieItemRequestFactory.makeEntity({
       imdbId: "tt1234562",
       state: "requested",
     }),
     showItemRequestFactory.makeEntity({
       imdbId: "tt1234563",
+      state: "requested",
+    }),
+    showItemRequestFactory.makeEntity({
+      imdbId: "tt1234564",
       state: "failed",
+    }),
+    showItemRequestFactory.makeEntity({
+      imdbId: "tt1234565",
+      state: "failed",
+    }),
+    showItemRequestFactory.makeEntity({
+      imdbId: "tt1234566",
+      state: "ongoing",
     }),
   ];
 
@@ -66,6 +78,8 @@ it("enqueues an item processor job for each incomplete item request in the datab
       }),
     );
   }
+
+  expect(flowSpy).toHaveBeenCalledTimes(incompleteItems.length);
 });
 
 it('enqueues a media item processor job in the "scrape" step for each incomplete indexed media item', async ({
