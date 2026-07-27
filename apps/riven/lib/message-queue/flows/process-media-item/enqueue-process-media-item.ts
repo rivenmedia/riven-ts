@@ -30,6 +30,14 @@ export async function enqueueProcessMediaItem(
   const mediaItemsToProcess =
     await services.mediaItemService.getItemsToProcess(id);
 
+  if (mediaItemsToProcess.length === 0) {
+    const { fullTitle } = await services.mediaItemService.getMediaItemById(id);
+
+    logger.verbose(`No media items require processing for ${fullTitle}.`);
+
+    return;
+  }
+
   const queue = createQueue("process-media-item");
 
   const rootNodes: FlowJob[] = [];
