@@ -60,7 +60,9 @@ export function filterChildrenValues<T extends string | undefined>(
   type ExpectedValue = T extends undefined ? Record<string, unknown> : unknown;
 
   if (id) {
-    return childrenValues[childJobKey(queueName, pluginName, id)] as ExpectedValue;
+    return childrenValues[
+      childJobKey(queueName, pluginName, id)
+    ] as ExpectedValue;
   }
 
   const pattern = new RegExp(
