@@ -13,6 +13,17 @@ import { StremThruSettings } from "./stremthru-settings.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
+/**
+ * Stores whose `getTorrent` file link is already a directly-streamable CDN URL.
+ * Every other store returns a `stremthru://` locked-link placeholder that only
+ * link/generate can resolve, so those must be piped through generateLink; for
+ * these two that call is a no-op echo, so skipping it avoids a wasted request.
+ * A denylist (not an allowlist) is used deliberately: a missing entry only
+ * costs one redundant request, whereas a wrongly-listed store would serve an
+ * unresolved placeholder and break playback.
+ */
+const DIRECT_LINK_STORES = new Set<Store>(["premiumize", "debridlink"]);
+
 export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
@@ -148,8 +159,11 @@ export const plugin: RivenPlugin = {
           if (file?.link) {
             // Stores like torbox return an unresolved `stremthru://`
             // locked-link placeholder here; link/generate resolves it into a
-            // signed CDN URL (and echoes already-direct links, e.g. premiumize).
-            const link = await api.generateLink(file.link, store);
+            // signed CDN URL. Direct-link stores already return a usable URL,
+            // so the generate call is skipped for them (see DIRECT_LINK_STORES).
+            const link = DIRECT_LINK_STORES.has(store)
+              ? file.link
+              : await api.generateLink(file.link, store);
 
             return {
               success: true,
@@ -211,6 +225,7 @@ export const plugin: RivenPlugin = {
       }
     },
     "riven.media-item.stream-link.health-check.requested": async ({
+      dataSources,
       event: { link, item },
     }) => {
       const response = await fetch(link, {
@@ -244,6 +259,27 @@ export const plugin: RivenPlugin = {
         throw new Error(
           `Failed to check stream link health: Received status code ${response.status.toString()} for URL ${link}`,
         );
+      }
+
+      // A lapsed subscription answers 403 (or 400 on torbox) on every link,
+      // indistinguishable from a genuinely expired URL signature. Reporting
+      // "expired" for an account-level failure would drive the core flow to
+      // refresh, fail, then blacklist — deleting healthy torrents across the
+      // whole library. Verify the store is still active before doing so.
+      if (state === "expired") {
+        const parsedStore = Store.safeParse(item.provider);
+
+        if (parsedStore.success) {
+          const subscriptionStatus = await dataSources
+            .get(StremThruTorzAPI)
+            .getSubscriptionStatus(parsedStore.data);
+
+          if (subscriptionStatus === "expired") {
+            throw new Error(
+              `Cannot health-check stream link for ${parsedStore.data}: the store subscription is expired.`,
+            );
+          }
+        }
       }
 
       return {

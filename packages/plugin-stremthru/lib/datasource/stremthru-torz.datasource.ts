@@ -225,6 +225,14 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     return data;
   }
 
+  public async getSubscriptionStatus(store: Store) {
+    const response = await this.get<unknown>("v0/store/user", {
+      headers: this.#buildCommonHeaders(store),
+    });
+
+    return StoreUserResponse.parse(response).data.subscription_status;
+  }
+
   public async getTorrent(id: string, store: Store) {
     const response = await this.get<unknown>(
       `v0/store/torz/${encodeURIComponent(id)}`,
