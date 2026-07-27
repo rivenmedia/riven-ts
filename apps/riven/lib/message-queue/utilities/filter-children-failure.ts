@@ -1,4 +1,4 @@
-import { queueNameFor } from "./queue-name-for.ts";
+import { childJobKey } from "./child-job-key.ts";
 
 import type { Flow } from "../flows/index.ts";
 import type { SandboxedJobDefinition } from "../sandboxed-jobs/index.ts";
@@ -11,7 +11,8 @@ import type { RivenEvent } from "@repo/util-plugin-sdk/events";
  * `getIgnoredChildrenFailures()`, keyed by `bull:<queueName>:<jobId>`.
  *
  * This helper looks up the ignored-failure reason for a specific child job,
- * mirroring the key convention used by {@link filterChildrenValues}.
+ * reusing {@link childJobKey} so it shares the exact-match key convention with
+ * {@link filterChildrenValues}.
  *
  * @param ignoredChildrenFailures Values returned from `await job.getIgnoredChildrenFailures()`
  * @param queueName The event/queue name of the child job
@@ -25,7 +26,5 @@ export function filterChildrenFailure(
   pluginName?: string,
   id?: string,
 ): string | undefined {
-  const key = `bull:${queueNameFor(queueName, pluginName)}:${id ?? ""}`;
-
-  return ignoredChildrenFailures[key];
+  return ignoredChildrenFailures[childJobKey(queueName, pluginName, id)];
 }

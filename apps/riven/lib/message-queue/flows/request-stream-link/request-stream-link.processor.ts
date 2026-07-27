@@ -20,7 +20,10 @@ import { filterChildrenValues } from "../../utilities/filter-children-values.ts"
 import { enqueueProcessMediaItem } from "../process-media-item/enqueue-process-media-item.ts";
 import { flow } from "../producer.ts";
 import { requestStreamLinkProcessorSchema } from "./request-stream-link.schema.ts";
-import { getHealthCheckNextStep } from "./utilities/get-health-check-next-step.ts";
+import {
+  getHealthCheckNextStep,
+  MAX_HEALTH_CHECK_ATTEMPTS,
+} from "./utilities/get-health-check-next-step.ts";
 
 export const requestStreamLinkProcessor =
   requestStreamLinkProcessorSchema.implementAsync(
@@ -213,9 +216,9 @@ export const requestStreamLinkProcessor =
               );
             }
 
-            const maxHealthCheckAttempts = 2;
-            let nextStep: (typeof job.data)["step"] = getHealthCheckNextStep(
+            const nextStep = getHealthCheckNextStep(
               data.state,
+              job.data.healthCheckAttempts,
             );
 
             switch (data.state) {
@@ -227,14 +230,10 @@ export const requestStreamLinkProcessor =
                 break;
               }
               case "expired": {
-                const healthCheckAttempts = job.data.healthCheckAttempts + 1;
-
-                if (healthCheckAttempts > maxHealthCheckAttempts) {
+                if (nextStep === "blacklist-stream") {
                   logger.warn(
-                    `Stream URL for ${chalk.bold(mediaEntry.mediaItem.$.fullTitle)} failed to refresh after ${maxHealthCheckAttempts.toString()} attempts; blacklisting the stream.`,
+                    `Stream URL for ${chalk.bold(mediaEntry.mediaItem.$.fullTitle)} failed to refresh after ${MAX_HEALTH_CHECK_ATTEMPTS.toString()} attempts; blacklisting the stream.`,
                   );
-
-                  nextStep = "blacklist-stream";
 
                   break;
                 }
@@ -253,7 +252,7 @@ export const requestStreamLinkProcessor =
 
                 await job.updateData({
                   ...job.data,
-                  healthCheckAttempts,
+                  healthCheckAttempts: job.data.healthCheckAttempts + 1,
                 });
 
                 break;
