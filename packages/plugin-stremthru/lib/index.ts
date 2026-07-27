@@ -243,8 +243,6 @@ export const plugin: RivenPlugin = {
 
       const expiredStatusCodes = new Set<StatusCodes>();
 
-      // Premiumize 403s an expired signed URL; scoped to premiumize since
-      // other stores' 403 semantics aren't verified.
       if (item.provider === "premiumize") {
         expiredStatusCodes.add(StatusCodes.FORBIDDEN);
       }
