@@ -225,7 +225,6 @@ export const plugin: RivenPlugin = {
       }
     },
     "riven.media-item.stream-link.health-check.requested": async ({
-      dataSources,
       event: { link, item },
     }) => {
       const response = await fetch(link, {
@@ -242,9 +241,16 @@ export const plugin: RivenPlugin = {
         StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
       ]);
 
-      // Debrid CDNs answer 403 when the URL signature has expired; the torrent
-      // itself is still available, so this must never classify as dead.
-      const expiredStatusCodes = new Set<StatusCodes>([StatusCodes.FORBIDDEN]);
+      const expiredStatusCodes = new Set<StatusCodes>();
+
+      // Premiumize answers 403 when the signed CDN URL has expired (the torrent
+      // is still cached); regenerating from the durable id mints a fresh link.
+      // Scoped to premiumize deliberately: other stores' 403 semantics aren't
+      // verified, and a blanket rule risks treating an account-level 403
+      // (e.g. a lapsed subscription) as an expired link and blacklisting.
+      if (item.provider === "premiumize") {
+        expiredStatusCodes.add(StatusCodes.FORBIDDEN);
+      }
 
       if (item.provider === "torbox") {
         expiredStatusCodes.add(StatusCodes.BAD_REQUEST);
@@ -259,27 +265,6 @@ export const plugin: RivenPlugin = {
         throw new Error(
           `Failed to check stream link health: Received status code ${response.status.toString()} for URL ${link}`,
         );
-      }
-
-      // A lapsed subscription answers 403 (or 400 on torbox) on every link,
-      // indistinguishable from a genuinely expired URL signature. Reporting
-      // "expired" for an account-level failure would drive the core flow to
-      // refresh, fail, then blacklist — deleting healthy torrents across the
-      // whole library. Verify the store is still active before doing so.
-      if (state === "expired") {
-        const parsedStore = Store.safeParse(item.provider);
-
-        if (parsedStore.success) {
-          const subscriptionStatus = await dataSources
-            .get(StremThruTorzAPI)
-            .getSubscriptionStatus(parsedStore.data);
-
-          if (subscriptionStatus === "expired") {
-            throw new Error(
-              `Cannot health-check stream link for ${parsedStore.data}: the store subscription is expired.`,
-            );
-          }
-        }
       }
 
       return {

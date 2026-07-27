@@ -8,30 +8,13 @@ import { it } from "./stremthru.test-context.ts";
 
 const link = "https://example.com/stream-link";
 
-function storeUserHandler(subscriptionStatus: "premium" | "expired" | "trial") {
-  return http.get("**/v0/store/user", () =>
-    HttpResponse.json({
-      data: {
-        id: "user-id",
-        email: "user@example.com",
-        subscription_status: subscriptionStatus,
-        has_usenet: false,
-      },
-    }),
-  );
-}
-
-it("classifies a 403 response as an expired link when the subscription is active", async ({
+it("classifies a 403 response as an expired link for premiumize", async ({
   dataSourceMap,
   server,
   plugin,
   settings,
 }) => {
-  server.use(
-    http.head(link, () => new HttpResponse(null, { status: 403 })),
-    // Active subscription => the 403 is a real expired-link signature.
-    storeUserHandler("premium"),
-  );
+  server.use(http.head(link, () => new HttpResponse(null, { status: 403 })));
 
   expect.assert(
     plugin.hooks["riven.media-item.stream-link.health-check.requested"],
@@ -39,7 +22,7 @@ it("classifies a 403 response as an expired link when the subscription is active
 
   const item = new MediaEntry();
 
-  item.provider = "realdebrid";
+  item.provider = "premiumize";
 
   await expect(
     plugin.hooks["riven.media-item.stream-link.health-check.requested"]({
@@ -57,18 +40,13 @@ it("classifies a 403 response as an expired link when the subscription is active
   });
 });
 
-it("throws instead of classifying a 403 as expired when the subscription has lapsed", async ({
+it("does not classify a 403 response as expired for non-premiumize stores", async ({
   dataSourceMap,
   server,
   plugin,
   settings,
 }) => {
-  server.use(
-    http.head(link, () => new HttpResponse(null, { status: 403 })),
-    // Lapsed subscription => 403 is account-level, not a link signature.
-    // Must NOT classify as expired (which would blacklist healthy torrents).
-    storeUserHandler("expired"),
-  );
+  server.use(http.head(link, () => new HttpResponse(null, { status: 403 })));
 
   expect.assert(
     plugin.hooks["riven.media-item.stream-link.health-check.requested"],
@@ -88,7 +66,7 @@ it("throws instead of classifying a 403 as expired when the subscription has lap
       logger: {} as never,
       settings,
     }),
-  ).rejects.toThrow(/subscription is expired/iu);
+  ).rejects.toThrow(/status code 403/iu);
 });
 
 it.for([
