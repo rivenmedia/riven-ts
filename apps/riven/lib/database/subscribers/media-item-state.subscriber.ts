@@ -27,6 +27,8 @@ export class MediaItemStateSubscriber implements EventSubscriber {
   public afterUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
     if (entity.state === "unreleased" && entity.isReleased) {
       entity.state = "indexed";
+    } else if (entity.state !== "unreleased" && !entity.isReleased) {
+      entity.state = "unreleased";
     }
   }
 
