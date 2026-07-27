@@ -7,7 +7,7 @@ import { expect, vi } from "vitest";
 
 import { it } from "../../../../__tests__/test-context.ts";
 
-it("returns the media item if processed successfully", async ({
+it("returns the movie if processed successfully", async ({
   factories: { movieItemRequestFactory },
   services: { indexerService },
 }) => {
@@ -64,7 +64,7 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item request is in a
   ).rejects.toThrow(MediaItemIndexErrorIncorrectState);
 });
 
-it("updates the media item with the latest data if it already exists", async ({
+it("updates the movie with the latest data if it already exists", async ({
   services: { indexerService },
   factories: { movieItemRequestFactory },
 }) => {

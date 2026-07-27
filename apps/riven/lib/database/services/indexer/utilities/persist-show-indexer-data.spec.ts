@@ -57,7 +57,7 @@ async function assertChildItemCounts(
   ).resolves.toBe(episodeCount);
 }
 
-it("returns the media item if processed successfully", async ({
+it("returns the show if processed successfully", async ({
   em,
   services: { indexerService },
   factories: { showItemRequestFactory },
@@ -96,7 +96,7 @@ it("returns the media item if processed successfully", async ({
   });
 });
 
-it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorrect state", async ({
+it("throws a MediaItemIndexErrorIncorrectState error if the item request is in an incorrect state", async ({
   services: { indexerService },
   factories: { showItemRequestFactory },
 }) => {
@@ -122,7 +122,7 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorr
   ).rejects.toThrow(MediaItemIndexErrorIncorrectState);
 });
 
-it("updates the media item with the latest data if it already exists", async ({
+it("updates the show and its children with the latest data if it has already been ingested", async ({
   em,
   services: { indexerService },
   factories: { showItemRequestFactory },
