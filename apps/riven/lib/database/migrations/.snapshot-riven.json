@@ -1347,7 +1347,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "unique": false,
+          "unique": true,
           "length": 10,
           "precision": null,
           "scale": null,
@@ -1433,6 +1433,14 @@
           "keyName": "media_item_title_index",
           "primary": false,
           "unique": false
+        },
+        {
+          "columnNames": ["tvdb_id", "full_title"],
+          "composite": true,
+          "constraint": true,
+          "keyName": "media_item_tvdb_id_full_title_unique",
+          "primary": false,
+          "unique": true
         },
         {
           "columnNames": ["type"],
