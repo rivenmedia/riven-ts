@@ -243,11 +243,8 @@ export const plugin: RivenPlugin = {
 
       const expiredStatusCodes = new Set<StatusCodes>();
 
-      // Premiumize answers 403 when the signed CDN URL has expired (the torrent
-      // is still cached); regenerating from the durable id mints a fresh link.
-      // Scoped to premiumize deliberately: other stores' 403 semantics aren't
-      // verified, and a blanket rule risks treating an account-level 403
-      // (e.g. a lapsed subscription) as an expired link and blacklisting.
+      // Premiumize 403s an expired signed URL; scoped to premiumize since
+      // other stores' 403 semantics aren't verified.
       if (item.provider === "premiumize") {
         expiredStatusCodes.add(StatusCodes.FORBIDDEN);
       }
