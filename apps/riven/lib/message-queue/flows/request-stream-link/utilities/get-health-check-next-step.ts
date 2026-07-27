@@ -15,8 +15,6 @@ export function getHealthCheckNextStep(
       return "save-healthy-link";
     }
     case "expired": {
-      // healthCheckAttempts is the count of refreshes already made, so once it
-      // reaches the cap a further refresh would exceed it — blacklist instead.
       return healthCheckAttempts >= MAX_HEALTH_CHECK_ATTEMPTS
         ? "blacklist-stream"
         : "request-stream-link";
