@@ -94,7 +94,9 @@ export async function persistShowIndexerData(
     });
 
     await em.upsert(Show, show, {
-      onConflictExcludeFields: ["indexedAt"],
+      onConflictAction: "merge",
+      onConflictFields: ["tvdbId", "fullTitle"],
+      onConflictExcludeFields: ["id", "indexedAt", "state"],
     });
 
     for (const season of Object.values(item.seasons)) {
@@ -127,7 +129,9 @@ export async function persistShowIndexerData(
       show.seasons.add(seasonEntry);
 
       await em.upsert(Season, seasonEntry, {
-        onConflictExcludeFields: ["indexedAt"],
+        onConflictFields: ["tvdbId", "fullTitle"],
+        onConflictAction: "merge",
+        onConflictExcludeFields: ["id", "indexedAt", "state"],
       });
 
       for (const episode of season.episodes) {
@@ -164,7 +168,9 @@ export async function persistShowIndexerData(
         seasonEntry.episodes.add(episodeEntry);
 
         await em.upsert(Episode, episodeEntry, {
-          onConflictExcludeFields: ["indexedAt"],
+          onConflictFields: ["tvdbId", "fullTitle"],
+          onConflictAction: "merge",
+          onConflictExcludeFields: ["id", "indexedAt", "state"],
         });
       }
     }

@@ -1,6 +1,8 @@
 import { toMerged } from "es-toolkit";
 
 import { services } from "../../../database/database.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
+import { createQueue } from "../../utilities/create-queue.ts";
 import { flow } from "../producer.ts";
 import { createProcessMediaItemJob } from "./process-media-item.schema.ts";
 
@@ -13,35 +15,63 @@ export interface EnqueueProcessMediaItemInput extends Partial<
   Pick<ProcessMediaItemFlow["input"], "step" | "isRootItem">
 > {
   id: UUID;
+  overwriteExistingJob?: boolean;
 }
 
 export async function enqueueProcessMediaItem(
-  { id, step = "scrape", isRootItem = true }: EnqueueProcessMediaItemInput,
+  {
+    id,
+    step = "scrape",
+    isRootItem = true,
+    overwriteExistingJob = false,
+  }: EnqueueProcessMediaItemInput,
   opts: FlowJob["opts"] = {},
 ) {
   const mediaItemsToProcess =
     await services.mediaItemService.getItemsToProcess(id);
 
-  const rootNodes = mediaItemsToProcess.map((mediaItem) =>
-    createProcessMediaItemJob(
-      mediaItem.fullTitle,
-      {
-        step,
-        mediaItem,
-        isRootItem,
-      },
-      {
-        opts: toMerged<typeof opts, PartialDeep<NonNullable<FlowJob["opts"]>>>(
-          opts,
-          {
+  const queue = createQueue("process-media-item");
+
+  const rootNodes: FlowJob[] = [];
+
+  for (const mediaItem of mediaItemsToProcess) {
+    const deduplicationKey = `process-${mediaItem.type}-${mediaItem.id}`;
+    const deduplicationId = await queue.getDeduplicationJobId(deduplicationKey);
+
+    if (overwriteExistingJob && deduplicationId) {
+      logger.verbose(
+        `Removing existing media item processing job for ${mediaItem.fullTitle}`,
+      );
+
+      const deduplicationFlow = await flow.getFlow({
+        id: deduplicationId,
+        queueName: "process-media-item",
+      });
+
+      await deduplicationFlow.job.remove();
+    }
+
+    rootNodes.push(
+      createProcessMediaItemJob(
+        mediaItem.fullTitle,
+        {
+          step,
+          mediaItem,
+          isRootItem,
+        },
+        {
+          opts: toMerged<
+            typeof opts,
+            PartialDeep<NonNullable<FlowJob["opts"]>>
+          >(opts, {
             deduplication: {
-              id: `process-${mediaItem.type}-${mediaItem.id}`,
+              id: deduplicationKey,
             },
-          },
-        ),
-      },
-    ),
-  );
+          }),
+        },
+      ),
+    );
+  }
 
   return flow.addBulk(rootNodes);
 }

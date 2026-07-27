@@ -575,7 +575,10 @@ export const mainRunnerMachine = setup({
                 },
                 {
                   type: "processMediaItem",
-                  params: ({ event: { item } }) => ({ id: item.id }),
+                  params: ({ event: { item } }) => ({
+                    id: item.id,
+                    overwriteExistingJob: true,
+                  }),
                 },
               ],
             },
@@ -596,7 +599,10 @@ export const mainRunnerMachine = setup({
                 },
                 {
                   type: "processMediaItem",
-                  params: ({ event: { item } }) => ({ id: item.id }),
+                  params: ({ event: { item } }) => ({
+                    id: item.id,
+                    overwriteExistingJob: true,
+                  }),
                 },
               ],
             },

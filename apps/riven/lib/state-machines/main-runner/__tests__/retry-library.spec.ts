@@ -79,7 +79,9 @@ it("enqueues an item processor job for each incomplete item request in the datab
     );
   }
 
-  expect(flowSpy).toHaveBeenCalledTimes(incompleteItems.length);
+  expect(flowSpy).toHaveBeenCalledTimes(
+    completeItems.length + incompleteItems.length,
+  );
 });
 
 it('enqueues a media item processor job in the "scrape" step for each incomplete indexed media item', async ({

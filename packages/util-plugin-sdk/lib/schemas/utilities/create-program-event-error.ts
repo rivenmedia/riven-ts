@@ -46,6 +46,9 @@ export const createProgramEventError = <
   payloadSchema: Schema,
 ) =>
   class extends ProgramEventError<Schema, Data> {
+    public override name =
+      payloadSchema.shape.type.def.values[0] ?? "ProgramEventError";
+
     public constructor(data: Data) {
       const [type] = payloadSchema.shape.type.def.values;
 
