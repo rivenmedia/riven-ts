@@ -1,4 +1,4 @@
-import { Show } from "@repo/util-plugin-sdk/dto/entities";
+import { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { wrap } from "@mikro-orm/core";
@@ -6,6 +6,56 @@ import { DateTime } from "luxon";
 import { expect, vi } from "vitest";
 
 import { it } from "../../../../__tests__/test-context.ts";
+
+import type { EntityManager } from "@mikro-orm/core";
+import type { UUID } from "node:crypto";
+
+/**
+ * Asserts that the counts of child items (episodes, seasons, and shows) for a given show match the expected values.
+ *
+ * As the show indexer upserts, this is important to verify so that duplicates are not created.
+ *
+ * @param em The entity manager instance.
+ * @param showId The ID of the show.
+ * @param param2 An object containing the expected counts of episodes, seasons, and shows.
+ */
+async function assertChildItemCounts(
+  em: EntityManager,
+  showId: UUID,
+  {
+    episodeCount,
+    seasonCount,
+    showCount,
+  }: {
+    showCount: number;
+    seasonCount: number;
+    episodeCount: number;
+  },
+) {
+  await expect(
+    em.count(Show, {
+      id: showId,
+    }),
+  ).resolves.toBe(showCount);
+
+  await expect(
+    em.count(Season, {
+      show: {
+        id: showId,
+      },
+    }),
+  ).resolves.toBe(seasonCount);
+
+  await expect(
+    em.count(Episode, {
+      season: {
+        show: {
+          id: showId,
+        },
+      },
+    }),
+  ).resolves.toBe(episodeCount);
+}
 
 it("returns the media item if processed successfully", async ({
   services: { indexerService },
@@ -66,6 +116,7 @@ it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorr
 });
 
 it("updates the media item with the latest data if it already exists", async ({
+  em,
   services: { indexerService },
   factories: { showItemRequestFactory },
 }) => {
@@ -215,6 +266,12 @@ it("updates the media item with the latest data if it already exists", async ({
     }),
   );
 
+  await assertChildItemCounts(em, initialShow.id, {
+    showCount: 1,
+    seasonCount: 1,
+    episodeCount: 3,
+  });
+
   const updatedUpcomingEpisodes = await updatedUpcomingShow.getEpisodes();
 
   expect(updatedUpcomingEpisodes).toHaveLength(3);
@@ -290,6 +347,12 @@ it("updates the media item with the latest data if it already exists", async ({
     }),
   );
 
+  await assertChildItemCounts(em, initialShow.id, {
+    showCount: 1,
+    seasonCount: 1,
+    episodeCount: 3,
+  });
+
   const updatedOngoingEpisodes = await updatedOngoingShow.getEpisodes();
 
   expect(updatedOngoingEpisodes).toHaveLength(3);
@@ -321,6 +384,12 @@ it("updates the media item with the latest data if it already exists", async ({
       year: firstEpisodeAirDate.year,
     }),
   );
+
+  await assertChildItemCounts(em, initialShow.id, {
+    showCount: 1,
+    seasonCount: 1,
+    episodeCount: 3,
+  });
 
   vi.setSystemTime(DateTime.utc().plus({ weeks: 1 }).toJSDate());
 
@@ -373,4 +442,10 @@ it("updates the media item with the latest data if it already exists", async ({
       nextAirDate: firstEpisodeAirDate.plus({ weeks: 2 }).toJSDate(),
     }),
   );
+
+  await assertChildItemCounts(em, initialShow.id, {
+    showCount: 1,
+    seasonCount: 1,
+    episodeCount: 3,
+  });
 });

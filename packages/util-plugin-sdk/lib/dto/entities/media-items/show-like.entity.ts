@@ -1,4 +1,4 @@
-import { Entity, Property, Unique } from "@mikro-orm/decorators/legacy";
+import { Entity, Property } from "@mikro-orm/decorators/legacy";
 import { IsNumberString } from "class-validator";
 import { Field, InterfaceType } from "type-graphql";
 
@@ -14,7 +14,6 @@ import type { Promisable } from "type-fest";
   abstract: true,
   discriminatorColumn: "type",
 })
-@Unique({ properties: ["tvdbId", "fullTitle"] })
 export abstract class ShowLikeMediaItem extends MediaItem {
   @Field(() => String)
   @Property({ type: "varchar", length: 10 })
