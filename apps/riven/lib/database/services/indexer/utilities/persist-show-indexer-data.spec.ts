@@ -58,6 +58,7 @@ async function assertChildItemCounts(
 }
 
 it("returns the media item if processed successfully", async ({
+  em,
   services: { indexerService },
   factories: { showItemRequestFactory },
 }) => {
@@ -87,6 +88,12 @@ it("returns the media item if processed successfully", async ({
       type: "show",
     }),
   );
+
+  await assertChildItemCounts(em, result.id, {
+    showCount: 1,
+    seasonCount: 0,
+    episodeCount: 0,
+  });
 });
 
 it("throws a MediaItemIndexErrorIncorrectState error if the item is in an incorrect state", async ({
