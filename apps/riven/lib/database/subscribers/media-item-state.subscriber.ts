@@ -316,7 +316,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
   }
 
   async #computeState(item: MediaItem): Promise<MediaItemState> {
-    if (!item.isReleased) {
+    if (item.releaseDate && !item.isReleased) {
       return "unreleased";
     }
 
