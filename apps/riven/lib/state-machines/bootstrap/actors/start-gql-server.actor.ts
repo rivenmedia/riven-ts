@@ -1,15 +1,19 @@
 import { buildSchema } from "@repo/core-util-graphql-schema";
 
 import { ApolloServer } from "@apollo/server";
+import { ApolloServerPluginCacheControl } from "@apollo/server/plugin/cacheControl";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin/landingPage/default";
 import { expressMiddleware } from "@as-integrations/express5";
+import { RequestContext } from "@mikro-orm/core";
+import { toNodeHandler } from "better-auth/node";
 import cors from "cors";
 import express from "express";
 import { createServer } from "node:http";
 import { URL } from "node:url";
 import { fromPromise } from "xstate";
 
+import { initAuth } from "../../../auth/auth.ts";
 import { initApolloClient } from "../../../graphql/apollo-client.ts";
 import { buildContextFunction } from "../../../graphql/build-context-function.ts";
 import { resolvers } from "../../../graphql/resolvers/index.ts";
@@ -20,11 +24,14 @@ import { settings } from "../../../utilities/settings.ts";
 import type { ApolloServerContext } from "../../../graphql/context.ts";
 import type { ValidPluginMap } from "../../../types/plugins.ts";
 import type { mainRunnerMachine } from "../../main-runner/index.js";
+import type { MikroORM } from "@mikro-orm/core";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+import type { RequestHandler } from "express";
 import type { ActorRefFromLogic } from "xstate";
 
 export interface StartGQLServerInput {
+  orm: MikroORM;
   mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine>;
   pluginSettings: PluginSettings;
   validPlugins: ValidPluginMap;
@@ -38,7 +45,7 @@ export interface StartGQLServerOutput {
 export const startGqlServer = fromPromise<
   StartGQLServerOutput,
   StartGQLServerInput
->(async ({ input: { mainRunnerRef, validPlugins } }) => {
+>(async ({ input: { orm, mainRunnerRef, validPlugins } }) => {
   const pluginResolvers = validPlugins
     .values()
     .flatMap(({ config }) => config.resolvers)
@@ -69,6 +76,7 @@ export const startGqlServer = fromPromise<
         },
       },
       ApolloServerPluginDrainHttpServer({ httpServer }),
+      ApolloServerPluginCacheControl(),
     ],
     formatError(formattedError, error) {
       logger.error("GraphQL Error:", { err: error });
@@ -89,17 +97,25 @@ export const startGqlServer = fromPromise<
     mainRunnerRef.send(event);
   };
 
+  const auth = initAuth(orm);
+  const withRequestContext: RequestHandler = (_req, _res, next) => {
+    RequestContext.create(orm.em, next);
+  };
+
+  app.all("/api/auth/*splat", withRequestContext, toNodeHandler(auth));
+
   app.use(
-    "/",
+    "/graphql",
     cors(),
     express.json(),
+    withRequestContext,
     expressMiddleware(server, {
       context: buildContextFunction(sendEvent),
     }),
   );
 
   const url = new URL(
-    `http://${settings.gqlHost}:${settings.gqlPort.toString()}/`,
+    `http://${settings.host}:${settings.port.toString()}/graphql`,
   );
 
   await new Promise<void>((resolve) => {

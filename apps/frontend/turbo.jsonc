@@ -1,0 +1,25 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "dev": {
+      "with": ["@repo/riven#dev"]
+    },
+    "codegen:gql": {
+      "dependsOn": ["@repo/riven#codegen:gql-schema"]
+    },
+    "e2e": {
+      "passThroughEnv": ["DATABASE_FILE_NAME"]
+    },
+    "e2e:headless": {},
+    "storybook": {
+      "cache": false,
+      "persistent": true
+    },
+    "build-storybook": {
+      "dependsOn": ["codegen:gql"],
+      "inputs": [".storybook/**", "{app,components,lib}/**/*.tsx?"],
+      "outputs": ["storybook-static"]
+    }
+  }
+}

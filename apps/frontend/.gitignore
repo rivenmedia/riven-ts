@@ -1,0 +1,14 @@
+!app/**/logs/
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+playwright/.auth/
+
+certificates/
+
+*storybook.log
+storybook-static
+public/mockServiceWorker.js

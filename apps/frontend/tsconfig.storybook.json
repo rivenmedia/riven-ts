@@ -1,0 +1,12 @@
+{
+  "$schema": "https://www.schemastore.org/tsconfig",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": false,
+    "composite": true
+  },
+  "files": [],
+  "include": [".storybook/**/*.ts", ".storybook/**/*.tsx", "**/*.tsx"],
+  "exclude": []
+}
