@@ -27,7 +27,11 @@ export const processItemRequestProcessor =
   processItemRequestProcessorSchema.implementAsync(
     async (
       { job, token },
-      { sendEvent, services: { itemRequestService, indexerService }, plugins },
+      {
+        sendEvent,
+        services: { mediaItemService, itemRequestService, indexerService },
+        plugins,
+      },
     ) => {
       switch (job.data.step) {
         case "request": {
@@ -113,21 +117,27 @@ export const processItemRequestProcessor =
               );
             }
 
-            const deduplicationId = await queue.getDeduplicationJobId(
-              `process-${updatedItem.type}-${updatedItem.id}`,
+            const itemsToProcess = await mediaItemService.getItemsToProcess(
+              updatedItem.id,
             );
 
-            if (deduplicationId) {
-              logger.verbose(
-                `Removing existing media item processing job for ${updatedItem.fullTitle}`,
+            for (const itemToProcess of itemsToProcess) {
+              const deduplicationId = await queue.getDeduplicationJobId(
+                `process-${itemToProcess.type}-${itemToProcess.id}`,
               );
 
-              const deduplicationFlow = await flow.getFlow({
-                id: deduplicationId,
-                queueName: "process-media-item",
-              });
+              if (deduplicationId) {
+                logger.verbose(
+                  `Removing existing media item processing job for ${itemToProcess.fullTitle}`,
+                );
 
-              await deduplicationFlow.job.remove();
+                const deduplicationFlow = await flow.getFlow({
+                  id: deduplicationId,
+                  queueName: "process-media-item",
+                });
+
+                await deduplicationFlow.job.remove();
+              }
             }
 
             sendEvent({
