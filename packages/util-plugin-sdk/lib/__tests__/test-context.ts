@@ -42,6 +42,8 @@ export const it = baseIt
         Episode,
         FileSystemEntry,
         ItemRequest,
+        LibrarySection,
+        LibrarySectionOverride,
         MediaEntry,
         MediaItem,
         Movie,
@@ -62,6 +64,8 @@ export const it = baseIt
         Episode,
         ItemRequest,
         Stream,
+        LibrarySection,
+        LibrarySectionOverride,
       ];
 
       const orm = await MikroORM.init({

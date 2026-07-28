@@ -106,7 +106,14 @@ async function serveMediaFile(pathInfo: PathInfo) {
 }
 
 async function open(path: string, _flags: number) {
-  const pathInfo = services.vfsService.parsePath(path);
+  const resolved = await services.vfsService.resolvePath(path);
+
+  assert.ok(
+    resolved.kind === "media",
+    new FuseError(Fuse.EISDIR, `Not a file: ${path}`),
+  );
+
+  const { pathInfo } = resolved;
 
   if (pathInfo.pathType === "subtitle-file") {
     return serveSubtitleFile(pathInfo);

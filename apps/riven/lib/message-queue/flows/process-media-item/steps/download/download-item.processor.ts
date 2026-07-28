@@ -11,7 +11,10 @@ import { downloadItemProcessorSchema } from "./download-item.schema.ts";
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
   async (
     { job },
-    { sendEvent, services: { mediaItemService, downloaderService } },
+    {
+      sendEvent,
+      services: { mediaItemService, downloaderService, librarySectionService },
+    },
   ) => {
     const childrenValues = filterChildrenValues(
       await job.getChildrenValues(),
@@ -65,6 +68,9 @@ export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(
           .diff(DateTime.fromMillis(job.timestamp))
           .as("milliseconds"),
         provider: finalResult.result.provider,
+        libraryDirectories: await librarySectionService.getVfsDirectoriesFor(
+          updatedItem.id,
+        ),
       });
     } catch (error) {
       if (

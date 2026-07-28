@@ -1,11 +1,29 @@
 import path from "node:path";
 import z from "zod";
 
+// The lookahead anchors the type group so that `/moviesXYZ` is rejected rather
+// than parsed as `/movies`.
 const PATH_PATTERN =
-  /^\/(?<type>movies|shows)(?<titlePath>\/(?<title>[^/]+)(?<seasonPath>\/Season (?<season>\d{2})?)?)?/u;
+  /^\/(?<type>movies|shows)(?=\/|$)(?<titlePath>\/(?<title>[^/]+)(?<seasonPath>\/Season (?<season>\d{2})?)?)?/u;
 
 const TMDB_ID_PATTERN = /\{tmdb-(?<tmdbId>\d+)\}/u;
 const TVDB_ID_PATTERN = /\{tvdb-(?<tvdbId>\d+)\}/u;
+
+/**
+ * Extracts the provider token embedded in a VFS entry name.
+ *
+ * Both tokens are written by `getPrettyName()` on the media item entities, and
+ * are the only thing that identifies which provider — and therefore which
+ * namespace — an entry belongs to.
+ *
+ * @example parseProviderToken("Alien (1979) {tmdb-348}") // { tmdbId: "348" }
+ */
+export function parseProviderToken(name: string) {
+  return {
+    tmdbId: TMDB_ID_PATTERN.exec(name)?.groups?.["tmdbId"],
+    tvdbId: TVDB_ID_PATTERN.exec(name)?.groups?.["tvdbId"],
+  };
+}
 const EPISODE_PATTERN = /s\d{2}e(?<episode>\d{2})/u;
 
 const pathGroupsSchema = z.object({

@@ -64,6 +64,8 @@ it('sends a "riven.media-item.download.success" event with the updated item and 
     durationMs: 9000,
     downloader: "@repo/plugin-test",
     provider: null,
+    // No library sections are configured, so only the built-in root is listed.
+    libraryDirectories: ["movies"],
   });
 });
 

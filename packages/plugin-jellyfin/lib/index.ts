@@ -1,4 +1,4 @@
-import path from "node:path";
+import { buildLibraryRefreshPaths } from "@repo/util-plugin-sdk/helpers/library-refresh-paths";
 
 import packageJson from "../package.json" with { type: "json" };
 import { JellyfinAPI } from "./datasource/jellyfin.datasource.ts";
@@ -29,15 +29,10 @@ export const plugin: RivenPlugin = {
         );
       }
 
-      const sectionPathsSet = new Set<string>();
-
-      for (const entry of mediaEntries) {
-        sectionPathsSet.add(
-          path.join(entry.baseDirectory, path.dirname(entry.path)),
-        );
-      }
-
-      const sectionPaths = [...sectionPathsSet];
+      const sectionPaths = buildLibraryRefreshPaths(
+        mediaEntries,
+        event.libraryDirectories,
+      );
 
       await jellyfinAPI.updateSections(sectionPaths);
 

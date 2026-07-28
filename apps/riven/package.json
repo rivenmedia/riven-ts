@@ -39,7 +39,8 @@
     "mikro-orm": "mikro-orm",
     "start": "NODE_ENV=production pnpm node --conditions=production --env-file-if-exists=.env.riven --enable-source-maps dist/lib/index.js",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "sections:examples": "node --import=@swc-node/register/esm-register scripts/create-example-library-sections.ts"
   },
   "dependencies": {
     "@apollo/client": "catalog:",
