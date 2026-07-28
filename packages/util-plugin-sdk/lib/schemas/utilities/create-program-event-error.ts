@@ -12,11 +12,11 @@ type BaseErrorSchema = ZodObject<{
 
 function buildErrorMessage(type: string, error: unknown) {
   if (error instanceof Error) {
-    return error.message;
+    return `${error.message} [${type}]`;
   }
 
   if (typeof error === "string") {
-    return error;
+    return `${error} [${type}]`;
   }
 
   return `Error of type ${type}`;
@@ -46,9 +46,6 @@ export const createProgramEventError = <
   payloadSchema: Schema,
 ) =>
   class extends ProgramEventError<Schema, Data> {
-    public override name =
-      payloadSchema.shape.type.def.values[0] ?? "ProgramEventError";
-
     public constructor(data: Data) {
       const [type] = payloadSchema.shape.type.def.values;
 
