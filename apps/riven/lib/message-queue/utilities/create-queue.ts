@@ -4,12 +4,11 @@ import { toMerged } from "es-toolkit";
 import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
+import { queueRegistry } from "./queue-registry.ts";
 
 import type { QueueOptions } from "bullmq";
 
 Queue.setMaxListeners(200);
-
-const queueRegistry = new Map<string, Queue>();
 
 export function createQueue(
   name: string,
