@@ -21,12 +21,16 @@ export async function clearDeduplicationJob(
 
   const deduplicationJobId = await queue.getDeduplicationJobId(deduplicationId);
 
-  if (deduplicationJobId) {
-    const deduplicationFlow = await flow.getFlow({
-      id: deduplicationJobId,
-      queueName,
-    });
-
-    await deduplicationFlow.job.remove();
+  if (!deduplicationJobId) {
+    return false;
   }
+
+  const deduplicationFlow = await flow.getFlow({
+    id: deduplicationJobId,
+    queueName,
+  });
+
+  await deduplicationFlow.job.remove();
+
+  return true;
 }

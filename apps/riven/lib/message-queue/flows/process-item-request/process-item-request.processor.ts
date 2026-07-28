@@ -114,14 +114,16 @@ export const processItemRequestProcessor =
             );
 
             for (const itemToProcess of itemsToProcess) {
-              await clearDeduplicationJob(
-                "process-media-item",
-                `process-${itemToProcess.type}-${itemToProcess.id}`,
-              );
-
-              logger.verbose(
-                `Removed existing media item processing job for ${itemToProcess.fullTitle}`,
-              );
+              if (
+                await clearDeduplicationJob(
+                  "process-media-item",
+                  `process-${itemToProcess.type}-${itemToProcess.id}`,
+                )
+              ) {
+                logger.verbose(
+                  `Removed existing media item processing job for ${itemToProcess.fullTitle}`,
+                );
+              }
             }
 
             sendEvent({
